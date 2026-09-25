@@ -1,0 +1,8 @@
+allowBuilds:
+  sharp: false
+  simple-git-hooks: false
+  unrs-resolver: false
+minimumReleaseAgeExclude:
+  - "@ai-sdk/gateway@4.0.92"
+  - ai@7.0.114
+  - "@ai-sdk/google@4.0.80"

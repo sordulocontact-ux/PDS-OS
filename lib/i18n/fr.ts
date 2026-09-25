@@ -1,0 +1,155 @@
+/** French UI copy. Every user-facing string lives here, never inline in components. */
+export const fr = {
+  app: {
+    name: "PDS OS",
+    description: "Gestion du cycle de vie des sorties musicales.",
+  },
+  home: {
+    version: "Version",
+    configTitle: "Configuration",
+    configValid:
+      "Configuration chargée : toutes les variables attendues sont présentes.",
+    configInvalid:
+      "Configuration incomplète. Variables manquantes ou invalides :",
+    issueReason: { missing: "manquante", invalid: "invalide" },
+    configHint:
+      "Renseignez-les dans .env.local (modèle : .env.example), puis relancez le serveur.",
+  },
+  labo: {
+    title: "Labo IA",
+    description:
+      "Banc de test local de la chaîne audio → transcription → compte rendu. Données fictives uniquement.",
+    warning:
+      "Les paliers gratuits peuvent utiliser les requêtes pour entraîner leurs modèles : aucun vrai call, aucune donnée réelle.",
+    audio: {
+      title: "1. Audio",
+      hint: "mp3, m4a, wav, webm — 25 Mo maximum.",
+      label: "Fichier audio",
+      submit: "Transcrire",
+      pending: "Transcription…",
+    },
+    paste: {
+      title: "ou coller une transcription",
+      label: "Transcription texte",
+      placeholder: "Collez ici le texte d'un faux call…",
+      submit: "Utiliser ce texte",
+    },
+    transcript: {
+      title: "2. Transcription",
+      empty: "Aucune transcription pour l'instant.",
+      noTiming: "Texte collé : pas de minutage.",
+      extract: "Extraire le compte rendu",
+      pending: "Extraction…",
+    },
+    report: {
+      title: "3. Compte rendu",
+      proposed: "proposé · à confirmer",
+      summary: "Résumé",
+      decided: "Décidé",
+      open: "À trancher",
+      nextActions: "Prochaines actions",
+      brief: "Brief",
+      objective: "Objectif",
+      timing: "Temporalité",
+      frame: "Cadre",
+      needs: "Besoins",
+      team: "Équipe",
+      none: "Rien d'identifié.",
+      raw: "Réponse brute (JSON)",
+      quoteMissing: "citation introuvable",
+      quoteUntimed: "citation retrouvée",
+      families: {
+        creation_content: "Création & contenus",
+        promotion_distribution: "Promotion & diffusion",
+        experiences_activations: "Expériences & activations",
+        other: "Autre",
+      },
+    },
+    prep: {
+      title: "4. Préparer le prochain call",
+      submit: "Préparer l'ordre du jour",
+      pending: "Préparation…",
+      nothing:
+        "Rien à reprendre : aucun point ouvert, aucune action, Brief complet.",
+      gaps: "Champs du Brief vides (calculé par le code)",
+      origins: {
+        open: "point ouvert",
+        action: "suivi d'action",
+        brief_gap: "Brief incomplet",
+      },
+      fields: {
+        objective: "Objectif",
+        timing: "Temporalité",
+        frame: "Cadre",
+        needs: "Besoins",
+        team: "Équipe",
+      },
+    },
+    sections: {
+      audio: "Chaîne audio → compte rendu",
+      release: "Détection de sortie par ISRC",
+    },
+    release: {
+      title: "Rechercher une sortie",
+      hint: "Deezer, puis iTunes, MusicBrainz et Odesli. Aucune IA : que du code.",
+      label: "ISRC",
+      placeholder: "USQX91300108",
+      submit: "Détecter",
+      pending: "Recherche…",
+      online: (count: number) =>
+        `En ligne · ${count} plateforme${count > 1 ? "s" : ""}`,
+      offline: "Introuvable sur les plateformes interrogées",
+      releaseDate: "Sortie le",
+      links: "Liens trouvés",
+      via: "via",
+      smartlink: "Smartlink",
+      smartlinkNone:
+        "Pas de smartlink Odesli sans clé : notre propre page de liens viendra à l'étape 6.",
+      steps: "Sources interrogées",
+      status: {
+        found: "trouvé",
+        empty: "rien",
+        skipped: "ignoré",
+        error: "erreur",
+      },
+      details: {
+        no_key: "pas de clé ODESLI_API_KEY",
+        needs_deezer: "nécessite un résultat Deezer",
+      } as Record<string, string>,
+      sources: {
+        deezer: "Deezer",
+        itunes: "iTunes / Apple Music",
+        musicbrainz: "MusicBrainz",
+        odesli: "Odesli",
+      },
+      platforms: {
+        spotify: "Spotify",
+        appleMusic: "Apple Music",
+        deezer: "Deezer",
+        youtubeMusic: "YouTube Music",
+        youtube: "YouTube",
+        tidal: "Tidal",
+        amazonMusic: "Amazon Music",
+        soundcloud: "SoundCloud",
+      },
+    },
+    meta: {
+      model: "Modèle",
+      duration: "Traitement",
+      audioLength: "Durée audio",
+      tokens: "Jetons entrée / sortie",
+    },
+    errors: {
+      disabled: "Le labo est désactivé en production.",
+      no_file: "Choisissez un fichier audio.",
+      file_too_large: "Fichier trop lourd : 25 Mo maximum.",
+      unsupported_type: "Format non pris en charge. Utilisez un fichier audio.",
+      invalid_input: "Transcription vide ou trop longue.",
+      invalid_isrc:
+        "ISRC invalide : 12 caractères, ex. FR-Z03-24-00001 ou FRZ032400001.",
+      provider_error:
+        "Le fournisseur a refusé la requête (quota, clé ou panne). Détail dans la console du serveur.",
+      network: "Le serveur ne répond pas.",
+    },
+  },
+} as const;

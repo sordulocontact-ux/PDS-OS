@@ -1,0 +1,40 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# testing
+/coverage
+/playwright-report/
+/test-results/
+
+# env — only the example is committed
+.env*
+!.env.example
+
+# supabase local stack
+supabase/.temp/
+supabase/.branches/
+
+# vercel
+.vercel
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# os / editors
+.DS_Store
+*.pem
+.idea/
+.vscode/*
+!.vscode/extensions.json
