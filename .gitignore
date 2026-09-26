@@ -44,3 +44,6 @@ yarn-error.log*
 
 # Local database export (emails, password hashes): never commit
 pds-data.sql
+
+# Local screenshots
+/screens/
