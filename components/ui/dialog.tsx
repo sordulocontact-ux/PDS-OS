@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { XIcon } from "lucide-react";
+import { IconXmark } from "nucleo-sharp-essential";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ function DialogContent({
             />
           }
         >
-          <XIcon strokeWidth={1.75} aria-hidden />
+          <IconXmark aria-hidden />
           <span className="sr-only">{closeLabel}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Popup>

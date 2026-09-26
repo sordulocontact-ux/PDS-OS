@@ -1,6 +1,6 @@
 "use client";
 
-import { XIcon } from "lucide-react";
+import { IconXmark } from "nucleo-sharp-essential";
 import { useMemo, useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
@@ -103,7 +103,7 @@ export function MasterPicker({
                 }
                 aria-label={t.remove(masterLabel(master))}
               >
-                <XIcon strokeWidth={1.75} aria-hidden />
+                <IconXmark aria-hidden />
               </Button>
             </li>
           ))}

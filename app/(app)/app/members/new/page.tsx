@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from "lucide-react";
+import { IconArrowLeft } from "@/components/icons";
 import Link from "next/link";
 
 import { PageContainer } from "@/components/shell/page-container";
@@ -21,7 +21,7 @@ export default async function NewMemberPage() {
         href={routes.members}
         className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeftIcon className="size-4" aria-hidden />
+        <IconArrowLeft className="size-4" aria-hidden />
         {t.back}
       </Link>
       <PageHeader title={t.title} description={t.subtitle} />

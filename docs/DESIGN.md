@@ -14,7 +14,20 @@ inventer.
 (`strokeLinecap="square"`), jonctions en onglet, trait de 2 px dessiné sur une grille de
 24 × 24. Aucune autre famille ne se mélange avec elle.
 
-`lucide-react` est l'ancienne famille : elle est à remplacer, on n'y ajoute plus rien.
+`lucide-react` a été retiré. Piège : `components.json` déclare encore
+`"iconLibrary": "lucide"`, donc un composant ajouté par `shadcn add` arrive avec des
+imports Lucide : les remplacer avant de commiter.
+
+### Où prendre une icône
+
+1. **Dans `nucleo-sharp-essential`** d'abord.
+2. **Sinon, dans `components/icons/`** : icônes dessinées par nous dans le même style,
+   exportées par `components/icons/index.ts` (`import { IconCopy } from "@/components/icons"`).
+3. **Absente des deux** : la dessiner dans `components/icons/`, un fichier par icône,
+   en réutilisant le composant `Icon` de Nucleo et le groupe `SharpStroke`
+   (`components/icons/sharp-stroke.tsx`) : grille 24, trait de 2, bouts carrés,
+   jonctions en onglet, tracés alignés sur des coordonnées entières, marge de 2 à 3
+   unités au bord. Jamais de SVG copié d'une autre famille.
 
 ### Paquet
 

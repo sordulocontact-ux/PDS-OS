@@ -1,6 +1,6 @@
 "use client";
 
-import { MicIcon } from "lucide-react";
+import { IconMicrophone } from "nucleo-sharp-essential";
 import { useSyncExternalStore, type Ref } from "react";
 
 import { isRecordingSupported } from "@/components/calls/recorder-media";
@@ -57,7 +57,7 @@ export function VoiceInputButton({
       onClick={onToggle}
       className="size-11 shrink-0"
     >
-      <MicIcon aria-hidden />
+      <IconMicrophone aria-hidden />
     </Button>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { BellIcon } from "lucide-react";
+import { IconBell } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
@@ -52,7 +52,7 @@ export function NotificationBell({
         }
         aria-label={unreadCount > 0 ? t.bellUnread(unreadCount) : t.bell}
       >
-        <BellIcon strokeWidth={1.75} aria-hidden className="size-[18px]" />
+        <IconBell aria-hidden className="size-[18px]" />
         {unreadCount > 0 && (
           <span
             aria-hidden

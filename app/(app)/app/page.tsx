@@ -1,4 +1,4 @@
-import { UserPlusIcon } from "lucide-react";
+import { IconUserPlus } from "@/components/icons";
 import Link from "next/link";
 
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
@@ -62,7 +62,7 @@ export default async function AppHomePage() {
       {pendingCount > 0 && (
         <div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-2 text-sm">
-            <UserPlusIcon
+            <IconUserPlus
               className="size-4 shrink-0 text-muted-foreground"
               aria-hidden
             />

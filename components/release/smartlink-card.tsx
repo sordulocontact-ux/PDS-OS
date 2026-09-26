@@ -1,6 +1,6 @@
 "use client";
 
-import { CopyIcon, ExternalLinkIcon } from "lucide-react";
+import { IconCopy, IconExternalLink } from "@/components/icons";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -75,7 +75,7 @@ export function SmartlinkCard({ url, enabled, toggleAction }: Props) {
             />
             <div className="flex gap-2">
               <Button type="button" variant="outline" size="lg" onClick={copy}>
-                <CopyIcon data-icon="inline-start" aria-hidden />
+                <IconCopy data-icon="inline-start" aria-hidden />
                 {t.copy}
               </Button>
               {enabled && (
@@ -87,7 +87,7 @@ export function SmartlinkCard({ url, enabled, toggleAction }: Props) {
                     <a href={url} target="_blank" rel="noopener noreferrer" />
                   }
                 >
-                  <ExternalLinkIcon data-icon="inline-start" aria-hidden />
+                  <IconExternalLink data-icon="inline-start" aria-hidden />
                   {t.open}
                 </Button>
               )}

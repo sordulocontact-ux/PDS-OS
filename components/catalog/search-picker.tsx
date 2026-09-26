@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { IconMagnifier, IconPlus } from "nucleo-sharp-essential";
 import { useId, useMemo, useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -104,9 +104,8 @@ export function SearchPicker({
       <label htmlFor={id} className="sr-only">
         {label}
       </label>
-      <SearchIcon
+      <IconMagnifier
         className="pointer-events-none absolute top-3 left-3 size-[15px] text-muted-foreground"
-        strokeWidth={1.75}
         aria-hidden
       />
       <Input
@@ -179,7 +178,7 @@ export function SearchPicker({
                   "bg-[var(--control-bg-hover)]",
               )}
             >
-              <PlusIcon className="size-4" strokeWidth={1.75} aria-hidden />
+              <IconPlus className="size-4" aria-hidden />
               {createLabel(query.trim())}
             </li>
           </ul>

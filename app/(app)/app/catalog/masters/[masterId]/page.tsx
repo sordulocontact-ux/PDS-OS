@@ -1,4 +1,5 @@
-import { ArrowLeftIcon, PlusIcon } from "lucide-react";
+import { IconPlus } from "nucleo-sharp-essential";
+import { IconArrowLeft } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -37,7 +38,7 @@ export default async function MasterPage({
       href={routes.projectsNewFromMaster(master.id)}
       className={buttonVariants({ size: "lg" })}
     >
-      <PlusIcon aria-hidden data-icon="inline-start" />
+      <IconPlus aria-hidden data-icon="inline-start" />
       {t.createProject}
     </Link>
   ) : null;
@@ -48,7 +49,7 @@ export default async function MasterPage({
         href={routes.masters}
         className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeftIcon className="size-4" aria-hidden />
+        <IconArrowLeft className="size-4" aria-hidden />
         {t.back}
       </Link>
       <PageHeader

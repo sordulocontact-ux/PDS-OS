@@ -1,4 +1,4 @@
-import { ArrowUpRightIcon } from "lucide-react";
+import { IconArrowUpRight } from "@/components/icons";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -51,7 +51,7 @@ export default async function SmartlinkPage({
                     <span className="sr-only">{t.public.listen} </span>
                     {t.platforms[link.platform]}
                   </span>
-                  <ArrowUpRightIcon
+                  <IconArrowUpRight
                     className="size-4 text-muted-foreground transition-transform duration-150 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none"
                     aria-hidden
                   />

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeftIcon } from "lucide-react";
+import { IconChevronLeft } from "nucleo-sharp-essential";
 
 import { CallStatusBadge, ConsentBadge } from "@/components/calls/call-badges";
 import { CallRecording } from "@/components/calls/call-recording";
@@ -52,7 +52,7 @@ export default async function CallPage({
           href={routes.projectCalls(projectId)}
           className="-ml-1 inline-flex min-h-10 w-fit items-center gap-1 rounded-md px-1 text-sm text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         >
-          <ChevronLeftIcon aria-hidden className="size-4" />
+          <IconChevronLeft aria-hidden className="size-4" />
           {t.back}
         </Link>
         <div className="flex flex-wrap items-center justify-between gap-3">

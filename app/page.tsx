@@ -1,4 +1,4 @@
-import { CircleAlertIcon } from "lucide-react";
+import { IconCircleXmark } from "@/components/icons";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -79,7 +79,7 @@ function ConfigCheck({ issues }: { issues: EnvIssue[] }) {
           <h2 className="text-sm font-medium">{t.configTitle}</h2>
           <div role="alert" className="space-y-2 text-sm">
             <p className="flex items-start gap-2 text-destructive">
-              <CircleAlertIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
+              <IconCircleXmark className="mt-0.5 size-4 shrink-0" aria-hidden />
               {t.configInvalid}
             </p>
             <ul className="space-y-1 pl-6">

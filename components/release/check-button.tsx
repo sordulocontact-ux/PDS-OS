@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCwIcon } from "lucide-react";
+import { IconRefresh } from "@/components/icons";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -41,7 +41,7 @@ export function CheckButton({
       disabled={disabled || pending}
       aria-busy={pending || undefined}
     >
-      <RefreshCwIcon
+      <IconRefresh
         data-icon="inline-start"
         className={
           pending ? "animate-spin motion-reduce:animate-none" : undefined

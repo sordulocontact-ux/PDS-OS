@@ -1,6 +1,6 @@
 "use client";
 
-import { CopyIcon } from "lucide-react";
+import { IconCopy } from "@/components/icons";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export function CopyLinkButton({
 
   return (
     <Button type="button" variant="outline" size={size} onClick={copy}>
-      <CopyIcon data-icon="inline-start" aria-hidden />
+      <IconCopy data-icon="inline-start" aria-hidden />
       {label}
     </Button>
   );

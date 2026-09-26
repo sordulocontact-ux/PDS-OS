@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from "lucide-react";
+import { IconArrowLeft } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -27,7 +27,7 @@ export default async function ProjectLayout({
         href={routes.projects}
         className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeftIcon className="size-4" aria-hidden />
+        <IconArrowLeft className="size-4" aria-hidden />
         {fr.shell.project.back}
       </Link>
 

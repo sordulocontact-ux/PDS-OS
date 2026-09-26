@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from "lucide-react";
+import { IconArrowLeft } from "@/components/icons";
 import Link from "next/link";
 
 import { CreateProjectForm } from "@/components/projects/create-project-form";
@@ -33,7 +33,7 @@ export default async function NewProjectPage({
         href={fromMaster ? routes.master(fromMaster.id) : routes.projects}
         className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeftIcon className="size-4" aria-hidden />
+        <IconArrowLeft className="size-4" aria-hidden />
         {fromMaster
           ? fr.catalog.master.backTo(fromMaster.title)
           : fr.shell.project.back}

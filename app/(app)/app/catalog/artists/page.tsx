@@ -1,4 +1,4 @@
-import { MicVocalIcon } from "lucide-react";
+import { IconMicrophone } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ArtistsTable } from "@/components/catalog/artists-table";
@@ -28,7 +28,7 @@ export default async function ArtistsPage() {
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : artists.length === 0 ? (
         <EmptyState
-          icon={MicVocalIcon}
+          icon={IconMicrophone}
           title={t.emptyTitle}
           body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
           action={canCreate ? <NewArtistButton /> : null}

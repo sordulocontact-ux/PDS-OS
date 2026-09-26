@@ -159,6 +159,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
   notifie, sans service role (`docs/ARCHITECTURE.md` § 8 bis).
 - **Sortie** : iTunes ne cherche pas par ISRC (passe par l'UPC) ; Odesli fermé sans clé.
+- **Icônes** : Nucleo Sharp uniquement (`nucleo-sharp-essential`), icônes manquantes
+  dessinées dans `components/icons/` ; pas de Lucide (`docs/DESIGN.md` § 1).
 - **Textes** : `lib/i18n/fr/<domaine>.ts`. **`cn()`** : `lib/utils/index.ts`.
 - **`AGENTS.md`** est réécrit par `next dev` : ne pas le supprimer. Doc Next 16 :
   `node_modules/next/dist/docs/`.

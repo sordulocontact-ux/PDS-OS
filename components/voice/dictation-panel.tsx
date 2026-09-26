@@ -1,6 +1,6 @@
 "use client";
 
-import { MicIcon } from "lucide-react";
+import { IconMicrophone } from "nucleo-sharp-essential";
 import { useSyncExternalStore } from "react";
 
 import { isRecordingSupported } from "@/components/calls/recorder-media";
@@ -41,7 +41,7 @@ export function DictationButton<P>({ dictation }: { dictation: Dictation<P> }) {
       title={supported ? undefined : fr.voice.unsupported}
       onClick={dictation.start}
     >
-      <MicIcon aria-hidden />
+      <IconMicrophone aria-hidden />
       {fr.voice.start}
     </Button>
   );

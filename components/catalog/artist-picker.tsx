@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowDownIcon, ArrowUpIcon, XIcon } from "lucide-react";
+import { IconXmark } from "nucleo-sharp-essential";
+import { IconArrowDown, IconArrowUp } from "@/components/icons";
 import { useMemo, useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
@@ -138,7 +139,7 @@ export function ArtistPicker({
                   onClick={() => move(index, -1)}
                   aria-label={t.moveUp(credit.name)}
                 >
-                  <ArrowUpIcon strokeWidth={1.75} aria-hidden />
+                  <IconArrowUp aria-hidden />
                 </Button>
                 <Button
                   type="button"
@@ -148,7 +149,7 @@ export function ArtistPicker({
                   onClick={() => move(index, 1)}
                   aria-label={t.moveDown(credit.name)}
                 >
-                  <ArrowDownIcon strokeWidth={1.75} aria-hidden />
+                  <IconArrowDown aria-hidden />
                 </Button>
                 <Button
                   type="button"
@@ -161,7 +162,7 @@ export function ArtistPicker({
                   }
                   aria-label={t.remove(credit.name)}
                 >
-                  <XIcon strokeWidth={1.75} aria-hidden />
+                  <IconXmark aria-hidden />
                 </Button>
               </span>
             </li>

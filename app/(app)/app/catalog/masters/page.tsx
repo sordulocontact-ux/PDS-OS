@@ -1,4 +1,5 @@
-import { DiscIcon, PlusIcon } from "lucide-react";
+import { IconPlus } from "nucleo-sharp-essential";
+import { IconDisc } from "@/components/icons";
 import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -19,7 +20,7 @@ export default async function MastersPage() {
   const { masters, error } = await listMasters();
   const newMaster = can(access, "manage_catalog") ? (
     <Link href={routes.mastersNew} className={buttonVariants({ size: "lg" })}>
-      <PlusIcon aria-hidden data-icon="inline-start" />
+      <IconPlus aria-hidden data-icon="inline-start" />
       {t.newMaster}
     </Link>
   ) : null;
@@ -35,7 +36,7 @@ export default async function MastersPage() {
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : masters.length === 0 ? (
         <EmptyState
-          icon={DiscIcon}
+          icon={IconDisc}
           title={t.emptyTitle}
           body={newMaster ? t.emptyBody : t.emptyBodyReadOnly}
           action={newMaster}

@@ -1,4 +1,5 @@
-import { ArrowLeftIcon, ExternalLinkIcon, PlusIcon } from "lucide-react";
+import { IconPlus } from "nucleo-sharp-essential";
+import { IconArrowLeft, IconExternalLink } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -29,7 +30,7 @@ export default async function ArtistPage({
         href={routes.artists}
         className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeftIcon className="size-4" aria-hidden />
+        <IconArrowLeft className="size-4" aria-hidden />
         {t.back}
       </Link>
       <PageHeader
@@ -47,7 +48,7 @@ export default async function ArtistPage({
               href={routes.mastersNewForArtist(artist.id)}
               className={buttonVariants({ size: "lg" })}
             >
-              <PlusIcon aria-hidden data-icon="inline-start" />
+              <IconPlus aria-hidden data-icon="inline-start" />
               {t.newMaster}
             </Link>
           ) : null
@@ -62,11 +63,7 @@ export default async function ArtistPage({
           className="-mt-2 flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           {t.openDeezer}
-          <ExternalLinkIcon
-            className="size-3.5"
-            strokeWidth={1.75}
-            aria-hidden
-          />
+          <IconExternalLink className="size-3.5" aria-hidden />
         </a>
       )}
 

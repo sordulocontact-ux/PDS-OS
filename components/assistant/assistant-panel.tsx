@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { ArrowUpIcon, SquareIcon } from "lucide-react";
+import { IconArrowUp, IconStop } from "@/components/icons";
 import {
   useEffect,
   useRef,
@@ -168,7 +168,7 @@ export function AssistantPanel() {
               aria-label={t.stop}
               className="size-11 shrink-0"
             >
-              <SquareIcon aria-hidden />
+              <IconStop aria-hidden />
             </Button>
           ) : (
             <Button
@@ -178,7 +178,7 @@ export function AssistantPanel() {
               disabled={!input.trim()}
               className="size-11 shrink-0"
             >
-              <ArrowUpIcon aria-hidden />
+              <IconArrowUp aria-hidden />
             </Button>
           )}
         </form>

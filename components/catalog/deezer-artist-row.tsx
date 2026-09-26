@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRightIcon } from "lucide-react";
+import { IconChevronRight } from "nucleo-sharp-essential";
 import Link from "next/link";
 
 import { ArtistAvatar } from "@/components/catalog/artist-avatar";
@@ -45,9 +45,8 @@ export function DeezerArtistRow({
       {artist.existing ? (
         <StatusBadge size="sm">{t.inCatalog}</StatusBadge>
       ) : (
-        <ChevronRightIcon
+        <IconChevronRight
           className="size-4 text-muted-foreground"
-          strokeWidth={1.75}
           aria-hidden
         />
       )}

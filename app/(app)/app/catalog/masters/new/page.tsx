@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from "lucide-react";
+import { IconArrowLeft } from "@/components/icons";
 import Link from "next/link";
 
 import { CreateMasterForm } from "@/components/catalog/create-master-form";
@@ -30,7 +30,7 @@ export default async function NewMasterPage({
         href={fromArtist ? routes.artist(fromArtist.id) : routes.masters}
         className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeftIcon className="size-4" aria-hidden />
+        <IconArrowLeft className="size-4" aria-hidden />
         {fromArtist
           ? fr.catalog.artist.backTo(fromArtist.name)
           : fr.catalog.master.back}

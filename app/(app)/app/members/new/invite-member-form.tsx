@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2Icon } from "lucide-react";
+import { IconCircleCheck } from "@/components/icons";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
@@ -29,7 +29,7 @@ export function InviteMemberForm() {
     return (
       <div className="flex flex-col gap-5">
         <div className="flex items-start gap-3">
-          <CheckCircle2Icon className="mt-0.5 size-5 shrink-0" aria-hidden />
+          <IconCircleCheck className="mt-0.5 size-5 shrink-0" aria-hidden />
           <div className="flex flex-col gap-1" role="status">
             <p className="font-medium">{t.successTitle(state.firstName)}</p>
             <p className="text-sm text-muted-foreground">

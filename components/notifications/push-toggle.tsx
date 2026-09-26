@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRingIcon } from "lucide-react";
+import { IconBell } from "nucleo-sharp-essential";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -109,7 +109,7 @@ export function PushToggle({ publicKey }: { publicKey: string | null }) {
     return (
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-2 text-xs text-muted-foreground">
-          <BellRingIcon className="size-3.5" strokeWidth={1.75} aria-hidden />
+          <IconBell className="size-3.5" aria-hidden />
           {t.enabled}
         </span>
         <Button variant="ghost" size="sm" onClick={disable} disabled={busy}>
@@ -127,7 +127,7 @@ export function PushToggle({ publicKey }: { publicKey: string | null }) {
         disabled={busy}
         aria-busy={busy || undefined}
       >
-        <BellRingIcon strokeWidth={1.75} aria-hidden data-icon="inline-start" />
+        <IconBell aria-hidden data-icon="inline-start" />
         {busy ? t.enabling : t.enable}
       </Button>
       {state === "failed" && (

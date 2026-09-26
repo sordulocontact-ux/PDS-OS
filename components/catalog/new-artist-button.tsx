@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon } from "lucide-react";
+import { IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { CreateArtistDialog } from "@/components/catalog/create-artist-dialog";
@@ -16,7 +16,7 @@ export function NewArtistButton() {
   return (
     <>
       <Button size="lg" onClick={() => setOpen(true)}>
-        <PlusIcon aria-hidden data-icon="inline-start" />
+        <IconPlus aria-hidden data-icon="inline-start" />
         {fr.catalog.artists.newArtist}
       </Button>
       <CreateArtistDialog open={open} onOpenChange={setOpen} />

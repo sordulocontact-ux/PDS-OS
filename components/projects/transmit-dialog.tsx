@@ -1,6 +1,6 @@
 "use client";
 
-import { SendIcon } from "lucide-react";
+import { IconPaperPlane2 } from "nucleo-sharp-essential";
 import { useActionState, useEffect, useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -38,7 +38,7 @@ export function TransmitDialog({
   return (
     <>
       <Button size="lg" onClick={() => setOpen(true)}>
-        <SendIcon strokeWidth={1.75} aria-hidden data-icon="inline-start" />
+        <IconPaperPlane2 aria-hidden data-icon="inline-start" />
         {retransmit ? t.panel.retransmit : t.panel.transmit}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>

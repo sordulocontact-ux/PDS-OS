@@ -1,4 +1,4 @@
-import { FolderPlusIcon, PlusIcon } from "lucide-react";
+import { IconFolderOpen, IconPlus } from "nucleo-sharp-essential";
 import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -21,7 +21,7 @@ export default async function ProjectsPage() {
 
   const newProject = canCreate ? (
     <Link href={routes.projectsNew} className={buttonVariants({ size: "lg" })}>
-      <PlusIcon aria-hidden data-icon="inline-start" />
+      <IconPlus aria-hidden data-icon="inline-start" />
       {t.newProject}
     </Link>
   ) : null;
@@ -38,7 +38,7 @@ export default async function ProjectsPage() {
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : projects.length === 0 ? (
         <EmptyState
-          icon={FolderPlusIcon}
+          icon={IconFolderOpen}
           title={t.emptyTitle}
           body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
           action={newProject}

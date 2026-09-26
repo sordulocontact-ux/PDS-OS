@@ -1,5 +1,5 @@
 import type { UIMessage } from "ai";
-import { LoaderCircleIcon } from "lucide-react";
+import { IconLoader } from "nucleo-sharp-essential";
 import Link from "next/link";
 
 import { evidenceOf, plainText } from "@/components/assistant/tool-output";
@@ -49,7 +49,7 @@ export function AssistantMessage({ message }: { message: UIMessage }) {
           key={p.toolCallId}
           className="flex items-center gap-2 text-xs text-muted-foreground"
         >
-          <LoaderCircleIcon
+          <IconLoader
             className="size-3.5 animate-spin motion-reduce:animate-none"
             aria-hidden
           />

@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchIcon } from "lucide-react";
+import { IconMagnifier } from "nucleo-sharp-essential";
 import { useEffect, useId, useState } from "react";
 
 import { DeezerArtistRow } from "@/components/catalog/deezer-artist-row";
@@ -88,9 +88,8 @@ export function DeezerArtistSearch({
           {t.label}
         </label>
         <div className="relative">
-          <SearchIcon
+          <IconMagnifier
             className="pointer-events-none absolute top-3 left-3 size-[15px] text-muted-foreground"
-            strokeWidth={1.75}
             aria-hidden
           />
           <Input

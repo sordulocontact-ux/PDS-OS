@@ -1,4 +1,5 @@
-import { UserPlusIcon, UsersIcon } from "lucide-react";
+import { IconUsers2 } from "nucleo-sharp-essential";
+import { IconUserPlus } from "@/components/icons";
 import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -45,7 +46,7 @@ export default async function MembersPage({
             href={routes.membersNew}
             className={cn(buttonVariants({ size: "lg" }), "gap-2")}
           >
-            <UserPlusIcon className="size-4" aria-hidden />
+            <IconUserPlus className="size-4" aria-hidden />
             {t.create}
           </Link>
         }
@@ -80,7 +81,7 @@ export default async function MembersPage({
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : visible.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border py-12 text-center">
-          <UsersIcon className="size-5 text-muted-foreground" aria-hidden />
+          <IconUsers2 className="size-5 text-muted-foreground" aria-hidden />
           <p className="text-sm text-muted-foreground">{t.empty[segment]}</p>
         </div>
       ) : (
