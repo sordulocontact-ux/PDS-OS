@@ -18,6 +18,7 @@ import {
 import { RecordingLive } from "@/components/calls/recording-live";
 import { RecordingReview } from "@/components/calls/recording-review";
 import { useRecorder } from "@/components/calls/use-recorder";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { uploadCallAudio, type UploadError } from "@/lib/calls/upload-audio";
 import { fr } from "@/lib/i18n/fr";
@@ -37,6 +38,7 @@ export function CallRecorder({
 }) {
   const t = fr.calls.recorder;
   const router = useRouter();
+  const canEdit = useCanEditProject();
   const meter = useRef<HTMLSpanElement>(null);
   // Browser capability, read without a server/client mismatch (the server assumes support).
   const tabSupported = useSyncExternalStore(
@@ -95,6 +97,9 @@ export function CallRecorder({
     toast.success(t.sent);
     router.refresh();
   }
+
+  // Recording writes the call's audio: owner only. Hooks above stay unconditional.
+  if (!canEdit) return null;
 
   return (
     <div className="grid gap-4">

@@ -1,12 +1,21 @@
-/** Outcome of a framing server action. Error codes are translated in fr.framing.errors. */
+/**
+ * Outcome of a project work action (framing, strategy). Error codes are
+ * translated in fr.framing.errors.
+ */
 export type FramingErrorCode =
   | "invalid_input"
   | "not_found"
   | "already_imported"
   | "invalid_transition"
   | "validator_not_member"
+  | "validator_not_allowed"
   | "not_the_validator"
   | "reason_required"
+  | "previous_stage_not_validated"
+  | "stage_locked"
+  | "lever_not_selected"
+  | "lever_has_deliverables"
+  | "nothing_to_import"
   | "forbidden"
   | "generic";
 
@@ -27,7 +36,11 @@ export function fromDatabaseError(
   for (const code of [
     "invalid_transition",
     "validator_not_member",
+    "validator_not_allowed",
     "not_the_validator",
+    "previous_stage_not_validated",
+    "lever_not_selected",
+    "lever_has_deliverables",
   ] as const) {
     if (message.includes(code)) return fail(code);
   }

@@ -23,7 +23,7 @@ export async function done(
   error: { code?: string; message?: string } | null,
 ): Promise<ActionResult> {
   if (error) return fromDatabaseError(error);
-  revalidatePath(routes.projectFraming(projectId));
+  revalidatePath(routes.project(projectId), "layout");
   return ok;
 }
 

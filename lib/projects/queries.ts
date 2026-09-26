@@ -195,7 +195,7 @@ export const getProject = cache(
     const { data, error } = await supabase
       .from("projects")
       .select(
-        `id, title, type, created_at, due_date, budget_cents, priority, framing_notes, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+        `id, title, type, created_at, due_date, budget_cents, priority, framing_notes, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
       )
       .eq("id", projectId)
       .maybeSingle();
@@ -219,6 +219,7 @@ export const getProject = cache(
       createdAt: data.created_at,
       artistName: artistNameOf(masters, data.artist),
       ownerName: owner || null,
+      ownerPersonId: data.owner_person_id,
       status: projectStatusOf(stages.length, assignments[0] ?? null),
       assignments,
       dueDate: data.due_date,
@@ -239,9 +240,10 @@ export const getProject = cache(
 
 // Sections that belong to a launched project (framing, calls, release) do not
 // exist before launch: a project with no stage answers 404 there.
-export async function requireLaunchedProject(projectId: string): Promise<void> {
+export async function requireLaunchedProject(projectId: string) {
   const project = await getProject(projectId);
   if (!project || project.stages.length === 0) notFound();
+  return project;
 }
 
 // Project managers a project can be transmitted to (director only: empty

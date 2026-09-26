@@ -1,9 +1,10 @@
 "use client";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
-import { importReport } from "@/lib/framing/actions/import";
 import type { FramingData } from "@/lib/framing/queries";
+import type { ActionResult } from "@/lib/framing/result";
 import { fr } from "@/lib/i18n/fr";
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
@@ -13,21 +14,32 @@ const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   minute: "2-digit",
 });
 
+/** Imports a call report into a deliverable (Brief or Strategy) as proposals. */
 export function ImportPanel({
   reports,
   projectId,
+  importAction,
+  title,
+  hint,
 }: {
   reports: FramingData["reports"];
   projectId: string;
+  importAction: (projectId: string, reportId: string) => Promise<ActionResult>;
+  title: string;
+  hint: string;
 }) {
   const t = fr.framing.import;
   const { pending, run } = useFramingAction();
+  const canEdit = useCanEditProject();
+
+  // Importing writes into the deliverable: the whole panel is for the owner only.
+  if (!canEdit) return null;
 
   return (
     <section className="grid gap-3">
       <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <p className="text-xs text-muted-foreground">{t.hint}</p>
+        <h3 className="text-sm font-medium">{title}</h3>
+        <p className="text-xs text-muted-foreground">{hint}</p>
       </div>
       {reports.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.empty}</p>
@@ -52,7 +64,7 @@ export function ImportPanel({
                   variant="outline"
                   disabled={pending}
                   onClick={() =>
-                    run(() => importReport(projectId, report.reportId))
+                    run(() => importAction(projectId, report.reportId))
                   }
                 >
                   {t.submit}

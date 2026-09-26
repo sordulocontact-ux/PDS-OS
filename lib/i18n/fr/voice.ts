@@ -34,6 +34,7 @@ export const voice = {
   },
   errors: {
     unauthorized: "Votre session a expiré. Reconnectez-vous.",
+    forbidden: "Seul le chef de projet responsable peut dicter sur ce projet.",
     invalid_input: "L'enregistrement n'a pas pu être envoyé. Réessayez.",
     not_found: "Projet introuvable.",
     audio_too_large: "La dictée est trop longue. Faites plus court.",

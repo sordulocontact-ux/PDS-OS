@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { Recording } from "@/components/calls/use-recorder";
 import { MetaList } from "@/components/labo/meta-list";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { formatClock, formatMegabytes } from "@/lib/calls/format";
 import type { UploadError } from "@/lib/calls/upload-audio";
@@ -27,6 +28,7 @@ export function RecordingReview({
 }) {
   const t = fr.calls.recorder;
   const [confirming, setConfirming] = useState(false);
+  const canEdit = useCanEditProject();
   const url = useMemo(
     () => URL.createObjectURL(recording.blob),
     [recording.blob],
@@ -53,7 +55,7 @@ export function RecordingReview({
           {fr.calls.errors[sendError]}
         </p>
       )}
-      {confirming ? (
+      {!canEdit ? null : confirming ? (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium">{t.confirmDiscard}</span>
           <Button variant="outline" onClick={onDiscard}>

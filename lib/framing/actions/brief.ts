@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { BRIEF_TEXT_FIELDS } from "@/lib/framing/brief";
+import { TEXT_FIELDS, type TextDeliverable } from "@/lib/framing/brief";
 import {
   fail,
   fromDatabaseError,
@@ -14,14 +14,21 @@ import {
 } from "@/lib/framing/result";
 import { createClient } from "@/lib/supabase/server";
 
-const fieldInput = z.object({
-  projectId: z.uuid(),
-  fieldKey: z.enum(BRIEF_TEXT_FIELDS),
-});
+// Text fields of a deliverable (Brief, Strategy): the key must belong to it.
+const fieldInput = z
+  .object({
+    projectId: z.uuid(),
+    deliverable: z.enum(["brief", "strategy"]),
+    fieldKey: z.string(),
+  })
+  .refine((v) =>
+    (TEXT_FIELDS[v.deliverable] as readonly string[]).includes(v.fieldKey),
+  );
 
 /** Each change appends a row: history and provenance are never overwritten. */
 async function append(
   projectId: string,
+  deliverable: TextDeliverable,
   fieldKey: string,
   row: {
     value: unknown;
@@ -37,7 +44,7 @@ async function append(
     .from("current_field_values")
     .select("*")
     .eq("project_id", projectId)
-    .eq("deliverable", "brief")
+    .eq("deliverable", deliverable)
     .eq("field_key", fieldKey)
     .maybeSingle();
   if (row.keepSource && !current) return fail("not_found");
@@ -47,7 +54,7 @@ async function append(
   const { error } = await supabase.from("field_values").insert({
     organization_id: access.organizationId,
     project_id: projectId,
-    deliverable: "brief",
+    deliverable,
     field_key: fieldKey,
     value: (row.value ?? current?.value ?? "") as string,
     status: row.status,
@@ -56,48 +63,56 @@ async function append(
     source_quote: keep ? current?.source_quote : null,
     source_start_seconds: keep ? current?.source_start_seconds : null,
   });
+  // The strategy is only written while in progress (restrictive RLS policy).
+  if (error?.code === "42501" && deliverable === "strategy")
+    return fail("stage_locked");
   if (error) return fromDatabaseError(error);
 
-  revalidatePath(routes.projectFraming(projectId));
+  revalidatePath(routes.project(projectId), "layout");
   return ok;
 }
 
-export async function saveBriefField(
+export async function saveField(
   projectId: string,
+  deliverable: TextDeliverable,
   fieldKey: string,
   value: string,
 ): Promise<ActionResult> {
-  const parsed = fieldInput
-    .extend({ value: z.string().trim().min(1).max(2000) })
-    .safeParse({ projectId, fieldKey, value });
-  if (!parsed.success) return fail("invalid_input");
-  return append(projectId, fieldKey, {
-    value: parsed.data.value,
+  const parsed = z.string().trim().min(1).max(2000).safeParse(value);
+  if (
+    !parsed.success ||
+    !fieldInput.safeParse({ projectId, deliverable, fieldKey }).success
+  )
+    return fail("invalid_input");
+  return append(projectId, deliverable, fieldKey, {
+    value: parsed.data,
     status: "confirmed",
     keepSource: false,
   });
 }
 
-export async function confirmBriefField(
+export async function confirmField(
   projectId: string,
+  deliverable: TextDeliverable,
   fieldKey: string,
 ): Promise<ActionResult> {
-  if (!fieldInput.safeParse({ projectId, fieldKey }).success)
+  if (!fieldInput.safeParse({ projectId, deliverable, fieldKey }).success)
     return fail("invalid_input");
-  return append(projectId, fieldKey, {
+  return append(projectId, deliverable, fieldKey, {
     value: null,
     status: "confirmed",
     keepSource: true,
   });
 }
 
-export async function rejectBriefField(
+export async function rejectField(
   projectId: string,
+  deliverable: TextDeliverable,
   fieldKey: string,
 ): Promise<ActionResult> {
-  if (!fieldInput.safeParse({ projectId, fieldKey }).success)
+  if (!fieldInput.safeParse({ projectId, deliverable, fieldKey }).success)
     return fail("invalid_input");
-  return append(projectId, fieldKey, {
+  return append(projectId, deliverable, fieldKey, {
     value: null,
     status: "rejected",
     keepSource: true,

@@ -63,3 +63,10 @@ export const needTreatment: Record<string, Treatment> = {
 export const onlineTreatment = (online: boolean): Treatment =>
   online ? "normal" : "pending";
 export const overdueTreatment: Treatment = "blocked";
+
+/** A lever to decide waits; selected runs; not selected is settled (muted label). */
+export const leverTreatment: Record<string, Treatment> = {
+  to_decide: "pending",
+  selected: "normal",
+  rejected: "normal",
+};

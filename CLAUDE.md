@@ -130,7 +130,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 - **Identité** : fondation d'Ibé importée (`supabase/migrations/*identity*`, `lib/auth/`).
   Premier admin local : `admin@pds.test`, confirmation via Mailpit (http://127.0.0.1:54324).
   Postes ≠ permissions : Directeur général, Chef de projet, Directeur créatif ; seule
-  `role_permissions` (SQL) donne les droits, le code teste `can(access, "…")`. Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`,
+  `role_permissions` (SQL) donne les droits, le code teste `can(access, "…")`.
+  **Dans un projet lancé, seul son responsable écrit** (cadrage, calls, sortie) ; le DG lit
+  et valide (`is_project_owner` en SQL, `canEditProject` / `useCanEditProject` à l'écran). Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`,
   sans service role. Confirmation d'email **coupée en local** (`config.toml`), à remettre
   en production (`docs/ARCHITECTURE.md` § 3).
 - **Env** : `lib/env.ts` (serveur) et `lib/env-public.ts` ; toute variable s'ajoute au
@@ -158,6 +160,10 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
   notifie, sans service role (`docs/ARCHITECTURE.md` § 8 bis).
+- **Stratégie** : `/strategy`, `lib/strategy/` ; démarre après validation du Brief, écrite
+  par le responsable **seulement en cours** (`strategy_is_editable`), figée une fois soumise.
+  Réutilise les briques du Cadrage ; calendrier saisi à la main, décompte calculé par le
+  code ; PO ne propose que ce qui a été dit en call (`docs/ARCHITECTURE.md` § 6 bis).
 - **Sortie** : iTunes ne cherche pas par ISRC (passe par l'UPC) ; Odesli fermé sans clé.
 - **Icônes** : Nucleo Sharp uniquement (`nucleo-sharp-essential`), icônes manquantes
   dessinées dans `components/icons/` ; pas de Lucide (`docs/DESIGN.md` § 1).
@@ -197,7 +203,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 163 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -221,13 +227,14 @@ Au-delà des six étapes :
 - [x] Transmission : le DG transmet à un chef de projet, qui accepte (lancement : étapes +
       responsable), refuse ou demande une précision (retour au DG, retransmission)
 - [x] Notifications : cloche, toast, notifications navigateur, pages à jour sans recharger
+- [x] Seul le chef de projet responsable écrit dans un projet ; le DG lit et valide
 - [ ] Le chef de projet ne voit que ses projets (RLS sur toutes les tables d'un projet)
 - [ ] Modifier un projet avant transmission (titre, masters, budget…)
-- [ ] Validations : le DG décide de toutes (Stratégie de lancement comprise)
 - [ ] Directeur créatif limité aux projets affectés ; dépôt de versions des livrables
 
-- [ ] Page **Stratégie de lancement** (choix retenus : calendrier saisi à la main, leviers
-      en texte libre par famille, IA limitée à ce qui a été dit en call)
+- [x] Page **Stratégie de lancement** : positionnement, publics, narratif, leviers par
+      famille, livrables engagés, calendrier manuel, import depuis un call, validation DG
+- [ ] Export **Plan de sortie** (PDF, Playwright) et partage par lien de la Stratégie
 - [ ] Dictée sur les autres étapes (Sortie, Stratégie…) : un adaptateur chacune
 - [ ] Politique de suppression Storage (remplacer un audio, fichiers orphelins)
 

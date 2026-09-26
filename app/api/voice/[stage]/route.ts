@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { createClient } from "@/lib/supabase/server";
 import { dictateFor } from "@/lib/voice/adapters";
 import { isVoiceStage } from "@/lib/voice/constants";
 import { readDictation, replyError } from "@/lib/voice/http";
@@ -22,6 +23,13 @@ export async function POST(
   if (!isVoiceStage(stage)) return replyError("not_found");
   const projectId = z.uuid().safeParse(body.form.get("projectId"));
   if (!projectId.success) return replyError("invalid_input");
+
+  // Refused before transcription: only the project's owner writes its stages.
+  const supabase = await createClient();
+  const { data: isOwner } = await supabase.rpc("is_project_owner", {
+    p_project_id: projectId.data,
+  });
+  if (!isOwner) return replyError("forbidden");
 
   const result = await dictateFor(stage, projectId.data, body.audio);
   return result.ok ? Response.json(result) : replyError(result.error);

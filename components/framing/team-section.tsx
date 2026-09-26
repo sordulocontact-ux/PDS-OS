@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ export function TeamSection({
   const t = fr.framing.team;
   const a = fr.framing.actions;
   const { pending, run } = useFramingAction();
+  const canEdit = useCanEditProject();
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
 
@@ -50,7 +52,7 @@ export function TeamSection({
                   projectId={projectId}
                 />
               )}
-              {member.review_status === "proposed" && (
+              {canEdit && member.review_status === "proposed" && (
                 <div className="flex gap-2">
                   <Button
                     size="sm"
@@ -81,43 +83,45 @@ export function TeamSection({
           ))}
         </ul>
       )}
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          run(
-            () => addTeamMember(projectId, name, role),
-            () => {
-              setName("");
-              setRole("");
-            },
-          );
-        }}
-      >
-        <div className="grid min-w-40 flex-1 gap-1">
-          <Label htmlFor="team-name">{t.name}</Label>
-          <Input
-            id="team-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <div className="grid min-w-40 flex-1 gap-1">
-          <Label htmlFor="team-role">{t.role}</Label>
-          <Input
-            id="team-role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          />
-        </div>
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={pending || name.trim() === ""}
+      {canEdit && (
+        <form
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            run(
+              () => addTeamMember(projectId, name, role),
+              () => {
+                setName("");
+                setRole("");
+              },
+            );
+          }}
         >
-          {a.add}
-        </Button>
-      </form>
+          <div className="grid min-w-40 flex-1 gap-1">
+            <Label htmlFor="team-name">{t.name}</Label>
+            <Input
+              id="team-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="grid min-w-40 flex-1 gap-1">
+            <Label htmlFor="team-role">{t.role}</Label>
+            <Input
+              id="team-role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            />
+          </div>
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={pending || name.trim() === ""}
+          >
+            {a.add}
+          </Button>
+        </form>
+      )}
     </section>
   );
 }

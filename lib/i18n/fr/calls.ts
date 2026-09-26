@@ -6,6 +6,8 @@ export const calls = {
       "Les échanges avec l'artiste et son équipe : enregistrement, transcription et compte rendu.",
     newCall: "Nouveau call",
     emptyTitle: "Aucun call pour ce projet",
+    emptyBodyReadOnly:
+      "Les calls apparaîtront ici dès que le chef de projet responsable les aura enregistrés.",
     emptyBody:
       "Créez un call pour y déposer son enregistrement et obtenir une transcription et un compte rendu à valider.",
     columns: {
@@ -169,6 +171,8 @@ export const calls = {
     date_invalid: "Date invalide.",
     not_found: "Call introuvable ou inaccessible.",
     unauthorized: "Session expirée : reconnectez-vous.",
+    forbidden:
+      "Seul le chef de projet responsable peut modifier les calls de ce projet.",
     consent_locked:
       "Un enregistrement est déposé : le consentement ne peut plus être retiré.",
     consent_required:

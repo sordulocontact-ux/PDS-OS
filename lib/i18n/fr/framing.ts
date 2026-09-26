@@ -102,7 +102,6 @@ export const framing = {
       validated: "Validé",
     },
     start: "Commencer le cadrage",
-    reopen: "Rouvrir",
     validator: "Valideur",
     note: "Message (facultatif)",
     request: "Demander la validation",
@@ -118,9 +117,19 @@ export const framing = {
     already_imported: "Ce compte rendu a déjà été importé.",
     invalid_transition: "Cette action n'est pas possible dans l'état actuel.",
     validator_not_member: "Le valideur doit être un membre approuvé.",
+    validator_not_allowed: "La validation se demande au directeur général.",
     not_the_validator: "Seul le valideur désigné peut décider.",
     reason_required: "Un motif est obligatoire.",
-    forbidden: "Vous n'avez pas les droits pour cette action.",
+    previous_stage_not_validated:
+      "Le Brief doit être validé avant de commencer la stratégie.",
+    stage_locked:
+      "La stratégie n'est modifiable que pendant qu'elle est en cours (ni avant, ni une fois soumise ou validée).",
+    lever_not_selected: "Un livrable se rattache à un levier retenu.",
+    lever_has_deliverables:
+      "Ce levier a des livrables engagés : retirez-les avant de changer son état.",
+    nothing_to_import:
+      "Ce compte rendu ne contient aucun élément de stratégie.",
+    forbidden: "Seul le chef de projet responsable modifie ce projet.",
     generic: "Une erreur est survenue. Réessayez.",
   },
 } as const;

@@ -117,6 +117,7 @@ export type ProjectDetail = {
   createdAt: string;
   artistName: string;
   ownerName: string | null;
+  ownerPersonId: string | null;
   status: ProjectStatus;
   // Newest first.
   assignments: Assignment[];

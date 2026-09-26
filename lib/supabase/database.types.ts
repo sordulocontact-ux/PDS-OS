@@ -345,6 +345,89 @@ export type Database = {
           },
         ]
       }
+      levers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          family: string
+          id: string
+          label: string
+          need_id: string | null
+          organization_id: string
+          project_id: string
+          review_status: string
+          source_quote: string | null
+          source_report_item_id: string | null
+          source_start_seconds: number | null
+          source_type: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          family: string
+          id?: string
+          label: string
+          need_id?: string | null
+          organization_id: string
+          project_id: string
+          review_status?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          family?: string
+          id?: string
+          label?: string
+          need_id?: string | null
+          organization_id?: string
+          project_id?: string
+          review_status?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levers_item_same_org"
+            columns: ["source_report_item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "report_items"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "levers_need_same_org"
+            columns: ["need_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "levers_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       master_artists: {
         Row: {
           artist_id: string
@@ -598,6 +681,67 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      milestones: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deliverable_id: string | null
+          id: string
+          kind: string
+          occurs_on: string
+          organization_id: string
+          project_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          id?: string
+          kind?: string
+          occurs_on: string
+          organization_id: string
+          project_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          id?: string
+          kind?: string
+          occurs_on?: string
+          organization_id?: string
+          project_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "milestones_deliverable_same_org"
+            columns: ["deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "milestones_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
           },
         ]
       }
@@ -1517,6 +1661,74 @@ export type Database = {
           },
         ]
       }
+      strategy_deliverables: {
+        Row: {
+          assignee_person_id: string | null
+          created_at: string
+          created_by: string | null
+          due_date: string | null
+          id: string
+          lever_id: string
+          organization_id: string
+          project_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_person_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          lever_id: string
+          organization_id: string
+          project_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_person_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          lever_id?: string
+          organization_id?: string
+          project_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_deliverables_assignee_person_id_fkey"
+            columns: ["assignee_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_deliverables_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_deliverables_lever_same_org"
+            columns: ["lever_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "levers"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "strategy_deliverables_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assignee_person_id: string
@@ -1828,8 +2040,18 @@ export type Database = {
         Returns: string
       }
       is_active_member: { Args: { org_id: string }; Returns: boolean }
+      is_call_owner: { Args: { p_call_id: string }; Returns: boolean }
       is_org_admin: { Args: { org_id: string }; Returns: boolean }
+      is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
       list_assignable_people: {
+        Args: { p_organization_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+        }[]
+      }
+      list_validators: {
         Args: { p_organization_id: string }
         Returns: {
           first_name: string
@@ -1922,6 +2144,7 @@ export type Database = {
         }[]
       }
       start_stage: { Args: { p_stage_id: string }; Returns: undefined }
+      strategy_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       transmit_project: {
         Args: {
           p_assignee_person_id: string

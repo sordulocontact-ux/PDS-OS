@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import type { ActionResult, CallStatus } from "@/lib/calls/constants";
 import { fr } from "@/lib/i18n/fr";
@@ -44,6 +45,7 @@ export function CallProcessing({
 }) {
   const t = fr.calls.process;
   const router = useRouter();
+  const canEdit = useCanEditProject();
   const [phase, setPhase] = useState<Phase | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,32 +76,34 @@ export function CallProcessing({
 
   return (
     <div className="grid gap-3">
-      <div className="flex flex-wrap gap-2">
-        {!hasTranscript ? (
-          <Button
-            onClick={() => run(true)}
-            disabled={busy}
-            className="h-10 px-4"
-          >
-            {phase === "transcribing"
-              ? t.transcribing
-              : phase === "extracting"
-                ? t.extracting
-                : status === "failed"
-                  ? t.retry
-                  : t.run}
-          </Button>
-        ) : (
-          <Button
-            onClick={() => run(false)}
-            disabled={busy}
-            variant={hasReport ? "outline" : "default"}
-            className="h-10 px-4"
-          >
-            {phase === "extracting" ? t.extracting : t.rerunExtraction}
-          </Button>
-        )}
-      </div>
+      {canEdit && (
+        <div className="flex flex-wrap gap-2">
+          {!hasTranscript ? (
+            <Button
+              onClick={() => run(true)}
+              disabled={busy}
+              className="h-10 px-4"
+            >
+              {phase === "transcribing"
+                ? t.transcribing
+                : phase === "extracting"
+                  ? t.extracting
+                  : status === "failed"
+                    ? t.retry
+                    : t.run}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => run(false)}
+              disabled={busy}
+              variant={hasReport ? "outline" : "default"}
+              className="h-10 px-4"
+            >
+              {phase === "extracting" ? t.extracting : t.rerunExtraction}
+            </Button>
+          )}
+        </div>
+      )}
       <p aria-live="polite" className="text-sm text-muted-foreground">
         {busy ? (runningElsewhere ? t.busy : t.hint) : null}
       </p>

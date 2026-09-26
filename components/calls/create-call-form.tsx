@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { ConsentOptions } from "@/components/calls/consent-options";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,9 @@ export function CreateCallForm({
   const t = fr.calls.create;
   const [open, setOpen] = useState(initiallyOpen);
   const [state, formAction, pending] = useActionState(createCall, null);
+  const canEdit = useCanEditProject();
+
+  if (!canEdit) return null;
 
   if (!open) {
     return (

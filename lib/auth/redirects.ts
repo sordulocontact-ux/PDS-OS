@@ -92,6 +92,7 @@ export const routes = {
     `/app/projects/new?master=${masterId}`,
   project: (id: string) => `/app/projects/${id}`,
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
+  projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,

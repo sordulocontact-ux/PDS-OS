@@ -36,7 +36,7 @@ export function toReportItemRows(
   report: LocatedCallReport,
   ids: { organizationId: string; reportId: string },
 ): ItemInsert[] {
-  const { brief } = report;
+  const { brief, strategy } = report;
   const drafts: Draft[] = [
     ...report.decided.map((x) => ({
       kind: "decided",
@@ -85,6 +85,26 @@ export function toReportItemRows(
       kind: "team",
       what: x.name,
       who: x.role,
+      quote: x.quote,
+      ...location(x.at),
+    })),
+    ...(["positioning", "audiences", "narrative"] as const).flatMap((kind) => {
+      const field = strategy[kind];
+      return field
+        ? [
+            {
+              kind,
+              what: field.value,
+              quote: field.quote,
+              ...location(field.at),
+            },
+          ]
+        : [];
+    }),
+    ...strategy.levers.map((x) => ({
+      kind: "lever",
+      what: x.label,
+      need_family: x.family,
       quote: x.quote,
       ...location(x.at),
     })),
@@ -162,6 +182,16 @@ export function fromReportItemRows(
         ...base(r),
       })),
       team: of("team").map((r) => ({ name: r.what, role: r.who, ...base(r) })),
+    },
+    strategy: {
+      positioning: field("positioning"),
+      audiences: field("audiences"),
+      narrative: field("narrative"),
+      levers: of("lever").map((r) => ({
+        label: r.what,
+        family: toFamily(r.need_family),
+        ...base(r),
+      })),
     },
   };
 }

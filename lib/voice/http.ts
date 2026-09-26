@@ -10,6 +10,7 @@ import {
 
 const HTTP_STATUS: Record<VoiceErrorCode, number> = {
   unauthorized: 401,
+  forbidden: 403,
   invalid_input: 400,
   not_found: 404,
   audio_too_large: 413,

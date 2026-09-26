@@ -28,7 +28,7 @@ async function run(
   if (error) return fromDatabaseError(error);
   // A validation request or decision notifies someone (database triggers).
   await schedulePendingPushes();
-  revalidatePath(routes.projectFraming(projectId));
+  // Framing and strategy pages, and the stage bar, all live under the layout.
   revalidatePath(routes.project(projectId), "layout");
   return ok;
 }

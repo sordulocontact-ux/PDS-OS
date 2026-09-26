@@ -12,6 +12,7 @@ import { labo } from "./labo";
 import { notifications } from "./notifications";
 import { release } from "./release";
 import { shell } from "./shell";
+import { strategy } from "./strategy";
 import { transmission } from "./transmission";
 import { voice } from "./voice";
 
@@ -23,6 +24,7 @@ export const fr = {
   calls,
   catalog,
   framing,
+  strategy,
   release,
   assistant,
   voice,

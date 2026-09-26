@@ -2,11 +2,14 @@ import { IconArrowLeft } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { EditAccessProvider } from "@/components/projects/edit-access";
 import { ProjectTabs } from "@/components/projects/project-tabs";
+import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { StageBar } from "@/components/projects/stage-bar";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 
 // Project frame: header, stage bar, section tabs. Pages below still check
@@ -16,7 +19,7 @@ export default async function ProjectLayout({
   children,
   params,
 }: LayoutProps<"/app/projects/[projectId]">) {
-  await requireApproved();
+  const access = await requireApproved();
   const { projectId } = await params;
   const project = await getProject(projectId);
   if (!project) notFound();
@@ -50,7 +53,11 @@ export default async function ProjectLayout({
         </>
       )}
 
-      <div className="flex flex-col pb-8">{children}</div>
+      {/* Only the owner writes inside a launched project; the database enforces it. */}
+      <EditAccessProvider canEdit={canEditProject(access, project)}>
+        {project.stages.length > 0 && <ReadOnlyNotice />}
+        <div className="flex flex-col pb-8">{children}</div>
+      </EditAccessProvider>
     </div>
   );
 }

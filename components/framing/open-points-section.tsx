@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,7 @@ export function OpenPointsSection({
   const t = fr.framing.openPoints;
   const a = fr.framing.actions;
   const { pending, run } = useFramingAction();
+  const canEdit = useCanEditProject();
   const [resolving, setResolving] = useState<string | null>(null);
   const [resolution, setResolution] = useState("");
   const [question, setQuestion] = useState("");
@@ -49,7 +51,7 @@ export function OpenPointsSection({
                 projectId={projectId}
               />
             )}
-            {resolving === point.id ? (
+            {!canEdit ? null : resolving === point.id ? (
               <form
                 className="grid gap-2"
                 onSubmit={(e) => {
@@ -104,32 +106,34 @@ export function OpenPointsSection({
           </li>
         ))}
       </ul>
-      <form
-        className="flex items-end gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          run(
-            () => addOpenPoint(projectId, question),
-            () => setQuestion(""),
-          );
-        }}
-      >
-        <div className="grid flex-1 gap-1">
-          <Label htmlFor="new-point">{t.question}</Label>
-          <Input
-            id="new-point"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-          />
-        </div>
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={pending || question.trim() === ""}
+      {canEdit && (
+        <form
+          className="flex items-end gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            run(
+              () => addOpenPoint(projectId, question),
+              () => setQuestion(""),
+            );
+          }}
         >
-          {a.add}
-        </Button>
-      </form>
+          <div className="grid flex-1 gap-1">
+            <Label htmlFor="new-point">{t.question}</Label>
+            <Input
+              id="new-point"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+            />
+          </div>
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={pending || question.trim() === ""}
+          >
+            {a.add}
+          </Button>
+        </form>
+      )}
       {resolved.length > 0 && (
         <details className="text-sm">
           <summary className="cursor-pointer text-muted-foreground">

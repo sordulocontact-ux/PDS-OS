@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { OptionSelect } from "@/components/framing/option-select";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { stageTreatment } from "@/lib/ui/state-treatments";
 import { Button } from "@/components/ui/button";
@@ -20,19 +21,28 @@ import { fr } from "@/lib/i18n/fr";
 type Props = Pick<FramingData, "stage" | "pendingValidation" | "members"> & {
   projectId: string;
   mePersonId: string | null;
+  /** Per stage: "Validation du Brief", "Commencer le cadrage"… */
+  title: string;
+  startLabel: string;
+  /** Why the stage cannot start yet (the database refuses it anyway). */
+  startBlocked?: string | null;
 };
 type StageState = keyof typeof fr.framing.validation.states;
 
-/** The framing stage's state machine, driven by database functions. */
+/** A stage's state machine (framing, strategy), driven by database functions. */
 export function ValidationPanel({
   stage,
   pendingValidation,
   members,
   projectId,
   mePersonId,
+  title,
+  startLabel,
+  startBlocked,
 }: Props) {
   const t = fr.framing.validation;
   const { pending, run } = useFramingAction();
+  const canEdit = useCanEditProject();
   const others = members.filter((m) => m.personId !== mePersonId);
   const [validator, setValidator] = useState(
     others[0]?.personId ?? members[0]?.personId ?? "",
@@ -45,24 +55,33 @@ export function ValidationPanel({
   return (
     <section className="grid gap-3">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-medium">{t.title}</h3>
+        <h3 className="text-sm font-medium">{title}</h3>
         <StatusBadge treatment={stageTreatment[state]}>
           {t.states[state]}
         </StatusBadge>
       </div>
 
-      {(state === "not_started" || state === "validated") && (
-        <Button
-          variant="outline"
-          className="justify-self-start"
-          disabled={pending}
-          onClick={() => run(() => startStage(projectId, stage.id))}
-        >
-          {state === "not_started" ? t.start : t.reopen}
-        </Button>
+      {/* A validated stage is final: it is never reopened. */}
+      {canEdit && state === "not_started" && (
+        <div className="grid gap-2">
+          <Button
+            variant="outline"
+            className="justify-self-start"
+            disabled={pending || Boolean(startBlocked)}
+            aria-describedby={startBlocked ? "start-blocked" : undefined}
+            onClick={() => run(() => startStage(projectId, stage.id))}
+          >
+            {startLabel}
+          </Button>
+          {startBlocked && (
+            <p id="start-blocked" className="text-xs text-muted-foreground">
+              {startBlocked}
+            </p>
+          )}
+        </div>
       )}
 
-      {state === "in_progress" && (
+      {canEdit && state === "in_progress" && (
         <form
           className="grid gap-2"
           onSubmit={(e) => {

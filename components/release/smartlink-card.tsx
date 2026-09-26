@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import { onlineTreatment } from "@/lib/ui/state-treatments";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -28,6 +29,7 @@ type Props = {
 /** Public smartlink: on/off switch, its address and a copy button. */
 export function SmartlinkCard({ url, enabled, toggleAction }: Props) {
   const [pending, startTransition] = useTransition();
+  const canEdit = useCanEditProject();
 
   function toggle() {
     startTransition(async () => {
@@ -98,18 +100,20 @@ export function SmartlinkCard({ url, enabled, toggleAction }: Props) {
           )}
         </div>
 
-        <div>
-          <Button
-            type="button"
-            size="lg"
-            variant={enabled ? "outline" : "default"}
-            onClick={toggle}
-            disabled={pending}
-            aria-busy={pending || undefined}
-          >
-            {pending ? t.pending : enabled ? t.disable : t.enable}
-          </Button>
-        </div>
+        {canEdit && (
+          <div>
+            <Button
+              type="button"
+              size="lg"
+              variant={enabled ? "outline" : "default"}
+              onClick={toggle}
+              disabled={pending}
+              aria-busy={pending || undefined}
+            >
+              {pending ? t.pending : enabled ? t.disable : t.enable}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

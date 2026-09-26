@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const HTTP_STATUS: Partial<Record<CallErrorCode, number>> = {
   unauthorized: 401,
+  forbidden: 403,
   not_found: 404,
   busy: 409,
   no_transcript: 409,
@@ -27,7 +28,16 @@ export async function handleStep(callId: string, step: Step) {
   if (access.state !== "approved") {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
-  const result = await step(await createClient(), callId);
+  const supabase = await createClient();
+  // Refused before any paid provider call: only the project's owner works on
+  // its calls (the database would refuse the write anyway).
+  const { data: isOwner } = await supabase.rpc("is_call_owner", {
+    p_call_id: callId,
+  });
+  if (!isOwner) {
+    return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
+  }
+  const result = await step(supabase, callId);
   const status = result.ok ? 200 : (HTTP_STATUS[result.error] ?? 500);
   return Response.json(result, { status });
 }

@@ -11,6 +11,7 @@ import type { Transcript } from "@/lib/ai/schemas/transcript";
 
 type Located<T> = T & { at: QuoteLocation };
 type Brief = CallReport["brief"];
+type Strategy = CallReport["strategy"];
 type Field = NonNullable<Brief["objective"]>;
 
 export type LocatedCallReport = {
@@ -24,6 +25,12 @@ export type LocatedCallReport = {
     needs: Located<Brief["needs"][number]>[];
     frame: Located<Field> | null;
     team: Located<Brief["team"][number]>[];
+  };
+  strategy: {
+    positioning: Located<Field> | null;
+    audiences: Located<Field> | null;
+    narrative: Located<Field> | null;
+    levers: Located<Strategy["levers"][number]>[];
   };
 };
 
@@ -57,6 +64,12 @@ export async function extractCallReport(
         needs: report.brief.needs.map(locate),
         frame: locateField(report.brief.frame),
         team: report.brief.team.map(locate),
+      },
+      strategy: {
+        positioning: locateField(report.strategy.positioning),
+        audiences: locateField(report.strategy.audiences),
+        narrative: locateField(report.strategy.narrative),
+        levers: report.strategy.levers.map(locate),
       },
     },
   };

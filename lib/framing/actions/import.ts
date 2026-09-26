@@ -52,6 +52,7 @@ export async function importReport(
     supabase
       .from("field_values")
       .select("id")
+      .eq("deliverable", "brief")
       .in("source_report_item_id", itemIds)
       .limit(1),
     supabase

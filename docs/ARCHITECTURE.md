@@ -41,6 +41,9 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926000601_project_transmission` | Circuit d'attribution : `project_assignments` (historique, une seule transmission `pending` par projet, aucune écriture client), `transmit_project` (permission `assign_projects`, destinataire `pilot_projects`, projet non lancé), `respond_to_assignment` (destinataire seul ; refus et précision exigent un message ; **l'acceptation lance** : responsable + étapes), `list_assignable_people`, `person_has_permission`. `owner_person_id` n'est plus modifiable par un client ; `projects_create_stages` supprimée. |
 | `…260926000701_notifications` | `notifications` (destinataire seul en lecture, aucune écriture client, publiée dans Realtime), alimentée **par triggers** : transmission, acceptation / refus / précision, validation demandée / décidée, tâche assignée — jamais à soi-même. `mark_notifications_read`, `push_subscriptions` (`save_push_subscription`, `forget_push_subscription`), `claim_push_deliveries` (l'auteur réclame les push de ce qu'il vient de causer : pas de service role). |
 | `…260926000801_artist_deezer` | `artists.deezer_id` (unique par organisation parmi les actifs), `picture_url`, `deezer_url` (https uniquement), tous facultatifs ; droits colonne insert/update. |
+| `…260926000901_owner_writes_project` | **Seul le responsable écrit dans un projet** (`is_project_owner`, `is_call_owner`) : cadrage, calls (+ audios du Storage), sortie ; le DG et les autres lisent. `start_stage` / `request_validation` réservées au responsable, valideur = détenteur de `validate` (`list_validators`). L'assigné d'une tâche peut la cocher. `record_release_detection` : responsable ou job serveur. |
+| `…260926001001_validated_stage_is_final` | Une étape validée est **définitive** : `start_stage` ne démarre qu'une étape « à venir » (plus de « Rouvrir »). Un refus renvoie toujours en cours. |
+| `…260926001101_launch_strategy` | Stratégie de lancement : `levers` (famille, `to_decide`/`selected`/`rejected`, `need_id` facultatif, provenance), `strategy_deliverables` (levier retenu obligatoire, responsable et échéance facultatifs), `milestones` (date saisie, type fermé, livrable facultatif, détaché si le livrable est retiré). `strategy_is_editable` : **responsable + étape en cours** → écriture (y compris `field_values` `strategy`, politique restrictive), figée dès la demande de validation. `start_stage` refuse la Stratégie tant que le Cadrage n'est pas validé (`previous_stage_not_validated`). Triggers `check_strategy_links` (`lever_not_selected`, `lever_has_deliverables`). `report_items` : kinds `positioning`, `audiences`, `narrative`, `lever`. |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 
 Principes :
@@ -60,6 +63,11 @@ Principes :
 - Questions métier ouvertes (§ 10 du contexte) rendues réversibles : étapes en données,
   circuit de validation générique (n'importe quel membre approuvé peut être valideur).
 
+- **Qui écrit dans un projet lancé** : son responsable seul (chef de projet qui l'a accepté,
+  et qui a toujours `pilot_projects`). Le DG lit et décide les validations qu'on lui
+  demande. Côté écran : `canEditProject()` (`lib/projects/edit-access.ts`) alimente
+  `useCanEditProject()` depuis le layout du projet ; les routes API des calls et de la
+  dictée refusent en 403 **avant** tout appel payant au fournisseur.
 - Invariants vérifiés **au commit** (triggers de contrainte différés) : un master a au
   moins un artiste (`master_requires_artist`) ; une sortie musicale non archivée a au moins
   un master (`music_release_requires_master`), quel que soit le chemin d'écriture.
@@ -79,8 +87,8 @@ Principes :
   (en attente, refusé, précision demandée), sinon non transmis. Les sections Cadrage / Calls / Sortie répondent 404 tant que le projet n'a
   pas d'étape (`requireLaunchedProject`).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/{rls,release,assistant,team,catalog,transmission,notifications}.test.sql`,
-124 tests). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+Tests : `supabase test db` (pgTAP, `supabase/tests/{rls,release,assistant,team,catalog,transmission,notifications,owner}.test.sql`,
+145 tests). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
@@ -207,6 +215,30 @@ n'écrit qu'un **adaptateur**.
 
 ---
 
+## 6 bis. Stratégie de lancement
+
+`app/(app)/app/projects/[projectId]/strategy`, `lib/strategy/*`, `components/strategy/*`.
+Même page que le Cadrage, mêmes briques réutilisées (`BriefFieldCard`, `ValidationPanel`,
+`ImportPanel`, `ProvenanceNote`, `useFramingAction`, `ActionResult`) : elles prennent le
+livrable, les libellés ou l'action d'import en props.
+
+- Champs texte : positionnement, publics, narratif (`field_values`, `deliverable = 'strategy'`,
+  actions génériques `saveField` / `confirmField` / `rejectField`).
+- Dispositif : leviers par famille (taxonomie des besoins) ; un besoin confirmé du Brief
+  sans levier est proposé comme point de départ (« En faire un levier »).
+- Livrables engagés : rattachés à un levier retenu. Calendrier : temps forts saisis à la
+  main ; décompte J-n calculé par `lib/strategy/calendar.ts` depuis la date de sortie
+  prévue (onglet Sortie), sinon l'échéance du projet.
+- IA : le compte rendu d'un call extrait aussi positionnement, publics, narratif et leviers
+  (citation obligatoire) ; `importStrategyReport` les pose en « proposé · à confirmer ».
+  **Jamais de temps fort ni de livrable proposé**, jamais d'état de levier décidé par PO.
+- Écriture : un `EditAccessProvider` imbriqué n'ouvre les contrôles qu'au responsable et
+  pendant « en cours » ; la base l'impose (`strategy_is_editable`), un refus RLS devient
+  `stage_locked`.
+- Hors périmètre pour l'instant : export Plan de sortie (Playwright), dictée, lien partagé.
+
+---
+
 ## 7. Sortie et smartlink (étape 6)
 
 - `lib/release/detect.ts` : Deezer (ISRC) → iTunes (**UPC** de l'album puis numéro de
@@ -302,6 +334,8 @@ fournisseur LLM choisi, clé Groq ; optionnelles : `LLM_MODEL`, `TRANSCRIPTION_M
 - Chrome headless : `--use-fake-device-for-media-stream` fournit un bip (micro et onglet),
   `--use-file-for-fake-audio-capture` reste muet sur macOS ; un vrai silence d'onglet ne
   se simule pas.
+- **Numéros de migration en parallèle** : deux sessions ont créé chacune un `…000801`. Avant
+  d'ajouter une migration, lister `supabase/migrations/` et prendre le numéro suivant.
 - **Tests Realtime** : la RLS de Realtime se vérifie avec deux vraies sessions (script
   Node, `signInWithPassword`), pas en pgTAP.
 - **Types générés des RPC** : un paramètre SQL sans `default` est typé obligatoire et non

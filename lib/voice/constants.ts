@@ -18,6 +18,7 @@ export const MAX_DICTATION_BYTES = 2 * 1024 * 1024;
 
 export type VoiceErrorCode =
   | "unauthorized"
+  | "forbidden"
   | "invalid_input"
   | "not_found"
   | "audio_too_large"

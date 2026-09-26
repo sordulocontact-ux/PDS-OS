@@ -96,6 +96,7 @@ export const shell = {
     tabs: {
       overview: "Vue d'ensemble",
       framing: "Cadrage",
+      strategy: "Stratégie",
       calls: "Calls",
       release: "Sortie",
     },
@@ -104,6 +105,8 @@ export const shell = {
       `Étape ${position} sur ${total}`,
     notFoundTitle: "Projet introuvable",
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",
+    readOnly:
+      "Lecture seule : seul le chef de projet responsable modifie ce projet.",
     overview: {
       facts: "Informations",
       artist: "Artiste",

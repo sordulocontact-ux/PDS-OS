@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { OptionSelect } from "@/components/framing/option-select";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,7 @@ export function TasksSection({
 }: Props) {
   const t = fr.framing.tasks;
   const { pending, run } = useFramingAction();
+  const canEdit = useCanEditProject();
   const people = Object.fromEntries(members.map((m) => [m.personId, m.name]));
   const [drafts, setDrafts] = useState<
     Record<string, { assignee: string; due: string }>
@@ -48,7 +50,7 @@ export function TasksSection({
   return (
     <section className="grid gap-4">
       <h3 className="text-sm font-medium">{t.title}</h3>
-      {proposedActions.length > 0 && (
+      {canEdit && proposedActions.length > 0 && (
         <div className="grid gap-3">
           <div className="grid gap-0.5">
             <p className="text-xs font-medium">{t.proposedTitle}</p>
@@ -120,16 +122,20 @@ export function TasksSection({
         <ul className="grid gap-2">
           {tasks.map((task) => (
             <li key={task.id} className="flex items-start gap-2 text-sm">
-              <input
-                type="checkbox"
-                id={`task-${task.id}`}
-                className="mt-1 size-4 accent-primary"
-                checked={task.status === "done"}
-                disabled={pending}
-                onChange={(e) =>
-                  run(() => setTaskDone(projectId, task.id, e.target.checked))
-                }
-              />
+              {/* The assignee may tick their own task even without edit rights;
+                  anyone else only reads its state. */}
+              {canEdit || task.assignee_person_id === mePersonId ? (
+                <input
+                  type="checkbox"
+                  id={`task-${task.id}`}
+                  className="mt-1 size-4 accent-primary"
+                  checked={task.status === "done"}
+                  disabled={pending}
+                  onChange={(e) =>
+                    run(() => setTaskDone(projectId, task.id, e.target.checked))
+                  }
+                />
+              ) : null}
               <label
                 htmlFor={`task-${task.id}`}
                 className={
