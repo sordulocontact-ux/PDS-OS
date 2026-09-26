@@ -2,7 +2,10 @@
 /node_modules
 /.pnp
 .pnp.*
-CLAUDE.md
+# pnpm only — lockfiles from other package managers are accidental
+package-lock.json
+yarn.lock
+
 # next.js
 /.next/
 /out/
