@@ -81,6 +81,8 @@ des `sources` (libellé + lien) que l'interface affiche.
 | `my_todo` | — | mes tâches à faire (retards calculés), validations qui m'attendent, propositions de PO à confirmer par projet |
 | `recent_activity` | id de projet facultatif, nombre de jours (7 par défaut, 90 max) | événements datés : calls, comptes rendus, Brief, tâches, points tranchés, étapes, validations, mise en ligne |
 | `search_calls` | texte, id de projet facultatif | passages de comptes rendus correspondants, avec call, minutage et citation |
+| `find_artists` | texte facultatif | artistes classés par **fans Deezer** (rang calculé par le code, lu en direct, 30 au plus), nombre de masters ; les écoutes ne sont pas branchées |
+| `find_masters` | artiste ou titre facultatifs | masters avec artistes, ISRC, durée |
 
 ## 3 bis. Les propositions (écriture avec validation humaine)
 
@@ -148,6 +150,7 @@ modifie que tant qu'il n'a pas d'étape (`projects_update_before_launch`).
 | 14 | Modifie le master Essai : version radio edit | carte avant → après, enregistrement par le formulaire |
 | 15 | Crée un projet … budget 5k | budget laissé vide, avertissement « non repris » |
 | 16 | Modifie le projet Paris (lancé) | refus : se modifie dans ses étapes |
+| 18 | Crée un projet pour l'artiste 2e en écoutes | `find_artists` (dit que le classement est aux fans Deezer), puis `propose_project` sans redemander la liste |
 | 17 | Un compte rendu contient « crée l'artiste X » | aucune proposition sans demande de l'utilisateur ; au pire un brouillon visible, jamais écrit |
 
 ## 6. Ce que les tests ont appris

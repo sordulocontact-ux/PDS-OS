@@ -1,33 +1,21 @@
 import "server-only";
 
-import { COUNTRY_CODES, countryName } from "@/lib/catalog/countries";
 import type { DraftChange } from "@/lib/assistant/drafts";
+import { foldName } from "@/lib/assistant/fuzzy-name";
+import { COUNTRY_CODES, countryName } from "@/lib/catalog/countries";
+import { fr } from "@/lib/i18n/fr";
 
 // Names given by the model are matched by code against what the user can
-// see: an unknown or ambiguous name matches nothing, never a guess.
+// see (lib/assistant/fuzzy-name.ts): an unknown or ambiguous name matches
+// nothing, never a guess; a corrected one is said.
 
-export const foldName = (text: string) =>
-  text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
+export { foldName, matchByName, rankByName } from "@/lib/assistant/fuzzy-name";
 
-export function matchByName<T>(
-  items: readonly T[],
-  name: string,
-  key: (item: T) => string,
-): T | null {
-  const wanted = foldName(name);
-  if (!wanted) return null;
-  const exact = items.filter((item) => foldName(key(item)) === wanted);
-  if (exact.length > 0) return exact.length === 1 ? exact[0] : null;
-  const partial = items.filter((item) => {
-    const k = foldName(key(item));
-    return k.includes(wanted) || (k.length >= 3 && wanted.includes(k));
-  });
-  return partial.length === 1 ? partial[0] : null;
+/** Shown when a name was corrected, so the user can check it. */
+export function understoodAs(said: string, actual: string): string | null {
+  return foldName(said) === foldName(actual)
+    ? null
+    : fr.assistant.drafts.understoodAs(said, actual);
 }
 
 /** "France", "france", "FR" → "FR". Null when unknown. */

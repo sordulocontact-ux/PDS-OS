@@ -1,10 +1,7 @@
-"use server";
+import "server-only";
 
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
 import { isBriefTextField } from "@/lib/framing/brief";
 import {
   fail,
@@ -12,9 +9,57 @@ import {
   ok,
   type ActionResult,
 } from "@/lib/framing/result";
-import { createClient } from "@/lib/supabase/server";
+import type { Database } from "@/lib/supabase/database.types";
 
-const input = z.object({ projectId: z.uuid(), reportId: z.uuid() });
+type Client = SupabaseClient<Database>;
+
+// Framing states that still take proposals (not submitted, not validated).
+const OPEN_STATES = ["not_started", "in_progress"];
+
+/**
+ * Right after a call report is saved, its content is proposed in the Brief:
+ * nobody imports by hand. Only the first report of a call is imported (a
+ * re-extraction would duplicate the proposals), and only while the framing is
+ * still being written. Runs with the user's client: RLS decides.
+ */
+export async function fillBriefFromCall(
+  supabase: Client,
+  callId: string,
+): Promise<boolean> {
+  const { data: call } = await supabase
+    .from("calls")
+    .select("project_id, organization_id")
+    .eq("id", callId)
+    .maybeSingle();
+  if (!call) return false;
+
+  const [reports, stage] = await Promise.all([
+    supabase
+      .from("call_reports")
+      .select("id")
+      .eq("call_id", callId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("project_stages")
+      .select("state, stage_definitions!inner(key)")
+      .eq("project_id", call.project_id)
+      .eq("stage_definitions.key", "framing")
+      .maybeSingle(),
+  ]);
+  const report = reports.data?.length === 1 ? reports.data[0] : null;
+  if (!report || !stage.data || !OPEN_STATES.includes(stage.data.state)) {
+    return false;
+  }
+
+  const result = await importReportIntoBrief(
+    supabase,
+    call.organization_id,
+    call.project_id,
+    report.id,
+  );
+  if (!result.ok) console.error("[framing] auto import failed:", result.error);
+  return result.ok;
+}
 
 /**
  * Turns a call report into Brief proposals ("proposé · à confirmer"), each
@@ -22,24 +67,12 @@ const input = z.object({ projectId: z.uuid(), reportId: z.uuid() });
  * report is imported at most once. Next actions are not turned into tasks here:
  * a task needs an owner and a due date, chosen by a person.
  */
-export async function importReport(
+export async function importReportIntoBrief(
+  supabase: Client,
+  organizationId: string,
   projectId: string,
   reportId: string,
 ): Promise<ActionResult> {
-  const parsed = input.safeParse({ projectId, reportId });
-  if (!parsed.success) return fail("invalid_input");
-  const access = await requireApproved();
-  const supabase = await createClient();
-
-  const { data: report } = await supabase
-    .from("call_reports")
-    .select("id, call_id, calls!inner(project_id)")
-    .eq("id", reportId)
-    .eq("calls.project_id", projectId)
-    .maybeSingle();
-  if (!report || !access.organizationId) return fail("not_found");
-  const organizationId = access.organizationId;
-
   const { data: items } = await supabase
     .from("report_items")
     .select("*")
@@ -137,6 +170,5 @@ export async function importReport(
   const error = results.find((r) => r?.error)?.error;
   if (error) return fromDatabaseError(error);
 
-  revalidatePath(routes.projectFraming(projectId));
   return ok;
 }

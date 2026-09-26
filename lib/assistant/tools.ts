@@ -3,6 +3,10 @@ import "server-only";
 import { tool } from "ai";
 import { z } from "zod";
 
+import {
+  findArtistsTool,
+  findMastersTool,
+} from "@/lib/assistant/catalog-tools";
 import { activityLine, formatDay, lateness } from "@/lib/assistant/facts";
 import { projectStatus } from "@/lib/assistant/project-status";
 import { proposeArtistTool } from "@/lib/assistant/propose/artist";
@@ -28,6 +32,8 @@ import { createClient } from "@/lib/supabase/server";
 export function createAssistantTools(access: Access, userTexts: string[]) {
   const context = { access, verbatim: verbatimFrom(userTexts) };
   return {
+    find_artists: findArtistsTool(),
+    find_masters: findMastersTool(),
     propose_artist: proposeArtistTool(context),
     propose_master: proposeMasterTool(context),
     propose_project: proposeProjectTool(context),

@@ -20,10 +20,43 @@ export const assistant = {
     my_todo: "Lecture de vos tâches",
     recent_activity: "Lecture de l'activité récente",
     search_calls: "Recherche dans les calls",
+    find_artists: "Lecture du catalogue d'artistes",
+    find_masters: "Lecture des masters",
     propose_artist: "Préparation de la fiche artiste",
     propose_master: "Préparation du master",
     propose_project: "Préparation du projet",
   } as Record<string, string>,
+  // Catalog facts for the model and the "Données utilisées" list.
+  catalog: {
+    artist: "Artiste",
+    fansNotStreams:
+      "Classement par fans Deezer, calculé par l'application : les écoutes (streams) ne sont pas disponibles dans PDS OS.",
+    artistRanked: (rank: number, name: string, fans: string, masters: string) =>
+      `N°${rank} : ${name}, ${fans} fans sur Deezer, ${masters}.`,
+    artistNoDeezer: (name: string, masters: string) =>
+      `${name} : pas de profil Deezer, non classé, ${masters}.`,
+    masterCount: (count: number) =>
+      count === 0
+        ? "aucun master"
+        : count === 1
+          ? "1 master"
+          : `${count} masters`,
+    noArtist: "Aucun artiste trouvé dans le catalogue.",
+    master: (
+      label: string,
+      artists: string,
+      isrc: string | null,
+      duration: string | null,
+    ) =>
+      [
+        `Master « ${label} » de ${artists || "artiste inconnu"}`,
+        isrc && `ISRC ${isrc}`,
+        duration && `durée ${duration}`,
+      ]
+        .filter(Boolean)
+        .join(", ") + ".",
+    noMaster: "Aucun master trouvé.",
+  },
   // Drafts proposed by PO: nothing is written before a person saves them.
   drafts: {
     badge: "Proposition de PO",
@@ -72,6 +105,8 @@ export const assistant = {
     notFound: (what: string, name: string) =>
       `${what} « ${name} » introuvable dans PDS OS (ou nom ambigu).`,
     what: { artist: "Artiste", master: "Master", project: "Projet" },
+    understoodAs: (said: string, actual: string) =>
+      `« ${said} » compris comme « ${actual} », le nom du catalogue.`,
     unknownArtist: (name: string) =>
       `« ${name} » n'est pas au catalogue : créez d'abord l'artiste, ou choisissez-le dans le formulaire.`,
     unknownMaster: (title: string) =>
