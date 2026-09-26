@@ -4,7 +4,7 @@ import {
   IconFolderOpen,
   IconHouse2,
   IconMicrophone,
-  IconUser,
+  IconUsers2,
 } from "nucleo-sharp-essential";
 import { IconDisc } from "@/components/icons";
 import Link from "next/link";
@@ -26,7 +26,7 @@ const ITEMS = [
   {
     href: routes.members,
     label: fr.shell.nav.members,
-    icon: IconUser,
+    icon: IconUsers2,
     adminOnly: true,
   },
 ] as const;
