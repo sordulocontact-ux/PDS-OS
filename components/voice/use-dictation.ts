@@ -7,6 +7,7 @@ import {
   type RecorderError,
   type Recording,
 } from "@/components/calls/use-recorder";
+import { useAudioMeter } from "@/components/ui/use-audio-meter";
 import {
   MAX_DICTATION_SECONDS,
   type DictationResponse,
@@ -29,7 +30,7 @@ export type DictationPhase<P> =
   | { name: "error"; error: VoiceErrorCode | RecorderError };
 
 export function useDictation<P>(stage: VoiceStage, projectId: string) {
-  const meter = useRef<HTMLSpanElement>(null);
+  const meter = useAudioMeter();
   const [result, setResult] = useState<DictationPhase<P> | null>(null);
   // Cancelled: the recording the recorder hands over is dropped, not sent.
   const cancelled = useRef(false);
@@ -65,13 +66,9 @@ export function useDictation<P>(stage: VoiceStage, projectId: string) {
     );
   }
 
-  const rec = useRecorder(
-    (level) =>
-      meter.current?.style.setProperty("transform", `scaleX(${level})`),
-    (recording) => {
-      if (!cancelled.current) void send(recording);
-    },
-  );
+  const rec = useRecorder(meter.push, (recording) => {
+    if (!cancelled.current) void send(recording);
+  });
 
   // The limit is part of the design: a dictation is a few sentences, not a call.
   const { elapsed, status, stop } = rec;
@@ -99,7 +96,7 @@ export function useDictation<P>(stage: VoiceStage, projectId: string) {
   return {
     phase,
     elapsed,
-    meter,
+    meter: meter.ref,
     start() {
       cancelled.current = false;
       setResult(null);

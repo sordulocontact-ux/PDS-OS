@@ -118,14 +118,18 @@ export async function getCall(
   };
 }
 
-/** Short-lived URL for the audio player. */
+/**
+ * Short-lived URL for the audio player; with `download`, the file is served
+ * as an attachment under that name (Fichiers page).
+ */
 export async function getAudioUrl(
   supabase: Client,
   path: string,
+  download?: string,
 ): Promise<string | null> {
   const { data } = await supabase.storage
     .from(AUDIO_BUCKET)
-    .createSignedUrl(path, 15 * 60);
+    .createSignedUrl(path, 15 * 60, download ? { download } : undefined);
   return data?.signedUrl ?? null;
 }
 

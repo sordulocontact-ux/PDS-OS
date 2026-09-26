@@ -13,7 +13,15 @@ import { cn } from "@/lib/utils";
 // "Workflow" section (Cadrage, Stratégie, Sortie) — see lib/ui/workflow-steps.ts.
 // Hides itself outside those three pages, so the layout can render it
 // unconditionally around every project page.
-export function WorkflowBreadcrumb({ projectId }: { projectId: string }) {
+// `lockedSteps`: steps that have a page but may not be opened yet (the
+// Stratégie before the Cadrage is validated) — shown greyed, not linked.
+export function WorkflowBreadcrumb({
+  projectId,
+  lockedSteps = [],
+}: {
+  projectId: string;
+  lockedSteps?: readonly string[];
+}) {
   const pathname = usePathname();
   const inWorkflow =
     pathname.startsWith(routes.projectFraming(projectId)) ||
@@ -28,7 +36,8 @@ export function WorkflowBreadcrumb({ projectId }: { projectId: string }) {
     >
       <ol className="flex items-center gap-1.5 text-body-md whitespace-nowrap">
         {WORKFLOW_STEPS.map((step, index) => {
-          const href = step.href?.(projectId);
+          const locked = lockedSteps.includes(step.key);
+          const href = locked ? undefined : step.href?.(projectId);
           const active = href ? pathname === href : false;
           return (
             <li key={step.key} className="flex items-center gap-1.5">
@@ -54,7 +63,12 @@ export function WorkflowBreadcrumb({ projectId }: { projectId: string }) {
               ) : (
                 <span
                   className="cursor-not-allowed rounded-lg px-2 py-1 text-[color:var(--nav-fg-muted)]"
-                  title={fr.shell.nav.comingSoon}
+                  aria-disabled
+                  title={
+                    locked
+                      ? fr.shell.project.workflowSteps.lockedUntilFraming
+                      : fr.shell.nav.comingSoon
+                  }
                 >
                   {step.label}
                 </span>

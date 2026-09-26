@@ -1,5 +1,6 @@
 import type { Ref } from "react";
 
+import { AudioMeter } from "@/components/ui/audio-meter";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatClock } from "@/lib/calls/format";
@@ -30,17 +31,8 @@ export function DictationLive({
           {t.limit(formatClock(MAX_DICTATION_SECONDS))}
         </span>
       </div>
-      {/* Live input level, written by the recorder hook without re-rendering. */}
-      <span
-        className="relative block h-[3px] overflow-hidden rounded-pill bg-[var(--meter-track)]"
-        aria-hidden
-        title={t.level}
-      >
-        <span
-          ref={meterRef}
-          className="absolute inset-0 origin-left scale-x-0 bg-[var(--po-ink-900)]"
-        />
-      </span>
+      {/* Live input level: bars moved by useAudioMeter, no re-render. */}
+      <AudioMeter ref={meterRef} label={t.level} />
       <p className="text-sm text-muted-foreground">{t.hint}</p>
       <div className="flex flex-wrap gap-2">
         <Button onClick={onFinish}>{t.finish}</Button>

@@ -27,10 +27,21 @@ type ProjectSidebarItem = {
   match?: (pathname: string) => boolean;
 };
 
-// 12 sections in the Figma order ("Devis Sordulo", node 120:74). Only three
-// have a page today — Vue d'ensemble, Workflow (Cadrage/Stratégie/Sortie,
-// entered through Cadrage) and Calls — the rest is shown, disabled, until
-// each gets its own page (docs/DESIGN.md § 4).
+// A section with its own page, active on it and everything below it.
+const section = (
+  key: string,
+  label: string,
+  href: string,
+): ProjectSidebarItem => ({
+  key,
+  label,
+  href,
+  match: (p) => p.startsWith(href),
+});
+
+// 12 sections in the Figma order ("Devis Sordulo", node 120:74), each with
+// its page; Workflow covers Cadrage/Stratégie/Sortie, entered through
+// Cadrage (docs/DESIGN.md § 4). An item without href is shown disabled.
 function useProjectSidebarItems(projectId: string): ProjectSidebarItem[] {
   const t = fr.shell.project.sidebar;
   return [
@@ -49,21 +60,20 @@ function useProjectSidebarItems(projectId: string): ProjectSidebarItem[] {
         p.startsWith(routes.projectStrategy(projectId)) ||
         p.startsWith(routes.projectRelease(projectId)),
     },
-    { key: "activations", label: t.activations },
-    { key: "work", label: t.work },
-    {
-      key: "calls",
-      label: t.calls,
-      href: routes.projectCalls(projectId),
-      match: (p) => p.startsWith(routes.projectCalls(projectId)),
-    },
-    { key: "team", label: t.team },
-    { key: "deliverables", label: t.deliverables },
-    { key: "files", label: t.files },
-    { key: "planning", label: t.planning },
-    { key: "budget", label: t.budget },
-    { key: "validations", label: t.validations },
-    { key: "activity", label: t.activity },
+    section("activations", t.activations, routes.projectActivations(projectId)),
+    section("work", t.work, routes.projectWork(projectId)),
+    section("calls", t.calls, routes.projectCalls(projectId)),
+    section("team", t.team, routes.projectTeam(projectId)),
+    section(
+      "deliverables",
+      t.deliverables,
+      routes.projectDeliverables(projectId),
+    ),
+    section("files", t.files, routes.projectFiles(projectId)),
+    section("planning", t.planning, routes.projectPlanning(projectId)),
+    section("budget", t.budget, routes.projectBudget(projectId)),
+    section("validations", t.validations, routes.projectValidations(projectId)),
+    section("activity", t.activity, routes.projectActivity(projectId)),
   ];
 }
 

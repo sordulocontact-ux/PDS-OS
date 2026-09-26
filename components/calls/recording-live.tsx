@@ -1,5 +1,6 @@
 import type { Ref } from "react";
 
+import { AudioMeter } from "@/components/ui/audio-meter";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatClock } from "@/lib/calls/format";
@@ -37,17 +38,8 @@ export function RecordingLive({
           {formatClock(elapsed)}
         </span>
       </div>
-      {/* Live input level: proof the sound is captured. Written by the hook, no re-render. */}
-      <span
-        className="relative block h-[3px] overflow-hidden rounded-pill bg-[var(--meter-track)]"
-        aria-hidden
-        title={t.level}
-      >
-        <span
-          ref={meterRef}
-          className="absolute inset-0 origin-left scale-x-0 bg-[var(--po-ink-900)]"
-        />
-      </span>
+      {/* Live input level: bars moved by useAudioMeter, no re-render. */}
+      <AudioMeter ref={meterRef} label={t.level} />
       {tabSilent ? (
         // Inline, not a toast (docs/DESIGN.md § 8). While it is up it holds the
         // only actions, so "Stop" is never shown twice.

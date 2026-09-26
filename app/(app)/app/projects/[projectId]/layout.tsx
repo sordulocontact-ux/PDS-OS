@@ -11,6 +11,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
+import { isFramingValidated } from "@/lib/projects/types";
 
 // Project frame: header, then content next to the contextual sidebar (Figma
 // "Double sidebar", docs/DESIGN.md § 4). The main app sidebar collapses to
@@ -55,7 +56,12 @@ export default async function ProjectLayout({
               projectId={project.id}
               projectTitle={project.title}
             />
-            <WorkflowBreadcrumb projectId={project.id} />
+            <WorkflowBreadcrumb
+              projectId={project.id}
+              lockedSteps={
+                isFramingValidated(project.stages) ? [] : ["strategy"]
+              }
+            />
           </>
         )}
 

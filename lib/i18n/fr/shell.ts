@@ -157,6 +157,7 @@ export const shell = {
     // avec `stages` (ProjectStage), qui reste la source d'état réelle.
     workflowSteps: {
       label: "Étapes du parcours",
+      lockedUntilFraming: "Disponible une fois le Cadrage validé",
       framing: "Cadrage",
       strategy: "Stratégie",
       conception: "Conception",

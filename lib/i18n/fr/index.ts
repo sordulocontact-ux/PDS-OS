@@ -4,12 +4,16 @@
  */
 import { assistant } from "./assistant";
 import { auth } from "./auth";
+import { budget } from "./budget";
 import { calls } from "./calls";
 import { catalog } from "./catalog";
 import { core } from "./core";
 import { framing } from "./framing";
 import { labo } from "./labo";
 import { notifications } from "./notifications";
+import { projectHistory } from "./project-history";
+import { projectPlan } from "./project-plan";
+import { projectWork } from "./project-work";
 import { release } from "./release";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
@@ -32,4 +36,8 @@ export const fr = {
   transmission,
   notifications,
   work,
+  projectWork,
+  projectPlan,
+  projectHistory,
+  budget,
 } as const;

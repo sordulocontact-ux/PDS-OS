@@ -136,6 +136,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `SearchField` | `ui/search-field.tsx` | champ de recherche arrondi, libellé fourni par l'appelant |
 | `Dialog` | `ui/dialog.tsx` | variant : default, glass (page floutée sans voile + panneau sombre translucide, fenêtre Espace Espace) |
 | `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
+| `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`) | `ui/data-table.tsx` | **tout tableau de liste**, design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (Masters, Artistes, fiche artiste, Projets, Membres) |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
 | `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
 | `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2 + contenu, action facultative) |
@@ -157,6 +158,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `CreativePicker` | `projects/creative-picker.tsx` | choix multiple de personnes en `FilterChip`, envoyé en un champ JSON |
 | `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
 | `FramingNeedsCall` | `framing/framing-needs-call.tsx` | état « le cadrage part d'un call » (Cadrage verrouillé, vue d'ensemble) |
+| `StrategyNeedsFraming` | `strategy/strategy-needs-framing.tsx` | état « la stratégie suit le cadrage » (Stratégie verrouillée tant que le Cadrage n'est pas validé) |
 | `ArtistEditSheet`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | panneau « Modifier » (photo, identité, bio), contacts de l'artiste |
 | `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
 | `Icon*` | `icons/index.ts` | icônes dessinées maison ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
@@ -272,7 +274,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
   notifie, sans service role (`docs/ARCHITECTURE.md` § 8 bis).
-- **Stratégie** : `/strategy`, `lib/strategy/` ; démarre après validation du Brief, écrite
+- **Stratégie** : `/strategy`, `lib/strategy/` ; **inaccessible avant validation du Cadrage**
+  (`isFramingValidated`, `StrategyNeedsFraming`, grisée dans le fil d'Ariane) ; démarre après validation du Brief, écrite
   par le responsable **seulement en cours** (`strategy_is_editable`), figée une fois soumise.
   Réutilise les briques du Cadrage ; calendrier saisi à la main, décompte calculé par le
   code. Questions à choix fermé (`lib/strategy/choices.ts`) : cocher **compose la réponse**

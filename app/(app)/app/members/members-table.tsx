@@ -1,13 +1,14 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { membershipTone } from "@/lib/ui/state-tones";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableMedia,
+  DataTableRow,
+} from "@/components/ui/data-table";
 import { signupUrl } from "@/lib/auth/site-url";
 import { fr } from "@/lib/i18n/fr";
 import type { MembershipRow } from "@/lib/members/types";
@@ -30,52 +31,52 @@ export function MembersTable({
   const t = fr.auth.members;
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t.columns.person}</TableHead>
-          <TableHead>{t.columns.role}</TableHead>
-          <TableHead>{t.columns.status}</TableHead>
-          <TableHead>{t.columns.decision}</TableHead>
-          <TableHead className="text-right">{t.columns.actions}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <DataTable>
+      <DataTableHeader>
+        <DataTableHead>{t.columns.person}</DataTableHead>
+        <DataTableHead hideBelow="sm">{t.columns.role}</DataTableHead>
+        <DataTableHead>{t.columns.status}</DataTableHead>
+        <DataTableHead hideBelow="md">{t.columns.decision}</DataTableHead>
+        <DataTableHead fill align="end">
+          {t.columns.actions}
+        </DataTableHead>
+      </DataTableHeader>
+      <DataTableBody>
         {rows.map((row) => {
           const isSelf = row.person.id === selfPersonId;
           const fullName = [row.person.firstName, row.person.lastName]
             .filter(Boolean)
             .join(" ");
           return (
-            <TableRow key={row.id} className="align-top">
-              <TableCell>
-                <div className="flex flex-col">
-                  <span className="font-medium">
-                    {fullName}
-                    {isSelf && (
-                      <span className="ml-1.5 text-xs font-medium text-muted-foreground">
-                        ({t.you})
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {row.person.email}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
+            <DataTableRow key={row.id}>
+              <DataTableCell>
+                <DataTableMedia
+                  title={
+                    <span className="truncate">
+                      {fullName}
+                      {isSelf && (
+                        <span className="ml-1.5 text-xs font-medium text-muted-foreground">
+                          ({t.you})
+                        </span>
+                      )}
+                    </span>
+                  }
+                  subtitle={row.person.email}
+                />
+              </DataTableCell>
+              <DataTableCell hideBelow="sm">
                 {row.role ? (
                   t.roles[row.role]
                 ) : (
                   <span className="text-muted-foreground">{t.noRole}</span>
                 )}
-              </TableCell>
-              <TableCell>
+              </DataTableCell>
+              <DataTableCell>
                 <StatusBadge tone={membershipTone[row.status]}>
                   {t.statuses[row.status]}
                 </StatusBadge>
-              </TableCell>
-              <TableCell>
+              </DataTableCell>
+              <DataTableCell hideBelow="md">
                 <div className="flex flex-col">
                   <span>
                     {row.status === "invited" && row.decidedAt
@@ -90,8 +91,8 @@ export function MembersTable({
                     </span>
                   )}
                 </div>
-              </TableCell>
-              <TableCell className="text-right">
+              </DataTableCell>
+              <DataTableCell fill align="end">
                 <MemberRowActions
                   membership={row}
                   isSelf={isSelf}
@@ -101,11 +102,11 @@ export function MembersTable({
                       : null
                   }
                 />
-              </TableCell>
-            </TableRow>
+              </DataTableCell>
+            </DataTableRow>
           );
         })}
-      </TableBody>
-    </Table>
+      </DataTableBody>
+    </DataTable>
   );
 }

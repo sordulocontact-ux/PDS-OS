@@ -158,6 +158,14 @@ export function currentStageOf(stages: ProjectStage[]): ProjectStage | null {
   );
 }
 
+// The Strategy (and the steps after it) opens only once the Cadrage is
+// validated; the database holds the same rule for writes.
+export function isFramingValidated(stages: ProjectStage[]): boolean {
+  return stages.some(
+    (stage) => stage.key === "framing" && stage.state === "validated",
+  );
+}
+
 export function personName(
   firstName: string | null,
   lastName: string | null,

@@ -69,6 +69,70 @@ export type Database = {
           },
         ]
       }
+      activity_events: {
+        Row: {
+          actor_person_id: string | null
+          artist_id: string
+          catalog_only: boolean
+          created_at: string
+          detail: Json
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string | null
+          seq: number
+          subject_id: string | null
+        }
+        Insert: {
+          actor_person_id?: string | null
+          artist_id: string
+          catalog_only?: boolean
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind: string
+          organization_id: string
+          project_id?: string | null
+          seq?: never
+          subject_id?: string | null
+        }
+        Update: {
+          actor_person_id?: string | null
+          artist_id?: string
+          catalog_only?: boolean
+          created_at?: string
+          detail?: Json
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string | null
+          seq?: never
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_events_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activity_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_contacts: {
         Row: {
           artist_id: string
@@ -126,6 +190,67 @@ export type Database = {
           },
           {
             foreignKeyName: "artist_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artist_files: {
+        Row: {
+          artist_id: string
+          bytes: number
+          category: string
+          created_at: string
+          created_by: string | null
+          file_name: string
+          id: string
+          mime: string
+          organization_id: string
+          path: string
+        }
+        Insert: {
+          artist_id: string
+          bytes: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          id?: string
+          mime: string
+          organization_id: string
+          path: string
+        }
+        Update: {
+          artist_id?: string
+          bytes?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          id?: string
+          mime?: string
+          organization_id?: string
+          path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_files_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_files_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_files_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -2206,6 +2331,18 @@ export type Database = {
           last_name: string
           person_id: string
         }[]
+      }
+      log_artist_event: {
+        Args: {
+          p_artist_id: string
+          p_catalog_only?: boolean
+          p_detail: Json
+          p_kind: string
+          p_organization_id: string
+          p_project_id?: string
+          p_subject_id: string
+        }
+        Returns: undefined
       }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       normalize_email: { Args: { input: string }; Returns: string }

@@ -6,6 +6,13 @@ export const strategy = {
   notStarted:
     "La stratégie n'a pas commencé. Le chef de projet la démarre une fois le Brief validé.",
   locked: "Stratégie soumise ou validée : elle n'est plus modifiable.",
+  needsFraming: {
+    title: "La stratégie suit le cadrage",
+    body: "Faites valider le Brief du Cadrage : la stratégie s'ouvrira ensuite.",
+    bodyReadOnly:
+      "La stratégie s'ouvrira dès que le Brief du Cadrage aura été validé.",
+    toFraming: "Aller au cadrage",
+  },
   fields: {
     positioning: "Positionnement",
     audiences: "Publics",

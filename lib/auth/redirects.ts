@@ -81,6 +81,8 @@ export const routes = {
   artists: "/app/catalog/artists",
   artist: (id: string) => `/app/catalog/artists/${id}`,
   artistDiscography: (id: string) => `/app/catalog/artists/${id}/discography`,
+  artistMasters: (id: string) => `/app/catalog/artists/${id}/masters`,
+  artistProjects: (id: string) => `/app/catalog/artists/${id}/projects`,
   masters: "/app/catalog/masters",
   mastersNew: "/app/catalog/masters/new",
   master: (id: string) => `/app/catalog/masters/${id}`,
@@ -99,6 +101,15 @@ export const routes = {
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
   projectRelease: (id: string) => `/app/projects/${id}/release`,
+  projectActivations: (id: string) => `/app/projects/${id}/activations`,
+  projectWork: (id: string) => `/app/projects/${id}/work`,
+  projectTeam: (id: string) => `/app/projects/${id}/team`,
+  projectDeliverables: (id: string) => `/app/projects/${id}/deliverables`,
+  projectFiles: (id: string) => `/app/projects/${id}/files`,
+  projectPlanning: (id: string) => `/app/projects/${id}/planning`,
+  projectBudget: (id: string) => `/app/projects/${id}/budget`,
+  projectValidations: (id: string) => `/app/projects/${id}/validations`,
+  projectActivity: (id: string) => `/app/projects/${id}/activity`,
   // Public, no account: smartlink of a release.
   smartlink: (token: string) => `/l/${token}`,
 } as const;

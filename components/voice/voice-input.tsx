@@ -6,6 +6,7 @@ import { useSyncExternalStore, type Ref } from "react";
 import { isRecordingSupported } from "@/components/calls/recorder-media";
 import type { RecorderError } from "@/components/calls/use-recorder";
 import type { VoiceInputPhase } from "@/components/voice/use-voice-input";
+import { AudioMeter } from "@/components/ui/audio-meter";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatClock } from "@/lib/calls/format";
@@ -113,17 +114,8 @@ export function VoiceInputStatus({
               {t.limit(formatClock(MAX_DICTATION_SECONDS))} · {t.input.escape}
             </span>
           </div>
-          {/* Live input level, written by the recorder hook without re-rendering. */}
-          <span
-            className="relative block h-[3px] overflow-hidden rounded-pill bg-[var(--meter-track)]"
-            aria-hidden
-            title={t.level}
-          >
-            <span
-              ref={meterRef}
-              className="absolute inset-0 origin-left scale-x-0 bg-[var(--meter-fill-over)]"
-            />
-          </span>
+          {/* Live input level: bars moved by useAudioMeter, no re-render. */}
+          <AudioMeter ref={meterRef} label={t.level} size="sm" />
         </div>
       );
   }

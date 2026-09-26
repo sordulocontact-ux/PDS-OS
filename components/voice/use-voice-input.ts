@@ -7,6 +7,7 @@ import {
   type RecorderError,
   type Recording,
 } from "@/components/calls/use-recorder";
+import { useAudioMeter } from "@/components/ui/use-audio-meter";
 import {
   MAX_DICTATION_SECONDS,
   type VoiceErrorCode,
@@ -24,7 +25,7 @@ export type VoiceInputPhase =
 type Answer = { ok: true; text: string } | { ok: false; error: VoiceErrorCode };
 
 export function useVoiceInput(onText: (text: string) => void) {
-  const meter = useRef<HTMLSpanElement>(null);
+  const meter = useAudioMeter();
   const [transcribing, setTranscribing] = useState(false);
   const [error, setError] = useState<VoiceErrorCode | null>(null);
   const cancelled = useRef(false);
@@ -57,13 +58,9 @@ export function useVoiceInput(onText: (text: string) => void) {
     else setError(answer.error);
   }
 
-  const rec = useRecorder(
-    (level) =>
-      meter.current?.style.setProperty("transform", `scaleX(${level})`),
-    (recording) => {
-      if (!cancelled.current) void send(recording);
-    },
-  );
+  const rec = useRecorder(meter.push, (recording) => {
+    if (!cancelled.current) void send(recording);
+  });
 
   const { elapsed, status, stop } = rec;
   useEffect(() => {
@@ -97,7 +94,7 @@ export function useVoiceInput(onText: (text: string) => void) {
   return {
     phase,
     elapsed,
-    meter,
+    meter: meter.ref,
     error: (error ?? rec.error) satisfies VoiceErrorCode | RecorderError | null,
     /** Starts listening, or stops and transcribes. */
     toggle() {

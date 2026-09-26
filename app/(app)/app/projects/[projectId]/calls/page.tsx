@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { CallList } from "@/components/calls/call-list";
 import { CreateCallForm } from "@/components/calls/create-call-form";
+import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { requireApproved } from "@/lib/auth/dal";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject, requireLaunchedProject } from "@/lib/projects/queries";
@@ -31,20 +32,20 @@ export default async function ProjectCallsPage({
 
   return (
     <div className="grid gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="grid max-w-prose gap-1">
-          <h2 className="text-lg font-semibold">{t.title}</h2>
-          <p className="text-sm text-muted-foreground">{t.description}</p>
-        </div>
-        {!empty && (
-          <CreateCallForm
-            projectId={projectId}
-            defaultOccurredAt={toParisLocalInput(now)}
-            defaultTitle=""
-            initiallyOpen={false}
-          />
-        )}
-      </header>
+      <ProjectPageHeader
+        title={t.title}
+        description={t.description}
+        action={
+          !empty && (
+            <CreateCallForm
+              projectId={projectId}
+              defaultOccurredAt={toParisLocalInput(now)}
+              defaultTitle=""
+              initiallyOpen={false}
+            />
+          )
+        }
+      />
 
       {empty ? (
         <section className="grid gap-4">

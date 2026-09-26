@@ -11,6 +11,7 @@ import { LeversSection } from "@/components/strategy/levers-section";
 import { ProposeChoices } from "@/components/strategy/propose-choices";
 import { StrategyChoices } from "@/components/strategy/strategy-choices";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
+import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
 import {
   Card,
   CardContent,
@@ -22,6 +23,7 @@ import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { importStrategyReport } from "@/lib/strategy/actions/import";
+import { isFramingValidated } from "@/lib/projects/types";
 import { loadStrategy } from "@/lib/strategy/queries";
 
 /** Launch strategy stage: the Strategy on one page, built on the validated Brief. */
@@ -31,6 +33,15 @@ export default async function StrategyPage({
   const access = await requireApproved();
   const { projectId } = await params;
   const project = await requireLaunchedProject(projectId);
+  // The strategy is built on the validated Brief: nothing to open before.
+  if (!isFramingValidated(project.stages)) {
+    return (
+      <StrategyNeedsFraming
+        projectId={projectId}
+        canEdit={canEditProject(access, project)}
+      />
+    );
+  }
   const data = await loadStrategy(projectId, access);
   if (!data) notFound();
   const t = fr.strategy;

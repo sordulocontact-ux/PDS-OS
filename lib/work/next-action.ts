@@ -18,7 +18,7 @@ export type NextActionKind =
 export type NextAction = { kind: NextActionKind; href: string };
 
 // Pages that exist for a stage; the others open the project overview.
-function stageHref(projectId: string, key: string): string {
+export function stageHref(projectId: string, key: string): string {
   switch (key) {
     case "framing":
       return routes.projectFraming(projectId);

@@ -1,15 +1,15 @@
-import Link from "next/link";
-
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableLink,
+  DataTableRow,
+  EMPTY_CELL,
+} from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectListItem } from "@/lib/projects/types";
@@ -19,30 +19,28 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
   const t = fr.shell.projects;
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t.columns.title}</TableHead>
-          <TableHead>{t.columns.artist}</TableHead>
-          <TableHead>{t.columns.type}</TableHead>
-          <TableHead>{t.columns.stage}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
+    <DataTable>
+      <DataTableHeader>
+        <DataTableHead>{t.columns.title}</DataTableHead>
+        <DataTableHead hideBelow="sm">{t.columns.artist}</DataTableHead>
+        <DataTableHead hideBelow="md">{t.columns.type}</DataTableHead>
+        <DataTableHead fill>{t.columns.stage}</DataTableHead>
+      </DataTableHeader>
+      <DataTableBody>
         {projects.map((project) => (
-          <TableRow key={project.id} className="relative">
-            <TableCell className="font-medium">
-              {/* The title link covers the whole row (after: pseudo-element). */}
-              <Link
-                href={routes.project(project.id)}
-                className="outline-none after:absolute after:inset-0 focus-visible:underline"
-              >
+          <DataTableRow key={project.id}>
+            <DataTableCell>
+              <DataTableLink href={routes.project(project.id)}>
                 {project.title}
-              </Link>
-            </TableCell>
-            <TableCell>{project.artistName}</TableCell>
-            <TableCell>{fr.shell.projectTypes[project.type]}</TableCell>
-            <TableCell>
+              </DataTableLink>
+            </DataTableCell>
+            <DataTableCell hideBelow="sm">
+              {project.artistName || EMPTY_CELL}
+            </DataTableCell>
+            <DataTableCell hideBelow="md">
+              {fr.shell.projectTypes[project.type]}
+            </DataTableCell>
+            <DataTableCell fill>
               {project.currentStage ? (
                 <span className="flex flex-wrap items-center gap-2">
                   {project.currentStage.label}
@@ -55,10 +53,10 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
                   {fr.transmission.statuses[project.status]}
                 </StatusBadge>
               )}
-            </TableCell>
-          </TableRow>
+            </DataTableCell>
+          </DataTableRow>
         ))}
-      </TableBody>
-    </Table>
+      </DataTableBody>
+    </DataTable>
   );
 }
