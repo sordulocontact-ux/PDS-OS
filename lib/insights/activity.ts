@@ -48,6 +48,12 @@ export async function loadRecentActivity(options: {
   const since = daysAgo(options.days);
   const byProject = <Q extends { eq: (col: string, v: string) => Q }>(q: Q) =>
     options.projectId ? q.eq("project_id", options.projectId) : q;
+  // Same filter through an embedded table (reports of calls, validations of
+  // stages), so a project's history does not read the whole organization.
+  const byEmbedded = <Q extends { eq: (col: string, v: string) => Q }>(
+    column: string,
+    q: Q,
+  ) => (options.projectId ? q.eq(column, options.projectId) : q);
 
   const [
     projects,
@@ -68,10 +74,13 @@ export async function loadRecentActivity(options: {
         .select("project_id, title, created_at, id")
         .gte("created_at", since),
     ),
-    supabase
-      .from("call_reports")
-      .select("created_at, calls!inner(id, title, project_id)")
-      .gte("created_at", since),
+    byEmbedded(
+      "calls.project_id",
+      supabase
+        .from("call_reports")
+        .select("created_at, calls!inner(id, title, project_id)")
+        .gte("created_at", since),
+    ),
     byProject(
       supabase
         .from("field_values")
@@ -104,12 +113,15 @@ export async function loadRecentActivity(options: {
         )
         .gte("state_changed_at", since),
     ),
-    supabase
-      .from("validations")
-      .select(
-        "state, requested_at, decided_at, project_stages!inner(project_id, stage_definitions!inner(label))",
-      )
-      .or(`requested_at.gte.${since},decided_at.gte.${since}`),
+    byEmbedded(
+      "project_stages.project_id",
+      supabase
+        .from("validations")
+        .select(
+          "state, requested_at, decided_at, project_stages!inner(project_id, stage_definitions!inner(label))",
+        )
+        .or(`requested_at.gte.${since},decided_at.gte.${since}`),
+    ),
     byProject(
       supabase
         .from("releases")

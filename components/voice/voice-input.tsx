@@ -1,6 +1,6 @@
 "use client";
 
-import { IconMicrophone } from "nucleo-sharp-essential";
+import { IconCheck, IconMicrophone, IconXmark } from "nucleo-sharp-essential";
 import { useSyncExternalStore, type Ref } from "react";
 
 import { isRecordingSupported } from "@/components/calls/recorder-media";
@@ -8,7 +8,6 @@ import type { RecorderError } from "@/components/calls/use-recorder";
 import type { VoiceInputPhase } from "@/components/voice/use-voice-input";
 import { AudioMeter } from "@/components/ui/audio-meter";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { formatClock } from "@/lib/calls/format";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
@@ -18,8 +17,9 @@ import {
 } from "@/lib/voice/constants";
 
 /**
- * Voice typing controls for a text input: the microphone button, next to the
- * send button, and the status line above the input.
+ * Voice typing controls for a text input: the microphone button next to the
+ * send button, the listening bar that replaces both, and the status line
+ * above the input.
  */
 
 const noSubscribe = () => () => {};
@@ -71,13 +71,9 @@ export function VoiceInputButton({
 export function VoiceInputStatus({
   phase,
   error,
-  elapsed,
-  meterRef,
 }: {
   phase: VoiceInputPhase;
   error: VoiceErrorCode | RecorderError | null;
-  elapsed: number;
-  meterRef: Ref<HTMLSpanElement>;
 }) {
   const t = fr.voice;
   if (error)
@@ -86,37 +82,69 @@ export function VoiceInputStatus({
         {t.errors[error]}
       </p>
     );
+  // While listening, the waveform in the input says it all (VoiceInputBar).
+  if (phase !== "transcribing") return null;
+  return (
+    <p className="text-sm text-muted-foreground" aria-live="polite">
+      {t.input.transcribing}
+    </p>
+  );
+}
 
-  switch (phase) {
-    case "idle":
-      return null;
-    case "requesting":
-      return (
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {t.requesting}
-        </p>
-      );
-    case "transcribing":
-      return (
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {t.input.transcribing}
-        </p>
-      );
-    case "recording":
-      return (
-        <div className="grid gap-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <StatusBadge tone="info" dot>
-              {t.recording}
-            </StatusBadge>
-            <span className="text-xs text-muted-foreground tabular-nums">
-              <span className="text-foreground">{formatClock(elapsed)}</span>{" "}
-              {t.limit(formatClock(MAX_DICTATION_SECONDS))} · {t.input.escape}
-            </span>
-          </div>
-          {/* Live input level: bars moved by useAudioMeter, no re-render. */}
-          <AudioMeter ref={meterRef} label={t.level} size="sm" />
-        </div>
-      );
-  }
+/**
+ * While listening, in place of the microphone and send buttons (as in
+ * Claude): the scrolling waveform, the clock, cancel and validate.
+ */
+export function VoiceInputBar({
+  phase,
+  elapsed,
+  meterRef,
+  onCancel,
+  onFinish,
+}: {
+  phase: VoiceInputPhase;
+  elapsed: number;
+  meterRef: Ref<HTMLSpanElement>;
+  onCancel: () => void;
+  onFinish: () => void;
+}) {
+  const t = fr.voice;
+  // The microphone is not open yet: nothing to cancel or validate.
+  const waiting = phase === "requesting";
+  return (
+    <div
+      className="flex min-w-0 grow animate-in items-center gap-3 duration-[var(--duration-base)] ease-[var(--ease-out)] fade-in-0"
+      aria-live="polite"
+    >
+      <span className="sr-only">{waiting ? t.requesting : t.recording}</span>
+      <AudioMeter ref={meterRef} label={t.level} size="sm" className="grow" />
+      <span
+        className="shrink-0 text-xs text-muted-foreground tabular-nums"
+        title={t.limit(formatClock(MAX_DICTATION_SECONDS))}
+      >
+        {formatClock(elapsed)}
+      </span>
+      <Button
+        type="button"
+        size="icon-sm"
+        variant="outline"
+        aria-label={t.input.cancel}
+        disabled={waiting}
+        onClick={onCancel}
+        className="shrink-0 animate-in border-[color:var(--border-hairline)] duration-[var(--duration-base)] ease-[var(--ease-out)] fade-in-0 zoom-in-90"
+      >
+        <IconXmark aria-hidden className="size-5" />
+      </Button>
+      <Button
+        type="button"
+        size="icon-sm"
+        aria-label={t.input.stop}
+        disabled={waiting}
+        onClick={onFinish}
+        className="shrink-0 animate-in duration-[var(--duration-base)] ease-[var(--ease-out)] fade-in-0 zoom-in-90"
+      >
+        <IconCheck aria-hidden className="size-5" />
+      </Button>
+    </div>
+  );
 }

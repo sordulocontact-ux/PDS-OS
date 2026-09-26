@@ -50,6 +50,13 @@ export const reviewTone: Record<string, Tone> = {
   rejected: "danger",
 };
 
+/** A validation request waits for its validator, then is settled. */
+export const validationTone: Record<string, Tone> = {
+  pending: "warning",
+  approved: "success",
+  rejected: "danger",
+};
+
 /** "Identifier un besoin n'engage rien": identified is neutral, committed runs. */
 export const needTone: Record<string, Tone> = {
   identified: "neutral",
@@ -75,4 +82,27 @@ export const masterReleaseTone: Record<string, Tone> = {
   online: "success",
   planned: "info",
   undated: "neutral",
+};
+
+/** Work of a person in a project (lib/project-work): late blocks, to do runs,
+ * waiting on someone else, done. */
+export const workStatusTone: Record<string, Tone> = {
+  overdue: "danger",
+  todo: "info",
+  waiting: "warning",
+  done: "success",
+};
+
+/** A committed deliverable, computed by code: late blocks, unstaffed waits. */
+export const deliverableStateTone: Record<string, Tone> = {
+  overdue: "danger",
+  to_staff: "warning",
+  planned: "info",
+};
+
+/** Budget line: planned is only an intention, committed runs, paid is settled. */
+export const budgetStatusTone: Record<string, Tone> = {
+  planned: "neutral",
+  committed: "info",
+  paid: "success",
 };

@@ -4,14 +4,16 @@ import type { Ref } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Live input level as a row of bars that rise with the voice, taller in the
- * middle (in the spirit of Wispr Flow). Pure markup: the bars are moved by
- * `useAudioMeter`, from the recorder's animation frames, without re-rendering.
+ * Live input level as a scrolling waveform (like Claude's dictation): the
+ * newest slice of voice enters on the right, older ones slide off to the left,
+ * fading out. Pure markup: `useAudioMeter` moves it from the recorder's
+ * animation frames, without re-rendering.
  */
 
-export const AUDIO_METER_BARS = 21;
+// Enough bars to fill a wide input; the ones past the left edge are clipped.
+const BARS = 240;
 
-const audioMeterVariants = cva("flex items-center", {
+const rowVariants = cva("flex shrink-0 items-center will-change-transform", {
   variants: {
     size: {
       sm: "h-5 gap-0.5",
@@ -23,7 +25,7 @@ const audioMeterVariants = cva("flex items-center", {
 
 const barVariants = cva(
   // Resting height matches AUDIO_METER_REST in use-audio-meter.ts.
-  "h-full origin-center scale-y-[0.12] rounded-pill bg-[var(--meter-fill-over)] will-change-transform",
+  "h-full shrink-0 origin-center scale-y-[0.12] rounded-pill bg-[var(--meter-fill-over)]",
   {
     variants: {
       size: {
@@ -40,7 +42,8 @@ export function AudioMeter({
   label,
   size,
   className,
-}: VariantProps<typeof audioMeterVariants> & {
+}: VariantProps<typeof rowVariants> & {
+  /** The moving row, handed to `useAudioMeter`. */
   ref: Ref<HTMLSpanElement>;
   /** Tooltip naming what is measured (microphone, call sound). */
   label: string;
@@ -48,14 +51,19 @@ export function AudioMeter({
 }) {
   return (
     <span
-      ref={ref}
       aria-hidden
       title={label}
-      className={cn(audioMeterVariants({ size }), className)}
+      // Anchored right: the row overflows to the left, where it fades out.
+      className={cn(
+        "flex min-w-0 justify-end overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_20%)]",
+        className,
+      )}
     >
-      {Array.from({ length: AUDIO_METER_BARS }, (_, i) => (
-        <span key={i} className={barVariants({ size })} />
-      ))}
+      <span ref={ref} className={rowVariants({ size })}>
+        {Array.from({ length: BARS }, (_, i) => (
+          <span key={i} className={barVariants({ size })} />
+        ))}
+      </span>
     </span>
   );
 }

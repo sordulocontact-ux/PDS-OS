@@ -46,6 +46,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001101_launch_strategy` | Stratégie de lancement : `levers` (famille, `to_decide`/`selected`/`rejected`, `need_id` facultatif, provenance), `strategy_deliverables` (levier retenu obligatoire, responsable et échéance facultatifs), `milestones` (date saisie, type fermé, livrable facultatif, détaché si le livrable est retiré). `strategy_is_editable` : **responsable + étape en cours** → écriture (y compris `field_values` `strategy`, politique restrictive), figée dès la demande de validation. `start_stage` refuse la Stratégie tant que le Cadrage n'est pas validé (`previous_stage_not_validated`). Triggers `check_strategy_links` (`lever_not_selected`, `lever_has_deliverables`). `report_items` : kinds `positioning`, `audiences`, `narrative`, `lever`. |
 | `…260926001201_project_visibility` | **Qui voit un projet** : `can_see_project` / `can_see_project_row` — DG (`view_all_projects`), responsable, destinataire d'une transmission en attente, directeur créatif de l'équipe (`project_creatives`, `add_project_creative` / `remove_project_creative` par le DG ou le responsable, notification `project_creative_added`). Policies de lecture de toutes les tables d'un projet (et audios Storage) réécrites ; une tâche reste visible à son assigné, une validation à son valideur. Catalogue visible par tous. |
 | `…260926001301_lever_voice_source` | `source_type = 'voice'` autorisé sur `levers` (dictée de la Stratégie). |
+| `…260927000501_budget_lines` | Lignes de budget d'un projet : libellé, montant (centimes ≥ 0), famille (taxonomie des leviers) et levier retenus facultatifs (même projet, trigger ; levier supprimé → lien retiré), statut `planned`/`committed`/`paid`. Lecture `can_see_project`, écriture `is_project_owner`, droits colonne par colonne. Tests `supabase/tests/budget.test.sql`. |
 | `…260926002301_call_consent_by_contract` | Consentement donné par contrat : `calls.consent` vaut `granted` par défaut, les calls `pending` passent à `granted`. Colonne, trigger et `calls_audio_requires_consent` conservés. |
 | `…260926001501_project_team_at_creation_and_framing_call` | Type `event`. `create_project` prend `p_assignee_person_id` (transmission d'office via `transmit_project`) et `p_creative_person_ids` (via `add_project_creative`), dans la même transaction : un refus annule tout. **Pas de cadrage sans call** : `framing_is_open` (compte rendu de call, ou Cadrage déjà entamé avant la règle), politiques restrictives sur `field_values` `brief`, `needs`, `project_team_members`, `start_stage` → `framing_requires_call`. |
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
@@ -115,6 +116,22 @@ Principes :
   (trigger avant écriture), suppression du principal → promotion du plus ancien. Piège :
   dans une policy `storage.objects`, écrire `objects.name` dans une sous-requête sur une
   table qui a aussi une colonne `name` (sinon c'est elle qui est lue).
+- **Onglets de la fiche artiste** : Vue d'ensemble, Masters, Projets, Fichiers, Activité,
+  Discographie (Deezer seul). Masters et Projets réutilisent les tableaux des pages de liste
+  (`listMasters({ ids })`, `listProjects({ ids })` ; `ArtistDetail.projectIds` = projets
+  vivants des masters de l'artiste, RLS de visibilité), ouverts aussi par les tuiles
+  chiffrées (`StatTiles` `href`). **Fichiers** (`artist_files`, bucket privé `artist-files`,
+  50 Mo, `<org>/<artist>/<uuid>[.<ext>]`) : catégories presse / photo / contrat / audio /
+  autre ; tout membre lit, **contrats lus seulement avec `manage_catalog`** (ligne et objet) ;
+  `manage_catalog` ajoute et supprime. Le navigateur envoie l'objet puis `recordArtistFile`
+  enregistre la ligne (objet supprimé si l'enregistrement échoue) ; téléchargement par URL
+  signée d'une heure (`lib/catalog/file-*.ts`, `files.ts`, `upload-file.ts`). **Activité**
+  (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
+  l'artiste, contacts, fichiers, masters, projets liés, transmissions), `detail` copié au
+  moment de l'événement, historique antérieur reconstitué par la migration ; lecture filtrée
+  par RLS (contacts et contrats : `manage_catalog`, événements de projet : `can_see_project`).
+  Phrases et jours (heure de Paris) composés par le code (`lib/catalog/activity*.ts`,
+  `components/catalog/artist-page/activity/`).
 - Projet créé **avec son équipe** : le formulaire exige un chef de projet (le projet lui est
   transmis d'office, il accepte / refuse / demande une précision comme avant) et propose
   les directeurs créatifs (pastilles `CreativePicker`). Ni étape, ni responsable avant
@@ -124,7 +141,7 @@ Principes :
   (en attente, refusé, précision demandée), sinon non transmis. Les sections Cadrage / Calls / Sortie répondent 404 tant que le projet n'a
   pas d'étape (`requireLaunchedProject`).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 228 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 258 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
@@ -377,6 +394,33 @@ poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, R
   (macOS : Réglages → Notifications → Google Chrome). Un push accepté (`201`) mais
   invisible vient presque toujours de ce réglage ou du mode Concentration.
 - Une modification qui ne notifie personne ne rafraîchit pas les autres écrans.
+
+## 8 ter. Pages d'un projet lancé
+
+Une page par section de la sidebar du projet, toutes derrière `requireLaunchedProject`
+(404 avant lancement), en-tête `ProjectPageHeader`. Tout ce qui est état, retard, décompte
+ou total est calculé par le code, jamais par PO.
+
+- **Travail** (`lib/project-work/`) : une carte par personne, triée en retard → à faire →
+  en attente → fait. Tâche à faire échue = en retard. Livrable : chez son responsable (en
+  retard si daté dans le passé — pas encore d'état « livré ») ; sans responsable, chez le
+  chef de projet en « Livrable à attribuer ». Validation en attente : « à donner » chez le
+  validateur, « demandée » (en attente) chez le demandeur. Points ouverts : bloc projet
+  « À décider », jamais sur une personne. Le responsable ajoute une tâche (`createTask`),
+  le responsable ou l'assigné la coche (`setTaskDone`). `?person=` filtre.
+- **Équipe** : membres internes et leur charge (mêmes fonctions que Travail), équipe
+  créative (`CreativeTeam`), intervenants cités dans les calls (`project_team_members`).
+- **Livrables / Activations / Planning** (`lib/project-plan/`, une lecture commune) : état
+  d'un livrable En retard / À attribuer / Planifié ; leviers par famille, retenus d'abord ;
+  frise par mois (temps forts, échéances, tâches, sortie prévue, échéance du projet), J-x
+  depuis la même date de référence que la Stratégie. Modification : dans la Stratégie.
+- **Fichiers / Validations / Activité** (`lib/project-history/`) : audio des calls
+  (téléchargement par URL signée de 15 min, session utilisateur) ; historique des
+  validations, en attente d'abord, décision sur la page de l'étape (`stageHref`) ; journal
+  reconstruit par `loadRecentActivity` (filtré par projet dans la requête), groupé par jour.
+- **Budget** (`lib/budget/`) : enveloppe = `projects.budget_cents` (fixée à la création),
+  Prévu = lignes prévues, Engagé = engagées + payées, Reste = enveloppe − engagé,
+  dépassement écrit en toutes lettres. Le responsable seul écrit ; PO ne lit pas la table.
 
 ## 9. Design (`docs/DESIGN.md`)
 

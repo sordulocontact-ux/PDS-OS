@@ -28,8 +28,8 @@ export const voice = {
   /** Voice typing in a text input (the assistant). */
   input: {
     start: "Dicter votre question",
-    stop: "Terminer la dictée",
-    escape: "Échap pour annuler",
+    stop: "Valider la dictée",
+    cancel: "Annuler la dictée",
     transcribing: "Transcription…",
   },
   errors: {

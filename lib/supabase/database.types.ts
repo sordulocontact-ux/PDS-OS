@@ -327,6 +327,73 @@ export type Database = {
           },
         ]
       }
+      budget_lines: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          created_by: string | null
+          family: string | null
+          id: string
+          label: string
+          lever_id: string | null
+          note: string | null
+          organization_id: string
+          project_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          created_by?: string | null
+          family?: string | null
+          id?: string
+          label: string
+          lever_id?: string | null
+          note?: string | null
+          organization_id: string
+          project_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          created_by?: string | null
+          family?: string | null
+          id?: string
+          label?: string
+          lever_id?: string | null
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_lines_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_lever_same_org"
+            columns: ["lever_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "levers"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "budget_lines_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       call_reports: {
         Row: {
           call_id: string

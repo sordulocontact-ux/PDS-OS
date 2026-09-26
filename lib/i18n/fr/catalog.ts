@@ -28,7 +28,17 @@ export const catalog = {
   // Artist page frame and overview.
   artistPage: {
     tabsLabel: "Sections de l'artiste",
-    tabs: { overview: "Vue d'ensemble", discography: "Discographie" },
+    tabs: {
+      overview: "Vue d'ensemble",
+      masters: "Masters",
+      projects: "Projets",
+      files: "Fichiers",
+      activity: "Activité",
+      discography: "Discographie",
+    },
+    noProjects:
+      "Aucun projet visible pour cet artiste : ses masters ne sont rattachés à aucun projet que vous pouvez voir.",
+    loadError: "La liste n'a pas pu être chargée. Rechargez la page.",
     kind: "Artiste",
     edit: "Modifier",
     identity: "Identité",

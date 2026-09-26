@@ -1,0 +1,117 @@
+"use client";
+
+import { IconMoneyBillCoin, IconPlus } from "nucleo-sharp-essential";
+import { useState } from "react";
+
+import { BudgetLineSheet } from "@/components/budget/budget-line-sheet";
+import { BudgetTable } from "@/components/budget/budget-table";
+import { DeleteBudgetLineDialog } from "@/components/budget/delete-budget-line-dialog";
+import { useCanEditProject } from "@/components/projects/edit-access";
+import { EmptyState } from "@/components/shell/empty-state";
+import { Button } from "@/components/ui/button";
+import { FilterChip } from "@/components/ui/filter-chip";
+import {
+  BUDGET_STATUSES,
+  type BudgetLever,
+  type BudgetLine,
+  type BudgetStatus,
+} from "@/lib/budget/types";
+import { fr } from "@/lib/i18n/fr";
+
+// The lines, filterable by status. The owner adds, edits and deletes; the
+// others read (the database refuses them anyway).
+export function BudgetLines({
+  projectId,
+  lines,
+  levers,
+}: {
+  projectId: string;
+  lines: BudgetLine[];
+  levers: BudgetLever[];
+}) {
+  const t = fr.budget;
+  const canEdit = useCanEditProject();
+  const [filter, setFilter] = useState<BudgetStatus | null>(null);
+  const [editing, setEditing] = useState<BudgetLine | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [deleting, setDeleting] = useState<BudgetLine | null>(null);
+
+  const shown = filter ? lines.filter((l) => l.status === filter) : lines;
+  const openSheet = (line: BudgetLine | null) => {
+    setEditing(line);
+    setSheetOpen(true);
+  };
+
+  const addButton = canEdit && (
+    <Button size="lg" onClick={() => openSheet(null)}>
+      <IconPlus aria-hidden data-icon="inline-start" />
+      {t.add}
+    </Button>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {lines.length === 0 ? (
+        <EmptyState
+          icon={IconMoneyBillCoin}
+          title={t.empty.title}
+          body={canEdit ? t.empty.body : t.empty.bodyReadOnly}
+          action={addButton || undefined}
+        />
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div
+              role="group"
+              aria-label={t.filters.label}
+              className="flex flex-wrap gap-2"
+            >
+              <FilterChip
+                pressed={filter === null}
+                onClick={() => setFilter(null)}
+              >
+                {t.filters.all}
+              </FilterChip>
+              {BUDGET_STATUSES.map((status) => (
+                <FilterChip
+                  key={status}
+                  pressed={filter === status}
+                  onClick={() => setFilter(status)}
+                >
+                  {t.statuses[status]}
+                </FilterChip>
+              ))}
+            </div>
+            {addButton}
+          </div>
+
+          {shown.length === 0 ? (
+            <p className="text-body-md text-muted-foreground">
+              {t.table.filteredEmpty}
+            </p>
+          ) : (
+            <BudgetTable
+              lines={shown}
+              canEdit={canEdit}
+              onEdit={openSheet}
+              onDelete={setDeleting}
+            />
+          )}
+        </>
+      )}
+
+      <BudgetLineSheet
+        projectId={projectId}
+        line={editing}
+        levers={levers}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
+      <DeleteBudgetLineDialog
+        projectId={projectId}
+        line={deleting}
+        onClose={() => setDeleting(null)}
+      />
+    </div>
+  );
+}

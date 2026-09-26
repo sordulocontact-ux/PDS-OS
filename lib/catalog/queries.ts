@@ -149,18 +149,23 @@ export async function findArtistsByDeezerIds(
 const MASTER_RELEASES_SELECT =
   "links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(archived_at, releases:releases!releases_project_same_org(title, planned_release_date, online_detected_at)))";
 
-export async function listMasters(): Promise<{
+/** Live masters, newest first; `ids` narrows to those (an artist's). */
+export async function listMasters(filter?: { ids: string[] }): Promise<{
   masters: MasterRow[];
   error: boolean;
 }> {
+  if (filter && filter.ids.length === 0) return { masters: [], error: false };
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("masters")
     .select(
       `id, title, version, isrc, duration_seconds, ${CREDITS_SELECT}, ${MASTER_RELEASES_SELECT}`,
     )
-    .is("archived_at", null)
-    .order("created_at", { ascending: false });
+    .is("archived_at", null);
+  if (filter) query = query.in("id", filter.ids);
+  const { data, error } = await query.order("created_at", {
+    ascending: false,
+  });
   if (error) {
     console.error("listMasters:", error.message);
     return { masters: [], error: true };

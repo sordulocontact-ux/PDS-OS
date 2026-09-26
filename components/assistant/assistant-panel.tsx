@@ -15,6 +15,7 @@ import { AssistantMessage } from "@/components/assistant/assistant-message";
 import { useAssistant } from "@/components/assistant/assistant-provider";
 import { useVoiceInput } from "@/components/voice/use-voice-input";
 import {
+  VoiceInputBar,
   VoiceInputButton,
   VoiceInputStatus,
 } from "@/components/voice/voice-input";
@@ -65,6 +66,8 @@ export function AssistantPanel({
     chat: ownChat ?? sharedChat,
   });
   const busy = status === "submitted" || status === "streaming";
+  // Listening: cancel and validate replace the microphone and send buttons.
+  const listening = voice.phase === "requesting" || voice.phase === "recording";
 
   // Opened to talk: listening starts with the window, once.
   const listened = useRef(false);
@@ -162,12 +165,7 @@ export function AssistantPanel({
         </div>
       )}
 
-      <VoiceInputStatus
-        phase={voice.phase}
-        error={voice.error}
-        elapsed={voice.elapsed}
-        meterRef={voice.meter}
-      />
+      <VoiceInputStatus phase={voice.phase} error={voice.error} />
       <form
         onSubmit={onSubmit}
         className={cn(
@@ -194,31 +192,43 @@ export function AssistantPanel({
           aria-busy={voice.phase === "transcribing"}
         />
         <div className="flex justify-end gap-2">
-          <VoiceInputButton
-            phase={voice.phase}
-            onToggle={voice.toggle}
-            disabled={busy}
-          />
-          {busy ? (
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="outline"
-              onClick={() => void stop()}
-              aria-label={t.stop}
-              className="shrink-0 border-[color:var(--border-hairline)]"
-            >
-              <IconStop aria-hidden className="size-5" />
-            </Button>
+          {listening ? (
+            <VoiceInputBar
+              phase={voice.phase}
+              elapsed={voice.elapsed}
+              meterRef={voice.meter}
+              onCancel={voice.cancel}
+              onFinish={voice.toggle}
+            />
           ) : (
-            <Button
-              type="submit"
-              size="icon-sm"
-              aria-label={t.send}
-              className="shrink-0"
-            >
-              <IconArrowUp aria-hidden className="size-5" />
-            </Button>
+            <>
+              <VoiceInputButton
+                phase={voice.phase}
+                onToggle={voice.toggle}
+                disabled={busy}
+              />
+              {busy ? (
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="outline"
+                  onClick={() => void stop()}
+                  aria-label={t.stop}
+                  className="shrink-0 border-[color:var(--border-hairline)]"
+                >
+                  <IconStop aria-hidden className="size-5" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  size="icon-sm"
+                  aria-label={t.send}
+                  className="shrink-0"
+                >
+                  <IconArrowUp aria-hidden className="size-5" />
+                </Button>
+              )}
+            </>
           )}
         </div>
       </form>

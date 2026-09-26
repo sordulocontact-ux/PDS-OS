@@ -62,23 +62,32 @@ export function ListCard({
   );
 }
 
-/** One line of a card: main text linked to its page, secondary text below. */
+/**
+ * One line of a card: main text linked to its page, secondary text below.
+ * `leading` sits before the link, outside it (a checkbox stays its own control).
+ */
 export function CardRow({
   href,
   main,
   sub,
   badge,
+  leading,
 }: {
   href: string;
   main: string;
   sub?: string;
   badge?: ReactNode;
+  leading?: ReactNode;
 }) {
   return (
-    <li>
+    <li className={cn(leading && "flex items-start gap-2")}>
+      {leading}
       <Link
         href={href}
-        className="-mx-2 flex items-start justify-between gap-3 rounded-lg px-2 py-1 hover:bg-[var(--control-bg-hover)]"
+        className={cn(
+          "-mx-2 flex items-start justify-between gap-3 rounded-lg px-2 py-1 hover:bg-[var(--control-bg-hover)]",
+          leading && "mx-0 min-w-0 flex-1",
+        )}
       >
         <span className="grid min-w-0 gap-1 text-body-md text-ink-800">
           <span className="truncate font-semibold">{main}</span>

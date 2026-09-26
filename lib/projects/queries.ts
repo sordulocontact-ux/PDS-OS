@@ -148,18 +148,23 @@ function artistNameOf(
   return masters[0]?.credits[0]?.name ?? legacyArtist?.name ?? "";
 }
 
-export async function listProjects(): Promise<{
+/** Live projects the viewer sees, newest first; `ids` narrows to those. */
+export async function listProjects(filter?: { ids: string[] }): Promise<{
   projects: ProjectListItem[];
   error: boolean;
 }> {
+  if (filter && filter.ids.length === 0) return { projects: [], error: false };
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("projects")
     .select(
       `id, title, type, owner_person_id, artist:artists!projects_artist_same_org(name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
     )
-    .is("archived_at", null)
-    .order("created_at", { ascending: false });
+    .is("archived_at", null);
+  if (filter) query = query.in("id", filter.ids);
+  const { data, error } = await query.order("created_at", {
+    ascending: false,
+  });
 
   if (error) {
     console.error("listProjects:", error.message);

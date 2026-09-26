@@ -1,5 +1,6 @@
 import { ReleaseCard } from "@/components/catalog/artist-profile/release-card";
 import { StatTiles, StatTilesSkeleton } from "@/components/ui/stat-tiles";
+import { routes } from "@/lib/auth/redirects";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
 import { formatFans } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
@@ -9,10 +10,12 @@ import { fr } from "@/lib/i18n/fr";
 // same). Without Deezer, or when it does not answer, the catalog's figures
 // stay.
 export async function ArtistHighlights({
+  artistId,
   deezerId,
   masterCount,
   projectCount,
 }: {
+  artistId: string;
   deezerId: number | null;
   masterCount: number;
   projectCount: number;
@@ -22,8 +25,16 @@ export async function ArtistHighlights({
   const p = fr.catalog.artistPage;
 
   const stats = [
-    { label: p.mastersCount, value: String(masterCount) },
-    { label: p.projectsCount, value: String(projectCount) },
+    {
+      label: p.mastersCount,
+      value: String(masterCount),
+      href: routes.artistMasters(artistId),
+    },
+    {
+      label: p.projectsCount,
+      value: String(projectCount),
+      href: routes.artistProjects(artistId),
+    },
     ...(profile
       ? [
           { label: p.fansCount, value: formatFans(profile.fans) },

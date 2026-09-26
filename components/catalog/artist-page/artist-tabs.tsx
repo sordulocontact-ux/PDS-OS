@@ -17,6 +17,10 @@ export function ArtistTabs({
       label={t.tabsLabel}
       tabs={[
         { href: routes.artist(artistId), label: t.tabs.overview, exact: true },
+        { href: routes.artistMasters(artistId), label: t.tabs.masters },
+        { href: routes.artistProjects(artistId), label: t.tabs.projects },
+        { href: routes.artistFiles(artistId), label: t.tabs.files },
+        { href: routes.artistActivity(artistId), label: t.tabs.activity },
         ...(hasDeezer
           ? [
               {

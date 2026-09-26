@@ -75,7 +75,7 @@ export const getArtist = cache(
       deezerId: data.deezer_id,
       deezerUrl: data.deezer_url,
       masters,
-      projectCount: projectIds.size,
+      projectIds: [...projectIds],
     };
   },
 );

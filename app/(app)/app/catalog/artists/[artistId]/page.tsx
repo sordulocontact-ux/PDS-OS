@@ -11,29 +11,17 @@ import {
   ArtistHighlights,
   ArtistHighlightsSkeleton,
 } from "@/components/catalog/artist-profile/artist-highlights";
-import { IconDisc } from "@/components/icons";
 import { PageSection } from "@/components/shell/page-section";
-import {
-  DataTable,
-  DataTableBody,
-  DataTableCell,
-  DataTableHead,
-  DataTableHeader,
-  DataTableIcon,
-  DataTableLink,
-  DataTableMedia,
-  DataTableRow,
-} from "@/components/ui/data-table";
 import { FactList } from "@/components/ui/fact-list";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
 import { getArtist, listArtistContacts } from "@/lib/catalog/artist-queries";
 import { countryName } from "@/lib/catalog/countries";
 import { fr } from "@/lib/i18n/fr";
 
 // Artist overview: key figures, identity, contacts (manage_catalog only:
-// the database hides them from everyone else), biography, notes, masters.
+// the database hides them from everyone else), biography, notes. Masters
+// and projects have their own tabs, opened from the figures.
 export default async function ArtistOverviewPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]">) {
@@ -51,8 +39,9 @@ export default async function ArtistOverviewPage({
       <Suspense fallback={<ArtistHighlightsSkeleton />}>
         <ArtistHighlights
           deezerId={artist.deezerId}
+          artistId={artist.id}
           masterCount={artist.masters.length}
-          projectCount={artist.projectCount}
+          projectCount={artist.projectIds.length}
         />
       </Suspense>
 
@@ -98,39 +87,6 @@ export default async function ArtistOverviewPage({
         >
           {artist.notes ?? t.noNotes}
         </p>
-      </PageSection>
-
-      <PageSection id="masters" title={t.masters}>
-        {artist.masters.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t.noMasters}</p>
-        ) : (
-          <DataTable>
-            <DataTableHeader>
-              <DataTableHead>{fr.catalog.masters.columns.title}</DataTableHead>
-              <DataTableHead fill>
-                {fr.catalog.masters.columns.artists}
-              </DataTableHead>
-            </DataTableHeader>
-            <DataTableBody>
-              {artist.masters.map((master) => (
-                <DataTableRow key={master.id}>
-                  <DataTableCell>
-                    <DataTableMedia
-                      visual={<DataTableIcon icon={IconDisc} />}
-                      title={
-                        <DataTableLink href={routes.master(master.id)}>
-                          {master.title}
-                        </DataTableLink>
-                      }
-                      subtitle={master.version}
-                    />
-                  </DataTableCell>
-                  <DataTableCell fill>{master.artists}</DataTableCell>
-                </DataTableRow>
-              ))}
-            </DataTableBody>
-          </DataTable>
-        )}
       </PageSection>
     </>
   );

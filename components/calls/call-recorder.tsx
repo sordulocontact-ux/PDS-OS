@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import {
   useEffect,
-  useRef,
   useState,
   useSyncExternalStore,
   type ReactNode,

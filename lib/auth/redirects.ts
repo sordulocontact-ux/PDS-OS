@@ -83,6 +83,8 @@ export const routes = {
   artistDiscography: (id: string) => `/app/catalog/artists/${id}/discography`,
   artistMasters: (id: string) => `/app/catalog/artists/${id}/masters`,
   artistProjects: (id: string) => `/app/catalog/artists/${id}/projects`,
+  artistFiles: (id: string) => `/app/catalog/artists/${id}/files`,
+  artistActivity: (id: string) => `/app/catalog/artists/${id}/activity`,
   masters: "/app/catalog/masters",
   mastersNew: "/app/catalog/masters/new",
   master: (id: string) => `/app/catalog/masters/${id}`,

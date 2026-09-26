@@ -1,0 +1,63 @@
+import { IconShieldCheck } from "nucleo-sharp-essential";
+
+import { ValidationItem } from "@/components/project-history/validation-item";
+import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { EmptyState } from "@/components/shell/empty-state";
+import { PageSection } from "@/components/shell/page-section";
+import { requireApproved } from "@/lib/auth/dal";
+import { fr } from "@/lib/i18n/fr";
+import { listProjectValidations } from "@/lib/project-history/queries";
+import { requireLaunchedProject } from "@/lib/projects/queries";
+
+const t = fr.projectHistory.validations;
+
+export const metadata = { title: `${t.title} · ${fr.app.name}` };
+
+// Every validation request of the project: pending ones first, on their own,
+// then the decided history. Deciding happens on the stage page.
+export default async function ProjectValidationsPage({
+  params,
+}: PageProps<"/app/projects/[projectId]/validations">) {
+  await requireApproved();
+  const { projectId } = await params;
+  await requireLaunchedProject(projectId);
+  const validations = await listProjectValidations(projectId);
+  const pending = validations.filter((v) => v.state === "pending");
+  const decided = validations.filter((v) => v.state !== "pending");
+
+  return (
+    <div className="grid gap-8">
+      <ProjectPageHeader title={t.title} description={t.description} />
+      {validations.length === 0 ? (
+        <EmptyState
+          icon={IconShieldCheck}
+          title={t.emptyTitle}
+          body={t.emptyBody}
+        />
+      ) : (
+        <>
+          {pending.length > 0 && (
+            <PageSection id="pending" title={t.pending}>
+              <ul className="grid gap-3">
+                {pending.map((v) => (
+                  <ValidationItem key={v.id} validation={v} />
+                ))}
+              </ul>
+            </PageSection>
+          )}
+          <PageSection id="history" title={t.history}>
+            {decided.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t.historyEmpty}</p>
+            ) : (
+              <ul className="grid gap-3">
+                {decided.map((v) => (
+                  <ValidationItem key={v.id} validation={v} />
+                ))}
+              </ul>
+            )}
+          </PageSection>
+        </>
+      )}
+    </div>
+  );
+}

@@ -178,8 +178,8 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   L'ombre reste portée par chaque sidebar (pas de conteneur commun entre deux layouts
   Next.js différents) : à peine visible entre les deux colonnes en mode fusionné, vu sa
   douceur (flou seul, 10 %). Titre du projet en haut, 12 sections dans l'ordre du Figma.
-  Seules Vue d'ensemble, Workflow (Cadrage + Stratégie + Sortie, entrée par Cadrage) et
-  Calls ont une page ; le reste est affiché grisé. Remplace l'ancienne double navigation
+  Chaque section a sa page (Workflow = Cadrage + Stratégie + Sortie, entrée par Cadrage) ;
+  en-tête commun `ProjectPageHeader` (h2, une phrase, action à droite). Remplace l'ancienne double navigation
   horizontale (fil d'Ariane + onglets). Les 7 étapes du métier s'affichent en fil
   d'Ariane fixe en haut du contenu, seulement sur les 3 pages Workflow
   (`components/projects/workflow-breadcrumb.tsx`, `lib/ui/workflow-steps.ts`) :

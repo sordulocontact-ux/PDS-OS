@@ -116,7 +116,8 @@ But : une modification d'interface se fait **à un seul endroit**.
 > le rappelle s'il est installé). Une ligne par élément, pas de détail d'implémentation.
 
 **Sources.** Règles : `docs/DESIGN.md` → valeurs : `app/globals.css` (DESIGN.md d'abord,
-puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas.
+puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas (dont `workStatusTone`,
+`deliverableStateTone`, `budgetStatusTone`, `validationTone`).
 
 **Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*` (dont `--surface-glass`), `--overlay-*` ·
 texte `--text-*` · bordures `--border-*`, `--hairline-*` · tons d'état `--tone-*` ·
@@ -142,20 +143,27 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2 + contenu, action facultative) |
 | `SectionTabs` | `shell/section-tabs.tsx` | onglets-liens d'une page de détail (projet, artiste), `aria-current` |
 | `FactList` | `ui/fact-list.tsx` | liste libellé / valeur dans une carte (faits d'un master, d'un projet, identité) |
-| `StatTiles` | `ui/stat-tiles.tsx` | chiffres clés en tuiles (+ squelette) |
+| `StatTiles` | `ui/stat-tiles.tsx` | chiffres clés en tuiles (+ squelette) ; `href` facultatif = tuile entière cliquable (lien étiré) ; `columns` 4 (défaut) ou 5 |
 | `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
 | `Tooltip` | `ui/tooltip.tsx` | shadcn, base sur `@base-ui/react/tooltip` (bulle au survol/focus, ex. sidebar repliée) |
 | `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) |
 | `ProjectSidebar`, `ProjectSidebarMobile`, `WorkflowBreadcrumb` | `projects/` | sidebar contextuelle d'un projet lancé (12 sections) et son tiroir mobile ; fil d'Ariane des 7 étapes du métier, habillage seul (`docs/DESIGN.md` § 4) |
-| `ListCard`, `CardRow` | `ui/list-card.tsx` | carte de lignes liées (libellé gris, `count` facultatif), accueil et Travail |
+| `ListCard`, `CardRow` | `ui/list-card.tsx` | carte de lignes liées (libellé gris, `count` facultatif), accueil et Travail ; `leading` = case à cocher hors du lien |
 | `TasksCard`, `ValidationsCard`, `ProposalsCard`, `HandoverCard`… | `home/home-cards.tsx` | cartes de l'accueil ; `all` = toutes les lignes + nombre (page Travail) |
 | `OwnedProjectsCard`, `DeliverablesCard`, `CreativeProjectsCard` | `work/work-cards.tsx` | cartes propres à la page Travail |
 | `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
+| `ProjectPageHeader` | `projects/project-page-header.tsx` | en-tête d'une section de projet (h2, une phrase, action) : Calls et les 9 pages ci-dessous |
+| `WorkBoard`, `PersonWorkCard`, `WorkRow`, `AddTaskForm`, `TeamWorkloadTable`, `ExternalTeamTable` | `project-work/` | Travail d'un projet par personne (filtre `FilterChip`, case « fait », ajout de tâche), charge de l'équipe |
+| `DeliverablesTable`, `LeverList`, `PlanningTimeline`, `EditInStrategy` | `project-plan/` | livrables, leviers par famille, frise datée par mois (repère Aujourd'hui), lien vers la Stratégie pour le responsable |
+| `BudgetSummary`, `BudgetLines`, `BudgetTable`, `BudgetLineSheet`, `DeleteBudgetLineDialog` | `budget/` | page Budget : tuiles et dépassement, lignes filtrables par statut, formulaire en `Sheet`, suppression confirmée |
+| `FilesTable`, `ValidationItem`, `ActivityTimeline` | `project-history/` | fichiers du projet (audio des calls, téléchargement signé), demande de validation, journal groupé par jour |
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
 | `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
 | `CreativePicker` | `projects/creative-picker.tsx` | choix multiple de personnes en `FilterChip`, envoyé en un champ JSON |
+| `AudioMeter`, `useAudioMeter` | `ui/audio-meter.tsx`, `ui/use-audio-meter.ts` | onde du micro qui défile de droite à gauche (façon Claude), size : sm, md ; dictée, saisie vocale de PO, enregistrement de call |
+| `VoiceInputButton`, `VoiceInputBar`, `VoiceInputStatus` | `voice/voice-input.tsx` | saisie vocale d'un champ : micro ; pendant l'écoute, onde + ✕ annuler + ✓ valider à la place du micro et d'Envoyer |
 | `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
 | `FramingNeedsCall` | `framing/framing-needs-call.tsx` | état « le cadrage part d'un call » (Cadrage verrouillé, vue d'ensemble) |
 | `StrategyNeedsFraming` | `strategy/strategy-needs-framing.tsx` | état « la stratégie suit le cadrage » (Stratégie verrouillée tant que le Cadrage n'est pas validé) |
@@ -264,7 +272,11 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   serveur relit Deezer, seul l'id vient du client. Sélecteurs :
   `components/catalog/search-picker.tsx` (commun), création en modale sans perte de saisie
   (`docs/ARCHITECTURE.md` § 2).
-  Fiche artiste à onglets (`/app/catalog/artists/[id]` + `/discography`, layout commun) :
+  Fiche artiste à onglets (`/app/catalog/artists/[id]` + `/masters`, `/projects`, `/files`,
+  `/activity`, `/discography`, layout commun ; tuiles Masters/Projets cliquables, mêmes
+  tableaux que les pages de liste via `listMasters({ ids })` / `listProjects({ ids })`) ;
+  fichiers `artist_files` (bucket privé `artist-files`, contrats réservés à `manage_catalog`),
+  journal `activity_events` **écrit par triggers seuls** (`docs/ARCHITECTURE.md` § 2) :
   identité (nom civil, pays ISO), contacts (`artist_contacts`, **lus et écrits seulement avec
   `manage_catalog`**, un principal tenu par trigger), bio saisie qui prime sur l'auto, photo
   téléversée (bucket privé `artist-pictures`, URL signées) qui prime sur celle de Deezer.
@@ -285,6 +297,14 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 - **Travail** `/app/work` : ce qui attend chacun, un bloc par permission (valider,
   attribuer, piloter, concevoir) ; prochaine action de chaque projet décidée par le code
   (`lib/work/`, `docs/ARCHITECTURE.md` § 8).
+- **Pages d'un projet lancé** : les 12 sections de la sidebar ont chacune leur page
+  (`/work`, `/team`, `/deliverables`, `/activations`, `/planning`, `/files`, `/budget`,
+  `/validations`, `/activity`), en lecture, sauf Travail (ajout de tâche, case « fait ») et
+  Budget. États (en retard, à attribuer…), décomptes et totaux calculés par le code
+  (`lib/project-work/`, `lib/project-plan/`, `lib/project-history/`) ; on modifie dans la
+  Stratégie. **Budget** : `budget_lines` (prévu / engagé / payé, famille et levier
+  facultatifs), écrit par le responsable seul, reste = enveloppe − engagé (`budgetTotals`),
+  jamais lu par PO (`docs/ARCHITECTURE.md` § 8 ter).
 - **Sortie** : iTunes ne cherche pas par ISRC (passe par l'UPC) ; Odesli fermé sans clé.
 - **Design** : `docs/DESIGN.md` fait foi. Typo Google Sans Flex partout, **medium minimum**
   (jamais de regular), texte courant 16 px, 14 px au plus petit (`docs/DESIGN.md` § 2) ; états →
@@ -331,7 +351,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 228 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 258 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -362,7 +382,8 @@ Au-delà des six étapes :
 - [x] Fiche artiste enrichie depuis Deezer : chiffres, dernière sortie / dernier album,
       bio (Deezer, repli Wikipédia), discographie filtrable, top titres, similaires
 - [x] Fiche artiste, étape 1 : onglets, identité, contacts, photo et bio modifiables
-- [ ] Fiche artiste, étapes suivantes : onglets Masters, Projets, Fichiers, Activité (journal)
+- [x] Fiche artiste : onglets Masters, Projets (tuiles cliquables), Fichiers, Activité
+      (journal écrit par triggers)
 - [x] Création avec l'équipe (chef de projet transmis d'office, directeurs créatifs), type
       Événement, pas de cadrage sans compte rendu de call, calls « À venir »
 - [x] Call sans consentement (contrat), traitement automatique et Brief pré-rempli dès la
@@ -378,6 +399,9 @@ Au-delà des six étapes :
 - [x] Page **Travail** : DG (validations, projets à retransmettre / en attente), chef de
       projet (projets à accepter, prochaine action par projet, livrables à attribuer,
       propositions de PO), directeur créatif (livrables à concevoir, projets de son équipe)
+- [x] Pages d'un projet : Travail (par personne, en retard / à faire / en attente, ajout de
+      tâche), Équipe, Livrables, Activations, Planning, Fichiers, Budget, Validations,
+      Activité
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 

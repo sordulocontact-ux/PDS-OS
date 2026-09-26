@@ -2,6 +2,8 @@
  * French UI copy. Every user-facing string lives here, never inline in
  * components. One file per domain, so parallel work never edits the same file.
  */
+import { artistActivity } from "./artist-activity";
+import { artistFiles } from "./artist-files";
 import { assistant } from "./assistant";
 import { auth } from "./auth";
 import { budget } from "./budget";
@@ -40,4 +42,6 @@ export const fr = {
   projectPlan,
   projectHistory,
   budget,
+  artistFiles,
+  artistActivity,
 } as const;
