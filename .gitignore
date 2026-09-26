@@ -41,3 +41,7 @@ yarn-error.log*
 
 # Local database export (emails, password hashes): never commit
 pds-data.sql
+
+# Local database backups (emails, password hashes): never commit
+backups/
+CLAUDE.md
