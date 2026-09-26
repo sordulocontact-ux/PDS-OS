@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-/** Frame shared by the home cards: a title, an optional link, a short list or an empty line. */
+/**
+ * Frame shared by the home cards (Figma "Desktop - 11"): a small grey label,
+ * an optional link, then a short list of rows or an empty line.
+ */
 export function HomeCard({
   title,
   action,
@@ -16,26 +17,24 @@ export function HomeCard({
   children?: ReactNode;
 }) {
   return (
-    <Card size="sm">
-      <CardHeader className="flex flex-row items-center justify-between gap-2">
-        <CardTitle className="text-sm">{title}</CardTitle>
+    <section className="flex flex-col gap-6 rounded-2xl border border-border p-3">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-caption text-grey-400">{title}</h2>
         {action && (
           <Link
             href={action.href}
-            className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+            className="text-caption text-muted-foreground underline-offset-4 hover:underline"
           >
             {action.label}
           </Link>
         )}
-      </CardHeader>
-      <CardContent>
-        {empty ? (
-          <p className="text-sm text-muted-foreground">{empty}</p>
-        ) : (
-          children
-        )}
-      </CardContent>
-    </Card>
+      </div>
+      {empty ? (
+        <p className="text-body-md text-muted-foreground">{empty}</p>
+      ) : (
+        <ul className="grid gap-1">{children}</ul>
+      )}
+    </section>
   );
 }
 
@@ -55,15 +54,11 @@ export function CardRow({
     <li>
       <Link
         href={href}
-        className="-mx-2 flex items-start justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-muted"
+        className="-mx-2 flex items-start justify-between gap-3 rounded-lg px-2 py-1 hover:bg-[var(--control-bg-hover)]"
       >
-        <span className="grid min-w-0">
-          <span className="truncate text-sm font-medium">{main}</span>
-          {sub && (
-            <span className="truncate text-xs text-muted-foreground">
-              {sub}
-            </span>
-          )}
+        <span className="grid min-w-0 gap-1 text-body-md text-ink-800">
+          <span className="truncate font-semibold">{main}</span>
+          {sub && <span className="truncate">{sub}</span>}
         </span>
         {badge}
       </Link>

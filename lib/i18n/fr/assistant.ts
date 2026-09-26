@@ -1,11 +1,9 @@
 /** Home page: the PO assistant and the cards below it. */
 export const assistant = {
   title: "Demander à PO",
-  subtitle:
-    "Posez une question sur vos projets : où ils en sont, ce qu'il reste à faire, ce qui a été dit en call.",
   disclaimer:
     "PO est une IA : il peut se tromper. Les faits exacts et les liens sont affichés sous chaque réponse.",
-  placeholder: "Ex. : où en est Lueur ?",
+  placeholder: "Comment je peux t'aider ?",
   label: "Votre question",
   send: "Envoyer",
   stop: "Arrêter",

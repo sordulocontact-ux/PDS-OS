@@ -28,6 +28,7 @@
   --po-grey-150: #e2e2e2;
   --po-grey-100: #ececec;
   --po-grey-50: #f4f4f4;
+  --po-grey-25: #fbfbfb;
   --po-white: #ffffff;
 
   /* --- Texte ------------------------------------------------------------- */
@@ -47,6 +48,10 @@
   --surface-pressed: var(--po-grey-150);
   --surface-inverse: var(--po-ink-900);
   --surface-inverse-raised: var(--po-ink-700);
+  /* DESIGN.md § 4 : fond de l'application autour de la barre latérale, et
+     fond teinté de la saisie de PO. */
+  --surface-app: var(--po-grey-25);
+  --surface-tint: rgb(64 64 64 / 0.06);
 
   /* --- Bordures ---------------------------------------------------------- */
   --border-hairline: var(--po-grey-100);
@@ -57,15 +62,13 @@
   --hairline: 1px solid var(--border-hairline);
   --hairline-strong: 1px solid var(--border-default);
 
-  /* --- Rail de navigation ------------------------------------------------ */
-  --nav-bg: var(--po-ink-900);
-  --nav-fg: var(--po-white);
-  --nav-fg-muted: var(--po-grey-400);
-  --nav-section-fg: var(--po-grey-500);
-  --nav-item-hover-bg: #141414;
-  --nav-item-active-bg: var(--po-ink-700);
-  --nav-item-active-rail: var(--po-white);
-  --nav-divider: #242424;
+  /* --- Barre latérale (DESIGN.md § 4) ------------------------------------- */
+  --nav-bg: var(--po-white);
+  --nav-fg: var(--po-ink-900);
+  --nav-fg-muted: var(--po-grey-500);
+  --nav-item-hover-bg: var(--po-grey-50);
+  --nav-item-active-bg: var(--po-grey-100);
+  --nav-divider: var(--po-grey-100);
 
   /* --- Tons d'état sémantiques (DESIGN.md § 3) : fond pâle, texte foncé --- */
   --tone-neutral-bg: var(--po-grey-100);
@@ -117,6 +120,8 @@
   --type-figure-lg-lh: 24px;
   --type-figure-md: 14px;
   --type-figure-md-lh: 20px;
+  --type-body-xl: 20px;
+  --type-body-xl-lh: 28px;
   --type-body-lg: 16px;
   --type-body-lg-lh: 22px;
   --type-body-md: 14px;
@@ -156,8 +161,10 @@
   --section-gap: var(--space-32);
   --page-gutter: 32px;
   --page-max: 1440px;
-  --nav-width: 232px;
+  --nav-width: 250px;
   --nav-width-collapsed: 64px;
+  /* Marge entre le bord de l'écran et la barre latérale flottante. */
+  --shell-inset: var(--space-16);
 
   /* --- Arrondis ---------------------------------------------------------- */
   /* Les paliers --radius-* sont déclarés dans le bloc @theme plus bas :
@@ -250,7 +257,7 @@
 
   --sidebar: var(--nav-bg);
   --sidebar-foreground: var(--nav-fg);
-  --sidebar-primary: var(--nav-item-active-rail);
+  --sidebar-primary: var(--nav-fg);
   --sidebar-primary-foreground: var(--nav-bg);
   --sidebar-accent: var(--nav-item-active-bg);
   --sidebar-accent-foreground: var(--nav-fg);
@@ -341,6 +348,8 @@
   --text-figure-md: var(--type-figure-md);
   --text-figure-md--line-height: var(--type-figure-md-lh);
   --text-figure-md--font-weight: var(--fw-medium);
+  --text-body-xl: var(--type-body-xl);
+  --text-body-xl--line-height: var(--type-body-xl-lh);
   --text-body-lg: var(--type-body-lg);
   --text-body-lg--line-height: var(--type-body-lg-lh);
   --text-body-md: var(--type-body-md);
@@ -367,8 +376,8 @@
 
 /* Valeurs littérales : Tailwind les publie en variables CSS utilisables
    partout (var(--radius-lg), var(--ease-standard)…) et en génère les classes
-   utilitaires. Arrondis : rien au-delà de 10 px sauf la pilule (DESIGN.md §4),
-   d'où les paliers 2xl et suivants volontairement plafonnés. */
+   utilitaires. Arrondis (DESIGN.md § 4) : cartes et saisie 12 px (2xl), barre
+   latérale 16 px (3xl), rien au-delà sauf la pilule, d'où 4xl plafonné. */
 @theme {
   --radius-none: 0px;
   --radius-xs: 2px;
@@ -376,9 +385,9 @@
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 10px;
-  --radius-2xl: 10px;
-  --radius-3xl: 10px;
-  --radius-4xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 16px;
   --radius-pill: 999px;
 
   --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
@@ -404,6 +413,18 @@
     font-size: var(--type-body-md);
     line-height: var(--type-body-md-lh);
     font-weight: var(--fw-regular);
+  }
+
+  /* -2 % on every element (DESIGN.md § 2), not on body alone: an inherited em
+     is frozen in px at the body size (a 20 px text would get 14 px tracking).
+     Form controls are named because Tailwind's preflight makes them inherit.
+     Utilities with their own tracking (titles, eyebrow) still win. */
+  *,
+  button,
+  input,
+  select,
+  optgroup,
+  textarea {
     letter-spacing: var(--type-body-tracking);
   }
 

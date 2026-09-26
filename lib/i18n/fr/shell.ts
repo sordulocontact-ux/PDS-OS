@@ -1,6 +1,6 @@
 /** Authenticated shell: navigation, projects list, project tabs (step 3). */
 export const shell = {
-  brandSubtitle: "Cycle de vie des sorties",
+  brand: "PDS",
   nav: {
     label: "Navigation principale",
     home: "Accueil",
@@ -15,7 +15,7 @@ export const shell = {
   home: {
     welcome: (firstName: string) => `Bonjour ${firstName}`,
     welcomeAnonymous: "Bonjour",
-    body: "Suivez chaque sortie, du cadrage au bilan.",
+    body: "Suivez chaque sortie, du cadrage au bilan",
     toProjects: "Voir les projets",
     pendingRequests: (count: number) =>
       count === 1

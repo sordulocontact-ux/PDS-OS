@@ -13,7 +13,7 @@ import { getPublicEnv } from "@/lib/env-public";
 import { fr } from "@/lib/i18n/fr";
 import { loadNotifications } from "@/lib/notifications/queries";
 
-// Authenticated shell: sidebar on desktop, drawer on mobile.
+// Authenticated shell: floating sidebar on desktop, drawer on mobile.
 // Display only. Access is enforced by each page (lib/auth/dal.ts), because a
 // layout does not re-run on client navigation.
 export default async function AppLayout({
@@ -30,33 +30,29 @@ export default async function AppLayout({
     ? await loadNotifications()
     : { items: [], unreadCount: 0 };
   const vapidPublicKey = getPublicEnv().NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null;
-  const bell = (onDark: boolean) =>
+  const bell = (side: "right" | "bottom") =>
     signedIn ? (
       <NotificationBell
         items={notifications.items}
         unreadCount={notifications.unreadCount}
         vapidPublicKey={vapidPublicKey}
-        onDark={onDark}
+        side={side}
       />
     ) : null;
 
-  // Links are ink by default (globals.css): the brand sets its colour per background.
-  const brand = (onDark: boolean) => (
+  // Trimmed to its cap height as in the Figma, so the navigation starts 24 px
+  // below the letters, not below the line box.
+  const brand = (
     <Link
       href={routes.app}
-      className={`flex flex-col px-3 no-underline ${onDark ? "text-[color:var(--nav-fg)]" : "text-foreground"}`}
+      className="text-base font-bold no-underline [text-box:trim-both_cap_alphabetic]"
     >
-      <span className="font-heading text-display-sm">{fr.app.name}</span>
-      {onDark && (
-        <span className="text-caption text-[color:var(--nav-fg-muted)]">
-          {fr.shell.brandSubtitle}
-        </span>
-      )}
+      {fr.shell.brand}
     </Link>
   );
 
   return (
-    <div className="flex flex-1">
+    <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
       <AccessWatcher
         current={access.state}
         role={access.role}
@@ -66,11 +62,12 @@ export default async function AppLayout({
         <NotificationListener personId={access.personId} />
       )}
 
-      <aside className="sticky top-0 hidden h-dvh w-[var(--nav-width)] shrink-0 flex-col justify-between gap-6 overflow-y-auto bg-sidebar py-5 text-sidebar-foreground md:flex">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-2 pr-2">
-            {brand(true)}
-            {bell(true)}
+      <aside className="sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--nav-width)] shrink-0 flex-col justify-between gap-6 overflow-y-auto rounded-3xl bg-sidebar px-6 py-4 text-sidebar-foreground md:flex">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between gap-2">
+            {brand}
+            {/* Centred on the brand without making the row taller. */}
+            <div className="-my-3.5">{bell("right")}</div>
           </div>
           <NavLinks isAdmin={isAdmin} />
         </div>
@@ -78,10 +75,10 @@ export default async function AppLayout({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-1 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
           <MobileNav isAdmin={isAdmin} footer={userPanel} />
-          {brand(false)}
-          <div className="ml-auto">{bell(false)}</div>
+          {brand}
+          <div className="ml-auto">{bell("bottom")}</div>
         </header>
         <main className="flex min-w-0 flex-1 flex-col">{children}</main>
       </div>

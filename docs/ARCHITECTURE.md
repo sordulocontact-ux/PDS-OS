@@ -140,7 +140,7 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   (en attente d'approbation, sauf invitation). **À réactiver sur le projet hébergé** :
   sans confirmation, n'importe qui peut s'inscrire avec l'adresse d'une invitation et
   récupérer le poste. Changer ce réglage demande `supabase stop && supabase start`.
-- Coquille : `app/(app)/layout.tsx` (barre latérale noire, tiroir mobile), projets
+- Coquille : `app/(app)/layout.tsx` (barre latérale blanche flottante, tiroir mobile), projets
   (`lib/projects/*`, étape actuelle calculée par le code), onglets projet : Vue d'ensemble,
   Cadrage, Calls, Sortie.
 
@@ -292,8 +292,9 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
 
 - Source unique : la table `notifications`, écrite par la base. Le texte est rédigé par le
   code (`lib/notifications/types.ts`), la base ne stocke que des identifiants.
-- **Cloche** (`components/notifications/notification-bell.tsx`) dans le rail et l'en-tête
-  mobile, données chargées par `app/(app)/layout.tsx`.
+- **Cloche** (`components/notifications/notification-bell.tsx`) dans la barre latérale
+  (panneau ouvert à droite) et l'en-tête mobile (dessous), données chargées par
+  `app/(app)/layout.tsx`.
 - **Realtime** (`notification-listener.tsx`) : à chaque insertion pour la personne
   connectée → `router.refresh()` (la page se met à jour sans recharger) + toast `sonner`
   (écart au design system, à valider avec Ibé). `supabase.realtime.setAuth()` **avant**
@@ -312,7 +313,8 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices
-  Google Sans Flex / Geist Mono, boutons pilule noire, barre latérale noire.
+  Google Sans Flex / Geist Mono, boutons pilule noire (boutons-icônes en carré arrondi),
+  barre latérale blanche flottante sur fond `--surface-app` (`docs/DESIGN.md` § 4).
 - États métier → cinq tons sémantiques (`neutral`, `info`, `warning`, `success`,
   `danger`) dans `lib/ui/state-tones.ts`, affichés par `components/ui/status-badge.tsx`.
 - Liste des masters : la sortie affichée (prochaine à venir, sinon la plus récente) est
@@ -320,6 +322,9 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
 - Liens soulignés seulement s'ils n'ont pas de classe (adaptation assumée).
 - **Piège `cn()`** : il confond les tailles de texte du système (`text-body-md`…) avec des
   couleurs ; dans une classe passée à `cn`, écrire `text-[length:var(--type-body-md)]`.
+  Il ne connaît pas non plus `rounded-pill` : deux arrondis restent alors dans la classe
+  et Tailwind, qui les trie par nom, fait gagner `rounded-pill` sur `rounded-lg` (d'où
+  `rounded-full` dans `button.tsx`).
 - **Photo d'artiste** : exception voulue à « avatar = initiales, jamais de photographie »,
   pour les artistes seulement (`components/catalog/artist-avatar.tsx`).
 - Écarts au système à arbitrer : toasts (sonner), animations d'ouverture du

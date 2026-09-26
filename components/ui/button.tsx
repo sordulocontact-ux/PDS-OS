@@ -4,8 +4,10 @@ import { cn } from "cn"
 
 // Adapted to docs/DESIGN.md § 7: primary = black pill, secondary = outline,
 // ghost = soft hover; colour/background transitions only, no scale or shadow.
+// rounded-full, not rounded-pill: Tailwind sorts radius utilities by name, so
+// only rounded-full lets the icon sizes' rounded-lg win.
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-pill border border-transparent bg-clip-padding text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-medium whitespace-nowrap no-underline transition-[background-color,border-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-medium whitespace-nowrap no-underline transition-[background-color,border-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {

@@ -4,7 +4,7 @@ import {
   IconFolderOpen,
   IconHouse2,
   IconMicrophone,
-  IconUsers2,
+  IconUser,
 } from "nucleo-sharp-essential";
 import { IconDisc } from "@/components/icons";
 import Link from "next/link";
@@ -26,7 +26,7 @@ const ITEMS = [
   {
     href: routes.members,
     label: fr.shell.nav.members,
-    icon: IconUsers2,
+    icon: IconUser,
     adminOnly: true,
   },
 ] as const;
@@ -50,7 +50,7 @@ export function NavLinks({
 
   return (
     <nav aria-label={fr.shell.nav.label}>
-      <ul className="flex flex-col gap-0.5">
+      <ul className="flex flex-col gap-3">
         {ITEMS.filter((item) => !("adminOnly" in item) || isAdmin).map(
           (item) => {
             const active = isActive(pathname, item.href, "exact" in item);
@@ -62,13 +62,13 @@ export function NavLinks({
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    // NavItem, docs/DESIGN.md § 7: grey at rest, white on hover, active = raised ink + white rail.
-                    "flex h-[var(--density-nav-item-h)] items-center gap-2.5 border-l-2 border-transparent px-3 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-medium text-[color:var(--po-grey-300)] no-underline transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)] hover:text-[color:var(--nav-fg)] focus-visible:outline-[color:var(--nav-fg)]",
+                    // NavItem, Figma "Desktop - 11": 40 px, 24 px icon, grey fill when active.
+                    "flex items-center gap-2 rounded-lg px-4 py-2 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-medium text-[color:var(--nav-fg)] no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
                     active &&
-                      "border-[color:var(--nav-item-active-rail)] bg-[var(--nav-item-active-bg)] text-[color:var(--nav-fg)]",
+                      "bg-[var(--nav-item-active-bg)] hover:bg-[var(--nav-item-active-bg)]",
                   )}
                 >
-                  <Icon className="size-[18px] shrink-0" aria-hidden />
+                  <Icon className="size-6 shrink-0" aria-hidden />
                   {item.label}
                 </Link>
               </li>

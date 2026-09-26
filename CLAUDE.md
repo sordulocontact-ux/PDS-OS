@@ -20,7 +20,7 @@ responsive, installable en PWA. Utilisateurs cibles en V1 : 3 à 5 personnes, en
 | Savoir ce qui est faisable techniquement, quelle API | `docs/CONTEXTE-PROJET.md` § 5 et § 6            |
 | Savoir ce que l'IA doit faire ou ne pas faire        | `docs/CONTEXTE-PROJET.md` § 7                   |
 | Savoir ce qui est hors périmètre                     | `docs/CONTEXTE-PROJET.md` § 9                   |
-| Apparence de l'interface (icônes, typo, couleurs d'état) | `docs/DESIGN.md`                            |
+| Apparence de l'interface (icônes, typo, couleurs d'état, coquille) | `docs/DESIGN.md`                  |
 | Où est quoi dans le code, pièges déjà rencontrés     | `docs/ARCHITECTURE.md`                          |
 | Comportement de l'assistant PO                       | `docs/ASSISTANT.md`                             |
 
@@ -77,6 +77,72 @@ Ne remplace aucune de ces briques sans demander. Ne propose pas d'alternative
 - **Nommage** : `kebab-case` pour les fichiers, `PascalCase` pour les composants,
   `camelCase` pour le reste.
 - **Commits** : `type(scope): message` — `feat`, `fix`, `chore`, `docs`, `refactor`.
+- **Périmètre** : Claude peut modifier le front-end **et le back-end** (migrations, RLS,
+  Server Actions, routes, `lib/`), en respectant les « Règles non négociables ».
+
+---
+
+## Composants d'abord : zéro duplication
+
+But : une modification d'interface se fait **à un seul endroit**.
+
+1. **Chercher avant de créer.** Partir de l'inventaire « Design system » ci-dessous, puis
+   de `components/<domaine>/`. Réutiliser ou étendre l'existant.
+2. **Deux fois = un composant.** Dès qu'un bloc de JSX ou une suite de classes revient une
+   deuxième fois, l'extraire en composant et remplacer **toutes** les occurrences. Pas
+   d'extraction préventive « qui pourrait servir ».
+3. **Une variante = une prop, jamais une copie.** Pour une variation, ajouter une prop ou
+   une variante `cva` (modèle : `button.tsx`, `status-badge.tsx`). Avant de modifier un
+   composant commun, vérifier ses autres usages.
+4. **Bien ranger.** Générique, sans métier → `components/ui/` ; structure de page →
+   `components/shell/` ; métier → `components/<domaine>/` ; utilisé par plusieurs domaines
+   → remonter dans `ui/` ou `shell/`. Logique client répétée (état, effets) → hook
+   `use-*.ts` à côté des composants.
+5. **Aucune valeur en dur.** Couleurs, rayons, ombres, espacements : tokens de
+   `app/globals.css` et classes Tailwind, jamais de hex ni de `style={{…}}` ponctuel.
+   Classes conditionnelles avec `cn()`. Textes dans `lib/i18n/fr/`.
+6. **Un composant = un rôle**, props typées explicitement, ~200 lignes au plus.
+7. **Léger côté client.** `"use client"` le plus bas possible dans l'arbre (sur la feuille
+   interactive, pas sur la page) ; composant client lourd et rarement affiché (modale,
+   éditeur) → `next/dynamic`.
+
+---
+
+## Design system
+
+> **Section tenue à jour par Claude, sans qu'on le demande.** Dès qu'un composant commun,
+> une variante, un token ou une icône est ajouté, modifié ou supprimé, mettre à jour cet
+> inventaire **dans la même tâche** (un hook local, `.claude/hooks/design-system-reminder.mjs`,
+> le rappelle s'il est installé). Une ligne par élément, pas de détail d'implémentation.
+
+**Sources.** Règles : `docs/DESIGN.md` → valeurs : `app/globals.css` (DESIGN.md d'abord,
+puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas.
+
+**Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*`, `--overlay-*` ·
+texte `--text-*` · bordures `--border-*`, `--hairline-*` · tons d'état `--tone-*` ·
+contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement `--space-*`,
+`--stack-*`, `--section-*`, `--page-*` · densité `--density-*` · rayons `--radius-*` ·
+élévation `--elevation-*`, `--shadow-*` · mouvement `--duration-*`, `--ease-*`,
+`--transition-*` · coquille `--nav-*`, `--shell-inset` · jauges `--meter-*`.
+
+**Composants communs**
+
+| Composant | Fichier | Variantes / usage |
+| --- | --- | --- |
+| `Button` | `ui/button.tsx` | variant : default, outline, secondary, ghost, destructive, link · size : default, xs, sm, lg (pilule), icon, icon-xs, icon-sm, icon-lg (carré arrondi 8 px) |
+| `Badge` | `ui/badge.tsx` | variant : default, secondary, destructive, outline, ghost, link |
+| `StatusBadge` | `ui/status-badge.tsx` | tone : neutral, info, warning, success, danger · size : sm, md |
+| `FilterChip` | `ui/filter-chip.tsx` | pastille de filtre (repos / survol / actif), prop `pressed` |
+| `SearchField` | `ui/search-field.tsx` | champ de recherche arrondi, libellé fourni par l'appelant |
+| `Card`, `Dialog`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
+| `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
+| `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
+| `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
+| `NavLinks`, `MobileNav`, `UserPanel` | `shell/` | navigation de la barre latérale blanche et du tiroir mobile (`docs/DESIGN.md` § 4) |
+| `HomeCard`, `CardRow` | `home/home-card.tsx` | carte de l'accueil (libellé gris, liste de lignes liées) |
+| `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
+| `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
+| `Icon*` | `icons/index.ts` | icônes dessinées maison ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
 
 ---
 
@@ -175,7 +241,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   code), jamais de texte libre ni de date (`docs/ARCHITECTURE.md` § 6 bis).
 - **Sortie** : iTunes ne cherche pas par ISRC (passe par l'UPC) ; Odesli fermé sans clé.
 - **Design** : `docs/DESIGN.md` fait foi. Typo Google Sans Flex partout ; états →
-  `lib/ui/state-tones.ts` (5 tons sémantiques) + `StatusBadge tone=…`.
+  `lib/ui/state-tones.ts` (5 tons sémantiques) + `StatusBadge tone=…`. Coquille et
+  accueil d'après le Figma « Desktop - 11 » : barre latérale blanche flottante, accueil
+  centré (salutation, PO, cartes), `docs/DESIGN.md` § 4.
 - **Icônes** : Nucleo Sharp uniquement (`nucleo-sharp-essential`), icônes manquantes
   dessinées dans `components/icons/` ; pas de Lucide (`docs/DESIGN.md` § 1).
 - **Textes** : `lib/i18n/fr/<domaine>.ts`. **`cn()`** : `lib/utils/index.ts`.
@@ -224,6 +292,8 @@ Au-delà des six étapes :
 
 - [x] Labo IA local (`/labo`), préparation du prochain call
 - [x] Assistant PO sur l'accueil + cartes (lecture seule, faits rédigés par le code)
+- [x] Accueil et barre latérale refaits d'après le Figma « Desktop - 11 » (barre blanche
+      flottante, salutation centrée, saisie teintée, cartes à contour)
 - [x] Enregistrement des calls dans l'app (onglet + micro, alerte de silence)
 - [x] Dictée à la voix sur le Cadrage (moteur commun, prêt pour les autres étapes)
 - [x] Postes (DG, chef de projet, directeur créatif) séparés des permissions, création de
