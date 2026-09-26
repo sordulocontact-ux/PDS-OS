@@ -18,19 +18,16 @@ import {
   VoiceInputStatus,
 } from "@/components/voice/voice-input";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { fr } from "@/lib/i18n/fr";
 
 const MAX_LENGTH = 2000;
 
-/** The PO assistant. The conversation lives in this tab only (docs/ASSISTANT.md § 2). */
+/**
+ * The PO assistant (Figma "Desktop - 11"): suggestions, then a tinted input
+ * with the microphone and send buttons. The conversation lives in this tab
+ * only (docs/ASSISTANT.md § 2).
+ */
 export function AssistantPanel() {
   const t = fr.assistant;
   const [input, setInput] = useState("");
@@ -61,6 +58,8 @@ export function AssistantPanel() {
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
+    // Send stays enabled as in the Figma: with nothing typed, back to the input.
+    if (!input.trim()) inputRef.current?.focus();
     ask(input);
   };
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -75,27 +74,18 @@ export function AssistantPanel() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="grid gap-1">
-            <CardTitle>{t.title}</CardTitle>
-            <CardDescription>{t.subtitle}</CardDescription>
-          </div>
-          {messages.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMessages([])}
-              disabled={busy}
-            >
-              {t.clear}
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        {messages.length > 0 && (
+    <section aria-label={t.title} className="flex flex-col gap-3">
+      {messages.length > 0 && (
+        <>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setMessages([])}
+            disabled={busy}
+            className="self-end"
+          >
+            {t.clear}
+          </Button>
           <div
             className="grid max-h-[28rem] gap-4 overflow-y-auto pr-1"
             aria-live="polite"
@@ -113,47 +103,52 @@ export function AssistantPanel() {
             )}
             <div ref={endRef} />
           </div>
-        )}
+        </>
+      )}
 
-        {messages.length === 0 && (
-          <div className="flex flex-wrap gap-2">
-            {t.suggestions.map((s) => (
-              <Button
-                key={s}
-                variant="outline"
-                size="sm"
-                onClick={() => ask(s)}
-              >
-                {s}
-              </Button>
-            ))}
-          </div>
-        )}
+      {messages.length === 0 && (
+        <div className="flex flex-wrap justify-center gap-2 md:gap-5">
+          {t.suggestions.map((s) => (
+            <Button
+              key={s}
+              variant="outline"
+              onClick={() => ask(s)}
+              className="h-auto bg-transparent p-3 font-normal text-ink-800"
+            >
+              {s}
+            </Button>
+          ))}
+        </div>
+      )}
 
-        <VoiceInputStatus
-          phase={voice.phase}
-          error={voice.error}
-          elapsed={voice.elapsed}
-          meterRef={voice.meter}
+      <VoiceInputStatus
+        phase={voice.phase}
+        error={voice.error}
+        elapsed={voice.elapsed}
+        meterRef={voice.meter}
+      />
+      <form
+        onSubmit={onSubmit}
+        className="flex min-h-51 flex-col gap-4 rounded-2xl border border-transparent bg-[var(--surface-tint)] p-6 transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-[color:var(--border-strong)]"
+      >
+        <label htmlFor="assistant-input" className="sr-only">
+          {t.label}
+        </label>
+        <Textarea
+          ref={inputRef}
+          id="assistant-input"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder={t.placeholder}
+          rows={1}
+          maxLength={MAX_LENGTH}
+          className="max-h-60 min-h-0 grow resize-none rounded-none border-0 p-0 text-base font-medium focus-visible:ring-0 md:text-base"
+          // Read-only, not disabled: it takes the focus back with the text.
+          readOnly={voice.phase === "transcribing"}
+          aria-busy={voice.phase === "transcribing"}
         />
-        <form onSubmit={onSubmit} className="flex items-end gap-2">
-          <label htmlFor="assistant-input" className="sr-only">
-            {t.label}
-          </label>
-          <Textarea
-            ref={inputRef}
-            id="assistant-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder={t.placeholder}
-            rows={1}
-            maxLength={MAX_LENGTH}
-            className="max-h-40 min-h-11 resize-none"
-            // Read-only, not disabled: it takes the focus back with the text.
-            readOnly={voice.phase === "transcribing"}
-            aria-busy={voice.phase === "transcribing"}
-          />
+        <div className="flex justify-end gap-2">
           <VoiceInputButton
             phase={voice.phase}
             onToggle={voice.toggle}
@@ -162,28 +157,29 @@ export function AssistantPanel() {
           {busy ? (
             <Button
               type="button"
-              size="icon"
+              size="icon-sm"
               variant="outline"
               onClick={() => void stop()}
               aria-label={t.stop}
-              className="size-11 shrink-0"
+              className="shrink-0 border-[color:var(--border-hairline)]"
             >
-              <IconStop aria-hidden />
+              <IconStop aria-hidden className="size-5" />
             </Button>
           ) : (
             <Button
               type="submit"
-              size="icon"
+              size="icon-sm"
               aria-label={t.send}
-              disabled={!input.trim()}
-              className="size-11 shrink-0"
+              className="shrink-0"
             >
-              <IconArrowUp aria-hidden />
+              <IconArrowUp aria-hidden className="size-5" />
             </Button>
           )}
-        </form>
-        <p className="text-xs text-muted-foreground">{t.disclaimer}</p>
-      </CardContent>
-    </Card>
+        </div>
+      </form>
+      <p className="text-center text-caption text-muted-foreground">
+        {t.disclaimer}
+      </p>
+    </section>
   );
 }

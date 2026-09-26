@@ -19,23 +19,21 @@ const MAX = 5;
 export function TasksCard({ tasks }: { tasks: Todo["tasks"] }) {
   return (
     <HomeCard title={t.tasks} empty={tasks.length ? undefined : t.tasksEmpty}>
-      <ul className="grid">
-        {tasks.slice(0, MAX).map((task) => (
-          <CardRow
-            key={task.id}
-            href={task.href}
-            main={task.title}
-            sub={`${task.projectTitle} · ${t.due(formatDay(task.dueDate))}`}
-            badge={
-              task.overdue ? (
-                <StatusBadge treatment={overdueTreatment} size="sm">
-                  {t.overdue}
-                </StatusBadge>
-              ) : undefined
-            }
-          />
-        ))}
-      </ul>
+      {tasks.slice(0, MAX).map((task) => (
+        <CardRow
+          key={task.id}
+          href={task.href}
+          main={task.title}
+          sub={`${task.projectTitle} · ${t.due(formatDay(task.dueDate))}`}
+          badge={
+            task.overdue ? (
+              <StatusBadge treatment={overdueTreatment} size="sm">
+                {t.overdue}
+              </StatusBadge>
+            ) : undefined
+          }
+        />
+      ))}
     </HomeCard>
   );
 }
@@ -50,16 +48,14 @@ export function ValidationsCard({
       title={t.validations}
       empty={validations.length ? undefined : t.validationsEmpty}
     >
-      <ul className="grid">
-        {validations.slice(0, MAX).map((v) => (
-          <CardRow
-            key={v.id}
-            href={v.href}
-            main={`${v.projectTitle} · ${v.stageLabel}`}
-            sub={formatDay(v.requestedAt)}
-          />
-        ))}
-      </ul>
+      {validations.slice(0, MAX).map((v) => (
+        <CardRow
+          key={v.id}
+          href={v.href}
+          main={`${v.projectTitle} · ${v.stageLabel}`}
+          sub={formatDay(v.requestedAt)}
+        />
+      ))}
     </HomeCard>
   );
 }
@@ -70,20 +66,18 @@ export function ProposalsCard({ proposals }: { proposals: Todo["proposals"] }) {
       title={t.proposals}
       empty={proposals.length ? undefined : t.proposalsEmpty}
     >
-      <ul className="grid">
-        {proposals.slice(0, MAX).map((p) => (
-          <CardRow
-            key={p.projectId}
-            href={p.href}
-            main={p.projectTitle}
-            badge={
-              <StatusBadge treatment="pending" size="sm">
-                {t.proposalsCount(p.count)}
-              </StatusBadge>
-            }
-          />
-        ))}
-      </ul>
+      {proposals.slice(0, MAX).map((p) => (
+        <CardRow
+          key={p.projectId}
+          href={p.href}
+          main={p.projectTitle}
+          badge={
+            <StatusBadge treatment="pending" size="sm">
+              {t.proposalsCount(p.count)}
+            </StatusBadge>
+          }
+        />
+      ))}
     </HomeCard>
   );
 }
@@ -94,16 +88,14 @@ export function ActivityCard({ events }: { events: ActivityEvent[] }) {
       title={t.activity}
       empty={events.length ? undefined : t.activityEmpty}
     >
-      <ul className="grid">
-        {events.slice(0, MAX).map((e, i) => (
-          <CardRow
-            key={`${e.at}-${i}`}
-            href={e.href}
-            main={`${e.projectTitle} · ${fr.assistant.activityKinds[e.kind] ?? e.kind}`}
-            sub={`${formatDay(e.at)} · ${e.detail}`}
-          />
-        ))}
-      </ul>
+      {events.slice(0, MAX).map((e, i) => (
+        <CardRow
+          key={`${e.at}-${i}`}
+          href={e.href}
+          main={`${e.projectTitle} · ${fr.assistant.activityKinds[e.kind] ?? e.kind}`}
+          sub={`${formatDay(e.at)} · ${e.detail}`}
+        />
+      ))}
     </HomeCard>
   );
 }
@@ -115,16 +107,14 @@ export function ProjectsCard({ projects }: { projects: ProjectListItem[] }) {
       action={{ label: t.allProjects, href: routes.projects }}
       empty={projects.length ? undefined : t.projectsEmpty}
     >
-      <ul className="grid">
-        {projects.slice(0, MAX).map((p) => (
-          <CardRow
-            key={p.id}
-            href={routes.project(p.id)}
-            main={p.title}
-            sub={`${p.artistName}${p.currentStage ? ` · ${p.currentStage.label} · ${fr.shell.stageStates[p.currentStage.state]}` : ""}`}
-          />
-        ))}
-      </ul>
+      {projects.slice(0, MAX).map((p) => (
+        <CardRow
+          key={p.id}
+          href={routes.project(p.id)}
+          main={p.title}
+          sub={`${p.artistName}${p.currentStage ? ` · ${p.currentStage.label} · ${fr.shell.stageStates[p.currentStage.state]}` : ""}`}
+        />
+      ))}
     </HomeCard>
   );
 }
@@ -135,26 +125,22 @@ export function ReleasesCard({ releases }: { releases: ReleaseOverview[] }) {
       title={t.releases}
       empty={releases.length ? undefined : t.releasesEmpty}
     >
-      <ul className="grid">
-        {releases.map((r) => (
-          <CardRow
-            key={r.href}
-            href={r.href}
-            main={r.title}
-            sub={
-              r.plannedDate ? t.planned(formatDay(r.plannedDate)) : undefined
-            }
-            badge={
-              <StatusBadge
-                treatment={onlineTreatment(Boolean(r.onlineSince))}
-                size="sm"
-              >
-                {r.onlineSince ? `${t.online} · ${r.platforms}` : t.notOnline}
-              </StatusBadge>
-            }
-          />
-        ))}
-      </ul>
+      {releases.map((r) => (
+        <CardRow
+          key={r.href}
+          href={r.href}
+          main={r.title}
+          sub={r.plannedDate ? t.planned(formatDay(r.plannedDate)) : undefined}
+          badge={
+            <StatusBadge
+              treatment={onlineTreatment(Boolean(r.onlineSince))}
+              size="sm"
+            >
+              {r.onlineSince ? `${t.online} · ${r.platforms}` : t.notOnline}
+            </StatusBadge>
+          }
+        />
+      ))}
     </HomeCard>
   );
 }
@@ -170,24 +156,19 @@ export function HandoverCard({
 }) {
   return (
     <HomeCard title={title}>
-      <ul className="grid">
-        {projects.slice(0, MAX).map((p) => (
-          <CardRow
-            key={p.id}
-            href={routes.project(p.id)}
-            main={p.title}
-            sub={p.artistName || undefined}
-            badge={
-              <StatusBadge
-                treatment={projectStatusTreatment[p.status]}
-                size="sm"
-              >
-                {fr.transmission.statuses[p.status]}
-              </StatusBadge>
-            }
-          />
-        ))}
-      </ul>
+      {projects.slice(0, MAX).map((p) => (
+        <CardRow
+          key={p.id}
+          href={routes.project(p.id)}
+          main={p.title}
+          sub={p.artistName || undefined}
+          badge={
+            <StatusBadge treatment={projectStatusTreatment[p.status]} size="sm">
+              {fr.transmission.statuses[p.status]}
+            </StatusBadge>
+          }
+        />
+      ))}
     </HomeCard>
   );
 }

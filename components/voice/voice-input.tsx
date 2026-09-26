@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatClock } from "@/lib/calls/format";
 import { fr } from "@/lib/i18n/fr";
+import { cn } from "@/lib/utils";
 import {
   MAX_DICTATION_SECONDS,
   type VoiceErrorCode,
@@ -42,7 +43,7 @@ export function VoiceInputButton({
   return (
     <Button
       type="button"
-      size="icon"
+      size="icon-sm"
       // Filled while listening: the state reads without color (DESIGN.md § 1).
       variant={listening ? "default" : "outline"}
       aria-label={listening ? t.stop : t.start}
@@ -55,9 +56,13 @@ export function VoiceInputButton({
         phase === "transcribing"
       }
       onClick={onToggle}
-      className="size-11 shrink-0"
+      // White square with a hairline at rest (Figma "Desktop - 11").
+      className={cn(
+        "shrink-0",
+        !listening && "border-[color:var(--border-hairline)]",
+      )}
     >
-      <IconMicrophone aria-hidden />
+      <IconMicrophone aria-hidden className="size-5" />
     </Button>
   );
 }

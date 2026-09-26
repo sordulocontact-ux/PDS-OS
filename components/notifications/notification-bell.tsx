@@ -20,17 +20,18 @@ import { cn } from "@/lib/utils";
 
 // Bell with the unread count, and the latest notifications. Opening one
 // marks it read and goes to its project. Data comes from the layout, which
-// the Realtime listener refreshes when a notification arrives.
+// the Realtime listener refreshes when a notification arrives. The panel opens
+// to the right from the sidebar, below from the mobile header.
 export function NotificationBell({
   items,
   unreadCount,
   vapidPublicKey,
-  onDark = false,
+  side = "bottom",
 }: {
   items: NotificationItem[];
   unreadCount: number;
   vapidPublicKey: string | null;
-  onDark?: boolean;
+  side?: "right" | "bottom";
 }) {
   const t = fr.notifications;
   const [open, setOpen] = useState(false);
@@ -43,31 +44,22 @@ export function NotificationBell({
           <Button
             variant="ghost"
             size="icon"
-            className={cn(
-              "relative",
-              onDark &&
-                "text-[color:var(--nav-fg)] hover:bg-[var(--nav-item-hover-bg)] focus-visible:outline-[color:var(--nav-fg)] aria-expanded:bg-[var(--nav-item-active-bg)]",
-            )}
+            className="relative hover:bg-[var(--nav-item-hover-bg)] aria-expanded:bg-[var(--nav-item-active-bg)]"
           />
         }
         aria-label={unreadCount > 0 ? t.bellUnread(unreadCount) : t.bell}
       >
-        <IconBell aria-hidden className="size-[18px]" />
+        <IconBell aria-hidden className="size-5" />
         {unreadCount > 0 && (
           <span
             aria-hidden
-            className={cn(
-              "absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-pill px-1 text-[10px] leading-none font-semibold tabular-nums",
-              onDark
-                ? "bg-[var(--nav-fg)] text-[color:var(--nav-bg)]"
-                : "bg-foreground text-background",
-            )}
+            className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-pill bg-foreground px-1 text-[10px] leading-none font-semibold text-background tabular-nums"
           >
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </PopoverTrigger>
-      <PopoverContent side={onDark ? "right" : "bottom"} align="start">
+      <PopoverContent side={side} align="start">
         <div className="flex items-center justify-between gap-2 border-b border-[color:var(--border-hairline)] px-4 py-3">
           <PopoverTitle>{t.title}</PopoverTitle>
           {unreadCount > 0 && (

@@ -55,7 +55,8 @@ Taille réglée par classe Tailwind, jamais par la prop `size` :
 | Usage                                   | Classe   |
 | --------------------------------------- | -------- |
 | Dans une ligne de texte, un badge       | `size-4` |
-| Bouton, navigation, champ               | `size-5` |
+| Bouton, champ                           | `size-5` |
+| Navigation (barre latérale, tiroir)     | `size-6` |
 | Icône isolée, état vide                 | `size-6` |
 
 Le trait est fixé à 2 dans la grille de 24 : il s'affine avec la taille (1,33 px à

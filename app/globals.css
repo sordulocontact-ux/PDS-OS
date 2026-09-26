@@ -28,6 +28,7 @@
   --po-grey-150: #e2e2e2;
   --po-grey-100: #ececec;
   --po-grey-50: #f4f4f4;
+  --po-grey-25: #fbfbfb;
   --po-white: #ffffff;
 
   /* --- Texte ------------------------------------------------------------- */
@@ -47,6 +48,10 @@
   --surface-pressed: var(--po-grey-150);
   --surface-inverse: var(--po-ink-900);
   --surface-inverse-raised: var(--po-ink-700);
+  /* Figma « Desktop - 11 » : fond de l'application autour de la barre
+     latérale, et fond teinté de la saisie de PO. */
+  --surface-app: var(--po-grey-25);
+  --surface-tint: rgb(64 64 64 / 0.06);
 
   /* --- Bordures ---------------------------------------------------------- */
   --border-hairline: var(--po-grey-100);
@@ -57,15 +62,13 @@
   --hairline: 1px solid var(--border-hairline);
   --hairline-strong: 1px solid var(--border-default);
 
-  /* --- Rail de navigation ------------------------------------------------ */
-  --nav-bg: var(--po-ink-900);
-  --nav-fg: var(--po-white);
-  --nav-fg-muted: var(--po-grey-400);
-  --nav-section-fg: var(--po-grey-500);
-  --nav-item-hover-bg: #141414;
-  --nav-item-active-bg: var(--po-ink-700);
-  --nav-item-active-rail: var(--po-white);
-  --nav-divider: #242424;
+  /* --- Barre latérale (Figma « Desktop - 11 ») ---------------------------- */
+  --nav-bg: var(--po-white);
+  --nav-fg: var(--po-ink-900);
+  --nav-fg-muted: var(--po-grey-500);
+  --nav-item-hover-bg: var(--po-grey-50);
+  --nav-item-active-bg: var(--po-grey-100);
+  --nav-divider: var(--po-grey-100);
 
   /* --- Traitements d'état : trois, et seulement trois --------------------- */
   --state-blocked-bg: var(--po-ink-900);
@@ -129,6 +132,9 @@
   --type-colhead-lh: 16px;
   --type-colhead-tracking: 0.01em;
   --type-display-tracking: -0.025em;
+  /* Figma « Desktop - 11 » : -2 % sur tout le texte, -4 % sur le grand titre. */
+  --type-text-tracking: -0.02em;
+  --type-display-xl-tracking: -0.04em;
 
   /* --- Espacement -------------------------------------------------------- */
   --space-0: 0px;
@@ -152,8 +158,10 @@
   --section-gap: var(--space-32);
   --page-gutter: 32px;
   --page-max: 1440px;
-  --nav-width: 232px;
+  --nav-width: 250px;
   --nav-width-collapsed: 64px;
+  /* Marge entre le bord de l'écran et la barre latérale flottante. */
+  --shell-inset: var(--space-16);
 
   /* --- Arrondis ---------------------------------------------------------- */
   /* Les paliers --radius-* sont déclarés dans le bloc @theme plus bas :
@@ -246,7 +254,7 @@
 
   --sidebar: var(--nav-bg);
   --sidebar-foreground: var(--nav-fg);
-  --sidebar-primary: var(--nav-item-active-rail);
+  --sidebar-primary: var(--nav-fg);
   --sidebar-primary-foreground: var(--nav-bg);
   --sidebar-accent: var(--nav-item-active-bg);
   --sidebar-accent-foreground: var(--nav-fg);
@@ -306,17 +314,18 @@
   --color-grey-100: var(--po-grey-100);
   --color-grey-50: var(--po-grey-50);
 
-  /* Polices */
-  --font-sans: var(--font-inter);
+  /* Polices. Display = Sharp Grotesk Medium 20 dans le Figma (police payante) :
+     remplacée par Google Sans Flex en attendant une licence web. */
+  --font-sans: var(--font-google-sans-flex);
   --font-heading: var(--font-geist);
-  --font-display: var(--font-geist);
+  --font-display: var(--font-google-sans-flex);
   --font-mono: var(--font-geist-mono);
 
   /* Échelle typographique */
   --text-display-xl: var(--type-display-xl);
   --text-display-xl--line-height: var(--type-display-xl-lh);
-  --text-display-xl--font-weight: var(--fw-bold);
-  --text-display-xl--letter-spacing: var(--type-display-tracking);
+  --text-display-xl--font-weight: var(--fw-medium);
+  --text-display-xl--letter-spacing: var(--type-display-xl-tracking);
   --text-display-lg: var(--type-display-lg);
   --text-display-lg--line-height: var(--type-display-lg-lh);
   --text-display-lg--font-weight: var(--fw-bold);
@@ -360,8 +369,9 @@
 
 /* Valeurs littérales : Tailwind les publie en variables CSS utilisables
    partout (var(--radius-lg), var(--ease-standard)…) et en génère les classes
-   utilitaires. Arrondis : rien au-delà de 10 px sauf la pilule (DESIGN.md §4),
-   d'où les paliers 2xl et suivants volontairement plafonnés. */
+   utilitaires. Arrondis : rien au-delà de 16 px sauf la pilule, d'où le
+   palier 4xl plafonné. Figma « Desktop - 11 » : cartes et saisie 12 px (2xl),
+   barre latérale 16 px (3xl). */
 @theme {
   --radius-none: 0px;
   --radius-xs: 2px;
@@ -369,9 +379,9 @@
   --radius-md: 6px;
   --radius-lg: 8px;
   --radius-xl: 10px;
-  --radius-2xl: 10px;
-  --radius-3xl: 10px;
-  --radius-4xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-4xl: 16px;
   --radius-pill: 999px;
 
   --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
@@ -397,6 +407,7 @@
     font-size: var(--type-body-md);
     line-height: var(--type-body-md-lh);
     font-weight: var(--fw-regular);
+    letter-spacing: var(--type-text-tracking);
   }
 
   /* Chiffres toujours tabulaires (DESIGN.md §2). */

@@ -12,7 +12,6 @@ import {
   ValidationsCard,
 } from "@/components/home/home-cards";
 import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -50,53 +49,57 @@ export default async function AppHomePage() {
       )
     : [];
 
+  // Layout of the Figma "Desktop - 11": centred greeting, then one column
+  // holding the assistant and the cards.
   return (
-    <PageContainer>
-      <PageHeader
-        title={
-          access.firstName ? t.welcome(access.firstName) : t.welcomeAnonymous
-        }
-        description={t.body}
-      />
+    <PageContainer className="items-center gap-10 py-10 md:py-20 xl:gap-21 xl:py-33">
+      <header className="flex flex-col items-center gap-3 text-center">
+        <h1 className="font-display text-display-xl text-ink-800">
+          {access.firstName ? t.welcome(access.firstName) : t.welcomeAnonymous}
+        </h1>
+        <p className="text-xl text-[color:var(--text-secondary)]">{t.body}</p>
+      </header>
 
-      {pendingCount > 0 && (
-        <div className="flex flex-col gap-3 rounded-xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="flex items-center gap-2 text-sm">
-            <IconUserPlus
-              className="size-4 shrink-0 text-muted-foreground"
-              aria-hidden
+      <div className="flex w-full max-w-4xl flex-col gap-10 md:gap-16">
+        {pendingCount > 0 && (
+          <div className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="flex items-center gap-2 text-sm">
+              <IconUserPlus
+                className="size-4 shrink-0 text-muted-foreground"
+                aria-hidden
+              />
+              {t.pendingRequests(pendingCount)}
+            </p>
+            <Link
+              href={routes.members}
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
+              {t.toMembers}
+            </Link>
+          </div>
+        )}
+        <AssistantPanel />
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {toAccept.length > 0 && (
+            <HandoverCard
+              title={fr.transmission.cards.toAccept}
+              projects={toAccept}
             />
-            {t.pendingRequests(pendingCount)}
-          </p>
-          <Link
-            href={routes.members}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            {t.toMembers}
-          </Link>
+          )}
+          {toRetransmit.length > 0 && (
+            <HandoverCard
+              title={fr.transmission.cards.toRetransmit}
+              projects={toRetransmit}
+            />
+          )}
+          <TasksCard tasks={todo.tasks} />
+          <ProjectsCard projects={projects} />
+          <ValidationsCard validations={todo.validations} />
+          <ProposalsCard proposals={todo.proposals} />
+          <ActivityCard events={events} />
+          <ReleasesCard releases={releases} />
         </div>
-      )}
-      <AssistantPanel />
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {toAccept.length > 0 && (
-          <HandoverCard
-            title={fr.transmission.cards.toAccept}
-            projects={toAccept}
-          />
-        )}
-        {toRetransmit.length > 0 && (
-          <HandoverCard
-            title={fr.transmission.cards.toRetransmit}
-            projects={toRetransmit}
-          />
-        )}
-        <TasksCard tasks={todo.tasks} />
-        <ValidationsCard validations={todo.validations} />
-        <ProposalsCard proposals={todo.proposals} />
-        <ProjectsCard projects={projects} />
-        <ActivityCard events={events} />
-        <ReleasesCard releases={releases} />
       </div>
     </PageContainer>
   );
