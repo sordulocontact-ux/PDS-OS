@@ -120,10 +120,28 @@ export const assistant = {
     teamByTransmission:
       "L'équipe d'un projet déjà créé change par la transmission, pas par cette proposition.",
   },
+  // Model context: the page PO was opened from, written by code.
+  pageContext: {
+    artist: (name: string) => `la fiche de l'artiste « ${name} »`,
+    master: (label: string, artists: string) =>
+      `la fiche du master « ${label} »${artists ? ` de ${artists}` : ""}`,
+    project: (title: string, id: string, section?: string) =>
+      `${section ? `l'onglet ${section} du` : "la page du"} projet « ${title} » (projectId ${id})`,
+    sections: {
+      framing: "Cadrage",
+      calls: "Calls",
+      strategy: "Stratégie",
+      release: "Sortie",
+    } as Record<string, string>,
+    artists: "la liste des artistes",
+    masters: "la liste des masters",
+    projects: "la liste des projets",
+  },
   launcher: {
     title: "PO",
     description:
-      "Posez une question ou demandez une création. La dictée démarre dès l'ouverture.",
+      "Parlez : votre demande part à PO dès la fin de la dictée. Il sait sur quelle page vous êtes.",
+    stopHint: "Entrée ou le micro pour envoyer, Échap pour annuler.",
     hint: "Espace Espace pour ouvrir PO depuis n'importe quelle page.",
     close: "Fermer",
   },

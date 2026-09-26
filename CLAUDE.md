@@ -144,7 +144,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
 | `NavLinks`, `MobileNav`, `UserPanel` | `shell/` | navigation de la barre latérale blanche et du tiroir mobile (`docs/DESIGN.md` § 4) |
 | `HomeCard`, `CardRow` | `home/home-card.tsx` | carte de l'accueil (libellé gris, liste de lignes liées) |
-| `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO partagée, fenêtre Espace Espace, panneau de relecture des brouillons |
+| `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
 | `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
@@ -229,9 +229,10 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   session. Chiffres, dates, ISRC, emails : recopiés de ce que l'utilisateur a écrit, vérifiés
   et lus par le code (`lib/assistant/verbatim.ts`). Projet modifiable tant qu'il n'est pas
   lancé (`update_project`), master par `update_master` (`docs/ASSISTANT.md` § 3 bis).
-- **Espace Espace** : ouvre PO depuis toute page de l'app, dictée déjà à l'écoute ;
-  conversation partagée avec l'accueil (`components/assistant/assistant-provider.tsx`,
-  `assistant-launcher.tsx`, `docs/ASSISTANT.md` § 2 bis).
+- **Espace Espace** : ouvre PO depuis toute page de l'app dans une **nouvelle
+  conversation**, dictée à l'écoute et envoyée dès qu'on a fini de parler ; la page
+  d'ouverture est un indice de contexte lu par le serveur (`lib/assistant/page-context.ts`),
+  jamais une limite (`assistant-launcher.tsx`, `docs/ASSISTANT.md` § 2 bis).
 - **Audio** : enregistreur dans l'app (onglet Meet/Zoom + micro, ou micro seul) ;
   `AudioContext.resume()` obligatoire ; alerte après 2 min de silence de l'onglet.
   Consentement **donné par contrat** (aucun écran). Après l'envoi, tout est automatique :
@@ -242,7 +243,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   date ni de temps fort), prévu sur tout le parcours.
   Moteur commun `lib/voice/`, un adaptateur par étape ; propositions relues avant écriture,
   rien en base avant « Appliquer », audio jamais stocké (`docs/ARCHITECTURE.md` § 6).
-  Micro de l'assistant : transcription seule, texte inséré dans la saisie, jamais envoyé seul.
+  Micro de l'assistant sur l'accueil : texte inséré dans la saisie, relu puis envoyé ; dans
+  la fenêtre Espace Espace, envoyé dès la fin de la dictée (demande de Sacha).
 - **Catalogue** : artistes, masters (crédits ordonnés), projets rattachés à 0..n masters
   (`lib/catalog/`, `/app/catalog/*`). Sortie musicale ⇒ au moins un master (vérifié au
   commit). Types : sortie musicale, contenu, partenariat, événement. Un projet naît **avec

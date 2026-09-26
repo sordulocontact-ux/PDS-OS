@@ -41,8 +41,8 @@ export function useAssistant(): AssistantContextValue {
 }
 
 /**
- * One PO conversation per tab, shared by the home page and the Espace Espace
- * window, and the side panel where a PO draft is reviewed and saved
+ * The home PO conversation (one per tab), the Espace Espace window (which
+ * opens its own), and the side panel where a PO draft is reviewed and saved
  * (docs/ASSISTANT.md § 3 bis). Nothing here is stored: it lives in the tab.
  */
 export function AssistantProvider({

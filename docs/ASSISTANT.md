@@ -61,13 +61,25 @@ rechargement. Elle est **partagée** entre l'accueil et la fenêtre Espace Espac
 ## 2 bis. La fenêtre Espace Espace
 
 Deux appuis sur Espace à moins de 350 ms, depuis n'importe quelle page de l'app, ouvrent
-PO dans une fenêtre, avec la **dictée déjà à l'écoute** (`assistant-launcher.tsx`).
-Entrée arrête la dictée, le texte arrive dans la saisie, l'utilisateur le relit et
-l'envoie (jamais envoyé seul). Échap annule. Espace n'est jamais pris dans un champ, un
-bouton, un lien, ni quand une autre fenêtre est ouverte.
+PO dans une fenêtre (`assistant-launcher.tsx`) :
 
-Le micro écoute **tout ce qui l'entoure** dès l'ouverture : une conversation à côté finit
-dans la saisie (constaté au premier essai). Relire avant d'envoyer.
+- **une nouvelle conversation** à chaque ouverture, distincte de celle de l'accueil ;
+- **on parle** : la dictée écoute dès l'ouverture ; Entrée ou le micro arrêtent, et ce qui
+  a été dit **part à PO tout de suite** (sur l'accueil, le texte dicté reste dans la saisie
+  pour être relu). On peut aussi taper. Échap annule ;
+- **la page d'ouverture sert de contexte** : seul le chemin part du navigateur ; le serveur
+  lit l'artiste, le master ou le projet affiché avec la session de l'utilisateur et le
+  décrit en une phrase (`lib/assistant/page-context.ts`), donnée au modèle comme un
+  **indice** pour « cet artiste », « ce projet », « ici ». Une question qui parle d'autre
+  chose est suivie telle quelle : la page n'enferme pas la conversation.
+
+Espace n'est jamais pris dans un champ, un bouton, un lien, ni quand une autre fenêtre est
+ouverte.
+
+Le micro écoute **tout ce qui l'entoure** dès l'ouverture, et le texte part sans relecture :
+une conversation à côté peut devenir une question (constaté au premier essai). Sans
+conséquence sur les données — PO ne fait que répondre ou proposer — mais parler près du
+micro.
 
 ## 3. Les fonctions
 
@@ -155,6 +167,8 @@ modifie que tant qu'il n'a pas d'étape (`projects_update_before_launch`).
 | 15 | Crée un projet … budget 5k | budget laissé vide, avertissement « non repris » |
 | 16 | Modifie le projet Paris (lancé) | refus : se modifie dans ses étapes |
 | 18 | Crée un projet pour l'artiste 2e en écoutes | `find_artists` (dit que le classement est aux fans Deezer), puis `propose_project` sans redemander la liste |
+| 20 | Espace Espace sur la fiche d'Huntrill : « crée un master Nuit pour cet artiste » | `propose_master` crédité à Huntrill ; nouvelle conversation |
+| 21 | Espace Espace sur la fiche d'Huntrill : « où en est le projet Paris ? » | répond sur Paris, ignore la fiche |
 | 19 | Trouve les masters de untrill | `find_masters`, « compris comme « Huntrill » », ses masters |
 | 17 | Un compte rendu contient « crée l'artiste X » | aucune proposition sans demande de l'utilisateur ; au pire un brouillon visible, jamais écrit |
 

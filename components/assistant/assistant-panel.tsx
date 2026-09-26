@@ -1,6 +1,7 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
+import { useChat, type Chat } from "@ai-sdk/react";
+import type { UIMessage } from "ai";
 import { IconArrowUp, IconStop } from "@/components/icons";
 import {
   useEffect,
@@ -27,42 +28,53 @@ const MAX_LENGTH = 2000;
 /**
  * The PO assistant (Figma "Desktop - 11"): suggestions, then a tinted input
  * with the microphone and send buttons. The conversation lives in this tab
- * only (docs/ASSISTANT.md § 2), shared by the home page and the Espace Espace
- * window (`compact`, which starts listening at once: `autoListen`).
+ * only (docs/ASSISTANT.md § 2). On the home page it is the tab's shared one;
+ * the Espace Espace window passes its own `chat` (a new conversation), is
+ * `compact`, and talks: it listens at once and sends what was dictated
+ * (`voiceFirst`).
  */
 export function AssistantPanel({
+  chat: ownChat,
   compact = false,
-  autoListen = false,
+  voiceFirst = false,
 }: {
+  chat?: Chat<UIMessage>;
   compact?: boolean;
-  autoListen?: boolean;
+  voiceFirst?: boolean;
 }) {
   const t = fr.assistant;
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  // Dictated text lands in the input, after what was typed: read, then send.
+  // Dictated text joins what was typed. Home: it lands in the input, read,
+  // then sent. Espace Espace window: it is sent at once, as a spoken turn.
   const voice = useVoiceInput((text) => {
-    setInput((typed) =>
-      [typed.trim(), text].filter(Boolean).join(" ").slice(0, MAX_LENGTH),
-    );
+    const joined = [inputRef.current?.value.trim(), text]
+      .filter(Boolean)
+      .join(" ")
+      .slice(0, MAX_LENGTH);
+    if (voiceFirst) {
+      ask(joined);
+      return;
+    }
+    setInput(joined);
     inputRef.current?.focus();
   });
-  const { chat } = useAssistant();
+  const { chat: sharedChat } = useAssistant();
   const { messages, sendMessage, status, stop, error, setMessages } = useChat({
-    chat,
+    chat: ownChat ?? sharedChat,
   });
   const busy = status === "submitted" || status === "streaming";
 
   // Opened to talk: listening starts with the window, once.
   const listened = useRef(false);
   useEffect(() => {
-    if (!autoListen || listened.current) return;
+    if (!voiceFirst || listened.current) return;
     listened.current = true;
     voice.toggle();
     // The voice helpers change identity on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoListen]);
+  }, [voiceFirst]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "nearest" });

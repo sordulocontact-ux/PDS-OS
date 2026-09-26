@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Chat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
 import { useAssistant } from "@/components/assistant/assistant-provider";
@@ -25,9 +28,9 @@ function spaceBelongsTo(target: EventTarget | null): boolean {
 }
 
 /**
- * Espace Espace, from any page: a window with PO, the dictation already
- * listening (like a voice launcher). The dictated text lands in the input,
- * the user reads it and sends it (docs/ASSISTANT.md § 2 bis).
+ * Espace Espace, from any page: a window with a new PO conversation, the
+ * dictation already listening; what is said is sent to PO when the dictation
+ * ends. PO knows the page it was opened from (docs/ASSISTANT.md § 2 bis).
  */
 export function AssistantLauncher() {
   const t = fr.assistant.launcher;
@@ -69,11 +72,29 @@ export function AssistantLauncher() {
       >
         <DialogHeader>
           <DialogTitle>{t.title}</DialogTitle>
-          <DialogDescription>{t.description}</DialogDescription>
+          <DialogDescription>
+            {t.description} {t.stopHint}
+          </DialogDescription>
         </DialogHeader>
-        {/* Mounted per opening: every opening starts listening. */}
-        {launcherOpen && <AssistantPanel compact autoListen />}
+        {/* Mounted per opening: a new conversation, listening at once. */}
+        {launcherOpen && <LauncherConversation />}
       </DialogContent>
     </Dialog>
   );
+}
+
+// Its own conversation, bound to the page it was opened from. The page is
+// only a path: the server reads what it shows, with the user's session.
+function LauncherConversation() {
+  const page = usePathname();
+  const [chat] = useState(
+    () =>
+      new Chat<UIMessage>({
+        transport: new DefaultChatTransport({
+          api: "/api/assistant",
+          body: { page },
+        }),
+      }),
+  );
+  return <AssistantPanel chat={chat} compact voiceFirst />;
 }

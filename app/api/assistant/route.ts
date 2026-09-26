@@ -8,6 +8,7 @@ import {
 } from "ai";
 import { z } from "zod";
 
+import { pageContext } from "@/lib/assistant/page-context";
 import { createAssistantTools } from "@/lib/assistant/tools";
 import { getAccess } from "@/lib/auth/dal";
 import { assistantInstructions } from "@/lib/ai/instructions/assistant";
@@ -29,6 +30,8 @@ const bodySchema = z.object({
     )
     .min(1)
     .max(40),
+  // The page PO was opened from (Espace Espace): a path, resolved by code.
+  page: z.string().max(300).optional(),
 });
 const MAX_USER_TEXT = 2000;
 
@@ -65,6 +68,7 @@ export async function POST(request: Request) {
     system: assistantInstructions({
       firstName: access.firstName,
       role: access.role,
+      page: await pageContext(parsed.data.page),
     }),
     messages: await convertToModelMessages(messages),
     tools: createAssistantTools(access, userTexts),
