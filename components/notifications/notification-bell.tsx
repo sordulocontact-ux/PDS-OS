@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 
 import { PushToggle } from "@/components/notifications/push-toggle";
 import { Button } from "@/components/ui/button";
+import { CountBadge } from "@/components/ui/count-badge";
 import {
   Popover,
   PopoverContent,
@@ -51,12 +52,10 @@ export function NotificationBell({
       >
         <IconBell aria-hidden className="size-5" />
         {unreadCount > 0 && (
-          <span
-            aria-hidden
-            className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-pill bg-foreground px-1 text-[10px] leading-none font-semibold text-background tabular-nums"
-          >
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
+          <CountBadge
+            count={unreadCount}
+            className="absolute -top-0.5 -right-0.5"
+          />
         )}
       </PopoverTrigger>
       <PopoverContent side={side} align="start">

@@ -29,7 +29,7 @@ export default async function MembersPage({
   const params = await searchParams;
   const segment: MembershipStatus = isMembershipStatus(params.status)
     ? params.status
-    : "pending";
+    : "approved";
 
   const { rows, error } = await listMemberships(access.organizationId ?? "");
   const visible = rows.filter((row) => row.status === segment);

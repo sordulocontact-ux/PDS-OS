@@ -143,6 +143,10 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
 - Coquille : `app/(app)/layout.tsx` (barre latérale blanche flottante, tiroir mobile), projets
   (`lib/projects/*`, étape actuelle calculée par le code), onglets projet : Vue d'ensemble,
   Cadrage, Calls, Sortie.
+- Demandes d'accès en attente : comptées par le layout (`countPendingMemberships`, admins
+  seulement) et affichées sur « Équipe », qui ouvre alors `?status=pending`. Un layout ne
+  se recalcule pas à chaque navigation : le compteur se met à jour au chargement d'une
+  page et après une action qui revalide (décision prise sur l'écran Équipe).
 
 ---
 

@@ -1,6 +1,3 @@
-import { IconUserPlus } from "@/components/icons";
-import Link from "next/link";
-
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
 import {
   ActivityCard,
@@ -12,30 +9,23 @@ import {
   ValidationsCard,
 } from "@/components/home/home-cards";
 import { PageContainer } from "@/components/shell/page-container";
-import { buttonVariants } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadReleasesOverview } from "@/lib/insights/releases";
 import { loadMyTodo } from "@/lib/insights/todo";
-import { countPendingMemberships } from "@/lib/members/queries";
 import { listProjects } from "@/lib/projects/queries";
 
 export default async function AppHomePage() {
   const access = await requireApproved();
   const t = fr.shell.home;
-  const [pendingCount, todo, events, { projects }, releases] =
-    await Promise.all([
-      can(access, "administer") && access.organizationId
-        ? countPendingMemberships(access.organizationId)
-        : Promise.resolve(0),
-      loadMyTodo(access),
-      loadRecentActivity({ days: 7, limit: 5 }),
-      listProjects(),
-      loadReleasesOverview(),
-    ]);
+  const [todo, events, { projects }, releases] = await Promise.all([
+    loadMyTodo(access),
+    loadRecentActivity({ days: 7, limit: 5 }),
+    listProjects(),
+    loadReleasesOverview(),
+  ]);
 
   // Handover circuit, decided by code from the computed project status.
   const toAccept = projects.filter(
@@ -63,23 +53,6 @@ export default async function AppHomePage() {
       </header>
 
       <div className="flex w-full max-w-4xl flex-col gap-10 md:gap-16">
-        {pendingCount > 0 && (
-          <div className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="flex items-center gap-2 text-sm">
-              <IconUserPlus
-                className="size-4 shrink-0 text-muted-foreground"
-                aria-hidden
-              />
-              {t.pendingRequests(pendingCount)}
-            </p>
-            <Link
-              href={routes.members}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              {t.toMembers}
-            </Link>
-          </div>
-        )}
         <AssistantPanel />
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

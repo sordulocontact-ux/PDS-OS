@@ -143,6 +143,9 @@ Source : maquette Figma « Desktop - 11 » (accueil), fichier « Devis Sordulo �
   espacés de 12 px, icône 24 px, fond `--nav-item-active-bg` sur la page ouverte,
   `--nav-item-hover-bg` au survol. En bas, la personne connectée et « Se déconnecter »,
   au même format qu'un élément de navigation.
+- Ce qui attend quelqu'un se compte dans une pastille noire (`CountBadge`), jamais dans
+  un bandeau : notifications non lues sur la cloche, demandes d'accès en attente à droite
+  d'« Équipe » (et sur le bouton du menu en mobile).
 - Mobile : même navigation dans un tiroir blanc, ouvert depuis l'en-tête.
 
 ### Accueil

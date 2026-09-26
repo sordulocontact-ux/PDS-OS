@@ -11,6 +11,7 @@ import { getAccess } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { getPublicEnv } from "@/lib/env-public";
 import { fr } from "@/lib/i18n/fr";
+import { countPendingMemberships } from "@/lib/members/queries";
 import { loadNotifications } from "@/lib/notifications/queries";
 
 // Authenticated shell: floating sidebar on desktop, drawer on mobile.
@@ -26,9 +27,13 @@ export default async function AppLayout({
   const name = [access.firstName, access.lastName].filter(Boolean).join(" ");
   const userPanel = <UserPanel name={name} email={access.email} />;
   const signedIn = access.state === "approved" && access.personId !== null;
-  const notifications = signedIn
-    ? await loadNotifications()
-    : { items: [], unreadCount: 0 };
+  // Access requests waiting for a decision: counted on "Équipe" for admins.
+  const [notifications, pendingMembers] = await Promise.all([
+    signedIn ? loadNotifications() : { items: [], unreadCount: 0 },
+    isAdmin && access.organizationId
+      ? countPendingMemberships(access.organizationId)
+      : 0,
+  ]);
   const vapidPublicKey = getPublicEnv().NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null;
   const bell = (side: "right" | "bottom") =>
     signedIn ? (
@@ -69,14 +74,18 @@ export default async function AppLayout({
             {/* Centred on the brand without making the row taller. */}
             <div className="-my-3.5">{bell("right")}</div>
           </div>
-          <NavLinks isAdmin={isAdmin} />
+          <NavLinks isAdmin={isAdmin} pendingMembers={pendingMembers} />
         </div>
         {userPanel}
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
-          <MobileNav isAdmin={isAdmin} footer={userPanel} />
+          <MobileNav
+            isAdmin={isAdmin}
+            pendingMembers={pendingMembers}
+            footer={userPanel}
+          />
           {brand}
           <div className="ml-auto">{bell("bottom")}</div>
         </header>

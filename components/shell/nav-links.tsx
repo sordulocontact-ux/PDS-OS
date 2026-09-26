@@ -10,6 +10,7 @@ import { IconDisc } from "@/components/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { CountBadge } from "@/components/ui/count-badge";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
@@ -39,11 +40,15 @@ function isActive(pathname: string, href: string, exact: boolean): boolean {
 
 // Main navigation, shared by the desktop sidebar and the mobile drawer.
 // Hiding "Équipe" is comfort only: the page itself requires an admin.
+// Access requests waiting for a decision show as a count on "Équipe", which
+// then opens straight on them (the team page opens on approved members).
 export function NavLinks({
   isAdmin,
+  pendingMembers = 0,
   onNavigate,
 }: {
   isAdmin: boolean;
+  pendingMembers?: number;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -55,12 +60,18 @@ export function NavLinks({
           (item) => {
             const active = isActive(pathname, item.href, "exact" in item);
             const Icon = item.icon;
+            const count = item.href === routes.members ? pendingMembers : 0;
             return (
               <li key={item.href}>
                 <Link
-                  href={item.href}
+                  href={count > 0 ? `${item.href}?status=pending` : item.href}
                   onClick={onNavigate}
                   aria-current={active ? "page" : undefined}
+                  aria-label={
+                    count > 0
+                      ? `${item.label}, ${fr.shell.nav.pendingMembers(count)}`
+                      : undefined
+                  }
                   className={cn(
                     // NavItem, Figma "Desktop - 11": 40 px, 24 px icon, grey fill when active.
                     "flex items-center gap-2 rounded-lg px-4 py-2 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-medium text-[color:var(--nav-fg)] no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
@@ -70,6 +81,9 @@ export function NavLinks({
                 >
                   <Icon className="size-6 shrink-0" aria-hidden />
                   {item.label}
+                  {count > 0 && (
+                    <CountBadge count={count} className="ml-auto" />
+                  )}
                 </Link>
               </li>
             );

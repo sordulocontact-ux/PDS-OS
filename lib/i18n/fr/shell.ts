@@ -8,6 +8,11 @@ export const shell = {
     artists: "Artistes",
     masters: "Masters",
     members: "Équipe",
+    // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.
+    pendingMembers: (count: number) =>
+      count === 1
+        ? "1 demande d'accès en attente"
+        : `${count} demandes d'accès en attente`,
     openMenu: "Ouvrir le menu",
     menuTitle: "Menu",
   },
@@ -17,11 +22,6 @@ export const shell = {
     welcomeAnonymous: "Bonjour",
     body: "Suivez chaque sortie, du cadrage au bilan",
     toProjects: "Voir les projets",
-    pendingRequests: (count: number) =>
-      count === 1
-        ? "1 demande d'accès attend votre décision."
-        : `${count} demandes d'accès attendent votre décision.`,
-    toMembers: "Ouvrir l'équipe",
   },
 
   projectTypes: {
