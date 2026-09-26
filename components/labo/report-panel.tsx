@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { ProvenanceTag } from "@/components/labo/provenance-tag";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { LocatedCallReport } from "@/lib/ai/call-report";
 import type { QuoteLocation } from "@/lib/ai/provenance";
 import { fr } from "@/lib/i18n/fr";
@@ -71,9 +72,9 @@ export function ReportPanel({ report }: { report: LocatedCallReport }) {
 
   return (
     <div className="space-y-6">
-      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      <StatusBadge treatment="pending" size="sm">
         {t.proposed}
-      </p>
+      </StatusBadge>
       <section className="space-y-1">
         <h3 className="text-sm font-medium">{t.summary}</h3>
         <p className="text-sm">{report.summary}</p>

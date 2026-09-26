@@ -1,0 +1,67 @@
+"use client";
+
+import { useFramingAction } from "@/components/framing/use-framing-action";
+import { Button } from "@/components/ui/button";
+import { importReport } from "@/lib/framing/actions/import";
+import type { FramingData } from "@/lib/framing/queries";
+import { fr } from "@/lib/i18n/fr";
+
+const dateFormat = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+export function ImportPanel({
+  reports,
+  projectId,
+}: {
+  reports: FramingData["reports"];
+  projectId: string;
+}) {
+  const t = fr.framing.import;
+  const { pending, run } = useFramingAction();
+
+  return (
+    <section className="grid gap-3">
+      <div className="grid gap-1">
+        <h3 className="text-sm font-medium">{t.title}</h3>
+        <p className="text-xs text-muted-foreground">{t.hint}</p>
+      </div>
+      {reports.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t.empty}</p>
+      ) : (
+        <ul className="grid gap-2">
+          {reports.map((report) => (
+            <li
+              key={report.reportId}
+              className="flex items-center justify-between gap-3 text-sm"
+            >
+              <span>
+                {report.callTitle}
+                <span className="block text-xs text-muted-foreground">
+                  {dateFormat.format(new Date(report.createdAt))}
+                </span>
+              </span>
+              {report.imported ? (
+                <span className="text-xs text-muted-foreground">{t.done}</span>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() =>
+                    run(() => importReport(projectId, report.reportId))
+                  }
+                >
+                  {t.submit}
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

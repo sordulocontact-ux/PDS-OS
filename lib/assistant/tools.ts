@@ -1,0 +1,176 @@
+import "server-only";
+
+import { tool } from "ai";
+import { z } from "zod";
+
+import { activityLine, formatDay, lateness } from "@/lib/assistant/facts";
+import { projectStatus } from "@/lib/assistant/project-status";
+import { uniqueSources, type Source } from "@/lib/assistant/sources";
+import type { Access } from "@/lib/auth/access";
+import { routes } from "@/lib/auth/redirects";
+import { loadRecentActivity } from "@/lib/insights/activity";
+import { loadMyTodo } from "@/lib/insights/todo";
+import { listProjects } from "@/lib/projects/queries";
+import { createClient } from "@/lib/supabase/server";
+
+/**
+ * The assistant's only reach into the world (docs/ASSISTANT.md § 3).
+ * Read-only, run with the user's session: RLS decides what is visible.
+ * Every result carries `sources`, rendered by the UI under the answer.
+ */
+export function createAssistantTools(access: Access) {
+  return {
+    find_projects: tool({
+      description:
+        "Liste les projets (sorties) visibles, avec artiste, type et étape actuelle. Recherche tolérante aux fautes si un texte est donné.",
+      inputSchema: z.object({
+        query: z
+          .string()
+          .max(100)
+          .optional()
+          .describe("Titre ou artiste, même approximatif"),
+      }),
+      execute: async ({ query }) => {
+        const { projects } = await listProjects();
+        let list = projects;
+        if (query?.trim()) {
+          const supabase = await createClient();
+          const { data } = await supabase.rpc("search_projects", {
+            p_query: query,
+          });
+          const order = new Map((data ?? []).map((r, i) => [r.id, i]));
+          list = projects
+            .filter((p) => order.has(p.id))
+            .sort((a, b) => order.get(a.id)! - order.get(b.id)!);
+        }
+        const found = list.slice(0, 20);
+        return {
+          projects: found.map((p) => ({
+            projectId: p.id,
+            title: p.title,
+            artist: p.artistName,
+            type: p.releaseType,
+            currentStage: p.currentStage
+              ? `${p.currentStage.label} (${p.currentStage.state})`
+              : null,
+          })),
+          sources: found.map((p): Source => ({
+            label: p.title,
+            href: routes.project(p.id),
+          })),
+        };
+      },
+    }),
+
+    project_status: tool({
+      description:
+        "État complet d'un projet : étapes, Brief, besoins, équipe, points ouverts, tâches (retards calculés), validation en attente, sortie. Appeler find_projects d'abord pour obtenir projectId.",
+      inputSchema: z.object({ projectId: z.uuid() }),
+      execute: async ({ projectId }) => projectStatus(projectId, access),
+    }),
+
+    my_todo: tool({
+      description:
+        "Ce qui attend l'utilisateur connecté : ses tâches à faire (retards calculés), les validations qui l'attendent, les propositions de PO à confirmer par projet.",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const todo = await loadMyTodo(access);
+        const facts = [
+          ...todo.tasks.map(
+            (t) =>
+              `Tâche « ${t.title} » (${t.projectTitle}) : à faire, échéance le ${formatDay(t.dueDate)}, ${lateness(t.overdue)}.`,
+          ),
+          ...todo.validations.map(
+            (v) =>
+              `Validation qui vous attend : ${v.stageLabel} de ${v.projectTitle}, demandée le ${formatDay(v.requestedAt)}.`,
+          ),
+          ...todo.proposals.map(
+            (p) =>
+              `${p.count} proposition(s) de PO à confirmer sur ${p.projectTitle}.`,
+          ),
+        ];
+        return {
+          facts: facts.length
+            ? facts
+            : [
+                "Rien ne vous attend : aucune tâche, aucune validation, aucune proposition.",
+              ],
+          sources: uniqueSources([
+            ...todo.tasks.map((t) => ({
+              label: `${t.projectTitle} · ${t.title}`,
+              href: t.href,
+            })),
+            ...todo.validations.map((v) => ({
+              label: `${v.projectTitle} · validation ${v.stageLabel}`,
+              href: v.href,
+            })),
+            ...todo.proposals.map((p) => ({
+              label: `${p.projectTitle} · propositions`,
+              href: p.href,
+            })),
+          ]),
+        };
+      },
+    }),
+
+    recent_activity: tool({
+      description:
+        "Événements datés récents (calls, comptes rendus, Brief, tâches, points tranchés, étapes, validations, mise en ligne), pour répondre à « ça a avancé ? ».",
+      inputSchema: z.object({
+        projectId: z.uuid().optional(),
+        days: z.number().int().min(1).max(90).default(7),
+      }),
+      execute: async ({ projectId, days }) => {
+        const events = await loadRecentActivity({ projectId, days, limit: 30 });
+        return {
+          days,
+          facts: events.length
+            ? events.map(activityLine)
+            : [`Aucun événement enregistré sur les ${days} derniers jours.`],
+          sources: uniqueSources(
+            events.map((e) => ({
+              label: `${e.projectTitle} · ${e.detail}`,
+              href: e.href,
+            })),
+          ).slice(0, 8),
+        };
+      },
+    }),
+
+    search_calls: tool({
+      description:
+        "Cherche dans les comptes rendus et transcriptions des calls (recherche plein texte en français). Renvoie les passages, le call et le minutage.",
+      inputSchema: z.object({
+        query: z.string().min(2).max(200),
+        projectId: z.uuid().optional(),
+      }),
+      execute: async ({ query, projectId }) => {
+        const supabase = await createClient();
+        const { data } = await supabase.rpc("search_calls", {
+          p_query: query,
+          p_project_id: projectId,
+        });
+        const results = data ?? [];
+        return {
+          results: results.map((r) => ({
+            source: r.source,
+            project: r.project_title,
+            call: r.call_title,
+            kind: r.kind,
+            excerpt: r.excerpt,
+            quote: r.quote,
+            startSeconds: r.start_seconds,
+          })),
+          sources: uniqueSources(
+            results.map((r) => ({
+              label: `${r.project_title} · ${r.call_title}`,
+              href: routes.projectCall(r.project_id, r.call_id),
+            })),
+          ),
+        };
+      },
+    }),
+  };
+}
+
+export type AssistantTools = ReturnType<typeof createAssistantTools>;

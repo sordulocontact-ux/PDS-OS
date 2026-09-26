@@ -1,3 +1,4 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { QuoteLocation } from "@/lib/ai/provenance";
 import { fr } from "@/lib/i18n/fr";
 import { formatTimestamp } from "@/lib/labo/format";
@@ -20,16 +21,19 @@ export function ProvenanceTag({
 
   return (
     <span className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-      <span
-        className={
-          at.status === "missing"
-            ? "font-medium text-destructive"
-            : "font-mono text-foreground"
-        }
-      >
-        {label}
-      </span>
-      <q className="italic">{quote}</q>
+      {at.status === "missing" ? (
+        // A quote absent from the transcript is a block: probably invented.
+        <StatusBadge
+          treatment="blocked"
+          size="sm"
+          className="justify-self-start"
+        >
+          {label}
+        </StatusBadge>
+      ) : (
+        <span className="font-mono text-foreground">{label}</span>
+      )}
+      <q>{quote}</q>
     </span>
   );
 }

@@ -43,6 +43,8 @@ export const serverEnvSchema = z
     MISTRAL_API_KEY: optionalSecret,
     GOOGLE_GENERATIVE_AI_API_KEY: optionalSecret,
     GROQ_API_KEY: optionalSecret,
+    /** Shared secret of the Vercel cron (Authorization: Bearer <CRON_SECRET>). */
+    CRON_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
     /** Optional: Odesli closed its public API, keys come from a whitelist. */
     ODESLI_API_KEY: optionalSecret,
   })

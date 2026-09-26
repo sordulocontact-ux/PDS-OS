@@ -1,0 +1,126 @@
+/** Framing stage page and the Brief (step 5). */
+export const framing = {
+  title: "Cadrage",
+  description:
+    "Le Brief de la sortie : objectif, temporalité, besoins, cadre, équipe.",
+  proposed: "proposé · à confirmer",
+  proposedHint:
+    "Proposé par PO à partir d'un call. Relisez, puis confirmez ou rejetez.",
+  empty: "Pas encore renseigné.",
+  fields: {
+    objective: "Objectif",
+    timing: "Temporalité",
+    frame: "Cadre",
+  },
+  actions: {
+    confirm: "Confirmer",
+    reject: "Rejeter",
+    edit: "Modifier",
+    fill: "Renseigner",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    add: "Ajouter",
+    working: "…",
+  },
+  provenance: {
+    from: "Source :",
+    at: "à",
+    manual: "Saisi à la main",
+    dictatedBy: (name: string | null) =>
+      name ? `Dicté par ${name}` : "Dicté à la voix",
+    missing:
+      "Citation introuvable dans la transcription : à vérifier avant de confirmer.",
+  },
+  import: {
+    title: "Importer depuis un call",
+    hint: "Pré-remplit le Brief à partir du dernier compte rendu d'un call. Rien n'est confirmé automatiquement.",
+    empty:
+      "Aucun compte rendu disponible. Enregistrez un call dans l'onglet Calls.",
+    submit: "Importer",
+    done: "Importé",
+  },
+  dictation: {
+    kinds: {
+      brief: (field: string, isEdit: boolean) =>
+        `${field} · ${isEdit ? "modification" : "à renseigner"}`,
+      need: (family: string) => `Nouveau besoin · ${family}`,
+      team: "Nouvelle personne dans l'équipe",
+      open_point: "Nouveau point ouvert",
+    },
+    noRole: "rôle non précisé",
+  },
+  needs: {
+    title: "Besoins",
+    hint: "Identifier un besoin n'engage rien : aucune mission, dépense ou activation n'est créée ici.",
+    empty: "Aucun besoin identifié.",
+    label: "Besoin",
+    family: "Famille",
+    identified: "Identifié",
+    committed: "Engagé",
+    commit: "Engager",
+    uncommit: "Repasser en identifié",
+    families: {
+      creation_content: "Création & contenus",
+      promotion_distribution: "Promotion & diffusion",
+      experiences_activations: "Expériences & activations",
+      other: "Autre",
+    },
+  },
+  team: {
+    title: "Équipe",
+    empty: "Personne pour l'instant.",
+    name: "Nom",
+    role: "Rôle",
+  },
+  openPoints: {
+    title: "Points ouverts",
+    hint: "Une décision non prise : pas de responsable, pas d'échéance.",
+    empty: "Aucun point ouvert.",
+    question: "Question",
+    resolve: "Trancher",
+    resolution: "Décision prise",
+    resolved: "Tranchés",
+  },
+  tasks: {
+    title: "Actions",
+    proposedTitle: "Actions proposées depuis les calls",
+    proposedHint:
+      "Une tâche a toujours un responsable et une échéance : à vous de les choisir.",
+    empty: "Aucune tâche.",
+    taskTitle: "Tâche",
+    assignee: "Responsable",
+    dueDate: "Échéance",
+    create: "Créer la tâche",
+    done: "Faite",
+  },
+  validation: {
+    title: "Validation du Brief",
+    states: {
+      not_started: "Pas commencé",
+      in_progress: "En cours",
+      awaiting_validation: "En attente de validation",
+      validated: "Validé",
+    },
+    start: "Commencer le cadrage",
+    reopen: "Rouvrir",
+    validator: "Valideur",
+    note: "Message (facultatif)",
+    request: "Demander la validation",
+    waitingFor: (name: string) => `En attente de ${name}.`,
+    youDecide: "Vous êtes le valideur.",
+    comment: "Commentaire (obligatoire pour refuser)",
+    approve: "Valider",
+    decline: "Refuser",
+  },
+  errors: {
+    invalid_input: "Saisie invalide.",
+    not_found: "Élément introuvable.",
+    already_imported: "Ce compte rendu a déjà été importé.",
+    invalid_transition: "Cette action n'est pas possible dans l'état actuel.",
+    validator_not_member: "Le valideur doit être un membre approuvé.",
+    not_the_validator: "Seul le valideur désigné peut décider.",
+    reason_required: "Un motif est obligatoire.",
+    forbidden: "Vous n'avez pas les droits pour cette action.",
+    generic: "Une erreur est survenue. Réessayez.",
+  },
+} as const;

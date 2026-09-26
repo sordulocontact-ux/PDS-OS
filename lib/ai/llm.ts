@@ -33,6 +33,17 @@ function resolveModel(env: ServerEnv): {
   }
 }
 
+/** The configured chat model, for the assistant's streamed conversation. */
+export function getChatModel(): {
+  model: LanguageModel;
+  provider: string;
+  modelId: string;
+} {
+  const env = getServerEnv();
+  const { model, modelId } = resolveModel(env);
+  return { model, provider: env.LLM_PROVIDER, modelId };
+}
+
 export type Extraction<T> = {
   output: T;
   provider: string;

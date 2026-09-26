@@ -17,6 +17,7 @@
     "@ai-sdk/google": "^4.0.80",
     "@ai-sdk/groq": "^4.0.48",
     "@ai-sdk/mistral": "^4.0.50",
+    "@ai-sdk/react": "4.0.117",
     "@base-ui/react": "^1.8.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.1",

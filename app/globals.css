@@ -1,130 +1,429 @@
+/* Imported from Ibé's PO repository (po/app/globals.css): tokens of docs/DESIGN.md
+   and the bridge to shadcn/ui. Change DESIGN.md first, then this file. */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* ==========================================================================
+   1 — TOKENS PO
+   Source de vérité : DESIGN.md. Ne pas modifier une valeur ici sans l'y
+   répercuter, sinon les deux divergent silencieusement.
+   ========================================================================== */
+
+:root {
+  /* --- Encre et gris ----------------------------------------------------- */
+  --po-black: #000000;
+  --po-ink-900: #000000;
+  --po-ink-800: #111111;
+  --po-ink-700: #1c1c1c;
+  --po-ink-600: #282828;
+  --po-grey-600: #5e5e5e;
+  --po-grey-500: #767676;
+  --po-grey-400: #8f8f8f;
+  --po-grey-300: #afafaf;
+  --po-grey-200: #d4d4d4;
+  --po-grey-150: #e2e2e2;
+  --po-grey-100: #ececec;
+  --po-grey-50: #f4f4f4;
+  --po-white: #ffffff;
+
+  /* --- Texte ------------------------------------------------------------- */
+  --text-primary: var(--po-ink-900);
+  --text-secondary: var(--po-grey-600);
+  --text-tertiary: var(--po-grey-500);
+  --text-muted: var(--po-grey-300);
+  --text-on-dark: var(--po-white);
+  --text-on-dark-secondary: var(--po-grey-400);
+  --text-link: var(--po-ink-900);
+
+  /* --- Surfaces ---------------------------------------------------------- */
+  --surface-page: var(--po-white);
+  --surface-raised: var(--po-white);
+  --surface-soft: var(--po-grey-50);
+  --surface-sunken: var(--po-grey-100);
+  --surface-pressed: var(--po-grey-150);
+  --surface-inverse: var(--po-ink-900);
+  --surface-inverse-raised: var(--po-ink-700);
+
+  /* --- Bordures ---------------------------------------------------------- */
+  --border-hairline: var(--po-grey-100);
+  --border-default: var(--po-grey-200);
+  --border-strong: var(--po-ink-900);
+  --border-field: #dcdcdc;
+  --border-on-dark: #2a2a2a;
+  --hairline: 1px solid var(--border-hairline);
+  --hairline-strong: 1px solid var(--border-default);
+
+  /* --- Rail de navigation ------------------------------------------------ */
+  --nav-bg: var(--po-ink-900);
+  --nav-fg: var(--po-white);
+  --nav-fg-muted: var(--po-grey-400);
+  --nav-section-fg: var(--po-grey-500);
+  --nav-item-hover-bg: #141414;
+  --nav-item-active-bg: var(--po-ink-700);
+  --nav-item-active-rail: var(--po-white);
+  --nav-divider: #242424;
+
+  /* --- Traitements d'état : trois, et seulement trois --------------------- */
+  --state-blocked-bg: var(--po-ink-900);
+  --state-blocked-fg: var(--po-white);
+  --state-blocked-border: var(--po-ink-900);
+  --state-normal-bg: var(--po-grey-100);
+  --state-normal-fg: var(--po-ink-800);
+  --state-normal-border: transparent;
+  --state-pending-bg: transparent;
+  --state-pending-fg: var(--po-grey-600);
+  --state-pending-border: var(--po-grey-200);
+
+  /* --- Jauges ------------------------------------------------------------ */
+  --meter-track: var(--po-grey-150);
+  --meter-fill: var(--po-grey-300);
+  --meter-fill-over: var(--po-ink-900);
+
+  /* --- Contrôles --------------------------------------------------------- */
+  --control-fg: var(--po-ink-900);
+  --control-bg: var(--po-white);
+  --control-bg-soft: var(--po-grey-100);
+  --control-bg-hover: var(--po-grey-50);
+  --control-bg-pressed: var(--po-grey-150);
+  --control-primary-bg: var(--po-ink-900);
+  --control-primary-fg: var(--po-white);
+  --control-primary-bg-hover: var(--po-ink-600);
+  --focus-ring: var(--po-ink-900);
+  --overlay-scrim: rgba(0, 0, 0, 0.4);
+
+  /* --- Graisses ---------------------------------------------------------- */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* --- Échelle typographique (taille / interligne) ------------------------ */
+  --type-display-xl: 40px;
+  --type-display-xl-lh: 44px;
+  --type-display-lg: 32px;
+  --type-display-lg-lh: 36px;
+  --type-display-md: 24px;
+  --type-display-md-lh: 30px;
+  --type-display-sm: 18px;
+  --type-display-sm-lh: 24px;
+  --type-figure-xl: 28px;
+  --type-figure-xl-lh: 32px;
+  --type-figure-lg: 20px;
+  --type-figure-lg-lh: 24px;
+  --type-figure-md: 14px;
+  --type-figure-md-lh: 20px;
+  --type-body-md: 14px;
+  --type-body-md-lh: 20px;
+  --type-body-sm: 13px;
+  --type-body-sm-lh: 18px;
+  --type-caption: 12px;
+  --type-caption-lh: 16px;
+  --type-eyebrow: 11px;
+  --type-eyebrow-lh: 14px;
+  --type-eyebrow-tracking: 0.09em;
+  --type-colhead: 12px;
+  --type-colhead-lh: 16px;
+  --type-colhead-tracking: 0.01em;
+  --type-display-tracking: -0.025em;
+
+  /* --- Espacement -------------------------------------------------------- */
+  --space-0: 0px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  --stack-tight: var(--space-4);
+  --stack-default: var(--space-8);
+  --stack-loose: var(--space-16);
+  --section-gap: var(--space-32);
+  --page-gutter: 32px;
+  --page-max: 1440px;
+  --nav-width: 232px;
+  --nav-width-collapsed: 64px;
+
+  /* --- Arrondis ---------------------------------------------------------- */
+  /* Les paliers --radius-* sont déclarés dans le bloc @theme plus bas :
+     Tailwind les publie lui-même en variables CSS, les redéclarer ici
+     créerait une référence circulaire. */
+  --radius-circle: 50%;
+  --radius: 10px;
+
+  /* --- Élévation --------------------------------------------------------- */
+  --elevation-0: none;
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --elevation-3: 0 12px 32px rgba(0, 0, 0, 0.16);
+
+  /* --- Animation --------------------------------------------------------- */
+  /* --ease-standard et --ease-out sont déclarées dans le bloc @theme, pour la
+     même raison que les arrondis. */
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --transition-control:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+
+  /* --- Densité : confortable (défaut) ------------------------------------ */
+  --density-row-h: 58px;
+  --density-cell-pad-y: 15px;
+  --density-cell-pad-x: 18px;
+  --density-control-h: 38px;
+  --density-control-pad-x: 16px;
+  --density-field-h: 40px;
+  --density-toolbar-gap: 12px;
+  --density-card-pad: 22px;
+  --density-nav-item-h: 42px;
+  --density-section-gap: 36px;
+  --density-meter-h: 2px;
+}
+
+/* --- Densité : compacte --------------------------------------------------- */
+[data-density="compact"] {
+  --density-row-h: 38px;
+  --density-cell-pad-y: 7px;
+  --density-cell-pad-x: 12px;
+  --density-control-h: 30px;
+  --density-control-pad-x: 11px;
+  --density-field-h: 32px;
+  --density-toolbar-gap: 8px;
+  --density-card-pad: 14px;
+  --density-nav-item-h: 32px;
+  --density-section-gap: 20px;
+  --density-meter-h: 2px;
+}
+
+/* ==========================================================================
+   2 — PONT VERS SHADCN/UI
+   Les composants shadcn lisent ces noms-là. On les branche sur les tokens PO
+   pour qu'un composant installé soit conforme sans retouche.
+   ========================================================================== */
+
+:root {
+  --background: var(--surface-page);
+  --foreground: var(--text-primary);
+  --card: var(--surface-raised);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface-raised);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--control-primary-bg);
+  --primary-foreground: var(--control-primary-fg);
+  --secondary: var(--control-bg-soft);
+  --secondary-foreground: var(--po-ink-800);
+  --muted: var(--surface-soft);
+  --muted-foreground: var(--text-tertiary);
+  --accent: var(--control-bg-hover);
+  --accent-foreground: var(--text-primary);
+
+  /* Pas de rouge. L'état bloquant se traite en encre pleine (DESIGN.md §1). */
+  --destructive: var(--state-blocked-bg);
+  --destructive-foreground: var(--state-blocked-fg);
+
+  --border: var(--border-default);
+  --input: var(--border-field);
+  --ring: var(--focus-ring);
+
+  --chart-1: var(--po-grey-200);
+  --chart-2: var(--po-grey-400);
+  --chart-3: var(--po-grey-500);
+  --chart-4: var(--po-grey-600);
+  --chart-5: var(--po-ink-700);
+
+  --sidebar: var(--nav-bg);
+  --sidebar-foreground: var(--nav-fg);
+  --sidebar-primary: var(--nav-item-active-rail);
+  --sidebar-primary-foreground: var(--nav-bg);
+  --sidebar-accent: var(--nav-item-active-bg);
+  --sidebar-accent-foreground: var(--nav-fg);
+  --sidebar-border: var(--nav-divider);
+  --sidebar-ring: var(--nav-fg);
+}
+
+/* ==========================================================================
+   3 — UTILITAIRES TAILWIND
+   ========================================================================== */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Palette PO, adressable directement : bg-ink-800, text-grey-500… */
+  --color-ink-900: var(--po-ink-900);
+  --color-ink-800: var(--po-ink-800);
+  --color-ink-700: var(--po-ink-700);
+  --color-ink-600: var(--po-ink-600);
+  --color-grey-600: var(--po-grey-600);
+  --color-grey-500: var(--po-grey-500);
+  --color-grey-400: var(--po-grey-400);
+  --color-grey-300: var(--po-grey-300);
+  --color-grey-200: var(--po-grey-200);
+  --color-grey-150: var(--po-grey-150);
+  --color-grey-100: var(--po-grey-100);
+  --color-grey-50: var(--po-grey-50);
+
+  /* Polices */
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-geist);
+  --font-display: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+
+  /* Échelle typographique */
+  --text-display-xl: var(--type-display-xl);
+  --text-display-xl--line-height: var(--type-display-xl-lh);
+  --text-display-xl--font-weight: var(--fw-bold);
+  --text-display-xl--letter-spacing: var(--type-display-tracking);
+  --text-display-lg: var(--type-display-lg);
+  --text-display-lg--line-height: var(--type-display-lg-lh);
+  --text-display-lg--font-weight: var(--fw-bold);
+  --text-display-lg--letter-spacing: var(--type-display-tracking);
+  --text-display-md: var(--type-display-md);
+  --text-display-md--line-height: var(--type-display-md-lh);
+  --text-display-md--font-weight: var(--fw-bold);
+  --text-display-sm: var(--type-display-sm);
+  --text-display-sm--line-height: var(--type-display-sm-lh);
+  --text-display-sm--font-weight: var(--fw-semibold);
+  --text-figure-xl: var(--type-figure-xl);
+  --text-figure-xl--line-height: var(--type-figure-xl-lh);
+  --text-figure-xl--font-weight: var(--fw-bold);
+  --text-figure-lg: var(--type-figure-lg);
+  --text-figure-lg--line-height: var(--type-figure-lg-lh);
+  --text-figure-lg--font-weight: var(--fw-semibold);
+  --text-figure-md: var(--type-figure-md);
+  --text-figure-md--line-height: var(--type-figure-md-lh);
+  --text-figure-md--font-weight: var(--fw-medium);
+  --text-body-md: var(--type-body-md);
+  --text-body-md--line-height: var(--type-body-md-lh);
+  --text-body-sm: var(--type-body-sm);
+  --text-body-sm--line-height: var(--type-body-sm-lh);
+  --text-caption: var(--type-caption);
+  --text-caption--line-height: var(--type-caption-lh);
+  --text-eyebrow: var(--type-eyebrow);
+  --text-eyebrow--line-height: var(--type-eyebrow-lh);
+  --text-eyebrow--letter-spacing: var(--type-eyebrow-tracking);
+  --text-eyebrow--font-weight: var(--fw-semibold);
+  --text-colhead: var(--type-colhead);
+  --text-colhead--line-height: var(--type-colhead-lh);
+  --text-colhead--letter-spacing: var(--type-colhead-tracking);
+  --text-colhead--font-weight: var(--fw-medium);
+
+  /* Élévation */
+  --shadow-elevation-0: var(--elevation-0);
+  --shadow-elevation-1: var(--elevation-1);
+  --shadow-elevation-2: var(--elevation-2);
+  --shadow-elevation-3: var(--elevation-3);
 }
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+/* Valeurs littérales : Tailwind les publie en variables CSS utilisables
+   partout (var(--radius-lg), var(--ease-standard)…) et en génère les classes
+   utilitaires. Arrondis : rien au-delà de 10 px sauf la pilule (DESIGN.md §4),
+   d'où les paliers 2xl et suivants volontairement plafonnés. */
+@theme {
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 10px;
+  --radius-3xl: 10px;
+  --radius-4xl: 10px;
+  --radius-pill: 999px;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
+/* ==========================================================================
+   4 — BASE
+   ========================================================================== */
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+
   html {
     @apply font-sans;
+  }
+
+  body {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-size: var(--type-body-md);
+    line-height: var(--type-body-md-lh);
+    font-weight: var(--fw-regular);
+  }
+
+  /* Chiffres toujours tabulaires (DESIGN.md §2). */
+  body {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Aucune italique dans le système. */
+  i,
+  em {
+    font-style: normal;
+  }
+
+  /* Les liens sont noirs et soulignés. Jamais de bleu.
+     PDS OS: underline only plain text links; links styled as components
+     (buttons, nav items, tabs, cards) carry their own classes. */
+  a {
+    color: var(--text-link);
+  }
+  a:not([class]) {
+    text-decoration: underline;
+  }
+
+  /* Focus : contour 2 px encre pleine, 2 px d'offset. Jamais de halo. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
   }
 }

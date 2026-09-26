@@ -1,0 +1,52 @@
+<!--
+  "Confirm signup" template. Locally wired in supabase/config.toml; in
+  production paste it in Supabase: Authentication > Email Templates.
+  Subject: Confirmez votre adresse — PDS OS
+
+  The link uses the token_hash format handled by /auth/confirm, and
+  {{ .RedirectTo }} (= NEXT_PUBLIC_SITE_URL + /auth/confirm, which must be in
+  the auth redirect allow-list) so it works from any browser or device.
+-->
+<div
+  style="
+    font-family: -apple-system, Helvetica, Arial, sans-serif;
+    color: #171717;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  "
+>
+  <p style="font-size: 16px; font-weight: 600; margin: 0 0 24px">PDS OS</p>
+  <p style="font-size: 14px; line-height: 20px; margin: 0 0 16px">Bonjour,</p>
+  <p style="font-size: 14px; line-height: 20px; margin: 0 0 24px">
+    Vous venez de créer un compte sur PDS OS. Confirmez votre adresse email en
+    cliquant sur le bouton ci-dessous.
+  </p>
+  <p style="margin: 0 0 24px">
+    <a
+      href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email"
+      style="
+        display: inline-block;
+        background: #171717;
+        color: #fafafa;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 10px 18px;
+        border-radius: 8px;
+      "
+    >
+      Confirmer mon adresse
+    </a>
+  </p>
+  <p
+    style="font-size: 13px; line-height: 18px; color: #525252; margin: 0 0 8px"
+  >
+    Après confirmation, un administrateur devra valider votre accès. L'écran
+    d'attente se mettra à jour de lui-même.
+  </p>
+  <p style="font-size: 13px; line-height: 18px; color: #525252; margin: 0">
+    Si vous n'êtes pas à l'origine de cette inscription, ignorez cet email :
+    rien ne sera activé sans ce clic.
+  </p>
+</div>

@@ -3,6 +3,7 @@ import "server-only";
 import { createGroq } from "@ai-sdk/groq";
 import { transcribe as sdkTranscribe, type TranscriptionModel } from "ai";
 
+import { groqTolerantFetch } from "@/lib/ai/groq-tolerant-fetch";
 import { DEFAULT_TRANSCRIPTION_MODEL } from "@/lib/ai/providers";
 import type { Transcript } from "@/lib/ai/schemas/transcript";
 import { getServerEnv, type ServerEnv } from "@/lib/env";
@@ -22,7 +23,10 @@ function resolveModel(env: ServerEnv): {
     case "groq": {
       const modelId =
         env.TRANSCRIPTION_MODEL ?? DEFAULT_TRANSCRIPTION_MODEL.groq;
-      const groq = createGroq({ apiKey: env.GROQ_API_KEY });
+      const groq = createGroq({
+        apiKey: env.GROQ_API_KEY,
+        fetch: groqTolerantFetch,
+      });
       return { model: groq.transcription(modelId), modelId };
     }
   }
