@@ -6,7 +6,7 @@ import { OptionSelect } from "@/components/framing/option-select";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { stageTreatment } from "@/lib/ui/state-treatments";
+import { stageTone } from "@/lib/ui/state-tones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,9 +56,7 @@ export function ValidationPanel({
     <section className="grid gap-3">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-medium">{title}</h3>
-        <StatusBadge treatment={stageTreatment[state]}>
-          {t.states[state]}
-        </StatusBadge>
+        <StatusBadge tone={stageTone[state]}>{t.states[state]}</StatusBadge>
       </div>
 
       {/* A validated stage is final: it is never reopened. */}

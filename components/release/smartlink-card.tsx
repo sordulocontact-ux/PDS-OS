@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { StatusBadge } from "@/components/ui/status-badge";
-import { onlineTreatment } from "@/lib/ui/state-treatments";
+import { onlineTone } from "@/lib/ui/state-tones";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +57,7 @@ export function SmartlinkCard({ url, enabled, toggleAction }: Props) {
         <CardTitle>{t.title}</CardTitle>
         <CardDescription>{t.hint}</CardDescription>
         <CardAction>
-          <StatusBadge treatment={onlineTreatment(enabled)}>
+          <StatusBadge tone={onlineTone(enabled)}>
             {enabled ? t.enabled : t.disabled}
           </StatusBadge>
         </CardAction>

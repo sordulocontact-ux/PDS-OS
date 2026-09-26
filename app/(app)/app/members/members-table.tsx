@@ -1,5 +1,5 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { membershipTreatment } from "@/lib/ui/state-treatments";
+import { membershipTone } from "@/lib/ui/state-tones";
 import {
   Table,
   TableBody,
@@ -71,7 +71,7 @@ export function MembersTable({
                 )}
               </TableCell>
               <TableCell>
-                <StatusBadge treatment={membershipTreatment[row.status]}>
+                <StatusBadge tone={membershipTone[row.status]}>
                   {t.statuses[row.status]}
                 </StatusBadge>
               </TableCell>

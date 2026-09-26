@@ -82,7 +82,7 @@ export function DictationPanel<P>({
     case "sending":
       return (
         <div aria-live="polite">
-          <StatusBadge treatment="pending" dot>
+          <StatusBadge tone="info" dot>
             {t.sending}
           </StatusBadge>
         </div>

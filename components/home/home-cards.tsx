@@ -8,10 +8,10 @@ import type { ReleaseOverview } from "@/lib/insights/releases";
 import type { Todo } from "@/lib/insights/todo";
 import type { ProjectListItem } from "@/lib/projects/types";
 import {
-  onlineTreatment,
-  overdueTreatment,
-  projectStatusTreatment,
-} from "@/lib/ui/state-treatments";
+  onlineTone,
+  overdueTone,
+  projectStatusTone,
+} from "@/lib/ui/state-tones";
 
 const t = fr.assistant.cards;
 const MAX = 5;
@@ -28,7 +28,7 @@ export function TasksCard({ tasks }: { tasks: Todo["tasks"] }) {
             sub={`${task.projectTitle} · ${t.due(formatDay(task.dueDate))}`}
             badge={
               task.overdue ? (
-                <StatusBadge treatment={overdueTreatment} size="sm">
+                <StatusBadge tone={overdueTone} size="sm">
                   {t.overdue}
                 </StatusBadge>
               ) : undefined
@@ -77,7 +77,7 @@ export function ProposalsCard({ proposals }: { proposals: Todo["proposals"] }) {
             href={p.href}
             main={p.projectTitle}
             badge={
-              <StatusBadge treatment="pending" size="sm">
+              <StatusBadge tone="warning" size="sm">
                 {t.proposalsCount(p.count)}
               </StatusBadge>
             }
@@ -145,10 +145,7 @@ export function ReleasesCard({ releases }: { releases: ReleaseOverview[] }) {
               r.plannedDate ? t.planned(formatDay(r.plannedDate)) : undefined
             }
             badge={
-              <StatusBadge
-                treatment={onlineTreatment(Boolean(r.onlineSince))}
-                size="sm"
-              >
+              <StatusBadge tone={onlineTone(Boolean(r.onlineSince))} size="sm">
                 {r.onlineSince ? `${t.online} · ${r.platforms}` : t.notOnline}
               </StatusBadge>
             }
@@ -178,10 +175,7 @@ export function HandoverCard({
             main={p.title}
             sub={p.artistName || undefined}
             badge={
-              <StatusBadge
-                treatment={projectStatusTreatment[p.status]}
-                size="sm"
-              >
+              <StatusBadge tone={projectStatusTone[p.status]} size="sm">
                 {fr.transmission.statuses[p.status]}
               </StatusBadge>
             }

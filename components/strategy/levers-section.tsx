@@ -18,7 +18,7 @@ import {
   updateLever,
 } from "@/lib/strategy/actions/levers";
 import type { StrategyData } from "@/lib/strategy/queries";
-import { leverTreatment } from "@/lib/ui/state-treatments";
+import { leverTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
 type Family = keyof typeof fr.framing.needs.families;
@@ -75,7 +75,7 @@ export function LeversSection({
                       >
                         {lever.label}
                       </span>
-                      <StatusBadge treatment={leverTreatment[state]} size="sm">
+                      <StatusBadge tone={leverTone[state]} size="sm">
                         {t.states[state]}
                       </StatusBadge>
                       {proposed && <ProposedBadge />}

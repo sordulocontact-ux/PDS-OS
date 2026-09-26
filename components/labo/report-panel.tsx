@@ -72,7 +72,7 @@ export function ReportPanel({ report }: { report: LocatedCallReport }) {
 
   return (
     <div className="space-y-6">
-      <StatusBadge treatment="pending" size="sm">
+      <StatusBadge tone="warning" size="sm">
         {t.proposed}
       </StatusBadge>
       <section className="space-y-1">

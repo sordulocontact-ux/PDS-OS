@@ -8,7 +8,7 @@ import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { needTreatment } from "@/lib/ui/state-treatments";
+import { needTone } from "@/lib/ui/state-tones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,10 +50,10 @@ export function NeedsSection({
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium">{need.label}</span>
-                <StatusBadge treatment="normal" size="sm">
+                <StatusBadge tone="neutral" size="sm">
                   {t.families[need.family as Family]}
                 </StatusBadge>
-                <StatusBadge treatment={needTreatment[need.state]} size="sm">
+                <StatusBadge tone={needTone[need.state]} size="sm">
                   {need.state === "committed" ? t.committed : t.identified}
                 </StatusBadge>
                 {need.review_status === "proposed" && <ProposedBadge />}

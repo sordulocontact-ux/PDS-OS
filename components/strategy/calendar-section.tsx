@@ -72,7 +72,7 @@ export function CalendarSection({
               <div className="grid min-w-0 gap-0.5 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-medium break-words">{m.title}</span>
-                  <StatusBadge treatment="normal" size="sm">
+                  <StatusBadge tone="neutral" size="sm">
                     {t.kinds[m.kind as Kind]}
                   </StatusBadge>
                 </div>

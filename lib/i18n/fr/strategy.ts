@@ -11,6 +11,101 @@ export const strategy = {
     audiences: "Publics",
     narrative: "Narratif",
   },
+  choices: {
+    questions: {
+      positioning: "Qu'est-ce qu'on privilégie avec cette sortie ?",
+      audiences: "À qui s'adresse la sortie ?",
+      narrative: "Quel angle pour raconter la sortie ?",
+    },
+    options: {
+      positioning: {
+        retain_fans: "Fidéliser la fanbase actuelle",
+        win_new_audience: "Conquérir un nouveau public",
+        reach_professionals:
+          "Installer l'artiste auprès des pros (médias, playlists, programmateurs)",
+        artistic_credibility: "Asseoir l'image et la crédibilité artistique",
+        maximize_streaming: "Maximiser l'écoute et le streaming",
+        prepare_next: "Préparer la suite (album, tournée)",
+      },
+      audiences: {
+        current_fans: "Public actuel de l'artiste",
+        new_audience: "Nouveau public",
+        professionals:
+          "Professionnels (médias, playlisteurs, programmateurs, bookers)",
+        brands_partners: "Marques et partenaires",
+        local_scene: "Communauté locale / scène",
+      },
+      narrative: {
+        personal_story: "L'histoire personnelle derrière le titre",
+        new_sound: "Une rupture / un nouveau son",
+        universe_continuity: "La continuité de l'univers de l'artiste",
+        collaboration: "Une collaboration (featuring, producteur)",
+        moment_place: "Un moment ou un lieu (saison, ville)",
+      },
+    },
+    // Fragments used to write the answer from the checked choices (code, not AI).
+    phrases: {
+      positioning: {
+        retain_fans: "fidéliser la fanbase actuelle",
+        win_new_audience: "conquérir un nouveau public",
+        reach_professionals:
+          "installer l'artiste auprès des pros (médias, playlists, programmateurs)",
+        artistic_credibility: "asseoir l'image et la crédibilité artistique",
+        maximize_streaming: "maximiser l'écoute et le streaming",
+        prepare_next: "préparer la suite (album, tournée)",
+      },
+      audiences: {
+        current_fans: "le public actuel de l'artiste",
+        new_audience: "un nouveau public",
+        professionals:
+          "les professionnels (médias, playlisteurs, programmateurs, bookers)",
+        brands_partners: "les marques et partenaires",
+        local_scene: "la communauté locale et la scène",
+      },
+      narrative: {
+        personal_story: "l'histoire personnelle derrière le titre",
+        new_sound: "une rupture, un nouveau son",
+        universe_continuity: "la continuité de l'univers de l'artiste",
+        collaboration: "une collaboration (featuring, producteur)",
+        moment_place: "un moment ou un lieu (saison, ville)",
+      },
+    },
+    sentences: {
+      positioning: (list: string) => `Avec cette sortie, on veut ${list}.`,
+      audiences: (list: string) => `La sortie vise ${list}.`,
+      narrative: (list: string) => `On raconte la sortie à travers ${list}.`,
+    },
+    and: "et",
+    answer: "Réponse",
+    answerHint:
+      "Composée à partir de vos choix : modifiez-la ou complétez-la librement.",
+    recompose: "Recomposer depuis les choix",
+    other: "Autre, préciser",
+    otherPlaceholder: "Précisez",
+    save: "Enregistrer la réponse",
+    saving: "Enregistrement…",
+    none: "Aucun choix pour l'instant.",
+    suggested: "Proposé",
+    accept: "Accepter",
+    dismiss: "Écarter",
+    acceptAll: "Tout accepter",
+    from: (source: string) => `D'après ${source}`,
+    propose: "Proposer des réponses",
+    proposing: "Analyse du Brief et des calls…",
+    proposeHint:
+      "PO pré-coche les réponses qui s'appuient sur le Brief validé et les comptes rendus de calls. Rien n'est retenu sans vous.",
+    proposedCount: (n: number) =>
+      n === 0
+        ? "Aucune réponse ne s'appuie clairement sur le Brief ou les calls."
+        : n === 1
+          ? "1 réponse proposée, à confirmer."
+          : `${n} réponses proposées, à confirmer.`,
+    noSources:
+      "Rien à analyser : validez le Brief ou importez un compte rendu de call d'abord.",
+    failed: "Impossible de proposer des réponses pour l'instant. Réessayez.",
+    briefSource: (field: string) => `le Brief (${field})`,
+    callSource: (call: string) => `le call « ${call} »`,
+  },
   brief: {
     title: "Rappel du Brief",
     validated: "Validé",

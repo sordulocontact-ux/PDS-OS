@@ -24,7 +24,7 @@ const buttonVariants = cva(
         default: "h-[var(--density-control-h)] gap-1.5 px-[var(--density-control-pad-x)]",
         xs: "h-6 gap-1 px-2.5 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1 px-3 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-10 gap-1.5 px-5",
+        lg: "h-10 gap-3 px-5 text-[length:var(--type-body-lg)] leading-[var(--type-body-lg-lh)]",
         icon: "size-[var(--density-control-h)] rounded-lg",
         "icon-xs": "size-6 rounded-lg [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8 rounded-lg",

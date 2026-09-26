@@ -18,3 +18,13 @@ export function formatDateTime(iso: string): string {
 export function formatDate(iso: string): string {
   return date.format(new Date(iso));
 }
+
+const shortDate = new Intl.DateTimeFormat("fr-FR", {
+  dateStyle: "medium",
+  timeZone: "Europe/Paris",
+});
+
+/** "27 nov. 2026", for dense tables. */
+export function formatShortDate(iso: string): string {
+  return shortDate.format(new Date(iso));
+}

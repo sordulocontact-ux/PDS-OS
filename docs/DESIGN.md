@@ -73,3 +73,52 @@ Le composant Nucleo n'ajoute pas `aria-hidden` tout seul :
 - icône à côté d'un libellé → `aria-hidden` sur l'icône ;
 - icône seule dans un bouton → `aria-hidden` sur l'icône **et** `aria-label` sur le
   bouton, texte tiré de `lib/i18n/fr/`.
+
+---
+
+## 2. Typographie
+
+### Familles
+
+- **Google Sans Flex** pour tout : titres, texte, boutons, tableaux. Licence OFL,
+  chargée par `next/font/google` dans `app/layout.tsx` (axe de graisse variable seul).
+- **Geist Mono** pour les identifiants, si un écran en a besoin.
+- **Sharp Grotesk** est la typo de titre des maquettes Figma, mais elle n'est **pas
+  utilisable** : le vault n'en a qu'une version d'essai, sans licence commerciale, et
+  PDS OS est un projet client. Si une licence web est achetée, il suffira de changer
+  `--font-heading` dans `app/globals.css`.
+
+### Échelle
+
+Tokens dans `app/globals.css` (`--type-*`), classes Tailwind `text-display-*`,
+`text-body-*` :
+
+| Usage                                         | Token          | Taille | Graisse |
+| --------------------------------------------- | -------------- | ------ | ------- |
+| Titre de page                                 | `display-lg`   | 32 px  | medium  |
+| Texte d'introduction sous le titre, bouton `lg`, champ de recherche | `body-lg` | 16 px | regular / medium |
+| Texte courant, cellules et en-têtes de tableau | `body-md`     | 14 px  | regular / medium |
+| Ligne secondaire (version d'un master…)       | `caption`      | 12 px  | medium  |
+
+Espacement des lettres : **-4 %** sur les titres (`--type-display-tracking`), **-2 %**
+sur tout le reste (`--type-body-tracking`, posé sur `body`).
+
+---
+
+## 3. Couleurs d'état
+
+Un état métier s'affiche dans un `StatusBadge` : pilule, fond pâle, texte foncé. Cinq
+tons sémantiques, et seulement cinq (`--tone-*` dans `globals.css`) :
+
+| Ton       | Sens                                   | Exemples                                  |
+| --------- | -------------------------------------- | ----------------------------------------- |
+| `neutral` | rien à faire pour l'instant, ou écarté | étape non commencée, brouillon, sans date |
+| `info`    | en cours                               | étape en cours, projet lancé, transcription, sortie prévue |
+| `warning` | attend l'action de quelqu'un           | validation attendue, transmis, invité, proposé |
+| `success` | fait, en ligne                         | validé, prêt, approuvé, en ligne          |
+| `danger`  | bloqué, refusé, en échec               | refusé, échec, en retard, citation introuvable |
+
+- La correspondance état → ton vit **uniquement** dans `lib/ui/state-tones.ts`. Un écran
+  n'écrit jamais une couleur, il passe `tone={…Tone[état]}`.
+- Le libellé porte toujours le sens : la couleur ne fait que le renforcer
+  (daltonisme, impression).

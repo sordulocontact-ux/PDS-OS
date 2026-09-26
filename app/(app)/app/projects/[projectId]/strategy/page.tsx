@@ -8,6 +8,8 @@ import { BriefReminder } from "@/components/strategy/brief-reminder";
 import { CalendarSection } from "@/components/strategy/calendar-section";
 import { DeliverablesSection } from "@/components/strategy/deliverables-section";
 import { LeversSection } from "@/components/strategy/levers-section";
+import { ProposeChoices } from "@/components/strategy/propose-choices";
+import { StrategyChoices } from "@/components/strategy/strategy-choices";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import {
   Card,
@@ -57,13 +59,25 @@ export default async function StrategyPage({
           </StrategyDictation>
           <CardContent className="grid divide-y divide-border">
             <div>
+              <ProposeChoices projectId={projectId} />
               {data.fields.map((field) => (
-                <BriefFieldCard
-                  key={`${field.key}-${field.value ?? ""}-${field.status ?? ""}`}
-                  field={field}
-                  label={t.fields[field.key]}
-                  projectId={projectId}
-                />
+                <div key={field.key}>
+                  {/* Remount when the saved answers change on the server. */}
+                  <StrategyChoices
+                    key={`${JSON.stringify(data.choices[field.key])}-${field.value ?? ""}`}
+                    field={field.key}
+                    value={data.choices[field.key]}
+                    suggestions={data.suggestions[field.key]}
+                    projectId={projectId}
+                    currentText={field.value}
+                  />
+                  <BriefFieldCard
+                    key={`${field.key}-${field.value ?? ""}-${field.status ?? ""}`}
+                    field={field}
+                    label={t.fields[field.key]}
+                    projectId={projectId}
+                  />
+                </div>
               ))}
             </div>
             <LeversSection

@@ -22,7 +22,7 @@ export function BriefReminder({
     <section className="grid gap-3">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-medium">{t.title}</h3>
-        <StatusBadge treatment={validated ? "normal" : "pending"} size="sm">
+        <StatusBadge tone={validated ? "success" : "warning"} size="sm">
           {validated ? t.validated : t.notValidated}
         </StatusBadge>
       </div>

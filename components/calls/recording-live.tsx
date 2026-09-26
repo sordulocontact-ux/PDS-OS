@@ -30,7 +30,7 @@ export function RecordingLive({
   return (
     <div className="grid gap-3 rounded-lg border border-border p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <StatusBadge treatment={paused ? "pending" : "normal"} dot>
+        <StatusBadge tone={paused ? "warning" : "info"} dot>
           {paused ? t.paused : t.recording}
         </StatusBadge>
         <span className="font-heading text-figure-xl tabular-nums">

@@ -23,11 +23,7 @@ export function ProvenanceTag({
     <span className="flex flex-col gap-0.5 text-xs text-muted-foreground">
       {at.status === "missing" ? (
         // A quote absent from the transcript is a block: probably invented.
-        <StatusBadge
-          treatment="blocked"
-          size="sm"
-          className="justify-self-start"
-        >
+        <StatusBadge tone="danger" size="sm" className="justify-self-start">
           {label}
         </StatusBadge>
       ) : (

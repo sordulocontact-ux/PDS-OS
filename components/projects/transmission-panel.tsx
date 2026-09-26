@@ -8,7 +8,7 @@ import { formatDay } from "@/lib/assistant/facts";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectDetail } from "@/lib/projects/types";
-import { projectStatusTreatment } from "@/lib/ui/state-treatments";
+import { projectStatusTone } from "@/lib/ui/state-tones";
 
 // Where a project stands before launch, and the one next action for the
 // viewer: the director transmits (again), the chosen manager answers.
@@ -52,7 +52,7 @@ export function TransmissionPanel({
             <h2 id="status-title" className="text-sm font-medium">
               {isAssignee ? fr.transmission.respond.title : t.title}
             </h2>
-            <StatusBadge treatment={projectStatusTreatment[status]}>
+            <StatusBadge tone={projectStatusTone[status]}>
               {fr.transmission.statuses[status]}
             </StatusBadge>
           </div>

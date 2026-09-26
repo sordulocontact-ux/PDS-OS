@@ -1,7 +1,7 @@
 import type { CheckReleaseResult } from "@/lib/release/action-types";
 import { CheckButton } from "@/components/release/check-button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { onlineTreatment } from "@/lib/ui/state-treatments";
+import { onlineTone } from "@/lib/ui/state-tones";
 import {
   Card,
   CardAction,
@@ -34,7 +34,7 @@ export function DetectionCard({ release, links, checkAction }: Props) {
         <CardTitle>{t.title}</CardTitle>
         <CardDescription>{t.hint}</CardDescription>
         <CardAction>
-          <StatusBadge treatment={onlineTreatment(online)}>
+          <StatusBadge tone={onlineTone(online)}>
             {online ? t.online : t.offline}
           </StatusBadge>
         </CardAction>

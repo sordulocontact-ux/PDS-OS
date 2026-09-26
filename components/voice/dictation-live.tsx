@@ -22,7 +22,7 @@ export function DictationLive({
   return (
     <div className="grid gap-3 rounded-lg border border-border p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <StatusBadge treatment="normal" dot>
+        <StatusBadge tone="info" dot>
           {t.recording}
         </StatusBadge>
         <span className="text-sm text-muted-foreground tabular-nums">

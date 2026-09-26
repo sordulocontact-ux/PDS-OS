@@ -3,7 +3,7 @@ import { IconDisc } from "@/components/icons";
 import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { MastersTable } from "@/components/catalog/masters-table";
+import { MastersList } from "@/components/catalog/masters-list";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
@@ -42,7 +42,10 @@ export default async function MastersPage() {
           action={newMaster}
         />
       ) : (
-        <MastersTable masters={masters} />
+        // The design leaves a wider gap between the header and the list.
+        <div className="md:mt-10">
+          <MastersList masters={masters} />
+        </div>
       )}
     </PageContainer>
   );

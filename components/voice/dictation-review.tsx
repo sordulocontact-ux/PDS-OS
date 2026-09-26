@@ -96,7 +96,7 @@ export function DictationReview({
                 </p>
                 {!item.located && (
                   <StatusBadge
-                    treatment="blocked"
+                    tone="danger"
                     size="sm"
                     className="h-auto justify-self-start py-0.5 whitespace-normal"
                   >

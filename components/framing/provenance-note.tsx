@@ -48,7 +48,7 @@ export function ProvenanceNote({
       </p>
       {provenance.located === "missing" && (
         <StatusBadge
-          treatment="blocked"
+          tone="danger"
           size="sm"
           className="h-auto justify-self-start py-0.5 whitespace-normal"
         >

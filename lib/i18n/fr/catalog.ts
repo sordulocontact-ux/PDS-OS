@@ -66,13 +66,31 @@ export const catalog = {
 
   masters: {
     title: "Masters",
-    subtitle: "Les enregistrements du catalogue et leurs crédits.",
+    subtitle:
+      "Les enregistrements audio de PDS, leurs identifiants et leurs sorties liées.",
     newMaster: "Nouveau master",
     columns: {
-      title: "Titre",
-      artists: "Artistes",
+      title: "Nom",
+      artists: "Artiste",
       isrc: "ISRC",
-      duration: "Durée",
+      release: "Release liée",
+      releaseDate: "Sortie officielle",
+      status: "Statut",
+    },
+    otherReleases: {
+      short: (count: number) => `+${count}`,
+      full: (count: number) =>
+        count > 1 ? `et ${count} autres sorties` : "et 1 autre sortie",
+    },
+    releaseStatus: {
+      online: "En ligne",
+      planned: "Prévue",
+      undated: "Sans date",
+    },
+    search: {
+      label: "Rechercher un master",
+      placeholder: "Rechercher par titre, artiste ou ISRC",
+      noResult: (query: string) => `Aucun master ne correspond à « ${query} ».`,
     },
     emptyTitle: "Aucun master pour l'instant",
     emptyBody: "Créez un master pour pouvoir le rattacher à un projet.",

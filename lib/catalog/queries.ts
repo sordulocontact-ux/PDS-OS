@@ -13,7 +13,9 @@ import {
   type MasterDetail,
   type MasterListItem,
   type MasterOption,
+  type MasterRow,
 } from "@/lib/catalog/types";
+import { pickMasterRelease } from "@/lib/catalog/master-release";
 import { createClient } from "@/lib/supabase/server";
 
 // Every query runs with the user's session: RLS decides what is visible.
@@ -169,14 +171,20 @@ export const getArtist = cache(
   },
 );
 
+// Releases of the master's live projects, for the release column of the list.
+const MASTER_RELEASES_SELECT =
+  "links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(archived_at, releases:releases!releases_project_same_org(title, planned_release_date, online_detected_at)))";
+
 export async function listMasters(): Promise<{
-  masters: MasterListItem[];
+  masters: MasterRow[];
   error: boolean;
 }> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("masters")
-    .select(`id, title, version, isrc, duration_seconds, ${CREDITS_SELECT}`)
+    .select(
+      `id, title, version, isrc, duration_seconds, ${CREDITS_SELECT}, ${MASTER_RELEASES_SELECT}`,
+    )
     .is("archived_at", null)
     .order("created_at", { ascending: false });
   if (error) {
@@ -184,7 +192,20 @@ export async function listMasters(): Promise<{
     return { masters: [], error: true };
   }
   return {
-    masters: (data ?? []).map((row) => toMasterListItem(row as RawMaster)),
+    masters: (data ?? []).map((row) => ({
+      ...toMasterListItem(row as RawMaster),
+      release: pickMasterRelease(
+        row.links.flatMap((l) =>
+          l.project && !l.project.archived_at
+            ? l.project.releases.map((r) => ({
+                title: r.title,
+                plannedReleaseDate: r.planned_release_date,
+                onlineDetectedAt: r.online_detected_at,
+              }))
+            : [],
+        ),
+      ),
+    })),
     error: false,
   };
 }

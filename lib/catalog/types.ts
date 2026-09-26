@@ -1,6 +1,7 @@
 // Catalog types and pure helpers. Client-safe.
 
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
+import type { MasterRelease } from "@/lib/catalog/master-release";
 
 export const CREDIT_ROLES = ["main", "featuring"] as const;
 export type CreditRole = (typeof CREDIT_ROLES)[number];
@@ -29,6 +30,9 @@ export type MasterListItem = MasterOption & {
   isrc: string | null;
   durationSeconds: number | null;
 };
+
+/** A row of the masters list: the master and the release shown for it. */
+export type MasterRow = MasterListItem & { release: MasterRelease | null };
 
 export type LinkedProject = { id: string; title: string; type: string };
 

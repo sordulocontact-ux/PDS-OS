@@ -1,7 +1,7 @@
 -- Launch strategy: starts after a validated Brief, written by the owner only
 -- while in progress, frozen once submitted. Run with `supabase test db`.
 begin;
-select plan(19);
+select plan(21);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -94,6 +94,15 @@ select lives_ok($$
 $$, 'the owner writes the positioning and adds a lever');
 select is((select state from public.levers where id = pg_temp.id_of('lever')), 'to_decide',
           'a new lever is to decide');
+select lives_ok($$
+  insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type)
+  values (pg_temp.org(), pg_temp.prj(), 'strategy', 'audiences_suggestions',
+          '{"items":[{"choice":"current_fans","source":"brief:objective","quote":"fidéliser les fans"}]}', 'proposed', 'suggestion')
+$$, 'PO can store a sourced suggestion of choices for the owner');
+select throws_ok($$
+  insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type)
+  values (pg_temp.org(), pg_temp.prj(), 'strategy', 'audiences_choices', '{"choices":["new_audience"]}', 'confirmed', 'suggestion')
+$$, '23514', null, 'a suggestion is never a confirmed choice');
 select lives_ok($$
   insert into public.levers (organization_id, project_id, label, family, source_type, source_quote)
   values (pg_temp.org(), pg_temp.prj(), 'Showcase', 'creation_content', 'voice', 'ajoute un showcase')

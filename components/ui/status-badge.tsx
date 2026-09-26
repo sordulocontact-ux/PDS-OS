@@ -1,34 +1,36 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-// Trois traitements, et seulement trois (DESIGN.md §1) :
-// bloquant = encre pleine · normal = gris doux · en attente = contour vide.
+// Pill with a semantic tone (docs/DESIGN.md § 3): pale background, dark text.
+// Tones come from lib/ui/state-tones.ts, never picked ad hoc.
 const statusBadgeVariants = cva(
-  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border font-medium",
+  "inline-flex shrink-0 items-center gap-1.5 rounded-pill font-medium whitespace-nowrap",
   {
     variants: {
-      treatment: {
-        blocked:
-          "border-[color:var(--state-blocked-border)] bg-[var(--state-blocked-bg)] text-[color:var(--state-blocked-fg)]",
-        normal:
-          "border-transparent bg-[var(--state-normal-bg)] text-[color:var(--state-normal-fg)]",
-        pending:
-          "border-[color:var(--state-pending-border)] bg-transparent text-[color:var(--state-pending-fg)]",
+      tone: {
+        neutral:
+          "bg-[var(--tone-neutral-bg)] text-[color:var(--tone-neutral-fg)]",
+        info: "bg-[var(--tone-info-bg)] text-[color:var(--tone-info-fg)]",
+        warning:
+          "bg-[var(--tone-warning-bg)] text-[color:var(--tone-warning-fg)]",
+        success:
+          "bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]",
+        danger: "bg-[var(--tone-danger-bg)] text-[color:var(--tone-danger-fg)]",
       },
       size: {
-        sm: "h-5 px-1.5 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]",
-        md: "h-6 px-2 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]",
+        sm: "h-5 px-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]",
+        md: "h-[26px] px-3 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)]",
       },
     },
     defaultVariants: {
-      treatment: "normal",
+      tone: "neutral",
       size: "md",
     },
   },
 );
 
 export function StatusBadge({
-  treatment,
+  tone,
   size,
   dot = false,
   className,
@@ -39,7 +41,7 @@ export function StatusBadge({
   return (
     <span
       data-slot="status-badge"
-      className={cn(statusBadgeVariants({ treatment, size }), className)}
+      className={cn(statusBadgeVariants({ tone, size }), className)}
       {...props}
     >
       {dot && <span aria-hidden className="size-1.5 rounded-full bg-current" />}

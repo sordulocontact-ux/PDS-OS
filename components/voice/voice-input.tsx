@@ -100,7 +100,7 @@ export function VoiceInputStatus({
       return (
         <div className="grid gap-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <StatusBadge treatment="normal" dot>
+            <StatusBadge tone="info" dot>
               {t.recording}
             </StatusBadge>
             <span className="text-xs text-muted-foreground tabular-nums">

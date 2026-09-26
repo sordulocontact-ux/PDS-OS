@@ -9,6 +9,7 @@ import {
   type BriefFieldState,
   type Provenance,
   type StrategyFieldState,
+  type StrategyTextField,
 } from "@/lib/framing/brief";
 import { provenanceLookup } from "@/lib/framing/provenance";
 import {
@@ -21,6 +22,14 @@ import {
   type PendingValidation,
 } from "@/lib/framing/related";
 import { referenceDate } from "@/lib/strategy/calendar";
+import {
+  choicesKey,
+  suggestionsKey,
+  toChoiceValue,
+  toSuggestions,
+  type ChoiceSuggestion,
+  type ChoiceValue,
+} from "@/lib/strategy/choices";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -38,6 +47,9 @@ export type StrategyData = {
   briefValidated: boolean;
   pendingValidation: PendingValidation | null;
   fields: StrategyFieldState[];
+  // Closed-choice answers per text field, and PO's pending pre-checks.
+  choices: Record<StrategyTextField, ChoiceValue>;
+  suggestions: Record<StrategyTextField, ChoiceSuggestion[]>;
   brief: BriefFieldState[];
   levers: Lever[];
   // Confirmed Brief needs no lever answers yet: the starting point.
@@ -155,6 +167,21 @@ export async function loadStrategy(
       const row = rowOf("strategy", key);
       return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
     }),
+    choices: Object.fromEntries(
+      STRATEGY_TEXT_FIELDS.map((key) => [
+        key,
+        toChoiceValue(key, rowOf("strategy", choicesKey(key))?.value),
+      ]),
+    ) as Record<StrategyTextField, ChoiceValue>,
+    suggestions: Object.fromEntries(
+      STRATEGY_TEXT_FIELDS.map((key) => {
+        const row = rowOf("strategy", suggestionsKey(key));
+        return [
+          key,
+          row?.status === "proposed" ? toSuggestions(key, row.value) : [],
+        ];
+      }),
+    ) as Record<StrategyTextField, ChoiceSuggestion[]>,
     // Read-only reminder: no provenance needed here.
     brief: BRIEF_TEXT_FIELDS.map((key) =>
       toBriefField(key, rowOf("brief", key), null),

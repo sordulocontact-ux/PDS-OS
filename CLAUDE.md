@@ -20,7 +20,7 @@ responsive, installable en PWA. Utilisateurs cibles en V1 : 3 à 5 personnes, en
 | Savoir ce qui est faisable techniquement, quelle API | `docs/CONTEXTE-PROJET.md` § 5 et § 6            |
 | Savoir ce que l'IA doit faire ou ne pas faire        | `docs/CONTEXTE-PROJET.md` § 7                   |
 | Savoir ce qui est hors périmètre                     | `docs/CONTEXTE-PROJET.md` § 9                   |
-| Apparence de l'interface (en cours : icônes)         | `docs/DESIGN.md`                                |
+| Apparence de l'interface (icônes, typo, couleurs d'état) | `docs/DESIGN.md`                            |
 | Où est quoi dans le code, pièges déjà rencontrés     | `docs/ARCHITECTURE.md`                          |
 | Comportement de l'assistant PO                       | `docs/ASSISTANT.md`                             |
 
@@ -133,9 +133,11 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   `role_permissions` (SQL) donne les droits, le code teste `can(access, "…")`.
   **Dans un projet lancé, seul son responsable écrit** (cadrage, calls, sortie) ; le DG lit
   et valide (`is_project_owner` en SQL, `canEditProject` / `useCanEditProject` à l'écran).
+  Une étape validée est **définitive** (jamais rouverte).
   **Visibilité** : DG tous les projets, chef de projet les siens (+ transmis en attente),
-  directeur créatif ceux de son équipe créative (`can_see_project`, `project_creatives`). Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`,
-  sans service role. Confirmation d'email **coupée en local** (`config.toml`), à remettre
+  directeur créatif ceux de son équipe créative (`can_see_project`, `project_creatives`).
+  Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`, sans service
+  role. Confirmation d'email **coupée en local** (`config.toml`), à remettre
   en production (`docs/ARCHITECTURE.md` § 3).
 - **Env** : `lib/env.ts` (serveur) et `lib/env-public.ts` ; toute variable s'ajoute au
   schéma zod **et** à `.env.example`.
@@ -157,8 +159,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   Sortie n'existent qu'après lancement, c.-à-d. après acceptation par un chef de projet
   (`transmit_project` / `respond_to_assignment`, statut calculé par `projectStatusOf`).
   Nouvel artiste : recherche Deezer d'abord (photo, lien), saisie manuelle en repli ; le
-  serveur relit Deezer, seul l'id vient du client (`docs/ARCHITECTURE.md` § 2). Sélecteurs : `components/catalog/search-picker.tsx`
-  (commun), création en modale sans perte de saisie (`docs/ARCHITECTURE.md` § 2).
+  serveur relit Deezer, seul l'id vient du client. Sélecteurs :
+  `components/catalog/search-picker.tsx` (commun), création en modale sans perte de saisie
+  (`docs/ARCHITECTURE.md` § 2).
 - **Notifications** : table `notifications` écrite par triggers (jamais par le code),
   cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
@@ -166,8 +169,13 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 - **Stratégie** : `/strategy`, `lib/strategy/` ; démarre après validation du Brief, écrite
   par le responsable **seulement en cours** (`strategy_is_editable`), figée une fois soumise.
   Réutilise les briques du Cadrage ; calendrier saisi à la main, décompte calculé par le
-  code ; PO ne propose que ce qui a été dit en call (`docs/ARCHITECTURE.md` § 6 bis).
+  code. Questions à choix fermé (`lib/strategy/choices.ts`) : cocher **compose la réponse**
+  (code, `lib/strategy/compose.ts`), retouchable. IA : dictée, et « Proposer des réponses »
+  qui **pré-coche** des choix fermés sourcés Brief validé + calls (citation vérifiée par le
+  code), jamais de texte libre ni de date (`docs/ARCHITECTURE.md` § 6 bis).
 - **Sortie** : iTunes ne cherche pas par ISRC (passe par l'UPC) ; Odesli fermé sans clé.
+- **Design** : `docs/DESIGN.md` fait foi. Typo Google Sans Flex partout ; états →
+  `lib/ui/state-tones.ts` (5 tons sémantiques) + `StatusBadge tone=…`.
 - **Icônes** : Nucleo Sharp uniquement (`nucleo-sharp-essential`), icônes manquantes
   dessinées dans `components/icons/` ; pas de Lucide (`docs/DESIGN.md` § 1).
 - **Textes** : `lib/i18n/fr/<domaine>.ts`. **`cn()`** : `lib/utils/index.ts`.
@@ -206,7 +214,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 163 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 183 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -222,23 +230,24 @@ Au-delà des six étapes :
       compte par le DG
 - [x] Parcours 01 : artiste → master → projet (non transmis, sans étape), permissions
       `manage_catalog` / `create_projects`
-- [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
-      dans la transcription, alerte après avoir raccroché)
-
-À faire ensuite (proposé, non commencé) :
-
 - [x] Transmission : le DG transmet à un chef de projet, qui accepte (lancement : étapes +
       responsable), refuse ou demande une précision (retour au DG, retransmission)
 - [x] Notifications : cloche, toast, notifications navigateur, pages à jour sans recharger
 - [x] Seul le chef de projet responsable écrit dans un projet ; le DG lit et valide
 - [x] Visibilité : chacun ne voit que ses projets (DG tous) ; équipe créative par projet
-- [ ] Modifier un projet avant transmission (titre, masters, budget…)
-- [ ] Directeur créatif : dépôt de versions des livrables (il lit seulement pour l'instant)
-
 - [x] Page **Stratégie de lancement** : positionnement, publics, narratif, leviers par
       famille, livrables engagés, calendrier manuel, import depuis un call, validation DG
-- [ ] Export **Plan de sortie** (PDF, Playwright) et partage par lien de la Stratégie
 - [x] Dictée sur la Stratégie (positionnement, publics, narratif, leviers)
+- [x] Stratégie : questions à choix fermé qui composent la réponse, « Proposer des
+      réponses » (PO pré-coche, sourcé)
+- [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
+      dans la transcription, alerte après avoir raccroché)
+
+À faire ensuite (proposé, non commencé) :
+
+- [ ] Modifier un projet avant transmission (titre, masters, budget…)
+- [ ] Directeur créatif : dépôt de versions des livrables (il lit seulement pour l'instant)
+- [ ] Export **Plan de sortie** (PDF, Playwright) et partage par lien de la Stratégie
 - [ ] Dictée sur les autres étapes (Sortie…) : un adaptateur chacune
 - [ ] Politique de suppression Storage (remplacer un audio, fichiers orphelins)
 

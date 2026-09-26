@@ -13,7 +13,7 @@ import {
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectListItem } from "@/lib/projects/types";
-import { projectStatusTreatment } from "@/lib/ui/state-treatments";
+import { projectStatusTone } from "@/lib/ui/state-tones";
 
 export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
   const t = fr.shell.projects;
@@ -51,10 +51,7 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
               ) : project.stageCount > 0 ? (
                 <span>{t.allValidated}</span>
               ) : (
-                <StatusBadge
-                  treatment={projectStatusTreatment[project.status]}
-                  size="sm"
-                >
+                <StatusBadge tone={projectStatusTone[project.status]} size="sm">
                   {fr.transmission.statuses[project.status]}
                 </StatusBadge>
               )}
