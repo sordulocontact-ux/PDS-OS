@@ -3,9 +3,6 @@
  * constraints of supabase/migrations/20260925000204_domain_calls.sql.
  */
 
-export const CONSENTS = ["pending", "granted", "refused"] as const;
-export type Consent = (typeof CONSENTS)[number];
-
 export const CALL_STATUSES = [
   "draft",
   "uploaded",
@@ -57,7 +54,6 @@ export type CallErrorCode =
   | "not_found"
   | "unauthorized"
   | "forbidden"
-  | "consent_locked"
   | "consent_required"
   | "audio_exists"
   | "file_too_large"
@@ -75,16 +71,8 @@ export type CallErrorCode =
 
 export type ActionResult = { ok: true } | { ok: false; error: CallErrorCode };
 
-export function isConsent(value: unknown): value is Consent {
-  return (CONSENTS as readonly unknown[]).includes(value);
-}
-
 export function asCallStatus(value: string): CallStatus {
   return (CALL_STATUSES as readonly string[]).includes(value)
     ? (value as CallStatus)
     : "failed";
-}
-
-export function asConsent(value: string): Consent {
-  return isConsent(value) ? value : "pending";
 }

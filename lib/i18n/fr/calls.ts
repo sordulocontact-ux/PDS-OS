@@ -5,6 +5,7 @@ export const calls = {
     description:
       "Les échanges avec l'artiste et son équipe : enregistrement, transcription et compte rendu.",
     newCall: "Nouveau call",
+    firstCallTitle: "Call de cadrage",
     emptyTitle: "Aucun call pour ce projet",
     emptyBodyReadOnly:
       "Les calls apparaîtront ici dès que le chef de projet responsable les aura enregistrés.",
@@ -13,7 +14,6 @@ export const calls = {
     columns: {
       title: "Call",
       date: "Date",
-      consent: "Consentement",
       status: "Traitement",
     },
   },
@@ -24,43 +24,14 @@ export const calls = {
     fieldDate: "Date et heure du call",
     dateHint:
       "Une date à venir planifie le call : vous l'enregistrerez le moment venu.",
-    consentLegend: "Consentement à l'enregistrement",
-    consentHint:
-      "Chaque participant doit avoir accepté l'enregistrement avant tout dépôt audio.",
     submit: "Créer le call",
     pending: "Création…",
     cancel: "Annuler",
   },
-  consent: {
-    title: "Consentement à l'enregistrement",
-    label: {
-      pending: "À recueillir",
-      granted: "Accordé",
-      refused: "Refusé",
-    },
-    explain: {
-      pending:
-        "Rien ne peut être déposé tant que le consentement n'est pas tranché.",
-      granted:
-        "Tous les participants ont accepté : l'enregistrement peut être déposé et transcrit.",
-      refused:
-        "Pas d'enregistrement, donc pas de transcription ni de compte rendu automatique.",
-    },
-    recorded: (date: string, who: string | null) =>
-      who ? `Noté le ${date} par ${who}` : `Noté le ${date}`,
-    notRecorded: "Pas encore noté.",
-    note: "Précision (facultatif)",
-    notePlaceholder: "Ex. accord oral donné en début de call",
-    change: "Mettre à jour",
-    pending: "Enregistrement…",
-    locked:
-      "Un enregistrement est déposé : le consentement ne peut plus être retiré depuis cet écran.",
-    saved: "Consentement mis à jour.",
-  },
   status: {
     // Display only: a draft call planned in the future.
     upcoming: "À venir",
-    draft: "Brouillon",
+    draft: "À enregistrer",
     uploaded: "Audio déposé",
     transcribing: "Transcription…",
     transcribed: "Transcrit",
@@ -75,9 +46,6 @@ export const calls = {
     submit: "Déposer l'enregistrement",
     pending: "Envoi…",
     uploaded: "Enregistrement déposé.",
-    blockedPending:
-      "Le dépôt est bloqué tant que le consentement est « à recueillir ».",
-    blockedRefused: "Consentement refusé : aucun enregistrement possible.",
     size: (mb: string) => `${mb} Mo`,
     playerUnavailable: "Lecture impossible pour le moment.",
   },
@@ -122,10 +90,10 @@ export const calls = {
     confirmDiscard: "Supprimer cet enregistrement ?",
     confirmDiscardAction: "Oui, supprimer",
     cancel: "Garder",
-    sent: "Enregistrement envoyé. Vous pouvez lancer la transcription.",
+    sent: "Enregistrement envoyé. Transcription en cours…",
     freeTierNote:
       "Au-delà de 25 Mo (environ 1 h 45), la transcription exige le palier payant du fournisseur.",
-    or: "ou déposer un fichier existant",
+    or: "Déposer un fichier audio à la place",
     errors: {
       unsupported:
         "Votre navigateur ne permet pas d'enregistrer. Utilisez Chrome ou Edge sur ordinateur.",
@@ -139,15 +107,36 @@ export const calls = {
     },
   },
   process: {
-    title: "Transcription et compte rendu",
-    run: "Transcrire et extraire",
-    transcribing: "Transcription en cours…",
-    extracting: "Extraction du compte rendu…",
-    rerunExtraction: "Relancer l'extraction",
+    title: "Traitement du call",
+    steps: {
+      audio: "Enregistrement reçu",
+      transcript: "Transcription",
+      report: "Compte rendu",
+      brief: "Brief pré-rempli",
+    },
+    stepDone: "terminé",
     retry: "Réessayer",
-    hint: "Compter jusqu'à quelques minutes pour un call long. Gardez cette page ouverte.",
+    hint: "Quelques minutes pour un call long. Gardez cette page ouverte : vous arriverez sur le Cadrage à la fin.",
     done: "Compte rendu prêt.",
-    busy: "Un traitement est déjà en cours pour ce call.",
+    briefFilled: "Brief pré-rempli depuis le call. Relisez et confirmez.",
+  },
+  page: {
+    record: {
+      title: "Enregistrer le call",
+      description:
+        "Lancez l'enregistrement au début du call et arrêtez-le à la fin. La suite est automatique.",
+    },
+    processing: {
+      title: "Traitement en cours",
+      description:
+        "Transcription puis compte rendu. Le Brief sera pré-rempli avec ce qui s'est dit.",
+    },
+    done: {
+      title: "Compte rendu prêt",
+      description:
+        "Ce qui s'est dit est proposé dans le Cadrage, à relire et confirmer.",
+      toFraming: "Ouvrir le Cadrage",
+    },
   },
   transcript: {
     title: "Transcription",
@@ -177,8 +166,6 @@ export const calls = {
     unauthorized: "Session expirée : reconnectez-vous.",
     forbidden:
       "Seul le chef de projet responsable peut modifier les calls de ce projet.",
-    consent_locked:
-      "Un enregistrement est déposé : le consentement ne peut plus être retiré.",
     consent_required:
       "Le consentement doit être accordé avant de déposer un enregistrement.",
     audio_exists: "Un enregistrement est déjà déposé pour ce call.",

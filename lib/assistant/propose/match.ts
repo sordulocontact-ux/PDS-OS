@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { DraftChange } from "@/lib/assistant/drafts";
-import { foldName } from "@/lib/assistant/fuzzy-name";
+import { foldName, matchByName } from "@/lib/assistant/fuzzy-name";
 import { COUNTRY_CODES, countryName } from "@/lib/catalog/countries";
 import { fr } from "@/lib/i18n/fr";
 
@@ -10,6 +10,19 @@ import { fr } from "@/lib/i18n/fr";
 // nothing, never a guess; a corrected one is said.
 
 export { foldName, matchByName, rankByName } from "@/lib/assistant/fuzzy-name";
+
+/** matchByName, noting in `notes` when the name had to be corrected. */
+export function findNamed<T>(
+  items: readonly T[],
+  name: string,
+  key: (item: T) => string,
+  notes: string[],
+): T | null {
+  const found = matchByName(items, name, key);
+  const note = found && understoodAs(name, key(found));
+  if (note) notes.push(note);
+  return found;
+}
 
 /** Shown when a name was corrected, so the user can check it. */
 export function understoodAs(said: string, actual: string): string | null {

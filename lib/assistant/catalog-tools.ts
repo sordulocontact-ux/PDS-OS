@@ -3,7 +3,7 @@ import "server-only";
 import { tool } from "ai";
 import { z } from "zod";
 
-import { foldName, matchByName } from "@/lib/assistant/propose/match";
+import { findNamed, foldName, rankByName } from "@/lib/assistant/propose/match";
 import type { Source } from "@/lib/assistant/sources";
 import { routes } from "@/lib/auth/redirects";
 import { listMasters } from "@/lib/catalog/queries";
@@ -47,8 +47,8 @@ export function findArtistsTool() {
         .order("name");
       let rows = data ?? [];
       if (query?.trim()) {
-        const wanted = foldName(query);
-        rows = rows.filter((a) => foldName(a.name).includes(wanted));
+        // Spelled or dictated wrong: what sounds like it ("untrill" → "Huntrill").
+        rows = rankByName(rows, query, (a) => a.name).map((r) => r.item);
       }
 
       const withFans = await Promise.all(
@@ -103,6 +103,7 @@ export function findMastersTool() {
     }),
     execute: async ({ artist, query }) => {
       const t = fr.assistant.catalog;
+      const notes: string[] = [];
       let masters: MasterListItem[] = (await listMasters()).masters;
       if (artist) {
         const supabase = await createClient();
@@ -110,7 +111,7 @@ export function findMastersTool() {
           .from("artists")
           .select("id, name")
           .is("archived_at", null);
-        const found = matchByName(data ?? [], artist, (a) => a.name);
+        const found = findNamed(data ?? [], artist, (a) => a.name, notes);
         if (!found)
           return {
             facts: [fr.assistant.drafts.notFound(t.artist, artist)],
@@ -121,14 +122,16 @@ export function findMastersTool() {
         masters = masters.filter((m) => foldName(m.artists).includes(name));
       }
       if (query?.trim()) {
-        const wanted = foldName(query);
-        masters = masters.filter((m) =>
-          foldName(masterLabel(m)).includes(wanted),
+        masters = rankByName(masters, query, (m) => masterLabel(m)).map(
+          (r) => r.item,
         );
       }
       const shown = masters.slice(0, 30);
       return {
-        facts: shown.length ? shown.map(masterFact) : [t.noMaster],
+        facts: [
+          ...notes,
+          ...(shown.length ? shown.map(masterFact) : [t.noMaster]),
+        ],
         sources: shown.slice(0, 8).map((m): Source => ({
           label: masterLabel(m),
           href: routes.master(m.id),

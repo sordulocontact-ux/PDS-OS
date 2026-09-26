@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from "react";
 
-import { ConsentOptions } from "@/components/calls/consent-options";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,14 +13,17 @@ import { fr } from "@/lib/i18n/fr";
 /**
  * "Nouveau call": a button that unfolds the form in place. When the project
  * has no call yet, the form is open from the start (it is the only action).
+ * A title and a date, nothing else: recording consent is given by contract.
  */
 export function CreateCallForm({
   projectId,
   defaultOccurredAt,
+  defaultTitle,
   initiallyOpen,
 }: {
   projectId: string;
   defaultOccurredAt: string;
+  defaultTitle: string;
   initiallyOpen: boolean;
 }) {
   const t = fr.calls.create;
@@ -66,6 +68,7 @@ export function CreateCallForm({
               required
               maxLength={200}
               autoComplete="off"
+              defaultValue={defaultTitle}
               placeholder={t.titlePlaceholder}
               className="h-10"
             />
@@ -85,11 +88,6 @@ export function CreateCallForm({
               {t.dateHint}
             </p>
           </div>
-          <ConsentOptions
-            defaultValue="pending"
-            legend={t.consentLegend}
-            hint={t.consentHint}
-          />
           {state && !state.ok && (
             <p role="alert" className="text-sm text-destructive">
               {fr.calls.errors[state.error]}

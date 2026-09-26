@@ -7,9 +7,7 @@ import type { Transcript } from "@/lib/ai/schemas/transcript";
 import {
   AUDIO_BUCKET,
   asCallStatus,
-  asConsent,
   type CallStatus,
-  type Consent,
 } from "@/lib/calls/constants";
 import {
   fromReportItemRows,
@@ -28,16 +26,12 @@ export type CallSummary = {
   id: string;
   title: string;
   occurredAt: string;
-  consent: Consent;
   status: CallStatus;
 };
 
 export type CallDetail = CallSummary & {
   organizationId: string;
   projectId: string;
-  consentNote: string | null;
-  consentRecordedAt: string | null;
-  consentRecordedBy: string | null;
   audioPath: string | null;
   audioMime: string | null;
   audioBytes: number | null;
@@ -86,7 +80,7 @@ export async function listCalls(
 ): Promise<CallSummary[]> {
   const { data, error } = await supabase
     .from("calls")
-    .select("id, title, occurred_at, consent, status")
+    .select("id, title, occurred_at, status")
     .eq("project_id", projectId)
     .order("occurred_at", { ascending: false });
   if (error) throw new Error(`listCalls: ${error.message}`);
@@ -94,13 +88,9 @@ export async function listCalls(
     id: row.id,
     title: row.title,
     occurredAt: row.occurred_at,
-    consent: asConsent(row.consent),
     status: asCallStatus(row.status),
   }));
 }
-
-const personName = (p: { first_name: string; last_name: string | null }) =>
-  [p.first_name, p.last_name].filter(Boolean).join(" ");
 
 export async function getCall(
   supabase: Client,
@@ -109,9 +99,7 @@ export async function getCall(
 ): Promise<CallDetail | null> {
   const { data } = await supabase
     .from("calls")
-    .select(
-      "*, recorder:people!calls_consent_recorded_by_fkey(first_name, last_name)",
-    )
+    .select("*")
     .eq("id", callId)
     .eq("project_id", projectId)
     .maybeSingle();
@@ -120,13 +108,9 @@ export async function getCall(
     id: data.id,
     title: data.title,
     occurredAt: data.occurred_at,
-    consent: asConsent(data.consent),
     status: asCallStatus(data.status),
     organizationId: data.organization_id,
     projectId: data.project_id,
-    consentNote: data.consent_note,
-    consentRecordedAt: data.consent_recorded_at,
-    consentRecordedBy: data.recorder ? personName(data.recorder) : null,
     audioPath: data.audio_path,
     audioMime: data.audio_mime,
     audioBytes: data.audio_bytes,

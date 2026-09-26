@@ -11,7 +11,7 @@ import type {
 import {
   change,
   countryCodeOf,
-  matchByName,
+  findNamed,
 } from "@/lib/assistant/propose/match";
 import {
   proposalResult,
@@ -74,10 +74,11 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
       const warnings: string[] = [];
       let current = null;
       if (input.existingArtist) {
-        const found = matchByName(
+        const found = findNamed(
           await listArtistOptions(),
           input.existingArtist,
           (a) => a.name,
+          warnings,
         );
         current = found ? await getArtist(found.id) : null;
         if (!current)

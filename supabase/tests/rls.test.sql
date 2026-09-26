@@ -2,7 +2,7 @@
 -- Users are created in auth.users: the identity triggers link them to a
 -- Person and a pending membership; the fixture admin is promoted directly.
 begin;
-select plan(27);
+select plan(28);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -27,6 +27,15 @@ create function pg_temp.add_call_report(p_project uuid) returns void language sq
   insert into public.call_reports (organization_id, call_id, transcript_id, summary, provider, model)
   select organization_id, call_id, id, 'Résumé', 'test', 'test' from t;
 $$;
+-- A call created with the defaults (as the owner, inside a test).
+create function pg_temp.new_call_default() returns uuid language plpgsql as $$
+declare v_id uuid;
+begin
+  insert into public.calls (organization_id, project_id, title)
+  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'Défauts')
+  returning id into v_id;
+  return v_id;
+end $$;
 create function pg_temp.act_as(p_user uuid) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
@@ -151,10 +160,13 @@ reset role;
 select pg_temp.act_as((select id from ids where name = 'member'));
 -- Business invariants -----------------------------------------------------------
 select throws_ok($$
-  insert into public.calls (organization_id, project_id, title)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), (select v from vars where k = 'call'));
+  insert into public.calls (organization_id, project_id, title, consent)
+  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), (select v from vars where k = 'call'), 'refused');
   update public.calls set audio_path = 'x/y/z.m4a' where title = (select v from vars where k = 'call')
-$$, '23514', null, 'no audio without recording consent');
+$$, '23514', null, 'no audio when consent was refused');
+insert into ids select 'default_call', pg_temp.new_call_default();
+select is((select consent from public.calls where id = (select id from ids where name = 'default_call')),
+          'granted', 'a new call is granted by contract');
 
 select throws_ok($$
   insert into public.tasks (organization_id, project_id, title, due_date)

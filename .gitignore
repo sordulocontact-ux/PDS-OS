@@ -2,7 +2,7 @@
 /node_modules
 /.pnp
 .pnp.*
-
+CLAUDE.md
 # next.js
 /.next/
 /out/
@@ -44,4 +44,3 @@ pds-data.sql
 
 # Local database backups (emails, password hashes): never commit
 backups/
-CLAUDE.md

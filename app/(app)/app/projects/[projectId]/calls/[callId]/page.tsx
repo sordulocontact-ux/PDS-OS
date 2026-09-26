@@ -2,10 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IconChevronLeft } from "nucleo-sharp-essential";
 
-import { CallStatusBadge, ConsentBadge } from "@/components/calls/call-badges";
-import { CallRecording } from "@/components/calls/call-recording";
+import { CallStatusBadge } from "@/components/calls/call-badges";
+import { CallAudio, CallRecording } from "@/components/calls/call-recording";
 import { CallResults } from "@/components/calls/call-results";
-import { ConsentForm } from "@/components/calls/consent-block";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,9 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireApproved } from "@/lib/auth/dal";
-import { requireLaunchedProject } from "@/lib/projects/queries";
 import { routes } from "@/lib/auth/redirects";
-import { formatDateTime } from "@/lib/calls/format";
+import { formatDateTime, isUpcoming } from "@/lib/calls/format";
 import {
   getAudioUrl,
   getCall,
@@ -24,10 +23,15 @@ import {
   loadLatestTranscript,
 } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: `${fr.calls.list.title} · ${fr.app.name}` };
 
+/**
+ * One call, one step at a time: record it, let the processing run by itself,
+ * then its report is in the Brief (the processing lands on the framing).
+ */
 export default async function CallPage({
   params,
 }: PageProps<"/app/projects/[projectId]/calls/[callId]">) {
@@ -44,9 +48,10 @@ export default async function CallPage({
     call.audioPath ? getAudioUrl(supabase, call.audioPath) : null,
   ]);
   const t = fr.calls;
+  const step = !call.audioPath ? "record" : report ? "done" : "processing";
 
   return (
-    <div className="grid gap-6">
+    <div className="grid w-full max-w-3xl gap-6">
       <header className="grid gap-3">
         <Link
           href={routes.projectCalls(projectId)}
@@ -65,52 +70,45 @@ export default async function CallPage({
               {formatDateTime(call.occurredAt)}
             </time>
           </div>
-          <div className="flex gap-2">
-            <ConsentBadge consent={call.consent} />
-            <CallStatusBadge status={call.status} />
-          </div>
+          <CallStatusBadge
+            status={call.status}
+            upcoming={isUpcoming(call, new Date())}
+          />
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.consent.title}</CardTitle>
-            <CardDescription>
-              {call.consentRecordedAt
-                ? t.consent.recorded(
-                    formatDateTime(call.consentRecordedAt),
-                    call.consentRecordedBy,
-                  )
-                : t.consent.notRecorded}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ConsentForm
-              callId={call.id}
-              consent={call.consent}
-              note={call.consentNote}
-              locked={call.audioPath !== null}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.audio.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.page[step].title}</CardTitle>
+          <CardDescription>{t.page[step].description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {step === "done" ? (
+            <div className="grid gap-6">
+              <Link
+                href={routes.projectFraming(projectId)}
+                className={buttonVariants({
+                  size: "lg",
+                  className: "justify-self-start",
+                })}
+              >
+                {t.page.done.toFraming}
+              </Link>
+              <CallAudio call={call} audioUrl={audioUrl} />
+            </div>
+          ) : (
             <CallRecording
               call={call}
               audioUrl={audioUrl}
               hasTranscript={transcript !== null}
-              hasReport={report !== null}
             />
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
 
-      <CallResults transcript={transcript} report={report} />
+      {step === "done" && (
+        <CallResults transcript={transcript} report={report} />
+      )}
     </div>
   );
 }

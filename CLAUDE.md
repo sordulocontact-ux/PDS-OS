@@ -150,6 +150,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
 | `CreativePicker` | `projects/creative-picker.tsx` | choix multiple de personnes en `FilterChip`, envoyé en un champ JSON |
+| `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
 | `FramingNeedsCall` | `framing/framing-needs-call.tsx` | état « le cadrage part d'un call » (Cadrage verrouillé, vue d'ensemble) |
 | `ArtistEditSheet`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | panneau « Modifier » (photo, identité, bio), contacts de l'artiste |
 | `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
@@ -233,6 +234,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   `assistant-launcher.tsx`, `docs/ASSISTANT.md` § 2 bis).
 - **Audio** : enregistreur dans l'app (onglet Meet/Zoom + micro, ou micro seul) ;
   `AudioContext.resume()` obligatoire ; alerte après 2 min de silence de l'onglet.
+  Consentement **donné par contrat** (aucun écran). Après l'envoi, tout est automatique :
+  transcription → compte rendu → Brief pré-rempli (`fillBriefFromCall`) → redirection
+  vers le Cadrage ; plus d'import manuel sur le Cadrage.
   Groq : `groq-tolerant-fetch.ts` évite « Invalid JSON response » sur de vrais audios.
 - **Dictée** : bouton « Dicter » sur le Cadrage et la Stratégie (textes + leviers, jamais de
   date ni de temps fort), prévu sur tout le parcours.
@@ -313,7 +317,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 214 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 228 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -347,6 +351,8 @@ Au-delà des six étapes :
 - [ ] Fiche artiste, étapes suivantes : onglets Masters, Projets, Fichiers, Activité (journal)
 - [x] Création avec l'équipe (chef de projet transmis d'office, directeurs créatifs), type
       Événement, pas de cadrage sans compte rendu de call, calls « À venir »
+- [x] Call sans consentement (contrat), traitement automatique et Brief pré-rempli dès la
+      fin du call
 - [x] PO en écriture avec validation humaine : il prépare artiste (fiche + contacts),
       master, projet (création ou modification avant lancement), l'humain relit le vrai
       formulaire et enregistre ; fenêtre PO sur Espace Espace, dictée à l'écoute

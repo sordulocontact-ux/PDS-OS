@@ -46,6 +46,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001101_launch_strategy` | Stratégie de lancement : `levers` (famille, `to_decide`/`selected`/`rejected`, `need_id` facultatif, provenance), `strategy_deliverables` (levier retenu obligatoire, responsable et échéance facultatifs), `milestones` (date saisie, type fermé, livrable facultatif, détaché si le livrable est retiré). `strategy_is_editable` : **responsable + étape en cours** → écriture (y compris `field_values` `strategy`, politique restrictive), figée dès la demande de validation. `start_stage` refuse la Stratégie tant que le Cadrage n'est pas validé (`previous_stage_not_validated`). Triggers `check_strategy_links` (`lever_not_selected`, `lever_has_deliverables`). `report_items` : kinds `positioning`, `audiences`, `narrative`, `lever`. |
 | `…260926001201_project_visibility` | **Qui voit un projet** : `can_see_project` / `can_see_project_row` — DG (`view_all_projects`), responsable, destinataire d'une transmission en attente, directeur créatif de l'équipe (`project_creatives`, `add_project_creative` / `remove_project_creative` par le DG ou le responsable, notification `project_creative_added`). Policies de lecture de toutes les tables d'un projet (et audios Storage) réécrites ; une tâche reste visible à son assigné, une validation à son valideur. Catalogue visible par tous. |
 | `…260926001301_lever_voice_source` | `source_type = 'voice'` autorisé sur `levers` (dictée de la Stratégie). |
+| `…260926002301_call_consent_by_contract` | Consentement donné par contrat : `calls.consent` vaut `granted` par défaut, les calls `pending` passent à `granted`. Colonne, trigger et `calls_audio_requires_consent` conservés. |
 | `…260926001501_project_team_at_creation_and_framing_call` | Type `event`. `create_project` prend `p_assignee_person_id` (transmission d'office via `transmit_project`) et `p_creative_person_ids` (via `add_project_creative`), dans la même transaction : un refus annule tout. **Pas de cadrage sans call** : `framing_is_open` (compte rendu de call, ou Cadrage déjà entamé avant la règle), politiques restrictives sur `field_values` `brief`, `needs`, `project_team_members`, `start_stage` → `framing_requires_call`. |
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
@@ -123,7 +124,7 @@ Principes :
   (en attente, refusé, précision demandée), sinon non transmis. Les sections Cadrage / Calls / Sortie répondent 404 tant que le projet n'a
   pas d'étape (`requireLaunchedProject`).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 214 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 228 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
@@ -180,8 +181,11 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
 
 ## 4. Calls, audio, transcription (étape 4 + enregistreur)
 
-- Page d'un call : consentement (`pending` / `granted` / `refused`, aucun audio sans
-  `granted`), enregistrement, transcription, compte rendu.
+- Page d'un call, **une étape à la fois** : enregistrer (fichier en repli, replié) →
+  traitement **automatique** dès l'envoi (`CallProcessing` : transcription puis compte
+  rendu, suivi `ProcessingSteps`, « Réessayer » seulement en cas d'échec, relecture de
+  l'état toutes les 5 s si un traitement tourne ailleurs) → redirection vers le Cadrage.
+  Consentement **accordé par contrat** (défaut `granted`, `…260926002301`) : plus d'écran.
 - **Enregistreur dans l'app** (`components/calls/call-recorder.tsx`, `use-recorder.ts`,
   `recorder-media.ts`, `recording-live.tsx`, `recording-review.tsx`) :
   - source « onglet » (Meet, Zoom… + micro mixés) ou « micro seul » ;
@@ -194,10 +198,13 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   - Pièges : `AudioContext` souvent suspendu après l'autorisation → `resume()` ;
     Chrome ne partage le son d'un onglet que si la vidéo est demandée (elle est coupée).
 - Envoi (fichier ou enregistrement) : `lib/calls/upload-audio.ts` → Storage direct depuis
-  le navigateur (RLS) → `attachAudio` (vérifie chemin, type, taille, consentement).
+  le navigateur (RLS) → `attachAudio` (vérifie chemin, type, taille).
 - Pipeline (`lib/calls/pipeline.ts`, routes `app/api/calls/[callId]/{transcribe,extract}`) :
   statut du call = verrou (un traitement à la fois), erreurs traduites (`audio_too_large`,
-  `provider_quota`…), compte rendu via `save_call_report`.
+  `provider_quota`…), compte rendu via `save_call_report`. La route `extract` enchaîne
+  `fillBriefFromCall` (`lib/framing/import-report.ts`) : le **premier** compte rendu d'un
+  call est versé dans le Brief tant que le Cadrage n'est ni soumis ni validé ; la réponse
+  porte `briefFilled`, qui déclenche la redirection.
 - Groq : `lib/ai/groq-tolerant-fetch.ts` complète les champs de segment nuls renvoyés sur de
   vrais enregistrements (sinon « Invalid JSON response »). Limite 25 Mo (gratuit) / 100 Mo.
 
@@ -224,7 +231,8 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
 la page et la vue d'ensemble affichent `FramingNeedsCall` (lien vers les Calls, placés
 avant le Cadrage dans les onglets). Un call brouillon daté dans le futur est affiché « À
 venir » (`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
-Import d'un compte rendu → propositions « proposé · à confirmer » (Brief, besoins, équipe,
+Compte rendu versé **automatiquement** (plus de panneau d'import sur le Cadrage ; la
+Stratégie garde le sien) → propositions « proposé · à confirmer » (Brief, besoins, équipe,
 points ouverts), provenance cliquable (call + minutage + citation), confirmer / rejeter /
 modifier, besoins identifié → engagé, actions proposées → tâches (responsable + échéance
 choisis par une personne), circuit de validation.

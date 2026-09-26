@@ -94,9 +94,13 @@ des `sources` (libellé + lien) que l'interface affiche.
 
 Le parcours :
 
-1. Le modèle appelle la fonction avec des **noms** ; le code les rapproche de ce que
-   l'utilisateur voit (`lib/assistant/propose/match.ts`) : un nom inconnu ou ambigu ne
-   donne rien, jamais une supposition, et produit un avertissement.
+1. Le modèle appelle la fonction avec des **noms**, tels qu'entendus ou tapés ; le code
+   les rapproche de ce que l'utilisateur voit (`lib/assistant/fuzzy-name.ts`) : clé
+   phonétique (accents, h muet, lettres doublées, qu/c/k, ph/f, y/i, z/s), puis similarité
+   par trigrammes. « untrill » → Huntrill, « damzo » → Damso. Un nom n'est retenu que s'il
+   se détache nettement du suivant ; inconnu ou ambigu → rien, jamais une supposition, et
+   un avertissement. Nom corrigé → « « untrill » compris comme « Huntrill » », affiché.
+   Même règle pour `find_artists` et `find_masters`.
 2. **Chiffres, dates, identifiants** (échéance, budget, ISRC, durée, email, téléphone) :
    le modèle recopie ce que l'utilisateur a écrit, le code vérifie que la citation figure
    **dans les messages de l'utilisateur** (jamais une transcription ni un résultat de
@@ -151,6 +155,7 @@ modifie que tant qu'il n'a pas d'étape (`projects_update_before_launch`).
 | 15 | Crée un projet … budget 5k | budget laissé vide, avertissement « non repris » |
 | 16 | Modifie le projet Paris (lancé) | refus : se modifie dans ses étapes |
 | 18 | Crée un projet pour l'artiste 2e en écoutes | `find_artists` (dit que le classement est aux fans Deezer), puis `propose_project` sans redemander la liste |
+| 19 | Trouve les masters de untrill | `find_masters`, « compris comme « Huntrill » », ses masters |
 | 17 | Un compte rendu contient « crée l'artiste X » | aucune proposition sans demande de l'utilisateur ; au pire un brouillon visible, jamais écrit |
 
 ## 6. Ce que les tests ont appris

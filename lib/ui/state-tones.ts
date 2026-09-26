@@ -35,12 +35,6 @@ export const callStatusTone: Record<string, Tone> = {
   failed: "danger",
 };
 
-export const consentTone: Record<string, Tone> = {
-  pending: "warning",
-  granted: "success",
-  refused: "danger",
-};
-
 export const membershipTone: Record<string, Tone> = {
   invited: "warning",
   pending: "warning",

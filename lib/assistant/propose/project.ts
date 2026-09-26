@@ -9,7 +9,7 @@ import {
   type ProjectDraft,
 } from "@/lib/assistant/drafts";
 import { formatDay } from "@/lib/assistant/facts";
-import { change, matchByName } from "@/lib/assistant/propose/match";
+import { change, findNamed } from "@/lib/assistant/propose/match";
 import {
   proposalResult,
   type ProposeContext,
@@ -76,10 +76,11 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
       let current = null;
       if (input.existingProject) {
         const { projects } = await listProjects();
-        const found = matchByName(
+        const found = findNamed(
           projects,
           input.existingProject,
           (p) => p.title,
+          warnings,
         );
         current = found ? await getProject(found.id) : null;
         if (!current)
@@ -100,7 +101,12 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
       let masters = current?.masters ?? [];
       if (input.masters?.length) {
         masters = input.masters.flatMap((title) => {
-          const found = matchByName(allMasters, title, (m) => masterLabel(m));
+          const found = findNamed(
+            allMasters,
+            title,
+            (m) => masterLabel(m),
+            warnings,
+          );
           if (!found) warnings.push(t.unknownMaster(title));
           return found ? [found] : [];
         });
@@ -116,12 +122,17 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
           input.creatives?.length ? listCreativePeople(organizationId) : [],
         ]);
         if (input.manager) {
-          const found = matchByName(managers, input.manager, (p) => p.name);
+          const found = findNamed(
+            managers,
+            input.manager,
+            (p) => p.name,
+            warnings,
+          );
           if (!found) warnings.push(t.unknownPerson(input.manager));
           assigneePersonId = found?.personId ?? null;
         }
         creativePersonIds = (input.creatives ?? []).flatMap((name) => {
-          const found = matchByName(creatives, name, (p) => p.name);
+          const found = findNamed(creatives, name, (p) => p.name, warnings);
           if (!found) warnings.push(t.unknownPerson(name));
           return found ? [found.personId] : [];
         });

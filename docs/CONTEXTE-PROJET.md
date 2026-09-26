@@ -300,9 +300,10 @@ peut prononcer une phrase qui ressemble à une instruction. Le texte transcrit e
 donnée, jamais une consigne. Il ne doit jamais être concaténé dans un prompt système.
 Même traitement pour tout fichier importé.
 
-**Consentement à l'enregistrement.** L'état « sans enregistrement » du prototype est
-conservé, avec ses conséquences expliquées et une trace horodatée de l'accord des
-participants, affichée sur l'écran de transcription.
+**Consentement à l'enregistrement.** Décidé le 26/09/2026 : il est **donné par contrat**
+(note de contrat signée par les participants). Rien ne le demande à l'écran ; tout call est
+« accordé » dès sa création. La colonne et la règle « pas d'audio sans accord » restent en
+base.
 
 **Paliers gratuits et entraînement.** Sur les paliers gratuits des fournisseurs de
 modèles, les requêtes peuvent servir à améliorer les modèles. **Aucune donnée réelle du

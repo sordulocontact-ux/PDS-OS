@@ -8,7 +8,6 @@ import { routes } from "@/lib/auth/redirects";
 import {
   ALLOWED_AUDIO_MIMES,
   MAX_AUDIO_BYTES,
-  isConsent,
   type ActionResult,
 } from "@/lib/calls/constants";
 import { createClient } from "@/lib/supabase/server";
@@ -37,13 +36,11 @@ export async function createCall(
   const projectId = text(form, "projectId");
   const title = text(form, "title");
   const occurredAt = new Date(text(form, "occurredAt"));
-  const consent = text(form, "consent");
   if (!title || title.length > 200)
     return { ok: false, error: "title_required" };
   if (Number.isNaN(occurredAt.getTime()))
     return { ok: false, error: "date_invalid" };
-  if (!projectId || !isConsent(consent))
-    return { ok: false, error: "invalid_input" };
+  if (!projectId) return { ok: false, error: "invalid_input" };
 
   const { data, error } = await session.supabase
     .from("calls")
@@ -52,7 +49,8 @@ export async function createCall(
       project_id: projectId,
       title,
       occurred_at: occurredAt.toISOString(),
-      consent,
+      // Recording consent is given by contract.
+      consent: "granted",
     })
     .select("id")
     .single();
@@ -61,41 +59,6 @@ export async function createCall(
     return { ok: false, error: "not_found" };
   }
   redirect(routes.projectCall(projectId, data.id));
-}
-
-export async function updateConsent(
-  _previous: ActionResult | null,
-  form: FormData,
-): Promise<ActionResult> {
-  const session = await approvedSession();
-  if (!session) return { ok: false, error: "unauthorized" };
-
-  const callId = text(form, "callId");
-  const consent = text(form, "consent");
-  const note = text(form, "note").slice(0, 500);
-  if (!callId || !isConsent(consent))
-    return { ok: false, error: "invalid_input" };
-
-  const { data: call } = await session.supabase
-    .from("calls")
-    .select("audio_path")
-    .eq("id", callId)
-    .maybeSingle();
-  if (!call) return { ok: false, error: "not_found" };
-  // The database refuses it too (calls_audio_requires_consent).
-  if (call.audio_path && consent !== "granted")
-    return { ok: false, error: "consent_locked" };
-
-  const { error } = await session.supabase
-    .from("calls")
-    .update({ consent, consent_note: note || null })
-    .eq("id", callId);
-  if (error) {
-    console.error("[calls] consent update failed:", error.message);
-    return { ok: false, error: "save_failed" };
-  }
-  refresh();
-  return { ok: true };
 }
 
 /**

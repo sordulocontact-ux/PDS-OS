@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { IconChevronRight } from "nucleo-sharp-essential";
 
-import { CallStatusBadge, ConsentBadge } from "@/components/calls/call-badges";
+import { CallStatusBadge } from "@/components/calls/call-badges";
 import { routes } from "@/lib/auth/redirects";
 import { formatDateTime, isUpcoming } from "@/lib/calls/format";
 import type { CallSummary } from "@/lib/calls/queries";
@@ -37,8 +37,6 @@ export function CallList({
               </time>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
-              <span className="sr-only">{t.consent} :</span>
-              <ConsentBadge consent={call.consent} />
               <span className="sr-only">{t.status} :</span>
               <CallStatusBadge
                 status={call.status}

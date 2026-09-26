@@ -40,6 +40,7 @@ export default async function ProjectCallsPage({
           <CreateCallForm
             projectId={projectId}
             defaultOccurredAt={toParisLocalInput(now)}
+            defaultTitle=""
             initiallyOpen={false}
           />
         )}
@@ -56,6 +57,7 @@ export default async function ProjectCallsPage({
           <CreateCallForm
             projectId={projectId}
             defaultOccurredAt={toParisLocalInput(now)}
+            defaultTitle={t.firstCallTitle}
             initiallyOpen
           />
         </section>

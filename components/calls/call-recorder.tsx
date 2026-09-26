@@ -103,7 +103,6 @@ export function CallRecorder({
 
   return (
     <div className="grid gap-4">
-      <h3 className="text-sm font-medium">{t.title}</h3>
       {(rec.status === "idle" || rec.status === "requesting") && (
         <>
           <ChoiceCards

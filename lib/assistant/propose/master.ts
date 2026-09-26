@@ -4,7 +4,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import type { DraftChange, MasterDraft } from "@/lib/assistant/drafts";
-import { change, matchByName } from "@/lib/assistant/propose/match";
+import { change, findNamed } from "@/lib/assistant/propose/match";
 import {
   proposalResult,
   type ProposeContext,
@@ -71,10 +71,11 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
       const warnings: string[] = [];
       let current = null;
       if (input.existingMaster) {
-        const found = matchByName(
+        const found = findNamed(
           await listMasterOptions(),
           input.existingMaster,
           (m) => masterLabel(m),
+          warnings,
         );
         current = found ? await getMaster(found.id) : null;
         if (!current)
@@ -88,7 +89,7 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
       if (input.artists?.length) {
         const artists = await listArtistOptions();
         credits = input.artists.flatMap((a) => {
-          const found = matchByName(artists, a.name, (x) => x.name);
+          const found = findNamed(artists, a.name, (x) => x.name, warnings);
           if (!found) warnings.push(t.unknownArtist(a.name));
           return found
             ? [{ artistId: found.id, name: found.name, role: a.role }]
