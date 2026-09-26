@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CallList } from "@/components/calls/call-list";
 import { CreateCallForm } from "@/components/calls/create-call-form";
 import { requireApproved } from "@/lib/auth/dal";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { toParisLocalInput } from "@/lib/calls/format";
 import { getProjectTitle, listCalls } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
@@ -15,6 +16,7 @@ export default async function ProjectCallsPage({
 }: PageProps<"/app/projects/[projectId]/calls">) {
   await requireApproved();
   const { projectId } = await params;
+  await requireLaunchedProject(projectId);
   const supabase = await createClient();
 
   const projectTitle = await getProjectTitle(supabase, projectId);

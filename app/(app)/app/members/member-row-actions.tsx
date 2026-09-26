@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { memberAction } from "@/lib/members/actions";
@@ -15,16 +16,21 @@ import {
   type MembershipRow,
 } from "@/lib/members/types";
 
-type Mode = "idle" | "reject" | "suspend" | "rename";
+import { CopyLinkButton } from "./copy-link-button";
+
+type Mode = "idle" | "approve" | "reject" | "suspend" | "rename" | "role";
 
 // Actions of one team row. One server action, an "intent" field per form.
 // Reason and name forms open inline, without a modal.
 export function MemberRowActions({
   membership,
   isSelf,
+  signupLink,
 }: {
   membership: MembershipRow;
   isSelf: boolean;
+  // Invitations only: the link the person signs up with.
+  signupLink: string | null;
 }) {
   const [state, action, pending] = useActionState(
     memberAction,
@@ -57,13 +63,6 @@ export function MemberRowActions({
   const quick = (intent: string, label: string, primary = false) => (
     <form action={action}>
       {hidden(intent)}
-      {intent === "set_role" && (
-        <input
-          type="hidden"
-          name="role"
-          value={role === "admin" ? "member" : "admin"}
-        />
-      )}
       <SubmitButton
         size="sm"
         variant={primary ? "default" : "outline"}
@@ -78,8 +77,15 @@ export function MemberRowActions({
     <div className="flex flex-col items-end gap-2">
       {mode === "idle" && (
         <div className="flex flex-wrap justify-end gap-1.5">
-          {(status === "pending" || status === "rejected") &&
-            quick("approve", a.approve, true)}
+          {status === "invited" && signupLink && (
+            <CopyLinkButton url={signupLink} label={a.copyLink} size="sm" />
+          )}
+          {status === "invited" && quick("cancel_invite", a.cancelInvite)}
+          {(status === "pending" || status === "rejected") && (
+            <Button type="button" size="sm" onClick={() => setMode("approve")}>
+              {a.approve}
+            </Button>
+          )}
           {status === "pending" && (
             <Button
               type="button"
@@ -101,13 +107,16 @@ export function MemberRowActions({
               {a.suspend}
             </Button>
           )}
-          {status === "approved" &&
-            role === "member" &&
-            quick("set_role", a.makeAdmin)}
-          {status === "approved" &&
-            role === "admin" &&
-            !isSelf &&
-            quick("set_role", a.removeAdmin)}
+          {(status === "invited" || status === "approved") && !isSelf && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setMode("role")}
+            >
+              {a.editRole}
+            </Button>
+          )}
           <Button
             type="button"
             size="sm"
@@ -147,6 +156,40 @@ export function MemberRowActions({
             </Button>
             <SubmitButton size="default" pendingLabel={c.loading}>
               {mode === "reject" ? a.reject : a.suspend}
+            </SubmitButton>
+          </div>
+        </form>
+      )}
+
+      {(mode === "role" || mode === "approve") && (
+        <form
+          action={action}
+          noValidate
+          className="flex w-full max-w-xs flex-col gap-2 text-left"
+        >
+          {hidden(mode === "approve" ? "approve" : "set_role")}
+          <OptionSelect
+            id={`role-${id}`}
+            name="role"
+            label={t.columns.role}
+            items={t.roles}
+            placeholder={a.rolePlaceholder}
+            defaultValue={
+              retainedMemberValue(state, "role", role ?? "") || null
+            }
+            error={fieldErrors?.role}
+          />
+          <div className="flex justify-end gap-1.5">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setMode("idle")}
+              disabled={pending}
+            >
+              {c.cancel}
+            </Button>
+            <SubmitButton size="default" pendingLabel={c.saving}>
+              {mode === "approve" ? a.approve : c.save}
             </SubmitButton>
           </div>
         </form>

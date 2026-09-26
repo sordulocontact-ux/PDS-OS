@@ -47,6 +47,15 @@ export const serverEnvSchema = z
     CRON_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
     /** Optional: Odesli closed its public API, keys come from a whitelist. */
     ODESLI_API_KEY: optionalSecret,
+    /** Web Push: optional, browser notifications are off without them. */
+    VAPID_PRIVATE_KEY: optionalSecret,
+    VAPID_SUBJECT: z.preprocess(
+      blankToUndefined,
+      z
+        .string()
+        .regex(/^(mailto:|https:\/\/)/)
+        .optional(),
+    ),
   })
   .superRefine((env, ctx) => {
     for (const provider of [env.LLM_PROVIDER, env.TRANSCRIPTION_PROVIDER]) {

@@ -26,7 +26,41 @@ export const ACCESS_STATES: readonly AccessState[] = [
   "suspended",
 ];
 
-export type OrganizationRole = "admin" | "member";
+// PDS positions. A position is not a permission: what each one allows is
+// decided by the database (role_permissions) and read from get_my_access.
+export const ORGANIZATION_ROLES = [
+  "general_director",
+  "project_manager",
+  "creative_director",
+] as const;
+export type OrganizationRole = (typeof ORGANIZATION_ROLES)[number];
+
+export function isOrganizationRole(value: unknown): value is OrganizationRole {
+  return (
+    typeof value === "string" &&
+    (ORGANIZATION_ROLES as readonly string[]).includes(value)
+  );
+}
+
+// Permissions of the V1 matrix (docs/CONTEXTE-PROJET.md § 12). Checks ask
+// for a permission, never for a position.
+export const PERMISSIONS = [
+  "administer",
+  "assign_projects",
+  "validate",
+  "pilot_projects",
+  "creative_work",
+  "manage_catalog",
+  "create_projects",
+] as const;
+export type Permission = (typeof PERMISSIONS)[number];
+
+export function isPermission(value: unknown): value is Permission {
+  return (
+    typeof value === "string" &&
+    (PERMISSIONS as readonly string[]).includes(value)
+  );
+}
 
 export const routes = {
   home: "/",
@@ -42,8 +76,20 @@ export const routes = {
   unavailable: "/unavailable",
   app: "/app",
   members: "/app/members",
+  membersNew: "/app/members/new",
+  artists: "/app/catalog/artists",
+  artist: (id: string) => `/app/catalog/artists/${id}`,
+  masters: "/app/catalog/masters",
+  mastersNew: "/app/catalog/masters/new",
+  master: (id: string) => `/app/catalog/masters/${id}`,
+  // Master form with this artist already credited (from the artist page).
+  mastersNewForArtist: (artistId: string) =>
+    `/app/catalog/masters/new?artist=${artistId}`,
   projects: "/app/projects",
   projectsNew: "/app/projects/new",
+  // Creation form with this master already linked (from the master page).
+  projectsNewFromMaster: (masterId: string) =>
+    `/app/projects/new?master=${masterId}`,
   project: (id: string) => `/app/projects/${id}`,
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,

@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireApproved } from "@/lib/auth/dal";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { loadFraming } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
 
@@ -24,6 +25,7 @@ export default async function FramingPage({
 }: PageProps<"/app/projects/[projectId]/framing">) {
   const access = await requireApproved();
   const { projectId } = await params;
+  await requireLaunchedProject(projectId);
   const data = await loadFraming(projectId, access);
   if (!data) notFound();
   const me = access.personId;

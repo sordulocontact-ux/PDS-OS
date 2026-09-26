@@ -48,14 +48,14 @@ insert into ids values
 insert into ids select 'org', id from public.organizations where slug = 'pds';
 -- The fixture admin is promoted directly (as postgres), so the suite does not
 -- depend on the one-shot bootstrap of the seed.
-update public.memberships set status = 'approved', role = 'admin'
+update public.memberships set status = 'approved', role = 'general_director'
  where person_id = (select person_id from public.accounts where id = (select id from ids where name = 'admin'));
 
 select pg_temp.act_as((select id from ids where name = 'admin'));
 insert into public.artists (organization_id, name)
 values ((select id from ids where name = 'org'), (select v from vars where k = 'artist'));
-insert into public.projects (organization_id, artist_id, title)
-select (select id from ids where name = 'org'), id, (select v from vars where k = 'project') from public.artists where name = (select v from vars where k = 'artist');
+insert into public.projects (organization_id, title, type)
+values ((select id from ids where name = 'org'), (select v from vars where k = 'project'), 'partnership');
 insert into ids select 'project', id from public.projects where title = (select v from vars where k = 'project');
 insert into public.calls (organization_id, project_id, title, consent)
 values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), (select v from vars where k = 'call'), 'granted');

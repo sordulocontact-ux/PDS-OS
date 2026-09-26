@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Access } from "@/lib/auth/access";
+import { fr } from "@/lib/i18n/fr";
 import { routes } from "@/lib/auth/redirects";
 import {
   familyLabel,
@@ -45,12 +46,14 @@ export async function projectStatus(projectId: string, access: Access) {
 
   const facts: string[] = [];
   facts.push(
-    `Projet « ${project.title} » de ${project.artistName} (${project.releaseType})${project.ownerName ? `, piloté par ${project.ownerName}` : ""}.`,
+    `Projet « ${project.title} »${project.artistName ? ` de ${project.artistName}` : ""} (${fr.shell.projectTypes[project.type]})${project.ownerName ? `, piloté par ${project.ownerName}` : ""}.`,
   );
   facts.push(
-    project.currentStage
-      ? `Étape actuelle : ${project.currentStage.label} (${stageState(project.currentStage.state)}).`
-      : "Toutes les étapes sont validées.",
+    project.stages.length === 0
+      ? `Projet pas encore lancé, aucune étape (${fr.transmission.statuses[project.status]}).`
+      : project.currentStage
+        ? `Étape actuelle : ${project.currentStage.label} (${stageState(project.currentStage.state)}).`
+        : "Toutes les étapes sont validées.",
   );
   for (const stage of project.stages) {
     if (stage.state !== "not_started")

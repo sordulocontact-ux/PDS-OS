@@ -1,16 +1,33 @@
 import { z } from "zod";
 
 import { fr } from "@/lib/i18n/fr";
-import { RELEASE_TYPES } from "@/lib/projects/types";
+import { PRIORITIES, PROJECT_TYPES } from "@/lib/projects/types";
 
 const e = fr.auth.errors;
 const pe = fr.shell.newProject.errors;
 
-const optionalUuid = z
+// "1 500,50" / "1500.5" / "1500" → cents. Undefined when not an amount,
+// null when empty.
+export function parseEurosToCents(input: string): number | null | undefined {
+  const value = input.replace(/[\s  €]/g, "").replace(",", ".");
+  if (value === "") return null;
+  if (!/^\d{1,10}(\.\d{1,2})?$/.test(value)) return undefined;
+  return Math.round(Number(value) * 100);
+}
+
+// Masters travel as one JSON field (FormData flattens repeated keys).
+const masterIdsSchema = z
   .string()
-  .trim()
-  .transform((value) => (value === "" ? null : value))
-  .pipe(z.uuid().nullable());
+  .optional()
+  .transform((raw, ctx) => {
+    try {
+      return JSON.parse(raw || "[]") as unknown;
+    } catch {
+      ctx.addIssue({ code: "custom", message: pe.invalidMasters });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.array(z.uuid(), { error: pe.invalidMasters }).max(50));
 
 export const createProjectSchema = z
   .object({
@@ -19,30 +36,43 @@ export const createProjectSchema = z
       .trim()
       .min(1, { error: e.required })
       .max(200, { error: e.tooLong }),
-    releaseType: z.enum(RELEASE_TYPES, { error: pe.invalidType }),
-    artistMode: z.enum(["existing", "new"]).default("existing"),
-    artistId: optionalUuid.optional().default(null),
-    artistName: z
+    type: z.enum(PROJECT_TYPES, { error: pe.invalidType }),
+    masterIds: masterIdsSchema,
+    dueDate: z
+      .string()
+      .optional()
+      .transform((value) => value || null)
+      .pipe(z.iso.date({ error: pe.invalidDate }).nullable()),
+    budget: z
+      .string()
+      .optional()
+      .transform((value, ctx) => {
+        const cents = parseEurosToCents(value ?? "");
+        if (cents === undefined) {
+          ctx.addIssue({ code: "custom", message: pe.invalidBudget });
+          return z.NEVER;
+        }
+        return cents;
+      }),
+    priority: z
+      .string()
+      .optional()
+      .transform((value) => value || null)
+      .pipe(z.enum(PRIORITIES, { error: pe.invalidPriority }).nullable()),
+    framingNotes: z
       .string()
       .trim()
-      .max(200, { error: e.tooLong })
+      .max(20000, { error: e.tooLong })
       .optional()
-      .default(""),
-    ownerPersonId: z.uuid({ error: pe.ownerInvalid }),
+      .transform((value) => value || null),
   })
+  // The rule that defines a music release; the database enforces it too.
   .superRefine((data, ctx) => {
-    if (data.artistMode === "existing" && !data.artistId) {
+    if (data.type === "music_release" && data.masterIds.length === 0) {
       ctx.addIssue({
         code: "custom",
-        path: ["artistId"],
-        message: pe.artistRequired,
-      });
-    }
-    if (data.artistMode === "new" && data.artistName === "") {
-      ctx.addIssue({
-        code: "custom",
-        path: ["artistName"],
-        message: pe.artistRequired,
+        path: ["masterIds"],
+        message: pe.mastersRequired,
       });
     }
   });

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { done, id, orgId, text } from "@/lib/framing/actions/shared";
 import { fail, type ActionResult } from "@/lib/framing/result";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 
 // Open points and tasks -----------------------------------------------------
@@ -73,6 +74,8 @@ export async function createTask(
     due_date: p.data.dueDate,
     source_report_item_id: p.data.sourceReportItemId,
   });
+  // The assignee is notified by a database trigger; the push leaves after.
+  if (!error) await schedulePendingPushes();
   return done(projectId, error);
 }
 

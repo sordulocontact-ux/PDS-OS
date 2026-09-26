@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Access } from "@/lib/auth/access";
+import { can, type Access } from "@/lib/auth/access";
 import { createClient } from "@/lib/supabase/server";
 
 export type Member = { personId: string; name: string };
@@ -23,7 +23,7 @@ export async function loadMembers(access: Access): Promise<Member[]> {
 
   // RLS already limits a non-admin to approved members; an admin also sees
   // pending requests, which are filtered out here.
-  if (access.role === "admin") {
+  if (can(access, "administer")) {
     const { data: approved } = await supabase
       .from("memberships")
       .select("person_id")

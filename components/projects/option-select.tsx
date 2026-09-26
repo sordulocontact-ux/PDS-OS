@@ -13,6 +13,7 @@ import {
 // Labelled single-choice select submitting its value under `name`.
 // `items` maps each value to its displayed label.
 export function OptionSelect({
+  id: idProp,
   name,
   label,
   items,
@@ -21,7 +22,9 @@ export function OptionSelect({
   hint,
   error,
   hideLabel = false,
+  onValueChange,
 }: {
+  id?: string;
   name: string;
   label: string;
   items: Record<string, string>;
@@ -30,8 +33,10 @@ export function OptionSelect({
   hint?: string;
   error?: string;
   hideLabel?: boolean;
+  // Optional: lets the form react to the choice; the value is still submitted.
+  onValueChange?: (value: string) => void;
 }) {
-  const id = `${name}-select`;
+  const id = idProp ?? `${name}-select`;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
 
   return (
@@ -39,7 +44,16 @@ export function OptionSelect({
       <Label htmlFor={id} className={hideLabel ? "sr-only" : undefined}>
         {label}
       </Label>
-      <Select name={name} items={items} defaultValue={defaultValue ?? null}>
+      <Select
+        // Same reason as Field: remount when the server sends another default.
+        key={defaultValue ?? ""}
+        name={name}
+        items={items}
+        defaultValue={defaultValue ?? null}
+        onValueChange={(next) =>
+          typeof next === "string" && onValueChange?.(next)
+        }
+      >
         <SelectTrigger
           id={id}
           aria-invalid={error ? true : undefined}

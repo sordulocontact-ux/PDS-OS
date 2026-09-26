@@ -1,4 +1,4 @@
-import { UsersIcon } from "lucide-react";
+import { UserPlusIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 
 import { MembersTable } from "./members-table";
 
-// Team screen: access requests and members, with the decisions taken there.
-// Admins only.
+// Team screen: accounts created ahead, access requests and members, with
+// the decisions taken there. General director only.
 export default async function MembersPage({
   searchParams,
 }: PageProps<"/app/members">) {
@@ -37,7 +37,19 @@ export default async function MembersPage({
 
   return (
     <PageContainer>
-      <PageHeader title={t.title} description={t.subtitle} />
+      <PageHeader
+        title={t.title}
+        description={t.subtitle}
+        action={
+          <Link
+            href={routes.membersNew}
+            className={cn(buttonVariants({ size: "lg" }), "gap-2")}
+          >
+            <UserPlusIcon className="size-4" aria-hidden />
+            {t.create}
+          </Link>
+        }
+      />
 
       <nav aria-label={t.segmentsLabel} className="flex flex-wrap gap-1.5">
         {MEMBERSHIP_STATUSES.map((status) => {

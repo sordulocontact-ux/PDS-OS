@@ -4,13 +4,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import {
   isAccessState,
+  isOrganizationRole,
+  isPermission,
   type AccessState,
   type OrganizationRole,
+  type Permission,
 } from "@/lib/auth/redirects";
 
 export type Access = {
   state: AccessState;
   role: OrganizationRole | null;
+  // Computed by the database from the position (role_permissions).
+  permissions: Permission[];
   personId: string | null;
   organizationId: string | null;
   firstName: string | null;
@@ -22,6 +27,7 @@ export type Access = {
 export const anonymousAccess: Access = {
   state: "anonymous",
   role: null,
+  permissions: [],
   personId: null,
   organizationId: null,
   firstName: null,
@@ -64,12 +70,17 @@ export async function fetchAccess(
     : isAccessState(raw.state)
       ? raw.state
       : "unavailable";
-  const role: OrganizationRole | null =
-    raw.role === "admin" || raw.role === "member" ? raw.role : null;
+  const role: OrganizationRole | null = isOrganizationRole(raw.role)
+    ? raw.role
+    : null;
 
   return {
     state,
     role: state === "approved" ? role : null,
+    permissions:
+      state === "approved" && Array.isArray(raw.permissions)
+        ? raw.permissions.filter(isPermission)
+        : [],
     personId: asString(raw.person_id),
     organizationId: asString(raw.organization_id),
     firstName: asString(raw.first_name),
@@ -77,4 +88,8 @@ export async function fetchAccess(
     email: user.email ?? null,
     accountId: user.id,
   };
+}
+
+export function can(access: Access, permission: Permission): boolean {
+  return access.permissions.includes(permission);
 }

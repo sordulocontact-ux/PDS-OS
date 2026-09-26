@@ -58,7 +58,17 @@ export async function signUp(
     },
   });
 
-  // An address already in use gets the same screen: no email enumeration.
+  // With email confirmation on, Supabase answers an address already in use
+  // like a new one (no enumeration) and the same screen follows. It only
+  // returns this error when confirmation is off, where it already tells the
+  // address exists: say so instead of asking to check a mailbox for nothing.
+  if (error?.code === "user_already_exists" || error?.code === "email_exists") {
+    return {
+      status: "error",
+      formError: t.errors.emailTaken,
+      values: retainedValues(formData),
+    };
+  }
   // Only truly blocking errors are shown.
   if (
     error &&
@@ -70,11 +80,7 @@ export async function signUp(
       values: retainedValues(formData),
     };
   }
-  if (
-    error &&
-    error.code !== "user_already_exists" &&
-    error.code !== "email_exists"
-  ) {
+  if (error) {
     console.error("signUp:", error.code, error.message);
     return {
       status: "error",

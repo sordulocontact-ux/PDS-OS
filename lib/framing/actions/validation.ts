@@ -11,6 +11,7 @@ import {
   ok,
   type ActionResult,
 } from "@/lib/framing/result";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 
 // State transitions go through the database functions, which check the
@@ -25,6 +26,8 @@ async function run(
   await requireApproved();
   const { error } = await call();
   if (error) return fromDatabaseError(error);
+  // A validation request or decision notifies someone (database triggers).
+  await schedulePendingPushes();
   revalidatePath(routes.projectFraming(projectId));
   revalidatePath(routes.project(projectId), "layout");
   return ok;

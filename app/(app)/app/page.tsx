@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
 import {
   ActivityCard,
+  HandoverCard,
   ProjectsCard,
   ProposalsCard,
   ReleasesCard,
@@ -13,6 +14,7 @@ import {
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -27,7 +29,7 @@ export default async function AppHomePage() {
   const t = fr.shell.home;
   const [pendingCount, todo, events, { projects }, releases] =
     await Promise.all([
-      access.role === "admin" && access.organizationId
+      can(access, "administer") && access.organizationId
         ? countPendingMemberships(access.organizationId)
         : Promise.resolve(0),
       loadMyTodo(access),
@@ -35,6 +37,18 @@ export default async function AppHomePage() {
       listProjects(),
       loadReleasesOverview(),
     ]);
+
+  // Handover circuit, decided by code from the computed project status.
+  const toAccept = projects.filter(
+    (p) =>
+      p.status === "pending" &&
+      p.latestAssignment?.assigneePersonId === access.personId,
+  );
+  const toRetransmit = can(access, "assign_projects")
+    ? projects.filter(
+        (p) => p.status === "refused" || p.status === "clarification_requested",
+      )
+    : [];
 
   return (
     <PageContainer>
@@ -65,6 +79,18 @@ export default async function AppHomePage() {
       <AssistantPanel />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {toAccept.length > 0 && (
+          <HandoverCard
+            title={fr.transmission.cards.toAccept}
+            projects={toAccept}
+          />
+        )}
+        {toRetransmit.length > 0 && (
+          <HandoverCard
+            title={fr.transmission.cards.toRetransmit}
+            projects={toRetransmit}
+          />
+        )}
         <TasksCard tasks={todo.tasks} />
         <ValidationsCard validations={todo.validations} />
         <ProposalsCard proposals={todo.proposals} />

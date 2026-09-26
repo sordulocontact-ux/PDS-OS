@@ -40,15 +40,9 @@ export async function dictate<State, Output, Proposal>(
   const state = await adapter.loadState(projectId);
   if (!state) return fail("not_found");
 
-  let transcript: Transcript;
-  try {
-    transcript = (await transcribe(audio)).transcript;
-  } catch (error) {
-    console.error("[voice] transcription failed:", error);
-    return fail(providerError(error));
-  }
-  const heard = transcript.text.trim();
-  if (heard === "") return fail("nothing_heard");
+  const transcription = await transcribeDictation(audio);
+  if (!transcription.ok) return transcription;
+  const { transcript, heard } = transcription;
 
   let output: Output;
   try {
@@ -65,6 +59,25 @@ export async function dictate<State, Output, Proposal>(
   const proposals = adapter.toProposals(output, state, locate);
   if (proposals.length === 0) return fail("nothing_understood");
   return { ok: true, heard, proposals };
+}
+
+/** Speech to text alone: also used to dictate a question to the assistant. */
+export async function transcribeDictation(
+  audio: Uint8Array,
+): Promise<
+  | { ok: true; transcript: Transcript; heard: string }
+  | { ok: false; error: VoiceErrorCode }
+> {
+  let transcript: Transcript;
+  try {
+    transcript = (await transcribe(audio)).transcript;
+  } catch (error) {
+    console.error("[voice] transcription failed:", error);
+    return fail(providerError(error));
+  }
+  const heard = transcript.text.trim();
+  if (heard === "") return fail("nothing_heard");
+  return { ok: true, transcript, heard };
 }
 
 function providerError(error: unknown): VoiceErrorCode {

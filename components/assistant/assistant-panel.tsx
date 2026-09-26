@@ -12,6 +12,11 @@ import {
 } from "react";
 
 import { AssistantMessage } from "@/components/assistant/assistant-message";
+import { useVoiceInput } from "@/components/voice/use-voice-input";
+import {
+  VoiceInputButton,
+  VoiceInputStatus,
+} from "@/components/voice/voice-input";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,6 +35,14 @@ export function AssistantPanel() {
   const t = fr.assistant;
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Dictated text lands in the input, after what was typed: read, then send.
+  const voice = useVoiceInput((text) => {
+    setInput((typed) =>
+      [typed.trim(), text].filter(Boolean).join(" ").slice(0, MAX_LENGTH),
+    );
+    inputRef.current?.focus();
+  });
   const { messages, sendMessage, status, stop, error, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: "/api/assistant" }),
   });
@@ -117,11 +130,18 @@ export function AssistantPanel() {
           </div>
         )}
 
+        <VoiceInputStatus
+          phase={voice.phase}
+          error={voice.error}
+          elapsed={voice.elapsed}
+          meterRef={voice.meter}
+        />
         <form onSubmit={onSubmit} className="flex items-end gap-2">
           <label htmlFor="assistant-input" className="sr-only">
             {t.label}
           </label>
           <Textarea
+            ref={inputRef}
             id="assistant-input"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -130,6 +150,14 @@ export function AssistantPanel() {
             rows={1}
             maxLength={MAX_LENGTH}
             className="max-h-40 min-h-11 resize-none"
+            // Read-only, not disabled: it takes the focus back with the text.
+            readOnly={voice.phase === "transcribing"}
+            aria-busy={voice.phase === "transcribing"}
+          />
+          <VoiceInputButton
+            phase={voice.phase}
+            onToggle={voice.toggle}
+            disabled={busy}
           />
           {busy ? (
             <Button

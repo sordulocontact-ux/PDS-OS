@@ -36,14 +36,19 @@ export default async function ProjectLayout({
           {project.title}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {project.artistName}
-          {" · "}
-          {fr.shell.releaseTypes[project.releaseType]}
+          {[project.artistName, fr.shell.projectTypes[project.type]]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
       </header>
 
-      <StageBar stages={project.stages} current={project.currentStage} />
-      <ProjectTabs projectId={project.id} />
+      {/* Stages and sections exist once the project is launched, not before. */}
+      {project.stages.length > 0 && (
+        <>
+          <StageBar stages={project.stages} current={project.currentStage} />
+          <ProjectTabs projectId={project.id} />
+        </>
+      )}
 
       <div className="flex flex-col pb-8">{children}</div>
     </div>

@@ -45,7 +45,7 @@ insert into ids select 'org', id from public.organizations where slug = 'pds';
 insert into ids select 'member_person', person_id from public.accounts where id = (select id from ids where name = 'member');
 -- The fixture admin is promoted directly (as postgres), so the suite does not
 -- depend on the one-shot bootstrap of the seed.
-update public.memberships set status = 'approved', role = 'admin'
+update public.memberships set status = 'approved', role = 'general_director'
  where person_id = (select person_id from public.accounts where id = (select id from ids where name = 'admin'));
 
 -- Identity -------------------------------------------------------------------
@@ -56,7 +56,7 @@ select is((select status from public.memberships m
 
 -- The admin approves the member; the outsider stays pending.
 select pg_temp.act_as((select id from ids where name = 'admin'));
-update public.memberships set status = 'approved'
+update public.memberships set status = 'approved', role = 'project_manager'
  where person_id = (select id from ids where name = 'member_person');
 select is((select status from public.memberships where person_id = (select id from ids where name = 'member_person')),
           'approved', 'an admin approves a membership');
@@ -67,13 +67,16 @@ values ((select id from ids where name = 'org'), (select v from vars where k = '
 insert into ids select 'artist', id from public.artists where name = (select v from vars where k = 'artist');
 
 select lives_ok($$
-  insert into public.projects (organization_id, artist_id, title)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'artist'), (select v from vars where k = 'project'))
-$$, 'an active member creates a project');
+  select public.create_project((select id from ids where name = 'org'), (select v from vars where k = 'project'),
+    'music_release',
+    array[public.create_master((select id from ids where name = 'org'), 'Lueur',
+      jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))))],
+    null, null, null, null)
+$$, 'the director creates a project around a master');
 insert into ids select 'project', id from public.projects where title = (select v from vars where k = 'project');
 
 select is((select count(*)::int from public.project_stages where project_id = (select id from ids where name = 'project')),
-          7, 'a new project gets one instance per configured stage');
+          0, 'creating a project instantiates no stage');
 select isnt((select created_by from public.projects where title = (select v from vars where k = 'project')), null,
             'authorship is set by the database');
 
@@ -88,6 +91,13 @@ select throws_ok($$
 $$, '42501', null, 'clients cannot write a stage state directly');
 
 -- State machine and validation -----------------------------------------------
+-- Stages exist once a project is launched (not built yet): created as postgres.
+reset role;
+insert into public.project_stages (organization_id, project_id, stage_definition_id)
+select d.organization_id, (select id from ids where name = 'project'), d.id
+from public.stage_definitions d
+where d.organization_id = (select id from ids where name = 'org') and d.archived_at is null;
+select pg_temp.act_as((select id from ids where name = 'admin'));
 insert into ids select 'stage', s.id from public.project_stages s
   join public.stage_definitions d on d.id = s.stage_definition_id
  where s.project_id = (select id from ids where name = 'project') and d.key = 'framing';
@@ -146,8 +156,8 @@ reset role;
 select pg_temp.act_as((select id from ids where name = 'outsider'));
 select is((select count(*)::int from public.projects), 0, 'a pending account sees no project');
 select throws_ok($$
-  insert into public.projects (organization_id, artist_id, title)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'artist'), 'Intrus')
+  insert into public.projects (organization_id, title, type)
+  values ((select id from ids where name = 'org'), 'Intrus', 'partnership')
 $$, '42501', null, 'a pending account cannot create a project');
 select is((select count(*)::int from public.people), 1, 'a pending account only sees itself');
 

@@ -1,9 +1,17 @@
 // Project types and pure helpers. Client-safe.
 
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
+import type { MasterOption } from "@/lib/catalog/types";
 
-export const RELEASE_TYPES = ["single", "ep", "album"] as const;
-export type ReleaseType = (typeof RELEASE_TYPES)[number];
+export const PROJECT_TYPES = [
+  "music_release",
+  "partnership",
+  "content",
+] as const;
+export type ProjectType = (typeof PROJECT_TYPES)[number];
+
+export const PRIORITIES = ["low", "normal", "high"] as const;
+export type Priority = (typeof PRIORITIES)[number];
 
 export const STAGE_STATES = [
   "not_started",
@@ -13,10 +21,17 @@ export const STAGE_STATES = [
 ] as const;
 export type StageState = (typeof STAGE_STATES)[number];
 
-export function isReleaseType(value: unknown): value is ReleaseType {
+export function isProjectType(value: unknown): value is ProjectType {
   return (
     typeof value === "string" &&
-    (RELEASE_TYPES as readonly string[]).includes(value)
+    (PROJECT_TYPES as readonly string[]).includes(value)
+  );
+}
+
+export function isPriority(value: unknown): value is Priority {
+  return (
+    typeof value === "string" &&
+    (PRIORITIES as readonly string[]).includes(value)
   );
 }
 
@@ -36,11 +51,61 @@ export type ProjectStage = {
   stateChangedAt: string | null;
 };
 
+export const ASSIGNMENT_STATUSES = [
+  "pending",
+  "accepted",
+  "refused",
+  "clarification_requested",
+] as const;
+export type AssignmentStatus = (typeof ASSIGNMENT_STATUSES)[number];
+
+export type ProjectStatus =
+  | "not_transmitted"
+  | "pending"
+  | "refused"
+  | "clarification_requested"
+  | "launched";
+
+export type Assignment = {
+  id: string;
+  status: AssignmentStatus;
+  assigneePersonId: string;
+  assigneeName: string;
+  assignedByName: string;
+  note: string | null;
+  response: string | null;
+  respondedAt: string | null;
+  createdAt: string;
+};
+
+export function isAssignmentStatus(value: unknown): value is AssignmentStatus {
+  return (
+    typeof value === "string" &&
+    (ASSIGNMENT_STATUSES as readonly string[]).includes(value)
+  );
+}
+
+// Computed, never stored: a project with stages is launched; otherwise its
+// latest transmission says where it stands.
+export function projectStatusOf(
+  stageCount: number,
+  latest: { status: AssignmentStatus } | null,
+): ProjectStatus {
+  if (stageCount > 0) return "launched";
+  if (!latest) return "not_transmitted";
+  // An accepted transmission always comes with stages; defensive fallback.
+  return latest.status === "accepted" ? "launched" : latest.status;
+}
+
 export type ProjectListItem = {
   id: string;
   title: string;
+  // Main credit of the first master; empty when the project has no master.
   artistName: string;
-  releaseType: ReleaseType;
+  type: ProjectType;
+  status: ProjectStatus;
+  // Latest transmission, if any: who it waits on, for the home cards.
+  latestAssignment: Pick<Assignment, "status" | "assigneePersonId"> | null;
   currentStage: ProjectStage | null;
   stageCount: number;
 };
@@ -48,16 +113,21 @@ export type ProjectListItem = {
 export type ProjectDetail = {
   id: string;
   title: string;
-  releaseType: ReleaseType;
+  type: ProjectType;
   createdAt: string;
   artistName: string;
   ownerName: string | null;
+  status: ProjectStatus;
+  // Newest first.
+  assignments: Assignment[];
+  dueDate: string | null;
+  budgetCents: number | null;
+  priority: Priority | null;
+  framingNotes: string | null;
+  masters: MasterOption[];
   stages: ProjectStage[];
   currentStage: ProjectStage | null;
 };
-
-export type ArtistOption = { id: string; name: string };
-export type OwnerOption = { personId: string; name: string };
 
 export type CreateProjectState =
   | { status: "idle" }

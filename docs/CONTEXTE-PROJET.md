@@ -349,8 +349,8 @@ Par ordre d'importance. Les trois premières bloquent le modèle de données.
 1. **Que recouvre l'étape « Défense » ?** Deux lectures plausibles : défense du projet en
    interne (documents et validation) ou suivi presse, radio et playlists après sortie
    (agrégateur de stats). Rien ne permet de trancher depuis le prototype.
-2. **Qui valide quoi ?** La liste des rôles réels et le circuit de validation.
-   Sans ça, la machine à états ne peut pas être figée.
+2. ~~**Qui valide quoi ?**~~ Tranché le 26/09/2026 : voir § 12. Le DG valide tout ce
+   qui est soumis à validation, Stratégie de lancement comprise.
 3. **Sept étapes ou cinq ?** « Production & préparation » et « Livraison & lancement » se
    recouvrent largement. Sept jalons multiplient mécaniquement les écrans.
 4. **Budget mensuel accepté pour les données** : 0 € (YouTube + CSV), 83 €/mois
@@ -401,3 +401,44 @@ Deux invariants structurants :
 
 - **toute valeur métier porte sa provenance** ;
 - **une tâche et un point ouvert sont deux entités distinctes.**
+
+---
+
+## 12. Postes, permissions et autorité (V1)
+
+Fiche fournie par le client le 26/09/2026, complétée par ses réponses du même jour.
+
+**Règle de fond : Poste ≠ Permission ≠ Autorité**, même si la V1 simplifie volontairement
+le rôle du DG. Dans le code, un poste ne donne jamais un droit directement : une seule
+table de correspondance traduit le poste en permissions (`role_permissions` en base).
+
+### Les 3 postes
+
+| Poste | Nature | Rôle |
+| --- | --- | --- |
+| **Directeur général** (DG) | Gestionnaire, admin V1 | Cumule Label Manager et responsable stratégie financière. Voit et administre l'ensemble. **Valide tout ce qui est soumis à validation**, dont le scénario (= la **Stratégie de lancement**). |
+| **Chef de projet** (CP) | Responsable opérationnel | Reçoit un projet, l'**accepte, le refuse ou demande une précision**. Pilote les projets qu'il a acceptés. **Ne voit que les projets qui lui sont attribués.** |
+| **Directeur créatif** (DC) | Membre interne affecté | Travaille sur les projets et livrables créatifs qui lui sont affectés. Dépose et propose des versions. Sans administration ni validation globale. |
+
+### Matrice des accès
+
+| Accès V1 | DG | Chef de projet | Dir. créatif |
+| --- | --- | --- | --- |
+| Administration et vue globale | Oui | Non | Non |
+| Réception et pilotage des projets | Vue / attribue | Oui | Selon affectation |
+| Travail créatif et dépôt de versions | Vue | Selon besoin | Oui |
+| Validation globale du scénario | Oui | Non | Non |
+
+### Circuit d'attribution
+
+1. Le DG attribue le projet à un chef de projet.
+2. Le chef de projet accepte, refuse, ou demande une précision.
+3. Refus ou demande de précision : le projet **revient chez le DG avec un message** (le
+   motif, ou l'information qui manque).
+
+### Encore ouvert
+
+- Qui affecte le directeur créatif à un projet (DG, chef de projet, les deux) ; un projet
+  peut-il avoir plusieurs DC ?
+- Un compte s'inscrit **sans poste** ; c'est le DG qui le fixe en l'approuvant.
+

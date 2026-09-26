@@ -20,7 +20,7 @@ responsive, installable en PWA. Utilisateurs cibles en V1 : 3 à 5 personnes, en
 | Savoir ce qui est faisable techniquement, quelle API | `docs/CONTEXTE-PROJET.md` § 5 et § 6            |
 | Savoir ce que l'IA doit faire ou ne pas faire        | `docs/CONTEXTE-PROJET.md` § 7                   |
 | Savoir ce qui est hors périmètre                     | `docs/CONTEXTE-PROJET.md` § 9                   |
-| Créer ou modifier un écran (apparence, états, composants) | `docs/DESIGN.md` |
+| Apparence de l'interface (en cours : icônes)         | `docs/DESIGN.md`                                |
 | Où est quoi dans le code, pièges déjà rencontrés     | `docs/ARCHITECTURE.md`                          |
 | Comportement de l'assistant PO                       | `docs/ASSISTANT.md`                             |
 
@@ -41,7 +41,7 @@ Playwright             → export PDF des documents (pas encore installé)
 next-pwa               → installation sur mobile (phase ultérieure)
 ```
 
-Outillage ajouté : zod, server-only, Prettier + plugin Tailwind, lint-staged +
+Outillage ajouté : zod, server-only, web-push (notifications navigateur), nucleo-sharp-essential (icônes, `docs/DESIGN.md` § 1), Prettier + plugin Tailwind, lint-staged +
 simple-git-hooks (pre-commit).
 
 Ne remplace aucune de ces briques sans demander. Ne propose pas d'alternative
@@ -88,7 +88,7 @@ app/                    routes (App Router)
   (public)/             pages partagées par lien à jeton
   api/                  route handlers — tout ce qui touche un secret
 components/
-  ui/                   shadcn, adapté au design system (docs/DESIGN.md) uniquement
+  ui/                   shadcn
   <domaine>/            composants métier
 lib/
   ai/                   llm.ts, transcribe.ts, schemas/, instructions/
@@ -96,11 +96,10 @@ lib/
   auth/ calls/ framing/ projects/ release/ integrations/ labo/
   i18n/fr/              textes d'interface, un fichier par domaine
   supabase/             clients serveur, navigateur, admin (cron seul), types générés
-  ui/                   state-treatments.ts (états → traitements du design)
 supabase/
   migrations/           SQL versionné, source de vérité du schéma
   tests/                pgTAP (supabase test db)
-docs/                   contexte, design, assistant, architecture
+docs/                   contexte, assistant, architecture
 ```
 
 ---
@@ -130,21 +129,35 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   (`lib/supabase/admin.ts`). États (étapes, validations) : fonctions SQL uniquement.
 - **Identité** : fondation d'Ibé importée (`supabase/migrations/*identity*`, `lib/auth/`).
   Premier admin local : `admin@pds.test`, confirmation via Mailpit (http://127.0.0.1:54324).
+  Postes ≠ permissions : Directeur général, Chef de projet, Directeur créatif ; seule
+  `role_permissions` (SQL) donne les droits, le code teste `can(access, "…")`. Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`,
+  sans service role. Confirmation d'email **coupée en local** (`config.toml`), à remettre
+  en production (`docs/ARCHITECTURE.md` § 3).
 - **Env** : `lib/env.ts` (serveur) et `lib/env-public.ts` ; toute variable s'ajoute au
   schéma zod **et** à `.env.example`.
 - **IA** : `lib/ai/llm.ts` et `lib/ai/transcribe.ts` seuls points d'entrée. Mistral gratuit
   → `ministral-14b-latest`. Provenance calculée par le code (`lib/ai/provenance.ts`).
   Assistant : faits rédigés par le code et affichés sous la réponse, **jamais la date du
   jour dans le contexte du modèle** (`docs/ASSISTANT.md`).
-- **Design** : `docs/DESIGN.md` fait foi ; états → `lib/ui/state-treatments.ts` +
-  `StatusBadge`. Piège : dans `cn()`, écrire `text-[length:var(--type-body-md)]`, jamais
-  `text-body-md` (la couleur du texte disparaît).
 - **Audio** : enregistreur dans l'app (onglet Meet/Zoom + micro, ou micro seul) ;
   `AudioContext.resume()` obligatoire ; alerte après 2 min de silence de l'onglet.
   Groq : `groq-tolerant-fetch.ts` évite « Invalid JSON response » sur de vrais audios.
 - **Dictée** : bouton « Dicter » (Cadrage pour l'instant, prévu sur tout le parcours).
   Moteur commun `lib/voice/`, un adaptateur par étape ; propositions relues avant écriture,
   rien en base avant « Appliquer », audio jamais stocké (`docs/ARCHITECTURE.md` § 6).
+  Micro de l'assistant : transcription seule, texte inséré dans la saisie, jamais envoyé seul.
+- **Catalogue** : artistes, masters (crédits ordonnés), projets rattachés à 0..n masters
+  (`lib/catalog/`, `/app/catalog/*`). Sortie musicale ⇒ au moins un master (vérifié au
+  commit). Un projet naît **non transmis, sans étape ni responsable** ; Cadrage, Calls et
+  Sortie n'existent qu'après lancement, c.-à-d. après acceptation par un chef de projet
+  (`transmit_project` / `respond_to_assignment`, statut calculé par `projectStatusOf`).
+  Nouvel artiste : recherche Deezer d'abord (photo, lien), saisie manuelle en repli ; le
+  serveur relit Deezer, seul l'id vient du client (`docs/ARCHITECTURE.md` § 2). Sélecteurs : `components/catalog/search-picker.tsx`
+  (commun), création en modale sans perte de saisie (`docs/ARCHITECTURE.md` § 2).
+- **Notifications** : table `notifications` écrite par triggers (jamais par le code),
+  cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
+  clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
+  notifie, sans service role (`docs/ARCHITECTURE.md` § 8 bis).
 - **Sortie** : iTunes ne cherche pas par ISRC (passe par l'UPC) ; Odesli fermé sans clé.
 - **Textes** : `lib/i18n/fr/<domaine>.ts`. **`cn()`** : `lib/utils/index.ts`.
 - **`AGENTS.md`** est réécrit par `next dev` : ne pas le supprimer. Doc Next 16 :
@@ -192,13 +205,24 @@ Au-delà des six étapes :
 
 - [x] Labo IA local (`/labo`), préparation du prochain call
 - [x] Assistant PO sur l'accueil + cartes (lecture seule, faits rédigés par le code)
-- [x] Design system d'Ibé appliqué à toute l'app
 - [x] Enregistrement des calls dans l'app (onglet + micro, alerte de silence)
 - [x] Dictée à la voix sur le Cadrage (moteur commun, prêt pour les autres étapes)
+- [x] Postes (DG, chef de projet, directeur créatif) séparés des permissions, création de
+      compte par le DG
+- [x] Parcours 01 : artiste → master → projet (non transmis, sans étape), permissions
+      `manage_catalog` / `create_projects`
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 
 À faire ensuite (proposé, non commencé) :
+
+- [x] Transmission : le DG transmet à un chef de projet, qui accepte (lancement : étapes +
+      responsable), refuse ou demande une précision (retour au DG, retransmission)
+- [x] Notifications : cloche, toast, notifications navigateur, pages à jour sans recharger
+- [ ] Le chef de projet ne voit que ses projets (RLS sur toutes les tables d'un projet)
+- [ ] Modifier un projet avant transmission (titre, masters, budget…)
+- [ ] Validations : le DG décide de toutes (Stratégie de lancement comprise)
+- [ ] Directeur créatif limité aux projets affectés ; dépôt de versions des livrables
 
 - [ ] Page **Stratégie de lancement** (choix retenus : calendrier saisi à la main, leviers
       en texte libre par famille, IA limitée à ce qui a été dit en call)
@@ -207,9 +231,9 @@ Au-delà des six étapes :
 
 Décisions en attente (avec Ibé / le client) :
 
+- Qui affecte le directeur créatif, et combien par projet (`docs/CONTEXTE-PROJET.md` § 12)
 - Quel projet fait foi : `po` d'Ibé (7 briques, sans IA) ou PDS OS ; qui s'appelle « PO »
 - § 10 du contexte : contenu de « Défense », qui valide quoi, 7 ou 5 étapes
-- Écarts au design system : toasts, animations d'ouverture, densité compacte
 - Offre payante Mistral / Groq avant toute donnée réelle ; clé Odesli ou smartlink maison
-- Mise en production : SMTP réel, `CRON_SECRET` et service role sur Vercel, durée max
+- Mise en production : réactiver la confirmation d'email, SMTP réel, `CRON_SECRET` et service role sur Vercel, durée max
   des fonctions (300 s) selon l'offre Vercel

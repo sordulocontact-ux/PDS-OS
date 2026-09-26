@@ -1,8 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-// Imported from Ibé's PO repository (po/components/ui/status-badge.tsx).
-
 // Trois traitements, et seulement trois (DESIGN.md §1) :
 // bloquant = encre pleine · normal = gris doux · en attente = contour vide.
 const statusBadgeVariants = cva(

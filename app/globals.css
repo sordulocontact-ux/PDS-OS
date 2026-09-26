@@ -1,5 +1,5 @@
-/* Imported from Ibé's PO repository (po/app/globals.css): tokens of docs/DESIGN.md
-   and the bridge to shadcn/ui. Change DESIGN.md first, then this file. */
+/* Tokens of docs/DESIGN.md and the bridge to shadcn/ui. Change DESIGN.md first,
+   then this file. */
 
 @import "tailwindcss";
 @import "tw-animate-css";

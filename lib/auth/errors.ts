@@ -27,6 +27,9 @@ export function authErrorMessage(error: ErrorLike): string {
 // refusals carry a PostgreSQL privilege code.
 const DATABASE_MESSAGES: Array<[needle: string, message: string]> = [
   ["person_has_no_account", e.personHasNoAccount],
+  ["person_has_account", e.personHasAccount],
+  ["invalid_role", e.invalidRole],
+  ["invalid_invitation", e.required],
   ["last_usable_admin", e.lastUsableAdmin],
   ["email_change_forbidden", e.emailChangeForbidden],
   ["bootstrap_locked", e.forbidden],

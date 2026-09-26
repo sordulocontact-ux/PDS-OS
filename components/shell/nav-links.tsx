@@ -1,6 +1,12 @@
 "use client";
 
-import { FolderKanbanIcon, HouseIcon, UsersIcon } from "lucide-react";
+import {
+  DiscIcon,
+  FolderKanbanIcon,
+  HouseIcon,
+  MicVocalIcon,
+  UsersIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -15,6 +21,8 @@ const ITEMS = [
     label: fr.shell.nav.projects,
     icon: FolderKanbanIcon,
   },
+  { href: routes.artists, label: fr.shell.nav.artists, icon: MicVocalIcon },
+  { href: routes.masters, label: fr.shell.nav.masters, icon: DiscIcon },
   {
     href: routes.members,
     label: fr.shell.nav.members,
