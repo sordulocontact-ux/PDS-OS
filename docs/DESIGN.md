@@ -132,21 +132,49 @@ tons sémantiques, et seulement cinq (`--tone-*` dans `globals.css`) :
 
 ## 4. Coquille, surfaces et arrondis
 
-Source : maquette Figma « Desktop - 11 » (accueil), fichier « Devis Sordulo ».
+Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœuds 120:47 /
+120:74 (navigation), fichier « Devis Sordulo ».
 
 ### Coquille
 
 - Fond de l'application `--surface-app` (#fbfbfb). La barre latérale est une carte
   blanche flottante : marge `--shell-inset` (16 px) avec le bord de l'écran, arrondi
-  16 px, largeur `--nav-width` (250 px), marges intérieures 24 / 16 px.
-- En haut, « PDS » en 16 px gras et la cloche. Dessous, la navigation : éléments de 40 px
-  espacés de 12 px, icône 24 px, fond `--nav-item-active-bg` sur la page ouverte,
-  `--nav-item-hover-bg` au survol. En bas, la personne connectée et « Se déconnecter »,
-  au même format qu'un élément de navigation.
+  16 px, largeur `--nav-width` (250 px) ou `--nav-width-collapsed` (64 px) repliée,
+  marges intérieures 24 / 16 px (12 px repliée), ombre `--nav-shadow` (Figma « Devis
+  Sordulo » nœud 121:179 : flou 3 px, sans décalage, noir 10 %). `components/shell/sidebar.tsx`.
+- En haut, « PDS » en 16 px gras et la cloche (masqués repliée), plus un chevron pour
+  replier / déplier (`components/shell/use-collapsed-nav.tsx`, un contexte React partagé
+  avec la sidebar de projet ci-dessous). Dessous, la navigation (`lib/ui/nav-items.ts`,
+  8 items) : éléments de 40 px espacés de 12 px, icône 24 px, fond `--nav-item-active-bg`
+  sur la page ouverte, `--nav-item-hover-bg` au survol. Repliée : icônes seules, centrées,
+  libellé en `Tooltip` au survol/focus. En bas, la personne connectée et
+  « Se déconnecter » (masqués repliée), au même format qu'un élément de navigation.
+- Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
+  chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
+- Un item sans page encore (Travail, Calendrier, Calls au niveau organisation) reste
+  visible, grisé, non cliquable (`disabled` dans `NavItem`), jamais retiré de l'ordre
+  du Figma.
+- **Sidebar contextuelle d'un projet lancé** (`components/projects/project-sidebar.tsx`,
+  Figma « Double sidebar ») : 200 px (`--project-nav-width`, 258 px dans le Figma, réduit
+  à la demande de Sacha le 27/09/2026), collée à gauche du contenu, contre la barre
+  principale repliée — même géométrie (`sticky`, même hauteur, ombre `--nav-shadow`) —
+  pour former une seule carte : arrondi seulement à droite tant que la principale est
+  repliée dans ce projet, arrondi des deux côtés si elle est dépliée manuellement.
+  L'ombre reste portée par chaque sidebar (pas de conteneur commun entre deux layouts
+  Next.js différents) : à peine visible entre les deux colonnes en mode fusionné, vu sa
+  douceur (flou seul, 10 %). Titre du projet en haut, 12 sections dans l'ordre du Figma.
+  Seules Vue d'ensemble, Workflow (Cadrage + Stratégie + Sortie, entrée par Cadrage) et
+  Calls ont une page ; le reste est affiché grisé. Remplace l'ancienne double navigation
+  horizontale (fil d'Ariane + onglets). Les 7 étapes du métier s'affichent en fil
+  d'Ariane fixe en haut du contenu, seulement sur les 3 pages Workflow
+  (`components/projects/workflow-breadcrumb.tsx`, `lib/ui/workflow-steps.ts`) :
+  habillage de navigation, pas un nouvel état — la vraie progression reste
+  `ProjectStage`, affichée sur la Vue d'ensemble (`docs/CONTEXTE-PROJET.md` § 10, point 3).
 - Ce qui attend quelqu'un se compte dans une pastille noire (`CountBadge`), jamais dans
   un bandeau : notifications non lues sur la cloche, demandes d'accès en attente à droite
   d'« Équipe » (et sur le bouton du menu en mobile).
-- Mobile : même navigation dans un tiroir blanc, ouvert depuis l'en-tête.
+- Mobile : même navigation (pleine largeur) dans un tiroir blanc, ouvert depuis l'en-tête ;
+  la sidebar contextuelle du projet n'a pas encore d'équivalent mobile.
 
 ### Accueil
 

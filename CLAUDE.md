@@ -142,7 +142,9 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `FactList` | `ui/fact-list.tsx` | liste libellé / valeur dans une carte (faits d'un master, d'un projet, identité) |
 | `StatTiles` | `ui/stat-tiles.tsx` | chiffres clés en tuiles (+ squelette) |
 | `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
-| `NavLinks`, `MobileNav`, `UserPanel` | `shell/` | navigation de la barre latérale blanche et du tiroir mobile (`docs/DESIGN.md` § 4) |
+| `Tooltip` | `ui/tooltip.tsx` | shadcn, base sur `@base-ui/react/tooltip` (bulle au survol/focus, ex. sidebar repliée) |
+| `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) |
+| `ProjectSidebar`, `ProjectSidebarMobile`, `WorkflowBreadcrumb` | `projects/` | sidebar contextuelle d'un projet lancé (12 sections) et son tiroir mobile ; fil d'Ariane des 7 étapes du métier, habillage seul (`docs/DESIGN.md` § 4) |
 | `HomeCard`, `CardRow` | `home/home-card.tsx` | carte de l'accueil (libellé gris, liste de lignes liées) |
 | `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
@@ -358,6 +360,11 @@ Au-delà des six étapes :
 - [x] PO en écriture avec validation humaine : il prépare artiste (fiche + contacts),
       master, projet (création ou modification avant lancement), l'humain relit le vrai
       formulaire et enregistre ; fenêtre PO sur Espace Espace, dictée à l'écoute
+- [x] Navigation refaite d'après le Figma « Devis Sordulo » (120:47 / 120:74) : barre
+      latérale principale repliable en icônes (`Tooltip`, repliée par défaut dans un
+      projet) ; sidebar contextuelle du projet à 12 sections (3 avec une page, le reste
+      grisé) qui remplace l'ancienne double navigation horizontale ; fil d'Ariane des
+      7 étapes du métier en habillage sur Cadrage/Stratégie/Sortie, sans nouvel état
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 

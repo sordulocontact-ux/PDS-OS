@@ -69,6 +69,8 @@
   --nav-item-hover-bg: var(--po-grey-50);
   --nav-item-active-bg: var(--po-grey-100);
   --nav-divider: var(--po-grey-100);
+  /* Figma « Devis Sordulo » nœud 121:179 : flou seul, sans décalage. */
+  --nav-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
 
   /* --- Tons d'état sémantiques (DESIGN.md § 3) : fond pâle, texte foncé --- */
   --tone-neutral-bg: var(--po-grey-100);
@@ -163,6 +165,10 @@
   --page-max: 1440px;
   --nav-width: 250px;
   --nav-width-collapsed: 64px;
+  /* Deuxième barre latérale, contextuelle à un projet (Figma "Double sidebar",
+     retouché à la demande de Sacha le 27/09/2026 : 200 px au lieu des 258 px
+     du Figma, jugés trop larges). */
+  --project-nav-width: 200px;
   /* Marge entre le bord de l'écran et la barre latérale flottante. */
   --shell-inset: var(--space-16);
 

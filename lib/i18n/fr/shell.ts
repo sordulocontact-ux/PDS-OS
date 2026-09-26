@@ -1,10 +1,13 @@
-/** Authenticated shell: navigation, projects list, project tabs (step 3). */
+/** Authenticated shell: navigation, projects list, project sidebar. */
 export const shell = {
   brand: "PDS",
   nav: {
     label: "Navigation principale",
     home: "Accueil",
+    work: "Travail",
     projects: "Projets",
+    calendar: "Calendrier",
+    calls: "Calls",
     artists: "Artistes",
     masters: "Masters",
     members: "Équipe",
@@ -15,6 +18,9 @@ export const shell = {
         : `${count} demandes d'accès en attente`,
     openMenu: "Ouvrir le menu",
     menuTitle: "Menu",
+    collapse: "Réduire la navigation",
+    expand: "Développer la navigation",
+    comingSoon: "Bientôt disponible",
   },
 
   home: {
@@ -127,17 +133,38 @@ export const shell = {
       hint: "Ils voient le projet et tout ce qu'il contient, sans le modifier.",
     },
     back: "Tous les projets",
-    tabsLabel: "Sections du projet",
-    tabs: {
+    // Sidebar contextuelle du projet (Figma "Devis Sordulo", node 120:74).
+    // Seuls overview et workflow (Cadrage + Stratégie + Sortie) et calls ont
+    // une page ; le reste est affiché mais désactivé (docs/DESIGN.md § 4).
+    sidebar: {
+      label: "Sections du projet",
       overview: "Vue d'ensemble",
+      workflow: "Workflow",
+      activations: "Activations",
+      work: "Travail",
+      calls: "Calls",
+      team: "Équipe",
+      deliverables: "Livrables",
+      files: "Fichiers",
+      planning: "Planning",
+      budget: "Budget",
+      validations: "Validations",
+      activity: "Activité",
+    },
+    // Les 7 étapes du métier (docs/CONTEXTE-PROJET.md § 4) : habillage de
+    // navigation fixe dans l'onglet Workflow, tant que le nombre d'étapes
+    // n'est pas tranché avec le client (§ 10, point 3). Ne pas confondre
+    // avec `stages` (ProjectStage), qui reste la source d'état réelle.
+    workflowSteps: {
+      label: "Étapes du parcours",
       framing: "Cadrage",
       strategy: "Stratégie",
-      calls: "Calls",
-      release: "Sortie",
+      conception: "Conception",
+      production: "Production",
+      delivery: "Livraison",
+      defense: "Défense",
+      wrap: "Bilan",
     },
-    stagesLabel: "Étapes du projet",
-    stageOf: (position: number, total: number) =>
-      `Étape ${position} sur ${total}`,
     notFoundTitle: "Projet introuvable",
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",
     readOnly:

@@ -354,6 +354,11 @@ Par ordre d'importance. Les trois premières bloquent le modèle de données.
    qui est soumis à validation, Stratégie de lancement comprise.
 3. **Sept étapes ou cinq ?** « Production & préparation » et « Livraison & lancement » se
    recouvrent largement. Sept jalons multiplient mécaniquement les écrans.
+   Habillage seul, 27/09/2026 : la sidebar contextuelle d'un projet (onglet « Workflow »)
+   affiche déjà les 7 libellés en fil d'Ariane (`lib/ui/workflow-steps.ts`), mais aucune
+   des 7 n'existe en base — 3 seulement ont une page (Cadrage, Stratégie, Sortie). Les
+   vraies étapes restent `ProjectStage`, visibles sur la Vue d'ensemble du projet. Ne pas
+   lire cet habillage comme une réponse à la question : elle reste ouverte.
 4. **Budget mensuel accepté pour les données** : 0 € (YouTube + CSV), 83 €/mois
    (Songstats) ou 129 $/mois (Soundcharts PRO).
 5. **Une seule chose qui doit absolument fonctionner le lundi matin.** S'il ne peut pas
