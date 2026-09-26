@@ -1,4 +1,4 @@
-import { CardRow, HomeCard } from "@/components/home/home-card";
+import { CardRow, ListCard } from "@/components/ui/list-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
 import { routes } from "@/lib/auth/redirects";
@@ -16,10 +16,27 @@ import {
 const t = fr.assistant.cards;
 const MAX = 5;
 
-export function TasksCard({ tasks }: { tasks: Todo["tasks"] }) {
+// `all` (work page): every row, with the count next to the title. The home
+// shows the first rows only.
+const shown = <T,>(rows: T[], all?: boolean) =>
+  all ? rows : rows.slice(0, MAX);
+const countOf = (rows: unknown[], all?: boolean) =>
+  all ? rows.length : undefined;
+
+export function TasksCard({
+  tasks,
+  all,
+}: {
+  tasks: Todo["tasks"];
+  all?: boolean;
+}) {
   return (
-    <HomeCard title={t.tasks} empty={tasks.length ? undefined : t.tasksEmpty}>
-      {tasks.slice(0, MAX).map((task) => (
+    <ListCard
+      title={t.tasks}
+      count={countOf(tasks, all)}
+      empty={tasks.length ? undefined : t.tasksEmpty}
+    >
+      {shown(tasks, all).map((task) => (
         <CardRow
           key={task.id}
           href={task.href}
@@ -34,21 +51,24 @@ export function TasksCard({ tasks }: { tasks: Todo["tasks"] }) {
           }
         />
       ))}
-    </HomeCard>
+    </ListCard>
   );
 }
 
 export function ValidationsCard({
   validations,
+  all,
 }: {
   validations: Todo["validations"];
+  all?: boolean;
 }) {
   return (
-    <HomeCard
+    <ListCard
       title={t.validations}
+      count={countOf(validations, all)}
       empty={validations.length ? undefined : t.validationsEmpty}
     >
-      {validations.slice(0, MAX).map((v) => (
+      {shown(validations, all).map((v) => (
         <CardRow
           key={v.id}
           href={v.href}
@@ -56,17 +76,24 @@ export function ValidationsCard({
           sub={formatDay(v.requestedAt)}
         />
       ))}
-    </HomeCard>
+    </ListCard>
   );
 }
 
-export function ProposalsCard({ proposals }: { proposals: Todo["proposals"] }) {
+export function ProposalsCard({
+  proposals,
+  all,
+}: {
+  proposals: Todo["proposals"];
+  all?: boolean;
+}) {
   return (
-    <HomeCard
+    <ListCard
       title={t.proposals}
+      count={countOf(proposals, all)}
       empty={proposals.length ? undefined : t.proposalsEmpty}
     >
-      {proposals.slice(0, MAX).map((p) => (
+      {shown(proposals, all).map((p) => (
         <CardRow
           key={p.projectId}
           href={p.href}
@@ -78,13 +105,13 @@ export function ProposalsCard({ proposals }: { proposals: Todo["proposals"] }) {
           }
         />
       ))}
-    </HomeCard>
+    </ListCard>
   );
 }
 
 export function ActivityCard({ events }: { events: ActivityEvent[] }) {
   return (
-    <HomeCard
+    <ListCard
       title={t.activity}
       empty={events.length ? undefined : t.activityEmpty}
     >
@@ -96,13 +123,13 @@ export function ActivityCard({ events }: { events: ActivityEvent[] }) {
           sub={`${formatDay(e.at)} · ${e.detail}`}
         />
       ))}
-    </HomeCard>
+    </ListCard>
   );
 }
 
 export function ProjectsCard({ projects }: { projects: ProjectListItem[] }) {
   return (
-    <HomeCard
+    <ListCard
       title={t.projects}
       action={{ label: t.allProjects, href: routes.projects }}
       empty={projects.length ? undefined : t.projectsEmpty}
@@ -115,13 +142,13 @@ export function ProjectsCard({ projects }: { projects: ProjectListItem[] }) {
           sub={`${p.artistName}${p.currentStage ? ` · ${p.currentStage.label} · ${fr.shell.stageStates[p.currentStage.state]}` : ""}`}
         />
       ))}
-    </HomeCard>
+    </ListCard>
   );
 }
 
 export function ReleasesCard({ releases }: { releases: ReleaseOverview[] }) {
   return (
-    <HomeCard
+    <ListCard
       title={t.releases}
       empty={releases.length ? undefined : t.releasesEmpty}
     >
@@ -138,22 +165,30 @@ export function ReleasesCard({ releases }: { releases: ReleaseOverview[] }) {
           }
         />
       ))}
-    </HomeCard>
+    </ListCard>
   );
 }
 
-// Projects waiting on the viewer in the handover circuit (to accept, or to
-// transmit again). Shown only when there is something to do.
+// Projects in the handover circuit (to accept, to transmit again, waiting for
+// a project manager). The home shows it only when there is something to do.
 export function HandoverCard({
   title,
   projects,
+  empty,
+  all,
 }: {
   title: string;
   projects: ProjectListItem[];
+  empty?: string;
+  all?: boolean;
 }) {
   return (
-    <HomeCard title={title}>
-      {projects.slice(0, MAX).map((p) => (
+    <ListCard
+      title={title}
+      count={countOf(projects, all)}
+      empty={projects.length ? undefined : empty}
+    >
+      {shown(projects, all).map((p) => (
         <CardRow
           key={p.id}
           href={routes.project(p.id)}
@@ -166,6 +201,6 @@ export function HandoverCard({
           }
         />
       ))}
-    </HomeCard>
+    </ListCard>
   );
 }

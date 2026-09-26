@@ -68,7 +68,8 @@ export function AssistantLauncher() {
     <Dialog open={launcherOpen} onOpenChange={setLauncherOpen}>
       <DialogContent
         closeLabel={t.close}
-        className="sm:top-[12dvh] sm:max-w-2xl sm:translate-y-0"
+        variant="glass"
+        className="sm:max-w-2xl"
       >
         <DialogHeader>
           <DialogTitle>{t.title}</DialogTitle>

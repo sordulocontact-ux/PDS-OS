@@ -96,12 +96,27 @@ Tokens dans `app/globals.css` (`--type-*`), classes Tailwind `text-display-*`,
 
 | Usage                                         | Token          | Taille | Graisse |
 | --------------------------------------------- | -------------- | ------ | ------- |
-| Salutation de l'accueil                       | `display-xl`   | 40 px  | medium  |
-| Titre de page                                 | `display-lg`   | 32 px  | medium  |
-| Sous-titre de l'accueil                       | `body-xl`      | 20 px  | regular |
-| Texte d'introduction sous le titre, bouton `lg`, champ de recherche | `body-lg` | 16 px | regular / medium |
-| Texte courant, cellules et en-têtes de tableau | `body-md`     | 14 px  | regular / medium |
-| Ligne secondaire (version d'un master…), libellé d'une carte de l'accueil | `caption` | 12 px | regular / medium |
+| Salutation de l'accueil                       | `display-xl`   | 46 px  | medium  |
+| Titre de page                                 | `display-lg`   | 36 px  | medium  |
+| Sous-titre de l'accueil                       | `body-xl`      | 22 px  | medium  |
+| Texte d'introduction sous le titre, bouton `lg`, champ de recherche | `body-lg` | 18 px | medium |
+| Texte courant, cellules et en-têtes de tableau | `body-md`     | 16 px  | medium / semi-bold |
+| Ligne secondaire (version d'un master…), libellé d'une carte de l'accueil | `caption` | 14 px | medium |
+
+**Taille : 16 px pour le texte courant, 14 px au plus petit** (hors pastille de
+compteur). Échelle agrandie d'un facteur 8/7 le 27/09/2026 à la demande de Sacha (14 → 16,
+12 → 14), rapports entre paliers conservés : display 46 / 36 / 28 / 20, chiffres 32 / 22 /
+16, texte 22 / 18 / 16 / 15, légende et en-tête de colonne 14, surtitre 13. Les classes
+par défaut de Tailwind (`text-xs`, `text-sm`, `text-base`, `text-lg`…) sont branchées
+sur ces paliers dans `app/globals.css` : `text-sm` = 16 px, `text-xs` = 14 px. Ne jamais
+écrire une taille en pixels dans un composant.
+
+**Graisse : medium (500) au minimum, partout.** Jamais de regular ni plus léger (demande
+de Sacha, 27/09/2026) ; semi-bold (600) et bold (700) si besoin de hiérarchie. `body`
+est en medium, et `font-normal` / `font-light` sont ramenés à 500 dans le bloc `@theme`
+de `app/globals.css` : une classe héritée de shadcn ne peut pas réintroduire du 400.
+La hiérarchie se fait par la taille, la couleur (`--text-secondary`, `--text-tertiary`)
+et le semi-bold, pas en allégeant.
 
 Espacement des lettres : **-4 %** sur les titres (`--type-display-tracking`), **-2 %**
 sur tout le reste (`--type-body-tracking`). Le -2 % est posé sur **chaque élément**, pas
@@ -151,7 +166,7 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   « Se déconnecter » (masqués repliée), au même format qu'un élément de navigation.
 - Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
   chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
-- Un item sans page encore (Travail, Calendrier, Calls au niveau organisation) reste
+- Un item sans page encore (Calendrier, Calls au niveau organisation) reste
   visible, grisé, non cliquable (`disabled` dans `NavItem`), jamais retiré de l'ordre
   du Figma.
 - **Sidebar contextuelle d'un projet lancé** (`components/projects/project-sidebar.tsx`,
@@ -182,7 +197,29 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   pilules à contour, saisie de PO sur fond teinté `--surface-tint` (micro en carré
   blanc, envoi en carré noir, 32 px), puis les cartes, trois par ligne.
 - Carte de l'accueil : contour `--border-default`, ni fond ni ombre, marge intérieure
-  12 px, libellé `caption` gris, lignes en `body-md` (titre semi-gras, détail regular).
+  12 px, libellé `caption` gris, lignes en `body-md` (titre semi-gras, détail medium).
+
+### Page Travail
+
+- `PageHeader` puis la grille des cartes de l'accueil (`ListCard`, 1 / 2 / 3 colonnes),
+  toutes les lignes affichées, avec le nombre en `CountBadge` à côté du libellé.
+- « Mes projets » (chef de projet) occupe deux colonnes : la prochaine action se lit en
+  entier. Une carte vide garde sa place avec une phrase : la page d'un poste a toujours
+  la même structure.
+
+### Fenêtre « verre » (Espace Espace)
+
+- `DialogContent variant="glass"` (`components/ui/dialog.tsx`), d'après une référence
+  fournie par Sacha le 27/09/2026 : la page derrière est seulement floutée,
+  **sans voile** : elle reste blanche, le panneau noir suffit au contraste (demande de
+  Sacha) ; le panneau est sombre et translucide
+  (`--surface-glass`), arrondi 16 px (`rounded-3xl`). **Un seul flou** pour la page et
+  pour le panneau : `--glass-blur` (8 px), léger, les formes de la page restent lisibles.
+- La classe `.surface-glass` (`app/globals.css`) inverse les tokens du pont shadcn dans
+  le panneau : textes blancs, boutons contour sur voile blanc 8 %, bouton principal
+  blanc, saisie teintée blanc 6 %. Aucun composant enfant n'est retouché.
+- Utilisée à l'essai sur la fenêtre PO d'Espace Espace seulement ; les autres modales
+  gardent la variante par défaut. Pas d'animation (§ 6).
 
 ### Arrondis
 

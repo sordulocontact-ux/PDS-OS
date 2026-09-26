@@ -19,7 +19,7 @@ const googleSansFlex = Google_Sans_Flex({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["500", "600"],
 });
 
 export const metadata: Metadata = {

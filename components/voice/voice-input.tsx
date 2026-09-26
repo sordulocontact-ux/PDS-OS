@@ -121,7 +121,7 @@ export function VoiceInputStatus({
           >
             <span
               ref={meterRef}
-              className="absolute inset-0 origin-left scale-x-0 bg-[var(--po-ink-900)]"
+              className="absolute inset-0 origin-left scale-x-0 bg-[var(--meter-fill-over)]"
             />
           </span>
         </div>

@@ -156,7 +156,7 @@ export async function listProjects(): Promise<{
   const { data, error } = await supabase
     .from("projects")
     .select(
-      `id, title, type, artist:artists!projects_artist_same_org(name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+      `id, title, type, owner_person_id, artist:artists!projects_artist_same_org(name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
     )
     .is("archived_at", null)
     .order("created_at", { ascending: false });
@@ -176,6 +176,7 @@ export async function listProjects(): Promise<{
       artistName: artistNameOf(masters, row.artist),
       type: isProjectType(row.type) ? row.type : "music_release",
       status: projectStatusOf(stages.length, latest ?? null),
+      ownerPersonId: row.owner_person_id,
       latestAssignment: latest
         ? { status: latest.status, assigneePersonId: latest.assigneePersonId }
         : null,

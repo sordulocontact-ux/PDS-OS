@@ -75,6 +75,7 @@ export const routes = {
   accessDenied: "/access-denied",
   unavailable: "/unavailable",
   app: "/app",
+  work: "/app/work",
   members: "/app/members",
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",

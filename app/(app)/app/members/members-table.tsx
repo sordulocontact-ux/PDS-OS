@@ -53,7 +53,7 @@ export function MembersTable({
                   <span className="font-medium">
                     {fullName}
                     {isSelf && (
-                      <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                      <span className="ml-1.5 text-xs font-medium text-muted-foreground">
                         ({t.you})
                       </span>
                     )}

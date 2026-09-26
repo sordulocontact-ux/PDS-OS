@@ -9,12 +9,12 @@ import {
   ValidationsCard,
 } from "@/components/home/home-cards";
 import { PageContainer } from "@/components/shell/page-container";
-import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadReleasesOverview } from "@/lib/insights/releases";
 import { loadMyTodo } from "@/lib/insights/todo";
+import { handoverOf } from "@/lib/projects/handover";
 import { listProjects } from "@/lib/projects/queries";
 
 export default async function AppHomePage() {
@@ -27,17 +27,7 @@ export default async function AppHomePage() {
     loadReleasesOverview(),
   ]);
 
-  // Handover circuit, decided by code from the computed project status.
-  const toAccept = projects.filter(
-    (p) =>
-      p.status === "pending" &&
-      p.latestAssignment?.assigneePersonId === access.personId,
-  );
-  const toRetransmit = can(access, "assign_projects")
-    ? projects.filter(
-        (p) => p.status === "refused" || p.status === "clarification_requested",
-      )
-    : [];
+  const { toAccept, toRetransmit } = handoverOf(projects, access);
 
   // Layout of the Figma "Desktop - 11": centred greeting, then one column
   // holding the assistant and the cards.

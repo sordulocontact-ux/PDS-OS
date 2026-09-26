@@ -15,6 +15,7 @@ import { shell } from "./shell";
 import { strategy } from "./strategy";
 import { transmission } from "./transmission";
 import { voice } from "./voice";
+import { work } from "./work";
 
 export const fr = {
   ...core,
@@ -30,4 +31,5 @@ export const fr = {
   voice,
   transmission,
   notifications,
+  work,
 } as const;

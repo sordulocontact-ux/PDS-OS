@@ -100,43 +100,48 @@
   --control-primary-bg-hover: var(--po-ink-600);
   --focus-ring: var(--po-ink-900);
   --overlay-scrim: rgba(0, 0, 0, 0.4);
+  /* Fenêtre « verre » (DESIGN.md § 4) : page floutée sans voile, panneau
+     sombre translucide. Un seul flou, pour la page et pour le panneau. */
+  --glass-blur: 8px;
+  --surface-glass: rgb(24 24 24 / 0.9);
 
-  /* --- Graisses ---------------------------------------------------------- */
-  --fw-regular: 400;
+  /* --- Graisses : medium au minimum, jamais de regular (DESIGN.md § 2) ---- */
   --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
 
   /* --- Échelle typographique (taille / interligne) ------------------------ */
-  --type-display-xl: 40px;
-  --type-display-xl-lh: 44px;
-  --type-display-lg: 32px;
-  --type-display-lg-lh: 36px;
-  --type-display-md: 24px;
-  --type-display-md-lh: 30px;
-  --type-display-sm: 18px;
-  --type-display-sm-lh: 24px;
-  --type-figure-xl: 28px;
-  --type-figure-xl-lh: 32px;
-  --type-figure-lg: 20px;
-  --type-figure-lg-lh: 24px;
-  --type-figure-md: 14px;
-  --type-figure-md-lh: 20px;
-  --type-body-xl: 20px;
-  --type-body-xl-lh: 28px;
-  --type-body-lg: 16px;
-  --type-body-lg-lh: 22px;
-  --type-body-md: 14px;
-  --type-body-md-lh: 20px;
-  --type-body-sm: 13px;
-  --type-body-sm-lh: 18px;
-  --type-caption: 12px;
-  --type-caption-lh: 16px;
-  --type-eyebrow: 11px;
-  --type-eyebrow-lh: 14px;
+  /* Agrandie d'un facteur 8/7 le 27/09/2026 (14 → 16, 12 → 14) pour la
+     lisibilité ; les rapports entre paliers sont conservés (DESIGN.md § 2). */
+  --type-display-xl: 46px;
+  --type-display-xl-lh: 52px;
+  --type-display-lg: 36px;
+  --type-display-lg-lh: 42px;
+  --type-display-md: 28px;
+  --type-display-md-lh: 34px;
+  --type-display-sm: 20px;
+  --type-display-sm-lh: 28px;
+  --type-figure-xl: 32px;
+  --type-figure-xl-lh: 36px;
+  --type-figure-lg: 22px;
+  --type-figure-lg-lh: 28px;
+  --type-figure-md: 16px;
+  --type-figure-md-lh: 22px;
+  --type-body-xl: 22px;
+  --type-body-xl-lh: 30px;
+  --type-body-lg: 18px;
+  --type-body-lg-lh: 26px;
+  --type-body-md: 16px;
+  --type-body-md-lh: 24px;
+  --type-body-sm: 15px;
+  --type-body-sm-lh: 22px;
+  --type-caption: 14px;
+  --type-caption-lh: 20px;
+  --type-eyebrow: 13px;
+  --type-eyebrow-lh: 16px;
   --type-eyebrow-tracking: 0.09em;
-  --type-colhead: 12px;
-  --type-colhead-lh: 16px;
+  --type-colhead: 14px;
+  --type-colhead-lh: 20px;
   --type-colhead-tracking: 0.01em;
   --type-display-tracking: -0.04em;
   --type-body-tracking: -0.02em;
@@ -271,6 +276,43 @@
   --sidebar-ring: var(--nav-fg);
 }
 
+/* Surface « verre » : panneau sombre translucide (Dialog variant="glass").
+   Tout ce qui est posé dedans (boutons, saisie, textes) lit ces tokens et
+   s'inverse sans retouche. */
+.surface-glass {
+  color-scheme: dark;
+  --text-primary: var(--po-white);
+  --text-secondary: var(--po-grey-300);
+  --text-tertiary: var(--po-grey-400);
+  --foreground: var(--po-white);
+  --muted-foreground: var(--po-grey-400);
+  --background: rgb(255 255 255 / 0.08);
+  --card: rgb(255 255 255 / 0.06);
+  --card-foreground: var(--po-white);
+  --muted: rgb(255 255 255 / 0.1);
+  --surface-soft: rgb(255 255 255 / 0.06);
+  --surface-sunken: rgb(255 255 255 / 0.1);
+  --surface-pressed: rgb(255 255 255 / 0.16);
+  --secondary: rgb(255 255 255 / 0.08);
+  --secondary-foreground: var(--po-grey-50);
+  --primary: var(--po-white);
+  --primary-foreground: var(--po-ink-900);
+  --control-primary-bg-hover: var(--po-grey-200);
+  --control-bg-hover: rgb(255 255 255 / 0.14);
+  --control-bg-pressed: rgb(255 255 255 / 0.2);
+  --accent: rgb(255 255 255 / 0.14);
+  --accent-foreground: var(--po-white);
+  --border: rgb(255 255 255 / 0.1);
+  --border-hairline: rgb(255 255 255 / 0.1);
+  --border-strong: rgb(255 255 255 / 0.4);
+  --input: rgb(255 255 255 / 0.12);
+  --ring: var(--po-white);
+  --focus-ring: var(--po-white);
+  --surface-tint: rgb(255 255 255 / 0.06);
+  --meter-track: rgb(255 255 255 / 0.12);
+  --meter-fill-over: var(--po-white);
+}
+
 /* ==========================================================================
    3 — UTILITAIRES TAILWIND
    ========================================================================== */
@@ -373,6 +415,25 @@
   --text-colhead--letter-spacing: var(--type-colhead-tracking);
   --text-colhead--font-weight: var(--fw-medium);
 
+  /* Échelle par défaut de Tailwind branchée sur la nôtre : text-xs, text-sm…
+     suivent l'échelle agrandie au lieu de rester en 12 / 14 px. */
+  --text-xs: var(--type-caption);
+  --text-xs--line-height: var(--type-caption-lh);
+  --text-sm: var(--type-body-md);
+  --text-sm--line-height: var(--type-body-md-lh);
+  --text-base: var(--type-body-lg);
+  --text-base--line-height: var(--type-body-lg-lh);
+  --text-lg: var(--type-display-sm);
+  --text-lg--line-height: var(--type-display-sm-lh);
+  --text-xl: var(--type-body-xl);
+  --text-xl--line-height: var(--type-body-xl-lh);
+  --text-2xl: var(--type-display-md);
+  --text-2xl--line-height: var(--type-display-md-lh);
+  --text-3xl: var(--type-display-lg);
+  --text-3xl--line-height: var(--type-display-lg-lh);
+  --text-4xl: var(--type-display-xl);
+  --text-4xl--line-height: var(--type-display-xl-lh);
+
   /* Élévation */
   --shadow-elevation-0: var(--elevation-0);
   --shadow-elevation-1: var(--elevation-1);
@@ -385,6 +446,13 @@
    utilitaires. Arrondis (DESIGN.md § 4) : cartes et saisie 12 px (2xl), barre
    latérale 16 px (3xl), rien au-delà sauf la pilule, d'où 4xl plafonné. */
 @theme {
+  /* Rien sous medium (DESIGN.md § 2) : font-normal et plus léger rendent en
+     medium, même ajoutés par un composant shadcn. */
+  --font-weight-thin: 500;
+  --font-weight-extralight: 500;
+  --font-weight-light: 500;
+  --font-weight-normal: 500;
+
   --radius-none: 0px;
   --radius-xs: 2px;
   --radius-sm: 4px;
@@ -418,7 +486,7 @@
     color: var(--text-primary);
     font-size: var(--type-body-md);
     line-height: var(--type-body-md-lh);
-    font-weight: var(--fw-regular);
+    font-weight: var(--fw-medium);
   }
 
   /* -2 % on every element (DESIGN.md § 2), not on body alone: an inherited em

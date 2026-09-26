@@ -62,7 +62,7 @@ export function CallPrepPanel({ report }: { report: LocatedCallReport }) {
               <li key={index}>
                 <p className="font-medium">
                   {item.topic}{" "}
-                  <span className="text-xs font-normal text-muted-foreground">
+                  <span className="text-xs font-medium text-muted-foreground">
                     · {t.origins[item.origin]}
                   </span>
                 </p>

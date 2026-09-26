@@ -330,6 +330,30 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
 - Accueil : `AssistantPanel` + cartes (`components/home/*`) alimentées par `lib/insights/`
   (todo, activité, sorties), les mêmes requêtes que l'assistant.
 
+### Page Travail (`/app/work`)
+
+Ce qui attend la personne connectée, **un bloc par permission** (jamais par nom de poste :
+qui cumule plusieurs permissions voit tous les blocs). Seule la phrase d'en-tête dépend du
+poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, RLS.
+
+| Permission | Blocs |
+| --- | --- |
+| `validate` | À valider (validations dont on est le validateur) |
+| `assign_projects` | À retransmettre (refusés, précision demandée) · En attente d'un chef de projet |
+| `pilot_projects` | Projets à accepter · Mes projets (lancés, dont on est responsable) avec la **prochaine action** · Livrables à attribuer (sans responsable ou sans échéance) · Propositions de PO de ses projets |
+| `creative_work` | Livrables à concevoir (livrables de Stratégie qui lui sont attribués) · Projets de son équipe créative, Conception signalée |
+| tous | Mes tâches |
+
+- **Prochaine action** : décidée par le code (`lib/work/next-action.ts`) depuis l'étape en
+  cours — Cadrage sans compte rendu de call → planifier/enregistrer le call ; Cadrage →
+  rédiger le Brief ; Stratégie → la construire ; Conception → suivre l'équipe créative ;
+  Livraison → préparer la sortie ; étape soumise → « en attente de validation », rangée
+  après ce que le responsable peut faire. Jamais par PO (règle 6).
+- Le circuit d'attribution (à accepter, à retransmettre, en attente) est calculé par
+  `handoverOf` (`lib/projects/handover.ts`), partagé avec l'accueil.
+- Le directeur créatif ne dépose pas encore de versions : ses livrables mènent à la
+  Stratégie où ils sont engagés. Le dépôt viendra avec la Conception.
+
 ---
 
 ## 8 bis. Notifications et mise à jour en direct

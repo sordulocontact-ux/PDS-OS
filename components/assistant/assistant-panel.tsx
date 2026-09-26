@@ -147,9 +147,14 @@ export function AssistantPanel({
           {t.suggestions.map((s) => (
             <Button
               key={s}
-              variant="outline"
+              // Window (glass): filled pills; home: outlined pills.
+              variant={compact ? "secondary" : "outline"}
               onClick={() => ask(s)}
-              className="h-auto bg-transparent p-3 font-normal text-ink-800"
+              className={cn(
+                "h-auto py-3 font-medium text-secondary-foreground",
+                // Window: wider pills, more room inside (demande de Sacha).
+                compact ? "px-5" : "bg-transparent px-3",
+              )}
             >
               {s}
             </Button>

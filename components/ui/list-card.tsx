@@ -1,25 +1,49 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CountBadge } from "@/components/ui/count-badge";
+import { cn } from "@/lib/utils";
+
 /**
- * Frame shared by the home cards (Figma "Desktop - 11"): a small grey label,
- * an optional link, then a short list of rows or an empty line.
+ * Card of short linked rows (Figma "Desktop - 11"), used by the home and the
+ * work page: a small grey label, an optional count and link, then the rows or
+ * an empty line.
  */
-export function HomeCard({
+export function ListCard({
   title,
+  count,
   action,
   empty,
+  className,
   children,
 }: {
   title: string;
+  // Things waiting in this card; the number is read with the title.
+  count?: number;
   action?: { label: string; href: string };
   empty?: string;
+  // Grid placement only (a wider card), never a restyle.
+  className?: string;
   children?: ReactNode;
 }) {
+  const counted = count !== undefined && count > 0;
   return (
-    <section className="flex flex-col gap-6 rounded-2xl border border-border p-3">
+    <section
+      className={cn(
+        "flex flex-col gap-6 rounded-2xl border border-border p-3",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-caption text-grey-400">{title}</h2>
+        <div className="flex items-center gap-2">
+          <h2
+            className="text-caption text-grey-400"
+            aria-label={counted ? `${title}, ${count}` : undefined}
+          >
+            {title}
+          </h2>
+          {counted && <CountBadge count={count} />}
+        </div>
         {action && (
           <Link
             href={action.href}

@@ -136,6 +136,7 @@ export const assistant = {
     artists: "la liste des artistes",
     masters: "la liste des masters",
     projects: "la liste des projets",
+    work: "sa page Travail (ce qui l'attend, projet par projet)",
   },
   launcher: {
     title: "PO",

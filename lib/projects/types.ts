@@ -105,6 +105,8 @@ export type ProjectListItem = {
   artistName: string;
   type: ProjectType;
   status: ProjectStatus;
+  // Who runs the launched project (null before acceptance).
+  ownerPersonId: string | null;
   // Latest transmission, if any: who it waits on, for the home cards.
   latestAssignment: Pick<Assignment, "status" | "assigneePersonId"> | null;
   currentStage: ProjectStage | null;

@@ -118,7 +118,7 @@ But : une modification d'interface se fait **à un seul endroit**.
 **Sources.** Règles : `docs/DESIGN.md` → valeurs : `app/globals.css` (DESIGN.md d'abord,
 puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas.
 
-**Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*`, `--overlay-*` ·
+**Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*` (dont `--surface-glass`), `--overlay-*` ·
 texte `--text-*` · bordures `--border-*`, `--hairline-*` · tons d'état `--tone-*` ·
 contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement `--space-*`,
 `--stack-*`, `--section-*`, `--page-*` · densité `--density-*` · rayons `--radius-*` ·
@@ -134,7 +134,8 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `StatusBadge` | `ui/status-badge.tsx` | tone : neutral, info, warning, success, danger · size : sm, md |
 | `FilterChip` | `ui/filter-chip.tsx` | pastille de filtre (repos / survol / actif), prop `pressed` |
 | `SearchField` | `ui/search-field.tsx` | champ de recherche arrondi, libellé fourni par l'appelant |
-| `Card`, `Dialog`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
+| `Dialog` | `ui/dialog.tsx` | variant : default, glass (page floutée sans voile + panneau sombre translucide, fenêtre Espace Espace) |
+| `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
 | `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
 | `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2 + contenu, action facultative) |
@@ -145,7 +146,9 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Tooltip` | `ui/tooltip.tsx` | shadcn, base sur `@base-ui/react/tooltip` (bulle au survol/focus, ex. sidebar repliée) |
 | `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) |
 | `ProjectSidebar`, `ProjectSidebarMobile`, `WorkflowBreadcrumb` | `projects/` | sidebar contextuelle d'un projet lancé (12 sections) et son tiroir mobile ; fil d'Ariane des 7 étapes du métier, habillage seul (`docs/DESIGN.md` § 4) |
-| `HomeCard`, `CardRow` | `home/home-card.tsx` | carte de l'accueil (libellé gris, liste de lignes liées) |
+| `ListCard`, `CardRow` | `ui/list-card.tsx` | carte de lignes liées (libellé gris, `count` facultatif), accueil et Travail |
+| `TasksCard`, `ValidationsCard`, `ProposalsCard`, `HandoverCard`… | `home/home-cards.tsx` | cartes de l'accueil ; `all` = toutes les lignes + nombre (page Travail) |
+| `OwnedProjectsCard`, `DeliverablesCard`, `CreativeProjectsCard` | `work/work-cards.tsx` | cartes propres à la page Travail |
 | `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
@@ -276,8 +279,12 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   (code, `lib/strategy/compose.ts`), retouchable. IA : dictée, et « Proposer des réponses »
   qui **pré-coche** des choix fermés sourcés Brief validé + calls (citation vérifiée par le
   code), jamais de texte libre ni de date (`docs/ARCHITECTURE.md` § 6 bis).
+- **Travail** `/app/work` : ce qui attend chacun, un bloc par permission (valider,
+  attribuer, piloter, concevoir) ; prochaine action de chaque projet décidée par le code
+  (`lib/work/`, `docs/ARCHITECTURE.md` § 8).
 - **Sortie** : iTunes ne cherche pas par ISRC (passe par l'UPC) ; Odesli fermé sans clé.
-- **Design** : `docs/DESIGN.md` fait foi. Typo Google Sans Flex partout ; états →
+- **Design** : `docs/DESIGN.md` fait foi. Typo Google Sans Flex partout, **medium minimum**
+  (jamais de regular), texte courant 16 px, 14 px au plus petit (`docs/DESIGN.md` § 2) ; états →
   `lib/ui/state-tones.ts` (5 tons sémantiques) + `StatusBadge tone=…`. Coquille et
   accueil d'après le Figma « Desktop - 11 » : barre latérale blanche flottante, accueil
   centré (salutation, PO, cartes), `docs/DESIGN.md` § 4.
@@ -365,6 +372,9 @@ Au-delà des six étapes :
       projet) ; sidebar contextuelle du projet à 12 sections (3 avec une page, le reste
       grisé) qui remplace l'ancienne double navigation horizontale ; fil d'Ariane des
       7 étapes du métier en habillage sur Cadrage/Stratégie/Sortie, sans nouvel état
+- [x] Page **Travail** : DG (validations, projets à retransmettre / en attente), chef de
+      projet (projets à accepter, prochaine action par projet, livrables à attribuer,
+      propositions de PO), directeur créatif (livrables à concevoir, projets de son équipe)
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 
