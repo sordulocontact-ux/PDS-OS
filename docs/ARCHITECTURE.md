@@ -89,6 +89,19 @@ Principes :
   classe mal (homonymes obscurs en tête) : on prend 25 résultats, triés par fans, 8 gardés.
   Photo = URL du CDN Deezer (pas de copie Storage) ; `ArtistAvatar` retombe sur les
   initiales si elle ne charge plus.
+- **Fiche artiste enrichie** (`lib/catalog/artist-profile.ts`) : pour un artiste importé de
+  Deezer, la page lit en direct fans, discographie complète (album / EP / single /
+  compilation, `lib/integrations/deezer-artist.ts`), top titres et artistes similaires.
+  « Dernière sortie », « Dernier album » et « À paraître » sont **calculés par le code**
+  (date du jour à Paris). Rien en base : cache `unstable_cache` d'une heure (une erreur
+  n'est jamais mise en cache), deux `Suspense` pour qu'un Deezer lent ne bloque pas la
+  page. **Bio** : API **interne** de Deezer (`lib/integrations/deezer-bio.ts`,
+  `gw-light.php` `deezer.pageArtist`, jeton CSRF + cookies d'une session anonyme — non
+  officielle, peut casser), puis repli **Wikipédia** trouvé par Wikidata via la propriété
+  « Deezer artist ID » P2722, jamais par le nom (`lib/integrations/wikipedia.ts`, fr puis
+  en, crédit + lien obligatoires CC BY-SA). HTML de Deezer réduit à du texte
+  (`htmlToText`), jamais rendu comme balisage. Wikidata limite vite le débit (429) :
+  ne pas marteler en test.
 - Projet créé = « Non transmis » : ni étape, ni responsable (`owner_person_id` posé
   uniquement par `respond_to_assignment` à l'acceptation). Statut du projet **calculé par
   le code** (`projectStatusOf`) : étapes présentes → lancé, sinon dernière transmission

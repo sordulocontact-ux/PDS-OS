@@ -25,6 +25,58 @@ export const catalog = {
     openDeezer: "Voir sur Deezer",
   },
 
+  // Artist page, what Deezer (and Wikipedia) knows about the artist.
+  deezerProfile: {
+    unavailable:
+      "Deezer ne répond pas pour l'instant. Ses informations reviendront au prochain chargement.",
+    loading: "Chargement des informations Deezer…",
+    stats: {
+      fans: "Fans sur Deezer",
+      releases: "Sorties",
+      albums: "Albums",
+    },
+    latestRelease: "Dernière sortie",
+    latestAlbum: "Dernier album",
+    noRelease: "Aucune sortie sur Deezer pour l'instant.",
+    bio: {
+      title: "Biographie",
+      more: "Lire la suite",
+      less: "Réduire",
+      fromDeezer: (author: string | null) =>
+        author ? `Source : ${author}, via Deezer` : "Source : Deezer",
+      fromWikipedia: (lang: "fr" | "en") =>
+        lang === "fr"
+          ? "Source : Wikipédia"
+          : "Source : Wikipédia (en anglais)",
+    },
+    discography: {
+      title: "Discographie",
+      filtersLabel: "Filtrer par type de sortie",
+      all: "Tout",
+      showAll: (count: number) => `Tout afficher (${count})`,
+      showLess: "Afficher moins",
+      noDate: "Date inconnue",
+      upcoming: "À paraître",
+    },
+    kinds: {
+      album: "Album",
+      ep: "EP",
+      single: "Single",
+      compile: "Compilation",
+    },
+    kindsPlural: {
+      album: "Albums",
+      ep: "EP",
+      single: "Singles",
+      compile: "Compilations",
+    },
+    topTracks: "Titres les plus écoutés",
+    related: "Artistes similaires",
+    inCatalog: "Au catalogue",
+    fans: (fans: string) => `${fans} fans`,
+    newTab: "(nouvel onglet)",
+  },
+
   artistForm: {
     title: "Nouvel artiste",
     description: "Il pourra être crédité sur un ou plusieurs masters.",

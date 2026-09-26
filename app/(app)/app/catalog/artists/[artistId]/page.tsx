@@ -2,10 +2,20 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { IconArrowLeft, IconExternalLink } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import {
+  ArtistDeezerDetails,
+  ArtistDeezerDetailsSkeleton,
+} from "@/components/catalog/artist-profile/artist-deezer-details";
+import {
+  ArtistHighlights,
+  ArtistHighlightsSkeleton,
+} from "@/components/catalog/artist-profile/artist-highlights";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
+import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -14,7 +24,9 @@ import { getArtist } from "@/lib/catalog/queries";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Minimal artist page: where "Cet artiste existe déjà" leads.
+// Artist page: the catalog's own data (notes, credited masters) and, for an
+// artist imported from Deezer, what Deezer knows, streamed in on its own so
+// a slow Deezer never holds the page.
 export default async function ArtistPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]">) {
@@ -67,21 +79,21 @@ export default async function ArtistPage({
         </a>
       )}
 
-      <section aria-labelledby="notes-title" className="flex flex-col gap-3">
-        <h2 id="notes-title" className="text-base font-medium">
-          {t.notes}
-        </h2>
+      {artist.deezerId !== null && (
+        <Suspense fallback={<ArtistHighlightsSkeleton />}>
+          <ArtistHighlights deezerId={artist.deezerId} />
+        </Suspense>
+      )}
+
+      <PageSection id="notes" title={t.notes}>
         <p
           className={`text-sm whitespace-pre-line ${artist.notes ? "" : "text-muted-foreground"}`}
         >
           {artist.notes ?? t.noNotes}
         </p>
-      </section>
+      </PageSection>
 
-      <section aria-labelledby="masters-title" className="flex flex-col gap-3">
-        <h2 id="masters-title" className="text-base font-medium">
-          {t.masters}
-        </h2>
+      <PageSection id="masters" title={t.masters}>
         {artist.masters.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t.noMasters}</p>
         ) : (
@@ -101,7 +113,13 @@ export default async function ArtistPage({
             ))}
           </ul>
         )}
-      </section>
+      </PageSection>
+
+      {artist.deezerId !== null && (
+        <Suspense fallback={<ArtistDeezerDetailsSkeleton />}>
+          <ArtistDeezerDetails deezerId={artist.deezerId} />
+        </Suspense>
+      )}
     </PageContainer>
   );
 }

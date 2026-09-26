@@ -147,7 +147,7 @@ export const getArtist = cache(
     const { data, error } = await supabase
       .from("artists")
       .select(
-        `id, name, notes, picture_url, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, version, isrc, duration_seconds, archived_at, ${CREDITS_SELECT}))`,
+        `id, name, notes, picture_url, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, version, isrc, duration_seconds, archived_at, ${CREDITS_SELECT}))`,
       )
       .eq("id", artistId)
       .maybeSingle();
@@ -165,6 +165,7 @@ export const getArtist = cache(
       name: data.name,
       notes: data.notes,
       pictureUrl: data.picture_url,
+      deezerId: data.deezer_id,
       deezerUrl: data.deezer_url,
       masters,
     };

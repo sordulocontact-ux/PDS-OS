@@ -137,11 +137,13 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Card`, `Dialog`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
 | `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
+| `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2 + contenu, action facultative) |
 | `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
 | `NavLinks`, `MobileNav`, `UserPanel` | `shell/` | navigation de la barre latérale blanche et du tiroir mobile (`docs/DESIGN.md` § 4) |
 | `HomeCard`, `CardRow` | `home/home-card.tsx` | carte de l'accueil (libellé gris, liste de lignes liées) |
 | `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
+| `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
 | `Icon*` | `icons/index.ts` | icônes dessinées maison ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
 
 ---
@@ -228,6 +230,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   serveur relit Deezer, seul l'id vient du client. Sélecteurs :
   `components/catalog/search-picker.tsx` (commun), création en modale sans perte de saisie
   (`docs/ARCHITECTURE.md` § 2).
+  Fiche artiste : fans, discographie, dernière sortie, top titres, similaires lus en direct
+  sur Deezer (cache 1 h, rien en base) ; bio par l'API **interne** Deezer, repli Wikipédia
+  via Wikidata P2722 (`lib/catalog/artist-profile.ts`, `docs/ARCHITECTURE.md` § 2).
 - **Notifications** : table `notifications` écrite par triggers (jamais par le code),
   cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
@@ -310,6 +315,8 @@ Au-delà des six étapes :
 - [x] Dictée sur la Stratégie (positionnement, publics, narratif, leviers)
 - [x] Stratégie : questions à choix fermé qui composent la réponse, « Proposer des
       réponses » (PO pré-coche, sourcé)
+- [x] Fiche artiste enrichie depuis Deezer : chiffres, dernière sortie / dernier album,
+      bio (Deezer, repli Wikipédia), discographie filtrable, top titres, similaires
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 

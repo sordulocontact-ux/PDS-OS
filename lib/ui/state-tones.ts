@@ -65,6 +65,9 @@ export const onlineTone = (online: boolean): Tone =>
   online ? "success" : "neutral";
 export const overdueTone: Tone = "danger";
 
+// A release announced on Deezer but not out yet.
+export const upcomingReleaseTone: Tone = "info";
+
 /** A lever to decide waits; selected is kept; not selected is settled aside. */
 export const leverTone: Record<string, Tone> = {
   to_decide: "warning",

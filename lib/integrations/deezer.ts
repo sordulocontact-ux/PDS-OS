@@ -55,6 +55,7 @@ const artistSchema = z.object({
   picture_medium: z.url().optional(),
   picture_big: z.url().optional(),
   nb_fan: z.number().int().nonnegative().optional(),
+  nb_album: z.number().int().nonnegative().optional(),
 });
 
 export type DeezerArtist = {
@@ -65,13 +66,16 @@ export type DeezerArtist = {
   pictureMedium: string | null;
   pictureBig: string | null;
   fans: number;
+  // Every release Deezer lists (albums, EPs, singles, compilations).
+  releaseCount: number;
 };
 
-// Deezer serves a placeholder with an empty hash (".../images/artist//...")
-// for artists without a picture; only its own https CDN is kept.
-function picture(url: string | undefined): string | null {
-  if (!url || url.includes("/artist//")) return null;
-  return url.startsWith("https://") ? url : null;
+// Deezer serves a placeholder with an empty hash (".../images/artist//...",
+// ".../images/cover//...") when there is no picture; only its own https CDN
+// is kept.
+export function deezerImage(url: string | undefined): string | null {
+  if (!url || !url.startsWith("https://")) return null;
+  return url.includes("//", "https://".length) ? null : url;
 }
 
 function toArtist(raw: z.infer<typeof artistSchema>): DeezerArtist {
@@ -79,9 +83,10 @@ function toArtist(raw: z.infer<typeof artistSchema>): DeezerArtist {
     id: raw.id,
     name: raw.name,
     link: raw.link,
-    pictureMedium: picture(raw.picture_medium),
-    pictureBig: picture(raw.picture_big),
+    pictureMedium: deezerImage(raw.picture_medium),
+    pictureBig: deezerImage(raw.picture_big),
     fans: raw.nb_fan ?? 0,
+    releaseCount: raw.nb_album ?? 0,
   };
 }
 
