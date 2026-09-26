@@ -431,10 +431,15 @@ table de correspondance traduit le poste en permissions (`role_permissions` en b
 
 ### Circuit d'attribution
 
-1. Le DG attribue le projet à un chef de projet.
+1. Le DG attribue le projet à un chef de projet **dès la création** (avec, facultatif, les
+   directeurs créatifs). Tranché le 26/09/2026.
 2. Le chef de projet accepte, refuse, ou demande une précision.
 3. Refus ou demande de précision : le projet **revient chez le DG avec un message** (le
    motif, ou l'information qui manque).
+
+Décidé le 26/09/2026 : quatre types de projet (sortie musicale avec au moins un master,
+contenu, partenariat, événement). Une fois le projet lancé, le premier geste est un
+**call** (planifié ou enregistré) : **pas de cadrage sans compte rendu de call**.
 
 ### Encore ouvert
 

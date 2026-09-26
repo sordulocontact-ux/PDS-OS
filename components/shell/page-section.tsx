@@ -14,7 +14,7 @@ export function PageSection({
   const titleId = `${id}-title`;
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex min-h-8 flex-wrap items-center justify-between gap-2">
         <h2 id={titleId} className="text-base font-medium">
           {title}
         </h2>

@@ -1,4 +1,3 @@
-import { ArtistBio } from "@/components/catalog/artist-profile/artist-bio";
 import { ArtistDiscography } from "@/components/catalog/artist-profile/artist-discography";
 import { ArtistTopTracks } from "@/components/catalog/artist-profile/artist-top-tracks";
 import { RelatedArtists } from "@/components/catalog/artist-profile/related-artists";
@@ -6,20 +5,15 @@ import { PageSection } from "@/components/shell/page-section";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
 import { fr } from "@/lib/i18n/fr";
 
-// Biography, discography, top tracks and similar artists. Renders nothing
-// when Deezer does not answer: ArtistHighlights already says so.
+// Discography tab: every release, top tracks and similar artists.
 export async function ArtistDeezerDetails({ deezerId }: { deezerId: number }) {
   const profile = await getArtistProfile(deezerId);
-  if (!profile) return null;
   const t = fr.catalog.deezerProfile;
+  if (!profile)
+    return <p className="text-sm text-muted-foreground">{t.unavailable}</p>;
 
   return (
     <>
-      {profile.bio && (
-        <PageSection id="bio" title={t.bio.title}>
-          <ArtistBio bio={profile.bio} />
-        </PageSection>
-      )}
       {profile.releases.length > 0 && (
         <PageSection id="discography" title={t.discography.title}>
           <ArtistDiscography releases={profile.releases} />

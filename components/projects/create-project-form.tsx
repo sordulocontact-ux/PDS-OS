@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
@@ -9,36 +9,74 @@ import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { MasterPicker } from "@/components/catalog/master-picker";
 import { OptionSelect } from "@/components/projects/option-select";
-import { buttonVariants } from "@/components/ui/button";
+import { ProjectTeamFields } from "@/components/projects/project-team-fields";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { createProject } from "@/lib/projects/actions";
+import type { CreativeMember } from "@/lib/projects/creatives";
+import { updateProject } from "@/lib/projects/edit-actions";
 import {
   PRIORITIES,
   PROJECT_TYPES,
   idleCreateProjectState,
   isProjectType,
+  type Priority,
   type ProjectType,
 } from "@/lib/projects/types";
+
+export type ProjectFormDefaults = {
+  title: string;
+  type: ProjectType | null;
+  masterIds: string[];
+  assigneePersonId?: string | null;
+  creativePersonIds?: string[];
+  dueDate?: string;
+  budget?: string;
+  priority?: Priority | null;
+  framingNotes?: string;
+};
 
 // Step C. Same form from the projects list (blank) and from a master page
 // (master linked, type and title prefilled). The master rule is checked on
 // submit only: switching the type never shows a warning in advance.
+// The team is chosen here: the project goes to its manager at creation.
+// With `projectId` it edits a project that is not launched (no team then);
+// with `onSaved` (side panel, a PO draft) the page behind stays.
 export function CreateProjectForm({
   masters,
   artists,
+  managers,
+  creatives,
   defaults,
+  projectId,
+  onSaved,
+  onCancel,
 }: {
   masters: MasterOption[];
   artists: ArtistOption[];
-  defaults: { title: string; type: ProjectType | null; masterIds: string[] };
+  managers: CreativeMember[];
+  creatives: CreativeMember[];
+  defaults: ProjectFormDefaults;
+  projectId?: string;
+  onSaved?: (project: { id: string; title: string }) => void;
+  onCancel?: () => void;
 }) {
   const t = fr.shell.newProject;
-  const [state, action] = useActionState(createProject, idleCreateProjectState);
+  const [state, action] = useActionState(
+    projectId ? updateProject : createProject,
+    idleCreateProjectState,
+  );
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const [type, setType] = useState<ProjectType | null>(defaults.type);
+
+  useEffect(() => {
+    if (state.status === "saved") onSaved?.(state.project);
+    // onSaved changes identity on every render of the parent.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   const typeItems = Object.fromEntries(
     PROJECT_TYPES.map((value) => [value, fr.shell.projectTypes[value]]),
@@ -49,6 +87,8 @@ export function CreateProjectForm({
 
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
+      {onSaved && <input type="hidden" name="intent" value="dialog" />}
+      {projectId && <input type="hidden" name="projectId" value={projectId} />}
       <Field
         name="title"
         label={t.fields.title}
@@ -81,13 +121,29 @@ export function CreateProjectForm({
         error={errors.masterIds}
       />
 
+      {!projectId && (
+        <ProjectTeamFields
+          managers={managers}
+          creatives={creatives}
+          defaultManagerId={
+            values.assigneePersonId || defaults.assigneePersonId || null
+          }
+          defaultCreativeIds={
+            values.creativePersonIds
+              ? parseIds(values.creativePersonIds)
+              : (defaults.creativePersonIds ?? [])
+          }
+          errors={errors}
+        />
+      )}
+
       <div className="grid gap-5 sm:grid-cols-2">
         <Field
           name="dueDate"
           type="date"
           label={t.fields.dueDate}
           hint={t.fields.dueDateHint}
-          defaultValue={values.dueDate ?? ""}
+          defaultValue={values.dueDate ?? defaults.dueDate ?? ""}
           error={errors.dueDate}
         />
         <Field
@@ -97,7 +153,7 @@ export function CreateProjectForm({
           inputMode="decimal"
           autoComplete="off"
           maxLength={20}
-          defaultValue={values.budget ?? ""}
+          defaultValue={values.budget ?? defaults.budget ?? ""}
           error={errors.budget}
           className="h-10 text-base tabular-nums md:text-sm"
         />
@@ -108,7 +164,7 @@ export function CreateProjectForm({
         label={t.fields.priority}
         placeholder={t.fields.priorityNone}
         items={priorityItems}
-        defaultValue={values.priority || null}
+        defaultValue={values.priority || defaults.priority || null}
         error={errors.priority}
       />
 
@@ -117,7 +173,7 @@ export function CreateProjectForm({
         label={t.fields.notes}
         hint={t.fields.notesHint}
         maxLength={20000}
-        defaultValue={values.framingNotes ?? ""}
+        defaultValue={values.framingNotes ?? defaults.framingNotes ?? ""}
         error={errors.framingNotes}
       />
 
@@ -126,14 +182,36 @@ export function CreateProjectForm({
       )}
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Link
-          href={routes.projects}
-          className={buttonVariants({ variant: "ghost", size: "lg" })}
-        >
-          {t.cancel}
-        </Link>
-        <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>
+        {onCancel ? (
+          <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
+            {t.cancel}
+          </Button>
+        ) : (
+          <Link
+            href={routes.projects}
+            className={buttonVariants({ variant: "ghost", size: "lg" })}
+          >
+            {t.cancel}
+          </Link>
+        )}
+        {projectId ? (
+          <SubmitButton pendingLabel={t.saving}>{t.save}</SubmitButton>
+        ) : (
+          <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>
+        )}
       </div>
     </form>
   );
+}
+
+// Selection sent back by the server after an error (a JSON list of ids).
+function parseIds(raw: string | undefined): string[] {
+  try {
+    const value: unknown = JSON.parse(raw || "[]");
+    return Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === "string")
+      : [];
+  } catch {
+    return [];
+  }
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { Button } from "@/components/ui/button";
-import type { ArtistBio as Bio } from "@/lib/catalog/types";
+import type { ArtistBio as Bio } from "@/lib/catalog/artist-types";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +54,8 @@ export function ArtistBio({ bio }: { bio: Bio }) {
             <ExternalLink href={bio.url} icon className="hover:text-foreground">
               {t.fromWikipedia(bio.lang)}
             </ExternalLink>
+          ) : bio.source === "manual" ? (
+            fr.catalog.artistPage.bioManual
           ) : (
             t.fromDeezer(bio.author)
           )}

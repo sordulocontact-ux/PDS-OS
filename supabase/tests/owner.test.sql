@@ -13,6 +13,19 @@ begin
   return v_id;
 end $$;
 
+-- The framing opens once the project has a call report (run as postgres).
+create function pg_temp.add_call_report(p_project uuid) returns void language sql as $$
+  with c as (
+    insert into public.calls (organization_id, project_id, title, consent)
+    select organization_id, id, 'Call de cadrage', 'granted' from public.projects where id = p_project
+    returning id, organization_id),
+  t as (
+    insert into public.transcripts (organization_id, call_id, text, provider, model)
+    select organization_id, id, 'Transcription', 'test', 'test' from c
+    returning id, organization_id, call_id)
+  insert into public.call_reports (organization_id, call_id, transcript_id, summary, provider, model)
+  select organization_id, call_id, id, 'Résumé', 'test', 'test' from t;
+$$;
 create function pg_temp.act_as(p_user uuid) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
@@ -45,6 +58,7 @@ insert into ids select 'project', public.create_project((select id from ids wher
 insert into ids select 'a1', public.transmit_project((select id from ids where name = 'project'),
   (select id from ids where name = 'owner_person'));
 reset role;
+select pg_temp.add_call_report((select id from ids where name = 'project'));
 select pg_temp.act_as((select id from ids where name = 'owner'));
 select public.respond_to_assignment((select id from ids where name = 'a1'), 'accepted');
 insert into ids select 'stage', s.id from public.project_stages s

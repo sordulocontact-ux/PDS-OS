@@ -12,6 +12,7 @@ export type FramingErrorCode =
   | "not_the_validator"
   | "reason_required"
   | "previous_stage_not_validated"
+  | "framing_requires_call"
   | "stage_locked"
   | "lever_not_selected"
   | "lever_has_deliverables"
@@ -39,6 +40,7 @@ export function fromDatabaseError(
     "validator_not_allowed",
     "not_the_validator",
     "previous_stage_not_validated",
+    "framing_requires_call",
     "lever_not_selected",
     "lever_has_deliverables",
   ] as const) {

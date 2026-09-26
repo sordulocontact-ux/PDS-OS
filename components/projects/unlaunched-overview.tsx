@@ -6,6 +6,7 @@ import { routes } from "@/lib/auth/redirects";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectDetail } from "@/lib/projects/types";
+import { FactList } from "@/components/ui/fact-list";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -118,22 +119,14 @@ export function UnlaunchedOverview({
         <h2 id="facts-title" className="text-base font-medium">
           {t.facts}
         </h2>
-        <dl className="flex flex-col gap-3 rounded-xl border border-border p-4 text-sm">
-          {facts.map(([label, value, figure]) => (
-            <div key={label} className="flex flex-col gap-0.5">
-              <dt className="text-xs text-muted-foreground">{label}</dt>
-              <dd
-                className={
-                  value === null
-                    ? "text-muted-foreground"
-                    : `font-medium break-words ${figure ? "tabular-nums" : ""}`
-                }
-              >
-                {value ?? t.notProvided}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <FactList
+          facts={facts.map(([label, value, figure]) => ({
+            label,
+            value,
+            valueClassName: figure ? "tabular-nums" : undefined,
+          }))}
+          emptyLabel={t.notProvided}
+        />
       </section>
     </div>
   );

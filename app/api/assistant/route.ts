@@ -52,6 +52,12 @@ export async function POST(request: Request) {
   );
   if (tooLong) return Response.json({ error: "too_long" }, { status: 413 });
 
+  const userTexts = messages.flatMap((m) =>
+    m.role === "user"
+      ? m.parts.flatMap((p) => (p.type === "text" ? [p.text] : []))
+      : [],
+  );
+
   const { model } = getChatModel();
   const result = streamText({
     model,
@@ -61,7 +67,7 @@ export async function POST(request: Request) {
       role: access.role,
     }),
     messages: await convertToModelMessages(messages),
-    tools: createAssistantTools(access),
+    tools: createAssistantTools(access, userTexts),
     stopWhen: isStepCount(5),
   });
 

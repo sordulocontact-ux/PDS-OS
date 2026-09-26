@@ -60,13 +60,16 @@ type Step =
   | { kind: "search"; query: string }
   | { kind: "details"; deezer: DeezerArtistResult | null; name: string };
 
-function ArtistForm({
+// Also used on its own, in the side panel reviewing a PO draft.
+export function ArtistForm({
   initialName,
+  initialNotes,
   onCancel,
   onDone,
   pickerMode,
 }: {
   initialName: string;
+  initialNotes?: string;
   onCancel: () => void;
   onDone: (artist: ArtistOption) => void;
   pickerMode: boolean;
@@ -99,6 +102,7 @@ function ArtistForm({
       key={step.deezer?.deezerId ?? "manual"}
       deezer={step.deezer}
       initialName={step.name}
+      initialNotes={initialNotes}
       onBack={() => setStep({ kind: "search", query: step.name })}
       onCancel={onCancel}
       onDone={onDone}

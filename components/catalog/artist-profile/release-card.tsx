@@ -1,7 +1,7 @@
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { ReleaseCover } from "@/components/catalog/artist-profile/release-cover";
 import { releaseMeta } from "@/lib/catalog/release-meta";
-import type { ArtistRelease } from "@/lib/catalog/types";
+import type { ArtistRelease } from "@/lib/catalog/artist-types";
 
 // Highlighted release (latest release, latest album): grey label, cover,
 // title and "Single · 14 nov. 2025". The whole card opens Deezer.

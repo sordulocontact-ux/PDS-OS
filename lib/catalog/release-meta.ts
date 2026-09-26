@@ -1,6 +1,6 @@
 // "Single · 14 nov. 2025": kind and date of a Deezer release. Client-safe.
 
-import type { ArtistRelease } from "@/lib/catalog/types";
+import type { ArtistRelease } from "@/lib/catalog/artist-types";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
 

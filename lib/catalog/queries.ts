@@ -6,7 +6,6 @@ import { catalogIdSchema } from "@/lib/catalog/schemas";
 import {
   formatCredits,
   isCreditRole,
-  type ArtistDetail,
   type ArtistListItem,
   type ArtistOption,
   type Credit,
@@ -16,6 +15,7 @@ import {
   type MasterRow,
 } from "@/lib/catalog/types";
 import { pickMasterRelease } from "@/lib/catalog/master-release";
+import { signArtistPictures } from "@/lib/catalog/pictures";
 import { createClient } from "@/lib/supabase/server";
 
 // Every query runs with the user's session: RLS decides what is visible.
@@ -45,7 +45,7 @@ export function toCredits(raw: RawCredit[]): Credit[] {
     );
 }
 
-type RawMaster = {
+export type RawMaster = {
   id: string;
   title: string;
   version: string | null;
@@ -54,7 +54,7 @@ type RawMaster = {
   credits: RawCredit[];
 };
 
-function toMasterListItem(row: RawMaster): MasterListItem {
+export function toMasterListItem(row: RawMaster): MasterListItem {
   return {
     id: row.id,
     title: row.title,
@@ -73,7 +73,7 @@ export async function listArtists(): Promise<{
   const { data, error } = await supabase
     .from("artists")
     .select(
-      "id, name, notes, picture_url, credits:master_artists!master_artists_artist_same_org(count)",
+      "id, name, notes, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(count)",
     )
     .is("archived_at", null)
     .order("name");
@@ -81,12 +81,17 @@ export async function listArtists(): Promise<{
     console.error("listArtists:", error.message);
     return { artists: [], error: true };
   }
+  const rows = data ?? [];
+  const signed = await signArtistPictures(
+    rows.flatMap((row) => (row.picture_path ? [row.picture_path] : [])),
+  );
   return {
-    artists: (data ?? []).map((row) => ({
+    artists: rows.map((row) => ({
       id: row.id,
       name: row.name,
       notes: row.notes,
-      pictureUrl: row.picture_url,
+      pictureUrl:
+        (row.picture_path && signed.get(row.picture_path)) || row.picture_url,
       masterCount: row.credits[0]?.count ?? 0,
     })),
     error: false,
@@ -139,38 +144,6 @@ export async function findArtistsByDeezerIds(
   }
   return found;
 }
-
-export const getArtist = cache(
-  async (artistId: string): Promise<ArtistDetail | null> => {
-    if (!catalogIdSchema.safeParse(artistId).success) return null;
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("artists")
-      .select(
-        `id, name, notes, picture_url, deezer_id, deezer_url, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(id, title, version, isrc, duration_seconds, archived_at, ${CREDITS_SELECT}))`,
-      )
-      .eq("id", artistId)
-      .maybeSingle();
-    if (error) {
-      console.error("getArtist:", error.message);
-      return null;
-    }
-    if (!data) return null;
-    const masters = data.credits
-      .flatMap((c) => (c.master && !c.master.archived_at ? [c.master] : []))
-      .map((m) => toMasterListItem(m as RawMaster))
-      .sort((a, b) => a.title.localeCompare(b.title, "fr"));
-    return {
-      id: data.id,
-      name: data.name,
-      notes: data.notes,
-      pictureUrl: data.picture_url,
-      deezerId: data.deezer_id,
-      deezerUrl: data.deezer_url,
-      masters,
-    };
-  },
-);
 
 // Releases of the master's live projects, for the release column of the list.
 const MASTER_RELEASES_SELECT =

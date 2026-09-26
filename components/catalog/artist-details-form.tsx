@@ -25,6 +25,7 @@ import { fr } from "@/lib/i18n/fr";
 export function ArtistDetailsForm({
   deezer,
   initialName,
+  initialNotes = "",
   onBack,
   onCancel,
   onDone,
@@ -32,6 +33,7 @@ export function ArtistDetailsForm({
 }: {
   deezer: DeezerArtistResult | null;
   initialName: string;
+  initialNotes?: string;
   onBack: () => void;
   onCancel: () => void;
   onDone: (artist: ArtistOption) => void;
@@ -120,7 +122,7 @@ export function ArtistDetailsForm({
         label={t.notes}
         hint={t.notesHint}
         maxLength={5000}
-        defaultValue={values.notes ?? ""}
+        defaultValue={values.notes ?? initialNotes}
         error={errors.notes}
       />
 

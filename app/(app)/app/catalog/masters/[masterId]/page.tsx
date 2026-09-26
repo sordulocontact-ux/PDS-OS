@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { FactList, type Fact } from "@/components/ui/fact-list";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -24,14 +25,20 @@ export default async function MasterPage({
 
   const t = fr.catalog.master;
   const notProvided = fr.catalog.notProvided;
-  const facts: Array<[string, string | null, string?]> = [
-    [t.version, master.version ?? t.mainVersion],
-    [t.isrc, master.isrc ? formatIsrc(master.isrc) : null, "font-mono"],
-    [
-      t.duration,
-      master.durationSeconds ? formatDuration(master.durationSeconds) : null,
-      "tabular-nums",
-    ],
+  const facts: Fact[] = [
+    { label: t.version, value: master.version ?? t.mainVersion },
+    {
+      label: t.isrc,
+      value: master.isrc ? formatIsrc(master.isrc) : null,
+      valueClassName: "font-mono",
+    },
+    {
+      label: t.duration,
+      value: master.durationSeconds
+        ? formatDuration(master.durationSeconds)
+        : null,
+      valueClassName: "tabular-nums",
+    },
   ];
   const createProject = can(access, "create_projects") ? (
     <Link
@@ -127,22 +134,7 @@ export default async function MasterPage({
           <h2 id="facts-title" className="text-base font-medium">
             {t.facts}
           </h2>
-          <dl className="flex flex-col gap-3 rounded-xl border border-border p-4 text-sm">
-            {facts.map(([label, value, className]) => (
-              <div key={label} className="flex flex-col gap-0.5">
-                <dt className="text-xs text-muted-foreground">{label}</dt>
-                <dd
-                  className={
-                    value === null
-                      ? "text-muted-foreground"
-                      : `font-medium break-words ${className ?? ""}`
-                  }
-                >
-                  {value ?? notProvided}
-                </dd>
-              </div>
-            ))}
-          </dl>
+          <FactList facts={facts} emptyLabel={notProvided} />
         </section>
       </div>
     </PageContainer>

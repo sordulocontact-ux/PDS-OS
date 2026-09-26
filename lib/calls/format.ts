@@ -16,6 +16,14 @@ export function formatMegabytes(bytes: number): string {
   });
 }
 
+/** A planned call: still a draft (nothing recorded) and dated in the future. */
+export function isUpcoming(
+  call: { status: string; occurredAt: string },
+  now: Date,
+): boolean {
+  return call.status === "draft" && new Date(call.occurredAt) > now;
+}
+
 /** "YYYY-MM-DDTHH:mm" in Paris time, the value format of datetime-local. */
 export function toParisLocalInput(date: Date): string {
   const parts = Object.fromEntries(

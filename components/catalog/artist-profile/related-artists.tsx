@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArtistAvatar } from "@/components/catalog/artist-avatar";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { routes } from "@/lib/auth/redirects";
-import { formatFans, type RelatedArtist } from "@/lib/catalog/types";
+import type { RelatedArtist } from "@/lib/catalog/artist-types";
+import { formatFans } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
 // Similar artists according to Deezer. One already in the catalog opens its

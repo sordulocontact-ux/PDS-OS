@@ -78,8 +78,12 @@ export function CreateCallForm({
               type="datetime-local"
               required
               defaultValue={defaultOccurredAt}
+              aria-describedby="call-date-hint"
               className="h-10 w-fit"
             />
+            <p id="call-date-hint" className="text-xs text-muted-foreground">
+              {t.dateHint}
+            </p>
           </div>
           <ConsentOptions
             defaultValue="pending"

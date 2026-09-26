@@ -1,6 +1,7 @@
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { ReleaseCover } from "@/components/catalog/artist-profile/release-cover";
-import { formatDuration, type ArtistTopTrack } from "@/lib/catalog/types";
+import type { ArtistTopTrack } from "@/lib/catalog/artist-types";
+import { formatDuration } from "@/lib/catalog/types";
 
 // Deezer's most played tracks, in its order.
 export function ArtistTopTracks({ tracks }: { tracks: ArtistTopTrack[] }) {

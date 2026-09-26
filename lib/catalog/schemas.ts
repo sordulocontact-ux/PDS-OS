@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { CONTACT_ROLES } from "@/lib/catalog/contacts";
+import { COUNTRY_CODES } from "@/lib/catalog/countries";
 import {
   CREDIT_ROLES,
   ISRC_PATTERN,
@@ -94,3 +96,58 @@ export const createMasterSchema = z.object({
 });
 
 export const catalogIdSchema = z.uuid();
+
+const pe = fr.catalog.profileForm.errors;
+
+export const updateArtistSchema = z.object({
+  artistId: z.uuid(),
+  name: createArtistSchema.shape.name,
+  legalName: optionalText(200),
+  countryCode: z
+    .string()
+    .optional()
+    .transform((value) => (value ? value : null))
+    .refine((value) => value === null || COUNTRY_CODES.has(value), {
+      error: pe.country,
+    }),
+  // Empty = back to the biography read from Deezer / Wikipedia.
+  bio: optionalText(5000),
+  notes: optionalText(5000),
+});
+
+export const contactSchema = z.object({
+  artistId: z.uuid(),
+  // Absent when adding a contact.
+  contactId: z
+    .string()
+    .optional()
+    .transform((value) => (value ? value : null))
+    .pipe(z.uuid().nullable()),
+  role: z.enum(CONTACT_ROLES, { error: e.required }),
+  name: z
+    .string({ error: e.required })
+    .trim()
+    .min(1, { error: e.required })
+    .max(200, { error: e.tooLong }),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(320, { error: e.tooLong })
+    .optional()
+    .transform((value) => (value ? value : null))
+    .pipe(z.email({ error: e.invalidEmail }).nullable()),
+  phone: optionalText(40).refine(
+    (value) => value === null || /^[0-9+(). -]{3,40}$/.test(value),
+    { error: pe.phone },
+  ),
+  isPrimary: z
+    .string()
+    .optional()
+    .transform((value) => value === "on"),
+});
+
+export const contactRefSchema = z.object({
+  artistId: z.uuid(),
+  contactId: z.uuid(),
+});

@@ -28,6 +28,7 @@ export const shell = {
     music_release: "Sortie musicale",
     partnership: "Partenariat",
     content: "Contenu",
+    event: "Événement",
   },
 
   priorities: { low: "Basse", normal: "Normale", high: "Haute" },
@@ -41,7 +42,7 @@ export const shell = {
 
   projects: {
     title: "Projets",
-    subtitle: "Sorties musicales, partenariats et contenus.",
+    subtitle: "Sorties musicales, contenus, partenariats et événements.",
     newProject: "Nouveau projet",
     columns: {
       title: "Titre",
@@ -61,7 +62,7 @@ export const shell = {
   newProject: {
     title: "Nouveau projet",
     subtitle:
-      "Le projet est créé non transmis. Il sera lancé une fois accepté par un chef de projet.",
+      "Le projet part chez le chef de projet choisi. Il sera lancé une fois qu'il l'aura accepté.",
     fields: {
       title: "Titre du projet",
       type: "Type",
@@ -75,11 +76,26 @@ export const shell = {
       priorityNone: "Non définie",
       notes: "Notes de cadrage",
       notesHint: "Reprenez le brief reçu.",
+      team: "Équipe",
+      manager: "Chef de projet",
+      managerPlaceholder: "Choisir un chef de projet",
+      managerHint:
+        "Il reçoit le projet et l'accepte, le refuse ou demande une précision.",
+      managerNone:
+        "Aucun chef de projet dans l'organisation : créez d'abord son compte depuis Membres.",
+      creatives: "Direction artistique",
+      creativesHint:
+        "Facultatif. Les directeurs créatifs choisis voient le projet. Modifiable ensuite.",
+      creativesNone: "Aucun directeur créatif dans l'organisation.",
     },
     submit: "Créer le projet",
     submitting: "Création…",
+    save: "Enregistrer",
+    saving: "Enregistrement…",
     cancel: "Annuler",
     errors: {
+      notEditable:
+        "Ce projet ne se modifie plus ici : il est lancé, ou vous n'en avez pas le droit.",
       mastersRequired:
         "Une sortie musicale doit rattacher au moins un master. Rattachez-en un, ou changez le type de projet.",
       invalidType: "Choisissez un type de projet.",
@@ -87,6 +103,11 @@ export const shell = {
       invalidBudget: "Montant invalide, par exemple 1500 ou 1 500,50.",
       invalidDate: "Date invalide.",
       invalidMasters: "Un master sélectionné n'existe plus. Retirez-le.",
+      managerRequired: "Choisissez le chef de projet qui recevra le projet.",
+      invalidManager:
+        "Cette personne n'est plus chef de projet. Choisissez-en un autre.",
+      invalidCreatives:
+        "Un directeur créatif sélectionné n'est plus disponible. Retirez-le.",
     },
   },
 

@@ -9,18 +9,23 @@ import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
+import { listCreativePeople } from "@/lib/projects/creatives";
+import { listAssignablePeople } from "@/lib/projects/queries";
 
 // ?master=<id>: opened from a master page — that master is linked, the type
 // is a music release and the title is the master's. Everything stays editable.
 export default async function NewProjectPage({
   searchParams,
 }: PageProps<"/app/projects/new">) {
-  await requirePermission("create_projects");
+  const access = await requirePermission("create_projects");
   const t = fr.shell.newProject;
   const { master: masterParam } = await searchParams;
-  const [masters, artists] = await Promise.all([
+  const organizationId = access.organizationId ?? "";
+  const [masters, artists, managers, creatives] = await Promise.all([
     listMasterOptions(),
     listArtistOptions(),
+    listAssignablePeople(organizationId),
+    listCreativePeople(organizationId),
   ]);
   const fromMaster =
     typeof masterParam === "string"
@@ -44,6 +49,8 @@ export default async function NewProjectPage({
           <CreateProjectForm
             masters={masters}
             artists={artists}
+            managers={managers}
+            creatives={creatives}
             defaults={
               fromMaster
                 ? {

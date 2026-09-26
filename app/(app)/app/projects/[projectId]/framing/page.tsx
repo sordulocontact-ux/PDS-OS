@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { BriefFieldCard } from "@/components/framing/brief-field-card";
 import { FramingDictation } from "@/components/framing/framing-dictation";
+import { FramingNeedsCall } from "@/components/framing/framing-needs-call";
 import { ImportPanel } from "@/components/framing/import-panel";
 import { NeedsSection } from "@/components/framing/needs-section";
 import { OpenPointsSection } from "@/components/framing/open-points-section";
@@ -17,16 +18,28 @@ import {
 import { requireApproved } from "@/lib/auth/dal";
 import { importReport } from "@/lib/framing/actions/import";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { loadFraming } from "@/lib/framing/queries";
+import { isFramingOpen, loadFraming } from "@/lib/framing/queries";
+import { canEditProject } from "@/lib/projects/edit-access";
 import { fr } from "@/lib/i18n/fr";
 
-/** Framing stage: the Brief on one page, pre-filled from calls, edited in place. */
+/**
+ * Framing stage: the Brief on one page, pre-filled from calls, edited in place.
+ * It starts from a call: locked until the project has a call report.
+ */
 export default async function FramingPage({
   params,
 }: PageProps<"/app/projects/[projectId]/framing">) {
   const access = await requireApproved();
   const { projectId } = await params;
-  await requireLaunchedProject(projectId);
+  const project = await requireLaunchedProject(projectId);
+  if (!(await isFramingOpen(projectId))) {
+    return (
+      <FramingNeedsCall
+        projectId={projectId}
+        canEdit={canEditProject(access, project)}
+      />
+    );
+  }
   const data = await loadFraming(projectId, access);
   if (!data) notFound();
   const me = access.personId;

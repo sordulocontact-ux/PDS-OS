@@ -79,6 +79,7 @@ export const routes = {
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",
   artist: (id: string) => `/app/catalog/artists/${id}`,
+  artistDiscography: (id: string) => `/app/catalog/artists/${id}/discography`,
   masters: "/app/catalog/masters",
   mastersNew: "/app/catalog/masters/new",
   master: (id: string) => `/app/catalog/masters/${id}`,

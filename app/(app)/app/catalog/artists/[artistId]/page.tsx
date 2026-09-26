@@ -1,89 +1,86 @@
-import { IconPlus } from "nucleo-sharp-essential";
-import { IconArrowLeft, IconExternalLink } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { ArtistContacts } from "@/components/catalog/artist-page/artist-contacts";
 import {
-  ArtistDeezerDetails,
-  ArtistDeezerDetailsSkeleton,
-} from "@/components/catalog/artist-profile/artist-deezer-details";
+  ArtistAutoBio,
+  ArtistAutoBioSkeleton,
+} from "@/components/catalog/artist-profile/artist-auto-bio";
+import { ArtistBio } from "@/components/catalog/artist-profile/artist-bio";
 import {
   ArtistHighlights,
   ArtistHighlightsSkeleton,
 } from "@/components/catalog/artist-profile/artist-highlights";
-import { PageContainer } from "@/components/shell/page-container";
-import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
-import { buttonVariants } from "@/components/ui/button";
+import { FactList } from "@/components/ui/fact-list";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { getArtist } from "@/lib/catalog/queries";
+import { getArtist, listArtistContacts } from "@/lib/catalog/artist-queries";
+import { countryName } from "@/lib/catalog/countries";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Artist page: the catalog's own data (notes, credited masters) and, for an
-// artist imported from Deezer, what Deezer knows, streamed in on its own so
-// a slow Deezer never holds the page.
-export default async function ArtistPage({
+// Artist overview: key figures, identity, contacts (manage_catalog only:
+// the database hides them from everyone else), biography, notes, masters.
+export default async function ArtistOverviewPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]">) {
   const access = await requireApproved();
   const { artistId } = await params;
   const artist = await getArtist(artistId);
   if (!artist) notFound();
+  const canEdit = can(access, "manage_catalog");
+  const contacts = canEdit ? await listArtistContacts(artist.id) : [];
   const t = fr.catalog.artist;
+  const p = fr.catalog.artistPage;
 
   return (
-    <PageContainer className="max-w-4xl">
-      <Link
-        href={routes.artists}
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <IconArrowLeft className="size-4" aria-hidden />
-        {t.back}
-      </Link>
-      <PageHeader
-        title={artist.name}
-        leading={
-          <ArtistAvatar
-            name={artist.name}
-            pictureUrl={artist.pictureUrl}
-            className="size-16 text-[length:var(--type-body-md)]"
+    <>
+      <Suspense fallback={<ArtistHighlightsSkeleton />}>
+        <ArtistHighlights
+          deezerId={artist.deezerId}
+          masterCount={artist.masters.length}
+          projectCount={artist.projectCount}
+        />
+      </Suspense>
+
+      <div className="grid gap-[var(--section-gap)] lg:grid-cols-2 lg:gap-6">
+        <PageSection id="identity" title={p.identity}>
+          <FactList
+            emptyLabel={fr.catalog.notProvided}
+            facts={[
+              { label: p.stageName, value: artist.name },
+              { label: p.legalName, value: artist.legalName },
+              { label: p.country, value: countryName(artist.countryCode) },
+            ]}
           />
-        }
-        action={
-          can(access, "manage_catalog") ? (
-            <Link
-              href={routes.mastersNewForArtist(artist.id)}
-              className={buttonVariants({ size: "lg" })}
-            >
-              <IconPlus aria-hidden data-icon="inline-start" />
-              {t.newMaster}
-            </Link>
-          ) : null
-        }
-      />
+        </PageSection>
+        {canEdit && <ArtistContacts artistId={artist.id} contacts={contacts} />}
+      </div>
 
-      {artist.deezerUrl && (
-        <a
-          href={artist.deezerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="-mt-2 flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          {t.openDeezer}
-          <IconExternalLink className="size-3.5" aria-hidden />
-        </a>
-      )}
-
-      {artist.deezerId !== null && (
-        <Suspense fallback={<ArtistHighlightsSkeleton />}>
-          <ArtistHighlights deezerId={artist.deezerId} />
-        </Suspense>
-      )}
+      <PageSection id="bio" title={fr.catalog.deezerProfile.bio.title}>
+        {artist.bio ? (
+          <ArtistBio
+            bio={{
+              text: artist.bio,
+              source: "manual",
+              author: null,
+              url: null,
+              lang: "fr",
+            }}
+          />
+        ) : artist.deezerId !== null ? (
+          <Suspense fallback={<ArtistAutoBioSkeleton />}>
+            <ArtistAutoBio deezerId={artist.deezerId} />
+          </Suspense>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {fr.catalog.deezerProfile.bio.none}
+          </p>
+        )}
+      </PageSection>
 
       <PageSection id="notes" title={t.notes}>
         <p
@@ -114,12 +111,6 @@ export default async function ArtistPage({
           </ul>
         )}
       </PageSection>
-
-      {artist.deezerId !== null && (
-        <Suspense fallback={<ArtistDeezerDetailsSkeleton />}>
-          <ArtistDeezerDetails deezerId={artist.deezerId} />
-        </Suspense>
-      )}
-    </PageContainer>
+    </>
   );
 }

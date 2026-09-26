@@ -9,13 +9,15 @@ import { databaseErrorMessage } from "@/lib/auth/errors";
 import { routes } from "@/lib/auth/redirects";
 import { parseForm, retainedValues } from "@/lib/auth/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createProjectSchema } from "@/lib/projects/schemas";
 import type { CreateProjectState } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
-// Creates a project and links its masters in one database call
-// (create_project), with the user's session: RLS (create_projects) and column
-// grants apply. No stage, no owner: the project waits to be handed over.
+// Creates a project in one database call (create_project), with the user's
+// session: RLS (create_projects) and column grants apply. Masters are linked,
+// the project is transmitted to its manager and the creative directors are
+// attached in the same transaction. No stage, no owner until acceptance.
 export async function createProject(
   _previous: CreateProjectState,
   formData: FormData,
@@ -47,6 +49,8 @@ export async function createProject(
     p_budget_cents: input.budget ?? undefined,
     p_priority: input.priority ?? undefined,
     p_framing_notes: input.framingNotes ?? undefined,
+    p_assignee_person_id: input.assigneePersonId,
+    p_creative_person_ids: input.creativePersonIds,
   });
 
   if (error || !projectId) {
@@ -55,6 +59,20 @@ export async function createProject(
       return {
         status: "error",
         fieldErrors: { masterIds: pe.mastersRequired },
+        values,
+      };
+    }
+    if (error?.message.includes("invalid_assignee")) {
+      return {
+        status: "error",
+        fieldErrors: { assigneePersonId: pe.invalidManager },
+        values,
+      };
+    }
+    if (error?.message.includes("invalid_creative")) {
+      return {
+        status: "error",
+        fieldErrors: { creativePersonIds: pe.invalidCreatives },
         values,
       };
     }
@@ -70,7 +88,13 @@ export async function createProject(
     return { status: "error", formError: databaseErrorMessage(error), values };
   }
 
+  // The manager and the creative directors are notified by database triggers.
+  await schedulePendingPushes();
   // Projects list and the "Projets liés" block of each linked master.
   revalidatePath(routes.app, "layout");
+  // From a side panel (a PO draft), the page behind stays.
+  if (formData.get("intent") === "dialog") {
+    return { status: "saved", project: { id: projectId, title: input.title } };
+  }
   redirect(routes.project(projectId));
 }

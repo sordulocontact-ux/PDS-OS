@@ -13,6 +13,19 @@ begin
   return v_id;
 end $$;
 
+-- The framing opens once the project has a call report (run as postgres).
+create function pg_temp.add_call_report(p_project uuid) returns void language sql as $$
+  with c as (
+    insert into public.calls (organization_id, project_id, title, consent)
+    select organization_id, id, 'Call de cadrage', 'granted' from public.projects where id = p_project
+    returning id, organization_id),
+  t as (
+    insert into public.transcripts (organization_id, call_id, text, provider, model)
+    select organization_id, id, 'Transcription', 'test', 'test' from c
+    returning id, organization_id, call_id)
+  insert into public.call_reports (organization_id, call_id, transcript_id, summary, provider, model)
+  select organization_id, call_id, id, 'Résumé', 'test', 'test' from t;
+$$;
 create function pg_temp.act_as(p_user uuid) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
@@ -61,6 +74,7 @@ select is((select count(*)::int from public.claim_push_deliveries()), 1,
 select is((select count(*)::int from public.claim_push_deliveries()), 0, 'a push is claimed once');
 
 reset role;
+select pg_temp.add_call_report((select id from ids where name = 'project'));
 select pg_temp.act_as((select id from ids where name = 'manager'));
 select is((select kind from public.notifications where subject_id = (select id from ids where name = 'a1')),
           'project_transmitted', 'the manager is notified of the transmission');

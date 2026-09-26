@@ -46,6 +46,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001101_launch_strategy` | Stratégie de lancement : `levers` (famille, `to_decide`/`selected`/`rejected`, `need_id` facultatif, provenance), `strategy_deliverables` (levier retenu obligatoire, responsable et échéance facultatifs), `milestones` (date saisie, type fermé, livrable facultatif, détaché si le livrable est retiré). `strategy_is_editable` : **responsable + étape en cours** → écriture (y compris `field_values` `strategy`, politique restrictive), figée dès la demande de validation. `start_stage` refuse la Stratégie tant que le Cadrage n'est pas validé (`previous_stage_not_validated`). Triggers `check_strategy_links` (`lever_not_selected`, `lever_has_deliverables`). `report_items` : kinds `positioning`, `audiences`, `narrative`, `lever`. |
 | `…260926001201_project_visibility` | **Qui voit un projet** : `can_see_project` / `can_see_project_row` — DG (`view_all_projects`), responsable, destinataire d'une transmission en attente, directeur créatif de l'équipe (`project_creatives`, `add_project_creative` / `remove_project_creative` par le DG ou le responsable, notification `project_creative_added`). Policies de lecture de toutes les tables d'un projet (et audios Storage) réécrites ; une tâche reste visible à son assigné, une validation à son valideur. Catalogue visible par tous. |
 | `…260926001301_lever_voice_source` | `source_type = 'voice'` autorisé sur `levers` (dictée de la Stratégie). |
+| `…260926001501_project_team_at_creation_and_framing_call` | Type `event`. `create_project` prend `p_assignee_person_id` (transmission d'office via `transmit_project`) et `p_creative_person_ids` (via `add_project_creative`), dans la même transaction : un refus annule tout. **Pas de cadrage sans call** : `framing_is_open` (compte rendu de call, ou Cadrage déjà entamé avant la règle), politiques restrictives sur `field_values` `brief`, `needs`, `project_team_members`, `start_stage` → `framing_requires_call`. |
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 
@@ -102,13 +103,27 @@ Principes :
   en, crédit + lien obligatoires CC BY-SA). HTML de Deezer réduit à du texte
   (`htmlToText`), jamais rendu comme balisage. Wikidata limite vite le débit (429) :
   ne pas marteler en test.
-- Projet créé = « Non transmis » : ni étape, ni responsable (`owner_person_id` posé
-  uniquement par `respond_to_assignment` à l'acceptation). Statut du projet **calculé par
+- **Profil d'artiste** (`20260926002001_artist_profile.sql`) : `legal_name`, `country_code`
+  (ISO alpha-2, noms via `Intl.DisplayNames`, `lib/catalog/countries.ts`), `bio` (saisie,
+  prime sur la bio auto ; vide = auto), `picture_path`. Photo : le navigateur envoie dans le
+  bucket privé `artist-pictures` (`<org>/<artist>/<uuid>.<ext>`, contrainte SQL sur le
+  chemin), puis `setArtistPicture` l'enregistre et supprime l'ancienne ; affichage par URL
+  signées d'une heure (`lib/catalog/pictures.ts`), Deezer en repli. Contacts
+  `artist_contacts` : RLS `manage_catalog` en lecture **et** écriture (le directeur créatif
+  ne voit pas les coordonnées), premier contact principal d'office, un seul principal
+  (trigger avant écriture), suppression du principal → promotion du plus ancien. Piège :
+  dans une policy `storage.objects`, écrire `objects.name` dans une sous-requête sur une
+  table qui a aussi une colonne `name` (sinon c'est elle qui est lue).
+- Projet créé **avec son équipe** : le formulaire exige un chef de projet (le projet lui est
+  transmis d'office, il accepte / refuse / demande une précision comme avant) et propose
+  les directeurs créatifs (pastilles `CreativePicker`). Ni étape, ni responsable avant
+  l'acceptation (`owner_person_id` posé uniquement par `respond_to_assignment`). En SQL,
+  l'assigné reste facultatif (tests, projets hérités) : l'obligation est dans le schéma zod. Statut du projet **calculé par
   le code** (`projectStatusOf`) : étapes présentes → lancé, sinon dernière transmission
   (en attente, refusé, précision demandée), sinon non transmis. Les sections Cadrage / Calls / Sortie répondent 404 tant que le projet n'a
   pas d'étape (`requireLaunchedProject`).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 183 tests). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 214 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
@@ -205,6 +220,10 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
 ## 6. Cadrage (étape 5)
 
 `app/(app)/app/projects/[projectId]/framing`, `lib/framing/*`, `components/framing/*`.
+**Le cadrage part d'un call** : tant que `framing_is_open` est faux (aucun compte rendu),
+la page et la vue d'ensemble affichent `FramingNeedsCall` (lien vers les Calls, placés
+avant le Cadrage dans les onglets). Un call brouillon daté dans le futur est affiché « À
+venir » (`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
 Import d'un compte rendu → propositions « proposé · à confirmer » (Brief, besoins, équipe,
 points ouverts), provenance cliquable (call + minutage + citation), confirmer / rejeter /
 modifier, besoins identifié → engagé, actions proposées → tâches (responsable + échéance

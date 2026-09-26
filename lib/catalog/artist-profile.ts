@@ -8,7 +8,7 @@ import type {
   ArtistBio,
   ArtistProfile,
   ArtistRelease,
-} from "@/lib/catalog/types";
+} from "@/lib/catalog/artist-types";
 import { getDeezerArtist } from "@/lib/integrations/deezer";
 import {
   listArtistReleases,

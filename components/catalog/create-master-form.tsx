@@ -10,6 +10,7 @@ import { ArtistPicker } from "@/components/catalog/artist-picker";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { createMaster } from "@/lib/catalog/actions";
+import { updateMaster } from "@/lib/catalog/master-edit-actions";
 import {
   idleCreateMasterState,
   type ArtistOption,
@@ -18,24 +19,40 @@ import {
 } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
+export type MasterDefaults = {
+  title: string;
+  version: string;
+  isrc: string;
+  duration: string;
+};
+
 // Step B form. As a page it redirects to the new master; inside the project
-// form's modal (onCreated given) it hands the master back instead.
+// form's modal (onCreated given) it hands the master back instead. With
+// `masterId` it edits that master (a PO draft reviewed in a side panel).
 export function CreateMasterForm({
   artists,
   defaultCredits,
+  defaults,
+  masterId,
   onCreated,
   onCancel,
   onArtistCreated,
 }: {
   artists: ArtistOption[];
   defaultCredits?: Credit[];
+  defaults?: MasterDefaults;
+  masterId?: string;
   onCreated?: (master: MasterOption) => void;
   onCancel?: () => void;
   onArtistCreated?: (artist: ArtistOption) => void;
 }) {
   const t = fr.catalog.masterForm;
-  const [state, action] = useActionState(createMaster, idleCreateMasterState);
-  const values = state.status === "error" ? (state.values ?? {}) : {};
+  const [state, action] = useActionState(
+    masterId ? updateMaster : createMaster,
+    idleCreateMasterState,
+  );
+  const saved = state.status === "error" ? (state.values ?? {}) : {};
+  const values = { ...defaults, ...saved };
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   // Field ids are prefixed in the modal: the project form behind has a title too.
   const prefix = onCreated ? "master-" : "";
@@ -53,6 +70,7 @@ export function CreateMasterForm({
         name="intent"
         value={onCreated ? "dialog" : "page"}
       />
+      {masterId && <input type="hidden" name="masterId" value={masterId} />}
       <Field
         id={`${prefix}title`}
         name="title"
@@ -128,7 +146,13 @@ export function CreateMasterForm({
             {t.cancel}
           </Link>
         )}
-        <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>
+        {masterId ? (
+          <SubmitButton pendingLabel={fr.catalog.profileForm.submitting}>
+            {fr.catalog.profileForm.submit}
+          </SubmitButton>
+        ) : (
+          <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>
+        )}
       </div>
     </form>
   );

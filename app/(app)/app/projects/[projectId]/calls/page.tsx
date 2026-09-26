@@ -26,6 +26,7 @@ export default async function ProjectCallsPage({
   if (!projectTitle) notFound();
   const calls = await listCalls(supabase, projectId);
   const t = fr.calls.list;
+  const now = new Date();
   const empty = calls.length === 0;
 
   return (
@@ -38,7 +39,7 @@ export default async function ProjectCallsPage({
         {!empty && (
           <CreateCallForm
             projectId={projectId}
-            defaultOccurredAt={toParisLocalInput(new Date())}
+            defaultOccurredAt={toParisLocalInput(now)}
             initiallyOpen={false}
           />
         )}
@@ -54,12 +55,12 @@ export default async function ProjectCallsPage({
           </div>
           <CreateCallForm
             projectId={projectId}
-            defaultOccurredAt={toParisLocalInput(new Date())}
+            defaultOccurredAt={toParisLocalInput(now)}
             initiallyOpen
           />
         </section>
       ) : (
-        <CallList projectId={projectId} calls={calls} />
+        <CallList projectId={projectId} calls={calls} now={now} />
       )}
     </div>
   );

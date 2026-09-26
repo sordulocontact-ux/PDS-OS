@@ -12,7 +12,7 @@ import {
   RELEASE_KINDS,
   type ArtistRelease,
   type ReleaseKind,
-} from "@/lib/catalog/types";
+} from "@/lib/catalog/artist-types";
 import { fr } from "@/lib/i18n/fr";
 import { upcomingReleaseTone } from "@/lib/ui/state-tones";
 

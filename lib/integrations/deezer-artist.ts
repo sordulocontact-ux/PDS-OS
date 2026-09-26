@@ -2,7 +2,7 @@ import "server-only";
 
 import { z } from "zod";
 
-import { RELEASE_KINDS, type ReleaseKind } from "@/lib/catalog/types";
+import { RELEASE_KINDS, type ReleaseKind } from "@/lib/catalog/artist-types";
 import { deezerImage as image } from "@/lib/integrations/deezer";
 import { fetchJson } from "@/lib/integrations/http";
 

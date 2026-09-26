@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AssistantProvider } from "@/components/assistant/assistant-provider";
 import { AccessWatcher } from "@/components/auth/access-watcher";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { NotificationListener } from "@/components/notifications/notification-listener";
@@ -57,40 +58,42 @@ export default async function AppLayout({
   );
 
   return (
-    <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
-      <AccessWatcher
-        current={access.state}
-        role={access.role}
-        intervalMs={60_000}
-      />
-      {signedIn && access.personId && (
-        <NotificationListener personId={access.personId} />
-      )}
+    <AssistantProvider launcher={signedIn}>
+      <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
+        <AccessWatcher
+          current={access.state}
+          role={access.role}
+          intervalMs={60_000}
+        />
+        {signedIn && access.personId && (
+          <NotificationListener personId={access.personId} />
+        )}
 
-      <aside className="sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--nav-width)] shrink-0 flex-col justify-between gap-6 overflow-y-auto rounded-3xl bg-sidebar px-6 py-4 text-sidebar-foreground md:flex">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center justify-between gap-2">
-            {brand}
-            {/* Centred on the brand without making the row taller. */}
-            <div className="-my-3.5">{bell("right")}</div>
+        <aside className="sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--nav-width)] shrink-0 flex-col justify-between gap-6 overflow-y-auto rounded-3xl bg-sidebar px-6 py-4 text-sidebar-foreground md:flex">
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between gap-2">
+              {brand}
+              {/* Centred on the brand without making the row taller. */}
+              <div className="-my-3.5">{bell("right")}</div>
+            </div>
+            <NavLinks isAdmin={isAdmin} pendingMembers={pendingMembers} />
           </div>
-          <NavLinks isAdmin={isAdmin} pendingMembers={pendingMembers} />
-        </div>
-        {userPanel}
-      </aside>
+          {userPanel}
+        </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
-          <MobileNav
-            isAdmin={isAdmin}
-            pendingMembers={pendingMembers}
-            footer={userPanel}
-          />
-          {brand}
-          <div className="ml-auto">{bell("bottom")}</div>
-        </header>
-        <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
+            <MobileNav
+              isAdmin={isAdmin}
+              pendingMembers={pendingMembers}
+              footer={userPanel}
+            />
+            {brand}
+            <div className="ml-auto">{bell("bottom")}</div>
+          </header>
+          <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+        </div>
       </div>
-    </div>
+    </AssistantProvider>
   );
 }

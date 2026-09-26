@@ -7,6 +7,13 @@ export const framing = {
   proposedHint:
     "Proposé par PO à partir d'un call. Relisez, puis confirmez ou rejetez.",
   empty: "Pas encore renseigné.",
+  needsCall: {
+    title: "Le cadrage part d'un call",
+    body: "Planifiez ou enregistrez un premier échange. Son compte rendu pré-remplira le Brief.",
+    bodyReadOnly:
+      "Le Brief s'ouvrira dès que le chef de projet aura enregistré un call et obtenu son compte rendu.",
+    toCalls: "Aller aux calls",
+  },
   fields: {
     objective: "Objectif",
     timing: "Temporalité",
@@ -122,6 +129,8 @@ export const framing = {
     reason_required: "Un motif est obligatoire.",
     previous_stage_not_validated:
       "Le Brief doit être validé avant de commencer la stratégie.",
+    framing_requires_call:
+      "Le cadrage part d'un call : enregistrez-en un et obtenez son compte rendu d'abord.",
     stage_locked:
       "La stratégie n'est modifiable que pendant qu'elle est en cours (ni avant, ni une fois soumise ou validée).",
     lever_not_selected: "Un livrable se rattache à un levier retenu.",

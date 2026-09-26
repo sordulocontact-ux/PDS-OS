@@ -2,7 +2,9 @@ import type { UIMessage } from "ai";
 import { IconLoader } from "nucleo-sharp-essential";
 import Link from "next/link";
 
+import { DraftCard } from "@/components/assistant/draft-card";
 import { evidenceOf, plainText } from "@/components/assistant/tool-output";
+import { proposalOf } from "@/lib/assistant/drafts";
 import { fr } from "@/lib/i18n/fr";
 
 type Part = UIMessage["parts"][number];
@@ -31,8 +33,14 @@ export function AssistantMessage({ message }: { message: UIMessage }) {
   const running = tools.filter(
     (p) => p.state !== "output-available" && p.state !== "output-error",
   );
-  const evidence = tools
-    .filter((p) => p.state === "output-available")
+  const done = tools.filter((p) => p.state === "output-available");
+  // Drafts show as cards; their facts would only repeat the card.
+  const drafts = done.flatMap((p) => {
+    const proposal = proposalOf(p.output);
+    return proposal ? [{ toolCallId: p.toolCallId, proposal }] : [];
+  });
+  const evidence = done
+    .filter((p) => !proposalOf(p.output))
     .map((p) => evidenceOf(p.output));
   const facts = evidence.flatMap((e) => e.facts);
   const sources = [
@@ -61,6 +69,9 @@ export function AssistantMessage({ message }: { message: UIMessage }) {
           {plainText(text)}
         </p>
       )}
+      {drafts.map((d) => (
+        <DraftCard key={d.toolCallId} {...d} />
+      ))}
       {facts.length > 0 && (
         <details className="rounded-lg border border-border px-3 py-2 text-xs">
           <summary className="cursor-pointer font-medium text-muted-foreground">

@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 
+import { FramingNeedsCall } from "@/components/framing/framing-needs-call";
 import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { isFramingOpen } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
 import {
   listCreativePeople,
@@ -13,6 +15,7 @@ import {
 } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
+import { FactList } from "@/components/ui/fact-list";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -63,6 +66,8 @@ export default async function ProjectOverviewPage({
     );
   }
 
+  // First thing to do once launched: a call, the framing starts from it.
+  const framingOpen = await isFramingOpen(project.id);
   const t = fr.shell.project.overview;
   const facts: Array<[string, string]> = [
     [t.artist, project.artistName || t.notProvided],
@@ -78,6 +83,12 @@ export default async function ProjectOverviewPage({
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="flex min-w-0 flex-col gap-8">
+        {!framingOpen && (
+          <FramingNeedsCall
+            projectId={project.id}
+            canEdit={canEditProject(access, project)}
+          />
+        )}
         <section aria-labelledby="stages-title" className="flex flex-col gap-3">
           <h2 id="stages-title" className="text-base font-medium">
             {t.stages}
@@ -120,14 +131,7 @@ export default async function ProjectOverviewPage({
         <h2 id="facts-title" className="text-base font-medium">
           {t.facts}
         </h2>
-        <dl className="flex flex-col gap-3 rounded-xl border border-border p-4 text-sm">
-          {facts.map(([label, value]) => (
-            <div key={label} className="flex flex-col gap-0.5">
-              <dt className="text-xs text-muted-foreground">{label}</dt>
-              <dd className="font-medium break-words">{value}</dd>
-            </div>
-          ))}
-        </dl>
+        <FactList facts={facts.map(([label, value]) => ({ label, value }))} />
       </section>
     </div>
   );

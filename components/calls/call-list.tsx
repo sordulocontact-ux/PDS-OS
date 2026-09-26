@@ -3,7 +3,7 @@ import { IconChevronRight } from "nucleo-sharp-essential";
 
 import { CallStatusBadge, ConsentBadge } from "@/components/calls/call-badges";
 import { routes } from "@/lib/auth/redirects";
-import { formatDateTime } from "@/lib/calls/format";
+import { formatDateTime, isUpcoming } from "@/lib/calls/format";
 import type { CallSummary } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 
@@ -11,9 +11,12 @@ import { fr } from "@/lib/i18n/fr";
 export function CallList({
   projectId,
   calls,
+  now,
 }: {
   projectId: string;
   calls: CallSummary[];
+  // Reference time for "À venir", taken once by the page.
+  now: Date;
 }) {
   const t = fr.calls.list.columns;
   return (
@@ -37,7 +40,10 @@ export function CallList({
               <span className="sr-only">{t.consent} :</span>
               <ConsentBadge consent={call.consent} />
               <span className="sr-only">{t.status} :</span>
-              <CallStatusBadge status={call.status} />
+              <CallStatusBadge
+                status={call.status}
+                upcoming={isUpcoming(call, now)}
+              />
             </div>
             <IconChevronRight
               aria-hidden

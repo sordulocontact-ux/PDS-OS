@@ -9,7 +9,7 @@ export const calls = {
     emptyBodyReadOnly:
       "Les calls apparaîtront ici dès que le chef de projet responsable les aura enregistrés.",
     emptyBody:
-      "Créez un call pour y déposer son enregistrement et obtenir une transcription et un compte rendu à valider.",
+      "Le cadrage part d'un call. Planifiez le premier échange, ou enregistrez-le maintenant : sa transcription et son compte rendu pré-rempliront le Brief.",
     columns: {
       title: "Call",
       date: "Date",
@@ -22,6 +22,8 @@ export const calls = {
     fieldTitle: "Titre",
     titlePlaceholder: "Ex. Cadrage avec l'équipe de Nova Kessel",
     fieldDate: "Date et heure du call",
+    dateHint:
+      "Une date à venir planifie le call : vous l'enregistrerez le moment venu.",
     consentLegend: "Consentement à l'enregistrement",
     consentHint:
       "Chaque participant doit avoir accepté l'enregistrement avant tout dépôt audio.",
@@ -56,6 +58,8 @@ export const calls = {
     saved: "Consentement mis à jour.",
   },
   status: {
+    // Display only: a draft call planned in the future.
+    upcoming: "À venir",
     draft: "Brouillon",
     uploaded: "Audio déposé",
     transcribing: "Transcription…",

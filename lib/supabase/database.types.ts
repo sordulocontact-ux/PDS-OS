@@ -69,43 +69,119 @@ export type Database = {
           },
         ]
       }
+      artist_contacts: {
+        Row: {
+          artist_id: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          is_primary: boolean
+          name: string
+          organization_id: string
+          phone: string | null
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean
+          name: string
+          organization_id: string
+          phone?: string | null
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean
+          name?: string
+          organization_id?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artist_contacts_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_contacts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artist_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artists: {
         Row: {
           archived_at: string | null
+          bio: string | null
+          country_code: string | null
           created_at: string
           created_by: string | null
           deezer_id: number | null
           deezer_url: string | null
           id: string
+          legal_name: string | null
           name: string
           notes: string | null
           organization_id: string
+          picture_path: string | null
           picture_url: string | null
           updated_at: string
         }
         Insert: {
           archived_at?: string | null
+          bio?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           deezer_id?: number | null
           deezer_url?: string | null
           id?: string
+          legal_name?: string | null
           name: string
           notes?: string | null
           organization_id: string
+          picture_path?: string | null
           picture_url?: string | null
           updated_at?: string
         }
         Update: {
           archived_at?: string | null
+          bio?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           deezer_id?: number | null
           deezer_url?: string | null
           id?: string
+          legal_name?: string | null
           name?: string
           notes?: string | null
           organization_id?: string
+          picture_path?: string | null
           picture_url?: string | null
           updated_at?: string
         }
@@ -2061,7 +2137,9 @@ export type Database = {
       }
       create_project: {
         Args: {
+          p_assignee_person_id?: string
           p_budget_cents?: number
+          p_creative_person_ids?: string[]
           p_due_date?: string
           p_framing_notes?: string
           p_master_ids?: string[]
@@ -2084,6 +2162,7 @@ export type Database = {
         Args: { p_endpoint: string }
         Returns: undefined
       }
+      framing_is_open: { Args: { p_project_id: string }; Returns: boolean }
       get_my_access: { Args: never; Returns: Json }
       get_smartlink: { Args: { p_token: string }; Returns: Json }
       has_permission: {
@@ -2102,6 +2181,7 @@ export type Database = {
       is_active_member: { Args: { org_id: string }; Returns: boolean }
       is_call_owner: { Args: { p_call_id: string }; Returns: boolean }
       is_org_admin: { Args: { org_id: string }; Returns: boolean }
+      is_project_launched: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
       list_assignable_people: {
         Args: { p_organization_id: string }
@@ -2226,6 +2306,30 @@ export type Database = {
         Returns: string
       }
       try_uuid: { Args: { input: string }; Returns: string }
+      update_master: {
+        Args: {
+          p_credits: Json
+          p_duration_seconds?: number
+          p_isrc?: string
+          p_master_id: string
+          p_title: string
+          p_version?: string
+        }
+        Returns: undefined
+      }
+      update_project: {
+        Args: {
+          p_budget_cents?: number
+          p_due_date?: string
+          p_framing_notes?: string
+          p_master_ids?: string[]
+          p_priority?: string
+          p_project_id: string
+          p_title: string
+          p_type: string
+        }
+        Returns: undefined
+      }
       usable_admin_count: {
         Args: {
           exclude_account_id?: string

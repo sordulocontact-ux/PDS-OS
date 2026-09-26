@@ -26,6 +26,7 @@ export const projectStatusTone: Record<string, Tone> = {
 
 export const callStatusTone: Record<string, Tone> = {
   draft: "neutral",
+  upcoming: "info",
   uploaded: "neutral",
   transcribing: "info",
   transcribed: "info",

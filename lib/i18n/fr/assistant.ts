@@ -20,7 +20,78 @@ export const assistant = {
     my_todo: "Lecture de vos tâches",
     recent_activity: "Lecture de l'activité récente",
     search_calls: "Recherche dans les calls",
+    propose_artist: "Préparation de la fiche artiste",
+    propose_master: "Préparation du master",
+    propose_project: "Préparation du projet",
   } as Record<string, string>,
+  // Drafts proposed by PO: nothing is written before a person saves them.
+  drafts: {
+    badge: "Proposition de PO",
+    notSaved: "Rien n'est enregistré tant que vous n'avez pas validé.",
+    review: "Relire et enregistrer",
+    saved: "Enregistré",
+    open: "Ouvrir",
+    loading: "Préparation du formulaire…",
+    loadFailed: "Le formulaire n'a pas pu être préparé. Réessayez.",
+    close: "Fermer",
+    empty: "Aucune valeur proposée : complétez le formulaire.",
+    titles: {
+      createArtist: (name: string) =>
+        name ? `Nouvel artiste : ${name}` : "Nouvel artiste",
+      updateArtist: (name: string) => `Modifier la fiche de ${name}`,
+      createMaster: (title: string) =>
+        title ? `Nouveau master : ${title}` : "Nouveau master",
+      updateMaster: (title: string) => `Modifier le master ${title}`,
+      createProject: (title: string) =>
+        title ? `Nouveau projet : ${title}` : "Nouveau projet",
+      updateProject: (title: string) => `Modifier le projet ${title}`,
+    },
+    sheet: {
+      artist: "Relisez la fiche, corrigez si besoin, puis enregistrez.",
+      artistProfile:
+        "L'artiste est créé. Relisez maintenant son identité et sa biographie.",
+      contacts: (count: number) =>
+        count === 1
+          ? "Relisez le contact proposé, puis enregistrez-le."
+          : `Relisez les ${count} contacts proposés, un par un.`,
+      master: "Relisez le master, corrigez si besoin, puis enregistrez.",
+      project: "Relisez le projet, corrigez si besoin, puis enregistrez.",
+    },
+    labels: {
+      contact: (role: string) => `Contact (${role})`,
+      credits: "Artistes",
+    },
+    // Facts for the model and the "Données utilisées" list.
+    ready: (title: string) =>
+      `Proposition préparée : ${title}. Rien n'est enregistré : l'utilisateur doit la relire et l'enregistrer lui-même avec « Relire et enregistrer ».`,
+    forbiddenCatalog:
+      "L'utilisateur n'a pas le droit de modifier le catalogue (artistes, masters).",
+    forbiddenProjects: "L'utilisateur n'a pas le droit de créer des projets.",
+    launched: (title: string) =>
+      `Le projet ${title} est lancé : ses informations ne se modifient plus ici, mais dans ses étapes (Cadrage, Stratégie) par son chef de projet.`,
+    notFound: (what: string, name: string) =>
+      `${what} « ${name} » introuvable dans PDS OS (ou nom ambigu).`,
+    what: { artist: "Artiste", master: "Master", project: "Projet" },
+    unknownArtist: (name: string) =>
+      `« ${name} » n'est pas au catalogue : créez d'abord l'artiste, ou choisissez-le dans le formulaire.`,
+    unknownMaster: (title: string) =>
+      `Master « ${title} » introuvable : rattachez-le dans le formulaire.`,
+    unknownPerson: (name: string) =>
+      `« ${name} » n'est pas un membre possible pour ce rôle : choisissez-le dans le formulaire.`,
+    unknownCountry: (country: string) =>
+      `Pays « ${country} » non reconnu : choisissez-le dans le formulaire.`,
+    notSaid: (label: string) =>
+      `${label} non repris : il doit figurer tel quel dans votre message (avec l'année pour une date).`,
+    teamByTransmission:
+      "L'équipe d'un projet déjà créé change par la transmission, pas par cette proposition.",
+  },
+  launcher: {
+    title: "PO",
+    description:
+      "Posez une question ou demandez une création. La dictée démarre dès l'ouverture.",
+    hint: "Espace Espace pour ouvrir PO depuis n'importe quelle page.",
+    close: "Fermer",
+  },
   facts: "Données utilisées",
   sources: "Sources",
   you: "Vous",

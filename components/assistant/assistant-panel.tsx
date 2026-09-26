@@ -1,7 +1,6 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import { IconArrowUp, IconStop } from "@/components/icons";
 import {
   useEffect,
@@ -12,6 +11,7 @@ import {
 } from "react";
 
 import { AssistantMessage } from "@/components/assistant/assistant-message";
+import { useAssistant } from "@/components/assistant/assistant-provider";
 import { useVoiceInput } from "@/components/voice/use-voice-input";
 import {
   VoiceInputButton,
@@ -20,15 +20,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { fr } from "@/lib/i18n/fr";
+import { cn } from "@/lib/utils";
 
 const MAX_LENGTH = 2000;
 
 /**
  * The PO assistant (Figma "Desktop - 11"): suggestions, then a tinted input
  * with the microphone and send buttons. The conversation lives in this tab
- * only (docs/ASSISTANT.md § 2).
+ * only (docs/ASSISTANT.md § 2), shared by the home page and the Espace Espace
+ * window (`compact`, which starts listening at once: `autoListen`).
  */
-export function AssistantPanel() {
+export function AssistantPanel({
+  compact = false,
+  autoListen = false,
+}: {
+  compact?: boolean;
+  autoListen?: boolean;
+}) {
   const t = fr.assistant;
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
@@ -40,10 +48,21 @@ export function AssistantPanel() {
     );
     inputRef.current?.focus();
   });
+  const { chat } = useAssistant();
   const { messages, sendMessage, status, stop, error, setMessages } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/assistant" }),
+    chat,
   });
   const busy = status === "submitted" || status === "streaming";
+
+  // Opened to talk: listening starts with the window, once.
+  const listened = useRef(false);
+  useEffect(() => {
+    if (!autoListen || listened.current) return;
+    listened.current = true;
+    voice.toggle();
+    // The voice helpers change identity on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoListen]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "nearest" });
@@ -69,7 +88,9 @@ export function AssistantPanel() {
       !event.nativeEvent.isComposing
     ) {
       event.preventDefault();
-      ask(input);
+      // While dictating, Enter ends the dictation: the text is read first.
+      if (voice.phase === "recording") voice.toggle();
+      else ask(input);
     }
   };
 
@@ -87,7 +108,10 @@ export function AssistantPanel() {
             {t.clear}
           </Button>
           <div
-            className="grid max-h-[28rem] gap-4 overflow-y-auto pr-1"
+            className={cn(
+              "grid gap-4 overflow-y-auto pr-1",
+              compact ? "max-h-[45dvh]" : "max-h-[28rem]",
+            )}
             aria-live="polite"
           >
             {messages.map((m) => (
@@ -129,7 +153,10 @@ export function AssistantPanel() {
       />
       <form
         onSubmit={onSubmit}
-        className="flex min-h-51 flex-col gap-4 rounded-2xl border border-transparent bg-[var(--surface-tint)] p-6 transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-[color:var(--border-strong)]"
+        className={cn(
+          "flex flex-col gap-4 rounded-2xl border border-transparent bg-[var(--surface-tint)] p-6 transition-[border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] has-[textarea:focus-visible]:border-[color:var(--border-strong)]",
+          compact ? "min-h-32" : "min-h-51",
+        )}
       >
         <label htmlFor="assistant-input" className="sr-only">
           {t.label}
@@ -146,6 +173,7 @@ export function AssistantPanel() {
           className="max-h-60 min-h-0 grow resize-none rounded-none border-0 p-0 text-base font-medium focus-visible:ring-0 md:text-base"
           // Read-only, not disabled: it takes the focus back with the text.
           readOnly={voice.phase === "transcribing"}
+          autoFocus={compact}
           aria-busy={voice.phase === "transcribing"}
         />
         <div className="flex justify-end gap-2">
@@ -179,6 +207,12 @@ export function AssistantPanel() {
       </form>
       <p className="text-center text-caption text-muted-foreground">
         {t.disclaimer}
+        {!compact && (
+          <>
+            <br />
+            {t.launcher.hint}
+          </>
+        )}
       </p>
     </section>
   );

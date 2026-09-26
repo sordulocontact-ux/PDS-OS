@@ -7,6 +7,7 @@ export const PROJECT_TYPES = [
   "music_release",
   "partnership",
   "content",
+  "event",
 ] as const;
 export type ProjectType = (typeof PROJECT_TYPES)[number];
 
@@ -137,7 +138,9 @@ export type CreateProjectState =
       formError?: string;
       fieldErrors?: FieldErrors;
       values?: FormValues;
-    };
+    }
+  // Saved from a side panel (intent=dialog), or edited: the page stays.
+  | { status: "saved"; project: { id: string; title: string } };
 
 export const idleCreateProjectState: CreateProjectState = { status: "idle" };
 

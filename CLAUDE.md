@@ -138,11 +138,20 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
 | `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
 | `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2 + contenu, action facultative) |
+| `SectionTabs` | `shell/section-tabs.tsx` | onglets-liens d'une page de détail (projet, artiste), `aria-current` |
+| `FactList` | `ui/fact-list.tsx` | liste libellé / valeur dans une carte (faits d'un master, d'un projet, identité) |
+| `StatTiles` | `ui/stat-tiles.tsx` | chiffres clés en tuiles (+ squelette) |
 | `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
 | `NavLinks`, `MobileNav`, `UserPanel` | `shell/` | navigation de la barre latérale blanche et du tiroir mobile (`docs/DESIGN.md` § 4) |
 | `HomeCard`, `CardRow` | `home/home-card.tsx` | carte de l'accueil (libellé gris, liste de lignes liées) |
+| `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO partagée, fenêtre Espace Espace, panneau de relecture des brouillons |
+| `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
+| `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
 | `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
+| `CreativePicker` | `projects/creative-picker.tsx` | choix multiple de personnes en `FilterChip`, envoyé en un champ JSON |
+| `FramingNeedsCall` | `framing/framing-needs-call.tsx` | état « le cadrage part d'un call » (Cadrage verrouillé, vue d'ensemble) |
+| `ArtistEditSheet`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | panneau « Modifier » (photo, identité, bio), contacts de l'artiste |
 | `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
 | `Icon*` | `icons/index.ts` | icônes dessinées maison ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
 
@@ -213,6 +222,15 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   → `ministral-14b-latest`. Provenance calculée par le code (`lib/ai/provenance.ts`).
   Assistant : faits rédigés par le code et affichés sous la réponse, **jamais la date du
   jour dans le contexte du modèle** (`docs/ASSISTANT.md`).
+- **PO écrit avec validation humaine** : `propose_artist|master|project`
+  (`lib/assistant/propose/`) renvoient un brouillon, jamais une écriture ; la carte ouvre le
+  **vrai formulaire** pré-rempli dans un panneau latéral, l'humain enregistre avec sa
+  session. Chiffres, dates, ISRC, emails : recopiés de ce que l'utilisateur a écrit, vérifiés
+  et lus par le code (`lib/assistant/verbatim.ts`). Projet modifiable tant qu'il n'est pas
+  lancé (`update_project`), master par `update_master` (`docs/ASSISTANT.md` § 3 bis).
+- **Espace Espace** : ouvre PO depuis toute page de l'app, dictée déjà à l'écoute ;
+  conversation partagée avec l'accueil (`components/assistant/assistant-provider.tsx`,
+  `assistant-launcher.tsx`, `docs/ASSISTANT.md` § 2 bis).
 - **Audio** : enregistreur dans l'app (onglet Meet/Zoom + micro, ou micro seul) ;
   `AudioContext.resume()` obligatoire ; alerte après 2 min de silence de l'onglet.
   Groq : `groq-tolerant-fetch.ts` évite « Invalid JSON response » sur de vrais audios.
@@ -223,16 +241,22 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   Micro de l'assistant : transcription seule, texte inséré dans la saisie, jamais envoyé seul.
 - **Catalogue** : artistes, masters (crédits ordonnés), projets rattachés à 0..n masters
   (`lib/catalog/`, `/app/catalog/*`). Sortie musicale ⇒ au moins un master (vérifié au
-  commit). Un projet naît **non transmis, sans étape ni responsable** ; Cadrage, Calls et
-  Sortie n'existent qu'après lancement, c.-à-d. après acceptation par un chef de projet
-  (`transmit_project` / `respond_to_assignment`, statut calculé par `projectStatusOf`).
+  commit). Types : sortie musicale, contenu, partenariat, événement. Un projet naît **avec
+  son équipe** : chef de projet obligatoire (transmis d'office) + directeurs créatifs, dans
+  `create_project` ; sans étape ni responsable jusqu'à l'acceptation. Cadrage, Calls et
+  Sortie n'existent qu'après lancement (`transmit_project` / `respond_to_assignment`,
+  statut calculé par `projectStatusOf`). **Pas de cadrage sans compte rendu de call**
+  (`framing_is_open` en SQL, `FramingNeedsCall` à l'écran) ; onglet Calls avant Cadrage.
   Nouvel artiste : recherche Deezer d'abord (photo, lien), saisie manuelle en repli ; le
   serveur relit Deezer, seul l'id vient du client. Sélecteurs :
   `components/catalog/search-picker.tsx` (commun), création en modale sans perte de saisie
   (`docs/ARCHITECTURE.md` § 2).
-  Fiche artiste : fans, discographie, dernière sortie, top titres, similaires lus en direct
-  sur Deezer (cache 1 h, rien en base) ; bio par l'API **interne** Deezer, repli Wikipédia
-  via Wikidata P2722 (`lib/catalog/artist-profile.ts`, `docs/ARCHITECTURE.md` § 2).
+  Fiche artiste à onglets (`/app/catalog/artists/[id]` + `/discography`, layout commun) :
+  identité (nom civil, pays ISO), contacts (`artist_contacts`, **lus et écrits seulement avec
+  `manage_catalog`**, un principal tenu par trigger), bio saisie qui prime sur l'auto, photo
+  téléversée (bucket privé `artist-pictures`, URL signées) qui prime sur celle de Deezer.
+  Deezer en direct (cache 1 h) ; bio auto par l'API **interne** Deezer, repli Wikipédia via
+  Wikidata P2722 (`lib/catalog/artist-*.ts`, `docs/ARCHITECTURE.md` § 2).
 - **Notifications** : table `notifications` écrite par triggers (jamais par le code),
   cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
@@ -260,12 +284,14 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 
 ## Méthode de travail attendue
 
+- **Construire en autonomie.** Quand Sacha demande quelque chose, le construire de bout
+  en bout **sans demander de vérification ni de feu vert** : pas de liste « j'attends ton
+  accord », pas de question de confirmation. Une règle métier manque → prendre la
+  décision la plus cohérente avec `docs/` et les règles non négociables, l'écrire dans
+  `docs/`, et la signaler dans le bilan de fin.
 - **Une étape à la fois.** Ne code pas la suivante sans qu'on te la demande.
 - **Pas de fonctionnalité non demandée.** Pas de page bonus, pas de composant
   « qui pourrait servir ».
-- **Annonce avant d'agir** quand la tâche touche plus de trois fichiers : liste ce que
-  tu vas faire, attends le feu vert.
-- **Si une information manque, demande.** Ne devine pas une règle métier.
 - **À la fin de chaque étape**, `pnpm build` doit passer, et tu listes ce qui a été fait
   et ce qui reste.
 
@@ -287,7 +313,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 183 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 214 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -296,7 +322,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 Au-delà des six étapes :
 
 - [x] Labo IA local (`/labo`), préparation du prochain call
-- [x] Assistant PO sur l'accueil + cartes (lecture seule, faits rédigés par le code)
+- [x] Assistant PO sur l'accueil + cartes (faits rédigés par le code)
 - [x] Accueil et barre latérale refaits d'après le Figma « Desktop - 11 » (barre blanche
       flottante, salutation centrée, saisie teintée, cartes à contour)
 - [x] Enregistrement des calls dans l'app (onglet + micro, alerte de silence)
@@ -317,12 +343,18 @@ Au-delà des six étapes :
       réponses » (PO pré-coche, sourcé)
 - [x] Fiche artiste enrichie depuis Deezer : chiffres, dernière sortie / dernier album,
       bio (Deezer, repli Wikipédia), discographie filtrable, top titres, similaires
+- [x] Fiche artiste, étape 1 : onglets, identité, contacts, photo et bio modifiables
+- [ ] Fiche artiste, étapes suivantes : onglets Masters, Projets, Fichiers, Activité (journal)
+- [x] Création avec l'équipe (chef de projet transmis d'office, directeurs créatifs), type
+      Événement, pas de cadrage sans compte rendu de call, calls « À venir »
+- [x] PO en écriture avec validation humaine : il prépare artiste (fiche + contacts),
+      master, projet (création ou modification avant lancement), l'humain relit le vrai
+      formulaire et enregistre ; fenêtre PO sur Espace Espace, dictée à l'écoute
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 
 À faire ensuite (proposé, non commencé) :
 
-- [ ] Modifier un projet avant transmission (titre, masters, budget…)
 - [ ] Directeur créatif : dépôt de versions des livrables (il lit seulement pour l'instant)
 - [ ] Export **Plan de sortie** (PDF, Playwright) et partage par lien de la Stratégie
 - [ ] Dictée sur les autres étapes (Sortie…) : un adaptateur chacune

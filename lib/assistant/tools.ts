@@ -5,7 +5,11 @@ import { z } from "zod";
 
 import { activityLine, formatDay, lateness } from "@/lib/assistant/facts";
 import { projectStatus } from "@/lib/assistant/project-status";
+import { proposeArtistTool } from "@/lib/assistant/propose/artist";
+import { proposeMasterTool } from "@/lib/assistant/propose/master";
+import { proposeProjectTool } from "@/lib/assistant/propose/project";
 import { uniqueSources, type Source } from "@/lib/assistant/sources";
+import { verbatimFrom } from "@/lib/assistant/verbatim";
 import type { Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { loadRecentActivity } from "@/lib/insights/activity";
@@ -15,11 +19,19 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * The assistant's only reach into the world (docs/ASSISTANT.md § 3).
- * Read-only, run with the user's session: RLS decides what is visible.
- * Every result carries `sources`, rendered by the UI under the answer.
+ * Run with the user's session: RLS decides what is visible. Nothing writes:
+ * the propose_* functions return drafts that a person reviews and saves
+ * (§ 3 bis). Every result carries `sources`, rendered under the answer.
+ * `userTexts`: what the user typed, the only place numbers and dates of a
+ * draft may come from.
  */
-export function createAssistantTools(access: Access) {
+export function createAssistantTools(access: Access, userTexts: string[]) {
+  const context = { access, verbatim: verbatimFrom(userTexts) };
   return {
+    propose_artist: proposeArtistTool(context),
+    propose_master: proposeMasterTool(context),
+    propose_project: proposeProjectTool(context),
+
     find_projects: tool({
       description:
         "Liste les projets (sorties) visibles, avec artiste, type et étape actuelle. Recherche tolérante aux fautes si un texte est donné.",

@@ -1,51 +1,56 @@
 import { ReleaseCard } from "@/components/catalog/artist-profile/release-card";
+import { StatTiles, StatTilesSkeleton } from "@/components/ui/stat-tiles";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
 import { formatFans } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Top of the artist page, read live from Deezer: key figures, then the
-// latest release and the latest album (one card when they are the same).
-export async function ArtistHighlights({ deezerId }: { deezerId: number }) {
-  const profile = await getArtistProfile(deezerId);
+// Top of the overview: the catalog's figures, then what Deezer adds (fans,
+// releases, latest release and latest album — one card when they are the
+// same). Without Deezer, or when it does not answer, the catalog's figures
+// stay.
+export async function ArtistHighlights({
+  deezerId,
+  masterCount,
+  projectCount,
+}: {
+  deezerId: number | null;
+  masterCount: number;
+  projectCount: number;
+}) {
+  const profile = deezerId === null ? null : await getArtistProfile(deezerId);
   const t = fr.catalog.deezerProfile;
-  if (!profile)
-    return <p className="text-sm text-muted-foreground">{t.unavailable}</p>;
+  const p = fr.catalog.artistPage;
 
   const stats = [
-    { label: t.stats.fans, value: formatFans(profile.fans) },
-    { label: t.stats.releases, value: String(profile.releases.length) },
-    {
-      label: t.stats.albums,
-      value: String(profile.releases.filter((r) => r.kind === "album").length),
-    },
+    { label: p.mastersCount, value: String(masterCount) },
+    { label: p.projectsCount, value: String(projectCount) },
+    ...(profile
+      ? [
+          { label: p.fansCount, value: formatFans(profile.fans) },
+          { label: t.stats.releases, value: String(profile.releases.length) },
+        ]
+      : []),
   ];
-  const { latestRelease, latestAlbum } = profile;
+  const latestRelease = profile?.latestRelease ?? null;
+  const latestAlbum = profile?.latestAlbum ?? null;
 
   return (
     <div className="flex flex-col gap-4">
-      <dl className="grid grid-cols-3 gap-3">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="flex flex-col-reverse gap-1 rounded-2xl border border-border p-3"
-          >
-            <dt className="text-caption text-grey-400">{stat.label}</dt>
-            <dd className="text-body-xl font-medium tabular-nums">
-              {stat.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      {latestRelease ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <ReleaseCard label={t.latestRelease} release={latestRelease} />
-          {latestAlbum && latestAlbum.id !== latestRelease.id && (
-            <ReleaseCard label={t.latestAlbum} release={latestAlbum} />
-          )}
-        </div>
-      ) : (
-        <p className="text-sm text-muted-foreground">{t.noRelease}</p>
+      <StatTiles stats={stats} />
+      {deezerId !== null && !profile && (
+        <p className="text-sm text-muted-foreground">{t.unavailable}</p>
       )}
+      {profile &&
+        (latestRelease ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ReleaseCard label={t.latestRelease} release={latestRelease} />
+            {latestAlbum && latestAlbum.id !== latestRelease.id && (
+              <ReleaseCard label={t.latestAlbum} release={latestAlbum} />
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t.noRelease}</p>
+        ))}
     </div>
   );
 }
@@ -53,14 +58,7 @@ export async function ArtistHighlights({ deezerId }: { deezerId: number }) {
 export function ArtistHighlightsSkeleton() {
   return (
     <div className="flex flex-col gap-4" aria-hidden>
-      <div className="grid grid-cols-3 gap-3">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-[74px] animate-pulse rounded-2xl bg-muted"
-          />
-        ))}
-      </div>
+      <StatTilesSkeleton />
       <div className="grid gap-3 sm:grid-cols-2">
         {[0, 1].map((i) => (
           <div
