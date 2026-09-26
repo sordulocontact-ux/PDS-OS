@@ -27,11 +27,13 @@ export function UnlaunchedOverview({
   viewerPersonId,
   canTransmit,
   people,
+  creativeTeam,
 }: {
   project: ProjectDetail;
   viewerPersonId: string | null;
   canTransmit: boolean;
   people: Array<{ personId: string; name: string }>;
+  creativeTeam: React.ReactNode;
 }) {
   const t = fr.shell.project.overview;
   const facts: Array<[string, string | null, boolean?]> = [
@@ -108,6 +110,7 @@ export function UnlaunchedOverview({
           </section>
         )}
 
+        {creativeTeam}
         <AssignmentHistory assignments={project.assignments} />
       </div>
 

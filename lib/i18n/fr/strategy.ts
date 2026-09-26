@@ -77,6 +77,13 @@ export const strategy = {
     dayOffset: (days: number) =>
       days === 0 ? "Jour J" : days < 0 ? `J${days}` : `J+${days}`,
   },
+  dictation: {
+    kinds: {
+      field: (field: string, isEdit: boolean) =>
+        `${field} · ${isEdit ? "modification" : "à renseigner"}`,
+      lever: (family: string) => `Nouveau levier · ${family}`,
+    },
+  },
   import: {
     title: "Importer depuis un call",
     hint: "Propose positionnement, publics, narratif et leviers entendus pendant un call. Rien n'est confirmé automatiquement ; le calendrier reste saisi à la main.",

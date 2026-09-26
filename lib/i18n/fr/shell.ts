@@ -91,6 +91,20 @@ export const shell = {
   },
 
   project: {
+    creatives: {
+      title: "Équipe créative",
+      empty: "Aucun directeur créatif sur ce projet.",
+      add: "Ajouter",
+      adding: "Ajout…",
+      placeholder: "Choisir un directeur créatif",
+      label: "Directeur créatif",
+      remove: (name: string) => `Retirer ${name}`,
+      removeShort: "Retirer",
+      noneAvailable: "Tous les directeurs créatifs sont déjà sur ce projet.",
+      noCreative: "Aucun directeur créatif dans l'équipe pour l'instant.",
+      error: "Impossible de modifier l'équipe créative. Réessayez.",
+      hint: "Ils voient le projet et tout ce qu'il contient, sans le modifier.",
+    },
     back: "Tous les projets",
     tabsLabel: "Sections du projet",
     tabs: {

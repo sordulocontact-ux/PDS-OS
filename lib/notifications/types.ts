@@ -12,6 +12,7 @@ export const NOTIFICATION_KINDS = [
   "validation_approved",
   "validation_rejected",
   "task_assigned",
+  "project_creative_added",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 

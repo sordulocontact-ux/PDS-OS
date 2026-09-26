@@ -27,6 +27,8 @@ export const notifications = {
       `${actor} a refusé votre demande de validation sur « ${project} ».`,
     task_assigned: (actor: string, project: string) =>
       `${actor} vous assigne une tâche sur « ${project} ».`,
+    project_creative_added: (actor: string, project: string) =>
+      `${actor} vous ajoute à l'équipe créative de « ${project} ».`,
   },
   open: "Ouvrir",
   push: {

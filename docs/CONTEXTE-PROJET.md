@@ -438,7 +438,8 @@ table de correspondance traduit le poste en permissions (`role_permissions` en b
 
 ### Encore ouvert
 
-- Qui affecte le directeur créatif à un projet (DG, chef de projet, les deux) ; un projet
-  peut-il avoir plusieurs DC ?
+- ~~Qui affecte le directeur créatif à un projet ; un projet peut-il avoir plusieurs DC ?~~
+  Tranché le 26/09/2026 : le DG (tous les projets) et le chef de projet responsable (ses
+  projets) ; plusieurs DC par projet. Un DC ne voit que les projets de son équipe créative.
 - Un compte s'inscrit **sans poste** ; c'est le DG qui le fixe en l'approuvant.
 

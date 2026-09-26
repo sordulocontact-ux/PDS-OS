@@ -44,6 +44,8 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926000901_owner_writes_project` | **Seul le responsable écrit dans un projet** (`is_project_owner`, `is_call_owner`) : cadrage, calls (+ audios du Storage), sortie ; le DG et les autres lisent. `start_stage` / `request_validation` réservées au responsable, valideur = détenteur de `validate` (`list_validators`). L'assigné d'une tâche peut la cocher. `record_release_detection` : responsable ou job serveur. |
 | `…260926001001_validated_stage_is_final` | Une étape validée est **définitive** : `start_stage` ne démarre qu'une étape « à venir » (plus de « Rouvrir »). Un refus renvoie toujours en cours. |
 | `…260926001101_launch_strategy` | Stratégie de lancement : `levers` (famille, `to_decide`/`selected`/`rejected`, `need_id` facultatif, provenance), `strategy_deliverables` (levier retenu obligatoire, responsable et échéance facultatifs), `milestones` (date saisie, type fermé, livrable facultatif, détaché si le livrable est retiré). `strategy_is_editable` : **responsable + étape en cours** → écriture (y compris `field_values` `strategy`, politique restrictive), figée dès la demande de validation. `start_stage` refuse la Stratégie tant que le Cadrage n'est pas validé (`previous_stage_not_validated`). Triggers `check_strategy_links` (`lever_not_selected`, `lever_has_deliverables`). `report_items` : kinds `positioning`, `audiences`, `narrative`, `lever`. |
+| `…260926001201_project_visibility` | **Qui voit un projet** : `can_see_project` / `can_see_project_row` — DG (`view_all_projects`), responsable, destinataire d'une transmission en attente, directeur créatif de l'équipe (`project_creatives`, `add_project_creative` / `remove_project_creative` par le DG ou le responsable, notification `project_creative_added`). Policies de lecture de toutes les tables d'un projet (et audios Storage) réécrites ; une tâche reste visible à son assigné, une validation à son valideur. Catalogue visible par tous. |
+| `…260926001301_lever_voice_source` | `source_type = 'voice'` autorisé sur `levers` (dictée de la Stratégie). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 
 Principes :
@@ -68,6 +70,11 @@ Principes :
   demande. Côté écran : `canEditProject()` (`lib/projects/edit-access.ts`) alimente
   `useCanEditProject()` depuis le layout du projet ; les routes API des calls et de la
   dictée refusent en 403 **avant** tout appel payant au fournisseur.
+- **Qui voit un projet** : DG tous ; chef de projet ses projets + ceux qui attendent sa
+  réponse (plus après un refus) ; directeur créatif ceux de son équipe créative. Tout ce qui
+  est dans un projet suit la même règle. Piège : la policy de `projects` évalue la règle sur
+  les colonnes de la ligne (`can_see_project_row`), car `INSERT … RETURNING` vérifie la
+  nouvelle ligne avant qu'un `select` sur `projects` puisse la voir.
 - Invariants vérifiés **au commit** (triggers de contrainte différés) : un master a au
   moins un artiste (`master_requires_artist`) ; une sortie musicale non archivée a au moins
   un master (`music_release_requires_master`), quel que soit le chemin d'écriture.
@@ -87,8 +94,7 @@ Principes :
   (en attente, refusé, précision demandée), sinon non transmis. Les sections Cadrage / Calls / Sortie répondent 404 tant que le projet n'a
   pas d'étape (`requireLaunchedProject`).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/{rls,release,assistant,team,catalog,transmission,notifications,owner}.test.sql`,
-145 tests). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 181 tests). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
@@ -186,7 +192,7 @@ points ouverts), provenance cliquable (call + minutage + citation), confirmer / 
 modifier, besoins identifié → engagé, actions proposées → tâches (responsable + échéance
 choisis par une personne), circuit de validation.
 
-### Dictée (bouton « Dicter », pilote sur le Cadrage)
+### Dictée (bouton « Dicter » : Cadrage et Stratégie)
 
 Remplir ou modifier un formulaire d'étape à la voix. Commun à toutes les étapes ; une étape
 n'écrit qu'un **adaptateur**.
@@ -235,7 +241,9 @@ livrable, les libellés ou l'action d'import en props.
 - Écriture : un `EditAccessProvider` imbriqué n'ouvre les contrôles qu'au responsable et
   pendant « en cours » ; la base l'impose (`strategy_is_editable`), un refus RLS devient
   `stage_locked`.
-- Hors périmètre pour l'instant : export Plan de sortie (Playwright), dictée, lien partagé.
+- Dictée : adaptateur `lib/strategy/voice.ts` (positionnement, publics, narratif, leviers ;
+  un levier dicté reste « à décider », jamais de date, de temps fort ni de livrable).
+- Hors périmètre pour l'instant : export Plan de sortie (Playwright), lien partagé.
 
 ---
 

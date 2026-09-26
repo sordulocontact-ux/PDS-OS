@@ -1,6 +1,7 @@
 import "server-only";
 
 import { framingVoice } from "@/lib/framing/voice";
+import { strategyVoice } from "@/lib/strategy/voice";
 import type { DictationResponse, VoiceStage } from "@/lib/voice/constants";
 import { dictate } from "@/lib/voice/engine";
 
@@ -13,5 +14,7 @@ export function dictateFor(
   switch (stage) {
     case "framing":
       return dictate(framingVoice, projectId, audio);
+    case "launch_strategy":
+      return dictate(strategyVoice, projectId, audio);
   }
 }

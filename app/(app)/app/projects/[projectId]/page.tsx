@@ -1,11 +1,17 @@
 import { notFound } from "next/navigation";
 
 import { AssignmentHistory } from "@/components/projects/assignment-history";
+import { CreativeTeam } from "@/components/projects/creative-team";
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
+import {
+  listCreativePeople,
+  listProjectCreatives,
+} from "@/lib/projects/creatives";
+import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -22,6 +28,24 @@ export default async function ProjectOverviewPage({
   const project = await getProject(projectId);
   if (!project) notFound();
 
+  // Creative team: the director or the project's owner manages it.
+  const canManageCreatives =
+    can(access, "assign_projects") || canEditProject(access, project);
+  const [creatives, creativeCandidates] = await Promise.all([
+    listProjectCreatives(project.id),
+    canManageCreatives && access.organizationId
+      ? listCreativePeople(access.organizationId)
+      : Promise.resolve([]),
+  ]);
+  const creativeTeam = (
+    <CreativeTeam
+      projectId={project.id}
+      members={creatives}
+      candidates={creativeCandidates}
+      canManage={canManageCreatives}
+    />
+  );
+
   if (project.stages.length === 0) {
     const canTransmit = can(access, "assign_projects");
     const people =
@@ -34,6 +58,7 @@ export default async function ProjectOverviewPage({
         viewerPersonId={access.personId}
         canTransmit={canTransmit}
         people={people}
+        creativeTeam={creativeTeam}
       />
     );
   }
@@ -87,6 +112,7 @@ export default async function ProjectOverviewPage({
             ))}
           </ol>
         </section>
+        {creativeTeam}
         <AssignmentHistory assignments={project.assignments} />
       </div>
 

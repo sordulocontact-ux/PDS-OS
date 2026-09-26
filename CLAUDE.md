@@ -132,7 +132,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   Postes ≠ permissions : Directeur général, Chef de projet, Directeur créatif ; seule
   `role_permissions` (SQL) donne les droits, le code teste `can(access, "…")`.
   **Dans un projet lancé, seul son responsable écrit** (cadrage, calls, sortie) ; le DG lit
-  et valide (`is_project_owner` en SQL, `canEditProject` / `useCanEditProject` à l'écran). Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`,
+  et valide (`is_project_owner` en SQL, `canEditProject` / `useCanEditProject` à l'écran).
+  **Visibilité** : DG tous les projets, chef de projet les siens (+ transmis en attente),
+  directeur créatif ceux de son équipe créative (`can_see_project`, `project_creatives`). Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`,
   sans service role. Confirmation d'email **coupée en local** (`config.toml`), à remettre
   en production (`docs/ARCHITECTURE.md` § 3).
 - **Env** : `lib/env.ts` (serveur) et `lib/env-public.ts` ; toute variable s'ajoute au
@@ -144,7 +146,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 - **Audio** : enregistreur dans l'app (onglet Meet/Zoom + micro, ou micro seul) ;
   `AudioContext.resume()` obligatoire ; alerte après 2 min de silence de l'onglet.
   Groq : `groq-tolerant-fetch.ts` évite « Invalid JSON response » sur de vrais audios.
-- **Dictée** : bouton « Dicter » (Cadrage pour l'instant, prévu sur tout le parcours).
+- **Dictée** : bouton « Dicter » sur le Cadrage et la Stratégie (textes + leviers, jamais de
+  date ni de temps fort), prévu sur tout le parcours.
   Moteur commun `lib/voice/`, un adaptateur par étape ; propositions relues avant écriture,
   rien en base avant « Appliquer », audio jamais stocké (`docs/ARCHITECTURE.md` § 6).
   Micro de l'assistant : transcription seule, texte inséré dans la saisie, jamais envoyé seul.
@@ -228,19 +231,19 @@ Au-delà des six étapes :
       responsable), refuse ou demande une précision (retour au DG, retransmission)
 - [x] Notifications : cloche, toast, notifications navigateur, pages à jour sans recharger
 - [x] Seul le chef de projet responsable écrit dans un projet ; le DG lit et valide
-- [ ] Le chef de projet ne voit que ses projets (RLS sur toutes les tables d'un projet)
+- [x] Visibilité : chacun ne voit que ses projets (DG tous) ; équipe créative par projet
 - [ ] Modifier un projet avant transmission (titre, masters, budget…)
-- [ ] Directeur créatif limité aux projets affectés ; dépôt de versions des livrables
+- [ ] Directeur créatif : dépôt de versions des livrables (il lit seulement pour l'instant)
 
 - [x] Page **Stratégie de lancement** : positionnement, publics, narratif, leviers par
       famille, livrables engagés, calendrier manuel, import depuis un call, validation DG
 - [ ] Export **Plan de sortie** (PDF, Playwright) et partage par lien de la Stratégie
-- [ ] Dictée sur les autres étapes (Sortie, Stratégie…) : un adaptateur chacune
+- [x] Dictée sur la Stratégie (positionnement, publics, narratif, leviers)
+- [ ] Dictée sur les autres étapes (Sortie…) : un adaptateur chacune
 - [ ] Politique de suppression Storage (remplacer un audio, fichiers orphelins)
 
 Décisions en attente (avec Ibé / le client) :
 
-- Qui affecte le directeur créatif, et combien par projet (`docs/CONTEXTE-PROJET.md` § 12)
 - Quel projet fait foi : `po` d'Ibé (7 briques, sans IA) ou PDS OS ; qui s'appelle « PO »
 - § 10 du contexte : contenu de « Défense », qui valide quoi, 7 ou 5 étapes
 - Offre payante Mistral / Groq avant toute donnée réelle ; clé Odesli ou smartlink maison

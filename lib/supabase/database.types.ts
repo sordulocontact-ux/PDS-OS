@@ -1092,6 +1092,52 @@ export type Database = {
           },
         ]
       }
+      project_creatives: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          organization_id: string
+          person_id: string
+          project_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          organization_id: string
+          person_id: string
+          project_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          organization_id?: string
+          person_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_creatives_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_creatives_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_creatives_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       project_masters: {
         Row: {
           created_at: string
@@ -1971,9 +2017,23 @@ export type Database = {
       }
     }
     Functions: {
+      add_project_creative: {
+        Args: { p_person_id: string; p_project_id: string }
+        Returns: undefined
+      }
       auth_organization_id: { Args: never; Returns: string }
       auth_person_id: { Args: never; Returns: string }
       can_admin_person: { Args: { target_person_id: string }; Returns: boolean }
+      can_manage_creatives: { Args: { p_project_id: string }; Returns: boolean }
+      can_see_project: { Args: { p_project_id: string }; Returns: boolean }
+      can_see_project_row: {
+        Args: {
+          p_organization_id: string
+          p_owner_person_id: string
+          p_project_id: string
+        }
+        Returns: boolean
+      }
       can_view_person: { Args: { target_person_id: string }; Returns: boolean }
       claim_push_deliveries: {
         Args: never
@@ -2051,6 +2111,14 @@ export type Database = {
           person_id: string
         }[]
       }
+      list_creative_people: {
+        Args: { p_organization_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+        }[]
+      }
       list_validators: {
         Args: { p_organization_id: string }
         Returns: {
@@ -2083,6 +2151,10 @@ export type Database = {
       record_release_detection: {
         Args: { p_links: Json; p_release_id: string }
         Returns: Json
+      }
+      remove_project_creative: {
+        Args: { p_person_id: string; p_project_id: string }
+        Returns: undefined
       }
       request_validation: {
         Args: {

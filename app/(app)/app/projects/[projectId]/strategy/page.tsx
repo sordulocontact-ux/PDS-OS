@@ -8,11 +8,11 @@ import { BriefReminder } from "@/components/strategy/brief-reminder";
 import { CalendarSection } from "@/components/strategy/calendar-section";
 import { DeliverablesSection } from "@/components/strategy/deliverables-section";
 import { LeversSection } from "@/components/strategy/levers-section";
+import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { requireApproved } from "@/lib/auth/dal";
@@ -48,13 +48,13 @@ export default async function StrategyPage({
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <EditAccessProvider canEdit={canWrite}>
         <Card>
-          <CardHeader>
+          <StrategyDictation projectId={projectId}>
             <CardTitle>{t.title}</CardTitle>
             <CardDescription>{t.description}</CardDescription>
             {status && (
               <p className="text-sm text-muted-foreground">{status}</p>
             )}
-          </CardHeader>
+          </StrategyDictation>
           <CardContent className="grid divide-y divide-border">
             <div>
               {data.fields.map((field) => (

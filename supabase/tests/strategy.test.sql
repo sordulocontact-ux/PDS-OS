@@ -1,7 +1,7 @@
 -- Launch strategy: starts after a validated Brief, written by the owner only
 -- while in progress, frozen once submitted. Run with `supabase test db`.
 begin;
-select plan(18);
+select plan(19);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -94,6 +94,10 @@ select lives_ok($$
 $$, 'the owner writes the positioning and adds a lever');
 select is((select state from public.levers where id = pg_temp.id_of('lever')), 'to_decide',
           'a new lever is to decide');
+select lives_ok($$
+  insert into public.levers (organization_id, project_id, label, family, source_type, source_quote)
+  values (pg_temp.org(), pg_temp.prj(), 'Showcase', 'creation_content', 'voice', 'ajoute un showcase')
+$$, 'a lever can come from a dictation');
 select throws_ok($$
   insert into public.strategy_deliverables (organization_id, project_id, lever_id, title)
   values (pg_temp.org(), pg_temp.prj(), pg_temp.id_of('lever'), 'Clip 16:9')
@@ -121,7 +125,7 @@ select ok((select deliverable_id is null from public.milestones where title = 'S
 -- Director --------------------------------------------------------------------
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
-select is((select count(*)::int from public.levers where project_id = pg_temp.prj()), 1,
+select is((select count(*)::int from public.levers where project_id = pg_temp.prj()), 2,
           'the director reads the levers');
 select throws_ok($$
   insert into public.levers (organization_id, project_id, label, family)

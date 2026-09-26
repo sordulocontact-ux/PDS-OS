@@ -1,7 +1,7 @@
 -- Handing a project over to a project manager, then launching it at
 -- acceptance (docs/CONTEXTE-PROJET.md § 12), run with `supabase test db`.
 begin;
-select plan(21);
+select plan(22);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -94,8 +94,14 @@ select throws_ok($$ select public.respond_to_assignment((select id from ids wher
 select lives_ok($$ select public.respond_to_assignment((select id from ids where name = 'a1'),
                    'clarification_requested', 'Quel budget pour le clip ?') $$,
                 'the manager asks for a clarification');
+select is((select count(*)::int from public.projects where id = (select id from ids where name = 'project')),
+          0, 'after answering, the manager no longer sees the project');
+reset role;
+select pg_temp.act_as((select id from ids where name = 'director'));
 select is((select status || '/' || response from public.project_assignments where id = (select id from ids where name = 'a1')),
           'clarification_requested/Quel budget pour le clip ?', 'the question goes back to the director');
+reset role;
+select pg_temp.act_as((select id from ids where name = 'manager'));
 select throws_ok($$ select public.respond_to_assignment((select id from ids where name = 'a1'), 'accepted') $$,
                  'P0001', 'assignment_closed', 'an answered transmission is closed');
 
