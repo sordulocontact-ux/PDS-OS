@@ -47,3 +47,7 @@ pds-data.sql
 
 # Local screenshots
 /screens/
+
+# Claude Code: personal instructions, skills and settings, never committed
+.claude/
+CLAUDE.md
