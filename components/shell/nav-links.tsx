@@ -70,7 +70,7 @@ export function NavLinks({
                 collapsed || item.disabled || count > 0 ? label : undefined
               }
               className={cn(
-                // NavItem, Figma "Desktop - 11": 40 px, 24 px icon, grey fill when active.
+                // NavItem, Figma "Desktop - 11": 40 px, 20 px icon, grey fill when active.
                 "flex items-center gap-2 rounded-lg px-4 py-2 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-medium text-[color:var(--nav-fg)] no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
                 collapsed && "justify-center px-0",
                 active &&
@@ -79,7 +79,7 @@ export function NavLinks({
                   "cursor-not-allowed text-[color:var(--nav-fg-muted)] hover:bg-transparent",
               )}
             >
-              <Icon className="size-6 shrink-0" aria-hidden />
+              <Icon className="size-5 shrink-0" aria-hidden />
               {!collapsed && item.label}
               {!collapsed && count > 0 && (
                 <CountBadge count={count} className="ml-auto" />

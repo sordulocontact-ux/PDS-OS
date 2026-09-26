@@ -7,10 +7,10 @@ import { routes } from "@/lib/auth/redirects";
 
 type CollapsedNav = {
   collapsed: boolean;
-  // True only when the collapsed sidebar actually sits against the
-  // project's contextual sidebar (Figma "Double sidebar") — not when
-  // collapsed manually outside a project, where there is nothing to merge
-  // into: each sidebar keeps its own rounded corners then.
+  // True whenever the project's contextual sidebar exists and sits right
+  // against the main one (Figma "Double sidebar") — collapsed or expanded,
+  // the two always touch inside a project, so the join is one continuous
+  // shape, never two separately rounded corners meeting.
   doubleSidebar: boolean;
   toggle: () => void;
 };
@@ -32,7 +32,7 @@ export function CollapsedNavProvider({
   const previouslyInsideProject = useRef(insideProject);
 
   // Collapsed by default inside a project, full width everywhere else. The
-  // chevron button overrides this — no preference is stored, nothing
+  // sidebar toggle button overrides this — no preference is stored, nothing
   // persists — but the override is forgotten when leaving or entering a
   // project, so the automatic behaviour resumes.
   useEffect(() => {
@@ -45,7 +45,7 @@ export function CollapsedNavProvider({
   const collapsed = override ?? insideProject;
   const value: CollapsedNav = {
     collapsed,
-    doubleSidebar: collapsed && insideProject,
+    doubleSidebar: insideProject,
     toggle: () => setOverride(!collapsed),
   };
 

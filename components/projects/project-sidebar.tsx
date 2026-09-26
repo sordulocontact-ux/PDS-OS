@@ -123,8 +123,9 @@ function ProjectSidebarList({
 
 // Contextual sidebar of a launched project, desktop only (Figma "Double
 // sidebar"). Same sticky geometry as the main Sidebar, so the two read as one
-// card: rounded on every side on its own, right-only when the collapsed main
-// sidebar sits right against it. See ProjectSidebarMobile for small screens.
+// card: right-only rounding, collapsed or expanded — the two always sit
+// right against each other inside a project. See ProjectSidebarMobile below
+// for small screens.
 export function ProjectSidebar({
   projectId,
   projectTitle,

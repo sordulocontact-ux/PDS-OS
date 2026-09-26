@@ -1,8 +1,8 @@
 "use client";
 
-import { IconChevronLeft, IconChevronRight } from "nucleo-sharp-essential";
 import Link from "next/link";
 
+import { IconSidebar } from "@/components/icons";
 import { NavLinks } from "@/components/shell/nav-links";
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 // Desktop sidebar, full width or collapsed to icons (Figma "Nav1 open" /
 // "Double sidebar", docs/DESIGN.md § 4). Collapsed by default inside a
-// project; the chevron overrides it for the current visit only.
+// project; the IconSidebar button overrides it for the current visit only.
 export function Sidebar({
   isAdmin,
   pendingMembers,
@@ -62,11 +62,7 @@ export function Sidebar({
             aria-label={collapsed ? t.expand : t.collapse}
             onClick={toggle}
           >
-            {collapsed ? (
-              <IconChevronRight aria-hidden />
-            ) : (
-              <IconChevronLeft aria-hidden />
-            )}
+            <IconSidebar aria-hidden />
           </Button>
         </div>
         <NavLinks
