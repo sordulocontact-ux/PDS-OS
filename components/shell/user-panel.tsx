@@ -21,7 +21,7 @@ export function UserPanel({
       </div>
       <SignOutButton
         variant="ghost"
-        className="h-10 w-full justify-start gap-2 rounded-lg px-4 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-[color:var(--nav-fg)] hover:bg-[var(--nav-item-hover-bg)] active:bg-[var(--nav-item-active-bg)] [&_svg:not([class*='size-'])]:size-6"
+        className="h-10 w-full justify-start gap-2 rounded-lg px-4 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] text-[color:var(--nav-fg)] hover:bg-[var(--nav-item-hover-bg)] active:bg-[var(--nav-item-active-bg)] [&_svg:not([class*='size-'])]:size-5"
       />
     </div>
   );
