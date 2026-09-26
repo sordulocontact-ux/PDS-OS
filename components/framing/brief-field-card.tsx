@@ -5,51 +5,58 @@ import { useState } from "react";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  confirmBriefField,
-  rejectBriefField,
-  saveBriefField,
+  confirmField,
+  rejectField,
+  saveField,
 } from "@/lib/framing/actions/brief";
-import type { BriefFieldState } from "@/lib/framing/brief";
+import type { FieldState } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 
-/** One Brief field, edited in place. A proposal is confirmed, rejected or rewritten. */
+/**
+ * One deliverable text field (Brief or Strategy), edited in place. A proposal
+ * is confirmed, rejected or rewritten.
+ */
 export function BriefFieldCard({
   field,
+  label,
   projectId,
 }: {
-  field: BriefFieldState;
+  field: FieldState;
+  label: string;
   projectId: string;
 }) {
   const t = fr.framing;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(field.value ?? "");
   const { pending, run } = useFramingAction();
-  const inputId = `brief-${field.key}`;
+  const canEdit = useCanEditProject();
+  const inputId = `${field.deliverable}-${field.key}`;
 
   return (
     <section className="grid gap-2 border-b border-border py-4 last:border-b-0">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-medium">{t.fields[field.key]}</h3>
+        <h3 className="text-sm font-medium">{label}</h3>
         {field.status === "proposed" && <ProposedBadge />}
       </div>
 
-      {editing ? (
+      {editing && canEdit ? (
         <form
           className="grid gap-2"
           onSubmit={(event) => {
             event.preventDefault();
             run(
-              () => saveBriefField(projectId, field.key, draft),
+              () => saveField(projectId, field.deliverable, field.key, draft),
               () => setEditing(false),
             );
           }}
         >
           <Label htmlFor={inputId} className="sr-only">
-            {t.fields[field.key]}
+            {label}
           </Label>
           <Textarea
             id={inputId}
@@ -86,7 +93,7 @@ export function BriefFieldCard({
         <p className="text-sm text-muted-foreground">{t.empty}</p>
       )}
 
-      {!editing && (
+      {!editing && canEdit && (
         <div className="flex flex-wrap gap-2">
           {field.status === "proposed" && (
             <>
@@ -94,7 +101,9 @@ export function BriefFieldCard({
                 size="sm"
                 disabled={pending}
                 onClick={() =>
-                  run(() => confirmBriefField(projectId, field.key))
+                  run(() =>
+                    confirmField(projectId, field.deliverable, field.key),
+                  )
                 }
               >
                 {t.actions.confirm}
@@ -104,7 +113,9 @@ export function BriefFieldCard({
                 variant="outline"
                 disabled={pending}
                 onClick={() =>
-                  run(() => rejectBriefField(projectId, field.key))
+                  run(() =>
+                    rejectField(projectId, field.deliverable, field.key),
+                  )
                 }
               >
                 {t.actions.reject}

@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { signupUrl } from "@/lib/auth/site-url";
 import { fr } from "@/lib/i18n/fr";
 import type { MembershipRow } from "@/lib/members/types";
 
@@ -62,7 +63,13 @@ export function MembersTable({
                   </span>
                 </div>
               </TableCell>
-              <TableCell>{t.roles[row.role]}</TableCell>
+              <TableCell>
+                {row.role ? (
+                  t.roles[row.role]
+                ) : (
+                  <span className="text-muted-foreground">{t.noRole}</span>
+                )}
+              </TableCell>
               <TableCell>
                 <StatusBadge treatment={membershipTreatment[row.status]}>
                   {t.statuses[row.status]}
@@ -71,9 +78,11 @@ export function MembersTable({
               <TableCell>
                 <div className="flex flex-col">
                   <span>
-                    {row.status !== "pending" && row.decidedAt
-                      ? dateFormatter.format(new Date(row.decidedAt))
-                      : `${t.requestedAt} ${dateFormatter.format(new Date(row.requestedAt))}`}
+                    {row.status === "invited" && row.decidedAt
+                      ? `${t.invitedAt} ${dateFormatter.format(new Date(row.decidedAt))}`
+                      : row.status !== "pending" && row.decidedAt
+                        ? dateFormatter.format(new Date(row.decidedAt))
+                        : `${t.requestedAt} ${dateFormatter.format(new Date(row.requestedAt))}`}
                   </span>
                   {row.decisionNote && (
                     <span className="max-w-xs truncate text-xs text-muted-foreground">
@@ -83,7 +92,15 @@ export function MembersTable({
                 </div>
               </TableCell>
               <TableCell className="text-right">
-                <MemberRowActions membership={row} isSelf={isSelf} />
+                <MemberRowActions
+                  membership={row}
+                  isSelf={isSelf}
+                  signupLink={
+                    row.status === "invited" && row.person.email
+                      ? signupUrl(row.person.email)
+                      : null
+                  }
+                />
               </TableCell>
             </TableRow>
           );

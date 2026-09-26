@@ -1,6 +1,12 @@
 "use client";
 
-import { FolderKanbanIcon, HouseIcon, UsersIcon } from "lucide-react";
+import {
+  IconFolderOpen,
+  IconHouse2,
+  IconMicrophone,
+  IconUsers2,
+} from "nucleo-sharp-essential";
+import { IconDisc } from "@/components/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -9,16 +15,18 @@ import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
-  { href: routes.app, label: fr.shell.nav.home, icon: HouseIcon, exact: true },
+  { href: routes.app, label: fr.shell.nav.home, icon: IconHouse2, exact: true },
   {
     href: routes.projects,
     label: fr.shell.nav.projects,
-    icon: FolderKanbanIcon,
+    icon: IconFolderOpen,
   },
+  { href: routes.artists, label: fr.shell.nav.artists, icon: IconMicrophone },
+  { href: routes.masters, label: fr.shell.nav.masters, icon: IconDisc },
   {
     href: routes.members,
     label: fr.shell.nav.members,
-    icon: UsersIcon,
+    icon: IconUsers2,
     adminOnly: true,
   },
 ] as const;
@@ -60,11 +68,7 @@ export function NavLinks({
                       "border-[color:var(--nav-item-active-rail)] bg-[var(--nav-item-active-bg)] text-[color:var(--nav-fg)]",
                   )}
                 >
-                  <Icon
-                    className="size-[18px] shrink-0"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
+                  <Icon className="size-[18px] shrink-0" aria-hidden />
                   {item.label}
                 </Link>
               </li>

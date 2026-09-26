@@ -1,6 +1,6 @@
 "use client";
 
-import { MenuIcon } from "lucide-react";
+import { IconMenu } from "@/components/icons";
 import { useState } from "react";
 
 import { NavLinks } from "@/components/shell/nav-links";
@@ -36,7 +36,7 @@ export function MobileNav({
           />
         }
       >
-        <MenuIcon aria-hidden />
+        <IconMenu aria-hidden />
       </SheetTrigger>
       <SheetContent
         side="left"

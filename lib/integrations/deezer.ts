@@ -45,3 +45,75 @@ export async function findAlbumUpc(albumId: number): Promise<string | null> {
   );
   return parsed.success ? (parsed.data.upc ?? null) : null;
 }
+
+// Artists ---------------------------------------------------------------------
+
+const artistSchema = z.object({
+  id: z.number().int().positive(),
+  name: z.string().trim().min(1),
+  link: z.url(),
+  picture_medium: z.url().optional(),
+  picture_big: z.url().optional(),
+  nb_fan: z.number().int().nonnegative().optional(),
+});
+
+export type DeezerArtist = {
+  id: number;
+  name: string;
+  link: string;
+  // Null when Deezer only has its grey placeholder.
+  pictureMedium: string | null;
+  pictureBig: string | null;
+  fans: number;
+};
+
+// Deezer serves a placeholder with an empty hash (".../images/artist//...")
+// for artists without a picture; only its own https CDN is kept.
+function picture(url: string | undefined): string | null {
+  if (!url || url.includes("/artist//")) return null;
+  return url.startsWith("https://") ? url : null;
+}
+
+function toArtist(raw: z.infer<typeof artistSchema>): DeezerArtist {
+  return {
+    id: raw.id,
+    name: raw.name,
+    link: raw.link,
+    pictureMedium: picture(raw.picture_medium),
+    pictureBig: picture(raw.picture_big),
+    fans: raw.nb_fan ?? 0,
+  };
+}
+
+const SEARCH_POOL = 25;
+
+// Deezer's relevance ranks obscure homonyms first ("angele" puts the artist
+// with 1.7 M fans sixth): a wider pool is fetched, then ordered by fans.
+export async function searchArtists(
+  query: string,
+  limit = 8,
+): Promise<DeezerArtist[]> {
+  const url = new URL(`${BASE}/search/artist`);
+  url.searchParams.set("q", query);
+  url.searchParams.set("limit", String(SEARCH_POOL));
+  const parsed = z
+    .object({ data: z.array(z.unknown()) })
+    .safeParse(await fetchJson("deezer", url));
+  if (!parsed.success) return [];
+  return parsed.data.data
+    .flatMap((row) => {
+      const artist = artistSchema.safeParse(row);
+      return artist.success ? [toArtist(artist.data)] : [];
+    })
+    .sort((a, b) => b.fans - a.fans)
+    .slice(0, limit);
+}
+
+export async function getDeezerArtist(
+  id: number,
+): Promise<DeezerArtist | null> {
+  const parsed = artistSchema.safeParse(
+    await fetchJson("deezer", `${BASE}/artist/${id}`),
+  );
+  return parsed.success ? toArtist(parsed.data) : null;
+}

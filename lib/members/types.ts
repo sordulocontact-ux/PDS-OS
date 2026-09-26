@@ -1,6 +1,7 @@
 // Types of the team screen. Client-safe.
 
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
+import type { OrganizationRole } from "@/lib/auth/redirects";
 
 export type MemberActionState =
   | { status: "idle" }
@@ -26,19 +27,21 @@ export function retainedMemberValue(
 }
 
 export type MembershipStatus =
-  "pending" | "approved" | "rejected" | "suspended";
-export type MembershipRole = "admin" | "member";
+  "invited" | "pending" | "approved" | "rejected" | "suspended";
+export type MembershipRole = OrganizationRole;
 
 export const MEMBERSHIP_STATUSES: readonly MembershipStatus[] = [
   "pending",
   "approved",
+  "invited",
   "rejected",
   "suspended",
 ];
 
 export type MembershipRow = {
   id: string;
-  role: MembershipRole;
+  // Null until the director chooses it (self-signup waiting for approval).
+  role: MembershipRole | null;
   status: MembershipStatus;
   requestedAt: string;
   decidedAt: string | null;
@@ -57,3 +60,23 @@ export function isMembershipStatus(value: unknown): value is MembershipStatus {
     (MEMBERSHIP_STATUSES as readonly string[]).includes(value)
   );
 }
+
+// Result of the account creation screen. ready: the account can log in now
+// (email confirmation off); otherwise the person confirms their address.
+export type InviteState =
+  | { status: "idle" }
+  | {
+      status: "error";
+      error?: string;
+      fieldErrors?: FieldErrors;
+      values?: FormValues;
+    }
+  | {
+      status: "success";
+      firstName: string;
+      email: string;
+      ready: boolean;
+      link: string;
+    };
+
+export const idleInviteState: InviteState = { status: "idle" };

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRightIcon } from "lucide-react";
+import { IconChevronRight } from "nucleo-sharp-essential";
 
 import { CallStatusBadge, ConsentBadge } from "@/components/calls/call-badges";
 import { routes } from "@/lib/auth/redirects";
@@ -39,7 +39,7 @@ export function CallList({
               <span className="sr-only">{t.status} :</span>
               <CallStatusBadge status={call.status} />
             </div>
-            <ChevronRightIcon
+            <IconChevronRight
               aria-hidden
               className="size-4 shrink-0 text-muted-foreground"
             />

@@ -3,8 +3,13 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { fetchAccess, type Access } from "@/lib/auth/access";
-import { destinationFor, routes, type AccessState } from "@/lib/auth/redirects";
+import { can, fetchAccess, type Access } from "@/lib/auth/access";
+import {
+  destinationFor,
+  routes,
+  type AccessState,
+  type Permission,
+} from "@/lib/auth/redirects";
 
 // Couche d'accès aux données : la seule porte par laquelle une page apprend
 // qui est connecté et ce qu'il a le droit de voir. À appeler dans chaque
@@ -46,7 +51,18 @@ export async function requireApproved(): Promise<Access> {
 
 export async function requireAdmin(): Promise<Access> {
   const access = await requireApproved();
-  if (access.role !== "admin") {
+  if (!can(access, "administer")) {
+    redirect(routes.app);
+  }
+  return access;
+}
+
+// Page reserved to a permission: anyone else goes back to the home page.
+export async function requirePermission(
+  permission: Permission,
+): Promise<Access> {
+  const access = await requireApproved();
+  if (!can(access, permission)) {
     redirect(routes.app);
   }
   return access;

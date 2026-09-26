@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { CardAction, CardContent, CardHeader } from "@/components/ui/card";
 import {
   DictationButton,
@@ -59,6 +60,9 @@ export function FramingDictation({
 }) {
   const dictation = useDictation<FramingProposal>("framing", projectId);
   const { pending, run } = useFramingAction();
+  const canEdit = useCanEditProject();
+
+  if (!canEdit) return <CardHeader>{children}</CardHeader>;
 
   return (
     <>

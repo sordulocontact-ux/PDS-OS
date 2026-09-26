@@ -2,7 +2,7 @@
 -- Users are created in auth.users: the identity triggers link them to a
 -- Person and a pending membership; the fixture admin is promoted directly.
 begin;
-select plan(26);
+select plan(27);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -45,7 +45,7 @@ insert into ids select 'org', id from public.organizations where slug = 'pds';
 insert into ids select 'member_person', person_id from public.accounts where id = (select id from ids where name = 'member');
 -- The fixture admin is promoted directly (as postgres), so the suite does not
 -- depend on the one-shot bootstrap of the seed.
-update public.memberships set status = 'approved', role = 'admin'
+update public.memberships set status = 'approved', role = 'general_director'
  where person_id = (select person_id from public.accounts where id = (select id from ids where name = 'admin'));
 
 -- Identity -------------------------------------------------------------------
@@ -56,7 +56,7 @@ select is((select status from public.memberships m
 
 -- The admin approves the member; the outsider stays pending.
 select pg_temp.act_as((select id from ids where name = 'admin'));
-update public.memberships set status = 'approved'
+update public.memberships set status = 'approved', role = 'project_manager'
  where person_id = (select id from ids where name = 'member_person');
 select is((select status from public.memberships where person_id = (select id from ids where name = 'member_person')),
           'approved', 'an admin approves a membership');
@@ -67,13 +67,16 @@ values ((select id from ids where name = 'org'), (select v from vars where k = '
 insert into ids select 'artist', id from public.artists where name = (select v from vars where k = 'artist');
 
 select lives_ok($$
-  insert into public.projects (organization_id, artist_id, title)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'artist'), (select v from vars where k = 'project'))
-$$, 'an active member creates a project');
+  select public.create_project((select id from ids where name = 'org'), (select v from vars where k = 'project'),
+    'music_release',
+    array[public.create_master((select id from ids where name = 'org'), 'Lueur',
+      jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))))],
+    null, null, null, null)
+$$, 'the director creates a project around a master');
 insert into ids select 'project', id from public.projects where title = (select v from vars where k = 'project');
 
 select is((select count(*)::int from public.project_stages where project_id = (select id from ids where name = 'project')),
-          7, 'a new project gets one instance per configured stage');
+          0, 'creating a project instantiates no stage');
 select isnt((select created_by from public.projects where title = (select v from vars where k = 'project')), null,
             'authorship is set by the database');
 
@@ -88,31 +91,50 @@ select throws_ok($$
 $$, '42501', null, 'clients cannot write a stage state directly');
 
 -- State machine and validation -----------------------------------------------
+-- Launched as postgres (the transmission is covered by transmission.test.sql):
+-- the member, a project manager, owns it; the director validates.
+reset role;
+insert into public.project_stages (organization_id, project_id, stage_definition_id)
+select d.organization_id, (select id from ids where name = 'project'), d.id
+from public.stage_definitions d
+where d.organization_id = (select id from ids where name = 'org') and d.archived_at is null;
+update public.projects set owner_person_id = (select id from ids where name = 'member_person')
+ where id = (select id from ids where name = 'project');
+insert into ids select 'admin_person', person_id from public.accounts where id = (select id from ids where name = 'admin');
 insert into ids select 'stage', s.id from public.project_stages s
   join public.stage_definitions d on d.id = s.stage_definition_id
  where s.project_id = (select id from ids where name = 'project') and d.key = 'framing';
 
+select pg_temp.act_as((select id from ids where name = 'admin'));
+select throws_ok($$ select public.start_stage((select id from ids where name = 'stage')) $$,
+                 '42501', null, 'the director does not work on the framing');
+
+reset role;
+select pg_temp.act_as((select id from ids where name = 'member'));
 select throws_ok($$ select public.request_validation((select id from ids where name = 'stage'),
-                    (select id from ids where name = 'member_person')) $$,
+                    (select id from ids where name = 'admin_person')) $$,
                  'P0001', 'invalid_transition', 'cannot request validation of a stage not started');
-select lives_ok($$ select public.start_stage((select id from ids where name = 'stage')) $$, 'a member starts a stage');
+select lives_ok($$ select public.start_stage((select id from ids where name = 'stage')) $$, 'the owner starts a stage');
 select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'),
-                   (select id from ids where name = 'member_person'), 'Brief prêt') $$,
-                'a member requests validation from a named validator');
-insert into ids select 'validation', id from public.validations where state = 'pending';
+                   (select id from ids where name = 'admin_person'), 'Brief prêt') $$,
+                'the owner asks the director for a validation');
+insert into ids select 'validation', id from public.validations
+ where project_stage_id = (select id from ids where name = 'stage') and state = 'pending';
 
 select throws_ok($$ select public.decide_validation((select id from ids where name = 'validation'), true) $$,
                  'P0001', 'not_the_validator', 'only the named validator decides');
 
 reset role;
-select pg_temp.act_as((select id from ids where name = 'member'));
+select pg_temp.act_as((select id from ids where name = 'admin'));
 select throws_ok($$ select public.decide_validation((select id from ids where name = 'validation'), false) $$,
                  '23514', null, 'a rejection requires a reason');
 select lives_ok($$ select public.decide_validation((select id from ids where name = 'validation'), true, 'OK') $$,
-                'the validator approves');
+                'the director approves');
 select is((select state from public.project_stages where id = (select id from ids where name = 'stage')),
           'validated', 'approval validates the stage');
 
+reset role;
+select pg_temp.act_as((select id from ids where name = 'member'));
 -- Business invariants -----------------------------------------------------------
 select throws_ok($$
   insert into public.calls (organization_id, project_id, title)
@@ -134,20 +156,20 @@ $$, '42501', null, 'field values are append-only');
 select lives_ok($$
   insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type, source_quote)
   values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'brief', 'objective', '"x"', 'confirmed', 'voice', 'mets en objectif x')
-$$, 'a member records a dictated value');
+$$, 'the owner records a dictated value');
 
 select lives_ok($$
   insert into public.needs (organization_id, project_id, label, family, source_type, source_quote)
   values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'Clip', 'creation_content', 'voice', 'il nous faut un clip')
-$$, 'a member records a dictated need');
+$$, 'the owner records a dictated need');
 
 -- Outsider (pending) -----------------------------------------------------------
 reset role;
 select pg_temp.act_as((select id from ids where name = 'outsider'));
 select is((select count(*)::int from public.projects), 0, 'a pending account sees no project');
 select throws_ok($$
-  insert into public.projects (organization_id, artist_id, title)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'artist'), 'Intrus')
+  insert into public.projects (organization_id, title, type)
+  values ((select id from ids where name = 'org'), 'Intrus', 'partnership')
 $$, '42501', null, 'a pending account cannot create a project');
 select is((select count(*)::int from public.people), 1, 'a pending account only sees itself');
 

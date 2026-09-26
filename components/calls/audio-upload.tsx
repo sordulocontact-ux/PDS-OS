@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,6 +39,7 @@ export function AudioUpload({
     CallErrorCode | "no_file" | "upload_failed" | null
   >(null);
   const [pending, setPending] = useState(false);
+  const canEdit = useCanEditProject();
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,6 +62,8 @@ export function AudioUpload({
     if (!result.ok) return setError(result.error);
     toast.success(t.uploaded);
   }
+
+  if (!canEdit) return null;
 
   return (
     <form onSubmit={onSubmit} className="grid gap-3">

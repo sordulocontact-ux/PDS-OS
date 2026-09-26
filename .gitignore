@@ -41,3 +41,6 @@ yarn-error.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Local database export (emails, password hashes): never commit
+pds-data.sql

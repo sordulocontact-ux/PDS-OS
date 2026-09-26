@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -12,6 +13,7 @@ import {
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectListItem } from "@/lib/projects/types";
+import { projectStatusTreatment } from "@/lib/ui/state-treatments";
 
 export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
   const t = fr.shell.projects;
@@ -39,7 +41,7 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
               </Link>
             </TableCell>
             <TableCell>{project.artistName}</TableCell>
-            <TableCell>{fr.shell.releaseTypes[project.releaseType]}</TableCell>
+            <TableCell>{fr.shell.projectTypes[project.type]}</TableCell>
             <TableCell>
               {project.currentStage ? (
                 <span className="flex flex-wrap items-center gap-2">
@@ -49,7 +51,12 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
               ) : project.stageCount > 0 ? (
                 <span>{t.allValidated}</span>
               ) : (
-                <span className="text-muted-foreground">{t.noStage}</span>
+                <StatusBadge
+                  treatment={projectStatusTreatment[project.status]}
+                  size="sm"
+                >
+                  {fr.transmission.statuses[project.status]}
+                </StatusBadge>
               )}
             </TableCell>
           </TableRow>

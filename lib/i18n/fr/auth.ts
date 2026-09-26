@@ -99,9 +99,10 @@ export const auth = {
 
   members: {
     title: "Équipe",
-    subtitle: "Demandes d'accès et membres",
+    subtitle: "Comptes, postes et demandes d'accès",
     segmentsLabel: "Filtrer par statut",
     segments: {
+      invited: "Invités",
       pending: "En attente",
       approved: "Actifs",
       rejected: "Refusés",
@@ -109,13 +110,18 @@ export const auth = {
     },
     columns: {
       person: "Personne",
-      role: "Rôle",
+      role: "Poste",
       status: "Statut",
       decision: "Dernière décision",
       actions: "Actions",
     },
-    roles: { admin: "Admin", member: "Membre" },
+    roles: {
+      general_director: "Directeur général",
+      project_manager: "Chef de projet",
+      creative_director: "Directeur créatif",
+    },
     statuses: {
+      invited: "Invité",
       pending: "En attente",
       approved: "Actif",
       rejected: "Refusé",
@@ -126,21 +132,59 @@ export const auth = {
       reject: "Refuser",
       suspend: "Suspendre",
       reactivate: "Réactiver",
-      makeAdmin: "Passer admin",
-      removeAdmin: "Retirer admin",
+      editRole: "Changer de poste",
+      rolePlaceholder: "Choisir un poste",
+      cancelInvite: "Annuler l'invitation",
+      copyLink: "Copier le lien",
       editName: "Modifier le nom",
     },
     you: "vous",
+    noRole: "À définir",
     reasonLabel: "Motif",
     reasonPlaceholder: "Obligatoire, visible des administrateurs seulement",
     requestedAt: "Demandé le",
+    invitedAt: "Invité le",
+    invitationCancelledNote: "Invitation annulée",
     empty: {
+      invited: "Aucune invitation en cours.",
       pending: "Aucune demande en attente.",
       approved: "Aucun membre actif.",
       rejected: "Aucune demande refusée.",
       suspended: "Aucun accès suspendu.",
     },
     loadError: "Impossible de charger l'équipe. Rechargez la page.",
+    create: "Créer un compte",
+  },
+
+  newMember: {
+    title: "Créer un compte",
+    subtitle:
+      "Adresse, mot de passe et poste : le compte est prêt à l'emploi, sans validation.",
+    back: "Équipe",
+    role: "Poste",
+    roleHint: {
+      general_director:
+        "Voit et administre l'ensemble. Attribue les projets et valide tout ce qui est soumis à validation.",
+      project_manager:
+        "Reçoit les projets attribués, les accepte, les refuse ou demande une précision, puis les pilote.",
+      creative_director:
+        "Travaille sur les projets et livrables créatifs qui lui sont affectés. Sans administration ni validation.",
+    },
+    submit: "Créer le compte",
+    submitting: "Création…",
+    cancel: "Annuler",
+    passwordHint: "10 caractères minimum. À transmettre à la personne.",
+    successTitle: (firstName: string) => `Compte de ${firstName} prêt`,
+    readyBody: (email: string) =>
+      `Connexion possible dès maintenant avec ${email} et le mot de passe choisi.`,
+    confirmBody: (email: string) =>
+      `Un email de confirmation a été envoyé à ${email}. Dès que la personne l'a confirmé, son accès s'ouvre avec le poste choisi. Si l'email n'arrive pas, envoyez-lui ce lien.`,
+    linkLabel: "Lien d'inscription",
+    copy: "Copier",
+    copied: "Lien copié",
+    copyFailed: "Copie impossible : sélectionnez le lien à la main.",
+    another: "Créer un autre compte",
+    toTeam: "Voir l'équipe",
   },
 
   errors: {
@@ -153,11 +197,17 @@ export const auth = {
     passwordMismatch: "Les deux mots de passe ne correspondent pas.",
     linkInvalid: "Ce lien n'est plus valide. Demandez un nouvel email.",
     invalidEmail: "Adresse email invalide.",
+    emailTaken: "Un compte existe déjà avec cette adresse. Connectez-vous.",
     required: "Ce champ est obligatoire.",
     tooLong: "Trop long.",
     personHasNoAccount: "Cette personne n'a pas encore de compte.",
+    accountNotCreated:
+      "Le poste est enregistré mais le compte n'a pas pu être créé. Réessayez, ou envoyez le lien d'inscription depuis l'onglet Invités.",
+    personHasAccount:
+      "Cette adresse a déjà un compte : retrouvez la personne dans l'équipe pour l'approuver ou changer son poste.",
+    invalidRole: "Choisissez un poste.",
     lastUsableAdmin:
-      "Impossible : il ne resterait plus aucun administrateur actif.",
+      "Impossible : il ne resterait plus aucun directeur général actif.",
     emailChangeForbidden:
       "L'adresse email d'un compte ne peut pas être modifiée.",
     forbidden: "Vous n'avez pas le droit de faire cette action.",

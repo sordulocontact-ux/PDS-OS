@@ -8,7 +8,7 @@ import { signUp } from "@/lib/auth/actions";
 import { idleFormState, retained } from "@/lib/auth/form-state";
 import { fr } from "@/lib/i18n/fr";
 
-export function SignUpForm() {
+export function SignUpForm({ invitedEmail }: { invitedEmail: string }) {
   const [state, action] = useActionState(signUp, idleFormState);
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
 
@@ -38,7 +38,7 @@ export function SignUpForm() {
         autoComplete="email"
         inputMode="email"
         required
-        defaultValue={retained(state, "email")}
+        defaultValue={retained(state, "email") || invitedEmail}
         error={errors.email}
       />
       <Field

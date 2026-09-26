@@ -1,4 +1,5 @@
-import { UsersIcon } from "lucide-react";
+import { IconUsers2 } from "nucleo-sharp-essential";
+import { IconUserPlus } from "@/components/icons";
 import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
@@ -18,8 +19,8 @@ import { cn } from "@/lib/utils";
 
 import { MembersTable } from "./members-table";
 
-// Team screen: access requests and members, with the decisions taken there.
-// Admins only.
+// Team screen: accounts created ahead, access requests and members, with
+// the decisions taken there. General director only.
 export default async function MembersPage({
   searchParams,
 }: PageProps<"/app/members">) {
@@ -37,7 +38,19 @@ export default async function MembersPage({
 
   return (
     <PageContainer>
-      <PageHeader title={t.title} description={t.subtitle} />
+      <PageHeader
+        title={t.title}
+        description={t.subtitle}
+        action={
+          <Link
+            href={routes.membersNew}
+            className={cn(buttonVariants({ size: "lg" }), "gap-2")}
+          >
+            <IconUserPlus className="size-4" aria-hidden />
+            {t.create}
+          </Link>
+        }
+      />
 
       <nav aria-label={t.segmentsLabel} className="flex flex-wrap gap-1.5">
         {MEMBERSHIP_STATUSES.map((status) => {
@@ -68,7 +81,7 @@ export default async function MembersPage({
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : visible.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border py-12 text-center">
-          <UsersIcon className="size-5 text-muted-foreground" aria-hidden />
+          <IconUsers2 className="size-5 text-muted-foreground" aria-hidden />
           <p className="text-sm text-muted-foreground">{t.empty[segment]}</p>
         </div>
       ) : (

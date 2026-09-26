@@ -13,6 +13,16 @@ export const stageTreatment: Record<string, Treatment> = {
   validated: "normal",
 };
 
+// Project handover: waiting is an outline; a refusal or a question is a block
+// the director must act on; a launched project runs.
+export const projectStatusTreatment: Record<string, Treatment> = {
+  not_transmitted: "pending",
+  pending: "pending",
+  refused: "blocked",
+  clarification_requested: "blocked",
+  launched: "normal",
+};
+
 export const callStatusTreatment: Record<string, Treatment> = {
   draft: "pending",
   uploaded: "pending",
@@ -30,6 +40,7 @@ export const consentTreatment: Record<string, Treatment> = {
 };
 
 export const membershipTreatment: Record<string, Treatment> = {
+  invited: "pending",
   pending: "pending",
   approved: "normal",
   rejected: "blocked",
@@ -52,3 +63,10 @@ export const needTreatment: Record<string, Treatment> = {
 export const onlineTreatment = (online: boolean): Treatment =>
   online ? "normal" : "pending";
 export const overdueTreatment: Treatment = "blocked";
+
+/** A lever to decide waits; selected runs; not selected is settled (muted label). */
+export const leverTreatment: Record<string, Treatment> = {
+  to_decide: "pending",
+  selected: "normal",
+  rejected: "normal",
+};

@@ -15,6 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireApproved } from "@/lib/auth/dal";
+import { importReport } from "@/lib/framing/actions/import";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { loadFraming } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
 
@@ -24,6 +26,7 @@ export default async function FramingPage({
 }: PageProps<"/app/projects/[projectId]/framing">) {
   const access = await requireApproved();
   const { projectId } = await params;
+  await requireLaunchedProject(projectId);
   const data = await loadFraming(projectId, access);
   if (!data) notFound();
   const me = access.personId;
@@ -41,6 +44,7 @@ export default async function FramingPage({
               <BriefFieldCard
                 key={`${field.key}-${field.value ?? ""}-${field.status ?? ""}`}
                 field={field}
+                label={fr.framing.fields[field.key]}
                 projectId={projectId}
               />
             ))}
@@ -56,15 +60,23 @@ export default async function FramingPage({
             <ValidationPanel
               stage={data.stage}
               pendingValidation={data.pendingValidation}
-              members={data.members}
+              members={data.validators}
               projectId={projectId}
               mePersonId={me}
+              title={fr.framing.validation.title}
+              startLabel={fr.framing.validation.start}
             />
           </CardContent>
         </Card>
         <Card>
           <CardContent>
-            <ImportPanel reports={data.reports} projectId={projectId} />
+            <ImportPanel
+              reports={data.reports}
+              projectId={projectId}
+              importAction={importReport}
+              title={fr.framing.import.title}
+              hint={fr.framing.import.hint}
+            />
           </CardContent>
         </Card>
         <Card>

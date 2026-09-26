@@ -4,49 +4,47 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { Field } from "@/components/auth/field";
-import { FieldError, FormMessage } from "@/components/auth/form-message";
+import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { TextareaField } from "@/components/auth/textarea-field";
+import { MasterPicker } from "@/components/catalog/master-picker";
 import { OptionSelect } from "@/components/projects/option-select";
 import { buttonVariants } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
+import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { createProject } from "@/lib/projects/actions";
 import {
-  RELEASE_TYPES,
+  PRIORITIES,
+  PROJECT_TYPES,
   idleCreateProjectState,
-  type ArtistOption,
-  type OwnerOption,
+  isProjectType,
+  type ProjectType,
 } from "@/lib/projects/types";
-import { cn } from "@/lib/utils";
 
-type ArtistMode = "existing" | "new";
-
+// Step C. Same form from the projects list (blank) and from a master page
+// (master linked, type and title prefilled). The master rule is checked on
+// submit only: switching the type never shows a warning in advance.
 export function CreateProjectForm({
+  masters,
   artists,
-  owners,
-  defaultOwnerId,
+  defaults,
 }: {
+  masters: MasterOption[];
   artists: ArtistOption[];
-  owners: OwnerOption[];
-  defaultOwnerId: string | null;
+  defaults: { title: string; type: ProjectType | null; masterIds: string[] };
 }) {
   const t = fr.shell.newProject;
   const [state, action] = useActionState(createProject, idleCreateProjectState);
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
-  const [mode, setMode] = useState<ArtistMode>(
-    artists.length === 0 || values.artistMode === "new" ? "new" : "existing",
-  );
+  const [type, setType] = useState<ProjectType | null>(defaults.type);
 
-  const releaseItems = Object.fromEntries(
-    RELEASE_TYPES.map((type) => [type, fr.shell.releaseTypes[type]]),
+  const typeItems = Object.fromEntries(
+    PROJECT_TYPES.map((value) => [value, fr.shell.projectTypes[value]]),
   );
-  const artistItems = Object.fromEntries(artists.map((a) => [a.id, a.name]));
-  const ownerItems = Object.fromEntries(
-    owners.map((o) => [
-      o.personId,
-      o.personId === defaultOwnerId ? `${o.name} ${t.you}` : o.name,
-    ]),
+  const priorityItems = Object.fromEntries(
+    PRIORITIES.map((value) => [value, fr.shell.priorities[value]]),
   );
 
   return (
@@ -55,88 +53,76 @@ export function CreateProjectForm({
         name="title"
         label={t.fields.title}
         required
-        autoFocus
+        autoFocus={!defaults.title}
+        autoComplete="off"
         maxLength={200}
-        defaultValue={values.title ?? ""}
+        defaultValue={values.title ?? defaults.title}
         error={errors.title}
       />
 
       <OptionSelect
-        name="releaseType"
-        label={t.fields.releaseType}
-        items={releaseItems}
-        defaultValue={values.releaseType ?? "single"}
-        error={errors.releaseType}
+        name="type"
+        label={t.fields.type}
+        items={typeItems}
+        defaultValue={values.type || defaults.type}
+        onValueChange={(value) => setType(isProjectType(value) ? value : null)}
+        error={errors.type}
       />
 
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1.5 text-sm font-medium">
-          {t.fields.artist}
-        </legend>
-        <input type="hidden" name="artistMode" value={mode} />
-        {artists.length > 0 ? (
-          <div
-            role="radiogroup"
-            className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1"
-          >
-            {(["existing", "new"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={mode === option}
-                onClick={() => setMode(option)}
-                className={cn(
-                  "h-9 rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                  mode === option
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {option === "existing"
-                  ? t.fields.artistExisting
-                  : t.fields.artistNew}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">{t.noArtistYet}</p>
-        )}
-        {mode === "existing" ? (
-          <OptionSelect
-            name="artistId"
-            label={t.fields.artistExisting}
-            hideLabel
-            placeholder={t.fields.artistPlaceholder}
-            items={artistItems}
-            defaultValue={values.artistId || null}
-            error={errors.artistId}
-          />
-        ) : (
-          <Field
-            name="artistName"
-            label={t.fields.artistNewName}
-            maxLength={200}
-            defaultValue={values.artistName ?? ""}
-            error={errors.artistName}
-          />
-        )}
-      </fieldset>
+      <MasterPicker
+        masters={masters}
+        artists={artists}
+        defaultSelectedIds={defaults.masterIds}
+        hint={
+          type && type !== "music_release"
+            ? t.fields.mastersOptional
+            : undefined
+        }
+        error={errors.masterIds}
+      />
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field
+          name="dueDate"
+          type="date"
+          label={t.fields.dueDate}
+          hint={t.fields.dueDateHint}
+          defaultValue={values.dueDate ?? ""}
+          error={errors.dueDate}
+        />
+        <Field
+          name="budget"
+          label={t.fields.budget}
+          hint={t.fields.budgetHint}
+          inputMode="decimal"
+          autoComplete="off"
+          maxLength={20}
+          defaultValue={values.budget ?? ""}
+          error={errors.budget}
+          className="h-10 text-base tabular-nums md:text-sm"
+        />
+      </div>
 
       <OptionSelect
-        name="ownerPersonId"
-        label={t.fields.owner}
-        hint={t.fields.ownerHint}
-        items={ownerItems}
-        defaultValue={values.ownerPersonId || defaultOwnerId}
-        error={errors.ownerPersonId}
+        name="priority"
+        label={t.fields.priority}
+        placeholder={t.fields.priorityNone}
+        items={priorityItems}
+        defaultValue={values.priority || null}
+        error={errors.priority}
+      />
+
+      <TextareaField
+        name="framingNotes"
+        label={t.fields.notes}
+        hint={t.fields.notesHint}
+        maxLength={20000}
+        defaultValue={values.framingNotes ?? ""}
+        error={errors.framingNotes}
       />
 
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>
-      )}
-      {errors.artistMode && (
-        <FieldError id="artistMode-error">{errors.artistMode}</FieldError>
       )}
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

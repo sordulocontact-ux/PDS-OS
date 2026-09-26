@@ -6,6 +6,7 @@ import { OptionSelect } from "@/components/framing/option-select";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { needTreatment } from "@/lib/ui/state-treatments";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export function NeedsSection({
   const t = fr.framing.needs;
   const a = fr.framing.actions;
   const { pending, run } = useFramingAction();
+  const canEdit = useCanEditProject();
   const [label, setLabel] = useState("");
   const [family, setFamily] = useState<Family>("creation_content");
 
@@ -62,22 +64,39 @@ export function NeedsSection({
                   projectId={projectId}
                 />
               )}
-              <div className="flex flex-wrap gap-2">
-                {need.review_status === "proposed" ? (
-                  <>
-                    <Button
-                      size="sm"
-                      disabled={pending}
-                      onClick={() =>
-                        run(() =>
-                          updateNeed(projectId, need.id, {
-                            review_status: "confirmed",
-                          }),
-                        )
-                      }
-                    >
-                      {a.confirm}
-                    </Button>
+              {canEdit && (
+                <div className="flex flex-wrap gap-2">
+                  {need.review_status === "proposed" ? (
+                    <>
+                      <Button
+                        size="sm"
+                        disabled={pending}
+                        onClick={() =>
+                          run(() =>
+                            updateNeed(projectId, need.id, {
+                              review_status: "confirmed",
+                            }),
+                          )
+                        }
+                      >
+                        {a.confirm}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={pending}
+                        onClick={() =>
+                          run(() =>
+                            updateNeed(projectId, need.id, {
+                              review_status: "rejected",
+                            }),
+                          )
+                        }
+                      >
+                        {a.reject}
+                      </Button>
+                    </>
+                  ) : (
                     <Button
                       size="sm"
                       variant="outline"
@@ -85,75 +104,62 @@ export function NeedsSection({
                       onClick={() =>
                         run(() =>
                           updateNeed(projectId, need.id, {
-                            review_status: "rejected",
+                            state:
+                              need.state === "committed"
+                                ? "identified"
+                                : "committed",
                           }),
                         )
                       }
                     >
-                      {a.reject}
+                      {need.state === "committed" ? t.uncommit : t.commit}
                     </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={pending}
-                    onClick={() =>
-                      run(() =>
-                        updateNeed(projectId, need.id, {
-                          state:
-                            need.state === "committed"
-                              ? "identified"
-                              : "committed",
-                        }),
-                      )
-                    }
-                  >
-                    {need.state === "committed" ? t.uncommit : t.commit}
-                  </Button>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      <form
-        className="flex flex-wrap items-end gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          run(
-            () => addNeed(projectId, label, family),
-            () => setLabel(""),
-          );
-        }}
-      >
-        <div className="grid min-w-56 flex-1 gap-1">
-          <Label htmlFor="need-label">{t.label}</Label>
-          <Input
-            id="need-label"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-          />
-        </div>
-        <div className="grid gap-1">
-          <Label htmlFor="need-family">{t.family}</Label>
-          <OptionSelect
-            id="need-family"
-            label={t.family}
-            options={t.families}
-            value={family}
-            onChange={(v) => setFamily(v as Family)}
-          />
-        </div>
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={pending || label.trim() === ""}
+      {canEdit && (
+        <form
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            run(
+              () => addNeed(projectId, label, family),
+              () => setLabel(""),
+            );
+          }}
         >
-          {a.add}
-        </Button>
-      </form>
+          <div className="grid min-w-56 flex-1 gap-1">
+            <Label htmlFor="need-label">{t.label}</Label>
+            <Input
+              id="need-label"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-1">
+            <Label htmlFor="need-family">{t.family}</Label>
+            <OptionSelect
+              id="need-family"
+              label={t.family}
+              options={t.families}
+              value={family}
+              onChange={(v) => setFamily(v as Family)}
+            />
+          </div>
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={pending || label.trim() === ""}
+          >
+            {a.add}
+          </Button>
+        </form>
+      )}
     </section>
   );
 }

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isOrganizationRole } from "@/lib/auth/redirects";
 import { isMembershipStatus, type MembershipRow } from "@/lib/members/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,10 +25,15 @@ export async function listMemberships(
 
   const rows: MembershipRow[] = [];
   for (const raw of data ?? []) {
-    if (!raw.person || !isMembershipStatus(raw.status)) continue;
+    if (
+      !raw.person ||
+      !isMembershipStatus(raw.status) ||
+      (raw.role !== null && !isOrganizationRole(raw.role))
+    )
+      continue;
     rows.push({
       id: raw.id,
-      role: raw.role === "admin" ? "admin" : "member",
+      role: raw.role,
       status: raw.status,
       requestedAt: raw.requested_at,
       decidedAt: raw.decided_at,

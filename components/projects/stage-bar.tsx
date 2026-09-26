@@ -1,4 +1,4 @@
-import { CheckIcon } from "lucide-react";
+import { IconCheck } from "nucleo-sharp-essential";
 
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectStage, StageState } from "@/lib/projects/types";
@@ -59,7 +59,7 @@ export function StageBar({
               />
               <span className="sr-only md:not-sr-only md:flex md:min-w-0 md:items-center md:gap-1 md:text-xs">
                 {stage.state === "validated" ? (
-                  <CheckIcon className="size-3 shrink-0" aria-hidden />
+                  <IconCheck className="size-3 shrink-0" aria-hidden />
                 ) : (
                   <span
                     className="text-muted-foreground tabular-nums"

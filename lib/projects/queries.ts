@@ -1,16 +1,29 @@
 import "server-only";
 
+import { notFound } from "next/navigation";
 import { cache } from "react";
 
 import { projectIdSchema } from "@/lib/projects/schemas";
 import {
+  CREDITS_SELECT,
+  toCredits,
+  type RawCredit,
+} from "@/lib/catalog/queries";
+import {
+  formatCredits,
+  type Credit,
+  type MasterOption,
+} from "@/lib/catalog/types";
+import {
   currentStageOf,
-  isReleaseType,
+  isAssignmentStatus,
+  isPriority,
+  isProjectType,
+  projectStatusOf,
+  type Assignment,
   isStageState,
   personName,
   sortStages,
-  type ArtistOption,
-  type OwnerOption,
   type ProjectDetail,
   type ProjectListItem,
   type ProjectStage,
@@ -52,6 +65,89 @@ function toStages(raw: RawStage[]): ProjectStage[] {
   return sortStages(stages);
 }
 
+// Masters in link order, each with its credits: the artist of a project is
+// the first credit of its first master (same rule as project_artist_name).
+const MASTERS_SELECT = `links:project_masters!project_masters_project_same_org(position, master:masters!project_masters_master_same_org(id, title, version, ${CREDITS_SELECT}))`;
+
+type RawLink = {
+  position: number;
+  master: {
+    id: string;
+    title: string;
+    version: string | null;
+    credits: RawCredit[];
+  } | null;
+};
+
+function toMasters(
+  raw: RawLink[],
+): Array<MasterOption & { credits: Credit[] }> {
+  return [...raw]
+    .sort((a, b) => a.position - b.position)
+    .flatMap((link) => {
+      if (!link.master) return [];
+      const credits = toCredits(link.master.credits);
+      return [
+        {
+          id: link.master.id,
+          title: link.master.title,
+          version: link.master.version,
+          artists: formatCredits(credits),
+          credits,
+        },
+      ];
+    });
+}
+
+const ASSIGNMENTS_SELECT =
+  "assignments:project_assignments!project_assignments_project_same_org(id, status, note, response, responded_at, created_at, assignee_person_id, assignee:people!project_assignments_assignee_person_id_fkey(first_name, last_name), assigner:people!project_assignments_assigned_by_fkey(first_name, last_name))";
+
+type RawAssignment = {
+  id: string;
+  status: string;
+  note: string | null;
+  response: string | null;
+  responded_at: string | null;
+  created_at: string;
+  assignee_person_id: string;
+  assignee: { first_name: string; last_name: string | null } | null;
+  assigner: { first_name: string; last_name: string | null } | null;
+};
+
+// Newest first.
+function toAssignments(raw: RawAssignment[]): Assignment[] {
+  return raw
+    .flatMap((a): Assignment[] =>
+      isAssignmentStatus(a.status)
+        ? [
+            {
+              id: a.id,
+              status: a.status,
+              assigneePersonId: a.assignee_person_id,
+              assigneeName: a.assignee
+                ? personName(a.assignee.first_name, a.assignee.last_name)
+                : "",
+              assignedByName: a.assigner
+                ? personName(a.assigner.first_name, a.assigner.last_name)
+                : "",
+              note: a.note,
+              response: a.response,
+              respondedAt: a.responded_at,
+              createdAt: a.created_at,
+            },
+          ]
+        : [],
+    )
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+function artistNameOf(
+  masters: Array<{ credits: Credit[] }>,
+  legacyArtist: { name: string } | null,
+): string {
+  return masters[0]?.credits[0]?.name ?? legacyArtist?.name ?? "";
+}
+
 export async function listProjects(): Promise<{
   projects: ProjectListItem[];
   error: boolean;
@@ -60,7 +156,7 @@ export async function listProjects(): Promise<{
   const { data, error } = await supabase
     .from("projects")
     .select(
-      `id, title, release_type, artist:artists!projects_artist_same_org(name), ${STAGES_SELECT}`,
+      `id, title, type, artist:artists!projects_artist_same_org(name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
     )
     .is("archived_at", null)
     .order("created_at", { ascending: false });
@@ -72,13 +168,17 @@ export async function listProjects(): Promise<{
 
   const projects = (data ?? []).map((row): ProjectListItem => {
     const stages = toStages(row.project_stages as RawStage[]);
+    const masters = toMasters(row.links as RawLink[]);
+    const latest = toAssignments(row.assignments as RawAssignment[])[0];
     return {
       id: row.id,
       title: row.title,
-      artistName: row.artist?.name ?? "",
-      releaseType: isReleaseType(row.release_type)
-        ? row.release_type
-        : "single",
+      artistName: artistNameOf(masters, row.artist),
+      type: isProjectType(row.type) ? row.type : "music_release",
+      status: projectStatusOf(stages.length, latest ?? null),
+      latestAssignment: latest
+        ? { status: latest.status, assigneePersonId: latest.assigneePersonId }
+        : null,
       currentStage: currentStageOf(stages),
       stageCount: stages.length,
     };
@@ -95,7 +195,7 @@ export const getProject = cache(
     const { data, error } = await supabase
       .from("projects")
       .select(
-        `id, title, release_type, created_at, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${STAGES_SELECT}`,
+        `id, title, type, created_at, due_date, budget_cents, priority, framing_notes, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
       )
       .eq("id", projectId)
       .maybeSingle();
@@ -107,68 +207,60 @@ export const getProject = cache(
     if (!data) return null;
 
     const stages = toStages(data.project_stages as RawStage[]);
+    const masters = toMasters(data.links as RawLink[]);
+    const assignments = toAssignments(data.assignments as RawAssignment[]);
     const owner = data.owner
       ? personName(data.owner.first_name, data.owner.last_name)
       : "";
     return {
       id: data.id,
       title: data.title,
-      releaseType: isReleaseType(data.release_type)
-        ? data.release_type
-        : "single",
+      type: isProjectType(data.type) ? data.type : "music_release",
       createdAt: data.created_at,
-      artistName: data.artist?.name ?? "",
+      artistName: artistNameOf(masters, data.artist),
       ownerName: owner || null,
+      ownerPersonId: data.owner_person_id,
+      status: projectStatusOf(stages.length, assignments[0] ?? null),
+      assignments,
+      dueDate: data.due_date,
+      budgetCents: data.budget_cents,
+      priority: isPriority(data.priority) ? data.priority : null,
+      framingNotes: data.framing_notes,
+      masters: masters.map(({ id, title, version, artists }) => ({
+        id,
+        title,
+        version,
+        artists,
+      })),
       stages,
       currentStage: currentStageOf(stages),
     };
   },
 );
 
-export async function listArtists(): Promise<ArtistOption[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("artists")
-    .select("id, name")
-    .is("archived_at", null)
-    .order("name");
-  if (error) {
-    console.error("listArtists:", error.message);
-    return [];
-  }
-  return data ?? [];
+// Sections that belong to a launched project (framing, calls, release) do not
+// exist before launch: a project with no stage answers 404 there.
+export async function requireLaunchedProject(projectId: string) {
+  const project = await getProject(projectId);
+  if (!project || project.stages.length === 0) notFound();
+  return project;
 }
 
-// Approved members who may own a project. RLS on people returns oneself plus
-// approved members (and, for admins, everyone with a membership). Admins also
-// see every membership, so the status filter is applied to what is visible;
-// a person whose membership is hidden is visible only because approved.
-export async function listOwnerCandidates(): Promise<OwnerOption[]> {
+// Project managers a project can be transmitted to (director only: empty
+// for anyone else, decided by the database).
+export async function listAssignablePeople(
+  organizationId: string,
+): Promise<Array<{ personId: string; name: string }>> {
   const supabase = await createClient();
-  const [people, memberships] = await Promise.all([
-    supabase
-      .from("people")
-      .select("id, first_name, last_name")
-      .order("first_name"),
-    supabase.from("memberships").select("person_id, status"),
-  ]);
-  if (people.error || memberships.error) {
-    console.error(
-      "listOwnerCandidates:",
-      people.error?.message ?? memberships.error?.message,
-    );
+  const { data, error } = await supabase.rpc("list_assignable_people", {
+    p_organization_id: organizationId,
+  });
+  if (error) {
+    console.error("listAssignablePeople:", error.message);
     return [];
   }
-
-  const statusByPerson = new Map<string, string>();
-  for (const m of memberships.data ?? []) {
-    statusByPerson.set(m.person_id, m.status);
-  }
-
-  return (people.data ?? [])
-    .filter((p) => (statusByPerson.get(p.id) ?? "approved") === "approved")
-    .map((p) => ({
-      personId: p.id,
-      name: personName(p.first_name, p.last_name) || p.id,
-    }));
+  return (data ?? []).map((p) => ({
+    personId: p.person_id,
+    name: personName(p.first_name, p.last_name),
+  }));
 }

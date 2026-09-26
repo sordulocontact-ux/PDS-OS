@@ -48,7 +48,7 @@ const line = (what: string, who: string | null, why: string | null) =>
 
 export function ReportPanel({ report }: { report: LocatedCallReport }) {
   const t = fr.labo.report;
-  const { brief } = report;
+  const { brief, strategy } = report;
   const field = (
     key: string,
     label: string,
@@ -130,6 +130,24 @@ export function ReportPanel({ report }: { report: LocatedCallReport }) {
           key: `t${i}`,
           main: x.name,
           detail: x.role ?? undefined,
+          at: x.at,
+          quote: x.quote,
+        }))}
+      />
+      <Section
+        title={t.strategy}
+        items={[
+          ...field("positioning", t.positioning, strategy.positioning),
+          ...field("audiences", t.audiences, strategy.audiences),
+          ...field("narrative", t.narrative, strategy.narrative),
+        ]}
+      />
+      <Section
+        title={t.levers}
+        items={strategy.levers.map((x, i) => ({
+          key: `l${i}`,
+          main: x.label,
+          detail: t.families[x.family],
           at: x.at,
           quote: x.quote,
         }))}

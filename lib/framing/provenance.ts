@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Provenance } from "@/lib/framing/brief";
+import type { Member } from "@/lib/framing/related";
 import { createClient } from "@/lib/supabase/server";
 
 type CallProvenance = Extract<Provenance, { kind: "call" }>;
@@ -61,4 +62,40 @@ export async function resolveProvenance(
     });
   }
   return result;
+}
+
+type ProvenanceRow = {
+  source_report_item_id: string | null;
+  source_type?: string | null;
+  source_quote?: string | null;
+  source_start_seconds?: number | null;
+  created_by?: string | null;
+};
+
+/**
+ * Resolves the provenance of every row at once, then returns a lookup: a call
+ * (with its quote and moment), a dictation (with who dictated), or null.
+ */
+export async function provenanceLookup(
+  rows: ProvenanceRow[],
+  members: Member[],
+): Promise<(row: ProvenanceRow) => Provenance | null> {
+  const resolved = await resolveProvenance(
+    rows.map((r) => ({
+      source_report_item_id: r.source_report_item_id,
+      source_quote: r.source_quote ?? null,
+      source_start_seconds: r.source_start_seconds ?? null,
+    })),
+  );
+  const nameOf = new Map(members.map((m) => [m.personId, m.name]));
+  return (row) => {
+    if (row.source_type === "voice")
+      return {
+        kind: "voice",
+        quote: row.source_quote ?? "",
+        author: row.created_by ? (nameOf.get(row.created_by) ?? null) : null,
+      };
+    const itemId = row.source_report_item_id;
+    return itemId ? (resolved.get(itemId) ?? null) : null;
+  };
 }

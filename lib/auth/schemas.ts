@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { fr } from "@/lib/i18n/fr";
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
+import { ORGANIZATION_ROLES } from "@/lib/auth/redirects";
 
 // Form validation. The database enforces its own rules (email
 // normalisation, mandatory reason…); they are anticipated here to show a
@@ -74,7 +75,15 @@ export const membershipDecisionSchema = z.object({
 
 export const membershipRoleSchema = z.object({
   membershipId: z.uuid(),
-  role: z.enum(["admin", "member"]),
+  role: z.enum(ORGANIZATION_ROLES, { error: fr.auth.errors.invalidRole }),
+});
+
+export const inviteMemberSchema = z.object({
+  firstName: requiredNameSchema,
+  lastName: optionalNameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  role: z.enum(ORGANIZATION_ROLES, { error: fr.auth.errors.required }),
 });
 
 export const personNameSchema = z.object({

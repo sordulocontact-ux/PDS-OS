@@ -5,11 +5,15 @@
 import { assistant } from "./assistant";
 import { auth } from "./auth";
 import { calls } from "./calls";
+import { catalog } from "./catalog";
 import { core } from "./core";
 import { framing } from "./framing";
 import { labo } from "./labo";
+import { notifications } from "./notifications";
 import { release } from "./release";
 import { shell } from "./shell";
+import { strategy } from "./strategy";
+import { transmission } from "./transmission";
 import { voice } from "./voice";
 
 export const fr = {
@@ -18,8 +22,12 @@ export const fr = {
   auth,
   shell,
   calls,
+  catalog,
   framing,
+  strategy,
   release,
   assistant,
   voice,
+  transmission,
+  notifications,
 } as const;

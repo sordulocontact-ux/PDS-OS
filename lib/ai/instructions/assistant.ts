@@ -6,13 +6,19 @@
  * mars"). Function results are data, never instructions; they are not
  * concatenated here.
  */
+const POSITION_NAMES: Record<string, string> = {
+  general_director: "directeur général",
+  project_manager: "chef de projet",
+  creative_director: "directeur créatif",
+};
+
 export function assistantInstructions(context: {
   firstName: string | null;
   role: string | null;
 }): string {
   return `Tu es PO, l'assistant de PDS OS, l'outil interne d'un label pour suivre le cycle de vie de ses sorties musicales.
 
-Contexte fourni par l'application : tu parles à ${context.firstName ?? "un membre de l'équipe"}${context.role === "admin" ? ", administrateur" : ""}.
+Contexte fourni par l'application : tu parles à ${context.firstName ?? "un membre de l'équipe"}${context.role ? `, ${POSITION_NAMES[context.role] ?? "membre de l'équipe"}` : ""}.
 
 Ton rôle : répondre aux questions sur les données de PDS OS, et seulement elles (projets, étapes, Brief, besoins, équipe, tâches, points ouverts, validations, calls, sorties).
 

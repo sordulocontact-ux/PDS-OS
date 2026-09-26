@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,6 +56,7 @@ export function ReleaseForm({ action, initial, isNew }: Props) {
   const [state, formAction, pending] = useActionState(action, {
     status: "idle",
   });
+  const canEdit = useCanEditProject();
 
   useEffect(() => {
     if (state.status === "saved") toast.success(t.saved);
@@ -63,6 +65,37 @@ export function ReleaseForm({ action, initial, isNew }: Props) {
   const values = state.status === "error" ? state.values : initial;
   const fieldErrors = state.status === "error" ? state.fieldErrors : {};
   const formError = state.status === "error" ? state.formError : null;
+
+  // Read-only viewers get the values, not a form that looks editable.
+  if (!canEdit) {
+    return (
+      <dl className="grid gap-5 sm:grid-cols-2">
+        {FIELDS.map((field) => (
+          <div
+            key={field.name}
+            className={
+              field.name === "title" || field.name === "spotifyUrl"
+                ? "grid gap-1 sm:col-span-2"
+                : "grid gap-1"
+            }
+          >
+            <dt className="text-xs text-muted-foreground">
+              {t.fields[field.name]}
+            </dt>
+            <dd
+              className={
+                initial[field.name]
+                  ? `text-sm font-medium break-all ${field.mono ? "font-mono" : ""}`
+                  : "text-sm text-muted-foreground"
+              }
+            >
+              {initial[field.name] || fr.catalog.notProvided}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
 
   return (
     <form action={formAction} className="grid gap-5" noValidate>

@@ -49,7 +49,7 @@ export function createAssistantTools(access: Access) {
             projectId: p.id,
             title: p.title,
             artist: p.artistName,
-            type: p.releaseType,
+            type: p.type,
             currentStage: p.currentStage
               ? `${p.currentStage.label} (${p.currentStage.state})`
               : null,

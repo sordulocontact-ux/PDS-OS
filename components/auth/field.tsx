@@ -22,6 +22,9 @@ export function Field({
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{label}</Label>
       <Input
+        // Base UI refuses a default value changed after mount (it warns): a
+        // value sent back by a server action remounts the input instead.
+        key={String(inputProps.defaultValue ?? "")}
         id={id}
         name={name}
         aria-invalid={error ? true : undefined}

@@ -1,4 +1,4 @@
-import { LogOutIcon } from "lucide-react";
+import { IconCircleLogout } from "nucleo-sharp-essential";
 
 import { SubmitButton } from "@/components/auth/submit-button";
 import { signOut } from "@/lib/auth/actions";
@@ -18,7 +18,7 @@ export function SignOutButton({
         pendingLabel={fr.auth.common.loading}
         className={className}
       >
-        <LogOutIcon aria-hidden />
+        <IconCircleLogout aria-hidden />
         {fr.auth.common.signOut}
       </SubmitButton>
     </form>

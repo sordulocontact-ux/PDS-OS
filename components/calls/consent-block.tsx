@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { ConsentOptions } from "@/components/calls/consent-options";
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +25,18 @@ export function ConsentForm({
 }) {
   const t = fr.calls.consent;
   const [state, formAction, pending] = useActionState(updateConsent, null);
+  const canEdit = useCanEditProject();
+
+  // Read-only viewers see the recorded choice as text, not disabled radios.
+  if (!canEdit) {
+    return (
+      <div className="grid gap-1 text-sm">
+        <p className="font-medium">{t.label[consent]}</p>
+        <p className="text-muted-foreground">{t.explain[consent]}</p>
+        {note && <p className="whitespace-pre-wrap">{note}</p>}
+      </div>
+    );
+  }
 
   return (
     <form action={formAction} className="grid gap-4">

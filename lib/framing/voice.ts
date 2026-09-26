@@ -117,7 +117,7 @@ function toProposals(
   state: FramingState,
   locate: Locate,
 ): FramingProposal[] {
-  const heard = output.changes;
+  const heard = output;
   const changes: Array<{ change: FramingChange; before: string | null }> = [];
 
   for (const field of BRIEF_TEXT_FIELDS) {
@@ -146,7 +146,10 @@ function toProposals(
   for (const need of heard.needs.filter((n) => newNeed(n.label)))
     changes.push({ change: { kind: "need", ...need }, before: null });
   for (const member of heard.team.filter((m) => newMember(m.name)))
-    changes.push({ change: { kind: "team", ...member }, before: null });
+    changes.push({
+      change: { kind: "team", ...member, role: member.role ?? null },
+      before: null,
+    });
   for (const point of heard.openPoints.filter((p) => newPoint(p.question)))
     changes.push({ change: { kind: "open_point", ...point }, before: null });
 

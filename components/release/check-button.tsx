@@ -1,9 +1,10 @@
 "use client";
 
-import { RefreshCwIcon } from "lucide-react";
+import { IconRefresh } from "@/components/icons";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
+import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import type { CheckReleaseResult } from "@/lib/release/action-types";
@@ -19,6 +20,7 @@ export function CheckButton({
   disabled?: boolean;
 }) {
   const [pending, startTransition] = useTransition();
+  const canEdit = useCanEditProject();
 
   function onClick() {
     startTransition(async () => {
@@ -32,6 +34,8 @@ export function CheckButton({
     });
   }
 
+  if (!canEdit) return null;
+
   return (
     <Button
       type="button"
@@ -41,7 +45,7 @@ export function CheckButton({
       disabled={disabled || pending}
       aria-busy={pending || undefined}
     >
-      <RefreshCwIcon
+      <IconRefresh
         data-icon="inline-start"
         className={
           pending ? "animate-spin motion-reduce:animate-none" : undefined

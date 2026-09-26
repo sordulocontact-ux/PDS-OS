@@ -56,6 +56,7 @@ export type CallErrorCode =
   | "date_invalid"
   | "not_found"
   | "unauthorized"
+  | "forbidden"
   | "consent_locked"
   | "consent_required"
   | "audio_exists"

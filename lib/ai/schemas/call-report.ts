@@ -76,6 +76,26 @@ export const callReportSchema = z.object({
       z.object({ name: z.string(), role: z.string().nullable(), quote }),
     ),
   }),
+  strategy: z.object({
+    positioning: field.describe(
+      "Positionnement de la sortie, tel qu'il a été formulé.",
+    ),
+    audiences: field.describe("Publics visés, tels qu'ils ont été nommés."),
+    narrative: field.describe(
+      "Narratif, histoire racontée autour de la sortie.",
+    ),
+    levers: z
+      .array(
+        z.object({
+          label: z.string(),
+          family: z.enum(NEED_FAMILIES),
+          quote,
+        }),
+      )
+      .describe(
+        "Leviers du dispositif de lancement évoqués (clip, playlisting, live, relations presse…).",
+      ),
+  }),
 });
 
 export type CallReport = z.infer<typeof callReportSchema>;

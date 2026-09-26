@@ -7,12 +7,15 @@ import {
   type BriefFieldState,
   type Provenance,
 } from "@/lib/framing/brief";
-import { resolveProvenance } from "@/lib/framing/provenance";
+import { provenanceLookup } from "@/lib/framing/provenance";
 import {
   loadImportableReports,
   loadMembers,
+  loadPendingValidation,
+  loadValidators,
   type ImportableReport,
   type Member,
+  type PendingValidation,
 } from "@/lib/framing/related";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
@@ -27,12 +30,7 @@ type ReportItem = Tables["report_items"]["Row"];
 export type FramingData = {
   project: { id: string; title: string; organizationId: string };
   stage: { id: string; state: string } | null;
-  pendingValidation: {
-    id: string;
-    validatorPersonId: string;
-    validatorName: string;
-    note: string | null;
-  } | null;
+  pendingValidation: PendingValidation | null;
   fields: BriefFieldState[];
   needs: Array<Need & { provenance: Provenance | null }>;
   team: Array<TeamMember & { provenance: Provenance | null }>;
@@ -41,6 +39,8 @@ export type FramingData = {
   proposedActions: ReportItem[];
   reports: ImportableReport[];
   members: Member[];
+  // Who a validation may be asked of: holders of "validate" (the director).
+  validators: Member[];
 };
 
 /** Everything the framing page shows, read with the user's session (RLS). */
@@ -66,6 +66,7 @@ export async function loadFraming(
     tasksRes,
     members,
     reports,
+    validators,
   ] = await Promise.all([
     supabase
       .from("project_stages")
@@ -102,6 +103,7 @@ export async function loadFraming(
       .order("due_date"),
     loadMembers(access),
     loadImportableReports(projectId),
+    loadValidators(project.organization_id),
   ]);
 
   const stage = stageRes.data
@@ -113,52 +115,21 @@ export async function loadFraming(
   const openPoints = pointsRes.data ?? [];
   const tasks = tasksRes.data ?? [];
 
-  const provenance = await resolveProvenance([
-    ...fieldRows,
-    ...needs,
-    ...team,
-    ...openPoints.map((p) => ({
-      source_report_item_id: p.source_report_item_id,
-      source_quote: null,
-      source_start_seconds: null,
-    })),
-  ]);
-  const nameOf = new Map(members.map((m) => [m.personId, m.name]));
-  const provenanceOf = (row: {
-    source_report_item_id: string | null;
-    source_type?: string | null;
-    source_quote?: string | null;
-    created_by?: string | null;
-  }): Provenance | null => {
-    if (row.source_type === "voice")
-      return {
-        kind: "voice",
-        quote: row.source_quote ?? "",
-        author: row.created_by ? (nameOf.get(row.created_by) ?? null) : null,
-      };
-    const itemId = row.source_report_item_id;
-    return itemId ? (provenance.get(itemId) ?? null) : null;
-  };
-
-  let pendingValidation: FramingData["pendingValidation"] = null;
-  if (stage) {
-    const { data } = await supabase
-      .from("validations")
-      .select("id, validator_person_id, request_note")
-      .eq("project_stage_id", stage.id)
-      .eq("state", "pending")
-      .maybeSingle();
-    if (data) {
-      pendingValidation = {
-        id: data.id,
-        validatorPersonId: data.validator_person_id,
-        validatorName:
-          members.find((m) => m.personId === data.validator_person_id)?.name ??
-          "—",
-        note: data.request_note,
-      };
-    }
-  }
+  const provenanceOf = await provenanceLookup(
+    [
+      ...fieldRows,
+      ...needs,
+      ...team,
+      ...openPoints.map((p) => ({
+        source_report_item_id: p.source_report_item_id,
+      })),
+    ],
+    members,
+  );
+  const pendingValidation = await loadPendingValidation(
+    stage?.id ?? null,
+    members,
+  );
 
   // Next actions of imported reports that have not become tasks yet.
   const importedIds = reports.filter((r) => r.imported).map((r) => r.reportId);
@@ -206,5 +177,6 @@ export async function loadFraming(
     ),
     reports,
     members,
+    validators,
   };
 }

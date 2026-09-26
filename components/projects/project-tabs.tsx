@@ -14,6 +14,11 @@ export function ProjectTabs({ projectId }: { projectId: string }) {
   const tabs = [
     { href: routes.project(projectId), label: t.overview, exact: true },
     { href: routes.projectFraming(projectId), label: t.framing, exact: false },
+    {
+      href: routes.projectStrategy(projectId),
+      label: t.strategy,
+      exact: false,
+    },
     { href: routes.projectCalls(projectId), label: t.calls, exact: false },
     { href: routes.projectRelease(projectId), label: t.release, exact: false },
   ];

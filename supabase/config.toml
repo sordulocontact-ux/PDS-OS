@@ -202,7 +202,10 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = true
+# Disabled for local testing only (sign up = logged in). The hosted project has
+# its own setting: keep confirmations ON there, invitations rely on them
+# (docs/ARCHITECTURE.md § 3).
+enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.

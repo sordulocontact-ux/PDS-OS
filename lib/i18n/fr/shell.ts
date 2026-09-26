@@ -5,6 +5,8 @@ export const shell = {
     label: "Navigation principale",
     home: "Accueil",
     projects: "Projets",
+    artists: "Artistes",
+    masters: "Masters",
     members: "Équipe",
     openMenu: "Ouvrir le menu",
     menuTitle: "Menu",
@@ -22,7 +24,13 @@ export const shell = {
     toMembers: "Ouvrir l'équipe",
   },
 
-  releaseTypes: { single: "Single", ep: "EP", album: "Album" },
+  projectTypes: {
+    music_release: "Sortie musicale",
+    partnership: "Partenariat",
+    content: "Contenu",
+  },
+
+  priorities: { low: "Basse", normal: "Normale", high: "Haute" },
 
   stageStates: {
     not_started: "À venir",
@@ -33,7 +41,7 @@ export const shell = {
 
   projects: {
     title: "Projets",
-    subtitle: "Toutes les sorties en cours de préparation.",
+    subtitle: "Sorties musicales, partenariats et contenus.",
     newProject: "Nouveau projet",
     columns: {
       title: "Titre",
@@ -46,33 +54,39 @@ export const shell = {
     emptyTitle: "Aucun projet pour l'instant",
     emptyBody:
       "Créez le premier projet pour commencer à suivre une sortie, du cadrage au bilan.",
+    emptyBodyReadOnly: "Les projets apparaîtront ici dès qu'ils seront créés.",
     loadError: "Impossible de charger les projets. Rechargez la page.",
   },
 
   newProject: {
     title: "Nouveau projet",
     subtitle:
-      "Un projet regroupe une sortie et ses sept étapes, du cadrage au bilan.",
+      "Le projet est créé non transmis. Il sera lancé une fois accepté par un chef de projet.",
     fields: {
-      title: "Titre",
-      releaseType: "Type de sortie",
-      artist: "Artiste",
-      artistExisting: "Artiste existant",
-      artistNew: "Nouvel artiste",
-      artistNewName: "Nom de l'artiste",
-      artistPlaceholder: "Choisir un artiste",
-      owner: "Responsable du projet",
-      ownerHint: "La personne qui pilote la sortie.",
+      title: "Titre du projet",
+      type: "Type",
+      masters: "Masters",
+      mastersOptional: "Facultatif pour ce type de projet.",
+      dueDate: "Échéance principale",
+      dueDateHint: "Date de sortie visée pour une sortie musicale.",
+      budget: "Budget prévisionnel",
+      budgetHint: "Montant en euros, par exemple 1500 ou 1 500,50.",
+      priority: "Priorité",
+      priorityNone: "Non définie",
+      notes: "Notes de cadrage",
+      notesHint: "Reprenez le brief reçu.",
     },
-    noArtistYet: "Aucun artiste enregistré : saisissez son nom.",
     submit: "Créer le projet",
     submitting: "Création…",
     cancel: "Annuler",
-    you: "(vous)",
     errors: {
-      artistRequired: "Choisissez un artiste ou saisissez un nom.",
-      ownerInvalid: "Choisissez un membre actif de l'équipe.",
-      invalidType: "Type de sortie invalide.",
+      mastersRequired:
+        "Une sortie musicale doit rattacher au moins un master. Rattachez-en un, ou changez le type de projet.",
+      invalidType: "Choisissez un type de projet.",
+      invalidPriority: "Priorité invalide.",
+      invalidBudget: "Montant invalide, par exemple 1500 ou 1 500,50.",
+      invalidDate: "Date invalide.",
+      invalidMasters: "Un master sélectionné n'existe plus. Retirez-le.",
     },
   },
 
@@ -82,6 +96,7 @@ export const shell = {
     tabs: {
       overview: "Vue d'ensemble",
       framing: "Cadrage",
+      strategy: "Stratégie",
       calls: "Calls",
       release: "Sortie",
     },
@@ -90,10 +105,19 @@ export const shell = {
       `Étape ${position} sur ${total}`,
     notFoundTitle: "Projet introuvable",
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",
+    readOnly:
+      "Lecture seule : seul le chef de projet responsable modifie ce projet.",
     overview: {
       facts: "Informations",
       artist: "Artiste",
-      type: "Type de sortie",
+      type: "Type",
+      masters: "Masters rattachés",
+      noMasters: "Aucun master rattaché.",
+      dueDate: "Échéance principale",
+      budget: "Budget prévisionnel",
+      priority: "Priorité",
+      framingNotes: "Notes de cadrage",
+      notProvided: "non renseigné",
       owner: "Responsable",
       noOwner: "Non défini",
       createdAt: "Créé le",

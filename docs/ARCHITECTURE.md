@@ -35,6 +35,16 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…000401_save_call_report` | `save_call_report(...)` : compte rendu + éléments en une transaction (SECURITY INVOKER). |
 | `…000501_assistant_search` | `pg_trgm`, index plein texte français, `search_projects`, `search_calls` (SECURITY INVOKER). |
 | `…260926000101_voice_source` | `source_type = 'voice'` autorisé sur `field_values`, `needs`, `project_team_members` (dictée). |
+| `…260926000401_positions_and_permissions` | Postes `general_director` / `project_manager` / `creative_director`, `role_permissions` (seule correspondance poste → permissions), `has_permission`, fonctions de la fondation réécrites sur la permission `administer`, `get_my_access` renvoie les permissions. |
+| `…260926000301_membership_role_chosen_on_approval` | Plus de poste par défaut : une inscription libre attend **sans poste**, `approved` exige un poste (contrainte). |
+| `…260926000501_catalog_and_project_creation` | Catalogue et création de projet (`docs/PARCOURS-01-ARTISTE-MASTER-PROJET.md`) : `masters`, `master_artists` (crédits ordonnés, `main`/`featuring`), `project_masters` ; `projects.type` (`music_release`/`partnership`/`content`) remplace `release_type`, + échéance, budget (centimes), priorité, notes de cadrage ; `artist_id` devient facultatif (projets antérieurs). **Plus de trigger `create_stages`** : les étapes naîtront au lancement. Permissions `manage_catalog` (DG, CP) et `create_projects` (DG). `create_master`, `create_project` (SECURITY INVOKER, une transaction), `project_artist_name`. |
+| `…260926000601_project_transmission` | Circuit d'attribution : `project_assignments` (historique, une seule transmission `pending` par projet, aucune écriture client), `transmit_project` (permission `assign_projects`, destinataire `pilot_projects`, projet non lancé), `respond_to_assignment` (destinataire seul ; refus et précision exigent un message ; **l'acceptation lance** : responsable + étapes), `list_assignable_people`, `person_has_permission`. `owner_person_id` n'est plus modifiable par un client ; `projects_create_stages` supprimée. |
+| `…260926000701_notifications` | `notifications` (destinataire seul en lecture, aucune écriture client, publiée dans Realtime), alimentée **par triggers** : transmission, acceptation / refus / précision, validation demandée / décidée, tâche assignée — jamais à soi-même. `mark_notifications_read`, `push_subscriptions` (`save_push_subscription`, `forget_push_subscription`), `claim_push_deliveries` (l'auteur réclame les push de ce qu'il vient de causer : pas de service role). |
+| `…260926000801_artist_deezer` | `artists.deezer_id` (unique par organisation parmi les actifs), `picture_url`, `deezer_url` (https uniquement), tous facultatifs ; droits colonne insert/update. |
+| `…260926000901_owner_writes_project` | **Seul le responsable écrit dans un projet** (`is_project_owner`, `is_call_owner`) : cadrage, calls (+ audios du Storage), sortie ; le DG et les autres lisent. `start_stage` / `request_validation` réservées au responsable, valideur = détenteur de `validate` (`list_validators`). L'assigné d'une tâche peut la cocher. `record_release_detection` : responsable ou job serveur. |
+| `…260926001001_validated_stage_is_final` | Une étape validée est **définitive** : `start_stage` ne démarre qu'une étape « à venir » (plus de « Rouvrir »). Un refus renvoie toujours en cours. |
+| `…260926001101_launch_strategy` | Stratégie de lancement : `levers` (famille, `to_decide`/`selected`/`rejected`, `need_id` facultatif, provenance), `strategy_deliverables` (levier retenu obligatoire, responsable et échéance facultatifs), `milestones` (date saisie, type fermé, livrable facultatif, détaché si le livrable est retiré). `strategy_is_editable` : **responsable + étape en cours** → écriture (y compris `field_values` `strategy`, politique restrictive), figée dès la demande de validation. `start_stage` refuse la Stratégie tant que le Cadrage n'est pas validé (`previous_stage_not_validated`). Triggers `check_strategy_links` (`lever_not_selected`, `lever_has_deliverables`). `report_items` : kinds `positioning`, `audiences`, `narrative`, `lever`. |
+| `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 
 Principes :
 
@@ -53,8 +63,32 @@ Principes :
 - Questions métier ouvertes (§ 10 du contexte) rendues réversibles : étapes en données,
   circuit de validation générique (n'importe quel membre approuvé peut être valideur).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/{rls,release,assistant}.test.sql`,
-43 tests). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+- **Qui écrit dans un projet lancé** : son responsable seul (chef de projet qui l'a accepté,
+  et qui a toujours `pilot_projects`). Le DG lit et décide les validations qu'on lui
+  demande. Côté écran : `canEditProject()` (`lib/projects/edit-access.ts`) alimente
+  `useCanEditProject()` depuis le layout du projet ; les routes API des calls et de la
+  dictée refusent en 403 **avant** tout appel payant au fournisseur.
+- Invariants vérifiés **au commit** (triggers de contrainte différés) : un master a au
+  moins un artiste (`master_requires_artist`) ; une sortie musicale non archivée a au moins
+  un master (`music_release_requires_master`), quel que soit le chemin d'écriture.
+- Nom d'artiste unique par organisation, casse et espaces ignorés (index sur
+  `lower(btrim(name))`) ; ISRC d'un master stocké sans tirets, unique par organisation.
+- **Artiste importé de Deezer** : la modale « Nouvel artiste » cherche d'abord sur Deezer
+  (`GET /api/catalog/artist-search?q=`, permission `manage_catalog`, résultats marqués
+  « Déjà au catalogue » par `deezer_id`), « Créer sans Deezer » garde la saisie manuelle.
+  Seul le `deezerId` part du navigateur : `createArtist` relit la photo et le lien sur
+  Deezer (`getDeezerArtist`), jamais une URL fournie par le client. La recherche Deezer
+  classe mal (homonymes obscurs en tête) : on prend 25 résultats, triés par fans, 8 gardés.
+  Photo = URL du CDN Deezer (pas de copie Storage) ; `ArtistAvatar` retombe sur les
+  initiales si elle ne charge plus.
+- Projet créé = « Non transmis » : ni étape, ni responsable (`owner_person_id` posé
+  uniquement par `respond_to_assignment` à l'acceptation). Statut du projet **calculé par
+  le code** (`projectStatusOf`) : étapes présentes → lancé, sinon dernière transmission
+  (en attente, refusé, précision demandée), sinon non transmis. Les sections Cadrage / Calls / Sortie répondent 404 tant que le projet n'a
+  pas d'étape (`requireLaunchedProject`).
+
+Tests : `supabase test db` (pgTAP, `supabase/tests/{rls,release,assistant,team,catalog,transmission,notifications,owner}.test.sql`,
+145 tests). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
@@ -72,6 +106,33 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   `/api/cron/`, `/api/labo/` (le proxy tamponne les corps de requête à 10 Mo).
 - Emails : confirmation activée, templates `supabase/templates/*`, lecture en local via
   Mailpit. `site_url` = `http://localhost:3000`.
+- **Postes ≠ permissions** (`docs/CONTEXTE-PROJET.md` § 12). `memberships.role` ne stocke
+  qu'un poste : `general_director`, `project_manager`, `creative_director`
+  (`ORGANIZATION_ROLES`). **Seule** `role_permissions(role)` (SQL) traduit un poste en
+  permissions (`administer`, `assign_projects`, `validate`, `pilot_projects`,
+  `creative_work`) ; `has_permission(org, perm)` les vérifie, `is_org_admin` = « détient
+  `administer` » (gardée pour les policies de la fondation). `get_my_access` renvoie les
+  permissions : le code teste `can(access, "administer")` (`lib/auth/access.ts`), jamais
+  un nom de poste. Seule `administer` est appliquée pour l'instant (équipe) ; les autres
+  attendent l'attribution des projets, les validations et les livrables créatifs. Chef
+  de projet et Directeur créatif ont donc encore l'accès d'un membre (tous les projets) :
+  la restriction aux projets attribués ou affectés viendra en RLS.
+- **Pas de poste par défaut** : une inscription libre arrive sans poste, le DG le choisit
+  en approuvant (« Approuver » ouvre le choix ; la base refuse un accès approuvé sans poste).
+- **Création de compte par le DG** (`/app/members/new`, `inviteMember`) : prénom, nom,
+  email, mot de passe, poste. 1) `invite_member` (session du DG) crée la Personne et un
+  membership `invited` avec le poste ; 2) `auth.signUp` sur un client anon **sans session**
+  (`lib/supabase/anonymous.ts` : le même droit que le formulaire public, jamais le service
+  role, et la session du DG n'est pas touchée). La confirmation de l'email approuve
+  l'invitation avec le poste (journal : source `system`). Sans confirmation, le compte est
+  utilisable tout de suite ; avec, la personne confirme d'abord (lien `/signup?email=…` en
+  secours, onglet Invités). Annuler une invitation = statut `rejected` ; réinviter la
+  rouvre. Une adresse qui a déjà un compte est refusée (`person_has_account`).
+- **Confirmation d'email désactivée en local** (`supabase/config.toml`,
+  `enable_confirmations = false`) pour tester les comptes vite : s'inscrire = être connecté
+  (en attente d'approbation, sauf invitation). **À réactiver sur le projet hébergé** :
+  sans confirmation, n'importe qui peut s'inscrire avec l'adresse d'une invitation et
+  récupérer le poste. Changer ce réglage demande `supabase stop && supabase start`.
 - Coquille : `app/(app)/layout.tsx` (barre latérale noire, tiroir mobile), projets
   (`lib/projects/*`, étape actuelle calculée par le code), onglets projet : Vue d'ensemble,
   Cadrage, Calls, Sortie.
@@ -146,6 +207,35 @@ n'écrit qu'un **adaptateur**.
   provenance « Dicté par X ».
 - Ajouter une étape : un adaptateur (`VoiceAdapter`), un `case` dans `dictateFor`, la valeur
   dans `VOICE_STAGES`, une action d'application et la mise en mots des propositions.
+- Micro de l'assistant (accueil) : **transcription seule**, `app/api/voice/transcribe`
+  (`transcribeDictation`), hook `useVoiceInput` + `VoiceInputButton` / `VoiceInputStatus`.
+  Le texte s'insère dans la saisie, **jamais envoyé automatiquement** (noms propres mal
+  transcrits) ; ensuite, c'est un message tapé comme un autre. Échap annule.
+- Les deux routes partagent `lib/voice/http.ts` (session approuvée, taille bornée).
+
+---
+
+## 6 bis. Stratégie de lancement
+
+`app/(app)/app/projects/[projectId]/strategy`, `lib/strategy/*`, `components/strategy/*`.
+Même page que le Cadrage, mêmes briques réutilisées (`BriefFieldCard`, `ValidationPanel`,
+`ImportPanel`, `ProvenanceNote`, `useFramingAction`, `ActionResult`) : elles prennent le
+livrable, les libellés ou l'action d'import en props.
+
+- Champs texte : positionnement, publics, narratif (`field_values`, `deliverable = 'strategy'`,
+  actions génériques `saveField` / `confirmField` / `rejectField`).
+- Dispositif : leviers par famille (taxonomie des besoins) ; un besoin confirmé du Brief
+  sans levier est proposé comme point de départ (« En faire un levier »).
+- Livrables engagés : rattachés à un levier retenu. Calendrier : temps forts saisis à la
+  main ; décompte J-n calculé par `lib/strategy/calendar.ts` depuis la date de sortie
+  prévue (onglet Sortie), sinon l'échéance du projet.
+- IA : le compte rendu d'un call extrait aussi positionnement, publics, narratif et leviers
+  (citation obligatoire) ; `importStrategyReport` les pose en « proposé · à confirmer ».
+  **Jamais de temps fort ni de livrable proposé**, jamais d'état de levier décidé par PO.
+- Écriture : un `EditAccessProvider` imbriqué n'ouvre les contrôles qu'au responsable et
+  pendant « en cours » ; la base l'impose (`strategy_is_editable`), un refus RLS devient
+  `stage_locked`.
+- Hors périmètre pour l'instant : export Plan de sortie (Playwright), dictée, lien partagé.
 
 ---
 
@@ -179,16 +269,39 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
 
 ---
 
+## 8 bis. Notifications et mise à jour en direct
+
+- Source unique : la table `notifications`, écrite par la base. Le texte est rédigé par le
+  code (`lib/notifications/types.ts`), la base ne stocke que des identifiants.
+- **Cloche** (`components/notifications/notification-bell.tsx`) dans le rail et l'en-tête
+  mobile, données chargées par `app/(app)/layout.tsx`.
+- **Realtime** (`notification-listener.tsx`) : à chaque insertion pour la personne
+  connectée → `router.refresh()` (la page se met à jour sans recharger) + toast `sonner`
+  (écart au design system, à valider avec Ibé). `supabase.realtime.setAuth()` **avant**
+  `subscribe()`, sinon la socket est anonyme et la RLS ne laisse rien passer.
+- **Web Push** : `public/sw.js` (écrit à la main, sans next-pwa), bouton d'activation
+  dans la cloche, dépendance `web-push`. Envoi : `schedulePendingPushes()` après chaque
+  action qui notifie (transmission, réponse, validation, tâche), exécuté dans `after()`
+  avec la session de l'auteur. Clés VAPID facultatives : sans elles, la cloche marche,
+  seules les notifications système sont coupées. iPhone : seulement app installée (PWA).
+- Son : onglet visible → carillon synthétisé (`lib/notifications/chime.ts`, muet tant que
+  la page n'a reçu aucun clic) ; onglet caché → notification système, son géré par l'OS
+  (macOS : Réglages → Notifications → Google Chrome). Un push accepté (`201`) mais
+  invisible vient presque toujours de ce réglage ou du mode Concentration.
+- Une modification qui ne notifie personne ne rafraîchit pas les autres écrans.
+
 ## 9. Design (`docs/DESIGN.md`)
 
-- Design system d'Ibé importé : tokens et pont shadcn dans `app/globals.css`, polices
+- Design system : tokens et pont shadcn dans `app/globals.css`, polices
   Geist / Inter / Geist Mono, boutons pilule noire, barre latérale noire.
 - États métier → trois traitements (`blocked` noir plein, `normal` gris doux, `pending`
   contour) dans `lib/ui/state-treatments.ts`, affichés par `components/ui/status-badge.tsx`.
 - Liens soulignés seulement s'ils n'ont pas de classe (adaptation assumée).
 - **Piège `cn()`** : il confond les tailles de texte du système (`text-body-md`…) avec des
   couleurs ; dans une classe passée à `cn`, écrire `text-[length:var(--type-body-md)]`.
-- Écarts au système à arbitrer avec Ibé : toasts (sonner), animations d'ouverture du
+- **Photo d'artiste** : exception voulue à « avatar = initiales, jamais de photographie »,
+  pour les artistes seulement (`components/catalog/artist-avatar.tsx`).
+- Écarts au système à arbitrer : toasts (sonner), animations d'ouverture du
   select et du tiroir, densité compacte non exposée.
 
 ---
@@ -221,10 +334,27 @@ fournisseur LLM choisi, clé Groq ; optionnelles : `LLM_MODEL`, `TRANSCRIPTION_M
 - Chrome headless : `--use-fake-device-for-media-stream` fournit un bip (micro et onglet),
   `--use-file-for-fake-audio-capture` reste muet sur macOS ; un vrai silence d'onglet ne
   se simule pas.
+- **Numéros de migration en parallèle** : deux sessions ont créé chacune un `…000801`. Avant
+  d'ajouter une migration, lister `supabase/migrations/` et prendre le numéro suivant.
+- **Tests Realtime** : la RLS de Realtime se vérifie avec deux vraies sessions (script
+  Node, `signInWithPassword`), pas en pgTAP.
+- **Types générés des RPC** : un paramètre SQL sans `default` est typé obligatoire et non
+  nul. Mettre les paramètres facultatifs en fin de signature avec `default null`, et
+  passer `undefined` (pas `null`) côté TypeScript.
+- **Triggers de contrainte différés et pgTAP** : un test tourne dans une seule transaction ;
+  pour vérifier un refus au commit, finir l'instruction par `set constraints all immediate`
+  dans le `throws_ok`, puis `set constraints all deferred`.
 - **ministral-14b et les schémas sans champ texte** : un schéma fait seulement d'objets et
   de listes reçoit en réponse… le schéma lui-même (`{"type":"object","properties":…}`),
   à chaque fois. Un premier champ texte libre (`request` dans la dictée) règle le problème.
   Rendre `nullable` un objet que le modèle peut vouloir mettre à `null`.
+- **ministral-14b et les schémas imbriqués** (dictée, 26/09/2026) : sous un objet englobant
+  (`changes: { brief, needs, … }`), le modèle ferme l'objet trop tôt et sort les listes au
+  premier niveau → `No object generated: response did not match schema` → 502. Garder le
+  schéma **à plat**. Sur une dictée courte, il **omet** les champs non dictés au lieu
+  d'écrire `null` : `.nullish()` pour les champs, `.default([])` pour les listes. Pour voir
+  la réponse brute, `error.text` de `NoObjectGeneratedError` (journal du serveur :
+  `.next/dev/logs/next-development.log`).
 - Test de la dictée sans micro : Chrome headless en CDP, `getUserMedia` remplacé par un
   script qui joue un fichier (`say -v Thomas … -o x.aiff` puis `afconvert -f m4af -d aac`)
   dans un `MediaStreamDestination`.

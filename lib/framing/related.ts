@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Access } from "@/lib/auth/access";
+import { can, type Access } from "@/lib/auth/access";
 import { createClient } from "@/lib/supabase/server";
 
 export type Member = { personId: string; name: string };
@@ -23,7 +23,7 @@ export async function loadMembers(access: Access): Promise<Member[]> {
 
   // RLS already limits a non-admin to approved members; an admin also sees
   // pending requests, which are filtered out here.
-  if (access.role === "admin") {
+  if (can(access, "administer")) {
     const { data: approved } = await supabase
       .from("memberships")
       .select("person_id")
@@ -37,9 +37,13 @@ export async function loadMembers(access: Access): Promise<Member[]> {
   }));
 }
 
-/** Latest report of each call of the project, and whether it was imported. */
+/**
+ * Latest report of each call of the project, and whether it was imported into
+ * the given deliverable (Brief or Strategy).
+ */
 export async function loadImportableReports(
   projectId: string,
+  deliverable: "brief" | "strategy" = "brief",
 ): Promise<ImportableReport[]> {
   const supabase = await createClient();
   const { data: calls } = await supabase
@@ -67,21 +71,23 @@ export async function loadImportableReports(
     .select("id, report_id")
     .in("report_id", reportIds);
   const itemIds = (items ?? []).map((i) => i.id);
-  // A report counts as imported once one of its items is referenced by the Brief.
-  const { data: used } = itemIds.length
-    ? await supabase
-        .from("field_values")
-        .select("source_report_item_id")
-        .in("source_report_item_id", itemIds)
-    : { data: [] };
-  const { data: usedPoints } = itemIds.length
-    ? await supabase
-        .from("open_points")
-        .select("source_report_item_id")
-        .in("source_report_item_id", itemIds)
-    : { data: [] };
+  // A report counts as imported once one of its items is referenced by the
+  // deliverable: its fields, plus open points (Brief) or levers (Strategy).
+  const [used, usedOther] = itemIds.length
+    ? await Promise.all([
+        supabase
+          .from("field_values")
+          .select("source_report_item_id")
+          .eq("deliverable", deliverable)
+          .in("source_report_item_id", itemIds),
+        supabase
+          .from(deliverable === "brief" ? "open_points" : "levers")
+          .select("source_report_item_id")
+          .in("source_report_item_id", itemIds),
+      ])
+    : [{ data: [] }, { data: [] }];
   const usedItems = new Set(
-    [...(used ?? []), ...(usedPoints ?? [])].map(
+    [...(used.data ?? []), ...(usedOther.data ?? [])].map(
       (u) => u.source_report_item_id,
     ),
   );
@@ -103,4 +109,48 @@ export async function loadImportableReports(
         ]
       : [];
   });
+}
+
+export type PendingValidation = {
+  id: string;
+  validatorPersonId: string;
+  validatorName: string;
+  note: string | null;
+};
+
+/** The validation awaiting a decision on a stage, if any. */
+export async function loadPendingValidation(
+  stageId: string | null,
+  members: Member[],
+): Promise<PendingValidation | null> {
+  if (!stageId) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("validations")
+    .select("id, validator_person_id, request_note")
+    .eq("project_stage_id", stageId)
+    .eq("state", "pending")
+    .maybeSingle();
+  if (!data) return null;
+  return {
+    id: data.id,
+    validatorPersonId: data.validator_person_id,
+    validatorName:
+      members.find((m) => m.personId === data.validator_person_id)?.name ?? "—",
+    note: data.request_note,
+  };
+}
+
+/** Who a validation may be asked of: holders of "validate" (the director). */
+export async function loadValidators(
+  organizationId: string,
+): Promise<Member[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("list_validators", {
+    p_organization_id: organizationId,
+  });
+  return (data ?? []).map((v) => ({
+    personId: v.person_id,
+    name: [v.first_name, v.last_name].filter(Boolean).join(" "),
+  }));
 }

@@ -1,4 +1,4 @@
-import { CheckIcon } from "lucide-react";
+import { IconCheck } from "nucleo-sharp-essential";
 
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
@@ -9,9 +9,7 @@ import { stageTreatment } from "@/lib/ui/state-treatments";
 export function StageStateBadge({ state }: { state: StageState }) {
   return (
     <StatusBadge treatment={stageTreatment[state]}>
-      {state === "validated" && (
-        <CheckIcon aria-hidden className="size-3.5" strokeWidth={1.75} />
-      )}
+      {state === "validated" && <IconCheck aria-hidden className="size-3.5" />}
       {fr.shell.stageStates[state]}
     </StatusBadge>
   );

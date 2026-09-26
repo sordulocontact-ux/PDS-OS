@@ -1,10 +1,30 @@
-/** Brief fields stored as versioned field_values. Pure code, importable anywhere. */
+/**
+ * Deliverable text fields (Brief, Strategy) stored as versioned field_values.
+ * Pure code, importable anywhere.
+ */
 
 export const BRIEF_TEXT_FIELDS = ["objective", "timing", "frame"] as const;
 export type BriefTextField = (typeof BRIEF_TEXT_FIELDS)[number];
 
+export const STRATEGY_TEXT_FIELDS = [
+  "positioning",
+  "audiences",
+  "narrative",
+] as const;
+export type StrategyTextField = (typeof STRATEGY_TEXT_FIELDS)[number];
+
+export const TEXT_FIELDS = {
+  brief: BRIEF_TEXT_FIELDS,
+  strategy: STRATEGY_TEXT_FIELDS,
+} as const;
+export type TextDeliverable = keyof typeof TEXT_FIELDS;
+
 export function isBriefTextField(value: string): value is BriefTextField {
   return (BRIEF_TEXT_FIELDS as readonly string[]).includes(value);
+}
+
+export function isStrategyTextField(value: string): value is StrategyTextField {
+  return (STRATEGY_TEXT_FIELDS as readonly string[]).includes(value);
 }
 
 export type Provenance =
@@ -24,26 +44,41 @@ export type Provenance =
       author: string | null;
     };
 
-export type BriefFieldState = {
-  key: BriefTextField;
+export type FieldState<K extends string = string> = {
+  deliverable: TextDeliverable;
+  key: K;
   value: string | null;
   status: "proposed" | "confirmed" | null;
   provenance: Provenance | null;
 };
+export type BriefFieldState = FieldState<BriefTextField>;
+export type StrategyFieldState = FieldState<StrategyTextField>;
+
+type Row = { value: unknown; status: string | null } | undefined;
 
 /** The current value of a field is its latest row; a rejection empties it. */
-export function toBriefField(
-  key: BriefTextField,
-  row: { value: unknown; status: string | null } | undefined,
+export function toFieldState<K extends string>(
+  deliverable: TextDeliverable,
+  key: K,
+  row: Row,
   provenance: Provenance | null,
-): BriefFieldState {
+): FieldState<K> {
   if (!row || row.status === "rejected" || typeof row.value !== "string") {
-    return { key, value: null, status: null, provenance: null };
+    return { deliverable, key, value: null, status: null, provenance: null };
   }
   return {
+    deliverable,
     key,
     value: row.value,
     status: row.status === "proposed" ? "proposed" : "confirmed",
     provenance,
   };
+}
+
+export function toBriefField(
+  key: BriefTextField,
+  row: Row,
+  provenance: Provenance | null,
+): BriefFieldState {
+  return toFieldState("brief", key, row, provenance);
 }

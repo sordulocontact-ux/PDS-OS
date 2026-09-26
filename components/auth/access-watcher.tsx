@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import {
   destinationFor,
   isAccessState,
+  isOrganizationRole,
   routes,
   type AccessState,
   type OrganizationRole,
@@ -41,10 +42,7 @@ export function AccessWatcher({
           role?: unknown;
         };
         if (stopped || !isAccessState(payload.state)) return;
-        const nextRole =
-          payload.role === "admin" || payload.role === "member"
-            ? payload.role
-            : null;
+        const nextRole = isOrganizationRole(payload.role) ? payload.role : null;
         if (payload.state === current && nextRole === role) return;
         router.replace(destinationFor(payload.state));
         router.refresh();

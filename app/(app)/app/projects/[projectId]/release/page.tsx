@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { requireApproved } from "@/lib/auth/dal";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { routes } from "@/lib/auth/redirects";
 import { getPublicEnv } from "@/lib/env-public";
 import { fr } from "@/lib/i18n/fr";
@@ -33,6 +34,7 @@ export default async function ReleasePage({
 }: PageProps<"/app/projects/[projectId]/release">) {
   await requireApproved();
   const { projectId } = await params;
+  await requireLaunchedProject(projectId);
   if (!isUuid(projectId)) notFound();
 
   const supabase = await createClient();

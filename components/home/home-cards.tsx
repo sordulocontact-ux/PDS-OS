@@ -7,7 +7,11 @@ import type { ActivityEvent } from "@/lib/insights/activity";
 import type { ReleaseOverview } from "@/lib/insights/releases";
 import type { Todo } from "@/lib/insights/todo";
 import type { ProjectListItem } from "@/lib/projects/types";
-import { onlineTreatment, overdueTreatment } from "@/lib/ui/state-treatments";
+import {
+  onlineTreatment,
+  overdueTreatment,
+  projectStatusTreatment,
+} from "@/lib/ui/state-treatments";
 
 const t = fr.assistant.cards;
 const MAX = 5;
@@ -146,6 +150,39 @@ export function ReleasesCard({ releases }: { releases: ReleaseOverview[] }) {
                 size="sm"
               >
                 {r.onlineSince ? `${t.online} · ${r.platforms}` : t.notOnline}
+              </StatusBadge>
+            }
+          />
+        ))}
+      </ul>
+    </HomeCard>
+  );
+}
+
+// Projects waiting on the viewer in the handover circuit (to accept, or to
+// transmit again). Shown only when there is something to do.
+export function HandoverCard({
+  title,
+  projects,
+}: {
+  title: string;
+  projects: ProjectListItem[];
+}) {
+  return (
+    <HomeCard title={title}>
+      <ul className="grid">
+        {projects.slice(0, MAX).map((p) => (
+          <CardRow
+            key={p.id}
+            href={routes.project(p.id)}
+            main={p.title}
+            sub={p.artistName || undefined}
+            badge={
+              <StatusBadge
+                treatment={projectStatusTreatment[p.status]}
+                size="sm"
+              >
+                {fr.transmission.statuses[p.status]}
               </StatusBadge>
             }
           />
