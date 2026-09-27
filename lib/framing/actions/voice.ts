@@ -63,6 +63,11 @@ export async function applyDictation(
       ? [{ ...voice(c.quote), label: c.label, family: c.family }]
       : [],
   );
+  const constraints = all.flatMap((c) =>
+    c.kind === "constraint"
+      ? [{ ...voice(c.quote), text: c.text, type: "other" }]
+      : [],
+  );
   const team = all.flatMap((c) =>
     c.kind === "team"
       ? [{ ...voice(c.quote), display_name: c.name, role: c.role || null }]
@@ -75,6 +80,9 @@ export async function applyDictation(
   const results = await Promise.all([
     fields.length ? supabase.from("field_values").insert(fields) : null,
     needs.length ? supabase.from("needs").insert(needs) : null,
+    constraints.length
+      ? supabase.from("framing_constraints").insert(constraints)
+      : null,
     team.length ? supabase.from("project_team_members").insert(team) : null,
     points.length ? supabase.from("open_points").insert(points) : null,
   ]);

@@ -317,8 +317,11 @@ s'afficher sans chargement.
 `app/(app)/app/projects/[projectId]/framing`, `lib/framing/*`, `components/framing/*`.
 **Le cadrage part d'un call** : tant que `framing_is_open` est faux (aucun compte rendu),
 la page et la vue d'ensemble affichent `FramingNeedsCall` (lien vers les Calls, placés
-avant le Cadrage dans les onglets). Un call brouillon daté dans le futur est affiché « À
-venir » (`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
+avant le Cadrage dans les onglets). « Préparer un call de cadrage » crée le call avec un
+ordre du jour fixe (les cinq rubriques du Brief, temps approximatif par rubrique —
+`lib/calls/first-call-agenda.ts`, affiché sur la fiche du call par `CallAgenda` tant qu'il
+n'est pas enregistré). Un call brouillon daté dans le futur est affiché « À venir »
+(`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
 Compte rendu versé **automatiquement** (plus de panneau d'import sur le Cadrage ; la
 Stratégie garde le sien) → propositions « proposé · à confirmer » (Brief, besoins, équipe,
 points ouverts), provenance cliquable (call + minutage + citation), confirmer / rejeter /

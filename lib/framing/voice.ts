@@ -19,6 +19,7 @@ import type { Locate, VoiceAdapter } from "@/lib/voice/engine";
 type FramingState = {
   brief: Record<(typeof BRIEF_TEXT_FIELDS)[number], string | null>;
   needs: string[];
+  constraints: string[];
   team: string[];
   openPoints: string[];
 };
@@ -32,7 +33,7 @@ async function loadState(projectId: string): Promise<FramingState | null> {
     .maybeSingle();
   if (!project) return null;
 
-  const [fields, needs, team, points] = await Promise.all([
+  const [fields, needs, constraints, team, points] = await Promise.all([
     supabase
       .from("current_field_values")
       .select("field_key, value, status")
@@ -41,6 +42,11 @@ async function loadState(projectId: string): Promise<FramingState | null> {
     supabase
       .from("needs")
       .select("label")
+      .eq("project_id", projectId)
+      .neq("review_status", "rejected"),
+    supabase
+      .from("framing_constraints")
+      .select("text")
       .eq("project_id", projectId)
       .neq("review_status", "rejected"),
     supabase
@@ -63,9 +69,9 @@ async function loadState(projectId: string): Promise<FramingState | null> {
     brief: {
       objective: valueOf("objective"),
       timing: valueOf("timing"),
-      frame: valueOf("frame"),
     },
     needs: (needs.data ?? []).map((n) => n.label),
+    constraints: (constraints.data ?? []).map((c) => c.text),
     team: (team.data ?? []).map((m) => m.display_name),
     openPoints: (points.data ?? []).map((p) => p.question),
   };
@@ -77,8 +83,8 @@ function describe(state: FramingState): string {
   return [
     `Objectif : ${state.brief.objective ?? "(vide)"}`,
     `Temporalité : ${state.brief.timing ?? "(vide)"}`,
-    `Cadre : ${state.brief.frame ?? "(vide)"}`,
     `Besoins :\n${list(state.needs)}`,
+    `Cadre & contraintes :\n${list(state.constraints)}`,
     `Équipe :\n${list(state.team)}`,
     `Points ouverts :\n${list(state.openPoints)}`,
   ].join("\n");
@@ -100,6 +106,8 @@ function plain(change: FramingChange): FramingChange {
       return { ...change, value: strip(change.value) };
     case "need":
       return { ...change, label: strip(change.label) };
+    case "constraint":
+      return { ...change, text: strip(change.text) };
     case "team":
       return {
         ...change,
@@ -140,11 +148,19 @@ function toProposals(
     };
   };
   const newNeed = fresh(state.needs);
+  const newConstraint = fresh(state.constraints);
   const newMember = fresh(state.team);
   const newPoint = fresh(state.openPoints);
 
   for (const need of heard.needs.filter((n) => newNeed(n.label)))
     changes.push({ change: { kind: "need", ...need }, before: null });
+  for (const constraint of heard.constraints.filter((c) =>
+    newConstraint(c.text),
+  ))
+    changes.push({
+      change: { kind: "constraint", ...constraint },
+      before: null,
+    });
   for (const member of heard.team.filter((m) => newMember(m.name)))
     changes.push({
       change: { kind: "team", ...member, role: member.role ?? null },

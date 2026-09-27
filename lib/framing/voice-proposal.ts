@@ -26,6 +26,11 @@ export const framingProposalSchema = z.discriminatedUnion("kind", [
     quote,
   }),
   z.object({
+    kind: z.literal("constraint"),
+    text: text(500),
+    quote,
+  }),
+  z.object({
     kind: z.literal("team"),
     name: text(120),
     role: z.string().trim().max(120).nullable(),

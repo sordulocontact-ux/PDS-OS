@@ -51,6 +51,7 @@ export const framing = {
       brief: (field: string, isEdit: boolean) =>
         `${field} · ${isEdit ? "modification" : "à renseigner"}`,
       need: (family: string) => `Nouveau besoin · ${family}`,
+      constraint: "Nouvelle ligne de cadre",
       team: "Nouvelle personne dans l'équipe",
       open_point: "Nouveau point ouvert",
     },

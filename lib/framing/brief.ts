@@ -3,7 +3,10 @@
  * Pure code, importable anywhere.
  */
 
-export const BRIEF_TEXT_FIELDS = ["objective", "timing", "frame"] as const;
+// "frame" (Cadre & contraintes) moved to its own reviewable lines
+// (public.framing_constraints, lib/framing/constraints.ts): a single free
+// text field could not be confirmed line by line.
+export const BRIEF_TEXT_FIELDS = ["objective", "timing"] as const;
 export type BriefTextField = (typeof BRIEF_TEXT_FIELDS)[number];
 
 export const STRATEGY_TEXT_FIELDS = [
