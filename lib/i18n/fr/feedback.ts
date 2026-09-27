@@ -53,6 +53,17 @@ export const feedback = {
     failed: "Une capture n'a pas pu être envoyée. Réessayez ou retirez-la.",
   },
 
+  // Zone capture, opened by the C key from any page.
+  capture: {
+    label: "Capture d'une zone de la page pour un retour",
+    firstCorner: "Cliquez un coin de la zone à capturer",
+    secondCorner: "Cliquez le coin opposé",
+    cancelHint: "Échap pour annuler",
+    working: "Capture…",
+    failed:
+      "La capture n'a pas pu être faite. Joignez une capture à la main si besoin.",
+  },
+
   mine: "Vos retours",
   received: "Retours de l'équipe",
   loadError: "Impossible de charger les retours pour l'instant.",

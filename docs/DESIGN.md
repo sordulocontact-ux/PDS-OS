@@ -217,12 +217,16 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   l'onglet actif est souligné, d'un trait de 2 px qui **glisse** d'un onglet à l'autre
   (`transform` seul, `--duration-slide` 240 ms, `--ease-standard` ; posé d'un coup si le
   mouvement est réduit). Demande de Sacha, 27/09/2026. Sert aux sections d'une fiche
-  (`SectionTabs`) et aux vues d'une liste (`TabFilter`).
-- **Vues d'une liste en onglets** (`TabFilter`, d'après une référence de Sacha le
-  27/09/2026) : quand un filtre découpe toute la liste en catégories (Tous / Signés /
-  Collaborations des Artistes), un onglet par catégorie avec son nombre en gris entre
-  parenthèses, calculé par le code. Casse normale, comme les onglets des fiches. Un
-  filtre secondaire (Actifs / Archivés du DG) se place en pastilles au bout de la barre.
+  (`SectionTabs`) et aux vues d'un tableau (`DataTableViews`).
+- **Tout filtre d'un tableau est en onglets** (`DataTableViews`, exporté avec
+  `DataTable`, d'après une référence de Sacha le 27/09/2026) : un onglet par vue avec
+  son nombre en gris entre parenthèses, calculé par le code, au-dessus du tableau **ou de
+  son état vide** (les onglets restent quand une vue est vide). Vue dans l'URL (`href`,
+  construit avec `viewHref`) ou filtre sur place (`onSelect`, Budget). Au bout de la
+  barre, `action` : un bouton (« Ajouter une ligne ») ou un filtre secondaire en
+  pastilles (Actifs / Archivés sur Artistes). Une seule vue : pas d'onglets. Casse
+  normale, comme les onglets des fiches. En place : Artistes (relation), Masters et
+  Projets (Actifs / Archivés, DG), Membres (statut), Budget (statut).
 - **Pastilles** (`FilterChip`, `ViewToggle`) : filtres secondaires ou qui se combinent.
 
 ### Modale : une seule, « verre »

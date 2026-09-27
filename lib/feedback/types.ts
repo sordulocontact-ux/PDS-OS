@@ -69,6 +69,8 @@ export type FeedbackTopic = {
   // Its Notion page once published, and the feedback not on it yet (code).
   notionUrl: string | null;
   notionSynced: boolean;
+  // Why the last publication to Notion failed, until one succeeds.
+  notionError: string | null;
   newSinceSync: number;
 };
 

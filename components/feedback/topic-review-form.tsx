@@ -50,7 +50,8 @@ export function TopicReviewForm({
         setError(t.actions.failed);
         return;
       }
-      if (result.notion === "failed") toast.warning(t.notion.failed);
+      if (result.notion && result.notion.status !== "synced")
+        toast.error(t.notion.failed(result.notion.reason), { duration: 15000 });
       onSaved();
     });
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 import type { Recording } from "@/components/calls/use-recorder";
 import { MetaList } from "@/components/labo/meta-list";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
+import { useObjectUrl } from "@/components/ui/use-object-url";
 import { formatClock, formatMegabytes } from "@/lib/calls/format";
 import type { UploadError } from "@/lib/calls/upload-audio";
 import { fr } from "@/lib/i18n/fr";
@@ -29,11 +30,7 @@ export function RecordingReview({
   const t = fr.calls.recorder;
   const [confirming, setConfirming] = useState(false);
   const canEdit = useCanEditProject();
-  const url = useMemo(
-    () => URL.createObjectURL(recording.blob),
-    [recording.blob],
-  );
-  useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  const url = useObjectUrl(recording.blob) ?? undefined;
 
   return (
     <div className="grid gap-3 rounded-lg border border-border p-4">

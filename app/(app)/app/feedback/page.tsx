@@ -6,6 +6,7 @@ import {
   type FeedbackView,
 } from "@/components/feedback/feedback-view-toggle";
 import { NewFeedbackButton } from "@/components/feedback/new-feedback-button";
+import { FormMessage } from "@/components/auth/form-message";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
@@ -14,7 +15,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { listMyFeedback, loadFeedbackInbox } from "@/lib/feedback/queries";
 import { isTopicStatus } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
-import { notionConfigured } from "@/lib/integrations/notion";
+import { notionMissingSettings } from "@/lib/integrations/notion";
 
 // Feedback about the app. Everyone sends through the feedback window and
 // reads their own here; the director (read_feedback) reviews the team's,
@@ -73,6 +74,11 @@ async function Inbox({ access, view }: { access: Access; view: FeedbackView }) {
     dismissed: inbox.topics.dismissed.length,
   };
 
+  // Said before sending and on the sent tab: nothing leaves for Notion.
+  const missingNotion = notionMissingSettings();
+  const notionOff =
+    missingNotion.length > 0 && (view === "new" || view === "sent");
+
   let content: React.ReactNode;
   if (view === "all") {
     content = <FeedbackList items={inbox.all} error={inbox.error} received />;
@@ -83,7 +89,7 @@ async function Inbox({ access, view }: { access: Access; view: FeedbackView }) {
         unfiled={view === "new" ? inbox.unfiled : []}
         error={inbox.error}
         emptyBody={t.emptyView[view]}
-        notion={notionConfigured()}
+        notion={missingNotion.length === 0}
       />
     );
     // New feedback may join a topic of any status: PO files it first.
@@ -98,6 +104,13 @@ async function Inbox({ access, view }: { access: Access; view: FeedbackView }) {
   return (
     <PageSection id="feedback-received" title={t.received}>
       <FeedbackViewToggle view={view} counts={counts} />
+      {notionOff && (
+        <FormMessage kind="error">
+          {t.notion.off(
+            t.notion.reasons.notConfigured(missingNotion.join(", ")),
+          )}
+        </FormMessage>
+      )}
       {content}
     </PageSection>
   );

@@ -23,6 +23,9 @@ export function isArchivedView(value: unknown): boolean {
   return value === "archived";
 }
 
+/** Live and archived rows of a list, for its Actifs / Archivés tabs. */
+export type RecordCounts = { live: number; archived: number };
+
 /** What the viewer may do on the rows of a list, decided by the page. */
 export type RecordRights = {
   canEdit: boolean;

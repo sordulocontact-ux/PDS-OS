@@ -190,9 +190,9 @@ Principes :
   (mêmes droits que le reste de la fiche). Les artistes existants avant la migration
   (`…002101`) ont été classés Signés.
 - **Liste** : onglets Tous (défaut) / Signés / Collaborations avec leur nombre
-  (`TabFilter`), dans l'URL (`?relation=`),
+  (`DataTableViews`), dans l'URL (`?relation=`),
   combinable avec Archivés du DG (`?view=archived`) — chaque filtre garde l'autre
-  (`ArtistListFilters`). La colonne « Relation » n'apparaît que dans « Tous ».
+  (`ArtistListViews`). La colonne « Relation » n'apparaît que dans « Tous ».
 - **Journal** : `artists_log` copie la relation à la création (« Fiche artiste créée
   (Signé) ») et la nouvelle valeur à chaque changement (« … (désormais Signé) »).
 - **PO** : `propose_artist` ne remplit la relation que si l'utilisateur l'a dite ;
@@ -606,6 +606,20 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   l'auteur et le DG), avant l'envoi du retour ; un trigger refuse un chemin qui n'est pas
   celui de l'auteur. Chemins dans `feedback.screenshot_paths` (`text[]`, 5 au plus,
   vérifié par contrainte et par le code). Affichées par URL signée (1 h).
+- **Capture d'une zone** (touche **C**, comme les commentaires de Figma) : hors d'un champ et
+  sans fenêtre ouverte, `useCaptureShortcut` affiche `ZoneCapture` : curseur en croix avec
+  l'icône des retours, un clic sur un coin puis sur le coin opposé (ou un glisser), Échap
+  ou clic droit pour annuler ; la page ne défile pas pendant la sélection. La zone est
+  capturée (`lib/feedback/capture-region.ts`) puis la fenêtre de retour s'ouvre avec.
+  Un navigateur ne peut pas lire l'écran sans demander l'autorisation à chaque fois
+  (`getDisplayMedia`, avec un bandeau de partage qui décale la page) : la page est donc
+  **redessinée depuis son DOM** par `modern-screenshot` (rendu du navigateur via SVG
+  `foreignObject`, polices et images embarquées, chargé à la première capture), le corps
+  entier puis recadré. Piège : la copie est dessinée non défilée ; les éléments `sticky`
+  et `fixed` (barre latérale) sont donc épinglés là où on les voit, par un attribut
+  temporaire que la copie reprend. Le calque porte `data-capture-ignore` et n'apparaît pas
+  sur la capture. Limites : une vidéo, un `<canvas>` ou une image d'un domaine sans CORS
+  peuvent sortir vides ; PNG, JPEG si plus de 5 Mo.
 - Table `feedback` : auteur posé par trigger, **jamais modifiée ni supprimée** (seul
   `topic_id` est posé par `file_feedback`).
 - **Lecture** : chacun voit les siens ; la permission **`read_feedback`** (DG seul,
@@ -651,8 +665,11 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   **Type** (sélection), **Priorité** (sélection), **Retours** (nombre), **Transmis par**
   (texte), **Transmis le** (date), **Lien** (URL). Le lien de la page et la date de
   dernière mise à jour sont écrits par `record_feedback_notion` (session du DG). Un échec
-  Notion n'annule jamais la transmission : le sujet affiche « Pas encore sur Notion » et
-  « Envoyer sur Notion ». Sans les deux variables, rien ne part : onglet « Transmis »
+  Notion n'annule jamais la transmission : sa **raison** en clair (réglage manquant, jeton
+  refusé, base non partagée avec l'intégration, colonne manquante, Notion indisponible…)
+  s'affiche en toast et reste sur le sujet (`notion_error`, `record_feedback_notion_error`)
+  jusqu'au prochain envoi réussi, avec « Réessayer sur Notion ». Réglage manquant : bandeau
+  sur « À examiner » et « Transmis ». Sans les deux variables, rien ne part : onglet « Transmis »
   seulement. Mise en place : intégration interne sur notion.so/my-integrations, base
   partagée avec elle (« … » → Connexions), variables dans `.env.local` / Vercel.
 - `lib/ai/llm.ts` : si ministral renvoie sa réponse emballée dans la forme du schéma

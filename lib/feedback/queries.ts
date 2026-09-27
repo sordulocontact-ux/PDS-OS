@@ -128,7 +128,7 @@ export async function loadFeedbackInbox(
     supabase
       .from("feedback_topics")
       .select(
-        "id, kind, title, summary, status, priority, reviewed_at, edited_at, notion_url, notion_page_id, notion_synced_at, reviewer:people!feedback_topics_reviewed_by_fkey(first_name, last_name), editor:people!feedback_topics_edited_by_fkey(first_name, last_name)",
+        "id, kind, title, summary, status, priority, reviewed_at, edited_at, notion_url, notion_page_id, notion_synced_at, notion_error, reviewer:people!feedback_topics_reviewed_by_fkey(first_name, last_name), editor:people!feedback_topics_edited_by_fkey(first_name, last_name)",
       ),
   ]);
   const error = feedbackRes.error ?? topicsRes.error;
@@ -175,6 +175,7 @@ export async function loadFeedbackInbox(
           : 0,
       notionUrl: row.notion_url,
       notionSynced: row.notion_page_id !== null,
+      notionError: row.notion_error,
       newSinceSync: row.notion_synced_at
         ? items.filter((i) => i.createdAt > row.notion_synced_at!).length
         : 0,

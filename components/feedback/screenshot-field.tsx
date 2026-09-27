@@ -1,11 +1,12 @@
 "use client";
 
 import { IconXmark } from "nucleo-sharp-essential";
-import { useEffect, useId, useMemo } from "react";
+import { useId } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
+import { useObjectUrl } from "@/components/ui/use-object-url";
 import {
   MAX_SCREENSHOT_BYTES,
   MAX_SCREENSHOTS,
@@ -42,42 +43,20 @@ export function ScreenshotField({
 }) {
   const t = fr.feedback.screenshot;
   const id = useId();
-  const previews = useMemo(
-    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
-    [files],
-  );
-  useEffect(
-    () => () => previews.forEach((p) => URL.revokeObjectURL(p.url)),
-    [previews],
-  );
   const full = files.length >= MAX_SCREENSHOTS;
 
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-sm font-medium">{t.label}</span>
-      {previews.length > 0 && (
+      {files.length > 0 && (
         <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-          {previews.map(({ file, url }, index) => (
-            <li
-              key={url}
-              className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
-              <img
-                src={url}
-                alt={t.altOf(index + 1)}
-                className="size-full object-cover"
-              />
-              <Button
-                type="button"
-                size="icon-xs"
-                aria-label={t.removeOf(index + 1)}
-                onClick={() => onRemove(file)}
-                className="absolute top-1 right-1"
-              >
-                <IconXmark aria-hidden />
-              </Button>
-            </li>
+          {files.map((file, index) => (
+            <ScreenshotThumb
+              key={`${file.name}-${file.size}-${file.lastModified}`}
+              file={file}
+              number={index + 1}
+              onRemove={() => onRemove(file)}
+            />
           ))}
         </ul>
       )}
@@ -98,5 +77,39 @@ export function ScreenshotField({
       />
       <FieldError id={`${id}-error`}>{error}</FieldError>
     </div>
+  );
+}
+
+function ScreenshotThumb({
+  file,
+  number,
+  onRemove,
+}: {
+  file: File;
+  number: number;
+  onRemove: () => void;
+}) {
+  const t = fr.feedback.screenshot;
+  const url = useObjectUrl(file);
+  return (
+    <li className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted">
+      {url && (
+        // eslint-disable-next-line @next/next/no-img-element -- local blob preview
+        <img
+          src={url}
+          alt={t.altOf(number)}
+          className="size-full object-cover"
+        />
+      )}
+      <Button
+        type="button"
+        size="icon-xs"
+        aria-label={t.removeOf(number)}
+        onClick={onRemove}
+        className="absolute top-1 right-1"
+      >
+        <IconXmark aria-hidden />
+      </Button>
+    </li>
   );
 }

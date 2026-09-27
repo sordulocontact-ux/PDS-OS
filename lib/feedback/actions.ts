@@ -149,7 +149,10 @@ export async function syncFeedbackTopicToNotion(
   topicId: string,
 ): Promise<{ notion: NotionSync }> {
   await requirePermission("read_feedback");
-  if (!z.uuid().safeParse(topicId).success) return { notion: "failed" };
+  if (!z.uuid().safeParse(topicId).success)
+    return {
+      notion: { status: "failed", reason: fr.feedback.notion.reasons.notSent },
+    };
   const notion = await syncTopicToNotion(await createClient(), topicId);
   revalidatePath(routes.feedback);
   return { notion };

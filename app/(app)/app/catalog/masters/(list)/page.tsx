@@ -2,13 +2,15 @@ import { IconBoxArchive, IconPlus } from "nucleo-sharp-essential";
 import { IconDisc } from "@/components/icons";
 import Link from "next/link";
 
-import { ArchiveViewToggle } from "@/components/archive/archive-view-toggle";
+import { archiveViews } from "@/components/archive/archive-views";
 import { FormMessage } from "@/components/auth/form-message";
 import { MastersList } from "@/components/catalog/masters-list";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { DataTableViews } from "@/components/ui/data-table";
+import { countRecords } from "@/lib/archive/queries";
 import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -24,7 +26,10 @@ export default async function MastersPage({
   const canArchive = can(access, "archive_records");
   // The archive is the director's: anyone else always sees live masters.
   const archived = canArchive && isArchivedView((await searchParams).view);
-  const { masters, error } = await listMasters({ archived });
+  const [{ masters, error }, counts] = await Promise.all([
+    listMasters({ archived }),
+    canArchive ? countRecords("master") : null,
+  ]);
   const newMaster =
     can(access, "manage_catalog") && !archived ? (
       <Link href={routes.mastersNew} className={buttonVariants({ size: "lg" })}>
@@ -40,38 +45,42 @@ export default async function MastersPage({
         description={t.subtitle}
         action={masters.length > 0 ? newMaster : null}
       />
-      {canArchive && (
-        <ArchiveViewToggle path={routes.masters} archived={archived} />
-      )}
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
-      ) : masters.length === 0 ? (
-        archived ? (
-          <EmptyState
-            icon={IconBoxArchive}
-            title={fr.records.archivedEmpty.master}
-            body={fr.records.archivedEmptyBody}
-          />
-        ) : (
-          <EmptyState
-            icon={IconDisc}
-            title={t.emptyTitle}
-            body={newMaster ? t.emptyBody : t.emptyBodyReadOnly}
-            action={newMaster}
-          />
-        )
       ) : (
-        // The design leaves a wider gap between the header and the list.
-        <div className={canArchive ? undefined : "md:mt-10"}>
-          <MastersList
-            masters={masters}
-            rights={{
-              canEdit: can(access, "manage_catalog"),
-              canArchive,
-              archived,
-            }}
-          />
-        </div>
+        <DataTableViews
+          label={fr.records.view.label}
+          views={archiveViews({ path: routes.masters, archived, counts })}
+        >
+          {masters.length === 0 ? (
+            archived ? (
+              <EmptyState
+                icon={IconBoxArchive}
+                title={fr.records.archivedEmpty.master}
+                body={fr.records.archivedEmptyBody}
+              />
+            ) : (
+              <EmptyState
+                icon={IconDisc}
+                title={t.emptyTitle}
+                body={newMaster ? t.emptyBody : t.emptyBodyReadOnly}
+                action={newMaster}
+              />
+            )
+          ) : (
+            // The design leaves a wider gap between the header and the list.
+            <div className={canArchive ? undefined : "md:mt-10"}>
+              <MastersList
+                masters={masters}
+                rights={{
+                  canEdit: can(access, "manage_catalog"),
+                  canArchive,
+                  archived,
+                }}
+              />
+            </div>
+          )}
+        </DataTableViews>
       )}
     </PageContainer>
   );

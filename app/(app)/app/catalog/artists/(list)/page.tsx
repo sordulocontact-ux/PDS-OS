@@ -1,7 +1,7 @@
 import { IconBoxArchive, IconMicrophone } from "nucleo-sharp-essential";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { ArtistListFilters } from "@/components/catalog/artist-list-filters";
+import { ArtistListViews } from "@/components/catalog/artist-list-views";
 import { ArtistsTable } from "@/components/catalog/artists-table";
 import { NewArtistButton } from "@/components/catalog/new-artist-button";
 import { EmptyState } from "@/components/shell/empty-state";
@@ -42,47 +42,50 @@ export default async function ArtistsPage({
         description={t.subtitle}
         action={canCreate && artists.length > 0 ? <NewArtistButton /> : null}
       />
-      <ArtistListFilters
-        relation={relation}
-        counts={counts}
-        archived={archived}
-        canArchive={canArchive}
-      />
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
-      ) : artists.length === 0 ? (
-        archived ? (
-          <EmptyState
-            icon={IconBoxArchive}
-            title={fr.records.archivedEmpty.artist}
-            body={fr.records.archivedEmptyBody}
-          />
-        ) : relation ? (
-          <EmptyState
-            icon={IconMicrophone}
-            title={t.filteredEmpty[relation]}
-            body={t.filteredEmptyBody}
-            action={canCreate ? <NewArtistButton /> : null}
-          />
-        ) : (
-          <EmptyState
-            icon={IconMicrophone}
-            title={t.emptyTitle}
-            body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
-            action={canCreate ? <NewArtistButton /> : null}
-          />
-        )
       ) : (
-        <ArtistsTable
-          artists={artists}
-          // Within a relation filter, it goes without saying.
-          showRelation={relation === null}
-          rights={{
-            canEdit: can(access, "manage_catalog"),
-            canArchive,
-            archived,
-          }}
-        />
+        <ArtistListViews
+          relation={relation}
+          counts={counts}
+          archived={archived}
+          canArchive={canArchive}
+        >
+          {artists.length === 0 ? (
+            archived ? (
+              <EmptyState
+                icon={IconBoxArchive}
+                title={fr.records.archivedEmpty.artist}
+                body={fr.records.archivedEmptyBody}
+              />
+            ) : relation ? (
+              <EmptyState
+                icon={IconMicrophone}
+                title={t.filteredEmpty[relation]}
+                body={t.filteredEmptyBody}
+                action={canCreate ? <NewArtistButton /> : null}
+              />
+            ) : (
+              <EmptyState
+                icon={IconMicrophone}
+                title={t.emptyTitle}
+                body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
+                action={canCreate ? <NewArtistButton /> : null}
+              />
+            )
+          ) : (
+            <ArtistsTable
+              artists={artists}
+              // Within a relation filter, it goes without saying.
+              showRelation={relation === null}
+              rights={{
+                canEdit: can(access, "manage_catalog"),
+                canArchive,
+                archived,
+              }}
+            />
+          )}
+        </ArtistListViews>
       )}
     </PageContainer>
   );

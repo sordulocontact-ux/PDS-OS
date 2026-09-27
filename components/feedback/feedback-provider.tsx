@@ -12,6 +12,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { useCaptureShortcut } from "@/components/feedback/use-capture-shortcut";
 import { FormDialog } from "@/components/ui/form-dialog";
 import type { FeedbackKind } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
@@ -19,6 +20,9 @@ import { fr } from "@/lib/i18n/fr";
 // Heavy and rarely shown: loaded on first opening.
 const FeedbackForm = dynamic(() =>
   import("@/components/feedback/feedback-form").then((m) => m.FeedbackForm),
+);
+const ZoneCapture = dynamic(() =>
+  import("@/components/feedback/zone-capture").then((m) => m.ZoneCapture),
 );
 
 type OpenOptions = {
@@ -60,7 +64,8 @@ function imageOf(event: ClipboardEvent): File | undefined {
 // screenshot (⌘⇧4 on a Mac is taken by macOS), so it opens on what it can
 // see: the Print Screen key (Windows), and a screenshot pasted anywhere in
 // the app (⌘V / Ctrl+V), which it then carries. Pastes inside the window go
-// to its own form; `data-paste-ignore` opts a zone out.
+// to its own form; `data-paste-ignore` opts a zone out. The C key captures
+// a zone of the page instead, then opens the window with it.
 export function FeedbackProvider({
   organizationId,
   personId,
@@ -73,6 +78,7 @@ export function FeedbackProvider({
   const t = fr.feedback.dialog;
   const pathname = usePathname();
   const [opening, setOpening] = useState<Opening | null>(null);
+  const [capturing, setCapturing] = useState(false);
   // Read by the document listeners, which outlive a render.
   const isOpen = useRef(false);
   useEffect(() => {
@@ -114,9 +120,27 @@ export function FeedbackProvider({
     };
   }, [enabled, open]);
 
+  const startCapture = useCallback(() => setCapturing(true), []);
+  const stopCapture = useCallback(() => setCapturing(false), []);
+  useCaptureShortcut(enabled && !capturing, startCapture);
+
   return (
     <FeedbackContext.Provider value={open}>
       {children}
+      {capturing && (
+        <ZoneCapture
+          onCaptured={(file) => {
+            setCapturing(false);
+            open({ screenshot: file });
+          }}
+          onFailed={() => {
+            setCapturing(false);
+            toast.error(fr.feedback.capture.failed);
+            open();
+          }}
+          onCancel={stopCapture}
+        />
+      )}
       {enabled && organizationId && personId && (
         <FormDialog
           open={opening !== null}

@@ -99,7 +99,7 @@ set constraints all deferred;
 
 select lives_ok($$
   insert into ids select 'master2', public.create_master((select id from ids where name = 'org'), 'Brume',
-    jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))), 'radio edit');
+    jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))), 'radio_edit');
   insert into ids select 'master3', public.create_master((select id from ids where name = 'org'), 'Vertige',
     jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))))
 $$, 'more masters for an EP');

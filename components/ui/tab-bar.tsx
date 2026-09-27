@@ -5,13 +5,14 @@ import { useLayoutEffect, useRef } from "react";
 import { tabLinkClass } from "@/components/ui/tab-link";
 import { ViewLink } from "@/components/ui/view-link";
 
+// A link when the view is in the URL (shareable, Back works), a toggle
+// button when the page filters in place (onSelect).
 export type TabBarItem = {
-  href: string;
   label: string;
   // Shown in grey after the label (rows of a list view).
   count?: number;
   current: boolean;
-};
+} & ({ href: string; onSelect?: never } | { href?: never; onSelect: () => void });
 
 type Position = { x: number; width: number };
 
@@ -24,9 +25,9 @@ const samePlace = (a: Position | null, b: Position | null) =>
 const lastPositions = new Map<string, Position & { at: number }>();
 const REMOUNT_WINDOW_MS = 1000;
 
-// Underlined tabs as links (docs/DESIGN.md § 4, « Onglets »): no rule under
-// the bar, only a 2 px indicator under the current tab, sliding from one
-// tab to the next (transform only; placed at once when motion is reduced).
+// Underlined tabs (docs/DESIGN.md § 4, « Onglets »): no rule under the bar,
+// only a 2 px indicator under the current tab, sliding from one tab to the
+// next (transform only; placed at once when motion is reduced).
 export function TabBar({ label, items }: { label: string; items: TabBarItem[] }) {
   const listRef = useRef<HTMLUListElement>(null);
   const indicatorRef = useRef<HTMLSpanElement>(null);
@@ -85,37 +86,58 @@ export function TabBar({ label, items }: { label: string; items: TabBarItem[] })
     };
   }, [active, label]);
 
+  const Bar = items.some((item) => item.href) ? "nav" : "div";
   return (
-    <nav
+    <Bar
       aria-label={label}
+      role={Bar === "div" ? "group" : undefined}
       className="-mx-4 min-w-0 overflow-x-auto px-4 md:mx-0 md:px-0"
     >
       {/* The positioned box: tabs are measured from it. */}
       <div className="relative w-fit">
-      <ul ref={listRef} className="flex gap-1">
-        {items.map((item) => (
-          <li key={item.href} className="shrink-0">
-            <ViewLink
-              href={item.href}
-              aria-current={item.current ? "page" : undefined}
-              className={tabLinkClass(item.current)}
-            >
-              {item.label}
-              {item.count !== undefined && (
-                <span className="text-muted-foreground tabular-nums">
-                  ({item.count})
-                </span>
+        <ul ref={listRef} className="flex gap-1">
+          {items.map((item) => (
+            <li key={item.href ?? item.label} className="shrink-0">
+              {item.href ? (
+                <ViewLink
+                  href={item.href}
+                  aria-current={item.current ? "page" : undefined}
+                  className={tabLinkClass(item.current)}
+                >
+                  <TabLabel item={item} />
+                </ViewLink>
+              ) : (
+                <button
+                  type="button"
+                  aria-pressed={item.current}
+                  onClick={item.onSelect}
+                  className={tabLinkClass(item.current)}
+                >
+                  <TabLabel item={item} />
+                </button>
               )}
-            </ViewLink>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
         <span
           ref={indicatorRef}
           aria-hidden
           className="pointer-events-none absolute bottom-0 left-0 h-0.5 w-px origin-left bg-foreground opacity-0 transition-transform duration-[var(--duration-slide)] ease-[var(--ease-standard)] motion-reduce:transition-none"
         />
       </div>
-    </nav>
+    </Bar>
+  );
+}
+
+function TabLabel({ item }: { item: TabBarItem }) {
+  return (
+    <>
+      {item.label}
+      {item.count !== undefined && (
+        <span className="text-muted-foreground tabular-nums">
+          ({item.count})
+        </span>
+      )}
+    </>
   );
 }

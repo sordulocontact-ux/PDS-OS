@@ -1183,10 +1183,12 @@ export type Database = {
       }
       master_files: {
         Row: {
+          audio_state: string | null
           bytes: number
           category: string
           created_at: string
           created_by: string | null
+          duration_seconds: number | null
           file_name: string
           id: string
           master_id: string
@@ -1195,10 +1197,12 @@ export type Database = {
           path: string
         }
         Insert: {
+          audio_state?: string | null
           bytes: number
           category?: string
           created_at?: string
           created_by?: string | null
+          duration_seconds?: number | null
           file_name: string
           id?: string
           master_id: string
@@ -1207,10 +1211,12 @@ export type Database = {
           path: string
         }
         Update: {
+          audio_state?: string | null
           bytes?: number
           category?: string
           created_at?: string
           created_by?: string | null
+          duration_seconds?: number | null
           file_name?: string
           id?: string
           master_id?: string
@@ -1435,6 +1441,7 @@ export type Database = {
       masters: {
         Row: {
           archived_at: string | null
+          audio_state: string | null
           created_at: string
           created_by: string | null
           duration_seconds: number | null
@@ -1446,10 +1453,12 @@ export type Database = {
           rights_year: number | null
           title: string
           updated_at: string
-          version: string | null
+          variant: string
+          variant_label: string | null
         }
         Insert: {
           archived_at?: string | null
+          audio_state?: string | null
           created_at?: string
           created_by?: string | null
           duration_seconds?: number | null
@@ -1461,10 +1470,12 @@ export type Database = {
           rights_year?: number | null
           title: string
           updated_at?: string
-          version?: string | null
+          variant?: string
+          variant_label?: string | null
         }
         Update: {
           archived_at?: string | null
+          audio_state?: string | null
           created_at?: string
           created_by?: string | null
           duration_seconds?: number | null
@@ -1476,7 +1487,8 @@ export type Database = {
           rights_year?: number | null
           title?: string
           updated_at?: string
-          version?: string | null
+          variant?: string
+          variant_label?: string | null
         }
         Relationships: [
           {
@@ -2995,6 +3007,7 @@ export type Database = {
         Args: { p_person_id: string; p_project_id: string }
         Returns: undefined
       }
+      audio_state_rank: { Args: { p_state: string }; Returns: number }
       auth_organization_id: { Args: never; Returns: string }
       auth_person_id: { Args: never; Returns: string }
       can_admin_person: { Args: { target_person_id: string }; Returns: boolean }
@@ -3028,12 +3041,14 @@ export type Database = {
       }
       create_master: {
         Args: {
+          p_audio_state?: string
           p_credits: Json
           p_duration_seconds?: number
           p_isrc?: string
           p_organization_id: string
           p_title: string
-          p_version?: string
+          p_variant?: string
+          p_variant_label?: string
         }
         Returns: string
       }
@@ -3297,12 +3312,14 @@ export type Database = {
       try_uuid: { Args: { input: string }; Returns: string }
       update_master: {
         Args: {
+          p_audio_state?: string
           p_credits: Json
           p_duration_seconds?: number
           p_isrc?: string
           p_master_id: string
           p_title: string
-          p_version?: string
+          p_variant?: string
+          p_variant_label?: string
         }
         Returns: undefined
       }

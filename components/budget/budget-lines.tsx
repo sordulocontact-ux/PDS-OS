@@ -9,7 +9,7 @@ import { DeleteBudgetLineDialog } from "@/components/budget/delete-budget-line-d
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
-import { FilterChip } from "@/components/ui/filter-chip";
+import { DataTableViews } from "@/components/ui/data-table";
 import {
   BUDGET_STATUSES,
   type BudgetLever,
@@ -18,7 +18,7 @@ import {
 } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 
-// The lines, filterable by status. The owner adds, edits and deletes; the
+// The lines, filtered in place by status (tabs with their counts). The owner adds, edits and deletes; the
 // others read (the database refuses them anyway).
 export function BudgetLines({
   projectId,
@@ -59,32 +59,24 @@ export function BudgetLines({
           action={addButton || undefined}
         />
       ) : (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div
-              role="group"
-              aria-label={t.filters.label}
-              className="flex flex-wrap gap-2"
-            >
-              <FilterChip
-                pressed={filter === null}
-                onClick={() => setFilter(null)}
-              >
-                {t.filters.all}
-              </FilterChip>
-              {BUDGET_STATUSES.map((status) => (
-                <FilterChip
-                  key={status}
-                  pressed={filter === status}
-                  onClick={() => setFilter(status)}
-                >
-                  {t.statuses[status]}
-                </FilterChip>
-              ))}
-            </div>
-            {addButton}
-          </div>
-
+        <DataTableViews
+          label={t.filters.label}
+          views={[
+            {
+              label: t.filters.all,
+              count: lines.length,
+              current: filter === null,
+              onSelect: () => setFilter(null),
+            },
+            ...BUDGET_STATUSES.map((status) => ({
+              label: t.statuses[status],
+              count: lines.filter((l) => l.status === status).length,
+              current: filter === status,
+              onSelect: () => setFilter(status),
+            })),
+          ]}
+          action={addButton}
+        >
           {shown.length === 0 ? (
             <p className="text-body-md text-muted-foreground">
               {t.table.filteredEmpty}
@@ -97,7 +89,7 @@ export function BudgetLines({
               onDelete={setDeleting}
             />
           )}
-        </>
+        </DataTableViews>
       )}
 
       <BudgetLineSheet

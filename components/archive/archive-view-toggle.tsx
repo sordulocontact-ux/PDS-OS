@@ -1,8 +1,10 @@
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { fr } from "@/lib/i18n/fr";
+import { viewHref } from "@/lib/ui/view-href";
 
-// Live rows or the archive, on a list page (director only), in the URL
-// (?view=archived). `params`: the page's other filters, kept on both views.
+// Live rows or the archive as pills (director only), in the URL
+// (?view=archived): the secondary filter of a list whose tabs are another
+// axis (Artistes). `params`: the page's other filters, kept on both views.
 export function ArchiveViewToggle({
   path,
   archived,
@@ -13,18 +15,20 @@ export function ArchiveViewToggle({
   params?: Record<string, string>;
 }) {
   const t = fr.records.view;
-  const href = (archivedView: boolean) => {
-    const query = new URLSearchParams(params);
-    if (archivedView) query.set("view", "archived");
-    const search = query.toString();
-    return search ? `${path}?${search}` : path;
-  };
   return (
     <ViewToggle
       label={t.label}
       options={[
-        { href: href(false), label: t.live, current: !archived },
-        { href: href(true), label: t.archived, current: archived },
+        {
+          href: viewHref(path, { ...params }),
+          label: t.live,
+          current: !archived,
+        },
+        {
+          href: viewHref(path, { ...params, view: "archived" }),
+          label: t.archived,
+          current: archived,
+        },
       ]}
     />
   );

@@ -41,7 +41,7 @@ Playwright             → export PDF des documents (pas encore installé)
 next-pwa               → installation sur mobile (phase ultérieure)
 ```
 
-Outillage ajouté : zod, server-only, web-push (notifications navigateur), nucleo-sharp-essential (icônes, `docs/DESIGN.md` § 1), Prettier + plugin Tailwind, lint-staged +
+Outillage ajouté : zod, server-only, web-push (notifications navigateur), nucleo-sharp-essential (icônes, `docs/DESIGN.md` § 1), modern-screenshot (capture d'une zone de la page pour un retour, chargé à la demande), Prettier + plugin Tailwind, lint-staged +
 simple-git-hooks (pre-commit).
 
 Ne remplace aucune de ces briques sans demander. Ne propose pas d'alternative
@@ -142,7 +142,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Loaded`, `useLoaded` | `ui/loaded.tsx`, `ui/use-loaded.ts` | chargement / échec / prêt d'une modale ou d'un panneau (action serveur appelée à l'ouverture) |
 | `Dialog` | `ui/dialog.tsx` | **la seule modale du site**, « verre » : page floutée sans voile + panneau sombre translucide (Espace Espace, Modifier, confirmations) ; tokens inversés par `.surface-glass` (`docs/DESIGN.md` § 4) |
 | `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
-| `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`) | `ui/data-table.tsx` | **tout tableau de liste**, design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (`href` null = texte seul), colonne « ⋯ » `DataTableActionsHead` / `DataTableActionsCell` (Masters, Artistes, fiche artiste, Projets, Membres) |
+| `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`, `Views`) | `ui/data-table.tsx` | **tout tableau de liste** ; **tout filtre de tableau en onglets** avec nombre via `DataTableViews` (au-dessus du tableau ou de son état vide, URL avec `viewHref` de `lib/ui/view-href.ts` ou `onSelect`), design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (`href` null = texte seul), colonne « ⋯ » `DataTableActionsHead` / `DataTableActionsCell` (Masters, Artistes, fiche artiste, Projets, Membres) |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
 | `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
 | `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2, `description` d'une ligne et action facultatives, contenu) |
@@ -158,6 +158,8 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `FeedbackProvider`, `useOpenFeedback` | `feedback/feedback-provider.tsx` | fenêtre de retour unique de l'app : ouverte par un bouton, la touche Impr. écran ou une capture collée |
 | `FeedbackNavButton` | `shell/feedback-nav-button.tsx` | « Envoyer un retour » du bas de la navigation (ferme le tiroir mobile, `data-close-nav`) |
 | `FeedbackForm`, `ScreenshotField` | `feedback/` | formulaire de la fenêtre de retour, captures jointes (5 au plus : aperçus avec ✕, zone de dépôt) |
+| `ZoneCapture`, `useCaptureShortcut` | `feedback/` | touche **C** : curseur « retour », deux coins (ou glisser) → capture de la zone, fenêtre de retour ouverte avec |
+| `useObjectUrl` | `ui/use-object-url.ts` | URL locale d'un fichier (aperçu avant envoi), révoquée proprement même en mode strict |
 | `FileDropZone` | `ui/file-drop-zone.tsx` | zone où glisser des fichiers, ou cliquer pour les choisir (input natif dans un label, `multiple`, état « au-dessus ») |
 | `FeedbackList`, `FeedbackItems`, `FeedbackCard`, `FeedbackTopics`, `TopicActions`, `FeedbackTriage`, `FeedbackViewToggle` | `feedback/` | page Retours : retours envoyés ; boîte du DG (sujets de PO, transmettre avec priorité, écarter, onglets) |
 | `TopicEditForm` | `feedback/topic-edit-form.tsx` | modale « Modifier le retour » du DG avant transmission (titre, résumé, type), réécriture proposée par PO |
@@ -175,7 +177,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
 | `AssistantComposer`, `AssistantThread`, `AssistantSuggestions`, `AssistantConversation` | `assistant/` | saisie de PO (micro, envoi/arrêt, `compact`, `voiceFirst`), fil des messages, pilules de suggestions ; page de conversation `/app/assistant` (retour, titre, « + ») |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
-| `RecordActions`, `ArchiveViewToggle`, `EditPanel` | `archive/` | « ⋯ » Modifier / Archiver / Restaurer d'un artiste, master ou projet ; filtre Actifs / Archivés (DG, `params` garde les autres filtres) ; corps chargé de la modale Modifier |
+| `RecordActions`, `ArchiveViewToggle`, `archiveViews`, `EditPanel` | `archive/` | « ⋯ » Modifier / Archiver / Restaurer d'un artiste, master ou projet ; `archiveViews` = onglets Actifs / Archivés (DG, nombres par `countRecords`), `ArchiveViewToggle` = mêmes vues en pastilles quand les onglets sont un autre axe ; corps chargé de la modale Modifier |
 | `ArtistActions`, `MasterActions`, `ProjectActions` | `catalog/`, `projects/project-actions.tsx` | `RecordActions` branché sur le vrai formulaire de chaque type (`rights`, raison de blocage connue d'avance) |
 | `ProjectPageHeader` | `projects/project-page-header.tsx` | en-tête d'une section de projet (h2, une phrase, action) : Calls et les 9 pages ci-dessous |
 | `ProjectSectionLoading` | `projects/project-section-loading.tsx` | squelette d'une section de projet (forme de `ProjectPageHeader`, puis lignes ou forme fournie) |
@@ -186,9 +188,9 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
 | `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
-| `TabBar`, `TabFilter` | `ui/tab-bar.tsx`, `ui/tab-filter.tsx` | barre d'onglets-liens sans filet, trait de 2 px qui glisse sous l'onglet actif (base de `SectionTabs`) ; vues d'une liste en onglets avec nombre (`?…=` dans l'URL), filtre secondaire au bout de la barre |
+| `TabBar` | `ui/tab-bar.tsx` | barre d'onglets (liens ou boutons) sans filet, trait de 2 px qui glisse sous l'onglet actif ; base de `SectionTabs` et `DataTableViews` |
 | `ChoiceCards` | `ui/choice-cards.tsx` | radios natifs avec la conséquence sous chaque choix (call, retours, membres, artiste) |
-| `ArtistRelationField`, `ArtistListFilters` | `catalog/` | choix Signé / Collaboration des formulaires artiste ; filtres de la liste Artistes (onglets Tous / Signés / Collaborations avec nombre, + Archivés du DG) |
+| `ArtistRelationField`, `ArtistListViews` | `catalog/` | choix Signé / Collaboration des formulaires artiste ; vues de la liste Artistes (onglets Tous / Signés / Collaborations, + Archivés du DG en pastilles) |
 | `CreativePicker` | `projects/creative-picker.tsx` | choix multiple de personnes en `FilterChip`, envoyé en un champ JSON |
 | `AudioMeter`, `useAudioMeter` | `ui/audio-meter.tsx`, `ui/use-audio-meter.ts` | onde du micro qui défile de droite à gauche (façon Claude), size : sm, md ; dictée, saisie vocale de PO, enregistrement de call |
 | `VoiceInputButton`, `VoiceInputBar`, `VoiceInputStatus` | `voice/voice-input.tsx` | saisie vocale d'un champ : micro ; pendant l'écoute, onde + ✕ annuler + ✓ valider à la place du micro et d'Envoyer |
@@ -383,7 +385,7 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   écrit par `set_*_archived` (SQL) uniquement ; menu « ⋯ » Modifier / Archiver sur chaque
   ligne et en-tête de fiche (`docs/ARCHITECTURE.md` § 2 quater). Membres : « Suspendre », « Modifier » (nom et poste) dans la modale.
 - **Retours** `/app/feedback` : l'équipe écrit au DG depuis la fenêtre de retour (bouton,
-  touche Impr. écran ou capture collée ⌘V, jusqu'à 5 captures glissées ou choisies dans une zone de dépôt, dans `feedback-screenshots`) ;
+  touche Impr. écran ou capture collée ⌘V, touche **C** pour capturer une zone de la page, jusqu'à 5 captures glissées ou choisies dans une zone de dépôt, dans `feedback-screenshots`) ;
   PO regroupe les doublons en sujets à l'ouverture de la page par le DG ; le DG seul
   (`read_feedback`) transmet un sujet avec une priorité ou l'écarte
   (`review_feedback_topic`), après l'avoir modifié s'il veut, seul ou avec PO qui propose

@@ -98,6 +98,14 @@ export function FeedbackTopics({
                         : ` · ${t.notion.notSynced}`)}
                   </p>
                 )}
+                {topic.status === "sent" && topic.notionError && (
+                  <p
+                    role="alert"
+                    className="text-sm text-[color:var(--tone-danger-fg)]"
+                  >
+                    {t.notion.error(topic.notionError)}
+                  </p>
+                )}
                 <details>
                   <summary className="w-fit cursor-pointer text-sm text-muted-foreground hover:text-foreground">
                     {t.originals(topic.items.length)}
