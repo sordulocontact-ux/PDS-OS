@@ -127,8 +127,8 @@ sur `body` seul : un `em` hérité se fige en pixels à la taille de `body` (un 
 
 ## 3. Couleurs d'état
 
-Un état métier s'affiche dans un `StatusBadge` : pilule, fond pâle, texte foncé. Cinq
-tons sémantiques, et seulement cinq (`--tone-*` dans `globals.css`) :
+Un état métier s'affiche dans un `StatusBadge` : pilule, fond pâle, texte foncé. Six
+tons sémantiques, et seulement six (`--tone-*` dans `globals.css`) :
 
 | Ton       | Sens                                   | Exemples                                  |
 | --------- | -------------------------------------- | ----------------------------------------- |
@@ -137,6 +137,7 @@ tons sémantiques, et seulement cinq (`--tone-*` dans `globals.css`) :
 | `warning` | attend l'action de quelqu'un           | validation attendue, transmis, invité, proposé |
 | `success` | fait, en ligne                         | validé, prêt, approuvé, en ligne          |
 | `danger`  | bloqué, refusé, en échec               | refusé, échec, en retard, citation introuvable |
+| `action`  | une validation attend une décision | étape « À valider », carte « Validations qui m'attendent » |
 
 - La correspondance état → ton vit **uniquement** dans `lib/ui/state-tones.ts`. Un écran
   n'écrit jamais une couleur, il passe `tone={…Tone[état]}`.

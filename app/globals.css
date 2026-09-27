@@ -83,6 +83,11 @@
   --tone-success-fg: #0d5226;
   --tone-danger-bg: #fce1df;
   --tone-danger-fg: #9a1b1b;
+  /* Réservé à l'action qui attend précisément la personne connectée (valider
+     un Brief, une Stratégie…) : plus voyant que warning, qui couvre tout ce
+     qui attend quelqu'un d'autre (transmis, invité, proposé). */
+  --tone-action-bg: #ece1fb;
+  --tone-action-fg: #4c1d9e;
 
   /* --- Jauges ------------------------------------------------------------ */
   --meter-track: var(--po-grey-150);

@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { requestValidation } from "@/lib/framing/actions/validation";
@@ -32,7 +34,10 @@ export function RequestValidationButton({
       size={size}
       disabled={pending}
       onClick={() =>
-        run(() => requestValidation(projectId, stageId, getNote?.() ?? ""))
+        run(
+          () => requestValidation(projectId, stageId, getNote?.() ?? ""),
+          () => toast.success(t.requested),
+        )
       }
     >
       {t.request}

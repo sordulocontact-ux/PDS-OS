@@ -5,12 +5,13 @@
  * danger = blocked, refused or failed. The label always carries the meaning:
  * colour only reinforces it.
  */
-export type Tone = "neutral" | "info" | "warning" | "success" | "danger";
+export type Tone =
+  "neutral" | "info" | "warning" | "success" | "danger" | "action";
 
 export const stageTone: Record<string, Tone> = {
   not_started: "neutral",
   in_progress: "info",
-  awaiting_validation: "warning",
+  awaiting_validation: "action",
   validated: "success",
 };
 
@@ -73,6 +74,13 @@ export const needTone: Record<string, Tone> = {
 export const onlineTone = (online: boolean): Tone =>
   online ? "success" : "neutral";
 export const overdueTone: Tone = "danger";
+
+/**
+ * A validation waiting for the signed-in person specifically (their own
+ * "Validations qui m'attendent" card): more visible than warning, which
+ * covers everything waiting on someone else in general.
+ */
+export const myValidationTone: Tone = "action";
 
 // A release announced on Deezer but not out yet.
 export const upcomingReleaseTone: Tone = "info";

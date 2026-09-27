@@ -9,12 +9,15 @@ import { ViewLink } from "@/components/ui/view-link";
 import { framingStepTone, type Tone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
+// Only empty/to_review/confirmed ever reach these (framingStepTone), but the
+// map is typed over every Tone to stay exhaustive as the palette grows.
 const DOT: Record<Tone, string> = {
   neutral: "bg-[var(--tone-neutral-fg)]",
   info: "bg-[var(--tone-info-fg)]",
   warning: "bg-[var(--tone-warning-fg)]",
   success: "bg-[var(--tone-success-fg)]",
   danger: "bg-[var(--tone-danger-fg)]",
+  action: "bg-[var(--tone-action-fg)]",
 };
 
 // A confirmed point shows a check instead of its dot, in the same tone.
@@ -24,6 +27,7 @@ const CHECK: Record<Tone, string> = {
   warning: "text-[color:var(--tone-warning-fg)]",
   success: "text-[color:var(--tone-success-fg)]",
   danger: "text-[color:var(--tone-danger-fg)]",
+  action: "text-[color:var(--tone-action-fg)]",
 };
 
 const itemClass = (shown: boolean) =>

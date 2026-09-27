@@ -70,6 +70,9 @@ export default async function FramingPage({
         steps={steps}
         fromCall={data.reports.length > 0}
         hrefOf={hrefOf}
+        projectId={projectId}
+        pendingValidation={data.pendingValidation}
+        mePersonId={access.personId}
       />
     ),
     objective: (

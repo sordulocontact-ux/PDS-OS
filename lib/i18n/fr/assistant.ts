@@ -232,6 +232,7 @@ export const assistant = {
     due: (date: string) => `Échéance ${date}`,
     validations: "Validations qui m'attendent",
     validationsEmpty: "Rien à valider.",
+    toValidate: "À valider",
     proposals: "Propositions de PO à confirmer",
     proposalsEmpty: "Aucune proposition en attente.",
     proposalsCount: (count: number) =>
