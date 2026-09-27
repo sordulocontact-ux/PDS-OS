@@ -53,3 +53,4 @@ backups/
 
 # Claude Code: personal instructions, skills and settings, never committed
 .claude/
+CLAUDE.md
