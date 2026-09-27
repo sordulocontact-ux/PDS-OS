@@ -3,18 +3,17 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-  OptionContent,
-  optionClass,
-} from "@/components/framing/guide/guide-row";
-import { SourceDetail } from "@/components/framing/guide/source-quote";
+import { sourceLabel } from "@/components/framing/guide/source-quote";
 import { FramingStepCard } from "@/components/framing/guide/step-card";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { confirmField, saveField } from "@/lib/framing/actions/brief";
 import type { BriefFieldState } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
+import { reviewTone } from "@/lib/ui/state-tones";
 
 /**
  * The timing as it was said ("sortie visée le 24 octobre"): kept in words,
@@ -38,24 +37,17 @@ export function TimingStep({
   const [draft, setDraft] = useState(field.value ?? "");
   const next = () => router.push(nextHref);
   const proposed = field.status === "proposed";
+  const quote = field.provenance?.quote;
 
   return (
     <FramingStepCard
-      title={t.title}
+      eyebrow={proposed ? t.eyebrowProposed : t.eyebrow}
+      title={field.value ?? t.titleEmpty}
+      description={t.body}
       actions={
         editable &&
         (editing ? (
           <>
-            {field.value && (
-              <Button
-                size="lg"
-                variant="ghost"
-                disabled={pending}
-                onClick={() => setEditing(false)}
-              >
-                {fr.framingGuide.cancel}
-              </Button>
-            )}
             <Button
               size="lg"
               type="submit"
@@ -64,20 +56,19 @@ export function TimingStep({
             >
               {fr.framingGuide.save}
             </Button>
+            {field.value && (
+              <Button
+                size="lg"
+                variant="outline"
+                disabled={pending}
+                onClick={() => setEditing(false)}
+              >
+                {fr.framingGuide.cancel}
+              </Button>
+            )}
           </>
         ) : (
           <>
-            <Button
-              size="lg"
-              variant="ghost"
-              disabled={pending}
-              onClick={() => {
-                setDraft(field.value ?? "");
-                setEditing(true);
-              }}
-            >
-              {t.edit}
-            </Button>
             <Button
               size="lg"
               disabled={pending}
@@ -89,41 +80,46 @@ export function TimingStep({
             >
               {proposed ? t.confirm : fr.framingGuide.next}
             </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              disabled={pending}
+              onClick={() => {
+                setDraft(field.value ?? "");
+                setEditing(true);
+              }}
+            >
+              {t.edit}
+            </Button>
           </>
         ))
       }
     >
-      {editable && editing ? (
+      {proposed && field.provenance && (
+        <ToneCallout tone={reviewTone.proposed}>
+          {t.hypothesis(sourceLabel(field.provenance))}
+          {quote ? ` « ${quote} »` : ""}
+        </ToneCallout>
+      )}
+
+      {editable && editing && (
         <form
           id="timing-form"
+          className="grid gap-2"
           onSubmit={(event) => {
             event.preventDefault();
             run(() => saveField(projectId, "brief", "timing", draft), next);
           }}
         >
+          <Label htmlFor="timing-value">{t.label}</Label>
           <Input
-            aria-label={t.label}
+            id="timing-value"
             value={draft}
             placeholder={t.placeholder}
             onChange={(e) => setDraft(e.target.value)}
             autoFocus
           />
         </form>
-      ) : (
-        field.value && (
-          <div className={optionClass(true)}>
-            <OptionContent
-              detail={
-                <SourceDetail
-                  provenance={field.provenance}
-                  proposed={proposed}
-                />
-              }
-            >
-              {field.value}
-            </OptionContent>
-          </div>
-        )
       )}
     </FramingStepCard>
   );

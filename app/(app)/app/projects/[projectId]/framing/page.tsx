@@ -113,18 +113,18 @@ export default async function FramingPage({
   }[view];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12">
-      <FramingStepNav
-        steps={steps}
-        current={view}
-        hrefs={
-          Object.fromEntries(
-            FRAMING_VIEWS.map((v) => [v, hrefOf(v)]),
-          ) as Record<FramingView, string>
-        }
-      />
-      <div className="flex min-w-0 flex-col gap-6">
-        {editable && <FramingDictation projectId={projectId} />}
+    <div className="flex flex-col gap-5">
+      {editable && <FramingDictation projectId={projectId} />}
+      <div className="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <FramingStepNav
+          steps={steps}
+          current={view}
+          hrefs={
+            Object.fromEntries(
+              FRAMING_VIEWS.map((v) => [v, hrefOf(v)]),
+            ) as Record<FramingView, string>
+          }
+        />
         {screen}
       </div>
     </div>

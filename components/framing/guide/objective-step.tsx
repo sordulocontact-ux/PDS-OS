@@ -5,10 +5,11 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { GuideRow } from "@/components/framing/guide/guide-row";
-import { SourceDetail } from "@/components/framing/guide/source-quote";
 import { FramingStepCard } from "@/components/framing/guide/step-card";
+import { SourceQuote } from "@/components/framing/guide/source-quote";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { confirmField, saveField } from "@/lib/framing/actions/brief";
 import {
@@ -77,19 +78,14 @@ export function ObjectiveStep({
 
   return (
     <FramingStepCard
+      eyebrow={field.status === "proposed" ? t.eyebrowProposed : t.eyebrow}
       title={t.title}
+      description={
+        field.provenance ? <SourceQuote provenance={field.provenance} /> : null
+      }
       actions={
         editable && (
           <>
-            <Button
-              size="lg"
-              variant="ghost"
-              disabled={busy}
-              onClick={suggest}
-              title={t.suggestHint}
-            >
-              {t.suggest}
-            </Button>
             <Button
               size="lg"
               disabled={
@@ -101,6 +97,26 @@ export function ObjectiveStep({
             >
               {t.confirm}
             </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              disabled={busy}
+              onClick={() => {
+                setDraft(field.value ?? "");
+                setChoice({ kind: "other" });
+              }}
+            >
+              {t.edit}
+            </Button>
+            <Button
+              size="lg"
+              variant="ghost"
+              disabled={busy}
+              onClick={suggest}
+              title={t.suggestHint}
+            >
+              {t.suggest}
+            </Button>
           </>
         )
       }
@@ -108,19 +124,14 @@ export function ObjectiveStep({
       <div
         role="radiogroup"
         aria-label={t.title}
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-1"
       >
         {field.value && (
           <GuideRow
             selected={is({ kind: "current" })}
             onSelect={() => setChoice({ kind: "current" })}
             disabled={!editable || busy}
-            detail={
-              <SourceDetail
-                provenance={field.provenance}
-                proposed={field.status === "proposed"}
-              />
-            }
+            detail={field.provenance?.kind === "call" ? t.fromCall : undefined}
           >
             {field.value}
           </GuideRow>
@@ -139,26 +150,25 @@ export function ObjectiveStep({
         {editable && (
           <GuideRow
             selected={is({ kind: "other" })}
-            onSelect={() => {
-              // Starts from the current wording: rewriting it is the usual case.
-              if (!draft) setDraft(field.value ?? "");
-              setChoice({ kind: "other" });
-            }}
+            onSelect={() => setChoice({ kind: "other" })}
             disabled={busy}
           >
             {t.other}
           </GuideRow>
         )}
       </div>
+
       {choice?.kind === "other" && editable && (
-        <Textarea
-          aria-label={t.otherLabel}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          rows={2}
-          autoFocus
-          className="-mt-5"
-        />
+        <div className="grid gap-2">
+          <Label htmlFor="objective-other">{t.otherLabel}</Label>
+          <Textarea
+            id="objective-other"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={2}
+            autoFocus
+          />
+        </div>
       )}
     </FramingStepCard>
   );

@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
-import { CardAction, CardContent, CardHeader } from "@/components/ui/card";
 import {
   DictationButton,
   DictationPanel,
@@ -35,16 +34,20 @@ function toItem(
 }
 
 /**
- * Header of the strategy card with the dictation button, and the dictation
- * panel right under it. Rendered inside the page's EditAccessProvider, so
- * the button only shows to the owner while the strategy is in progress.
+ * Header of the strategy: the title, then on its right the owner's actions
+ * (`actions`, then "Remplir en dictant"), and the dictation panel right
+ * under it. Rendered inside the page's EditAccessProvider, so the buttons
+ * only show to the owner while the strategy is in progress.
  */
 export function StrategyDictation({
   projectId,
+  actions,
   children,
 }: {
   projectId: string;
-  /** Card title, description and status. */
+  /** Buttons before the dictation one ("Proposer des réponses"). */
+  actions?: ReactNode;
+  /** Title and status. */
   children: ReactNode;
 }) {
   const dictation = useDictation<StrategyProposal>(
@@ -54,31 +57,34 @@ export function StrategyDictation({
   const { pending, run } = useFramingAction();
   const canEdit = useCanEditProject();
 
-  if (!canEdit) return <CardHeader>{children}</CardHeader>;
-
   return (
-    <>
-      <CardHeader>
-        {children}
-        <CardAction>
-          <DictationButton dictation={dictation} />
-        </CardAction>
-      </CardHeader>
-      {dictation.phase.name !== "idle" && (
-        <CardContent>
-          <DictationPanel
-            dictation={dictation}
-            toItems={(proposals) => proposals.map(toItem)}
-            pending={pending}
-            onApply={(proposals) =>
-              run(
-                () => applyStrategyDictation(projectId, proposals),
-                dictation.reset,
-              )
-            }
-          />
-        </CardContent>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1">{children}</div>
+        {canEdit && (
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {actions}
+            <DictationButton
+              dictation={dictation}
+              label={fr.voice.fill}
+              size="lg"
+            />
+          </div>
+        )}
+      </div>
+      {canEdit && dictation.phase.name !== "idle" && (
+        <DictationPanel
+          dictation={dictation}
+          toItems={(proposals) => proposals.map(toItem)}
+          pending={pending}
+          onApply={(proposals) =>
+            run(
+              () => applyStrategyDictation(projectId, proposals),
+              dictation.reset,
+            )
+          }
+        />
       )}
-    </>
+    </div>
   );
 }

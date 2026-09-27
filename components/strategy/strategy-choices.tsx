@@ -1,18 +1,25 @@
 "use client";
 
+import { IconCheck } from "nucleo-sharp-essential";
 import { useState } from "react";
 
+import { ProposedBadge } from "@/components/framing/proposed-badge";
+import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { ChoicesReadOnly } from "@/components/strategy/choices-read-only";
+import {
+  labelClass,
+  optionClass,
+  sectionTitleClass,
+} from "@/components/strategy/option-class";
 import { SuggestionList } from "@/components/strategy/suggestion-list";
 import { Button } from "@/components/ui/button";
-import { FilterChip } from "@/components/ui/filter-chip";
 import { Input } from "@/components/ui/input";
-import type { StrategyTextField } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { confirmField, rejectField } from "@/lib/framing/actions/brief";
+import type { StrategyFieldState } from "@/lib/framing/brief";
+import { fr } from "@/lib/i18n/fr";
 import { saveStrategyAnswer } from "@/lib/strategy/actions/choices";
 import {
   STRATEGY_CHOICES,
@@ -21,36 +28,37 @@ import {
 } from "@/lib/strategy/choices";
 import { composeAnswer } from "@/lib/strategy/compose";
 
-// Closed-choice question of a Strategy field. Checking answers writes the
+// One question of the Strategy: the choices as cards (blue once checked), the
+// answer written from them, then PO's pre-checks. Checking answers writes the
 // answer text right away (composed by code, several choices blend into one
-// sentence); the owner edits or completes it, then saves both together.
-// PO's pre-checks can be accepted or dismissed.
+// sentence); the owner edits or completes it, then saves both together. A
+// text proposed by a call or a dictation is confirmed or rejected here.
 export function StrategyChoices({
   field,
   value,
   suggestions,
   projectId,
-  currentText,
 }: {
-  field: StrategyTextField;
+  field: StrategyFieldState;
   value: ChoiceValue;
-  // The saved answer text of the field, if any.
-  currentText: string | null;
   suggestions: ChoiceSuggestion[];
   projectId: string;
 }) {
+  const key = field.key;
   const t = fr.strategy.choices;
-  const labels: Record<string, string> = t.options[field];
+  const a = fr.framing.actions;
+  const labels: Record<string, string> = t.options[key];
   const canEdit = useCanEditProject();
   const { pending, run } = useFramingAction();
   const [choices, setChoices] = useState<string[]>(value.choices);
   const [otherOn, setOtherOn] = useState(value.other !== null);
   const [other, setOther] = useState(value.other ?? "");
-  const questionId = `choices-${field}`;
-  const answerId = `answer-${field}`;
+  const titleId = `choices-${key}`;
+  const answerId = `answer-${key}`;
+  const currentText = field.value;
 
   // The text follows the choices until the owner types in it themselves.
-  const composedFromSaved = composeAnswer(field, value);
+  const composedFromSaved = composeAnswer(key, value);
   const [text, setText] = useState(currentText ?? composedFromSaved);
   const [manual, setManual] = useState(
     currentText !== null && currentText !== composedFromSaved,
@@ -60,7 +68,7 @@ export function StrategyChoices({
     nextOther: string,
     otherShown: boolean,
   ) =>
-    composeAnswer(field, {
+    composeAnswer(key, {
       choices: nextChoices,
       other: otherShown && nextOther.trim() ? nextOther : null,
     });
@@ -78,7 +86,8 @@ export function StrategyChoices({
     (otherOn ? other.trim() : "") === (value.other ?? "") &&
     text.trim() === (currentText ?? composedFromSaved).trim();
 
-  if (!canEdit) return <ChoicesReadOnly field={field} value={value} />;
+  if (!canEdit)
+    return <ChoicesReadOnly field={key} value={value} text={currentText} />;
 
   const toggle = (choice: string) => {
     const next = choices.includes(choice)
@@ -88,34 +97,47 @@ export function StrategyChoices({
     follow(next, other, otherOn);
   };
 
+  const card = (
+    id: string,
+    selected: boolean,
+    label: string,
+    onClick: () => void,
+  ) => (
+    <button
+      key={id}
+      type="button"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={optionClass(selected)}
+    >
+      <span className="min-w-0 flex-1 font-medium break-words text-foreground">
+        {label}
+      </span>
+      {selected && <IconCheck aria-hidden className="mt-1 size-4 shrink-0" />}
+    </button>
+  );
+
   return (
-    <fieldset className="grid gap-3 pt-4" aria-describedby={questionId}>
-      <legend id={questionId} className="text-sm font-medium">
-        {t.questions[field]}
-      </legend>
-      <div className="flex flex-wrap gap-2">
-        {STRATEGY_CHOICES[field].map((choice) => (
-          <FilterChip
-            key={choice}
-            pressed={choices.includes(choice)}
-            onClick={() => toggle(choice)}
-          >
-            {labels[choice]}
-          </FilterChip>
-        ))}
-        <FilterChip
-          pressed={otherOn}
-          onClick={() => {
-            setOtherOn(!otherOn);
-            follow(choices, other, !otherOn);
-          }}
-        >
-          {t.other}
-        </FilterChip>
+    <section aria-labelledby={titleId} className="flex flex-col gap-4">
+      <h3 id={titleId} className={sectionTitleClass}>
+        {t.questions[key]}
+      </h3>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {STRATEGY_CHOICES[key].map((choice) =>
+          card(choice, choices.includes(choice), labels[choice], () =>
+            toggle(choice),
+          ),
+        )}
+        {card("other", otherOn, t.other, () => {
+          setOtherOn(!otherOn);
+          follow(choices, other, !otherOn);
+        })}
       </div>
+
       {otherOn && (
         <Input
-          aria-label={`${t.questions[field]} — ${t.other}`}
+          aria-label={`${t.questions[key]} — ${t.other}`}
           value={other}
           onChange={(e) => {
             setOther(e.target.value);
@@ -124,11 +146,32 @@ export function StrategyChoices({
           placeholder={t.otherPlaceholder}
           maxLength={300}
           className="h-10 text-base md:text-sm"
+          autoFocus
         />
       )}
+
+      {suggestions.length > 0 && (
+        <SuggestionList
+          field={key}
+          suggestions={suggestions}
+          projectId={projectId}
+          onAccepted={(accepted) => {
+            const next = [...new Set([...choices, ...accepted])];
+            setChoices(next);
+            follow(next, other, otherOn);
+          }}
+        />
+      )}
+
       {(choices.length > 0 || otherOn || text.trim() !== "") && (
-        <div className="grid gap-1.5">
-          <Label htmlFor={answerId}>{t.answer}</Label>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <label htmlFor={answerId} className={labelClass}>
+              {t.answer}
+            </label>
+            {field.status === "proposed" && <ProposedBadge />}
+            <ProvenanceNote provenance={field.provenance} />
+          </div>
           <Textarea
             id={answerId}
             value={text}
@@ -139,54 +182,63 @@ export function StrategyChoices({
             }}
             className="text-base md:text-sm"
           />
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">{t.answerHint}</p>
-            {manual && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setText(compose(choices, other, otherOn));
-                  setManual(false);
-                }}
-              >
-                {t.recompose}
-              </Button>
-            )}
-          </div>
         </div>
       )}
-      {!saved && (
-        <Button
-          size="sm"
-          className="justify-self-start"
-          disabled={pending}
-          onClick={() =>
-            run(() =>
-              saveStrategyAnswer(
-                projectId,
-                field,
-                { choices, other: otherOn ? other : null },
-                text,
-              ),
-            )
-          }
-        >
-          {pending ? t.saving : t.save}
-        </Button>
+
+      {(manual || !saved || field.status === "proposed") && (
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+          {manual && (
+            <Button
+              variant="ghost"
+              disabled={pending}
+              onClick={() => {
+                setText(compose(choices, other, otherOn));
+                setManual(false);
+              }}
+            >
+              {t.recompose}
+            </Button>
+          )}
+          {saved && field.status === "proposed" && (
+            <>
+              <Button
+                variant="ghost"
+                disabled={pending}
+                onClick={() =>
+                  run(() => rejectField(projectId, "strategy", key))
+                }
+              >
+                {a.reject}
+              </Button>
+              <Button
+                disabled={pending}
+                onClick={() =>
+                  run(() => confirmField(projectId, "strategy", key))
+                }
+              >
+                {a.confirm}
+              </Button>
+            </>
+          )}
+          {!saved && (
+            <Button
+              disabled={pending}
+              onClick={() =>
+                run(() =>
+                  saveStrategyAnswer(
+                    projectId,
+                    key,
+                    { choices, other: otherOn ? other : null },
+                    text,
+                  ),
+                )
+              }
+            >
+              {pending ? t.saving : t.save}
+            </Button>
+          )}
+        </div>
       )}
-      {suggestions.length > 0 && (
-        <SuggestionList
-          field={field}
-          suggestions={suggestions}
-          projectId={projectId}
-          onAccepted={(accepted) => {
-            const next = [...new Set([...choices, ...accepted])];
-            setChoices(next);
-            follow(next, other, otherOn);
-          }}
-        />
-      )}
-    </fieldset>
+    </section>
   );
 }

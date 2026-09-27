@@ -51,7 +51,10 @@ export function TasksSection({
     <div className="grid gap-4">
       {canEdit && proposedActions.length > 0 && (
         <div className="grid gap-3">
-          <p className="text-body-md font-medium">{t.proposedTitle}</p>
+          <div className="grid gap-0.5">
+            <p className="text-xs font-medium">{t.proposedTitle}</p>
+            <p className="text-xs text-muted-foreground">{t.proposedHint}</p>
+          </div>
           {proposedActions.map((item) => {
             const draft = draftOf(item.id);
             return (

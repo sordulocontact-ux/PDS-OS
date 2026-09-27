@@ -29,31 +29,25 @@ export function SuggestionList({
   const { pending, run } = useFramingAction();
 
   return (
-    <div className="grid gap-2 rounded-lg border border-dashed border-border p-3">
-      <ul className="grid gap-3">
+    <div className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-3">
         {suggestions.map((s) => (
-          <li key={s.choice} className="grid gap-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium">{labels[s.choice]}</span>
-              <ProposedBadge />
+          <li
+            key={s.choice}
+            className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+          >
+            <div className="flex min-w-0 flex-col gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <ProposedBadge />
+                <span className="text-body-md font-medium">
+                  {labels[s.choice]}
+                </span>
+              </div>
+              <p className="text-caption break-words text-muted-foreground">
+                {t.from(s.sourceLabel)} : « {s.quote} »
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t.from(s.sourceLabel)} : « {s.quote} »
-            </p>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                disabled={pending}
-                onClick={() =>
-                  run(
-                    () =>
-                      acceptStrategySuggestions(projectId, field, [s.choice]),
-                    () => onAccepted([s.choice]),
-                  )
-                }
-              >
-                {t.accept}
-              </Button>
+            <div className="flex shrink-0 gap-2">
               <Button
                 size="sm"
                 variant="ghost"
@@ -66,6 +60,20 @@ export function SuggestionList({
               >
                 {t.dismiss}
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={pending}
+                onClick={() =>
+                  run(
+                    () =>
+                      acceptStrategySuggestions(projectId, field, [s.choice]),
+                    () => onAccepted([s.choice]),
+                  )
+                }
+              >
+                {t.accept}
+              </Button>
             </div>
           </li>
         ))}
@@ -73,8 +81,8 @@ export function SuggestionList({
       {suggestions.length > 1 && (
         <Button
           size="sm"
-          variant="outline"
-          className="justify-self-start"
+          variant="ghost"
+          className="self-start"
           disabled={pending}
           onClick={() =>
             run(

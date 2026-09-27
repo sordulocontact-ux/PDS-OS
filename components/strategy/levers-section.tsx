@@ -1,5 +1,6 @@
 "use client";
 
+import { IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { OptionSelect } from "@/components/framing/option-select";
@@ -7,6 +8,11 @@ import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
+import {
+  labelClass,
+  optionClass,
+  sectionTitleClass,
+} from "@/components/strategy/option-class";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +30,10 @@ import { cn } from "@/lib/utils";
 type Family = keyof typeof fr.framing.needs.families;
 type LeverState = keyof typeof fr.strategy.levers.states;
 
-/** The launch plan's levers, by family (the same closed taxonomy as needs). */
+/**
+ * The launch plan's levers, by family (the same closed taxonomy as needs). A
+ * selected lever is a blue card: it is the one that carries deliverables.
+ */
 export function LeversSection({
   levers,
   openNeeds,
@@ -43,54 +52,73 @@ export function LeversSection({
     .filter((group) => group.items.length > 0);
 
   return (
-    <section className="grid gap-4 py-4">
-      <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <p className="text-xs text-muted-foreground">{t.hint}</p>
-      </div>
+    <section aria-labelledby="levers-title" className="flex flex-col gap-6">
+      <h3 id="levers-title" className={sectionTitleClass}>
+        {t.title}
+      </h3>
 
       {byFamily.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.empty}</p>
+        <p className="text-body-md text-muted-foreground">{t.empty}</p>
       ) : (
         byFamily.map((group) => (
-          <div key={group.key} className="grid gap-2">
-            <h4 className="text-xs font-medium text-muted-foreground">
-              {families[group.key]}
-            </h4>
-            <ul className="grid gap-2">
+          <div key={group.key} className="flex flex-col gap-3">
+            <p className={labelClass}>{families[group.key]}</p>
+            <ul className="flex flex-col gap-3">
               {group.items.map((lever) => {
                 const state = lever.state as LeverState;
                 const proposed = lever.review_status === "proposed";
                 return (
                   <li
                     key={lever.id}
-                    className="grid gap-2 rounded-lg border border-border p-3"
+                    className={cn(
+                      optionClass(state === "selected" && !proposed),
+                      "flex-col sm:flex-row sm:items-center sm:justify-between",
+                    )}
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={cn(
-                          "text-sm font-medium",
-                          state === "rejected" && "text-muted-foreground",
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={cn(
+                            "font-semibold break-words",
+                            state === "rejected" &&
+                              "text-muted-foreground line-through",
+                          )}
+                        >
+                          {lever.label}
+                        </span>
+                        {proposed && <ProposedBadge />}
+                        {!canEdit && (
+                          <StatusBadge tone={leverTone[state]} size="sm">
+                            {t.states[state]}
+                          </StatusBadge>
                         )}
-                      >
-                        {lever.label}
-                      </span>
-                      <StatusBadge tone={leverTone[state]} size="sm">
-                        {t.states[state]}
-                      </StatusBadge>
-                      {proposed && <ProposedBadge />}
+                      </div>
+                      {lever.needLabel && (
+                        <span className="text-caption text-muted-foreground">
+                          {t.fromNeed(lever.needLabel)}
+                        </span>
+                      )}
+                      {lever.provenance && (
+                        <ProvenanceNote provenance={lever.provenance} />
+                      )}
                     </div>
-                    {lever.needLabel && (
-                      <p className="text-xs text-muted-foreground">
-                        {t.fromNeed(lever.needLabel)}
-                      </p>
-                    )}
-                    {lever.provenance && (
-                      <ProvenanceNote provenance={lever.provenance} />
-                    )}
                     {canEdit &&
                       (proposed ? (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex shrink-0 gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={pending}
+                            onClick={() =>
+                              run(() =>
+                                updateLever(projectId, lever.id, {
+                                  review_status: "rejected",
+                                }),
+                              )
+                            }
+                          >
+                            {a.reject}
+                          </Button>
                           <Button
                             size="sm"
                             disabled={pending}
@@ -104,23 +132,9 @@ export function LeversSection({
                           >
                             {a.confirm}
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={pending}
-                            onClick={() =>
-                              run(() =>
-                                updateLever(projectId, lever.id, {
-                                  review_status: "rejected",
-                                }),
-                              )
-                            }
-                          >
-                            {a.reject}
-                          </Button>
                         </div>
                       ) : (
-                        <div className="justify-self-start">
+                        <div className="shrink-0">
                           <OptionSelect
                             id={`lever-state-${lever.id}`}
                             label={`${t.state} — ${lever.label}`}
@@ -146,41 +160,28 @@ export function LeversSection({
       )}
 
       {canEdit && openNeeds.length > 0 && (
-        <div className="grid gap-2 rounded-lg border border-dashed border-border p-3">
-          <div className="grid gap-0.5">
-            <p className="text-xs font-medium">{t.needsTitle}</p>
-            <p className="text-xs text-muted-foreground">{t.needsHint}</p>
-          </div>
-          <ul className="grid gap-2">
+        <div className="flex flex-col gap-3">
+          <p className={labelClass}>{t.needsTitle}</p>
+          <div className="flex flex-wrap gap-2">
             {openNeeds.map((need) => (
-              <li
+              <Button
                 key={need.id}
-                className="flex flex-wrap items-center justify-between gap-2 text-sm"
+                variant="outline"
+                disabled={pending}
+                title={t.fromNeedAction}
+                onClick={() => run(() => leverFromNeed(projectId, need.id))}
               >
-                <span>
-                  {need.label}
-                  <span className="text-muted-foreground">
-                    {" · "}
-                    {families[need.family as Family]}
-                  </span>
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={pending}
-                  onClick={() => run(() => leverFromNeed(projectId, need.id))}
-                >
-                  {t.fromNeedAction}
-                </Button>
-              </li>
+                <IconPlus aria-hidden />
+                {need.label}
+              </Button>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
       {canEdit && (
         <form
-          className="flex flex-wrap items-end gap-2"
+          className="flex flex-col gap-3 sm:flex-row sm:items-end"
           onSubmit={(event) => {
             event.preventDefault();
             run(
@@ -189,16 +190,20 @@ export function LeversSection({
             );
           }}
         >
-          <div className="grid min-w-56 flex-1 gap-1">
-            <Label htmlFor="lever-label">{t.label}</Label>
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <Label htmlFor="lever-label" className={labelClass}>
+              {t.label}
+            </Label>
             <Input
               id="lever-label"
               value={label}
               onChange={(e) => setLabel(e.target.value)}
             />
           </div>
-          <div className="grid gap-1">
-            <Label htmlFor="lever-family">{t.family}</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="lever-family" className={labelClass}>
+              {t.family}
+            </Label>
             <OptionSelect
               id="lever-family"
               label={t.family}

@@ -31,7 +31,7 @@ export function AddNeedDialog({
     <>
       <Button
         size="lg"
-        variant="ghost"
+        variant="outline"
         disabled={disabled}
         onClick={() => {
           setLabel("");

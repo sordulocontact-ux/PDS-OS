@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { labelClass } from "@/components/strategy/option-class";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -19,23 +20,26 @@ export function BriefReminder({
   const filled = brief.filter((f) => f.value);
 
   return (
-    <section className="grid gap-3">
+    <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <StatusBadge tone={validated ? "success" : "warning"} size="sm">
-          {validated ? t.validated : t.notValidated}
-        </StatusBadge>
+        <h3 className={labelClass}>{t.title}</h3>
+        {/* Validated is the normal case here: only the exception is marked. */}
+        {!validated && (
+          <StatusBadge tone="warning" size="sm">
+            {t.notValidated}
+          </StatusBadge>
+        )}
       </div>
       {filled.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.empty}</p>
+        <p className="text-body-md text-muted-foreground">{t.empty}</p>
       ) : (
-        <dl className="grid gap-2 text-sm">
+        <dl className="flex flex-col gap-3">
           {filled.map((field) => (
-            <div key={field.key} className="grid gap-0.5">
-              <dt className="text-xs text-muted-foreground">
+            <div key={field.key} className="flex flex-col gap-0.5">
+              <dt className="text-caption text-muted-foreground">
                 {fr.framing.fields[field.key]}
               </dt>
-              <dd className="line-clamp-4 whitespace-pre-wrap">
+              <dd className="line-clamp-4 text-body-md whitespace-pre-wrap">
                 {field.value}
               </dd>
             </div>
@@ -44,7 +48,7 @@ export function BriefReminder({
       )}
       <Link
         href={routes.projectFraming(projectId)}
-        className="w-fit text-xs underline underline-offset-4 hover:text-foreground"
+        className="w-fit text-caption underline underline-offset-4"
       >
         {t.open}
       </Link>

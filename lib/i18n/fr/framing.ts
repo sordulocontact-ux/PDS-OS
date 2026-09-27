@@ -56,7 +56,6 @@ export const framing = {
     done: "Importé",
   },
   dictation: {
-    fill: "Remplir en dictant",
     kinds: {
       brief: (field: string, isEdit: boolean) =>
         `${field} · ${isEdit ? "modification" : "à renseigner"}`,
@@ -105,6 +104,7 @@ export const framing = {
   },
   openPoints: {
     title: "Points ouverts",
+    hint: "Une décision non prise : pas de responsable, pas d'échéance.",
     empty: "Aucun point ouvert.",
     question: "Question",
     resolve: "Trancher",
@@ -114,6 +114,8 @@ export const framing = {
   tasks: {
     title: "Actions",
     proposedTitle: "Actions proposées depuis les calls",
+    proposedHint:
+      "Une tâche a toujours un responsable et une échéance : à vous de les choisir.",
     empty: "Aucune tâche.",
     taskTitle: "Tâche",
     assignee: "Responsable",

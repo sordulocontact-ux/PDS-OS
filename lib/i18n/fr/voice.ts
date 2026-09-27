@@ -1,6 +1,7 @@
 /** Dictation: fill or edit a stage form by voice, common to every stage. */
 export const voice = {
   start: "Dicter",
+  fill: "Remplir en dictant",
   unsupported: "La dictée nécessite un micro et un navigateur récent.",
   requesting: "Autorisation du micro…",
   recording: "Je vous écoute",
