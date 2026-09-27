@@ -63,6 +63,7 @@ export async function createArtist(
     .insert({
       organization_id: access.organizationId,
       name: parsed.data.name,
+      relation: parsed.data.relation,
       notes: parsed.data.notes,
       deezer_id: deezer?.id ?? null,
       picture_url: deezer?.pictureBig ?? null,

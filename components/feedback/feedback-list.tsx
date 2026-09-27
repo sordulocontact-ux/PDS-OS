@@ -10,7 +10,7 @@ import { formatLongDay, formatTime } from "@/lib/project-history/format";
 
 // Feedback as it was sent, newest first: kind, when, who (someone else's
 // only), the page it came from and, for the director, the topic PO filed it
-// in; then the message as it was written and its screenshot.
+// in; then the message as it was written and its screenshots.
 export function FeedbackItems({
   items,
   showTopic = false,
@@ -43,22 +43,28 @@ export function FeedbackItems({
           }
         >
           <p className="break-words whitespace-pre-line">{item.message}</p>
-          {item.screenshotUrl && (
-            <a
-              href={item.screenshotUrl}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={t.screenshot.open}
-              className="w-fit"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- signed URL of a private bucket */}
-              <img
-                src={item.screenshotUrl}
-                alt={t.screenshot.alt}
-                loading="lazy"
-                className="max-h-40 max-w-full rounded-lg border border-border object-contain"
-              />
-            </a>
+          {item.screenshotUrls.length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {item.screenshotUrls.map((url, index) => (
+                <li key={url}>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={t.screenshot.openOf(index + 1)}
+                    className="block w-fit"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- signed URL of a private bucket */}
+                    <img
+                      src={url}
+                      alt={t.screenshot.altOf(index + 1)}
+                      loading="lazy"
+                      className="max-h-40 max-w-full rounded-lg border border-border object-contain"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
           )}
           {showTopic && (
             <p className="text-sm text-muted-foreground">

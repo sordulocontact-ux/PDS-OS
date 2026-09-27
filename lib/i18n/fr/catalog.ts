@@ -2,15 +2,47 @@
 export const catalog = {
   notProvided: "non renseigné",
 
+  // Relation of an artist with PDS, apart from archiving (Actif / Archivé).
+  relation: {
+    legend: "Relation avec PDS",
+    labels: { signed: "Signé", collaboration: "Collaboration" },
+    hints: {
+      signed: "Intégré au roster de PDS, accompagné dans la durée.",
+      collaboration:
+        "Présent pour un ou plusieurs projets ponctuels (un PDS Mic…), sans faire partie du roster.",
+    },
+    editHint:
+      "Changer la relation garde la même fiche : masters, projets, contacts, fichiers et historique.",
+    required: "Choisissez la relation avec PDS.",
+    filter: {
+      label: "Relation avec PDS",
+      all: "Tous",
+      signed: "Signés",
+      collaboration: "Collaborations",
+    },
+  },
+
   artists: {
     title: "Artistes",
     subtitle:
       "Les artistes du label, tels qu'ils apparaissent sur les plateformes.",
     newArtist: "Nouvel artiste",
-    columns: { name: "Nom", masters: "Masters", notes: "Notes" },
+    columns: {
+      name: "Nom",
+      relation: "Relation",
+      masters: "Masters",
+      notes: "Notes",
+    },
     emptyTitle: "Aucun artiste pour l'instant",
     emptyBody: "Ajoutez un artiste pour pouvoir lui créditer des masters.",
     emptyBodyReadOnly: "Les artistes apparaîtront ici dès qu'ils seront créés.",
+    // A relation filter with no match, while the catalog holds artists.
+    filteredEmpty: {
+      signed: "Aucun artiste signé",
+      collaboration: "Aucune collaboration",
+    },
+    filteredEmptyBody:
+      "La relation avec PDS se choisit à la création et se modifie depuis la fiche de l'artiste.",
     loadError: "Impossible de charger les artistes. Rechargez la page.",
   },
 
@@ -43,6 +75,7 @@ export const catalog = {
     edit: "Modifier",
     identity: "Identité",
     stageName: "Nom d'artiste",
+    relation: "Relation avec PDS",
     legalName: "Nom civil",
     country: "Pays d'origine",
     summary: "En bref",
@@ -55,7 +88,8 @@ export const catalog = {
 
   profileForm: {
     title: "Modifier l'artiste",
-    description: "Identité, photo et biographie de la fiche.",
+    description:
+      "Identité, relation avec PDS, photo et biographie de la fiche.",
     identity: "Identité",
     name: "Nom d'artiste",
     legalName: "Nom civil",

@@ -31,10 +31,16 @@ export const assistant = {
     artist: "Artiste",
     fansNotStreams:
       "Classement par fans Deezer, calculé par l'application : les écoutes (streams) ne sont pas disponibles dans PDS OS.",
-    artistRanked: (rank: number, name: string, fans: string, masters: string) =>
-      `N°${rank} : ${name}, ${fans} fans sur Deezer, ${masters}.`,
-    artistNoDeezer: (name: string, masters: string) =>
-      `${name} : pas de profil Deezer, non classé, ${masters}.`,
+    artistRanked: (
+      rank: number,
+      name: string,
+      relation: string,
+      fans: string,
+      masters: string,
+    ) =>
+      `N°${rank} : ${name} (${relation}), ${fans} fans sur Deezer, ${masters}.`,
+    artistNoDeezer: (name: string, relation: string, masters: string) =>
+      `${name} (${relation}) : pas de profil Deezer, non classé, ${masters}.`,
     masterCount: (count: number) =>
       count === 0
         ? "aucun master"

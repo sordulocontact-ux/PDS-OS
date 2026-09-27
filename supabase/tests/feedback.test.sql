@@ -4,7 +4,7 @@
 -- the director only. Screenshots stay in their author's folder.
 -- Run with `supabase test db`.
 begin;
-select plan(43);
+select plan(47);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -169,9 +169,14 @@ select lives_ok($$ insert into storage.objects (bucket_id, name) values ('feedba
 select throws_ok($$ insert into storage.objects (bucket_id, name) values ('feedback-screenshots', (select v from vars where k = 'theirs')) $$,
                  '42501', null, 'never into someone else''s folder');
 select throws_ok($$
-  insert into public.feedback (organization_id, kind, message, screenshot_path)
-  values (pg_temp.id_of('org'), 'bug', 'Capture d''un autre', (select v from vars where k = 'theirs'))
-$$, 'P0001', 'invalid_screenshot_path', 'a feedback points only to its author''s screenshot');
+  insert into public.feedback (organization_id, kind, message, screenshot_paths)
+  values (pg_temp.id_of('org'), 'bug', 'Capture d''un autre',
+          array[(select v from vars where k = 'own'), (select v from vars where k = 'theirs')])
+$$, 'P0001', 'invalid_screenshot_path', 'a feedback points only to its author''s screenshots');
+select throws_ok($$
+  insert into public.feedback (organization_id, kind, message, screenshot_paths)
+  values (pg_temp.id_of('org'), 'bug', 'Six captures', array_fill((select v from vars where k = 'own'), array[6]))
+$$, '23514', null, 'five screenshots at most');
 
 -- Editing before sending ------------------------------------------------------
 select throws_ok($$ select public.edit_feedback_topic(pg_temp.id_of('topic2'), 'idea', 'Titre', 'Résumé') $$,
@@ -207,6 +212,18 @@ reset role;
 select pg_temp.act_as(pg_temp.id_of('author'));
 select throws_ok($$ select public.record_feedback_notion(pg_temp.id_of('topic'), 'abc', null) $$,
                  '42501', null, 'only the director records a Notion page');
+
+-- Notion errors ---------------------------------------------------------------
+select throws_ok($$ select public.record_feedback_notion_error(pg_temp.id_of('topic'), 'Jeton refusé') $$,
+                 '42501', null, 'only the director records a Notion error');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('director'));
+select public.record_feedback_notion_error(pg_temp.id_of('topic'), 'Jeton refusé');
+select is((select notion_error from public.feedback_topics where id = pg_temp.id_of('topic')), 'Jeton refusé',
+          'the director records why a topic is not on Notion');
+select public.record_feedback_notion(pg_temp.id_of('topic'), 'abc');
+select is((select notion_error from public.feedback_topics where id = pg_temp.id_of('topic')), null,
+          'a successful update clears the error');
 
 select * from finish();
 rollback;

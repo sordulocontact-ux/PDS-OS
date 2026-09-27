@@ -1,5 +1,7 @@
 // Artist activity log, as read on the Activity tab. Client-safe.
 
+import type { ArtistRelation } from "@/lib/catalog/types";
+
 export const ACTIVITY_KINDS = [
   "artist_created",
   "artist_updated",
@@ -21,6 +23,7 @@ export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
 
 export const ARTIST_FIELDS = [
   "identity",
+  "relation",
   "bio",
   "notes",
   "picture",
@@ -47,6 +50,8 @@ export type ActivityDetail = {
   role?: string;
   category?: FileCategory;
   fields?: ArtistField[];
+  // Relation with PDS at the time (creation, or the new one on a change).
+  relation?: ArtistRelation;
 };
 
 export type ActivityEvent = {

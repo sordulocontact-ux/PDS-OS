@@ -8,11 +8,25 @@ export type CreditRole = (typeof CREDIT_ROLES)[number];
 
 export type ArtistOption = { id: string; name: string };
 
+// Relation of an artist with PDS (docs/ARCHITECTURE.md § 2 quinquies): what
+// the artist is to PDS, apart from the record's state (archived or not).
+export const ARTIST_RELATIONS = ["signed", "collaboration"] as const;
+export type ArtistRelation = (typeof ARTIST_RELATIONS)[number];
+
+export function isArtistRelation(value: unknown): value is ArtistRelation {
+  return (ARTIST_RELATIONS as readonly unknown[]).includes(value);
+}
+
+// The column is checked in SQL; the fallback only satisfies the type.
+export const artistRelationOf = (value: string): ArtistRelation =>
+  isArtistRelation(value) ? value : "signed";
+
 export type ArtistListItem = {
   id: string;
   name: string;
   pictureUrl: string | null;
   notes: string | null;
+  relation: ArtistRelation;
   // Live masters crediting the artist.
   masterCount: number;
 };

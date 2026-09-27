@@ -6,14 +6,45 @@ import { isFeedbackKind, isFeedbackPriority } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
 import {
   createFeedbackPage,
-  notionConfigured,
+  NotionError,
+  notionMissingSettings,
   updateFeedbackPage,
   type FeedbackOriginal,
 } from "@/lib/integrations/notion";
 import { formatLongDay, formatTime } from "@/lib/project-history/format";
 import type { createClient } from "@/lib/supabase/server";
 
-export type NotionSync = "synced" | "failed" | "off";
+/** The outcome, with the reason in plain French when it is not on Notion. */
+export type NotionSync =
+  { status: "synced" } | { status: "off" | "failed"; reason: string };
+
+/** Why Notion refused, said so the director knows what to fix. */
+export function explainNotionError(error: unknown): string {
+  const t = fr.feedback.notion.reasons;
+  if (!(error instanceof NotionError)) return t.unknown;
+  const detail = error.detail ? ` (${error.detail})` : "";
+  switch (error.reason) {
+    case "not_configured":
+      return t.notConfigured(notionMissingSettings().join(", "));
+    case "unreachable":
+      return t.unreachable;
+    case "http_401":
+      return t.unauthorized;
+    case "http_403":
+      return t.forbidden;
+    case "http_404":
+      return t.notShared;
+    case "http_400":
+      return t.invalid + detail;
+    case "http_409":
+    case "http_429":
+      return t.busy;
+    default:
+      return error.reason.startsWith("http_5")
+        ? t.unreachable
+        : `${t.unknown}${detail}`;
+  }
+}
 
 const fullName = (
   p: { first_name: string | null; last_name: string | null } | null,
@@ -24,13 +55,19 @@ const fullName = (
  * summary, priority, count) and the feedback that joined since the last
  * update. Read and recorded with the director's session (RLS,
  * record_feedback_notion); only the Notion call uses the app's token. A
- * failure never undoes the sending: the page shows it, with a retry.
+ * failure never undoes the sending: its reason, in plain French, is returned
+ * and kept on the topic (record_feedback_notion_error), shown with a retry.
  */
 export async function syncTopicToNotion(
   supabase: Awaited<ReturnType<typeof createClient>>,
   topicId: string,
 ): Promise<NotionSync> {
-  if (!notionConfigured()) return "off";
+  const missing = notionMissingSettings();
+  if (missing.length > 0)
+    return {
+      status: "off",
+      reason: fr.feedback.notion.reasons.notConfigured(missing.join(", ")),
+    };
 
   const [topicRes, feedbackRes] = await Promise.all([
     supabase
@@ -53,7 +90,7 @@ export async function syncTopicToNotion(
     !isFeedbackPriority(topic.priority) ||
     feedbackRes.error
   )
-    return "failed";
+    return { status: "failed", reason: fr.feedback.notion.reasons.notSent };
 
   const items = feedbackRes.data ?? [];
   const original = (f: (typeof items)[number]): FeedbackOriginal => ({
@@ -101,11 +138,20 @@ export async function syncTopicToNotion(
     });
     if (error) {
       console.error("syncTopicToNotion:", error.message);
-      return "failed";
+      return {
+        status: "failed",
+        reason: fr.feedback.notion.reasons.notRecorded,
+      };
     }
-    return "synced";
+    return { status: "synced" };
   } catch (error) {
     console.error("syncTopicToNotion:", error);
-    return "failed";
+    const reason = explainNotionError(error);
+    // Kept on the topic until a later update succeeds.
+    await supabase.rpc("record_feedback_notion_error", {
+      p_topic: topicId,
+      p_error: reason,
+    });
+    return { status: "failed", reason };
   }
 }

@@ -4,6 +4,7 @@ import { cache } from "react";
 
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import {
+  artistRelationOf,
   formatCredits,
   isCreditRole,
   type ArtistListItem,
@@ -74,7 +75,7 @@ export async function listArtists(filter?: { archived?: boolean }): Promise<{
   const query = supabase
     .from("artists")
     .select(
-      "id, name, notes, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at))",
+      "id, name, notes, relation, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at))",
     );
   const { data, error } = await (
     filter?.archived
@@ -94,6 +95,7 @@ export async function listArtists(filter?: { archived?: boolean }): Promise<{
       id: row.id,
       name: row.name,
       notes: row.notes,
+      relation: artistRelationOf(row.relation),
       pictureUrl:
         (row.picture_path && signed.get(row.picture_path)) || row.picture_url,
       masterCount: row.credits.filter((c) => c.master && !c.master.archived_at)

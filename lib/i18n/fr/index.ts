@@ -3,17 +3,18 @@
  * components. One file per domain, so parallel work never edits the same file.
  */
 import { artistActivity } from "./artist-activity";
-import { artistFiles } from "./artist-files";
 import { assistant } from "./assistant";
 import { auth } from "./auth";
 import { budget } from "./budget";
 import { calls } from "./calls";
 import { catalog } from "./catalog";
+import { catalogFiles } from "./catalog-files";
 import { core } from "./core";
 import { design } from "./design";
 import { feedback } from "./feedback";
 import { framing } from "./framing";
 import { labo } from "./labo";
+import { masterPage } from "./master-page";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
 import { projectPlan } from "./project-plan";
@@ -46,8 +47,9 @@ export const fr = {
   projectPlan,
   projectHistory,
   budget,
-  artistFiles,
+  catalogFiles,
   artistActivity,
+  masterPage,
   records,
   feedback,
 } as const;

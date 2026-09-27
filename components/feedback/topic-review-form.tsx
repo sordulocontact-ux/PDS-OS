@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { ChoiceCards } from "@/components/calls/choice-cards";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { reviewFeedbackTopic } from "@/lib/feedback/actions";

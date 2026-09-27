@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 
-import { ChoiceCards } from "@/components/calls/choice-cards";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";

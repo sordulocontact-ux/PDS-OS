@@ -129,3 +129,23 @@ export const feedbackPriorityTone: Record<string, Tone> = {
   normal: "info",
   low: "neutral",
 };
+
+/** Declaration of a master to a collecting society: still to file waits for
+ * the team, filed waits for the organism, then confirmed or refused. */
+export const declarationStatusTone: Record<string, Tone> = {
+  todo: "warning",
+  submitted: "info",
+  confirmed: "success",
+  rejected: "danger",
+};
+
+/** Shares of a kind of split (splitTotal): complete at 100 %, else to do. */
+export const splitStatusTone: Record<string, Tone> = {
+  empty: "warning",
+  incomplete: "warning",
+  complete: "success",
+};
+
+/** An item of the master's file (overview checklist). */
+export const checklistTone = (done: boolean): Tone =>
+  done ? "success" : "warning";

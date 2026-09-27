@@ -1,4 +1,3 @@
-import type { ActivityEvent } from "@/lib/catalog/activity-types";
 import { fr } from "@/lib/i18n/fr";
 
 // Days and times of the log, in Europe/Paris, computed by the code.
@@ -25,11 +24,11 @@ const timeFormat = new Intl.DateTimeFormat("fr-FR", {
   minute: "2-digit",
 });
 
-export type ActivityDay = {
+export type ActivityDay<T> = {
   // "2026-09-27", unique on the page.
   key: string;
   label: string;
-  events: ActivityEvent[];
+  events: T[];
 };
 
 /** "YYYY-MM-DD" of an instant, in Paris. */
@@ -42,10 +41,13 @@ export function formatActivityTime(iso: string): string {
 }
 
 /** Events (newest first) grouped by Paris day, labelled against `now`. */
-export function groupByDay(events: ActivityEvent[], now: Date): ActivityDay[] {
+export function groupByDay<T extends { createdAt: string }>(
+  events: T[],
+  now: Date,
+): ActivityDay<T>[] {
   const today = dayKey(now);
   const yesterday = dayKey(new Date(now.getTime() - 24 * 60 * 60 * 1000));
-  const days: ActivityDay[] = [];
+  const days: ActivityDay<T>[] = [];
   for (const event of events) {
     const date = new Date(event.createdAt);
     const key = dayKey(date);

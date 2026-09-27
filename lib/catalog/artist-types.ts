@@ -1,12 +1,17 @@
 // Artist page types: the catalog record and what Deezer (and Wikipedia)
 // says about the artist. Client-safe.
 
-import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
+import type {
+  ArtistOption,
+  ArtistRelation,
+  MasterOption,
+} from "@/lib/catalog/types";
 
 export type ArtistDetail = {
   id: string;
   organizationId: string;
   name: string;
+  relation: ArtistRelation;
   legalName: string | null;
   countryCode: string | null;
   // Written by the team; null = the biography read from Deezer / Wikipedia.

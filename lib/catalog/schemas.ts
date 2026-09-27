@@ -3,6 +3,7 @@ import { z } from "zod";
 import { CONTACT_ROLES } from "@/lib/catalog/contacts";
 import { COUNTRY_CODES } from "@/lib/catalog/countries";
 import {
+  ARTIST_RELATIONS,
   CREDIT_ROLES,
   ISRC_PATTERN,
   normalizeIsrc,
@@ -21,7 +22,13 @@ const optionalText = (max: number) =>
     .optional()
     .transform((value) => (value ? value : null));
 
+// Always chosen by a person: no default on either side.
+const relationSchema = z.enum(ARTIST_RELATIONS, {
+  error: fr.catalog.relation.required,
+});
+
 export const createArtistSchema = z.object({
+  relation: relationSchema,
   name: z
     .string({ error: e.required })
     .trim()
@@ -103,6 +110,7 @@ const pe = fr.catalog.profileForm.errors;
 export const updateArtistSchema = z.object({
   artistId: z.uuid(),
   name: createArtistSchema.shape.name,
+  relation: relationSchema,
   legalName: optionalText(200),
   countryCode: z
     .string()

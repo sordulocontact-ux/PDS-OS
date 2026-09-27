@@ -1,5 +1,6 @@
 "use client";
 
+import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +12,8 @@ import {
 
 // Asks before an action that removes something from view. Without
 // `onConfirm` it only explains (the action is not possible) and closes.
-// Stays open while pending; the caller closes it on success.
+// Stays open while pending; the caller closes it on success, or passes the
+// `error` to show when it failed.
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -23,6 +25,7 @@ export function ConfirmDialog({
   pendingLabel,
   pending = false,
   destructive = false,
+  error,
   onConfirm,
 }: {
   open: boolean;
@@ -37,6 +40,7 @@ export function ConfirmDialog({
   pending?: boolean;
   // Definitive action: full-ink button. Reversible ones stay default.
   destructive?: boolean;
+  error?: string | null;
   onConfirm?: () => void;
 }) {
   return (
@@ -46,6 +50,7 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
+        {error && <FormMessage kind="error">{error}</FormMessage>}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button
             type="button"

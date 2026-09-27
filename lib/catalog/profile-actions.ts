@@ -58,13 +58,15 @@ export async function updateArtist(
       values: parsed.values,
     };
   }
-  const { artistId, name, legalName, countryCode, bio, notes } = parsed.data;
+  const { artistId, name, relation, legalName, countryCode, bio, notes } =
+    parsed.data;
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("artists")
     .update({
       name,
+      relation,
       legal_name: legalName,
       country_code: countryCode,
       bio,

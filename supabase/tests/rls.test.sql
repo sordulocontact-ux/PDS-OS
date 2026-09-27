@@ -84,8 +84,8 @@ select is((select status from public.memberships where person_id = (select id fr
           'approved', 'an admin approves a membership');
 
 -- Projects and stages ----------------------------------------------------------
-insert into public.artists (organization_id, name)
-values ((select id from ids where name = 'org'), (select v from vars where k = 'artist'));
+insert into public.artists (organization_id, name, relation)
+values ((select id from ids where name = 'org'), (select v from vars where k = 'artist'), 'signed');
 insert into ids select 'artist', id from public.artists where name = (select v from vars where k = 'artist');
 
 select lives_ok($$
@@ -103,8 +103,8 @@ select isnt((select created_by from public.projects where title = (select v from
             'authorship is set by the database');
 
 select throws_ok($$
-  insert into public.artists (organization_id, name, created_by)
-  values ((select id from ids where name = 'org'), 'Faux', (select id from ids where name = 'member_person'))
+  insert into public.artists (organization_id, name, created_by, relation)
+  values ((select id from ids where name = 'org'), 'Faux', (select id from ids where name = 'member_person'), 'signed')
 $$, '42501', null, 'clients cannot write authorship');
 
 select throws_ok($$

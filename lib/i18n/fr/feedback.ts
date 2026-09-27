@@ -38,17 +38,19 @@ export const feedback = {
   success: "Merci ! Votre retour est bien arrivé.",
 
   screenshot: {
-    label: "Capture d'écran",
-    add: "Joindre une capture",
-    remove: "Retirer la capture",
-    pasteHint:
-      "Astuce : faites une capture, puis collez-la ici (⌘V ou Ctrl+V).",
+    label: "Captures d'écran",
+    drop: "Glissez vos captures ici, ou cliquez pour les choisir",
+    rules: "PNG, JPEG ou WebP, 5 Mo chacune, 5 au plus.",
+    full: "5 captures au plus : retirez-en une pour en ajouter une autre.",
+    removeOf: (n: number) => `Retirer la capture ${n}`,
+    pasteHint: "Vous pouvez aussi en coller une (⌘V ou Ctrl+V).",
     printScreenHint: "Capture faite : collez-la ici (Ctrl+V) pour la joindre.",
-    alt: "Capture d'écran jointe au retour",
-    open: "Voir la capture",
+    altOf: (n: number) => `Capture d'écran ${n} jointe au retour`,
+    openOf: (n: number) => `Voir la capture ${n}`,
     badType: "Image PNG, JPEG ou WebP uniquement.",
-    tooLarge: "5 Mo au plus.",
-    failed: "La capture n'a pas pu être envoyée. Réessayez ou retirez-la.",
+    tooLarge: "5 Mo au plus par capture.",
+    tooMany: "5 captures au plus : les suivantes n'ont pas été ajoutées.",
+    failed: "Une capture n'a pas pu être envoyée. Réessayez ou retirez-la.",
   },
 
   mine: "Vos retours",
@@ -132,9 +134,31 @@ export const feedback = {
     update: "Mettre à jour sur Notion",
     pending: "Envoi sur Notion…",
     synced: "Envoyé sur Notion.",
-    failed:
-      "Transmis dans PDS OS, mais pas envoyé sur Notion. Réessayez avec « Envoyer sur Notion ».",
+    failed: (reason: string) =>
+      `Transmis dans PDS OS, mais pas envoyé sur Notion : ${reason}`,
+    error: (reason: string) => `Pas envoyé sur Notion : ${reason}`,
+    retry: "Réessayer sur Notion",
+    off: (reason: string) =>
+      `Les retours transmis ne partent pas sur Notion : ${reason}`,
     notSynced: "Pas encore sur Notion.",
+    reasons: {
+      notConfigured: (settings: string) =>
+        `réglage manquant (${settings}) dans .env.local ou sur Vercel ; redémarrez le serveur après l'avoir ajouté.`,
+      unreachable: "Notion ne répond pas. Réessayez dans quelques minutes.",
+      unauthorized:
+        "le jeton NOTION_TOKEN est refusé. Vérifiez-le, ou recréez l'intégration dans l'espace Sordulo.",
+      forbidden:
+        "l'intégration n'a pas le droit d'écrire dans la base (capacités « Insérer » et « Mettre à jour du contenu » de l'intégration).",
+      notShared:
+        "la base Notion est introuvable ou n'est pas partagée avec l'intégration (page Retours → « ••• » → Connexions).",
+      invalid:
+        "Notion refuse la page : une colonne manque ou n'a pas le bon type (Titre, Résumé, Type, Priorité, Retours, Transmis par, Transmis le, Lien).",
+      busy: "Notion est occupé. Réessayez dans une minute.",
+      notSent: "le sujet n'est pas transmis.",
+      notRecorded:
+        "la page Notion est créée, mais PDS OS n'a pas pu enregistrer son lien. Réessayez.",
+      unknown: "erreur inattendue de Notion.",
+    },
     newSinceSync: (count: number) =>
       count === 1
         ? "1 retour pas encore sur Notion"

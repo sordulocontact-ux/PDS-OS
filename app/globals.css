@@ -199,6 +199,8 @@
   --duration-instant: 80ms;
   --duration-fast: 120ms;
   --duration-base: 180ms;
+  /* Something crossing the screen (tab indicator): a little longer. */
+  --duration-slide: 240ms;
   --transition-control:
     background-color var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard),

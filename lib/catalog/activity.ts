@@ -11,6 +11,7 @@ import {
   type ActivityKind,
 } from "@/lib/catalog/activity-types";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
+import { ARTIST_RELATIONS } from "@/lib/catalog/types";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -29,6 +30,7 @@ const detailSchema = z.object({
   assignee: z.string().optional().catch(undefined),
   role: z.string().optional().catch(undefined),
   category: z.enum(FILE_CATEGORIES).optional().catch(undefined),
+  relation: z.enum(ARTIST_RELATIONS).optional().catch(undefined),
   fields: z
     .array(z.string())
     .optional()

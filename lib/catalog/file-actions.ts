@@ -7,33 +7,39 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
-  ARTIST_FILE_BUCKET,
-  FILE_CATEGORIES,
+  FILE_BUCKETS,
   MAX_FILE_BYTES,
-  isArtistFilePath,
+  isCatalogFilePath,
+  isFileCategory,
+  type FileOwner,
 } from "@/lib/catalog/file-rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
-// Artist file writes, with the user's session: RLS (manage_catalog) and
-// column grants decide; the permission check only gives a clean message.
+// Writes of artist and master files, with the user's session: RLS
+// (manage_catalog) and column grants decide; the permission check only
+// gives a clean message.
 
 type Result = { ok: true } | { ok: false; error: string };
 
-const recordSchema = z.object({
-  artistId: catalogIdSchema,
-  path: z.string().max(200),
-  category: z.enum(FILE_CATEGORIES),
-  fileName: z.string().trim().min(1).max(255),
-  mime: z.string().trim().min(1).max(255),
-  bytes: z.number().int().positive().max(MAX_FILE_BYTES),
+const ownerSchema = z.object({
+  kind: z.enum(["artist", "master"]),
+  id: catalogIdSchema,
 });
 
-const deleteSchema = z.object({
-  artistId: catalogIdSchema,
-  fileId: z.uuid(),
-});
+const recordSchema = z
+  .object({
+    owner: ownerSchema,
+    path: z.string().max(200),
+    category: z.string(),
+    fileName: z.string().trim().min(1).max(255),
+    mime: z.string().trim().min(1).max(255),
+    bytes: z.number().int().positive().max(MAX_FILE_BYTES),
+  })
+  .refine((input) => isFileCategory(input.owner.kind, input.category));
+
+const deleteSchema = z.object({ owner: ownerSchema, fileId: z.uuid() });
 
 async function catalogAccess() {
   const access = await requireApproved();
@@ -42,69 +48,91 @@ async function catalogAccess() {
     : null;
 }
 
-function refresh(artistId: string) {
-  revalidatePath(routes.artistFiles(artistId));
-  revalidatePath(routes.artistActivity(artistId));
+function refresh(owner: FileOwner) {
+  if (owner.kind === "artist") {
+    revalidatePath(routes.artistFiles(owner.id));
+    revalidatePath(routes.artistActivity(owner.id));
+  } else {
+    // Every tab of the master: the overview counts the master file.
+    revalidatePath(routes.master(owner.id), "layout");
+  }
 }
 
 // The browser uploaded the object (storage RLS); this records it.
-export async function recordArtistFile(
+export async function recordCatalogFile(
   input: z.input<typeof recordSchema>,
 ): Promise<Result> {
-  const t = fr.artistFiles;
+  const t = fr.catalogFiles;
   const organizationId = await catalogAccess();
   const parsed = recordSchema.safeParse(input);
   if (!organizationId || !parsed.success)
     return { ok: false, error: fr.auth.errors.forbidden };
-  const { artistId, path, category, fileName, mime, bytes } = parsed.data;
-  if (!isArtistFilePath(path, organizationId, artistId))
+  const { owner, path, category, fileName, mime, bytes } = parsed.data;
+  if (!isCatalogFilePath(path, organizationId, owner.id))
     return { ok: false, error: t.failed };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("artist_files").insert({
+  const row = {
     organization_id: organizationId,
-    artist_id: artistId,
     category,
     path,
     file_name: fileName,
     mime,
     bytes,
-  });
+  };
+  const { error } =
+    owner.kind === "artist"
+      ? await supabase
+          .from("artist_files")
+          .insert({ ...row, artist_id: owner.id })
+      : await supabase
+          .from("master_files")
+          .insert({ ...row, master_id: owner.id });
   if (error) {
-    console.error("recordArtistFile:", error.message);
+    console.error("recordCatalogFile:", error.message);
     return { ok: false, error: t.failed };
   }
-  refresh(artistId);
+  refresh(owner);
   return { ok: true };
 }
 
 // Deletes the row first (the object without a row is unreachable), then
 // the object.
-export async function deleteArtistFile(
+export async function deleteCatalogFile(
   input: z.input<typeof deleteSchema>,
 ): Promise<Result> {
-  const t = fr.artistFiles;
+  const t = fr.catalogFiles;
   const parsed = deleteSchema.safeParse(input);
   if (!parsed.success || !(await catalogAccess()))
     return { ok: false, error: fr.auth.errors.forbidden };
+  const { owner, fileId } = parsed.data;
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("artist_files")
-    .delete()
-    .eq("id", parsed.data.fileId)
-    .eq("artist_id", parsed.data.artistId)
-    .select("path")
-    .maybeSingle();
+  const { data, error } =
+    owner.kind === "artist"
+      ? await supabase
+          .from("artist_files")
+          .delete()
+          .eq("id", fileId)
+          .eq("artist_id", owner.id)
+          .select("path")
+          .maybeSingle()
+      : await supabase
+          .from("master_files")
+          .delete()
+          .eq("id", fileId)
+          .eq("master_id", owner.id)
+          .select("path")
+          .maybeSingle();
   if (error || !data) {
-    if (error) console.error("deleteArtistFile:", error.message);
+    if (error) console.error("deleteCatalogFile:", error.message);
     return { ok: false, error: t.deleteFailed };
   }
   const removed = await supabase.storage
-    .from(ARTIST_FILE_BUCKET)
+    .from(FILE_BUCKETS[owner.kind])
     .remove([data.path]);
   if (removed.error)
-    console.error("deleteArtistFile (object):", removed.error.message);
-  refresh(parsed.data.artistId);
+    console.error("deleteCatalogFile (object):", removed.error.message);
+  refresh(owner);
   return { ok: true };
 }

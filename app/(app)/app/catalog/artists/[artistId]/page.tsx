@@ -59,6 +59,10 @@ export default async function ArtistOverviewPage({
             emptyLabel={fr.catalog.notProvided}
             facts={[
               { label: p.stageName, value: artist.name },
+              {
+                label: p.relation,
+                value: fr.catalog.relation.labels[artist.relation],
+              },
               { label: p.legalName, value: artist.legalName },
               { label: p.country, value: countryName(artist.countryCode) },
             ]}

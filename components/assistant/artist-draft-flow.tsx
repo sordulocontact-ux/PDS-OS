@@ -61,6 +61,7 @@ export function ArtistDraftFlow({
       <ArtistForm
         initialName={values.name}
         initialNotes={values.notes ?? ""}
+        initialRelation={values.relation}
         pickerMode={false}
         onCancel={onCancel}
         onDone={(artist) =>
@@ -81,7 +82,11 @@ export function ArtistDraftFlow({
           saved && (
             <ArtistProfileForm
               // The saved record, with what PO proposes in place.
-              artist={{ ...saved, ...values }}
+              artist={{
+                ...saved,
+                ...values,
+                relation: values.relation ?? saved.relation,
+              }}
               onDone={(message) => {
                 const next = firstContact(artist);
                 // Skipped on an existing artist, with no contact to review:

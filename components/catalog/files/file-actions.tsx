@@ -13,22 +13,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { deleteArtistFile } from "@/lib/catalog/file-actions";
-import type { ArtistFile } from "@/lib/catalog/file-rules";
+import { deleteCatalogFile } from "@/lib/catalog/file-actions";
+import type { CatalogFile, FileOwner } from "@/lib/catalog/file-rules";
 import { fr } from "@/lib/i18n/fr";
 
 // Row actions: download (signed URL), and delete after confirmation for
 // manage_catalog. The dialog stays open with the error if it fails.
 export function FileActions({
-  artistId,
+  owner,
   file,
   canDelete,
 }: {
-  artistId: string;
-  file: ArtistFile;
+  owner: FileOwner;
+  file: CatalogFile;
   canDelete: boolean;
 }) {
-  const t = fr.artistFiles;
+  const t = fr.catalogFiles;
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export function FileActions({
 
   function confirm() {
     startTransition(async () => {
-      const result = await deleteArtistFile({ artistId, fileId: file.id });
+      const result = await deleteCatalogFile({ owner, fileId: file.id });
       if (result.ok) close();
       else setError(result.error);
     });

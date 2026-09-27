@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 
-import { ChoiceCards } from "@/components/calls/choice-cards";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import {
@@ -18,13 +18,21 @@ import {
   isAppPath,
   type FeedbackKind,
 } from "@/lib/feedback/types";
+import { MAX_SCREENSHOTS } from "@/lib/feedback/screenshot-rules";
 import { uploadFeedbackScreenshot } from "@/lib/feedback/upload-screenshot";
 import { fr } from "@/lib/i18n/fr";
 
-// One feedback, in the feedback window: its kind, the message, an optional
-// screenshot (picked, or pasted anywhere in the form) and the page it was
-// opened from, sent along so nobody has to describe where they were. The
-// screenshot is uploaded first, from the browser, into the author's folder.
+const sameFile = (a: File, b: File) =>
+  a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
+
+const imagesOf = (data: DataTransfer) =>
+  [...data.files].filter((f) => f.type.startsWith("image/"));
+
+// One feedback, in the feedback window: its kind, the message, optional
+// screenshots (dropped or pasted anywhere in the form, or picked) and the page
+// it was opened from, sent along so nobody has to describe where they were.
+// The screenshots are uploaded first, from the browser, into the author's
+// folder.
 // `defaults`: a feedback prepared by PO, to review before sending.
 export function FeedbackForm({
   organizationId,
@@ -49,8 +57,8 @@ export function FeedbackForm({
   const initialProblem = initialScreenshot
     ? screenshotProblem(initialScreenshot)
     : null;
-  const [screenshot, setScreenshot] = useState(
-    initialProblem ? null : initialScreenshot,
+  const [screenshots, setScreenshots] = useState<File[]>(
+    initialScreenshot && !initialProblem ? [initialScreenshot] : [],
   );
   const [errors, setErrors] = useState<FieldErrors>({
     screenshot: initialProblem ?? undefined,
@@ -58,22 +66,45 @@ export function FeedbackForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   // A screenshot already uploaded is not uploaded again on retry.
-  const uploaded = useRef<{ file: File; path: string } | null>(null);
+  const uploaded = useRef(new Map<File, string>());
   const page = pagePath && isAppPath(pagePath) ? pagePath : null;
 
-  const attach = (file: File | null) => {
-    const problem = file ? screenshotProblem(file) : null;
+  // Keeps the valid files, up to the limit, and says why others were left.
+  const attach = (files: File[]) => {
+    const next = [...screenshots];
+    let problem: string | null = null;
+    for (const file of files) {
+      if (next.some((f) => sameFile(f, file))) continue;
+      const fileProblem = screenshotProblem(file);
+      if (fileProblem) problem ??= fileProblem;
+      else if (next.length >= MAX_SCREENSHOTS) problem ??= t.screenshot.tooMany;
+      else next.push(file);
+    }
+    setScreenshots(next);
     setErrors((e) => ({ ...e, screenshot: problem ?? undefined }));
-    if (!problem) setScreenshot(file);
+  };
+
+  const remove = (file: File) => {
+    setScreenshots((files) => files.filter((f) => f !== file));
+    setErrors((e) => ({ ...e, screenshot: undefined }));
   };
 
   const onPaste = (event: React.ClipboardEvent) => {
-    const image = [...event.clipboardData.files].find((f) =>
-      f.type.startsWith("image/"),
-    );
-    if (!image) return;
+    const images = imagesOf(event.clipboardData);
+    if (images.length === 0) return;
     event.preventDefault();
-    attach(image);
+    attach(images);
+  };
+
+  // A screenshot dropped beside the zone is attached too, instead of the
+  // browser leaving the page to open it.
+  const onDragOver = (event: React.DragEvent) => {
+    if (event.dataTransfer.types.includes("Files")) event.preventDefault();
+  };
+  const onDrop = (event: React.DragEvent) => {
+    if (!event.dataTransfer.types.includes("Files")) return;
+    event.preventDefault();
+    attach([...event.dataTransfer.files]);
   };
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -90,29 +121,29 @@ export function FeedbackForm({
     if (local.kind || local.message) return;
 
     startTransition(async () => {
-      let screenshotPath: string | null = null;
-      if (screenshot) {
-        if (uploaded.current?.file === screenshot) {
-          screenshotPath = uploaded.current.path;
-        } else {
+      const uploads = await Promise.all(
+        screenshots.map(async (file) => {
+          const path = uploaded.current.get(file);
+          if (path) return { ok: true as const, path };
           const upload = await uploadFeedbackScreenshot({
             organizationId,
             personId,
-            file: screenshot,
+            file,
           });
-          if (!upload.ok) {
-            setErrors({ screenshot: upload.error });
-            return;
-          }
-          uploaded.current = { file: screenshot, path: upload.path };
-          screenshotPath = upload.path;
-        }
+          if (upload.ok) uploaded.current.set(file, upload.path);
+          return upload;
+        }),
+      );
+      const failed = uploads.find((u) => !u.ok);
+      if (failed && !failed.ok) {
+        setErrors({ screenshot: failed.error });
+        return;
       }
       const result = await sendFeedback({
         kind,
         message,
         pagePath: page,
-        screenshotPath,
+        screenshotPaths: uploads.flatMap((u) => (u.ok ? [u.path] : [])),
       });
       if (!result.ok) {
         setErrors(result.fieldErrors ?? {});
@@ -127,6 +158,8 @@ export function FeedbackForm({
     <form
       onSubmit={onSubmit}
       onPaste={onPaste}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       noValidate
       className="flex flex-col gap-5"
     >
@@ -156,8 +189,9 @@ export function FeedbackForm({
       />
 
       <ScreenshotField
-        file={screenshot}
-        onChange={attach}
+        files={screenshots}
+        onAdd={attach}
+        onRemove={remove}
         error={errors.screenshot}
         printScreen={printScreen}
       />

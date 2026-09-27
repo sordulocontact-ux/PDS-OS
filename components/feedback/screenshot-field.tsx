@@ -1,11 +1,14 @@
 "use client";
 
+import { IconXmark } from "nucleo-sharp-essential";
 import { useEffect, useId, useMemo } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { FileDropZone } from "@/components/ui/file-drop-zone";
 import {
   MAX_SCREENSHOT_BYTES,
+  MAX_SCREENSHOTS,
   SCREENSHOT_EXTENSIONS,
 } from "@/lib/feedback/screenshot-rules";
 import { fr } from "@/lib/i18n/fr";
@@ -20,76 +23,79 @@ export function screenshotProblem(file: File): string | null {
   return null;
 }
 
-// The screenshot of a feedback: its preview and "remove", or a file picker
-// with the paste tip (the form takes pasted images itself).
+// The screenshots of a feedback: their previews, each with "remove", then a
+// zone to drop more or click to pick them, until the limit. Pasting works
+// too (the form takes pasted images itself).
 export function ScreenshotField({
-  file,
-  onChange,
+  files,
+  onAdd,
+  onRemove,
   error,
   printScreen,
 }: {
-  file: File | null;
-  onChange: (file: File | null) => void;
+  files: File[];
+  onAdd: (files: File[]) => void;
+  onRemove: (file: File) => void;
   error?: string;
   // Opened by Print Screen: the capture is in the clipboard, say so.
   printScreen: boolean;
 }) {
   const t = fr.feedback.screenshot;
   const id = useId();
-  const preview = useMemo(
-    () => (file ? URL.createObjectURL(file) : null),
-    [file],
+  const previews = useMemo(
+    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
+    [files],
   );
   useEffect(
-    () => () => {
-      if (preview) URL.revokeObjectURL(preview);
-    },
-    [preview],
+    () => () => previews.forEach((p) => URL.revokeObjectURL(p.url)),
+    [previews],
   );
+  const full = files.length >= MAX_SCREENSHOTS;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium" id={`${id}-label`}>
-        {t.label}
-      </span>
-      {file && preview ? (
-        <div className="flex flex-col items-start gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
-          <img
-            src={preview}
-            alt={t.alt}
-            className="max-h-48 max-w-full rounded-lg border border-border object-contain"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onChange(null)}
-          >
-            {t.remove}
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-col items-start gap-1.5">
-          <label
-            htmlFor={id}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            {t.add}
-          </label>
-          <input
-            id={id}
-            type="file"
-            accept={ACCEPT}
-            aria-labelledby={`${id}-label`}
-            className="sr-only"
-            onChange={(event) => onChange(event.target.files?.[0] ?? null)}
-          />
-          <p className="text-sm text-muted-foreground">
-            {printScreen ? t.printScreenHint : t.pasteHint}
-          </p>
-        </div>
+      <span className="text-sm font-medium">{t.label}</span>
+      {previews.length > 0 && (
+        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {previews.map(({ file, url }, index) => (
+            <li
+              key={url}
+              className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
+              <img
+                src={url}
+                alt={t.altOf(index + 1)}
+                className="size-full object-cover"
+              />
+              <Button
+                type="button"
+                size="icon-xs"
+                aria-label={t.removeOf(index + 1)}
+                onClick={() => onRemove(file)}
+                className="absolute top-1 right-1"
+              >
+                <IconXmark aria-hidden />
+              </Button>
+            </li>
+          ))}
+        </ul>
       )}
+      <FileDropZone
+        label={full ? t.full : t.drop}
+        hint={
+          full
+            ? undefined
+            : printScreen
+              ? t.printScreenHint
+              : `${t.rules} ${t.pasteHint}`
+        }
+        accept={ACCEPT}
+        multiple
+        disabled={full}
+        describedBy={error ? `${id}-error` : undefined}
+        onFiles={onAdd}
+      />
       <FieldError id={`${id}-error`}>{error}</FieldError>
     </div>
   );

@@ -41,8 +41,8 @@ export type Feedback = {
   createdAt: string;
   // Null for the viewer's own feedback.
   authorName: string | null;
-  // Short-lived signed URL of the attached screenshot.
-  screenshotUrl: string | null;
+  // Short-lived signed URLs of the attached screenshots, in their order.
+  screenshotUrls: string[];
   // The topic PO filed it in; null while it waits to be sorted.
   topicId: string | null;
   topicTitle: string | null;
@@ -76,7 +76,7 @@ export type SendFeedbackInput = {
   kind: string;
   message: string;
   pagePath: string | null;
-  screenshotPath: string | null;
+  screenshotPaths: string[];
 };
 
 export type SendFeedbackResult =

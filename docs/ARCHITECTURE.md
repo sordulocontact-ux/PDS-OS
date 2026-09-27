@@ -178,7 +178,75 @@ Principes :
   un projet ne se modifie qu'avant lancement. Même menu dans l'en-tête des fiches artiste,
   master et projet non lancé ; après archivage depuis une fiche, retour à la liste.
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 303 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+### 2 quinquies. Relation d'un artiste avec PDS (Signé / Collaboration)
+
+- **Deux axes indépendants** (demande de Sacha, 27/09/2026) : la **relation avec PDS**
+  (`artists.relation` : `signed` = intégré au roster, `collaboration` = projets ponctuels,
+  un PDS Mic…) décrit l'artiste ; **Actif / Archivé** (`archived_at`) décrit la fiche. Un
+  seul objet Artiste : passer de Collaboration à Signé ne change que la colonne, la fiche
+  garde masters, projets, contacts, fichiers et journal.
+- **Toujours choisie par une personne** : obligatoire à la création (pas de défaut en base,
+  ni dans le formulaire, ni chez PO), modifiable dans « Modifier » par `manage_catalog`
+  (mêmes droits que le reste de la fiche). Les artistes existants avant la migration
+  (`…002101`) ont été classés Signés.
+- **Liste** : onglets Tous (défaut) / Signés / Collaborations avec leur nombre
+  (`TabFilter`), dans l'URL (`?relation=`),
+  combinable avec Archivés du DG (`?view=archived`) — chaque filtre garde l'autre
+  (`ArtistListFilters`). La colonne « Relation » n'apparaît que dans « Tous ».
+- **Journal** : `artists_log` copie la relation à la création (« Fiche artiste créée
+  (Signé) ») et la nouvelle valeur à chaque changement (« … (désormais Signé) »).
+- **PO** : `propose_artist` ne remplit la relation que si l'utilisateur l'a dite ;
+  `find_artists` la donne pour chaque artiste et filtre par relation.
+- Après « Créer l'artiste » depuis la page Artistes, la fiche du nouvel artiste s'ouvre ;
+  depuis un sélecteur (master, projet), l'artiste est rendu au formulaire sans le quitter.
+
+### 2 sexies. Fiche master à onglets (`/app/catalog/masters/[id]/…`)
+
+Migration `…003001_master_page.sql`, code dans `lib/catalog/master/`, écrans dans
+`components/catalog/master-page/`. Layout commun (en-tête, « Créer un projet », « ⋯ »,
+`MasterTabs`), une page par onglet, `loading.tsx` qui ne remplace que le corps.
+
+- **Vue d'ensemble** : tuiles cliquables (versions, sessions, contributeurs, projets),
+  **dossier du master** (ISRC, ISWC, titulaire ℗, contributeurs, splits à 100 %,
+  déclarations déposées, fichier master) calculé par le code (`masterChecklist`), faits,
+  artistes interprètes.
+- **Sessions & pistes** : `master_sessions` (enregistrement, production, mixage, mastering,
+  autre ; date, lieu, ingénieur, notes) et `master_tracks` (piste du multipiste,
+  interprète, session facultative **du même master**, vérifié par trigger ; supprimer une
+  session garde ses pistes, sans session).
+- **Versions** : décidées par le code, sans colonne (`listMasterVersionIds`) : les autres
+  masters actifs **de même titre** (casse et espaces ignorés) qui créditent un des artistes
+  principaux. « Nouvelle version » ouvre `/masters/new?versionOf=<id>` pré-rempli (titre,
+  crédits) ; chaque version a son propre ISRC.
+- **Contributeurs & crédits** : les artistes interprètes restent `master_artists`
+  (modifiés par « Modifier ») ; `master_contributors` porte tous les autres crédits (rôle
+  fermé, précision libre), triés dans l'ordre des rôles.
+- **Splits** : `master_splits`, deux types (master, édition), parts en % à deux décimales.
+  **Total ≤ 100 % par type, vérifié au commit** (`split_total_over_100`, trigger différé) ;
+  total, reste et statut calculés par le code (`splitTotal`, en centièmes). **Lus et écrits
+  avec `manage_catalog` seulement** (comme les contrats) : l'onglet est masqué aux autres,
+  leurs événements de journal sont `catalog_only`.
+- **Droits & déclarations** : colonnes `masters.iswc` (normalisé `T` + 10 chiffres),
+  `rights_holder`, `rights_year` (mention ℗ composée par le code) ; `master_declarations` une
+  ligne par organisme (SACEM, SCPP, SPPF, ADAMI, SPEDIDAM) une fois déposée : Déposée,
+  Confirmée, Refusée ; pas de ligne = « À déposer ».
+- **Distribution** : lecture seule, les sorties (`releases`) des projets actifs qui portent
+  le master, avec UPC, date, statut (`releaseStatusOf`) et liens détectés ; on modifie dans
+  la Sortie du projet.
+- **Projets**, **Fichiers**, **Activité** : mêmes tableaux et composants que la fiche
+  artiste. Fichiers : `master_files` + bucket privé `master-files` (master final, stems,
+  mix, pochette, contrat, autre), contrats réservés à `manage_catalog` ; composants et
+  actions communs artiste / master (`components/catalog/files/`, `FileOwner`).
+  Journal : `activity_events` porte maintenant `master_id` (et `artist_id` devient
+  facultatif, l'un des deux obligatoire) ; triggers `masters_log` (création, identité,
+  droits), `master_items_log` (un événement générique `master_item_*` avec la section et
+  un nom copié), `master_files_log`, `project_masters_log_master`. Rendu commun
+  `ActivityLog`.
+- **Écritures** : `manage_catalog` et **master actif seulement** (`master_is_live` dans les
+  politiques RLS) ; lecture par tout membre (splits exceptés). Toute écriture rafraîchit
+  le layout du master (`revalidatePath(…, "layout")`).
+
+Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 408 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
@@ -525,15 +593,19 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
 - **Fenêtre de retour** (`FeedbackProvider`, une pour toute l'app) : « Envoyer un retour »
   en bas de la navigation, « Nouveau retour » sur la page. Type fermé (`bug`, `idea`,
   `other`), message (4 000 caractères), page d'origine jointe d'office (chemin `/app…`
-  seulement), capture facultative. Le formulaire est chargé à la première ouverture.
+  seulement), captures facultatives (5 au plus). Le formulaire est chargé à la première ouverture.
 - **Capture d'écran** : un navigateur ne voit pas une capture système (⌘⇧3/4/5 sont pris
   par macOS). La fenêtre s'ouvre donc sur ce qu'on peut voir : la touche **Impr. écran**
   (Windows), et une image **collée** (⌘V / Ctrl+V) n'importe où dans l'app, qu'elle joint.
-  Une zone peut s'y soustraire avec `data-paste-ignore`. L'image (PNG, JPEG, WebP, 5 Mo)
-  part du navigateur vers le bucket privé `feedback-screenshots`, dans
+  Une zone peut s'y soustraire avec `data-paste-ignore`. Dans la fenêtre, une **zone de
+  dépôt** (`FileDropZone`) reçoit les captures glissées ou s'ouvre au clic sur le
+  sélecteur de fichiers (plusieurs à la fois) ; une image lâchée ailleurs dans le
+  formulaire est jointe aussi, plutôt que d'ouvrir l'image à la place de la page. Chaque
+  image (PNG, JPEG, WebP, 5 Mo) part du navigateur vers le bucket privé `feedback-screenshots`, dans
   `<organisation>/<personne>/<uuid>.<ext>` (RLS : chacun son dossier ; lecture par
   l'auteur et le DG), avant l'envoi du retour ; un trigger refuse un chemin qui n'est pas
-  celui de l'auteur. Affichée par URL signée (1 h).
+  celui de l'auteur. Chemins dans `feedback.screenshot_paths` (`text[]`, 5 au plus,
+  vérifié par contrainte et par le code). Affichées par URL signée (1 h).
 - Table `feedback` : auteur posé par trigger, **jamais modifiée ni supprimée** (seul
   `topic_id` est posé par `file_feedback`).
 - **Lecture** : chacun voit les siens ; la permission **`read_feedback`** (DG seul,
@@ -645,7 +717,11 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
 - Chrome headless : `--use-fake-device-for-media-stream` fournit un bip (micro et onglet),
   `--use-file-for-fake-audio-capture` reste muet sur macOS ; un vrai silence d'onglet ne
   se simule pas.
-- **Numéros de migration en parallèle** : deux sessions ont créé chacune un `…000801`. Avant
+- **`text[] || 'littéral'` dans un trigger** : le littéral non typé est lu comme un
+  tableau (`malformed array literal`). `artists_log` échouait ainsi sur toute
+  modification de fiche artiste jusqu'à `…002101` ; écrire `array_append(v, 'x')`.
+- **Numéros de migration en parallèle** : deux sessions ont créé chacune un `…000801`
+  (et encore un `…002001` le 27/09). Avant
   d'ajouter une migration, lister `supabase/migrations/` et prendre le numéro suivant.
 - **Tests Realtime** : la RLS de Realtime se vérifie avec deux vraies sessions (script
   Node, `signInWithPassword`), pas en pgTAP.

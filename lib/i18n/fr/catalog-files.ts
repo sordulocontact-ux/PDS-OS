@@ -1,5 +1,5 @@
-// Files tab of the artist page.
-export const artistFiles = {
+// Files tab of the artist and master pages.
+export const catalogFiles = {
   title: "Fichiers",
   emptyTitle: "Aucun fichier pour l'instant",
   emptyBody:
@@ -14,11 +14,21 @@ export const artistFiles = {
     actions: "Actions",
   },
   categories: {
-    press: "Presse",
-    photo: "Photo",
-    contract: "Contrat",
-    audio: "Audio",
-    other: "Autre",
+    artist: {
+      press: "Presse",
+      photo: "Photo",
+      contract: "Contrat",
+      audio: "Audio",
+      other: "Autre",
+    },
+    master: {
+      master: "Master final",
+      stems: "Stems",
+      mix: "Mix",
+      artwork: "Pochette",
+      contract: "Contrat",
+      other: "Autre",
+    },
   },
   upload: {
     categoryLabel: "Catégorie du fichier",

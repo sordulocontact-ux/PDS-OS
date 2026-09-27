@@ -4,7 +4,7 @@ import { IconCircleCheck } from "@/components/icons";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
-import { ChoiceCards } from "@/components/calls/choice-cards";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Field } from "@/components/auth/field";
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";

@@ -24,6 +24,7 @@ export const artistActivity = {
 
   fields: {
     identity: "l'identité",
+    relation: "la relation avec PDS",
     bio: "la biographie",
     notes: "les notes",
     picture: "la photo",
@@ -40,6 +41,10 @@ export const artistActivity = {
 
   sentences: {
     artistCreated: "Fiche artiste créée",
+    artistCreatedAs: (relation: string) => `Fiche artiste créée (${relation})`,
+    // A relation change says where the artist now stands.
+    relationNow: (field: string, relation: string) =>
+      `${field} (désormais ${relation})`,
     artistUpdated: (fields: string) => `Fiche modifiée : ${fields}`,
     artistUpdatedNoField: "Fiche modifiée",
     contactAdded: (name: string) => `Contact ${name} ajouté`,

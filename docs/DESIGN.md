@@ -210,6 +210,21 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   entier. Une carte vide garde sa place avec une phrase : la page d'un poste a toujours
   la même structure.
 
+### Onglets et filtres de liste
+
+- **Onglets soulignés** (`TabBar`, `components/ui/tab-bar.tsx`, une seule barre) :
+  libellé gris, encre pleine quand il est actif. **Pas de filet sous la barre** : seul
+  l'onglet actif est souligné, d'un trait de 2 px qui **glisse** d'un onglet à l'autre
+  (`transform` seul, `--duration-slide` 240 ms, `--ease-standard` ; posé d'un coup si le
+  mouvement est réduit). Demande de Sacha, 27/09/2026. Sert aux sections d'une fiche
+  (`SectionTabs`) et aux vues d'une liste (`TabFilter`).
+- **Vues d'une liste en onglets** (`TabFilter`, d'après une référence de Sacha le
+  27/09/2026) : quand un filtre découpe toute la liste en catégories (Tous / Signés /
+  Collaborations des Artistes), un onglet par catégorie avec son nombre en gris entre
+  parenthèses, calculé par le code. Casse normale, comme les onglets des fiches. Un
+  filtre secondaire (Actifs / Archivés du DG) se place en pastilles au bout de la barre.
+- **Pastilles** (`FilterChip`, `ViewToggle`) : filtres secondaires ou qui se combinent.
+
 ### Modale : une seule, « verre »
 
 **Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,

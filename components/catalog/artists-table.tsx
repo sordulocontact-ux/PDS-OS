@@ -20,19 +20,26 @@ import { fr } from "@/lib/i18n/fr";
 
 export function ArtistsTable({
   artists,
+  showRelation = false,
   rights,
 }: {
   artists: ArtistListItem[];
+  // "Signé" / "Collaboration" as plain text, when the list mixes both.
+  showRelation?: boolean;
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
 }) {
   const t = fr.catalog.artists.columns;
+  const relationLabels = fr.catalog.relation.labels;
   const withActions = rights && (rights.canEdit || rights.canArchive);
 
   return (
     <DataTable>
       <DataTableHeader>
         <DataTableHead>{t.name}</DataTableHead>
+        {showRelation && (
+          <DataTableHead hideBelow="sm">{t.relation}</DataTableHead>
+        )}
         <DataTableHead>{t.masters}</DataTableHead>
         <DataTableHead hideBelow="md" fill>
           {t.notes}
@@ -60,6 +67,14 @@ export function ArtistsTable({
                 }
               />
             </DataTableCell>
+            {showRelation && (
+              <DataTableCell
+                hideBelow="sm"
+                className="text-[color:var(--text-secondary)]"
+              >
+                {relationLabels[artist.relation]}
+              </DataTableCell>
+            )}
             <DataTableCell className="tabular-nums">
               {artist.masterCount}
             </DataTableCell>

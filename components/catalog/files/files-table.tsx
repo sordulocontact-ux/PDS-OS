@@ -1,6 +1,6 @@
 import { IconFile } from "nucleo-sharp-essential";
 
-import { FileActions } from "@/components/catalog/artist-page/files/file-actions";
+import { FileActions } from "@/components/catalog/files/file-actions";
 import {
   DataTable,
   DataTableBody,
@@ -13,22 +13,27 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { formatFileSize, type ArtistFile } from "@/lib/catalog/file-rules";
+import {
+  formatFileSize,
+  type CatalogFile,
+  type FileOwner,
+} from "@/lib/catalog/file-rules";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
 
-// Files of the artist, newest first: name and size, category, author, date,
+// Files of an artist or a master, newest first: name and size, category, author, date,
 // then download / delete.
 export function FilesTable({
-  artistId,
+  owner,
   files,
   canDelete,
 }: {
-  artistId: string;
-  files: ArtistFile[];
+  owner: FileOwner;
+  files: CatalogFile[];
   canDelete: boolean;
 }) {
-  const t = fr.artistFiles;
+  const t = fr.catalogFiles;
+  const labels: Record<string, string> = t.categories[owner.kind];
 
   return (
     <DataTable>
@@ -53,7 +58,7 @@ export function FilesTable({
             </DataTableCell>
             <DataTableCell hideBelow="sm">
               <StatusBadge tone="neutral" size="sm">
-                {t.categories[file.category]}
+                {labels[file.category] ?? labels.other}
               </StatusBadge>
             </DataTableCell>
             <DataTableCell hideBelow="lg">
@@ -63,11 +68,7 @@ export function FilesTable({
               {formatShortDate(file.createdAt)}
             </DataTableCell>
             <DataTableCell fill align="end">
-              <FileActions
-                artistId={artistId}
-                file={file}
-                canDelete={canDelete}
-              />
+              <FileActions owner={owner} file={file} canDelete={canDelete} />
             </DataTableCell>
           </DataTableRow>
         ))}

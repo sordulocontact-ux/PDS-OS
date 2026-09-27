@@ -92,6 +92,18 @@ export const routes = {
   masters: "/app/catalog/masters",
   mastersNew: "/app/catalog/masters/new",
   master: (id: string) => `/app/catalog/masters/${id}`,
+  masterSessions: (id: string) => `/app/catalog/masters/${id}/sessions`,
+  masterVersions: (id: string) => `/app/catalog/masters/${id}/versions`,
+  masterCredits: (id: string) => `/app/catalog/masters/${id}/credits`,
+  masterSplits: (id: string) => `/app/catalog/masters/${id}/splits`,
+  masterRights: (id: string) => `/app/catalog/masters/${id}/rights`,
+  masterDistribution: (id: string) => `/app/catalog/masters/${id}/distribution`,
+  masterProjects: (id: string) => `/app/catalog/masters/${id}/projects`,
+  masterFiles: (id: string) => `/app/catalog/masters/${id}/files`,
+  masterActivity: (id: string) => `/app/catalog/masters/${id}/activity`,
+  // Master form pre-filled from another master (title, credits): a version.
+  mastersNewVersionOf: (masterId: string) =>
+    `/app/catalog/masters/new?versionOf=${masterId}`,
   // Master form with this artist already credited (from the artist page).
   mastersNewForArtist: (artistId: string) =>
     `/app/catalog/masters/new?artist=${artistId}`,

@@ -18,9 +18,30 @@ const VERSION = "2022-06-28";
 const TEXT_MAX = 2000;
 const BLOCKS_MAX = 90;
 
-export function notionConfigured(): boolean {
+/** A refused call: `reason` for code ("http_404"), `code` and `detail` as
+ * Notion gave them ("object_not_found", "Could not find database…"). */
+export class NotionError extends IntegrationError {
+  constructor(
+    reason: string,
+    readonly code: string | null = null,
+    readonly detail: string | null = null,
+  ) {
+    super("notion", reason);
+    this.name = "NotionError";
+  }
+}
+
+/** The settings missing for Notion to work; empty when configured. */
+export function notionMissingSettings(): string[] {
   const env = getServerEnv();
-  return Boolean(env.NOTION_TOKEN && env.NOTION_FEEDBACK_DATABASE_ID);
+  return [
+    ...(env.NOTION_TOKEN ? [] : ["NOTION_TOKEN"]),
+    ...(env.NOTION_FEEDBACK_DATABASE_ID ? [] : ["NOTION_FEEDBACK_DATABASE_ID"]),
+  ];
+}
+
+export function notionConfigured(): boolean {
+  return notionMissingSettings().length === 0;
 }
 
 async function call(
@@ -29,7 +50,7 @@ async function call(
   body: unknown,
 ): Promise<Record<string, unknown>> {
   const { NOTION_TOKEN } = getServerEnv();
-  if (!NOTION_TOKEN) throw new IntegrationError("notion", "not_configured");
+  if (!NOTION_TOKEN) throw new NotionError("not_configured");
   let response: Response;
   try {
     response = await fetch(`${API}${path}`, {
@@ -44,16 +65,17 @@ async function call(
       signal: AbortSignal.timeout(10000),
     });
   } catch {
-    throw new IntegrationError("notion", "unreachable");
+    throw new NotionError("unreachable");
   }
   const json = (await response.json().catch(() => ({}))) as Record<
     string,
     unknown
   >;
   if (!response.ok)
-    throw new IntegrationError(
-      "notion",
-      `http_${response.status}${typeof json.code === "string" ? `_${json.code}` : ""}`,
+    throw new NotionError(
+      `http_${response.status}`,
+      typeof json.code === "string" ? json.code : null,
+      typeof json.message === "string" ? json.message : null,
     );
   return json;
 }
@@ -120,8 +142,7 @@ export async function createFeedbackPage(
   heading: string,
 ): Promise<{ id: string; url: string | null }> {
   const { NOTION_FEEDBACK_DATABASE_ID } = getServerEnv();
-  if (!NOTION_FEEDBACK_DATABASE_ID)
-    throw new IntegrationError("notion", "not_configured");
+  if (!NOTION_FEEDBACK_DATABASE_ID) throw new NotionError("not_configured");
   const created = await call("POST", "/pages", {
     parent: { database_id: NOTION_FEEDBACK_DATABASE_ID },
     properties: properties(page),
@@ -134,8 +155,7 @@ export async function createFeedbackPage(
       ...originalBlocks(originals),
     ],
   });
-  if (typeof created.id !== "string")
-    throw new IntegrationError("notion", "no_page_id");
+  if (typeof created.id !== "string") throw new NotionError("no_page_id");
   return {
     id: created.id,
     url: typeof created.url === "string" ? created.url : null,

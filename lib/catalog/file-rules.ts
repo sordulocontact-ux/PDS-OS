@@ -1,22 +1,33 @@
-// Artist files: bucket, limits and categories. Client-safe (the browser
-// checks before uploading; the database enforces the same rules).
+// Files of an artist or a master: buckets, limits and categories.
+// Client-safe (the browser checks before uploading; the database enforces
+// the same rules).
 
-export const ARTIST_FILE_BUCKET = "artist-files";
 export const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
-export const FILE_CATEGORIES = [
-  "press",
-  "photo",
-  "contract",
-  "audio",
-  "other",
-] as const;
-export type FileCategory = (typeof FILE_CATEGORIES)[number];
+/** What a file is attached to. */
+export type FileOwnerKind = "artist" | "master";
+export type FileOwner = { kind: FileOwnerKind; id: string };
 
-export function isFileCategory(value: unknown): value is FileCategory {
+export const FILE_BUCKETS = {
+  artist: "artist-files",
+  master: "master-files",
+} as const satisfies Record<FileOwnerKind, string>;
+
+export const FILE_CATEGORIES = {
+  artist: ["press", "photo", "contract", "audio", "other"],
+  master: ["master", "stems", "mix", "artwork", "contract", "other"],
+} as const satisfies Record<FileOwnerKind, readonly string[]>;
+
+export type FileCategory<K extends FileOwnerKind = FileOwnerKind> =
+  (typeof FILE_CATEGORIES)[K][number];
+
+export function isFileCategory<K extends FileOwnerKind>(
+  kind: K,
+  value: unknown,
+): value is FileCategory<K> {
   return (
     typeof value === "string" &&
-    (FILE_CATEGORIES as readonly string[]).includes(value)
+    (FILE_CATEGORIES[kind] as readonly string[]).includes(value)
   );
 }
 
@@ -26,13 +37,13 @@ export function fileExtension(fileName: string): string | null {
   return match ? match[1].toLowerCase() : null;
 }
 
-// "<organization_id>/<artist_id>/<uuid>[.<ext>]", as the database checks.
-export function isArtistFilePath(
+// "<organization_id>/<owner_id>/<uuid>[.<ext>]", as the database checks.
+export function isCatalogFilePath(
   path: string,
   organizationId: string,
-  artistId: string,
+  ownerId: string,
 ): boolean {
-  const prefix = `${organizationId}/${artistId}/`;
+  const prefix = `${organizationId}/${ownerId}/`;
   return (
     path.startsWith(prefix) &&
     /^[0-9a-f-]{36}(\.[a-z0-9]{1,10})?$/.test(path.slice(prefix.length))
@@ -48,9 +59,9 @@ export function formatFileSize(bytes: number): string {
   return `${sizeFormat.format(bytes / (1024 * 1024))} Mo`;
 }
 
-export type ArtistFile = {
+export type CatalogFile = {
   id: string;
-  category: FileCategory;
+  category: string;
   fileName: string;
   mime: string;
   bytes: number;

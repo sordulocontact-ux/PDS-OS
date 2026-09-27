@@ -6,22 +6,23 @@ import { useRef, useState, useTransition } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/filter-chip";
-import { FILE_CATEGORIES, type FileCategory } from "@/lib/catalog/file-rules";
-import { uploadArtistFile } from "@/lib/catalog/upload-file";
+import { FILE_CATEGORIES, type FileOwner } from "@/lib/catalog/file-rules";
+import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { fr } from "@/lib/i18n/fr";
 
 // Adds a file at once: pick the category, then the file. The list refreshes
 // from the server once it is recorded.
 export function FileUpload({
   organizationId,
-  artistId,
+  owner,
 }: {
   organizationId: string;
-  artistId: string;
+  owner: FileOwner;
 }) {
-  const t = fr.artistFiles;
+  const t = fr.catalogFiles;
+  const labels: Record<string, string> = t.categories[owner.kind];
   const input = useRef<HTMLInputElement>(null);
-  const [category, setCategory] = useState<FileCategory>("other");
+  const [category, setCategory] = useState<string>("other");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -29,9 +30,9 @@ export function FileUpload({
     if (!file) return;
     setError(null);
     startTransition(async () => {
-      const result = await uploadArtistFile({
+      const result = await uploadCatalogFile({
         organizationId,
-        artistId,
+        owner,
         category,
         file,
       });
@@ -48,14 +49,14 @@ export function FileUpload({
           aria-label={t.upload.categoryLabel}
           className="flex flex-wrap gap-2"
         >
-          {FILE_CATEGORIES.map((value) => (
+          {FILE_CATEGORIES[owner.kind].map((value) => (
             <FilterChip
               key={value}
               pressed={category === value}
               disabled={pending}
               onClick={() => setCategory(value)}
             >
-              {t.categories[value]}
+              {labels[value]}
             </FilterChip>
           ))}
         </div>
