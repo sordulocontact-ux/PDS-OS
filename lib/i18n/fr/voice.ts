@@ -30,6 +30,7 @@ export const voice = {
     start: "Dicter votre question",
     stop: "Valider la dictée",
     cancel: "Annuler la dictée",
+    listening: "Écoute en cours…",
     transcribing: "Transcription…",
   },
   errors: {

@@ -43,11 +43,11 @@ export function activitySentence(event: ActivityEvent): string {
     case "project_transmitted":
       return s.projectTransmitted(title, assignee);
     case "project_accepted":
-      return s.projectAccepted(title, assignee);
+      return s.projectAccepted(title);
     case "project_refused":
-      return s.projectRefused(title, assignee);
+      return s.projectRefused(title);
     case "project_clarification_requested":
-      return s.projectClarification(title, assignee);
+      return s.projectClarification(title);
   }
 }
 

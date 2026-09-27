@@ -148,20 +148,29 @@ function artistNameOf(
   return masters[0]?.credits[0]?.name ?? legacyArtist?.name ?? "";
 }
 
-/** Live projects the viewer sees, newest first; `ids` narrows to those. */
-export async function listProjects(filter?: { ids: string[] }): Promise<{
+/**
+ * Live projects the viewer sees, newest first; `ids` narrows to those,
+ * `archived` lists the archive instead.
+ */
+export async function listProjects(filter?: {
+  ids?: string[];
+  archived?: boolean;
+}): Promise<{
   projects: ProjectListItem[];
   error: boolean;
 }> {
-  if (filter && filter.ids.length === 0) return { projects: [], error: false };
+  if (filter?.ids && filter.ids.length === 0)
+    return { projects: [], error: false };
   const supabase = await createClient();
-  let query = supabase
+  const select = supabase
     .from("projects")
     .select(
       `id, title, type, owner_person_id, artist:artists!projects_artist_same_org(name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
-    )
-    .is("archived_at", null);
-  if (filter) query = query.in("id", filter.ids);
+    );
+  let query = filter?.archived
+    ? select.not("archived_at", "is", null)
+    : select.is("archived_at", null);
+  if (filter?.ids) query = query.in("id", filter.ids);
   const { data, error } = await query.order("created_at", {
     ascending: false,
   });
@@ -204,6 +213,7 @@ export const getProject = cache(
         `id, title, type, created_at, due_date, budget_cents, priority, framing_notes, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
       )
       .eq("id", projectId)
+      .is("archived_at", null)
       .maybeSingle();
 
     if (error) {

@@ -14,11 +14,11 @@ import {
 } from "@/lib/framing/result";
 import { createClient } from "@/lib/supabase/server";
 
-// Text fields of a deliverable (Brief, Strategy): the key must belong to it.
+// Text fields of a deliverable (Brief, Strategy, Dossier): the key must belong to it.
 const fieldInput = z
   .object({
     projectId: z.uuid(),
-    deliverable: z.enum(["brief", "strategy"]),
+    deliverable: z.enum(["brief", "strategy", "design_doc"]),
     fieldKey: z.string(),
   })
   .refine((v) =>
@@ -63,8 +63,9 @@ async function append(
     source_quote: keep ? current?.source_quote : null,
     source_start_seconds: keep ? current?.source_start_seconds : null,
   });
-  // The strategy is only written while in progress (restrictive RLS policy).
-  if (error?.code === "42501" && deliverable === "strategy")
+  // The strategy and the Dossier are only written while in progress
+  // (restrictive RLS policies).
+  if (error?.code === "42501" && deliverable !== "brief")
     return fail("stage_locked");
   if (error) return fromDatabaseError(error);
 

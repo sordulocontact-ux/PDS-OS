@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { FormMessage } from "@/components/auth/form-message";
 import { ProjectsTable } from "@/components/projects/projects-table";
 import { EmptyState } from "@/components/shell/empty-state";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { fr } from "@/lib/i18n/fr";
@@ -14,7 +15,7 @@ import { listProjects } from "@/lib/projects/queries";
 export default async function ArtistProjectsPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]/projects">) {
-  await requireApproved();
+  const access = await requireApproved();
   const { artistId } = await params;
   const artist = await getArtist(artistId);
   if (!artist) notFound();
@@ -31,5 +32,14 @@ export default async function ArtistProjectsPage({
       />
     );
   }
-  return <ProjectsTable projects={projects} />;
+  return (
+    <ProjectsTable
+      projects={projects}
+      rights={{
+        canEdit: can(access, "create_projects"),
+        canArchive: can(access, "archive_records"),
+        archived: false,
+      }}
+    />
+  );
 }

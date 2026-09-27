@@ -2,10 +2,9 @@
 
 import type { ReactNode } from "react";
 
-import { useLoaded } from "@/components/assistant/use-loaded";
-import { FormMessage } from "@/components/auth/form-message";
 import { CreateMasterForm } from "@/components/catalog/create-master-form";
 import { CreateProjectForm } from "@/components/projects/create-project-form";
+import { Loaded } from "@/components/ui/loaded";
 import {
   loadMasterForm,
   loadProjectForm,
@@ -32,16 +31,11 @@ export function Loading<T>({
   children: (data: T) => ReactNode;
 }) {
   const t = fr.assistant.drafts;
-  const state = useLoaded(load);
-  if (state.status === "loading")
-    return (
-      <p role="status" className="text-sm text-muted-foreground">
-        {t.loading}
-      </p>
-    );
-  if (state.status === "error")
-    return <FormMessage kind="error">{t.loadFailed}</FormMessage>;
-  return children(state.data);
+  return (
+    <Loaded load={load} loadingLabel={t.loading} errorLabel={t.loadFailed}>
+      {children}
+    </Loaded>
+  );
 }
 
 // The real master form, pre-filled with the draft.

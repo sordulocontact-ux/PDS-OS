@@ -1,12 +1,19 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import {
+  IconLock,
+  IconPenWriting2,
+  IconUser,
+  IconXmark,
+} from "nucleo-sharp-essential";
+import { useActionState, useState, useTransition } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
+import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { fr } from "@/lib/i18n/fr";
 import { memberAction } from "@/lib/members/actions";
 import {
@@ -21,7 +28,9 @@ import { CopyLinkButton } from "./copy-link-button";
 type Mode = "idle" | "approve" | "reject" | "suspend" | "rename" | "role";
 
 // Actions of one team row. One server action, an "intent" field per form.
-// Reason and name forms open inline, without a modal.
+// The decision waiting on the row stays a visible button (approve,
+// reactivate, copy the link); editing and removing sit in the "⋯" menu, as
+// on the other lists. Reason and name forms open inline, without a modal.
 export function MemberRowActions({
   membership,
   isSelf,
@@ -47,6 +56,7 @@ export function MemberRowActions({
     state.status === "success" && state !== opened.at ? "idle" : opened.mode;
   const setMode = (next: Mode) => setOpened({ mode: next, at: state });
 
+  const [, startTransition] = useTransition();
   const { id, status, role, person } = membership;
   const t = fr.auth.members;
   const a = t.actions;
@@ -59,6 +69,58 @@ export function MemberRowActions({
       <input type="hidden" name="membershipId" value={id} />
     </>
   );
+
+  // A menu item has no form around it: the same action, called directly.
+  const submit = (intent: string) => {
+    const data = new FormData();
+    data.set("intent", intent);
+    data.set("membershipId", id);
+    startTransition(() => action(data));
+  };
+
+  const menu: RowAction[] = [
+    {
+      key: "rename",
+      label: a.editName,
+      icon: IconPenWriting2,
+      onSelect: () => setMode("rename"),
+    },
+  ];
+  if ((status === "invited" || status === "approved") && !isSelf) {
+    menu.push({
+      key: "role",
+      label: a.editRole,
+      icon: IconUser,
+      onSelect: () => setMode("role"),
+    });
+  }
+  if (status === "pending") {
+    menu.push({
+      key: "reject",
+      label: a.reject,
+      icon: IconXmark,
+      onSelect: () => setMode("reject"),
+    });
+  }
+  if (status === "invited") {
+    menu.push({
+      key: "cancel",
+      label: a.cancelInvite,
+      icon: IconXmark,
+      onSelect: () => submit("cancel_invite"),
+    });
+  }
+  if (status === "approved" && !isSelf) {
+    menu.push({
+      key: "suspend",
+      label: a.suspend,
+      icon: IconLock,
+      onSelect: () => setMode("suspend"),
+    });
+  }
+  const fullName = [person.firstName, person.lastName]
+    .filter(Boolean)
+    .join(" ");
 
   const quick = (intent: string, label: string, primary = false) => (
     <form action={action}>
@@ -76,55 +138,17 @@ export function MemberRowActions({
   return (
     <div className="flex flex-col items-end gap-2">
       {mode === "idle" && (
-        <div className="flex flex-wrap justify-end gap-1.5">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
           {status === "invited" && signupLink && (
             <CopyLinkButton url={signupLink} label={a.copyLink} size="sm" />
           )}
-          {status === "invited" && quick("cancel_invite", a.cancelInvite)}
           {(status === "pending" || status === "rejected") && (
             <Button type="button" size="sm" onClick={() => setMode("approve")}>
               {a.approve}
             </Button>
           )}
-          {status === "pending" && (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => setMode("reject")}
-            >
-              {a.reject}
-            </Button>
-          )}
           {status === "suspended" && quick("reactivate", a.reactivate, true)}
-          {status === "approved" && !isSelf && (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => setMode("suspend")}
-            >
-              {a.suspend}
-            </Button>
-          )}
-          {(status === "invited" || status === "approved") && !isSelf && (
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => setMode("role")}
-            >
-              {a.editRole}
-            </Button>
-          )}
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => setMode("rename")}
-          >
-            {a.editName}
-          </Button>
+          <RowActions label={fr.records.menu.label(fullName)} actions={menu} />
         </div>
       )}
 

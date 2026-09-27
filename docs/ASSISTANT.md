@@ -55,8 +55,17 @@ comptes rendus et transcriptions, recherche tolérante aux fautes sur les noms d
 et d'artistes.
 
 La conversation n'est pas enregistrée : elle vit dans l'onglet et disparaît au
-rechargement. Elle est **partagée** entre l'accueil et la fenêtre Espace Espace
-(`components/assistant/assistant-provider.tsx`).
+rechargement (`components/assistant/assistant-provider.tsx`). La fenêtre Espace Espace
+a la sienne (§ 2 bis).
+
+**Page de conversation** (`/app/assistant`, `assistant-conversation.tsx`, d'après Midday) :
+une question posée depuis l'accueil (saisie ou suggestion) ouvre cette page, où la
+conversation continue. En-tête : retour à l'accueil, titre, « + » pour une nouvelle
+conversation (qui reste sur la page, suggestions au-dessus de la saisie). Le titre est la
+**première question telle quelle**, jamais rédigé par le modèle. Le retour garde la
+conversation : l'accueil propose « Reprendre la conversation », et une nouvelle question
+posée depuis l'accueil **la prolonge** (rien n'étant enregistré, en démarrer une autre
+d'office la ferait perdre sans prévenir) ; seul « + » repart de zéro.
 
 ## 2 bis. La fenêtre Espace Espace
 

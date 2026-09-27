@@ -133,11 +133,16 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Button` | `ui/button.tsx` | variant : default, outline, secondary, ghost, destructive, link · size : default, xs, sm, lg (pilule), icon, icon-xs, icon-sm, icon-lg (carré arrondi 8 px) |
 | `Badge` | `ui/badge.tsx` | variant : default, secondary, destructive, outline, ghost, link |
 | `StatusBadge` | `ui/status-badge.tsx` | tone : neutral, info, warning, success, danger · size : sm, md |
-| `FilterChip` | `ui/filter-chip.tsx` | pastille de filtre (repos / survol / actif), prop `pressed` |
+| `FilterChip`, `FilterChipLink` | `ui/filter-chip.tsx` | pastille de filtre (repos / survol / actif), prop `pressed` ; en lien quand le filtre est dans l'URL (`current`) |
 | `SearchField` | `ui/search-field.tsx` | champ de recherche arrondi, libellé fourni par l'appelant |
+| `ConfirmDialog` | `ui/confirm-dialog.tsx` | confirmation d'une action (`destructive` si définitive) ; sans `onConfirm`, explique seulement pourquoi c'est impossible |
+| `DropdownMenu` (+ `Trigger`, `Content`, `Item`) | `ui/dropdown-menu.tsx` | menu Base UI, surface du Popover, sans animation |
+| `RowActions` | `ui/row-actions.tsx` | « ⋯ » d'une ligne ou d'un en-tête (`size` icon-sm / icon-lg), rien si aucune action |
+| `FormDialog` | `ui/form-dialog.tsx` | formulaire dans la modale `Dialog` (en bas sur mobile), corps monté à chaque ouverture ; toute modification (« ⋯ » Modifier, fiche artiste) |
+| `Loaded`, `useLoaded` | `ui/loaded.tsx`, `ui/use-loaded.ts` | chargement / échec / prêt d'une modale ou d'un panneau (action serveur appelée à l'ouverture) |
 | `Dialog` | `ui/dialog.tsx` | variant : default, glass (page floutée sans voile + panneau sombre translucide, fenêtre Espace Espace) |
 | `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
-| `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`) | `ui/data-table.tsx` | **tout tableau de liste**, design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (Masters, Artistes, fiche artiste, Projets, Membres) |
+| `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`) | `ui/data-table.tsx` | **tout tableau de liste**, design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (`href` null = texte seul), colonne « ⋯ » `DataTableActionsHead` / `DataTableActionsCell` (Masters, Artistes, fiche artiste, Projets, Membres) |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
 | `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
 | `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2 + contenu, action facultative) |
@@ -152,7 +157,10 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `TasksCard`, `ValidationsCard`, `ProposalsCard`, `HandoverCard`… | `home/home-cards.tsx` | cartes de l'accueil ; `all` = toutes les lignes + nombre (page Travail) |
 | `OwnedProjectsCard`, `DeliverablesCard`, `CreativeProjectsCard` | `work/work-cards.tsx` | cartes propres à la page Travail |
 | `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
+| `AssistantComposer`, `AssistantThread`, `AssistantSuggestions`, `AssistantConversation` | `assistant/` | saisie de PO (micro, envoi/arrêt, `compact`, `voiceFirst`), fil des messages, pilules de suggestions ; page de conversation `/app/assistant` (retour, titre, « + ») |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
+| `RecordActions`, `ArchiveViewToggle`, `EditPanel` | `archive/` | « ⋯ » Modifier / Archiver / Restaurer d'un artiste, master ou projet ; filtre Actifs / Archivés (DG) ; corps chargé de la modale Modifier |
+| `ArtistActions`, `MasterActions`, `ProjectActions` | `catalog/`, `projects/project-actions.tsx` | `RecordActions` branché sur le vrai formulaire de chaque type (`rights`, raison de blocage connue d'avance) |
 | `ProjectPageHeader` | `projects/project-page-header.tsx` | en-tête d'une section de projet (h2, une phrase, action) : Calls et les 9 pages ci-dessous |
 | `WorkBoard`, `PersonWorkCard`, `WorkRow`, `AddTaskForm`, `TeamWorkloadTable`, `ExternalTeamTable` | `project-work/` | Travail d'un projet par personne (filtre `FilterChip`, case « fait », ajout de tâche), charge de l'équipe |
 | `DeliverablesTable`, `LeverList`, `PlanningTimeline`, `EditInStrategy` | `project-plan/` | livrables, leviers par famille, frise datée par mois (repère Aujourd'hui), lien vers la Stratégie pour le responsable |
@@ -167,9 +175,9 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
 | `FramingNeedsCall` | `framing/framing-needs-call.tsx` | état « le cadrage part d'un call » (Cadrage verrouillé, vue d'ensemble) |
 | `StrategyNeedsFraming` | `strategy/strategy-needs-framing.tsx` | état « la stratégie suit le cadrage » (Stratégie verrouillée tant que le Cadrage n'est pas validé) |
-| `ArtistEditSheet`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | panneau « Modifier » (photo, identité, bio), contacts de l'artiste |
+| `ArtistEditDialog`, `ArtistEditBody`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | modale « Modifier » (photo, identité, bio ; corps réutilisé depuis la liste), contacts de l'artiste |
 | `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
-| `Icon*` | `icons/index.ts` | icônes dessinées maison ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
+| `Icon*` | `icons/index.ts` | icônes dessinées maison (dont `IconDots`, le « ⋯ ») ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
 
 ---
 
@@ -244,6 +252,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   session. Chiffres, dates, ISRC, emails : recopiés de ce que l'utilisateur a écrit, vérifiés
   et lus par le code (`lib/assistant/verbatim.ts`). Projet modifiable tant qu'il n'est pas
   lancé (`update_project`), master par `update_master` (`docs/ASSISTANT.md` § 3 bis).
+- **Conversation PO** : une question de l'accueil ouvre `/app/assistant` (conversation de
+  l'onglet, titre = première question, « + » = nouvelle), `docs/ASSISTANT.md` § 2.
 - **Espace Espace** : ouvre PO depuis toute page de l'app dans une **nouvelle
   conversation**, dictée à l'écoute et envoyée dès qu'on a fini de parler ; la page
   d'ouverture est un indice de contexte lu par le serveur (`lib/assistant/page-context.ts`),
@@ -316,6 +326,11 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 - **Textes** : `lib/i18n/fr/<domaine>.ts`. **`cn()`** : `lib/utils/index.ts`.
 - **`AGENTS.md`** est réécrit par `next dev` : ne pas le supprimer. Doc Next 16 :
   `node_modules/next/dist/docs/`.
+- **Archivage** : artistes, masters, projets **archivés, jamais supprimés**, par le DG seul
+  (`archive_records`), refusé si encore utilisé (projet lancé, master d'un projet actif,
+  artiste d'un master actif) ; restauration depuis « Archivés » des listes. `archived_at`
+  écrit par `set_*_archived` (SQL) uniquement ; menu « ⋯ » Modifier / Archiver sur chaque
+  ligne et en-tête de fiche (`docs/ARCHITECTURE.md` § 2 quater). Membres : « Suspendre ».
 - **Labo** `/labo` : banc de test local (404 en production), faux call `docs/labo/`.
 
 ---
@@ -351,7 +366,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 258 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 303 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -402,6 +417,8 @@ Au-delà des six étapes :
 - [x] Pages d'un projet : Travail (par personne, en retard / à faire / en attente, ajout de
       tâche), Équipe, Livrables, Activations, Planning, Fichiers, Budget, Validations,
       Activité
+- [x] Menu « ⋯ » par ligne (artistes, masters, projets, membres) : modifier dans la
+      modale, archiver / restaurer (DG, refusé si utilisé), filtre « Archivés »
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 

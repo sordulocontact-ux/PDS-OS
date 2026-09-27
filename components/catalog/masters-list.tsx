@@ -4,11 +4,18 @@ import { useDeferredValue, useState } from "react";
 
 import { MastersTable } from "@/components/catalog/masters-table";
 import { SearchField } from "@/components/ui/search-field";
+import type { RecordRights } from "@/lib/archive/types";
 import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
 // Masters list with an instant search on title, version, artists and ISRC.
-export function MastersList({ masters }: { masters: MasterRow[] }) {
+export function MastersList({
+  masters,
+  rights,
+}: {
+  masters: MasterRow[];
+  rights?: RecordRights;
+}) {
   const t = fr.catalog.masters.search;
   const [query, setQuery] = useState("");
   const needle = normalize(useDeferredValue(query));
@@ -30,7 +37,7 @@ export function MastersList({ masters }: { masters: MasterRow[] }) {
         onChange={(e) => setQuery(e.target.value)}
       />
       {visible.length > 0 ? (
-        <MastersTable masters={visible} />
+        <MastersTable masters={visible} rights={rights} />
       ) : (
         <p
           role="status"

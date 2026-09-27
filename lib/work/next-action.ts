@@ -24,6 +24,8 @@ export function stageHref(projectId: string, key: string): string {
       return routes.projectFraming(projectId);
     case "launch_strategy":
       return routes.projectStrategy(projectId);
+    case "design":
+      return routes.projectDesign(projectId);
     case "delivery":
       return routes.projectRelease(projectId);
     default:

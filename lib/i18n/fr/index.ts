@@ -10,12 +10,14 @@ import { budget } from "./budget";
 import { calls } from "./calls";
 import { catalog } from "./catalog";
 import { core } from "./core";
+import { design } from "./design";
 import { framing } from "./framing";
 import { labo } from "./labo";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
 import { projectPlan } from "./project-plan";
 import { projectWork } from "./project-work";
+import { records } from "./records";
 import { release } from "./release";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
@@ -32,6 +34,7 @@ export const fr = {
   catalog,
   framing,
   strategy,
+  design,
   release,
   assistant,
   voice,
@@ -44,4 +47,5 @@ export const fr = {
   budget,
   artistFiles,
   artistActivity,
+  records,
 } as const;

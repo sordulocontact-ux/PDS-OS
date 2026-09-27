@@ -51,6 +51,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001501_project_team_at_creation_and_framing_call` | Type `event`. `create_project` prend `p_assignee_person_id` (transmission d'office via `transmit_project`) et `p_creative_person_ids` (via `add_project_creative`), dans la même transaction : un refus annule tout. **Pas de cadrage sans call** : `framing_is_open` (compte rendu de call, ou Cadrage déjà entamé avant la règle), politiques restrictives sur `field_values` `brief`, `needs`, `project_team_members`, `start_stage` → `framing_requires_call`. |
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
+| `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
 
 Principes :
 
@@ -141,7 +142,31 @@ Principes :
   (en attente, refusé, précision demandée), sinon non transmis. Les sections Cadrage / Calls / Sortie répondent 404 tant que le projet n'a
   pas d'étape (`requireLaunchedProject`).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 258 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+### 2 quater. Archiver, restaurer, modifier depuis une liste
+
+- **Archiver, pas supprimer** : artiste, master, projet disparaissent des listes, des
+  sélecteurs, de PO et de leur fiche (404), mais restent en base avec leur historique,
+  leurs contacts et leurs fichiers. Restaurables par le DG depuis le filtre « Archivés »
+  des pages de liste (`?view=archived`, ignoré pour les autres postes). Aucune suppression
+  définitive n'existe (décision de Sacha, 27/09/2026).
+- **DG seul** (`archive_records`), **refusé si utilisé** : un artiste crédité sur un master
+  actif (ou artiste d'un projet actif), un master utilisé par un projet actif, un projet
+  **lancé** (son travail vit dans ses étapes). On archive donc de haut en bas (projet →
+  master → artiste) et on restaure dans l'autre sens. La raison connue d'avance
+  (`masterCount`, `projectCount`, étapes) est expliquée dans le dialogue au lieu de
+  demander ; la base reste la seule à décider (`lib/archive/actions.ts` traduit ses codes).
+- Un projet archivé en attente de réponse garde sa transmission, gelée : elle revient
+  telle quelle à la restauration.
+- **Membres** : pas d'archivage à part — « Suspendre » (déjà réversible, motif obligatoire)
+  joue ce rôle, et n'est **pas** bloqué quand la personne a des projets : couper un accès
+  doit toujours rester possible.
+- **Menu « ⋯ » par ligne** (`RowActions`, `components/archive/record-actions.tsx`) :
+  Modifier ouvre le **vrai formulaire** dans la modale du design system (`FormDialog`), chargé à
+  l'ouverture (`lib/catalog/edit-form-actions.ts`, `lib/projects/edit-form-actions.ts`) ;
+  un projet ne se modifie qu'avant lancement. Même menu dans l'en-tête des fiches artiste,
+  master et projet non lancé ; après archivage depuis une fiche, retour à la liste.
+
+Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 303 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.

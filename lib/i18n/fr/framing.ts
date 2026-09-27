@@ -128,14 +128,21 @@ export const framing = {
     not_the_validator: "Seul le valideur désigné peut décider.",
     reason_required: "Un motif est obligatoire.",
     previous_stage_not_validated:
-      "Le Brief doit être validé avant de commencer la stratégie.",
+      "L'étape précédente doit être validée avant de commencer celle-ci.",
     framing_requires_call:
       "Le cadrage part d'un call : enregistrez-en un et obtenez son compte rendu d'abord.",
     stage_locked:
-      "La stratégie n'est modifiable que pendant qu'elle est en cours (ni avant, ni une fois soumise ou validée).",
+      "Cette étape n'est modifiable que pendant qu'elle est en cours (ni avant, ni une fois soumise ou validée).",
     lever_not_selected: "Un livrable se rattache à un levier retenu.",
     lever_has_deliverables:
       "Ce levier a des livrables engagés : retirez-les avant de changer son état.",
+    version_superseded:
+      "Une version plus récente a été déposée entre-temps : relisez celle-ci.",
+    cannot_deposit:
+      "Impossible de déposer ici : la conception n'est pas en cours, ou ce livrable ne vous est pas confié.",
+    file_too_large:
+      "Fichier trop lourd (50 Mo au plus) : déposez plutôt un lien vers le fichier.",
+    upload_failed: "L'envoi du fichier a échoué. Réessayez.",
     nothing_to_import:
       "Ce compte rendu ne contient aucun élément de stratégie.",
     forbidden: "Seul le chef de projet responsable modifie ce projet.",

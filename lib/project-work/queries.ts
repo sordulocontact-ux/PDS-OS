@@ -102,7 +102,8 @@ export async function loadProjectWork(
         personId: d.assignee_person_id,
         status: dueStatus(d.due_date, today),
         dueDate: d.due_date,
-        href: strategy,
+        // Designed version after version in the Conception.
+        href: routes.projectDesign(projectId),
       });
     // Nobody on it yet: the owner has to staff it.
     else if (project.ownerPersonId)

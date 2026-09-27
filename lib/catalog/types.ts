@@ -13,6 +13,7 @@ export type ArtistListItem = {
   name: string;
   pictureUrl: string | null;
   notes: string | null;
+  // Live masters crediting the artist.
   masterCount: number;
 };
 
@@ -32,7 +33,11 @@ export type MasterListItem = MasterOption & {
 };
 
 /** A row of the masters list: the master and the release shown for it. */
-export type MasterRow = MasterListItem & { release: MasterRelease | null };
+export type MasterRow = MasterListItem & {
+  release: MasterRelease | null;
+  // Live projects using it: archiving waits for them.
+  projectCount: number;
+};
 
 export type LinkedProject = { id: string; title: string; type: string };
 

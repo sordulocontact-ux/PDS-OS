@@ -65,18 +65,22 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
   };
 }
 
-export async function listArtists(): Promise<{
+/** Live artists by name; `archived` lists the archive instead. */
+export async function listArtists(filter?: { archived?: boolean }): Promise<{
   artists: ArtistListItem[];
   error: boolean;
 }> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const query = supabase
     .from("artists")
     .select(
-      "id, name, notes, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(count)",
-    )
-    .is("archived_at", null)
-    .order("name");
+      "id, name, notes, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at))",
+    );
+  const { data, error } = await (
+    filter?.archived
+      ? query.not("archived_at", "is", null)
+      : query.is("archived_at", null)
+  ).order("name");
   if (error) {
     console.error("listArtists:", error.message);
     return { artists: [], error: true };
@@ -92,7 +96,8 @@ export async function listArtists(): Promise<{
       notes: row.notes,
       pictureUrl:
         (row.picture_path && signed.get(row.picture_path)) || row.picture_url,
-      masterCount: row.credits[0]?.count ?? 0,
+      masterCount: row.credits.filter((c) => c.master && !c.master.archived_at)
+        .length,
     })),
     error: false,
   };
@@ -149,20 +154,29 @@ export async function findArtistsByDeezerIds(
 const MASTER_RELEASES_SELECT =
   "links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(archived_at, releases:releases!releases_project_same_org(title, planned_release_date, online_detected_at)))";
 
-/** Live masters, newest first; `ids` narrows to those (an artist's). */
-export async function listMasters(filter?: { ids: string[] }): Promise<{
+/**
+ * Live masters, newest first; `ids` narrows to those (an artist's),
+ * `archived` lists the archive instead.
+ */
+export async function listMasters(filter?: {
+  ids?: string[];
+  archived?: boolean;
+}): Promise<{
   masters: MasterRow[];
   error: boolean;
 }> {
-  if (filter && filter.ids.length === 0) return { masters: [], error: false };
+  if (filter?.ids && filter.ids.length === 0)
+    return { masters: [], error: false };
   const supabase = await createClient();
-  let query = supabase
+  const select = supabase
     .from("masters")
     .select(
       `id, title, version, isrc, duration_seconds, ${CREDITS_SELECT}, ${MASTER_RELEASES_SELECT}`,
-    )
-    .is("archived_at", null);
-  if (filter) query = query.in("id", filter.ids);
+    );
+  let query = filter?.archived
+    ? select.not("archived_at", "is", null)
+    : select.is("archived_at", null);
+  if (filter?.ids) query = query.in("id", filter.ids);
   const { data, error } = await query.order("created_at", {
     ascending: false,
   });
@@ -173,6 +187,8 @@ export async function listMasters(filter?: { ids: string[] }): Promise<{
   return {
     masters: (data ?? []).map((row) => ({
       ...toMasterListItem(row as RawMaster),
+      projectCount: row.links.filter((l) => l.project && !l.project.archived_at)
+        .length,
       release: pickMasterRelease(
         row.links.flatMap((l) =>
           l.project && !l.project.archived_at
@@ -209,6 +225,7 @@ export const getMaster = cache(
         `id, title, version, isrc, duration_seconds, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, title, type, archived_at, created_at))`,
       )
       .eq("id", masterId)
+      .is("archived_at", null)
       .maybeSingle();
     if (error) {
       console.error("getMaster:", error.message);

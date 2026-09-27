@@ -196,6 +196,9 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 - Salutation et sous-titre centrés, puis une colonne de 896 px : suggestions en
   pilules à contour, saisie de PO sur fond teinté `--surface-tint` (micro en carré
   blanc, envoi en carré noir, 32 px), puis les cartes, trois par ligne.
+- Une question ouvre la **page de conversation** (d'après Midday) : en-tête avec retour
+  et « + » en boutons carrés à contour, titre centré (la première question, tronquée) ;
+  fil de 896 px qui défile seul, saisie teintée collée en bas avec la mention de PO.
 - Carte de l'accueil : contour `--border-default`, ni fond ni ombre, marge intérieure
   12 px, libellé `caption` gris, lignes en `body-md` (titre semi-gras, détail medium).
 

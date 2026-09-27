@@ -29,6 +29,12 @@ export const notifications = {
       `${actor} vous assigne une tâche sur « ${project} ».`,
     project_creative_added: (actor: string, project: string) =>
       `${actor} vous ajoute à l'équipe créative de « ${project} ».`,
+    design_version_submitted: (actor: string, project: string) =>
+      `${actor} a déposé une version à relire sur « ${project} ».`,
+    design_version_approved: (actor: string, project: string) =>
+      `${actor} a approuvé votre version sur « ${project} ».`,
+    design_version_changes_requested: (actor: string, project: string) =>
+      `${actor} demande des retouches sur votre version (« ${project} »).`,
   },
   open: "Ouvrir",
   push: {

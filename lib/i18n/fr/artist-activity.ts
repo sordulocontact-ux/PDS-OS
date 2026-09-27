@@ -53,12 +53,11 @@ export const artistActivity = {
     projectLinked: (title: string) => `Rattaché au projet ${title}`,
     projectTransmitted: (title: string, assignee: string) =>
       `Projet ${title} transmis à ${assignee}`,
-    projectAccepted: (title: string, assignee: string) =>
-      `Projet ${title} accepté par ${assignee}`,
-    projectRefused: (title: string, assignee: string) =>
-      `Projet ${title} refusé par ${assignee}`,
-    projectClarification: (title: string, assignee: string) =>
-      `Précision demandée sur le projet ${title} par ${assignee}`,
+    // The one who answers is the actor, shown on the line below.
+    projectAccepted: (title: string) => `Projet ${title} accepté`,
+    projectRefused: (title: string) => `Projet ${title} refusé`,
+    projectClarification: (title: string) =>
+      `Précision demandée sur le projet ${title}`,
   },
 
   quoted,

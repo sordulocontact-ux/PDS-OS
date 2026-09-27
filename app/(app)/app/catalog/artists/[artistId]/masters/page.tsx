@@ -53,5 +53,14 @@ export default async function ArtistMastersPage({
       />
     );
   }
-  return <MastersTable masters={masters} />;
+  return (
+    <MastersTable
+      masters={masters}
+      rights={{
+        canEdit: can(access, "manage_catalog"),
+        canArchive: can(access, "archive_records"),
+        archived: false,
+      }}
+    />
+  );
 }

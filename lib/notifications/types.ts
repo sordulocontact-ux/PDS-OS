@@ -13,6 +13,9 @@ export const NOTIFICATION_KINDS = [
   "validation_rejected",
   "task_assigned",
   "project_creative_added",
+  "design_version_submitted",
+  "design_version_approved",
+  "design_version_changes_requested",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -43,6 +46,13 @@ export function notificationText(
   return t.texts[kind](actorName || t.someone, projectTitle || t.aProject);
 }
 
-export function notificationHref(projectId: string | null): string {
-  return projectId ? routes.project(projectId) : routes.app;
+// A design version opens the Conception; everything else the project.
+export function notificationHref(
+  kind: NotificationKind,
+  projectId: string | null,
+): string {
+  if (!projectId) return routes.app;
+  return kind.startsWith("design_version_")
+    ? routes.projectDesign(projectId)
+    : routes.project(projectId);
 }

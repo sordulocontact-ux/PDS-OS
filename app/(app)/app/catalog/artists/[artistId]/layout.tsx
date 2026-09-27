@@ -2,8 +2,9 @@ import { IconPlus } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ArtistActions } from "@/components/catalog/artist-actions";
 import { ArtistAvatar } from "@/components/catalog/artist-avatar";
-import { ArtistEditSheet } from "@/components/catalog/artist-page/artist-edit-sheet";
+import { ArtistEditDialog } from "@/components/catalog/artist-page/artist-edit-dialog";
 import { ArtistTabs } from "@/components/catalog/artist-page/artist-tabs";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { IconArrowLeft } from "@/components/icons";
@@ -30,6 +31,7 @@ export default async function ArtistLayout({
   if (!artist) notFound();
   const t = fr.catalog.artist;
   const canEdit = can(access, "manage_catalog");
+  const canArchive = can(access, "archive_records");
 
   return (
     <PageContainer className="max-w-5xl">
@@ -58,16 +60,31 @@ export default async function ArtistLayout({
             />
           }
           action={
-            canEdit ? (
+            canEdit || canArchive ? (
               <div className="flex flex-wrap gap-2">
-                <ArtistEditSheet artist={artist} />
-                <Link
-                  href={routes.mastersNewForArtist(artist.id)}
-                  className={buttonVariants({ size: "lg" })}
-                >
-                  <IconPlus aria-hidden data-icon="inline-start" />
-                  {t.newMaster}
-                </Link>
+                {canEdit && (
+                  <>
+                    <ArtistEditDialog artist={artist} />
+                    <Link
+                      href={routes.mastersNewForArtist(artist.id)}
+                      className={buttonVariants({ size: "lg" })}
+                    >
+                      <IconPlus aria-hidden data-icon="inline-start" />
+                      {t.newMaster}
+                    </Link>
+                  </>
+                )}
+                {/* "Modifier" has its own button here: the menu archives. */}
+                <ArtistActions
+                  artist={{
+                    id: artist.id,
+                    name: artist.name,
+                    masterCount: artist.masters.length,
+                  }}
+                  rights={{ canEdit: false, canArchive, archived: false }}
+                  leaveTo={routes.artists}
+                  size="icon-lg"
+                />
               </div>
             ) : null
           }

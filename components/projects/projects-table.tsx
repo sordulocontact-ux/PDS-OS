@@ -1,6 +1,9 @@
+import { ProjectActions } from "@/components/projects/project-actions";
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
 import {
   DataTable,
+  DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
   DataTableHead,
@@ -10,13 +13,22 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectListItem } from "@/lib/projects/types";
 import { projectStatusTone } from "@/lib/ui/state-tones";
 
-export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
+export function ProjectsTable({
+  projects,
+  rights,
+}: {
+  projects: ProjectListItem[];
+  // Row actions ("⋯"); none when the viewer may neither edit nor archive.
+  rights?: RecordRights;
+}) {
   const t = fr.shell.projects;
+  const withActions = rights && (rights.canEdit || rights.canArchive);
 
   return (
     <DataTable>
@@ -25,12 +37,15 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
         <DataTableHead hideBelow="sm">{t.columns.artist}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.type}</DataTableHead>
         <DataTableHead fill>{t.columns.stage}</DataTableHead>
+        {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
       <DataTableBody>
         {projects.map((project) => (
           <DataTableRow key={project.id}>
             <DataTableCell>
-              <DataTableLink href={routes.project(project.id)}>
+              <DataTableLink
+                href={rights?.archived ? null : routes.project(project.id)}
+              >
                 {project.title}
               </DataTableLink>
             </DataTableCell>
@@ -54,6 +69,18 @@ export function ProjectsTable({ projects }: { projects: ProjectListItem[] }) {
                 </StatusBadge>
               )}
             </DataTableCell>
+            {withActions && (
+              <DataTableActionsCell>
+                <ProjectActions
+                  project={{
+                    id: project.id,
+                    title: project.title,
+                    launched: project.stageCount > 0,
+                  }}
+                  rights={rights}
+                />
+              </DataTableActionsCell>
+            )}
           </DataTableRow>
         ))}
       </DataTableBody>

@@ -9,6 +9,7 @@ export { IconCircleCheck } from "./circle-check";
 export { IconCircleXmark } from "./circle-xmark";
 export { IconCopy } from "./copy";
 export { IconDisc } from "./disc";
+export { IconDots } from "./dots";
 export { IconExternalLink } from "./external-link";
 export { IconMenu } from "./menu";
 export { IconRefresh } from "./refresh";

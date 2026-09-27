@@ -1,5 +1,5 @@
 /**
- * Deliverable text fields (Brief, Strategy) stored as versioned field_values.
+ * Deliverable text fields (Brief, Strategy, Dossier de conception) stored as versioned field_values.
  * Pure code, importable anywhere.
  */
 
@@ -13,9 +13,17 @@ export const STRATEGY_TEXT_FIELDS = [
 ] as const;
 export type StrategyTextField = (typeof STRATEGY_TEXT_FIELDS)[number];
 
+export const DESIGN_TEXT_FIELDS = [
+  "creative_direction",
+  "visual_codes",
+  "references",
+] as const;
+export type DesignTextField = (typeof DESIGN_TEXT_FIELDS)[number];
+
 export const TEXT_FIELDS = {
   brief: BRIEF_TEXT_FIELDS,
   strategy: STRATEGY_TEXT_FIELDS,
+  design_doc: DESIGN_TEXT_FIELDS,
 } as const;
 export type TextDeliverable = keyof typeof TEXT_FIELDS;
 
@@ -53,6 +61,7 @@ export type FieldState<K extends string = string> = {
 };
 export type BriefFieldState = FieldState<BriefTextField>;
 export type StrategyFieldState = FieldState<StrategyTextField>;
+export type DesignFieldState = FieldState<DesignTextField>;
 
 type Row = { value: unknown; status: string | null } | undefined;
 

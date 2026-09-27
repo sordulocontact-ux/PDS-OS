@@ -106,3 +106,12 @@ export const budgetStatusTone: Record<string, Tone> = {
   committed: "info",
   paid: "success",
 };
+
+/** Design state of a deliverable (lib/design/rules.ts): nothing yet, waiting
+ * for the owner's review, sent back for changes, approved. */
+export const designStateTone: Record<string, Tone> = {
+  to_design: "neutral",
+  submitted: "warning",
+  changes_requested: "danger",
+  approved: "success",
+};

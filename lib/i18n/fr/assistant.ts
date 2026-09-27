@@ -146,6 +146,14 @@ export const assistant = {
     hint: "Espace Espace pour ouvrir PO depuis n'importe quelle page.",
     close: "Fermer",
   },
+  // Conversation page, opened by a question from the home page.
+  conversation: {
+    pageTitle: "Conversation avec PO",
+    back: "Retour à l'accueil",
+    new: "Nouvelle conversation",
+    reply: "Répondre…",
+    resume: "Reprendre la conversation",
+  },
   facts: "Données utilisées",
   sources: "Sources",
   you: "Vous",

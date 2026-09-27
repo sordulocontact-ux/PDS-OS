@@ -84,7 +84,11 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
 
   const today = todo.today;
   const titles = new Map(projects.map((p) => [p.id, p.title]));
-  const toDeliverable = (d: RawDeliverable): WorkDeliverable => ({
+  // Staffed in the Strategy, designed (versions deposited) in the Conception.
+  const toDeliverable = (
+    d: RawDeliverable,
+    href: (projectId: string) => string,
+  ): WorkDeliverable => ({
     id: d.id,
     title: d.title,
     dueDate: d.due_date,
@@ -92,7 +96,7 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
     hasAssignee: d.assignee_person_id !== null,
     projectId: d.project_id,
     projectTitle: titles.get(d.project_id) ?? "—",
-    href: routes.projectStrategy(d.project_id),
+    href: href(d.project_id),
   });
   // Overdue first, then by due date, undated last.
   const byDue = (a: WorkDeliverable, b: WorkDeliverable) =>
@@ -151,11 +155,13 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
     toRetransmit,
     awaitingAcceptance,
     ownedProjects,
-    deliverablesToStaff: (staffRes.data ?? []).map(toDeliverable).sort(byDue),
+    deliverablesToStaff: (staffRes.data ?? [])
+      .map((d) => toDeliverable(d, routes.projectStrategy))
+      .sort(byDue),
     // Only the owner writes in a launched project, so only they review.
     proposals: todo.proposals.filter((p) => ownedSet.has(p.projectId)),
     myDeliverables: (myDeliverablesRes.data ?? [])
-      .map(toDeliverable)
+      .map((d) => toDeliverable(d, routes.projectDesign))
       .sort(byDue),
     creativeProjects: projects.filter(
       (p) => p.status === "launched" && creativeIds.has(p.id),

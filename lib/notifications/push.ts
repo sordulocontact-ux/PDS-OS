@@ -61,7 +61,7 @@ export async function sendPendingPushes(
             actor,
             d.project_id ? (titles.get(d.project_id) ?? null) : null,
           ),
-          url: notificationHref(d.project_id),
+          url: notificationHref(d.kind, d.project_id),
           tag: d.notification_id,
         });
         try {

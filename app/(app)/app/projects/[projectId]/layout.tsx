@@ -1,17 +1,20 @@
 import { notFound } from "next/navigation";
 
 import { EditAccessProvider } from "@/components/projects/edit-access";
+import { ProjectActions } from "@/components/projects/project-actions";
 import {
   ProjectSidebar,
   ProjectSidebarMobile,
 } from "@/components/projects/project-sidebar";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { WorkflowBreadcrumb } from "@/components/projects/workflow-breadcrumb";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
-import { isFramingValidated } from "@/lib/projects/types";
+import { isStageValidated } from "@/lib/projects/types";
 
 // Project frame: header, then content next to the contextual sidebar (Figma
 // "Double sidebar", docs/DESIGN.md § 4). The main app sidebar collapses to
@@ -38,15 +41,34 @@ export default async function ProjectLayout({
       )}
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pt-6 md:px-8 md:pt-8">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight break-words">
-            {project.title}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {[project.artistName, fr.shell.projectTypes[project.type]]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
+        <header className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-col gap-1">
+            <h1 className="text-2xl font-semibold tracking-tight break-words">
+              {project.title}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {[project.artistName, fr.shell.projectTypes[project.type]]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </div>
+          {/* Before launch only: afterwards it is written through its stages. */}
+          {project.stages.length === 0 && (
+            <ProjectActions
+              project={{
+                id: project.id,
+                title: project.title,
+                launched: false,
+              }}
+              rights={{
+                canEdit: can(access, "create_projects"),
+                canArchive: can(access, "archive_records"),
+                archived: false,
+              }}
+              leaveTo={routes.projects}
+              size="icon-lg"
+            />
+          )}
         </header>
 
         {/* Sections exist once the project is launched, not before. */}
@@ -58,16 +80,23 @@ export default async function ProjectLayout({
             />
             <WorkflowBreadcrumb
               projectId={project.id}
-              lockedSteps={
-                isFramingValidated(project.stages) ? [] : ["strategy"]
-              }
+              lockedSteps={[
+                ...(isStageValidated(project.stages, "framing")
+                  ? []
+                  : ["strategy"]),
+                ...(isStageValidated(project.stages, "launch_strategy")
+                  ? []
+                  : ["conception"]),
+              ]}
             />
           </>
         )}
 
         {/* Only the owner writes inside a launched project; the database enforces it. */}
         <EditAccessProvider canEdit={canEditProject(access, project)}>
-          {project.stages.length > 0 && <ReadOnlyNotice />}
+          {project.stages.length > 0 && (
+            <ReadOnlyNotice projectId={project.id} />
+          )}
           <div className="flex flex-col pb-8">{children}</div>
         </EditAccessProvider>
       </div>

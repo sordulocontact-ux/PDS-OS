@@ -543,6 +543,98 @@ export type Database = {
           },
         ]
       }
+      design_versions: {
+        Row: {
+          bytes: number | null
+          created_at: string
+          created_by: string | null
+          deliverable_id: string | null
+          file_name: string | null
+          id: string
+          kind: string
+          mime: string | null
+          note: string | null
+          number: number
+          organization_id: string
+          path: string | null
+          project_id: string
+          review_comment: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          url: string | null
+        }
+        Insert: {
+          bytes?: number | null
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          file_name?: string | null
+          id?: string
+          kind: string
+          mime?: string | null
+          note?: string | null
+          number?: number
+          organization_id: string
+          path?: string | null
+          project_id: string
+          review_comment?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          url?: string | null
+        }
+        Update: {
+          bytes?: number | null
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          file_name?: string | null
+          id?: string
+          kind?: string
+          mime?: string | null
+          note?: string | null
+          number?: number
+          organization_id?: string
+          path?: string | null
+          project_id?: string
+          review_comment?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_versions_deliverable_same_org"
+            columns: ["deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_versions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_versions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       field_values: {
         Row: {
           created_at: string
@@ -2292,6 +2384,10 @@ export type Database = {
       auth_organization_id: { Args: never; Returns: string }
       auth_person_id: { Args: never; Returns: string }
       can_admin_person: { Args: { target_person_id: string }; Returns: boolean }
+      can_deposit_design_version: {
+        Args: { p_deliverable_id: string; p_project_id: string }
+        Returns: boolean
+      }
       can_manage_creatives: { Args: { p_project_id: string }; Returns: boolean }
       can_see_project: { Args: { p_project_id: string }; Returns: boolean }
       can_see_project_row: {
@@ -2349,6 +2445,11 @@ export type Database = {
           p_validation_id: string
         }
         Returns: undefined
+      }
+      design_is_editable: { Args: { p_project_id: string }; Returns: boolean }
+      design_is_in_progress: {
+        Args: { p_project_id: string }
+        Returns: boolean
       }
       forget_push_subscription: {
         Args: { p_endpoint: string }
@@ -2456,6 +2557,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      review_design_version: {
+        Args: { p_approve: boolean; p_comment?: string; p_version_id: string }
+        Returns: undefined
+      }
       role_permissions: { Args: { p_role: string }; Returns: string[] }
       save_call_report: {
         Args: {
@@ -2498,6 +2603,18 @@ export type Database = {
           score: number
           title: string
         }[]
+      }
+      set_artist_archived: {
+        Args: { p_archived: boolean; p_artist_id: string }
+        Returns: undefined
+      }
+      set_master_archived: {
+        Args: { p_archived: boolean; p_master_id: string }
+        Returns: undefined
+      }
+      set_project_archived: {
+        Args: { p_archived: boolean; p_project_id: string }
+        Returns: undefined
       }
       start_stage: { Args: { p_stage_id: string }; Returns: undefined }
       strategy_is_editable: { Args: { p_project_id: string }; Returns: boolean }

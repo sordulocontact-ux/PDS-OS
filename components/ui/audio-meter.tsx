@@ -16,8 +16,8 @@ const BARS = 240;
 const rowVariants = cva("flex shrink-0 items-center will-change-transform", {
   variants: {
     size: {
-      sm: "h-5 gap-0.5",
-      md: "h-8 gap-1",
+      sm: "h-15 gap-0.5",
+      md: "h-10 gap-1",
     },
   },
   defaultVariants: { size: "md" },
@@ -25,7 +25,7 @@ const rowVariants = cva("flex shrink-0 items-center will-change-transform", {
 
 const barVariants = cva(
   // Resting height matches AUDIO_METER_REST in use-audio-meter.ts.
-  "h-full shrink-0 origin-center scale-y-[0.12] rounded-pill bg-[var(--meter-fill-over)]",
+  "h-full shrink-0 origin-center scale-y-[0.04] rounded-pill bg-[var(--meter-fill-over)]",
   {
     variants: {
       size: {

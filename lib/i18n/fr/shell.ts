@@ -157,7 +157,11 @@ export const shell = {
     // avec `stages` (ProjectStage), qui reste la source d'état réelle.
     workflowSteps: {
       label: "Étapes du parcours",
-      lockedUntilFraming: "Disponible une fois le Cadrage validé",
+      // Why a step with a page cannot be opened yet.
+      locked: {
+        strategy: "Disponible une fois le Cadrage validé",
+        conception: "Disponible une fois la Stratégie validée",
+      } as Record<string, string>,
       framing: "Cadrage",
       strategy: "Stratégie",
       conception: "Conception",
@@ -170,6 +174,8 @@ export const shell = {
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",
     readOnly:
       "Lecture seule : seul le chef de projet responsable modifie ce projet.",
+    readOnlyDesign:
+      "Seul le chef de projet responsable écrit le Dossier et relit les versions ; l'équipe créative y dépose les siennes.",
     overview: {
       facts: "Informations",
       artist: "Artiste",

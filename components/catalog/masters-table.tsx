@@ -1,6 +1,9 @@
+import { MasterActions } from "@/components/catalog/master-actions";
 import { IconDisc } from "@/components/icons";
 import {
   DataTable,
+  DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
   DataTableHead,
@@ -12,14 +15,23 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { formatIsrc, type MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
 import { masterReleaseTone } from "@/lib/ui/state-tones";
 
-export function MastersTable({ masters }: { masters: MasterRow[] }) {
+export function MastersTable({
+  masters,
+  rights,
+}: {
+  masters: MasterRow[];
+  // Row actions ("⋯"); none when the viewer may neither edit nor archive.
+  rights?: RecordRights;
+}) {
   const t = fr.catalog.masters;
+  const withActions = rights && (rights.canEdit || rights.canArchive);
 
   return (
     <DataTable>
@@ -30,6 +42,7 @@ export function MastersTable({ masters }: { masters: MasterRow[] }) {
         <DataTableHead hideBelow="lg">{t.columns.release}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.releaseDate}</DataTableHead>
         <DataTableHead fill>{t.columns.status}</DataTableHead>
+        {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
       <DataTableBody>
         {masters.map((master) => (
@@ -38,7 +51,9 @@ export function MastersTable({ masters }: { masters: MasterRow[] }) {
               <DataTableMedia
                 visual={<DataTableIcon icon={IconDisc} />}
                 title={
-                  <DataTableLink href={routes.master(master.id)}>
+                  <DataTableLink
+                    href={rights?.archived ? null : routes.master(master.id)}
+                  >
                     {master.title}
                   </DataTableLink>
                 }
@@ -82,6 +97,11 @@ export function MastersTable({ masters }: { masters: MasterRow[] }) {
                 EMPTY_CELL
               )}
             </DataTableCell>
+            {withActions && (
+              <DataTableActionsCell>
+                <MasterActions master={master} rights={rights} />
+              </DataTableActionsCell>
+            )}
           </DataTableRow>
         ))}
       </DataTableBody>

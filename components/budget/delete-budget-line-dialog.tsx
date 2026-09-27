@@ -3,14 +3,7 @@
 import { toast } from "sonner";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteBudgetLine } from "@/lib/budget/actions";
 import type { BudgetLine } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
@@ -40,30 +33,18 @@ export function DeleteBudgetLineDialog({
   }
 
   return (
-    <Dialog open={line !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent closeLabel={fr.budget.form.close}>
-        <DialogHeader>
-          <DialogTitle>{t.title}</DialogTitle>
-          <DialogDescription>
-            {line ? t.body(line.label) : ""}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button type="button" variant="ghost" size="lg" onClick={onClose}>
-            {fr.budget.form.cancel}
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="lg"
-            disabled={pending}
-            aria-busy={pending || undefined}
-            onClick={confirm}
-          >
-            {pending ? t.deleting : t.confirm}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <ConfirmDialog
+      open={line !== null}
+      onOpenChange={(open) => !open && onClose()}
+      title={t.title}
+      description={line ? t.body(line.label) : ""}
+      cancelLabel={fr.budget.form.cancel}
+      closeLabel={fr.budget.form.close}
+      confirmLabel={t.confirm}
+      pendingLabel={t.deleting}
+      pending={pending}
+      destructive
+      onConfirm={confirm}
+    />
   );
 }

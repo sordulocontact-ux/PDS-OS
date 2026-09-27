@@ -118,13 +118,15 @@ export function DataTableCell({
 
 // The row's main link: its pseudo-element covers the whole row. Other
 // interactive elements of the row need `relative z-10` to stay clickable.
+// Without `href` (an archived row has no page) the text stays plain.
 export function DataTableLink({
   href,
   children,
 }: {
-  href: string;
+  href: string | null;
   children: React.ReactNode;
 }) {
+  if (href === null) return <span className="truncate">{children}</span>;
   return (
     <Link
       href={href}
@@ -174,4 +176,21 @@ export function DataTableIcon({
       <Icon className="size-5" />
     </span>
   );
+}
+
+// Last column: the row's "⋯" menu (RowActions), as narrow as its button.
+export function DataTableActionsHead({ label }: { label: string }) {
+  return (
+    <TableHead className="h-auto w-8 px-0 pb-2">
+      <span className="sr-only">{label}</span>
+    </TableHead>
+  );
+}
+
+export function DataTableActionsCell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <TableCell className="w-8 px-0 py-2 text-right">{children}</TableCell>;
 }

@@ -3,6 +3,7 @@ import { IconArrowLeft } from "@/components/icons";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { MasterActions } from "@/components/catalog/master-actions";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -62,7 +63,25 @@ export default async function MasterPage({
       <PageHeader
         title={master.title}
         description={master.artists}
-        action={createProject}
+        action={
+          <div className="flex flex-wrap gap-2">
+            {createProject}
+            <MasterActions
+              master={{
+                id: master.id,
+                title: master.title,
+                projectCount: master.projects.length,
+              }}
+              rights={{
+                canEdit: can(access, "manage_catalog"),
+                canArchive: can(access, "archive_records"),
+                archived: false,
+              }}
+              leaveTo={routes.masters}
+              size="icon-lg"
+            />
+          </div>
+        }
       />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">

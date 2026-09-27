@@ -17,6 +17,10 @@ export type FramingErrorCode =
   | "lever_not_selected"
   | "lever_has_deliverables"
   | "nothing_to_import"
+  | "version_superseded"
+  | "cannot_deposit"
+  | "file_too_large"
+  | "upload_failed"
   | "forbidden"
   | "generic";
 
@@ -43,12 +47,16 @@ export function fromDatabaseError(
     "framing_requires_call",
     "lever_not_selected",
     "lever_has_deliverables",
+    "version_superseded",
+    "reason_required",
+    "stage_locked",
   ] as const) {
     if (message.includes(code)) return fail(code);
   }
   if (
     message.includes("stage_not_found") ||
-    message.includes("validation_not_found")
+    message.includes("validation_not_found") ||
+    message.includes("version_not_found")
   )
     return fail("not_found");
   if (error?.code === "42501") return fail("forbidden");

@@ -52,6 +52,7 @@ export const PERMISSIONS = [
   "creative_work",
   "manage_catalog",
   "create_projects",
+  "archive_records",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -75,6 +76,7 @@ export const routes = {
   accessDenied: "/access-denied",
   unavailable: "/unavailable",
   app: "/app",
+  assistant: "/app/assistant",
   work: "/app/work",
   members: "/app/members",
   membersNew: "/app/members/new",
@@ -99,6 +101,7 @@ export const routes = {
   project: (id: string) => `/app/projects/${id}`,
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
+  projectDesign: (id: string) => `/app/projects/${id}/design`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,

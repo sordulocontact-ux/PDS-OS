@@ -3,7 +3,16 @@ export const projectHistory = {
   files: {
     title: "Fichiers",
     description:
-      "Ce qui est stocké pour ce projet : les enregistrements des calls.",
+      "Ce qui est stocké pour ce projet : les enregistrements des calls et les versions déposées en conception.",
+    callsTitle: "Enregistrements des calls",
+    designTitle: "Versions de la conception",
+    designColumns: {
+      version: "Version",
+      date: "Déposée le",
+      author: "Par",
+      state: "État",
+    },
+    directionTarget: "Direction créative",
     columns: {
       call: "Call",
       date: "Date",
@@ -21,7 +30,7 @@ export const projectHistory = {
     report: "Compte rendu",
     emptyTitle: "Aucun fichier",
     emptyBody:
-      "Les enregistrements des calls apparaîtront ici ; le dépôt de fichiers (livrables, prestataires) viendra plus tard.",
+      "Les enregistrements des calls et les versions déposées en conception apparaîtront ici.",
   },
   validations: {
     title: "Validations",
