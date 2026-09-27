@@ -13,7 +13,8 @@ import { createClient } from "@/lib/supabase/server";
 // Signed URLs live one hour, as the artist pictures.
 const SIGNED_URL_SECONDS = 3600;
 
-const SELECT = "id, category, path, file_name, mime, bytes, created_at";
+const SELECT =
+  "id, category, description, path, file_name, mime, bytes, created_at";
 const MASTER_SELECT = `${SELECT}, audio_state, duration_seconds`;
 
 /**
@@ -49,6 +50,12 @@ async function readRows(owner: FileOwner, scope?: FileScope) {
     .order("created_at", { ascending: false });
 }
 
+function withDownloadName(url: string, fileName: string): string {
+  const signed = new URL(url);
+  signed.searchParams.set("download", fileName);
+  return signed.toString();
+}
+
 /**
  * Files of an artist or a master, newest first, with the viewer's session:
  * RLS hides contracts from a viewer without manage_catalog.
@@ -63,39 +70,52 @@ export async function listCatalogFiles(
     return { files: [], error: true };
   }
 
+  const rows = data ?? [];
+  if (rows.length === 0) return { files: [], error: false };
+
+  // One signing request for the whole list. The download name is a plain
+  // query parameter beside the token (as storage-js adds it), so the same
+  // signature serves both opening and downloading.
   const supabase = await createClient();
-  const bucket = supabase.storage.from(FILE_BUCKETS[owner.kind]);
-  const files = await Promise.all(
-    (data ?? []).map(async (row): Promise<CatalogFile> => {
-      // Only a title's files have these columns.
-      const audio = row as {
-        audio_state?: string | null;
-        duration_seconds?: number | null;
-      };
-      const signed = await bucket.createSignedUrl(
-        row.path,
-        SIGNED_URL_SECONDS,
-        { download: row.file_name },
-      );
-      if (signed.error)
-        console.error("listCatalogFiles (sign):", signed.error.message);
-      return {
-        id: row.id,
-        category: isFileCategory(owner.kind, row.category)
-          ? row.category
-          : "other",
-        fileName: row.file_name,
-        mime: row.mime,
-        bytes: row.bytes,
-        audioState: audioStateOf(audio.audio_state ?? null),
-        durationSeconds: audio.duration_seconds ?? null,
-        createdAt: row.created_at,
-        authorName: row.author
-          ? personName(row.author.first_name, row.author.last_name)
-          : "",
-        downloadUrl: signed.data?.signedUrl ?? null,
-      };
-    }),
+  const signed = await supabase.storage
+    .from(FILE_BUCKETS[owner.kind])
+    .createSignedUrls(
+      rows.map((row) => row.path),
+      SIGNED_URL_SECONDS,
+    );
+  if (signed.error)
+    console.error("listCatalogFiles (sign):", signed.error.message);
+  const urlOf = new Map(
+    (signed.data ?? []).flatMap((entry) =>
+      entry.path && entry.signedUrl ? [[entry.path, entry.signedUrl]] : [],
+    ),
   );
+
+  const files = rows.map((row): CatalogFile => {
+    // Only a title's files have these columns.
+    const audio = row as {
+      audio_state?: string | null;
+      duration_seconds?: number | null;
+    };
+    const openUrl = urlOf.get(row.path) ?? null;
+    return {
+      id: row.id,
+      category: isFileCategory(owner.kind, row.category)
+        ? row.category
+        : "other",
+      description: row.description,
+      fileName: row.file_name,
+      mime: row.mime,
+      bytes: row.bytes,
+      audioState: audioStateOf(audio.audio_state ?? null),
+      durationSeconds: audio.duration_seconds ?? null,
+      createdAt: row.created_at,
+      authorName: row.author
+        ? personName(row.author.first_name, row.author.last_name)
+        : "",
+      openUrl,
+      downloadUrl: openUrl && withDownloadName(openUrl, row.file_name),
+    };
+  });
   return { files, error: false };
 }

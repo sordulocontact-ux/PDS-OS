@@ -67,6 +67,7 @@ export const shell = {
       stage: "Étape en cours",
     },
     allValidated: "Terminé",
+    draft: "Brouillon",
     noStage: "—",
     emptyTitle: "Aucun projet pour l'instant",
     emptyBody:
@@ -150,9 +151,7 @@ export const shell = {
       saving: "Enregistrement du brouillon…",
       saved: "Brouillon enregistré.",
       error: "Le brouillon n'a pas pu être enregistré. Vérifiez la connexion.",
-      listTitle: "Brouillons",
       untitled: "Projet sans titre",
-      updated: (when: string) => `Modifié le ${when}`,
       notFound:
         "Ce brouillon n'existe plus : le projet a sans doute déjà été créé.",
       delete: "Supprimer le brouillon",

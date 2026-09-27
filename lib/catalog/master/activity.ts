@@ -30,6 +30,7 @@ const detailSchema = z.object({
   section: z.enum(MASTER_ITEM_SECTIONS).optional().catch(undefined),
   fields: z.array(z.string()).optional().catch(undefined),
   category: z.string().optional().catch(undefined),
+  previous_category: z.string().optional().catch(undefined),
   audio_state: z.enum(AUDIO_STATES).nullish().catch(undefined),
 });
 type Detail = z.infer<typeof detailSchema>;
@@ -86,6 +87,13 @@ function sentence(kind: string, d: Detail): string | null {
             quoted(d.name, fr.artistActivity.aFile),
           )
         : s.fileAdded(quoted(d.name, fr.artistActivity.aFile));
+    case "file_updated": {
+      const name = quoted(d.name, fr.artistActivity.aFile);
+      const labels: Record<string, string> = fr.catalogFiles.categories.master;
+      return d.previous_category && d.category && labels[d.category]
+        ? s.fileMoved(name, labels[d.category])
+        : s.fileUpdated(name);
+    }
     case "file_removed":
       return d.audio_state
         ? s.audioRemoved(

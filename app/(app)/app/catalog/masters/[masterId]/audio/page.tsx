@@ -2,7 +2,7 @@ import { IconVolumeUp } from "nucleo-sharp-essential";
 import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { FileUpload } from "@/components/catalog/files/file-upload";
+import { AudioUpload } from "@/components/catalog/files/audio-upload";
 import { FilesTable } from "@/components/catalog/files/files-table";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -40,10 +40,10 @@ export default async function MasterAudioPage({
   return (
     <div className="flex flex-col gap-[var(--section-gap)]">
       {organizationId && (
-        <FileUpload
+        <AudioUpload
           organizationId={organizationId}
           owner={owner}
-          audio={{ defaultState: master.audioState ?? "demo" }}
+          defaultState={master.audioState ?? "demo"}
         />
       )}
       {error ? (
@@ -74,7 +74,7 @@ export default async function MasterAudioPage({
                 <FilesTable
                   owner={owner}
                   files={own}
-                  canDelete={!!organizationId}
+                  canEdit={!!organizationId}
                   audio
                 />
               ) : (

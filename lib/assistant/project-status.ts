@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Access } from "@/lib/auth/access";
 import { fr } from "@/lib/i18n/fr";
+import { projectKindLabel } from "@/lib/projects/labels";
 import { routes } from "@/lib/auth/redirects";
 import {
   familyLabel,
@@ -46,7 +47,7 @@ export async function projectStatus(projectId: string, access: Access) {
 
   const facts: string[] = [];
   facts.push(
-    `Projet « ${project.title} »${project.artistName ? ` de ${project.artistName}` : ""} (${fr.shell.projectTypes[project.type]})${project.ownerName ? `, piloté par ${project.ownerName}` : ""}.`,
+    `Projet « ${project.title} »${project.artistName ? ` de ${project.artistName}` : ""} (${projectKindLabel({ type: project.type, musicFormat: project.musicFormat, contentFormatName: project.contentFormat?.name ?? null })})${project.ownerName ? `, piloté par ${project.ownerName}` : ""}.`,
   );
   facts.push(
     project.stages.length === 0

@@ -25,6 +25,9 @@ export const projectStatusTone: Record<string, Tone> = {
   launched: "info",
 };
 
+/** A draft of the new project form, listed with the projects: nothing yet. */
+export const draftTone: Tone = "neutral";
+
 export const callStatusTone: Record<string, Tone> = {
   draft: "neutral",
   upcoming: "info",

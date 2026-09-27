@@ -9,6 +9,7 @@ export const ACTIVITY_KINDS = [
   "contact_updated",
   "contact_removed",
   "file_added",
+  "file_updated",
   "file_removed",
   "master_created",
   "master_credited",
@@ -51,6 +52,8 @@ export type ActivityDetail = {
   assignee?: string;
   role?: string;
   category?: FileCategory;
+  // A reclassified file: where it was.
+  previous_category?: FileCategory;
   fields?: ArtistField[];
   // Relation with PDS at the time (creation, or the new one on a change).
   relation?: ArtistRelation;

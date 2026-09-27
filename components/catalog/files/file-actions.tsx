@@ -1,101 +1,133 @@
 "use client";
 
-import { IconTrash } from "nucleo-sharp-essential";
+import {
+  IconEyeOpen,
+  IconPenWriting2,
+  IconTrash,
+} from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
 
-import { FormMessage } from "@/components/auth/form-message";
-import { IconArrowDown } from "@/components/icons";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { FileEditForm } from "@/components/catalog/files/file-edit-form";
+import { IconDownload } from "@/components/icons";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { FormDialog } from "@/components/ui/form-dialog";
+import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { deleteCatalogFile } from "@/lib/catalog/file-actions";
 import type { CatalogFile, FileOwner } from "@/lib/catalog/file-rules";
 import { fr } from "@/lib/i18n/fr";
 
-// Row actions: download (signed URL), and delete after confirmation for
-// manage_catalog. The dialog stays open with the error if it fails.
+// "⋯" of a file: open it in a new tab (the browser previews PDFs, images,
+// sounds), download it under its name, then for manage_catalog edit it
+// (name, category, precision) and delete it after confirmation.
 export function FileActions({
   owner,
   file,
+  canEdit,
   canDelete,
 }: {
   owner: FileOwner;
   file: CatalogFile;
+  canEdit: boolean;
   canDelete: boolean;
 }) {
   const t = fr.catalogFiles;
-  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function close() {
+  function closeDelete() {
     setError(null);
-    setOpen(false);
+    setDeleting(false);
   }
 
-  function confirm() {
+  function confirmDelete() {
     startTransition(async () => {
       const result = await deleteCatalogFile({ owner, fileId: file.id });
-      if (result.ok) close();
+      if (result.ok) closeDelete();
       else setError(result.error);
     });
   }
 
+  const { openUrl, downloadUrl } = file;
+  const actions: RowAction[] = [
+    ...(openUrl
+      ? [
+          {
+            key: "open",
+            label: t.menu.open,
+            icon: IconEyeOpen,
+            onSelect: () => window.open(openUrl, "_blank", "noopener"),
+          },
+        ]
+      : []),
+    ...(downloadUrl
+      ? [
+          {
+            key: "download",
+            label: t.menu.download,
+            icon: IconDownload,
+            // Served as an attachment: the page stays.
+            onSelect: () => window.location.assign(downloadUrl),
+          },
+        ]
+      : []),
+    ...(canEdit
+      ? [
+          {
+            key: "edit",
+            label: t.menu.edit,
+            icon: IconPenWriting2,
+            onSelect: () => setEditing(true),
+          },
+        ]
+      : []),
+    ...(canDelete
+      ? [
+          {
+            key: "delete",
+            label: t.menu.remove,
+            icon: IconTrash,
+            onSelect: () => setDeleting(true),
+          },
+        ]
+      : []),
+  ];
+
   return (
-    <div className="flex justify-end gap-1">
-      {file.downloadUrl && (
-        <a
-          href={file.downloadUrl}
-          aria-label={t.download(file.fileName)}
-          className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+    <>
+      <RowActions label={t.menu.label(file.fileName)} actions={actions} />
+      {canEdit && (
+        <FormDialog
+          open={editing}
+          onOpenChange={setEditing}
+          title={t.edit.title}
+          description={t.edit.description}
+          closeLabel={t.close}
         >
-          <IconArrowDown aria-hidden />
-        </a>
+          <FileEditForm
+            owner={owner}
+            file={file}
+            onDone={() => setEditing(false)}
+          />
+        </FormDialog>
       )}
       {canDelete && (
-        <>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t.remove(file.fileName)}
-            onClick={() => setOpen(true)}
-          >
-            <IconTrash aria-hidden />
-          </Button>
-          <Dialog open={open} onOpenChange={(next) => !next && close()}>
-            <DialogContent closeLabel={t.close}>
-              <DialogHeader>
-                <DialogTitle>{t.confirmTitle}</DialogTitle>
-                <DialogDescription>
-                  {t.confirmBody(file.fileName)}
-                </DialogDescription>
-              </DialogHeader>
-              {error && <FormMessage kind="error">{error}</FormMessage>}
-              <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <Button type="button" variant="ghost" size="lg" onClick={close}>
-                  {t.cancel}
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="lg"
-                  disabled={pending}
-                  aria-busy={pending || undefined}
-                  onClick={confirm}
-                >
-                  {pending ? t.deleting : t.confirm}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
+        <ConfirmDialog
+          open={deleting}
+          onOpenChange={(open) => !open && closeDelete()}
+          title={t.confirmTitle}
+          description={t.confirmBody(file.fileName)}
+          cancelLabel={t.cancel}
+          closeLabel={t.close}
+          confirmLabel={t.confirm}
+          pendingLabel={t.deleting}
+          pending={pending}
+          destructive
+          error={error}
+          onConfirm={confirmDelete}
+        />
       )}
-    </div>
+    </>
   );
 }

@@ -73,7 +73,9 @@ export function buildTimeline(
       title: releaseTitle,
       href: routes.projectRelease(projectId),
     });
-  if (plan.projectDueDate)
+  // One date, one truth: once the Release tab has its planned date, it
+  // stands for the project's due date too (as for the strategy countdown).
+  if (plan.projectDueDate && !plan.plannedReleaseDate)
     items.push({
       key: "project-due",
       date: plan.projectDueDate,

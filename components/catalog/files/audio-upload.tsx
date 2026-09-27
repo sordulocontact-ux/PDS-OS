@@ -9,7 +9,6 @@ import { FilterChip } from "@/components/ui/filter-chip";
 import { readAudioDuration } from "@/lib/catalog/audio-duration";
 import {
   AUDIO_ACCEPT,
-  FILES_TAB_CATEGORIES,
   isAudioFile,
   type FileOwner,
 } from "@/lib/catalog/file-rules";
@@ -17,38 +16,29 @@ import { AUDIO_STATES, type AudioState } from "@/lib/catalog/title-rules";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { fr } from "@/lib/i18n/fr";
 
-// Adds a file at once: pick the category, then the file. The list refreshes
-// from the server once it is recorded. With `audio` (a title's Audio tab),
-// the chips pick the audio state the file stands for instead, starting
-// from the title's own, and the browser reads the file's duration.
-export function FileUpload({
+// Audio tab of a title: pick the audio state the file stands for (starting
+// from the title's own), then the file; the browser reads its duration.
+// The list refreshes from the server once it is recorded. Other files go
+// through the library (FileImport).
+export function AudioUpload({
   organizationId,
   owner,
-  audio,
+  defaultState,
 }: {
   organizationId: string;
   owner: FileOwner;
-  audio?: { defaultState: AudioState };
+  defaultState: AudioState;
 }) {
-  const t = fr.catalogFiles;
   const a = fr.masterPage.audio;
-  const choices: Record<string, string> = audio
-    ? fr.catalog.audioStates
-    : t.categories[owner.kind];
-  const values: readonly string[] = audio
-    ? AUDIO_STATES
-    : FILES_TAB_CATEGORIES[owner.kind];
   const input = useRef<HTMLInputElement>(null);
-  const [choice, setChoice] = useState<string>(
-    audio ? audio.defaultState : "other",
-  );
+  const [state, setState] = useState<AudioState>(defaultState);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   function upload(file: File | undefined) {
     if (!file) return;
     setError(null);
-    if (audio && !isAudioFile(file)) {
+    if (!isAudioFile(file)) {
       setError(a.notAudio);
       return;
     }
@@ -57,13 +47,9 @@ export function FileUpload({
         organizationId,
         owner,
         file,
-        ...(audio
-          ? {
-              category: "audio",
-              audioState: choice as AudioState,
-              durationSeconds: await readAudioDuration(file),
-            }
-          : { category: choice }),
+        category: "audio",
+        audioState: state,
+        durationSeconds: await readAudioDuration(file),
       });
       if (!result.ok) setError(result.error);
       if (input.current) input.current.value = "";
@@ -75,17 +61,17 @@ export function FileUpload({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div
           role="group"
-          aria-label={audio ? a.stateLabel : t.upload.categoryLabel}
+          aria-label={a.stateLabel}
           className="flex flex-wrap gap-2"
         >
-          {values.map((value) => (
+          {AUDIO_STATES.map((value) => (
             <FilterChip
               key={value}
-              pressed={choice === value}
+              pressed={state === value}
               disabled={pending}
-              onClick={() => setChoice(value)}
+              onClick={() => setState(value)}
             >
-              {choices[value]}
+              {fr.catalog.audioStates[value]}
             </FilterChip>
           ))}
         </div>
@@ -96,21 +82,19 @@ export function FileUpload({
           onClick={() => input.current?.click()}
         >
           <IconPaperclip aria-hidden data-icon="inline-start" />
-          {pending ? t.upload.uploading : audio ? a.add : t.upload.add}
+          {pending ? fr.catalogFiles.add.uploading : a.add}
         </Button>
       </div>
       <input
         ref={input}
         type="file"
-        accept={audio ? AUDIO_ACCEPT : undefined}
+        accept={AUDIO_ACCEPT}
         className="sr-only"
         tabIndex={-1}
         aria-hidden
         onChange={(event) => upload(event.target.files?.[0])}
       />
-      <p className="text-xs text-muted-foreground">
-        {audio ? a.hint : t.upload.hint}
-      </p>
+      <p className="text-xs text-muted-foreground">{a.hint}</p>
       {error && <FormMessage kind="error">{error}</FormMessage>}
     </div>
   );

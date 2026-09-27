@@ -19,9 +19,9 @@ export type SaveDraftResult =
 /**
  * Saves the new project form as it is. Without `draftId`, opens a draft;
  * with one, updates it, and never reopens a draft that was deleted.
- * `leaving`: the page is being left, so the cached new project page (its
- * list of drafts) is refreshed; never while typing, which would re-render
- * the form.
+ * `leaving`: the page is being left, so the cached projects list (where
+ * the drafts are listed) is refreshed; never while typing, which would
+ * re-render the form.
  */
 export async function saveProjectDraft(
   draftId: string | null,
@@ -52,7 +52,8 @@ export async function saveProjectDraft(
     console.error("saveProjectDraft:", error.message);
     return { ok: false };
   }
-  if (leaving) revalidatePath(routes.projectsNew);
+  // The projects list shows the drafts.
+  if (leaving) revalidatePath(routes.projects);
   return { ok: true, id: data?.id ?? null };
 }
 
@@ -70,6 +71,6 @@ export async function deleteProjectDraft(
     console.error("deleteProjectDraft:", error.message);
     return { ok: false };
   }
-  revalidatePath(routes.projectsNew);
+  revalidatePath(routes.projects);
   return { ok: true };
 }

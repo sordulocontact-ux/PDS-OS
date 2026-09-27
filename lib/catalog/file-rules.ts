@@ -28,6 +28,91 @@ export const FILES_TAB_CATEGORIES = {
   master: ["stems", "artwork", "contract", "other"],
 } as const satisfies { [K in FileOwnerKind]: readonly FileCategory<K>[] };
 
+/** Free precision beside the category ("Contrat artiste 2026"), as in SQL. */
+export const MAX_DESCRIPTION_LENGTH = 200;
+
+/**
+ * A view of the library (feedback n°6): every file, or one category. Views
+ * filter the same rows; a file exists once. `canReadContracts`: without it
+ * (RLS hides contracts) the Contracts view is not offered at all.
+ */
+export type FileView = "all" | string;
+
+export function fileViewsOf(
+  kind: FileOwnerKind,
+  canReadContracts: boolean,
+): string[] {
+  return [
+    "all",
+    ...FILES_TAB_CATEGORIES[kind].filter(
+      (category) => canReadContracts || category !== "contract",
+    ),
+  ];
+}
+
+export function fileViewOf(
+  kind: FileOwnerKind,
+  canReadContracts: boolean,
+  value: unknown,
+): FileView {
+  return typeof value === "string" &&
+    fileViewsOf(kind, canReadContracts).includes(value)
+    ? value
+    : "all";
+}
+
+/** Categories a file of the Files tab can be classified in. */
+export function isLibraryCategory(kind: FileOwnerKind, value: unknown) {
+  return (
+    typeof value === "string" &&
+    (FILES_TAB_CATEGORIES[kind] as readonly string[]).includes(value)
+  );
+}
+
+/**
+ * The category offered first for new files: the view they were dropped on,
+ * else what their type says (an image is a photo or an artwork, a sound is
+ * audio on an artist), else none: the person chooses.
+ */
+export function suggestedCategory(
+  kind: FileOwnerKind,
+  view: FileView,
+  files: { name: string; type: string }[],
+): string | null {
+  if (view !== "all") return view;
+  const guess = (file: { name: string; type: string }) =>
+    file.type.startsWith("image/")
+      ? kind === "artist"
+        ? "photo"
+        : "artwork"
+      : kind === "artist" && isAudioFile(file)
+        ? "audio"
+        : null;
+  const guesses = new Set(files.map(guess));
+  const [only] = guesses;
+  return guesses.size === 1 ? (only ?? null) : null;
+}
+
+/** "PDF", "JPG": the extension, else the MIME subtype. */
+export function fileFormat(fileName: string, mime: string): string {
+  const ext = fileExtension(fileName);
+  if (ext) return ext.toUpperCase();
+  const subtype = mime.split("/")[1];
+  return subtype && subtype !== "octet-stream"
+    ? subtype.split(/[.+;-]/)[0].toUpperCase()
+    : "";
+}
+
+/** What the file's icon shows. */
+export function fileKind(file: {
+  fileName: string;
+  mime: string;
+}): "image" | "audio" | "document" {
+  if (file.mime.startsWith("image/")) return "image";
+  if (isAudioFile({ name: file.fileName, type: file.mime })) return "audio";
+  return "document";
+}
+
 /** Audio files the browser can usually read (its duration included). */
 export const AUDIO_ACCEPT = "audio/*,.wav,.aif,.aiff,.mp3,.flac,.m4a,.aac,.ogg";
 
@@ -92,6 +177,8 @@ export function formatFileSize(bytes: number): string {
 export type CatalogFile = {
   id: string;
   category: string;
+  // Free precision ("Portrait presse — septembre 2026"), null when none.
+  description: string | null;
   fileName: string;
   mime: string;
   bytes: number;
@@ -101,6 +188,8 @@ export type CatalogFile = {
   createdAt: string;
   // Empty when the author's name cannot be read.
   authorName: string;
-  // Short-lived signed URL that downloads under the original name.
+  // Short-lived signed URLs: open in the browser (preview), or download
+  // under the original name.
+  openUrl: string | null;
   downloadUrl: string | null;
 };

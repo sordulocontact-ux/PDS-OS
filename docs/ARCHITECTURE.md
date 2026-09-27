@@ -55,6 +55,8 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
+| `…260927012001_catalog_file_library` | Bibliothèque de fichiers (retour n°6, § 2) : `artist_files.description` et `master_files.description` (précision libre, 200 car., `null` si vide) ; `manage_catalog` modifie nom, catégorie et précision (droits colonne, policies `*_update_catalog`), jamais un fichier audio de titre (`category <> 'audio'` avant et après) ; événement `file_updated` (`previous_category` si reclassé, privé si contrat avant **ou** après) ; lecture des objets `master-files` passée en positif comme `artist-files` (même faille que l'audit du 27/09). Tests : `file-library.test.sql`. |
+| `…260927011001_project_types_and_formats`, `…011101_pds_mic_format` | Types et formats de projet (retour n°2, `docs/CONTEXTE-PROJET.md` § 12, « Types et formats ») : `partnership` retiré (devenu `content`), `event` refusé par `create_project` ; `projects.music_format` (single, ep, album, mixtape, compilation, other ; musical seulement), `projects.content_format_id` → `content_formats` (formats PDS réutilisables, lus par tout membre, créés par `create_projects`, nom unique par organisation ; « PDS Mic » inséré pour `pds`), `artist_id` d'un contenu ; `framing_notes` renommé `initial_context`. `check_project_shape` (format obligatoire, un seul master pour un single), appelé par `create_project` et `update_project`, qui écartent ce que le type n'utilise pas. Tests : `project-types.test.sql`. |
 
 Principes :
 
@@ -132,9 +134,26 @@ Principes :
   chiffrées (`StatTiles` `href`). **Fichiers** (`artist_files`, bucket privé `artist-files`,
   50 Mo, `<org>/<artist>/<uuid>[.<ext>]`) : catégories presse / photo / contrat / audio /
   autre ; tout membre lit, **contrats lus seulement avec `manage_catalog`** (ligne et objet) ;
-  `manage_catalog` ajoute et supprime. Le navigateur envoie l'objet puis `recordArtistFile`
-  enregistre la ligne (objet supprimé si l'enregistrement échoue) ; téléchargement par URL
-  signée d'une heure (`lib/catalog/file-*.ts`, `files.ts`, `upload-file.ts`). **Activité**
+  `manage_catalog` ajoute, modifie et supprime. Le navigateur envoie l'objet puis
+  `recordCatalogFile` enregistre la ligne (objet supprimé si l'enregistrement échoue) ; une
+  seule signature par lot (`createSignedUrls`, une heure) sert à **ouvrir** et à
+  **télécharger** (`download=<nom>` ajouté à l'URL, hors jeton) (`lib/catalog/file-*.ts`,
+  `files.ts`, `upload-file.ts`). **Bibliothèque** (retour n°6, 27/09/2026) : un fichier =
+  une ligne, la **catégorie est une propriété**, jamais une copie ; Tous / Presse / Photos /
+  Contrats / Audio / Autres sont des vues filtrées par le code (`?category=`,
+  `fileViewsOf`, `FileLibrary`), nombres compris. « Tous » = les lignes que la RLS laisse
+  lire : un contrat n'y apparaît jamais pour qui ne peut pas l'ouvrir, et la vue Contrats
+  n'est pas proposée sans `manage_catalog`. Pour `manage_catalog`, toute la bibliothèque est
+  une zone de dépôt (glisser, clic dans le cadre vide, bouton « Ajouter un fichier ») ; la
+  modale demande la catégorie (proposée d'après la vue ouverte, sinon le type : image →
+  photo / pochette, son → audio) et une **précision libre** (`description`) plutôt que des
+  sous-types, à structurer plus tard selon l'usage. Plusieurs fichiers déposés ensemble
+  partagent catégorie et précision. « ⋯ » : Ouvrir (nouvel onglet), Télécharger, Modifier
+  (nom, catégorie = reclasser, précision), Supprimer. **Pas d'archivage d'un fichier** :
+  l'archivage reste réservé aux artistes, titres et projets (§ 2 quater) ; un fichier se
+  supprime (`manage_catalog`, confirmé). Même bibliothèque sur l'onglet Fichiers d'un titre
+  (hors fichiers audio, qui gardent leur onglet), pensée pour être réutilisée ensuite par un
+  projet, un call ou une activation (`FileOwner`). **Activité**
   (`activity_events`) : journal écrit **par triggers seuls** (création / modification de
   l'artiste, contacts, fichiers, masters, projets liés, transmissions), `detail` copié au
   moment de l'événement, historique antérieur reconstitué par la migration ; lecture filtrée
@@ -317,11 +336,13 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   avant une première modification. L'adresse prend `?draft=<id>` par `history.replaceState`
   (une vraie navigation re-rendrait le formulaire en pleine saisie), pour qu'un
   rechargement ou le retour arrière le reprenne ; si la page en cache date d'avant le
-  brouillon, elle est relue (`router.refresh`). Enregistrer en quittant rafraîchit la page
-  (sa liste de brouillons), jamais pendant la saisie.
-- **Reprendre** : `/app/projects/new` liste les brouillons de la personne (« Brouillons »,
-  `ListCard`, le plus récent d'abord), chacun rouvre le formulaire pré-rempli ; un brouillon
-  introuvable le dit. Les valeurs sont relues comme une saisie (`draftValues`) et revérifiées
+  brouillon, elle est relue (`router.refresh`). Enregistrer en quittant rafraîchit la liste
+  des projets (où sont les brouillons), jamais pendant la saisie.
+- **Reprendre** : la liste **Projets** montre en tête les brouillons de la personne (vue
+  Actifs, avec `create_projects`), le plus récent d'abord, avec leur type (« Musical · EP »)
+  et une pastille « Brouillon » (`draftTone`, neutre) ; chacun rouvre le formulaire
+  pré-rempli (`/app/projects/new?draft=<id>`) ; un brouillon introuvable le dit. La page
+  « Nouveau projet » ne les liste plus (demande de Sacha, 27/09/2026). Les valeurs sont relues comme une saisie (`draftValues`) et revérifiées
   à la création.
 - **Fin** : « Créer le projet » supprime le brouillon (`createProject`, session de
   l'auteur) ; l'enregistrement s'arrête pendant l'envoi et reprend si la création est

@@ -11,6 +11,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { isFramingOpen } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
+import { projectKindLabel } from "@/lib/projects/labels";
 import {
   listCreativePeople,
   listProjectCreatives,
@@ -79,7 +80,14 @@ export default async function ProjectOverviewPage({
   const t = fr.shell.project.overview;
   const facts: Array<[string, string]> = [
     [t.artist, project.artistName || t.notProvided],
-    [t.type, fr.shell.projectTypes[project.type]],
+    [
+      t.type,
+      projectKindLabel({
+        type: project.type,
+        musicFormat: project.musicFormat,
+        contentFormatName: project.contentFormat?.name ?? null,
+      }),
+    ],
     [t.owner, project.ownerName ?? t.noOwner],
     [
       t.currentStage,

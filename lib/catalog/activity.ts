@@ -33,6 +33,7 @@ const detailSchema = z.object({
   assignee: z.string().optional().catch(undefined),
   role: z.string().optional().catch(undefined),
   category: z.enum(FILE_CATEGORIES).optional().catch(undefined),
+  previous_category: z.enum(FILE_CATEGORIES).optional().catch(undefined),
   relation: z.enum(ARTIST_RELATIONS).optional().catch(undefined),
   fields: z
     .array(z.string())

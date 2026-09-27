@@ -1,19 +1,21 @@
-import { IconFile, IconVolumeUp } from "nucleo-sharp-essential";
-
 import { FileActions } from "@/components/catalog/files/file-actions";
+import { FileTypeIcon } from "@/components/catalog/files/file-type-icon";
 import {
   DataTable,
+  DataTableActionsCell,
+  DataTableActionsHead,
   DataTableBody,
   DataTableCell,
   DataTableHead,
   DataTableHeader,
-  DataTableIcon,
+  DataTableLink,
   DataTableMedia,
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
+  fileFormat,
   formatFileSize,
   type CatalogFile,
   type FileOwner,
@@ -22,18 +24,21 @@ import { formatDuration } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
 
-// Files of an artist or a title, newest first: name and size, category, author, date,
-// then download / delete. `audio`: audio versions of one audio state (Audio
-// tab), so no category column, and the duration beside the size.
+// Files of an artist or a title, newest first: name (opens the file in a new
+// tab), precision, format and size, category, author, date, then "⋯".
+// `audio`: audio versions of one audio state (Audio tab), so no category
+// column, the duration beside the size, and no editing (their state is set
+// on upload).
 export function FilesTable({
   owner,
   files,
-  canDelete,
+  canEdit,
   audio = false,
 }: {
   owner: FileOwner;
   files: CatalogFile[];
-  canDelete: boolean;
+  // manage_catalog: edit and delete.
+  canEdit: boolean;
   audio?: boolean;
 }) {
   const t = fr.catalogFiles;
@@ -47,26 +52,42 @@ export function FilesTable({
           <DataTableHead hideBelow="sm">{t.columns.category}</DataTableHead>
         )}
         <DataTableHead hideBelow="lg">{t.columns.addedBy}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.addedAt}</DataTableHead>
-        <DataTableHead fill align="end">
-          <span className="sr-only">{t.columns.actions}</span>
+        <DataTableHead hideBelow="md" fill>
+          {t.columns.addedAt}
         </DataTableHead>
+        <DataTableActionsHead label={t.columns.actions} />
       </DataTableHeader>
       <DataTableBody>
         {files.map((file) => (
           <DataTableRow key={file.id}>
             <DataTableCell>
               <DataTableMedia
-                visual={
-                  <DataTableIcon icon={audio ? IconVolumeUp : IconFile} />
+                visual={<FileTypeIcon file={file} />}
+                title={
+                  <DataTableLink href={file.openUrl} newTab>
+                    <span className="sr-only">{t.open(file.fileName)}</span>
+                    <span aria-hidden>{file.fileName}</span>
+                  </DataTableLink>
                 }
-                title={<span className="truncate">{file.fileName}</span>}
-                subtitle={[
-                  formatFileSize(file.bytes),
-                  file.durationSeconds && formatDuration(file.durationSeconds),
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
+                subtitle={
+                  <>
+                    {/* The category column is hidden on phones. */}
+                    {!audio && (
+                      <span className="sm:hidden">
+                        {labels[file.category] ?? labels.other} ·{" "}
+                      </span>
+                    )}
+                    {[
+                      file.description,
+                      fileFormat(file.fileName, file.mime),
+                      formatFileSize(file.bytes),
+                      file.durationSeconds &&
+                        formatDuration(file.durationSeconds),
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </>
+                }
               />
             </DataTableCell>
             {!audio && (
@@ -79,12 +100,17 @@ export function FilesTable({
             <DataTableCell hideBelow="lg">
               {file.authorName || EMPTY_CELL}
             </DataTableCell>
-            <DataTableCell hideBelow="md">
+            <DataTableCell hideBelow="md" fill>
               {formatShortDate(file.createdAt)}
             </DataTableCell>
-            <DataTableCell fill align="end">
-              <FileActions owner={owner} file={file} canDelete={canDelete} />
-            </DataTableCell>
+            <DataTableActionsCell>
+              <FileActions
+                owner={owner}
+                file={file}
+                canEdit={canEdit && !audio}
+                canDelete={canEdit}
+              />
+            </DataTableActionsCell>
           </DataTableRow>
         ))}
       </DataTableBody>

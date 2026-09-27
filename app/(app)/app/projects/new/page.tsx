@@ -5,26 +5,20 @@ import { FormMessage } from "@/components/auth/form-message";
 import { CreateProjectForm } from "@/components/projects/create-project-form";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
-import { CardRow, ListCard } from "@/components/ui/list-card";
 import { requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
-import { formatLongDay, formatTime } from "@/lib/project-history/format";
 import { listContentFormats } from "@/lib/projects/content-formats";
 import { listCreativePeople } from "@/lib/projects/creatives";
-import {
-  draftDefaults,
-  getProjectDraft,
-  listProjectDrafts,
-} from "@/lib/projects/drafts";
+import { draftDefaults, getProjectDraft } from "@/lib/projects/drafts";
 import { listAssignablePeople } from "@/lib/projects/queries";
 
 // ?master=<id>: opened from a master page — that master is linked, the
 // project is a music single and the title is the master's. Everything stays
 // editable.
-// ?draft=<id>: resumes a draft of this form (feedback n°6); without one, the
-// viewer's drafts are listed above a blank form.
+// ?draft=<id>: resumes a draft of this form (feedback n°6), opened from the
+// projects list where the drafts are listed with a "Brouillon" badge.
 export default async function NewProjectPage({
   searchParams,
 }: PageProps<"/app/projects/new">) {
@@ -33,7 +27,7 @@ export default async function NewProjectPage({
   const { master: masterParam, draft: draftParam } = await searchParams;
   const draftId = typeof draftParam === "string" ? draftParam : null;
   const organizationId = access.organizationId ?? "";
-  const [masters, artists, contentFormats, managers, creatives, draft, drafts] =
+  const [masters, artists, contentFormats, managers, creatives, draft] =
     await Promise.all([
       listMasterOptions(),
       listArtistOptions(),
@@ -41,7 +35,6 @@ export default async function NewProjectPage({
       listAssignablePeople(organizationId),
       listCreativePeople(organizationId),
       draftId ? getProjectDraft(draftId) : null,
-      draftId ? [] : listProjectDrafts(),
     ]);
   const fromMaster =
     typeof masterParam === "string"
@@ -62,20 +55,6 @@ export default async function NewProjectPage({
       <PageHeader title={t.title} description={t.subtitle} />
       {draftId && !draft && (
         <FormMessage kind="error">{t.draft.notFound}</FormMessage>
-      )}
-      {drafts.length > 0 && (
-        <ListCard title={t.draft.listTitle} count={drafts.length}>
-          {drafts.map((d) => (
-            <CardRow
-              key={d.id}
-              href={`${routes.projectsNew}?draft=${d.id}`}
-              main={d.title || t.draft.untitled}
-              sub={t.draft.updated(
-                `${formatLongDay(d.updatedAt)}, ${formatTime(d.updatedAt)}`,
-              )}
-            />
-          ))}
-        </ListCard>
       )}
       <CreateProjectForm
         // A new form for each draft: nothing carried from the last one.

@@ -10,7 +10,7 @@ import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { WorkflowBreadcrumb } from "@/components/projects/workflow-breadcrumb";
 import { requireApproved } from "@/lib/auth/dal";
 import { hasPendingValidation } from "@/lib/framing/related";
-import { fr } from "@/lib/i18n/fr";
+import { projectKindLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { isFramingValidated } from "@/lib/projects/types";
@@ -68,7 +68,14 @@ export default async function ProjectLayout({
             )}
           </div>
           <p className="text-sm text-muted-foreground">
-            {[project.artistName, fr.shell.projectTypes[project.type]]
+            {[
+              project.artistName,
+              projectKindLabel({
+                type: project.type,
+                musicFormat: project.musicFormat,
+                contentFormatName: project.contentFormat?.name ?? null,
+              }),
+            ]
               .filter(Boolean)
               .join(" · ")}
           </p>

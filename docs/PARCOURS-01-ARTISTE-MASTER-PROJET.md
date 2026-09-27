@@ -58,32 +58,39 @@ affiche le titre, les crédits dans l'ordre, l'ISRC formaté ou « non renseign�
 Deux chemins d'entrée, même formulaire :
 
 - Depuis la fiche master, bouton « Créer un projet » → le master est déjà rattaché, le
-  type est présélectionné sur « Sortie musicale », le titre du projet est pré-rempli avec
-  le titre du master. Tout reste modifiable.
+  projet est présélectionné en « Musical » · « Single », le titre du projet est pré-rempli
+  avec le titre du master. Tout reste modifiable.
 - Depuis `/projets` → bouton « Nouveau projet » → formulaire vierge.
 
-Formulaire `/projets/nouveau` :
+> **Mis à jour le 27/09/2026 (retour n°2)** : types et formats décrits dans
+> `docs/CONTEXTE-PROJET.md` § 12, « Types et formats de projet ». Le partenariat n'est
+> plus un type de projet.
 
-| Champ | Obligatoire | Note |
-| --- | --- | --- |
-| Titre du projet | oui | |
-| Type | oui | `sortie_musicale`, `partenariat`, `contenu` |
-| Masters | dépend du type | Voir la règle ci-dessous |
-| Échéance principale | non | Date de sortie visée pour une sortie musicale |
-| Budget prévisionnel | non | Montant en euros |
-| Priorité | non | basse, normale, haute |
-| Notes de cadrage | non | Champ libre, reprend le brief reçu |
+Formulaire `/projets/nouveau`, en trois blocs :
+
+| Bloc | Champ | Obligatoire | Note |
+| --- | --- | --- | --- |
+| Le projet | Type | oui | Musical, Contenu (Événement : « Bientôt ») |
+| | Format | oui | Musical : Single, EP, Album, Mixtape, Compilation, Autre. Contenu : Format PDS existant ou Contenu ponctuel |
+| | Masters | musical | Un seul pour un single, au moins un sinon |
+| | Format PDS | édition d'un format | Choisi ou créé dans le sélecteur |
+| | Artiste | non | Contenu seulement |
+| Informations initiales | Titre du projet | oui | |
+| | Échéance principale / Date de sortie visée | non | La date de l'onglet Sortie la remplace ensuite |
+| | Budget prévisionnel | non | Montant en euros, première estimation |
+| | Priorité | non | Haute : en tête des listes |
+| | Contexte initial | non | Ce qu'on sait en transmettant, pas le Brief |
+| Équipe | Chef de projet | oui | La personne, jamais le poste |
+| | Direction créative | non | |
 
 ### La règle qui porte tout le type de projet
 
-- `sortie_musicale` → au moins un master obligatoire. Le formulaire refuse la validation
-  sans master et le dit explicitement.
-- `partenariat` et `contenu` → master facultatif. Zéro master est un cas normal, pas une
-  saisie incomplète : ne pas afficher d'avertissement.
+- Musical → un format et au moins un master (exactement un pour un single). Le formulaire
+  refuse la validation et le dit explicitement ; la base refuse aussi (`check_project_shape`).
+- Contenu → aucun master : ce que le formulaire a gardé d'un autre type est ignoré.
 
-Changer le type après avoir rattaché des masters ne les efface pas. Passer de
-`partenariat` à `sortie_musicale` sans master affiche la contrainte au moment de valider,
-pas avant.
+Changer le type ne vide rien à l'écran : revenir au type précédent retrouve la saisie.
+Les contraintes s'affichent au moment de valider, pas avant.
 
 ### Rattacher plusieurs masters
 
@@ -125,7 +132,7 @@ Et symétriquement, la fiche du master affiche maintenant le projet dans son blo
 - [ ] Créer un artiste depuis le formulaire master le laisse sélectionné au retour.
 - [ ] Créer un master depuis le formulaire projet le laisse rattaché au retour.
 - [ ] Une sortie musicale sans master est refusée, avec un message qui nomme la règle.
-- [ ] Un partenariat sans master est créé sans avertissement.
+- [ ] Un contenu ponctuel sans master ni artiste est créé sans avertissement.
 - [ ] Un projet avec trois masters s'affiche correctement des deux côtés.
 - [ ] Après création, le projet est « Non transmis » et aucune étape n'existe en base.
 - [ ] Le directeur créatif ne voit aucun bouton de création sur ces trois écrans, et un

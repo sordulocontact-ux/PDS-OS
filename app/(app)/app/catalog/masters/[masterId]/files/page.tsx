@@ -1,52 +1,48 @@
-import { IconFile } from "nucleo-sharp-essential";
 import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { FileUpload } from "@/components/catalog/files/file-upload";
-import { FilesTable } from "@/components/catalog/files/files-table";
-import { EmptyState } from "@/components/shell/empty-state";
+import { FileLibrary } from "@/components/catalog/files/file-library";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
+import { fileViewOf } from "@/lib/catalog/file-rules";
 import { listCatalogFiles } from "@/lib/catalog/files";
 import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
 // Files tab: stems, artwork, contracts… everything but the audio versions,
-// which have their own tab. Everyone reads them (contracts only with
-// manage_catalog, RLS); manage_catalog adds and deletes. Same components as
-// the artist files.
+// which have their own tab. The same library as the artist's (views by
+// category, ?category=). Everyone reads it (contracts only with
+// manage_catalog, RLS); manage_catalog adds, edits and deletes.
 export default async function MasterFilesPage({
   params,
+  searchParams,
 }: PageProps<"/app/catalog/masters/[masterId]/files">) {
   const { masterId } = await params;
   const owner = { kind: "master", id: masterId } as const;
-  const [access, master, { files, error }] = await allInOrder([
+  const [access, master, { files, error }, query] = await allInOrder([
     requireApproved(),
     getMaster(masterId),
     listCatalogFiles(owner, "other"),
+    searchParams,
   ]);
   if (!master) notFound();
-  const canEdit = can(access, "manage_catalog") && !!access.organizationId;
-  const t = fr.catalogFiles;
+  const canReadContracts = can(access, "manage_catalog");
   const m = fr.masterPage.files;
 
+  if (error)
+    return <FormMessage kind="error">{fr.catalogFiles.loadError}</FormMessage>;
   return (
-    <div className="flex flex-col gap-6">
-      {canEdit && access.organizationId && (
-        <FileUpload organizationId={access.organizationId} owner={owner} />
-      )}
-      {error ? (
-        <FormMessage kind="error">{t.loadError}</FormMessage>
-      ) : files.length === 0 ? (
-        <EmptyState
-          icon={IconFile}
-          title={t.emptyTitle}
-          body={canEdit ? m.emptyBody : m.emptyBodyReadOnly}
-        />
-      ) : (
-        <FilesTable owner={owner} files={files} canDelete={canEdit} />
-      )}
-    </div>
+    <FileLibrary
+      owner={owner}
+      organizationId={canReadContracts ? access.organizationId : null}
+      canReadContracts={canReadContracts}
+      files={files}
+      view={fileViewOf("master", canReadContracts, query.category)}
+      basePath={routes.masterFiles(masterId)}
+      emptyBody={m.emptyBody}
+      emptyBodyReadOnly={m.emptyBodyReadOnly}
+    />
   );
 }

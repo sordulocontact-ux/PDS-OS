@@ -1,8 +1,9 @@
 "use client";
 
 import { IconImage, type IconProps } from "nucleo-sharp-essential";
-import { useId, useState } from "react";
+import { useId } from "react";
 
+import { useFileDrop } from "@/components/ui/use-file-drop";
 import { cn } from "@/lib/utils";
 
 /**
@@ -31,34 +32,12 @@ export function FileDropZone({
   onFiles: (files: File[]) => void;
 }) {
   const id = useId();
-  const [dragging, setDragging] = useState(false);
-
-  const onDragOver = (event: React.DragEvent) => {
-    if (disabled || !event.dataTransfer.types.includes("Files")) return;
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "copy";
-    setDragging(true);
-  };
-  // Leaving for a child (icon, text) is not leaving the zone.
-  const onDragLeave = (event: React.DragEvent) => {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null))
-      setDragging(false);
-  };
-  const onDrop = (event: React.DragEvent) => {
-    if (disabled) return;
-    event.preventDefault();
-    event.stopPropagation();
-    setDragging(false);
-    const files = [...event.dataTransfer.files];
-    if (files.length > 0) onFiles(multiple ? files : files.slice(0, 1));
-  };
+  const { dragging, handlers } = useFileDrop({ disabled, multiple, onFiles });
 
   return (
     <label
       htmlFor={id}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
+      {...handlers}
       data-dragging={dragging || undefined}
       className={cn(
         "flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border px-4 py-6 text-center transition-colors",

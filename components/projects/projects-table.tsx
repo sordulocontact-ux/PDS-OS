@@ -17,14 +17,23 @@ import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { projectKindLabel } from "@/lib/projects/labels";
+import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import type { ProjectListItem } from "@/lib/projects/types";
-import { projectPriorityTone, projectStatusTone } from "@/lib/ui/state-tones";
+import {
+  draftTone,
+  projectPriorityTone,
+  projectStatusTone,
+} from "@/lib/ui/state-tones";
 
 export function ProjectsTable({
   projects,
+  drafts = [],
   rights,
 }: {
   projects: ProjectListItem[];
+  // The viewer's drafts of the new project form, listed first: a click
+  // resumes the form.
+  drafts?: ProjectDraftItem[];
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
 }) {
@@ -41,6 +50,25 @@ export function ProjectsTable({
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
       <DataTableBody>
+        {drafts.map((draft) => (
+          <DataTableRow key={`draft-${draft.id}`}>
+            <DataTableCell>
+              <DataTableLink href={`${routes.projectsNew}?draft=${draft.id}`}>
+                {draft.title || fr.shell.newProject.draft.untitled}
+              </DataTableLink>
+            </DataTableCell>
+            <DataTableCell hideBelow="sm">{EMPTY_CELL}</DataTableCell>
+            <DataTableCell hideBelow="md">
+              {draft.kind ?? EMPTY_CELL}
+            </DataTableCell>
+            <DataTableCell fill>
+              <StatusBadge tone={draftTone} size="sm">
+                {t.draft}
+              </StatusBadge>
+            </DataTableCell>
+            {withActions && <DataTableActionsCell>{null}</DataTableActionsCell>}
+          </DataTableRow>
+        ))}
         {projects.map((project) => (
           <DataTableRow key={project.id}>
             <DataTableCell>

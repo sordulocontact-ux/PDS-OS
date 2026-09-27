@@ -37,6 +37,10 @@ export function activitySentence(event: ActivityEvent): string {
       return s.contactRemoved(name(t.aContact));
     case "file_added":
       return s.fileAdded(name(t.aFile));
+    case "file_updated":
+      return d.previous_category && d.category
+        ? s.fileMoved(name(t.aFile), t.fileCategories[d.category])
+        : s.fileUpdated(name(t.aFile));
     case "file_removed":
       return s.fileRemoved(name(t.aFile));
     case "master_created":

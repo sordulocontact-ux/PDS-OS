@@ -8,9 +8,11 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import {
   FILE_BUCKETS,
+  MAX_DESCRIPTION_LENGTH,
   MAX_FILE_BYTES,
   isCatalogFilePath,
   isFileCategory,
+  isLibraryCategory,
   type FileOwner,
 } from "@/lib/catalog/file-rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
@@ -29,12 +31,23 @@ const ownerSchema = z.object({
   id: catalogIdSchema,
 });
 
+// Blank means none (null), as the database wants it.
+const descriptionSchema = z
+  .string()
+  .trim()
+  .max(MAX_DESCRIPTION_LENGTH)
+  .nullish()
+  .transform((value) => value || null);
+
+const fileNameSchema = z.string().trim().min(1).max(255);
+
 const recordSchema = z
   .object({
     owner: ownerSchema,
     path: z.string().max(200),
     category: z.string(),
-    fileName: z.string().trim().min(1).max(255),
+    description: descriptionSchema,
+    fileName: fileNameSchema,
     mime: z.string().trim().min(1).max(255),
     bytes: z.number().int().positive().max(MAX_FILE_BYTES),
     // An audio version of a title: the state it stands for, and the
@@ -50,6 +63,17 @@ const recordSchema = z
   );
 
 const deleteSchema = z.object({ owner: ownerSchema, fileId: z.uuid() });
+
+// A title's audio versions are not edited here (RLS refuses them too).
+const updateSchema = z
+  .object({
+    owner: ownerSchema,
+    fileId: z.uuid(),
+    fileName: fileNameSchema,
+    category: z.string(),
+    description: descriptionSchema,
+  })
+  .refine((input) => isLibraryCategory(input.owner.kind, input.category));
 
 async function catalogAccess() {
   const access = await requireApproved();
@@ -77,7 +101,8 @@ export async function recordCatalogFile(
   const parsed = recordSchema.safeParse(input);
   if (!organizationId || !parsed.success)
     return { ok: false, error: fr.auth.errors.forbidden };
-  const { owner, path, category, fileName, mime, bytes } = parsed.data;
+  const { owner, path, category, description, fileName, mime, bytes } =
+    parsed.data;
   const audio =
     category === "audio"
       ? {
@@ -92,6 +117,7 @@ export async function recordCatalogFile(
   const row = {
     organization_id: organizationId,
     category,
+    description,
     path,
     file_name: fileName,
     mime,
@@ -108,6 +134,44 @@ export async function recordCatalogFile(
   if (error) {
     console.error("recordCatalogFile:", error.message);
     return { ok: false, error: t.failed };
+  }
+  refresh(owner);
+  return { ok: true };
+}
+
+// Name, category and precision: reclassifying moves the one file from a
+// view to another (and a contract out of, or into, restricted reading).
+export async function updateCatalogFile(
+  input: z.input<typeof updateSchema>,
+): Promise<Result> {
+  const t = fr.catalogFiles;
+  const parsed = updateSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: t.invalid };
+  if (!(await catalogAccess()))
+    return { ok: false, error: fr.auth.errors.forbidden };
+  const { owner, fileId, fileName, category, description } = parsed.data;
+
+  const supabase = await createClient();
+  const values = { file_name: fileName, category, description };
+  const { data, error } =
+    owner.kind === "artist"
+      ? await supabase
+          .from("artist_files")
+          .update(values)
+          .eq("id", fileId)
+          .eq("artist_id", owner.id)
+          .select("id")
+          .maybeSingle()
+      : await supabase
+          .from("master_files")
+          .update(values)
+          .eq("id", fileId)
+          .eq("master_id", owner.id)
+          .select("id")
+          .maybeSingle();
+  if (error || !data) {
+    if (error) console.error("updateCatalogFile:", error.message);
+    return { ok: false, error: t.updateFailed };
   }
   refresh(owner);
   return { ok: true };

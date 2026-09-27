@@ -1,49 +1,46 @@
-import { IconFile } from "nucleo-sharp-essential";
 import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { FileUpload } from "@/components/catalog/files/file-upload";
-import { FilesTable } from "@/components/catalog/files/files-table";
-import { EmptyState } from "@/components/shell/empty-state";
+import { FileLibrary } from "@/components/catalog/files/file-library";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
+import { fileViewOf } from "@/lib/catalog/file-rules";
 import { listCatalogFiles } from "@/lib/catalog/files";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Files tab: documents of the artist. Everyone reads them (contracts only
-// with manage_catalog, RLS); manage_catalog adds and deletes.
+// Files tab: the artist's document library, filtered by category in the
+// URL (?category=). Everyone reads it (contracts only with manage_catalog,
+// RLS); manage_catalog adds, edits, reclassifies and deletes.
 export default async function ArtistFilesPage({
   params,
+  searchParams,
 }: PageProps<"/app/catalog/artists/[artistId]/files">) {
   const { artistId } = await params;
-  const [access, artist, { files, error }] = await allInOrder([
+  const owner = { kind: "artist", id: artistId } as const;
+  const [access, artist, { files, error }, query] = await allInOrder([
     requireApproved(),
     getArtist(artistId),
-    listCatalogFiles({ kind: "artist", id: artistId }),
+    listCatalogFiles(owner),
+    searchParams,
   ]);
   if (!artist) notFound();
   const canEdit = can(access, "manage_catalog");
   const t = fr.catalogFiles;
-  const owner = { kind: "artist", id: artist.id } as const;
 
+  if (error) return <FormMessage kind="error">{t.loadError}</FormMessage>;
   return (
-    <div className="flex flex-col gap-6">
-      {canEdit && (
-        <FileUpload organizationId={artist.organizationId} owner={owner} />
-      )}
-      {error ? (
-        <FormMessage kind="error">{t.loadError}</FormMessage>
-      ) : files.length === 0 ? (
-        <EmptyState
-          icon={IconFile}
-          title={t.emptyTitle}
-          body={canEdit ? t.emptyBody : t.emptyBodyReadOnly}
-        />
-      ) : (
-        <FilesTable owner={owner} files={files} canDelete={canEdit} />
-      )}
-    </div>
+    <FileLibrary
+      owner={owner}
+      organizationId={canEdit ? artist.organizationId : null}
+      canReadContracts={canEdit}
+      files={files}
+      view={fileViewOf("artist", canEdit, query.category)}
+      basePath={routes.artistFiles(artist.id)}
+      emptyBody={t.emptyBody}
+      emptyBodyReadOnly={t.emptyBodyReadOnly}
+    />
   );
 }

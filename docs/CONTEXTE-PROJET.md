@@ -443,9 +443,41 @@ table de correspondance traduit le poste en permissions (`role_permissions` en b
 3. Refus ou demande de précision : le projet **revient chez le DG avec un message** (le
    motif, ou l'information qui manque).
 
-Décidé le 26/09/2026 : quatre types de projet (sortie musicale avec au moins un master,
-contenu, partenariat, événement). Une fois le projet lancé, le premier geste est un
-**call** (planifié ou enregistré) : **pas de cadrage sans compte rendu de call**.
+Décidé le 26/09/2026 : une fois le projet lancé, le premier geste est un **call**
+(planifié ou enregistré) : **pas de cadrage sans compte rendu de call**.
+
+### Types et formats de projet (retour n°2, 27/09/2026)
+
+La création suit **Type → Format → objet(s) lié(s) → informations initiales → chef de
+projet → Transmettre**. Elle reste légère : ce n'est pas un Cadrage avant le Cadrage.
+
+- **Trois familles** : Musical, Contenu, Événement. **Un partenariat n'est pas un projet**
+  (ni type, ni sous-type, ni contexte) : il aura sa propre catégorie plus tard. Les
+  anciens projets « partenariat » sont devenus des contenus.
+- **Musical** : un format (Single, EP, Album, Mixtape, Compilation, Autre) puis les masters
+  du Catalogue. **Un single rattache exactement un master** ; les autres formats au moins
+  un (compilation : plusieurs artistes possibles, lus sur les masters). Le projet ne fait
+  que **référencer** ses masters : crédits, splits, fichiers restent sur le master, qui
+  peut n'avoir que titre + artiste principal.
+- **Contenu** : soit l'édition d'un **format PDS existant** (« PDS Mic »), soit un
+  **contenu ponctuel**. **Format ≠ Projet** : le format est durable et enregistré en base
+  (`content_formats`, créé depuis le formulaire, jamais codé) ; chaque édition est un
+  nouveau projet. Artiste facultatif. Ce qu'un format pourra pré-remplir (structure,
+  route, livrables, postes) reste à définir.
+- **Événement** : présent dans le modèle, **fermé en V1** (carte « Bientôt », refusé par
+  `create_project`) ; les événements créés avant restent consultables et modifiables.
+- **Chef de projet** : on choisit la personne, jamais le poste. L'acceptation lance le
+  projet (étapes, responsable), le Cadrage devient disponible **sans démarrer tout seul**.
+  Direction créative facultative, qui ne donne aucun droit de validation.
+- **Échéance** : pour un projet musical, « Date de sortie visée » ; dès que la date prévue
+  de l'onglet Sortie existe, **elle fait foi** (décompte de la Stratégie, Planning, où
+  l'échéance ne s'affiche plus en double).
+- **Budget prévisionnel** : première estimation ; le suivi prévu / engagé / payé vit sur
+  la page Budget. Prévu ≠ autorisé ≠ engagé ≠ dépensé.
+- **Priorité** : facultative, **utilisée** — les projets en priorité haute passent en tête
+  de l'accueil, de Travail et de la liste Projets, avec une pastille « Priorité haute ».
+- **Contexte initial** (ex-« Notes de cadrage ») : ce qu'on sait au moment de transmettre,
+  matière d'entrée que PO pourra reprendre au Cadrage ; ce n'est pas le Brief.
 
 ### Encore ouvert
 

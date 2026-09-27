@@ -124,17 +124,30 @@ export function DataTableCell({
 // Without `href` (an archived row has no page) the text stays plain.
 export function DataTableLink({
   href,
+  newTab = false,
   children,
 }: {
   href: string | null;
+  // A file opened in the browser, outside the app: a plain link, new tab.
+  newTab?: boolean;
   children: React.ReactNode;
 }) {
   if (href === null) return <span className="truncate">{children}</span>;
+  const className =
+    "truncate outline-none after:absolute after:inset-0 hover:underline focus-visible:underline";
+  if (newTab)
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
+        {children}
+      </a>
+    );
   return (
-    <Link
-      href={href}
-      className="truncate outline-none after:absolute after:inset-0 hover:underline focus-visible:underline"
-    >
+    <Link href={href} className={className}>
       {children}
     </Link>
   );

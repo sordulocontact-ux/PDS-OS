@@ -5,6 +5,7 @@ import { TransmissionPanel } from "@/components/projects/transmission-panel";
 import { routes } from "@/lib/auth/redirects";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
+import { projectKindLabel } from "@/lib/projects/labels";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { FactList } from "@/components/ui/fact-list";
 
@@ -38,7 +39,17 @@ export function UnlaunchedOverview({
 }) {
   const t = fr.shell.project.overview;
   const facts: Array<[string, string | null, boolean?]> = [
-    [t.type, fr.shell.projectTypes[project.type]],
+    [
+      t.type,
+      projectKindLabel({
+        type: project.type,
+        musicFormat: project.musicFormat,
+        contentFormatName: project.contentFormat?.name ?? null,
+      }),
+    ],
+    ...(project.type === "content"
+      ? [[t.artist, project.artistName || null] as [string, string | null]]
+      : []),
     [
       t.dueDate,
       project.dueDate
@@ -69,44 +80,46 @@ export function UnlaunchedOverview({
           people={people}
         />
 
-        <section
-          aria-labelledby="masters-title"
-          className="flex flex-col gap-3"
-        >
-          <h2 id="masters-title" className="text-base font-medium">
-            {t.masters}
-          </h2>
-          {project.masters.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t.noMasters}</p>
-          ) : (
-            <ul className="divide-y divide-border rounded-xl border border-border">
-              {project.masters.map((master) => (
-                <li key={master.id} className="relative px-4 py-3">
-                  <Link
-                    href={routes.master(master.id)}
-                    className="text-sm font-medium no-underline after:absolute after:inset-0 hover:underline"
-                  >
-                    {masterLabel(master)}
-                  </Link>
-                  <p className="text-xs text-muted-foreground">
-                    {master.artists}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        {project.type === "music_release" && (
+          <section
+            aria-labelledby="masters-title"
+            className="flex flex-col gap-3"
+          >
+            <h2 id="masters-title" className="text-base font-medium">
+              {t.masters}
+            </h2>
+            {project.masters.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t.noMasters}</p>
+            ) : (
+              <ul className="divide-y divide-border rounded-xl border border-border">
+                {project.masters.map((master) => (
+                  <li key={master.id} className="relative px-4 py-3">
+                    <Link
+                      href={routes.master(master.id)}
+                      className="text-sm font-medium no-underline after:absolute after:inset-0 hover:underline"
+                    >
+                      {masterLabel(master)}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {master.artists}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
-        {project.framingNotes && (
+        {project.initialContext && (
           <section
             aria-labelledby="notes-title"
             className="flex flex-col gap-3"
           >
             <h2 id="notes-title" className="text-base font-medium">
-              {t.framingNotes}
+              {t.initialContext}
             </h2>
             <p className="text-sm whitespace-pre-line">
-              {project.framingNotes}
+              {project.initialContext}
             </p>
           </section>
         )}

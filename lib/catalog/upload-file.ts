@@ -18,6 +18,7 @@ export async function uploadCatalogFile(input: {
   organizationId: string;
   owner: FileOwner;
   category: string;
+  description?: string | null;
   file: File;
   // An audio version of a title (category "audio").
   audioState?: AudioState;
@@ -44,6 +45,7 @@ export async function uploadCatalogFile(input: {
     owner: input.owner,
     path,
     category: input.category,
+    description: input.description,
     fileName: input.file.name,
     mime,
     bytes: input.file.size,

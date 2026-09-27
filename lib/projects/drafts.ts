@@ -2,6 +2,8 @@ import "server-only";
 
 import type { ProjectFormDefaults } from "@/components/projects/create-project-form";
 import type { FormValues } from "@/lib/auth/form-state";
+import { listContentFormats } from "@/lib/projects/content-formats";
+import { projectKindLabel } from "@/lib/projects/labels";
 import {
   isContentMode,
   isMusicFormat,
@@ -30,10 +32,15 @@ export const DRAFT_FIELDS = {
   framingNotes: 20000,
 } as const;
 
-// Drafts listed on the new project page, most recent first.
+// Drafts listed at the top of the projects list, most recent first.
 const MAX_LISTED = 20;
 
-export type ProjectDraftItem = { id: string; title: string; updatedAt: string };
+export type ProjectDraftItem = {
+  id: string;
+  title: string;
+  // "Musical · EP", as the project will read; null before a type is chosen.
+  kind: string | null;
+};
 
 /** Only the form's fields, as text, within their limits. */
 export function draftValues(input: unknown): FormValues {
@@ -52,17 +59,34 @@ export async function listProjectDrafts(): Promise<ProjectDraftItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("project_drafts")
-    .select("id, form_values, updated_at")
+    .select("id, form_values")
     .order("updated_at", { ascending: false })
     .limit(MAX_LISTED);
   if (error) {
     console.error("listProjectDrafts:", error.message);
     return [];
   }
-  return data.map((draft) => ({
+  const drafts = data.map((draft) => ({
     id: draft.id,
-    title: draftValues(draft.form_values).title?.trim() ?? "",
-    updatedAt: draft.updated_at,
+    values: draftDefaults(draftValues(draft.form_values)),
+  }));
+  // Format names only when a draft names one (RLS: every member reads them).
+  const formats = drafts.some((d) => d.values.contentFormatId)
+    ? new Map((await listContentFormats()).map((f) => [f.id, f.name]))
+    : new Map<string, string>();
+  return drafts.map(({ id, values }) => ({
+    id,
+    title: values.title.trim(),
+    kind: values.type
+      ? projectKindLabel({
+          type: values.type,
+          musicFormat: values.musicFormat ?? null,
+          contentFormatName:
+            values.contentMode === "format" && values.contentFormatId
+              ? (formats.get(values.contentFormatId) ?? null)
+              : null,
+        })
+      : null,
   }));
 }
 

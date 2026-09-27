@@ -43,7 +43,7 @@ export function useProjectDraft(
   const inFlight = useRef(false);
   const stopped = useRef(false);
 
-  // `leaving`: saved even unchanged, so the page's list of drafts is fresh
+  // `leaving`: saved even unchanged, so the drafts of the projects list are fresh
   // when coming back to it.
   const save = useCallback(
     async (leaving = false) => {

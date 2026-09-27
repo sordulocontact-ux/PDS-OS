@@ -144,6 +144,23 @@ tons sémantiques, et seulement six (`--tone-*` dans `globals.css`) :
 - Le libellé porte toujours le sens : la couleur ne fait que le renforcer
   (daltonisme, impression).
 
+## 3 bis. Sélection
+
+Le choix fait dans une **carte de choix en tuile** (`ChoiceCards variant="tile"` : icône
+et libellé centrés, radio masquée ; type d'un projet) se montre en **bleu** : contour
+`--selection-border`, fond `--selection-bg` (Figma de Sacha, 27/09/2026, nœud 1493:4748).
+Couleur **provisoire** : Sacha la changera, dans `app/globals.css` seulement (et
+`.surface-glass` pour la modale). Ce n'est pas un ton d'état (§ 3) : le bleu `info` reste
+réservé à « en cours ».
+
+Le reste des sélections ne change pas : pastilles `FilterChip` en encre pleine (format,
+priorité, direction créative, via `ChipChoice` pour un choix unique), cartes `ChoiceCards`
+à contour noir.
+
+Formulaire long en **blocs titrés** (`FormSection`) : une carte blanche à filet par groupe
+(« Le projet », « Informations initiales », « Équipe »), sans la carte dans une modale ou un
+panneau latéral.
+
 ---
 
 ## 4. Coquille, surfaces et arrondis

@@ -19,6 +19,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { listProjectDrafts } from "@/lib/projects/drafts";
 import { listProjects } from "@/lib/projects/queries";
 
 export default async function ProjectsPage({
@@ -29,11 +30,14 @@ export default async function ProjectsPage({
   const canArchive = can(access, "archive_records");
   // The archive is the director's: anyone else always sees live projects.
   const archived = canArchive && isArchivedView((await searchParams).view);
-  const [{ projects, error }, counts] = await Promise.all([
+  const canCreate = can(access, "create_projects") && !archived;
+  const [{ projects, error }, counts, drafts] = await Promise.all([
     listProjects({ archived }),
     canArchive ? countRecords("project") : null,
+    // Drafts belong with the live projects of whoever may create them.
+    canCreate ? listProjectDrafts() : [],
   ]);
-  const canCreate = can(access, "create_projects") && !archived;
+  const listed = projects.length + drafts.length > 0;
 
   const newProject = canCreate ? (
     <Link href={routes.projectsNew} className={buttonVariants({ size: "lg" })}>
@@ -47,7 +51,7 @@ export default async function ProjectsPage({
       <PageHeader
         title={t.title}
         description={t.subtitle}
-        action={projects.length > 0 ? newProject : null}
+        action={listed ? newProject : null}
       />
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
@@ -56,7 +60,7 @@ export default async function ProjectsPage({
           label={fr.records.view.label}
           views={archiveViews({ path: routes.projects, archived, counts })}
         >
-          {projects.length === 0 ? (
+          {!listed ? (
             archived ? (
               <EmptyState
                 icon={IconBoxArchive}
@@ -74,6 +78,7 @@ export default async function ProjectsPage({
           ) : (
             <ProjectsTable
               projects={projects}
+              drafts={drafts}
               rights={{
                 canEdit: can(access, "create_projects"),
                 canArchive,

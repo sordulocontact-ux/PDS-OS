@@ -341,7 +341,7 @@ export const masterPage = {
 
   files: {
     emptyBody:
-      "Stems, pochette, contrats : ajoutez ici les autres fichiers du titre. Les fichiers audio successifs sont dans l'onglet Audio.",
+      "Glissez un fichier ici, ou cliquez pour le choisir : stems, pochette, contrats. Les fichiers audio successifs sont dans l'onglet Audio.",
     emptyBodyReadOnly: "Les fichiers du titre apparaîtront ici.",
   },
 
@@ -368,6 +368,9 @@ export const masterPage = {
       itemRemoved: (what: string) => `Suppression de ${what}`,
       fileAdded: (name: string) => `Fichier ${name} ajouté`,
       fileRemoved: (name: string) => `Fichier ${name} supprimé`,
+      fileUpdated: (name: string) => `Fichier ${name} modifié`,
+      fileMoved: (name: string, category: string) =>
+        `Fichier ${name} classé dans ${category}`,
       audioAdded: (state: string, name: string) =>
         `Fichier audio ${name} ajouté (${state})`,
       audioRemoved: (state: string, name: string) =>

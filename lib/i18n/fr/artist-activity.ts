@@ -51,6 +51,9 @@ export const artistActivity = {
     contactUpdated: (name: string) => `Contact ${name} modifié`,
     contactRemoved: (name: string) => `Contact ${name} retiré`,
     fileAdded: (name: string) => `Fichier ${name} ajouté`,
+    fileUpdated: (name: string) => `Fichier ${name} modifié`,
+    fileMoved: (name: string, category: string) =>
+      `Fichier ${name} classé dans ${category}`,
     fileRemoved: (name: string) => `Fichier ${name} supprimé`,
     masterCreated: (title: string) => `Titre ${title} créé`,
     masterCredited: (title: string) => `Crédité sur le titre ${title}`,
