@@ -115,3 +115,10 @@ export const designStateTone: Record<string, Tone> = {
   changes_requested: "danger",
   approved: "success",
 };
+
+/** Kind of a feedback about the app: a bug blocks someone, an idea is ahead. */
+export const feedbackKindTone: Record<string, Tone> = {
+  bug: "danger",
+  idea: "info",
+  other: "neutral",
+};

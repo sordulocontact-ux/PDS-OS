@@ -1,9 +1,9 @@
 "use client";
 
 import { IconChevronRight, IconCheck } from "nucleo-sharp-essential";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { WORKFLOW_STEPS } from "@/lib/ui/workflow-steps";
@@ -60,7 +60,7 @@ export function WorkflowBreadcrumb({
                 />
               )}
               {href ? (
-                <Link
+                <ViewLink
                   href={href}
                   aria-current={active ? "step" : undefined}
                   className={cn(
@@ -80,7 +80,7 @@ export function WorkflowBreadcrumb({
                   >
                     {step.label}
                   </span>
-                </Link>
+                </ViewLink>
               ) : (
                 <span
                   className="flex cursor-not-allowed items-center gap-2 rounded-pill py-1 pr-3 pl-1 text-[color:var(--nav-fg-muted)]"

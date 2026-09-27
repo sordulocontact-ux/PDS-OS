@@ -1,31 +1,27 @@
-import { notFound } from "next/navigation";
-
 import { CallList } from "@/components/calls/call-list";
 import { CreateCallForm } from "@/components/calls/create-call-form";
 import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { requireApproved } from "@/lib/auth/dal";
 import { canEditProject } from "@/lib/projects/edit-access";
-import { getProject, requireLaunchedProject } from "@/lib/projects/queries";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { toParisLocalInput } from "@/lib/calls/format";
-import { getProjectTitle, listCalls } from "@/lib/calls/queries";
+import { listCalls } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
+import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.calls.list.title} · ${fr.app.name}` };
 
 export default async function ProjectCallsPage({
   params,
 }: PageProps<"/app/projects/[projectId]/calls">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  await requireLaunchedProject(projectId);
-  const project = await getProject(projectId);
-  const canEdit = project ? canEditProject(access, project) : false;
-  const supabase = await createClient();
-
-  const projectTitle = await getProjectTitle(supabase, projectId);
-  if (!projectTitle) notFound();
-  const calls = await listCalls(supabase, projectId);
+  const [access, project, calls] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    createClient().then((supabase) => listCalls(supabase, projectId)),
+  ]);
+  const canEdit = canEditProject(access, project);
   const t = fr.calls.list;
   const now = new Date();
   const empty = calls.length === 0;

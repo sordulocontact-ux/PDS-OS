@@ -46,23 +46,26 @@ function asString(value: unknown): string | null {
 export async function fetchAccess(
   supabase: SupabaseClient<Database>,
 ): Promise<Access> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() verifies the token's signature locally (asymmetric signing
+  // keys, JWKS cached by auth-js) instead of asking the auth server on every
+  // page: a session revoked elsewhere stays readable until the token expires
+  // (jwt_expiry, 1 h), which is harmless since RLS checks the same token and
+  // get_my_access() re-reads the membership on each call.
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
 
-  if (!user) {
+  if (!claims?.sub) {
     return anonymousAccess;
   }
 
-  const { data, error } = await supabase.rpc("get_my_access");
+  const { data: accessData, error } = await supabase.rpc("get_my_access");
   if (error) {
     console.error("get_my_access :", error.message);
   }
 
-  const raw = (data && typeof data === "object" ? data : {}) as Record<
-    string,
-    unknown
-  >;
+  const raw = (
+    accessData && typeof accessData === "object" ? accessData : {}
+  ) as Record<string, unknown>;
   // Une panne de la base ou une réponse inattendue ferment l'accès, mais
   // s'annoncent comme une panne — jamais comme un compte incomplet.
   const state: AccessState = error
@@ -85,8 +88,8 @@ export async function fetchAccess(
     organizationId: asString(raw.organization_id),
     firstName: asString(raw.first_name),
     lastName: asString(raw.last_name),
-    email: user.email ?? null,
-    accountId: user.id,
+    email: asString(claims.email),
+    accountId: claims.sub,
   };
 }
 

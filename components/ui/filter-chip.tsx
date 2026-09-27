@@ -1,5 +1,5 @@
-import Link from "next/link";
 
+import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
 // FilterChip (docs/DESIGN.md § 7): pill, rest / hover / active (full ink).
@@ -45,12 +45,12 @@ export function FilterChipLink({
   children: React.ReactNode;
 }) {
   return (
-    <Link
+    <ViewLink
       href={href}
       aria-current={current ? "page" : undefined}
       className={chipClass(current, className)}
     >
       {children}
-    </Link>
+    </ViewLink>
   );
 }

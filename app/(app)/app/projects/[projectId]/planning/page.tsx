@@ -11,6 +11,7 @@ import { loadProjectPlan } from "@/lib/project-plan/queries";
 import { buildTimeline } from "@/lib/project-plan/timeline";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectPlan.planning;
 
@@ -22,10 +23,12 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
 export default async function ProjectPlanningPage({
   params,
 }: PageProps<"/app/projects/[projectId]/planning">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
-  const plan = await loadProjectPlan(projectId);
+  const [access, project, plan] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    loadProjectPlan(projectId),
+  ]);
   const months = buildTimeline(
     projectId,
     plan,

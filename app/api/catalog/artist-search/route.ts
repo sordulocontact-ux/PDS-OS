@@ -1,13 +1,35 @@
 import { can } from "@/lib/auth/access";
 import { getAccess } from "@/lib/auth/dal";
+import { parseDeezerLink } from "@/lib/catalog/deezer-link";
 import { findArtistsByDeezerIds } from "@/lib/catalog/queries";
 import { artistSearchSchema } from "@/lib/catalog/schemas";
 import type { DeezerArtistResult } from "@/lib/catalog/types";
-import { searchArtists } from "@/lib/integrations/deezer";
+import {
+  getDeezerArtist,
+  resolveDeezerShareLink,
+  searchArtists,
+  type DeezerArtist,
+} from "@/lib/integrations/deezer";
+
+// A pasted Deezer link answers that one artist, however few fans it has; a
+// link to anything but an artist answers no result.
+async function findArtists(query: string): Promise<DeezerArtist[]> {
+  const link = parseDeezerLink(query);
+  if (!link) return searchArtists(query);
+  const id =
+    link.kind === "artist"
+      ? link.id
+      : link.kind === "share"
+        ? await resolveDeezerShareLink(link.url)
+        : null;
+  const artist = id ? await getDeezerArtist(id) : null;
+  return artist ? [artist] : [];
+}
 
 /**
- * Deezer artist search for the "Nouvel artiste" modal: `?q=`. Answers the
- * results, each flagged when the catalog already holds that Deezer profile.
+ * Deezer artist search for the "Nouvel artiste" modal: `?q=` is a name or a
+ * Deezer artist link. Answers the results, each flagged when the catalog
+ * already holds that Deezer profile.
  * Reserved to those who may create artists; writes nothing.
  */
 export async function GET(request: Request) {
@@ -23,7 +45,7 @@ export async function GET(request: Request) {
   if (!query.success)
     return Response.json({ error: "invalid_input" }, { status: 400 });
 
-  const found = await searchArtists(query.data).catch((error: unknown) => {
+  const found = await findArtists(query.data).catch((error: unknown) => {
     console.error("artist-search:", error);
     return null;
   });

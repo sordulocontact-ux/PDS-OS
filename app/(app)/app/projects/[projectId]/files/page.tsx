@@ -11,6 +11,7 @@ import { fr } from "@/lib/i18n/fr";
 import { listProjectFiles } from "@/lib/project-history/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectHistory.files;
 
@@ -21,10 +22,10 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
 export default async function ProjectFilesPage({
   params,
 }: PageProps<"/app/projects/[projectId]/files">) {
-  await requireApproved();
   const { projectId } = await params;
-  await requireLaunchedProject(projectId);
-  const [files, designFiles] = await Promise.all([
+  const [, , files, designFiles] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
     listProjectFiles(projectId),
     createClient().then((supabase) => listDesignFiles(supabase, projectId)),
   ]);

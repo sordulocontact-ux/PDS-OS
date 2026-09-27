@@ -2,6 +2,7 @@ import { ArtistDiscography } from "@/components/catalog/artist-profile/artist-di
 import { ArtistTopTracks } from "@/components/catalog/artist-profile/artist-top-tracks";
 import { RelatedArtists } from "@/components/catalog/artist-profile/related-artists";
 import { PageSection } from "@/components/shell/page-section";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
 import { fr } from "@/lib/i18n/fr";
 
@@ -36,13 +37,10 @@ export async function ArtistDeezerDetails({ deezerId }: { deezerId: number }) {
 export function ArtistDeezerDetailsSkeleton() {
   return (
     <div className="flex flex-col gap-3" aria-hidden>
-      <div className="h-5 w-32 animate-pulse rounded bg-muted" />
+      <Skeleton className="h-5 w-32 rounded" />
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="aspect-square animate-pulse rounded-lg bg-muted"
-          />
+          <Skeleton key={i} className="aspect-square rounded-lg" />
         ))}
       </div>
     </div>

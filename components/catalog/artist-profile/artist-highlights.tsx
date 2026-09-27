@@ -1,5 +1,6 @@
 import { ReleaseCard } from "@/components/catalog/artist-profile/release-card";
 import { StatTiles, StatTilesSkeleton } from "@/components/ui/stat-tiles";
+import { Skeleton } from "@/components/ui/skeleton";
 import { routes } from "@/lib/auth/redirects";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
 import { formatFans } from "@/lib/catalog/types";
@@ -72,10 +73,7 @@ export function ArtistHighlightsSkeleton() {
       <StatTilesSkeleton />
       <div className="grid gap-3 sm:grid-cols-2">
         {[0, 1].map((i) => (
-          <div
-            key={i}
-            className="h-[106px] animate-pulse rounded-2xl bg-muted"
-          />
+          <Skeleton key={i} className="h-[106px] rounded-2xl" />
         ))}
       </div>
     </div>

@@ -15,6 +15,7 @@ import {
 } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 import { FactList } from "@/components/ui/fact-list";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
@@ -26,20 +27,32 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
 export default async function ProjectOverviewPage({
   params,
 }: PageProps<"/app/projects/[projectId]">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await getProject(projectId);
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    getProject(projectId),
+  ]);
   if (!project) notFound();
 
   // Creative team: the director or the project's owner manages it.
   const canManageCreatives =
     can(access, "assign_projects") || canEditProject(access, project);
-  const [creatives, creativeCandidates] = await Promise.all([
-    listProjectCreatives(project.id),
-    canManageCreatives && access.organizationId
-      ? listCreativePeople(access.organizationId)
-      : Promise.resolve([]),
-  ]);
+  const canTransmit = can(access, "assign_projects");
+  const launched = project.stages.length > 0;
+  const organizationId = access.organizationId;
+  // Everything else in one round trip, each query only when it is shown.
+  const [creatives, creativeCandidates, people, framingOpen] =
+    await Promise.all([
+      listProjectCreatives(project.id),
+      canManageCreatives && organizationId
+        ? listCreativePeople(organizationId)
+        : Promise.resolve([]),
+      !launched && canTransmit && organizationId
+        ? listAssignablePeople(organizationId)
+        : Promise.resolve([]),
+      // First thing to do once launched: a call, the framing starts from it.
+      launched ? isFramingOpen(project.id) : Promise.resolve(false),
+    ]);
   const creativeTeam = (
     <CreativeTeam
       projectId={project.id}
@@ -49,12 +62,7 @@ export default async function ProjectOverviewPage({
     />
   );
 
-  if (project.stages.length === 0) {
-    const canTransmit = can(access, "assign_projects");
-    const people =
-      canTransmit && access.organizationId
-        ? await listAssignablePeople(access.organizationId)
-        : [];
+  if (!launched) {
     return (
       <UnlaunchedOverview
         project={project}
@@ -66,8 +74,6 @@ export default async function ProjectOverviewPage({
     );
   }
 
-  // First thing to do once launched: a call, the framing starts from it.
-  const framingOpen = await isFramingOpen(project.id);
   const t = fr.shell.project.overview;
   const facts: Array<[string, string]> = [
     [t.artist, project.artistName || t.notProvided],

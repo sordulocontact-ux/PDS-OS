@@ -70,7 +70,14 @@ export function MobileNav({
             pendingMembers={pendingMembers}
             onNavigate={() => setOpen(false)}
           />
-          {footer}
+          {/* A link of the footer (feedback) navigates too: close the drawer. */}
+          <div
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("a")) setOpen(false);
+            }}
+          >
+            {footer}
+          </div>
         </div>
       </SheetContent>
     </Sheet>

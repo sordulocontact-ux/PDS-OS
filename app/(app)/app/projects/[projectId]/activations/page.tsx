@@ -11,6 +11,7 @@ import { fr } from "@/lib/i18n/fr";
 import { LEVER_FAMILIES, loadProjectPlan } from "@/lib/project-plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectPlan.activations;
 
@@ -21,10 +22,12 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
 export default async function ProjectActivationsPage({
   params,
 }: PageProps<"/app/projects/[projectId]/activations">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
-  const { levers, deliverables } = await loadProjectPlan(projectId);
+  const [access, project, { levers, deliverables }] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    loadProjectPlan(projectId),
+  ]);
   const count = (state: string) =>
     levers.filter((l) => l.state === state).length;
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export type StatTile = {
@@ -60,7 +61,7 @@ export function StatTilesSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="h-[74px] animate-pulse rounded-2xl bg-muted" />
+        <Skeleton key={i} className="h-[74px] rounded-2xl" />
       ))}
     </div>
   );

@@ -7,6 +7,7 @@ import { loadBudget } from "@/lib/budget/queries";
 import { budgetTotals } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = { title: `${fr.budget.title} · ${fr.app.name}` };
 
@@ -15,10 +16,12 @@ export const metadata = { title: `${fr.budget.title} · ${fr.app.name}` };
 export default async function ProjectBudgetPage({
   params,
 }: PageProps<"/app/projects/[projectId]/budget">) {
-  await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
-  const { error, lines, levers } = await loadBudget(projectId);
+  const [, project, { error, lines, levers }] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    loadBudget(projectId),
+  ]);
   const t = fr.budget;
 
   return (

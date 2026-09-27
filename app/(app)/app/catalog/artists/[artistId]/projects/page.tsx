@@ -9,15 +9,18 @@ import { requireApproved } from "@/lib/auth/dal";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { fr } from "@/lib/i18n/fr";
 import { listProjects } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 // Projects tab: live projects holding one of the artist's masters, among
 // those the viewer may see (RLS), in the same table as the Projects page.
 export default async function ArtistProjectsPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]/projects">) {
-  const access = await requireApproved();
   const { artistId } = await params;
-  const artist = await getArtist(artistId);
+  const [access, artist] = await allInOrder([
+    requireApproved(),
+    getArtist(artistId),
+  ]);
   if (!artist) notFound();
   const { projects, error } = await listProjects({ ids: artist.projectIds });
   const p = fr.catalog.artistPage;

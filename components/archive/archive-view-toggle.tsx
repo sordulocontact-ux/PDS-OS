@@ -1,8 +1,8 @@
-import { FilterChipLink } from "@/components/ui/filter-chip";
+import { ViewToggle } from "@/components/ui/view-toggle";
 import { fr } from "@/lib/i18n/fr";
 
-// Live rows or the archive, on a list page (director only). The choice is
-// in the URL (?view=archived): shareable, and the back button works.
+// Live rows or the archive, on a list page (director only), in the URL
+// (?view=archived).
 export function ArchiveViewToggle({
   path,
   archived,
@@ -12,13 +12,12 @@ export function ArchiveViewToggle({
 }) {
   const t = fr.records.view;
   return (
-    <nav aria-label={t.label} className="flex flex-wrap gap-1.5">
-      <FilterChipLink href={path} current={!archived}>
-        {t.live}
-      </FilterChipLink>
-      <FilterChipLink href={`${path}?view=archived`} current={archived}>
-        {t.archived}
-      </FilterChipLink>
-    </nav>
+    <ViewToggle
+      label={t.label}
+      options={[
+        { href: path, label: t.live, current: !archived },
+        { href: `${path}?view=archived`, label: t.archived, current: archived },
+      ]}
+    />
   );
 }

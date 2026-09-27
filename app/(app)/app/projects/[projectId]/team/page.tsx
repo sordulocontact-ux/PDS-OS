@@ -15,6 +15,7 @@ import {
 } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
   title: `${fr.projectWork.team.title} · ${fr.app.name}`,
@@ -26,9 +27,11 @@ export const metadata = {
 export default async function ProjectTeamPage({
   params,
 }: PageProps<"/app/projects/[projectId]/team">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+  ]);
   const t = fr.projectWork.team;
 
   // Same rule as the overview: the director or the owner manages creatives.

@@ -276,9 +276,10 @@
   --sidebar-ring: var(--nav-fg);
 }
 
-/* Surface « verre » : panneau sombre translucide (Dialog variant="glass").
-   Tout ce qui est posé dedans (boutons, saisie, textes) lit ces tokens et
-   s'inverse sans retouche. */
+/* Surface « verre » : panneau sombre translucide de toute modale (Dialog,
+   DESIGN.md § 4). Tout ce qui est posé dedans (boutons, saisie, listes,
+   textes) lit ces tokens et s'inverse sans retouche : un token lu dans une
+   modale et absent d'ici y garde sa valeur claire. */
 .surface-glass {
   color-scheme: dark;
   --text-primary: var(--po-white);
@@ -310,7 +311,25 @@
   --focus-ring: var(--po-white);
   --surface-tint: rgb(255 255 255 / 0.06);
   --meter-track: rgb(255 255 255 / 0.12);
+  --meter-fill: var(--po-grey-500);
   --meter-fill-over: var(--po-white);
+  --text-muted: var(--po-grey-500);
+  --text-link: var(--po-white);
+  --border-default: rgb(255 255 255 / 0.1);
+  --border-field: rgb(255 255 255 / 0.12);
+  --surface-raised: var(--po-ink-700);
+  /* Liste posée sur le panneau (SearchPicker) : opaque, elle couvre ce qui
+     est dessous. */
+  --popover: var(--po-ink-700);
+  --popover-foreground: var(--po-white);
+  --control-fg: var(--po-white);
+  --control-bg: rgb(255 255 255 / 0.08);
+  --control-bg-soft: rgb(255 255 255 / 0.08);
+  --control-primary-bg: var(--po-white);
+  --control-primary-fg: var(--po-ink-900);
+  /* Pas de rouge : l'action définitive reste en « encre pleine », ici blanche. */
+  --destructive: var(--po-white);
+  --destructive-foreground: var(--po-ink-900);
 }
 
 /* ==========================================================================

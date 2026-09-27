@@ -290,6 +290,56 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"feedback": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"id": string,"kind": string,"message": string,"organization_id": string,"page_path": string | null,"topic_id": string | null
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"kind": string,"message": string,"organization_id": string,"page_path"?: string | null,"topic_id"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"kind"?: string,"message"?: string,"organization_id"?: string,"page_path"?: string | null,"topic_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "feedback_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "feedback_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "feedback_topic_same_org"
+      columns: ["topic_id","organization_id"]
+isOneToOne: false
+      referencedRelation: "feedback_topics"
+      referencedColumns: ["id","organization_id"]
+    }
+                  ]
+                },"feedback_topics": {
+                  Row: {
+                    "created_at": string,"id": string,"kind": string,"organization_id": string,"summary": string,"title": string,"updated_at": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"kind": string,"organization_id": string,"summary": string,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"kind"?: string,"organization_id"?: string,"summary"?: string,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "feedback_topics_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"field_values": {
                   Row: {
                     "created_at": string,"created_by": string | null,"deliverable": string,"field_key": string,"id": string,"organization_id": string,"project_id": string,"source_quote": string | null,"source_report_item_id": string | null,"source_start_seconds": number | null,"source_type": string,"status": string,"value": NonNullable<Json>
@@ -1184,6 +1234,9 @@ isOneToOne: false
                            },
 "forget_push_subscription":
 { Args: { "p_endpoint": string }; Returns: undefined
+                           },
+"file_feedback":
+{ Args: { "p_feedback": string,"p_summary"?: string,"p_title"?: string,"p_topic"?: string }; Returns: string
                            },
 "framing_is_open":
 { Args: { "p_project_id": string }; Returns: boolean

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { PersonWorkCard } from "@/components/project-work/person-work-card";
+import { CardGrid } from "@/components/ui/card-grid";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { fr } from "@/lib/i18n/fr";
 import type { WorkPerson } from "@/lib/project-work/queries";
@@ -53,7 +54,7 @@ export function WorkBoard({
           ))}
         </div>
       )}
-      <div className="grid items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <CardGrid className="items-start">
         {shown.map((p) => (
           <PersonWorkCard
             key={p.personId}
@@ -64,7 +65,7 @@ export function WorkBoard({
             mePersonId={mePersonId}
           />
         ))}
-      </div>
+      </CardGrid>
     </div>
   );
 }

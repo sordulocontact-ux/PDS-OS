@@ -11,6 +11,7 @@ import { calls } from "./calls";
 import { catalog } from "./catalog";
 import { core } from "./core";
 import { design } from "./design";
+import { feedback } from "./feedback";
 import { framing } from "./framing";
 import { labo } from "./labo";
 import { notifications } from "./notifications";
@@ -48,4 +49,5 @@ export const fr = {
   artistFiles,
   artistActivity,
   records,
+  feedback,
 } as const;

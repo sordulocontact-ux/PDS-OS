@@ -6,23 +6,10 @@ import { IconXmark } from "nucleo-sharp-essential";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Modal of the design system (docs/DESIGN.md § 7): 10 px radius, elevation 3,
-// rgba(0,0,0,.4) scrim without blur, no motion (§ 6). On phones it sits at
-// the bottom, full width, so its actions stay within thumb reach.
-// variant="glass" (§ 4 bis): the page blurred, not darkened, behind a
-// dark translucent panel whose tokens invert what it holds.
-
-const backdropVariants = {
-  default: "bg-[var(--overlay-scrim)]",
-  glass:
-    "backdrop-blur-[var(--glass-blur)]",
-} as const;
-
-const popupVariants = {
-  default: "rounded-t-[var(--radius-xl)] bg-background sm:rounded-[var(--radius-xl)]",
-  glass:
-    "surface-glass rounded-t-3xl bg-[var(--surface-glass)] backdrop-blur-[var(--glass-blur)] sm:rounded-3xl",
-} as const;
+// The one modal of the app (docs/DESIGN.md § 4, « Modale »): the page
+// blurred, not darkened, behind a dark translucent panel whose tokens invert
+// what it holds (.surface-glass). No motion (§ 6). On phones it sits at the
+// bottom, full width, so its actions stay within thumb reach.
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -31,22 +18,20 @@ function DialogContent({
   className,
   children,
   closeLabel,
-  variant = "default",
   ...props
 }: DialogPrimitive.Popup.Props & {
   closeLabel: string;
-  variant?: keyof typeof popupVariants;
 }) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
-        className={cn("fixed inset-0 z-50", backdropVariants[variant])}
+        className="fixed inset-0 z-50 backdrop-blur-[var(--glass-blur)]"
       />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-foreground shadow-elevation-3 outline-none sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-[calc(100%-2rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-6",
-          popupVariants[variant],
+          "surface-glass rounded-t-3xl bg-[var(--surface-glass)] backdrop-blur-[var(--glass-blur)] sm:rounded-3xl",
           className,
         )}
         {...props}

@@ -39,7 +39,8 @@ export const createArtistSchema = z.object({
     .transform((value) => (value === null ? null : Number(value))),
 });
 
-export const artistSearchSchema = z.string().trim().min(2).max(100);
+// A name, or a pasted Deezer link (share links carry tracking parameters).
+export const artistSearchSchema = z.string().trim().min(2).max(300);
 
 // Credits travel as one JSON field (FormData flattens repeated keys).
 const creditsSchema = z

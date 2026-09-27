@@ -14,6 +14,7 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 import { isFramingOpen, loadFraming } from "@/lib/framing/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { fr } from "@/lib/i18n/fr";
+import { allInOrder } from "@/lib/utils/parallel";
 
 /**
  * Framing stage: the Brief on one page, pre-filled from calls (automatically,
@@ -31,10 +32,13 @@ import { fr } from "@/lib/i18n/fr";
 export default async function FramingPage({
   params,
 }: PageProps<"/app/projects/[projectId]/framing">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
-  if (!(await isFramingOpen(projectId))) {
+  const [access, project, framingOpen] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    isFramingOpen(projectId),
+  ]);
+  if (!framingOpen) {
     return (
       <FramingNeedsCall
         projectId={projectId}

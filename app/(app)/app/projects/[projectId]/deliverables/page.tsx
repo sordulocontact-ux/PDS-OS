@@ -10,6 +10,7 @@ import { fr } from "@/lib/i18n/fr";
 import { loadProjectPlan } from "@/lib/project-plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectPlan.deliverables;
 
@@ -18,10 +19,12 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
 export default async function ProjectDeliverablesPage({
   params,
 }: PageProps<"/app/projects/[projectId]/deliverables">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
-  const { deliverables } = await loadProjectPlan(projectId);
+  const [access, project, { deliverables }] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    loadProjectPlan(projectId),
+  ]);
   const count = (state: string) =>
     deliverables.filter((d) => d.state === state).length;
 

@@ -22,6 +22,7 @@ import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { isStageValidated } from "@/lib/projects/types";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.design;
 
@@ -35,9 +36,11 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
 export default async function DesignPage({
   params,
 }: PageProps<"/app/projects/[projectId]/design">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+  ]);
   // The Conception designs what the validated Strategy committed to.
   if (!isStageValidated(project.stages, "launch_strategy")) {
     return (

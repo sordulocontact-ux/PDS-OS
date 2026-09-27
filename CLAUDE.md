@@ -140,7 +140,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `RowActions` | `ui/row-actions.tsx` | « ⋯ » d'une ligne ou d'un en-tête (`size` icon-sm / icon-lg), rien si aucune action |
 | `FormDialog` | `ui/form-dialog.tsx` | formulaire dans la modale `Dialog` (en bas sur mobile), corps monté à chaque ouverture ; toute modification (« ⋯ » Modifier, fiche artiste) |
 | `Loaded`, `useLoaded` | `ui/loaded.tsx`, `ui/use-loaded.ts` | chargement / échec / prêt d'une modale ou d'un panneau (action serveur appelée à l'ouverture) |
-| `Dialog` | `ui/dialog.tsx` | variant : default, glass (page floutée sans voile + panneau sombre translucide, fenêtre Espace Espace) |
+| `Dialog` | `ui/dialog.tsx` | **la seule modale du site**, « verre » : page floutée sans voile + panneau sombre translucide (Espace Espace, Modifier, confirmations) ; tokens inversés par `.surface-glass` (`docs/DESIGN.md` § 4) |
 | `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
 | `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`) | `ui/data-table.tsx` | **tout tableau de liste**, design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (`href` null = texte seul), colonne « ⋯ » `DataTableActionsHead` / `DataTableActionsCell` (Masters, Artistes, fiche artiste, Projets, Membres) |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
@@ -150,18 +150,27 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `FactList` | `ui/fact-list.tsx` | liste libellé / valeur dans une carte (faits d'un master, d'un projet, identité) |
 | `StatTiles` | `ui/stat-tiles.tsx` | chiffres clés en tuiles (+ squelette) ; `href` facultatif = tuile entière cliquable (lien étiré) ; `columns` 4 (défaut) ou 5 |
 | `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
+| `Skeleton`, `SkeletonRows`, `LoadingRegion` | `ui/skeleton.tsx` | bloc qui pulse (immobile si mouvement réduit), lignes de liste, zone annoncée « Chargement… » ; **tout** squelette en part |
+| `PageLoading` | `shell/page-loading.tsx` | `loading.tsx` d'une page : cadre, vrai titre s'il est connu, lignes ou forme fournie |
+| `ViewLink` | `ui/view-link.tsx` | lien vers une autre vue de la même page (section, onglet, étape, filtre), préchargé en entier : changement de vue sans chargement (`docs/ARCHITECTURE.md` § 3 bis) |
 | `Tooltip` | `ui/tooltip.tsx` | shadcn, base sur `@base-ui/react/tooltip` (bulle au survol/focus, ex. sidebar repliée) |
-| `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) |
+| `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) ; classes d'un élément de navigation dans `nav-item.ts` |
+| `FeedbackLink` | `shell/feedback-link.tsx` | « Envoyer un retour » du bas de la navigation, joint la page courante |
+| `FeedbackForm`, `FeedbackList` | `feedback/` | page Retours : envoi (type, message, page d'origine), retours envoyés ou reçus |
 | `ProjectSidebar`, `ProjectSidebarMobile`, `WorkflowBreadcrumb` | `projects/` | sidebar contextuelle d'un projet lancé (12 sections) et son tiroir mobile ; fil d'Ariane des 7 étapes du métier, habillage seul (`docs/DESIGN.md` § 4) |
 | `ListCard`, `CardRow` | `ui/list-card.tsx` | carte de lignes liées (libellé gris, `count` facultatif), accueil et Travail ; `leading` = case à cocher hors du lien |
+| `CardGrid`, `CardGridSkeleton` | `ui/card-grid.tsx` | grille de `ListCard` (1 → 2 → 3 colonnes), accueil, Travail, travail d'un projet ; squelette annoncé |
 | `TasksCard`, `ValidationsCard`, `ProposalsCard`, `HandoverCard`… | `home/home-cards.tsx` | cartes de l'accueil ; `all` = toutes les lignes + nombre (page Travail) |
+| `HomeFrame`, `HomeFeed` | `home/home-frame.tsx`, `home/home-feed.tsx` | cadre de l'accueil (salutation, PO) partagé avec son `loading.tsx` ; cartes chargées en streaming |
 | `OwnedProjectsCard`, `DeliverablesCard`, `CreativeProjectsCard` | `work/work-cards.tsx` | cartes propres à la page Travail |
+| `MyWorkCards` | `work/my-work-cards.tsx` | cartes de la page Travail, chargées en streaming sous l'en-tête |
 | `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
 | `AssistantComposer`, `AssistantThread`, `AssistantSuggestions`, `AssistantConversation` | `assistant/` | saisie de PO (micro, envoi/arrêt, `compact`, `voiceFirst`), fil des messages, pilules de suggestions ; page de conversation `/app/assistant` (retour, titre, « + ») |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
 | `RecordActions`, `ArchiveViewToggle`, `EditPanel` | `archive/` | « ⋯ » Modifier / Archiver / Restaurer d'un artiste, master ou projet ; filtre Actifs / Archivés (DG) ; corps chargé de la modale Modifier |
 | `ArtistActions`, `MasterActions`, `ProjectActions` | `catalog/`, `projects/project-actions.tsx` | `RecordActions` branché sur le vrai formulaire de chaque type (`rights`, raison de blocage connue d'avance) |
 | `ProjectPageHeader` | `projects/project-page-header.tsx` | en-tête d'une section de projet (h2, une phrase, action) : Calls et les 9 pages ci-dessous |
+| `ProjectSectionLoading` | `projects/project-section-loading.tsx` | squelette d'une section de projet (forme de `ProjectPageHeader`, puis lignes ou forme fournie) |
 | `WorkBoard`, `PersonWorkCard`, `WorkRow`, `AddTaskForm`, `TeamWorkloadTable`, `ExternalTeamTable` | `project-work/` | Travail d'un projet par personne (filtre `FilterChip`, case « fait », ajout de tâche), charge de l'équipe |
 | `DeliverablesTable`, `LeverList`, `PlanningTimeline`, `EditInStrategy` | `project-plan/` | livrables, leviers par famille, frise datée par mois (repère Aujourd'hui), lien vers la Stratégie pour le responsable |
 | `BudgetSummary`, `BudgetLines`, `BudgetTable`, `BudgetLineSheet`, `DeleteBudgetLineDialog` | `budget/` | page Budget : tuiles et dépassement, lignes filtrables par statut, formulaire en `Sheet`, suppression confirmée |
@@ -228,6 +237,11 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 - **Sécurité** : toutes les écritures passent par la session utilisateur (RLS forcé,
   droits colonne par colonne, clés composites par organisation). Service role : cron seul
   (`lib/supabase/admin.ts`). États (étapes, validations) : fonctions SQL uniquement.
+- **Navigation fluide** (`docs/ARCHITECTURE.md` § 3 bis) : vues d'une page en `ViewLink`
+  (préchargées), `staleTimes` 30 s / 60 s, `loading.tsx` partout (groupes `(list)` et `(home)`
+  pour qu'un squelette n'enveloppe pas les pages enfants), accès + données en un aller-retour
+  (`allInOrder`, accès d'abord), `getClaims()` au lieu de `getUser()`. Juger en `pnpm start`,
+  jamais en `pnpm dev` (aucun préchargement).
 - **Identité** : fondation d'Ibé importée (`supabase/migrations/*identity*`, `lib/auth/`).
   Premier admin local : `admin@pds.test`, confirmation via Mailpit (http://127.0.0.1:54324).
   Postes ≠ permissions : Directeur général, Chef de projet, Directeur créatif ; seule
@@ -278,8 +292,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   Sortie n'existent qu'après lancement (`transmit_project` / `respond_to_assignment`,
   statut calculé par `projectStatusOf`). **Pas de cadrage sans compte rendu de call**
   (`framing_is_open` en SQL, `FramingNeedsCall` à l'écran) ; onglet Calls avant Cadrage.
-  Nouvel artiste : recherche Deezer d'abord (photo, lien), saisie manuelle en repli ; le
-  serveur relit Deezer, seul l'id vient du client. Sélecteurs :
+  Nouvel artiste : recherche Deezer d'abord (nom **ou lien Deezer collé**, pour les petits
+  artistes), saisie manuelle en repli ; le serveur relit Deezer, seul l'id vient du
+  client. Sélecteurs :
   `components/catalog/search-picker.tsx` (commun), création en modale sans perte de saisie
   (`docs/ARCHITECTURE.md` § 2).
   Fiche artiste à onglets (`/app/catalog/artists/[id]` + `/masters`, `/projects`, `/files`,
@@ -320,7 +335,10 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   (jamais de regular), texte courant 16 px, 14 px au plus petit (`docs/DESIGN.md` § 2) ; états →
   `lib/ui/state-tones.ts` (5 tons sémantiques) + `StatusBadge tone=…`. Coquille et
   accueil d'après le Figma « Desktop - 11 » : barre latérale blanche flottante, accueil
-  centré (salutation, PO, cartes), `docs/DESIGN.md` § 4.
+  centré (salutation, PO, cartes), `docs/DESIGN.md` § 4. **Une seule modale, la
+  fenêtre « verre » d'Espace Espace**, partout (`Dialog`, `FormDialog`,
+  `ConfirmDialog`) ; un token lu dans une modale doit exister dans `.surface-glass`
+  (`docs/DESIGN.md` § 4, « Modale »).
 - **Icônes** : Nucleo Sharp uniquement (`nucleo-sharp-essential`), icônes manquantes
   dessinées dans `components/icons/` ; pas de Lucide (`docs/DESIGN.md` § 1).
 - **Textes** : `lib/i18n/fr/<domaine>.ts`. **`cn()`** : `lib/utils/index.ts`.
@@ -331,6 +349,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   artiste d'un master actif) ; restauration depuis « Archivés » des listes. `archived_at`
   écrit par `set_*_archived` (SQL) uniquement ; menu « ⋯ » Modifier / Archiver sur chaque
   ligne et en-tête de fiche (`docs/ARCHITECTURE.md` § 2 quater). Membres : « Suspendre ».
+- **Retours** `/app/feedback` : tout membre envoie un retour (bug, idée, autre) avec la
+  page d'origine ; table `feedback` jamais modifiée, lue par son auteur et par qui détient
+  `administer` (`docs/ARCHITECTURE.md` § 8 quater).
 - **Labo** `/labo` : banc de test local (404 en production), faux call `docs/labo/`.
 
 ---
@@ -419,6 +440,7 @@ Au-delà des six étapes :
       Activité
 - [x] Menu « ⋯ » par ligne (artistes, masters, projets, membres) : modifier dans la
       modale, archiver / restaurer (DG, refusé si utilisé), filtre « Archivés »
+- [x] Page **Retours** : envoi d'un retour sur l'app depuis toute page, retours reçus (DG)
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 

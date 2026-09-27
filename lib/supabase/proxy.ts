@@ -51,17 +51,17 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // getUser() (not getSession()) validates the token with the auth server.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() (not getSession()) refreshes an expired session and verifies
+  // the token's signature locally, without an auth server round trip on every
+  // request and every prefetch (lib/auth/access.ts).
+  const { data } = await supabase.auth.getClaims();
 
-  if (!user && isProtected(pathname)) {
+  if (!data?.claims?.sub && isProtected(pathname)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = routes.login;
     loginUrl.search = "";
     const redirection = NextResponse.redirect(loginUrl);
-    // Carry over cookies set during getUser(): when a token became invalid,
+    // Carry over cookies set during getClaims(): when a token became invalid,
     // Supabase asks to delete them; without this the browser would keep
     // sending dead cookies forever.
     for (const cookie of response.cookies.getAll()) {

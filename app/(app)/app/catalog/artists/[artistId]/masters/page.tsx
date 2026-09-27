@@ -13,15 +13,18 @@ import { routes } from "@/lib/auth/redirects";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { listMasters } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
+import { allInOrder } from "@/lib/utils/parallel";
 
 // Masters tab: every live master crediting the artist, in the same table
 // as the Masters page (ISRC, release, date, status).
 export default async function ArtistMastersPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]/masters">) {
-  const access = await requireApproved();
   const { artistId } = await params;
-  const artist = await getArtist(artistId);
+  const [access, artist] = await allInOrder([
+    requireApproved(),
+    getArtist(artistId),
+  ]);
   if (!artist) notFound();
   const { masters, error } = await listMasters({
     ids: artist.masters.map((m) => m.id),

@@ -11,6 +11,7 @@ import { loadProjectWork } from "@/lib/project-work/queries";
 import { countWork, WORK_STATUSES } from "@/lib/project-work/workload";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
   title: `${fr.projectWork.work.title} · ${fr.app.name}`,
@@ -22,10 +23,11 @@ export default async function ProjectWorkPage({
   params,
   searchParams,
 }: PageProps<"/app/projects/[projectId]/work">) {
-  const access = await requireApproved();
-  const { projectId } = await params;
-  const { person } = await searchParams;
-  const project = await requireLaunchedProject(projectId);
+  const [{ projectId }, { person }] = await Promise.all([params, searchParams]);
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+  ]);
   const work = await loadProjectWork(project, access);
   const counts = countWork(work.items);
   const t = fr.projectWork.work;

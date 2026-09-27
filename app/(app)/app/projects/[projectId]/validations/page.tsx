@@ -8,6 +8,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { listProjectValidations } from "@/lib/project-history/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectHistory.validations;
 
@@ -18,10 +19,12 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
 export default async function ProjectValidationsPage({
   params,
 }: PageProps<"/app/projects/[projectId]/validations">) {
-  await requireApproved();
   const { projectId } = await params;
-  await requireLaunchedProject(projectId);
-  const validations = await listProjectValidations(projectId);
+  const [, , validations] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    listProjectValidations(projectId),
+  ]);
   const pending = validations.filter((v) => v.state === "pending");
   const decided = validations.filter((v) => v.state !== "pending");
 

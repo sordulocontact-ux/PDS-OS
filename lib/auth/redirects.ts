@@ -53,6 +53,7 @@ export const PERMISSIONS = [
   "manage_catalog",
   "create_projects",
   "archive_records",
+  "read_feedback",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -78,6 +79,10 @@ export const routes = {
   app: "/app",
   assistant: "/app/assistant",
   work: "/app/work",
+  feedback: "/app/feedback",
+  // Feedback form, remembering the page it was opened from.
+  feedbackFrom: (path: string) =>
+    `/app/feedback?from=${encodeURIComponent(path)}`,
   members: "/app/members",
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",

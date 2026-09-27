@@ -8,6 +8,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { listArtistActivity } from "@/lib/catalog/activity";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { fr } from "@/lib/i18n/fr";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const LIMIT = 200;
 
@@ -17,11 +18,13 @@ const LIMIT = 200;
 export default async function ArtistActivityPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]/activity">) {
-  await requireApproved();
   const { artistId } = await params;
-  const artist = await getArtist(artistId);
+  const [, artist, { events, error }] = await allInOrder([
+    requireApproved(),
+    getArtist(artistId),
+    listArtistActivity(artistId),
+  ]);
   if (!artist) notFound();
-  const { events, error } = await listArtistActivity(artist.id);
   const t = fr.artistActivity;
 
   if (error) return <FormMessage kind="error">{t.loadError}</FormMessage>;

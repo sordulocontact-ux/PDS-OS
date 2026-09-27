@@ -1,12 +1,12 @@
 "use client";
 
 import { IconSitemap4 } from "nucleo-sharp-essential";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
 import {
   Sheet,
   SheetContent,
@@ -93,7 +93,7 @@ function ProjectSidebarList({
         return (
           <li key={item.key}>
             {item.href ? (
-              <Link
+              <ViewLink
                 href={item.href}
                 onClick={onNavigate}
                 aria-current={active ? "page" : undefined}
@@ -104,7 +104,7 @@ function ProjectSidebarList({
                 )}
               >
                 {item.label}
-              </Link>
+              </ViewLink>
             ) : (
               <span
                 aria-disabled

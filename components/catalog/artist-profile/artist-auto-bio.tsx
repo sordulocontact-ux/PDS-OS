@@ -1,4 +1,5 @@
 import { ArtistBio } from "@/components/catalog/artist-profile/artist-bio";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
 import { fr } from "@/lib/i18n/fr";
 
@@ -18,10 +19,7 @@ export function ArtistAutoBioSkeleton() {
   return (
     <div className="flex max-w-prose flex-col gap-2" aria-hidden>
       {["w-full", "w-full", "w-2/3"].map((width, i) => (
-        <div
-          key={i}
-          className={`h-4 ${width} animate-pulse rounded bg-muted`}
-        />
+        <Skeleton key={i} className={`h-4 ${width} rounded`} />
       ))}
     </div>
   );

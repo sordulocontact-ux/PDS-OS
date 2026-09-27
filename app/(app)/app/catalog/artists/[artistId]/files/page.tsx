@@ -10,18 +10,21 @@ import { requireApproved } from "@/lib/auth/dal";
 import { getArtist } from "@/lib/catalog/artist-queries";
 import { listArtistFiles } from "@/lib/catalog/files";
 import { fr } from "@/lib/i18n/fr";
+import { allInOrder } from "@/lib/utils/parallel";
 
 // Files tab: documents of the artist. Everyone reads them (contracts only
 // with manage_catalog, RLS); manage_catalog adds and deletes.
 export default async function ArtistFilesPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]/files">) {
-  const access = await requireApproved();
   const { artistId } = await params;
-  const artist = await getArtist(artistId);
+  const [access, artist, { files, error }] = await allInOrder([
+    requireApproved(),
+    getArtist(artistId),
+    listArtistFiles(artistId),
+  ]);
   if (!artist) notFound();
   const canEdit = can(access, "manage_catalog");
-  const { files, error } = await listArtistFiles(artist.id);
   const t = fr.artistFiles;
 
   return (

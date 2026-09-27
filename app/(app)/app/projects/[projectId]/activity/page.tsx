@@ -7,6 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.projectHistory.activity;
 
@@ -17,14 +18,12 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
 export default async function ProjectActivityPage({
   params,
 }: PageProps<"/app/projects/[projectId]/activity">) {
-  await requireApproved();
   const { projectId } = await params;
-  await requireLaunchedProject(projectId);
-  const events = await loadRecentActivity({
-    projectId,
-    days: 3650,
-    limit: 200,
-  });
+  const [, , events] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    loadRecentActivity({ projectId, days: 3650, limit: 200 }),
+  ]);
 
   return (
     <div className="grid gap-6">

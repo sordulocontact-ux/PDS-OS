@@ -19,6 +19,7 @@ import { fr } from "@/lib/i18n/fr";
 import { getProjectRelease } from "@/lib/release/queries";
 import { isUuid } from "@/lib/release/uuid";
 import { createClient } from "@/lib/supabase/server";
+import { allInOrder } from "@/lib/utils/parallel";
 
 import { checkRelease, saveRelease, setSmartlinkEnabled } from "./actions";
 
@@ -32,13 +33,13 @@ export const maxDuration = 60;
 export default async function ReleasePage({
   params,
 }: PageProps<"/app/projects/[projectId]/release">) {
-  await requireApproved();
   const { projectId } = await params;
-  await requireLaunchedProject(projectId);
   if (!isUuid(projectId)) notFound();
-
-  const supabase = await createClient();
-  const data = await getProjectRelease(supabase, projectId);
+  const [, , data] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+    createClient().then((supabase) => getProjectRelease(supabase, projectId)),
+  ]);
   if (!data) notFound();
   const { project, release, links } = data;
 

@@ -18,6 +18,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { getArtist, listArtistContacts } from "@/lib/catalog/artist-queries";
 import { countryName } from "@/lib/catalog/countries";
 import { fr } from "@/lib/i18n/fr";
+import { allInOrder } from "@/lib/utils/parallel";
 
 // Artist overview: key figures, identity, contacts (manage_catalog only:
 // the database hides them from everyone else), biography, notes. Masters
@@ -25,12 +26,19 @@ import { fr } from "@/lib/i18n/fr";
 export default async function ArtistOverviewPage({
   params,
 }: PageProps<"/app/catalog/artists/[artistId]">) {
-  const access = await requireApproved();
   const { artistId } = await params;
-  const artist = await getArtist(artistId);
+  const accessPromise = requireApproved();
+  // Contacts are read only with manage_catalog (RLS agrees): fetched as soon
+  // as access is known, alongside the artist.
+  const [access, artist, contacts] = await allInOrder([
+    accessPromise,
+    getArtist(artistId),
+    accessPromise.then((known) =>
+      can(known, "manage_catalog") ? listArtistContacts(artistId) : [],
+    ),
+  ]);
   if (!artist) notFound();
   const canEdit = can(access, "manage_catalog");
-  const contacts = canEdit ? await listArtistContacts(artist.id) : [];
   const t = fr.catalog.artist;
   const p = fr.catalog.artistPage;
 

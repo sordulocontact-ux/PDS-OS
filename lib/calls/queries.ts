@@ -62,18 +62,6 @@ export type StoredReport = {
   count: number;
 };
 
-export async function getProjectTitle(
-  supabase: Client,
-  projectId: string,
-): Promise<string | null> {
-  const { data } = await supabase
-    .from("projects")
-    .select("title")
-    .eq("id", projectId)
-    .maybeSingle();
-  return data?.title ?? null;
-}
-
 export async function listCalls(
   supabase: Client,
   projectId: string,

@@ -14,6 +14,7 @@ import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { isFramingValidated } from "@/lib/projects/types";
+import { allInOrder } from "@/lib/utils/parallel";
 
 // Project frame: header, then content next to the contextual sidebar (Figma
 // "Double sidebar", docs/DESIGN.md § 4). The main app sidebar collapses to
@@ -26,9 +27,11 @@ export default async function ProjectLayout({
   children,
   params,
 }: LayoutProps<"/app/projects/[projectId]">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await getProject(projectId);
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    getProject(projectId),
+  ]);
   if (!project) notFound();
 
   const canEdit = canEditProject(access, project);

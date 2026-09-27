@@ -2,7 +2,8 @@ import "server-only";
 
 import { z } from "zod";
 
-import { fetchJson } from "@/lib/integrations/http";
+import { deezerArtistIdOf } from "@/lib/catalog/deezer-link";
+import { fetchJson, IntegrationError } from "@/lib/integrations/http";
 
 /**
  * Deezer public API — no authentication, 50 requests / 5 s.
@@ -121,4 +122,23 @@ export async function getDeezerArtist(
     await fetchJson("deezer", `${BASE}/artist/${id}`),
   );
   return parsed.success ? toArtist(parsed.data) : null;
+}
+
+// A link.deezer.com share link answers one redirect to the deezer.com page;
+// only that hop is followed, and only the artist id is kept from it.
+export async function resolveDeezerShareLink(
+  url: string,
+): Promise<number | null> {
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      cache: "no-store",
+      redirect: "manual",
+      signal: AbortSignal.timeout(8000),
+    });
+  } catch {
+    throw new IntegrationError("deezer", "unreachable");
+  }
+  const location = response.headers.get("location");
+  return location ? deezerArtistIdOf(location) : null;
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { ViewLink } from "@/components/ui/view-link";
 import { cn } from "@/lib/utils";
 
 export type SectionTab = {
@@ -35,7 +35,7 @@ export function SectionTabs({
             : pathname === tab.href || pathname.startsWith(`${tab.href}/`);
           return (
             <li key={tab.href} className="shrink-0">
-              <Link
+              <ViewLink
                 href={tab.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
@@ -46,7 +46,7 @@ export function SectionTabs({
                 )}
               >
                 {tab.label}
-              </Link>
+              </ViewLink>
             </li>
           );
         })}

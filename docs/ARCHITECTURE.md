@@ -91,6 +91,11 @@ Principes :
   Seul le `deezerId` part du navigateur : `createArtist` relit la photo et le lien sur
   Deezer (`getDeezerArtist`), jamais une URL fournie par le client. La recherche Deezer
   classe mal (homonymes obscurs en tête) : on prend 25 résultats, triés par fans, 8 gardés.
+  Les petits artistes n'y sortent jamais : le même champ accepte un **lien Deezer**
+  (`lib/catalog/deezer-link.ts`) — `deezer.com/[fr/]artist/<id>` lu directement, lien de
+  partage `link.deezer.com/s/…` résolu par **une** redirection (`resolveDeezerShareLink`,
+  seuls ces hôtes sont appelés, jamais une URL arbitraire). Lien d'album ou de titre : aucun
+  résultat, message qui demande le lien de la page de l'artiste.
   Photo = URL du CDN Deezer (pas de copie Storage) ; `ArtistAvatar` retombe sur les
   initiales si elle ne charge plus.
 - **Fiche artiste enrichie** (`lib/catalog/artist-profile.ts`) : pour un artiste importé de
@@ -218,6 +223,47 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   seulement) et affichées sur « Équipe », qui ouvre alors `?status=pending`. Un layout ne
   se recalcule pas à chaque navigation : le compteur se met à jour au chargement d'une
   page et après une action qui revalide (décision prise sur l'écran Équipe).
+
+---
+
+## 3 bis. Fluidité de la navigation
+
+Un clic ne doit jamais laisser l'écran figé, et changer de vue dans une même page (section
+d'un projet, onglet d'artiste, étape du fil d'Ariane, filtre Actifs / Archivés) doit
+s'afficher sans chargement.
+
+- **Vues préchargées** : ces liens passent par `ViewLink` (`components/ui/view-link.tsx`),
+  un `Link` en `prefetch` complet : la page **et ses données** sont rendues en arrière-plan
+  dès que le lien est à l'écran. Mesuré en production locale : 5 à 25 ms par changement de
+  section, aucun squelette. Coût : ~12 rendus de page en fond à l'ouverture d'un projet,
+  acceptable pour 3 à 5 utilisateurs ; ne pas l'étendre à des listes longues (une ligne =
+  un préchargement complet).
+- **Cache du routeur** (`next.config.ts`, `experimental.staleTimes`) : `dynamic: 30` (page
+  revisitée en moins de 30 s), `static: 60` (vue préchargée, re-préchargée au survol une
+  fois expirée). Jamais périmé après une écriture : tout `revalidatePath` d'une Server
+  Action vide ce cache, les notifications Realtime font `router.refresh()`. Une écriture
+  d'un collègue **sans** notification peut rester invisible 60 s au plus.
+- **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
+  page) : `app/(app)/app/loading.tsx` générique (`PageLoading`), listes avec leur vrai titre,
+  sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),
+  onglets d'artiste, accueil (`HomeFrame` : PO utilisable avant les cartes). Piège : un
+  `loading.tsx` enveloppe **aussi les segments enfants**, et le layout asynchrone d'un
+  enfant s'attend sous le `loading.tsx` du parent. D'où les groupes `(list)` et `(home)` :
+  sans eux, ouvrir une fiche artiste montrait le squelette de la liste des artistes.
+- **Streaming** : accueil et Travail affichent l'en-tête tout de suite, les cartes arrivent
+  derrière un `<Suspense>` (`HomeFeed`, `MyWorkCards`).
+- **Pas de cascade** : une page lance l'accès, l'enregistrement et ses données en un seul
+  aller-retour avec `allInOrder` (`lib/utils/parallel.ts`), qui renvoie la première erreur
+  **dans l'ordre des arguments** (accès, puis enregistrement, puis données) : une
+  redirection vers le bon écran l'emporte toujours sur un 404. Lancer une requête avant de
+  connaître l'accès ne révèle rien : le RLS la filtre de toute façon.
+- **Auth sans aller-retour** : `getClaims()` (proxy et `fetchAccess`) vérifie la signature
+  du jeton localement (clés asymétriques ES256, JWKS mis en cache par auth-js) au lieu
+  d'interroger le serveur Auth deux fois par page. Revers : une session révoquée ailleurs
+  reste lisible jusqu'à l'expiration du jeton (1 h) ; sans effet sur les droits,
+  `get_my_access` relit l'adhésion à chaque page et le RLS s'applique au même jeton.
+- **À savoir** : `next dev` ne précharge jamais et compile chaque page à sa première visite.
+  La fluidité se juge avec `pnpm build && pnpm start`.
 
 ---
 
@@ -446,6 +492,20 @@ ou total est calculé par le code, jamais par PO.
 - **Budget** (`lib/budget/`) : enveloppe = `projects.budget_cents` (fixée à la création),
   Prévu = lignes prévues, Engagé = engagées + payées, Reste = enveloppe − engagé,
   dépassement écrit en toutes lettres. Le responsable seul écrit ; PO ne lit pas la table.
+
+## 8 quater. Retours sur l'application (`/app/feedback`)
+
+- Page ouverte à tout membre, par « Envoyer un retour » dans le bas de la navigation
+  (`FeedbackLink`, au-dessus de « Se déconnecter »). Le lien porte la page d'où l'on
+  vient (`?from=`) : elle est jointe au retour, seul un chemin `/app…` est gardé (code et
+  contrainte SQL), une valeur inconnue est ignorée sans refuser l'envoi.
+- Table `feedback` : type fermé (`bug`, `idea`, `other`), message (4 000 caractères au
+  plus), page facultative, auteur posé par trigger (`set_created_by`). **Jamais modifiée
+  ni supprimée** : aucun droit `update` / `delete`.
+- Lecture (RLS) : l'auteur voit les siens, qui détient `administer` voit tous ceux de
+  l'organisation (« Retours reçus »). C'est là que l'équipe qui construit l'outil les lit.
+- Non fait, volontairement : pas de statut « traité », pas de notification, pas de
+  capture d'écran ; à ajouter si le besoin se confirme.
 
 ## 9. Design (`docs/DESIGN.md`)
 

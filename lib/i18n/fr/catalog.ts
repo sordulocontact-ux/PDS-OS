@@ -203,13 +203,15 @@ export const catalog = {
       "Deezer ne répond pas. Réessayez, ou créez l'artiste sans Deezer.",
     deezer: {
       label: "Rechercher sur Deezer",
-      placeholder: "Nom de l'artiste",
-      hint: "Photo, nom et lien Deezer seront repris automatiquement.",
+      placeholder: "Nom de l'artiste ou lien Deezer",
+      hint: "Photo, nom et lien Deezer seront repris automatiquement. Artiste introuvable par son nom ? Collez le lien de sa page Deezer.",
       searching: "Recherche sur Deezer…",
       unavailable:
         "Deezer ne répond pas. Réessayez dans un instant, ou créez l'artiste sans Deezer.",
       noResult: (query: string) =>
-        `Aucun artiste Deezer pour « ${query} ». Vérifiez l'orthographe, ou créez-le sans Deezer.`,
+        `Aucun artiste Deezer pour « ${query} ». Vérifiez l'orthographe, collez le lien de sa page Deezer, ou créez-le sans Deezer.`,
+      noLinkResult:
+        "Ce lien ne mène à aucun artiste. Copiez le lien de la page de l'artiste sur Deezer (deezer.com/artist/…), ou créez-le sans Deezer.",
       resultsLabel: "Artistes trouvés sur Deezer",
       resultCount: (count: number) =>
         count > 1 ? `${count} artistes trouvés` : "1 artiste trouvé",

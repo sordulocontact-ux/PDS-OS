@@ -210,19 +210,32 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   entier. Une carte vide garde sa place avec une phrase : la page d'un poste a toujours
   la même structure.
 
-### Fenêtre « verre » (Espace Espace)
+### Modale : une seule, « verre »
 
-- `DialogContent variant="glass"` (`components/ui/dialog.tsx`), d'après une référence
-  fournie par Sacha le 27/09/2026 : la page derrière est seulement floutée,
-  **sans voile** : elle reste blanche, le panneau noir suffit au contraste (demande de
-  Sacha) ; le panneau est sombre et translucide
-  (`--surface-glass`), arrondi 16 px (`rounded-3xl`). **Un seul flou** pour la page et
-  pour le panneau : `--glass-blur` (8 px), léger, les formes de la page restent lisibles.
-- La classe `.surface-glass` (`app/globals.css`) inverse les tokens du pont shadcn dans
-  le panneau : textes blancs, boutons contour sur voile blanc 8 %, bouton principal
-  blanc, saisie teintée blanc 6 %. Aucun composant enfant n'est retouché.
-- Utilisée à l'essai sur la fenêtre PO d'Espace Espace seulement ; les autres modales
-  gardent la variante par défaut. Pas d'animation (§ 6).
+**Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,
+27/09/2026) : modifier un artiste, un master, un projet, confirmer, transmettre, créer
+depuis un sélecteur… Il n'existe **pas** d'autre apparence de modale ; `DialogContent`
+n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
+`ConfirmDialog` (`components/ui/`), jamais par un panneau blanc refait à la main.
+
+- `DialogContent` (`components/ui/dialog.tsx`), d'après une référence fournie par Sacha
+  le 27/09/2026 : la page derrière est seulement floutée, **sans voile** : elle reste
+  blanche, le panneau noir suffit au contraste ; le panneau est sombre et translucide
+  (`--surface-glass`), arrondi 16 px (`rounded-3xl`), en bas pleine largeur sur mobile.
+  **Un seul flou** pour la page et pour le panneau : `--glass-blur` (8 px), léger, les
+  formes de la page restent lisibles.
+- La classe `.surface-glass` (`app/globals.css`) inverse les tokens dans le panneau :
+  textes blancs, boutons contour sur voile blanc 8 %, bouton principal et action
+  définitive blancs, champs et filets blancs translucides, liste d'un sélecteur
+  (`SearchPicker`) opaque `--po-ink-700`. Aucun composant enfant n'est retouché.
+- **Piège** : un token lu dans une modale et absent de `.surface-glass` y garde sa valeur
+  claire (texte noir sur fond noir). Un composant qui lit un nouveau token et s'affiche
+  en modale → ajouter ce token à `.surface-glass`. Les couleurs brutes (`text-ink-800`,
+  `text-grey-400`) ne s'inversent pas : ne pas les employer dans une modale.
+- Hors périmètre : les panneaux latéraux (`Sheet` : relecture d'un brouillon de PO, ligne
+  de budget, tiroir de navigation mobile), les menus et listes déroulantes en portail
+  (`Select`, `DropdownMenu`, `Popover`, `Tooltip`) restent clairs.
+- Pas d'animation (§ 6).
 
 ### Arrondis
 

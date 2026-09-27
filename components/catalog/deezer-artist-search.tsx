@@ -6,6 +6,7 @@ import { useEffect, useId, useState } from "react";
 import { DeezerArtistRow } from "@/components/catalog/deezer-artist-row";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { parseDeezerLink } from "@/lib/catalog/deezer-link";
 import type { ArtistOption, DeezerArtistResult } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
@@ -20,7 +21,8 @@ const DEBOUNCE_MS = 300;
 
 // First step of "Nouvel artiste": find the artist on Deezer. An artist the
 // catalog already holds is offered as is (select it, or open its page), and
-// "Créer sans Deezer" covers artists not on the platforms yet.
+// "Créer sans Deezer" covers artists not on the platforms yet. A pasted Deezer
+// link finds the small artists the name search never surfaces.
 export function DeezerArtistSearch({
   initialQuery,
   pickerMode,
@@ -41,6 +43,7 @@ export function DeezerArtistSearch({
   const [query, setQuery] = useState(initialQuery);
   const [search, setSearch] = useState<Search>({ status: "idle" });
   const trimmed = query.trim();
+  const isLink = parseDeezerLink(trimmed) !== null;
 
   useEffect(() => {
     if (trimmed.length < MIN_QUERY) return;
@@ -78,7 +81,9 @@ export function DeezerArtistSearch({
         : shown.status === "error"
           ? t.unavailable
           : shown.results.length === 0
-            ? t.noResult(shown.query)
+            ? parseDeezerLink(shown.query)
+              ? t.noLinkResult
+              : t.noResult(shown.query)
             : null;
 
   return (
@@ -97,7 +102,7 @@ export function DeezerArtistSearch({
             type="search"
             autoFocus
             autoComplete="off"
-            maxLength={100}
+            maxLength={300}
             value={query}
             placeholder={t.placeholder}
             onChange={(event) => setQuery(event.target.value)}
@@ -140,7 +145,7 @@ export function DeezerArtistSearch({
           type="button"
           variant="outline"
           size="lg"
-          onClick={() => onManual(trimmed)}
+          onClick={() => onManual(isLink ? "" : trimmed)}
         >
           {t.manual}
         </Button>

@@ -25,14 +25,17 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 import { importStrategyReport } from "@/lib/strategy/actions/import";
 import { isFramingValidated } from "@/lib/projects/types";
 import { loadStrategy } from "@/lib/strategy/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
 /** Launch strategy stage: the Strategy on one page, built on the validated Brief. */
 export default async function StrategyPage({
   params,
 }: PageProps<"/app/projects/[projectId]/strategy">) {
-  const access = await requireApproved();
   const { projectId } = await params;
-  const project = await requireLaunchedProject(projectId);
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+  ]);
   // The strategy is built on the validated Brief: nothing to open before.
   if (!isFramingValidated(project.stages)) {
     return (
