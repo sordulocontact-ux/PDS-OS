@@ -17,16 +17,23 @@ import {
 import { parseSaidDate, parseSaidEuros } from "@/lib/assistant/verbatim";
 import { can } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
-import { listMasterOptions } from "@/lib/catalog/queries";
+import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
+import { listContentFormats } from "@/lib/projects/content-formats";
 import { listCreativePeople } from "@/lib/projects/creatives";
+import { projectKindLabel } from "@/lib/projects/labels";
 import {
   getProject,
   listAssignablePeople,
   listProjects,
 } from "@/lib/projects/queries";
-import { PRIORITIES, PROJECT_TYPES } from "@/lib/projects/types";
+import {
+  CREATABLE_PROJECT_TYPES,
+  MUSIC_FORMATS,
+  PRIORITIES,
+  contentModeOf,
+} from "@/lib/projects/types";
 
 const said = (what: string) =>
   z
@@ -38,7 +45,7 @@ const said = (what: string) =>
 export function proposeProjectTool({ access, verbatim }: ProposeContext) {
   return tool({
     description:
-      "Prépare la création d'un projet, ou la modification d'un projet pas encore lancé : titre, type, titres du catalogue (morceaux), chef de projet et direction artistique (création seulement), échéance, budget, priorité, notes de cadrage. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
+      "Prépare la création d'un projet, ou la modification d'un projet pas encore lancé : titre, type (music_release = musical, content = contenu ; pas d'événement ni de partenariat), format musical et masters du catalogue pour un projet musical, format PDS existant (PDS Mic…) et artiste facultatif pour un contenu, chef de projet et direction créative (création seulement), échéance, budget, priorité, contexte initial. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
     inputSchema: z.object({
       existingProject: z
         .string()
@@ -48,7 +55,23 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
           "Titre du projet existant à modifier ; absent pour en créer un",
         ),
       title: z.string().max(200).optional(),
-      type: z.enum(PROJECT_TYPES).optional(),
+      type: z.enum(CREATABLE_PROJECT_TYPES).optional(),
+      musicFormat: z
+        .enum(MUSIC_FORMATS)
+        .optional()
+        .describe("Format d'un projet musical : single, ep, album…"),
+      contentFormat: z
+        .string()
+        .max(120)
+        .optional()
+        .describe(
+          "Nom du format PDS existant d'un contenu ; absent pour un contenu ponctuel",
+        ),
+      artist: z
+        .string()
+        .max(200)
+        .optional()
+        .describe("Artiste d'un contenu, s'il en concerne un"),
       masters: z
         .array(z.string().max(200))
         .max(20)
@@ -63,7 +86,11 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
       dueDate: said("Échéance avec l'année"),
       budget: said("Budget en euros"),
       priority: z.enum(PRIORITIES).optional(),
-      notes: z.string().max(20000).optional().describe("Notes de cadrage"),
+      notes: z
+        .string()
+        .max(20000)
+        .optional()
+        .describe("Contexte initial : ce qu'on sait déjà du projet"),
     }),
     execute: async (input) => {
       const t = fr.assistant.drafts;
@@ -97,7 +124,20 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
           };
       }
 
-      const allMasters = await listMasterOptions();
+      const [allMasters, formats, artists] = await Promise.all([
+        listMasterOptions(),
+        input.contentFormat ? listContentFormats() : [],
+        input.artist ? listArtistOptions() : [],
+      ]);
+      const format = input.contentFormat
+        ? findNamed(formats, input.contentFormat, (f) => f.name, warnings)
+        : null;
+      if (input.contentFormat && !format)
+        warnings.push(t.unknownFormat(input.contentFormat));
+      const artist = input.artist
+        ? findNamed(artists, input.artist, (a) => a.name, warnings)
+        : null;
+      if (input.artist && !artist) warnings.push(t.unknownArtist(input.artist));
       let masters = current?.masters ?? [];
       if (input.masters?.length) {
         masters = input.masters.flatMap((title) => {
@@ -147,9 +187,24 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         warnings.push(t.notSaid(labels.budget));
 
       const currentBudget = centsToEuros(current?.budgetCents ?? null);
+      const type = input.type ?? current?.type ?? null;
+      const contentFormatId = format?.id ?? current?.contentFormat?.id ?? null;
       const values: ProjectDraft["values"] = {
         title: input.title?.trim() || current?.title || "",
-        type: input.type ?? current?.type ?? null,
+        type,
+        musicFormat: input.musicFormat ?? current?.musicFormat ?? null,
+        contentMode:
+          type !== "content"
+            ? null
+            : contentFormatId
+              ? "format"
+              : input.contentFormat
+                ? "format"
+                : current
+                  ? contentModeOf(current)
+                  : null,
+        contentFormatId,
+        artistId: artist?.id ?? current?.artistId ?? null,
         masterIds: [...new Set(masters.map((m) => m.id))],
         assigneePersonId,
         creativePersonIds: [...new Set(creativePersonIds)],
@@ -157,22 +212,44 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         budget:
           budgetCents !== null ? centsToEuros(budgetCents) : currentBudget,
         priority: input.priority ?? current?.priority ?? null,
-        framingNotes: input.notes?.trim() || current?.framingNotes || "",
+        initialContext: input.notes?.trim() || current?.initialContext || "",
       };
 
       const shell = fr.shell;
       const changes: DraftChange[] = [];
-      const typeLabel = (v: ProjectDraft["values"]["type"]) =>
-        v ? shell.projectTypes[v] : null;
+      const formatName = (id: string | null) =>
+        id === current?.contentFormat?.id
+          ? (current?.contentFormat?.name ?? null)
+          : (format?.name ?? null);
+      const kindLabel = (
+        v: Pick<
+          ProjectDraft["values"],
+          "type" | "musicFormat" | "contentFormatId"
+        >,
+      ) =>
+        v.type
+          ? projectKindLabel({
+              type: v.type,
+              musicFormat: v.musicFormat,
+              contentFormatName: formatName(v.contentFormatId),
+            })
+          : null;
       const mastersLabel = (list: typeof masters) =>
         list.map((m) => masterLabel(m)).join(", ");
       change(changes, labels.title, current?.title, values.title);
       change(
         changes,
         labels.type,
-        typeLabel(current?.type ?? null),
-        typeLabel(values.type),
+        current
+          ? kindLabel({
+              type: current.type,
+              musicFormat: current.musicFormat,
+              contentFormatId: current.contentFormat?.id ?? null,
+            })
+          : null,
+        kindLabel(values),
       );
+      if (artist) change(changes, labels.artist, null, artist.name);
       change(
         changes,
         labels.masters,
@@ -199,7 +276,12 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         current?.priority ? shell.priorities[current.priority] : null,
         values.priority ? shell.priorities[values.priority] : null,
       );
-      change(changes, labels.notes, current?.framingNotes, values.framingNotes);
+      change(
+        changes,
+        labels.initialContext,
+        current?.initialContext,
+        values.initialContext,
+      );
 
       return proposalResult({
         draft: { kind: "project", projectId: current?.id ?? null, values },

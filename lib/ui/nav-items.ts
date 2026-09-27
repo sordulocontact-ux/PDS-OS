@@ -13,9 +13,9 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
 // The 8 items of the main sidebar (Figma "Devis Sordulo", node 120:47 and
-// 120:74), plus "Retours": one source, used full-width and icon-only. "Calendrier" and
-// "Calls" have no organization-wide page yet (calls live inside a
-// project, routes.projectCalls) — kept visible, disabled, per docs/DESIGN.md § 4.
+// 120:74), plus "Retours": one source, used full-width and icon-only.
+// "Calendrier" has no organization-wide page yet — kept visible, disabled,
+// per docs/DESIGN.md § 4. "Calls" lists the calls of every visible project.
 export type NavItem = {
   href: string;
   label: string;
@@ -35,7 +35,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: IconCalendarDays,
     disabled: true,
   },
-  { href: "#", label: fr.shell.nav.calls, icon: IconPhone, disabled: true },
+  { href: routes.calls, label: fr.shell.nav.calls, icon: IconPhone },
   { href: routes.artists, label: fr.shell.nav.artists, icon: IconMicrophone },
   { href: routes.masters, label: fr.shell.nav.masters, icon: IconDisc },
   {

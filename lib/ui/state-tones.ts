@@ -149,6 +149,14 @@ export const feedbackKindTone: Record<string, Tone> = {
   other: "neutral",
 };
 
+/** Priority of a project; only "high" is shown, as a badge in the lists
+ * (same tones as a feedback's priority). */
+export const projectPriorityTone: Record<string, Tone> = {
+  high: "danger",
+  normal: "info",
+  low: "neutral",
+};
+
 /** Priority the director gives a feedback topic when sending it. */
 export const feedbackPriorityTone: Record<string, Tone> = {
   high: "danger",

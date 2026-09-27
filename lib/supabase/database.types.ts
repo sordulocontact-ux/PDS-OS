@@ -214,6 +214,7 @@ export type Database = {
           category: string
           created_at: string
           created_by: string | null
+          description: string | null
           file_name: string
           id: string
           mime: string
@@ -226,6 +227,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           file_name: string
           id?: string
           mime: string
@@ -238,6 +240,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           file_name?: string
           id?: string
           mime?: string
@@ -559,6 +562,54 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      content_formats: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_formats_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_formats_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1191,6 +1242,7 @@ export type Database = {
           category: string
           created_at: string
           created_by: string | null
+          description: string | null
           duration_seconds: number | null
           file_name: string
           id: string
@@ -1205,6 +1257,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           duration_seconds?: number | null
           file_name: string
           id?: string
@@ -1219,6 +1272,7 @@ export type Database = {
           category?: string
           created_at?: string
           created_by?: string | null
+          description?: string | null
           duration_seconds?: number | null
           file_name?: string
           id?: string
@@ -2361,11 +2415,13 @@ export type Database = {
           archived_at: string | null
           artist_id: string | null
           budget_cents: number | null
+          content_format_id: string | null
           created_at: string
           created_by: string | null
           due_date: string | null
-          framing_notes: string | null
           id: string
+          initial_context: string | null
+          music_format: string | null
           organization_id: string
           owner_person_id: string | null
           priority: string | null
@@ -2377,11 +2433,13 @@ export type Database = {
           archived_at?: string | null
           artist_id?: string | null
           budget_cents?: number | null
+          content_format_id?: string | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
-          framing_notes?: string | null
           id?: string
+          initial_context?: string | null
+          music_format?: string | null
           organization_id: string
           owner_person_id?: string | null
           priority?: string | null
@@ -2393,11 +2451,13 @@ export type Database = {
           archived_at?: string | null
           artist_id?: string | null
           budget_cents?: number | null
+          content_format_id?: string | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
-          framing_notes?: string | null
           id?: string
+          initial_context?: string | null
+          music_format?: string | null
           organization_id?: string
           owner_person_id?: string | null
           priority?: string | null
@@ -2411,6 +2471,13 @@ export type Database = {
             columns: ["artist_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "projects_content_format_same_org"
+            columns: ["content_format_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "content_formats"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -3071,6 +3138,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_person: { Args: { target_person_id: string }; Returns: boolean }
+      check_project_shape: {
+        Args: { p_master_ids: string[]; p_music_format: string; p_type: string }
+        Returns: undefined
+      }
       claim_push_deliveries: {
         Args: { p_secret: string }
         Returns: {
@@ -3099,12 +3170,15 @@ export type Database = {
       }
       create_project: {
         Args: {
+          p_artist_id?: string
           p_assignee_person_id?: string
           p_budget_cents?: number
+          p_content_format_id?: string
           p_creative_person_ids?: string[]
           p_due_date?: string
-          p_framing_notes?: string
+          p_initial_context?: string
           p_master_ids?: string[]
+          p_music_format?: string
           p_organization_id: string
           p_priority?: string
           p_title: string
@@ -3370,10 +3444,13 @@ export type Database = {
       }
       update_project: {
         Args: {
+          p_artist_id?: string
           p_budget_cents?: number
+          p_content_format_id?: string
           p_due_date?: string
-          p_framing_notes?: string
+          p_initial_context?: string
           p_master_ids?: string[]
+          p_music_format?: string
           p_priority?: string
           p_project_id: string
           p_title: string

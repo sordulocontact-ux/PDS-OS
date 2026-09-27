@@ -93,7 +93,7 @@ select lives_ok($$
     'music_release',
     array[public.create_master((select id from ids where name = 'org'), 'Lueur',
       jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))))],
-    null, null, null, null)
+    null, null, null, null, p_music_format => 'single')
 $$, 'the director creates a project around a master');
 insert into ids select 'project', id from public.projects where title = (select v from vars where k = 'project');
 
@@ -194,7 +194,7 @@ select pg_temp.act_as((select id from ids where name = 'outsider'));
 select is((select count(*)::int from public.projects), 0, 'a pending account sees no project');
 select throws_ok($$
   insert into public.projects (organization_id, title, type)
-  values ((select id from ids where name = 'org'), 'Intrus', 'partnership')
+  values ((select id from ids where name = 'org'), 'Intrus', 'content')
 $$, '42501', null, 'a pending account cannot create a project');
 select is((select count(*)::int from public.people), 1, 'a pending account only sees itself');
 

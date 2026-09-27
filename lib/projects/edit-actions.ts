@@ -8,6 +8,7 @@ import { databaseErrorMessage } from "@/lib/auth/errors";
 import { routes } from "@/lib/auth/redirects";
 import { parseForm, retainedValues } from "@/lib/auth/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { foreignKeyError, shapeError } from "@/lib/projects/errors";
 import { updateProjectSchema } from "@/lib/projects/schemas";
 import type { CreateProjectState } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -45,27 +46,21 @@ export async function updateProject(
     p_due_date: input.dueDate ?? undefined,
     p_budget_cents: input.budget ?? undefined,
     p_priority: input.priority ?? undefined,
-    p_framing_notes: input.framingNotes ?? undefined,
+    p_initial_context: input.initialContext ?? undefined,
+    p_music_format: input.musicFormat ?? undefined,
+    p_content_format_id: input.contentFormatId ?? undefined,
+    p_artist_id: input.artistId ?? undefined,
   });
 
   if (error) {
     const pe = fr.shell.newProject.errors;
-    if (error.message.includes("music_release_requires_master")) {
-      return {
-        status: "error",
-        fieldErrors: { masterIds: pe.mastersRequired },
-        values,
-      };
-    }
+    const shape = shapeError(error.message);
+    if (shape) return { status: "error", ...shape, values };
     if (error.message.includes("project_not_editable")) {
       return { status: "error", formError: pe.notEditable, values };
     }
     if (error.code === "23503") {
-      return {
-        status: "error",
-        fieldErrors: { masterIds: pe.invalidMasters },
-        values,
-      };
+      return { status: "error", fieldErrors: foreignKeyError(error), values };
     }
     console.error("updateProject:", error.message);
     return { status: "error", formError: databaseErrorMessage(error), values };

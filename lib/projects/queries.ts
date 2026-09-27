@@ -19,8 +19,10 @@ import {
 import {
   currentStageOf,
   isAssignmentStatus,
+  isMusicFormat,
   isPriority,
   isProjectType,
+  priorityRank,
   projectStatusOf,
   type Assignment,
   isStageState,
@@ -103,6 +105,9 @@ function toMasters(
     });
 }
 
+const FORMAT_SELECT =
+  "content_format:content_formats!projects_content_format_same_org(id, name, description)";
+
 const ASSIGNMENTS_SELECT =
   "assignments:project_assignments!project_assignments_project_same_org(id, status, note, response, responded_at, created_at, assignee_person_id, assignee:people!project_assignments_assignee_person_id_fkey(first_name, last_name), assigner:people!project_assignments_assigned_by_fkey(first_name, last_name))";
 
@@ -153,8 +158,9 @@ function artistNameOf(
 }
 
 /**
- * Live projects the viewer sees, newest first; `ids` narrows to those,
- * `archived` lists the archive instead.
+ * Live projects the viewer sees, high priority first, then newest first;
+ * `ids` narrows to those, `archived` lists the archive instead. The order is
+ * the one of the home cards, Travail and the projects list.
  */
 export async function listProjects(filter?: {
   ids?: string[];
@@ -169,7 +175,7 @@ export async function listProjects(filter?: {
   const select = supabase
     .from("projects")
     .select(
-      `id, title, type, owner_person_id, artist:artists!projects_artist_same_org(name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+      `id, title, type, music_format, priority, owner_person_id, artist:artists!projects_artist_same_org(name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
     );
   let query = filter?.archived
     ? select.not("archived_at", "is", null)
@@ -193,6 +199,9 @@ export async function listProjects(filter?: {
       title: row.title,
       artistName: artistNameOf(masters, row.artist),
       type: isProjectType(row.type) ? row.type : "music_release",
+      musicFormat: isMusicFormat(row.music_format) ? row.music_format : null,
+      contentFormatName: row.content_format?.name ?? null,
+      priority: isPriority(row.priority) ? row.priority : null,
       status: projectStatusOf(stages.length, latest ?? null),
       ownerPersonId: row.owner_person_id,
       latestAssignment: latest
@@ -202,6 +211,8 @@ export async function listProjects(filter?: {
       stageCount: stages.length,
     };
   });
+  // Stable: newest first inside each priority.
+  projects.sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
   return { projects, error: false };
 }
 
@@ -214,7 +225,7 @@ export const getProject = cache(
     const { data, error } = await supabase
       .from("projects")
       .select(
-        `id, title, type, created_at, due_date, budget_cents, priority, framing_notes, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+        `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
       )
       .eq("id", projectId)
       .is("archived_at", null)
@@ -236,6 +247,9 @@ export const getProject = cache(
       id: data.id,
       title: data.title,
       type: isProjectType(data.type) ? data.type : "music_release",
+      musicFormat: isMusicFormat(data.music_format) ? data.music_format : null,
+      contentFormat: data.content_format,
+      artistId: data.artist_id,
       createdAt: data.created_at,
       artistName: artistNameOf(masters, data.artist),
       ownerName: owner || null,
@@ -245,7 +259,7 @@ export const getProject = cache(
       dueDate: data.due_date,
       budgetCents: data.budget_cents,
       priority: isPriority(data.priority) ? data.priority : null,
-      framingNotes: data.framing_notes,
+      initialContext: data.initial_context,
       masters: masters.map(masterOption),
       stages,
       currentStage: currentStageOf(stages),

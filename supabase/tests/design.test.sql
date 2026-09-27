@@ -43,7 +43,7 @@ insert into ids select name || '_person', a.person_id
 -- The director creates the project with its creative, the owner accepts.
 select pg_temp.act_as((select id from ids where name = 'director'));
 insert into ids select 'project', public.create_project((select id from ids where name = 'org'),
-  'DS ' || (select v from vars where k = 'tag'), 'partnership');
+  'DS ' || (select v from vars where k = 'tag'), 'content');
 insert into ids select 'a1', public.transmit_project((select id from ids where name = 'project'),
   (select id from ids where name = 'owner_person'));
 select public.add_project_creative((select id from ids where name = 'project'),

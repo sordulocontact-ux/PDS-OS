@@ -7,7 +7,9 @@ import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
 import type { CreativeMember } from "@/lib/projects/creatives";
 import { listCreativePeople } from "@/lib/projects/creatives";
+import { listContentFormats } from "@/lib/projects/content-formats";
 import { listAssignablePeople } from "@/lib/projects/queries";
+import type { ContentFormatOption } from "@/lib/projects/types";
 
 // What the side panel needs to show the real form for a PO draft. Read with
 // the user's session: the lists are what this person may pick from.
@@ -29,14 +31,17 @@ export async function loadProjectForm(): Promise<{
   artists: ArtistOption[];
   managers: CreativeMember[];
   creatives: CreativeMember[];
+  contentFormats: ContentFormatOption[];
 }> {
   const access = await requireApproved();
   const organizationId = access.organizationId;
-  const [masters, artists, managers, creatives] = await Promise.all([
-    listMasterOptions(),
-    listArtistOptions(),
-    organizationId ? listAssignablePeople(organizationId) : [],
-    organizationId ? listCreativePeople(organizationId) : [],
-  ]);
-  return { masters, artists, managers, creatives };
+  const [masters, artists, managers, creatives, contentFormats] =
+    await Promise.all([
+      listMasterOptions(),
+      listArtistOptions(),
+      organizationId ? listAssignablePeople(organizationId) : [],
+      organizationId ? listCreativePeople(organizationId) : [],
+      listContentFormats(),
+    ]);
+  return { masters, artists, managers, creatives, contentFormats };
 }

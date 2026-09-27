@@ -45,23 +45,23 @@ insert into ids select name || '_person', a.person_id
 select pg_temp.act_as((select id from ids where name = 'director'));
 
 select throws_ok($$ select public.create_project((select id from ids where name = 'org'),
-                    'Mauvais CP', 'event', p_assignee_person_id => (select id from ids where name = 'creative_person')) $$,
+                    'Mauvais CP', 'content', p_assignee_person_id => (select id from ids where name = 'creative_person')) $$,
                  'P0001', 'invalid_assignee', 'the project manager must be one');
 select is((select count(*)::int from public.projects where title = 'Mauvais CP'),
           0, 'a failed transmission creates nothing');
 
 select throws_ok($$ select public.create_project((select id from ids where name = 'org'),
-                    'Mauvais DC', 'event',
+                    'Mauvais DC', 'content',
                     p_assignee_person_id => (select id from ids where name = 'manager_person'),
                     p_creative_person_ids => array[(select id from ids where name = 'manager_person')]) $$,
                  'P0001', 'invalid_creative', 'a creative must be a creative director');
 
 select lives_ok($$ insert into ids select 'project', public.create_project((select id from ids where name = 'org'),
-                   'Soirée ' || (select v from vars where k = 'tag'), 'event',
+                   'Soirée ' || (select v from vars where k = 'tag'), 'content',
                    p_assignee_person_id => (select id from ids where name = 'manager_person'),
                    p_creative_person_ids => array[(select id from ids where name = 'creative_person'),
                                                   (select id from ids where name = 'creative2_person')]) $$,
-                'the director creates an event with its team, without master');
+                'the director creates a content project with its team, without master');
 select is((select assignee_person_id from public.project_assignments
             where project_id = (select id from ids where name = 'project') and status = 'pending'),
           (select id from ids where name = 'manager_person'), 'the project is transmitted at creation');

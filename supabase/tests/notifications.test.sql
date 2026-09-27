@@ -66,7 +66,7 @@ select lives_ok($$ select public.save_push_subscription(
 reset role;
 select pg_temp.act_as((select id from ids where name = 'director'));
 insert into ids select 'project', public.create_project((select id from ids where name = 'org'),
-  'OP ' || (select v from vars where k = 'tag'), 'partnership');
+  'OP ' || (select v from vars where k = 'tag'), 'content');
 insert into ids select 'a1', public.transmit_project((select id from ids where name = 'project'),
   (select id from ids where name = 'manager_person'));
 

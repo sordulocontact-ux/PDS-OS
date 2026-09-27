@@ -3,13 +3,35 @@
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
 import type { MasterOption } from "@/lib/catalog/types";
 
-export const PROJECT_TYPES = [
-  "music_release",
-  "partnership",
-  "content",
-  "event",
-] as const;
+// Three families (feedback n°2): music (stored `music_release`), content,
+// event. A partnership is not a project. Event exists but is closed in V1:
+// no new project uses it (create_project refuses it).
+export const PROJECT_TYPES = ["music_release", "content", "event"] as const;
 export type ProjectType = (typeof PROJECT_TYPES)[number];
+export const CREATABLE_PROJECT_TYPES = ["music_release", "content"] as const;
+
+// Format of a music project. A single links exactly one master.
+export const MUSIC_FORMATS = [
+  "single",
+  "ep",
+  "album",
+  "mixtape",
+  "compilation",
+  "other",
+] as const;
+export type MusicFormat = (typeof MUSIC_FORMATS)[number];
+
+// A content project is an edition of a reusable PDS format, or a one-off
+// content. Not stored: a project with a content format is an edition.
+export const CONTENT_MODES = ["format", "one_off"] as const;
+export type ContentMode = (typeof CONTENT_MODES)[number];
+
+// A reusable content format of PDS ("PDS Mic"): data, never code.
+export type ContentFormatOption = {
+  id: string;
+  name: string;
+  description: string | null;
+};
 
 export const PRIORITIES = ["low", "normal", "high"] as const;
 export type Priority = (typeof PRIORITIES)[number];
@@ -27,6 +49,36 @@ export function isProjectType(value: unknown): value is ProjectType {
     typeof value === "string" &&
     (PROJECT_TYPES as readonly string[]).includes(value)
   );
+}
+
+export function isMusicFormat(value: unknown): value is MusicFormat {
+  return (
+    typeof value === "string" &&
+    (MUSIC_FORMATS as readonly string[]).includes(value)
+  );
+}
+
+export function isContentMode(value: unknown): value is ContentMode {
+  return (
+    typeof value === "string" &&
+    (CONTENT_MODES as readonly string[]).includes(value)
+  );
+}
+
+// A content project with a format is an edition of it; one without, created
+// since formats exist, a one-off content. Older content projects: unknown.
+export function contentModeOf(project: {
+  type: ProjectType;
+  contentFormat: { id: string } | null;
+}): ContentMode | null {
+  if (project.type !== "content") return null;
+  return project.contentFormat ? "format" : "one_off";
+}
+
+// High first, then normal or none, then low: the order of the lists (home,
+// Travail, Projets).
+export function priorityRank(priority: Priority | null): number {
+  return priority === "high" ? 0 : priority === "low" ? 2 : 1;
 }
 
 export function isPriority(value: unknown): value is Priority {
@@ -104,6 +156,9 @@ export type ProjectListItem = {
   // Main credit of the first master; empty when the project has no master.
   artistName: string;
   type: ProjectType;
+  musicFormat: MusicFormat | null;
+  contentFormatName: string | null;
+  priority: Priority | null;
   status: ProjectStatus;
   // Who runs the launched project (null before acceptance).
   ownerPersonId: string | null;
@@ -117,6 +172,10 @@ export type ProjectDetail = {
   id: string;
   title: string;
   type: ProjectType;
+  musicFormat: MusicFormat | null;
+  contentFormat: ContentFormatOption | null;
+  // Artist named by a content project (a music one reads its masters).
+  artistId: string | null;
   createdAt: string;
   artistName: string;
   ownerName: string | null;
@@ -127,7 +186,8 @@ export type ProjectDetail = {
   dueDate: string | null;
   budgetCents: number | null;
   priority: Priority | null;
-  framingNotes: string | null;
+  // What was known when the project was transmitted; not the framing Brief.
+  initialContext: string | null;
   masters: MasterOption[];
   stages: ProjectStage[];
   currentStage: ProjectStage | null;

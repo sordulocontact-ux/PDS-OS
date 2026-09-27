@@ -167,7 +167,7 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   « Se déconnecter » (masqués repliée), au même format qu'un élément de navigation.
 - Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
   chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
-- Un item sans page encore (Calendrier, Calls au niveau organisation) reste
+- Un item sans page encore (Calendrier) reste
   visible, grisé, non cliquable (`disabled` dans `NavItem`), jamais retiré de l'ordre
   du Figma.
 - **Sidebar contextuelle d'un projet lancé** (`components/projects/project-sidebar.tsx`,

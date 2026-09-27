@@ -1,11 +1,14 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
 export type Choice<V extends string> = {
   value: V;
   label: string;
-  hint: string;
+  // The consequence of the choice; optional on a tile (then a short note).
+  hint?: string;
+  // Tile only: shown above the label.
+  icon?: ReactNode;
   disabled?: boolean;
 };
 
@@ -14,6 +17,8 @@ export type Choice<V extends string> = {
  * decision is informed. Native radios: keyboard and screen readers for free.
  * Uncontrolled (defaultValue, for forms) or controlled (value + onChange).
  * `columns={3}`: side by side from the small breakpoint, for short choices.
+ * `variant="tile"`: a centred icon and label, the radio hidden, the choice
+ * made in the selection colour (type of a project).
  */
 export function ChoiceCards<V extends string>({
   name,
@@ -26,6 +31,7 @@ export function ChoiceCards<V extends string>({
   value,
   onChange,
   columns = 1,
+  variant = "card",
 }: {
   name: string;
   choices: Choice<V>[];
@@ -34,13 +40,20 @@ export function ChoiceCards<V extends string>({
   hint?: string;
   disabled?: boolean;
   defaultValue?: V;
-  value?: V;
+  // Controlled when given; null: nothing chosen yet.
+  value?: V | null;
   onChange?: (value: V) => void;
   columns?: 1 | 3;
+  variant?: "card" | "tile";
 }) {
+  const tile = variant === "tile";
   return (
     <fieldset
-      className={cn("grid gap-2", columns === 3 && "sm:grid-cols-3")}
+      className={cn(
+        "grid gap-2",
+        tile && "gap-3",
+        columns === 3 && "sm:grid-cols-3",
+      )}
       disabled={disabled}
     >
       <legend className={hideLegend ? "sr-only" : "mb-1 text-sm font-medium"}>
@@ -52,7 +65,12 @@ export function ChoiceCards<V extends string>({
       {choices.map((choice) => (
         <label
           key={choice.value}
-          className="flex cursor-pointer gap-3 rounded-lg border border-border p-3 transition-colors has-checked:border-ring has-checked:bg-muted has-disabled:cursor-not-allowed has-disabled:opacity-60"
+          className={cn(
+            "flex cursor-pointer rounded-lg border border-border transition-colors has-disabled:cursor-not-allowed has-disabled:opacity-60",
+            tile
+              ? "flex-col items-center justify-center gap-2 p-6 text-center has-checked:border-[var(--selection-border)] has-checked:bg-[var(--selection-bg)] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-foreground"
+              : "gap-3 p-3 has-checked:border-ring has-checked:bg-muted",
+          )}
         >
           <input
             type="radio"
@@ -66,13 +84,29 @@ export function ChoiceCards<V extends string>({
                     e.target.checked && onChange?.(choice.value),
                 }
               : { defaultChecked: choice.value === defaultValue })}
-            className="mt-0.5 size-4 accent-primary"
+            className={tile ? "sr-only" : "mt-0.5 size-4 accent-primary"}
           />
-          {/* Top-aligned: side by side, cards stretch to the tallest. */}
-          <span className="grid content-start gap-0.5">
-            <span className="text-sm font-medium">{choice.label}</span>
-            <span className="text-sm text-muted-foreground">{choice.hint}</span>
-          </span>
+          {tile ? (
+            <>
+              {choice.icon}
+              <span className="text-sm font-medium">{choice.label}</span>
+              {choice.hint && (
+                <span className="text-xs text-muted-foreground">
+                  {choice.hint}
+                </span>
+              )}
+            </>
+          ) : (
+            // Top-aligned: side by side, cards stretch to the tallest.
+            <span className="grid content-start gap-0.5">
+              <span className="text-sm font-medium">{choice.label}</span>
+              {choice.hint && (
+                <span className="text-sm text-muted-foreground">
+                  {choice.hint}
+                </span>
+              )}
+            </span>
+          )}
         </label>
       ))}
     </fieldset>

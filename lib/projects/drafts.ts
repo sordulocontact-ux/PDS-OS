@@ -2,7 +2,12 @@ import "server-only";
 
 import type { ProjectFormDefaults } from "@/components/projects/create-project-form";
 import type { FormValues } from "@/lib/auth/form-state";
-import { isPriority, isProjectType } from "@/lib/projects/types";
+import {
+  isContentMode,
+  isMusicFormat,
+  isPriority,
+  isProjectType,
+} from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 // Fields of the "Nouveau projet" form kept in a draft, with their length
@@ -10,12 +15,18 @@ import { createClient } from "@/lib/supabase/server";
 export const DRAFT_FIELDS = {
   title: 200,
   type: 40,
+  musicFormat: 20,
+  contentMode: 20,
+  contentFormatId: 40,
+  artistId: 40,
   masterIds: 8000,
   assigneePersonId: 40,
   creativePersonIds: 8000,
   dueDate: 20,
   budget: 20,
   priority: 20,
+  initialContext: 20000,
+  // Drafts typed before the field was renamed (feedback n°2).
   framingNotes: 20000,
 } as const;
 
@@ -83,12 +94,16 @@ export function draftDefaults(values: FormValues): ProjectFormDefaults {
   return {
     title: values.title ?? "",
     type: isProjectType(values.type) ? values.type : null,
+    musicFormat: isMusicFormat(values.musicFormat) ? values.musicFormat : null,
+    contentMode: isContentMode(values.contentMode) ? values.contentMode : null,
+    contentFormatId: values.contentFormatId ?? null,
+    artistId: values.artistId ?? null,
     masterIds: idsOf(values.masterIds),
     assigneePersonId: values.assigneePersonId ?? null,
     creativePersonIds: idsOf(values.creativePersonIds),
     dueDate: values.dueDate,
     budget: values.budget,
     priority: isPriority(values.priority) ? values.priority : null,
-    framingNotes: values.framingNotes,
+    initialContext: values.initialContext ?? values.framingNotes,
   };
 }

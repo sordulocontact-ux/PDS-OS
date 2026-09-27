@@ -7,12 +7,13 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { MasterPicker } from "@/components/catalog/master-picker";
-import { OptionSelect } from "@/components/projects/option-select";
 import { ProjectDraftControls } from "@/components/projects/project-draft-controls";
+import { ProjectKindFields } from "@/components/projects/project-kind-fields";
 import { ProjectTeamFields } from "@/components/projects/project-team-fields";
 import { useProjectDraft } from "@/components/projects/use-project-draft";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { ChipChoice } from "@/components/ui/chip-choice";
+import { FormSection } from "@/components/ui/form-section";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
@@ -21,9 +22,10 @@ import type { CreativeMember } from "@/lib/projects/creatives";
 import { updateProject } from "@/lib/projects/edit-actions";
 import {
   PRIORITIES,
-  PROJECT_TYPES,
   idleCreateProjectState,
-  isProjectType,
+  type ContentFormatOption,
+  type ContentMode,
+  type MusicFormat,
   type Priority,
   type ProjectType,
 } from "@/lib/projects/types";
@@ -31,26 +33,31 @@ import {
 export type ProjectFormDefaults = {
   title: string;
   type: ProjectType | null;
+  musicFormat?: MusicFormat | null;
+  contentMode?: ContentMode | null;
+  contentFormatId?: string | null;
+  artistId?: string | null;
   masterIds: string[];
   assigneePersonId?: string | null;
   creativePersonIds?: string[];
   dueDate?: string;
   budget?: string;
   priority?: Priority | null;
-  framingNotes?: string;
+  initialContext?: string;
 };
 
-// Step C. Same form from the projects list (blank) and from a master page
-// (master linked, type and title prefilled). The master rule is checked on
-// submit only: switching the type never shows a warning in advance.
-// The team is chosen here: the project goes to its manager at creation.
+// Step C (feedback n°2): Type → Format → linked objects → initial
+// information → project manager → transmitted. Same form from the projects
+// list (blank) and from a master page (music, single, that master linked).
+// Rules are checked on submit only: switching the type never warns ahead.
 // With `projectId` it edits a project that is not launched (no team then);
-// with `onSaved` (side panel, a PO draft) the page behind stays.
-// On the new project page, what is typed is kept as a draft (`draftId`: the
-// one being resumed).
+// with `onSaved` (side panel, a PO draft) the page behind stays. Both show
+// the sections without their cards. On the new project page, what is typed
+// is kept as a draft (`draftId`: the one being resumed).
 export function CreateProjectForm({
   masters,
   artists,
+  contentFormats,
   managers,
   creatives,
   defaults,
@@ -61,6 +68,7 @@ export function CreateProjectForm({
 }: {
   masters: MasterOption[];
   artists: ArtistOption[];
+  contentFormats: ContentFormatOption[];
   managers: CreativeMember[];
   creatives: CreativeMember[];
   defaults: ProjectFormDefaults;
@@ -77,8 +85,10 @@ export function CreateProjectForm({
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const [type, setType] = useState<ProjectType | null>(defaults.type);
+  const [priority, setPriority] = useState(defaults.priority ?? null);
   const formRef = useRef<HTMLFormElement>(null);
   const withDraft = !projectId && !onSaved;
+  const plain = !withDraft;
   const draft = useProjectDraft(formRef, resumedDraftId, withDraft);
 
   // A refused creation keeps the form, and its draft, going.
@@ -93,12 +103,7 @@ export function CreateProjectForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
-  const typeItems = Object.fromEntries(
-    PROJECT_TYPES.map((value) => [value, fr.shell.projectTypes[value]]),
-  );
-  const priorityItems = Object.fromEntries(
-    PRIORITIES.map((value) => [value, fr.shell.priorities[value]]),
-  );
+  const music = type === "music_release";
 
   return (
     <form
@@ -114,93 +119,97 @@ export function CreateProjectForm({
         <input type="hidden" name="draftId" value={draft.draftId} />
       )}
       {projectId && <input type="hidden" name="projectId" value={projectId} />}
-      <Field
-        name="title"
-        label={t.fields.title}
-        required
-        autoFocus={!defaults.title}
-        autoComplete="off"
-        maxLength={200}
-        defaultValue={values.title ?? defaults.title}
-        error={errors.title}
-      />
 
-      <OptionSelect
-        name="type"
-        label={t.fields.type}
-        items={typeItems}
-        defaultValue={values.type || defaults.type}
-        onValueChange={(value) => setType(isProjectType(value) ? value : null)}
-        error={errors.type}
-      />
-
-      <MasterPicker
-        masters={masters}
-        artists={artists}
-        defaultSelectedIds={defaults.masterIds}
-        hint={
-          type && type !== "music_release"
-            ? t.fields.mastersOptional
-            : undefined
-        }
-        error={errors.masterIds}
-      />
-
-      {!projectId && (
-        <ProjectTeamFields
-          managers={managers}
-          creatives={creatives}
-          defaultManagerId={
-            values.assigneePersonId || defaults.assigneePersonId || null
-          }
-          defaultCreativeIds={
-            values.creativePersonIds
-              ? parseIds(values.creativePersonIds)
-              : (defaults.creativePersonIds ?? [])
-          }
+      <FormSection title={t.sections.project} plain={plain}>
+        <ProjectKindFields
+          type={type}
+          onTypeChange={setType}
+          defaults={{
+            musicFormat: defaults.musicFormat ?? null,
+            contentMode: defaults.contentMode ?? null,
+            contentFormatId: defaults.contentFormatId ?? null,
+            artistId: defaults.artistId ?? null,
+            masterIds: defaults.masterIds,
+          }}
+          masters={masters}
+          artists={artists}
+          contentFormats={contentFormats}
           errors={errors}
         />
-      )}
+      </FormSection>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <FormSection title={t.sections.details} plain={plain}>
         <Field
-          name="dueDate"
-          type="date"
-          label={t.fields.dueDate}
-          hint={t.fields.dueDateHint}
-          defaultValue={values.dueDate ?? defaults.dueDate ?? ""}
-          error={errors.dueDate}
-        />
-        <Field
-          name="budget"
-          label={t.fields.budget}
-          hint={t.fields.budgetHint}
-          inputMode="decimal"
+          name="title"
+          label={t.fields.title}
+          required
           autoComplete="off"
-          maxLength={20}
-          defaultValue={values.budget ?? defaults.budget ?? ""}
-          error={errors.budget}
-          className="h-10 text-base tabular-nums md:text-sm"
+          maxLength={200}
+          defaultValue={values.title ?? defaults.title}
+          error={errors.title}
         />
-      </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field
+            name="dueDate"
+            type="date"
+            label={music ? t.fields.releaseDate : t.fields.dueDate}
+            hint={music ? t.fields.releaseDateHint : undefined}
+            defaultValue={values.dueDate ?? defaults.dueDate ?? ""}
+            error={errors.dueDate}
+          />
+          <Field
+            name="budget"
+            label={t.fields.budget}
+            suffix="€"
+            inputMode="decimal"
+            autoComplete="off"
+            maxLength={20}
+            defaultValue={values.budget ?? defaults.budget ?? ""}
+            error={errors.budget}
+            className="h-10 pr-9 text-base tabular-nums md:text-sm"
+          />
+        </div>
+        <ChipChoice
+          name="priority"
+          legend={t.fields.priority}
+          note={t.fields.optional}
+          options={PRIORITIES.map((value) => ({
+            value,
+            label: fr.shell.priorities[value],
+          }))}
+          value={priority}
+          onChange={setPriority}
+          deselectable
+          hint={t.fields.priorityHint}
+          error={errors.priority}
+        />
+        <TextareaField
+          name="initialContext"
+          label={t.fields.initialContext}
+          hint={t.fields.initialContextHint}
+          maxLength={20000}
+          defaultValue={values.initialContext ?? defaults.initialContext ?? ""}
+          error={errors.initialContext}
+        />
+      </FormSection>
 
-      <OptionSelect
-        name="priority"
-        label={t.fields.priority}
-        placeholder={t.fields.priorityNone}
-        items={priorityItems}
-        defaultValue={values.priority || defaults.priority || null}
-        error={errors.priority}
-      />
-
-      <TextareaField
-        name="framingNotes"
-        label={t.fields.notes}
-        hint={t.fields.notesHint}
-        maxLength={20000}
-        defaultValue={values.framingNotes ?? defaults.framingNotes ?? ""}
-        error={errors.framingNotes}
-      />
+      {!projectId && (
+        <FormSection title={t.sections.team} plain={plain}>
+          <ProjectTeamFields
+            managers={managers}
+            creatives={creatives}
+            defaultManagerId={
+              values.assigneePersonId || defaults.assigneePersonId || null
+            }
+            defaultCreativeIds={
+              values.creativePersonIds
+                ? parseIds(values.creativePersonIds)
+                : (defaults.creativePersonIds ?? [])
+            }
+            errors={errors}
+          />
+        </FormSection>
+      )}
 
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>

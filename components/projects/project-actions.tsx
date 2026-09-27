@@ -52,6 +52,7 @@ export function ProjectActions({
                   <CreateProjectForm
                     masters={data.masters}
                     artists={data.artists}
+                    contentFormats={data.contentFormats}
                     managers={[]}
                     creatives={[]}
                     defaults={data.defaults}

@@ -79,6 +79,7 @@ export const routes = {
   app: "/app",
   assistant: "/app/assistant",
   work: "/app/work",
+  calls: "/app/calls",
   feedback: "/app/feedback",
   members: "/app/members",
   membersNew: "/app/members/new",

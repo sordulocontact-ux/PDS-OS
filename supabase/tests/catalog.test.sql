@@ -105,7 +105,7 @@ select lives_ok($$
 $$, 'more masters for an EP');
 
 select throws_ok($$
-  select public.create_project((select id from ids where name = 'org'), 'Pas le droit', 'partnership',
+  select public.create_project((select id from ids where name = 'org'), 'Pas le droit', 'content',
     null, null, null, null, null)
 $$, '42501', null, 'a project manager cannot create a project');
 
@@ -126,8 +126,8 @@ $$, 'P0001', 'music_release_requires_master', 'the rule also holds for a direct 
 set constraints all deferred;
 
 select lives_ok($$
-  insert into ids select 'partnership', public.create_project((select id from ids where name = 'org'),
-    'OP marque', 'partnership', null, null, null, null, null)
+  insert into ids select 'content', public.create_project((select id from ids where name = 'org'),
+    'OP marque', 'content', null, null, null, null, null)
 $$, 'a partnership without master is created');
 
 select lives_ok($$
@@ -135,7 +135,7 @@ select lives_ok($$
     'EP Lueur', 'music_release',
     array[(select id from ids where name = 'master'), (select id from ids where name = 'master2'),
           (select id from ids where name = 'master3'), (select id from ids where name = 'master')],
-    '2026-12-04', 150000, 'high', 'Brief reçu par mail')
+    '2026-12-04', 150000, 'high', 'Brief reçu par mail', p_music_format => 'ep')
 $$, 'a music release with three masters is created');
 
 select is((select string_agg(master_id::text, ',' order by position) from public.project_masters
@@ -146,14 +146,14 @@ select is((select string_agg(master_id::text, ',' order by position) from public
 
 select lives_ok($$
   select public.create_project((select id from ids where name = 'org'), 'Single Lueur', 'music_release',
-    array[(select id from ids where name = 'master')], null, null, null, null)
+    array[(select id from ids where name = 'master')], null, null, null, null, p_music_format => 'single')
 $$, 'the same master can join another project');
 
 select is((select count(*)::int from public.project_stages
-            where project_id in ((select id from ids where name = 'ep'), (select id from ids where name = 'partnership'))),
+            where project_id in ((select id from ids where name = 'ep'), (select id from ids where name = 'content'))),
           0, 'a created project has no stage');
 select is((select count(*)::int from public.projects
-            where id in ((select id from ids where name = 'ep'), (select id from ids where name = 'partnership'))
+            where id in ((select id from ids where name = 'ep'), (select id from ids where name = 'content'))
               and owner_person_id is null),
           2, 'nobody owns a project at creation');
 select is(public.project_artist_name((select id from ids where name = 'ep')),
@@ -161,7 +161,7 @@ select is(public.project_artist_name((select id from ids where name = 'ep')),
 
 select throws_ok($$
   insert into public.projects (organization_id, title, type, owner_person_id)
-  values ((select id from ids where name = 'org'), 'Avec responsable', 'partnership',
+  values ((select id from ids where name = 'org'), 'Avec responsable', 'content',
           (select person_id from public.accounts where id = (select id from ids where name = 'director')))
 $$, '42501', null, 'the owner cannot be set at creation');
 

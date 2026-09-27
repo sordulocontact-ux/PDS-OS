@@ -21,19 +21,24 @@ import {
 } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Masters of a project: search, add several, remove. Submitted as one JSON
-// field `masterIds`, in the order chosen. "Créer un master" opens step B in a
+// Masters of a project: search, add several (up to `max`: one for a single),
+// remove. Submitted as one JSON field `masterIds`, in the order chosen. "Créer un master" opens step B in a
 // modal and links the new master on return; the project form keeps its input.
 export function MasterPicker({
   masters,
   artists,
   defaultSelectedIds,
+  label = fr.shell.newProject.fields.masters,
+  max,
   hint,
   error,
 }: {
   masters: MasterOption[];
   artists: ArtistOption[];
   defaultSelectedIds: string[];
+  label?: string;
+  // Once reached, the search goes: a master is removed before another.
+  max?: number;
   hint?: string;
   error?: string;
 }) {
@@ -65,9 +70,7 @@ export function MasterPicker({
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1.5 text-sm font-medium">
-        {fr.shell.newProject.fields.masters}
-      </legend>
+      <legend className="mb-1.5 text-sm font-medium">{label}</legend>
       <input
         type="hidden"
         name="masterIds"
@@ -110,23 +113,25 @@ export function MasterPicker({
         </ul>
       )}
 
-      <SearchPicker
-        label={t.searchLabel}
-        placeholder={t.placeholder}
-        options={options.map((m) => ({
-          id: m.id,
-          label: masterLabel(m),
-          detail: m.artists,
-        }))}
-        excludedIds={excluded}
-        onPick={add}
-        onCreate={() => setDialogOpen(true)}
-        createLabel={() => t.create}
-        noResultLabel={t.noResult}
-        allSelectedLabel={t.allSelected}
-        invalid={Boolean(error)}
-        describedBy={error ? errorId : hint ? hintId : undefined}
-      />
+      {(max === undefined || selected.length < max) && (
+        <SearchPicker
+          label={t.searchLabel}
+          placeholder={t.placeholder}
+          options={options.map((m) => ({
+            id: m.id,
+            label: masterLabel(m),
+            detail: m.artists,
+          }))}
+          excludedIds={excluded}
+          onPick={add}
+          onCreate={() => setDialogOpen(true)}
+          createLabel={() => t.create}
+          noResultLabel={t.noResult}
+          allSelectedLabel={t.allSelected}
+          invalid={Boolean(error)}
+          describedBy={error ? errorId : hint ? hintId : undefined}
+        />
+      )}
       {error ? (
         <FieldError id={errorId}>{error}</FieldError>
       ) : hint ? (

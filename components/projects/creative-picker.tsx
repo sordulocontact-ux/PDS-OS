@@ -11,6 +11,7 @@ import type { CreativeMember } from "@/lib/projects/creatives";
 export function CreativePicker({
   name,
   label,
+  note,
   hint,
   emptyLabel,
   candidates,
@@ -19,7 +20,9 @@ export function CreativePicker({
 }: {
   name: string;
   label: string;
-  hint: string;
+  // Shown after the label, muted ("facultatif").
+  note?: string;
+  hint?: string;
   emptyLabel: string;
   candidates: CreativeMember[];
   defaultSelectedIds: string[];
@@ -38,11 +41,12 @@ export function CreativePicker({
     <div
       role="group"
       aria-labelledby={`${id}-label`}
-      aria-describedby={error ? `${id}-error` : `${id}-hint`}
+      aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
       className="flex flex-col gap-1.5"
     >
       <span id={`${id}-label`} className="text-sm leading-none font-medium">
         {label}
+        {note && <span className="text-muted-foreground"> · {note}</span>}
       </span>
       <input type="hidden" name={name} value={JSON.stringify(selected)} />
       {candidates.length === 0 ? (
@@ -62,11 +66,11 @@ export function CreativePicker({
       )}
       {error ? (
         <FieldError id={`${id}-error`}>{error}</FieldError>
-      ) : (
+      ) : hint ? (
         <p id={`${id}-hint`} className="text-xs text-muted-foreground">
           {hint}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

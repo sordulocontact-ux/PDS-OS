@@ -48,7 +48,7 @@ insert into ids select 'master', public.create_master((select id from ids where 
 insert into ids select 'project', public.create_project((select id from ids where name = 'org'),
   'Projet ' || (select v from vars where k = 'tag'), 'music_release',
   array[(select id from ids where name = 'master')],
-  p_assignee_person_id => (select id from ids where name = 'manager_person'));
+  p_assignee_person_id => (select id from ids where name = 'manager_person'), p_music_format => 'single');
 insert into ids select 'launched', public.create_project((select id from ids where name = 'org'),
   'Lancé ' || (select v from vars where k = 'tag'), 'content',
   p_assignee_person_id => (select id from ids where name = 'manager_person'));

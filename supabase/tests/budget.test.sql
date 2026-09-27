@@ -43,7 +43,7 @@ grant execute on function pg_temp.id_of(text) to authenticated;
 -- The director creates and transmits, the owner accepts: the project is launched.
 select pg_temp.act_as(pg_temp.id_of('director'));
 insert into ids select 'project', public.create_project(pg_temp.id_of('org'),
-  'BU ' || (select v from vars where k = 'tag'), 'partnership');
+  'BU ' || (select v from vars where k = 'tag'), 'content');
 insert into ids select 'a1', public.transmit_project(pg_temp.id_of('project'), pg_temp.id_of('owner_person'));
 reset role;
 select pg_temp.act_as(pg_temp.id_of('owner'));

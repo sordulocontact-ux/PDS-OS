@@ -13,7 +13,12 @@ import type {
   FeedbackPriority,
   TopicAction,
 } from "@/lib/feedback/types";
-import type { Priority, ProjectType } from "@/lib/projects/types";
+import type {
+  ContentMode,
+  MusicFormat,
+  Priority,
+  ProjectType,
+} from "@/lib/projects/types";
 
 /** One line of the proposal card, written by code. */
 export type DraftChange = {
@@ -58,6 +63,10 @@ export type ProjectDraft = {
   values: {
     title: string;
     type: ProjectType | null;
+    musicFormat: MusicFormat | null;
+    contentMode: ContentMode | null;
+    contentFormatId: string | null;
+    artistId: string | null;
     masterIds: string[];
     // Creation only: the team of a created project changes by transmission.
     assigneePersonId: string | null;
@@ -66,7 +75,7 @@ export type ProjectDraft = {
     dueDate: string;
     budget: string;
     priority: Priority | null;
-    framingNotes: string;
+    initialContext: string;
   };
 };
 

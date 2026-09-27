@@ -16,8 +16,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { projectKindLabel } from "@/lib/projects/labels";
 import type { ProjectListItem } from "@/lib/projects/types";
-import { projectStatusTone } from "@/lib/ui/state-tones";
+import { projectPriorityTone, projectStatusTone } from "@/lib/ui/state-tones";
 
 export function ProjectsTable({
   projects,
@@ -43,17 +44,24 @@ export function ProjectsTable({
         {projects.map((project) => (
           <DataTableRow key={project.id}>
             <DataTableCell>
-              <DataTableLink
-                href={rights?.archived ? null : routes.project(project.id)}
-              >
-                {project.title}
-              </DataTableLink>
+              <span className="flex flex-wrap items-center gap-2">
+                <DataTableLink
+                  href={rights?.archived ? null : routes.project(project.id)}
+                >
+                  {project.title}
+                </DataTableLink>
+                {project.priority === "high" && (
+                  <StatusBadge tone={projectPriorityTone.high} size="sm">
+                    {fr.shell.highPriority}
+                  </StatusBadge>
+                )}
+              </span>
             </DataTableCell>
             <DataTableCell hideBelow="sm">
               {project.artistName || EMPTY_CELL}
             </DataTableCell>
             <DataTableCell hideBelow="md">
-              {fr.shell.projectTypes[project.type]}
+              {projectKindLabel(project)}
             </DataTableCell>
             <DataTableCell fill>
               {project.currentStage ? (

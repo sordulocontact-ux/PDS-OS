@@ -141,6 +141,8 @@ export const assistant = {
       `« ${said} » compris comme « ${actual} », le nom du catalogue.`,
     unknownArtist: (name: string) =>
       `« ${name} » n'est pas au catalogue : créez d'abord l'artiste, ou choisissez-le dans le formulaire.`,
+    unknownFormat: (name: string) =>
+      `Format PDS « ${name} » introuvable : choisissez-le ou créez-le dans le formulaire.`,
     unknownMaster: (title: string) =>
       `Titre « ${title} » introuvable : rattachez-le dans le formulaire.`,
     unknownPerson: (name: string) =>

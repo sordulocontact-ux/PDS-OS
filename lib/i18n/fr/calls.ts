@@ -17,6 +17,31 @@ export const calls = {
       status: "Traitement",
     },
   },
+  // Calls page of the main navigation: every visible project's calls.
+  all: {
+    title: "Calls",
+    description:
+      "Tous les échanges enregistrés ou planifiés, sur l'ensemble de vos projets.",
+    loadError: "Impossible de charger les calls. Réessayez.",
+    views: {
+      label: "Filtrer les calls",
+      all: "Tous",
+      upcoming: "À venir",
+      past: "Passés",
+    },
+    columns: {
+      title: "Call",
+      date: "Date",
+      status: "Traitement",
+    },
+    emptyTitle: "Aucun call pour l'instant",
+    emptyBody:
+      "Un call se crée depuis la page Calls d'un projet lancé. Il apparaîtra ici avec ceux des autres projets.",
+    emptyUpcomingTitle: "Aucun call à venir",
+    emptyPastTitle: "Aucun call passé",
+    emptyViewBody: "Les autres calls restent visibles dans l'onglet « Tous ».",
+    openProjects: "Voir les projets",
+  },
   create: {
     title: "Nouveau call",
     fieldTitle: "Titre",

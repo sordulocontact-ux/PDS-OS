@@ -138,7 +138,6 @@ export function FeedbackForm({
           choices={FEEDBACK_KINDS.map((kind) => ({
             value: kind,
             label: t.kinds[kind],
-            hint: t.kindHints[kind],
           }))}
         />
         <FieldError id="kind-error">{errors.kind}</FieldError>
@@ -175,7 +174,6 @@ export function FeedbackForm({
           choices={FEEDBACK_PRIORITIES.map((priority) => ({
             value: priority,
             label: t.priorities[priority],
-            hint: t.review.priorityHints[priority],
           }))}
         />
       )}

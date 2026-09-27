@@ -89,6 +89,12 @@
   --tone-action-bg: #ece1fb;
   --tone-action-fg: #4c1d9e;
 
+  /* --- Sélection (DESIGN.md § 3 bis) : le choix fait dans une carte de
+     choix (type de projet). Couleur provisoire de Sacha (27/09/2026), à
+     changer ici seulement. -------------------------------------------------- */
+  --selection-border: #64a2ff;
+  --selection-bg: rgb(100 162 255 / 0.1);
+
   /* --- Jauges ------------------------------------------------------------ */
   --meter-track: var(--po-grey-150);
   --meter-fill: var(--po-grey-300);
@@ -341,6 +347,8 @@
   /* Pas de rouge : l'action définitive reste en « encre pleine », ici blanche. */
   --destructive: var(--po-white);
   --destructive-foreground: var(--po-ink-900);
+  /* Plus présent sur le panneau sombre. */
+  --selection-bg: rgb(100 162 255 / 0.18);
 }
 
 /* ==========================================================================

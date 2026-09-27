@@ -83,6 +83,33 @@ export async function listCalls(
   }));
 }
 
+export type CallListItem = CallSummary & {
+  projectId: string;
+  projectTitle: string;
+};
+
+/**
+ * Every call the user may see, across projects (Calls page of the main
+ * navigation). RLS already limits it to visible projects (can_see_project).
+ */
+export async function listAllCalls(supabase: Client): Promise<CallListItem[]> {
+  const { data, error } = await supabase
+    .from("calls")
+    .select(
+      "id, title, occurred_at, status, project_id, project:projects!calls_project_same_org(title)",
+    )
+    .order("occurred_at", { ascending: false });
+  if (error) throw new Error(`listAllCalls: ${error.message}`);
+  return data.map((row) => ({
+    id: row.id,
+    title: row.title,
+    occurredAt: row.occurred_at,
+    status: asCallStatus(row.status),
+    projectId: row.project_id,
+    projectTitle: row.project?.title ?? "",
+  }));
+}
+
 function toAgenda(value: unknown): AgendaItem[] | null {
   if (!Array.isArray(value)) return null;
   const items = value.flatMap((item: unknown) => {

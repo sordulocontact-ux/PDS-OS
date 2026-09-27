@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 import { fr } from "@/lib/i18n/fr";
-import { PRIORITIES, PROJECT_TYPES } from "@/lib/projects/types";
+import {
+  CONTENT_MODES,
+  MUSIC_FORMATS,
+  PRIORITIES,
+  PROJECT_TYPES,
+} from "@/lib/projects/types";
 
 const e = fr.auth.errors;
 const pe = fr.shell.newProject.errors;
@@ -31,6 +36,26 @@ function uuidListSchema(message: string, max: number) {
     .pipe(z.array(z.uuid(), { error: message }).max(max));
 }
 
+// An optional choice: empty → null, otherwise one of the values.
+function optionalEnum<T extends readonly [string, ...string[]]>(
+  values: T,
+  message: string,
+) {
+  return z
+    .string()
+    .optional()
+    .transform((value) => value || null)
+    .pipe(z.enum(values, { error: message }).nullable());
+}
+
+function optionalUuid(message: string) {
+  return z
+    .string()
+    .optional()
+    .transform((value) => value || null)
+    .pipe(z.uuid({ error: message }).nullable());
+}
+
 // Fields shared by creation and editing (before launch).
 const projectFields = {
   title: z
@@ -56,12 +81,12 @@ const projectFields = {
       }
       return cents;
     }),
-  priority: z
-    .string()
-    .optional()
-    .transform((value) => value || null)
-    .pipe(z.enum(PRIORITIES, { error: pe.invalidPriority }).nullable()),
-  framingNotes: z
+  priority: optionalEnum(PRIORITIES, pe.invalidPriority),
+  musicFormat: optionalEnum(MUSIC_FORMATS, pe.musicFormatRequired),
+  contentMode: optionalEnum(CONTENT_MODES, pe.contentModeRequired),
+  contentFormatId: optionalUuid(pe.invalidContentFormat),
+  artistId: optionalUuid(pe.invalidArtist),
+  initialContext: z
     .string()
     .trim()
     .max(20000, { error: e.tooLong })
@@ -69,18 +94,47 @@ const projectFields = {
     .transform((value) => value || null),
 };
 
-// The rule that defines a music release; the database enforces it too.
-function requireMasterForRelease(
-  data: { type: string; masterIds: string[] },
-  ctx: z.RefinementCtx,
-) {
-  if (data.type === "music_release" && data.masterIds.length === 0) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["masterIds"],
-      message: pe.mastersRequired,
-    });
+type Shape = {
+  type: string;
+  masterIds: string[];
+  musicFormat: string | null;
+  contentMode: string | null;
+  contentFormatId: string | null;
+};
+
+// What the type asks for (check_project_shape holds the same rules in SQL):
+// a music project names its format and links masters, one for a single; a
+// content project is an edition of a format or a one-off content.
+function checkShape(data: Shape, ctx: z.RefinementCtx) {
+  const issue = (path: string, message: string) =>
+    ctx.addIssue({ code: "custom", path: [path], message });
+  const masters = new Set(data.masterIds).size;
+  if (data.type === "music_release") {
+    if (!data.musicFormat) issue("musicFormat", pe.musicFormatRequired);
+    if (masters === 0) issue("masterIds", pe.mastersRequired);
+    else if (data.musicFormat === "single" && masters > 1)
+      issue("masterIds", pe.singleOneMaster);
   }
+  if (data.type === "content") {
+    if (!data.contentMode) issue("contentMode", pe.contentModeRequired);
+    else if (data.contentMode === "format" && !data.contentFormatId)
+      issue("contentFormatId", pe.contentFormatRequired);
+  }
+}
+
+// What is saved, whatever else the form still holds: the fields of the
+// other type are dropped (the database does the same).
+function normalize<T extends Shape & { artistId: string | null }>(data: T) {
+  const music = data.type === "music_release";
+  const content = data.type === "content";
+  return {
+    ...data,
+    masterIds: music ? data.masterIds : [],
+    musicFormat: music ? data.musicFormat : null,
+    contentFormatId:
+      content && data.contentMode === "format" ? data.contentFormatId : null,
+    artistId: content ? data.artistId : null,
+  };
 }
 
 export const createProjectSchema = z
@@ -90,11 +144,22 @@ export const createProjectSchema = z
     assigneePersonId: z.uuid({ error: pe.managerRequired }),
     creativePersonIds: uuidListSchema(pe.invalidCreatives, 20),
   })
-  .superRefine(requireMasterForRelease);
+  .superRefine((data, ctx) => {
+    // The event branch is closed in V1.
+    if (data.type === "event")
+      ctx.addIssue({
+        code: "custom",
+        path: ["type"],
+        message: pe.typeUnavailable,
+      });
+    checkShape(data, ctx);
+  })
+  .transform(normalize);
 
 // Before launch only; the team changes by transmission, not here.
 export const updateProjectSchema = z
   .object({ ...projectFields, projectId: z.uuid() })
-  .superRefine(requireMasterForRelease);
+  .superRefine(checkShape)
+  .transform(normalize);
 
 export const projectIdSchema = z.uuid();

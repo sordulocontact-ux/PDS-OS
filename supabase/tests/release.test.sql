@@ -53,7 +53,7 @@ insert into ids select 'org', id from public.organizations where slug = 'pds';
 update public.memberships set status = 'approved', role = 'project_manager'
  where person_id = (select person_id from public.accounts where id = (select id from ids where name = 'admin'));
 insert into public.projects (organization_id, title, type, owner_person_id)
-values ((select id from ids where name = 'org'), (select v from vars where k = 'project'), 'partnership',
+values ((select id from ids where name = 'org'), (select v from vars where k = 'project'), 'content',
         (select person_id from public.accounts where id = (select id from ids where name = 'admin')));
 
 select pg_temp.act_as((select id from ids where name = 'admin'));

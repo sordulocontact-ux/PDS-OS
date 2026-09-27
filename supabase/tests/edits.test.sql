@@ -55,7 +55,7 @@ insert into ids select 'master', public.create_master((select id from ids where 
 insert into ids select 'project', public.create_project((select id from ids where name = 'org'),
   'Projet ' || (select v from vars where k = 'tag'), 'music_release',
   array[(select id from ids where name = 'master')],
-  p_assignee_person_id => (select id from ids where name = 'manager_person'));
+  p_assignee_person_id => (select id from ids where name = 'manager_person'), p_music_format => 'single');
 
 -- Masters ------------------------------------------------------------------------
 select lives_ok($$ select public.update_master((select id from ids where name = 'master'), 'Titre (radio)',
@@ -82,7 +82,7 @@ reset role;
 select pg_temp.act_as((select id from ids where name = 'director'));
 select lives_ok($$ select public.update_project((select id from ids where name = 'project'), 'Nouveau titre',
                    'music_release', array[(select id from ids where name = 'master')],
-                   p_budget_cents => 150000, p_priority => 'high') $$,
+                   p_budget_cents => 150000, p_priority => 'high', p_music_format => 'single') $$,
                 'the director edits a project waiting for its manager');
 select is((select budget_cents from public.projects where id = (select id from ids where name = 'project')),
           150000::bigint, 'the new values are saved');
@@ -92,7 +92,7 @@ select throws_ok($$ select public.update_project((select id from ids where name 
 
 reset role;
 select pg_temp.act_as((select id from ids where name = 'creative'));
-select throws_ok($$ select public.update_project((select id from ids where name = 'project'), 'Piraté', 'event') $$,
+select throws_ok($$ select public.update_project((select id from ids where name = 'project'), 'Piraté', 'content') $$,
                  'P0001', 'project_not_editable', 'a creative director cannot edit a project');
 
 -- Projects after launch ----------------------------------------------------------
@@ -105,7 +105,7 @@ select public.respond_to_assignment(
 reset role;
 select pg_temp.act_as((select id from ids where name = 'director'));
 select throws_ok($$ select public.update_project((select id from ids where name = 'project'), 'Trop tard',
-                   'music_release', array[(select id from ids where name = 'master')]) $$,
+                   'music_release', array[(select id from ids where name = 'master')], p_music_format => 'single') $$,
                  'P0001', 'project_not_editable', 'a launched project is no longer edited here');
 select is((select title from public.projects where id = (select id from ids where name = 'project')),
           'Nouveau titre', 'its title is unchanged');

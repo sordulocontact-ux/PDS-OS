@@ -94,7 +94,8 @@ with x as (
   values ((select id from ids where name = 'org'), 'Titre 2') returning id)
 insert into ids select 'master2', id from x;
 insert into ids select 'project', public.create_project((select id from ids where name = 'org'),
-  'OP ' || (select v from vars where k = 'tag'), 'partnership', array[(select id from ids where name = 'master1')]);
+  'OP ' || (select v from vars where k = 'tag'), 'music_release', array[(select id from ids where name = 'master1')],
+  p_music_format => 'ep');
 select lives_ok($$
   insert into public.project_masters (organization_id, project_id, master_id, position)
   values ((select id from ids where name = 'org'), (select id from ids where name = 'project'),
@@ -124,7 +125,7 @@ select throws_ok($$
 $$, '42501', null, 'once launched, the director cannot link another master');
 
 insert into ids select 'draft', public.create_project((select id from ids where name = 'org'),
-  'Brouillon ' || (select v from vars where k = 'tag'), 'partnership');
+  'Brouillon ' || (select v from vars where k = 'tag'), 'content');
 reset role;
 update public.masters set archived_at = now() where id = (select id from ids where name = 'master3');
 select pg_temp.act_as((select id from ids where name = 'director'));

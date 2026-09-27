@@ -10,6 +10,7 @@ import { routes } from "@/lib/auth/redirects";
 import { parseForm, retainedValues } from "@/lib/auth/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
+import { foreignKeyError, shapeError } from "@/lib/projects/errors";
 import { createProjectSchema } from "@/lib/projects/schemas";
 import type { CreateProjectState } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -48,20 +49,18 @@ export async function createProject(
     p_due_date: input.dueDate ?? undefined,
     p_budget_cents: input.budget ?? undefined,
     p_priority: input.priority ?? undefined,
-    p_framing_notes: input.framingNotes ?? undefined,
+    p_initial_context: input.initialContext ?? undefined,
     p_assignee_person_id: input.assigneePersonId,
     p_creative_person_ids: input.creativePersonIds,
+    p_music_format: input.musicFormat ?? undefined,
+    p_content_format_id: input.contentFormatId ?? undefined,
+    p_artist_id: input.artistId ?? undefined,
   });
 
   if (error || !projectId) {
     const pe = fr.shell.newProject.errors;
-    if (error?.message.includes("music_release_requires_master")) {
-      return {
-        status: "error",
-        fieldErrors: { masterIds: pe.mastersRequired },
-        values,
-      };
-    }
+    const shape = shapeError(error?.message);
+    if (shape) return { status: "error", ...shape, values };
     if (error?.message.includes("invalid_assignee")) {
       return {
         status: "error",
@@ -76,13 +75,9 @@ export async function createProject(
         values,
       };
     }
-    // Foreign key: a linked master no longer exists (or is out of reach).
+    // Foreign key: a linked master, format or artist no longer exists.
     if (error?.code === "23503") {
-      return {
-        status: "error",
-        fieldErrors: { masterIds: pe.invalidMasters },
-        values,
-      };
+      return { status: "error", fieldErrors: foreignKeyError(error), values };
     }
     console.error("createProject:", error?.message);
     return { status: "error", formError: databaseErrorMessage(error), values };

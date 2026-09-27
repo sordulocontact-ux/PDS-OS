@@ -32,13 +32,22 @@ export const shell = {
   },
 
   projectTypes: {
-    music_release: "Sortie musicale",
-    partnership: "Partenariat",
+    music_release: "Musical",
     content: "Contenu",
     event: "Événement",
   },
 
+  musicFormats: {
+    single: "Single",
+    ep: "EP",
+    album: "Album",
+    mixtape: "Mixtape",
+    compilation: "Compilation",
+    other: "Autre",
+  },
+
   priorities: { low: "Basse", normal: "Normale", high: "Haute" },
+  highPriority: "Priorité haute",
 
   stageStates: {
     not_started: "À venir",
@@ -49,7 +58,7 @@ export const shell = {
 
   projects: {
     title: "Projets",
-    subtitle: "Sorties musicales, contenus, partenariats et événements.",
+    subtitle: "Sorties musicales, contenus et événements.",
     newProject: "Nouveau projet",
     columns: {
       title: "Titre",
@@ -70,33 +79,71 @@ export const shell = {
     title: "Nouveau projet",
     subtitle:
       "Le projet part chez le chef de projet choisi. Il sera lancé une fois qu'il l'aura accepté.",
+    sections: {
+      project: "Le projet",
+      details: "Informations initiales",
+      team: "Équipe",
+    },
     fields: {
       title: "Titre du projet",
       type: "Type",
-      masters: "Titres",
-      mastersOptional: "Facultatif pour ce type de projet.",
+      eventSoon: "Bientôt",
+      format: "Format",
+      contentModes: {
+        format: "Format PDS existant",
+        one_off: "Contenu ponctuel",
+      },
+      contentFormat: "Format PDS",
+      artist: "Artiste",
+      optional: "facultatif",
+      master: "Master",
+      masters: "Masters",
+      singleHint: "Un seul master pour un single.",
       dueDate: "Échéance principale",
-      dueDateHint: "Date de sortie visée pour une sortie musicale.",
+      releaseDate: "Date de sortie visée",
+      releaseDateHint:
+        "Remplacée par la date de l'onglet Sortie une fois celle-ci saisie.",
       budget: "Budget prévisionnel",
-      budgetHint: "Montant en euros, par exemple 1500 ou 1 500,50.",
       priority: "Priorité",
-      priorityNone: "Non définie",
-      notes: "Notes de cadrage",
-      notesHint: "Reprenez le brief reçu.",
+      priorityHint: "Haute : en tête de l'accueil, de Travail et des projets.",
+      initialContext: "Contexte initial",
+      initialContextHint:
+        "Ajoutez ici les informations déjà connues au moment de transmettre le projet.",
       team: "Équipe",
       manager: "Chef de projet",
       managerPlaceholder: "Choisir un chef de projet",
-      managerHint:
-        "Il reçoit le projet et l'accepte, le refuse ou demande une précision.",
       managerNone:
         "Aucun chef de projet dans l'organisation : créez d'abord son compte depuis Membres.",
-      creatives: "Direction artistique",
-      creativesHint:
-        "Facultatif. Les directeurs créatifs choisis voient le projet. Modifiable ensuite.",
+      creatives: "Direction créative",
       creativesNone: "Aucun directeur créatif dans l'organisation.",
     },
-    submit: "Créer le projet",
-    submitting: "Création…",
+    contentFormatPicker: {
+      searchLabel: "Choisir un format PDS",
+      placeholder: "Rechercher un format…",
+      noResult: (query: string) => `Aucun format ne s'appelle « ${query} ».`,
+      allSelected: "Aucun autre format.",
+      create: "Créer un format PDS",
+      createNamed: (name: string) => `Créer le format « ${name} »`,
+      remove: (name: string) => `Retirer ${name}`,
+    },
+    contentFormatForm: {
+      title: "Nouveau format PDS",
+      description:
+        "Un format se réutilise : chaque édition sera un nouveau projet.",
+      name: "Nom du format",
+      details: "Description",
+      submit: "Créer le format",
+      submitting: "Création…",
+      cancel: "Annuler",
+      close: "Fermer",
+      nameTaken: "Un format porte déjà ce nom.",
+    },
+    artistField: {
+      searchLabel: "Rattacher un artiste",
+      remove: (name: string) => `Retirer ${name}`,
+    },
+    submit: "Transmettre le projet",
+    submitting: "Transmission…",
     // Kept as it is typed (feedback n°6), resumed from this page.
     draft: {
       idle: "Votre saisie est gardée en brouillon : vous pouvez quitter la page et la reprendre ici.",
@@ -125,7 +172,16 @@ export const shell = {
       notEditable:
         "Ce projet ne se modifie plus ici : il est lancé, ou vous n'en avez pas le droit.",
       mastersRequired:
-        "Une sortie musicale doit rattacher au moins un titre. Rattachez-en un, ou changez le type de projet.",
+        "Un projet musical rattache au moins un master. Rattachez-en un, ou créez-le.",
+      singleOneMaster:
+        "Un single rattache un seul master. Retirez-en, ou choisissez un autre format.",
+      musicFormatRequired: "Choisissez le format de la sortie.",
+      contentModeRequired:
+        "Choisissez un format PDS existant ou un contenu ponctuel.",
+      contentFormatRequired: "Choisissez le format PDS, ou créez-le.",
+      invalidContentFormat: "Ce format n'existe plus. Choisissez-en un autre.",
+      invalidArtist: "Cet artiste n'est plus disponible. Retirez-le.",
+      typeUnavailable: "Ce type de projet n'est pas encore disponible.",
       invalidType: "Choisissez un type de projet.",
       invalidPriority: "Priorité invalide.",
       invalidBudget: "Montant invalide, par exemple 1500 ou 1 500,50.",
@@ -207,7 +263,7 @@ export const shell = {
       dueDate: "Échéance principale",
       budget: "Budget prévisionnel",
       priority: "Priorité",
-      framingNotes: "Notes de cadrage",
+      initialContext: "Contexte initial",
       notProvided: "non renseigné",
       owner: "Responsable",
       noOwner: "Non défini",
