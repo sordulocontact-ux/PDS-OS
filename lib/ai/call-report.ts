@@ -23,7 +23,7 @@ export type LocatedCallReport = {
     objective: Located<Field> | null;
     timing: Located<Field> | null;
     needs: Located<Brief["needs"][number]>[];
-    frame: Located<Field> | null;
+    frame: Located<Brief["frame"][number]>[];
     team: Located<Brief["team"][number]>[];
   };
   strategy: {
@@ -62,7 +62,7 @@ export async function extractCallReport(
         objective: locateField(report.brief.objective),
         timing: locateField(report.brief.timing),
         needs: report.brief.needs.map(locate),
-        frame: locateField(report.brief.frame),
+        frame: report.brief.frame.map(locate),
         team: report.brief.team.map(locate),
       },
       strategy: {

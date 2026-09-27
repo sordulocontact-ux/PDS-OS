@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IconChevronLeft } from "nucleo-sharp-essential";
 
+import { CallAgenda } from "@/components/calls/call-agenda";
 import { CallStatusBadge } from "@/components/calls/call-badges";
 import { CallAudio, CallRecording } from "@/components/calls/call-recording";
 import { CallResults } from "@/components/calls/call-results";
@@ -76,6 +77,13 @@ export default async function CallPage({
           />
         </div>
       </header>
+
+      {step === "record" && call.agenda && (
+        <CallAgenda
+          agenda={call.agenda}
+          durationMinutes={call.durationMinutes}
+        />
+      )}
 
       <Card>
         <CardHeader>

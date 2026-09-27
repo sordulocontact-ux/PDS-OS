@@ -35,9 +35,6 @@ const changes = {
       timing: field.describe(
         "Temporalité telle qu'énoncée (ex. « début mars »). Ne jamais convertir en date. Null si non dictée.",
       ),
-      frame: field.describe(
-        "Cadre : contraintes de budget, juridiques, artistiques. Null si non dicté.",
-      ),
     })
     .nullish()
     .describe("Null si aucun champ du Brief n'est dicté."),
@@ -47,6 +44,12 @@ const changes = {
     )
     .default([])
     .describe("Besoins à ajouter. Pas ceux qui existent déjà."),
+  constraints: z
+    .array(z.object({ text: z.string(), quote }))
+    .default([])
+    .describe(
+      "Contraintes de cadre à ajouter (budget, production, artistique, droits…). Pas celles qui existent déjà.",
+    ),
   team: z
     .array(z.object({ name: z.string(), role: z.string().nullish(), quote }))
     .default([])

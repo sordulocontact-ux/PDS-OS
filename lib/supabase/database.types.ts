@@ -463,6 +463,7 @@ export type Database = {
       }
       calls: {
         Row: {
+          agenda: Json | null
           audio_bytes: number | null
           audio_mime: string | null
           audio_path: string | null
@@ -472,6 +473,7 @@ export type Database = {
           consent_recorded_by: string | null
           created_at: string
           created_by: string | null
+          duration_minutes: number | null
           error_code: string | null
           id: string
           occurred_at: string
@@ -482,6 +484,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agenda?: Json | null
           audio_bytes?: number | null
           audio_mime?: string | null
           audio_path?: string | null
@@ -491,6 +494,7 @@ export type Database = {
           consent_recorded_by?: string | null
           created_at?: string
           created_by?: string | null
+          duration_minutes?: number | null
           error_code?: string | null
           id?: string
           occurred_at?: string
@@ -501,6 +505,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agenda?: Json | null
           audio_bytes?: number | null
           audio_mime?: string | null
           audio_path?: string | null
@@ -510,6 +515,7 @@ export type Database = {
           consent_recorded_by?: string | null
           created_at?: string
           created_by?: string | null
+          duration_minutes?: number | null
           error_code?: string | null
           id?: string
           occurred_at?: string
@@ -835,6 +841,76 @@ export type Database = {
           },
           {
             foreignKeyName: "field_values_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      framing_constraints: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          review_status: string
+          source_quote: string | null
+          source_report_item_id: string | null
+          source_start_seconds: number | null
+          source_type: string
+          text: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          review_status?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          text: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          review_status?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          text?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "framing_constraints_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "framing_constraints_item_same_org"
+            columns: ["source_report_item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "report_items"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "framing_constraints_project_same_org"
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -1753,6 +1829,7 @@ export type Database = {
           project_id: string
           review_status: string
           role: string | null
+          role_key: string | null
           source_quote: string | null
           source_report_item_id: string | null
           source_start_seconds: number | null
@@ -1769,6 +1846,7 @@ export type Database = {
           project_id: string
           review_status?: string
           role?: string | null
+          role_key?: string | null
           source_quote?: string | null
           source_report_item_id?: string | null
           source_start_seconds?: number | null
@@ -1785,6 +1863,7 @@ export type Database = {
           project_id?: string
           review_status?: string
           role?: string | null
+          role_key?: string | null
           source_quote?: string | null
           source_report_item_id?: string | null
           source_start_seconds?: number | null
@@ -2786,6 +2865,10 @@ export type Database = {
         Returns: undefined
       }
       sole_validator: { Args: { p_organization_id: string }; Returns: string }
+      start_framing_without_call: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
       start_stage: { Args: { p_stage_id: string }; Returns: undefined }
       strategy_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       transmit_project: {

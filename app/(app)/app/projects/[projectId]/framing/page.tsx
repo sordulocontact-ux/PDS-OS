@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { BriefFieldCard } from "@/components/framing/brief-field-card";
 import { FramingDictation } from "@/components/framing/framing-dictation";
-import { FramingNeedsCall } from "@/components/framing/framing-needs-call";
+import { FramingStart } from "@/components/framing/framing-start";
 import { NeedsSection } from "@/components/framing/needs-section";
 import { OpenPointsSection } from "@/components/framing/open-points-section";
 import { TasksSection } from "@/components/framing/tasks-section";
@@ -40,7 +40,7 @@ export default async function FramingPage({
   ]);
   if (!framingOpen) {
     return (
-      <FramingNeedsCall
+      <FramingStart
         projectId={projectId}
         canEdit={canEditProject(access, project)}
       />

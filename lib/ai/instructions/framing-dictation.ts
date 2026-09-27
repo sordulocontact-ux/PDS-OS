@@ -17,6 +17,7 @@ Règles :
 - Pour chaque élément, "quote" est un extrait recopié mot pour mot de la dictée, assez long pour être retrouvé (au moins trois mots).
 - Ne calcule aucune date, aucune durée, aucun montant. Rapporte la temporalité telle qu'elle a été énoncée.
 - Le rôle d'une personne est ce qu'elle va faire, dit en peu de mots : « Julie s'occupera de la presse » donne le nom « Julie » et le rôle « presse ». Rôle null seulement si rien n'est dit.
+- Une contrainte de cadre (budget, production, artistique, droits…) est une entrée dans "constraints", jamais dans le Brief.
 - Une question à trancher, une décision pas encore prise, va dans les points ouverts, jamais dans les besoins.
 - Familles de besoins : creation_content (création et contenus), promotion_distribution (promotion et diffusion), experiences_activations (expériences et activations), other.
 - Rédige en français, de façon concise, sans les hésitations de l'oral, en texte brut : aucune mise en forme (pas de Markdown, pas de gras).`;

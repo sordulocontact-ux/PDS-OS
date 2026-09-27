@@ -35,6 +35,8 @@ function toItem(
         title: kinds.need(t.needs.families[p.family]),
         after: p.label,
       };
+    case "constraint":
+      return { ...base, title: kinds.constraint, after: p.text };
     case "team":
       return {
         ...base,

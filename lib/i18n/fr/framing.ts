@@ -8,11 +8,20 @@ export const framing = {
     "Proposé par PO à partir d'un call. Relisez, puis confirmez ou rejetez.",
   empty: "Pas encore renseigné.",
   needsCall: {
-    title: "Le cadrage part d'un call",
-    body: "Planifiez ou enregistrez un premier échange. Son compte rendu pré-remplira le Brief.",
+    title: "Du call au Brief validé",
+    body: "Commencez par un call pour que PO prépare l'ordre du jour et pré-remplisse le Brief, ou passez directement au Brief si l'échange a déjà eu lieu ailleurs.",
     bodyReadOnly:
-      "Le Brief s'ouvrira dès que le chef de projet aura enregistré un call et obtenu son compte rendu.",
-    toCalls: "Aller aux calls",
+      "Le Brief s'ouvrira dès que le chef de projet aura préparé ou enregistré un call, ou aura commencé le Brief en amont.",
+    withCall: {
+      title: "Préparer un call de cadrage",
+      body: "PO structure l'ordre du jour (objectif, temporalité, cadre, besoins, équipe) et son temps approximatif ; son compte rendu pré-remplira le Brief.",
+      action: "Préparer un call de cadrage",
+    },
+    withoutCall: {
+      title: "Commencer en amont",
+      body: "Aucun call n'a eu lieu : remplissez le Brief à la main, sans pré-remplissage.",
+      action: "Commencer en amont",
+    },
   },
   fields: {
     objective: "Objectif",
@@ -51,6 +60,7 @@ export const framing = {
       brief: (field: string, isEdit: boolean) =>
         `${field} · ${isEdit ? "modification" : "à renseigner"}`,
       need: (family: string) => `Nouveau besoin · ${family}`,
+      constraint: "Nouvelle ligne de cadre",
       team: "Nouvelle personne dans l'équipe",
       open_point: "Nouveau point ouvert",
     },

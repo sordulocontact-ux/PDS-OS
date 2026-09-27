@@ -9,6 +9,7 @@ import {
   asCallStatus,
   type CallStatus,
 } from "@/lib/calls/constants";
+import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import {
   fromReportItemRows,
   type ReportItemRow,
@@ -36,6 +37,8 @@ export type CallDetail = CallSummary & {
   audioMime: string | null;
   audioBytes: number | null;
   errorCode: string | null;
+  agenda: AgendaItem[] | null;
+  durationMinutes: number | null;
 };
 
 export type StoredTranscript = {
@@ -80,6 +83,18 @@ export async function listCalls(
   }));
 }
 
+function toAgenda(value: unknown): AgendaItem[] | null {
+  if (!Array.isArray(value)) return null;
+  const items = value.flatMap((item: unknown) => {
+    if (typeof item !== "object" || item === null) return [];
+    const { topic, minutes } = item as Record<string, unknown>;
+    return typeof topic === "string" && typeof minutes === "number"
+      ? [{ topic, minutes }]
+      : [];
+  });
+  return items.length > 0 ? items : null;
+}
+
 export async function getCall(
   supabase: Client,
   projectId: string,
@@ -103,6 +118,8 @@ export async function getCall(
     audioMime: data.audio_mime,
     audioBytes: data.audio_bytes,
     errorCode: data.error_code,
+    agenda: toAgenda(data.agenda),
+    durationMinutes: data.duration_minutes,
   };
 }
 

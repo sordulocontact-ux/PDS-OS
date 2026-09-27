@@ -387,7 +387,8 @@
   --color-grey-100: var(--po-grey-100);
   --color-grey-50: var(--po-grey-50);
 
-  /* Polices */
+  /* Polices. Display = Sharp Grotesk Medium 20 dans le Figma (police payante) :
+     remplacée par Google Sans Flex en attendant une licence web. */
   --font-sans: var(--font-google-sans-flex);
   --font-heading: var(--font-google-sans-flex);
   --font-display: var(--font-google-sans-flex);

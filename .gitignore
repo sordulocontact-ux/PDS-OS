@@ -2,7 +2,10 @@
 /node_modules
 /.pnp
 .pnp.*
-CLAUDE.md
+# pnpm only — lockfiles from other package managers are accidental
+package-lock.json
+yarn.lock
+
 # next.js
 /.next/
 /out/
@@ -44,3 +47,9 @@ pds-data.sql
 
 # Local database backups (emails, password hashes): never commit
 backups/
+
+# Local screenshots
+/screens/
+
+# Claude Code: personal instructions, skills and settings, never committed
+.claude/

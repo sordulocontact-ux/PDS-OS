@@ -61,7 +61,7 @@ export function toReportItemRows(
       quote: x.quote,
       ...location(x.at),
     })),
-    ...(["objective", "timing", "frame"] as const).flatMap((kind) => {
+    ...(["objective", "timing"] as const).flatMap((kind) => {
       const field = brief[kind];
       return field
         ? [
@@ -74,6 +74,12 @@ export function toReportItemRows(
           ]
         : [];
     }),
+    ...brief.frame.map((x) => ({
+      kind: "frame",
+      what: x.value,
+      quote: x.quote,
+      ...location(x.at),
+    })),
     ...brief.needs.map((x) => ({
       kind: "need",
       what: x.label,
@@ -175,7 +181,7 @@ export function fromReportItemRows(
     brief: {
       objective: field("objective"),
       timing: field("timing"),
-      frame: field("frame"),
+      frame: of("frame").map((r) => ({ value: r.what, ...base(r) })),
       needs: of("need").map((r) => ({
         label: r.what,
         family: toFamily(r.need_family),

@@ -69,9 +69,11 @@ export const callReportSchema = z.object({
         quote,
       }),
     ),
-    frame: field.describe(
-      "Cadre : contraintes de budget, juridiques, artistiques.",
-    ),
+    frame: z
+      .array(z.object({ value: z.string(), quote }))
+      .describe(
+        "Contraintes réellement mentionnées (budget, production, artistique, droits…), une entrée par contrainte distincte. Liste vide si aucune.",
+      ),
     team: z.array(
       z.object({ name: z.string(), role: z.string().nullable(), quote }),
     ),

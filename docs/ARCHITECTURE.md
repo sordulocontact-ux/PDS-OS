@@ -322,10 +322,16 @@ s'afficher sans chargement.
 ## 6. Cadrage (étape 5)
 
 `app/(app)/app/projects/[projectId]/framing`, `lib/framing/*`, `components/framing/*`.
-**Le cadrage part d'un call** : tant que `framing_is_open` est faux (aucun compte rendu),
-la page et la vue d'ensemble affichent `FramingNeedsCall` (lien vers les Calls, placés
-avant le Cadrage dans les onglets). Un call brouillon daté dans le futur est affiché « À
-venir » (`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
+**Le cadrage part d'un call, ou du Brief en amont** : tant que `framing_is_open` est faux
+(aucun compte rendu, aucun Brief entamé ; lu par `isFramingOpen`), la page et la vue
+d'ensemble affichent `FramingStart` (deux options). « Préparer un call de cadrage » crée le
+call avec un ordre du jour fixe (les cinq rubriques du Brief, temps approximatif par
+rubrique — `lib/calls/first-call-agenda.ts`, affiché sur la fiche du call par `CallAgenda`
+tant qu'il n'est pas enregistré). « Commencer en amont » ouvre le Brief à la main, sans
+pré-remplissage (`start_framing_without_call`, fonction SQL security definer : la policy
+`field_values_framing_open` réclame `framing_is_open` déjà vrai pour la toute première
+ligne ; la fonction casse cette circularité en vérifiant `is_project_owner` elle-même). Un call brouillon daté dans le futur est affiché « À venir »
+(`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
 Compte rendu versé **automatiquement** (plus de panneau d'import sur le Cadrage ; la
 Stratégie garde le sien) → propositions « proposé · à confirmer » (Brief, besoins, équipe,
 points ouverts), provenance cliquable (call + minutage + citation), confirmer / rejeter /

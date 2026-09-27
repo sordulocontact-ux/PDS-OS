@@ -138,6 +138,10 @@ export const calls = {
       toFraming: "Ouvrir le Cadrage",
     },
   },
+  agenda: {
+    title: "Ordre du jour",
+    duration: (minutes: number) => `Environ ${minutes} min`,
+  },
   transcript: {
     title: "Transcription",
     empty: "Pas encore de transcription.",

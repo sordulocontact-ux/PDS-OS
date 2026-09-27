@@ -111,8 +111,16 @@ export function ReportPanel({ report }: { report: LocatedCallReport }) {
         items={[
           ...field("objective", t.objective, brief.objective),
           ...field("timing", t.timing, brief.timing),
-          ...field("frame", t.frame, brief.frame),
         ]}
+      />
+      <Section
+        title={t.frame}
+        items={brief.frame.map((x, i) => ({
+          key: `f${i}`,
+          main: x.value,
+          at: x.at,
+          quote: x.quote,
+        }))}
       />
       <Section
         title={t.needs}

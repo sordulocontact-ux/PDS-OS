@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { FramingNeedsCall } from "@/components/framing/framing-needs-call";
+import { FramingStart } from "@/components/framing/framing-start";
 import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
@@ -90,7 +90,7 @@ export default async function ProjectOverviewPage({
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="flex min-w-0 flex-col gap-8">
         {!framingOpen && (
-          <FramingNeedsCall
+          <FramingStart
             projectId={project.id}
             canEdit={canEditProject(access, project)}
           />

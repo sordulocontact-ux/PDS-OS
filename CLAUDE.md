@@ -189,7 +189,8 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `AudioMeter`, `useAudioMeter` | `ui/audio-meter.tsx`, `ui/use-audio-meter.ts` | onde du micro qui défile de droite à gauche (façon Claude), size : sm, md ; dictée, saisie vocale de PO, enregistrement de call |
 | `VoiceInputButton`, `VoiceInputBar`, `VoiceInputStatus` | `voice/voice-input.tsx` | saisie vocale d'un champ : micro ; pendant l'écoute, onde + ✕ annuler + ✓ valider à la place du micro et d'Envoyer |
 | `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
-| `FramingNeedsCall` | `framing/framing-needs-call.tsx` | état « le cadrage part d'un call » (Cadrage verrouillé, vue d'ensemble) |
+| `FramingStart` | `framing/framing-start.tsx` | état « cadrage pas encore ouvert » (Cadrage verrouillé, vue d'ensemble) : deux options, préparer un call ou commencer en amont |
+| `CallAgenda` | `calls/call-agenda.tsx` | ordre du jour préparé d'un call (points à aborder, temps approximatif), affiché avant l'enregistrement |
 | `StrategyNeedsFraming` | `strategy/strategy-needs-framing.tsx` | état « la stratégie suit le cadrage » (Stratégie verrouillée tant que le Cadrage n'est pas validé) |
 | `ArtistEditDialog`, `ArtistEditBody`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | modale « Modifier » (photo, identité, bio ; corps réutilisé depuis la liste), contacts de l'artiste |
 | `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
@@ -300,8 +301,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   son équipe** : chef de projet obligatoire (transmis d'office) + directeurs créatifs, dans
   `create_project` ; sans étape ni responsable jusqu'à l'acceptation. Cadrage, Calls et
   Sortie n'existent qu'après lancement (`transmit_project` / `respond_to_assignment`,
-  statut calculé par `projectStatusOf`). **Pas de cadrage sans compte rendu de call**
-  (`framing_is_open` en SQL, `FramingNeedsCall` à l'écran) ; onglet Calls avant Cadrage.
+  statut calculé par `projectStatusOf`). **Le cadrage part d'un call, ou du Brief en amont**
+  (`framing_is_open` en SQL, `FramingStart` à l'écran : préparer un call avec ordre du jour,
+  ou commencer en amont sans pré-remplissage) ; onglet Calls avant Cadrage.
   Nouvel artiste : recherche Deezer d'abord (nom **ou lien Deezer collé**, pour les petits
   artistes), saisie manuelle en repli ; le serveur relit Deezer, seul l'id vient du
   client. Sélecteurs :

@@ -27,7 +27,7 @@ type OpenPoint = Tables["open_points"]["Row"];
 type Task = Tables["tasks"]["Row"];
 type ReportItem = Tables["report_items"]["Row"];
 
-/** No framing without a call report; the rule lives in SQL (framing_is_open). */
+/** Framing opens with a call report or "Commencer en amont"; the rule lives in SQL (framing_is_open). */
 export async function isFramingOpen(projectId: string): Promise<boolean> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("framing_is_open", {
