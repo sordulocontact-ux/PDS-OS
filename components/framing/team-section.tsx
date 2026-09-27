@@ -31,8 +31,7 @@ export function TeamSection({
   const [role, setRole] = useState("");
 
   return (
-    <section className="grid gap-3 py-4">
-      <h3 className="text-sm font-medium">{t.title}</h3>
+    <div className="grid gap-3">
       {team.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.empty}</p>
       ) : (
@@ -47,10 +46,7 @@ export function TeamSection({
                 {member.review_status === "proposed" && <ProposedBadge />}
               </div>
               {member.provenance && (
-                <ProvenanceNote
-                  provenance={member.provenance}
-                  projectId={projectId}
-                />
+                <ProvenanceNote provenance={member.provenance} />
               )}
               {canEdit && member.review_status === "proposed" && (
                 <div className="flex gap-2">
@@ -122,6 +118,6 @@ export function TeamSection({
           </Button>
         </form>
       )}
-    </section>
+    </div>
   );
 }

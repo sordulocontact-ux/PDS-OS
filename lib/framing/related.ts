@@ -118,6 +118,22 @@ export type PendingValidation = {
   note: string | null;
 };
 
+/**
+ * Whether a stage already has a validation request awaiting a decision — all
+ * the project header needs to decide whether "Demander la validation" still
+ * applies, without loading the fuller FramingData just for that button.
+ */
+export async function hasPendingValidation(stageId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("validations")
+    .select("id")
+    .eq("project_stage_id", stageId)
+    .eq("state", "pending")
+    .maybeSingle();
+  return data !== null;
+}
+
 /** The validation awaiting a decision on a stage, if any. */
 export async function loadPendingValidation(
   stageId: string | null,

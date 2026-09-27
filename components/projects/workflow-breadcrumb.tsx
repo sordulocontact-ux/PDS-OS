@@ -1,6 +1,6 @@
 "use client";
 
-import { IconChevronRight } from "nucleo-sharp-essential";
+import { IconChevronRight, IconCheck } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -10,12 +10,16 @@ import { WORKFLOW_STEPS } from "@/lib/ui/workflow-steps";
 import { cn } from "@/lib/utils";
 
 // The 7-step breadcrumb of the business process, shown at the top of the
-// "Workflow" section (Cadrage, Stratégie, Conception, Sortie) — see
-// lib/ui/workflow-steps.ts. Hides itself outside those pages, so the layout can render it
+// "Workflow" section (Cadrage, Stratégie, Sortie) — see lib/ui/workflow-steps.ts.
+// Hides itself outside those three pages, so the layout can render it
 // unconditionally around every project page.
 // `lockedSteps`: steps that have a page but may not be opened yet (the
-// Stratégie before the Cadrage is validated, the Conception before the
-// Stratégie is) — shown greyed, not linked.
+// Stratégie before the Cadrage is validated) — shown greyed, not linked.
+//
+// Design: numbered dots between chevrons, so the current step reads at a
+// glance without losing the original ">" breadcrumb feel. Steps before the
+// active one look "done" (filled dot, check mark); the active dot is filled
+// too, its label in bold.
 export function WorkflowBreadcrumb({
   projectId,
   lockedSteps = [],
@@ -27,20 +31,26 @@ export function WorkflowBreadcrumb({
   const inWorkflow =
     pathname.startsWith(routes.projectFraming(projectId)) ||
     pathname.startsWith(routes.projectStrategy(projectId)) ||
-    pathname.startsWith(routes.projectDesign(projectId)) ||
     pathname.startsWith(routes.projectRelease(projectId));
   if (!inWorkflow) return null;
+
+  const activeIndex = WORKFLOW_STEPS.findIndex((step) => {
+    const href = step.href?.(projectId);
+    return href ? pathname === href : false;
+  });
 
   return (
     <nav
       aria-label={fr.shell.project.workflowSteps.label}
       className="overflow-x-auto"
     >
-      <ol className="flex items-center gap-1.5 text-body-md whitespace-nowrap">
+      <ol className="flex items-center whitespace-nowrap">
         {WORKFLOW_STEPS.map((step, index) => {
           const locked = lockedSteps.includes(step.key);
           const href = locked ? undefined : step.href?.(projectId);
-          const active = href ? pathname === href : false;
+          const active = index === activeIndex;
+          const done = activeIndex >= 0 && index < activeIndex;
+
           return (
             <li key={step.key} className="flex items-center gap-1.5">
               {index > 0 && (
@@ -54,26 +64,37 @@ export function WorkflowBreadcrumb({
                   href={href}
                   aria-current={active ? "step" : undefined}
                   className={cn(
-                    "rounded-lg px-2 py-1 no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
-                    active
-                      ? "font-medium text-foreground"
-                      : "text-[color:var(--nav-fg-muted)]",
+                    "group flex items-center gap-2 rounded-pill py-1 pr-3 pl-1 no-underline hover:bg-[var(--nav-item-hover-bg)]",
                   )}
                 >
-                  {step.label}
+                  <StepDot active={active} done={done}>
+                    {index + 1}
+                  </StepDot>
+                  <span
+                    className={cn(
+                      "text-body-md",
+                      active
+                        ? "font-medium text-[color:var(--tone-info-fg)]"
+                        : "text-[color:var(--nav-fg-muted)] group-hover:text-foreground",
+                    )}
+                  >
+                    {step.label}
+                  </span>
                 </Link>
               ) : (
                 <span
-                  className="cursor-not-allowed rounded-lg px-2 py-1 text-[color:var(--nav-fg-muted)]"
+                  className="flex cursor-not-allowed items-center gap-2 rounded-pill py-1 pr-3 pl-1 text-[color:var(--nav-fg-muted)]"
                   aria-disabled
                   title={
                     locked
-                      ? (fr.shell.project.workflowSteps.locked[step.key] ??
-                        fr.shell.nav.comingSoon)
+                      ? fr.shell.project.workflowSteps.locked[step.key]
                       : fr.shell.nav.comingSoon
                   }
                 >
-                  {step.label}
+                  <StepDot active={false} done={false}>
+                    {index + 1}
+                  </StepDot>
+                  <span className="text-body-md">{step.label}</span>
                 </span>
               )}
             </li>
@@ -81,5 +102,31 @@ export function WorkflowBreadcrumb({
         })}
       </ol>
     </nav>
+  );
+}
+
+function StepDot({
+  active,
+  done,
+  children,
+}: {
+  active: boolean;
+  done: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "flex size-6 shrink-0 items-center justify-center rounded-full border text-[length:var(--type-caption)] font-medium",
+        active
+          ? "border-[var(--tone-info-fg)] text-[color:var(--tone-info-fg)]"
+          : done
+            ? "border-[var(--nav-fg)] text-[color:var(--nav-fg)]"
+            : "border-[var(--border-default)] text-[color:var(--nav-fg-muted)]",
+      )}
+    >
+      {done && !active ? <IconCheck className="size-3.5" /> : children}
+    </span>
   );
 }

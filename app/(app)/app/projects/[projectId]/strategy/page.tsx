@@ -118,7 +118,6 @@ export default async function StrategyPage({
             <ValidationPanel
               stage={data.stage}
               pendingValidation={data.pendingValidation}
-              members={data.validators}
               projectId={projectId}
               mePersonId={access.personId}
               title={t.validation.title}

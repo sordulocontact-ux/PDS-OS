@@ -38,7 +38,7 @@ export function BriefFieldCard({
   const inputId = `${field.deliverable}-${field.key}`;
 
   return (
-    <section className="grid gap-2 border-b border-border py-4 last:border-b-0">
+    <section className="grid gap-2 rounded-lg border border-border p-4">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-sm font-medium">{label}</h3>
         {field.status === "proposed" && <ProposedBadge />}
@@ -87,7 +87,7 @@ export function BriefFieldCard({
       ) : field.value ? (
         <>
           <p className="text-sm whitespace-pre-wrap">{field.value}</p>
-          <ProvenanceNote provenance={field.provenance} projectId={projectId} />
+          <ProvenanceNote provenance={field.provenance} />
         </>
       ) : (
         <p className="text-sm text-muted-foreground">{t.empty}</p>

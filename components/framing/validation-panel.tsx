@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
-import { OptionSelect } from "@/components/framing/option-select";
+import { RequestValidationButton } from "@/components/framing/request-validation-button";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -10,15 +10,11 @@ import { stageTone } from "@/lib/ui/state-tones";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  decideValidation,
-  requestValidation,
-  startStage,
-} from "@/lib/framing/actions/validation";
+import { decideValidation, startStage } from "@/lib/framing/actions/validation";
 import type { FramingData } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
 
-type Props = Pick<FramingData, "stage" | "pendingValidation" | "members"> & {
+type Props = Pick<FramingData, "stage" | "pendingValidation"> & {
   projectId: string;
   mePersonId: string | null;
   /** Per stage: "Validation du Brief", "Commencer le cadrage"… */
@@ -29,11 +25,14 @@ type Props = Pick<FramingData, "stage" | "pendingValidation" | "members"> & {
 };
 type StageState = keyof typeof fr.framing.validation.states;
 
-/** A stage's state machine (framing, strategy), driven by database functions. */
+/**
+ * A stage's state machine (framing, strategy), driven by database functions.
+ * Asking for a validation never picks a validator: the database resolves the
+ * sole holder of "validate" itself (sole_validator).
+ */
 export function ValidationPanel({
   stage,
   pendingValidation,
-  members,
   projectId,
   mePersonId,
   title,
@@ -43,17 +42,13 @@ export function ValidationPanel({
   const t = fr.framing.validation;
   const { pending, run } = useFramingAction();
   const canEdit = useCanEditProject();
-  const others = members.filter((m) => m.personId !== mePersonId);
-  const [validator, setValidator] = useState(
-    others[0]?.personId ?? members[0]?.personId ?? "",
-  );
-  const [note, setNote] = useState("");
+  const noteRef = useRef<HTMLInputElement>(null);
   const [comment, setComment] = useState("");
   if (!stage) return null;
   const state = stage.state as StageState;
 
   return (
-    <section className="grid gap-3">
+    <div className="grid gap-3">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-medium">{title}</h3>
         <StatusBadge tone={stageTone[state]}>{t.states[state]}</StatusBadge>
@@ -80,44 +75,17 @@ export function ValidationPanel({
       )}
 
       {canEdit && state === "in_progress" && (
-        <form
-          className="grid gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            run(
-              () => requestValidation(projectId, stage.id, validator, note),
-              () => setNote(""),
-            );
-          }}
-        >
-          <div className="grid gap-1">
-            <Label htmlFor="validator">{t.validator}</Label>
-            <OptionSelect
-              id="validator"
-              label={t.validator}
-              value={validator}
-              onChange={setValidator}
-              options={Object.fromEntries(
-                members.map((m) => [m.personId, m.name]),
-              )}
-            />
-          </div>
+        <div className="grid gap-2">
           <div className="grid gap-1">
             <Label htmlFor="validation-note">{t.note}</Label>
-            <Input
-              id="validation-note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
+            <Input id="validation-note" ref={noteRef} />
           </div>
-          <Button
-            type="submit"
-            className="justify-self-start"
-            disabled={pending || !validator}
-          >
-            {t.request}
-          </Button>
-        </form>
+          <RequestValidationButton
+            projectId={projectId}
+            stageId={stage.id}
+            getNote={() => noteRef.current?.value ?? ""}
+          />
+        </div>
       )}
 
       {state === "awaiting_validation" && pendingValidation && (
@@ -176,6 +144,6 @@ export function ValidationPanel({
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }

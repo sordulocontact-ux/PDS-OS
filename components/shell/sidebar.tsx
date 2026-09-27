@@ -30,9 +30,9 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] shrink-0 flex-col justify-between gap-6 overflow-y-auto rounded-3xl bg-sidebar px-6 py-4 text-sidebar-foreground shadow-[var(--nav-shadow)] transition-[width] duration-[var(--duration-fast)] ease-[var(--ease-standard)] md:flex",
+        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] shrink-0 flex-col justify-between gap-6 overflow-y-auto rounded-3xl bg-sidebar px-4 py-3 text-sidebar-foreground shadow-[var(--nav-shadow)] transition-[width] duration-[var(--duration-fast)] ease-[var(--ease-standard)] md:flex",
         collapsed
-          ? "w-[var(--nav-width-collapsed)] px-3"
+          ? "w-[var(--nav-width-collapsed)] px-2"
           : "w-[var(--nav-width)]",
         // Fused with the project's contextual sidebar right next to it
         // (Figma "Double sidebar"): one rectangle, so no rounding or hairline

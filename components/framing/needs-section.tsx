@@ -10,13 +10,18 @@ import { useCanEditProject } from "@/components/projects/edit-access";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { needTone } from "@/lib/ui/state-tones";
 import { Button } from "@/components/ui/button";
+import { FilterChip } from "@/components/ui/filter-chip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addNeed, updateNeed } from "@/lib/framing/actions/needs-team";
+import { NEED_PRESETS } from "@/lib/framing/needs-presets";
 import type { FramingData } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
 
 type Family = keyof typeof fr.framing.needs.families;
+const PRESET_FAMILIES = Object.keys(NEED_PRESETS).filter(
+  (f) => NEED_PRESETS[f as Family].length > 0,
+) as Family[];
 
 export function NeedsSection({
   needs,
@@ -31,13 +36,46 @@ export function NeedsSection({
   const canEdit = useCanEditProject();
   const [label, setLabel] = useState("");
   const [family, setFamily] = useState<Family>("creation_content");
+  const presetLabels: Record<string, string> = t.presets;
+  const existingLabels = new Set(
+    needs.map((n) => n.label.trim().toLowerCase()),
+  );
 
   return (
-    <section className="grid gap-3 py-4">
-      <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <p className="text-xs text-muted-foreground">{t.hint}</p>
-      </div>
+    <div className="grid gap-3">
+      <p className="text-xs text-muted-foreground">{t.hint}</p>
+
+      {canEdit && (
+        <div className="grid gap-3">
+          {PRESET_FAMILIES.map((f) => (
+            <div key={f} className="grid gap-1.5">
+              <p className="text-xs font-medium text-muted-foreground">
+                {t.families[f]}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {NEED_PRESETS[f].map((preset) => {
+                  const presetLabel = presetLabels[preset];
+                  const added = existingLabels.has(
+                    presetLabel.trim().toLowerCase(),
+                  );
+                  return (
+                    <FilterChip
+                      key={preset}
+                      pressed={added}
+                      disabled={pending || added}
+                      onClick={() =>
+                        run(() => addNeed(projectId, presetLabel, f))
+                      }
+                    >
+                      {presetLabel}
+                    </FilterChip>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {needs.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.empty}</p>
@@ -59,10 +97,7 @@ export function NeedsSection({
                 {need.review_status === "proposed" && <ProposedBadge />}
               </div>
               {need.provenance && (
-                <ProvenanceNote
-                  provenance={need.provenance}
-                  projectId={projectId}
-                />
+                <ProvenanceNote provenance={need.provenance} />
               )}
               {canEdit && (
                 <div className="flex flex-wrap gap-2">
@@ -134,7 +169,7 @@ export function NeedsSection({
           }}
         >
           <div className="grid min-w-56 flex-1 gap-1">
-            <Label htmlFor="need-label">{t.label}</Label>
+            <Label htmlFor="need-label">{t.other}</Label>
             <Input
               id="need-label"
               value={label}
@@ -160,6 +195,6 @@ export function NeedsSection({
           </Button>
         </form>
       )}
-    </section>
+    </div>
   );
 }

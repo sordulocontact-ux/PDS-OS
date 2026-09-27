@@ -88,7 +88,7 @@ $$, '42501', null, 'no strategy field before the strategy starts');
 
 -- The owner validates the Brief through the director.
 select public.start_stage(pg_temp.id_of('framing'));
-select public.request_validation(pg_temp.id_of('framing'), pg_temp.id_of('director_person'), null);
+select public.request_validation(pg_temp.id_of('framing'), null);
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
 select public.decide_validation((select id from public.validations
@@ -158,7 +158,7 @@ $$, '42501', null, 'the director cannot add a lever');
 -- Submitted: frozen -------------------------------------------------------------
 reset role;
 select pg_temp.act_as(pg_temp.id_of('owner'));
-select public.request_validation(pg_temp.id_of('strategy'), pg_temp.id_of('director_person'), null);
+select public.request_validation(pg_temp.id_of('strategy'), null);
 select throws_ok($$
   insert into public.levers (organization_id, project_id, label, family)
   values (pg_temp.org(), pg_temp.prj(), 'Live', 'experiences_activations')

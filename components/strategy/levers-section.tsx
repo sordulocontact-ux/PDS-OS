@@ -86,10 +86,7 @@ export function LeversSection({
                       </p>
                     )}
                     {lever.provenance && (
-                      <ProvenanceNote
-                        provenance={lever.provenance}
-                        projectId={projectId}
-                      />
+                      <ProvenanceNote provenance={lever.provenance} />
                     )}
                     {canEdit &&
                       (proposed ? (

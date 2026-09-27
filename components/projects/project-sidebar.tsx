@@ -22,8 +22,8 @@ type ProjectSidebarItem = {
   key: string;
   label: string;
   href?: string;
-  // Active on this page and everything below it (Workflow covers four
-  // pages: Cadrage, Stratégie, Conception, Sortie).
+  // Active on this page and everything below it (Workflow covers three
+  // pages: Cadrage, Stratégie, Sortie).
   match?: (pathname: string) => boolean;
 };
 
@@ -40,7 +40,7 @@ const section = (
 });
 
 // 12 sections in the Figma order ("Devis Sordulo", node 120:74), each with
-// its page; Workflow covers Cadrage/Stratégie/Conception/Sortie, entered through
+// its page; Workflow covers Cadrage/Stratégie/Sortie, entered through
 // Cadrage (docs/DESIGN.md § 4). An item without href is shown disabled.
 function useProjectSidebarItems(projectId: string): ProjectSidebarItem[] {
   const t = fr.shell.project.sidebar;
@@ -58,7 +58,6 @@ function useProjectSidebarItems(projectId: string): ProjectSidebarItem[] {
       match: (p) =>
         p.startsWith(routes.projectFraming(projectId)) ||
         p.startsWith(routes.projectStrategy(projectId)) ||
-        p.startsWith(routes.projectDesign(projectId)) ||
         p.startsWith(routes.projectRelease(projectId)),
     },
     section("activations", t.activations, routes.projectActivations(projectId)),
@@ -88,7 +87,7 @@ function ProjectSidebarList({
   const pathname = usePathname();
 
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="flex flex-col gap-1">
       {items.map((item) => {
         const active = item.match?.(pathname) ?? false;
         return (
@@ -142,7 +141,7 @@ export function ProjectSidebar({
     <nav
       aria-label={t.label}
       className={cn(
-        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col gap-4 overflow-y-auto bg-sidebar p-4 text-sidebar-foreground shadow-[var(--nav-shadow)] md:flex",
+        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col gap-4 overflow-y-auto bg-sidebar p-3 text-sidebar-foreground shadow-[var(--nav-shadow)] md:flex",
         doubleSidebar
           ? "rounded-tr-3xl rounded-br-3xl"
           : "rounded-3xl border-l border-[color:var(--nav-divider)]",

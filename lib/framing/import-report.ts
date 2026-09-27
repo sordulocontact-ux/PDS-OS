@@ -21,6 +21,10 @@ const OPEN_STATES = ["not_started", "in_progress"];
  * nobody imports by hand. Only the first report of a call is imported (a
  * re-extraction would duplicate the proposals), and only while the framing is
  * still being written. Runs with the user's client: RLS decides.
+ *
+ * This is also the one moment the stage is allowed to leave "not_started" on
+ * its own, with no button to click: a report cannot exist before the call is
+ * open, so starting the stage here can never race ahead of framing_is_open.
  */
 export async function fillBriefFromCall(
   supabase: Client,
@@ -41,7 +45,7 @@ export async function fillBriefFromCall(
       .order("created_at", { ascending: false }),
     supabase
       .from("project_stages")
-      .select("state, stage_definitions!inner(key)")
+      .select("id, state, stage_definitions!inner(key)")
       .eq("project_id", call.project_id)
       .eq("stage_definitions.key", "framing")
       .maybeSingle(),
@@ -49,6 +53,13 @@ export async function fillBriefFromCall(
   const report = reports.data?.length === 1 ? reports.data[0] : null;
   if (!report || !stage.data || !OPEN_STATES.includes(stage.data.state)) {
     return false;
+  }
+
+  if (stage.data.state === "not_started") {
+    const { error } = await supabase.rpc("start_stage", {
+      p_stage_id: stage.data.id,
+    });
+    if (error) console.error("[framing] auto start failed:", error.message);
   }
 
   const result = await importReportIntoBrief(

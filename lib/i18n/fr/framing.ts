@@ -72,6 +72,19 @@ export const framing = {
       experiences_activations: "Expériences & activations",
       other: "Autre",
     },
+    presets: {
+      clip: "Clip",
+      social_content: "Contenus réseaux",
+      cover_visual_identity: "Cover / identité visuelle",
+      photoshoot: "Shooting photo",
+      press_relations: "Relations presse / médias",
+      influence_campaign: "Campagne influence / créateurs",
+      playlisting: "Playlisting",
+      marketing_campaign: "Campagne marketing",
+      live_showcase: "Live / showcase",
+      event: "Événement",
+    },
+    other: "Autre",
   },
   team: {
     title: "Équipe",
@@ -123,8 +136,10 @@ export const framing = {
     not_found: "Élément introuvable.",
     already_imported: "Ce compte rendu a déjà été importé.",
     invalid_transition: "Cette action n'est pas possible dans l'état actuel.",
-    validator_not_member: "Le valideur doit être un membre approuvé.",
-    validator_not_allowed: "La validation se demande au directeur général.",
+    no_validator:
+      "Aucun directeur général actif : personne à qui demander la validation.",
+    multiple_validators:
+      "Plusieurs directeurs généraux actifs : contactez-en un directement.",
     not_the_validator: "Seul le valideur désigné peut décider.",
     reason_required: "Un motif est obligatoire.",
     previous_stage_not_validated:

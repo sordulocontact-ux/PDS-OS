@@ -7,8 +7,8 @@ export type FramingErrorCode =
   | "not_found"
   | "already_imported"
   | "invalid_transition"
-  | "validator_not_member"
-  | "validator_not_allowed"
+  | "no_validator"
+  | "multiple_validators"
   | "not_the_validator"
   | "reason_required"
   | "previous_stage_not_validated"
@@ -40,8 +40,8 @@ export function fromDatabaseError(
   const message = error?.message ?? "";
   for (const code of [
     "invalid_transition",
-    "validator_not_member",
-    "validator_not_allowed",
+    "no_validator",
+    "multiple_validators",
     "not_the_validator",
     "previous_stage_not_validated",
     "framing_requires_call",

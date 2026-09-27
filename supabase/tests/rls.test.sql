@@ -134,12 +134,10 @@ select throws_ok($$ select public.start_stage((select id from ids where name = '
 
 reset role;
 select pg_temp.act_as((select id from ids where name = 'member'));
-select throws_ok($$ select public.request_validation((select id from ids where name = 'stage'),
-                    (select id from ids where name = 'admin_person')) $$,
+select throws_ok($$ select public.request_validation((select id from ids where name = 'stage')) $$,
                  'P0001', 'invalid_transition', 'cannot request validation of a stage not started');
 select lives_ok($$ select public.start_stage((select id from ids where name = 'stage')) $$, 'the owner starts a stage');
-select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'),
-                   (select id from ids where name = 'admin_person'), 'Brief prêt') $$,
+select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'), 'Brief prêt') $$,
                 'the owner asks the director for a validation');
 insert into ids select 'validation', id from public.validations
  where project_stage_id = (select id from ids where name = 'stage') and state = 'pending';

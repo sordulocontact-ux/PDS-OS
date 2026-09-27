@@ -37,7 +37,7 @@ export function ExternalTeamTable({
             <DataTableCell className="truncate">{m.name}</DataTableCell>
             <DataTableCell hideBelow="sm">{m.role || t.noRole}</DataTableCell>
             <DataTableCell fill hideBelow="md" className="whitespace-normal">
-              <ProvenanceNote provenance={m.provenance} projectId={projectId} />
+              <ProvenanceNote provenance={m.provenance} />
             </DataTableCell>
           </DataTableRow>
         ))}

@@ -102,8 +102,7 @@ insert into ids select 'stage', s.id from public.project_stages s
   join public.stage_definitions d on d.id = s.stage_definition_id
  where s.project_id = (select id from ids where name = 'project') and d.key = 'framing';
 select public.start_stage((select id from ids where name = 'stage'));
-select public.request_validation((select id from ids where name = 'stage'),
-  (select id from ids where name = 'director_person'), 'Brief prêt');
+select public.request_validation((select id from ids where name = 'stage'), 'Brief prêt');
 insert into public.tasks (organization_id, project_id, title, assignee_person_id, due_date)
 values ((select id from ids where name = 'org'), (select id from ids where name = 'project'),
         'Envoyer le brief', (select id from ids where name = 'director_person'), current_date + 7);

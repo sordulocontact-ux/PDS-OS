@@ -88,12 +88,12 @@ select ok(exists(select 1 from public.list_validators((select id from ids where 
                  where person_id = (select id from ids where name = 'other_person')),
           'only the director is offered as validator');
 select lives_ok($$ select public.start_stage((select id from ids where name = 'stage')) $$, 'the owner starts the framing');
-select throws_ok($$ select public.request_validation((select id from ids where name = 'stage'),
-                    (select id from ids where name = 'other_person')) $$,
-                 'P0001', 'validator_not_allowed', 'a validation is asked of the director only');
-select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'),
-                   (select id from ids where name = 'director_person'), 'Brief prêt') $$,
-                'the owner asks the director');
+select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'), 'Brief prêt') $$,
+                'the owner asks for a validation: the sole director is resolved automatically');
+select is((select validator_person_id from public.validations
+           where project_stage_id = (select id from ids where name = 'stage') and state = 'pending'),
+          (select id from ids where name = 'director_person'),
+          'the director is the one resolved as validator');
 
 -- Director --------------------------------------------------------------------
 reset role;

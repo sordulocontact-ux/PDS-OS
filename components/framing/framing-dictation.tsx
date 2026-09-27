@@ -47,22 +47,25 @@ function toItem(
 }
 
 /**
- * Header of the framing card with the dictation button, and the dictation
- * panel right under it, next to the Brief it changes.
+ * The dictation button, and the dictation panel right under it, next to the
+ * Brief it changes. No title lives here: the page title is the project's own
+ * (project layout) and "Cadrage" is already the active step in the workflow
+ * breadcrumb just above — repeating it a third time inside the card would
+ * only restate what the page already says.
  */
 export function FramingDictation({
   projectId,
   children,
 }: {
   projectId: string;
-  /** Card title and description. */
-  children: ReactNode;
+  /** Extra header content (title, description), if the caller has any. */
+  children?: ReactNode;
 }) {
   const dictation = useDictation<FramingProposal>("framing", projectId);
   const { pending, run } = useFramingAction();
   const canEdit = useCanEditProject();
 
-  if (!canEdit) return <CardHeader>{children}</CardHeader>;
+  if (!canEdit) return children ? <CardHeader>{children}</CardHeader> : null;
 
   return (
     <>

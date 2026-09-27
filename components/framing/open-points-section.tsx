@@ -33,11 +33,8 @@ export function OpenPointsSection({
   const resolved = points.filter((p) => p.status === "resolved");
 
   return (
-    <section className="grid gap-3">
-      <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <p className="text-xs text-muted-foreground">{t.hint}</p>
-      </div>
+    <div className="grid gap-3">
+      <p className="text-xs text-muted-foreground">{t.hint}</p>
       {open.length === 0 && (
         <p className="text-sm text-muted-foreground">{t.empty}</p>
       )}
@@ -46,10 +43,7 @@ export function OpenPointsSection({
           <li key={point.id} className="grid gap-1.5">
             <p className="text-sm">{point.question}</p>
             {point.provenance && (
-              <ProvenanceNote
-                provenance={point.provenance}
-                projectId={projectId}
-              />
+              <ProvenanceNote provenance={point.provenance} />
             )}
             {!canEdit ? null : resolving === point.id ? (
               <form
@@ -151,6 +145,6 @@ export function OpenPointsSection({
           </ul>
         </details>
       )}
-    </section>
+    </div>
   );
 }

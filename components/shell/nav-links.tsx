@@ -41,7 +41,7 @@ export function NavLinks({
 
   return (
     <nav aria-label={t.label}>
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-1">
         {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
           const active = isActive(pathname, item.href, item.exact ?? false);
           const Icon = item.icon;

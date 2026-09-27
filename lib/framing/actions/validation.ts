@@ -44,25 +44,23 @@ export async function startStage(
   );
 }
 
+// The validator is never chosen by the caller: in V1 there is exactly one
+// holder of "validate" (the general director), resolved by the database
+// (sole_validator), which refuses explicitly if the org ever has none or
+// more than one instead of guessing.
 export async function requestValidation(
   projectId: string,
   stageId: string,
-  validatorPersonId: string,
   note: string,
 ): Promise<ActionResult> {
   const p = z
-    .object({
-      stageId: z.uuid(),
-      validatorPersonId: z.uuid(),
-      note: z.string().max(500),
-    })
-    .safeParse({ stageId, validatorPersonId, note });
+    .object({ stageId: z.uuid(), note: z.string().max(500) })
+    .safeParse({ stageId, note });
   if (!p.success) return fail("invalid_input");
   const supabase = await createClient();
   return run(projectId, () =>
     supabase.rpc("request_validation", {
       p_stage_id: stageId,
-      p_validator_person_id: validatorPersonId,
       p_note: note,
     }),
   );

@@ -48,8 +48,7 @@ export function TasksSection({
   ) => setDrafts((all) => ({ ...all, [id]: { ...draftOf(id), ...patch } }));
 
   return (
-    <section className="grid gap-4">
-      <h3 className="text-sm font-medium">{t.title}</h3>
+    <div className="grid gap-4">
       {canEdit && proposedActions.length > 0 && (
         <div className="grid gap-3">
           <div className="grid gap-0.5">
@@ -154,6 +153,6 @@ export function TasksSection({
           ))}
         </ul>
       )}
-    </section>
+    </div>
   );
 }
