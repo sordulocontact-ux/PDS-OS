@@ -1,8 +1,6 @@
 /** Launch strategy stage page and the Strategy deliverable. */
 export const strategy = {
   title: "Stratégie de lancement",
-  description:
-    "La Stratégie de la sortie : positionnement, publics, narratif, dispositif, livrables engagés, calendrier.",
   notStarted:
     "La stratégie n'a pas commencé. Le chef de projet la démarre une fois le Brief validé.",
   locked: "Stratégie soumise ou validée : elle n'est plus modifiable.",
@@ -84,8 +82,6 @@ export const strategy = {
     },
     and: "et",
     answer: "Réponse",
-    answerHint:
-      "Composée à partir de vos choix : modifiez-la ou complétez-la librement.",
     recompose: "Recomposer depuis les choix",
     other: "Autre, préciser",
     otherPlaceholder: "Précisez",
@@ -122,7 +118,6 @@ export const strategy = {
   },
   levers: {
     title: "Dispositif",
-    hint: "Les leviers de lancement, par famille. Seul un levier retenu porte des livrables.",
     empty: "Aucun levier pour l'instant.",
     familyEmpty: "Aucun levier.",
     label: "Levier",
@@ -135,13 +130,10 @@ export const strategy = {
     },
     fromNeed: (need: string) => `Répond au besoin « ${need} »`,
     needsTitle: "Besoins du Brief sans levier",
-    needsHint:
-      "Point de départ : transformez un besoin en levier, puis arbitrez.",
     fromNeedAction: "En faire un levier",
   },
   deliverables: {
     title: "Livrables engagés",
-    hint: "Ce que le dispositif engage à produire. Responsable et échéance peuvent venir plus tard.",
     empty: "Aucun livrable engagé.",
     noLever: "Retenez d'abord un levier pour y rattacher des livrables.",
     name: "Livrable",
@@ -155,7 +147,6 @@ export const strategy = {
   },
   calendar: {
     title: "Calendrier",
-    hint: "Les temps forts, saisis à la main. Le décompte est calculé depuis la date de sortie.",
     empty: "Aucun temps fort.",
     reference: (date: string) => `Date de sortie de référence : ${date}`,
     noReference:
@@ -188,7 +179,6 @@ export const strategy = {
   },
   import: {
     title: "Importer depuis un call",
-    hint: "Propose positionnement, publics, narratif et leviers entendus pendant un call. Rien n'est confirmé automatiquement ; le calendrier reste saisi à la main.",
   },
   validation: {
     title: "Validation de la Stratégie",

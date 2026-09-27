@@ -152,6 +152,7 @@ export const framingGuide = {
     openPoint: "Point ouvert",
     openBrief: "Ouvrir le brief partageable",
     approve: "Valider et clôturer",
+    approved: "Cadrage validé.",
   },
   brief: {
     eyebrow: "Brief de cadrage",

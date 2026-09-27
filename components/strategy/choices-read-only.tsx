@@ -1,14 +1,18 @@
+import { sectionTitleClass } from "@/components/strategy/option-class";
 import type { StrategyTextField } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import type { ChoiceValue } from "@/lib/strategy/choices";
 
-// The answers chosen for a Strategy question, for anyone who only reads.
+// A Strategy question for anyone who only reads: the chosen answers in blue,
+// then the answer text.
 export function ChoicesReadOnly({
   field,
   value,
+  text,
 }: {
   field: StrategyTextField;
   value: ChoiceValue;
+  text: string | null;
 }) {
   const t = fr.strategy.choices;
   const labels: Record<string, string> = t.options[field];
@@ -18,22 +22,27 @@ export function ChoicesReadOnly({
   ];
 
   return (
-    <div className="grid gap-2 pt-4">
-      <p className="text-sm text-muted-foreground">{t.questions[field]}</p>
-      {chosen.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.none}</p>
+    <section className="flex flex-col gap-4">
+      <h3 className={sectionTitleClass}>{t.questions[field]}</h3>
+      {chosen.length === 0 && !text ? (
+        <p className="text-body-md text-muted-foreground">{t.none}</p>
       ) : (
-        <ul className="flex flex-wrap gap-2">
-          {chosen.map((label) => (
-            <li
-              key={label}
-              className="rounded-pill bg-muted px-3 py-1 text-sm font-medium"
-            >
-              {label}
-            </li>
-          ))}
-        </ul>
+        <>
+          {chosen.length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {chosen.map((label) => (
+                <li
+                  key={label}
+                  className="rounded-pill border border-[var(--select-border)] bg-[var(--select-bg)] px-3.5 py-1.5 text-sm font-medium"
+                >
+                  {label}
+                </li>
+              ))}
+            </ul>
+          )}
+          {text && <p className="text-body-md whitespace-pre-wrap">{text}</p>}
+        </>
       )}
-    </div>
+    </section>
   );
 }

@@ -109,6 +109,10 @@
   --control-primary-bg: var(--po-ink-900);
   --control-primary-fg: var(--po-white);
   --control-primary-bg-hover: var(--po-ink-600);
+  /* Choix retenu parmi des options (DESIGN.md § 4, « Sélection ») : fond bleu
+     pâle, contour bleu. Jamais pour un lien ni un bouton. */
+  --select-bg: #eef4fe;
+  --select-border: #7aaef2;
   --focus-ring: var(--po-ink-900);
   --overlay-scrim: rgba(0, 0, 0, 0.4);
   /* Fenêtre « verre » (DESIGN.md § 4) : page floutée sans voile, panneau
@@ -344,6 +348,8 @@
   --control-bg-soft: rgb(255 255 255 / 0.08);
   --control-primary-bg: var(--po-white);
   --control-primary-fg: var(--po-ink-900);
+  --select-bg: rgb(122 174 242 / 0.18);
+  --select-border: #7aaef2;
   /* Pas de rouge : l'action définitive reste en « encre pleine », ici blanche. */
   --destructive: var(--po-white);
   --destructive-foreground: var(--po-ink-900);

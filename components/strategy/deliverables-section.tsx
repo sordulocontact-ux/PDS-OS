@@ -8,6 +8,11 @@ import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  labelClass,
+  optionClass,
+  sectionTitleClass,
+} from "@/components/strategy/option-class";
 import { fr } from "@/lib/i18n/fr";
 import { addDeliverable, removeDeliverable } from "@/lib/strategy/actions/plan";
 import type { StrategyData } from "@/lib/strategy/queries";
@@ -47,24 +52,23 @@ export function DeliverablesSection({
     : (selected[0]?.id ?? "");
 
   return (
-    <section className="grid gap-3 py-4">
-      <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <p className="text-xs text-muted-foreground">{t.hint}</p>
-      </div>
+    <section
+      aria-labelledby="deliverables-title"
+      className="flex flex-col gap-6"
+    >
+      <h3 id="deliverables-title" className={sectionTitleClass}>
+        {t.title}
+      </h3>
 
       {deliverables.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.empty}</p>
+        <p className="text-body-md text-muted-foreground">{t.empty}</p>
       ) : (
-        <ul className="grid gap-2">
+        <ul className="flex flex-col gap-3">
           {deliverables.map((d) => (
-            <li
-              key={d.id}
-              className="flex items-start justify-between gap-3 rounded-lg border border-border p-3"
-            >
-              <div className="grid gap-0.5 text-sm">
-                <span className="font-medium">{d.title}</span>
-                <span className="text-xs text-muted-foreground">
+            <li key={d.id} className={`${optionClass(false)} justify-between`}>
+              <div className="flex min-w-0 flex-col gap-1">
+                <span className="font-semibold break-words">{d.title}</span>
+                <span className="text-caption text-muted-foreground">
                   {[
                     leverName.get(d.lever_id),
                     d.assignee_person_id
@@ -96,10 +100,10 @@ export function DeliverablesSection({
 
       {canEdit &&
         (selected.length === 0 ? (
-          <p className="text-xs text-muted-foreground">{t.noLever}</p>
+          <p className="text-body-md text-muted-foreground">{t.noLever}</p>
         ) : (
           <form
-            className="grid gap-2 sm:grid-cols-2"
+            className="grid gap-4 sm:grid-cols-2"
             onSubmit={(event) => {
               event.preventDefault();
               run(
@@ -117,16 +121,20 @@ export function DeliverablesSection({
               );
             }}
           >
-            <div className="grid gap-1 sm:col-span-2">
-              <Label htmlFor="deliverable-title">{t.name}</Label>
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <Label htmlFor="deliverable-title" className={labelClass}>
+                {t.name}
+              </Label>
               <Input
                 id="deliverable-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
-            <div className="grid gap-1">
-              <Label htmlFor="deliverable-lever">{t.lever}</Label>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="deliverable-lever" className={labelClass}>
+                {t.lever}
+              </Label>
               <OptionSelect
                 id="deliverable-lever"
                 label={t.lever}
@@ -137,8 +145,10 @@ export function DeliverablesSection({
                 onChange={setLever}
               />
             </div>
-            <div className="grid gap-1">
-              <Label htmlFor="deliverable-assignee">{t.assignee}</Label>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="deliverable-assignee" className={labelClass}>
+                {t.assignee}
+              </Label>
               <OptionSelect
                 id="deliverable-assignee"
                 label={t.assignee}
@@ -147,8 +157,10 @@ export function DeliverablesSection({
                 onChange={setAssignee}
               />
             </div>
-            <div className="grid gap-1">
-              <Label htmlFor="deliverable-due">{t.dueDate}</Label>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="deliverable-due" className={labelClass}>
+                {t.dueDate}
+              </Label>
               <Input
                 id="deliverable-due"
                 type="date"

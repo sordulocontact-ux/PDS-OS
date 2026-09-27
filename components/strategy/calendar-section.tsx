@@ -7,12 +7,18 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  labelClass,
+  optionClass,
+  sectionTitleClass,
+} from "@/components/strategy/option-class";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import { addMilestone, removeMilestone } from "@/lib/strategy/actions/plan";
 import { dayOffset } from "@/lib/strategy/calendar";
 import type { StrategyData } from "@/lib/strategy/queries";
+import { cn } from "@/lib/utils";
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
   weekday: "short",
@@ -46,37 +52,41 @@ export function CalendarSection({
   const [deliverable, setDeliverable] = useState(NONE);
 
   return (
-    <section className="grid gap-3 py-4">
-      <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <p className="text-xs text-muted-foreground">{t.hint}</p>
-        <p className="text-xs text-muted-foreground">
+    <section aria-labelledby="calendar-title" className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <h3 id="calendar-title" className={sectionTitleClass}>
+          {t.title}
+        </h3>
+        <p className="text-caption text-muted-foreground">
           {referenceDate ? t.reference(format(referenceDate)) : t.noReference}
         </p>
       </div>
 
       {milestones.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.empty}</p>
+        <p className="text-body-md text-muted-foreground">{t.empty}</p>
       ) : (
-        <ol className="grid gap-2">
+        <ol className="flex flex-col gap-3">
           {milestones.map((m) => (
             <li
               key={m.id}
-              className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-3 rounded-lg border border-border p-3"
+              className={cn(
+                optionClass(false),
+                "grid grid-cols-[3.5rem_minmax(0,1fr)_auto]",
+              )}
             >
-              <span className="pt-0.5 font-mono text-xs text-muted-foreground tabular-nums">
+              <span className="pt-0.5 text-caption font-semibold text-muted-foreground tabular-nums">
                 {referenceDate
                   ? t.dayOffset(dayOffset(m.occurs_on, referenceDate))
                   : "—"}
               </span>
-              <div className="grid min-w-0 gap-0.5 text-sm">
+              <div className="flex min-w-0 flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium break-words">{m.title}</span>
+                  <span className="font-semibold break-words">{m.title}</span>
                   <StatusBadge tone="neutral" size="sm">
                     {t.kinds[m.kind as Kind]}
                   </StatusBadge>
                 </div>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-caption text-muted-foreground">
                   {[
                     format(m.occurs_on),
                     m.deliverable_id && deliverableName.get(m.deliverable_id),
@@ -105,7 +115,7 @@ export function CalendarSection({
 
       {canEdit && (
         <form
-          className="grid gap-2 sm:grid-cols-2"
+          className="grid gap-4 sm:grid-cols-2"
           onSubmit={(event) => {
             event.preventDefault();
             run(
@@ -124,16 +134,20 @@ export function CalendarSection({
             );
           }}
         >
-          <div className="grid gap-1 sm:col-span-2">
-            <Label htmlFor="milestone-title">{t.name}</Label>
+          <div className="flex flex-col gap-2 sm:col-span-2">
+            <Label htmlFor="milestone-title" className={labelClass}>
+              {t.name}
+            </Label>
             <Input
               id="milestone-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
-          <div className="grid gap-1">
-            <Label htmlFor="milestone-date">{t.date}</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="milestone-date" className={labelClass}>
+              {t.date}
+            </Label>
             <Input
               id="milestone-date"
               type="date"
@@ -141,8 +155,10 @@ export function CalendarSection({
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
-          <div className="grid gap-1">
-            <Label htmlFor="milestone-kind">{t.kind}</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="milestone-kind" className={labelClass}>
+              {t.kind}
+            </Label>
             <OptionSelect
               id="milestone-kind"
               label={t.kind}
@@ -152,8 +168,10 @@ export function CalendarSection({
             />
           </div>
           {deliverables.length > 0 && (
-            <div className="grid gap-1">
-              <Label htmlFor="milestone-deliverable">{t.deliverable}</Label>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="milestone-deliverable" className={labelClass}>
+                {t.deliverable}
+              </Label>
               <OptionSelect
                 id="milestone-deliverable"
                 label={t.deliverable}

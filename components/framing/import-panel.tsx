@@ -26,7 +26,7 @@ export function ImportPanel({
   projectId: string;
   importAction: (projectId: string, reportId: string) => Promise<ActionResult>;
   title: string;
-  hint: string;
+  hint?: string;
 }) {
   const t = fr.framing.import;
   const { pending, run } = useFramingAction();
@@ -38,8 +38,8 @@ export function ImportPanel({
   return (
     <section className="grid gap-3">
       <div className="grid gap-1">
-        <h3 className="text-sm font-medium">{title}</h3>
-        <p className="text-xs text-muted-foreground">{hint}</p>
+        <h3 className="text-body-md font-medium">{title}</h3>
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       </div>
       {reports.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t.empty}</p>

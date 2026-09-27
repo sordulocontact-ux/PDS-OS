@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { decideValidation } from "@/lib/framing/actions/validation";
@@ -22,7 +24,10 @@ export function ApproveButton({
       size="lg"
       disabled={pending}
       onClick={() =>
-        run(() => decideValidation(projectId, validationId, true, ""))
+        run(
+          () => decideValidation(projectId, validationId, true, ""),
+          () => toast.success(fr.framingGuide.summary.approved),
+        )
       }
     >
       {fr.framingGuide.summary.approve}

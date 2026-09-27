@@ -247,6 +247,27 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   Projets (Actifs / Archivés, DG), Membres (statut), Budget (statut).
 - **Pastilles** (`FilterChip`, `ViewToggle`) : filtres secondaires ou qui se combinent.
 
+### Sélection et formulaires en étapes
+
+D'après la maquette « Nouveau projet » fournie par Sacha le 27/09/2026, appliquée
+d'abord à la Stratégie (`app/(app)/app/projects/[projectId]/strategy`,
+`components/strategy/option-class.ts`) :
+
+- **Choix retenu en bleu** : une réponse cochée parmi des cartes (questions de la
+  Stratégie), un levier retenu, prennent le fond `--select-bg` et le contour
+  `--select-border` ; les autres restent blanches à contour `--border-default`. Texte
+  toujours noir. Le bleu ne sert qu'à ça : ni lien, ni bouton, ni état (les états
+  restent aux `--tone-*`).
+- **Pastilles à cocher** (formats) : `FilterChip` « ink », noire une fois cochée.
+- **Pas de cadre dans un cadre** : la page n'est pas enfermée dans une carte, les
+  sections sont espacées (48 px) sans trait ; seuls les éléments (réponses, leviers,
+  livrables, temps forts) et les blocs de la colonne de droite ont un contour.
+- Titre de section en `display-sm` semi-gras, libellé de champ en `body-md` medium noir
+  au-dessus du contrôle ; pas de phrase qui explique la section. Une source (call,
+  citation) tient en une ligne `caption`.
+- Actions de la page (proposer, dicter) à droite du titre ; boutons d'une réponse en bas
+  à droite, secondaires en `ghost` d'abord, le principal (noir) en dernier.
+
 ### Modale : une seule, « verre »
 
 **Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,
