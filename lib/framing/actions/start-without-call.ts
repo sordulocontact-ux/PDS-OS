@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
  * the restrictive field_values_framing_open policy checks framing_is_open()
  * on every insert — including this first one meant to satisfy it. The
  * security definer RPC breaks that circularity and checks is_project_owner()
- * itself (supabase/migrations/20260927001001_call_agenda.sql).
+ * itself (supabase/migrations/20260927001301_call_agenda.sql).
  */
 export async function startFramingWithoutCall(projectId: string) {
   const access = await requireApproved();

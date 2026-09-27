@@ -224,13 +224,13 @@ isOneToOne: false
                   ]
                 },"calls": {
                   Row: {
-                    "audio_bytes": number | null,"audio_mime": string | null,"audio_path": string | null,"consent": string,"consent_note": string | null,"consent_recorded_at": string | null,"consent_recorded_by": string | null,"created_at": string,"created_by": string | null,"error_code": string | null,"id": string,"occurred_at": string,"organization_id": string,"project_id": string,"status": string,"title": string,"updated_at": string
+                    "agenda": Json | null,"audio_bytes": number | null,"audio_mime": string | null,"audio_path": string | null,"consent": string,"consent_note": string | null,"consent_recorded_at": string | null,"consent_recorded_by": string | null,"created_at": string,"created_by": string | null,"duration_minutes": number | null,"error_code": string | null,"id": string,"occurred_at": string,"organization_id": string,"project_id": string,"status": string,"title": string,"updated_at": string
                   }
                   Insert: {
-                    "audio_bytes"?: number | null,"audio_mime"?: string | null,"audio_path"?: string | null,"consent"?: string,"consent_note"?: string | null,"consent_recorded_at"?: string | null,"consent_recorded_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"error_code"?: string | null,"id"?: string,"occurred_at"?: string,"organization_id": string,"project_id": string,"status"?: string,"title": string,"updated_at"?: string
+                    "agenda"?: Json | null,"audio_bytes"?: number | null,"audio_mime"?: string | null,"audio_path"?: string | null,"consent"?: string,"consent_note"?: string | null,"consent_recorded_at"?: string | null,"consent_recorded_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"duration_minutes"?: number | null,"error_code"?: string | null,"id"?: string,"occurred_at"?: string,"organization_id": string,"project_id": string,"status"?: string,"title": string,"updated_at"?: string
                   }
                   Update: {
-                    "audio_bytes"?: number | null,"audio_mime"?: string | null,"audio_path"?: string | null,"consent"?: string,"consent_note"?: string | null,"consent_recorded_at"?: string | null,"consent_recorded_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"error_code"?: string | null,"id"?: string,"occurred_at"?: string,"organization_id"?: string,"project_id"?: string,"status"?: string,"title"?: string,"updated_at"?: string
+                    "agenda"?: Json | null,"audio_bytes"?: number | null,"audio_mime"?: string | null,"audio_path"?: string | null,"consent"?: string,"consent_note"?: string | null,"consent_recorded_at"?: string | null,"consent_recorded_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"duration_minutes"?: number | null,"error_code"?: string | null,"id"?: string,"occurred_at"?: string,"organization_id"?: string,"project_id"?: string,"status"?: string,"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -365,6 +365,37 @@ isOneToOne: false
       referencedColumns: ["id","organization_id"]
     },{
       foreignKeyName: "field_values_project_same_org"
+      columns: ["project_id","organization_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id","organization_id"]
+    }
+                  ]
+                },"framing_constraints": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"id": string,"organization_id": string,"project_id": string,"review_status": string,"source_quote": string | null,"source_report_item_id": string | null,"source_start_seconds": number | null,"source_type": string,"text": string,"type": string,"updated_at": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"organization_id": string,"project_id": string,"review_status"?: string,"source_quote"?: string | null,"source_report_item_id"?: string | null,"source_start_seconds"?: number | null,"source_type"?: string,"text": string,"type": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"organization_id"?: string,"project_id"?: string,"review_status"?: string,"source_quote"?: string | null,"source_report_item_id"?: string | null,"source_start_seconds"?: number | null,"source_type"?: string,"text"?: string,"type"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "framing_constraints_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "people"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "framing_constraints_item_same_org"
+      columns: ["source_report_item_id","organization_id"]
+isOneToOne: false
+      referencedRelation: "report_items"
+      referencedColumns: ["id","organization_id"]
+    },{
+      foreignKeyName: "framing_constraints_project_same_org"
       columns: ["project_id","organization_id"]
 isOneToOne: false
       referencedRelation: "projects"
@@ -826,13 +857,13 @@ isOneToOne: false
                   ]
                 },"project_team_members": {
                   Row: {
-                    "created_at": string,"created_by": string | null,"display_name": string,"id": string,"organization_id": string,"person_id": string | null,"project_id": string,"review_status": string,"role": string | null,"source_quote": string | null,"source_report_item_id": string | null,"source_start_seconds": number | null,"source_type": string,"updated_at": string
+                    "created_at": string,"created_by": string | null,"display_name": string,"id": string,"organization_id": string,"person_id": string | null,"project_id": string,"review_status": string,"role": string | null,"role_key": string | null,"source_quote": string | null,"source_report_item_id": string | null,"source_start_seconds": number | null,"source_type": string,"updated_at": string
                   }
                   Insert: {
-                    "created_at"?: string,"created_by"?: string | null,"display_name": string,"id"?: string,"organization_id": string,"person_id"?: string | null,"project_id": string,"review_status"?: string,"role"?: string | null,"source_quote"?: string | null,"source_report_item_id"?: string | null,"source_start_seconds"?: number | null,"source_type"?: string,"updated_at"?: string
+                    "created_at"?: string,"created_by"?: string | null,"display_name": string,"id"?: string,"organization_id": string,"person_id"?: string | null,"project_id": string,"review_status"?: string,"role"?: string | null,"role_key"?: string | null,"source_quote"?: string | null,"source_report_item_id"?: string | null,"source_start_seconds"?: number | null,"source_type"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"created_by"?: string | null,"display_name"?: string,"id"?: string,"organization_id"?: string,"person_id"?: string | null,"project_id"?: string,"review_status"?: string,"role"?: string | null,"source_quote"?: string | null,"source_report_item_id"?: string | null,"source_start_seconds"?: number | null,"source_type"?: string,"updated_at"?: string
+                    "created_at"?: string,"created_by"?: string | null,"display_name"?: string,"id"?: string,"organization_id"?: string,"person_id"?: string | null,"project_id"?: string,"review_status"?: string,"role"?: string | null,"role_key"?: string | null,"source_quote"?: string | null,"source_report_item_id"?: string | null,"source_start_seconds"?: number | null,"source_type"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -1232,11 +1263,11 @@ isOneToOne: false
 "design_is_in_progress":
 { Args: { "p_project_id": string }; Returns: boolean
                            },
-"forget_push_subscription":
-{ Args: { "p_endpoint": string }; Returns: undefined
-                           },
 "file_feedback":
 { Args: { "p_feedback": string,"p_summary"?: string,"p_title"?: string,"p_topic"?: string }; Returns: string
+                           },
+"forget_push_subscription":
+{ Args: { "p_endpoint": string }; Returns: undefined
                            },
 "framing_is_open":
 { Args: { "p_project_id": string }; Returns: boolean
@@ -1346,6 +1377,9 @@ isOneToOne: false
                            },
 "sole_validator":
 { Args: { "p_organization_id": string }; Returns: string
+                           },
+"start_framing_without_call":
+{ Args: { "p_project_id": string }; Returns: undefined
                            },
 "start_stage":
 { Args: { "p_stage_id": string }; Returns: undefined

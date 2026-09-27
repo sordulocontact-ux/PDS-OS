@@ -27,7 +27,7 @@ type OpenPoint = Tables["open_points"]["Row"];
 type Task = Tables["tasks"]["Row"];
 type ReportItem = Tables["report_items"]["Row"];
 
-/** No framing without a call report; the rule lives in SQL (framing_is_open). */
+/** Framing opens with a call report or "Commencer en amont"; the rule lives in SQL (framing_is_open). */
 export async function isFramingOpen(projectId: string): Promise<boolean> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("framing_is_open", {
@@ -52,23 +52,6 @@ export type FramingData = {
   // Who a validation may be asked of: holders of "validate" (the director).
   validators: Member[];
 };
-
-/**
- * Whether the framing accepts entries yet: a call report exists, the stage
- * was already started, or "Commencer en amont" was used
- * (public.framing_is_open, supabase/migrations/20260927001001_call_agenda.sql).
- */
-export async function isFramingOpen(projectId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("framing_is_open", {
-    p_project_id: projectId,
-  });
-  if (error) {
-    console.error("[framing] isFramingOpen:", error.message);
-    return false;
-  }
-  return data ?? false;
-}
 
 /** Everything the framing page shows, read with the user's session (RLS). */
 export async function loadFraming(
