@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadNotification } from "@/lib/notifications/queries";
+import { isPushServiceUrl } from "@/lib/notifications/push-hosts";
 import type { NotificationItem } from "@/lib/notifications/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,7 +33,7 @@ export async function getNotification(
 }
 
 const subscriptionSchema = z.object({
-  endpoint: z.url().startsWith("https://").max(2000),
+  endpoint: z.url().max(2000).refine(isPushServiceUrl),
   keys: z.object({
     p256dh: z.string().min(1).max(500),
     auth: z.string().min(1).max(500),

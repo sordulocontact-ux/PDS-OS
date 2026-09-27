@@ -20,7 +20,8 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Sends the Web Push of the notifications the current user has just caused.
  * Runs with the actor's own session (claim_push_deliveries only returns what
- * they caused): no service role. Call it after a write, inside `after()`.
+ * they caused): no service role. PUSH_CLAIM_SECRET proves the call comes from
+ * this server, not from the browser. Call it after a write, inside `after()`.
  * Never throws: a failed push must not fail the action.
  */
 export async function sendPendingPushes(
@@ -28,11 +29,14 @@ export async function sendPendingPushes(
 ): Promise<void> {
   try {
     const publicKey = getPublicEnv().NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-    const { VAPID_PRIVATE_KEY, VAPID_SUBJECT } = getServerEnv();
+    const { VAPID_PRIVATE_KEY, VAPID_SUBJECT, PUSH_CLAIM_SECRET } =
+      getServerEnv();
     if (!publicKey || !VAPID_PRIVATE_KEY || !VAPID_SUBJECT) return;
+    if (!PUSH_CLAIM_SECRET) return;
 
     const { data: deliveries, error } = await supabase.rpc(
       "claim_push_deliveries",
+      { p_secret: PUSH_CLAIM_SECRET },
     );
     if (error) throw error;
     if (!deliveries?.length) return;
@@ -74,8 +78,9 @@ export async function sendPendingPushes(
           const status = (err as { statusCode?: number }).statusCode;
           // Gone: the browser unsubscribed or the subscription expired.
           if (status === 404 || status === 410) {
-            await supabase.rpc("forget_push_subscription", {
+            await supabase.rpc("drop_gone_push_subscription", {
               p_endpoint: d.endpoint,
+              p_secret: PUSH_CLAIM_SECRET,
             });
           } else {
             console.error("sendPendingPushes/send:", status ?? err);

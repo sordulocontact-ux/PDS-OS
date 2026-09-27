@@ -101,9 +101,12 @@
   --focus-ring: var(--po-ink-900);
   --overlay-scrim: rgba(0, 0, 0, 0.4);
   /* Fenêtre « verre » (DESIGN.md § 4) : page floutée sans voile, panneau
-     sombre translucide. Un seul flou, pour la page et pour le panneau. */
-  --glass-blur: 8px;
-  --surface-glass: rgb(24 24 24 / 0.9);
+     sombre translucide. Deux flous depuis le 27/09/2026 (demande de Sacha) :
+     la page derrière, léger (4 px, 8 px avant), et le panneau, plus fort. */
+  --glass-blur: 4px;
+  --glass-panel-blur: 24px;
+  /* 82 % (90 % jusqu'au 27/09/2026, jugé trop sombre par Sacha). */
+  --surface-glass: rgb(24 24 24 / 0.82);
 
   /* --- Graisses : medium au minimum, jamais de regular (DESIGN.md § 2) ---- */
   --fw-medium: 500;
@@ -283,10 +286,10 @@
 .surface-glass {
   color-scheme: dark;
   --text-primary: var(--po-white);
-  --text-secondary: var(--po-grey-300);
-  --text-tertiary: var(--po-grey-400);
+  --text-secondary: var(--po-grey-200);
+  --text-tertiary: var(--po-grey-300);
   --foreground: var(--po-white);
-  --muted-foreground: var(--po-grey-400);
+  --muted-foreground: var(--po-grey-300);
   --background: rgb(255 255 255 / 0.08);
   --card: rgb(255 255 255 / 0.06);
   --card-foreground: var(--po-white);
@@ -313,7 +316,7 @@
   --meter-track: rgb(255 255 255 / 0.12);
   --meter-fill: var(--po-grey-500);
   --meter-fill-over: var(--po-white);
-  --text-muted: var(--po-grey-500);
+  --text-muted: var(--po-grey-400);
   --text-link: var(--po-white);
   --border-default: rgb(255 255 255 / 0.1);
   --border-field: rgb(255 255 255 / 0.12);

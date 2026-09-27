@@ -8,8 +8,13 @@ import { cn } from "@/lib/utils";
 
 // The one modal of the app (docs/DESIGN.md § 4, « Modale »): the page
 // blurred, not darkened, behind a dark translucent panel whose tokens invert
-// what it holds (.surface-glass). No motion (§ 6). On phones it sits at the
-// bottom, full width, so its actions stay within thumb reach.
+// what it holds (.surface-glass). A short fade in and out, no movement, so
+// it stays under reduced motion. On phones it sits at the bottom, full
+// width, so its actions stay within thumb reach.
+
+// Enters in --duration-base, leaves a little faster.
+const fade =
+  "duration-[var(--duration-base)] ease-[var(--ease-out)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-[var(--duration-fast)]";
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -25,13 +30,20 @@ function DialogContent({
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
-        className="fixed inset-0 z-50 backdrop-blur-[var(--glass-blur)]"
+        className={cn(
+          // The blur itself rises with the panel: switched on at once, the
+          // whole page seemed to reload before the modal appeared.
+          "fixed inset-0 z-50 backdrop-blur-[var(--glass-blur)] transition-[opacity,backdrop-filter] data-starting-style:backdrop-blur-[0px] data-ending-style:backdrop-blur-[0px]",
+          fade,
+        )}
       />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
           "fixed inset-x-0 bottom-0 z-50 flex max-h-[calc(100dvh-2rem)] flex-col gap-5 overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-foreground shadow-elevation-3 outline-none sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-[calc(100%-2rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:p-6",
-          "surface-glass rounded-t-3xl bg-[var(--surface-glass)] backdrop-blur-[var(--glass-blur)] sm:rounded-3xl",
+          "transition-opacity",
+          fade,
+          "surface-glass rounded-t-3xl bg-[var(--surface-glass)] backdrop-blur-[var(--glass-panel-blur)] sm:rounded-3xl",
           className,
         )}
         {...props}

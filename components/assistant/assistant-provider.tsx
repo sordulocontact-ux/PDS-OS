@@ -28,6 +28,8 @@ type AssistantContextValue = {
   /** Drafts saved in this tab, by tool call: the card shows the link. */
   saved: Record<string, SavedLink>;
   review: (toolCallId: string, proposal: DraftProposal) => void;
+  /** A draft completed outside the side panel (a feedback sent from its card). */
+  markSaved: (toolCallId: string, link: SavedLink) => void;
   launcherOpen: boolean;
   setLauncherOpen: (open: boolean) => void;
 };
@@ -76,6 +78,9 @@ export function AssistantProvider({
         // Never two layers: the window gives way to the panel.
         setLauncherOpen(false);
         setReviewing({ toolCallId, proposal });
+      },
+      markSaved(toolCallId, link) {
+        setSaved((previous) => ({ ...previous, [toolCallId]: link }));
       },
     }),
     [chat, saved, launcherOpen],

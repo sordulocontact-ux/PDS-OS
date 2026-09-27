@@ -70,10 +70,11 @@ export function MobileNav({
             pendingMembers={pendingMembers}
             onNavigate={() => setOpen(false)}
           />
-          {/* A link of the footer (feedback) navigates too: close the drawer. */}
+          {/* The feedback button opens its window: close the drawer first. */}
           <div
             onClick={(event) => {
-              if ((event.target as HTMLElement).closest("a")) setOpen(false);
+              const target = event.target as HTMLElement;
+              if (target.closest("a, [data-close-nav]")) setOpen(false);
             }}
           >
             {footer}

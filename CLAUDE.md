@@ -119,7 +119,7 @@ But : une modification d'interface se fait **à un seul endroit**.
 puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas (dont `workStatusTone`,
 `deliverableStateTone`, `budgetStatusTone`, `validationTone`).
 
-**Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*` (dont `--surface-glass`), `--overlay-*` ·
+**Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*` (dont `--surface-glass`), `--overlay-*`, flous `--glass-blur` (page) et `--glass-panel-blur` (panneau) ·
 texte `--text-*` · bordures `--border-*`, `--hairline-*` · tons d'état `--tone-*` ·
 contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement `--space-*`,
 `--stack-*`, `--section-*`, `--page-*` · densité `--density-*` · rayons `--radius-*` ·
@@ -155,8 +155,15 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `ViewLink` | `ui/view-link.tsx` | lien vers une autre vue de la même page (section, onglet, étape, filtre), préchargé en entier : changement de vue sans chargement (`docs/ARCHITECTURE.md` § 3 bis) |
 | `Tooltip` | `ui/tooltip.tsx` | shadcn, base sur `@base-ui/react/tooltip` (bulle au survol/focus, ex. sidebar repliée) |
 | `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) ; classes d'un élément de navigation dans `nav-item.ts` |
-| `FeedbackLink` | `shell/feedback-link.tsx` | « Envoyer un retour » du bas de la navigation, joint la page courante |
-| `FeedbackForm`, `FeedbackList` | `feedback/` | page Retours : envoi (type, message, page d'origine), retours envoyés ou reçus |
+| `FeedbackProvider`, `useOpenFeedback` | `feedback/feedback-provider.tsx` | fenêtre de retour unique de l'app : ouverte par un bouton, la touche Impr. écran ou une capture collée |
+| `FeedbackNavButton` | `shell/feedback-nav-button.tsx` | « Envoyer un retour » du bas de la navigation (ferme le tiroir mobile, `data-close-nav`) |
+| `FeedbackForm`, `ScreenshotField` | `feedback/` | formulaire de la fenêtre de retour, capture jointe (aperçu, retirer, choisir un fichier) |
+| `FeedbackList`, `FeedbackItems`, `FeedbackCard`, `FeedbackTopics`, `TopicActions`, `FeedbackTriage`, `FeedbackViewToggle` | `feedback/` | page Retours : retours envoyés ; boîte du DG (sujets de PO, transmettre avec priorité, écarter, onglets) |
+| `TopicEditForm` | `feedback/topic-edit-form.tsx` | modale « Modifier le retour » du DG avant transmission (titre, résumé, type), réécriture proposée par PO |
+| `TopicReviewForm` | `feedback/topic-review-form.tsx` | confirmation d'une décision sur un sujet préparée par PO (priorité à choisir ou corriger) |
+| `FeedbackTopicDraftForm`, `FeedbackReviewDraftForm` | `assistant/feedback-draft-forms.tsx` | formulaires du DG ouverts depuis une proposition de PO (modifier, décider) |
+| `FeedbackDraftActions` | `assistant/feedback-draft-actions.tsx` | carte d'un retour préparé par PO : « Envoyer » tel quel ou « Modifier » dans la fenêtre de retour |
+| `ViewToggle` | `ui/view-toggle.tsx` | pastilles de vue dans l'URL (`?view=`), base de `ArchiveViewToggle` et `FeedbackViewToggle` |
 | `ProjectSidebar`, `ProjectSidebarMobile`, `WorkflowBreadcrumb` | `projects/` | sidebar contextuelle d'un projet lancé (12 sections) et son tiroir mobile ; fil d'Ariane des 7 étapes du métier, habillage seul (`docs/DESIGN.md` § 4) |
 | `ListCard`, `CardRow` | `ui/list-card.tsx` | carte de lignes liées (libellé gris, `count` facultatif), accueil et Travail ; `leading` = case à cocher hors du lien |
 | `CardGrid`, `CardGridSkeleton` | `ui/card-grid.tsx` | grille de `ListCard` (1 → 2 → 3 colonnes), accueil, Travail, travail d'un projet ; squelette annoncé |
@@ -248,7 +255,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   `role_permissions` (SQL) donne les droits, le code teste `can(access, "…")`.
   **Dans un projet lancé, seul son responsable écrit** (cadrage, calls, sortie) ; le DG lit
   et valide (`is_project_owner` en SQL, `canEditProject` / `useCanEditProject` à l'écran).
-  Une étape validée est **définitive** (jamais rouverte).
+  Une étape validée est **définitive** (jamais rouverte) ; un Cadrage soumis ou validé est
+  figé en RLS (`framing_is_editable`), pas seulement dans le code.
   **Visibilité** : DG tous les projets, chef de projet les siens (+ transmis en attente),
   directeur créatif ceux de son équipe créative (`can_see_project`, `project_creatives`).
   Le DG crée un compte (email, mot de passe, poste) sur `/app/members/new`, sans service
@@ -266,6 +274,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   session. Chiffres, dates, ISRC, emails : recopiés de ce que l'utilisateur a écrit, vérifiés
   et lus par le code (`lib/assistant/verbatim.ts`). Projet modifiable tant qu'il n'est pas
   lancé (`update_project`), master par `update_master` (`docs/ASSISTANT.md` § 3 bis).
+  Retours : `propose_feedback` (tout membre) ; pour le DG `find_feedback`,
+  `propose_feedback_edit`, `propose_feedback_review` : PO prépare, le DG confirme.
 - **Conversation PO** : une question de l'accueil ouvre `/app/assistant` (conversation de
   l'onglet, titre = première question, « + » = nouvelle), `docs/ASSISTANT.md` § 2.
 - **Espace Espace** : ouvre PO depuis toute page de l'app dans une **nouvelle
@@ -310,7 +320,8 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
 - **Notifications** : table `notifications` écrite par triggers (jamais par le code),
   cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
-  notifie, sans service role (`docs/ARCHITECTURE.md` § 8 bis).
+  notifie, sans service role ; la réclamation exige `PUSH_CLAIM_SECRET` (= secret Vault
+  `push_claim_secret`), endpoints limités aux services de push connus (`docs/ARCHITECTURE.md` § 8 bis).
 - **Stratégie** : `/strategy`, `lib/strategy/` ; **inaccessible avant validation du Cadrage**
   (`isFramingValidated`, `StrategyNeedsFraming`, grisée dans le fil d'Ariane) ; démarre après validation du Brief, écrite
   par le responsable **seulement en cours** (`strategy_is_editable`), figée une fois soumise.
@@ -348,10 +359,15 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   (`archive_records`), refusé si encore utilisé (projet lancé, master d'un projet actif,
   artiste d'un master actif) ; restauration depuis « Archivés » des listes. `archived_at`
   écrit par `set_*_archived` (SQL) uniquement ; menu « ⋯ » Modifier / Archiver sur chaque
-  ligne et en-tête de fiche (`docs/ARCHITECTURE.md` § 2 quater). Membres : « Suspendre ».
-- **Retours** `/app/feedback` : tout membre envoie un retour (bug, idée, autre) avec la
-  page d'origine ; table `feedback` jamais modifiée, lue par son auteur et par qui détient
-  `administer` (`docs/ARCHITECTURE.md` § 8 quater).
+  ligne et en-tête de fiche (`docs/ARCHITECTURE.md` § 2 quater). Membres : « Suspendre », « Modifier » (nom et poste) dans la modale.
+- **Retours** `/app/feedback` : l'équipe écrit au DG depuis la fenêtre de retour (bouton,
+  touche Impr. écran ou capture collée ⌘V, capture jointe dans `feedback-screenshots`) ;
+  PO regroupe les doublons en sujets à l'ouverture de la page par le DG ; le DG seul
+  (`read_feedback`) transmet un sujet avec une priorité ou l'écarte
+  (`review_feedback_topic`), après l'avoir modifié s'il veut, seul ou avec PO qui propose
+  (`edit_feedback_topic`) ; un sujet transmis part sur **Notion** (`lib/integrations/notion.ts`,
+  `NOTION_TOKEN` + `NOTION_FEEDBACK_DATABASE_ID`, facultatifs) ; les retours d'origine restent consultables
+  (`docs/ARCHITECTURE.md` § 8 quater).
 - **Labo** `/labo` : banc de test local (404 en production), faux call `docs/labo/`.
 
 ---
@@ -387,7 +403,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 303 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 329 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -440,7 +456,8 @@ Au-delà des six étapes :
       Activité
 - [x] Menu « ⋯ » par ligne (artistes, masters, projets, membres) : modifier dans la
       modale, archiver / restaurer (DG, refusé si utilisé), filtre « Archivés »
-- [x] Page **Retours** : envoi d'un retour sur l'app depuis toute page, retours reçus (DG)
+- [x] **Retours** : fenêtre de retour partout (capture collée, Impr. écran), dédoublonnage
+      par PO, le DG modifie (seul ou avec PO), transmet avec une priorité ou écarte
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 
@@ -456,5 +473,6 @@ Décisions en attente (avec Ibé / le client) :
 - Quel projet fait foi : `po` d'Ibé (7 briques, sans IA) ou PDS OS ; qui s'appelle « PO »
 - § 10 du contexte : contenu de « Défense », qui valide quoi, 7 ou 5 étapes
 - Offre payante Mistral / Groq avant toute donnée réelle ; clé Odesli ou smartlink maison
-- Mise en production : réactiver la confirmation d'email, SMTP réel, `CRON_SECRET` et service role sur Vercel, durée max
+- Mise en production : réactiver la confirmation d'email, SMTP réel, `CRON_SECRET` et service role sur Vercel,
+  `PUSH_CLAIM_SECRET` + secret Vault `push_claim_secret` (même valeur), durée max
   des fonctions (300 s) selon l'offre Vercel

@@ -1,18 +1,15 @@
 "use client";
 
-import {
-  IconLock,
-  IconPenWriting2,
-  IconUser,
-  IconXmark,
-} from "nucleo-sharp-essential";
+import { IconLock, IconPenWriting2, IconXmark } from "nucleo-sharp-essential";
 import { useActionState, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
+import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { fr } from "@/lib/i18n/fr";
 import { memberAction } from "@/lib/members/actions";
@@ -24,13 +21,15 @@ import {
 } from "@/lib/members/types";
 
 import { CopyLinkButton } from "./copy-link-button";
+import { MemberEditForm } from "./member-edit-form";
 
-type Mode = "idle" | "approve" | "reject" | "suspend" | "rename" | "role";
+type Mode = "idle" | "approve" | "reject" | "suspend";
 
 // Actions of one team row. One server action, an "intent" field per form.
 // The decision waiting on the row stays a visible button (approve,
 // reactivate, copy the link); editing and removing sit in the "⋯" menu, as
-// on the other lists. Reason and name forms open inline, without a modal.
+// on the other lists. "Modifier" (name, position) opens the modal; a reason
+// or a position to approve with opens inline.
 export function MemberRowActions({
   membership,
   isSelf,
@@ -78,22 +77,15 @@ export function MemberRowActions({
     startTransition(() => action(data));
   };
 
+  const [editing, setEditing] = useState(false);
   const menu: RowAction[] = [
     {
-      key: "rename",
-      label: a.editName,
+      key: "edit",
+      label: fr.records.menu.edit,
       icon: IconPenWriting2,
-      onSelect: () => setMode("rename"),
+      onSelect: () => setEditing(true),
     },
   ];
-  if ((status === "invited" || status === "approved") && !isSelf) {
-    menu.push({
-      key: "role",
-      label: a.editRole,
-      icon: IconUser,
-      onSelect: () => setMode("role"),
-    });
-  }
   if (status === "pending") {
     menu.push({
       key: "reject",
@@ -185,13 +177,13 @@ export function MemberRowActions({
         </form>
       )}
 
-      {(mode === "role" || mode === "approve") && (
+      {mode === "approve" && (
         <form
           action={action}
           noValidate
           className="flex w-full max-w-xs flex-col gap-2 text-left"
         >
-          {hidden(mode === "approve" ? "approve" : "set_role")}
+          {hidden("approve")}
           <OptionSelect
             id={`role-${id}`}
             name="role"
@@ -213,55 +205,7 @@ export function MemberRowActions({
               {c.cancel}
             </Button>
             <SubmitButton size="default" pendingLabel={c.saving}>
-              {mode === "approve" ? a.approve : c.save}
-            </SubmitButton>
-          </div>
-        </form>
-      )}
-
-      {mode === "rename" && (
-        <form
-          action={action}
-          noValidate
-          className="flex w-full max-w-xs flex-col gap-2 text-left"
-        >
-          <input type="hidden" name="intent" value="rename" />
-          <input type="hidden" name="personId" value={person.id} />
-          <Field
-            name="firstName"
-            id={`firstName-${id}`}
-            label={fr.auth.fields.firstName}
-            defaultValue={retainedMemberValue(
-              state,
-              "firstName",
-              person.firstName,
-            )}
-            required
-            autoFocus
-            error={fieldErrors?.firstName}
-          />
-          <Field
-            name="lastName"
-            id={`lastName-${id}`}
-            label={fr.auth.fields.lastName}
-            defaultValue={retainedMemberValue(
-              state,
-              "lastName",
-              person.lastName ?? "",
-            )}
-            error={fieldErrors?.lastName}
-          />
-          <div className="flex justify-end gap-1.5">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setMode("idle")}
-              disabled={pending}
-            >
-              {c.cancel}
-            </Button>
-            <SubmitButton size="default" pendingLabel={c.saving}>
-              {c.save}
+              {a.approve}
             </SubmitButton>
           </div>
         </form>
@@ -270,6 +214,23 @@ export function MemberRowActions({
       {state.status === "error" && !state.fieldErrors && (
         <FormMessage kind="error">{state.error}</FormMessage>
       )}
+
+      <FormDialog
+        open={editing}
+        onOpenChange={setEditing}
+        title={t.edit.title}
+        description={t.edit.description}
+        closeLabel={fr.records.edit.close}
+      >
+        <MemberEditForm
+          membership={membership}
+          isSelf={isSelf}
+          onDone={(saved) => {
+            setEditing(false);
+            if (saved) toast.success(t.edit.saved);
+          }}
+        />
+      </FormDialog>
     </div>
   );
 }

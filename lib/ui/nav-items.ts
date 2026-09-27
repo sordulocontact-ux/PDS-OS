@@ -3,6 +3,7 @@ import {
   IconFolderOpen,
   IconHouse2,
   IconMicrophone,
+  IconMsgs,
   IconPhone,
   IconUsers2,
 } from "nucleo-sharp-essential";
@@ -12,7 +13,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
 // The 8 items of the main sidebar (Figma "Devis Sordulo", node 120:47 and
-// 120:74): one source, used full-width and icon-only. "Calendrier" and
+// 120:74), plus "Retours": one source, used full-width and icon-only. "Calendrier" and
 // "Calls" have no organization-wide page yet (calls live inside a
 // project, routes.projectCalls) — kept visible, disabled, per docs/DESIGN.md § 4.
 export type NavItem = {
@@ -43,4 +44,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: IconUsers2,
     adminOnly: true,
   },
+  // Not in the Figma: the feedback page (the director's inbox, everyone
+  // else's own feedback). Sending opens the feedback window instead.
+  { href: routes.feedback, label: fr.shell.nav.feedback, icon: IconMsgs },
 ] as const;

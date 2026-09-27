@@ -68,6 +68,14 @@ export const assistant = {
     loadFailed: "Le formulaire n'a pas pu être préparé. Réessayez.",
     close: "Fermer",
     empty: "Aucune valeur proposée : complétez le formulaire.",
+    feedback: {
+      send: "Envoyer",
+      sending: "Envoi…",
+      edit: "Modifier",
+      sent: "Envoyé",
+      hint: "Envoyé au directeur général tel quel, ou modifiez-le avant.",
+      failed: "Le retour n'a pas pu être envoyé. Réessayez ou modifiez-le.",
+    },
     titles: {
       createArtist: (name: string) =>
         name ? `Nouvel artiste : ${name}` : "Nouvel artiste",
@@ -78,6 +86,15 @@ export const assistant = {
       createProject: (title: string) =>
         title ? `Nouveau projet : ${title}` : "Nouveau projet",
       updateProject: (title: string) => `Modifier le projet ${title}`,
+      feedback: (kind: string | null) =>
+        kind ? `Nouveau retour : ${kind}` : "Nouveau retour",
+      editTopic: (title: string) => `Modifier le retour « ${title} »`,
+      review: {
+        send: (title: string) => `Transmettre « ${title} »`,
+        prioritize: (title: string) => `Changer la priorité de « ${title} »`,
+        dismiss: (title: string) => `Écarter « ${title} »`,
+        reopen: (title: string) => `Remettre « ${title} » à examiner`,
+      },
     },
     sheet: {
       artist: "Relisez la fiche, corrigez si besoin, puis enregistrez.",
@@ -89,10 +106,21 @@ export const assistant = {
           : `Relisez les ${count} contacts proposés, un par un.`,
       master: "Relisez le master, corrigez si besoin, puis enregistrez.",
       project: "Relisez le projet, corrigez si besoin, puis enregistrez.",
+      // Not opened here: a feedback is sent from its card or the feedback window.
+      feedback: "Relisez le retour, puis envoyez-le au directeur général.",
+      feedbackTopic:
+        "Relisez le texte que recevra l'équipe qui construit PDS OS, puis enregistrez.",
+      feedbackReview: "Vérifiez la décision, puis confirmez.",
     },
     labels: {
       contact: (role: string) => `Contact (${role})`,
       credits: "Artistes",
+      feedbackKind: "Type",
+      message: "Message",
+      page: "Page",
+      topicTitle: "Titre",
+      summary: "Résumé",
+      priority: "Priorité",
     },
     // Facts for the model and the "Données utilisées" list.
     ready: (title: string) =>
@@ -117,6 +145,18 @@ export const assistant = {
       `Pays « ${country} » non reconnu : choisissez-le dans le formulaire.`,
     notSaid: (label: string) =>
       `${label} non repris : il doit figurer tel quel dans votre message (avec l'année pour une date).`,
+    forbiddenFeedback:
+      "Seul le directeur général lit et traite les retours de l'équipe.",
+    topicNotFound:
+      "Sujet de retour introuvable : appelez find_feedback pour obtenir son topicId.",
+    topicSent: (title: string) =>
+      `Le sujet « ${title} » est déjà transmis : son texte ne se modifie plus, seule sa priorité peut changer.`,
+    invalidReview: (title: string, status: string) =>
+      `Cette décision n'est pas possible : le sujet « ${title} » est ${status}.`,
+    rewriteFailed:
+      "La réécriture n'a pas pu être préparée : modifiez le texte dans le formulaire.",
+    priorityToChoose:
+      "Priorité non reprise : elle doit figurer dans votre message (haute, normale ou basse). Choisissez-la dans le formulaire.",
     teamByTransmission:
       "L'équipe d'un projet déjà créé change par la transmission, pas par cette proposition.",
   },
@@ -136,6 +176,8 @@ export const assistant = {
     artists: "la liste des artistes",
     masters: "la liste des masters",
     projects: "la liste des projets",
+    feedback:
+      "la page Retours (les retours de l'équipe sur l'application PDS OS)",
     work: "sa page Travail (ce qui l'attend, projet par projet)",
   },
   launcher: {

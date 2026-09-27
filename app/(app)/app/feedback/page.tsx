@@ -1,39 +1,44 @@
-import { FeedbackForm } from "@/components/feedback/feedback-form";
 import { FeedbackList } from "@/components/feedback/feedback-list";
 import { FeedbackTopics } from "@/components/feedback/feedback-topics";
 import { FeedbackTriage } from "@/components/feedback/feedback-triage";
-import { FeedbackViewToggle } from "@/components/feedback/feedback-view-toggle";
+import {
+  FeedbackViewToggle,
+  type FeedbackView,
+} from "@/components/feedback/feedback-view-toggle";
+import { NewFeedbackButton } from "@/components/feedback/new-feedback-button";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
-import { Card, CardContent } from "@/components/ui/card";
 import { can, type Access } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { listMyFeedback, loadFeedbackInbox } from "@/lib/feedback/queries";
-import { isAppPath } from "@/lib/feedback/types";
+import { isTopicStatus } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
+import { notionConfigured } from "@/lib/integrations/notion";
 
-// Feedback about the app, open to every member: the form, then what was
-// already sent. Everyone reads their own; the director (read_feedback)
-// reads everyone's, grouped by PO into topics or as sent (?view=all).
+// Feedback about the app. Everyone sends through the feedback window and
+// reads their own here; the director (read_feedback) reviews the team's,
+// grouped by PO, and sends what matters with a priority.
 export default async function FeedbackPage({
   searchParams,
 }: PageProps<"/app/feedback">) {
   const access = await requireApproved();
   const t = fr.feedback;
-  const { from, view } = await searchParams;
-  const pagePath = typeof from === "string" && isAppPath(from) ? from : null;
+  const { view } = await searchParams;
+  const reader = can(access, "read_feedback");
 
   return (
-    <PageContainer className="max-w-2xl">
-      <PageHeader title={t.title} description={t.subtitle} />
-      <Card>
-        <CardContent>
-          <FeedbackForm pagePath={pagePath} />
-        </CardContent>
-      </Card>
-      {can(access, "read_feedback") ? (
-        <Received access={access} all={view === "all"} />
+    <PageContainer className="max-w-3xl">
+      <PageHeader
+        title={t.title}
+        description={reader ? t.subtitleReader : t.subtitle}
+        action={<NewFeedbackButton />}
+      />
+      {reader ? (
+        <Inbox
+          access={access}
+          view={view === "all" || isTopicStatus(view) ? view : "new"}
+        />
       ) : (
         <Mine access={access} />
       )}
@@ -52,31 +57,48 @@ async function Mine({ access }: { access: Access }) {
   );
 }
 
-async function Received({ access, all }: { access: Access; all: boolean }) {
+async function Inbox({ access, view }: { access: Access; view: FeedbackView }) {
+  const t = fr.feedback;
   const inbox = access.personId
     ? await loadFeedbackInbox(access.personId)
-    : { error: true, topics: [], unfiled: [], all: [] };
-  const topics = (
-    <FeedbackTopics
-      topics={inbox.topics}
-      unfiled={inbox.unfiled}
-      error={inbox.error}
-    />
-  );
+    : {
+        error: true,
+        topics: { new: [], sent: [], dismissed: [] },
+        unfiled: [],
+        all: [],
+      };
+  const counts = {
+    new: inbox.topics.new.length + inbox.unfiled.length,
+    sent: inbox.topics.sent.length,
+    dismissed: inbox.topics.dismissed.length,
+  };
 
-  return (
-    <PageSection
-      id="feedback-received"
-      title={fr.feedback.received}
-      action={<FeedbackViewToggle all={all} />}
-    >
-      {all ? (
-        <FeedbackList items={inbox.all} error={inbox.error} received />
-      ) : inbox.unfiled.length > 0 ? (
+  let content: React.ReactNode;
+  if (view === "all") {
+    content = <FeedbackList items={inbox.all} error={inbox.error} received />;
+  } else {
+    const topics = (
+      <FeedbackTopics
+        topics={inbox.topics[view]}
+        unfiled={view === "new" ? inbox.unfiled : []}
+        error={inbox.error}
+        emptyBody={t.emptyView[view]}
+        notion={notionConfigured()}
+      />
+    );
+    // New feedback may join a topic of any status: PO files it first.
+    content =
+      inbox.unfiled.length > 0 ? (
         <FeedbackTriage count={inbox.unfiled.length}>{topics}</FeedbackTriage>
       ) : (
         topics
-      )}
+      );
+  }
+
+  return (
+    <PageSection id="feedback-received" title={t.received}>
+      <FeedbackViewToggle view={view} counts={counts} />
+      {content}
     </PageSection>
   );
 }

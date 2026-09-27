@@ -10,11 +10,13 @@ import {
 import { activityLine, formatDay, lateness } from "@/lib/assistant/facts";
 import { projectStatus } from "@/lib/assistant/project-status";
 import { proposeArtistTool } from "@/lib/assistant/propose/artist";
+import { proposeFeedbackTool } from "@/lib/assistant/propose/feedback";
+import { feedbackReviewTools } from "@/lib/assistant/propose/feedback-review";
 import { proposeMasterTool } from "@/lib/assistant/propose/master";
 import { proposeProjectTool } from "@/lib/assistant/propose/project";
 import { uniqueSources, type Source } from "@/lib/assistant/sources";
 import { verbatimFrom } from "@/lib/assistant/verbatim";
-import type { Access } from "@/lib/auth/access";
+import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadMyTodo } from "@/lib/insights/todo";
@@ -27,9 +29,14 @@ import { createClient } from "@/lib/supabase/server";
  * the propose_* functions return drafts that a person reviews and saves
  * (§ 3 bis). Every result carries `sources`, rendered under the answer.
  * `userTexts`: what the user typed, the only place numbers and dates of a
- * draft may come from.
+ * draft may come from. `pagePath`: the page PO was opened from, joined to a
+ * feedback draft. The director's feedback tools exist only for read_feedback.
  */
-export function createAssistantTools(access: Access, userTexts: string[]) {
+export function createAssistantTools(
+  access: Access,
+  userTexts: string[],
+  pagePath: string | null = null,
+) {
   const context = { access, verbatim: verbatimFrom(userTexts) };
   return {
     find_artists: findArtistsTool(),
@@ -37,6 +44,8 @@ export function createAssistantTools(access: Access, userTexts: string[]) {
     propose_artist: proposeArtistTool(context),
     propose_master: proposeMasterTool(context),
     propose_project: proposeProjectTool(context),
+    propose_feedback: proposeFeedbackTool({ ...context, pagePath }),
+    ...(can(access, "read_feedback") ? feedbackReviewTools(context) : {}),
 
     find_projects: tool({
       description:

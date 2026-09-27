@@ -4,6 +4,10 @@ import { useState } from "react";
 
 import { ArtistDraftFlow } from "@/components/assistant/artist-draft-flow";
 import {
+  FeedbackReviewDraftForm,
+  FeedbackTopicDraftForm,
+} from "@/components/assistant/feedback-draft-forms";
+import {
   MasterDraftForm,
   ProjectDraftForm,
   type SavedLink,
@@ -55,6 +59,20 @@ export default function DraftSheetBody({
         )}
         {draft.kind === "project" && (
           <ProjectDraftForm
+            draft={draft}
+            onSaved={onSaved}
+            onCancel={onCancel}
+          />
+        )}
+        {draft.kind === "feedbackTopic" && (
+          <FeedbackTopicDraftForm
+            draft={draft}
+            onSaved={onSaved}
+            onCancel={onCancel}
+          />
+        )}
+        {draft.kind === "feedbackReview" && (
+          <FeedbackReviewDraftForm
             draft={draft}
             onSaved={onSaved}
             onCancel={onCancel}

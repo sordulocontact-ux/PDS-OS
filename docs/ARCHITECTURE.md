@@ -52,6 +52,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
+| `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 
 Principes :
 
@@ -165,6 +166,12 @@ Principes :
 - **Membres** : pas d'archivage à part — « Suspendre » (déjà réversible, motif obligatoire)
   joue ce rôle, et n'est **pas** bloqué quand la personne a des projets : couper un accès
   doit toujours rester possible.
+- **Modifier un membre** (« ⋯ » Modifier de la page Équipe) : prénom, nom et poste dans
+  la modale (`FormDialog`, `app/(app)/app/members/member-edit-form.tsx`), une seule
+  intention `edit` de `memberAction`. Le poste ne se change que pour une invitation ou un
+  accès actif, jamais le sien ; sinon la modale l'affiche avec la raison (se choisit à
+  l'approbation, ou réactiver d'abord). Deux mises à jour (`people` puis `memberships`),
+  chacune bornée par ses droits colonne.
 - **Menu « ⋯ » par ligne** (`RowActions`, `components/archive/record-actions.tsx`) :
   Modifier ouvre le **vrai formulaire** dans la modale du design system (`FormDialog`), chargé à
   l'ouverture (`lib/catalog/edit-form-actions.ts`, `lib/projects/edit-form-actions.ts`) ;
@@ -460,6 +467,17 @@ poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, R
   action qui notifie (transmission, réponse, validation, tâche), exécuté dans `after()`
   avec la session de l'auteur. Clés VAPID facultatives : sans elles, la cloche marche,
   seules les notifications système sont coupées. iPhone : seulement app installée (PWA).
+- **Secret de réclamation** : `claim_push_deliveries(p_secret)` et
+  `drop_gone_push_subscription` (abonnement mort, 404/410) exigent `PUSH_CLAIM_SECRET`,
+  comparé au secret Vault `push_claim_secret`. Sans lui, n'importe quel membre appelait la
+  RPC depuis le navigateur et lisait les abonnements de ses collègues (endpoint + clés),
+  puis pouvait les supprimer ou se les approprier. `forget_push_subscription` ne supprime
+  que ses propres navigateurs. Endpoints limités aux services de push connus (FCM,
+  Mozilla, Apple, Windows : `lib/notifications/push-hosts.ts` et la même liste en SQL),
+  sinon le serveur POSTerait vers n'importe quel hôte. Local : secret posé par
+  `supabase/seed.sql`. **Production** : une fois, dans l'éditeur SQL,
+  `select vault.create_secret('<openssl rand -hex 32>', 'push_claim_secret');` et la même
+  valeur dans `PUSH_CLAIM_SECRET` sur Vercel — sans cela, aucun push ne part (échec fermé).
 - Son : onglet visible → carillon synthétisé (`lib/notifications/chime.ts`, muet tant que
   la page n'a reçu aucun clic) ; onglet caché → notification système, son géré par l'OS
   (macOS : Réglages → Notifications → Google Chrome). Un push accepté (`201`) mais
@@ -495,17 +513,73 @@ ou total est calculé par le code, jamais par PO.
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
-- Page ouverte à tout membre, par « Envoyer un retour » dans le bas de la navigation
-  (`FeedbackLink`, au-dessus de « Se déconnecter »). Le lien porte la page d'où l'on
-  vient (`?from=`) : elle est jointe au retour, seul un chemin `/app…` est gardé (code et
-  contrainte SQL), une valeur inconnue est ignorée sans refuser l'envoi.
-- Table `feedback` : type fermé (`bug`, `idea`, `other`), message (4 000 caractères au
-  plus), page facultative, auteur posé par trigger (`set_created_by`). **Jamais modifiée
-  ni supprimée** : aucun droit `update` / `delete`.
-- Lecture (RLS) : l'auteur voit les siens, qui détient `administer` voit tous ceux de
-  l'organisation (« Retours reçus »). C'est là que l'équipe qui construit l'outil les lit.
-- Non fait, volontairement : pas de statut « traité », pas de notification, pas de
-  capture d'écran ; à ajouter si le besoin se confirme.
+Circuit : l'équipe écrit au **DG**, PO regroupe les doublons, le DG choisit ce qui est
+utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
+
+- **Fenêtre de retour** (`FeedbackProvider`, une pour toute l'app) : « Envoyer un retour »
+  en bas de la navigation, « Nouveau retour » sur la page. Type fermé (`bug`, `idea`,
+  `other`), message (4 000 caractères), page d'origine jointe d'office (chemin `/app…`
+  seulement), capture facultative. Le formulaire est chargé à la première ouverture.
+- **Capture d'écran** : un navigateur ne voit pas une capture système (⌘⇧3/4/5 sont pris
+  par macOS). La fenêtre s'ouvre donc sur ce qu'on peut voir : la touche **Impr. écran**
+  (Windows), et une image **collée** (⌘V / Ctrl+V) n'importe où dans l'app, qu'elle joint.
+  Une zone peut s'y soustraire avec `data-paste-ignore`. L'image (PNG, JPEG, WebP, 5 Mo)
+  part du navigateur vers le bucket privé `feedback-screenshots`, dans
+  `<organisation>/<personne>/<uuid>.<ext>` (RLS : chacun son dossier ; lecture par
+  l'auteur et le DG), avant l'envoi du retour ; un trigger refuse un chemin qui n'est pas
+  celui de l'auteur. Affichée par URL signée (1 h).
+- Table `feedback` : auteur posé par trigger, **jamais modifiée ni supprimée** (seul
+  `topic_id` est posé par `file_feedback`).
+- **Lecture** : chacun voit les siens ; la permission **`read_feedback`** (DG seul,
+  `role_permissions`) voit tous ceux de l'organisation et décide.
+- **Tri par PO** (`lib/feedback/triage.ts`) : à l'ouverture de la page par le DG, s'il y a
+  des retours non classés, `FeedbackTriage` appelle `triageFeedback` (session du DG,
+  jamais le service role) et affiche « PO vérifie… » à la place de la liste. Pour chaque
+  retour, PO reçoit le message et les sujets ouverts (données, jamais consignes) et dit
+  s'il rejoint un sujet (identifiant court vérifié par le code, sinon nouveau sujet) ;
+  il écrit le titre et le résumé, jamais de compteur, de date ni de priorité. En cas
+  d'échec, les retours restent « En attente de tri », visibles, avec « Réessayer ».
+- **Sujets** `feedback_topics` : `new` (à examiner), `sent` (transmis, priorité
+  `high` / `normal` / `low` obligatoire, date et auteur de la transmission), `dismissed`
+  (écarté). Changements par `review_feedback_topic` seulement : transmettre, changer la
+  priorité, écarter, remettre à examiner. Un retour qui rejoint un sujet écarté le remet à
+  examiner ; un sujet transmis affiche « N nouveaux retours depuis la transmission »
+  (calculé par le code).
+- La page est dans la navigation principale (« Retours », hors Figma, pour tous) : le DG y
+  trouve sa boîte, les autres leurs retours envoyés.
+- **Modifier avant de transmettre** (sujet à examiner ou écarté, jamais transmis) : le DG
+  corrige titre, résumé et type dans la modale « Modifier le retour »
+  (`edit_feedback_topic`, qui pose `edited_at` / `edited_by`). « Demander à PO de
+  réécrire » : PO repart des retours d'origine et d'une consigne facultative du DG, et sa
+  proposition remplit les champs ; rien n'est écrit avant « Enregistrer » par le DG. Un
+  sujet modifié affiche « Modifié le … par … » au lieu de « résumé par PO », et PO ne
+  réécrit plus son résumé quand un nouveau retour le rejoint (`file_feedback`). Le texte
+  de PO est nettoyé de toute mise en forme par le code (`plainText`).
+- Onglets du DG (`?view=`) : À examiner, Transmis (par priorité puis date), Écartés,
+  **Tous les retours** tels qu'envoyés, puisque PO peut se tromper ; chaque sujet déplie
+  aussi ses retours d'origine.
+- **Par PO** (`docs/ASSISTANT.md` § 3 bis) : tout membre dit « fais-moi ce retour… » et PO
+  prépare le retour, envoyé depuis sa carte tel quel (« Envoyer ») ou après retouche dans
+  la fenêtre de retour (« Modifier », `FeedbackDraftActions`) ; la page d'ouverture est
+  jointe seulement depuis la fenêtre Espace Espace, qui la connaît ; le DG fait tout le reste par PO : lire, modifier, transmettre,
+  écarter. Chaque proposition s'ouvre dans le vrai formulaire (fenêtre de retour,
+  « Modifier le retour », confirmation de décision) et l'humain enregistre.
+- **Où arrivent les retours transmis : Notion** (`lib/integrations/notion.ts`, seul point
+  d'entrée, `fetch` sans dépendance). À « Transmettre », le serveur crée une page dans la
+  base `NOTION_FEEDBACK_DATABASE_ID` avec le jeton d'intégration interne `NOTION_TOKEN`
+  (serveur seulement), puis la met à jour à chaque changement de priorité ou avec
+  « Mettre à jour sur Notion » (propriétés, et retours arrivés depuis ajoutés au corps).
+  Propriétés attendues, nom et type exacts : **Titre** (titre), **Résumé** (texte),
+  **Type** (sélection), **Priorité** (sélection), **Retours** (nombre), **Transmis par**
+  (texte), **Transmis le** (date), **Lien** (URL). Le lien de la page et la date de
+  dernière mise à jour sont écrits par `record_feedback_notion` (session du DG). Un échec
+  Notion n'annule jamais la transmission : le sujet affiche « Pas encore sur Notion » et
+  « Envoyer sur Notion ». Sans les deux variables, rien ne part : onglet « Transmis »
+  seulement. Mise en place : intégration interne sur notion.so/my-integrations, base
+  partagée avec elle (« … » → Connexions), variables dans `.env.local` / Vercel.
+- `lib/ai/llm.ts` : si ministral renvoie sa réponse emballée dans la forme du schéma
+  (`{"type":"object","properties":{…}}`), le contenu de `properties` est validé à la
+  place (vu sur le tri, 27/09/2026).
 
 ## 9. Design (`docs/DESIGN.md`)
 
@@ -542,12 +616,20 @@ transcription, compte rendu, préparation de call, détection ISRC. Faux call :
 Voir `.env.example` (commenté). Schémas zod : `lib/env.ts` (serveur) et
 `lib/env-public.ts` (`NEXT_PUBLIC_*`). Clés requises : Supabase (URL, anon), clé du
 fournisseur LLM choisi, clé Groq ; optionnelles : `LLM_MODEL`, `TRANSCRIPTION_MODEL`,
-`ODESLI_API_KEY`, `CRON_SECRET` (≥ 32 car.), `SUPABASE_SERVICE_ROLE_KEY` (cron).
+`ODESLI_API_KEY`, `CRON_SECRET` (≥ 32 car.), `SUPABASE_SERVICE_ROLE_KEY` (cron),
+clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vault, § 8 bis).
 
 ---
 
 ## 12. Pièges rencontrés (à ne pas redécouvrir)
 
+- **Une sous-requête dans une policy subit le RLS de l'appelant.** Écrire « lisible s'il
+  n'existe pas de ligne interdite » ne protège rien : pour qui ne voit pas ces lignes, le
+  `not exists` est toujours vrai (fuite des contrats `artist-files`, corrigée en
+  `…001101`). Toujours écrire la condition en positif (« il existe une ligne que je vois »).
+- **Un état figé se garde en RLS, pas seulement dans l'action.** Un client authentifié
+  appelle PostgREST directement : le Cadrage validé restait modifiable tant que seul
+  `lib/framing/` refusait (`framing_is_editable`, `…001101`).
 - Docker Desktop est installé mais son CLI n'est pas dans le PATH : préfixer
   `PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"` pour `supabase`.
 - Une seule stack Supabase à la fois (le repo `po` d'Ibé utilise les mêmes ports).

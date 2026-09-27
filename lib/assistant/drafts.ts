@@ -4,6 +4,11 @@
 
 import type { Credit } from "@/lib/catalog/types";
 import type { ContactRole } from "@/lib/catalog/contacts";
+import type {
+  FeedbackKind,
+  FeedbackPriority,
+  TopicAction,
+} from "@/lib/feedback/types";
 import type { Priority, ProjectType } from "@/lib/projects/types";
 
 /** One line of the proposal card, written by code. */
@@ -65,7 +70,40 @@ export type ProjectDraft = {
   };
 };
 
-export type Draft = ArtistDraft | MasterDraft | ProjectDraft;
+/** A feedback about the app, sent to the director (any member). */
+export type FeedbackDraft = {
+  kind: "feedback";
+  values: {
+    feedbackKind: FeedbackKind;
+    message: string;
+    // The page PO was opened from, when it is a page of the app.
+    pagePath: string | null;
+  };
+};
+
+/** The director's edit of a topic before sending it. */
+export type FeedbackTopicDraft = {
+  kind: "feedbackTopic";
+  topicId: string;
+  values: { feedbackKind: FeedbackKind; title: string; summary: string };
+};
+
+/** The director's decision on a topic; the priority only when the user said it. */
+export type FeedbackReviewDraft = {
+  kind: "feedbackReview";
+  topicId: string;
+  topicTitle: string;
+  action: TopicAction;
+  priority: FeedbackPriority | null;
+};
+
+export type Draft =
+  | ArtistDraft
+  | MasterDraft
+  | ProjectDraft
+  | FeedbackDraft
+  | FeedbackTopicDraft
+  | FeedbackReviewDraft;
 
 export type DraftProposal = {
   draft: Draft;
@@ -75,7 +113,14 @@ export type DraftProposal = {
   warnings: string[];
 };
 
-const KINDS = new Set(["artist", "master", "project"]);
+const KINDS = new Set([
+  "artist",
+  "master",
+  "project",
+  "feedback",
+  "feedbackTopic",
+  "feedbackReview",
+]);
 
 /** Tool output → proposal. The output is ours, the check only guards the UI. */
 export function proposalOf(output: unknown): DraftProposal | null {

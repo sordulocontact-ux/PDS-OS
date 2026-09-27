@@ -3,16 +3,20 @@
 import Link from "next/link";
 
 import { useAssistant } from "@/components/assistant/assistant-provider";
+import { FeedbackDraftActions } from "@/components/assistant/feedback-draft-actions";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { DraftProposal } from "@/lib/assistant/drafts";
 import { fr } from "@/lib/i18n/fr";
 import { reviewTone } from "@/lib/ui/state-tones";
+import { cn } from "@/lib/utils";
 
 /**
  * A PO draft in the conversation: what it would write (written by code, the
  * previous value struck through), what PO could not fill, and the button that
- * opens the real form. Nothing is saved before that form is.
+ * opens the real form. Nothing is saved before that form is. A feedback is
+ * the exception: sent from the card as shown, or edited in the feedback
+ * window (FeedbackDraftActions).
  */
 export function DraftCard({
   toolCallId,
@@ -24,6 +28,9 @@ export function DraftCard({
   const t = fr.assistant.drafts;
   const { saved, review } = useAssistant();
   const link = saved[toolCallId];
+  const { draft } = proposal;
+  // A feedback is short and sent as shown: its whole text is on the card.
+  const isFeedback = draft.kind === "feedback";
 
   return (
     <section
@@ -36,7 +43,7 @@ export function DraftCard({
           tone={reviewTone[link ? "confirmed" : "proposed"]}
           size="sm"
         >
-          {link ? t.saved : t.badge}
+          {link ? (isFeedback ? t.feedback.sent : t.saved) : t.badge}
         </StatusBadge>
       </div>
 
@@ -45,7 +52,12 @@ export function DraftCard({
           {proposal.changes.map((c) => (
             <div key={c.label} className="grid gap-0.5">
               <dt className="text-muted-foreground">{c.label}</dt>
-              <dd className="line-clamp-3 whitespace-pre-wrap">
+              <dd
+                className={cn(
+                  "whitespace-pre-wrap",
+                  !isFeedback && "line-clamp-3",
+                )}
+              >
                 {c.before && (
                   <>
                     <del className="text-muted-foreground">{c.before}</del>{" "}
@@ -75,6 +87,8 @@ export function DraftCard({
         >
           {t.open} : {link.label}
         </Link>
+      ) : isFeedback ? (
+        <FeedbackDraftActions toolCallId={toolCallId} draft={draft} />
       ) : (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <Button size="sm" onClick={() => review(toolCallId, proposal)}>

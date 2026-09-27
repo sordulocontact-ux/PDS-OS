@@ -170,10 +170,10 @@ $$, '42501', null, 'a submitted strategy takes no new field value');
 update public.levers set state = 'to_decide' where id = pg_temp.id_of('lever');
 select is((select state from public.levers where id = pg_temp.id_of('lever')), 'selected',
           'a submitted strategy cannot be changed');
-select lives_ok($$
+select throws_ok($$
   insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type)
   values (pg_temp.org(), pg_temp.prj(), 'brief', 'frame', '"x"', 'confirmed', 'manual')
-$$, 'the Brief itself is not affected by the strategy lock');
+$$, '42501', null, 'the Brief stays frozen once the framing is validated');
 
 reset role;
 select * from finish();

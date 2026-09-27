@@ -132,11 +132,21 @@ export const auth = {
       reject: "Refuser",
       suspend: "Suspendre",
       reactivate: "Réactiver",
-      editRole: "Changer de poste",
       rolePlaceholder: "Choisir un poste",
       cancelInvite: "Annuler l'invitation",
       copyLink: "Copier le lien",
-      editName: "Modifier le nom",
+    },
+    // "Modifier" modal of a row: name and position.
+    edit: {
+      title: "Modifier le membre",
+      description: "Nom et poste dans l'équipe.",
+      saved: "Modifications enregistrées.",
+      // Why the position is not in the form.
+      roleLocked: {
+        self: "Votre propre poste ne se change pas ici.",
+        undecided: "Le poste se choisit en approuvant l'accès.",
+        suspended: "Réactivez l'accès pour changer de poste.",
+      },
     },
     you: "vous",
     noRole: "À définir",

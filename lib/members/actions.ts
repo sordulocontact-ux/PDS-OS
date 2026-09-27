@@ -117,25 +117,27 @@ export async function memberAction(
       });
     }
 
-    case "set_role": {
-      const parsed = parseForm(membershipRoleSchema, formData);
-      if (!parsed.ok) return { status: "error", error: fr.auth.errors.generic };
-      return patchMembership(parsed.data.membershipId, {
-        role: parsed.data.role,
-      });
-    }
-
-    case "rename": {
+    // "Modifier" modal: the name, and the position when the row allows it
+    // (the form only sends a role then). Two granted columns sets, two
+    // updates; the database refuses what the admin may not change.
+    case "edit": {
       const parsed = parseForm(personNameSchema, formData);
-      if (!parsed.ok) {
+      const withRole = formData.has("role");
+      const role = withRole ? parseForm(membershipRoleSchema, formData) : null;
+      if (!parsed.ok || (role && !role.ok)) {
+        const fieldErrors = {
+          ...(parsed.ok ? {} : parsed.fieldErrors),
+          ...(role && !role.ok ? role.fieldErrors : {}),
+        };
         return {
           status: "error",
           error:
-            parsed.fieldErrors.firstName ??
-            parsed.fieldErrors.lastName ??
+            fieldErrors.firstName ??
+            fieldErrors.lastName ??
+            fieldErrors.role ??
             fr.auth.errors.required,
-          fieldErrors: parsed.fieldErrors,
-          values: parsed.values,
+          fieldErrors,
+          values: retainedValues(formData),
         };
       }
       const supabase = await createClient();
@@ -152,6 +154,11 @@ export async function memberAction(
       if (!data || data.length === 0)
         return { status: "error", error: fr.auth.errors.notFound };
 
+      if (role?.ok) {
+        return patchMembership(role.data.membershipId, {
+          role: role.data.role,
+        });
+      }
       revalidatePath(routes.members);
       return { status: "success" };
     }

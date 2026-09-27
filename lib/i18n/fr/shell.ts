@@ -11,6 +11,7 @@ export const shell = {
     artists: "Artistes",
     masters: "Masters",
     members: "Équipe",
+    feedback: "Retours",
     // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.
     pendingMembers: (count: number) =>
       count === 1

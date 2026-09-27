@@ -37,6 +37,13 @@ grant all on ids to authenticated;
 create temp table vars (k text primary key, v text) on commit drop;
 grant all on vars to authenticated;
 insert into vars select 'tag', substr(md5(random()::text), 1, 8);
+-- The app server's push secret (Vault), created here if the seed did not.
+do $$ begin
+  if not exists (select 1 from vault.secrets where name = 'push_claim_secret') then
+    perform vault.create_secret(md5(random()::text) || md5(random()::text), 'push_claim_secret');
+  end if;
+end $$;
+insert into vars select 'secret', decrypted_secret from vault.decrypted_secrets where name = 'push_claim_secret';
 
 insert into ids values
   ('director', pg_temp.new_user('director-' || (select v from vars where k = 'tag') || '@pds.test')),
@@ -52,7 +59,7 @@ insert into ids select name || '_person', a.person_id
 -- The manager's browser is subscribed to Web Push.
 select pg_temp.act_as((select id from ids where name = 'manager'));
 select lives_ok($$ select public.save_push_subscription(
-  'https://push.example.test/' || (select v from vars where k = 'tag'), 'key', 'secret') $$,
+  'https://fcm.googleapis.com/fcm/send/' || (select v from vars where k = 'tag'), 'key', 'secret') $$,
   'a person subscribes a browser');
 
 -- Transmission ----------------------------------------------------------------
@@ -69,16 +76,16 @@ select throws_ok($$ insert into public.notifications (organization_id, recipient
                     values ((select id from ids where name = 'org'), (select id from ids where name = 'director_person'), 'task_assigned') $$,
                  '42501', null, 'clients cannot write notifications');
 
-select is((select count(*)::int from public.claim_push_deliveries()), 1,
+select is((select count(*)::int from public.claim_push_deliveries((select v from vars where k = 'secret'))), 1,
           'the actor claims the push of what they just caused, for each subscribed browser');
-select is((select count(*)::int from public.claim_push_deliveries()), 0, 'a push is claimed once');
+select is((select count(*)::int from public.claim_push_deliveries((select v from vars where k = 'secret'))), 0, 'a push is claimed once');
 
 reset role;
 select pg_temp.add_call_report((select id from ids where name = 'project'));
 select pg_temp.act_as((select id from ids where name = 'manager'));
 select is((select kind from public.notifications where subject_id = (select id from ids where name = 'a1')),
           'project_transmitted', 'the manager is notified of the transmission');
-select is((select count(*)::int from public.claim_push_deliveries()), 0,
+select is((select count(*)::int from public.claim_push_deliveries((select v from vars where k = 'secret'))), 0,
           'nobody claims pushes caused by someone else');
 select lives_ok($$ select public.respond_to_assignment((select id from ids where name = 'a1'),
                    'clarification_requested', 'Quel budget ?') $$, 'the manager asks for a clarification');

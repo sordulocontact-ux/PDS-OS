@@ -80,9 +80,6 @@ export const routes = {
   assistant: "/app/assistant",
   work: "/app/work",
   feedback: "/app/feedback",
-  // Feedback form, remembering the page it was opened from.
-  feedbackFrom: (path: string) =>
-    `/app/feedback?from=${encodeURIComponent(path)}`,
   members: "/app/members",
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",

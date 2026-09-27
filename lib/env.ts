@@ -47,8 +47,24 @@ export const serverEnvSchema = z
     CRON_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
     /** Optional: Odesli closed its public API, keys come from a whitelist. */
     ODESLI_API_KEY: optionalSecret,
+    /** Notion: optional, sent feedback stays in the app without them. */
+    NOTION_TOKEN: optionalSecret,
+    NOTION_FEEDBACK_DATABASE_ID: z.preprocess(
+      blankToUndefined,
+      z
+        .string()
+        .regex(
+          /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i,
+        )
+        .optional(),
+    ),
     /** Web Push: optional, browser notifications are off without them. */
     VAPID_PRIVATE_KEY: optionalSecret,
+    /** Same value as the Vault secret push_claim_secret: pushes are off without it. */
+    PUSH_CLAIM_SECRET: z.preprocess(
+      blankToUndefined,
+      z.string().min(32).optional(),
+    ),
     VAPID_SUBJECT: z.preprocess(
       blankToUndefined,
       z

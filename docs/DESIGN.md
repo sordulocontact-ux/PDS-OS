@@ -221,9 +221,12 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 - `DialogContent` (`components/ui/dialog.tsx`), d'après une référence fournie par Sacha
   le 27/09/2026 : la page derrière est seulement floutée, **sans voile** : elle reste
   blanche, le panneau noir suffit au contraste ; le panneau est sombre et translucide
-  (`--surface-glass`), arrondi 16 px (`rounded-3xl`), en bas pleine largeur sur mobile.
-  **Un seul flou** pour la page et pour le panneau : `--glass-blur` (8 px), léger, les
-  formes de la page restent lisibles.
+  (`--surface-glass`, noir à 82 % : 90 % était trop sombre ; les gris de texte du
+  panneau sont éclaircis d'un cran pour rester à 4,5:1), arrondi 16 px (`rounded-3xl`), en bas pleine largeur sur mobile.
+  **Deux flous** (demande de Sacha, 27/09/2026, ils n'en faisaient qu'un avant) : la page
+  derrière, `--glass-blur` (4 px ; 8 px avant, jugé trop flou), léger, les formes de la
+  page restent lisibles ; le panneau lui-même, `--glass-panel-blur` (24 px), plus fort,
+  pour que ce qu'il recouvre ne se lise pas à travers.
 - La classe `.surface-glass` (`app/globals.css`) inverse les tokens dans le panneau :
   textes blancs, boutons contour sur voile blanc 8 %, bouton principal et action
   définitive blancs, champs et filets blancs translucides, liste d'un sélecteur
@@ -235,7 +238,12 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 - Hors périmètre : les panneaux latéraux (`Sheet` : relecture d'un brouillon de PO, ligne
   de budget, tiroir de navigation mobile), les menus et listes déroulantes en portail
   (`Select`, `DropdownMenu`, `Popover`, `Tooltip`) restent clairs.
-- Pas d'animation (§ 6).
+- **Fondu d'entrée et de sortie** (demande de Sacha, 27/09/2026) : le panneau en
+  opacité, et le **flou de la page monte avec lui** (`backdrop-filter` de 0 à
+  `--glass-blur`, en plus de l'opacité) ; entrée `--duration-base` (180 ms) `--ease-out`,
+  sortie plus courte `--duration-fast` (120 ms). Piège : un flou posé d'un coup, sans
+  transition, fait croire que la page se recharge avant l'arrivée de la modale. Ni
+  glissement ni zoom : rien à couper quand le mouvement est réduit.
 
 ### Arrondis
 

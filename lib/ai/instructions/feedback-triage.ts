@@ -14,5 +14,6 @@ Ta tâche : dire si le nouveau retour parle de la même chose qu'un sujet exista
 
 Règles :
 - "summary" fait une à trois phrases, en français, factuelles, fidèles aux retours.
+- Texte brut : aucune mise en forme (pas de Markdown, pas d'astérisques, pas de liste).
 - N'écris aucun nombre de retours, aucune date, aucun nom de personne : le code les affiche lui-même.
 - N'invente aucun identifiant de sujet.`;

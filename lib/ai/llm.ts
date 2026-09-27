@@ -2,7 +2,13 @@ import "server-only";
 
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
-import { generateText, Output, type LanguageModel } from "ai";
+import {
+  generateText,
+  NoObjectGeneratedError,
+  Output,
+  type LanguageModel,
+  type LanguageModelUsage,
+} from "ai";
 import type { z } from "zod";
 
 import { DEFAULT_LLM_MODEL } from "@/lib/ai/providers";
@@ -69,20 +75,54 @@ export async function extract<T>(
   const { model, modelId } = resolveModel(env);
   const startedAt = performance.now();
 
-  const result = await generateText({
-    model,
-    temperature: 0,
-    system: instructions,
-    messages: [{ role: "user", content: `<data>\n${input}\n</data>` }],
-    output: Output.object({ schema }),
-  });
+  let output: T;
+  let usage: LanguageModelUsage | undefined;
+  try {
+    const result = await generateText({
+      model,
+      temperature: 0,
+      system: instructions,
+      messages: [{ role: "user", content: `<data>\n${input}\n</data>` }],
+      output: Output.object({ schema }),
+    });
+    output = result.output;
+    usage = result.usage;
+  } catch (error) {
+    const echoed = fromSchemaEcho(error, schema);
+    if (echoed === undefined) throw error;
+    output = echoed;
+    usage = NoObjectGeneratedError.isInstance(error) ? error.usage : undefined;
+  }
 
   return {
-    output: result.output,
+    output,
     provider: env.LLM_PROVIDER,
     model: modelId,
     durationMs: Math.round(performance.now() - startedAt),
-    inputTokens: result.usage.inputTokens,
-    outputTokens: result.usage.outputTokens,
+    inputTokens: usage?.inputTokens,
+    outputTokens: usage?.outputTokens,
   };
+}
+
+/**
+ * ministral-14b sometimes wraps a correct answer in the shape of the schema
+ * itself: {"type":"object","properties":{…the answer…}} (seen on feedback
+ * triage, 2026-09-27). When the answer did not match the schema, the content
+ * of `properties` is validated in its place; anything else stays an error.
+ */
+function fromSchemaEcho<T>(
+  error: unknown,
+  schema: z.ZodType<T>,
+): T | undefined {
+  if (!NoObjectGeneratedError.isInstance(error) || !error.text) return;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(error.text);
+  } catch {
+    return;
+  }
+  if (!parsed || typeof parsed !== "object" || !("properties" in parsed))
+    return;
+  const result = schema.safeParse(parsed.properties);
+  return result.success ? result.data : undefined;
 }

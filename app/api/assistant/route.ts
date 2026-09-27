@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       page: await pageContext(parsed.data.page),
     }),
     messages: await convertToModelMessages(messages),
-    tools: createAssistantTools(access, userTexts),
+    tools: createAssistantTools(access, userTexts, parsed.data.page ?? null),
     stopWhen: isStepCount(5),
   });
 

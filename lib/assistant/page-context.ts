@@ -46,5 +46,6 @@ export async function pageContext(
   if (path.startsWith("/app/catalog/masters")) return t.masters;
   if (path.startsWith("/app/projects")) return t.projects;
   if (path.startsWith("/app/work")) return t.work;
+  if (path.startsWith("/app/feedback")) return t.feedback;
   return null;
 }

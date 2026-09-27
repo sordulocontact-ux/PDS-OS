@@ -11,7 +11,9 @@ PO répond aux questions de l'équipe **sur les données de PDS OS, et seulement
 où en est un projet, ce qu'il reste à faire, ce qui a avancé, ce qui a été dit en call.
 
 Il **prépare** aussi des créations et des modifications — artiste (fiche complète et
-contacts), master, projet pas encore lancé — que **l'humain relit et enregistre** (§ 3 bis).
+contacts), master, projet pas encore lancé, **retour sur l'application** (tout membre),
+et pour le directeur général le traitement des retours de l'équipe (modifier un sujet,
+le transmettre avec une priorité, l'écarter) — que **l'humain relit et enregistre** (§ 3 bis).
 Lui-même n'écrit jamais rien.
 
 Il ne fait **pas** :
@@ -112,6 +114,10 @@ des `sources` (libellé + lien) que l'interface affiche.
 | `propose_artist` | artiste : nom, nom civil, pays, biographie, notes, contacts à ajouter | `manage_catalog` |
 | `propose_master` | master : titre, artistes crédités (déjà au catalogue), version, ISRC, durée | `manage_catalog` |
 | `propose_project` | projet : titre, type, masters, échéance, budget, priorité, notes ; chef de projet et direction artistique à la création seulement | `create_projects` ; en modification, projet **pas lancé** |
+| `propose_feedback` | retour sur l'app : type (« Autre » par défaut, affiché), message (avec les mots de l'utilisateur), page d'où PO a été ouvert. Exception au panneau latéral : la carte montre tout le texte, **Envoyer** l'envoie tel quel (clic de la personne, sa session), **Modifier** ouvre la fenêtre de retour pré-remplie | tout membre |
+| `find_feedback` | (lecture) sujets de retours par statut, avec `topicId` | `read_feedback` (DG) |
+| `propose_feedback_edit` | titre, résumé, type d'un sujet pas encore transmis ; « réécris / reformule » → `rewrite`, et c'est `lib/feedback/rewrite.ts` qui réécrit à partir des retours d'origine, jamais le texte du modèle | `read_feedback` |
+| `propose_feedback_review` | transmettre (priorité), changer la priorité, écarter, remettre à examiner ; la priorité n'est gardée que si les mots de l'utilisateur la disent (`priorityQuote` vérifiée), sinon le DG la choisit | `read_feedback` |
 
 Le parcours :
 

@@ -1,9 +1,10 @@
 -- Feedback: sent by any member for themself, read by its author and by the
 -- general director (read_feedback), never edited nor deleted; grouped into
--- topics by file_feedback(), for the director only.
+-- topics by file_feedback(), reviewed (sent with a priority, dismissed) by
+-- the director only. Screenshots stay in their author's folder.
 -- Run with `supabase test db`.
 begin;
-select plan(19);
+select plan(43);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -118,6 +119,94 @@ reset role;
 select pg_temp.act_as(pg_temp.id_of('author'));
 select is((select count(*) from public.feedback_topics where id = pg_temp.id_of('topic')), 0::bigint,
           'a member does not read the topics');
+
+-- Review -----------------------------------------------------------------------
+select throws_ok($$ select public.review_feedback_topic(pg_temp.id_of('topic'), 'send', 'high') $$,
+                 '42501', null, 'only the director reviews a topic');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('director'));
+select is((select status from public.feedback_topics where id = pg_temp.id_of('topic')), 'new',
+          'a topic starts to review');
+select throws_ok($$ select public.review_feedback_topic(pg_temp.id_of('topic'), 'send') $$,
+                 'P0001', 'priority_required', 'sending needs a priority');
+select lives_ok($$ select public.review_feedback_topic(pg_temp.id_of('topic'), 'send', 'high') $$,
+                'the director sends a topic with a priority');
+select is((select status || ':' || priority from public.feedback_topics where id = pg_temp.id_of('topic')),
+          'sent:high', 'the topic is sent, high priority');
+select is((select reviewed_by from public.feedback_topics where id = pg_temp.id_of('topic')),
+          pg_temp.id_of('director_person'), 'who sent it is set by the database');
+select lives_ok($$ select public.review_feedback_topic(pg_temp.id_of('topic'), 'prioritize', 'low') $$,
+                'the director changes the priority of a sent topic');
+select throws_ok($$ select public.review_feedback_topic(pg_temp.id_of('topic'), 'dismiss') $$,
+                 'P0001', 'invalid_transition', 'a sent topic is not dismissed');
+
+reset role;
+select pg_temp.act_as(pg_temp.id_of('other'));
+insert into public.feedback (organization_id, kind, message)
+values (pg_temp.id_of('org'), 'idea', 'Un mode sombre');
+insert into public.feedback (organization_id, kind, message)
+values (pg_temp.id_of('org'), 'idea', 'Un thème sombre, encore');
+insert into ids select 'fb3', id from public.feedback where message = 'Un mode sombre';
+insert into ids select 'fb4', id from public.feedback where message = 'Un thème sombre, encore';
+reset role;
+select pg_temp.act_as(pg_temp.id_of('director'));
+insert into ids select 'topic2', public.file_feedback(pg_temp.id_of('fb3'), null, 'Mode sombre', 'Un mode sombre.');
+select lives_ok($$ select public.review_feedback_topic(pg_temp.id_of('topic2'), 'dismiss') $$,
+                'the director dismisses a topic');
+select public.file_feedback(pg_temp.id_of('fb4'), pg_temp.id_of('topic2'));
+select is((select status from public.feedback_topics where id = pg_temp.id_of('topic2')), 'new',
+          'a new feedback brings a dismissed topic back to review');
+select is((select summary from public.feedback_topics where id = pg_temp.id_of('topic2')), 'Un mode sombre.',
+          'joining without a summary keeps the summary');
+
+-- Screenshots -----------------------------------------------------------------
+reset role;
+select pg_temp.act_as(pg_temp.id_of('author'));
+insert into vars values ('own', pg_temp.id_of('org') || '/' || pg_temp.id_of('author_person') || '/' || gen_random_uuid() || '.png');
+insert into vars values ('theirs', pg_temp.id_of('org') || '/' || pg_temp.id_of('other_person') || '/' || gen_random_uuid() || '.png');
+select lives_ok($$ insert into storage.objects (bucket_id, name) values ('feedback-screenshots', (select v from vars where k = 'own')) $$,
+                'a member uploads a screenshot into their folder');
+select throws_ok($$ insert into storage.objects (bucket_id, name) values ('feedback-screenshots', (select v from vars where k = 'theirs')) $$,
+                 '42501', null, 'never into someone else''s folder');
+select throws_ok($$
+  insert into public.feedback (organization_id, kind, message, screenshot_path)
+  values (pg_temp.id_of('org'), 'bug', 'Capture d''un autre', (select v from vars where k = 'theirs'))
+$$, 'P0001', 'invalid_screenshot_path', 'a feedback points only to its author''s screenshot');
+
+-- Editing before sending ------------------------------------------------------
+select throws_ok($$ select public.edit_feedback_topic(pg_temp.id_of('topic2'), 'idea', 'Titre', 'Résumé') $$,
+                 '42501', null, 'only the director edits a topic');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('director'));
+select lives_ok($$ select public.edit_feedback_topic(pg_temp.id_of('topic2'), 'idea', 'Thème sombre', 'Proposer un thème sombre.') $$,
+                'the director edits a topic before sending it');
+select is((select edited_by from public.feedback_topics where id = pg_temp.id_of('topic2')),
+          pg_temp.id_of('director_person'), 'who edited it is set by the database');
+select throws_ok($$ select public.edit_feedback_topic(pg_temp.id_of('topic'), 'bug', 'Titre', 'Résumé') $$,
+                 'P0001', 'topic_already_sent', 'a sent topic is no longer edited');
+select throws_ok($$ select public.edit_feedback_topic(pg_temp.id_of('topic2'), 'idea', '  ', 'Résumé') $$,
+                 '23514', null, 'a topic keeps a title');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('other'));
+insert into public.feedback (organization_id, kind, message) values (pg_temp.id_of('org'), 'idea', 'Mode nuit svp');
+insert into ids select 'fb5', id from public.feedback where message = 'Mode nuit svp';
+reset role;
+select pg_temp.act_as(pg_temp.id_of('director'));
+select public.file_feedback(pg_temp.id_of('fb5'), pg_temp.id_of('topic2'), '', 'Résumé réécrit par PO.');
+select is((select summary from public.feedback_topics where id = pg_temp.id_of('topic2')),
+          'Proposer un thème sombre.', 'PO never rewrites a summary the director edited');
+
+-- Notion ----------------------------------------------------------------------
+select throws_ok($$ select public.record_feedback_notion(pg_temp.id_of('topic2'), 'abc', 'https://www.notion.so/abc') $$,
+                 'P0001', 'topic_not_sent', 'only a sent topic has a Notion page');
+select lives_ok($$ select public.record_feedback_notion(pg_temp.id_of('topic'), 'abc', 'https://www.notion.so/abc') $$,
+                'the director records the Notion page of a sent topic');
+select throws_ok($$ select public.record_feedback_notion(pg_temp.id_of('topic'), 'other', null) $$,
+                 'P0001', 'notion_page_mismatch', 'a topic keeps its Notion page');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('author'));
+select throws_ok($$ select public.record_feedback_notion(pg_temp.id_of('topic'), 'abc', null) $$,
+                 '42501', null, 'only the director records a Notion page');
 
 select * from finish();
 rollback;

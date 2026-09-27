@@ -3,14 +3,17 @@ import "server-only";
 import { FEEDBACK_TRIAGE_INSTRUCTIONS } from "@/lib/ai/instructions/feedback-triage";
 import { extract } from "@/lib/ai/llm";
 import { feedbackTriageSchema } from "@/lib/ai/schemas/feedback-triage";
+import {
+  plainText,
+  TOPIC_SUMMARY_MAX as SUMMARY_MAX,
+  TOPIC_TITLE_MAX as TITLE_MAX,
+} from "@/lib/feedback/types";
 import type { createClient } from "@/lib/supabase/server";
 
 // Feedback filed per run, oldest first; the rest waits for the next visit.
 const MAX_PER_RUN = 20;
 // Topics shown to the model: the most recently fed ones.
 const MAX_TOPICS = 100;
-const TITLE_MAX = 200;
-const SUMMARY_MAX = 2000;
 
 type Topic = { id: string; kind: string; title: string; summary: string };
 
@@ -90,9 +93,9 @@ export async function triageUnfiledFeedback(
     }
 
     const match = refs.find((t) => t.ref === output.topic.trim());
-    const summary = output.summary.trim().slice(0, SUMMARY_MAX);
+    const summary = plainText(output.summary).slice(0, SUMMARY_MAX);
     const title =
-      output.title.trim().slice(0, TITLE_MAX) ||
+      plainText(output.title).slice(0, TITLE_MAX) ||
       fallbackTitle(feedback.message);
 
     const newSummary = summary || feedback.message.slice(0, SUMMARY_MAX);

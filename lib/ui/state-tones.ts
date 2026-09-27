@@ -122,3 +122,10 @@ export const feedbackKindTone: Record<string, Tone> = {
   idea: "info",
   other: "neutral",
 };
+
+/** Priority the director gives a feedback topic when sending it. */
+export const feedbackPriorityTone: Record<string, Tone> = {
+  high: "danger",
+  normal: "info",
+  low: "neutral",
+};

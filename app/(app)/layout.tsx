@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { AssistantProvider } from "@/components/assistant/assistant-provider";
 import { AccessWatcher } from "@/components/auth/access-watcher";
+import { FeedbackProvider } from "@/components/feedback/feedback-provider";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { NotificationListener } from "@/components/notifications/notification-listener";
 import { MobileNav } from "@/components/shell/mobile-nav";
@@ -59,39 +60,44 @@ export default async function AppLayout({
   );
 
   return (
-    <AssistantProvider launcher={signedIn}>
-      <CollapsedNavProvider>
-        <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
-          <AccessWatcher
-            current={access.state}
-            role={access.role}
-            intervalMs={60_000}
-          />
-          {signedIn && access.personId && (
-            <NotificationListener personId={access.personId} />
-          )}
+    <FeedbackProvider
+      organizationId={signedIn ? access.organizationId : null}
+      personId={signedIn ? access.personId : null}
+    >
+      <AssistantProvider launcher={signedIn}>
+        <CollapsedNavProvider>
+          <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
+            <AccessWatcher
+              current={access.state}
+              role={access.role}
+              intervalMs={60_000}
+            />
+            {signedIn && access.personId && (
+              <NotificationListener personId={access.personId} />
+            )}
 
-          <Sidebar
-            isAdmin={isAdmin}
-            pendingMembers={pendingMembers}
-            bell={bell("right")}
-            userPanel={userPanel}
-          />
+            <Sidebar
+              isAdmin={isAdmin}
+              pendingMembers={pendingMembers}
+              bell={bell("right")}
+              userPanel={userPanel}
+            />
 
-          <div className="flex min-w-0 flex-1 flex-col">
-            <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
-              <MobileNav
-                isAdmin={isAdmin}
-                pendingMembers={pendingMembers}
-                footer={userPanel}
-              />
-              {brand}
-              <div className="ml-auto">{bell("bottom")}</div>
-            </header>
-            <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
+                <MobileNav
+                  isAdmin={isAdmin}
+                  pendingMembers={pendingMembers}
+                  footer={userPanel}
+                />
+                {brand}
+                <div className="ml-auto">{bell("bottom")}</div>
+              </header>
+              <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+            </div>
           </div>
-        </div>
-      </CollapsedNavProvider>
-    </AssistantProvider>
+        </CollapsedNavProvider>
+      </AssistantProvider>
+    </FeedbackProvider>
   );
 }

@@ -137,6 +137,23 @@ select pg_temp.act_as((select id from ids where name = 'member'));
 select throws_ok($$ select public.request_validation((select id from ids where name = 'stage')) $$,
                  'P0001', 'invalid_transition', 'cannot request validation of a stage not started');
 select lives_ok($$ select public.start_stage((select id from ids where name = 'stage')) $$, 'the owner starts a stage');
+-- The Brief is written while the framing is open (frozen once submitted).
+select throws_ok($$
+  insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type)
+  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'brief', 'objective', '"x"', 'confirmed', 'manual');
+  update public.field_values set value = '"y"'
+$$, '42501', null, 'field values are append-only');
+
+select lives_ok($$
+  insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type, source_quote)
+  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'brief', 'objective', '"x"', 'confirmed', 'voice', 'mets en objectif x')
+$$, 'the owner records a dictated value');
+
+select lives_ok($$
+  insert into public.needs (organization_id, project_id, label, family, source_type, source_quote)
+  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'Clip', 'creation_content', 'voice', 'il nous faut un clip')
+$$, 'the owner records a dictated need');
+
 select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'), 'Brief prêt') $$,
                 'the owner asks the director for a validation');
 insert into ids select 'validation', id from public.validations
@@ -170,22 +187,6 @@ select throws_ok($$
   insert into public.tasks (organization_id, project_id, title, due_date)
   values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'Sans responsable', current_date)
 $$, '23502', null, 'a task always has an owner');
-
-select throws_ok($$
-  insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'brief', 'objective', '"x"', 'confirmed', 'manual');
-  update public.field_values set value = '"y"'
-$$, '42501', null, 'field values are append-only');
-
-select lives_ok($$
-  insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type, source_quote)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'brief', 'objective', '"x"', 'confirmed', 'voice', 'mets en objectif x')
-$$, 'the owner records a dictated value');
-
-select lives_ok($$
-  insert into public.needs (organization_id, project_id, label, family, source_type, source_quote)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'Clip', 'creation_content', 'voice', 'il nous faut un clip')
-$$, 'the owner records a dictated need');
 
 -- Outsider (pending) -----------------------------------------------------------
 reset role;
