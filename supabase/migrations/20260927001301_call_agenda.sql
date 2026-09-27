@@ -8,6 +8,7 @@ alter table public.calls
   add constraint calls_duration_positive check (duration_minutes is null or duration_minutes > 0);
 
 grant insert (agenda, duration_minutes) on public.calls to authenticated;
+grant update (agenda, duration_minutes) on public.calls to authenticated;
 
 -- "Commencer en amont": opens the framing without a call. framing_is_open()
 -- itself only requires a brief field_values row to exist, but the restrictive

@@ -24,6 +24,7 @@ import {
   loadLatestTranscript,
 } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
+import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,9 +37,9 @@ export const metadata = { title: `${fr.calls.list.title} · ${fr.app.name}` };
 export default async function CallPage({
   params,
 }: PageProps<"/app/projects/[projectId]/calls/[callId]">) {
-  await requireApproved();
+  const access = await requireApproved();
   const { projectId, callId } = await params;
-  await requireLaunchedProject(projectId);
+  const project = await requireLaunchedProject(projectId);
   const supabase = await createClient();
 
   const call = await getCall(supabase, projectId, callId);
@@ -80,8 +81,10 @@ export default async function CallPage({
 
       {step === "record" && call.agenda && (
         <CallAgenda
+          callId={call.id}
           agenda={call.agenda}
           durationMinutes={call.durationMinutes}
+          canEdit={canEditProject(access, project)}
         />
       )}
 

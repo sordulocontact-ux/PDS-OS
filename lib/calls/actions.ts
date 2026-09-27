@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { getAccess } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -10,6 +11,7 @@ import {
   MAX_AUDIO_BYTES,
   type ActionResult,
 } from "@/lib/calls/constants";
+import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -109,6 +111,52 @@ export async function attachAudio(input: {
     .select("id");
   if (error || !updated?.length) {
     console.error("[calls] attach audio failed:", error?.message);
+    return { ok: false, error: "save_failed" };
+  }
+  refresh();
+  return { ok: true };
+}
+
+const agendaSchema = z
+  .array(
+    z.object({
+      topic: z.string().trim().min(1).max(200),
+      minutes: z.number().int().min(1).max(240),
+    }),
+  )
+  .max(20);
+
+/**
+ * Saves an edited agenda (add, rename, retime, remove, reorder a point): the
+ * total is always the sum of its points, never a value typed by hand
+ * (CLAUDE.md rule 6). Editable only before the call is recorded — once audio
+ * is attached, the agenda is history, not a plan.
+ */
+export async function updateCallAgenda(
+  callId: string,
+  agenda: AgendaItem[],
+): Promise<ActionResult> {
+  const session = await approvedSession();
+  if (!session) return { ok: false, error: "unauthorized" };
+
+  const parsed = agendaSchema.safeParse(agenda);
+  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  const durationMinutes = parsed.data.reduce(
+    (sum, item) => sum + item.minutes,
+    0,
+  );
+
+  const { data: updated, error } = await session.supabase
+    .from("calls")
+    .update({
+      agenda: parsed.data,
+      duration_minutes: durationMinutes || null,
+    })
+    .eq("id", callId)
+    .is("audio_path", null)
+    .select("id");
+  if (error || !updated?.length) {
+    console.error("[calls] update agenda failed:", error?.message);
     return { ok: false, error: "save_failed" };
   }
   refresh();

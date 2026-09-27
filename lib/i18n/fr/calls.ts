@@ -140,7 +140,16 @@ export const calls = {
   },
   agenda: {
     title: "Ordre du jour",
-    duration: (minutes: number) => `Environ ${minutes} min`,
+    total: (minutes: number) => `Durée totale estimée : environ ${minutes} min`,
+    duration: (minutes: number) => `${minutes} min`,
+    topicPlaceholder: "Point à aborder",
+    add: "Ajouter un point",
+    remove: "Retirer ce point",
+    edit: "Modifier",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    saving: "Enregistrement…",
+    empty: "Aucun point pour l'instant.",
   },
   transcript: {
     title: "Transcription",
