@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // PDF export (lib/pdf/render.ts): loaded from node_modules at run time,
+  // never bundled; Chromium's compressed binary is read from its bin folder,
+  // which file tracing cannot see on its own.
+  serverExternalPackages: ["playwright-core", "@sparticuz/chromium"],
+  outputFileTracingIncludes: {
+    "/api/projects/[projectId]/framing-brief": [
+      "./node_modules/@sparticuz/chromium/bin/**",
+    ],
+  },
   experimental: {
     // Client cache of rendered pages (docs/ARCHITECTURE.md § 3 bis). A page
     // visited less than 30 s ago shows again at once; a view prefetched in

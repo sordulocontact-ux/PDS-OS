@@ -84,6 +84,42 @@ export async function proposeObjectiveChoices(
   return { ok: true, count: fresh.length };
 }
 
+/**
+ * Makes one of PO's suggestions the confirmed objective. The text is taken
+ * from the stored suggestion, never from the client, and keeps its call
+ * source when it came from a call item.
+ */
+export async function chooseObjective(
+  projectId: string,
+  suggestionText: string,
+): Promise<ActionResult> {
+  const organizationId = await orgId();
+  if (!id.safeParse(projectId).success || !organizationId)
+    return fail("invalid_input");
+  const supabase = await createClient();
+  const suggestion = (await currentSuggestions(supabase, projectId)).find(
+    (s) => s.text === suggestionText,
+  );
+  if (!suggestion) return fail("not_found");
+
+  const itemId = suggestion.source.startsWith("item:")
+    ? suggestion.source.slice("item:".length)
+    : null;
+  const fromCall = itemId !== null && id.safeParse(itemId).success;
+  const { error } = await supabase.from("field_values").insert({
+    organization_id: organizationId,
+    project_id: projectId,
+    deliverable: "brief",
+    field_key: "objective",
+    value: suggestion.text,
+    status: "confirmed",
+    source_type: fromCall ? "call" : "manual",
+    source_report_item_id: fromCall ? itemId : null,
+    source_quote: fromCall ? suggestion.quote : null,
+  });
+  return done(projectId, error);
+}
+
 /** Removes one suggestion from the list: chosen (applied elsewhere) or dismissed. */
 export async function dismissObjectiveSuggestion(
   projectId: string,

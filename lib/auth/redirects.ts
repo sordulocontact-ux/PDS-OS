@@ -102,6 +102,13 @@ export const routes = {
     `/app/projects/new?master=${masterId}`,
   project: (id: string) => `/app/projects/${id}`,
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
+  // One screen of the Framing's guided review (lib/framing/guide.ts).
+  projectFramingStep: (id: string, step: string) =>
+    `/app/projects/${id}/framing?step=${step}`,
+  // The shareable Brief, printable as a PDF.
+  projectFramingBrief: (id: string) => `/app/projects/${id}/framing/brief`,
+  // The same Brief as a downloaded PDF file.
+  projectFramingBriefPdf: (id: string) => `/api/projects/${id}/framing-brief`,
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,

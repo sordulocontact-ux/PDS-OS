@@ -19,7 +19,7 @@ export function FramingStart({
 }) {
   const t = fr.framing.needsCall;
   return (
-    <section className="grid gap-6 rounded-xl border border-border p-6">
+    <section className="grid gap-6">
       <div className="grid gap-1">
         <h2 className="text-lg font-semibold">{t.title}</h2>
         <p className="max-w-prose text-sm text-muted-foreground">
@@ -67,13 +67,13 @@ function FramingStartOption({
   variant: "default" | "outline";
 }) {
   return (
-    <div className="grid gap-3 rounded-lg border border-border p-4">
+    <div className="flex h-full flex-col rounded-lg border border-border p-4">
       <div className="grid gap-2">
         <Icon className="size-[22px] text-muted-foreground" aria-hidden />
         <h3 className="text-sm font-medium">{title}</h3>
         <p className="text-sm text-muted-foreground">{body}</p>
       </div>
-      <form action={action} className="justify-self-start">
+      <form action={action} className="mt-auto justify-self-start pt-5">
         <button type="submit" className={buttonVariants({ variant })}>
           {actionLabel}
         </button>

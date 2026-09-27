@@ -199,6 +199,8 @@
   --duration-instant: 80ms;
   --duration-fast: 120ms;
   --duration-base: 180ms;
+  /* Un fond qui glisse d'un élément à l'autre (menu du Cadrage). */
+  --duration-slide: 260ms;
   --transition-control:
     background-color var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard),

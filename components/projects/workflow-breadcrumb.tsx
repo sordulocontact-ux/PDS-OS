@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 //
 // Design: numbered dots between chevrons, so the current step reads at a
 // glance without losing the original ">" breadcrumb feel. Steps before the
-// active one look "done" (filled dot, check mark); the active dot is filled
-// too, its label in bold.
+// active one look "done" (check mark); the active one is in full ink (never
+// blue), its label and every number in semi-bold, circles 1.5 px (Sacha).
 export function WorkflowBreadcrumb({
   projectId,
   lockedSteps = [],
@@ -36,7 +36,8 @@ export function WorkflowBreadcrumb({
 
   const activeIndex = WORKFLOW_STEPS.findIndex((step) => {
     const href = step.href?.(projectId);
-    return href ? pathname === href : false;
+    // A sub-page (the Cadrage's shareable Brief) keeps its step active.
+    return href ? pathname === href || pathname.startsWith(`${href}/`) : false;
   });
 
   return (
@@ -74,7 +75,7 @@ export function WorkflowBreadcrumb({
                     className={cn(
                       "text-body-md",
                       active
-                        ? "font-medium text-[color:var(--tone-info-fg)]"
+                        ? "font-semibold text-foreground"
                         : "text-[color:var(--nav-fg-muted)] group-hover:text-foreground",
                     )}
                   >
@@ -118,9 +119,9 @@ function StepDot({
     <span
       aria-hidden
       className={cn(
-        "flex size-6 shrink-0 items-center justify-center rounded-full border text-[length:var(--type-caption)] font-medium",
+        "flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[length:var(--type-caption)] font-semibold",
         active
-          ? "border-[var(--tone-info-fg)] text-[color:var(--tone-info-fg)]"
+          ? "border-foreground text-foreground"
           : done
             ? "border-[var(--nav-fg)] text-[color:var(--nav-fg)]"
             : "border-[var(--border-default)] text-[color:var(--nav-fg-muted)]",

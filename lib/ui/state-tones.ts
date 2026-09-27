@@ -57,6 +57,13 @@ export const validationTone: Record<string, Tone> = {
   rejected: "danger",
 };
 
+/** A point of the Framing's guided review (lib/framing/guide.ts). */
+export const framingStepTone: Record<string, Tone> = {
+  empty: "neutral",
+  to_review: "warning",
+  confirmed: "success",
+};
+
 /** "Identifier un besoin n'engage rien": identified is neutral, committed runs. */
 export const needTone: Record<string, Tone> = {
   identified: "neutral",

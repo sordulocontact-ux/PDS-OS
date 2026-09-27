@@ -14,74 +14,7 @@ import {
 import { fail, type ActionResult } from "@/lib/framing/result";
 import { createClient } from "@/lib/supabase/server";
 
-// Needs ---------------------------------------------------------------------
-
-export async function addNeed(
-  projectId: string,
-  label: string,
-  family: string,
-): Promise<ActionResult> {
-  const p = z
-    .object({ projectId: id, label: text(200), family: z.enum(FAMILIES) })
-    .safeParse({ projectId, label, family });
-  const organizationId = await orgId();
-  if (!p.success || !organizationId) return fail("invalid_input");
-  const supabase = await createClient();
-  const { error } = await supabase.from("needs").insert({
-    organization_id: organizationId,
-    project_id: projectId,
-    label: p.data.label,
-    family: p.data.family,
-  });
-  return done(projectId, error);
-}
-
-const needPatch = z.object({
-  label: text(200).optional(),
-  family: z.enum(FAMILIES).optional(),
-  state: z.enum(["identified", "committed"]).optional(),
-  review_status: z.enum(REVIEW).optional(),
-});
-
-export async function updateNeed(
-  projectId: string,
-  needId: string,
-  patch: z.input<typeof needPatch>,
-): Promise<ActionResult> {
-  const p = needPatch.safeParse(patch);
-  if (!p.success || !id.safeParse(needId).success) return fail("invalid_input");
-  await requireApproved();
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from("needs")
-    .update(p.data)
-    .eq("id", needId)
-    .eq("project_id", projectId);
-  return done(projectId, error);
-}
-
 // Team ----------------------------------------------------------------------
-
-export async function addTeamMember(
-  projectId: string,
-  displayName: string,
-  role: string,
-): Promise<ActionResult> {
-  const p = z
-    .object({ displayName: text(120), role: z.string().trim().max(120) })
-    .safeParse({ displayName, role });
-  const organizationId = await orgId();
-  if (!p.success || !organizationId || !id.safeParse(projectId).success)
-    return fail("invalid_input");
-  const supabase = await createClient();
-  const { error } = await supabase.from("project_team_members").insert({
-    organization_id: organizationId,
-    project_id: projectId,
-    display_name: p.data.displayName,
-    role: p.data.role || null,
-  });
-  return done(projectId, error);
-}
 
 export async function reviewTeamMember(
   projectId: string,
@@ -100,5 +33,56 @@ export async function reviewTeamMember(
     .update({ review_status: status })
     .eq("id", memberId)
     .eq("project_id", projectId);
+  return done(projectId, error);
+}
+
+const selection = z.object({
+  projectId: id,
+  add: z
+    .array(z.object({ label: text(200), family: z.enum(FAMILIES) }))
+    .max(50),
+  remove: z.array(id).max(50),
+});
+
+/**
+ * "Confirmer cette sélection" of the Besoins & activations screen, in one
+ * go: the chips clicked on are added, the ones clicked off are rejected, and
+ * every need still proposed is confirmed. Nothing is written while clicking.
+ */
+export async function saveNeedsSelection(
+  projectId: string,
+  // The family is checked here (FAMILIES), not trusted from the client.
+  add: Array<{ label: string; family: string }>,
+  remove: string[],
+): Promise<ActionResult> {
+  const p = selection.safeParse({ projectId, add, remove });
+  const organizationId = await orgId();
+  if (!p.success || !organizationId) return fail("invalid_input");
+  const supabase = await createClient();
+
+  if (p.data.remove.length) {
+    const { error } = await supabase
+      .from("needs")
+      .update({ review_status: "rejected" })
+      .eq("project_id", projectId)
+      .in("id", p.data.remove);
+    if (error) return done(projectId, error);
+  }
+  if (p.data.add.length) {
+    const { error } = await supabase.from("needs").insert(
+      p.data.add.map((need) => ({
+        organization_id: organizationId,
+        project_id: projectId,
+        label: need.label,
+        family: need.family,
+      })),
+    );
+    if (error) return done(projectId, error);
+  }
+  const { error } = await supabase
+    .from("needs")
+    .update({ review_status: "confirmed" })
+    .eq("project_id", projectId)
+    .eq("review_status", "proposed");
   return done(projectId, error);
 }

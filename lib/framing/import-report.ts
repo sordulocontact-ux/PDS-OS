@@ -92,7 +92,7 @@ export async function importReportIntoBrief(
   if (!items?.length) return fail("not_found");
   const itemIds = items.map((i) => i.id);
 
-  const [f, n, t, o] = await Promise.all([
+  const [f, n, t, o, c] = await Promise.all([
     supabase
       .from("field_values")
       .select("id")
@@ -114,8 +114,13 @@ export async function importReportIntoBrief(
       .select("id")
       .in("source_report_item_id", itemIds)
       .limit(1),
+    supabase
+      .from("framing_constraints")
+      .select("id")
+      .in("source_report_item_id", itemIds)
+      .limit(1),
   ]);
-  if ([f, n, t, o].some((r) => (r.data?.length ?? 0) > 0))
+  if ([f, n, t, o, c].some((r) => (r.data?.length ?? 0) > 0))
     return fail("already_imported");
 
   const { data: current } = await supabase
@@ -163,6 +168,16 @@ export async function importReportIntoBrief(
       role: i.who,
       review_status: "proposed",
     }));
+  // The report does not type a constraint: it arrives as "other" and the
+  // person picks budget, production… while reviewing it.
+  const constraints = items
+    .filter((i) => i.kind === "frame")
+    .map((i) => ({
+      ...source(i),
+      type: "other",
+      text: i.what,
+      review_status: "proposed",
+    }));
   const points = items
     .filter((i) => i.kind === "open")
     .map((i) => ({
@@ -176,6 +191,9 @@ export async function importReportIntoBrief(
     fields.length ? supabase.from("field_values").insert(fields) : null,
     needs.length ? supabase.from("needs").insert(needs) : null,
     team.length ? supabase.from("project_team_members").insert(team) : null,
+    constraints.length
+      ? supabase.from("framing_constraints").insert(constraints)
+      : null,
     points.length ? supabase.from("open_points").insert(points) : null,
   ]);
   const error = results.find((r) => r?.error)?.error;

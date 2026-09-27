@@ -52,6 +52,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
+| `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 
 Principes :
@@ -333,10 +334,51 @@ pré-remplissage (`start_framing_without_call`, fonction SQL security definer : 
 ligne ; la fonction casse cette circularité en vérifiant `is_project_owner` elle-même). Un call brouillon daté dans le futur est affiché « À venir »
 (`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
 Compte rendu versé **automatiquement** (plus de panneau d'import sur le Cadrage ; la
-Stratégie garde le sien) → propositions « proposé · à confirmer » (Brief, besoins, équipe,
-points ouverts), provenance cliquable (call + minutage + citation), confirmer / rejeter /
-modifier, besoins identifié → engagé, actions proposées → tâches (responsable + échéance
-choisis par une personne), circuit de validation.
+Stratégie garde le sien) → propositions « proposé · à confirmer » (Brief, besoins, cadre,
+équipe, points ouverts), actions proposées → tâches (responsable + échéance choisis par une
+personne), circuit de validation.
+
+**Relecture guidée** (27/09/2026, d'après les maquettes de Sacha) : la page est un parcours
+d'une question à la fois, l'écran dans l'URL (`?step=overview|objective|timing|needs|frame|team|summary`,
+`lib/framing/guide.ts`), menu des 5 points à gauche (`FramingStepNav`, statut et résumé
+d'une ligne **calculés par le code**), un écran par point (`components/framing/guide/`) :
+
+- **Objectif** : on clique une formulation (celle du call, ou une de PO via « Proposer des
+  formulations », citée mot pour mot et vérifiée, `chooseObjective` relit le texte en base,
+  jamais celui du client) ou « Autre intention » en saisie libre.
+- **Temporalité** : texte tel qu'il a été dit (« sortie visée le 24 octobre »), jamais
+  converti en date ; encart « hypothèse à confirmer » avec la source. Pas de « Voir les
+  impacts » : le planning ne se construit qu'après validation.
+- **Besoins & activations** : pastilles (`FilterChip` soft) ; un clic ne change que la
+  sélection à l'écran, rien n'est écrit avant « Confirmer cette sélection », qui ajoute,
+  rejette et confirme en une fois (`saveNeedsSelection`) ;
+  activation = famille `promotion_distribution`, besoin = le reste. L'état identifié /
+  engagé n'est plus manipulé ici (l'engagement se fait dans la Stratégie, par les leviers).
+- **Cadre & contraintes** : lignes de `framing_constraints` (type budget / production /
+  artistique / droits / autre), une modale par ligne ; le compte rendu les importe en
+  « autre » (le modèle ne type pas), la personne choisit le type.
+- **Équipe projet** : une carte par rôle fixe (`lib/framing/team-roles.ts`, rôles
+  débloqués par les besoins, `teamBoard`), pleine ou « À trouver » ; « Attribuer » en un
+  clic à une personne déjà dans l'équipe ou à un nouveau nom (`role_key`, au plus une ligne
+  par rôle).
+- « Confirmer la sélection / le cadre / l'équipe » confirme d'un coup les lignes encore
+  proposées de l'écran (`confirmProposed`) puis passe au point suivant.
+- **Récapitulatif** : aperçu du Brief (`briefFacts`, faits écrits par le code), « Reste à
+  faire » (points à confirmer, rôles à pourvoir, points ouverts), demande de validation
+  (responsable), « Valider et clôturer » (valideur seul, `decide_validation`), points
+  ouverts et tâches.
+- **Brief partageable** `/framing/brief` : lecture seule, « Copier le lien » (ouvert aux
+  seuls membres qui voient le projet — pas de lien public à jeton en V1) et « Exporter en
+  PDF » qui **télécharge un fichier** (jamais la fenêtre d'impression) : route
+  `GET /api/projects/[projectId]/framing-brief`, données lues avec la session (RLS), HTML
+  autonome et échappé (`lib/framing/brief-pdf.ts`) imprimé par Playwright.
+
+**Export PDF** (`lib/pdf/render.ts`, seul point d'entrée) : `playwright-core` reçoit un HTML
+complet (`setContent`), le navigateur ne visite jamais l'app, aucune session ne lui est
+confiée. Sur Vercel, Chromium de `@sparticuz/chromium` ; en local, le Chrome installé
+(`channel: "chrome"`, il doit donc être présent sur la machine). Les deux paquets sont en
+`serverExternalPackages` et le dossier `bin` de Chromium est ajouté au traçage de la route
+(`next.config.ts`) ; `maxDuration` 60 s. Environ 2 s par PDF, plus au premier lancement.
 
 ### Dictée (bouton « Dicter » : Cadrage et Stratégie)
 

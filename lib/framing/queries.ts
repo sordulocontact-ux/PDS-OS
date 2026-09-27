@@ -8,6 +8,7 @@ import {
   type Provenance,
 } from "@/lib/framing/brief";
 import { provenanceLookup } from "@/lib/framing/provenance";
+import type { ObjectiveSuggestion } from "@/lib/framing/suggest-objective";
 import {
   loadImportableReports,
   loadMembers,
@@ -25,6 +26,7 @@ type Need = Tables["needs"]["Row"];
 type TeamMember = Tables["project_team_members"]["Row"];
 type OpenPoint = Tables["open_points"]["Row"];
 type Task = Tables["tasks"]["Row"];
+type Constraint = Tables["framing_constraints"]["Row"];
 type ReportItem = Tables["report_items"]["Row"];
 
 /** Framing opens with a call report or "Commencer en amont"; the rule lives in SQL (framing_is_open). */
@@ -44,6 +46,9 @@ export type FramingData = {
   fields: BriefFieldState[];
   needs: Array<Need & { provenance: Provenance | null }>;
   team: Array<TeamMember & { provenance: Provenance | null }>;
+  constraints: Array<Constraint & { provenance: Provenance | null }>;
+  // Objective rephrasings PO suggested (lib/framing/actions/objective.ts).
+  objectiveSuggestions: ObjectiveSuggestion[];
   openPoints: Array<OpenPoint & { provenance: Provenance | null }>;
   tasks: Task[];
   proposedActions: ReportItem[];
@@ -52,6 +57,14 @@ export type FramingData = {
   // Who a validation may be asked of: holders of "validate" (the director).
   validators: Member[];
 };
+
+function suggestionsOf(
+  rows: Array<{ field_key: string | null; value: unknown }>,
+): ObjectiveSuggestion[] {
+  const row = rows.find((r) => r.field_key === "objective_suggestions");
+  const items = (row?.value as { items?: unknown } | null)?.items;
+  return Array.isArray(items) ? (items as ObjectiveSuggestion[]) : [];
+}
 
 /** Everything the framing page shows, read with the user's session (RLS). */
 export async function loadFraming(
@@ -72,6 +85,7 @@ export async function loadFraming(
     fieldsRes,
     needsRes,
     teamRes,
+    constraintsRes,
     pointsRes,
     tasksRes,
     members,
@@ -102,6 +116,12 @@ export async function loadFraming(
       .neq("review_status", "rejected")
       .order("created_at"),
     supabase
+      .from("framing_constraints")
+      .select("*")
+      .eq("project_id", projectId)
+      .neq("review_status", "rejected")
+      .order("created_at"),
+    supabase
       .from("open_points")
       .select("*")
       .eq("project_id", projectId)
@@ -122,6 +142,7 @@ export async function loadFraming(
   const fieldRows = fieldsRes.data ?? [];
   const needs = needsRes.data ?? [];
   const team = teamRes.data ?? [];
+  const constraints = constraintsRes.data ?? [];
   const openPoints = pointsRes.data ?? [];
   const tasks = tasksRes.data ?? [];
 
@@ -130,6 +151,7 @@ export async function loadFraming(
       ...fieldRows,
       ...needs,
       ...team,
+      ...constraints,
       ...openPoints.map((p) => ({
         source_report_item_id: p.source_report_item_id,
       })),
@@ -161,6 +183,7 @@ export async function loadFraming(
     },
     stage,
     pendingValidation,
+    objectiveSuggestions: suggestionsOf(fieldRows),
     fields: BRIEF_TEXT_FIELDS.map((key) => {
       const row = fieldRows.find((r) => r.field_key === key);
       return toBriefField(
@@ -176,6 +199,10 @@ export async function loadFraming(
     team: team.map((m) => ({
       ...m,
       provenance: provenanceOf(m),
+    })),
+    constraints: constraints.map((c) => ({
+      ...c,
+      provenance: provenanceOf(c),
     })),
     openPoints: openPoints.map((p) => ({
       ...p,

@@ -37,7 +37,8 @@ Tailwind + shadcn/ui
 Supabase (Postgres, Auth, Storage, RLS, Realtime)
 Vercel AI SDK          → couche unique sur les fournisseurs de LLM
                          (@ai-sdk/mistral · groq · google · react)
-Playwright             → export PDF des documents (pas encore installé)
+Playwright             → export PDF des documents (playwright-core + @sparticuz/chromium
+                         sur Vercel, Chrome local en dev ; lib/pdf/render.ts)
 next-pwa               → installation sur mobile (phase ultérieure)
 ```
 
@@ -117,7 +118,7 @@ But : une modification d'interface se fait **à un seul endroit**.
 
 **Sources.** Règles : `docs/DESIGN.md` → valeurs : `app/globals.css` (DESIGN.md d'abord,
 puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas (dont `workStatusTone`,
-`deliverableStateTone`, `budgetStatusTone`, `validationTone`).
+`deliverableStateTone`, `budgetStatusTone`, `validationTone`, `framingStepTone`).
 
 **Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*` (dont `--surface-glass`), `--overlay-*`, flous `--glass-blur` (page) et `--glass-panel-blur` (panneau) ·
 texte `--text-*` · bordures `--border-*`, `--hairline-*` · tons d'état `--tone-*` ·
@@ -133,7 +134,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Button` | `ui/button.tsx` | variant : default, outline, secondary, ghost, destructive, link · size : default, xs, sm, lg (pilule), icon, icon-xs, icon-sm, icon-lg (carré arrondi 8 px) |
 | `Badge` | `ui/badge.tsx` | variant : default, secondary, destructive, outline, ghost, link |
 | `StatusBadge` | `ui/status-badge.tsx` | tone : neutral, info, warning, success, danger · size : sm, md |
-| `FilterChip`, `FilterChipLink` | `ui/filter-chip.tsx` | pastille de filtre (repos / survol / actif), prop `pressed` ; en lien quand le filtre est dans l'URL (`current`) |
+| `FilterChip`, `FilterChipLink` | `ui/filter-chip.tsx` | pastille de filtre (repos / survol / actif), prop `pressed`, `variant` ink (actif noir, défaut) ou soft (actif gris sans contour, survol sans contour, sélection à côté d'un bouton noir) ; en lien quand le filtre est dans l'URL (`current`) |
 | `SearchField` | `ui/search-field.tsx` | champ de recherche arrondi, libellé fourni par l'appelant |
 | `ConfirmDialog` | `ui/confirm-dialog.tsx` | confirmation d'une action (`destructive` si définitive) ; sans `onConfirm`, explique seulement pourquoi c'est impossible |
 | `DropdownMenu` (+ `Trigger`, `Content`, `Item`) | `ui/dropdown-menu.tsx` | menu Base UI, surface du Popover, sans animation |
@@ -190,11 +191,15 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `VoiceInputButton`, `VoiceInputBar`, `VoiceInputStatus` | `voice/voice-input.tsx` | saisie vocale d'un champ : micro ; pendant l'écoute, onde + ✕ annuler + ✓ valider à la place du micro et d'Envoyer |
 | `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
 | `FramingStart` | `framing/framing-start.tsx` | état « cadrage pas encore ouvert » (Cadrage verrouillé, vue d'ensemble) : deux options, préparer un call ou commencer en amont |
+| `ToneCallout` | `ui/tone-callout.tsx` | court encart sur le fond pâle d'un ton (hypothèse à confirmer, alerte), `tone` de `state-tones.ts` |
+| `FramingStepNav`, `FramingStepCard`, `GuideRow` | `framing/guide/` | relecture guidée du Cadrage : menu des 5 points (statut + résumé, fond blanc qui glisse d'un point à l'autre, `--duration-slide`), carte d'une question (surtitre, titre, actions), ligne « › » en lien ou en choix (radio) |
+| `OverviewStep`, `ObjectiveStep`, `TimingStep`, `NeedsStep`, `FrameStep`, `TeamStep`, `SummaryStep` | `framing/guide/` | un écran par point du Cadrage, récapitulatif (`?step=`) ; modales `AddNeedDialog`, `ConstraintDialog`, `AssignRoleDialog` |
+| `BriefFacts`, `BriefActions`, `SourceQuote` | `framing/guide/` | faits du Brief côte à côte (récap, brief partageable), « Copier le lien » / « Exporter en PDF » (fichier téléchargé), citation source d'une proposition |
 | `CallAgenda` | `calls/call-agenda.tsx` | ordre du jour préparé d'un call (points à aborder, temps approximatif), affiché avant l'enregistrement |
 | `StrategyNeedsFraming` | `strategy/strategy-needs-framing.tsx` | état « la stratégie suit le cadrage » (Stratégie verrouillée tant que le Cadrage n'est pas validé) |
 | `ArtistEditDialog`, `ArtistEditBody`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | modale « Modifier » (photo, identité, bio ; corps réutilisé depuis la liste), contacts de l'artiste |
 | `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
-| `Icon*` | `icons/index.ts` | icônes dessinées maison (dont `IconDots`, le « ⋯ ») ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
+| `Icon*` | `icons/index.ts` | icônes dessinées maison (dont `IconDots`, le « ⋯ », et `IconDownload`, un téléchargement) ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
 
 ---
 
@@ -304,6 +309,11 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   statut calculé par `projectStatusOf`). **Le cadrage part d'un call, ou du Brief en amont**
   (`framing_is_open` en SQL, `FramingStart` à l'écran : préparer un call avec ordre du jour,
   ou commencer en amont sans pré-remplissage) ; onglet Calls avant Cadrage.
+  **Cadrage en relecture guidée** : une question à la fois (`?step=`, `lib/framing/guide.ts`),
+  on répond en cliquant (formulations sourcées, pastilles, lignes de contraintes
+  `framing_constraints`, cartes de rôles `role_key`), récapitulatif puis Brief partageable
+  `/framing/brief`, PDF téléchargé (route `/api/projects/[id]/framing-brief`, Playwright
+  sur un HTML autonome, `docs/ARCHITECTURE.md` § 6).
   Nouvel artiste : recherche Deezer d'abord (nom **ou lien Deezer collé**, pour les petits
   artistes), saisie manuelle en repli ; le serveur relit Deezer, seul l'id vient du
   client. Sélecteurs :
@@ -460,13 +470,16 @@ Au-delà des six étapes :
       modale, archiver / restaurer (DG, refusé si utilisé), filtre « Archivés »
 - [x] **Retours** : fenêtre de retour partout (capture collée, Impr. écran), dédoublonnage
       par PO, le DG modifie (seul ou avec PO), transmet avec une priorité ou écarte
+- [x] **Cadrage en relecture guidée** : 5 points un par un (objectif, temporalité, besoins &
+      activations, cadre & contraintes, équipe par rôles), récapitulatif, Brief partageable
+      et export PDF
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 
 À faire ensuite (proposé, non commencé) :
 
 - [ ] Directeur créatif : dépôt de versions des livrables (il lit seulement pour l'instant)
-- [ ] Export **Plan de sortie** (PDF, Playwright) et partage par lien de la Stratégie
+- [ ] Export **Plan de sortie** (PDF, via `lib/pdf/render.ts` comme le Brief) et partage par lien de la Stratégie
 - [ ] Dictée sur les autres étapes (Sortie…) : un adaptateur chacune
 - [ ] Politique de suppression Storage (remplacer un audio, fichiers orphelins)
 

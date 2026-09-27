@@ -13,6 +13,7 @@ import { core } from "./core";
 import { design } from "./design";
 import { feedback } from "./feedback";
 import { framing } from "./framing";
+import { framingGuide } from "./framing-guide";
 import { labo } from "./labo";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
@@ -34,6 +35,7 @@ export const fr = {
   calls,
   catalog,
   framing,
+  framingGuide,
   strategy,
   design,
   release,

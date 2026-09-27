@@ -20,7 +20,7 @@ export function RequestValidationButton({
 }: {
   projectId: string;
   stageId: string;
-  size?: "default" | "sm";
+  size?: "default" | "sm" | "lg";
   /** Reads the note at submit time; omit where there is no note field. */
   getNote?: () => string;
 }) {
