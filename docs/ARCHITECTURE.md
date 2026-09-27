@@ -201,24 +201,28 @@ Principes :
 - Après « Créer l'artiste » depuis la page Artistes, la fiche du nouvel artiste s'ouvre ;
   depuis un sélecteur (master, projet), l'artiste est rendu au formulaire sans le quitter.
 
-### 2 sexies. Fiche master à onglets (`/app/catalog/masters/[id]/…`)
+### 2 sexies. Fiche titre à onglets (`/app/catalog/masters/[id]/…`)
+
+> Depuis le retour n°5 (27/09/2026), l'objet s'appelle **Titre** à l'écran ; le code et les
+> URL gardent `master` (voir § 2 septies).
 
 Migration `…003001_master_page.sql`, code dans `lib/catalog/master/`, écrans dans
 `components/catalog/master-page/`. Layout commun (en-tête, « Créer un projet », « ⋯ »,
 `MasterTabs`), une page par onglet, `loading.tsx` qui ne remplace que le corps.
 
-- **Vue d'ensemble** : tuiles cliquables (versions, sessions, contributeurs, projets),
-  **dossier du master** (ISRC, ISWC, titulaire ℗, contributeurs, splits à 100 %,
-  déclarations déposées, fichier master) calculé par le code (`masterChecklist`), faits,
+- **Vue d'ensemble** : tuiles cliquables (fichiers audio, variantes, sessions,
+  contributeurs, projets), **dossier du titre** (ISRC, ISWC, titulaire ℗, contributeurs,
+  splits à 100 %, déclarations déposées, fichier audio au stade Master final) calculé par le code (`masterChecklist`), faits,
   artistes interprètes.
 - **Sessions & pistes** : `master_sessions` (enregistrement, production, mixage, mastering,
   autre ; date, lieu, ingénieur, notes) et `master_tracks` (piste du multipiste,
   interprète, session facultative **du même master**, vérifié par trigger ; supprimer une
   session garde ses pistes, sans session).
-- **Versions** : décidées par le code, sans colonne (`listMasterVersionIds`) : les autres
-  masters actifs **de même titre** (casse et espaces ignorés) qui créditent un des artistes
-  principaux. « Nouvelle version » ouvre `/masters/new?versionOf=<id>` pré-rempli (titre,
-  crédits) ; chaque version a son propre ISRC.
+- **Audio** (`/audio`) : les fichiers audio successifs, un bloc par état audio (§ 2 septies).
+- **Variantes** (`/variants`) : décidées par le code (`listMasterVariantIds`) : les autres
+  titres actifs **de même nom** (casse et espaces ignorés) qui créditent un des artistes
+  principaux. « Nouvelle variante » ouvre `/masters/new?variantOf=<id>` pré-rempli (nom,
+  crédits) ; chaque variante a son propre ISRC. Le champ Variante ne fait que la nommer.
 - **Contributeurs & crédits** : les artistes interprètes restent `master_artists`
   (modifiés par « Modifier ») ; `master_contributors` porte tous les autres crédits (rôle
   fermé, précision libre), triés dans l'ordre des rôles.
@@ -235,8 +239,8 @@ Migration `…003001_master_page.sql`, code dans `lib/catalog/master/`, écrans 
   le master, avec UPC, date, statut (`releaseStatusOf`) et liens détectés ; on modifie dans
   la Sortie du projet.
 - **Projets**, **Fichiers**, **Activité** : mêmes tableaux et composants que la fiche
-  artiste. Fichiers : `master_files` + bucket privé `master-files` (master final, stems,
-  mix, pochette, contrat, autre), contrats réservés à `manage_catalog` ; composants et
+  artiste. Fichiers : `master_files` + bucket privé `master-files` (stems, pochette, contrat,
+  autre ; les fichiers `audio` ont leur onglet), contrats réservés à `manage_catalog` ; composants et
   actions communs artiste / master (`components/catalog/files/`, `FileOwner`).
   Journal : `activity_events` porte maintenant `master_id` (et `artist_id` devient
   facultatif, l'un des deux obligatoire) ; triggers `masters_log` (création, identité,
@@ -247,7 +251,54 @@ Migration `…003001_master_page.sql`, code dans `lib/catalog/master/`, écrans 
   politiques RLS) ; lecture par tout membre (splits exceptés). Toute écriture rafraîchit
   le layout du master (`revalidatePath(…, "layout")`).
 
-Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 408 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
+### 2 septies. Titre, état audio, variante (retour n°5)
+
+Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.ts`, vues
+`lib/catalog/title-views.ts`, composants `components/catalog/title/`.
+
+- **Vocabulaire** : à l'écran, « Titre » partout (Titres, Nouveau titre, Créer le titre) ;
+  « master » ne désigne plus que l'état audio et le split de propriété de
+  l'enregistrement. Le code, la table (`masters`), les routes (`/app/catalog/masters`) et
+  les fonctions de PO (`propose_master`, `find_masters`) gardent leur nom : les renommer
+  aurait touché toutes les clés étrangères sans rien changer au sens.
+- **Un titre = l'objet musical durable**, créé dès la maquette et enrichi sans jamais être
+  recréé. Obligatoires : titre et artiste principal. Facultatifs mais proposés dès la
+  création (bloc « Si vous les connaissez déjà ») : état audio, variante, ISRC, durée,
+  fichier audio.
+- **État audio** (`masters.audio_state`) : `demo` Maquette → `rough_mix` Mise à plat →
+  `master` Master → `final_master` Master final (`audio_state_rank` en SQL). **Null =
+  non renseigné**, jamais deviné : un titre existant avant la migration reste « Non
+  renseigné ». Ton : `audioStateTone`, pastille `AudioStateBadge`.
+- **Variante** (`masters.variant`, défaut `original`) : Original, Radio Edit, Instrumental,
+  Acapella, Remix, Autre ; `variant_label` (précision libre) **seulement pour Autre**
+  (contrainte SQL). Remplace l'ancien champ libre `version`, converti par la migration (texte
+  non reconnu → Autre avec ses mots). Libellé : `variantText`, `masterLabel`
+  (« Sauvéé (Instrumental) »).
+- **Fichiers audio successifs** : `master_files.category = 'audio'` avec `audio_state`
+  obligatoire et `duration_seconds` (lue par le navigateur, `readAudioDuration` : métadonnées
+  `<audio>`, sinon décodage Web Audio jusqu'à 25 Mo ; null s'il ne sait pas). Anciennes
+  catégories converties : `master` → audio Master final, `mix` → audio Mise à plat. Un
+  fichier ne crée jamais de titre.
+- **Le titre avance seul** : trigger `y_advance_title` (security invoker : les droits de la
+  personne qui dépose) — un fichier audio d'un état **≥** celui du titre le fait passer à
+  cet état (jamais en arrière) et lui donne sa durée si elle est connue. Journal : « Fichier
+  audio … ajouté (Master) », « État audio : Master ».
+- **Fichier choisi à la création** : il reste dans le navigateur ; `createMaster` rend le
+  titre (`intent=upload`), puis `useTitleAudioUpload` l'envoie et ouvre la fiche. Un
+  fichier sans état audio est refusé avant l'envoi (pas d'état deviné) ; un envoi raté
+  laisse le titre créé, toast et ouverture de l'onglet Audio.
+- **Liste Titres** : onglets par état audio dans l'URL (`?state=`) : **Hors maquettes (par
+  défaut)**, Maquettes, Mises à plat, Masters, Masters finaux, Tous ; un titre « Non
+  renseigné » n'est jamais caché ; Archivés du DG en pastilles, comme Artistes. Colonne
+  État audio.
+- **Création automatique depuis Studio (à venir)** : elle devra appeler `create_master`,
+  seule porte d'entrée, avec l'état `demo` et le fichier rattaché comme ci-dessus, sans
+  inventer titre, artiste, crédits, splits ni ISRC : même objet qu'une création manuelle.
+- **PO** : `propose_master` ne remplit état audio et variante que si l'utilisateur les
+  nomme ; ses mots sont vérifiés et lus par le code (`parseSaidAudioState`,
+  `parseSaidVariant` dans `lib/assistant/verbatim.ts`), comme l'ISRC.
+
+Tests : `supabase test db` (pgTAP, `supabase/tests/*.test.sql`, 422 tests ; `pg_temp.add_call_report` ouvre le Cadrage dans les fixtures). Fixtures uniques par exécution (tag aléatoire) : passent sans reset.
 
 Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En production, poser
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.

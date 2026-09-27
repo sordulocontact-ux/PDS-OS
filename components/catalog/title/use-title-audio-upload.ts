@@ -76,6 +76,7 @@ export function useTitleAudioUpload(organizationId: string | null) {
     sending,
     choose,
     check,
+    clearStateError: () => setStateError(undefined),
     send,
   };
 }
