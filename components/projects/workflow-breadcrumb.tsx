@@ -10,8 +10,8 @@ import { WORKFLOW_STEPS } from "@/lib/ui/workflow-steps";
 import { cn } from "@/lib/utils";
 
 // The 7-step breadcrumb of the business process, shown at the top of the
-// "Workflow" section (Cadrage, Stratégie, Sortie) — see lib/ui/workflow-steps.ts.
-// Hides itself outside those three pages, so the layout can render it
+// "Workflow" section (Cadrage, Stratégie, Conception, Sortie) — see
+// lib/ui/workflow-steps.ts. Hides itself outside those pages, so the layout can render it
 // unconditionally around every project page.
 // `lockedSteps`: steps that have a page but may not be opened yet (the
 // Stratégie before the Cadrage is validated) — shown greyed, not linked.
@@ -31,6 +31,7 @@ export function WorkflowBreadcrumb({
   const inWorkflow =
     pathname.startsWith(routes.projectFraming(projectId)) ||
     pathname.startsWith(routes.projectStrategy(projectId)) ||
+    pathname.startsWith(routes.projectDesign(projectId)) ||
     pathname.startsWith(routes.projectRelease(projectId));
   if (!inWorkflow) return null;
 

@@ -40,7 +40,7 @@ const section = (
 });
 
 // 12 sections in the Figma order ("Devis Sordulo", node 120:74), each with
-// its page; Workflow covers Cadrage/Stratégie/Sortie, entered through
+// its page; Workflow covers Cadrage/Stratégie/Conception/Sortie, entered through
 // Cadrage (docs/DESIGN.md § 4). An item without href is shown disabled.
 function useProjectSidebarItems(projectId: string): ProjectSidebarItem[] {
   const t = fr.shell.project.sidebar;
@@ -58,6 +58,7 @@ function useProjectSidebarItems(projectId: string): ProjectSidebarItem[] {
       match: (p) =>
         p.startsWith(routes.projectFraming(projectId)) ||
         p.startsWith(routes.projectStrategy(projectId)) ||
+        p.startsWith(routes.projectDesign(projectId)) ||
         p.startsWith(routes.projectRelease(projectId)),
     },
     section("activations", t.activations, routes.projectActivations(projectId)),
