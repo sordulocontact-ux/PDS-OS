@@ -116,7 +116,7 @@ But : une modification d'interface se fait **à un seul endroit**.
 > le rappelle s'il est installé). Une ligne par élément, pas de détail d'implémentation.
 
 **Sources.** Règles : `docs/DESIGN.md` → valeurs : `app/globals.css` (DESIGN.md d'abord,
-puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas (dont `workStatusTone`,
+puis le CSS). Ton d'un état : `lib/ui/state-tones.ts`, jamais choisi au cas par cas (dont `audioStateTone`, `workStatusTone`,
 `deliverableStateTone`, `budgetStatusTone`, `validationTone`).
 
 **Tokens** (`app/globals.css`) : palette `--po-*` · surfaces `--surface-*` (dont `--surface-glass`), `--overlay-*`, flous `--glass-blur` (page) et `--glass-panel-blur` (panneau) ·
@@ -144,7 +144,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
 | `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`, `Views`) | `ui/data-table.tsx` | **tout tableau de liste** ; **tout filtre de tableau en onglets** avec nombre via `DataTableViews` (au-dessus du tableau ou de son état vide, URL avec `viewHref` de `lib/ui/view-href.ts` ou `onSelect`), design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (`href` null = texte seul), colonne « ⋯ » `DataTableActionsHead` / `DataTableActionsCell` (Masters, Artistes, fiche artiste, Projets, Membres) |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
-| `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
+| `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action ; `badge` = pastille d'état à côté du titre) |
 | `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2, `description` d'une ligne et action facultatives, contenu) |
 | `SectionTabs` | `shell/section-tabs.tsx` | onglets-liens d'une page de détail (projet, artiste), `aria-current`, sur `TabBar` |
 | `FactList` | `ui/fact-list.tsx` | liste libellé / valeur dans une carte (faits d'un master, d'un projet, identité) |
@@ -160,7 +160,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `FeedbackForm`, `ScreenshotField` | `feedback/` | formulaire de la fenêtre de retour, captures jointes (5 au plus : aperçus avec ✕, zone de dépôt) |
 | `ZoneCapture`, `useCaptureShortcut` | `feedback/` | touche **C** : curseur « retour », deux coins (ou glisser) → capture de la zone, fenêtre de retour ouverte avec |
 | `useObjectUrl` | `ui/use-object-url.ts` | URL locale d'un fichier (aperçu avant envoi), révoquée proprement même en mode strict |
-| `FileDropZone` | `ui/file-drop-zone.tsx` | zone où glisser des fichiers, ou cliquer pour les choisir (input natif dans un label, `multiple`, état « au-dessus ») |
+| `FileDropZone` | `ui/file-drop-zone.tsx` | zone où glisser des fichiers, ou cliquer pour les choisir (input natif dans un label, `multiple`, `icon`, état « au-dessus ») |
 | `FeedbackList`, `FeedbackItems`, `FeedbackCard`, `FeedbackTopics`, `TopicActions`, `FeedbackTriage`, `FeedbackViewToggle` | `feedback/` | page Retours : retours envoyés ; boîte du DG (sujets de PO, transmettre avec priorité, écarter, onglets) |
 | `TopicEditForm` | `feedback/topic-edit-form.tsx` | modale « Modifier le retour » du DG avant transmission (titre, résumé, type), réécriture proposée par PO |
 | `TopicReviewForm` | `feedback/topic-review-form.tsx` | confirmation d'une décision sur un sujet préparée par PO (priorité à choisir ou corriger) |
@@ -186,7 +186,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `BudgetSummary`, `BudgetLines`, `BudgetTable`, `BudgetLineSheet`, `DeleteBudgetLineDialog` | `budget/` | page Budget : tuiles et dépassement, lignes filtrables par statut, formulaire en `Sheet`, suppression confirmée |
 | `FilesTable`, `ValidationItem`, `ActivityTimeline` | `project-history/` | fichiers du projet (audio des calls, téléchargement signé), demande de validation, journal groupé par jour |
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
-| `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire ; `TextareaField` `addon` = contrôle posé dans le coin bas du champ (micro) |
+| `Field`, `TextareaField`, `SubmitButton` (`busy` : travail après l'action, un envoi), `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire ; `TextareaField` `addon` = contrôle posé dans le coin bas du champ (micro) |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
 | `TabBar` | `ui/tab-bar.tsx` | barre d'onglets (liens ou boutons) sans filet, trait de 2 px qui glisse sous l'onglet actif ; base de `SectionTabs` et `DataTableViews` |
 | `ChoiceCards` | `ui/choice-cards.tsx` | radios natifs avec la conséquence sous chaque choix (call, retours, membres, artiste) ; `columns={3}` côte à côte dès `sm` |
@@ -200,7 +200,8 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `CallAgenda` | `calls/call-agenda.tsx` | ordre du jour préparé d'un call (points à aborder, temps approximatif), affiché avant l'enregistrement |
 | `StrategyNeedsFraming` | `strategy/strategy-needs-framing.tsx` | état « la stratégie suit le cadrage » (Stratégie verrouillée tant que le Cadrage n'est pas validé) |
 | `ArtistEditDialog`, `ArtistEditBody`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | modale « Modifier » (photo, identité, bio ; corps réutilisé depuis la liste), contacts de l'artiste |
-| `FileUpload`, `FilesTable`, `FileActions` | `catalog/files/` | fichiers d'un artiste ou d'un master (`owner: FileOwner`) : catégorie + envoi, tableau, télécharger / supprimer |
+| `FileUpload`, `FilesTable`, `FileActions` | `catalog/files/` | fichiers d'un artiste ou d'un titre (`owner: FileOwner`) : catégorie + envoi, tableau, télécharger / supprimer ; `audio` = état audio au lieu de la catégorie, durée lue (onglet Audio) |
+| `AudioStateBadge`, `TitleDetailsFields`, `AudioFileField`, `useTitleAudioUpload`, `TitleListViews` | `catalog/title/` | pastille d'état audio ; champs facultatifs d'un titre (état audio, variante + précision, ISRC, durée) ; fichier audio choisi avant envoi ; envoi après création ; onglets par état de la liste Titres |
 | `ActivityLog` | `catalog/activity/activity-log.tsx` | journal par jour d'un artiste ou d'un master (phrases déjà écrites par le code) |
 | `MasterTabs`, `MasterArtists`, `MasterChecklist`, `DistributionList` | `catalog/master-page/` | onglets de la fiche master (Splits pour `manage_catalog`), artistes interprètes, dossier du master, sorties des projets |
 | `SessionsSection`, `TracksSection`, `ContributorsSection`, `SplitsSection`, `RightsSection`, `DeclarationsSection` (+ leurs `*Form`) | `catalog/master-page/` | listes modifiables de la fiche master, formulaire en `FormDialog` |
@@ -334,10 +335,20 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   téléversée (bucket privé `artist-pictures`, URL signées) qui prime sur celle de Deezer.
   Deezer en direct (cache 1 h) ; bio auto par l'API **interne** Deezer, repli Wikipédia via
   Wikidata P2722 (`lib/catalog/artist-*.ts`, `docs/ARCHITECTURE.md` § 2).
-  **Fiche master à 10 onglets** (`/app/catalog/masters/[id]` + `/sessions`, `/versions`,
-  `/credits`, `/splits`, `/rights`, `/distribution`, `/projects`, `/files`, `/activity`) :
-  dossier du master calculé par le code, sessions et pistes, versions (même titre + même
-  artiste principal, décidé par le code), contributeurs, splits master / édition (≤ 100 %
+  **Titre** (retour n°5) : à l'écran l'objet s'appelle **Titre** ; code, table `masters`,
+  routes et fonctions de PO gardent `master`. Créé dès la maquette (titre + artiste
+  principal obligatoires, le reste facultatif mais proposé : état audio, variante, ISRC,
+  durée, fichier audio), jamais recréé. **État audio** (Maquette → Mise à plat → Master →
+  Master final, null = non renseigné, jamais deviné) ≠ **Variante** (Original, Radio Edit,
+  Instrumental, Acapella, Remix, Autre + précision). Fichiers audio successifs
+  (`master_files` catégorie `audio` + état + durée lue par le navigateur) ; un fichier plus
+  avancé fait avancer le titre (trigger, jamais en arrière). Liste : onglets par état,
+  **Hors maquettes** par défaut. Future création depuis Studio : `create_master`, seule
+  porte d'entrée (`docs/ARCHITECTURE.md` § 2 septies).
+  **Fiche titre à 11 onglets** (`/app/catalog/masters/[id]` + `/audio`, `/sessions`,
+  `/variants`, `/credits`, `/splits`, `/rights`, `/distribution`, `/projects`, `/files`,
+  `/activity`) : dossier du titre calculé par le code, fichiers audio par état, sessions et
+  pistes, variantes (même nom + même artiste principal, décidé par le code), contributeurs, splits master / édition (≤ 100 %
   vérifié en SQL, **`manage_catalog` seul**), ISWC et ℗, déclarations SACEM / SCPP / SPPF /
   ADAMI / SPEDIDAM, sorties des projets en lecture, fichiers `master-files`, journal
   (`activity_events.master_id`) ; écriture `manage_catalog` sur master actif
@@ -428,7 +439,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 408 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 422 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -488,6 +499,9 @@ Au-delà des six étapes :
 - [x] **Fiche master à onglets** : vue d'ensemble (dossier à compléter), sessions & pistes,
       versions, contributeurs & crédits, splits, droits & déclarations, distribution,
       projets, fichiers, activité
+- [x] **Titres** (retour n°5) : Master → Titre à l'écran, état audio ≠ variante, création
+      minimale, fichiers audio successifs qui font avancer le titre, onglets par état
+      (Hors maquettes par défaut)
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 

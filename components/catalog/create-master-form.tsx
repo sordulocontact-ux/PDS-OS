@@ -119,9 +119,12 @@ export function CreateMasterForm({
       />
 
       <fieldset className="flex flex-col gap-5 border-t border-border pt-5">
-        <legend className="mb-4 text-sm font-medium text-muted-foreground">
-          {t.optionalLegend}
-        </legend>
+        {/* At creation only: an edit is about what is already known. */}
+        {!masterId && (
+          <legend className="mb-4 text-sm font-medium text-muted-foreground">
+            {t.optionalLegend}
+          </legend>
+        )}
         <TitleDetailsFields
           prefix={prefix}
           values={values}
@@ -129,7 +132,10 @@ export function CreateMasterForm({
             ...errors,
             audioState: errors.audioState ?? audio.stateError,
           }}
-          onAudioStateChange={setAudioState}
+          onAudioStateChange={(state) => {
+            setAudioState(state);
+            audio.clearStateError();
+          }}
         />
         {withFile && (
           <AudioFileField
