@@ -1,27 +1,59 @@
-/** Catalog: artists, masters and their pickers (docs/PARCOURS-01). */
+/** Catalog: artists, titles ("masters" in the code) and their pickers (docs/PARCOURS-01). */
 export const catalog = {
   notProvided: "non renseigné",
+
+  // Relation of an artist with PDS, apart from archiving (Actif / Archivé).
+  relation: {
+    legend: "Relation avec PDS",
+    labels: { signed: "Signé", collaboration: "Collaboration" },
+    hints: {
+      signed: "Intégré au roster de PDS, accompagné dans la durée.",
+      collaboration:
+        "Présent pour un ou plusieurs projets ponctuels (un PDS Mic…), sans faire partie du roster.",
+    },
+    editHint:
+      "Changer la relation garde la même fiche : titres, projets, contacts, fichiers et historique.",
+    required: "Choisissez la relation avec PDS.",
+    filter: {
+      label: "Relation avec PDS",
+      all: "Tous",
+      signed: "Signés",
+      collaboration: "Collaborations",
+    },
+  },
 
   artists: {
     title: "Artistes",
     subtitle:
       "Les artistes du label, tels qu'ils apparaissent sur les plateformes.",
     newArtist: "Nouvel artiste",
-    columns: { name: "Nom", masters: "Masters", notes: "Notes" },
+    columns: {
+      name: "Nom",
+      relation: "Relation",
+      masters: "Titres",
+      notes: "Notes",
+    },
     emptyTitle: "Aucun artiste pour l'instant",
-    emptyBody: "Ajoutez un artiste pour pouvoir lui créditer des masters.",
+    emptyBody: "Ajoutez un artiste pour pouvoir lui créditer des titres.",
     emptyBodyReadOnly: "Les artistes apparaîtront ici dès qu'ils seront créés.",
+    // A relation filter with no match, while the catalog holds artists.
+    filteredEmpty: {
+      signed: "Aucun artiste signé",
+      collaboration: "Aucune collaboration",
+    },
+    filteredEmptyBody:
+      "La relation avec PDS se choisit à la création et se modifie depuis la fiche de l'artiste.",
     loadError: "Impossible de charger les artistes. Rechargez la page.",
   },
 
   artist: {
     back: "Tous les artistes",
     backTo: (name: string) => `Retour à ${name}`,
-    newMaster: "Nouveau master",
+    newMaster: "Nouveau titre",
     notes: "Notes",
     noNotes: "Aucune note.",
-    masters: "Masters crédités",
-    noMasters: "Aucun master ne crédite cet artiste pour l'instant.",
+    masters: "Titres crédités",
+    noMasters: "Aucun titre ne crédite cet artiste pour l'instant.",
     openDeezer: "Voir sur Deezer",
   },
 
@@ -30,23 +62,24 @@ export const catalog = {
     tabsLabel: "Sections de l'artiste",
     tabs: {
       overview: "Vue d'ensemble",
-      masters: "Masters",
+      masters: "Titres",
       projects: "Projets",
       files: "Fichiers",
       activity: "Activité",
       discography: "Discographie",
     },
     noProjects:
-      "Aucun projet visible pour cet artiste : ses masters ne sont rattachés à aucun projet que vous pouvez voir.",
+      "Aucun projet visible pour cet artiste : ses titres ne sont rattachés à aucun projet que vous pouvez voir.",
     loadError: "La liste n'a pas pu être chargée. Rechargez la page.",
     kind: "Artiste",
     edit: "Modifier",
     identity: "Identité",
     stageName: "Nom d'artiste",
+    relation: "Relation avec PDS",
     legalName: "Nom civil",
     country: "Pays d'origine",
     summary: "En bref",
-    mastersCount: "Masters",
+    mastersCount: "Titres",
     projectsCount: "Projets",
     fansCount: "Fans sur Deezer",
     noDeezer: "Pas de profil Deezer : discographie et chiffres indisponibles.",
@@ -55,7 +88,8 @@ export const catalog = {
 
   profileForm: {
     title: "Modifier l'artiste",
-    description: "Identité, photo et biographie de la fiche.",
+    description:
+      "Identité, relation avec PDS, photo et biographie de la fiche.",
     identity: "Identité",
     name: "Nom d'artiste",
     legalName: "Nom civil",
@@ -185,7 +219,7 @@ export const catalog = {
 
   artistForm: {
     title: "Nouvel artiste",
-    description: "Il pourra être crédité sur un ou plusieurs masters.",
+    description: "Il pourra être crédité sur un ou plusieurs titres.",
     name: "Nom",
     nameHint: "Nom de scène tel qu'il apparaît sur les plateformes.",
     notes: "Notes",
@@ -224,14 +258,31 @@ export const catalog = {
     },
   },
 
+  // Audio state and variant of a title: two separate facts.
+  audioStates: {
+    demo: "Maquette",
+    rough_mix: "Mise à plat",
+    master: "Master",
+    final_master: "Master final",
+  },
+  variants: {
+    original: "Original",
+    radio_edit: "Radio Edit",
+    instrumental: "Instrumental",
+    acapella: "Acapella",
+    remix: "Remix",
+    other: "Autre",
+  },
+
   masters: {
-    title: "Masters",
+    title: "Titres",
     subtitle:
-      "Les enregistrements audio de PDS, leurs identifiants et leurs sorties liées.",
-    newMaster: "Nouveau master",
+      "Les morceaux de PDS, de la maquette au master final, avec leurs identifiants et leurs sorties.",
+    newMaster: "Nouveau titre",
     columns: {
-      title: "Nom",
+      title: "Titre",
       artists: "Artiste",
+      audioState: "État audio",
       isrc: "ISRC",
       release: "Release liée",
       releaseDate: "Sortie officielle",
@@ -247,55 +298,94 @@ export const catalog = {
       planned: "Prévue",
       undated: "Sans date",
     },
-    search: {
-      label: "Rechercher un master",
-      placeholder: "Rechercher par titre, artiste ou ISRC",
-      noResult: (query: string) => `Aucun master ne correspond à « ${query} ».`,
+    // Views of the list by audio state. The default one leaves the demos
+    // out: they stay titles, one tab away.
+    views: {
+      label: "État audio",
+      withoutDemos: "Hors maquettes",
+      demo: "Maquettes",
+      rough_mix: "Mises à plat",
+      master: "Masters",
+      final_master: "Masters finaux",
+      all: "Tous",
     },
-    emptyTitle: "Aucun master pour l'instant",
-    emptyBody: "Créez un master pour pouvoir le rattacher à un projet.",
-    emptyBodyReadOnly: "Les masters apparaîtront ici dès qu'ils seront créés.",
-    loadError: "Impossible de charger les masters. Rechargez la page.",
+    filteredEmpty: {
+      withoutDemos: "Aucun titre au-delà de la maquette",
+      demo: "Aucune maquette",
+      rough_mix: "Aucune mise à plat",
+      master: "Aucun master",
+      final_master: "Aucun master final",
+    },
+    filteredEmptyBody:
+      "L'état audio se choisit à la création, se modifie dans « Modifier » et avance tout seul quand on ajoute un fichier audio plus avancé.",
+    search: {
+      label: "Rechercher un titre",
+      placeholder: "Rechercher par titre, artiste ou ISRC",
+      noResult: (query: string) => `Aucun titre ne correspond à « ${query} ».`,
+    },
+    emptyTitle: "Aucun titre pour l'instant",
+    emptyBody:
+      "Créez un titre dès qu'un morceau existe, même à l'état de maquette.",
+    emptyBodyReadOnly: "Les titres apparaîtront ici dès qu'ils seront créés.",
+    loadError: "Impossible de charger les titres. Rechargez la page.",
   },
 
   master: {
-    back: "Tous les masters",
+    back: "Tous les titres",
     backTo: (title: string) => `Retour à « ${title} »`,
     facts: "Informations",
     credits: "Crédits",
-    version: "Version",
-    mainVersion: "Version principale",
+    audioState: "État audio",
+    variant: "Variante",
     isrc: "ISRC",
     duration: "Durée",
     linkedProjects: "Projets liés",
-    noLinkedProjects: "Aucun projet ne rattache ce master pour l'instant.",
+    noLinkedProjects: "Aucun projet ne rattache ce titre pour l'instant.",
     createProject: "Créer un projet",
   },
 
   masterForm: {
-    title: "Nouveau master",
-    subtitle: "Un enregistrement, crédité à un ou plusieurs artistes.",
+    title: "Nouveau titre",
+    subtitle:
+      "Un titre et son artiste principal suffisent : le reste se complète quand vous le connaissez.",
+    // The optional fields, grouped under the two required ones.
+    optionalLegend: "Si vous les connaissez déjà",
     fields: {
       title: "Titre",
       artists: "Artistes",
-      version: "Version",
-      versionHint:
-        "« radio edit », « instrumental »… Laissez vide pour la version principale.",
+      audioState: "État audio",
+      audioStateHint:
+        "Facultatif. Il avance tout seul avec les fichiers audio.",
+      audioStateUnknown: "Non renseigné",
+      variant: "Variante",
+      variantLabel: "Précisez la variante",
+      variantLabelHint: "Facultatif. « Version live », « Slowed »…",
       isrc: "ISRC",
       isrcHint: "Facultatif. Les tirets et les espaces sont acceptés.",
       duration: "Durée",
       durationHint: "Facultatif, au format m:ss, par exemple 3:07.",
+      audioFile: "Fichier audio",
+      audioFileHint:
+        "Facultatif. Rattaché au titre à l'état audio choisi ; sa durée est lue quand c'est possible.",
     },
-    submit: "Créer le master",
+    submit: "Créer le titre",
     submitting: "Création…",
+    uploading: "Envoi du fichier…",
     cancel: "Annuler",
+    // The title exists, its file did not follow: said on the title's page.
+    fileFailed:
+      "Le titre est créé, mais le fichier audio n'a pas pu être envoyé. Ajoutez-le depuis l'onglet Audio.",
     errors: {
       artistsRequired: "Ajoutez au moins un artiste.",
       isrcInvalid:
         "ISRC invalide : 12 caractères, par exemple FR-Z03-26-00001.",
-      isrcTaken: "Un master porte déjà cet ISRC.",
+      isrcTaken: "Un titre porte déjà cet ISRC.",
       durationInvalid:
         "Durée invalide : utilisez le format m:ss, par exemple 3:07.",
+      audioStateInvalid: "Choisissez un état audio de la liste.",
+      variantInvalid: "Choisissez une variante de la liste.",
+      fileNeedsAudioState:
+        "Choisissez l'état audio du fichier : maquette, mise à plat, master ou master final.",
     },
   },
 
@@ -316,13 +406,13 @@ export const catalog = {
   },
 
   masterPicker: {
-    searchLabel: "Rattacher un master",
+    searchLabel: "Rattacher un titre",
     placeholder: "Rechercher par titre ou artiste…",
-    noResult: (query: string) => `Aucun master ne correspond à « ${query} ».`,
-    allSelected: "Tous les masters sont déjà rattachés.",
-    create: "Créer un master",
-    empty: "Aucun master rattaché.",
-    linked: "Masters rattachés",
+    noResult: (query: string) => `Aucun titre ne correspond à « ${query} ».`,
+    allSelected: "Tous les titres sont déjà rattachés.",
+    create: "Créer un titre",
+    empty: "Aucun titre rattaché.",
+    linked: "Titres rattachés",
     remove: (title: string) => `Retirer ${title}`,
     createDialogDescription:
       "Il sera rattaché au projet dès sa création. Votre saisie est conservée.",

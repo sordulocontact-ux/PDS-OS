@@ -2,7 +2,11 @@
 // written: it pre-fills the real form, a person reviews it and saves with
 // their own session. Client-safe.
 
-import type { Credit } from "@/lib/catalog/types";
+import type {
+  ArtistRelation,
+  Credit,
+  MasterFormDefaults,
+} from "@/lib/catalog/types";
 import type { ContactRole } from "@/lib/catalog/contacts";
 import type {
   FeedbackKind,
@@ -31,6 +35,8 @@ export type ArtistDraft = {
   artistId: string | null;
   values: {
     name: string;
+    // Null = not said: the person chooses in the form.
+    relation: ArtistRelation | null;
     notes: string | null;
     legalName: string | null;
     countryCode: string | null;
@@ -42,14 +48,8 @@ export type ArtistDraft = {
 export type MasterDraft = {
   kind: "master";
   masterId: string | null;
-  values: {
-    title: string;
-    version: string;
-    // Form formats: "FRZ032600001", "3:07"; empty when not given.
-    isrc: string;
-    duration: string;
-    credits: Credit[];
-  };
+  // The title form's values (audio state and variant only when said).
+  values: MasterFormDefaults & { credits: Credit[] };
 };
 
 export type ProjectDraft = {

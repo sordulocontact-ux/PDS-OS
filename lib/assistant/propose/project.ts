@@ -38,7 +38,7 @@ const said = (what: string) =>
 export function proposeProjectTool({ access, verbatim }: ProposeContext) {
   return tool({
     description:
-      "Prépare la création d'un projet, ou la modification d'un projet pas encore lancé : titre, type, masters, chef de projet et direction artistique (création seulement), échéance, budget, priorité, notes de cadrage. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
+      "Prépare la création d'un projet, ou la modification d'un projet pas encore lancé : titre, type, titres du catalogue (morceaux), chef de projet et direction artistique (création seulement), échéance, budget, priorité, notes de cadrage. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
     inputSchema: z.object({
       existingProject: z
         .string()
@@ -53,7 +53,7 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         .array(z.string().max(200))
         .max(20)
         .optional()
-        .describe("Titres des masters à rattacher"),
+        .describe("Noms des titres du catalogue à rattacher"),
       manager: z.string().max(100).optional().describe("Nom du chef de projet"),
       creatives: z
         .array(z.string().max(100))

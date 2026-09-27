@@ -11,6 +11,7 @@ import { useState } from "react";
 
 import { ContactForm } from "@/components/catalog/artist-page/contact-form";
 import { DeleteContactDialog } from "@/components/catalog/artist-page/delete-contact-dialog";
+import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,9 +56,7 @@ export function ArtistContacts({
       }
     >
       {contacts.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
-          {t.empty}
-        </p>
+        <EmptyNote>{t.empty}</EmptyNote>
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border">
           {contacts.map((contact) => (

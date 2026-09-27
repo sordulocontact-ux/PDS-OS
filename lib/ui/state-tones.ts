@@ -91,6 +91,17 @@ export const masterReleaseTone: Record<string, Tone> = {
   undated: "neutral",
 };
 
+/**
+ * How far a title has come: a demo is not work to do (neutral), a rough mix
+ * or a master runs toward the final master, which is done.
+ */
+export const audioStateTone: Record<string, Tone> = {
+  demo: "neutral",
+  rough_mix: "info",
+  master: "info",
+  final_master: "success",
+};
+
 /** Work of a person in a project (lib/project-work): late blocks, to do runs,
  * waiting on someone else, done. */
 export const workStatusTone: Record<string, Tone> = {
@@ -136,3 +147,23 @@ export const feedbackPriorityTone: Record<string, Tone> = {
   normal: "info",
   low: "neutral",
 };
+
+/** Declaration of a master to a collecting society: still to file waits for
+ * the team, filed waits for the organism, then confirmed or refused. */
+export const declarationStatusTone: Record<string, Tone> = {
+  todo: "warning",
+  submitted: "info",
+  confirmed: "success",
+  rejected: "danger",
+};
+
+/** Shares of a kind of split (splitTotal): complete at 100 %, else to do. */
+export const splitStatusTone: Record<string, Tone> = {
+  empty: "warning",
+  incomplete: "warning",
+  complete: "success",
+};
+
+/** An item of the master's file (overview checklist). */
+export const checklistTone = (done: boolean): Tone =>
+  done ? "success" : "warning";

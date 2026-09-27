@@ -11,6 +11,8 @@ import {
   type ActivityKind,
 } from "@/lib/catalog/activity-types";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
+import { variantOf, variantText } from "@/lib/catalog/title-rules";
+import { ARTIST_RELATIONS } from "@/lib/catalog/types";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,10 +27,13 @@ const kindSchema = z.enum(ACTIVITY_KINDS);
 const detailSchema = z.object({
   name: z.string().optional().catch(undefined),
   title: z.string().optional().catch(undefined),
+  // Before titles had a variant: the free version text.
   version: z.string().nullish().catch(undefined),
+  variant: z.string().nullish().catch(undefined),
   assignee: z.string().optional().catch(undefined),
   role: z.string().optional().catch(undefined),
   category: z.enum(FILE_CATEGORIES).optional().catch(undefined),
+  relation: z.enum(ARTIST_RELATIONS).optional().catch(undefined),
   fields: z
     .array(z.string())
     .optional()
@@ -66,7 +71,16 @@ export async function listArtistActivity(
     const kind = kindSchema.safeParse(row.kind);
     if (!kind.success) return [];
     const parsed = detailSchema.safeParse(row.detail);
-    const { version, ...rest } = parsed.success ? parsed.data : {};
+    const {
+      version,
+      variant: rawVariant,
+      ...rest
+    } = parsed.success ? parsed.data : {};
+    const variant =
+      version ||
+      (rawVariant
+        ? variantText({ variant: variantOf(rawVariant), variantLabel: null })
+        : null);
     const href = row.project_id
       ? routes.project(row.project_id)
       : MASTER_KINDS.includes(kind.data) && row.subject_id
@@ -81,7 +95,7 @@ export async function listArtistActivity(
           ? personName(row.actor.first_name, row.actor.last_name)
           : "",
         href,
-        detail: { ...rest, ...(version ? { version } : {}) },
+        detail: { ...rest, ...(variant ? { variant } : {}) },
       },
     ];
   });

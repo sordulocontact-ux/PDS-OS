@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { ChoiceCards } from "@/components/calls/choice-cards";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { reviewFeedbackTopic } from "@/lib/feedback/actions";
@@ -50,7 +50,8 @@ export function TopicReviewForm({
         setError(t.actions.failed);
         return;
       }
-      if (result.notion === "failed") toast.warning(t.notion.failed);
+      if (result.notion && result.notion.status !== "synced")
+        toast.error(t.notion.failed(result.notion.reason), { duration: 15000 });
       onSaved();
     });
 

@@ -9,14 +9,14 @@ export const artistActivity = {
   listLabel: "Journal d'activité de l'artiste",
   emptyTitle: "Aucune activité pour l'instant",
   emptyBody:
-    "Les créations, modifications, fichiers, masters et projets de l'artiste apparaîtront ici.",
+    "Les créations, modifications, fichiers, titres et projets de l'artiste apparaîtront ici.",
   loadError: "Le journal n'a pas pu être chargé. Rechargez la page.",
   today: "Aujourd'hui",
   yesterday: "Hier",
   by: (name: string) => `Par ${name}`,
   open: "Ouvrir",
   limitNote: "Seuls les 200 derniers événements sont affichés.",
-  aMaster: "un master",
+  aMaster: "un titre",
   aProject: "un projet",
   aFile: "un fichier",
   aContact: "un contact",
@@ -24,6 +24,7 @@ export const artistActivity = {
 
   fields: {
     identity: "l'identité",
+    relation: "la relation avec PDS",
     bio: "la biographie",
     notes: "les notes",
     picture: "la photo",
@@ -40,6 +41,10 @@ export const artistActivity = {
 
   sentences: {
     artistCreated: "Fiche artiste créée",
+    artistCreatedAs: (relation: string) => `Fiche artiste créée (${relation})`,
+    // A relation change says where the artist now stands.
+    relationNow: (field: string, relation: string) =>
+      `${field} (désormais ${relation})`,
     artistUpdated: (fields: string) => `Fiche modifiée : ${fields}`,
     artistUpdatedNoField: "Fiche modifiée",
     contactAdded: (name: string) => `Contact ${name} ajouté`,
@@ -47,8 +52,8 @@ export const artistActivity = {
     contactRemoved: (name: string) => `Contact ${name} retiré`,
     fileAdded: (name: string) => `Fichier ${name} ajouté`,
     fileRemoved: (name: string) => `Fichier ${name} supprimé`,
-    masterCreated: (title: string) => `Master ${title} créé`,
-    masterCredited: (title: string) => `Crédité sur le master ${title}`,
+    masterCreated: (title: string) => `Titre ${title} créé`,
+    masterCredited: (title: string) => `Crédité sur le titre ${title}`,
     projectCreated: (title: string) => `Projet ${title} créé`,
     projectLinked: (title: string) => `Rattaché au projet ${title}`,
     projectTransmitted: (title: string, assignee: string) =>

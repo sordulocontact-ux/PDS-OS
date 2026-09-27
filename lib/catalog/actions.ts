@@ -12,6 +12,7 @@ import {
   findArtistByName,
   findArtistsByDeezerIds,
   getMaster,
+  masterOption,
 } from "@/lib/catalog/queries";
 import { createArtistSchema, createMasterSchema } from "@/lib/catalog/schemas";
 import type { CreateArtistState, CreateMasterState } from "@/lib/catalog/types";
@@ -63,6 +64,7 @@ export async function createArtist(
     .insert({
       organization_id: access.organizationId,
       name: parsed.data.name,
+      relation: parsed.data.relation,
       notes: parsed.data.notes,
       deezer_id: deezer?.id ?? null,
       picture_url: deezer?.pictureBig ?? null,
@@ -102,8 +104,10 @@ export async function createArtist(
   return { status: "created", artist: data };
 }
 
-// `intent=page` redirects to the new master; `intent=dialog` (from the
-// project form) returns it so the form links it without losing its input.
+// `intent=page` redirects to the new title; `intent=dialog` (from the
+// project form) returns it so the form links it without losing its input;
+// `intent=upload` returns it too, so the browser sends the chosen audio file
+// to the new title before opening it. The file never travels here.
 export async function createMaster(
   _previous: CreateMasterState,
   formData: FormData,
@@ -133,7 +137,9 @@ export async function createMaster(
       artist_id: c.artistId,
       role: c.role,
     })),
-    p_version: input.version ?? undefined,
+    p_variant: input.variant,
+    p_variant_label: input.variantLabel ?? undefined,
+    p_audio_state: input.audioState ?? undefined,
     p_isrc: input.isrc ?? undefined,
     p_duration_seconds: input.duration ?? undefined,
   });
@@ -155,11 +161,11 @@ export async function createMaster(
   }
 
   revalidatePath(routes.app, "layout");
-  if (formData.get("intent") === "dialog") {
+  const intent = formData.get("intent");
+  if (intent === "dialog" || intent === "upload") {
     const master = await getMaster(masterId);
     if (master) {
-      const { id, title, version, artists } = master;
-      return { status: "created", master: { id, title, version, artists } };
+      return { status: "created", master: masterOption(master) };
     }
   }
   redirect(routes.master(masterId));

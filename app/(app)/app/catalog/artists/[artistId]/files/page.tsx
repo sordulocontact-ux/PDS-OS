@@ -2,13 +2,13 @@ import { IconFile } from "nucleo-sharp-essential";
 import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { FileUpload } from "@/components/catalog/artist-page/files/file-upload";
-import { FilesTable } from "@/components/catalog/artist-page/files/files-table";
+import { FileUpload } from "@/components/catalog/files/file-upload";
+import { FilesTable } from "@/components/catalog/files/files-table";
 import { EmptyState } from "@/components/shell/empty-state";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { getArtist } from "@/lib/catalog/artist-queries";
-import { listArtistFiles } from "@/lib/catalog/files";
+import { listCatalogFiles } from "@/lib/catalog/files";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -21,19 +21,17 @@ export default async function ArtistFilesPage({
   const [access, artist, { files, error }] = await allInOrder([
     requireApproved(),
     getArtist(artistId),
-    listArtistFiles(artistId),
+    listCatalogFiles({ kind: "artist", id: artistId }),
   ]);
   if (!artist) notFound();
   const canEdit = can(access, "manage_catalog");
-  const t = fr.artistFiles;
+  const t = fr.catalogFiles;
+  const owner = { kind: "artist", id: artist.id } as const;
 
   return (
     <div className="flex flex-col gap-6">
       {canEdit && (
-        <FileUpload
-          organizationId={artist.organizationId}
-          artistId={artist.id}
-        />
+        <FileUpload organizationId={artist.organizationId} owner={owner} />
       )}
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
@@ -44,7 +42,7 @@ export default async function ArtistFilesPage({
           body={canEdit ? t.emptyBody : t.emptyBodyReadOnly}
         />
       ) : (
-        <FilesTable artistId={artist.id} files={files} canDelete={canEdit} />
+        <FilesTable owner={owner} files={files} canDelete={canEdit} />
       )}
     </div>
   );

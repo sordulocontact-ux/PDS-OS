@@ -8,6 +8,8 @@ import type { Source } from "@/lib/assistant/sources";
 import { routes } from "@/lib/auth/redirects";
 import { listMasters } from "@/lib/catalog/queries";
 import {
+  ARTIST_RELATIONS,
+  artistRelationOf,
   formatDuration,
   formatFans,
   formatIsrc,
@@ -27,24 +29,33 @@ const MAX_DEEZER_LOOKUPS = 30;
 export function findArtistsTool() {
   return tool({
     description:
-      "Liste les artistes du catalogue, classés par nombre de fans Deezer (calculé par l'application), avec leur nombre de masters. Sert aussi à « l'artiste le plus écouté / 2e en écoutes » : les écoutes ne sont pas disponibles, le classement se fait aux fans Deezer.",
+      "Liste les artistes du catalogue, classés par nombre de fans Deezer (calculé par l'application), avec leur relation avec PDS (Signé = roster PDS, Collaboration = projets ponctuels) et leur nombre de masters. Sert aussi à « l'artiste le plus écouté / 2e en écoutes » : les écoutes ne sont pas disponibles, le classement se fait aux fans Deezer.",
     inputSchema: z.object({
       query: z
         .string()
         .max(100)
         .optional()
         .describe("Nom d'artiste, même approximatif ; absent pour tout lister"),
+      relation: z
+        .enum(ARTIST_RELATIONS)
+        .optional()
+        .describe(
+          "signed = artistes signés (roster PDS), collaboration = collaborations ; absent pour les deux",
+        ),
     }),
-    execute: async ({ query }) => {
+    execute: async ({ query, relation }) => {
       const t = fr.assistant.catalog;
+      const relations = fr.catalog.relation.labels;
       const supabase = await createClient();
-      const { data } = await supabase
+      const selected = supabase
         .from("artists")
         .select(
-          "id, name, deezer_id, credits:master_artists!master_artists_artist_same_org(count)",
+          "id, name, relation, deezer_id, credits:master_artists!master_artists_artist_same_org(count)",
         )
-        .is("archived_at", null)
-        .order("name");
+        .is("archived_at", null);
+      const { data } = await (
+        relation ? selected.eq("relation", relation) : selected
+      ).order("name");
       let rows = data ?? [];
       if (query?.trim()) {
         // Spelled or dictated wrong: what sounds like it ("untrill" → "Huntrill").
@@ -70,9 +81,10 @@ export function findArtistsTool() {
       let rank = 0;
       const facts = withFans.map((a) => {
         const masters = t.masterCount(a.masterCount);
-        if (a.fans === null) return t.artistNoDeezer(a.name, masters);
+        const label = relations[artistRelationOf(a.relation)];
+        if (a.fans === null) return t.artistNoDeezer(a.name, label, masters);
         rank += 1;
-        return t.artistRanked(rank, a.name, formatFans(a.fans), masters);
+        return t.artistRanked(rank, a.name, label, formatFans(a.fans), masters);
       });
       return {
         facts: facts.length ? [t.fansNotStreams, ...facts] : [t.noArtist],
@@ -88,6 +100,7 @@ function masterFact(m: MasterListItem): string {
   return fr.assistant.catalog.master(
     masterLabel(m),
     m.artists,
+    m.audioState ? fr.catalog.audioStates[m.audioState] : null,
     m.isrc ? formatIsrc(m.isrc) : null,
     m.durationSeconds !== null ? formatDuration(m.durationSeconds) : null,
   );
@@ -96,7 +109,7 @@ function masterFact(m: MasterListItem): string {
 export function findMastersTool() {
   return tool({
     description:
-      "Liste les masters (enregistrements) du catalogue avec leurs artistes, ISRC et durée ; filtrable par artiste ou par titre.",
+      "Liste les titres du catalogue (morceaux, de la maquette au master final) avec leurs artistes, état audio, ISRC et durée ; filtrable par artiste ou par nom.",
     inputSchema: z.object({
       artist: z.string().max(200).optional().describe("Nom de l'artiste"),
       query: z.string().max(200).optional().describe("Titre, même partiel"),

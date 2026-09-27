@@ -39,6 +39,9 @@ const column = ({ hideBelow: hide, fill, align }: ColumnProps) =>
     align === "end" && "pr-0 text-right",
   );
 
+// Tabs above a table (or its empty state): see data-table-views.tsx.
+export { DataTableViews } from "@/components/ui/data-table-views";
+
 // Shown in a cell that has no value.
 export const EMPTY_CELL = "—";
 

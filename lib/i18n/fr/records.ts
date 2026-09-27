@@ -1,4 +1,4 @@
-// Row actions of the lists (artists, masters, projects): "⋯" menu, edit
+// Row actions of the lists (artists, titles, projects): "⋯" menu, edit
 // panel, archiving (docs/ARCHITECTURE.md § 2 quater).
 
 type Kind = "artist" | "master" | "project";
@@ -19,7 +19,7 @@ export const records = {
   },
   archivedEmpty: {
     artist: "Aucun artiste archivé.",
-    master: "Aucun master archivé.",
+    master: "Aucun titre archivé.",
     project: "Aucun projet archivé.",
   } satisfies Record<Kind, string>,
   archivedEmptyBody:
@@ -27,12 +27,12 @@ export const records = {
   edit: {
     title: {
       artist: "Modifier l'artiste",
-      master: "Modifier le master",
+      master: "Modifier le titre",
       project: "Modifier le projet",
     } satisfies Record<Kind, string>,
     description: {
       artist: "Photo, identité et biographie.",
-      master: "Titre, artistes crédités, version, ISRC et durée.",
+      master: "Titre, artistes crédités, état audio, variante, ISRC et durée.",
       project: "Modifiable tant que le projet n'est pas lancé.",
     } satisfies Record<Kind, string>,
     loading: "Préparation du formulaire…",
@@ -46,7 +46,7 @@ export const records = {
       artist:
         "L'artiste disparaît du catalogue et des sélecteurs. Sa fiche, ses contacts et ses fichiers sont conservés : vous pourrez le restaurer depuis « Archivés ».",
       master:
-        "Le master disparaît du catalogue et des sélecteurs. Il est conservé : vous pourrez le restaurer depuis « Archivés ».",
+        "Le titre disparaît du catalogue et des sélecteurs. Il est conservé : vous pourrez le restaurer depuis « Archivés ».",
       project:
         "Le projet disparaît des listes, et sa transmission en attente est suspendue. Il est conservé : vous pourrez le restaurer depuis « Archivés ».",
     } satisfies Record<Kind, string>,
@@ -58,12 +58,12 @@ export const records = {
     blocked: {
       artistHasMasters: (count: number) =>
         count === 1
-          ? "Un master actif crédite cet artiste. Archivez d'abord ce master."
-          : `${count} masters actifs créditent cet artiste. Archivez d'abord ces masters.`,
+          ? "Un titre actif crédite cet artiste. Archivez d'abord ce titre."
+          : `${count} titres actifs créditent cet artiste. Archivez d'abord ces titres.`,
       masterHasProjects: (count: number) =>
         count === 1
-          ? "Un projet actif utilise ce master. Archivez d'abord ce projet."
-          : `${count} projets actifs utilisent ce master. Archivez d'abord ces projets.`,
+          ? "Un projet actif utilise ce titre. Archivez d'abord ce projet."
+          : `${count} projets actifs utilisent ce titre. Archivez d'abord ces projets.`,
       projectLaunched:
         "Ce projet est lancé : son travail vit dans ses étapes. Seul un projet pas encore lancé peut être archivé.",
     },
@@ -75,7 +75,7 @@ export const records = {
       artist:
         "L'artiste revient dans le catalogue et les sélecteurs, tel qu'il a été archivé.",
       master:
-        "Le master revient dans le catalogue et les sélecteurs, tel qu'il a été archivé.",
+        "Le titre revient dans le catalogue et les sélecteurs, tel qu'il a été archivé.",
       project:
         "Le projet revient dans les listes, avec sa transmission en attente s'il en avait une.",
     } satisfies Record<Kind, string>,
@@ -88,17 +88,17 @@ export const records = {
     forbidden: "Seul le directeur général peut archiver ou restaurer.",
     not_found: "Cet élément n'existe plus ou ne vous est pas visible.",
     artist_in_use:
-      "Cet artiste est encore crédité sur un master ou lié à un projet actif. Archivez-les d'abord.",
+      "Cet artiste est encore crédité sur un titre ou lié à un projet actif. Archivez-les d'abord.",
     master_in_use:
-      "Ce master est encore utilisé par un projet actif. Archivez d'abord ce projet.",
+      "Ce titre est encore utilisé par un projet actif. Archivez d'abord ce projet.",
     project_launched:
       "Ce projet est lancé : seul un projet pas encore lancé peut être archivé.",
     artist_name_taken:
       "Un artiste actif porte déjà ce nom ou ce profil Deezer : renommez l'un des deux avant de restaurer.",
     master_uses_archived:
-      "Un artiste crédité sur ce master est archivé : restaurez-le d'abord.",
+      "Un artiste crédité sur ce titre est archivé : restaurez-le d'abord.",
     project_uses_archived:
-      "Ce projet utilise un master ou un artiste archivé : restaurez-le d'abord.",
+      "Ce projet utilise un titre ou un artiste archivé : restaurez-le d'abord.",
     generic: "L'opération n'a pas abouti. Réessayez.",
   },
 } as const;

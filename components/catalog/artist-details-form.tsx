@@ -8,24 +8,28 @@ import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { ArtistRelationField } from "@/components/catalog/artist-relation-field";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { createArtist } from "@/lib/catalog/actions";
 import {
   formatFans,
   idleCreateArtistState,
+  isArtistRelation,
   type ArtistOption,
+  type ArtistRelation,
   type DeezerArtistResult,
 } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
 // Second step of "Nouvel artiste": the chosen Deezer profile (or none), the
-// name as it will appear in the catalog, and notes. Only the Deezer id is
+// name as it will appear in the catalog, the relation with PDS, and notes. Only the Deezer id is
 // sent: the server reads the picture and link from Deezer itself.
 export function ArtistDetailsForm({
   deezer,
   initialName,
   initialNotes = "",
+  initialRelation = null,
   onBack,
   onCancel,
   onDone,
@@ -34,6 +38,7 @@ export function ArtistDetailsForm({
   deezer: DeezerArtistResult | null;
   initialName: string;
   initialNotes?: string;
+  initialRelation?: ArtistRelation | null;
   onBack: () => void;
   onCancel: () => void;
   onDone: (artist: ArtistOption) => void;
@@ -44,6 +49,9 @@ export function ArtistDetailsForm({
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const existing = state.status === "error" ? state.existing : undefined;
+  const relation = isArtistRelation(values.relation)
+    ? values.relation
+    : initialRelation;
 
   useEffect(() => {
     if (state.status === "created") onDone(state.artist);
@@ -116,6 +124,8 @@ export function ArtistDetailsForm({
             </Link>
           ))}
       </div>
+
+      <ArtistRelationField defaultValue={relation} error={errors.relation} />
 
       <TextareaField
         name="notes"

@@ -104,14 +104,14 @@ des `sources` (libellé + lien) que l'interface affiche.
 | `my_todo` | — | mes tâches à faire (retards calculés), validations qui m'attendent, propositions de PO à confirmer par projet |
 | `recent_activity` | id de projet facultatif, nombre de jours (7 par défaut, 90 max) | événements datés : calls, comptes rendus, Brief, tâches, points tranchés, étapes, validations, mise en ligne |
 | `search_calls` | texte, id de projet facultatif | passages de comptes rendus correspondants, avec call, minutage et citation |
-| `find_artists` | texte facultatif | artistes classés par **fans Deezer** (rang calculé par le code, lu en direct, 30 au plus), nombre de masters ; les écoutes ne sont pas branchées |
+| `find_artists` | texte facultatif, relation (signés / collaborations) facultative | artistes classés par **fans Deezer** (rang calculé par le code, lu en direct, 30 au plus), relation avec PDS, nombre de masters ; les écoutes ne sont pas branchées |
 | `find_masters` | artiste ou titre facultatifs | masters avec artistes, ISRC, durée |
 
 ## 3 bis. Les propositions (écriture avec validation humaine)
 
 | Fonction | Crée ou modifie | Droit requis |
 | --- | --- | --- |
-| `propose_artist` | artiste : nom, nom civil, pays, biographie, notes, contacts à ajouter | `manage_catalog` |
+| `propose_artist` | artiste : nom, relation avec PDS (seulement si dite), nom civil, pays, biographie, notes, contacts à ajouter | `manage_catalog` |
 | `propose_master` | master : titre, artistes crédités (déjà au catalogue), version, ISRC, durée | `manage_catalog` |
 | `propose_project` | projet : titre, type, masters, échéance, budget, priorité, notes ; chef de projet et direction artistique à la création seulement | `create_projects` ; en modification, projet **pas lancé** |
 | `propose_feedback` | retour sur l'app : type (« Autre » par défaut, affiché), message (avec les mots de l'utilisateur), page d'où PO a été ouvert. Exception au panneau latéral : la carte montre tout le texte, **Envoyer** l'envoie tel quel (clic de la personne, sa session), **Modifier** ouvre la fenêtre de retour pré-remplie | tout membre |

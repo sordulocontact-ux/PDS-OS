@@ -4,6 +4,7 @@ import { cache } from "react";
 
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import {
+  artistRelationOf,
   formatCredits,
   isCreditRole,
   type ArtistListItem,
@@ -14,6 +15,7 @@ import {
   type MasterOption,
   type MasterRow,
 } from "@/lib/catalog/types";
+import { audioStateOf, variantOf } from "@/lib/catalog/title-rules";
 import { pickMasterRelease } from "@/lib/catalog/master-release";
 import { signArtistPictures } from "@/lib/catalog/pictures";
 import { createClient } from "@/lib/supabase/server";
@@ -45,10 +47,16 @@ export function toCredits(raw: RawCredit[]): Credit[] {
     );
 }
 
+// The columns of a title every list reads.
+export const MASTER_COLUMNS =
+  "id, title, variant, variant_label, audio_state, isrc, duration_seconds";
+
 export type RawMaster = {
   id: string;
   title: string;
-  version: string | null;
+  variant: string;
+  variant_label: string | null;
+  audio_state: string | null;
   isrc: string | null;
   duration_seconds: number | null;
   credits: RawCredit[];
@@ -58,7 +66,9 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
   return {
     id: row.id,
     title: row.title,
-    version: row.version,
+    variant: variantOf(row.variant),
+    variantLabel: row.variant_label,
+    audioState: audioStateOf(row.audio_state),
     artists: formatCredits(toCredits(row.credits)),
     isrc: row.isrc,
     durationSeconds: row.duration_seconds,
@@ -74,7 +84,7 @@ export async function listArtists(filter?: { archived?: boolean }): Promise<{
   const query = supabase
     .from("artists")
     .select(
-      "id, name, notes, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at))",
+      "id, name, notes, relation, picture_url, picture_path, credits:master_artists!master_artists_artist_same_org(master:masters!master_artists_master_same_org(archived_at))",
     );
   const { data, error } = await (
     filter?.archived
@@ -94,6 +104,7 @@ export async function listArtists(filter?: { archived?: boolean }): Promise<{
       id: row.id,
       name: row.name,
       notes: row.notes,
+      relation: artistRelationOf(row.relation),
       pictureUrl:
         (row.picture_path && signed.get(row.picture_path)) || row.picture_url,
       masterCount: row.credits.filter((c) => c.master && !c.master.archived_at)
@@ -170,9 +181,7 @@ export async function listMasters(filter?: {
   const supabase = await createClient();
   const select = supabase
     .from("masters")
-    .select(
-      `id, title, version, isrc, duration_seconds, ${CREDITS_SELECT}, ${MASTER_RELEASES_SELECT}`,
-    );
+    .select(`${MASTER_COLUMNS}, ${CREDITS_SELECT}, ${MASTER_RELEASES_SELECT}`);
   let query = filter?.archived
     ? select.not("archived_at", "is", null)
     : select.is("archived_at", null);
@@ -205,14 +214,20 @@ export async function listMasters(filter?: {
   };
 }
 
+/** What a picker or a draft needs of a title. */
+export function masterOption({
+  id,
+  title,
+  variant,
+  variantLabel,
+  artists,
+}: MasterOption): MasterOption {
+  return { id, title, variant, variantLabel, artists };
+}
+
 export async function listMasterOptions(): Promise<MasterOption[]> {
   const { masters } = await listMasters();
-  return masters.map(({ id, title, version, artists }) => ({
-    id,
-    title,
-    version,
-    artists,
-  }));
+  return masters.map(masterOption);
 }
 
 export const getMaster = cache(
@@ -222,7 +237,7 @@ export const getMaster = cache(
     const { data, error } = await supabase
       .from("masters")
       .select(
-        `id, title, version, isrc, duration_seconds, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, title, type, archived_at, created_at))`,
+        `${MASTER_COLUMNS}, ${CREDITS_SELECT}, links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, title, type, archived_at, created_at))`,
       )
       .eq("id", masterId)
       .is("archived_at", null)

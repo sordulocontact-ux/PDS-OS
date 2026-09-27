@@ -43,17 +43,17 @@ update public.memberships m set status = 'approved', role = r.role
 -- Artists -------------------------------------------------------------------
 select pg_temp.act_as((select id from ids where name = 'manager'));
 select lives_ok($$
-  insert into public.artists (organization_id, name, notes)
-  values ((select id from ids where name = 'org'), (select v from vars where k = 'artist'), 'Signée en 2026');
-  insert into public.artists (organization_id, name)
-  values ((select id from ids where name = 'org'), (select v from vars where k = 'guest'))
+  insert into public.artists (organization_id, name, notes, relation)
+  values ((select id from ids where name = 'org'), (select v from vars where k = 'artist'), 'Signée en 2026', 'signed');
+  insert into public.artists (organization_id, name, relation)
+  values ((select id from ids where name = 'org'), (select v from vars where k = 'guest'), 'collaboration')
 $$, 'a project manager creates artists');
 insert into ids select 'artist', id from public.artists where name = (select v from vars where k = 'artist');
 insert into ids select 'guest', id from public.artists where name = (select v from vars where k = 'guest');
 
 select throws_ok($$
-  insert into public.artists (organization_id, name)
-  values ((select id from ids where name = 'org'), '  ' || upper((select v from vars where k = 'artist')) || ' ')
+  insert into public.artists (organization_id, name, relation)
+  values ((select id from ids where name = 'org'), '  ' || upper((select v from vars where k = 'artist')) || ' ', 'signed')
 $$, '23505', null, 'an artist name is unique, whatever the case and spaces');
 
 -- Deezer id: random per run, the dev database may already hold real ones.
@@ -99,7 +99,7 @@ set constraints all deferred;
 
 select lives_ok($$
   insert into ids select 'master2', public.create_master((select id from ids where name = 'org'), 'Brume',
-    jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))), 'radio edit');
+    jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))), 'radio_edit');
   insert into ids select 'master3', public.create_master((select id from ids where name = 'org'), 'Vertige',
     jsonb_build_array(jsonb_build_object('artist_id', (select id from ids where name = 'artist'))))
 $$, 'more masters for an EP');
@@ -172,7 +172,7 @@ select pg_temp.act_as((select id from ids where name = 'creative'));
 select ok((select count(*) from public.masters where id = (select id from ids where name = 'master')) = 1,
           'a creative director reads the catalog');
 select throws_ok($$
-  insert into public.artists (organization_id, name) values ((select id from ids where name = 'org'), 'Intrus DC')
+  insert into public.artists (organization_id, name, relation) values ((select id from ids where name = 'org'), 'Intrus DC', 'signed')
 $$, '42501', null, 'a creative director cannot create an artist');
 select throws_ok($$
   select public.create_master((select id from ids where name = 'org'), 'Intrus',

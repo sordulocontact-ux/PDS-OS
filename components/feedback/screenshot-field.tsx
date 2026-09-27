@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useId, useMemo } from "react";
+import { IconXmark } from "nucleo-sharp-essential";
+import { useId } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { FileDropZone } from "@/components/ui/file-drop-zone";
+import { useObjectUrl } from "@/components/ui/use-object-url";
 import {
   MAX_SCREENSHOT_BYTES,
+  MAX_SCREENSHOTS,
   SCREENSHOT_EXTENSIONS,
 } from "@/lib/feedback/screenshot-rules";
 import { fr } from "@/lib/i18n/fr";
@@ -20,77 +24,92 @@ export function screenshotProblem(file: File): string | null {
   return null;
 }
 
-// The screenshot of a feedback: its preview and "remove", or a file picker
-// with the paste tip (the form takes pasted images itself).
+// The screenshots of a feedback: their previews, each with "remove", then a
+// zone to drop more or click to pick them, until the limit. Pasting works
+// too (the form takes pasted images itself).
 export function ScreenshotField({
-  file,
-  onChange,
+  files,
+  onAdd,
+  onRemove,
   error,
   printScreen,
 }: {
-  file: File | null;
-  onChange: (file: File | null) => void;
+  files: File[];
+  onAdd: (files: File[]) => void;
+  onRemove: (file: File) => void;
   error?: string;
   // Opened by Print Screen: the capture is in the clipboard, say so.
   printScreen: boolean;
 }) {
   const t = fr.feedback.screenshot;
   const id = useId();
-  const preview = useMemo(
-    () => (file ? URL.createObjectURL(file) : null),
-    [file],
-  );
-  useEffect(
-    () => () => {
-      if (preview) URL.revokeObjectURL(preview);
-    },
-    [preview],
-  );
+  const full = files.length >= MAX_SCREENSHOTS;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium" id={`${id}-label`}>
-        {t.label}
-      </span>
-      {file && preview ? (
-        <div className="flex flex-col items-start gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
-          <img
-            src={preview}
-            alt={t.alt}
-            className="max-h-48 max-w-full rounded-lg border border-border object-contain"
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => onChange(null)}
-          >
-            {t.remove}
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-col items-start gap-1.5">
-          <label
-            htmlFor={id}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            {t.add}
-          </label>
-          <input
-            id={id}
-            type="file"
-            accept={ACCEPT}
-            aria-labelledby={`${id}-label`}
-            className="sr-only"
-            onChange={(event) => onChange(event.target.files?.[0] ?? null)}
-          />
-          <p className="text-sm text-muted-foreground">
-            {printScreen ? t.printScreenHint : t.pasteHint}
-          </p>
-        </div>
+      <span className="text-sm font-medium">{t.label}</span>
+      {files.length > 0 && (
+        <ul className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {files.map((file, index) => (
+            <ScreenshotThumb
+              key={`${file.name}-${file.size}-${file.lastModified}`}
+              file={file}
+              number={index + 1}
+              onRemove={() => onRemove(file)}
+            />
+          ))}
+        </ul>
       )}
+      <FileDropZone
+        label={full ? t.full : t.drop}
+        hint={
+          full
+            ? undefined
+            : printScreen
+              ? t.printScreenHint
+              : `${t.rules} ${t.pasteHint}`
+        }
+        accept={ACCEPT}
+        multiple
+        disabled={full}
+        describedBy={error ? `${id}-error` : undefined}
+        onFiles={onAdd}
+      />
       <FieldError id={`${id}-error`}>{error}</FieldError>
     </div>
+  );
+}
+
+function ScreenshotThumb({
+  file,
+  number,
+  onRemove,
+}: {
+  file: File;
+  number: number;
+  onRemove: () => void;
+}) {
+  const t = fr.feedback.screenshot;
+  const url = useObjectUrl(file);
+  return (
+    <li className="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted">
+      {url && (
+        // eslint-disable-next-line @next/next/no-img-element -- local blob preview
+        <img
+          src={url}
+          alt={t.altOf(number)}
+          className="size-full object-cover"
+        />
+      )}
+      <Button
+        type="button"
+        size="icon-xs"
+        aria-label={t.removeOf(number)}
+        onClick={onRemove}
+        className="absolute top-1 right-1"
+      >
+        <IconXmark aria-hidden />
+      </Button>
+    </li>
   );
 }

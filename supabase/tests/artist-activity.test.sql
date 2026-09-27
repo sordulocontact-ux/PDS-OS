@@ -38,8 +38,8 @@ update public.memberships m set status = 'approved', role = r.role
                        where id = (select id from ids where name = r.name));
 
 select pg_temp.act_as((select id from ids where name = 'manager'));
-insert into public.artists (organization_id, name)
-values ((select id from ids where name = 'org'), 'Kalia ' || (select v from vars where k = 'tag'));
+insert into public.artists (organization_id, name, relation)
+values ((select id from ids where name = 'org'), 'Kalia ' || (select v from vars where k = 'tag'), 'signed');
 insert into ids select 'artist', id from public.artists
  where name = 'Kalia ' || (select v from vars where k = 'tag');
 

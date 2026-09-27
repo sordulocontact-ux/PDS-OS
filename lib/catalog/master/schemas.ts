@@ -1,0 +1,142 @@
+import { z } from "zod";
+
+import {
+  CONTRIBUTOR_ROLES,
+  DECLARATION_STATUSES,
+  MASTER_ITEM_SECTIONS,
+  ORGANISMS,
+  SESSION_KINDS,
+  SPLIT_KINDS,
+  SPLIT_ROLES,
+  normalizeIswc,
+} from "@/lib/catalog/master/rules";
+import { catalogIdSchema } from "@/lib/catalog/schemas";
+import { fr } from "@/lib/i18n/fr";
+
+// Forms of the master page. Every rule is also a check in SQL.
+const e = fr.auth.errors;
+const t = fr.masterPage;
+
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max, { error: e.tooLong })
+    .optional()
+    .transform((value) => (value ? value : null));
+
+const requiredText = (max: number) =>
+  z
+    .string({ error: e.required })
+    .trim()
+    .min(1, { error: e.required })
+    .max(max, { error: e.tooLong });
+
+// "" = none; otherwise a plain YYYY-MM-DD from a date input.
+const optionalDate = z
+  .string()
+  .optional()
+  .transform((value) => (value ? value : null))
+  .refine((value) => value === null || /^\d{4}-\d{2}-\d{2}$/.test(value), {
+    error: e.required,
+  });
+
+// The row being edited, absent when adding.
+const optionalId = z
+  .string()
+  .optional()
+  .transform((value) => (value ? value : null))
+  .pipe(z.uuid().nullable());
+
+const base = { masterId: catalogIdSchema, itemId: optionalId };
+
+export const sessionSchema = z.object({
+  ...base,
+  kind: z.enum(SESSION_KINDS, { error: e.required }),
+  date: optionalDate,
+  studio: optionalText(200),
+  engineer: optionalText(200),
+  notes: optionalText(2000),
+});
+
+export const trackSchema = z.object({
+  ...base,
+  name: requiredText(200),
+  performer: optionalText(200),
+  // "none" = not tied to a session.
+  sessionId: z
+    .string()
+    .optional()
+    .transform((value) => (value && value !== "none" ? value : null))
+    .pipe(z.uuid().nullable()),
+});
+
+export const contributorSchema = z.object({
+  ...base,
+  name: requiredText(200),
+  role: z.enum(CONTRIBUTOR_ROLES, { error: e.required }),
+  detail: optionalText(200),
+});
+
+export const splitSchema = z.object({
+  ...base,
+  kind: z.enum(SPLIT_KINDS, { error: e.required }),
+  party: requiredText(200),
+  role: z.enum(SPLIT_ROLES, { error: e.required }),
+  // "33,33" or "33.33": at most two decimals, between 0.01 and 100.
+  share: z
+    .string({ error: t.splits.errors.share })
+    .trim()
+    .transform((value) => value.replace(",", ".").replace(/\s|%/g, ""))
+    .refine((value) => /^\d{1,3}(\.\d{1,2})?$/.test(value), {
+      error: t.splits.errors.share,
+    })
+    .transform(Number)
+    .refine((value) => value > 0 && value <= 100, {
+      error: t.splits.errors.share,
+    }),
+});
+
+export const declarationSchema = z.object({
+  masterId: catalogIdSchema,
+  organism: z.enum(ORGANISMS),
+  status: z.enum(DECLARATION_STATUSES, { error: e.required }),
+  reference: optionalText(100),
+  date: optionalDate,
+  notes: optionalText(2000),
+});
+
+export const rightsSchema = z.object({
+  masterId: catalogIdSchema,
+  iswc: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value, ctx) => {
+      if (!value) return null;
+      const iswc = normalizeIswc(value);
+      if (!iswc) {
+        ctx.addIssue({ code: "custom", message: t.rights.errors.iswc });
+        return z.NEVER;
+      }
+      return iswc;
+    }),
+  rightsHolder: optionalText(200),
+  rightsYear: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => (value ? Number(value) : null))
+    .refine(
+      (value) =>
+        value === null ||
+        (Number.isInteger(value) && value >= 1900 && value <= 2100),
+      { error: t.rights.errors.year },
+    ),
+});
+
+export const deleteItemSchema = z.object({
+  masterId: catalogIdSchema,
+  section: z.enum(MASTER_ITEM_SECTIONS),
+  itemId: z.uuid(),
+});

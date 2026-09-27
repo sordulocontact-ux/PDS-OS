@@ -3,6 +3,7 @@ import {
   normalizeIsrc,
   parseDuration,
 } from "@/lib/catalog/types";
+import type { AudioState, Variant } from "@/lib/catalog/title-rules";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 
 /**
@@ -108,4 +109,30 @@ export function parseSaidEmail(quote: string): string | null {
 export function parseSaidPhone(quote: string): string | null {
   const phone = quote.trim();
   return /^[0-9+(). -]{3,40}$/.test(phone) ? phone : null;
+}
+
+/**
+ * The audio state named in the user's words: "c'est une maquette" → demo,
+ * "la mise à plat" → rough_mix, "master final" → final_master, "master" →
+ * master. Null when no state is named.
+ */
+export function parseSaidAudioState(quote: string): AudioState | null {
+  const text = fold(quote);
+  if (/master(ise)? final|final master|version finale/.test(text))
+    return "final_master";
+  if (/mise a plat|rough mix/.test(text)) return "rough_mix";
+  if (/maquette|\bdemo\b/.test(text)) return "demo";
+  if (/\bmaster(ise|isee|ing)?\b/.test(text)) return "master";
+  return null;
+}
+
+/** The variant named in the user's words ("l'instru", "radio edit"…). */
+export function parseSaidVariant(quote: string): Variant | null {
+  const text = fold(quote);
+  if (/radio ?edit/.test(text)) return "radio_edit";
+  if (/instru/.test(text)) return "instrumental";
+  if (/a ?cc?apella/.test(text)) return "acapella";
+  if (/remix/.test(text)) return "remix";
+  if (/original/.test(text)) return "original";
+  return null;
 }

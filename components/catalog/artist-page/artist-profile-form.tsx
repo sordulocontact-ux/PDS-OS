@@ -5,16 +5,19 @@ import { useActionState, useEffect } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { ArtistRelationField } from "@/components/catalog/artist-relation-field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { idleFormState } from "@/lib/auth/form-state";
 import type { ArtistDetail } from "@/lib/catalog/artist-types";
 import { countryItems } from "@/lib/catalog/countries";
+import { isArtistRelation } from "@/lib/catalog/types";
 import { updateArtist } from "@/lib/catalog/profile-actions";
 import { fr } from "@/lib/i18n/fr";
 
-// Identity, biography and notes of the artist. Closes once saved.
+// Identity, relation with PDS, biography and notes of the artist. Closes once
+// saved.
 export function ArtistProfileForm({
   artist,
   onDone,
@@ -46,6 +49,13 @@ export function ArtistProfileForm({
         maxLength={200}
         defaultValue={value("name", artist.name)}
         error={errors.name}
+      />
+      <ArtistRelationField
+        defaultValue={
+          isArtistRelation(values.relation) ? values.relation : artist.relation
+        }
+        hint={fr.catalog.relation.editHint}
+        error={errors.relation}
       />
       <Field
         name="legalName"

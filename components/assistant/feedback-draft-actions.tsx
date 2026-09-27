@@ -37,7 +37,7 @@ export function FeedbackDraftActions({
         kind: draft.values.feedbackKind,
         message: draft.values.message,
         pagePath: draft.values.pagePath,
-        screenshotPath: null,
+        screenshotPaths: [],
       });
       if (!result.ok) {
         setFailed(true);

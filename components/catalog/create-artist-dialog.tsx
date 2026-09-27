@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ArtistDetailsForm } from "@/components/catalog/artist-details-form";
@@ -11,13 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { ArtistOption, DeezerArtistResult } from "@/lib/catalog/types";
+import { routes } from "@/lib/auth/redirects";
+import type {
+  ArtistOption,
+  ArtistRelation,
+  DeezerArtistResult,
+} from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
 // "Nouvel artiste" modal (step A): search Deezer first, then confirm the
-// name and add notes; "Créer sans Deezer" keeps the manual form. From the
-// artist list, a taken artist links to its page; from a picker, it offers to
-// select that artist instead, so the form behind keeps its input.
+// name, the relation with PDS and notes; "Créer sans Deezer" keeps the manual
+// form. From the artist list, the new (or taken) artist opens on its page;
+// from a picker, it is handed back instead, so the form behind keeps its
+// input.
 export function CreateArtistDialog({
   open,
   onOpenChange,
@@ -31,6 +38,7 @@ export function CreateArtistDialog({
   initialName?: string;
 }) {
   const t = fr.catalog.artistForm;
+  const router = useRouter();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -45,8 +53,13 @@ export function CreateArtistDialog({
             initialName={initialName}
             onCancel={() => onOpenChange(false)}
             onDone={(artist) => {
-              onCreated?.(artist);
-              onOpenChange(false);
+              if (onCreated) {
+                onCreated(artist);
+                onOpenChange(false);
+              } else {
+                // The modal leaves with the list page: no flash of the list.
+                router.push(routes.artist(artist.id));
+              }
             }}
             pickerMode={Boolean(onCreated)}
           />
@@ -64,12 +77,14 @@ type Step =
 export function ArtistForm({
   initialName,
   initialNotes,
+  initialRelation,
   onCancel,
   onDone,
   pickerMode,
 }: {
   initialName: string;
   initialNotes?: string;
+  initialRelation?: ArtistRelation | null;
   onCancel: () => void;
   onDone: (artist: ArtistOption) => void;
   pickerMode: boolean;
@@ -103,6 +118,7 @@ export function ArtistForm({
       deezer={step.deezer}
       initialName={step.name}
       initialNotes={initialNotes}
+      initialRelation={initialRelation}
       onBack={() => setStep({ kind: "search", query: step.name })}
       onCancel={onCancel}
       onDone={onDone}

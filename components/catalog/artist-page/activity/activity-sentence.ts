@@ -7,17 +7,24 @@ export function activitySentence(event: ActivityEvent): string {
   const s = t.sentences;
   const d = event.detail;
   const title = t.quoted(
-    d.title && d.version ? `${d.title} (${d.version})` : d.title,
+    d.title && d.variant ? `${d.title} (${d.variant})` : d.title,
     event.kind.startsWith("master") ? t.aMaster : t.aProject,
   );
   const assignee = d.assignee || t.someone;
   const name = (fallback: string) => t.quoted(d.name, fallback);
+  const relations = fr.catalog.relation.labels;
 
   switch (event.kind) {
     case "artist_created":
-      return s.artistCreated;
+      return d.relation
+        ? s.artistCreatedAs(relations[d.relation])
+        : s.artistCreated;
     case "artist_updated": {
-      const fields = (d.fields ?? []).map((f) => t.fields[f]);
+      const fields = (d.fields ?? []).map((f) =>
+        f === "relation" && d.relation
+          ? s.relationNow(t.fields[f], relations[d.relation])
+          : t.fields[f],
+      );
       return fields.length > 0
         ? s.artistUpdated(joinFr(fields))
         : s.artistUpdatedNoField;

@@ -9,7 +9,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import { ChoiceCards } from "@/components/calls/choice-cards";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import {
   isRecordingSupported,
   type RecorderSource,

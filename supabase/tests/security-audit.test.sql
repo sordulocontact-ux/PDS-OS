@@ -58,8 +58,8 @@ insert into ids select name || '_person', a.person_id
 
 -- 1. Contracts in the artist-files bucket --------------------------------------
 with x as (
-  insert into public.artists (organization_id, name)
-  values ((select id from ids where name = 'org'), 'Artiste ' || (select v from vars where k = 'tag'))
+  insert into public.artists (organization_id, name, relation)
+  values ((select id from ids where name = 'org'), 'Artiste ' || (select v from vars where k = 'tag'), 'signed')
   returning id)
 insert into ids select 'artist', id from x;
 insert into vars select 'contract_path',

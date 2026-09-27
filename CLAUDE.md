@@ -42,7 +42,7 @@ Playwright             → export PDF des documents (playwright-core + @sparticu
 next-pwa               → installation sur mobile (phase ultérieure)
 ```
 
-Outillage ajouté : zod, server-only, web-push (notifications navigateur), nucleo-sharp-essential (icônes, `docs/DESIGN.md` § 1), Prettier + plugin Tailwind, lint-staged +
+Outillage ajouté : zod, server-only, web-push (notifications navigateur), nucleo-sharp-essential (icônes, `docs/DESIGN.md` § 1), modern-screenshot (capture d'une zone de la page pour un retour, chargé à la demande), Prettier + plugin Tailwind, lint-staged +
 simple-git-hooks (pre-commit).
 
 Ne remplace aucune de ces briques sans demander. Ne propose pas d'alternative
@@ -136,21 +136,21 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `StatusBadge` | `ui/status-badge.tsx` | tone : neutral, info, warning, success, danger · size : sm, md |
 | `FilterChip`, `FilterChipLink` | `ui/filter-chip.tsx` | pastille de filtre (repos / survol / actif), prop `pressed`, `variant` ink (actif noir, défaut) ou soft (actif gris sans contour, survol sans contour, sélection à côté d'un bouton noir) ; en lien quand le filtre est dans l'URL (`current`) |
 | `SearchField` | `ui/search-field.tsx` | champ de recherche arrondi, libellé fourni par l'appelant |
-| `ConfirmDialog` | `ui/confirm-dialog.tsx` | confirmation d'une action (`destructive` si définitive) ; sans `onConfirm`, explique seulement pourquoi c'est impossible |
+| `ConfirmDialog` | `ui/confirm-dialog.tsx` | confirmation d'une action (`destructive` si définitive, `error` si elle a échoué) ; sans `onConfirm`, explique seulement pourquoi c'est impossible |
 | `DropdownMenu` (+ `Trigger`, `Content`, `Item`) | `ui/dropdown-menu.tsx` | menu Base UI, surface du Popover, sans animation |
 | `RowActions` | `ui/row-actions.tsx` | « ⋯ » d'une ligne ou d'un en-tête (`size` icon-sm / icon-lg), rien si aucune action |
-| `FormDialog` | `ui/form-dialog.tsx` | formulaire dans la modale `Dialog` (en bas sur mobile), corps monté à chaque ouverture ; toute modification (« ⋯ » Modifier, fiche artiste) |
+| `FormDialog` | `ui/form-dialog.tsx` | formulaire dans la modale `Dialog` (en bas sur mobile), corps monté à chaque ouverture ; toute modification (« ⋯ » Modifier, fiche artiste) ; `size="wide"` pour un long formulaire (fenêtre de retour) |
 | `Loaded`, `useLoaded` | `ui/loaded.tsx`, `ui/use-loaded.ts` | chargement / échec / prêt d'une modale ou d'un panneau (action serveur appelée à l'ouverture) |
 | `Dialog` | `ui/dialog.tsx` | **la seule modale du site**, « verre » : page floutée sans voile + panneau sombre translucide (Espace Espace, Modifier, confirmations) ; tokens inversés par `.surface-glass` (`docs/DESIGN.md` § 4) |
 | `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
-| `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`) | `ui/data-table.tsx` | **tout tableau de liste**, design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (`href` null = texte seul), colonne « ⋯ » `DataTableActionsHead` / `DataTableActionsCell` (Masters, Artistes, fiche artiste, Projets, Membres) |
+| `DataTable` (+ `Header`, `Head`, `Body`, `Row`, `Cell`, `Link`, `Media`, `Icon`, `Views`) | `ui/data-table.tsx` | **tout tableau de liste** ; **tout filtre de tableau en onglets** avec nombre via `DataTableViews` (au-dessus du tableau ou de son état vide, URL avec `viewHref` de `lib/ui/view-href.ts` ou `onSelect`), design de la page Masters : filet sous l'en-tête, lignes aérées, colonnes 192 px, `fill` pour la dernière, `hideBelow` sm/md/lg, `align="end"`, ligne cliquable via `DataTableLink` (`href` null = texte seul), colonne « ⋯ » `DataTableActionsHead` / `DataTableActionsCell` (Masters, Artistes, fiche artiste, Projets, Membres) |
 | `Input`, `Textarea`, `Label`, `Separator`, `Toaster` | `ui/` | shadcn |
 | `PageContainer`, `PageHeader` | `shell/` | cadre et en-tête de chaque page (titre, description, action) |
-| `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2 + contenu, action facultative) |
-| `SectionTabs` | `shell/section-tabs.tsx` | onglets-liens d'une page de détail (projet, artiste), `aria-current` |
+| `PageSection` | `shell/page-section.tsx` | bloc titré d'une page de détail (h2, `description` d'une ligne et action facultatives, contenu) |
+| `SectionTabs` | `shell/section-tabs.tsx` | onglets-liens d'une page de détail (projet, artiste), `aria-current`, sur `TabBar` |
 | `FactList` | `ui/fact-list.tsx` | liste libellé / valeur dans une carte (faits d'un master, d'un projet, identité) |
 | `StatTiles` | `ui/stat-tiles.tsx` | chiffres clés en tuiles (+ squelette) ; `href` facultatif = tuile entière cliquable (lien étiré) ; `columns` 4 (défaut) ou 5 |
-| `EmptyState` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne |
+| `EmptyState`, `EmptyNote` | `shell/empty-state.tsx` | état vide : icône, titre, une consigne ; `EmptyNote` = liste vide dans une section (une ligne en pointillés) |
 | `Skeleton`, `SkeletonRows`, `LoadingRegion` | `ui/skeleton.tsx` | bloc qui pulse (immobile si mouvement réduit), lignes de liste, zone annoncée « Chargement… » ; **tout** squelette en part |
 | `PageLoading` | `shell/page-loading.tsx` | `loading.tsx` d'une page : cadre, vrai titre s'il est connu, lignes ou forme fournie |
 | `ViewLink` | `ui/view-link.tsx` | lien vers une autre vue de la même page (section, onglet, étape, filtre), préchargé en entier : changement de vue sans chargement (`docs/ARCHITECTURE.md` § 3 bis) |
@@ -158,7 +158,10 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) ; classes d'un élément de navigation dans `nav-item.ts` |
 | `FeedbackProvider`, `useOpenFeedback` | `feedback/feedback-provider.tsx` | fenêtre de retour unique de l'app : ouverte par un bouton, la touche Impr. écran ou une capture collée |
 | `FeedbackNavButton` | `shell/feedback-nav-button.tsx` | « Envoyer un retour » du bas de la navigation (ferme le tiroir mobile, `data-close-nav`) |
-| `FeedbackForm`, `ScreenshotField` | `feedback/` | formulaire de la fenêtre de retour, capture jointe (aperçu, retirer, choisir un fichier) |
+| `FeedbackForm`, `ScreenshotField` | `feedback/` | formulaire de la fenêtre de retour, captures jointes (5 au plus : aperçus avec ✕, zone de dépôt) |
+| `ZoneCapture`, `useCaptureShortcut` | `feedback/` | touche **C** : curseur « retour », deux coins (ou glisser) → capture de la zone, fenêtre de retour ouverte avec |
+| `useObjectUrl` | `ui/use-object-url.ts` | URL locale d'un fichier (aperçu avant envoi), révoquée proprement même en mode strict |
+| `FileDropZone` | `ui/file-drop-zone.tsx` | zone où glisser des fichiers, ou cliquer pour les choisir (input natif dans un label, `multiple`, état « au-dessus ») |
 | `FeedbackList`, `FeedbackItems`, `FeedbackCard`, `FeedbackTopics`, `TopicActions`, `FeedbackTriage`, `FeedbackViewToggle` | `feedback/` | page Retours : retours envoyés ; boîte du DG (sujets de PO, transmettre avec priorité, écarter, onglets) |
 | `TopicEditForm` | `feedback/topic-edit-form.tsx` | modale « Modifier le retour » du DG avant transmission (titre, résumé, type), réécriture proposée par PO |
 | `TopicReviewForm` | `feedback/topic-review-form.tsx` | confirmation d'une décision sur un sujet préparée par PO (priorité à choisir ou corriger) |
@@ -175,7 +178,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `AssistantProvider`, `useAssistant` | `assistant/assistant-provider.tsx` | conversation PO de l'accueil, fenêtre Espace Espace (sa propre conversation), panneau de relecture des brouillons |
 | `AssistantComposer`, `AssistantThread`, `AssistantSuggestions`, `AssistantConversation` | `assistant/` | saisie de PO (micro, envoi/arrêt, `compact`, `voiceFirst`), fil des messages, pilules de suggestions ; page de conversation `/app/assistant` (retour, titre, « + ») |
 | `DraftCard` | `assistant/draft-card.tsx` | proposition de PO dans le fil (avant barré → après, avertissements, « Relire et enregistrer ») |
-| `RecordActions`, `ArchiveViewToggle`, `EditPanel` | `archive/` | « ⋯ » Modifier / Archiver / Restaurer d'un artiste, master ou projet ; filtre Actifs / Archivés (DG) ; corps chargé de la modale Modifier |
+| `RecordActions`, `ArchiveViewToggle`, `archiveViews`, `EditPanel` | `archive/` | « ⋯ » Modifier / Archiver / Restaurer d'un artiste, master ou projet ; `archiveViews` = onglets Actifs / Archivés (DG, nombres par `countRecords`), `ArchiveViewToggle` = mêmes vues en pastilles quand les onglets sont un autre axe ; corps chargé de la modale Modifier |
 | `ArtistActions`, `MasterActions`, `ProjectActions` | `catalog/`, `projects/project-actions.tsx` | `RecordActions` branché sur le vrai formulaire de chaque type (`rights`, raison de blocage connue d'avance) |
 | `ProjectPageHeader` | `projects/project-page-header.tsx` | en-tête d'une section de projet (h2, une phrase, action) : Calls et les 9 pages ci-dessous |
 | `ProjectSectionLoading` | `projects/project-section-loading.tsx` | squelette d'une section de projet (forme de `ProjectPageHeader`, puis lignes ou forme fournie) |
@@ -184,11 +187,15 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `BudgetSummary`, `BudgetLines`, `BudgetTable`, `BudgetLineSheet`, `DeleteBudgetLineDialog` | `budget/` | page Budget : tuiles et dépassement, lignes filtrables par statut, formulaire en `Sheet`, suppression confirmée |
 | `FilesTable`, `ValidationItem`, `ActivityTimeline` | `project-history/` | fichiers du projet (audio des calls, téléchargement signé), demande de validation, journal groupé par jour |
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
-| `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
+| `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire ; `TextareaField` `addon` = contrôle posé dans le coin bas du champ (micro) |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
+| `TabBar` | `ui/tab-bar.tsx` | barre d'onglets (liens ou boutons) sans filet, trait de 2 px qui glisse sous l'onglet actif ; base de `SectionTabs` et `DataTableViews` |
+| `ChoiceCards` | `ui/choice-cards.tsx` | radios natifs avec la conséquence sous chaque choix (call, retours, membres, artiste) ; `columns={3}` côte à côte dès `sm` |
+| `ArtistRelationField`, `ArtistListViews` | `catalog/` | choix Signé / Collaboration des formulaires artiste ; vues de la liste Artistes (onglets Tous / Signés / Collaborations, + Archivés du DG en pastilles) |
 | `CreativePicker` | `projects/creative-picker.tsx` | choix multiple de personnes en `FilterChip`, envoyé en un champ JSON |
 | `AudioMeter`, `useAudioMeter` | `ui/audio-meter.tsx`, `ui/use-audio-meter.ts` | onde du micro qui défile de droite à gauche (façon Claude), size : sm, md ; dictée, saisie vocale de PO, enregistrement de call |
 | `VoiceInputButton`, `VoiceInputBar`, `VoiceInputStatus` | `voice/voice-input.tsx` | saisie vocale d'un champ : micro ; pendant l'écoute, onde + ✕ annuler + ✓ valider à la place du micro et d'Envoyer |
+| `VoiceFieldControl` | `voice/voice-field-control.tsx` | micro de n'importe quel champ texte (`fieldId`), le texte dicté s'ajoute à ce qui est écrit ; message de la fenêtre de retour |
 | `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
 | `FramingStart` | `framing/framing-start.tsx` | état « cadrage pas encore ouvert » (Cadrage verrouillé, vue d'ensemble) : deux options, préparer un call ou commencer en amont |
 | `ToneCallout` | `ui/tone-callout.tsx` | court encart sur le fond pâle d'un ton (hypothèse à confirmer, alerte), `tone` de `state-tones.ts` |
@@ -198,6 +205,11 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `CallAgenda` | `calls/call-agenda.tsx` | ordre du jour préparé d'un call (points à aborder, temps approximatif), affiché avant l'enregistrement |
 | `StrategyNeedsFraming` | `strategy/strategy-needs-framing.tsx` | état « la stratégie suit le cadrage » (Stratégie verrouillée tant que le Cadrage n'est pas validé) |
 | `ArtistEditDialog`, `ArtistEditBody`, `ArtistContacts`, `ContactForm` | `catalog/artist-page/` | modale « Modifier » (photo, identité, bio ; corps réutilisé depuis la liste), contacts de l'artiste |
+| `FileUpload`, `FilesTable`, `FileActions` | `catalog/files/` | fichiers d'un artiste ou d'un master (`owner: FileOwner`) : catégorie + envoi, tableau, télécharger / supprimer |
+| `ActivityLog` | `catalog/activity/activity-log.tsx` | journal par jour d'un artiste ou d'un master (phrases déjà écrites par le code) |
+| `MasterTabs`, `MasterArtists`, `MasterChecklist`, `DistributionList` | `catalog/master-page/` | onglets de la fiche master (Splits pour `manage_catalog`), artistes interprètes, dossier du master, sorties des projets |
+| `SessionsSection`, `TracksSection`, `ContributorsSection`, `SplitsSection`, `RightsSection`, `DeclarationsSection` (+ leurs `*Form`) | `catalog/master-page/` | listes modifiables de la fiche master, formulaire en `FormDialog` |
+| `MasterForm`, `useItemDialogs`, `ItemRowActions`, `AddItemButton`, `DeleteItemDialog` | `catalog/master-page/` | socle des listes du master : formulaire (valeurs rendues après refus), ligne en cours de modification, « ⋯ » Modifier / Supprimer, suppression confirmée |
 | `ReleaseCover`, `ReleaseCard`, `ExternalLink` | `catalog/artist-profile/` | pochette carrée (repli disque), carte de sortie mise en avant, lien vers Deezer/Wikipédia en nouvel onglet (`cover` : toute la ligne cliquable) |
 | `Icon*` | `icons/index.ts` | icônes dessinées maison (dont `IconDots`, le « ⋯ », et `IconDownload`, un téléchargement) ; le reste vient de `nucleo-sharp-essential` (`docs/DESIGN.md` § 1) |
 
@@ -316,7 +328,10 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   sur un HTML autonome, `docs/ARCHITECTURE.md` § 6).
   Nouvel artiste : recherche Deezer d'abord (nom **ou lien Deezer collé**, pour les petits
   artistes), saisie manuelle en repli ; le serveur relit Deezer, seul l'id vient du
-  client. Sélecteurs :
+  client ; créé depuis la page Artistes, sa fiche s'ouvre. **Relation avec PDS** (Signé /
+  Collaboration, `artists.relation`) choisie à la création, modifiable, indépendante
+  d'Actif / Archivé ; filtre Tous / Signés / Collaborations (`docs/ARCHITECTURE.md`
+  § 2 quinquies). Sélecteurs :
   `components/catalog/search-picker.tsx` (commun), création en modale sans perte de saisie
   (`docs/ARCHITECTURE.md` § 2).
   Fiche artiste à onglets (`/app/catalog/artists/[id]` + `/masters`, `/projects`, `/files`,
@@ -329,6 +344,14 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   téléversée (bucket privé `artist-pictures`, URL signées) qui prime sur celle de Deezer.
   Deezer en direct (cache 1 h) ; bio auto par l'API **interne** Deezer, repli Wikipédia via
   Wikidata P2722 (`lib/catalog/artist-*.ts`, `docs/ARCHITECTURE.md` § 2).
+  **Fiche master à 10 onglets** (`/app/catalog/masters/[id]` + `/sessions`, `/versions`,
+  `/credits`, `/splits`, `/rights`, `/distribution`, `/projects`, `/files`, `/activity`) :
+  dossier du master calculé par le code, sessions et pistes, versions (même titre + même
+  artiste principal, décidé par le code), contributeurs, splits master / édition (≤ 100 %
+  vérifié en SQL, **`manage_catalog` seul**), ISWC et ℗, déclarations SACEM / SCPP / SPPF /
+  ADAMI / SPEDIDAM, sorties des projets en lecture, fichiers `master-files`, journal
+  (`activity_events.master_id`) ; écriture `manage_catalog` sur master actif
+  (`lib/catalog/master/`, `docs/ARCHITECTURE.md` § 2 sexies).
 - **Notifications** : table `notifications` écrite par triggers (jamais par le code),
   cloche + toast + rafraîchissement via Realtime, Web Push (`public/sw.js`, `web-push`,
   clés VAPID facultatives). Envoi push : `schedulePendingPushes()` après toute action qui
@@ -373,11 +396,11 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   écrit par `set_*_archived` (SQL) uniquement ; menu « ⋯ » Modifier / Archiver sur chaque
   ligne et en-tête de fiche (`docs/ARCHITECTURE.md` § 2 quater). Membres : « Suspendre », « Modifier » (nom et poste) dans la modale.
 - **Retours** `/app/feedback` : l'équipe écrit au DG depuis la fenêtre de retour (bouton,
-  touche Impr. écran ou capture collée ⌘V, capture jointe dans `feedback-screenshots`) ;
+  touche Impr. écran ou capture collée ⌘V, touche **C** pour capturer une zone de la page, jusqu'à 5 captures glissées ou choisies dans une zone de dépôt, dans `feedback-screenshots`) ;
   PO regroupe les doublons en sujets à l'ouverture de la page par le DG ; le DG seul
   (`read_feedback`) transmet un sujet avec une priorité ou l'écarte
   (`review_feedback_topic`), après l'avoir modifié s'il veut, seul ou avec PO qui propose
-  (`edit_feedback_topic`) ; un sujet transmis part sur **Notion** (`lib/integrations/notion.ts`,
+  (`edit_feedback_topic`) ; un sujet transmis part sur **Notion** avec ses captures téléversées (colonne facultative « Captures ») (`lib/integrations/notion.ts`,
   `NOTION_TOKEN` + `NOTION_FEEDBACK_DATABASE_ID`, facultatifs) ; les retours d'origine restent consultables
   (`docs/ARCHITECTURE.md` § 8 quater).
 - **Labo** `/labo` : banc de test local (404 en production), faux call `docs/labo/`.
@@ -415,7 +438,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 329 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 408 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -473,6 +496,11 @@ Au-delà des six étapes :
 - [x] **Cadrage en relecture guidée** : 5 points un par un (objectif, temporalité, besoins &
       activations, cadre & contraintes, équipe par rôles), récapitulatif, Brief partageable
       et export PDF
+- [x] Artistes **Signés / Collaborations** (relation avec PDS, un seul objet Artiste,
+      filtre de la liste) ; « Créer l'artiste » ouvre sa fiche
+- [x] **Fiche master à onglets** : vue d'ensemble (dossier à compléter), sessions & pistes,
+      versions, contributeurs & crédits, splits, droits & déclarations, distribution,
+      projets, fichiers, activité
 - [ ] À tester par l'équipe dans un vrai Chrome : enregistrement d'un vrai Meet (deux voix
       dans la transcription, alerte après avoir raccroché)
 

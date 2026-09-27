@@ -22,7 +22,7 @@ type Row = {
   kind: string;
   message: string;
   page_path: string | null;
-  screenshot_path: string | null;
+  screenshot_paths: string[];
   created_at: string;
   created_by: string | null;
   topic_id: string | null;
@@ -30,7 +30,7 @@ type Row = {
 };
 
 const SELECT =
-  "id, kind, message, page_path, screenshot_path, created_at, created_by, topic_id, author:people!feedback_created_by_fkey(first_name, last_name)";
+  "id, kind, message, page_path, screenshot_paths, created_at, created_by, topic_id, author:people!feedback_created_by_fkey(first_name, last_name)";
 
 const fullName = (person: Person) =>
   [person?.first_name, person?.last_name].filter(Boolean).join(" ") || "—";
@@ -41,9 +41,7 @@ async function signScreenshots(
   supabase: Supabase,
   rows: Row[],
 ): Promise<Map<string, string>> {
-  const paths = rows.flatMap((r) =>
-    r.screenshot_path ? [r.screenshot_path] : [],
-  );
+  const paths = rows.flatMap((r) => r.screenshot_paths);
   const signed = new Map<string, string>();
   if (paths.length === 0) return signed;
   const { data, error } = await supabase.storage
@@ -69,9 +67,10 @@ function toFeedback(
     pagePath: row.page_path,
     createdAt: row.created_at,
     authorName: row.created_by === personId ? null : fullName(row.author),
-    screenshotUrl: row.screenshot_path
-      ? (screenshots.get(row.screenshot_path) ?? null)
-      : null,
+    screenshotUrls: row.screenshot_paths.flatMap((path) => {
+      const url = screenshots.get(path);
+      return url ? [url] : [];
+    }),
     topicId: row.topic_id,
     topicTitle: row.topic_id ? (titles.get(row.topic_id) ?? null) : null,
   };
@@ -129,7 +128,7 @@ export async function loadFeedbackInbox(
     supabase
       .from("feedback_topics")
       .select(
-        "id, kind, title, summary, status, priority, reviewed_at, edited_at, notion_url, notion_page_id, notion_synced_at, reviewer:people!feedback_topics_reviewed_by_fkey(first_name, last_name), editor:people!feedback_topics_edited_by_fkey(first_name, last_name)",
+        "id, kind, title, summary, status, priority, reviewed_at, edited_at, notion_url, notion_page_id, notion_synced_at, notion_error, reviewer:people!feedback_topics_reviewed_by_fkey(first_name, last_name), editor:people!feedback_topics_edited_by_fkey(first_name, last_name)",
       ),
   ]);
   const error = feedbackRes.error ?? topicsRes.error;
@@ -176,6 +175,7 @@ export async function loadFeedbackInbox(
           : 0,
       notionUrl: row.notion_url,
       notionSynced: row.notion_page_id !== null,
+      notionError: row.notion_error,
       newSinceSync: row.notion_synced_at
         ? items.filter((i) => i.createdAt > row.notion_synced_at!).length
         : 0,

@@ -5,10 +5,11 @@ import { useDeferredValue, useState } from "react";
 import { MastersTable } from "@/components/catalog/masters-table";
 import { SearchField } from "@/components/ui/search-field";
 import type { RecordRights } from "@/lib/archive/types";
+import { variantText } from "@/lib/catalog/title-rules";
 import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Masters list with an instant search on title, version, artists and ISRC.
+// Titles list with an instant search on name, variant, artists and ISRC.
 export function MastersList({
   masters,
   rights,
@@ -22,7 +23,9 @@ export function MastersList({
   const visible = needle
     ? masters.filter((m) =>
         normalize(
-          [m.title, m.version, m.artists, m.isrc].filter(Boolean).join(" "),
+          [m.title, variantText(m), m.artists, m.isrc]
+            .filter(Boolean)
+            .join(" "),
         ).includes(needle),
       )
     : masters;

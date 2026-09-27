@@ -50,15 +50,17 @@ export function TopicActions({
     startTransition(async () => {
       const result = await reviewFeedbackTopic(topic.id, action, priority);
       if (!result.ok) toast.error(t.actions.failed);
-      else if (result.notion === "failed") toast.warning(t.notion.failed);
-      else if (result.notion === "synced") toast.success(t.notion.synced);
+      else if (result.notion?.status === "synced")
+        toast.success(t.notion.synced);
+      else if (result.notion)
+        toast.error(t.notion.failed(result.notion.reason), { duration: 15000 });
     });
 
   const publish = () =>
     startTransition(async () => {
       const { notion: result } = await syncFeedbackTopicToNotion(topic.id);
-      if (result === "synced") toast.success(t.notion.synced);
-      else toast.error(t.notion.failed);
+      if (result.status === "synced") toast.success(t.notion.synced);
+      else toast.error(t.notion.error(result.reason), { duration: 15000 });
     });
 
   const priorityMenu = (label: string, action: "send" | "prioritize") => (
@@ -136,7 +138,9 @@ export function TopicActions({
         priorityMenu(t.actions.changePriority, "prioritize")}
       {topic.status === "sent" &&
         notion &&
-        (!topic.notionSynced || topic.newSinceSync > 0) && (
+        (!topic.notionSynced ||
+          topic.newSinceSync > 0 ||
+          topic.notionError !== null) && (
           <Button
             size="sm"
             variant="outline"
@@ -144,7 +148,11 @@ export function TopicActions({
             aria-busy={pending || undefined}
             onClick={publish}
           >
-            {topic.notionSynced ? t.notion.update : t.notion.send}
+            {topic.notionError
+              ? t.notion.retry
+              : topic.notionSynced
+                ? t.notion.update
+                : t.notion.send}
           </Button>
         )}
       {topic.status === "sent" && topic.notionUrl && (

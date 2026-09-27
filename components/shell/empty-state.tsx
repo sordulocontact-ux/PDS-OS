@@ -24,3 +24,13 @@ export function EmptyState({
     </div>
   );
 }
+
+// A list still empty inside a section (contacts, tracks, shares): one line
+// in the same dashed frame, without icon or title.
+export function EmptyNote({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+      {children}
+    </p>
+  );
+}

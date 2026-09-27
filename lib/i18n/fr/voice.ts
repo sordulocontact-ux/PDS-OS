@@ -28,6 +28,7 @@ export const voice = {
   /** Voice typing in a text input (the assistant). */
   input: {
     start: "Dicter votre question",
+    startField: "Dicter le texte",
     stop: "Valider la dictée",
     cancel: "Annuler la dictée",
     listening: "Écoute en cours…",

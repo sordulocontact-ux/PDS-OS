@@ -3,6 +3,8 @@
 
 export const FEEDBACK_SCREENSHOT_BUCKET = "feedback-screenshots";
 export const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+// Per feedback; the database checks the same limit.
+export const MAX_SCREENSHOTS = 5;
 
 export const SCREENSHOT_EXTENSIONS: Record<string, "jpg" | "png" | "webp"> = {
   "image/jpeg": "jpg",

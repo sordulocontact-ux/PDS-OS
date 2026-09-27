@@ -3,11 +3,18 @@ import { z } from "zod";
 import { CONTACT_ROLES } from "@/lib/catalog/contacts";
 import { COUNTRY_CODES } from "@/lib/catalog/countries";
 import {
+  ARTIST_RELATIONS,
   CREDIT_ROLES,
   ISRC_PATTERN,
   normalizeIsrc,
   parseDuration,
 } from "@/lib/catalog/types";
+import {
+  AUDIO_STATES,
+  DEFAULT_VARIANT,
+  UNKNOWN_AUDIO_STATE,
+  VARIANTS,
+} from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 
 const e = fr.auth.errors;
@@ -21,7 +28,13 @@ const optionalText = (max: number) =>
     .optional()
     .transform((value) => (value ? value : null));
 
+// Always chosen by a person: no default on either side.
+const relationSchema = z.enum(ARTIST_RELATIONS, {
+  error: fr.catalog.relation.required,
+});
+
 export const createArtistSchema = z.object({
+  relation: relationSchema,
   name: z
     .string({ error: e.required })
     .trim()
@@ -68,6 +81,8 @@ const creditsSchema = z
       ),
   );
 
+// A title: its name and main artist are the only required fields
+// (docs/ARCHITECTURE.md § 2 septies).
 export const createMasterSchema = z.object({
   title: z
     .string({ error: e.required })
@@ -75,7 +90,21 @@ export const createMasterSchema = z.object({
     .min(1, { error: e.required })
     .max(200, { error: e.tooLong }),
   credits: creditsSchema,
-  version: optionalText(100),
+  // Empty or "Non renseigné" = unknown, never guessed.
+  audioState: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value && value !== UNKNOWN_AUDIO_STATE ? value : null,
+    )
+    .pipe(z.enum(AUDIO_STATES, { error: me.audioStateInvalid }).nullable()),
+  variant: z
+    .string()
+    .optional()
+    .transform((value) => value || DEFAULT_VARIANT)
+    .pipe(z.enum(VARIANTS, { error: me.variantInvalid })),
+  // Only kept for "Autre": create_master drops it otherwise.
+  variantLabel: optionalText(100),
   isrc: z
     .string()
     .optional()
@@ -103,6 +132,7 @@ const pe = fr.catalog.profileForm.errors;
 export const updateArtistSchema = z.object({
   artistId: z.uuid(),
   name: createArtistSchema.shape.name,
+  relation: relationSchema,
   legalName: optionalText(200),
   countryCode: z
     .string()

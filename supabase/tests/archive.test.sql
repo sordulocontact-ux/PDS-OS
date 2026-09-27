@@ -39,8 +39,8 @@ insert into ids select name || '_person', a.person_id
 
 select pg_temp.act_as((select id from ids where name = 'director'));
 with a as (
-  insert into public.artists (organization_id, name)
-  values ((select id from ids where name = 'org'), 'Archivable ' || (select v from vars where k = 'tag'))
+  insert into public.artists (organization_id, name, relation)
+  values ((select id from ids where name = 'org'), 'Archivable ' || (select v from vars where k = 'tag'), 'signed')
   returning id)
 insert into ids select 'artist', id from a;
 insert into ids select 'master', public.create_master((select id from ids where name = 'org'), 'Titre',
@@ -123,8 +123,8 @@ select lives_ok($$ select public.set_project_archived((select id from ids where 
 select public.set_project_archived((select id from ids where name = 'project'), true);
 select public.set_master_archived((select id from ids where name = 'master'), true);
 select public.set_artist_archived((select id from ids where name = 'artist'), true);
-insert into public.artists (organization_id, name)
-values ((select id from ids where name = 'org'), 'Archivable ' || (select v from vars where k = 'tag'));
+insert into public.artists (organization_id, name, relation)
+values ((select id from ids where name = 'org'), 'Archivable ' || (select v from vars where k = 'tag'), 'signed');
 select throws_ok($$ select public.set_artist_archived((select id from ids where name = 'artist'), false) $$,
                  'P0001', 'artist_name_taken', 'a live artist holding the name blocks the restore');
 

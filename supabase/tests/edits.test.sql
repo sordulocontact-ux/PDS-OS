@@ -41,13 +41,13 @@ insert into ids select name || '_person', a.person_id
 
 select pg_temp.act_as((select id from ids where name = 'director'));
 with a as (
-  insert into public.artists (organization_id, name)
-  values ((select id from ids where name = 'org'), 'Artiste ' || (select v from vars where k = 'tag'))
+  insert into public.artists (organization_id, name, relation)
+  values ((select id from ids where name = 'org'), 'Artiste ' || (select v from vars where k = 'tag'), 'signed')
   returning id)
 insert into ids select 'artist', id from a;
 with a as (
-  insert into public.artists (organization_id, name)
-  values ((select id from ids where name = 'org'), 'Invité ' || (select v from vars where k = 'tag'))
+  insert into public.artists (organization_id, name, relation)
+  values ((select id from ids where name = 'org'), 'Invité ' || (select v from vars where k = 'tag'), 'signed')
   returning id)
 insert into ids select 'artist2', id from a;
 insert into ids select 'master', public.create_master((select id from ids where name = 'org'), 'Titre',

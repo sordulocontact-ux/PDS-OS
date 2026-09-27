@@ -23,6 +23,7 @@ import { getArtist } from "@/lib/catalog/artist-queries";
 import { CONTACT_ROLES } from "@/lib/catalog/contacts";
 import { countryName } from "@/lib/catalog/countries";
 import { listArtistOptions } from "@/lib/catalog/queries";
+import { ARTIST_RELATIONS } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { parseSaidEmail, parseSaidPhone } from "@/lib/assistant/verbatim";
 
@@ -35,7 +36,7 @@ const said = z
 export function proposeArtistTool({ access, verbatim }: ProposeContext) {
   return tool({
     description:
-      "Prépare la création d'un artiste, ou la modification / le complément de la fiche d'un artiste existant (nom, nom civil, pays, biographie, notes, contacts). N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Ne remplis que ce que l'utilisateur a dit.",
+      "Prépare la création d'un artiste, ou la modification / le complément de la fiche d'un artiste existant (nom, relation avec PDS, nom civil, pays, biographie, notes, contacts). N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Ne remplis que ce que l'utilisateur a dit.",
     inputSchema: z.object({
       existingArtist: z
         .string()
@@ -45,6 +46,12 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
           "Nom de l'artiste déjà au catalogue à modifier ; absent pour créer un artiste",
         ),
       name: z.string().max(200).optional().describe("Nom d'artiste"),
+      relation: z
+        .enum(ARTIST_RELATIONS)
+        .optional()
+        .describe(
+          "Relation avec PDS, seulement si l'utilisateur l'a dite : signed = signé au roster PDS, collaboration = projet ponctuel (un PDS Mic…) hors roster",
+        ),
       legalName: z.string().max(200).optional().describe("Nom civil"),
       country: z
         .string()
@@ -71,6 +78,7 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
         return { facts: [t.forbiddenCatalog], sources: [] };
 
       const labels = fr.catalog.profileForm;
+      const relations = fr.catalog.relation.labels;
       const warnings: string[] = [];
       let current = null;
       if (input.existingArtist) {
@@ -116,6 +124,7 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
 
       const values: ArtistDraft["values"] = {
         name: input.name?.trim() || current?.name || "",
+        relation: input.relation ?? current?.relation ?? null,
         legalName: input.legalName?.trim() || current?.legalName || null,
         countryCode,
         bio: input.bio?.trim() || current?.bio || null,
@@ -124,6 +133,12 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
 
       const changes: DraftChange[] = [];
       change(changes, labels.name, current?.name, values.name);
+      change(
+        changes,
+        fr.catalog.relation.legend,
+        current ? relations[current.relation] : null,
+        values.relation ? relations[values.relation] : null,
+      );
       change(changes, labels.legalName, current?.legalName, values.legalName);
       change(
         changes,

@@ -7,7 +7,10 @@ import { requireApproved, requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { syncTopicToNotion, type NotionSync } from "@/lib/feedback/notion-sync";
 import { proposeRewrite, type RewriteResult } from "@/lib/feedback/rewrite";
-import { isFeedbackScreenshotPath } from "@/lib/feedback/screenshot-rules";
+import {
+  isFeedbackScreenshotPath,
+  MAX_SCREENSHOTS,
+} from "@/lib/feedback/screenshot-rules";
 import { triageUnfiledFeedback } from "@/lib/feedback/triage";
 import {
   FEEDBACK_KINDS,
@@ -35,7 +38,7 @@ const feedbackInput = z.object({
     .string()
     .nullable()
     .transform((v) => (v && isAppPath(v) ? v : null)),
-  screenshotPath: z.string().nullable(),
+  screenshotPaths: z.array(z.string()).max(MAX_SCREENSHOTS),
 });
 
 export async function sendFeedback(
@@ -61,12 +64,13 @@ export async function sendFeedback(
     };
   }
   const { organizationId, personId } = access;
-  const screenshotPath = parsed.data.screenshotPath;
+  const screenshotPaths = parsed.data.screenshotPaths;
   if (
     !organizationId ||
     !personId ||
-    (screenshotPath &&
-      !isFeedbackScreenshotPath(screenshotPath, organizationId, personId))
+    !screenshotPaths.every((path) =>
+      isFeedbackScreenshotPath(path, organizationId, personId),
+    )
   ) {
     return { ok: false, error: t.generic };
   }
@@ -77,7 +81,7 @@ export async function sendFeedback(
     kind: parsed.data.kind,
     message: parsed.data.message,
     page_path: parsed.data.pagePath,
-    screenshot_path: screenshotPath,
+    screenshot_paths: screenshotPaths,
   });
   if (error) {
     console.error("sendFeedback:", error.message);
@@ -145,7 +149,10 @@ export async function syncFeedbackTopicToNotion(
   topicId: string,
 ): Promise<{ notion: NotionSync }> {
   await requirePermission("read_feedback");
-  if (!z.uuid().safeParse(topicId).success) return { notion: "failed" };
+  if (!z.uuid().safeParse(topicId).success)
+    return {
+      notion: { status: "failed", reason: fr.feedback.notion.reasons.notSent },
+    };
   const notion = await syncTopicToNotion(await createClient(), topicId);
   revalidatePath(routes.feedback);
   return { notion };

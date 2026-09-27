@@ -1,0 +1,141 @@
+"use client";
+
+import { useState } from "react";
+
+import { PageSection } from "@/components/shell/page-section";
+import { Button } from "@/components/ui/button";
+import {
+  DataTable,
+  DataTableActionsCell,
+  DataTableActionsHead,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableMedia,
+  DataTableRow,
+  EMPTY_CELL,
+} from "@/components/ui/data-table";
+import { FormDialog } from "@/components/ui/form-dialog";
+import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  ORGANISMS,
+  type MasterDeclaration,
+  type Organism,
+} from "@/lib/catalog/master/rules";
+import { fr } from "@/lib/i18n/fr";
+import { formatShortDate } from "@/lib/release/format";
+import { declarationStatusTone } from "@/lib/ui/state-tones";
+
+import { DeclarationForm } from "./declaration-form";
+import { DeleteItemDialog, ItemRowActions } from "./item-dialogs";
+
+// One row per collecting society: "À déposer" until a declaration is noted,
+// then its status, reference and date.
+export function DeclarationsSection({
+  masterId,
+  declarations,
+  canEdit,
+}: {
+  masterId: string;
+  declarations: MasterDeclaration[];
+  canEdit: boolean;
+}) {
+  const t = fr.masterPage.declarations;
+  const byOrganism = new Map(declarations.map((d) => [d.organism, d]));
+  const [editing, setEditing] = useState<Organism | null>(null);
+  const [deleting, setDeleting] = useState<MasterDeclaration | null>(null);
+
+  return (
+    <PageSection id="declarations" title={t.title} description={t.description}>
+      <DataTable>
+        <DataTableHeader>
+          <DataTableHead>{t.columns.organism}</DataTableHead>
+          <DataTableHead>{t.columns.status}</DataTableHead>
+          <DataTableHead hideBelow="md">{t.columns.reference}</DataTableHead>
+          <DataTableHead hideBelow="sm" fill>
+            {t.columns.date}
+          </DataTableHead>
+          {canEdit && <DataTableActionsHead label={t.columns.actions} />}
+        </DataTableHeader>
+        <DataTableBody>
+          {ORGANISMS.map((organism) => {
+            const declaration = byOrganism.get(organism);
+            const status = declaration?.status ?? "todo";
+            return (
+              <DataTableRow key={organism}>
+                <DataTableCell>
+                  <DataTableMedia
+                    title={t.organisms[organism]}
+                    subtitle={t.organismDescriptions[organism]}
+                  />
+                </DataTableCell>
+                <DataTableCell>
+                  <StatusBadge tone={declarationStatusTone[status]}>
+                    {t.statuses[status]}
+                  </StatusBadge>
+                </DataTableCell>
+                <DataTableCell hideBelow="md" className="font-mono">
+                  {declaration?.reference ?? EMPTY_CELL}
+                </DataTableCell>
+                <DataTableCell hideBelow="sm" fill>
+                  {declaration?.date
+                    ? formatShortDate(declaration.date)
+                    : EMPTY_CELL}
+                </DataTableCell>
+                {canEdit && (
+                  <DataTableActionsCell>
+                    {declaration ? (
+                      <ItemRowActions
+                        name={t.organisms[organism]}
+                        onEdit={() => setEditing(organism)}
+                        onDelete={() => setDeleting(declaration)}
+                      />
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => setEditing(organism)}
+                      >
+                        {t.declare}
+                      </Button>
+                    )}
+                  </DataTableActionsCell>
+                )}
+              </DataTableRow>
+            );
+          })}
+        </DataTableBody>
+      </DataTable>
+
+      <FormDialog
+        open={editing !== null}
+        onOpenChange={(open) => !open && setEditing(null)}
+        title={editing ? t.dialogTitle(t.organisms[editing]) : ""}
+        description={t.formDescription}
+        closeLabel={fr.masterPage.form.close}
+      >
+        {editing && (
+          <DeclarationForm
+            masterId={masterId}
+            organism={editing}
+            declaration={byOrganism.get(editing) ?? null}
+            onDone={() => setEditing(null)}
+          />
+        )}
+      </FormDialog>
+      <DeleteItemDialog
+        masterId={masterId}
+        section="declaration"
+        item={
+          deleting
+            ? { id: deleting.id, name: t.organisms[deleting.organism] }
+            : null
+        }
+        title={t.confirmTitle}
+        body={t.confirmBody}
+        onClose={() => setDeleting(null)}
+      />
+    </PageSection>
+  );
+}
