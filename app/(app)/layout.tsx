@@ -63,6 +63,7 @@ export default async function AppLayout({
     <FeedbackProvider
       organizationId={signedIn ? access.organizationId : null}
       personId={signedIn ? access.personId : null}
+      direct={signedIn && can(access, "read_feedback")}
     >
       <AssistantProvider launcher={signedIn}>
         <CollapsedNavProvider>

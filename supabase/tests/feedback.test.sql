@@ -1,10 +1,10 @@
 -- Feedback: sent by any member for themself, read by its author and by the
--- general director (read_feedback), never edited nor deleted; grouped into
+-- general director (read_feedback), edited by its author only, never deleted; grouped into
 -- topics by file_feedback(), reviewed (sent with a priority, dismissed) by
 -- the director only. Screenshots stay in their author's folder.
 -- Run with `supabase test db`.
 begin;
-select plan(47);
+select plan(54);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -69,11 +69,25 @@ select throws_ok($$
   values (pg_temp.id_of('org'), 'idea', 'Lien externe', 'https://example.com')
 $$, '23514', null, 'the page is a path of the app');
 
--- Never edited nor deleted ----------------------------------------------------
-select throws_ok($$ update public.feedback set message = 'Changé' where id = pg_temp.id_of('fb') $$,
-                 '42501', null, 'feedback is never edited');
+-- Edited by its author only, never deleted -----------------------------------
+select lives_ok($$ update public.feedback set message = 'Le bouton ne répond pas, capture jointe'
+                   where id = pg_temp.id_of('fb') $$,
+                'the author edits their feedback');
+select isnt((select edited_at from public.feedback where id = pg_temp.id_of('fb')), null,
+            'the edit is dated by the database');
+select throws_ok($$ update public.feedback set page_path = '/app' where id = pg_temp.id_of('fb') $$,
+                 '42501', null, 'the page it was sent from never changes');
+select throws_ok($$ update public.feedback set created_by = pg_temp.id_of('other_person') where id = pg_temp.id_of('fb') $$,
+                 '42501', null, 'the author never changes');
 select throws_ok($$ delete from public.feedback where id = pg_temp.id_of('fb') $$,
                  '42501', null, 'feedback is never deleted');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('other'));
+update public.feedback set message = 'Changé par un autre' where id = pg_temp.id_of('fb');
+reset role;
+select is((select message from public.feedback where id = pg_temp.id_of('fb')),
+          'Le bouton ne répond pas, capture jointe', 'nobody else edits it');
+select pg_temp.act_as(pg_temp.id_of('author'));
 
 -- Reading ---------------------------------------------------------------------
 reset role;
@@ -114,6 +128,8 @@ select is(public.file_feedback(pg_temp.id_of('fb2'), null, 'Autre', 'Autre'), pg
           'feedback already filed stays where it is');
 select is((select message from public.feedback where id = pg_temp.id_of('fb2')),
           'Le bouton est toujours cassé', 'the original message is never changed');
+select is((select edited_at from public.feedback where id = pg_temp.id_of('fb2')), null,
+          'filing is not an edit');
 
 reset role;
 select pg_temp.act_as(pg_temp.id_of('author'));
@@ -177,6 +193,12 @@ select throws_ok($$
   insert into public.feedback (organization_id, kind, message, screenshot_paths)
   values (pg_temp.id_of('org'), 'bug', 'Six captures', array_fill((select v from vars where k = 'own'), array[6]))
 $$, '23514', null, 'five screenshots at most');
+select throws_ok($$
+  update public.feedback set screenshot_paths = array[(select v from vars where k = 'theirs')]
+   where id = pg_temp.id_of('fb')
+$$, 'P0001', 'invalid_screenshot_path', 'an edit points only to its author''s screenshots too');
+select throws_ok($$ update public.feedback set topic_id = null where id = pg_temp.id_of('fb') $$,
+                 '42501', null, 'the author never moves it out of its topic');
 
 -- Editing before sending ------------------------------------------------------
 select throws_ok($$ select public.edit_feedback_topic(pg_temp.id_of('topic2'), 'idea', 'Titre', 'Résumé') $$,

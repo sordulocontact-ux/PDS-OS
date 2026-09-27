@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
@@ -9,7 +9,9 @@ import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { MasterPicker } from "@/components/catalog/master-picker";
 import { OptionSelect } from "@/components/projects/option-select";
+import { ProjectDraftControls } from "@/components/projects/project-draft-controls";
 import { ProjectTeamFields } from "@/components/projects/project-team-fields";
+import { useProjectDraft } from "@/components/projects/use-project-draft";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistOption, MasterOption } from "@/lib/catalog/types";
@@ -44,6 +46,8 @@ export type ProjectFormDefaults = {
 // The team is chosen here: the project goes to its manager at creation.
 // With `projectId` it edits a project that is not launched (no team then);
 // with `onSaved` (side panel, a PO draft) the page behind stays.
+// On the new project page, what is typed is kept as a draft (`draftId`: the
+// one being resumed).
 export function CreateProjectForm({
   masters,
   artists,
@@ -51,6 +55,7 @@ export function CreateProjectForm({
   creatives,
   defaults,
   projectId,
+  draftId: resumedDraftId = null,
   onSaved,
   onCancel,
 }: {
@@ -60,6 +65,7 @@ export function CreateProjectForm({
   creatives: CreativeMember[];
   defaults: ProjectFormDefaults;
   projectId?: string;
+  draftId?: string | null;
   onSaved?: (project: { id: string; title: string }) => void;
   onCancel?: () => void;
 }) {
@@ -71,6 +77,15 @@ export function CreateProjectForm({
   const values = state.status === "error" ? (state.values ?? {}) : {};
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const [type, setType] = useState<ProjectType | null>(defaults.type);
+  const formRef = useRef<HTMLFormElement>(null);
+  const withDraft = !projectId && !onSaved;
+  const draft = useProjectDraft(formRef, resumedDraftId, withDraft);
+
+  // A refused creation keeps the form, and its draft, going.
+  const { pause } = draft;
+  useEffect(() => {
+    if (state.status === "error") pause(false);
+  }, [state, pause]);
 
   useEffect(() => {
     if (state.status === "saved") onSaved?.(state.project);
@@ -86,8 +101,18 @@ export function CreateProjectForm({
   );
 
   return (
-    <form action={action} noValidate className="flex flex-col gap-5">
+    <form
+      ref={formRef}
+      action={action}
+      // The created project deletes the draft: nothing is saved meanwhile.
+      onSubmit={() => pause(true)}
+      noValidate
+      className="flex flex-col gap-5"
+    >
       {onSaved && <input type="hidden" name="intent" value="dialog" />}
+      {withDraft && draft.draftId && (
+        <input type="hidden" name="draftId" value={draft.draftId} />
+      )}
       {projectId && <input type="hidden" name="projectId" value={projectId} />}
       <Field
         name="title"
@@ -179,6 +204,14 @@ export function CreateProjectForm({
 
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>
+      )}
+
+      {withDraft && (
+        <ProjectDraftControls
+          draftId={draft.draftId}
+          status={draft.status}
+          pause={pause}
+        />
       )}
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

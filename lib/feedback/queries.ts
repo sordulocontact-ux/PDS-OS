@@ -24,13 +24,14 @@ type Row = {
   page_path: string | null;
   screenshot_paths: string[];
   created_at: string;
+  edited_at: string | null;
   created_by: string | null;
   topic_id: string | null;
   author: Person;
 };
 
 const SELECT =
-  "id, kind, message, page_path, screenshot_paths, created_at, created_by, topic_id, author:people!feedback_created_by_fkey(first_name, last_name)";
+  "id, kind, message, page_path, screenshot_paths, created_at, edited_at, created_by, topic_id, author:people!feedback_created_by_fkey(first_name, last_name)";
 
 const fullName = (person: Person) =>
   [person?.first_name, person?.last_name].filter(Boolean).join(" ") || "—";
@@ -66,10 +67,11 @@ function toFeedback(
     message: row.message,
     pagePath: row.page_path,
     createdAt: row.created_at,
+    editedAt: row.edited_at,
     authorName: row.created_by === personId ? null : fullName(row.author),
-    screenshotUrls: row.screenshot_paths.flatMap((path) => {
+    screenshots: row.screenshot_paths.flatMap((path) => {
       const url = screenshots.get(path);
-      return url ? [url] : [];
+      return url ? [{ path, url }] : [];
     }),
     topicId: row.topic_id,
     topicTitle: row.topic_id ? (titles.get(row.topic_id) ?? null) : null,
@@ -176,8 +178,11 @@ export async function loadFeedbackInbox(
       notionUrl: row.notion_url,
       notionSynced: row.notion_page_id !== null,
       notionError: row.notion_error,
+      // Sent or edited since the last publication.
       newSinceSync: row.notion_synced_at
-        ? items.filter((i) => i.createdAt > row.notion_synced_at!).length
+        ? items.filter(
+            (i) => (i.editedAt ?? i.createdAt) > row.notion_synced_at!,
+          ).length
         : 0,
     });
   }

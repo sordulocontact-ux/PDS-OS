@@ -17,6 +17,14 @@ export const feedback = {
       "Il arrive au directeur général, qui le transmet s'il est utile.",
     close: "Fermer",
   },
+  // The director's own feedback: no inbox, straight to Notion.
+  directDialog: {
+    title: "Envoyer un retour sur Notion",
+    description:
+      "Il part directement dans les tickets Notion, avec la priorité choisie.",
+  },
+  directSubmit: "Envoyer sur Notion",
+  directSubmitting: "Envoi sur Notion…",
   kind: "De quoi s'agit-il ?",
   kinds: {
     bug: "Bug",
@@ -63,6 +71,19 @@ export const feedback = {
     failed:
       "La capture n'a pas pu être faite. Joignez une capture à la main si besoin.",
   },
+
+  // The author changes their own feedback after sending it.
+  mineEdit: {
+    action: "Modifier",
+    actionOf: (date: string) => `Modifier le retour du ${date}`,
+    title: "Modifier votre retour",
+    description:
+      "Ajoutez une précision ou une capture : le directeur général voit la version à jour.",
+    submit: "Enregistrer",
+    submitting: "Enregistrement…",
+    success: "Retour modifié.",
+  },
+  edited: (date: string) => `Modifié le ${date}`,
 
   mine: "Vos retours",
   received: "Retours de l'équipe",
@@ -166,6 +187,8 @@ export const feedback = {
         "Notion refuse la page : une colonne manque ou n'a pas le bon type (Titre, Résumé, Type, Priorité, Retours, Transmis par, Transmis le, Lien).",
       busy: "Notion est occupé. Réessayez dans une minute.",
       notSent: "le sujet n'est pas transmis.",
+      notFiled:
+        "le retour est enregistré, mais n'a pas pu être transmis. Transmettez-le depuis la page Retours.",
       notRecorded:
         "la page Notion est créée, mais PDS OS n'a pas pu enregistrer son lien. Réessayez.",
       unknown: "erreur inattendue de Notion.",
@@ -205,5 +228,6 @@ export const feedback = {
     messageRequired: "Écrivez votre retour.",
     messageTooLong: "4 000 caractères au plus.",
     generic: "Le retour n'a pas pu être envoyé. Réessayez.",
+    editFailed: "La modification n'a pas pu être enregistrée. Réessayez.",
   },
 } as const;

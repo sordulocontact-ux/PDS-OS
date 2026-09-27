@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 import { useCaptureShortcut } from "@/components/feedback/use-capture-shortcut";
 import { FormDialog } from "@/components/ui/form-dialog";
-import type { FeedbackKind } from "@/lib/feedback/types";
+import type { EditedFeedback, FeedbackKind } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
 
 // Heavy and rarely shown: loaded on first opening.
@@ -33,6 +33,8 @@ type OpenOptions = {
   pagePath?: string | null;
   // Called once it is sent (PO's card then shows it as sent).
   onSent?: () => void;
+  // The viewer's own feedback, already sent, to change.
+  editing?: EditedFeedback;
 };
 type Opening = {
   screenshot: File | null;
@@ -41,6 +43,7 @@ type Opening = {
   pagePath: string | null;
   defaults?: OpenOptions["defaults"];
   onSent?: () => void;
+  editing?: EditedFeedback;
 };
 
 const FeedbackContext = createContext<((options?: OpenOptions) => void) | null>(
@@ -66,16 +69,21 @@ function imageOf(event: ClipboardEvent): File | undefined {
 // the app (⌘V / Ctrl+V), which it then carries. Pastes inside the window go
 // to its own form; `data-paste-ignore` opts a zone out. The C key captures
 // a zone of the page instead, then opens the window with it.
+// `direct`: the director, whose feedback goes straight to Notion.
 export function FeedbackProvider({
   organizationId,
   personId,
+  direct = false,
   children,
 }: {
   organizationId: string | null;
   personId: string | null;
+  direct?: boolean;
   children: React.ReactNode;
 }) {
-  const t = fr.feedback.dialog;
+  const dialog = direct
+    ? { ...fr.feedback.dialog, ...fr.feedback.directDialog }
+    : fr.feedback.dialog;
   const pathname = usePathname();
   const [opening, setOpening] = useState<Opening | null>(null);
   const [capturing, setCapturing] = useState(false);
@@ -93,6 +101,7 @@ export function FeedbackProvider({
         pagePath: options?.pagePath !== undefined ? options.pagePath : pathname,
         defaults: options?.defaults,
         onSent: options?.onSent,
+        editing: options?.editing,
       }),
     [pathname],
   );
@@ -145,9 +154,13 @@ export function FeedbackProvider({
         <FormDialog
           open={opening !== null}
           onOpenChange={(next) => !next && setOpening(null)}
-          title={t.title}
-          description={t.description}
-          closeLabel={t.close}
+          title={opening?.editing ? fr.feedback.mineEdit.title : dialog.title}
+          description={
+            opening?.editing
+              ? fr.feedback.mineEdit.description
+              : dialog.description
+          }
+          closeLabel={dialog.close}
           size="wide"
         >
           {opening && (
@@ -158,8 +171,18 @@ export function FeedbackProvider({
               initialScreenshot={opening.screenshot}
               printScreen={opening.printScreen}
               defaults={opening.defaults}
-              onSent={() => {
-                toast.success(fr.feedback.success);
+              direct={direct}
+              editing={opening.editing}
+              onSent={(notion) => {
+                if (opening.editing)
+                  toast.success(fr.feedback.mineEdit.success);
+                else if (!notion) toast.success(fr.feedback.success);
+                else if (notion.status === "synced")
+                  toast.success(fr.feedback.notion.synced);
+                else
+                  toast.error(fr.feedback.notion.error(notion.reason), {
+                    duration: 15000,
+                  });
                 opening.onSent?.();
                 setOpening(null);
               }}

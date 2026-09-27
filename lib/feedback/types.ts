@@ -1,6 +1,7 @@
 // Feedback about the app itself. Client-safe.
 
 import type { FieldErrors } from "@/lib/auth/form-state";
+import type { NotionSync } from "@/lib/feedback/notion-sync";
 
 export const FEEDBACK_KINDS = ["bug", "idea", "other"] as const;
 export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
@@ -39,14 +40,25 @@ export type Feedback = {
   message: string;
   pagePath: string | null;
   createdAt: string;
+  // Set once its author changed it after sending.
+  editedAt: string | null;
   // Null for the viewer's own feedback.
   authorName: string | null;
-  // Short-lived signed URLs of the attached screenshots, in their order.
-  screenshotUrls: string[];
+  // The attached screenshots in their order: their storage path (kept on an
+  // edit) and a short-lived signed URL.
+  screenshots: FeedbackScreenshot[];
   // The topic PO filed it in; null while it waits to be sorted.
   topicId: string | null;
   topicTitle: string | null;
 };
+
+export type FeedbackScreenshot = { path: string; url: string };
+
+/** The author's own feedback, opened again to change it. */
+export type EditedFeedback = Pick<
+  Feedback,
+  "id" | "kind" | "message" | "screenshots"
+>;
 
 /** Similar feedback gathered by PO, reviewed by the director. */
 export type FeedbackTopic = {
@@ -79,10 +91,22 @@ export type SendFeedbackInput = {
   message: string;
   pagePath: string | null;
   screenshotPaths: string[];
+  // Director only: sent straight to Notion with this priority.
+  priority?: string;
+};
+
+/** The author's own feedback, changed after sending. */
+export type EditFeedbackInput = {
+  feedbackId: string;
+  kind: string;
+  message: string;
+  // The screenshots kept and those just uploaded, in their order.
+  screenshotPaths: string[];
 };
 
 export type SendFeedbackResult =
-  { ok: true } | { ok: false; error: string; fieldErrors?: FieldErrors };
+  | { ok: true; notion?: NotionSync }
+  | { ok: false; error: string; fieldErrors?: FieldErrors };
 
 /** PO's text as plain text: Markdown emphasis and code marks removed. */
 export function plainText(text: string): string {

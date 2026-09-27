@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { IconMsgSmile } from "nucleo-sharp-essential";
 
+import { EditFeedbackButton } from "@/components/feedback/edit-feedback-button";
 import { FeedbackCard } from "@/components/feedback/feedback-card";
 import { EmptyState } from "@/components/shell/empty-state";
 import { FormMessage } from "@/components/auth/form-message";
@@ -11,12 +12,15 @@ import { formatLongDay, formatTime } from "@/lib/project-history/format";
 // Feedback as it was sent, newest first: kind, when, who (someone else's
 // only), the page it came from and, for the director, the topic PO filed it
 // in; then the message as it was written and its screenshots.
+// `editable`: the viewer's own feedback, which they may still change.
 export function FeedbackItems({
   items,
   showTopic = false,
+  editable = false,
 }: {
   items: Feedback[];
   showTopic?: boolean;
+  editable?: boolean;
 }) {
   const t = fr.feedback;
   return (
@@ -25,11 +29,33 @@ export function FeedbackItems({
         <FeedbackCard
           key={item.id}
           kind={item.kind}
+          action={
+            editable && (
+              <EditFeedbackButton
+                feedback={{
+                  id: item.id,
+                  kind: item.kind,
+                  message: item.message,
+                  screenshots: item.screenshots,
+                }}
+                label={t.mineEdit.actionOf(
+                  `${formatLongDay(item.createdAt)}, ${formatTime(item.createdAt)}`,
+                )}
+              />
+            )
+          }
           facts={
             <>
               <time dateTime={item.createdAt}>
                 {formatLongDay(item.createdAt)}, {formatTime(item.createdAt)}
               </time>
+              {item.editedAt && (
+                <time dateTime={item.editedAt}>
+                  {t.edited(
+                    `${formatLongDay(item.editedAt)}, ${formatTime(item.editedAt)}`,
+                  )}
+                </time>
+              )}
               {item.authorName && <span>{t.from(item.authorName)}</span>}
               {item.pagePath && (
                 <Link
@@ -42,11 +68,13 @@ export function FeedbackItems({
             </>
           }
         >
-          <p className="break-words whitespace-pre-line">{item.message}</p>
-          {item.screenshotUrls.length > 0 && (
+          <p className="max-w-prose break-words whitespace-pre-line">
+            {item.message}
+          </p>
+          {item.screenshots.length > 0 && (
             <ul className="flex flex-wrap gap-2">
-              {item.screenshotUrls.map((url, index) => (
-                <li key={url}>
+              {item.screenshots.map(({ path, url }, index) => (
+                <li key={path}>
                   <a
                     href={url}
                     target="_blank"
@@ -99,5 +127,7 @@ export function FeedbackList({
       />
     );
   }
-  return <FeedbackItems items={items} showTopic={received} />;
+  return (
+    <FeedbackItems items={items} showTopic={received} editable={!received} />
+  );
 }

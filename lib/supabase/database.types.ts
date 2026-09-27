@@ -658,6 +658,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          edited_at: string | null
           id: string
           kind: string
           message: string
@@ -669,6 +670,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          edited_at?: string | null
           id?: string
           kind: string
           message: string
@@ -680,6 +682,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          edited_at?: string | null
           id?: string
           kind?: string
           message?: string
@@ -2118,6 +2121,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      project_drafts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          form_values: Json
+          id: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          form_values?: Json
+          id?: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          form_values?: Json
+          id?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_drafts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
