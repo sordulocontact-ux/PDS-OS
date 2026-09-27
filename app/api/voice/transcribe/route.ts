@@ -5,7 +5,8 @@ import { readDictation, replyError } from "@/lib/voice/http";
 export const maxDuration = 60;
 
 /**
- * Speech to text alone, for a question to the assistant: multipart `audio`,
+ * Speech to text alone, for a question to the assistant or any text field
+ * (VoiceFieldControl): multipart `audio`,
  * answers `{ ok, text }`. The text goes back into the input, where the user
  * reads it before sending. The audio is not kept.
  */

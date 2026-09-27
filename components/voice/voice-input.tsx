@@ -28,10 +28,13 @@ export function VoiceInputButton({
   phase,
   onToggle,
   disabled,
+  startLabel = fr.voice.input.start,
 }: {
   phase: VoiceInputPhase;
   onToggle: () => void;
   disabled?: boolean;
+  // What the microphone does at rest, for a screen reader.
+  startLabel?: string;
 }) {
   const t = fr.voice.input;
   // Browser capability, read without a server/client mismatch.
@@ -47,7 +50,7 @@ export function VoiceInputButton({
       size="icon-sm"
       // Filled while listening: the state reads without color (DESIGN.md § 1).
       variant={listening ? "default" : "outline"}
-      aria-label={listening ? t.stop : t.start}
+      aria-label={listening ? t.stop : startLabel}
       aria-pressed={listening}
       title={supported ? undefined : fr.voice.unsupported}
       disabled={

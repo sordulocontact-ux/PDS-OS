@@ -10,6 +10,7 @@ import {
   screenshotProblem,
 } from "@/components/feedback/screenshot-field";
 import { Button } from "@/components/ui/button";
+import { VoiceFieldControl } from "@/components/voice/voice-field-control";
 import type { FieldErrors } from "@/lib/auth/form-state";
 import { sendFeedback } from "@/lib/feedback/actions";
 import {
@@ -186,6 +187,7 @@ export function FeedbackForm({
         maxLength={FEEDBACK_MESSAGE_MAX}
         defaultValue={defaults?.message}
         error={errors.message}
+        addon={<VoiceFieldControl fieldId="message" />}
       />
 
       <ScreenshotField
