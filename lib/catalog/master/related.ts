@@ -7,23 +7,24 @@ import {
 import type { Credit } from "@/lib/catalog/types";
 import { createClient } from "@/lib/supabase/server";
 
-// What the master page reads around a master: its other versions and the
-// releases of the projects carrying it.
+// What the title page reads around a title ("master" in the code): its other
+// variants and the releases of the projects carrying it.
 
 const normalizeTitle = (title: string) => title.trim().toLowerCase();
 
-// Artists a version must share: the main ones, or every credit if none.
+// Artists a variant must share: the main ones, or every credit if none.
 function keyArtists(credits: Credit[]): Set<string> {
   const main = credits.filter((c) => c.role === "main");
   return new Set((main.length > 0 ? main : credits).map((c) => c.artistId));
 }
 
 /**
- * Other live masters of the same title (case and surrounding spaces
- * ignored) crediting one of the master's main artists: radio edit,
- * instrumental, remix… (docs/ARCHITECTURE.md § 2 sexies). Decided by code.
+ * Other live titles of the same name (case and surrounding spaces ignored)
+ * crediting one of the title's main artists: radio edit, instrumental,
+ * remix… (docs/ARCHITECTURE.md § 2 sexies). Decided by code, whatever the
+ * variant field says: it only names each one.
  */
-export async function listMasterVersionIds(master: {
+export async function listMasterVariantIds(master: {
   id: string;
   title: string;
   credits: Credit[];
@@ -39,7 +40,7 @@ export async function listMasterVersionIds(master: {
     .is("archived_at", null)
     .neq("id", master.id);
   if (error) {
-    console.error("listMasterVersionIds:", error.message);
+    console.error("listMasterVariantIds:", error.message);
     return { ids: [], error: true };
   }
   const title = normalizeTitle(master.title);

@@ -148,6 +148,7 @@ export function FeedbackProvider({
           title={t.title}
           description={t.description}
           closeLabel={t.close}
+          size="wide"
         >
           {opening && (
             <FeedbackForm

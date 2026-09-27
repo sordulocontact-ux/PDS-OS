@@ -11,32 +11,32 @@ import { buttonVariants } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { listMasterVersionIds } from "@/lib/catalog/master/related";
+import { listMasterVariantIds } from "@/lib/catalog/master/related";
 import { getMaster, listMasters } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Versions: the other masters of the same title for the same artists, in the
-// table of the Masters page. A new version starts from this master's title
-// and credits.
-export default async function MasterVersionsPage({
+// Variants: the other titles of the same name for the same artists, in the
+// table of the Titres page. A new variant starts from this title's name and
+// credits.
+export default async function MasterVariantsPage({
   params,
-}: PageProps<"/app/catalog/masters/[masterId]/versions">) {
+}: PageProps<"/app/catalog/masters/[masterId]/variants">) {
   const { masterId } = await params;
   const [access, master] = await allInOrder([
     requireApproved(),
     getMaster(masterId),
   ]);
   if (!master) notFound();
-  const found = await listMasterVersionIds(master);
+  const found = await listMasterVariantIds(master);
   const { masters, error } = found.error
     ? { masters: [], error: true }
     : await listMasters({ ids: found.ids });
-  const t = fr.masterPage.versions;
+  const t = fr.masterPage.variants;
   const canEdit = can(access, "manage_catalog");
   const add = canEdit ? (
     <Link
-      href={routes.mastersNewVersionOf(master.id)}
+      href={routes.mastersNewVariantOf(master.id)}
       className={buttonVariants({ variant: "outline", size: "sm" })}
     >
       <IconPlus aria-hidden data-icon="inline-start" />
@@ -58,7 +58,7 @@ export default async function MasterVersionsPage({
   }
   return (
     <PageSection
-      id="versions"
+      id="variants"
       title={t.title}
       description={t.description}
       action={add}

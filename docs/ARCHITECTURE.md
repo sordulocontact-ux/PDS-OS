@@ -606,18 +606,28 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   l'auteur et le DG), avant l'envoi du retour ; un trigger refuse un chemin qui n'est pas
   celui de l'auteur. Chemins dans `feedback.screenshot_paths` (`text[]`, 5 au plus,
   vérifié par contrainte et par le code). Affichées par URL signée (1 h).
+- **Dictée du message** : micro dans le coin du champ (`VoiceFieldControl`, `addon` de
+  `TextareaField`) ; le texte transcrit (`/api/voice/transcribe`, audio jamais gardé)
+  s'ajoute à ce qui est écrit, relu avant l'envoi. Réutilisable sur tout champ texte.
 - **Capture d'une zone** (touche **C**, comme les commentaires de Figma) : hors d'un champ et
   sans fenêtre ouverte, `useCaptureShortcut` affiche `ZoneCapture` : curseur en croix avec
   l'icône des retours, un clic sur un coin puis sur le coin opposé (ou un glisser), Échap
-  ou clic droit pour annuler ; la page ne défile pas pendant la sélection. La zone est
-  capturée (`lib/feedback/capture-region.ts`) puis la fenêtre de retour s'ouvre avec.
+  ou clic droit pour annuler ; la page ne défile pas pendant la sélection. Au relâchement
+  ou au second clic, la zone **se fige** (elle ne suit plus la souris) et « Capture… »
+  s'affiche ; Échap annule encore. La zone est capturée (`lib/feedback/capture-region.ts`)
+  puis la fenêtre de retour s'ouvre avec ; au-delà de 20 s, elle s'ouvre sans capture.
   Un navigateur ne peut pas lire l'écran sans demander l'autorisation à chaque fois
   (`getDisplayMedia`, avec un bandeau de partage qui décale la page) : la page est donc
   **redessinée depuis son DOM** par `modern-screenshot` (rendu du navigateur via SVG
   `foreignObject`, polices et images embarquées, chargé à la première capture), le corps
   entier puis recadré. Piège : la copie est dessinée non défilée ; les éléments `sticky`
   et `fixed` (barre latérale) sont donc épinglés là où on les voit, par un attribut
-  temporaire que la copie reprend. Le calque porte `data-capture-ignore` et n'apparaît pas
+  temporaire que la copie reprend. Autre piège : la bibliothèque attend **toutes** les
+  images de la page (30 s chacune par défaut) et les retélécharge ; une image `lazy` hors
+  écran ne se charge jamais et la capture restait sur « Capture… ». Une image pas encore
+  chargée (qui n'affiche rien) est donc remplacée par une image vide le temps de la copie,
+  une image chargée hors de la zone n'est pas retéléchargée (`fetchFn`), et toute attente
+  est plafonnée à 5 s. Le calque porte `data-capture-ignore` et n'apparaît pas
   sur la capture. Limites : une vidéo, un `<canvas>` ou une image d'un domaine sans CORS
   peuvent sortir vides ; PNG, JPEG si plus de 5 Mo.
 - Table `feedback` : auteur posé par trigger, **jamais modifiée ni supprimée** (seul
@@ -663,7 +673,14 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   « Mettre à jour sur Notion » (propriétés, et retours arrivés depuis ajoutés au corps).
   Propriétés attendues, nom et type exacts : **Titre** (titre), **Résumé** (texte),
   **Type** (sélection), **Priorité** (sélection), **Retours** (nombre), **Transmis par**
-  (texte), **Transmis le** (date), **Lien** (URL). Le lien de la page et la date de
+  (texte), **Transmis le** (date), **Lien** (URL) ; facultative : **Captures** (fichiers et
+  médias), remplie seulement si la base l'a (schéma lu à chaque envoi). Les captures sont
+  **téléversées** chez Notion (API *File Upload* : création, envoi en multipart, puis
+  rattachement), jamais en lien : les URL signées de l'app expirent en une heure. Elles
+  apparaissent en blocs image sous chaque retour d'origine du corps, et dans la colonne
+  Captures (toutes, renvoyées quand il en arrive de nouvelles, une colonne se remplaçant
+  en entier). Lues avec la session du DG (RLS du bucket) ; une capture qui échoue est
+  laissée de côté, jamais une raison de refuser l'envoi. Le lien de la page et la date de
   dernière mise à jour sont écrits par `record_feedback_notion` (session du DG). Un échec
   Notion n'annule jamais la transmission : sa **raison** en clair (réglage manquant, jeton
   refusé, base non partagée avec l'intégration, colonne manquante, Notion indisponible…)

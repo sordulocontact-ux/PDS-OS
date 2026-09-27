@@ -21,9 +21,9 @@ export const assistant = {
     recent_activity: "Lecture de l'activité récente",
     search_calls: "Recherche dans les calls",
     find_artists: "Lecture du catalogue d'artistes",
-    find_masters: "Lecture des masters",
+    find_masters: "Lecture des titres",
     propose_artist: "Préparation de la fiche artiste",
-    propose_master: "Préparation du master",
+    propose_master: "Préparation du titre",
     propose_project: "Préparation du projet",
   } as Record<string, string>,
   // Catalog facts for the model and the "Données utilisées" list.
@@ -42,26 +42,24 @@ export const assistant = {
     artistNoDeezer: (name: string, relation: string, masters: string) =>
       `${name} (${relation}) : pas de profil Deezer, non classé, ${masters}.`,
     masterCount: (count: number) =>
-      count === 0
-        ? "aucun master"
-        : count === 1
-          ? "1 master"
-          : `${count} masters`,
+      count === 0 ? "aucun titre" : count === 1 ? "1 titre" : `${count} titres`,
     noArtist: "Aucun artiste trouvé dans le catalogue.",
     master: (
       label: string,
       artists: string,
+      audioState: string | null,
       isrc: string | null,
       duration: string | null,
     ) =>
       [
-        `Master « ${label} » de ${artists || "artiste inconnu"}`,
+        `Titre « ${label} » de ${artists || "artiste inconnu"}`,
+        audioState && `état audio ${audioState}`,
         isrc && `ISRC ${isrc}`,
         duration && `durée ${duration}`,
       ]
         .filter(Boolean)
         .join(", ") + ".",
-    noMaster: "Aucun master trouvé.",
+    noMaster: "Aucun titre trouvé.",
   },
   // Drafts proposed by PO: nothing is written before a person saves them.
   drafts: {
@@ -87,8 +85,8 @@ export const assistant = {
         name ? `Nouvel artiste : ${name}` : "Nouvel artiste",
       updateArtist: (name: string) => `Modifier la fiche de ${name}`,
       createMaster: (title: string) =>
-        title ? `Nouveau master : ${title}` : "Nouveau master",
-      updateMaster: (title: string) => `Modifier le master ${title}`,
+        title ? `Nouveau titre : ${title}` : "Nouveau titre",
+      updateMaster: (title: string) => `Modifier le titre ${title}`,
       createProject: (title: string) =>
         title ? `Nouveau projet : ${title}` : "Nouveau projet",
       updateProject: (title: string) => `Modifier le projet ${title}`,
@@ -110,7 +108,7 @@ export const assistant = {
         count === 1
           ? "Relisez le contact proposé, puis enregistrez-le."
           : `Relisez les ${count} contacts proposés, un par un.`,
-      master: "Relisez le master, corrigez si besoin, puis enregistrez.",
+      master: "Relisez le titre, corrigez si besoin, puis enregistrez.",
       project: "Relisez le projet, corrigez si besoin, puis enregistrez.",
       // Not opened here: a feedback is sent from its card or the feedback window.
       feedback: "Relisez le retour, puis envoyez-le au directeur général.",
@@ -132,19 +130,19 @@ export const assistant = {
     ready: (title: string) =>
       `Proposition préparée : ${title}. Rien n'est enregistré : l'utilisateur doit la relire et l'enregistrer lui-même avec « Relire et enregistrer ».`,
     forbiddenCatalog:
-      "L'utilisateur n'a pas le droit de modifier le catalogue (artistes, masters).",
+      "L'utilisateur n'a pas le droit de modifier le catalogue (artistes, titres).",
     forbiddenProjects: "L'utilisateur n'a pas le droit de créer des projets.",
     launched: (title: string) =>
       `Le projet ${title} est lancé : ses informations ne se modifient plus ici, mais dans ses étapes (Cadrage, Stratégie) par son chef de projet.`,
     notFound: (what: string, name: string) =>
       `${what} « ${name} » introuvable dans PDS OS (ou nom ambigu).`,
-    what: { artist: "Artiste", master: "Master", project: "Projet" },
+    what: { artist: "Artiste", master: "Titre", project: "Projet" },
     understoodAs: (said: string, actual: string) =>
       `« ${said} » compris comme « ${actual} », le nom du catalogue.`,
     unknownArtist: (name: string) =>
       `« ${name} » n'est pas au catalogue : créez d'abord l'artiste, ou choisissez-le dans le formulaire.`,
     unknownMaster: (title: string) =>
-      `Master « ${title} » introuvable : rattachez-le dans le formulaire.`,
+      `Titre « ${title} » introuvable : rattachez-le dans le formulaire.`,
     unknownPerson: (name: string) =>
       `« ${name} » n'est pas un membre possible pour ce rôle : choisissez-le dans le formulaire.`,
     unknownCountry: (country: string) =>
@@ -170,7 +168,7 @@ export const assistant = {
   pageContext: {
     artist: (name: string) => `la fiche de l'artiste « ${name} »`,
     master: (label: string, artists: string) =>
-      `la fiche du master « ${label} »${artists ? ` de ${artists}` : ""}`,
+      `la fiche du titre « ${label} »${artists ? ` de ${artists}` : ""}`,
     project: (title: string, id: string, section?: string) =>
       `${section ? `l'onglet ${section} du` : "la page du"} projet « ${title} » (projectId ${id})`,
     sections: {
@@ -180,7 +178,7 @@ export const assistant = {
       release: "Sortie",
     } as Record<string, string>,
     artists: "la liste des artistes",
-    masters: "la liste des masters",
+    masters: "la liste des titres",
     projects: "la liste des projets",
     feedback:
       "la page Retours (les retours de l'équipe sur l'application PDS OS)",

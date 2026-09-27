@@ -45,7 +45,8 @@ export function VoiceFieldControl({ fieldId }: { fieldId: string }) {
         <VoiceInputStatus phase={voice.phase} error={voice.error} />
       </div>
       {listening ? (
-        <div className="flex w-full max-w-72 min-w-0">
+        // The whole width of the field: the waveform runs to its left edge.
+        <div className="flex min-w-0 grow">
           <VoiceInputBar
             phase={voice.phase}
             elapsed={voice.elapsed}

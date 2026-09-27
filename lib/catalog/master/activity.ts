@@ -11,11 +11,12 @@ import {
   oneOf,
 } from "@/lib/catalog/master/rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
+import { AUDIO_STATES } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
-// Activity of a master, read with the user's session: RLS hides split and
+// Activity of a title ("master" in the code), read with the user's session: RLS hides split and
 // contract events without manage_catalog, and project events the viewer may
 // not see. Rows are written by database triggers only; each becomes one
 // sentence written here, from what the trigger copied at the time.
@@ -28,6 +29,8 @@ const detailSchema = z.object({
   kind: z.string().nullish().catch(undefined),
   section: z.enum(MASTER_ITEM_SECTIONS).optional().catch(undefined),
   fields: z.array(z.string()).optional().catch(undefined),
+  category: z.string().optional().catch(undefined),
+  audio_state: z.enum(AUDIO_STATES).nullish().catch(undefined),
 });
 type Detail = z.infer<typeof detailSchema>;
 
@@ -57,8 +60,12 @@ function sentence(kind: string, d: Detail): string | null {
     case "master_created":
       return s.masterCreated;
     case "master_updated": {
+      // The audio state alone (often moved forward by an audio file) says
+      // where the title now stands.
+      if (d.fields?.length === 1 && d.fields[0] === "audio" && d.audio_state)
+        return s.audioStateSet(fr.catalog.audioStates[d.audio_state]);
       const fields = (d.fields ?? []).flatMap((f) =>
-        f === "identity" || f === "rights"
+        f === "identity" || f === "rights" || f === "audio"
           ? [fr.masterPage.activity.fields[f]]
           : [],
       );
@@ -73,9 +80,19 @@ function sentence(kind: string, d: Detail): string | null {
     case "master_item_removed":
       return s.itemRemoved(itemLabel(d));
     case "file_added":
-      return s.fileAdded(quoted(d.name, fr.artistActivity.aFile));
+      return d.audio_state
+        ? s.audioAdded(
+            fr.catalog.audioStates[d.audio_state],
+            quoted(d.name, fr.artistActivity.aFile),
+          )
+        : s.fileAdded(quoted(d.name, fr.artistActivity.aFile));
     case "file_removed":
-      return s.fileRemoved(quoted(d.name, fr.artistActivity.aFile));
+      return d.audio_state
+        ? s.audioRemoved(
+            fr.catalog.audioStates[d.audio_state],
+            quoted(d.name, fr.artistActivity.aFile),
+          )
+        : s.fileRemoved(quoted(d.name, fr.artistActivity.aFile));
     case "project_created":
       return s.projectCreated(quoted(d.title, fr.artistActivity.aProject));
     case "project_linked":

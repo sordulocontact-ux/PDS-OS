@@ -9,7 +9,7 @@ export const shell = {
     calendar: "Calendrier",
     calls: "Calls",
     artists: "Artistes",
-    masters: "Masters",
+    masters: "Titres",
     members: "Équipe",
     feedback: "Retours",
     // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.
@@ -73,7 +73,7 @@ export const shell = {
     fields: {
       title: "Titre du projet",
       type: "Type",
-      masters: "Masters",
+      masters: "Titres",
       mastersOptional: "Facultatif pour ce type de projet.",
       dueDate: "Échéance principale",
       dueDateHint: "Date de sortie visée pour une sortie musicale.",
@@ -104,12 +104,12 @@ export const shell = {
       notEditable:
         "Ce projet ne se modifie plus ici : il est lancé, ou vous n'en avez pas le droit.",
       mastersRequired:
-        "Une sortie musicale doit rattacher au moins un master. Rattachez-en un, ou changez le type de projet.",
+        "Une sortie musicale doit rattacher au moins un titre. Rattachez-en un, ou changez le type de projet.",
       invalidType: "Choisissez un type de projet.",
       invalidPriority: "Priorité invalide.",
       invalidBudget: "Montant invalide, par exemple 1500 ou 1 500,50.",
       invalidDate: "Date invalide.",
-      invalidMasters: "Un master sélectionné n'existe plus. Retirez-le.",
+      invalidMasters: "Un titre sélectionné n'existe plus. Retirez-le.",
       managerRequired: "Choisissez le chef de projet qui recevra le projet.",
       invalidManager:
         "Cette personne n'est plus chef de projet. Choisissez-en un autre.",
@@ -181,8 +181,8 @@ export const shell = {
       facts: "Informations",
       artist: "Artiste",
       type: "Type",
-      masters: "Masters rattachés",
-      noMasters: "Aucun master rattaché.",
+      masters: "Titres rattachés",
+      noMasters: "Aucun titre rattaché.",
       dueDate: "Échéance principale",
       budget: "Budget prévisionnel",
       priority: "Priorité",

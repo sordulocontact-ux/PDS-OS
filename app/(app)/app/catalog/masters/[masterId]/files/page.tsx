@@ -12,9 +12,10 @@ import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Files tab: master final, stems, mixes, artwork, contracts. Everyone reads
-// them (contracts only with manage_catalog, RLS); manage_catalog adds and
-// deletes. Same components as the artist files.
+// Files tab: stems, artwork, contracts… everything but the audio versions,
+// which have their own tab. Everyone reads them (contracts only with
+// manage_catalog, RLS); manage_catalog adds and deletes. Same components as
+// the artist files.
 export default async function MasterFilesPage({
   params,
 }: PageProps<"/app/catalog/masters/[masterId]/files">) {
@@ -23,7 +24,7 @@ export default async function MasterFilesPage({
   const [access, master, { files, error }] = await allInOrder([
     requireApproved(),
     getMaster(masterId),
-    listCatalogFiles(owner),
+    listCatalogFiles(owner, "other"),
   ]);
   if (!master) notFound();
   const canEdit = can(access, "manage_catalog") && !!access.organizationId;

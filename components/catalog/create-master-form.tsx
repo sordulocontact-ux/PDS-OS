@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useRef, useState } from "react";
 
-import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
+import { Field } from "@/components/auth/field";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { ArtistPicker } from "@/components/catalog/artist-picker";
+import { AudioFileField } from "@/components/catalog/title/audio-file-field";
+import { TitleDetailsFields } from "@/components/catalog/title/title-details-fields";
+import { useTitleAudioUpload } from "@/components/catalog/title/use-title-audio-upload";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { createMaster } from "@/lib/catalog/actions";
@@ -15,22 +19,20 @@ import {
   idleCreateMasterState,
   type ArtistOption,
   type Credit,
+  type MasterFormDefaults,
   type MasterOption,
 } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-export type MasterDefaults = {
-  title: string;
-  version: string;
-  isrc: string;
-  duration: string;
-};
-
-// Step B form. As a page it redirects to the new master; inside the project
-// form's modal (onCreated given) it hands the master back instead. With
-// `masterId` it edits that master (a PO draft reviewed in a side panel).
+// Title form (a "master" in the code). Title and main artist are required;
+// everything else is optional but at hand, for a demo just out of the studio
+// as for a finished song entered with all it has. As a page it opens the new
+// title, after sending its audio file when one was chosen (organizationId
+// given); inside the project form's modal (onCreated given) it hands the
+// title back instead. With `masterId` it edits that title.
 export function CreateMasterForm({
   artists,
+  organizationId,
   defaultCredits,
   defaults,
   masterId,
@@ -39,14 +41,17 @@ export function CreateMasterForm({
   onArtistCreated,
 }: {
   artists: ArtistOption[];
+  // Creation page only: where an audio file chosen here is sent.
+  organizationId?: string | null;
   defaultCredits?: Credit[];
-  defaults?: MasterDefaults;
+  defaults?: Partial<MasterFormDefaults>;
   masterId?: string;
   onCreated?: (master: MasterOption) => void;
   onCancel?: () => void;
   onArtistCreated?: (artist: ArtistOption) => void;
 }) {
   const t = fr.catalog.masterForm;
+  const router = useRouter();
   const [state, action] = useActionState(
     masterId ? updateMaster : createMaster,
     idleCreateMasterState,
@@ -56,20 +61,43 @@ export function CreateMasterForm({
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   // Field ids are prefixed in the modal: the project form behind has a title too.
   const prefix = onCreated ? "master-" : "";
+  const withFile = !masterId && !onCreated && !!organizationId;
+
+  const [audioState, setAudioState] = useState(values.audioState ?? "");
+  const audio = useTitleAudioUpload(organizationId ?? null);
+  const handled = useRef<unknown>(null);
 
   useEffect(() => {
-    if (state.status === "created") onCreated?.(state.master);
+    if (state.status !== "created" || handled.current === state) return;
+    handled.current = state;
+    if (onCreated) {
+      onCreated(state.master);
+      return;
+    }
+    // Page creation with a file: send it to the new title, then open it.
+    void audio.send(state.master.id, audioState).then((ok) => {
+      router.push(
+        ok
+          ? routes.master(state.master.id)
+          : routes.masterAudio(state.master.id),
+      );
+    });
     // onCreated changes identity on every render of the parent.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
+  const intent = onCreated ? "dialog" : audio.file ? "upload" : "page";
+
   return (
-    <form action={action} noValidate className="flex flex-col gap-5">
-      <input
-        type="hidden"
-        name="intent"
-        value={onCreated ? "dialog" : "page"}
-      />
+    <form
+      action={action}
+      noValidate
+      className="flex flex-col gap-5"
+      onSubmit={(event) => {
+        if (!audio.check(audioState)) event.preventDefault();
+      }}
+    >
+      <input type="hidden" name="intent" value={intent} />
       {masterId && <input type="hidden" name="masterId" value={masterId} />}
       <Field
         id={`${prefix}title`}
@@ -90,44 +118,31 @@ export function CreateMasterForm({
         error={errors.credits}
       />
 
-      <Field
-        id={`${prefix}version`}
-        name="version"
-        label={t.fields.version}
-        hint={t.fields.versionHint}
-        autoComplete="off"
-        maxLength={100}
-        defaultValue={values.version ?? ""}
-        error={errors.version}
-      />
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          id={`${prefix}isrc`}
-          name="isrc"
-          label={t.fields.isrc}
-          hint={t.fields.isrcHint}
-          autoComplete="off"
-          autoCapitalize="characters"
-          spellCheck={false}
-          maxLength={20}
-          defaultValue={values.isrc ?? ""}
-          error={errors.isrc}
-          className="h-10 font-mono text-base md:text-sm"
+      <fieldset className="flex flex-col gap-5 border-t border-border pt-5">
+        <legend className="mb-4 text-sm font-medium text-muted-foreground">
+          {t.optionalLegend}
+        </legend>
+        <TitleDetailsFields
+          prefix={prefix}
+          values={values}
+          errors={{
+            ...errors,
+            audioState: errors.audioState ?? audio.stateError,
+          }}
+          onAudioStateChange={setAudioState}
         />
-        <Field
-          id={`${prefix}duration`}
-          name="duration"
-          label={t.fields.duration}
-          hint={t.fields.durationHint}
-          autoComplete="off"
-          placeholder="3:07"
-          maxLength={8}
-          defaultValue={values.duration ?? ""}
-          error={errors.duration}
-          className="h-10 text-base tabular-nums md:text-sm"
-        />
-      </div>
+        {withFile && (
+          <AudioFileField
+            label={t.fields.audioFile}
+            hint={t.fields.audioFileHint}
+            file={audio.file}
+            durationSeconds={audio.durationSeconds}
+            error={audio.fileError}
+            disabled={audio.sending}
+            onChange={audio.choose}
+          />
+        )}
+      </fieldset>
 
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>
@@ -151,7 +166,12 @@ export function CreateMasterForm({
             {fr.catalog.profileForm.submit}
           </SubmitButton>
         ) : (
-          <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>
+          <SubmitButton
+            pendingLabel={audio.sending ? t.uploading : t.submitting}
+            busy={audio.sending}
+          >
+            {t.submit}
+          </SubmitButton>
         )}
       </div>
     </form>

@@ -17,6 +17,7 @@ export function FormDialog({
   description,
   closeLabel,
   trigger,
+  size = "default",
   children,
 }: {
   open: boolean;
@@ -27,12 +28,17 @@ export function FormDialog({
   closeLabel: string;
   // A DialogTrigger, when the modal opens from its own button.
   trigger?: React.ReactNode;
+  // `wide`: a longer form laid out wider rather than taller (feedback).
+  size?: "default" | "wide";
   children: React.ReactNode;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger}
-      <DialogContent closeLabel={closeLabel}>
+      <DialogContent
+        closeLabel={closeLabel}
+        className={size === "wide" ? "sm:max-w-2xl" : undefined}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

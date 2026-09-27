@@ -32,32 +32,30 @@ type Swapped = {
 
 // Only the images in the zone matter. The library waits for every image of
 // the page and downloads each again: a lazy image below the fold never loads
-// by itself, and the capture hung on it. Out of the zone, an image not loaded
-// yet is blanked for the time of the copy (it shows nothing anyway), and a
-// loaded one is not downloaded (`blankUrls`, read by fetchFn).
+// by itself, and the capture hung on it. An image not loaded yet shows
+// nothing on screen: it is blanked for the time of the copy, wherever it is.
+// A loaded one out of the zone is not downloaded again (`blankUrls`, read by
+// fetchFn).
 function sortImages(region: Region) {
   const swapped: Swapped[] = [];
   const kept = new Set<string>();
   const outside = new Set<string>();
   for (const img of document.images) {
-    const inZone = meets(img.getBoundingClientRect(), region);
-    if (inZone) {
-      kept.add(img.src).add(img.currentSrc);
+    if (!img.complete) {
+      swapped.push({
+        img,
+        src: img.getAttribute("src"),
+        srcset: img.getAttribute("srcset"),
+        sizes: img.getAttribute("sizes"),
+      });
+      img.removeAttribute("srcset");
+      img.removeAttribute("sizes");
+      img.src = BLANK;
       continue;
     }
-    if (img.complete) {
-      outside.add(img.src).add(img.currentSrc);
-      continue;
-    }
-    swapped.push({
-      img,
-      src: img.getAttribute("src"),
-      srcset: img.getAttribute("srcset"),
-      sizes: img.getAttribute("sizes"),
-    });
-    img.removeAttribute("srcset");
-    img.removeAttribute("sizes");
-    img.src = BLANK;
+    const urls = [img.src, img.currentSrc];
+    const set = meets(img.getBoundingClientRect(), region) ? kept : outside;
+    for (const url of urls) set.add(url);
   }
   const blankUrls = new Set([...outside].filter((url) => !kept.has(url)));
   const restore = () => {

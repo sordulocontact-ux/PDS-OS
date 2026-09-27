@@ -14,6 +14,7 @@ import {
   type FileOwner,
 } from "@/lib/catalog/file-rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
+import { AUDIO_STATES } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,8 +37,17 @@ const recordSchema = z
     fileName: z.string().trim().min(1).max(255),
     mime: z.string().trim().min(1).max(255),
     bytes: z.number().int().positive().max(MAX_FILE_BYTES),
+    // An audio version of a title: the state it stands for, and the
+    // duration the browser read from it (null when it could not).
+    audioState: z.enum(AUDIO_STATES).nullish(),
+    durationSeconds: z.number().int().min(1).max(86399).nullish(),
   })
-  .refine((input) => isFileCategory(input.owner.kind, input.category));
+  .refine((input) => isFileCategory(input.owner.kind, input.category))
+  .refine(
+    (input) =>
+      (input.category === "audio" && input.owner.kind === "master") ===
+      Boolean(input.audioState),
+  );
 
 const deleteSchema = z.object({ owner: ownerSchema, fileId: z.uuid() });
 
@@ -68,6 +78,13 @@ export async function recordCatalogFile(
   if (!organizationId || !parsed.success)
     return { ok: false, error: fr.auth.errors.forbidden };
   const { owner, path, category, fileName, mime, bytes } = parsed.data;
+  const audio =
+    category === "audio"
+      ? {
+          audio_state: parsed.data.audioState,
+          duration_seconds: parsed.data.durationSeconds ?? null,
+        }
+      : {};
   if (!isCatalogFilePath(path, organizationId, owner.id))
     return { ok: false, error: t.failed };
 
@@ -87,7 +104,7 @@ export async function recordCatalogFile(
           .insert({ ...row, artist_id: owner.id })
       : await supabase
           .from("master_files")
-          .insert({ ...row, master_id: owner.id });
+          .insert({ ...row, ...audio, master_id: owner.id });
   if (error) {
     console.error("recordCatalogFile:", error.message);
     return { ok: false, error: t.failed };

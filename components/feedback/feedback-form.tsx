@@ -168,6 +168,7 @@ export function FeedbackForm({
         <ChoiceCards
           name="kind"
           legend={t.kind}
+          columns={3}
           defaultValue={defaults?.kind ?? undefined}
           choices={FEEDBACK_KINDS.map((kind) => ({
             value: kind,

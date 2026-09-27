@@ -11,18 +11,18 @@ import { getMaster, listArtistOptions } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 
 // ?artist=<id>: opened from an artist page — that artist is already credited
-// as main artist. ?versionOf=<id>: a new version of that master — its title
+// as main artist. ?variantOf=<id>: a new variant of that title — its name
 // and credits are copied. Credits stay editable (featuring, other artists,
 // order).
 export default async function NewMasterPage({
   searchParams,
 }: PageProps<"/app/catalog/masters/new">) {
-  await requirePermission("manage_catalog");
+  const access = await requirePermission("manage_catalog");
   const t = fr.catalog.masterForm;
-  const { artist: artistParam, versionOf } = await searchParams;
+  const { artist: artistParam, variantOf } = await searchParams;
   const [artists, original] = await Promise.all([
     listArtistOptions(),
-    typeof versionOf === "string" ? getMaster(versionOf) : null,
+    typeof variantOf === "string" ? getMaster(variantOf) : null,
   ]);
   const fromArtist =
     typeof artistParam === "string"
@@ -34,7 +34,7 @@ export default async function NewMasterPage({
       <Link
         href={
           original
-            ? routes.masterVersions(original.id)
+            ? routes.masterVariants(original.id)
             : fromArtist
               ? routes.artist(fromArtist.id)
               : routes.masters
@@ -53,11 +53,8 @@ export default async function NewMasterPage({
         <CardContent>
           <CreateMasterForm
             artists={artists}
-            defaults={
-              original
-                ? { title: original.title, version: "", isrc: "", duration: "" }
-                : undefined
-            }
+            organizationId={access.organizationId}
+            defaults={original ? { title: original.title } : undefined}
             defaultCredits={
               original
                 ? original.credits

@@ -138,7 +138,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `ConfirmDialog` | `ui/confirm-dialog.tsx` | confirmation d'une action (`destructive` si définitive, `error` si elle a échoué) ; sans `onConfirm`, explique seulement pourquoi c'est impossible |
 | `DropdownMenu` (+ `Trigger`, `Content`, `Item`) | `ui/dropdown-menu.tsx` | menu Base UI, surface du Popover, sans animation |
 | `RowActions` | `ui/row-actions.tsx` | « ⋯ » d'une ligne ou d'un en-tête (`size` icon-sm / icon-lg), rien si aucune action |
-| `FormDialog` | `ui/form-dialog.tsx` | formulaire dans la modale `Dialog` (en bas sur mobile), corps monté à chaque ouverture ; toute modification (« ⋯ » Modifier, fiche artiste) |
+| `FormDialog` | `ui/form-dialog.tsx` | formulaire dans la modale `Dialog` (en bas sur mobile), corps monté à chaque ouverture ; toute modification (« ⋯ » Modifier, fiche artiste) ; `size="wide"` pour un long formulaire (fenêtre de retour) |
 | `Loaded`, `useLoaded` | `ui/loaded.tsx`, `ui/use-loaded.ts` | chargement / échec / prêt d'une modale ou d'un panneau (action serveur appelée à l'ouverture) |
 | `Dialog` | `ui/dialog.tsx` | **la seule modale du site**, « verre » : page floutée sans voile + panneau sombre translucide (Espace Espace, Modifier, confirmations) ; tokens inversés par `.surface-glass` (`docs/DESIGN.md` § 4) |
 | `Card`, `Sheet`, `Popover`, `Select`, `Table` | `ui/` | shadcn |
@@ -186,14 +186,15 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `BudgetSummary`, `BudgetLines`, `BudgetTable`, `BudgetLineSheet`, `DeleteBudgetLineDialog` | `budget/` | page Budget : tuiles et dépassement, lignes filtrables par statut, formulaire en `Sheet`, suppression confirmée |
 | `FilesTable`, `ValidationItem`, `ActivityTimeline` | `project-history/` | fichiers du projet (audio des calls, téléchargement signé), demande de validation, journal groupé par jour |
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
-| `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire |
+| `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire ; `TextareaField` `addon` = contrôle posé dans le coin bas du champ (micro) |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
 | `TabBar` | `ui/tab-bar.tsx` | barre d'onglets (liens ou boutons) sans filet, trait de 2 px qui glisse sous l'onglet actif ; base de `SectionTabs` et `DataTableViews` |
-| `ChoiceCards` | `ui/choice-cards.tsx` | radios natifs avec la conséquence sous chaque choix (call, retours, membres, artiste) |
+| `ChoiceCards` | `ui/choice-cards.tsx` | radios natifs avec la conséquence sous chaque choix (call, retours, membres, artiste) ; `columns={3}` côte à côte dès `sm` |
 | `ArtistRelationField`, `ArtistListViews` | `catalog/` | choix Signé / Collaboration des formulaires artiste ; vues de la liste Artistes (onglets Tous / Signés / Collaborations, + Archivés du DG en pastilles) |
 | `CreativePicker` | `projects/creative-picker.tsx` | choix multiple de personnes en `FilterChip`, envoyé en un champ JSON |
 | `AudioMeter`, `useAudioMeter` | `ui/audio-meter.tsx`, `ui/use-audio-meter.ts` | onde du micro qui défile de droite à gauche (façon Claude), size : sm, md ; dictée, saisie vocale de PO, enregistrement de call |
 | `VoiceInputButton`, `VoiceInputBar`, `VoiceInputStatus` | `voice/voice-input.tsx` | saisie vocale d'un champ : micro ; pendant l'écoute, onde + ✕ annuler + ✓ valider à la place du micro et d'Envoyer |
+| `VoiceFieldControl` | `voice/voice-field-control.tsx` | micro de n'importe quel champ texte (`fieldId`), le texte dicté s'ajoute à ce qui est écrit ; message de la fenêtre de retour |
 | `ProcessingSteps` | `calls/processing-steps.tsx` | suivi d'étapes (fait / en cours / à venir) du traitement d'un call |
 | `FramingStart` | `framing/framing-start.tsx` | état « cadrage pas encore ouvert » (Cadrage verrouillé, vue d'ensemble) : deux options, préparer un call ou commencer en amont |
 | `CallAgenda` | `calls/call-agenda.tsx` | ordre du jour préparé d'un call (points à aborder, temps approximatif), affiché avant l'enregistrement |
@@ -389,7 +390,7 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   PO regroupe les doublons en sujets à l'ouverture de la page par le DG ; le DG seul
   (`read_feedback`) transmet un sujet avec une priorité ou l'écarte
   (`review_feedback_topic`), après l'avoir modifié s'il veut, seul ou avec PO qui propose
-  (`edit_feedback_topic`) ; un sujet transmis part sur **Notion** (`lib/integrations/notion.ts`,
+  (`edit_feedback_topic`) ; un sujet transmis part sur **Notion** avec ses captures téléversées (colonne facultative « Captures ») (`lib/integrations/notion.ts`,
   `NOTION_TOKEN` + `NOTION_FEEDBACK_DATABASE_ID`, facultatifs) ; les retours d'origine restent consultables
   (`docs/ARCHITECTURE.md` § 8 quater).
 - **Labo** `/labo` : banc de test local (404 en production), faux call `docs/labo/`.

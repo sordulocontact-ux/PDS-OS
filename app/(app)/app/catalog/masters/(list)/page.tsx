@@ -1,35 +1,41 @@
 import { IconBoxArchive, IconPlus } from "nucleo-sharp-essential";
-import { IconDisc } from "@/components/icons";
 import Link from "next/link";
 
-import { archiveViews } from "@/components/archive/archive-views";
 import { FormMessage } from "@/components/auth/form-message";
 import { MastersList } from "@/components/catalog/masters-list";
+import { TitleListViews } from "@/components/catalog/title/title-list-views";
+import { IconDisc } from "@/components/icons";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
-import { DataTableViews } from "@/components/ui/data-table";
-import { countRecords } from "@/lib/archive/queries";
 import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { listMasters } from "@/lib/catalog/queries";
+import {
+  countTitleViews,
+  inTitleView,
+  titleViewOf,
+} from "@/lib/catalog/title-views";
 import { fr } from "@/lib/i18n/fr";
 
+// Titres ("masters" in the code): tabs by audio state, the demos left out
+// by default (docs/ARCHITECTURE.md § 2 septies).
 export default async function MastersPage({
   searchParams,
 }: PageProps<"/app/catalog/masters">) {
   const access = await requireApproved();
   const t = fr.catalog.masters;
   const canArchive = can(access, "archive_records");
-  // The archive is the director's: anyone else always sees live masters.
-  const archived = canArchive && isArchivedView((await searchParams).view);
-  const [{ masters, error }, counts] = await Promise.all([
-    listMasters({ archived }),
-    canArchive ? countRecords("master") : null,
-  ]);
+  const params = await searchParams;
+  // The archive is the director's: anyone else always sees live titles.
+  const archived = canArchive && isArchivedView(params.view);
+  const view = titleViewOf(params.state);
+  // One read for the tab counts and the rows: the catalog stays small.
+  const { masters: all, error } = await listMasters({ archived });
+  const masters = all.filter((master) => inTitleView(master, view));
   const newMaster =
     can(access, "manage_catalog") && !archived ? (
       <Link href={routes.mastersNew} className={buttonVariants({ size: "lg" })}>
@@ -43,14 +49,16 @@ export default async function MastersPage({
       <PageHeader
         title={t.title}
         description={t.subtitle}
-        action={masters.length > 0 ? newMaster : null}
+        action={all.length > 0 ? newMaster : null}
       />
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
       ) : (
-        <DataTableViews
-          label={fr.records.view.label}
-          views={archiveViews({ path: routes.masters, archived, counts })}
+        <TitleListViews
+          view={view}
+          counts={countTitleViews(all)}
+          archived={archived}
+          canArchive={canArchive}
         >
           {masters.length === 0 ? (
             archived ? (
@@ -58,6 +66,13 @@ export default async function MastersPage({
                 icon={IconBoxArchive}
                 title={fr.records.archivedEmpty.master}
                 body={fr.records.archivedEmptyBody}
+              />
+            ) : all.length > 0 && view !== "all" ? (
+              <EmptyState
+                icon={IconDisc}
+                title={t.filteredEmpty[view]}
+                body={t.filteredEmptyBody}
+                action={newMaster}
               />
             ) : (
               <EmptyState
@@ -68,19 +83,16 @@ export default async function MastersPage({
               />
             )
           ) : (
-            // The design leaves a wider gap between the header and the list.
-            <div className={canArchive ? undefined : "md:mt-10"}>
-              <MastersList
-                masters={masters}
-                rights={{
-                  canEdit: can(access, "manage_catalog"),
-                  canArchive,
-                  archived,
-                }}
-              />
-            </div>
+            <MastersList
+              masters={masters}
+              rights={{
+                canEdit: can(access, "manage_catalog"),
+                canArchive,
+                archived,
+              }}
+            />
           )}
-        </DataTableViews>
+        </TitleListViews>
       )}
     </PageContainer>
   );

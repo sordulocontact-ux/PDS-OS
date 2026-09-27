@@ -10,14 +10,16 @@ import {
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
-// Figures and checklist of the master overview. Counts and states are
+// Figures and checklist of the title overview ("master" in the code). Counts and states are
 // computed here, never by the model.
 
 export type MasterCounts = {
   sessions: number;
   contributors: number;
   declarationsFiled: number;
-  masterFiles: number;
+  // Audio versions of the title, and those at "Master final".
+  audioFiles: number;
+  finalMasterFiles: number;
 };
 
 export async function countMasterItems(
@@ -25,34 +27,42 @@ export async function countMasterItems(
 ): Promise<MasterCounts> {
   const supabase = await createClient();
   const count = { count: "exact", head: true } as const;
-  const [sessions, contributors, declarations, files] = await Promise.all([
-    supabase
-      .from("master_sessions")
-      .select("id", count)
-      .eq("master_id", masterId),
-    supabase
-      .from("master_contributors")
-      .select("id", count)
-      .eq("master_id", masterId),
-    supabase
-      .from("master_declarations")
-      .select("id", count)
-      .eq("master_id", masterId)
-      .neq("status", "rejected"),
-    supabase
-      .from("master_files")
-      .select("id", count)
-      .eq("master_id", masterId)
-      .eq("category", "master"),
-  ]);
-  for (const result of [sessions, contributors, declarations, files]) {
+  const [sessions, contributors, declarations, audio, final] =
+    await Promise.all([
+      supabase
+        .from("master_sessions")
+        .select("id", count)
+        .eq("master_id", masterId),
+      supabase
+        .from("master_contributors")
+        .select("id", count)
+        .eq("master_id", masterId),
+      supabase
+        .from("master_declarations")
+        .select("id", count)
+        .eq("master_id", masterId)
+        .neq("status", "rejected"),
+      supabase
+        .from("master_files")
+        .select("id", count)
+        .eq("master_id", masterId)
+        .eq("category", "audio"),
+      supabase
+        .from("master_files")
+        .select("id", count)
+        .eq("master_id", masterId)
+        .eq("category", "audio")
+        .eq("audio_state", "final_master"),
+    ]);
+  for (const result of [sessions, contributors, declarations, audio, final]) {
     if (result.error) console.error("countMasterItems:", result.error.message);
   }
   return {
     sessions: sessions.count ?? 0,
     contributors: contributors.count ?? 0,
     declarationsFiled: declarations.count ?? 0,
-    masterFiles: files.count ?? 0,
+    audioFiles: audio.count ?? 0,
+    finalMasterFiles: final.count ?? 0,
   };
 }
 
@@ -130,8 +140,8 @@ export async function masterChecklist(input: {
     {
       key: "masterFile",
       label: t.masterFile,
-      done: counts.masterFiles > 0,
-      href: routes.masterFiles(masterId),
+      done: counts.finalMasterFiles > 0,
+      href: routes.masterAudio(masterId),
     },
   );
   return items;

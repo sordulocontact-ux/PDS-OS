@@ -7,7 +7,7 @@ export function activitySentence(event: ActivityEvent): string {
   const s = t.sentences;
   const d = event.detail;
   const title = t.quoted(
-    d.title && d.version ? `${d.title} (${d.version})` : d.title,
+    d.title && d.variant ? `${d.title} (${d.variant})` : d.title,
     event.kind.startsWith("master") ? t.aMaster : t.aProject,
   );
   const assignee = d.assignee || t.someone;

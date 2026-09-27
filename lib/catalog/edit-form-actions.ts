@@ -5,9 +5,10 @@ import { getArtist } from "@/lib/catalog/artist-queries";
 import type { ArtistDetail } from "@/lib/catalog/artist-types";
 import { getMaster, listArtistOptions } from "@/lib/catalog/queries";
 import {
-  formatDuration,
+  masterFormDefaults,
   type ArtistOption,
   type MasterDetail,
+  type MasterFormDefaults,
 } from "@/lib/catalog/types";
 
 // What the "Modifier" modal of a list row needs, read with the user's session
@@ -23,7 +24,7 @@ export async function loadArtistEdit(
 export type MasterEdit = {
   artists: ArtistOption[];
   master: MasterDetail;
-  defaults: { title: string; version: string; isrc: string; duration: string };
+  defaults: MasterFormDefaults;
 };
 
 export async function loadMasterEdit(
@@ -38,14 +39,6 @@ export async function loadMasterEdit(
   return {
     artists,
     master,
-    defaults: {
-      title: master.title,
-      version: master.version ?? "",
-      isrc: master.isrc ?? "",
-      duration:
-        master.durationSeconds != null
-          ? formatDuration(master.durationSeconds)
-          : "",
-    },
+    defaults: masterFormDefaults(master),
   };
 }

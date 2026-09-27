@@ -6,9 +6,11 @@ import { cache } from "react";
 import { projectIdSchema } from "@/lib/projects/schemas";
 import {
   CREDITS_SELECT,
+  masterOption,
   toCredits,
   type RawCredit,
 } from "@/lib/catalog/queries";
+import { variantOf } from "@/lib/catalog/title-rules";
 import {
   formatCredits,
   type Credit,
@@ -67,14 +69,15 @@ function toStages(raw: RawStage[]): ProjectStage[] {
 
 // Masters in link order, each with its credits: the artist of a project is
 // the first credit of its first master (same rule as project_artist_name).
-const MASTERS_SELECT = `links:project_masters!project_masters_project_same_org(position, master:masters!project_masters_master_same_org(id, title, version, ${CREDITS_SELECT}))`;
+const MASTERS_SELECT = `links:project_masters!project_masters_project_same_org(position, master:masters!project_masters_master_same_org(id, title, variant, variant_label, ${CREDITS_SELECT}))`;
 
 type RawLink = {
   position: number;
   master: {
     id: string;
     title: string;
-    version: string | null;
+    variant: string;
+    variant_label: string | null;
     credits: RawCredit[];
   } | null;
 };
@@ -91,7 +94,8 @@ function toMasters(
         {
           id: link.master.id,
           title: link.master.title,
-          version: link.master.version,
+          variant: variantOf(link.master.variant),
+          variantLabel: link.master.variant_label,
           artists: formatCredits(credits),
           credits,
         },
@@ -242,12 +246,7 @@ export const getProject = cache(
       budgetCents: data.budget_cents,
       priority: isPriority(data.priority) ? data.priority : null,
       framingNotes: data.framing_notes,
-      masters: masters.map(({ id, title, version, artists }) => ({
-        id,
-        title,
-        version,
-        artists,
-      })),
+      masters: masters.map(masterOption),
       stages,
       currentStage: currentStageOf(stages),
     };

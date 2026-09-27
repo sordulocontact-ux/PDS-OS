@@ -2,13 +2,16 @@ import "server-only";
 
 import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
+import { FEEDBACK_SCREENSHOT_BUCKET } from "@/lib/feedback/screenshot-rules";
 import { isFeedbackKind, isFeedbackPriority } from "@/lib/feedback/types";
 import { fr } from "@/lib/i18n/fr";
 import {
   createFeedbackPage,
+  hasCapturesColumn,
   NotionError,
   notionMissingSettings,
   updateFeedbackPage,
+  uploadFile,
   type FeedbackOriginal,
 } from "@/lib/integrations/notion";
 import { formatLongDay, formatTime } from "@/lib/project-history/format";
@@ -46,6 +49,40 @@ export function explainNotionError(error: unknown): string {
   }
 }
 
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+// Screenshots sent at once to Notion.
+const UPLOADS_AT_ONCE = 3;
+
+/**
+ * Reads each screenshot with the director's session (storage RLS) and sends
+ * it to Notion. A screenshot that fails is left out, logged: it never keeps
+ * the topic off Notion.
+ */
+async function uploadScreenshots(
+  supabase: Supabase,
+  paths: string[],
+): Promise<Map<string, string>> {
+  const ids = new Map<string, string>();
+  const queue = [...new Set(paths)];
+  const next = async (): Promise<void> => {
+    const path = queue.shift();
+    if (!path) return;
+    try {
+      const { data, error } = await supabase.storage
+        .from(FEEDBACK_SCREENSHOT_BUCKET)
+        .download(path);
+      if (error || !data) throw error ?? new Error("no_file");
+      ids.set(path, await uploadFile(data, path.split("/").pop() ?? path));
+    } catch (error) {
+      console.error("uploadScreenshots:", path, error);
+    }
+    return next();
+  };
+  await Promise.all(Array.from({ length: UPLOADS_AT_ONCE }, next));
+  return ids;
+}
+
 const fullName = (
   p: { first_name: string | null; last_name: string | null } | null,
 ) => [p?.first_name, p?.last_name].filter(Boolean).join(" ") || "—";
@@ -59,7 +96,7 @@ const fullName = (
  * and kept on the topic (record_feedback_notion_error), shown with a retry.
  */
 export async function syncTopicToNotion(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Supabase,
   topicId: string,
 ): Promise<NotionSync> {
   const missing = notionMissingSettings();
@@ -79,7 +116,7 @@ export async function syncTopicToNotion(
       .maybeSingle(),
     supabase
       .from("feedback")
-      .select("message, page_path, created_at")
+      .select("message, page_path, created_at, screenshot_paths")
       .eq("topic_id", topicId)
       .order("created_at"),
   ]);
@@ -93,11 +130,11 @@ export async function syncTopicToNotion(
     return { status: "failed", reason: fr.feedback.notion.reasons.notSent };
 
   const items = feedbackRes.data ?? [];
-  const original = (f: (typeof items)[number]): FeedbackOriginal => ({
-    message: f.message,
-    pagePath: f.page_path,
-    when: `${formatLongDay(f.created_at)}, ${formatTime(f.created_at)}`,
-  });
+  const since = topic.notion_synced_at ?? "";
+  // Written in the page: all on creation, then those that joined since.
+  const written = topic.notion_page_id
+    ? items.filter((f) => f.created_at > since)
+    : items;
   const t = fr.feedback;
   const page = {
     title: topic.title,
@@ -108,28 +145,47 @@ export async function syncTopicToNotion(
   };
 
   try {
+    // Captures column: every screenshot of the topic, re-sent only when
+    // new ones came (a column is replaced as a whole).
+    const bodyPaths = written.flatMap((f) => f.screenshot_paths);
+    const columnPaths =
+      (!topic.notion_page_id || bodyPaths.length > 0) &&
+      (await hasCapturesColumn())
+        ? items.flatMap((f) => f.screenshot_paths)
+        : [];
+    const uploaded = await uploadScreenshots(supabase, [
+      ...bodyPaths,
+      ...columnPaths,
+    ]);
+    const idsOf = (paths: string[]) =>
+      paths.flatMap((path) => uploaded.get(path) ?? []);
+    const original = (f: (typeof items)[number]): FeedbackOriginal => ({
+      message: f.message,
+      pagePath: f.page_path,
+      when: `${formatLongDay(f.created_at)}, ${formatTime(f.created_at)}`,
+      captures: idsOf(f.screenshot_paths),
+    });
+    const withCaptures = columnPaths.length
+      ? { ...page, captures: idsOf(columnPaths) }
+      : page;
+
     let pageId = topic.notion_page_id;
     let url: string | null = null;
     if (!pageId) {
       const created = await createFeedbackPage(
         {
-          ...page,
+          ...withCaptures,
           sentBy: fullName(topic.reviewer),
           sentOn: (topic.reviewed_at ?? new Date().toISOString()).slice(0, 10),
           link: `${siteUrl()}${routes.feedback}?view=sent`,
         },
-        items.map(original),
+        written.map(original),
         t.notion.originalsHeading,
       );
       pageId = created.id;
       url = created.url;
     } else {
-      const since = topic.notion_synced_at ?? "";
-      await updateFeedbackPage(
-        pageId,
-        page,
-        items.filter((f) => f.created_at > since).map(original),
-      );
+      await updateFeedbackPage(pageId, withCaptures, written.map(original));
     }
     const { error } = await supabase.rpc("record_feedback_notion", {
       p_topic: topicId,

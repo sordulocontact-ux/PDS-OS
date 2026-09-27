@@ -17,6 +17,9 @@ export function isAudioState(value: unknown): value is AudioState {
   return (AUDIO_STATES as readonly unknown[]).includes(value);
 }
 
+/** What a select submits for "Non renseigné": read as null. */
+export const UNKNOWN_AUDIO_STATE = "unknown";
+
 /** Null when the state is unknown (never guessed). */
 export const audioStateOf = (value: string | null): AudioState | null =>
   isAudioState(value) ? value : null;

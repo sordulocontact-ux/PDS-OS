@@ -5,6 +5,7 @@ import {
   fileExtension,
   type FileOwner,
 } from "@/lib/catalog/file-rules";
+import type { AudioState } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,6 +19,9 @@ export async function uploadCatalogFile(input: {
   owner: FileOwner;
   category: string;
   file: File;
+  // An audio version of a title (category "audio").
+  audioState?: AudioState;
+  durationSeconds?: number | null;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const t = fr.catalogFiles;
   if (input.file.size === 0) return { ok: false, error: t.empty };
@@ -43,6 +47,8 @@ export async function uploadCatalogFile(input: {
     fileName: input.file.name,
     mime,
     bytes: input.file.size,
+    audioState: input.audioState,
+    durationSeconds: input.durationSeconds,
   });
   // Not recorded: the object would be orphaned, remove it.
   if (!result.ok) await bucket.remove([path]);

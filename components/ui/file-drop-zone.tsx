@@ -1,6 +1,6 @@
 "use client";
 
-import { IconImage } from "nucleo-sharp-essential";
+import { IconImage, type IconProps } from "nucleo-sharp-essential";
 import { useId, useState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ export function FileDropZone({
   multiple = false,
   disabled = false,
   describedBy,
+  icon: Icon = IconImage,
   onFiles,
 }: {
   label: string;
@@ -25,6 +26,8 @@ export function FileDropZone({
   multiple?: boolean;
   disabled?: boolean;
   describedBy?: string;
+  // What is expected (an image by default).
+  icon?: React.ComponentType<IconProps>;
   onFiles: (files: File[]) => void;
 }) {
   const id = useId();
@@ -64,7 +67,7 @@ export function FileDropZone({
         disabled && "pointer-events-none opacity-60",
       )}
     >
-      <IconImage aria-hidden className="size-6 text-muted-foreground" />
+      <Icon aria-hidden className="size-6 text-muted-foreground" />
       <span className="text-sm font-medium">{label}</span>
       {hint && <span className="text-sm text-muted-foreground">{hint}</span>}
       <input

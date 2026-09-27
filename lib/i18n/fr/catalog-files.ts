@@ -1,4 +1,4 @@
-// Files tab of the artist and master pages.
+// Files tab of the artist and title pages.
 export const catalogFiles = {
   title: "Fichiers",
   emptyTitle: "Aucun fichier pour l'instant",
@@ -22,9 +22,8 @@ export const catalogFiles = {
       other: "Autre",
     },
     master: {
-      master: "Master final",
+      audio: "Audio",
       stems: "Stems",
-      mix: "Mix",
       artwork: "Pochette",
       contract: "Contrat",
       other: "Autre",

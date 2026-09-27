@@ -100,6 +100,7 @@ function masterFact(m: MasterListItem): string {
   return fr.assistant.catalog.master(
     masterLabel(m),
     m.artists,
+    m.audioState ? fr.catalog.audioStates[m.audioState] : null,
     m.isrc ? formatIsrc(m.isrc) : null,
     m.durationSeconds !== null ? formatDuration(m.durationSeconds) : null,
   );
@@ -108,7 +109,7 @@ function masterFact(m: MasterListItem): string {
 export function findMastersTool() {
   return tool({
     description:
-      "Liste les masters (enregistrements) du catalogue avec leurs artistes, ISRC et durée ; filtrable par artiste ou par titre.",
+      "Liste les titres du catalogue (morceaux, de la maquette au master final) avec leurs artistes, état audio, ISRC et durée ; filtrable par artiste ou par nom.",
     inputSchema: z.object({
       artist: z.string().max(200).optional().describe("Nom de l'artiste"),
       query: z.string().max(200).optional().describe("Titre, même partiel"),

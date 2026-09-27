@@ -45,7 +45,9 @@ export type FileCategory = (typeof FILE_CATEGORIES)[number];
 export type ActivityDetail = {
   name?: string;
   title?: string;
-  version?: string;
+  // Shown after a title's name: its variant ("Instrumental"), or the free
+  // version text of events older than variants.
+  variant?: string;
   assignee?: string;
   role?: string;
   category?: FileCategory;

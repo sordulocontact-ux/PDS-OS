@@ -2,6 +2,11 @@
 
 import type { FieldErrors, FormValues } from "@/lib/auth/form-state";
 import type { MasterRelease } from "@/lib/catalog/master-release";
+import {
+  variantText,
+  type AudioState,
+  type Variant,
+} from "@/lib/catalog/title-rules";
 
 export const CREDIT_ROLES = ["main", "featuring"] as const;
 export type CreditRole = (typeof CREDIT_ROLES)[number];
@@ -33,15 +38,20 @@ export type ArtistListItem = {
 
 export type Credit = { artistId: string; name: string; role: CreditRole };
 
+// A title ("master" in the code, docs/ARCHITECTURE.md § 2 septies).
 export type MasterOption = {
   id: string;
   title: string;
-  version: string | null;
+  variant: Variant;
+  // The words given for "Autre"; null otherwise.
+  variantLabel: string | null;
   // Credits in display order, already formatted ("Nova feat. Sable").
   artists: string;
 };
 
 export type MasterListItem = MasterOption & {
+  // Null when unknown: never guessed.
+  audioState: AudioState | null;
   isrc: string | null;
   durationSeconds: number | null;
 };
@@ -52,6 +62,32 @@ export type MasterRow = MasterListItem & {
   // Live projects using it: archiving waits for them.
   projectCount: number;
 };
+
+/** The title form's values, as text (a select or field each). */
+export type MasterFormDefaults = {
+  title: string;
+  // "" = unknown.
+  audioState: string;
+  variant: string;
+  variantLabel: string;
+  // Form formats: "FRZ032600001", "3:07"; empty when not given.
+  isrc: string;
+  duration: string;
+};
+
+export function masterFormDefaults(master: MasterListItem): MasterFormDefaults {
+  return {
+    title: master.title,
+    audioState: master.audioState ?? "",
+    variant: master.variant,
+    variantLabel: master.variantLabel ?? "",
+    isrc: master.isrc ?? "",
+    duration:
+      master.durationSeconds != null
+        ? formatDuration(master.durationSeconds)
+        : "",
+  };
+}
 
 export type LinkedProject = { id: string; title: string; type: string };
 
@@ -162,10 +198,12 @@ export function isCreditRole(value: unknown): value is CreditRole {
   );
 }
 
-// "Titre (radio edit)" when a version is set.
+// "Sauvéé (Instrumental)" for any variant but the original.
 export function masterLabel(master: {
   title: string;
-  version: string | null;
+  variant: Variant;
+  variantLabel: string | null;
 }): string {
-  return master.version ? `${master.title} (${master.version})` : master.title;
+  const variant = variantText(master);
+  return variant ? `${master.title} (${variant})` : master.title;
 }

@@ -1,4 +1,4 @@
-// Master page: header, tabs and the sections below them.
+// Title page ("master" in the code): header, tabs and the sections below them.
 const optional = "Facultatif.";
 
 const form = {
@@ -17,11 +17,12 @@ const remove = {
 };
 
 export const masterPage = {
-  tabsLabel: "Sections du master",
+  tabsLabel: "Sections du titre",
   tabs: {
     overview: "Vue d'ensemble",
+    audio: "Audio",
     sessions: "Sessions & pistes",
-    versions: "Versions",
+    variants: "Variantes",
     credits: "Contributeurs & crédits",
     splits: "Splits",
     rights: "Droits & déclarations",
@@ -33,11 +34,12 @@ export const masterPage = {
   loadError: "Ces informations n'ont pas pu être chargées. Rechargez la page.",
   form,
   deleteFailed: "La suppression n'a pas abouti. Réessayez.",
-  archivedNote: "Ce master est archivé : il n'est plus modifiable.",
+  archivedNote: "Ce titre est archivé : il n'est plus modifiable.",
 
   overview: {
     figures: {
-      versions: "Versions",
+      audioFiles: "Fichiers audio",
+      variants: "Variantes",
       sessions: "Sessions",
       contributors: "Contributeurs",
       projects: "Projets",
@@ -45,7 +47,7 @@ export const masterPage = {
     facts: "Informations",
     artists: "Artistes",
     checklist: {
-      title: "Dossier du master",
+      title: "Dossier du titre",
       done: "Fait",
       todo: "À compléter",
       isrc: "ISRC renseigné",
@@ -56,7 +58,7 @@ export const masterPage = {
       publishingSplits: "Splits de l'édition complets (100 %)",
       declarations: (done: number, total: number) =>
         `Déclarations déposées (${done} sur ${total})`,
-      masterFile: "Fichier master déposé",
+      masterFile: "Fichier Master final déposé",
     },
   },
 
@@ -120,16 +122,35 @@ export const masterPage = {
     confirmBody: (name: string) => `« ${name} » sera supprimée.`,
   },
 
-  versions: {
-    title: "Versions",
+  variants: {
+    title: "Variantes",
     description:
-      "Les autres enregistrements du même titre, pour les mêmes artistes : radio edit, instrumental, remix… Chacun a son propre ISRC.",
-    add: "Nouvelle version",
-    current: "Ce master",
-    emptyTitle: "Pas d'autre version",
+      "Les autres variantes du même titre, pour les mêmes artistes : radio edit, instrumental, remix… Chacune a son propre ISRC.",
+    add: "Nouvelle variante",
+    emptyTitle: "Pas d'autre variante",
     emptyBody:
-      "Créez une version pour une radio edit, une instrumentale ou un remix.",
-    emptyBodyReadOnly: "Les autres versions de ce titre apparaîtront ici.",
+      "Créez une variante pour une radio edit, une instrumentale ou un remix.",
+    emptyBodyReadOnly: "Les autres variantes de ce titre apparaîtront ici.",
+  },
+
+  // Successive audio files of the title, grouped by audio state.
+  audio: {
+    title: "Évolution du morceau",
+    description:
+      "Chaque fichier garde l'état audio qu'il représente. Le titre avance tout seul vers l'état le plus avancé déposé.",
+    current: "État actuel",
+    add: "Ajouter un fichier audio",
+    stateLabel: "État audio du fichier",
+    uploading: "Envoi…",
+    hint: "WAV, AIFF, MP3, FLAC… 50 Mo au plus. La durée est lue quand le navigateur le peut.",
+    notAudio: "Choisissez un fichier audio (WAV, AIFF, MP3, FLAC…).",
+    emptyTitle: "Aucun fichier audio",
+    emptyBody:
+      "Déposez la maquette, puis les mises à plat et les masters : ils restent tous rattachés à ce titre.",
+    emptyBodyReadOnly: "Les fichiers audio du titre apparaîtront ici.",
+    none: "Aucun fichier à cet état.",
+    fileMeta: (author: string, date: string) =>
+      author ? `${author} · ${date}` : date,
   },
 
   credits: {
@@ -296,12 +317,12 @@ export const masterPage = {
 
   distribution: {
     description:
-      "Les sorties des projets qui portent ce master. On les modifie dans la Sortie du projet.",
+      "Les sorties des projets qui portent ce titre. On les modifie dans la Sortie du projet.",
     emptyTitle: "Pas encore de sortie",
     emptyBody:
-      "Rattachez ce master à un projet : sa sortie, son UPC et ses liens apparaîtront ici.",
+      "Rattachez ce titre à un projet : sa sortie, son UPC et ses liens apparaîtront ici.",
     emptyBodyLinked:
-      "Les projets de ce master n'ont pas encore de sortie. Elle apparaîtra ici dès qu'elle sera créée dans leur Sortie.",
+      "Les projets de ce titre n'ont pas encore de sortie. Elle apparaîtra ici dès qu'elle sera créée dans leur Sortie.",
     columns: {
       release: "Sortie",
       project: "Projet",
@@ -315,17 +336,17 @@ export const masterPage = {
 
   projects: {
     emptyTitle: "Aucun projet",
-    emptyBody: "Aucun projet ne rattache ce master pour l'instant.",
+    emptyBody: "Aucun projet ne rattache ce titre pour l'instant.",
   },
 
   files: {
     emptyBody:
-      "Master final, stems, mixes, pochette, contrats : ajoutez ici les fichiers du titre.",
+      "Stems, pochette, contrats : ajoutez ici les autres fichiers du titre. Les fichiers audio successifs sont dans l'onglet Audio.",
     emptyBodyReadOnly: "Les fichiers du titre apparaîtront ici.",
   },
 
   activity: {
-    emptyBody: "Ce qui se passe autour de ce master apparaîtra ici.",
+    emptyBody: "Ce qui se passe autour de ce titre apparaîtra ici.",
     sections: {
       session: "la session",
       track: "la piste",
@@ -335,19 +356,25 @@ export const masterPage = {
     },
     fields: {
       identity: "l'identité",
+      audio: "l'état audio",
       rights: "les droits",
     },
     sentences: {
-      masterCreated: "Master créé",
+      masterCreated: "Titre créé",
       masterUpdated: (fields: string) => `Modification de ${fields}`,
-      masterUpdatedNoField: "Master modifié",
+      masterUpdatedNoField: "Titre modifié",
       itemAdded: (what: string) => `Ajout de ${what}`,
       itemUpdated: (what: string) => `Modification de ${what}`,
       itemRemoved: (what: string) => `Suppression de ${what}`,
       fileAdded: (name: string) => `Fichier ${name} ajouté`,
       fileRemoved: (name: string) => `Fichier ${name} supprimé`,
-      projectCreated: (title: string) => `Projet ${title} créé avec ce master`,
-      projectLinked: (title: string) => `Master rattaché au projet ${title}`,
+      audioAdded: (state: string, name: string) =>
+        `Fichier audio ${name} ajouté (${state})`,
+      audioRemoved: (state: string, name: string) =>
+        `Fichier audio ${name} supprimé (${state})`,
+      audioStateSet: (state: string) => `État audio : ${state}`,
+      projectCreated: (title: string) => `Projet ${title} créé avec ce titre`,
+      projectLinked: (title: string) => `Titre rattaché au projet ${title}`,
     },
   },
 

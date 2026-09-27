@@ -116,7 +116,11 @@ export function ZoneCapture({
     pressedAt.current = point;
     // First corner; the second one comes with the next click or the release.
     if (!anchor) setAnchor(point);
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Keeps the release even outside the window; refused for a pointer
+    // already gone, which changes nothing.
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {}
   };
 
   const onPointerUp = (event: React.PointerEvent) => {

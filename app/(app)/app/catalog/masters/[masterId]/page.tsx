@@ -13,14 +13,15 @@ import {
   masterChecklist,
 } from "@/lib/catalog/master/overview";
 import { getMasterRights } from "@/lib/catalog/master/queries";
-import { listMasterVersionIds } from "@/lib/catalog/master/related";
+import { listMasterVariantIds } from "@/lib/catalog/master/related";
 import { formatIswc, pLine } from "@/lib/catalog/master/rules";
 import { getMaster } from "@/lib/catalog/queries";
+import { variantText } from "@/lib/catalog/title-rules";
 import { formatDuration, formatIsrc } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Master overview: key figures (each opens its tab), what the master's file
+// Title overview: key figures (each opens its tab), what the title's file
 // still needs, facts and performing artists.
 export default async function MasterOverviewPage({
   params,
@@ -33,8 +34,8 @@ export default async function MasterOverviewPage({
     countMasterItems(masterId),
   ]);
   if (!master || !rights) notFound();
-  const [versions, checklist] = await Promise.all([
-    listMasterVersionIds(master),
+  const [variants, checklist] = await Promise.all([
+    listMasterVariantIds(master),
     masterChecklist({
       masterId,
       isrc: master.isrc,
@@ -49,11 +50,17 @@ export default async function MasterOverviewPage({
   return (
     <>
       <StatTiles
+        columns={5}
         stats={[
           {
-            label: t.figures.versions,
-            value: String(versions.ids.length + 1),
-            href: routes.masterVersions(masterId),
+            label: t.figures.audioFiles,
+            value: String(counts.audioFiles),
+            href: routes.masterAudio(masterId),
+          },
+          {
+            label: t.figures.variants,
+            value: String(variants.ids.length + 1),
+            href: routes.masterVariants(masterId),
           },
           {
             label: t.figures.sessions,
@@ -82,7 +89,16 @@ export default async function MasterOverviewPage({
             <FactList
               emptyLabel={fr.catalog.notProvided}
               facts={[
-                { label: m.version, value: master.version ?? m.mainVersion },
+                {
+                  label: m.audioState,
+                  value: master.audioState
+                    ? fr.catalog.audioStates[master.audioState]
+                    : null,
+                },
+                {
+                  label: m.variant,
+                  value: variantText(master) ?? fr.catalog.variants.original,
+                },
                 {
                   label: m.isrc,
                   value: master.isrc ? formatIsrc(master.isrc) : null,

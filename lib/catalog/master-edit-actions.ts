@@ -7,7 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { databaseErrorMessage } from "@/lib/auth/errors";
 import { routes } from "@/lib/auth/redirects";
 import { parseForm, retainedValues } from "@/lib/auth/schemas";
-import { getMaster } from "@/lib/catalog/queries";
+import { getMaster, masterOption } from "@/lib/catalog/queries";
 import { catalogIdSchema, createMasterSchema } from "@/lib/catalog/schemas";
 import type { CreateMasterState } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
@@ -51,7 +51,9 @@ export async function updateMaster(
       artist_id: c.artistId,
       role: c.role,
     })),
-    p_version: input.version ?? undefined,
+    p_variant: input.variant,
+    p_variant_label: input.variantLabel ?? undefined,
+    p_audio_state: input.audioState ?? undefined,
     p_isrc: input.isrc ?? undefined,
     p_duration_seconds: input.duration ?? undefined,
   });
@@ -78,6 +80,5 @@ export async function updateMaster(
   revalidatePath(routes.app, "layout");
   const master = await getMaster(input.masterId);
   if (!master) return { status: "error", formError: fr.auth.errors.forbidden };
-  const { id, title, version, artists } = master;
-  return { status: "created", master: { id, title, version, artists } };
+  return { status: "created", master: masterOption(master) };
 }

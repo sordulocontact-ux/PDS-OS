@@ -1,6 +1,8 @@
-// Files of an artist or a master: buckets, limits and categories.
+// Files of an artist or a title ("master"): buckets, limits and categories.
 // Client-safe (the browser checks before uploading; the database enforces
 // the same rules).
+
+import type { AudioState } from "@/lib/catalog/title-rules";
 
 export const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
@@ -15,8 +17,36 @@ export const FILE_BUCKETS = {
 
 export const FILE_CATEGORIES = {
   artist: ["press", "photo", "contract", "audio", "other"],
-  master: ["master", "stems", "mix", "artwork", "contract", "other"],
+  // `audio`: a successive audio version of the title, with its audio state
+  // (Audio tab); the others are the Files tab's.
+  master: ["audio", "stems", "artwork", "contract", "other"],
 } as const satisfies Record<FileOwnerKind, readonly string[]>;
+
+/** Categories offered by the Files tab: audio versions have their own tab. */
+export const FILES_TAB_CATEGORIES = {
+  artist: FILE_CATEGORIES.artist,
+  master: ["stems", "artwork", "contract", "other"],
+} as const satisfies { [K in FileOwnerKind]: readonly FileCategory<K>[] };
+
+/** Audio files the browser can usually read (its duration included). */
+export const AUDIO_ACCEPT = "audio/*,.wav,.aif,.aiff,.mp3,.flac,.m4a,.aac,.ogg";
+
+export function isAudioFile(file: { name: string; type: string }): boolean {
+  if (file.type.startsWith("audio/")) return true;
+  const ext = fileExtension(file.name);
+  return ext !== null && AUDIO_EXTENSIONS.has(ext);
+}
+
+const AUDIO_EXTENSIONS = new Set([
+  "wav",
+  "aif",
+  "aiff",
+  "mp3",
+  "flac",
+  "m4a",
+  "aac",
+  "ogg",
+]);
 
 export type FileCategory<K extends FileOwnerKind = FileOwnerKind> =
   (typeof FILE_CATEGORIES)[K][number];
@@ -65,6 +95,9 @@ export type CatalogFile = {
   fileName: string;
   mime: string;
   bytes: number;
+  // Audio versions of a title only.
+  audioState: AudioState | null;
+  durationSeconds: number | null;
   createdAt: string;
   // Empty when the author's name cannot be read.
   authorName: string;

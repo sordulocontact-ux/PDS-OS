@@ -9,7 +9,12 @@ import {
   proposalResult,
   type ProposeContext,
 } from "@/lib/assistant/propose/result";
-import { parseSaidDuration, parseSaidIsrc } from "@/lib/assistant/verbatim";
+import {
+  parseSaidAudioState,
+  parseSaidDuration,
+  parseSaidIsrc,
+  parseSaidVariant,
+} from "@/lib/assistant/verbatim";
 import { can } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import {
@@ -18,10 +23,15 @@ import {
   listMasterOptions,
 } from "@/lib/catalog/queries";
 import {
+  audioStateOf,
+  variantOf,
+  variantText,
+} from "@/lib/catalog/title-rules";
+import {
   CREDIT_ROLES,
   formatCredits,
-  formatDuration,
   formatIsrc,
+  masterFormDefaults,
   masterLabel,
   type Credit,
 } from "@/lib/catalog/types";
@@ -30,15 +40,13 @@ import { fr } from "@/lib/i18n/fr";
 export function proposeMasterTool({ access, verbatim }: ProposeContext) {
   return tool({
     description:
-      "Prépare la création d'un master (enregistrement), ou la modification d'un master existant : titre, artistes crédités, version, ISRC, durée. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Les artistes doivent déjà être au catalogue.",
+      "Prépare la création d'un titre (un morceau du catalogue, de la maquette au master final), ou la modification d'un titre existant : nom, artistes crédités, état audio, variante, ISRC, durée. Seuls le nom et l'artiste principal sont obligatoires : n'invente jamais le reste. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même. Les artistes doivent déjà être au catalogue.",
     inputSchema: z.object({
       existingMaster: z
         .string()
         .max(200)
         .optional()
-        .describe(
-          "Titre du master existant à modifier ; absent pour en créer un",
-        ),
+        .describe("Nom du titre existant à modifier ; absent pour en créer un"),
       title: z.string().max(200).optional(),
       artists: z
         .array(
@@ -50,7 +58,20 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
         .max(20)
         .optional()
         .describe("Artistes crédités dans l'ordre ; featuring pour un invité"),
-      version: z.string().max(100).optional().describe("« radio edit »…"),
+      audioState: z
+        .string()
+        .max(100)
+        .optional()
+        .describe(
+          "Seulement si l'utilisateur dit où en est le morceau : ses mots exacts (« c'est une maquette », « la mise à plat », « le master final »)",
+        ),
+      variant: z
+        .string()
+        .max(100)
+        .optional()
+        .describe(
+          "Seulement si l'utilisateur la nomme : ses mots exacts (« l'instru », « radio edit », « remix »)",
+        ),
       isrc: z
         .string()
         .max(20)
@@ -108,15 +129,32 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
       if (input.duration && !duration)
         warnings.push(t.notSaid(labels.duration));
 
-      const currentDuration =
-        current?.durationSeconds != null
-          ? formatDuration(current.durationSeconds)
-          : "";
+      // Audio state and variant: named in the user's words, read by code.
+      const stateQuote = verbatim.quote(input.audioState);
+      const audioState = stateQuote ? parseSaidAudioState(stateQuote) : null;
+      if (input.audioState && !audioState)
+        warnings.push(t.notSaid(labels.audioState));
+      const variantQuote = verbatim.quote(input.variant);
+      const variant = variantQuote ? parseSaidVariant(variantQuote) : null;
+      if (input.variant && !variant) warnings.push(t.notSaid(labels.variant));
+
+      const base = current
+        ? masterFormDefaults(current)
+        : {
+            title: "",
+            audioState: "",
+            variant: "",
+            variantLabel: "",
+            isrc: "",
+            duration: "",
+          };
       const values: MasterDraft["values"] = {
-        title: input.title?.trim() || current?.title || "",
-        version: input.version?.trim() || current?.version || "",
-        isrc: isrc ?? current?.isrc ?? "",
-        duration: duration ?? currentDuration,
+        title: input.title?.trim() || base.title,
+        audioState: audioState ?? base.audioState,
+        variant: variant ?? base.variant,
+        variantLabel: variant && variant !== "other" ? "" : base.variantLabel,
+        isrc: isrc ?? base.isrc,
+        duration: duration ?? base.duration,
         credits,
       };
 
@@ -128,14 +166,34 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
         current ? formatCredits(current.credits) : null,
         formatCredits(values.credits),
       );
-      change(changes, labels.version, current?.version, values.version);
+      const stateName = (value: string) => {
+        const state = audioStateOf(value || null);
+        return state ? fr.catalog.audioStates[state] : null;
+      };
+      change(
+        changes,
+        labels.audioState,
+        stateName(base.audioState),
+        stateName(values.audioState),
+      );
+      const variantName = (value: string, label: string) =>
+        variantText({
+          variant: variantOf(value || "original"),
+          variantLabel: label || null,
+        });
+      change(
+        changes,
+        labels.variant,
+        variantName(base.variant, base.variantLabel),
+        variantName(values.variant, values.variantLabel),
+      );
       change(
         changes,
         labels.isrc,
         current?.isrc ? formatIsrc(current.isrc) : null,
         values.isrc ? formatIsrc(values.isrc) : null,
       );
-      change(changes, labels.duration, currentDuration, values.duration);
+      change(changes, labels.duration, base.duration, values.duration);
 
       return proposalResult({
         draft: { kind: "master", masterId: current?.id ?? null, values },

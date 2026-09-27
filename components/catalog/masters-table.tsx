@@ -1,4 +1,5 @@
 import { MasterActions } from "@/components/catalog/master-actions";
+import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
 import { IconDisc } from "@/components/icons";
 import {
   DataTable,
@@ -17,6 +18,7 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
+import { variantText } from "@/lib/catalog/title-rules";
 import { formatIsrc, type MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
@@ -38,6 +40,7 @@ export function MastersTable({
       <DataTableHeader>
         <DataTableHead>{t.columns.title}</DataTableHead>
         <DataTableHead>{t.columns.artists}</DataTableHead>
+        <DataTableHead hideBelow="sm">{t.columns.audioState}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.isrc}</DataTableHead>
         <DataTableHead hideBelow="lg">{t.columns.release}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.releaseDate}</DataTableHead>
@@ -57,10 +60,17 @@ export function MastersTable({
                     {master.title}
                   </DataTableLink>
                 }
-                subtitle={master.version}
+                subtitle={variantText(master)}
               />
             </DataTableCell>
             <DataTableCell>{master.artists}</DataTableCell>
+            <DataTableCell hideBelow="sm">
+              {master.audioState ? (
+                <AudioStateBadge state={master.audioState} size="sm" />
+              ) : (
+                EMPTY_CELL
+              )}
+            </DataTableCell>
             <DataTableCell hideBelow="md">
               {master.isrc ? formatIsrc(master.isrc) : EMPTY_CELL}
             </DataTableCell>

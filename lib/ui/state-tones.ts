@@ -84,6 +84,17 @@ export const masterReleaseTone: Record<string, Tone> = {
   undated: "neutral",
 };
 
+/**
+ * How far a title has come: a demo is not work to do (neutral), a rough mix
+ * or a master runs toward the final master, which is done.
+ */
+export const audioStateTone: Record<string, Tone> = {
+  demo: "neutral",
+  rough_mix: "info",
+  master: "info",
+  final_master: "success",
+};
+
 /** Work of a person in a project (lib/project-work): late blocks, to do runs,
  * waiting on someone else, done. */
 export const workStatusTone: Record<string, Tone> = {
