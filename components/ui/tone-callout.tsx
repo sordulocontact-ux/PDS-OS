@@ -17,6 +17,7 @@ const toneCalloutVariants = cva(
         success:
           "bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]",
         danger: "bg-[var(--tone-danger-bg)] text-[color:var(--tone-danger-fg)]",
+        action: "bg-[var(--tone-action-bg)] text-[color:var(--tone-action-fg)]",
       },
     },
     defaultVariants: { tone: "neutral" },

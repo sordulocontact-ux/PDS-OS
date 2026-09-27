@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FramingStart } from "@/components/framing/framing-start";
@@ -7,6 +8,7 @@ import { StageStateBadge } from "@/components/projects/stage-state-badge";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { isFramingOpen } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -99,34 +101,59 @@ export default async function ProjectOverviewPage({
           <h2 id="stages-title" className="text-base font-medium">
             {t.stages}
           </h2>
-          <ol className="divide-y divide-border rounded-xl border border-border">
-            {project.stages.map((stage, index) => (
-              <li
-                key={stage.id}
-                aria-current={
-                  project.currentStage?.id === stage.id ? "step" : undefined
-                }
-                className="flex items-center justify-between gap-3 px-4 py-3 aria-[current=step]:bg-muted/50"
-              >
-                <span className="flex min-w-0 items-baseline gap-3">
-                  <span className="w-4 shrink-0 text-sm text-muted-foreground tabular-nums">
-                    {index + 1}
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium">
-                      {stage.label}
+          <ol className="flex flex-col divide-y divide-border overflow-hidden rounded-xl border border-border">
+            {project.stages.map((stage, index) => {
+              const href =
+                stage.key === "framing"
+                  ? routes.projectFraming(project.id)
+                  : stage.key === "launch_strategy"
+                    ? routes.projectStrategy(project.id)
+                    : stage.key === "design"
+                      ? routes.projectDesign(project.id)
+                      : null;
+              const content = (
+                <>
+                  <span className="flex min-w-0 items-baseline gap-3">
+                    <span className="w-4 shrink-0 text-sm text-muted-foreground tabular-nums">
+                      {index + 1}
                     </span>
-                    {stage.stateChangedAt && (
-                      <span className="text-xs text-muted-foreground">
-                        {t.changedAt}{" "}
-                        {dateFormatter.format(new Date(stage.stateChangedAt))}
+                    <span className="flex min-w-0 flex-col">
+                      <span className="truncate text-sm font-medium">
+                        {stage.label}
                       </span>
-                    )}
+                      {stage.stateChangedAt && (
+                        <span className="text-xs text-muted-foreground">
+                          {t.changedAt}{" "}
+                          {dateFormatter.format(new Date(stage.stateChangedAt))}
+                        </span>
+                      )}
+                    </span>
                   </span>
-                </span>
-                <StageStateBadge state={stage.state} />
-              </li>
-            ))}
+                  <StageStateBadge state={stage.state} />
+                </>
+              );
+              const current = project.currentStage?.id === stage.id;
+              return (
+                <li key={stage.id}>
+                  {href ? (
+                    <Link
+                      href={href}
+                      aria-current={current ? "step" : undefined}
+                      className="flex items-center justify-between gap-3 px-4 py-4 no-underline hover:bg-muted/50"
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <div
+                      aria-current={current ? "step" : undefined}
+                      className="flex items-center justify-between gap-3 px-4 py-4"
+                    >
+                      {content}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ol>
         </section>
         {creativeTeam}

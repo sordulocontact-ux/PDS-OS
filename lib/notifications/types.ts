@@ -46,13 +46,27 @@ export function notificationText(
   return t.texts[kind](actorName || t.someone, projectTitle || t.aProject);
 }
 
-// A design version opens the Conception; everything else the project.
+// A design version opens the Conception; a validation opens its stage's own
+// page (the summary screen, for the Cadrage's guided review, so the
+// "Valider"/"Refuser" buttons are the first thing in view); everything else
+// the project overview.
 export function notificationHref(
   kind: NotificationKind,
   projectId: string | null,
+  stageKey?: StageKey | null,
 ): string {
   if (!projectId) return routes.app;
-  return kind.startsWith("design_version_")
-    ? routes.projectDesign(projectId)
-    : routes.project(projectId);
+  if (kind.startsWith("design_version_"))
+    return routes.projectDesign(projectId);
+  if (kind.startsWith("validation_")) {
+    if (stageKey === "framing")
+      return routes.projectFramingStep(projectId, "summary");
+    if (stageKey === "launch_strategy")
+      return routes.projectStrategy(projectId);
+    if (stageKey === "design") return routes.projectDesign(projectId);
+  }
+  return routes.project(projectId);
 }
+
+// Keys of stage_definitions relevant to a validation's kind of stage.
+export type StageKey = "framing" | "launch_strategy" | "design";

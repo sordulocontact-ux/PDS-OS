@@ -8,6 +8,7 @@ import type { ReleaseOverview } from "@/lib/insights/releases";
 import type { Todo } from "@/lib/insights/todo";
 import type { ProjectListItem } from "@/lib/projects/types";
 import {
+  myValidationTone,
   onlineTone,
   overdueTone,
   projectStatusTone,
@@ -74,6 +75,11 @@ export function ValidationsCard({
           href={v.href}
           main={`${v.projectTitle} · ${v.stageLabel}`}
           sub={formatDay(v.requestedAt)}
+          badge={
+            <StatusBadge tone={myValidationTone} size="sm">
+              {t.toValidate}
+            </StatusBadge>
+          }
         />
       ))}
     </ListCard>

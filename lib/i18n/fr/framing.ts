@@ -135,6 +135,7 @@ export const framing = {
     validator: "Valideur",
     note: "Message (facultatif)",
     request: "Demander la validation",
+    requested: "Validation demandée.",
     waitingFor: (name: string) => `En attente de ${name}.`,
     youDecide: "Vous êtes le valideur.",
     comment: "Commentaire (obligatoire pour refuser)",

@@ -12,6 +12,7 @@ import {
   isNotificationKind,
   notificationHref,
   notificationText,
+  type StageKey,
 } from "@/lib/notifications/types";
 import { personName } from "@/lib/projects/types";
 import type { Database } from "@/lib/supabase/database.types";
@@ -47,12 +48,36 @@ export async function sendPendingPushes(
         deliveries.flatMap((d) => (d.project_id ? [d.project_id] : [])),
       ),
     ];
-    const [{ data: projects }, access] = await Promise.all([
-      supabase.from("projects").select("id, title").in("id", projectIds),
-      fetchAccess(supabase),
-    ]);
+    // A validation's subject_id points at validations.id: resolved
+    // separately since the column has no single foreign key.
+    const validationIds = [
+      ...new Set(
+        deliveries.flatMap((d) =>
+          d.kind.startsWith("validation_") && d.subject_id
+            ? [d.subject_id]
+            : [],
+        ),
+      ),
+    ];
+    const [{ data: projects }, access, { data: validations }] =
+      await Promise.all([
+        supabase.from("projects").select("id, title").in("id", projectIds),
+        fetchAccess(supabase),
+        validationIds.length
+          ? supabase
+              .from("validations")
+              .select("id, project_stages!inner(stage_definitions!inner(key))")
+              .in("id", validationIds)
+          : Promise.resolve({ data: [] }),
+      ]);
     const titles = new Map((projects ?? []).map((p) => [p.id, p.title]));
     const actor = personName(access.firstName, access.lastName) || null;
+    const stageKeys = new Map<string, StageKey>();
+    for (const v of validations ?? []) {
+      const key = v.project_stages.stage_definitions.key;
+      if (key === "framing" || key === "launch_strategy" || key === "design")
+        stageKeys.set(v.id, key);
+    }
 
     webpush.setVapidDetails(VAPID_SUBJECT, publicKey, VAPID_PRIVATE_KEY);
     await Promise.all(
@@ -65,7 +90,11 @@ export async function sendPendingPushes(
             actor,
             d.project_id ? (titles.get(d.project_id) ?? null) : null,
           ),
-          url: notificationHref(d.kind, d.project_id),
+          url: notificationHref(
+            d.kind,
+            d.project_id,
+            d.subject_id ? (stageKeys.get(d.subject_id) ?? null) : null,
+          ),
           tag: d.notification_id,
         });
         try {

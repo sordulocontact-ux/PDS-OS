@@ -16,6 +16,7 @@ const statusBadgeVariants = cva(
         success:
           "bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]",
         danger: "bg-[var(--tone-danger-bg)] text-[color:var(--tone-danger-fg)]",
+        action: "bg-[var(--tone-action-bg)] text-[color:var(--tone-action-fg)]",
       },
       size: {
         sm: "h-5 px-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]",
