@@ -29,7 +29,7 @@ export default async function FeedbackPage({
   const reader = can(access, "read_feedback");
 
   return (
-    <PageContainer className="max-w-3xl">
+    <PageContainer>
       <PageHeader
         title={t.title}
         description={reader ? t.subtitleReader : t.subtitle}

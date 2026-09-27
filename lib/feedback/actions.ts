@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { can } from "@/lib/auth/access";
 import { requireApproved, requirePermission } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { sendDirectToNotion } from "@/lib/feedback/direct";
 import { syncTopicToNotion, type NotionSync } from "@/lib/feedback/notion-sync";
 import { proposeRewrite, type RewriteResult } from "@/lib/feedback/rewrite";
 import {
@@ -39,6 +41,8 @@ const feedbackInput = z.object({
     .nullable()
     .transform((v) => (v && isAppPath(v) ? v : null)),
   screenshotPaths: z.array(z.string()).max(MAX_SCREENSHOTS),
+  // The director's own feedback, sent straight to Notion with it.
+  priority: z.enum(FEEDBACK_PRIORITIES).optional(),
 });
 
 export async function sendFeedback(
@@ -64,6 +68,9 @@ export async function sendFeedback(
     };
   }
   const { organizationId, personId } = access;
+  const { priority } = parsed.data;
+  if (priority && !can(access, "read_feedback"))
+    return { ok: false, error: t.generic };
   const screenshotPaths = parsed.data.screenshotPaths;
   if (
     !organizationId ||
@@ -76,20 +83,31 @@ export async function sendFeedback(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("feedback").insert({
-    organization_id: organizationId,
-    kind: parsed.data.kind,
-    message: parsed.data.message,
-    page_path: parsed.data.pagePath,
-    screenshot_paths: screenshotPaths,
-  });
-  if (error) {
-    console.error("sendFeedback:", error.message);
+  const { data, error } = await supabase
+    .from("feedback")
+    .insert({
+      organization_id: organizationId,
+      kind: parsed.data.kind,
+      message: parsed.data.message,
+      page_path: parsed.data.pagePath,
+      screenshot_paths: screenshotPaths,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    console.error("sendFeedback:", error?.message);
     return { ok: false, error: t.generic };
   }
 
+  const notion = priority
+    ? await sendDirectToNotion(
+        supabase,
+        { id: data.id, ...parsed.data },
+        priority,
+      )
+    : undefined;
   revalidatePath(routes.feedback);
-  return { ok: true };
+  return { ok: true, notion };
 }
 
 /**

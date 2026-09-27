@@ -97,6 +97,27 @@ export const shell = {
     },
     submit: "Créer le projet",
     submitting: "Création…",
+    // Kept as it is typed (feedback n°6), resumed from this page.
+    draft: {
+      idle: "Votre saisie est gardée en brouillon : vous pouvez quitter la page et la reprendre ici.",
+      saving: "Enregistrement du brouillon…",
+      saved: "Brouillon enregistré.",
+      error: "Le brouillon n'a pas pu être enregistré. Vérifiez la connexion.",
+      listTitle: "Brouillons",
+      untitled: "Projet sans titre",
+      updated: (when: string) => `Modifié le ${when}`,
+      notFound:
+        "Ce brouillon n'existe plus : le projet a sans doute déjà été créé.",
+      delete: "Supprimer le brouillon",
+      confirmTitle: "Supprimer ce brouillon ?",
+      confirmDescription:
+        "Ce qui a été saisi sera perdu. Aucun projet n'a été créé.",
+      confirm: "Supprimer",
+      deleting: "Suppression…",
+      cancel: "Annuler",
+      close: "Fermer",
+      deleteFailed: "Le brouillon n'a pas pu être supprimé. Réessayez.",
+    },
     save: "Enregistrer",
     saving: "Enregistrement…",
     cancel: "Annuler",

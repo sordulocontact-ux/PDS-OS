@@ -54,6 +54,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
 | `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
+| `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
 
 Principes :
 
@@ -304,6 +305,30 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
 `bootstrap_admin_email` par une requête SQL explicite ; le verrou se ferme après usage.
 
 ---
+
+### 2 octies. Brouillon d'un nouveau projet (retour n°6)
+
+- **Problème** : un DG quitte « Nouveau projet » (pour créer le compte d'un chef de projet,
+  par exemple) et perd tout ce qu'il avait saisi.
+- **Enregistré au fil de la saisie**, en base (`project_drafts`, jamais `localStorage`) :
+  `useProjectDraft` (`components/projects/use-project-draft.ts`) relit le formulaire toutes
+  les 1,5 s — plusieurs champs sont des contrôles maison qui écrivent des champs cachés sans
+  événement — et l'enregistre s'il a changé, puis en quittant la page. Rien n'est écrit
+  avant une première modification. L'adresse prend `?draft=<id>` par `history.replaceState`
+  (une vraie navigation re-rendrait le formulaire en pleine saisie), pour qu'un
+  rechargement ou le retour arrière le reprenne ; si la page en cache date d'avant le
+  brouillon, elle est relue (`router.refresh`). Enregistrer en quittant rafraîchit la page
+  (sa liste de brouillons), jamais pendant la saisie.
+- **Reprendre** : `/app/projects/new` liste les brouillons de la personne (« Brouillons »,
+  `ListCard`, le plus récent d'abord), chacun rouvre le formulaire pré-rempli ; un brouillon
+  introuvable le dit. Les valeurs sont relues comme une saisie (`draftValues`) et revérifiées
+  à la création.
+- **Fin** : « Créer le projet » supprime le brouillon (`createProject`, session de
+  l'auteur) ; l'enregistrement s'arrête pendant l'envoi et reprend si la création est
+  refusée. « Supprimer le brouillon » (confirmé) le jette. Un brouillon supprimé ailleurs
+  n'est jamais recréé par un onglet resté ouvert.
+- Seulement sur la page « Nouveau projet » : pas dans le panneau ouvert par PO (son
+  brouillon est déjà la carte de PO), ni pour modifier un projet.
 
 ## 3. Authentification et navigation (étape 3)
 
@@ -723,8 +748,29 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   est plafonnée à 5 s. Le calque porte `data-capture-ignore` et n'apparaît pas
   sur la capture. Limites : une vidéo, un `<canvas>` ou une image d'un domaine sans CORS
   peuvent sortir vides ; PNG, JPEG si plus de 5 Mo.
-- Table `feedback` : auteur posé par trigger, **jamais modifiée ni supprimée** (seul
-  `topic_id` est posé par `file_feedback`).
+- **Retour du DG → directement sur Notion** (demande de Sacha, 27/09/2026) : le DG n'a
+  pas à se trier lui-même. Pour qui a `read_feedback`, la fenêtre de retour (bouton,
+  touche **C**, capture collée) s'intitule « Envoyer un retour sur Notion » et demande la
+  **priorité** (Normale par défaut, choisie par un humain). `sendFeedback` enregistre le
+  retour, puis `sendDirectToNotion` (`lib/feedback/direct.ts`) : PO écrit titre et résumé
+  (repli : premiers mots, par le code), `file_feedback` ouvre un sujet à lui seul,
+  `review_feedback_topic` le transmet, `syncTopicToNotion` crée le ticket avec ses
+  captures et la page d'origine — mêmes fonctions SQL et même session que depuis la page
+  Retours, aucune migration. Échec Notion : toast avec la raison, sujet dans « Transmis »
+  avec « Réessayer sur Notion » ; échec du classement : retour laissé dans la boîte « À
+  examiner ». Le « Envoyer » d'une carte de PO passe encore par la boîte (pas de priorité).
+- Table `feedback` : auteur posé par trigger, **jamais supprimée**. **Son auteur la modifie**
+  (« Modifier » sur chaque carte de « Vos retours », même fenêtre de retour pré-remplie) :
+  type, message, captures (garder, retirer, ajouter), à tout moment, pour ajouter une
+  précision ou une capture oubliée. Droits colonne par colonne (`kind`, `message`,
+  `screenshot_paths`) + politique `feedback_update_author` ; `edited_at` posé par trigger
+  (`mark_feedback_edited`, pas quand `file_feedback` pose `topic_id`) ; les captures
+  ajoutées passent le même contrôle de dossier (`b_check_screenshot` à l'insertion et à la
+  modification). La page d'origine, l'auteur et le sujet ne changent jamais. Un retour
+  modifié après la dernière publication d'un sujet compte dans « N retours pas encore sur
+  Notion » (`newSinceSync`, code) : le DG met la page à jour. Le résumé de PO n'est pas
+  réécrit. Une capture retirée reste dans le bucket (politique de suppression Storage à
+  faire).
 - **Lecture** : chacun voit les siens ; la permission **`read_feedback`** (DG seul,
   `role_permissions`) voit tous ceux de l'organisation et décide.
 - **Tri par PO** (`lib/feedback/triage.ts`) : à l'ouverture de la page par le DG, s'il y a

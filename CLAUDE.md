@@ -158,7 +158,8 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `NavLinks`, `MobileNav`, `UserPanel`, `Sidebar` | `shell/` | navigation de la barre latérale blanche (pleine largeur ou repliée, contexte partagé `use-collapsed-nav.tsx`) et du tiroir mobile (`docs/DESIGN.md` § 4) ; classes d'un élément de navigation dans `nav-item.ts` |
 | `FeedbackProvider`, `useOpenFeedback` | `feedback/feedback-provider.tsx` | fenêtre de retour unique de l'app : ouverte par un bouton, la touche Impr. écran ou une capture collée |
 | `FeedbackNavButton` | `shell/feedback-nav-button.tsx` | « Envoyer un retour » du bas de la navigation (ferme le tiroir mobile, `data-close-nav`) |
-| `FeedbackForm`, `ScreenshotField` | `feedback/` | formulaire de la fenêtre de retour, captures jointes (5 au plus : aperçus avec ✕, zone de dépôt) |
+| `FeedbackForm`, `ScreenshotField`, `useScreenshotAttachments` | `feedback/` | formulaire de la fenêtre de retour, captures jointes (5 au plus : aperçus avec ✕, zone de dépôt, `kept` = captures déjà envoyées) ; `direct` (DG) = priorité à choisir, envoi sur Notion ; `editing` = modification par l'auteur |
+| `EditFeedbackButton` | `feedback/edit-feedback-button.tsx` | « Modifier » d'un retour envoyé par soi (slot `action` de `FeedbackCard`) |
 | `ZoneCapture`, `useCaptureShortcut` | `feedback/` | touche **C** : curseur « retour », deux coins (ou glisser) → capture de la zone, fenêtre de retour ouverte avec |
 | `useObjectUrl` | `ui/use-object-url.ts` | URL locale d'un fichier (aperçu avant envoi), révoquée proprement même en mode strict |
 | `FileDropZone` | `ui/file-drop-zone.tsx` | zone où glisser des fichiers, ou cliquer pour les choisir (input natif dans un label, `multiple`, état « au-dessus ») |
@@ -187,6 +188,7 @@ contrôles `--control-*` · typo `--type-*`, `--fw-*`, `--font-*` · espacement 
 | `BudgetSummary`, `BudgetLines`, `BudgetTable`, `BudgetLineSheet`, `DeleteBudgetLineDialog` | `budget/` | page Budget : tuiles et dépassement, lignes filtrables par statut, formulaire en `Sheet`, suppression confirmée |
 | `FilesTable`, `ValidationItem`, `ActivityTimeline` | `project-history/` | fichiers du projet (audio des calls, téléchargement signé), demande de validation, journal groupé par jour |
 | `ProjectTeamFields` | `projects/project-team-fields.tsx` | bloc « Équipe » du formulaire projet (création seule) |
+| `ProjectDraftControls`, `useProjectDraft` | `projects/` | brouillon du formulaire « Nouveau projet » : enregistré au fil de la saisie, état affiché, « Supprimer le brouillon » confirmé |
 | `Field`, `TextareaField`, `SubmitButton`, `FormMessage`, `FieldError` | `auth/` | champs et retours de formulaire ; `TextareaField` `addon` = contrôle posé dans le coin bas du champ (micro) |
 | `SearchPicker` | `catalog/search-picker.tsx` | sélecteur avec recherche et création en modale |
 | `TabBar` | `ui/tab-bar.tsx` | barre d'onglets (liens ou boutons) sans filet, trait de 2 px qui glisse sous l'onglet actif ; base de `SectionTabs` et `DataTableViews` |
@@ -316,7 +318,9 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   (`lib/catalog/`, `/app/catalog/*`). Sortie musicale ⇒ au moins un master (vérifié au
   commit). Types : sortie musicale, contenu, partenariat, événement. Un projet naît **avec
   son équipe** : chef de projet obligatoire (transmis d'office) + directeurs créatifs, dans
-  `create_project` ; sans étape ni responsable jusqu'à l'acceptation. Cadrage, Calls et
+  `create_project` ; sans étape ni responsable jusqu'à l'acceptation. **La saisie de
+  « Nouveau projet » est gardée en brouillon** (`project_drafts`, auteur seul), reprise
+  depuis la même page (`docs/ARCHITECTURE.md` § 2 octies). Cadrage, Calls et
   Sortie n'existent qu'après lancement (`transmit_project` / `respond_to_assignment`,
   statut calculé par `projectStatusOf`). **Le cadrage part d'un call, ou du Brief en amont**
   (`framing_is_open` en SQL, `FramingStart` à l'écran : préparer un call avec ordre du jour,
@@ -397,7 +401,10 @@ Le détail est dans `docs/ARCHITECTURE.md`. L'essentiel :
   ligne et en-tête de fiche (`docs/ARCHITECTURE.md` § 2 quater). Membres : « Suspendre », « Modifier » (nom et poste) dans la modale.
 - **Retours** `/app/feedback` : l'équipe écrit au DG depuis la fenêtre de retour (bouton,
   touche Impr. écran ou capture collée ⌘V, touche **C** pour capturer une zone de la page, jusqu'à 5 captures glissées ou choisies dans une zone de dépôt, dans `feedback-screenshots`) ;
-  PO regroupe les doublons en sujets à l'ouverture de la page par le DG ; le DG seul
+  l'auteur **modifie** son retour ensuite (type, message, captures ; `edited_at` par trigger) ;
+  PO regroupe les doublons en sujets à l'ouverture de la page par le DG ; **le retour du
+  DG lui-même part directement sur Notion** avec la priorité choisie dans la fenêtre
+  (`lib/feedback/direct.ts`) ; le DG seul
   (`read_feedback`) transmet un sujet avec une priorité ou l'écarte
   (`review_feedback_topic`), après l'avoir modifié s'il veut, seul ou avec PO qui propose
   (`edit_feedback_topic`) ; un sujet transmis part sur **Notion** avec ses captures téléversées (colonne facultative « Captures ») (`lib/integrations/notion.ts`,
@@ -438,7 +445,7 @@ ou « Commandes »). N'ajoute que des informations utiles et durables, jamais de
 > Tenir cette section à jour à chaque fin d'étape.
 
 - [x] Étape 1 — amorçage (stack, env validé, qualité, page de vérification)
-- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 408 au total aujourd'hui)
+- [x] Étape 2 — modèle de données et RLS (43 tests pgTAP ; 425 au total aujourd'hui)
 - [x] Étape 3 — authentification et coquille de navigation (fondation d'Ibé transposée)
 - [x] Étape 4 — chaîne audio → transcription → compte rendu structuré, persistée
 - [x] Étape 5 — étape Cadrage de bout en bout (propositions, provenance, validation)
@@ -498,6 +505,8 @@ Au-delà des six étapes :
       et export PDF
 - [x] Artistes **Signés / Collaborations** (relation avec PDS, un seul objet Artiste,
       filtre de la liste) ; « Créer l'artiste » ouvre sa fiche
+- [x] Brouillon de « Nouveau projet » (retour n°6) ; retour du DG envoyé directement sur
+      Notion avec sa priorité
 - [x] **Fiche master à onglets** : vue d'ensemble (dossier à compléter), sessions & pistes,
       versions, contributeurs & crédits, splits, droits & déclarations, distribution,
       projets, fichiers, activité

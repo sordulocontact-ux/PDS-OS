@@ -18,12 +18,12 @@ const MAX_TOPICS = 100;
 type Topic = { id: string; kind: string; title: string; summary: string };
 
 // Title of a new topic when the model gives none: the first words, by code.
-function fallbackTitle(message: string): string {
+export function fallbackTitle(message: string): string {
   const words = message.trim().split(/\s+/).slice(0, 8).join(" ");
   return words.length > 80 ? `${words.slice(0, 79)}…` : words;
 }
 
-function prompt(
+export function triagePrompt(
   feedback: { kind: string; message: string },
   topics: Array<Topic & { ref: string }>,
 ): string {
@@ -84,7 +84,7 @@ export async function triageUnfiledFeedback(
     try {
       ({ output } = await extract(
         feedbackTriageSchema,
-        prompt(feedback, refs),
+        triagePrompt(feedback, refs),
         FEEDBACK_TRIAGE_INSTRUCTIONS,
       ));
     } catch (error) {

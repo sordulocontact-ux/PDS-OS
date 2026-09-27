@@ -88,6 +88,16 @@ export async function createProject(
     return { status: "error", formError: databaseErrorMessage(error), values };
   }
 
+  // The draft it was typed in is done with (RLS: only the author's).
+  const draftId = formData.get("draftId");
+  if (typeof draftId === "string" && draftId) {
+    const { error: draftError } = await supabase
+      .from("project_drafts")
+      .delete()
+      .eq("id", draftId);
+    if (draftError) console.error("createProject:", draftError.message);
+  }
+
   // The manager and the creative directors are notified by database triggers.
   await schedulePendingPushes();
   // Projects list and the "Projets liés" block of each linked master.

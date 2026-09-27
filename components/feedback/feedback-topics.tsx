@@ -72,7 +72,7 @@ export function FeedbackTopics({
                 }
               >
                 <h3 className="font-medium">{topic.title}</h3>
-                <p className="break-words whitespace-pre-line">
+                <p className="max-w-prose break-words whitespace-pre-line">
                   {topic.summary}
                 </p>
                 {topic.editedAt && (

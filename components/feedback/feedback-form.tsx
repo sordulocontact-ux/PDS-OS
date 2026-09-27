@@ -1,33 +1,27 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import {
-  ScreenshotField,
-  screenshotProblem,
-} from "@/components/feedback/screenshot-field";
+import { ScreenshotField } from "@/components/feedback/screenshot-field";
+import { useScreenshotAttachments } from "@/components/feedback/use-screenshot-attachments";
 import { Button } from "@/components/ui/button";
 import { VoiceFieldControl } from "@/components/voice/voice-field-control";
 import type { FieldErrors } from "@/lib/auth/form-state";
 import { sendFeedback } from "@/lib/feedback/actions";
+import { editFeedback } from "@/lib/feedback/edit-actions";
+import type { NotionSync } from "@/lib/feedback/notion-sync";
 import {
   FEEDBACK_KINDS,
   FEEDBACK_MESSAGE_MAX,
+  FEEDBACK_PRIORITIES,
   isAppPath,
+  type EditedFeedback,
   type FeedbackKind,
 } from "@/lib/feedback/types";
-import { MAX_SCREENSHOTS } from "@/lib/feedback/screenshot-rules";
-import { uploadFeedbackScreenshot } from "@/lib/feedback/upload-screenshot";
 import { fr } from "@/lib/i18n/fr";
-
-const sameFile = (a: File, b: File) =>
-  a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
-
-const imagesOf = (data: DataTransfer) =>
-  [...data.files].filter((f) => f.type.startsWith("image/"));
 
 // One feedback, in the feedback window: its kind, the message, optional
 // screenshots (dropped or pasted anywhere in the form, or picked) and the page
@@ -35,6 +29,10 @@ const imagesOf = (data: DataTransfer) =>
 // The screenshots are uploaded first, from the browser, into the author's
 // folder.
 // `defaults`: a feedback prepared by PO, to review before sending.
+// `direct`: the director's own feedback, sent straight to Notion with the
+// priority chosen here (no inbox to review it in).
+// `editing`: the author's feedback already sent, changed in place (its page
+// stays the one it was sent from).
 export function FeedbackForm({
   organizationId,
   personId,
@@ -42,6 +40,8 @@ export function FeedbackForm({
   initialScreenshot = null,
   printScreen = false,
   defaults,
+  direct = false,
+  editing,
   onSent,
   onCancel,
 }: {
@@ -51,68 +51,31 @@ export function FeedbackForm({
   initialScreenshot?: File | null;
   printScreen?: boolean;
   defaults?: { kind: FeedbackKind | null; message: string };
-  onSent: () => void;
+  direct?: boolean;
+  editing?: EditedFeedback;
+  onSent: (notion?: NotionSync) => void;
   onCancel: () => void;
 }) {
   const t = fr.feedback;
-  const initialProblem = initialScreenshot
-    ? screenshotProblem(initialScreenshot)
-    : null;
-  const [screenshots, setScreenshots] = useState<File[]>(
-    initialScreenshot && !initialProblem ? [initialScreenshot] : [],
-  );
-  const [errors, setErrors] = useState<FieldErrors>({
-    screenshot: initialProblem ?? undefined,
+  const screenshots = useScreenshotAttachments({
+    organizationId,
+    personId,
+    initialScreenshot,
+    initialKept: editing?.screenshots ?? [],
   });
+  const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  // A screenshot already uploaded is not uploaded again on retry.
-  const uploaded = useRef(new Map<File, string>());
-  const page = pagePath && isAppPath(pagePath) ? pagePath : null;
-
-  // Keeps the valid files, up to the limit, and says why others were left.
-  const attach = (files: File[]) => {
-    const next = [...screenshots];
-    let problem: string | null = null;
-    for (const file of files) {
-      if (next.some((f) => sameFile(f, file))) continue;
-      const fileProblem = screenshotProblem(file);
-      if (fileProblem) problem ??= fileProblem;
-      else if (next.length >= MAX_SCREENSHOTS) problem ??= t.screenshot.tooMany;
-      else next.push(file);
-    }
-    setScreenshots(next);
-    setErrors((e) => ({ ...e, screenshot: problem ?? undefined }));
-  };
-
-  const remove = (file: File) => {
-    setScreenshots((files) => files.filter((f) => f !== file));
-    setErrors((e) => ({ ...e, screenshot: undefined }));
-  };
-
-  const onPaste = (event: React.ClipboardEvent) => {
-    const images = imagesOf(event.clipboardData);
-    if (images.length === 0) return;
-    event.preventDefault();
-    attach(images);
-  };
-
-  // A screenshot dropped beside the zone is attached too, instead of the
-  // browser leaving the page to open it.
-  const onDragOver = (event: React.DragEvent) => {
-    if (event.dataTransfer.types.includes("Files")) event.preventDefault();
-  };
-  const onDrop = (event: React.DragEvent) => {
-    if (!event.dataTransfer.types.includes("Files")) return;
-    event.preventDefault();
-    attach([...event.dataTransfer.files]);
-  };
+  const page = !editing && pagePath && isAppPath(pagePath) ? pagePath : null;
+  const toNotion = direct && !editing;
+  const initial = editing ?? defaults;
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const kind = String(data.get("kind") ?? "");
     const message = String(data.get("message") ?? "");
+    const priority = toNotion ? String(data.get("priority") ?? "") : undefined;
     const local: FieldErrors = {
       kind: kind ? undefined : t.errors.kind,
       message: message.trim() ? undefined : t.errors.messageRequired,
@@ -122,45 +85,47 @@ export function FeedbackForm({
     if (local.kind || local.message) return;
 
     startTransition(async () => {
-      const uploads = await Promise.all(
-        screenshots.map(async (file) => {
-          const path = uploaded.current.get(file);
-          if (path) return { ok: true as const, path };
-          const upload = await uploadFeedbackScreenshot({
-            organizationId,
-            personId,
-            file,
+      const upload = await screenshots.upload();
+      if (!upload.ok) return;
+      const result = editing
+        ? await editFeedback({
+            feedbackId: editing.id,
+            kind,
+            message,
+            screenshotPaths: upload.paths,
+          })
+        : await sendFeedback({
+            kind,
+            message,
+            pagePath: page,
+            screenshotPaths: upload.paths,
+            priority,
           });
-          if (upload.ok) uploaded.current.set(file, upload.path);
-          return upload;
-        }),
-      );
-      const failed = uploads.find((u) => !u.ok);
-      if (failed && !failed.ok) {
-        setErrors({ screenshot: failed.error });
-        return;
-      }
-      const result = await sendFeedback({
-        kind,
-        message,
-        pagePath: page,
-        screenshotPaths: uploads.flatMap((u) => (u.ok ? [u.path] : [])),
-      });
       if (!result.ok) {
         setErrors(result.fieldErrors ?? {});
         setFormError(result.fieldErrors ? null : result.error);
         return;
       }
-      onSent();
+      onSent(result.notion);
     });
   };
+
+  const submitLabel = editing
+    ? pending
+      ? t.mineEdit.submitting
+      : t.mineEdit.submit
+    : toNotion
+      ? pending
+        ? t.directSubmitting
+        : t.directSubmit
+      : pending
+        ? t.submitting
+        : t.submit;
 
   return (
     <form
       onSubmit={onSubmit}
-      onPaste={onPaste}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
+      {...screenshots.dropHandlers}
       noValidate
       className="flex flex-col gap-5"
     >
@@ -169,7 +134,7 @@ export function FeedbackForm({
           name="kind"
           legend={t.kind}
           columns={3}
-          defaultValue={defaults?.kind ?? undefined}
+          defaultValue={initial?.kind ?? undefined}
           choices={FEEDBACK_KINDS.map((kind) => ({
             value: kind,
             label: t.kinds[kind],
@@ -186,18 +151,34 @@ export function FeedbackForm({
         required
         rows={5}
         maxLength={FEEDBACK_MESSAGE_MAX}
-        defaultValue={defaults?.message}
+        defaultValue={initial?.message}
         error={errors.message}
         addon={<VoiceFieldControl fieldId="message" />}
       />
 
       <ScreenshotField
-        files={screenshots}
-        onAdd={attach}
-        onRemove={remove}
-        error={errors.screenshot}
+        kept={screenshots.kept}
+        files={screenshots.files}
+        onAdd={screenshots.attach}
+        onRemove={screenshots.remove}
+        onRemoveKept={screenshots.removeKept}
+        error={screenshots.error}
         printScreen={printScreen}
       />
+
+      {toNotion && (
+        <ChoiceCards
+          name="priority"
+          legend={t.review.priority}
+          columns={3}
+          defaultValue="normal"
+          choices={FEEDBACK_PRIORITIES.map((priority) => ({
+            value: priority,
+            label: t.priorities[priority],
+            hint: t.review.priorityHints[priority],
+          }))}
+        />
+      )}
 
       {page && (
         <p className="text-sm text-muted-foreground">
@@ -218,7 +199,7 @@ export function FeedbackForm({
           disabled={pending}
           aria-busy={pending || undefined}
         >
-          {pending ? t.submitting : t.submit}
+          {submitLabel}
         </Button>
       </div>
     </form>
