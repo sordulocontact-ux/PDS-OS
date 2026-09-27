@@ -1,35 +1,33 @@
 import { cn } from "@/lib/utils";
 
 /**
- * One screen of the Framing's guided review: a surtitle saying where the
- * content comes from, the question or answer as title, then the content and
- * its actions (the first one is the main action).
+ * One screen of the Framing's guided review (docs/DESIGN.md § 4, « Sélection
+ * et formulaires en étapes »): the question as title, the content, then the
+ * actions at the bottom right, main one last. No card around it: only the
+ * clickable options inside have an outline.
  */
 export function FramingStepCard({
-  eyebrow,
   title,
   description,
   actions,
+  actionsAlign = "end",
   className,
   children,
 }: {
-  eyebrow: string;
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
+  /** "start" when there is no content to close: the buttons follow the title. */
+  actionsAlign?: "start" | "end";
   className?: string;
   children?: React.ReactNode;
 }) {
   return (
     <section
       aria-labelledby="framing-step-title"
-      className={cn(
-        "flex min-w-0 flex-col gap-6 rounded-3xl border border-border bg-background p-5 md:p-8",
-        className,
-      )}
+      className={cn("flex min-w-0 flex-col gap-8", className)}
     >
       <header className="flex flex-col gap-2">
-        <p className="text-caption text-muted-foreground">{eyebrow}</p>
         <h2
           id="framing-step-title"
           className="text-display-md font-semibold break-words text-foreground"
@@ -43,7 +41,17 @@ export function FramingStepCard({
         )}
       </header>
       {children}
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      {actions && (
+        <div
+          className={cn(
+            "flex flex-col-reverse gap-2 sm:flex-wrap sm:justify-end",
+            // At the start, the main button (last) comes first, left.
+            actionsAlign === "end" ? "sm:flex-row" : "sm:flex-row-reverse",
+          )}
+        >
+          {actions}
+        </div>
+      )}
     </section>
   );
 }

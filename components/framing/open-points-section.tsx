@@ -34,7 +34,6 @@ export function OpenPointsSection({
 
   return (
     <div className="grid gap-3">
-      <p className="text-xs text-muted-foreground">{t.hint}</p>
       {open.length === 0 && (
         <p className="text-sm text-muted-foreground">{t.empty}</p>
       )}

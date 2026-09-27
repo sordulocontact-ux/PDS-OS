@@ -1,10 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
-import { CardAction, CardContent, CardHeader } from "@/components/ui/card";
 import {
   DictationButton,
   DictationPanel,
@@ -49,46 +46,37 @@ function toItem(
 }
 
 /**
- * The dictation button, and the dictation panel right under it, next to the
- * Brief it changes. No title lives here: the page title is the project's own
- * (project layout) and "Cadrage" is already the active step in the workflow
- * breadcrumb just above — repeating it a third time inside the card would
- * only restate what the page already says.
+ * "Remplir en dictant": the owner says what to fill or change, PO turns it
+ * into proposals for any point of the Framing, reviewed in the panel that
+ * opens right under the button before anything is saved. Sits above the
+ * current screen, whichever point it is.
  */
-export function FramingDictation({
-  projectId,
-  children,
-}: {
-  projectId: string;
-  /** Extra header content (title, description), if the caller has any. */
-  children?: ReactNode;
-}) {
+export function FramingDictation({ projectId }: { projectId: string }) {
   const dictation = useDictation<FramingProposal>("framing", projectId);
   const { pending, run } = useFramingAction();
   const canEdit = useCanEditProject();
 
-  if (!canEdit) return children ? <CardHeader>{children}</CardHeader> : null;
+  if (!canEdit) return null;
 
   return (
-    <>
-      <CardHeader>
-        {children}
-        <CardAction>
-          <DictationButton dictation={dictation} />
-        </CardAction>
-      </CardHeader>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-end">
+        <DictationButton
+          dictation={dictation}
+          label={fr.framing.dictation.fill}
+          size="lg"
+        />
+      </div>
       {dictation.phase.name !== "idle" && (
-        <CardContent>
-          <DictationPanel
-            dictation={dictation}
-            toItems={(proposals) => proposals.map(toItem)}
-            pending={pending}
-            onApply={(proposals) =>
-              run(() => applyDictation(projectId, proposals), dictation.reset)
-            }
-          />
-        </CardContent>
+        <DictationPanel
+          dictation={dictation}
+          toItems={(proposals) => proposals.map(toItem)}
+          pending={pending}
+          onApply={(proposals) =>
+            run(() => applyDictation(projectId, proposals), dictation.reset)
+          }
+        />
       )}
-    </>
+    </div>
   );
 }

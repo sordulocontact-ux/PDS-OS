@@ -2,6 +2,10 @@ import Link from "next/link";
 
 import { ApproveButton } from "@/components/framing/guide/approve-button";
 import { BriefFacts } from "@/components/framing/guide/brief-facts";
+import {
+  OptionContent,
+  optionClass,
+} from "@/components/framing/guide/guide-row";
 import { FramingStepCard } from "@/components/framing/guide/step-card";
 import { OpenPointsSection } from "@/components/framing/open-points-section";
 import { RequestValidationButton } from "@/components/framing/request-validation-button";
@@ -38,15 +42,14 @@ export function SummaryStep({
   const canRequest = canEdit && data.stage?.state === "in_progress" && !pending;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 flex-col gap-12">
       <FramingStepCard
-        eyebrow={t.eyebrow}
         title={briefObjective(data) ?? t.noObjective}
         actions={
           <>
             <Link
               href={briefHref}
-              className={buttonVariants({ variant: "outline", size: "lg" })}
+              className={buttonVariants({ variant: "ghost", size: "lg" })}
             >
               {t.openBrief}
             </Link>
@@ -73,7 +76,7 @@ export function SummaryStep({
         {todos.length === 0 ? (
           <p className="text-body-md text-muted-foreground">{t.todoEmpty}</p>
         ) : (
-          <ul className="grid gap-2 md:grid-cols-2">
+          <ul className="grid gap-3 md:grid-cols-2">
             {todos.map((todo) => (
               <li key={todo.key}>
                 <Link
@@ -82,14 +85,13 @@ export function SummaryStep({
                       ? "#framing-open-points"
                       : hrefOf(todo.view)
                   }
-                  className="flex h-full flex-col gap-0.5 rounded-2xl bg-[var(--surface-tint)] px-4 py-3 transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-pressed)]"
+                  className={optionClass(false)}
                 >
-                  <span className="text-body-md font-semibold break-words">
+                  <OptionContent
+                    detail={<span className="truncate">{todo.detail}</span>}
+                  >
                     {todo.label}
-                  </span>
-                  <span className="truncate text-caption text-muted-foreground">
-                    {todo.detail}
-                  </span>
+                  </OptionContent>
                 </Link>
               </li>
             ))}
@@ -97,8 +99,8 @@ export function SummaryStep({
         )}
       </PageSection>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="flex flex-col gap-6">
+      <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
+        <div className="flex flex-col gap-12">
           {/* Asking is the card's button; the panel shows the wait and the
               decision (a refusal needs its comment). */}
           {data.stage && data.stage.state !== "in_progress" && (

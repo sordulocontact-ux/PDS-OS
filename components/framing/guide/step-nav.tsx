@@ -38,7 +38,7 @@ const itemClass = (shown: boolean) =>
 
 /**
  * The 5 points of the Framing, each with its status and one-line summary,
- * then the recap. The white card under the current point slides to the
+ * then the recap. The blue card under the current point slides to the
  * clicked one at once, before the server answers, so a change of point reads
  * as one movement rather than a card vanishing and reappearing.
  */
@@ -104,7 +104,7 @@ export function FramingStepNav({
       <div
         ref={cardRef}
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 rounded-2xl bg-background opacity-0 shadow-[var(--nav-shadow)] data-[ready=true]:transition-[transform,height] data-[ready=true]:duration-[var(--duration-slide)] data-[ready=true]:ease-[var(--ease-out)] motion-reduce:transition-none"
+        className="pointer-events-none absolute inset-x-0 top-0 rounded-2xl border border-[var(--select-border)] bg-[var(--select-bg)] opacity-0 data-[ready=true]:transition-[transform,height] data-[ready=true]:duration-[var(--duration-slide)] data-[ready=true]:ease-[var(--ease-out)] motion-reduce:transition-none"
       />
       <ol ref={listRef} className="relative flex flex-col gap-1">
         {steps.map((s) => (

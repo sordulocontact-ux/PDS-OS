@@ -2,14 +2,13 @@ import Link from "next/link";
 
 import { ApproveButton } from "@/components/framing/guide/approve-button";
 import { FramingStepCard } from "@/components/framing/guide/step-card";
-import { GuideRow } from "@/components/framing/guide/guide-row";
 import { buttonVariants } from "@/components/ui/button";
 import type { FramingView, StepOverview } from "@/lib/framing/guide";
 import type { PendingValidation } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 
-/** Entry of the guided review: the 5 points as understood, then "start" —
- * or, for the person waited on to validate, "Valider" directly. */
+/** Entry of the guided review: "start", the points themselves being listed in
+ * the step nav next to it — or, for the person waited on, "Valider". */
 export function OverviewStep({
   steps,
   fromCall,
@@ -33,13 +32,12 @@ export function OverviewStep({
 
   return (
     <FramingStepCard
-      eyebrow={t.overview.eyebrow}
       title={
         fromCall
           ? t.overview.titleFromCall(steps.length)
           : t.overview.titleManual
       }
-      description={t.overview.body}
+      actionsAlign="start"
       actions={
         iAmTheValidator ? (
           <ApproveButton
@@ -48,6 +46,14 @@ export function OverviewStep({
           />
         ) : (
           <>
+            {firstOpen && started && (
+              <Link
+                href={hrefOf("summary")}
+                className={buttonVariants({ variant: "ghost", size: "lg" })}
+              >
+                {t.overview.toSummary}
+              </Link>
+            )}
             <Link
               href={hrefOf(firstOpen?.step ?? "summary")}
               className={buttonVariants({ size: "lg" })}
@@ -58,25 +64,9 @@ export function OverviewStep({
                   : t.overview.start
                 : t.overview.toSummary}
             </Link>
-            {firstOpen && started && (
-              <Link
-                href={hrefOf("summary")}
-                className={buttonVariants({ variant: "outline", size: "lg" })}
-              >
-                {t.overview.toSummary}
-              </Link>
-            )}
           </>
         )
       }
-    >
-      <div className="flex flex-col gap-1">
-        {steps.map((s) => (
-          <GuideRow key={s.step} href={hrefOf(s.step)}>
-            {`${t.steps[s.step]} · ${s.line}`}
-          </GuideRow>
-        ))}
-      </div>
-    </FramingStepCard>
+    />
   );
 }

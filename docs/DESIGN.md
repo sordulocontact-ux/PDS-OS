@@ -230,6 +230,24 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   Projets (Actifs / Archivés, DG), Membres (statut), Budget (statut).
 - **Pastilles** (`FilterChip`, `ViewToggle`) : filtres secondaires ou qui se combinent.
 
+### Sélection et formulaires en étapes
+
+D'après la maquette « Nouveau projet » fournie par Sacha le 27/09/2026, appliquée
+d'abord au Cadrage (`components/framing/guide/`) :
+
+- **Choix retenu en bleu** : une option choisie parmi des cartes (objectif, point courant
+  du cadrage) prend le fond `--select-bg` et le contour `--select-border` ; les autres
+  restent blanches à contour `--border-default`. Texte toujours noir. Le bleu ne sert
+  qu'à ça : ni lien, ni bouton, ni état (les états restent aux `--tone-*`).
+- **Pastilles à cocher** (besoins, formats) : `FilterChip` « ink », noire une fois cochée.
+- **Pas de cadre dans un cadre** : un écran n'est pas enfermé dans une carte ; seuls les
+  éléments cliquables (options, lignes) ont un contour.
+- Libellé de champ en `body-md` medium noir au-dessus du contrôle, pas de surtitre gris,
+  pas de phrase qui explique l'écran. Une source (call, citation) tient en une ligne
+  `caption` sous l'option qu'elle justifie.
+- Boutons en bas à droite : secondaires en `ghost` d'abord, le principal (noir) en
+  dernier ; empilés, principal en haut, sur mobile.
+
 ### Modale : une seule, « verre »
 
 **Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,

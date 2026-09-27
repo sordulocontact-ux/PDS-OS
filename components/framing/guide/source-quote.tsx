@@ -1,3 +1,4 @@
+import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import type { Provenance } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
@@ -11,26 +12,29 @@ export function sourceLabel(provenance: Provenance): string {
     : fr.framingGuide.unknownCall;
 }
 
-/** The words a proposal was taken from, and where they were said. */
-export function SourceQuote({ provenance }: { provenance: Provenance }) {
+/**
+ * The caption line under a value: "Proposé" while PO's proposal is not
+ * confirmed (AI Act), where it was said and the words, and the warning when
+ * the quote could not be found in the transcription.
+ */
+export function SourceDetail({
+  provenance,
+  proposed,
+}: {
+  provenance: Provenance | null;
+  proposed: boolean;
+}) {
+  if (!provenance && !proposed) return null;
   return (
-    <span className="flex flex-col gap-1.5">
-      <span className="flex items-start gap-2">
-        <span
-          aria-hidden
-          className="mt-0.5 inline-flex h-5 shrink-0 items-center rounded-md bg-foreground px-1.5 text-caption font-semibold text-background"
-        >
-          {fr.framingGuide.poBadge}
-        </span>
+    <>
+      {proposed && <ProposedBadge />}
+      {provenance && (
         <span className="break-words">
-          {provenance.quote ? `« ${provenance.quote} »` : null}
-          <span className="text-caption">
-            {provenance.quote ? " · " : ""}
-            {sourceLabel(provenance)}
-          </span>
+          {sourceLabel(provenance)}
+          {provenance.quote ? ` · « ${provenance.quote} »` : ""}
         </span>
-      </span>
+      )}
       <ProvenanceNote provenance={provenance} />
-    </span>
+    </>
   );
 }

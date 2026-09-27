@@ -31,27 +31,21 @@ export const framingGuide = {
         .join(" · ") || "À définir",
   },
   overview: {
-    eyebrow: "Cadrage · relecture guidée",
     titleFromCall: (count: number) =>
       `Relire les ${count} points compris pendant le call`,
     titleManual: "Cadrer la sortie en 5 points",
-    body: "Chaque proposition vient d'un call ou d'une dictée. Rien n'est considéré comme confirmé sans une action explicite.",
     start: "Commencer la relecture",
     resume: "Reprendre la relecture",
     toSummary: "Voir le récapitulatif",
   },
   objective: {
-    eyebrow: "Objectif",
-    eyebrowProposed: "Objectif · proposé par PO",
     title: "Qu'est-ce qui compte le plus pour cette sortie ?",
-    fromCall: "Compris pendant le call",
-    other: "Autre intention",
+    other: "Autre formulation",
     otherLabel: "Votre intention, en une phrase",
     suggest: "Proposer des formulations",
     suggestHint:
       "PO reformule l'objectif à partir des calls, chaque proposition citée mot pour mot.",
     confirm: "Confirmer cet objectif",
-    edit: "Modifier",
     suggestErrors: {
       no_sources: "Aucun call ni objectif sur lequel s'appuyer.",
       provider: "PO n'a pas pu répondre. Réessayez dans un instant.",
@@ -61,34 +55,19 @@ export const framingGuide = {
     noneFound: "PO n'a trouvé aucune formulation vérifiable dans les calls.",
   },
   timing: {
-    eyebrow: "Temporalité",
-    eyebrowProposed: "Temporalité · hypothèse issue du call",
-    titleEmpty: "Quand cette sortie doit-elle arriver ?",
-    body: "La temporalité est notée telle qu'elle a été dite. Le planning ne se construit pas dessus avant validation du Brief.",
-    hypothesis: (source: string) =>
-      `Source : ${source} · hypothèse à confirmer par le responsable du cadrage.`,
+    title: "Quand cette sortie doit-elle arriver ?",
     label: "Temporalité, telle que vous la diriez",
     placeholder: "Ex. sortie visée le 24 octobre",
     confirm: "Confirmer",
     edit: "Modifier",
-    fill: "Renseigner",
   },
   needs: {
-    eyebrow: "Besoins & activations",
-    introTitle: "De quoi cette sortie a-t-elle besoin ?",
-    introBody:
-      "Cochez ce qu'il faudra pour la sortie. Identifier un besoin n'engage rien : aucune mission, dépense ou activation n'est créée ici.",
+    title: "De quoi cette sortie a-t-elle besoin ?",
+    // Labels of the Brief's facts (lib/framing/brief-summary.ts).
     needsTitle: "Besoins",
-    needsBody:
-      "Ce qu'il faut produire ou organiser : clip, visuels, contenus, live.",
     activationsTitle: "Activations",
-    activationsBody:
-      "Ce qui met la sortie en mouvement : presse, influence, marketing, playlisting.",
-    define: "Définir les besoins",
-    title: "Ce qu'il faudra pour cette sortie",
-    needsGroup: "Besoins de production & contenus",
-    activationsGroup: "Activations de promotion & diffusion",
-    note: "Une activation est un dispositif organisé pour promouvoir, diffuser ou amplifier la sortie. Un partenariat reste une opportunité liée, pas une activation automatique.",
+    needsGroup: "Production & contenus",
+    activationsGroup: "Promotion & diffusion",
     proposedHint: "Proposé depuis un call",
     confirm: "Confirmer cette sélection",
     add: "Ajouter un besoin",
@@ -97,9 +76,7 @@ export const framingGuide = {
     family: "Famille",
   },
   frame: {
-    eyebrow: "Cadre & contraintes",
     title: "Les limites à respecter",
-    body: "Chaque ligne garde sa source et se corrige séparément.",
     empty: "Aucune contrainte pour l'instant.",
     types: {
       budget: "Budget",
@@ -118,9 +95,7 @@ export const framingGuide = {
     remove: "Retirer",
   },
   team: {
-    eyebrow: "Équipe projet",
-    title: "Relier les besoins aux bonnes personnes",
-    reminder: "Rappel :",
+    title: "Qui s'en occupe ?",
     roles: {
       artistic_direction: "Direction artistique",
       creative_direction: "Direction créative",
@@ -143,7 +118,6 @@ export const framingGuide = {
     remove: "Retirer",
   },
   summary: {
-    eyebrow: "Aperçu du Brief de cadrage",
     noObjective: "Objectif à définir",
     todoTitle: "Reste à faire",
     todoEmpty: "Rien d'ouvert : le Brief est prêt à être validé.",
@@ -152,6 +126,7 @@ export const framingGuide = {
     openPoint: "Point ouvert",
     openBrief: "Ouvrir le brief partageable",
     approve: "Valider et clôturer",
+    approved: "Cadrage validé.",
   },
   brief: {
     eyebrow: "Brief de cadrage",
@@ -168,7 +143,6 @@ export const framingGuide = {
     copied:
       "Lien copié. Il ne s'ouvre que pour les membres qui voient ce projet.",
   },
-  poBadge: "PO",
   unknownCall: "Un call",
   back: "Précédent",
   next: "Point suivant",

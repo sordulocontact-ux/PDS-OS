@@ -42,7 +42,6 @@ export function NeedsStep({
   const t = fr.framingGuide.needs;
   const router = useRouter();
   const { pending, run } = useFramingAction();
-  const [defining, setDefining] = useState(needs.length > 0 || !editable);
   const saved = GROUPS.flatMap((g) => needChips(needs, g));
   // Chips typed with "Ajouter un besoin", not saved yet.
   const [added, setAdded] = useState<NeedChip[]>([]);
@@ -50,37 +49,6 @@ export function NeedsStep({
     () => new Set(saved.filter((c) => c.need).map((c) => c.key)),
   );
   const chips = [...saved, ...added];
-
-  if (!defining)
-    return (
-      <FramingStepCard
-        eyebrow={t.eyebrow}
-        title={t.introTitle}
-        description={t.introBody}
-        actions={
-          <Button size="lg" onClick={() => setDefining(true)}>
-            {t.define}
-          </Button>
-        }
-      >
-        <div className="grid gap-3 md:grid-cols-2">
-          {(
-            [
-              [t.needsTitle, t.needsBody],
-              [t.activationsTitle, t.activationsBody],
-            ] as const
-          ).map(([title, body]) => (
-            <div
-              key={title}
-              className="flex flex-col gap-1 rounded-2xl bg-[var(--surface-tint)] p-4"
-            >
-              <p className="text-body-md font-semibold">{title}</p>
-              <p className="text-body-md text-muted-foreground">{body}</p>
-            </div>
-          ))}
-        </div>
-      </FramingStepCard>
-    );
 
   const toggle = (key: string) =>
     setOn((current) => {
@@ -117,8 +85,8 @@ export function NeedsStep({
     );
 
   const group = (key: NeedGroup, title: string) => (
-    <div className="flex flex-col gap-2">
-      <p className="text-caption text-muted-foreground">{title}</p>
+    <div className="flex flex-col gap-3">
+      <p className="text-body-md font-medium text-foreground">{title}</p>
       <div className="flex flex-wrap gap-2">
         {chips
           .filter((chip) => groupOf(chip.family) === key)
@@ -126,9 +94,11 @@ export function NeedsStep({
             <FilterChip
               key={chip.key}
               pressed={on.has(chip.key)}
-              variant="soft"
-              disabled={!editable || pending}
-              onClick={() => toggle(chip.key)}
+              // Read-only: shown as chosen, not faded like a disabled chip.
+              aria-disabled={!editable || undefined}
+              disabled={pending}
+              onClick={() => editable && toggle(chip.key)}
+              className={editable ? undefined : "pointer-events-none"}
             >
               {chip.label}
               {chip.need?.review_status === "proposed" && (
@@ -148,22 +118,20 @@ export function NeedsStep({
 
   return (
     <FramingStepCard
-      eyebrow={t.eyebrow}
       title={t.title}
       actions={
         editable && (
           <>
+            <AddNeedDialog onAdd={add} disabled={pending} />
             <Button size="lg" disabled={pending} onClick={confirm}>
               {t.confirm}
             </Button>
-            <AddNeedDialog onAdd={add} disabled={pending} />
           </>
         )
       }
     >
       {group("needs", t.needsGroup)}
       {group("activations", t.activationsGroup)}
-      <p className="text-body-md text-muted-foreground">{t.note}</p>
     </FramingStepCard>
   );
 }

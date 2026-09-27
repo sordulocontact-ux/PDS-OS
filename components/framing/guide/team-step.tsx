@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { AssignRoleDialog } from "@/components/framing/guide/assign-role-dialog";
+import {
+  OptionContent,
+  optionClass,
+} from "@/components/framing/guide/guide-row";
 import { FramingStepCard } from "@/components/framing/guide/step-card";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { useFramingAction } from "@/components/framing/use-framing-action";
@@ -38,11 +42,18 @@ export function TeamStep({
 
   return (
     <FramingStepCard
-      eyebrow={t.eyebrow}
       title={t.title}
       actions={
         editable && (
           <>
+            <Button
+              size="lg"
+              variant="ghost"
+              disabled={pending}
+              onClick={() => setAssigning(null)}
+            >
+              {t.assign}
+            </Button>
             <Button
               size="lg"
               disabled={pending}
@@ -55,25 +66,10 @@ export function TeamStep({
             >
               {t.confirm}
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              disabled={pending}
-              onClick={() => setAssigning(null)}
-            >
-              {t.assign}
-            </Button>
           </>
         )
       }
     >
-      {needs.length > 0 && (
-        <p className="rounded-2xl bg-[var(--surface-tint)] px-4 py-2.5 text-caption text-muted-foreground">
-          <span className="font-semibold text-foreground">{t.reminder}</span>{" "}
-          {needs.map((n) => n.label.toLowerCase()).join(" · ")}
-        </p>
-      )}
-
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {roles.map((card) => (
           <li key={card.role}>
@@ -82,28 +78,31 @@ export function TeamStep({
               disabled={!editable}
               onClick={() => setAssigning(card)}
               className={cn(
-                "flex h-full min-h-28 w-full flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground",
-                card.member
-                  ? "border-border bg-background"
-                  : "border-dashed border-border bg-[var(--surface-soft)]",
-                editable && "hover:border-grey-300",
+                optionClass(false),
+                "h-full",
+                !card.member && "border-dashed bg-transparent",
               )}
             >
-              <span className="text-body-md font-semibold">
+              <OptionContent
+                detail={
+                  <>
+                    {card.member?.review_status === "proposed" && (
+                      <ProposedBadge />
+                    )}
+                    {card.member?.display_name ?? t.toFind}
+                  </>
+                }
+              >
                 {t.roles[card.role]}
-              </span>
-              <span className="text-caption text-muted-foreground">
-                {card.member?.display_name ?? t.toFind}
-              </span>
-              {card.member?.review_status === "proposed" && <ProposedBadge />}
+              </OptionContent>
             </button>
           </li>
         ))}
       </ul>
 
       {others.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="text-caption text-muted-foreground">{t.others}</p>
+        <div className="flex flex-col gap-3">
+          <p className="text-body-md font-medium text-foreground">{t.others}</p>
           <ul className="flex flex-wrap gap-x-4 gap-y-1 text-body-md">
             {others.map((m) => (
               <li key={m.id} className="flex items-center gap-2">

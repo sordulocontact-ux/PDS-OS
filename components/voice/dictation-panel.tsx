@@ -24,7 +24,15 @@ type Dictation<P> = ReturnType<typeof useDictation<P>>;
 
 const noSubscribe = () => () => {};
 
-export function DictationButton<P>({ dictation }: { dictation: Dictation<P> }) {
+export function DictationButton<P>({
+  dictation,
+  label = fr.voice.start,
+  size = "sm",
+}: {
+  dictation: Dictation<P>;
+  label?: string;
+  size?: "sm" | "lg";
+}) {
   // Browser capability, read without a server/client mismatch.
   const supported = useSyncExternalStore(
     noSubscribe,
@@ -36,13 +44,13 @@ export function DictationButton<P>({ dictation }: { dictation: Dictation<P> }) {
   return (
     <Button
       variant="outline"
-      size="sm"
+      size={size}
       disabled={!supported || busy}
       title={supported ? undefined : fr.voice.unsupported}
       onClick={dictation.start}
     >
       <IconMicrophone aria-hidden />
-      {fr.voice.start}
+      {label}
     </Button>
   );
 }
