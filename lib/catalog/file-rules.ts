@@ -1,4 +1,5 @@
-// Files of an artist or a title ("master"): buckets, limits and categories.
+// Files of an artist, a title ("master") or a launched project: buckets,
+// limits and categories. One library for all three (feedback n°6).
 // Client-safe (the browser checks before uploading; the database enforces
 // the same rules).
 
@@ -7,12 +8,13 @@ import type { AudioState } from "@/lib/catalog/title-rules";
 export const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
 /** What a file is attached to. */
-export type FileOwnerKind = "artist" | "master";
+export type FileOwnerKind = "artist" | "master" | "project";
 export type FileOwner = { kind: FileOwnerKind; id: string };
 
 export const FILE_BUCKETS = {
   artist: "artist-files",
   master: "master-files",
+  project: "project-files",
 } as const satisfies Record<FileOwnerKind, string>;
 
 export const FILE_CATEGORIES = {
@@ -20,12 +22,15 @@ export const FILE_CATEGORIES = {
   // `audio`: a successive audio version of the title, with its audio state
   // (Audio tab); the others are the Files tab's.
   master: ["audio", "stems", "artwork", "contract", "other"],
+  // Call recordings and design versions have their own tables and sections.
+  project: ["brief", "visual", "contract", "press", "other"],
 } as const satisfies Record<FileOwnerKind, readonly string[]>;
 
 /** Categories offered by the Files tab: audio versions have their own tab. */
 export const FILES_TAB_CATEGORIES = {
   artist: FILE_CATEGORIES.artist,
   master: ["stems", "artwork", "contract", "other"],
+  project: FILE_CATEGORIES.project,
 } as const satisfies { [K in FileOwnerKind]: readonly FileCategory<K>[] };
 
 /** Free precision beside the category ("Contrat artiste 2026"), as in SQL. */
@@ -82,9 +87,7 @@ export function suggestedCategory(
   if (view !== "all") return view;
   const guess = (file: { name: string; type: string }) =>
     file.type.startsWith("image/")
-      ? kind === "artist"
-        ? "photo"
-        : "artwork"
+      ? IMAGE_CATEGORY[kind]
       : kind === "artist" && isAudioFile(file)
         ? "audio"
         : null;
@@ -92,6 +95,13 @@ export function suggestedCategory(
   const [only] = guesses;
   return guesses.size === 1 ? (only ?? null) : null;
 }
+
+// Where an image goes by default.
+const IMAGE_CATEGORY = {
+  artist: "photo",
+  master: "artwork",
+  project: "visual",
+} as const satisfies { [K in FileOwnerKind]: FileCategory<K> };
 
 /** "PDF", "JPG": the extension, else the MIME subtype. */
 export function fileFormat(fileName: string, mime: string): string {

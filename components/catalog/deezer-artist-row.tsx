@@ -14,7 +14,7 @@ import {
 import { fr } from "@/lib/i18n/fr";
 
 const ROW =
-  "flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left no-underline outline-none transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--control-bg-hover)] focus-visible:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-foreground";
+  "flex min-h-14 w-full items-center gap-3 px-3 py-2 text-left no-underline outline-none transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--control-bg-hover)] focus-visible:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring";
 
 // One Deezer result: picture, name, fans; flagged when already in the catalog.
 export function DeezerArtistRow({

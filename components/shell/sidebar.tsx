@@ -30,10 +30,8 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] shrink-0 flex-col justify-between gap-6 overflow-y-auto rounded-3xl bg-sidebar px-4 py-3 text-sidebar-foreground shadow-[var(--nav-shadow)] transition-[width] duration-[var(--duration-fast)] ease-[var(--ease-standard)] md:flex",
-        collapsed
-          ? "w-[var(--nav-width-collapsed)] px-2"
-          : "w-[var(--nav-width)]",
+        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] shrink-0 flex-col justify-between gap-6 overflow-y-auto rounded-3xl bg-sidebar p-2 text-sidebar-foreground shadow-[var(--nav-shadow)] transition-[width] duration-[var(--duration-fast)] ease-[var(--ease-standard)] md:flex",
+        collapsed ? "w-[var(--nav-width-collapsed)]" : "w-[var(--nav-width)]",
         // Fused with the project's contextual sidebar right next to it
         // (Figma "Double sidebar"): one rectangle, so no rounding or hairline
         // where the two meet.
@@ -44,7 +42,8 @@ export function Sidebar({
         <div
           className={cn(
             "flex items-center gap-2",
-            collapsed ? "flex-col" : "justify-between",
+            // Expanded, the brand lines up with the navigation's icons.
+            collapsed ? "flex-col" : "justify-between pl-4",
           )}
         >
           {!collapsed && (
@@ -58,11 +57,13 @@ export function Sidebar({
           {!collapsed && <div className="-my-3.5">{bell}</div>}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
+            className="hover:bg-[var(--nav-item-hover-bg)]"
             aria-label={collapsed ? t.expand : t.collapse}
             onClick={toggle}
           >
-            <IconSidebar aria-hidden />
+            {/* Same button and 20 px icon as the bell and the navigation. */}
+            <IconSidebar aria-hidden className="size-5" />
           </Button>
         </div>
         <NavLinks

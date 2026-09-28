@@ -2,7 +2,8 @@
 export const transmission = {
   statuses: {
     not_transmitted: "Non transmis",
-    pending: "En attente d'acceptation",
+    // Handed over, waiting for the project manager to accept it.
+    pending: "Transmis, à accepter",
     refused: "Refusé",
     clarification_requested: "Précision demandée",
     launched: "Lancé",

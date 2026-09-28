@@ -20,14 +20,14 @@ import { AUDIO_STATES } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
-// Writes of artist and master files, with the user's session: RLS
-// (manage_catalog) and column grants decide; the permission check only
-// gives a clean message.
+// Writes of artist, title and project files, with the user's session: RLS
+// and column grants decide (manage_catalog for the catalog, the project's
+// owner for a project); the permission check only gives a clean message.
 
 type Result = { ok: true } | { ok: false; error: string };
 
 const ownerSchema = z.object({
-  kind: z.enum(["artist", "master"]),
+  kind: z.enum(["artist", "master", "project"]),
   id: catalogIdSchema,
 });
 
@@ -75,20 +75,30 @@ const updateSchema = z
   })
   .refine((input) => isLibraryCategory(input.owner.kind, input.category));
 
-async function catalogAccess() {
+// The organization to write in, when the viewer may write there at all.
+// Inside a project, only its owner writes: RLS checks that one.
+async function writerAccess(owner: FileOwner) {
   const access = await requireApproved();
-  return access.organizationId && can(access, "manage_catalog")
+  const permission =
+    owner.kind === "project" ? "pilot_projects" : "manage_catalog";
+  return access.organizationId && can(access, permission)
     ? access.organizationId
     : null;
 }
 
 function refresh(owner: FileOwner) {
-  if (owner.kind === "artist") {
-    revalidatePath(routes.artistFiles(owner.id));
-    revalidatePath(routes.artistActivity(owner.id));
-  } else {
-    // Every tab of the master: the overview counts the master file.
-    revalidatePath(routes.master(owner.id), "layout");
+  switch (owner.kind) {
+    case "artist":
+      revalidatePath(routes.artistFiles(owner.id));
+      revalidatePath(routes.artistActivity(owner.id));
+      return;
+    case "master":
+      // Every tab of the master: the overview counts the master file.
+      revalidatePath(routes.master(owner.id), "layout");
+      return;
+    case "project":
+      revalidatePath(routes.projectFiles(owner.id));
+      revalidatePath(routes.projectActivity(owner.id));
   }
 }
 
@@ -97,8 +107,10 @@ export async function recordCatalogFile(
   input: z.input<typeof recordSchema>,
 ): Promise<Result> {
   const t = fr.catalogFiles;
-  const organizationId = await catalogAccess();
   const parsed = recordSchema.safeParse(input);
+  const organizationId = parsed.success
+    ? await writerAccess(parsed.data.owner)
+    : null;
   if (!organizationId || !parsed.success)
     return { ok: false, error: fr.auth.errors.forbidden };
   const { owner, path, category, description, fileName, mime, bytes } =
@@ -123,14 +135,23 @@ export async function recordCatalogFile(
     mime,
     bytes,
   };
-  const { error } =
-    owner.kind === "artist"
-      ? await supabase
+  const insert = () => {
+    switch (owner.kind) {
+      case "artist":
+        return supabase
           .from("artist_files")
-          .insert({ ...row, artist_id: owner.id })
-      : await supabase
+          .insert({ ...row, artist_id: owner.id });
+      case "master":
+        return supabase
           .from("master_files")
           .insert({ ...row, ...audio, master_id: owner.id });
+      case "project":
+        return supabase
+          .from("project_files")
+          .insert({ ...row, project_id: owner.id });
+    }
+  };
+  const { error } = await insert();
   if (error) {
     console.error("recordCatalogFile:", error.message);
     return { ok: false, error: t.failed };
@@ -147,28 +168,41 @@ export async function updateCatalogFile(
   const t = fr.catalogFiles;
   const parsed = updateSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: t.invalid };
-  if (!(await catalogAccess()))
-    return { ok: false, error: fr.auth.errors.forbidden };
   const { owner, fileId, fileName, category, description } = parsed.data;
+  if (!(await writerAccess(owner)))
+    return { ok: false, error: fr.auth.errors.forbidden };
 
   const supabase = await createClient();
   const values = { file_name: fileName, category, description };
-  const { data, error } =
-    owner.kind === "artist"
-      ? await supabase
+  const update = () => {
+    switch (owner.kind) {
+      case "artist":
+        return supabase
           .from("artist_files")
           .update(values)
           .eq("id", fileId)
           .eq("artist_id", owner.id)
           .select("id")
-          .maybeSingle()
-      : await supabase
+          .maybeSingle();
+      case "master":
+        return supabase
           .from("master_files")
           .update(values)
           .eq("id", fileId)
           .eq("master_id", owner.id)
           .select("id")
           .maybeSingle();
+      case "project":
+        return supabase
+          .from("project_files")
+          .update(values)
+          .eq("id", fileId)
+          .eq("project_id", owner.id)
+          .select("id")
+          .maybeSingle();
+    }
+  };
+  const { data, error } = await update();
   if (error || !data) {
     if (error) console.error("updateCatalogFile:", error.message);
     return { ok: false, error: t.updateFailed };
@@ -184,27 +218,40 @@ export async function deleteCatalogFile(
 ): Promise<Result> {
   const t = fr.catalogFiles;
   const parsed = deleteSchema.safeParse(input);
-  if (!parsed.success || !(await catalogAccess()))
+  if (!parsed.success || !(await writerAccess(parsed.data.owner)))
     return { ok: false, error: fr.auth.errors.forbidden };
   const { owner, fileId } = parsed.data;
 
   const supabase = await createClient();
-  const { data, error } =
-    owner.kind === "artist"
-      ? await supabase
+  const remove = () => {
+    switch (owner.kind) {
+      case "artist":
+        return supabase
           .from("artist_files")
           .delete()
           .eq("id", fileId)
           .eq("artist_id", owner.id)
           .select("path")
-          .maybeSingle()
-      : await supabase
+          .maybeSingle();
+      case "master":
+        return supabase
           .from("master_files")
           .delete()
           .eq("id", fileId)
           .eq("master_id", owner.id)
           .select("path")
           .maybeSingle();
+      case "project":
+        return supabase
+          .from("project_files")
+          .delete()
+          .eq("id", fileId)
+          .eq("project_id", owner.id)
+          .select("path")
+          .maybeSingle();
+    }
+  };
+  const { data, error } = await remove();
   if (error || !data) {
     if (error) console.error("deleteCatalogFile:", error.message);
     return { ok: false, error: t.deleteFailed };

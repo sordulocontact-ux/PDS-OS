@@ -17,8 +17,9 @@ export type Choice<V extends string> = {
  * decision is informed. Native radios: keyboard and screen readers for free.
  * Uncontrolled (defaultValue, for forms) or controlled (value + onChange).
  * `columns={3}`: side by side from the small breakpoint, for short choices.
- * `variant="tile"`: a centred icon and label, the radio hidden, the choice
- * made in the selection colour (type of a project).
+ * The choice made shows in the selection colour (docs/DESIGN.md § 3 bis).
+ * `variant="tile"`: a centred icon and label, the radio hidden (type of a
+ * project).
  */
 export function ChoiceCards<V extends string>({
   name,
@@ -66,10 +67,10 @@ export function ChoiceCards<V extends string>({
         <label
           key={choice.value}
           className={cn(
-            "flex cursor-pointer rounded-lg border border-border transition-colors has-disabled:cursor-not-allowed has-disabled:opacity-60",
+            "flex cursor-pointer rounded-lg border border-border transition-colors has-checked:border-[var(--selection-border)] has-checked:bg-[var(--selection-bg)] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring has-disabled:cursor-not-allowed has-disabled:opacity-60",
             tile
-              ? "flex-col items-center justify-center gap-2 p-6 text-center has-checked:border-[var(--selection-border)] has-checked:bg-[var(--selection-bg)] has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-foreground"
-              : "gap-3 p-3 has-checked:border-ring has-checked:bg-muted",
+              ? "flex-col items-center justify-center gap-2 p-6 text-center"
+              : "gap-3 p-3",
           )}
         >
           <input
@@ -84,7 +85,7 @@ export function ChoiceCards<V extends string>({
                     e.target.checked && onChange?.(choice.value),
                 }
               : { defaultChecked: choice.value === defaultValue })}
-            className={tile ? "sr-only" : "mt-0.5 size-4 accent-primary"}
+            className={tile ? "sr-only" : "mt-0.5 size-4 accent-selection"}
           />
           {tile ? (
             <>

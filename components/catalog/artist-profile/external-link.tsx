@@ -24,7 +24,7 @@ export function ExternalLink({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground",
+        "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         cover && "after:absolute after:inset-0 after:rounded-[inherit]",
         icon && "inline-flex items-center gap-1.5",
         className,

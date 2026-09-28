@@ -146,16 +146,33 @@ tons sémantiques, et seulement six (`--tone-*` dans `globals.css`) :
 
 ## 3 bis. Sélection
 
-Le choix fait dans une **carte de choix en tuile** (`ChoiceCards variant="tile"` : icône
-et libellé centrés, radio masquée ; type d'un projet) se montre en **bleu** : contour
-`--selection-border`, fond `--selection-bg` (Figma de Sacha, 27/09/2026, nœud 1493:4748).
-Couleur **provisoire** : Sacha la changera, dans `app/globals.css` seulement (et
-`.surface-glass` pour la modale). Ce n'est pas un ton d'état (§ 3) : le bleu `info` reste
-réservé à « en cours ».
+Le **bleu est l'accent unique de sélection** (décision de Sacha, 27/09/2026) : jeton
+`--selection` (#64a2ff), avec `--selection-border` (contour) et `--selection-bg` (fond
+pâle). Classes Tailwind `accent-selection`, `outline-ring`, `border-ring`. Il habille :
 
-Le reste des sélections ne change pas : pastilles `FilterChip` en encre pleine (format,
-priorité, direction créative, via `ChipChoice` pour un choix unique), cartes `ChoiceCards`
-à contour noir.
+- le **focus** clavier, partout (`--focus-ring` = `--selection`, aussi dans la modale) ;
+- un **champ en saisie** (`Input`, `Textarea`, `Select`, saisie de PO) : contour bleu ;
+- une **radio** et une **case cochée** natives (`accent-selection`) ;
+- une **carte de choix** cochée (`ChoiceCards`, tuile ou non) et une option retenue de la
+  Stratégie (`optionClass`) : contour `--selection-border`, fond `--selection-bg`.
+
+À changer dans `app/globals.css` seulement (`.surface-glass` éclaircit `--selection-bg`
+pour la modale). Ce n'est pas un ton d'état (§ 3) : le bleu `info` reste réservé à
+« en cours ». Les pastilles `FilterChip` (filtres, et `ChipChoice` qui s'en sert) restent
+en encre pleine : un filtre actif n'est pas une sélection de formulaire.
+
+## 3 ter. Teintes de catégorie
+
+Pour reconnaître d'un coup d'œil une **catégorie** dans un tableau, sans aucune valeur
+d'état : l'**étape** d'un projet (Cadrage bleu ciel, Stratégie indigo, Conception rose,
+Production orange, Livraison sarcelle, Défense jaune, Bilan ardoise) et son **type**
+(Musical violet, Contenu vert tilleul, Événement sable), distincts des étapes puisqu'ils
+sont sur la même ligne. Jetons `--hue-<teinte>-bg` / `-fg` (`app/globals.css`), variantes
+de `StatusBadge`, correspondance dans `lib/ui/category-hues.ts` seulement.
+
+Liste des projets : la colonne « Étape » ne montre **que l'étape** (jamais « En cours »,
+« À venir » : cet état se lit sur le projet), ou « Brouillon », « Terminé », ou avant le
+lancement le statut de transmission (« Transmis, à accepter »…).
 
 Formulaire long en **blocs titrés** (`FormSection`) : une carte blanche à filet par groupe
 (« Le projet », « Informations initiales », « Équipe »), sans la carte dans une modale ou un
@@ -173,12 +190,14 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 - Fond de l'application `--surface-app` (#fbfbfb). La barre latérale est une carte
   blanche flottante : marge `--shell-inset` (16 px) avec le bord de l'écran, arrondi
   16 px, largeur `--nav-width` (250 px) ou `--nav-width-collapsed` (64 px) repliée,
-  marges intérieures 24 / 16 px (12 px repliée), ombre `--nav-shadow` (Figma « Devis
+  marge intérieure 8 px (24 / 16 px jusqu'au 27/09/2026, jugée trop large par Sacha ;
+  même 8 px sur la sidebar de projet), ombre `--nav-shadow` (Figma « Devis
   Sordulo » nœud 121:179 : flou 3 px, sans décalage, noir 10 %). `components/shell/sidebar.tsx`.
-- En haut, « PDS » en 16 px gras et la cloche (masqués repliée), plus un chevron pour
-  replier / déplier (`components/shell/use-collapsed-nav.tsx`, un contexte React partagé
+- En haut, « PDS » en 16 px gras et la cloche (masqués repliée), plus un bouton pour
+  replier / déplier (même taille de bouton que la cloche, icône 20 px comme la
+  navigation) (`components/shell/use-collapsed-nav.tsx`, un contexte React partagé
   avec la sidebar de projet ci-dessous). Dessous, la navigation (`lib/ui/nav-items.ts`,
-  8 items) : éléments de 40 px espacés de 12 px, icône 24 px, fond `--nav-item-active-bg`
+  8 items) : éléments de 40 px espacés de 12 px, icône 20 px, fond `--nav-item-active-bg`
   sur la page ouverte, `--nav-item-hover-bg` au survol. Repliée : icônes seules, centrées,
   libellé en `Tooltip` au survol/focus. En bas, la personne connectée et
   « Se déconnecter » (masqués repliée), au même format qu'un élément de navigation.

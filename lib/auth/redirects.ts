@@ -52,6 +52,8 @@ export const PERMISSIONS = [
   "creative_work",
   "manage_catalog",
   "create_projects",
+  // Sees every project, and reads their contracts (the direction).
+  "view_all_projects",
   "archive_records",
   "read_feedback",
 ] as const;

@@ -221,6 +221,7 @@ export const assistant = {
     validation_requested: "validation demandée",
     validation_decided: "validation décidée",
     release_online: "sortie détectée en ligne",
+    file_added: "document ajouté",
   } as Record<string, string>,
   validationStates: {
     pending: "en attente",

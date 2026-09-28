@@ -56,7 +56,7 @@ export function WorkRow({
           <input
             type="checkbox"
             aria-label={t.markDone(item.title)}
-            className="mt-1.5 size-4 shrink-0 accent-primary"
+            className="mt-1.5 size-4 shrink-0 accent-selection"
             checked={item.status === "done"}
             disabled={pending}
             onChange={(e) =>

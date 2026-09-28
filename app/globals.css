@@ -89,10 +89,36 @@
   --tone-action-bg: #ece1fb;
   --tone-action-fg: #4c1d9e;
 
-  /* --- Sélection (DESIGN.md § 3 bis) : le choix fait dans une carte de
-     choix (type de projet). Couleur provisoire de Sacha (27/09/2026), à
-     changer ici seulement. -------------------------------------------------- */
-  --selection-border: #64a2ff;
+  /* --- Teintes de catégorie (DESIGN.md § 3 ter) : reconnaître d'un coup
+     d'œil une catégorie (étape d'un projet, type) dans un tableau. Aucune
+     valeur d'état : ce n'est pas un ton (§ 3). Fond pâle, texte foncé,
+     contraste ≥ 4,5:1. ----------------------------------------------------- */
+  --hue-sky-bg: #dbeefb;
+  --hue-sky-fg: #0c4a6e;
+  --hue-indigo-bg: #e3e6fc;
+  --hue-indigo-fg: #2e3a9e;
+  --hue-violet-bg: #efe3fc;
+  --hue-violet-fg: #5b21b6;
+  --hue-pink-bg: #fce4f1;
+  --hue-pink-fg: #9d1760;
+  --hue-orange-bg: #fde6d4;
+  --hue-orange-fg: #8a3a0a;
+  --hue-yellow-bg: #f7efc4;
+  --hue-yellow-fg: #5e4b00;
+  --hue-lime-bg: #e6f4cf;
+  --hue-lime-fg: #3b5311;
+  --hue-teal-bg: #d5f3ee;
+  --hue-teal-fg: #0f5249;
+  --hue-sand-bg: #efe6da;
+  --hue-sand-fg: #5c4630;
+  --hue-slate-bg: #e4e8ee;
+  --hue-slate-fg: #334155;
+
+  /* --- Sélection (DESIGN.md § 3 bis) : l'accent unique de ce qui est choisi
+     ou actif (focus, champ en saisie, radio, case cochée, carte de choix).
+     Couleur de Sacha (27/09/2026), à changer ici seulement. ---------------- */
+  --selection: #64a2ff;
+  --selection-border: var(--selection);
   --selection-bg: rgb(100 162 255 / 0.1);
 
   /* --- Jauges ------------------------------------------------------------ */
@@ -109,11 +135,7 @@
   --control-primary-bg: var(--po-ink-900);
   --control-primary-fg: var(--po-white);
   --control-primary-bg-hover: var(--po-ink-600);
-  /* Choix retenu parmi des options (DESIGN.md § 4, « Sélection ») : fond bleu
-     pâle, contour bleu. Jamais pour un lien ni un bouton. */
-  --select-bg: #eef4fe;
-  --select-border: #7aaef2;
-  --focus-ring: var(--po-ink-900);
+  --focus-ring: var(--selection);
   --overlay-scrim: rgba(0, 0, 0, 0.4);
   /* Fenêtre « verre » (DESIGN.md § 4) : page floutée sans voile, panneau
      sombre translucide. Deux flous depuis le 27/09/2026 (demande de Sacha) :
@@ -328,8 +350,6 @@
   --border-hairline: rgb(255 255 255 / 0.1);
   --border-strong: rgb(255 255 255 / 0.4);
   --input: rgb(255 255 255 / 0.12);
-  --ring: var(--po-white);
-  --focus-ring: var(--po-white);
   --surface-tint: rgb(255 255 255 / 0.06);
   --meter-track: rgb(255 255 255 / 0.12);
   --meter-fill: var(--po-grey-500);
@@ -348,8 +368,6 @@
   --control-bg-soft: rgb(255 255 255 / 0.08);
   --control-primary-bg: var(--po-white);
   --control-primary-fg: var(--po-ink-900);
-  --select-bg: rgb(122 174 242 / 0.18);
-  --select-border: #7aaef2;
   /* Pas de rouge : l'action définitive reste en « encre pleine », ici blanche. */
   --destructive: var(--po-white);
   --destructive-foreground: var(--po-ink-900);
@@ -381,6 +399,8 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-selection: var(--selection);
+  --color-selection-bg: var(--selection-bg);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -569,7 +589,7 @@
     text-decoration: underline;
   }
 
-  /* Focus : contour 2 px encre pleine, 2 px d'offset. Jamais de halo. */
+  /* Focus : contour 2 px bleu de sélection, 2 px d'offset. Jamais de halo. */
   :focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;

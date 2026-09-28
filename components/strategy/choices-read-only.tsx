@@ -33,7 +33,7 @@ export function ChoicesReadOnly({
               {chosen.map((label) => (
                 <li
                   key={label}
-                  className="rounded-pill border border-[var(--select-border)] bg-[var(--select-bg)] px-3.5 py-1.5 text-sm font-medium"
+                  className="rounded-pill border border-[var(--selection-border)] bg-[var(--selection-bg)] px-3.5 py-1.5 text-sm font-medium"
                 >
                   {label}
                 </li>

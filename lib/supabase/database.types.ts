@@ -2220,6 +2220,70 @@ export type Database = {
           },
         ]
       }
+      project_files: {
+        Row: {
+          bytes: number
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          file_name: string
+          id: string
+          mime: string
+          organization_id: string
+          path: string
+          project_id: string
+        }
+        Insert: {
+          bytes: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name: string
+          id?: string
+          mime: string
+          organization_id: string
+          path: string
+          project_id: string
+        }
+        Update: {
+          bytes?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name?: string
+          id?: string
+          mime?: string
+          organization_id?: string
+          path?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_files_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_files_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       project_masters: {
         Row: {
           created_at: string
@@ -3128,6 +3192,10 @@ export type Database = {
         Returns: boolean
       }
       can_manage_creatives: { Args: { p_project_id: string }; Returns: boolean }
+      can_read_project_contracts: {
+        Args: { p_project_id: string }
+        Returns: boolean
+      }
       can_see_project: { Args: { p_project_id: string }; Returns: boolean }
       can_see_project_row: {
         Args: {

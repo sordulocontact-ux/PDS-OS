@@ -3,7 +3,11 @@ export const projectHistory = {
   files: {
     title: "Fichiers",
     description:
-      "Ce qui est stocké pour ce projet : les enregistrements des calls et les versions déposées en conception.",
+      "Les documents du projet, classés par catégorie, puis les enregistrements des calls et les versions déposées en conception.",
+    libraryTitle: "Documents",
+    libraryEmptyBody:
+      "Glissez un fichier ici, ou cliquez pour le choisir : brief, visuels, contrats, presse. Vous direz ensuite où le classer.",
+    libraryEmptyBodyReadOnly: "Les documents du projet apparaîtront ici.",
     callsTitle: "Enregistrements des calls",
     designTitle: "Versions de la conception",
     designColumns: {
@@ -28,9 +32,6 @@ export const projectHistory = {
     unavailable: "Indisponible",
     transcript: "Transcription",
     report: "Compte rendu",
-    emptyTitle: "Aucun fichier",
-    emptyBody:
-      "Les enregistrements des calls et les versions déposées en conception apparaîtront ici.",
   },
   validations: {
     title: "Validations",

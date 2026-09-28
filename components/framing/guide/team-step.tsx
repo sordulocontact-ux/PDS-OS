@@ -82,7 +82,7 @@ export function TeamStep({
               disabled={!editable}
               onClick={() => setAssigning(card)}
               className={cn(
-                "flex h-full min-h-28 w-full flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground",
+                "flex h-full min-h-28 w-full flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                 card.member
                   ? "border-border bg-background"
                   : "border-dashed border-border bg-[var(--surface-soft)]",

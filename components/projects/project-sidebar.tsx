@@ -142,7 +142,7 @@ export function ProjectSidebar({
     <nav
       aria-label={t.label}
       className={cn(
-        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col gap-4 overflow-y-auto bg-sidebar p-3 text-sidebar-foreground shadow-[var(--nav-shadow)] md:flex",
+        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col gap-4 overflow-y-auto bg-sidebar p-2 text-sidebar-foreground shadow-[var(--nav-shadow)] md:flex",
         doubleSidebar
           ? "rounded-tr-3xl rounded-br-3xl"
           : "rounded-3xl border-l border-[color:var(--nav-divider)]",

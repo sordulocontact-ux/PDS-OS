@@ -4,20 +4,28 @@
 import { fr } from "@/lib/i18n/fr";
 import type { MusicFormat, ProjectType } from "@/lib/projects/types";
 
-export function projectKindLabel(project: {
+export type ProjectKind = {
   type: ProjectType;
   musicFormat: MusicFormat | null;
   contentFormatName: string | null;
-}): string {
-  const type = fr.shell.projectTypes[project.type];
+};
+
+/** The part after the type ("EP", "PDS Mic"); null when there is none. */
+export function projectFormatLabel(project: ProjectKind): string | null {
   if (project.type === "music_release")
     return project.musicFormat
-      ? `${type} · ${fr.shell.musicFormats[project.musicFormat]}`
-      : type;
+      ? fr.shell.musicFormats[project.musicFormat]
+      : null;
   if (project.type === "content")
-    return `${type} · ${
+    return (
       project.contentFormatName ??
       fr.shell.newProject.fields.contentModes.one_off
-    }`;
-  return type;
+    );
+  return null;
+}
+
+export function projectKindLabel(project: ProjectKind): string {
+  const type = fr.shell.projectTypes[project.type];
+  const format = projectFormatLabel(project);
+  return format ? `${type} · ${format}` : type;
 }

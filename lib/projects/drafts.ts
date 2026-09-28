@@ -3,7 +3,7 @@ import "server-only";
 import type { ProjectFormDefaults } from "@/components/projects/create-project-form";
 import type { FormValues } from "@/lib/auth/form-state";
 import { listContentFormats } from "@/lib/projects/content-formats";
-import { projectKindLabel } from "@/lib/projects/labels";
+import type { ProjectKind } from "@/lib/projects/labels";
 import {
   isContentMode,
   isMusicFormat,
@@ -38,8 +38,8 @@ const MAX_LISTED = 20;
 export type ProjectDraftItem = {
   id: string;
   title: string;
-  // "Musical · EP", as the project will read; null before a type is chosen.
-  kind: string | null;
+  // As the project will read; null before a type is chosen.
+  kind: ProjectKind | null;
 };
 
 /** Only the form's fields, as text, within their limits. */
@@ -78,14 +78,14 @@ export async function listProjectDrafts(): Promise<ProjectDraftItem[]> {
     id,
     title: values.title.trim(),
     kind: values.type
-      ? projectKindLabel({
+      ? {
           type: values.type,
           musicFormat: values.musicFormat ?? null,
           contentFormatName:
             values.contentMode === "format" && values.contentFormatId
               ? (formats.get(values.contentFormatId) ?? null)
               : null,
-        })
+        }
       : null,
   }));
 }

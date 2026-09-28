@@ -12,7 +12,7 @@ import { fr } from "@/lib/i18n/fr";
 export function RelatedArtists({ artists }: { artists: RelatedArtist[] }) {
   const t = fr.catalog.deezerProfile;
   const linkClass =
-    "truncate text-sm font-medium outline-none after:absolute after:inset-0 after:rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground";
+    "truncate text-sm font-medium outline-none after:absolute after:inset-0 after:rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
   return (
     <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

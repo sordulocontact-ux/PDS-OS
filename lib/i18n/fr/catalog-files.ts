@@ -28,6 +28,14 @@ export const catalogFiles = {
       contract: "Contrats",
       other: "Autres",
     },
+    project: {
+      all: "Tous",
+      brief: "Brief",
+      visual: "Visuels",
+      contract: "Contrats",
+      press: "Presse",
+      other: "Autres",
+    },
   },
   loadError: "Les fichiers n'ont pas pu être chargés. Rechargez la page.",
   columns: {
@@ -50,6 +58,13 @@ export const catalogFiles = {
       stems: "Stems",
       artwork: "Pochette",
       contract: "Contrat",
+      other: "Autre",
+    },
+    project: {
+      brief: "Brief",
+      visual: "Visuel",
+      contract: "Contrat",
+      press: "Presse",
       other: "Autre",
     },
   },
@@ -81,17 +96,37 @@ export const catalogFiles = {
     descriptionHint: "Facultatif. Ce qu'est ce fichier, en quelques mots.",
     // Example shown in the empty field, by category.
     placeholders: {
-      press: "Ex. Dossier de presse 2026",
-      photo: "Ex. Portrait presse — septembre 2026",
-      contract: "Ex. Contrat artiste 2026",
-      audio: "Ex. Maquette voix",
-      stems: "Ex. Stems V2",
-      artwork: "Ex. Pochette finale",
-      other: "Ex. Fiche technique",
-    } as Record<string, string>,
+      artist: {
+        press: "Ex. Dossier de presse 2026",
+        photo: "Ex. Portrait presse — septembre 2026",
+        contract: "Ex. Contrat artiste 2026",
+        audio: "Ex. Maquette voix",
+        other: "Ex. Fiche technique",
+      },
+      master: {
+        stems: "Ex. Stems V2",
+        artwork: "Ex. Pochette finale",
+        contract: "Ex. Contrat de licence",
+        other: "Ex. Fiche technique",
+      },
+      project: {
+        brief: "Ex. Brief créatif V2",
+        visual: "Ex. Moodboard du clip",
+        contract: "Ex. Contrat réalisateur",
+        press: "Ex. Communiqué de sortie",
+        other: "Ex. Planning de tournage",
+      },
+    } as Record<string, Record<string, string>>,
     name: "Nom du fichier",
-    contractNote:
-      "Les contrats ne sont visibles que par la direction et les chefs de projet.",
+    // Who reads a contract, said when Contract is chosen.
+    contractNote: {
+      artist:
+        "Les contrats ne sont visibles que par la direction et les chefs de projet.",
+      master:
+        "Les contrats ne sont visibles que par la direction et les chefs de projet.",
+      project:
+        "Les contrats ne sont visibles que par la direction et le chef de projet responsable.",
+    },
   },
   hint: "50 Mo au plus par fichier.",
   edit: {

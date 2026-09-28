@@ -127,7 +127,7 @@ export function TasksSection({
                 <input
                   type="checkbox"
                   id={`task-${task.id}`}
-                  className="mt-1 size-4 accent-primary"
+                  className="mt-1 size-4 accent-selection"
                   checked={task.status === "done"}
                   disabled={pending}
                   onChange={(e) =>

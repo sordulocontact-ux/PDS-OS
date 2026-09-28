@@ -99,7 +99,7 @@ export function ContactForm({
           <input
             type="checkbox"
             name="isPrimary"
-            className="size-4 accent-primary"
+            className="size-4 accent-selection"
             defaultChecked={values.isPrimary === "on"}
           />
           {t.form.isPrimary}

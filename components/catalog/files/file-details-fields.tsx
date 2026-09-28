@@ -43,7 +43,9 @@ export function FileDetailsFields({
           }))}
           value={category}
           onChange={(value) => value && onCategory(value)}
-          hint={category === "contract" ? t.fields.contractNote : undefined}
+          hint={
+            category === "contract" ? t.fields.contractNote[kind] : undefined
+          }
           error={categoryError}
         />
       </fieldset>
@@ -53,7 +55,7 @@ export function FileDetailsFields({
         hint={t.fields.descriptionHint}
         autoComplete="off"
         maxLength={MAX_DESCRIPTION_LENGTH}
-        placeholder={t.fields.placeholders[category ?? "other"]}
+        placeholder={t.fields.placeholders[kind][category ?? "other"]}
         value={description}
         disabled={disabled}
         onChange={(event) => onDescription(event.target.value)}

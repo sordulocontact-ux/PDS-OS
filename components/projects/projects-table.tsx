@@ -1,5 +1,5 @@
 import { ProjectActions } from "@/components/projects/project-actions";
-import { StageStateBadge } from "@/components/projects/stage-state-badge";
+import { ProjectKindBadge } from "@/components/projects/project-kind-badge";
 import {
   DataTable,
   DataTableActionsCell,
@@ -16,11 +16,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { projectKindLabel } from "@/lib/projects/labels";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import type { ProjectListItem } from "@/lib/projects/types";
+import { stageHue } from "@/lib/ui/category-hues";
 import {
   draftTone,
+  doneTone,
   projectPriorityTone,
   projectStatusTone,
 } from "@/lib/ui/state-tones";
@@ -59,7 +60,7 @@ export function ProjectsTable({
             </DataTableCell>
             <DataTableCell hideBelow="sm">{EMPTY_CELL}</DataTableCell>
             <DataTableCell hideBelow="md">
-              {draft.kind ?? EMPTY_CELL}
+              {draft.kind ? <ProjectKindBadge kind={draft.kind} /> : EMPTY_CELL}
             </DataTableCell>
             <DataTableCell fill>
               <StatusBadge tone={draftTone} size="sm">
@@ -89,16 +90,23 @@ export function ProjectsTable({
               {project.artistName || EMPTY_CELL}
             </DataTableCell>
             <DataTableCell hideBelow="md">
-              {projectKindLabel(project)}
+              <ProjectKindBadge kind={project} />
             </DataTableCell>
+            {/* The stage only, each in its hue: its state (en cours, à
+                venir…) is read on the project itself. Before the launch,
+                the handover status. */}
             <DataTableCell fill>
               {project.currentStage ? (
-                <span className="flex flex-wrap items-center gap-2">
+                <StatusBadge
+                  tone={stageHue(project.currentStage.key)}
+                  size="sm"
+                >
                   {project.currentStage.label}
-                  <StageStateBadge state={project.currentStage.state} />
-                </span>
+                </StatusBadge>
               ) : project.stageCount > 0 ? (
-                <span>{t.allValidated}</span>
+                <StatusBadge tone={doneTone} size="sm">
+                  {t.allValidated}
+                </StatusBadge>
               ) : (
                 <StatusBadge tone={projectStatusTone[project.status]} size="sm">
                   {fr.transmission.statuses[project.status]}

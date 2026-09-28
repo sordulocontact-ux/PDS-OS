@@ -23,9 +23,17 @@ const MASTER_SELECT = `${SELECT}, audio_state, duration_seconds`;
  */
 export type FileScope = "audio" | "other";
 
-// The two tables share their columns; only the owner column differs.
+// The three tables share their columns; only the owner column differs.
 async function readRows(owner: FileOwner, scope?: FileScope) {
   const supabase = await createClient();
+  if (owner.kind === "project")
+    return supabase
+      .from("project_files")
+      .select(
+        `${SELECT}, author:people!project_files_created_by_fkey(first_name, last_name)`,
+      )
+      .eq("project_id", owner.id)
+      .order("created_at", { ascending: false });
   if (owner.kind === "master") {
     const query = supabase
       .from("master_files")
@@ -57,8 +65,9 @@ function withDownloadName(url: string, fileName: string): string {
 }
 
 /**
- * Files of an artist or a master, newest first, with the viewer's session:
- * RLS hides contracts from a viewer without manage_catalog.
+ * Files of an artist, a master or a project, newest first, with the
+ * viewer's session: RLS hides contracts from a viewer who may not read them
+ * (and a project's files from whoever does not see the project).
  */
 export async function listCatalogFiles(
   owner: FileOwner,

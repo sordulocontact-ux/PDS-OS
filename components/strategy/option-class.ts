@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
  */
 export const optionClass = (selected: boolean) =>
   cn(
-    "flex min-w-0 items-start gap-3 rounded-2xl border px-4 py-3.5 text-left text-body-md transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:pointer-events-none",
+    "flex min-w-0 items-start gap-3 rounded-2xl border px-4 py-3.5 text-left text-body-md transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none",
     selected
-      ? "border-[var(--select-border)] bg-[var(--select-bg)]"
+      ? "border-[var(--selection-border)] bg-[var(--selection-bg)]"
       : "border-border bg-background enabled:hover:border-grey-300",
   );
 

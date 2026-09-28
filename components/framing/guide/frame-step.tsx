@@ -82,7 +82,7 @@ export function FrameStep({
                 className={cn(
                   "-mx-3 grid w-[calc(100%+1.5rem)] gap-1 rounded-lg px-3 py-2.5 text-left sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4",
                   editable &&
-                    "hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground",
+                    "hover:bg-[var(--control-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                 )}
               >
                 <span className="text-body-md font-semibold">

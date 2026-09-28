@@ -17,7 +17,8 @@ export type ActivityKind =
   | "stage_changed"
   | "validation_requested"
   | "validation_decided"
-  | "release_online";
+  | "release_online"
+  | "file_added";
 
 // Human labels for Brief fields, so neither the UI nor the model sees raw keys.
 const BRIEF_FIELD_LABELS: Record<string, string> = {
@@ -66,6 +67,7 @@ export async function loadRecentActivity(options: {
     stages,
     validations,
     releases,
+    files,
   ] = await Promise.all([
     supabase.from("projects").select("id, title"),
     byProject(
@@ -127,6 +129,14 @@ export async function loadRecentActivity(options: {
         .from("releases")
         .select("project_id, title, online_detected_at")
         .gte("online_detected_at", since),
+    ),
+    // Documents of the project library (RLS hides contracts from whoever
+    // may not read them).
+    byProject(
+      supabase
+        .from("project_files")
+        .select("project_id, file_name, created_at")
+        .gte("created_at", since),
     ),
   ]);
 
@@ -239,6 +249,14 @@ export async function loadRecentActivity(options: {
       r.project_id,
       r.title,
       routes.projectRelease(r.project_id),
+    );
+  for (const f of files.data ?? [])
+    push(
+      f.created_at,
+      "file_added",
+      f.project_id,
+      f.file_name,
+      routes.projectFiles(f.project_id),
     );
 
   return events
