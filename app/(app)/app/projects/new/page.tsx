@@ -1,8 +1,6 @@
-import { IconArrowLeft } from "@/components/icons";
-import Link from "next/link";
-
 import { FormMessage } from "@/components/auth/form-message";
 import { CreateProjectForm } from "@/components/projects/create-project-form";
+import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { requirePermission } from "@/lib/auth/dal";
@@ -43,15 +41,13 @@ export default async function NewProjectPage({
 
   return (
     <PageContainer className="max-w-2xl">
-      <Link
+      <BackLink
         href={fromMaster ? routes.master(fromMaster.id) : routes.projects}
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <IconArrowLeft className="size-4" aria-hidden />
         {fromMaster
           ? fr.catalog.master.backTo(fromMaster.title)
           : fr.shell.project.back}
-      </Link>
+      </BackLink>
       <PageHeader title={t.title} description={t.subtitle} />
       {draftId && !draft && (
         <FormMessage kind="error">{t.draft.notFound}</FormMessage>

@@ -1,7 +1,7 @@
-// Row actions of the lists (artists, titles, projects): "⋯" menu, edit
-// panel, archiving (docs/ARCHITECTURE.md § 2 quater).
+// Row actions of the lists (artists, titles, projects, network contacts):
+// "⋯" menu, edit panel, archiving (docs/ARCHITECTURE.md § 2 quater).
 
-type Kind = "artist" | "master" | "project";
+type Kind = "artist" | "master" | "project" | "contact";
 
 export const records = {
   menu: {
@@ -21,6 +21,7 @@ export const records = {
     artist: "Aucun artiste archivé.",
     master: "Aucun titre archivé.",
     project: "Aucun projet archivé.",
+    contact: "Aucun contact archivé.",
   } satisfies Record<Kind, string>,
   archivedEmptyBody:
     "Ce qui est archivé depuis le menu « ⋯ » d'une ligne apparaît ici, prêt à être restauré.",
@@ -29,11 +30,13 @@ export const records = {
       artist: "Modifier l'artiste",
       master: "Modifier le titre",
       project: "Modifier le projet",
+      contact: "Modifier le contact",
     } satisfies Record<Kind, string>,
     description: {
       artist: "Photo, identité et biographie.",
       master: "Titre, artistes crédités, état audio, variante, ISRC et durée.",
       project: "Modifiable tant que le projet n'est pas lancé.",
+      contact: "Rôles, coordonnées et notes.",
     } satisfies Record<Kind, string>,
     loading: "Préparation du formulaire…",
     loadFailed: "Le formulaire n'a pas pu être préparé. Réessayez.",
@@ -49,6 +52,8 @@ export const records = {
         "Le titre disparaît du catalogue et des sélecteurs. Il est conservé : vous pourrez le restaurer depuis « Archivés ».",
       project:
         "Le projet disparaît des listes, et sa transmission en attente est suspendue. Il est conservé : vous pourrez le restaurer depuis « Archivés ».",
+      contact:
+        "Le contact disparaît du réseau et des sélecteurs. Sa fiche est conservée : vous pourrez le restaurer depuis « Archivés ».",
     } satisfies Record<Kind, string>,
     confirm: "Archiver",
     pending: "Archivage…",
@@ -78,6 +83,7 @@ export const records = {
         "Le titre revient dans le catalogue et les sélecteurs, tel qu'il a été archivé.",
       project:
         "Le projet revient dans les listes, avec sa transmission en attente s'il en avait une.",
+      contact: "Le contact revient dans le réseau, tel qu'il a été archivé.",
     } satisfies Record<Kind, string>,
     confirm: "Restaurer",
     pending: "Restauration…",
@@ -99,6 +105,8 @@ export const records = {
       "Un artiste crédité sur ce titre est archivé : restaurez-le d'abord.",
     project_uses_archived:
       "Ce projet utilise un titre ou un artiste archivé : restaurez-le d'abord.",
+    contact_in_use:
+      "Ce contact est partie à un contrat en cours. Il pourra être archivé une fois le contrat résilié.",
     generic: "L'opération n'a pas abouti. Réessayez.",
   },
 } as const;

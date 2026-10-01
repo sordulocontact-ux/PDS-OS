@@ -3,7 +3,9 @@ import "server-only";
 import {
   FILE_BUCKETS,
   isFileCategory,
+  withDownloadName,
   type CatalogFile,
+  type CatalogFileVersion,
   type FileOwner,
 } from "@/lib/catalog/file-rules";
 import { audioStateOf } from "@/lib/catalog/title-rules";
@@ -14,7 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 const SIGNED_URL_SECONDS = 3600;
 
 const SELECT =
-  "id, category, description, path, file_name, mime, bytes, created_at";
+  "id, category, description, path, file_name, mime, bytes, created_at, series_id, version";
 const MASTER_SELECT = `${SELECT}, audio_state, duration_seconds`;
 
 /**
@@ -23,9 +25,17 @@ const MASTER_SELECT = `${SELECT}, audio_state, duration_seconds`;
  */
 export type FileScope = "audio" | "other";
 
-// The three tables share their columns; only the owner column differs.
+// The four tables share their columns; only the owner column differs.
 async function readRows(owner: FileOwner, scope?: FileScope) {
   const supabase = await createClient();
+  if (owner.kind === "contract")
+    return supabase
+      .from("contract_files")
+      .select(
+        `${SELECT}, author:people!contract_files_created_by_fkey(first_name, last_name)`,
+      )
+      .eq("contract_id", owner.id)
+      .order("created_at", { ascending: false });
   if (owner.kind === "project")
     return supabase
       .from("project_files")
@@ -58,14 +68,9 @@ async function readRows(owner: FileOwner, scope?: FileScope) {
     .order("created_at", { ascending: false });
 }
 
-function withDownloadName(url: string, fileName: string): string {
-  const signed = new URL(url);
-  signed.searchParams.set("download", fileName);
-  return signed.toString();
-}
-
 /**
- * Files of an artist, a master or a project, newest first, with the
+ * Files of an artist, a master, a project or a contract, newest first, one
+ * entry per file with its versions (the latest one leads), read with the
  * viewer's session: RLS hides contracts from a viewer who may not read them
  * (and a project's files from whoever does not see the project).
  */
@@ -100,31 +105,62 @@ export async function listCatalogFiles(
     ),
   );
 
-  const files = rows.map((row): CatalogFile => {
-    // Only a title's files have these columns.
-    const audio = row as {
-      audio_state?: string | null;
-      duration_seconds?: number | null;
-    };
+  type Row = (typeof rows)[number];
+  const author = (row: Row) =>
+    row.author ? personName(row.author.first_name, row.author.last_name) : "";
+  const versionOf = (row: Row): CatalogFileVersion => {
     const openUrl = urlOf.get(row.path) ?? null;
     return {
       id: row.id,
-      category: isFileCategory(owner.kind, row.category)
-        ? row.category
-        : "other",
-      description: row.description,
+      version: row.version,
       fileName: row.file_name,
       mime: row.mime,
       bytes: row.bytes,
-      audioState: audioStateOf(audio.audio_state ?? null),
-      durationSeconds: audio.duration_seconds ?? null,
       createdAt: row.created_at,
-      authorName: row.author
-        ? personName(row.author.first_name, row.author.last_name)
-        : "",
+      authorName: author(row),
       openUrl,
       downloadUrl: openUrl && withDownloadName(openUrl, row.file_name),
     };
-  });
+  };
+
+  // One entry per series, led by its latest version; series in the order
+  // of their latest version (newest first).
+  const series = new Map<string, Row[]>();
+  for (const row of rows) {
+    const list = series.get(row.series_id);
+    if (list) list.push(row);
+    else series.set(row.series_id, [row]);
+  }
+  const files = [...series.values()]
+    .map((list) => list.sort((a, b) => b.version - a.version))
+    .sort((a, b) => b[0].created_at.localeCompare(a[0].created_at))
+    .map((list): CatalogFile => {
+      const row = list[0];
+      // Only a title's files have these columns.
+      const audio = row as {
+        audio_state?: string | null;
+        duration_seconds?: number | null;
+      };
+      const latest = versionOf(row);
+      return {
+        id: row.id,
+        seriesId: row.series_id,
+        version: row.version,
+        versions: list.map(versionOf),
+        category: isFileCategory(owner.kind, row.category)
+          ? row.category
+          : "other",
+        description: row.description,
+        fileName: row.file_name,
+        mime: row.mime,
+        bytes: row.bytes,
+        audioState: audioStateOf(audio.audio_state ?? null),
+        durationSeconds: audio.duration_seconds ?? null,
+        createdAt: row.created_at,
+        authorName: latest.authorName,
+        openUrl: latest.openUrl,
+        downloadUrl: latest.downloadUrl,
+      };
+    });
   return { files, error: false };
 }

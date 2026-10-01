@@ -1,7 +1,7 @@
 "use client";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { CreativePicker } from "@/components/projects/creative-picker";
+import { PeoplePicker } from "@/components/ui/people-picker";
 import { OptionSelect } from "@/components/projects/option-select";
 import type { FieldErrors } from "@/lib/auth/form-state";
 import { fr } from "@/lib/i18n/fr";
@@ -42,7 +42,7 @@ export function ProjectTeamFields({
           error={errors.assigneePersonId}
         />
       )}
-      <CreativePicker
+      <PeoplePicker
         name="creativePersonIds"
         label={t.creatives}
         note={t.optional}

@@ -1,6 +1,11 @@
-// Archiving artists, masters and projects. Client-safe.
+// Archiving artists, masters, projects and network contacts. Client-safe.
 
-export const ARCHIVE_KINDS = ["artist", "master", "project"] as const;
+export const ARCHIVE_KINDS = [
+  "artist",
+  "master",
+  "project",
+  "contact",
+] as const;
 export type ArchiveKind = (typeof ARCHIVE_KINDS)[number];
 
 /** Translated in fr.records.errors. */
@@ -13,6 +18,7 @@ export type ArchiveErrorCode =
   | "artist_name_taken"
   | "master_uses_archived"
   | "project_uses_archived"
+  | "contact_in_use"
   | "generic";
 
 export type ArchiveResult =

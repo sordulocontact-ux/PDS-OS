@@ -161,22 +161,25 @@ export async function loadRecentActivity(options: {
     });
   };
 
+  // Project activity: internal meetings (no project) are not part of it.
   for (const c of calls.data ?? [])
-    push(
-      c.created_at,
-      "call_created",
-      c.project_id,
-      c.title,
-      routes.projectCall(c.project_id, c.id),
-    );
+    if (c.project_id)
+      push(
+        c.created_at,
+        "call_created",
+        c.project_id,
+        c.title,
+        routes.projectCall(c.project_id, c.id),
+      );
   for (const r of reports.data ?? [])
-    push(
-      r.created_at,
-      "report_created",
-      r.calls.project_id,
-      r.calls.title,
-      routes.projectCall(r.calls.project_id, r.calls.id),
-    );
+    if (r.calls.project_id)
+      push(
+        r.created_at,
+        "report_created",
+        r.calls.project_id,
+        r.calls.title,
+        routes.projectCall(r.calls.project_id, r.calls.id),
+      );
   const fieldKind = {
     proposed: "brief_proposed",
     confirmed: "brief_confirmed",

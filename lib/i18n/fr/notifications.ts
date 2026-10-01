@@ -35,6 +35,14 @@ export const notifications = {
       `${actor} a approuvé votre version sur « ${project} ».`,
     design_version_changes_requested: (actor: string, project: string) =>
       `${actor} demande des retouches sur votre version (« ${project} »).`,
+    // A contract or a meeting may have no project: the text never names one.
+    contract_review_requested: (actor: string) =>
+      `${actor} vous demande de valider un contrat.`,
+    contract_approved: (actor: string) => `${actor} a validé votre contrat.`,
+    contract_changes_requested: (actor: string) =>
+      `${actor} demande des modifications sur votre contrat.`,
+    meeting_invited: (actor: string) =>
+      `${actor} vous invite à une réunion interne.`,
   },
   open: "Ouvrir",
   push: {

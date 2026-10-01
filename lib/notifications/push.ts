@@ -94,6 +94,7 @@ export async function sendPendingPushes(
             d.kind,
             d.project_id,
             d.subject_id ? (stageKeys.get(d.subject_id) ?? null) : null,
+            d.subject_id,
           ),
           tag: d.notification_id,
         });

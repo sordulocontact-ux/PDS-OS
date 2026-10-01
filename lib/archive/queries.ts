@@ -7,6 +7,7 @@ const TABLES = {
   artist: "artists",
   master: "masters",
   project: "projects",
+  contact: "network_contacts",
 } as const satisfies Record<ArchiveKind, string>;
 
 // Live and archived rows of a list, for its tabs; counted by the database

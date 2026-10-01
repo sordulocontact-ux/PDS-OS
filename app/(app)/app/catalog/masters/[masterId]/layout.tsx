@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { MasterActions } from "@/components/catalog/master-actions";
 import { MasterTabs } from "@/components/catalog/master-page/master-tabs";
 import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
-import { IconArrowLeft } from "@/components/icons";
+import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -35,13 +35,7 @@ export default async function MasterLayout({
 
   return (
     <PageContainer className="max-w-6xl">
-      <Link
-        href={routes.masters}
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <IconArrowLeft className="size-4" aria-hidden />
-        {t.back}
-      </Link>
+      <BackLink href={routes.masters}>{t.back}</BackLink>
       <PageHeader
         title={master.title}
         badge={

@@ -36,6 +36,13 @@ export const catalogFiles = {
       press: "Presse",
       other: "Autres",
     },
+    contract: {
+      all: "Tous",
+      draft: "Projets de contrat",
+      signed: "Signés",
+      annex: "Annexes",
+      other: "Autres",
+    },
   },
   loadError: "Les fichiers n'ont pas pu être chargés. Rechargez la page.",
   columns: {
@@ -65,6 +72,12 @@ export const catalogFiles = {
       visual: "Visuel",
       contract: "Contrat",
       press: "Presse",
+      other: "Autre",
+    },
+    contract: {
+      draft: "Projet de contrat",
+      signed: "Signé",
+      annex: "Annexe",
       other: "Autre",
     },
   },
@@ -116,6 +129,12 @@ export const catalogFiles = {
         press: "Ex. Communiqué de sortie",
         other: "Ex. Planning de tournage",
       },
+      contract: {
+        draft: "Ex. Version relue par l'avocat",
+        signed: "Ex. Exemplaire signé des deux parties",
+        annex: "Ex. Annexe 1 — calendrier",
+        other: "Ex. Échange de mails",
+      },
     } as Record<string, Record<string, string>>,
     name: "Nom du fichier",
     // Who reads a contract, said when Contract is chosen.
@@ -126,6 +145,7 @@ export const catalogFiles = {
         "Les contrats ne sont visibles que par la direction et les chefs de projet.",
       project:
         "Les contrats ne sont visibles que par la direction et le chef de projet responsable.",
+      contract: "",
     },
   },
   hint: "50 Mo au plus par fichier.",
@@ -140,12 +160,31 @@ export const catalogFiles = {
     label: (name: string) => `Actions pour « ${name} »`,
     open: "Ouvrir",
     download: "Télécharger",
+    newVersion: "Nouvelle version",
+    versions: (count: number) => `Versions (${count})`,
     edit: "Modifier",
     remove: "Supprimer",
+  },
+  // A file replaced by a new version keeps the previous ones.
+  versions: {
+    badge: (version: number) => `v${version}`,
+    title: "Versions du fichier",
+    description:
+      "La plus récente d'abord. Chaque version reste ouvrable et téléchargeable.",
+    current: "Actuelle",
+    label: (version: number) => `Version ${version}`,
+    by: (author: string, date: string) =>
+      author ? `${author} · ${date}` : date,
+    uploading: "Envoi de la nouvelle version…",
+    added: (version: number) => `Version ${version} ajoutée.`,
+    removeOne: "Supprimer cette version",
   },
   open: (name: string) => `Ouvrir ${name} dans un nouvel onglet`,
   remove: (name: string) => `Retirer ${name}`,
   confirmTitle: "Supprimer ce fichier ?",
+  // Deleting the latest version: the previous one becomes the current one.
+  confirmVersionBody: (name: string, version: number) =>
+    `La version ${version} de « ${name} » sera supprimée définitivement. La précédente redevient la version actuelle.`,
   confirmBody: (name: string) =>
     `« ${name} » sera supprimé définitivement pour toute l'équipe.`,
   confirm: "Supprimer",

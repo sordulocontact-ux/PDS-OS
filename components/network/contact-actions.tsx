@@ -1,0 +1,52 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { EditPanel } from "@/components/archive/edit-panel";
+import { RecordActions } from "@/components/archive/record-actions";
+import { ContactForm } from "@/components/network/contact-form";
+import type { RecordRights } from "@/lib/archive/types";
+import { fr } from "@/lib/i18n/fr";
+import { loadContactEdit } from "@/lib/network/actions";
+
+/** "⋯" of a network contact: edit it, archive or restore it (director). */
+export function ContactActions({
+  contact,
+  rights,
+  leaveTo,
+  size,
+}: {
+  contact: { id: string; name: string };
+  rights: RecordRights;
+  leaveTo?: string;
+  size?: "icon-sm" | "icon-lg";
+}) {
+  const router = useRouter();
+  return (
+    <RecordActions
+      kind="contact"
+      id={contact.id}
+      name={contact.name}
+      rights={rights}
+      leaveTo={leaveTo}
+      size={size}
+      edit={(close) => (
+        <EditPanel load={() => loadContactEdit(contact.id)}>
+          {({ contact: values, options }) => (
+            <ContactForm
+              contact={values}
+              options={options}
+              onCancel={close}
+              onSaved={() => {
+                close();
+                toast.success(fr.records.edit.saved);
+                router.refresh();
+              }}
+            />
+          )}
+        </EditPanel>
+      )}
+    />
+  );
+}

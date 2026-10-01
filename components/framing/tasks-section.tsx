@@ -1,13 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
-import { OptionSelect } from "@/components/framing/option-select";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { ActionTaskForm } from "@/components/project-work/action-task-form";
 import { useCanEditProject } from "@/components/projects/edit-access";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createTask, setTaskDone } from "@/lib/framing/actions/points-tasks";
 import type { FramingData } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
@@ -34,19 +29,6 @@ export function TasksSection({
   const { pending, run } = useFramingAction();
   const canEdit = useCanEditProject();
   const people = Object.fromEntries(members.map((m) => [m.personId, m.name]));
-  const [drafts, setDrafts] = useState<
-    Record<string, { assignee: string; due: string }>
-  >({});
-  const draftOf = (id: string) =>
-    drafts[id] ?? {
-      assignee: mePersonId ?? members[0]?.personId ?? "",
-      due: "",
-    };
-  const setDraft = (
-    id: string,
-    patch: Partial<{ assignee: string; due: string }>,
-  ) => setDrafts((all) => ({ ...all, [id]: { ...draftOf(id), ...patch } }));
-
   return (
     <div className="grid gap-4">
       {canEdit && proposedActions.length > 0 && (
@@ -55,64 +37,26 @@ export function TasksSection({
             <p className="text-xs font-medium">{t.proposedTitle}</p>
             <p className="text-xs text-muted-foreground">{t.proposedHint}</p>
           </div>
-          {proposedActions.map((item) => {
-            const draft = draftOf(item.id);
-            return (
-              <form
-                key={item.id}
-                className="grid gap-2 rounded-lg border border-dashed border-border p-3"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  run(() =>
-                    createTask(projectId, {
-                      title: item.what,
-                      assigneePersonId: draft.assignee,
-                      dueDate: draft.due,
-                      sourceReportItemId: item.id,
-                    }),
-                  );
-                }}
-              >
-                <p className="text-sm">
-                  {item.what}
-                  {item.who && (
-                    <span className="text-muted-foreground"> — {item.who}</span>
-                  )}
-                </p>
-                <div className="flex flex-wrap items-end gap-2">
-                  <div className="grid gap-1">
-                    <Label htmlFor={`as-${item.id}`}>{t.assignee}</Label>
-                    <OptionSelect
-                      id={`as-${item.id}`}
-                      label={t.assignee}
-                      options={people}
-                      value={draft.assignee}
-                      onChange={(v) => setDraft(item.id, { assignee: v })}
-                    />
-                  </div>
-                  <div className="grid gap-1">
-                    <Label htmlFor={`due-${item.id}`}>{t.dueDate}</Label>
-                    <Input
-                      id={`due-${item.id}`}
-                      type="date"
-                      value={draft.due}
-                      onChange={(e) =>
-                        setDraft(item.id, { due: e.target.value })
-                      }
-                      className="w-auto"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={pending || !draft.assignee || !draft.due}
-                  >
-                    {t.create}
-                  </Button>
-                </div>
-              </form>
-            );
-          })}
+          {proposedActions.map((item) => (
+            <ActionTaskForm
+              key={item.id}
+              item={item}
+              members={members}
+              defaultAssigneeId={mePersonId ?? members[0]?.personId ?? ""}
+              projectId={projectId}
+              pending={pending}
+              onSubmit={(values) =>
+                run(() =>
+                  createTask(projectId, {
+                    title: item.what,
+                    assigneePersonId: values.assigneePersonId,
+                    dueDate: values.dueDate,
+                    sourceReportItemId: item.id,
+                  }),
+                )
+              }
+            />
+          ))}
         </div>
       )}
       {tasks.length === 0 ? (

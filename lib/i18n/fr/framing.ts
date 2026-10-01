@@ -120,6 +120,8 @@ export const framing = {
     taskTitle: "Tâche",
     assignee: "Responsable",
     dueDate: "Échéance",
+    // A call outside any project: which project the task goes to.
+    project: "Projet",
     create: "Créer la tâche",
     done: "Faite",
   },

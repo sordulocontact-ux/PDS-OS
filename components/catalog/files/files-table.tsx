@@ -33,12 +33,15 @@ export function FilesTable({
   owner,
   files,
   canEdit,
+  organizationId = null,
   audio = false,
 }: {
   owner: FileOwner;
   files: CatalogFile[];
-  // manage_catalog: edit and delete.
+  // The library's writer: edit, delete, add a version.
   canEdit: boolean;
+  // Where a new version is uploaded (the writer's organization).
+  organizationId?: string | null;
   audio?: boolean;
 }) {
   const t = fr.catalogFiles;
@@ -78,6 +81,7 @@ export function FilesTable({
                       </span>
                     )}
                     {[
+                      file.version > 1 && t.versions.badge(file.version),
                       file.description,
                       fileFormat(file.fileName, file.mime),
                       formatFileSize(file.bytes),
@@ -109,6 +113,7 @@ export function FilesTable({
                 file={file}
                 canEdit={canEdit && !audio}
                 canDelete={canEdit}
+                organizationId={audio ? null : organizationId}
               />
             </DataTableActionsCell>
           </DataTableRow>

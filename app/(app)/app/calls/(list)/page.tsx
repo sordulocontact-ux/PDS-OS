@@ -1,8 +1,10 @@
 import { IconFolderOpen, IconPhone } from "nucleo-sharp-essential";
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { AllCallsTable } from "@/components/calls/all-calls-table";
+import { NewMeetingButton } from "@/components/calls/new-meeting-button";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
@@ -10,8 +12,14 @@ import { buttonVariants } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { asCallView, callViewOf, CALL_VIEWS } from "@/lib/calls/format";
+import {
+  asCallView,
+  callViewOf,
+  CALL_VIEWS,
+  toParisLocalInput,
+} from "@/lib/calls/format";
 import { listAllCalls, type CallListItem } from "@/lib/calls/queries";
+import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 import { viewHref } from "@/lib/ui/view-href";
@@ -23,6 +31,8 @@ async function loadCalls(): Promise<CallListItem[] | null> {
   try {
     return await listAllCalls(await createClient());
   } catch (error) {
+    // Next's own signals (dynamic rendering, redirects) are not failures.
+    unstable_rethrow(error);
     console.error(error);
     return null;
   }
@@ -31,7 +41,7 @@ async function loadCalls(): Promise<CallListItem[] | null> {
 export default async function CallsPage({
   searchParams,
 }: PageProps<"/app/calls">) {
-  const [, calls, params] = await allInOrder([
+  const [access, calls, params] = await allInOrder([
     requireApproved(),
     loadCalls(),
     searchParams,
@@ -39,11 +49,30 @@ export default async function CallsPage({
   const t = fr.calls.all;
   const view = asCallView(params.view);
   const now = new Date();
+  const members = (await loadMembers(access)).filter(
+    (member) => member.personId !== access.personId,
+  );
+  // An internal meeting is planned for the next round hour by default.
+  const nextHour = new Date(now);
+  nextHour.setMinutes(0, 0, 0);
+  nextHour.setHours(nextHour.getHours() + 1);
+  const header = (
+    <PageHeader
+      title={t.title}
+      description={t.description}
+      action={
+        <NewMeetingButton
+          members={members}
+          defaultOccurredAt={toParisLocalInput(nextHour)}
+        />
+      }
+    />
+  );
 
   if (!calls) {
     return (
       <PageContainer>
-        <PageHeader title={t.title} description={t.description} />
+        {header}
         <FormMessage kind="error">{t.loadError}</FormMessage>
       </PageContainer>
     );
@@ -59,7 +88,7 @@ export default async function CallsPage({
 
   return (
     <PageContainer>
-      <PageHeader title={t.title} description={t.description} />
+      {header}
       {calls.length === 0 ? (
         <EmptyState
           icon={IconPhone}

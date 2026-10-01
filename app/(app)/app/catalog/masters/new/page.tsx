@@ -1,7 +1,5 @@
-import { IconArrowLeft } from "@/components/icons";
-import Link from "next/link";
-
 import { CreateMasterForm } from "@/components/catalog/create-master-form";
+import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,7 +29,7 @@ export default async function NewMasterPage({
 
   return (
     <PageContainer className="max-w-2xl">
-      <Link
+      <BackLink
         href={
           original
             ? routes.masterVariants(original.id)
@@ -39,15 +37,13 @@ export default async function NewMasterPage({
               ? routes.artist(fromArtist.id)
               : routes.masters
         }
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <IconArrowLeft className="size-4" aria-hidden />
         {original
           ? fr.catalog.master.backTo(original.title)
           : fromArtist
             ? fr.catalog.artist.backTo(fromArtist.name)
             : fr.catalog.master.back}
-      </Link>
+      </BackLink>
       <PageHeader title={t.title} description={t.subtitle} />
       <Card>
         <CardContent>

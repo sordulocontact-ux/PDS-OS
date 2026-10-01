@@ -20,14 +20,43 @@ import { AUDIO_STATES } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
-// Writes of artist, title and project files, with the user's session: RLS
-// and column grants decide (manage_catalog for the catalog, the project's
-// owner for a project); the permission check only gives a clean message.
+// Writes of artist, title, project and contract files, with the user's
+// session: RLS and column grants decide (manage_catalog for the catalog, the
+// project's owner for a project, the contract's owner or the direction for a
+// contract); the permission check only gives a clean message.
 
 type Result = { ok: true } | { ok: false; error: string };
 
+// One table per owner kind. Insert stays per table (each has its own owner
+// column and extras); reads, renames and deletes only touch the columns the
+// four tables share, so they go through one of them for typing: the
+// project's (same shared columns, `project_id` standing for the owner).
+const FILE_TABLES = {
+  artist: "artist_files",
+  master: "master_files",
+  project: "project_files",
+  contract: "contract_files",
+} as const satisfies Record<FileOwner["kind"], string>;
+
+const OWNER_COLUMNS = {
+  artist: "artist_id",
+  master: "master_id",
+  project: "project_id",
+  contract: "contract_id",
+} as const satisfies Record<FileOwner["kind"], string>;
+
+function sharedFiles(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  owner: FileOwner,
+) {
+  return {
+    table: () => supabase.from(FILE_TABLES[owner.kind] as "project_files"),
+    ownerColumn: OWNER_COLUMNS[owner.kind] as "project_id",
+  };
+}
+
 const ownerSchema = z.object({
-  kind: z.enum(["artist", "master", "project"]),
+  kind: z.enum(["artist", "master", "project", "contract"]),
   id: catalogIdSchema,
 });
 
@@ -50,6 +79,8 @@ const recordSchema = z
     fileName: fileNameSchema,
     mime: z.string().trim().min(1).max(255),
     bytes: z.number().int().positive().max(MAX_FILE_BYTES),
+    // A new version of this file (same owner, the database checks).
+    replacesId: z.uuid().nullish(),
     // An audio version of a title: the state it stands for, and the
     // duration the browser read from it (null when it could not).
     audioState: z.enum(AUDIO_STATES).nullish(),
@@ -65,6 +96,8 @@ const recordSchema = z
 const deleteSchema = z.object({ owner: ownerSchema, fileId: z.uuid() });
 
 // A title's audio versions are not edited here (RLS refuses them too).
+// Category and precision apply to every version of the file; the name to
+// this version only.
 const updateSchema = z
   .object({
     owner: ownerSchema,
@@ -80,7 +113,11 @@ const updateSchema = z
 async function writerAccess(owner: FileOwner) {
   const access = await requireApproved();
   const permission =
-    owner.kind === "project" ? "pilot_projects" : "manage_catalog";
+    owner.kind === "project"
+      ? "pilot_projects"
+      : owner.kind === "contract"
+        ? "manage_contracts"
+        : "manage_catalog";
   return access.organizationId && can(access, permission)
     ? access.organizationId
     : null;
@@ -99,7 +136,11 @@ function refresh(owner: FileOwner) {
     case "project":
       revalidatePath(routes.projectFiles(owner.id));
       revalidatePath(routes.projectActivity(owner.id));
+      return;
+    case "contract":
+      revalidatePath(routes.contract(owner.id));
   }
+  revalidatePath(routes.files);
 }
 
 // The browser uploaded the object (storage RLS); this records it.
@@ -115,6 +156,7 @@ export async function recordCatalogFile(
     return { ok: false, error: fr.auth.errors.forbidden };
   const { owner, path, category, description, fileName, mime, bytes } =
     parsed.data;
+  const replacesId = parsed.data.replacesId ?? null;
   const audio =
     category === "audio"
       ? {
@@ -134,6 +176,7 @@ export async function recordCatalogFile(
     file_name: fileName,
     mime,
     bytes,
+    replaces_id: replacesId,
   };
   const insert = () => {
     switch (owner.kind) {
@@ -149,6 +192,10 @@ export async function recordCatalogFile(
         return supabase
           .from("project_files")
           .insert({ ...row, project_id: owner.id });
+      case "contract":
+        return supabase
+          .from("contract_files")
+          .insert({ ...row, contract_id: owner.id });
     }
   };
   const { error } = await insert();
@@ -173,37 +220,29 @@ export async function updateCatalogFile(
     return { ok: false, error: fr.auth.errors.forbidden };
 
   const supabase = await createClient();
-  const values = { file_name: fileName, category, description };
-  const update = () => {
-    switch (owner.kind) {
-      case "artist":
-        return supabase
-          .from("artist_files")
-          .update(values)
-          .eq("id", fileId)
-          .eq("artist_id", owner.id)
-          .select("id")
-          .maybeSingle();
-      case "master":
-        return supabase
-          .from("master_files")
-          .update(values)
-          .eq("id", fileId)
-          .eq("master_id", owner.id)
-          .select("id")
-          .maybeSingle();
-      case "project":
-        return supabase
-          .from("project_files")
-          .update(values)
-          .eq("id", fileId)
-          .eq("project_id", owner.id)
-          .select("id")
-          .maybeSingle();
-    }
-  };
-  const { data, error } = await update();
-  if (error || !data) {
+  const { table, ownerColumn } = sharedFiles(supabase, owner);
+  // The version being edited: its series, within this owner.
+  const { data: current, error: readError } = await table()
+    .select("series_id")
+    .eq("id", fileId)
+    .eq(ownerColumn, owner.id)
+    .maybeSingle();
+  const renamed =
+    current &&
+    (await table()
+      .update({ file_name: fileName })
+      .eq("id", fileId)
+      .select("id")
+      .maybeSingle());
+  const reclassified =
+    current &&
+    (await table()
+      .update({ category, description })
+      .eq("series_id", current.series_id)
+      .eq(ownerColumn, owner.id)
+      .select("id"));
+  const error = readError ?? renamed?.error ?? reclassified?.error;
+  if (error || !current || !renamed?.data) {
     if (error) console.error("updateCatalogFile:", error.message);
     return { ok: false, error: t.updateFailed };
   }
@@ -223,34 +262,14 @@ export async function deleteCatalogFile(
   const { owner, fileId } = parsed.data;
 
   const supabase = await createClient();
-  const remove = () => {
-    switch (owner.kind) {
-      case "artist":
-        return supabase
-          .from("artist_files")
-          .delete()
-          .eq("id", fileId)
-          .eq("artist_id", owner.id)
-          .select("path")
-          .maybeSingle();
-      case "master":
-        return supabase
-          .from("master_files")
-          .delete()
-          .eq("id", fileId)
-          .eq("master_id", owner.id)
-          .select("path")
-          .maybeSingle();
-      case "project":
-        return supabase
-          .from("project_files")
-          .delete()
-          .eq("id", fileId)
-          .eq("project_id", owner.id)
-          .select("path")
-          .maybeSingle();
-    }
-  };
+  const { table, ownerColumn } = sharedFiles(supabase, owner);
+  const remove = () =>
+    table()
+      .delete()
+      .eq("id", fileId)
+      .eq(ownerColumn, owner.id)
+      .select("path")
+      .maybeSingle();
   const { data, error } = await remove();
   if (error || !data) {
     if (error) console.error("deleteCatalogFile:", error.message);

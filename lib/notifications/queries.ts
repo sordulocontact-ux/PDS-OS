@@ -57,7 +57,7 @@ function toItem(row: Row, stageKey: StageKey | null): NotificationItem | null {
     id: row.id,
     kind: row.kind,
     text: notificationText(row.kind, actor, row.project?.title ?? null),
-    href: notificationHref(row.kind, row.project_id, stageKey),
+    href: notificationHref(row.kind, row.project_id, stageKey, row.subject_id),
     createdAt: row.created_at,
     read: row.read_at !== null,
   };

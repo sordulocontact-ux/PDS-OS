@@ -13,7 +13,8 @@ import { fr } from "@/lib/i18n/fr";
 /**
  * "Nouveau call": a button that unfolds the form in place. When the project
  * has no call yet, the form is open from the start (it is the only action).
- * A title and a date, nothing else: recording consent is given by contract.
+ * A title, a date and an optional video link: recording consent is given by
+ * contract.
  */
 export function CreateCallForm({
   projectId,
@@ -86,6 +87,23 @@ export function CreateCallForm({
             />
             <p id="call-date-hint" className="text-xs text-muted-foreground">
               {t.dateHint}
+            </p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="call-link">{t.fieldLink}</Label>
+            <Input
+              id="call-link"
+              name="meetingUrl"
+              type="url"
+              inputMode="url"
+              maxLength={500}
+              autoComplete="off"
+              placeholder={t.linkPlaceholder}
+              aria-describedby="call-link-hint"
+              className="h-10"
+            />
+            <p id="call-link-hint" className="text-xs text-muted-foreground">
+              {t.linkHint}
             </p>
           </div>
           {state && !state.ok && (

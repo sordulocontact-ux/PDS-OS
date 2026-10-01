@@ -16,6 +16,10 @@ export const NOTIFICATION_KINDS = [
   "design_version_submitted",
   "design_version_approved",
   "design_version_changes_requested",
+  "contract_review_requested",
+  "contract_approved",
+  "contract_changes_requested",
+  "meeting_invited",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -46,15 +50,19 @@ export function notificationText(
   return t.texts[kind](actorName || t.someone, projectTitle || t.aProject);
 }
 
-// A design version opens the Conception; a validation opens its stage's own
-// page (the summary screen, for the Cadrage's guided review, so the
-// "Valider"/"Refuser" buttons are the first thing in view); everything else
-// the project overview.
+// A contract or a meeting opens its own page (`subjectId`); a design version
+// opens the Conception; a validation opens its stage's own page (the summary
+// screen, for the Cadrage's guided review, so the "Valider"/"Refuser"
+// buttons are the first thing in view); everything else the project overview.
 export function notificationHref(
   kind: NotificationKind,
   projectId: string | null,
   stageKey?: StageKey | null,
+  subjectId?: string | null,
 ): string {
+  if (kind.startsWith("contract_") && subjectId)
+    return routes.contract(subjectId);
+  if (kind === "meeting_invited" && subjectId) return routes.meeting(subjectId);
   if (!projectId) return routes.app;
   if (kind.startsWith("design_version_"))
     return routes.projectDesign(projectId);

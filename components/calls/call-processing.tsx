@@ -38,7 +38,8 @@ const errorText = (code: string | null) =>
 /**
  * Starts by itself once the recording is in: transcription, report, then the
  * Brief is pre-filled and the user lands on the framing. Both steps persist
- * their status server-side, so a reload picks up where the call stands.
+ * their status server-side, so a reload picks up where the call stands. An
+ * internal meeting (`projectId` null) has no Brief: it stops at the report.
  */
 export function CallProcessing({
   projectId,
@@ -47,7 +48,7 @@ export function CallProcessing({
   errorCode,
   hasTranscript,
 }: {
-  projectId: string;
+  projectId: string | null;
   callId: string;
   status: CallStatus;
   errorCode: string | null;
@@ -82,7 +83,7 @@ export function CallProcessing({
       router.refresh();
       return setError(extracted.error);
     }
-    if (extracted.briefFilled) {
+    if (extracted.briefFilled && projectId) {
       toast.success(t.briefFilled);
       router.push(routes.projectFraming(projectId));
     } else {
@@ -132,11 +133,19 @@ export function CallProcessing({
             label: t.steps.report,
             state: state(false, extracting),
           },
-          { key: "brief", label: t.steps.brief, state: "waiting" },
+          ...(projectId
+            ? [
+                {
+                  key: "brief",
+                  label: t.steps.brief,
+                  state: "waiting" as const,
+                },
+              ]
+            : []),
         ]}
       />
       <p aria-live="polite" className="text-sm text-muted-foreground">
-        {failed ? null : t.hint}
+        {failed ? null : projectId ? t.hint : t.meetingHint}
       </p>
       {failed && (
         <div className="grid gap-3">

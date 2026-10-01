@@ -19,7 +19,7 @@ import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
 
 /**
- * Files tab of an artist or a title (feedback n°6): one library, and views
+ * Files tab of an artist, a title, a project or a contract (feedback n°6): one library, and views
  * that filter it (Tous, then one per category, counts by the code). `files`
  * are those the viewer may read (RLS): Tous never shows a contract a viewer
  * could not open, and without that right the Contracts view is not offered.
@@ -79,7 +79,12 @@ export function FileLibrary({
       {canEdit ? (
         <FileDropArea>
           {visible.length > 0 ? (
-            <FilesTable owner={owner} files={visible} canEdit />
+            <FilesTable
+              owner={owner}
+              files={visible}
+              canEdit
+              organizationId={organizationId}
+            />
           ) : (
             <FileImportEmpty title={title} body={body} />
           )}

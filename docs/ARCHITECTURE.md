@@ -163,7 +163,7 @@ Principes :
   `components/catalog/artist-page/activity/`).
 - Projet créé **avec son équipe** : le formulaire exige un chef de projet (le projet lui est
   transmis d'office, il accepte / refuse / demande une précision comme avant) et propose
-  les directeurs créatifs (pastilles `CreativePicker`). Ni étape, ni responsable avant
+  les directeurs créatifs (pastilles `PeoplePicker`). Ni étape, ni responsable avant
   l'acceptation (`owner_person_id` posé uniquement par `respond_to_assignment`). En SQL,
   l'assigné reste facultatif (tests, projets hérités) : l'obligation est dans le schéma zod. Statut du projet **calculé par
   le code** (`projectStatusOf`) : étapes présentes → lancé, sinon dernière transmission
@@ -469,6 +469,32 @@ s'afficher sans chargement.
   porte `briefFilled`, qui déclenche la redirection.
 - Groq : `lib/ai/groq-tolerant-fetch.ts` complète les champs de segment nuls renvoyés sur de
   vrais enregistrements (sinon « Invalid JSON response »). Limite 25 Mo (gratuit) / 100 Mo.
+- **Page commune** `CallWorkspace` (`components/calls/call-workspace.tsx`) : en-tête (retour,
+  date, état, **« Rejoindre »** si un lien de visio est posé et que rien n'est enregistré,
+  « Ajouter / Modifier le lien de visio » pour qui travaille sur le call), ordre du jour,
+  enregistrement, traitement, puis **Décisions et actions** et le compte rendu. Utilisée par
+  le call d'un projet et par la réunion interne.
+- **Lien de visio** `calls.meeting_url` (https seulement, vérifié en SQL et en zod) : saisi à
+  la création ou ensuite (`updateCallLink`), ouvert dans un nouvel onglet ; l'enregistrement
+  reste celui de l'app (`…260929000301`).
+- **Réunion interne** = call **sans projet** (`project_id` nul), créé depuis `/app/calls`
+  (« Nouvelle réunion », `createMeeting`) par n'importe quel membre, avec des participants
+  (`call_attendees`, membres actifs, **seulement sur une réunion**, chacun notifié
+  `meeting_invited`). Vue par son créateur et ses participants (`can_see_call`), enregistrée
+  et traitée par son créateur seul (`is_call_owner`), page `/app/calls/[callId]`. Pas de Brief
+  à remplir (`fillBriefFromCall` renvoie faux, étape « Brief » absente du suivi) ; hors du
+  journal d'activité d'un projet et de `search_calls` (jointure sur `projects`). La liste
+  `/app/calls` est rangée dans le groupe `(list)` pour que son squelette n'enveloppe pas la
+  page d'une réunion. Politique de lecture de `calls` écrite **sur les colonnes de la ligne**,
+  pas via `can_see_call(id)` : une ligne en cours d'insertion n'est pas encore visible d'une
+  fonction, et `insert … returning` vérifie cette politique (même piège sur `contracts`).
+- **Décisions et actions** (`lib/calls/outcomes.ts`, `components/calls/call-outcomes.tsx`) :
+  sous chaque call traité, les `report_items` `decided` (lus tels quels) et `next_action`,
+  chacune avec la tâche qui en est née (`tasks.source_report_item_id`) ou le formulaire
+  `ActionTaskForm` (responsable + échéance choisis par une personne, jamais par PO), partagé
+  avec le Cadrage. Call de projet : son responsable crée la tâche dans le projet. Réunion
+  interne : la tâche va dans un projet lancé **dont le lecteur est responsable**
+  (`listOwnedProjects`) — la RLS de `tasks` ne laisse créer que le responsable.
 
 ---
 
@@ -862,6 +888,52 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   (`{"type":"object","properties":{…}}`), le contenu de `properties` est validé à la
   place (vu sur le tri, 27/09/2026).
 
+## 8 quinquies. Réseau, contrats, versions de fichiers, bibliothèque globale
+
+Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
+`supabase/tests/network-contracts-meetings.test.sql`).
+
+- **Permissions** : `manage_network` (tous les postes) et `manage_contracts` (DG et chefs de
+  projet), dans `role_permissions` comme les autres.
+- **Réseau** `/app/network` (`network_contacts`, `lib/network/`, `components/network/`) :
+  une personne ou une structure, **au moins un rôle** parmi une liste fermée (artiste,
+  beatmaker, musicien·ne, ingé son, prestataire, partenaire, label…), coordonnées, notes ;
+  une personne peut appartenir à une structure du réseau (`parent_id`, vérifié par trigger),
+  un contact peut renvoyer à un artiste du catalogue (`artist_id`). **Lu par tous les
+  membres actifs** (c'est l'annuaire partagé), écrit par `manage_network`, **archivé, jamais
+  supprimé**, par le DG (`set_network_contact_archived`, refusé tant qu'un contrat non résilié
+  le nomme). Onglets par famille de rôles (un contact apparaît dans chacune des siennes),
+  recherche instantanée, Archivés pour le DG. Les contacts d'artiste (`artist_contacts`) et
+  les intervenants cités restent à part : pas de fusion automatique en V1.
+- **Contrats** `/app/contracts` (`contracts`, `contract_parties`, `contract_files`,
+  `lib/contracts/`, `components/contracts/`) : titre, type (liste fermée), responsable
+  (membre `manage_contracts` ; le DG choisit via `list_contract_owners`, les autres suivent
+  les leurs), projet et artiste facultatifs, échéance, début/fin, notes ; **parties** =
+  contacts du Réseau avec leur rôle. **Lus** par leur responsable, la direction
+  (`view_all_projects`) et le responsable du projet lié (`can_see_contract`) ; écrits par le
+  responsable ou la direction, **figés en RLS** pendant la relecture et une fois résiliés
+  (`can_edit_contract`). Statut déplacé par `advance_contract` seulement : `draft` →
+  soumettre → `in_review` → le DG (`validate`) valide (`approved`) ou demande des
+  modifications (commentaire obligatoire, retour en `draft`) → envoyer (`sent`) → signature
+  avec sa date (jamais future, `signed_on`) → résilier (`terminated`). Notifications
+  `contract_review_requested` (à chaque détenteur de `validate`), `contract_approved`,
+  `contract_changes_requested`. **« Expiré » est calculé par le code** (signé et date de fin
+  passée, `contractStateOf`), jamais stocké ; une échéance passée sur un contrat non signé est
+  signalée (`isContractDue`).
+- **Versions de fichiers** (les quatre bibliothèques : artiste, titre, projet, contrat) :
+  chaque version est sa ligne et son objet, groupées par `series_id`, numérotées par la base
+  (`version`, trigger `file_versions_link`, qui refuse une version d'un autre propriétaire).
+  « ⋯ » → « Nouvelle version » (même catégorie et précision) et « Versions (n) » (historique,
+  chacune ouvrable et téléchargeable) ; la liste montre la dernière, « v2 » dans le sous-titre.
+  Reclasser (catégorie, précision) s'applique à toute la série, renommer à la version ;
+  supprimer la dernière rend la précédente actuelle. Les versions audio d'un titre
+  (`audio_state`) gardent leur propre logique et ne passent pas par là.
+- **Bibliothèque globale** `/app/files` (`lib/library/queries.ts`) : vue SQL `library_files`
+  (**security invoker** : la RLS de chaque table s'applique, contrats compris), dernière version
+  de chaque fichier lisible, avec ce à quoi il est rattaché (lien vers sa bibliothèque, où il
+  se modifie et se versionne). Onglets par rattachement, recherche instantanée, 500 fichiers
+  les plus récents au plus (le reste est dit).
+
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices
@@ -949,4 +1021,5 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
   script qui joue un fichier (`say -v Thomas … -o x.aiff` puis `afconvert -f m4af -d aac`)
   dans un `MediaStreamDestination`.
 - Données de test locales : `admin@pds.test` / `Framing-test-2026!` (admin), projet
-  « Lueur ». Fictives uniquement : les paliers gratuits peuvent entraîner leurs modèles.
+  « Lueur » ; `cp-conception@pds.test` / `Conception-test-2026!` (chef de projet, responsable
+  de « Soleil noir — conception (test) »). Fictives uniquement : les paliers gratuits peuvent entraîner leurs modèles.

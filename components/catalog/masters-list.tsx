@@ -1,15 +1,14 @@
 "use client";
 
-import { useDeferredValue, useState } from "react";
-
 import { MastersTable } from "@/components/catalog/masters-table";
-import { SearchField } from "@/components/ui/search-field";
+import { SearchableList } from "@/components/ui/searchable-list";
 import type { RecordRights } from "@/lib/archive/types";
 import { variantText } from "@/lib/catalog/title-rules";
 import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Titles list with an instant search on name, variant, artists and ISRC.
+// Titles list with an instant search on name, variant, artists and ISRC
+// (separators ignored: "fr-xxx" finds "FRXXX…").
 export function MastersList({
   masters,
   rights,
@@ -18,46 +17,15 @@ export function MastersList({
   rights?: RecordRights;
 }) {
   const t = fr.catalog.masters.search;
-  const [query, setQuery] = useState("");
-  const needle = normalize(useDeferredValue(query));
-  const visible = needle
-    ? masters.filter((m) =>
-        normalize(
-          [m.title, variantText(m), m.artists, m.isrc]
-            .filter(Boolean)
-            .join(" "),
-        ).includes(needle),
-      )
-    : masters;
-
   return (
-    <div className="flex flex-col gap-4">
-      <SearchField
-        aria-label={t.label}
-        placeholder={t.placeholder}
-        maxLength={100}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      {visible.length > 0 ? (
-        <MastersTable masters={visible} rights={rights} />
-      ) : (
-        <p
-          role="status"
-          className="py-8 text-center text-[color:var(--text-secondary)]"
-        >
-          {t.noResult(query.trim())}
-        </p>
-      )}
-    </div>
+    <SearchableList
+      items={masters}
+      searchText={(m) => [m.title, variantText(m), m.artists, m.isrc]}
+      label={t.label}
+      placeholder={t.placeholder}
+      noResult={t.noResult}
+    >
+      {(visible) => <MastersTable masters={visible} rights={rights} />}
+    </SearchableList>
   );
-}
-
-// Case, accents and ISRC separators do not matter ("fr-xxx" finds "FRXXX…").
-function normalize(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[\s-]+/g, "");
 }

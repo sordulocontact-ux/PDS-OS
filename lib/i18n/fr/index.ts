@@ -9,13 +9,16 @@ import { budget } from "./budget";
 import { calls } from "./calls";
 import { catalog } from "./catalog";
 import { catalogFiles } from "./catalog-files";
+import { contracts } from "./contracts";
 import { core } from "./core";
 import { design } from "./design";
 import { feedback } from "./feedback";
 import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
 import { labo } from "./labo";
+import { library } from "./library";
 import { masterPage } from "./master-page";
+import { network } from "./network";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
 import { projectPlan } from "./project-plan";
@@ -50,6 +53,9 @@ export const fr = {
   projectHistory,
   budget,
   catalogFiles,
+  library,
+  network,
+  contracts,
   artistActivity,
   masterPage,
   records,

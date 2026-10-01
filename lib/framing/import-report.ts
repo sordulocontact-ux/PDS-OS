@@ -35,7 +35,9 @@ export async function fillBriefFromCall(
     .select("project_id, organization_id")
     .eq("id", callId)
     .maybeSingle();
-  if (!call) return false;
+  // An internal meeting has no project, so no Brief to fill.
+  if (!call?.project_id) return false;
+  const projectId = call.project_id;
 
   const [reports, stage] = await Promise.all([
     supabase
@@ -46,7 +48,7 @@ export async function fillBriefFromCall(
     supabase
       .from("project_stages")
       .select("id, state, stage_definitions!inner(key)")
-      .eq("project_id", call.project_id)
+      .eq("project_id", projectId)
       .eq("stage_definitions.key", "framing")
       .maybeSingle(),
   ]);
@@ -65,7 +67,7 @@ export async function fillBriefFromCall(
   const result = await importReportIntoBrief(
     supabase,
     call.organization_id,
-    call.project_id,
+    projectId,
     report.id,
   );
   if (!result.ok) console.error("[framing] auto import failed:", result.error);

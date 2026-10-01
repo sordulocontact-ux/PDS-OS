@@ -24,6 +24,7 @@ const RPC = {
   artist: "set_artist_archived",
   master: "set_master_archived",
   project: "set_project_archived",
+  contact: "set_network_contact_archived",
 } as const satisfies Record<ArchiveKind, string>;
 
 // Raised by the SQL functions (…000701_archive_records.sql).
@@ -34,10 +35,12 @@ const DATABASE_CODES = [
   "artist_name_taken",
   "master_uses_archived",
   "project_uses_archived",
+  "contact_in_use",
 ] as const satisfies readonly ArchiveErrorCode[];
 
 /**
- * Archives (hides, keeps) or restores an artist, a master or a project, with
+ * Archives (hides, keeps) or restores an artist, a master, a project or a
+ * network contact, with
  * the user's session: the SQL function checks the permission and refuses a
  * row still in use. The button is only shown to the director; this is not
  * where the rule lives.
@@ -54,18 +57,20 @@ export async function setArchived(
 
   const supabase = await createClient();
   const args = { p_archived: parsed.data.archived };
-  const { error } =
-    parsed.data.kind === "artist"
-      ? await supabase.rpc(RPC.artist, { ...args, p_artist_id: parsed.data.id })
-      : parsed.data.kind === "master"
-        ? await supabase.rpc(RPC.master, {
-            ...args,
-            p_master_id: parsed.data.id,
-          })
-        : await supabase.rpc(RPC.project, {
-            ...args,
-            p_project_id: parsed.data.id,
-          });
+  const { id: recordId } = parsed.data;
+  const call = () => {
+    switch (parsed.data.kind) {
+      case "artist":
+        return supabase.rpc(RPC.artist, { ...args, p_artist_id: recordId });
+      case "master":
+        return supabase.rpc(RPC.master, { ...args, p_master_id: recordId });
+      case "project":
+        return supabase.rpc(RPC.project, { ...args, p_project_id: recordId });
+      case "contact":
+        return supabase.rpc(RPC.contact, { ...args, p_contact_id: recordId });
+    }
+  };
+  const { error } = await call();
 
   if (error) {
     const message = error.message ?? "";

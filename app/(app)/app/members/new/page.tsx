@@ -1,6 +1,4 @@
-import { IconArrowLeft } from "@/components/icons";
-import Link from "next/link";
-
+import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,13 +15,7 @@ export default async function NewMemberPage() {
 
   return (
     <PageContainer className="max-w-2xl">
-      <Link
-        href={routes.members}
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <IconArrowLeft className="size-4" aria-hidden />
-        {t.back}
-      </Link>
+      <BackLink href={routes.members}>{t.back}</BackLink>
       <PageHeader title={t.title} description={t.subtitle} />
       <Card>
         <CardContent>

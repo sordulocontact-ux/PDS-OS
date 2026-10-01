@@ -56,6 +56,10 @@ export const PERMISSIONS = [
   "view_all_projects",
   "archive_records",
   "read_feedback",
+  // Adds and edits the people and organizations of the network.
+  "manage_network",
+  // Creates and follows contracts (the direction and project managers).
+  "manage_contracts",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -82,6 +86,14 @@ export const routes = {
   assistant: "/app/assistant",
   work: "/app/work",
   calls: "/app/calls",
+  // An internal meeting: a call without a project.
+  meeting: (callId: string) => `/app/calls/${callId}`,
+  // Every file the viewer may read, across artists, titles, projects, contracts.
+  files: "/app/files",
+  network: "/app/network",
+  networkContact: (id: string) => `/app/network/${id}`,
+  contracts: "/app/contracts",
+  contract: (id: string) => `/app/contracts/${id}`,
   feedback: "/app/feedback",
   members: "/app/members",
   membersNew: "/app/members/new",

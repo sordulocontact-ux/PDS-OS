@@ -7,7 +7,7 @@ import { ArtistAvatar } from "@/components/catalog/artist-avatar";
 import { ArtistEditDialog } from "@/components/catalog/artist-page/artist-edit-dialog";
 import { ArtistTabs } from "@/components/catalog/artist-page/artist-tabs";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
-import { IconArrowLeft } from "@/components/icons";
+import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -38,13 +38,7 @@ export default async function ArtistLayout({
 
   return (
     <PageContainer className="max-w-5xl">
-      <Link
-        href={routes.artists}
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <IconArrowLeft className="size-4" aria-hidden />
-        {t.back}
-      </Link>
+      <BackLink href={routes.artists}>{t.back}</BackLink>
 
       <div className="flex flex-col gap-4">
         <PageHeader

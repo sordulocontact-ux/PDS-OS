@@ -51,6 +51,7 @@ export type CallErrorCode =
   | "invalid_input"
   | "title_required"
   | "date_invalid"
+  | "link_invalid"
   | "not_found"
   | "unauthorized"
   | "forbidden"

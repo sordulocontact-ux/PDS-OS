@@ -83,13 +83,14 @@ select is((select count(*)::int from public.memberships where id = (select id fr
 -- Positions grant permissions; checks ask for permissions ----------------------
 select is(public.role_permissions('general_director'),
           array['administer', 'assign_projects', 'validate', 'manage_catalog', 'create_projects',
-                'view_all_projects', 'archive_records'],
-          'the general director administers, assigns and creates projects, validates, manages the catalog, archives');
-select is(public.role_permissions('creative_director'), array['creative_work'],
-          'the creative director does creative work only');
+                'view_all_projects', 'archive_records', 'read_feedback', 'manage_network',
+                'manage_contracts'],
+          'the general director administers, assigns and creates projects, validates, manages the catalog, archives, reads feedback, keeps the network and the contracts');
+select is(public.role_permissions('creative_director'), array['creative_work', 'manage_network'],
+          'the creative director does creative work and keeps the network');
 select ok(not public.is_org_admin((select id from public.organizations where slug = 'pds')),
           'a creative director does not administer');
-select is((public.get_my_access() -> 'permissions'), '["creative_work"]'::jsonb,
+select is((public.get_my_access() -> 'permissions'), '["creative_work", "manage_network"]'::jsonb,
           'get_my_access returns the permissions of the position');
 
 reset role;

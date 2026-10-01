@@ -10,6 +10,9 @@ export const shell = {
     calls: "Calls",
     artists: "Artistes",
     masters: "Titres",
+    network: "Réseau",
+    contracts: "Contrats",
+    files: "Fichiers",
     members: "Équipe",
     feedback: "Retours",
     // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.

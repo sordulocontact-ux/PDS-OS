@@ -1,5 +1,6 @@
-// Files of an artist, a title ("master") or a launched project: buckets,
-// limits and categories. One library for all three (feedback n°6).
+// Files of an artist, a title ("master"), a launched project or a contract:
+// buckets, limits and categories. One library for all four (feedback n°6),
+// each file versioned (a new version keeps the previous ones).
 // Client-safe (the browser checks before uploading; the database enforces
 // the same rules).
 
@@ -8,13 +9,14 @@ import type { AudioState } from "@/lib/catalog/title-rules";
 export const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
 /** What a file is attached to. */
-export type FileOwnerKind = "artist" | "master" | "project";
+export type FileOwnerKind = "artist" | "master" | "project" | "contract";
 export type FileOwner = { kind: FileOwnerKind; id: string };
 
 export const FILE_BUCKETS = {
   artist: "artist-files",
   master: "master-files",
   project: "project-files",
+  contract: "contract-files",
 } as const satisfies Record<FileOwnerKind, string>;
 
 export const FILE_CATEGORIES = {
@@ -24,6 +26,8 @@ export const FILE_CATEGORIES = {
   master: ["audio", "stems", "artwork", "contract", "other"],
   // Call recordings and design versions have their own tables and sections.
   project: ["brief", "visual", "contract", "press", "other"],
+  // The drafts exchanged, the signed copy, annexes.
+  contract: ["draft", "signed", "annex", "other"],
 } as const satisfies Record<FileOwnerKind, readonly string[]>;
 
 /** Categories offered by the Files tab: audio versions have their own tab. */
@@ -31,6 +35,7 @@ export const FILES_TAB_CATEGORIES = {
   artist: FILE_CATEGORIES.artist,
   master: ["stems", "artwork", "contract", "other"],
   project: FILE_CATEGORIES.project,
+  contract: FILE_CATEGORIES.contract,
 } as const satisfies { [K in FileOwnerKind]: readonly FileCategory<K>[] };
 
 /** Free precision beside the category ("Contrat artiste 2026"), as in SQL. */
@@ -101,6 +106,7 @@ const IMAGE_CATEGORY = {
   artist: "photo",
   master: "artwork",
   project: "visual",
+  contract: "annex",
 } as const satisfies { [K in FileOwnerKind]: FileCategory<K> };
 
 /** "PDF", "JPG": the extension, else the MIME subtype. */
@@ -175,6 +181,17 @@ export function isCatalogFilePath(
   );
 }
 
+/**
+ * A signed URL that downloads under the file's own name: the name is a plain
+ * query parameter beside the token (as storage-js adds it), so the same
+ * signature serves both opening and downloading.
+ */
+export function withDownloadName(url: string, fileName: string): string {
+  const signed = new URL(url);
+  signed.searchParams.set("download", fileName);
+  return signed.toString();
+}
+
 const sizeFormat = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 });
 
 /** "2,4 Mo", "830 Ko". */
@@ -184,8 +201,27 @@ export function formatFileSize(bytes: number): string {
   return `${sizeFormat.format(bytes / (1024 * 1024))} Mo`;
 }
 
+/** An earlier version of a file, kept when a new one replaced it. */
+export type CatalogFileVersion = {
+  id: string;
+  version: number;
+  fileName: string;
+  mime: string;
+  bytes: number;
+  createdAt: string;
+  authorName: string;
+  openUrl: string | null;
+  downloadUrl: string | null;
+};
+
 export type CatalogFile = {
   id: string;
+  // Its series (every version of the same file) and its number in it.
+  seriesId: string;
+  version: number;
+  // Every version of the series, newest first, this one included; a single
+  // entry when the file was never replaced.
+  versions: CatalogFileVersion[];
   category: string;
   // Free precision ("Portrait presse — septembre 2026"), null when none.
   description: string | null;

@@ -220,6 +220,9 @@ export type Database = {
           mime: string
           organization_id: string
           path: string
+          replaces_id: string | null
+          series_id: string
+          version: number
         }
         Insert: {
           artist_id: string
@@ -233,6 +236,9 @@ export type Database = {
           mime: string
           organization_id: string
           path: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
         }
         Update: {
           artist_id?: string
@@ -246,6 +252,9 @@ export type Database = {
           mime?: string
           organization_id?: string
           path?: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
         }
         Relationships: [
           {
@@ -410,6 +419,42 @@ export type Database = {
           },
         ]
       }
+      call_attendees: {
+        Row: {
+          call_id: string
+          created_at: string
+          organization_id: string
+          person_id: string
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          organization_id: string
+          person_id: string
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          organization_id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_attendees_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "call_attendees_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_reports: {
         Row: {
           call_id: string
@@ -492,9 +537,10 @@ export type Database = {
           duration_minutes: number | null
           error_code: string | null
           id: string
+          meeting_url: string | null
           occurred_at: string
           organization_id: string
-          project_id: string
+          project_id: string | null
           status: string
           title: string
           updated_at: string
@@ -513,9 +559,10 @@ export type Database = {
           duration_minutes?: number | null
           error_code?: string | null
           id?: string
+          meeting_url?: string | null
           occurred_at?: string
           organization_id: string
-          project_id: string
+          project_id?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -534,9 +581,10 @@ export type Database = {
           duration_minutes?: number | null
           error_code?: string | null
           id?: string
+          meeting_url?: string | null
           occurred_at?: string
           organization_id?: string
-          project_id?: string
+          project_id?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -609,6 +657,227 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_files: {
+        Row: {
+          bytes: number
+          category: string
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          file_name: string
+          id: string
+          mime: string
+          organization_id: string
+          path: string
+          replaces_id: string | null
+          series_id: string
+          version: number
+        }
+        Insert: {
+          bytes: number
+          category?: string
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name: string
+          id?: string
+          mime: string
+          organization_id: string
+          path: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
+        }
+        Update: {
+          bytes?: number
+          category?: string
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_name?: string
+          id?: string
+          mime?: string
+          organization_id?: string
+          path?: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_files_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contract_files_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_files_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_parties: {
+        Row: {
+          contact_id: string
+          contract_id: string
+          created_at: string
+          organization_id: string
+          role: string | null
+        }
+        Insert: {
+          contact_id: string
+          contract_id: string
+          created_at?: string
+          organization_id: string
+          role?: string | null
+        }
+        Update: {
+          contact_id?: string
+          contract_id?: string
+          created_at?: string
+          organization_id?: string
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_parties_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contract_parties_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          artist_id: string | null
+          created_at: string
+          created_by: string | null
+          due_on: string | null
+          ends_on: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          owner_person_id: string
+          project_id: string | null
+          review_comment: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          signed_on: string | null
+          starts_on: string | null
+          status: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_on?: string | null
+          ends_on?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          owner_person_id: string
+          project_id?: string | null
+          review_comment?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signed_on?: string | null
+          starts_on?: string | null
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_on?: string | null
+          ends_on?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          owner_person_id?: string
+          project_id?: string | null
+          review_comment?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signed_on?: string | null
+          starts_on?: string | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contracts_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
         ]
@@ -1250,6 +1519,9 @@ export type Database = {
           mime: string
           organization_id: string
           path: string
+          replaces_id: string | null
+          series_id: string
+          version: number
         }
         Insert: {
           audio_state?: string | null
@@ -1265,6 +1537,9 @@ export type Database = {
           mime: string
           organization_id: string
           path: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
         }
         Update: {
           audio_state?: string | null
@@ -1280,6 +1555,9 @@ export type Database = {
           mime?: string
           organization_id?: string
           path?: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
         }
         Relationships: [
           {
@@ -1858,6 +2136,92 @@ export type Database = {
           },
         ]
       }
+      network_contacts: {
+        Row: {
+          archived_at: string | null
+          artist_id: string | null
+          city: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          kind: string
+          name: string
+          notes: string | null
+          organization_id: string
+          parent_id: string | null
+          phone: string | null
+          roles: string[]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          artist_id?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          kind: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          parent_id?: string | null
+          phone?: string | null
+          roles: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          artist_id?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          parent_id?: string | null
+          phone?: string | null
+          roles?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_contacts_artist_same_org"
+            columns: ["artist_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "network_contacts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_contacts_parent_same_org"
+            columns: ["parent_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_person_id: string | null
@@ -2233,6 +2597,9 @@ export type Database = {
           organization_id: string
           path: string
           project_id: string
+          replaces_id: string | null
+          series_id: string
+          version: number
         }
         Insert: {
           bytes: number
@@ -2246,6 +2613,9 @@ export type Database = {
           organization_id: string
           path: string
           project_id: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
         }
         Update: {
           bytes?: number
@@ -2259,6 +2629,9 @@ export type Database = {
           organization_id?: string
           path?: string
           project_id?: string
+          replaces_id?: string | null
+          series_id?: string
+          version?: number
         }
         Relationships: [
           {
@@ -3177,10 +3550,41 @@ export type Database = {
           },
         ]
       }
+      library_files: {
+        Row: {
+          bytes: number | null
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          file_name: string | null
+          id: string | null
+          mime: string | null
+          organization_id: string | null
+          owner_id: string | null
+          owner_label: string | null
+          path: string | null
+          rank: number | null
+          series_id: string | null
+          source: string | null
+          version: number | null
+          version_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_project_creative: {
         Args: { p_person_id: string; p_project_id: string }
+        Returns: undefined
+      }
+      advance_contract: {
+        Args: {
+          p_action: string
+          p_comment?: string
+          p_contract_id: string
+          p_signed_on?: string
+        }
         Returns: undefined
       }
       audio_state_rank: { Args: { p_state: string }; Returns: number }
@@ -3191,11 +3595,14 @@ export type Database = {
         Args: { p_deliverable_id: string; p_project_id: string }
         Returns: boolean
       }
+      can_edit_contract: { Args: { p_contract_id: string }; Returns: boolean }
       can_manage_creatives: { Args: { p_project_id: string }; Returns: boolean }
       can_read_project_contracts: {
         Args: { p_project_id: string }
         Returns: boolean
       }
+      can_see_call: { Args: { p_call_id: string }; Returns: boolean }
+      can_see_contract: { Args: { p_contract_id: string }; Returns: boolean }
       can_see_project: { Args: { p_project_id: string }; Returns: boolean }
       can_see_project_row: {
         Args: {
@@ -3316,6 +3723,14 @@ export type Database = {
       is_project_launched: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
       list_assignable_people: {
+        Args: { p_organization_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+        }[]
+      }
+      list_contract_owners: {
         Args: { p_organization_id: string }
         Returns: {
           first_name: string
@@ -3475,6 +3890,10 @@ export type Database = {
       }
       set_master_archived: {
         Args: { p_archived: boolean; p_master_id: string }
+        Returns: undefined
+      }
+      set_network_contact_archived: {
+        Args: { p_archived: boolean; p_contact_id: string }
         Returns: undefined
       }
       set_project_archived: {

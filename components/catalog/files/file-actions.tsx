@@ -1,40 +1,68 @@
 "use client";
 
 import {
-  IconEyeOpen,
+  IconLayers,
+  IconPaperclip,
   IconPenWriting2,
   IconTrash,
 } from "nucleo-sharp-essential";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { FileEditForm } from "@/components/catalog/files/file-edit-form";
-import { IconDownload } from "@/components/icons";
+import { fileOpenActions } from "@/components/catalog/files/file-open-actions";
+import { FileVersionsDialog } from "@/components/catalog/files/file-versions-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { deleteCatalogFile } from "@/lib/catalog/file-actions";
 import type { CatalogFile, FileOwner } from "@/lib/catalog/file-rules";
+import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { fr } from "@/lib/i18n/fr";
 
 // "⋯" of a file: open it in a new tab (the browser previews PDFs, images,
-// sounds), download it under its name, then for manage_catalog edit it
+// sounds), download it under its name, see its earlier versions, then for
+// its writer add a new version (same category and precision), edit it
 // (name, category, precision) and delete it after confirmation.
 export function FileActions({
   owner,
   file,
   canEdit,
   canDelete,
+  organizationId,
 }: {
   owner: FileOwner;
   file: CatalogFile;
   canEdit: boolean;
   canDelete: boolean;
+  // The writer's organization: where a new version is uploaded.
+  organizationId: string | null;
 }) {
   const t = fr.catalogFiles;
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [history, setHistory] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [uploading, startUpload] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const picker = useRef<HTMLInputElement>(null);
+  const canVersion = canEdit && organizationId !== null;
+
+  function addVersion(picked: File) {
+    if (!organizationId) return;
+    startUpload(async () => {
+      const result = await uploadCatalogFile({
+        organizationId,
+        owner,
+        category: file.category,
+        description: file.description,
+        file: picked,
+        replacesId: file.id,
+      });
+      if (result.ok) toast.success(t.versions.added(file.version + 1));
+      else toast.error(result.error);
+    });
+  }
 
   function closeDelete() {
     setError(null);
@@ -49,26 +77,25 @@ export function FileActions({
     });
   }
 
-  const { openUrl, downloadUrl } = file;
   const actions: RowAction[] = [
-    ...(openUrl
+    ...fileOpenActions(file),
+    ...(file.versions.length > 1
       ? [
           {
-            key: "open",
-            label: t.menu.open,
-            icon: IconEyeOpen,
-            onSelect: () => window.open(openUrl, "_blank", "noopener"),
+            key: "versions",
+            label: t.menu.versions(file.versions.length),
+            icon: IconLayers,
+            onSelect: () => setHistory(true),
           },
         ]
       : []),
-    ...(downloadUrl
+    ...(canVersion && !uploading
       ? [
           {
-            key: "download",
-            label: t.menu.download,
-            icon: IconDownload,
-            // Served as an attachment: the page stays.
-            onSelect: () => window.location.assign(downloadUrl),
+            key: "new-version",
+            label: t.menu.newVersion,
+            icon: IconPaperclip,
+            onSelect: () => picker.current?.click(),
           },
         ]
       : []),
@@ -97,6 +124,28 @@ export function FileActions({
   return (
     <>
       <RowActions label={t.menu.label(file.fileName)} actions={actions} />
+      {canVersion && (
+        <input
+          ref={picker}
+          type="file"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden
+          onChange={(event) => {
+            const [picked] = event.target.files ?? [];
+            // Picking the same file again must fire a change.
+            event.target.value = "";
+            if (picked) addVersion(picked);
+          }}
+        />
+      )}
+      {file.versions.length > 1 && (
+        <FileVersionsDialog
+          file={file}
+          open={history}
+          onOpenChange={setHistory}
+        />
+      )}
       {canEdit && (
         <FormDialog
           open={editing}
@@ -117,7 +166,11 @@ export function FileActions({
           open={deleting}
           onOpenChange={(open) => !open && closeDelete()}
           title={t.confirmTitle}
-          description={t.confirmBody(file.fileName)}
+          description={
+            file.version > 1
+              ? t.confirmVersionBody(file.fileName, file.version)
+              : t.confirmBody(file.fileName)
+          }
           cancelLabel={t.cancel}
           closeLabel={t.close}
           confirmLabel={t.confirm}

@@ -10,6 +10,8 @@ import {
   type CallStatus,
 } from "@/lib/calls/constants";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
+import { routes } from "@/lib/auth/redirects";
+import { personName } from "@/lib/projects/types";
 import {
   fromReportItemRows,
   type ReportItemRow,
@@ -28,11 +30,19 @@ export type CallSummary = {
   title: string;
   occurredAt: string;
   status: CallStatus;
+  // Video link (Meet, Zoom…): "Rejoindre" opens it. Null when none.
+  meetingUrl: string | null;
 };
+
+export type CallAttendee = { personId: string; name: string };
 
 export type CallDetail = CallSummary & {
   organizationId: string;
-  projectId: string;
+  // Null: an internal meeting, outside any project.
+  projectId: string | null;
+  createdBy: string | null;
+  // Members invited to an internal meeting (none on a project call).
+  attendees: CallAttendee[];
   audioPath: string | null;
   audioMime: string | null;
   audioBytes: number | null;
@@ -71,7 +81,7 @@ export async function listCalls(
 ): Promise<CallSummary[]> {
   const { data, error } = await supabase
     .from("calls")
-    .select("id, title, occurred_at, status")
+    .select("id, title, occurred_at, status, meeting_url")
     .eq("project_id", projectId)
     .order("occurred_at", { ascending: false });
   if (error) throw new Error(`listCalls: ${error.message}`);
@@ -80,33 +90,46 @@ export async function listCalls(
     title: row.title,
     occurredAt: row.occurred_at,
     status: asCallStatus(row.status),
+    meetingUrl: row.meeting_url,
   }));
 }
 
 export type CallListItem = CallSummary & {
-  projectId: string;
-  projectTitle: string;
+  // Null for an internal meeting.
+  projectId: string | null;
+  projectTitle: string | null;
+  // The call's own page: inside its project, or the meeting's page.
+  href: string;
 };
 
+// Most recent first; a team of 3 to 5 people stays far below this.
+const ALL_CALLS_LIMIT = 500;
+
 /**
- * Every call the user may see, across projects (Calls page of the main
- * navigation). RLS already limits it to visible projects (can_see_project).
+ * Every call the user may see (Calls page of the main navigation): those of
+ * visible projects and the internal meetings they created or were invited
+ * to. RLS decides (can_see_call).
  */
 export async function listAllCalls(supabase: Client): Promise<CallListItem[]> {
   const { data, error } = await supabase
     .from("calls")
     .select(
-      "id, title, occurred_at, status, project_id, project:projects!calls_project_same_org(title)",
+      "id, title, occurred_at, status, meeting_url, project_id, project:projects!calls_project_same_org(title)",
     )
-    .order("occurred_at", { ascending: false });
+    .order("occurred_at", { ascending: false })
+    .limit(ALL_CALLS_LIMIT);
   if (error) throw new Error(`listAllCalls: ${error.message}`);
   return data.map((row) => ({
     id: row.id,
     title: row.title,
     occurredAt: row.occurred_at,
     status: asCallStatus(row.status),
+    meetingUrl: row.meeting_url,
     projectId: row.project_id,
-    projectTitle: row.project?.title ?? "",
+    projectTitle: row.project?.title ?? null,
+    href: row.project_id
+      ? routes.projectCall(row.project_id, row.id)
+      : routes.meeting(row.id),
   }));
 }
 
@@ -122,25 +145,42 @@ function toAgenda(value: unknown): AgendaItem[] | null {
   return items.length > 0 ? items : null;
 }
 
+/**
+ * One call: of this project, or (`projectId` null) an internal meeting —
+ * a project call is never read through the meeting page, nor the reverse.
+ */
 export async function getCall(
   supabase: Client,
-  projectId: string,
+  projectId: string | null,
   callId: string,
 ): Promise<CallDetail | null> {
-  const { data } = await supabase
+  const query = supabase
     .from("calls")
-    .select("*")
-    .eq("id", callId)
-    .eq("project_id", projectId)
-    .maybeSingle();
+    .select(
+      "*, call_attendees(person_id, person:people!call_attendees_person_id_fkey(first_name, last_name))",
+    )
+    .eq("id", callId);
+  const { data } = await (
+    projectId ? query.eq("project_id", projectId) : query.is("project_id", null)
+  ).maybeSingle();
   if (!data) return null;
   return {
     id: data.id,
     title: data.title,
     occurredAt: data.occurred_at,
     status: asCallStatus(data.status),
+    meetingUrl: data.meeting_url,
     organizationId: data.organization_id,
     projectId: data.project_id,
+    createdBy: data.created_by,
+    attendees: data.call_attendees
+      .map((a) => ({
+        personId: a.person_id,
+        name: a.person
+          ? personName(a.person.first_name, a.person.last_name)
+          : "",
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr")),
     audioPath: data.audio_path,
     audioMime: data.audio_mime,
     audioBytes: data.audio_bytes,

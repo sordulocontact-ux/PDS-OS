@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
 import { FilterChip } from "@/components/ui/filter-chip";
@@ -68,6 +68,82 @@ export function ChipChoice<V extends string>({
           );
         })}
       </div>
+      {error ? (
+        <FieldError id={`${id}-error`}>{error}</FieldError>
+      ) : hint ? (
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Several choices among a few, as toggle pills (roles of a contact, a
+ * meeting's attendees): uncontrolled, submitted under `name` as one JSON
+ * array through a hidden input. `emptyLabel` replaces the pills when there
+ * is nothing to choose.
+ */
+export function ChipMultiChoice<V extends string>({
+  name,
+  legend,
+  note,
+  options,
+  defaultValue,
+  onChange,
+  emptyLabel,
+  hint,
+  error,
+}: {
+  name: string;
+  legend: string;
+  note?: string;
+  options: ChipOption<V>[];
+  defaultValue: V[];
+  onChange?: (value: V[]) => void;
+  emptyLabel?: string;
+  hint?: string;
+  error?: string;
+}) {
+  const id = useId();
+  const [selected, setSelected] = useState<V[]>(defaultValue);
+  const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+  const toggle = (value: V) => {
+    const next = selected.includes(value)
+      ? selected.filter((item) => item !== value)
+      : [...selected, value];
+    setSelected(next);
+    onChange?.(next);
+  };
+
+  return (
+    <div
+      role="group"
+      aria-labelledby={`${id}-label`}
+      aria-describedby={describedBy}
+      className="flex flex-col gap-1.5"
+    >
+      <span id={`${id}-label`} className="text-sm leading-none font-medium">
+        {legend}
+        {note && <span className="text-muted-foreground"> · {note}</span>}
+      </span>
+      <input type="hidden" name={name} value={JSON.stringify(selected)} />
+      {options.length === 0 && emptyLabel ? (
+        <p className="text-sm text-muted-foreground">{emptyLabel}</p>
+      ) : (
+        <div className="flex flex-wrap gap-2 pt-1">
+          {options.map((option) => (
+            <FilterChip
+              key={option.value}
+              pressed={selected.includes(option.value)}
+              onClick={() => toggle(option.value)}
+            >
+              {option.label}
+            </FilterChip>
+          ))}
+        </div>
+      )}
       {error ? (
         <FieldError id={`${id}-error`}>{error}</FieldError>
       ) : hint ? (

@@ -12,13 +12,14 @@ import {
   DataTableMedia,
   DataTableRow,
 } from "@/components/ui/data-table";
-import { routes } from "@/lib/auth/redirects";
+import { JoinCallLink } from "@/components/calls/join-call-link";
 import { formatDateTime, isUpcoming } from "@/lib/calls/format";
 import type { CallListItem } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 
-// Calls of every visible project: the row opens the call, its project reads
-// under the title.
+// Calls of every visible project and the internal meetings: the row opens the
+// call, its project (or "Réunion interne") reads under the title; a planned
+// call with a video link offers "Rejoindre".
 export function AllCallsTable({
   calls,
   now,
@@ -43,13 +44,9 @@ export function AllCallsTable({
               <DataTableMedia
                 visual={<DataTableIcon icon={IconPhone} />}
                 title={
-                  <DataTableLink
-                    href={routes.projectCall(call.projectId, call.id)}
-                  >
-                    {call.title}
-                  </DataTableLink>
+                  <DataTableLink href={call.href}>{call.title}</DataTableLink>
                 }
-                subtitle={call.projectTitle}
+                subtitle={call.projectTitle ?? fr.calls.all.internal}
               />
             </DataTableCell>
             <DataTableCell hideBelow="sm">
@@ -58,10 +55,20 @@ export function AllCallsTable({
               </time>
             </DataTableCell>
             <DataTableCell fill>
-              <CallStatusBadge
-                status={call.status}
-                upcoming={isUpcoming(call, now)}
-              />
+              <div className="flex flex-wrap items-center gap-3">
+                <CallStatusBadge
+                  status={call.status}
+                  upcoming={isUpcoming(call, now)}
+                />
+                {call.meetingUrl && isUpcoming(call, now) && (
+                  <JoinCallLink
+                    url={call.meetingUrl}
+                    title={call.title}
+                    size="sm"
+                    inRow
+                  />
+                )}
+              </div>
             </DataTableCell>
           </DataTableRow>
         ))}

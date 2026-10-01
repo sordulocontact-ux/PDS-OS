@@ -12,6 +12,7 @@ import {
   type ActionResult,
 } from "@/lib/calls/constants";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -28,6 +29,20 @@ async function approvedSession() {
 const text = (form: FormData, key: string) =>
   String(form.get(key) ?? "").trim();
 
+// A video link (Meet, Zoom, Teams…): https only, as the database checks.
+// Blank means none.
+const meetingUrlSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .transform((value) => value || null)
+  .refine((value) => value === null || /^https:\/\/\S+$/.test(value));
+
+function meetingUrlOf(form: FormData): string | null | undefined {
+  const parsed = meetingUrlSchema.safeParse(text(form, "meetingUrl"));
+  return parsed.success ? parsed.data : undefined;
+}
+
 export async function createCall(
   _previous: ActionResult | null,
   form: FormData,
@@ -43,6 +58,8 @@ export async function createCall(
   if (Number.isNaN(occurredAt.getTime()))
     return { ok: false, error: "date_invalid" };
   if (!projectId) return { ok: false, error: "invalid_input" };
+  const meetingUrl = meetingUrlOf(form);
+  if (meetingUrl === undefined) return { ok: false, error: "link_invalid" };
 
   const { data, error } = await session.supabase
     .from("calls")
@@ -51,6 +68,7 @@ export async function createCall(
       project_id: projectId,
       title,
       occurred_at: occurredAt.toISOString(),
+      meeting_url: meetingUrl,
       // Recording consent is given by contract.
       consent: "granted",
     })
@@ -61,6 +79,98 @@ export async function createCall(
     return { ok: false, error: "not_found" };
   }
   redirect(routes.projectCall(projectId, data.id));
+}
+
+const attendeesSchema = z.array(z.uuid()).max(50);
+
+/**
+ * An internal meeting: a call without a project, seen by its creator and the
+ * members invited to it (can_see_call). Any member creates one; recorded and
+ * processed like a call, without a Brief to fill.
+ */
+export async function createMeeting(
+  _previous: ActionResult | null,
+  form: FormData,
+): Promise<ActionResult> {
+  const session = await approvedSession();
+  if (!session) return { ok: false, error: "unauthorized" };
+
+  const title = text(form, "title");
+  const occurredAt = new Date(text(form, "occurredAt"));
+  if (!title || title.length > 200)
+    return { ok: false, error: "title_required" };
+  if (Number.isNaN(occurredAt.getTime()))
+    return { ok: false, error: "date_invalid" };
+  const meetingUrl = meetingUrlOf(form);
+  if (meetingUrl === undefined) return { ok: false, error: "link_invalid" };
+  let attendees: string[];
+  try {
+    const parsed = attendeesSchema.safeParse(
+      JSON.parse(text(form, "attendees") || "[]"),
+    );
+    if (!parsed.success) return { ok: false, error: "invalid_input" };
+    attendees = [...new Set(parsed.data)].filter(
+      (id) => id !== session.access.personId,
+    );
+  } catch {
+    return { ok: false, error: "invalid_input" };
+  }
+
+  const organizationId = session.access.organizationId!;
+  const { data, error } = await session.supabase
+    .from("calls")
+    .insert({
+      organization_id: organizationId,
+      title,
+      occurred_at: occurredAt.toISOString(),
+      meeting_url: meetingUrl,
+      consent: "granted",
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    console.error("[calls] create meeting failed:", error?.message);
+    return { ok: false, error: "save_failed" };
+  }
+  if (attendees.length > 0) {
+    // Each invitation notifies its member (database trigger).
+    const { error: inviteError } = await session.supabase
+      .from("call_attendees")
+      .insert(
+        attendees.map((personId) => ({
+          call_id: data.id,
+          organization_id: organizationId,
+          person_id: personId,
+        })),
+      );
+    if (inviteError)
+      console.error("[calls] invite failed:", inviteError.message);
+    else await schedulePendingPushes();
+  }
+  redirect(routes.meeting(data.id));
+}
+
+/** The video link of a call, added or changed before or after the fact. */
+export async function updateCallLink(
+  callId: string,
+  meetingUrl: string,
+): Promise<ActionResult> {
+  const session = await approvedSession();
+  if (!session) return { ok: false, error: "unauthorized" };
+  const parsed = meetingUrlSchema.safeParse(meetingUrl);
+  if (!parsed.success || !z.uuid().safeParse(callId).success)
+    return { ok: false, error: "link_invalid" };
+  const { data: updated, error } = await session.supabase
+    .from("calls")
+    .update({ meeting_url: parsed.data })
+    .eq("id", callId)
+    .select("id");
+  if (error || !updated?.length) {
+    if (error) console.error("[calls] update link failed:", error.message);
+    return { ok: false, error: "forbidden" };
+  }
+  refresh();
+  return { ok: true };
 }
 
 /**

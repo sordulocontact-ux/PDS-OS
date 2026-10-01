@@ -11,7 +11,8 @@ import { createClient } from "@/lib/supabase/client";
 
 /**
  * Browser-side: uploads the file straight to the owner's private bucket
- * (storage RLS: manage_catalog), then records it through a server action.
+ * (storage RLS: manage_catalog, the project's or the contract's writer),
+ * then records it through a server action.
  * Same flow as the artist picture (lib/catalog/upload-picture.ts).
  */
 export async function uploadCatalogFile(input: {
@@ -20,6 +21,8 @@ export async function uploadCatalogFile(input: {
   category: string;
   description?: string | null;
   file: File;
+  // A new version of this file (same category and precision).
+  replacesId?: string;
   // An audio version of a title (category "audio").
   audioState?: AudioState;
   durationSeconds?: number | null;
@@ -49,6 +52,7 @@ export async function uploadCatalogFile(input: {
     fileName: input.file.name,
     mime,
     bytes: input.file.size,
+    replacesId: input.replacesId,
     audioState: input.audioState,
     durationSeconds: input.durationSeconds,
   });
