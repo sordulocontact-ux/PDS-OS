@@ -224,8 +224,9 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   en-tête commun `ProjectPageHeader` (h2, une phrase, action à droite).
 - **Étapes d'un processus en chevrons** (`ProcessSteps`, `components/ui/`), sous
   l'en-tête, au même endroit pour chaque processus : Workflow (7 étapes numérotées,
-  `WorkflowBreadcrumb`) et Juridique (État des lieux · Personnes · Droits · Contrats,
-  sans numéro comme dans le Figma, `LegalSteps`, une URL par étape sous `/legal`).
+  `WorkflowBreadcrumb`) et Juridique (État des lieux · Cadrage juridique · Confirmation ·
+  Plan d'action · Suivi, son parcours interne défini par le DG le 04/10/2026, sans numéro,
+  `LegalSteps`, une URL par étape sous `/legal`).
   **Deux signaux jamais mélangés** : le fond noir = la page ouverte ; la coche dans le
   rond = l'étape vraiment validée (états des `project_stages`, jamais la position de
   la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.

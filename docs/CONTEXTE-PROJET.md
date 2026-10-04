@@ -49,6 +49,56 @@ s'appelle **PO**. Le produit s'appelle **PDS OS**.
 | 6   | Défense                  | **Périmètre à clarifier avec le client** — voir § 10                                                                                      |
 | 7   | Bilan & clôture          | Streams, vues, performance, stats de sortie                                                                                               |
 
+### Workflows spécialisés : Master et Juridique (précision du DG, 04/10/2026)
+
+Les sept étapes restent **la colonne vertébrale** du projet. Rien ne les remplace.
+
+- **Le Cadrage est global** : il cadre le projet de A à Z (objectif, budget, échéance,
+  équipe, responsables, livrables) et **initialise toutes les dimensions**. Par exemple :
+  qui mixe, qui masterise, date du master final, participants, besoins juridiques déjà
+  identifiés, date de distribution souhaitée.
+- **Master et Juridique sont des workflows spécialisés.** Ils sont rattachés au Workflow du
+  projet et **alimentés par le Brief**. Ils détaillent l'exécution :
+  - Master : réception du mix, retours, versions, validation, master final ;
+  - Juridique : personnes, droits, contrats, splits, clearances, formalités, suivi.
+
+  Ils ne sont **ni une étape du cycle, ni un outil transversal**.
+- **En parallèle** : la Stratégie peut avancer pendant que Master et Juridique tournent. On
+  n'attend pas qu'un workflow soit fini pour en commencer un autre.
+- **Les dépendances relient le tout.** La Livraison n'avance que quand ses prérequis sont
+  prêts : master final, métadonnées, éléments juridiques, assets.
+- **Chaque workflow spécialisé a son propre parcours interne**, distinct des sept étapes.
+  Celui du Juridique : État des lieux → Cadrage juridique → Confirmation → Plan d'action →
+  Suivi.
+- **Planning, Budget, Validations et Activité sont des outils transversaux** : on n'y range
+  ni Master ni Juridique.
+- **Disposition** : placer Master et Juridique sous Workflow est une proposition, pas une
+  décision figée. Seule cette logique fonctionnelle compte.
+
+**Points à trancher avant de coder le Juridique.** Ils viennent de la relecture des
+tickets du 30/09 (Cadrage, Master, Juridique 01 à 08) :
+
+- **Le Brief comme source.** Les tickets Master et Juridique 01 ne citent pas le Brief de
+  cadrage parmi leurs sources. D'après la logique ci-dessus, ils doivent en partir
+  (dimension « Cadre juridique », mixeur, échéances).
+- **Juridique 08 (Récap Sortie)** relève de l'étape **Livraison**, pas du Juridique. La
+  brique « Distribution », que le Master interroge, n'a pas de ticket.
+- **Juridique 07 (moteur de dépendances)** sert à tout le projet. Les tickets 02 à 05 en
+  dépendent alors que le 07 dépend d'eux : il faut une base minimale dès le premier
+  workflow spécialisé.
+- **Un seul vocabulaire de plan**, au lieu de trois :
+  - Plan du projet : Focus / Ensuite / Pendant ce temps / À anticiper ;
+  - Plan d'action juridique : À lancer maintenant / En cours / À venir ;
+  - Suivi : À traiter maintenant / En attente externe / Incident / Progression silencieuse.
+- **Un seul classement de confiance** : le Cadrage en a 3 (connu / à confirmer /
+  manquant), Juridique 01 en a 7. « SIMULÉ » relève des données de test, pas de la
+  production.
+- **Étendre plutôt que dupliquer** ce qui existe déjà : Réseau (ticket 02), Contrats
+  (ticket 03), Splits de la fiche master (ticket 04), Déclarations SACEM / SCPP (ticket 06).
+- **Qui pilote le Juridique** : les tickets confient des branches à une RAF / juriste, un
+  poste qui n'existe pas (§ 12). C'est une exception à « seul le responsable du projet
+  écrit ».
+
 Modules transversaux présents dans la navigation du prototype : Accueil, Projets,
 Talents, Musique, Budgets, Calls, Idées, Équipe, Paramètres. Onglets au sein d'un
 projet : Vue d'ensemble, Travail, Budget, Calls, Fichiers, Historique.

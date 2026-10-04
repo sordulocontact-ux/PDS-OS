@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 // Juridique: the first step at /legal, the others one segment below
-// (/legal/people…). Empty for now: the steps above (LegalSteps, in the
+// (/legal/framing…). Empty for now: the steps above (LegalSteps, in the
 // project layout) are all there is.
 export default async function ProjectLegalPage({
   params,

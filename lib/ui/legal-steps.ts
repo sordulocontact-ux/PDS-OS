@@ -1,14 +1,17 @@
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
-// The steps of the Juridique process (Figma "PDS OS", node 1510:3096), each
-// its own URL: the first is the section's entry (/legal), the others a
-// segment below it. Empty pages for now: no state yet, every step opens.
+// The internal path of the Juridique workflow, as the DG defined it
+// (docs/CONTEXTE-PROJET.md § 2) — its own, never the project's 7 steps. Each
+// step has its own URL: the first is the section's entry (/legal), the
+// others a segment below it. Empty pages for now: no state yet, every step
+// opens.
 export const LEGAL_STEP_KEYS = [
   "inventory",
-  "people",
-  "rights",
-  "contracts",
+  "framing",
+  "confirmation",
+  "plan",
+  "tracking",
 ] as const;
 
 export type LegalStepKey = (typeof LEGAL_STEP_KEYS)[number];

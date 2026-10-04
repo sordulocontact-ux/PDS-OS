@@ -247,9 +247,10 @@ export const shell = {
     legalSteps: {
       label: "Étapes juridiques",
       inventory: "État des lieux",
-      people: "Personnes",
-      rights: "Droits",
-      contracts: "Contrats",
+      framing: "Cadrage juridique",
+      confirmation: "Confirmation",
+      plan: "Plan d'action",
+      tracking: "Suivi",
     },
     workflowSteps: {
       label: "Étapes du parcours",
