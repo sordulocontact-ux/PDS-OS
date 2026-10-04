@@ -143,6 +143,11 @@ export const routes = {
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
   projectRelease: (id: string) => `/app/projects/${id}/release`,
+  // Specialised workflows next to the 7 steps, empty pages for now.
+  projectMaster: (id: string) => `/app/projects/${id}/master`,
+  projectLegal: (id: string) => `/app/projects/${id}/legal`,
+  projectLegalStep: (id: string, step: string) =>
+    `/app/projects/${id}/legal/${step}`,
   projectActivations: (id: string) => `/app/projects/${id}/activations`,
   projectWork: (id: string) => `/app/projects/${id}/work`,
   projectTeam: (id: string) => `/app/projects/${id}/team`,

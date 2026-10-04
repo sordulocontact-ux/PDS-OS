@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 
 import { FramingHeaderAction } from "@/components/projects/framing-header-action";
+import { LegalSteps } from "@/components/projects/legal-steps";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import {
   ProjectSidebar,
   ProjectSidebarMobile,
 } from "@/components/projects/project-sidebar";
+import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { WorkflowBreadcrumb } from "@/components/projects/workflow-breadcrumb";
 import { requireApproved } from "@/lib/auth/dal";
@@ -14,13 +16,16 @@ import { projectKindLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { isFramingValidated } from "@/lib/projects/types";
+import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Project frame: header, then content next to the contextual sidebar (Figma
-// "Double sidebar", docs/DESIGN.md § 4). The main app sidebar collapses to
-// icons whenever a project page is open, and the two sidebars fuse into one
-// card (components/shell/use-collapsed-nav.tsx, shared through context so
-// both agree). Pages below still check access themselves (a layout does not
+// Project frame: header, then the sections — either the contextual sidebar
+// next to the content (Figma "Double sidebar") or one row of tabs under the
+// header, never both: DOUBLE_SIDEBAR in lib/ui/project-sections.ts picks one
+// (docs/DESIGN.md § 4). With the sidebar, the main app sidebar collapses to
+// icons whenever a project page is open, and the two fuse into one card
+// (components/shell/use-collapsed-nav.tsx, shared through context so both
+// agree). Pages below still check access themselves (a layout does not
 // re-run on client navigation); the project query is cached per request, so
 // they reuse it for free.
 export default async function ProjectLayout({
@@ -50,7 +55,7 @@ export default async function ProjectLayout({
     <div className="flex flex-1">
       {/* Sits right against the main sidebar (collapsed to icons on a
           project page), so the two read as one "double sidebar" (Figma). */}
-      {project.stages.length > 0 && (
+      {DOUBLE_SIDEBAR && project.stages.length > 0 && (
         <ProjectSidebar projectId={project.id} projectTitle={project.title} />
       )}
 
@@ -84,16 +89,26 @@ export default async function ProjectLayout({
         {/* Sections exist once the project is launched, not before. */}
         {project.stages.length > 0 && (
           <>
-            <ProjectSidebarMobile
-              projectId={project.id}
-              projectTitle={project.title}
-            />
+            {DOUBLE_SIDEBAR ? (
+              <ProjectSidebarMobile
+                projectId={project.id}
+                projectTitle={project.title}
+              />
+            ) : (
+              <ProjectTabs projectId={project.id} />
+            )}
+            {/* The steps of the open process, if any: each hides itself
+                outside its section. */}
             <WorkflowBreadcrumb
               projectId={project.id}
+              validatedStages={project.stages
+                .filter((stage) => stage.state === "validated")
+                .map((stage) => stage.key)}
               lockedSteps={
                 isFramingValidated(project.stages) ? [] : ["strategy"]
               }
             />
+            <LegalSteps projectId={project.id} />
           </>
         )}
 

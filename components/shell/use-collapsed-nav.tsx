@@ -4,13 +4,15 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import { routes } from "@/lib/auth/redirects";
+import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
 
 type CollapsedNav = {
   collapsed: boolean;
   // True whenever the project's contextual sidebar exists and sits right
   // against the main one (Figma "Double sidebar") — collapsed or expanded,
   // the two always touch inside a project, so the join is one continuous
-  // shape, never two separately rounded corners meeting.
+  // shape, never two separately rounded corners meeting. Never true when the
+  // project uses tabs instead (DOUBLE_SIDEBAR off).
   doubleSidebar: boolean;
   toggle: () => void;
 };
@@ -27,25 +29,28 @@ export function CollapsedNavProvider({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const insideProject = pathname.startsWith(`${routes.projects}/`);
+  // Only the project's own sidebar makes room for itself: with tabs, the main
+  // sidebar keeps its width inside a project, as on an artist's page.
+  const withProjectSidebar =
+    DOUBLE_SIDEBAR && pathname.startsWith(`${routes.projects}/`);
   const [override, setOverride] = useState<boolean | null>(null);
-  const previouslyInsideProject = useRef(insideProject);
+  const hadProjectSidebar = useRef(withProjectSidebar);
 
   // Collapsed by default inside a project, full width everywhere else. The
   // sidebar toggle button overrides this — no preference is stored, nothing
   // persists — but the override is forgotten when leaving or entering a
   // project, so the automatic behaviour resumes.
   useEffect(() => {
-    if (previouslyInsideProject.current !== insideProject) {
+    if (hadProjectSidebar.current !== withProjectSidebar) {
       setOverride(null);
-      previouslyInsideProject.current = insideProject;
+      hadProjectSidebar.current = withProjectSidebar;
     }
-  }, [insideProject]);
+  }, [withProjectSidebar]);
 
-  const collapsed = override ?? insideProject;
+  const collapsed = override ?? withProjectSidebar;
   const value: CollapsedNav = {
     collapsed,
-    doubleSidebar: insideProject,
+    doubleSidebar: withProjectSidebar,
     toggle: () => setOverride(!collapsed),
   };
 

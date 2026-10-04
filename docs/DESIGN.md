@@ -214,14 +214,30 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   repliée dans ce projet, arrondi des deux côtés si elle est dépliée manuellement.
   L'ombre reste portée par chaque sidebar (pas de conteneur commun entre deux layouts
   Next.js différents) : à peine visible entre les deux colonnes en mode fusionné, vu sa
-  douceur (flou seul, 10 %). Titre du projet en haut, 12 sections dans l'ordre du Figma.
-  Chaque section a sa page (Workflow = Cadrage + Stratégie + Sortie, entrée par Cadrage) ;
-  en-tête commun `ProjectPageHeader` (h2, une phrase, action à droite). Remplace l'ancienne double navigation
-  horizontale (fil d'Ariane + onglets). Les 7 étapes du métier s'affichent en fil
-  d'Ariane fixe en haut du contenu, seulement sur les 3 pages Workflow
-  (`components/projects/workflow-breadcrumb.tsx`, `lib/ui/workflow-steps.ts`) :
-  habillage de navigation, pas un nouvel état — la vraie progression reste
-  `ProjectStage`, affichée sur la Vue d'ensemble (`docs/CONTEXTE-PROJET.md` § 10, point 3).
+  douceur (flou seul, 10 %). Titre du projet en haut, puis les sections en groupes
+  titrés (Figma « PDS OS », nœud 1510:3096) : Vue d'ensemble seule, **Processus**
+  (Workflow, Master, Juridique), **Pilotage** (Travail, Équipe, Planning, Budget),
+  **Production** (Calls, Livrables, Activations, Fichiers, Validations, Activité) —
+  Activations, absente du Figma, rangée avec les Livrables. Liste et groupes :
+  `lib/ui/project-sections.ts`. Chaque section a sa page (Workflow = Cadrage +
+  Stratégie + Sortie, entrée par Cadrage ; Master et Juridique vides pour l'instant) ;
+  en-tête commun `ProjectPageHeader` (h2, une phrase, action à droite).
+- **Étapes d'un processus en chevrons** (`ProcessSteps`, `components/ui/`), sous
+  l'en-tête, au même endroit pour chaque processus : Workflow (7 étapes numérotées,
+  `WorkflowBreadcrumb`) et Juridique (État des lieux · Personnes · Droits · Contrats,
+  sans numéro comme dans le Figma, `LegalSteps`, une URL par étape sous `/legal`).
+  **Deux signaux jamais mélangés** : le fond noir = la page ouverte ; la coche dans le
+  rond = l'étape vraiment validée (états des `project_stages`, jamais la position de
+  la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.
+- **Sidebar ou onglets : un seul interrupteur**, `DOUBLE_SIDEBAR` dans
+  `lib/ui/project-sections.ts` (liste des sections partagée par les deux). `true` : la
+  sidebar contextuelle ci-dessus, la barre principale repliée. `false` : une seule
+  rangée d'onglets sous l'en-tête (`ProjectTabs`, même `TabBar` que l'artiste et le
+  titre), la barre principale garde sa largeur ; Équipe, Activations, Validations et
+  Activité n'ont pas d'onglet : listées dans « Aussi dans ce projet » sur la Vue
+  d'ensemble, elles allument l'onglet Vue d'ensemble. Jamais les deux à la fois. Sous
+  les onglets : le fil des étapes du Workflow ou rien — les filtres appartiennent à la
+  page, une pastille veut toujours dire « filtre », jamais « autre page ».
 - Ce qui attend quelqu'un se compte dans une pastille noire (`CountBadge`), jamais dans
   un bandeau : notifications non lues sur la cloche, demandes d'accès en attente à droite
   d'« Équipe » (et sur le bouton du menu en mobile).

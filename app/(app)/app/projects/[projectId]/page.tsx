@@ -20,6 +20,8 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 import { FactList } from "@/components/ui/fact-list";
+import { CardRow, ListCard } from "@/components/ui/list-card";
+import { DOUBLE_SIDEBAR, projectSections } from "@/lib/ui/project-sections";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -168,12 +170,28 @@ export default async function ProjectOverviewPage({
         <AssignmentHistory assignments={project.assignments} />
       </div>
 
-      <section aria-labelledby="facts-title" className="flex flex-col gap-3">
-        <h2 id="facts-title" className="text-base font-medium">
-          {t.facts}
-        </h2>
-        <FactList facts={facts.map(([label, value]) => ({ label, value }))} />
-      </section>
+      <div className="flex min-w-0 flex-col gap-8">
+        <section aria-labelledby="facts-title" className="flex flex-col gap-3">
+          <h2 id="facts-title" className="text-base font-medium">
+            {t.facts}
+          </h2>
+          <FactList facts={facts.map(([label, value]) => ({ label, value }))} />
+        </section>
+        {/* With tabs, the sections that have no tab are reached from here. */}
+        {!DOUBLE_SIDEBAR && (
+          <ListCard title={t.moreSections}>
+            {projectSections(project.id)
+              .filter((section) => section.tabParent === "overview")
+              .map((section) => (
+                <CardRow
+                  key={section.key}
+                  href={section.href}
+                  main={section.label}
+                />
+              ))}
+          </ListCard>
+        )}
+      </div>
     </div>
   );
 }

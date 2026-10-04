@@ -1,5 +1,7 @@
 /** Authenticated shell: navigation, projects list, project sidebar. */
 export const shell = {
+  // Read after a validated step of a process (ProcessSteps), by screen readers.
+  processSteps: { done: "validée" },
   brand: "PDS",
   nav: {
     label: "Navigation principale",
@@ -218,8 +220,15 @@ export const shell = {
     // une page ; le reste est affiché mais désactivé (docs/DESIGN.md § 4).
     sidebar: {
       label: "Sections du projet",
+      groups: {
+        process: "Processus",
+        steering: "Pilotage",
+        production: "Production",
+      },
       overview: "Vue d'ensemble",
       workflow: "Workflow",
+      master: "Master",
+      legal: "Juridique",
       activations: "Activations",
       work: "Travail",
       calls: "Calls",
@@ -235,6 +244,13 @@ export const shell = {
     // navigation fixe dans l'onglet Workflow, tant que le nombre d'étapes
     // n'est pas tranché avec le client (§ 10, point 3). Ne pas confondre
     // avec `stages` (ProjectStage), qui reste la source d'état réelle.
+    legalSteps: {
+      label: "Étapes juridiques",
+      inventory: "État des lieux",
+      people: "Personnes",
+      rights: "Droits",
+      contracts: "Contrats",
+    },
     workflowSteps: {
       label: "Étapes du parcours",
       // Why a step with a page cannot be opened yet.
@@ -273,6 +289,8 @@ export const shell = {
       currentStage: "Étape en cours",
       stages: "Étapes",
       changedAt: "Mis à jour le",
+      // Sections without a tab of their own, when the project uses tabs.
+      moreSections: "Aussi dans ce projet",
     },
   },
 } as const;

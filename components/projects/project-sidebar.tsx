@@ -2,7 +2,7 @@
 
 import { IconSitemap4 } from "nucleo-sharp-essential";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
 import { Button } from "@/components/ui/button";
@@ -14,119 +14,90 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import {
+  projectSections,
+  type ProjectSection,
+  type ProjectSectionGroup,
+} from "@/lib/ui/project-sections";
 import { cn } from "@/lib/utils";
 
-type ProjectSidebarItem = {
-  key: string;
-  label: string;
-  href?: string;
-  // Active on this page and everything below it (Workflow covers three
-  // pages: Cadrage, Stratégie, Sortie).
-  match?: (pathname: string) => boolean;
-};
+type Block = { group?: ProjectSectionGroup; items: ProjectSection[] };
 
-// A section with its own page, active on it and everything below it.
-const section = (
-  key: string,
-  label: string,
-  href: string,
-): ProjectSidebarItem => ({
-  key,
-  label,
-  href,
-  match: (p) => p.startsWith(href),
-});
-
-// 12 sections in the Figma order ("Devis Sordulo", node 120:74), each with
-// its page; Workflow covers Cadrage/Stratégie/Conception/Sortie, entered through
-// Cadrage (docs/DESIGN.md § 4). An item without href is shown disabled.
-function useProjectSidebarItems(projectId: string): ProjectSidebarItem[] {
-  const t = fr.shell.project.sidebar;
-  return [
-    {
-      key: "overview",
-      label: t.overview,
-      href: routes.project(projectId),
-      match: (p) => p === routes.project(projectId),
-    },
-    {
-      key: "workflow",
-      label: t.workflow,
-      href: routes.projectFraming(projectId),
-      match: (p) =>
-        p.startsWith(routes.projectFraming(projectId)) ||
-        p.startsWith(routes.projectStrategy(projectId)) ||
-        p.startsWith(routes.projectDesign(projectId)) ||
-        p.startsWith(routes.projectRelease(projectId)),
-    },
-    section("activations", t.activations, routes.projectActivations(projectId)),
-    section("work", t.work, routes.projectWork(projectId)),
-    section("calls", t.calls, routes.projectCalls(projectId)),
-    section("team", t.team, routes.projectTeam(projectId)),
-    section(
-      "deliverables",
-      t.deliverables,
-      routes.projectDeliverables(projectId),
-    ),
-    section("files", t.files, routes.projectFiles(projectId)),
-    section("planning", t.planning, routes.projectPlanning(projectId)),
-    section("budget", t.budget, routes.projectBudget(projectId)),
-    section("validations", t.validations, routes.projectValidations(projectId)),
-    section("activity", t.activity, routes.projectActivity(projectId)),
-  ];
+// Consecutive sections of the same group form one titled block; the
+// overview, ungrouped, stands alone at the top.
+function toBlocks(items: ProjectSection[]): Block[] {
+  const blocks: Block[] = [];
+  for (const item of items) {
+    const last = blocks.at(-1);
+    if (last && last.group === item.group) last.items.push(item);
+    else blocks.push({ group: item.group, items: [item] });
+  }
+  return blocks;
 }
 
 function ProjectSidebarList({
   items,
   onNavigate,
 }: {
-  items: ProjectSidebarItem[];
+  items: ProjectSection[];
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const groups = fr.shell.project.sidebar.groups;
+  // The desktop sidebar and the mobile drawer can both be in the page.
+  const idPrefix = useId();
 
   return (
-    <ul className="flex flex-col gap-1">
-      {items.map((item) => {
-        const active = item.match?.(pathname) ?? false;
-        return (
-          <li key={item.key}>
-            {item.href ? (
-              <ViewLink
-                href={item.href}
-                onClick={onNavigate}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex h-9 items-center rounded-lg px-4 text-body-md text-[color:var(--nav-fg)] no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
-                  active &&
-                    "bg-[var(--nav-item-active-bg)] font-medium hover:bg-[var(--nav-item-active-bg)]",
-                )}
-              >
-                {item.label}
-              </ViewLink>
-            ) : (
-              <span
-                aria-disabled
-                title={fr.shell.nav.comingSoon}
-                className="flex h-9 cursor-not-allowed items-center rounded-lg px-4 text-body-md text-[color:var(--nav-fg-muted)]"
-              >
-                {item.label}
-              </span>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <div className="flex flex-col gap-6">
+      {toBlocks(items).map((block) => (
+        <div key={block.group ?? "top"} className="flex flex-col gap-1">
+          {block.group && (
+            <p
+              id={`${idPrefix}-${block.group}`}
+              className="px-4 text-caption text-[color:var(--nav-fg-muted)]"
+            >
+              {groups[block.group]}
+            </p>
+          )}
+          <ul
+            className="flex flex-col gap-1"
+            aria-labelledby={
+              block.group ? `${idPrefix}-${block.group}` : undefined
+            }
+          >
+            {block.items.map((item) => {
+              const active = item.match(pathname);
+              return (
+                <li key={item.key}>
+                  <ViewLink
+                    href={item.href}
+                    onClick={onNavigate}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex h-9 items-center rounded-lg px-4 text-body-md text-[color:var(--nav-fg)] no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
+                      active &&
+                        "bg-[var(--nav-item-active-bg)] font-medium hover:bg-[var(--nav-item-active-bg)]",
+                    )}
+                  >
+                    {item.label}
+                  </ViewLink>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </div>
   );
 }
 
 // Contextual sidebar of a launched project, desktop only (Figma "Double
-// sidebar"). Same sticky geometry as the main Sidebar, so the two read as one
-// card: right-only rounding, collapsed or expanded — the two always sit
-// right against each other inside a project. See ProjectSidebarMobile below
-// for small screens.
+// sidebar"), shown when DOUBLE_SIDEBAR is on (lib/ui/project-sections.ts).
+// Same sticky geometry as the main Sidebar, so the two read as one card:
+// right-only rounding, collapsed or expanded — the two always sit right
+// against each other inside a project. See ProjectSidebarMobile below for
+// small screens.
 export function ProjectSidebar({
   projectId,
   projectTitle,
@@ -134,7 +105,7 @@ export function ProjectSidebar({
   projectId: string;
   projectTitle: string;
 }) {
-  const items = useProjectSidebarItems(projectId);
+  const items = projectSections(projectId);
   const { doubleSidebar } = useCollapsedNav();
   const t = fr.shell.project.sidebar;
 
@@ -149,7 +120,7 @@ export function ProjectSidebar({
       )}
     >
       <p
-        className="truncate px-3 text-body-md font-semibold"
+        className="shrink-0 truncate px-3 text-body-md font-semibold"
         title={projectTitle}
       >
         {projectTitle}
@@ -168,7 +139,7 @@ export function ProjectSidebarMobile({
   projectId: string;
   projectTitle: string;
 }) {
-  const items = useProjectSidebarItems(projectId);
+  const items = projectSections(projectId);
   const t = fr.shell.project.sidebar;
   const [open, setOpen] = useState(false);
 
