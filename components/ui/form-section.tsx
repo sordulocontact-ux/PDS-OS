@@ -1,5 +1,6 @@
 import { useId } from "react";
 
+import { sectionCardClass } from "@/components/ui/section-card";
 import { cn } from "@/lib/utils";
 
 // A titled block of a long form, on its own white card (the "Nouveau
@@ -20,8 +21,7 @@ export function FormSection({
       aria-labelledby={id}
       className={cn(
         "flex min-w-0 flex-col gap-5",
-        !plain &&
-          "rounded-xl border border-[color:var(--border-hairline)] bg-card p-4",
+        !plain && sectionCardClass,
       )}
     >
       <h2 id={id} className="text-base font-medium">

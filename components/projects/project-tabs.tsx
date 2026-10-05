@@ -11,9 +11,15 @@ import { projectSections } from "@/lib/ui/project-sections";
 // artist's or a title's page. A section without a tab of its own lights its
 // parent tab. Under the tabs comes the Workflow's stepper or nothing: filters
 // belong to the page (docs/DESIGN.md § 4).
-export function ProjectTabs({ projectId }: { projectId: string }) {
+export function ProjectTabs({
+  projectId,
+  canSeeLegal,
+}: {
+  projectId: string;
+  canSeeLegal: boolean;
+}) {
   const pathname = usePathname();
-  const sections = projectSections(projectId);
+  const sections = projectSections(projectId, { legal: canSeeLegal });
   const open = sections.find((section) => section.match(pathname));
   const currentTab = open?.tabParent ?? open?.key;
 

@@ -169,6 +169,9 @@ Production orange, Livraison sarcelle, Défense jaune, Bilan ardoise) et son **t
 (Musical violet, Contenu vert tilleul, Événement sable), distincts des étapes puisqu'ils
 sont sur la même ligne. Jetons `--hue-<teinte>-bg` / `-fg` (`app/globals.css`), variantes
 de `StatusBadge`, correspondance dans `lib/ui/category-hues.ts` seulement.
+Le **titre d'une ligne** dans les tableaux du Juridique est aussi une catégorie : un tag dans
+une colonne « Titre », une teinte par titre selon sa place dans le projet (`titleHue`). Il
+n'est jamais ajouté au sous-titre de la ligne (demande de Sacha, 04/10/2026).
 
 Liste des projets : la colonne « Étape » ne montre **que l'étape** (jamais « En cours »,
 « À venir » : cet état se lit sur le projet), ou « Brouillon », « Terminé », ou avant le
@@ -177,6 +180,24 @@ lancement le statut de transmission (« Transmis, à accepter »…).
 Formulaire long en **blocs titrés** (`FormSection`) : une carte blanche à filet par groupe
 (« Le projet », « Informations initiales », « Équipe »), sans la carte dans une modale ou un
 panneau latéral.
+
+**Cartes de section** (`sectionCardClass`, `components/ui/section-card.ts`) : fond `bg-card`,
+filet `--border-hairline`, `rounded-xl`, marge intérieure 16 px puis 24 px dès `md`. Les
+mêmes pour `FormSection` et pour `PageSection card`. Fiche titre (Figma « PDS OS » 1:3,
+04/10/2026) : **chaque bloc de chaque onglet est une carte** (y compris la bibliothèque de
+l'onglet Fichiers), les tuiles de la Vue d'ensemble restent hors carte.
+**Rien d'encadré dans une carte** (demande de Sacha, 04/10/2026) : ni contour, ni carte
+imbriquée, ni traits entre les lignes. Les listes y sont des `DataTable` comme partout
+(artistes interprètes avec le rôle en pastille et sans numéro, l'ordre n'ayant pas de sens ;
+sorties de la Distribution), le dossier du titre une liste sans filet. Les pièces partagées
+perdent leur cadre dans une carte par la variante `in-[.section-card]:` (classe posée par
+`sectionCardClass`) : `FactList` passe en grille sans contour (faits côte à côte tant que la
+largeur le permet), `EmptyNote` en simple ligne grise, le journal sans traits.
+**Tuiles qui filtrent** (État du master) : une tuile de chiffres peut être le filtre de sa page
+(`StatTiles` `view`) ; active, elle passe à l'encre (contour `foreground`, fond `muted`), comme
+une pastille de filtre active, et un nouveau clic la retire.
+**Espacements d'un bloc** (`PageSection`, partout) : 2 px entre le titre et sa description,
+20 px entre l'en-tête (titre + description) et le contenu.
 
 ---
 
@@ -220,13 +241,16 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   **Production** (Calls, Livrables, Activations, Fichiers, Validations, Activité) —
   Activations, absente du Figma, rangée avec les Livrables. Liste et groupes :
   `lib/ui/project-sections.ts`. Chaque section a sa page (Workflow = Cadrage +
-  Stratégie + Sortie, entrée par Cadrage ; Master et Juridique vides pour l'instant) ;
+  Stratégie + Sortie, entrée par Cadrage ; Master, ouvert par son État du master ; Juridique, ouvert
+  par son État des lieux, listé seulement pour `manage_legal`) ;
   en-tête commun `ProjectPageHeader` (h2, une phrase, action à droite).
 - **Étapes d'un processus en chevrons** (`ProcessSteps`, `components/ui/`), sous
   l'en-tête, au même endroit pour chaque processus : Workflow (7 étapes numérotées,
   `WorkflowBreadcrumb`) et Juridique (État des lieux · Cadrage juridique · Confirmation ·
   Plan d'action · Suivi, son parcours interne défini par le DG le 04/10/2026, sans numéro,
-  `LegalSteps`, une URL par étape sous `/legal`).
+  `LegalSteps`, une URL par étape sous `/legal`) et Master (État du master · Brief
+  Mix/Master · Mix · Mastering · Master final, sans numéro, `SectionSteps`, une URL par
+  étape sous `/master`).
   **Deux signaux jamais mélangés** : le fond noir = la page ouverte ; la coche dans le
   rond = l'étape vraiment validée (états des `project_stages`, jamais la position de
   la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.
@@ -267,11 +291,20 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 ### Onglets et filtres de liste
 
 - **Onglets soulignés** (`TabBar`, `components/ui/tab-bar.tsx`, une seule barre) :
-  libellé gris, encre pleine quand il est actif. **Pas de filet sous la barre** : seul
-  l'onglet actif est souligné, d'un trait de 2 px qui **glisse** d'un onglet à l'autre
+  libellé gris, encre pleine quand il est actif. **Un filet gris sous toute la barre**
+  (`--border-hairline`, demande de Sacha le 05/10/2026 : sans lui la barre flottait) ;
+  l'onglet actif est souligné par-dessus, d'un trait de 2 px qui **glisse** d'un onglet à l'autre
   (`transform` seul, `--duration-slide` 240 ms, `--ease-standard` ; posé d'un coup si le
   mouvement est réduit). Demande de Sacha, 27/09/2026. Sert aux sections d'une fiche
   (`SectionTabs`) et aux vues d'un tableau (`DataTableViews`).
+- **Six onglets au plus sur une fiche, sur un seul niveau.** Au-delà, la barre déborde
+  et les derniers onglets se cachent derrière une barre de défilement. On ne crée pas de
+  second niveau (pastilles sous les onglets : on ne sait plus ce qui navigue et ce qui
+  filtre) : on **fusionne** les sections voisines en blocs (`PageSection`) d'une même page,
+  atteints par leur ancre. Fiche titre, 04/10/2026 : Vue d'ensemble (+ Variantes, Activité)
+  · Audio (+ Sessions & pistes) · Crédits (+ Splits) · Droits · Projets & sorties (+
+  Distribution) · Fichiers. Dans une page fusionnée, une section vide est une `EmptyNote`,
+  pas un `EmptyState`.
 - **Tout filtre d'un tableau est en onglets** (`DataTableViews`, exporté avec
   `DataTable`, d'après une référence de Sacha le 27/09/2026) : un onglet par vue avec
   son nombre en gris entre parenthèses, calculé par le code, au-dessus du tableau **ou de
@@ -295,6 +328,13 @@ d'abord à la Stratégie (`app/(app)/app/projects/[projectId]/strategy`,
   toujours noir. Le bleu ne sert qu'à ça : ni lien, ni bouton, ni état (les états
   restent aux `--tone-*`).
 - **Pastilles à cocher** (formats) : `FilterChip` « ink », noire une fois cochée.
+- **Longue liste de choix : un menu, pas des pastilles** (demande de Sacha, 04/10/2026). Les
+  pastilles conviennent à quelques choix visibles d'un coup (format, priorité). Au-delà
+  (les 16 rôles d'un contact du Réseau), on utilise `OptionSelect multiple` : un menu
+  déroulant où l'on coche sans le fermer, et les choix résumés dans le déclencheur.
+  **Une case à cocher à gauche de chaque choix** (`SelectItem indicator="checkbox"`), bleue
+  `--selection` une fois cochée : on voit tout de suite qu'on peut en choisir plusieurs. Le
+  menu à choix unique garde la coche à droite.
 - **Pas de cadre dans un cadre** : la page n'est pas enfermée dans une carte, les
   sections sont espacées (48 px) sans trait ; seuls les éléments (réponses, leviers,
   livrables, temps forts) et les blocs de la colonne de droite ont un contour.

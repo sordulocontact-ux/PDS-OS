@@ -9,7 +9,8 @@ export type Fact = {
 };
 
 // Label / value list in a bordered card (facts of a master, a project, an
-// artist's identity).
+// artist's identity). On a section card: no frame, the facts side by side
+// as far as the width allows.
 export function FactList({
   facts,
   emptyLabel,
@@ -23,6 +24,7 @@ export function FactList({
     <dl
       className={cn(
         "flex flex-col gap-3 rounded-xl border border-border p-4 text-sm",
+        "in-[.section-card]:grid in-[.section-card]:grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] in-[.section-card]:gap-x-6 in-[.section-card]:gap-y-4 in-[.section-card]:border-0 in-[.section-card]:p-0",
         className,
       )}
     >

@@ -4,25 +4,30 @@ import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { FileDetailsFields } from "@/components/catalog/files/file-details-fields";
-import { FileTypeIcon } from "@/components/catalog/files/file-type-icon";
+import { PendingFiles } from "@/components/catalog/files/pending-files";
 import { Button } from "@/components/ui/button";
+import { ChipChoice } from "@/components/ui/chip-choice";
 import { FormDialog } from "@/components/ui/form-dialog";
-import {
-  fileFormat,
-  formatFileSize,
-  type FileOwner,
-} from "@/lib/catalog/file-rules";
+import { readAudioDuration } from "@/lib/catalog/audio-duration";
+import { isAudioFile, type FileOwner } from "@/lib/catalog/file-rules";
+import { AUDIO_STATES, type AudioState } from "@/lib/catalog/title-rules";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { fr } from "@/lib/i18n/fr";
 
+// What the modal asks: a category and a precision (a library), or the audio
+// state the files stand for (the audio versions of a title).
+export type AddFilesMode =
+  | { kind: "library"; suggested: string | null }
+  | { kind: "audio"; defaultState: AudioState };
+
 // Files just dropped or picked: where to classify them, then Ajouter. They
-// share the category and the precision; once recorded, the page refreshes
-// from the server and they appear in Tous and in their category.
+// share the category and the precision (or the audio state); once recorded,
+// the page refreshes from the server and shows them.
 export function AddFilesDialog({
   organizationId,
   owner,
   files,
-  suggested,
+  mode,
   onClose,
   onAdded,
 }: {
@@ -30,26 +35,27 @@ export function AddFilesDialog({
   owner: FileOwner;
   // null: closed.
   files: File[] | null;
-  suggested: string | null;
+  mode: AddFilesMode;
   onClose: () => void;
   onAdded: (category: string) => void;
 }) {
-  const t = fr.catalogFiles;
+  const t =
+    mode.kind === "audio" ? fr.masterPage.audio.dialog : fr.catalogFiles.add;
   const count = files?.length ?? 0;
   return (
     <FormDialog
       open={files !== null}
       onOpenChange={(open) => !open && onClose()}
-      title={t.add.title(count)}
-      description={count > 1 ? t.add.descriptionMany : t.add.description}
-      closeLabel={t.close}
+      title={fr.catalogFiles.add.title(count)}
+      description={count > 1 ? t.descriptionMany : t.description}
+      closeLabel={fr.catalogFiles.close}
     >
       {files && (
         <AddFilesForm
           organizationId={organizationId}
           owner={owner}
           files={files}
-          suggested={suggested}
+          mode={mode}
           onCancel={onClose}
           onAdded={onAdded}
         />
@@ -62,21 +68,30 @@ function AddFilesForm({
   organizationId,
   owner,
   files,
-  suggested,
+  mode,
   onCancel,
   onAdded,
 }: {
   organizationId: string;
   owner: FileOwner;
   files: File[];
-  suggested: string | null;
+  mode: AddFilesMode;
   onCancel: () => void;
   onAdded: (category: string) => void;
 }) {
   const t = fr.catalogFiles;
+  const a = fr.masterPage.audio;
+  const audio = mode.kind === "audio";
   // Files still to send: after a partial failure, only the failed ones.
   const [remaining, setRemaining] = useState(files);
-  const [category, setCategory] = useState<string | null>(suggested);
+  const [category, setCategory] = useState<string | null>(
+    audio ? "audio" : mode.suggested,
+  );
+  const [audioState, setAudioState] = useState<AudioState>(
+    audio ? mode.defaultState : "demo",
+  );
+  // Dropped files are not filtered by the picker's `accept`.
+  const notAudio = audio && remaining.some((file) => !isAudioFile(file));
   const [description, setDescription] = useState("");
   const [categoryError, setCategoryError] = useState<string>();
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +104,7 @@ function AddFilesForm({
       setCategoryError(t.fields.categoryRequired);
       return;
     }
+    if (notAudio) return;
     setError(null);
     startTransition(async () => {
       const failed: File[] = [];
@@ -97,13 +113,18 @@ function AddFilesForm({
       // One after the other: each upload is its own request, and the
       // progress reads "Envoi 2/3…".
       for (const file of remaining) {
-        const result = await uploadCatalogFile({
-          organizationId,
-          owner,
-          category,
-          description,
-          file,
-        });
+        const result = await uploadCatalogFile(
+          audio
+            ? {
+                organizationId,
+                owner,
+                category,
+                file,
+                audioState,
+                durationSeconds: await readAudioDuration(file),
+              }
+            : { organizationId, owner, category, description, file },
+        );
         if (!result.ok) {
           failed.push(file);
           lastError = result.error;
@@ -123,37 +144,36 @@ function AddFilesForm({
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5">
-      <ul className="flex flex-col gap-2">
-        {remaining.map((file, index) => (
-          <li
-            key={`${file.name}-${index}`}
-            className="flex min-w-0 items-center gap-3"
-          >
-            <FileTypeIcon file={{ fileName: file.name, mime: file.type }} />
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate text-sm font-medium">{file.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {[fileFormat(file.name, file.type), formatFileSize(file.size)]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <FileDetailsFields
-        kind={owner.kind}
-        category={category}
-        onCategory={(value) => {
-          setCategory(value);
-          setCategoryError(undefined);
-        }}
-        description={description}
-        onDescription={setDescription}
-        categoryError={categoryError}
-        disabled={pending}
-      />
-      <p className="text-xs text-muted-foreground">{t.hint}</p>
+      <PendingFiles files={remaining} />
+      {audio ? (
+        <fieldset disabled={pending} className="contents">
+          <ChipChoice
+            name="audioState"
+            legend={a.stateLabel}
+            options={AUDIO_STATES.map((value) => ({
+              value,
+              label: fr.catalog.audioStates[value],
+            }))}
+            value={audioState}
+            onChange={(value) => value && setAudioState(value)}
+          />
+        </fieldset>
+      ) : (
+        <FileDetailsFields
+          kind={owner.kind}
+          category={category}
+          onCategory={(value) => {
+            setCategory(value);
+            setCategoryError(undefined);
+          }}
+          description={description}
+          onDescription={setDescription}
+          categoryError={categoryError}
+          disabled={pending}
+        />
+      )}
+      <p className="text-xs text-muted-foreground">{audio ? a.hint : t.hint}</p>
+      {notAudio && <FormMessage kind="error">{a.notAudio}</FormMessage>}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
@@ -162,7 +182,7 @@ function AddFilesForm({
         <Button
           type="submit"
           size="lg"
-          disabled={pending}
+          disabled={pending || notAudio}
           aria-busy={pending || undefined}
         >
           {pending

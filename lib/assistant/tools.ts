@@ -15,6 +15,11 @@ import { feedbackReviewTools } from "@/lib/assistant/propose/feedback-review";
 import { proposeMasterTool } from "@/lib/assistant/propose/master";
 import { proposeProjectTool } from "@/lib/assistant/propose/project";
 import { uniqueSources, type Source } from "@/lib/assistant/sources";
+import { fillPageTestDataTool } from "@/lib/assistant/test-data/fill-tool";
+import {
+  createTestDataTool,
+  isTestDataEnabled,
+} from "@/lib/assistant/test-data/tool";
 import { verbatimFrom } from "@/lib/assistant/verbatim";
 import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
@@ -31,6 +36,8 @@ import { createClient } from "@/lib/supabase/server";
  * `userTexts`: what the user typed, the only place numbers and dates of a
  * draft may come from. `pagePath`: the page PO was opened from, joined to a
  * feedback draft. The director's feedback tools exist only for read_feedback.
+ * Outside production only, create_test_data and fill_page_test_data write
+ * fake records, the open page by default (§ 3 ter).
  */
 export function createAssistantTools(
   access: Access,
@@ -46,6 +53,12 @@ export function createAssistantTools(
     propose_project: proposeProjectTool(context),
     propose_feedback: proposeFeedbackTool({ ...context, pagePath }),
     ...(can(access, "read_feedback") ? feedbackReviewTools(context) : {}),
+    ...(isTestDataEnabled
+      ? {
+          create_test_data: createTestDataTool(access, pagePath),
+          fill_page_test_data: fillPageTestDataTool(access, pagePath),
+        }
+      : {}),
 
     find_projects: tool({
       description:

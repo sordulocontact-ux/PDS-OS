@@ -36,3 +36,21 @@ export const projectTypeHue: Record<ProjectType, Hue> = {
   content: "lime",
   event: "sand",
 };
+
+/** A project's titles in its order (Juridique): the same title keeps the same
+ * hue on every row, so its lines are found at a glance; cycles past ten. */
+const titleHues: Hue[] = [
+  "sky",
+  "violet",
+  "orange",
+  "teal",
+  "pink",
+  "lime",
+  "indigo",
+  "yellow",
+  "sand",
+  "slate",
+];
+
+export const titleHue = (position: number): Hue =>
+  titleHues[position % titleHues.length] ?? "slate";

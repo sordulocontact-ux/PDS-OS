@@ -1,32 +1,43 @@
-import Link from "next/link";
-
+import {
+  DataTable,
+  DataTableBody,
+  DataTableCell,
+  DataTableHead,
+  DataTableHeader,
+  DataTableLink,
+  DataTableRow,
+} from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import type { Credit } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Performing artists of the master in credit order, each a link to its page.
+// Performing artists of the master, listed like every table (no number: the
+// order carries no meaning here), each a link to its page, the role in a tag.
 export function MasterArtists({ credits }: { credits: Credit[] }) {
+  const t = fr.masterPage.artistsTable;
   return (
-    <ol className="divide-y divide-border rounded-xl border border-border">
-      {credits.map((credit, index) => (
-        <li
-          key={credit.artistId}
-          className="relative flex items-center gap-3 px-4 py-3"
-        >
-          <span className="w-4 text-sm text-muted-foreground tabular-nums">
-            {index + 1}
-          </span>
-          <Link
-            href={routes.artist(credit.artistId)}
-            className="min-w-0 flex-1 truncate text-sm font-medium no-underline after:absolute after:inset-0 hover:underline"
-          >
-            {credit.name}
-          </Link>
-          <span className="text-xs text-muted-foreground">
-            {fr.catalog.artistPicker.roles[credit.role]}
-          </span>
-        </li>
-      ))}
-    </ol>
+    <DataTable>
+      <DataTableHeader>
+        <DataTableHead>{t.artist}</DataTableHead>
+        <DataTableHead fill>{t.role}</DataTableHead>
+      </DataTableHeader>
+      <DataTableBody>
+        {credits.map((credit) => (
+          <DataTableRow key={credit.artistId}>
+            <DataTableCell>
+              <DataTableLink href={routes.artist(credit.artistId)}>
+                {credit.name}
+              </DataTableLink>
+            </DataTableCell>
+            <DataTableCell fill>
+              <StatusBadge tone="neutral" size="sm">
+                {fr.catalog.artistPicker.roles[credit.role]}
+              </StatusBadge>
+            </DataTableCell>
+          </DataTableRow>
+        ))}
+      </DataTableBody>
+    </DataTable>
   );
 }

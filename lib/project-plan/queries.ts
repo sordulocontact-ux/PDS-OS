@@ -56,6 +56,14 @@ export type PlanMilestone = {
   kind: string;
 };
 
+export type PlanCall = {
+  id: string;
+  title: string;
+  // Paris day of the call, for the planning; the time is formatted on screen.
+  date: string;
+  occurredAt: string;
+};
+
 export type ProjectPlan = {
   today: string;
   referenceDate: string | null;
@@ -65,6 +73,7 @@ export type ProjectPlan = {
   deliverables: PlanDeliverable[];
   milestones: PlanMilestone[];
   tasks: PlanTask[];
+  calls: PlanCall[];
 };
 
 const isFamily = (value: string): value is LeverFamily =>
@@ -99,6 +108,7 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
     tasksRes,
     releaseRes,
     peopleRes,
+    callsRes,
   ] = await Promise.all([
     supabase.from("projects").select("due_date").eq("id", projectId).single(),
     supabase
@@ -131,6 +141,11 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
       .limit(1)
       .maybeSingle(),
     supabase.from("people").select("id, first_name, last_name"),
+    supabase
+      .from("calls")
+      .select("id, title, occurred_at")
+      .eq("project_id", projectId)
+      .order("occurred_at"),
   ]);
 
   const names = new Map(
@@ -200,6 +215,12 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
       title: t.title,
       dueDate: t.due_date,
       done: t.status === "done",
+    })),
+    calls: (callsRes.data ?? []).map((c) => ({
+      id: c.id,
+      title: c.title,
+      date: todayInParis(new Date(c.occurred_at)),
+      occurredAt: c.occurred_at,
     })),
   };
 }

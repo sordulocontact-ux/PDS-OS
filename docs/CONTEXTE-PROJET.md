@@ -95,9 +95,14 @@ tickets du 30/09 (Cadrage, Master, Juridique 01 à 08) :
   production.
 - **Étendre plutôt que dupliquer** ce qui existe déjà : Réseau (ticket 02), Contrats
   (ticket 03), Splits de la fiche master (ticket 04), Déclarations SACEM / SCPP (ticket 06).
+- **Une personne à la fois artiste du catalogue et créditée** (Dioo, interprète et auteur
+  dans le cas Piégée) : sa ligne d'interprète est connue par sa fiche artiste, mais sa ligne
+  d'auteur proposerait « Ajouter au Réseau », ce qui recréerait un doublon. Les tickets ne
+  disent pas comment relier les deux qualités d'une même personne.
 - **Qui pilote le Juridique** : les tickets confient des branches à une RAF / juriste, un
   poste qui n'existe pas (§ 12). C'est une exception à « seul le responsable du projet
-  écrit ».
+  écrit ». *Choix par défaut en attendant (04/10/2026)* : une permission `manage_legal`
+  donnée au DG et aux chefs de projet (`docs/ARCHITECTURE.md` § 8 sexies).
 
 Modules transversaux présents dans la navigation du prototype : Accueil, Projets,
 Talents, Musique, Budgets, Calls, Idées, Équipe, Paramètres. Onglets au sein d'un

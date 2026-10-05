@@ -73,10 +73,7 @@ export default async function MasterLayout({
         }
       />
 
-      <MasterTabs
-        masterId={master.id}
-        canSeeSplits={can(access, "manage_catalog")}
-      />
+      <MasterTabs masterId={master.id} />
       <div className="-mt-2 flex flex-col gap-[var(--section-gap)]">
         {children}
       </div>

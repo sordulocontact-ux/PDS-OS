@@ -1,18 +1,23 @@
 "use client";
 
-import { IconFile, IconPaperclip } from "nucleo-sharp-essential";
+import { IconFile, IconPaperclip, IconPlus } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { createContext, use, useEffect, useRef, useState } from "react";
 
-import { AddFilesDialog } from "@/components/catalog/files/add-files-dialog";
+import {
+  AddFilesDialog,
+  type AddFilesMode,
+} from "@/components/catalog/files/add-files-dialog";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { useFileDrop } from "@/components/ui/use-file-drop";
 import {
+  AUDIO_ACCEPT,
   suggestedCategory,
   type FileOwner,
   type FileView,
 } from "@/lib/catalog/file-rules";
+import type { AudioState } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
 
@@ -32,21 +37,31 @@ const ImportContext = createContext<ImportValue | null>(null);
  * the modal that asks their category and precision. The view they were dropped on is the
  * category offered first. A file dropped next to the zone is ignored rather
  * than opened by the browser (which would leave the page).
+ * The audio versions of a title (`audio`) go the same way: the modal asks
+ * their audio state instead.
  */
 export function FileImport({
   organizationId,
   owner,
-  view,
-  basePath,
+  onAdded,
   children,
+  ...target
 }: {
   organizationId: string;
   owner: FileOwner;
-  view: FileView;
-  // The library's page: views are `?category=` on it.
-  basePath: string;
+  // Once recorded, for a page other than the owner's (its own refreshes
+  // from the server action).
+  onAdded?: () => void;
   children: React.ReactNode;
-}) {
+} & (
+  | {
+      view: FileView;
+      // The library's page: views are `?category=` on it.
+      basePath: string;
+      audio?: never;
+    }
+  | { audio: { defaultState: AudioState }; view?: never; basePath?: never }
+)) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[] | null>(null);
@@ -71,10 +86,17 @@ export function FileImport({
 
   function added(category: string) {
     setFiles(null);
+    onAdded?.();
     // Added from another category's view: show it where it now lives.
-    if (view !== "all" && view !== category)
-      router.push(viewHref(basePath, { category }));
+    if (target.view && target.view !== "all" && target.view !== category)
+      router.push(viewHref(target.basePath, { category }));
   }
+  const mode: AddFilesMode = target.audio
+    ? { kind: "audio", defaultState: target.audio.defaultState }
+    : {
+        kind: "library",
+        suggested: files && suggestedCategory(owner.kind, target.view, files),
+      };
 
   return (
     <ImportContext
@@ -89,6 +111,7 @@ export function FileImport({
         ref={input}
         type="file"
         multiple
+        accept={target.audio ? AUDIO_ACCEPT : undefined}
         className="sr-only"
         tabIndex={-1}
         aria-hidden
@@ -103,7 +126,7 @@ export function FileImport({
         organizationId={organizationId}
         owner={owner}
         files={files}
-        suggested={files && suggestedCategory(owner.kind, view, files)}
+        mode={mode}
         onClose={() => setFiles(null)}
         onAdded={added}
       />
@@ -140,13 +163,33 @@ export function FileDropArea({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** "Ajouter un fichier", at the end of the library's tabs. */
-export function FileImportButton() {
+/**
+ * "Ajouter un fichier", at the end of the library's tabs. `compact`: the
+ * add button of a block (outline, small, +), like "Ajouter une session".
+ * `row`: the action of a table row (outline, xs, above the row's stretched
+ * link), like the Master's "Ajouter les pistes".
+ */
+export function FileImportButton({
+  label = fr.catalogFiles.upload.add,
+  compact = false,
+  row = false,
+}: {
+  label?: string;
+  compact?: boolean;
+  row?: boolean;
+}) {
   const context = use(ImportContext);
+  const Icon = compact ? IconPlus : IconPaperclip;
   return (
-    <Button type="button" size="lg" onClick={() => context?.pick()}>
-      <IconPaperclip aria-hidden data-icon="inline-start" />
-      {fr.catalogFiles.upload.add}
+    <Button
+      type="button"
+      variant={compact || row ? "outline" : "default"}
+      size={row ? "xs" : compact ? "sm" : "lg"}
+      className={row ? "relative z-10" : undefined}
+      onClick={() => context?.pick()}
+    >
+      {!row && <Icon aria-hidden data-icon="inline-start" />}
+      {label}
     </Button>
   );
 }

@@ -25,7 +25,68 @@ export const assistant = {
     propose_artist: "Préparation de la fiche artiste",
     propose_master: "Préparation du titre",
     propose_project: "Préparation du projet",
+    create_test_data: "Création des données de test",
+    fill_page_test_data: "Remplissage de la page avec des données de test",
   } as Record<string, string>,
+  // Development only: fake records written straight away (docs/ASSISTANT.md § 3 ter).
+  testData: {
+    notes: "Données de test créées par PO (fictives).",
+    forbidden:
+      "Création impossible : votre poste ne permet pas de créer ces éléments.",
+    noManager:
+      "Création du projet impossible : aucun chef de projet n'est disponible dans l'organisation.",
+    failed: (what: string) =>
+      `La création ${what} a échoué ; rien d'autre n'a été créé ensuite.`,
+    what: {
+      artist: "de l'artiste de test",
+      master: "du titre de test",
+      project: "du projet de test",
+    },
+    artistCreated: (name: string) => `Artiste de test « ${name} » créé.`,
+    masterCreated: (title: string, artist: string) =>
+      `Titre de test « ${title} » créé, crédité à ${artist}.`,
+    projectCreated: (title: string, kind: string, manager: string) =>
+      `Projet de test « ${title} » créé (${kind}), transmis à ${manager}.`,
+    // Filling the open page (fill_page_test_data).
+    noPage:
+      "Aucune fiche de titre, d'artiste ou de projet n'est ouverte : rien à compléter ici.",
+    noTitles: (title: string) =>
+      `Le projet « ${title} » n'a aucun titre : ses pages (Master, Juridique) se lisent sur ses titres, il n'y a rien à compléter.`,
+    filled: (what: string, list: string) =>
+      `Complété sur ${what} avec des données fictives : ${list}.`,
+    untouched: (list: string) => `Laissé tel quel (déjà rempli) : ${list}.`,
+    notFilled: (list: string) => `Échec, non complété : ${list}.`,
+    nothingToFill: (what: string) =>
+      `Rien à compléter sur ${what} : chaque section a déjà des données.`,
+    distribution:
+      "La distribution vient de la Sortie d'un projet lancé : elle reste vide.",
+    masterSections: {
+      core: "ISRC, durée et état audio",
+      sessions: "sessions et pistes",
+      credits: "contributeurs",
+      masterSplits: "splits master (100 %)",
+      publishingSplits: "splits édition (100 %)",
+      rights: "ISWC et ℗",
+      declarations: "déclarations SACEM, SCPP, SPPF, ADAMI, SPEDIDAM",
+      variant: "versions (Instrumental)",
+      project: "projets (un single)",
+      audio: "audio (Master final)",
+      artwork: "pochette",
+    },
+    projectSections: {
+      network: "ingénieurs de mix et de mastering ajoutés au Réseau et reliés",
+    },
+    artistSections: {
+      identity: "nom civil et pays",
+      bio: "biographie",
+      contacts: "contacts (manager, presse)",
+      masters: "titres",
+    },
+    theMaster: (title: string) => `le titre « ${title} »`,
+    theArtist: (name: string) => `l'artiste ${name}`,
+    theProject: (title: string, count: number) =>
+      `${count > 1 ? `les ${count} titres` : "le titre"} du projet « ${title} »`,
+  },
   // Catalog facts for the model and the "Données utilisées" list.
   catalog: {
     artist: "Artiste",

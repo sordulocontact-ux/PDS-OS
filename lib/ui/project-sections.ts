@@ -6,7 +6,7 @@ import { fr } from "@/lib/i18n/fr";
 //   icons (Figma "Double sidebar"), every section listed by group;
 // - false: one row of tabs under the project header, like the other detail
 //   pages (artist, title); the main sidebar keeps its width.
-export const DOUBLE_SIDEBAR = true;
+export const DOUBLE_SIDEBAR = false;
 
 // Titled groups of the sidebar (Figma "PDS OS", node 1510:3096). The tabs
 // ignore them: a tab bar has no headings.
@@ -35,7 +35,11 @@ const below =
 // Workflow covers Cadrage/Stratégie/Conception/Sortie, entered through
 // Cadrage; Master and Juridique are the two other processes. Shared by the
 // sidebar and the tabs, so both list the same sections in the same order.
-export function projectSections(projectId: string): ProjectSection[] {
+// Juridique is listed only for a viewer holding manage_legal (`legal`).
+export function projectSections(
+  projectId: string,
+  { legal }: { legal: boolean },
+): ProjectSection[] {
   const t = fr.shell.project.sidebar;
   const section = (
     key: string,
@@ -73,7 +77,9 @@ export function projectSections(projectId: string): ProjectSection[] {
       group: "process",
     },
     section("master", t.master, routes.projectMaster(projectId), "process"),
-    section("legal", t.legal, routes.projectLegal(projectId), "process"),
+    ...(legal
+      ? [section("legal", t.legal, routes.projectLegal(projectId), "process")]
+      : []),
     section("work", t.work, routes.projectWork(projectId), "steering"),
     section(
       "team",

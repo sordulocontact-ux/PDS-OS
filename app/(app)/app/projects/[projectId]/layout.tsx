@@ -9,13 +9,18 @@ import {
 } from "@/components/projects/project-sidebar";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
+import { SectionSteps } from "@/components/projects/section-steps";
 import { WorkflowBreadcrumb } from "@/components/projects/workflow-breadcrumb";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { hasPendingValidation } from "@/lib/framing/related";
+import { fr } from "@/lib/i18n/fr";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { isFramingValidated } from "@/lib/projects/types";
+import { masterSteps } from "@/lib/ui/master-steps";
 import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -40,6 +45,7 @@ export default async function ProjectLayout({
   if (!project) notFound();
 
   const canEdit = canEditProject(access, project);
+  const canSeeLegal = can(access, "manage_legal");
 
   // "Demander la validation" sits on the title's own line, only while the
   // Cadrage is in progress and nothing is already awaiting a decision — the
@@ -56,7 +62,11 @@ export default async function ProjectLayout({
       {/* Sits right against the main sidebar (collapsed to icons on a
           project page), so the two read as one "double sidebar" (Figma). */}
       {DOUBLE_SIDEBAR && project.stages.length > 0 && (
-        <ProjectSidebar projectId={project.id} projectTitle={project.title} />
+        <ProjectSidebar
+          projectId={project.id}
+          projectTitle={project.title}
+          canSeeLegal={canSeeLegal}
+        />
       )}
 
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pt-6 md:px-8 md:pt-8">
@@ -93,9 +103,10 @@ export default async function ProjectLayout({
               <ProjectSidebarMobile
                 projectId={project.id}
                 projectTitle={project.title}
+                canSeeLegal={canSeeLegal}
               />
             ) : (
-              <ProjectTabs projectId={project.id} />
+              <ProjectTabs projectId={project.id} canSeeLegal={canSeeLegal} />
             )}
             {/* The steps of the open process, if any: each hides itself
                 outside its section. */}
@@ -108,7 +119,13 @@ export default async function ProjectLayout({
                 isFramingValidated(project.stages) ? [] : ["strategy"]
               }
             />
-            <LegalSteps projectId={project.id} />
+            <SectionSteps
+              base={routes.projectMaster(project.id)}
+              label={fr.masterWorkflow.steps.label}
+              soon={fr.masterWorkflow.steps.soon}
+              steps={masterSteps(project.id)}
+            />
+            {canSeeLegal && <LegalSteps projectId={project.id} />}
           </>
         )}
 

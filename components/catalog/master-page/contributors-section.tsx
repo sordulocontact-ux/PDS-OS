@@ -40,6 +40,7 @@ export function ContributorsSection({
 
   return (
     <PageSection
+      card
       id="contributors"
       title={t.title}
       description={t.description}

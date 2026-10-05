@@ -16,6 +16,8 @@ export function LoadedFormButton<T>({
   label,
   icon: Icon,
   variant = "default",
+  size = "lg",
+  className,
   title,
   description,
   closeLabel,
@@ -25,6 +27,10 @@ export function LoadedFormButton<T>({
   label: string;
   icon?: ComponentType<{ "aria-hidden"?: boolean; "data-icon"?: string }>;
   variant?: "default" | "outline";
+  // "xs" inside a table row (with `className="relative z-10"` above the
+  // row's stretched link).
+  size?: "lg" | "sm" | "xs";
+  className?: string;
   title: string;
   description: string;
   closeLabel: string;
@@ -38,8 +44,9 @@ export function LoadedFormButton<T>({
     <>
       <Button
         type="button"
-        size="lg"
+        size={size}
         variant={variant}
+        className={className}
         onClick={() => setOpen(true)}
       >
         {Icon && <Icon aria-hidden data-icon="inline-start" />}

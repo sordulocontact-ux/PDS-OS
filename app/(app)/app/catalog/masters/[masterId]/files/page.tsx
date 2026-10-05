@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { FileLibrary } from "@/components/catalog/files/file-library";
+import { sectionCardClass } from "@/components/ui/section-card";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -33,16 +34,19 @@ export default async function MasterFilesPage({
 
   if (error)
     return <FormMessage kind="error">{fr.catalogFiles.loadError}</FormMessage>;
+  // On a white card, like every block of the title page.
   return (
-    <FileLibrary
-      owner={owner}
-      organizationId={canReadContracts ? access.organizationId : null}
-      canReadContracts={canReadContracts}
-      files={files}
-      view={fileViewOf("master", canReadContracts, query.category)}
-      basePath={routes.masterFiles(masterId)}
-      emptyBody={m.emptyBody}
-      emptyBodyReadOnly={m.emptyBodyReadOnly}
-    />
+    <div className={sectionCardClass}>
+      <FileLibrary
+        owner={owner}
+        organizationId={canReadContracts ? access.organizationId : null}
+        canReadContracts={canReadContracts}
+        files={files}
+        view={fileViewOf("master", canReadContracts, query.category)}
+        basePath={routes.masterFiles(masterId)}
+        emptyBody={m.emptyBody}
+        emptyBodyReadOnly={m.emptyBodyReadOnly}
+      />
+    </div>
   );
 }

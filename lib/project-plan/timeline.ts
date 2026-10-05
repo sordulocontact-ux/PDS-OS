@@ -2,7 +2,7 @@ import { routes } from "@/lib/auth/redirects";
 import type { ProjectPlan } from "@/lib/project-plan/queries";
 
 export type TimelineKind =
-  "milestone" | "deliverable" | "task" | "release" | "project_due";
+  "milestone" | "call" | "deliverable" | "task" | "release" | "project_due";
 
 export type TimelineItem = {
   key: string;
@@ -12,6 +12,8 @@ export type TimelineItem = {
   // Milestone type key (strategy calendar kinds), for its badge.
   milestoneKind?: string;
   done?: boolean;
+  // A call's timestamp, for its time of day.
+  occurredAt?: string;
   href: string;
 };
 
@@ -22,8 +24,9 @@ const kindOrder: Record<TimelineKind, number> = {
   release: 0,
   project_due: 1,
   milestone: 2,
-  deliverable: 3,
-  task: 4,
+  call: 3,
+  deliverable: 4,
+  task: 5,
 };
 
 /** Every dated thing of the project, merged and grouped by month (code). */
@@ -42,6 +45,14 @@ export function buildTimeline(
       title: m.title,
       milestoneKind: m.kind,
       href: strategy,
+    })),
+    ...plan.calls.map((c) => ({
+      key: `c-${c.id}`,
+      date: c.date,
+      kind: "call" as const,
+      title: c.title,
+      occurredAt: c.occurredAt,
+      href: routes.projectCall(projectId, c.id),
     })),
     ...plan.deliverables.flatMap((d) =>
       d.dueDate

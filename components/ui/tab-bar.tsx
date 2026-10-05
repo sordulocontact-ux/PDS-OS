@@ -25,9 +25,9 @@ const samePlace = (a: Position | null, b: Position | null) =>
 const lastPositions = new Map<string, Position & { at: number }>();
 const REMOUNT_WINDOW_MS = 1000;
 
-// Underlined tabs (docs/DESIGN.md § 4, « Onglets »): no rule under the bar,
-// only a 2 px indicator under the current tab, sliding from one tab to the
-// next (transform only; placed at once when motion is reduced).
+// Underlined tabs (docs/DESIGN.md § 4, « Onglets »): a hairline under the
+// whole bar, and a 2 px indicator over it under the current tab, sliding from
+// one tab to the next (transform only; placed at once when motion is reduced).
 export function TabBar({ label, items }: { label: string; items: TabBarItem[] }) {
   const listRef = useRef<HTMLUListElement>(null);
   const indicatorRef = useRef<HTMLSpanElement>(null);
@@ -87,11 +87,12 @@ export function TabBar({ label, items }: { label: string; items: TabBarItem[] })
   }, [active, label]);
 
   const Bar = items.some((item) => item.href) ? "nav" : "div";
+  // The rule is an inset shadow, not a border: the indicator is drawn over it.
   return (
     <Bar
       aria-label={label}
       role={Bar === "div" ? "group" : undefined}
-      className="-mx-4 min-w-0 overflow-x-auto px-4 md:mx-0 md:px-0"
+      className="-mx-4 min-w-0 overflow-x-auto px-4 shadow-[inset_0_-1px_0_var(--border-hairline)] md:mx-0 md:px-0"
     >
       {/* The positioned box: tabs are measured from it. */}
       <div className="relative w-fit">

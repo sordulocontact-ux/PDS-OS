@@ -7,7 +7,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
-import { ChipChoice, ChipMultiChoice } from "@/components/ui/chip-choice";
+import { ChipChoice } from "@/components/ui/chip-choice";
 import { fr } from "@/lib/i18n/fr";
 import { saveNetworkContact } from "@/lib/network/actions";
 import {
@@ -16,6 +16,7 @@ import {
   type NetworkContactValues,
   type NetworkFormOptions,
   type NetworkKind,
+  type NetworkRole,
 } from "@/lib/network/types";
 
 /**
@@ -25,12 +26,18 @@ import {
  */
 export function ContactForm({
   contact,
+  initial,
+  stay = false,
   options,
   onSaved,
   onCancel,
 }: {
   // Absent: a new contact.
   contact?: NetworkContactValues;
+  // A new contact already known by name and roles (a credit of a title).
+  initial?: { name: string; roles: NetworkRole[]; artistId?: string | null };
+  // Created from another page: stay there instead of opening the contact.
+  stay?: boolean;
   options: NetworkFormOptions;
   onSaved: (id: string) => void;
   onCancel: () => void;
@@ -54,6 +61,7 @@ export function ContactForm({
   return (
     <form action={formAction} className="flex flex-col gap-5">
       {contact && <input type="hidden" name="id" value={contact.id} />}
+      {stay && <input type="hidden" name="stay" value="1" />}
       <ChipChoice
         name="kind"
         legend={t.kind}
@@ -71,25 +79,26 @@ export function ContactForm({
         maxLength={200}
         autoComplete="off"
         placeholder={t.namePlaceholder[kind]}
-        defaultValue={contact?.name}
+        defaultValue={contact?.name ?? initial?.name}
         error={error?.field === "name" ? error.error : undefined}
       />
-      <ChipMultiChoice
+      <OptionSelect
+        multiple
         name="roles"
-        legend={t.roles}
-        hint={t.rolesHint}
-        options={NETWORK_ROLES.map((value) => ({
-          value,
-          label: fr.network.roles[value],
-        }))}
-        defaultValue={contact?.roles ?? []}
+        label={t.roles}
+        placeholder={t.rolesPlaceholder}
+        items={Object.fromEntries(
+          NETWORK_ROLES.map((value) => [value, fr.network.roles[value]]),
+        )}
+        defaultValue={contact?.roles ?? initial?.roles ?? []}
+        // The database accepts up to 8 roles (network_contacts_roles_check).
+        max={8}
         error={error?.field === "roles" ? error.error : undefined}
       />
       {kind === "person" && organizations.length > 0 && (
         <OptionSelect
           name="parentId"
           label={`${t.parent} · ${t.parentNote}`}
-          hint={t.parentHint}
           items={{
             none: t.parentNone,
             ...Object.fromEntries(organizations.map((o) => [o.id, o.name])),
@@ -101,12 +110,11 @@ export function ContactForm({
         <OptionSelect
           name="artistId"
           label={`${t.artist} · ${t.artistNote}`}
-          hint={t.artistHint}
           items={{
             none: t.artistNone,
             ...Object.fromEntries(options.artists.map((a) => [a.id, a.name])),
           }}
-          defaultValue={contact?.artistId ?? "none"}
+          defaultValue={contact?.artistId ?? initial?.artistId ?? "none"}
         />
       )}
       <div className="grid gap-5 sm:grid-cols-2">

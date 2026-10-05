@@ -275,7 +275,7 @@ export const catalog = {
   },
 
   masters: {
-    title: "Titres",
+    title: "Catalogue",
     subtitle:
       "Les morceaux de PDS, de la maquette au master final, avec leurs identifiants et leurs sorties.",
     newMaster: "Nouveau titre",
@@ -331,7 +331,7 @@ export const catalog = {
   },
 
   master: {
-    back: "Tous les titres",
+    back: "Tout le catalogue",
     backTo: (title: string) => `Retour à « ${title} »`,
     facts: "Informations",
     credits: "Crédits",

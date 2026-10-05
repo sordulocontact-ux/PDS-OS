@@ -13,6 +13,18 @@ export const AUDIO_STATES = [
 ] as const;
 export type AudioState = (typeof AUDIO_STATES)[number];
 
+// Audio versions of a title, most advanced state first, then newest: the
+// latest master on top.
+export function byAudioProgress<
+  T extends { audioState: AudioState | null; createdAt: string },
+>(files: T[]): T[] {
+  const rank = (file: T) =>
+    file.audioState ? AUDIO_STATES.indexOf(file.audioState) : -1;
+  return files.toSorted(
+    (a, b) => rank(b) - rank(a) || b.createdAt.localeCompare(a.createdAt),
+  );
+}
+
 export function isAudioState(value: unknown): value is AudioState {
   return (AUDIO_STATES as readonly unknown[]).includes(value);
 }

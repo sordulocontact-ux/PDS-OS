@@ -107,30 +107,47 @@ function SelectLabel({
   )
 }
 
+// indicator "check" (default): a tick on the right of the chosen item.
+// "checkbox": a box on the left of every item, filled in the selection blue
+// once ticked — tells at a glance that several can be chosen (multiple).
 function SelectItem({
   className,
   children,
+  indicator = "check",
   ...props
-}: SelectPrimitive.Item.Props) {
+}: SelectPrimitive.Item.Props & { indicator?: "check" | "checkbox" }) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "group/item relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1 pl-1.5 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        indicator === "check" ? "pr-8" : "gap-2.5 pr-2",
         className
       )}
       {...props}
     >
+      {indicator === "checkbox" && (
+        // Drawn, not a native input: an option is not a form control of its
+        // own (the list carries aria-multiselectable, the option aria-selected).
+        <span
+          aria-hidden
+          className="flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-[color:var(--border-strong)] group-data-selected/item:border-selection group-data-selected/item:bg-selection"
+        >
+          <IconCheck className="size-3 text-[color:var(--po-white)] opacity-0 group-data-selected/item:opacity-100" />
+        </span>
+      )}
       <SelectPrimitive.ItemText className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">
         {children}
       </SelectPrimitive.ItemText>
-      <SelectPrimitive.ItemIndicator
-        render={
-          <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
-        }
-      >
-        <IconCheck className="pointer-events-none" />
-      </SelectPrimitive.ItemIndicator>
+      {indicator === "check" && (
+        <SelectPrimitive.ItemIndicator
+          render={
+            <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
+          }
+        >
+          <IconCheck className="pointer-events-none" />
+        </SelectPrimitive.ItemIndicator>
+      )}
     </SelectPrimitive.Item>
   )
 }

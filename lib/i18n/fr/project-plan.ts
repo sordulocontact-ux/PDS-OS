@@ -53,13 +53,14 @@ export const projectPlan = {
   planning: {
     title: "Planning",
     description:
-      "Tout ce qui est daté dans le projet, dans l'ordre : temps forts, échéances et sortie.",
+      "Tout ce qui est daté dans le projet, dans l'ordre : temps forts, calls, échéances et sortie.",
     reference: (date: string) => `Décompte depuis la sortie du ${date}`,
     noReference:
       "Aucune date de sortie connue (onglet Sortie ou échéance du projet) : pas de décompte.",
     today: "Aujourd'hui",
     kinds: {
       milestone: "Temps fort",
+      call: "Call",
       deliverable: "Livrable",
       task: "Tâche",
       release: "Sortie prévue",
@@ -68,6 +69,6 @@ export const projectPlan = {
     taskDone: "Faite",
     emptyTitle: "Rien de daté pour l'instant",
     emptyBody:
-      "Les temps forts se saisissent dans la Stratégie ; les échéances des livrables et des tâches s'y ajoutent ici.",
+      "Les temps forts se saisissent dans la Stratégie ; les calls et les échéances des livrables et des tâches s'y ajoutent ici.",
   },
 } as const;

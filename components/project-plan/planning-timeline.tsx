@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { Fragment } from "react";
 
-import { formatMonth, formatWeekday } from "@/components/project-plan/format";
+import {
+  formatMonth,
+  formatTime,
+  formatWeekday,
+} from "@/components/project-plan/format";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { TimelineItem, TimelineMonth } from "@/lib/project-plan/timeline";
@@ -66,7 +70,9 @@ function TimelineRow({
           <span className="text-xs text-muted-foreground">
             {item.kind === "milestone"
               ? `${t.kinds.milestone} · ${kind}`
-              : kind}
+              : item.occurredAt
+                ? `${kind} · ${formatTime(item.occurredAt)}`
+                : kind}
           </span>
         </span>
         {item.done ? (

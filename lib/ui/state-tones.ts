@@ -186,6 +186,38 @@ export const splitStatusTone: Record<string, Tone> = {
   complete: "success",
 };
 
+/** A fact of a workflow's first step (lib/facts/types.ts: Juridique, Master),
+ * toned like the Cadrage's steps: absent is nothing yet (not a block),
+ * present but unsettled waits for a check, settled is done. */
+export const factTone: Record<string, Tone> = {
+  known: "success",
+  to_confirm: "warning",
+  missing: "neutral",
+};
+
+/** An action of the Juridique's plan (ticket Juridique 07's item states):
+ * to act on, waiting for someone outside, held by another action, done or
+ * no longer needed. */
+export const planItemTone: Record<string, Tone> = {
+  action_now: "action",
+  waiting_external: "info",
+  blocked: "neutral",
+  done: "success",
+  obsolete: "neutral",
+};
+
+/** A fiche de renseignements (Juridique 02): nothing yet, a link to send,
+ * waiting for the person, answers to review, complete, or a dead link. */
+export const legalFormTone: Record<string, Tone> = {
+  none: "neutral",
+  link_generated: "action",
+  sent: "info",
+  action_required: "warning",
+  complete: "success",
+  expired: "warning",
+  revoked: "neutral",
+};
+
 /** An item of the master's file (overview checklist). */
 export const checklistTone = (done: boolean): Tone =>
   done ? "success" : "warning";

@@ -1,35 +1,42 @@
-import { IconVolumeUp } from "nucleo-sharp-essential";
 import { notFound } from "next/navigation";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { AudioUpload } from "@/components/catalog/files/audio-upload";
+import {
+  FileDropArea,
+  FileImport,
+  FileImportButton,
+} from "@/components/catalog/files/file-import";
 import { FilesTable } from "@/components/catalog/files/files-table";
-import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
+import { SessionsSection } from "@/components/catalog/master-page/sessions-section";
+import { TracksSection } from "@/components/catalog/master-page/tracks-section";
+import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { listCatalogFiles } from "@/lib/catalog/files";
+import { listMasterSessions } from "@/lib/catalog/master/queries";
 import { getMaster } from "@/lib/catalog/queries";
-import { AUDIO_STATES } from "@/lib/catalog/title-rules";
+import { byAudioProgress } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
-import { audioStateTone } from "@/lib/ui/state-tones";
 import { allInOrder } from "@/lib/utils/parallel";
 
-// Audio tab: the song's evolution, one block per audio state from the demo
-// to the final master, each with its files (newest first). Every file stays
-// on this same title; adding one at a later state moves the title forward
-// (SQL trigger, docs/ARCHITECTURE.md § 2 septies). manage_catalog adds and
-// deletes; everyone listens.
+// Audio tab: the song's evolution in one table, each file with the audio
+// state it stands for (a column, not a group), most advanced first. Every
+// file stays on this same title; adding one at a later state moves the title
+// forward (SQL trigger, docs/ARCHITECTURE.md § 2 septies). Then the sessions
+// and the tracks of its multitrack (#sessions, #tracks). manage_catalog adds
+// (button or drop, the state is asked in the modal) and deletes; everyone
+// listens.
 export default async function MasterAudioPage({
   params,
 }: PageProps<"/app/catalog/masters/[masterId]/audio">) {
   const { masterId } = await params;
   const owner = { kind: "master", id: masterId } as const;
-  const [access, master, { files, error }] = await allInOrder([
+  const [access, master, { files, error }, made] = await allInOrder([
     requireApproved(),
     getMaster(masterId),
     listCatalogFiles(owner, "audio"),
+    listMasterSessions(masterId),
   ]);
   if (!master) notFound();
   const organizationId = can(access, "manage_catalog")
@@ -37,53 +44,61 @@ export default async function MasterAudioPage({
     : null;
   const t = fr.masterPage.audio;
 
-  return (
-    <div className="flex flex-col gap-[var(--section-gap)]">
-      {organizationId && (
-        <AudioUpload
-          organizationId={organizationId}
-          owner={owner}
-          defaultState={master.audioState ?? "demo"}
-        />
-      )}
+  const evolution = (
+    <PageSection
+      card
+      id="audio"
+      title={t.title}
+      description={t.description}
+      action={organizationId && <FileImportButton label={t.add} compact />}
+    >
       {error ? (
         <FormMessage kind="error">{fr.catalogFiles.loadError}</FormMessage>
       ) : files.length === 0 ? (
-        <EmptyState
-          icon={IconVolumeUp}
-          title={t.emptyTitle}
-          body={organizationId ? t.emptyBody : t.emptyBodyReadOnly}
-        />
+        <EmptyNote>
+          {organizationId ? t.emptyBody : t.emptyBodyReadOnly}
+        </EmptyNote>
       ) : (
-        AUDIO_STATES.map((state) => {
-          const own = files.filter((file) => file.audioState === state);
-          return (
-            <PageSection
-              key={state}
-              id={`audio-${state}`}
-              title={fr.catalog.audioStates[state]}
-              action={
-                master.audioState === state && (
-                  <StatusBadge tone={audioStateTone[state]} size="sm">
-                    {t.current}
-                  </StatusBadge>
-                )
-              }
-            >
-              {own.length > 0 ? (
-                <FilesTable
-                  owner={owner}
-                  files={own}
-                  canEdit={!!organizationId}
-                  audio
-                />
-              ) : (
-                <EmptyNote>{t.none}</EmptyNote>
-              )}
-            </PageSection>
-          );
-        })
+        <FilesTable
+          owner={owner}
+          files={byAudioProgress(files)}
+          canEdit={!!organizationId}
+          audio
+        />
       )}
-    </div>
+    </PageSection>
+  );
+
+  return (
+    <>
+      {organizationId ? (
+        <FileImport
+          organizationId={organizationId}
+          owner={owner}
+          audio={{ defaultState: master.audioState ?? "demo" }}
+        >
+          <FileDropArea>{evolution}</FileDropArea>
+        </FileImport>
+      ) : (
+        evolution
+      )}
+      {made.error ? (
+        <FormMessage kind="error">{fr.masterPage.loadError}</FormMessage>
+      ) : (
+        <>
+          <SessionsSection
+            masterId={master.id}
+            sessions={made.sessions}
+            canEdit={!!organizationId}
+          />
+          <TracksSection
+            masterId={master.id}
+            tracks={made.tracks}
+            sessions={made.sessions}
+            canEdit={!!organizationId}
+          />
+        </>
+      )}
+    </>
   );
 }

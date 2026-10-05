@@ -22,12 +22,15 @@ import { fr } from "@/lib/i18n/fr";
  */
 export function ContractForm({
   contract,
+  initialProjectId,
   options,
   onSaved,
   onCancel,
 }: {
   // Absent: a new contract.
   contract?: ContractValues;
+  // A new contract created from a project (Juridique): already attached.
+  initialProjectId?: string;
   options: ContractFormOptions;
   onSaved: (id: string) => void;
   onCancel: () => void;
@@ -84,7 +87,7 @@ export function ContractForm({
             none: t.projectNone,
             ...Object.fromEntries(options.projects.map((p) => [p.id, p.title])),
           }}
-          defaultValue={contract?.projectId ?? "none"}
+          defaultValue={contract?.projectId ?? initialProjectId ?? "none"}
         />
         <OptionSelect
           name="artistId"

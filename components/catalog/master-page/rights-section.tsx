@@ -3,7 +3,6 @@
 import { IconPenWriting2 } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { Field } from "@/components/auth/field";
 import { PageSection } from "@/components/shell/page-section";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
@@ -13,10 +12,9 @@ import {
   pLine,
   type MasterRights,
 } from "@/lib/catalog/master/rules";
-import { saveMasterRights } from "@/lib/catalog/master/rights-actions";
 import { fr } from "@/lib/i18n/fr";
 
-import { MasterForm } from "./master-form";
+import { RightsForm } from "./rights-form";
 
 // Rights on the master: ISWC of the work, holder and year of the ℗.
 export function RightsSection({
@@ -33,6 +31,7 @@ export function RightsSection({
 
   return (
     <PageSection
+      card
       id="rights"
       title={t.title}
       description={t.description}
@@ -70,49 +69,11 @@ export function RightsSection({
         description={t.formDescription}
         closeLabel={fr.masterPage.form.close}
       >
-        <MasterForm
-          action={saveMasterRights}
-          hidden={{ masterId }}
+        <RightsForm
+          masterId={masterId}
+          rights={rights}
           onDone={() => setOpen(false)}
-        >
-          {({ value, error }) => (
-            <>
-              <Field
-                name="iswc"
-                label={t.fields.iswc}
-                hint={t.fields.iswcHint}
-                autoFocus
-                autoComplete="off"
-                maxLength={20}
-                className="h-10 font-mono text-base md:text-sm"
-                defaultValue={value(
-                  "iswc",
-                  rights.iswc ? formatIswc(rights.iswc) : null,
-                )}
-                error={error("iswc")}
-              />
-              <Field
-                name="rightsHolder"
-                label={t.fields.rightsHolder}
-                hint={t.fields.rightsHolderHint}
-                autoComplete="off"
-                maxLength={200}
-                defaultValue={value("rightsHolder", rights.rightsHolder)}
-                error={error("rightsHolder")}
-              />
-              <Field
-                name="rightsYear"
-                label={t.fields.rightsYear}
-                hint={t.fields.rightsYearHint}
-                inputMode="numeric"
-                autoComplete="off"
-                maxLength={4}
-                defaultValue={value("rightsYear", rights.rightsYear)}
-                error={error("rightsYear")}
-              />
-            </>
-          )}
-        </MasterForm>
+        />
       </FormDialog>
     </PageSection>
   );

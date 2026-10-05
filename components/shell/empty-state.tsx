@@ -51,7 +51,8 @@ export function EmptyState({
 // in the same dashed frame, without icon or title.
 export function EmptyNote({ children }: { children: React.ReactNode }) {
   return (
-    <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+    // On a section card, a plain line: no frame inside a card.
+    <p className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground in-[.section-card]:border-0 in-[.section-card]:p-0">
       {children}
     </p>
   );

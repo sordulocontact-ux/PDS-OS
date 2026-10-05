@@ -1,24 +1,89 @@
 import { notFound } from "next/navigation";
 
+import { ConfirmationView } from "@/components/legal/confirmation/confirmation-view";
+import { FormsView } from "@/components/legal/forms/forms-view";
+import { IntakeView } from "@/components/legal/intake/intake-view";
+import { PlanView } from "@/components/legal/plan/plan-view";
+import { TrackingView } from "@/components/legal/tracking/tracking-view";
+import { LegalInventory } from "@/components/legal/legal-inventory";
+import { can } from "@/lib/auth/access";
+import { asFactStatus } from "@/lib/facts/views";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
+import { loadConfirmation } from "@/lib/legal/confirmation/queries";
+import { loadLegalInventory } from "@/lib/legal/inventory";
+import { loadForms } from "@/lib/legal/forms/queries";
+import { loadIntake } from "@/lib/legal/intake/queries";
+import { loadLegalPlan } from "@/lib/legal/plan/queries";
+import { loadTracking } from "@/lib/legal/tracking/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { isLegalStepSegment } from "@/lib/ui/legal-steps";
+import { builtLegalStepOf } from "@/lib/ui/legal-steps";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
   title: `${fr.shell.project.sidebar.legal} · ${fr.app.name}`,
 };
 
-// Juridique: the first step at /legal, the others one segment below
-// (/legal/framing…). Empty for now: the steps above (LegalSteps, in the
-// project layout) are all there is.
+// Juridique: the État des lieux at /legal, the Cadrage juridique at
+// /legal/framing, the Confirmation at /legal/confirmation, the Plan d'action
+// at /legal/plan, the Suivi at /legal/tracking; a step not built yet (greyed
+// in the steps) is a 404.
+// Reserved to manage_legal: anyone else gets the same 404 as a missing page.
 export default async function ProjectLegalPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/legal/[[...step]]">) {
-  const { projectId, step } = await params;
-  if (step && (step.length > 1 || !isLegalStepSegment(step[0]))) notFound();
-  await allInOrder([requireApproved(), requireLaunchedProject(projectId)]);
+  const [{ projectId, step }, query] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const current = builtLegalStepOf(step);
+  if (!current) notFound();
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+  ]);
+  if (!can(access, "manage_legal")) notFound();
 
-  return null;
+  if (current === "framing") {
+    // The dossier beside the conversation is the État des lieux itself.
+    const [intake, inventory] = await Promise.all([
+      loadIntake(project),
+      loadLegalInventory(project, access),
+    ]);
+    return (
+      <IntakeView
+        projectId={project.id}
+        intake={intake}
+        inventory={inventory}
+        // Checked against the questions by the workspace: anything else is
+        // ignored.
+        initialQuestion={
+          typeof query.question === "string" ? query.question : null
+        }
+      />
+    );
+  }
+  if (current === "forms") {
+    const rows = await loadForms(project, access);
+    return <FormsView projectId={project.id} rows={rows} />;
+  }
+  if (current === "tracking") {
+    const tracking = await loadTracking(project, access);
+    return <TrackingView projectId={project.id} tracking={tracking} />;
+  }
+  if (current === "plan") {
+    const plan = await loadLegalPlan(project, access);
+    return <PlanView projectId={project.id} plan={plan} />;
+  }
+  if (current === "confirmation") {
+    const confirmation = await loadConfirmation(project, access);
+    return (
+      <ConfirmationView projectId={project.id} confirmation={confirmation} />
+    );
+  }
+  const inventory = await loadLegalInventory(project, access);
+  return (
+    <LegalInventory inventory={inventory} state={asFactStatus(query.state)} />
+  );
 }

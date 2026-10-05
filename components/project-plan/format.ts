@@ -9,6 +9,12 @@ const monthFormat = new Intl.DateTimeFormat("fr-FR", {
   year: "numeric",
 });
 
+// A call's time of day, on Paris time like the rest of the calls.
+const timeFormat = new Intl.DateTimeFormat("fr-FR", {
+  timeStyle: "short",
+  timeZone: "Europe/Paris",
+});
+
 const atNoon = (date: string) => new Date(`${date}T12:00:00`);
 
 export const formatWeekday = (date: string) =>
@@ -16,3 +22,4 @@ export const formatWeekday = (date: string) =>
 // "2026-10" → "octobre 2026".
 export const formatMonth = (month: string) =>
   monthFormat.format(atNoon(`${month}-01`));
+export const formatTime = (iso: string) => timeFormat.format(new Date(iso));

@@ -48,6 +48,7 @@ export const catalogFiles = {
   columns: {
     name: "Nom",
     category: "Catégorie",
+    audioState: "État",
     addedBy: "Ajouté par",
     addedAt: "Ajouté le",
     actions: "Actions",

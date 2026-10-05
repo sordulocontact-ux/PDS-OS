@@ -23,7 +23,7 @@ import {
   ItemRowActions,
   useItemDialogs,
 } from "./item-dialogs";
-import { sessionLabel } from "./session-label";
+import { sessionLabel } from "@/lib/catalog/master/session-label";
 import { TrackForm } from "./track-form";
 
 // Tracks of the multitrack: name, performer, the session they come from.
@@ -44,6 +44,7 @@ export function TracksSection({
 
   return (
     <PageSection
+      card
       id="tracks"
       title={t.title}
       description={t.description}

@@ -6,6 +6,7 @@ import { ProcessSteps } from "@/components/ui/process-steps";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import {
+  LEGAL_BUILT_STEPS,
   LEGAL_STEP_KEYS,
   legalStepHref,
   legalStepLabel,
@@ -25,10 +26,12 @@ export function LegalSteps({ projectId }: { projectId: string }) {
       numbered={false}
       steps={LEGAL_STEP_KEYS.map((key) => {
         const href = legalStepHref(projectId, key);
+        const built = LEGAL_BUILT_STEPS.includes(key);
         return {
           key,
           label: legalStepLabel(key),
-          href,
+          href: built ? href : undefined,
+          title: built ? undefined : fr.shell.project.legalSteps.soon,
           current: pathname === href,
         };
       })}

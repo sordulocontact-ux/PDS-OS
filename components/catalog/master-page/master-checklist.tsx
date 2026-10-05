@@ -6,15 +6,16 @@ import { fr } from "@/lib/i18n/fr";
 import { checklistTone } from "@/lib/ui/state-tones";
 
 // What the master's file still needs, each line opening the tab where it is
-// completed. States computed by code (masterChecklist).
+// completed, listed without frame nor rules (it sits on a card). States
+// computed by code (masterChecklist).
 export function MasterChecklist({ items }: { items: ChecklistItem[] }) {
   const t = fr.masterPage.overview.checklist;
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border">
+    <ul className="flex flex-col">
       {items.map((item) => (
         <li
           key={item.key}
-          className="relative flex min-h-12 items-center justify-between gap-3 px-4 py-2.5"
+          className="relative flex min-h-11 items-center justify-between gap-3 py-1.5"
         >
           {item.href ? (
             <Link

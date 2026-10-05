@@ -4,16 +4,6 @@ import { useState } from "react";
 
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
-import {
-  DataTable,
-  DataTableActionsCell,
-  DataTableActionsHead,
-  DataTableBody,
-  DataTableCell,
-  DataTableHead,
-  DataTableHeader,
-  DataTableRow,
-} from "@/components/ui/data-table";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -29,10 +19,10 @@ import { splitStatusTone } from "@/lib/ui/state-tones";
 import {
   AddItemButton,
   DeleteItemDialog,
-  ItemRowActions,
   useItemDialogs,
 } from "./item-dialogs";
 import { SplitForm } from "./split-form";
+import { SplitsTable } from "./splits-table";
 
 // Shares of the master and of the publishing, one section each: total and
 // remainder computed by code (splitTotal), never above 100 % (SQL).
@@ -61,6 +51,7 @@ export function SplitsSection({
         const total = splitTotal(splits, kind);
         return (
           <PageSection
+            card
             key={kind}
             id={`splits-${kind}`}
             title={t.kinds[kind]}
@@ -87,40 +78,12 @@ export function SplitsSection({
             {rows.length === 0 ? (
               <EmptyNote>{t.empty}</EmptyNote>
             ) : (
-              <DataTable>
-                <DataTableHeader>
-                  <DataTableHead>{t.columns.party}</DataTableHead>
-                  <DataTableHead hideBelow="sm">{t.columns.role}</DataTableHead>
-                  <DataTableHead fill align="end">
-                    {t.columns.share}
-                  </DataTableHead>
-                  {canEdit && (
-                    <DataTableActionsHead label={t.columns.actions} />
-                  )}
-                </DataTableHeader>
-                <DataTableBody>
-                  {rows.map((split) => (
-                    <DataTableRow key={split.id}>
-                      <DataTableCell>{split.party}</DataTableCell>
-                      <DataTableCell hideBelow="sm">
-                        {t.roles[split.role]}
-                      </DataTableCell>
-                      <DataTableCell fill align="end" className="tabular-nums">
-                        {formatShare(split.share)}
-                      </DataTableCell>
-                      {canEdit && (
-                        <DataTableActionsCell>
-                          <ItemRowActions
-                            name={split.party}
-                            onEdit={() => dialogs.edit(split)}
-                            onDelete={() => dialogs.remove(split)}
-                          />
-                        </DataTableActionsCell>
-                      )}
-                    </DataTableRow>
-                  ))}
-                </DataTableBody>
-              </DataTable>
+              <SplitsTable
+                rows={rows}
+                canEdit={canEdit}
+                onEdit={dialogs.edit}
+                onDelete={dialogs.remove}
+              />
             )}
             <p className="text-sm text-muted-foreground tabular-nums">
               {t.total(formatShare(total.total))}

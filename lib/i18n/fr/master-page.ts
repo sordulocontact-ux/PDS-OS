@@ -18,19 +18,18 @@ const remove = {
 
 export const masterPage = {
   tabsLabel: "Sections du titre",
+  artistsTable: { artist: "Artiste", role: "Rôle" },
+  // Six tabs at most (docs/DESIGN.md § 4): the other sections are blocks of
+  // one of these pages.
   tabs: {
     overview: "Vue d'ensemble",
     audio: "Audio",
-    sessions: "Sessions & pistes",
-    variants: "Variantes",
-    credits: "Contributeurs & crédits",
-    splits: "Splits",
-    rights: "Droits & déclarations",
-    distribution: "Distribution",
-    projects: "Projets",
+    credits: "Crédits",
+    rights: "Droits",
+    projects: "Projets & sorties",
     files: "Fichiers",
-    activity: "Activité",
   },
+
   loadError: "Ces informations n'ont pas pu être chargées. Rechargez la page.",
   form,
   deleteFailed: "La suppression n'a pas abouti. Réessayez.",
@@ -127,7 +126,6 @@ export const masterPage = {
     description:
       "Les autres variantes du même titre, pour les mêmes artistes : radio edit, instrumental, remix… Chacune a son propre ISRC.",
     add: "Nouvelle variante",
-    emptyTitle: "Pas d'autre variante",
     emptyBody:
       "Créez une variante pour une radio edit, une instrumentale ou un remix.",
     emptyBodyReadOnly: "Les autres variantes de ce titre apparaîtront ici.",
@@ -138,19 +136,17 @@ export const masterPage = {
     title: "Évolution du morceau",
     description:
       "Chaque fichier garde l'état audio qu'il représente. Le titre avance tout seul vers l'état le plus avancé déposé.",
-    current: "État actuel",
     add: "Ajouter un fichier audio",
     stateLabel: "État audio du fichier",
-    uploading: "Envoi…",
     hint: "WAV, AIFF, MP3, FLAC… 50 Mo au plus. La durée est lue quand le navigateur le peut.",
     notAudio: "Choisissez un fichier audio (WAV, AIFF, MP3, FLAC…).",
-    emptyTitle: "Aucun fichier audio",
+    dialog: {
+      description: "À quel état du morceau correspond-il ?",
+      descriptionMany: "Ils correspondront tous au même état du morceau.",
+    },
     emptyBody:
       "Déposez la maquette, puis les mises à plat et les masters : ils restent tous rattachés à ce titre.",
     emptyBodyReadOnly: "Les fichiers audio du titre apparaîtront ici.",
-    none: "Aucun fichier à cet état.",
-    fileMeta: (author: string, date: string) =>
-      author ? `${author} · ${date}` : date,
   },
 
   credits: {
@@ -188,6 +184,8 @@ export const masterPage = {
       detail: "Précision",
       detailHint:
         "Instrument ou détail : « guitare », « production additionnelle ».",
+      // Opened from a project with several titles (Juridique).
+      master: "Titre",
     },
     addTitle: "Nouveau contributeur",
     editTitle: "Modifier le contributeur",
@@ -316,9 +314,9 @@ export const masterPage = {
   },
 
   distribution: {
+    title: "Distribution",
     description:
       "Les sorties des projets qui portent ce titre. On les modifie dans la Sortie du projet.",
-    emptyTitle: "Pas encore de sortie",
     emptyBody:
       "Rattachez ce titre à un projet : sa sortie, son UPC et ses liens apparaîtront ici.",
     emptyBodyLinked:
@@ -329,13 +327,13 @@ export const masterPage = {
       upc: "UPC",
       date: "Date",
       status: "Statut",
+      links: "Sur les plateformes",
     },
-    links: "Sur les plateformes",
-    noLinks: "Aucun lien détecté pour l'instant.",
+    noLinks: "Aucun lien détecté",
   },
 
   projects: {
-    emptyTitle: "Aucun projet",
+    title: "Projets",
     emptyBody: "Aucun projet ne rattache ce titre pour l'instant.",
   },
 

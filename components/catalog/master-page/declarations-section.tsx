@@ -47,7 +47,12 @@ export function DeclarationsSection({
   const [deleting, setDeleting] = useState<MasterDeclaration | null>(null);
 
   return (
-    <PageSection id="declarations" title={t.title} description={t.description}>
+    <PageSection
+      card
+      id="declarations"
+      title={t.title}
+      description={t.description}
+    >
       <DataTable>
         <DataTableHeader>
           <DataTableHead>{t.columns.organism}</DataTableHead>

@@ -7,7 +7,7 @@ import type { MasterSession, MasterTrack } from "@/lib/catalog/master/rules";
 import { fr } from "@/lib/i18n/fr";
 
 import { MasterForm } from "./master-form";
-import { sessionLabel } from "./session-label";
+import { sessionLabel } from "@/lib/catalog/master/session-label";
 
 export function TrackForm({
   masterId,

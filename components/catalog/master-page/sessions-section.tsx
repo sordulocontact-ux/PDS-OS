@@ -26,7 +26,7 @@ import {
   useItemDialogs,
 } from "./item-dialogs";
 import { SessionForm } from "./session-form";
-import { sessionLabel } from "./session-label";
+import { sessionLabel } from "@/lib/catalog/master/session-label";
 
 // Sessions of the master, by date: type and date, place, engineer, notes.
 export function SessionsSection({
@@ -43,6 +43,7 @@ export function SessionsSection({
 
   return (
     <PageSection
+      card
       id="sessions"
       title={t.title}
       description={t.description}

@@ -1,7 +1,7 @@
 -- Team positions and invitations (account created ahead by the director),
 -- run with `supabase test db`.
 begin;
-select plan(20);
+select plan(21);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -84,8 +84,11 @@ select is((select count(*)::int from public.memberships where id = (select id fr
 select is(public.role_permissions('general_director'),
           array['administer', 'assign_projects', 'validate', 'manage_catalog', 'create_projects',
                 'view_all_projects', 'archive_records', 'read_feedback', 'manage_network',
-                'manage_contracts'],
-          'the general director administers, assigns and creates projects, validates, manages the catalog, archives, reads feedback, keeps the network and the contracts');
+                'manage_contracts', 'manage_legal'],
+          'the general director administers, assigns and creates projects, validates, manages the catalog, archives, reads feedback, keeps the network, the contracts and the legal side');
+select is(public.role_permissions('project_manager'),
+          array['pilot_projects', 'manage_catalog', 'manage_network', 'manage_contracts', 'manage_legal'],
+          'a project manager pilots projects and keeps the catalog, the network, the contracts and the legal side');
 select is(public.role_permissions('creative_director'), array['creative_work', 'manage_network'],
           'the creative director does creative work and keeps the network');
 select ok(not public.is_org_admin((select id from public.organizations where slug = 'pds')),

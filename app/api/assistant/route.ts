@@ -9,6 +9,7 @@ import {
 import { z } from "zod";
 
 import { pageContext } from "@/lib/assistant/page-context";
+import { isTestDataEnabled } from "@/lib/assistant/test-data/tool";
 import { createAssistantTools } from "@/lib/assistant/tools";
 import { getAccess } from "@/lib/auth/dal";
 import { assistantInstructions } from "@/lib/ai/instructions/assistant";
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
       firstName: access.firstName,
       role: access.role,
       page: await pageContext(parsed.data.page),
+      testData: isTestDataEnabled,
     }),
     messages: await convertToModelMessages(messages),
     tools: createAssistantTools(access, userTexts, parsed.data.page ?? null),

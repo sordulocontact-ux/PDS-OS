@@ -11,7 +11,8 @@ export const shell = {
     calendar: "Calendrier",
     calls: "Calls",
     artists: "Artistes",
-    masters: "Titres",
+    // The list of titles ("masters" in the code), named Catalogue (04/10/2026).
+    masters: "Catalogue",
     network: "Réseau",
     contracts: "Contrats",
     files: "Fichiers",
@@ -246,6 +247,7 @@ export const shell = {
     // avec `stages` (ProjectStage), qui reste la source d'état réelle.
     legalSteps: {
       label: "Étapes juridiques",
+      soon: "Bientôt disponible",
       inventory: "État des lieux",
       framing: "Cadrage juridique",
       confirmation: "Confirmation",

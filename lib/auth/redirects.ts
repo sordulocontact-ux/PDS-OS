@@ -60,6 +60,8 @@ export const PERMISSIONS = [
   "manage_network",
   // Creates and follows contracts (the direction and project managers).
   "manage_contracts",
+  // Sees and runs a project's Juridique (the direction and project managers).
+  "manage_legal",
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
@@ -107,16 +109,21 @@ export const routes = {
   masters: "/app/catalog/masters",
   mastersNew: "/app/catalog/masters/new",
   master: (id: string) => `/app/catalog/masters/${id}`,
+  // Six tabs (overview, audio, credits, rights, projects, files); the other
+  // sections are blocks of one of them, reached by their anchor. Their old
+  // URLs redirect here.
   masterAudio: (id: string) => `/app/catalog/masters/${id}/audio`,
-  masterSessions: (id: string) => `/app/catalog/masters/${id}/sessions`,
-  masterVariants: (id: string) => `/app/catalog/masters/${id}/variants`,
+  masterSessions: (id: string) => `/app/catalog/masters/${id}/audio#sessions`,
+  masterVariants: (id: string) => `/app/catalog/masters/${id}#variants`,
   masterCredits: (id: string) => `/app/catalog/masters/${id}/credits`,
-  masterSplits: (id: string) => `/app/catalog/masters/${id}/splits`,
+  masterSplits: (id: string) =>
+    `/app/catalog/masters/${id}/credits#splits-master`,
   masterRights: (id: string) => `/app/catalog/masters/${id}/rights`,
-  masterDistribution: (id: string) => `/app/catalog/masters/${id}/distribution`,
+  masterDistribution: (id: string) =>
+    `/app/catalog/masters/${id}/projects#distribution`,
   masterProjects: (id: string) => `/app/catalog/masters/${id}/projects`,
   masterFiles: (id: string) => `/app/catalog/masters/${id}/files`,
-  masterActivity: (id: string) => `/app/catalog/masters/${id}/activity`,
+  masterActivity: (id: string) => `/app/catalog/masters/${id}#activity`,
   // Title form pre-filled from another title (name, credits): a variant.
   mastersNewVariantOf: (masterId: string) =>
     `/app/catalog/masters/new?variantOf=${masterId}`,
@@ -143,8 +150,10 @@ export const routes = {
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
   projectRelease: (id: string) => `/app/projects/${id}/release`,
-  // Specialised workflows next to the 7 steps, empty pages for now.
+  // Specialised workflows next to the 7 steps, one URL per internal step.
   projectMaster: (id: string) => `/app/projects/${id}/master`,
+  projectMasterStep: (id: string, step: string) =>
+    `/app/projects/${id}/master/${step}`,
   projectLegal: (id: string) => `/app/projects/${id}/legal`,
   projectLegalStep: (id: string, step: string) =>
     `/app/projects/${id}/legal/${step}`,
@@ -159,6 +168,8 @@ export const routes = {
   projectActivity: (id: string) => `/app/projects/${id}/activity`,
   // Public, no account: smartlink of a release.
   smartlink: (token: string) => `/l/${token}`,
+  // Public, no account: a fiche de renseignements (Juridique 02).
+  legalForm: (token: string) => `/f/${token}`,
 } as const;
 
 export function destinationFor(state: AccessState): string {

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { FieldError } from "@/components/auth/form-message";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,66 +12,77 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Labelled single-choice select submitting its value under `name`.
-// `items` maps each value to its displayed label.
-export function OptionSelect({
-  id: idProp,
-  name,
-  label,
-  items,
-  defaultValue,
-  placeholder,
-  hint,
-  error,
-  hideLabel = false,
-  onValueChange,
-}: {
+type CommonProps = {
   id?: string;
   name: string;
   label: string;
+  // Each value and its displayed label, in the order they are listed.
   items: Record<string, string>;
-  defaultValue?: string | null;
   placeholder?: string;
   hint?: string;
   error?: string;
   hideLabel?: boolean;
+};
+
+type SingleProps = CommonProps & {
+  multiple?: false;
+  defaultValue?: string | null;
   // Optional: lets the form react to the choice; the value is still submitted.
   onValueChange?: (value: string) => void;
-}) {
+};
+
+// Several choices in one menu (a contact's roles): submitted as a JSON array
+// under `name`, like ChipMultiChoice, so the server reads either the same way.
+type MultipleProps = CommonProps & {
+  multiple: true;
+  defaultValue?: string[];
+  // Past this many, the other choices are disabled (the database's limit).
+  max?: number;
+};
+
+// Labelled select submitting its value under `name`: one choice, or several
+// with `multiple` (the menu stays open while ticking, the trigger lists them).
+export function OptionSelect(props: SingleProps | MultipleProps) {
+  const { id: idProp, name, label, hint, error, hideLabel = false } = props;
   const id = idProp ?? `${name}-select`;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
+  const trigger = {
+    id,
+    "aria-invalid": error ? true : undefined,
+    "aria-describedby": describedBy,
+    className: "w-full text-base data-[size=default]:h-10 md:text-sm",
+  } as const;
 
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id} className={hideLabel ? "sr-only" : undefined}>
         {label}
       </Label>
-      <Select
-        // Same reason as Field: remount when the server sends another default.
-        key={defaultValue ?? ""}
-        name={name}
-        items={items}
-        defaultValue={defaultValue ?? null}
-        onValueChange={(next) =>
-          typeof next === "string" && onValueChange?.(next)
-        }
-      >
-        <SelectTrigger
-          id={id}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          className="w-full text-base data-[size=default]:h-10 md:text-sm"
+      {props.multiple ? (
+        <MultipleSelect {...props} trigger={trigger} />
+      ) : (
+        <Select
+          // Same reason as Field: remount when the server sends another default.
+          key={props.defaultValue ?? ""}
+          name={name}
+          items={props.items}
+          defaultValue={props.defaultValue ?? null}
+          onValueChange={(next) =>
+            typeof next === "string" && props.onValueChange?.(next)
+          }
         >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {Object.entries(items).map(([value, itemLabel]) => (
-            <SelectItem key={value} value={value}>
-              {itemLabel}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <SelectTrigger {...trigger}>
+            <SelectValue placeholder={props.placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(props.items).map(([value, itemLabel]) => (
+              <SelectItem key={value} value={value}>
+                {itemLabel}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
       {error ? (
         <FieldError id={`${id}-error`}>{error}</FieldError>
       ) : hint ? (
@@ -78,5 +91,63 @@ export function OptionSelect({
         </p>
       ) : null}
     </div>
+  );
+}
+
+function MultipleSelect({
+  name,
+  items,
+  defaultValue,
+  placeholder,
+  max,
+  trigger,
+}: MultipleProps & {
+  trigger: React.ComponentProps<typeof SelectTrigger>;
+}) {
+  const [selected, setSelected] = useState<string[]>(defaultValue ?? []);
+  const order = Object.keys(items);
+  // Listed in the menu's order, whatever the order they were ticked in.
+  const summary = order
+    .filter((value) => selected.includes(value))
+    .map((value) => items[value])
+    .join(", ");
+  const full = max !== undefined && selected.length >= max;
+
+  return (
+    <>
+      <input type="hidden" name={name} value={JSON.stringify(selected)} />
+      <Select
+        multiple
+        items={items}
+        value={selected}
+        onValueChange={(next) =>
+          setSelected(Array.isArray(next) ? next.map(String) : [])
+        }
+      >
+        <SelectTrigger {...trigger}>
+          <SelectValue>
+            {() =>
+              summary || (
+                <span className="text-muted-foreground">{placeholder}</span>
+              )
+            }
+          </SelectValue>
+        </SelectTrigger>
+        {/* Under the trigger rather than over it: the list is ticked
+            several times, the trigger keeps showing the choices. */}
+        <SelectContent alignItemWithTrigger={false}>
+          {Object.entries(items).map(([value, itemLabel]) => (
+            <SelectItem
+              key={value}
+              value={value}
+              indicator="checkbox"
+              disabled={full && !selected.includes(value)}
+            >
+              {itemLabel}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
   );
 }

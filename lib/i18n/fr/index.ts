@@ -12,12 +12,16 @@ import { catalogFiles } from "./catalog-files";
 import { contracts } from "./contracts";
 import { core } from "./core";
 import { design } from "./design";
+import { facts } from "./facts";
 import { feedback } from "./feedback";
 import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
 import { labo } from "./labo";
+import { legal } from "./legal";
+import { legalForms } from "./legal-forms";
 import { library } from "./library";
 import { masterPage } from "./master-page";
+import { masterWorkflow } from "./master-workflow";
 import { network } from "./network";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
@@ -56,6 +60,10 @@ export const fr = {
   library,
   network,
   contracts,
+  facts,
+  legal,
+  legalForms,
+  masterWorkflow,
   artistActivity,
   masterPage,
   records,

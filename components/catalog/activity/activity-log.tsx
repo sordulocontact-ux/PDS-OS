@@ -32,7 +32,7 @@ export function ActivityLog({
     <div className="flex flex-col gap-[var(--section-gap)]">
       {groupByDay(entries, now).map((day) => (
         <PageSection key={day.key} id={`day-${day.key}`} title={day.label}>
-          <ol className="flex flex-col divide-y divide-border">
+          <ol className="flex flex-col divide-y divide-border in-[.section-card]:divide-y-0">
             {day.events.map((entry) => (
               <ActivityRow key={entry.id} entry={entry} />
             ))}

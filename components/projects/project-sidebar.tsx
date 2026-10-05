@@ -101,11 +101,13 @@ function ProjectSidebarList({
 export function ProjectSidebar({
   projectId,
   projectTitle,
+  canSeeLegal,
 }: {
   projectId: string;
   projectTitle: string;
+  canSeeLegal: boolean;
 }) {
-  const items = projectSections(projectId);
+  const items = projectSections(projectId, { legal: canSeeLegal });
   const { doubleSidebar } = useCollapsedNav();
   const t = fr.shell.project.sidebar;
 
@@ -130,16 +132,18 @@ export function ProjectSidebar({
   );
 }
 
-// Small-screen equivalent: a button that opens the same 12 sections in a
+// Small-screen equivalent: a button that opens the same sections in a
 // drawer, since the desktop sidebar has no room on a phone (docs/DESIGN.md § 4).
 export function ProjectSidebarMobile({
   projectId,
   projectTitle,
+  canSeeLegal,
 }: {
   projectId: string;
   projectTitle: string;
+  canSeeLegal: boolean;
 }) {
-  const items = projectSections(projectId);
+  const items = projectSections(projectId, { legal: canSeeLegal });
   const t = fr.shell.project.sidebar;
   const [open, setOpen] = useState(false);
 

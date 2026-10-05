@@ -149,7 +149,8 @@ export async function saveNetworkContact(
   revalidatePath(routes.networkContact(data.id));
   // A new contact opens on its page. Redirected here, not by the modal: on an
   // empty list, the button (and its modal) leaves the page with the refresh.
-  if (!id) redirect(routes.networkContact(data.id));
+  // `stay`: added from another page (Juridique), which refreshes itself.
+  if (!id && form.get("stay") !== "1") redirect(routes.networkContact(data.id));
   return { ok: true, id: data.id };
 }
 

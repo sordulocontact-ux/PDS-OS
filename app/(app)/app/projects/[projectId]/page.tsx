@@ -180,7 +180,9 @@ export default async function ProjectOverviewPage({
         {/* With tabs, the sections that have no tab are reached from here. */}
         {!DOUBLE_SIDEBAR && (
           <ListCard title={t.moreSections}>
-            {projectSections(project.id)
+            {projectSections(project.id, {
+              legal: can(access, "manage_legal"),
+            })
               .filter((section) => section.tabParent === "overview")
               .map((section) => (
                 <CardRow
