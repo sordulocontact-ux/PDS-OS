@@ -1,29 +1,42 @@
+import { BriefBudget } from "@/components/master-workflow/brief-budget";
+import { BriefExchanges } from "@/components/master-workflow/brief-exchanges";
 import { BriefForm } from "@/components/master-workflow/brief-form";
+import { BriefHeader } from "@/components/master-workflow/brief-header";
+import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { MasterFactAction } from "@/components/master-workflow/master-fact-action";
+import { PrepareExchangeButton } from "@/components/master-workflow/prepare-exchange-button";
 import { AddToNetworkButton } from "@/components/network/add-to-network-button";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
+import { toParisLocalInput } from "@/lib/calls/format";
 import { fr } from "@/lib/i18n/fr";
 import type { BriefView } from "@/lib/master-workflow/brief-types";
+import type { BriefQuestionsView } from "@/lib/master-workflow/question-types";
 import { formatShortDate } from "@/lib/release/format";
 
 /**
  * The Brief Mix/Master of a project: the source of each title as the État
  * du master shows it (confirmed there, or right here by the owner), then the
- * form of the brief. "Ajouter un ingénieur" puts a missing engineer in the
- * Réseau without leaving the page: the menus list them at once.
+ * exchanges held to fill it and the questions asked to the team, then its
+ * form. The owner fills it by hand, by
+ * dictation (header) or from an exchange's transcript; "Ajouter un
+ * ingénieur" puts a missing engineer in the Réseau without leaving the page.
  */
-export function BriefPage({ view }: { view: BriefView }) {
+export function BriefPage({
+  view,
+  questions,
+}: {
+  view: BriefView;
+  questions: BriefQuestionsView;
+}) {
   const t = fr.masterWorkflow.brief;
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader
-        title={t.title}
-        description={t.description}
-        action={
-          view.canEdit &&
+      <BriefHeader
+        projectId={view.projectId}
+        canEdit={view.canEdit}
+        actions={
           view.canAddContact && (
             <AddToNetworkButton
               header
@@ -67,7 +80,46 @@ export function BriefPage({ view }: { view: BriefView }) {
         )}
       </PageSection>
 
-      <BriefForm view={view} />
+      <PageSection
+        id="brief-exchanges"
+        title={t.exchanges.title}
+        description={t.exchanges.description}
+        card
+        action={
+          view.canEdit && (
+            <PrepareExchangeButton
+              projectId={view.projectId}
+              agenda={view.nextAgenda}
+              defaultOccurredAt={toParisLocalInput(new Date())}
+            />
+          )
+        }
+      >
+        {view.exchanges.length === 0 ? (
+          <EmptyNote>{t.exchanges.empty}</EmptyNote>
+        ) : (
+          <BriefExchanges
+            projectId={view.projectId}
+            exchanges={view.exchanges}
+            canEdit={view.canEdit}
+          />
+        )}
+      </PageSection>
+
+      <BriefQuestions projectId={view.projectId} view={questions} />
+
+      {/* Remounted on each save (an answer applied included): the fields
+          start again from the saved brief. */}
+      <BriefForm key={view.savedAt ?? "new"} view={view} />
+
+      <PageSection
+        id="brief-budget"
+        title={t.budget.title}
+        description={t.budget.description}
+        card
+      >
+        <BriefBudget view={view} />
+      </PageSection>
     </div>
   );
 }

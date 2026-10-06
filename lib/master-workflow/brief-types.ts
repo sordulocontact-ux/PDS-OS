@@ -2,6 +2,9 @@
 // § 8 septies, lot 3): values and types shared by the page and its form.
 // Client-safe; the lists mirror the database checks.
 
+import type { BudgetStatus } from "@/lib/budget/types";
+import type { CallStatus } from "@/lib/calls/constants";
+import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import type { MasterFact, NetworkEngineer } from "@/lib/master-workflow/types";
 
 /** What the engineers deliver (ticket § 3): chosen, never all imposed. */
@@ -56,6 +59,24 @@ export type MasterBrief = {
 /** A person who may validate the versions: the owner, a creative director. */
 export type BriefPerson = { personId: string; name: string };
 
+/** The Budget line standing for a role of the brief. */
+export type BriefBudgetLine = {
+  role: "mix" | "mastering";
+  amountCents: number;
+  status: BudgetStatus;
+};
+
+/** A call held to fill the brief, newest first. */
+export type BriefExchange = {
+  callId: string;
+  title: string;
+  occurredAt: string;
+  status: CallStatus;
+  href: string;
+  // Transcribed: what was said can be proposed for the brief.
+  canPropose: boolean;
+};
+
 /** Everything the Brief page shows, read in one round. */
 export type BriefView = {
   projectId: string;
@@ -69,6 +90,10 @@ export type BriefView = {
   sourcesFailed: boolean;
   engineers: NetworkEngineer[];
   validators: BriefPerson[];
+  exchanges: BriefExchange[];
+  budget: BriefBudgetLine[];
+  // The agenda a new exchange would get (what the brief still lacks).
+  nextAgenda: AgendaItem[];
   // The project's owner: the only one who writes the brief.
   canEdit: boolean;
   // manage_network: add an engineer to the Réseau from the form.

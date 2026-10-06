@@ -27,7 +27,7 @@ export function NewContractButton({ projectId }: { projectId?: string } = {}) {
       {(options, close) => (
         <ContractForm
           options={options}
-          initialProjectId={projectId}
+          initial={projectId ? { projectId } : undefined}
           onCancel={close}
           // The server action opens the new page itself.
           onSaved={close}

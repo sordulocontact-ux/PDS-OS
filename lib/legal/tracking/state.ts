@@ -12,6 +12,7 @@
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
 import type { PlanItemStatus } from "@/lib/legal/plan/proposal";
 import type { PlanRow } from "@/lib/legal/plan/queries";
+import type { SplitState } from "@/lib/legal/splits/queries";
 import {
   itemSource,
   sourceContext,
@@ -23,13 +24,9 @@ export type { TrackClearance } from "@/lib/legal/tracking/sources";
 export const TRACK_GROUPS = ["now", "decision", "waiting", "silent"] as const;
 export type TrackGroup = (typeof TRACK_GROUPS)[number];
 
-/** The task of the project's Travail an action became, if any. */
-export type TrackTask = { id: string; done: boolean };
-
 export type TrackedItem = PlanRow & {
   // The stored item's id (delegation writes on it).
   id: string;
-  task: TrackTask | null;
   // Recomputed from the sources (ticket 07's item states).
   current: PlanItemStatus;
   group: TrackGroup;
@@ -44,11 +41,12 @@ export type TrackedItem = PlanRow & {
 
 export function trackPlan(input: {
   projectId: string;
-  items: Array<PlanRow & { id: string; task: TrackTask | null }>;
+  items: Array<PlanRow & { id: string }>;
   rows: InventoryRows;
   clearances: TrackClearance[];
   today: string;
   completeContacts: Set<string>;
+  splitOf: Map<string, SplitState>;
 }): TrackedItem[] {
   const ctx = sourceContext(input);
   const sourceOf = (item: PlanRow, depsDone: boolean) =>
@@ -58,7 +56,7 @@ export function trackPlan(input: {
   // no longer needed (« débloquée indépendamment »). Plans are small.
   const result = new Map<string, TrackedItem>();
   const resolve = (
-    item: PlanRow & { id: string; task: TrackTask | null },
+    item: PlanRow & { id: string },
     seen = new Set<string>(),
   ): TrackedItem => {
     const known = result.get(item.key);

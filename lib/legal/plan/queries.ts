@@ -1,6 +1,7 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
+import { completeFormContacts } from "@/lib/legal/forms/queries";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import {
   proposePlan,
@@ -73,15 +74,16 @@ export async function proposeLegalPlan(
   },
   access: Access,
 ): Promise<PlanItem[]> {
-  const [rows, clearances] = await Promise.all([
+  const [rows, clearances, completeContacts] = await Promise.all([
     readInventoryRows(
       project.id,
       project.masters,
       can(access, "manage_catalog"),
     ),
     listPlanClearances(project.id),
+    completeFormContacts(project.id),
   ]);
-  return proposePlan({ rows, clearances });
+  return proposePlan({ rows, clearances, completeContacts });
 }
 
 export async function loadLegalPlan(
@@ -122,7 +124,7 @@ export async function loadLegalPlan(
     const { data: items, error } = await supabase
       .from("legal_plan_items")
       .select(
-        "item_key, kind, master_id, label, detail, why, status, depends_on, responsible_person_id, due_on",
+        "item_key, kind, master_id, label, detail, why, subject, credit_ids, status, depends_on, responsible_person_id, due_on",
       )
       .eq("plan_id", plan.data.id)
       .order("created_at");
@@ -140,6 +142,8 @@ export async function loadLegalPlan(
         label: row.label,
         detail: row.detail,
         why: row.why ?? "",
+        subject: row.subject,
+        creditIds: row.credit_ids,
         status: row.status as PlanItemStatus,
         column: COLUMN_OF[row.status] ?? "later",
         dependsOn: row.depends_on,
@@ -167,9 +171,8 @@ export async function loadLegalPlan(
       ...item,
       responsibleId: owner,
       responsibleName: owner ? (names.get(owner) ?? null) : null,
-      // An action to start now becomes a task, which needs a date: the
-      // project's, shown and changeable.
-      dueOn: item.column === "now" ? project.dueDate : null,
+      // The project's date, shown and changeable; an action may have none.
+      dueOn: project.dueDate,
     })),
   };
 }

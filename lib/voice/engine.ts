@@ -37,16 +37,40 @@ export async function dictate<State, Output, Proposal>(
   projectId: string,
   audio: Uint8Array,
 ): Promise<DictationResponse<Proposal>> {
+  // Checked before paying for a transcription.
   const state = await adapter.loadState(projectId);
   if (!state) return fail("not_found");
 
   const transcription = await transcribeDictation(audio);
   if (!transcription.ok) return transcription;
-  const { transcript, heard } = transcription;
+  return proposeFrom(
+    adapter,
+    projectId,
+    transcription.transcript,
+    transcription.heard,
+    state,
+  );
+}
+
+/**
+ * The extraction half of a dictation, from a transcript already there: a
+ * dictation's, or a call's (the Master's exchanges fill the Brief Mix/Master
+ * from what was said). `heard` is what the review shows first.
+ */
+export async function proposeFrom<State, Output, Proposal>(
+  adapter: VoiceAdapter<State, Output, Proposal>,
+  projectId: string,
+  transcript: Transcript,
+  heard: string,
+  // Already read by the caller, or read here.
+  loaded?: State,
+): Promise<DictationResponse<Proposal>> {
+  const state = loaded ?? (await adapter.loadState(projectId));
+  if (!state) return fail("not_found");
 
   let output: Output;
   try {
-    const input = `<etat_actuel>\n${adapter.describe(state)}\n</etat_actuel>\n<dictee>\n${heard}\n</dictee>`;
+    const input = `<etat_actuel>\n${adapter.describe(state)}\n</etat_actuel>\n<dictee>\n${transcript.text.trim()}\n</dictee>`;
     output = (await extract(adapter.schema, input, adapter.instructions))
       .output;
   } catch (error) {

@@ -42,8 +42,10 @@ export const legal = {
         title: "Répartitions",
         description: "Parts du master et de l'édition, titre par titre.",
       },
+      // « Accords » is the clearances' dossier (third-party elements):
+      // never the same word for the contracts.
       agreements: {
-        title: "Accords",
+        title: "Contrats",
         description: "Les contrats rattachés au projet.",
       },
       declarations: {
@@ -164,7 +166,8 @@ export const legal = {
     },
     done: {
       title: "Toutes les questions ont une réponse",
-      body: "La prochaine étape, la confirmation du dossier, arrive bientôt. Vous pouvez encore corriger une réponse ci-dessous.",
+      body: "Relisez maintenant le dossier et confirmez-le. Vous pouvez encore corriger une réponse ci-dessous.",
+      action: "Passer à la confirmation",
     },
     errors: {
       invalid: "Cette réponse n'a pas pu être lue. Réessayez.",
@@ -205,8 +208,8 @@ export const legal = {
         description: "Ce que les titres empruntent à des œuvres existantes.",
       },
       agreements: {
-        title: "Accords",
-        description: "Les contrats du projet et les accords déclarés.",
+        title: "Contrats",
+        description: "Les contrats du projet et ceux déclarés au cadrage.",
       },
       publishers: {
         title: "Éditeurs",
@@ -247,7 +250,8 @@ export const legal = {
         ? `Dossier confirmé le ${date} par ${name}.`
         : `Dossier confirmé le ${date}.`,
     confirmedNote:
-      "Corriger une réponse le rouvrira : il faudra le confirmer à nouveau. La prochaine étape, le plan d'action, arrive bientôt.",
+      "Corriger une réponse le rouvrira : il faudra le confirmer à nouveau.",
+    openPlan: "Passer au plan d'action",
     reopened:
       "Une réponse a changé depuis la dernière confirmation : relisez le dossier et confirmez-le à nouveau.",
     errors: {
@@ -272,7 +276,7 @@ export const legal = {
       later: {
         title: "À venir",
         description:
-          "Débloquées dès que ce dont elles dépendent est fait. Leur tâche se crée alors depuis le Suivi.",
+          "Débloquées dès que ce dont elles dépendent est fait. Leur tâche attend déjà dans Travail.",
       },
     },
     // Plain words (Sacha, 04/10/2026: « je comprends pas ») : what to do,
@@ -280,10 +284,10 @@ export const legal = {
     items: {
       onboarding: (count: number) =>
         count === 1
-          ? "Récupérer les informations d'une personne"
-          : `Récupérer les informations de ${count} personnes`,
+          ? "Faire remplir une fiche de renseignements"
+          : `Faire remplir ${count} fiches de renseignements`,
       onboardingWhy:
-        "Créditées mais pas encore dans le Réseau : il faut leur identité, leurs coordonnées, leur numéro SACEM et de quoi les payer.",
+        "Chaque personne créditée remplit sa fiche par un lien, sans compte : identité, coordonnées, numéro SACEM, de quoi la payer. Ses contrats et déclarations en dépendent.",
       contract: (name: string) => `Faire signer un contrat à ${name}`,
       contractWhy:
         "Sa participation (rémunération, cession de ses droits) doit être écrite et signée.",
@@ -299,6 +303,22 @@ export const legal = {
         "La déclaration ouvre les droits d'auteur. Elle attend les informations des créateurs, la répartition, les accords et le master final.",
     },
     after: (labels: string) => `Après : ${labels}`,
+    // One group per kind of action: what they share is said once.
+    groups: {
+      onboarding: "Fiches de renseignements",
+      contract: "Contrats à faire signer",
+      splits: "Répartitions de l'édition",
+      clearance: "Accords à obtenir",
+      formality: "Déclarations SACEM",
+    },
+    // Where an action is done, the same button everywhere.
+    go: {
+      onboarding: "Préparer les fiches",
+      contract: "Voir les contrats",
+      splits: "Répartir",
+      clearance: "Voir les accords",
+      formality: "Déclarer",
+    },
     empty: "Rien dans cette colonne.",
     include: (label: string) => `Garder « ${label} » dans le plan`,
     responsible: "Responsable",
@@ -308,7 +328,7 @@ export const legal = {
     launch: "Lancer le plan",
     launching: "Lancement…",
     notice:
-      "Lancer le plan crée les tâches des actions à lancer maintenant. Rien n'est envoyé à l'extérieur et aucun contrat n'est créé.",
+      "Lancer le plan crée une tâche par action dans Travail ; chacune se coche d'elle-même quand sa source dit que c'est fait. Rien n'est envoyé à l'extérieur et aucun contrat n'est créé.",
     nothing: "Le dossier ne demande aucune action pour l'instant.",
     needsConfirmation: {
       title: "Le dossier n'est pas encore confirmé",
@@ -327,8 +347,6 @@ export const legal = {
     errors: {
       notConfirmed: "Le dossier doit d'abord être confirmé.",
       already: "Le plan a déjà été lancé.",
-      dueMissing: (labels: string) =>
-        `Ajoutez une échéance pour créer la tâche de : ${labels}.`,
       failed: "Le plan n'a pas pu être lancé. Réessayez.",
     },
     openTracking: "Voir le suivi",
@@ -338,7 +356,7 @@ export const legal = {
     description:
       "Qu'est-ce qui nécessite notre attention ? L'état de chaque action est relu à chaque visite dans le Réseau, les Contrats et les fiches des titres.",
     integrations:
-      "Pas encore intégrés : les fiches à remplir par lien, l'envoi en signature et les dépôts SACEM. Les états viennent de ce qui est saisi dans PDS OS.",
+      "Pas encore intégrés : la signature électronique (le contrat signé et sa preuve sont déposés à la main) et les dépôts SACEM. Les états viennent de ce qui est saisi dans PDS OS.",
     groups: {
       now: {
         title: "À traiter maintenant",
@@ -372,8 +390,12 @@ export const legal = {
       awaitingDirector: "À valider par la direction",
       noContract: "Aucun contrat pour l'instant",
       titleRemoved: "Le titre n'est plus dans le projet",
-      splitComplete: "Répartition saisie à 100 %",
-      splitToDo: "Répartition à compléter",
+      splitConfirmed: "Répartition confirmée par tous",
+      splitDisputed: "Répartition contestée",
+      splitWaiting: (confirmed: number, total: number) =>
+        `${confirmed} confirmation${confirmed > 1 ? "s" : ""} sur ${total}`,
+      splitToDo: "Répartition à proposer",
+      splitOnTitle: "Répartie sur la fiche du titre, à faire confirmer",
       clearanceGone: "Plus à sécuriser",
       cleared: "Sécurisé",
       clearance: {
@@ -401,18 +423,15 @@ export const legal = {
     errors: {
       failed: "La modification n'a pas pu être enregistrée. Réessayez.",
       responsible: "Ce responsable ne peut pas suivre le juridique.",
-      dueMissing:
-        "Ajoutez une échéance (Modifier) : elle est nécessaire pour créer la tâche.",
-      responsibleMissing:
-        "Désignez un responsable (Modifier) : la tâche lui sera assignée.",
     },
-    task: {
-      create: "Créer la tâche",
-      creating: "Création…",
-      tick: "Cocher la tâche",
-      open: "Tâche dans Travail",
-      done: "Tâche cochée",
-      none: "Pas encore de tâche",
+    added: {
+      body: (count: number) =>
+        count === 1
+          ? "1 action est apparue depuis le lancement (une personne ou un titre ajouté)."
+          : `${count} actions sont apparues depuis le lancement (des personnes ou des titres ajoutés).`,
+      action: "Ajouter au plan",
+      adding: "Ajout…",
+      failed: "Les actions n'ont pas pu être ajoutées. Réessayez.",
     },
     notLaunched: {
       title: "Le plan n'est pas encore lancé",

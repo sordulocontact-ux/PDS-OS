@@ -1,0 +1,164 @@
+-- Juridique, branch 06: the formality engine and SACEM 725
+-- (supabase/migrations/20261005007001_legal_formalities.sql). Run with
+-- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
+-- shares, signatures, deposit, registration and ISWC here are SIMULATED).
+begin;
+select plan(21);
+
+-- Fixtures ------------------------------------------------------------------
+create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
+declare v_id uuid := gen_random_uuid();
+begin
+  insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at, raw_user_meta_data)
+  values (v_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          p_email, now(), jsonb_build_object('first_name', split_part(p_email, '@', 1)));
+  return v_id;
+end $$;
+
+create function pg_temp.act_as(p_user uuid) returns void language plpgsql as $$
+begin
+  perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated')::text, true);
+  execute 'set local role authenticated';
+end $$;
+
+create temp table ids (name text primary key, id uuid) on commit drop;
+grant all on ids to authenticated;
+create function pg_temp.id_of(p_name text) returns uuid language sql as $$
+  select id from ids where name = p_name
+$$;
+create temp table vars (k text primary key, v text) on commit drop;
+grant all on vars to authenticated;
+insert into vars select 'tag', substr(md5(random()::text), 1, 8);
+
+insert into ids values
+  ('director', pg_temp.new_user('director-' || (select v from vars where k = 'tag') || '@pds.test')),
+  ('manager', pg_temp.new_user('manager-' || (select v from vars where k = 'tag') || '@pds.test')),
+  ('creative', pg_temp.new_user('creative-' || (select v from vars where k = 'tag') || '@pds.test'));
+insert into ids select 'org', id from public.organizations where slug = 'pds';
+update public.memberships m set status = 'approved', role = r.role
+  from (values ('director', 'general_director'), ('manager', 'project_manager'),
+               ('creative', 'creative_director')) as r (name, role)
+ where m.person_id = (select person_id from public.accounts
+                       where id = (select id from ids where name = r.name));
+insert into ids select 'manager_person', person_id from public.accounts
+ where id = pg_temp.id_of('manager');
+insert into ids select 'director_person', person_id from public.accounts
+ where id = pg_temp.id_of('director');
+insert into ids select 'creative_person', person_id from public.accounts
+ where id = pg_temp.id_of('creative');
+
+-- A project owned by the manager, with one title, and another title outside it.
+reset role;
+insert into public.artists (organization_id, name, relation)
+values (pg_temp.id_of('org'), 'Dioo ' || (select v from vars where k = 'tag'), 'signed');
+insert into ids select 'artist', id from public.artists
+ where name = 'Dioo ' || (select v from vars where k = 'tag');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+insert into ids select 'master', public.create_master(
+  pg_temp.id_of('org'), 'Piégée',
+  jsonb_build_array(jsonb_build_object('artist_id', pg_temp.id_of('artist'))));
+insert into ids select 'other_master', public.create_master(
+  pg_temp.id_of('org'), 'Ailleurs',
+  jsonb_build_array(jsonb_build_object('artist_id', pg_temp.id_of('artist'))));
+reset role;
+insert into public.projects (organization_id, title, type, music_format, owner_person_id)
+values (pg_temp.id_of('org'), 'Projet ' || (select v from vars where k = 'tag'), 'music_release',
+        'single', pg_temp.id_of('manager_person'));
+insert into ids select 'project', id from public.projects
+ where title = 'Projet ' || (select v from vars where k = 'tag');
+insert into public.project_masters (organization_id, project_id, master_id, position)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('master'), 1);
+
+
+insert into public.legal_clearances (organization_id, project_id, master_id, element, work)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('master'), 'topline', 'Humanisme');
+insert into public.legal_plans (organization_id, project_id, status, launched_at)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'active', now());
+insert into public.legal_plan_items (organization_id, plan_id, project_id, item_key, kind, master_id,
+                                     label, status, responsible_person_id)
+select pg_temp.id_of('org'), id, pg_temp.id_of('project'), 'formality:' || pg_temp.id_of('master'),
+       'formality', pg_temp.id_of('master'), 'SACEM', 'blocked', pg_temp.id_of('manager_person')
+  from public.legal_plans where project_id = pg_temp.id_of('project');
+select public.legal_plan_item_task((select id from public.legal_plan_items where project_id = pg_temp.id_of('project')));
+
+create function pg_temp.creators(p_shares text[]) returns jsonb language sql as $$
+  select jsonb_build_array(
+    jsonb_build_object('last_name', 'Ever', 'quality', 'composer', 'phono', p_shares[1], 'signs', true),
+    jsonb_build_object('last_name', 'Samy', 'quality', 'composer', 'phono', p_shares[2], 'signs', true),
+    jsonb_build_object('last_name', 'Le J', 'quality', 'author', 'phono', p_shares[3], 'signs', true))
+$$;
+create function pg_temp.status() returns text language sql as $$
+  select status from public.legal_formalities where project_id = pg_temp.id_of('project')
+$$;
+
+select pg_temp.act_as(pg_temp.id_of('manager'));
+insert into ids select 'f', public.open_formality(pg_temp.id_of('project'), pg_temp.id_of('master'), 'SACEM_725_EDITED_WORK');
+select ok(public.formality_missing(pg_temp.id_of('f')) @> array['title', 'duration', 'creators', 'dep_dr', 'borrowing:Humanisme'],
+          'the formality lists what the bulletin still needs');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'title', jsonb_build_object('value', 'Piégée', 'source', 'Titre'),
+  'duration', jsonb_build_object('value', '3:12', 'source', 'Master final'),
+  'performers', jsonb_build_object('value', 'Dioo', 'source', 'Artistes du titre'),
+  'creators', jsonb_build_object('value', pg_temp.creators(array['33.33', '33.33', '33.33']), 'source', 'Saisi'),
+  'dep_dr', jsonb_build_object('value', jsonb_build_object('choice', 'DEP'), 'source', 'Saisi')));
+select ok('phono_total' = any (public.formality_missing(pg_temp.id_of('f'))), 'the Phono shares must total exactly 100 %');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi')));
+select is(public.formality_missing(pg_temp.id_of('f')), array['borrowing:Humanisme'], 'only the unsecured borrowing remains');
+select is(pg_temp.status(), 'collecting_data', 'an unsecured Humanisme keeps the formality from being finalised');
+select throws_ok(format($$ select public.generate_formality_document(%L) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_not_ready', 'no bulletin before the borrowing is secured');
+
+reset role;
+update public.legal_clearances set status = 'cleared' where project_id = pg_temp.id_of('project');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select public.save_formality_values(pg_temp.id_of('f'), '{}'::jsonb);
+select is(pg_temp.status(), 'ready_to_generate', 'ready once everything is there');
+
+-- Document, signatures, deposit ----------------------------------------------------
+select is(public.generate_formality_document(pg_temp.id_of('f')), 1, 'version 1 of the bulletin');
+select is((select count(*)::int from public.legal_formality_signatures where formality_id = pg_temp.id_of('f')), 3,
+          'every rights holder who signs has a signature to collect');
+select throws_ok(format($$ select public.submit_formality(%L, 'Envoyé') $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_not_ready', 'no deposit before the signatures');
+select throws_ok(format($$ select public.record_formality_signature((select id from public.legal_formality_signatures where formality_id = %L limit 1), null) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_proof_required', 'a signature is recorded with its proof');
+select public.record_formality_signature(id, 'Bulletin signé reçu (SIMULÉ)')
+  from public.legal_formality_signatures where formality_id = pg_temp.id_of('f');
+select is(pg_temp.status(), 'ready_to_submit', 'all signed: ready to submit');
+select public.submit_formality(pg_temp.id_of('f'), 'Envoyé par courrier le 05/10 (SIMULÉ)');
+select is(pg_temp.status(), 'submitted', 'submitted is not registered');
+select is((select status from public.master_declarations where master_id = pg_temp.id_of('master') and organism = 'sacem'),
+          'submitted', 'the title''s SACEM declaration reads submitted');
+
+-- An external correction reopens only its field ------------------------------------------
+select public.require_formality_action(pg_temp.id_of('f'), array['duration'], 'Durée à corriger');
+select is(pg_temp.status(), 'action_required', 'ACTION_REQUIRED');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'title', jsonb_build_object('value', 'Autre titre', 'source', 'Saisi')));
+select is((select value #>> '{}' from public.legal_formality_values where formality_id = pg_temp.id_of('f') and field_key = 'title'),
+          'Piégée', 'a field not reopened stays as it was');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'duration', jsonb_build_object('value', '3:14', 'source', 'Master final')));
+select is(public.generate_formality_document(pg_temp.id_of('f')), 2, 'the correction makes a new version');
+select is((select count(*)::int from public.legal_formality_signatures
+            where formality_id = pg_temp.id_of('f') and document_version = 2 and status = 'pending'), 3,
+          'with new signatures, version 1 kept');
+
+-- Partial declaration, processing, completion with proof ----------------------------------
+select throws_ok(format($$ select public.declare_formality_partial(%L, null) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_reason_required', 'a partial declaration says why');
+select public.declare_formality_partial(pg_temp.id_of('f'), 'Le J injoignable (SIMULÉ)');
+select public.submit_formality(pg_temp.id_of('f'), 'Renvoyé le 20/10 (SIMULÉ)');
+select public.mark_formality_processing(pg_temp.id_of('f'));
+select throws_ok(format($$ select public.complete_formality(%L, null, null, null) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_proof_required', 'COMPLETED needs the proof of the result');
+select public.complete_formality(pg_temp.id_of('f'), 'Avis d''enregistrement SACEM (SIMULÉ)', 'W-123', 'T1234567890');
+select is((select iswc from public.masters where id = pg_temp.id_of('master')), 'T1234567890',
+          'the ISWC received is carried to the title');
+reset role;
+select is((select t.status from public.tasks t join public.legal_plan_items i on i.id = t.legal_plan_item_id
+            where i.project_id = pg_temp.id_of('project')), 'done', 'the plan''s SACEM task is ticked');
+
+select * from finish();
+rollback;

@@ -67,3 +67,11 @@ export function callViewOf(
 ): CallView {
   return isUpcoming(call, now) ? "upcoming" : "past";
 }
+
+/** The next round hour, the default time of a new internal meeting. */
+export function nextRoundHourInput(now: Date): string {
+  const next = new Date(now);
+  next.setMinutes(0, 0, 0);
+  next.setHours(next.getHours() + 1);
+  return toParisLocalInput(next);
+}

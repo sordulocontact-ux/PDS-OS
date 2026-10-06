@@ -17,9 +17,9 @@
 // débloqué ensuite ». Nothing is forced into a line: an item waits only for
 // what it really depends on (« aucune séquence artificiellement linéaire »).
 
-import type { ContributorRole } from "@/lib/catalog/master/rules";
 import { fr } from "@/lib/i18n/fr";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
+import { titleItems } from "@/lib/legal/plan/proposal-titles";
 import { normalizeSearch } from "@/lib/utils/search";
 
 export const PLAN_COLUMNS = ["now", "ongoing", "later"] as const;
@@ -41,6 +41,11 @@ export type PlanItem = {
   detail: string | null;
   // Why it exists, in one sentence.
   why: string;
+  // Who or what it is about, alone (a person, a title): the line of a
+  // grouped list.
+  subject: string | null;
+  // The credits a contract is for (its person's contact found from them).
+  creditIds: string[];
   column: PlanColumn;
   status: PlanItemStatus;
   dependsOn: string[];
@@ -54,14 +59,6 @@ export type PlanClearance = {
   author: string | null;
   status: string;
 };
-
-// Roles that make someone a creator of the work (the SACEM bulletin lists
-// authors, composers and arrangers).
-const CREATOR_ROLES: readonly ContributorRole[] = [
-  "composer",
-  "lyricist",
-  "arranger",
-];
 
 // A clearance someone outside is answering: waiting, not to act on.
 const CLEARANCE_WAITING = [
@@ -79,6 +76,8 @@ const t = fr.legal.plan.items;
 export function proposePlan(input: {
   rows: InventoryRows;
   clearances: PlanClearance[];
+  // Contacts whose fiche de renseignements is complete (Juridique 02).
+  completeContacts: Set<string>;
 }): PlanItem[] {
   const { rows } = input;
   const titleOf = new Map(rows.titles.map((m) => [m.id, m.title]));
@@ -86,7 +85,12 @@ export function proposePlan(input: {
   // Every credited person once, across the project's titles.
   const people = new Map<
     string,
-    { name: string; contactId: string | null; roles: Set<string> }
+    {
+      name: string;
+      contactId: string | null;
+      roles: Set<string>;
+      creditIds: string[];
+    }
   >();
   for (const master of rows.titles)
     for (const credit of rows.creditsOf.get(master.id) ?? []) {
@@ -95,13 +99,19 @@ export function proposePlan(input: {
         name: credit.name,
         contactId: credit.contactId,
         roles: new Set<string>(),
+        creditIds: [],
       };
       person.contactId ??= credit.contactId;
+      person.creditIds.push(credit.id);
       person.roles.add(fr.masterPage.credits.roles[credit.role]);
       people.set(key, person);
     }
 
-  const incomplete = [...people.values()].filter((p) => !p.contactId);
+  // « PO détecte une Person incomplète » : no contact yet, or a fiche not
+  // complete.
+  const ficheMissing = (p: { contactId: string | null }) =>
+    !p.contactId || !input.completeContacts.has(p.contactId);
+  const incomplete = [...people.values()].filter(ficheMissing);
   const onboarding: PlanItem[] =
     incomplete.length > 0
       ? [
@@ -112,6 +122,8 @@ export function proposePlan(input: {
             label: t.onboarding(incomplete.length),
             detail: incomplete.map((p) => p.name).join(", "),
             why: t.onboardingWhy,
+            subject: null,
+            creditIds: [],
             column: "now",
             status: "action_now",
             dependsOn: [],
@@ -129,7 +141,8 @@ export function proposePlan(input: {
       const running = theirs.some(
         (c) => c.status !== "terminated" && c.status !== "signed",
       );
-      const waits = person.contactId ? [] : afterOnboarding;
+      // « La réception de la fiche Ever ne débloque que l'accord Ever ».
+      const waits = ficheMissing(person) ? afterOnboarding : [];
       return [
         {
           key: `contract:${key}`,
@@ -138,6 +151,8 @@ export function proposePlan(input: {
           label: t.contract(person.name),
           detail: [...person.roles].join(" · "),
           why: t.contractWhy,
+          subject: person.name,
+          creditIds: person.creditIds,
           column: running ? "ongoing" : waits.length > 0 ? "later" : "now",
           status: running
             ? "waiting_external"
@@ -171,56 +186,15 @@ export function proposePlan(input: {
           .filter(Boolean)
           .join(" · "),
         why: t.clearanceWhy,
+        subject: c.work,
+        creditIds: [],
         column: waiting ? "ongoing" : "now",
         status: waiting ? "waiting_external" : "action_now",
         dependsOn: [],
       };
     });
 
-  const perTitle = rows.titles.flatMap((master): PlanItem[] => {
-    const creators = (rows.creditsOf.get(master.id) ?? []).filter((c) =>
-      CREATOR_ROLES.includes(c.role),
-    );
-    const splits: PlanItem[] =
-      creators.length > 0
-        ? [
-            {
-              key: `splits:${master.id}`,
-              kind: "splits",
-              masterId: master.id,
-              label: t.splits(master.title),
-              detail: [...new Set(creators.map((c) => c.name))].join(", "),
-              why: t.splitsWhy,
-              column: afterOnboarding.length > 0 ? "later" : "now",
-              status: afterOnboarding.length > 0 ? "blocked" : "action_now",
-              dependsOn: afterOnboarding,
-            },
-          ]
-        : [];
-    const sacem = rows.filedOf.get(master.id)?.get("sacem");
-    const filed = sacem && sacem.status !== "rejected";
-    const waits = [
-      ...afterOnboarding,
-      ...splits.map((s) => s.key),
-      ...clearances.filter((c) => c.masterId === master.id).map((c) => c.key),
-    ];
-    const formality: PlanItem[] = filed
-      ? []
-      : [
-          {
-            key: `formality:${master.id}`,
-            kind: "formality",
-            masterId: master.id,
-            label: t.formality(master.title),
-            detail: null,
-            why: t.formalityWhy,
-            column: waits.length > 0 ? "later" : "now",
-            status: waits.length > 0 ? "blocked" : "action_now",
-            dependsOn: waits,
-          },
-        ];
-    return [...splits, ...formality];
-  });
+  const perTitle = titleItems(rows, afterOnboarding, clearances);
 
   return [...onboarding, ...clearances, ...contracts, ...perTitle];
 }

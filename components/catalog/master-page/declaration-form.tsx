@@ -17,12 +17,17 @@ export function DeclarationForm({
   masterId,
   organism,
   declaration,
+  defaults,
   onDone,
+  onCancel,
 }: {
   masterId: string;
   organism: Organism;
   declaration: MasterDeclaration | null;
+  // Values proposed by PO, by field name.
+  defaults?: Record<string, string>;
   onDone: () => void;
+  onCancel?: () => void;
 }) {
   const t = fr.masterPage.declarations;
   const optional = fr.masterPage.form.optional;
@@ -33,8 +38,10 @@ export function DeclarationForm({
   return (
     <MasterForm
       action={saveDeclaration}
+      defaults={defaults}
       hidden={{ masterId, organism }}
       onDone={onDone}
+      onCancel={onCancel}
     >
       {({ value, error }) => (
         <>

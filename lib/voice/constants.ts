@@ -4,7 +4,11 @@
  */
 
 /** Stages that accept dictation. Each one has an adapter in lib/voice/adapters.ts. */
-export const VOICE_STAGES = ["framing", "launch_strategy"] as const;
+export const VOICE_STAGES = [
+  "framing",
+  "launch_strategy",
+  "master_brief",
+] as const;
 export type VoiceStage = (typeof VOICE_STAGES)[number];
 
 export function isVoiceStage(value: string): value is VoiceStage {

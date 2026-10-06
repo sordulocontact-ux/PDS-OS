@@ -70,7 +70,9 @@ export type CallErrorCode =
   | "save_failed"
   | "unknown";
 
-export type ActionResult = { ok: true } | { ok: false; error: CallErrorCode };
+// `id`: the meeting created from PO's panel, which stays open (`stay`).
+export type ActionResult =
+  { ok: true; id?: string } | { ok: false; error: CallErrorCode };
 
 export function asCallStatus(value: string): CallStatus {
   return (CALL_STATUSES as readonly string[]).includes(value)

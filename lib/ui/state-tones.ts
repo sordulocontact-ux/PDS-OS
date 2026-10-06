@@ -112,6 +112,7 @@ export const masterReleaseTone: Record<string, Tone> = {
 export const audioStateTone: Record<string, Tone> = {
   demo: "neutral",
   rough_mix: "info",
+  mix: "info",
   master: "info",
   final_master: "success",
 };
@@ -135,6 +136,8 @@ export const deliverableStateTone: Record<string, Tone> = {
 /** Budget line: planned is only an intention, committed runs, paid is settled. */
 export const budgetStatusTone: Record<string, Tone> = {
   planned: "neutral",
+  // A quote waits for someone's decision (accept it or not).
+  proposed: "warning",
   committed: "info",
   paid: "success",
 };
@@ -216,6 +219,107 @@ export const legalFormTone: Record<string, Tone> = {
   complete: "success",
   expired: "warning",
   revoked: "neutral",
+};
+
+/** An agreement of the Juridique (branch 03), from the mapping to the
+ * signature: to settle, information missing, to act on, waiting, done. */
+export const agreementTone: Record<string, Tone> = {
+  unmapped: "action",
+  not_needed: "neutral",
+  needs_info: "warning",
+  ready_to_generate: "action",
+  draft: "action",
+  review_required: "info",
+  ready_for_signature: "action",
+  signature_pending: "info",
+  signed: "success",
+  ended: "neutral",
+};
+
+/** A version of a split sheet (Juridique 04): being written, sent, partly
+ * or fully confirmed, disputed, replaced. */
+export const splitVersionTone: Record<string, Tone> = {
+  draft: "action",
+  proposed: "info",
+  partially_confirmed: "info",
+  confirmed: "success",
+  disputed: "danger",
+  superseded: "neutral",
+};
+
+/** One person's answer to a split version. */
+export const splitConfirmationTone: Record<string, Tone> = {
+  none: "neutral",
+  pending: "info",
+  confirmed: "success",
+  disputed: "danger",
+  revoked: "neutral",
+  expired: "warning",
+};
+
+/** A clearance (Juridique 05): to investigate, on its way, secured, refused,
+ * dropped, or an action awaited. */
+export const clearanceTone: Record<string, Tone> = {
+  to_investigate: "action",
+  rightsholders_identified: "info",
+  contacted: "info",
+  waiting_external: "info",
+  negotiating: "info",
+  agreement_reached: "info",
+  document_pending: "info",
+  signed: "info",
+  cleared: "success",
+  refused: "danger",
+  abandoned: "neutral",
+  action_required: "warning",
+};
+
+/** A formality (Juridique 06): data to gather, ready, signing, submitted
+ * (not registered), registered, or a correction asked. */
+export const formalityTone: Record<string, Tone> = {
+  collecting_data: "action",
+  ready_to_generate: "action",
+  document_ready: "info",
+  signatures_pending: "info",
+  ready_to_submit: "action",
+  submitted: "info",
+  processing: "info",
+  completed: "success",
+  action_required: "warning",
+};
+
+/** A contract template: to validate, in use, retired. */
+export const templateStatusTone: Record<string, Tone> = {
+  draft: "warning",
+  validated: "success",
+  retired: "neutral",
+};
+
+/** A sending of the Master's package (lib/master-workflow/transmission-types.ts):
+ * received is done, waiting is in progress, without an answer it waits for
+ * a reminder, an expired link is a failure, a replaced one is history. */
+export const transmissionStateTone: Record<string, Tone> = {
+  received: "success",
+  waiting: "info",
+  to_remind: "warning",
+  expired: "danger",
+  replaced: "neutral",
+};
+
+/** A version of the mix (lib/master-workflow/mix-types.ts): the team's
+ * feedback awaited, then sent to the engineer. */
+export const mixVersionTone: Record<string, Tone> = {
+  received: "warning",
+  feedback_sent: "info",
+};
+
+/** A question of the Brief Mix/Master (lib/master-workflow/question-types.ts):
+ * awaited from the person asked, answered, then in the brief. */
+export const briefQuestionTone: Record<string, Tone> = {
+  open: "warning",
+  answered: "info",
+  applied: "success",
+  done: "success",
 };
 
 /** An item of the master's file (overview checklist). */

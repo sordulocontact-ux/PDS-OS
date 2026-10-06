@@ -99,7 +99,7 @@ export async function listMasterContributors(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("master_contributors")
-    .select("id, name, role, detail")
+    .select("id, name, role, detail, contact_id")
     .eq("master_id", masterId)
     .order("created_at");
   if (error) {
@@ -111,6 +111,7 @@ export async function listMasterContributors(
     name: row.name,
     role: oneOf(CONTRIBUTOR_ROLES, row.role, "other"),
     detail: row.detail,
+    contactId: row.contact_id,
   }));
   const rank = (c: MasterContributor) => CONTRIBUTOR_ROLES.indexOf(c.role);
   return {
@@ -126,7 +127,7 @@ export async function listMasterSplits(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("master_splits")
-    .select("id, kind, party, role, share")
+    .select("id, kind, party, role, share, contact_id, artist_id")
     .eq("master_id", masterId)
     .order("share", { ascending: false })
     .order("created_at");
@@ -141,6 +142,8 @@ export async function listMasterSplits(
       party: row.party,
       role: oneOf(SPLIT_ROLES, row.role, "other"),
       share: Number(row.share),
+      contactId: row.contact_id,
+      artistId: row.artist_id,
     })),
     error: false,
   };

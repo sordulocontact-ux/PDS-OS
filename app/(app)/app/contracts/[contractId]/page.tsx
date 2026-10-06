@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FileLibrary } from "@/components/catalog/files/file-library";
+import { ContractDocumentSection } from "@/components/contracts/contract-document-section";
 import { ContractFlow } from "@/components/contracts/contract-flow";
 import { ContractParties } from "@/components/contracts/contract-parties";
 import { EditContractButton } from "@/components/contracts/edit-contract-button";
@@ -17,6 +18,7 @@ import { listCatalogFiles } from "@/lib/catalog/files";
 import { getContract, listPartyCandidates } from "@/lib/contracts/queries";
 import { todayInParis } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
+import { getContractDocument } from "@/lib/legal/contracts/document";
 import { formatDate, formatDateTime } from "@/lib/release/format";
 
 export const metadata = { title: `${fr.contracts.title} · ${fr.app.name}` };
@@ -38,11 +40,12 @@ export default async function ContractPage({
   if (!contract) notFound();
 
   const owner = { kind: "contract" as const, id: contract.id };
-  const [candidates, library] = await Promise.all([
+  const [candidates, library, document] = await Promise.all([
     contract.can.edit
       ? listPartyCandidates(contract.partyList.map((p) => p.contactId))
       : [],
     listCatalogFiles(owner),
+    getContractDocument(contract.id),
   ]);
   const t = fr.contracts;
   const p = t.page;
@@ -71,6 +74,13 @@ export default async function ContractPage({
             state={contract.state}
             can={contract.can}
             today={today}
+            proof={
+              document
+                ? {
+                    missing: !document.proof.signed || !document.proof.evidence,
+                  }
+                : null
+            }
             lastReview={
               contract.reviewerName && contract.reviewedAt
                 ? {
@@ -130,6 +140,17 @@ export default async function ContractPage({
           ]}
         />
       </div>
+      {document && (
+        <ContractDocumentSection
+          contractId={contract.id}
+          title={contract.title}
+          document={document}
+          canRevise={
+            contract.can.edit &&
+            (contract.state === "draft" || contract.state === "approved")
+          }
+        />
+      )}
       {/* Full width: the library's tabs and its button need the room. */}
       <PageSection
         id="contract-files"

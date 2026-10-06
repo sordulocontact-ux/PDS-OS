@@ -20,6 +20,13 @@ export const NOTIFICATION_KINDS = [
   "contract_approved",
   "contract_changes_requested",
   "meeting_invited",
+  "master_transmission_received",
+  "master_mix_version_received",
+  "master_mix_approved",
+  "master_mix_changes_requested",
+  "master_mastering_version_received",
+  "master_final_approved",
+  "master_mastering_changes_requested",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -64,6 +71,13 @@ export function notificationHref(
     return routes.contract(subjectId);
   if (kind === "meeting_invited" && subjectId) return routes.meeting(subjectId);
   if (!projectId) return routes.app;
+  // The engineer confirmed the package: its follow-up, in the Master's Mix.
+  if (kind === "master_transmission_received" || kind.startsWith("master_mix_"))
+    return routes.projectMasterStep(projectId, "mix");
+  if (kind.startsWith("master_mastering_"))
+    return routes.projectMasterStep(projectId, "mastering");
+  if (kind === "master_final_approved")
+    return routes.projectMasterStep(projectId, "final");
   if (kind.startsWith("design_version_"))
     return routes.projectDesign(projectId);
   if (kind.startsWith("validation_")) {

@@ -12,6 +12,7 @@ import {
   briefDeliverablesOf,
   type BriefDate,
 } from "@/lib/master-workflow/brief-types";
+import { writeBrief } from "@/lib/master-workflow/brief-row";
 import { calendarInOrder, isIsoDate } from "@/lib/master-workflow/calendar";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { createClient } from "@/lib/supabase/server";
@@ -133,24 +134,12 @@ export async function saveMasterBrief(
     mastering_due: dates.masteringDue,
     master_final_due: dates.masterFinalDue,
   };
-  // Update, else create: an upsert would rewrite the project and the
-  // organization too, columns nobody may update (grants column by column).
-  const updated = await supabase
-    .from("master_briefs")
-    .update(fields)
-    .eq("project_id", projectId)
-    .select("id");
-  const error =
-    updated.error ??
-    (updated.data.length > 0
-      ? null
-      : (
-          await supabase.from("master_briefs").insert({
-            ...fields,
-            organization_id: access.organizationId,
-            project_id: projectId,
-          })
-        ).error);
+  const error = await writeBrief(
+    supabase,
+    access.organizationId,
+    projectId,
+    fields,
+  );
   if (error) {
     console.error("saveMasterBrief:", error.code, error.message);
     if (error.code === "42501") return fail({}, t.forbidden);

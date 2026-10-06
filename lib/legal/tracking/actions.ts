@@ -50,39 +50,9 @@ export async function delegateLegalPlanItem(
         : t.failed,
     };
   }
-  revalidatePath(routes.projectLegal(projectId), "layout");
-  return { ok: true };
-}
-
-export type TaskResult = { ok: true } | { ok: false; error: string };
-
-/** « Créer la tâche » of an action freed after the launch: assigned to its
- * responsible, due on its date or the project's (create_legal_plan_task). */
-export async function createLegalPlanTask(
-  projectId: string,
-  itemId: string,
-): Promise<TaskResult> {
-  const t = fr.legal.tracking.errors;
-  const ids = z.object({ projectId: catalogIdSchema, itemId: catalogIdSchema });
-  const parsed = ids.safeParse({ projectId, itemId });
-  const access = await requireApproved();
-  if (!parsed.success || !can(access, "manage_legal"))
-    return { ok: false, error: fr.auth.errors.forbidden };
-
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("create_legal_plan_task", {
-    p_item_id: parsed.data.itemId,
-  });
-  if (error) {
-    console.error("createLegalPlanTask:", error.message);
-    if (error.message.includes("legal_task_due_missing"))
-      return { ok: false, error: t.dueMissing };
-    if (error.message.includes("legal_task_responsible_missing"))
-      return { ok: false, error: t.responsibleMissing };
-    return { ok: false, error: t.failed };
-  }
+  // The task moves with the action (a trigger); its new person is told.
   await schedulePendingPushes();
-  revalidatePath(routes.projectLegal(parsed.data.projectId), "layout");
-  revalidatePath(routes.projectWork(parsed.data.projectId));
+  revalidatePath(routes.projectLegal(projectId), "layout");
+  revalidatePath(routes.projectWork(projectId));
   return { ok: true };
 }

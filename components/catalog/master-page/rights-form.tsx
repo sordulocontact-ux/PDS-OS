@@ -12,15 +12,26 @@ import { MasterForm } from "./master-form";
 export function RightsForm({
   masterId,
   rights,
+  defaults,
   onDone,
+  onCancel,
 }: {
   masterId: string;
   rights: MasterRights;
+  // Values proposed by PO, by field name.
+  defaults?: Record<string, string>;
   onDone: () => void;
+  onCancel?: () => void;
 }) {
   const t = fr.masterPage.rights;
   return (
-    <MasterForm action={saveMasterRights} hidden={{ masterId }} onDone={onDone}>
+    <MasterForm
+      action={saveMasterRights}
+      defaults={defaults}
+      hidden={{ masterId }}
+      onDone={onDone}
+      onCancel={onCancel}
+    >
       {({ value, error }) => (
         <>
           <Field

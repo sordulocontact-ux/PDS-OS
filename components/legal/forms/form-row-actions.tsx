@@ -6,8 +6,7 @@ import { toast } from "sonner";
 
 import { SubmissionDialog } from "@/components/legal/forms/submission-dialog";
 import { Button } from "@/components/ui/button";
-import { FormDialog } from "@/components/ui/form-dialog";
-import { Input } from "@/components/ui/input";
+import { LinksDialog } from "@/components/ui/links-dialog";
 import { fr } from "@/lib/i18n/fr";
 import { prepareLegalForm, setLegalFormState } from "@/lib/legal/forms/actions";
 import type { FormRow } from "@/lib/legal/forms/queries";
@@ -42,15 +41,6 @@ export function FormRowActions({
       if (result.ok) router.refresh();
       else toast.error(result.error);
     });
-  const copy = async () => {
-    if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success(t.copied);
-    } catch {
-      // The field stays selectable: the link can be copied by hand.
-    }
-  };
   const open = row.state === "link_generated" || row.state === "sent";
 
   return (
@@ -88,33 +78,19 @@ export function FormRowActions({
           {t.revoke}
         </Button>
       )}
-      <FormDialog
+      <LinksDialog
         open={url !== null}
-        onOpenChange={(next) => {
-          if (!next) {
-            setUrl(null);
-            router.refresh();
-          }
+        onClose={() => {
+          setUrl(null);
+          router.refresh();
         }}
         title={t.linkTitle(row.name)}
         description={t.linkBody}
+        links={url ? [{ key: row.key, label: t.linkTitle(row.name), url }] : []}
+        copyLabel={t.copy}
+        copiedLabel={t.copied}
         closeLabel={fr.masterPage.form.close}
-      >
-        <div className="flex flex-col gap-4">
-          <Input
-            readOnly
-            value={url ?? ""}
-            aria-label={t.linkTitle(row.name)}
-            className="font-mono text-sm"
-            onFocus={(event) => event.currentTarget.select()}
-          />
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="button" size="lg" onClick={copy}>
-              {t.copy}
-            </Button>
-          </div>
-        </div>
-      </FormDialog>
+      />
     </div>
   );
 }

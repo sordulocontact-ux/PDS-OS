@@ -22,15 +22,19 @@ import { fr } from "@/lib/i18n/fr";
  */
 export function ContractForm({
   contract,
-  initialProjectId,
+  initial,
+  stay = false,
   options,
   onSaved,
   onCancel,
 }: {
   // Absent: a new contract.
   contract?: ContractValues;
-  // A new contract created from a project (Juridique): already attached.
-  initialProjectId?: string;
+  // A new contract already filled: attached to a project (Juridique), or a
+  // draft of PO.
+  initial?: Partial<Omit<ContractValues, "id">>;
+  // Created from another page (PO's panel): stay there instead of opening it.
+  stay?: boolean;
   options: ContractFormOptions;
   onSaved: (id: string) => void;
   onCancel: () => void;
@@ -50,6 +54,7 @@ export function ContractForm({
   return (
     <form action={formAction} className="flex flex-col gap-5">
       {contract && <input type="hidden" name="id" value={contract.id} />}
+      {stay && <input type="hidden" name="stay" value="1" />}
       <Field
         name="title"
         label={t.title}
@@ -57,7 +62,7 @@ export function ContractForm({
         maxLength={200}
         autoComplete="off"
         placeholder={t.titlePlaceholder}
-        defaultValue={contract?.title}
+        defaultValue={contract?.title ?? initial?.title}
         error={error?.field === "title" ? error.error : undefined}
       />
       <OptionSelect
@@ -66,7 +71,7 @@ export function ContractForm({
         items={Object.fromEntries(
           CONTRACT_TYPES.map((type) => [type, fr.contracts.types[type]]),
         )}
-        defaultValue={contract?.type ?? "artist"}
+        defaultValue={contract?.type ?? initial?.type ?? "artist"}
       />
       {options.owners.length > 0 && (
         <OptionSelect
@@ -76,7 +81,11 @@ export function ContractForm({
           items={Object.fromEntries(
             options.owners.map((owner) => [owner.personId, owner.name]),
           )}
-          defaultValue={contract?.ownerPersonId ?? options.owners[0]?.personId}
+          defaultValue={
+            contract?.ownerPersonId ??
+            initial?.ownerPersonId ??
+            options.owners[0]?.personId
+          }
         />
       )}
       <div className="grid gap-5 sm:grid-cols-2">
@@ -87,7 +96,7 @@ export function ContractForm({
             none: t.projectNone,
             ...Object.fromEntries(options.projects.map((p) => [p.id, p.title])),
           }}
-          defaultValue={contract?.projectId ?? initialProjectId ?? "none"}
+          defaultValue={contract?.projectId ?? initial?.projectId ?? "none"}
         />
         <OptionSelect
           name="artistId"
@@ -96,7 +105,7 @@ export function ContractForm({
             none: t.artistNone,
             ...Object.fromEntries(options.artists.map((a) => [a.id, a.name])),
           }}
-          defaultValue={contract?.artistId ?? "none"}
+          defaultValue={contract?.artistId ?? initial?.artistId ?? "none"}
         />
       </div>
       <Field
@@ -104,7 +113,7 @@ export function ContractForm({
         type="date"
         label={optional(t.dueOn)}
         hint={t.dueOnHint}
-        defaultValue={contract?.dueOn ?? ""}
+        defaultValue={contract?.dueOn ?? initial?.dueOn ?? ""}
         className="h-10 w-fit text-base md:text-sm"
       />
       <div className="grid gap-5 sm:grid-cols-2">
@@ -112,14 +121,14 @@ export function ContractForm({
           name="startsOn"
           type="date"
           label={optional(t.startsOn)}
-          defaultValue={contract?.startsOn ?? ""}
+          defaultValue={contract?.startsOn ?? initial?.startsOn ?? ""}
           className="h-10 w-fit text-base md:text-sm"
         />
         <Field
           name="endsOn"
           type="date"
           label={optional(t.endsOn)}
-          defaultValue={contract?.endsOn ?? ""}
+          defaultValue={contract?.endsOn ?? initial?.endsOn ?? ""}
           error={error?.field === "endsOn" ? error.error : undefined}
           className="h-10 w-fit text-base md:text-sm"
         />
@@ -130,7 +139,7 @@ export function ContractForm({
         maxLength={4000}
         rows={3}
         placeholder={t.notesPlaceholder}
-        defaultValue={contract?.notes ?? ""}
+        defaultValue={contract?.notes ?? initial?.notes ?? ""}
       />
       {error && !error.field && (
         <FormMessage kind="error">{error.error}</FormMessage>

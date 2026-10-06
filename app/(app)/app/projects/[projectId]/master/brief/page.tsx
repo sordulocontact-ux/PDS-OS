@@ -2,6 +2,7 @@ import { BriefPage } from "@/components/master-workflow/brief-page";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadMasterBrief } from "@/lib/master-workflow/brief";
+import { loadBriefQuestions } from "@/lib/master-workflow/questions";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -20,6 +21,9 @@ export default async function ProjectMasterBriefPage({
     requireLaunchedProject(projectId),
   ]);
 
-  const view = await loadMasterBrief(project, access);
-  return <BriefPage view={view} />;
+  const [view, questions] = await Promise.all([
+    loadMasterBrief(project, access),
+    loadBriefQuestions(project, access),
+  ]);
+  return <BriefPage view={view} questions={questions} />;
 }

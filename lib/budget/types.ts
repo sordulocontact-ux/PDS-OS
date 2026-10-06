@@ -1,7 +1,14 @@
 // Budget lines and their totals. Client-safe, pure code: every amount shown
 // is computed here from the lines, never by PO (CLAUDE.md, rule 6).
 
-export const BUDGET_STATUSES = ["planned", "committed", "paid"] as const;
+// Estimé → Proposé (a quote, not accepted) → Engagé (accepted) → Payé
+// (ticket Master § 9). A proposed amount does not consume the envelope.
+export const BUDGET_STATUSES = [
+  "planned",
+  "proposed",
+  "committed",
+  "paid",
+] as const;
 export type BudgetStatus = (typeof BUDGET_STATUSES)[number];
 
 export const BUDGET_FAMILIES = [
@@ -27,6 +34,8 @@ export type BudgetLever = { id: string; label: string };
 
 export type BudgetTotals = {
   plannedCents: number;
+  // Quoted, not accepted yet: shown, never taken from the envelope.
+  proposedCents: number;
   // Committed includes paid: money the project is bound to spend.
   committedCents: number;
   paidCents: number;
@@ -59,6 +68,7 @@ export function budgetTotals(
   const committedCents = sum(["committed", "paid"]);
   return {
     plannedCents: sum(["planned"]),
+    proposedCents: sum(["proposed"]),
     committedCents,
     paidCents: sum(["paid"]),
     remainingCents:

@@ -46,7 +46,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001101_launch_strategy` | Stratégie de lancement : `levers` (famille, `to_decide`/`selected`/`rejected`, `need_id` facultatif, provenance), `strategy_deliverables` (levier retenu obligatoire, responsable et échéance facultatifs), `milestones` (date saisie, type fermé, livrable facultatif, détaché si le livrable est retiré). `strategy_is_editable` : **responsable + étape en cours** → écriture (y compris `field_values` `strategy`, politique restrictive), figée dès la demande de validation. `start_stage` refuse la Stratégie tant que le Cadrage n'est pas validé (`previous_stage_not_validated`). Triggers `check_strategy_links` (`lever_not_selected`, `lever_has_deliverables`). `report_items` : kinds `positioning`, `audiences`, `narrative`, `lever`. |
 | `…260926001201_project_visibility` | **Qui voit un projet** : `can_see_project` / `can_see_project_row` — DG (`view_all_projects`), responsable, destinataire d'une transmission en attente, directeur créatif de l'équipe (`project_creatives`, `add_project_creative` / `remove_project_creative` par le DG ou le responsable, notification `project_creative_added`). Policies de lecture de toutes les tables d'un projet (et audios Storage) réécrites ; une tâche reste visible à son assigné, une validation à son valideur. Catalogue visible par tous. |
 | `…260926001301_lever_voice_source` | `source_type = 'voice'` autorisé sur `levers` (dictée de la Stratégie). |
-| `…260927000501_budget_lines` | Lignes de budget d'un projet : libellé, montant (centimes ≥ 0), famille (taxonomie des leviers) et levier retenus facultatifs (même projet, trigger ; levier supprimé → lien retiré), statut `planned`/`committed`/`paid`. Lecture `can_see_project`, écriture `is_project_owner`, droits colonne par colonne. Tests `supabase/tests/budget.test.sql`. |
+| `…260927000501_budget_lines` | Lignes de budget d'un projet : libellé, montant (centimes ≥ 0), famille (taxonomie des leviers) et levier retenus facultatifs (même projet, trigger ; levier supprimé → lien retiré), statut `planned`/`committed`/`paid` (+ `proposed` et `master_role` depuis `…20261005012001_budget_four_states`, § 8 septies). Lecture `can_see_project`, écriture `is_project_owner`, droits colonne par colonne. Tests `supabase/tests/budget.test.sql`. |
 | `…260926002301_call_consent_by_contract` | Consentement donné par contrat : `calls.consent` vaut `granted` par défaut, les calls `pending` passent à `granted`. Colonne, trigger et `calls_audio_requires_consent` conservés. |
 | `…260926001501_project_team_at_creation_and_framing_call` | Type `event`. `create_project` prend `p_assignee_person_id` (transmission d'office via `transmit_project`) et `p_creative_person_ids` (via `add_project_creative`), dans la même transaction : un refus annule tout. **Pas de cadrage sans call** : `framing_is_open` (compte rendu de call, ou Cadrage déjà entamé avant la règle), politiques restrictives sur `field_values` `brief`, `needs`, `project_team_members`, `start_stage` → `framing_requires_call`. |
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
@@ -301,6 +301,7 @@ Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.t
   création (bloc « Si vous les connaissez déjà ») : état audio, variante, ISRC, durée,
   fichier audio.
 - **État audio** (`masters.audio_state`) : `demo` Maquette → `rough_mix` Mise à plat →
+  `mix` Mix (depuis le 05/10/2026 : une version du mix reçue de l'ingénieur, § 8 septies) →
   `master` Master → `final_master` Master final (`audio_state_rank` en SQL). **Null =
   non renseigné**, jamais deviné : un titre existant avant la migration reste « Non
   renseigné ». Ton : `audioStateTone`, pastille `AudioStateBadge`.
@@ -323,7 +324,7 @@ Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.t
   fichier sans état audio est refusé avant l'envoi (pas d'état deviné) ; un envoi raté
   laisse le titre créé, toast et ouverture de l'onglet Audio.
 - **Catalogue** (liste des titres, « Titres » jusqu'au 04/10/2026) : onglets par état audio dans l'URL (`?state=`) : **Hors maquettes (par
-  défaut)**, Maquettes, Mises à plat, Masters, Masters finaux, Tous ; un titre « Non
+  défaut)**, Maquettes, Mises à plat, Mix, Masters, Masters finaux, Tous ; un titre « Non
   renseigné » n'est jamais caché ; Archivés du DG en pastilles, comme Artistes. Colonne
   État audio.
 - **Création automatique depuis Studio (à venir)** : elle devra appeler `create_master`,
@@ -607,6 +608,9 @@ n'écrit qu'un **adaptateur**.
   provenance « Dicté par X ».
 - Ajouter une étape : un adaptateur (`VoiceAdapter`), un `case` dans `dictateFor`, la valeur
   dans `VOICE_STAGES`, une action d'application et la mise en mots des propositions.
+  Étapes branchées : Cadrage, Stratégie, Brief Mix/Master (`master_brief`, § 8 septies).
+  `proposeFrom` (la moitié extraction de `dictate`) sert aussi à une transcription de call
+  déjà faite (échanges du Master).
 - Micro de l'assistant (accueil) : **transcription seule**, `app/api/voice/transcribe`
   (`transcribeDictation`), hook `useVoiceInput` + `VoiceInputButton` / `VoiceInputStatus`.
   Le texte s'insère dans la saisie, **jamais envoyé automatiquement** (noms propres mal
@@ -1150,22 +1154,65 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   - **Délégation** : « Modifier » change le responsable ou l'échéance par
     `update_legal_plan_item`, qui garde chaque changement dans `legal_plan_events` (« Délégation
     ou escalade explicite lorsque le responsable change »).
-  - **Les actions sont des tâches** (`…20261004001401_legal_plan_tasks.sql`, retour de
-    Sacha du 04/10/2026 : « c'est du travail à donner ? »). Chaque action est écrite en
-    clair (« Obtenir l'accord pour « Für Elise » ») avec une phrase qui dit pourquoi
-    (`legal_plan_items.why`). Au lancement, chaque action **à lancer maintenant** qui a
-    un responsable devient une tâche du Travail du projet (`tasks.legal_plan_item_id`) :
-    assignée au responsable, qui est prévenu (`tasks_notify`, push), avec l'échéance de
-    l'action ou, à défaut, celle du projet (pré-remplie dans le formulaire ; sans aucune
-    date, le lancement la demande). Une action débloquée plus tard propose « Créer la
-    tâche » dans le Suivi (`create_legal_plan_task`, une seule fois). Une tâche se coche
-    comme toute tâche. Quand ses sources disent l'action faite alors que la tâche est
-    ouverte, le Suivi propose « Cocher la tâche ». Rien ne se coche tout seul : il
-    faudrait que la base réagisse à chaque source, ce qui attend le moteur d'événements.
+  - **Les actions sont des tâches** (`…20261004001401_legal_plan_tasks.sql`, puis
+    `…20261005003001_legal_tasks_auto.sql`, `legal-tasks.test.sql` ; retours de Sacha du
+    04/10 « c'est du travail à donner ? » et du 05/10 « pourquoi on doit créer la tâche,
+    elle pourrait se créer toute seule ? »). Chaque action est écrite en clair avec une
+    phrase qui dit pourquoi (`why`) et son sujet seul (`subject` : la personne, le titre).
+    - **Création** : au lancement, **chaque** action qui a un responsable devient une tâche
+      du Travail (`insert_legal_plan_item` → `legal_plan_item_task`), assignée et
+      notifiée, échéance de l'action, sinon du projet, sinon aucune (`tasks.due_date`
+      nullable pour les seules tâches du plan, contrainte `tasks_due_date_required`).
+      Donner un responsable ou une échéance à une action (délégation) crée ou déplace
+      sa tâche (trigger `z_sync_task`). Plus de bouton « Créer la tâche ».
+    - **En attente** : une tâche dont une action dépendante a encore sa tâche ouverte
+      s'affiche « En attente de : … » dans le Travail du projet et quitte l'accueil
+      (`lib/legal/tasks.ts`, calculé à la lecture, rien n'est stocké).
+    - **Coche par les sources** : `legal_plan_item_done` lit les mêmes règles que le Suivi
+      (toutes les fiches complètes, contrat signé liant le contact des crédits
+      `credit_ids`, split édition à 100 %, clearance `cleared`, déclaration SACEM
+      confirmée) ; les triggers `z_legal_tick` de `legal_forms`, `contracts`,
+      `contract_parties`, `master_contributors`, `master_splits`, `legal_clearances` et
+      `master_declarations` cochent la tâche dans la même transaction. Jamais décochée par
+      eux. Les deux jeux de règles (SQL et `lib/legal/tracking/sources.ts`) doivent rester
+      alignés.
+    - **Là où ça se fait** : `lib/legal/plan/where.ts` donne la page et le libellé du bouton
+      de chaque nature d'action (fiches → `/legal/forms`, contrat → `/legal/contracts`,
+      répartition → splits du titre, déclaration → droits du titre, accord → État des
+      lieux), le même dans le Plan, le Suivi et la tâche du Travail.
+    - **Actions apparues après le lancement** (une personne créditée, un titre ajouté) :
+      le Suivi compare le plan à ce que le dossier demande maintenant et propose « Ajouter
+      au plan » (`add_legal_plan_items`, une clé déjà présente est laissée).
+    - **Plans déjà lancés** : la migration crée les tâches manquantes, retrouve les crédits
+      des contrats par le nom (même comparaison que `lib/utils/search.ts`, accents français)
+      et coche ce qui est déjà fait.
+  - **Lecture groupée** (retour du 05/10 « beaucoup de répétitions ») : dans le Plan et le
+    Suivi, les actions d'une même nature forment un groupe (`groupActions`) qui dit une
+    fois son nom, sa raison et ce qu'il attend, avec un seul bouton quand toutes se font
+    au même endroit ; chaque ligne ne garde que son sujet.
+  - **Dossiers** : les pages des branches (Fiches de renseignements, Contrats) sont en
+    pastilles sous les étapes du Juridique, ouvertes à tout moment.
   - **Pas encore** (dit à l'écran, comme le demande le ticket) : l'envoi en signature,
-    les dépôts SACEM, l'outbox d'événements, les relances, et les effets des branches (le
-    besoin financier d'un contrat signé, par exemple). Ils arriveront avec les branches
-    03 à 06.
+    les dépôts SACEM, l'outbox d'événements, les relances, et les effets des branches 04 à
+    06.
+- **Contact créé, crédits reliés** (retour de Sacha du 05/10/2026 : « si on rajoute au
+  réseau, c'est logique que ça soit le même ») : à la création d'un contact du Réseau, d'où
+  qu'elle vienne (page Réseau, « Ajouter au Réseau », en-tête « Ingénieurs du Réseau »), le
+  serveur relie les crédits **non reliés** de l'organisation qui portent exactement son nom
+  (`lib/network/link-credits.ts`, insensible à la casse, avec la session : `manage_catalog`).
+  Un crédit déjà relié n'est jamais déplacé ; un homonyme d'un contact **existant** reste une
+  suggestion (« Relier »). Des accents différents (« Etait » / « était ») ne se relient pas
+  seuls.
+- **Choisir plutôt que retaper** (retours de Sacha du 05/10/2026) : le nom d'un crédit et
+  l'ayant droit d'une part du titre se choisissent dans une liste (`PersonPickerField`) :
+  le Réseau pour un crédit ; pour une part, les personnes créditées sur le titre, ses
+  artistes, puis le Réseau (l'ordre suit le type de part). Le choix est gardé
+  (`master_contributors.contact_id`, `master_splits.contact_id` ou `artist_id`,
+  migration `…20261005008001_split_parties.sql`) ; « Ajouter « X » au Réseau » crée le
+  contact en modale ; « Garder seulement le nom » reste possible. La fiche du titre montre
+  la répartition de l'édition confirmée dans le Juridique et propose « Reprendre ces
+  parts » (un clic, arrondi au plus fort reste à 2 décimales : 33,34 / 33,33 / 33,33) ;
+  la version exacte reste dans le Juridique.
 - **Branche 02 : fiches de renseignements** (`/legal/forms`, page publique `/f/<jeton>`,
   `…20261004004001_legal_forms.sql`, `legal-forms.test.sql`), d'après le ticket Juridique 02.
   - **Une fiche par personne créditée** sur les titres du projet (`formPeople`, regroupée
@@ -1190,6 +1237,125 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   - **Suivi** : l'action « Fiches » est faite quand chaque personne créditée a une fiche
     complète (`completeFormContacts`) ; un contrat ne passe « à lancer » que si la fiche
     de son contact est complète, sinon il attend la fiche.
+- **Branche 03 : contrats depuis des modèles** (`/legal/contracts`, `/app/contracts/templates`,
+  `…20261005001001_contract_templates.sql`, `legal-contracts.test.sql`), d'après le ticket
+  Juridique 03. Étend le module Contrats (§ 8 quinquies) au lieu de le dupliquer.
+  - **Modèles** (`contract_templates`) : collés par un humain (« Aucun modèle juridique
+    nouveau ni aucune clause n'est inventé »), écrits par `manage_legal`, **validés par le
+    DG** (`validate`). Une ligne n'est jamais modifiée, sauf son état : une correction est
+    une nouvelle version de la même série (`create_contract_template`), validée à son tour ;
+    valider une version retire la précédente, les copies déjà faites gardent la leur.
+  - **Champs** : `{{id}}` d'une liste fermée (`lib/legal/contracts/fields.ts`), refusée à
+    l'enregistrement si un id est inconnu. Chaque valeur est lue par le code à **une** source
+    (`values.ts`) : fiche de renseignements (`contact_legal_details`), Réseau, projet,
+    crédits des titres, cartographie (rémunération), structure. Aucune valeur saisie à la
+    main au moment de générer : une valeur manquante se complète à sa source, ce qui la rend
+    traçable.
+  - **Cartographie** (`legal_agreement_needs`) : une ligne par personne créditée qui a un
+    contact. Le code propose le modèle validé dont les rôles recoupent le mieux ceux de la
+    personne (aucune table rôle → type de contrat inventée) et la rémunération de sa fiche
+    quand c'est un montant simple (`feeCentsOf`). « Valider la cartographie » enregistre tout
+    d'un coup (`approve_contract_mapping`, événement `contract_mapping.approved`) ; une
+    personne décochée n'a pas d'accord ; une ligne déjà générée ne change plus.
+  - **États** (`lib/legal/contracts/state.ts`) : cartographie à valider, pas d'accord,
+    NEEDS_INFO (modèle absent ou valeur manquante), READY_TO_GENERATE, puis ceux du contrat
+    (DRAFT, REVIEW_REQUIRED, APPROVED = prêt à envoyer, SIGNATURE_PENDING, SIGNED). APPROVED
+    et READY_FOR_SIGNATURE ne font qu'un : l'approbation du document précis par le DG
+    est l'autorisation d'envoi (décision du 05/10/2026, à revoir si Justine et le DG ne
+    sont pas la même personne).
+  - **Copie** (`contract_documents`, `generate_legal_contract`) : le texte est rempli **en SQL**
+    à partir du modèle et des valeurs données par le serveur ; refusée tant qu'une valeur
+    manque. Elle crée un contrat brouillon du module Contrats (responsable = auteur, la
+    personne en partie) et garde le modèle, sa version et chaque valeur avec sa source.
+  - **Clauses** : « Modifier une clause » crée une nouvelle version avec sa raison
+    (`revise_contract_document`, brouillon ou approuvé seulement) ; un contrat approuvé
+    repasse en brouillon et doit être validé à nouveau.
+  - **Preuves** : pour un contrat généré, `advance_contract` demande comment il a été envoyé
+    (la note est gardée dans le journal comme preuve d'envoi) et refuse la signature tant
+    que les fichiers n'ont pas un « Signé » **et** une « Preuve de signature » (nouvelle
+    catégorie `evidence`). Les contrats écrits à la main gardent l'ancien comportement.
+    Signature électronique (Yousign ou autre) : non intégrée, rien ne la présente comme
+    disponible.
+  - **Besoin financier** (`financial_needs`) : à la signature d'un contrat dont l'accord a une
+    rémunération, un trigger crée un besoin « en attente de facture » (jamais « à payer »),
+    un seul par contrat. La suite (facture, paiement) est hors du ticket.
+  - **Journal** (`contract_events`, écrit par les fonctions seules) : génération, clause
+    modifiée, envoi en validation, approbation, demande de modifications, envoi en
+    signature, signature, résiliation, besoin financier créé.
+  - **Export** : `/api/contracts/[id]/document`, la dernière version seule en PDF
+    (Playwright), sans habillage de l'app.
+  - Le Suivi envoie l'action « Contrat » d'une personne dont la fiche est complète vers
+    `/legal/contracts`.
+- **Branche 04 : répartitions confirmées** (`/legal/splits`, page publique `/s/<jeton>`,
+  `…20261005005001_legal_splits.sql`, `legal-splits.test.sql`), d'après le ticket Juridique 04.
+  - **Feuille par titre** (`legal_split_sheets`), **versions** (`legal_split_versions` : brouillon,
+    envoyée, confirmée en partie, confirmée, contestée, remplacée), **lignes**
+    (`legal_split_entries` : nom, rôle, part `numeric(7,4)`, contact et crédit d'origine).
+  - **Parts exactes** : le code compte en dix-millièmes de pourcent (entiers,
+    `lib/legal/splits/shares.ts`), « Parts égales » donne le reste aux premières lignes
+    (33,3334 + 33,3333 + 33,3333) ; `propose_split_version` refuse tout total autre que 100 ;
+    l'écran arrondit à 2 décimales.
+  - **Un lien par personne et par version** (`legal_split_confirmations`, jeton de 64 hex,
+    seul son `sha256` gardé, 30 jours, « Nouveau lien » révoque l'ancien). La page publique lit
+    la version et son empreinte (`split_content_hash`) ; la réponse est refusée si l'empreinte
+    a changé (« ne vaut que pour le contenu exact présenté ») et garde en preuve l'empreinte,
+    le contenu, l'heure et le navigateur. Une contestation exige sa raison, rien n'est effacé.
+  - **Nouvelle version** : enregistrer après un envoi crée la version suivante ; l'envoyer
+    remplace la précédente et révoque ses liens en attente (« supersède, ne copie pas »).
+  - Le plan : « Répartir l'édition » est fait quand la version active est confirmée (trigger
+    sur `legal_split_versions`) ; `master_splits` reste la donnée du titre et la répartition
+    SACEM n'en est jamais déduite.
+  - **Point de départ** (retour de Sacha du 05/10) : si l'édition est déjà répartie à 100 % sur
+    la fiche du titre (`master_splits`, lue avec `manage_catalog`), la première version part de
+    ces parts (`titlePublishingLines`) : la carte les affiche, « Envoyer pour confirmation » directement (`proposeTitleSplit` relit les parts côté serveur, brouillon puis envoi) ou « Modifier avant l'envoi » ; comme le Suivi (« Répartie sur la fiche
+    du titre, à faire confirmer ») ; sinon, les créateurs crédités à parts égales. L'action
+    reste ouverte : seule la confirmation de chacun la clôt (ticket 04).
+- **Branche 05 : accords (clearance)** (`/legal/clearances`, `…20261005006001_legal_clearance.sql`,
+  `legal-clearance.test.sql`), d'après le ticket Juridique 05, générique (aucun workflow
+  « Humanisme »).
+  - `legal_clearances` reçoit sa **qualification** : usage exact, droits concernés (œuvre,
+    master, les deux, ou rien à sécuriser avec sa raison), responsable. Autour : ayants droit
+    par droit, journal des échanges, conditions (`legal_clearance_terms`, proposées jusqu'à la
+    **validation du DG**), le contrat de chaque droit (`legal_clearance_contracts`, un contrat
+    du module Contrats : documents et preuves y vivent), l'historique.
+  - **États** du ticket, chacun avec ce qu'il exige (`clearance_missing`) : ayants droit de
+    chaque droit concerné, un envoi consigné, des conditions validées, un contrat par droit,
+    signé, puis le signé **et** la preuve pour « Sécurisé ». Refus, abandon et action requise
+    disent leur raison ; un refus « bloque la sortie en l'état ». Rien à sécuriser passe
+    directement à « Sécurisé » avec sa raison (Für Elise rejouée : composition du domaine
+    public, à confirmer par le juridique).
+  - **PO lit un échange libre** (`readClearanceMessage`, `lib/ai/schemas/legal-clearance.ts`) :
+    il relève la nature de l'échange, les ayants droit, les conditions ; le code ne garde que
+    ce qui est écrit mot pour mot et choisit l'état à proposer (`statusFromEvent`, matrice
+    d'actions) ; chaque proposition s'applique d'un clic par les mêmes fonctions.
+- **Branche 06 : formalités et SACEM 725** (`/legal/formalities`,
+  `…20261005007001_legal_formalities.sql`, `legal-formalities.test.sql`), d'après le ticket
+  Juridique 06 et le bulletin SACEM 725 — 02/2026 (œuvres éditées).
+  - **Moteur générique** : `legal_formalities` (une par titre et définition, version de la
+    définition, responsable, champs rouverts, preuves, identifiant externe),
+    `legal_formality_values` (valeur validée et sa source), `legal_formality_documents`
+    (versions du bulletin), `legal_formality_signatures`, `legal_formality_events`. La
+    définition `SACEM_725_EDITED_WORK` v1 : ses champs dans `lib/legal/formalities/definition.ts`,
+    ses règles dans `formality_missing` (SQL).
+  - **Pré-remplissage sourcé** (`prefill.ts`) : titre et ISWC du titre (ISWC seulement s'il
+    existe), durée **du master final seulement**, interprètes du titre, créateurs des crédits et
+    des fiches (nom civil, pseudonyme, IPI/COAD). Jamais déduits : première exploitation,
+    territoires, DEP/DR, parts Phono (la répartition n'est pas recopiée). À l'enregistrement,
+    une valeur non saisie est relue à sa source par le serveur, le navigateur ne peut pas la
+    falsifier.
+  - **Règles** : titre, durée, au moins un créateur (5 au plus, 3 éditeurs au plus), nom et
+    qualité de chacun, parts Phono à 100 % exactement, choix DEP/DR, portée de
+    l'autorisation d'arrangement s'il y a un arrangeur, contrat d'édition si seuls les éditeurs
+    signent sinon rubrique G sans copie, et **chaque emprunt du titre sécurisé** avant de
+    générer. Les astérisques exacts du bulletin restent à vérifier sur le document papier.
+  - **Étapes** : données à compléter → prête à générer → bulletin généré (version, PDF
+    `/api/legal/formalities/[id]/document`) → signatures (chaque ayant droit qui signe, avec la
+    preuve) ou déclaration partielle avec sa raison → prête à déposer → **déposée** (preuve du
+    dépôt, déclaration SACEM du titre « déposée ») → en traitement → **enregistrée** (preuve du
+    résultat, identifiant SACEM, ISWC reporté sur le titre s'il était vide, déclaration
+    « confirmée », tâche du plan cochée). Une **correction** rouvre seulement les champs
+    nommés ; les autres restent ; une nouvelle version et de nouvelles signatures suivent.
+  - Pas d'SPPF ni de dépôt numérique : le dépôt et la preuve restent humains (MVP).
 - Ce qui viendra du **Cadrage intelligent** (fait par quelqu'un d'autre) : la dimension 06
   « Cadre juridique » du Brief comme source supplémentaire, et le lancement du Juridique
   depuis le Plan du projet. En attendant, la section est ouverte dès que le projet est
@@ -1294,7 +1460,183 @@ lots, chacun utile seul.
   (`saveMasterBrief`) ; pas d'upsert, qui réécrirait `project_id` et `organization_id`,
   colonnes que personne ne peut modifier (droits colonne par colonne).
   Pas encore : la transmission au mixeur (package, suivi, relances, § 8), le Budget à
-  quatre états (§ 9), « Préparer un échange » (un call de cadrage du master) et la dictée.
+  quatre états (§ 9).
+- **Lot 3 bis : remplir le Brief à la voix ou par un échange** (ticket § 3 « Commencer
+  directement / Préparer un échange » ; migration `…20261005010001_master_brief_calls.sql`,
+  tests `supabase/tests/master-exchange.test.sql`). Tout passe par un seul adaptateur,
+  `masterBriefVoice` (`lib/master-workflow/voice.ts`, schéma fermé
+  `lib/ai/schemas/master-brief.ts`, consignes `lib/ai/instructions/master-brief.ts`) :
+  - **Ce que le modèle peut proposer** : réécrire références, direction, contraintes ;
+    nommer l'ingénieur du mix ou du mastering ; dire « même ingénieur » ; recopier les mots
+    d'un tarif ; ajouter un livrable de la liste. **Jamais** une date, un délai, un nombre
+    de révisions, le validateur ni la source : une personne les décide.
+  - **Le code décide** de ce qui est nouveau (doublons et non-changements écartés), de qui
+    est l'ingénieur (nom comparé sans accents ni casse aux ingénieurs du Réseau ; un nom
+    inconnu n'est pas proposé, on l'ajoute d'abord au Réseau), et **lit le montant d'un
+    tarif dans les mots dits** (`parseSaidEuros`, « 800 euros » → 800 €), à la proposition
+    puis de nouveau à l'application : aucun nombre ne vient du modèle ni du client. Une
+    citation (et pour un tarif, le montant) introuvable dans ce qui a été dit → la
+    proposition est décochée par défaut. « Même ingénieur » dit : pas de proposition
+    d'ingénieur de mastering en plus.
+  - **Dictée** : « Remplir en dictant » en tête du Brief, étape `master_brief` du moteur
+    commun (`/api/voice/master_brief`, responsable seul).
+  - **Préparer un échange** : une modale (titre, date, lien de visio, champs communs
+    `CallFields` avec « Nouveau call ») montre l'ordre du jour **écrit par le code** à
+    partir de ce que le Brief ne dit pas encore (`masterExchangeAgenda` : ingénieurs,
+    tarifs et révisions, direction, livrables restés par défaut, date du master final,
+    source à confirmer ; sinon « relire ensemble le Brief »), durée = somme des points.
+    `create_master_exchange` (SQL, droits de l'appelant) crée le call et le rattache
+    (`master_brief_calls`) dans une seule transaction, puis la page du call s'ouvre :
+    enregistrement et traitement comme tout call. **Un échange n'est jamais importé dans le
+    Brief du Cadrage** (`app/api/calls/[callId]/extract`).
+  - **Proposer pour le Brief** : dans « Échanges », sur un call transcrit, la transcription
+    passe par le même adaptateur (`proposeFrom`, la moitié extraction du moteur de dictée,
+    `lib/voice/engine.ts`), puis la même relecture (`DictationReview`). « Appliquer »
+    (`applyBriefProposals`) écrit les propositions gardées avec la session du responsable
+    (mise à jour, sinon création avec le responsable comme validateur ; rien à écrire = rien
+    d'écrit).
+  - Robustesse du modèle (ministral-14b, 05/10/2026) : il imbrique parfois un texte dans
+    sa propre valeur, sans la citation extérieure. Le schéma accepte les deux formes, le
+    code (`textOf`) garde le texte intérieur ; les mises en forme (`*titre*`) sont retirées.
+- **Lot 4 : transmettre au mixeur** (ticket § 8 ; étape **Mix**, `/master/mix` ; migration
+  `…20261005011001_master_transmissions.sql`, tests `supabase/tests/master-transmission.test.sql`).
+  L'ingénieur est un contact du Réseau, **sans compte** : le dossier l'atteint par un **lien
+  privé**, sur le modèle des fiches de renseignements du Juridique (`/f/[token]`).
+  - **Le dossier, montré avant l'envoi** (`loadMixView`, `PackagePreview`) : le destinataire
+    (l'ingénieur du mix du Brief), les **titres à mixer** (ceux sans Master final) avec leur
+    **source confirmée** et leurs stems (dernière version de chaque fichier), direction,
+    références, contraintes, livrables, révisions, échéances Mix V1 et Mix final. **Les
+    tarifs n'y sont pas** : ils restent internes. Ce qui bloque l'envoi est calculé par le
+    code et dit en tête (pas d'ingénieur, rien à mixer, une source à confirmer).
+  - **« Transmettre au mixeur »** (`transmitToMixer`) recalcule tout côté serveur, signe les
+    fichiers **avec la session du responsable** pour 30 jours (aucun service role), puis
+    `create_master_transmission` (SQL, responsable seul) : destinataire = l'ingénieur du
+    Brief, lien précédent révoqué, **seul le SHA-256 du jeton est stocké**, le jeton n'est
+    rendu qu'une fois. La modale affiche le lien une seule fois : « Copier le lien », « Écrire
+    un e-mail » (mailto pré-rempli), « Fermer ». Le dossier est un **instantané** (`package`,
+    JSON validé par `masterPackageSchema`).
+  - **Page du mixeur** `/m/[token]` (sans session, `SESSIONLESS_PREFIXES`, jamais indexée,
+    sans referrer) : `get_master_transmission` ne rend le dossier que pour un lien ouvert ou
+    reçu, sinon « remplacé » ou « expiré » ; « J'ai bien reçu le dossier »
+    (`acknowledge_master_transmission`, une seule fois) **notifie l'expéditeur**
+    (notification `master_transmission_received`, lien vers l'étape Mix).
+  - **Suivi** (`TransmissionHistory`) : un envoi par ligne, état **calculé par le code**
+    (`transmissionState`) : reçu, en attente, **sans réponse depuis 3 jours → à relancer**
+    (`REMIND_AFTER_DAYS`, décision du 05/10/2026 : le ticket ne fixe pas de délai, trois
+    jours laissent passer un week-end), lien expiré, remplacé. **« Relancer »** = un nouvel
+    envoi qui remplace le lien précédent et renouvelle les fichiers pour 30 jours.
+  - Ingénieur membre de l'équipe (« pour un utilisateur PO → Mon Travail ») : pas en V1, les
+    ingénieurs sont des contacts du Réseau ; à brancher sur Travail le jour où l'un d'eux a
+    un compte.
+  - Notifications : `notifications_kind_check` redéclarée avec la liste du dépôt +
+    `master_transmission_received`, **`NOT VALID`** (une base locale peut garder des types
+    d'une branche abandonnée ; toute nouvelle ligne est contrôlée).
+- **Lot 5 : budget à quatre états** (ticket § 9 ; migration
+  `…20261005012001_budget_four_states.sql`, tests `supabase/tests/master-budget.test.sql`).
+  Le Budget du projet entier passe à **Estimé → Proposé → Engagé → Payé** (`planned`,
+  `proposed`, `committed`, `paid`) : « Prévu » devient « Estimé » (vocabulaire du ticket),
+  « Proposé » = un devis reçu, pas accepté. **Un montant proposé ne consomme pas
+  l'enveloppe** : il a sa tuile (`proposedCents`), le reste reste enveloppe − engagé
+  (`budgetTotals`). Ton `proposed` = warning (attend une décision).
+  - **Depuis le Brief** (section « Budget du projet », `BriefBudget`) : par rôle (mix,
+    mastering), « Inscrire au budget » crée la ligne Estimé à partir du tarif **enregistré**
+    du Brief (`addBriefRateToBudget`, libellé « Mix · ingénieur », famille Création &
+    contenus), reliée au rôle par `budget_lines.master_role` (une ligne par rôle et par
+    projet, index unique ; jamais déplacée). Son état se change sur place
+    (`setBriefBudgetStatus`) ou dans le Budget, comme toute ligne. Si le Brief et la ligne
+    divergent, la section le dit (« Le Brief dit 750 € ») sans rien écrire. Même ingénieur
+    sans tarif de mastering : « compris dans le tarif du mix ». Total estimé du Brief
+    calculé par le code (la somme de ses tarifs enregistrés).
+- **Lot 6 : versions et retours du mix** (ticket § 10 ; section « Versions du mix » de l'étape
+  Mix ; migration `…20261005013001_master_mix_versions.sql`, tests
+  `supabase/tests/master-mix.test.sql`).
+  - **Nouvel état audio `mix`** (Mix), entre la mise à plat et le master : une version du mix
+    est une version audio du titre comme les autres (onglet Audio, onglet « Mix » du
+    Catalogue, `y_advance_title` qui ne fait jamais reculer un titre). Décision du
+    05/10/2026 : plutôt qu'une table de fichiers à part, qui aurait caché ces versions de la
+    fiche du titre.
+  - **À réception** (« Ajouter une version », l'import audio du titre, état Mix présélectionné) :
+    le trigger `z_create_mix_versions` sur `master_files` crée la version
+    (`master_mix_versions`) **dans chaque projet du titre qui a un Brief Mix/Master**,
+    numérotée V1, V2… par titre et par projet, avec son auteur, sa date, son statut, et
+    **notifie** les directeurs créatifs du projet et le validateur du Brief
+    (`master_mix_version_received`, jamais l'auteur de l'envoi).
+  - **Retours** : tout membre qui voit le projet commente une version (`master_mix_comments`,
+    RLS `can_see_project`) — « les contributeurs commentent ».
+  - **Synthèse** : le responsable l'écrit ; **« Proposer une synthèse »** fait rédiger PO
+    (`proposeMixSummary`, schéma `lib/ai/schemas/mix-feedback.ts`, consignes
+    `lib/ai/instructions/mix-feedback.ts`) à partir des commentaires passés **en données**
+    (règle 4), sans auteurs, sans décision ; le texte remplit le champ, rien n'est écrit avant
+    « Enregistrer la synthèse ». **« Transmettre les retours »** (`send_mix_feedback`,
+    responsable seul, une fois, synthèse obligatoire) : la synthèse envoyée n'est **plus
+    jamais réécrite** (RLS) et s'affiche sur la page du mixeur (`/m/[token]`, « Retours sur
+    vos versions », renvoyés par `get_master_transmission`).
+  - La validation d'une version (Valider / Demander une modification) et le Mix final
+    viennent au lot 7.
+- **Lot 7 : validation du mix, puis mastering** (ticket § 11 et 12 ; migration
+  `…20261005014001_master_mix_decisions.sql`, tests `supabase/tests/master-decision.test.sql`).
+  - **Qui tranche** : le validateur du Brief ; **sans validateur, le responsable du
+    projet** (décision du 05/10/2026, le ticket suppose toujours un validateur désigné).
+    `decide_mix_version` (SQL) vérifie qui, que la version est **la dernière** du titre et
+    pas encore tranchée.
+  - **« Valider ce mix »** (confirmation, définitif) : la version devient le **Mix final** du
+    titre (un seul par titre et par projet, index unique) ; **« Demander une
+    modification »** (note facultative) : la version reste dans l'historique, la suivante
+    se tranche à son tour. Une décision ne change jamais (décision, note, qui, quand
+    conservés). Une version reçue après le Mix final **ne le remplace pas** : la page le
+    dit, sans bouton de décision. Le responsable est notifié de chaque décision prise par
+    quelqu'un d'autre (`master_mix_approved`, `master_mix_changes_requested`).
+  - **Mastering** (étape `/master/mastering`) : quand chaque titre à masteriser a son Mix
+    final, le code l'écrit (« Le Mix final est validé. Le Mastering peut commencer. ») et
+    nomme qui masterise (« même ingénieur que le mix : poursuivez avec X », ou l'ingénieur
+    du mastering du Brief). Le dossier de mastering est le même mécanisme que celui du
+    mix, par rôle (`loadStepView(…, "mastering")`, `transmitPackage`, `PackageSections`) :
+    les Mix finals validés (au lieu des sources, sans stems), échéances Mastering et
+    Master final, envoi **après confirmation humaine**, lien privé, suivi, relance. La
+    page de l'ingénieur ne montre que les retours de sa propre étape.
+- **Lot 8 : master final** (ticket § 13 ; étape `/master/final` ; migration
+  `…20261005015001_master_mastering_versions.sql`, tests `supabase/tests/master-final.test.sql`).
+  - Les versions ont une **étape** (`stage`) : un fichier audio **Mix** crée une version de
+    mix, un fichier **Master** ou **Master final** une version de **mastering** ; numérotées
+    dans leur étape, mêmes retours, synthèse, transmission et décision (section « Versions du
+    mastering » de l'étape Mastering, libellés par étape `fr.masterWorkflow.mixVersions.stages`).
+  - **Valider une version de mastering = le Master final** : `decide_mix_version` fait passer
+    son fichier à l'état « Master final » et **le titre avec lui** (le Catalogue, l'État du
+    master et le dossier du titre le voient). Un seul Master final par titre et par projet.
+    Notifications `master_mastering_version_received`, `master_final_approved`,
+    `master_mastering_changes_requested`.
+  - **Étape Master final** (`loadFinalView`, `FinalPage`) : par titre, la version validée
+    (fichier, qui, quand), l'ingénieur du mastering, l'état au Catalogue, puis **les autres
+    livrables du Brief** (instrumental, clean, radio edit, stems…) que le responsable coche à
+    leur réception (`master_deliverables_received`, les deux masters exclus en SQL : ce sont
+    les résultats du workflow).
+  - **Distribution** : la brique n'existe pas ; la page le dit. Le prérequis « Master final »
+    se lira sur `masters.audio_state = 'final_master'` et la version validée, sans ressaisie.
+- **Lot 9 : questions aux bonnes personnes** (ticket § 6 : « ne pas demander
+  systématiquement toutes les informations au Chef de projet » ; section « Questions à
+  l'équipe » du Brief ; migration `…20261005016001_master_brief_questions.sql`, tests
+  `supabase/tests/master-questions.test.sql`).
+  - **Qui est interrogé sur quoi : une règle du code** (`lib/master-workflow/questions-plan.ts`),
+    pas un choix de PO (règle 6) : la **direction artistique** (vide au Brief) et les **autres
+    livrables** (rien au-delà des deux masters) vont aux **directeurs créatifs du projet** ;
+    ingénieurs, tarifs, calendrier et validateur restent au responsable, qui pilote. Une
+    personne déjà interrogée sur un point ne l'est pas deux fois (une réponse « rien
+    d'autre » compte).
+  - **Le responsable pose les questions** (un geste humain, « Poser les questions ») :
+    l'action recalcule le plan côté serveur (rien ne vient du client), puis
+    `ask_master_brief_questions`
+    vérifie le responsable et que chaque personne est directeur créatif du projet, crée la
+    question et **une tâche de son Travail** (`tasks.master_question_id`, échéance J+3,
+    notification `task_assigned` par le trigger des tâches). La tâche mène au Brief
+    (`questionTaskHref`, Travail personnel et Travail du projet).
+  - **La personne répond sur le Brief** (`answer_master_question`, une fois) : un texte pour la
+    direction, des livrables cochés (aucun = « rien d'autre ») ; sa tâche est cochée dans la
+    même transaction.
+  - **Les réponses alimentent le Brief par le responsable** (`apply_master_question`, une
+    fois) : la direction s'ajoute à ce qui est écrit, les livrables rejoignent ceux du Brief
+    (créé avec ses valeurs par défaut s'il n'existait pas). Le formulaire est remonté à chaque
+    enregistrement (`key = savedAt`) et repart du Brief à jour.
+  - Lecture : quiconque voit le projet ; aucune écriture directe sur `master_brief_questions`.
 - **Compléter depuis la page**, toujours avec le formulaire d'origine (`MasterFactAction`) :
   « Ajouter l'audio » (import audio du titre, état demandé), « Ajouter les pistes » (import
   de la bibliothèque, catégorie stems), « Ajouter une session » (`SessionForm`),
@@ -1306,14 +1648,16 @@ lots, chacun utile seul.
   (`?state=known|to_confirm|missing`, `factTiles` et `filterFactSections`,
   `lib/facts/views.ts`) : seules les lignes de cet état, dans les blocs qui en ont ; le
   Réseau est masqué ; la tuile active (à l'encre) ramène à tout.
-- **Une personne, plusieurs crédits** (retour de Sacha, 04/10/2026) : le même ingénieur
-  crédité sur deux titres du projet, ce sont deux crédits. « Ajouter au Réseau » et
-  « Relier » relient **tous les crédits non reliés du même nom** (sans accents ni casse) du
-  projet en une seule décision (`unlinkedCreditsByName`, `linkContributorContact` avec
-  une liste) ; la modale l'annonce (« Il sera relié aux 2 crédits… »), le bouton
-  « Relier » aussi (titre). Un crédit déjà relié à un autre contact n'est jamais déplacé
-  (`contact_id is null` dans la mise à jour). Au Juridique, il suffit de passer cette
-  table à `creditContactState`.
+- **Une personne, plusieurs crédits** (retours de Sacha, 04 et 05/10/2026) : le même
+  ingénieur crédité sur deux titres, ce sont deux crédits. **Créer le contact** (« Ajouter
+  au Réseau », « Ajouter un ingénieur », ou depuis le Réseau) relie côté serveur **tous les
+  crédits non reliés de ce nom** (sans accents ni casse), sur tous les titres
+  (`lib/network/link-credits.ts`, appelé par `saveNetworkContact`, avec `manage_catalog`) ;
+  la modale l'annonce avant d'enregistrer. **« Relier »**, pour un contact déjà au Réseau,
+  relie d'un clic les crédits non reliés de ce nom **dans le projet**
+  (`unlinkedCreditsByName`, `linkContributorContact` avec une liste), annoncé dans son
+  titre. Un crédit déjà relié à un autre contact n'est jamais déplacé
+  (`contact_id is null` dans la mise à jour).
 - **Socle commun avec le Juridique** : `lib/facts/` (types de faits, `groupOf`, statut d'un
   crédit dans le Réseau, filtres par état), `FactTable` (`components/ui/fact-table.tsx`, l'action dessinée par
   `renderAction`), `factTone`, textes `fr.facts`, action `linkContributorContact`

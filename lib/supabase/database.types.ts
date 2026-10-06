@@ -361,6 +361,7 @@ export type Database = {
           id: string
           label: string
           lever_id: string | null
+          master_role: string | null
           note: string | null
           organization_id: string
           project_id: string
@@ -375,6 +376,7 @@ export type Database = {
           id?: string
           label: string
           lever_id?: string | null
+          master_role?: string | null
           note?: string | null
           organization_id: string
           project_id: string
@@ -389,6 +391,7 @@ export type Database = {
           id?: string
           label?: string
           lever_id?: string | null
+          master_role?: string | null
           note?: string | null
           organization_id?: string
           project_id?: string
@@ -685,6 +688,81 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_documents: {
+        Row: {
+          body: string
+          comment: string | null
+          contract_id: string
+          created_at: string
+          created_by: string | null
+          fields: Json
+          id: string
+          organization_id: string
+          template_id: string
+          template_version: number
+          version: number
+        }
+        Insert: {
+          body: string
+          comment?: string | null
+          contract_id: string
+          created_at?: string
+          created_by?: string | null
+          fields?: Json
+          id?: string
+          organization_id: string
+          template_id: string
+          template_version: number
+          version: number
+        }
+        Update: {
+          body?: string
+          comment?: string | null
+          contract_id?: string
+          created_at?: string
+          created_by?: string | null
+          fields?: Json
+          id?: string
+          organization_id?: string
+          template_id?: string
+          template_version?: number
+          version?: number
+        }
+        Relationships: []
+      }
+      contract_events: {
+        Row: {
+          actor_person_id: string | null
+          contract_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          note: string | null
+          organization_id: string
+          project_id: string | null
+        }
+        Insert: {
+          actor_person_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          note?: string | null
+          organization_id: string
+          project_id?: string | null
+        }
+        Update: {
+          actor_person_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string | null
+        }
+        Relationships: []
+      }
       contract_files: {
         Row: {
           bytes: number
@@ -796,6 +874,63 @@ export type Database = {
             referencedColumns: ["id", "organization_id"]
           },
         ]
+      }
+      contract_templates: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          fields: string[]
+          id: string
+          name: string
+          organization_id: string
+          retired_at: string | null
+          roles: string[]
+          series_id: string
+          status: string
+          type: string
+          usage: string | null
+          validated_at: string | null
+          validated_by: string | null
+          version: number
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          fields?: string[]
+          id?: string
+          name: string
+          organization_id: string
+          retired_at?: string | null
+          roles: string[]
+          series_id: string
+          status?: string
+          type: string
+          usage?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          version: number
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          fields?: string[]
+          id?: string
+          name?: string
+          organization_id?: string
+          retired_at?: string | null
+          roles?: string[]
+          series_id?: string
+          status?: string
+          type?: string
+          usage?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          version?: number
+        }
+        Relationships: []
       }
       contracts: {
         Row: {
@@ -1211,6 +1346,42 @@ export type Database = {
           },
         ]
       }
+      financial_needs: {
+        Row: {
+          amount_cents: number
+          contact_id: string
+          contract_id: string
+          created_at: string
+          currency: string
+          id: string
+          organization_id: string
+          project_id: string | null
+          status: string
+        }
+        Insert: {
+          amount_cents: number
+          contact_id: string
+          contract_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          organization_id: string
+          project_id?: string | null
+          status?: string
+        }
+        Update: {
+          amount_cents?: number
+          contact_id?: string
+          contract_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          organization_id?: string
+          project_id?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       framing_constraints: {
         Row: {
           created_at: string
@@ -1281,6 +1452,51 @@ export type Database = {
           },
         ]
       }
+      legal_agreement_needs: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          contact_id: string
+          contract_id: string | null
+          contract_type: string
+          created_at: string
+          fee_cents: number | null
+          id: string
+          organization_id: string
+          project_id: string
+          roles: string[]
+          template_id: string | null
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          contact_id: string
+          contract_id?: string | null
+          contract_type: string
+          created_at?: string
+          fee_cents?: number | null
+          id?: string
+          organization_id: string
+          project_id: string
+          roles?: string[]
+          template_id?: string | null
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          contact_id?: string
+          contract_id?: string | null
+          contract_type?: string
+          created_at?: string
+          fee_cents?: number | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          roles?: string[]
+          template_id?: string | null
+        }
+        Relationships: []
+      }
       legal_answers: {
         Row: {
           created_at: string
@@ -1317,6 +1533,195 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_clearance_communications: {
+        Row: {
+          body: string
+          clearance_id: string
+          created_at: string
+          created_by: string | null
+          direction: string
+          id: string
+          kind: string
+          occurred_at: string
+          organization_id: string
+        }
+        Insert: {
+          body: string
+          clearance_id: string
+          created_at?: string
+          created_by?: string | null
+          direction: string
+          id?: string
+          kind: string
+          occurred_at?: string
+          organization_id: string
+        }
+        Update: {
+          body?: string
+          clearance_id?: string
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          id?: string
+          kind?: string
+          occurred_at?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      legal_clearance_contracts: {
+        Row: {
+          clearance_id: string
+          contract_id: string
+          created_at: string
+          organization_id: string
+          right: string
+        }
+        Insert: {
+          clearance_id: string
+          contract_id: string
+          created_at?: string
+          organization_id: string
+          right: string
+        }
+        Update: {
+          clearance_id?: string
+          contract_id?: string
+          created_at?: string
+          organization_id?: string
+          right?: string
+        }
+        Relationships: []
+      }
+      legal_clearance_events: {
+        Row: {
+          actor_person_id: string | null
+          clearance_id: string
+          created_at: string
+          from_status: string | null
+          id: string
+          kind: string
+          note: string | null
+          organization_id: string
+          to_status: string | null
+        }
+        Insert: {
+          actor_person_id?: string | null
+          clearance_id: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          organization_id: string
+          to_status?: string | null
+        }
+        Update: {
+          actor_person_id?: string | null
+          clearance_id?: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          organization_id?: string
+          to_status?: string | null
+        }
+        Relationships: []
+      }
+      legal_clearance_rightsholders: {
+        Row: {
+          clearance_id: string
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          organization_id: string
+          right: string
+          role: string
+        }
+        Insert: {
+          clearance_id: string
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          right: string
+          role: string
+        }
+        Update: {
+          clearance_id?: string
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          right?: string
+          role?: string
+        }
+        Relationships: []
+      }
+      legal_clearance_terms: {
+        Row: {
+          amount_cents: number | null
+          clearance_id: string
+          communication_id: string | null
+          created_at: string
+          created_by: string | null
+          credits: string | null
+          decided_at: string | null
+          decided_by: string | null
+          duration: string | null
+          id: string
+          organization_id: string
+          other: string | null
+          right: string | null
+          share: string | null
+          status: string
+          territory: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          clearance_id: string
+          communication_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credits?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          duration?: string | null
+          id?: string
+          organization_id: string
+          other?: string | null
+          right?: string | null
+          share?: string | null
+          status?: string
+          territory?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          clearance_id?: string
+          communication_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          credits?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          duration?: string | null
+          id?: string
+          organization_id?: string
+          other?: string | null
+          right?: string | null
+          share?: string | null
+          status?: string
+          territory?: string | null
+        }
+        Relationships: []
+      }
       legal_clearances: {
         Row: {
           author: string | null
@@ -1326,11 +1731,15 @@ export type Database = {
           id: string
           master_id: string | null
           organization_id: string
+          qualified_at: string | null
           project_id: string
+          rights_scope: string | null
+          scope_reason: string | null
           responsible_person_id: string | null
           source_fact_id: string | null
           status: string
           updated_at: string
+          usage: string | null
           work: string
         }
         Insert: {
@@ -1341,11 +1750,15 @@ export type Database = {
           id?: string
           master_id?: string | null
           organization_id: string
+          qualified_at?: string | null
           project_id: string
+          rights_scope?: string | null
+          scope_reason?: string | null
           responsible_person_id?: string | null
           source_fact_id?: string | null
           status?: string
           updated_at?: string
+          usage?: string | null
           work: string
         }
         Update: {
@@ -1356,11 +1769,15 @@ export type Database = {
           id?: string
           master_id?: string | null
           organization_id?: string
+          qualified_at?: string | null
           project_id?: string
+          rights_scope?: string | null
+          scope_reason?: string | null
           responsible_person_id?: string | null
           source_fact_id?: string | null
           status?: string
           updated_at?: string
+          usage?: string | null
           work?: string
         }
         Relationships: []
@@ -1473,6 +1890,201 @@ export type Database = {
           person?: Json
           project_id?: string
           roles?: string[]
+        }
+        Relationships: []
+      }
+      legal_formalities: {
+        Row: {
+          completed_at: string | null
+          completion_proof: string | null
+          created_at: string
+          created_by: string | null
+          definition_key: string
+          definition_version: number
+          external_id: string | null
+          id: string
+          master_id: string
+          organization_id: string
+          partial_reason: string | null
+          project_id: string
+          reopened: string[]
+          responsible_person_id: string | null
+          status: string
+          submission_proof: string | null
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completion_proof?: string | null
+          created_at?: string
+          created_by?: string | null
+          definition_key: string
+          definition_version: number
+          external_id?: string | null
+          id?: string
+          master_id: string
+          organization_id: string
+          partial_reason?: string | null
+          project_id: string
+          reopened?: string[]
+          responsible_person_id?: string | null
+          status?: string
+          submission_proof?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completion_proof?: string | null
+          created_at?: string
+          created_by?: string | null
+          definition_key?: string
+          definition_version?: number
+          external_id?: string | null
+          id?: string
+          master_id?: string
+          organization_id?: string
+          partial_reason?: string | null
+          project_id?: string
+          reopened?: string[]
+          responsible_person_id?: string | null
+          status?: string
+          submission_proof?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      legal_formality_documents: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string | null
+          formality_id: string
+          id: string
+          organization_id: string
+          version: number
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          created_by?: string | null
+          formality_id: string
+          id?: string
+          organization_id: string
+          version: number
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          formality_id?: string
+          id?: string
+          organization_id?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      legal_formality_events: {
+        Row: {
+          actor_person_id: string | null
+          created_at: string
+          formality_id: string
+          id: string
+          kind: string
+          note: string | null
+          organization_id: string
+        }
+        Insert: {
+          actor_person_id?: string | null
+          created_at?: string
+          formality_id: string
+          id?: string
+          kind: string
+          note?: string | null
+          organization_id: string
+        }
+        Update: {
+          actor_person_id?: string | null
+          created_at?: string
+          formality_id?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      legal_formality_signatures: {
+        Row: {
+          document_version: number
+          formality_id: string
+          id: string
+          organization_id: string
+          proof: string | null
+          recorded_by: string | null
+          role: string
+          signed_at: string | null
+          signer: string
+          status: string
+        }
+        Insert: {
+          document_version: number
+          formality_id: string
+          id?: string
+          organization_id: string
+          proof?: string | null
+          recorded_by?: string | null
+          role: string
+          signed_at?: string | null
+          signer: string
+          status?: string
+        }
+        Update: {
+          document_version?: number
+          formality_id?: string
+          id?: string
+          organization_id?: string
+          proof?: string | null
+          recorded_by?: string | null
+          role?: string
+          signed_at?: string | null
+          signer?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      legal_formality_values: {
+        Row: {
+          field_key: string
+          formality_id: string
+          organization_id: string
+          source: string
+          status: string
+          validated_at: string | null
+          validated_by: string | null
+          value: Json
+        }
+        Insert: {
+          field_key: string
+          formality_id: string
+          organization_id: string
+          source: string
+          status?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          value: Json
+        }
+        Update: {
+          field_key?: string
+          formality_id?: string
+          organization_id?: string
+          source?: string
+          status?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
@@ -1607,6 +2219,7 @@ export type Database = {
       }
       legal_plan_items: {
         Row: {
+          credit_ids: string[]
           created_at: string
           depends_on: string[]
           detail: string | null
@@ -1621,10 +2234,12 @@ export type Database = {
           project_id: string
           responsible_person_id: string | null
           status: string
+          subject: string | null
           updated_at: string
           why: string | null
         }
         Insert: {
+          credit_ids?: string[]
           created_at?: string
           depends_on?: string[]
           detail?: string | null
@@ -1639,10 +2254,12 @@ export type Database = {
           project_id: string
           responsible_person_id?: string | null
           status: string
+          subject?: string | null
           updated_at?: string
           why?: string | null
         }
         Update: {
+          credit_ids?: string[]
           created_at?: string
           depends_on?: string[]
           detail?: string | null
@@ -1657,6 +2274,7 @@ export type Database = {
           project_id?: string
           responsible_person_id?: string | null
           status?: string
+          subject?: string | null
           updated_at?: string
           why?: string | null
         }
@@ -1698,6 +2316,189 @@ export type Database = {
           project_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      legal_split_confirmations: {
+        Row: {
+          comment: string | null
+          created_at: string
+          created_by: string | null
+          entry_id: string
+          evidence: Json | null
+          expires_at: string
+          id: string
+          organization_id: string
+          responded_at: string | null
+          revoked_at: string | null
+          status: string
+          token_hash: string
+          version_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          entry_id: string
+          evidence?: Json | null
+          expires_at: string
+          id?: string
+          organization_id: string
+          responded_at?: string | null
+          revoked_at?: string | null
+          status?: string
+          token_hash: string
+          version_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          entry_id?: string
+          evidence?: Json | null
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          responded_at?: string | null
+          revoked_at?: string | null
+          status?: string
+          token_hash?: string
+          version_id?: string
+        }
+        Relationships: []
+      }
+      legal_split_entries: {
+        Row: {
+          contact_id: string | null
+          credit_id: string | null
+          id: string
+          name: string
+          organization_id: string
+          position: number
+          role: string
+          share: number
+          version_id: string
+        }
+        Insert: {
+          contact_id?: string | null
+          credit_id?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          position: number
+          role: string
+          share: number
+          version_id: string
+        }
+        Update: {
+          contact_id?: string | null
+          credit_id?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          position?: number
+          role?: string
+          share?: number
+          version_id?: string
+        }
+        Relationships: []
+      }
+      legal_split_events: {
+        Row: {
+          actor_person_id: string | null
+          created_at: string
+          entry_id: string | null
+          id: string
+          kind: string
+          note: string | null
+          organization_id: string
+          version_id: string
+        }
+        Insert: {
+          actor_person_id?: string | null
+          created_at?: string
+          entry_id?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          organization_id: string
+          version_id: string
+        }
+        Update: {
+          actor_person_id?: string | null
+          created_at?: string
+          entry_id?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          organization_id?: string
+          version_id?: string
+        }
+        Relationships: []
+      }
+      legal_split_sheets: {
+        Row: {
+          created_at: string
+          id: string
+          master_id: string
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          master_id: string
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          master_id?: string
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: []
+      }
+      legal_split_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          organization_id: string
+          proposed_at: string | null
+          proposed_by: string | null
+          sheet_id: string
+          status: string
+          superseded_at: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id: string
+          proposed_at?: string | null
+          proposed_by?: string | null
+          sheet_id: string
+          status?: string
+          superseded_at?: string | null
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          organization_id?: string
+          proposed_at?: string | null
+          proposed_by?: string | null
+          sheet_id?: string
+          status?: string
+          superseded_at?: string | null
+          version?: number
         }
         Relationships: []
       }
@@ -1822,6 +2623,119 @@ export type Database = {
             columns: ["master_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "masters"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      master_brief_calls: {
+        Row: {
+          call_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_brief_calls_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_brief_calls_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_brief_calls_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      master_brief_questions: {
+        Row: {
+          answer_choices: string[] | null
+          answer_text: string | null
+          answered_at: string | null
+          applied_at: string | null
+          asked_to: string
+          created_at: string
+          created_by: string | null
+          dimension: string
+          id: string
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          answer_choices?: string[] | null
+          answer_text?: string | null
+          answered_at?: string | null
+          applied_at?: string | null
+          asked_to: string
+          created_at?: string
+          created_by?: string | null
+          dimension: string
+          id?: string
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          answer_choices?: string[] | null
+          answer_text?: string | null
+          answered_at?: string | null
+          applied_at?: string | null
+          asked_to?: string
+          created_at?: string
+          created_by?: string | null
+          dimension?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_brief_questions_asked_to_fkey"
+            columns: ["asked_to"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_brief_questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_brief_questions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
           },
         ]
@@ -2076,6 +2990,51 @@ export type Database = {
           },
         ]
       }
+      master_deliverables_received: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deliverable: string
+          id: string
+          master_id: string
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deliverable: string
+          id?: string
+          master_id: string
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deliverable?: string
+          id?: string
+          master_id?: string
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_deliverables_received_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_deliverables_received_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       master_files: {
         Row: {
           audio_state: string | null
@@ -2214,6 +3173,161 @@ export type Database = {
           },
         ]
       }
+      master_mix_comments: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          version_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          version_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_mix_comments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_mix_comments_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_mix_comments_version_same_org"
+            columns: ["version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "master_mix_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      master_mix_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision: string | null
+          decision_note: string | null
+          feedback_sent_at: string | null
+          feedback_sent_by: string | null
+          feedback_summary: string | null
+          file_id: string
+          id: string
+          master_id: string
+          number: number
+          organization_id: string
+          project_id: string
+          stage: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          decision_note?: string | null
+          feedback_sent_at?: string | null
+          feedback_sent_by?: string | null
+          feedback_summary?: string | null
+          file_id: string
+          id?: string
+          master_id: string
+          number: number
+          organization_id: string
+          project_id: string
+          stage?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          decision_note?: string | null
+          feedback_sent_at?: string | null
+          feedback_sent_by?: string | null
+          feedback_summary?: string | null
+          file_id?: string
+          id?: string
+          master_id?: string
+          number?: number
+          organization_id?: string
+          project_id?: string
+          stage?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_mix_versions_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_mix_versions_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "master_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_mix_versions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_mix_versions_title_in_project"
+            columns: ["project_id", "master_id"]
+            isOneToOne: false
+            referencedRelation: "project_masters"
+            referencedColumns: ["project_id", "master_id"]
+          },
+          {
+            foreignKeyName: "master_mix_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_mix_versions_feedback_sent_by_fkey"
+            columns: ["feedback_sent_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_sessions: {
         Row: {
           created_at: string
@@ -2280,6 +3394,8 @@ export type Database = {
       }
       master_splits: {
         Row: {
+          artist_id: string | null
+          contact_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -2292,6 +3408,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          artist_id?: string | null
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -2304,6 +3422,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          artist_id?: string | null
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -2400,6 +3520,76 @@ export type Database = {
             columns: ["session_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "master_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      master_transmissions: {
+        Row: {
+          acknowledged_at: string | null
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          note: string | null
+          organization_id: string
+          package: Json
+          project_id: string
+          revoked_at: string | null
+          role: string
+          token_hash: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          id?: string
+          note?: string | null
+          organization_id: string
+          package: Json
+          project_id: string
+          revoked_at?: string | null
+          role: string
+          token_hash: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          note?: string | null
+          organization_id?: string
+          package?: Json
+          project_id?: string
+          revoked_at?: string | null
+          role?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_transmissions_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_transmissions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_transmissions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
           },
         ]
@@ -3947,9 +5137,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           done_at: string | null
-          due_date: string
+          due_date: string | null
           id: string
           legal_plan_item_id: string | null
+          master_question_id: string | null
           organization_id: string
           project_id: string
           source_report_item_id: string | null
@@ -3962,9 +5153,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           done_at?: string | null
-          due_date: string
+          due_date?: string | null
           id?: string
           legal_plan_item_id?: string | null
+          master_question_id?: string | null
           organization_id: string
           project_id: string
           source_report_item_id?: string | null
@@ -3977,9 +5169,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           done_at?: string | null
-          due_date?: string
+          due_date?: string | null
           id?: string
           legal_plan_item_id?: string | null
+          master_question_id?: string | null
           organization_id?: string
           project_id?: string
           source_report_item_id?: string | null
@@ -4007,6 +5200,13 @@ export type Database = {
             columns: ["source_report_item_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "report_items"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "tasks_master_question_same_org"
+            columns: ["master_question_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "master_brief_questions"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -4208,8 +5408,30 @@ export type Database = {
       }
     }
     Functions: {
+      acknowledge_master_transmission: {
+        Args: { p_token: string }
+        Returns: string
+      }
+      add_clearance_rightsholder: {
+        Args: {
+          p_clearance_id: string
+          p_contact_id: string | null
+          p_name: string
+          p_right: string
+          p_role: string
+        }
+        Returns: string
+      }
       add_project_creative: {
         Args: { p_person_id: string; p_project_id: string }
+        Returns: undefined
+      }
+      add_legal_plan_items: {
+        Args: { p_items: Json; p_project_id: string }
+        Returns: number
+      }
+      advance_clearance: {
+        Args: { p_clearance_id: string; p_note: string | null; p_status: string }
         Returns: undefined
       }
       advance_contract: {
@@ -4221,6 +5443,22 @@ export type Database = {
         }
         Returns: undefined
       }
+      answer_master_question: {
+        Args: { p_choices?: string[]; p_question_id: string; p_text: string }
+        Returns: undefined
+      }
+      apply_master_question: {
+        Args: { p_question_id: string }
+        Returns: undefined
+      }
+      ask_master_brief_questions: {
+        Args: { p_items: Json; p_project_id: string }
+        Returns: number
+      }
+      approve_contract_mapping: {
+        Args: { p_items: Json; p_project_id: string }
+        Returns: undefined
+      }
       audio_state_rank: { Args: { p_state: string }; Returns: number }
       auth_organization_id: { Args: never; Returns: string }
       auth_person_id: { Args: never; Returns: string }
@@ -4230,7 +5468,10 @@ export type Database = {
         Returns: boolean
       }
       can_edit_contract: { Args: { p_contract_id: string }; Returns: boolean }
+      can_manage_clearance: { Args: { p_clearance_id: string }; Returns: boolean }
       can_manage_creatives: { Args: { p_project_id: string }; Returns: boolean }
+      can_manage_formality: { Args: { p_formality_id: string }; Returns: boolean }
+      can_manage_split_sheet: { Args: { p_sheet_id: string }; Returns: boolean }
       can_read_project_contracts: {
         Args: { p_project_id: string }
         Returns: boolean
@@ -4264,6 +5505,32 @@ export type Database = {
           subject_id: string
         }[]
       }
+      clearance_missing: {
+        Args: { p_clearance_id: string; p_status: string }
+        Returns: string[]
+      }
+      complete_formality: {
+        Args: {
+          p_external_id: string | null
+          p_formality_id: string
+          p_iswc: string | null
+          p_proof: string
+        }
+        Returns: undefined
+      }
+      contract_placeholders: { Args: { p_body: string }; Returns: string[] }
+      create_contract_template: {
+        Args: {
+          p_body: string
+          p_name: string
+          p_organization_id: string
+          p_roles: string[]
+          p_series_id: string | null
+          p_type: string
+          p_usage: string | null
+        }
+        Returns: string
+      }
       create_master: {
         Args: {
           p_audio_state?: string
@@ -4274,6 +5541,25 @@ export type Database = {
           p_title: string
           p_variant?: string
           p_variant_label?: string
+        }
+        Returns: string
+      }
+      create_master_exchange: {
+        Args: {
+          p_agenda: Json
+          p_meeting_url: string
+          p_occurred_at: string
+          p_project_id: string
+          p_title: string
+        }
+        Returns: string
+      }
+      create_master_transmission: {
+        Args: {
+          p_note: string
+          p_package: Json
+          p_project_id: string
+          p_role: string
         }
         Returns: string
       }
@@ -4295,12 +5581,24 @@ export type Database = {
         }
         Returns: string
       }
+      decide_clearance_terms: {
+        Args: { p_accept: boolean; p_terms_id: string }
+        Returns: undefined
+      }
+      decide_mix_version: {
+        Args: { p_decision: string; p_note: string; p_version_id: string }
+        Returns: undefined
+      }
       decide_validation: {
         Args: {
           p_approve: boolean
           p_comment?: string
           p_validation_id: string
         }
+        Returns: undefined
+      }
+      declare_formality_partial: {
+        Args: { p_formality_id: string; p_reason: string }
         Returns: undefined
       }
       design_is_editable: { Args: { p_project_id: string }; Returns: boolean }
@@ -4334,10 +5632,21 @@ export type Database = {
         Args: { p_endpoint: string }
         Returns: undefined
       }
+      formality_missing: { Args: { p_formality_id: string }; Returns: string[] }
       framing_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       framing_is_open: { Args: { p_project_id: string }; Returns: boolean }
+      generate_formality_document: { Args: { p_formality_id: string }; Returns: number }
+      generate_legal_contract: {
+        Args: { p_fields: Json; p_need_id: string }
+        Returns: string
+      }
+      get_master_transmission: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       get_my_access: { Args: never; Returns: Json }
       get_smartlink: { Args: { p_token: string }; Returns: Json }
+      get_split_confirmation: { Args: { p_token: string }; Returns: Json }
       has_permission: {
         Args: { org_id: string; p_permission: string }
         Returns: boolean
@@ -4356,6 +5665,10 @@ export type Database = {
       is_org_admin: { Args: { org_id: string }; Returns: boolean }
       is_project_launched: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
+      link_clearance_contract: {
+        Args: { p_clearance_id: string; p_contract_id: string; p_right: string }
+        Returns: undefined
+      }
       list_assignable_people: {
         Args: { p_organization_id: string }
         Returns: {
@@ -4400,6 +5713,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      log_clearance_communication: {
+        Args: {
+          p_body: string
+          p_clearance_id: string
+          p_direction: string
+          p_kind: string
+          p_occurred_at: string | null
+        }
+        Returns: string
+      }
       log_master_event: {
         Args: {
           p_catalog_only?: boolean
@@ -4412,8 +5735,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_formality_processing: { Args: { p_formality_id: string }; Returns: undefined }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       master_is_live: { Args: { p_master_id: string }; Returns: boolean }
+      new_split_confirmation: { Args: { p_entry_id: string }; Returns: string }
       normalize_email: { Args: { input: string }; Returns: string }
       notify: {
         Args: {
@@ -4424,6 +5749,10 @@ export type Database = {
           p_subject_id: string
         }
         Returns: undefined
+      }
+      open_formality: {
+        Args: { p_key: string; p_master_id: string; p_project_id: string }
+        Returns: string
       }
       person_has_permission: {
         Args: {
@@ -4438,14 +5767,22 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: boolean
       }
+      propose_clearance_terms: {
+        Args: {
+          p_clearance_id: string
+          p_communication_id: string | null
+          p_terms: Json
+        }
+        Returns: string
+      }
+      propose_split_version: {
+        Args: { p_version_id: string }
+        Returns: { entry_id: string; token: string }[]
+      }
       push_secret_matches: { Args: { p_secret: string }; Returns: boolean }
       confirm_legal_intake: {
         Args: { p_project_id: string }
         Returns: undefined
-      }
-      create_legal_plan_task: {
-        Args: { p_item_id: string }
-        Returns: string
       }
       get_legal_form: { Args: { p_token: string }; Returns: Json }
       launch_legal_plan: {
@@ -4460,12 +5797,69 @@ export type Database = {
           person_id: string
         }[]
       }
+      qualify_clearance: {
+        Args: {
+          p_clearance_id: string
+          p_reason: string | null
+          p_responsible: string | null
+          p_scope: string
+          p_usage: string
+        }
+        Returns: undefined
+      }
+      record_formality_signature: {
+        Args: { p_proof: string; p_signature_id: string }
+        Returns: undefined
+      }
+      remove_clearance_rightsholder: { Args: { p_rightsholder_id: string }; Returns: undefined }
+      require_formality_action: {
+        Args: { p_fields: string[]; p_formality_id: string; p_note: string }
+        Returns: undefined
+      }
+      respond_split_confirmation: {
+        Args: {
+          p_comment: string | null
+          p_decision: string
+          p_hash: string
+          p_token: string
+        }
+        Returns: string
+      }
       review_legal_form: {
         Args: { p_accept: boolean; p_form_id: string }
         Returns: undefined
       }
+      revise_contract_document: {
+        Args: { p_body: string; p_comment: string; p_contract_id: string }
+        Returns: undefined
+      }
+      save_formality_values: {
+        Args: { p_formality_id: string; p_values: Json }
+        Returns: undefined
+      }
+      save_split_draft: {
+        Args: {
+          p_entries: Json
+          p_master_id: string
+          p_note: string | null
+          p_project_id: string
+        }
+        Returns: string
+      }
+      send_mix_feedback: {
+        Args: { p_version_id: string }
+        Returns: undefined
+      }
+      set_contract_template_status: {
+        Args: { p_status: string; p_template_id: string }
+        Returns: undefined
+      }
       set_legal_form_state: {
         Args: { p_form_id: string; p_state: string }
+        Returns: undefined
+      }
+      submit_formality: {
+        Args: { p_formality_id: string; p_proof: string }
         Returns: undefined
       }
       submit_legal_form: {

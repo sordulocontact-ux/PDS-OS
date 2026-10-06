@@ -10,12 +10,13 @@ import { Label } from "@/components/ui/label";
 import { createTask } from "@/lib/framing/actions/points-tasks";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { cn } from "@/lib/utils";
 
 const t = fr.projectWork.work.add;
 
 /**
  * A free task on the project's to-do list (owner only): title, owner and due
- * date are all required, chosen by a person — never by PO.
+ * date are all required, chosen by a person — PO may only pre-fill them.
  */
 export function AddTaskForm({
   projectId,
@@ -27,13 +28,6 @@ export function AddTaskForm({
   defaultAssignee: string | null;
 }) {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [assignee, setAssignee] = useState(
-    defaultAssignee ?? members[0]?.personId ?? "",
-  );
-  const [due, setDue] = useState("");
-  const { pending, run } = useFramingAction();
-  const people = Object.fromEntries(members.map((m) => [m.personId, m.name]));
 
   if (!open)
     return (
@@ -43,9 +37,51 @@ export function AddTaskForm({
     );
 
   return (
+    <TaskForm
+      framed
+      projectId={projectId}
+      members={members}
+      initial={{ title: "", assigneePersonId: defaultAssignee, dueDate: "" }}
+      onDone={() => setOpen(false)}
+      onCancel={() => setOpen(false)}
+    />
+  );
+}
+
+/**
+ * The task's fields. `framed`: inline on the Travail page, with its own
+ * title; without it, inside a panel that already has one (PO's draft).
+ */
+export function TaskForm({
+  projectId,
+  members,
+  initial,
+  framed = false,
+  onDone,
+  onCancel,
+}: {
+  projectId: string;
+  members: Member[];
+  initial: { title: string; assigneePersonId: string | null; dueDate: string };
+  framed?: boolean;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const [title, setTitle] = useState(initial.title);
+  const [assignee, setAssignee] = useState(
+    initial.assigneePersonId ?? members[0]?.personId ?? "",
+  );
+  const [due, setDue] = useState(initial.dueDate);
+  const { pending, run } = useFramingAction();
+  const people = Object.fromEntries(members.map((m) => [m.personId, m.name]));
+
+  return (
     <form
       aria-label={t.title}
-      className="grid w-full gap-3 rounded-2xl border border-border p-4"
+      className={cn(
+        "grid w-full gap-3",
+        framed && "rounded-2xl border border-border p-4",
+      )}
       onSubmit={(e) => {
         e.preventDefault();
         run(
@@ -56,18 +92,16 @@ export function AddTaskForm({
               dueDate: due,
               sourceReportItemId: null,
             }),
-          () => {
-            setTitle("");
-            setDue("");
-            setOpen(false);
-          },
+          onDone,
         );
       }}
     >
-      <div className="grid gap-0.5">
-        <p className="text-sm font-medium">{t.title}</p>
-        <p className="text-xs text-muted-foreground">{t.hint}</p>
-      </div>
+      {framed && (
+        <div className="grid gap-0.5">
+          <p className="text-sm font-medium">{t.title}</p>
+          <p className="text-xs text-muted-foreground">{t.hint}</p>
+        </div>
+      )}
       <div className="grid gap-1">
         <Label htmlFor="new-task-title">{t.label}</Label>
         <Input
@@ -108,12 +142,7 @@ export function AddTaskForm({
           >
             {t.submit}
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => setOpen(false)}
-          >
+          <Button type="button" size="sm" variant="ghost" onClick={onCancel}>
             {t.cancel}
           </Button>
         </div>

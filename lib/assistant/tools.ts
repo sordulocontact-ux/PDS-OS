@@ -10,10 +10,19 @@ import {
 import { activityLine, formatDay, lateness } from "@/lib/assistant/facts";
 import { projectStatus } from "@/lib/assistant/project-status";
 import { proposeArtistTool } from "@/lib/assistant/propose/artist";
+import { proposeContractTool } from "@/lib/assistant/propose/contract";
+import { proposeContractTemplateTool } from "@/lib/assistant/propose/contract-template";
 import { proposeFeedbackTool } from "@/lib/assistant/propose/feedback";
 import { feedbackReviewTools } from "@/lib/assistant/propose/feedback-review";
 import { proposeMasterTool } from "@/lib/assistant/propose/master";
+import { proposeMeetingTool } from "@/lib/assistant/propose/meeting";
+import { proposeNetworkContactTool } from "@/lib/assistant/propose/network-contact";
 import { proposeProjectTool } from "@/lib/assistant/propose/project";
+import {
+  proposeBudgetLineTool,
+  proposeTaskTool,
+} from "@/lib/assistant/propose/project-items";
+import { proposeTitleItemTool } from "@/lib/assistant/propose/title-item";
 import { uniqueSources, type Source } from "@/lib/assistant/sources";
 import { fillPageTestDataTool } from "@/lib/assistant/test-data/fill-tool";
 import {
@@ -44,14 +53,21 @@ export function createAssistantTools(
   userTexts: string[],
   pagePath: string | null = null,
 ) {
-  const context = { access, verbatim: verbatimFrom(userTexts) };
+  const context = { access, verbatim: verbatimFrom(userTexts), pagePath };
   return {
     find_artists: findArtistsTool(),
     find_masters: findMastersTool(),
     propose_artist: proposeArtistTool(context),
     propose_master: proposeMasterTool(context),
+    propose_title_item: proposeTitleItemTool(context),
     propose_project: proposeProjectTool(context),
-    propose_feedback: proposeFeedbackTool({ ...context, pagePath }),
+    propose_contract_template: proposeContractTemplateTool(context),
+    propose_contract: proposeContractTool(context),
+    propose_network_contact: proposeNetworkContactTool(context),
+    propose_task: proposeTaskTool(context),
+    propose_meeting: proposeMeetingTool(context),
+    propose_budget_line: proposeBudgetLineTool(context),
+    propose_feedback: proposeFeedbackTool(context),
     ...(can(access, "read_feedback") ? feedbackReviewTools(context) : {}),
     ...(isTestDataEnabled
       ? {
@@ -118,7 +134,7 @@ export function createAssistantTools(
         const facts = [
           ...todo.tasks.map(
             (t) =>
-              `Tâche « ${t.title} » (${t.projectTitle}) : à faire, échéance le ${formatDay(t.dueDate)}, ${lateness(t.overdue)}.`,
+              `Tâche « ${t.title} » (${t.projectTitle}) : à faire, ${t.dueDate ? `échéance le ${formatDay(t.dueDate)}` : "sans échéance"}, ${lateness(t.overdue)}.`,
           ),
           ...todo.validations.map(
             (v) =>

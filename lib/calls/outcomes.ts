@@ -76,7 +76,8 @@ export async function loadCallOutcomes(
         id: item.id,
         what: item.what,
         who: item.who,
-        task: task
+        // A call's task always has a date (only the Juridique's may not).
+        task: task?.due_date
           ? {
               assigneeName: task.assignee
                 ? personName(task.assignee.first_name, task.assignee.last_name)

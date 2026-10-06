@@ -21,6 +21,7 @@ const columnClasses = {
   3: "sm:grid-cols-3",
   4: "sm:grid-cols-4",
   5: "sm:grid-cols-3 lg:grid-cols-5",
+  6: "sm:grid-cols-3 lg:grid-cols-6",
 } as const;
 
 export function StatTiles({
@@ -28,7 +29,7 @@ export function StatTiles({
   columns = 4,
 }: {
   stats: StatTile[];
-  // Tiles per row from sm up (4 by default, 3 for Juridique, 5 for the budget).
+  // Tiles per row from sm up (4 by default, 3 for Juridique, 6 for the budget).
   columns?: keyof typeof columnClasses;
 }) {
   return (
@@ -44,7 +45,9 @@ export function StatTiles({
             stat.view?.current && "border-foreground bg-muted",
           )}
         >
-          <dt className="text-caption text-grey-400">{stat.label}</dt>
+          <dt className="text-caption text-[color:var(--text-secondary)]">
+            {stat.label}
+          </dt>
           <dd className="text-body-xl font-medium tabular-nums">
             {stat.href && stat.view ? (
               <ViewLink

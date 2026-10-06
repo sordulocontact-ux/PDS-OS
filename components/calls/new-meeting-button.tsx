@@ -1,7 +1,7 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
@@ -52,18 +52,33 @@ export function NewMeetingButton({
   );
 }
 
-function MeetingForm({
+/**
+ * The meeting's fields. Created, it opens on its page, unless `onSaved` is
+ * given (PO's panel): then the page stays and gets the new meeting's id.
+ */
+export function MeetingForm({
   members,
   defaultOccurredAt,
+  defaults,
+  onSaved,
   onCancel,
 }: {
   members: Person[];
   defaultOccurredAt: string;
+  // A draft of PO: title, link and guests already filled.
+  defaults?: { title: string; meetingUrl: string; attendeeIds: string[] };
+  onSaved?: (id: string) => void;
   onCancel: () => void;
 }) {
   const t = fr.calls.meeting;
   const create = fr.calls.create;
   const [state, formAction, pending] = useActionState(createMeeting, null);
+
+  useEffect(() => {
+    if (state?.ok && state.id) onSaved?.(state.id);
+    // onSaved changes with each render of the parent; the result is what counts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   // datetime-local has no zone: convert with the browser's zone before sending.
   const submit = (form: FormData) => {
@@ -77,6 +92,7 @@ function MeetingForm({
 
   return (
     <form action={submit} className="flex flex-col gap-5">
+      {onSaved && <input type="hidden" name="stay" value="1" />}
       <Field
         name="title"
         label={create.fieldTitle}
@@ -84,6 +100,7 @@ function MeetingForm({
         maxLength={200}
         autoComplete="off"
         placeholder={t.titlePlaceholder}
+        defaultValue={defaults?.title}
       />
       <Field
         name="occurredAtLocal"
@@ -103,6 +120,7 @@ function MeetingForm({
         autoComplete="off"
         placeholder={create.linkPlaceholder}
         hint={create.linkHint}
+        defaultValue={defaults?.meetingUrl}
       />
       <PeoplePicker
         name="attendees"
@@ -110,7 +128,7 @@ function MeetingForm({
         hint={t.attendeesHint}
         emptyLabel={t.noMembers}
         candidates={members}
-        defaultSelectedIds={[]}
+        defaultSelectedIds={defaults?.attendeeIds ?? []}
       />
       {state && !state.ok && (
         <FormMessage kind="error">{fr.calls.errors[state.error]}</FormMessage>

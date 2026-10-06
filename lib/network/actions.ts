@@ -18,6 +18,7 @@ import {
   type NetworkContactValues,
   type NetworkFormOptions,
 } from "@/lib/network/types";
+import { linkCreditsOfNewContact } from "@/lib/network/link-credits";
 import { createClient } from "@/lib/supabase/server";
 
 // Writes of the network, with the user's session: RLS (manage_network) and
@@ -145,6 +146,12 @@ export async function saveNetworkContact(
     if (error) console.error("saveNetworkContact:", error.message);
     return { ok: false, error: t.failed };
   }
+  // A new contact takes the unlinked credits of its exact name.
+  if (!id)
+    await linkCreditsOfNewContact(supabase, access, {
+      id: data.id,
+      name: values.name,
+    });
   revalidatePath(routes.network);
   revalidatePath(routes.networkContact(data.id));
   // A new contact opens on its page. Redirected here, not by the modal: on an

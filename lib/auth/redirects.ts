@@ -96,6 +96,10 @@ export const routes = {
   networkContact: (id: string) => `/app/network/${id}`,
   contracts: "/app/contracts",
   contract: (id: string) => `/app/contracts/${id}`,
+  contractTemplates: "/app/contracts/templates",
+  contractDocumentPdf: (id: string) => `/api/contracts/${id}/document`,
+  formalityDocumentPdf: (id: string, version: number) =>
+    `/api/legal/formalities/${id}/document?version=${version}`,
   feedback: "/app/feedback",
   members: "/app/members",
   membersNew: "/app/members/new",
@@ -170,6 +174,7 @@ export const routes = {
   smartlink: (token: string) => `/l/${token}`,
   // Public, no account: a fiche de renseignements (Juridique 02).
   legalForm: (token: string) => `/f/${token}`,
+  legalSplit: (token: string) => `/s/${token}`,
 } as const;
 
 export function destinationFor(state: AccessState): string {

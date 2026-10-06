@@ -30,6 +30,7 @@ export const projectWork = {
     },
     due: (day: string) => `échéance ${day}`,
     noDueDate: "sans échéance",
+    waitingOn: (labels: string) => `En attente de : ${labels}`,
     doneOn: (day: string) => `fait le ${day}`,
     validator: (name: string) => `auprès de ${name}`,
     doneCount: (count: number) =>

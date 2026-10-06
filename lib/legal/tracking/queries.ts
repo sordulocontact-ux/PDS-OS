@@ -4,7 +4,12 @@ import { can, type Access } from "@/lib/auth/access";
 import { todayInParis } from "@/lib/contracts/types";
 import { completeFormContacts } from "@/lib/legal/forms/queries";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
-import type { PlanItemKind, PlanItemStatus } from "@/lib/legal/plan/proposal";
+import { splitStates } from "@/lib/legal/splits/queries";
+import {
+  proposePlan,
+  type PlanItemKind,
+  type PlanItemStatus,
+} from "@/lib/legal/plan/proposal";
 import { trackPlan, type TrackedItem } from "@/lib/legal/tracking/state";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -14,6 +19,9 @@ export type LegalTracking =
   | {
       state: "tracking";
       items: TrackedItem[];
+      // Actions the dossier asks for now that the plan does not hold
+      // (a person or a title added since the launch): « Ajouter au plan ».
+      added: number;
       // Who may answer for an action (delegation).
       people: Array<{ personId: string; name: string }>;
     };
@@ -36,12 +44,12 @@ export async function loadTracking(
   if (error) console.error("loadTracking plan:", error.message);
   if (!plan?.launched_at) return { state: "not_launched" };
 
-  const [items, rows, clearances, people, completeContacts] = await Promise.all(
-    [
+  const [items, rows, clearances, people, completeContacts, splitOf] =
+    await Promise.all([
       supabase
         .from("legal_plan_items")
         .select(
-          "id, item_key, kind, master_id, label, detail, why, status, depends_on, responsible_person_id, due_on",
+          "id, item_key, kind, master_id, label, detail, why, subject, credit_ids, status, depends_on, responsible_person_id, due_on",
         )
         .eq("plan_id", plan.id)
         .order("created_at"),
@@ -52,7 +60,7 @@ export async function loadTracking(
       ),
       supabase
         .from("legal_clearances")
-        .select("id, status, updated_at")
+        .select("id, master_id, element, work, author, status, updated_at")
         .eq("project_id", project.id),
       access.organizationId
         ? supabase.rpc("list_legal_people", {
@@ -60,31 +68,22 @@ export async function loadTracking(
           })
         : Promise.resolve({ data: [], error: null }),
       completeFormContacts(project.id),
-    ],
-  );
+      splitStates(project.id),
+    ]);
   if (items.error) console.error("loadTracking items:", items.error.message);
-  // The tasks these actions became (RLS: the project's visible tasks).
-  const itemIds = (items.data ?? []).map((row) => row.id);
-  const tasks =
-    itemIds.length > 0
-      ? await supabase
-          .from("tasks")
-          .select("id, status, legal_plan_item_id")
-          .in("legal_plan_item_id", itemIds)
-      : { data: [], error: null };
-  if (tasks.error) console.error("loadTracking tasks:", tasks.error.message);
-  const taskOf = new Map(
-    (tasks.data ?? []).flatMap((task) =>
-      task.legal_plan_item_id
-        ? [
-            [
-              task.legal_plan_item_id,
-              { id: task.id, done: task.status === "done" },
-            ] as const,
-          ]
-        : [],
-    ),
-  );
+  const planKeys = new Set((items.data ?? []).map((row) => row.item_key));
+  const added = proposePlan({
+    rows,
+    completeContacts,
+    clearances: (clearances.data ?? []).map((c) => ({
+      id: c.id,
+      masterId: c.master_id,
+      element: c.element,
+      work: c.work,
+      author: c.author,
+      status: c.status,
+    })),
+  }).filter((item) => !planKeys.has(item.key)).length;
   const names = new Map(
     (people.data ?? []).map((p) => [
       p.person_id,
@@ -94,11 +93,13 @@ export async function loadTracking(
 
   return {
     state: "tracking",
+    added,
     people: [...names].map(([personId, name]) => ({ personId, name })),
     items: trackPlan({
       projectId: project.id,
       today: todayInParis(new Date()),
       completeContacts,
+      splitOf,
       rows,
       clearances: (clearances.data ?? []).map((c) => ({
         id: c.id,
@@ -107,13 +108,14 @@ export async function loadTracking(
       })),
       items: (items.data ?? []).map((row) => ({
         id: row.id,
-        task: taskOf.get(row.id) ?? null,
         key: row.item_key,
         kind: row.kind as PlanItemKind,
         masterId: row.master_id,
         label: row.label,
         detail: row.detail,
         why: row.why ?? "",
+        subject: row.subject,
+        creditIds: row.credit_ids,
         status: row.status as PlanItemStatus,
         // The plan's column at launch; the Suivi regroups by current state.
         column: "now",

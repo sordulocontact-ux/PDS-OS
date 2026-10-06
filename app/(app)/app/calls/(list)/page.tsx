@@ -16,7 +16,7 @@ import {
   asCallView,
   callViewOf,
   CALL_VIEWS,
-  toParisLocalInput,
+  nextRoundHourInput,
 } from "@/lib/calls/format";
 import { listAllCalls, type CallListItem } from "@/lib/calls/queries";
 import { loadMembers } from "@/lib/framing/related";
@@ -52,10 +52,6 @@ export default async function CallsPage({
   const members = (await loadMembers(access)).filter(
     (member) => member.personId !== access.personId,
   );
-  // An internal meeting is planned for the next round hour by default.
-  const nextHour = new Date(now);
-  nextHour.setMinutes(0, 0, 0);
-  nextHour.setHours(nextHour.getHours() + 1);
   const header = (
     <PageHeader
       title={t.title}
@@ -63,7 +59,7 @@ export default async function CallsPage({
       action={
         <NewMeetingButton
           members={members}
-          defaultOccurredAt={toParisLocalInput(nextHour)}
+          defaultOccurredAt={nextRoundHourInput(now)}
         />
       }
     />

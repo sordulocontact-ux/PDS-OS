@@ -3,12 +3,15 @@ import "server-only";
 import type { Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { isOverdue, todayInParis } from "@/lib/insights/dates";
+import { legalTaskInfo } from "@/lib/legal/tasks";
+import { questionTaskHref } from "@/lib/master-workflow/question-types";
 import { createClient } from "@/lib/supabase/server";
 
 export type TodoTask = {
   id: string;
   title: string;
-  dueDate: string;
+  // Null only for a task of the Juridique's plan without a date.
+  dueDate: string | null;
   overdue: boolean;
   projectId: string;
   projectTitle: string;
@@ -48,7 +51,9 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
     await Promise.all([
       supabase
         .from("tasks")
-        .select("id, title, due_date, project_id")
+        .select(
+          "id, title, due_date, project_id, legal_plan_item_id, master_question_id",
+        )
         .eq("assignee_person_id", me)
         .eq("status", "todo")
         .order("due_date"),
@@ -77,20 +82,33 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
   const titles = new Map((projectsRes.data ?? []).map((p) => [p.id, p.title]));
   const titleOf = (id: string) => titles.get(id) ?? "—";
 
-  const tasks = (tasksRes.data ?? []).map((t) => ({
-    id: t.id,
-    title: t.title,
-    dueDate: t.due_date,
-    overdue: isOverdue(t.due_date, today),
-    projectId: t.project_id,
-    projectTitle: titleOf(t.project_id),
-    href: routes.projectFraming(t.project_id),
-  }));
-  // Overdue first, then by due date.
+  // What waits for another action is not to do yet: left out here, shown
+  // « en attente » in the project's Travail.
+  const legal = await legalTaskInfo(supabase, tasksRes.data ?? []);
+  const tasks = (tasksRes.data ?? []).flatMap((t) => {
+    const fromPlan = legal.get(t.id);
+    if (fromPlan?.waitingOn) return [];
+    return [
+      {
+        id: t.id,
+        title: t.title,
+        dueDate: t.due_date,
+        overdue: t.due_date !== null && isOverdue(t.due_date, today),
+        projectId: t.project_id,
+        projectTitle: titleOf(t.project_id),
+        href:
+          fromPlan?.href ??
+          (t.master_question_id
+            ? questionTaskHref(t.project_id)
+            : routes.projectFraming(t.project_id)),
+      },
+    ];
+  });
+  // Overdue first, then by due date (undated last).
   tasks.sort(
     (a, b) =>
       Number(b.overdue) - Number(a.overdue) ||
-      a.dueDate.localeCompare(b.dueDate),
+      (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999"),
   );
 
   const validations = (validationsRes.data ?? []).map((v) => {

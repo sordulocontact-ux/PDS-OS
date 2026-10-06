@@ -12,19 +12,26 @@ import { MasterForm } from "./master-form";
 export function SessionForm({
   masterId,
   session,
+  defaults,
   onDone,
+  onCancel,
 }: {
   masterId: string;
   session: MasterSession | null;
+  // Values proposed by PO, by field name.
+  defaults?: Record<string, string>;
   onDone: () => void;
+  onCancel?: () => void;
 }) {
   const t = fr.masterPage.sessions;
   const optional = fr.masterPage.form.optional;
   return (
     <MasterForm
       action={saveSession}
+      defaults={defaults}
       hidden={{ masterId, itemId: session?.id }}
       onDone={onDone}
+      onCancel={onCancel}
     >
       {({ value, error }) => (
         <>

@@ -18,16 +18,19 @@ import { fr } from "@/lib/i18n/fr";
 export function TitleFileButton({
   organizationId,
   action,
+  label,
 }: {
   organizationId: string;
   action: Extract<MasterFactAction, { kind: "add_audio" | "add_stems" }>;
+  // "Ajouter une version" on the Mix step (an audio file at the mix state).
+  label?: string;
 }) {
   const router = useRouter();
   const t = fr.masterWorkflow.inventory.actions;
   const owner = { kind: "master", id: action.masterId } as const;
   const button =
     action.kind === "add_audio" ? (
-      <FileImportButton row label={t.addAudio} />
+      <FileImportButton row label={label ?? t.addAudio} />
     ) : (
       <FileImportButton row label={t.addStems} />
     );

@@ -11,6 +11,7 @@ import { saveSplit } from "@/lib/catalog/master/rights-actions";
 import { fr } from "@/lib/i18n/fr";
 
 import { MasterForm } from "./master-form";
+import { SplitPartyField } from "./split-party-field";
 
 const shareInput = new Intl.NumberFormat("fr-FR", {
   maximumFractionDigits: 2,
@@ -22,7 +23,9 @@ export function SplitForm({
   split,
   kind,
   available,
+  defaults,
   onDone,
+  onCancel,
 }: {
   masterId: string;
   split: MasterSplit | null;
@@ -30,14 +33,19 @@ export function SplitForm({
   kind: SplitKind;
   // What the share may take, computed by the caller (remainder + its own).
   available: number;
+  // Values proposed by PO, by field name.
+  defaults?: Record<string, string>;
   onDone: () => void;
+  onCancel?: () => void;
 }) {
   const t = fr.masterPage.splits;
   return (
     <MasterForm
       action={saveSplit}
+      defaults={defaults}
       hidden={{ masterId, itemId: split?.id }}
       onDone={onDone}
+      onCancel={onCancel}
     >
       {({ value, error }) => (
         <>
@@ -48,14 +56,12 @@ export function SplitForm({
             defaultValue={value("kind", split?.kind ?? kind)}
             error={error("kind")}
           />
-          <Field
-            name="party"
-            label={t.fields.party}
-            required
-            autoFocus
-            autoComplete="off"
-            maxLength={200}
-            defaultValue={value("party", split?.party)}
+          <SplitPartyField
+            masterId={masterId}
+            kind={split?.kind ?? kind}
+            role={split?.role ?? (kind === "master" ? "label" : "author")}
+            split={split}
+            defaultName={value("party", split?.party) || null}
             error={error("party")}
           />
           <OptionSelect

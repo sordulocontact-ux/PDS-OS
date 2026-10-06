@@ -63,6 +63,10 @@ insert into ids select 'project', id from public.projects
 insert into public.project_masters (organization_id, project_id, master_id, position)
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('master'), 1);
 
+-- A credited person without a fiche yet: the fiches are still to collect.
+insert into public.master_contributors (organization_id, master_id, name, role)
+values (pg_temp.id_of('org'), pg_temp.id_of('master'), 'Ever', 'composer');
+
 -- An answered dossier, not confirmed yet -----------------------------------------
 select pg_temp.act_as(pg_temp.id_of('manager'));
 select public.record_legal_answer(
@@ -112,7 +116,7 @@ select is((select count(*)::int from public.tasks t
 select is((select count(*)::int from public.tasks t
             join public.legal_plan_items i on i.id = t.legal_plan_item_id
             where i.item_key = 'splits:x'),
-          0, 'an action that waits for another one is not a task yet');
+          0, 'an action without a responsible has no task');
 
 -- Delegation (supabase/migrations/20261004001301_legal_plan_delegation.sql)
 select lives_ok($$
@@ -129,12 +133,14 @@ select throws_ok($$
     pg_temp.id_of('creative_person'), null)
 $$, 'P0001', 'legal_plan_responsible_invalid', 'a responsible must hold manage_legal');
 
-select lives_ok($$
-  select public.create_legal_plan_task((select id from public.legal_plan_items where item_key = 'splits:x'))
-$$, 'a freed action becomes a task on demand');
-select throws_ok($$
-  select public.create_legal_plan_task((select id from public.legal_plan_items where item_key = 'splits:x'))
-$$, 'P0001', 'legal_task_exists', 'once only');
+select is((select count(*)::int from public.tasks t
+            join public.legal_plan_items i on i.id = t.legal_plan_item_id
+            where i.item_key = 'splits:x' and t.assignee_person_id = pg_temp.id_of('manager_person')),
+          1, 'a delegated action gets its task (20261005003001)');
+select is((select t.due_date from public.tasks t
+            join public.legal_plan_items i on i.id = t.legal_plan_item_id
+            where i.item_key = 'splits:x'),
+          '2026-11-01'::date, 'on the action''s new date');
 
 reset role;
 select pg_temp.act_as(pg_temp.id_of('creative'));

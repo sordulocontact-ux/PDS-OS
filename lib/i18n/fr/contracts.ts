@@ -102,7 +102,7 @@ export const contracts = {
     edit: "Modifier",
     filesTitle: "Fichiers",
     filesDescription:
-      "Projets de contrat, exemplaire signé, annexes. Une nouvelle version garde les précédentes.",
+      "Projets de contrat, exemplaire signé et sa preuve, annexes. Une nouvelle version garde les précédentes.",
     filesEmpty:
       "Glissez le projet de contrat ici, ou cliquez pour le choisir. Chaque nouvelle version gardera les précédentes.",
     filesEmptyReadOnly: "Les fichiers du contrat apparaîtront ici.",

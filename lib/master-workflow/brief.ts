@@ -1,14 +1,21 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
+import { routes } from "@/lib/auth/redirects";
+import { isBudgetStatus } from "@/lib/budget/types";
+import { asCallStatus } from "@/lib/calls/constants";
 import {
-  DEFAULT_DELIVERABLES,
-  briefDeliverablesOf,
-  type BriefPerson,
-  type BriefView,
-  type MasterBrief,
+  BRIEF_COLUMNS,
+  briefFromRow,
+  emptyBrief,
+} from "@/lib/master-workflow/brief-row";
+import type {
+  BriefPerson,
+  BriefView,
+  MasterBrief,
 } from "@/lib/master-workflow/brief-types";
 import type { FlowCredit } from "@/lib/master-workflow/engineer-facts";
+import { masterExchangeAgenda } from "@/lib/master-workflow/exchange-agenda";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
 import { networkEngineers } from "@/lib/master-workflow/network-engineers";
 import { materialFacts, sourceFacts } from "@/lib/master-workflow/source-facts";
@@ -18,8 +25,10 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
-const BRIEF_SELECT =
-  "mix_contact_id, mastering_same_engineer, mastering_contact_id, mix_rate_cents, mastering_rate_cents, revisions, validator_person_id, references_text, direction, constraints_text, deliverables, mix_v1_due, mix_final_due, mastering_due, master_final_due, updated_at, updater:people!master_briefs_updated_by_fkey(first_name, last_name)";
+// From these states on, the call has a transcript to propose from.
+const TRANSCRIBED = ["transcribed", "extracting", "ready"];
+
+const BRIEF_SELECT = `${BRIEF_COLUMNS}, updated_at, updater:people!master_briefs_updated_by_fkey(first_name, last_name)`;
 
 /**
  * The contact credited for a role on the project's titles, when it is one
@@ -56,7 +65,7 @@ export async function loadMasterBrief(
   access: Access,
 ): Promise<BriefView> {
   const supabase = await createClient();
-  const [rows, saved, creatives] = await Promise.all([
+  const [rows, saved, creatives, exchanges, budget] = await Promise.all([
     readMasterRows(project.id, project.masters),
     supabase
       .from("master_briefs")
@@ -64,7 +73,21 @@ export async function loadMasterBrief(
       .eq("project_id", project.id)
       .maybeSingle(),
     listProjectCreatives(project.id),
+    supabase
+      .from("master_brief_calls")
+      .select(
+        "call:calls!master_brief_calls_call_same_org(id, title, occurred_at, status)",
+      )
+      .eq("project_id", project.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("budget_lines")
+      .select("master_role, amount_cents, status")
+      .eq("project_id", project.id)
+      .not("master_role", "is", null),
   ]);
+  if (exchanges.error)
+    console.error("loadMasterBrief exchanges:", exchanges.error.message);
   if (saved.error) console.error("loadMasterBrief:", saved.error.message);
   const canEdit = canEditProject(access, project);
   const canEditCatalog = can(access, "manage_catalog");
@@ -78,43 +101,12 @@ export async function loadMasterBrief(
   const sameCredited =
     mixCredited !== null && mixCredited === masteringCredited;
   const brief: MasterBrief = row
-    ? {
-        mixContactId: row.mix_contact_id,
-        masteringSameEngineer: row.mastering_same_engineer,
-        masteringContactId: row.mastering_contact_id,
-        mixRateCents: row.mix_rate_cents,
-        masteringRateCents: row.mastering_rate_cents,
-        revisions: row.revisions,
-        validatorPersonId: row.validator_person_id,
-        references: row.references_text,
-        direction: row.direction,
-        constraints: row.constraints_text,
-        deliverables: briefDeliverablesOf(row.deliverables),
-        dates: {
-          mixV1Due: row.mix_v1_due,
-          mixFinalDue: row.mix_final_due,
-          masteringDue: row.mastering_due,
-          masterFinalDue: row.master_final_due,
-        },
-      }
+    ? briefFromRow(row)
     : {
+        ...emptyBrief(project.ownerPersonId),
         mixContactId: mixCredited,
         masteringSameEngineer: sameCredited,
         masteringContactId: sameCredited ? null : masteringCredited,
-        mixRateCents: null,
-        masteringRateCents: null,
-        revisions: null,
-        validatorPersonId: project.ownerPersonId,
-        references: null,
-        direction: null,
-        constraints: null,
-        deliverables: DEFAULT_DELIVERABLES,
-        dates: {
-          mixV1Due: null,
-          mixFinalDue: null,
-          masteringDue: null,
-          masterFinalDue: null,
-        },
       };
 
   const validators: BriefPerson[] = [
@@ -126,6 +118,21 @@ export async function loadMasterBrief(
     ),
   ];
 
+  const sources = rows.titles.flatMap((title) => [
+    ...sourceFacts(
+      title,
+      rows.audioOf.get(title.id) ?? [],
+      rows.sourceOf.get(title.id) ?? null,
+      rows.sessionsOf.get(title.id) ?? [],
+      { projectId: project.id, addAudio: canEditCatalog, confirm: canEdit },
+    ),
+    ...materialFacts(title, rows.stemsOf.get(title.id) ?? 0, canEditCatalog),
+  ]);
+  // A source still to confirm, or no audio at all: a point of the agenda.
+  const sourcesOpen = sources.some(
+    (fact) => fact.key.startsWith("source-") && fact.status !== "known",
+  );
+
   return {
     projectId: project.id,
     brief,
@@ -133,21 +140,39 @@ export async function loadMasterBrief(
     savedBy: row?.updater
       ? personName(row.updater.first_name, row.updater.last_name)
       : null,
-    sources: rows.titles.flatMap((title) => [
-      ...sourceFacts(
-        title,
-        rows.audioOf.get(title.id) ?? [],
-        rows.sourceOf.get(title.id) ?? null,
-        rows.sessionsOf.get(title.id) ?? [],
-        { projectId: project.id, addAudio: canEditCatalog, confirm: canEdit },
-      ),
-      ...materialFacts(title, rows.stemsOf.get(title.id) ?? 0, canEditCatalog),
-    ]),
+    sources,
     sourcesFailed: Boolean(rows.failed.sources || rows.failed.materials),
     engineers: rows.failed.network
       ? []
       : networkEngineers(rows.contacts, rows.linkedCredits),
     validators,
+    exchanges: (exchanges.data ?? []).flatMap((row) =>
+      row.call
+        ? [
+            {
+              callId: row.call.id,
+              title: row.call.title,
+              occurredAt: row.call.occurred_at,
+              status: asCallStatus(row.call.status),
+              href: routes.projectCall(project.id, row.call.id),
+              canPropose: TRANSCRIBED.includes(row.call.status),
+            },
+          ]
+        : [],
+    ),
+    nextAgenda: masterExchangeAgenda(brief, sourcesOpen),
+    budget: (budget.data ?? []).flatMap((row) =>
+      (row.master_role === "mix" || row.master_role === "mastering") &&
+      isBudgetStatus(row.status)
+        ? [
+            {
+              role: row.master_role,
+              amountCents: row.amount_cents,
+              status: row.status,
+            },
+          ]
+        : [],
+    ),
     canEdit,
     canAddContact: can(access, "manage_network"),
     organizationId: canEditCatalog ? access.organizationId : null,

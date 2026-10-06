@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { IconCheck } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { AnsweredList } from "@/components/legal/intake/answered-list";
 import { QuestionCard } from "@/components/legal/intake/question-card";
 import { EmptyState } from "@/components/shell/empty-state";
+import { Button } from "@/components/ui/button";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { answerKey } from "@/lib/legal/intake/questions";
 import type { IntakeQuestion } from "@/lib/legal/intake/types";
@@ -57,7 +60,24 @@ export function IntakeWorkspace({
           onSaved={() => setCorrecting(null)}
         />
       ) : (
-        <EmptyState icon={IconCheck} title={t.done.title} body={t.done.body} />
+        // Every question answered: the next step, never a dead end.
+        <EmptyState
+          icon={IconCheck}
+          title={t.done.title}
+          body={t.done.body}
+          action={
+            <Button
+              nativeButton={false}
+              render={
+                <Link
+                  href={routes.projectLegalStep(projectId, "confirmation")}
+                />
+              }
+            >
+              {t.done.action}
+            </Button>
+          }
+        />
       )}
       <AnsweredList
         questions={answered.filter((q) => keyOf(q) !== correcting)}

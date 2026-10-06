@@ -4,6 +4,7 @@
  */
 import { artistActivity } from "./artist-activity";
 import { assistant } from "./assistant";
+import { assistantRecords } from "./assistant-records";
 import { auth } from "./auth";
 import { budget } from "./budget";
 import { calls } from "./calls";
@@ -18,7 +19,11 @@ import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
 import { labo } from "./labo";
 import { legal } from "./legal";
+import { legalClearance } from "./legal-clearance";
+import { legalContracts } from "./legal-contracts";
+import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
+import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { masterPage } from "./master-page";
 import { masterWorkflow } from "./master-workflow";
@@ -48,6 +53,7 @@ export const fr = {
   design,
   release,
   assistant,
+  assistantRecords,
   voice,
   transmission,
   notifications,
@@ -62,7 +68,11 @@ export const fr = {
   contracts,
   facts,
   legal,
+  legalClearance,
+  legalContracts,
+  legalFormalities,
   legalForms,
+  legalSplits,
   masterWorkflow,
   artistActivity,
   masterPage,

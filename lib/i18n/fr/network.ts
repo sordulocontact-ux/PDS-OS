@@ -18,6 +18,19 @@ export const network = {
     person: "Personne",
     organization: "Structure",
   },
+  // Picking someone of the Réseau from another form (a credit, a share).
+  picker: {
+    searchLabel: "Chercher dans le Réseau",
+    placeholder: "Nom d'une personne ou d'une structure du Réseau…",
+    create: "Ajouter au Réseau",
+    createNamed: (name: string) => `Ajouter « ${name} » au Réseau`,
+    noResult: (name: string) => `Personne nommée « ${name} » dans le Réseau.`,
+    allSelected: "Tout le Réseau est déjà proposé.",
+    remove: (name: string) => `Changer ${name}`,
+    keepName: "Garder seulement le nom",
+    search: "Chercher dans le Réseau",
+    loading: "Chargement du Réseau…",
+  },
   roles: {
     artist: "Artiste",
     beatmaker: "Beatmaker",

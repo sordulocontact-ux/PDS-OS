@@ -13,12 +13,17 @@ export function TrackForm({
   masterId,
   track,
   sessions,
+  defaults,
   onDone,
+  onCancel,
 }: {
   masterId: string;
   track: MasterTrack | null;
   sessions: MasterSession[];
+  // Values proposed by PO, by field name.
+  defaults?: Record<string, string>;
   onDone: () => void;
+  onCancel?: () => void;
 }) {
   const t = fr.masterPage.tracks;
   // "none" = not tied to a session (a select has no empty value).
@@ -29,8 +34,10 @@ export function TrackForm({
   return (
     <MasterForm
       action={saveTrack}
+      defaults={defaults}
       hidden={{ masterId, itemId: track?.id }}
       onDone={onDone}
+      onCancel={onCancel}
     >
       {({ value, error }) => (
         <>

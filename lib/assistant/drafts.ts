@@ -2,6 +2,10 @@
 // written: it pre-fills the real form, a person reviews it and saves with
 // their own session. Client-safe.
 
+import {
+  RECORD_DRAFT_KINDS,
+  type RecordDraft,
+} from "@/lib/assistant/draft-records";
 import type {
   ArtistRelation,
   Credit,
@@ -112,7 +116,8 @@ export type Draft =
   | ProjectDraft
   | FeedbackDraft
   | FeedbackTopicDraft
-  | FeedbackReviewDraft;
+  | FeedbackReviewDraft
+  | RecordDraft;
 
 export type DraftProposal = {
   draft: Draft;
@@ -129,6 +134,7 @@ const KINDS = new Set([
   "feedback",
   "feedbackTopic",
   "feedbackReview",
+  ...RECORD_DRAFT_KINDS,
 ]);
 
 /** Tool output → proposal. The output is ours, the check only guards the UI. */

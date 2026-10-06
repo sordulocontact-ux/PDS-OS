@@ -43,6 +43,21 @@ export const notifications = {
       `${actor} demande des modifications sur votre contrat.`,
     meeting_invited: (actor: string) =>
       `${actor} vous invite à une réunion interne.`,
+    // The engineer has no account: no actor, the project names it.
+    master_transmission_received: (_actor: string, project: string) =>
+      `Le mixeur a bien reçu le dossier de « ${project} ».`,
+    master_mix_version_received: (actor: string, project: string) =>
+      `${actor} a ajouté une version du mix de « ${project} » : vos retours sont attendus.`,
+    master_mix_approved: (actor: string, project: string) =>
+      `${actor} a validé le mix final de « ${project} ».`,
+    master_mix_changes_requested: (actor: string, project: string) =>
+      `${actor} demande une modification du mix de « ${project} ».`,
+    master_mastering_version_received: (actor: string, project: string) =>
+      `${actor} a ajouté une version du mastering de « ${project} » : vos retours sont attendus.`,
+    master_final_approved: (actor: string, project: string) =>
+      `${actor} a validé le master final de « ${project} ».`,
+    master_mastering_changes_requested: (actor: string, project: string) =>
+      `${actor} demande une modification du mastering de « ${project} ».`,
   },
   open: "Ouvrir",
   push: {

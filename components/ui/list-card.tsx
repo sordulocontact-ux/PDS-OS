@@ -89,11 +89,12 @@ export function CardRow({
           leading && "mx-0 min-w-0 flex-1",
         )}
       >
+        {/* Never cut: a long title wraps, the badge keeps its width. */}
         <span className="grid min-w-0 gap-1 text-body-md text-ink-800">
-          <span className="truncate font-semibold">{main}</span>
-          {sub && <span className="truncate">{sub}</span>}
+          <span className="font-semibold break-words">{main}</span>
+          {sub && <span className="break-words">{sub}</span>}
         </span>
-        {badge}
+        {badge && <span className="shrink-0">{badge}</span>}
       </Link>
     </li>
   );

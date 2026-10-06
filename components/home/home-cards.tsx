@@ -42,7 +42,7 @@ export function TasksCard({
           key={task.id}
           href={task.href}
           main={task.title}
-          sub={`${task.projectTitle} · ${t.due(formatDay(task.dueDate))}`}
+          sub={`${task.projectTitle} · ${task.dueDate ? t.due(formatDay(task.dueDate)) : t.noDue}`}
           badge={
             task.overdue ? (
               <StatusBadge tone={overdueTone} size="sm">

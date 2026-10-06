@@ -1,0 +1,42 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { fr } from "@/lib/i18n/fr";
+import { applyBriefQuestion } from "@/lib/master-workflow/question-actions";
+
+/** "Ajouter au Brief": the owner puts an answer into the brief, once. */
+export function ApplyAnswerButton({
+  projectId,
+  questionId,
+}: {
+  projectId: string;
+  questionId: string;
+}) {
+  const t = fr.masterWorkflow.questions;
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={pending}
+      onClick={() =>
+        startTransition(async () => {
+          const result = await applyBriefQuestion(projectId, questionId);
+          if (!result.ok) {
+            toast.error(result.error);
+            return;
+          }
+          toast.success(t.appliedToast);
+          router.refresh();
+        })
+      }
+    >
+      {pending ? t.applying : t.apply}
+    </Button>
+  );
+}

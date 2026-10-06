@@ -9,6 +9,7 @@ import type {
 } from "@/lib/catalog/master/rules";
 import { fr } from "@/lib/i18n/fr";
 
+import { ContributorPersonField } from "./contributor-person-field";
 import { MasterForm } from "./master-form";
 
 export function ContributorForm({
@@ -16,7 +17,9 @@ export function ContributorForm({
   titles,
   contributor,
   initial,
+  defaults,
   onDone,
+  onCancel,
 }: {
   // The credited title (preselected when `titles` is given).
   masterId: string;
@@ -27,18 +30,23 @@ export function ContributorForm({
   // A new credit already filled (the Master: the role to credit, and the
   // engineer named in a session).
   initial?: { name: string | null; role: ContributorRole };
+  // Values proposed by PO, by field name.
+  defaults?: Record<string, string>;
   onDone: () => void;
+  onCancel?: () => void;
 }) {
   const t = fr.masterPage.credits;
   const chooseTitle = titles !== undefined && titles.length > 1;
   return (
     <MasterForm
       action={saveContributor}
+      defaults={defaults}
       hidden={{
         masterId: chooseTitle ? undefined : masterId,
         itemId: contributor?.id,
       }}
       onDone={onDone}
+      onCancel={onCancel}
     >
       {({ value, error }) => (
         <>
@@ -50,14 +58,12 @@ export function ContributorForm({
               defaultValue={value("masterId", masterId)}
             />
           )}
-          <Field
-            name="name"
-            label={t.fields.name}
-            required
-            autoFocus
-            autoComplete="off"
-            maxLength={200}
-            defaultValue={value("name", contributor?.name ?? initial?.name)}
+          <ContributorPersonField
+            defaultName={
+              value("name", contributor?.name ?? initial?.name) || null
+            }
+            defaultContactId={contributor?.contactId ?? null}
+            role={contributor?.role ?? initial?.role ?? "composer"}
             error={error("name")}
           />
           <OptionSelect

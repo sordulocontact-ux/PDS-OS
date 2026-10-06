@@ -8,11 +8,13 @@ import {
   PlanItemRow,
   type PlanChoice,
 } from "@/components/legal/plan/plan-item-row";
+import { ActionGroup } from "@/components/legal/plan/action-group";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { launchLegalPlan } from "@/lib/legal/plan/actions";
+import { groupActions, lineOf } from "@/lib/legal/plan/groups";
 import { PLAN_COLUMNS } from "@/lib/legal/plan/proposal";
 import type { PlanRow } from "@/lib/legal/plan/queries";
 
@@ -42,7 +44,12 @@ export function PlanForm({
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const labelOf = new Map(items.map((item) => [item.key, item.label]));
+  // Only what is still in the plan holds an action back.
+  const labelOf = new Map(
+    items
+      .filter((item) => choices[item.key]?.include)
+      .map((item) => [item.key, item.label]),
+  );
 
   const launch = () =>
     startTransition(async () => {
@@ -72,26 +79,34 @@ export function PlanForm({
             {rows.length === 0 ? (
               <EmptyNote>{t.empty}</EmptyNote>
             ) : (
-              <ul className="flex flex-col">
-                {rows.map((item) => (
-                  <PlanItemRow
-                    key={item.key}
-                    item={item}
-                    // Only what is still in the plan holds an action back.
-                    after={item.dependsOn
-                      .filter((key) => choices[key]?.include)
-                      .flatMap((key) => labelOf.get(key) ?? [])}
-                    choice={choices[item.key]}
-                    people={people}
-                    onChange={(choice) =>
-                      setChoices((current) => ({
-                        ...current,
-                        [item.key]: choice,
-                      }))
-                    }
-                  />
+              <div className="flex flex-col gap-6">
+                {groupActions(rows, labelOf).map((group) => (
+                  <ActionGroup
+                    key={group.kind}
+                    title={group.title}
+                    count={group.items.length}
+                    why={group.why}
+                    after={group.after}
+                    action={null}
+                  >
+                    {group.items.map((item) => (
+                      <PlanItemRow
+                        key={item.key}
+                        item={item}
+                        line={lineOf(item, group, labelOf)}
+                        choice={choices[item.key]}
+                        people={people}
+                        onChange={(choice) =>
+                          setChoices((current) => ({
+                            ...current,
+                            [item.key]: choice,
+                          }))
+                        }
+                      />
+                    ))}
+                  </ActionGroup>
                 ))}
-              </ul>
+              </div>
             )}
           </PageSection>
         );

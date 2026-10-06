@@ -16,7 +16,6 @@ import {
   type NetworkContactValues,
   type NetworkFormOptions,
   type NetworkKind,
-  type NetworkRole,
 } from "@/lib/network/types";
 
 /**
@@ -34,8 +33,9 @@ export function ContactForm({
 }: {
   // Absent: a new contact.
   contact?: NetworkContactValues;
-  // A new contact already known by name and roles (a credit of a title).
-  initial?: { name: string; roles: NetworkRole[]; artistId?: string | null };
+  // A new contact already filled: a credit of a title (name and roles), or
+  // a draft of PO.
+  initial?: Partial<Omit<NetworkContactValues, "id">>;
   // Created from another page: stay there instead of opening the contact.
   stay?: boolean;
   options: NetworkFormOptions;
@@ -44,7 +44,9 @@ export function ContactForm({
 }) {
   const t = fr.network.form;
   const [state, formAction, pending] = useActionState(saveNetworkContact, null);
-  const [kind, setKind] = useState<NetworkKind>(contact?.kind ?? "person");
+  const [kind, setKind] = useState<NetworkKind>(
+    contact?.kind ?? initial?.kind ?? "person",
+  );
 
   useEffect(() => {
     if (state?.ok) onSaved(state.id);
@@ -103,7 +105,7 @@ export function ContactForm({
             none: t.parentNone,
             ...Object.fromEntries(organizations.map((o) => [o.id, o.name])),
           }}
-          defaultValue={contact?.parentId ?? "none"}
+          defaultValue={contact?.parentId ?? initial?.parentId ?? "none"}
         />
       )}
       {options.artists.length > 0 && (
@@ -124,7 +126,7 @@ export function ContactForm({
           label={`${t.email} · ${t.optional}`}
           autoComplete="off"
           maxLength={320}
-          defaultValue={contact?.email ?? ""}
+          defaultValue={contact?.email ?? initial?.email ?? ""}
           error={error?.field === "email" ? error.error : undefined}
         />
         <Field
@@ -133,7 +135,7 @@ export function ContactForm({
           label={`${t.phone} · ${t.optional}`}
           autoComplete="off"
           maxLength={40}
-          defaultValue={contact?.phone ?? ""}
+          defaultValue={contact?.phone ?? initial?.phone ?? ""}
         />
         <Field
           name="website"
@@ -143,7 +145,7 @@ export function ContactForm({
           autoComplete="off"
           maxLength={500}
           placeholder={t.websitePlaceholder}
-          defaultValue={contact?.website ?? ""}
+          defaultValue={contact?.website ?? initial?.website ?? ""}
           error={error?.field === "website" ? error.error : undefined}
         />
         <Field
@@ -151,7 +153,7 @@ export function ContactForm({
           label={`${t.city} · ${t.optional}`}
           autoComplete="off"
           maxLength={120}
-          defaultValue={contact?.city ?? ""}
+          defaultValue={contact?.city ?? initial?.city ?? ""}
         />
       </div>
       <TextareaField
@@ -160,7 +162,7 @@ export function ContactForm({
         maxLength={2000}
         rows={3}
         placeholder={t.notesPlaceholder}
-        defaultValue={contact?.notes ?? ""}
+        defaultValue={contact?.notes ?? initial?.notes ?? ""}
       />
       {error && !error.field && (
         <FormMessage kind="error">{error.error}</FormMessage>

@@ -1,4 +1,5 @@
 import { IconHandshake } from "nucleo-sharp-essential";
+import Link from "next/link";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ContractsList } from "@/components/contracts/contracts-list";
@@ -6,6 +7,7 @@ import { NewContractButton } from "@/components/contracts/new-contract-button";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
+import { buttonVariants } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -38,6 +40,15 @@ export default async function ContractsPage({
   const view = asContractView(params.view);
   const canCreate = can(access, "manage_contracts");
   const newButton = canCreate ? <NewContractButton /> : null;
+  // The template library (Juridique 03), beside the button.
+  const templatesLink = can(access, "manage_legal") ? (
+    <Link
+      href={routes.contractTemplates}
+      className={buttonVariants({ variant: "outline", size: "lg" })}
+    >
+      {fr.legalContracts.templates.open}
+    </Link>
+  ) : null;
 
   if (!all)
     return (
@@ -56,7 +67,14 @@ export default async function ContractsPage({
       <PageHeader
         title={t.title}
         description={t.description}
-        action={all.length > 0 ? newButton : null}
+        action={
+          templatesLink || all.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {templatesLink}
+              {all.length > 0 && newButton}
+            </div>
+          ) : null
+        }
       />
       {all.length === 0 ? (
         <EmptyState

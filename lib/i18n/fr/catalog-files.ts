@@ -40,6 +40,7 @@ export const catalogFiles = {
       all: "Tous",
       draft: "Projets de contrat",
       signed: "Signés",
+      evidence: "Preuves",
       annex: "Annexes",
       other: "Autres",
     },
@@ -78,6 +79,7 @@ export const catalogFiles = {
     contract: {
       draft: "Projet de contrat",
       signed: "Signé",
+      evidence: "Preuve de signature",
       annex: "Annexe",
       other: "Autre",
     },

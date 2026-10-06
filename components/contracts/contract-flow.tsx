@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { ContractSignatureStep } from "@/components/contracts/contract-signature-step";
 import { ContractStateBadge } from "@/components/contracts/contract-state-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ export function ContractFlow({
   can,
   lastReview,
   today,
+  proof = null,
 }: {
   contractId: string;
   state: ContractState;
@@ -46,12 +47,13 @@ export function ContractFlow({
   lastReview: { comment: string | null; label: string } | null;
   // "YYYY-MM-DD" in Paris: the default signature date, and its maximum.
   today: string;
+  // A contract generated from a template: its proof of signature.
+  proof?: { missing: boolean } | null;
 }) {
   const t = fr.contracts.flow;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [comment, setComment] = useState("");
-  const [signedOn, setSignedOn] = useState(today);
   const [terminating, setTerminating] = useState(false);
 
   function run(
@@ -136,40 +138,14 @@ export function ContractFlow({
         )}
 
         {(can.send || can.sign) && (
-          <div className="flex flex-wrap items-end gap-3">
-            {can.sign && (
-              <>
-                <Field
-                  name="signedOn"
-                  type="date"
-                  label={t.signedOnLabel}
-                  hint={t.signedOnHint}
-                  max={today}
-                  value={signedOn}
-                  disabled={pending}
-                  onChange={(event) => setSignedOn(event.target.value)}
-                  className="h-10 w-fit text-base md:text-sm"
-                />
-                <Button
-                  size="lg"
-                  disabled={pending || !signedOn}
-                  onClick={() => run("sign", { signedOn })}
-                >
-                  {t.sign}
-                </Button>
-              </>
-            )}
-            {can.send && (
-              <Button
-                size="lg"
-                variant="outline"
-                disabled={pending}
-                onClick={() => run("send")}
-              >
-                {t.send}
-              </Button>
-            )}
-          </div>
+          <ContractSignatureStep
+            can={can}
+            today={today}
+            pending={pending}
+            proof={proof}
+            onSend={(note) => run("send", { comment: note })}
+            onSign={(signedOn) => run("sign", { signedOn })}
+          />
         )}
 
         {can.terminate && (

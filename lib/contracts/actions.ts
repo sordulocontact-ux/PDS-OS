@@ -133,7 +133,8 @@ export async function saveContract(
   }
   refresh(data.id);
   // A new contract opens on its page (redirected here: see saveNetworkContact).
-  if (!id) redirect(routes.contract(data.id));
+  // `stay`: created from PO's panel, which shows the link itself.
+  if (!id && form.get("stay") !== "1") redirect(routes.contract(data.id));
   return { ok: true, id: data.id };
 }
 
@@ -267,6 +268,11 @@ export async function advanceContract(input: {
       return { ok: false, error: t.signedOn };
     if (message.includes("contract_wrong_status"))
       return { ok: false, error: t.status };
+    // A generated contract (Juridique 03): sent and signed with a proof.
+    if (message.includes("contract_send_proof_required"))
+      return { ok: false, error: fr.legalContracts.document.sendLabel };
+    if (message.includes("contract_proof_missing"))
+      return { ok: false, error: fr.legalContracts.document.proofMissing };
     if (error.code === "42501") return { ok: false, error: t.forbidden };
     console.error("advanceContract:", message);
     return { ok: false, error: t.failed };

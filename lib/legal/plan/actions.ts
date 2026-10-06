@@ -8,6 +8,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { planItemPayload } from "@/lib/legal/plan/payload";
 import { proposeLegalPlan } from "@/lib/legal/plan/queries";
 import { getProject } from "@/lib/projects/queries";
 import { schedulePendingPushes } from "@/lib/notifications/push";
@@ -50,38 +51,9 @@ export async function launchLegalPlan(
   const proposal = await proposeLegalPlan(project, access);
   const kept = proposal.filter((item) => chosen.get(item.key)?.include ?? true);
   const keys = new Set(kept.map((item) => item.key));
-  const items = kept.map((item) => {
-    const dependsOn = item.dependsOn.filter((key) => keys.has(key));
-    const freed = item.status === "blocked" && dependsOn.length === 0;
-    const choice = chosen.get(item.key);
-    return {
-      key: item.key,
-      kind: item.kind,
-      master_id: item.masterId,
-      label: item.label,
-      detail: item.detail,
-      why: item.why,
-      status: freed ? "action_now" : item.status,
-      depends_on: dependsOn,
-      responsible_person_id: choice?.responsibleId ?? null,
-      due_on: choice?.dueOn ?? null,
-    };
-  });
-
-  // An action to start now becomes a task, and a task needs a date: its
-  // own, else the project's.
-  const undated = items.filter(
-    (item) =>
-      item.status === "action_now" &&
-      item.responsible_person_id &&
-      !item.due_on &&
-      !project.dueDate,
+  const items = kept.map((item) =>
+    planItemPayload(item, keys, chosen.get(item.key)),
   );
-  if (undated.length > 0)
-    return {
-      ok: false,
-      error: t.dueMissing(undated.map((item) => item.label).join(", ")),
-    };
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("launch_legal_plan", {
@@ -100,5 +72,61 @@ export async function launchLegalPlan(
   await schedulePendingPushes();
   revalidatePath(routes.projectLegal(id.data), "layout");
   revalidatePath(routes.projectWork(id.data));
+  return { ok: true };
+}
+
+/**
+ * « Ajouter au plan »: the actions the dossier asks for now that the plan
+ * does not hold (a person or a title added since the launch), each with its
+ * task, given to the project's owner, on the project's date.
+ */
+export async function addLegalPlanItems(
+  projectId: string,
+): Promise<LaunchResult> {
+  const id = catalogIdSchema.safeParse(projectId);
+  const access = await requireApproved();
+  if (!id.success || !can(access, "manage_legal"))
+    return { ok: false, error: fr.auth.errors.forbidden };
+  const project = await getProject(id.data);
+  if (!project) return { ok: false, error: fr.auth.errors.forbidden };
+
+  const supabase = await createClient();
+  const [proposal, existing, people] = await Promise.all([
+    proposeLegalPlan(project, access),
+    supabase
+      .from("legal_plan_items")
+      .select("item_key")
+      .eq("project_id", project.id),
+    access.organizationId
+      ? supabase.rpc("list_legal_people", {
+          p_organization_id: access.organizationId,
+        })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  const known = new Set((existing.data ?? []).map((row) => row.item_key));
+  const fresh = proposal.filter((item) => !known.has(item.key));
+  if (fresh.length === 0) return { ok: true };
+  const owner = (people.data ?? []).some(
+    (p) => p.person_id === project.ownerPersonId,
+  )
+    ? project.ownerPersonId
+    : null;
+  const keys = new Set([...known, ...fresh.map((item) => item.key)]);
+  const { error } = await supabase.rpc("add_legal_plan_items", {
+    p_project_id: project.id,
+    p_items: fresh.map((item) =>
+      planItemPayload(item, keys, {
+        responsibleId: owner,
+        dueOn: project.dueDate,
+      }),
+    ),
+  });
+  if (error) {
+    console.error("addLegalPlanItems:", error.message);
+    return { ok: false, error: fr.legal.tracking.added.failed };
+  }
+  await schedulePendingPushes();
+  revalidatePath(routes.projectLegal(project.id), "layout");
+  revalidatePath(routes.projectWork(project.id));
   return { ok: true };
 }

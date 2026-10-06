@@ -13,6 +13,7 @@ import {
 } from "@/lib/catalog/master/queries";
 import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
+import { confirmedSplitOf } from "@/lib/legal/splits/title-split";
 import { allInOrder } from "@/lib/utils/parallel";
 
 // Credits: the performing artists (edited in "Modifier"), every other credit
@@ -24,14 +25,19 @@ export default async function MasterCreditsPage({
 }: PageProps<"/app/catalog/masters/[masterId]/credits">) {
   const { masterId } = await params;
   const accessPromise = requireApproved();
-  const [access, master, { contributors, error }, shares] = await allInOrder([
-    accessPromise,
-    getMaster(masterId),
-    listMasterContributors(masterId),
-    accessPromise.then((known) =>
-      can(known, "manage_catalog") ? listMasterSplits(masterId) : null,
-    ),
-  ]);
+  const [access, master, { contributors, error }, shares, confirmed] =
+    await allInOrder([
+      accessPromise,
+      getMaster(masterId),
+      listMasterContributors(masterId),
+      accessPromise.then((known) =>
+        can(known, "manage_catalog") ? listMasterSplits(masterId) : null,
+      ),
+      // Read only with manage_legal (RLS): null for anyone else.
+      accessPromise.then((known) =>
+        can(known, "manage_legal") ? confirmedSplitOf(masterId) : null,
+      ),
+    ]);
   if (!master) notFound();
   const t = fr.masterPage.credits;
 
@@ -58,7 +64,12 @@ export default async function MasterCreditsPage({
         (shares.error ? (
           <FormMessage kind="error">{fr.masterPage.loadError}</FormMessage>
         ) : (
-          <SplitsSection masterId={master.id} splits={shares.splits} canEdit />
+          <SplitsSection
+            masterId={master.id}
+            splits={shares.splits}
+            canEdit
+            confirmed={confirmed}
+          />
         ))}
     </>
   );

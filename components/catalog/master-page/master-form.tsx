@@ -19,16 +19,22 @@ type Action = (
 // A form of the master page in its modal: hidden ids, the fields, the error,
 // then Annuler / Enregistrer. Closes itself once saved; after a refused save
 // the typed values come back (`value`) with each field's error (`error`).
+// `defaults`: values proposed by PO, by field name, over the saved ones.
 export function MasterForm({
   action,
   hidden,
+  defaults,
   onDone,
+  onCancel = onDone,
   children,
 }: {
   action: Action;
   // Ids the action needs (master, edited row…).
   hidden: Record<string, string | null | undefined>;
+  defaults?: Record<string, string>;
   onDone: () => void;
+  // When cancelling is not just closing (PO's panel).
+  onCancel?: () => void;
   children: (field: {
     value: (name: string, saved: string | number | null | undefined) => string;
     error: (name: string) => string | undefined;
@@ -53,14 +59,15 @@ export function MasterForm({
         ) : null,
       )}
       {children({
-        value: (name, saved) => values[name] ?? (saved ?? "").toString(),
+        value: (name, saved) =>
+          values[name] ?? defaults?.[name] ?? (saved ?? "").toString(),
         error: (name) => errors[name],
       })}
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>
       )}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onDone}>
+        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
           {t.cancel}
         </Button>
         <SubmitButton pendingLabel={t.submitting}>{t.submit}</SubmitButton>

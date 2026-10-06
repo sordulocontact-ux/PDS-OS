@@ -87,9 +87,12 @@ export async function projectStatus(projectId: string, access: Access) {
       facts.push(`Point ouvert (décision non prise) : « ${point.question} ».`);
   }
   for (const task of framing?.tasks ?? []) {
-    const late = task.status === "todo" && isOverdue(task.due_date, today);
+    const late =
+      task.status === "todo" &&
+      task.due_date !== null &&
+      isOverdue(task.due_date, today);
     facts.push(
-      `Tâche « ${task.title} » : ${task.status === "done" ? "faite" : "à faire"}, responsable ${people.get(task.assignee_person_id) ?? "inconnu"}, échéance le ${formatDay(task.due_date)}${task.status === "todo" ? `, ${lateness(late)}` : ""}.`,
+      `Tâche « ${task.title} » : ${task.status === "done" ? "faite" : "à faire"}, responsable ${people.get(task.assignee_person_id) ?? "inconnu"}, ${task.due_date ? `échéance le ${formatDay(task.due_date)}` : "sans échéance"}${task.status === "todo" ? `, ${lateness(late)}` : ""}.`,
     );
   }
   const r = release?.release;

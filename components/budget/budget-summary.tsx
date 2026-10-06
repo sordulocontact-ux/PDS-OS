@@ -17,7 +17,7 @@ export function BudgetSummary({
   return (
     <div className="flex flex-col gap-3">
       <StatTiles
-        columns={5}
+        columns={6}
         stats={[
           {
             label: t.tiles.envelope,
@@ -27,6 +27,10 @@ export function BudgetSummary({
                 : formatEuros(envelopeCents),
           },
           { label: t.tiles.planned, value: formatEuros(totals.plannedCents) },
+          {
+            label: t.tiles.proposed,
+            value: formatEuros(totals.proposedCents),
+          },
           {
             label: t.tiles.committed,
             value: formatEuros(totals.committedCents),

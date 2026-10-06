@@ -21,7 +21,11 @@ export const facts = {
     count > 1
       ? `Relier les ${count} crédits « ${name} » du projet à ce contact du Réseau`
       : `Relier ce crédit à « ${name} » du Réseau`,
+  // Said before saving: the server links every unlinked credit of that name,
+  // on every title (lib/network/link-credits.ts), not only this project's.
   linkMany: (count: number, name: string) =>
-    `Il sera relié aux ${count} crédits « ${name} » du projet.`,
+    count > 1
+      ? `Les crédits « ${name} » reliés à personne y seront reliés, dont ${count} dans ce projet.`
+      : `Les crédits « ${name} » reliés à personne y seront reliés, dont celui-ci.`,
   linkFailed: "Le crédit n'a pas pu être relié. Réessayez.",
 } as const;

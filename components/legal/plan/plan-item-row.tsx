@@ -21,14 +21,19 @@ const NONE = "none";
  */
 export function PlanItemRow({
   item,
-  after,
+  line,
   choice,
   people,
   onChange,
 }: {
   item: PlanRow;
-  // Labels of the actions it waits for.
-  after: string[];
+  // What this line says on its own, the rest being said by its group.
+  line: {
+    title: string;
+    detail: string | null;
+    why: string | null;
+    after: string[];
+  };
   choice: PlanChoice;
   people: Array<{ personId: string; name: string }>;
   onChange: (choice: PlanChoice) => void;
@@ -53,20 +58,20 @@ export function PlanItemRow({
           }
         />
         <span className="flex min-w-0 flex-col gap-0.5">
-          <span className="font-medium break-words">{item.label}</span>
-          {item.detail && (
+          <span className="font-medium break-words">{line.title}</span>
+          {line.detail && (
             <span className="text-sm break-words text-muted-foreground">
-              {item.detail}
+              {line.detail}
             </span>
           )}
-          {item.why && (
+          {line.why && (
             <span className="text-sm break-words text-muted-foreground">
-              {item.why}
+              {line.why}
             </span>
           )}
-          {after.length > 0 && (
+          {line.after.length > 0 && (
             <span className="text-sm text-muted-foreground">
-              {t.after(after.join(", "))}
+              {t.after(line.after.join(", "))}
             </span>
           )}
         </span>

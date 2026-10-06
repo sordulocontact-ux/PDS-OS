@@ -253,6 +253,15 @@ export const shell = {
       confirmation: "Confirmation",
       plan: "Plan d'action",
       tracking: "Suivi",
+      // The branches' pages, opened at any time beside the path.
+      branchesLabel: "Dossiers juridiques",
+      branches: {
+        forms: "Fiches de renseignements",
+        contracts: "Contrats",
+        splits: "Répartitions",
+        clearances: "Accords",
+        formalities: "SACEM",
+      },
     },
     workflowSteps: {
       label: "Étapes du parcours",

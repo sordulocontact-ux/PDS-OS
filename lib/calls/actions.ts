@@ -147,6 +147,8 @@ export async function createMeeting(
       console.error("[calls] invite failed:", inviteError.message);
     else await schedulePendingPushes();
   }
+  // `stay`: created from PO's panel, which shows the link itself.
+  if (form.get("stay") === "1") return { ok: true, id: data.id };
   redirect(routes.meeting(data.id));
 }
 

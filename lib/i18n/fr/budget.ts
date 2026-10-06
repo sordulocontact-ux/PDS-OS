@@ -2,10 +2,11 @@
 export const budget = {
   title: "Budget",
   description:
-    "L'enveloppe du projet et chaque dépense, de prévue à payée. Les totaux sont calculés à partir des lignes.",
+    "L'enveloppe du projet et chaque dépense, d'estimée à payée. Un montant proposé ne consomme pas l'enveloppe : accepté, il devient engagé. Les totaux sont calculés à partir des lignes.",
   tiles: {
     envelope: "Enveloppe",
-    planned: "Prévu",
+    planned: "Estimé",
+    proposed: "Proposé",
     committed: "Engagé",
     paid: "Payé",
     remaining: "Reste",
@@ -15,7 +16,8 @@ export const budget = {
   overrun: (amount: string) => `Dépassement de ${amount}`,
   envelopeHint: "L'enveloppe est celle fixée à la création du projet.",
   statuses: {
-    planned: "Prévu",
+    planned: "Estimé",
+    proposed: "Proposé",
     committed: "Engagé",
     paid: "Payé",
   },

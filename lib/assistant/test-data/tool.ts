@@ -7,6 +7,7 @@ import { z } from "zod";
 import { pageRecord } from "@/lib/assistant/page-context";
 import type { Source } from "@/lib/assistant/sources";
 import { mastersFor } from "@/lib/assistant/test-data/fake";
+import { insertTemplate } from "@/lib/assistant/test-data/fake-template";
 import {
   insertArtist,
   insertMasters,
@@ -56,9 +57,9 @@ async function pageCatalog(pagePath: string | null) {
 export function createTestDataTool(access: Access, pagePath: string | null) {
   return tool({
     description:
-      "MODE DÉVELOPPEMENT. Crée tout de suite, sans formulaire, de NOUVEAUX éléments de test fictifs : artiste, titre ou projet (musical : avec ses titres ; contenu ponctuel). Par défaut sur la page ouverte : un titre créé depuis la fiche d'un artiste lui est crédité, un projet créé depuis la fiche d'un titre porte ce titre. Noms, dates et montants tirés par l'application. Pour compléter la page ouverte elle-même, utiliser fill_page_test_data.",
+      "MODE DÉVELOPPEMENT. Crée tout de suite, sans formulaire, de NOUVEAUX éléments de test fictifs : artiste, titre, projet (musical : avec ses titres ; contenu ponctuel) ou modèle de contrat (contractTemplate : texte fictif écrit par l'application, à valider par le directeur général). Par défaut sur la page ouverte : un titre créé depuis la fiche d'un artiste lui est crédité, un projet créé depuis la fiche d'un titre porte ce titre. Noms, dates et montants tirés par l'application. Pour compléter la page ouverte elle-même, utiliser fill_page_test_data.",
     inputSchema: z.object({
-      kind: z.enum(["artist", "master", "project"]),
+      kind: z.enum(["artist", "master", "project", "contractTemplate"]),
       count: z.number().int().min(1).max(5).default(1),
       projectType: z
         .enum(CREATABLE_PROJECT_TYPES)
@@ -72,6 +73,7 @@ export function createTestDataTool(access: Access, pagePath: string | null) {
     execute: async ({ kind, count, projectType, musicFormat }) => {
       const t = fr.assistant.testData;
       const organizationId = access.organizationId;
+      if (kind === "contractTemplate") return createTemplates(access, count);
       const type = projectType ?? "music_release";
       const needsCatalog = kind !== "project" || type === "music_release";
       if (
@@ -158,4 +160,31 @@ export function createTestDataTool(access: Access, pagePath: string | null) {
       return { facts, sources };
     },
   });
+}
+
+/** Fake contract templates: fixed texts written by code (fake-template.ts). */
+async function createTemplates(access: Access, count: number) {
+  const t = fr.assistant.testData;
+  if (!access.organizationId || !can(access, "manage_legal"))
+    return { facts: [t.forbidden], sources: [] };
+  const supabase = await createClient();
+  const facts: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const made = await insertTemplate(supabase, access.organizationId, i);
+    if (!made) {
+      facts.push(t.failed(t.what.template));
+      break;
+    }
+    facts.push(t.templateCreated(made.name));
+  }
+  if (facts.length) revalidatePath(routes.contractTemplates);
+  return {
+    facts,
+    sources: [
+      {
+        label: fr.assistantRecords.templatesLink,
+        href: routes.contractTemplates,
+      },
+    ],
+  };
 }

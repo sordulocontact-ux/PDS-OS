@@ -113,7 +113,7 @@ export function parseSaidPhone(quote: string): string | null {
 
 /**
  * The audio state named in the user's words: "c'est une maquette" → demo,
- * "la mise à plat" → rough_mix, "master final" → final_master, "master" →
+ * "la mise à plat" → rough_mix, "le mix" → mix, "master final" → final_master, "master" →
  * master. Null when no state is named.
  */
 export function parseSaidAudioState(quote: string): AudioState | null {
@@ -121,6 +121,7 @@ export function parseSaidAudioState(quote: string): AudioState | null {
   if (/master(ise)? final|final master|version finale/.test(text))
     return "final_master";
   if (/mise a plat|rough mix/.test(text)) return "rough_mix";
+  if (/\bmix(e|age)?\b|\bmixage\b/.test(text)) return "mix";
   if (/maquette|\bdemo\b/.test(text)) return "demo";
   if (/\bmaster(ise|isee|ing)?\b/.test(text)) return "master";
   return null;
@@ -134,5 +135,44 @@ export function parseSaidVariant(quote: string): Variant | null {
   if (/a ?cc?apella/.test(text)) return "acapella";
   if (/remix/.test(text)) return "remix";
   if (/original/.test(text)) return "original";
+  return null;
+}
+
+/**
+ * "12 octobre 2026 à 15h30", "12/10/2026 15:30" → "2026-10-12T15:30", the
+ * meeting form's datetime-local. Null without a year or without an hour.
+ */
+export function parseSaidDateTime(quote: string): string | null {
+  const m = /^(.*?)\s+(?:a\s+)?(\d{1,2})\s*(?:h|:)\s*(\d{2})?$/.exec(
+    fold(quote),
+  );
+  if (!m) return null;
+  const date = parseSaidDate(m[1]);
+  const hour = Number(m[2]);
+  const minute = Number(m[3] ?? "0");
+  if (!date || hour > 23 || minute > 59) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date}T${pad(hour)}:${pad(minute)}`;
+}
+
+/** A web address as typed, http(s) only (the forms refuse anything else). */
+export function parseSaidUrl(quote: string): string | null {
+  const url = quote.trim();
+  if (!/^https?:\/\/\S+$/i.test(url)) return null;
+  try {
+    return new URL(url).toString();
+  } catch {
+    return null;
+  }
+}
+
+/** The state of a spend named in the user's words: "payé", "engagé", "prévu". */
+export function parseSaidBudgetStatus(
+  quote: string,
+): "planned" | "committed" | "paid" | null {
+  const text = fold(quote);
+  if (/\bpaye(e|s)?\b|regle/.test(text)) return "paid";
+  if (/engage|signe|commande/.test(text)) return "committed";
+  if (/prevu|estime|previsionnel/.test(text)) return "planned";
   return null;
 }

@@ -1,11 +1,10 @@
 "use client";
 
-import { IconLink, IconLoader } from "nucleo-sharp-essential";
-import { useState } from "react";
+import { IconLink } from "nucleo-sharp-essential";
 import { toast } from "sonner";
 
-import { IconDownload } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { fr } from "@/lib/i18n/fr";
 
 /**
@@ -20,26 +19,6 @@ export function BriefActions({
   fileName: string;
 }) {
   const t = fr.framingGuide.brief;
-  const [exporting, setExporting] = useState(false);
-
-  async function exportPdf() {
-    setExporting(true);
-    try {
-      const response = await fetch(pdfHref);
-      if (!response.ok) throw new Error(String(response.status));
-      const url = URL.createObjectURL(await response.blob());
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      toast.error(t.pdfFailed);
-    } finally {
-      setExporting(false);
-    }
-  }
-
   return (
     <>
       <Button
@@ -57,14 +36,13 @@ export function BriefActions({
         <IconLink aria-hidden />
         {t.share}
       </Button>
-      <Button size="lg" disabled={exporting} onClick={exportPdf}>
-        {exporting ? (
-          <IconLoader aria-hidden className="animate-spin" />
-        ) : (
-          <IconDownload aria-hidden />
-        )}
-        {exporting ? t.exporting : t.print}
-      </Button>
+      <PdfExportButton
+        href={pdfHref}
+        fileName={fileName}
+        label={t.print}
+        pendingLabel={t.exporting}
+        failedLabel={t.pdfFailed}
+      />
     </>
   );
 }

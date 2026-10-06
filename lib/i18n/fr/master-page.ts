@@ -157,6 +157,8 @@ export const masterPage = {
     description:
       "Auteurs, compositeurs, producteurs, ingénieurs, musiciens : tous les crédits du titre.",
     add: "Ajouter un contributeur",
+    // Who is credited: a person of the Réseau, or only a name.
+    person: "Personne",
     emptyTitle: "Aucun contributeur",
     emptyBody: "Créditez les auteurs, compositeurs, producteurs et musiciens.",
     emptyBodyReadOnly: "Les contributeurs du titre apparaîtront ici.",
@@ -226,6 +228,23 @@ export const masterPage = {
       complete: "Complet",
       incomplete: (remaining: string) => `Reste ${remaining}`,
       empty: "À répartir",
+    },
+    // The publishing split confirmed by everyone in the Juridique.
+    confirmed: {
+      title: (project: string, version: number) =>
+        `Répartition confirmée par tous dans le Juridique (projet « ${project} », version ${version}).`,
+      differs: "Les parts ci-dessous ne sont pas les mêmes.",
+      same: "Les parts ci-dessous sont les mêmes.",
+      adopt: "Reprendre ces parts",
+      adopting: "Reprise…",
+      rounded:
+        "Les parts du titre gardent deux décimales : elles sont arrondies pour faire toujours 100 %.",
+      failed: "Les parts n'ont pas pu être reprises. Réessayez.",
+    },
+    // Who a share goes to, picked (or only a name).
+    party: {
+      credited: "Crédité sur le titre",
+      artist: "Artiste du titre",
     },
     fields: {
       kind: "Type",

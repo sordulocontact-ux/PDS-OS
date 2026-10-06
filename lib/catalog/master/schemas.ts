@@ -76,12 +76,27 @@ export const contributorSchema = z.object({
   name: requiredText(200),
   role: z.enum(CONTRIBUTOR_ROLES, { error: e.required }),
   detail: optionalText(200),
+  // The person picked from the Réseau; empty for a name only.
+  contactId: optionalId,
 });
+
+// "contact:<id>" or "artist:<id>": who a share is, picked; "" for a name only.
+const partyRef = z
+  .string()
+  .optional()
+  .transform((value) => value || null)
+  .refine(
+    (value) => value === null || /^(contact|artist):[0-9a-f-]{36}$/.test(value),
+    {
+      error: e.required,
+    },
+  );
 
 export const splitSchema = z.object({
   ...base,
   kind: z.enum(SPLIT_KINDS, { error: e.required }),
   party: requiredText(200),
+  partyRef,
   role: z.enum(SPLIT_ROLES, { error: e.required }),
   // "33,33" or "33.33": at most two decimals, between 0.01 and 100.
   share: z

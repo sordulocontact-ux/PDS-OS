@@ -55,7 +55,13 @@ export function ConfirmationView({
       {c.status === "confirmed" && c.confirmedAt ? (
         <ToneCallout tone="success">
           {t.confirmed(formatDateTime(c.confirmedAt), c.confirmedBy)}{" "}
-          {t.confirmedNote}
+          {t.confirmedNote}{" "}
+          <Link
+            href={routes.projectLegalStep(projectId, "plan")}
+            className="underline underline-offset-4"
+          >
+            {t.openPlan}
+          </Link>
         </ToneCallout>
       ) : c.openQuestions > 0 ? (
         <ToneCallout tone="warning">

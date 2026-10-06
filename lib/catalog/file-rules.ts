@@ -26,8 +26,8 @@ export const FILE_CATEGORIES = {
   master: ["audio", "stems", "artwork", "contract", "other"],
   // Call recordings and design versions have their own tables and sections.
   project: ["brief", "visual", "contract", "press", "other"],
-  // The drafts exchanged, the signed copy, annexes.
-  contract: ["draft", "signed", "annex", "other"],
+  // The drafts exchanged, the signed copy, its proof (Juridique 03), annexes.
+  contract: ["draft", "signed", "evidence", "annex", "other"],
 } as const satisfies Record<FileOwnerKind, readonly string[]>;
 
 /** Categories offered by the Files tab: audio versions have their own tab. */

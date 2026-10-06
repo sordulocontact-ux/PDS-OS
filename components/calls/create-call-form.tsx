@@ -2,11 +2,10 @@
 
 import { useActionState, useState } from "react";
 
+import { CallFields, withOccurredAt } from "@/components/calls/call-fields";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createCall } from "@/lib/calls/actions";
 import { fr } from "@/lib/i18n/fr";
 
@@ -42,16 +41,7 @@ export function CreateCallForm({
     );
   }
 
-  // datetime-local has no zone: convert with the browser's zone before sending.
-  const submit = (form: FormData) => {
-    const local = String(form.get("occurredAtLocal") ?? "");
-    const date = new Date(local);
-    form.set(
-      "occurredAt",
-      Number.isNaN(date.getTime()) ? "" : date.toISOString(),
-    );
-    formAction(form);
-  };
+  const submit = (form: FormData) => formAction(withOccurredAt(form));
 
   return (
     <Card className="w-full">
@@ -61,51 +51,10 @@ export function CreateCallForm({
       <CardContent>
         <form action={submit} className="grid max-w-xl gap-5">
           <input type="hidden" name="projectId" value={projectId} />
-          <div className="grid gap-2">
-            <Label htmlFor="call-title">{t.fieldTitle}</Label>
-            <Input
-              id="call-title"
-              name="title"
-              required
-              maxLength={200}
-              autoComplete="off"
-              defaultValue={defaultTitle}
-              placeholder={t.titlePlaceholder}
-              className="h-10"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="call-date">{t.fieldDate}</Label>
-            <Input
-              id="call-date"
-              name="occurredAtLocal"
-              type="datetime-local"
-              required
-              defaultValue={defaultOccurredAt}
-              aria-describedby="call-date-hint"
-              className="h-10 w-fit"
-            />
-            <p id="call-date-hint" className="text-xs text-muted-foreground">
-              {t.dateHint}
-            </p>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="call-link">{t.fieldLink}</Label>
-            <Input
-              id="call-link"
-              name="meetingUrl"
-              type="url"
-              inputMode="url"
-              maxLength={500}
-              autoComplete="off"
-              placeholder={t.linkPlaceholder}
-              aria-describedby="call-link-hint"
-              className="h-10"
-            />
-            <p id="call-link-hint" className="text-xs text-muted-foreground">
-              {t.linkHint}
-            </p>
-          </div>
+          <CallFields
+            defaultTitle={defaultTitle}
+            defaultOccurredAt={defaultOccurredAt}
+          />
           {state && !state.ok && (
             <p role="alert" className="text-sm text-destructive">
               {fr.calls.errors[state.error]}

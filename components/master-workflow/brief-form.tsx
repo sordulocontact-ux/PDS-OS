@@ -12,21 +12,21 @@ import { BriefEngineerField } from "@/components/master-workflow/brief-engineer-
 import { OptionSelect } from "@/components/projects/option-select";
 import { FormSection } from "@/components/ui/form-section";
 import { idleFormState } from "@/lib/auth/form-state";
-import { centsToInput, formatEuros } from "@/lib/budget/types";
+import { centsToInput } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 import { saveMasterBrief } from "@/lib/master-workflow/brief-actions";
 import {
   BRIEF_DELIVERABLES,
   type BriefView,
 } from "@/lib/master-workflow/brief-types";
-import { parseEurosToCents } from "@/lib/projects/schemas";
 
 const NONE = "none";
 const rateInput = (cents: number | null) =>
   cents === null ? "" : centsToInput(cents);
 
 /**
- * The Brief Mix/Master as one form, a white card per dimension (ticket § 3).
+ * The Brief Mix/Master as one form, a white card per dimension (ticket § 3);
+ * its budget is the section after it (BriefBudget).
  * The project's owner saves it; anyone else reads the same fields, locked.
  * After a refused save, the typed values come back with each field's error.
  */
@@ -41,16 +41,6 @@ export function BriefForm({ view }: { view: BriefView }) {
   const { brief } = view;
 
   const [same, setSame] = useState(brief.masteringSameEngineer);
-  const [mixRate, setMixRate] = useState(rateInput(brief.mixRateCents));
-  const [masteringRate, setMasteringRate] = useState(
-    rateInput(brief.masteringRateCents),
-  );
-  const total = [mixRate, masteringRate]
-    .map((rate) => parseEurosToCents(rate))
-    .reduce<number | null>(
-      (sum, cents) => (typeof cents === "number" ? (sum ?? 0) + cents : sum),
-      null,
-    );
 
   useEffect(() => {
     if (state.status === "success") toast.success(t.savedToast);
@@ -75,8 +65,7 @@ export function BriefForm({ view }: { view: BriefView }) {
               inputMode="decimal"
               autoComplete="off"
               suffix="€"
-              value={mixRate}
-              onChange={(event) => setMixRate(event.target.value)}
+              defaultValue={value("mixRate", rateInput(brief.mixRateCents))}
               error={errors.mixRate}
             />
             <Field
@@ -134,8 +123,10 @@ export function BriefForm({ view }: { view: BriefView }) {
             inputMode="decimal"
             autoComplete="off"
             suffix="€"
-            value={masteringRate}
-            onChange={(event) => setMasteringRate(event.target.value)}
+            defaultValue={value(
+              "masteringRate",
+              rateInput(brief.masteringRateCents),
+            )}
             error={errors.masteringRate}
           />
         </FormSection>
@@ -182,12 +173,6 @@ export function BriefForm({ view }: { view: BriefView }) {
 
         <FormSection title={t.sections.calendar.title}>
           <BriefCalendarFields initial={brief.dates} error={errors.calendar} />
-        </FormSection>
-
-        <FormSection title={t.sections.budget.title}>
-          <p className="text-sm font-medium tabular-nums">
-            {total === null ? t.noRate : t.total(formatEuros(total))}
-          </p>
         </FormSection>
       </fieldset>
 

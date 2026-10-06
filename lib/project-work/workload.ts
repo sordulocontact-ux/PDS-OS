@@ -26,6 +26,8 @@ export type WorkItem = {
   // Validations: the other person of the circuit (validator).
   otherPersonId: string | null;
   href: string;
+  // A task of the Juridique's plan still held back by another action.
+  waitingOn?: string | null;
 };
 
 export type WorkCounts = Record<WorkStatus, number>;

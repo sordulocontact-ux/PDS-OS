@@ -16,6 +16,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { hasPendingValidation } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { loadLegalStepsDone } from "@/lib/legal/steps-done";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
@@ -52,10 +53,14 @@ export default async function ProjectLayout({
   // framing stage's state comes for free from project.stages, so only the
   // pending check needs its own (single, boolean) query.
   const framingStage = project.stages.find((s) => s.key === "framing");
-  const framingActionable =
-    canEdit &&
-    framingStage?.state === "in_progress" &&
-    !(await hasPendingValidation(framingStage.id));
+  const [framingPending, legalDone] = await Promise.all([
+    canEdit && framingStage?.state === "in_progress"
+      ? hasPendingValidation(framingStage.id)
+      : true,
+    // The checks of the Juridique steps, for those who see the section.
+    canSeeLegal && project.stages.length > 0 ? loadLegalStepsDone(project) : [],
+  ]);
+  const framingActionable = framingStage !== undefined && !framingPending;
 
   return (
     <div className="flex flex-1">
@@ -125,7 +130,9 @@ export default async function ProjectLayout({
               soon={fr.masterWorkflow.steps.soon}
               steps={masterSteps(project.id)}
             />
-            {canSeeLegal && <LegalSteps projectId={project.id} />}
+            {canSeeLegal && (
+              <LegalSteps projectId={project.id} done={legalDone} />
+            )}
           </>
         )}
 

@@ -14,6 +14,7 @@ import {
   type SplitKind,
 } from "@/lib/catalog/master/rules";
 import { fr } from "@/lib/i18n/fr";
+import type { ConfirmedSplit } from "@/lib/legal/splits/title-split";
 import { splitStatusTone } from "@/lib/ui/state-tones";
 
 import {
@@ -21,6 +22,7 @@ import {
   DeleteItemDialog,
   useItemDialogs,
 } from "./item-dialogs";
+import { ConfirmedSplitNote } from "./confirmed-split-note";
 import { SplitForm } from "./split-form";
 import { SplitsTable } from "./splits-table";
 
@@ -30,10 +32,13 @@ export function SplitsSection({
   masterId,
   splits,
   canEdit,
+  confirmed = null,
 }: {
   masterId: string;
   splits: MasterSplit[];
   canEdit: boolean;
+  // The Juridique's confirmed publishing split, when there is one.
+  confirmed?: ConfirmedSplit | null;
 }) {
   const t = fr.masterPage.splits;
   const dialogs = useItemDialogs<MasterSplit>();
@@ -75,6 +80,14 @@ export function SplitsSection({
               </div>
             }
           >
+            {kind === "publishing" && confirmed && (
+              <ConfirmedSplitNote
+                masterId={masterId}
+                confirmed={confirmed}
+                current={rows}
+                canEdit={canEdit}
+              />
+            )}
             {rows.length === 0 ? (
               <EmptyNote>{t.empty}</EmptyNote>
             ) : (

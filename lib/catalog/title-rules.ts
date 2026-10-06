@@ -8,6 +8,8 @@ import { fr } from "@/lib/i18n/fr";
 export const AUDIO_STATES = [
   "demo",
   "rough_mix",
+  // A version of the mix (Master workflow: V1, V2… sent back by the engineer).
+  "mix",
   "master",
   "final_master",
 ] as const;

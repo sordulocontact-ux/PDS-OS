@@ -88,6 +88,8 @@ export type MasterContributor = {
   name: string;
   role: ContributorRole;
   detail: string | null;
+  // Its contact of the Réseau, once linked.
+  contactId: string | null;
 };
 
 export type MasterSplit = {
@@ -97,6 +99,10 @@ export type MasterSplit = {
   role: SplitRole;
   // In percent, two decimals at most.
   share: number;
+  // Who it is, when known: a contact of the Réseau or an artist of the
+  // catalog (at most one); null for a name only.
+  contactId?: string | null;
+  artistId?: string | null;
 };
 
 export type MasterDeclaration = {

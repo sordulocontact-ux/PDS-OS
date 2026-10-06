@@ -27,7 +27,13 @@ export const LEGAL_BUILT_STEPS: readonly LegalStepKey[] = [
 
 // Pages of a branch (tickets Juridique 02 to 06), reached from the plan
 // and the Suivi, not steps of the path.
-export const LEGAL_BRANCH_PAGES = ["forms"] as const;
+export const LEGAL_BRANCH_PAGES = [
+  "forms",
+  "contracts",
+  "splits",
+  "clearances",
+  "formalities",
+] as const;
 export type LegalBranchPage = (typeof LEGAL_BRANCH_PAGES)[number];
 
 /** The built step or branch page a URL's segments open: none = the first

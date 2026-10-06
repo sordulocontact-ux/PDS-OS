@@ -210,12 +210,19 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
       occursOn: m.occurs_on,
       kind: m.kind,
     })),
-    tasks: (tasksRes.data ?? []).map((t) => ({
-      id: t.id,
-      title: t.title,
-      dueDate: t.due_date,
-      done: t.status === "done",
-    })),
+    // On the timeline: a task without a date (the Juridique's) has no place.
+    tasks: (tasksRes.data ?? []).flatMap((t) =>
+      t.due_date
+        ? [
+            {
+              id: t.id,
+              title: t.title,
+              dueDate: t.due_date,
+              done: t.status === "done",
+            },
+          ]
+        : [],
+    ),
     calls: (callsRes.data ?? []).map((c) => ({
       id: c.id,
       title: c.title,

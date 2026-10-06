@@ -9,6 +9,8 @@ import {
   sortWork,
   type WorkItem,
 } from "@/lib/project-work/workload";
+import { legalTaskInfo } from "@/lib/legal/tasks";
+import { questionTaskHref } from "@/lib/master-workflow/question-types";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -52,7 +54,9 @@ export async function loadProjectWork(
     await Promise.all([
       supabase
         .from("tasks")
-        .select("id, title, assignee_person_id, due_date, status, done_at")
+        .select(
+          "id, title, assignee_person_id, due_date, status, done_at, legal_plan_item_id, master_question_id",
+        )
         .eq("project_id", projectId),
       supabase
         .from("strategy_deliverables")
@@ -77,19 +81,33 @@ export async function loadProjectWork(
 
   const items: WorkItem[] = [];
   const base = { doneAt: null, otherPersonId: null };
+  const legal = await legalTaskInfo(supabase, tasks.data ?? []);
 
-  for (const t of tasks.data ?? [])
+  for (const t of tasks.data ?? []) {
+    const fromPlan = legal.get(t.id);
     items.push({
       ...base,
       id: t.id,
       kind: "task",
       title: t.title,
       personId: t.assignee_person_id,
-      status: t.status === "done" ? "done" : dueStatus(t.due_date, today),
+      status:
+        t.status === "done"
+          ? "done"
+          : fromPlan?.waitingOn
+            ? "waiting"
+            : dueStatus(t.due_date, today),
       dueDate: t.due_date,
       doneAt: t.done_at,
-      href: routes.projectFraming(projectId),
+      // A task leads where it is done.
+      href:
+        fromPlan?.href ??
+        (t.master_question_id
+          ? questionTaskHref(projectId)
+          : routes.projectFraming(projectId)),
+      waitingOn: fromPlan?.waitingOn ?? null,
     });
+  }
 
   const strategy = routes.projectStrategy(projectId);
   for (const d of deliverables.data ?? []) {

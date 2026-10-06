@@ -74,7 +74,8 @@ export async function saveContributor(
 ): Promise<MasterFormState> {
   const parsed = await parseMasterForm(contributorSchema, formData);
   if (!parsed.ok) return parsed.state;
-  const { masterId, itemId, ...row } = parsed.data;
+  const { masterId, itemId, contactId, ...fields } = parsed.data;
+  const row = { ...fields, contact_id: contactId };
   const supabase = await createClient();
   const { error } = itemId
     ? await supabase

@@ -41,10 +41,13 @@ export const assistant = {
       artist: "de l'artiste de test",
       master: "du titre de test",
       project: "du projet de test",
+      template: "du modèle de contrat de test",
     },
     artistCreated: (name: string) => `Artiste de test « ${name} » créé.`,
     masterCreated: (title: string, artist: string) =>
       `Titre de test « ${title} » créé, crédité à ${artist}.`,
+    templateCreated: (name: string) =>
+      `Modèle de contrat de test « ${name} » créé en brouillon (texte fictif écrit par l'application, sans valeur juridique) : le directeur général peut le valider pour essayer « Générer le contrat ».`,
     projectCreated: (title: string, kind: string, manager: string) =>
       `Projet de test « ${title} » créé (${kind}), transmis à ${manager}.`,
     // Filling the open page (fill_page_test_data).
@@ -294,6 +297,7 @@ export const assistant = {
     tasksEmpty: "Aucune tâche à faire.",
     overdue: "En retard",
     due: (date: string) => `Échéance ${date}`,
+    noDue: "Sans échéance",
     validations: "Validations qui m'attendent",
     validationsEmpty: "Rien à valider.",
     toValidate: "À valider",

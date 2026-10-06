@@ -45,6 +45,10 @@ export function ProcessSteps({
                   {step.done ? <IconCheck className="size-3.5" /> : index + 1}
                 </span>
               )}
+              {/* Without a number, the check stands alone before the label. */}
+              {!numbered && step.done && (
+                <IconCheck aria-hidden className="size-3.5 shrink-0" />
+              )}
               <span className="text-body-md">{step.label}</span>
               {step.done && (
                 <span className="sr-only">, {fr.shell.processSteps.done}</span>

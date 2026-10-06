@@ -18,7 +18,13 @@ export type MasterStepKey = (typeof MASTER_STEP_KEYS)[number];
 
 // Steps with a page so far; the others show greyed, not linked, and their
 // URL answers 404 (one lot at a time).
-export const MASTER_BUILT_STEPS: readonly MasterStepKey[] = ["state", "brief"];
+export const MASTER_BUILT_STEPS: readonly MasterStepKey[] = [
+  "state",
+  "brief",
+  "mix",
+  "mastering",
+  "final",
+];
 
 export const masterStepHref = (projectId: string, key: MasterStepKey) =>
   key === MASTER_STEP_KEYS[0]

@@ -262,6 +262,7 @@ export const catalog = {
   audioStates: {
     demo: "Maquette",
     rough_mix: "Mise à plat",
+    mix: "Mix",
     master: "Master",
     final_master: "Master final",
   },
@@ -305,6 +306,7 @@ export const catalog = {
       withoutDemos: "Hors maquettes",
       demo: "Maquettes",
       rough_mix: "Mises à plat",
+      mix: "Mix",
       master: "Masters",
       final_master: "Masters finaux",
       all: "Tous",
@@ -313,6 +315,7 @@ export const catalog = {
       withoutDemos: "Aucun titre au-delà de la maquette",
       demo: "Aucune maquette",
       rough_mix: "Aucune mise à plat",
+      mix: "Aucun mix",
       master: "Aucun master",
       final_master: "Aucun master final",
     },

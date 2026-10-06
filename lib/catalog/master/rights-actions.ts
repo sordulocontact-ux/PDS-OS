@@ -23,7 +23,13 @@ export async function saveSplit(
 ): Promise<MasterFormState> {
   const parsed = await parseMasterForm(splitSchema, formData);
   if (!parsed.ok) return parsed.state;
-  const { masterId, itemId, ...row } = parsed.data;
+  const { masterId, itemId, partyRef, ...fields } = parsed.data;
+  const [refKind, refId] = partyRef ? partyRef.split(":") : [null, null];
+  const row = {
+    ...fields,
+    contact_id: refKind === "contact" ? refId : null,
+    artist_id: refKind === "artist" ? refId : null,
+  };
   const supabase = await createClient();
   const { error } = itemId
     ? await supabase

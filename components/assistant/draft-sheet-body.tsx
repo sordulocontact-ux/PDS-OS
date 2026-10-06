@@ -13,6 +13,15 @@ import {
   type SavedLink,
 } from "@/components/assistant/draft-forms";
 import {
+  BudgetLineDraftForm,
+  ContractDraftForm,
+  ContractTemplateDraftForm,
+  MeetingDraftForm,
+  NetworkContactDraftForm,
+  TaskDraftForm,
+} from "@/components/assistant/record-draft-forms";
+import { TitleItemDraftForm } from "@/components/assistant/title-item-draft-form";
+import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
@@ -31,7 +40,7 @@ export default function DraftSheetBody({
   onSaved: (saved: SavedLink) => void;
   onCancel: () => void;
 }) {
-  const t = fr.assistant.drafts.sheet;
+  const t = { ...fr.assistant.drafts.sheet, ...fr.assistantRecords.sheet };
   const { draft } = proposal;
   const [description, setDescription] = useState<string>(t[draft.kind]);
 
@@ -78,7 +87,43 @@ export default function DraftSheetBody({
             onCancel={onCancel}
           />
         )}
+        <RecordDraftBody
+          proposal={proposal}
+          onSaved={onSaved}
+          onCancel={onCancel}
+        />
       </div>
     </>
   );
+}
+
+// The record drafts (lib/assistant/draft-records.ts), one real form each.
+function RecordDraftBody({
+  proposal: { draft },
+  onSaved,
+  onCancel,
+}: {
+  proposal: DraftProposal;
+  onSaved: (saved: SavedLink) => void;
+  onCancel: () => void;
+}) {
+  const props = { onSaved, onCancel };
+  switch (draft.kind) {
+    case "contractTemplate":
+      return <ContractTemplateDraftForm draft={draft} {...props} />;
+    case "contract":
+      return <ContractDraftForm draft={draft} {...props} />;
+    case "networkContact":
+      return <NetworkContactDraftForm draft={draft} {...props} />;
+    case "task":
+      return <TaskDraftForm draft={draft} {...props} />;
+    case "meeting":
+      return <MeetingDraftForm draft={draft} {...props} />;
+    case "budgetLine":
+      return <BudgetLineDraftForm draft={draft} {...props} />;
+    case "titleItem":
+      return <TitleItemDraftForm draft={draft} {...props} />;
+    default:
+      return null;
+  }
 }

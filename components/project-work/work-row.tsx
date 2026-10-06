@@ -4,7 +4,7 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { CardRow } from "@/components/ui/list-card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { formatDay } from "@/lib/assistant/facts";
+import { formatShortDate } from "@/lib/release/format";
 import { setTaskDone } from "@/lib/framing/actions/points-tasks";
 import { fr } from "@/lib/i18n/fr";
 import type { WorkItem } from "@/lib/project-work/workload";
@@ -12,20 +12,25 @@ import { workStatusTone } from "@/lib/ui/state-tones";
 
 const t = fr.projectWork.work;
 
-// Secondary line: what it is, then when (or who the validation waits on).
+// Secondary line: what it waits for, else when (or who the validation waits
+// on). A task needs no « Tâche » label: its checkbox says it.
 function subOf(item: WorkItem, names: Record<string, string>): string {
+  if (item.waitingOn && item.status === "waiting")
+    return t.waitingOn(item.waitingOn);
   const other = item.otherPersonId ? names[item.otherPersonId] : undefined;
   const when =
     item.kind === "task" && item.doneAt
-      ? t.doneOn(formatDay(item.doneAt))
+      ? t.doneOn(formatShortDate(item.doneAt))
       : item.dueDate
-        ? t.due(formatDay(item.dueDate))
+        ? t.due(formatShortDate(item.dueDate))
         : item.kind === "task" || item.kind === "deliverable"
           ? t.noDueDate
           : other && item.kind === "awaitValidation"
             ? t.validator(other)
             : null;
-  return [t.kinds[item.kind], when].filter(Boolean).join(" · ");
+  return [item.kind === "task" ? null : t.kinds[item.kind], when]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 /** One work item of a person; a task gets its "done" checkbox. */
