@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const who = z.union([
   z.object({ memberId: id }),
+  z.object({ contactId: id }),
   z.object({ name: text(120) }),
 ]);
 
@@ -39,6 +40,21 @@ export async function assignRole(
     .neq("review_status", "rejected")
     .maybeSingle();
 
+  // An engineer of the Réseau: the name is read from the contact, never
+  // taken from the client (docs/ARCHITECTURE.md § 8 septies).
+  let contactId: string | null = null;
+  if ("contactId" in p.data.person) {
+    const { data: contact } = await supabase
+      .from("network_contacts")
+      .select("id, name")
+      .eq("id", p.data.person.contactId)
+      .is("archived_at", null)
+      .maybeSingle();
+    if (!contact) return fail("not_found");
+    contactId = contact.id;
+    p.data.person = { name: contact.name };
+  }
+
   if ("name" in p.data.person) {
     const { error } = holder
       ? await supabase
@@ -46,6 +62,7 @@ export async function assignRole(
           .update({
             display_name: p.data.person.name,
             person_id: null,
+            contact_id: contactId,
             review_status: "confirmed",
           })
           .eq("id", holder.id)
@@ -55,6 +72,7 @@ export async function assignRole(
           display_name: p.data.person.name,
           role,
           role_key: p.data.roleKey,
+          contact_id: contactId,
         });
     return done(projectId, error);
   }

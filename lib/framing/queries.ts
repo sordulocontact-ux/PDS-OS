@@ -28,6 +28,7 @@ type OpenPoint = Tables["open_points"]["Row"];
 type Task = Tables["tasks"]["Row"];
 type Constraint = Tables["framing_constraints"]["Row"];
 type ReportItem = Tables["report_items"]["Row"];
+type FieldRow = Database["public"]["Views"]["current_field_values"]["Row"];
 
 /** Framing opens with a call report or "Commencer en amont"; the rule lives in SQL (framing_is_open). */
 export async function isFramingOpen(projectId: string): Promise<boolean> {
@@ -44,6 +45,9 @@ export type FramingData = {
   stage: { id: string; state: string } | null;
   pendingValidation: PendingValidation | null;
   fields: BriefFieldState[];
+  // Every current Brief row (questions of the Cadrage intelligent, « rien à
+  // signaler » markers, suggestions), with where it comes from.
+  briefRows: Array<FieldRow & { provenance: Provenance | null }>;
   needs: Array<Need & { provenance: Provenance | null }>;
   team: Array<TeamMember & { provenance: Provenance | null }>;
   constraints: Array<Constraint & { provenance: Provenance | null }>;
@@ -184,6 +188,10 @@ export async function loadFraming(
     stage,
     pendingValidation,
     objectiveSuggestions: suggestionsOf(fieldRows),
+    briefRows: fieldRows.map((row) => ({
+      ...row,
+      provenance: provenanceOf(row),
+    })),
     fields: BRIEF_TEXT_FIELDS.map((key) => {
       const row = fieldRows.find((r) => r.field_key === key);
       return toBriefField(

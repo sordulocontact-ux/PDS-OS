@@ -17,6 +17,7 @@ import { facts } from "./facts";
 import { feedback } from "./feedback";
 import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
+import { framingIntel } from "./framing-intel";
 import { labo } from "./labo";
 import { legal } from "./legal";
 import { legalClearance } from "./legal-clearance";
@@ -49,6 +50,7 @@ export const fr = {
   catalog,
   framing,
   framingGuide,
+  framingIntel,
   strategy,
   design,
   release,

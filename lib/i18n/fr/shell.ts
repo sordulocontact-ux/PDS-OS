@@ -228,6 +228,7 @@ export const shell = {
       },
       overview: "Vue d'ensemble",
       workflow: "Workflow",
+      plan: "Plan du projet",
       master: "Master",
       legal: "Juridique",
       activations: "Activations",
@@ -267,7 +268,7 @@ export const shell = {
       label: "Étapes du parcours",
       // Why a step with a page cannot be opened yet.
       locked: {
-        strategy: "Disponible une fois le Cadrage validé",
+        strategy: "Se lance depuis le Plan du Projet, une fois le Brief validé",
         conception: "Disponible une fois la Stratégie validée",
       } as Record<string, string>,
       framing: "Cadrage",

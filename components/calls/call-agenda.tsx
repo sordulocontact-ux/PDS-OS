@@ -57,14 +57,20 @@ export function CallAgenda({
         )}
         <ol className="grid list-decimal gap-2 pl-5 text-sm">
           {agenda.map((item, index) => (
-            <li
-              key={index}
-              className="flex items-baseline justify-between gap-3"
-            >
-              <span>{item.topic}</span>
-              <span className="shrink-0 text-xs text-muted-foreground">
-                {t.duration(item.minutes)}
+            <li key={index}>
+              <span className="flex items-baseline justify-between gap-3">
+                <span>{item.topic}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {t.duration(item.minutes)}
+                </span>
               </span>
+              {item.questions && item.questions.length > 0 && (
+                <ul className="mt-1 grid list-disc gap-0.5 pl-5 text-xs text-muted-foreground">
+                  {item.questions.map((question) => (
+                    <li key={question}>{question}</li>
+                  ))}
+                </ul>
+              )}
             </li>
           ))}
         </ol>

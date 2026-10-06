@@ -109,6 +109,8 @@ insert into ids select 'stage', s.id from public.project_stages s
   join public.stage_definitions d on d.id = s.stage_definition_id
  where s.project_id = (select id from ids where name = 'project') and d.key = 'framing';
 select public.start_stage((select id from ids where name = 'stage'));
+-- A framing validation is the validation of a Brief version (…20261006000101).
+select public.create_framing_brief((select id from ids where name = 'project'), '{}'::jsonb);
 select public.request_validation((select id from ids where name = 'stage'), 'Brief prêt');
 insert into public.tasks (organization_id, project_id, title, assignee_person_id, due_date)
 values ((select id from ids where name = 'org'), (select id from ids where name = 'project'),

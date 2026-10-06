@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatDateTime, isUpcoming } from "@/lib/calls/format";
+import { fr } from "@/lib/i18n/fr";
 import type {
   CallDetail,
   StoredReport,
@@ -95,6 +96,33 @@ export function CallWorkspace({
         )}
       </header>
 
+      {call.framing && (
+        <div className="grid gap-2 rounded-lg border border-border p-4 text-sm">
+          <h3 className="font-medium">{fr.framingIntel.call.detailsTitle}</h3>
+          <p>
+            <span className="text-muted-foreground">
+              {fr.framingIntel.call.detailsPurpose} :{" "}
+            </span>
+            {call.framing.purpose}
+          </p>
+          {call.framing.participants.length > 0 && (
+            <p>
+              <span className="text-muted-foreground">
+                {fr.framingIntel.call.participants} :{" "}
+              </span>
+              {call.framing.participants.join(", ")}
+            </p>
+          )}
+          {call.framing.documents.length > 0 && (
+            <p>
+              <span className="text-muted-foreground">
+                {fr.framingIntel.call.documents} :{" "}
+              </span>
+              {call.framing.documents.map((d) => d.name).join(", ")}
+            </p>
+          )}
+        </div>
+      )}
       {step === "record" && call.agenda && (
         <CallAgenda
           callId={call.id}

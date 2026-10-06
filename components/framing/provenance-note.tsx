@@ -16,7 +16,7 @@ export function ProvenanceNote({
   provenance: Provenance | null;
 }) {
   const t = fr.framing.provenance;
-  if (!provenance || provenance.kind === "voice") return null;
+  if (!provenance || provenance.kind !== "call") return null;
   if (provenance.located !== "missing") return null;
 
   return (

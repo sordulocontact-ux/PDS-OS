@@ -88,6 +88,8 @@ select ok(exists(select 1 from public.list_validators((select id from ids where 
                  where person_id = (select id from ids where name = 'other_person')),
           'only the director is offered as validator');
 select lives_ok($$ select public.start_stage((select id from ids where name = 'stage')) $$, 'the owner starts the framing');
+-- A framing validation is the validation of a Brief version (…20261006000101).
+select public.create_framing_brief((select id from ids where name = 'project'), '{}'::jsonb);
 select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'), 'Brief prêt') $$,
                 'the owner asks for a validation: the sole director is resolved automatically');
 select is((select validator_person_id from public.validations

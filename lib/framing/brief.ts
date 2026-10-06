@@ -53,6 +53,16 @@ export type Provenance =
       kind: "voice";
       quote: string;
       author: string | null;
+    }
+  | {
+      /**
+       * Taken from what the project already records (project sheet, Budget,
+       * credits…) or read by PO in the initial context: `label` says where,
+       * `quote` the words when there are any.
+       */
+      kind: "record";
+      label: string;
+      quote: string | null;
     };
 
 export type FieldState<K extends string = string> = {

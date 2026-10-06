@@ -337,3 +337,21 @@ export const contractStateTone: Record<string, Tone> = {
   expired: "neutral",
   terminated: "neutral",
 };
+
+/** A version of the Brief de cadrage (framing_briefs.state): waiting for the
+ * validator, validated, sent back for a change, replaced by a newer one. */
+export const briefVersionTone: Record<string, Tone> = {
+  pending: "warning",
+  sent: "warning",
+  approved: "success",
+  changes_requested: "danger",
+  superseded: "neutral",
+};
+
+/** A workflow of the Plan du Projet: started, waiting for its go, or
+ * following its own stage (Conception, Livraison). */
+export const planWorkflowTone: Record<string, Tone> = {
+  launched: "info",
+  waiting: "neutral",
+  follows: "neutral",
+};

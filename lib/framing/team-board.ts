@@ -24,11 +24,13 @@ const isRoleKey = (value: string | null): value is TeamRoleKey =>
 export function teamBoard(
   team: FramingData["team"],
   needs: FramingData["needs"],
+  context: { music?: boolean } = {},
 ): { roles: RoleCard[]; others: TeamRow[] } {
   const wanted = new Set<TeamRoleKey>(
     rolesForNeeds(
       needs.map((n) => n.label),
       fr.framing.needs.presets,
+      context,
     ),
   );
   for (const member of team)

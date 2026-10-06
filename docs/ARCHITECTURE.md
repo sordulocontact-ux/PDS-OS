@@ -56,6 +56,8 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
 | `…260927012001_catalog_file_library` | Bibliothèque de fichiers (retour n°6, § 2) : `artist_files.description` et `master_files.description` (précision libre, 200 car., `null` si vide) ; `manage_catalog` modifie nom, catégorie et précision (droits colonne, policies `*_update_catalog`), jamais un fichier audio de titre (`category <> 'audio'` avant et après) ; événement `file_updated` (`previous_category` si reclassé, privé si contrat avant **ou** après) ; lecture des objets `master-files` passée en positif comme `artist-files` (même faille que l'audit du 27/09). Tests : `file-library.test.sql`. |
+| `…20261006000101_framing_intelligent` | Cadrage intelligent (§ 6) : `source_label` (field_values, needs, framing_constraints, project_team_members, vue `current_field_values` recréée), type de contrainte `human`, `project_team_members.contact_id` (Réseau), `framing_deadlines`, `report_items.brief_key` (genre `brief_fact`), `framing_briefs` (versions, `create_framing_brief`, `send_framing_brief`, `decide_framing_brief`, trigger `framing_brief_follow_validation`), `request_validation` refuse un Cadrage sans version (`brief_required`), `framing_key_dimension` / `framing_dimension_editable` + politiques restrictives par dimension, `framing_calls` + `create_framing_call`. Tests : `framing-intelligent.test.sql`. |
+| `…20261006000201_project_plan` | Plan du Projet (§ 6 ter) : `project_plans`, `project_plan_items`, `workflow_is_launched`, `launch_project_plan`, `launch_plan_workflow` ; `start_stage` refuse la Stratégie sans plan (`plan_required`). |
 | `…260927013001_project_files` | Documents d'un projet (§ 8 ter) : `project_files` (catégories `brief` / `visual` / `contract` / `press` / `other`, `description`), bucket privé `project-files` (`<org>/<projet>/<uuid>[.<ext>]`) ; lecture `can_see_project`, contrats via `can_read_project_contracts` (responsable ou `view_all_projects`) ; insertion, modification (nom, catégorie, précision) et suppression par `is_project_owner` ; objets lus en positif (responsable, ou ligne visible). Tests : `project-files.test.sql`. |
 | `…260927011001_project_types_and_formats`, `…011101_pds_mic_format` | Types et formats de projet (retour n°2, `docs/CONTEXTE-PROJET.md` § 12, « Types et formats ») : `partnership` retiré (devenu `content`), `event` refusé par `create_project` ; `projects.music_format` (single, ep, album, mixtape, compilation, other ; musical seulement), `projects.content_format_id` → `content_formats` (formats PDS réutilisables, lus par tout membre, créés par `create_projects`, nom unique par organisation ; « PDS Mic » inséré pour `pds`), `artist_id` d'un contenu ; `framing_notes` renommé `initial_context`. `check_project_shape` (format obligatoire, un seul master pour un single), appelé par `create_project` et `update_project`, qui écartent ce que le type n'utilise pas. Tests : `project-types.test.sql`. |
 
@@ -461,7 +463,8 @@ s'afficher sans chargement.
 - Page d'un call, **une étape à la fois** : enregistrer (fichier en repli, replié) →
   traitement **automatique** dès l'envoi (`CallProcessing` : transcription puis compte
   rendu, suivi `ProcessingSteps`, « Réessayer » seulement en cas d'échec, relecture de
-  l'état toutes les 5 s si un traitement tourne ailleurs) → redirection vers le Cadrage.
+  l'état toutes les 5 s si un traitement tourne ailleurs) → redirection vers la relecture
+  de l'échange dans le Cadrage (`?step=review&call=…`, § 6).
   Consentement **accordé par contrat** (défaut `granted`, `…260926002301`) : plus d'écran.
 - **Enregistreur dans l'app** (`components/calls/call-recorder.tsx`, `use-recorder.ts`,
   `recorder-media.ts`, `recording-live.tsx`, `recording-review.tsx`) :
@@ -527,65 +530,97 @@ s'afficher sans chargement.
 
 ---
 
-## 6. Cadrage (étape 5)
+## 6. Cadrage intelligent (étape 1)
 
-`app/(app)/app/projects/[projectId]/framing`, `lib/framing/*`, `components/framing/*`.
-**Le cadrage part d'un call, ou du Brief en amont** : tant que `framing_is_open` est faux
-(aucun compte rendu, aucun Brief entamé ; lu par `isFramingOpen`), la page et la vue
-d'ensemble affichent `FramingStart` (deux options). « Préparer un call de cadrage » crée le
-call avec un ordre du jour fixe (les cinq rubriques du Brief, temps approximatif par
-rubrique — `lib/calls/first-call-agenda.ts`, affiché sur la fiche du call par `CallAgenda`
-tant qu'il n'est pas enregistré). « Commencer en amont » ouvre le Brief à la main, sans
-pré-remplissage (`start_framing_without_call`, fonction SQL security definer : la policy
-`field_values_framing_open` réclame `framing_is_open` déjà vrai pour la toute première
-ligne ; la fonction casse cette circularité en vérifiant `is_project_owner` elle-même). Un call brouillon daté dans le futur est affiché « À venir »
-(`isUpcoming`, calculé par le code) : c'est la planification d'un échange.
-Compte rendu versé **automatiquement** (plus de panneau d'import sur le Cadrage ; la
-Stratégie garde le sien) → propositions « proposé · à confirmer » (Brief, besoins, cadre,
-équipe, points ouverts), actions proposées → tâches (responsable + échéance choisis par une
-personne), circuit de validation.
+`app/(app)/app/projects/[projectId]/framing`, `lib/framing/*`, `components/framing/intel/*`,
+migration `…20261006000101_framing_intelligent.sql`, tests
+`supabase/tests/framing-intelligent.test.sql`. D'après le ticket « Cadrage intelligent d'un
+projet » du 30/09/2026. Décisions du 06/10/2026 (`docs/CONTEXTE-PROJET.md` § 2) : les besoins
+restent dans 01 Objectif, la temporalité a de vraies dates confirmées, Stratégie / Master /
+Juridique attendent le Plan du Projet, le bouton final s'appelle « Lancer le plan ».
 
-**Relecture guidée** (27/09/2026, d'après les maquettes de Sacha) : la page est un parcours
-d'une question à la fois, l'écran dans l'URL (`?step=overview|objective|timing|needs|frame|team|summary`,
-`lib/framing/guide.ts`), menu des 5 points à gauche (`FramingStepNav`, statut et résumé
-d'une ligne **calculés par le code**), un écran par point (`components/framing/guide/`) :
+**Six dimensions** (`lib/framing/dimensions.ts`, même liste en SQL dans
+`framing_key_dimension`) : 01 Objectif (résultat, critère de réussite, priorité principale,
+ce qu'il faut produire = besoins & activations), 02 Temporalité (date cible, échéances
+imposées `framing_deadlines`, contraintes calendaires, prérequis), 03 Budget & contraintes
+(enveloppe, engagements, contraintes financières / créatives / humaines / opérationnelles),
+04 Équipe (intervenants = rôles + équipe créative, décideurs, ressources manquantes ; rôles
+Mixage et Mastering tenus par un contact du Réseau sur un projet musical), 05 État de départ
+(état réel, éléments existants, décisions prises, travail commencé), 06 Cadre juridique
+(parties, accords, contrats et droits à prévoir, éléments sécurisés, blocages connus = lignes
+`framing_constraints` de type `rights`). Chaque question a un genre (texte, date, montant,
+liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none": true}`).
 
-- **Objectif** : on clique une formulation (celle du call, ou une de PO via « Proposer des
-  formulations », citée mot pour mot et vérifiée, `chooseObjective` relit le texte en base,
-  jamais celui du client) ou « Autre intention » en saisie libre.
-- **Temporalité** : texte tel qu'il a été dit (« sortie visée le 24 octobre »), jamais
-  converti en date ; encart « hypothèse à confirmer » avec la source. Pas de « Voir les
-  impacts » : le planning ne se construit qu'après validation.
-- **Besoins & activations** : pastilles (`FilterChip` soft) ; un clic ne change que la
-  sélection à l'écran, rien n'est écrit avant « Confirmer cette sélection », qui ajoute,
-  rejette et confirme en une fois (`saveNeedsSelection`) ;
-  activation = famille `promotion_distribution`, besoin = le reste. L'état identifié /
-  engagé n'est plus manipulé ici (l'engagement se fait dans la Stratégie, par les leviers).
-- **Cadre & contraintes** : lignes de `framing_constraints` (type budget / production /
-  artistique / droits / autre), une modale par ligne ; le compte rendu les importe en
-  « autre » (le modèle ne type pas), la personne choisit le type.
-- **Équipe projet** : une carte par rôle fixe (`lib/framing/team-roles.ts`, rôles
-  débloqués par les besoins, `teamBoard`), pleine ou « À trouver » ; « Attribuer » en un
-  clic à une personne déjà dans l'équipe ou à un nouveau nom (`role_key`, au plus une ligne
-  par rôle).
-- « Confirmer la sélection / le cadre / l'équipe » confirme d'un coup les lignes encore
-  proposées de l'écran (`confirmProposed`) puis passe au point suivant.
-- **Récapitulatif** : aperçu du Brief (`briefFacts`, faits écrits par le code), « Reste à
-  faire » (points à confirmer, rôles à pourvoir, points ouverts), demande de validation
-  (responsable), « Valider et clôturer » (valideur seul, `decide_validation`), points
-  ouverts et tâches.
-- **Brief partageable** `/framing/brief` : lecture seule, « Copier le lien » (ouvert aux
-  seuls membres qui voient le projet — pas de lien public à jeton en V1) et « Exporter en
-  PDF » qui **télécharge un fichier** (jamais la fenêtre d'impression) : route
-  `GET /api/projects/[projectId]/framing-brief`, données lues avec la session (RLS), HTML
-  autonome et échappé (`lib/framing/brief-pdf.ts`) imprimé par Playwright.
-
-**Export PDF** (`lib/pdf/render.ts`, seul point d'entrée) : `playwright-core` reçoit un HTML
-complet (`setContent`), le navigateur ne visite jamais l'app, aucune session ne lui est
-confiée. Sur Vercel, Chromium de `@sparticuz/chromium` ; en local, le Chrome installé
-(`channel: "chrome"`, il doit donc être présent sur la machine). Les deux paquets sont en
-`serverExternalPackages` et le dossier `bin` de Chromium est ajouté au traçage de la route
-(`next.config.ts`) ; `maxDuration` 60 s. Environ 2 s par PDF, plus au premier lancement.
+- **Analyse préalable** (`lib/framing/knowledge.ts` + `lib/framing/assess.ts`) : en un
+  aller-retour, ce que le projet sait (fiche, équipe, titres et état audio, crédits, contrats,
+  Budget, fichiers, décisions des calls, travail, Brief Mix/Master, Cadrage juridique). Le
+  **code** classe chaque question connu / à confirmer / manquant : une réponse confirmée est
+  connue ; une proposition (call, dictée, contexte initial) ou une valeur déjà enregistrée
+  ailleurs (échéance et budget de la fiche, crédits, contrats…, `source_label`) est à
+  confirmer ; sinon manquante. « Confirmer » relit la valeur côté serveur, jamais celle du
+  client. « Écarter » / « Passer » écrit une ligne rejetée : la valeur n'est plus proposée.
+- **Entrée** (`FramingEntry`, Vue d'ensemble et Cadrage) : « ✓ Prise en charge acceptée »,
+  l'analyse par dimension, « Commencer le cadrage » (`startFramingWithPo` : ouvre le Cadrage
+  sans call, démarre l'étape, PO lit **une fois** le contexte initial, marqueur
+  `context_analysis`) et « Préparer un échange ». « Reprendre » n'apparaît qu'une fois
+  l'étape démarrée et le contexte lu (`framingStarted`).
+- **Parcours direct** (`?step=<dimension>&q=<question>`) : une question à la fois, la
+  suivante calculée par le code (`nextAfter`), la question adaptée (« La date cible est-elle
+  toujours le 20 novembre 2026 ? »), « M'aider à définir » (`lib/framing/help.ts` : jusqu'à
+  trois formulations, chacune citée mot pour mot d'une source et vérifiée par le code, gardées
+  dans `<clé>_suggestions`), « Écrire moi-même », « Déjà connu » sous la carte. Les listes
+  reprennent les écrans d'avant (pastilles de besoins, lignes de contraintes, cartes de rôles)
+  plus les échéances. `?step=brief` : ce qui reste avant le Brief, ou « Créer le Brief ».
+- **Lecture par PO** (`lib/framing/analyse.ts`, schéma plat `lib/ai/schemas/framing-facts.ts`)
+  : du contexte initial ou de la transcription d'un call, des propositions « à confirmer »
+  pour les six dimensions. Citation introuvable = écartée ; valeur déjà confirmée ou proposée
+  = jamais touchée ; dimension fermée = laissée ; mise en forme Markdown retirée. Dates et
+  montants sont **cités** par le modèle et **lus** par le code (`lib/framing/said.ts` : date
+  complète avec l'année, sinon une personne la choisit).
+- **Parcours Call** : « Préparer un échange » (`FramingCallSheet`, panneau latéral) : but,
+  sujets calculés par le code à partir de ce qui manque (`lib/framing/call-prep.ts`, une
+  ligne par dimension ouverte, « Préparer en détail » ajoute les questions), sujets ajoutés,
+  participants, documents du projet, date et lien ; « Lancer » = `create_framing_call` (un
+  call normal + `framing_calls`). La page du call montre but, participants, documents et
+  l'ordre du jour détaillé (`AgendaItem.questions`).
+- **Exploitation d'un call** (`lib/framing/call-analysis.ts`, route `extract`) : après le
+  compte rendu (qui reste dans Calls) et `fillBriefFromCall`, PO lit la transcription une fois
+  par compte rendu ; ses faits deviennent des `report_items` de genre `brief_fact`
+  (`brief_key`), localisés dans la transcription, et les propositions pointent vers eux. Le
+  call terminé ouvre `?step=review&call=<id>` : par dimension, chaque donnée entendue
+  « Confirmer » / « Modifier », chaque manque « Information manquante » / « Compléter ». Un
+  échange du Master n'est jamais lu pour le Cadrage.
+- **Brief versionné** (`framing_briefs`, `lib/framing/brief-snapshot.ts`) : « Créer le
+  Brief » seulement quand toute question obligatoire est connue et que rien n'est à confirmer
+  (`assessment.ready`) ; le serveur écrit l'instantané des six dimensions avec leurs sources
+  (`create_framing_brief`, responsable seul), version suivante, la précédente non envoyée
+  « remplacée ». Si le Cadrage a changé depuis, « Mettre à jour le Brief » avant l'envoi
+  (`snapshotMatches`). Page `/framing/brief` : la version telle qu'envoyée, son état, les
+  actions, l'historique (qui, quand, demande du valideur, dimensions rouvertes, changements
+  ligne à ligne avec la version d'avant). Export PDF de la dernière version
+  (`lib/framing/brief-pdf.ts`). L'instantané est écrit par le serveur avec la session du
+  responsable : c'est ce que le valideur lit, donc ce qu'il valide.
+- **Validation** : « Envoyer en validation » = `send_framing_brief` (passe par
+  `request_validation` : notification, Mon Travail, Validations du projet ; une validation du
+  Cadrage sans version en attente est refusée, `brief_required`). Le valideur (DG,
+  `sole_validator`) : « Valider le Brief » ou « Demander une modification » avec un
+  commentaire et **au moins une dimension** (`decide_framing_brief`). Le trigger
+  `framing_brief_follow_validation` aligne l'état de la version sur la décision. Les
+  notifications de validation du Cadrage ouvrent la page du Brief.
+- **Correction** : `framing_dimension_editable` (SQL) n'ouvre que les dimensions rouvertes,
+  pour toute la correction (reportées sur la version suivante) ; les politiques restrictives
+  de `field_values` (Brief), `needs`, `project_team_members`, `framing_constraints` et
+  `framing_deadlines` l'imposent. L'écran le dit (bandeau du valideur, « Dimension fermée »).
+- **Validé** : « ✓ Brief validé ✓ Cadrage terminé » ; le Cadrage reste consultable, la Vue
+  d'ensemble passe au Plan du Projet (`ProjectAttention`). Un Cadrage validé avant les
+  versions se lit en direct.
+- Sources : `field_values.source_label` (et sur les lignes) dit d'où vient une valeur reprise
+  (« Fiche projet », « Contexte initial », « Crédits des titres »…) ; provenance `record` à
+  côté de `call` et `voice`.
+- Liens : le Brief Mix/Master part de l'ingénieur du mix et du mastering (rôles du Cadrage)
+  et de la date du master final (échéance) avant son premier enregistrement
+  (`lib/master-workflow/framing-defaults.ts`, les crédits des titres d'abord) ; l'État des
+  lieux du Juridique liste les réponses confirmées de la dimension 06.
 
 ### Dictée (bouton « Dicter » : Cadrage et Stratégie)
 
@@ -652,6 +687,35 @@ livrable, les libellés ou l'action d'import en props.
   d'IA ; phrases dans `fr.strategy.choices.phrases`), que le responsable retouche avant
   « Enregistrer la réponse » (choix + texte en une écriture).
 - Hors périmètre pour l'instant : export Plan de sortie (Playwright), lien partagé.
+
+---
+
+## 6 ter. Plan du Projet
+
+`app/(app)/app/projects/[projectId]/plan`, `lib/plan/*`, `components/plan/*`, migration
+`…20261006000201_project_plan.sql` (tests dans `framing-intelligent.test.sql`).
+
+- **Proposition calculée par le code** (`proposePlan`), à chaque visite tant que le plan
+  n'est pas lancé : Stratégie en Focus ; Master (titres sans master final) en Focus si la date
+  cible confirmée est à 42 jours ou moins, sinon Pendant ce temps ; Juridique (projet musical,
+  besoins ou blocages juridiques) en Focus s'il y a un blocage connu, sinon Pendant ce temps ;
+  Conception et Livraison & sortie en Ensuite avec leurs dépendances ; À anticiper : échéances
+  datées, rôles à trouver, enveloppe absente ou dépassée, contrats à prévoir, points ouverts.
+  Cadrage spécialisé nommé : Brief Mix/Master, Cadrage juridique.
+- **Modifier le plan** : changer de colonne, de responsable (membre approuvé), retirer ou
+  remettre. **Lancer le plan** : le navigateur n'envoie que ces choix par clé, le serveur
+  repropose et `launch_project_plan` enregistre une fois (`project_plans`,
+  `project_plan_items`). Les workflows en Focus ou Pendant ce temps démarrent (la Stratégie
+  passe en cours) ; ceux d'Ensuite attendent « Lancer maintenant » (`launch_plan_workflow`).
+- **Verrou** : `workflow_is_launched` (lancé par le plan, ou déjà commencé avant : Brief
+  Mix/Master ou source, Cadrage juridique, Stratégie entamée). `start_stage` refuse la
+  Stratégie sans plan (`plan_required`). Master et Juridique : layouts `master/` et `legal/`
+  qui affichent `WorkflowLocked` au lieu de la page (verrou de parcours, pas de sécurité : la
+  RLS de leurs tables n'a pas changé). Fil des étapes : Stratégie grisée jusqu'au plan.
+- Mon Travail : un projet au Cadrage validé et sans plan a pour prochaine action
+  « Construire et lancer le plan du projet ».
+- Section « Plan du projet » de la navigation (groupe Processus ; avec les onglets, listée
+  dans « Aussi dans ce projet »).
 
 ---
 
@@ -1356,10 +1420,12 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     « confirmée », tâche du plan cochée). Une **correction** rouvre seulement les champs
     nommés ; les autres restent ; une nouvelle version et de nouvelles signatures suivent.
   - Pas d'SPPF ni de dépôt numérique : le dépôt et la preuve restent humains (MVP).
-- Ce qui viendra du **Cadrage intelligent** (fait par quelqu'un d'autre) : la dimension 06
-  « Cadre juridique » du Brief comme source supplémentaire, et le lancement du Juridique
-  depuis le Plan du projet. En attendant, la section est ouverte dès que le projet est
-  lancé.
+- **Depuis le Cadrage intelligent** (§ 6, 06/10/2026) : les réponses confirmées (ou
+  proposées) de la dimension 06 « Cadre juridique » du Brief (parties, accords, contrats et
+  droits à prévoir, éléments sécurisés) rejoignent les points signalés de l'État des lieux
+  (`inventory-rows.ts`), à côté des contraintes de droits ; leur lien ouvre la dimension.
+  Le Juridique **se lance depuis le Plan du Projet** (§ 6 ter) : layout `legal/` verrouillé
+  tant que le plan ne l'a pas lancé, sauf s'il avait déjà commencé (Cadrage juridique).
 
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
@@ -1662,9 +1728,14 @@ lots, chacun utile seul.
   crédit dans le Réseau, filtres par état), `FactTable` (`components/ui/fact-table.tsx`, l'action dessinée par
   `renderAction`), `factTone`, textes `fr.facts`, action `linkContributorContact`
   (`lib/catalog/master/contact-link-actions.ts`).
+- **Depuis le Cadrage intelligent** (§ 6, 06/10/2026) : avant son premier enregistrement,
+  le Brief Mix/Master part de l'ingénieur du mix et du mastering choisis au Cadrage (rôles
+  tenus par un contact du Réseau) quand les crédits des titres ne le disent pas, et de la
+  date du master final (échéance confirmée) (`framing-defaults.ts`). Le Master **se lance
+  depuis le Plan du Projet** (§ 6 ter) : layout `master/` verrouillé tant que le plan ne l'a
+  pas lancé, sauf s'il avait déjà commencé (Brief ou source confirmée).
 - **Pas encore là** : la brique Distribution n'existe pas, ses exigences ne sont pas codées
-  en dur (ticket § 14). Le pré-remplissage depuis le Brief du Cadrage intelligent (qui mixe,
-  qui masterise, date du master final) remplira le Brief Mix/Master quand il existera. Le
+  en dur (ticket § 14). Le
   Budget à quatre états (Estimé / Proposé / Engagé / Payé) étendra `budget_lines` au lot
   suivant ; le Brief n'en garde que les tarifs estimés.
 
@@ -1754,6 +1825,12 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
 - Test de la dictée sans micro : Chrome headless en CDP, `getUserMedia` remplacé par un
   script qui joue un fichier (`say -v Thomas … -o x.aiff` puis `afconvert -f m4af -d aac`)
   dans un `MediaStreamDestination`.
+- **Types de la base sans la CLI** (Windows) : le générateur du conteneur `pg_meta` est plus
+  ancien que celui de la CLI et omet `isOneToOne` dans les relations (le typage des jointures
+  casse). Ne pas remplacer `database.types.ts` par sa sortie : n'y reporter que les tables,
+  colonnes et fonctions nouvelles.
+- **`\d` dans un gabarit** : `` new RegExp(`\d…`) `` perd la barre oblique (une séquence
+  inconnue d'un gabarit vaut la lettre seule) ; écrire `String.raw` (`lib/framing/said.ts`).
 - Données de test locales : `admin@pds.test` / `Framing-test-2026!` (admin), projet
   « Lueur » ; `cp-conception@pds.test` / `Conception-test-2026!` (chef de projet, responsable
   de « Soleil noir — conception (test) »). Fictives uniquement : les paliers gratuits peuvent entraîner leurs modèles.

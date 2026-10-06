@@ -154,6 +154,8 @@ select lives_ok($$
   values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'Clip', 'creation_content', 'voice', 'il nous faut un clip')
 $$, 'the owner records a dictated need');
 
+-- A framing validation is the validation of a Brief version (…20261006000101).
+select public.create_framing_brief((select id from ids where name = 'project'), '{}'::jsonb);
 select lives_ok($$ select public.request_validation((select id from ids where name = 'stage'), 'Brief prêt') $$,
                 'the owner asks the director for a validation');
 insert into ids select 'validation', id from public.validations

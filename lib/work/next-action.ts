@@ -8,6 +8,7 @@ import type { ProjectStage } from "@/lib/projects/types";
 export type NextActionKind =
   | "record_call"
   | "write_brief"
+  | "build_plan"
   | "build_strategy"
   | "follow_design"
   | "prepare_release"
@@ -45,12 +46,16 @@ export function nextActionOf(
     return { kind: "await_validation", href };
 
   switch (stage.key) {
+    // The Cadrage intelligent starts with PO or from an exchange: no call
+    // is required first (hasCallReport only says which way it went).
     case "framing":
-      return hasCallReport
-        ? { kind: "write_brief", href }
-        : { kind: "record_call", href: routes.projectCalls(projectId) };
+      return { kind: hasCallReport ? "write_brief" : "record_call", href };
+    // A Stratégie not started waits for the Plan du Projet (it starts
+    // when the plan is launched).
     case "launch_strategy":
-      return { kind: "build_strategy", href };
+      return stage.state === "not_started"
+        ? { kind: "build_plan", href: routes.projectPlan(projectId) }
+        : { kind: "build_strategy", href };
     case "design":
       return { kind: "follow_design", href };
     case "delivery":

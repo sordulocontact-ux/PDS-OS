@@ -16,6 +16,7 @@ import type {
 } from "@/lib/master-workflow/brief-types";
 import type { FlowCredit } from "@/lib/master-workflow/engineer-facts";
 import { masterExchangeAgenda } from "@/lib/master-workflow/exchange-agenda";
+import { loadFramingDefaults } from "@/lib/master-workflow/framing-defaults";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
 import { networkEngineers } from "@/lib/master-workflow/network-engineers";
 import { materialFacts, sourceFacts } from "@/lib/master-workflow/source-facts";
@@ -65,27 +66,29 @@ export async function loadMasterBrief(
   access: Access,
 ): Promise<BriefView> {
   const supabase = await createClient();
-  const [rows, saved, creatives, exchanges, budget] = await Promise.all([
-    readMasterRows(project.id, project.masters),
-    supabase
-      .from("master_briefs")
-      .select(BRIEF_SELECT)
-      .eq("project_id", project.id)
-      .maybeSingle(),
-    listProjectCreatives(project.id),
-    supabase
-      .from("master_brief_calls")
-      .select(
-        "call:calls!master_brief_calls_call_same_org(id, title, occurred_at, status)",
-      )
-      .eq("project_id", project.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("budget_lines")
-      .select("master_role, amount_cents, status")
-      .eq("project_id", project.id)
-      .not("master_role", "is", null),
-  ]);
+  const [rows, saved, creatives, exchanges, budget, framing] =
+    await Promise.all([
+      readMasterRows(project.id, project.masters),
+      supabase
+        .from("master_briefs")
+        .select(BRIEF_SELECT)
+        .eq("project_id", project.id)
+        .maybeSingle(),
+      listProjectCreatives(project.id),
+      supabase
+        .from("master_brief_calls")
+        .select(
+          "call:calls!master_brief_calls_call_same_org(id, title, occurred_at, status)",
+        )
+        .eq("project_id", project.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("budget_lines")
+        .select("master_role, amount_cents, status")
+        .eq("project_id", project.id)
+        .not("master_role", "is", null),
+      loadFramingDefaults(project.id),
+    ]);
   if (exchanges.error)
     console.error("loadMasterBrief exchanges:", exchanges.error.message);
   if (saved.error) console.error("loadMasterBrief:", saved.error.message);
@@ -93,11 +96,12 @@ export async function loadMasterBrief(
   const canEditCatalog = can(access, "manage_catalog");
 
   const row = saved.data;
-  const mixCredited = creditedContact(rows.creditsOf, "mix_engineer");
-  const masteringCredited = creditedContact(
-    rows.creditsOf,
-    "mastering_engineer",
-  );
+  // Credits on the titles first, then what the Cadrage confirmed.
+  const mixCredited =
+    creditedContact(rows.creditsOf, "mix_engineer") ?? framing.mixContactId;
+  const masteringCredited =
+    creditedContact(rows.creditsOf, "mastering_engineer") ??
+    framing.masteringContactId;
   const sameCredited =
     mixCredited !== null && mixCredited === masteringCredited;
   const brief: MasterBrief = row
@@ -107,6 +111,10 @@ export async function loadMasterBrief(
         mixContactId: mixCredited,
         masteringSameEngineer: sameCredited,
         masteringContactId: sameCredited ? null : masteringCredited,
+        dates: {
+          ...emptyBrief(project.ownerPersonId).dates,
+          masterFinalDue: framing.masterFinalDue,
+        },
       };
 
   const validators: BriefPerson[] = [
