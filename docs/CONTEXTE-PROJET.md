@@ -41,7 +41,7 @@ s'appelle **PO**. Le produit s'appelle **PDS OS**.
 
 | #   | Étape                    | Ce qu'elle produit                                                                                                                        |
 | --- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Cadrage                  | Le **Brief** : objectif, temporalité, besoins, cadre, équipe                                                                              |
+| 1   | Cadrage                  | Le **Brief** (versionné, validé) : objectif, temporalité, budget & contraintes, équipe, état de départ, cadre juridique ; puis le Plan du Projet |
 | 2   | Stratégie de lancement   | La **Stratégie** : positionnement, publics, narratif, dispositif, livrables engagés, calendrier. Export éditorial : le **Plan de sortie** |
 | 3   | Conception               | Le **Dossier de conception** : direction créative, cover, capsules, clip                                                                  |
 | 4   | Production & préparation | Organisation et fabrication : lieux, équipe, planning, exécution                                                                          |
@@ -74,6 +74,25 @@ Les sept étapes restent **la colonne vertébrale** du projet. Rien ne les rempl
   ni Master ni Juridique.
 - **Disposition** : placer Master et Juridique sous Workflow est une proposition, pas une
   décision figée. Seule cette logique fonctionnelle compte.
+
+### Cadrage intelligent : décisions du 06/10/2026
+
+Ticket « Cadrage intelligent d'un projet » (30/09/2026), réalisé le 06/10/2026
+(`docs/ARCHITECTURE.md` § 6 et § 6 ter). Quatre points que le ticket laissait ouverts ont
+été tranchés :
+
+- **Six dimensions**, comme le ticket : Objectif, Temporalité, Budget & contraintes, Équipe,
+  État de départ, Cadre juridique. **Les besoins & activations restent dans 01 Objectif**
+  (« Ce qu'il faut produire ») : le DG veut que le Cadrage couvre les livrables, et la
+  Stratégie en part pour ses leviers.
+- **Vraies dates confirmées** pour la Temporalité (date cible, échéances dont le master
+  final), toujours choisies ou confirmées par une personne. PO cite la phrase dite ; le code
+  ne lit qu'une date complète, année comprise ; sinon, une personne choisit la date.
+- **Stratégie, Master et Juridique attendent le Plan du Projet** : ils ne démarrent plus
+  seuls après le Cadrage, mais depuis « Lancer le plan ». Un workflow déjà commencé avant
+  cette règle reste ouvert.
+- **« Lancer le plan »** plutôt que « Lancer le Projet » : un projet est déjà « lancé » quand
+  le chef de projet l'accepte.
 
 **Points à trancher avant de coder le Juridique.** Ils viennent de la relecture des
 tickets du 30/09 (Cadrage, Master, Juridique 01 à 08) :

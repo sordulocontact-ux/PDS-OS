@@ -49,6 +49,13 @@ export type CallDetail = CallSummary & {
   errorCode: string | null;
   agenda: AgendaItem[] | null;
   durationMinutes: number | null;
+  // Prepared from the Cadrage (« Préparer un échange »): its purpose, who
+  // takes part, the documents that go with it.
+  framing: {
+    purpose: string;
+    participants: string[];
+    documents: Array<{ id: string; name: string }>;
+  } | null;
 };
 
 export type StoredTranscript = {
@@ -137,9 +144,12 @@ function toAgenda(value: unknown): AgendaItem[] | null {
   if (!Array.isArray(value)) return null;
   const items = value.flatMap((item: unknown) => {
     if (typeof item !== "object" || item === null) return [];
-    const { topic, minutes } = item as Record<string, unknown>;
+    const { topic, minutes, questions } = item as Record<string, unknown>;
+    const asked = Array.isArray(questions)
+      ? questions.filter((q): q is string => typeof q === "string")
+      : [];
     return typeof topic === "string" && typeof minutes === "number"
-      ? [{ topic, minutes }]
+      ? [{ topic, minutes, ...(asked.length ? { questions: asked } : {}) }]
       : [];
   });
   return items.length > 0 ? items : null;
@@ -187,6 +197,37 @@ export async function getCall(
     errorCode: data.error_code,
     agenda: toAgenda(data.agenda),
     durationMinutes: data.duration_minutes,
+    framing: await framingOfCall(supabase, data.id),
+  };
+}
+
+async function framingOfCall(
+  supabase: Client,
+  callId: string,
+): Promise<CallDetail["framing"]> {
+  const { data } = await supabase
+    .from("framing_calls")
+    .select("purpose, participants, document_ids")
+    .eq("call_id", callId)
+    .maybeSingle();
+  if (!data) return null;
+  const { data: files } = data.document_ids.length
+    ? await supabase
+        .from("project_files")
+        .select("id, file_name")
+        .in("id", data.document_ids)
+    : { data: [] };
+  const participants = Array.isArray(data.participants)
+    ? data.participants.flatMap((p) =>
+        p && typeof p === "object" && "name" in p && typeof p.name === "string"
+          ? [p.name]
+          : [],
+      )
+    : [];
+  return {
+    purpose: data.purpose,
+    participants,
+    documents: (files ?? []).map((f) => ({ id: f.id, name: f.file_name })),
   };
 }
 

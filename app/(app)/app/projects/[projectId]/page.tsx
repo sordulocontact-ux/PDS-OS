@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { FramingStart } from "@/components/framing/framing-start";
+import { FramingEntry } from "@/components/framing/intel/framing-entry";
+import { ProjectAttention } from "@/components/projects/project-attention";
 import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { StageStateBadge } from "@/components/projects/stage-state-badge";
@@ -9,7 +10,11 @@ import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { assessFraming } from "@/lib/framing/assess";
+import { callSheetData } from "@/lib/framing/call-sheet-data";
+import { framingStarted, loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { isFramingOpen } from "@/lib/framing/queries";
+import { loadLaunchedPlan } from "@/lib/plan/queries";
 import { fr } from "@/lib/i18n/fr";
 import { projectKindLabel } from "@/lib/projects/labels";
 import {
@@ -46,7 +51,10 @@ export default async function ProjectOverviewPage({
   const launched = project.stages.length > 0;
   const organizationId = access.organizationId;
   // Everything else in one round trip, each query only when it is shown.
-  const [creatives, creativeCandidates, people, framingOpen] =
+  const framingState = project.stages.find((s) => s.key === "framing")?.state;
+  const framingWorking =
+    framingState === "not_started" || framingState === "in_progress";
+  const [creatives, creativeCandidates, people, framingOpen, knowledge, plan] =
     await Promise.all([
       listProjectCreatives(project.id),
       canManageCreatives && organizationId
@@ -57,6 +65,13 @@ export default async function ProjectOverviewPage({
         : Promise.resolve([]),
       // First thing to do once launched: a call, the framing starts from it.
       launched ? isFramingOpen(project.id) : Promise.resolve(false),
+      // What PO found already known, for the entry of the Cadrage.
+      launched && framingState !== "validated"
+        ? loadFramingKnowledge(project.id, access)
+        : Promise.resolve(null),
+      framingState === "validated"
+        ? loadLaunchedPlan(project.id)
+        : Promise.resolve(null),
     ]);
   const creativeTeam = (
     <CreativeTeam
@@ -101,9 +116,34 @@ export default async function ProjectOverviewPage({
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <div className="flex min-w-0 flex-col gap-8">
-        {!framingOpen && (
-          <FramingStart
+        {knowledge && framingWorking && (
+          <FramingEntry
             projectId={project.id}
+            assessment={assessFraming(knowledge)}
+            acceptedAt={knowledge.acceptedAt}
+            ownerName={project.ownerName}
+            started={framingOpen && framingStarted(knowledge)}
+            canEdit={canEditProject(access, project)}
+            callSheet={callSheetData(knowledge, assessFraming(knowledge))}
+          />
+        )}
+        {framingState === "awaiting_validation" && (
+          <ProjectAttention
+            projectId={project.id}
+            state="awaiting"
+            validatorName={
+              knowledge?.framing.pendingValidation?.validatorName ?? null
+            }
+            planLaunchedAt={null}
+            canEdit={canEditProject(access, project)}
+          />
+        )}
+        {framingState === "validated" && (
+          <ProjectAttention
+            projectId={project.id}
+            state="validated"
+            validatorName={null}
+            planLaunchedAt={plan?.launchedAt ?? null}
             canEdit={canEditProject(access, project)}
           />
         )}
@@ -111,7 +151,7 @@ export default async function ProjectOverviewPage({
           <h2 id="stages-title" className="text-base font-medium">
             {t.stages}
           </h2>
-          <ol className="flex flex-col divide-y divide-border overflow-hidden rounded-xl border border-border">
+          <ol className="flex flex-col gap-1 rounded-xl border border-border p-1">
             {project.stages.map((stage, index) => {
               const href =
                 stage.key === "framing"
@@ -149,14 +189,14 @@ export default async function ProjectOverviewPage({
                     <Link
                       href={href}
                       aria-current={current ? "step" : undefined}
-                      className="flex items-center justify-between gap-3 px-4 py-4 no-underline hover:bg-muted/50"
+                      className="flex items-center justify-between gap-3 rounded-lg px-4 py-3 no-underline hover:bg-muted/50"
                     >
                       {content}
                     </Link>
                   ) : (
                     <div
                       aria-current={current ? "step" : undefined}
-                      className="flex items-center justify-between gap-3 px-4 py-4"
+                      className="flex items-center justify-between gap-3 px-4 py-3"
                     >
                       {content}
                     </div>

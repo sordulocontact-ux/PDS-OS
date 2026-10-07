@@ -12,7 +12,11 @@ import { Label } from "@/components/ui/label";
 import { assignRole, releaseRole } from "@/lib/framing/actions/team-roles";
 import type { FramingData } from "@/lib/framing/queries";
 import type { RoleCard } from "@/lib/framing/team-board";
-import { TEAM_ROLE_KEYS, type TeamRoleKey } from "@/lib/framing/team-roles";
+import {
+  TEAM_ROLE_KEYS,
+  isEngineerRole,
+  type TeamRoleKey,
+} from "@/lib/framing/team-roles";
 import { fr } from "@/lib/i18n/fr";
 
 /**
@@ -23,12 +27,18 @@ export function AssignRoleDialog({
   projectId,
   card,
   team,
+  roles = TEAM_ROLE_KEYS,
+  engineers = [],
   open,
   onOpenChange,
 }: {
   projectId: string;
   card: RoleCard | null;
   team: FramingData["team"];
+  // The roles offered when none is fixed.
+  roles?: readonly TeamRoleKey[];
+  // Engineers of the Réseau, offered for the mix and mastering roles.
+  engineers?: Array<{ id: string; name: string }>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -45,6 +55,8 @@ export function AssignRoleDialog({
         projectId={projectId}
         card={card}
         team={team}
+        roles={roles}
+        engineers={engineers}
         onDone={() => onOpenChange(false)}
       />
     </FormDialog>
@@ -55,23 +67,26 @@ function AssignForm({
   projectId,
   card,
   team,
+  roles,
+  engineers,
   onDone,
 }: {
   projectId: string;
   card: RoleCard | null;
   team: FramingData["team"];
+  roles: readonly TeamRoleKey[];
+  engineers: Array<{ id: string; name: string }>;
   onDone: () => void;
 }) {
   const t = fr.framingGuide.team;
   const { pending, run } = useFramingAction();
-  const [role, setRole] = useState<TeamRoleKey>(
-    card?.role ?? TEAM_ROLE_KEYS[0],
-  );
+  const [role, setRole] = useState<TeamRoleKey>(card?.role ?? roles[0]);
   const [name, setName] = useState("");
   const people = team.filter((m) => m.role_key !== role);
   const roleOptions = Object.fromEntries(
-    TEAM_ROLE_KEYS.map((key) => [key, t.roles[key]]),
+    roles.map((key) => [key, t.roles[key]]),
   );
+  const offerEngineers = isEngineerRole(role) && engineers.length > 0;
 
   return (
     <form
@@ -91,6 +106,29 @@ function AssignForm({
             value={role}
             onChange={(v) => setRole(v as TeamRoleKey)}
           />
+        </div>
+      )}
+      {offerEngineers && (
+        <div className="flex flex-col gap-2">
+          <p className="text-caption text-muted-foreground">{t.fromNetwork}</p>
+          <div className="flex flex-wrap gap-2">
+            {engineers.map((engineer) => (
+              <FilterChip
+                key={engineer.id}
+                pressed={false}
+                disabled={pending}
+                onClick={() =>
+                  run(
+                    () =>
+                      assignRole(projectId, role, { contactId: engineer.id }),
+                    onDone,
+                  )
+                }
+              >
+                {engineer.name}
+              </FilterChip>
+            ))}
+          </div>
         </div>
       )}
       {people.length > 0 && (

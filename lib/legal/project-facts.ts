@@ -84,6 +84,6 @@ export function flagFacts(
     source: t.sources.framing,
     status: "to_confirm",
     statusLabel: flag.proposed ? t.states.flaggedProposed : t.states.flagged,
-    href: routes.projectFramingStep(projectId, "frame"),
+    href: routes.projectFramingStep(projectId, "legal"),
   }));
 }

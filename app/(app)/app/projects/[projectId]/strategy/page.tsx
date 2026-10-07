@@ -11,6 +11,8 @@ import { ProposeChoices } from "@/components/strategy/propose-choices";
 import { StrategyChoices } from "@/components/strategy/strategy-choices";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
+import { WorkflowLocked } from "@/components/plan/workflow-locked";
+import { workflowGate } from "@/lib/plan/queries";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -38,6 +40,16 @@ export default async function StrategyPage({
       />
     );
   }
+  // The Stratégie starts from the Plan du Projet, never on its own.
+  const gate = await workflowGate(project, "strategy");
+  if (gate)
+    return (
+      <WorkflowLocked
+        projectId={projectId}
+        name={fr.framingIntel.plan.workflows.strategy}
+        {...gate}
+      />
+    );
   const data = await loadStrategy(projectId, access);
   if (!data) notFound();
   const t = fr.strategy;

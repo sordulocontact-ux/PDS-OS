@@ -81,8 +81,9 @@ export function notificationHref(
   if (kind.startsWith("design_version_"))
     return routes.projectDesign(projectId);
   if (kind.startsWith("validation_")) {
-    if (stageKey === "framing")
-      return routes.projectFramingStep(projectId, "summary");
+    // The Brief's own page: the validator decides there, the owner sees
+    // the decision and what was reopened.
+    if (stageKey === "framing") return routes.projectFramingBrief(projectId);
     if (stageKey === "launch_strategy")
       return routes.projectStrategy(projectId);
     if (stageKey === "design") return routes.projectDesign(projectId);

@@ -6,6 +6,7 @@ import type {
   Organism,
 } from "@/lib/catalog/master/rules";
 import { asContractStatus } from "@/lib/contracts/types";
+import { fr } from "@/lib/i18n/fr";
 import { networkIndex, type NetworkIndex } from "@/lib/facts/credit-contact";
 import {
   contributorsByTitle,
@@ -62,6 +63,12 @@ export async function readInventoryRows(
   const artistsOf = new Map(projectMasters.map((m) => [m.id, m.artists]));
   const titled = masterIds.length > 0;
   const none = Promise.resolve({ data: [], error: null });
+  const BRIEF_LEGAL_KEYS = [
+    "legal_parties",
+    "legal_agreements",
+    "legal_needs",
+    "legal_secured",
+  ] as const;
 
   const [
     masters,
@@ -72,6 +79,7 @@ export async function readInventoryRows(
     network,
     contracts,
     flags,
+    briefLegal,
   ] = await Promise.all([
     titled
       ? supabase
@@ -130,6 +138,15 @@ export async function readInventoryRows(
       .eq("type", "rights")
       .neq("review_status", "rejected")
       .order("created_at"),
+    // Dimension 06 « Cadre juridique » of the Brief de cadrage: what the
+    // Cadrage intelligent confirmed (docs/ARCHITECTURE.md § 6).
+    supabase
+      .from("current_field_values")
+      .select("id, field_key, value, status")
+      .eq("project_id", projectId)
+      .eq("deliverable", "brief")
+      .in("field_key", [...BRIEF_LEGAL_KEYS])
+      .in("status", ["confirmed", "proposed"]),
   ]);
 
   const byId = new Map(
@@ -166,11 +183,24 @@ export async function readInventoryRows(
       partyIds: row.contract_parties.map((party) => party.contact_id),
       updatedAt: row.updated_at,
     })),
-    flags: (flags.data ?? []).map((row) => ({
-      id: row.id,
-      text: row.text,
-      proposed: row.review_status === "proposed",
-    })),
+    flags: [
+      ...(flags.data ?? []).map((row) => ({
+        id: row.id,
+        text: row.text,
+        proposed: row.review_status === "proposed",
+      })),
+      ...(briefLegal.data ?? []).flatMap((row) =>
+        typeof row.value === "string" && row.value.trim() && row.id
+          ? [
+              {
+                id: row.id,
+                text: `${fr.framingIntel.questions[row.field_key as (typeof BRIEF_LEGAL_KEYS)[number]].label} : ${row.value}`,
+                proposed: row.status === "proposed",
+              },
+            ]
+          : [],
+      ),
+    ],
     failed: {
       titles: failed("masters", masters.error),
       people:
@@ -180,7 +210,7 @@ export async function readInventoryRows(
       splits: failed("splits", splits.error),
       agreements: failed("contracts", contracts.error),
       declarations: failed("declarations", declarations.error),
-      flags: failed("flags", flags.error),
+      flags: failed("flags", flags.error) || failed("brief", briefLegal.error),
     },
   };
 }

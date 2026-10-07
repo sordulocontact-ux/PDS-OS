@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { FramingHeaderAction } from "@/components/projects/framing-header-action";
 import { LegalSteps } from "@/components/projects/legal-steps";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import {
@@ -14,15 +13,14 @@ import { WorkflowBreadcrumb } from "@/components/projects/workflow-breadcrumb";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { hasPendingValidation } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { loadLegalStepsDone } from "@/lib/legal/steps-done";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
-import { isFramingValidated } from "@/lib/projects/types";
 import { masterSteps } from "@/lib/ui/master-steps";
 import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
+import { isWorkflowLaunched } from "@/lib/plan/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
 // Project frame: header, then the sections — either the contextual sidebar
@@ -48,19 +46,15 @@ export default async function ProjectLayout({
   const canEdit = canEditProject(access, project);
   const canSeeLegal = can(access, "manage_legal");
 
-  // "Demander la validation" sits on the title's own line, only while the
-  // Cadrage is in progress and nothing is already awaiting a decision — the
-  // framing stage's state comes for free from project.stages, so only the
-  // pending check needs its own (single, boolean) query.
-  const framingStage = project.stages.find((s) => s.key === "framing");
-  const [framingPending, legalDone] = await Promise.all([
-    canEdit && framingStage?.state === "in_progress"
-      ? hasPendingValidation(framingStage.id)
-      : true,
+  // The Brief is sent for validation from its own page (framing/brief);
+  // the Stratégie opens once the Plan du Projet launches it.
+  const [strategyLaunched, legalDone] = await Promise.all([
+    project.stages.length > 0
+      ? isWorkflowLaunched(project.id, "strategy")
+      : false,
     // The checks of the Juridique steps, for those who see the section.
     canSeeLegal && project.stages.length > 0 ? loadLegalStepsDone(project) : [],
   ]);
-  const framingActionable = framingStage !== undefined && !framingPending;
 
   return (
     <div className="flex flex-1">
@@ -80,12 +74,6 @@ export default async function ProjectLayout({
             <h1 className="text-2xl font-semibold tracking-tight break-words">
               {project.title}
             </h1>
-            {framingStage && framingActionable && (
-              <FramingHeaderAction
-                projectId={project.id}
-                stageId={framingStage.id}
-              />
-            )}
           </div>
           <p className="text-sm text-muted-foreground">
             {[
@@ -120,9 +108,7 @@ export default async function ProjectLayout({
               validatedStages={project.stages
                 .filter((stage) => stage.state === "validated")
                 .map((stage) => stage.key)}
-              lockedSteps={
-                isFramingValidated(project.stages) ? [] : ["strategy"]
-              }
+              lockedSteps={strategyLaunched ? [] : ["strategy"]}
             />
             <SectionSteps
               base={routes.projectMaster(project.id)}

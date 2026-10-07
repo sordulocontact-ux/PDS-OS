@@ -234,6 +234,7 @@ const agendaSchema = z
     z.object({
       topic: z.string().trim().min(1).max(200),
       minutes: z.number().int().min(1).max(240),
+      questions: z.array(z.string().max(300)).max(20).optional(),
     }),
   )
   .max(20);

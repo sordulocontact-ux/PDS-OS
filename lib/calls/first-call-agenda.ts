@@ -4,7 +4,13 @@
  * (docs/CONTEXTE-PROJET.md § 6, usage 5 "Préparation de call").
  */
 
-export type AgendaItem = { topic: string; minutes: number };
+// `questions`: the precise questions of a topic, when the call was prepared
+// « en détail » from the Cadrage (lib/framing/call-prep.ts).
+export type AgendaItem = {
+  topic: string;
+  minutes: number;
+  questions?: string[];
+};
 
 export const FIRST_CALL_AGENDA: readonly AgendaItem[] = [
   { topic: "Objectif de la sortie", minutes: 10 },

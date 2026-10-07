@@ -1,13 +1,17 @@
+import { getAccess } from "@/lib/auth/dal";
 import { runExtraction } from "@/lib/calls/pipeline";
 import { handleStep } from "@/lib/calls/route-helpers";
+import { analyseFramingCall } from "@/lib/framing/call-analysis";
 import { fillBriefFromCall } from "@/lib/framing/import-report";
 
 // Structured extraction of a long transcript can take a while.
 export const maxDuration = 300;
 
-// Extraction, then the report goes straight into the Brief as proposals —
+// Extraction, then the report goes straight into the Cadrage as proposals —
 // except for an exchange of the Master (master_brief_calls): it fills the
-// Brief Mix/Master instead, from its own page, never the Cadrage's.
+// Brief Mix/Master instead, from its own page, never the Cadrage's. PO also
+// reads the call for the six dimensions of the Cadrage intelligent
+// (lib/framing/call-analysis.ts); the report itself stays in Calls.
 export async function POST(
   _request: Request,
   { params }: RouteContext<"/api/calls/[callId]/extract">,
@@ -22,6 +26,12 @@ export async function POST(
       .eq("call_id", id)
       .maybeSingle();
     if (exchange) return { ok: true, briefFilled: false };
-    return { ok: true, briefFilled: await fillBriefFromCall(supabase, id) };
+    const filled = await fillBriefFromCall(supabase, id);
+    const access = await getAccess();
+    const analysed =
+      access.state === "approved"
+        ? await analyseFramingCall(supabase, access, id)
+        : false;
+    return { ok: true, briefFilled: filled || analysed };
   });
 }

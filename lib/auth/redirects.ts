@@ -144,6 +144,14 @@ export const routes = {
   // One screen of the Framing's guided review (lib/framing/guide.ts).
   projectFramingStep: (id: string, step: string) =>
     `/app/projects/${id}/framing?step=${step}`,
+  // One question of the Cadrage intelligent (lib/framing/dimensions.ts).
+  projectFramingQuestion: (id: string, dimension: string, key: string) =>
+    `/app/projects/${id}/framing?step=${dimension}&q=${key}`,
+  // What PO understood from a framing call, to confirm item by item.
+  projectFramingReview: (id: string, callId: string) =>
+    `/app/projects/${id}/framing?step=review&call=${callId}`,
+  // The plan PO proposes once the Brief is validated.
+  projectPlan: (id: string) => `/app/projects/${id}/plan`,
   // The shareable Brief, printable as a PDF.
   projectFramingBrief: (id: string) => `/app/projects/${id}/framing/brief`,
   // The same Brief as a downloaded PDF file.

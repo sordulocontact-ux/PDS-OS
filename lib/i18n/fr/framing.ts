@@ -174,6 +174,17 @@ export const framing = {
     nothing_to_import:
       "Ce compte rendu ne contient aucun élément de stratégie.",
     forbidden: "Seul le chef de projet responsable modifie ce projet.",
+    brief_incomplete:
+      "Le cadrage n'est pas complet : confirmez ce qui reste à confirmer et répondez aux questions obligatoires.",
+    brief_outdated:
+      "Le cadrage a changé depuis cette version du Brief : mettez le Brief à jour avant de l'envoyer.",
+    brief_required:
+      "Générez d'abord le Brief : c'est lui que le valideur relit.",
+    dimensions_required: "Choisissez au moins une dimension à rouvrir.",
+    plan_required: "La Stratégie se lance depuis le Plan du Projet.",
+    plan_already_launched: "Le plan de ce projet est déjà lancé.",
+    framing_not_validated: "Le plan se construit une fois le Brief validé.",
+    invalid_owner: "Ce responsable n'est pas membre de l'équipe.",
     generic: "Une erreur est survenue. Réessayez.",
   },
 } as const;

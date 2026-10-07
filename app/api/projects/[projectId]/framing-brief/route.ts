@@ -1,15 +1,16 @@
 import { getAccess } from "@/lib/auth/dal";
 import { briefFileName, briefHtml } from "@/lib/framing/brief-pdf";
-import { briefFacts, briefObjective } from "@/lib/framing/brief-summary";
-import { loadFraming } from "@/lib/framing/queries";
+import { buildBriefSnapshot, snapshotOf } from "@/lib/framing/brief-snapshot";
+import { loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { htmlToPdf } from "@/lib/pdf/render";
 
 // Starting a browser and printing takes a few seconds, more on a cold start.
 export const maxDuration = 60;
 
 /**
- * The shareable Brief as a PDF file, downloaded (never the print dialog).
- * Read with the user's session: RLS decides who sees the project.
+ * The Brief as a PDF file, downloaded (never the print dialog): its latest
+ * version as it was written, or the Cadrage as it stands when no version
+ * exists yet. Read with the user's session: RLS decides who sees it.
  */
 export async function GET(
   _request: Request,
@@ -20,18 +21,22 @@ export async function GET(
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   const { projectId } = await params;
-  const data = await loadFraming(projectId, access);
-  if (!data) {
+  const knowledge = await loadFramingKnowledge(projectId, access);
+  if (!knowledge) {
     return Response.json({ ok: false, error: "not_found" }, { status: 404 });
   }
+  const latest = knowledge.briefs[0];
+  const snapshot =
+    (latest ? snapshotOf(latest.content) : null) ??
+    buildBriefSnapshot(knowledge);
 
   let pdf: Uint8Array;
   try {
     pdf = await htmlToPdf(
       briefHtml({
-        projectTitle: data.project.title,
-        objective: briefObjective(data),
-        facts: briefFacts(data),
+        snapshot,
+        version: latest?.version ?? null,
+        state: latest?.state ?? null,
       }),
     );
   } catch (error) {
@@ -39,7 +44,7 @@ export async function GET(
     return Response.json({ ok: false, error: "pdf_failed" }, { status: 500 });
   }
 
-  const name = briefFileName(data.project.title);
+  const name = briefFileName(knowledge.project.title);
   return new Response(
     new Blob([pdf as BlobPart], { type: "application/pdf" }),
     {

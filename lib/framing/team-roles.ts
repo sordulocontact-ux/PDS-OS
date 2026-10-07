@@ -11,6 +11,8 @@ export const TEAM_ROLE_KEYS = [
   "press_relations",
   "influence_marketing",
   "playlisting",
+  "mix_engineer",
+  "mastering_engineer",
 ] as const;
 
 export type TeamRoleKey = (typeof TEAM_ROLE_KEYS)[number];
@@ -21,6 +23,16 @@ export const ALWAYS_OFFERED_ROLES: readonly TeamRoleKey[] = [
   "artistic_direction",
   "creative_direction",
 ];
+
+// Who mixes, who masters: offered on a music project with titles, held by
+// a contact of the Réseau (project_team_members.contact_id), the link the
+// Brief Mix/Master starts from (docs/ARCHITECTURE.md § 8 septies).
+export const ENGINEER_ROLES: readonly TeamRoleKey[] = [
+  "mix_engineer",
+  "mastering_engineer",
+];
+export const isEngineerRole = (role: string | null) =>
+  role !== null && (ENGINEER_ROLES as readonly string[]).includes(role);
 
 // Keyed by the need preset key (lib/framing/needs-presets.ts), not its label:
 // a need's label may have been edited by hand, but a preset key is stable.
@@ -42,6 +54,7 @@ export const ROLE_OF_NEED_PRESET: Record<string, TeamRoleKey> = {
 export function rolesForNeeds(
   needLabels: string[],
   presetLabels: Record<string, string>,
+  { music = false }: { music?: boolean } = {},
 ): TeamRoleKey[] {
   const normalize = (s: string) => s.trim().toLowerCase();
   const roleOfLabel = new Map(
@@ -54,5 +67,11 @@ export function rolesForNeeds(
     const role = roleOfLabel.get(normalize(label));
     return role ? [role] : [];
   });
-  return [...new Set([...ALWAYS_OFFERED_ROLES, ...fromNeeds])];
+  return [
+    ...new Set([
+      ...ALWAYS_OFFERED_ROLES,
+      ...fromNeeds,
+      ...(music ? ENGINEER_ROLES : []),
+    ]),
+  ];
 }

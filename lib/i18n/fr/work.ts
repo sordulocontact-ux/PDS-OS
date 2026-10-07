@@ -29,8 +29,9 @@ export const work = {
   },
 
   nextActions: {
-    record_call: "Planifier ou enregistrer le call de lancement",
-    write_brief: "Rédiger le Brief et le soumettre",
+    record_call: "Cadrer le projet, avec PO ou pendant un échange",
+    write_brief: "Compléter le cadrage et envoyer le Brief",
+    build_plan: "Construire et lancer le plan du projet",
     build_strategy: "Construire la Stratégie et la soumettre",
     follow_design: "Suivre la conception avec l'équipe créative",
     prepare_release: "Préparer la sortie",

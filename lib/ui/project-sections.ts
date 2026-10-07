@@ -76,6 +76,15 @@ export function projectSections(
         ].some((href) => below(href)(p)),
       group: "process",
     },
+    // The Plan du Projet, once the Brief is validated: what starts, what
+    // follows, what runs in parallel (docs/ARCHITECTURE.md § 6 ter).
+    section(
+      "plan",
+      t.plan,
+      routes.projectPlan(projectId),
+      "process",
+      "overview",
+    ),
     section("master", t.master, routes.projectMaster(projectId), "process"),
     ...(legal
       ? [section("legal", t.legal, routes.projectLegal(projectId), "process")]

@@ -30,12 +30,16 @@ export function ConstraintDialog({
   constraint,
   open,
   onOpenChange,
+  scope = "budget",
 }: {
   projectId: string;
   // null: a new line.
   constraint: Constraint | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // « Budget & contraintes » types its lines; « Cadre juridique » only
+  // holds rights lines (its known blockers).
+  scope?: "budget" | "legal";
 }) {
   const t = fr.framingGuide.frame;
   return (
@@ -49,6 +53,7 @@ export function ConstraintDialog({
       <ConstraintForm
         projectId={projectId}
         constraint={constraint}
+        scope={scope}
         onDone={() => onOpenChange(false)}
       />
     </FormDialog>
@@ -58,10 +63,12 @@ export function ConstraintDialog({
 function ConstraintForm({
   projectId,
   constraint,
+  scope,
   onDone,
 }: {
   projectId: string;
   constraint: Constraint | null;
+  scope: "budget" | "legal";
   onDone: () => void;
 }) {
   const t = fr.framingGuide.frame;
@@ -69,7 +76,14 @@ function ConstraintForm({
   const [type, setType] = useState<ConstraintType>(
     constraint && isConstraintType(constraint.type)
       ? constraint.type
-      : "budget",
+      : scope === "legal"
+        ? "rights"
+        : "budget",
+  );
+  const budgetTypes = Object.fromEntries(
+    Object.entries(fr.framingIntel.constraintTypes).filter(
+      ([key]) => key !== "rights",
+    ),
   );
   const [text, setText] = useState(constraint?.text ?? "");
 
@@ -91,16 +105,18 @@ function ConstraintForm({
         );
       }}
     >
-      <div className="grid gap-1.5">
-        <Label htmlFor="constraint-type">{t.type}</Label>
-        <OptionSelect
-          id="constraint-type"
-          label={t.type}
-          options={t.types}
-          value={type}
-          onChange={(v) => isConstraintType(v) && setType(v)}
-        />
-      </div>
+      {scope === "budget" && (
+        <div className="grid gap-1.5">
+          <Label htmlFor="constraint-type">{t.type}</Label>
+          <OptionSelect
+            id="constraint-type"
+            label={t.type}
+            options={budgetTypes}
+            value={type}
+            onChange={(v) => isConstraintType(v) && setType(v)}
+          />
+        </div>
+      )}
       <div className="grid gap-1.5">
         <Label htmlFor="constraint-text">{t.text}</Label>
         <Textarea

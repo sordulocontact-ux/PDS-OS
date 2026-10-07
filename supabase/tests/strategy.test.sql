@@ -88,6 +88,8 @@ $$, '42501', null, 'no strategy field before the strategy starts');
 
 -- The owner validates the Brief through the director.
 select public.start_stage(pg_temp.id_of('framing'));
+-- A framing validation is the validation of a Brief version (…20261006000101).
+select public.create_framing_brief(pg_temp.prj(), '{}'::jsonb);
 select public.request_validation(pg_temp.id_of('framing'), null);
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
@@ -97,8 +99,10 @@ reset role;
 select pg_temp.act_as(pg_temp.id_of('owner'));
 
 -- In progress ---------------------------------------------------------------
-select lives_ok($$ select public.start_stage(pg_temp.id_of('strategy')) $$,
-                'the owner starts the strategy once the Brief is validated');
+-- The Stratégie starts from the plan of the project (…20261006000201).
+select lives_ok($$ select public.launch_project_plan(pg_temp.prj(),
+                   '[{"column":"focus","workflow":"strategy","title":"Stratégie"}]'::jsonb) $$,
+                'the owner starts the strategy from the plan once the Brief is validated');
 select lives_ok($$
   insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type)
   values (pg_temp.org(), pg_temp.prj(), 'strategy', 'positioning', '"Pop solaire"', 'confirmed', 'manual');

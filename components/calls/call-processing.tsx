@@ -85,7 +85,7 @@ export function CallProcessing({
     }
     if (extracted.briefFilled && projectId) {
       toast.success(t.briefFilled);
-      router.push(routes.projectFraming(projectId));
+      router.push(routes.projectFramingReview(projectId, callId));
     } else {
       toast.success(t.done);
       router.refresh();
