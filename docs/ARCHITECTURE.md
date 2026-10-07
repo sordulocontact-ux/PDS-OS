@@ -52,6 +52,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
+| `…261006000101_delete_records` | Suppression définitive (§ 2 quater) : `delete_records(kind, ids[])` (SECURITY DEFINER, `archive_records`, 200 lignes au plus) renvoie une ligne par id (`error` nul = supprimée, sinon `not_found` / `forbidden` / `*_in_use` / `generic`), chaque id dans son sous-bloc ; un projet part avec tout son contenu (`delete_project_row`, enfants avant parents), un master / artiste / contact seulement s'il n'est plus utilisé ; crédits et parts d'un contact supprimé gardent le nom sans lien. Tests : `delete-records.test.sql`. |
 | `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
@@ -172,12 +173,42 @@ Principes :
 
 ### 2 quater. Archiver, restaurer, modifier depuis une liste
 
-- **Archiver, pas supprimer** : artiste, master, projet disparaissent des listes, des
+- **Archiver** : artiste, master, projet disparaissent des listes, des
   sélecteurs, de PO et de leur fiche (404), mais restent en base avec leur historique,
   leurs contacts et leurs fichiers. Restaurables par le DG depuis le filtre « Archivés »
-  des pages de liste (`?view=archived`, ignoré pour les autres postes). Aucune suppression
-  définitive n'existe (décision de Sacha, 27/09/2026).
-- **DG seul** (`archive_records`), **refusé si utilisé** : un artiste crédité sur un master
+  des pages de liste (`?view=archived`, ignoré pour les autres postes).
+- **Supprimer** (demande de Sacha du 06/10/2026, qui remplace la règle « aucune
+  suppression » du 27/09) : « Supprimer » dans le « ⋯ » de chaque ligne et fiche
+  (actif ou archivé), et **cases à cocher** sur les quatre pages de liste (Artistes,
+  Catalogue, Projets, Réseau ; `selectable`) : la case d'en-tête prend toutes les lignes
+  affichées, une barre « verre » flottante en bas de l'écran annonce « n sélectionnés »,
+  « Supprimer » (confirmé, définitif) et ✕ / Échap pour désélectionner. La sélection ne
+  garde que les lignes à l'écran (`components/ui/row-selection.tsx` : chaque case
+  enregistre sa ligne tant qu'elle est montée), donc jamais une ligne cachée par la
+  recherche. DG seul (même permission `archive_records`), une seule fonction SQL
+  `delete_records` (`lib/archive/delete-actions.ts`). Règles :
+  - **projet** : supprimé avec tout ce qu'il contient (étapes, calls, tâches, stratégie,
+    budget, lignes de fichiers, juridique, master, contrats du projet), lancé ou non ;
+    ses masters et son artiste restent au catalogue ;
+  - **master** : refusé tant qu'un projet l'utilise (même archivé) ; ses artistes
+    crédités, sessions, pistes, crédits, splits, déclarations, fichiers et journal partent
+    avec lui ;
+  - **artiste** : refusé tant qu'un master le crédite, ou qu'un projet ou un contrat le
+    nomme ; contacts, fichiers et journal partent avec lui ; une part de split ou un
+    contact du Réseau lié garde son nom, sans lien ;
+  - **contact du Réseau** : crédits et parts qui le nommaient gardent le nom sans lien
+    (comme « Garder seulement le nom »), membres d'une structure deviennent
+    indépendants ; refusé tant qu'un contrat, un Brief, une fiche juridique ou un envoi
+    le nomme ;
+  - **sélection** : ce qui peut partir part, chaque ligne gardée est signalée avec sa
+    raison (toast) et reste cochée ; on supprime donc de haut en bas (projet → master →
+    artiste) ;
+  - toute référence inconnue de la fonction (nouvelle table) fait échouer la ligne sans
+    rien en effacer (`foreign_key_violation` → « encore utilisé ») : **une nouvelle table
+    qui pointe vers un projet doit être ajoutée à `delete_project_row`** ;
+  - les objets Storage (fichiers, audio, photos) restent dans leurs buckets, inaccessibles :
+    la politique de nettoyage Storage reste à décider (« À faire »).
+- **Archivage : DG seul** (`archive_records`), **refusé si utilisé** : un artiste crédité sur un master
   actif (ou artiste d'un projet actif), un master utilisé par un projet actif, un projet
   **lancé** (son travail vit dans ses étapes). On archive donc de haut en bas (projet →
   master → artiste) et on restaure dans l'autre sens. La raison connue d'avance
@@ -1217,10 +1248,18 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   `…20261004004001_legal_forms.sql`, `legal-forms.test.sql`), d'après le ticket Juridique 02.
   - **Une fiche par personne créditée** sur les titres du projet (`formPeople`, regroupée
     par contact ou, à défaut, par nom). « Préparer la fiche » (`prepare_legal_form`, manage_legal)
-    crée le contact s'il manque (crédits du même nom reliés), révoque le lien précédent et
+    crée le contact s'il manque (seul ce contact neuf prend les crédits non reliés de son
+    nom), révoque le lien précédent et
     renvoie un jeton de 64 hex **affiché une seule fois** : seul son `sha256` est gardé,
     il expire après 30 jours. L'équipe l'envoie par le canal qu'elle veut (« notamment pour
     un envoi WhatsApp dans le MVP ») puis le marque envoyé.
+  - **Jamais de rattachement par le nom** (audit du 06/10/2026,
+    `…20261006001001_legal_forms_no_name_link.sql`, `brief-credits-forms.test.sql`) : une
+    personne qui a déjà un contact ne lui fait pas prendre ses autres crédits non reliés, et
+    une personne sans contact mais avec un **homonyme dans le Réseau** n'a pas de fiche
+    (`legal_form_namesake`, `FormPerson.namesakeId`) : la ligne renvoie à « Relier » sur l'État
+    des lieux, sinon la fiche créait un doublon (l'ingénieur du mix y perdait son historique
+    côté Master). Comparaison des noms en SQL : `legal_name_key`, comme `normalizeSearch`.
   - **Sans compte** : `/f/` est hors session dans `lib/supabase/proxy.ts` ; la page lit et
     écrit par deux fonctions `security definer` accordées à `anon` (`get_legal_form`,
     `submit_legal_form`), qui ne font rien d'autre que ce jeton permet. Aucune table n'est
@@ -1321,7 +1360,10 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   - **États** du ticket, chacun avec ce qu'il exige (`clearance_missing`) : ayants droit de
     chaque droit concerné, un envoi consigné, des conditions validées, un contrat par droit,
     signé, puis le signé **et** la preuve pour « Sécurisé ». Refus, abandon et action requise
-    disent leur raison ; un refus « bloque la sortie en l'état ». Rien à sécuriser passe
+    disent leur raison ; un refus « bloque la sortie en l'état ». Un refus ou une action
+    requise **n'est pas une fin** : « Reprendre à … » ramène l'accord à l'état qu'il avait
+    avant (lu dans son journal, `nextStatus`), avec les mêmes exigences ; seul l'abandon
+    clôt. Rien à sécuriser passe
     directement à « Sécurisé » avec sa raison (Für Elise rejouée : composition du domaine
     public, à confirmer par le juridique).
   - **PO lit un échange libre** (`readClearanceMessage`, `lib/ai/schemas/legal-clearance.ts`) :
@@ -1453,6 +1495,14 @@ lots, chacun utile seul.
     (`master_briefs_calendar_order`) et par le code avant (`calendarInOrder`) ;
   - **Budget estimé** : total des deux tarifs, calculé par le code.
 
+  **L'ingénieur choisi est crédité** (audit du 06/10/2026,
+  `…20261006002001_master_brief_engineer_credits.sql`) : le trigger `z_credit_engineers` de
+  `master_briefs` ajoute un crédit `mix_engineer` / `mastering_engineer` **relié au contact**
+  sur chaque titre actif du projet sans Master final qui n'en a pas encore ; ce crédit est
+  marqué `from_brief` et remplacé si le Brief change d'ingénieur ; un crédit écrit à la main
+  n'est jamais touché. Sans ça, le Juridique (qui ne lit que les crédits) ne prévoyait ni
+  fiche ni contrat pour l'ingénieur, et l'État du master affichait « Personne ».
+
   **Avant le premier enregistrement**, le Brief part de ce que le projet sait : l'ingénieur
   de mix (ou de mastering) relié sur les crédits, s'il est le même sur tous les titres (et
   « même ingénieur » s'il fait les deux), le chef de projet comme validateur, Mix final et
@@ -1525,6 +1575,9 @@ lots, chacun utile seul.
     (`REMIND_AFTER_DAYS`, décision du 05/10/2026 : le ticket ne fixe pas de délai, trois
     jours laissent passer un week-end), lien expiré, remplacé. **« Relancer »** = un nouvel
     envoi qui remplace le lien précédent et renouvelle les fichiers pour 30 jours.
+    **« Renvoyer le dossier »** une fois le dossier reçu (nouvelle source confirmée, stems
+    définitifs, lien expiré) : même envoi, dossier recalculé tel qu'il est ce jour-là ; les
+    retours transmis restent lisibles (lus par projet, pas par envoi).
   - Ingénieur membre de l'équipe (« pour un utilisateur PO → Mon Travail ») : pas en V1, les
     ingénieurs sont des contacts du Réseau ; à brancher sur Travail le jour où l'un d'eux a
     un compte.
@@ -1560,7 +1613,8 @@ lots, chacun utile seul.
     (`master_mix_versions`) **dans chaque projet du titre qui a un Brief Mix/Master**,
     numérotée V1, V2… par titre et par projet, avec son auteur, sa date, son statut, et
     **notifie** les directeurs créatifs du projet et le validateur du Brief
-    (`master_mix_version_received`, jamais l'auteur de l'envoi).
+    (`master_mix_version_received`, jamais l'auteur de l'envoi). Sans Brief enregistré, la
+    section ne propose pas d'import (il ne créerait aucune version) et renvoie au Brief.
   - **Retours** : tout membre qui voit le projet commente une version (`master_mix_comments`,
     RLS `can_see_project`) — « les contributeurs commentent ».
   - **Synthèse** : le responsable l'écrit ; **« Proposer une synthèse »** fait rédiger PO

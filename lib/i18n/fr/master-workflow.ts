@@ -219,13 +219,23 @@ export const masterWorkflow = {
       mix: "Transmettre au mixeur",
       mastering: "Transmettre au mastering",
     },
-    remind: "Relancer",
     transmitTitle: "Transmettre le dossier",
-    remindTitle: "Relancer le mixeur",
     transmitDescription:
       "Un lien privé, valable 30 jours, donne accès au dossier et à ses fichiers, sans compte. Il n'est affiché qu'une fois : copiez-le ou envoyez-le tout de suite.",
-    remindDescription:
-      "Un nouveau lien remplace le précédent (et renouvelle les fichiers pour 30 jours). Il n'est affiché qu'une fois.",
+    modes: {
+      remind: {
+        label: "Relancer",
+        title: "Relancer l'ingénieur",
+        description:
+          "Un nouveau lien remplace le précédent (et renouvelle les fichiers pour 30 jours). Il n'est affiché qu'une fois.",
+      },
+      resend: {
+        label: "Renvoyer le dossier",
+        title: "Renvoyer le dossier",
+        description:
+          "Le dossier est recalculé tel qu'il est aujourd'hui (source, stems, Brief) et un nouveau lien remplace le précédent, pour 30 jours. Les retours déjà transmis y restent. Il n'est affiché qu'une fois.",
+      },
+    },
     note: "Message pour le mixeur",
     noteHint: "Facultatif, affiché en tête du dossier.",
     submit: "Créer le lien",
@@ -301,6 +311,9 @@ export const masterWorkflow = {
     },
   },
   mixVersions: {
+    needsBrief:
+      "Les versions sont suivies dès que le Brief Mix/Master est enregistré : c'est lui qui désigne l'ingénieur et le validateur.",
+    openBrief: "Ouvrir le Brief Mix/Master",
     // What differs between the versions of the mix and of the mastering.
     stages: {
       mix: {

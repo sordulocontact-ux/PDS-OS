@@ -58,7 +58,10 @@ export function ProgressSection({
               )
             }
           >
-            {t.drawer.moveTo(t.statuses[next])}
+            {clearance.status === "refused" ||
+            clearance.status === "action_required"
+              ? t.drawer.resumeAt(t.statuses[next])
+              : t.drawer.moveTo(t.statuses[next])}
           </Button>
         )}
         {CLEARANCE_EXCEPTIONS.filter((e) => e !== clearance.status).map((e) => (

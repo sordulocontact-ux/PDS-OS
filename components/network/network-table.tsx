@@ -2,6 +2,7 @@
 
 import { IconOffice, IconUser } from "nucleo-sharp-essential";
 
+import { RecordSelection } from "@/components/archive/record-selection";
 import { ContactActions } from "@/components/network/contact-actions";
 import {
   DataTable,
@@ -17,13 +18,15 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
+import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { rolesText, type NetworkContactRow } from "@/lib/network/types";
 
 // The network, by name: a person or an organization (its icon), what it
-// does, how to reach it; the row opens its page, "⋯" edits or archives it.
+// does, how to reach it; the row opens its page, "⋯" edits, archives or
+// deletes it, checkboxes delete several at once (director).
 export function NetworkTable({
   contacts,
   rights,
@@ -32,10 +35,13 @@ export function NetworkTable({
   rights: RecordRights;
 }) {
   const t = fr.network;
+  const selection = fr.records.selection;
+  const withSelection = rights.canArchive;
 
-  return (
+  const table = (
     <DataTable>
       <DataTableHeader>
+        {withSelection && <SelectAllHead label={selection.all} />}
         <DataTableHead>{t.columns.name}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.roles}</DataTableHead>
         <DataTableHead hideBelow="lg">{t.columns.contact}</DataTableHead>
@@ -47,6 +53,12 @@ export function NetworkTable({
       <DataTableBody>
         {contacts.map((contact) => (
           <DataTableRow key={contact.id}>
+            {withSelection && (
+              <SelectRowCell
+                row={{ id: contact.id, name: contact.name }}
+                label={selection.row(contact.name)}
+              />
+            )}
             <DataTableCell>
               <DataTableMedia
                 visual={
@@ -108,5 +120,11 @@ export function NetworkTable({
         ))}
       </DataTableBody>
     </DataTable>
+  );
+
+  return withSelection ? (
+    <RecordSelection kind="contact">{table}</RecordSelection>
+  ) : (
+    table
   );
 }

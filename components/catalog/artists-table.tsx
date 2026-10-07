@@ -1,3 +1,4 @@
+import { RecordSelection } from "@/components/archive/record-selection";
 import { ArtistActions } from "@/components/catalog/artist-actions";
 import { ArtistAvatar } from "@/components/catalog/artist-avatar";
 import {
@@ -13,6 +14,7 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
+import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import type { ArtistListItem } from "@/lib/catalog/types";
@@ -22,20 +24,26 @@ export function ArtistsTable({
   artists,
   showRelation = false,
   rights,
+  selectable = false,
 }: {
   artists: ArtistListItem[];
   // "Signé" / "Collaboration" as plain text, when the list mixes both.
   showRelation?: boolean;
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
+  // Checkboxes to delete several at once (main list, director only).
+  selectable?: boolean;
 }) {
   const t = fr.catalog.artists.columns;
   const relationLabels = fr.catalog.relation.labels;
   const withActions = rights && (rights.canEdit || rights.canArchive);
+  const withSelection = selectable && rights?.canArchive;
+  const selection = fr.records.selection;
 
-  return (
+  const table = (
     <DataTable>
       <DataTableHeader>
+        {withSelection && <SelectAllHead label={selection.all} />}
         <DataTableHead>{t.name}</DataTableHead>
         {showRelation && (
           <DataTableHead hideBelow="sm">{t.relation}</DataTableHead>
@@ -49,6 +57,12 @@ export function ArtistsTable({
       <DataTableBody>
         {artists.map((artist) => (
           <DataTableRow key={artist.id}>
+            {withSelection && (
+              <SelectRowCell
+                row={{ id: artist.id, name: artist.name }}
+                label={selection.row(artist.name)}
+              />
+            )}
             <DataTableCell>
               <DataTableMedia
                 visual={
@@ -94,5 +108,11 @@ export function ArtistsTable({
         ))}
       </DataTableBody>
     </DataTable>
+  );
+
+  return withSelection ? (
+    <RecordSelection kind="artist">{table}</RecordSelection>
+  ) : (
+    table
   );
 }

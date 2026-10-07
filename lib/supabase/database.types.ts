@@ -2864,6 +2864,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           detail: string | null
+          from_brief: boolean
           id: string
           master_id: string
           name: string
@@ -2876,6 +2877,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           detail?: string | null
+          from_brief?: boolean
           id?: string
           master_id: string
           name: string
@@ -2888,6 +2890,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           detail?: string | null
+          from_brief?: boolean
           id?: string
           master_id?: string
           name?: string
@@ -5601,6 +5604,13 @@ export type Database = {
         Args: { p_formality_id: string; p_reason: string }
         Returns: undefined
       }
+      delete_records: {
+        Args: { p_ids: string[]; p_kind: string }
+        Returns: {
+          error: string
+          record_id: string
+        }[]
+      }
       design_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       design_is_in_progress: {
         Args: { p_project_id: string }
@@ -5785,6 +5795,7 @@ export type Database = {
         Returns: undefined
       }
       get_legal_form: { Args: { p_token: string }; Returns: Json }
+      legal_name_key: { Args: { p_name: string }; Returns: string }
       launch_legal_plan: {
         Args: { p_items: Json; p_project_id: string }
         Returns: string

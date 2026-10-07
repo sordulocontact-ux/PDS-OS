@@ -1,3 +1,4 @@
+import { RecordSelection } from "@/components/archive/record-selection";
 import { ProjectActions } from "@/components/projects/project-actions";
 import { ProjectKindBadge } from "@/components/projects/project-kind-badge";
 import {
@@ -12,6 +13,11 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
+import {
+  SelectAllHead,
+  SelectEmptyCell,
+  SelectRowCell,
+} from "@/components/ui/row-selection";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
@@ -30,6 +36,7 @@ export function ProjectsTable({
   projects,
   drafts = [],
   rights,
+  selectable = false,
 }: {
   projects: ProjectListItem[];
   // The viewer's drafts of the new project form, listed first: a click
@@ -37,13 +44,18 @@ export function ProjectsTable({
   drafts?: ProjectDraftItem[];
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
+  // Checkboxes to delete several at once (main list, director only).
+  selectable?: boolean;
 }) {
   const t = fr.shell.projects;
   const withActions = rights && (rights.canEdit || rights.canArchive);
+  const withSelection = selectable && rights?.canArchive;
+  const selection = fr.records.selection;
 
-  return (
+  const table = (
     <DataTable>
       <DataTableHeader>
+        {withSelection && <SelectAllHead label={selection.all} />}
         <DataTableHead>{t.columns.title}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.artist}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.type}</DataTableHead>
@@ -53,6 +65,8 @@ export function ProjectsTable({
       <DataTableBody>
         {drafts.map((draft) => (
           <DataTableRow key={`draft-${draft.id}`}>
+            {/* A draft is deleted from its form. */}
+            {withSelection && <SelectEmptyCell />}
             <DataTableCell>
               <DataTableLink href={`${routes.projectsNew}?draft=${draft.id}`}>
                 {draft.title || fr.shell.newProject.draft.untitled}
@@ -72,6 +86,12 @@ export function ProjectsTable({
         ))}
         {projects.map((project) => (
           <DataTableRow key={project.id}>
+            {withSelection && (
+              <SelectRowCell
+                row={{ id: project.id, name: project.title }}
+                label={selection.row(project.title)}
+              />
+            )}
             <DataTableCell>
               <span className="flex flex-wrap items-center gap-2">
                 <DataTableLink
@@ -129,5 +149,11 @@ export function ProjectsTable({
         ))}
       </DataTableBody>
     </DataTable>
+  );
+
+  return withSelection ? (
+    <RecordSelection kind="project">{table}</RecordSelection>
+  ) : (
+    table
   );
 }

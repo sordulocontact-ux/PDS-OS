@@ -15,7 +15,7 @@ const ArtistEditBody = dynamic(() =>
   ),
 );
 
-/** "⋯" of an artist: edit its profile, archive or restore it. */
+/** "⋯" of an artist: edit its profile, archive, restore or delete it. */
 export function ArtistActions({
   artist,
   rights,
@@ -38,6 +38,11 @@ export function ArtistActions({
       blockedReason={
         artist.masterCount > 0
           ? fr.records.archive.blocked.artistHasMasters(artist.masterCount)
+          : undefined
+      }
+      deleteBlockedReason={
+        artist.masterCount > 0
+          ? fr.records.delete.blocked.artistHasMasters(artist.masterCount)
           : undefined
       }
       edit={(close) => (

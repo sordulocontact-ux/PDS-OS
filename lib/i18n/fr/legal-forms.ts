@@ -129,6 +129,9 @@ export const legalForms = {
     },
     prepare: "Préparer la fiche",
     preparing: "Préparation…",
+    namesake:
+      "Quelqu'un de ce nom est déjà dans le Réseau : reliez d'abord son crédit sur l'État des lieux.",
+    linkFirst: "Relier sur l'État des lieux",
     newLink: "Nouveau lien",
     linkTitle: (name: string) => `Lien de la fiche de ${name}`,
     linkBody:

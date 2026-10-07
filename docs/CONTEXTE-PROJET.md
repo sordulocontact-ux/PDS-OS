@@ -81,6 +81,19 @@ tickets du 30/09 (Cadrage, Master, Juridique 01 à 08) :
 - **Le Brief comme source.** Les tickets Master et Juridique 01 ne citent pas le Brief de
   cadrage parmi leurs sources. D'après la logique ci-dessus, ils doivent en partir
   (dimension « Cadre juridique », mixeur, échéances).
+- **Ce que le Cadrage intelligent transmet au Master** (audit du 06/10/2026). La précision
+  du DG ci-dessus dit que le Cadrage initialise « qui mixe, qui masterise, date du master
+  final ». Le ticket Cadrage ne les nomme pas : il parle seulement d'« intervenants,
+  validateurs » (04 Équipe) et de « date cible, échéances imposées » (02 Temporalité).
+  Aujourd'hui, le Master ne lit rien du Cadrage : le Brief Mix/Master fait saisir ces
+  valeurs. Deux choix sont retenus pour le Cadrage intelligent :
+  - **04 Équipe porte les rôles Mix et Mastering** (personne du Réseau). Le Brief Mix/Master
+    les reprend pré-remplis, puis l'ingénieur choisi est crédité sur les titres, ce qui le
+    rend visible au Juridique (déjà en place depuis le Brief).
+  - **02 Temporalité porte la date du master final** quand il y a une sortie musicale. Elle
+    alimente le calendrier proposé par le Brief Mix/Master.
+  Le « Cadrage Master » du ticket Master (§ 3) **reste** : il part de ces valeurs et les fait
+  confirmer, au lieu de les redemander. Il ne remplace pas le Cadrage global.
 - **Juridique 08 (Récap Sortie)** relève de l'étape **Livraison**, pas du Juridique. La
   brique « Distribution », que le Master interroge, n'a pas de ticket.
 - **Juridique 07 (moteur de dépendances)** sert à tout le projet. Les tickets 02 à 05 en

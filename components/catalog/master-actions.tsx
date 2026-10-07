@@ -5,7 +5,7 @@ import { MasterEditForm } from "@/components/catalog/master-edit-form";
 import type { RecordRights } from "@/lib/archive/types";
 import { fr } from "@/lib/i18n/fr";
 
-/** "⋯" of a master: edit it (credits included), archive or restore it. */
+/** "⋯" of a master: edit it (credits included), archive, restore or delete it. */
 export function MasterActions({
   master,
   rights,
@@ -28,6 +28,11 @@ export function MasterActions({
       blockedReason={
         master.projectCount > 0
           ? fr.records.archive.blocked.masterHasProjects(master.projectCount)
+          : undefined
+      }
+      deleteBlockedReason={
+        master.projectCount > 0
+          ? fr.records.delete.blocked.masterHasProjects(master.projectCount)
           : undefined
       }
       edit={(close) => (

@@ -39,3 +39,26 @@ export type RecordRights = {
   // The list shows the archive: rows can only be restored.
   archived: boolean;
 };
+
+// Deleting for good, one row or a selection (…20261006000101_delete_records).
+
+/** Rows deleted in one call, at most (checked again by the database). */
+export const MAX_DELETE = 200;
+
+/** Translated in fr.records.delete.errors. */
+export type DeleteErrorCode =
+  | "forbidden"
+  | "not_found"
+  | "artist_in_use"
+  | "master_in_use"
+  | "contact_in_use"
+  | "generic";
+
+/** What could go went: the rows refused are reported one by one. */
+export type DeleteResult =
+  | {
+      ok: true;
+      deleted: string[];
+      failed: { id: string; error: DeleteErrorCode }[];
+    }
+  | { ok: false; error: DeleteErrorCode };

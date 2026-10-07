@@ -4,11 +4,13 @@ import {
   IconArrowDottedRotateAnticlockwise,
   IconBoxArchive,
   IconPenWriting2,
+  IconTrash,
 } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import { useDeleteRecords } from "@/components/archive/use-delete-records";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
@@ -16,17 +18,19 @@ import { setArchived } from "@/lib/archive/actions";
 import type { ArchiveKind, RecordRights } from "@/lib/archive/types";
 import { fr } from "@/lib/i18n/fr";
 
-type Open = "none" | "edit" | "archive";
+type Open = "none" | "edit" | "archive" | "delete";
 
-// "⋯" of an artist, a master or a project: Modifier (the real form in the
-// design system's modal), Archiver or Restaurer (confirmed). The database decides; a
-// reason known in advance (`blockedReason`) is explained instead of asked.
+// "⋯" of an artist, a master, a project or a contact: Modifier (the real form
+// in the design system's modal), Archiver or Restaurer, Supprimer (confirmed,
+// definitive). The database decides; a reason known in advance
+// (`blockedReason`, `deleteBlockedReason`) is explained instead of asked.
 export function RecordActions({
   kind,
   id,
   name,
   rights,
   blockedReason,
+  deleteBlockedReason,
   edit,
   leaveTo,
   size,
@@ -36,9 +40,10 @@ export function RecordActions({
   name: string;
   rights: RecordRights;
   blockedReason?: string;
+  deleteBlockedReason?: string;
   // Body of the edit modal; absent = not editable here.
   edit?: (close: () => void) => ReactNode;
-  // Detail page: where to go once the record is archived.
+  // Detail page: where to go once the record is archived or deleted.
   leaveTo?: string;
   size?: "icon-sm" | "icon-lg";
 }) {
@@ -46,6 +51,7 @@ export function RecordActions({
   const router = useRouter();
   const [open, setOpen] = useState<Open>("none");
   const [pending, startTransition] = useTransition();
+  const deletion = useDeleteRecords(kind);
   const close = () => setOpen("none");
   const restoring = rights.archived;
 
@@ -65,6 +71,13 @@ export function RecordActions({
       icon: restoring ? IconArrowDottedRotateAnticlockwise : IconBoxArchive,
       onSelect: () => setOpen("archive"),
     });
+    // Same permission: the director archives or deletes, live or archived.
+    actions.push({
+      key: "delete",
+      label: t.menu.delete,
+      icon: IconTrash,
+      onSelect: () => setOpen("delete"),
+    });
   }
 
   function confirm() {
@@ -77,6 +90,14 @@ export function RecordActions({
       toast.success(restoring ? t.restore.done : t.archive.done);
       close();
       if (leaveTo && !restoring) router.replace(leaveTo);
+    });
+  }
+
+  function confirmDelete() {
+    deletion.remove([{ id, name }], (deleted) => {
+      if (!deleted.includes(id)) return;
+      close();
+      if (leaveTo) router.replace(leaveTo);
     });
   }
 
@@ -117,6 +138,24 @@ export function RecordActions({
         pendingLabel={restoring ? t.restore.pending : t.archive.pending}
         pending={pending}
         onConfirm={blocked ? undefined : confirm}
+      />
+
+      <ConfirmDialog
+        open={open === "delete"}
+        onOpenChange={(next) => !next && !deletion.pending && close()}
+        title={
+          deleteBlockedReason
+            ? t.delete.blockedTitle(name)
+            : t.delete.title(name)
+        }
+        description={deleteBlockedReason ?? t.delete.body[kind]}
+        cancelLabel={deleteBlockedReason ? t.archive.understood : t.cancel}
+        closeLabel={t.edit.close}
+        confirmLabel={t.delete.confirm}
+        pendingLabel={t.delete.pending}
+        pending={deletion.pending}
+        destructive
+        onConfirm={deleteBlockedReason ? undefined : confirmDelete}
       />
     </>
   );

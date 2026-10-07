@@ -104,7 +104,13 @@ export async function loadClearances(
     (rows.data ?? []).map(async (row): Promise<Clearance> => {
       const status = row.status as ClearanceStatus;
       const scope = row.rights_scope as Scope | null;
-      const next = nextStatus(status, scope);
+      // Newest first: the last move into the current state says where it
+      // came from (the state to resume after a refusal).
+      const before =
+        (events.data ?? []).find(
+          (e) => e.clearance_id === row.id && e.to_status === status,
+        )?.from_status ?? null;
+      const next = nextStatus(status, scope, before);
       const missing = next
         ? ((
             await supabase.rpc("clearance_missing", {

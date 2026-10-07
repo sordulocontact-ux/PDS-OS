@@ -1,7 +1,19 @@
 // Row actions of the lists (artists, titles, projects, network contacts):
-// "⋯" menu, edit panel, archiving (docs/ARCHITECTURE.md § 2 quater).
+// "⋯" menu, edit panel, archiving, deleting one row or a selection
+// (docs/ARCHITECTURE.md § 2 quater).
 
 type Kind = "artist" | "master" | "project" | "contact";
+
+// Singular and plural nouns, for the selection counts.
+const nouns = {
+  artist: ["artiste", "artistes"],
+  master: ["titre", "titres"],
+  project: ["projet", "projets"],
+  contact: ["contact", "contacts"],
+} as const satisfies Record<Kind, readonly [string, string]>;
+
+const count = (kind: Kind, n: number) =>
+  `${n}\u00a0${nouns[kind][n === 1 ? 0 : 1]}`;
 
 export const records = {
   menu: {
@@ -10,6 +22,17 @@ export const records = {
     edit: "Modifier",
     archive: "Archiver",
     restore: "Restaurer",
+    delete: "Supprimer",
+  },
+  // Checkboxes of the main lists and the bar shown once a row is ticked.
+  selection: {
+    column: "Sélection",
+    all: "Tout sélectionner",
+    row: (name: string) => `Sélectionner « ${name} »`,
+    bar: "Actions sur la sélection",
+    count: (n: number) => (n === 1 ? "1 sélectionné" : `${n} sélectionnés`),
+    clear: "Tout désélectionner",
+    delete: "Supprimer",
   },
   // The list filter: live rows, or the archive (director only).
   view: {
@@ -88,6 +111,62 @@ export const records = {
     confirm: "Restaurer",
     pending: "Restauration…",
     done: "Restauré.",
+  },
+  delete: {
+    title: (name: string) => `Supprimer « ${name} » ?`,
+    titleMany: (kind: Kind, n: number) => `Supprimer ${count(kind, n)} ?`,
+    body: {
+      artist:
+        "L'artiste est supprimé avec ses contacts, ses fichiers et son journal. C'est définitif : pour le mettre de côté sans rien perdre, archivez-le plutôt.",
+      master:
+        "Le titre est supprimé avec ses crédits, ses splits, ses déclarations, ses fichiers et son journal. C'est définitif : pour le mettre de côté sans rien perdre, archivez-le plutôt.",
+      project:
+        "Le projet est supprimé avec tout ce qu'il contient : étapes, calls, tâches, stratégie, budget, fichiers, juridique, master et contrats du projet. Ses titres et son artiste restent au catalogue. C'est définitif : pour le mettre de côté, archivez-le plutôt.",
+      contact:
+        "Le contact est supprimé du Réseau. Les crédits et les parts qui le nommaient gardent son nom, sans lien. C'est définitif : pour le mettre de côté, archivez-le plutôt.",
+    } satisfies Record<Kind, string>,
+    bodyMany: {
+      artist:
+        "Chaque artiste est supprimé avec ses contacts, ses fichiers et son journal. Ceux encore crédités sur un titre, ou liés à un projet ou un contrat, sont gardés et signalés. C'est définitif.",
+      master:
+        "Chaque titre est supprimé avec ses crédits, ses splits, ses déclarations, ses fichiers et son journal. Ceux qu'un projet utilise encore sont gardés et signalés. C'est définitif.",
+      project:
+        "Chaque projet est supprimé avec tout ce qu'il contient : étapes, calls, tâches, stratégie, budget, fichiers, juridique, master et contrats du projet. Leurs titres et artistes restent au catalogue. C'est définitif.",
+      contact:
+        "Chaque contact est supprimé du Réseau ; les crédits et les parts qui le nommaient gardent son nom, sans lien. Ceux encore nommés dans un contrat ou un dossier sont gardés et signalés. C'est définitif.",
+    } satisfies Record<Kind, string>,
+    confirm: "Supprimer définitivement",
+    pending: "Suppression…",
+    done: (kind: Kind, n: number) =>
+      n === 1 ? "Supprimé." : `${count(kind, n)} supprimés.`,
+    // Some rows of a selection stayed: one line each, with its reason.
+    partial: (kind: Kind, n: number) =>
+      n === 1
+        ? "1 élément n'a pas pu être supprimé."
+        : `${count(kind, n)} n'ont pas pu être supprimés.`,
+    reason: (name: string, reason: string) => `« ${name} » : ${reason}`,
+    // Known before asking: the dialog explains instead of confirming.
+    blockedTitle: (name: string) => `« ${name} » ne peut pas être supprimé`,
+    blocked: {
+      artistHasMasters: (n: number) =>
+        n === 1
+          ? "Un titre crédite cet artiste. Supprimez d'abord ce titre, ou retirez-en l'artiste."
+          : `${n} titres créditent cet artiste. Supprimez d'abord ces titres, ou retirez-en l'artiste.`,
+      masterHasProjects: (n: number) =>
+        n === 1
+          ? "Un projet utilise ce titre. Supprimez d'abord ce projet."
+          : `${n} projets utilisent ce titre. Supprimez d'abord ces projets.`,
+    },
+    errors: {
+      forbidden: "Seul le directeur général peut supprimer.",
+      not_found: "Cet élément n'existe plus ou ne vous est pas visible.",
+      artist_in_use:
+        "encore crédité sur un titre, ou lié à un projet ou un contrat.",
+      master_in_use: "encore utilisé par un projet.",
+      contact_in_use:
+        "encore partie à un contrat, ou nommé dans le Brief, le juridique ou un envoi d'un projet.",
+      generic: "La suppression n'a pas abouti. Réessayez.",
+    },
   },
   cancel: "Annuler",
   errors: {

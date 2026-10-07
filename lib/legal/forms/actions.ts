@@ -24,7 +24,8 @@ export type PrepareResult =
 
 /**
  * Prepares the fiche of one credited person: their contact (created from the
- * credit if they are not in the Réseau, credits linked), a new link (the
+ * credit if nobody of that name is in the Réseau, credits linked; a namesake
+ * is linked first with « Relier », never here), a new link (the
  * previous one revoked). The person is found again on the server from the
  * project's credits, never taken from the browser. The link is returned
  * once: only its hash is kept.
@@ -48,6 +49,7 @@ export async function prepareLegalForm(
   );
   const person = formPeople(rows).find((p) => p.key === personKey);
   if (!person) return { ok: false, error: t.failed };
+  if (person.namesakeId) return { ok: false, error: t.namesake };
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("prepare_legal_form", {
@@ -55,7 +57,8 @@ export async function prepareLegalForm(
     p_contact_id: person.contactId,
     p_name: person.name,
     p_network_roles: person.networkRoles,
-    p_credit_ids: person.unlinkedCreditIds,
+    // Only a contact created now takes the credits (prepare_legal_form).
+    p_credit_ids: person.contactId ? [] : person.unlinkedCreditIds,
     p_prefill: { roles: person.formRoles },
     p_version: LEGAL_FORM_VERSION,
   });

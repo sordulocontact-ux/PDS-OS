@@ -75,6 +75,7 @@ export default async function ArtistsPage({
             )
           ) : (
             <ArtistsTable
+              selectable
               artists={artists}
               // Within a relation filter, it goes without saying.
               showRelation={relation === null}

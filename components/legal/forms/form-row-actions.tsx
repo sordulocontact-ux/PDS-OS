@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -7,6 +8,7 @@ import { toast } from "sonner";
 import { SubmissionDialog } from "@/components/legal/forms/submission-dialog";
 import { Button } from "@/components/ui/button";
 import { LinksDialog } from "@/components/ui/links-dialog";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { prepareLegalForm, setLegalFormState } from "@/lib/legal/forms/actions";
 import type { FormRow } from "@/lib/legal/forms/queries";
@@ -42,6 +44,21 @@ export function FormRowActions({
       else toast.error(result.error);
     });
   const open = row.state === "link_generated" || row.state === "sent";
+
+  // A namesake in the Réseau: the credit is linked first (État des lieux),
+  // otherwise the fiche would create a duplicate contact.
+  if (row.namesakeId)
+    return (
+      <div className="flex flex-col gap-1 sm:items-end">
+        <p className="text-caption text-muted-foreground">{t.namesake}</p>
+        <Link
+          href={routes.projectLegal(projectId)}
+          className="text-sm underline underline-offset-4"
+        >
+          {t.linkFirst}
+        </Link>
+      </div>
+    );
 
   return (
     <div className="flex flex-wrap items-center gap-2 sm:justify-end">

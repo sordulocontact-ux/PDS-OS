@@ -1,6 +1,8 @@
 // Who a fiche de renseignements goes to: each person credited on the
 // project's titles, once (by name, across titles), with the credits to link
-// to their contact and the roles their credits already say (to pre-tick,
+// to their contact when it is created for the fiche, a namesake of the
+// Réseau when there is one (it is linked first, by a human: « Relier »),
+// and the roles their credits already say (to pre-tick,
 // « Les rôles préremplis viennent du cadrage et restent corrigeables »).
 // Catalog performers are not here: their artist page is their source. Pure.
 
@@ -28,8 +30,12 @@ export type FormPerson = {
   key: string;
   name: string;
   contactId: string | null;
-  // Credits not linked to a contact yet: linked when the fiche is prepared.
+  // Credits not linked to a contact yet: linked to the contact created for
+  // the fiche (never to an existing one: that is « Relier »).
   unlinkedCreditIds: string[];
+  // No contact, but the Réseau has someone of that name: no fiche (it would
+  // create a duplicate) until the credits are linked.
+  namesakeId: string | null;
   creditRoles: ContributorRole[];
   formRoles: FormRole[];
   networkRoles: NetworkRole[];
@@ -49,6 +55,7 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
         name: credit.name,
         contactId: null,
         unlinkedCreditIds: [],
+        namesakeId: null,
         creditRoles: [],
         formRoles: [],
         networkRoles: [],
@@ -60,5 +67,8 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
       addOnce(person.networkRoles, NETWORK_ROLE_OF[credit.role]);
       people.set(key, person);
     }
+  for (const person of people.values())
+    if (!person.contactId)
+      person.namesakeId = rows.network.byName.get(person.key)?.id ?? null;
   return [...people.values()];
 }

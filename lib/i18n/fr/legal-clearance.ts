@@ -114,6 +114,7 @@ export const legalClearance = {
     reject: "Refuser",
     progress: "Avancement",
     moveTo: (label: string) => `Passer à « ${label} »`,
+    resumeAt: (label: string) => `Reprendre à « ${label} »`,
     needs: "Pour passer à l'étape suivante :",
     exceptions: {
       refused: "Refus des ayants droit",

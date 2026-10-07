@@ -1,3 +1,4 @@
+import { RecordSelection } from "@/components/archive/record-selection";
 import { MasterActions } from "@/components/catalog/master-actions";
 import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
 import { IconDisc } from "@/components/icons";
@@ -15,6 +16,7 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
+import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
@@ -27,17 +29,23 @@ import { masterReleaseTone } from "@/lib/ui/state-tones";
 export function MastersTable({
   masters,
   rights,
+  selectable = false,
 }: {
   masters: MasterRow[];
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
+  // Checkboxes to delete several at once (main list, director only).
+  selectable?: boolean;
 }) {
   const t = fr.catalog.masters;
   const withActions = rights && (rights.canEdit || rights.canArchive);
+  const withSelection = selectable && rights?.canArchive;
+  const selection = fr.records.selection;
 
-  return (
+  const table = (
     <DataTable>
       <DataTableHeader>
+        {withSelection && <SelectAllHead label={selection.all} />}
         <DataTableHead>{t.columns.title}</DataTableHead>
         <DataTableHead>{t.columns.artists}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.audioState}</DataTableHead>
@@ -50,6 +58,12 @@ export function MastersTable({
       <DataTableBody>
         {masters.map((master) => (
           <DataTableRow key={master.id}>
+            {withSelection && (
+              <SelectRowCell
+                row={{ id: master.id, name: master.title }}
+                label={selection.row(master.title)}
+              />
+            )}
             <DataTableCell>
               <DataTableMedia
                 visual={<DataTableIcon icon={IconDisc} />}
@@ -116,5 +130,11 @@ export function MastersTable({
         ))}
       </DataTableBody>
     </DataTable>
+  );
+
+  return withSelection ? (
+    <RecordSelection kind="master">{table}</RecordSelection>
+  ) : (
+    table
   );
 }

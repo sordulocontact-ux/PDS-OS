@@ -33,6 +33,7 @@ export function MixPage({
           view={versions}
           canEdit={view.canEdit}
           organizationId={view.organizationId}
+          hasBrief={view.brief !== null}
         />
       </PageSection>
     </div>

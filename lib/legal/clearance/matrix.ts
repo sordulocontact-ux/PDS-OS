@@ -52,14 +52,26 @@ export const rightsOf = (scope: Scope | null): RightKind[] =>
 export const isClosed = (status: ClearanceStatus) =>
   status === "cleared" || status === "abandoned";
 
-/** The next state of the path; nothing to secure goes straight to CLEARED. */
+const onPath = (
+  status: string | null,
+): status is (typeof CLEARANCE_PATH)[number] =>
+  CLEARANCE_PATH.includes(status as (typeof CLEARANCE_PATH)[number]);
+
+/**
+ * The next state of the path; nothing to secure goes straight to CLEARED.
+ * A refusal or an action required is not an end (the rights holder comes
+ * back, the action is done): the clearance resumes at the state it held
+ * before (`before`, read in its journal), or from the start.
+ */
 export function nextStatus(
   status: ClearanceStatus,
   scope: Scope | null,
+  before: string | null = null,
 ): ClearanceStatus | null {
   if (isClosed(status)) return null;
   if (scope === "none") return "cleared";
-  if (status === "refused" || status === "action_required") return null;
+  if (status === "refused" || status === "action_required")
+    return onPath(before) ? before : "to_investigate";
   const i = CLEARANCE_PATH.indexOf(status as (typeof CLEARANCE_PATH)[number]);
   return i >= 0 && i < CLEARANCE_PATH.length - 1 ? CLEARANCE_PATH[i + 1] : null;
 }

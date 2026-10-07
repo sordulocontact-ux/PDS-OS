@@ -77,6 +77,7 @@ export default async function ProjectsPage({
             )
           ) : (
             <ProjectsTable
+              selectable
               projects={projects}
               drafts={drafts}
               rights={{

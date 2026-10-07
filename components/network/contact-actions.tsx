@@ -10,7 +10,7 @@ import type { RecordRights } from "@/lib/archive/types";
 import { fr } from "@/lib/i18n/fr";
 import { loadContactEdit } from "@/lib/network/actions";
 
-/** "⋯" of a network contact: edit it, archive or restore it (director). */
+/** "⋯" of a network contact: edit it, archive, restore or delete it (director). */
 export function ContactActions({
   contact,
   rights,

@@ -15,23 +15,27 @@ import { fr } from "@/lib/i18n/fr";
 import type { PackageRole } from "@/lib/master-workflow/transmission";
 import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
 
+export type TransmitMode = "first" | "remind" | "resend";
+
 /**
- * "Transmettre au mixeur" / "Relancer": a note, then the private link,
- * shown once (only its hash is stored): copy it, or open an e-mail to the
- * engineer with it. The follow-up refreshes when the modal closes.
+ * "Transmettre au mixeur", "Relancer" (no answer yet) or "Renvoyer le
+ * dossier" (received, but the package changed or its link expired): a note,
+ * then the private link, shown once (only its hash is stored): copy it, or
+ * open an e-mail to the engineer with it. The follow-up refreshes when the
+ * modal closes.
  */
 export function TransmitButton({
   projectId,
   projectTitle,
   engineerEmail,
-  remind,
+  mode,
   role,
 }: {
   projectId: string;
   projectTitle: string;
   engineerEmail: string | null;
-  // A reminder: a new link replaces the previous one.
-  remind: boolean;
+  // After the first sending, a new link always replaces the previous one.
+  mode: TransmitMode;
   role: PackageRole;
 }) {
   const t = fr.masterWorkflow.mix;
@@ -44,18 +48,20 @@ export function TransmitButton({
   return (
     <>
       <Button
-        variant={remind ? "outline" : "default"}
+        variant={mode === "first" ? "default" : "outline"}
         size="sm"
         onClick={() => setOpen(true)}
       >
         <IconPaperPlane2 aria-hidden data-icon="inline-start" />
-        {remind ? t.remind : t.transmitTo[role]}
+        {mode === "first" ? t.transmitTo[role] : t.modes[mode].label}
       </Button>
       <FormDialog
         open={open}
         onOpenChange={close}
-        title={remind ? t.remindTitle : t.transmitTitle}
-        description={remind ? t.remindDescription : t.transmitDescription}
+        title={mode === "first" ? t.transmitTitle : t.modes[mode].title}
+        description={
+          mode === "first" ? t.transmitDescription : t.modes[mode].description
+        }
         closeLabel={t.close}
       >
         <TransmitForm

@@ -25,7 +25,9 @@ export function MastersList({
       placeholder={t.placeholder}
       noResult={t.noResult}
     >
-      {(visible) => <MastersTable masters={visible} rights={rights} />}
+      {(visible) => (
+        <MastersTable masters={visible} rights={rights} selectable />
+      )}
     </SearchableList>
   );
 }

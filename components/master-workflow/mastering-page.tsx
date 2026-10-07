@@ -49,6 +49,7 @@ export function MasteringPage({
           view={versions}
           canEdit={view.canEdit}
           organizationId={view.organizationId}
+          hasBrief={view.brief !== null}
         />
       </PageSection>
     </div>
