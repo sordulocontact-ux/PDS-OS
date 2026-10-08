@@ -52,13 +52,15 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926001401_strategy_choice_suggestions` | Questions à choix fermé de la Stratégie : `field_values` clés `<champ>_choices` (confirmé, manuel) et `<champ>_suggestions` (source `suggestion`, toujours `proposed`/`rejected`). |
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
-| `…261006000101_delete_records` | Suppression définitive (§ 2 quater) : `delete_records(kind, ids[])` (SECURITY DEFINER, `archive_records`, 200 lignes au plus) renvoie une ligne par id (`error` nul = supprimée, sinon `not_found` / `forbidden` / `*_in_use` / `generic`), chaque id dans son sous-bloc ; un projet part avec tout son contenu (`delete_project_row`, enfants avant parents), un master / artiste / contact seulement s'il n'est plus utilisé ; crédits et parts d'un contact supprimé gardent le nom sans lien. Tests : `delete-records.test.sql`. |
+| `…20261006000301_delete_records` (numéroté `000101` à l'origine, en double avec le Cadrage intelligent) | Suppression définitive (§ 2 quater) : `delete_records(kind, ids[])` (SECURITY DEFINER, `archive_records`, 200 lignes au plus) renvoie une ligne par id (`error` nul = supprimée, sinon `not_found` / `forbidden` / `*_in_use` / `generic`), chaque id dans son sous-bloc ; un projet part avec tout son contenu (`delete_project_row`, enfants avant parents), un master / artiste / contact seulement s'il n'est plus utilisé ; crédits et parts d'un contact supprimé gardent le nom sans lien. Tests : `delete-records.test.sql`. |
 | `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
 | `…260927012001_catalog_file_library` | Bibliothèque de fichiers (retour n°6, § 2) : `artist_files.description` et `master_files.description` (précision libre, 200 car., `null` si vide) ; `manage_catalog` modifie nom, catégorie et précision (droits colonne, policies `*_update_catalog`), jamais un fichier audio de titre (`category <> 'audio'` avant et après) ; événement `file_updated` (`previous_category` si reclassé, privé si contrat avant **ou** après) ; lecture des objets `master-files` passée en positif comme `artist-files` (même faille que l'audit du 27/09). Tests : `file-library.test.sql`. |
 | `…20261006000101_framing_intelligent` | Cadrage intelligent (§ 6) : `source_label` (field_values, needs, framing_constraints, project_team_members, vue `current_field_values` recréée), type de contrainte `human`, `project_team_members.contact_id` (Réseau), `framing_deadlines`, `report_items.brief_key` (genre `brief_fact`), `framing_briefs` (versions, `create_framing_brief`, `send_framing_brief`, `decide_framing_brief`, trigger `framing_brief_follow_validation`), `request_validation` refuse un Cadrage sans version (`brief_required`), `framing_key_dimension` / `framing_dimension_editable` + politiques restrictives par dimension, `framing_calls` + `create_framing_call`. Tests : `framing-intelligent.test.sql`. |
 | `…20261006000201_project_plan` | Plan du Projet (§ 6 ter) : `project_plans`, `project_plan_items`, `workflow_is_launched`, `launch_project_plan`, `launch_plan_workflow` ; `start_stage` refuse la Stratégie sans plan (`plan_required`). |
+| `…20261007000101_plan_add_workflow` | Audit du 07/10 : `launch_plan_workflow(projet, workflow, titre, raison)` ajoute au plan lancé, en Focus et au nom de qui le lance, un workflow qui n'y figure pas (retiré avant le lancement ou jamais proposé), puis le démarre ; `plan_required` sans plan, `invalid_transition` s'il est déjà lancé. Tests : `framing-intelligent.test.sql`. |
+| `…20261007000201_legal_confirm_without_questions` | Audit du 07/10 : `confirm_legal_intake` crée le dossier juridique s'il n'existe pas (projet sans question à poser), au lieu de `legal_intake_not_started`. Tests : `legal-intake.test.sql`. |
 | `…260927013001_project_files` | Documents d'un projet (§ 8 ter) : `project_files` (catégories `brief` / `visual` / `contract` / `press` / `other`, `description`), bucket privé `project-files` (`<org>/<projet>/<uuid>[.<ext>]`) ; lecture `can_see_project`, contrats via `can_read_project_contracts` (responsable ou `view_all_projects`) ; insertion, modification (nom, catégorie, précision) et suppression par `is_project_owner` ; objets lus en positif (responsable, ou ligne visible). Tests : `project-files.test.sql`. |
 | `…260927011001_project_types_and_formats`, `…011101_pds_mic_format` | Types et formats de projet (retour n°2, `docs/CONTEXTE-PROJET.md` § 12, « Types et formats ») : `partnership` retiré (devenu `content`), `event` refusé par `create_project` ; `projects.music_format` (single, ep, album, mixtape, compilation, other ; musical seulement), `projects.content_format_id` → `content_formats` (formats PDS réutilisables, lus par tout membre, créés par `create_projects`, nom unique par organisation ; « PDS Mic » inséré pour `pds`), `artist_id` d'un contenu ; `framing_notes` renommé `initial_context`. `check_project_shape` (format obligatoire, un seul master pour un single), appelé par `create_project` et `update_project`, qui écartent ce que le type n'utilise pas. Tests : `project-types.test.sql`. |
 
@@ -723,7 +725,7 @@ livrable, les libellés ou l'action d'import en props.
 
 ## 6 ter. Plan du Projet
 
-`app/(app)/app/projects/[projectId]/plan`, `lib/plan/*`, `components/plan/*`, migration
+Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `components/plan/*`, migration
 `…20261006000201_project_plan.sql` (tests dans `framing-intelligent.test.sql`).
 
 - **Proposition calculée par le code** (`proposePlan`), à chaque visite tant que le plan
@@ -738,6 +740,11 @@ livrable, les libellés ou l'action d'import en props.
   repropose et `launch_project_plan` enregistre une fois (`project_plans`,
   `project_plan_items`). Les workflows en Focus ou Pendant ce temps démarrent (la Stratégie
   passe en cours) ; ceux d'Ensuite attendent « Lancer maintenant » (`launch_plan_workflow`).
+- **Workflow hors du plan** (audit du 07/10) : Stratégie, Master ou Juridique retirés avant le
+  lancement, ou jamais proposés, sont listés sous le plan lancé (« Hors du plan ») ;
+  « Ajouter et lancer » les ajoute en Focus (titre et raison écrits par le serveur,
+  responsable = qui lance) et les démarre. Leur page verrouillée le dit (`absent` de
+  `workflowGate`). Une Stratégie retirée ne bloque donc plus Conception et Sortie.
 - **Verrou** : `workflow_is_launched` (lancé par le plan, ou déjà commencé avant : Brief
   Mix/Master ou source, Cadrage juridique, Stratégie entamée). `start_stage` refuse la
   Stratégie sans plan (`plan_required`). Master et Juridique : layouts `master/` et `legal/`
@@ -745,8 +752,21 @@ livrable, les libellés ou l'action d'import en props.
   RLS de leurs tables n'a pas changé). Fil des étapes : Stratégie grisée jusqu'au plan.
 - Mon Travail : un projet au Cadrage validé et sans plan a pour prochaine action
   « Construire et lancer le plan du projet ».
-- Section « Plan du projet » de la navigation (groupe Processus ; avec les onglets, listée
-  dans « Aussi dans ce projet »).
+- **Le plan est sur la Vue d'ensemble** (07/10/2026) : dès le Brief validé, la Vue
+  d'ensemble montre le plan lui-même (`ProjectPlanSection` : `PlanBoard` tant qu'il est
+  proposé) à la place de la liste des étapes ; **une fois lancé, la nouvelle Vue d'ensemble**
+  (`ProjectBoard`, § 8 ter, lot 4 de l'architecture globale) prend sa place. **Il n'y a
+  plus de page `/plan`** (supprimée le 08/10/2026) ni de section « Plan du projet » dans
+  `project-sections.ts` : `routes.projectPlan` = la Vue d'ensemble, ancre `#plan` (liens du
+  Brief, du Travail et du workflow verrouillé). Un ancien lien vers `/plan` répond 404.
+- **Le Juridique sur la Vue d'ensemble** : `LegalOverview` a été supprimé le 08/10/2026 (lot 4
+  de l'architecture globale) ; le Juridique y est sa carte de workflow, ses actions (décisions
+  et actions libres du Suivi, `summarizeTracking` et `trackPlan` inchangés) dans « À faire
+  ensuite » et ses emprunts non sécurisés dans « Blocages ». **Bloque la sortie = seulement
+  un accord non sécurisé**, la seule règle donnée par le ticket Juridique 08 (fixture : « Humanisme
+  sans autorisation est OPEN et bloquant ») ; le reste de sa ReadinessPolicy est un point à
+  trancher (`docs/CONTEXTE-PROJET.md` § 2). Lecture seule : la génération automatique des
+  contrats reste faite par les pages Contrats et Suivi.
 
 ---
 
@@ -842,6 +862,82 @@ poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, R
 Une page par section de la sidebar du projet, toutes derrière `requireLaunchedProject`
 (404 avant lancement), en-tête `ProjectPageHeader`. Tout ce qui est état, retard, décompte
 ou total est calculé par le code, jamais par PO.
+
+**Architecture globale (ticket du 08/10/2026, lot 1 : navigation).** La sidebar sépare le
+niveau Projet du niveau Workflow (`lib/ui/project-sections.ts`) : Vue d'ensemble et
+Cadrage en tête, au-dessus de tout ; puis le groupe **Workflows** — Master, Juridique,
+**Marketing** (section qui couvre `/strategy`, `/design` et `/activations` ; Activations
+quitte le groupe Production) et **Distribution** (`/release`, la Sortie) ; puis Pilotage et
+Production. Les 7 chevrons du parcours (`WorkflowBreadcrumb`, `lib/ui/workflow-steps.ts`)
+sont supprimés ; les `project_stages` restent la source d'état, inchangés en base. Le
+Marketing a ses chevrons (`lib/ui/marketing-steps.ts`, `SectionSteps` avec `within` = ses
+pages) : Stratégie (verrouillée tant que le Plan du Projet ne l'a pas lancée, comme avant),
+Conception, Production et Suivi & bilan (sans page : grisés), Activations ; coche = stage
+validé (`launch_strategy`, `design`, `production`, `review`). **Défense** n'a plus de place à
+l'écran tant que le DG ne l'a pas rattachée. Sans `manage_legal`, le Juridique est listé
+`restricted` (grisé, cadenas, raison), jamais un lien ; sa page répond toujours 404 (pas
+de fuite par lien profond). Pas de fil d'Ariane pour l'instant (décision de Sacha).
+
+**Lot 2** : Master en 4 chevrons (§ 8 septies) ; **Distribution** = la page Sortie en deux
+étapes sans nouvelle capacité, **Préparation** (`/release`, identifiants et date) puis **En
+ligne** (`/release/online`, détection et smartlink, qui dit attendre la Préparation tant
+qu'aucune sortie n'est enregistrée ; actions revalidées en `layout` pour les deux pages) ;
+**Juridique** : le chevron du plan devient « Suivi » une fois lancé, et « Étape du dossier »
+donne l'une des cinq étapes du DG (`legalPhase`, depuis `loadLegalStepsDone`).
+
+**Lot 3 : statuts communs** (`lib/workflow-status/`). `rules.ts` (pur, testé) traduit les
+états de chaque workflow en **Non démarré / En cours / En attente / Bloqué / Terminé**, avec
+l'étape (chevron) d'où vient le statut, sa raison en mots (« V3 à valider par Akili
+Mensah ») et l'avancement en unités du métier (titres, actions, étapes) ; `load.ts`
+(`loadWorkflowStates`, `cache` React : le layout et la Vue d'ensemble partagent une lecture
+par requête) lit les sources existantes avec la session : Master = `loadStepView` (mix),
+`loadMixVersions` (mix, mastering), envois de mastering, `loadFinalView` ; Juridique =
+`loadIntake`, `legal_intakes`, `loadTracking` + `summarizeTracking`, seulement avec
+`manage_legal` (sinon `restricted`, rien n'est lu) ; Marketing = les `project_stages`
+`launch_strategy`, `design`, `production`, `review` (Défense ignorée) ; Distribution = la
+ligne `releases`. Non démarré = workflow pas lancé depuis le Plan du projet
+(`workflow_is_launched`) ou rien d'enregistré. Rien n'est stocké. **Workflows d'un projet**
+(`applicableWorkflows`, ticket § 13) : le Master s'il a des titres, la Distribution pour un
+projet Musical, Juridique et Marketing toujours ; la sidebar et les onglets n'affichent que
+ceux-là. Le layout en tire le **point de statut** de chaque workflow dans la sidebar
+(`StatusDot`, `workflowStatusTone`, sans violet) et les **coches** des chevrons du Master,
+de la Distribution et du Juridique. **Bloqué** n'est produit par aucune règle tant que les
+dépendances entre workflows n'existent pas (lot 5).
+
+**Lot 4 : Vue d'ensemble** (`components/overview/`, `ProjectBoard`), montrée une fois le plan
+du projet lancé (avant : `ProjectPlanSection`). Sous l'en-tête, le bandeau **Cadrage** (date
+de validation, lien), puis **une carte par workflow** (`WorkflowCards`) : statut commun,
+barre fine des chevrons (fait en encre, en cours en gris), étape et « étape n sur N » (le
+Juridique : l'étape du dossier), raison, avancement ; le nom est un lien étiré vers l'étape
+en cours ; un workflow non lancé offre « Lancer » au responsable (`launch_plan_workflow`,
+même action que l'ancien plan lancé) ; sans `manage_legal`, la carte Juridique dit
+seulement « Accès restreint » (rien n'est lu). Un workflow absent du projet est nommé sous
+les cartes. Puis, calculés par `lib/workflow-status/board.ts` (pur, testé) : **À faire
+ensuite** (la prochaine étape de chaque workflow en cours, avec la date du Brief pour le
+Master et la sortie pour la Distribution ; pour le Juridique lancé, ses décisions et
+actions libres du Suivi ; retards d'abord puis par date), **Blocages** (workflow au statut
+Bloqué, emprunts non sécurisés ; un clic ouvre un panneau `Sheet` : cause, impact, source,
+« Ouvrir dans … »), **Échéances** (échéance du projet, calendrier du Brief tant que son
+étape n'est pas passée — Mix V1 tant qu'on est en Préparation —, actions datées du Suivi,
+sortie prévue ; les retards gardés, triés par date, six au plus). `LaunchedPlan` n'est plus
+affiché ; `LegalOverview` et `loadLegalOverview` sont supprimés.
+
+**Lot 5 : dépendances entre workflows** (`dependencies` et `withDependencies` dans
+`rules.ts`, calculées dans `loadWorkflowStates`, jamais saisies ni stockées). Seules celles
+que les données existantes savent dire, chacune avec les champs du ticket § 10 (source,
+attendu, consommateur, état Disponible / En cours / En attente / Bloqué, échéance,
+responsable, lien vers la source) : **Master final de chaque titre → Distribution** (mise en
+ligne ; état du Master, date du Master final du Brief), **emprunts sécurisés → Distribution**
+(mise en ligne ; emprunts du Suivi lancé, lus seulement avec `manage_legal`),
+**ingénieurs du Brief → Juridique** (contrats de prestation). Une dépendance ne bloque que
+l'action qui l'exige (§ 3) : la Distribution prête (étape En ligne, en attente) passe
+**Bloqué** tant qu'une dépendance vers elle manque, sa Préparation jamais ; aucun autre
+workflow n'est gelé. Sur la Vue d'ensemble : tableau **Dépendances entre workflows**
+(`DependenciesTable`, `DataTable`, la ligne ouvre la source, `dependencyTone`) ; chaque
+dépendance manquante d'un workflow bloqué devient un **blocage** dont la source est le
+workflow qui doit fournir (les emprunts gardent une ligne par emprunt), et un workflow
+bloqué quitte « À faire ensuite ». Pas de dépendance inventée sans donnée (pochette,
+date de sortie de la Stratégie, NDA : à décider).
 
 - **Travail** (`lib/project-work/`) : une carte par personne, triée en retard → à faire →
   en attente → fait. Tâche à faire échue = en retard. Livrable : chez son responsable (en
@@ -1011,7 +1107,10 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
   projet), dans `role_permissions` comme les autres.
 - **Réseau** `/app/network` (`network_contacts`, `lib/network/`, `components/network/`) :
   une personne ou une structure, **au moins un rôle** parmi une liste fermée (artiste,
-  beatmaker, musicien·ne, ingé son, prestataire, partenaire, label…), coordonnées, notes ;
+  beatmaker, musicien·ne, ingé son, prestataire, partenaire, label, éditeur…), coordonnées,
+  notes ; « Éditeur » (`publisher`, `…20261007000501_network_publisher_role.sql`) ajouté le
+  07/10/2026 pour les emprunts : l'œuvre d'un sample s'autorise auprès de son éditeur, le son
+  auprès de son label, deux structures ajoutées une fois au Réseau et choisies ensuite ;
   une personne peut appartenir à une structure du réseau (`parent_id`, vérifié par trigger),
   un contact peut renvoyer à un artiste du catalogue (`artist_id`). **Lu par tous les
   membres actifs** (c'est l'annuaire partagé), écrit par `manage_network`, **archivé, jamais
@@ -1053,6 +1152,101 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
 Workflow spécialisé du projet, mené en parallèle des 7 étapes (`docs/CONTEXTE-PROJET.md` § 2).
 Parcours interne : État des lieux → Cadrage juridique → Confirmation → Plan d'action → Suivi
 (`lib/ui/legal-steps.ts`). Les tickets Juridique 01 à 08 du 30/09 sont livrés par lots.
+
+- **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
+  `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un
+  distributeur, un photographe, un réalisateur… ajouté au dossier depuis le Réseau (jamais un
+  nom libre : `PersonPickerField allowNameOnly={false}`), avec un rôle de fiche (liste fermée de
+  `FORM_ROLES`, pré-rempli depuis ses rôles du Réseau, `suggestedFormRole`). Écrit par
+  `add_legal_project_contact` / `remove_legal_project_contact` (`manage_legal` +
+  `can_see_project`) ; une personne créditée sur un titre est refusée (connue par son crédit),
+  le retrait est refusé tant qu'un contrat est prévu pour elle dans la cartographie ; lu en
+  RLS par `manage_legal` seul ; le projet supprimé l'emporte (cascade). `readInventoryRows`
+  le lit, **`formPeople` l'ajoute après les crédités** (clé `contact:<id>`) : il reçoit donc
+  sa fiche de renseignements et sa ligne dans la cartographie des contrats (modèles
+  compatibles par rôle), sans autre changement. Section « Intervenants non crédités » en bas
+  de l'État des lieux (`ProjectContactsSection`). **Pas encore** dans le plan d'action proposé
+  ni le Suivi (leurs actions et la coche automatique lisent les crédits, en SQL) ; **un seul
+  contrat par personne et par projet** reste la règle (`legal_agreement_needs`) : plusieurs
+  (NDA en plus d'une prestation) attendent la décision sur le NDA.
+
+- **Simplification du 07/10/2026** (Sacha : « la partie juridique est très compliquée »,
+  audit et prototype validés le même jour). Les objets, leurs règles et leurs preuves ne
+  bougent pas (les tickets interdisent de les confondre : 04, 05, 06) ; ce sont les **lieux**
+  qui se regroupent (ticket 07 : « Le Plan d'action et le Suivi sont deux vues du même
+  graphe ») :
+  - **Deux étapes à l'écran** (`LEGAL_TABS`, `LegalSteps`) : **État des lieux** (`/legal`), qui
+    porte aussi la question de PO en cours (`IntakeWorkspace embedded`), les réponses et le
+    dossier à confirmer (`ConfirmationPanel`), puis **Plan d'action** (`/legal/plan`), grisé
+    tant que le dossier n'est pas confirmé, qui devient le Suivi une fois lancé. Les anciennes
+    adresses `/framing`, `/confirmation` (avec `?question=`) et `/tracking` redirigent. Plus de
+    pastilles de dossiers sous les étapes (une pastille veut dire filtre, `DESIGN.md` § 4) :
+    chaque action du plan ouvre sa branche, qui garde un lien « ← Plan d'action ».
+  - **Le plan lancé, comme le prototype** (08/10/2026, `TrackingView`, `lib/legal/plan/board.ts`) :
+    une carte par démarche dans l'ordre où elles se débloquent, **une ligne par personne
+    (fiches), par personne (contrats), par titre (répartitions, SACEM) ou par emprunt**, avec
+    son état en badge et le verbe de ce qu'il y a à faire ; **toute la ligne ouvre un panneau
+    où la démarche se fait** (`PlanRowSheet`) : `FichePanel` (préparer, lien affiché une fois,
+    marquer envoyée, nouveau lien, révoquer, corrections à accepter, réponses), `ContractPanel`
+    (générer, soumettre, valider ou demander des modifications pour la direction, envoyer avec
+    sa façon, signé et preuve déposés, marquer signé ; valeurs et leurs sources), `SplitPanel`
+    (éditeur en ligne, envoi pour confirmation, réponses et nouveaux liens, contestation),
+    l'emprunt (`ClearanceBody`), la SACEM (`FormalityCard`), la cartographie des contrats
+    (`MappingPanel`, une ligne « Cartographie des contrats » tant qu'elle n'est pas validée) ;
+    en pied de panneau, le responsable (« Modifier » = délégation) et « Ouvrir la page ». Les
+    tuiles comptent les lignes ; « Prêt pour la sortie » : barre des emprunts sécurisés et ceux
+    qui bloquent. Le plan lit pour cela les données de chaque branche (`loadForms`,
+    `loadAgreementsGenerated`, `loadSplits`, `loadClearances`, `loadFormalities`,
+    `contractProofOf`).
+  - **Avant le 08/10** (`TrackingView`) : une section par démarche dans l'ordre où elles se
+    débloquent (fiches et emprunts en parallèle, puis contrats, répartitions, SACEM ;
+    `groups.ts`), avec son avancement et « Après : … » ; les tuiles des quatre groupes
+    d'attention filtrent (`?view=`), par défaut « Ce qui attend une action » (à traiter et
+    décisions), « Tout le plan » replie en une ligne ce qui attend un retour, une autre action,
+    ou est fait. À côté, « Prêt pour la sortie » (`ReleaseReadiness`) : seuls les emprunts non
+    sécurisés bloquent (ticket 08), le reste de la politique est dit « à décider ».
+  - **« Accords » devient « Emprunts »** à l'écran : le mot désignait aussi les contrats
+    (ticket 01). Le code garde `clearance`.
+  - **Un emprunt en trois temps** (`ClearanceStages`, le parcours du prototype « Juridique
+    PDS OS v3 », repris à l'identique le 07/10 à la demande de Sacha ; chaque bouton = une
+    action de `lib/legal/clearance/flow-actions.ts` qui enchaîne les états par les mêmes
+    fonctions SQL) :
+    - **Demander** (`AskMoment`) : ce qui est repris en pastilles (proposé par le code selon
+      l'élément : un sample = l'œuvre et l'enregistrement, une topline, une interpolation ou une
+      reprise = l'œuvre ; à corriger, rien d'appliqué avant le clic), un ayant droit par droit
+      choisi dans le Réseau (`PersonPickerField`, rôle repris du Réseau, sinon éditeur pour
+      l'œuvre, label pour l'enregistrement ; libellés « Qui détient l'œuvre « X » ? » et « Qui
+      détient l'enregistrement original de « X » ? » avec où trouver : répertoire SACEM, mention
+      ℗ ; « Ajouter au Réseau » crée une structure Éditeur ou Label sans quitter le panneau),
+      « Copier un modèle de demande », puis « J'ai envoyé la demande » (`requestClearance` :
+      qualification avec l'usage écrit par le code depuis le dossier, ayants droit, identifiés,
+      envoi consigné, contactés). « Rien à sécuriser » demande sa raison et clôt.
+    - **Négocier** (`NegotiateMoment`) : leur réponse collée, lue par PO
+      (`readClearanceMessage`), les conditions affichées dans des champs à corriger, « Envoyer à
+      la direction » (`submitClearanceReply` : réponse au journal, conditions proposées, en
+      négociation) ou « Enregistrer le refus ». La direction voit « Valider les conditions » ou
+      « Demander une contre-proposition » ; le responsable voit « Chez la direction ».
+      **Notifications** (`…20261007000601_clearance_terms_notifications.sql`, trigger sur
+      `legal_clearance_terms`) : des conditions proposées notifient chaque membre qui valide
+      (`clearance_terms_proposed`) ; leur validation ou leur refus notifie le responsable de
+      l'emprunt, sinon du projet (`clearance_terms_validated` / `_rejected`) ; le lien ouvre
+      la page Emprunts avec le panneau ouvert (`?emprunt=`). Dans le plan, un emprunt dont
+      les conditions attendent passe en « Décision requise » (`termsPending`).
+    - **Décision du 07/10/2026** : valider les conditions vaut accord sur l'emprunt. Le même
+      clic de la direction (`validateClearanceTerms`) prépare le contrat d'autorisation (un
+      contrat pour l'emprunt, type licence, suivi par le responsable de l'emprunt sinon du
+      projet, ayants droit en parties, rattaché à chaque droit concerné), le soumet et
+      l'approuve : une validation au lieu de deux. À revoir si le DG veut relire le document
+      lui-même avant l'envoi.
+    - **Signer** (`SignMoment`) : « Envoyé par e-mail / par un outil de signature / remis en
+      main propre » (`sendClearanceContract`, la façon est la preuve d'envoi), puis le signé et
+      sa preuve **déposés dans le panneau** (`ContractProofSlot`, rangés dans le contrat), puis
+      « Marquer comme sécurisé » (`secureClearanceFlow` : contrat signé ce jour, emprunt signé
+      puis sécurisé, jamais en arrière ; manques dits en rouge avant). Un emprunt arrivé là sans
+      contrat (avant le 07/10) garde le rattachement d'avant (`DocumentsTab`).
+    Le journal (échanges, historique) est replié sous les trois temps ; la seule autre issue
+    est « Retirer l'élément du titre » (abandon avec sa raison). Le panneau s'ouvre aussi depuis
+    la ligne du plan et depuis « Prêt pour la sortie ».
 
 - **Permission `manage_legal`** (`…20261004000101_legal_permission.sql`) : DG et chefs de
   projet. Décision par défaut prise le 04/10/2026, en attendant la réponse du DG sur
@@ -1183,7 +1377,10 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     mènent à `/legal/framing?question=<clé>:<titre|project>`, qui ouvre cette question
     (avec la réponse précédente pour une correction).
   - **« Confirmer le dossier »** n'apparaît que lorsque toutes les questions ont une
-    réponse (vérifié par le code, qui calcule les questions). `confirm_legal_intake`
+    réponse (vérifié par le code, qui calcule les questions). Sans aucune question à poser
+    (pas de titre, contrat déjà rattaché), le Cadrage le dit (« Aucune question à poser »,
+    étape cochée) et la Confirmation se propose directement : `confirm_legal_intake` crée
+    alors le dossier (audit du 07/10, plus de renvoi en boucle entre les deux étapes). `confirm_legal_intake`
     (security definer, `manage_legal` sur un projet visible) passe le dossier à
     « confirmé », avec qui et quand, et ses faits **déclarés** à « confirmé »
     (`confirmed_by`). Un fait **à vérifier** le reste (l'attribution de Humanisme n'est pas
@@ -1209,8 +1406,12 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
       (04), après les fiches ;
     - **sécuriser** chaque élément tiers (05) : à lancer s'il est à instruire, « En cours »
       s'il attend un retour ;
-    - **déclaration SACEM** par titre pas encore déclaré (06), après les fiches, la
-      répartition et les éléments tiers du titre (et le master final, noté).
+    - **déclaration SACEM** par titre dont la SACEM n'a pas **confirmé** la déclaration
+      (06), après les fiches, la répartition et les éléments tiers du titre (et le master
+      final, noté). Une déclaration seulement « soumise » ou refusée garde l'action : elle
+      peut encore être refusée, le Suivi la montre « en attente d'un retour » (règle commune
+      avec `trackPlan` et `legal_plan_item_done`, 08/10/2026 ; avant, une déclaration
+      soumise retirait l'action et la page SACEM n'était plus atteignable).
 
     Colonnes : à lancer maintenant (rien ne retient), en cours (attend un retour), à
     venir (dépend d'une autre action). Fiches et clearances partent en parallèle.
@@ -1354,6 +1555,32 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     crédits des titres, cartographie (rémunération), structure. Aucune valeur saisie à la
     main au moment de générer : une valeur manquante se complète à sa source, ce qui la rend
     traçable.
+  - **Éditeur du texte** (demande de Sacha, 07/10/2026 : « super compliqué s'il faut mettre
+    des variables ») : personne ne tape `{{…}}`. `TemplateBodyEditor` est un `contenteditable`
+    en texte brut où chaque champ est une **pastille** non modifiable (« Nom civil »),
+    insérée au curseur par les boutons groupés au-dessus (La personne / Le projet / L'accord,
+    `CONTRACT_FIELD_GROUPS`) ; le texte enregistré est relu du DOM (`serialize`, pastille →
+    `{{id}}`, `<br>` → `\n`), le format en base ne change pas. Collage en texte brut, `{{id}}`
+    collés convertis en pastilles, pas de gras. Le même rendu en lecture (`TemplateBody`).
+  - **Partir d'un contrat déjà rempli** (« Repérer les valeurs », `suggestTemplateValues`) :
+    on colle le contrat d'une vraie personne ; le **code** repère ce qui a une forme
+    (e-mail, téléphone, SIRET, IPI : `value-patterns.ts`), **PO** les noms, l'adresse, les
+    titres, la somme et la structure (`lib/ai/instructions/contract-template-values.ts`, le
+    contrat en donnée, 40 000 premiers caractères). Un extrait n'est gardé que s'il est écrit
+    **tel quel**, mot entier, hors pastille (`countExcerpt`) ; à qui il appartient (personne
+    ou label) n'est jamais décidé par la machine. Les valeurs restantes sont surlignées dans
+    le texte (CSS Custom Highlight, `::highlight(template-value)`), chacune avec son champ
+    (modifiable), « Remplacer » (toutes ses occurrences, annulable) ou « Ignorer » ; un texte
+    collé n'est remplacé qu'au clic. **Un contrat importé** (Word, PDF, texte) est lu par PO
+    dès l'import et ce qu'il repère est **remplacé aussitôt** (demande de Sacha, 07/10/2026 :
+    pas de transcription à relire, l'analyse directe) : « Ce que PO a repéré dans « … » »,
+    chaque valeur avec son champ encore modifiable (la pastille suit) et « Annuler » ; le
+    texte reste replié derrière « Afficher le texte ». Dans la même lecture, PO décrit le
+    modèle (nom sans nom propre, type de contrat, rôles de la personne, usage) : seuls les
+    champs encore vides sont pré-remplis, avec un encart qui le dit, et tout se corrige.
+    L'import est en tête du formulaire. Rien n'est enregistré avant
+    « Enregistrer le modèle », et le DG valide encore le modèle. PO pointe, il n'écrit ni
+    clause ni valeur. PO en échec → seules les valeurs du code sont proposées, et c'est dit.
   - **Cartographie** (`legal_agreement_needs`) : une ligne par personne créditée qui a un
     contact. Le code propose le modèle validé dont les rôles recoupent le mieux ceux de la
     personne (aucune table rôle → type de contrat inventée) et la rémunération de sa fiche
@@ -1368,8 +1595,29 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     sont pas la même personne).
   - **Copie** (`contract_documents`, `generate_legal_contract`) : le texte est rempli **en SQL**
     à partir du modèle et des valeurs données par le serveur ; refusée tant qu'une valeur
-    manque. Elle crée un contrat brouillon du module Contrats (responsable = auteur, la
-    personne en partie) et garde le modèle, sa version et chaque valeur avec sa source.
+    manque. Elle crée un contrat brouillon du module Contrats (responsable = **le responsable
+    du projet**, à défaut l'auteur ; la personne en partie) et garde le modèle, sa version et
+    chaque valeur avec sa source.
+  - **Génération automatique** (demande de Sacha, 07/10/2026, étape 3 du ticket : « dès que
+    les prérequis d'un accord sont disponibles, PO duplique le template compatible ») :
+    `generateReadyAgreements` (`lib/legal/contracts/auto-generate.ts`) génère chaque accord
+    « prêt » sans clic, avec la session de la personne, là où les accords sont regardés : la
+    page Contrats et le Suivi du Juridique (au rendu, `loadAgreementsGenerated`) et juste
+    après « Valider la cartographie ». Pas de trigger ni de cron : les valeurs sont lues par
+    le code TypeScript à leurs sources, et le service role est réservé au cron. Une fiche
+    remplie par lien sans compte ne génère donc rien tant que personne n'ouvre le Juridique.
+    Le journal dit « automatique » ; le brouillon reste à soumettre et à valider par le DG.
+    « Générer le contrat » reste en secours si la génération automatique a échoué.
+  - **Fichier source** (« ContractTemplate : … fichier source ») : un modèle peut être importé
+    d'un Word (.docx), d'un PDF ou d'un texte (10 Mo au plus) ; le navigateur le dépose dans le
+    bucket privé `contract-template-sources` (`<organisation>/<uuid>.<ext>`, RLS
+    `manage_legal`), le serveur en lit le texte (`readTemplateSource`, `source-text.ts` :
+    Word lu sans dépendance, document.xml du zip ; PDF par **unpdf**) et le met dans
+    l'éditeur, replié, puis PO en repère les valeurs (ci-dessus) ; l'ancien texte reste à un
+    clic (« Annuler »). Le fichier est gardé avec la
+    version (`source_path`, `source_name`, vérifiés par `create_contract_template`), repris
+    par une nouvelle version, téléchargeable depuis « Voir le modèle ». Perdu à l'import :
+    mise en page, numérotation automatique de Word, en-têtes et pieds de page.
   - **Clauses** : « Modifier une clause » crée une nouvelle version avec sa raison
     (`revise_contract_document`, brouillon ou approuvé seulement) ; un contrat approuvé
     repasse en brouillon et doit être validé à nouveau.
@@ -1449,19 +1697,66 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     territoires, DEP/DR, parts Phono (la répartition n'est pas recopiée). À l'enregistrement,
     une valeur non saisie est relue à sa source par le serveur, le navigateur ne peut pas la
     falsifier.
+  - **Créateurs et éditeurs choisis, jamais tapés** (Sacha, 07/10/2026) : chaque créateur est
+    choisi dans le Réseau par `PersonPickerField` (personnes créditées sur le titre comme
+    auteur, compositeur ou arrangeur en tête), chaque éditeur parmi les structures du Réseau
+    (éditeurs de la répartition de l'édition en tête) : `lib/legal/formalities/party-actions.ts`.
+    Le choix remplit nom civil, prénom, pseudonyme, IPI/COAD (fiche de renseignements,
+    `contact_legal_details`) et la qualité (rôle du crédit), tous corrigeables ; seule la part
+    Phono se saisit. Le bulletin garde le `contact_id` de chacun. Les éditeurs de la
+    répartition sont pré-remplis par leur nom, jamais par leur part. « Garder seulement le
+    nom » reste possible pour quelqu'un qu'on ne met pas au Réseau. Choisir dans le Réseau une
+    personne non créditée sur le titre **ne crée pas de crédit** (ce serait une écriture au
+    Catalogue, `manage_catalog`, cachée dans un formulaire du Juridique) : à faire par
+    « Ajouter un contributeur ».
+  - **Manques en rouge** : au clic sur « Valider le dossier », le dossier est enregistré tel
+    quel puis chaque code de `formality_missing` est dit sous son champ, en rouge, avec sa
+    raison (`field-errors.ts`) ; un message au-dessus du bouton compte les manques, le premier
+    champ en rouge prend le focus. Un champ redevient normal dès que sa valeur à l'écran
+    répond au manque. La règle reste en SQL : l'écran ne fait que la traduire.
   - **Règles** : titre, durée, au moins un créateur (5 au plus, 3 éditeurs au plus), nom et
-    qualité de chacun, parts Phono à 100 % exactement, choix DEP/DR, portée de
+    qualité de chacun, parts Phono à 100 % exactement, réponse de la rubrique D, portée de
     l'autorisation d'arrangement s'il y a un arrangeur, contrat d'édition si seuls les éditeurs
-    signent sinon rubrique G sans copie, et **chaque emprunt du titre sécurisé** avant de
-    générer. Les astérisques exacts du bulletin restent à vérifier sur le document papier.
-  - **Étapes** : données à compléter → prête à générer → bulletin généré (version, PDF
-    `/api/legal/formalities/[id]/document`) → signatures (chaque ayant droit qui signe, avec la
+    signent sinon la date du contrat (rubrique G), et **chaque emprunt du titre sécurisé**
+    avant de générer.
+  - **Champs alignés sur le bulletin papier** (07/10/2026, lecture du PDF 725 - 02/2026) :
+    la rubrique D n'est pas un choix « DEP ou DR » mais une case : au sein de chaque catégorie,
+    le partage des DEP et DR **suit les parts Phono** (`follow_phono`, case cochée) ou le
+    **partage égal du Règlement général** (`statutory`) ; les anciennes réponses DEP/DR sont
+    rouvertes « à vérifier » (`…20261007000401_formality_dep_dr_follow_phono.sql`). La première
+    exploitation est une date (`first_exploitation`) et, à part, un lieu ou diffuseur
+    (`first_exploitation_place`). La rubrique G est la **date du contrat** conclu conjointement
+    entre créateurs et éditeurs ; le tableau des contrats non conjoints (éditeur n°, créateur n°,
+    date) n'est pas géré (point à trancher).
+  - **Le PDF est le bulletin officiel rempli** (`bulletin-pdf.ts`, `pdf-lib`) : le formulaire
+    SACEM fourni avec le ticket (`lib/legal/formalities/assets/sacem-725-02-2026.pdf`, 156
+    champs aux noms opaques, reliés à leur rubrique par leur position sur la page) reçoit les
+    valeurs de la version. Durée en h / m / s, dates en jj / mm / aaaa, ISWC réduit à ses 10
+    chiffres, « Monde » coche la case, sinon « Autres » + la liste ; qualité cochée et part Phono
+    sur sa ligne (entier, décimales) ; une seule valeur « IPI / COAD » va dans « Code
+    international » si elle a 9 chiffres ou plus, sinon dans COAD (la notice : l'IPI, à défaut
+    le COAD). Laissés vides, le PDF restant modifiable : signatures, « Je fais partie du groupe
+    » (oui / non, non demandé par PDS OS, point à trancher), « Fait le », partie réservée à la
+    SACEM. Un caractère que la police standard ne sait pas écrire perd son accent. Un nouveau
+    bulletin SACEM = un nouveau fichier et une nouvelle table de correspondance.
+  - **Étapes** : données à compléter → prête à générer → bulletin généré (version, bulletin
+    officiel rempli `/api/legal/formalities/[id]/document`) → signatures (chaque ayant droit qui signe, avec la
     preuve) ou déclaration partielle avec sa raison → prête à déposer → **déposée** (preuve du
     dépôt, déclaration SACEM du titre « déposée ») → en traitement → **enregistrée** (preuve du
     résultat, identifiant SACEM, ISWC reporté sur le titre s'il était vide, déclaration
     « confirmée », tâche du plan cochée). Une **correction** rouvre seulement les champs
     nommés ; les autres restent ; une nouvelle version et de nouvelles signatures suivent.
   - Pas d'SPPF ni de dépôt numérique : le dépôt et la preuve restent humains (MVP).
+  - **Contrat d'édition signé** (demande de Sacha, 07/10/2026, ticket 03 : « contract.signed
+    … peut débloquer Formalités ») : un contrat de type `publishing` du projet qui passe à
+    « signé » coche « La copie du contrat d'édition est jointe » sur chaque bulletin SACEM du
+    projet encore en préparation (trigger `contracts_tick_formalities`, source « Contrat
+    signé : … », événement `contract.signed`, puis `formality_settle`). Un bulletin déjà
+    généré n'est pas modifié (ses signatures ne correspondraient plus) : son historique dit
+    de joindre le contrat au dépôt. Un bulletin ouvert après la signature le reçoit en
+    pré-remplissage (`prefill.ts`). Le contrat vaut pour tous les titres du projet (un
+    contrat n'est pas rattaché à un titre) ; décocher reste possible. Un contrat résilié
+    ensuite ne décoche rien.
 - **Depuis le Cadrage intelligent** (§ 6, 06/10/2026) : les réponses confirmées (ou
   proposées) de la dimension 06 « Cadre juridique » du Brief (parties, accords, contrats et
   droits à prévoir, éléments sécurisés) rejoignent les points signalés de l'État des lieux
@@ -1478,6 +1773,28 @@ du mix final) → Mastering → Master final (`lib/ui/master-steps.ts`, chevrons
 sous l'en-tête). Une étape = un dossier sous `/master` : une étape pas encore construite est
 grisée (« Bientôt disponible ») et son adresse répond 404 sans route attrape-tout. Livré par
 lots, chacun utile seul.
+
+- **Simplification du 07/10/2026** (Sacha : « aussi optimisée que le juridique, la plus
+  simple, la plus fluide ») : **trois étapes à l'écran** (`MASTER_TABS`, `masterSteps`,
+  `SectionSteps also`), les cinq pages et leurs règles inchangées :
+  - **Préparer** (`/master`) : en tête, « Où en est la préparation » (`PrepareSummary`, lu dans
+    la vue de l'envoi au mixeur, donc les mêmes blocages) : source de chaque titre, Brief
+    Mix/Master, envoi au mixeur, chacun avec son seul bouton ; puis l'État du master. Le Brief
+    (`/master/brief`) s'ouvre de là, avec « ← Préparer ».
+  - **Mix et mastering** (`/master/mix`, `ProductionPage`) : les deux tours sur une page, chacun
+    avec son dossier et ses versions décidées titre par titre ; le mastering s'ouvre quand chaque
+    titre a son mix final, un tour fini se replie en une ligne ; une fois envoyé, « ce que reçoit
+    l'ingénieur » se replie (`PackageSections`).
+- **Quatre étapes depuis le 08/10/2026** (ticket « Architecture globale », lot 2 : un chevron
+  = un jalon que le métier reconnaît) : **Préparation**, **Mixage** (`/master/mix`),
+  **Mastering** (`/master/mastering`, redevenue une page : même `ProductionPage` avec
+  `stage`, en attente avec le nombre de mix finals tant que chaque titre n'a pas le sien) et
+  **Master final**. Les validations du mix et du master restent dans leur page, jamais une
+  étape. Les notifications du mastering ouvrent `/master/mastering` ; l'accusé de réception
+  d'un dossier (`master_transmission_received`) ouvre toujours le Mixage, la notification ne
+  disant pas quel tour (limite connue). `masterSteps(projectId, done)` accepte les étapes
+  faites, branchées au lot 3.
+  - **Master final** (`/master/final`) inchangé.
 
 - **Qui voit, qui écrit** (décision du 04/10/2026, en attendant le DG) : pas de permission
   dédiée. La page se lit par **quiconque voit le projet** (DG, chef de projet, directeur

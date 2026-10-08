@@ -24,7 +24,8 @@ export function ContributorPersonField({
       refName="contactId"
       nameName="name"
       legend={fr.masterPage.credits.person}
-      load={listNetworkPeople}
+      required
+      load={() => listNetworkPeople()}
       defaultRef={defaultContactId}
       defaultName={defaultName}
       createRoles={[NETWORK_ROLE_OF[role]]}

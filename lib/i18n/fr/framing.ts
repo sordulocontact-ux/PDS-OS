@@ -135,7 +135,7 @@ export const framing = {
     },
     start: "Commencer le cadrage",
     validator: "Valideur",
-    note: "Message (facultatif)",
+    note: "Message",
     request: "Demander la validation",
     requested: "Validation demandée.",
     waitingFor: (name: string) => `En attente de ${name}.`,

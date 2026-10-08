@@ -25,12 +25,16 @@ export function IntakeWorkspace({
   projectId,
   questions,
   initialQuestion,
+  embedded = false,
 }: {
   projectId: string;
   questions: IntakeQuestion[];
   // `?question=<key>:<title|project>` (from the Confirmation's « Corriger »
   // or « Répondre »): that question opens first.
   initialQuestion: string | null;
+  // On the État des lieux, the dossier and its confirmation sit below: once
+  // every question is answered, nothing more is said here.
+  embedded?: boolean;
 }) {
   const t = fr.legal.intake;
   const [correcting, setCorrecting] = useState<string | null>(
@@ -46,9 +50,11 @@ export function IntakeWorkspace({
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
-      <p className="text-sm text-muted-foreground tabular-nums">
-        {t.progress(answered.length, questions.length)}
-      </p>
+      {questions.length > 0 && (active || !embedded) && (
+        <p className="text-sm text-muted-foreground tabular-nums">
+          {t.progress(answered.length, questions.length)}
+        </p>
+      )}
       {active ? (
         <QuestionCard
           // A fresh card per question: its answer and review start empty.
@@ -59,20 +65,16 @@ export function IntakeWorkspace({
           onCancel={() => setCorrecting(null)}
           onSaved={() => setCorrecting(null)}
         />
-      ) : (
+      ) : embedded ? null : (
         // Every question answered: the next step, never a dead end.
         <EmptyState
           icon={IconCheck}
-          title={t.done.title}
-          body={t.done.body}
+          title={questions.length === 0 ? t.nothingToAsk.title : t.done.title}
+          body={questions.length === 0 ? t.nothingToAsk.body : t.done.body}
           action={
             <Button
               nativeButton={false}
-              render={
-                <Link
-                  href={routes.projectLegalStep(projectId, "confirmation")}
-                />
-              }
+              render={<Link href={routes.projectLegal(projectId)} />}
             >
               {t.done.action}
             </Button>

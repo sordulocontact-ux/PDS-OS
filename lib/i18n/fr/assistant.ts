@@ -89,6 +89,13 @@ export const assistant = {
     theArtist: (name: string) => `l'artiste ${name}`,
     theProject: (title: string, count: number) =>
       `${count > 1 ? `les ${count} titres` : "le titre"} du projet « ${title} »`,
+    theFraming: (title: string) => `le Cadrage du projet « ${title} »`,
+    framingSections:
+      "les questions encore ouvertes des six dimensions (propositions confirmées, autres réponses fictives)",
+    framingOwnerOnly: (title: string) =>
+      `Cadrage non complété : seul le responsable du projet « ${title} » écrit son Cadrage.`,
+    framingNotFilled:
+      "Le Cadrage du projet n'a pas été touché : il se remplit quand on le demande, ou depuis sa page Cadrage.",
   },
   // Catalog facts for the model and the "Données utilisées" list.
   catalog: {

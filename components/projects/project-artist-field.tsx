@@ -36,7 +36,6 @@ export function ProjectArtistField({
       <SinglePicker
         name="artistId"
         legend={t.fields.artist}
-        note={t.fields.optional}
         options={options}
         selectedId={selectedId}
         onSelect={setSelectedId}

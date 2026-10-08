@@ -44,8 +44,11 @@ export function titleItems(
             },
           ]
         : [];
-    const sacem = rows.filedOf.get(master.id)?.get("sacem");
-    const filed = sacem && sacem.status !== "rejected";
+    // Only a confirmed declaration is done (same rule as the Suivi and
+    // legal_plan_item_done): a submitted one can still be refused, so it
+    // stays in the plan, followed until the SACEM registers it.
+    const filed =
+      rows.filedOf.get(master.id)?.get("sacem")?.status === "confirmed";
     const waits = [
       ...afterOnboarding,
       ...splits.map((s) => s.key),

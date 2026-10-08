@@ -122,21 +122,31 @@ export function DeliverablesSection({
             }}
           >
             <div className="flex flex-col gap-2 sm:col-span-2">
-              <Label htmlFor="deliverable-title" className={labelClass}>
+              <Label
+                htmlFor="deliverable-title"
+                required
+                className={labelClass}
+              >
                 {t.name}
               </Label>
               <Input
                 id="deliverable-title"
+                aria-required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="deliverable-lever" className={labelClass}>
+              <Label
+                htmlFor="deliverable-lever"
+                required
+                className={labelClass}
+              >
                 {t.lever}
               </Label>
               <OptionSelect
                 id="deliverable-lever"
+                required
                 label={t.lever}
                 options={Object.fromEntries(
                   selected.map((l) => [l.id, l.label]),

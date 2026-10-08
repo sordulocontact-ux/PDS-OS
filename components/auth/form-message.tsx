@@ -19,7 +19,7 @@ export function FormMessage({
       className={cn(
         "rounded-lg border px-3 py-2 text-sm",
         kind === "error"
-          ? "border-destructive/30 bg-destructive/5 text-destructive"
+          ? "border-error/30 bg-error/5 text-error"
           : "border-border bg-muted text-muted-foreground",
         className,
       )}
@@ -38,7 +38,7 @@ export function FieldError({
 }) {
   if (!children) return null;
   return (
-    <p id={id} className="text-xs font-medium text-destructive">
+    <p id={id} className="text-xs font-medium text-error">
       {children}
     </p>
   );

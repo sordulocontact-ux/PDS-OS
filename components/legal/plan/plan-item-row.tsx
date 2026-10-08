@@ -5,6 +5,7 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { fr } from "@/lib/i18n/fr";
 import type { PlanRow } from "@/lib/legal/plan/queries";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type PlanChoice = {
   include: boolean;
@@ -48,9 +49,8 @@ export function PlanItemRow({
       )}
     >
       <label className="flex min-w-0 flex-1 items-start gap-3">
-        <input
-          type="checkbox"
-          className="mt-1 size-4 shrink-0 accent-selection"
+        <Checkbox
+          className="mt-1 shrink-0"
           checked={choice.include}
           aria-label={t.include(item.label)}
           onChange={(event) =>
@@ -103,7 +103,7 @@ export function PlanItemRow({
           id={`${id}-due`}
           name={`${id}-due`}
           type="date"
-          label={`${t.due} · ${t.optional}`}
+          label={t.due}
           defaultValue={item.dueOn ?? ""}
           onChange={(event) =>
             onChange({ ...choice, dueOn: event.target.value || null })

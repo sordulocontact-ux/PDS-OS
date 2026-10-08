@@ -149,7 +149,7 @@ export function CallProcessing({
       </p>
       {failed && (
         <div className="grid gap-3">
-          <p role="alert" className="text-sm text-destructive">
+          <p role="alert" className="text-sm text-error">
             {errorText(error ?? errorCode)}
           </p>
           {canEdit && (

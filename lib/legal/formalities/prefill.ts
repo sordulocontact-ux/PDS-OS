@@ -2,10 +2,17 @@
 // comes from (ticket Juridique 06, « PO préremplit les champs sourcés et
 // liste les valeurs manquantes »). Never a first exploitation, never an
 // ISWC that is not on the title, never a draft's duration, never the split
-// sheet's shares. Pure.
+// sheet's shares. A signed publishing contract of the project ticks « copie
+// jointe » (also done in SQL when the contract is signed later:
+// contracts_tick_formalities). Pure.
 
 import type { ContributorRole } from "@/lib/catalog/master/rules";
-import type { Creator } from "@/lib/legal/formalities/definition";
+import {
+  QUALITY_OF_ROLE,
+  creatorIdentity,
+  type Creator,
+  type Publisher,
+} from "@/lib/legal/formalities/definition";
 
 export type Prefill = Record<
   string,
@@ -21,14 +28,18 @@ export type PrefillContext = {
   credits: Array<{
     name: string;
     role: ContributorRole;
+    contactId: string | null;
     details: Record<string, string>;
   }>;
-};
-
-const QUALITY: Partial<Record<ContributorRole, Creator["quality"]>> = {
-  lyricist: "author",
-  composer: "composer",
-  arranger: "arranger",
+  // The publishers of the title's publishing split (their name, never their
+  // share), with their contact and fiche when linked.
+  publishers: Array<{
+    name: string;
+    contactId: string | null;
+    details: Record<string, string>;
+  }>;
+  // The project's signed publishing contract, by its title, if there is one.
+  signedPublishingContract: string | null;
 };
 
 const minutes = (seconds: number) =>
@@ -37,20 +48,31 @@ const minutes = (seconds: number) =>
 export function prefillSacem725(ctx: PrefillContext): Prefill {
   const seen = new Set<string>();
   const creators: Creator[] = ctx.credits.flatMap((c) => {
-    const quality = QUALITY[c.role];
-    const key = `${c.name}|${quality}`;
+    const quality = QUALITY_OF_ROLE[c.role];
+    const key = `${c.contactId ?? c.name}|${quality}`;
     if (!quality || seen.has(key)) return [];
     seen.add(key);
-    const d = c.details;
     return [
       {
-        last_name: d.legal_last_name || c.name,
-        first_name: d.legal_first_name || "",
-        pseudonym: d.pseudonym || (d.legal_last_name ? c.name : ""),
-        ipi: d.ipi_coad || "",
+        ...creatorIdentity(c.name, c.details),
         quality,
         phono: "",
         signs: true,
+        ...(c.contactId ? { contact_id: c.contactId } : {}),
+      },
+    ];
+  });
+  const named = new Set<string>();
+  const publishers: Publisher[] = ctx.publishers.flatMap((p) => {
+    const key = p.contactId ?? p.name;
+    if (named.has(key)) return [];
+    named.add(key);
+    return [
+      {
+        name: p.name,
+        ipi: p.details.ipi_coad || "",
+        phono: "",
+        ...(p.contactId ? { contact_id: p.contactId } : {}),
       },
     ];
   });
@@ -69,5 +91,19 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
       creators.length > 0
         ? { value: creators, source: "Crédits et fiches de renseignements" }
         : undefined,
+    publishers:
+      publishers.length > 0
+        ? { value: publishers.slice(0, 3), source: "Répartition de l'édition" }
+        : undefined,
+    publishing_contract: ctx.signedPublishingContract
+      ? {
+          value: { provided: true, rubric_g: "" },
+          // Same words as the SQL trigger.
+          source: `Contrat signé : ${ctx.signedPublishingContract}`.slice(
+            0,
+            200,
+          ),
+        }
+      : undefined,
   };
 }

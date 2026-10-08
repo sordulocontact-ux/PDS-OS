@@ -48,7 +48,7 @@ export function RecordingReview({
         <p className="text-xs text-muted-foreground">{t.freeTierNote}</p>
       )}
       {sendError && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {fr.calls.errors[sendError]}
         </p>
       )}

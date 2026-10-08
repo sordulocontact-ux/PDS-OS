@@ -68,4 +68,7 @@ export type Clearances = {
   people: Array<{ personId: string; name: string }>;
   projectContracts: Array<{ id: string; title: string }>;
   canValidate: boolean;
+  // Where the signed copy and its proof are uploaded from the drawer
+  // (contract-files/<organisation>/…).
+  organizationId: string | null;
 };

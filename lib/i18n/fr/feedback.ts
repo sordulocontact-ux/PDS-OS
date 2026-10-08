@@ -141,7 +141,7 @@ export const feedback = {
     summary: "Résumé",
     rewrite: {
       label: "Demander à PO de réécrire",
-      hint: "Facultatif : dites ce que vous voulez (plus court, plus précis…). PO repart des retours d'origine.",
+      hint: "Dites ce que vous voulez (plus court, plus précis…). PO repart des retours d'origine.",
       placeholder: "Ex. : plus court, en mettant l'accent sur l'impact",
       submit: "Proposer",
       pending: "PO réécrit…",

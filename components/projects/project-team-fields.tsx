@@ -36,6 +36,7 @@ export function ProjectTeamFields({
         <OptionSelect
           name="assigneePersonId"
           label={t.manager}
+          required
           placeholder={t.managerPlaceholder}
           items={managerItems}
           defaultValue={defaultManagerId}
@@ -45,7 +46,6 @@ export function ProjectTeamFields({
       <PeoplePicker
         name="creativePersonIds"
         label={t.creatives}
-        note={t.optional}
         emptyLabel={t.creativesNone}
         candidates={creatives}
         defaultSelectedIds={defaultCreativeIds}

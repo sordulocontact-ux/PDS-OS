@@ -43,6 +43,7 @@ export function ContentFormatField({
       <SinglePicker
         name="contentFormatId"
         legend={t.fields.contentFormat}
+        required
         options={options}
         selectedId={selectedId}
         onSelect={setSelectedId}

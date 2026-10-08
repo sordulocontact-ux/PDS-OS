@@ -21,7 +21,13 @@ import type { TemplateSeries } from "@/lib/legal/contracts/templates";
 
 /** « ⋯ » of a template: read it, start a new version, validate (the
  * director), retire. */
-export function TemplateRowActions({ template }: { template: TemplateSeries }) {
+export function TemplateRowActions({
+  template,
+  organizationId,
+}: {
+  template: TemplateSeries;
+  organizationId: string;
+}) {
   const t = fr.legalContracts.templates;
   const router = useRouter();
   const [open, setOpen] = useState<"view" | "version" | "retire" | null>(null);
@@ -100,6 +106,7 @@ export function TemplateRowActions({ template }: { template: TemplateSeries }) {
         size="wide"
       >
         <TemplateForm
+          organizationId={organizationId}
           initial={{
             seriesId: template.seriesId,
             name: template.name,
@@ -107,6 +114,7 @@ export function TemplateRowActions({ template }: { template: TemplateSeries }) {
             roles: template.roles,
             usage: template.usage ?? "",
             body: template.body,
+            source: template.source,
           }}
           onCancel={() => setOpen(null)}
           onDone={() => {

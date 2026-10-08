@@ -52,8 +52,7 @@ export const calls = {
     dateHint:
       "Une date à venir planifie le call : vous l'enregistrerez le moment venu.",
     fieldLink: "Lien de visio",
-    linkHint:
-      "Facultatif. Meet, Zoom, Teams… : « Rejoindre » l'ouvrira le moment venu.",
+    linkHint: "Meet, Zoom, Teams… : « Rejoindre » l'ouvrira le moment venu.",
     linkPlaceholder: "https://meet.google.com/…",
     submit: "Créer le call",
     pending: "Création…",

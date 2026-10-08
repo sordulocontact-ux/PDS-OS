@@ -8,21 +8,13 @@ import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
 
 type CollapsedNav = {
   collapsed: boolean;
-  // True whenever the project's contextual sidebar exists and sits right
-  // against the main one (Figma "Double sidebar") — collapsed or expanded,
-  // the two always touch inside a project, so the join is one continuous
-  // shape, never two separately rounded corners meeting. Never true when the
-  // project uses tabs instead (DOUBLE_SIDEBAR off).
-  doubleSidebar: boolean;
   toggle: () => void;
 };
 
 const CollapsedNavContext = createContext<CollapsedNav | null>(null);
 
-// Shared by the main Sidebar and the project's ProjectSidebar — both need to
-// agree on whether they are fused into one "double sidebar" (Figma), so this
-// lives above both in app/(app)/layout.tsx rather than as a plain hook each
-// would call independently (that would give each its own, unsynced state).
+// Lives above the main Sidebar in app/(app)/layout.tsx, which reads it, so
+// the pathname that collapses it inside a project is read in one place.
 export function CollapsedNavProvider({
   children,
 }: {
@@ -50,7 +42,6 @@ export function CollapsedNavProvider({
   const collapsed = override ?? withProjectSidebar;
   const value: CollapsedNav = {
     collapsed,
-    doubleSidebar: withProjectSidebar,
     toggle: () => setOverride(!collapsed),
   };
 

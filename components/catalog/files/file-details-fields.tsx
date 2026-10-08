@@ -37,6 +37,7 @@ export function FileDetailsFields({
         <ChipChoice
           name="category"
           legend={t.fields.category}
+          required
           options={FILES_TAB_CATEGORIES[kind].map((value) => ({
             value: value as string,
             label: labels[value],

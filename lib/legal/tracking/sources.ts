@@ -14,7 +14,13 @@ import type { SplitState } from "@/lib/legal/splits/queries";
 import { titlePublishingLines } from "@/lib/legal/splits/shares";
 import { normalizeSearch } from "@/lib/utils/search";
 
-export type TrackClearance = { id: string; status: string; updatedAt: string };
+export type TrackClearance = {
+  id: string;
+  status: string;
+  updatedAt: string;
+  // Conditions received wait for the direction: a decision, not a wait.
+  termsPending?: boolean;
+};
 
 export type Source = {
   status: PlanItemStatus;
@@ -205,6 +211,13 @@ export function itemSource(
         status: "action_now",
         decision: true,
         reason: t.clearance[clearance.status as "refused" | "action_required"],
+        href,
+      };
+    if (clearance.termsPending)
+      return {
+        status: "action_now",
+        decision: true,
+        reason: t.clearanceTermsPending,
         href,
       };
     if (CLEARANCE_WAITING.includes(clearance.status))

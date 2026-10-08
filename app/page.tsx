@@ -78,7 +78,7 @@ function ConfigCheck({ issues }: { issues: EnvIssue[] }) {
         <CardContent className="space-y-3">
           <h2 className="text-sm font-medium">{t.configTitle}</h2>
           <div role="alert" className="space-y-2 text-sm">
-            <p className="flex items-start gap-2 text-destructive">
+            <p className="flex items-start gap-2 text-error">
               <IconCircleXmark className="mt-0.5 size-4 shrink-0" aria-hidden />
               {t.configInvalid}
             </p>

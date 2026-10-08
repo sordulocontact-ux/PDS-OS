@@ -8,6 +8,10 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
+import {
+  contractFieldsOf,
+  loadAgreementsGenerated,
+} from "@/lib/legal/contracts/auto-generate";
 import { loadAgreements } from "@/lib/legal/contracts/queries";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -39,7 +43,11 @@ async function loadFor(projectId: string) {
   if (!can(access, "manage_legal")) return null;
   const project = await getProject(projectId);
   if (!project) return null;
-  return { project, agreements: await loadAgreements(project, access) };
+  return {
+    access,
+    project,
+    agreements: await loadAgreements(project, access),
+  };
 }
 
 function errorOf(message: string): string {
@@ -84,11 +92,15 @@ export async function approveContractMapping(
     console.error("approveContractMapping:", error.message);
     return { ok: false, error: errorOf(error.message) };
   }
+  // The agreements whose values are all there are generated at once.
+  await loadAgreementsGenerated(loaded.project, loaded.access);
   revalidatePath(routes.projectLegal(loaded.project.id), "layout");
+  revalidatePath(routes.contracts, "layout");
   return { ok: true };
 }
 
-/** « PO duplique le template compatible » once every value is there. */
+/** « Générer le contrat » by hand: the automatic generation
+ * (auto-generate.ts) failed or has not run yet. */
 export async function generateLegalContract(
   projectId: string,
   needId: string,
@@ -104,17 +116,10 @@ export async function generateLegalContract(
   if (row.state !== "ready_to_generate")
     return { ok: false, error: errorOf("contract_fields_missing") };
 
-  const sources = fr.legalContracts.sources;
-  const fields = Object.fromEntries(
-    row.fields.map((f) => [
-      f.id,
-      { value: f.value, source: f.source ? sources[f.source] : "" },
-    ]),
-  );
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("generate_legal_contract", {
     p_need_id: need.data,
-    p_fields: fields,
+    p_fields: contractFieldsOf(row),
   });
   if (error || !data) {
     if (error) console.error("generateLegalContract:", error.message);

@@ -21,7 +21,7 @@ export function ReleaseCover({
     >
       <IconDisc className="size-6" />
       {coverUrl && (
-        // Plain <img>, as in ArtistAvatar: Deezer's CDN is the only source.
+        // Plain <img>, as in Avatar: Deezer's CDN is the only source.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={coverUrl}

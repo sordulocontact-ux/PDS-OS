@@ -1,12 +1,10 @@
 // Title page ("master" in the code): header, tabs and the sections below them.
-const optional = "Facultatif.";
 
 const form = {
   cancel: "Annuler",
   close: "Fermer",
   submit: "Enregistrer",
   submitting: "Enregistrement…",
-  optional,
 };
 
 const remove = {
@@ -86,6 +84,8 @@ export const masterPage = {
       engineer: "Ingénieur du son",
       notes: "Notes",
     },
+    engineerSuggested: (name: string) =>
+      `${name} est proposé d'après les crédits du titre ou le Brief Mix/Master.`,
     addTitle: "Nouvelle session",
     editTitle: "Modifier la session",
     formDescription: "Seuls le type et la date servent au classement.",
@@ -272,11 +272,13 @@ export const masterPage = {
     edit: "Modifier",
     fields: {
       iswc: "ISWC",
-      iswcHint: "Facultatif. Code de l'œuvre, par exemple T-034.524.680-1.",
+      iswcHint: "Code de l'œuvre, par exemple T-034.524.680-1.",
       rightsHolder: "Titulaire du ℗",
-      rightsHolderHint: "Facultatif. Le producteur phonographique.",
+      rightsHolderHint: "Le producteur phonographique.",
+      rightsHolderSuggested: (role: "label" | "producer") =>
+        `Proposé d'après la répartition master du titre (${role === "label" ? "label" : "producteur"}).`,
       rightsYear: "Année du ℗",
-      rightsYearHint: "Facultatif. Année de première publication.",
+      rightsYearHint: "Année de première publication.",
     },
     pLine: "Mention ℗",
     editTitle: "Modifier les droits",

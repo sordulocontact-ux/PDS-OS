@@ -27,8 +27,12 @@ export function MasterInventory({
   inventory,
   basePath,
   state,
+  lead,
 }: {
   inventory: Inventory;
+  // Between the header and the tiles: where the preparation stands (the
+  // « Préparer » step).
+  lead?: React.ReactNode;
   // The page's URL, for the tiles' filters.
   basePath: string;
   state: FactStatus | null;
@@ -40,7 +44,11 @@ export function MasterInventory({
   );
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader title={t.title} description={t.description} />
+      <ProjectPageHeader
+        title={lead ? fr.masterWorkflow.steps.prepare : t.title}
+        description={t.description}
+      />
+      {lead}
 
       {inventory.hasTitles ? (
         <>

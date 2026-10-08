@@ -4,7 +4,7 @@ import { IconImage } from "nucleo-sharp-essential";
 import { useRef, useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import type { ArtistDetail } from "@/lib/catalog/artist-types";
 import { PICTURE_EXTENSIONS } from "@/lib/catalog/picture-rules";
@@ -56,7 +56,7 @@ export function ArtistPictureField({ artist }: { artist: ArtistDetail }) {
     <fieldset className="flex flex-col gap-3" aria-busy={pending || undefined}>
       <legend className="mb-3 text-sm font-medium">{t.title}</legend>
       <div className="flex items-center gap-4">
-        <ArtistAvatar
+        <Avatar
           name={artist.name}
           pictureUrl={artist.pictureUrl}
           className="size-20 rounded-2xl text-[length:var(--type-body-lg)]"

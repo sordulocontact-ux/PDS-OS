@@ -1,14 +1,11 @@
 import { getAccess } from "@/lib/auth/dal";
-import { formalityHtml } from "@/lib/legal/formalities/document-pdf";
-import { htmlToPdf } from "@/lib/pdf/render";
+import { sacem725Pdf } from "@/lib/legal/formalities/bulletin-pdf";
 import { createClient } from "@/lib/supabase/server";
-
-// Starting a browser and printing takes a few seconds, more on a cold start.
-export const maxDuration = 60;
 
 /**
  * A version of a formality's bulletin as a PDF (ticket Juridique 06,
- * « PO génère une version du bulletin »), downloaded. Read with the user's
+ * « PO génère une version du bulletin »): the official SACEM 725 bulletin
+ * filled with the version's values, downloaded. Read with the user's
  * session: RLS decides who sees the formality (manage_legal).
  */
 export async function GET(
@@ -47,15 +44,8 @@ export async function GET(
 
   let pdf: Uint8Array;
   try {
-    pdf = await htmlToPdf(
-      formalityHtml({
-        title,
-        version: document.version,
-        content: document.content as Record<
-          string,
-          { value: unknown; source: string }
-        >,
-      }),
+    pdf = await sacem725Pdf(
+      document.content as Record<string, { value: unknown; source: string }>,
     );
   } catch (error) {
     console.error("[formality-document] pdf failed:", error);

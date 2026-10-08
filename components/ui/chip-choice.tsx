@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
 import { FilterChip } from "@/components/ui/filter-chip";
+import { RequiredMark } from "@/components/ui/required-mark";
 
 export type ChipOption<V extends string> = { value: V; label: string };
 
@@ -16,7 +17,7 @@ export type ChipOption<V extends string> = { value: V; label: string };
 export function ChipChoice<V extends string>({
   name,
   legend,
-  note,
+  required = false,
   options,
   value,
   onChange,
@@ -26,8 +27,8 @@ export function ChipChoice<V extends string>({
 }: {
   name: string;
   legend: string;
-  // Shown after the legend, muted ("facultatif").
-  note?: string;
+  // Shows the « * » after the legend (docs/DESIGN.md § 4).
+  required?: boolean;
   options: ChipOption<V>[];
   value: V | null;
   onChange: (value: V | null) => void;
@@ -47,9 +48,7 @@ export function ChipChoice<V extends string>({
     >
       <span id={`${id}-label`} className="text-sm leading-none font-medium">
         {legend}
-        {note && (
-          <span className="text-muted-foreground"> · {note}</span>
-        )}
+        {required && <RequiredMark announce />}
       </span>
       <input type="hidden" name={name} value={value ?? ""} />
       <div className="flex flex-wrap gap-2 pt-1">
@@ -88,7 +87,7 @@ export function ChipChoice<V extends string>({
 export function ChipMultiChoice<V extends string>({
   name,
   legend,
-  note,
+  required = false,
   options,
   defaultValue,
   onChange,
@@ -98,7 +97,8 @@ export function ChipMultiChoice<V extends string>({
 }: {
   name: string;
   legend: string;
-  note?: string;
+  // Shows the « * » after the legend (docs/DESIGN.md § 4).
+  required?: boolean;
   options: ChipOption<V>[];
   defaultValue: V[];
   onChange?: (value: V[]) => void;
@@ -126,7 +126,7 @@ export function ChipMultiChoice<V extends string>({
     >
       <span id={`${id}-label`} className="text-sm leading-none font-medium">
         {legend}
-        {note && <span className="text-muted-foreground"> · {note}</span>}
+        {required && <RequiredMark announce />}
       </span>
       <input type="hidden" name={name} value={JSON.stringify(selected)} />
       {options.length === 0 && emptyLabel ? (

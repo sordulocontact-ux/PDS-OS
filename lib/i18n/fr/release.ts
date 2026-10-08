@@ -1,9 +1,19 @@
 /** Release, detection status and public smartlink (step 6). */
 export const release = {
+  // Distribution in two steps (lib/ui/distribution-steps.ts, ticket
+  // « Architecture globale »): what leaves, then what is online.
   page: {
-    title: "Sortie",
+    title: "Préparation",
     description:
-      "Identifiants de la sortie, détection sur les plateformes et smartlink public.",
+      "Les identifiants et la date de la sortie, une seule fois pour tout le projet.",
+  },
+  online: {
+    title: "En ligne",
+    description:
+      "La détection du titre sur les plateformes et le smartlink public.",
+    empty:
+      "Enregistre d'abord la sortie dans la Préparation : la détection part de son ISRC.",
+    toPrepare: "Aller à la Préparation",
   },
   form: {
     titleCreate: "Déclarer la sortie",
@@ -14,7 +24,7 @@ export const release = {
       isrc: "ISRC",
       isrcHint: "12 caractères, ex. FRZ032600001. Espaces et tirets acceptés.",
       upc: "UPC",
-      upcHint: "Code-barres de 12 ou 13 chiffres (facultatif).",
+      upcHint: "Code-barres de 12 ou 13 chiffres.",
       plannedReleaseDate: "Date de sortie prévue",
       spotifyUrl: "Lien Spotify",
       spotifyUrlHint:

@@ -65,12 +65,74 @@ export const legalContracts = {
       roles: "Rôles concernés",
       usage: "Usage",
       body: "Texte du modèle",
-      bodyHint:
-        "Écrivez {{nom.du.champ}} là où une valeur doit être injectée. Champs disponibles :",
       submit: "Enregistrer le modèle",
       submitting: "Enregistrement…",
+      proposed:
+        "Nom, type, rôles et usage proposés par PO d'après le contrat : corrigez-les si besoin.",
       unknown: (ids: string) => `Champs inconnus : ${ids}.`,
       invalid: "Vérifiez le nom, le type, les rôles et le texte.",
+    },
+    editor: {
+      label: "Texte du modèle",
+      insert: "Insérer une valeur",
+      insertHint:
+        "Placez le curseur dans le texte, puis cliquez sur la valeur à insérer. Elle sera remplie pour chaque contrat.",
+      groups: {
+        person: "La personne",
+        project: "Le projet",
+        agreement: "L'accord",
+      },
+      placeholder:
+        "Collez ici le texte du contrat, déjà relu par votre juriste.",
+    },
+    source: {
+      title: "Fichier source",
+      description:
+        "Word, PDF ou texte, 10 Mo au plus. PO lit le contrat et repère ses valeurs ; le fichier est gardé avec le modèle.",
+      import: "Importer un fichier",
+      replace: "Remplacer",
+      remove: "Retirer",
+      reading: "Lecture du fichier…",
+      current: (name: string) => `Fichier source : ${name}`,
+      drop: "Déposez le fichier ici",
+      imported: (name: string) => `Contrat importé de « ${name} »`,
+      folded:
+        "Le texte du contrat est repris tel quel, chaque valeur repérée remplacée par sa pastille.",
+      showText: "Afficher le texte",
+      undo: "Annuler",
+      pdfNote: "Lu dans un PDF : la mise en page n'est pas gardée.",
+      open: "Télécharger le fichier source",
+      unsupported:
+        "Format non lu : importez un fichier Word (.docx), PDF ou texte. Un ancien .doc s'enregistre en .docx depuis Word.",
+      tooLarge: "Fichier trop lourd : 10 Mo au plus.",
+      tooLong: "Texte trop long pour un modèle (200 000 caractères au plus).",
+      unreadable: "Aucun texte n'a pu être lu dans ce fichier.",
+      failed: "Le fichier n'a pas pu être importé. Réessayez.",
+    },
+    values: {
+      title: "Vous partez d'un contrat déjà rempli ?",
+      description:
+        "Collez-le tel quel. PO repère les noms, l'adresse, les titres et la somme, le code les e-mails, téléphones et numéros : vous choisissez ce qui devient une valeur à remplir.",
+      fromFile: (name: string) => `Ce que PO a repéré dans « ${name} »`,
+      fromFileDescription:
+        "Déjà remplacé dans le modèle. Changez le champ si PO s'est trompé, ou « Annuler » pour garder le texte d'origine.",
+      find: "Repérer les valeurs",
+      finding: "PO lit le contrat…",
+      findAgain: "Repérer à nouveau",
+      empty: "Collez d'abord le texte du contrat.",
+      none: "Aucune valeur repérée : insérez-les avec les boutons au-dessus du texte.",
+      partial:
+        "PO n'a pas pu lire le contrat : seuls les e-mails, téléphones et numéros sont proposés.",
+      times: (n: number) => (n === 1 ? "1 fois" : `${n} fois`),
+      gone: "Plus dans le texte",
+      fieldLabel: (excerpt: string) => `Valeur pour « ${excerpt} »`,
+      replace: "Remplacer",
+      ignore: "Ignorer",
+      undo: "Annuler",
+      replaced: (n: number) =>
+        n === 1 ? "Remplacé 1 fois" : `Remplacé ${n} fois`,
+      replaceAll: (n: number) => `Tout remplacer (${n})`,
+      failed: "La lecture du contrat a échoué. Réessayez.",
     },
     versions: "Versions",
     validatedBy: (name: string, date: string) =>
@@ -87,7 +149,7 @@ export const legalContracts = {
   agreements: {
     title: "Contrats",
     description:
-      "Chaque personne créditée, l'accord qu'il lui faut et le modèle proposé. Validez la cartographie, puis générez chaque contrat dès que ses informations sont là.",
+      "Chaque personne créditée, l'accord qu'il lui faut et le modèle proposé. Validez la cartographie : chaque contrat est préparé automatiquement dès que ses informations sont là, puis relu et validé avant l'envoi.",
     back: "Retour au suivi",
     templates: "Modèles de contrat",
     noTemplate:

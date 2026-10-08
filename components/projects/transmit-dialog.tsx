@@ -92,6 +92,7 @@ function TransmitForm({
       <OptionSelect
         name="assigneePersonId"
         label={t.assignee}
+        required
         placeholder={t.assigneePlaceholder}
         items={Object.fromEntries(people.map((p) => [p.personId, p.name]))}
         defaultValue={values.assigneePersonId || defaultAssigneeId || null}

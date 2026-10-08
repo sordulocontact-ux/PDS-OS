@@ -101,7 +101,7 @@ export function PublicForm({
           {fields
             .filter((field) => field.block === block)
             .map((field) => {
-              const label = `${t.fields[field.id]}${field.required ? "" : ` · ${t.public.optional}`}`;
+              const label = t.fields[field.id];
               const hint = known[field.id] ? t.public.known : undefined;
               const err = flagged.includes(field.id)
                 ? field.required && !answers[field.id]
@@ -116,6 +116,7 @@ export function PublicForm({
                     key={field.id}
                     name={field.id}
                     label={label}
+                    required={field.required}
                     items={t.options[field.id] ?? {}}
                     defaultValue={answers[field.id] ?? null}
                     hint={hint}
@@ -129,6 +130,7 @@ export function PublicForm({
                     key={field.id}
                     name={field.id}
                     label={label}
+                    aria-required={field.required || undefined}
                     hint={hint}
                     error={err}
                     rows={3}
@@ -143,6 +145,7 @@ export function PublicForm({
                   name={field.id}
                   type={field.type}
                   label={label}
+                  aria-required={field.required || undefined}
                   hint={hint}
                   error={err}
                   maxLength={300}

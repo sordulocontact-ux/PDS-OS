@@ -1,21 +1,25 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FramingEntry } from "@/components/framing/intel/framing-entry";
-import { ProjectAttention } from "@/components/projects/project-attention";
+import { ProjectBoard } from "@/components/overview/project-board";
+import { ProjectPlanSection } from "@/components/plan/project-plan-section";
 import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { CreativeTeam } from "@/components/projects/creative-team";
-import { StageStateBadge } from "@/components/projects/stage-state-badge";
+import { ProjectAttention } from "@/components/projects/project-attention";
+import { ProjectStages } from "@/components/projects/project-stages";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
+import { FactList } from "@/components/ui/fact-list";
+import { CardRow, ListCard } from "@/components/ui/list-card";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
 import { assessFraming } from "@/lib/framing/assess";
 import { callSheetData } from "@/lib/framing/call-sheet-data";
 import { framingStarted, loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { isFramingOpen } from "@/lib/framing/queries";
-import { loadLaunchedPlan } from "@/lib/plan/queries";
 import { fr } from "@/lib/i18n/fr";
+import { proposePlan } from "@/lib/plan/propose";
+import { todayInParis } from "@/lib/insights/dates";
+import { loadLaunchedPlan } from "@/lib/plan/queries";
 import { projectKindLabel } from "@/lib/projects/labels";
 import {
   listCreativePeople,
@@ -23,10 +27,9 @@ import {
 } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject, listAssignablePeople } from "@/lib/projects/queries";
-import { allInOrder } from "@/lib/utils/parallel";
-import { FactList } from "@/components/ui/fact-list";
-import { CardRow, ListCard } from "@/components/ui/list-card";
 import { DOUBLE_SIDEBAR, projectSections } from "@/lib/ui/project-sections";
+import { allInOrder } from "@/lib/utils/parallel";
+import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
 const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
@@ -34,6 +37,13 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   year: "numeric",
 });
 
+/**
+ * Where a launched project opens. Until the Brief is validated: the Cadrage
+ * and the stages. Then the Plan du projet to launch; once launched, the
+ * overview of the ticket « Architecture globale »: the workflows side by
+ * side, next actions, blockers, deadlines (ProjectBoard, read from the
+ * workflows themselves; docs/ARCHITECTURE.md § 6 ter and § 8 ter).
+ */
 export default async function ProjectOverviewPage({
   params,
 }: PageProps<"/app/projects/[projectId]">) {
@@ -48,12 +58,14 @@ export default async function ProjectOverviewPage({
   const canManageCreatives =
     can(access, "assign_projects") || canEditProject(access, project);
   const canTransmit = can(access, "assign_projects");
+  const canEdit = canEditProject(access, project);
   const launched = project.stages.length > 0;
   const organizationId = access.organizationId;
-  // Everything else in one round trip, each query only when it is shown.
   const framingState = project.stages.find((s) => s.key === "framing")?.state;
   const framingWorking =
     framingState === "not_started" || framingState === "in_progress";
+  const framingValidated = framingState === "validated";
+  // Everything else in one round trip, each query only when it is shown.
   const [creatives, creativeCandidates, people, framingOpen, knowledge, plan] =
     await Promise.all([
       listProjectCreatives(project.id),
@@ -66,13 +78,21 @@ export default async function ProjectOverviewPage({
       // First thing to do once launched: a call, the framing starts from it.
       launched ? isFramingOpen(project.id) : Promise.resolve(false),
       // What PO found already known, for the entry of the Cadrage.
-      launched && framingState !== "validated"
+      launched && !framingValidated
         ? loadFramingKnowledge(project.id, access)
         : Promise.resolve(null),
-      framingState === "validated"
-        ? loadLaunchedPlan(project.id)
-        : Promise.resolve(null),
+      framingValidated ? loadLaunchedPlan(project.id) : Promise.resolve(null),
     ]);
+  // Second round, only for what the first one says is shown: the plan to
+  // propose (from the validated Cadrage), or the workflows once it runs
+  // (shared with the layout's reading in this request).
+  const [proposalKnowledge, flows] = await Promise.all([
+    framingValidated && !plan
+      ? loadFramingKnowledge(project.id, access)
+      : Promise.resolve(null),
+    plan ? loadWorkflowStates(project.id) : Promise.resolve(null),
+  ]);
+
   const creativeTeam = (
     <CreativeTeam
       projectId={project.id}
@@ -114,125 +134,97 @@ export default async function ProjectOverviewPage({
   ];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
-      <div className="flex min-w-0 flex-col gap-8">
-        {knowledge && framingWorking && (
-          <FramingEntry
-            projectId={project.id}
-            assessment={assessFraming(knowledge)}
-            acceptedAt={knowledge.acceptedAt}
-            ownerName={project.ownerName}
-            started={framingOpen && framingStarted(knowledge)}
-            canEdit={canEditProject(access, project)}
-            callSheet={callSheetData(knowledge, assessFraming(knowledge))}
-          />
-        )}
-        {framingState === "awaiting_validation" && (
-          <ProjectAttention
-            projectId={project.id}
-            state="awaiting"
-            validatorName={
-              knowledge?.framing.pendingValidation?.validatorName ?? null
-            }
-            planLaunchedAt={null}
-            canEdit={canEditProject(access, project)}
-          />
-        )}
-        {framingState === "validated" && (
+    <div className="flex flex-col gap-10">
+      {knowledge && framingWorking && (
+        <FramingEntry
+          projectId={project.id}
+          assessment={assessFraming(knowledge)}
+          acceptedAt={knowledge.acceptedAt}
+          ownerName={project.ownerName}
+          started={framingOpen && framingStarted(knowledge)}
+          canEdit={canEdit}
+          callSheet={callSheetData(knowledge, assessFraming(knowledge))}
+        />
+      )}
+      {framingState === "awaiting_validation" && (
+        <ProjectAttention
+          projectId={project.id}
+          state="awaiting"
+          validatorName={
+            knowledge?.framing.pendingValidation?.validatorName ?? null
+          }
+          planLaunchedAt={null}
+        />
+      )}
+      {framingValidated && plan && flows && (
+        <ProjectBoard
+          project={project}
+          flows={flows}
+          today={todayInParis()}
+          canLaunch={canEdit}
+        />
+      )}
+      {framingValidated && !plan && (
+        <>
           <ProjectAttention
             projectId={project.id}
             state="validated"
             validatorName={null}
-            planLaunchedAt={plan?.launchedAt ?? null}
-            canEdit={canEditProject(access, project)}
+            planLaunchedAt={null}
           />
-        )}
-        <section aria-labelledby="stages-title" className="flex flex-col gap-3">
-          <h2 id="stages-title" className="text-base font-medium">
-            {t.stages}
-          </h2>
-          <ol className="flex flex-col gap-1 rounded-xl border border-border p-1">
-            {project.stages.map((stage, index) => {
-              const href =
-                stage.key === "framing"
-                  ? routes.projectFraming(project.id)
-                  : stage.key === "launch_strategy"
-                    ? routes.projectStrategy(project.id)
-                    : stage.key === "design"
-                      ? routes.projectDesign(project.id)
-                      : null;
-              const content = (
-                <>
-                  <span className="flex min-w-0 items-baseline gap-3">
-                    <span className="w-4 shrink-0 text-sm text-muted-foreground tabular-nums">
-                      {index + 1}
-                    </span>
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate text-sm font-medium">
-                        {stage.label}
-                      </span>
-                      {stage.stateChangedAt && (
-                        <span className="text-xs text-muted-foreground">
-                          {t.changedAt}{" "}
-                          {dateFormatter.format(new Date(stage.stateChangedAt))}
-                        </span>
-                      )}
-                    </span>
-                  </span>
-                  <StageStateBadge state={stage.state} />
-                </>
-              );
-              const current = project.currentStage?.id === stage.id;
-              return (
-                <li key={stage.id}>
-                  {href ? (
-                    <Link
-                      href={href}
-                      aria-current={current ? "step" : undefined}
-                      className="flex items-center justify-between gap-3 rounded-lg px-4 py-3 no-underline hover:bg-muted/50"
-                    >
-                      {content}
-                    </Link>
-                  ) : (
-                    <div
-                      aria-current={current ? "step" : undefined}
-                      className="flex items-center justify-between gap-3 px-4 py-3"
-                    >
-                      {content}
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </section>
-        {creativeTeam}
-        <AssignmentHistory assignments={project.assignments} />
-      </div>
+          <ProjectPlanSection
+            projectId={project.id}
+            canEdit={canEdit}
+            launched={null}
+            proposal={
+              proposalKnowledge
+                ? {
+                    items: proposePlan(proposalKnowledge),
+                    members: proposalKnowledge.framing.members,
+                  }
+                : null
+            }
+          />
+        </>
+      )}
 
-      <div className="flex min-w-0 flex-col gap-8">
-        <section aria-labelledby="facts-title" className="flex flex-col gap-3">
-          <h2 id="facts-title" className="text-base font-medium">
-            {t.facts}
-          </h2>
-          <FactList facts={facts.map(([label, value]) => ({ label, value }))} />
-        </section>
-        {/* With tabs, the sections that have no tab are reached from here. */}
-        {!DOUBLE_SIDEBAR && (
-          <ListCard title={t.moreSections}>
-            {projectSections(project.id, {
-              legal: can(access, "manage_legal"),
-            })
-              .filter((section) => section.tabParent === "overview")
-              .map((section) => (
-                <CardRow
-                  key={section.key}
-                  href={section.href}
-                  main={section.label}
-                />
-              ))}
-          </ListCard>
-        )}
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="flex min-w-0 flex-col gap-8">
+          {/* The plan takes the stages' place once the Brief is validated. */}
+          {!framingValidated && <ProjectStages project={project} />}
+          {creativeTeam}
+          <AssignmentHistory assignments={project.assignments} />
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-8">
+          <section
+            aria-labelledby="facts-title"
+            className="flex flex-col gap-3"
+          >
+            <h2 id="facts-title" className="text-base font-medium">
+              {t.facts}
+            </h2>
+            <FactList
+              facts={facts.map(([label, value]) => ({ label, value }))}
+            />
+          </section>
+          {/* With tabs, the sections that have no tab are reached from here. */}
+          {!DOUBLE_SIDEBAR && (
+            <ListCard title={t.moreSections}>
+              {projectSections(project.id, {
+                legal: can(access, "manage_legal"),
+              })
+                .filter((section) => section.tabParent === "overview")
+                .map((section) => (
+                  <CardRow
+                    key={section.key}
+                    href={section.href}
+                    main={section.label}
+                  />
+                ))}
+            </ListCard>
+          )}
+        </div>
       </div>
     </div>
   );

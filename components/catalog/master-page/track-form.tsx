@@ -55,7 +55,6 @@ export function TrackForm({
           <Field
             name="performer"
             label={t.fields.performer}
-            hint={fr.masterPage.form.optional}
             autoComplete="off"
             maxLength={200}
             defaultValue={value("performer", track?.performer)}

@@ -67,7 +67,7 @@ export function ReleasePanel() {
             <div className="grid gap-1">
               <p
                 className={
-                  result.online ? "font-medium" : "font-medium text-destructive"
+                  result.online ? "font-medium" : "font-medium text-error"
                 }
               >
                 {result.online ? t.online(result.links.length) : t.offline}
@@ -138,7 +138,7 @@ export function ReleasePanel() {
                     <span
                       className={
                         step.status === "error"
-                          ? "font-medium text-destructive"
+                          ? "font-medium text-error"
                           : "font-mono"
                       }
                     >

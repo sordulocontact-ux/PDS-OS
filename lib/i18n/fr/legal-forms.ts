@@ -14,7 +14,6 @@ export const legalForms = {
     submit: "Envoyer ma fiche",
     submitting: "Envoi…",
     required: "Obligatoire",
-    optional: "facultatif",
     missing: "Complétez les champs obligatoires.",
     invalid: "Vérifiez les champs signalés.",
     failed: "Votre fiche n'a pas pu être envoyée. Réessayez dans un instant.",

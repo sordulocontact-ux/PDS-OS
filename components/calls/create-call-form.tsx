@@ -56,7 +56,7 @@ export function CreateCallForm({
             defaultOccurredAt={defaultOccurredAt}
           />
           {state && !state.ok && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-sm text-error">
               {fr.calls.errors[state.error]}
             </p>
           )}

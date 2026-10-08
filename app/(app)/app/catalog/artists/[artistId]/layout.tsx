@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ArtistActions } from "@/components/catalog/artist-actions";
-import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { ArtistEditDialog } from "@/components/catalog/artist-page/artist-edit-dialog";
 import { ArtistTabs } from "@/components/catalog/artist-page/artist-tabs";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
@@ -50,7 +50,7 @@ export default async function ArtistLayout({
             .filter(Boolean)
             .join(" · ")}
           leading={
-            <ArtistAvatar
+            <Avatar
               name={artist.name}
               pictureUrl={artist.pictureUrl}
               className="size-20 rounded-2xl text-[length:var(--type-body-lg)]"

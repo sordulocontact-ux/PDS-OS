@@ -1,22 +1,31 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { AgreementsView } from "@/components/legal/contracts/agreements-view";
 import { ClearancesView } from "@/components/legal/clearance/clearances-view";
 import { FormalitiesView } from "@/components/legal/formalities/formalities-view";
-import { ConfirmationView } from "@/components/legal/confirmation/confirmation-view";
+import {
+  ConfirmationPanel,
+  ConfirmationStatus,
+} from "@/components/legal/confirmation/confirmation-view";
 import { FormsView } from "@/components/legal/forms/forms-view";
-import { IntakeView } from "@/components/legal/intake/intake-view";
+import { IntakeWorkspace } from "@/components/legal/intake/intake-workspace";
 import { PlanView } from "@/components/legal/plan/plan-view";
 import { SplitsView } from "@/components/legal/splits/splits-view";
-import { TrackingView } from "@/components/legal/tracking/tracking-view";
+import {
+  TrackingView,
+  asTrackingView,
+} from "@/components/legal/tracking/tracking-view";
 import { LegalInventory } from "@/components/legal/legal-inventory";
+import { BackLink } from "@/components/shell/back-link";
+import { routes } from "@/lib/auth/redirects";
+import { contractProofOf } from "@/lib/contracts/proof";
 import { can } from "@/lib/auth/access";
 import { asFactStatus } from "@/lib/facts/views";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadConfirmation } from "@/lib/legal/confirmation/queries";
 import { loadClearances } from "@/lib/legal/clearance/queries";
-import { loadAgreements } from "@/lib/legal/contracts/queries";
+import { loadAgreementsGenerated } from "@/lib/legal/contracts/auto-generate";
 import { loadFormalities } from "@/lib/legal/formalities/queries";
 import { loadLegalInventory } from "@/lib/legal/inventory";
 import { loadForms } from "@/lib/legal/forms/queries";
@@ -32,11 +41,11 @@ export const metadata = {
   title: `${fr.shell.project.sidebar.legal} · ${fr.app.name}`,
 };
 
-// Juridique: the État des lieux at /legal, the Cadrage juridique at
-// /legal/framing, the Confirmation at /legal/confirmation, the Plan d'action
-// at /legal/plan, the Suivi at /legal/tracking, the branches' pages
-// (/legal/forms, /legal/contracts); a step not built yet (greyed
-// in the steps) is a 404.
+// Juridique in two steps (Sacha, 07/10/2026: « très compliqué »): the État
+// des lieux at /legal holds the Cadrage's questions and the Confirmation;
+// the Plan d'action at /legal/plan becomes the Suivi once launched. The
+// branches' pages (/legal/forms, /legal/contracts…) open from its actions.
+// The old /framing, /confirmation and /tracking redirect.
 // Reserved to manage_legal: anyone else gets the same 404 as a missing page.
 export default async function ProjectLegalPage({
   params,
@@ -54,61 +63,127 @@ export default async function ProjectLegalPage({
   ]);
   if (!can(access, "manage_legal")) notFound();
 
-  if (current === "framing") {
-    // The dossier beside the conversation is the État des lieux itself.
-    const [intake, inventory] = await Promise.all([
-      loadIntake(project),
-      loadLegalInventory(project, access),
-    ]);
-    return (
-      <IntakeView
-        projectId={project.id}
-        intake={intake}
-        inventory={inventory}
-        // Checked against the questions by the workspace: anything else is
-        // ignored.
-        initialQuestion={
-          typeof query.question === "string" ? query.question : null
-        }
-      />
-    );
+  // The questions and the confirmation live on the État des lieux.
+  if (current === "framing" || current === "confirmation") {
+    const question =
+      typeof query.question === "string"
+        ? `?question=${encodeURIComponent(query.question)}`
+        : "";
+    redirect(`${routes.projectLegal(projectId)}${question}`);
   }
+  if (current === "tracking")
+    redirect(routes.projectLegalStep(projectId, "plan"));
+
+  // A branch's page opens from an action of the plan: the way back.
+  const branch = (page: React.ReactNode) => (
+    <div className="grid gap-6">
+      <BackLink href={routes.projectLegalStep(projectId, "plan")}>
+        {fr.shell.project.legalSteps.backToPlan}
+      </BackLink>
+      {page}
+    </div>
+  );
+
   if (current === "formalities") {
     const titles = await loadFormalities(project, access);
-    return <FormalitiesView projectId={project.id} titles={titles} />;
+    return branch(<FormalitiesView projectId={project.id} titles={titles} />);
   }
   if (current === "clearances") {
     const clearances = await loadClearances(project, access);
-    return <ClearancesView projectId={project.id} clearances={clearances} />;
+    return branch(
+      <ClearancesView
+        projectId={project.id}
+        clearances={clearances}
+        openId={typeof query.emprunt === "string" ? query.emprunt : null}
+      />,
+    );
   }
   if (current === "splits") {
     const splits = await loadSplits(project, access);
-    return <SplitsView projectId={project.id} splits={splits} />;
+    return branch(<SplitsView projectId={project.id} splits={splits} />);
   }
   if (current === "contracts") {
-    const agreements = await loadAgreements(project, access);
-    return <AgreementsView projectId={project.id} agreements={agreements} />;
+    // The agreements that became ready are generated on the way.
+    const agreements = await loadAgreementsGenerated(project, access);
+    return branch(
+      <AgreementsView projectId={project.id} agreements={agreements} />,
+    );
   }
   if (current === "forms") {
     const rows = await loadForms(project, access);
-    return <FormsView projectId={project.id} rows={rows} />;
-  }
-  if (current === "tracking") {
-    const tracking = await loadTracking(project, access);
-    return <TrackingView projectId={project.id} tracking={tracking} />;
+    return branch(<FormsView projectId={project.id} rows={rows} />);
   }
   if (current === "plan") {
     const plan = await loadLegalPlan(project, access);
-    return <PlanView projectId={project.id} plan={plan} />;
-  }
-  if (current === "confirmation") {
-    const confirmation = await loadConfirmation(project, access);
+    if (plan.state !== "launched")
+      return <PlanView projectId={project.id} plan={plan} />;
+    // Launched, the plan is followed: each line opens the panel where it
+    // is done, so every branch's data is read here (the ready agreements
+    // are generated on the way).
+    const agreements = await loadAgreementsGenerated(project, access);
+    const [tracking, clearances, forms, splits, formalities] =
+      await Promise.all([
+        loadTracking(project, access),
+        loadClearances(project, access),
+        loadForms(project, access),
+        loadSplits(project, access),
+        loadFormalities(project, access),
+      ]);
+    const proof = await contractProofOf(
+      agreements.rows.flatMap((row) => (row.contract ? [row.contract.id] : [])),
+    );
     return (
-      <ConfirmationView projectId={project.id} confirmation={confirmation} />
+      <TrackingView
+        projectId={project.id}
+        tracking={tracking}
+        view={asTrackingView(query.view)}
+        titles={project.masters.map((m) => ({ id: m.id, title: m.title }))}
+        data={{
+          forms,
+          agreements,
+          splits,
+          clearances,
+          formalities,
+          proof: Object.fromEntries(proof),
+        }}
+      />
     );
   }
-  const inventory = await loadLegalInventory(project, access);
+
+  // The État des lieux: the question of the moment, the dossier to confirm
+  // once every question has an answer, then what the project knows.
+  const [intake, inventory, confirmation] = await Promise.all([
+    loadIntake(project),
+    loadLegalInventory(project, access),
+    loadConfirmation(project, access),
+  ]);
+  const initialQuestion =
+    typeof query.question === "string" ? query.question : null;
   return (
-    <LegalInventory inventory={inventory} state={asFactStatus(query.state)} />
+    <LegalInventory
+      inventory={inventory}
+      state={asFactStatus(query.state)}
+      lead={
+        <>
+          <ConfirmationStatus
+            projectId={project.id}
+            confirmation={confirmation}
+          />
+          <IntakeWorkspace
+            // « Corriger » from the dossier reopens its question: a new
+            // workspace for it.
+            key={initialQuestion ?? "intake"}
+            projectId={project.id}
+            questions={intake.questions}
+            initialQuestion={initialQuestion}
+            embedded
+          />
+          <ConfirmationPanel
+            projectId={project.id}
+            confirmation={confirmation}
+          />
+        </>
+      }
+    />
   );
 }

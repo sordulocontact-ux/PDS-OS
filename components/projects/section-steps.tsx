@@ -8,29 +8,39 @@ export type SectionStep = {
   key: string;
   label: string;
   href: string;
-  // Has a page; otherwise greyed, not linked, with `soon` as its title.
+  // Has a page and may be opened; otherwise greyed, not linked, with
+  // `title` (why it is closed) or `soon` as its title.
   built: boolean;
+  title?: string;
+  // Really done (computed by the server): a check before the label.
+  done?: boolean;
+  // Other pages the step covers (a sub-page opened from it): current there
+  // too.
+  also?: string[];
 };
 
 /**
- * The internal steps of a specialised workflow (Master) as chevrons without
- * numbers, under the project header — same place and component as the
- * Workflow's. Hides itself outside the section (`base` and below), so the
+ * The steps of a workflow (Master, Marketing) as chevrons without numbers,
+ * under the project header — same place and component as the Juridique's.
+ * Hides itself outside the workflow's pages (`within` and below), so the
  * layout renders it around every project page.
  */
 export function SectionSteps({
-  base,
+  within,
   label,
   soon,
   steps,
 }: {
-  base: string;
+  within: string[];
   label: string;
   soon: string;
   steps: SectionStep[];
 }) {
   const pathname = usePathname();
-  if (pathname !== base && !pathname.startsWith(`${base}/`)) return null;
+  const inside = within.some(
+    (base) => pathname === base || pathname.startsWith(`${base}/`),
+  );
+  if (!inside) return null;
 
   return (
     <ProcessSteps
@@ -40,8 +50,9 @@ export function SectionSteps({
         key: step.key,
         label: step.label,
         href: step.built ? step.href : undefined,
-        title: step.built ? undefined : soon,
-        current: pathname === step.href,
+        title: step.built ? undefined : (step.title ?? soon),
+        done: step.done,
+        current: pathname === step.href || !!step.also?.includes(pathname),
       }))}
     />
   );

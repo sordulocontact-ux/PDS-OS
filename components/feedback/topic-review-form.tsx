@@ -61,6 +61,7 @@ export function TopicReviewForm({
         <ChoiceCards
           name="priority"
           legend={t.review.priority}
+          required
           choices={FEEDBACK_PRIORITIES.map((p) => ({
             value: p,
             label: t.priorities[p],

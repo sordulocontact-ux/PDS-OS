@@ -57,6 +57,7 @@ export function SignaturesList({
                   <Field
                     name={`${s.id}-proof`}
                     label={t.signProof}
+                    aria-required
                     value={proofs[s.id] ?? ""}
                     onChange={(e) =>
                       setProofs((p) => ({ ...p, [s.id]: e.target.value }))

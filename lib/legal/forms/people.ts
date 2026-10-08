@@ -4,7 +4,10 @@
 // Réseau when there is one (it is linked first, by a human: « Relier »),
 // and the roles their credits already say (to pre-tick,
 // « Les rôles préremplis viennent du cadrage et restent corrigeables »).
-// Catalog performers are not here: their artist page is their source. Pure.
+// Catalog performers are not here: their artist page is their source. The
+// people of the Réseau added to the legal file without a credit follow
+// (ticket « Architecture globale », lot 6), with the role chosen for them.
+// Pure.
 
 import type { ContributorRole } from "@/lib/catalog/master/rules";
 import type { FormRole } from "@/lib/legal/forms/definition";
@@ -70,5 +73,20 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
   for (const person of people.values())
     if (!person.contactId)
       person.namesakeId = rows.network.byName.get(person.key)?.id ?? null;
-  return [...people.values()];
+  const credited = new Set(
+    [...people.values()].flatMap((p) => (p.contactId ? [p.contactId] : [])),
+  );
+  const added = rows.projectContacts
+    .filter((contact) => !credited.has(contact.contactId))
+    .map((contact): FormPerson => ({
+      key: `contact:${contact.contactId}`,
+      name: contact.name,
+      contactId: contact.contactId,
+      unlinkedCreditIds: [],
+      namesakeId: null,
+      creditRoles: [],
+      formRoles: [contact.role],
+      networkRoles: [],
+    }));
+  return [...people.values(), ...added];
 }

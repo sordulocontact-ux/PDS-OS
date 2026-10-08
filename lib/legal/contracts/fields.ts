@@ -23,6 +23,26 @@ export const CONTRACT_FIELD_IDS = [
 ] as const;
 export type ContractFieldId = (typeof CONTRACT_FIELD_IDS)[number];
 
+/** The fields as the template editor offers them, by what they describe. */
+export const CONTRACT_FIELD_GROUPS: Record<
+  "person" | "project" | "agreement",
+  readonly ContractFieldId[]
+> = {
+  person: [
+    "personne.nom_civil",
+    "personne.nom_artiste",
+    "personne.adresse",
+    "personne.email",
+    "personne.telephone",
+    "personne.statut",
+    "personne.societe",
+    "personne.siret",
+    "personne.ipi",
+  ],
+  project: ["projet.titre", "projet.artiste", "projet.titres"],
+  agreement: ["remuneration", "personne.roles", "organisation.nom"],
+};
+
 export type FieldSource =
   "fiche" | "network" | "project" | "credits" | "mapping" | "organization";
 

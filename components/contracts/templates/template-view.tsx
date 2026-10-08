@@ -1,3 +1,5 @@
+import { TemplateBody } from "@/components/contracts/templates/field-chip";
+import { TemplateSourceLink } from "@/components/contracts/templates/template-source-link";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { TemplateSeries } from "@/lib/legal/contracts/templates";
@@ -17,6 +19,15 @@ export function TemplateView({ template }: { template: TemplateSeries }) {
           )}
         </p>
       )}
+      {template.source && (
+        <section className="flex flex-col gap-2">
+          <h3 className="text-sm font-medium">{t.source.title}</h3>
+          <TemplateSourceLink
+            templateId={template.id}
+            name={template.source.name}
+          />
+        </section>
+      )}
       <section className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">{t.usesFields}</h3>
         <p className="text-sm text-muted-foreground">
@@ -25,9 +36,7 @@ export function TemplateView({ template }: { template: TemplateSeries }) {
             .join(", ") || "—"}
         </p>
       </section>
-      <div className="max-h-96 overflow-y-auto overscroll-contain rounded-xl border bg-background p-4 text-sm break-words whitespace-pre-wrap">
-        {template.body}
-      </div>
+      <TemplateBody body={template.body} />
       <section className="flex flex-col gap-2">
         <h3 className="text-sm font-medium">{t.versions}</h3>
         <ul className="flex flex-wrap gap-2">

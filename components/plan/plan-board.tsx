@@ -141,11 +141,13 @@ export function PlanBoard({
                             <Label
                               htmlFor={`plan-col-${item.key}`}
                               className="text-caption"
+                              required
                             >
                               {t.move}
                             </Label>
                             <OptionSelect
                               id={`plan-col-${item.key}`}
+                              required
                               label={t.move}
                               options={columnOptions}
                               value={choices[item.key].column}

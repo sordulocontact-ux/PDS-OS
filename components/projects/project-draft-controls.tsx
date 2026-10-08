@@ -50,7 +50,7 @@ export function ProjectDraftControls({
         role="status"
         className={cn(
           "text-sm",
-          status === "error" ? "text-destructive" : "text-muted-foreground",
+          status === "error" ? "text-error" : "text-muted-foreground",
         )}
       >
         {t[status]}

@@ -76,6 +76,7 @@ export function MemberEditForm({
           id={`role-${id}`}
           name="role"
           label={t.columns.role}
+          required
           items={t.roles}
           placeholder={t.actions.rolePlaceholder}
           defaultValue={retainedMemberValue(state, "role", role ?? "") || null}

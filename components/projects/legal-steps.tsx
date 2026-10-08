@@ -2,23 +2,25 @@
 
 import { usePathname } from "next/navigation";
 
-import { FilterChipLink } from "@/components/ui/filter-chip";
 import { ProcessSteps } from "@/components/ui/process-steps";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import {
-  LEGAL_BRANCH_PAGES,
-  LEGAL_BUILT_STEPS,
-  LEGAL_STEP_KEYS,
-  legalStepHref,
-  legalStepLabel,
+  LEGAL_TABS,
+  builtLegalStepOf,
+  legalPhase,
+  legalTabOf,
   type LegalStepKey,
 } from "@/lib/ui/legal-steps";
 
-// The Juridique steps as chevrons, without numbers (Figma), at the top of the
-// Juridique section — same place and component as the Workflow's. Hides
-// itself elsewhere, so the layout renders it around every project page.
-// `done`: the steps really done, computed by the server (lib/legal/steps-done.ts).
+// The Juridique in two steps as chevrons, at the top of the section — same
+// place and component as the Workflow's and the Master's. The État des
+// lieux is checked once the dossier is confirmed; the Plan d'action opens
+// then (before, it is greyed with its reason). The branches have no entry
+// here any more: each action of the plan opens its own. Hides itself
+// elsewhere, so the layout renders it around every project page.
+// `done`: the steps really done, computed by the server
+// (lib/legal/steps-done.ts).
 export function LegalSteps({
   projectId,
   done,
@@ -31,37 +33,40 @@ export function LegalSteps({
   const base = routes.projectLegal(projectId);
   if (pathname !== base && !pathname.startsWith(`${base}/`)) return null;
 
+  const segments = pathname.slice(base.length).split("/").filter(Boolean);
+  const page = builtLegalStepOf(segments);
+  const current = page ? legalTabOf(page) : null;
+  const confirmed = done.includes("confirmation");
+  const launched = done.includes("plan");
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <ProcessSteps
-        label={fr.shell.project.legalSteps.label}
+        label={t.label}
         numbered={false}
-        steps={LEGAL_STEP_KEYS.map((key) => {
-          const href = legalStepHref(projectId, key);
-          const built = LEGAL_BUILT_STEPS.includes(key);
+        steps={LEGAL_TABS.map((key) => {
+          const open = key === "inventory" || confirmed;
           return {
             key,
-            label: legalStepLabel(key),
-            href: built ? href : undefined,
-            title: built ? undefined : fr.shell.project.legalSteps.soon,
-            current: pathname === href,
-            done: done.includes(key),
+            // The plan once launched is followed: the chevron says so.
+            label: key === "plan" && launched ? t.tracking : t[key],
+            href: open
+              ? key === "inventory"
+                ? base
+                : routes.projectLegalStep(projectId, "plan")
+              : undefined,
+            title: open ? undefined : t.planLocked,
+            current: current === key,
+            done: key === "inventory" ? confirmed : false,
           };
         })}
       />
-      {/* The branches are no steps: dossiers opened at any time (Sacha,
-        05/10/2026: « des pages qu'on ne peut atteindre que depuis le
-        Suivi »). */}
-      <nav aria-label={t.branchesLabel} className="flex flex-wrap gap-2">
-        {LEGAL_BRANCH_PAGES.map((page) => {
-          const href = routes.projectLegalStep(projectId, page);
-          return (
-            <FilterChipLink key={page} href={href} current={pathname === href}>
-              {t.branches[page]}
-            </FilterChipLink>
-          );
-        })}
-      </nav>
+      <p className="text-caption text-muted-foreground">
+        {t.phase} ·{" "}
+        <span className="font-medium text-foreground">
+          {t[legalPhase(done)]}
+        </span>
+      </p>
     </div>
   );
 }

@@ -23,6 +23,7 @@ export type FormalityStatus = (typeof FORMALITY_STATUSES)[number];
 
 export type FieldKind =
   | "text"
+  | "date"
   | "textarea"
   | "creators"
   | "publishers"
@@ -45,8 +46,15 @@ export const SACEM_725_FIELDS: readonly FormalityField[] = [
   { key: "group_name", section: "work", kind: "text", required: false },
   { key: "iswc", section: "work", kind: "text", required: false },
   { key: "performers", section: "exploitation", kind: "text", required: false },
+  // The bulletin asks the date and, apart, the place or broadcaster.
   {
     key: "first_exploitation",
+    section: "exploitation",
+    kind: "date",
+    required: false,
+  },
+  {
+    key: "first_exploitation_place",
     section: "exploitation",
     kind: "text",
     required: false,
@@ -75,6 +83,11 @@ export const SACEM_725_FIELDS: readonly FormalityField[] = [
 ];
 
 export const QUALITIES = ["author", "composer", "arranger", "adapter"] as const;
+
+// Rubrique D: within each category, the DEP and DR shares follow the Phono
+// shares (the box of the bulletin ticked) or the equal sharing of the
+// Règlement général (left empty). Checked in formality_missing (SQL).
+export const DEP_DR_CHOICES = ["follow_phono", "statutory"] as const;
 export type Quality = (typeof QUALITIES)[number];
 
 export type Creator = {
@@ -86,8 +99,36 @@ export type Creator = {
   // Exact share, « 33.3334 » (never copied from the split sheet).
   phono: string;
   signs: boolean;
+  // The Réseau contact this creator was picked from (never by name).
+  contact_id?: string;
 };
-export type Publisher = { name: string; ipi: string; phono: string };
+export type Publisher = {
+  name: string;
+  ipi: string;
+  phono: string;
+  contact_id?: string;
+};
+
+// What the bulletin takes of a person, from their name in the Réseau and
+// their fiche de renseignements (contact_legal_details).
+export function creatorIdentity(
+  name: string,
+  details: Record<string, string>,
+): Pick<Creator, "last_name" | "first_name" | "pseudonym" | "ipi"> {
+  return {
+    last_name: details.legal_last_name || name,
+    first_name: details.legal_first_name || "",
+    pseudonym: details.pseudonym || (details.legal_last_name ? name : ""),
+    ipi: details.ipi_coad || "",
+  };
+}
+
+// The bulletin's quality of a credit of the title.
+export const QUALITY_OF_ROLE: Partial<Record<string, Quality>> = {
+  lyricist: "author",
+  composer: "composer",
+  arranger: "arranger",
+};
 
 /** A code of formality_missing (SQL) in words. */
 export function formalityMissingLabel(code: string): string {

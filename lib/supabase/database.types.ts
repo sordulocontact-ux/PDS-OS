@@ -543,7 +543,9 @@ export type Database = {
           meeting_url: string | null
           occurred_at: string
           organization_id: string
+          prep: Json | null
           project_id: string | null
+          purpose: string | null
           status: string
           title: string
           updated_at: string
@@ -565,7 +567,9 @@ export type Database = {
           meeting_url?: string | null
           occurred_at?: string
           organization_id: string
+          prep?: Json | null
           project_id?: string | null
+          purpose?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -587,7 +591,9 @@ export type Database = {
           meeting_url?: string | null
           occurred_at?: string
           organization_id?: string
+          prep?: Json | null
           project_id?: string | null
+          purpose?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -887,6 +893,8 @@ export type Database = {
           retired_at: string | null
           roles: string[]
           series_id: string
+          source_name: string | null
+          source_path: string | null
           status: string
           type: string
           usage: string | null
@@ -905,6 +913,8 @@ export type Database = {
           retired_at?: string | null
           roles: string[]
           series_id: string
+          source_name?: string | null
+          source_path?: string | null
           status?: string
           type: string
           usage?: string | null
@@ -923,6 +933,8 @@ export type Database = {
           retired_at?: string | null
           roles?: string[]
           series_id?: string
+          source_name?: string | null
+          source_path?: string | null
           status?: string
           type?: string
           usage?: string | null
@@ -930,7 +942,29 @@ export type Database = {
           validated_by?: string | null
           version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contract_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_templates_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contracts: {
         Row: {
@@ -2525,6 +2559,65 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      legal_project_contacts: {
+        Row: {
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          role: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          role: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_project_contacts_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "legal_project_contacts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_project_contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_project_contacts_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
       }
       legal_split_confirmations: {
         Row: {
@@ -5775,6 +5868,10 @@ export type Database = {
         }
         Returns: string
       }
+      add_legal_project_contact: {
+        Args: { p_contact_id: string; p_project_id: string; p_role: string }
+        Returns: string
+      }
       add_project_creative: {
         Args: { p_person_id: string; p_project_id: string }
         Returns: undefined
@@ -5815,15 +5912,23 @@ export type Database = {
       audio_state_rank: { Args: { p_state: string }; Returns: number }
       auth_organization_id: { Args: never; Returns: string }
       auth_person_id: { Args: never; Returns: string }
+      brief_field_dimension: { Args: { p_field_key: string }; Returns: string }
+      brief_snapshot: { Args: { p_project_id: string }; Returns: Json }
       can_admin_person: { Args: { target_person_id: string }; Returns: boolean }
       can_deposit_design_version: {
         Args: { p_deliverable_id: string; p_project_id: string }
         Returns: boolean
       }
       can_edit_contract: { Args: { p_contract_id: string }; Returns: boolean }
-      can_manage_clearance: { Args: { p_clearance_id: string }; Returns: boolean }
+      can_manage_clearance: {
+        Args: { p_clearance_id: string }
+        Returns: boolean
+      }
       can_manage_creatives: { Args: { p_project_id: string }; Returns: boolean }
-      can_manage_formality: { Args: { p_formality_id: string }; Returns: boolean }
+      can_manage_formality: {
+        Args: { p_formality_id: string }
+        Returns: boolean
+      }
       can_manage_split_sheet: { Args: { p_sheet_id: string }; Returns: boolean }
       can_read_project_contracts: {
         Args: { p_project_id: string }
@@ -5858,10 +5963,39 @@ export type Database = {
           subject_id: string
         }[]
       }
+      clearance_for_write: {
+        Args: { p_clearance_id: string }
+        Returns: {
+          author: string | null
+          created_at: string
+          created_by: string | null
+          element: string
+          id: string
+          master_id: string | null
+          organization_id: string
+          project_id: string
+          qualified_at: string | null
+          responsible_person_id: string | null
+          rights_scope: string | null
+          scope_reason: string | null
+          source_fact_id: string | null
+          status: string
+          updated_at: string
+          usage: string | null
+          work: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "legal_clearances"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       clearance_missing: {
         Args: { p_clearance_id: string; p_status: string }
         Returns: string[]
       }
+      clearance_rights: { Args: { p_scope: string }; Returns: string[] }
       complete_formality: {
         Args: {
           p_external_id: string | null
@@ -5869,6 +6003,10 @@ export type Database = {
           p_iswc: string | null
           p_proof: string
         }
+        Returns: undefined
+      }
+      consolidate_split_version: {
+        Args: { p_version_id: string }
         Returns: undefined
       }
       contract_placeholders: { Args: { p_body: string }; Returns: string[] }
@@ -5879,6 +6017,8 @@ export type Database = {
           p_organization_id: string
           p_roles: string[]
           p_series_id: string | null
+          p_source_name?: string
+          p_source_path?: string
           p_type: string
           p_usage: string | null
         }
@@ -5951,6 +6091,15 @@ export type Database = {
         }
         Returns: string
       }
+      credit_brief_engineer: {
+        Args: {
+          p_brief: Database["public"]["Tables"]["master_briefs"]["Row"]
+          p_new_contact: string
+          p_old_contact: string
+          p_role: string
+        }
+        Returns: undefined
+      }
       decide_clearance_terms: {
         Args: { p_accept: boolean; p_terms_id: string }
         Returns: undefined
@@ -5980,6 +6129,10 @@ export type Database = {
         Args: { p_formality_id: string; p_reason: string }
         Returns: undefined
       }
+      delete_artist_row: { Args: { p_artist_id: string }; Returns: undefined }
+      delete_contact_row: { Args: { p_contact_id: string }; Returns: undefined }
+      delete_master_row: { Args: { p_master_id: string }; Returns: undefined }
+      delete_project_row: { Args: { p_project_id: string }; Returns: undefined }
       delete_records: {
         Args: { p_ids: string[]; p_kind: string }
         Returns: {
@@ -6018,7 +6171,37 @@ export type Database = {
         Args: { p_endpoint: string }
         Returns: undefined
       }
+      formality_for_write: {
+        Args: { p_formality_id: string }
+        Returns: {
+          completed_at: string | null
+          completion_proof: string | null
+          created_at: string
+          created_by: string | null
+          definition_key: string
+          definition_version: number
+          external_id: string | null
+          id: string
+          master_id: string
+          organization_id: string
+          partial_reason: string | null
+          project_id: string
+          reopened: string[]
+          responsible_person_id: string | null
+          status: string
+          submission_proof: string | null
+          submitted_at: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "legal_formalities"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       formality_missing: { Args: { p_formality_id: string }; Returns: string[] }
+      formality_settle: { Args: { p_formality_id: string }; Returns: undefined }
       framing_dimension_editable: {
         Args: { p_dimension: string; p_project_id: string }
         Returns: boolean
@@ -6026,21 +6209,50 @@ export type Database = {
       framing_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       framing_is_open: { Args: { p_project_id: string }; Returns: boolean }
       framing_key_dimension: { Args: { p_key: string }; Returns: string }
-      generate_formality_document: { Args: { p_formality_id: string }; Returns: number }
+      framing_stage_for_update: {
+        Args: { p_project_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          organization_id: string
+          project_id: string
+          stage_definition_id: string
+          state: string
+          state_changed_at: string | null
+          state_changed_by: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "project_stages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      generate_formality_document: {
+        Args: { p_formality_id: string }
+        Returns: number
+      }
       generate_legal_contract: {
         Args: { p_fields: Json; p_need_id: string }
         Returns: string
       }
-      get_master_transmission: {
-        Args: { p_token: string }
-        Returns: Json
-      }
+      get_master_transmission: { Args: { p_token: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }
       get_smartlink: { Args: { p_token: string }; Returns: Json }
       get_split_confirmation: { Args: { p_token: string }; Returns: Json }
       has_permission: {
         Args: { org_id: string; p_permission: string }
         Returns: boolean
+      }
+      insert_legal_plan_item: {
+        Args: {
+          p_item: Json
+          p_org: string
+          p_plan: string
+          p_project_id: string
+        }
+        Returns: string
       }
       invite_member: {
         Args: {
@@ -6057,12 +6269,28 @@ export type Database = {
       is_project_launched: { Args: { p_project_id: string }; Returns: boolean }
       is_project_owner: { Args: { p_project_id: string }; Returns: boolean }
       launch_plan_workflow: {
-        Args: { p_project_id: string; p_workflow: string }
+        Args: {
+          p_project_id: string
+          p_title?: string
+          p_why?: string
+          p_workflow: string
+        }
         Returns: undefined
       }
       launch_project_plan: {
         Args: { p_items: Json; p_project_id: string }
         Returns: string
+      }
+      legal_plan_item_done: {
+        Args: {
+          p_item: Database["public"]["Tables"]["legal_plan_items"]["Row"]
+        }
+        Returns: boolean
+      }
+      legal_plan_item_task: { Args: { p_item_id: string }; Returns: undefined }
+      legal_tick_tasks: {
+        Args: { p_project_ids: string[] }
+        Returns: undefined
       }
       link_clearance_contract: {
         Args: { p_clearance_id: string; p_contract_id: string; p_right: string }
@@ -6122,6 +6350,34 @@ export type Database = {
         }
         Returns: string
       }
+      log_clearance_event: {
+        Args: {
+          p_clearance: Database["public"]["Tables"]["legal_clearances"]["Row"]
+          p_from?: string
+          p_kind: string
+          p_note?: string
+          p_to?: string
+        }
+        Returns: undefined
+      }
+      log_contract_event: {
+        Args: {
+          p_contract_id: string
+          p_kind: string
+          p_note?: string
+          p_organization_id: string
+          p_project_id: string
+        }
+        Returns: undefined
+      }
+      log_formality_event: {
+        Args: {
+          p_formality: Database["public"]["Tables"]["legal_formalities"]["Row"]
+          p_kind: string
+          p_note?: string
+        }
+        Returns: undefined
+      }
       log_master_event: {
         Args: {
           p_catalog_only?: boolean
@@ -6134,7 +6390,20 @@ export type Database = {
         }
         Returns: undefined
       }
-      mark_formality_processing: { Args: { p_formality_id: string }; Returns: undefined }
+      log_split_event: {
+        Args: {
+          p_entry_id?: string
+          p_kind: string
+          p_note?: string
+          p_org: string
+          p_version_id: string
+        }
+        Returns: undefined
+      }
+      mark_formality_processing: {
+        Args: { p_formality_id: string }
+        Returns: undefined
+      }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
       master_is_live: { Args: { p_master_id: string }; Returns: boolean }
       new_split_confirmation: { Args: { p_entry_id: string }; Returns: string }
@@ -6161,6 +6430,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      plan_check_editable: { Args: { p_project_id: string }; Returns: string }
+      plan_items_valid: { Args: { p_items: Json }; Returns: boolean }
       project_artist_name: { Args: { p_project_id: string }; Returns: string }
       project_masters_editable: {
         Args: { p_project_id: string }
@@ -6176,7 +6447,10 @@ export type Database = {
       }
       propose_split_version: {
         Args: { p_version_id: string }
-        Returns: { entry_id: string; token: string }[]
+        Returns: {
+          entry_id: string
+          token: string
+        }[]
       }
       push_secret_matches: { Args: { p_secret: string }; Returns: boolean }
       confirm_legal_intake: {
@@ -6211,7 +6485,14 @@ export type Database = {
         Args: { p_proof: string; p_signature_id: string }
         Returns: undefined
       }
-      remove_clearance_rightsholder: { Args: { p_rightsholder_id: string }; Returns: undefined }
+      remove_clearance_rightsholder: {
+        Args: { p_rightsholder_id: string }
+        Returns: undefined
+      }
+      remove_legal_project_contact: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
       require_formality_action: {
         Args: { p_fields: string[]; p_formality_id: string; p_note: string }
         Returns: undefined
@@ -6250,16 +6531,19 @@ export type Database = {
         Args: { p_brief_id: string; p_note?: string }
         Returns: string
       }
-      send_mix_feedback: {
-        Args: { p_version_id: string }
-        Returns: undefined
-      }
+      send_mix_feedback: { Args: { p_version_id: string }; Returns: undefined }
       set_contract_template_status: {
         Args: { p_status: string; p_template_id: string }
         Returns: undefined
       }
       set_legal_form_state: {
         Args: { p_form_id: string; p_state: string }
+        Returns: undefined
+      }
+      split_content_hash: { Args: { p_version_id: string }; Returns: string }
+      split_version_content: { Args: { p_version_id: string }; Returns: Json }
+      start_strategy_stage: {
+        Args: { p_project_id: string }
         Returns: undefined
       }
       submit_formality: {

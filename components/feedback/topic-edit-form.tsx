@@ -136,6 +136,7 @@ export function TopicEditForm({
       <ChoiceCards
         name="kind"
         legend={t.kind}
+        required
         choices={FEEDBACK_KINDS.map((k) => ({
           value: k,
           label: fr.feedback.kinds[k],

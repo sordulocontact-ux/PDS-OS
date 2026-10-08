@@ -355,3 +355,23 @@ export const planWorkflowTone: Record<string, Tone> = {
   waiting: "neutral",
   follows: "neutral",
 };
+
+// Common status of a workflow (ticket « Architecture globale » § 8,
+// lib/workflow-status/rules.ts): running is info, waiting for someone is a
+// warning, blocked is danger, finished is success. No violet (§ 12).
+export const workflowStatusTone: Record<string, Tone> = {
+  not_started: "neutral",
+  in_progress: "info",
+  waiting: "warning",
+  blocked: "danger",
+  done: "success",
+};
+
+// What one workflow expects from another (lib/workflow-status/rules.ts):
+// available is success, running info, waiting warning, blocked danger.
+export const dependencyTone: Record<string, Tone> = {
+  ready: "success",
+  in_progress: "info",
+  waiting: "warning",
+  blocked: "danger",
+};

@@ -94,8 +94,13 @@ export async function loadConfirmation(
     : null;
 
   return {
+    // Nothing to ask (no title, a contract already attached): the dossier is
+    // ready to confirm without a single answer, never sent back to the
+    // Cadrage (confirm_legal_intake opens it).
     status: !intakeRow.data
-      ? "not_started"
+      ? intake.questions.length === 0
+        ? "draft"
+        : "not_started"
       : intakeRow.data.status === "confirmed"
         ? "confirmed"
         : "draft",

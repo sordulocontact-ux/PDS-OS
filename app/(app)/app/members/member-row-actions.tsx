@@ -188,6 +188,7 @@ export function MemberRowActions({
             id={`role-${id}`}
             name="role"
             label={t.columns.role}
+            required
             items={t.roles}
             placeholder={a.rolePlaceholder}
             defaultValue={

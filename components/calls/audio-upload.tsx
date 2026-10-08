@@ -67,11 +67,14 @@ export function AudioUpload({
 
   return (
     <form onSubmit={onSubmit} className="grid gap-3">
-      <Label htmlFor="call-audio">{t.label}</Label>
+      <Label htmlFor="call-audio" required>
+        {t.label}
+      </Label>
       <input
         id="call-audio"
         name="audio"
         type="file"
+        aria-required
         accept="audio/*,video/mp4,.m4a"
         disabled={pending}
         aria-describedby="call-audio-hint"
@@ -81,7 +84,7 @@ export function AudioUpload({
         {t.hint}
       </p>
       {error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {fr.calls.errors[error]}
         </p>
       )}

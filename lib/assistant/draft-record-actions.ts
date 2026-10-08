@@ -35,27 +35,40 @@ export type TemplateCurrent = {
   roles: FormRole[];
   usage: string;
   body: string;
+  source: { path: string; name: string } | null;
 };
 
-/** The latest version of a template series: what a new version starts from. */
-export async function loadTemplateCurrent(
-  seriesId: string,
-): Promise<TemplateCurrent | null> {
+export type TemplateFormData = {
+  organizationId: string;
+  current: TemplateCurrent | null;
+};
+
+/** The template form's organization (where a source file goes) and, for a
+ * new version, the latest version of the series it starts from. */
+export async function loadTemplateForm(
+  seriesId: string | null,
+): Promise<TemplateFormData | null> {
   const access = await requireApproved();
-  if (!can(access, "manage_legal") || !z.uuid().safeParse(seriesId).success)
-    return null;
+  if (!can(access, "manage_legal") || !access.organizationId) return null;
+  const organizationId = access.organizationId;
+  if (!seriesId) return { organizationId, current: null };
+  if (!z.uuid().safeParse(seriesId).success) return null;
   const series = (await listTemplateSeries(access)).find(
     (s) => s.seriesId === seriesId,
   );
-  return series
-    ? {
-        name: series.name,
-        type: series.type,
-        roles: series.roles,
-        usage: series.usage ?? "",
-        body: series.body,
-      }
-    : null;
+  return {
+    organizationId,
+    current: series
+      ? {
+          name: series.name,
+          type: series.type,
+          roles: series.roles,
+          usage: series.usage ?? "",
+          body: series.body,
+          source: series.source,
+        }
+      : null,
+  };
 }
 
 /** Who a task may go to. */

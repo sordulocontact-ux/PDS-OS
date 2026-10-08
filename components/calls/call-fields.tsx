@@ -24,7 +24,9 @@ export function CallFields({
   return (
     <>
       <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-title`}>{t.fieldTitle}</Label>
+        <Label htmlFor={`${idPrefix}-title`} required>
+          {t.fieldTitle}
+        </Label>
         <Input
           id={`${idPrefix}-title`}
           name="title"
@@ -37,7 +39,9 @@ export function CallFields({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor={`${idPrefix}-date`}>{t.fieldDate}</Label>
+        <Label htmlFor={`${idPrefix}-date`} required>
+          {t.fieldDate}
+        </Label>
         <Input
           id={`${idPrefix}-date`}
           name="occurredAtLocal"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { routes } from "@/lib/auth/redirects";
 import type { RelatedArtist } from "@/lib/catalog/artist-types";
@@ -21,7 +21,7 @@ export function RelatedArtists({ artists }: { artists: RelatedArtist[] }) {
           key={artist.deezerId}
           className="relative flex items-center gap-3 rounded-xl p-2 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--control-bg-hover)]"
         >
-          <ArtistAvatar
+          <Avatar
             name={artist.name}
             pictureUrl={artist.pictureUrl}
             className="size-12"

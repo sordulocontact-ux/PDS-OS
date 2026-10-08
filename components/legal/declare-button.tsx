@@ -65,6 +65,7 @@ export function DeclareButton({
             <OptionSelect
               name="legal-declare-title"
               label={l.title}
+              required
               items={Object.fromEntries(titles.map((m) => [m.id, m.title]))}
               defaultValue={masterId}
               onValueChange={setMasterId}
@@ -77,6 +78,7 @@ export function DeclareButton({
                 key={masterId}
                 name="legal-declare-organism"
                 label={l.organism}
+                required
                 items={Object.fromEntries(free.map((o) => [o, t.organisms[o]]))}
                 defaultValue={current}
                 onValueChange={(value) => setOrganism(value as Organism)}

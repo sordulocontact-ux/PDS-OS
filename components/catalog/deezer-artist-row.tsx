@@ -3,7 +3,7 @@
 import { IconChevronRight } from "nucleo-sharp-essential";
 import Link from "next/link";
 
-import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import {
@@ -31,7 +31,7 @@ export function DeezerArtistRow({
   const t = fr.catalog.artistForm.deezer;
   const content = (
     <>
-      <ArtistAvatar
+      <Avatar
         name={artist.name}
         pictureUrl={artist.pictureUrl}
         className="size-10"

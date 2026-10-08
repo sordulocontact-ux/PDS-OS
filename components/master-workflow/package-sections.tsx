@@ -38,6 +38,10 @@ export function PackageSections({ view }: { view: StepView }) {
         card
         // A first sending here; afterwards, "Relancer" in the follow-up.
         action={ready && !latest && button("first")}
+        // Once sent, what the engineer received folds away: the follow-up
+        // and the versions come first.
+        collapsible={latest !== undefined}
+        defaultOpen={latest === undefined}
       >
         <PackagePreview view={view} />
       </PageSection>

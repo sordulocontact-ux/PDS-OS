@@ -31,6 +31,7 @@ export type ContractTemplate = {
   status: TemplateStatus;
   validatedBy: string | null;
   validatedAt: string | null;
+  source: { path: string; name: string } | null;
 };
 
 // One line per template: its latest version, the others listed under it.
@@ -53,7 +54,7 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
   const { data, error } = await supabase
     .from("contract_templates")
     .select(
-      "id, series_id, version, name, type, roles, usage, body, fields, status, validated_by, validated_at",
+      "id, series_id, version, name, type, roles, usage, body, fields, status, validated_by, validated_at, source_path, source_name",
     )
     .order("name")
     .order("version", { ascending: false })
@@ -91,6 +92,10 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
       ? (nameOf.get(row.validated_by) ?? null)
       : null,
     validatedAt: row.validated_at,
+    source:
+      row.source_path && row.source_name
+        ? { path: row.source_path, name: row.source_name }
+        : null,
   }));
 }
 

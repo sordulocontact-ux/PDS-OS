@@ -1,7 +1,7 @@
 -- Juridique, Cadrage juridique (supabase/migrations/20261004001001_legal_intake.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(22);
+select plan(24);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -144,6 +144,19 @@ select throws_ok($$
   select public.record_legal_answer(
     pg_temp.id_of('project'), 'agreements', pg_temp.id_of('master'), 'x', '[]'::jsonb)
 $$, 'P0001', 'legal_question_scope', 'a project-wide question names no title');
+
+-- Nothing to ask (no answer ever recorded): the dossier is still confirmed.
+reset role;
+insert into public.projects (organization_id, title, type, music_format, owner_person_id)
+values (pg_temp.id_of('org'), 'Vide ' || (select v from vars where k = 'tag'), 'music_release',
+        'single', pg_temp.id_of('manager_person'));
+insert into ids select 'empty_project', id from public.projects
+ where title = 'Vide ' || (select v from vars where k = 'tag');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select lives_ok($$ select public.confirm_legal_intake(pg_temp.id_of('empty_project')) $$,
+                'a dossier with nothing to ask is confirmed without any answer');
+select is((select status from public.legal_intakes where project_id = pg_temp.id_of('empty_project')),
+          'confirmed', 'confirming opens the dossier it did not have yet');
 
 reset role;
 select pg_temp.act_as(pg_temp.id_of('creative'));

@@ -30,7 +30,6 @@ export function DeclarationForm({
   onCancel?: () => void;
 }) {
   const t = fr.masterPage.declarations;
-  const optional = fr.masterPage.form.optional;
   // A noted declaration is filed at least: "À déposer" is its absence.
   const statuses = Object.fromEntries(
     DECLARATION_STATUSES.map((status) => [status, t.statuses[status]]),
@@ -48,6 +47,7 @@ export function DeclarationForm({
           <OptionSelect
             name="status"
             label={t.fields.status}
+            required
             items={statuses}
             defaultValue={value("status", declaration?.status ?? "submitted")}
             error={error("status")}
@@ -55,7 +55,6 @@ export function DeclarationForm({
           <Field
             name="reference"
             label={t.fields.reference}
-            hint={optional}
             autoFocus
             autoComplete="off"
             maxLength={100}
@@ -66,14 +65,12 @@ export function DeclarationForm({
             name="date"
             type="date"
             label={t.fields.date}
-            hint={optional}
             defaultValue={value("date", declaration?.date)}
             error={error("date")}
           />
           <TextareaField
             name="notes"
             label={t.fields.notes}
-            hint={optional}
             rows={3}
             maxLength={2000}
             defaultValue={value("notes", declaration?.notes)}

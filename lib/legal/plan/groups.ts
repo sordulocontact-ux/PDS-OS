@@ -6,11 +6,14 @@
 import { fr } from "@/lib/i18n/fr";
 import { type PlanItemKind } from "@/lib/legal/plan/proposal";
 
+// In the order they unlock: the fiches and the borrowings start together
+// (ticket Juridique 07: « Réseau et Humanisme démarrent en parallèle »),
+// the contracts and the splits wait for the fiches, the SACEM for the rest.
 const ORDER: PlanItemKind[] = [
   "onboarding",
+  "clearance",
   "contract",
   "splits",
-  "clearance",
   "formality",
 ];
 

@@ -166,9 +166,12 @@ function DeadlineForm({
       }}
     >
       <div className="grid gap-1.5">
-        <Label htmlFor="deadline-kind">{t.kind}</Label>
+        <Label htmlFor="deadline-kind" required>
+          {t.kind}
+        </Label>
         <OptionSelect
           id="deadline-kind"
+          required
           label={t.kind}
           options={fr.framingIntel.deadlineKinds}
           value={kind}
@@ -177,7 +180,9 @@ function DeadlineForm({
       </div>
       {kind === "other" && (
         <div className="grid gap-1.5">
-          <Label htmlFor="deadline-label">{t.label}</Label>
+          <Label htmlFor="deadline-label" required>
+            {t.label}
+          </Label>
           <Input
             id="deadline-label"
             value={label}
@@ -187,7 +192,9 @@ function DeadlineForm({
         </div>
       )}
       <div className="grid gap-1.5">
-        <Label htmlFor="deadline-date">{t.date}</Label>
+        <Label htmlFor="deadline-date" required>
+          {t.date}
+        </Label>
         <Input
           id="deadline-date"
           type="date"

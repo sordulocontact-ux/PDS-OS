@@ -86,6 +86,7 @@ function SourceForm({
       <ChoiceCards
         name="fileId"
         legend={t.legend}
+        required
         disabled={pending}
         choices={action.options.map((option) => ({
           value: option.fileId,

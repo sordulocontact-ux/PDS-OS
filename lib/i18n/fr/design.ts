@@ -81,7 +81,7 @@ export const design = {
     urlPlaceholder: "https://…",
     urlHint:
       "Drive, Frame.io, WeTransfer… un lien https vers la version à relire.",
-    noteLabel: "Note pour la relecture (facultatif)",
+    noteLabel: "Note pour la relecture",
     notePlaceholder: "Ce qui a changé, ce qu'il faut regarder.",
     submit: "Déposer",
     submitting: "Envoi…",

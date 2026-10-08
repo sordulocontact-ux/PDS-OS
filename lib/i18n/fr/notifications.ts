@@ -58,6 +58,12 @@ export const notifications = {
       `${actor} a validé le master final de « ${project} ».`,
     master_mastering_changes_requested: (actor: string, project: string) =>
       `${actor} demande une modification du mastering de « ${project} ».`,
+    clearance_terms_proposed: (actor: string, project: string) =>
+      `${actor} vous demande de valider les conditions d'un emprunt (« ${project} »).`,
+    clearance_terms_validated: (actor: string, project: string) =>
+      `${actor} a validé les conditions de l'emprunt (« ${project} ») : le contrat est prêt à envoyer.`,
+    clearance_terms_rejected: (actor: string, project: string) =>
+      `${actor} demande une contre-proposition sur l'emprunt (« ${project} »).`,
   },
   open: "Ouvrir",
   push: {

@@ -6,6 +6,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import {
+  DEP_DR_CHOICES,
   QUALITIES,
   SACEM_725,
   SACEM_725_FIELDS,
@@ -32,16 +33,20 @@ const creator = z.object({
   quality: z.enum(QUALITIES).or(z.literal("")),
   phono: share,
   signs: z.boolean(),
+  contact_id: id.optional(),
 });
 const publisher = z.object({
   name: z.string().trim().max(200),
   ipi: z.string().trim().max(40),
   phono: share,
+  contact_id: id.optional(),
 });
 const VALUE: Record<string, z.ZodType> = {
   creators: z.array(creator).max(5),
   publishers: z.array(publisher).max(3),
-  dep_dr: z.object({ choice: z.enum(["DEP", "DR"]).or(z.literal("")) }),
+  dep_dr: z.object({
+    choice: z.enum(DEP_DR_CHOICES).or(z.literal("")),
+  }),
   arrangement: z.object({
     scope: z.enum(["all", "specific"]).or(z.literal("")),
     detail: z.string().trim().max(500),
@@ -92,6 +97,9 @@ export async function saveFormalityValues(
   const out: Record<string, { value: unknown; source: string }> = {};
   for (const [key, entry] of Object.entries(values)) {
     if (!KEYS.includes(key)) continue;
+    // A field left empty is not an answer: nothing to write (and a null
+    // creators or text would fail its schema and refuse the whole dossier).
+    if (entry.value === null || entry.value === undefined) continue;
     if (!entry.typed) {
       const sourced = title.prefill[key];
       if (sourced) out[key] = sourced;

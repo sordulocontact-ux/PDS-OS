@@ -30,12 +30,13 @@ export const legalFormalities = {
     group_name: "Nom du groupe",
     iswc: "ISWC",
     performers: "Interprètes",
-    first_exploitation: "Première exploitation (date, lieu ou diffuseur)",
+    first_exploitation: "Date de la première exploitation",
+    first_exploitation_place: "Lieu ou diffuseur / exploitant",
     territories: "Territoires cédés",
     arrangement: "Arrangement",
     creators: "Créateurs (1 à 5)",
     publishers: "Éditeurs (1 à 3)",
-    dep_dr: "Modalités DEP / DR",
+    dep_dr: "Partage des DEP et DR",
     publishing_contract: "Contrat d'édition",
   } as Record<string, string>,
   notes: {
@@ -44,15 +45,14 @@ export const legalFormalities = {
     first_exploitation:
       "Ce qui a réellement eu lieu, pas la date de sortie prévue. Jamais déduite.",
     iswc: "Seulement s'il est déjà connu : jamais inventé.",
-    dep_dr: "Un choix explicite, jamais déduit de la répartition.",
+    territories: "« Monde », ou les territoires exacts de la cession.",
+    dep_dr:
+      "Au sein de chaque catégorie (auteurs, compositeurs…). Un choix explicite, jamais déduit de la répartition.",
     creators:
-      "La part Phono de chacun n'est pas recopiée de la répartition : elle se saisit, et le total doit faire 100 %.",
+      "Choisissez chaque personne dans le Réseau : son identité et son IPI viennent de sa fiche. La part Phono n'est pas recopiée de la répartition : elle se saisit, et le total doit faire 100 %.",
   } as Record<string, string>,
   sources: {
-    sourced: "Rempli",
-    typed: "Saisi",
     toVerify: "À vérifier",
-    missing: "À saisir",
   },
   qualities: {
     author: "Auteur",
@@ -60,11 +60,17 @@ export const legalFormalities = {
     arranger: "Arrangeur",
     adapter: "Adaptateur",
   },
+  // Rubrique D of the bulletin.
+  depDrChoices: {
+    follow_phono: "Suit les parts Phono",
+    statutory: "Partage égal du Règlement général",
+  },
   arrangementScopes: {
     all: "Autorisé pour toutes les exploitations",
     specific: "Autorisé pour certaines exploitations déterminées",
   },
   creator: {
+    person: "Créateur",
     lastName: "Nom",
     firstName: "Prénom",
     pseudonym: "Pseudonyme",
@@ -76,6 +82,8 @@ export const legalFormalities = {
     remove: "Retirer",
   },
   publisher: {
+    person: "Éditeur",
+    inSplit: "Éditeur de la répartition",
     name: "Dénomination",
     ipi: "IPI / COAD",
     phono: "Part Phono",
@@ -83,7 +91,9 @@ export const legalFormalities = {
   },
   contract: {
     provided: "La copie du contrat d'édition est jointe",
-    rubricG: "Rubrique G (sans copie du contrat)",
+    rubricG: "Date du contrat de cession et d'édition (rubrique G)",
+    rubricGHint:
+      "Le contrat conclu conjointement entre les créateurs et les éditeurs du bulletin.",
   },
   missing: {
     title: "Le titre",
@@ -94,13 +104,34 @@ export const legalFormalities = {
     creator_name: (i: string) => `Le nom du créateur ${i}`,
     creator_quality: (i: string) => `La qualité du créateur ${i}`,
     phono_total: "Des parts Phono qui font exactement 100 %",
-    dep_dr: "Le choix DEP / DR",
+    dep_dr: "Le partage des DEP et DR",
     arrangement: "La portée de l'autorisation d'arrangement",
     publishing_contract: "Le contrat d'édition (seuls les éditeurs signent)",
-    rubric_g: "La rubrique G (copie du contrat d'édition non jointe)",
+    rubric_g: "La date du contrat d'édition (copie non jointe, rubrique G)",
     borrowing: (work: string) =>
       `L'accord pour « ${work} » (emprunt non sécurisé)`,
     to_verify: (field: string) => `À vérifier : ${field}`,
+  },
+  // Said under the field that misses, once « Valider le dossier » is tried.
+  fieldErrors: {
+    title: "Obligatoire sur le bulletin.",
+    duration:
+      "Obligatoire : la durée du master final, qui n'est pas encore reçu.",
+    creators: "Le bulletin nomme au moins un créateur.",
+    creator_name: "Le nom civil est obligatoire pour la SACEM.",
+    creator_quality:
+      "Choisissez la qualité : auteur, compositeur, arrangeur ou adaptateur.",
+    phono_total:
+      "Les parts Phono des créateurs et des éditeurs doivent faire exactement 100 %.",
+    dep_dr:
+      "Dites si le partage des DEP et DR suit les parts Phono : jamais déduit de la répartition.",
+    arrangement:
+      "Un arrangeur est crédité : dites pour quelles exploitations l'arrangement est autorisé.",
+    publishing_contract:
+      "Seuls les éditeurs signent : la copie du contrat d'édition est obligatoire.",
+    rubric_g:
+      "Sans copie du contrat d'édition, donnez la date du contrat (rubrique G).",
+    to_verify: "Valeur rouverte par la SACEM : vérifiez-la.",
   },
   page: {
     title: "SACEM",
@@ -110,7 +141,19 @@ export const legalFormalities = {
     open: "Ouvrir la formalité",
     validate: "Valider le dossier",
     validating: "Validation…",
+    invalid: (n: number) =>
+      n === 1
+        ? "Dossier enregistré, mais une information manque : elle est en rouge."
+        : `Dossier enregistré, mais ${n} informations manquent : elles sont en rouge.`,
+    missingCount: (n: number) =>
+      n === 1
+        ? "Une information manque : elle est en rouge."
+        : `${n} informations manquent : elles sont en rouge.`,
     needs: "Avant de générer le bulletin :",
+    // Every field of the dossier answered: only what is done elsewhere is left.
+    validatedNeeds: "Dossier validé. Avant de générer le bulletin, il reste :",
+    openClearances: "Ouvrir les emprunts",
+    update: "Enregistrer les modifications",
     borrowings: "Emprunts",
     noBorrowing: "Aucun emprunt à une œuvre existante.",
     generate: "Générer le bulletin",
@@ -150,6 +193,7 @@ export const legalFormalities = {
     "formality.processing": "En traitement",
     "formality.action_required": "Correction demandée",
     "formality.completed": "Enregistrement confirmé",
+    "contract.signed": "Contrat d'édition signé",
   } as Record<string, string>,
   errors: {
     missing: (items: string) => `Il manque : ${items}.`,

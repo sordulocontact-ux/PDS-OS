@@ -7,6 +7,7 @@ import { FieldError } from "@/components/auth/form-message";
 import { CreateMasterForm } from "@/components/catalog/create-master-form";
 import { SearchPicker } from "@/components/catalog/search-picker";
 import { Button } from "@/components/ui/button";
+import { RequiredMark } from "@/components/ui/required-mark";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,7 @@ export function MasterPicker({
   max,
   hint,
   error,
+  required = false,
 }: {
   masters: MasterOption[];
   artists: ArtistOption[];
@@ -41,6 +43,8 @@ export function MasterPicker({
   max?: number;
   hint?: string;
   error?: string;
+  // Shows the « * » after the legend (docs/DESIGN.md § 4).
+  required?: boolean;
 }) {
   const t = fr.catalog.masterPicker;
   const [created, setCreated] = useState<MasterOption[]>([]);
@@ -70,7 +74,10 @@ export function MasterPicker({
 
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-1.5 text-sm font-medium">{label}</legend>
+      <legend className="mb-1.5 text-sm font-medium">
+        {label}
+        {required && <RequiredMark announce />}
+      </legend>
       <input
         type="hidden"
         name="masterIds"

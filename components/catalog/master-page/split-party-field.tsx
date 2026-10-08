@@ -54,6 +54,7 @@ export function SplitPartyField({
       refName="partyRef"
       nameName="party"
       legend={fr.masterPage.splits.fields.party}
+      required
       load={async () => {
         const parties = await listSplitParties(masterId);
         const rank = (g: (typeof parties)[number]["group"]) =>

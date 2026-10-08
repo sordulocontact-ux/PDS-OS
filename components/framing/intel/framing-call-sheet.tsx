@@ -22,6 +22,7 @@ import { idleFormState } from "@/lib/auth/form-state";
 import { prepareFramingCall } from "@/lib/framing/actions/call";
 import type { FramingTopic } from "@/lib/framing/call-prep";
 import { fr } from "@/lib/i18n/fr";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type CallSheetData = {
   topics: FramingTopic[];
@@ -139,7 +140,9 @@ function CallForm({
       />
 
       <div className="grid gap-2">
-        <Label htmlFor="framing-call-purpose">{t.purposeLabel}</Label>
+        <Label htmlFor="framing-call-purpose" required>
+          {t.purposeLabel}
+        </Label>
         <Textarea
           id="framing-call-purpose"
           name="purpose"
@@ -166,9 +169,8 @@ function CallForm({
           {data.topics.map((topic) => (
             <li key={topic.dimension} className="flex flex-col gap-1">
               <label className="flex items-start gap-3 text-body-md">
-                <input
-                  type="checkbox"
-                  className="mt-1 size-4 accent-selection"
+                <Checkbox
+                  className="mt-1"
                   checked={kept.has(topic.dimension)}
                   onChange={() =>
                     setKept((set) => toggle(set, topic.dimension))
@@ -307,9 +309,7 @@ function CallForm({
             {data.documents.map((doc) => (
               <li key={doc.id}>
                 <label className="flex items-center gap-3 text-body-md">
-                  <input
-                    type="checkbox"
-                    className="size-4 accent-selection"
+                  <Checkbox
                     checked={documents.has(doc.id)}
                     onChange={() => setDocuments((set) => toggle(set, doc.id))}
                   />

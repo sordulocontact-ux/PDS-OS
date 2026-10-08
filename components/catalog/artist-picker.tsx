@@ -8,6 +8,7 @@ import { FieldError } from "@/components/auth/form-message";
 import { CreateArtistDialog } from "@/components/catalog/create-artist-dialog";
 import { SearchPicker } from "@/components/catalog/search-picker";
 import { Button } from "@/components/ui/button";
+import { RequiredMark } from "@/components/ui/required-mark";
 import {
   Select,
   SelectContent,
@@ -77,6 +78,7 @@ export function ArtistPicker({
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-1.5 text-sm font-medium">
         {fr.catalog.masterForm.fields.artists}
+        <RequiredMark announce />
       </legend>
       <input
         type="hidden"

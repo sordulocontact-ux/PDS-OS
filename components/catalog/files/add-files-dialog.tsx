@@ -150,6 +150,7 @@ function AddFilesForm({
           <ChipChoice
             name="audioState"
             legend={a.stateLabel}
+            required
             options={AUDIO_STATES.map((value) => ({
               value,
               label: fr.catalog.audioStates[value],

@@ -54,6 +54,7 @@ export function ContributorForm({
             <OptionSelect
               name="masterId"
               label={t.fields.master}
+              required
               items={Object.fromEntries(titles.map((m) => [m.id, m.title]))}
               defaultValue={value("masterId", masterId)}
             />
@@ -69,6 +70,7 @@ export function ContributorForm({
           <OptionSelect
             name="role"
             label={t.fields.role}
+            required
             items={t.roles}
             defaultValue={value(
               "role",

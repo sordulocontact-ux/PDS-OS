@@ -64,9 +64,12 @@ export function ActionTaskForm({
       <div className="flex flex-wrap items-end gap-2">
         {projects && (
           <div className="grid gap-1">
-            <Label htmlFor={`pr-${item.id}`}>{t.project}</Label>
+            <Label htmlFor={`pr-${item.id}`} required>
+              {t.project}
+            </Label>
             <OptionSelect
               id={`pr-${item.id}`}
+              required
               label={t.project}
               options={Object.fromEntries(projects.map((p) => [p.id, p.title]))}
               value={project}
@@ -75,9 +78,12 @@ export function ActionTaskForm({
           </div>
         )}
         <div className="grid gap-1">
-          <Label htmlFor={`as-${item.id}`}>{t.assignee}</Label>
+          <Label htmlFor={`as-${item.id}`} required>
+            {t.assignee}
+          </Label>
           <OptionSelect
             id={`as-${item.id}`}
+            required
             label={t.assignee}
             options={people}
             value={assignee}
@@ -85,9 +91,12 @@ export function ActionTaskForm({
           />
         </div>
         <div className="grid gap-1">
-          <Label htmlFor={`due-${item.id}`}>{t.dueDate}</Label>
+          <Label htmlFor={`due-${item.id}`} required>
+            {t.dueDate}
+          </Label>
           <Input
             id={`due-${item.id}`}
+            aria-required
             type="date"
             value={due}
             onChange={(event) => setDue(event.target.value)}

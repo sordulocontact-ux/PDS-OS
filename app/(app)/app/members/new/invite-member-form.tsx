@@ -133,6 +133,7 @@ export function InviteMemberForm() {
           key={defaultRole ?? ""}
           name="role"
           legend={t.role}
+          required
           choices={roleChoices}
           defaultValue={defaultRole}
         />

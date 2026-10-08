@@ -1,4 +1,8 @@
 export const core = {
+  // Shared by every form (docs/DESIGN.md § 4, « Champs obligatoires »).
+  forms: {
+    required: "obligatoire",
+  },
   app: {
     name: "PDS OS",
     description: "Gestion du cycle de vie des sorties musicales.",

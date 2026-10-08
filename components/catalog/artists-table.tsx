@@ -1,6 +1,6 @@
 import { RecordSelection } from "@/components/archive/record-selection";
 import { ArtistActions } from "@/components/catalog/artist-actions";
-import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { Avatar } from "@/components/ui/avatar";
 import {
   DataTable,
   DataTableActionsCell,
@@ -66,7 +66,7 @@ export function ArtistsTable({
             <DataTableCell>
               <DataTableMedia
                 visual={
-                  <ArtistAvatar
+                  <Avatar
                     name={artist.name}
                     pictureUrl={artist.pictureUrl}
                     className="size-9"

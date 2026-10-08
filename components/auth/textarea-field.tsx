@@ -1,3 +1,4 @@
+import { isRequired } from "@/components/auth/field";
 import { FieldError } from "@/components/auth/form-message";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -5,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 // Multi-line sibling of Field: label above, textarea, hint or error below.
 // `addon`: a control laid in the textarea's bottom row (the microphone).
+// The « * » follows `required` or `aria-required`, as in Field.
 export function TextareaField({
   name,
   label,
@@ -25,7 +27,9 @@ export function TextareaField({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} required={isRequired(textareaProps)}>
+        {label}
+      </Label>
       <div className="relative">
         <Textarea
           key={String(textareaProps.defaultValue ?? "")}

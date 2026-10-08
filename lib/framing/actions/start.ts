@@ -7,6 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { analyseForFraming } from "@/lib/framing/analyse";
 import { loadFramingKnowledge } from "@/lib/framing/knowledge";
+import { openFraming } from "@/lib/framing/open";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -29,19 +30,7 @@ export async function startFramingWithPo(projectId: string) {
     return;
   const supabase = await createClient();
 
-  const { error } = await supabase.rpc("start_framing_without_call", {
-    p_project_id: projectId,
-  });
-  if (error) {
-    console.error("[framing] startFramingWithPo:", error.message);
-    return;
-  }
-  const stage = project.stages.find((s) => s.key === "framing");
-  if (stage?.state === "not_started") {
-    const started = await supabase.rpc("start_stage", { p_stage_id: stage.id });
-    if (started.error)
-      console.error("[framing] start_stage:", started.error.message);
-  }
+  if (!(await openFraming(supabase, project))) return;
 
   const knowledge = await loadFramingKnowledge(projectId, access);
   const analysed = knowledge?.framing.briefRows.some(

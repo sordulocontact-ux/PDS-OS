@@ -105,6 +105,7 @@ export function QuestionCard({
           id={FIELD_ID}
           name="answer"
           label={t.answerLabel}
+          aria-required
           hint={q.hint}
           rows={4}
           maxLength={4000}

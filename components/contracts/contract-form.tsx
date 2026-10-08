@@ -49,7 +49,6 @@ export function ContractForm({
   }, [state]);
 
   const error = state && !state.ok ? state : null;
-  const optional = (label: string) => `${label} · ${t.optional}`;
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -68,6 +67,7 @@ export function ContractForm({
       <OptionSelect
         name="type"
         label={t.type}
+        required
         items={Object.fromEntries(
           CONTRACT_TYPES.map((type) => [type, fr.contracts.types[type]]),
         )}
@@ -91,7 +91,7 @@ export function ContractForm({
       <div className="grid gap-5 sm:grid-cols-2">
         <OptionSelect
           name="projectId"
-          label={optional(t.project)}
+          label={t.project}
           items={{
             none: t.projectNone,
             ...Object.fromEntries(options.projects.map((p) => [p.id, p.title])),
@@ -100,7 +100,7 @@ export function ContractForm({
         />
         <OptionSelect
           name="artistId"
-          label={optional(t.artist)}
+          label={t.artist}
           items={{
             none: t.artistNone,
             ...Object.fromEntries(options.artists.map((a) => [a.id, a.name])),
@@ -111,7 +111,7 @@ export function ContractForm({
       <Field
         name="dueOn"
         type="date"
-        label={optional(t.dueOn)}
+        label={t.dueOn}
         hint={t.dueOnHint}
         defaultValue={contract?.dueOn ?? initial?.dueOn ?? ""}
         className="h-10 w-fit text-base md:text-sm"
@@ -120,14 +120,14 @@ export function ContractForm({
         <Field
           name="startsOn"
           type="date"
-          label={optional(t.startsOn)}
+          label={t.startsOn}
           defaultValue={contract?.startsOn ?? initial?.startsOn ?? ""}
           className="h-10 w-fit text-base md:text-sm"
         />
         <Field
           name="endsOn"
           type="date"
-          label={optional(t.endsOn)}
+          label={t.endsOn}
           defaultValue={contract?.endsOn ?? initial?.endsOn ?? ""}
           error={error?.field === "endsOn" ? error.error : undefined}
           className="h-10 w-fit text-base md:text-sm"
@@ -135,7 +135,7 @@ export function ContractForm({
       </div>
       <TextareaField
         name="notes"
-        label={optional(t.notes)}
+        label={t.notes}
         maxLength={4000}
         rows={3}
         placeholder={t.notesPlaceholder}

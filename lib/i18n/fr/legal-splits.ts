@@ -59,7 +59,7 @@ export const legalSplits = {
     title: (title: string) => `Répartition de « ${title} »`,
     description:
       "Les parts sont gardées exactes, à 4 décimales, et doivent faire 100 % tout juste ; l'affichage les arrondit.",
-    name: "Nom",
+    name: "Personne",
     role: "Rôle",
     share: "Part",
     add: "Ajouter une personne",
@@ -71,6 +71,12 @@ export const legalSplits = {
     totalOk: "Total : 100 %",
     totalOff: (value: string) => `Total : ${value}, il faut 100 % tout juste`,
     invalid: "Vérifiez les noms et les parts (un nombre, 4 décimales au plus).",
+    personMissing:
+      "Choisissez la personne dans le Réseau, ou gardez seulement son nom.",
+    shareInvalid: "Indiquez sa part : un nombre, 4 décimales au plus.",
+    missingCount: (n: number) =>
+      n === 1 ? "1 ligne à compléter" : `${n} lignes à compléter`,
+    notInNetwork: "pas encore dans le Réseau",
   },
   links: {
     title: (title: string) => `Liens de confirmation · ${title}`,
@@ -82,6 +88,8 @@ export const legalSplits = {
   errors: {
     total: "La répartition doit faire exactement 100 % pour être envoyée.",
     closed: "Cette version n'est plus active.",
+    contactInvalid:
+      "Une personne n'est plus dans le Réseau : choisissez-la de nouveau.",
     failed: "L'action n'a pas pu être faite. Réessayez.",
   },
   public: {

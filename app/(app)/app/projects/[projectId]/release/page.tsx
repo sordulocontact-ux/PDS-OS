@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { DetectionCard } from "@/components/release/detection-card";
 import { ReleaseForm } from "@/components/release/release-form";
-import { SmartlinkCard } from "@/components/release/smartlink-card";
 import {
   Card,
   CardContent,
@@ -13,23 +11,20 @@ import {
 } from "@/components/ui/card";
 import { requireApproved } from "@/lib/auth/dal";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { routes } from "@/lib/auth/redirects";
-import { getPublicEnv } from "@/lib/env-public";
 import { fr } from "@/lib/i18n/fr";
 import { getProjectRelease } from "@/lib/release/queries";
 import { isUuid } from "@/lib/release/uuid";
 import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
-import { checkRelease, saveRelease, setSmartlinkEnabled } from "./actions";
+import { saveRelease } from "./actions";
 
 const t = fr.release;
 
 export const metadata: Metadata = { title: `${t.page.title} · ${fr.app.name}` };
 
-// "Vérifier maintenant" queries several catalogues in a row.
-export const maxDuration = 60;
-
+// Distribution, Préparation: the release's identifiers and date. Detection
+// and smartlink live on the next step, En ligne (./online).
 export default async function ReleasePage({
   params,
 }: PageProps<"/app/projects/[projectId]/release">) {
@@ -41,7 +36,7 @@ export default async function ReleasePage({
     createClient().then((supabase) => getProjectRelease(supabase, projectId)),
   ]);
   if (!data) notFound();
-  const { project, release, links } = data;
+  const { project, release } = data;
 
   const initial = {
     title: release?.title ?? project.title,
@@ -58,38 +53,21 @@ export default async function ReleasePage({
         <p className="text-sm text-muted-foreground">{t.page.description}</p>
       </header>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {release ? t.form.titleEdit : t.form.titleCreate}
-            </CardTitle>
-            <CardDescription>{t.form.hint}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ReleaseForm
-              action={saveRelease.bind(null, projectId)}
-              initial={initial}
-              isNew={!release}
-            />
-          </CardContent>
-        </Card>
-
-        {release && (
-          <div className="grid gap-6">
-            <DetectionCard
-              release={release}
-              links={links}
-              checkAction={checkRelease.bind(null, projectId)}
-            />
-            <SmartlinkCard
-              url={`${getPublicEnv().NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")}${routes.smartlink(release.smartlink_token)}`}
-              enabled={release.smartlink_enabled}
-              toggleAction={setSmartlinkEnabled.bind(null, projectId)}
-            />
-          </div>
-        )}
-      </div>
+      <Card className="max-w-3xl">
+        <CardHeader>
+          <CardTitle>
+            {release ? t.form.titleEdit : t.form.titleCreate}
+          </CardTitle>
+          <CardDescription>{t.form.hint}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ReleaseForm
+            action={saveRelease.bind(null, projectId)}
+            initial={initial}
+            isNew={!release}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

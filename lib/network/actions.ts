@@ -20,6 +20,7 @@ import {
 } from "@/lib/network/types";
 import { linkCreditsOfNewContact } from "@/lib/network/link-credits";
 import { createClient } from "@/lib/supabase/server";
+import { jsonListOf } from "@/lib/utils/form-data";
 
 // Writes of the network, with the user's session: RLS (manage_network) and
 // column grants decide; the permission check only gives a clean message.
@@ -66,14 +67,6 @@ const contactSchema = z.object({
   notes: optional(2000),
 });
 
-function parseRoles(raw: FormDataEntryValue | null): unknown {
-  try {
-    return JSON.parse(String(raw ?? "[]"));
-  } catch {
-    return [];
-  }
-}
-
 /** Creates or updates a contact from the contact form. */
 export async function saveNetworkContact(
   _previous: SaveContactResult | null,
@@ -88,7 +81,7 @@ export async function saveNetworkContact(
     id: form.get("id") || undefined,
     kind: form.get("kind"),
     name: form.get("name") ?? "",
-    roles: parseRoles(form.get("roles")),
+    roles: jsonListOf(form.get("roles")),
     parentId: form.get("parentId") ?? "",
     artistId: form.get("artistId") ?? "",
     email: form.get("email") ?? "",

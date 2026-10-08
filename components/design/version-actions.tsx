@@ -49,9 +49,12 @@ export function VersionActions({
           );
         }}
       >
-        <Label htmlFor={inputId}>{t.review.commentLabel}</Label>
+        <Label htmlFor={inputId} required>
+          {t.review.commentLabel}
+        </Label>
         <Textarea
           id={inputId}
+          aria-required="true"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder={t.review.commentPlaceholder}

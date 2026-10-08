@@ -19,6 +19,7 @@ import {
   BRIEF_DELIVERABLES,
   type BriefView,
 } from "@/lib/master-workflow/brief-types";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const NONE = "none";
 const rateInput = (cents: number | null) =>
@@ -54,6 +55,7 @@ export function BriefForm({ view }: { view: BriefView }) {
           <BriefEngineerField
             name="mixContactId"
             label={f.mixEngineer}
+            projectId={view.projectId}
             engineers={view.engineers}
             defaultValue={brief.mixContactId}
           />
@@ -98,13 +100,11 @@ export function BriefForm({ view }: { view: BriefView }) {
 
         <FormSection title={t.sections.mastering.title}>
           <label className="flex items-center gap-2 text-sm font-medium">
-            <input
-              type="checkbox"
+            <Checkbox
               name="masteringSameEngineer"
               value="1"
               checked={same}
               onChange={(event) => setSame(event.target.checked)}
-              className="size-4 accent-selection"
             />
             {f.sameEngineer}
           </label>
@@ -112,6 +112,7 @@ export function BriefForm({ view }: { view: BriefView }) {
             <BriefEngineerField
               name="masteringContactId"
               label={f.masteringEngineer}
+              projectId={view.projectId}
               engineers={view.engineers}
               defaultValue={brief.masteringContactId}
             />

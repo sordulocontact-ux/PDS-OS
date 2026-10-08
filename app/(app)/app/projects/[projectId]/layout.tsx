@@ -9,19 +9,22 @@ import {
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { SectionSteps } from "@/components/projects/section-steps";
-import { WorkflowBreadcrumb } from "@/components/projects/workflow-breadcrumb";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { loadLegalStepsDone } from "@/lib/legal/steps-done";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
-import { masterSteps } from "@/lib/ui/master-steps";
+import {
+  distributionPages,
+  distributionSteps,
+} from "@/lib/ui/distribution-steps";
+import { marketingPages, marketingSteps } from "@/lib/ui/marketing-steps";
+import { masterSteps, type MasterTab } from "@/lib/ui/master-steps";
 import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
-import { isWorkflowLaunched } from "@/lib/plan/queries";
 import { allInOrder } from "@/lib/utils/parallel";
+import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
 // Project frame: header, then the sections — either the contextual sidebar
 // next to the content (Figma "Double sidebar") or one row of tabs under the
@@ -46,15 +49,22 @@ export default async function ProjectLayout({
   const canEdit = canEditProject(access, project);
   const canSeeLegal = can(access, "manage_legal");
 
-  // The Brief is sent for validation from its own page (framing/brief);
-  // the Stratégie opens once the Plan du Projet launches it.
-  const [strategyLaunched, legalDone] = await Promise.all([
-    project.stages.length > 0
-      ? isWorkflowLaunched(project.id, "strategy")
-      : false,
-    // The checks of the Juridique steps, for those who see the section.
-    canSeeLegal && project.stages.length > 0 ? loadLegalStepsDone(project) : [],
-  ]);
+  // Each workflow's state, read from its sources (shared with the overview
+  // in the same request): the sidebar's dots, the chevrons' checks. The
+  // Stratégie opens once the Plan du Projet launches it.
+  const flows = await loadWorkflowStates(project.id);
+  const stateOf = (key: keyof NonNullable<typeof flows>["states"]) => {
+    const state = flows?.states[key];
+    return state && state !== "restricted" ? state : null;
+  };
+  const statuses = Object.fromEntries(
+    Object.entries(flows?.states ?? {}).flatMap(([key, state]) =>
+      state && state !== "restricted" ? [[key, state.status]] : [],
+    ),
+  );
+  const strategyLaunched =
+    (stateOf("marketing")?.status ?? "not_started") !== "not_started";
+  const legalDone = flows?.legalDone ?? [];
 
   return (
     <div className="flex flex-1">
@@ -65,6 +75,8 @@ export default async function ProjectLayout({
           projectId={project.id}
           projectTitle={project.title}
           canSeeLegal={canSeeLegal}
+          workflows={flows?.workflows}
+          statuses={statuses}
         />
       )}
 
@@ -97,24 +109,47 @@ export default async function ProjectLayout({
                 projectId={project.id}
                 projectTitle={project.title}
                 canSeeLegal={canSeeLegal}
+                workflows={flows?.workflows}
+                statuses={statuses}
               />
             ) : (
-              <ProjectTabs projectId={project.id} canSeeLegal={canSeeLegal} />
+              <ProjectTabs
+                projectId={project.id}
+                canSeeLegal={canSeeLegal}
+                workflows={flows?.workflows}
+              />
             )}
-            {/* The steps of the open process, if any: each hides itself
-                outside its section. */}
-            <WorkflowBreadcrumb
-              projectId={project.id}
-              validatedStages={project.stages
-                .filter((stage) => stage.state === "validated")
-                .map((stage) => stage.key)}
-              lockedSteps={strategyLaunched ? [] : ["strategy"]}
+            {/* The chevrons of the open workflow, if any: each hides itself
+                outside its workflow. The Cadrage has none: it stands above
+                the workflows (ticket « Architecture globale »). */}
+            <SectionSteps
+              within={marketingPages(project.id)}
+              label={fr.shell.project.marketingSteps.label}
+              soon={fr.shell.project.marketingSteps.soon}
+              steps={marketingSteps(project.id, {
+                strategyLaunched,
+                validatedStages: project.stages
+                  .filter((stage) => stage.state === "validated")
+                  .map((stage) => stage.key),
+              })}
             />
             <SectionSteps
-              base={routes.projectMaster(project.id)}
+              within={distributionPages(project.id)}
+              label={fr.shell.project.distributionSteps.label}
+              soon={fr.shell.project.marketingSteps.soon}
+              steps={distributionSteps(
+                project.id,
+                stateOf("distribution")?.done,
+              )}
+            />
+            <SectionSteps
+              within={[routes.projectMaster(project.id)]}
               label={fr.masterWorkflow.steps.label}
               soon={fr.masterWorkflow.steps.soon}
-              steps={masterSteps(project.id)}
+              steps={masterSteps(
+                project.id,
+                (stateOf("master")?.done ?? []) as MasterTab[],
+              )}
             />
             {canSeeLegal && (
               <LegalSteps projectId={project.id} done={legalDone} />

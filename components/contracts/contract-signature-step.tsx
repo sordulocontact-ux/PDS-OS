@@ -49,6 +49,7 @@ export function ContractSignatureStep({
         <TextareaField
           name="sendNote"
           label={d.sendLabel}
+          aria-required
           rows={2}
           maxLength={2000}
           value={note}
@@ -63,6 +64,7 @@ export function ContractSignatureStep({
               name="signedOn"
               type="date"
               label={t.signedOnLabel}
+              aria-required
               hint={t.signedOnHint}
               max={today}
               value={signedOn}

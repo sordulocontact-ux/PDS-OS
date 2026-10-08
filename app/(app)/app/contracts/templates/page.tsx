@@ -23,7 +23,8 @@ export const metadata = {
  */
 export default async function ContractTemplatesPage() {
   const access = await requireApproved();
-  if (!can(access, "manage_legal")) notFound();
+  if (!can(access, "manage_legal") || !access.organizationId) notFound();
+  const organizationId = access.organizationId;
   const templates = await listTemplateSeries(access);
   const t = fr.legalContracts.templates;
 
@@ -33,17 +34,21 @@ export default async function ContractTemplatesPage() {
       <PageHeader
         title={t.title}
         description={t.description}
-        action={templates.length > 0 ? <TemplateFormButton /> : null}
+        action={
+          templates.length > 0 ? (
+            <TemplateFormButton organizationId={organizationId} />
+          ) : null
+        }
       />
       {templates.length === 0 ? (
         <EmptyState
           icon={IconFile}
           title={t.empty}
           body={t.emptyBody}
-          action={<TemplateFormButton />}
+          action={<TemplateFormButton organizationId={organizationId} />}
         />
       ) : (
-        <TemplatesTable templates={templates} />
+        <TemplatesTable templates={templates} organizationId={organizationId} />
       )}
     </PageContainer>
   );

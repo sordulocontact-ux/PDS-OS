@@ -16,6 +16,7 @@ import {
 } from "@/lib/framing/actions/brief-versions";
 import { DIMENSIONS, type Dimension } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /** The owner's moves on the latest version: update it, or send it. */
 export function BriefOwnerActions({
@@ -168,9 +169,7 @@ export function BriefValidatorActions({
             </legend>
             {DIMENSIONS.map((d, index) => (
               <label key={d} className="flex items-center gap-3 text-body-md">
-                <input
-                  type="checkbox"
-                  className="size-4 accent-selection"
+                <Checkbox
                   checked={dimensions.has(d)}
                   onChange={() => toggle(d)}
                 />
@@ -180,7 +179,9 @@ export function BriefValidatorActions({
             ))}
           </fieldset>
           <div className="grid gap-1.5">
-            <Label htmlFor="brief-comment">{t.commentLabel}</Label>
+            <Label htmlFor="brief-comment" required>
+              {t.commentLabel}
+            </Label>
             <Textarea
               id="brief-comment"
               value={comment}

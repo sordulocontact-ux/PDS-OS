@@ -9,6 +9,7 @@ import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { toParisLocalInput } from "@/lib/calls/format";
 import { fr } from "@/lib/i18n/fr";
 import type { BriefView } from "@/lib/master-workflow/brief-types";
@@ -56,6 +57,7 @@ export function BriefPage({
           ? t.saved(formatShortDate(view.savedAt), view.savedBy)
           : t.notSaved}
       </p>
+      {view.allFinal && <ToneCallout tone="success">{t.allFinal}</ToneCallout>}
 
       <PageSection
         id="brief-sources"

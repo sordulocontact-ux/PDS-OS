@@ -2,50 +2,56 @@
 
 import { useState } from "react";
 
-import { OptionSelect } from "@/components/projects/option-select";
+import { PersonPickerField } from "@/components/network/person-picker-field";
+import { listBriefEngineers } from "@/lib/catalog/master/engineer-actions";
 import { fr } from "@/lib/i18n/fr";
+import type { RankedPerson } from "@/lib/network/ranked-people";
 import type { NetworkEngineer } from "@/lib/master-workflow/types";
 
-const NONE = "none";
-
 /**
- * An engineer of the Brief, chosen among the Réseau's engineers: once
- * chosen, what the Réseau already knows of them (structure, city,
- * coordinates, titles done with PDS) shows under the menu, so nobody asks
- * again (ticket § 4).
+ * An engineer of the Brief, picked in the Réseau (Sacha, 07/10/2026): the
+ * engineers credited on the project's titles first, then the Réseau's
+ * engineers, then the rest; added to the Réseau without leaving the form.
+ * The brief stores a contact (master_briefs.*_contact_id, a foreign key to
+ * network_contacts): a name alone is not saved, so it asks for the contact.
+ * Once chosen, what the Réseau already knows of them (structure, city,
+ * coordinates, titles done with PDS) shows under it (ticket § 4).
  */
 export function BriefEngineerField({
   name,
   label,
+  projectId,
   engineers,
   defaultValue,
   error,
 }: {
   name: string;
   label: string;
+  projectId: string;
   engineers: NetworkEngineer[];
   defaultValue: string | null;
   error?: string;
 }) {
   const t = fr.masterWorkflow.brief;
-  const [selected, setSelected] = useState(defaultValue ?? NONE);
+  const [selected, setSelected] = useState(defaultValue);
   const engineer = engineers.find((row) => row.id === selected);
-  const items = {
-    [NONE]: t.none,
-    ...Object.fromEntries(engineers.map((row) => [row.id, row.name])),
-  };
   return (
     <div className="flex flex-col gap-1.5">
-      <OptionSelect
-        name={name}
-        label={label}
-        items={items}
-        defaultValue={defaultValue ?? NONE}
-        onValueChange={setSelected}
-        hint={engineer ? undefined : t.fields.engineerHint}
+      <PersonPickerField<RankedPerson>
+        refName={name}
+        nameName={`${name}Name`}
+        legend={label}
+        load={() => listBriefEngineers(projectId)}
+        defaultRef={defaultValue}
+        defaultName={null}
+        createRoles={["engineer"]}
+        refOfContact={(id) => id}
+        // The Brief keeps a contact of the Réseau, never a name alone.
+        allowNameOnly={false}
+        onPick={(option) => setSelected(option?.id ?? null)}
         error={error}
       />
-      {engineer && (
+      {engineer ? (
         <p className="text-caption text-[color:var(--text-secondary)]">
           {[
             engineer.structure,
@@ -56,6 +62,12 @@ export function BriefEngineerField({
             .filter(Boolean)
             .join(" · ")}
         </p>
+      ) : (
+        !selected && (
+          <p className="text-caption text-[color:var(--text-secondary)]">
+            {t.fields.engineerHint}
+          </p>
+        )
       )}
     </div>
   );

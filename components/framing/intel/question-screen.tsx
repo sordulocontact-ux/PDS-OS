@@ -205,9 +205,6 @@ export function QuestionScreen({
             <StatusBadge tone={factTone[question.status]} size="sm">
               {fr.framingIntel.statuses[question.status]}
             </StatusBadge>
-            {!def.required && (
-              <span className="text-caption">{fr.framingIntel.optional}</span>
-            )}
           </span>
         </span>
       }
@@ -378,7 +375,7 @@ function AnswerForm({
       }}
     >
       <div className="grid gap-1.5">
-        <Label htmlFor={id}>
+        <Label htmlFor={id} required={QUESTIONS[question.key].required}>
           {kind === "date"
             ? t.dateLabel
             : kind === "money"

@@ -34,7 +34,7 @@ export const transmission = {
     assignee: "Chef de projet",
     assigneePlaceholder: "Choisir un chef de projet",
     note: "Message",
-    noteHint: "Facultatif. Contexte, réponse à une question…",
+    noteHint: "Contexte, réponse à une question…",
     submit: "Transmettre",
     submitting: "Transmission…",
     cancel: "Annuler",

@@ -17,6 +17,7 @@ import type {
 import type { FlowCredit } from "@/lib/master-workflow/engineer-facts";
 import { masterExchangeAgenda } from "@/lib/master-workflow/exchange-agenda";
 import { loadFramingDefaults } from "@/lib/master-workflow/framing-defaults";
+import { hasMasterFinal } from "@/lib/master-workflow/audio-source";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
 import { networkEngineers } from "@/lib/master-workflow/network-engineers";
 import { materialFacts, sourceFacts } from "@/lib/master-workflow/source-facts";
@@ -149,6 +150,11 @@ export async function loadMasterBrief(
       ? personName(row.updater.first_name, row.updater.last_name)
       : null,
     sources,
+    allFinal:
+      rows.titles.length > 0 &&
+      rows.titles.every((title) =>
+        hasMasterFinal(rows.audioOf.get(title.id) ?? []),
+      ),
     sourcesFailed: Boolean(rows.failed.sources || rows.failed.materials),
     engineers: rows.failed.network
       ? []

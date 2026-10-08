@@ -12,6 +12,7 @@ import {
   ok,
   type ActionResult,
 } from "@/lib/framing/result";
+import { fr } from "@/lib/i18n/fr";
 import { PLAN_COLUMNS, proposePlan } from "@/lib/plan/propose";
 import { createClient } from "@/lib/supabase/server";
 
@@ -73,7 +74,11 @@ export async function launchPlan(
   return ok;
 }
 
-/** « Lancer maintenant »: a workflow the plan left in Ensuite. */
+/**
+ * « Lancer maintenant »: a workflow the plan left in Ensuite, or one left out
+ * of it (removed before the launch, or never proposed), which is added in
+ * Focus with its title and reason written here, never by the browser.
+ */
 export async function launchPlanWorkflow(
   projectId: string,
   workflow: string,
@@ -87,9 +92,12 @@ export async function launchPlanWorkflow(
   if (!p.success) return fail("invalid_input");
   await requireApproved();
   const supabase = await createClient();
+  const t = fr.framingIntel.plan;
   const { error } = await supabase.rpc("launch_plan_workflow", {
     p_project_id: projectId,
     p_workflow: p.data.workflow,
+    p_title: t.workflows[p.data.workflow],
+    p_why: t.why.addedLater,
   });
   if (error) return fromDatabaseError(error);
   revalidatePath(routes.project(projectId), "layout");

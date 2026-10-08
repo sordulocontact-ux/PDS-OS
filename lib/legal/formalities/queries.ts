@@ -35,43 +35,70 @@ export async function loadFormalities(
   const masterIds = project.masters.map((m) => m.id);
   if (masterIds.length === 0) return [];
   const none = { data: [], error: null };
-  const [masters, performers, credits, clearances, formalities, people] =
-    await Promise.all([
-      supabase
-        .from("masters")
-        .select("id, title, duration_seconds, audio_state, iswc")
-        .in("id", masterIds),
-      supabase
-        .from("master_artists")
-        .select(
-          "master_id, artist:artists!master_artists_artist_same_org(name)",
-        )
-        .in("master_id", masterIds),
-      supabase
-        .from("master_contributors")
-        .select("master_id, name, role, contact_id")
-        .in("master_id", masterIds)
-        .order("position"),
-      supabase
-        .from("legal_clearances")
-        .select("master_id, work, status")
-        .eq("project_id", project.id),
-      supabase
-        .from("legal_formalities")
-        .select(
-          "id, master_id, status, reopened, partial_reason, submission_proof, submitted_at, completion_proof, completed_at, external_id",
-        )
-        .eq("project_id", project.id)
-        .eq("definition_key", SACEM_725),
-      access.organizationId
-        ? supabase.rpc("list_legal_people", {
-            p_organization_id: access.organizationId,
-          })
-        : Promise.resolve(none),
-    ]);
+  const [
+    masters,
+    performers,
+    credits,
+    clearances,
+    formalities,
+    people,
+    publishing,
+    publisherSplits,
+  ] = await Promise.all([
+    supabase
+      .from("masters")
+      .select("id, title, duration_seconds, audio_state, iswc")
+      .in("id", masterIds),
+    supabase
+      .from("master_artists")
+      .select("master_id, artist:artists!master_artists_artist_same_org(name)")
+      .in("master_id", masterIds),
+    supabase
+      .from("master_contributors")
+      .select("master_id, name, role, contact_id")
+      .in("master_id", masterIds)
+      .order("position"),
+    supabase
+      .from("legal_clearances")
+      .select("master_id, work, status")
+      .eq("project_id", project.id),
+    supabase
+      .from("legal_formalities")
+      .select(
+        "id, master_id, status, reopened, partial_reason, submission_proof, submitted_at, completion_proof, completed_at, external_id",
+      )
+      .eq("project_id", project.id)
+      .eq("definition_key", SACEM_725),
+    access.organizationId
+      ? supabase.rpc("list_legal_people", {
+          p_organization_id: access.organizationId,
+        })
+      : Promise.resolve(none),
+    // A signed publishing contract of the project (RLS: the contracts the
+    // viewer may read).
+    supabase
+      .from("contracts")
+      .select("title")
+      .eq("project_id", project.id)
+      .eq("type", "publishing")
+      .eq("status", "signed")
+      .order("signed_on", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    // The publishers of each title's publishing split: their name only.
+    supabase
+      .from("master_splits")
+      .select("master_id, party, contact_id")
+      .in("master_id", masterIds)
+      .eq("kind", "publishing")
+      .eq("role", "publisher")
+      .order("share", { ascending: false }),
+  ]);
   const contactIds = [
     ...new Set(
-      (credits.data ?? []).flatMap((c) => (c.contact_id ? [c.contact_id] : [])),
+      [...(credits.data ?? []), ...(publisherSplits.data ?? [])].flatMap((c) =>
+        c.contact_id ? [c.contact_id] : [],
+      ),
     ),
   ];
   const fIds = (formalities.data ?? []).map((f) => f.id);
@@ -138,8 +165,17 @@ export async function loadFormalities(
           .map((c) => ({
             name: c.name,
             role: c.role as ContributorRole,
+            contactId: c.contact_id,
             details: c.contact_id ? (detailsOf.get(c.contact_id) ?? {}) : {},
           })),
+        publishers: (publisherSplits.data ?? [])
+          .filter((s) => s.master_id === m.id)
+          .map((s) => ({
+            name: s.party,
+            contactId: s.contact_id,
+            details: s.contact_id ? (detailsOf.get(s.contact_id) ?? {}) : {},
+          })),
+        signedPublishingContract: publishing.data?.title ?? null,
       });
       let formality: FormalityView | null = null;
       if (f) {

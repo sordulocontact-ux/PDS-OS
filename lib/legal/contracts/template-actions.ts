@@ -25,6 +25,12 @@ const templateSchema = z.object({
   roles: z.array(z.enum(FORM_ROLES)).min(1).max(FORM_ROLES.length),
   usage: z.string().trim().max(500),
   body: z.string().min(1).max(200_000),
+  source: z
+    .object({
+      path: z.string().min(1).max(500),
+      name: z.string().trim().min(1).max(255),
+    })
+    .nullable(),
 });
 
 export async function createContractTemplate(
@@ -50,10 +56,17 @@ export async function createContractTemplate(
     p_roles: parsed.data.roles,
     p_usage: parsed.data.usage || null,
     p_body: parsed.data.body,
+    p_source_path: parsed.data.source?.path,
+    p_source_name: parsed.data.source?.name,
   });
   if (error) {
     console.error("createContractTemplate:", error.message);
-    return { ok: false, error: t.failed };
+    return {
+      ok: false,
+      error: error.message.includes("template_source_invalid")
+        ? t.source.failed
+        : t.failed,
+    };
   }
   revalidatePath(routes.contractTemplates);
   return { ok: true };

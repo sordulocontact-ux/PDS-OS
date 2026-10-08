@@ -69,7 +69,6 @@ export const contracts = {
     projectNone: "Aucun",
     artist: "Artiste",
     artistNone: "Aucun",
-    optional: "facultatif",
     dueOn: "Échéance",
     dueOnHint: "La date clé : signature attendue, renouvellement, délai.",
     startsOn: "Début",
@@ -119,9 +118,16 @@ export const contracts = {
     submit: "Ajouter",
     pending: "Ajout…",
     remove: (name: string) => `Retirer ${name} des parties`,
-    noContacts:
-      "Tous les contacts du réseau sont déjà parties, ou le réseau est vide.",
-    openNetwork: "Ouvrir le Réseau",
+    // Who the picker offers first, under each name.
+    groups: {
+      artist: "Artiste du contrat",
+      credit: "Crédité sur le projet",
+    },
+    // The role suggested for the contact of the contract's artist.
+    artistRole: "Artiste",
+    // A party is a contact of the Réseau: a name alone cannot be bound.
+    contactRequired:
+      "Une partie est un contact du Réseau : choisissez-la, ou ajoutez-la au Réseau.",
     failed: "La partie n'a pas pu être enregistrée. Réessayez.",
   },
   // The status card: where the contract stands and the next step.

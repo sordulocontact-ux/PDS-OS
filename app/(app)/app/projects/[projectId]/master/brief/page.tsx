@@ -1,5 +1,7 @@
 import { BriefPage } from "@/components/master-workflow/brief-page";
+import { BackLink } from "@/components/shell/back-link";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { loadMasterBrief } from "@/lib/master-workflow/brief";
 import { loadBriefQuestions } from "@/lib/master-workflow/questions";
@@ -25,5 +27,13 @@ export default async function ProjectMasterBriefPage({
     loadMasterBrief(project, access),
     loadBriefQuestions(project, access),
   ]);
-  return <BriefPage view={view} questions={questions} />;
+  // Opened from « Préparer »: the way back.
+  return (
+    <div className="grid gap-6">
+      <BackLink href={routes.projectMaster(projectId)}>
+        {fr.masterWorkflow.steps.backToPrepare}
+      </BackLink>
+      <BriefPage view={view} questions={questions} />
+    </div>
+  );
 }

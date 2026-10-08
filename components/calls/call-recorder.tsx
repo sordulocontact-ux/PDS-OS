@@ -155,7 +155,7 @@ export function CallRecorder({
         />
       )}
       {rec.error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {t.errors[rec.error]}
         </p>
       )}

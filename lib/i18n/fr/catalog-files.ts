@@ -109,7 +109,7 @@ export const catalogFiles = {
     category: "Catégorie",
     categoryRequired: "Choisissez une catégorie.",
     description: "Précision",
-    descriptionHint: "Facultatif. Ce qu'est ce fichier, en quelques mots.",
+    descriptionHint: "Ce qu'est ce fichier, en quelques mots.",
     // Example shown in the empty field, by category.
     placeholders: {
       artist: {

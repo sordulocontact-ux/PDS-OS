@@ -20,7 +20,13 @@ import { templateStatusTone } from "@/lib/ui/state-tones";
 
 // One line per template (its latest version): what it is, who it is for,
 // whether it can be used; « ⋯ » reads it and moves it on.
-export function TemplatesTable({ templates }: { templates: TemplateSeries[] }) {
+export function TemplatesTable({
+  templates,
+  organizationId,
+}: {
+  templates: TemplateSeries[];
+  organizationId: string;
+}) {
   const t = fr.legalContracts.templates;
   return (
     <DataTable>
@@ -57,7 +63,10 @@ export function TemplatesTable({ templates }: { templates: TemplateSeries[] }) {
               </StatusBadge>
             </DataTableCell>
             <DataTableActionsCell>
-              <TemplateRowActions template={template} />
+              <TemplateRowActions
+                template={template}
+                organizationId={organizationId}
+              />
             </DataTableActionsCell>
           </DataTableRow>
         ))}

@@ -251,7 +251,7 @@ export async function loadRecentActivity(options: {
       "release_online",
       r.project_id,
       r.title,
-      routes.projectRelease(r.project_id),
+      routes.projectReleaseOnline(r.project_id),
     );
   for (const f of files.data ?? [])
     push(

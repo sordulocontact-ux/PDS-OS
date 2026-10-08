@@ -135,32 +135,35 @@ export function CalendarSection({
           }}
         >
           <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="milestone-title" className={labelClass}>
+            <Label htmlFor="milestone-title" required className={labelClass}>
               {t.name}
             </Label>
             <Input
               id="milestone-title"
+              aria-required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="milestone-date" className={labelClass}>
+            <Label htmlFor="milestone-date" required className={labelClass}>
               {t.date}
             </Label>
             <Input
               id="milestone-date"
+              aria-required
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="milestone-kind" className={labelClass}>
+            <Label htmlFor="milestone-kind" required className={labelClass}>
               {t.kind}
             </Label>
             <OptionSelect
               id="milestone-kind"
+              required
               label={t.kind}
               options={t.kinds}
               value={kind}

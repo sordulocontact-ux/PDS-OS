@@ -1,11 +1,12 @@
 "use client";
 
-import { IconSitemap4 } from "nucleo-sharp-essential";
+import { IconLock, IconSitemap4 } from "nucleo-sharp-essential";
 import { usePathname } from "next/navigation";
 import { useId, useState } from "react";
 
-import { useCollapsedNav } from "@/components/shell/use-collapsed-nav";
+import { ProjectSwitcher } from "@/components/projects/project-switcher";
 import { Button } from "@/components/ui/button";
+import { StatusDot } from "@/components/ui/status-dot";
 import { ViewLink } from "@/components/ui/view-link";
 import {
   Sheet,
@@ -20,6 +21,7 @@ import {
   type ProjectSection,
   type ProjectSectionGroup,
 } from "@/lib/ui/project-sections";
+import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
 type Block = { group?: ProjectSectionGroup; items: ProjectSection[] };
@@ -36,11 +38,17 @@ function toBlocks(items: ProjectSection[]): Block[] {
   return blocks;
 }
 
+// What the sidebar knows of each workflow: its common status, computed on
+// the server (lib/workflow-status/load.ts), shown as a dot.
+export type SidebarStatuses = Partial<Record<string, string>>;
+
 function ProjectSidebarList({
   items,
+  statuses = {},
   onNavigate,
 }: {
   items: ProjectSection[];
+  statuses?: SidebarStatuses;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -67,6 +75,23 @@ function ProjectSidebarList({
             }
           >
             {block.items.map((item) => {
+              // Listed but closed to this viewer: readable, never a link.
+              if (item.restricted)
+                return (
+                  <li key={item.key}>
+                    <span
+                      aria-disabled
+                      title={fr.shell.project.sidebar.restricted}
+                      className="flex h-9 cursor-not-allowed items-center justify-between gap-2 rounded-lg px-4 text-body-md text-[color:var(--nav-fg-muted)]"
+                    >
+                      {item.label}
+                      <IconLock aria-hidden className="size-3.5 shrink-0" />
+                      <span className="sr-only">
+                        , {fr.shell.project.sidebar.restricted}
+                      </span>
+                    </span>
+                  </li>
+                );
               const active = item.match(pathname);
               return (
                 <li key={item.key}>
@@ -75,12 +100,24 @@ function ProjectSidebarList({
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex h-9 items-center rounded-lg px-4 text-body-md text-[color:var(--nav-fg)] no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
+                      "flex h-9 items-center gap-2 rounded-lg px-4 text-body-md text-[color:var(--nav-fg)] no-underline transition-[background-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--nav-item-hover-bg)]",
                       active &&
                         "bg-[var(--nav-item-active-bg)] font-medium hover:bg-[var(--nav-item-active-bg)]",
                     )}
                   >
-                    {item.label}
+                    <span className="min-w-0 flex-1">{item.label}</span>
+                    {statuses[item.key] && (
+                      <StatusDot
+                        tone={workflowStatusTone[statuses[item.key]!]}
+                        label={
+                          fr.workflowStatus.statuses[
+                            statuses[
+                              item.key
+                            ] as keyof typeof fr.workflowStatus.statuses
+                          ]
+                        }
+                      />
+                    )}
                   </ViewLink>
                 </li>
               );
@@ -92,42 +129,39 @@ function ProjectSidebarList({
   );
 }
 
-// Contextual sidebar of a launched project, desktop only (Figma "Double
-// sidebar"), shown when DOUBLE_SIDEBAR is on (lib/ui/project-sections.ts).
-// Same sticky geometry as the main Sidebar, so the two read as one card:
-// right-only rounding, collapsed or expanded — the two always sit right
-// against each other inside a project. See ProjectSidebarMobile below for
-// small screens.
+// Contextual sidebar of a launched project, desktop only (Figma "PDS OS",
+// node 47:12056), shown when DOUBLE_SIDEBAR is on (lib/ui/project-sections.ts).
+// Same sticky geometry as the main Sidebar, right against it: full height,
+// square, no outer margin, a hairline on the right; at the top, on a
+// hairline, the project switcher.
+// See ProjectSidebarMobile below for small screens.
 export function ProjectSidebar({
   projectId,
   projectTitle,
   canSeeLegal,
+  workflows,
+  statuses,
 }: {
   projectId: string;
   projectTitle: string;
   canSeeLegal: boolean;
+  workflows?: readonly string[];
+  statuses?: SidebarStatuses;
 }) {
-  const items = projectSections(projectId, { legal: canSeeLegal });
-  const { doubleSidebar } = useCollapsedNav();
+  const items = projectSections(projectId, { legal: canSeeLegal, workflows });
   const t = fr.shell.project.sidebar;
 
   return (
     <nav
       aria-label={t.label}
-      className={cn(
-        "sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col gap-4 overflow-y-auto bg-sidebar p-2 text-sidebar-foreground shadow-[var(--nav-shadow)] md:flex",
-        doubleSidebar
-          ? "rounded-tr-3xl rounded-br-3xl"
-          : "rounded-3xl border-l border-[color:var(--nav-divider)]",
-      )}
+      className="sticky top-[var(--shell-inset)] hidden h-[calc(100dvh-2*var(--shell-inset))] w-[var(--project-nav-width)] shrink-0 flex-col gap-4 overflow-y-auto border-r border-[color:var(--nav-border)] bg-sidebar pb-2 text-sidebar-foreground md:flex"
     >
-      <p
-        className="shrink-0 truncate px-3 text-body-md font-semibold"
-        title={projectTitle}
-      >
-        {projectTitle}
-      </p>
-      <ProjectSidebarList items={items} />
+      <div className="flex h-14 shrink-0 items-center border-b border-[color:var(--nav-border)] px-2">
+        <ProjectSwitcher projectId={projectId} projectTitle={projectTitle} />
+      </div>
+      <div className="px-2">
+        <ProjectSidebarList items={items} statuses={statuses} />
+      </div>
     </nav>
   );
 }
@@ -138,12 +172,16 @@ export function ProjectSidebarMobile({
   projectId,
   projectTitle,
   canSeeLegal,
+  workflows,
+  statuses,
 }: {
   projectId: string;
   projectTitle: string;
   canSeeLegal: boolean;
+  workflows?: readonly string[];
+  statuses?: SidebarStatuses;
 }) {
-  const items = projectSections(projectId, { legal: canSeeLegal });
+  const items = projectSections(projectId, { legal: canSeeLegal, workflows });
   const t = fr.shell.project.sidebar;
   const [open, setOpen] = useState(false);
 
@@ -163,7 +201,11 @@ export function ProjectSidebarMobile({
             {projectTitle}
           </SheetTitle>
         </SheetHeader>
-        <ProjectSidebarList items={items} onNavigate={() => setOpen(false)} />
+        <ProjectSidebarList
+          items={items}
+          statuses={statuses}
+          onNavigate={() => setOpen(false)}
+        />
       </SheetContent>
     </Sheet>
   );

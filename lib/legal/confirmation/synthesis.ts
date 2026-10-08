@@ -60,7 +60,8 @@ export function questionHref(
   question: QuestionKey,
   masterId: string | null,
 ): string {
-  return `${routes.projectLegalStep(projectId, "framing")}?question=${question}:${
+  // The questions are asked on the État des lieux itself.
+  return `${routes.projectLegal(projectId)}?question=${question}:${
     masterId ?? "project"
   }`;
 }

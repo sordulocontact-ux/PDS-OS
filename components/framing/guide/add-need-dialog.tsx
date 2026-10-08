@@ -56,7 +56,9 @@ export function AddNeedDialog({
           }}
         >
           <div className="grid gap-1.5">
-            <Label htmlFor="add-need-label">{t.label}</Label>
+            <Label htmlFor="add-need-label" required>
+              {t.label}
+            </Label>
             <Input
               id="add-need-label"
               value={label}
@@ -65,9 +67,12 @@ export function AddNeedDialog({
             />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="add-need-family">{t.family}</Label>
+            <Label htmlFor="add-need-family" required>
+              {t.family}
+            </Label>
             <OptionSelect
               id="add-need-family"
+              required
               label={t.family}
               options={fr.framing.needs.families}
               value={family}

@@ -150,8 +150,9 @@ export const routes = {
   // What PO understood from a framing call, to confirm item by item.
   projectFramingReview: (id: string, callId: string) =>
     `/app/projects/${id}/framing?step=review&call=${callId}`,
-  // The plan PO proposes once the Brief is validated.
-  projectPlan: (id: string) => `/app/projects/${id}/plan`,
+  // The plan PO proposes once the Brief is validated: a section of the
+  // overview (there is no plan page).
+  projectPlan: (id: string) => `/app/projects/${id}#plan`,
   // The shareable Brief, printable as a PDF.
   projectFramingBrief: (id: string) => `/app/projects/${id}/framing/brief`,
   // The same Brief as a downloaded PDF file.
@@ -162,6 +163,8 @@ export const routes = {
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
   projectRelease: (id: string) => `/app/projects/${id}/release`,
+  // Distribution, « En ligne »: detection on the platforms and the smartlink.
+  projectReleaseOnline: (id: string) => `/app/projects/${id}/release/online`,
   // Specialised workflows next to the 7 steps, one URL per internal step.
   projectMaster: (id: string) => `/app/projects/${id}/master`,
   projectMasterStep: (id: string, step: string) =>

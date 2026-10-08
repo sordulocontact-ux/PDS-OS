@@ -189,14 +189,18 @@ sur la page ouverte** (celle d'où PO a été appelé) : l'utilisateur n'a pas �
   (§ 3 bis).
 
 **`fill_page_test_data`** — « complète la page », « remplis tout pour voir le rendu ».
-Sans paramètre. Ne remplit que les **sections vides** : rien n'est remplacé ni dupliqué,
-un second appel ne fait rien.
+Seul paramètre : `framing` (remplir le Cadrage depuis une autre page du projet). Ne
+remplit que les **sections vides** : rien n'est remplacé ni dupliqué, un second appel ne
+fait rien. Le résultat nomme ce qui a été rempli ; PO ne rapporte rien d'autre (une
+réponse « rien à compléter » sur les titres ne dit **rien** du Cadrage : bug du 08/10/2026,
+où PO a annoncé un Cadrage « complet » qui n'avait jamais été touché).
 
 | Page ouverte | Ce qui est rempli |
 | --- | --- |
 | Fiche d'un titre (tout onglet) | ISRC, durée, état audio ; 3 sessions + 5 pistes ; 5 contributeurs ; splits master et édition à 100 % ; ISWC et ℗ ; une déclaration par organisme manquant ; une version Instrumental ; un projet single qui porte le titre ; un audio « Master final » (une seconde de silence, vrai WAV) et une pochette. La distribution reste vide : elle vient de la Sortie d'un projet lancé |
 | Fiche d'un artiste | nom civil et pays, biographie, deux contacts (manager, presse), deux titres s'il n'en a aucun |
-| Page d'un projet (toute section : vue d'ensemble, Master, Juridique…) | chacun de ses titres comme sa fiche (ses pages Master et Juridique se lisent sur ses titres), puis les ingénieurs de mix et de mastering crédités ajoutés au Réseau (rôle Ingénieur, coordonnées fictives, `manage_network`) et leurs crédits reliés par `contact_id` ; un homonyme déjà dans le Réseau est réutilisé. Un projet sans titre : PO le dit |
+| Page Cadrage d'un projet, ou `framing: true` sur une autre de ses pages | le Cadrage intelligent, **responsable du projet seulement** (sinon PO le dit) : ouvert s'il ne l'est pas (comme « Commencer le cadrage », sans lecture du contexte), puis chaque question pas encore connue : une proposition (call, fiche du projet, titres, crédits) est confirmée avec sa source (même code que « Confirmer », `lib/framing/confirm.ts`), le reste reçoit une valeur fixée dans le code (`test-data/fake-framing.ts` : textes, date et enveloppe de la fiche du projet sinon dans 90 jours / 15 000 €, trois besoins, une échéance de sortie, une contrainte de production, « Rien à signaler » pour l'équipe et les droits). Une question écartée reste écartée. Refusé par la RLS une fois le Brief chez le validateur. Le Brief n'est ni généré ni envoyé |
+| Autre page d'un projet (vue d'ensemble, Master, Juridique…) | chacun de ses titres comme sa fiche (ses pages Master et Juridique se lisent sur ses titres), puis les ingénieurs de mix et de mastering crédités ajoutés au Réseau (rôle Ingénieur, coordonnées fictives, `manage_network`) et leurs crédits reliés par `contact_id` ; un homonyme déjà dans le Réseau est réutilisé. Un projet sans titre : PO le dit |
 | Autre page | rien : PO le dit |
 
 **`create_test_data`** — « crée un faux projet », « invente trois artistes », « crée un
@@ -258,6 +262,7 @@ n'écrit toujours aucune clause (§ 1).
 | 22 | (dev) Crée-moi un projet de zéro avec de fausses informations, c'est pour tester | `create_test_data` kind project tout de suite, sans question ; artiste, titre et projet créés, liens affichés |
 | 23 | (dev) Crée le projet Saison froide pour Huntrill | `propose_project` (pas de « faux » ni de « test »), jamais `create_test_data` |
 | 24 | (dev) Espace Espace sur un titre : « complète toute la page avec des infos quelconques pour voir » | `fill_page_test_data` sur ce titre (pas de nouveau projet) ; relancé : « rien à compléter » |
+| 33 | (dev) Espace Espace sur le Cadrage d'un projet dont on est responsable : « remplis le cadrage avec de fausses infos » | `fill_page_test_data`, le Cadrage passe à toutes les informations connues à l'écran ; relancé : « rien à compléter sur le Cadrage » |
 | 25 | (dev) Espace Espace sur la fiche d'un artiste : « crée un faux titre » | `create_test_data` kind master, crédité à cet artiste |
 | 32 | (dev) Crée-moi un modèle de contrat d'exemple de zéro avec des infos crédibles | `create_test_data` kind contractTemplate tout de suite, modèle « (test) » en brouillon dans la bibliothèque |
 | 26 | Crée-moi un nouveau modèle de contrat | `propose_contract_template` tout de suite, carte « Nouveau modèle de contrat », avertissement « collez le texte » ; jamais « je ne peux créer que des artistes… » |

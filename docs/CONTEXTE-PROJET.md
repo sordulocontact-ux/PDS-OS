@@ -115,6 +115,13 @@ tickets du 30/09 (Cadrage, Master, Juridique 01 à 08) :
   confirmer, au lieu de les redemander. Il ne remplace pas le Cadrage global.
 - **Juridique 08 (Récap Sortie)** relève de l'étape **Livraison**, pas du Juridique. La
   brique « Distribution », que le Master interroge, n'a pas de ticket.
+- **Ce qui bloque la sortie (ReadinessPolicy du ticket 08)**. Le ticket dit que
+  « blocking_release est déterminé par ReadinessPolicy » et ne tranche que sa fixture : un
+  accord non sécurisé (« Humanisme sans autorisation ») est bloquant, une facture absente
+  ne l'est pas, la SACEM « peut être bloquante selon la politique configurée ». Rien n'est
+  dit des fiches, des contrats, des répartitions, ni du Master ou de la Stratégie. *Choix
+  par défaut en attendant (07/10/2026)* : la Vue d'ensemble ne marque « Bloque la sortie »
+  que les accords non sécurisés ; tout le reste est montré comme du suivi.
 - **Juridique 07 (moteur de dépendances)** sert à tout le projet. Les tickets 02 à 05 en
   dépendent alors que le 07 dépend d'eux : il faut une base minimale dès le premier
   workflow spécialisé.

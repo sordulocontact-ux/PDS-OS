@@ -30,7 +30,6 @@ export const framingIntel = {
     `${known} sur ${total} informations confirmées`,
   questionOf: (index: number, total: number) =>
     `Question ${index} sur ${total}`,
-  optional: "Facultatif",
   none: "Rien à signaler",
   notProvided: "Non renseigné",
   questions: {
@@ -406,7 +405,7 @@ export const framingIntel = {
     documents: "Documents",
     noDocuments: "Aucun document dans le projet.",
     date: "Date et heure",
-    link: "Lien de visio (facultatif)",
+    link: "Lien de visio",
     launch: "Lancer",
     launching: "Préparation…",
     failed: "L'échange n'a pas pu être préparé. Réessayez.",
@@ -426,7 +425,7 @@ export const framingIntel = {
     notSent: "Pas encore envoyée au valideur.",
     sentTo: (name: string, date: string) => `Envoyée à ${name} le ${date}.`,
     send: "Envoyer en validation",
-    sendNote: "Message au valideur (facultatif)",
+    sendNote: "Message au valideur",
     sending: "Envoi…",
     approve: "Valider le Brief",
     approveTitle: "Valider le Brief ?",
@@ -512,6 +511,12 @@ export const framingIntel = {
       follows: "Suit son étape",
     },
     open: "Ouvrir",
+    absentTitle: "Hors du plan",
+    absentHint:
+      "Retirés au lancement ou jamais proposés : vous pouvez les ajouter et les lancer.",
+    absentReadOnly:
+      "Pas dans le plan : le chef de projet responsable peut l'ajouter.",
+    addAndLaunch: "Ajouter et lancer",
     empty: "Rien dans cette colonne.",
     notReady: "Le plan se construit une fois le Brief validé.",
     readOnly: "Le chef de projet responsable lance le plan.",
@@ -529,6 +534,7 @@ export const framingIntel = {
       design: "Après la Stratégie : direction créative, cover, contenus.",
       delivery:
         "Quand le master final et le juridique sont prêts : livraison et sortie.",
+      addedLater: "Ajouté au plan après son lancement.",
     },
     anticipate: {
       deadline: (label: string, date: string) => `${label} le ${date}`,
@@ -547,6 +553,8 @@ export const framingIntel = {
       "Il démarrera une fois le cadrage validé et le plan du projet lancé.",
     bodyWaiting:
       "Le plan le place en Ensuite : lancez-le depuis le plan quand le moment est venu.",
+    bodyAbsent:
+      "Il n'est pas dans le plan lancé : ajoutez-le depuis le plan pour le démarrer.",
     openPlan: "Ouvrir le plan",
     openFraming: "Ouvrir le cadrage",
   },

@@ -118,6 +118,7 @@ export function StepsPanel({
             <OptionSelect
               name={`${f.id}-correction-field`}
               label={t.correctionFields}
+              required
               items={Object.fromEntries(
                 SACEM_725_FIELDS.map((x) => [
                   x.key,
@@ -138,6 +139,7 @@ export function StepsPanel({
                     ? t.correctionNote
                     : t.completeProof
             }
+            aria-required
             rows={2}
             maxLength={2000}
             value={text}

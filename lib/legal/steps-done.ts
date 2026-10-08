@@ -5,7 +5,8 @@ import type { LegalStepKey } from "@/lib/ui/legal-steps";
 import { createClient } from "@/lib/supabase/server";
 
 /** The Juridique steps really done, computed by the code for the checks of
- * the steps: the Cadrage once every question has an answer, the Confirmation
+ * the steps: the Cadrage once every question has an answer (or none is
+ * asked), the Confirmation
  * while the dossier stays confirmed (a correction reopens it), the Plan once
  * launched. The État des lieux and the Suivi are never "done": one is read,
  * the other followed until the release. Read with the viewer's session (RLS:
@@ -33,10 +34,8 @@ export async function loadLegalStepsDone(project: {
   if (plan.error) console.error("loadLegalStepsDone plan:", plan.error.message);
 
   const done: LegalStepKey[] = [];
-  if (
-    intake.questions.length > 0 &&
-    intake.questions.every((question) => question.answered)
-  )
+  // Nothing to ask counts as done: the Confirmation is the next step.
+  if (intake.questions.every((question) => question.answered))
     done.push("framing");
   if (intakeRow.data?.status === "confirmed") done.push("confirmation");
   if (plan.data?.launched_at) done.push("plan");

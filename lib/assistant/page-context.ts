@@ -19,8 +19,15 @@ const ARTIST = new RegExp(`^/app/catalog/artists/(${UUID})(?:/|$)`);
 const MASTER = new RegExp(`^/app/catalog/masters/(${UUID})(?:/|$)`);
 const PROJECT = new RegExp(`^/app/projects/(${UUID})(?:/([a-z-]+))?`);
 
-/** The record a page shows, read from its path only (no database access). */
-export type PageRecord = { kind: "artist" | "master" | "project"; id: string };
+/**
+ * The record a page shows, read from its path only (no database access);
+ * for a project, the section open in it (framing, master…), if any.
+ */
+export type PageRecord = {
+  kind: "artist" | "master" | "project";
+  id: string;
+  section?: string;
+};
 
 export function pageRecord(path: string | null | undefined): PageRecord | null {
   if (!path) return null;
@@ -29,7 +36,9 @@ export function pageRecord(path: string | null | undefined): PageRecord | null {
   const master = MASTER.exec(path);
   if (master) return { kind: "master", id: master[1] };
   const project = PROJECT.exec(path);
-  return project ? { kind: "project", id: project[1] } : null;
+  return project
+    ? { kind: "project", id: project[1], section: project[2] }
+    : null;
 }
 
 export async function pageContext(

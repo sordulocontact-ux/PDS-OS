@@ -88,7 +88,7 @@ export function DelegateButton({
           <Field
             name={`delegate-due-${itemId}`}
             type="date"
-            label={`${p.due} · ${p.optional}`}
+            label={p.due}
             defaultValue={dueOn ?? ""}
             onChange={(event) => setDue(event.target.value || null)}
           />

@@ -118,7 +118,9 @@ export function ReleaseForm({ action, initial, isNew }: Props) {
                   : "grid gap-2"
               }
             >
-              <Label htmlFor={id}>{t.fields[field.name]}</Label>
+              <Label htmlFor={id} required={field.required}>
+                {t.fields[field.name]}
+              </Label>
               <Input
                 // Remount on server-side changes so defaultValue follows.
                 key={`${field.name}:${values[field.name]}`}
@@ -138,7 +140,7 @@ export function ReleaseForm({ action, initial, isNew }: Props) {
                 }
               />
               {invalid ? (
-                <p id={`${id}-error`} className="text-sm text-destructive">
+                <p id={`${id}-error`} className="text-sm text-error">
                   {t.errors[field.name]}
                 </p>
               ) : field.hint ? (
@@ -152,7 +154,7 @@ export function ReleaseForm({ action, initial, isNew }: Props) {
       </div>
 
       {formError && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-sm text-error">
           {t.errors[formError]}
         </p>
       )}

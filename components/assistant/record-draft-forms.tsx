@@ -11,8 +11,8 @@ import {
   loadBudgetLevers,
   loadMeetingForm,
   loadTaskMembers,
-  loadTemplateCurrent,
-  type TemplateCurrent,
+  loadTemplateForm,
+  type TemplateFormData,
 } from "@/lib/assistant/draft-record-actions";
 import type {
   BudgetLineDraft,
@@ -43,8 +43,9 @@ export function ContractTemplateDraftForm({
   onCancel,
 }: FormProps<ContractTemplateDraft>) {
   const { seriesId, values } = draft;
-  const form = (current: TemplateCurrent | null) => (
+  const form = ({ organizationId, current }: TemplateFormData) => (
     <TemplateForm
+      organizationId={organizationId}
       initial={{
         seriesId,
         name: values.name ?? current?.name ?? "",
@@ -52,6 +53,7 @@ export function ContractTemplateDraftForm({
         roles: values.roles ?? current?.roles ?? [],
         usage: values.usage ?? current?.usage ?? "",
         body: values.body ?? current?.body ?? "",
+        source: current?.source ?? null,
       }}
       onCancel={onCancel}
       onDone={() =>
@@ -63,10 +65,17 @@ export function ContractTemplateDraftForm({
     />
   );
   // A new version starts from the latest one, read when the panel opens.
-  return seriesId ? (
-    <Loading load={() => loadTemplateCurrent(seriesId)}>{form}</Loading>
-  ) : (
-    form(null)
+  return (
+    <Loading
+      load={async () => {
+        const data = await loadTemplateForm(seriesId);
+        // Not allowed any more: the panel says it could not load.
+        if (!data) throw new Error("template form");
+        return data;
+      }}
+    >
+      {form}
+    </Loading>
   );
 }
 

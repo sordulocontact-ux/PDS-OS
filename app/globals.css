@@ -71,6 +71,13 @@
   --nav-divider: var(--po-grey-100);
   /* Figma « Devis Sordulo » nœud 121:179 : flou seul, sans décalage. */
   --nav-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+  /* Barre collée au bord de l'écran (Figma « PDS OS », nœud 47:12055) : un
+     filet à droite, plus d'ombre ; logo en carré noir ; point bleu de la
+     cloche quand une notification n'est pas lue. */
+  --nav-border: rgb(0 0 0 / 0.08);
+  --nav-brand-bg: var(--po-ink-900);
+  --nav-brand-fg: var(--po-white);
+  --nav-unread-dot: var(--selection);
 
   /* --- Tons d'état sémantiques (DESIGN.md § 3) : fond pâle, texte foncé --- */
   --tone-neutral-bg: var(--po-grey-100);
@@ -116,10 +123,11 @@
 
   /* --- Sélection (DESIGN.md § 3 bis) : l'accent unique de ce qui est choisi
      ou actif (focus, champ en saisie, radio, case cochée, carte de choix).
-     Couleur de Sacha (27/09/2026), à changer ici seulement. ---------------- */
-  --selection: #64a2ff;
+     Couleur de Sacha (Figma « Checkbox base », 07/10/2026 ; #64a2ff avant),
+     à changer ici seulement. Le fond pâle vaut Blue/25 (#eff6ff) sur blanc. */
+  --selection: #155dfc;
   --selection-border: var(--selection);
-  --selection-bg: rgb(100 162 255 / 0.1);
+  --selection-bg: rgb(21 93 252 / 0.07);
 
   /* --- Jauges ------------------------------------------------------------ */
   --meter-track: var(--po-grey-150);
@@ -208,14 +216,17 @@
   --section-gap: var(--space-32);
   --page-gutter: 32px;
   --page-max: 1440px;
-  --nav-width: 250px;
-  --nav-width-collapsed: 64px;
+  /* Figma « PDS OS », nœuds 47:12055 (dépliée) et 47:12047 (repliée). */
+  --nav-width: 218px;
+  --nav-width-collapsed: 68px;
   /* Deuxième barre latérale, contextuelle à un projet (Figma "Double sidebar",
      retouché à la demande de Sacha le 27/09/2026 : 200 px au lieu des 258 px
      du Figma, jugés trop larges). */
   --project-nav-width: 200px;
-  /* Marge entre le bord de l'écran et la barre latérale flottante. */
-  --shell-inset: var(--space-16);
+  /* Marge entre le bord de l'écran et les barres latérales : nulle depuis le
+     07/10/2026, elles sont collées au bord et pleine hauteur (Figma « PDS OS »,
+     nœud 47:12047). */
+  --shell-inset: 0px;
   /* Pointe d'un chevron du fil des étapes (ProcessSteps, Figma 1510:3096) ;
      deux chevrons se chevauchent de la pointe moins 3 px : un filet du fond
      les sépare. */
@@ -303,6 +314,9 @@
   /* Pas de rouge. L'état bloquant se traite en encre pleine (DESIGN.md §1). */
   --destructive: var(--po-ink-900);
   --destructive-foreground: var(--po-white);
+  /* Le seul rouge : une saisie manquante ou refusée (champ, message), jamais
+     une action (Sacha, 07/10/2026 ; DESIGN.md § 4, « Manques à la validation »). */
+  --error: #d92d20;
 
   --border: var(--border-default);
   --input: var(--border-field);
@@ -376,8 +390,9 @@
   /* Pas de rouge : l'action définitive reste en « encre pleine », ici blanche. */
   --destructive: var(--po-white);
   --destructive-foreground: var(--po-ink-900);
+  --error: #f97066;
   /* Plus présent sur le panneau sombre. */
-  --selection-bg: rgb(100 162 255 / 0.18);
+  --selection-bg: rgb(21 93 252 / 0.18);
 }
 
 /* ==========================================================================
@@ -401,6 +416,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-error: var(--error);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -638,4 +654,14 @@
   li:only-child > .process-step {
     clip-path: none;
   }
+}
+
+/* Valeurs repérées dans un contrat à transformer en modèle, encore à
+   remplacer ou ignorer (« Repérer les valeurs », editor-dom.ts). Le build
+   avertit « 'highlight' is not recognized » (lightningcss ne connaît pas
+   encore ce pseudo-élément) : la règle est gardée telle quelle, sans effet
+   sur le reste. */
+::highlight(template-value) {
+  background-color: var(--tone-warning-bg);
+  color: var(--tone-warning-fg);
 }

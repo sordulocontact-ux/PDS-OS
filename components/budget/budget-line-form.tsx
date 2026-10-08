@@ -97,7 +97,9 @@ export function BudgetLineForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <div className="grid gap-1.5">
-        <Label htmlFor="budget-label">{t.label}</Label>
+        <Label htmlFor="budget-label" required>
+          {t.label}
+        </Label>
         <Input
           id="budget-label"
           name="label"
@@ -107,7 +109,9 @@ export function BudgetLineForm({
         />
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="budget-amount">{t.amount}</Label>
+        <Label htmlFor="budget-amount" required>
+          {t.amount}
+        </Label>
         <Input
           id="budget-amount"
           name="amount"
@@ -124,7 +128,7 @@ export function BudgetLineForm({
           id="budget-amount-hint"
           className={
             amountError
-              ? "text-caption text-destructive"
+              ? "text-caption text-error"
               : "text-caption text-muted-foreground"
           }
         >
@@ -132,9 +136,12 @@ export function BudgetLineForm({
         </p>
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor="budget-status">{t.status}</Label>
+        <Label htmlFor="budget-status" required>
+          {t.status}
+        </Label>
         <OptionSelect
           id="budget-status"
+          required
           label={t.status}
           options={fr.budget.statuses}
           value={status}

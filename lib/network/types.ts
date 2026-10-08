@@ -19,6 +19,9 @@ export const NETWORK_ROLES = [
   "provider",
   "partner",
   "label",
+  // A music publisher (« Éditeur »): who authorises the work of a borrowing
+  // (migration 20261007000501).
+  "publisher",
   "distributor",
   "media",
   "manager",
@@ -37,7 +40,15 @@ export const NETWORK_FAMILIES = {
     "producer",
   ],
   image: ["videographer", "photographer", "designer"],
-  business: ["provider", "partner", "label", "distributor", "media", "manager"],
+  business: [
+    "provider",
+    "partner",
+    "label",
+    "publisher",
+    "distributor",
+    "media",
+    "manager",
+  ],
   other: ["other"],
 } as const satisfies Record<string, readonly NetworkRole[]>;
 export type NetworkFamily = keyof typeof NETWORK_FAMILIES;

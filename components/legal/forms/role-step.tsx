@@ -4,6 +4,7 @@ import { Field } from "@/components/auth/field";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /** The fiche's first question (Juridique 02): « Quel est votre rôle sur ce
  * projet ? », several choices, « Autre » with its words. */
@@ -34,9 +35,8 @@ export function RoleStep({
             key={role}
             className="flex items-center gap-3 rounded-xl border px-3 py-2.5 has-checked:border-selection has-checked:bg-selection-bg"
           >
-            <input
-              type="checkbox"
-              className="size-4 shrink-0 accent-selection"
+            <Checkbox
+              className="shrink-0"
               checked={roles.includes(role)}
               onChange={() => onToggle(role)}
             />
@@ -48,6 +48,7 @@ export function RoleStep({
         <Field
           name="other_role"
           label={t.public.otherRole}
+          aria-required
           maxLength={200}
           value={otherRole}
           onChange={(event) => onOtherRole(event.target.value)}

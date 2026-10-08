@@ -41,6 +41,10 @@ export type SourceRights = {
 
 const t = fr.masterWorkflow.inventory;
 
+/** The title already has its master final: nothing left to mix. */
+export const hasMasterFinal = (audio: FlowAudio[]) =>
+  byAudioProgress(audio)[0]?.audioState === "final_master";
+
 /** "Mise à plat · sauvee_v3.wav · v2". */
 const versionText = (file: FlowAudio) =>
   [

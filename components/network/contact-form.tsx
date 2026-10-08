@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { ParentOrganizationField } from "@/components/network/parent-organization-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
@@ -21,7 +22,8 @@ import {
 /**
  * A network contact, created or edited in the modal: a person or an
  * organization, its roles, then how to reach it. A person may belong to an
- * organization of the network; a contact may stand for a catalog artist.
+ * organization of the network (picked, or added on the spot); a contact may
+ * stand for a catalog artist.
  */
 export function ContactForm({
   contact,
@@ -55,10 +57,6 @@ export function ContactForm({
   }, [state]);
 
   const error = state && !state.ok ? state : null;
-  // Another organization than itself (a contact never belongs to itself).
-  const organizations = options.organizations.filter(
-    (organization) => organization.id !== contact?.id,
-  );
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -67,6 +65,7 @@ export function ContactForm({
       <ChipChoice
         name="kind"
         legend={t.kind}
+        required
         options={NETWORK_KINDS.map((value) => ({
           value,
           label: fr.network.kinds[value],
@@ -88,6 +87,7 @@ export function ContactForm({
         multiple
         name="roles"
         label={t.roles}
+        required
         placeholder={t.rolesPlaceholder}
         items={Object.fromEntries(
           NETWORK_ROLES.map((value) => [value, fr.network.roles[value]]),
@@ -97,21 +97,17 @@ export function ContactForm({
         max={8}
         error={error?.field === "roles" ? error.error : undefined}
       />
-      {kind === "person" && organizations.length > 0 && (
-        <OptionSelect
-          name="parentId"
-          label={`${t.parent} · ${t.parentNote}`}
-          items={{
-            none: t.parentNone,
-            ...Object.fromEntries(organizations.map((o) => [o.id, o.name])),
-          }}
-          defaultValue={contact?.parentId ?? initial?.parentId ?? "none"}
+      {kind === "person" && (
+        <ParentOrganizationField
+          contactId={contact?.id}
+          organizations={options.organizations}
+          defaultId={contact?.parentId ?? initial?.parentId ?? null}
         />
       )}
       {options.artists.length > 0 && (
         <OptionSelect
           name="artistId"
-          label={`${t.artist} · ${t.artistNote}`}
+          label={t.artist}
           items={{
             none: t.artistNone,
             ...Object.fromEntries(options.artists.map((a) => [a.id, a.name])),
@@ -123,7 +119,7 @@ export function ContactForm({
         <Field
           name="email"
           type="email"
-          label={`${t.email} · ${t.optional}`}
+          label={t.email}
           autoComplete="off"
           maxLength={320}
           defaultValue={contact?.email ?? initial?.email ?? ""}
@@ -132,7 +128,7 @@ export function ContactForm({
         <Field
           name="phone"
           type="tel"
-          label={`${t.phone} · ${t.optional}`}
+          label={t.phone}
           autoComplete="off"
           maxLength={40}
           defaultValue={contact?.phone ?? initial?.phone ?? ""}
@@ -141,7 +137,7 @@ export function ContactForm({
           name="website"
           type="url"
           inputMode="url"
-          label={`${t.website} · ${t.optional}`}
+          label={t.website}
           autoComplete="off"
           maxLength={500}
           placeholder={t.websitePlaceholder}
@@ -150,7 +146,7 @@ export function ContactForm({
         />
         <Field
           name="city"
-          label={`${t.city} · ${t.optional}`}
+          label={t.city}
           autoComplete="off"
           maxLength={120}
           defaultValue={contact?.city ?? initial?.city ?? ""}
@@ -158,7 +154,7 @@ export function ContactForm({
       </div>
       <TextareaField
         name="notes"
-        label={`${t.notes} · ${t.optional}`}
+        label={t.notes}
         maxLength={2000}
         rows={3}
         placeholder={t.notesPlaceholder}

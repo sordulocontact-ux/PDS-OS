@@ -10,6 +10,76 @@ export const masterWorkflow = {
     mix: "Mix",
     mastering: "Mastering",
     final: "Master final",
+    // The four steps shown (lib/ui/master-steps.ts, ticket « Architecture
+    // globale »): mix and mastering are two business milestones.
+    prepare: "Préparation",
+    mixing: "Mixage",
+    backToPrepare: "Préparation",
+  },
+  // One page per round (lib/ui/master-steps.ts, ticket « Architecture
+  // globale »): the validations live inside, never a step of their own.
+  production: {
+    progress: (done: number, total: number) =>
+      `${done} titre${done > 1 ? "s" : ""} validé${done > 1 ? "s" : ""} sur ${total}`,
+    show: "Afficher",
+    mix: {
+      title: "Mixage",
+      description:
+        "Le dossier part au mixeur, les versions reviennent, le validateur décide titre par titre. Un mix validé ne change plus.",
+      round: "Mix",
+      done: "Chaque titre a son mix final",
+    },
+    mastering: {
+      title: "Mastering",
+      description:
+        "Le dossier de mastering part avec les mix finals, les versions reviennent, le validateur décide titre par titre.",
+      round: "Mastering",
+      done: "Chaque titre a son master final",
+      waiting: (done: number, total: number) =>
+        `S'ouvre quand chaque titre a son mix final (${done} sur ${total} pour l'instant).`,
+    },
+  },
+  // « Préparer » (lib/ui/master-steps.ts): where the preparation stands.
+  prepare: {
+    title: "Où en est la préparation",
+    description:
+      "La source de chaque titre, le Brief, puis l'envoi au mixeur : chaque ligne dit ce qui reste.",
+    doneLabel: "fait",
+    todoLabel: "à faire",
+    sources: {
+      title: "Source du mix",
+      none: "Aucun titre dans le projet.",
+      finished: (total: number) =>
+        total === 1
+          ? "Le titre a déjà son master final : aucune source à confirmer."
+          : `Les ${total} titres ont déjà leur master final : aucune source à confirmer.`,
+      count: (done: number, total: number) =>
+        done === total
+          ? total === 1
+            ? "Confirmée pour le titre."
+            : `Confirmée pour les ${total} titres.`
+          : `${done} titre${done > 1 ? "s" : ""} sur ${total} confirmé${done > 1 ? "s" : ""} : la version de départ de chaque titre, plus bas.`,
+      action: "Confirmer les sources",
+    },
+    brief: {
+      title: "Brief Mix/Master",
+      empty:
+        "Pas encore enregistré : ce que le projet sait déjà y est pré-rempli, à relire.",
+      notNeeded: "Facultatif : il n'y a rien à mixer ni à masteriser.",
+      noEngineer: "Enregistré, sans ingénieur du mix.",
+      engineer: (name: string) => `Mix confié à ${name}.`,
+      fill: "Remplir le Brief",
+      open: "Ouvrir le Brief",
+    },
+    send: {
+      title: "Envoi au mixeur",
+      ready: "Tout est prêt : le dossier peut partir.",
+      sent: "Le dossier est parti : la suite se passe dans Mix et mastering.",
+      action: "Passer au mix",
+      follow: "Suivre le mix",
+      nothing: "Rien à envoyer : chaque titre a déjà son master final.",
+      final: "Voir le master final",
+    },
   },
   brief: {
     title: "Brief Mix/Master",
@@ -19,6 +89,8 @@ export const masterWorkflow = {
       by ? `Enregistré le ${date} par ${by}` : `Enregistré le ${date}`,
     notSaved:
       "Pas encore enregistré : ce qui est déjà connu du projet est pré-rempli.",
+    allFinal:
+      "Tous les titres du projet ont déjà leur master final : il n'y a rien à mixer ni à masteriser. Le Brief reste facultatif, pour garder une trace.",
     submit: "Enregistrer le Brief",
     submitting: "Enregistrement…",
     savedToast: "Brief enregistré.",
@@ -47,11 +119,12 @@ export const masterWorkflow = {
     fields: {
       mixEngineer: "Ingénieur du mix",
       masteringEngineer: "Ingénieur du mastering",
-      engineerHint: "Les ingénieurs du Réseau.",
+      engineerHint:
+        "Les ingénieurs crédités sur les titres d'abord, puis ceux du Réseau.",
       sameEngineer: "Même ingénieur que le mix",
       mixRate: "Tarif estimé du mix",
       masteringRate: "Tarif estimé du mastering",
-      rateHint: "Facultatif, en euros.",
+      rateHint: "En euros.",
       revisions: "Révisions incluses",
       revisionsHint: "Le nombre d'allers-retours prévus avec l'ingénieur.",
       validator: "Qui valide les versions",
@@ -85,6 +158,7 @@ export const masterWorkflow = {
       "Indiquez la date du master final pour obtenir une proposition.",
     engineerContact: {
       noHistory: "Jamais crédité sur un titre de PDS",
+      credited: "Crédité sur les titres du projet",
     },
     budget: {
       title: "Budget du projet",
@@ -237,7 +311,7 @@ export const masterWorkflow = {
       },
     },
     note: "Message pour le mixeur",
-    noteHint: "Facultatif, affiché en tête du dossier.",
+    noteHint: "Affiché en tête du dossier.",
     submit: "Créer le lien",
     submitting: "Création du lien…",
     cancel: "Annuler",
@@ -405,7 +479,7 @@ export const masterWorkflow = {
     requestDescription:
       "La version reste dans l'historique ; la suivante sera tranchée à son tour. Les retours de l'équipe passent par la synthèse.",
     requestNote: "Ce qu'il faut changer",
-    requestNoteHint: "Facultatif, visible par l'équipe.",
+    requestNoteHint: "Visible par l'équipe.",
     requestSubmit: "Demander la modification",
     cancel: "Annuler",
     close: "Fermer",

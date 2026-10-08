@@ -7,7 +7,7 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { ArtistAvatar } from "@/components/catalog/artist-avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { ArtistRelationField } from "@/components/catalog/artist-relation-field";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
@@ -64,7 +64,7 @@ export function ArtistDetailsForm({
       {deezer ? (
         <div className="flex items-center gap-3 rounded-xl border border-border p-3">
           <input type="hidden" name="deezerId" value={deezer.deezerId} />
-          <ArtistAvatar
+          <Avatar
             name={deezer.name}
             pictureUrl={deezer.pictureUrl}
             className="size-12"
@@ -130,7 +130,6 @@ export function ArtistDetailsForm({
       <TextareaField
         name="notes"
         label={t.notes}
-        hint={t.notesHint}
         maxLength={5000}
         defaultValue={values.notes ?? initialNotes}
         error={errors.notes}

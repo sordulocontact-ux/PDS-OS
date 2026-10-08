@@ -103,9 +103,12 @@ export function TaskForm({
         </div>
       )}
       <div className="grid gap-1">
-        <Label htmlFor="new-task-title">{t.label}</Label>
+        <Label htmlFor="new-task-title" required>
+          {t.label}
+        </Label>
         <Input
           id="new-task-title"
+          aria-required
           value={title}
           maxLength={300}
           placeholder={t.placeholder}
@@ -115,9 +118,12 @@ export function TaskForm({
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <div className="grid gap-1">
-          <Label htmlFor="new-task-assignee">{t.assignee}</Label>
+          <Label htmlFor="new-task-assignee" required>
+            {t.assignee}
+          </Label>
           <OptionSelect
             id="new-task-assignee"
+            required
             label={t.assignee}
             options={people}
             value={assignee}
@@ -125,9 +131,12 @@ export function TaskForm({
           />
         </div>
         <div className="grid gap-1">
-          <Label htmlFor="new-task-due">{t.dueDate}</Label>
+          <Label htmlFor="new-task-due" required>
+            {t.dueDate}
+          </Label>
           <Input
             id="new-task-due"
+            aria-required
             type="date"
             value={due}
             onChange={(e) => setDue(e.target.value)}

@@ -9,19 +9,23 @@ import { fr } from "@/lib/i18n/fr";
 /**
  * A workflow that waits for the Plan du Projet (decision of 06/10/2026):
  * nothing starts silently. Before the Brief is validated it says when it
- * will open; after, it leads to the plan, where it is launched.
+ * will open; after, it leads to the plan, where it is launched (or added,
+ * when the launched plan left it out).
  */
 export function WorkflowLocked({
   projectId,
   name,
   framingValidated,
   waiting,
+  absent,
 }: {
   projectId: string;
   name: string;
   framingValidated: boolean;
   // Placed in Ensuite by a launched plan: waiting for « Lancer maintenant ».
   waiting: boolean;
+  // Left out of the launched plan: added from it.
+  absent: boolean;
 }) {
   const t = fr.framingIntel.locked;
   return (
@@ -29,7 +33,13 @@ export function WorkflowLocked({
       icon={IconLock}
       title={t.title(name)}
       body={
-        waiting ? t.bodyWaiting : framingValidated ? t.body : t.bodyBeforeBrief
+        waiting
+          ? t.bodyWaiting
+          : absent
+            ? t.bodyAbsent
+            : framingValidated
+              ? t.body
+              : t.bodyBeforeBrief
       }
       action={
         <Link

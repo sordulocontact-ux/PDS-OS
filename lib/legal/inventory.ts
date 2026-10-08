@@ -109,5 +109,6 @@ export async function loadLegalInventory(
       ]),
     ),
     counts: countFacts(sections),
+    projectContacts: rows.projectContacts,
   };
 }

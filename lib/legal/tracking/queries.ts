@@ -71,6 +71,18 @@ export async function loadTracking(
       splitStates(project.id),
     ]);
   if (items.error) console.error("loadTracking items:", items.error.message);
+  // The borrowings whose conditions wait for the direction.
+  const clearanceIds = (clearances.data ?? []).map((c) => c.id);
+  const { data: pendingTerms } = clearanceIds.length
+    ? await supabase
+        .from("legal_clearance_terms")
+        .select("clearance_id")
+        .eq("status", "proposed")
+        .in("clearance_id", clearanceIds)
+    : { data: [] };
+  const termsPending = new Set(
+    (pendingTerms ?? []).map((row) => row.clearance_id),
+  );
   const planKeys = new Set((items.data ?? []).map((row) => row.item_key));
   const added = proposePlan({
     rows,
@@ -105,6 +117,7 @@ export async function loadTracking(
         id: c.id,
         status: c.status,
         updatedAt: c.updated_at,
+        termsPending: termsPending.has(c.id),
       })),
       items: (items.data ?? []).map((row) => ({
         id: row.id,

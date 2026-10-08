@@ -1,39 +1,31 @@
 "use client";
 
-import { IconPlus, IconXmark } from "nucleo-sharp-essential";
-import { useState, useTransition } from "react";
+import { IconPlus } from "nucleo-sharp-essential";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
-import { OptionSelect } from "@/components/projects/option-select";
+import {
+  SplitEditorRow,
+  type SplitRow,
+} from "@/components/legal/splits/split-editor-row";
+import { useSplitRows } from "@/components/legal/splits/use-split-rows";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { saveSplitDraft } from "@/lib/legal/splits/actions";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import {
   FULL,
-  SPLIT_ROLES,
-  equalUnits,
-  exactShare,
   formatShare,
   totalUnits,
   unitsOf,
-  type SplitRole,
 } from "@/lib/legal/splits/shares";
 
-type Row = {
-  key: number;
-  name: string;
-  role: SplitRole;
-  share: string;
-  contactId: string | null;
-  creditId: string | null;
-};
-
 /**
- * The split of one title, line by line: name, role, exact share. « Parts
- * égales » computes shares that total exactly 100 %; the total is checked
- * here and again by the database before anything is sent.
+ * The split of one title, line by line: the person (picked, its contact
+ * kept), role, exact share. « Parts égales » computes shares that total
+ * exactly 100 %; the total is checked here and again by the database
+ * before anything is sent.
  */
 export function SplitEditor({
   projectId,
@@ -52,47 +44,37 @@ export function SplitEditor({
   onCancel: () => void;
 }) {
   const t = fr.legalSplits.editor;
-  const [rows, setRows] = useState<Row[]>(() =>
-    (initial.length > 0
-      ? initial
-      : [
-          {
-            name: "",
-            role: "composer" as SplitRole,
-            units: FULL,
-            contactId: null,
-            creditId: null,
-          },
-        ]
-    ).map((line, i) => ({
-      key: i,
-      name: line.name,
-      role: line.role,
-      share: exactShare(line.units),
-      contactId: line.contactId,
-      creditId: line.creditId,
-    })),
+  const { rows, set, load, add, remove, equal } = useSplitRows(
+    masterId,
+    initial,
   );
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [tried, setTried] = useState(0);
+  const root = useRef<HTMLDivElement>(null);
   const [pending, startTransition] = useTransition();
 
   const units = rows.map((row) => unitsOf(row.share));
   const total = totalUnits(units);
-  const set = (key: number, change: Partial<Row>) =>
-    setRows((all) =>
-      all.map((row) => (row.key === key ? { ...row, ...change } : row)),
-    );
-  const equal = () => {
-    const parts = equalUnits(rows.length);
-    setRows((all) =>
-      all.map((row, i) => ({ ...row, share: exactShare(parts[i]) })),
-    );
-  };
+  const errorsOf = (row: SplitRow, i: number) => ({
+    person: row.name.trim() ? undefined : t.personMissing,
+    share: units[i] === null ? t.shareInvalid : undefined,
+  });
+  const missing = rows.filter((row, i) => {
+    const e = errorsOf(row, i);
+    return e.person || e.share;
+  }).length;
+  // After a try, the first line in red takes the focus.
+  useEffect(() => {
+    if (!tried) return;
+    root.current
+      ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      ?.focus({ preventScroll: true });
+  }, [tried]);
 
   function save() {
-    if (rows.some((row) => !row.name.trim()) || units.some((u) => u === null))
-      return setError(t.invalid);
+    setError(null);
+    if (missing > 0) return setTried((n) => n + 1);
     startTransition(async () => {
       const result = await saveSplitDraft({
         projectId,
@@ -112,74 +94,23 @@ export function SplitEditor({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div ref={root} className="flex flex-col gap-4">
       <ul className="flex flex-col gap-3">
-        {rows.map((row) => (
-          <li
+        {rows.map((row, i) => (
+          <SplitEditorRow
             key={row.key}
-            className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem_8rem_auto] sm:items-end"
-          >
-            <Field
-              name={`name-${row.key}`}
-              label={t.name}
-              maxLength={200}
-              value={row.name}
-              onChange={(event) => set(row.key, { name: event.target.value })}
-            />
-            <OptionSelect
-              name={`role-${row.key}`}
-              label={t.role}
-              items={Object.fromEntries(
-                SPLIT_ROLES.map((r) => [r, fr.legalSplits.roles[r]]),
-              )}
-              defaultValue={row.role}
-              onValueChange={(value) =>
-                set(row.key, { role: value as SplitRole })
-              }
-            />
-            <Field
-              name={`share-${row.key}`}
-              label={t.share}
-              inputMode="decimal"
-              suffix="%"
-              value={row.share}
-              onChange={(event) => set(row.key, { share: event.target.value })}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label={t.remove(row.name)}
-              disabled={rows.length === 1}
-              onClick={() =>
-                setRows((all) => all.filter((r) => r.key !== row.key))
-              }
-            >
-              <IconXmark aria-hidden />
-            </Button>
-          </li>
+            row={row}
+            load={load}
+            canRemove={rows.length > 1}
+            errors={tried ? errorsOf(row, i) : null}
+            onChange={(change) => set(row.key, change)}
+            onRemove={() => remove(row.key)}
+          />
         ))}
       </ul>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setRows((all) => [
-                ...all,
-                {
-                  key: Math.max(...all.map((r) => r.key)) + 1,
-                  name: "",
-                  role: "composer",
-                  share: "",
-                  contactId: null,
-                  creditId: null,
-                },
-              ])
-            }
-          >
+          <Button type="button" variant="outline" size="sm" onClick={add}>
             <IconPlus aria-hidden />
             {t.add}
           </Button>
@@ -207,7 +138,9 @@ export function SplitEditor({
           onChange={(event) => setNote(event.target.value)}
         />
       )}
-      {error && <FormMessage kind="error">{error}</FormMessage>}
+      <FormMessage kind="error">
+        {error ?? (tried && missing > 0 ? t.missingCount(missing) : null)}
+      </FormMessage>
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
           {fr.legalSplits.public.cancel}

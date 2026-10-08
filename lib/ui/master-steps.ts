@@ -31,13 +31,33 @@ export const masterStepHref = (projectId: string, key: MasterStepKey) =>
     ? routes.projectMaster(projectId)
     : routes.projectMasterStep(projectId, key);
 
-/** The steps as SectionSteps draws them. */
-export function masterSteps(projectId: string) {
+// What the person sees (ticket « Architecture globale », 08/10/2026, after
+// the three steps of 07/10): four business milestones. Préparation holds the
+// État du master and opens the Brief; Mixage and Mastering each have their
+// page, their validations inside (never a step of their own); the Master
+// final closes. Every old URL still answers.
+export const MASTER_TABS = ["prepare", "mixing", "mastering", "final"] as const;
+export type MasterTab = (typeof MASTER_TABS)[number];
+
+/** The steps as SectionSteps draws them: each with the pages it covers.
+ * `done`: the steps really done, computed by the server. */
+export function masterSteps(
+  projectId: string,
+  done: readonly MasterTab[] = [],
+) {
   const t = fr.masterWorkflow.steps;
-  return MASTER_STEP_KEYS.map((key) => ({
+  const href = (key: MasterStepKey) => masterStepHref(projectId, key);
+  const step = (key: MasterTab, label: string, page: MasterStepKey) => ({
     key,
-    label: t[key],
-    href: masterStepHref(projectId, key),
-    built: MASTER_BUILT_STEPS.includes(key),
-  }));
+    label,
+    href: href(page),
+    built: true,
+    done: done.includes(key),
+  });
+  return [
+    { ...step("prepare", t.prepare, "state"), also: [href("brief")] },
+    step("mixing", t.mixing, "mix"),
+    step("mastering", t.mastering, "mastering"),
+    step("final", t.final, "final"),
+  ];
 }

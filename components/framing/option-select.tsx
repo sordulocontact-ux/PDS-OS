@@ -8,7 +8,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/** The shadcn Select for a plain { value: label } list. */
+/**
+ * The shadcn Select for a plain { value: label } list. `required`: said to
+ * screen readers; the « * » is on the caller's Label.
+ */
 export function OptionSelect({
   id,
   label,
@@ -16,6 +19,7 @@ export function OptionSelect({
   value,
   onChange,
   disabled,
+  required = false,
 }: {
   id: string;
   label: string;
@@ -23,6 +27,7 @@ export function OptionSelect({
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  required?: boolean;
 }) {
   return (
     <Select
@@ -31,7 +36,12 @@ export function OptionSelect({
       onValueChange={(next) => typeof next === "string" && onChange(next)}
       disabled={disabled}
     >
-      <SelectTrigger id={id} aria-label={label} className="min-w-44">
+      <SelectTrigger
+        id={id}
+        aria-label={label}
+        aria-required={required || undefined}
+        className="min-w-44"
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

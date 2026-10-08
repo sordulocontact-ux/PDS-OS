@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { fr } from "@/lib/i18n/fr";
 import type { BriefDeliverable } from "@/lib/master-workflow/brief-types";
 import { setDeliverableReceived } from "@/lib/master-workflow/final-actions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /** The brief's other deliverables of a title, checked off by the owner as
  * they arrive; read-only for everyone else. */
@@ -36,9 +37,7 @@ export function DeliverablesChecklist({
       <legend className="mb-1 text-sm font-medium">{t.deliverables}</legend>
       {deliverables.map((item) => (
         <label key={item.key} className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            className="size-4 accent-selection"
+          <Checkbox
             defaultChecked={item.received}
             onChange={(event) => {
               const received = event.target.checked;

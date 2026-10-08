@@ -4,7 +4,7 @@
 -- plan launching the workflows, the Stratégie waiting for it.
 -- Run with `supabase test db`.
 begin;
-select plan(31);
+select plan(36);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -173,6 +173,19 @@ select is(public.workflow_is_launched(pg_temp.id_of('project'), 'master'), false
           'a workflow placed in Ensuite waits');
 select lives_ok($$ select public.launch_plan_workflow(pg_temp.id_of('project'), 'master') $$,
                 'the owner launches it when the time comes');
+-- A workflow the plan left out still starts: added in Focus, then launched.
+select throws_ok($$ select public.launch_plan_workflow(pg_temp.id_of('project'), 'legal') $$,
+                 '23514', null, 'a workflow left out of the plan needs its title');
+select lives_ok($$ select public.launch_plan_workflow(pg_temp.id_of('project'), 'legal',
+                    'Juridique', 'Ajouté après le lancement du plan.') $$,
+                'the owner adds a workflow left out of the plan and launches it');
+select is(public.workflow_is_launched(pg_temp.id_of('project'), 'legal'), true,
+          'the added workflow is launched');
+select is((select column_key || ':' || (owner_person_id = pg_temp.id_of('owner_person'))::text
+             from public.project_plan_items where plan_id = pg_temp.id_of('plan') and workflow = 'legal'),
+          'focus:true', 'it is added in Focus, owned by the person who launched it');
+select throws_ok($$ select public.launch_plan_workflow(pg_temp.id_of('project'), 'legal') $$,
+                 'P0001', 'invalid_transition', 'a workflow is launched once');
 select throws_ok($$ select public.launch_project_plan(pg_temp.id_of('project'),
                     '[{"column":"focus","title":"x"}]'::jsonb) $$,
                  'P0001', 'plan_already_launched', 'a plan is launched once');

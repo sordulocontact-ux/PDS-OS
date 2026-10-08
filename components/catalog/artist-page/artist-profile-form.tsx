@@ -60,7 +60,6 @@ export function ArtistProfileForm({
       <Field
         name="legalName"
         label={t.legalName}
-        hint={t.legalNameHint}
         autoComplete="off"
         maxLength={200}
         defaultValue={value("legalName", artist.legalName)}

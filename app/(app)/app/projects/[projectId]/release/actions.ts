@@ -84,7 +84,7 @@ export async function saveRelease(
     return fail("generic");
   }
 
-  revalidatePath(routes.projectRelease(projectId));
+  revalidatePath(routes.projectRelease(projectId), "layout");
   return { status: "saved", at: Date.now() };
 }
 
@@ -108,7 +108,7 @@ export async function checkRelease(
     };
   }
 
-  revalidatePath(routes.projectRelease(projectId));
+  revalidatePath(routes.projectRelease(projectId), "layout");
   return { ok: true, linkCount: outcome.linkCount };
 }
 
@@ -126,6 +126,6 @@ export async function setSmartlinkEnabled(
     console.error("setSmartlinkEnabled:", error.code, error.message);
     return { ok: false };
   }
-  revalidatePath(routes.projectRelease(projectId));
+  revalidatePath(routes.projectRelease(projectId), "layout");
   return { ok: true };
 }

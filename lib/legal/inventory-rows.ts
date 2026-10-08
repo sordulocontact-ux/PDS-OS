@@ -22,6 +22,7 @@ import type {
   InventoryContract,
   InventoryFlag,
 } from "@/lib/legal/project-facts";
+import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
 import type { InventoryMaster } from "@/lib/legal/title-facts";
 import type { LegalSectionKey } from "@/lib/legal/types";
 import { createClient } from "@/lib/supabase/server";
@@ -44,6 +45,13 @@ export type InventoryRows = {
   network: NetworkIndex;
   contracts: InventoryContract[];
   flags: InventoryFlag[];
+  // People of the Réseau in the legal file without a credit (lot 6).
+  projectContacts: Array<{
+    id: string;
+    contactId: string;
+    name: string;
+    role: FormRole;
+  }>;
   failed: Partial<Record<LegalSectionKey, boolean>>;
 };
 
@@ -80,6 +88,7 @@ export async function readInventoryRows(
     contracts,
     flags,
     briefLegal,
+    projectContacts,
   ] = await Promise.all([
     titled
       ? supabase
@@ -147,6 +156,14 @@ export async function readInventoryRows(
       .eq("deliverable", "brief")
       .in("field_key", [...BRIEF_LEGAL_KEYS])
       .in("status", ["confirmed", "proposed"]),
+    // Read with manage_legal only (RLS): empty for anyone else.
+    supabase
+      .from("legal_project_contacts")
+      .select(
+        "id, contact_id, role, contact:network_contacts!legal_project_contacts_contact_same_org(name)",
+      )
+      .eq("project_id", projectId)
+      .order("created_at"),
   ]);
 
   const byId = new Map(
@@ -167,6 +184,19 @@ export async function readInventoryRows(
 
   return {
     titles: masterIds.flatMap((id) => byId.get(id) ?? []),
+    projectContacts: (projectContacts.data ?? []).flatMap((row) => {
+      const role = FORM_ROLES.find((r) => r === row.role);
+      return row.contact && role
+        ? [
+            {
+              id: row.id,
+              contactId: row.contact_id,
+              name: row.contact.name,
+              role,
+            },
+          ]
+        : [];
+    }),
     performersOf: performersByTitle(performers.data ?? []),
     creditsOf: contributorsByTitle(credits.data ?? []),
     splitsOf: splitsByTitle(splits.data ?? []),

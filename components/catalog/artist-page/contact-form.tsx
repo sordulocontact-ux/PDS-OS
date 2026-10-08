@@ -14,6 +14,7 @@ import {
 } from "@/lib/catalog/contacts";
 import { saveContact } from "@/lib/catalog/profile-actions";
 import { fr } from "@/lib/i18n/fr";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Adds a contact, or edits `contact`. Closes itself once saved. `defaults`
 // pre-fills a new contact (one proposed by PO, reviewed before saving).
@@ -54,6 +55,7 @@ export function ContactForm({
       <OptionSelect
         name="role"
         label={t.form.role}
+        required
         items={t.roles}
         defaultValue={value(
           "role",
@@ -75,7 +77,6 @@ export function ContactForm({
         name="email"
         type="email"
         label={t.form.email}
-        hint={t.form.optional}
         inputMode="email"
         autoComplete="off"
         maxLength={320}
@@ -86,7 +87,6 @@ export function ContactForm({
         name="phone"
         type="tel"
         label={t.form.phone}
-        hint={t.form.optional}
         inputMode="tel"
         autoComplete="off"
         maxLength={40}
@@ -96,10 +96,8 @@ export function ContactForm({
       {/* Already primary: stays so until another contact takes the place. */}
       {!contact?.isPrimary && (
         <label className="flex min-h-11 items-center gap-2.5 text-sm">
-          <input
-            type="checkbox"
+          <Checkbox
             name="isPrimary"
-            className="size-4 accent-selection"
             defaultChecked={values.isPrimary === "on"}
           />
           {t.form.isPrimary}

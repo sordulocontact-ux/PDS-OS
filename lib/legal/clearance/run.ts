@@ -31,6 +31,7 @@ function errorOf(error: { message: string; code?: string; details?: string }) {
   if (m.includes("clearance_usage_required")) return t.usage;
   if (m.includes("clearance_terms_not_allowed")) return t.termsNotAllowed;
   if (m.includes("clearance_closed")) return t.closed;
+  if (m.includes("clearance_contact_invalid")) return t.contactInvalid;
   return t.failed;
 }
 

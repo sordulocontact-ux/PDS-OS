@@ -191,21 +191,23 @@ export function LeversSection({
           }}
         >
           <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <Label htmlFor="lever-label" className={labelClass}>
+            <Label htmlFor="lever-label" required className={labelClass}>
               {t.label}
             </Label>
             <Input
               id="lever-label"
+              aria-required
               value={label}
               onChange={(e) => setLabel(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="lever-family" className={labelClass}>
+            <Label htmlFor="lever-family" required className={labelClass}>
               {t.family}
             </Label>
             <OptionSelect
               id="lever-family"
+              required
               label={t.family}
               options={families}
               value={family}

@@ -147,12 +147,19 @@ tons sémantiques, et seulement six (`--tone-*` dans `globals.css`) :
 ## 3 bis. Sélection
 
 Le **bleu est l'accent unique de sélection** (décision de Sacha, 27/09/2026) : jeton
-`--selection` (#64a2ff), avec `--selection-border` (contour) et `--selection-bg` (fond
+`--selection` (#155dfc depuis le 07/10/2026, Figma « Checkbox base » ; #64a2ff avant), avec `--selection-border` (contour) et `--selection-bg` (fond
 pâle). Classes Tailwind `accent-selection`, `outline-ring`, `border-ring`. Il habille :
 
 - le **focus** clavier, partout (`--focus-ring` = `--selection`, aussi dans la modale) ;
 - un **champ en saisie** (`Input`, `Textarea`, `Select`, saisie de PO) : contour bleu ;
-- une **radio** et une **case cochée** natives (`accent-selection`) ;
+- une **radio** native (`accent-selection`) ;
+- une **case à cocher** : toujours le composant `Checkbox` (`components/ui/checkbox.tsx`),
+  d'après le Figma « Checkbox base » (49:12665) : 16 px (`sm`, rayon 4) ou 20 px (`md`,
+  rayon 6) ; au repos contour `--border-default` sur fond blanc ; survol, focus, cochée ou
+  demi-cochée : contour `--selection` et fond `--selection-bg`, coche ou tiret bleu en trait
+  arrondi ; désactivée : fond `--surface-soft`, coche grise. Jamais d'`<input
+  type="checkbox">` brut ni de case pleine bleue ; la case des menus (`SelectItem
+  indicator="checkbox"`) reprend le même dessin (`CheckboxMark`) ;
 - une **carte de choix** cochée (`ChoiceCards`, tuile ou non) et une option retenue de la
   Stratégie (`optionClass`) : contour `--selection-border`, fond `--selection-bg`.
 
@@ -208,52 +215,71 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 
 ### Coquille
 
-- Fond de l'application `--surface-app` (#fbfbfb). La barre latérale est une carte
-  blanche flottante : marge `--shell-inset` (16 px) avec le bord de l'écran, arrondi
-  16 px, largeur `--nav-width` (250 px) ou `--nav-width-collapsed` (64 px) repliée,
-  marge intérieure 8 px (24 / 16 px jusqu'au 27/09/2026, jugée trop large par Sacha ;
-  même 8 px sur la sidebar de projet), ombre `--nav-shadow` (Figma « Devis
-  Sordulo » nœud 121:179 : flou 3 px, sans décalage, noir 10 %). `components/shell/sidebar.tsx`.
-- En haut, « PDS » en 16 px gras et la cloche (masqués repliée), plus un bouton pour
-  replier / déplier (même taille de bouton que la cloche, icône 20 px comme la
-  navigation) (`components/shell/use-collapsed-nav.tsx`, un contexte React partagé
-  avec la sidebar de projet ci-dessous). Dessous, la navigation (`lib/ui/nav-items.ts`,
-  8 items) : éléments de 40 px espacés de 12 px, icône 20 px, fond `--nav-item-active-bg`
-  sur la page ouverte, `--nav-item-hover-bg` au survol. Repliée : icônes seules, centrées,
-  libellé en `Tooltip` au survol/focus. En bas, la personne connectée et
-  « Se déconnecter » (masqués repliée), au même format qu'un élément de navigation.
+- Fond de l'application `--surface-app`. La barre latérale est **collée au bord de
+  l'écran, pleine hauteur, sans arrondi ni ombre**, un filet `--nav-border` à droite
+  (Figma « PDS OS », nœuds 47:12055 dépliée et 47:12047 repliée, 07/10/2026 ; avant :
+  carte flottante à 16 px du bord, `--shell-inset` vaut désormais 0). Largeur
+  `--nav-width` (218 px) ou `--nav-width-collapsed` (68 px), marge intérieure 8 px.
+  `components/shell/sidebar.tsx`.
+- En haut, « PDS » dans un carré noir de 60 px arrondi 12 px (`--nav-brand-bg`, masqué
+  repliée) et le bouton pour replier / déplier (icône 20 px). Dessous, la navigation
+  (`lib/ui/nav-items.ts`) : éléments de 40 px, icône 20 px, fond `--nav-item-active-bg`
+  sur la page ouverte, `--nav-item-hover-bg` au survol. Repliée : icônes seules,
+  centrées, libellé en `Tooltip`. En bas, sur un filet : l'avatar (initiales) et le nom
+  de la personne connectée, qui ouvrent un menu (nom, email, « Envoyer un retour »,
+  « Se déconnecter » ; `AccountMenu`), et la cloche ronde à droite, point bleu
+  `--nav-unread-dot` s'il y a du non lu. Repliée : la cloche au-dessus de l'avatar
+  (absente du Figma replié, gardée pour ne pas perdre les notifications dans un
+  projet). Le texte reste en `body-md` (16 px) : le Figma est dessiné à 14 px, avant
+  l'agrandissement 8/7 de l'échelle (§ 2).
 - Repliée par défaut sur une page d'un projet lancé, dépliée partout ailleurs ; le
   chevron l'inverse pour la visite en cours seulement, rien n'est mémorisé.
 - Un item sans page encore (Calendrier) reste
   visible, grisé, non cliquable (`disabled` dans `NavItem`), jamais retiré de l'ordre
   du Figma.
 - **Sidebar contextuelle d'un projet lancé** (`components/projects/project-sidebar.tsx`,
-  Figma « Double sidebar ») : 200 px (`--project-nav-width`, 258 px dans le Figma, réduit
-  à la demande de Sacha le 27/09/2026), collée à gauche du contenu, contre la barre
-  principale repliée — même géométrie (`sticky`, même hauteur, ombre `--nav-shadow`) —
-  pour former une seule carte : arrondi seulement à droite tant que la principale est
-  repliée dans ce projet, arrondi des deux côtés si elle est dépliée manuellement.
-  L'ombre reste portée par chaque sidebar (pas de conteneur commun entre deux layouts
-  Next.js différents) : à peine visible entre les deux colonnes en mode fusionné, vu sa
-  douceur (flou seul, 10 %). Titre du projet en haut, puis les sections en groupes
-  titrés (Figma « PDS OS », nœud 1510:3096) : Vue d'ensemble seule, **Processus**
-  (Workflow, Master, Juridique), **Pilotage** (Travail, Équipe, Planning, Budget),
-  **Production** (Calls, Livrables, Activations, Fichiers, Validations, Activité) —
-  Activations, absente du Figma, rangée avec les Livrables. Liste et groupes :
-  `lib/ui/project-sections.ts`. Chaque section a sa page (Workflow = Cadrage +
-  Stratégie + Sortie, entrée par Cadrage ; Master, ouvert par son État du master ; Juridique, ouvert
-  par son État des lieux, listé seulement pour `manage_legal`) ;
+  Figma « PDS OS » nœud 47:12056) : 200 px (`--project-nav-width`), contre la barre
+  principale repliée, même géométrie (`sticky`, pleine hauteur, filet `--nav-border` à
+  droite), **sans arrondi ni marge
+  extérieure** (demande de Sacha, 07/10/2026). En haut, sur un filet, le **sélecteur de
+  projet** (`ProjectSwitcher`) : le titre et un double chevron ouvrent les projets
+  visibles (lus à l'ouverture, ordre de la liste Projets) avec une recherche, comme
+  Vercel ou Supabase ; choisir un projet lancé garde la section ouverte (seulement la
+  section : un call ou une étape du Juridique n'a pas de sens dans l'autre projet), un
+  projet non lancé ouvre sa première page ; « Tous les projets » en pied. Puis les sections en groupes
+  titrés (ticket « Architecture globale », 08/10/2026) : **Vue d'ensemble** puis
+  **Cadrage**, sans titre de groupe, au-dessus de tous les workflows ; **Workflows**
+  (Master, Juridique, Marketing, Distribution, menés en parallèle) ; **Pilotage** (Travail,
+  Équipe, Planning, Budget) ; **Production** (Calls, Livrables, Fichiers, Validations,
+  Activité). Plus rien ne s'appelle « Processus » ni « Workflow ». Liste et groupes :
+  `lib/ui/project-sections.ts`. Chaque section a sa page (Marketing = Stratégie,
+  Conception, Activations, entrée par la Stratégie ; Distribution = la Sortie ; Master,
+  ouvert par son État du master ; Juridique, ouvert par son État des lieux). Sans
+  `manage_legal`, le Juridique reste listé, **grisé avec un cadenas** et sa raison, jamais
+  un lien (sa page répond toujours 404) ; en onglets, il n'a pas d'onglet ;
   en-tête commun `ProjectPageHeader` (h2, une phrase, action à droite).
 - **Étapes d'un processus en chevrons** (`ProcessSteps`, `components/ui/`), sous
-  l'en-tête, au même endroit pour chaque processus : Workflow (7 étapes numérotées,
-  `WorkflowBreadcrumb`) et Juridique (État des lieux · Cadrage juridique · Confirmation ·
-  Plan d'action · Suivi, son parcours interne défini par le DG le 04/10/2026, sans numéro,
-  `LegalSteps`, une URL par étape sous `/legal`) et Master (État du master · Brief
-  Mix/Master · Mix · Mastering · Master final, sans numéro, `SectionSteps`, une URL par
-  étape sous `/master`).
+  l'en-tête, au même endroit pour chaque workflow, sans numéro : Marketing (**Stratégie ·
+  Conception · Production · Activations · Suivi & bilan**, `SectionSteps` +
+  `lib/ui/marketing-steps.ts` ; une organisation, pas une séquence : chaque étape qui a une
+  page s'ouvre seule, sauf la Stratégie avant son lancement ; Production et Suivi & bilan
+  grisés tant qu'ils n'ont pas de page ; Défense, non tranchée, n'est montrée nulle part),
+  Juridique (**État des lieux · Plan d'action**, sans numéro,
+  `LegalSteps` ; le Cadrage et la Confirmation vivent sur l'État des lieux, le Suivi est le
+  Plan d'action lancé ; le chevron devient « Suivi » une fois le plan lancé, et sous les
+  chevrons une ligne « Étape du dossier · … » donne l'une des cinq étapes du DG, un état et
+  jamais un chevron : `legalPhase`), Master (**Préparation · Mixage · Mastering · Master
+  final**, sans numéro, `SectionSteps`, une étape pouvant couvrir une sous-page : le Brief
+  sous Préparation ; les validations du mix et du master vivent dans Mixage et Mastering,
+  jamais une étape à part) et Distribution (**Préparation · En ligne** : la page Sortie en
+  deux, `lib/ui/distribution-steps.ts`). Le
+  Cadrage n'a pas de chevrons : il est au-dessus des workflows (les 7 chevrons du parcours,
+  `WorkflowBreadcrumb`, ont disparu le 08/10/2026). Trois
+  étapes au plus à l'écran pour un workflow spécialisé (simplification du 07/10/2026) : une
+  sous-page ouverte depuis une étape porte un `BackLink` vers elle, jamais une pastille.
   **Deux signaux jamais mélangés** : le fond noir = la page ouverte ; la coche dans le
-  rond = l'étape vraiment validée (états des `project_stages`, jamais la position de
-  la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.
+  rond = l'étape vraiment validée (états réels, `project_stages` pour le Marketing, jamais
+  la position de la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.
 - **Sidebar ou onglets : un seul interrupteur**, `DOUBLE_SIDEBAR` dans
   `lib/ui/project-sections.ts` (liste des sections partagée par les deux). `true` : la
   sidebar contextuelle ci-dessus, la barre principale repliée. `false` : une seule
@@ -264,7 +290,8 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   les onglets : le fil des étapes du Workflow ou rien — les filtres appartiennent à la
   page, une pastille veut toujours dire « filtre », jamais « autre page ».
 - Ce qui attend quelqu'un se compte dans une pastille noire (`CountBadge`), jamais dans
-  un bandeau : notifications non lues sur la cloche, demandes d'accès en attente à droite
+  un bandeau : notifications non lues sur la cloche de l'en-tête mobile (un point bleu
+  sur celle de la barre latérale, Figma), demandes d'accès en attente à droite
   d'« Équipe » (et sur le bouton du menu en mobile).
 - Mobile : même navigation (pleine largeur) dans un tiroir blanc, ouvert depuis l'en-tête ;
   la sidebar contextuelle du projet n'a pas encore d'équivalent mobile.
@@ -332,8 +359,8 @@ d'abord à la Stratégie (`app/(app)/app/projects/[projectId]/strategy`,
   pastilles conviennent à quelques choix visibles d'un coup (format, priorité). Au-delà
   (les 16 rôles d'un contact du Réseau), on utilise `OptionSelect multiple` : un menu
   déroulant où l'on coche sans le fermer, et les choix résumés dans le déclencheur.
-  **Une case à cocher à gauche de chaque choix** (`SelectItem indicator="checkbox"`), bleue
-  `--selection` une fois cochée : on voit tout de suite qu'on peut en choisir plusieurs. Le
+  **Une case à cocher à gauche de chaque choix** (`SelectItem indicator="checkbox"`), dessinée
+  comme `Checkbox` (§ 3 bis) une fois cochée : on voit tout de suite qu'on peut en choisir plusieurs. Le
   menu à choix unique garde la coche à droite.
 - **Pas de cadre dans un cadre** : la page n'est pas enfermée dans une carte, les
   sections sont espacées (48 px) sans trait ; seuls les éléments (réponses, leviers,
@@ -343,6 +370,68 @@ d'abord à la Stratégie (`app/(app)/app/projects/[projectId]/strategy`,
   citation) tient en une ligne `caption`.
 - Actions de la page (proposer, dicter) à droite du titre ; boutons d'une réponse en bas
   à droite, secondaires en `ghost` d'abord, le principal (noir) en dernier.
+
+### Personnes et pré-remplissage
+
+Règles de Sacha (07/10/2026), pour **toute** l'application :
+
+- **Désigner quelqu'un = `PersonPickerField`**, jamais un champ texte libre : un crédit, une
+  part, un créateur ou un éditeur SACEM, un ingénieur, une partie… Les personnes déjà liées
+  à l'objet (crédités du titre, artistes, répartition) en tête, puis le Réseau ; « Ajouter
+  « X » au Réseau » en modale sans quitter le formulaire ; « Garder seulement le nom » en
+  dernier recours. On enregistre l'id (`contact_id`), jamais un lien deviné par le nom. Les
+  comptes de l'app (responsable, assigné, validateur) restent choisis dans la liste des
+  membres : ce ne sont pas des contacts du Réseau.
+  Appliqué le 07/10/2026 : créateurs et éditeurs SACEM, ayants droit d'un accord, lignes
+  d'une répartition, parties d'un contrat, structure parente d'un contact, ingénieurs du
+  Brief Mix/Master et d'une session, personnes externes d'un rôle d'équipe du Cadrage.
+  Quand le lien est obligatoire (partie de contrat, ingénieur du Brief, structure parente),
+  « Garder seulement le nom » est masqué (`allowNameOnly={false}`). Restent en texte, faute
+  de colonne pour l'id : l'ingénieur d'une session (`master_sessions.engineer`, choisi dans
+  le Réseau mais seul le nom est gardé) et le titulaire du ℗ (pré-rempli par le label de la
+  répartition master). Les réponses libres lues par PO (Cadrage juridique, questions du
+  Cadrage) restent du texte.
+- **Tout ce qu'on sait est pré-rempli** : identité, IPI, coordonnées, rôle, montants ou dates
+  déjà connus ailleurs dans l'app arrivent remplis, avec leur source quand le formulaire en
+  affiche une, et restent corrigeables. L'utilisateur ne retape jamais une information que
+  PDS OS détient. Exceptions : ce qu'une règle interdit de déduire (parts Phono, DEP/DR,
+  première exploitation…).
+
+### Champs obligatoires
+
+Décision de Sacha (08/10/2026) : **un champ obligatoire porte un « * » après son libellé,
+un champ facultatif ne porte rien.** On n'écrit jamais « facultatif » (ni dans le libellé,
+ni dans l'aide, ni en note) : c'était du texte en plus sur la moitié des champs, et
+l'astérisque est la convention que tout le monde connaît. Pas de légende « * = obligatoire ».
+
+- Le « * » vient du composant, jamais tapé dans le texte : `RequiredMark`
+  (`components/ui/required-mark.tsx`), en gris secondaire (pas en rouge : le rouge `--error`
+  est réservé aux manques, ci-dessous).
+- `Field` / `TextareaField` l'affichent d'eux-mêmes avec `required`, ou `aria-required`
+  quand la validation native du navigateur ne doit pas s'en mêler ; `Label`,
+  `OptionSelect`, `ChipChoice`, `ChipMultiChoice`, `PeoplePicker`, `SinglePicker`,
+  `ChoiceCards` et `PersonPickerField` prennent une prop `required`.
+- Obligatoire = ce que le serveur refuse vide (schéma zod, action, SQL) ; on ne marque pas un
+  champ que le serveur accepte vide.
+- Lecteurs d'écran : le « * » est masqué, le contrôle porte `required` / `aria-required` ;
+  pour un groupe (pastilles, choix, sélecteur de personne), « (obligatoire) » est dit en
+  texte masqué.
+- L'astérisque annonce avant ; le rouge explique après (« Manques à la validation »).
+  L'aide sous un champ ne sert qu'à ce qui apprend quelque chose (format, conséquence).
+
+### Manques à la validation
+
+Quand on valide un formulaire ou un dossier incomplet, **chaque champ manquant passe en
+rouge** (`aria-invalid`, contour `error`) avec, dessous, **pourquoi** il est attendu
+(`FieldError`, une phrase qui dit quoi faire) ; un `FormMessage` au-dessus du bouton compte
+les manques ; le premier champ en rouge prend le focus. Rien en rouge avant le premier essai.
+Pas de pastille de provenance au-dessus des champs (« Rempli », « Saisi », « À saisir ») :
+elles n'apprenaient rien (Sacha, 07/10/2026) ; seul « À vérifier » reste, sur un champ rouvert.
+Ce rouge est un **vrai rouge**, le token `--error` (`text-error`, `border-error`), propre à la
+saisie : `--destructive` reste à l'encre pour les actions définitives (décision de Sacha,
+07/10/2026 : les manques en encre se lisaient comme du gris).
+Un champ redevient normal dès qu'il est corrigé. Le bouton n'est jamais désactivé pour
+cause de champs manquants.
 
 ### Modale : une seule, « verre »
 
@@ -385,7 +474,7 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 | -------------------------------------------------- | ------------- | ------- |
 | Bouton-icône, élément de navigation, ligne de carte | `rounded-lg`  | 8 px    |
 | Carte de l'accueil, saisie de PO                   | `rounded-2xl` | 12 px   |
-| Barre latérale                                     | `rounded-3xl` | 16 px   |
+| Barres latérales : aucun arrondi (collées au bord) | —             | 0       |
 | Bouton à libellé, suggestion, badge, filtre        | pilule        | 999 px  |
 
 Rien au-delà de 16 px, sauf la pilule. Piège : le `Button` utilise `rounded-full` et

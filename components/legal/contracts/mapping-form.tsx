@@ -12,6 +12,7 @@ import { fr } from "@/lib/i18n/fr";
 import { approveContractMapping } from "@/lib/legal/contracts/actions";
 import { feeCentsOf } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type Choice = { needed: boolean; templateId: string | null; fee: string };
 
@@ -108,9 +109,8 @@ export function MappingForm({
               ) : (
                 <div className="flex flex-col gap-3">
                   <label className="flex w-fit items-center gap-3 rounded-xl border px-3 py-2 has-checked:border-selection has-checked:bg-selection-bg">
-                    <input
-                      type="checkbox"
-                      className="size-4 shrink-0 accent-selection"
+                    <Checkbox
+                      className="shrink-0"
                       checked={c.needed}
                       onChange={(event) =>
                         set(row.key, { needed: event.target.checked })

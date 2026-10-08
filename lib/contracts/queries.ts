@@ -138,22 +138,6 @@ export async function getContract(
   };
 }
 
-/** Live contacts of the network not yet parties of the contract. */
-export async function listPartyCandidates(
-  excluded: string[],
-): Promise<{ id: string; name: string }[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("network_contacts")
-    .select("id, name")
-    .is("archived_at", null)
-    .order("name")
-    .limit(1000);
-  if (error) console.error("listPartyCandidates:", error.message);
-  const taken = new Set(excluded);
-  return (data ?? []).filter((contact) => !taken.has(contact.id));
-}
-
 /**
  * What the contract form offers: its owners (the direction gives a contract
  * to any member following contracts; anyone else follows their own), the

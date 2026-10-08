@@ -49,6 +49,7 @@ const draftSchema = z.object({
 function errorOf(message: string) {
   const t = fr.legalSplits.errors;
   if (message.includes("split_total_not_100")) return t.total;
+  if (message.includes("split_contact_invalid")) return t.contactInvalid;
   if (
     message.includes("split_version_closed") ||
     message.includes("split_version_not_draft")

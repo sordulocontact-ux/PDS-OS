@@ -59,11 +59,13 @@ export function FilterChip({
 export function FilterChipLink({
   href,
   current,
+  variant,
   className,
   children,
 }: {
   href: string;
   current: boolean;
+  variant?: "ink" | "soft";
   className?: string;
   children: React.ReactNode;
 }) {
@@ -71,7 +73,7 @@ export function FilterChipLink({
     <ViewLink
       href={href}
       aria-current={current ? "page" : undefined}
-      className={chipClass(current, className)}
+      className={chipClass(current, className, variant)}
     >
       {children}
     </ViewLink>

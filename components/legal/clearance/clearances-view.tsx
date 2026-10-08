@@ -13,9 +13,12 @@ import { clearanceTone } from "@/lib/ui/state-tones";
 export function ClearancesView({
   projectId,
   clearances,
+  openId = null,
 }: {
   projectId: string;
   clearances: Clearances;
+  // `?emprunt=`: the borrowing a notification points at, opened at once.
+  openId?: string | null;
 }) {
   const t = fr.legalClearance;
   const { items, ...context } = clearances;
@@ -73,6 +76,7 @@ export function ClearancesView({
                     projectId={projectId}
                     clearance={c}
                     context={context}
+                    defaultOpen={c.id === openId}
                   />
                 </div>
               </li>

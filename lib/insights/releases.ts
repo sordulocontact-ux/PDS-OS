@@ -31,6 +31,6 @@ export async function loadReleasesOverview(
     onlineSince: r.online_detected_at,
     platforms: (r.release_links ?? []).filter((l) => l.source !== "manual")
       .length,
-    href: routes.projectRelease(r.project_id),
+    href: routes.projectReleaseOnline(r.project_id),
   }));
 }

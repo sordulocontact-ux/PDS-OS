@@ -10,7 +10,11 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { fr } from "@/lib/i18n/fr";
 
 /** « Nouveau modèle »: the form in the wide modal. */
-export function TemplateFormButton() {
+export function TemplateFormButton({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
   const t = fr.legalContracts.templates;
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -29,6 +33,7 @@ export function TemplateFormButton() {
         size="wide"
       >
         <TemplateForm
+          organizationId={organizationId}
           onCancel={() => setOpen(false)}
           onDone={() => {
             setOpen(false);

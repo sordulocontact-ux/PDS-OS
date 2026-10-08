@@ -9,6 +9,7 @@ import { setTaskDone } from "@/lib/framing/actions/points-tasks";
 import { fr } from "@/lib/i18n/fr";
 import type { WorkItem } from "@/lib/project-work/workload";
 import { workStatusTone } from "@/lib/ui/state-tones";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const t = fr.projectWork.work;
 
@@ -58,10 +59,9 @@ export function WorkRow({
       sub={subOf(item, names)}
       leading={
         canTick ? (
-          <input
-            type="checkbox"
+          <Checkbox
             aria-label={t.markDone(item.title)}
-            className="mt-1.5 size-4 shrink-0 accent-selection"
+            className="mt-1.5 shrink-0"
             checked={item.status === "done"}
             disabled={pending}
             onChange={(e) =>

@@ -87,6 +87,8 @@ export type BriefView = {
   savedBy: string | null;
   // The mix's source of each title (État du master's facts, actions kept).
   sources: MasterFact[];
+  // Every title already has its master final: nothing to mix nor master.
+  allFinal: boolean;
   sourcesFailed: boolean;
   engineers: NetworkEngineer[];
   validators: BriefPerson[];

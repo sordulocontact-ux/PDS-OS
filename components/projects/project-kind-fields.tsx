@@ -72,6 +72,7 @@ export function ProjectKindFields({
         <ChoiceCards
           name="type"
           legend={t.type}
+          required
           variant="tile"
           columns={3}
           value={type}
@@ -99,6 +100,7 @@ export function ProjectKindFields({
         <ChipChoice
           name="musicFormat"
           legend={t.format}
+          required
           options={MUSIC_FORMATS.map((value) => ({
             value,
             label: fr.shell.musicFormats[value],
@@ -112,6 +114,7 @@ export function ProjectKindFields({
           artists={artists}
           defaultSelectedIds={defaults.masterIds}
           label={single ? t.master : t.masters}
+          required
           max={single ? 1 : undefined}
           hint={single ? t.singleHint : undefined}
           error={errors.masterIds}
@@ -124,6 +127,7 @@ export function ProjectKindFields({
         <ChipChoice
           name="contentMode"
           legend={t.format}
+          required
           options={CONTENT_MODES.map((value) => ({
             value,
             label: t.contentModes[value],

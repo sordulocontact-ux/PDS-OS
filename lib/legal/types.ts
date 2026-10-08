@@ -10,6 +10,7 @@ import type {
   SplitKind,
 } from "@/lib/catalog/master/rules";
 import type { CreditContactAction } from "@/lib/facts/credit-contact";
+import type { FormRole } from "@/lib/legal/forms/definition";
 import {
   FACT_STATUSES,
   type Fact,
@@ -100,4 +101,11 @@ export type LegalInventory = {
   // others.
   declared: Record<string, Organism[]>;
   counts: Record<LegalFactStatus, number>;
+  // People of the Réseau in the file without a credit (lot 6).
+  projectContacts: Array<{
+    id: string;
+    contactId: string;
+    name: string;
+    role: FormRole;
+  }>;
 };

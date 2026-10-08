@@ -4,7 +4,15 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 // One form field: label above, input, hint or error below. `suffix`: a
-// short unit laid at the end of the input ("€").
+// short unit laid at the end of the input ("€"). The « * » follows `required`,
+// or `aria-required` when the form checks it itself (no native validation).
+export function isRequired(props: {
+  required?: boolean;
+  "aria-required"?: boolean | "true" | "false";
+}): boolean {
+  return Boolean(props.required) || String(props["aria-required"]) === "true";
+}
+
 export function Field({
   name,
   label,
@@ -24,7 +32,9 @@ export function Field({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} required={isRequired(inputProps)}>
+        {label}
+      </Label>
       <div className="relative">
         <Input
           // Base UI refuses a default value changed after mount (it warns): a

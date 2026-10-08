@@ -4,6 +4,7 @@ import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "cn"
 import { IconCheck, IconChevronDown, IconChevronUp } from "nucleo-sharp-essential";
+import { CheckboxMark } from "@/components/ui/checkbox";
 
 const Select = SelectPrimitive.Root
 
@@ -40,7 +41,7 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "flex w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-error aria-invalid:ring-3 aria-invalid:ring-error/20 data-placeholder:text-muted-foreground data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 dark:aria-invalid:border-error/50 dark:aria-invalid:ring-error/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
@@ -108,8 +109,8 @@ function SelectLabel({
 }
 
 // indicator "check" (default): a tick on the right of the chosen item.
-// "checkbox": a box on the left of every item, filled in the selection blue
-// once ticked — tells at a glance that several can be chosen (multiple).
+// "checkbox": a box on the left of every item, drawn like Checkbox (blue
+// outline, pale fill, blue tick) once ticked — tells at a glance that several can be chosen (multiple).
 function SelectItem({
   className,
   children,
@@ -131,9 +132,12 @@ function SelectItem({
         // own (the list carries aria-multiselectable, the option aria-selected).
         <span
           aria-hidden
-          className="flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-[color:var(--border-strong)] group-data-selected/item:border-selection group-data-selected/item:bg-selection"
+          className="flex size-4 shrink-0 items-center justify-center rounded-sm border border-[color:var(--border-default)] bg-[var(--control-bg)] group-data-selected/item:border-selection group-data-selected/item:bg-selection-bg"
         >
-          <IconCheck className="size-3 text-[color:var(--po-white)] opacity-0 group-data-selected/item:opacity-100" />
+          <CheckboxMark
+            kind="check"
+            className="size-3 text-selection opacity-0 group-data-selected/item:opacity-100"
+          />
         </span>
       )}
       <SelectPrimitive.ItemText className="flex flex-1 shrink-0 gap-2 whitespace-nowrap">

@@ -15,7 +15,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fileViewOf } from "@/lib/catalog/file-rules";
 import { listCatalogFiles } from "@/lib/catalog/files";
-import { getContract, listPartyCandidates } from "@/lib/contracts/queries";
+import { getContract } from "@/lib/contracts/queries";
 import { todayInParis } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { getContractDocument } from "@/lib/legal/contracts/document";
@@ -40,10 +40,7 @@ export default async function ContractPage({
   if (!contract) notFound();
 
   const owner = { kind: "contract" as const, id: contract.id };
-  const [candidates, library, document] = await Promise.all([
-    contract.can.edit
-      ? listPartyCandidates(contract.partyList.map((p) => p.contactId))
-      : [],
+  const [library, document] = await Promise.all([
     listCatalogFiles(owner),
     getContractDocument(contract.id),
   ]);
@@ -96,7 +93,6 @@ export default async function ContractPage({
           <ContractParties
             contractId={contract.id}
             parties={contract.partyList}
-            candidates={candidates}
             canEdit={contract.can.edit}
           />
         </div>

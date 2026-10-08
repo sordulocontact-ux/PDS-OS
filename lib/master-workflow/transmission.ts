@@ -1,9 +1,12 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
-import { audioStateOf, byAudioProgress } from "@/lib/catalog/title-rules";
+import { audioStateOf } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
-import type { FlowAudio } from "@/lib/master-workflow/audio-source";
+import {
+  hasMasterFinal,
+  type FlowAudio,
+} from "@/lib/master-workflow/audio-source";
 import { BRIEF_COLUMNS, briefFromRow } from "@/lib/master-workflow/brief-row";
 import type { MasterBrief } from "@/lib/master-workflow/brief-types";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
@@ -34,6 +37,8 @@ export type StepView = {
   brief: MasterBrief | null;
   engineer: { id: string; name: string; email: string | null } | null;
   titles: PlannedTitle[];
+  // Titles left out because they already have their master final.
+  finished: number;
   // What prevents the sending, worded; empty when it can go.
   blockers: string[];
   history: TransmissionRow[];
@@ -116,8 +121,7 @@ export async function loadStepView(
   // A title already at its master final needs no mix: it is not sent.
   const titles: PlannedTitle[] = rows.titles.flatMap((title) => {
     const audio = rows.audioOf.get(title.id) ?? [];
-    const [latest] = byAudioProgress(audio);
-    if (latest?.audioState === "final_master") return [];
+    if (hasMasterFinal(audio)) return [];
     const sourceId = rows.sourceOf.get(title.id)?.fileId;
     return [
       {
@@ -153,6 +157,7 @@ export async function loadStepView(
       ? { id: contact.id, name: contact.name, email: contact.email }
       : null,
     titles,
+    finished: rows.titles.length - titles.length,
     blockers,
     history: (history.data ?? []).map((row) => ({
       id: row.id,

@@ -1,9 +1,10 @@
 "use client";
 
 import { Field } from "@/components/auth/field";
-import { TextareaField } from "@/components/auth/textarea-field";
+import { FieldError } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { fr } from "@/lib/i18n/fr";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type Arrangement = { scope: string; detail: string };
 type Contract = { provided: boolean; rubric_g: string };
@@ -13,14 +14,18 @@ type Contract = { provided: boolean; rubric_g: string };
 export function ArrangementField({
   id,
   label,
+  required = false,
   disabled,
   value,
+  error,
   onChange,
 }: {
   id: string;
   label: string;
+  required?: boolean;
   disabled: boolean;
   value: Arrangement;
+  error?: string;
   onChange: (next: Arrangement) => void;
 }) {
   const t = fr.legalFormalities;
@@ -29,11 +34,13 @@ export function ArrangementField({
       <OptionSelect
         name={`${id}-arrangement`}
         label={label}
+        required={required}
         items={{
           all: t.arrangementScopes.all,
           specific: t.arrangementScopes.specific,
         }}
         defaultValue={value.scope || null}
+        error={error}
         onValueChange={(scope) => onChange({ ...value, scope })}
       />
       {value.scope === "specific" && (
@@ -53,35 +60,41 @@ export function ArrangementField({
  * sans copie, renseigner la rubrique G ». */
 export function ContractField({
   id,
+  required = false,
   disabled,
   value,
+  error,
   onChange,
 }: {
   id: string;
+  required?: boolean;
   disabled: boolean;
   value: Contract;
+  error?: string;
   onChange: (next: Contract) => void;
 }) {
   const t = fr.legalFormalities.contract;
   return (
     <div className="flex flex-col gap-2">
       <label className="flex items-center gap-2 font-medium">
-        <input
-          type="checkbox"
-          className="size-4 accent-selection"
+        <Checkbox
           disabled={disabled}
           checked={value.provided}
           onChange={(e) => onChange({ ...value, provided: e.target.checked })}
         />
         {t.provided}
       </label>
+      <FieldError id={`${id}-contract-error`}>{error}</FieldError>
       {!value.provided && (
-        <TextareaField
+        <Field
+          type="date"
           name={`${id}-rubric-g`}
           label={t.rubricG}
-          rows={2}
+          aria-required={required || undefined}
+          hint={t.rubricGHint}
           disabled={disabled}
           value={value.rubric_g}
+          aria-invalid={error ? true : undefined}
           onChange={(e) => onChange({ ...value, rubric_g: e.target.value })}
         />
       )}

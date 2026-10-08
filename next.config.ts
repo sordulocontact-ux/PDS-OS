@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     "/api/projects/[projectId]/framing-brief": [
       "./node_modules/@sparticuz/chromium/bin/**",
     ],
+    // The official SACEM 725 bulletin the formality fills, read at run time.
+    "/api/legal/formalities/[formalityId]/document": [
+      "./lib/legal/formalities/assets/**",
+    ],
   },
   experimental: {
     // Client cache of rendered pages (docs/ARCHITECTURE.md § 3 bis). A page

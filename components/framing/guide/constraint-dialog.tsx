@@ -107,9 +107,12 @@ function ConstraintForm({
     >
       {scope === "budget" && (
         <div className="grid gap-1.5">
-          <Label htmlFor="constraint-type">{t.type}</Label>
+          <Label htmlFor="constraint-type" required>
+            {t.type}
+          </Label>
           <OptionSelect
             id="constraint-type"
+            required
             label={t.type}
             options={budgetTypes}
             value={type}
@@ -118,7 +121,9 @@ function ConstraintForm({
         </div>
       )}
       <div className="grid gap-1.5">
-        <Label htmlFor="constraint-text">{t.text}</Label>
+        <Label htmlFor="constraint-text" required>
+          {t.text}
+        </Label>
         <Textarea
           id="constraint-text"
           value={text}

@@ -1,5 +1,6 @@
 import type { ChangeEvent, ReactNode } from "react";
 
+import { RequiredMark } from "@/components/ui/required-mark";
 import { cn } from "@/lib/utils";
 
 export type Choice<V extends string> = {
@@ -26,6 +27,7 @@ export function ChoiceCards<V extends string>({
   choices,
   legend,
   hideLegend,
+  required = false,
   hint,
   disabled,
   defaultValue,
@@ -38,6 +40,8 @@ export function ChoiceCards<V extends string>({
   choices: Choice<V>[];
   legend: string;
   hideLegend?: boolean;
+  // Shows the « * » after the legend (docs/DESIGN.md § 4).
+  required?: boolean;
   hint?: string;
   disabled?: boolean;
   defaultValue?: V;
@@ -59,6 +63,7 @@ export function ChoiceCards<V extends string>({
     >
       <legend className={hideLegend ? "sr-only" : "mb-1 text-sm font-medium"}>
         {legend}
+        {required && <RequiredMark announce />}
       </legend>
       {hint && (
         <p className="col-span-full text-sm text-muted-foreground">{hint}</p>

@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { TableCell, TableHead } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Rows ticked in a list (DataTable). Each row's checkbox registers the row
 // while it is shown: the selection only ever holds rows on screen, so a row
@@ -79,14 +80,10 @@ export function useRowSelection(): RowSelectionValue {
 
 // A 36 px target around a 16 px native box, above the row's stretched link
 // (DataTableLink).
-function Checkbox(props: React.ComponentProps<"input">) {
+function RowCheckbox(props: React.ComponentProps<typeof Checkbox>) {
   return (
     <label className="relative z-10 -ml-2.5 flex size-9 cursor-pointer items-center justify-center">
-      <input
-        type="checkbox"
-        className="size-4 cursor-pointer accent-selection"
-        {...props}
-      />
+      <Checkbox {...props} />
     </label>
   );
 }
@@ -103,7 +100,7 @@ export function SelectAllHead({ label }: { label: string }) {
 
   return (
     <TableHead className="h-auto w-10 px-0 pb-0 align-middle">
-      <Checkbox
+      <RowCheckbox
         ref={ref}
         aria-label={label}
         checked={all}
@@ -128,7 +125,7 @@ export function SelectRowCell({
 
   return (
     <TableCell className="w-10 px-0 py-0.5 align-middle">
-      <Checkbox
+      <RowCheckbox
         aria-label={label}
         checked={isSelected(id)}
         onChange={(event) => toggle(id, event.target.checked)}

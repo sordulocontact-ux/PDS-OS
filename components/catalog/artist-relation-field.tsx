@@ -20,6 +20,7 @@ export function ArtistRelationField({
       <ChoiceCards
         name="relation"
         legend={t.legend}
+        required
         hint={hint}
         defaultValue={defaultValue ?? undefined}
         choices={ARTIST_RELATIONS.map((relation) => ({

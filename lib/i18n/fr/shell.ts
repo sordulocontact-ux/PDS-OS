@@ -2,6 +2,11 @@
 export const shell = {
   // Read after a validated step of a process (ProcessSteps), by screen readers.
   processSteps: { done: "validée" },
+  // The chevron of a collapsible PageSection, read with the section's title.
+  section: {
+    collapse: (title: string) => `Replier « ${title} »`,
+    expand: (title: string) => `Déplier « ${title} »`,
+  },
   brand: "PDS",
   nav: {
     label: "Navigation principale",
@@ -28,6 +33,12 @@ export const shell = {
     collapse: "Réduire la navigation",
     expand: "Développer la navigation",
     comingSoon: "Bientôt disponible",
+  },
+
+  // Bottom of the sidebar: who is signed in, in a menu (Figma "PDS OS", 47:12055).
+  account: {
+    fallbackName: "Compte",
+    open: (name: string) => `Compte de ${name}`,
   },
 
   home: {
@@ -102,7 +113,6 @@ export const shell = {
       },
       contentFormat: "Format PDS",
       artist: "Artiste",
-      optional: "facultatif",
       master: "Master",
       masters: "Masters",
       singleHint: "Un seul master pour un single.",
@@ -216,22 +226,34 @@ export const shell = {
       hint: "Ils voient le projet et tout ce qu'il contient, sans le modifier.",
     },
     back: "Tous les projets",
-    // Sidebar contextuelle du projet (Figma "Devis Sordulo", node 120:74).
-    // Seuls overview et workflow (Cadrage + Stratégie + Sortie) et calls ont
-    // une page ; le reste est affiché mais désactivé (docs/DESIGN.md § 4).
+    // Sidebar contextuelle du projet (ticket « Architecture globale »,
+    // 08/10/2026) : Vue d'ensemble et Cadrage, puis les workflows en
+    // parallèle, puis le pilotage (docs/DESIGN.md § 4).
     sidebar: {
       label: "Sections du projet",
+      // Project switcher at the top of the sidebar (Figma "PDS OS", 47:12056).
+      switcher: {
+        open: (title: string) => `${title} — changer de projet`,
+        search: "Rechercher un projet",
+        placeholder: "Rechercher…",
+        noResult: (query: string) => `Aucun projet pour « ${query} »`,
+        loading: "Chargement des projets…",
+        error: "Les projets n'ont pas pu être chargés.",
+        all: "Tous les projets",
+      },
       groups: {
-        process: "Processus",
+        workflows: "Workflows",
         steering: "Pilotage",
         production: "Production",
       },
       overview: "Vue d'ensemble",
-      workflow: "Workflow",
-      plan: "Plan du projet",
+      framing: "Cadrage",
       master: "Master",
       legal: "Juridique",
-      activations: "Activations",
+      marketing: "Marketing",
+      distribution: "Distribution",
+      // Why a listed section is closed to this viewer.
+      restricted: "Réservé à la direction et aux chefs de projet",
       work: "Travail",
       calls: "Calls",
       team: "Équipe",
@@ -242,10 +264,6 @@ export const shell = {
       validations: "Validations",
       activity: "Activité",
     },
-    // Les 7 étapes du métier (docs/CONTEXTE-PROJET.md § 4) : habillage de
-    // navigation fixe dans l'onglet Workflow, tant que le nombre d'étapes
-    // n'est pas tranché avec le client (§ 10, point 3). Ne pas confondre
-    // avec `stages` (ProjectStage), qui reste la source d'état réelle.
     legalSteps: {
       label: "Étapes juridiques",
       soon: "Bientôt disponible",
@@ -254,30 +272,43 @@ export const shell = {
       confirmation: "Confirmation",
       plan: "Plan d'action",
       tracking: "Suivi",
-      // The branches' pages, opened at any time beside the path.
-      branchesLabel: "Dossiers juridiques",
+      planLocked: "Disponible une fois le dossier confirmé",
+      // Under the chevrons: the DG's five steps, as the dossier's state.
+      phase: "Étape du dossier",
+      // Back from a branch's page (opened by an action of the plan).
+      backToPlan: "Plan d'action",
+      // The branches' pages, each opened from an action of the plan.
       branches: {
         forms: "Fiches de renseignements",
         contracts: "Contrats",
         splits: "Répartitions",
-        clearances: "Accords",
+        // « Accords » named both the clearances and the contracts (ticket
+        // Juridique 01 calls the contracts « Accords »): the clearance of an
+        // element taken from another work is an « Emprunt » on screen.
+        clearances: "Emprunts",
         formalities: "SACEM",
       },
     },
-    workflowSteps: {
-      label: "Étapes du parcours",
-      // Why a step with a page cannot be opened yet.
-      locked: {
-        strategy: "Se lance depuis le Plan du Projet, une fois le Brief validé",
-        conception: "Disponible une fois la Stratégie validée",
-      } as Record<string, string>,
-      framing: "Cadrage",
+    // Le workflow Marketing (ticket « Architecture globale », § 4) : une
+    // organisation, pas une séquence ; chaque étape s'ouvre dès que sa page
+    // existe et que ses prérequis réels sont là (lib/ui/marketing-steps.ts).
+    // La Distribution (ticket « Architecture globale ») : la page Sortie en
+    // deux étapes, sans nouvelle capacité (lib/ui/distribution-steps.ts).
+    distributionSteps: {
+      label: "Étapes de la Distribution",
+      prepare: "Préparation",
+      online: "En ligne",
+    },
+    marketingSteps: {
+      label: "Étapes du Marketing",
       strategy: "Stratégie",
       conception: "Conception",
       production: "Production",
-      delivery: "Livraison",
-      defense: "Défense",
-      wrap: "Bilan",
+      activations: "Activations",
+      review: "Suivi & bilan",
+      soon: "Pas encore de page",
+      strategyLocked:
+        "Se lance depuis le Plan du Projet, une fois le Brief validé",
     },
     notFoundTitle: "Projet introuvable",
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",

@@ -3,6 +3,7 @@ import { AddContributorButton } from "@/components/legal/add-contributor-button"
 import { DeclareButton } from "@/components/legal/declare-button";
 import { FactAction } from "@/components/legal/fact-action";
 import { LegalTitlesTable } from "@/components/legal/legal-titles-table";
+import { ProjectContactsSection } from "@/components/legal/project-contacts-section";
 import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -27,8 +28,12 @@ import type {
 export function LegalInventory({
   inventory: all,
   state,
+  lead,
 }: {
   inventory: Inventory;
+  // Shown between the header and the tiles (the État des lieux puts the
+  // Cadrage's question and the Confirmation there).
+  lead?: React.ReactNode;
   // `?state=`: the tile clicked, only its facts shown (lib/facts/views.ts,
   // as on the État du master). The counts stay those of the whole dossier.
   state: FactStatus | null;
@@ -48,7 +53,11 @@ export function LegalInventory({
     : all;
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader title={t.title} description={t.description} />
+      <ProjectPageHeader
+        title={t.title}
+        description={lead ? t.dossierDescription : t.description}
+      />
+      {lead}
 
       <StatTiles
         columns={3}
@@ -75,6 +84,13 @@ export function LegalInventory({
           <SectionBody section={section} inventory={inventory} />
         </PageSection>
       ))}
+      {/* Not a fact of the dossier: hidden while a tile filters it. */}
+      {!state && (
+        <ProjectContactsSection
+          projectId={all.projectId}
+          contacts={all.projectContacts}
+        />
+      )}
     </div>
   );
 }

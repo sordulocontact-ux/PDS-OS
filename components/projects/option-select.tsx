@@ -22,6 +22,8 @@ type CommonProps = {
   hint?: string;
   error?: string;
   hideLabel?: boolean;
+  // Shows the « * » after the label (docs/DESIGN.md § 4).
+  required?: boolean;
 };
 
 type SingleProps = CommonProps & {
@@ -43,19 +45,32 @@ type MultipleProps = CommonProps & {
 // Labelled select submitting its value under `name`: one choice, or several
 // with `multiple` (the menu stays open while ticking, the trigger lists them).
 export function OptionSelect(props: SingleProps | MultipleProps) {
-  const { id: idProp, name, label, hint, error, hideLabel = false } = props;
+  const {
+    id: idProp,
+    name,
+    label,
+    hint,
+    error,
+    hideLabel = false,
+    required = false,
+  } = props;
   const id = idProp ?? `${name}-select`;
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   const trigger = {
     id,
     "aria-invalid": error ? true : undefined,
     "aria-describedby": describedBy,
+    "aria-required": required || undefined,
     className: "w-full text-base data-[size=default]:h-10 md:text-sm",
   } as const;
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id} className={hideLabel ? "sr-only" : undefined}>
+      <Label
+        htmlFor={id}
+        required={required}
+        className={hideLabel ? "sr-only" : undefined}
+      >
         {label}
       </Label>
       {props.multiple ? (

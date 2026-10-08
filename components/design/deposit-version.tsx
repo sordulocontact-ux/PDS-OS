@@ -133,7 +133,9 @@ function DepositForm({
 
       {kind === "file" ? (
         <div className="grid gap-2">
-          <Label htmlFor="design-file">{t.fileLabel}</Label>
+          <Label htmlFor="design-file" required>
+            {t.fileLabel}
+          </Label>
           <div className="flex flex-wrap items-center gap-3">
             <Button
               type="button"
@@ -151,6 +153,7 @@ function DepositForm({
             ref={fileInput}
             id="design-file"
             type="file"
+            aria-required="true"
             className="sr-only"
             onChange={(event) => setFile(event.target.files?.[0] ?? null)}
           />
@@ -158,10 +161,13 @@ function DepositForm({
         </div>
       ) : (
         <div className="grid gap-2">
-          <Label htmlFor="design-url">{t.urlLabel}</Label>
+          <Label htmlFor="design-url" required>
+            {t.urlLabel}
+          </Label>
           <Input
             id="design-url"
             type="url"
+            aria-required="true"
             inputMode="url"
             autoComplete="off"
             placeholder={t.urlPlaceholder}

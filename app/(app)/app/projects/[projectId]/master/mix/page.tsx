@@ -1,4 +1,7 @@
-import { MixPage } from "@/components/master-workflow/mix-page";
+import {
+  ProductionPage,
+  mixRoundDone,
+} from "@/components/master-workflow/production-page";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadMixVersions } from "@/lib/master-workflow/mix-versions";
@@ -7,12 +10,12 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
-  title: `${fr.masterWorkflow.mix.title} · ${fr.app.name}`,
+  title: `${fr.masterWorkflow.production.mix.title} · ${fr.app.name}`,
 };
 
-// Master, Mix step: the package sent to the mix engineer and its follow-up.
-// Read by whoever sees the project, sent by its owner
-// (create_master_transmission).
+// Master, Mixage: the package sent to the mixer and its follow-up, then the
+// versions and their decisions (the mix validation lives here). Read by
+// whoever sees the project, sent by its owner (create_master_transmission).
 export default async function ProjectMasterMixPage({
   params,
 }: PageProps<"/app/projects/[projectId]/master/mix">) {
@@ -22,9 +25,16 @@ export default async function ProjectMasterMixPage({
     requireLaunchedProject(projectId),
   ]);
 
-  const [view, versions] = await Promise.all([
+  const [view, versions, masteringView] = await Promise.all([
     loadStepView(project, access, "mix"),
     loadMixVersions(project, access.personId, "mix"),
+    loadStepView(project, access, "mastering"),
   ]);
-  return <MixPage view={view} versions={versions} />;
+  return (
+    <ProductionPage
+      stage="mix"
+      round={{ view, versions }}
+      done={mixRoundDone(masteringView)}
+    />
+  );
 }

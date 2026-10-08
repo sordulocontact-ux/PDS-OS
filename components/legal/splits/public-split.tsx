@@ -83,6 +83,7 @@ export function PublicSplit({ token, split }: { token: string; split: Open }) {
         <TextareaField
           name="comment"
           label={t.disputeLabel}
+          aria-required
           rows={3}
           maxLength={2000}
           value={comment}

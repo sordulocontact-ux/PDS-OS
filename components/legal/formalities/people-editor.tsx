@@ -1,22 +1,28 @@
 "use client";
 
-import { IconPlus, IconXmark } from "nucleo-sharp-essential";
+import { IconPlus } from "nucleo-sharp-essential";
+import { useRef, useState } from "react";
 
-import { Field } from "@/components/auth/field";
-import { OptionSelect } from "@/components/projects/option-select";
+import { FieldError } from "@/components/auth/form-message";
+import { usePickerLoad } from "@/components/network/use-picker-load";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
+import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
+import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
 import {
-  QUALITIES,
-  type Creator,
-  type Publisher,
-} from "@/lib/legal/formalities/definition";
+  listSacemCreators,
+  listSacemPublishers,
+} from "@/lib/legal/formalities/party-actions";
 import {
   FULL,
   formatShare,
   totalUnits,
   unitsOf,
 } from "@/lib/legal/splits/shares";
+import { cn } from "@/lib/utils";
+
+import { CreatorCard } from "./creator-card";
+import { PublisherRow } from "./publisher-row";
 
 const blankCreator: Creator = {
   last_name: "",
@@ -29,22 +35,45 @@ const blankCreator: Creator = {
 };
 const blankPublisher: Publisher = { name: "", ipi: "", phono: "" };
 
-/** Creators 1 to 5 and publishers 1 to 3, each with an exact Phono share;
- * the total of both groups is shown, and must be exactly 100 %. */
+// Stable keys for rows that can be removed from the middle: each row keeps
+// its picker (and what it loaded) when an earlier one goes.
+function useRowIds(count: number) {
+  const next = useRef(count);
+  const [ids, setIds] = useState(() =>
+    Array.from({ length: count }, (_, i) => String(i)),
+  );
+  return {
+    ids,
+    add: () => setIds((all) => [...all, String(next.current++)]),
+    remove: (i: number) => setIds((all) => all.filter((_, j) => j !== i)),
+  };
+}
+
+/** Creators 1 to 5 and publishers 1 to 3, each picked in the Réseau with an
+ * exact Phono share; the total of both groups is shown, and must be exactly
+ * 100 %. */
 export function PeopleEditor({
+  masterId,
   creators,
   publishers,
   disabled,
+  errors,
   onCreators,
   onPublishers,
 }: {
+  masterId: string;
   creators: Creator[];
   publishers: Publisher[];
   disabled: boolean;
+  errors: DossierErrors | null;
   onCreators: (next: Creator[]) => void;
   onPublishers: (next: Publisher[]) => void;
 }) {
   const t = fr.legalFormalities;
+  const creatorRows = useRowIds(creators.length);
+  const publisherRows = useRowIds(publishers.length);
+  const loadCreators = usePickerLoad(() => listSacemCreators(masterId));
+  const loadPublishers = usePickerLoad(() => listSacemPublishers(masterId));
   const total = totalUnits(
     [...creators, ...publishers].map((p) =>
       unitsOf(p.phono.replace(",", ".") || "0"),
@@ -58,125 +87,37 @@ export function PeopleEditor({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">{t.notes.creators}</p>
+      <FieldError id={`creators-${masterId}-error`}>
+        {errors?.fields.creators}
+      </FieldError>
       {creators.map((c, i) => (
-        <div
-          key={i}
-          className="grid gap-2 rounded-xl border p-3 sm:grid-cols-3"
-        >
-          <Field
-            name={`c-last-${i}`}
-            label={t.creator.lastName}
-            value={c.last_name}
-            disabled={disabled}
-            onChange={(e) => setCreator(i, { last_name: e.target.value })}
-          />
-          <Field
-            name={`c-first-${i}`}
-            label={t.creator.firstName}
-            value={c.first_name}
-            disabled={disabled}
-            onChange={(e) => setCreator(i, { first_name: e.target.value })}
-          />
-          <Field
-            name={`c-pseudo-${i}`}
-            label={t.creator.pseudonym}
-            value={c.pseudonym}
-            disabled={disabled}
-            onChange={(e) => setCreator(i, { pseudonym: e.target.value })}
-          />
-          <Field
-            name={`c-ipi-${i}`}
-            label={t.creator.ipi}
-            value={c.ipi}
-            disabled={disabled}
-            onChange={(e) => setCreator(i, { ipi: e.target.value })}
-          />
-          <OptionSelect
-            name={`c-quality-${i}`}
-            label={t.creator.quality}
-            items={Object.fromEntries(
-              QUALITIES.map((q) => [q, t.qualities[q]]),
-            )}
-            defaultValue={c.quality || null}
-            onValueChange={(v) =>
-              setCreator(i, { quality: v as Creator["quality"] })
-            }
-          />
-          <Field
-            name={`c-phono-${i}`}
-            label={t.creator.phono}
-            inputMode="decimal"
-            suffix="%"
-            value={c.phono.replace(".", ",")}
-            disabled={disabled}
-            onChange={(e) =>
-              setCreator(i, { phono: e.target.value.replace(",", ".") })
-            }
-          />
-          <label className="flex items-center gap-2 text-sm sm:col-span-2">
-            <input
-              type="checkbox"
-              className="size-4 accent-selection"
-              checked={c.signs}
-              disabled={disabled}
-              onChange={(e) => setCreator(i, { signs: e.target.checked })}
-            />
-            {t.creator.signs}
-          </label>
-          {!disabled && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="justify-self-end"
-              onClick={() => onCreators(creators.filter((_, j) => j !== i))}
-            >
-              <IconXmark aria-hidden />
-              {t.creator.remove}
-            </Button>
-          )}
-        </div>
+        <CreatorCard
+          key={creatorRows.ids[i] ?? i}
+          rowId={`${masterId}-${creatorRows.ids[i] ?? i}`}
+          creator={c}
+          load={loadCreators}
+          disabled={disabled}
+          errors={errors?.creators[i]}
+          onChange={(change) => setCreator(i, change)}
+          onRemove={() => {
+            creatorRows.remove(i);
+            onCreators(creators.filter((_, j) => j !== i));
+          }}
+        />
       ))}
       {publishers.map((p, i) => (
-        <div
-          key={`p${i}`}
-          className="grid gap-2 rounded-xl border p-3 sm:grid-cols-[minmax(0,1fr)_10rem_8rem_auto] sm:items-end"
-        >
-          <Field
-            name={`p-name-${i}`}
-            label={t.publisher.name}
-            value={p.name}
-            disabled={disabled}
-            onChange={(e) => setPublisher(i, { name: e.target.value })}
-          />
-          <Field
-            name={`p-ipi-${i}`}
-            label={t.publisher.ipi}
-            value={p.ipi}
-            disabled={disabled}
-            onChange={(e) => setPublisher(i, { ipi: e.target.value })}
-          />
-          <Field
-            name={`p-phono-${i}`}
-            label={t.publisher.phono}
-            inputMode="decimal"
-            suffix="%"
-            value={p.phono.replace(".", ",")}
-            disabled={disabled}
-            onChange={(e) =>
-              setPublisher(i, { phono: e.target.value.replace(",", ".") })
-            }
-          />
-          {!disabled && (
-            <Button
-              size="icon"
-              variant="ghost"
-              aria-label={t.creator.remove}
-              onClick={() => onPublishers(publishers.filter((_, j) => j !== i))}
-            >
-              <IconXmark aria-hidden />
-            </Button>
-          )}
-        </div>
+        <PublisherRow
+          key={publisherRows.ids[i] ?? i}
+          rowId={`${masterId}-${publisherRows.ids[i] ?? i}`}
+          publisher={p}
+          load={loadPublishers}
+          disabled={disabled}
+          onChange={(change) => setPublisher(i, change)}
+          onRemove={() => {
+            publisherRows.remove(i);
+            onPublishers(publishers.filter((_, j) => j !== i));
+          }}
+        />
       ))}
       <div className="flex flex-wrap items-center justify-between gap-2">
         {!disabled && (
@@ -185,7 +126,10 @@ export function PeopleEditor({
               size="sm"
               variant="outline"
               disabled={creators.length >= 5}
-              onClick={() => onCreators([...creators, blankCreator])}
+              onClick={() => {
+                creatorRows.add();
+                onCreators([...creators, blankCreator]);
+              }}
             >
               <IconPlus aria-hidden />
               {t.creator.add}
@@ -194,22 +138,32 @@ export function PeopleEditor({
               size="sm"
               variant="outline"
               disabled={publishers.length >= 3}
-              onClick={() => onPublishers([...publishers, blankPublisher])}
+              onClick={() => {
+                publisherRows.add();
+                onPublishers([...publishers, blankPublisher]);
+              }}
             >
               <IconPlus aria-hidden />
               {t.publisher.add}
             </Button>
           </div>
         )}
-        <span
-          className={
-            total === FULL
-              ? "font-medium"
-              : "font-medium text-[color:var(--tone-warning-fg)]"
-          }
-        >
-          {t.creator.phono} : {formatShare(total)}
-        </span>
+        <div className="flex flex-col items-end gap-1">
+          <span
+            className={cn(
+              "font-medium",
+              total !== FULL &&
+                (errors?.phono
+                  ? "text-error"
+                  : "text-[color:var(--tone-warning-fg)]"),
+            )}
+          >
+            {t.creator.phono} : {formatShare(total)}
+          </span>
+          <FieldError id={`phono-${masterId}-error`}>
+            {errors?.phono}
+          </FieldError>
+        </div>
       </div>
     </div>
   );

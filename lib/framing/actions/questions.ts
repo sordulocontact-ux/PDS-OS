@@ -7,6 +7,11 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { assessFraming, findQuestion } from "@/lib/framing/assess";
 import {
+  confirmLines,
+  confirmedRow,
+  type BriefRow,
+} from "@/lib/framing/confirm";
+import {
   QUESTIONS,
   isQuestionKey,
   type QuestionKey,
@@ -27,20 +32,10 @@ import { createClient } from "@/lib/supabase/server";
 
 const projectId_ = z.uuid();
 
-type Row = {
-  value: unknown;
-  status: "confirmed" | "proposed" | "rejected";
-  source_type: "manual" | "call" | "import" | "voice";
-  source_report_item_id?: string | null;
-  source_quote?: string | null;
-  source_start_seconds?: number | null;
-  source_label?: string | null;
-};
-
 async function appendRow(
   projectId: string,
   key: string,
-  row: Row,
+  row: BriefRow,
 ): Promise<ActionResult> {
   const access = await requireApproved();
   if (!access.organizationId || !projectId_.safeParse(projectId).success)
@@ -169,70 +164,14 @@ export async function confirmQuestion(
   const state = findQuestion(assessFraming(knowledge), key);
   if (state.status !== "to_confirm") return fail("invalid_transition");
   const kind = QUESTIONS[key].kind;
-  const supabase = await createClient();
 
   if (kind === "text" || kind === "date" || kind === "money") {
-    const answer = state.answer;
-    if (!answer) return fail("not_found");
-    const value =
-      answer.kind === "text"
-        ? answer.text
-        : answer.kind === "date"
-          ? answer.date
-          : answer.kind === "money"
-            ? answer.cents
-            : { none: true };
-    if (state.fromRecord)
-      return appendRow(projectId, key, {
-        value,
-        status: "confirmed",
-        source_type: "import",
-        source_label:
-          state.provenance?.kind === "record" ? state.provenance.label : null,
-      });
-    const row = knowledge.framing.briefRows.find((r) => r.field_key === key);
-    if (!row) return fail("not_found");
-    return appendRow(projectId, key, {
-      value,
-      status: "confirmed",
-      source_type: row.source_type as Row["source_type"],
-      source_report_item_id: row.source_report_item_id,
-      source_quote: row.source_quote,
-      source_start_seconds: row.source_start_seconds,
-      source_label: row.source_label,
-    });
+    const row = confirmedRow(state, knowledge);
+    return row ? appendRow(projectId, key, row) : fail("not_found");
   }
-
-  const confirmed = { review_status: "confirmed" };
-  const result =
-    kind === "constraints" || kind === "rights"
-      ? await (kind === "rights"
-          ? supabase
-              .from("framing_constraints")
-              .update(confirmed)
-              .eq("project_id", projectId)
-              .eq("review_status", "proposed")
-              .eq("type", "rights")
-          : supabase
-              .from("framing_constraints")
-              .update(confirmed)
-              .eq("project_id", projectId)
-              .eq("review_status", "proposed")
-              .neq("type", "rights"))
-      : kind === "deadlines"
-        ? // A proposed deadline without its date waits for a person to pick it.
-          await supabase
-            .from("framing_deadlines")
-            .update(confirmed)
-            .eq("project_id", projectId)
-            .eq("review_status", "proposed")
-            .not("due_date", "is", null)
-        : await supabase
-            .from(kind === "needs" ? "needs" : "project_team_members")
-            .update(confirmed)
-            .eq("project_id", projectId)
-            .eq("review_status", "proposed");
-  return finish(projectId, result.error);
+  const supabase = await createClient();
+  const { error } = await confirmLines(supabase, projectId, key);
+  return finish(projectId, error);
 }
 
 // Deadlines ------------------------------------------------------------------

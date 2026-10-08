@@ -172,7 +172,6 @@ export function CreateProjectForm({
         <ChipChoice
           name="priority"
           legend={t.fields.priority}
-          note={t.fields.optional}
           options={PRIORITIES.map((value) => ({
             value,
             label: fr.shell.priorities[value],

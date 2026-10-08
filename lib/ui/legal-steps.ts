@@ -52,6 +52,30 @@ export function builtLegalStepOf(
   );
 }
 
+// What the person sees (Sacha, 07/10/2026: « la partie juridique est très
+// compliquée »): two steps instead of five steps and five dossiers. The
+// État des lieux holds the Cadrage's questions and the Confirmation on the
+// same page; the Plan d'action becomes the Suivi once launched, and opens
+// the branches. The old URLs still answer, by a redirect.
+export const LEGAL_TABS = ["inventory", "plan"] as const;
+export type LegalTab = (typeof LEGAL_TABS)[number];
+
+export const legalTabOf = (page: LegalStepKey | LegalBranchPage): LegalTab =>
+  page === "inventory" || page === "framing" || page === "confirmation"
+    ? "inventory"
+    : "plan";
+
+/** Where the dossier stands, in the DG's five words (ticket « Architecture
+ * globale » § 7: « État des lieux > Cadrage juridique > Confirmation > Plan
+ * d'action > Suivi »): a state shown on the page, never a chevron of its
+ * own. `done` comes from lib/legal/steps-done.ts. */
+export function legalPhase(done: readonly LegalStepKey[]): LegalStepKey {
+  if (!done.includes("framing")) return "framing";
+  if (!done.includes("confirmation")) return "confirmation";
+  if (!done.includes("plan")) return "plan";
+  return "tracking";
+}
+
 export const legalStepHref = (projectId: string, key: LegalStepKey) =>
   key === LEGAL_STEP_KEYS[0]
     ? routes.projectLegal(projectId)

@@ -100,7 +100,7 @@ select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'duration', jsonb_build_object('value', '3:12', 'source', 'Master final'),
   'performers', jsonb_build_object('value', 'Dioo', 'source', 'Artistes du titre'),
   'creators', jsonb_build_object('value', pg_temp.creators(array['33.33', '33.33', '33.33']), 'source', 'Saisi'),
-  'dep_dr', jsonb_build_object('value', jsonb_build_object('choice', 'DEP'), 'source', 'Saisi')));
+  'dep_dr', jsonb_build_object('value', jsonb_build_object('choice', 'follow_phono'), 'source', 'Saisi')));
 select ok('phono_total' = any (public.formality_missing(pg_temp.id_of('f'))), 'the Phono shares must total exactly 100 %');
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi')));

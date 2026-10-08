@@ -8,7 +8,7 @@ import { ChipMultiChoice } from "@/components/ui/chip-choice";
 export function PeoplePicker({
   name,
   label,
-  note,
+  required = false,
   hint,
   emptyLabel,
   candidates,
@@ -17,8 +17,8 @@ export function PeoplePicker({
 }: {
   name: string;
   label: string;
-  // Shown after the label, muted ("facultatif").
-  note?: string;
+  // Shows the « * » after the label (docs/DESIGN.md § 4).
+  required?: boolean;
   hint?: string;
   emptyLabel: string;
   candidates: { personId: string; name: string }[];
@@ -29,7 +29,7 @@ export function PeoplePicker({
     <ChipMultiChoice
       name={name}
       legend={label}
-      note={note}
+      required={required}
       hint={hint}
       emptyLabel={emptyLabel}
       error={error}

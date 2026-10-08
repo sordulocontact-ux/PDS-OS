@@ -78,25 +78,36 @@ export async function isWorkflowLaunched(
   return data === true;
 }
 
-export type WorkflowGate = { framingValidated: boolean; waiting: boolean };
+export type WorkflowGate = {
+  framingValidated: boolean;
+  // Placed in Ensuite by the launched plan: waiting for « Lancer maintenant ».
+  waiting: boolean;
+  // Left out of the launched plan: to add from it.
+  absent: boolean;
+};
 
 /**
  * Null when the workflow may be worked on; otherwise what its lock says:
- * the Brief not validated yet, or a plan that left it in Ensuite.
+ * the Brief not validated yet, a plan that left it in Ensuite, or a plan
+ * launched without it.
  */
 export async function workflowGate(
   project: { id: string; stages: Array<{ key: string; state: string }> },
   workflow: "strategy" | "master" | "legal",
 ): Promise<WorkflowGate | null> {
   const supabase = await createClient();
-  const [launched, item] = await Promise.all([
+  const [launched, plan, item] = await Promise.all([
     isWorkflowLaunched(project.id, workflow),
+    supabase
+      .from("project_plans")
+      .select("id")
+      .eq("project_id", project.id)
+      .maybeSingle(),
     supabase
       .from("project_plan_items")
       .select("id")
       .eq("project_id", project.id)
       .eq("workflow", workflow)
-      .is("launched_at", null)
       .maybeSingle(),
   ]);
   if (launched) return null;
@@ -105,5 +116,6 @@ export async function workflowGate(
       (s) => s.key === "framing" && s.state === "validated",
     ),
     waiting: item.data !== null,
+    absent: plan.data !== null && item.data === null,
   };
 }

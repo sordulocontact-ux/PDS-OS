@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Humanisme » in « Piégée »,
 -- test data only: the authorization, its conditions and proof are SIMULATED).
 begin;
-select plan(19);
+select plan(21);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -124,12 +124,25 @@ select throws_ok(format($$ select pg_temp.advance(%L, 'cleared') $$, pg_temp.id_
 -- Conditions stay proposed until PDS validates them ---------------------------------------
 insert into ids select 'terms', public.propose_clearance_terms(pg_temp.id_of('humanisme'),
   '{"right": "work", "amount_cents": 50000, "share": "10 %"}'::jsonb, null);
+reset role;
+select is((select count(*)::int from public.notifications
+            where recipient_person_id = pg_temp.id_of('director_person')
+              and kind = 'clearance_terms_proposed'
+              and subject_id = pg_temp.id_of('humanisme')), 1,
+          'the direction is told the conditions wait for it');
+select pg_temp.act_as(pg_temp.id_of('manager'));
 select throws_ok(format($$ select pg_temp.advance(%L, 'agreement_reached') $$, pg_temp.id_of('humanisme')),
                  'P0001', 'clearance_missing', 'an agreement needs validated conditions');
 select throws_ok(format($$ select public.decide_clearance_terms(%L, true) $$, pg_temp.id_of('terms')),
                  '42501', 'clearance_terms_not_allowed', 'a project manager does not validate the conditions');
 select pg_temp.act_as(pg_temp.id_of('director'));
 select public.decide_clearance_terms(pg_temp.id_of('terms'), true);
+reset role;
+select is((select count(*)::int from public.notifications
+            where recipient_person_id = pg_temp.id_of('manager_person')
+              and kind = 'clearance_terms_validated'
+              and subject_id = pg_temp.id_of('humanisme')), 1,
+          'the responsible is told the conditions are validated');
 select pg_temp.act_as(pg_temp.id_of('manager'));
 select is(pg_temp.advance(pg_temp.id_of('humanisme'), 'agreement_reached'), 'agreement_reached',
           'agreement reached on validated conditions');

@@ -52,6 +52,7 @@ export function SplitForm({
           <OptionSelect
             name="kind"
             label={t.fields.kind}
+            required
             items={t.kinds}
             defaultValue={value("kind", split?.kind ?? kind)}
             error={error("kind")}
@@ -67,6 +68,7 @@ export function SplitForm({
           <OptionSelect
             name="role"
             label={t.fields.role}
+            required
             items={t.roles}
             defaultValue={value(
               "role",

@@ -40,6 +40,7 @@ import { strategy } from "./strategy";
 import { transmission } from "./transmission";
 import { voice } from "./voice";
 import { work } from "./work";
+import { workflowStatus } from "./workflow-status";
 
 export const fr = {
   ...core,
@@ -80,4 +81,5 @@ export const fr = {
   masterPage,
   records,
   feedback,
+  workflowStatus,
 } as const;

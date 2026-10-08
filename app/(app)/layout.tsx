@@ -17,7 +17,8 @@ import { fr } from "@/lib/i18n/fr";
 import { countPendingMemberships } from "@/lib/members/queries";
 import { loadNotifications } from "@/lib/notifications/queries";
 
-// Authenticated shell: floating sidebar on desktop, drawer on mobile.
+// Authenticated shell: sidebar against the screen's edge on desktop, drawer on
+// mobile.
 // Display only. Access is enforced by each page (lib/auth/dal.ts), because a
 // layout does not re-run on client navigation.
 export default async function AppLayout({
@@ -38,13 +39,14 @@ export default async function AppLayout({
       : 0,
   ]);
   const vapidPublicKey = getPublicEnv().NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null;
-  const bell = (side: "right" | "bottom") =>
+  const bell = (variant: "nav" | "ghost") =>
     signedIn ? (
       <NotificationBell
         items={notifications.items}
         unreadCount={notifications.unreadCount}
         vapidPublicKey={vapidPublicKey}
-        side={side}
+        side={variant === "nav" ? "right" : "bottom"}
+        variant={variant}
       />
     ) : null;
 
@@ -80,8 +82,9 @@ export default async function AppLayout({
             <Sidebar
               isAdmin={isAdmin}
               pendingMembers={pendingMembers}
-              bell={bell("right")}
-              userPanel={userPanel}
+              bell={bell("nav")}
+              name={name}
+              email={access.email}
             />
 
             <div className="flex min-w-0 flex-1 flex-col">
@@ -92,7 +95,7 @@ export default async function AppLayout({
                   footer={userPanel}
                 />
                 {brand}
-                <div className="ml-auto">{bell("bottom")}</div>
+                <div className="ml-auto">{bell("ghost")}</div>
               </header>
               <main className="flex min-w-0 flex-1 flex-col">{children}</main>
             </div>

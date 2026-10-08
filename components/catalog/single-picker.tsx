@@ -9,6 +9,7 @@ import {
   type PickerOption,
 } from "@/components/catalog/search-picker";
 import { Button } from "@/components/ui/button";
+import { RequiredMark } from "@/components/ui/required-mark";
 
 /**
  * One item picked from a list with search (a content format, the artist of
@@ -19,7 +20,7 @@ import { Button } from "@/components/ui/button";
 export function SinglePicker({
   name,
   legend,
-  note,
+  required = false,
   options,
   selectedId,
   onSelect,
@@ -34,7 +35,8 @@ export function SinglePicker({
 }: {
   name: string;
   legend: string;
-  note?: string;
+  // Shows the « * » after the legend (docs/DESIGN.md § 4).
+  required?: boolean;
   options: PickerOption[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
@@ -59,7 +61,7 @@ export function SinglePicker({
     >
       <span id={`${id}-label`} className="text-sm leading-none font-medium">
         {legend}
-        {note && <span className="text-muted-foreground"> · {note}</span>}
+        {required && <RequiredMark announce />}
       </span>
       <input type="hidden" name={name} value={selected?.id ?? ""} />
       {selected ? (
