@@ -178,6 +178,9 @@ export type ProjectDetail = {
   artistId: string | null;
   createdAt: string;
   artistName: string;
+  // The artist named first (the first title's first credit, else the
+  // content project's): where the breadcrumb leads.
+  mainArtistId: string | null;
   ownerName: string | null;
   ownerPersonId: string | null;
   status: ProjectStatus;

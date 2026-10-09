@@ -1,5 +1,4 @@
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
 
 // The internal path of the Juridique workflow, as the DG defined it
 // (docs/CONTEXTE-PROJET.md § 2) — its own, never the project's 7 steps. Each
@@ -52,23 +51,20 @@ export function builtLegalStepOf(
   );
 }
 
-// What the person sees (Sacha, 07/10/2026: « la partie juridique est très
-// compliquée »): two steps instead of five steps and five dossiers. The
-// État des lieux holds the Cadrage's questions and the Confirmation on the
-// same page; the Plan d'action becomes the Suivi once launched, and opens
-// the branches. The old URLs still answer, by a redirect.
-export const LEGAL_TABS = ["inventory", "plan"] as const;
-export type LegalTab = (typeof LEGAL_TABS)[number];
+// Two pages hold the five steps (Sacha, 07/10/2026: « la partie juridique
+// est très compliquée »): the État des lieux holds the Cadrage's questions
+// and the Confirmation; the Plan d'action becomes the Suivi once launched,
+// and opens the branches. The old URLs still answer, by a redirect. The
+// chevrons show the DG's five steps (ticket « Architecture globale » § 7).
+type LegalPage = "inventory" | "plan";
 
-export const legalTabOf = (page: LegalStepKey | LegalBranchPage): LegalTab =>
+export const legalTabOf = (page: LegalStepKey | LegalBranchPage): LegalPage =>
   page === "inventory" || page === "framing" || page === "confirmation"
     ? "inventory"
     : "plan";
 
-/** Where the dossier stands, in the DG's five words (ticket « Architecture
- * globale » § 7: « État des lieux > Cadrage juridique > Confirmation > Plan
- * d'action > Suivi »): a state shown on the page, never a chevron of its
- * own. `done` comes from lib/legal/steps-done.ts. */
+/** Where the dossier stands: the first of the DG's five steps not done
+ * (`done` from lib/workflow-status/rules.ts, legalState). */
 export function legalPhase(done: readonly LegalStepKey[]): LegalStepKey {
   if (!done.includes("framing")) return "framing";
   if (!done.includes("confirmation")) return "confirmation";
@@ -76,10 +72,34 @@ export function legalPhase(done: readonly LegalStepKey[]): LegalStepKey {
   return "tracking";
 }
 
-export const legalStepHref = (projectId: string, key: LegalStepKey) =>
-  key === LEGAL_STEP_KEYS[0]
-    ? routes.projectLegal(projectId)
-    : routes.projectLegalStep(projectId, key);
+// Anchors of the État des lieux, where the Cadrage juridique's questions and
+// the Confirmation live (app/.../legal/[[...step]]/page.tsx).
+export const LEGAL_ANCHORS = {
+  framing: "legal-questions",
+  confirmation: "legal-dossier",
+} as const;
 
-export const legalStepLabel = (key: LegalStepKey) =>
-  fr.shell.project.legalSteps[key];
+/** Where each of the five steps is done: the first three on the État des
+ * lieux (the last two at their block), the Plan d'action and the Suivi on
+ * the plan's page, which becomes the Suivi once launched. */
+export function legalChevronHref(projectId: string, key: LegalStepKey) {
+  const base = routes.projectLegal(projectId);
+  if (key === "framing" || key === "confirmation")
+    return `${base}#${LEGAL_ANCHORS[key]}`;
+  return key === "inventory"
+    ? base
+    : routes.projectLegalStep(projectId, "plan");
+}
+
+/** The step a Juridique page stands on (its chevron in ink): on the État
+ * des lieux, the dossier's own step when the page holds it; on the plan's
+ * pages, the Plan d'action, or the Suivi once launched. */
+export function legalCurrentStep(
+  page: LegalStepKey | LegalBranchPage,
+  done: readonly LegalStepKey[],
+): LegalStepKey {
+  if (legalTabOf(page) === "plan")
+    return done.includes("plan") ? "tracking" : "plan";
+  const phase = legalPhase(done);
+  return phase === "framing" || phase === "confirmation" ? phase : "inventory";
+}

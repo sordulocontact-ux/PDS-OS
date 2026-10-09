@@ -6,21 +6,23 @@ import { ProcessSteps } from "@/components/ui/process-steps";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import {
-  LEGAL_TABS,
+  LEGAL_STEP_KEYS,
   builtLegalStepOf,
-  legalPhase,
-  legalTabOf,
+  legalChevronHref,
+  legalCurrentStep,
   type LegalStepKey,
 } from "@/lib/ui/legal-steps";
 
-// The Juridique in two steps as chevrons, at the top of the section — same
-// place and component as the Workflow's and the Master's. The État des
-// lieux is checked once the dossier is confirmed; the Plan d'action opens
-// then (before, it is greyed with its reason). The branches have no entry
-// here any more: each action of the plan opens its own. Hides itself
+// The Juridique's five steps as chevrons, at the top of the section — same
+// place and component as the other workflows' (ticket « Architecture
+// globale » § 7: « État des lieux > Cadrage juridique > Confirmation > Plan
+// d'action > Suivi »). The first three open the État des lieux at their
+// block, the last two the plan's page. The Confirmation waits for every
+// answer, the Plan d'action for the confirmed dossier, the Suivi for the
+// launched plan: each greyed with its reason until then. Hides itself
 // elsewhere, so the layout renders it around every project page.
-// `done`: the steps really done, computed by the server
-// (lib/legal/steps-done.ts).
+// `done`: the steps really done, computed by the code
+// (lib/workflow-status/rules.ts, legalState).
 export function LegalSteps({
   projectId,
   done,
@@ -33,40 +35,34 @@ export function LegalSteps({
   const base = routes.projectLegal(projectId);
   if (pathname !== base && !pathname.startsWith(`${base}/`)) return null;
 
-  const segments = pathname.slice(base.length).split("/").filter(Boolean);
-  const page = builtLegalStepOf(segments);
-  const current = page ? legalTabOf(page) : null;
-  const confirmed = done.includes("confirmation");
-  const launched = done.includes("plan");
+  const page = builtLegalStepOf(
+    pathname.slice(base.length).split("/").filter(Boolean),
+  );
+  const current = page ? legalCurrentStep(page, done) : null;
+  const lockOf = (key: LegalStepKey): string | undefined =>
+    key === "confirmation" && !done.includes("framing")
+      ? t.confirmationLocked
+      : key === "plan" && !done.includes("confirmation")
+        ? t.planLocked
+        : key === "tracking" && !done.includes("plan")
+          ? t.trackingLocked
+          : undefined;
 
   return (
-    <div className="flex flex-col gap-2">
-      <ProcessSteps
-        label={t.label}
-        numbered={false}
-        steps={LEGAL_TABS.map((key) => {
-          const open = key === "inventory" || confirmed;
-          return {
-            key,
-            // The plan once launched is followed: the chevron says so.
-            label: key === "plan" && launched ? t.tracking : t[key],
-            href: open
-              ? key === "inventory"
-                ? base
-                : routes.projectLegalStep(projectId, "plan")
-              : undefined,
-            title: open ? undefined : t.planLocked,
-            current: current === key,
-            done: key === "inventory" ? confirmed : false,
-          };
-        })}
-      />
-      <p className="text-caption text-muted-foreground">
-        {t.phase} ·{" "}
-        <span className="font-medium text-foreground">
-          {t[legalPhase(done)]}
-        </span>
-      </p>
-    </div>
+    <ProcessSteps
+      label={t.label}
+      numbered={false}
+      steps={LEGAL_STEP_KEYS.map((key) => {
+        const locked = lockOf(key);
+        return {
+          key,
+          label: t[key],
+          href: locked ? undefined : legalChevronHref(projectId, key),
+          title: locked,
+          current: current === key,
+          done: done.includes(key),
+        };
+      })}
+    />
   );
 }

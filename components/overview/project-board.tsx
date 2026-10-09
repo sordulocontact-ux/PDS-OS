@@ -1,11 +1,9 @@
 import { IconDrawCompass } from "nucleo-sharp-essential";
 
 import { BlockersCard } from "@/components/overview/blockers-card";
-import {
-  DeadlinesCard,
-  NextActionsCard,
-} from "@/components/overview/board-cards";
+import { DeadlinesCard } from "@/components/overview/board-cards";
 import { DependenciesTable } from "@/components/overview/dependencies-table";
+import { NextActionsTable } from "@/components/overview/next-actions-table";
 import { WorkflowCards } from "@/components/overview/workflow-cards";
 import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { ViewLink } from "@/components/ui/view-link";
@@ -85,7 +83,6 @@ export function ProjectBoard({
         projectId={project.id}
         workflows={flows.workflows}
         states={flows.states}
-        legalDone={flows.legalDone}
         canLaunch={canLaunch}
       />
       {absent.length > 0 && (
@@ -94,15 +91,20 @@ export function ProjectBoard({
         </p>
       )}
 
+      <NextActionsTable actions={boardActions(input)} />
+
       <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <NextActionsCard actions={boardActions(input)} />
-        <div className="flex min-w-0 flex-col gap-4">
-          <BlockersCard blockers={boardBlockers(input)} />
-          <DeadlinesCard deadlines={boardDeadlines(input)} />
-        </div>
+        <BlockersCard blockers={boardBlockers(input)} />
+        <DeadlinesCard
+          deadlines={boardDeadlines(input)}
+          planningHref={routes.projectPlanning(project.id)}
+        />
       </div>
 
-      <DependenciesTable deps={flows.dependencies} />
+      <DependenciesTable
+        deps={flows.dependencies}
+        legalRestricted={flows.states.legal === "restricted"}
+      />
     </div>
   );
 }

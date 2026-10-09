@@ -876,7 +876,7 @@ Conception, Production et Suivi & bilan (sans page : grisés), Activations ; coc
 validé (`launch_strategy`, `design`, `production`, `review`). **Défense** n'a plus de place à
 l'écran tant que le DG ne l'a pas rattachée. Sans `manage_legal`, le Juridique est listé
 `restricted` (grisé, cadenas, raison), jamais un lien ; sa page répond toujours 404 (pas
-de fuite par lien profond). Pas de fil d'Ariane pour l'instant (décision de Sacha).
+de fuite par lien profond). Fil d'Ariane ajouté au lot 6.
 
 **Lot 2** : Master en 4 chevrons (§ 8 septies) ; **Distribution** = la page Sortie en deux
 étapes sans nouvelle capacité, **Préparation** (`/release`, identifiants et date) puis **En
@@ -938,6 +938,60 @@ dépendance manquante d'un workflow bloqué devient un **blocage** dont la sourc
 workflow qui doit fournir (les emprunts gardent une ligne par emprunt), et un workflow
 bloqué quitte « À faire ensuite ». Pas de dépendance inventée sans donnée (pochette,
 date de sortie de la Stratégie, NDA : à décider).
+
+**Lot 6 : alignement sur les maquettes du ticket (09/10/2026)** (Vue d'ensemble, Master,
+Conception, Juridique ; leurs valeurs sont illustratives, rien n'en est recopié).
+- **Fil d'Ariane** (`ProjectBreadcrumb`) en tête de toute page de projet : « ← Projets ›
+  Artiste › Projet › Section › Étape » (« Vue d'ensemble » sur l'accueil du projet, rien
+  après le projet avant son lancement). Chaque niveau sauf la page ouverte est un lien ; la
+  flèche remonte d'un niveau (jamais vers l'artiste, chemin de côté). Section par
+  `projectSections` (le Juridique restreint n'y est jamais nommé), étape par les mêmes
+  listes que les chevrons, calculées une fois par le layout. Artiste : premier crédit du
+  premier titre, sinon l'artiste du projet de contenu (`ProjectDetail.mainArtistId`).
+  La décision « pas de fil d'Ariane » du lot 1 est levée par le ticket (§ 6).
+- **En-tête du projet** (`ProjectHeader`) : pochette = dernière image « artwork » déposée
+  sur ses titres (`master_files`, URL signée 1 h, session de l'utilisateur,
+  `lib/projects/cover.ts`), sinon un disque ; type en surtitre, titre, artiste et « Sortie
+  le … » (date prévue de la ligne `releases`, rien sinon) ; **statut du projet** calculé par
+  `projectStatus` (`rules.ts`) depuis ses workflows lisibles : Terminé si tous le sont,
+  Non démarré si aucun n'a commencé, En cours sinon ; avant le lancement, le statut de
+  transmission. Ni genre, ni humeur, ni label, ni « Voir le projet » : aucune donnée ne les
+  porte.
+- **Chevrons** pleine largeur, étapes de même largeur (`ProcessSteps`). Étape verrouillée
+  focalisable, sa raison dans une bulle `Tooltip` et lue après le libellé.
+- **Juridique en cinq chevrons** (critère du ticket et maquette 04) : État des lieux ›
+  Cadrage juridique › Confirmation › Plan d'action › Suivi, sur les deux pages existantes
+  (aucune page ni URL nouvelle) : les trois premiers ouvrent l'État des lieux (Cadrage à
+  `#legal-questions`, Confirmation à `#legal-dossier`, `LEGAL_ANCHORS`), les deux derniers
+  la page du plan. En noir : l'étape du dossier quand la page la porte (`legalCurrentStep`).
+  Verrous : Confirmation tant qu'une question reste sans réponse, Plan d'action tant que le
+  dossier n'est pas confirmé, Suivi tant que le plan n'est pas lancé. Coches et étape
+  courante calculées par `legalState` (`done` : État des lieux et Cadrage une fois toutes
+  les réponses données, Confirmation, Plan lancé, Suivi quand toutes ses actions sont
+  closes) ; la ligne « Étape du dossier » disparaît.
+- **Vue d'ensemble** : cartes des workflows avec un anneau (`ProgressRing`, part des étapes
+  vraiment faites), statut, « n / N étapes », étape en cours et raison ; **À faire ensuite**
+  en tableau (`NextActionsTable`, onglets par workflow filtrés sur place, la ligne ouvre
+  l'action) ; puis Blocages et **Prochaine échéance** (la plus proche en grand, les autres
+  et les retards dessous, « Voir le planning ») ; puis les dépendances. Avant le plan, plus
+  de liste numérotée des 7 étapes ni d'« Étape en cours » (`ProjectStages` supprimé) : sous
+  le Cadrage, les cartes des workflows, sans « Lancer ».
+- **Sidebar** : le dernier groupe (Calls, Livrables, Fichiers, Validations, Activité) n'a
+  plus de titre (« Production » est une étape du Marketing). Le Marketing reste une entrée
+  sans sous-menu : ses chevrons suffisent (§ 5, pas de second système).
+- **Aucun violet** (§ 12) : ton `action` en encre sur gris, teinte de catégorie `violet`
+  renommée `ink` (type Musical, titres du Juridique).
+- **Juridique fermé au lecteur** (§ 9) : le tableau des dépendances ajoute une ligne
+  « Ce que le Juridique fournit aux autres workflows · Accès restreint », sans détail ni
+  lien ; la dépendance « ingénieurs du Brief → Juridique », lue dans le Master seul, reste
+  visible. **Limite connue** : l’état d’un emprunt se calcule dans le code depuis les
+  sources du Juridique (`trackPlan`), que la RLS réserve à `manage_legal` ; la Distribution
+  ne passe donc en Bloqué pour un emprunt que chez qui lit le Juridique (le recopier en SQL
+  dupliquerait une logique fragile ; le service role est exclu).
+- **Lecture seule** (§ 9) : les contrôles d’écriture restent absents pour qui n’écrit pas
+  (modèle existant, 62 composants), et le bandeau en tête de chaque page nomme le chef de
+  projet qui écrit (`ReadOnlyNotice`). Passer à des contrôles grisés un par un reste à
+  décider : refonte large, à juger à l’écran.
 
 - **Travail** (`lib/project-work/`) : une carte par personne, triée en retard → à faire →
   en attente → fait. Tâche à faire échue = en retard. Livrable : chez son responsable (en

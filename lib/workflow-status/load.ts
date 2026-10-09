@@ -169,13 +169,7 @@ async function legalFacts(project: Project) {
   const openQuestions = intake.questions.filter((q) => !q.answered).length;
   const confirmed = intakeRow.data?.status === "confirmed";
   const planLaunched = tracking.state === "tracking";
-  const done: LegalStepKey[] = [
-    ...(openQuestions === 0 ? (["framing"] as const) : []),
-    ...(confirmed ? (["confirmation"] as const) : []),
-    ...(planLaunched ? (["plan"] as const) : []),
-  ];
   return {
-    done,
     items,
     state: legalState({
       launched,
@@ -276,7 +270,8 @@ export const loadWorkflowStates = cache(
     return {
       workflows,
       states,
-      legalDone: legal?.done ?? [],
+      // The five steps' checks, as the rules computed them.
+      legalDone: (legal?.state.done ?? []) as LegalStepKey[],
       dependencies: deps,
       details: {
         masterDates: master?.dates ?? null,
