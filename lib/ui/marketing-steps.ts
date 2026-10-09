@@ -41,6 +41,21 @@ export function marketingSteps(
       built: step.href !== null && !locked,
       title: locked ? t.strategyLocked : undefined,
       done: step.stageKey !== null && validatedStages.includes(step.stageKey),
+      // The Strategy's own pages (Brief de sortie, documents, generators,
+      // follow-up) keep its chevron open.
+      also:
+        step.key === "strategy"
+          ? [
+              routes.projectStrategyBrief(projectId),
+              routes.projectStrategyDocuments(projectId),
+              ...(["brief", "release_plan", "press_kit"] as const).map((kind) =>
+                routes.projectStrategyDocument(projectId, kind),
+              ),
+              routes.projectStrategyReleasePlan(projectId),
+              routes.projectStrategyPressKit(projectId),
+              routes.projectStrategyFollowUp(projectId),
+            ]
+          : undefined,
     };
   });
 }

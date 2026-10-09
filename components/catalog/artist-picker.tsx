@@ -1,13 +1,14 @@
 "use client";
 
 import { IconXmark } from "nucleo-sharp-essential";
-import { IconArrowDown, IconArrowUp } from "@/components/icons";
+
 import { useMemo, useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
 import { CreateArtistDialog } from "@/components/catalog/create-artist-dialog";
 import { SearchPicker } from "@/components/catalog/search-picker";
 import { Button } from "@/components/ui/button";
+import { MoveButtons } from "@/components/ui/move-buttons";
 import { RequiredMark } from "@/components/ui/required-mark";
 import {
   Select,
@@ -91,7 +92,7 @@ export function ArtistPicker({
       {credits.length > 0 && (
         <ol
           aria-label={t.credits}
-          className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-lg border border-border"
+          className="flex flex-col gap-0.5 rounded-lg border border-border py-1"
         >
           {credits.map((credit, index) => (
             <li
@@ -133,26 +134,14 @@ export function ArtistPicker({
                 </SelectContent>
               </Select>
               <span className="flex">
-                <Button
-                  type="button"
-                  variant="ghost"
+                <MoveButtons
                   size="icon"
-                  disabled={index === 0}
-                  onClick={() => move(index, -1)}
-                  aria-label={t.moveUp(credit.name)}
-                >
-                  <IconArrowUp aria-hidden />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  disabled={index === credits.length - 1}
-                  onClick={() => move(index, 1)}
-                  aria-label={t.moveDown(credit.name)}
-                >
-                  <IconArrowDown aria-hidden />
-                </Button>
+                  upLabel={t.moveUp(credit.name)}
+                  downLabel={t.moveDown(credit.name)}
+                  first={index === 0}
+                  last={index === credits.length - 1}
+                  onMove={(delta) => move(index, delta)}
+                />
                 <Button
                   type="button"
                   variant="ghost"

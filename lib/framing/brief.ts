@@ -16,6 +16,17 @@ export const STRATEGY_TEXT_FIELDS = [
 ] as const;
 export type StrategyTextField = (typeof STRATEGY_TEXT_FIELDS)[number];
 
+// Free answers of the Strategy without closed choices: the parts of the
+// narrative (its angle is « narrative » above) and the strategic objective.
+export const STRATEGY_EXTRA_FIELDS = [
+  "narrative_origin",
+  "narrative_story",
+  "narrative_context",
+  "narrative_why_now",
+  "strategy_objective",
+] as const;
+export type StrategyExtraField = (typeof STRATEGY_EXTRA_FIELDS)[number];
+
 export const DESIGN_TEXT_FIELDS = [
   "creative_direction",
   "visual_codes",
@@ -25,7 +36,7 @@ export type DesignTextField = (typeof DESIGN_TEXT_FIELDS)[number];
 
 export const TEXT_FIELDS = {
   brief: BRIEF_TEXT_FIELDS,
-  strategy: STRATEGY_TEXT_FIELDS,
+  strategy: [...STRATEGY_TEXT_FIELDS, ...STRATEGY_EXTRA_FIELDS],
   design_doc: DESIGN_TEXT_FIELDS,
 } as const;
 export type TextDeliverable = keyof typeof TEXT_FIELDS;

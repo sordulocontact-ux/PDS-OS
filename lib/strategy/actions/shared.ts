@@ -16,6 +16,7 @@ export async function done(
 ): Promise<ActionResult> {
   if (error?.code === "42501") return { ok: false, error: "stage_locked" };
   if (error) return fromDatabaseError(error);
-  revalidatePath(routes.projectStrategy(projectId));
+  // The pilot, the Brief, the documents and the follow-up share a layout.
+  revalidatePath(routes.projectStrategy(projectId), "layout");
   return ok;
 }

@@ -162,7 +162,9 @@ $$, '42501', null, 'the director cannot add a lever');
 -- Submitted: frozen -------------------------------------------------------------
 reset role;
 select pg_temp.act_as(pg_temp.id_of('owner'));
-select public.request_validation(pg_temp.id_of('strategy'), null);
+-- A strategy is submitted as a version of its Brief de sortie (…20261009000101).
+select public.send_strategy_document(
+  public.create_strategy_document(pg_temp.prj(), 'brief', '{"kind":"strategy_brief"}'::jsonb));
 select throws_ok($$
   insert into public.levers (organization_id, project_id, label, family)
   values (pg_temp.org(), pg_temp.prj(), 'Live', 'experiences_activations')
