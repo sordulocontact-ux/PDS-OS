@@ -1,7 +1,6 @@
 import { IconShieldCheck } from "nucleo-sharp-essential";
 
 import { ValidationItem } from "@/components/project-history/validation-item";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { requireApproved } from "@/lib/auth/dal";
@@ -30,7 +29,6 @@ export default async function ProjectValidationsPage({
 
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader title={t.title} description={t.description} />
       {validations.length === 0 ? (
         <EmptyState
           icon={IconShieldCheck}

@@ -1,7 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { toast } from "sonner";
+import { useActionState } from "react";
 
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
@@ -58,11 +57,7 @@ export function ReleaseForm({ action, initial, isNew }: Props) {
   });
   const canEdit = useCanEditProject();
 
-  useEffect(() => {
-    if (state.status === "saved") toast.success(t.saved);
-  }, [state]);
-
-  const values = state.status === "error" ? state.values : initial;
+  const values = state.status === "idle" ? initial : state.values;
   const fieldErrors = state.status === "error" ? state.fieldErrors : {};
   const formError = state.status === "error" ? state.formError : null;
 
@@ -159,10 +154,15 @@ export function ReleaseForm({ action, initial, isNew }: Props) {
         </p>
       )}
 
-      <div>
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? t.pending : isNew ? t.submitCreate : t.submitEdit}
         </Button>
+        {state.status === "saved" && !pending && (
+          <p role="status" className="text-sm text-muted-foreground">
+            {t.saved}
+          </p>
+        )}
       </div>
     </form>
   );

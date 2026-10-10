@@ -7,7 +7,6 @@ import {
 } from "@/components/overview/board-cards";
 import { DependenciesTable } from "@/components/overview/dependencies-table";
 import { WorkflowCards } from "@/components/overview/workflow-cards";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -63,8 +62,6 @@ export function ProjectBoard({
 
   return (
     <div className="flex flex-col gap-6">
-      <ProjectPageHeader title={t.title} description={t.description} />
-
       <ViewLink
         href={routes.projectFraming(project.id)}
         className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-[var(--surface-soft)] px-4 py-3 no-underline transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-sunken)]"

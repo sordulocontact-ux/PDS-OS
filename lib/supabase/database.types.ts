@@ -1075,6 +1075,100 @@ export type Database = {
           },
         ]
       }
+      deliverable_deliveries: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          checked_at: string | null
+          checked_by: string | null
+          deliverable_id: string
+          delivered_at: string | null
+          delivered_by: string | null
+          final_note: string | null
+          final_set_at: string
+          final_set_by: string | null
+          final_url: string
+          id: string
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          checked_at?: string | null
+          checked_by?: string | null
+          deliverable_id: string
+          delivered_at?: string | null
+          delivered_by?: string | null
+          final_note?: string | null
+          final_set_at?: string
+          final_set_by?: string | null
+          final_url: string
+          id?: string
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          checked_at?: string | null
+          checked_by?: string | null
+          deliverable_id?: string
+          delivered_at?: string | null
+          delivered_by?: string | null
+          final_note?: string | null
+          final_set_at?: string
+          final_set_by?: string | null
+          final_url?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deliverable_deliveries_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverable_deliveries_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverable_deliveries_deliverable_same_org"
+            columns: ["deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_deliveries_delivered_by_fkey"
+            columns: ["delivered_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverable_deliveries_final_set_by_fkey"
+            columns: ["final_set_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deliverable_deliveries_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       design_versions: {
         Row: {
           bytes: number | null
@@ -4956,6 +5050,54 @@ export type Database = {
           },
         ]
       }
+      project_reviews: {
+        Row: {
+          id: string
+          improve: string | null
+          organization_id: string
+          project_id: string
+          results: string | null
+          updated_at: string
+          updated_by: string | null
+          worked: string | null
+        }
+        Insert: {
+          id?: string
+          improve?: string | null
+          organization_id: string
+          project_id: string
+          results?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          worked?: string | null
+        }
+        Update: {
+          id?: string
+          improve?: string | null
+          organization_id?: string
+          project_id?: string
+          results?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          worked?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_reviews_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "project_reviews_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_stages: {
         Row: {
           created_at: string
@@ -5283,9 +5425,17 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          delivered_on: string | null
+          delivered_to_contact_id: string | null
+          delivery_note: string | null
+          delivery_recorded_at: string | null
+          delivery_recorded_by: string | null
           id: string
           isrc: string | null
           last_checked_at: string | null
+          online_confirmed_by: string | null
+          online_confirmed_on: string | null
+          online_confirmed_url: string | null
           online_detected_at: string | null
           organization_id: string
           planned_release_date: string | null
@@ -5300,9 +5450,17 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          delivered_on?: string | null
+          delivered_to_contact_id?: string | null
+          delivery_note?: string | null
+          delivery_recorded_at?: string | null
+          delivery_recorded_by?: string | null
           id?: string
           isrc?: string | null
           last_checked_at?: string | null
+          online_confirmed_by?: string | null
+          online_confirmed_on?: string | null
+          online_confirmed_url?: string | null
           online_detected_at?: string | null
           organization_id: string
           planned_release_date?: string | null
@@ -5317,9 +5475,17 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          delivered_on?: string | null
+          delivered_to_contact_id?: string | null
+          delivery_note?: string | null
+          delivery_recorded_at?: string | null
+          delivery_recorded_by?: string | null
           id?: string
           isrc?: string | null
           last_checked_at?: string | null
+          online_confirmed_by?: string | null
+          online_confirmed_on?: string | null
+          online_confirmed_url?: string | null
           online_detected_at?: string | null
           organization_id?: string
           planned_release_date?: string | null
@@ -5335,6 +5501,27 @@ export type Database = {
           {
             foreignKeyName: "releases_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_delivered_to_same_org"
+            columns: ["delivered_to_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "releases_delivery_recorded_by_fkey"
+            columns: ["delivery_recorded_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "releases_online_confirmed_by_fkey"
+            columns: ["online_confirmed_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -5893,6 +6080,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      advance_deliverable_delivery: {
+        Args: { p_deliverable_id: string; p_step: string }
+        Returns: undefined
+      }
       answer_master_question: {
         Args: { p_choices?: string[]; p_question_id: string; p_text: string }
         Returns: undefined
@@ -6003,6 +6194,10 @@ export type Database = {
           p_iswc: string | null
           p_proof: string
         }
+        Returns: undefined
+      }
+      confirm_release_online: {
+        Args: { p_online_on: string; p_release_id: string; p_url: string }
         Returns: undefined
       }
       consolidate_split_version: {
@@ -6281,6 +6476,10 @@ export type Database = {
         Args: { p_items: Json; p_project_id: string }
         Returns: string
       }
+      legal_form_same_value: {
+        Args: { p_after: Json; p_before: Json; p_key: string }
+        Returns: boolean
+      }
       legal_plan_item_done: {
         Args: {
           p_item: Database["public"]["Tables"]["legal_plan_items"]["Row"]
@@ -6485,12 +6684,25 @@ export type Database = {
         Args: { p_proof: string; p_signature_id: string }
         Returns: undefined
       }
+      record_release_delivery: {
+        Args: {
+          p_contact_id: string
+          p_delivered_on: string
+          p_note: string
+          p_release_id: string
+        }
+        Returns: undefined
+      }
       remove_clearance_rightsholder: {
         Args: { p_rightsholder_id: string }
         Returns: undefined
       }
       remove_legal_project_contact: {
         Args: { p_id: string }
+        Returns: undefined
+      }
+      reopen_release_delivery: {
+        Args: { p_release_id: string }
         Returns: undefined
       }
       require_formality_action: {
@@ -6518,6 +6730,15 @@ export type Database = {
         Args: { p_formality_id: string; p_values: Json }
         Returns: undefined
       }
+      save_project_review: {
+        Args: {
+          p_improve: string
+          p_project_id: string
+          p_results: string
+          p_worked: string
+        }
+        Returns: undefined
+      }
       save_split_draft: {
         Args: {
           p_entries: Json
@@ -6534,6 +6755,10 @@ export type Database = {
       send_mix_feedback: { Args: { p_version_id: string }; Returns: undefined }
       set_contract_template_status: {
         Args: { p_status: string; p_template_id: string }
+        Returns: undefined
+      }
+      set_deliverable_final: {
+        Args: { p_deliverable_id: string; p_note: string; p_url: string }
         Returns: undefined
       }
       set_legal_form_state: {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 
 import { readAudioDuration } from "@/lib/catalog/audio-duration";
 import { MAX_FILE_BYTES, isAudioFile } from "@/lib/catalog/file-rules";
@@ -64,7 +63,7 @@ export function useTitleAudioUpload(organizationId: string | null) {
       durationSeconds,
     });
     setSending(false);
-    if (!result.ok) toast.error(t.fileFailed);
+    // A failure is said by the form, which stays on screen with the way out.
     return result.ok;
   }
 

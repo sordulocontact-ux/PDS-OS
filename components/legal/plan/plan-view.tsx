@@ -3,7 +3,6 @@ import { IconScale } from "nucleo-sharp-essential";
 
 import { ActionGroup } from "@/components/legal/plan/action-group";
 import { PlanForm } from "@/components/legal/plan/plan-form";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { Button } from "@/components/ui/button";
@@ -25,14 +24,9 @@ export function PlanView({
   plan: LegalPlan;
 }) {
   const t = fr.legal.plan;
-  const header = (
-    <ProjectPageHeader title={t.title} description={t.description} />
-  );
-
   if (plan.state === "needs_confirmation")
     return (
       <div className="grid gap-8">
-        {header}
         <EmptyState
           icon={IconScale}
           title={t.needsConfirmation.title}
@@ -52,7 +46,6 @@ export function PlanView({
   if (plan.state === "proposal")
     return (
       <div className="grid gap-8">
-        {header}
         <PlanForm
           projectId={projectId}
           items={plan.items}
@@ -63,7 +56,6 @@ export function PlanView({
 
   return (
     <div className="grid gap-8">
-      {header}
       <ToneCallout tone="success">
         {t.launched(formatDateTime(plan.launchedAt), plan.launchedBy)}{" "}
         <Link

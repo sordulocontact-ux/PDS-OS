@@ -1,7 +1,6 @@
 import { MasterFactAction } from "@/components/master-workflow/master-fact-action";
 import { NetworkEngineersTable } from "@/components/master-workflow/network-engineers-table";
 import { AddToNetworkButton } from "@/components/network/add-to-network-button";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
@@ -44,10 +43,6 @@ export function MasterInventory({
   );
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader
-        title={lead ? fr.masterWorkflow.steps.prepare : t.title}
-        description={t.description}
-      />
       {lead}
 
       {inventory.hasTitles ? (

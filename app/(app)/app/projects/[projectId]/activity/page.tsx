@@ -1,7 +1,6 @@
 import { IconSquareActivityChart } from "nucleo-sharp-essential";
 
 import { ActivityTimeline } from "@/components/project-history/activity-timeline";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyState } from "@/components/shell/empty-state";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -27,7 +26,6 @@ export default async function ProjectActivityPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader title={t.title} description={t.description} />
       {events.length === 0 ? (
         <EmptyState
           icon={IconSquareActivityChart}

@@ -226,6 +226,8 @@ export const shell = {
       hint: "Ils voient le projet et tout ce qu'il contient, sans le modifier.",
     },
     back: "Tous les projets",
+    // Fil d'Ariane au-dessus d'une sous-page (« Master / Brief Mix/Master »).
+    trail: "Fil d'Ariane",
     // Sidebar contextuelle du projet (ticket « Architecture globale »,
     // 08/10/2026) : Vue d'ensemble et Cadrage, puis les workflows en
     // parallèle, puis le pilotage (docs/DESIGN.md § 4).

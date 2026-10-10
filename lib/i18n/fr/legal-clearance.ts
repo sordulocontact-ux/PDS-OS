@@ -300,7 +300,7 @@ export const legalClearance = {
     read: "Lire la réponse",
     reading: "Lecture…",
     understood: "Ce que PO a compris",
-    termsRead: "Conditions lues par PO dans leur réponse",
+    termsRead: "Conditions de leur réponse, lues par PO et relues par l'équipe",
     verbatim:
       "Rien n'est gardé qui ne soit mot pour mot dans leur réponse. Corrigez si besoin.",
     refusal: "Un refus",
@@ -308,6 +308,7 @@ export const legalClearance = {
     toDirection: "Envoyer à la direction",
     recordRefusal: "Enregistrer le refus",
     amount: "Montant",
+    amountInvalid: "Écrivez un montant en euros, par exemple 2 000.",
     share: "Part",
     credits: "Crédits",
     countered:

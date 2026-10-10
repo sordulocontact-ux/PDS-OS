@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { SplitEditor } from "@/components/legal/splits/split-editor";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { LinksDialog } from "@/components/ui/links-dialog";
+import { useShowLinks } from "@/components/ui/one-time-links";
 import { fr } from "@/lib/i18n/fr";
 import {
   newSplitLink,
@@ -72,30 +72,22 @@ export function SplitEditorButton({
   );
 }
 
-function useLinks(title: string) {
+/** Shows the split's links once, in the dialog that outlives the page's
+ * refresh (the button that asked for them moves to « En attente »). */
+function useShowSplitLinks(title: string) {
   const router = useRouter();
-  const [links, setLinks] = useState<SplitLink[] | null>(null);
+  const show = useShowLinks();
   const t = fr.legalSplits.links;
-  const dialog = (
-    <LinksDialog
-      open={links !== null}
-      onClose={() => {
-        setLinks(null);
-        router.refresh();
-      }}
-      title={t.title(title)}
-      description={t.body}
-      links={(links ?? []).map((l) => ({
-        key: l.entryId,
-        label: l.name,
-        url: l.url,
-      }))}
-      copyLabel={t.copy}
-      copiedLabel={t.copied}
-      closeLabel={t.close}
-    />
-  );
-  return { setLinks, dialog };
+  return (links: SplitLink[]) =>
+    show({
+      title: t.title(title),
+      description: t.body,
+      links: links.map((l) => ({ key: l.entryId, label: l.name, url: l.url })),
+      copyLabel: t.copy,
+      copiedLabel: t.copied,
+      closeLabel: t.close,
+      onClose: () => router.refresh(),
+    });
 }
 
 /** « Envoyer pour confirmation »: the draft (or the split of the title's
@@ -112,28 +104,25 @@ export function ProposeSplitButton({
 }) {
   const t = fr.legalSplits.page;
   const [pending, startTransition] = useTransition();
-  const { setLinks, dialog } = useLinks(title);
+  const setLinks = useShowSplitLinks(title);
   return (
-    <>
-      <Button
-        size="sm"
-        disabled={pending}
-        aria-busy={pending || undefined}
-        onClick={() =>
-          startTransition(async () => {
-            const result =
-              "versionId" in target
-                ? await proposeSplit(projectId, target.versionId)
-                : await proposeTitleSplit(projectId, target.masterId);
-            if (result.ok) setLinks(result.data);
-            else toast.error(result.error);
-          })
-        }
-      >
-        {pending ? t.proposing : t.propose}
-      </Button>
-      {dialog}
-    </>
+    <Button
+      size="sm"
+      disabled={pending}
+      aria-busy={pending || undefined}
+      onClick={() =>
+        startTransition(async () => {
+          const result =
+            "versionId" in target
+              ? await proposeSplit(projectId, target.versionId)
+              : await proposeTitleSplit(projectId, target.masterId);
+          if (result.ok) setLinks(result.data);
+          else toast.error(result.error);
+        })
+      }
+    >
+      {pending ? t.proposing : t.propose}
+    </Button>
   );
 }
 
@@ -150,25 +139,22 @@ export function NewSplitLinkButton({
   title: string;
 }) {
   const [pending, startTransition] = useTransition();
-  const { setLinks, dialog } = useLinks(title);
+  const setLinks = useShowSplitLinks(title);
   return (
-    <>
-      <Button
-        variant="outline"
-        size="xs"
-        disabled={pending}
-        className="relative z-10"
-        onClick={() =>
-          startTransition(async () => {
-            const result = await newSplitLink(projectId, entryId);
-            if (result.ok) setLinks([{ entryId, name, url: result.data }]);
-            else toast.error(result.error);
-          })
-        }
-      >
-        {fr.legalSplits.page.newLink}
-      </Button>
-      {dialog}
-    </>
+    <Button
+      variant="outline"
+      size="xs"
+      disabled={pending}
+      className="relative z-10"
+      onClick={() =>
+        startTransition(async () => {
+          const result = await newSplitLink(projectId, entryId);
+          if (result.ok) setLinks([{ entryId, name, url: result.data }]);
+          else toast.error(result.error);
+        })
+      }
+    >
+      {fr.legalSplits.page.newLink}
+    </Button>
   );
 }

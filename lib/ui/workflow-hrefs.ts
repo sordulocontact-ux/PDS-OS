@@ -2,8 +2,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
 // Where each step of a workflow is done (lib/workflow-status/rules.ts names
-// the step): the overview's cards and actions open it. A step without a page
-// (Production, Suivi & bilan) opens its workflow's entry.
+// the step): the overview's cards and actions open it.
 export function workflowStepHref(
   projectId: string,
   workflow: string,
@@ -21,9 +20,13 @@ export function workflowStepHref(
     case "marketing":
       return step === "conception"
         ? routes.projectDesign(projectId)
-        : step === "activations"
-          ? routes.projectActivations(projectId)
-          : routes.projectStrategy(projectId);
+        : step === "production"
+          ? routes.projectProduction(projectId)
+          : step === "activations"
+            ? routes.projectActivations(projectId)
+            : step === "review"
+              ? routes.projectReview(projectId)
+              : routes.projectStrategy(projectId);
     default:
       return step === "online"
         ? routes.projectReleaseOnline(projectId)

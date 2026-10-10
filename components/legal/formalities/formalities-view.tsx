@@ -1,5 +1,4 @@
 import { FormalityCard } from "@/components/legal/formalities/formality-card";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { fr } from "@/lib/i18n/fr";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
@@ -15,7 +14,6 @@ export function FormalitiesView({
   const t = fr.legalFormalities.page;
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader title={t.title} description={t.description} />
       {titles.length === 0 ? (
         <EmptyNote>{t.empty}</EmptyNote>
       ) : (

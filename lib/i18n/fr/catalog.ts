@@ -373,7 +373,12 @@ export const catalog = {
     cancel: "Annuler",
     // The title exists, its file did not follow: said on the title's page.
     fileFailed:
-      "Le titre est créé, mais le fichier audio n'a pas pu être envoyé. Ajoutez-le depuis l'onglet Audio.",
+      "Le titre est créé, mais le fichier audio n'a pas pu être envoyé. Ne recréez pas le titre : ajoutez le fichier depuis son onglet Audio.",
+    createdSending: (title: string) =>
+      `« ${title} » est créé. Envoi du fichier audio…`,
+    createdOpening: (title: string) => `« ${title} » est créé. Ouverture…`,
+    openTitle: "Ouvrir le titre",
+    addFileAgain: "Ajouter le fichier",
     errors: {
       artistsRequired: "Ajoutez au moins un artiste.",
       isrcInvalid:

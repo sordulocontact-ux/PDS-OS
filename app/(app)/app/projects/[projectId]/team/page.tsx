@@ -1,7 +1,6 @@
 import { ExternalTeamTable } from "@/components/project-work/external-team-table";
 import { TeamWorkloadTable } from "@/components/project-work/team-workload-table";
 import { CreativeTeam } from "@/components/projects/creative-team";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { PageSection } from "@/components/shell/page-section";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -48,8 +47,6 @@ export default async function ProjectTeamPage({
 
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader title={t.title} description={t.description} />
-
       <PageSection id="team-internal" title={t.internal}>
         <TeamWorkloadTable
           projectId={project.id}

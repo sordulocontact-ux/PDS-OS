@@ -151,6 +151,9 @@ export const framing = {
     invalid_transition: "Cette action n'est pas possible dans l'état actuel.",
     no_validator:
       "Aucun directeur général actif : personne à qui demander la validation.",
+    deliveries_open:
+      "Chaque livrable doit être livré avant de demander la validation de la production.",
+    review_required: "Écrivez le bilan avant de demander la clôture du projet.",
     multiple_validators:
       "Plusieurs directeurs généraux actifs : contactez-en un directement.",
     not_the_validator: "Seul le valideur désigné peut décider.",

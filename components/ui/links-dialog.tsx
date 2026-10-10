@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Input } from "@/components/ui/input";
 
+export type OneTimeLink = {
+  key: string;
+  label: string;
+  url: string;
+  /** A ready e-mail carrying the link (`mailto:`), when the address is known. */
+  email?: { href: string; label: string };
+};
+
 /**
  * Links shown once, to copy and send by any channel (fiches de
  * renseignements, confirmations de répartition): each one selectable by
@@ -25,7 +33,7 @@ export function LinksDialog({
   onClose: () => void;
   title: string;
   description: string;
-  links: Array<{ key: string; label: string; url: string }>;
+  links: OneTimeLink[];
   copyLabel: string;
   copiedLabel: string;
   closeLabel: string;
@@ -59,6 +67,17 @@ export function LinksDialog({
                 className="font-mono text-sm"
                 onFocus={(event) => event.currentTarget.select()}
               />
+              {link.email && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="shrink-0"
+                  render={<a href={link.email.href} />}
+                  nativeButton={false}
+                >
+                  {link.email.label}
+                </Button>
+              )}
               <Button type="button" size="lg" className="shrink-0" onClick={() => copy(link.url)}>
                 {copyLabel}
               </Button>

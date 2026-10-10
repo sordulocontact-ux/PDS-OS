@@ -89,12 +89,12 @@ export const workflowStatus = {
     },
     master: {
       what: "Master final de chaque titre",
-      toWhat: "Mise en ligne",
+      toWhat: "Livraison au distributeur",
       ready: "Chaque titre a son master final",
     },
     clearances: {
       what: "Emprunts sécurisés",
-      toWhat: "Mise en ligne",
+      toWhat: "Livraison au distributeur",
       ready: (n: number) =>
         `${n} emprunt${n > 1 ? "s" : ""} sécurisé${n > 1 ? "s" : ""} sur ${n}`,
       open: (n: number, names: string) =>
@@ -105,7 +105,8 @@ export const workflowStatus = {
       toWhat: "Contrats de prestation",
       missing: "À choisir dans le Brief Mix/Master",
     },
-    blockedBy: (list: string) => `La mise en ligne attend : ${list}`,
+    blockedBy: (list: string) =>
+      `La livraison au distributeur attend : ${list}`,
   },
   master: {
     noTitle: "Aucun titre rattaché au projet",
@@ -163,10 +164,9 @@ export const workflowStatus = {
     record: "Sortie à enregistrer : titre, ISRC, date",
     isrc: "ISRC à renseigner",
     date: "Date de sortie à renseigner",
-    online: (date: string | null) =>
-      date
-        ? `Pas encore détectée en ligne (sortie prévue le ${date})`
-        : "Pas encore détectée en ligne",
+    deliver: "Prête : à livrer au distributeur",
+    online: (delivered: string, to: string, planned: string | null) =>
+      `Livrée à ${to} le ${delivered} : pas encore en ligne${planned ? ` (sortie prévue le ${planned})` : ""}`,
     done: (date: string) => `En ligne depuis le ${date}`,
     progress: (done: number) => `Identifiants et date : ${done} sur 2`,
   },

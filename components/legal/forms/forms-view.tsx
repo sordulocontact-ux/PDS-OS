@@ -1,5 +1,4 @@
 import { FormRowActions } from "@/components/legal/forms/form-row-actions";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -23,9 +22,6 @@ export function FormsView({
   const t = fr.legalForms.page;
   return (
     <div className="grid gap-8">
-      <div className="flex flex-col gap-3">
-        <ProjectPageHeader title={t.title} description={t.description} />
-      </div>
       <PageSection card id="legal-forms" title={t.title}>
         {rows.length === 0 ? (
           <EmptyNote>{t.empty}</EmptyNote>

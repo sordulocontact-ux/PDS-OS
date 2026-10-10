@@ -8,7 +8,7 @@ import { deleteBudgetLine } from "@/lib/budget/actions";
 import type { BudgetLine } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Confirms a definitive deletion; stays open if it fails (error in a toast).
+// Confirms a definitive deletion; stays open if it fails, with the error.
 export function DeleteBudgetLineDialog({
   projectId,
   line,
@@ -19,7 +19,9 @@ export function DeleteBudgetLineDialog({
   onClose: () => void;
 }) {
   const t = fr.budget.confirm;
-  const { pending, run } = useFramingAction();
+  const { pending, run, error, clearError } = useFramingAction({
+    inline: true,
+  });
 
   function confirm() {
     if (!line) return;
@@ -35,7 +37,11 @@ export function DeleteBudgetLineDialog({
   return (
     <ConfirmDialog
       open={line !== null}
-      onOpenChange={(open) => !open && onClose()}
+      onOpenChange={(open) => {
+        if (open) return;
+        clearError();
+        onClose();
+      }}
       title={t.title}
       description={line ? t.body(line.label) : ""}
       cancelLabel={fr.budget.form.cancel}
@@ -44,6 +50,7 @@ export function DeleteBudgetLineDialog({
       pendingLabel={t.deleting}
       pending={pending}
       destructive
+      error={error}
       onConfirm={confirm}
     />
   );

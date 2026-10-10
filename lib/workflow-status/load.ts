@@ -199,7 +199,9 @@ async function distributionFacts(projectId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("releases")
-    .select("isrc, planned_release_date, online_detected_at")
+    .select(
+      "isrc, planned_release_date, online_detected_at, online_confirmed_on, delivered_on, network_contacts!releases_delivered_to_same_org(name)",
+    )
     .eq("project_id", projectId)
     .order("created_at", { ascending: true })
     .limit(1)
@@ -210,7 +212,14 @@ async function distributionFacts(projectId: string) {
       recorded: data !== null,
       isrc: Boolean(data?.isrc),
       plannedDate: data?.planned_release_date ?? null,
-      onlineSince: data?.online_detected_at ?? null,
+      delivered: data?.delivered_on
+        ? {
+            on: data.delivered_on,
+            to: data.network_contacts?.name ?? "—",
+          }
+        : null,
+      onlineSince:
+        data?.online_detected_at ?? data?.online_confirmed_on ?? null,
     },
     formatDate,
   );

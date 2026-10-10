@@ -1,5 +1,4 @@
 import { ClearanceDrawer } from "@/components/legal/clearance/clearance-drawer";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -24,10 +23,6 @@ export function ClearancesView({
   const { items, ...context } = clearances;
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader
-        title={t.page.title}
-        description={t.page.description}
-      />
       <PageSection card id="legal-clearances" title={t.page.title}>
         {items.length === 0 ? (
           <EmptyNote>{t.page.empty}</EmptyNote>

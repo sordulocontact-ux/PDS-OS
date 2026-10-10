@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { MappingPanel } from "@/components/legal/contracts/mapping-panel";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,13 +33,7 @@ export function AgreementsView({
   );
   return (
     <div className="grid gap-8">
-      <div className="flex flex-col gap-3">
-        <ProjectPageHeader
-          title={t.title}
-          description={t.description}
-          action={templatesLink}
-        />
-      </div>
+      <ProjectPageActions>{templatesLink}</ProjectPageActions>
       {!agreements.hasValidatedTemplate && (
         <ToneCallout tone="warning">{t.noTemplate}</ToneCallout>
       )}

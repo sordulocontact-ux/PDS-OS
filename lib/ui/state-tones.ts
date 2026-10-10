@@ -79,6 +79,28 @@ export const needTone: Record<string, Tone> = {
 
 export const onlineTone = (online: boolean): Tone =>
   online ? "success" : "neutral";
+
+/** A deliverable on its way to « Livré » (lib/production/rules.ts). */
+export const productionDeliveryTone: Record<
+  "no_file" | "to_approve" | "to_check" | "to_deliver" | "delivered",
+  Tone
+> = {
+  no_file: "neutral",
+  to_approve: "warning",
+  to_check: "info",
+  to_deliver: "info",
+  delivered: "success",
+};
+
+/** A release before its distributor: blocked, ready to leave, delivered. */
+export const releaseDeliveryTone: Record<
+  "not_ready" | "ready" | "delivered",
+  Tone
+> = {
+  not_ready: "warning",
+  ready: "info",
+  delivered: "success",
+};
 export const overdueTone: Tone = "danger";
 
 /**

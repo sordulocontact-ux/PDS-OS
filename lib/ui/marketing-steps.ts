@@ -5,8 +5,8 @@ import { fr } from "@/lib/i18n/fr";
 // Stratégie, Conception, Production, Activations, Suivi & bilan. An
 // organisation, not a sequence: every step with a page opens on its own,
 // except the Stratégie before the Plan du Projet launches it. A check comes
-// from the project's stage (`stageKey`), never from the step's position;
-// Production and Suivi & bilan have no page yet. The project's stages are
+// from the project's stage (`stageKey`), never from the step's position.
+// Production and Suivi & bilan got their page on 10/10/2026. The project's stages are
 // unchanged (Défense keeps its stage, shown nowhere until it is decided).
 const STEPS = [
   {
@@ -15,9 +15,13 @@ const STEPS = [
     href: routes.projectStrategy,
   },
   { key: "conception", stageKey: "design", href: routes.projectDesign },
-  { key: "production", stageKey: "production", href: null },
+  {
+    key: "production",
+    stageKey: "production",
+    href: routes.projectProduction,
+  },
   { key: "activations", stageKey: null, href: routes.projectActivations },
-  { key: "review", stageKey: "review", href: null },
+  { key: "review", stageKey: "review", href: routes.projectReview },
 ] as const;
 
 /** Every page of the workflow: where its chevrons show. */

@@ -17,7 +17,7 @@ export type ProjectRelease = {
 };
 
 const RELEASE_COLUMNS =
-  "id, organization_id, project_id, title, isrc, upc, planned_release_date, spotify_url, online_detected_at, last_checked_at, smartlink_token, smartlink_enabled, created_by, created_at, updated_at";
+  "id, organization_id, project_id, title, isrc, upc, planned_release_date, spotify_url, online_detected_at, last_checked_at, smartlink_token, smartlink_enabled, created_by, created_at, updated_at, delivered_on, delivered_to_contact_id, delivery_note, delivery_recorded_by, delivery_recorded_at, online_confirmed_on, online_confirmed_url, online_confirmed_by";
 
 /**
  * The project and its release (V1: one release per project, the oldest).

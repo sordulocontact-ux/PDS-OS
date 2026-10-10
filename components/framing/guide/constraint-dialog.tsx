@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/framing/option-select";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
@@ -72,7 +73,7 @@ function ConstraintForm({
   onDone: () => void;
 }) {
   const t = fr.framingGuide.frame;
-  const { pending, run } = useFramingAction();
+  const { pending, run, error } = useFramingAction({ inline: true });
   const [type, setType] = useState<ConstraintType>(
     constraint && isConstraintType(constraint.type)
       ? constraint.type
@@ -132,6 +133,7 @@ function ConstraintForm({
           autoFocus
         />
       </div>
+      {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-wrap gap-2">
         <Button
           type="submit"

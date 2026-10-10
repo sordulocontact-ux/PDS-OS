@@ -2,7 +2,7 @@ import { IconBox2 } from "nucleo-sharp-essential";
 
 import { DeliverablesTable } from "@/components/project-plan/deliverables-table";
 import { EditInStrategy } from "@/components/project-plan/edit-in-strategy";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { EmptyState } from "@/components/shell/empty-state";
 import { StatTiles } from "@/components/ui/stat-tiles";
 import { requireApproved } from "@/lib/auth/dal";
@@ -30,16 +30,14 @@ export default async function ProjectDeliverablesPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader
-        title={t.title}
-        description={t.description}
-        action={
+      <ProjectPageActions>
+        {
           <EditInStrategy
             projectId={projectId}
             canEdit={canEditProject(access, project)}
           />
         }
-      />
+      </ProjectPageActions>
       {deliverables.length === 0 ? (
         <EmptyState icon={IconBox2} title={t.emptyTitle} body={t.emptyBody} />
       ) : (

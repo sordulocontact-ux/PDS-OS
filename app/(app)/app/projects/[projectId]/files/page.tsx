@@ -2,7 +2,6 @@ import { FormMessage } from "@/components/auth/form-message";
 import { FileLibrary } from "@/components/catalog/files/file-library";
 import { DesignFilesTable } from "@/components/project-history/design-files-table";
 import { FilesTable } from "@/components/project-history/files-table";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { PageSection } from "@/components/shell/page-section";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -45,7 +44,6 @@ export default async function ProjectFilesPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader title={t.title} description={t.description} />
       <PageSection id="documents" title={t.libraryTitle}>
         {library.error ? (
           <FormMessage kind="error">{fr.catalogFiles.loadError}</FormMessage>

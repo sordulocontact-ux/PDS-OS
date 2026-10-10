@@ -66,6 +66,13 @@ export function CreateMasterForm({
   const [audioState, setAudioState] = useState(values.audioState ?? "");
   const audio = useTitleAudioUpload(organizationId ?? null);
   const handled = useRef<unknown>(null);
+  // Once created on the page, the form gives way to what happens to the title:
+  // an emptied form left on screen got the title created twice (UX test of
+  // 09/10/2026, upload failed under load).
+  const createdMaster =
+    !onCreated && state.status === "created" ? state.master : null;
+  // The title whose file could not follow it.
+  const [fileFailed, setFileFailed] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.status !== "created" || handled.current === state) return;
@@ -74,19 +81,45 @@ export function CreateMasterForm({
       onCreated(state.master);
       return;
     }
-    // Page creation with a file: send it to the new title, then open it.
-    void audio.send(state.master.id, audioState).then((ok) => {
-      router.push(
-        ok
-          ? routes.master(state.master.id)
-          : routes.masterAudio(state.master.id),
-      );
+    // Page creation with a file: send it to the new title, then open it. A
+    // failed file is said here, with the way to add it again.
+    const master = state.master;
+    void audio.send(master.id, audioState).then((ok) => {
+      if (ok) router.push(routes.master(master.id));
+      else setFileFailed(master.id);
     });
     // onCreated changes identity on every render of the parent.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
   const intent = onCreated ? "dialog" : audio.file ? "upload" : "page";
+
+  if (createdMaster)
+    return fileFailed === createdMaster.id ? (
+      <div className="flex flex-col gap-5">
+        <FormMessage kind="error">{t.fileFailed}</FormMessage>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Link
+            href={routes.master(createdMaster.id)}
+            className={buttonVariants({ variant: "ghost", size: "lg" })}
+          >
+            {t.openTitle}
+          </Link>
+          <Link
+            href={routes.masterAudio(createdMaster.id)}
+            className={buttonVariants({ size: "lg" })}
+          >
+            {t.addFileAgain}
+          </Link>
+        </div>
+      </div>
+    ) : (
+      <FormMessage kind="info">
+        {audio.sending
+          ? t.createdSending(createdMaster.title)
+          : t.createdOpening(createdMaster.title)}
+      </FormMessage>
+    );
 
   return (
     <form

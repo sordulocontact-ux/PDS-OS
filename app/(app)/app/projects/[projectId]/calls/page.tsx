@@ -1,6 +1,6 @@
 import { CallList } from "@/components/calls/call-list";
 import { CreateCallForm } from "@/components/calls/create-call-form";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { requireApproved } from "@/lib/auth/dal";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -28,20 +28,16 @@ export default async function ProjectCallsPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader
-        title={t.title}
-        description={t.description}
-        action={
-          !empty && (
-            <CreateCallForm
-              projectId={projectId}
-              defaultOccurredAt={toParisLocalInput(now)}
-              defaultTitle=""
-              initiallyOpen={false}
-            />
-          )
-        }
-      />
+      <ProjectPageActions>
+        {!empty && (
+          <CreateCallForm
+            projectId={projectId}
+            defaultOccurredAt={toParisLocalInput(now)}
+            defaultTitle=""
+            initiallyOpen={false}
+          />
+        )}
+      </ProjectPageActions>
 
       {empty ? (
         <section className="grid gap-4">

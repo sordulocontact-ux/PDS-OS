@@ -9,6 +9,7 @@ import { MobileNav } from "@/components/shell/mobile-nav";
 import { Sidebar } from "@/components/shell/sidebar";
 import { CollapsedNavProvider } from "@/components/shell/use-collapsed-nav";
 import { UserPanel } from "@/components/shell/user-panel";
+import { OneTimeLinksProvider } from "@/components/ui/one-time-links";
 import { can } from "@/lib/auth/access";
 import { getAccess } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -69,37 +70,39 @@ export default async function AppLayout({
     >
       <AssistantProvider launcher={signedIn}>
         <CollapsedNavProvider>
-          <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
-            <AccessWatcher
-              current={access.state}
-              role={access.role}
-              intervalMs={60_000}
-            />
-            {signedIn && access.personId && (
-              <NotificationListener personId={access.personId} />
-            )}
+          <OneTimeLinksProvider>
+            <div className="flex flex-1 bg-[var(--surface-app)] md:p-[var(--shell-inset)]">
+              <AccessWatcher
+                current={access.state}
+                role={access.role}
+                intervalMs={60_000}
+              />
+              {signedIn && access.personId && (
+                <NotificationListener personId={access.personId} />
+              )}
 
-            <Sidebar
-              isAdmin={isAdmin}
-              pendingMembers={pendingMembers}
-              bell={bell("nav")}
-              name={name}
-              email={access.email}
-            />
+              <Sidebar
+                isAdmin={isAdmin}
+                pendingMembers={pendingMembers}
+                bell={bell("nav")}
+                name={name}
+                email={access.email}
+              />
 
-            <div className="flex min-w-0 flex-1 flex-col">
-              <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
-                <MobileNav
-                  isAdmin={isAdmin}
-                  pendingMembers={pendingMembers}
-                  footer={userPanel}
-                />
-                {brand}
-                <div className="ml-auto">{bell("ghost")}</div>
-              </header>
-              <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+              <div className="flex min-w-0 flex-1 flex-col">
+                <header className="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-[color:var(--border-hairline)] bg-background px-2 md:hidden">
+                  <MobileNav
+                    isAdmin={isAdmin}
+                    pendingMembers={pendingMembers}
+                    footer={userPanel}
+                  />
+                  {brand}
+                  <div className="ml-auto">{bell("ghost")}</div>
+                </header>
+                <main className="flex min-w-0 flex-1 flex-col">{children}</main>
+              </div>
             </div>
-          </div>
+          </OneTimeLinksProvider>
         </CollapsedNavProvider>
       </AssistantProvider>
     </FeedbackProvider>

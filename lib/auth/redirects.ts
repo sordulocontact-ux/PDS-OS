@@ -173,6 +173,8 @@ export const routes = {
   projectLegalStep: (id: string, step: string) =>
     `/app/projects/${id}/legal/${step}`,
   projectActivations: (id: string) => `/app/projects/${id}/activations`,
+  projectProduction: (id: string) => `/app/projects/${id}/production`,
+  projectReview: (id: string) => `/app/projects/${id}/review`,
   projectWork: (id: string) => `/app/projects/${id}/work`,
   projectTeam: (id: string) => `/app/projects/${id}/team`,
   projectDeliverables: (id: string) => `/app/projects/${id}/deliverables`,

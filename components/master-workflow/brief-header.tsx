@@ -1,6 +1,6 @@
 "use client";
 
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import {
   toBriefItem,
   useApplyBrief,
@@ -33,18 +33,14 @@ export function BriefHeader({
   const { pending, apply } = useApplyBrief(projectId);
   return (
     <div className="flex flex-col gap-4">
-      <ProjectPageHeader
-        title={t.title}
-        description={t.description}
-        action={
-          canEdit && (
-            <div className="flex shrink-0 flex-wrap gap-2">
-              {actions}
-              <DictationButton dictation={dictation} label={t.dictate} />
-            </div>
-          )
-        }
-      />
+      <ProjectPageActions>
+        {canEdit && (
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {actions}
+            <DictationButton dictation={dictation} label={t.dictate} />
+          </div>
+        )}
+      </ProjectPageActions>
       {canEdit && dictation.phase.name !== "idle" && (
         <DictationPanel
           dictation={dictation}

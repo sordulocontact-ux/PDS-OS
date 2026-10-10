@@ -96,7 +96,9 @@ export function projectSections(
         [
           routes.projectStrategy(projectId),
           routes.projectDesign(projectId),
+          routes.projectProduction(projectId),
           routes.projectActivations(projectId),
+          routes.projectReview(projectId),
         ].some((href) => below(href)(p)),
       group: "workflows",
     },
@@ -149,4 +151,50 @@ export function projectSections(
     (section) =>
       !workflowKeys.includes(section.key) || workflows.includes(section.key),
   );
+}
+
+export type ProjectCrumb = { label: string; href?: string };
+
+// Title of a project page (Figma « PDS OS », node 76:3145): the name of the
+// section it belongs to, nothing about the project (the switcher of the
+// sidebar names it). A page opened from inside a section rather than from
+// its chevrons — the Brief Mix/Master, a branch of the Juridique, the Brief
+// de cadrage — adds its own name after the section's, which becomes a link:
+// the trail replaces the « ← … » links those pages had. The steps of a
+// workflow (Mixage, Plan d'action…) add nothing: their chevrons name them.
+// The last crumb is the page's h1; none outside every section.
+export function projectTrail(
+  projectId: string,
+  pathname: string,
+  sections: ProjectSection[],
+): ProjectCrumb[] {
+  const section = sections.find((item) => item.match(pathname));
+  if (!section) return [];
+
+  const home = { label: section.label, href: section.href };
+  const legal = routes.projectLegal(projectId);
+  // A branch of the Juridique opens from an action of the Plan d'action:
+  // the trail goes back through it.
+  const plan = {
+    label: fr.shell.project.legalSteps.backToPlan,
+    href: routes.projectLegalStep(projectId, "plan"),
+  };
+  const subPages: Record<string, ProjectCrumb[]> = {
+    [`${routes.projectMaster(projectId)}/brief`]: [
+      { label: fr.masterWorkflow.brief.title },
+    ],
+    [routes.projectFramingBrief(projectId)]: [
+      { label: fr.framingIntel.brief.title },
+    ],
+    [`${legal}/forms`]: [plan, { label: fr.legalForms.page.title }],
+    [`${legal}/contracts`]: [
+      plan,
+      { label: fr.legalContracts.agreements.title },
+    ],
+    [`${legal}/splits`]: [plan, { label: fr.legalSplits.page.title }],
+    [`${legal}/clearances`]: [plan, { label: fr.legalClearance.page.title }],
+    [`${legal}/formalities`]: [plan, { label: fr.legalFormalities.page.title }],
+  };
+  const below = subPages[pathname];
+  return below ? [home, ...below] : [{ label: section.label }];
 }

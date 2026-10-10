@@ -4,7 +4,6 @@ import { DeclareButton } from "@/components/legal/declare-button";
 import { FactAction } from "@/components/legal/fact-action";
 import { LegalTitlesTable } from "@/components/legal/legal-titles-table";
 import { ProjectContactsSection } from "@/components/legal/project-contacts-section";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
@@ -53,10 +52,6 @@ export function LegalInventory({
     : all;
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader
-        title={t.title}
-        description={lead ? t.dossierDescription : t.description}
-      />
       {lead}
 
       <StatTiles

@@ -43,7 +43,9 @@ export function PlanBoard({
 }) {
   const t = fr.framingIntel.plan;
   const router = useRouter();
-  const { pending, run } = useFramingAction();
+  const { pending, run, error, clearError } = useFramingAction({
+    inline: true,
+  });
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [choices, setChoices] = useState<Record<string, Choice>>(() =>
@@ -241,7 +243,10 @@ export function PlanBoard({
       )}
       <ConfirmDialog
         open={confirming}
-        onOpenChange={setConfirming}
+        onOpenChange={(open) => {
+          clearError();
+          setConfirming(open);
+        }}
         title={t.launchConfirmTitle}
         description={t.launchConfirmBody}
         cancelLabel={fr.framingIntel.guide.cancel}
@@ -249,6 +254,7 @@ export function PlanBoard({
         confirmLabel={t.launch}
         pendingLabel={t.launching}
         pending={pending}
+        error={error}
         onConfirm={() =>
           run(
             () =>

@@ -6,6 +6,7 @@ import {
   ProjectSidebar,
   ProjectSidebarMobile,
 } from "@/components/projects/project-sidebar";
+import { ProjectPageTitle } from "@/components/projects/project-page-title";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { SectionSteps } from "@/components/projects/section-steps";
@@ -26,7 +27,8 @@ import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
 import { allInOrder } from "@/lib/utils/parallel";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
-// Project frame: header, then the sections — either the contextual sidebar
+// Project frame: the page's title (the section's name once launched,
+// ProjectPageTitle), then the sections — either the contextual sidebar
 // next to the content (Figma "Double sidebar") or one row of tabs under the
 // header, never both: DOUBLE_SIDEBAR in lib/ui/project-sections.ts picks one
 // (docs/DESIGN.md § 4). With the sidebar, the main app sidebar collapses to
@@ -80,26 +82,35 @@ export default async function ProjectLayout({
         />
       )}
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-5 px-4 pt-6 md:px-8 md:pt-8">
-        <header className="flex flex-col gap-1">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 pt-6 md:px-8">
+        {/* Launched: the section's name, nothing about the project (the
+            sidebar's switcher names it, Figma node 76:3145). Before, no
+            sections: the project itself is the page. */}
+        {project.stages.length > 0 ? (
+          <ProjectPageTitle
+            projectId={project.id}
+            canSeeLegal={canSeeLegal}
+            workflows={flows?.workflows}
+          />
+        ) : (
+          <header className="flex flex-col gap-1">
             <h1 className="text-2xl font-semibold tracking-tight break-words">
               {project.title}
             </h1>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {[
-              project.artistName,
-              projectKindLabel({
-                type: project.type,
-                musicFormat: project.musicFormat,
-                contentFormatName: project.contentFormat?.name ?? null,
-              }),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
-        </header>
+            <p className="text-sm text-muted-foreground">
+              {[
+                project.artistName,
+                projectKindLabel({
+                  type: project.type,
+                  musicFormat: project.musicFormat,
+                  contentFormatName: project.contentFormat?.name ?? null,
+                }),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </header>
+        )}
 
         {/* Sections exist once the project is launched, not before. */}
         {project.stages.length > 0 && (

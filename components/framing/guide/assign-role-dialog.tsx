@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/framing/option-select";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { PersonPickerField } from "@/components/network/person-picker-field";
@@ -99,7 +100,7 @@ function AssignForm({
   onDone: () => void;
 }) {
   const t = fr.framingGuide.team;
-  const { pending, run } = useFramingAction();
+  const { pending, run, error } = useFramingAction({ inline: true });
   const [role, setRole] = useState<TeamRoleKey>(card?.role ?? roles[0]);
   // The current holder, when someone outside the team: picked again.
   const holder = card?.member && !card.member.person_id ? card.member : null;
@@ -198,6 +199,7 @@ function AssignForm({
           setPicked({ contactId: option?.id ?? null, name: typed })
         }
       />
+      {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-wrap gap-2">
         <Button
           type="submit"

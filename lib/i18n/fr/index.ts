@@ -34,7 +34,9 @@ import { projectHistory } from "./project-history";
 import { projectPlan } from "./project-plan";
 import { projectWork } from "./project-work";
 import { records } from "./records";
+import { production, projectReview } from "./production";
 import { release } from "./release";
+import { releaseDelivery } from "./release-delivery";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
 import { transmission } from "./transmission";
@@ -54,7 +56,10 @@ export const fr = {
   framingIntel,
   strategy,
   design,
+  production,
+  projectReview,
   release,
+  releaseDelivery,
   assistant,
   assistantRecords,
   voice,

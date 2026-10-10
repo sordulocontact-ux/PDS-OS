@@ -860,7 +860,8 @@ poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, R
 ## 8 ter. Pages d'un projet lancé
 
 Une page par section de la sidebar du projet, toutes derrière `requireLaunchedProject`
-(404 avant lancement), en-tête `ProjectPageHeader`. Tout ce qui est état, retard, décompte
+(404 avant lancement), titre = nom de la section (`ProjectPageTitle` dans le layout,
+fil d'Ariane sur une sous-page), action éventuelle en `ProjectPageActions`. Tout ce qui est état, retard, décompte
 ou total est calculé par le code, jamais par PO.
 
 **Architecture globale (ticket du 08/10/2026, lot 1 : navigation).** La sidebar sépare le
@@ -2119,6 +2120,53 @@ lots, chacun utile seul.
   Budget à quatre états (Estimé / Proposé / Engagé / Payé) étendra `budget_lines` au lot
   suivant ; le Brief n'en garde que les tarifs estimés.
 
+## 8 octies. Distribution : livraison au distributeur et mise en ligne
+
+Retour du test UX du 09/10/2026 (`docs/TEST-UX-2026-10-09-PARCOURS-COMPLET.md` § 1.5) : une sortie
+ne pouvait être ni livrée au distributeur ni passée « en ligne » à la main. Source : ticket
+Juridique 08 (Récap Sortie), MVP : « La validation finale précède l'action manuelle The Orchard »,
+« Aucune intégration externe absente n'est présentée comme terminée ».
+
+- **Rien n'est envoyé par PDS OS** : la livraison se fait chez le distributeur, le responsable du
+  projet l'enregistre (`record_release_delivery` : distributeur choisi dans le Réseau, date,
+  note). Colonnes de `releases` écrites par ces fonctions seulement (migration
+  `20261010000201_release_delivery.sql`).
+- **Prête à livrer** est calculé par le code (`lib/release/delivery.ts`, deux listes comme dans le
+  ticket) : bloquent l'ISRC, la date de sortie et ce que les autres workflows doivent à la
+  Distribution (`dependencies` : master final de chaque titre, emprunts sécurisés). L'UPC est à
+  suivre sans bloquer (« L'UPC appartient à la Release », souvent donné par le distributeur).
+  L'action serveur revérifie avec la même règle.
+- **« Livré ne signifie pas Publié »** (ticket Production § 21) : la mise en ligne reste détectée par
+  le cron (`online_detected_at`), ou confirmée à la main une fois livrée (`confirm_release_online`,
+  date entre la livraison et aujourd'hui, lien d'écoute facultatif). « Rouvrir la livraison » est
+  refusé une fois en ligne.
+- Statut commun : préparée → « Prête : à livrer » (En cours, Bloqué si une dépendance manque) →
+  livrée → En attente de la mise en ligne → Terminé. Tout se passe sur l'étape **En ligne**
+  (`DeliveryCard` en tête de page).
+
+## 8 nonies. Marketing : Production et Suivi & bilan
+
+Même test UX : « Production » et « Suivi & bilan » n'avaient pas de page, un contenu ne pouvait être
+ni livré ni clos. Migration `20261010000301_production_delivery_and_review.sql`.
+
+- **Production** (`/production`, `lib/production/`) : la tranche du ticket « Workflow Production
+  complet » qui termine le parcours, § 20 : par livrable engagé dans la Stratégie, sa source créative
+  (version validée en Conception), un **fichier final** (lien https vers les exports), puis **trois
+  décisions distinctes et dans l'ordre**, chacune avec qui et quand : version finale validée (le
+  responsable ou un directeur créatif du projet), exports contrôlés, livré (le responsable). Un
+  nouveau fichier annule les décisions du précédent ; « Rouvrir » aussi. Écritures seulement
+  pendant l'étape `production` (démarrée par le responsable, validée par le DG comme les autres) ;
+  sa validation est refusée tant qu'un livrable n'est pas livré (`deliveries_open`).
+- **Hors de cette tranche** (reste du ticket Production) : préproduction, équipes, call technique,
+  devis et matériel, feuille de service, tournage et rushes, retours horodatés, transmission à
+  Activations. À construire avec le ticket.
+- **Suivi & bilan** (`/review`, `lib/review/`) : l'état de chaque workflow (lu par
+  `loadWorkflowStates`), le bilan (résultats, ce qui a marché, à améliorer, `project_reviews`, écrit
+  pendant l'étape `review`), puis « Bilan & clôture » : le DG valide, le projet est clos (l'étape
+  `review` validée). Clôture refusée sans bilan écrit (`review_required`). Décision prise ici, faute
+  de ticket : la clôture n'exige pas que les autres workflows soient terminés, la direction en juge
+  en lisant l'état affiché.
+
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices
@@ -2209,6 +2257,14 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
   ancien que celui de la CLI et omet `isOneToOne` dans les relations (le typage des jointures
   casse). Ne pas remplacer `database.types.ts` par sa sortie : n'y reporter que les tables,
   colonnes et fonctions nouvelles.
+- **Lien « affiché une seule fois » perdu** (test UX du 09/10/2026) : une action serveur qui
+  `revalidatePath` re-rend la page, la ligne change d'état et le composant qui gardait le lien dans
+  son `useState` est démonté avec lui. Tout lien à usage unique passe par `useShowLinks()`
+  (`components/ui/one-time-links.tsx`, fournisseur monté dans `app/(app)/layout.tsx`), dont la
+  fenêtre survit au rafraîchissement.
+- **Erreur d'une action ouverte en modale** : un toast passe inaperçu sous une fenêtre ;
+  `useFramingAction({ inline: true })` rend l'erreur dans la fenêtre (`FormMessage`, `ConfirmDialog
+  error`).
 - **`\d` dans un gabarit** : `` new RegExp(`\d…`) `` perd la barre oblique (une séquence
   inconnue d'un gabarit vaut la lettre seule) ; écrire `String.raw` (`lib/framing/said.ts`).
 - Données de test locales : `admin@pds.test` / `Framing-test-2026!` (admin), projet

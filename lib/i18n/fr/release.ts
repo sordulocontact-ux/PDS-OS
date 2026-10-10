@@ -10,7 +10,7 @@ export const release = {
   online: {
     title: "En ligne",
     description:
-      "La détection du titre sur les plateformes et le smartlink public.",
+      "La livraison au distributeur, puis la détection du titre sur les plateformes et le smartlink public.",
     empty:
       "Enregistre d'abord la sortie dans la Préparation : la détection part de son ISRC.",
     toPrepare: "Aller à la Préparation",

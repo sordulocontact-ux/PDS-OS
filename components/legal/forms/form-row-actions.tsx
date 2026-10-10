@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { SubmissionDialog } from "@/components/legal/forms/submission-dialog";
 import { Button } from "@/components/ui/button";
-import { LinksDialog } from "@/components/ui/links-dialog";
+import { useShowLinks } from "@/components/ui/one-time-links";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { prepareLegalForm, setLegalFormState } from "@/lib/legal/forms/actions";
@@ -27,13 +27,24 @@ export function FormRowActions({
 }) {
   const router = useRouter();
   const t = fr.legalForms.page;
-  const [url, setUrl] = useState<string | null>(null);
+  const showLinks = useShowLinks();
   const [pending, startTransition] = useTransition();
 
   const prepare = () =>
     startTransition(async () => {
       const result = await prepareLegalForm(projectId, row.key);
-      if (result.ok) setUrl(result.url);
+      if (result.ok)
+        showLinks({
+          title: t.linkTitle(row.name),
+          description: t.linkBody,
+          links: [
+            { key: row.key, label: t.linkTitle(row.name), url: result.url },
+          ],
+          copyLabel: t.copy,
+          copiedLabel: t.copied,
+          closeLabel: fr.masterPage.form.close,
+          onClose: () => router.refresh(),
+        });
       else toast.error(result.error);
     });
   const setState = (state: "sent" | "revoked") =>
@@ -95,19 +106,6 @@ export function FormRowActions({
           {t.revoke}
         </Button>
       )}
-      <LinksDialog
-        open={url !== null}
-        onClose={() => {
-          setUrl(null);
-          router.refresh();
-        }}
-        title={t.linkTitle(row.name)}
-        description={t.linkBody}
-        links={url ? [{ key: row.key, label: t.linkTitle(row.name), url }] : []}
-        copyLabel={t.copy}
-        copiedLabel={t.copied}
-        closeLabel={fr.masterPage.form.close}
-      />
     </div>
   );
 }

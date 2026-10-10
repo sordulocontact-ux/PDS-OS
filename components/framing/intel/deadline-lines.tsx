@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/framing/option-select";
 import { sourceLabel } from "@/components/framing/guide/source-quote";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
@@ -146,7 +147,7 @@ function DeadlineForm({
   onDone: () => void;
 }) {
   const t = fr.framingIntel.guide.deadlines;
-  const { pending, run } = useFramingAction();
+  const { pending, run, error } = useFramingAction({ inline: true });
   const [kind, setKind] = useState(deadline?.kind ?? "master_final");
   const [label, setLabel] = useState(deadline?.label ?? "");
   const [date, setDate] = useState(deadline?.due_date ?? "");
@@ -204,6 +205,7 @@ function DeadlineForm({
           autoFocus
         />
       </div>
+      {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-wrap gap-2">
         <Button
           type="submit"

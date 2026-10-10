@@ -8,6 +8,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
+import { parseEurosToCents } from "@/lib/projects/schemas";
 import { advanceClearance } from "@/lib/legal/clearance/actions";
 import {
   counterClearanceTerms,
@@ -38,12 +39,11 @@ type Reading = {
 
 const euros = (cents: number | null) =>
   cents === null ? "" : String(cents / 100).replace(".", ",");
-const cents = (amount: string) => {
-  const value = Number(amount.replace(/\s/g, "").replace(",", "."));
-  return amount.trim() && Number.isFinite(value) && value >= 0
-    ? Math.round(value * 100)
-    : null;
-};
+// « 2 000 € HT », « 2000,50 »… → cents; null when empty, undefined when
+// it is not an amount: then said on the field, never sent as "no amount"
+// (UX test of 09/10/2026: an advance of 2 000 € vanished before the DG).
+const cents = (amount: string) =>
+  parseEurosToCents(amount.replace(/\b(HT|TTC)\b/gi, ""));
 
 function readingOf(proposal: MessageProposal): Reading {
   const t = proposal.terms;
@@ -74,6 +74,7 @@ export function NegotiateMoment({
   const [reply, setReply] = useState("");
   const [reading, setReading] = useState<Reading | null>(null);
   const [tried, setTried] = useState(false);
+  const [amountError, setAmountError] = useState(false);
   const [reads, startReading] = useTransition();
 
   const proposed = clearance.terms.find((x) => x.status === "proposed");
@@ -277,9 +278,11 @@ export function NegotiateMoment({
                 inputMode="decimal"
                 suffix="€"
                 value={reading.amount}
-                onChange={(event) =>
-                  setReading({ ...reading, amount: event.target.value })
-                }
+                error={amountError ? t.amountInvalid : undefined}
+                onChange={(event) => {
+                  setAmountError(false);
+                  setReading({ ...reading, amount: event.target.value });
+                }}
               />
               <Field
                 name={`share-${clearance.id}`}
@@ -306,22 +309,30 @@ export function NegotiateMoment({
           <div className="flex flex-wrap gap-2">
             <Button
               disabled={pending}
-              onClick={() =>
+              onClick={() => {
+                const amountCents = cents(reading.amount);
+                if (amountCents === undefined) {
+                  setAmountError(true);
+                  document
+                    .getElementsByName(`amount-${clearance.id}`)[0]
+                    ?.focus();
+                  return;
+                }
                 run(() =>
                   submitClearanceReply({
                     projectId,
                     clearanceId: clearance.id,
                     body: reply,
                     terms: {
-                      amountCents: cents(reading.amount),
+                      amountCents,
                       share: reading.share,
                       credits: reading.credits,
                       territory: reading.territory,
                       duration: reading.duration,
                     },
                   }),
-                )
-              }
+                );
+              }}
             >
               {t.toDirection}
             </Button>

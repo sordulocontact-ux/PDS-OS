@@ -2,7 +2,7 @@ import { IconCalendarDays } from "nucleo-sharp-essential";
 
 import { EditInStrategy } from "@/components/project-plan/edit-in-strategy";
 import { PlanningTimeline } from "@/components/project-plan/planning-timeline";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { EmptyState } from "@/components/shell/empty-state";
 import { formatDay } from "@/lib/assistant/facts";
 import { requireApproved } from "@/lib/auth/dal";
@@ -38,16 +38,14 @@ export default async function ProjectPlanningPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader
-        title={t.title}
-        description={t.description}
-        action={
+      <ProjectPageActions>
+        {
           <EditInStrategy
             projectId={projectId}
             canEdit={canEditProject(access, project)}
           />
         }
-      />
+      </ProjectPageActions>
       {months.length === 0 ? (
         <EmptyState
           icon={IconCalendarDays}

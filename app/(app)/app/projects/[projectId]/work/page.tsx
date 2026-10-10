@@ -1,7 +1,7 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { AddTaskForm } from "@/components/project-work/add-task-form";
 import { WorkBoard } from "@/components/project-work/work-board";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { CardRow, ListCard } from "@/components/ui/list-card";
 import { StatTiles } from "@/components/ui/stat-tiles";
 import { requireApproved } from "@/lib/auth/dal";
@@ -34,19 +34,15 @@ export default async function ProjectWorkPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader
-        title={t.title}
-        description={t.description}
-        action={
-          canEditProject(access, project) && (
-            <AddTaskForm
-              projectId={project.id}
-              members={work.members}
-              defaultAssignee={access.personId}
-            />
-          )
-        }
-      />
+      <ProjectPageActions>
+        {canEditProject(access, project) && (
+          <AddTaskForm
+            projectId={project.id}
+            members={work.members}
+            defaultAssignee={access.personId}
+          />
+        )}
+      </ProjectPageActions>
 
       {work.error && <FormMessage kind="error">{t.loadError}</FormMessage>}
 

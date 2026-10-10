@@ -322,7 +322,8 @@ export const masterWorkflow = {
     submit: "Créer le lien",
     submitting: "Création du lien…",
     cancel: "Annuler",
-    sent: "Le dossier est prêt. Envoyez ce lien au mixeur :",
+    sent: "Le dossier est prêt. Envoyez ce lien à l'ingénieur : il n'est affiché qu'une fois.",
+    linkTitle: "Lien du dossier",
     link: "Lien du dossier",
     copy: "Copier le lien",
     copied: "Lien copié.",
@@ -387,7 +388,7 @@ export const masterWorkflow = {
     deliverablesHint: "Cochez chaque livrable quand il est reçu.",
     noDeliverables: "Le Brief n'attend pas d'autre livrable.",
     distribution:
-      "La brique Distribution n'existe pas encore : quand elle existera, le master final validé y sera repris comme prérequis, sans rien ressaisir.",
+      "Le master final validé est repris par la Distribution comme prérequis de la livraison au distributeur, sans rien ressaisir.",
     errors: {
       forbidden:
         "Seul le chef de projet responsable coche les livrables reçus.",

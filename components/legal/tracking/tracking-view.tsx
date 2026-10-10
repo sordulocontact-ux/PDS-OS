@@ -14,7 +14,6 @@ import {
   type PlanRowView,
 } from "@/components/legal/tracking/plan-row-sheet";
 import { SplitPanel } from "@/components/legal/tracking/split-panel";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { FilterChipLink } from "@/components/ui/filter-chip";
@@ -81,14 +80,9 @@ export function TrackingView({
   titles: Array<{ id: string; title: string }>;
 }) {
   const t = fr.legal.tracking;
-  const header = (
-    <ProjectPageHeader title={t.title} description={t.description} />
-  );
-
   if (tracking.state === "not_launched")
     return (
       <div className="grid gap-8">
-        {header}
         <EmptyState
           icon={IconScale}
           title={t.notLaunched.title}
@@ -328,7 +322,6 @@ export function TrackingView({
 
   return (
     <div className="grid gap-8">
-      {header}
       <StatTiles
         columns={4}
         stats={TRACK_GROUPS.map((group) => ({

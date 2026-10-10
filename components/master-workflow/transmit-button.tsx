@@ -3,14 +3,12 @@
 import { IconPaperPlane2 } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useShowLinks } from "@/components/ui/one-time-links";
 import { fr } from "@/lib/i18n/fr";
 import type { PackageRole } from "@/lib/master-workflow/transmission";
 import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
@@ -21,8 +19,8 @@ export type TransmitMode = "first" | "remind" | "resend";
  * "Transmettre au mixeur", "Relancer" (no answer yet) or "Renvoyer le
  * dossier" (received, but the package changed or its link expired): a note,
  * then the private link, shown once (only its hash is stored): copy it, or
- * open an e-mail to the engineer with it. The follow-up refreshes when the
- * modal closes.
+ * open an e-mail to the engineer with it (`useShowLinks`). The follow-up
+ * refreshes when the modal closes.
  */
 export function TransmitButton({
   projectId,
@@ -90,7 +88,7 @@ function TransmitForm({
   onClose: () => void;
 }) {
   const t = fr.masterWorkflow.mix;
-  const [link, setLink] = useState<string | null>(null);
+  const showLinks = useShowLinks();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -100,56 +98,32 @@ function TransmitForm({
     setError(null);
     startTransition(async () => {
       const result = await transmitPackage(projectId, role, note);
-      if (result.ok) setLink(`${window.location.origin}/m/${result.token}`);
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      // The page refreshes and this button may move ("Relancer"): the link
+      // is shown by the dialog above the page, which survives it.
+      const link = `${window.location.origin}/m/${result.token}`;
+      onClose();
+      showLinks({
+        title: t.linkTitle,
+        description: t.sent,
+        links: [
+          {
+            key: result.token,
+            label: t.link,
+            url: link,
+            email: engineerEmail
+              ? {
+                  href: `mailto:${engineerEmail}?subject=${encodeURIComponent(t.emailSubject[role](projectTitle))}&body=${encodeURIComponent(t.emailBody(link))}`,
+                  label: t.email,
+                }
+              : undefined,
+          },
+        ],
+        copyLabel: t.copy,
+        copiedLabel: t.copied,
+        closeLabel: t.close,
+      });
     });
-  }
-
-  if (link) {
-    const mailto = engineerEmail
-      ? `mailto:${engineerEmail}?subject=${encodeURIComponent(t.emailSubject[role](projectTitle))}&body=${encodeURIComponent(t.emailBody(link))}`
-      : null;
-    return (
-      <div className="flex flex-col gap-5">
-        <p className="text-sm">{t.sent}</p>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="package-link">{t.link}</Label>
-          <Input
-            id="package-link"
-            readOnly
-            value={link}
-            onFocus={(event) => event.currentTarget.select()}
-            className="h-10"
-          />
-        </div>
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button type="button" variant="ghost" size="lg" onClick={onClose}>
-            {t.close}
-          </Button>
-          {mailto && (
-            <Button
-              variant="outline"
-              size="lg"
-              render={<a href={mailto} />}
-              nativeButton={false}
-            >
-              {t.email}
-            </Button>
-          )}
-          <Button
-            type="button"
-            size="lg"
-            onClick={() =>
-              navigator.clipboard
-                .writeText(link)
-                .then(() => toast.success(t.copied))
-            }
-          >
-            {t.copy}
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   return (

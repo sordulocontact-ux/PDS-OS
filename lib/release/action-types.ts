@@ -4,7 +4,9 @@ import type { ReleaseField } from "@/lib/release/schema";
 
 export type SaveReleaseState =
   | { status: "idle" }
-  | { status: "saved"; at: number }
+  // The values as saved (normalized): shown by the form whatever the page's
+  // refresh brings back, so a saved field never looks emptied.
+  | { status: "saved"; at: number; values: Record<ReleaseField, string> }
   | {
       status: "error";
       fieldErrors: Partial<Record<ReleaseField, true>>;

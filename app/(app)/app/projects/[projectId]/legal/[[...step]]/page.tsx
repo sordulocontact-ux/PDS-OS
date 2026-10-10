@@ -16,7 +16,6 @@ import {
   asTrackingView,
 } from "@/components/legal/tracking/tracking-view";
 import { LegalInventory } from "@/components/legal/legal-inventory";
-import { BackLink } from "@/components/shell/back-link";
 import { routes } from "@/lib/auth/redirects";
 import { contractProofOf } from "@/lib/contracts/proof";
 import { can } from "@/lib/auth/access";
@@ -74,44 +73,32 @@ export default async function ProjectLegalPage({
   if (current === "tracking")
     redirect(routes.projectLegalStep(projectId, "plan"));
 
-  // A branch's page opens from an action of the plan: the way back.
-  const branch = (page: React.ReactNode) => (
-    <div className="grid gap-6">
-      <BackLink href={routes.projectLegalStep(projectId, "plan")}>
-        {fr.shell.project.legalSteps.backToPlan}
-      </BackLink>
-      {page}
-    </div>
-  );
-
   if (current === "formalities") {
     const titles = await loadFormalities(project, access);
-    return branch(<FormalitiesView projectId={project.id} titles={titles} />);
+    return <FormalitiesView projectId={project.id} titles={titles} />;
   }
   if (current === "clearances") {
     const clearances = await loadClearances(project, access);
-    return branch(
+    return (
       <ClearancesView
         projectId={project.id}
         clearances={clearances}
         openId={typeof query.emprunt === "string" ? query.emprunt : null}
-      />,
+      />
     );
   }
   if (current === "splits") {
     const splits = await loadSplits(project, access);
-    return branch(<SplitsView projectId={project.id} splits={splits} />);
+    return <SplitsView projectId={project.id} splits={splits} />;
   }
   if (current === "contracts") {
     // The agreements that became ready are generated on the way.
     const agreements = await loadAgreementsGenerated(project, access);
-    return branch(
-      <AgreementsView projectId={project.id} agreements={agreements} />,
-    );
+    return <AgreementsView projectId={project.id} agreements={agreements} />;
   }
   if (current === "forms") {
     const rows = await loadForms(project, access);
-    return branch(<FormsView projectId={project.id} rows={rows} />);
+    return <FormsView projectId={project.id} rows={rows} />;
   }
   if (current === "plan") {
     const plan = await loadLegalPlan(project, access);

@@ -380,6 +380,9 @@ export type DistributionFacts = {
   recorded: boolean;
   isrc: boolean;
   plannedDate: string | null;
+  // Recorded once it left for the distributor (lib/release/delivery.ts).
+  delivered: { on: string; to: string } | null;
+  // Detected by the cron, or confirmed by the owner.
   onlineSince: string | null;
 };
 
@@ -424,11 +427,26 @@ export function distributionState(
       progress,
       done,
     };
+  // Prepared: the owner delivers it to the distributor (« En ligne » step),
+  // then it waits for the platforms.
+  if (!facts.delivered)
+    return {
+      ...base,
+      status: "in_progress",
+      step: "online",
+      reason: t.deliver,
+      progress,
+      done,
+    };
   return {
     ...base,
     status: "waiting",
     step: "online",
-    reason: t.online(facts.plannedDate ? formatDate(facts.plannedDate) : null),
+    reason: t.online(
+      formatDate(facts.delivered.on),
+      facts.delivered.to,
+      facts.plannedDate ? formatDate(facts.plannedDate) : null,
+    ),
     progress,
     done,
   };
@@ -564,8 +582,9 @@ export function dependencies(facts: DependencyFacts): Dependency[] {
 }
 
 /** A dependency blocks only the action that needs it (ticket § 3): the
- * Distribution, ready to go online, is Bloqué while what the mise en ligne
- * expects is not there; its preparation never is. */
+ * Distribution, ready to be delivered, is Bloqué while what the delivery
+ * expects is not there; its preparation never is, nor a release already
+ * delivered (it waits for the platforms). */
 export function withDependencies(
   states: DependencyFacts["states"],
   deps: Dependency[],
@@ -577,7 +596,7 @@ export function withDependencies(
   if (
     !distribution ||
     distribution.step !== "online" ||
-    distribution.status !== "waiting" ||
+    distribution.status !== "in_progress" ||
     missing.length === 0
   )
     return states;

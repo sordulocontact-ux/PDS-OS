@@ -1,5 +1,4 @@
 import { DeliverablesChecklist } from "@/components/master-workflow/deliverables-checklist";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
@@ -21,7 +20,6 @@ export function FinalPage({ view }: { view: FinalView }) {
   const allBefore = allDone && view.titles.every((title) => !title.final);
   return (
     <div className="grid gap-8">
-      <ProjectPageHeader title={t.title} description={t.description} />
       <ToneCallout tone={allDone ? "success" : "info"}>
         {allBefore ? t.allBefore : allDone ? t.allDone : t.waiting}
       </ToneCallout>

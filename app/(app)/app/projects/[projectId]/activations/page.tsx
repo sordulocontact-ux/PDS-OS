@@ -2,7 +2,7 @@ import { IconLayers } from "nucleo-sharp-essential";
 
 import { EditInStrategy } from "@/components/project-plan/edit-in-strategy";
 import { LeverList } from "@/components/project-plan/lever-list";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatTiles } from "@/components/ui/stat-tiles";
@@ -33,16 +33,14 @@ export default async function ProjectActivationsPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader
-        title={t.title}
-        description={t.description}
-        action={
+      <ProjectPageActions>
+        {
           <EditInStrategy
             projectId={projectId}
             canEdit={canEditProject(access, project)}
           />
         }
-      />
+      </ProjectPageActions>
       {levers.length === 0 ? (
         <EmptyState icon={IconLayers} title={t.emptyTitle} body={t.emptyBody} />
       ) : (

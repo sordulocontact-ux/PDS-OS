@@ -5,7 +5,6 @@ import { IconCircleCheck } from "@/components/icons";
 
 import { MixVersionsSection } from "@/components/master-workflow/mix-versions-section";
 import { PackageSections } from "@/components/master-workflow/package-sections";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { buttonVariants } from "@/components/ui/button";
@@ -66,7 +65,6 @@ export function ProductionPage({
   if (count.total === 0 && round.view.finished > 0)
     return (
       <div className="grid gap-10">
-        <ProjectPageHeader title={t.title} description={t.description} />
         <EmptyState
           icon={IconCircleCheck}
           title={t.nothing}
@@ -85,7 +83,6 @@ export function ProductionPage({
 
   return (
     <div className="grid gap-10">
-      <ProjectPageHeader title={t.title} description={t.description} />
       <RoundSection
         id={stage}
         title={t.round}

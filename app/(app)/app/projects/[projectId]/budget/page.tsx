@@ -1,7 +1,6 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { BudgetLines } from "@/components/budget/budget-lines";
 import { BudgetSummary } from "@/components/budget/budget-summary";
-import { ProjectPageHeader } from "@/components/projects/project-page-header";
 import { requireApproved } from "@/lib/auth/dal";
 import { loadBudget } from "@/lib/budget/queries";
 import { budgetTotals } from "@/lib/budget/types";
@@ -26,7 +25,6 @@ export default async function ProjectBudgetPage({
 
   return (
     <div className="grid gap-6">
-      <ProjectPageHeader title={t.title} description={t.description} />
       {error && <FormMessage kind="error">{t.loadError}</FormMessage>}
       <BudgetSummary
         envelopeCents={project.budgetCents}

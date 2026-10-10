@@ -30,6 +30,8 @@ export type FramingErrorCode =
   | "plan_already_launched"
   | "framing_not_validated"
   | "invalid_owner"
+  | "deliveries_open"
+  | "review_required"
   | "generic";
 
 export type ActionResult =
@@ -64,6 +66,8 @@ export function fromDatabaseError(
     "plan_already_launched",
     "framing_not_validated",
     "invalid_owner",
+    "deliveries_open",
+    "review_required",
   ] as const) {
     if (message.includes(code)) return fail(code);
   }

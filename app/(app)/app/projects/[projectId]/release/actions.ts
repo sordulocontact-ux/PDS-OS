@@ -70,22 +70,42 @@ export async function saveRelease(
     spotify_url: parsed.data.spotifyUrl,
   };
 
-  const { error } = release
-    ? await supabase.from("releases").update(row).eq("id", release.id)
-    : await supabase.from("releases").insert({
-        ...row,
-        organization_id: project.organizationId,
-        project_id: project.id,
-      });
+  // `select` returns the written row: an update the RLS filters out (not the
+  // project's owner) writes nothing without an error, never "saved".
+  const { data: written, error } = release
+    ? await supabase
+        .from("releases")
+        .update(row)
+        .eq("id", release.id)
+        .select("id")
+    : await supabase
+        .from("releases")
+        .insert({
+          ...row,
+          organization_id: project.organizationId,
+          project_id: project.id,
+        })
+        .select("id");
 
   if (error) {
     if (error.code === "23505") return fail("isrcTaken", { isrc: true });
     console.error("saveRelease:", error.code, error.message);
     return fail("generic");
   }
+  if (!written?.length) return fail("generic");
 
   revalidatePath(routes.projectRelease(projectId), "layout");
-  return { status: "saved", at: Date.now() };
+  return {
+    status: "saved",
+    at: Date.now(),
+    values: {
+      title: row.title,
+      isrc: row.isrc ?? "",
+      upc: row.upc ?? "",
+      plannedReleaseDate: row.planned_release_date ?? "",
+      spotifyUrl: row.spotify_url ?? "",
+    },
+  };
 }
 
 export async function checkRelease(

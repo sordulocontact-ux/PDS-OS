@@ -256,8 +256,17 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   Conception, Activations, entrée par la Stratégie ; Distribution = la Sortie ; Master,
   ouvert par son État du master ; Juridique, ouvert par son État des lieux). Sans
   `manage_legal`, le Juridique reste listé, **grisé avec un cadenas** et sa raison, jamais
-  un lien (sa page répond toujours 404) ; en onglets, il n'a pas d'onglet ;
-  en-tête commun `ProjectPageHeader` (h2, une phrase, action à droite).
+  un lien (sa page répond toujours 404) ; en onglets, il n'a pas d'onglet.
+- **Titre d'une page de projet lancé** (Sacha, 10/10/2026, Figma « PDS OS » 76:3145 : « il
+  y a trop d'information ») : seulement le **nom de la section** en h1 (« Master »,
+  « Budget », 28 px medium, `text-display-md` ; plus grand que la maquette à la demande de Sacha), puis les chevrons du workflow s'il en a, puis le contenu.
+  Plus de titre du projet (le sélecteur de la sidebar le nomme), ni d'artiste, ni de h2 +
+  phrase d'en-tête sur la page : l'étape est dite par son chevron. Une sous-page ouverte
+  depuis la section (Brief Mix/Master, branches du Juridique, Brief de cadrage) a un **fil
+  d'Ariane** à la place : « Master / Brief Mix/Master », parents en gris et en lien
+  (`ProjectPageTitle`, `projectTrail` dans `lib/ui/project-sections.ts`). L'action d'une
+  page (« Nouveau call », « Ajouter une tâche ») reste, à droite au-dessus du contenu
+  (`ProjectPageActions`). Projet non lancé : son titre et son type restent l'en-tête.
 - **Étapes d'un processus en chevrons** (`ProcessSteps`, `components/ui/`), sous
   l'en-tête, au même endroit pour chaque workflow, sans numéro : Marketing (**Stratégie ·
   Conception · Production · Activations · Suivi & bilan**, `SectionSteps` +
@@ -276,7 +285,7 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   Cadrage n'a pas de chevrons : il est au-dessus des workflows (les 7 chevrons du parcours,
   `WorkflowBreadcrumb`, ont disparu le 08/10/2026). Trois
   étapes au plus à l'écran pour un workflow spécialisé (simplification du 07/10/2026) : une
-  sous-page ouverte depuis une étape porte un `BackLink` vers elle, jamais une pastille.
+  sous-page ouverte depuis une étape y revient par le fil d'Ariane du titre, jamais une pastille.
   **Deux signaux jamais mélangés** : le fond noir = la page ouverte ; la coche dans le
   rond = l'étape vraiment validée (états réels, `project_stages` pour le Marketing, jamais
   la position de la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.

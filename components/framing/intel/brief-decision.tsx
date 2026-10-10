@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { FormMessage } from "@/components/auth/form-message";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -29,7 +30,7 @@ export function BriefOwnerActions({
   outdated: boolean;
 }) {
   const t = fr.framingIntel.brief;
-  const { pending, run } = useFramingAction();
+  const { pending, run, error, clearError } = useFramingAction();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
 
@@ -52,7 +53,10 @@ export function BriefOwnerActions({
       </Button>
       <FormDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(next) => {
+          clearError();
+          setOpen(next);
+        }}
         title={t.send}
         description={t.notSent}
         closeLabel={fr.framingGuide.close}
@@ -64,6 +68,7 @@ export function BriefOwnerActions({
             run(
               () => sendBrief(projectId, briefId, note),
               () => setOpen(false),
+              { inline: true },
             );
           }}
         >
@@ -77,6 +82,7 @@ export function BriefOwnerActions({
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
+          {error && <FormMessage kind="error">{error}</FormMessage>}
           <div className="flex flex-wrap gap-2">
             <Button type="submit" size="lg" disabled={pending}>
               {pending ? t.sending : t.send}
@@ -102,7 +108,9 @@ export function BriefValidatorActions({
 }) {
   const t = fr.framingIntel.brief;
   const router = useRouter();
-  const { pending, run } = useFramingAction();
+  const { pending, run, error, clearError } = useFramingAction({
+    inline: true,
+  });
   const [approving, setApproving] = useState(false);
   const [asking, setAsking] = useState(false);
   const [comment, setComment] = useState("");
@@ -125,7 +133,10 @@ export function BriefValidatorActions({
       </Button>
       <ConfirmDialog
         open={approving}
-        onOpenChange={setApproving}
+        onOpenChange={(next) => {
+          clearError();
+          setApproving(next);
+        }}
         title={t.approveTitle}
         description={t.approveBody}
         cancelLabel={fr.framingIntel.guide.cancel}
@@ -133,6 +144,7 @@ export function BriefValidatorActions({
         confirmLabel={t.approve}
         pendingLabel={t.sending}
         pending={pending}
+        error={error}
         onConfirm={() =>
           run(
             () => decideBrief(projectId, validationId, true, "", []),
@@ -145,7 +157,10 @@ export function BriefValidatorActions({
       />
       <FormDialog
         open={asking}
-        onOpenChange={setAsking}
+        onOpenChange={(next) => {
+          clearError();
+          setAsking(next);
+        }}
         title={t.requestChange}
         description={t.requestBody}
         closeLabel={fr.framingGuide.close}
@@ -191,6 +206,7 @@ export function BriefValidatorActions({
               required
             />
           </div>
+          {error && <FormMessage kind="error">{error}</FormMessage>}
           <div className="flex flex-wrap gap-2">
             <Button
               type="submit"
