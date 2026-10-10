@@ -15,6 +15,10 @@ export type NavItem = {
   // One line under the title (counts, written by code); none for the Brief.
   line?: string;
   status?: "known" | "to_confirm" | "missing";
+  // Another workflow's states (the Strategy): its own tone and words.
+  tone?: Tone;
+  statusLabel?: string;
+  done?: boolean;
 };
 
 const DOT: Record<Tone, string> = {
@@ -86,7 +90,9 @@ export function DimensionNav({
       />
       <ol ref={listRef} className="relative flex flex-col gap-1">
         {items.map((item) => {
-          const tone = item.status ? factTone[item.status] : null;
+          const tone =
+            item.tone ?? (item.status ? factTone[item.status] : null);
+          const done = item.done ?? item.status === "known";
           return (
             <li key={item.key}>
               <ViewLink
@@ -104,7 +110,7 @@ export function DimensionNav({
                 </span>
                 {item.line !== undefined && tone && (
                   <span className="flex min-w-0 items-center gap-2 text-caption text-muted-foreground">
-                    {item.status === "known" ? (
+                    {done ? (
                       <IconCheck
                         aria-hidden
                         className={cn("-mx-0.5 size-3 shrink-0", CHECK[tone])}
@@ -119,7 +125,9 @@ export function DimensionNav({
                       />
                     )}
                     <span className="sr-only">
-                      {item.status ? t.statuses[item.status] : ""} :
+                      {item.statusLabel ??
+                        (item.status ? t.statuses[item.status] : "")}{" "}
+                      :
                     </span>
                     <span className="truncate">{item.line}</span>
                   </span>

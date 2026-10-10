@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * « Prochaine action », at the top of a plan's panel (the prototype's): what
- * to do now, in blue; a decision of the direction, in violet; a wait for
+ * to do now, in blue; a decision of the direction, in ink; a wait for
  * someone else, in grey — then the controls that do it.
  */
 export function NextCard({

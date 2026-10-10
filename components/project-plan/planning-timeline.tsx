@@ -79,6 +79,10 @@ function TimelineRow({
           <StatusBadge tone="success" size="sm">
             {t.taskDone}
           </StatusBadge>
+        ) : item.late ? (
+          <StatusBadge tone="danger" size="sm">
+            {t.late}
+          </StatusBadge>
         ) : (
           <span />
         )}

@@ -91,10 +91,11 @@
   --tone-danger-bg: #fce1df;
   --tone-danger-fg: #9a1b1b;
   /* Réservé à l'action qui attend précisément la personne connectée (valider
-     un Brief, une Stratégie…) : plus voyant que warning, qui couvre tout ce
+     un Brief, une Stratégie…) : en encre sur gris, sans teinte (ticket
+     « Architecture globale » § 12 : aucun violet) ; warning couvre ce
      qui attend quelqu'un d'autre (transmis, invité, proposé). */
-  --tone-action-bg: #ece1fb;
-  --tone-action-fg: #4c1d9e;
+  --tone-action-bg: var(--po-grey-150);
+  --tone-action-fg: var(--po-ink-900);
 
   /* --- Teintes de catégorie (DESIGN.md § 3 ter) : reconnaître d'un coup
      d'œil une catégorie (étape d'un projet, type) dans un tableau. Aucune
@@ -104,8 +105,8 @@
   --hue-sky-fg: #0c4a6e;
   --hue-indigo-bg: #e3e6fc;
   --hue-indigo-fg: #2e3a9e;
-  --hue-violet-bg: #efe3fc;
-  --hue-violet-fg: #5b21b6;
+  --hue-ink-bg: var(--po-grey-100);
+  --hue-ink-fg: var(--po-ink-900);
   --hue-pink-bg: #fce4f1;
   --hue-pink-fg: #9d1760;
   --hue-orange-bg: #fde6d4;

@@ -62,11 +62,13 @@ export const projectPlan = {
       milestone: "Temps fort",
       call: "Call",
       deliverable: "Livrable",
+      upstream: "Échéance amont",
       task: "Tâche",
       release: "Sortie prévue",
       project_due: "Échéance du projet",
     },
     taskDone: "Faite",
+    late: "En retard",
     emptyTitle: "Rien de daté pour l'instant",
     emptyBody:
       "Les temps forts se saisissent dans la Stratégie ; les calls et les échéances des livrables et des tâches s'y ajoutent ici.",

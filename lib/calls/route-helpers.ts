@@ -21,7 +21,9 @@ const HTTP_STATUS: Partial<Record<CallErrorCode, number>> = {
 type Step = (
   supabase: Awaited<ReturnType<typeof createClient>>,
   callId: string,
-) => Promise<ActionResult & { briefFilled?: boolean }>;
+) => Promise<
+  ActionResult & { briefFilled?: boolean; strategyFilled?: boolean }
+>;
 
 /** Runs a pipeline step for an approved session and answers in JSON. */
 export async function handleStep(callId: string, step: Step) {

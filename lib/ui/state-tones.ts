@@ -375,3 +375,37 @@ export const dependencyTone: Record<string, Tone> = {
   waiting: "warning",
   blocked: "danger",
 };
+
+/** A dimension of the Strategy (lib/strategy/assess.ts). */
+export const strategyDimensionTone: Record<string, Tone> = {
+  todo: "neutral",
+  in_progress: "info",
+  to_decide: "warning",
+  done: "success",
+};
+
+/** A version of a Strategy document (Brief de sortie, Plan, Dossier). */
+export const strategyDocumentTone: Record<string, Tone> = {
+  pending: "neutral",
+  sent: "action",
+  approved: "success",
+  changes_requested: "danger",
+  superseded: "neutral",
+};
+
+/** One reviewer's answer on a sent version. */
+export const strategyReviewTone: Record<string, Tone> = {
+  not_started: "neutral",
+  pending: "warning",
+  approved: "success",
+  changes_requested: "danger",
+  cancelled: "neutral",
+};
+
+/** The Strategy's follow-up before release (lib/strategy/follow-up.ts). */
+export const followUpTone: Record<string, Tone> = {
+  ready: "success",
+  in_progress: "info",
+  waiting: "neutral",
+  blocked: "danger",
+};

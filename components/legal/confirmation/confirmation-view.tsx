@@ -10,6 +10,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { Confirmation } from "@/lib/legal/confirmation/queries";
 import { formatDateTime } from "@/lib/release/format";
+import { LEGAL_ANCHORS } from "@/lib/ui/legal-steps";
 
 /** Where the dossier stands, said once at the top of the État des lieux:
  * confirmed (by whom, when, and the way to the plan), or reopened by a
@@ -61,7 +62,7 @@ export function ConfirmationPanel({
   return (
     <PageSection
       card
-      id="legal-dossier"
+      id={LEGAL_ANCHORS.confirmation}
       title={confirmed ? t.confirmedTitle : t.toConfirmTitle}
       description={t.description}
       collapsible={confirmed}

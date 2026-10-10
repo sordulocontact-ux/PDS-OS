@@ -246,10 +246,18 @@ export type LegalFacts = {
 export function legalState(facts: LegalFacts): WorkflowState {
   const t = fr.workflowStatus.legal;
   const base = { workflow: "legal" as const };
+  // The DG's five steps (ticket § 7), each checked by its own fact: the
+  // État des lieux and the Cadrage juridique once every question has an
+  // answer, the Confirmation while the dossier stays confirmed, the Plan
+  // d'action once launched, the Suivi once every action is closed.
   const done = [
-    ...(facts.confirmed ? ["inventory"] : []),
+    ...(facts.launched && facts.openQuestions === 0
+      ? ["inventory", "framing"]
+      : []),
+    ...(facts.confirmed ? ["confirmation"] : []),
+    ...(facts.planLaunched ? ["plan"] : []),
     ...(facts.planLaunched && facts.actionsDone === facts.actionsTotal
-      ? ["plan"]
+      ? ["tracking"]
       : []),
   ];
   const dossier = t.progressDossier(facts.answeredQuestions);
@@ -266,7 +274,7 @@ export function legalState(facts: LegalFacts): WorkflowState {
     return {
       ...base,
       status: "in_progress",
-      step: "inventory",
+      step: facts.openQuestions > 0 ? "framing" : "confirmation",
       reason:
         facts.openQuestions > 0 ? t.questions(facts.openQuestions) : t.confirm,
       progress: dossier,
@@ -287,7 +295,7 @@ export function legalState(facts: LegalFacts): WorkflowState {
     return {
       ...base,
       status: "done",
-      step: "plan",
+      step: "tracking",
       reason: t.done,
       progress,
       done,
@@ -306,7 +314,7 @@ export function legalState(facts: LegalFacts): WorkflowState {
       c.decision === 0 && c.now === 0 && c.waiting > 0
         ? "waiting"
         : "in_progress",
-    step: "plan",
+    step: "tracking",
     reason: reason || progress,
     progress,
     done,
@@ -542,7 +550,8 @@ export function dependencies(facts: DependencyFacts): Dependency[] {
     });
   }
 
-  if (master && legal && facts.engineers) {
+  // Read in the Master only: shown even to whom the Juridique is closed.
+  if (master && has("legal") && facts.engineers) {
     const { mix, mastering } = facts.engineers;
     const ready = mix !== null && mastering !== null;
     deps.push({
@@ -591,4 +600,21 @@ export function withDependencies(
       ),
     },
   };
+}
+
+/** The project's own status, in its header (ticket § 8): Terminé once every
+ * workflow the viewer reads is, Non démarré while none has started, En
+ * cours otherwise — what holds a workflow back is told on the overview. A
+ * restricted workflow counts for nothing. */
+export function projectStatus(
+  states: Partial<Record<WorkflowKey, WorkflowState | "restricted">>,
+): CommonStatus {
+  const readable = Object.values(states).filter(
+    (state): state is WorkflowState => !!state && state !== "restricted",
+  );
+  if (readable.length === 0) return "not_started";
+  if (readable.every((state) => state.status === "done")) return "done";
+  if (readable.every((state) => state.status === "not_started"))
+    return "not_started";
+  return "in_progress";
 }
