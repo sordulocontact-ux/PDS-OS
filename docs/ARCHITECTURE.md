@@ -861,10 +861,18 @@ livrable, les libellés ou l'action d'import en props.
   Chaque ligne : nom, résumé, état (**À compléter / En cours / À arbitrer / Complété**),
   calculés par le code (`dimensionStatuses`, ton `strategyDimensionTone`). « À arbitrer » =
   une proposition ou un choix attend une décision (proposition d'un call, choix pré-cochés,
-  levier à arbitrer, devis à accepter, enveloppe dépassée). Au clic, la dimension s'ouvre dans
-  le **panneau de travail** (`?d=<dimension>`, `StrategyDimensionPanel`, panneau latéral) ;
-  fermer revient au pilotage. Les blocs existants (choix fermés, leviers, livrables,
-  calendrier) y sont repris tels quels.
+  levier à arbitrer, devis à accepter, enveloppe dépassée). Au clic, la dimension **se déplie
+  sur place** sous sa ligne, chevron à droite (`?d=<dimension>`, `DimensionRegion`), une seule
+  à la fois ; recliquer la ligne la replie. Plus de panneau latéral (demande de Sacha,
+  10/10/2026). L'URL garde la dimension ouverte : un rechargement, le Brief de sortie ou le
+  Planning (`?d=calendar`) la retrouvent dépliée, et sa ligne est ramenée à l'écran si une
+  autre, repliée au-dessus, l'a décalée. **Enregistrer replie** : une réponse enregistrée ou
+  confirmée (`StrategyChoices`, via `useCloseDimension`) referme la dimension ; sans rien à
+  enregistrer, « Terminé » prend la place du bouton. Les dimensions faites d'une liste
+  (Dispositif, Livrables, Calendrier, Budget, KPIs) restent dépliées après chaque ajout, pour
+  en saisir plusieurs (une dépense après l'autre au Budget), et se replient par « Terminé »
+  en bas ou par la ligne. Les blocs existants (choix fermés, leviers, livrables, calendrier) y sont
+  repris tels quels.
   - **Narratif** : 4 éléments de récit saisis à la main (`NARRATIVE_PARTS` : origine,
     ce qu'il raconte, contexte artistique, pourquoi maintenant, champs `field_values`
     `narrative_*`) + l'**angle** (le champ `narrative`, ses choix fermés). Gardés séparés
@@ -1306,8 +1314,8 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   seulement), captures facultatives (5 au plus). Le formulaire est chargé à la première ouverture.
 - **Capture d'écran** : un navigateur ne voit pas une capture système (⌘⇧3/4/5 sont pris
   par macOS). La fenêtre s'ouvre donc sur ce qu'on peut voir : la touche **Impr. écran**
-  (Windows), et une image **collée** (⌘V / Ctrl+V) n'importe où dans l'app, qu'elle joint.
-  Une zone peut s'y soustraire avec `data-paste-ignore`. Dans la fenêtre, une **zone de
+  (Windows), puis on y colle la capture. **Coller (⌘V / Ctrl+V) ailleurs n'ouvre jamais la
+  fenêtre** : le collage va aux zones de dépôt de la page (ci-dessous). Dans la fenêtre, une **zone de
   dépôt** (`FileDropZone`) reçoit les captures glissées ou s'ouvre au clic sur le
   sélecteur de fichiers (plusieurs à la fois) ; une image lâchée ailleurs dans le
   formulaire est jointe aussi, plutôt que d'ouvrir l'image à la place de la page. Chaque
@@ -1316,6 +1324,14 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   l'auteur et le DG), avant l'envoi du retour ; un trigger refuse un chemin qui n'est pas
   celui de l'auteur. Chemins dans `feedback.screenshot_paths` (`text[]`, 5 au plus,
   vérifié par contrainte et par le code). Affichées par URL signée (1 h).
+- **Coller dans une zone de dépôt** (partout dans l'app) : toute zone bâtie sur
+  `useFileDrop` (`FileDropZone`, fichiers d'une fiche, source d'un modèle de contrat) prend
+  aussi les fichiers collés (⌘V / Ctrl+V), vérifiés par l'appelant comme un dépôt
+  (`components/ui/paste-targets.ts`, un seul écouteur). Un collage va à **une** zone : celle
+  qui a le focus, sinon celle sous le pointeur, sinon la dernière touchée, sinon la première
+  de la page ; seulement les zones de la couche active (la modale ouverte, sinon la page).
+  Un texte collé dans un champ reste du texte (des cellules copiées portent aussi une image),
+  et un collage déjà pris (formulaire de retour) n'est pas repris.
 - **Dictée du message** : micro dans le coin du champ (`VoiceFieldControl`, `addon` de
   `TextareaField`) ; le texte transcrit (`/api/voice/transcribe`, audio jamais gardé)
   s'ajoute à ce qui est écrit, relu avant l'envoi. Réutilisable sur tout champ texte.

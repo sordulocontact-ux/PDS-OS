@@ -15,7 +15,7 @@ import type { StrategyDimension } from "@/lib/strategy/dimensions";
 import type { StrategyData } from "@/lib/strategy/queries";
 
 /**
- * The work of one dimension, in its panel: the blocks the Stratégie already
+ * The work of one dimension, unfolded on the pilotage: the blocks the Stratégie already
  * had (closed questions, levers, deliverables, calendar), the narrative's
  * story parts, the project's budget lines and the objectives.
  */

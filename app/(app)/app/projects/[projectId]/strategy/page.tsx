@@ -10,14 +10,12 @@ import { ValidatedStrategy } from "@/components/strategy/documents/validated-str
 import { ProposeChoices } from "@/components/strategy/propose-choices";
 import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
-import { StrategyDimensionPanel } from "@/components/strategy/strategy-dimension-panel";
 import { StrategyEntry } from "@/components/strategy/strategy-entry";
 import { StrategyPilotage } from "@/components/strategy/strategy-pilotage";
 import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
 import { loadBudget } from "@/lib/budget/queries";
 import { todayInParis } from "@/lib/insights/dates";
 import { fr } from "@/lib/i18n/fr";
@@ -40,7 +38,7 @@ import { allInOrder } from "@/lib/utils/parallel";
 /**
  * Launch strategy stage, built on the validated Brief: first its entry
  * (context, « Commencer la stratégie », « Préparer un échange »), then the
- * pilotage of its eight dimensions, each worked in its panel (?d=).
+ * pilotage of its eight dimensions, each unfolded in place (?d=).
  */
 export default async function StrategyPage({
   params,
@@ -172,7 +170,17 @@ export default async function StrategyPage({
             projectId={projectId}
             statuses={statuses}
             current={open?.key ?? null}
-          />
+          >
+            {open && (
+              <DimensionWork
+                dimension={open.key}
+                data={data}
+                budget={budget}
+                envelopeCents={project.budgetCents}
+                projectId={projectId}
+              />
+            )}
+          </StrategyPilotage>
           {!validated && (
             <BriefEntry
               projectId={projectId}
@@ -180,20 +188,6 @@ export default async function StrategyPage({
             />
           )}
         </div>
-        {open && (
-          <StrategyDimensionPanel
-            status={open}
-            closeHref={routes.projectStrategy(projectId)}
-          >
-            <DimensionWork
-              dimension={open.key}
-              data={data}
-              budget={budget}
-              envelopeCents={project.budgetCents}
-              projectId={projectId}
-            />
-          </StrategyDimensionPanel>
-        )}
       </EditAccessProvider>
 
       <aside className="flex flex-col gap-4 self-start lg:sticky lg:top-6">

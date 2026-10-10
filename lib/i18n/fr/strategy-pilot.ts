@@ -1,9 +1,11 @@
 const plural = (n: number, one: string, many: string) =>
   `${n} ${n > 1 ? many : one}`;
 
-/** Pilotage of the Stratégie: its eight dimensions and their work panel. */
+/** Pilotage of the Stratégie: its eight dimensions, unfolded in place. */
 export const strategyPilot = {
   listLabel: "Dimensions de la stratégie",
+  // Folds the unfolded dimension back, once there is nothing left to save.
+  done: "Terminé",
   number: (index: number) => String(index + 1).padStart(2, "0"),
   dimensions: {
     positioning: "Positionnement",
@@ -15,7 +17,7 @@ export const strategyPilot = {
     budget: "Budget stratégie",
     objectives: "Objectifs & KPIs",
   },
-  // One sentence under the panel's title: what the dimension decides.
+  // One sentence atop an unfolded dimension: what it decides.
   purposes: {
     positioning: "Ce que la sortie doit accomplir en priorité.",
     audiences: "À qui la sortie s'adresse d'abord.",
@@ -34,7 +36,6 @@ export const strategyPilot = {
     to_decide: "À arbitrer",
     complete: "Complété",
   },
-  close: "Fermer",
   summaries: {
     notDefined: "Pas encore défini",
     proposed: (value: string) => `Proposé : ${value}`,

@@ -57,18 +57,11 @@ export function useOpenFeedback() {
   return open;
 }
 
-function imageOf(event: ClipboardEvent): File | undefined {
-  return [...(event.clipboardData?.files ?? [])].find((file) =>
-    file.type.startsWith("image/"),
-  );
-}
-
 // The feedback window, one for the whole app. A browser never sees a system
 // screenshot (⌘⇧4 on a Mac is taken by macOS), so it opens on what it can
-// see: the Print Screen key (Windows), and a screenshot pasted anywhere in
-// the app (⌘V / Ctrl+V), which it then carries. Pastes inside the window go
-// to its own form; `data-paste-ignore` opts a zone out. The C key captures
-// a zone of the page instead, then opens the window with it.
+// see: the Print Screen key (Windows), the capture then pasted in its form.
+// A paste elsewhere never opens it (it goes to the page's drop zones). The
+// C key captures a zone of the page instead, then opens the window with it.
 // `direct`: the director, whose feedback goes straight to Notion.
 export function FeedbackProvider({
   organizationId,
@@ -87,7 +80,7 @@ export function FeedbackProvider({
   const pathname = usePathname();
   const [opening, setOpening] = useState<Opening | null>(null);
   const [capturing, setCapturing] = useState(false);
-  // Read by the document listeners, which outlive a render.
+  // Read by the document listener, which outlives a render.
   const isOpen = useRef(false);
   useEffect(() => {
     isOpen.current = opening !== null;
@@ -113,20 +106,8 @@ export function FeedbackProvider({
       if (event.key === "PrintScreen" && !isOpen.current)
         open({ printScreen: true });
     };
-    const onPaste = (event: ClipboardEvent) => {
-      const image = imageOf(event);
-      if (!image || isOpen.current) return;
-      if ((event.target as Element | null)?.closest?.("[data-paste-ignore]"))
-        return;
-      event.preventDefault();
-      open({ screenshot: image });
-    };
     document.addEventListener("keyup", onKeyUp);
-    document.addEventListener("paste", onPaste);
-    return () => {
-      document.removeEventListener("keyup", onKeyUp);
-      document.removeEventListener("paste", onPaste);
-    };
+    return () => document.removeEventListener("keyup", onKeyUp);
   }, [enabled, open]);
 
   const startCapture = useCallback(() => setCapturing(true), []);

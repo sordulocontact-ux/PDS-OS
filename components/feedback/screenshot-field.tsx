@@ -28,7 +28,7 @@ export function screenshotProblem(file: File): string | null {
 // The screenshots of a feedback: their previews, each with "remove" (those
 // already attached, on an edit, then the new files), then a zone to drop
 // more or click to pick them, until the limit. Pasting works too (the form
-// takes pasted images itself).
+// takes pasted images itself, before the zone would).
 export function ScreenshotField({
   kept = [],
   files,

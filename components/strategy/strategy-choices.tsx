@@ -8,6 +8,7 @@ import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { ChoicesReadOnly } from "@/components/strategy/choices-read-only";
+import { useCloseDimension } from "@/components/strategy/dimension-region";
 import {
   labelClass,
   optionClass,
@@ -50,6 +51,8 @@ export function StrategyChoices({
   const labels: Record<string, string> = t.options[key];
   const canEdit = useCanEditProject();
   const { pending, run } = useFramingAction();
+  // On the pilotage, a saved or confirmed answer folds its dimension back.
+  const closeDimension = useCloseDimension() ?? undefined;
   const [choices, setChoices] = useState<string[]>(value.choices);
   const [otherOn, setOtherOn] = useState(value.other !== null);
   const [other, setOther] = useState(value.other ?? "");
@@ -185,7 +188,7 @@ export function StrategyChoices({
         </div>
       )}
 
-      {(manual || !saved || field.status === "proposed") && (
+      {(manual || !saved || field.status === "proposed" || closeDimension) && (
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
           {manual && (
             <Button
@@ -213,7 +216,10 @@ export function StrategyChoices({
               <Button
                 disabled={pending}
                 onClick={() =>
-                  run(() => confirmField(projectId, "strategy", key))
+                  run(
+                    () => confirmField(projectId, "strategy", key),
+                    closeDimension,
+                  )
                 }
               >
                 {a.confirm}
@@ -224,18 +230,23 @@ export function StrategyChoices({
             <Button
               disabled={pending}
               onClick={() =>
-                run(() =>
-                  saveStrategyAnswer(
-                    projectId,
-                    key,
-                    { choices, other: otherOn ? other : null },
-                    text,
-                  ),
+                run(
+                  () =>
+                    saveStrategyAnswer(
+                      projectId,
+                      key,
+                      { choices, other: otherOn ? other : null },
+                      text,
+                    ),
+                  closeDimension,
                 )
               }
             >
               {pending ? t.saving : t.save}
             </Button>
+          )}
+          {saved && field.status !== "proposed" && closeDimension && (
+            <Button onClick={closeDimension}>{fr.strategyPilot.done}</Button>
           )}
         </div>
       )}
