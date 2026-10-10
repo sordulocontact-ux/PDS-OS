@@ -23,7 +23,8 @@ export const metadata = { title: `${fr.calls.list.title} · ${fr.app.name}` };
 
 /**
  * One call of a project: record it, let the processing run by itself, then
- * its report is in the Brief (the processing lands on the framing), and its
+ * its report is in the Brief (the processing lands on the framing; an
+ * exchange of the Stratégie fills the Stratégie instead), and its
  * actions become the project's tasks.
  */
 export default async function CallPage({
@@ -72,13 +73,19 @@ export default async function CallPage({
       steps={t.page}
       doneAction={
         <Link
-          href={routes.projectFraming(projectId)}
+          href={
+            call.prepared?.kind === "strategy"
+              ? routes.projectStrategy(projectId)
+              : routes.projectFraming(projectId)
+          }
           className={buttonVariants({
             size: "lg",
             className: "justify-self-start",
           })}
         >
-          {t.page.done.toFraming}
+          {call.prepared?.kind === "strategy"
+            ? fr.strategyEntry.toStrategy
+            : t.page.done.toFraming}
         </Link>
       }
       outcomes={

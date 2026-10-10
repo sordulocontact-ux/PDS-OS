@@ -282,6 +282,20 @@ export const calls = {
   back: "Tous les calls",
   // A project's call names its project under the date (link to its overview).
   project: "Projet",
+  // « Préparer un échange » (Cadrage, Stratégie): topics and participants.
+  prepare: {
+    addTopic: "Ajouter un sujet",
+    topicPlaceholder: "Un sujet à aborder",
+    removeTopic: (topic: string) => `Retirer « ${topic} »`,
+    detail: "Préparer en détail",
+    hideDetail: "Masquer le détail",
+    minutes: (n: number) => `${n} min`,
+    total: (n: number) => `Environ ${n} min`,
+    participants: "Participants",
+    addParticipant: "Ajouter",
+    participantPlaceholder: "Nom (artiste, manager…)",
+    removeParticipant: (name: string) => `Retirer ${name}`,
+  },
   errors: {
     invalid_input: "Vérifiez les champs du formulaire.",
     title_required: "Donnez un titre au call.",

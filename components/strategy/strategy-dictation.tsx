@@ -42,9 +42,12 @@ function toItem(
 export function StrategyDictation({
   projectId,
   actions,
+  label = fr.voice.fill,
   children,
 }: {
   projectId: string;
+  /** The dictation button's label (« Modifier avec PO » on the Brief). */
+  label?: string;
   /** Buttons before the dictation one ("Proposer des réponses"). */
   actions?: ReactNode;
   /** Title and status. */
@@ -59,16 +62,15 @@ export function StrategyDictation({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-1">{children}</div>
+      {/* The actions go under the title once they no longer fit beside it. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex min-w-0 flex-1 basis-64 flex-col gap-1">
+          {children}
+        </div>
         {canEdit && (
-          <div className="flex shrink-0 flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {actions}
-            <DictationButton
-              dictation={dictation}
-              label={fr.voice.fill}
-              size="lg"
-            />
+            <DictationButton dictation={dictation} label={label} size="lg" />
           </div>
         )}
       </div>

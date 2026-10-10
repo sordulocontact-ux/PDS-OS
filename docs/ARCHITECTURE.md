@@ -694,6 +694,108 @@ Même page que le Cadrage, mêmes briques réutilisées (`BriefFieldCard`, `Vali
 `ImportPanel`, `ProvenanceNote`, `useFramingAction`, `ActionResult`) : elles prennent le
 livrable, les libellés ou l'action d'import en props.
 
+- **Entrée** (ticket Stratégie, étape 1 ; migration `20261010000401_strategy_calls`) : le
+  plan démarre l'étape (`launch_strategy` en cours), mais la page reste l'entrée tant que
+  le responsable n'a pas ouvert le travail (`strategy_workspaces`, écrit par
+  `start_strategy` seul ; les stratégies déjà travaillées ont été reprises par la
+  migration). L'entrée montre le contexte (projet, artiste, type, date de sortie de
+  référence, statut « Non commencée ») et deux portes : « Commencer la stratégie » et
+  « Préparer un échange ». Aucun tableau de bord avant. Le lecteur (DG…) voit la même
+  entrée sans bouton.
+- **Préparer un échange** (`components/strategy/strategy-call-*`, `lib/strategy/call-prep.ts`,
+  `prepareStrategyCall`) : le code propose l'objectif, les participants (responsable,
+  directeurs créatifs, artiste), les sujets calculés depuis ce qui manque (champ vide ou à
+  confirmer, besoin sans levier, levier à arbitrer, levier retenu sans livrable, date de
+  sortie et temps forts absents ; 4 min par question, 5 à 15 par sujet), la date et le
+  **format** (visio, sur place, téléphone ; lien seulement en visio). « Vérifier » affiche
+  un récapitulatif, seul « Créer l'échange » crée le call (`create_strategy_call` : call +
+  `strategy_calls` en une transaction, refusé avant le Brief validé et une fois la
+  stratégie soumise). Le serveur recalcule l'ordre du jour, jamais envoyé par le client.
+  Sujets et participants : composants partagés avec le Cadrage
+  (`AgendaTopicsField`, `ParticipantsField`, `lib/calls/prepare.ts`).
+- **Après un échange stratégie** (`/api/calls/[callId]/extract`) : le compte rendu remplit
+  la Stratégie et non le Cadrage (`fillStrategyFromCall`, `lib/strategy/import-report.ts`) :
+  l'entrée cède la place (`start_strategy`), les éléments du compte rendu deviennent des
+  propositions sourcées (positionnement, publics, narratif, leviers), puis PO pré-coche les
+  choix fermés appuyés par les sources (`proposeStrategyChoices`) : un même passage peut
+  nourrir plusieurs dimensions. Le traitement ouvre ensuite la Stratégie. Seul le premier
+  compte rendu d'un call est importé.
+- **Pilotage** (ticket Stratégie, étape 2 ; migration `20261010000501_strategy_objectives`) :
+  après « Commencer », la page centrale est une liste verticale des **8 dimensions**
+  (`lib/strategy/dimensions.ts`) : Positionnement, Publics prioritaires, Narratif de sortie,
+  Dispositif, Livrables engagés, Calendrier de lancement, Budget stratégie, Objectifs & KPIs.
+  Chaque ligne : nom, résumé, état (**À compléter / En cours / À arbitrer / Complété**),
+  calculés par le code (`dimensionStatuses`, ton `strategyDimensionTone`). « À arbitrer » =
+  une proposition ou un choix attend une décision (proposition d'un call, choix pré-cochés,
+  levier à arbitrer, devis à accepter, enveloppe dépassée). Au clic, la dimension s'ouvre dans
+  le **panneau de travail** (`?d=<dimension>`, `StrategyDimensionPanel`, panneau latéral) ;
+  fermer revient au pilotage. Les blocs existants (choix fermés, leviers, livrables,
+  calendrier) y sont repris tels quels.
+  - **Narratif** : 4 éléments de récit saisis à la main (`NARRATIVE_PARTS` : origine,
+    ce qu'il raconte, contexte artistique, pourquoi maintenant, champs `field_values`
+    `narrative_*`) + l'**angle** (le champ `narrative`, ses choix fermés). Gardés séparés
+    pour être repris par le Plan de sortie, le Dossier de presse et les pitchs. Pas encore
+    extraits des calls.
+  - **Budget stratégie** = les **lignes du budget du projet** (`budget_lines`, page Budget),
+    rattachées aux leviers : un seul budget, jamais deux qui divergent. Mêmes composants
+    (`BudgetSummary`, `BudgetLines`). Les montants ne sont jamais lus par PO : « Préparer un
+    échange » ne cite que les libellés.
+  - **Objectifs & KPIs** : `strategy_objectives` (libellé, cible facultative, unité,
+    échéance), saisis par une personne, jamais par PO ; écrits par le responsable
+    pendant « en cours » (`strategy_is_editable`).
+  - Les sujets de « Préparer un échange » suivent les 8 dimensions.
+- **Dispositif** (étape 3) : chaque levier est **Retenu / À arbitrer / Non retenu**, les trois
+  états côte à côte (`LeverStateControl`), un clic pour changer ; la base refuse de « dé-retenir »
+  un levier qui porte des livrables (`lever_has_deliverables`). **Leviers courants en un clic**
+  (`lib/strategy/lever-presets.ts` : social organique, influence, RP / médias, pitching
+  playlists, partenariats, publicité en ligne, radio, live / showcase, clip / contenus vidéo),
+  proposés par le code, ajoutés « à arbitrer », masqués une fois présents (même libellé, sans
+  accent ni casse). Le détail opérationnel d'un levier retenu se traite dans Activations.
+- **Livrables engagés** (étape 4 ; migration `20261010000601_strategy_calendar_channels`) :
+  saisis par une personne (nature, **quantité** `strategy_deliverables.quantity` 1 à 99, levier
+  retenu, responsable, échéance), groupés par levier retenu, modifiables en place
+  (`lib/strategy/actions/deliverables.ts`). **Jamais de liste prédéfinie** : nombre et nature
+  dépendent du projet. Titre avec quantité par `deliverableTitle` (« Capsules × 5 »), repris en
+  Conception, qui lit ces livrables une fois la Stratégie validée.
+- **Calendrier de lancement** (étape 5) : rétroplanning à deux niveaux, onglets **Temps forts**
+  (J-n / J0 / J+n calculés par `dayOffset` depuis la date de sortie de référence) et **Par canal**
+  (`milestones.channel` : Organique, Influence, RP / Médias, Sortie toujours affichés ; Live /
+  Event et Autre seulement s'ils ont un temps fort). Chaque temps fort s'ouvre et se modifie
+  dans la modale (`components/strategy/calendar/milestone-form.tsx`) : titre, **jour relatif
+  « J-10 »** converti en date par le code (synchronisé avec la date), type, canal (suit le type
+  tant qu'on ne l'a pas choisi), livrable qui sort ce jour-là, note (`milestones.notes`).
+  Toujours saisi par une personne, jamais par PO.
+  - **Échéances amont** calculées par le code (`lib/strategy/upstream.ts`) : pour chaque livrable
+    rattaché à un temps fort, depuis le **premier** où il sort, conception terminée à J-21,
+    production terminée à J-10, validation à J-4 (`UPSTREAM_LEAD_DAYS`, délais par défaut, à
+    ajuster là). Une étape déjà passée alors que le temps fort est à venir est « Trop tard » ;
+    la dimension Calendrier passe alors **À arbitrer**.
+  - **Propagées vers le Planning** : type `upstream` de `lib/project-plan/timeline.ts`, avec le
+    canal des temps forts ; un clic ouvre `/strategy?d=calendar`.
+- **Budget stratégie** (étape 6) : lecture stratégie des `budget_lines` (`lib/strategy/budget.ts`,
+  `strategyBudget`) : **proposé** = toutes les lignes, **validé** = engagé ou payé, **à arbitrer**
+  = estimé ou devis, reste = enveloppe − validé ; **répartition par levier** (chaque levier
+  retenu, même à 0 €, puis les autres leviers qui portent des lignes, puis « Hors levier »).
+  Panneau : tuiles, tableau par levier, puis l'éditeur de lignes de la page Budget. La dimension
+  est « À arbitrer » s'il reste un montant à arbitrer ou si l'enveloppe est dépassée.
+  **Strictement interne** : dans le Brief de sortie, jamais dans le Plan de sortie ni le Dossier
+  de presse (règle pour les générateurs à venir).
+- **Objectifs & KPIs** (étape 7 ; migration `20261010000701_strategy_kpis`) : l'**objectif
+  stratégique** est un champ texte (`strategic_objective`) ; chaque KPI est **quantitatif**
+  (cible, unité, échéance) ou **qualitatif** (le signal attendu, sans chiffre : vérifié en SQL).
+  Un KPI quantitatif peut être alimenté automatiquement par les **fans Deezer de l'artiste**
+  (`source = 'deezer_fans'`, `lib/strategy/kpi-actuals.ts`), lus par le code **après la
+  date de sortie** ; sans donnée : « Donnée indisponible ». Aucune valeur inventée, jamais par PO.
+- **Brief de sortie consolidé** (étape 8, `/strategy/brief`, `components/strategy/brief/`) :
+  établi quand **aucune dimension n'est « À compléter »** (`briefReadiness`, `lib/strategy/brief.ts`) ;
+  sinon la page et le pilotage nomment les dimensions manquantes. Document interne de référence,
+  rendu en direct depuis les données (les huit dimensions dans l'ordre), avec en tête **uniquement
+  les éléments restant à arbitrer** (`arbitrations` : proposition à confirmer, choix pré-cochés,
+  levier à arbitrer, échéance amont trop tard, budget à arbitrer ou dépassé), chacun menant à son
+  panneau. **Modifier avec PO** = la dictée de la Stratégie (propositions relues avant écriture) ;
+  **Demander la validation** = le circuit de l'étape (le DG décide), proposé seulement quand le
+  Brief est établi ; le pilotage renvoie vers le Brief pour la demander. Pas d'instantané stocké :
+  une stratégie soumise ou validée est figée en RLS, le Brief affiché est donc celui validé.
 - Champs texte : positionnement, publics, narratif (`field_values`, `deliverable = 'strategy'`,
   actions génériques `saveField` / `confirmField` / `rejectField`).
 - Dispositif : leviers par famille (taxonomie des besoins) ; un besoin confirmé du Brief

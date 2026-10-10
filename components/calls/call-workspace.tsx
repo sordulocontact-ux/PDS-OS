@@ -7,6 +7,7 @@ import { CallLinkButton } from "@/components/calls/call-link-button";
 import { CallAudio, CallRecording } from "@/components/calls/call-recording";
 import { CallResults } from "@/components/calls/call-results";
 import { JoinCallLink } from "@/components/calls/join-call-link";
+import { PreparedCallDetails } from "@/components/calls/prepared-call-details";
 import {
   Card,
   CardContent,
@@ -15,7 +16,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatDateTime, isUpcoming } from "@/lib/calls/format";
-import { fr } from "@/lib/i18n/fr";
 import type {
   CallDetail,
   StoredReport,
@@ -60,6 +60,11 @@ export function CallWorkspace({
   const upcoming = isUpcoming(call, new Date());
   // The link is useful until the call is recorded.
   const joinable = call.meetingUrl && !call.audioPath;
+  // A strategy call held on site or by phone takes no video link.
+  const linkable =
+    canEdit &&
+    !call.audioPath &&
+    (!call.prepared?.format || call.prepared.format === "video");
 
   return (
     <div className="grid w-full max-w-3xl gap-6">
@@ -84,45 +89,19 @@ export function CallWorkspace({
           </div>
           <CallStatusBadge status={call.status} upcoming={upcoming} />
         </div>
-        {(joinable || (canEdit && !call.audioPath)) && (
+        {(joinable || linkable) && (
           <div className="flex flex-wrap items-center gap-2">
             {joinable && call.meetingUrl && (
               <JoinCallLink url={call.meetingUrl} title={call.title} />
             )}
-            {canEdit && !call.audioPath && (
+            {linkable && (
               <CallLinkButton callId={call.id} meetingUrl={call.meetingUrl} />
             )}
           </div>
         )}
       </header>
 
-      {call.framing && (
-        <div className="grid gap-2 rounded-lg border border-border p-4 text-sm">
-          <h3 className="font-medium">{fr.framingIntel.call.detailsTitle}</h3>
-          <p>
-            <span className="text-muted-foreground">
-              {fr.framingIntel.call.detailsPurpose} :{" "}
-            </span>
-            {call.framing.purpose}
-          </p>
-          {call.framing.participants.length > 0 && (
-            <p>
-              <span className="text-muted-foreground">
-                {fr.framingIntel.call.participants} :{" "}
-              </span>
-              {call.framing.participants.join(", ")}
-            </p>
-          )}
-          {call.framing.documents.length > 0 && (
-            <p>
-              <span className="text-muted-foreground">
-                {fr.framingIntel.call.documents} :{" "}
-              </span>
-              {call.framing.documents.map((d) => d.name).join(", ")}
-            </p>
-          )}
-        </div>
-      )}
+      {call.prepared && <PreparedCallDetails prepared={call.prepared} />}
       {step === "record" && call.agenda && (
         <CallAgenda
           callId={call.id}

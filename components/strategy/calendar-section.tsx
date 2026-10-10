@@ -1,38 +1,38 @@
 "use client";
 
+import { IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { OptionSelect } from "@/components/framing/option-select";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ChannelView } from "@/components/strategy/calendar/channel-view";
+import { MilestoneForm } from "@/components/strategy/calendar/milestone-form";
 import {
-  labelClass,
-  optionClass,
-  sectionTitleClass,
-} from "@/components/strategy/option-class";
-import { Label } from "@/components/ui/label";
-import { StatusBadge } from "@/components/ui/status-badge";
+  MilestoneRow,
+  formatMilestoneDate,
+} from "@/components/strategy/calendar/milestone-row";
+import { UpstreamChains } from "@/components/strategy/calendar/upstream-chains";
+import { Button } from "@/components/ui/button";
+import { FormDialog } from "@/components/ui/form-dialog";
+import { TabBar } from "@/components/ui/tab-bar";
 import { fr } from "@/lib/i18n/fr";
-import { addMilestone, removeMilestone } from "@/lib/strategy/actions/plan";
-import { dayOffset } from "@/lib/strategy/calendar";
-import type { StrategyData } from "@/lib/strategy/queries";
-import { cn } from "@/lib/utils";
+import { todayInParis } from "@/lib/insights/dates";
+import {
+  addMilestone,
+  removeMilestone,
+  updateMilestone,
+} from "@/lib/strategy/actions/plan";
+import type { Milestone, StrategyData } from "@/lib/strategy/queries";
+import { upstreamChains } from "@/lib/strategy/upstream";
 
-const dateFormat = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "short",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-const format = (date: string) =>
-  dateFormat.format(new Date(`${date}T12:00:00`));
-const NONE = "none";
+type View = "milestones" | "channels";
 
-type Kind = keyof typeof fr.strategy.calendar.kinds;
-
-/** Milestones entered by hand; the countdown is date arithmetic in code. */
+/**
+ * Calendrier de lancement (ticket Stratégie § 5): the milestones typed by
+ * the team, read two ways — by date relative to the release, or by channel —
+ * and the upstream deadlines of the deliverables they bring out. Every
+ * countdown and deadline is date arithmetic in code.
+ */
 export function CalendarSection({
   milestones,
   deliverables,
@@ -42,162 +42,117 @@ export function CalendarSection({
   projectId: string;
 }) {
   const t = fr.strategy.calendar;
+  const c = fr.strategyCalendar;
   const { pending, run } = useFramingAction();
   const canEdit = useCanEditProject();
-  const deliverableName = new Map(deliverables.map((d) => [d.id, d.title]));
+  const [view, setView] = useState<View>("milestones");
+  // The milestone open in the dialog, or "new" for a new one.
+  const [open, setOpen] = useState<Milestone | "new" | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [kind, setKind] = useState<Kind>("announcement");
-  const [deliverable, setDeliverable] = useState(NONE);
+  const titles = new Map(deliverables.map((d) => [d.id, d.title]));
+  const deliverableTitle = (id: string | null) =>
+    id ? (titles.get(id) ?? null) : null;
+  const onOpen = canEdit ? (m: Milestone) => setOpen(m) : undefined;
+  const chains = upstreamChains(
+    milestones.map((m) => ({
+      id: m.id,
+      title: m.title,
+      occursOn: m.occurs_on,
+      deliverableId: m.deliverable_id,
+    })),
+    deliverables,
+    todayInParis(),
+  );
+  const editing = open === "new" ? null : open;
+  const close = () => setOpen(null);
 
   return (
     <section aria-labelledby="calendar-title" className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h3 id="calendar-title" className={sectionTitleClass}>
+        {/* Named by the panel title: kept for the section label. */}
+        <h3 id="calendar-title" className="sr-only">
           {t.title}
         </h3>
         <p className="text-caption text-muted-foreground">
-          {referenceDate ? t.reference(format(referenceDate)) : t.noReference}
+          {referenceDate
+            ? t.reference(formatMilestoneDate(referenceDate))
+            : t.noReference}
         </p>
       </div>
 
-      {milestones.length === 0 ? (
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <TabBar
+          label={c.views.label}
+          items={(["milestones", "channels"] as const).map((key) => ({
+            label: c.views[key],
+            current: view === key,
+            onSelect: () => setView(key),
+          }))}
+        />
+        {canEdit && (
+          <Button variant="outline" onClick={() => setOpen("new")}>
+            <IconPlus aria-hidden data-icon="inline-start" />
+            {c.add}
+          </Button>
+        )}
+      </div>
+
+      {view === "channels" ? (
+        <ChannelView
+          milestones={milestones}
+          referenceDate={referenceDate}
+          deliverableTitle={deliverableTitle}
+          onOpen={onOpen}
+        />
+      ) : milestones.length === 0 ? (
         <p className="text-body-md text-muted-foreground">{t.empty}</p>
       ) : (
         <ol className="flex flex-col gap-3">
           {milestones.map((m) => (
-            <li
-              key={m.id}
-              className={cn(
-                optionClass(false),
-                "grid grid-cols-[3.5rem_minmax(0,1fr)_auto]",
-              )}
-            >
-              <span className="pt-0.5 text-caption font-semibold text-muted-foreground tabular-nums">
-                {referenceDate
-                  ? t.dayOffset(dayOffset(m.occurs_on, referenceDate))
-                  : "—"}
-              </span>
-              <div className="flex min-w-0 flex-col gap-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold break-words">{m.title}</span>
-                  <StatusBadge tone="neutral" size="sm">
-                    {t.kinds[m.kind as Kind]}
-                  </StatusBadge>
-                </div>
-                <span className="text-caption text-muted-foreground">
-                  {[
-                    format(m.occurs_on),
-                    m.deliverable_id && deliverableName.get(m.deliverable_id),
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
-              </div>
-              {canEdit ? (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={pending}
-                  aria-label={t.removeLabel(m.title)}
-                  onClick={() => run(() => removeMilestone(projectId, m.id))}
-                >
-                  {t.remove}
-                </Button>
-              ) : (
-                <span />
-              )}
+            <li key={m.id}>
+              <MilestoneRow
+                milestone={m}
+                referenceDate={referenceDate}
+                deliverableTitle={deliverableTitle(m.deliverable_id)}
+                onOpen={onOpen && (() => onOpen(m))}
+              />
             </li>
           ))}
         </ol>
       )}
 
+      <UpstreamChains chains={chains} referenceDate={referenceDate} />
+
       {canEdit && (
-        <form
-          className="grid gap-4 sm:grid-cols-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            run(
-              () =>
-                addMilestone(projectId, {
-                  title,
-                  occursOn: date,
-                  kind,
-                  deliverableId: deliverable === NONE ? "" : deliverable,
-                }),
-              () => {
-                setTitle("");
-                setDate("");
-                setDeliverable(NONE);
-              },
-            );
-          }}
+        <FormDialog
+          open={open !== null}
+          onOpenChange={(next) => !next && close()}
+          title={editing ? c.dialog.editTitle : c.dialog.addTitle}
+          description={c.dialog.description}
+          closeLabel={c.dialog.close}
+          size="wide"
         >
-          <div className="flex flex-col gap-2 sm:col-span-2">
-            <Label htmlFor="milestone-title" required className={labelClass}>
-              {t.name}
-            </Label>
-            <Input
-              id="milestone-title"
-              aria-required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="milestone-date" required className={labelClass}>
-              {t.date}
-            </Label>
-            <Input
-              id="milestone-date"
-              aria-required
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="milestone-kind" required className={labelClass}>
-              {t.kind}
-            </Label>
-            <OptionSelect
-              id="milestone-kind"
-              required
-              label={t.kind}
-              options={t.kinds}
-              value={kind}
-              onChange={(v) => setKind(v as Kind)}
-            />
-          </div>
-          {deliverables.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="milestone-deliverable" className={labelClass}>
-                {t.deliverable}
-              </Label>
-              <OptionSelect
-                id="milestone-deliverable"
-                label={t.deliverable}
-                options={{
-                  [NONE]: t.noDeliverable,
-                  ...Object.fromEntries(
-                    deliverables.map((d) => [d.id, d.title]),
-                  ),
-                }}
-                value={deliverable}
-                onChange={setDeliverable}
-              />
-            </div>
-          )}
-          <Button
-            type="submit"
-            variant="outline"
-            className="self-end justify-self-start"
-            disabled={pending || title.trim() === "" || date === ""}
-          >
-            {fr.framing.actions.add}
-          </Button>
-        </form>
+          <MilestoneForm
+            milestone={editing}
+            referenceDate={referenceDate}
+            deliverables={deliverables}
+            pending={pending}
+            onSubmit={(input) =>
+              run(
+                () =>
+                  editing
+                    ? updateMilestone(projectId, editing.id, input)
+                    : addMilestone(projectId, input),
+                close,
+              )
+            }
+            onRemove={
+              editing
+                ? () => run(() => removeMilestone(projectId, editing.id), close)
+                : undefined
+            }
+          />
+        </FormDialog>
       )}
     </section>
   );

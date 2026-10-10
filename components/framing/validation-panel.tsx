@@ -22,6 +22,9 @@ type Props = Pick<FramingData, "stage" | "pendingValidation"> & {
   startLabel: string;
   /** Why the stage cannot start yet (the database refuses it anyway). */
   startBlocked?: string | null;
+  /** Why the validation is not asked here (the Stratégie asks it from its
+   * Brief de sortie, once complete): shown instead of the request. */
+  requestBlocked?: React.ReactNode;
 };
 type StageState = keyof typeof fr.framing.validation.states;
 
@@ -38,6 +41,7 @@ export function ValidationPanel({
   title,
   startLabel,
   startBlocked,
+  requestBlocked,
 }: Props) {
   const t = fr.framing.validation;
   const { pending, run } = useFramingAction();
@@ -74,7 +78,11 @@ export function ValidationPanel({
         </div>
       )}
 
-      {canEdit && state === "in_progress" && (
+      {canEdit && state === "in_progress" && requestBlocked && (
+        <div className="text-sm text-muted-foreground">{requestBlocked}</div>
+      )}
+
+      {canEdit && state === "in_progress" && !requestBlocked && (
         <div className="grid gap-2">
           <div className="grid gap-1">
             <Label htmlFor="validation-note">{t.note}</Label>

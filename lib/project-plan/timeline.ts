@@ -1,8 +1,15 @@
 import { routes } from "@/lib/auth/redirects";
 import type { ProjectPlan } from "@/lib/project-plan/queries";
+import { upstreamChains, type UpstreamStepKey } from "@/lib/strategy/upstream";
 
 export type TimelineKind =
-  "milestone" | "call" | "deliverable" | "task" | "release" | "project_due";
+  | "milestone"
+  | "call"
+  | "deliverable"
+  | "upstream"
+  | "task"
+  | "release"
+  | "project_due";
 
 export type TimelineItem = {
   key: string;
@@ -11,6 +18,10 @@ export type TimelineItem = {
   title: string;
   // Milestone type key (strategy calendar kinds), for its badge.
   milestoneKind?: string;
+  // Milestone channel key (lib/strategy/calendar.ts), for its line.
+  channel?: string;
+  // An upstream deadline: its step and the milestone it prepares.
+  upstream?: { step: UpstreamStepKey; milestoneTitle: string; late: boolean };
   done?: boolean;
   // A call's timestamp, for its time of day.
   occurredAt?: string;
@@ -26,7 +37,8 @@ const kindOrder: Record<TimelineKind, number> = {
   milestone: 2,
   call: 3,
   deliverable: 4,
-  task: 5,
+  upstream: 5,
+  task: 6,
 };
 
 /** Every dated thing of the project, merged and grouped by month (code). */
@@ -36,7 +48,8 @@ export function buildTimeline(
   releaseTitle: string,
   projectDueTitle: string,
 ): TimelineMonth[] {
-  const strategy = routes.projectStrategy(projectId);
+  // A milestone and an upstream deadline open the calendar's panel.
+  const calendar = routes.projectStrategyDimension(projectId, "calendar");
   const items: TimelineItem[] = [
     ...plan.milestones.map((m) => ({
       key: `m-${m.id}`,
@@ -44,8 +57,26 @@ export function buildTimeline(
       kind: "milestone" as const,
       title: m.title,
       milestoneKind: m.kind,
-      href: strategy,
+      channel: m.channel,
+      href: calendar,
     })),
+    // Upstream deadlines of the calendar (lib/strategy/upstream.ts),
+    // computed by code from the milestones' linked deliverables.
+    ...upstreamChains(plan.milestones, plan.deliverables, plan.today).flatMap(
+      (chain) =>
+        chain.steps.map((step) => ({
+          key: `u-${chain.deliverableId}-${step.key}`,
+          date: step.date,
+          kind: "upstream" as const,
+          title: chain.deliverableTitle,
+          upstream: {
+            step: step.key,
+            milestoneTitle: chain.milestoneTitle,
+            late: step.late,
+          },
+          href: calendar,
+        })),
+    ),
     ...plan.calls.map((c) => ({
       key: `c-${c.id}`,
       date: c.date,

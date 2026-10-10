@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
+import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
 import { assessFraming } from "@/lib/framing/assess";
 import { framingCallTopics } from "@/lib/framing/call-prep";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
@@ -84,7 +85,7 @@ export async function prepareFramingCall(
         minutes: topic.minutes,
         ...(p.detailed ? { questions: topic.questions } : {}),
       })),
-    ...p.extraTopics.map((topic) => ({ topic, minutes: 5 })),
+    ...p.extraTopics.map((topic) => ({ topic, minutes: EXTRA_TOPIC_MINUTES })),
   ];
 
   const supabase = await createClient();
