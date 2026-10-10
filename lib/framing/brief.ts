@@ -27,6 +27,10 @@ export const NARRATIVE_PARTS = [
 ] as const;
 export type NarrativePart = (typeof NARRATIVE_PARTS)[number];
 
+// « Objectifs & KPIs » (ticket Stratégie § 7): what the release must
+// accomplish, in the team's words; the KPIs are strategy_objectives rows.
+export const STRATEGIC_OBJECTIVE = "strategic_objective";
+
 export const DESIGN_TEXT_FIELDS = [
   "creative_direction",
   "visual_codes",
@@ -36,7 +40,7 @@ export type DesignTextField = (typeof DESIGN_TEXT_FIELDS)[number];
 
 export const TEXT_FIELDS = {
   brief: BRIEF_TEXT_FIELDS,
-  strategy: [...STRATEGY_TEXT_FIELDS, ...NARRATIVE_PARTS],
+  strategy: [...STRATEGY_TEXT_FIELDS, ...NARRATIVE_PARTS, STRATEGIC_OBJECTIVE],
   design_doc: DESIGN_TEXT_FIELDS,
 } as const;
 export type TextDeliverable = keyof typeof TEXT_FIELDS;

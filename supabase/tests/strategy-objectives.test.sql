@@ -1,7 +1,7 @@
 -- Stratégie, étape 2 (…20261010000201): « Objectifs & KPIs », written by the
 -- owner while the strategy is in progress only. Run with `supabase test db`.
 begin;
-select plan(12);
+select plan(17);
 
 
 
@@ -116,13 +116,35 @@ select is((select target from public.strategy_objectives
             where project_id = pg_temp.prj() and label = 'Abonnés'), 2000::numeric,
           'the target is saved');
 
+-- KPI kinds and sources (…20261010000701).
+select lives_ok($$
+  insert into public.strategy_objectives (organization_id, project_id, label, kind)
+  values (pg_temp.org(), pg_temp.prj(), 'Retours presse spécialisée', 'qualitative')
+$$, 'a qualitative KPI has no figure');
+select throws_ok($$
+  insert into public.strategy_objectives (organization_id, project_id, label, kind, target)
+  values (pg_temp.org(), pg_temp.prj(), 'Qualitatif chiffré', 'qualitative', 10)
+$$, '23514', null, 'a qualitative KPI never carries a target');
+select throws_ok($$
+  insert into public.strategy_objectives (organization_id, project_id, label, kind, source)
+  values (pg_temp.org(), pg_temp.prj(), 'Qualitatif mesuré', 'qualitative', 'deezer_fans')
+$$, '23514', null, 'only a figure can be measured automatically');
+select lives_ok($$
+  insert into public.strategy_objectives (organization_id, project_id, label, target, source)
+  values (pg_temp.org(), pg_temp.prj(), 'Fans Deezer', 15000, 'deezer_fans')
+$$, 'a quantitative KPI can be fed by Deezer');
+select throws_ok($$
+  insert into public.strategy_objectives (organization_id, project_id, label, source)
+  values (pg_temp.org(), pg_temp.prj(), 'Inconnu', 'spotify')
+$$, '23514', null, 'an unknown source is refused');
+
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other'));
 select throws_ok($$ select pg_temp.add_objective('Intrus', 1) $$,
                  '42501', null, 'another project manager cannot write');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
-select is((select count(*)::int from public.strategy_objectives where project_id = pg_temp.prj()), 2,
+select is((select count(*)::int from public.strategy_objectives where project_id = pg_temp.prj()), 4,
           'the director reads the objectives');
 
 -- Once submitted, the objectives are frozen.
@@ -135,7 +157,7 @@ update public.strategy_objectives set target = 1 where project_id = pg_temp.prj(
 delete from public.strategy_objectives where project_id = pg_temp.prj();
 reset role;
 select is((select count(*)::int from public.strategy_objectives
-            where project_id = pg_temp.prj() and target <> 1), 2,
+            where project_id = pg_temp.prj() and target <> 1), 3,
           'a submitted strategy keeps its objectives as they were');
 
 select * from finish();

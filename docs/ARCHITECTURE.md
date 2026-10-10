@@ -772,6 +772,30 @@ livrable, les libellés ou l'action d'import en props.
     la dimension Calendrier passe alors **À arbitrer**.
   - **Propagées vers le Planning** : type `upstream` de `lib/project-plan/timeline.ts`, avec le
     canal des temps forts ; un clic ouvre `/strategy?d=calendar`.
+- **Budget stratégie** (étape 6) : lecture stratégie des `budget_lines` (`lib/strategy/budget.ts`,
+  `strategyBudget`) : **proposé** = toutes les lignes, **validé** = engagé ou payé, **à arbitrer**
+  = estimé ou devis, reste = enveloppe − validé ; **répartition par levier** (chaque levier
+  retenu, même à 0 €, puis les autres leviers qui portent des lignes, puis « Hors levier »).
+  Panneau : tuiles, tableau par levier, puis l'éditeur de lignes de la page Budget. La dimension
+  est « À arbitrer » s'il reste un montant à arbitrer ou si l'enveloppe est dépassée.
+  **Strictement interne** : dans le Brief de sortie, jamais dans le Plan de sortie ni le Dossier
+  de presse (règle pour les générateurs à venir).
+- **Objectifs & KPIs** (étape 7 ; migration `20261010000701_strategy_kpis`) : l'**objectif
+  stratégique** est un champ texte (`strategic_objective`) ; chaque KPI est **quantitatif**
+  (cible, unité, échéance) ou **qualitatif** (le signal attendu, sans chiffre : vérifié en SQL).
+  Un KPI quantitatif peut être alimenté automatiquement par les **fans Deezer de l'artiste**
+  (`source = 'deezer_fans'`, `lib/strategy/kpi-actuals.ts`), lus par le code **après la
+  date de sortie** ; sans donnée : « Donnée indisponible ». Aucune valeur inventée, jamais par PO.
+- **Brief de sortie consolidé** (étape 8, `/strategy/brief`, `components/strategy/brief/`) :
+  établi quand **aucune dimension n'est « À compléter »** (`briefReadiness`, `lib/strategy/brief.ts`) ;
+  sinon la page et le pilotage nomment les dimensions manquantes. Document interne de référence,
+  rendu en direct depuis les données (les huit dimensions dans l'ordre), avec en tête **uniquement
+  les éléments restant à arbitrer** (`arbitrations` : proposition à confirmer, choix pré-cochés,
+  levier à arbitrer, échéance amont trop tard, budget à arbitrer ou dépassé), chacun menant à son
+  panneau. **Modifier avec PO** = la dictée de la Stratégie (propositions relues avant écriture) ;
+  **Demander la validation** = le circuit de l'étape (le DG décide), proposé seulement quand le
+  Brief est établi ; le pilotage renvoie vers le Brief pour la demander. Pas d'instantané stocké :
+  une stratégie soumise ou validée est figée en RLS, le Brief affiché est donc celui validé.
 - Champs texte : positionnement, publics, narratif (`field_values`, `deliverable = 'strategy'`,
   actions génériques `saveField` / `confirmField` / `rejectField`).
 - Dispositif : leviers par famille (taxonomie des besoins) ; un besoin confirmé du Brief

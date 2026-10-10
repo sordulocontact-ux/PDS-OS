@@ -6,6 +6,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { id, orgId, text } from "@/lib/framing/actions/shared";
 import { fail, type ActionResult } from "@/lib/framing/result";
 import { done } from "@/lib/strategy/actions/shared";
+import { KPI_KINDS, KPI_SOURCES } from "@/lib/strategy/kpis";
 import { createClient } from "@/lib/supabase/server";
 
 // « Objectifs & KPIs »: each figure is typed by a person, never proposed by
@@ -23,13 +24,32 @@ const target = z
   .refine((v) => v === "" || /^\d{1,12}(\.\d{1,2})?$/.test(v))
   .transform((v) => (v === "" ? null : Number(v)));
 
-const objectiveInput = z.object({
-  label: text(200),
-  target,
-  unit: optional(text(40)),
-  dueOn: optional(z.iso.date()),
-});
+// A qualitative signal carries no figure and is never measured by a source
+// (also checked in SQL, strategy_objectives_qualitative_check).
+const objectiveInput = z
+  .object({
+    kind: z.enum(KPI_KINDS),
+    label: text(200),
+    target,
+    unit: optional(text(40)),
+    source: z.enum(KPI_SOURCES),
+    dueOn: optional(z.iso.date()),
+  })
+  .transform((v) =>
+    v.kind === "qualitative"
+      ? { ...v, target: null, unit: null, source: "manual" as const }
+      : v,
+  );
 export type ObjectiveInput = z.input<typeof objectiveInput>;
+
+const row = (p: z.output<typeof objectiveInput>) => ({
+  kind: p.kind,
+  label: p.label,
+  target: p.target,
+  unit: p.unit,
+  source: p.source,
+  due_on: p.dueOn,
+});
 
 export async function addObjective(
   projectId: string,
@@ -43,10 +63,7 @@ export async function addObjective(
   const { error } = await supabase.from("strategy_objectives").insert({
     organization_id: organizationId,
     project_id: projectId,
-    label: p.data.label,
-    target: p.data.target,
-    unit: p.data.unit,
-    due_on: p.data.dueOn,
+    ...row(p.data),
   });
   return done(projectId, error);
 }
@@ -63,12 +80,7 @@ export async function updateObjective(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("strategy_objectives")
-    .update({
-      label: p.data.label,
-      target: p.data.target,
-      unit: p.data.unit,
-      due_on: p.data.dueOn,
-    })
+    .update(row(p.data))
     .eq("id", objectiveId)
     .eq("project_id", projectId)
     .select("id");

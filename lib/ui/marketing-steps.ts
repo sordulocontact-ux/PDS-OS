@@ -44,6 +44,11 @@ export function marketingSteps(
       href: step.href ? step.href(projectId) : "",
       built: step.href !== null && !locked,
       title: locked ? t.strategyLocked : undefined,
+      // The Brief de sortie is a page of the Stratégie.
+      also:
+        step.key === "strategy"
+          ? [routes.projectStrategyBrief(projectId)]
+          : undefined,
       done: step.stageKey !== null && validatedStages.includes(step.stageKey),
     };
   });

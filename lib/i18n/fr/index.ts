@@ -39,10 +39,13 @@ import { release } from "./release";
 import { releaseDelivery } from "./release-delivery";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
+import { strategyBrief } from "./strategy-brief";
+import { strategyBudget } from "./strategy-budget";
 import { strategyCalendar } from "./strategy-calendar";
 import { strategyDeliverables } from "./strategy-deliverables";
 import { strategyDispositif } from "./strategy-dispositif";
 import { strategyEntry } from "./strategy-entry";
+import { strategyKpis } from "./strategy-kpis";
 import { strategyPilot } from "./strategy-pilot";
 import { transmission } from "./transmission";
 import { voice } from "./voice";
@@ -64,6 +67,9 @@ export const fr = {
   strategyDispositif,
   strategyDeliverables,
   strategyCalendar,
+  strategyBudget,
+  strategyKpis,
+  strategyBrief,
   strategyPilot,
   design,
   production,

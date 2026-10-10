@@ -4,6 +4,7 @@ import { ImportPanel } from "@/components/framing/import-panel";
 import { ValidationPanel } from "@/components/framing/validation-panel";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { BriefReminder } from "@/components/strategy/brief-reminder";
+import { BriefEntry } from "@/components/strategy/brief/brief-entry";
 import { DimensionWork } from "@/components/strategy/dimension-work";
 import { ProposeChoices } from "@/components/strategy/propose-choices";
 import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
@@ -13,6 +14,7 @@ import { StrategyEntry } from "@/components/strategy/strategy-entry";
 import { StrategyPilotage } from "@/components/strategy/strategy-pilotage";
 import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
+import { ViewLink } from "@/components/ui/view-link";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -24,6 +26,7 @@ import { projectKindLabel } from "@/lib/projects/labels";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { importStrategyReport } from "@/lib/strategy/actions/import";
 import { isFramingValidated } from "@/lib/projects/types";
+import { briefReadiness } from "@/lib/strategy/brief";
 import { strategySheetData } from "@/lib/strategy/call-sheet-data";
 import {
   dimensionStatuses,
@@ -151,6 +154,10 @@ export default async function StrategyPage({
             statuses={statuses}
             current={open?.key ?? null}
           />
+          <BriefEntry
+            projectId={projectId}
+            missing={briefReadiness(statuses).missing}
+          />
         </div>
         {open && (
           <StrategyDimensionPanel
@@ -178,6 +185,15 @@ export default async function StrategyPage({
             title={t.validation.title}
             startLabel={t.validation.start}
             startBlocked={data.briefValidated ? null : t.validation.briefFirst}
+            // The validation is asked on the Brief de sortie (ticket § 8).
+            requestBlocked={
+              <ViewLink
+                href={routes.projectStrategyBrief(projectId)}
+                className="underline underline-offset-2"
+              >
+                {fr.strategyBrief.requestFromBrief}
+              </ViewLink>
+            }
           />
         </div>
         <div className={block}>

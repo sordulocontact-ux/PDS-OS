@@ -1,15 +1,16 @@
 import { BudgetLines } from "@/components/budget/budget-lines";
-import { BudgetSummary } from "@/components/budget/budget-summary";
 import { BriefFieldCard } from "@/components/framing/brief-field-card";
+import { LeverBudgetTable } from "@/components/strategy/budget/lever-budget-table";
+import { StrategyBudgetSummary } from "@/components/strategy/budget/strategy-budget-summary";
 import { CalendarSection } from "@/components/strategy/calendar-section";
 import { DeliverablesSection } from "@/components/strategy/deliverables-section";
 import { LeversSection } from "@/components/strategy/levers-section";
-import { ObjectivesSection } from "@/components/strategy/objectives-section";
+import { ObjectivesWork } from "@/components/strategy/objectives-work";
 import { StrategyChoices } from "@/components/strategy/strategy-choices";
 import type { BudgetData } from "@/lib/budget/queries";
-import { budgetTotals } from "@/lib/budget/types";
 import type { StrategyTextField } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
+import { strategyBudget as computeStrategyBudget } from "@/lib/strategy/budget";
 import type { StrategyDimension } from "@/lib/strategy/dimensions";
 import type { StrategyData } from "@/lib/strategy/queries";
 
@@ -95,23 +96,30 @@ export function DimensionWork({
           projectId={projectId}
         />
       );
-    case "budget":
+    case "budget": {
+      const strategyBudget = computeStrategyBudget(
+        budget.lines,
+        data.levers,
+        envelopeCents,
+      );
       return (
         <>
-          <BudgetSummary
-            envelopeCents={envelopeCents}
-            totals={budgetTotals(budget.lines, envelopeCents)}
-          />
-          <BudgetLines
-            projectId={projectId}
-            lines={budget.lines}
-            levers={budget.levers}
-          />
+          <StrategyBudgetSummary budget={strategyBudget} />
+          <LeverBudgetTable rows={strategyBudget.byLever} />
+          <div className="flex flex-col gap-3">
+            <h3 className="text-body-md font-semibold">
+              {fr.strategyBudget.linesTitle}
+            </h3>
+            <BudgetLines
+              projectId={projectId}
+              lines={budget.lines}
+              levers={budget.levers}
+            />
+          </div>
         </>
       );
+    }
     case "objectives":
-      return (
-        <ObjectivesSection objectives={data.objectives} projectId={projectId} />
-      );
+      return <ObjectivesWork data={data} projectId={projectId} />;
   }
 }

@@ -4,6 +4,7 @@ import type { Access } from "@/lib/auth/access";
 import {
   BRIEF_TEXT_FIELDS,
   NARRATIVE_PARTS,
+  STRATEGIC_OBJECTIVE,
   STRATEGY_TEXT_FIELDS,
   toBriefField,
   toFieldState,
@@ -58,6 +59,8 @@ export type StrategyData = {
   fields: StrategyFieldState[];
   // The story parts of the narrative (its angle is the `narrative` field).
   narrativeParts: FieldState<NarrativePart>[];
+  // What the release must accomplish (« Objectifs & KPIs »), then its KPIs.
+  strategicObjective: FieldState<typeof STRATEGIC_OBJECTIVE>;
   objectives: StrategyObjective[];
   // Closed-choice answers per text field, and PO's pending pre-checks.
   choices: Record<StrategyTextField, ChoiceValue>;
@@ -206,6 +209,15 @@ export async function loadStrategy(
       const row = rowOf("strategy", key);
       return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
     }),
+    strategicObjective: (() => {
+      const row = rowOf("strategy", STRATEGIC_OBJECTIVE);
+      return toFieldState(
+        "strategy",
+        STRATEGIC_OBJECTIVE,
+        row,
+        row ? provenanceOf(row) : null,
+      );
+    })(),
     objectives: objectivesRes.data ?? [],
     choices: Object.fromEntries(
       STRATEGY_TEXT_FIELDS.map((key) => [

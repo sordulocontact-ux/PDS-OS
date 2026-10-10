@@ -42,9 +42,12 @@ function toItem(
 export function StrategyDictation({
   projectId,
   actions,
+  label = fr.voice.fill,
   children,
 }: {
   projectId: string;
+  /** The dictation button's label (« Modifier avec PO » on the Brief). */
+  label?: string;
   /** Buttons before the dictation one ("Proposer des réponses"). */
   actions?: ReactNode;
   /** Title and status. */
@@ -67,11 +70,7 @@ export function StrategyDictation({
         {canEdit && (
           <div className="flex flex-wrap gap-2">
             {actions}
-            <DictationButton
-              dictation={dictation}
-              label={fr.voice.fill}
-              size="lg"
-            />
+            <DictationButton dictation={dictation} label={label} size="lg" />
           </div>
         )}
       </div>

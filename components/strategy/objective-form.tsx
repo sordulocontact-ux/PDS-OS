@@ -4,15 +4,19 @@ import { useState } from "react";
 
 import { labelClass } from "@/components/strategy/option-class";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FilterChip } from "@/components/ui/filter-chip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fr } from "@/lib/i18n/fr";
 import type { ObjectiveInput } from "@/lib/strategy/actions/objectives";
+import { KPI_KINDS, type KpiKind } from "@/lib/strategy/kpis";
 
 /**
- * An objective and its figure, typed by a person: what is measured, the
- * target (to set later if unknown), its unit and by when. The caller
- * remounts it (key) to empty it once saved.
+ * A KPI, typed by a person: quantitative (what is measured, the target —
+ * to set later if unknown —, its unit, by when, optionally measured from
+ * Deezer after the release) or qualitative (the signal looked for, no
+ * figure). The caller remounts it (key) to empty it once saved.
  */
 export function ObjectiveForm({
   idPrefix,
@@ -29,68 +33,110 @@ export function ObjectiveForm({
   onSubmit: (input: ObjectiveInput) => void;
   onCancel?: () => void;
 }) {
-  const t = fr.strategyPilot.objectives;
+  const t = fr.strategyKpis;
+  const [kind, setKind] = useState<KpiKind>(initial?.kind ?? "quantitative");
   const [label, setLabel] = useState(initial?.label ?? "");
   const [target, setTarget] = useState(initial?.target ?? "");
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [dueOn, setDueOn] = useState(initial?.dueOn ?? "");
+  const [measured, setMeasured] = useState(initial?.source === "deezer_fans");
+  const quantitative = kind === "quantitative";
+  const id = (field: string) => `${idPrefix}-${field}`;
 
   return (
     <form
       className="grid gap-4 sm:grid-cols-3"
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit({ label, target, unit, dueOn });
+        onSubmit({
+          kind,
+          label,
+          target: quantitative ? target : "",
+          unit: quantitative ? unit : "",
+          source: quantitative && measured ? "deezer_fans" : "manual",
+          dueOn,
+        });
       }}
     >
+      <div
+        role="group"
+        aria-label={t.kind}
+        className="flex flex-wrap gap-1.5 sm:col-span-3"
+      >
+        {KPI_KINDS.map((k) => (
+          <FilterChip
+            key={k}
+            variant="soft"
+            pressed={kind === k}
+            onClick={() => setKind(k)}
+          >
+            {t.kinds[k]}
+          </FilterChip>
+        ))}
+      </div>
       <div className="flex flex-col gap-2 sm:col-span-3">
-        <Label htmlFor={`${idPrefix}-label`} required className={labelClass}>
-          {t.label}
+        <Label htmlFor={id("label")} required className={labelClass}>
+          {t.label[kind]}
         </Label>
         <Input
-          id={`${idPrefix}-label`}
+          id={id("label")}
           aria-required
           maxLength={200}
           value={label}
-          placeholder={t.labelPlaceholder}
+          placeholder={t.labelPlaceholder[kind]}
           onChange={(e) => setLabel(e.target.value)}
         />
       </div>
+      {quantitative && (
+        <>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor={id("target")} className={labelClass}>
+              {t.target}
+            </Label>
+            <Input
+              id={id("target")}
+              inputMode="decimal"
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              className="tabular-nums"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor={id("unit")} className={labelClass}>
+              {t.unit}
+            </Label>
+            <Input
+              id={id("unit")}
+              maxLength={40}
+              value={unit}
+              placeholder={t.unitPlaceholder}
+              onChange={(e) => setUnit(e.target.value)}
+            />
+          </div>
+        </>
+      )}
       <div className="flex flex-col gap-2">
-        <Label htmlFor={`${idPrefix}-target`} className={labelClass}>
-          {t.target}
-        </Label>
-        <Input
-          id={`${idPrefix}-target`}
-          inputMode="decimal"
-          value={target}
-          onChange={(e) => setTarget(e.target.value)}
-          className="tabular-nums"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor={`${idPrefix}-unit`} className={labelClass}>
-          {t.unit}
-        </Label>
-        <Input
-          id={`${idPrefix}-unit`}
-          maxLength={40}
-          value={unit}
-          placeholder={t.unitPlaceholder}
-          onChange={(e) => setUnit(e.target.value)}
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor={`${idPrefix}-due`} className={labelClass}>
+        <Label htmlFor={id("due")} className={labelClass}>
           {t.dueOn}
         </Label>
         <Input
-          id={`${idPrefix}-due`}
+          id={id("due")}
           type="date"
           value={dueOn}
           onChange={(e) => setDueOn(e.target.value)}
+          className="w-fit"
         />
       </div>
+      {quantitative && (
+        <label className="flex items-start gap-3 text-body-md sm:col-span-3">
+          <Checkbox
+            className="mt-1"
+            checked={measured}
+            onChange={(e) => setMeasured(e.target.checked)}
+          />
+          <span>{t.source}</span>
+        </label>
+      )}
       <div className="flex flex-wrap gap-2 sm:col-span-3">
         <Button
           type="submit"

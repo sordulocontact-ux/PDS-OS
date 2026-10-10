@@ -5826,9 +5826,11 @@ export type Database = {
           created_by: string | null
           due_on: string | null
           id: string
+          kind: string
           label: string
           organization_id: string
           project_id: string
+          source: string
           target: number | null
           unit: string | null
           updated_at: string
@@ -5838,9 +5840,11 @@ export type Database = {
           created_by?: string | null
           due_on?: string | null
           id?: string
+          kind?: string
           label: string
           organization_id: string
           project_id: string
+          source?: string
           target?: number | null
           unit?: string | null
           updated_at?: string
@@ -5850,9 +5854,11 @@ export type Database = {
           created_by?: string | null
           due_on?: string | null
           id?: string
+          kind?: string
           label?: string
           organization_id?: string
           project_id?: string
+          source?: string
           target?: number | null
           unit?: string | null
           updated_at?: string

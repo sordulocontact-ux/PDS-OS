@@ -35,7 +35,8 @@ export type StrategyPrepInput = {
   deliverables: Array<{ lever_id: string }>;
   milestones: unknown[];
   referenceDate: string | null;
-  objectives: Array<{ label: string; target: number | null }>;
+  strategicObjective: { status: "proposed" | "confirmed" | null };
+  objectives: Array<{ label: string; kind: string; target: number | null }>;
   // Budget lines: only their status, label and lever, never an amount.
   budgetLines: Array<{
     label: string;
@@ -96,11 +97,16 @@ function questionsOf(
       ];
     }
     case "objectives":
-      return input.objectives.length === 0
-        ? [q.noObjective]
-        : input.objectives
-            .filter((o) => o.target === null)
-            .map((o) => q.targetFor(o.label));
+      return [
+        ...(input.strategicObjective.status === "confirmed"
+          ? []
+          : [q.strategicObjective]),
+        ...(input.objectives.length === 0
+          ? [q.noObjective]
+          : input.objectives
+              .filter((o) => o.kind === "quantitative" && o.target === null)
+              .map((o) => q.targetFor(o.label))),
+      ];
     case "calendar":
       return [
         ...(input.referenceDate ? [] : [q.releaseDate]),

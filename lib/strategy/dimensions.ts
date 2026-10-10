@@ -8,6 +8,7 @@ import { formatBriefDate } from "@/lib/framing/assess";
 import type { FieldState } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import type { ChoiceSuggestion, ChoiceValue } from "@/lib/strategy/choices";
+import { strategyBudget } from "@/lib/strategy/budget";
 import { upstreamChains } from "@/lib/strategy/upstream";
 
 export const STRATEGY_DIMENSIONS = [
@@ -54,7 +55,12 @@ export type DimensionInput = {
     "positioning" | "audiences" | "narrative",
     ChoiceSuggestion[]
   >;
-  levers: Array<{ id: string; state: string; review_status: string }>;
+  levers: Array<{
+    id: string;
+    label: string;
+    state: string;
+    review_status: string;
+  }>;
   openNeeds: unknown[];
   deliverables: Array<{
     id: string;
@@ -72,7 +78,8 @@ export type DimensionInput = {
   referenceDate: string | null;
   // "YYYY-MM-DD" in Paris: an upstream deadline already past is late.
   today: string;
-  objectives: Array<{ target: number | null }>;
+  strategicObjective: FieldState;
+  objectives: Array<{ kind: string; target: number | null }>;
   budgetLines: Pick<BudgetLine, "amountCents" | "status" | "leverId">[];
   envelopeCents: number | null;
 };
@@ -188,45 +195,50 @@ function calendar(input: DimensionInput): Omit<DimensionStatus, "key"> {
 }
 
 function budget(input: DimensionInput): Omit<DimensionStatus, "key"> {
-  const lines = input.budgetLines;
-  if (lines.length === 0) return { state: "to_complete", summary: s.noBudget };
-  const sum = (statuses: string[]) =>
-    lines
-      .filter((l) => statuses.includes(l.status))
-      .reduce((total, l) => total + l.amountCents, 0);
-  const committed = sum(["committed", "paid"]);
-  const planned = sum(["planned"]);
-  const toAccept = lines.filter((l) => l.status === "proposed").length;
-  const overrun =
-    input.envelopeCents !== null && committed > input.envelopeCents;
-  const budgeted = new Set(lines.map((l) => l.leverId));
-  const uncovered = selectedLeverIds(input).filter(
-    (id) => !budgeted.has(id),
+  if (input.budgetLines.length === 0)
+    return { state: "to_complete", summary: s.noBudget };
+  const b = strategyBudget(
+    input.budgetLines,
+    input.levers,
+    input.envelopeCents,
+  );
+  const overrun = b.remainingCents !== null && b.remainingCents < 0;
+  const selected = new Set(selectedLeverIds(input));
+  const uncovered = b.byLever.filter(
+    (l) =>
+      l.leverId !== null && selected.has(l.leverId) && l.validatedCents === 0,
   ).length;
   const summary = join([
-    s.budget.committed(formatEuros(committed)),
-    planned > 0 && s.budget.planned(formatEuros(planned)),
-    input.envelopeCents !== null &&
-      s.budget.envelope(formatEuros(input.envelopeCents)),
-    toAccept > 0 && s.budget.toAccept(toAccept),
+    s.budget.validated(formatEuros(b.validatedCents)),
+    b.toDecideCents > 0 && s.budget.toDecide(formatEuros(b.toDecideCents)),
+    b.envelopeCents !== null && s.budget.envelope(formatEuros(b.envelopeCents)),
     overrun && s.budget.overrun,
     uncovered > 0 && s.budget.uncovered(uncovered),
   ]);
-  if (toAccept > 0 || overrun) return { state: "to_decide", summary };
+  if (b.toDecideCents > 0 || overrun) return { state: "to_decide", summary };
   return { state: uncovered > 0 ? "in_progress" : "complete", summary };
 }
 
 function objectives(input: DimensionInput): Omit<DimensionStatus, "key"> {
   const list = input.objectives;
-  if (list.length === 0)
+  const defined = input.strategicObjective.status === "confirmed";
+  if (list.length === 0 && !input.strategicObjective.value)
     return { state: "to_complete", summary: s.noObjective };
-  const noTarget = list.filter((o) => o.target === null).length;
+  // A qualitative signal has no figure: it never lacks a target.
+  const noTarget = list.filter(
+    (o) => o.kind === "quantitative" && o.target === null,
+  ).length;
+  const summary = join([
+    defined ? s.objectives.defined : s.objectives.undefined,
+    s.objectives.count(list.length),
+    noTarget > 0 && s.objectives.noTarget(noTarget),
+  ]);
+  if (input.strategicObjective.status === "proposed")
+    return { state: "to_decide", summary };
   return {
-    state: noTarget > 0 ? "in_progress" : "complete",
-    summary: join([
-      s.objectives.count(list.length),
-      noTarget > 0 && s.objectives.noTarget(noTarget),
-    ]),
+    state:
+      defined && list.length > 0 && noTarget === 0 ? "complete" : "in_progress",
+    summary,
   };
 }
 
