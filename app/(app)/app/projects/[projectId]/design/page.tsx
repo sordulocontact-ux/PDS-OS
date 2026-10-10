@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
+import {
+  DesignNeedsStrategy,
+  EarlyDepositLink,
+} from "@/components/design/design-needs-strategy";
 import { DesignProgress } from "@/components/design/design-progress";
 import {
   DeliverableHeading,
@@ -19,6 +22,7 @@ import {
 import { requireApproved } from "@/lib/auth/dal";
 import { loadDesign } from "@/lib/design/queries";
 import { fr } from "@/lib/i18n/fr";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { isStageValidated } from "@/lib/projects/types";
@@ -37,16 +41,21 @@ export default async function DesignPage({
   params,
 }: PageProps<"/app/projects/[projectId]/design">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
+  const [access, project, creatives] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
+    listProjectCreatives(projectId),
   ]);
+  const creative =
+    !canEditProject(access, project) &&
+    creatives.some((c) => c.personId === access.personId);
   // The Conception designs what the validated Strategy committed to.
   if (!isStageValidated(project.stages, "launch_strategy")) {
     return (
       <DesignNeedsStrategy
         projectId={projectId}
         canEdit={canEditProject(access, project)}
+        creative={creative}
       />
     );
   }
@@ -75,6 +84,12 @@ export default async function DesignPage({
           <CardTitle>{t.title}</CardTitle>
           <CardDescription>{t.description}</CardDescription>
           {status && <p className="text-sm text-muted-foreground">{status}</p>}
+          {creative && state === "not_started" && (
+            <div className="grid justify-items-start gap-2 pt-1">
+              <p className="text-sm text-muted-foreground">{t.earlyDeposit}</p>
+              <EarlyDepositLink projectId={projectId} size="sm" />
+            </div>
+          )}
         </CardHeader>
         <CardContent className="grid divide-y divide-border">
           <section className="grid gap-1 pb-4">
@@ -115,7 +130,11 @@ export default async function DesignPage({
             ) : (
               <ul className="grid gap-3">
                 {data.deliverables.map((d) => (
-                  <li key={d.deliverableId}>
+                  <li
+                    key={d.deliverableId}
+                    id={`deliverable-${d.deliverableId}`}
+                    className="scroll-mt-24"
+                  >
                     <DesignTrack
                       {...track}
                       track={d}

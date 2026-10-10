@@ -1,4 +1,5 @@
 import { AcknowledgeButton } from "@/components/master-workflow/acknowledge-button";
+import { DeliverVersion } from "@/components/master-workflow/deliver-version";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
@@ -11,7 +12,8 @@ type Open = Extract<PublicPackage, { state: "open" | "received" }>;
 /**
  * The package as the mix engineer opens it, without an account: the label's
  * message, the files of each title (signed links, as long as the link
- * lives), what is expected, then the confirmation of the reception.
+ * lives) and where to deposit a version of it, what is expected, then the
+ * confirmation of the reception.
  */
 export function PublicPackageView({
   token,
@@ -71,6 +73,25 @@ export function PublicPackageView({
               {title.stems.map((stem) => (
                 <FileLine key={stem.url} label={t.stem} file={stem} />
               ))}
+              {title.masterId && (
+                <>
+                  {data.deliveries
+                    .filter((d) => d.masterId === title.masterId)
+                    .map((d) => (
+                      <p
+                        key={`${d.fileName}-${d.sentAt}`}
+                        className="text-sm text-[color:var(--text-secondary)]"
+                      >
+                        {t.deliver.sent(d.fileName, formatShortDate(d.sentAt))}
+                      </p>
+                    ))}
+                  <DeliverVersion
+                    token={token}
+                    masterId={title.masterId}
+                    role={pack.role}
+                  />
+                </>
+              )}
             </li>
           ))}
         </ul>

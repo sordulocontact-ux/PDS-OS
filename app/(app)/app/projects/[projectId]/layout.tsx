@@ -15,7 +15,10 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { projectKindLabel } from "@/lib/projects/labels";
-import { canEditProject } from "@/lib/projects/edit-access";
+import {
+  canEditProject,
+  canSeeProjectBudget,
+} from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import {
   distributionPages,
@@ -50,6 +53,7 @@ export default async function ProjectLayout({
 
   const canEdit = canEditProject(access, project);
   const canSeeLegal = can(access, "manage_legal");
+  const canSeeBudget = canSeeProjectBudget(access, project);
 
   // Each workflow's state, read from its sources (shared with the overview
   // in the same request): the sidebar's dots, the chevrons' checks. The
@@ -77,6 +81,7 @@ export default async function ProjectLayout({
           projectId={project.id}
           projectTitle={project.title}
           canSeeLegal={canSeeLegal}
+          canSeeBudget={canSeeBudget}
           workflows={flows?.workflows}
           statuses={statuses}
         />
@@ -90,6 +95,7 @@ export default async function ProjectLayout({
           <ProjectPageTitle
             projectId={project.id}
             canSeeLegal={canSeeLegal}
+            canSeeBudget={canSeeBudget}
             workflows={flows?.workflows}
           />
         ) : (
@@ -120,6 +126,7 @@ export default async function ProjectLayout({
                 projectId={project.id}
                 projectTitle={project.title}
                 canSeeLegal={canSeeLegal}
+                canSeeBudget={canSeeBudget}
                 workflows={flows?.workflows}
                 statuses={statuses}
               />
@@ -127,6 +134,7 @@ export default async function ProjectLayout({
               <ProjectTabs
                 projectId={project.id}
                 canSeeLegal={canSeeLegal}
+                canSeeBudget={canSeeBudget}
                 workflows={flows?.workflows}
               />
             )}

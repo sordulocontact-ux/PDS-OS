@@ -4178,6 +4178,24 @@ export type Database = {
           },
         ]
       }
+      member_welcomes: {
+        Row: {
+          dismissed_at: string
+          organization_id: string
+          person_id: string
+        }
+        Insert: {
+          dismissed_at?: string
+          organization_id: string
+          person_id: string
+        }
+        Update: {
+          dismissed_at?: string
+          organization_id?: string
+          person_id?: string
+        }
+        Relationships: []
+      }
       memberships: {
         Row: {
           approved_account_id: string | null
@@ -5953,6 +5971,7 @@ export type Database = {
           assignee_person_id: string
           created_at: string
           created_by: string | null
+          deliverable_id: string | null
           done_at: string | null
           due_date: string | null
           id: string
@@ -5969,6 +5988,7 @@ export type Database = {
           assignee_person_id: string
           created_at?: string
           created_by?: string | null
+          deliverable_id?: string | null
           done_at?: string | null
           due_date?: string | null
           id?: string
@@ -5985,6 +6005,7 @@ export type Database = {
           assignee_person_id?: string
           created_at?: string
           created_by?: string | null
+          deliverable_id?: string | null
           done_at?: string | null
           due_date?: string | null
           id?: string
@@ -6459,6 +6480,7 @@ export type Database = {
       }
       create_master_transmission: {
         Args: {
+          p_expires_at: string
           p_note: string
           p_package: Json
           p_project_id: string
@@ -6823,6 +6845,10 @@ export type Database = {
         Args: { p_key: string; p_master_id: string; p_project_id: string }
         Returns: string
       }
+      open_master_delivery: {
+        Args: { p_extension: string | null; p_master_id: string; p_token: string }
+        Returns: string
+      }
       person_has_permission: {
         Args: {
           p_organization_id: string
@@ -6834,6 +6860,14 @@ export type Database = {
       plan_check_editable: { Args: { p_project_id: string }; Returns: string }
       plan_items_valid: { Args: { p_items: Json }; Returns: boolean }
       project_artist_name: { Args: { p_project_id: string }; Returns: string }
+      project_assignment_messages: {
+        Args: { p_project_id: string }
+        Returns: {
+          assignment_id: string
+          note: string | null
+          response: string | null
+        }[]
+      }
       project_masters_editable: {
         Args: { p_project_id: string }
         Returns: boolean
@@ -6885,6 +6919,15 @@ export type Database = {
       record_formality_signature: {
         Args: { p_proof: string; p_signature_id: string }
         Returns: undefined
+      }
+      record_master_delivery: {
+        Args: {
+          p_file_name: string
+          p_mime: string
+          p_path: string
+          p_token: string
+        }
+        Returns: string
       }
       record_release_delivery: {
         Args: {

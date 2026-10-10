@@ -38,6 +38,29 @@ export const FILES_TAB_CATEGORIES = {
   contract: FILE_CATEGORIES.contract,
 } as const satisfies { [K in FileOwnerKind]: readonly FileCategory<K>[] };
 
+/**
+ * A writer limited to some categories and to her own files: the creative
+ * team in a project's library (Visuels and Autres, UX test of 09/10/2026).
+ */
+export type FileWriteScope = {
+  categories: readonly string[];
+  personId: string;
+};
+
+export const CREATIVE_PROJECT_CATEGORIES = ["visual", "other"] as const;
+
+/** Whether a scoped writer may edit or delete this file (RLS says the same). */
+export function canWriteFile(
+  file: { category: string; authorPersonId: string | null },
+  scope: FileWriteScope | null | undefined,
+): boolean {
+  return (
+    !scope ||
+    (file.authorPersonId === scope.personId &&
+      scope.categories.includes(file.category))
+  );
+}
+
 /** Free precision beside the category ("Contrat artiste 2026"), as in SQL. */
 export const MAX_DESCRIPTION_LENGTH = 200;
 
@@ -234,6 +257,8 @@ export type CatalogFile = {
   createdAt: string;
   // Empty when the author's name cannot be read.
   authorName: string;
+  // Who added this version (a creative director edits only her own files).
+  authorPersonId: string | null;
   // Short-lived signed URLs: open in the browser (preview), or download
   // under the original name.
   openUrl: string | null;

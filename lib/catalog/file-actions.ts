@@ -109,18 +109,18 @@ const updateSchema = z
   .refine((input) => isLibraryCategory(input.owner.kind, input.category));
 
 // The organization to write in, when the viewer may write there at all.
-// Inside a project, only its owner writes: RLS checks that one.
+// Inside a project, its owner writes, and its creative directors in Visuels
+// and Autres (their own files): RLS checks which.
 async function writerAccess(owner: FileOwner) {
   const access = await requireApproved();
-  const permission =
+  const allowed =
     owner.kind === "project"
-      ? "pilot_projects"
-      : owner.kind === "contract"
-        ? "manage_contracts"
-        : "manage_catalog";
-  return access.organizationId && can(access, permission)
-    ? access.organizationId
-    : null;
+      ? can(access, "pilot_projects") || can(access, "creative_work")
+      : can(
+          access,
+          owner.kind === "contract" ? "manage_contracts" : "manage_catalog",
+        );
+  return access.organizationId && allowed ? access.organizationId : null;
 }
 
 function refresh(owner: FileOwner) {

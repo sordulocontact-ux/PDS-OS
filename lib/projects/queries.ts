@@ -109,13 +109,11 @@ const FORMAT_SELECT =
   "content_format:content_formats!projects_content_format_same_org(id, name, description)";
 
 const ASSIGNMENTS_SELECT =
-  "assignments:project_assignments!project_assignments_project_same_org(id, status, note, response, responded_at, created_at, assignee_person_id, assignee:people!project_assignments_assignee_person_id_fkey(first_name, last_name), assigner:people!project_assignments_assigned_by_fkey(first_name, last_name))";
+  "assignments:project_assignments!project_assignments_project_same_org(id, status, responded_at, created_at, assignee_person_id, assignee:people!project_assignments_assignee_person_id_fkey(first_name, last_name), assigner:people!project_assignments_assigned_by_fkey(first_name, last_name))";
 
 type RawAssignment = {
   id: string;
   status: string;
-  note: string | null;
-  response: string | null;
   responded_at: string | null;
   created_at: string;
   assignee_person_id: string;
@@ -123,8 +121,14 @@ type RawAssignment = {
   assigner: { first_name: string; last_name: string | null } | null;
 };
 
-// Newest first.
-function toAssignments(raw: RawAssignment[]): Assignment[] {
+type AssignmentMessages = { note: string | null; response: string | null };
+
+// Newest first. `messages`: the words of each transmission the viewer may
+// read (the person it went to, who sent it, the direction); none elsewhere.
+function toAssignments(
+  raw: RawAssignment[],
+  messages: Map<string, AssignmentMessages> = new Map(),
+): Assignment[] {
   return raw
     .flatMap((a): Assignment[] =>
       isAssignmentStatus(a.status)
@@ -139,8 +143,8 @@ function toAssignments(raw: RawAssignment[]): Assignment[] {
               assignedByName: a.assigner
                 ? personName(a.assigner.first_name, a.assigner.last_name)
                 : "",
-              note: a.note,
-              response: a.response,
+              note: messages.get(a.id)?.note ?? null,
+              response: messages.get(a.id)?.response ?? null,
               respondedAt: a.responded_at,
               createdAt: a.created_at,
             },
@@ -222,14 +226,21 @@ export const getProject = cache(
     if (!projectIdSchema.safeParse(projectId).success) return null;
 
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("projects")
-      .select(
-        `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
-      )
-      .eq("id", projectId)
-      .is("archived_at", null)
-      .maybeSingle();
+    const [{ data, error }, answers] = await Promise.all([
+      supabase
+        .from("projects")
+        .select(
+          `id, title, type, music_format, artist_id, created_at, due_date, budget_cents, priority, initial_context, owner_person_id, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+        )
+        .eq("id", projectId)
+        .is("archived_at", null)
+        .maybeSingle(),
+      // What a transmission says is private (UX test of 09/10/2026): the
+      // database returns only the messages the viewer may read.
+      supabase.rpc("project_assignment_messages", { p_project_id: projectId }),
+    ]);
+    if (answers.error)
+      console.error("getProject messages:", answers.error.message);
 
     // A failed read is not « not found »: thrown to the error page
     // (app/(app)/app/error.tsx, « Réessayer »), never shown as a 404.
@@ -238,7 +249,15 @@ export const getProject = cache(
 
     const stages = toStages(data.project_stages as RawStage[]);
     const masters = toMasters(data.links as RawLink[]);
-    const assignments = toAssignments(data.assignments as RawAssignment[]);
+    const assignments = toAssignments(
+      data.assignments as RawAssignment[],
+      new Map(
+        (answers.data ?? []).map((a) => [
+          a.assignment_id,
+          { note: a.note, response: a.response },
+        ]),
+      ),
+    );
     const owner = data.owner
       ? personName(data.owner.first_name, data.owner.last_name)
       : "";

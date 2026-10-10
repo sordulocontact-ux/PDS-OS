@@ -164,6 +164,9 @@ export const routes = {
   projectStrategyDimension: (id: string, dimension: string) =>
     `/app/projects/${id}/strategy?d=${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
+  // One deliverable of the Conception, by its anchor.
+  projectDesignDeliverable: (id: string, deliverableId: string) =>
+    `/app/projects/${id}/design#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,

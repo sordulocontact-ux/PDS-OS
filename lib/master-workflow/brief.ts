@@ -23,7 +23,10 @@ import { networkEngineers } from "@/lib/master-workflow/network-engineers";
 import { materialFacts, sourceFacts } from "@/lib/master-workflow/source-facts";
 import type { EngineerRole } from "@/lib/master-workflow/types";
 import { listProjectCreatives } from "@/lib/projects/creatives";
-import { canEditProject } from "@/lib/projects/edit-access";
+import {
+  canEditProject,
+  canSeeProjectBudget,
+} from "@/lib/projects/edit-access";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -94,15 +97,19 @@ export async function loadMasterBrief(
     console.error("loadMasterBrief exchanges:", exchanges.error.message);
   if (saved.error) console.error("loadMasterBrief:", saved.error.message);
   const canEdit = canEditProject(access, project);
+  const canSeeBudget = canSeeProjectBudget(access, project);
   const canEditCatalog = can(access, "manage_catalog");
 
   const row = saved.data;
   // Credits on the titles first, then what the Cadrage confirmed.
   const mixCredited =
-    creditedContact(rows.creditsOf, "mix_engineer") ?? framing.mixContactId;
+    creditedContact(rows.creditsOf, "mix_engineer") ??
+    rows.framingEngineers.get("mix_engineer")?.contactId ??
+    null;
   const masteringCredited =
     creditedContact(rows.creditsOf, "mastering_engineer") ??
-    framing.masteringContactId;
+    rows.framingEngineers.get("mastering_engineer")?.contactId ??
+    null;
   const sameCredited =
     mixCredited !== null && mixCredited === masteringCredited;
   const brief: MasterBrief = row
@@ -144,7 +151,11 @@ export async function loadMasterBrief(
 
   return {
     projectId: project.id,
-    brief,
+    // The rates never leave the server for someone who may not read them.
+    brief: canSeeBudget
+      ? brief
+      : { ...brief, mixRateCents: null, masteringRateCents: null },
+    canSeeBudget,
     savedAt: row?.updated_at ?? null,
     savedBy: row?.updater
       ? personName(row.updater.first_name, row.updater.last_name)

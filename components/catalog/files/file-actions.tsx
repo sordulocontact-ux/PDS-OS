@@ -30,11 +30,14 @@ export function FileActions({
   canEdit,
   canDelete,
   organizationId,
+  categories,
 }: {
   owner: FileOwner;
   file: CatalogFile;
   canEdit: boolean;
   canDelete: boolean;
+  // A scoped writer: the categories she may reclassify into.
+  categories?: readonly string[];
   // The writer's organization: where a new version is uploaded.
   organizationId: string | null;
 }) {
@@ -157,6 +160,7 @@ export function FileActions({
           <FileEditForm
             owner={owner}
             file={file}
+            categories={categories}
             onDone={() => setEditing(false)}
           />
         </FormDialog>

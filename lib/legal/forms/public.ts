@@ -9,12 +9,25 @@ import { createClient } from "@/lib/supabase/server";
 /** A fiche as its public page sees it, read through get_legal_form(token):
  * the database checks the token, its expiry and revocation. */
 
+// Who asks: the organization and the project's owner (email when known).
+const requesterSchema = z
+  .object({
+    organization: z.string().nullable().default(null),
+    contact: z.string().nullable().default(null),
+    email: z.string().nullable().default(null),
+  })
+  .catch({ organization: null, contact: null, email: null })
+  .default({ organization: null, contact: null, email: null });
+
+export type FormRequester = z.infer<typeof requesterSchema>;
+
 const publicSchema = z.discriminatedUnion("state", [
   z.object({
     state: z.literal("open"),
     version: z.number(),
     person: z.string(),
     project: z.string(),
+    requester: requesterSchema,
     prefill: z
       .object({ roles: z.array(z.enum(FORM_ROLES)).default([]) })
       .catch({ roles: [] }),
@@ -28,7 +41,10 @@ const publicSchema = z.discriminatedUnion("state", [
         ),
       ),
   }),
-  z.object({ state: z.enum(["submitted", "expired", "revoked"]) }),
+  z.object({
+    state: z.enum(["submitted", "expired", "revoked"]),
+    requester: requesterSchema,
+  }),
 ]);
 
 export type PublicForm = z.infer<typeof publicSchema>;

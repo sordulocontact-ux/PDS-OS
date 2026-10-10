@@ -14,6 +14,7 @@ import { FramingEntry } from "@/components/framing/intel/framing-entry";
 import { FramingProgress } from "@/components/framing/intel/framing-progress";
 import { KnownAnswers } from "@/components/framing/intel/known-answers";
 import { NeedsLines } from "@/components/framing/intel/needs-lines";
+import { QuestionPager } from "@/components/framing/intel/question-pager";
 import { QuestionScreen } from "@/components/framing/intel/question-screen";
 import { TeamLines } from "@/components/framing/intel/team-lines";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -94,6 +95,12 @@ export default async function FramingPage({
     routes.projectFramingStep(projectId, d);
   const questionHref = (q: QuestionState) =>
     routes.projectFramingQuestion(projectId, q.dimension, q.key);
+  // Every question in the guide's order, for previous / next.
+  const ordered = assessment.dimensions.flatMap((d) => d.questions);
+  const neighbourHref = (q: QuestionState, step: -1 | 1) => {
+    const other = ordered[ordered.findIndex((o) => o.key === q.key) + step];
+    return other ? questionHref(other) : null;
+  };
   const nextHrefOf = (q: QuestionState) => {
     const next = nextAfter(assessment, q.key);
     return next ? questionHref(next) : briefHref;
@@ -207,7 +214,7 @@ export default async function FramingPage({
         editable={
           canEdit && (stage === "not_started" || stage === "in_progress")
         }
-        hasBrief={k.briefs.length > 0}
+        hasBrief={k.briefs.length > 0 || stage === "validated"}
         briefHref={routes.projectFramingBrief(projectId)}
       />
     );
@@ -298,6 +305,12 @@ export default async function FramingPage({
             eyebrow={eyebrow}
             editable={editable}
             nextHref={nextHrefOf(question)}
+            nav={
+              <QuestionPager
+                previousHref={neighbourHref(question, -1)}
+                nextHref={neighbourHref(question, 1)}
+              />
+            }
             suggestions={suggestions}
             hint={
               question.key === "target_date" && timingSaid

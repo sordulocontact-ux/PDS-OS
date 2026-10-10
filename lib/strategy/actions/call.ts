@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
+import { inviteProjectTeam } from "@/lib/calls/invite";
 import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -118,5 +119,13 @@ export async function prepareStrategyCall(
       values,
     };
   }
+  // The team members kept among the participants are invited (notified).
+  await inviteProjectTeam({
+    callId,
+    organizationId: access.organizationId!,
+    projectId: p.projectId,
+    mePersonId: access.personId,
+    names: p.participants,
+  });
   redirect(routes.projectCall(p.projectId, callId));
 }

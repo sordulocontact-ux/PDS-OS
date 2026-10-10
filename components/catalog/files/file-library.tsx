@@ -14,6 +14,7 @@ import {
   type CatalogFile,
   type FileOwner,
   type FileView,
+  type FileWriteScope,
 } from "@/lib/catalog/file-rules";
 import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
@@ -24,6 +25,8 @@ import { viewHref } from "@/lib/ui/view-href";
  * are those the viewer may read (RLS): Tous never shows a contract a viewer
  * could not open, and without that right the Contracts view is not offered.
  * `organizationId` (manage_catalog) makes the list an import zone.
+ * `scope`: a writer limited to some categories and to her own files (the
+ * creative team in a project's library).
  */
 export function FileLibrary({
   owner,
@@ -34,6 +37,7 @@ export function FileLibrary({
   basePath,
   emptyBody,
   emptyBodyReadOnly,
+  scope,
 }: {
   owner: FileOwner;
   organizationId: string | null;
@@ -43,6 +47,7 @@ export function FileLibrary({
   basePath: string;
   emptyBody: string;
   emptyBodyReadOnly: string;
+  scope?: FileWriteScope | null;
 }) {
   const t = fr.catalogFiles;
   const labels: Record<string, string> = t.views[owner.kind];
@@ -84,6 +89,7 @@ export function FileLibrary({
               files={visible}
               canEdit
               organizationId={organizationId}
+              scope={scope}
             />
           ) : (
             <FileImportEmpty title={title} body={body} />
@@ -104,6 +110,7 @@ export function FileLibrary({
       owner={owner}
       view={view}
       basePath={basePath}
+      categories={scope?.categories}
     >
       {library}
     </FileImport>

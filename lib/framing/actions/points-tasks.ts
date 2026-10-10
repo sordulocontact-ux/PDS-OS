@@ -54,6 +54,8 @@ const taskInput = z.object({
   assigneePersonId: id,
   dueDate: z.iso.date(),
   sourceReportItemId: id.nullable(),
+  // The deliverable the task is about (same project, checked in SQL).
+  deliverableId: id.nullable().default(null),
 });
 
 /** A task always gets an owner and a due date, chosen by a person — never by PO. */
@@ -73,6 +75,7 @@ export async function createTask(
     assignee_person_id: p.data.assigneePersonId,
     due_date: p.data.dueDate,
     source_report_item_id: p.data.sourceReportItemId,
+    deliverable_id: p.data.deliverableId,
   });
   // The assignee is notified by a database trigger; the push leaves after.
   if (!error) await schedulePendingPushes();

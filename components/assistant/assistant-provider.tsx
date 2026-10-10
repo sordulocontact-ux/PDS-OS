@@ -32,6 +32,9 @@ type AssistantContextValue = {
   markSaved: (toolCallId: string, link: SavedLink) => void;
   launcherOpen: boolean;
   setLauncherOpen: (open: boolean) => void;
+  /** Questions the open page adds to the suggestions (a project to accept). */
+  pageSuggestions: string[];
+  setPageSuggestions: (suggestions: string[]) => void;
 };
 
 const AssistantContext = createContext<AssistantContextValue | null>(null);
@@ -63,6 +66,7 @@ export function AssistantProvider({
   );
   const [saved, setSaved] = useState<Record<string, SavedLink>>({});
   const [launcherOpen, setLauncherOpen] = useState(false);
+  const [pageSuggestions, setPageSuggestions] = useState<string[]>([]);
   const [reviewing, setReviewing] = useState<{
     toolCallId: string;
     proposal: DraftProposal;
@@ -74,6 +78,8 @@ export function AssistantProvider({
       saved,
       launcherOpen,
       setLauncherOpen,
+      pageSuggestions,
+      setPageSuggestions,
       review(toolCallId, proposal) {
         // Never two layers: the window gives way to the panel.
         setLauncherOpen(false);
@@ -83,7 +89,7 @@ export function AssistantProvider({
         setSaved((previous) => ({ ...previous, [toolCallId]: link }));
       },
     }),
-    [chat, saved, launcherOpen],
+    [chat, saved, launcherOpen, pageSuggestions],
   );
 
   // The draft after `toolCallId` in the same answer, not saved yet: an

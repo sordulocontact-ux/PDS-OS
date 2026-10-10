@@ -7,6 +7,7 @@ import {
 } from "@/components/overview/board-cards";
 import { DependenciesTable } from "@/components/overview/dependencies-table";
 import { WorkflowCards } from "@/components/overview/workflow-cards";
+import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -62,21 +63,37 @@ export function ProjectBoard({
 
   return (
     <div className="flex flex-col gap-6">
-      <ViewLink
-        href={routes.projectFraming(project.id)}
-        className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-[var(--surface-soft)] px-4 py-3 no-underline transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-sunken)]"
-      >
+      {/* The whole band opens the Cadrage (stretched link); « Voir le
+          Brief » sits above it and opens the Brief itself. */}
+      <div className="relative flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-[var(--surface-soft)] px-4 py-3 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-[var(--surface-sunken)] has-[>a:focus-visible]:ring-3 has-[>a:focus-visible]:ring-ring/50">
         <IconDrawCompass aria-hidden className="size-5 shrink-0" />
-        <span className="text-body-md font-semibold">{t.framing}</span>
+        <ViewLink
+          href={routes.projectFraming(project.id)}
+          className="text-body-md font-semibold no-underline outline-none after:absolute after:inset-0 after:rounded-2xl"
+        >
+          {t.framing}
+        </ViewLink>
         {framing?.state === "validated" && framing.stateChangedAt && (
           <span className="text-body-md text-muted-foreground">
             {t.framingValidated(formatDate(framing.stateChangedAt))}
           </span>
         )}
-        <span className="ml-auto text-caption text-muted-foreground underline-offset-4">
-          {t.framingOpen}
+        <span className="ml-auto flex items-center gap-3">
+          <ViewLink
+            href={routes.projectFramingBrief(project.id)}
+            className={buttonVariants({
+              size: "sm",
+              variant: "outline",
+              className: "relative z-10",
+            })}
+          >
+            {t.seeBrief}
+          </ViewLink>
+          <span aria-hidden className="text-caption text-muted-foreground">
+            {t.framingOpen}
+          </span>
         </span>
-      </ViewLink>
+      </div>
 
       <WorkflowCards
         projectId={project.id}

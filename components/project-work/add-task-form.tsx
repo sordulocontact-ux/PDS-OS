@@ -13,6 +13,10 @@ import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
 const t = fr.projectWork.work.add;
+// The « none » choice of the deliverable menu (a Select value is never empty).
+const NO_DELIVERABLE = "none";
+
+export type TaskDeliverable = { id: string; title: string };
 
 /**
  * A free task on the project's to-do list (owner only): title, owner and due
@@ -21,10 +25,12 @@ const t = fr.projectWork.work.add;
 export function AddTaskForm({
   projectId,
   members,
+  deliverables,
   defaultAssignee,
 }: {
   projectId: string;
   members: Member[];
+  deliverables: TaskDeliverable[];
   defaultAssignee: string | null;
 }) {
   const [open, setOpen] = useState(false);
@@ -41,6 +47,7 @@ export function AddTaskForm({
       framed
       projectId={projectId}
       members={members}
+      deliverables={deliverables}
       initial={{ title: "", assigneePersonId: defaultAssignee, dueDate: "" }}
       onDone={() => setOpen(false)}
       onCancel={() => setOpen(false)}
@@ -51,10 +58,13 @@ export function AddTaskForm({
 /**
  * The task's fields. `framed`: inline on the Travail page, with its own
  * title; without it, inside a panel that already has one (PO's draft).
+ * `deliverables`: the task may name the one it is about, and then leads to
+ * it in the Conception.
  */
 export function TaskForm({
   projectId,
   members,
+  deliverables = [],
   initial,
   framed = false,
   onDone,
@@ -62,6 +72,7 @@ export function TaskForm({
 }: {
   projectId: string;
   members: Member[];
+  deliverables?: TaskDeliverable[];
   initial: { title: string; assigneePersonId: string | null; dueDate: string };
   framed?: boolean;
   onDone: () => void;
@@ -72,6 +83,7 @@ export function TaskForm({
     initial.assigneePersonId ?? members[0]?.personId ?? "",
   );
   const [due, setDue] = useState(initial.dueDate);
+  const [deliverable, setDeliverable] = useState(NO_DELIVERABLE);
   const { pending, run } = useFramingAction();
   const people = Object.fromEntries(members.map((m) => [m.personId, m.name]));
 
@@ -91,6 +103,8 @@ export function TaskForm({
               assigneePersonId: assignee,
               dueDate: due,
               sourceReportItemId: null,
+              deliverableId:
+                deliverable === NO_DELIVERABLE ? null : deliverable,
             }),
           onDone,
         );
@@ -143,6 +157,21 @@ export function TaskForm({
             className="w-auto"
           />
         </div>
+        {deliverables.length > 0 && (
+          <div className="grid gap-1">
+            <Label htmlFor="new-task-deliverable">{t.deliverable}</Label>
+            <OptionSelect
+              id="new-task-deliverable"
+              label={t.deliverable}
+              options={{
+                [NO_DELIVERABLE]: t.noDeliverable,
+                ...Object.fromEntries(deliverables.map((d) => [d.id, d.title])),
+              }}
+              value={deliverable}
+              onChange={setDeliverable}
+            />
+          </div>
+        )}
         <div className="flex gap-2">
           <Button
             type="submit"

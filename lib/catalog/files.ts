@@ -16,7 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 const SIGNED_URL_SECONDS = 3600;
 
 const SELECT =
-  "id, category, description, path, file_name, mime, bytes, created_at, series_id, version";
+  "id, category, description, path, file_name, mime, bytes, created_at, created_by, series_id, version";
 const MASTER_SELECT = `${SELECT}, audio_state, duration_seconds`;
 
 /**
@@ -158,6 +158,7 @@ export async function listCatalogFiles(
         durationSeconds: audio.duration_seconds ?? null,
         createdAt: row.created_at,
         authorName: latest.authorName,
+        authorPersonId: row.created_by,
         openUrl: latest.openUrl,
         downloadUrl: latest.downloadUrl,
       };

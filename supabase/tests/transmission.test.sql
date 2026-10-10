@@ -98,7 +98,10 @@ select is((select count(*)::int from public.projects where id = (select id from 
           0, 'after answering, the manager no longer sees the project');
 reset role;
 select pg_temp.act_as((select id from ids where name = 'director'));
-select is((select status || '/' || response from public.project_assignments where id = (select id from ids where name = 'a1')),
+select is((select a.status || '/' || r.response
+             from public.project_assignments a
+             join public.project_assignment_messages(a.project_id) r on r.assignment_id = a.id
+            where a.id = (select id from ids where name = 'a1')),
           'clarification_requested/Quel budget pour le clip ?', 'the question goes back to the director');
 reset role;
 select pg_temp.act_as((select id from ids where name = 'manager'));

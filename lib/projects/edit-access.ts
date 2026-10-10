@@ -13,3 +13,16 @@ export function canEditProject(
     can(access, "pilot_projects")
   );
 }
+
+// Who reads a project's budget (its lines, their notes, the Brief Mix/Master
+// rates): its owner and the direction (UX test of 09/10/2026: the creative
+// director read it). Same rule as can_read_project_budget() in the database.
+export function canSeeProjectBudget(
+  access: Access,
+  project: { ownerPersonId: string | null },
+): boolean {
+  return (
+    (access.personId !== null && project.ownerPersonId === access.personId) ||
+    can(access, "view_all_projects")
+  );
+}

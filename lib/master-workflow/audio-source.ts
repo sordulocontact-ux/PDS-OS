@@ -67,11 +67,11 @@ function sourceCandidates(audio: FlowAudio[]): FlowAudio[] {
 }
 
 function confirmAction(
-  title: FactTitle,
+  title: FactTitle & { audioState: AudioState | null },
   candidates: FlowAudio[],
   detected: FlowAudio,
   current: FlowAudio | null,
-  projectId: string,
+  rights: SourceRights,
 ): MasterFactAction {
   const options = candidates.map((file): SourceOption => ({
     fileId: file.id,
@@ -86,12 +86,13 @@ function confirmAction(
   }));
   return {
     kind: "confirm_source",
-    projectId,
+    projectId: rights.projectId,
     masterId: title.id,
     title: title.title,
     currentFileId: current?.id ?? null,
     detectedFileId: detected.id,
     options,
+    importState: rights.addAudio ? (title.audioState ?? "demo") : null,
   };
 }
 
@@ -138,7 +139,7 @@ export function audioSourceFact(
     ? (audio.find((file) => file.id === source.fileId) ?? null)
     : null;
   const action = rights.confirm
-    ? confirmAction(title, candidates, detected, current, rights.projectId)
+    ? confirmAction(title, candidates, detected, current, rights)
     : undefined;
 
   if (!source || !current)

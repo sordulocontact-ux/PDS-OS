@@ -37,6 +37,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadMyTodo } from "@/lib/insights/todo";
+import { handoverOf } from "@/lib/projects/handover";
 import { listProjects } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -103,12 +104,18 @@ export function createAssistantTools(
             .sort((a, b) => order.get(a.id)! - order.get(b.id)!);
         }
         const found = list.slice(0, 20);
+        const waiting = new Set(
+          handoverOf(projects, access).toAccept.map((p) => p.id),
+        );
         return {
           projects: found.map((p) => ({
             projectId: p.id,
             title: p.title,
             artist: p.artistName,
             type: p.type,
+            // pending = transmitted, not accepted yet; launched = accepted.
+            status: p.status,
+            waitingForYourAnswer: waiting.has(p.id),
             currentStage: p.currentStage
               ? `${p.currentStage.label} (${p.currentStage.state})`
               : null,
@@ -179,12 +186,26 @@ export function createAssistantTools(
 
     my_todo: tool({
       description:
-        "Ce qui attend l'utilisateur connecté : ses tâches à faire (retards calculés), les validations qui l'attendent, les propositions de PO à confirmer par projet.",
+        "Ce qui attend l'utilisateur connecté : les projets qu'on lui a transmis et qu'il doit accepter, ses tâches et ses livrables à faire (retards calculés), les validations qui l'attendent, les propositions de PO à confirmer par projet.",
       inputSchema: z.object({}),
       execute: async () => {
-        const todo = await loadMyTodo(access);
+        const [todo, { projects }] = await Promise.all([
+          loadMyTodo(access),
+          listProjects(),
+        ]);
+        // What waits for the person's answer comes first (UX test of
+        // 09/10/2026: PO answered a new member without the project to accept).
+        const { toAccept } = handoverOf(projects, access);
         const facts = [
           ...(todo.error ? [fr.assistant.readFailed] : []),
+          ...toAccept.map(
+            (p) =>
+              `Projet « ${p.title} »${p.artistName ? ` (${p.artistName})` : ""} : il vous a été transmis et attend votre réponse (accepter, refuser ou demander une précision). C'est la première chose à faire.`,
+          ),
+          ...todo.deliverables.map(
+            (d) =>
+              `Livrable « ${d.title} » (${d.projectTitle}) : à concevoir, ${d.dueDate ? `échéance le ${formatDay(d.dueDate)}` : "sans échéance"}, ${lateness(d.overdue)}.`,
+          ),
           ...todo.tasks.map(
             (t) =>
               `Tâche « ${t.title} » (${t.projectTitle}) : à faire, ${t.dueDate ? `échéance le ${formatDay(t.dueDate)}` : "sans échéance"}, ${lateness(t.overdue)}.`,
@@ -202,9 +223,17 @@ export function createAssistantTools(
           facts: facts.length
             ? facts
             : [
-                "Rien ne vous attend : aucune tâche, aucune validation, aucune proposition.",
+                "Rien ne vous attend : aucun projet à accepter, aucune tâche, aucun livrable, aucune validation, aucune proposition.",
               ],
           sources: uniqueSources([
+            ...toAccept.map((p) => ({
+              label: `${p.title} · à accepter`,
+              href: routes.project(p.id),
+            })),
+            ...todo.deliverables.map((d) => ({
+              label: `${d.projectTitle} · ${d.title}`,
+              href: d.href,
+            })),
             ...todo.tasks.map((t) => ({
               label: `${t.projectTitle} · ${t.title}`,
               href: t.href,

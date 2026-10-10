@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { FramingStepCard } from "@/components/framing/guide/step-card";
 import { useFramingAction } from "@/components/framing/use-framing-action";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
 import { generateBrief } from "@/lib/framing/actions/brief-versions";
 import { fr } from "@/lib/i18n/fr";
 
@@ -30,7 +31,8 @@ export function BriefReady({
   // Cadrage is not « complet » (UX test of 09/10/2026: « complet » at 21/23).
   optional: Remaining[];
   editable: boolean;
-  // A version exists already: the button updates it.
+  // A version exists already (or a Cadrage validated before versions): the
+  // button updates it, and « Voir le Brief » opens it, even once frozen.
   hasBrief: boolean;
   briefHref: string;
 }) {
@@ -57,20 +59,34 @@ export function BriefReady({
             : t.doneBody
       }
       actions={
-        ready &&
-        editable && (
-          <Button
-            size="lg"
-            disabled={pending}
-            onClick={() =>
-              run(
-                () => generateBrief(projectId),
-                () => router.push(briefHref),
-              )
-            }
-          >
-            {pending ? t.generating : hasBrief ? t.update : t.generate}
-          </Button>
+        ((ready && editable) || hasBrief) && (
+          <>
+            {ready && editable && (
+              <Button
+                size="lg"
+                disabled={pending}
+                onClick={() =>
+                  run(
+                    () => generateBrief(projectId),
+                    () => router.push(briefHref),
+                  )
+                }
+              >
+                {pending ? t.generating : hasBrief ? t.update : t.generate}
+              </Button>
+            )}
+            {hasBrief && (
+              <ViewLink
+                href={briefHref}
+                className={buttonVariants({
+                  size: "lg",
+                  variant: ready && editable ? "outline" : "default",
+                })}
+              >
+                {t.seeBrief}
+              </ViewLink>
+            )}
+          </>
         )
       }
     >

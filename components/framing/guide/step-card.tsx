@@ -10,6 +10,7 @@ export function FramingStepCard({
   title,
   description,
   actions,
+  nav,
   className,
   children,
 }: {
@@ -17,6 +18,8 @@ export function FramingStepCard({
   title: string;
   description?: React.ReactNode;
   actions?: React.ReactNode;
+  // Beside the surtitle: moving between screens (previous / next question).
+  nav?: React.ReactNode;
   className?: string;
   children?: React.ReactNode;
 }) {
@@ -29,7 +32,12 @@ export function FramingStepCard({
       )}
     >
       <header className="flex flex-col gap-2">
-        <p className="text-caption text-muted-foreground">{eyebrow}</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-w-0 text-caption text-muted-foreground">
+            {eyebrow}
+          </p>
+          {nav}
+        </div>
         <h2
           id="framing-step-title"
           className="text-display-md font-semibold break-words text-foreground"

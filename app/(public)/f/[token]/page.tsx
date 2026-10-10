@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PublicForm } from "@/components/legal/forms/public-form";
+import {
+  DataUseNote,
+  RequesterNote,
+} from "@/components/legal/forms/requester-note";
 import { fr } from "@/lib/i18n/fr";
 import { getPublicForm } from "@/lib/legal/forms/public";
 
@@ -31,7 +35,7 @@ export default async function LegalFormPage({
           </h1>
           {form.state === "open" && (
             <p className="text-muted-foreground">
-              {t.intro(form.person, form.project)}
+              {t.intro(form.person, form.project, form.requester.organization)}
             </p>
           )}
         </header>
@@ -40,11 +44,19 @@ export default async function LegalFormPage({
             token={token}
             prefillRoles={form.prefill.roles}
             known={form.known}
+            requester={form.requester}
           />
         ) : (
-          <p className="rounded-2xl border bg-background p-6 font-medium">
-            {t.states[form.state]}
-          </p>
+          <div className="flex flex-col gap-4 rounded-2xl border bg-background p-6">
+            <p className="font-medium">{t.states[form.state]}</p>
+            <RequesterNote requester={form.requester} />
+          </div>
+        )}
+        {form.state === "open" && (
+          <aside className="flex flex-col gap-5 rounded-2xl border bg-background p-6">
+            <RequesterNote requester={form.requester} />
+            <DataUseNote requester={form.requester} />
+          </aside>
         )}
       </div>
     </main>

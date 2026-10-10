@@ -6,25 +6,30 @@ import { CallFields, withOccurredAt } from "@/components/calls/call-fields";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PeoplePicker } from "@/components/ui/people-picker";
 import { createCall } from "@/lib/calls/actions";
 import { fr } from "@/lib/i18n/fr";
 
 /**
  * "Nouveau call": a button that unfolds the form in place. When the project
  * has no call yet, the form is open from the start (it is the only action).
- * A title, a date and an optional video link: recording consent is given by
- * contract.
+ * A title, a date, an optional video link and who takes part: recording
+ * consent is given by contract.
  */
 export function CreateCallForm({
   projectId,
   defaultOccurredAt,
   defaultTitle,
   initiallyOpen,
+  team,
 }: {
   projectId: string;
   defaultOccurredAt: string;
   defaultTitle: string;
   initiallyOpen: boolean;
+  // Who can be invited (the project's team, the owner left out), all
+  // proposed: each one is notified (UX test of 09/10/2026).
+  team: { personId: string; name: string }[];
 }) {
   const t = fr.calls.create;
   const [open, setOpen] = useState(initiallyOpen);
@@ -54,6 +59,14 @@ export function CreateCallForm({
           <CallFields
             defaultTitle={defaultTitle}
             defaultOccurredAt={defaultOccurredAt}
+          />
+          <PeoplePicker
+            name="attendees"
+            label={t.fieldAttendees}
+            hint={t.attendeesHint}
+            emptyLabel={t.noTeam}
+            candidates={team}
+            defaultSelectedIds={team.map((p) => p.personId)}
           />
           {state && !state.ok && (
             <p role="alert" className="text-sm text-error">

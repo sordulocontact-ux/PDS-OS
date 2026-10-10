@@ -1,8 +1,16 @@
+"use client";
+
+import { useEffect } from "react";
+
+import { useAssistant } from "@/components/assistant/assistant-provider";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
-/** Ready-made questions in pills: outlined on a page, filled in the window. */
+/**
+ * Ready-made questions in pills: outlined on a page, filled in the window.
+ * The open page may put its own first (`PageSuggestions`).
+ */
 export function AssistantSuggestions({
   onAsk,
   disabled,
@@ -12,9 +20,14 @@ export function AssistantSuggestions({
   disabled: boolean;
   filled?: boolean;
 }) {
+  const { pageSuggestions } = useAssistant();
+  const suggestions = [...pageSuggestions, ...fr.assistant.suggestions].slice(
+    0,
+    4,
+  );
   return (
     <div className="flex flex-wrap justify-center gap-2 md:gap-5">
-      {fr.assistant.suggestions.map((s) => (
+      {suggestions.map((s) => (
         <Button
           key={s}
           variant={filled ? "secondary" : "outline"}
@@ -31,4 +44,18 @@ export function AssistantSuggestions({
       ))}
     </div>
   );
+}
+
+/**
+ * Puts questions of the open page first among PO's suggestions, as long as
+ * it is shown (the home's project to accept, UX test of 09/10/2026).
+ */
+export function PageSuggestions({ items }: { items: string[] }) {
+  const { setPageSuggestions } = useAssistant();
+  const key = items.join("\n");
+  useEffect(() => {
+    setPageSuggestions(key ? key.split("\n") : []);
+    return () => setPageSuggestions([]);
+  }, [key, setPageSuggestions]);
+  return null;
 }

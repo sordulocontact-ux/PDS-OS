@@ -32,18 +32,23 @@ export type MasterFactAction =
       // The latest version detected by code: offered first.
       detectedFileId: string;
       options: SourceOption[];
+      // manage_catalog: a version not listed yet is imported from the modal
+      // (the title's audio import), this state offered first; null without.
+      importState: AudioState | null;
     }
   // No separated tracks: the title's file import, category stems.
   | { kind: "add_stems"; masterId: string }
   // No studio session: the title's session form.
   | { kind: "add_session"; masterId: string }
   // Nobody credited for a role: the title's credit form, the role (and the
-  // engineer named in a session, if any) already filled.
+  // engineer confirmed at the Cadrage or named in a session, if any) already
+  // filled; `contactId` = the Réseau contact the credit is linked to.
   | {
       kind: "credit_engineer";
       masterId: string;
       role: EngineerRole;
       name: string | null;
+      contactId: string | null;
     };
 
 /** An audio version offered as the mix's source. */
@@ -89,13 +94,10 @@ export type NetworkEngineer = {
 };
 
 export type MasterInventory = {
-  // No title attached to the project: nothing to follow but the Réseau.
+  // No title attached to the project: nothing to follow.
   hasTitles: boolean;
   sections: MasterSection[];
-  engineers: { rows: NetworkEngineer[]; failed: boolean };
   counts: Record<FactStatus, number>;
-  // manage_network: add an engineer to the Réseau from the page.
-  canAddContact: boolean;
   // Where a file added from the page is stored; null without manage_catalog.
   organizationId: string | null;
 };

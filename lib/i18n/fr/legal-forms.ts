@@ -3,8 +3,33 @@
 export const legalForms = {
   public: {
     title: "Fiche de renseignements",
-    intro: (person: string, project: string) =>
-      `Bonjour ${person}. Pour le projet « ${project} », l'équipe a besoin de quelques informations. Remplissez seulement ce qui vous concerne : vous n'avez pas besoin de compte.`,
+    intro: (person: string, project: string, organization: string | null) =>
+      `Bonjour ${person}. ${organization ?? "L'équipe"} prépare le projet « ${project} » et a besoin de quelques informations vous concernant. Remplissez seulement ce qui vous concerne : vous n'avez pas besoin de compte.`,
+    // Who asks and whom to write to (UX test of 09/10/2026).
+    requester: {
+      title: "Une question ?",
+      body: (contact: string) => `Écrivez à ${contact}, responsable du projet.`,
+      bodyNoEmail: (contact: string) =>
+        `${contact} est responsable du projet : contactez cette personne par le moyen habituel.`,
+      team: "Contactez l'équipe qui vous a envoyé ce lien.",
+    },
+    dataUse: {
+      title: "À quoi servent vos données",
+      purposes:
+        "À vos crédits sur les titres du projet, à vos contrats et aux déclarations auprès des organismes de gestion des droits (SACEM, SCPP…).",
+      access: (organization: string | null) =>
+        `Seule l'équipe ${organization ? `de ${organization} ` : ""}qui suit le projet y a accès.`,
+      retention:
+        "Elles sont gardées tant que les titres du projet sont exploités, puis le temps que la loi impose au label.",
+      rights:
+        "Vous pouvez les consulter, les corriger ou demander leur suppression en écrivant au responsable du projet (RGPD, articles 15 à 17).",
+    },
+    afterSubmit: {
+      title: "Et ensuite ?",
+      review: "L'équipe relit votre fiche.",
+      follow:
+        "Si votre rôle demande un contrat ou une répartition des droits, l'équipe vous les enverra à relire avant toute signature.",
+    },
     rolesTitle: "Quel est votre rôle sur ce projet ?",
     rolesHint: "Plusieurs choix possibles.",
     otherRole: "Précisez votre rôle",

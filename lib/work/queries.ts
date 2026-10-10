@@ -64,23 +64,16 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
   const pilots = can(access, "pilot_projects");
   const creative = can(access, "creative_work");
 
-  const [todo, { projects, error }, creativesRes, myDeliverablesRes] =
-    await Promise.all([
-      loadMyTodo(access),
-      listProjects(),
-      creative
-        ? supabase
-            .from("project_creatives")
-            .select("project_id")
-            .eq("person_id", me)
-        : Promise.resolve({ data: [] as { project_id: string }[] }),
-      creative
-        ? supabase
-            .from("strategy_deliverables")
-            .select("id, title, due_date, assignee_person_id, project_id")
-            .eq("assignee_person_id", me)
-        : Promise.resolve({ data: [] as RawDeliverable[] }),
-    ]);
+  const [todo, { projects, error }, creativesRes] = await Promise.all([
+    loadMyTodo(access),
+    listProjects(),
+    creative
+      ? supabase
+          .from("project_creatives")
+          .select("project_id")
+          .eq("person_id", me)
+      : Promise.resolve({ data: [] as { project_id: string }[] }),
+  ]);
 
   const today = todo.today;
   const titles = new Map(projects.map((p) => [p.id, p.title]));
@@ -160,9 +153,19 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
       .sort(byDue),
     // Only the owner writes in a launched project, so only they review.
     proposals: todo.proposals.filter((p) => ownedSet.has(p.projectId)),
-    myDeliverables: (myDeliverablesRes.data ?? [])
-      .map((d) => toDeliverable(d, routes.projectDesign))
-      .sort(byDue),
+    // The same list as the home's « Mes tâches » (still to design).
+    myDeliverables: creative
+      ? todo.deliverables.map((d) => ({
+          id: d.id,
+          title: d.title,
+          dueDate: d.dueDate,
+          overdue: d.overdue,
+          hasAssignee: true,
+          projectId: d.projectId,
+          projectTitle: d.projectTitle,
+          href: d.href,
+        }))
+      : [],
     creativeProjects: projects.filter(
       (p) => p.status === "launched" && creativeIds.has(p.id),
     ),

@@ -6,11 +6,15 @@ import { PageSection } from "@/components/shell/page-section";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { fileViewOf } from "@/lib/catalog/file-rules";
+import {
+  CREATIVE_PROJECT_CATEGORIES,
+  fileViewOf,
+} from "@/lib/catalog/file-rules";
 import { listCatalogFiles } from "@/lib/catalog/files";
 import { listDesignFiles } from "@/lib/design/versions";
 import { fr } from "@/lib/i18n/fr";
 import { listProjectFiles } from "@/lib/project-history/queries";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -21,8 +25,9 @@ const t = fr.projectHistory.files;
 export const metadata = { title: `${t.title} · ${fr.app.name}` };
 
 // The project's documents: the same library as an artist's (views by
-// category, ?category=), written by the owner alone, read by whoever sees
-// the project (contracts: owner and direction, RLS). Below, what other
+// category, ?category=), written by the owner, and by its creative directors
+// in Visuels and Autres (their own files), read by whoever sees the project
+// (contracts: owner and direction, RLS). Below, what other
 // steps stored: versions deposited in the Conception, call recordings.
 export default async function ProjectFilesPage({
   params,
@@ -30,16 +35,25 @@ export default async function ProjectFilesPage({
 }: PageProps<"/app/projects/[projectId]/files">) {
   const { projectId } = await params;
   const owner = { kind: "project", id: projectId } as const;
-  const [access, project, library, callFiles, designFiles, query] =
+  const [access, project, library, callFiles, designFiles, creatives, query] =
     await allInOrder([
       requireApproved(),
       requireLaunchedProject(projectId),
       listCatalogFiles(owner),
       listProjectFiles(projectId),
       createClient().then((supabase) => listDesignFiles(supabase, projectId)),
+      listProjectCreatives(projectId),
       searchParams,
     ]);
   const canEdit = canEditProject(access, project);
+  // The creative team deposits from the launch on (UX test of 09/10/2026).
+  const creativeScope =
+    !canEdit &&
+    access.personId &&
+    creatives.some((c) => c.personId === access.personId)
+      ? { categories: CREATIVE_PROJECT_CATEGORIES, personId: access.personId }
+      : null;
+  const writes = canEdit || creativeScope !== null;
   const canReadContracts = canEdit || can(access, "view_all_projects");
 
   return (
@@ -50,12 +64,15 @@ export default async function ProjectFilesPage({
         ) : (
           <FileLibrary
             owner={owner}
-            organizationId={canEdit ? access.organizationId : null}
+            organizationId={writes ? access.organizationId : null}
+            scope={creativeScope}
             canReadContracts={canReadContracts}
             files={library.files}
             view={fileViewOf("project", canReadContracts, query.category)}
             basePath={routes.projectFiles(projectId)}
-            emptyBody={t.libraryEmptyBody}
+            emptyBody={
+              creativeScope ? t.libraryEmptyBodyCreative : t.libraryEmptyBody
+            }
             emptyBodyReadOnly={t.libraryEmptyBodyReadOnly}
           />
         )}

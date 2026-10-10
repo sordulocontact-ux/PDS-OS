@@ -28,8 +28,12 @@ export function ContributorForm({
   titles?: Array<{ id: string; title: string }>;
   contributor: MasterContributor | null;
   // A new credit already filled (the Master: the role to credit, and the
-  // engineer named in a session).
-  initial?: { name: string | null; role: ContributorRole };
+  // engineer confirmed at the Cadrage, already linked, or named in a session).
+  initial?: {
+    name: string | null;
+    role: ContributorRole;
+    contactId?: string | null;
+  };
   // Values proposed by PO, by field name.
   defaults?: Record<string, string>;
   onDone: () => void;
@@ -63,7 +67,9 @@ export function ContributorForm({
             defaultName={
               value("name", contributor?.name ?? initial?.name) || null
             }
-            defaultContactId={contributor?.contactId ?? null}
+            defaultContactId={
+              contributor ? contributor.contactId : (initial?.contactId ?? null)
+            }
             role={contributor?.role ?? initial?.role ?? "composer"}
             error={error("name")}
           />

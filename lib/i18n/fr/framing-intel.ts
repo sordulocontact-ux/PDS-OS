@@ -252,7 +252,12 @@ export const framingIntel = {
         .join(", "),
     masterBrief: "Brief Mix/Master commencé",
     legalIntake: "Cadrage juridique commencé",
-    party: (name: string, roles: string[]) => `${name} (${roles.join(", ")})`,
+    party: (name: string, roles: string[]) =>
+      roles.length ? `${name} (${roles.join(", ")})` : name,
+    // One line per party, read as a list (Brief, PDF: white-space pre-line).
+    parties: (parties: string[]) => parties.map((p) => `– ${p}`).join("\n"),
+    needs: (parties: string[]) =>
+      `Un accord avec chaque partie :\n${parties.map((p) => `– ${p}`).join("\n")}`,
     performer: "interprète",
     featuring: "featuring",
     contract: (title: string, status: string) => `${title} (${status})`,
@@ -335,6 +340,9 @@ export const framingIntel = {
     cancel: "Annuler",
     choose: "Choisir",
     next: "Question suivante",
+    previous: "Question précédente",
+    pagerLabel: "Parcourir les questions",
+    see: "Voir",
     answerLabel: "Votre réponse",
     dateLabel: "Date",
     amountLabel: "Montant en euros",
@@ -364,6 +372,7 @@ export const framingIntel = {
     generate: "Créer le Brief",
     update: "Mettre à jour le Brief",
     generating: "Création du Brief…",
+    seeBrief: "Voir le Brief",
     remainingTitle: "Avant de créer le Brief",
     remaining: (n: number) =>
       `${plural(n, "information", "informations")} à confirmer ou à compléter.`,

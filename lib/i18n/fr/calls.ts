@@ -54,6 +54,10 @@ export const calls = {
     fieldLink: "Lien de visio",
     linkHint: "Meet, Zoom, Teams… : « Rejoindre » l'ouvrira le moment venu.",
     linkPlaceholder: "https://meet.google.com/…",
+    fieldAttendees: "Participants",
+    attendeesHint:
+      "L'équipe du projet. Les personnes choisies sont prévenues et le voient dans leurs calls à venir.",
+    noTeam: "Personne d'autre dans l'équipe du projet pour l'instant.",
     submit: "Créer le call",
     pending: "Création…",
     cancel: "Annuler",

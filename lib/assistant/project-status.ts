@@ -59,6 +59,14 @@ export async function projectStatus(projectId: string, access: Access) {
         ? `Étape actuelle : ${project.currentStage.label} (${stageState(project.currentStage.state)}).`
         : "Toutes les étapes sont validées.",
   );
+  // A project not launched yet is presented by what was known when it was
+  // transmitted (its initial context is data, quoted as written).
+  if (project.stages.length === 0) {
+    if (project.initialContext)
+      facts.push(`Contexte initial : « ${project.initialContext} ».`);
+    if (project.dueDate)
+      facts.push(`Échéance du projet : ${formatDay(project.dueDate)}.`);
+  }
   for (const stage of project.stages) {
     if (stage.state !== "not_started")
       facts.push(`Étape ${stage.label} : ${stageState(stage.state)}.`);

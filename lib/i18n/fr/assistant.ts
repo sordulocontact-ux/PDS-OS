@@ -335,6 +335,7 @@ export const assistant = {
   cards: {
     tasks: "Mes tâches",
     tasksEmpty: "Aucune tâche à faire.",
+    deliverable: "Livrable",
     overdue: "En retard",
     due: (date: string) => `Échéance ${date}`,
     noDue: "Sans échéance",

@@ -31,6 +31,7 @@ export const workflowStatus = {
     framing: "Cadrage",
     framingValidated: (date: string) => `Validé le ${date}`,
     framingOpen: "Ouvrir le Cadrage",
+    seeBrief: "Voir le Brief",
     actions: {
       title: "À faire ensuite",
       description: "Par échéance, les retards d'abord",

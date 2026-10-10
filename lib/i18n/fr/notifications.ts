@@ -64,6 +64,17 @@ export const notifications = {
       `${actor} a validé les conditions de l'emprunt (« ${project} ») : le contrat est prêt à envoyer.`,
     clearance_terms_rejected: (actor: string, project: string) =>
       `${actor} demande une contre-proposition sur l'emprunt (« ${project} »).`,
+    project_launched: (actor: string, project: string) =>
+      `« ${project} » est lancé : ${actor} en est responsable.`,
+    brief_approved: (_actor: string, project: string) =>
+      `Le Brief de « ${project} » est validé : il est prêt à lire.`,
+    call_invited: (actor: string, project: string) =>
+      `${actor} vous invite à un call sur « ${project} ».`,
+    // The engineer has no account: no actor, the project names it.
+    master_delivery_received: (_actor: string, project: string) =>
+      `L'ingénieur a déposé une nouvelle version du mix de « ${project} ».`,
+    master_mastering_delivery_received: (_actor: string, project: string) =>
+      `L'ingénieur a déposé une nouvelle version du mastering de « ${project} ».`,
   },
   open: "Ouvrir",
   push: {

@@ -10,7 +10,7 @@ import {
   type WorkItem,
 } from "@/lib/project-work/workload";
 import { legalTaskInfo } from "@/lib/legal/tasks";
-import { questionTaskHref } from "@/lib/master-workflow/question-types";
+import { taskHref } from "@/lib/project-work/task-href";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -35,6 +35,8 @@ export type ProjectWork = {
   names: Record<string, string>;
   // Who a task can be given to (approved members).
   members: Member[];
+  // What a task can be about (the project's committed deliverables).
+  deliverables: { id: string; title: string }[];
 };
 
 /**
@@ -55,7 +57,7 @@ export async function loadProjectWork(
       supabase
         .from("tasks")
         .select(
-          "id, title, assignee_person_id, due_date, status, done_at, legal_plan_item_id, master_question_id",
+          "id, project_id, title, assignee_person_id, due_date, status, done_at, legal_plan_item_id, master_question_id, deliverable_id",
         )
         .eq("project_id", projectId),
       supabase
@@ -100,11 +102,7 @@ export async function loadProjectWork(
       dueDate: t.due_date,
       doneAt: t.done_at,
       // A task leads where it is done.
-      href:
-        fromPlan?.href ??
-        (t.master_question_id
-          ? questionTaskHref(projectId)
-          : routes.projectFraming(projectId)),
+      href: taskHref(t, fromPlan?.href, true),
       waitingOn: fromPlan?.waitingOn ?? null,
     });
   }
@@ -121,7 +119,7 @@ export async function loadProjectWork(
         status: dueStatus(d.due_date, today),
         dueDate: d.due_date,
         // Designed version after version in the Conception.
-        href: routes.projectDesign(projectId),
+        href: routes.projectDesignDeliverable(projectId, d.id),
       });
     // Nobody on it yet: the owner has to staff it.
     else if (project.ownerPersonId)
@@ -190,5 +188,9 @@ export async function loadProjectWork(
     openPoints: points.data ?? [],
     names: Object.fromEntries(names),
     members,
+    deliverables: (deliverables.data ?? []).map((d) => ({
+      id: d.id,
+      title: d.title,
+    })),
   };
 }

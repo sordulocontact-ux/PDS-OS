@@ -592,6 +592,14 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   ailleurs (échéance et budget de la fiche, crédits, contrats…, `source_label`) est à
   confirmer ; sinon manquante. « Confirmer » relit la valeur côté serveur, jamais celle du
   client. « Écarter » / « Passer » écrit une ligne rejetée : la valeur n'est plus proposée.
+  **Parties impliquées** (`projectParties`, 10/10/2026) = tous ceux hors de PDS : crédits
+  des titres, équipe confirmée tenue par un contact du Réseau ou un nom (jamais un membre de
+  l'app), intervenants ajoutés au Juridique ; une ligne par nom (« – »), rôles fusionnés.
+  **Contrats et droits à prévoir** en découle : « Un accord avec chaque partie : … », à
+  confirmer (le type de contrat de chacun reste la cartographie du Juridique). Une valeur
+  confirmée telle que le projet l'enregistrait (importée, avec `source_label`, sans
+  citation) est **reproposée** si l'enregistrement a changé depuis, tant que le Cadrage est
+  ouvert (une personne ajoutée à l'équipe après coup) ; une valeur écrite à la main, jamais.
 - **Entrée** (`FramingEntry`, Vue d'ensemble et Cadrage) : « ✓ Prise en charge acceptée »,
   l'analyse par dimension, « Commencer le cadrage » (`startFramingWithPo` : ouvre le Cadrage
   sans call, démarre l'étape, PO lit **une fois** le contexte initial, marqueur
@@ -1936,18 +1944,26 @@ lots, chacun utile seul.
   - **Mix et mastering** : par rôle, le crédit (`mix_engineer`, `mastering_engineer`) et son
     lien au Réseau, par la même règle que le Juridique (`creditContactState`,
     `lib/facts/credit-contact.ts` : relié = connu, homonyme = « Relier », absent = « Ajouter
-    au Réseau ») ; sinon l'ingénieur nommé dans une session de mixage / mastering, à
-    confirmer en le créditant ; sinon manquant, avec le nombre d'ingénieurs du Réseau (on ne
-    demande jamais si le Réseau en a un, le code le sait).
-  - **Ingénieurs du Réseau** : les contacts au rôle `engineer`, ceux avec qui PDS a le plus
-    travaillé d'abord (« Mix sur 2 titres · Mastering sur 1 titre », titres distincts), avec
-    structure, ville, coordonnées. Les tarifs et disponibilités n'existent pas encore dans le
-    Réseau.
+    au Réseau ») ; sinon l'ingénieur **confirmé au Cadrage** (rôle d'équipe tenu par un
+    contact du Réseau, `framingEngineers` de `readMasterRows`, « Désigné au Cadrage »), à
+    confirmer par « Créditer » (formulaire de crédit pré-rempli et déjà relié au contact :
+    un crédit est un fait du titre, posé par une personne, jamais automatiquement) ; sinon
+    l'ingénieur nommé dans une session de mixage / mastering, à confirmer en le créditant ;
+    sinon manquant, avec le nombre d'ingénieurs du Réseau (on ne demande jamais si le Réseau
+    en a un, le code le sait). Le Brief lit la même équipe du Cadrage (même lecture), pour que
+    les deux pages disent la même chose (retour de Sacha du 10/10/2026).
+  - **Ingénieurs du Réseau** : plus affichés sur la Préparation depuis le 10/10/2026 (liste
+    sans action, doublon du choix de l'ingénieur) ; leur historique avec PDS (« Mix sur 2
+    titres · Mastering sur 1 titre », `networkEngineers`) est montré dans le Brief, là où on
+    les choisit. Les tarifs et disponibilités n'existent pas encore dans le Réseau.
 - **Lot 2 : confirmer la source** (ticket § 1, migration `…20261004002001_master_flow_sources.sql`,
   tests `supabase/tests/master-flow.test.sql`). « Confirmer » ouvre la modale des versions
   audio du titre, la dernière détectée présélectionnée (« Utiliser cette version comme
   source ? »), les autres au choix (« Choisir une autre version ») ; « Utiliser cette
-  version » enregistre (`confirmMasterSource`). Règles, toutes en SQL :
+  version » enregistre (`confirmMasterSource`). Une version absente de la liste s'importe
+  depuis la modale (« Importer une version » : le même import audio que l'onglet Audio du
+  titre, `manage_catalog`, le fichier reste au titre) ; revenue avec la page rafraîchie, elle
+  est présélectionnée (10/10/2026). Règles, toutes en SQL :
   - **le responsable du projet seul** confirme (`is_project_owner`) ; tout membre qui voit
     le projet lit la source ;
   - le titre appartient au projet (clé composite sur `project_masters`), le fichier est une
@@ -2268,6 +2284,67 @@ ni livré ni clos. Migration `20261010000301_production_delivery_and_review.sql`
   `review` validée). Clôture refusée sans bilan écrit (`review_required`). Décision prise ici, faute
   de ticket : la clôture n'exige pas que les autres workflows soient terminés, la direction en juge
   en lisant l'état affiché.
+
+## 8 decies. Les autres rôles (test UX du 09/10/2026, section 5)
+
+« Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,
+tests `supabase/tests/ux-roles.test.sql` (41).
+
+- **Accueil par permission** (`components/home/home-feed.tsx`) : « Validations » seulement avec
+  `validate`, « Propositions de PO » seulement avec `pilot_projects`, sur les projets dont on est
+  responsable (filtré dans `loadMyTodo`), et masquée quand il n'y a rien. « Mes tâches » = tâches +
+  **livrables assignés encore à concevoir** (`plateOf`, `Todo.deliverables` : sans version, ou
+  retouches demandées ; une version soumise attend le responsable, une approuvée est faite) ; la
+  page Travail lit la même liste (`myDeliverables`).
+- **Où mène une tâche** (`lib/project-work/task-href.ts`) : action du Juridique, question du Brief,
+  sinon le **livrable** qu'elle nomme (`tasks.deliverable_id`, même projet vérifié par trigger,
+  ancre `#deliverable-<id>` de la Conception), sinon le **Travail du projet** (plus jamais le
+  Cadrage) ; sur le Travail lui-même, la ligne n'est pas un lien (`CardRow` sans `href`). Le
+  formulaire de tâche propose « Livrable concerné » (facultatif).
+- **Notifications de l'équipe créative** (triggers) : `project_launched` à l'acceptation,
+  `brief_approved` quand une version du Brief est validée, `call_invited` pour un call de projet.
+  Un call de projet a désormais des **participants** (`call_attendees`), choisis par le
+  responsable **dans l'équipe du projet seulement** (responsable + directeurs créatifs,
+  `attendee_not_in_team`) : « Nouveau call » les propose tous cochés ; un échange préparé (Cadrage,
+  Stratégie) invite les membres de l'équipe dont le nom, proposé par le code depuis cette même
+  équipe, est resté dans la liste (`inviteProjectTeam`).
+- **Dépôt créatif avant la Conception** : un directeur créatif du projet écrit dans la
+  bibliothèque Fichiers **en Visuels et Autres**, modifie et supprime **ses** fichiers seulement
+  (`is_project_creative`, policies `project_files_*_creative`, `FileWriteScope` côté écran) ; Brief,
+  Contrats et Presse restent au responsable. La Conception non démarrée (ou la Stratégie non
+  validée) renvoie vers Fichiers › Visuels (`EarlyDepositLink`).
+- **Dépôt de l'ingénieur par son lien** (`/m/[token]`, sans compte, sans service role) :
+  `open_master_delivery` ouvre un **emplacement à usage unique** (chemin aléatoire du bucket
+  `master-files`, une heure, 20 par heure et par lien) où Storage accepte l'envoi anonyme
+  (`is_open_delivery_slot`), puis `record_master_delivery` vérifie que l'objet existe, lit sa
+  taille dans Storage et crée le fichier audio du titre à l'état **Mix** (lien de mix) ou
+  **Master** (lien de mastering) : la version suit (`create_mix_versions`), l'équipe et
+  l'expéditeur sont notifiés (`master_delivery_received`, `master_mastering_delivery_received`).
+  Seuls les dossiers envoyés depuis le 10/10/2026 portent `masterId` par titre : un ancien lien
+  n'offre pas le dépôt (« Relancer » en donne un nouveau). Limite : 50 Mo (celle du bucket).
+- **Durée du lien de l'ingénieur** (`lib/master-workflow/link-expiry.ts`) : 14 jours après la
+  date finale de l'étape au Brief (mix final, master final), jamais moins de 30 jours, au plus
+  179 ; les fichiers sont signés pour la même durée ; la base refuse hors de 1 à 180 jours.
+- **Fiche `/f/…`** : `get_legal_form` renvoie `requester` (nom de l'organisation, responsable du
+  projet et son e-mail) pour tout jeton connu ; la page dit qui demande, à qui écrire
+  (`RequesterNote`), à quoi servent les données (`DataUseNote`, RGPD art. 13 : finalités,
+  destinataires, conservation, droits art. 15 à 17) et, après l'envoi, la suite.
+- **Recrue** : carte « Bienvenue » sur l'accueil (`WelcomeCard`) pour un membre approuvé depuis
+  moins de 30 jours, trois repères choisis **par permission** (`welcomeVariantOf`), fermée en base
+  (`member_welcomes`). PO : `my_todo` commence par les projets à accepter et liste les livrables,
+  `find_projects` dit `status` et `waitingForYourAnswer`, `project_status` présente un projet non
+  lancé (contexte initial, échéance) ; la première suggestion de l'accueil devient « Présente-moi
+  le projet « X » » (`PageSuggestions`).
+- **Confidentialité d'une transmission** : `note` et `response` de `project_assignments` ne sont
+  plus lisibles directement (droits colonne) ; `project_assignment_messages()` les rend à la
+  personne transmise, à celle qui a transmis et aux membres `assign_projects`. Les autres voient
+  l'historique (qui, quand, la décision), pas les mots.
+- **Budget** : lignes (et leurs notes, et les tarifs du Brief Mix/Master inscrits au budget) lues
+  par le responsable et la direction seulement (`can_read_project_budget`) ; section absente de la
+  navigation et page 404 pour les autres (`canSeeProjectBudget`) ; les tarifs du Brief ne quittent
+  pas le serveur pour eux (`BriefView.canSeeBudget`). **Pas couvert** (point à trancher,
+  `docs/CONTEXTE-PROJET.md`) : l'enveloppe du Cadrage (dans le Brief partagé avec l'équipe), les
+  colonnes de tarif de `master_briefs` lues par l'API, ce qui se dit du budget dans les calls.
 
 ## 9. Design (`docs/DESIGN.md`)
 

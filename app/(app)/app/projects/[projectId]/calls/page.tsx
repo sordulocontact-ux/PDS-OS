@@ -5,6 +5,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { toParisLocalInput } from "@/lib/calls/format";
+import { loadProjectTeam } from "@/lib/calls/invite";
 import { listCalls } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
@@ -16,11 +17,13 @@ export default async function ProjectCallsPage({
   params,
 }: PageProps<"/app/projects/[projectId]/calls">) {
   const { projectId } = await params;
-  const [access, project, calls] = await allInOrder([
+  const [access, project, calls, team] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
     createClient().then((supabase) => listCalls(supabase, projectId)),
+    loadProjectTeam(projectId),
   ]);
+  const invitable = team.filter((p) => p.personId !== access.personId);
   const canEdit = canEditProject(access, project);
   const t = fr.calls.list;
   const now = new Date();
@@ -35,6 +38,7 @@ export default async function ProjectCallsPage({
             defaultOccurredAt={toParisLocalInput(now)}
             defaultTitle=""
             initiallyOpen={false}
+            team={invitable}
           />
         )}
       </ProjectPageActions>
@@ -52,6 +56,7 @@ export default async function ProjectCallsPage({
             defaultOccurredAt={toParisLocalInput(now)}
             defaultTitle={t.firstCallTitle}
             initiallyOpen
+            team={invitable}
           />
         </section>
       ) : (

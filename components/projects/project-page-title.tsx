@@ -17,17 +17,23 @@ import { projectSections, projectTrail } from "@/lib/ui/project-sections";
 export function ProjectPageTitle({
   projectId,
   canSeeLegal,
+  canSeeBudget = true,
   workflows,
 }: {
   projectId: string;
   canSeeLegal: boolean;
+  canSeeBudget?: boolean;
   workflows?: readonly string[];
 }) {
   const pathname = usePathname();
   const trail = projectTrail(
     projectId,
     pathname,
-    projectSections(projectId, { legal: canSeeLegal, workflows }),
+    projectSections(projectId, {
+      legal: canSeeLegal,
+      budget: canSeeBudget,
+      workflows,
+    }),
   );
   const current = trail.at(-1);
   if (!current) return null;

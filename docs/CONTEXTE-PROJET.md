@@ -147,6 +147,24 @@ Modules transversaux présents dans la navigation du prototype : Accueil, Projet
 Talents, Musique, Budgets, Calls, Idées, Équipe, Paramètres. Onglets au sein d'un
 projet : Vue d'ensemble, Travail, Budget, Calls, Fichiers, Historique.
 
+### Points à trancher : les autres rôles (test UX du 09/10/2026, section 5)
+
+Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 decies), à confirmer :
+
+- **Budget et directeur créatif.** Lignes de budget, leurs notes et tarifs du Brief Mix/Master
+  sont réservés au responsable et à la direction. Restent lisibles par l'équipe créative :
+  l'**enveloppe du Cadrage** (elle fait partie du Brief, partagé avec l'équipe), ce qui se dit du
+  budget **dans les calls** (transcriptions), et les colonnes de tarif de `master_briefs` par
+  l'API (masquées à l'écran). À trancher : l'enveloppe sort-elle du Brief pour l'équipe créative ?
+- **Conservation des données d'une fiche** (`/f/…`) : la page dit « tant que les titres du projet
+  sont exploités, puis le temps que la loi impose au label » (RGPD art. 13 demande une durée ou
+  ses critères). Durée exacte à valider avec le label.
+- **Dépôt de l'ingénieur** : 50 Mo au plus (limite du bucket), un WAV long la dépasse. Relever la
+  limite (offre Supabase) ou accepter un lien externe ?
+- **Participants d'un call de projet** : l'équipe du projet seulement (responsable et
+  directeurs créatifs), pour qu'un invité voie toujours le projet. Inviter la direction ou un
+  autre membre demanderait de l'ajouter à l'équipe.
+
 ### Vocabulaire fixé
 
 Trois objets, trois noms. Ne jamais en introduire d'autres dans l'interface.

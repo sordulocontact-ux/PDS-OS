@@ -8,6 +8,8 @@ export const projectHistory = {
     libraryEmptyBody:
       "Glissez un fichier ici, ou cliquez pour le choisir : brief, visuels, contrats, presse. Vous direz ensuite où le classer.",
     libraryEmptyBodyReadOnly: "Les documents du projet apparaîtront ici.",
+    libraryEmptyBodyCreative:
+      "Glissez un fichier ici, ou cliquez pour le choisir : références, premières pistes. Ils vont dans Visuels ou Autres.",
     callsTitle: "Enregistrements des calls",
     designTitle: "Versions de la conception",
     designColumns: {
