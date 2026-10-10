@@ -125,6 +125,9 @@ export const workflowStatus = {
     deliverables: (n: number) =>
       `${plural(n, "livrable", "livrables")} du Brief à recevoir`,
     done: "Chaque titre a son master final et ses livrables",
+    alreadyFinal: "Chaque titre avait déjà son master final : rien à mixer",
+    progressAlreadyFinal: (n: number) =>
+      `${plural(n, "titre", "titres")} déjà au master final`,
     progressPrepare: (done: number) => `Préparation : ${done} sur 3`,
     progressRound: (round: string, done: number, total: number) =>
       `${round} validé pour ${done} titre${done > 1 ? "s" : ""} sur ${total}`,

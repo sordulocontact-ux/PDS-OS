@@ -111,25 +111,35 @@ function roundState(
   return { status: "waiting", reason: t.newVersion(engineer) };
 }
 
+const mixDone = (facts: MasterFacts) =>
+  facts.mix.titles === 0 || facts.mix.finals >= facts.mix.titles;
+
+/** Every title has its master final, through the workflow or before it:
+ * what going online waits for, launched or not. */
+export const mastersFinal = (facts: MasterFacts) =>
+  mixDone(facts) &&
+  (facts.mastering.titles === 0 ||
+    facts.mastering.finals >= facts.mastering.titles);
+
 export function masterState(facts: MasterFacts): WorkflowState {
   const t = fr.workflowStatus.master;
   const base = { workflow: "master" as const };
   const p = facts.prepare;
   const prepared = p.sources === p.sourcesTotal && p.brief && p.sent;
-  const mixDone =
-    facts.mix.titles === 0 || facts.mix.finals >= facts.mix.titles;
-  const masterDone =
-    mixDone &&
-    (facts.mastering.titles === 0 ||
-      facts.mastering.finals >= facts.mastering.titles);
+  const masterDone = mastersFinal(facts);
   const delivered =
     masterDone && facts.deliverables.received >= facts.deliverables.expected;
-  const done: MasterTab[] = [
-    ...(prepared ? (["prepare"] as const) : []),
-    ...(prepared && mixDone ? (["mixing"] as const) : []),
-    ...(masterDone ? (["mastering"] as const) : []),
-    ...(delivered ? (["final"] as const) : []),
-  ];
+  // Nothing is done in a workflow not launched, or without titles: titles
+  // already at their master final must not tick its chevrons beforehand.
+  const started = facts.launched && facts.titles > 0;
+  const done: MasterTab[] = !started
+    ? []
+    : [
+        ...(prepared ? (["prepare"] as const) : []),
+        ...(prepared && mixDone(facts) ? (["mixing"] as const) : []),
+        ...(masterDone ? (["mastering"] as const) : []),
+        ...(delivered ? (["final"] as const) : []),
+      ];
   const prepareCount = [p.sources === p.sourcesTotal, p.brief, p.sent].filter(
     Boolean,
   ).length;
@@ -140,7 +150,10 @@ export function masterState(facts: MasterFacts): WorkflowState {
       status: "not_started",
       step: "prepare",
       reason: fr.workflowStatus.notLaunched,
-      progress: t.progressPrepare(prepareCount),
+      progress:
+        facts.mix.titles === 0
+          ? t.progressAlreadyFinal(facts.titles)
+          : t.progressPrepare(prepareCount),
       done,
     };
   if (facts.titles === 0)
@@ -166,7 +179,7 @@ export function masterState(facts: MasterFacts): WorkflowState {
       progress: t.progressPrepare(prepareCount),
       done,
     };
-  if (!mixDone)
+  if (!mixDone(facts))
     return {
       ...base,
       ...roundState(facts.mix, facts.mixEngineer, facts.validator, t.send),
@@ -189,6 +202,17 @@ export function masterState(facts: MasterFacts): WorkflowState {
         facts.mastering.finals,
         facts.mastering.titles,
       ),
+      done,
+    };
+  // Every title had its master final before the workflow: nothing to mix,
+  // said as such rather than as work done through it.
+  if (facts.mix.titles === 0)
+    return {
+      ...base,
+      status: "done",
+      step: "final",
+      reason: t.alreadyFinal,
+      progress: t.progressAlreadyFinal(facts.titles),
       done,
     };
   const missing = facts.deliverables.expected - facts.deliverables.received;
@@ -442,6 +466,8 @@ export type DependencyFacts = {
   owner: string | null;
   // The Brief's Master final date.
   masterDue: string | null;
+  // Every title has its master final (null: no Master).
+  mastersFinal: boolean | null;
   // The Brief's engineers (null: no Master).
   engineers: { mix: string | null; mastering: string | null } | null;
   // The launched plan's borrowings (null: the Juridique is not readable or
@@ -475,7 +501,7 @@ export function dependencies(facts: DependencyFacts): Dependency[] {
   const legal = readable(facts.states, "legal");
 
   if (master && has("distribution")) {
-    const ready = master.done.includes("mastering");
+    const ready = facts.mastersFinal === true;
     deps.push({
       key: "master-online",
       from: "master",

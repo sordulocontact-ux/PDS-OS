@@ -22,12 +22,18 @@ export const masterWorkflow = {
     progress: (done: number, total: number) =>
       `${done} titre${done > 1 ? "s" : ""} validé${done > 1 ? "s" : ""} sur ${total}`,
     show: "Afficher",
+    alreadyFinal: (n: number) =>
+      n === 1
+        ? "Le titre avait déjà son master final au Catalogue avant le workflow."
+        : `Les ${n} titres avaient déjà leur master final au Catalogue avant le workflow.`,
+    toFinal: "Voir le master final",
     mix: {
       title: "Mixage",
       description:
         "Le dossier part au mixeur, les versions reviennent, le validateur décide titre par titre. Un mix validé ne change plus.",
       round: "Mix",
       done: "Chaque titre a son mix final",
+      nothing: "Rien à mixer",
     },
     mastering: {
       title: "Mastering",
@@ -35,6 +41,7 @@ export const masterWorkflow = {
         "Le dossier de mastering part avec les mix finals, les versions reviennent, le validateur décide titre par titre.",
       round: "Mastering",
       done: "Chaque titre a son master final",
+      nothing: "Rien à masteriser",
       waiting: (done: number, total: number) =>
         `S'ouvre quand chaque titre a son mix final (${done} sur ${total} pour l'instant).`,
     },
@@ -361,6 +368,9 @@ export const masterWorkflow = {
     description:
       "Le master final validé de chaque titre, rattaché au Catalogue, et les autres livrables attendus par le Brief.",
     allDone: "Chaque titre a son master final, rattaché au Catalogue.",
+    allBefore:
+      "Chaque titre avait déjà son master final au Catalogue avant le workflow : il n'y avait rien à mixer ni à masteriser.",
+    before: (date: string) => `Déjà au Catalogue le ${date}, avant le workflow`,
     waiting:
       "Un titre a son master final quand le validateur valide une version dans l'étape Mastering.",
     noFinal: "Pas encore de master final validé",

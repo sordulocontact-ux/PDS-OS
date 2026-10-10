@@ -1,19 +1,36 @@
+import Link from "next/link";
 import { IconCheck } from "nucleo-sharp-essential";
+
+import { IconCircleCheck } from "@/components/icons";
 
 import { MixVersionsSection } from "@/components/master-workflow/mix-versions-section";
 import { PackageSections } from "@/components/master-workflow/package-sections";
 import { ProjectPageHeader } from "@/components/projects/project-page-header";
+import { EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
+import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { MixVersionsView } from "@/lib/master-workflow/mix-types";
 import type { StepView } from "@/lib/master-workflow/transmission";
+import { masterStepHref } from "@/lib/ui/master-steps";
 
 type Round = { view: StepView; versions: MixVersionsView };
 
-export const finalsOf = (versions: MixVersionsView) =>
-  versions.titles.filter((title) => title.finalNumber !== null).length;
+/** Where a round stands, over its own titles: those it carries (no master
+ * final yet) and those that already went through it (they have versions).
+ * A title at its master final before the workflow is never counted. */
+export function roundCount(versions: MixVersionsView, view: StepView) {
+  const planned = new Set(view.titles.map((title) => title.id));
+  const titles = versions.titles.filter(
+    (title) => planned.has(title.masterId) || title.versions.length > 0,
+  );
+  return {
+    finals: titles.filter((title) => title.finalNumber !== null).length,
+    total: titles.length,
+  };
+}
 
 /** Every title has its Mix final: the mastering's package holds them all
  * (the rule of the Mastering step). */
@@ -43,6 +60,28 @@ export function ProductionPage({
 }) {
   const t = fr.masterWorkflow.production[stage];
   const engineer = round.view.engineer;
+  const count = roundCount(round.versions, round.view);
+
+  // Every title had its master final before the workflow: no round at all.
+  if (count.total === 0 && round.view.finished > 0)
+    return (
+      <div className="grid gap-10">
+        <ProjectPageHeader title={t.title} description={t.description} />
+        <EmptyState
+          icon={IconCircleCheck}
+          title={t.nothing}
+          body={fr.masterWorkflow.production.alreadyFinal(round.view.finished)}
+          action={
+            <Link
+              href={masterStepHref(round.view.projectId, "final")}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              {fr.masterWorkflow.production.toFinal}
+            </Link>
+          }
+        />
+      </div>
+    );
 
   return (
     <div className="grid gap-10">
@@ -54,10 +93,7 @@ export function ProductionPage({
         progress={
           waiting
             ? null
-            : fr.masterWorkflow.production.progress(
-                finalsOf(round.versions),
-                round.versions.titles.length,
-              )
+            : fr.masterWorkflow.production.progress(count.finals, count.total)
         }
         doneLine={t.done}
       >

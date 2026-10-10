@@ -16,12 +16,14 @@ import { finalLabel, type FinalView } from "@/lib/master-workflow/final";
 export function FinalPage({ view }: { view: FinalView }) {
   const t = fr.masterWorkflow.final;
   const allDone =
-    view.titles.length > 0 && view.titles.every((title) => title.final);
+    view.titles.length > 0 &&
+    view.titles.every((title) => title.final || title.before);
+  const allBefore = allDone && view.titles.every((title) => !title.final);
   return (
     <div className="grid gap-8">
       <ProjectPageHeader title={t.title} description={t.description} />
       <ToneCallout tone={allDone ? "success" : "info"}>
-        {allDone ? t.allDone : t.waiting}
+        {allBefore ? t.allBefore : allDone ? t.allDone : t.waiting}
       </ToneCallout>
       {view.failed ? (
         <EmptyNote>{fr.facts.failed}</EmptyNote>
@@ -44,7 +46,7 @@ export function FinalPage({ view }: { view: FinalView }) {
                     label: t.facts.final,
                     value: title.final
                       ? t.version(title.final.number, title.final.fileName)
-                      : null,
+                      : (title.before?.fileName ?? null),
                   },
                   {
                     label: t.facts.validated,
@@ -53,9 +55,14 @@ export function FinalPage({ view }: { view: FinalView }) {
                           formatDateTime(title.final.decidedAt),
                           title.final.decidedBy,
                         )
-                      : null,
+                      : title.before
+                        ? t.before(formatDateTime(title.before.addedAt))
+                        : null,
                   },
-                  { label: t.facts.engineer, value: view.engineer },
+                  // The Brief's engineer did not master a file that came before.
+                  ...(title.before
+                    ? []
+                    : [{ label: t.facts.engineer, value: view.engineer }]),
                   {
                     label: t.facts.catalogue,
                     value: finalLabel(title.audioState),

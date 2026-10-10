@@ -901,7 +901,16 @@ ligne `releases`. Non démarré = workflow pas lancé depuis le Plan du projet
 projet Musical, Juridique et Marketing toujours ; la sidebar et les onglets n'affichent que
 ceux-là. Le layout en tire le **point de statut** de chaque workflow dans la sidebar
 (`StatusDot`, `workflowStatusTone`, sans violet) et les **coches** des chevrons du Master,
-de la Distribution et du Juridique. **Bloqué** n'est produit par aucune règle tant que les
+de la Distribution et du Juridique. **Master et titres déjà au master final** (09/10/2026) : un
+titre dont l'audio le plus avancé est un Master final n'entre pas dans le workflow (comme le
+dossier du mixeur) ; si c'est le cas de tous, le Master lancé est Terminé avec la raison
+« Chaque titre avait déjà son master final : rien à mixer ». Aucun chevron n'est coché tant
+que le workflow n'est pas lancé ; la dépendance vers la mise en ligne lit le fait
+(`mastersFinal`), pas les coches, et reste donc disponible. La page Master final montre alors le fichier
+Master final du Catalogue et sa date (« Déjà au Catalogue le …, avant le workflow »), sans
+l'ingénieur du Brief, au lieu de « Pas encore de master final validé ». Mixage et Mastering
+disent « Rien à mixer » / « Rien à masteriser » (lien vers le Master final) au lieu du dossier
+vide, et leurs compteurs ne comptent que les titres du tour (`roundCount`). **Bloqué** n'est produit par aucune règle tant que les
 dépendances entre workflows n'existent pas (lot 5).
 
 **Lot 4 : Vue d'ensemble** (`components/overview/`, `ProjectBoard`), montrée une fois le plan

@@ -25,7 +25,9 @@ import {
   legalState,
   marketingState,
   masterState,
+  mastersFinal,
   type Dependency,
+  type MasterFacts,
   type RoundFacts,
   type WorkflowKey,
   type WorkflowState,
@@ -105,7 +107,7 @@ async function masterFacts(project: Project, personId: string | null) {
   ]);
   const nothingToMix = mixView.titles.length === 0;
   const mixSent = mixView.history.some((row) => !row.revokedAt);
-  const state = masterState({
+  const facts: MasterFacts = {
     launched,
     titles: project.masters.length,
     prepare: {
@@ -141,9 +143,10 @@ async function masterFacts(project: Project, personId: string | null) {
     validator: mixVersions.decider,
     mixEngineer: mixView.engineer?.name ?? null,
     masteringEngineer: final.engineer,
-  });
+  };
   return {
-    state,
+    state: masterState(facts),
+    allFinal: mastersFinal(facts),
     dates: mixView.brief?.dates ?? null,
     engineers: {
       mix: mixView.engineer?.name ?? null,
@@ -258,6 +261,7 @@ export const loadWorkflowStates = cache(
       states,
       owner: project.ownerName,
       masterDue: master?.dates?.masterFinalDue ?? null,
+      mastersFinal: master?.allFinal ?? null,
       engineers: master?.engineers ?? null,
       clearances: legal
         ? legal.items

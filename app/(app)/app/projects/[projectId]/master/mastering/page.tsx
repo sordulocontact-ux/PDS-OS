@@ -1,7 +1,7 @@
 import {
   ProductionPage,
-  finalsOf,
   mixRoundDone,
+  roundCount,
 } from "@/components/master-workflow/production-page";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -33,20 +33,13 @@ export default async function ProjectMasterMasteringPage({
     loadMixVersions(project, access.personId, "mix"),
   ]);
   const open = mixRoundDone(view);
+  const mastered = roundCount(versions, view);
   return (
     <ProductionPage
       stage="mastering"
       round={{ view, versions }}
-      done={
-        open &&
-        versions.titles.length > 0 &&
-        finalsOf(versions) === versions.titles.length
-      }
-      waiting={
-        open
-          ? null
-          : { finals: finalsOf(mixVersions), total: mixVersions.titles.length }
-      }
+      done={open && mastered.total > 0 && mastered.finals === mastered.total}
+      waiting={open ? null : roundCount(mixVersions, view)}
     />
   );
 }

@@ -25,6 +25,9 @@ export type FinalTitle = {
     decidedAt: string;
     decidedBy: string | null;
   } | null;
+  // No validated version, but the title already had its master final in
+  // the Catalogue: the workflow left it out (nothing to mix), its file shown.
+  before: { fileName: string; addedAt: string } | null;
   // The title's state in the Catalogue.
   audioState: AudioState | null;
   // The brief's other deliverables, and whether each arrived.
@@ -56,7 +59,7 @@ export async function loadFinalView(
   const supabase = await createClient();
   const ids = project.masters.map((master) => master.id);
   const none = Promise.resolve({ data: [], error: null });
-  const [finals, masters, brief, received] = await Promise.all([
+  const [finals, masters, catalogFinals, brief, received] = await Promise.all([
     supabase
       .from("master_mix_versions")
       .select(
@@ -67,6 +70,14 @@ export async function loadFinalView(
       .eq("decision", "approved"),
     ids.length
       ? supabase.from("masters").select("id, audio_state").in("id", ids)
+      : none,
+    ids.length
+      ? supabase
+          .from("master_files")
+          .select("master_id, file_name, created_at")
+          .in("master_id", ids)
+          .eq("audio_state", "final_master")
+          .order("created_at", { ascending: false })
       : none,
     supabase
       .from("master_briefs")
@@ -80,7 +91,9 @@ export async function loadFinalView(
       .select("master_id, deliverable")
       .eq("project_id", project.id),
   ]);
-  const failed = Boolean(finals.error || masters.error || received.error);
+  const failed = Boolean(
+    finals.error || masters.error || catalogFinals.error || received.error,
+  );
   if (failed) console.error("loadFinalView:", finals.error?.message);
 
   const expected = briefDeliverablesOf(brief.data?.deliverables ?? []).filter(
@@ -102,6 +115,9 @@ export async function loadFinalView(
       const final = (finals.data ?? []).find(
         (row) => row.master_id === master.id,
       );
+      const catalogFinal = (catalogFinals.data ?? []).find(
+        (row) => row.master_id === master.id,
+      );
       return {
         id: master.id,
         title: master.title,
@@ -118,6 +134,13 @@ export async function loadFinalView(
                       final.decider.last_name,
                     )
                   : null,
+              }
+            : null,
+        before:
+          !final?.decided_at && catalogFinal
+            ? {
+                fileName: catalogFinal.file_name,
+                addedAt: catalogFinal.created_at,
               }
             : null,
         audioState: stateOf.get(master.id) ?? null,
