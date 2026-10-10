@@ -220,6 +220,15 @@ export const factTone: Record<string, Tone> = {
   missing: "neutral",
 };
 
+/** A dimension of the Stratégie's pilotage (lib/strategy/dimensions.ts):
+ * nothing yet, started, a proposal or choice waiting for a decision, done. */
+export const strategyDimensionTone: Record<string, Tone> = {
+  to_complete: "neutral",
+  in_progress: "info",
+  to_decide: "warning",
+  complete: "success",
+};
+
 /** An action of the Juridique's plan (ticket Juridique 07's item states):
  * to act on, waiting for someone outside, held by another action, done or
  * no longer needed. */

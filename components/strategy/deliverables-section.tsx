@@ -8,11 +8,7 @@ import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  labelClass,
-  optionClass,
-  sectionTitleClass,
-} from "@/components/strategy/option-class";
+import { labelClass, optionClass } from "@/components/strategy/option-class";
 import { fr } from "@/lib/i18n/fr";
 import { addDeliverable, removeDeliverable } from "@/lib/strategy/actions/plan";
 import type { StrategyData } from "@/lib/strategy/queries";
@@ -56,7 +52,8 @@ export function DeliverablesSection({
       aria-labelledby="deliverables-title"
       className="flex flex-col gap-6"
     >
-      <h3 id="deliverables-title" className={sectionTitleClass}>
+      {/* Named by the panel title: kept for the section label. */}
+      <h3 id="deliverables-title" className="sr-only">
         {t.title}
       </h3>
 

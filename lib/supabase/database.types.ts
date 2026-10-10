@@ -5695,6 +5695,54 @@ export type Database = {
           },
         ]
       }
+      strategy_calls: {
+        Row: {
+          call_id: string
+          created_at: string
+          document_ids: string[]
+          format: string
+          organization_id: string
+          participants: Json
+          project_id: string
+          purpose: string
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          document_ids?: string[]
+          format: string
+          organization_id: string
+          participants?: Json
+          project_id: string
+          purpose: string
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          document_ids?: string[]
+          format?: string
+          organization_id?: string
+          participants?: Json
+          project_id?: string
+          purpose?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_calls_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "strategy_calls_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       strategy_deliverables: {
         Row: {
           assignee_person_id: string | null
@@ -5760,6 +5808,96 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      strategy_objectives: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          due_on: string | null
+          id: string
+          label: string
+          organization_id: string
+          project_id: string
+          target: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          due_on?: string | null
+          id?: string
+          label: string
+          organization_id: string
+          project_id: string
+          target?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          due_on?: string | null
+          id?: string
+          label?: string
+          organization_id?: string
+          project_id?: string
+          target?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_objectives_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_objectives_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      strategy_workspaces: {
+        Row: {
+          organization_id: string
+          project_id: string
+          started_at: string
+          started_by: string | null
+        }
+        Insert: {
+          organization_id: string
+          project_id: string
+          started_at?: string
+          started_by?: string | null
+        }
+        Update: {
+          organization_id?: string
+          project_id?: string
+          started_at?: string
+          started_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_workspaces_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "strategy_workspaces_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -6227,6 +6365,19 @@ export type Database = {
         Args: {
           p_agenda: Json
           p_document_ids: string[]
+          p_meeting_url: string
+          p_occurred_at: string
+          p_participants: Json
+          p_project_id: string
+          p_purpose: string
+          p_title: string
+        }
+        Returns: string
+      }
+      create_strategy_call: {
+        Args: {
+          p_agenda: Json
+          p_format: string
           p_meeting_url: string
           p_occurred_at: string
           p_participants: Json
@@ -6920,6 +7071,7 @@ export type Database = {
         Returns: undefined
       }
       start_stage: { Args: { p_stage_id: string }; Returns: undefined }
+      start_strategy: { Args: { p_project_id: string }; Returns: undefined }
       strategy_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       transmit_project: {
         Args: {

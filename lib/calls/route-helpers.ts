@@ -17,11 +17,14 @@ const HTTP_STATUS: Partial<Record<CallErrorCode, number>> = {
   audio_unavailable: 502,
 };
 
-// A step may add facts to its success (the extraction says if the Brief was filled).
+// A step may add facts to its success (the extraction says if the Brief or
+// the Stratégie was filled).
 type Step = (
   supabase: Awaited<ReturnType<typeof createClient>>,
   callId: string,
-) => Promise<ActionResult & { briefFilled?: boolean }>;
+) => Promise<
+  ActionResult & { briefFilled?: boolean; strategyFilled?: boolean }
+>;
 
 /** Runs a pipeline step for an approved session and answers in JSON. */
 export async function handleStep(callId: string, step: Step) {

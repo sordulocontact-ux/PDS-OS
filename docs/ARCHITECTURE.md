@@ -694,6 +694,56 @@ Même page que le Cadrage, mêmes briques réutilisées (`BriefFieldCard`, `Vali
 `ImportPanel`, `ProvenanceNote`, `useFramingAction`, `ActionResult`) : elles prennent le
 livrable, les libellés ou l'action d'import en props.
 
+- **Entrée** (ticket Stratégie, étape 1 ; migration `20261010000401_strategy_calls`) : le
+  plan démarre l'étape (`launch_strategy` en cours), mais la page reste l'entrée tant que
+  le responsable n'a pas ouvert le travail (`strategy_workspaces`, écrit par
+  `start_strategy` seul ; les stratégies déjà travaillées ont été reprises par la
+  migration). L'entrée montre le contexte (projet, artiste, type, date de sortie de
+  référence, statut « Non commencée ») et deux portes : « Commencer la stratégie » et
+  « Préparer un échange ». Aucun tableau de bord avant. Le lecteur (DG…) voit la même
+  entrée sans bouton.
+- **Préparer un échange** (`components/strategy/strategy-call-*`, `lib/strategy/call-prep.ts`,
+  `prepareStrategyCall`) : le code propose l'objectif, les participants (responsable,
+  directeurs créatifs, artiste), les sujets calculés depuis ce qui manque (champ vide ou à
+  confirmer, besoin sans levier, levier à arbitrer, levier retenu sans livrable, date de
+  sortie et temps forts absents ; 4 min par question, 5 à 15 par sujet), la date et le
+  **format** (visio, sur place, téléphone ; lien seulement en visio). « Vérifier » affiche
+  un récapitulatif, seul « Créer l'échange » crée le call (`create_strategy_call` : call +
+  `strategy_calls` en une transaction, refusé avant le Brief validé et une fois la
+  stratégie soumise). Le serveur recalcule l'ordre du jour, jamais envoyé par le client.
+  Sujets et participants : composants partagés avec le Cadrage
+  (`AgendaTopicsField`, `ParticipantsField`, `lib/calls/prepare.ts`).
+- **Après un échange stratégie** (`/api/calls/[callId]/extract`) : le compte rendu remplit
+  la Stratégie et non le Cadrage (`fillStrategyFromCall`, `lib/strategy/import-report.ts`) :
+  l'entrée cède la place (`start_strategy`), les éléments du compte rendu deviennent des
+  propositions sourcées (positionnement, publics, narratif, leviers), puis PO pré-coche les
+  choix fermés appuyés par les sources (`proposeStrategyChoices`) : un même passage peut
+  nourrir plusieurs dimensions. Le traitement ouvre ensuite la Stratégie. Seul le premier
+  compte rendu d'un call est importé.
+- **Pilotage** (ticket Stratégie, étape 2 ; migration `20261010000501_strategy_objectives`) :
+  après « Commencer », la page centrale est une liste verticale des **8 dimensions**
+  (`lib/strategy/dimensions.ts`) : Positionnement, Publics prioritaires, Narratif de sortie,
+  Dispositif, Livrables engagés, Calendrier de lancement, Budget stratégie, Objectifs & KPIs.
+  Chaque ligne : nom, résumé, état (**À compléter / En cours / À arbitrer / Complété**),
+  calculés par le code (`dimensionStatuses`, ton `strategyDimensionTone`). « À arbitrer » =
+  une proposition ou un choix attend une décision (proposition d'un call, choix pré-cochés,
+  levier à arbitrer, devis à accepter, enveloppe dépassée). Au clic, la dimension s'ouvre dans
+  le **panneau de travail** (`?d=<dimension>`, `StrategyDimensionPanel`, panneau latéral) ;
+  fermer revient au pilotage. Les blocs existants (choix fermés, leviers, livrables,
+  calendrier) y sont repris tels quels.
+  - **Narratif** : 4 éléments de récit saisis à la main (`NARRATIVE_PARTS` : origine,
+    ce qu'il raconte, contexte artistique, pourquoi maintenant, champs `field_values`
+    `narrative_*`) + l'**angle** (le champ `narrative`, ses choix fermés). Gardés séparés
+    pour être repris par le Plan de sortie, le Dossier de presse et les pitchs. Pas encore
+    extraits des calls.
+  - **Budget stratégie** = les **lignes du budget du projet** (`budget_lines`, page Budget),
+    rattachées aux leviers : un seul budget, jamais deux qui divergent. Mêmes composants
+    (`BudgetSummary`, `BudgetLines`). Les montants ne sont jamais lus par PO : « Préparer un
+    échange » ne cite que les libellés.
+  - **Objectifs & KPIs** : `strategy_objectives` (libellé, cible facultative, unité,
+    échéance), saisis par une personne, jamais par PO ; écrits par le responsable
+    pendant « en cours » (`strategy_is_editable`).
+  - Les sujets de « Préparer un échange » suivent les 8 dimensions.
 - Champs texte : positionnement, publics, narratif (`field_values`, `deliverable = 'strategy'`,
   actions génériques `saveField` / `confirmField` / `rejectField`).
 - Dispositif : leviers par famille (taxonomie des besoins) ; un besoin confirmé du Brief

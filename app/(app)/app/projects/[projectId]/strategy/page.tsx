@@ -4,29 +4,44 @@ import { ImportPanel } from "@/components/framing/import-panel";
 import { ValidationPanel } from "@/components/framing/validation-panel";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { BriefReminder } from "@/components/strategy/brief-reminder";
-import { CalendarSection } from "@/components/strategy/calendar-section";
-import { DeliverablesSection } from "@/components/strategy/deliverables-section";
-import { LeversSection } from "@/components/strategy/levers-section";
+import { DimensionWork } from "@/components/strategy/dimension-work";
 import { ProposeChoices } from "@/components/strategy/propose-choices";
-import { StrategyChoices } from "@/components/strategy/strategy-choices";
+import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
+import { StrategyDimensionPanel } from "@/components/strategy/strategy-dimension-panel";
+import { StrategyEntry } from "@/components/strategy/strategy-entry";
+import { StrategyPilotage } from "@/components/strategy/strategy-pilotage";
 import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
+import { loadBudget } from "@/lib/budget/queries";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
+import { projectKindLabel } from "@/lib/projects/labels";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { importStrategyReport } from "@/lib/strategy/actions/import";
 import { isFramingValidated } from "@/lib/projects/types";
+import { strategySheetData } from "@/lib/strategy/call-sheet-data";
+import {
+  dimensionStatuses,
+  isStrategyDimension,
+} from "@/lib/strategy/dimensions";
 import { loadStrategy } from "@/lib/strategy/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-/** Launch strategy stage: the Strategy on one page, built on the validated Brief. */
+/**
+ * Launch strategy stage, built on the validated Brief: first its entry
+ * (context, « Commencer la stratégie », « Préparer un échange »), then the
+ * pilotage of its eight dimensions, each worked in its panel (?d=).
+ */
 export default async function StrategyPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/strategy">) {
   const { projectId } = await params;
+  const asked = (await searchParams).d;
   const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
@@ -50,20 +65,58 @@ export default async function StrategyPage({
         {...gate}
       />
     );
-  const data = await loadStrategy(projectId, access);
+  const [data, budget] = await Promise.all([
+    loadStrategy(projectId, access),
+    loadBudget(projectId),
+  ]);
   if (!data) notFound();
   const t = fr.strategy;
   const state = data.stage?.state ?? "not_started";
+  const isOwner = canEditProject(access, project);
+  const callSheet =
+    isOwner && (state === "not_started" || state === "in_progress")
+      ? await strategySheetData(project, data, budget.lines)
+      : null;
+
+  // First opening: the context and the two ways in, no dashboard yet.
+  if (!data.started)
+    return (
+      <StrategyEntry
+        projectId={projectId}
+        context={{
+          title: project.title,
+          artistName: project.artistName,
+          kind: projectKindLabel({
+            type: project.type,
+            musicFormat: project.musicFormat,
+            contentFormatName: project.contentFormat?.name ?? null,
+          }),
+          releaseDate: data.referenceDate,
+        }}
+        callReportCount={data.callReportCount}
+        canEdit={isOwner}
+        callSheet={callSheet}
+      />
+    );
 
   // The owner writes only while the strategy is in progress; the database
   // enforces it (strategy_is_editable), this only decides what is offered.
-  const canWrite = canEditProject(access, project) && state === "in_progress";
+  const canWrite = isOwner && state === "in_progress";
   const status =
     state === "not_started"
       ? t.notStarted
       : state === "in_progress"
         ? null
         : t.locked;
+
+  const statuses = dimensionStatuses({
+    ...data,
+    budgetLines: budget.lines,
+    envelopeCents: project.budgetCents,
+  });
+  const open = isStrategyDimension(asked)
+    ? statuses.find((d) => d.key === asked)
+    : undefined;
 
   // docs/DESIGN.md § 4, « Sélection et formulaires en étapes »: no card around
   // the page, sections spaced out, only the answers and items outlined.
@@ -72,10 +125,17 @@ export default async function StrategyPage({
   return (
     <div className="grid gap-12 pt-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <EditAccessProvider canEdit={canWrite}>
-        <div className="flex min-w-0 flex-col gap-12">
+        <div className="flex min-w-0 flex-col gap-8">
           <StrategyDictation
             projectId={projectId}
-            actions={<ProposeChoices projectId={projectId} />}
+            actions={
+              <>
+                <ProposeChoices projectId={projectId} />
+                {callSheet && (
+                  <StrategyCallSheet projectId={projectId} data={callSheet} />
+                )}
+              </>
+            }
           >
             <h2 className="text-display-md font-semibold break-words">
               {t.title}
@@ -84,34 +144,26 @@ export default async function StrategyPage({
               <p className="text-body-md text-muted-foreground">{status}</p>
             )}
           </StrategyDictation>
-          {data.fields.map((field) => (
-            // Remount when the saved answers change on the server.
-            <StrategyChoices
-              key={`${field.key}-${JSON.stringify(data.choices[field.key])}-${field.value ?? ""}-${field.status ?? ""}`}
-              field={field}
-              value={data.choices[field.key]}
-              suggestions={data.suggestions[field.key]}
-              projectId={projectId}
-            />
-          ))}
-          <LeversSection
-            levers={data.levers}
-            openNeeds={data.openNeeds}
+          <StrategyPilotage
             projectId={projectId}
-          />
-          <DeliverablesSection
-            deliverables={data.deliverables}
-            levers={data.levers}
-            members={data.members}
-            projectId={projectId}
-          />
-          <CalendarSection
-            milestones={data.milestones}
-            deliverables={data.deliverables}
-            referenceDate={data.referenceDate}
-            projectId={projectId}
+            statuses={statuses}
+            current={open?.key ?? null}
           />
         </div>
+        {open && (
+          <StrategyDimensionPanel
+            status={open}
+            closeHref={routes.projectStrategy(projectId)}
+          >
+            <DimensionWork
+              dimension={open.key}
+              data={data}
+              budget={budget}
+              envelopeCents={project.budgetCents}
+              projectId={projectId}
+            />
+          </StrategyDimensionPanel>
+        )}
       </EditAccessProvider>
 
       <aside className="flex flex-col gap-4 self-start lg:sticky lg:top-6">

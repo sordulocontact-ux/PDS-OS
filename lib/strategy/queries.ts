@@ -3,10 +3,13 @@ import "server-only";
 import type { Access } from "@/lib/auth/access";
 import {
   BRIEF_TEXT_FIELDS,
+  NARRATIVE_PARTS,
   STRATEGY_TEXT_FIELDS,
   toBriefField,
   toFieldState,
   type BriefFieldState,
+  type FieldState,
+  type NarrativePart,
   type Provenance,
   type StrategyFieldState,
   type StrategyTextField,
@@ -40,13 +43,22 @@ export type Lever = Tables["levers"]["Row"] & {
 };
 export type StrategyDeliverable = Tables["strategy_deliverables"]["Row"];
 export type Milestone = Tables["milestones"]["Row"];
+export type StrategyObjective = Tables["strategy_objectives"]["Row"];
 export type OpenNeed = { id: string; label: string; family: string };
 
 export type StrategyData = {
   stage: { id: string; state: string } | null;
+  // The owner opened the work (« Commencer la stratégie », or a strategy
+  // call processed): until then, the page is the entry.
+  started: boolean;
+  // Call reports of the project: sources PO can lean on.
+  callReportCount: number;
   briefValidated: boolean;
   pendingValidation: PendingValidation | null;
   fields: StrategyFieldState[];
+  // The story parts of the narrative (its angle is the `narrative` field).
+  narrativeParts: FieldState<NarrativePart>[];
+  objectives: StrategyObjective[];
   // Closed-choice answers per text field, and PO's pending pre-checks.
   choices: Record<StrategyTextField, ChoiceValue>;
   suggestions: Record<StrategyTextField, ChoiceSuggestion[]>;
@@ -87,6 +99,9 @@ export async function loadStrategy(
     members,
     reports,
     validators,
+    workspaceRes,
+    reportCountRes,
+    objectivesRes,
   ] = await Promise.all([
     supabase
       .from("project_stages")
@@ -131,6 +146,20 @@ export async function loadStrategy(
     loadMembers(access),
     loadImportableReports(projectId, "strategy"),
     loadValidators(project.organization_id),
+    supabase
+      .from("strategy_workspaces")
+      .select("project_id")
+      .eq("project_id", projectId)
+      .maybeSingle(),
+    supabase
+      .from("call_reports")
+      .select("id, calls!inner(project_id)", { count: "exact", head: true })
+      .eq("calls.project_id", projectId),
+    supabase
+      .from("strategy_objectives")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at"),
   ]);
 
   const stages = stagesRes.data ?? [];
@@ -161,12 +190,23 @@ export async function loadStrategy(
 
   return {
     stage,
+    // A submitted or validated strategy has obviously begun.
+    started:
+      workspaceRes.data !== null ||
+      stage?.state === "awaiting_validation" ||
+      stage?.state === "validated",
+    callReportCount: reportCountRes.count ?? 0,
     briefValidated,
     pendingValidation,
     fields: STRATEGY_TEXT_FIELDS.map((key) => {
       const row = rowOf("strategy", key);
       return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
     }),
+    narrativeParts: NARRATIVE_PARTS.map((key) => {
+      const row = rowOf("strategy", key);
+      return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
+    }),
+    objectives: objectivesRes.data ?? [],
     choices: Object.fromEntries(
       STRATEGY_TEXT_FIELDS.map((key) => [
         key,

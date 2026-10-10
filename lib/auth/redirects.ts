@@ -158,6 +158,9 @@ export const routes = {
   // The same Brief as a downloaded PDF file.
   projectFramingBriefPdf: (id: string) => `/api/projects/${id}/framing-brief`,
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
+  // A dimension of the Stratégie open in its work panel.
+  projectStrategyDimension: (id: string, dimension: string) =>
+    `/app/projects/${id}/strategy?d=${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>

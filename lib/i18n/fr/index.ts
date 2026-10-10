@@ -39,6 +39,8 @@ import { release } from "./release";
 import { releaseDelivery } from "./release-delivery";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
+import { strategyEntry } from "./strategy-entry";
+import { strategyPilot } from "./strategy-pilot";
 import { transmission } from "./transmission";
 import { voice } from "./voice";
 import { work } from "./work";
@@ -55,6 +57,8 @@ export const fr = {
   framingGuide,
   framingIntel,
   strategy,
+  strategyEntry,
+  strategyPilot,
   design,
   production,
   projectReview,

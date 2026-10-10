@@ -16,7 +16,10 @@ import { fr } from "@/lib/i18n/fr";
 
 type ErrorKey = keyof typeof fr.calls.errors;
 type Phase = "transcribing" | "extracting";
-type StepResult = ActionResult & { briefFilled?: boolean };
+type StepResult = ActionResult & {
+  briefFilled?: boolean;
+  strategyFilled?: boolean;
+};
 
 // A job started elsewhere (another tab, a reload): check back on it.
 const POLL_MS = 5000;
@@ -83,7 +86,10 @@ export function CallProcessing({
       router.refresh();
       return setError(extracted.error);
     }
-    if (extracted.briefFilled && projectId) {
+    if (extracted.strategyFilled && projectId) {
+      toast.success(fr.strategyEntry.afterCall);
+      router.push(routes.projectStrategy(projectId));
+    } else if (extracted.briefFilled && projectId) {
       toast.success(t.briefFilled);
       router.push(routes.projectFramingReview(projectId, callId));
     } else {

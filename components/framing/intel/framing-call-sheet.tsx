@@ -1,14 +1,13 @@
 "use client";
 
-import { IconTrash } from "nucleo-sharp-essential";
 import { useActionState, useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
+import { AgendaTopicsField } from "@/components/calls/agenda-topics-field";
 import { CallFields, withOccurredAt } from "@/components/calls/call-fields";
+import { ParticipantsField } from "@/components/calls/participants-field";
 import { Button } from "@/components/ui/button";
-import { FilterChip } from "@/components/ui/filter-chip";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
@@ -21,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { idleFormState } from "@/lib/auth/form-state";
 import { prepareFramingCall } from "@/lib/framing/actions/call";
 import type { FramingTopic } from "@/lib/framing/call-prep";
+import type { Dimension } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -92,31 +92,15 @@ function CallForm({
   );
   const [detailed, setDetailed] = useState(false);
   const [extra, setExtra] = useState<string[]>([]);
-  const [topicDraft, setTopicDraft] = useState("");
   const [people, setPeople] = useState<string[]>(data.people);
-  const [personDraft, setPersonDraft] = useState("");
   const [documents, setDocuments] = useState<Set<string>>(new Set());
-  const minutes =
-    data.topics
-      .filter((x) => kept.has(x.dimension))
-      .reduce((s, x) => s + x.minutes, 0) +
-    extra.length * 5;
+  const topics = data.topics.map((x) => ({ ...x, id: x.dimension }));
 
   const toggle = <T,>(set: Set<T>, value: T) => {
     const next = new Set(set);
     if (next.has(value)) next.delete(value);
     else next.add(value);
     return next;
-  };
-  const addTopic = () => {
-    const topic = topicDraft.trim();
-    if (topic && !extra.includes(topic)) setExtra((list) => [...list, topic]);
-    setTopicDraft("");
-  };
-  const addPerson = () => {
-    const name = personDraft.trim();
-    if (name && !people.includes(name)) setPeople((list) => [...list, name]);
-    setPersonDraft("");
   };
 
   return (
@@ -153,147 +137,23 @@ function CallForm({
         />
       </div>
 
-      <section
-        aria-labelledby="framing-call-topics"
-        className="flex flex-col gap-3"
-      >
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h3 id="framing-call-topics" className="text-sm font-medium">
-            {t.topics}
-          </h3>
-          <span className="text-caption text-muted-foreground tabular-nums">
-            {t.total(minutes)}
-          </span>
-        </div>
-        <ul className="flex flex-col gap-2">
-          {data.topics.map((topic) => (
-            <li key={topic.dimension} className="flex flex-col gap-1">
-              <label className="flex items-start gap-3 text-body-md">
-                <Checkbox
-                  className="mt-1"
-                  checked={kept.has(topic.dimension)}
-                  onChange={() =>
-                    setKept((set) => toggle(set, topic.dimension))
-                  }
-                />
-                <span className="flex min-w-0 flex-col">
-                  <span className="font-semibold">
-                    {topic.topic}{" "}
-                    <span className="font-medium text-muted-foreground tabular-nums">
-                      · {t.minutes(topic.minutes)}
-                    </span>
-                  </span>
-                  {detailed && kept.has(topic.dimension) && (
-                    <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-caption text-muted-foreground">
-                      {topic.questions.map((q) => (
-                        <li key={q}>{q}</li>
-                      ))}
-                    </ul>
-                  )}
-                </span>
-              </label>
-            </li>
-          ))}
-          {extra.map((topic) => (
-            <li
-              key={topic}
-              className="flex items-center justify-between gap-3 text-body-md"
-            >
-              <span className="font-semibold">
-                {topic}{" "}
-                <span className="font-medium text-muted-foreground">
-                  · {t.minutes(5)}
-                </span>
-              </span>
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="ghost"
-                aria-label={t.removeTopic(topic)}
-                onClick={() =>
-                  setExtra((list) => list.filter((x) => x !== topic))
-                }
-              >
-                <IconTrash aria-hidden className="size-4" />
-              </Button>
-            </li>
-          ))}
-        </ul>
-        <div className="flex flex-wrap gap-2">
-          <Input
-            aria-label={t.addTopic}
-            value={topicDraft}
-            maxLength={200}
-            placeholder={t.topicPlaceholder}
-            onChange={(e) => setTopicDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addTopic();
-              }
-            }}
-            className="h-9 min-w-0 flex-1"
-          />
-          <Button type="button" size="sm" variant="outline" onClick={addTopic}>
-            {t.addTopic}
-          </Button>
-        </div>
-        {data.topics.length > 0 && (
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="self-start"
-            onClick={() => setDetailed((v) => !v)}
-          >
-            {detailed ? t.hideDetail : t.detail}
-          </Button>
-        )}
-      </section>
+      <AgendaTopicsField
+        id="framing-call-topics"
+        title={t.topics}
+        topics={topics}
+        kept={kept}
+        onToggle={(id) => setKept((set) => toggle(set, id as Dimension))}
+        extra={extra}
+        onExtraChange={setExtra}
+        detailed={detailed}
+        onDetailedChange={setDetailed}
+      />
 
-      <section
-        aria-labelledby="framing-call-people"
-        className="flex flex-col gap-3"
-      >
-        <h3 id="framing-call-people" className="text-sm font-medium">
-          {t.participants}
-        </h3>
-        {people.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {people.map((name) => (
-              <FilterChip
-                key={name}
-                pressed
-                aria-label={t.removeParticipant(name)}
-                onClick={() =>
-                  setPeople((list) => list.filter((x) => x !== name))
-                }
-              >
-                {name}
-              </FilterChip>
-            ))}
-          </div>
-        )}
-        <div className="flex flex-wrap gap-2">
-          <Input
-            aria-label={t.participantPlaceholder}
-            value={personDraft}
-            maxLength={120}
-            placeholder={t.participantPlaceholder}
-            onChange={(e) => setPersonDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addPerson();
-              }
-            }}
-            className="h-9 min-w-0 flex-1"
-          />
-          <Button type="button" size="sm" variant="outline" onClick={addPerson}>
-            {t.addParticipant}
-          </Button>
-        </div>
-      </section>
+      <ParticipantsField
+        id="framing-call-people"
+        people={people}
+        onChange={setPeople}
+      />
 
       <section
         aria-labelledby="framing-call-documents"

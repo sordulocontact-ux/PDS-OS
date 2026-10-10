@@ -16,12 +16,14 @@ export type StatTile = {
 
 // Key figures in bordered tiles: value large, grey label below. A tile with
 // an href is a stretched link: the whole tile is clickable, dt/dd stay put.
-// Literal classes: Tailwind only generates what it reads in full.
+// The columns follow the room the tiles have (container queries), not the
+// screen: the same tiles fit a page and a side panel. Literal classes:
+// Tailwind only generates what it reads in full.
 const columnClasses = {
-  3: "sm:grid-cols-3",
-  4: "sm:grid-cols-4",
-  5: "sm:grid-cols-3 lg:grid-cols-5",
-  6: "sm:grid-cols-3 lg:grid-cols-6",
+  3: "@md:grid-cols-3",
+  4: "@xl:grid-cols-4",
+  5: "@md:grid-cols-3 @3xl:grid-cols-5",
+  6: "@md:grid-cols-3 @4xl:grid-cols-6",
 } as const;
 
 export function StatTiles({
@@ -29,16 +31,18 @@ export function StatTiles({
   columns = 4,
 }: {
   stats: StatTile[];
-  // Tiles per row from sm up (4 by default, 3 for Juridique, 6 for the budget).
+  // Tiles per row once there is room (4 by default, 3 for Juridique, 6 for
+  // the budget).
   columns?: keyof typeof columnClasses;
 }) {
   return (
+    <div className="@container">
     <dl className={cn("grid grid-cols-2 gap-3", columnClasses[columns])}>
       {stats.map((stat) => (
         <div
           key={stat.label}
           className={cn(
-            "relative flex flex-col-reverse gap-1 rounded-2xl border border-border p-3",
+            "relative flex min-w-0 flex-col-reverse gap-1 rounded-2xl border border-border p-3",
             stat.href &&
               "transition-colors focus-within:ring-3 focus-within:ring-ring/50 hover:bg-muted",
             // An active filter is in ink, like an active FilterChip.
@@ -73,15 +77,18 @@ export function StatTiles({
         </div>
       ))}
     </dl>
+    </div>
   );
 }
 
 export function StatTilesSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
+    <div className="@container" aria-hidden>
+    <div className="grid grid-cols-2 gap-3 @xl:grid-cols-4">
       {Array.from({ length: count }, (_, i) => (
         <Skeleton key={i} className="h-[74px] rounded-2xl" />
       ))}
+    </div>
     </div>
   );
 }

@@ -7,11 +7,7 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  labelClass,
-  optionClass,
-  sectionTitleClass,
-} from "@/components/strategy/option-class";
+import { labelClass, optionClass } from "@/components/strategy/option-class";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
@@ -54,7 +50,8 @@ export function CalendarSection({
   return (
     <section aria-labelledby="calendar-title" className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h3 id="calendar-title" className={sectionTitleClass}>
+        {/* Named by the panel title: kept for the section label. */}
+        <h3 id="calendar-title" className="sr-only">
           {t.title}
         </h3>
         <p className="text-caption text-muted-foreground">

@@ -12,6 +12,7 @@ import {
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { routes } from "@/lib/auth/redirects";
 import { personName } from "@/lib/projects/types";
+import { isCallFormat, type CallFormat } from "@/lib/strategy/call-prep";
 import {
   fromReportItemRows,
   type ReportItemRow,
@@ -49,12 +50,15 @@ export type CallDetail = CallSummary & {
   errorCode: string | null;
   agenda: AgendaItem[] | null;
   durationMinutes: number | null;
-  // Prepared from the Cadrage (« Préparer un échange »): its purpose, who
-  // takes part, the documents that go with it.
-  framing: {
+  // Prepared from the Cadrage or the Stratégie (« Préparer un échange »):
+  // its purpose, who takes part, the documents that go with it, and how a
+  // strategy call is held.
+  prepared: {
+    kind: "framing" | "strategy";
     purpose: string;
     participants: string[];
     documents: Array<{ id: string; name: string }>;
+    format: CallFormat | null;
   } | null;
 };
 
@@ -197,19 +201,27 @@ export async function getCall(
     errorCode: data.error_code,
     agenda: toAgenda(data.agenda),
     durationMinutes: data.duration_minutes,
-    framing: await framingOfCall(supabase, data.id),
+    prepared: await preparedOfCall(supabase, data.id),
   };
 }
 
-async function framingOfCall(
+async function preparedOfCall(
   supabase: Client,
   callId: string,
-): Promise<CallDetail["framing"]> {
-  const { data } = await supabase
-    .from("framing_calls")
-    .select("purpose, participants, document_ids")
-    .eq("call_id", callId)
-    .maybeSingle();
+): Promise<CallDetail["prepared"]> {
+  const [framing, strategy] = await Promise.all([
+    supabase
+      .from("framing_calls")
+      .select("purpose, participants, document_ids")
+      .eq("call_id", callId)
+      .maybeSingle(),
+    supabase
+      .from("strategy_calls")
+      .select("purpose, participants, document_ids, format")
+      .eq("call_id", callId)
+      .maybeSingle(),
+  ]);
+  const data = strategy.data ?? framing.data;
   if (!data) return null;
   const { data: files } = data.document_ids.length
     ? await supabase
@@ -225,9 +237,11 @@ async function framingOfCall(
       )
     : [];
   return {
+    kind: strategy.data ? "strategy" : "framing",
     purpose: data.purpose,
     participants,
     documents: (files ?? []).map((f) => ({ id: f.id, name: f.file_name })),
+    format: "format" in data && isCallFormat(data.format) ? data.format : null,
   };
 }
 
