@@ -2,6 +2,7 @@
 // Client-safe: the lists mirror the database checks.
 
 import { fr } from "@/lib/i18n/fr";
+import type { ContactSocials } from "@/lib/network/socials";
 
 export const NETWORK_KINDS = ["person", "organization"] as const;
 export type NetworkKind = (typeof NETWORK_KINDS)[number];
@@ -36,16 +37,15 @@ export const NETWORK_ROLES = [
 ] as const;
 export type NetworkRole = (typeof NETWORK_ROLES)[number];
 
-/** Tabs of the Réseau page: role families; a contact sits in each of its. */
+/**
+ * Tabs of the Réseau page: role families; a contact sits in each of its.
+ * « Artistes » (Sacha, 10/10/2026): artists and beatmakers to contact one
+ * day, spotted on TikTok in the Labo or added by hand; neither signed nor in
+ * collaboration (those are the catalog's artists).
+ */
 export const NETWORK_FAMILIES = {
-  music: [
-    "artist",
-    "beatmaker",
-    "musician",
-    "songwriter",
-    "engineer",
-    "producer",
-  ],
+  artists: ["artist", "beatmaker"],
+  music: ["musician", "songwriter", "engineer", "producer"],
   image: ["art_director", "videographer", "photographer", "designer"],
   business: [
     "provider",
@@ -99,6 +99,8 @@ export type NetworkContactRow = {
   email: string | null;
   phone: string | null;
   city: string | null;
+  // Shown when there is no e-mail nor phone: how to reach a spotted artist.
+  tiktok: string | null;
 };
 
 /** Everything the contact form edits, as saved. */
@@ -114,7 +116,7 @@ export type NetworkContactValues = {
   website: string | null;
   city: string | null;
   notes: string | null;
-};
+} & ContactSocials;
 
 /** Choices of the contact form: organizations and catalog artists. */
 export type NetworkFormOptions = {

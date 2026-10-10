@@ -52,6 +52,12 @@ export const captureReadingSchema = z.object({
           .describe(
             "Son compte Instagram, seulement s'il est écrit sur la capture (bio, légende : « insta : … », « IG … »). null sinon.",
           ),
+        activity: z
+          .enum(["artist", "beatmaker", "both", "unknown"])
+          .nullish()
+          .describe(
+            "artist : chante ou rappe ; beatmaker : fait des prods (FL Studio, MPC, « type beat », « prod by »… à l'écran) ; both : les deux ; unknown : la capture ne le dit pas.",
+          ),
         role: z
           .enum(["account", "sound", "mentioned"])
           .describe(

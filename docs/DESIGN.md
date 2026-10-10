@@ -208,6 +208,36 @@ une pastille de filtre active, et un nouveau clic la retire.
 
 ---
 
+## 3 quater. Thème sombre
+
+Demande de Sacha du 10/10/2026 : toute l'application existe en clair et en sombre.
+
+- **Choix** : menu du compte (pied de la barre latérale) et tiroir mobile, « Thème » :
+  **Système** (défaut, suit le réglage de l'ordinateur), Clair, Sombre. `next-themes`
+  (déjà installé pour les toasts) pose la classe `.dark` sur `<html>` avant le premier
+  affichage, sans éclair blanc. Le choix est une préférence d'affichage du navigateur,
+  pas une donnée métier : il reste dans le stockage de `next-themes` (clé `pds-theme`),
+  pas dans Supabase. Le changement est instantané (transitions coupées pendant la bascule).
+- **Un seul endroit** : le bloc `:root.dark` d'`app/globals.css` redéfinit les tokens
+  sémantiques (texte, surfaces, bordures, navigation, tons, teintes, sélection, jauges,
+  contrôles, élévation, pont shadcn). **Jamais** la palette `--po-*`, **jamais** un
+  composant. Un composant qui lit un token marche dans les deux thèmes ; une couleur brute
+  de la palette (`text-ink-800`, `bg-[var(--po-…)]`) ne s'inverse pas : ne pas l'employer
+  pour du texte ou un fond (gris moyens `text-grey-400`, points d'état : tolérés, lisibles
+  sur les deux fonds).
+- **Règles** : plus une surface est haute, plus elle est claire (`--surface-app` #0a0a0a
+  → page #0f0f0f → carte #161616 → menu #1c1c1c) ; fonds discrets (doux, creux, survol,
+  appuyé) en blanc translucide, lisibles sur la page comme sur une carte ; texte principal
+  #ededed, jamais blanc pur ; le bouton principal, l'action définitive et le carré du logo
+  passent en clair ; tons d'état et teintes de catégorie en fond sombre teinté **opaque**
+  et texte clair (≥ 7:1) ; bleu de sélection éclairci (#3b7bff) pour garder 3:1 sur le
+  noir ; ombres plus denses, les filets portent la forme.
+- **Modale « verre »** en sombre : panneau éclairci (gris 40 à 82 %) pour se détacher de
+  la page, liste posée dessus plus claire que lui (#2c2c2c).
+- Hors périmètre : les PDF exportés (Brief, contrats, bulletin SACEM) restent clairs.
+
+---
+
 ## 4. Coquille, surfaces et arrondis
 
 Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœuds 120:47 /
@@ -474,8 +504,8 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
   (`SearchPicker`) opaque `--po-ink-700`. Aucun composant enfant n'est retouché.
 - **Piège** : un token lu dans une modale et absent de `.surface-glass` y garde sa valeur
   claire (texte noir sur fond noir). Un composant qui lit un nouveau token et s'affiche
-  en modale → ajouter ce token à `.surface-glass`. Les couleurs brutes (`text-ink-800`,
-  `text-grey-400`) ne s'inversent pas : ne pas les employer dans une modale.
+  en modale → ajouter ce token à `.surface-glass`. Les couleurs brutes de la palette ne
+  s'inversent pas : ne pas les employer dans une modale (ni pour un texte, § 3 quater).
 - Hors périmètre : les panneaux latéraux (`Sheet` : relecture d'un brouillon de PO, ligne
   de budget, tiroir de navigation mobile), les menus et listes déroulantes en portail
   (`Select`, `DropdownMenu`, `Popover`, `Tooltip`) restent clairs.

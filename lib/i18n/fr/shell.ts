@@ -42,6 +42,15 @@ export const shell = {
     open: (name: string) => `Compte de ${name}`,
   },
 
+  // Light or dark interface (docs/DESIGN.md § 3 quater), in the account menu
+  // and the mobile drawer. "Système" follows the computer's setting.
+  theme: {
+    label: "Thème",
+    system: "Système",
+    light: "Clair",
+    dark: "Sombre",
+  },
+
   home: {
     welcome: (firstName: string) => `Bonjour ${firstName}`,
     welcomeAnonymous: "Bonjour",

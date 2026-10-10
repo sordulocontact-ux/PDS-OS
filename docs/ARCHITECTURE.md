@@ -1444,7 +1444,15 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
   membres actifs** (c'est l'annuaire partagé), écrit par `manage_network`, **archivé, jamais
   supprimé**, par le DG (`set_network_contact_archived`, refusé tant qu'un contrat non résilié
   le nomme). Onglets par famille de rôles (un contact apparaît dans chacune des siennes),
-  recherche instantanée, Archivés pour le DG. Les contacts d'artiste (`artist_contacts`) et
+  recherche instantanée, Archivés pour le DG. **Onglet « Artistes »** (Sacha, 10/10/2026) :
+  rôles Artiste et Beatmaker, les artistes à contacter un jour, ni signés ni en collaboration
+  (ceux-là sont au Catalogue), repérés sur TikTok depuis le Labo (§ 10 bis) ou ajoutés à la
+  main ; « Musique » garde musicien·ne, auteur·rice, ingé son, réalisateur·rice. **Réseaux**
+  (`…20261010008001_network_socials.sql`, `lib/network/socials.ts`, test
+  `network-socials.test.sql`) : pseudo TikTok et Instagram (minuscules), id d'artiste Spotify et
+  Deezer, gardés comme identifiants (contraintes SQL), jamais comme URL libres ; le formulaire
+  accepte « @pseudo » ou le lien collé, la fiche affiche les liens, la liste montre le TikTok
+  quand il n'y a ni e-mail ni téléphone. Les contacts d'artiste (`artist_contacts`) et
   les intervenants cités restent à part : pas de fusion automatique en V1.
 - **Contrats** `/app/contracts` (`contracts`, `contract_parties`, `contract_files`,
   `lib/contracts/`, `components/contracts/`) : titre, type (liste fermée), responsable
@@ -2886,7 +2894,8 @@ transcription, compte rendu, préparation de call, détection ISRC. Faux call :
 
 Demande d'Ibé (10/10/2026) : retrouver les artistes qu'il repère sur TikTok. Page de la
 navigation principale, **pour tout membre approuvé, en production aussi** (contrairement à
-`/labo`), où l'on essaie une fonction avant de la mettre dans l'app. Rien n'est enregistré.
+`/labo`), où l'on essaie une fonction avant de la mettre dans l'app. Rien n'est enregistré
+sans un clic : « Ajouter au Réseau » (ci-dessous).
 
 - **Pourquoi pas TikTok** : l'API officielle ne lit que le compte connecté (Display API) ;
   la Research API est réservée aux chercheurs, sans usage commercial ; les scrapers violent
@@ -2925,6 +2934,50 @@ navigation principale, **pour tout membre approuvé, en production aussi** (cont
   vérifier ». MusicBrainz : une requête par seconde (file dans le module). Chaque lien dit
   sa source ; une source en panne est sautée, jamais bloquante. Huntrill → TikTok @huntrill
   (confirmé par TikTok), Instagram @huntrillion (MusicBrainz).
+- **Profil TikTok** (`lib/integrations/tiktok-profile.ts`, 10/10/2026, demande de Sacha :
+  « toutes les informations qu'on a grâce au lien TikTok ») : la page publique du profil
+  embarque ses données en JSON (`__UNIVERSAL_DATA_FOR_REHYDRATION__`, format non documenté) :
+  nom affiché, **bio**, **lien de la bio**, abonnés, vidéos, certification. Une page lue par
+  pseudo confirmé, sur clic d'un humain (dépôt d'une capture) ; illisible → repli sur l'oEmbed
+  officiel, rien n'est bloquant. **Point à trancher** : c'est une lecture de page HTML, ce que
+  les conditions de TikTok interdisent en principe (voir « Pourquoi pas TikTok ») ; à couper
+  (appel unique dans `confirmTikTok`) si PDS préfère s'en tenir à l'oEmbed. La bio est une
+  donnée lue par le code seul, jamais envoyée au modèle. Le lien de la bio devient un indice
+  Deezer de plus (`linkClues`) et un Linktree à lire.
+- **Départager les homonymes** (`lib/catalog/capture-proofs.ts`, Sacha 10/10/2026 : « comparer
+  les bios Deezer avec Insta et TikTok […] et si à la fin il n'est toujours pas sûr, choisir le
+  bon lien Deezer ») : pour « Plusieurs comptes » (4 candidats au plus) et « À vérifier », le code
+  cherche deux preuves de plus par candidat : le profil Deezer relié par **MusicBrainz / Wikidata
+  au même TikTok ou Instagram** que la capture (la plus forte, `accountMatch`, 3 candidats au
+  plus les plus suivis : MusicBrainz = une requête par seconde, réponses gardées 10 min), et sa
+  **bio Deezer** (API interne, § 2) qui cite un pseudo ou un nom de la capture (`bioMatch`). Une
+  seule preuve → « Compte trouvé », chaque preuve dite en une phrase. Toujours plusieurs :
+  **PO compare** (`extract`, `lib/ai/schemas/capture-choice.ts`) la bio TikTok, le lien de la
+  bio et l'Instagram avec les bios Deezer, quelques titres et les fans, et **penche** pour un
+  compte ou ne tranche pas, en deux phrases ; jamais un état : le statut reste « Plusieurs
+  comptes ». La personne **choisit** dans le Labo (`DeezerChooser`) : les homonymes avec leur
+  bio et leurs preuves, celui de PO en tête, ou **un autre lien Deezer collé** (page artiste ou
+  lien de partage `link.deezer.com`), relu sur Deezer par le serveur (`chooseCaptureDeezer`,
+  seul l'id vient du navigateur, rien n'est enregistré) → « Choisi par vous », réseaux du compte
+  repris (ceux trouvés via l'ancien compte retirés), et c'est ce compte qui part dans « Ajouter
+  au Réseau ». « Pas le bon compte Deezer ? » rouvre le choix sur toute ligne.
+- **E-mail** (`emailsIn`, `lib/utils/email.ts`, lu par le code, jamais deviné) : le premier écrit
+  sur la capture (compte qui publie), sinon dans la bio TikTok, sinon un `mailto:` du Linktree ;
+  sa source est affichée. **Instagram** écrit dans la bio (« Ig: … », « insta @… ») : source
+  « dans sa bio TikTok ».
+- **Artiste ou beatmaker** (`activityOf`, `capture-socials.ts`) : un mot lu par le code dans la
+  bio ou sur la capture du compte (« beatmaker », « type beat », « prod », « instrus », « FL
+  Studio »…) propose Beatmaker, avec le mot cité ; sinon la lecture de PO (`activity` du schéma :
+  logiciel de production à l'écran…). Une proposition : rôles pré-remplis dans le formulaire.
+- **« Ajouter au Réseau »** (`CaptureNetworkAction`, `lib/catalog/capture-contact.ts`) : le
+  **vrai formulaire de contact** pré-rempli (nom du compte Deezer s'il est sûr, rôles Artiste /
+  Beatmaker, e-mail, lien de la bio en site web, TikTok, Instagram, Spotify, Deezer si « Compte
+  trouvé » ou « À vérifier », fiche du catalogue si ce compte Deezer y est déjà) et des notes
+  écrites par le code (date du repérage, place sur la capture, abonnés TikTok, fans Deezer, bio
+  citée) ; une personne relit et enregistre (`manage_network`), on reste sur le Labo et le
+  bouton devient « Ajouté au Réseau ». Déjà dans le Réseau = même compte TikTok, Instagram ou
+  Deezer (`findContactsByAccounts`), **jamais par le nom** : « Dans le Réseau » mène au contact.
+  Le contact rejoint l'onglet **Artistes** du Réseau (§ 8 quinquies).
 - Deux captures lues à la fois (palier gratuit Mistral, Deezer 50 requêtes / 5 s), 8 Mo
   au plus, PNG / JPEG / WebP, collées (⌘V) ou déposées. Un artefact claude.ai ne peut pas
   servir de banc : il n'atteint ni Mistral ni l'API Deezer (réseau bloqué).

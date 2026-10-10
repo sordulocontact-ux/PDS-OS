@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Google_Sans_Flex } from "next/font/google";
 
+import { ThemeProvider } from "@/components/shell/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { fr } from "@/lib/i18n/fr";
 
@@ -32,10 +33,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="fr"
       className={`${googleSansFlex.variable} ${geistMono.variable} h-full antialiased`}
+      // next-themes sets the "dark" class before the first paint.
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

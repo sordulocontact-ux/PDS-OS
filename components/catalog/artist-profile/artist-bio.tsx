@@ -28,7 +28,7 @@ export function ArtistBio({ bio }: { bio: Bio }) {
       <div
         lang={bio.lang}
         id="artist-bio-text"
-        className="flex max-w-prose flex-col gap-3 text-sm whitespace-pre-line text-ink-800"
+        className="flex max-w-prose flex-col gap-3 text-sm whitespace-pre-line text-foreground"
       >
         {shown.map((paragraph, i) => (
           <p key={i} className={cn(collapsed && "line-clamp-4")}>

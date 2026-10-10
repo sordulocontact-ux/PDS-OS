@@ -59,6 +59,8 @@
   --border-strong: var(--po-ink-900);
   --border-field: #dcdcdc;
   --border-on-dark: #2a2a2a;
+  /* Contour d'un contrôle au survol (bouton outline, pastille de filtre). */
+  --border-hover: var(--po-grey-300);
   --hairline: 1px solid var(--border-hairline);
   --hairline-strong: 1px solid var(--border-default);
 
@@ -340,6 +342,147 @@
   --sidebar-accent-foreground: var(--nav-fg);
   --sidebar-border: var(--nav-divider);
   --sidebar-ring: var(--nav-fg);
+}
+
+/* ==========================================================================
+   2 bis — THÈME SOMBRE (DESIGN.md § 3 quater)
+   Classe .dark posée sur <html> par next-themes (ThemeProvider), selon le
+   choix du menu du compte : Système (défaut), Clair ou Sombre. On ne change
+   que des tokens sémantiques, jamais la palette --po-*, ni un composant.
+   Plus une surface est haute, plus elle est claire ; les fonds discrets sont
+   translucides pour se lire sur la page comme sur une carte ; le texte n'est
+   jamais blanc pur. Le pont shadcn (bloc 2) suit tout seul : ses var() se
+   résolvent sur <html>, où .dark les redéfinit.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  /* --- Texte ------------------------------------------------------------- */
+  --text-primary: #ededed;
+  --text-secondary: #a8a8a8;
+  --text-tertiary: #8f8f8f;
+  --text-muted: #5e5e5e;
+  --text-link: #ededed;
+
+  /* --- Surfaces : la page au fond, la carte au-dessus ------------------- */
+  --surface-app: #0a0a0a;
+  --surface-page: #0f0f0f;
+  --surface-raised: #161616;
+  --surface-soft: rgb(255 255 255 / 0.05);
+  --surface-sunken: rgb(255 255 255 / 0.08);
+  --surface-pressed: rgb(255 255 255 / 0.12);
+  --surface-inverse: #ededed;
+  --surface-inverse-raised: #d4d4d4;
+  --surface-tint: rgb(255 255 255 / 0.06);
+
+  /* --- Bordures : les ombres se voient mal, les filets portent la forme -- */
+  --border-hairline: rgb(255 255 255 / 0.08);
+  --border-default: rgb(255 255 255 / 0.12);
+  --border-strong: #ededed;
+  --border-field: rgb(255 255 255 / 0.14);
+  --border-hover: rgb(255 255 255 / 0.28);
+
+  /* --- Barre latérale ----------------------------------------------------- */
+  --nav-bg: #0f0f0f;
+  --nav-fg: #ededed;
+  --nav-fg-muted: #8f8f8f;
+  --nav-item-hover-bg: rgb(255 255 255 / 0.05);
+  --nav-item-active-bg: rgb(255 255 255 / 0.09);
+  --nav-divider: rgb(255 255 255 / 0.08);
+  --nav-border: rgb(255 255 255 / 0.08);
+  --nav-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+  /* Le carré du logo s'inverse, comme le bouton principal. */
+  --nav-brand-bg: #ededed;
+  --nav-brand-fg: var(--po-black);
+
+  /* --- Tons d'état : fond sombre teinté, texte clair (≥ 7:1). Opaques :
+     un événement du calendrier ne laisse pas voir la grille dessous. ------ */
+  --tone-neutral-bg: #262626;
+  --tone-neutral-fg: #d4d4d4;
+  --tone-info-bg: #12233d;
+  --tone-info-fg: #9ec5ff;
+  --tone-warning-bg: #33260c;
+  --tone-warning-fg: #f5c869;
+  --tone-success-bg: #0f2e1c;
+  --tone-success-fg: #7fdca0;
+  --tone-danger-bg: #3a1616;
+  --tone-danger-fg: #ff9b94;
+  --tone-action-bg: #2a1c47;
+  --tone-action-fg: #c9b2ff;
+
+  /* --- Teintes de catégorie : même logique que les tons ------------------ */
+  --hue-sky-bg: #0e2a3b;
+  --hue-sky-fg: #8ccff5;
+  --hue-indigo-bg: #1c2148;
+  --hue-indigo-fg: #a9b4ff;
+  --hue-violet-bg: #2a1b45;
+  --hue-violet-fg: #c8a9fb;
+  --hue-pink-bg: #3a1529;
+  --hue-pink-fg: #f5a3cf;
+  --hue-orange-bg: #3a2010;
+  --hue-orange-fg: #f9b183;
+  --hue-yellow-bg: #322a0a;
+  --hue-yellow-fg: #e8d27a;
+  --hue-lime-bg: #1e2c0e;
+  --hue-lime-fg: #b5dc7d;
+  --hue-teal-bg: #0d2d29;
+  --hue-teal-fg: #7fdccc;
+  --hue-sand-bg: #2e261c;
+  --hue-sand-fg: #d8c3a5;
+  --hue-slate-bg: #222831;
+  --hue-slate-fg: #b6c2d2;
+
+  /* --- Sélection : le bleu de Sacha éclairci pour garder 3:1 sur le noir -- */
+  --selection: #3b7bff;
+  --selection-bg: rgb(59 123 255 / 0.16);
+
+  /* --- Jauges ------------------------------------------------------------ */
+  --meter-track: rgb(255 255 255 / 0.1);
+  --meter-fill: #6b6b6b;
+  --meter-fill-over: #ededed;
+
+  /* --- Contrôles : le bouton principal devient clair --------------------- */
+  --control-fg: #ededed;
+  --control-bg: rgb(255 255 255 / 0.03);
+  --control-bg-soft: rgb(255 255 255 / 0.08);
+  --control-bg-hover: rgb(255 255 255 / 0.07);
+  --control-bg-pressed: rgb(255 255 255 / 0.12);
+  --control-primary-bg: #ededed;
+  --control-primary-fg: #0a0a0a;
+  --control-primary-bg-hover: var(--po-white);
+  --overlay-scrim: rgba(0, 0, 0, 0.6);
+  /* Sur une page déjà sombre, le verre s'éclaircit pour s'en détacher. */
+  --surface-glass: rgb(40 40 40 / 0.82);
+
+  /* --- Élévation : ombres plus denses, sinon invisibles ------------------- */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --elevation-3: 0 12px 32px rgba(0, 0, 0, 0.65);
+
+  /* --- Pont shadcn : ce qui ne passe pas par un token sémantique ---------- */
+  --secondary-foreground: #d4d4d4;
+  /* L'action définitive reste en « encre pleine », ici claire. */
+  --destructive: #ededed;
+  --destructive-foreground: #0a0a0a;
+  --error: #f97066;
+  --popover: #1c1c1c;
+  --chart-1: #333333;
+  --chart-2: #5e5e5e;
+  --chart-3: #8f8f8f;
+  --chart-4: #afafaf;
+  --chart-5: #ededed;
+}
+
+/* Liste ou menu posé sur le verre : plus clair que le panneau en sombre
+   (en clair, ink-700 suffit sous un panneau presque noir). */
+:root.dark .surface-glass {
+  --surface-raised: #2c2c2c;
+  --popover: #2c2c2c;
 }
 
 /* Surface « verre » : panneau sombre translucide de toute modale (Dialog,

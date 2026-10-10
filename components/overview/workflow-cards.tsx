@@ -148,7 +148,7 @@ export function WorkflowCards({
                     : t.board.stepOf(index + 1, steps.length)}
                 </span>
               </p>
-              <p className="text-caption text-ink-800">{state.reason}</p>
+              <p className="text-caption text-foreground">{state.reason}</p>
               <p className="text-caption text-muted-foreground">
                 {state.progress}
               </p>

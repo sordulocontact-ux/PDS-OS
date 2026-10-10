@@ -70,14 +70,24 @@ export async function matchOnDeezer(person: Person): Promise<Matched> {
   const accounts = await Promise.all(
     homonyms.map(({ artist, via }) => withEvidence(artist, via, clues)),
   );
-  return { ...person, ...decide(accounts) };
+  return { ...person, ...decide(accounts), suggestion: null };
 }
 
-function decide(
+/**
+ * The account, from the proofs gathered so far: the same TikTok or Instagram
+ * linked to the Deezer profile first (MusicBrainz / Wikidata), then a
+ * release or the Deezer biography matching the screenshot.
+ */
+export function decide(
   accounts: DeezerAccount[],
 ): Pick<Matched, "status" | "account" | "others"> {
-  const linked = accounts.filter((a) => a.evidence.length > 0);
   const rest = (pick: DeezerAccount) => accounts.filter((a) => a !== pick);
+  const same = accounts.filter((a) => a.accountMatch);
+  if (same.length === 1)
+    return { status: "linked", account: same[0], others: rest(same[0]) };
+  const linked = (same.length > 1 ? same : accounts).filter(
+    (a) => a.evidence.length > 0 || a.bioMatch.length > 0,
+  );
   if (linked.length === 1)
     return { status: "linked", account: linked[0], others: rest(linked[0]) };
   if (accounts.length === 0)
@@ -115,6 +125,11 @@ async function withEvidence(
         .map((r) => r.title),
     ),
   ].slice(0, MAX_EVIDENCE);
+  return { ...deezerAccountOf(artist), evidence };
+}
+
+/** A Deezer artist as the Labo shows it, before any proof. */
+export function deezerAccountOf(artist: DeezerArtist): DeezerAccount {
   return {
     deezerId: artist.id,
     name: artist.name,
@@ -122,7 +137,10 @@ async function withEvidence(
     pictureUrl: artist.pictureMedium,
     fans: artist.fans,
     releaseCount: artist.releaseCount,
-    evidence,
+    evidence: [],
+    bioMatch: [],
+    accountMatch: null,
+    bio: null,
     existing: null,
   };
 }

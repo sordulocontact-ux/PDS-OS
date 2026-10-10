@@ -159,6 +159,11 @@ export function proposeNetworkContactTool({
         website: website ?? current?.website ?? null,
         city: city || current?.city || null,
         notes: notes || current?.notes || null,
+        // Never said to PO: kept as saved, or none for a new contact.
+        tiktok: current?.tiktok ?? null,
+        instagram: current?.instagram ?? null,
+        spotifyId: current?.spotifyId ?? null,
+        deezerId: current?.deezerId ?? null,
       };
 
       const changes: DraftChange[] = [];

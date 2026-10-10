@@ -40,7 +40,7 @@ export function WelcomeCard({ variant }: { variant: WelcomeVariant }) {
       <div className="flex flex-col gap-1">
         <h2
           id="welcome-title"
-          className="text-body-lg font-semibold text-ink-800"
+          className="text-body-lg font-semibold text-foreground"
         >
           {t.title}
         </h2>
@@ -48,7 +48,7 @@ export function WelcomeCard({ variant }: { variant: WelcomeVariant }) {
           {t.intro}
         </p>
       </div>
-      <ol className="flex list-decimal flex-col gap-2 pl-5 text-body-md text-ink-800">
+      <ol className="flex list-decimal flex-col gap-2 pl-5 text-body-md text-foreground">
         {t[variant].map((point, index) => {
           const href = HREFS[variant][index];
           return (

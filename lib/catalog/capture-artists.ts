@@ -11,6 +11,7 @@ import type {
   CaptureArtistsResult,
 } from "@/lib/catalog/capture-artist-types";
 import { matchOnDeezer } from "@/lib/catalog/capture-deezer";
+import { withProofs } from "@/lib/catalog/capture-proofs";
 import type { Person } from "@/lib/catalog/capture-person";
 import { confirmTikTok, withSocials } from "@/lib/catalog/capture-socials";
 import {
@@ -19,7 +20,9 @@ import {
   MIN_CLUE_KEY,
 } from "@/lib/catalog/capture-text";
 import { findArtistsByDeezerIds } from "@/lib/catalog/queries";
-import { asHandle } from "@/lib/integrations/artist-socials";
+import { findContactsByAccounts } from "@/lib/network/queries";
+import { asHandle } from "@/lib/network/socials";
+import { emailsIn } from "@/lib/utils/email";
 
 /**
  * A TikTok screenshot → the artists on it, their Deezer account and their
@@ -46,10 +49,13 @@ export async function readCaptureArtists(image: {
   const people = checkedPeople(reading.output);
   const artists = await Promise.all(
     people.map((person) =>
-      confirmTikTok(person).then(matchOnDeezer).then(withSocials),
+      confirmTikTok(person)
+        .then(matchOnDeezer)
+        .then(withProofs)
+        .then(withSocials),
     ),
   );
-  await flagExisting(artists);
+  await Promise.all([flagExisting(artists), flagInNetwork(artists)]);
   return {
     isTikTok: reading.output.isTikTok,
     analysis: reading.output.analysis,
@@ -70,6 +76,8 @@ export function checkedPeople(reading: CaptureReading): Person[] {
   const seen = key(reading.visibleText.join(" "));
   const isWritten = (value: string) => key(value) && seen.includes(key(value));
   const links = reading.links.map((l) => l.trim()).filter(isWritten);
+  // An address written on the screenshot (a profile's bio) is the account's.
+  const writtenEmail = emailsIn(reading.visibleText.join("\n"))[0];
   const people: Person[] = [];
 
   for (const raw of reading.people) {
@@ -100,6 +108,8 @@ export function checkedPeople(reading: CaptureReading): Person[] {
       same.searchNames = unique([...same.searchNames, ...searchNames]);
       same.read.tiktok ??= read.tiktok;
       same.read.instagram ??= read.instagram;
+      if (same.activity === "unknown")
+        same.activity = raw.activity ?? "unknown";
       continue;
     }
     const account = raw.role === "account";
@@ -111,10 +121,18 @@ export function checkedPeople(reading: CaptureReading): Person[] {
       role: raw.role,
       reasoning: raw.reasoning.trim(),
       tiktok: null,
+      profile: null,
       searchNames,
       clues: account ? linkClues(links) : [],
       links: account ? links : [],
       read,
+      bioInstagram: null,
+      email:
+        account && writtenEmail
+          ? { value: writtenEmail, source: "capture" }
+          : null,
+      writtenText: account ? reading.visibleText.join("\n") : "",
+      activity: raw.activity ?? "unknown",
     });
   }
   return people.slice(0, MAX_PEOPLE);
@@ -135,4 +153,22 @@ async function flagExisting(artists: CaptureArtist[]) {
   );
   for (const account of accounts)
     account.existing = existing.get(account.deezerId) ?? null;
+}
+
+// Already in the Réseau: same TikTok, Instagram or Deezer account. Read with
+// the viewer's session; a failure only hides the hint.
+async function flagInNetwork(artists: CaptureArtist[]) {
+  const handle = (link: CaptureArtist["tiktok"]) =>
+    link ? link.label.replace(/^@/, "") : null;
+  const found = await findContactsByAccounts({
+    tiktok: artists.flatMap((a) => handle(a.tiktok) ?? []),
+    instagram: artists.flatMap((a) => handle(a.instagram) ?? []),
+    deezer: artists.flatMap((a) => a.account?.deezerId ?? []),
+  });
+  for (const artist of artists)
+    artist.contact =
+      found.tiktok.get(handle(artist.tiktok)?.toLowerCase() ?? "") ??
+      found.instagram.get(handle(artist.instagram)?.toLowerCase() ?? "") ??
+      (artist.account ? found.deezer.get(artist.account.deezerId) : null) ??
+      null;
 }

@@ -14,10 +14,12 @@ import { cn } from "@/lib/utils";
 /** A screenshot, its reading state, and the people read on it. */
 export function CaptureCard({
   item,
+  canAddToNetwork,
   onRemove,
   onRetry,
 }: {
   item: CaptureItem;
+  canAddToNetwork: boolean;
   onRemove: () => void;
   onRetry: () => void;
 }) {
@@ -98,6 +100,7 @@ export function CaptureCard({
                   <CaptureArtistRow
                     key={artist.names.join("|")}
                     artist={artist}
+                    canAddToNetwork={canAddToNetwork}
                   />
                 ))}
               </ul>

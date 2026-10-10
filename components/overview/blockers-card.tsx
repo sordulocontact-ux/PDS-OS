@@ -49,7 +49,7 @@ export function BlockersCard({ blockers }: { blockers: BoardBlocker[] }) {
                 aria-hidden
                 className="mt-1 size-4 shrink-0 text-[color:var(--tone-danger-fg)]"
               />
-              <span className="grid min-w-0 gap-1 text-body-md text-ink-800">
+              <span className="grid min-w-0 gap-1 text-body-md text-foreground">
                 <span className="font-semibold break-words">
                   {blocker.title}
                 </span>

@@ -7,6 +7,7 @@ import {
   type NetworkFormOptions,
   type NetworkKind,
 } from "@/lib/network/types";
+import { asHandle } from "@/lib/network/socials";
 import { createClient } from "@/lib/supabase/server";
 
 // Read side of the network, with the viewer's session (RLS: every active
@@ -43,7 +44,9 @@ export async function listNetworkContacts(
   const supabase = await createClient();
   const query = supabase
     .from("network_contacts")
-    .select("id, kind, name, roles, email, phone, city, parent_id")
+    .select(
+      "id, kind, name, roles, email, phone, city, parent_id, tiktok_handle",
+    )
     .order("name")
     .limit(LIST_LIMIT);
   const { data, error } = await (archived
@@ -66,6 +69,7 @@ export async function listNetworkContacts(
     email: row.email,
     phone: row.phone,
     city: row.city,
+    tiktok: row.tiktok_handle,
   }));
 }
 
@@ -124,6 +128,10 @@ export async function getNetworkContact(
     website: row.website,
     city: row.city,
     notes: row.notes,
+    tiktok: row.tiktok_handle,
+    instagram: row.instagram_handle,
+    spotifyId: row.spotify_artist_id,
+    deezerId: row.deezer_artist_id,
     archived: row.archived_at !== null,
     parentName: row.parent_id ? (parents.get(row.parent_id) ?? null) : null,
     artistName: row.artist?.name ?? null,
@@ -174,4 +182,62 @@ export async function loadNetworkFormOptions(): Promise<NetworkFormOptions> {
     organizations: organizations.data ?? [],
     artists: artists.data ?? [],
   };
+}
+
+type FoundContact = { id: string; name: string };
+
+/**
+ * Live contacts holding one of these accounts (Labo: "already in the
+ * Réseau"), keyed by lowercased handle or Deezer id. Never by name: two
+ * artists may share one.
+ */
+export async function findContactsByAccounts(accounts: {
+  tiktok: string[];
+  instagram: string[];
+  deezer: number[];
+}): Promise<{
+  tiktok: Map<string, FoundContact>;
+  instagram: Map<string, FoundContact>;
+  deezer: Map<number, FoundContact>;
+}> {
+  const found = {
+    tiktok: new Map<string, FoundContact>(),
+    instagram: new Map<string, FoundContact>(),
+    deezer: new Map<number, FoundContact>(),
+  };
+  // Handles are saved lowercased (lib/network/socials.ts); only valid
+  // handles reach the filter, so nothing can break out of it.
+  const handles = (values: string[]) => [
+    ...new Set(values.flatMap((v) => asHandle(v)?.toLowerCase() ?? [])),
+  ];
+  const filters = [
+    handles(accounts.tiktok).length > 0 &&
+      `tiktok_handle.in.(${handles(accounts.tiktok).join(",")})`,
+    handles(accounts.instagram).length > 0 &&
+      `instagram_handle.in.(${handles(accounts.instagram).join(",")})`,
+    accounts.deezer.length > 0 &&
+      `deezer_artist_id.in.(${[...new Set(accounts.deezer)].join(",")})`,
+  ].filter((filter): filter is string => !!filter);
+  if (filters.length === 0) return found;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("network_contacts")
+    .select("id, name, tiktok_handle, instagram_handle, deezer_artist_id")
+    .is("archived_at", null)
+    .or(filters.join(","))
+    .limit(LIST_LIMIT);
+  if (error) {
+    console.error("findContactsByAccounts:", error.message);
+    return found;
+  }
+  for (const row of data) {
+    const contact = { id: row.id, name: row.name };
+    if (row.tiktok_handle)
+      found.tiktok.set(row.tiktok_handle.toLowerCase(), contact);
+    if (row.instagram_handle)
+      found.instagram.set(row.instagram_handle.toLowerCase(), contact);
+    if (row.deezer_artist_id) found.deezer.set(row.deezer_artist_id, contact);
+  }
+  return found;
 }

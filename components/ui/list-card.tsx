@@ -95,7 +95,7 @@ export function CardRow({
   const body = (
     <>
       {/* Never cut: a long title wraps, the badge keeps its width. */}
-      <span className="grid min-w-0 gap-1 text-body-md text-ink-800">
+      <span className="grid min-w-0 gap-1 text-body-md text-foreground">
         <span className="font-semibold break-words">{main}</span>
         {sub && <span className="break-words">{sub}</span>}
       </span>

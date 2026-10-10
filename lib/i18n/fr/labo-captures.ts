@@ -2,10 +2,10 @@
 export const laboCaptures = {
   title: "Labo",
   description:
-    "Fonctions en essai avant d'entrer dans l'app. Rien n'est enregistré ici.",
+    "Fonctions en essai avant d'entrer dans l'app. Rien n'est enregistré sans votre clic.",
   section: "Artistes depuis des captures TikTok",
   sectionDescription:
-    "PO lit chaque capture et regroupe les noms d'une même personne ; le code retrouve son compte Deezer.",
+    "PO lit chaque capture et regroupe les noms d'une même personne ; le code retrouve son profil TikTok, son compte Deezer et ses réseaux. « Ajouter au Réseau » l'enregistre dans l'onglet Artistes du Réseau.",
   drop: "Glissez vos captures ici, ou cliquez pour les choisir",
   dropHint: "Ou collez une capture (⌘ V). PNG, JPEG ou WebP, 8 Mo au plus.",
   empty: "Aucune capture pour l'instant.",
@@ -32,15 +32,45 @@ export const laboCaptures = {
     single: "À vérifier",
     several: "Plusieurs comptes",
     none: "Pas sur Deezer",
+    chosen: "Choisi par vous",
   },
   matchWhy: {
-    linked: (titles: string) =>
-      `Ses sorties correspondent à la capture : ${titles}.`,
     single:
-      "Le compte Deezer de ce nom le plus suivi. Vérifiez que c'est bien lui.",
+      "Le compte Deezer de ce nom le plus suivi, sans autre preuve. Vérifiez que c'est bien lui.",
     several:
-      "Plusieurs artistes Deezer portent ce nom. Ouvrez-les pour choisir.",
+      "Plusieurs artistes Deezer portent ce nom et rien ne les départage sûrement : choisissez le bon.",
     none: "Aucun artiste Deezer ne porte exactement l'un de ces noms.",
+    chosen: "Le compte Deezer que vous avez choisi.",
+  },
+  // Why the code is sure of a Deezer account, one sentence per proof.
+  proofs: {
+    account: (source: string, network: string, handle: string) =>
+      `${source} relie ce compte Deezer à son ${network} ${handle}.`,
+    bio: (words: string) => `Sa bio Deezer cite ${words}.`,
+    releases: (titles: string) =>
+      `Ses sorties correspondent à la capture : ${titles}.`,
+    sources: { musicbrainz: "MusicBrainz", wikidata: "Wikidata" },
+  },
+  // Picking the Deezer account by hand.
+  chooser: {
+    title: "Quel est son compte Deezer ?",
+    suggested: "PO penche pour lui",
+    undecided: "PO ne tranche pas :",
+    pick: (name: string) => `Choisir ${name}`,
+    pickShort: "C'est lui",
+    current: "Compte retenu",
+    otherLink: "Autre lien Deezer",
+    otherPlaceholder: "deezer.com/artist/… ou link.deezer.com/…",
+    use: "Utiliser ce lien",
+    pending: "Lecture sur Deezer…",
+    open: "Pas le bon compte Deezer ?",
+    close: "Garder ce compte",
+    errors: {
+      invalid_link:
+        "Ce n'est pas le lien d'une page artiste Deezer (deezer.com/artist/…).",
+      not_found: "Deezer ne connaît pas cet artiste.",
+      unavailable: "Deezer ne répond pas. Réessayez dans un instant.",
+    },
   },
   openDeezer: "Ouvrir sur Deezer",
   fans: (count: string) => `${count} fans`,
@@ -51,16 +81,70 @@ export const laboCaptures = {
     tiktok: "TikTok",
     instagram: "Instagram",
     spotify: "Spotify",
-    none: "Aucun compte TikTok, Instagram ni Spotify trouvé.",
+    none: "Aucun compte TikTok, Instagram ni Spotify, aucun e-mail trouvé.",
     source: {
       capture: "lu sur la capture",
       tiktok: "confirmé par TikTok",
+      bio: "dans sa bio TikTok",
       linktree: "sur son Linktree",
       musicbrainz: "via MusicBrainz",
       wikidata: "via Wikidata",
     },
   },
-  otherAccounts: "Autres comptes du même nom",
+  // The public TikTok profile, read on its page.
+  profile: {
+    followers: (count: string) => `${count} abonnés TikTok`,
+    videos: (count: number) => (count === 1 ? "1 vidéo" : `${count} vidéos`),
+    verified: "Compte certifié",
+    bio: "Bio TikTok",
+  },
+  // What the person does, proposed for the Réseau's roles.
+  activity: {
+    clue: (word: string, where: string) => `« ${word} » ${where}`,
+    where: {
+      tiktok: "dans sa bio TikTok",
+      capture: "sur la capture",
+    },
+    po: "d'après PO",
+  },
+  email: {
+    label: "E-mail",
+    source: {
+      capture: "lu sur la capture",
+      tiktok: "dans sa bio TikTok",
+      linktree: "sur son Linktree",
+    },
+  },
+  // Saving a person to the Réseau (Artistes tab).
+  network: {
+    add: "Ajouter au Réseau",
+    title: "Ajouter au Réseau",
+    description:
+      "Tout ce que le Labo a trouvé est déjà rempli : relisez, corrigez, puis enregistrez. Le contact rejoint l'onglet Artistes du Réseau.",
+    inNetwork: "Dans le Réseau",
+    added: "Ajouté au Réseau",
+    open: (name: string) => `Ouvrir ${name} dans le Réseau`,
+    // Notes of the new contact, written by the code.
+    notes: {
+      spotted: (date: string, role: string) =>
+        `Repéré sur TikTok le ${date} (${role}).`,
+      role: {
+        account: "compte qui publie",
+        sound: "artiste du son utilisé",
+        mentioned: "mentionné sur la vidéo",
+      },
+      tiktok: (followers: string | null, videos: number | null) =>
+        `TikTok : ${[
+          followers && `${followers} abonnés`,
+          videos !== null && (videos === 1 ? "1 vidéo" : `${videos} vidéos`),
+        ]
+          .filter(Boolean)
+          .join(", ")}.`,
+      deezer: (fans: string, releases: number) =>
+        `Deezer : ${fans} fans, ${releases === 1 ? "1 sortie" : `${releases} sorties`}.`,
+      bio: (bio: string) => `Bio TikTok : « ${bio} »`,
+    },
+  },
   meta: (model: string, seconds: string) => `${model} · ${seconds} s`,
   errors: {
     unauthorized: "Votre session a expiré. Reconnectez-vous.",

@@ -2,6 +2,7 @@ import { CaptureArtistsBench } from "@/components/labo/captures/capture-artists-
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 
@@ -9,10 +10,11 @@ export const metadata = { title: `${fr.laboCaptures.title} · ${fr.app.name}` };
 
 /**
  * Features on trial before they enter the app, for every member. Today:
- * artists read on TikTok screenshots and found on Deezer. Nothing is saved.
+ * artists read on TikTok screenshots and found on Deezer, saved to the
+ * Réseau by a person (« Ajouter au Réseau »).
  */
 export default async function LaboPage() {
-  await requireApproved();
+  const access = await requireApproved();
   const t = fr.laboCaptures;
 
   return (
@@ -23,7 +25,7 @@ export default async function LaboPage() {
         title={t.section}
         description={t.sectionDescription}
       >
-        <CaptureArtistsBench />
+        <CaptureArtistsBench canAddToNetwork={can(access, "manage_network")} />
       </PageSection>
     </PageContainer>
   );

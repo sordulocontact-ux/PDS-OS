@@ -1,21 +1,46 @@
-import type { SocialLink } from "@/lib/catalog/capture-artist-types";
+import type {
+  CaptureEmail,
+  SocialLink,
+} from "@/lib/catalog/capture-artist-types";
 import { fr } from "@/lib/i18n/fr";
 
-/** TikTok, Instagram and Spotify of a person, each with its source. */
+/**
+ * TikTok, Instagram, Spotify and e-mail of a person, each with its source.
+ */
 export function SocialLinks({
   tiktok,
   instagram,
   spotify,
+  email,
 }: {
   tiktok: SocialLink | null;
   instagram: SocialLink | null;
   spotify: SocialLink | null;
+  email: CaptureEmail | null;
 }) {
   const t = fr.laboCaptures.socials;
+  const e = fr.laboCaptures.email;
   const links = [
-    { network: t.tiktok, link: tiktok },
-    { network: t.instagram, link: instagram },
-    { network: t.spotify, link: spotify },
+    {
+      network: t.tiktok,
+      link: tiktok && { ...tiktok, from: t.source[tiktok.source] },
+    },
+    {
+      network: t.instagram,
+      link: instagram && { ...instagram, from: t.source[instagram.source] },
+    },
+    {
+      network: t.spotify,
+      link: spotify && { ...spotify, from: t.source[spotify.source] },
+    },
+    {
+      network: e.label,
+      link: email && {
+        label: email.value,
+        url: `mailto:${email.value}`,
+        from: e.source[email.source],
+      },
+    },
   ].flatMap(({ network, link }) => (link ? [{ network, link }] : []));
 
   if (links.length === 0)
@@ -29,16 +54,14 @@ export function SocialLinks({
           <dd className="min-w-0">
             <a
               href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...(link.url.startsWith("mailto:")
+                ? {}
+                : { target: "_blank", rel: "noopener noreferrer" })}
               className="font-semibold break-all underline-offset-4 hover:underline"
             >
               {link.label}
             </a>
-            <span className="text-muted-foreground">
-              {" "}
-              · {t.source[link.source]}
-            </span>
+            <span className="text-muted-foreground"> · {link.from}</span>
           </dd>
         </div>
       ))}

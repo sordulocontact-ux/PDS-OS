@@ -7,6 +7,7 @@ import {
   type SocialHandles,
 } from "@/lib/integrations/artist-socials";
 import { fetchText } from "@/lib/integrations/http";
+import { emailsIn } from "@/lib/utils/email";
 
 /**
  * The networks an artist lists on their public Linktree page. No API: the
@@ -25,9 +26,10 @@ const pageSchema = z.object({
 
 const DATA = /<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/;
 
+/** The networks and the e-mail (a "mailto:" link) of a Linktree page. */
 export async function linktreeSocials(
   slug: string,
-): Promise<SocialHandles | null> {
+): Promise<(SocialHandles & { email: string | null }) | null> {
   const html = await fetchText(
     "linktree",
     `https://linktr.ee/${encodeURIComponent(slug)}`,
@@ -43,8 +45,12 @@ export async function linktreeSocials(
   const parsed = pageSchema.safeParse(raw);
   if (!parsed.success) return null;
   const { socialLinks = [], links = [] } = parsed.data.props.pageProps;
-  return socialsFromUrls([
+  const urls = [
     ...socialLinks.map((l) => l.url),
     ...links.flatMap((l) => l.url ?? []),
-  ]);
+  ];
+  return {
+    ...socialsFromUrls(urls),
+    email: emailsIn(urls.join(" "))[0] ?? null,
+  };
 }

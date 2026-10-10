@@ -19,6 +19,11 @@ import {
   type NetworkFormOptions,
 } from "@/lib/network/types";
 import { linkCreditsOfNewContact } from "@/lib/network/link-credits";
+import {
+  parseDeezerId,
+  parseHandle,
+  parseSpotifyId,
+} from "@/lib/network/socials";
 import { createClient } from "@/lib/supabase/server";
 import { jsonListOf } from "@/lib/utils/form-data";
 
@@ -30,7 +35,7 @@ export type SaveContactResult =
   | {
       ok: false;
       error: string;
-      field?: "name" | "roles" | "email" | "website";
+      field?: SocialField | "name" | "roles" | "email" | "website";
     };
 
 // Blank means none (null), as the database wants it.
@@ -44,6 +49,22 @@ const optional = (max: number) =>
 const noneOrId = z
   .union([z.uuid(), z.literal(""), z.literal("none")])
   .transform((value) => (value === "none" || value === "" ? null : value));
+
+type SocialField = "tiktok" | "instagram" | "spotify" | "deezer";
+
+// An account typed as "@handle", an id or a pasted profile link; blank =
+// none, anything else unreadable = refused with its field.
+const account = <T>(parse: (value: string) => T | null) =>
+  z
+    .string()
+    .trim()
+    .max(500)
+    .transform((value, ctx) => {
+      if (!value) return null;
+      const parsed = parse(value);
+      if (parsed === null) ctx.addIssue({ code: "custom", message: "account" });
+      return parsed;
+    });
 
 const contactSchema = z.object({
   // Absent: a new contact.
@@ -65,7 +86,18 @@ const contactSchema = z.object({
   ),
   city: optional(120),
   notes: optional(2000),
+  tiktok: account((v) => parseHandle(v, "tiktok.com")),
+  instagram: account((v) => parseHandle(v, "instagram.com")),
+  spotify: account(parseSpotifyId),
+  deezer: account(parseDeezerId),
 });
+
+const SOCIAL_FIELDS: readonly SocialField[] = [
+  "tiktok",
+  "instagram",
+  "spotify",
+  "deezer",
+];
 
 /** Creates or updates a contact from the contact form. */
 export async function saveNetworkContact(
@@ -89,6 +121,10 @@ export async function saveNetworkContact(
     website: form.get("website") ?? "",
     city: form.get("city") ?? "",
     notes: form.get("notes") ?? "",
+    tiktok: form.get("tiktok") ?? "",
+    instagram: form.get("instagram") ?? "",
+    spotify: form.get("spotify") ?? "",
+    deezer: form.get("deezer") ?? "",
   });
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
@@ -103,6 +139,8 @@ export async function saveNetworkContact(
     if (path === "website")
       return { ok: false, error: t.website, field: "website" };
     if (path === "name") return { ok: false, error: t.invalid, field: "name" };
+    const social = SOCIAL_FIELDS.find((field) => field === path);
+    if (social) return { ok: false, error: t.accounts[social], field: social };
     return { ok: false, error: t.invalid };
   }
   const { id, kind, ...values } = parsed.data;
@@ -118,6 +156,10 @@ export async function saveNetworkContact(
     website: values.website,
     city: values.city,
     notes: values.notes,
+    tiktok_handle: values.tiktok,
+    instagram_handle: values.instagram,
+    spotify_artist_id: values.spotify,
+    deezer_artist_id: values.deezer,
   };
 
   const supabase = await createClient();

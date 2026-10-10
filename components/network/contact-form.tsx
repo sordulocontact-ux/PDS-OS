@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { ContactSocialsFields } from "@/components/network/contact-socials-fields";
 import { ParentOrganizationField } from "@/components/network/parent-organization-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
@@ -39,8 +40,8 @@ export function ContactForm({
 }: {
   // Absent: a new contact.
   contact?: NetworkContactValues;
-  // A new contact already filled: a credit of a title (name and roles), or
-  // a draft of PO.
+  // A new contact already filled: a credit of a title (name and roles), a
+  // draft of PO, or an artist spotted on TikTok in the Labo.
   initial?: Partial<Omit<NetworkContactValues, "id">>;
   // Created from another page: stay there instead of opening the contact.
   stay?: boolean;
@@ -181,6 +182,7 @@ export function ContactForm({
           defaultValue={contact?.city ?? initial?.city ?? ""}
         />
       </div>
+      <ContactSocialsFields values={contact ?? initial} error={error} />
       <TextareaField
         name="notes"
         label={t.notes}

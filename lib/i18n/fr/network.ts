@@ -9,6 +9,7 @@ export const network = {
   // where it has a role).
   views: {
     all: "Tous",
+    artists: "Artistes",
     music: "Musique",
     image: "Image",
     business: "Prestataires & partenaires",
@@ -107,6 +108,16 @@ export const network = {
     city: "Ville",
     notes: "Notes",
     notesPlaceholder: "Tarifs, disponibilités, dernier projet ensemble…",
+    // An artist's accounts: a handle, or the profile link pasted as is.
+    accounts: "Réseaux",
+    tiktok: "TikTok",
+    tiktokPlaceholder: "@pseudo ou lien du profil",
+    instagram: "Instagram",
+    instagramPlaceholder: "@pseudo ou lien du profil",
+    spotify: "Spotify",
+    spotifyPlaceholder: "Lien de la page artiste",
+    deezer: "Deezer",
+    deezerPlaceholder: "Lien de la page artiste",
     submitCreate: "Ajouter au réseau",
     submitEdit: "Enregistrer",
     pending: "Enregistrement…",
@@ -117,6 +128,13 @@ export const network = {
     invalid: "Vérifiez le nom, les rôles et les coordonnées.",
     email: "Adresse e-mail invalide.",
     website: "Le site doit commencer par http:// ou https://.",
+    accounts: {
+      tiktok: "Pseudo TikTok illisible : « @pseudo » ou le lien tiktok.com/@…",
+      instagram:
+        "Pseudo Instagram illisible : « @pseudo » ou le lien instagram.com/…",
+      spotify: "Lien Spotify illisible : la page open.spotify.com/artist/…",
+      deezer: "Lien Deezer illisible : la page deezer.com/artist/…",
+    },
     forbidden: "Vous ne pouvez pas modifier le réseau.",
     parent: "La structure choisie n'existe plus dans le réseau.",
     failed: "Le contact n'a pas pu être enregistré. Réessayez.",
@@ -133,6 +151,7 @@ export const network = {
     parent: "Structure",
     artist: "Fiche artiste",
     notes: "Notes",
+    accounts: "Réseaux",
     none: "non renseigné",
     members: "Membres de la structure",
     membersDescription: "Les personnes du réseau qui y travaillent.",

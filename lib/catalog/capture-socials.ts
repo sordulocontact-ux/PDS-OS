@@ -1,12 +1,14 @@
 import "server-only";
 
 import type {
+  ActivityRole,
+  CaptureActivity,
   CaptureArtist,
   SocialLink,
   SocialSource,
 } from "@/lib/catalog/capture-artist-types";
 import type { Matched, Person } from "@/lib/catalog/capture-person";
-import { linktreeSlug } from "@/lib/catalog/capture-text";
+import { linkClues, linktreeSlug } from "@/lib/catalog/capture-text";
 import {
   instagramUrl,
   socialsOfDeezerArtist,
@@ -16,6 +18,9 @@ import {
   type SocialHandles,
 } from "@/lib/integrations/artist-socials";
 import { linktreeSocials } from "@/lib/integrations/linktree";
+import { readTikTokProfile } from "@/lib/integrations/tiktok-profile";
+import { asHandle } from "@/lib/network/socials";
+import { emailsIn } from "@/lib/utils/email";
 
 /**
  * TikTok, Instagram and Spotify of a person read on a screenshot (Labo),
@@ -29,18 +34,26 @@ type Network = keyof SocialHandles;
 /**
  * The handle read on the screenshot, asked to TikTok before the Deezer
  * search: a handle TikTok does not know is dropped (misread); the display
- * name TikTok answers joins the names (a video shows only the handle).
+ * name TikTok answers joins the names (a video shows only the handle). Its
+ * public page also gives the bio, the bio link and the audience: the link is
+ * one more clue for Deezer, the bio may hold an e-mail or an Instagram.
+ * When the page cannot be read, the official oEmbed still confirms it.
  */
 export async function confirmTikTok(person: Person): Promise<Person> {
   const handle = person.read.tiktok;
   if (!handle) return person;
-  const profile = await tiktokProfile(handle);
+  const page = await readTikTokProfile(handle);
+  const profile =
+    page === undefined
+      ? await tiktokProfile(handle)
+      : page && { handle: page.handle, displayName: page.displayName };
   if (profile === null) return person;
   if (profile === undefined)
     return { ...person, tiktok: handleLink("tiktok", handle, "capture") };
   const known = person.names.some(
     (n) => n.toLowerCase() === profile.displayName.toLowerCase(),
   );
+  const bioLink = page?.bioLink;
   return {
     ...person,
     names:
@@ -48,7 +61,36 @@ export async function confirmTikTok(person: Person): Promise<Person> {
         ? person.names
         : [...person.names, profile.displayName],
     tiktok: handleLink("tiktok", profile.handle, "tiktok"),
+    profile: page
+      ? {
+          displayName: page.displayName,
+          bio: page.bio,
+          bioLink: page.bioLink,
+          followers: page.followers,
+          videos: page.videos,
+          verified: page.verified,
+        }
+      : null,
+    links: bioLink ? [...person.links, bioLink] : person.links,
+    clues: bioLink
+      ? [...new Set([...person.clues, ...linkClues([bioLink])])]
+      : person.clues,
+    bioInstagram: instagramInBio(page?.bio ?? ""),
+    email:
+      person.email ??
+      (page && emailsIn(page.bio)[0]
+        ? { value: emailsIn(page.bio)[0], source: "tiktok" }
+        : null),
   };
+}
+
+// "Ig: theodorabosslady", "insta @x", "instagram : x" in a bio; a word
+// after "IG" without ":" or "@" is not taken for a handle.
+const INSTAGRAM_IN_BIO =
+  /\b(?:ig|insta(?:gram)?)\s*(?:[:：\-]\s*@?|@)([A-Za-z0-9._]{2,30})/i;
+
+function instagramInBio(bio: string): string | null {
+  return asHandle(INSTAGRAM_IN_BIO.exec(bio)?.[1]);
 }
 
 export async function withSocials(person: Matched): Promise<CaptureArtist> {
@@ -63,7 +105,13 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
     status: person.status,
     account: person.account,
     others: person.others,
+    suggestion: person.suggestion,
+    profile: person.profile,
+    activity: activityOf(person),
+    // Looked up afterwards, with the viewer's session.
+    contact: null,
   };
+  let email = person.email;
   const name = artist.account?.name ?? artist.artistName;
   const link = (network: Network, value: string, source: SocialSource) =>
     network === "spotify"
@@ -74,7 +122,9 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
     tiktok: artist.tiktok,
     instagram: read.instagram
       ? link("instagram", read.instagram, "capture")
-      : null,
+      : person.bioInstagram
+        ? link("instagram", person.bioInstagram, "bio")
+        : null,
     spotify: null,
   };
   const fill = (handles: SocialHandles | null, source: SocialSource) => {
@@ -88,8 +138,12 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
 
   // The artist's own Linktree, when the screenshot shows it in full.
   const slug = linktreeSlug(links);
-  if (slug && !complete())
-    fill(await linktreeSocials(slug).catch(() => null), "linktree");
+  if (slug && (!complete() || !email)) {
+    const linktree = await linktreeSocials(slug).catch(() => null);
+    fill(linktree, "linktree");
+    if (!email && linktree?.email)
+      email = { value: linktree.email, source: "linktree" };
+  }
 
   // Only for an account the code is fairly sure of: never for homonyms.
   const sure =
@@ -103,7 +157,34 @@ export async function withSocials(person: Matched): Promise<CaptureArtist> {
         found[network] = link(network, value.handle, value.source);
     }
   }
-  return { ...artist, ...found };
+  return { ...artist, ...found, email };
+}
+
+// Words that say "beatmaker", read by the code in the bio or on the
+// screenshot (for the account), before PO's reading.
+const BEATMAKER =
+  /\b(beat\s?-?maker|beatmaking|type\s?beats?|beats?\s?(?:dispo|for\s?sale|à\s?vendre)|instrus?|prod(?:uct(?:eur|er|rice))?\b\.?|fl\s?studio)(?![a-zà-ÿ])/i;
+
+function activityOf(person: Matched): CaptureActivity {
+  const bio = person.profile?.bio ?? "";
+  const inBio = BEATMAKER.exec(bio)?.[1];
+  const onCapture =
+    person.role === "account" ? BEATMAKER.exec(person.writtenText)?.[1] : null;
+  const clue = inBio
+    ? { text: inBio, source: "tiktok" as const }
+    : onCapture
+      ? { text: onCapture, source: "capture" as const }
+      : null;
+  const po = person.activity;
+  const beatmaker = !!clue || po === "beatmaker" || po === "both";
+  // Nothing said either way: an artist.
+  const artist =
+    po === "artist" || po === "both" || (po === "unknown" && !beatmaker);
+  const roles: ActivityRole[] = [
+    ...(artist ? (["artist"] as const) : []),
+    ...(beatmaker ? (["beatmaker"] as const) : []),
+  ];
+  return { roles, clue };
 }
 
 function handleLink(

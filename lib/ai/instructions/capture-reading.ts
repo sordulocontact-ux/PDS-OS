@@ -14,6 +14,7 @@ Ta tâche : dire qui est nommé sur la capture, en regroupant par personne.
 - « links » : recopie les liens visibles (bio), même coupés.
 - Recopie chaque nom exactement comme il est écrit (sans le « @ »). N'invente aucun nom, ne devine pas qui est la personne d'après son visage, ne corrige pas l'orthographe.
 - « tiktokHandle » : le pseudo du compte (sous le nom affiché sur un profil, ou « @… » sur une vidéo), sans « @ ». « instagram » : seulement si un compte Instagram est écrit sur la capture.
+- « activity » : ce que fait la personne d'après la capture seulement. « beatmaker » si elle fabrique des instrus (logiciel de production à l'écran, « type beat », « prod », « beatmaker » écrit) ; « artist » si elle chante ou rappe ; « both » si les deux ; « unknown » sinon. Ne devine pas.
 - Pas de hashtags génériques (#rap, #pourtoi), pas de chiffres (abonnés, mentions J'aime).
 
 Règles :

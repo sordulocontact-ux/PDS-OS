@@ -15,6 +15,7 @@ import { routes } from "@/lib/auth/redirects";
 import { asContractStatus } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { getNetworkContact } from "@/lib/network/queries";
+import { socialLinksOf } from "@/lib/network/socials";
 import { rolesText } from "@/lib/network/types";
 
 export const metadata = { title: `${fr.network.title} · ${fr.app.name}` };
@@ -36,6 +37,7 @@ export default async function NetworkContactPage({
   if (!contact) notFound();
   const t = fr.network;
   const p = t.page;
+  const accounts = socialLinksOf(contact);
 
   return (
     <PageContainer>
@@ -132,6 +134,25 @@ export default async function NetworkContactPage({
               ),
             },
             { label: p.city, value: contact.city },
+            {
+              label: p.accounts,
+              value: accounts.length > 0 && (
+                <span className="flex flex-col gap-1">
+                  {accounts.map((account) => (
+                    <a
+                      key={account.network}
+                      href={account.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={linkClass}
+                    >
+                      {fr.network.form[account.network]}
+                      {account.label && ` · ${account.label}`}
+                    </a>
+                  ))}
+                </span>
+              ),
+            },
             ...(contact.kind === "person"
               ? [
                   {

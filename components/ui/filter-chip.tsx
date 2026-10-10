@@ -23,7 +23,7 @@ const chipClass = (
     !active && "border-border bg-background text-foreground",
     !active &&
       variant === "ink" &&
-      "hover:border-grey-300 hover:bg-[var(--control-bg-hover)]",
+      "hover:border-[color:var(--border-hover)] hover:bg-[var(--control-bg-hover)]",
     // Soft: the outline goes on hover, only the grey fill remains.
     !active &&
       variant === "soft" &&

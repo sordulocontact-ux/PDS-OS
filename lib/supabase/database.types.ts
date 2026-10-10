@@ -5600,8 +5600,10 @@ export type Database = {
           city: string | null
           created_at: string
           created_by: string | null
+          deezer_artist_id: number | null
           email: string | null
           id: string
+          instagram_handle: string | null
           kind: string
           name: string
           notes: string | null
@@ -5609,6 +5611,8 @@ export type Database = {
           parent_id: string | null
           phone: string | null
           roles: string[]
+          spotify_artist_id: string | null
+          tiktok_handle: string | null
           updated_at: string
           website: string | null
         }
@@ -5618,8 +5622,10 @@ export type Database = {
           city?: string | null
           created_at?: string
           created_by?: string | null
+          deezer_artist_id?: number | null
           email?: string | null
           id?: string
+          instagram_handle?: string | null
           kind: string
           name: string
           notes?: string | null
@@ -5627,6 +5633,8 @@ export type Database = {
           parent_id?: string | null
           phone?: string | null
           roles: string[]
+          spotify_artist_id?: string | null
+          tiktok_handle?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -5636,8 +5644,10 @@ export type Database = {
           city?: string | null
           created_at?: string
           created_by?: string | null
+          deezer_artist_id?: number | null
           email?: string | null
           id?: string
+          instagram_handle?: string | null
           kind?: string
           name?: string
           notes?: string | null
@@ -5645,6 +5655,8 @@ export type Database = {
           parent_id?: string | null
           phone?: string | null
           roles?: string[]
+          spotify_artist_id?: string | null
+          tiktok_handle?: string | null
           updated_at?: string
           website?: string | null
         }

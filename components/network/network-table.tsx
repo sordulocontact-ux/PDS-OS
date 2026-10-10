@@ -101,7 +101,9 @@ export function NetworkTable({
             <DataTableCell hideBelow="lg">
               <span className="flex min-w-0 flex-col">
                 <span className="truncate">
-                  {contact.email ?? contact.phone ?? EMPTY_CELL}
+                  {contact.email ??
+                    contact.phone ??
+                    (contact.tiktok ? `@${contact.tiktok}` : EMPTY_CELL)}
                 </span>
                 {contact.email && contact.phone && (
                   <span className="truncate text-sm text-muted-foreground">

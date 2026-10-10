@@ -18,7 +18,9 @@ export function HomeFrame({
     <PageContainer className="items-center gap-10 py-10 md:py-20 xl:gap-21 xl:py-33">
       <header className="flex flex-col items-center gap-3 text-center">
         {title ? (
-          <h1 className="font-display text-display-xl text-ink-800">{title}</h1>
+          <h1 className="font-display text-display-xl text-foreground">
+            {title}
+          </h1>
         ) : (
           <Skeleton className="h-13 w-72 max-w-full" />
         )}

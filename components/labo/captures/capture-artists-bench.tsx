@@ -14,9 +14,14 @@ import { fr } from "@/lib/i18n/fr";
 
 /**
  * Labo: TikTok screenshots dropped, picked or pasted (⌘V anywhere on the
- * page), each read by the server; the newest first.
+ * page), each read by the server; the newest first. `canAddToNetwork`
+ * (manage_network): each person read can be saved to the Réseau.
  */
-export function CaptureArtistsBench() {
+export function CaptureArtistsBench({
+  canAddToNetwork,
+}: {
+  canAddToNetwork: boolean;
+}) {
   const t = fr.laboCaptures;
   const { items, add, remove, retry } = useCaptureQueue();
 
@@ -54,6 +59,7 @@ export function CaptureArtistsBench() {
             <CaptureCard
               key={item.id}
               item={item}
+              canAddToNetwork={canAddToNetwork}
               onRemove={() => remove(item.id)}
               onRetry={() => retry(item.id)}
             />

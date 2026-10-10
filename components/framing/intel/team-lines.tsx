@@ -61,7 +61,7 @@ export function TeamLines({
                 card.member || card.holder
                   ? "border-border bg-background"
                   : "border-dashed border-border bg-[var(--surface-soft)]",
-                editable && "hover:border-grey-300",
+                editable && "hover:border-[color:var(--border-hover)]",
               )}
             >
               <span className="text-body-md font-semibold">

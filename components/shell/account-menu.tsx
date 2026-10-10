@@ -5,11 +5,16 @@ import { useTransition } from "react";
 
 import { useOpenFeedback } from "@/components/feedback/feedback-provider";
 import { navItemClass } from "@/components/shell/nav-item";
+import { useThemeChoice } from "@/components/shell/use-theme-choice";
 import { Avatar } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroupLabel,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth/actions";
@@ -18,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 // Bottom of the desktop sidebar (Figma "PDS OS", node 47:12055): the signed-in
 // person's avatar and name, opening a menu with who they are, "Envoyer un
-// retour" and "Se déconnecter". Collapsed, the avatar alone. The mobile drawer
+// retour", the theme and "Se déconnecter". Collapsed, the avatar alone. The mobile drawer
 // keeps UserPanel, which has room to list the same things.
 export function AccountMenu({
   name,
@@ -31,6 +36,7 @@ export function AccountMenu({
 }) {
   const openFeedback = useOpenFeedback();
   const [signingOut, startSignOut] = useTransition();
+  const theme = useThemeChoice();
   const t = fr.shell.account;
   const shownName = name || t.fallbackName;
 
@@ -60,6 +66,19 @@ export function AccountMenu({
           <IconMsgSmile aria-hidden />
           {fr.feedback.navLink}
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup
+          value={theme.value}
+          onValueChange={theme.setValue}
+        >
+          <DropdownMenuGroupLabel>{theme.label}</DropdownMenuGroupLabel>
+          {theme.options.map((option) => (
+            <DropdownMenuRadioItem key={option.value} value={option.value}>
+              {option.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={signingOut}
           onClick={() => startSignOut(() => signOut())}

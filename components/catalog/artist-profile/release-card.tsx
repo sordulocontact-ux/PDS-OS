@@ -20,7 +20,7 @@ export function ReleaseCard({
         <ExternalLink
           href={release.link}
           cover
-          className="line-clamp-2 text-body-md font-semibold text-ink-800"
+          className="line-clamp-2 text-body-md font-semibold text-foreground"
         >
           {release.title}
         </ExternalLink>

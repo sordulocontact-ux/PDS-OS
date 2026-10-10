@@ -4,6 +4,13 @@ import { z } from "zod";
 
 import { fetchJson, IntegrationError } from "@/lib/integrations/http";
 import { wikidataItem } from "@/lib/integrations/wikipedia";
+import {
+  asHandle,
+  instagramUrl,
+  isSpotifyId,
+  spotifyUrl,
+  tiktokUrl,
+} from "@/lib/network/socials";
 
 /**
  * An artist's TikTok and Instagram, from public sources only (no key, no
@@ -20,22 +27,8 @@ export type SocialHandles = {
 };
 
 const NONE: SocialHandles = { tiktok: null, instagram: null, spotify: null };
-const SPOTIFY_ID = /^[A-Za-z0-9]{22}$/;
 
-// TikTok and Instagram usernames: letters, digits, "." and "_".
-const HANDLE = /^[A-Za-z0-9._]{1,30}$/;
-
-export const tiktokUrl = (handle: string) =>
-  `https://www.tiktok.com/@${handle}`;
-export const instagramUrl = (handle: string) =>
-  `https://www.instagram.com/${handle}/`;
-export const spotifyUrl = (id: string) =>
-  `https://open.spotify.com/artist/${id}`;
-
-export const asHandle = (value: string | null | undefined) => {
-  const handle = value?.trim().replace(/^@/, "") ?? "";
-  return HANDLE.test(handle) ? handle : null;
-};
+export { asHandle, instagramUrl, spotifyUrl, tiktokUrl };
 
 const oembedSchema = z.object({
   author_url: z.url(),
@@ -79,7 +72,7 @@ function spotifyIdFrom(resource: string): string | null {
   const [kind, id] = url.pathname.split("/").filter(Boolean);
   return url.hostname === "open.spotify.com" &&
     kind === "artist" &&
-    SPOTIFY_ID.test(id ?? "")
+    isSpotifyId(id ?? "")
     ? id
     : null;
 }
@@ -194,22 +187,42 @@ async function fromWikidata(deezerId: number): Promise<SocialHandles> {
   return {
     tiktok: asHandle(first("P7085")),
     instagram: asHandle(first("P2003")),
-    spotify: spotify && SPOTIFY_ID.test(spotify) ? spotify : null,
+    spotify: spotify && isSpotifyId(spotify) ? spotify : null,
   };
 }
+
+export type LinkedSocials = Record<
+  keyof SocialHandles,
+  { handle: string; source: "musicbrainz" | "wikidata" } | null
+>;
+
+// Asked again for the same profile within a reading (proofs of the
+// homonyms, then the account's networks): MusicBrainz allows one request
+// per second, so each answer is kept 10 minutes.
+const LINKED_TTL_MS = 10 * 60 * 1000;
+const linkedCache = new Map<
+  number,
+  { at: number; value: Promise<LinkedSocials> }
+>();
 
 /**
  * The accounts linked to a Deezer profile, with where each one comes from.
  * A source that fails is skipped: the links are a bonus, never a blocker.
  */
-export async function socialsOfDeezerArtist(
+export function socialsOfDeezerArtist(
   deezerId: number,
-): Promise<
-  Record<
-    keyof SocialHandles,
-    { handle: string; source: "musicbrainz" | "wikidata" } | null
-  >
-> {
+): Promise<LinkedSocials> {
+  const now = Date.now();
+  for (const [id, entry] of linkedCache)
+    if (now - entry.at > LINKED_TTL_MS) linkedCache.delete(id);
+  const cached = linkedCache.get(deezerId);
+  if (cached) return cached.value;
+  const value = readLinkedSocials(deezerId);
+  linkedCache.set(deezerId, { at: now, value });
+  return value;
+}
+
+async function readLinkedSocials(deezerId: number): Promise<LinkedSocials> {
   const [mb, wd] = await Promise.all([
     fromMusicBrainz(deezerId).catch(() => NONE),
     fromWikidata(deezerId).catch(() => NONE),
