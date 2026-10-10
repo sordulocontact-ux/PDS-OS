@@ -6,13 +6,14 @@ import type { Arbitration } from "@/lib/strategy/brief";
 
 /**
  * What the Brief still leaves to arbitrate, and only that (ticket § 8): each
- * line opens its dimension's work panel. Nothing left: one quiet line.
+ * line opens its dimension's work panel — not in a frozen version
+ * (`projectId` null). Nothing left: one quiet line.
  */
 export function BriefToDecide({
   projectId,
   items,
 }: {
-  projectId: string;
+  projectId: string | null;
   items: Arbitration[];
 }) {
   const t = fr.strategyBrief.toDecide;
@@ -29,12 +30,19 @@ export function BriefToDecide({
       <ul className="flex list-disc flex-col gap-1 pl-5 text-body-md font-medium">
         {items.map((item) => (
           <li key={item.key}>
-            <ViewLink
-              href={routes.projectStrategyDimension(projectId, item.dimension)}
-              className="underline-offset-2 hover:underline"
-            >
-              {item.text}
-            </ViewLink>
+            {projectId ? (
+              <ViewLink
+                href={routes.projectStrategyDimension(
+                  projectId,
+                  item.dimension,
+                )}
+                className="underline-offset-2 hover:underline"
+              >
+                {item.text}
+              </ViewLink>
+            ) : (
+              item.text
+            )}
           </li>
         ))}
       </ul>

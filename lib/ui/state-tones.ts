@@ -220,6 +220,15 @@ export const factTone: Record<string, Tone> = {
   missing: "neutral",
 };
 
+/** An item of the Stratégie's follow-up before the release
+ * (lib/strategy/follow-up.ts): ready, running, waiting for a decision, blocked. */
+export const followUpTone: Record<string, Tone> = {
+  ready: "success",
+  in_progress: "info",
+  waiting: "warning",
+  blocked: "danger",
+};
+
 /** A dimension of the Stratégie's pilotage (lib/strategy/dimensions.ts):
  * nothing yet, started, a proposal or choice waiting for a decision, done. */
 export const strategyDimensionTone: Record<string, Tone> = {
@@ -227,6 +236,25 @@ export const strategyDimensionTone: Record<string, Tone> = {
   in_progress: "info",
   to_decide: "warning",
   complete: "success",
+};
+
+/** A version of a strategy document: ready to send, waiting for its
+ * reviewers, validated, to correct, or replaced by a newer one. */
+export const strategyDocumentTone: Record<string, Tone> = {
+  pending: "neutral",
+  sent: "action",
+  approved: "success",
+  changes_requested: "danger",
+  superseded: "neutral",
+};
+
+/** A reviewer of a strategy document: waiting, validated, asked for a
+ * change, or the round ended before they answered. */
+export const strategyReviewTone: Record<string, Tone> = {
+  pending: "warning",
+  approved: "success",
+  changes_requested: "danger",
+  cancelled: "neutral",
 };
 
 /** An action of the Juridique's plan (ticket Juridique 07's item states):
@@ -405,4 +433,258 @@ export const dependencyTone: Record<string, Tone> = {
   in_progress: "info",
   waiting: "warning",
   blocked: "danger",
+};
+
+/** A deliverable of the Conception: engaged by the Stratégie, or added late
+ * and still to qualify (neither validated nor planned). */
+export const conceptionDeliverableTone: Record<string, Tone> = {
+  confirmed: "success",
+  to_qualify: "warning",
+};
+
+/** Who holds a production position (production_assignments.availability):
+ * waiting for an answer, confirmed available, unavailable. Set by a person,
+ * never by PO. */
+export const productionAvailabilityTone: Record<string, Tone> = {
+  to_confirm: "warning",
+  available: "success",
+  unavailable: "danger",
+};
+
+/** The Conception as a whole (lib/design/states.ts). */
+export const conceptionStateTone: Record<string, Tone> = {
+  not_started: "neutral",
+  in_progress: "info",
+  to_arbitrate: "warning",
+  partially_validated: "action",
+  done: "success",
+};
+
+/** The consolidated intentions of a target: nothing yet, to confirm by the
+ * owner, confirmed, or changed since their confirmation. */
+export const intentionsStateTone: Record<string, Tone> = {
+  draft: "neutral",
+  to_confirm: "warning",
+  confirmed: "success",
+  to_revise: "warning",
+};
+
+/** The artistic direction and a Fiche Livrable on their way to validation;
+ * a decision of a validator. */
+export const designReviewTone: Record<string, Tone> = {
+  to_assign: "warning",
+  in_preparation: "info",
+  draft: "neutral",
+  to_complete: "info",
+  ready: "action",
+  pending: "warning",
+  approved: "success",
+  ready_for_production: "success",
+  transferred: "success",
+  changes_requested: "danger",
+  rejected: "danger",
+};
+
+// Production of a deliverable (lib/production/phase.ts).
+export const productionPhaseTone: Record<string, Tone> = {
+  to_prepare: "neutral",
+  preproduction: "info",
+  ready: "info",
+  shooting: "warning",
+  shot: "info",
+  post: "info",
+  final_check: "warning",
+  delivered: "success",
+  handed_off: "success",
+};
+
+/** A reference of the Conception: a proposal until a validated section of
+ * the artistic direction carries it (lib/design/reference-status.ts). */
+export const referenceStatusTone: Record<string, Tone> = {
+  proposed: "neutral",
+  validated: "success",
+};
+
+/** One of the three decisions before « Livré » (lib/production/delivery/rules.ts):
+ * blocked = an expected file is not conforming. */
+export const deliveryDecisionTone: Record<
+  "done" | "to_do" | "blocked" | "waiting",
+  Tone
+> = {
+  done: "success",
+  to_do: "warning",
+  blocked: "danger",
+  waiting: "neutral",
+};
+
+/** A line of the exports' technical check; stale = checked before the
+ * current validated version or final file. */
+export const exportCheckTone: Record<
+  "to_check" | "ok" | "not_ok" | "stale",
+  Tone
+> = {
+  to_check: "warning",
+  ok: "success",
+  not_ok: "danger",
+  stale: "warning",
+};
+
+/** A transmission to Activations: matches the delivery, overtaken by it
+ * (stale), or replaced by a later one. */
+export const activationHandoffTone: Record<
+  "current" | "stale" | "earlier",
+  Tone
+> = {
+  current: "success",
+  stale: "warning",
+  earlier: "neutral",
+};
+
+/** The shoot of a deliverable (lib/production/shoot/rules.ts). */
+export const shootStateTone: Record<string, Tone> = {
+  planned: "neutral",
+  in_progress: "info",
+  done: "success",
+  partial: "warning",
+  postponed: "neutral",
+  interrupted: "danger",
+};
+
+/** A declaration of the shoot (rushes, audio sources, backup): a person's
+ * word, never a check of the files. */
+export const shootDeclarationTone = (declared: boolean): Tone =>
+  declared ? "success" : "warning";
+
+/** An incident of the shoot: open until a person writes its resolution. */
+export const shootIncidentTone: Record<string, Tone> = {
+  open: "warning",
+  resolved: "success",
+};
+
+/** A confirmed equipment line on its way back (production_equipment). */
+export const equipmentReturnTone: Record<string, Tone> = {
+  booked: "neutral",
+  picked_up: "info",
+  to_return: "warning",
+  returned: "success",
+  incident: "danger",
+};
+
+/** The equipment's return as a whole, computed from its confirmed lines. */
+export const returnStateTone: Record<string, Tone> = {
+  none: "neutral",
+  to_return: "warning",
+  partial: "warning",
+  all_returned: "success",
+  incident: "danger",
+};
+
+/** The shoot report: not yet possible, to validate by the owner, validated. */
+export const shootReportTone: Record<string, Tone> = {
+  not_ended: "neutral",
+  to_validate: "action",
+  validated: "success",
+};
+
+/** A step of the postproduction (lib/production/post/rules.ts). */
+export const postStepTone: Record<string, Tone> = {
+  todo: "neutral",
+  in_progress: "info",
+  done: "success",
+};
+
+/** A version of the postproduction: a draft, under review, back to the
+ * provider, waiting for the validator's decision, validated or refused. */
+export const productionVersionTone: Record<string, Tone> = {
+  draft: "neutral",
+  in_review: "info",
+  changes_requested: "warning",
+  final_review: "action",
+  approved: "success",
+  refused: "danger",
+};
+
+/** A feedback on a version: a correction declared fixed waits for someone to
+ * verify it, never validated on its own. */
+export const versionCommentTone: Record<string, Tone> = {
+  open: "warning",
+  acknowledged: "info",
+  declared_fixed: "info",
+  to_verify: "action",
+  resolved: "success",
+  rejected: "neutral",
+};
+
+// Préproduction of a deliverable (lib/production/preprod/).
+
+/** A team brief: not transmitted, transmitted as it stands, changed since. */
+export const teamBriefTone: Record<string, Tone> = {
+  draft: "neutral",
+  transmitted: "success",
+  outdated: "warning",
+};
+
+/** A point of the technical call: PO's proposal waits for a person. */
+export const callItemStatusTone: Record<string, Tone> = {
+  proposed: "warning",
+  confirmed: "success",
+  rejected: "neutral",
+};
+
+/** An action of the preproduction plan, and the plan as a whole
+ * (lib/production/preprod/plan.ts). */
+export const planStateTone: Record<string, Tone> = {
+  empty: "neutral",
+  draft: "neutral",
+  to_review: "warning",
+  approved: "success",
+  in_progress: "info",
+  done: "success",
+  blocked: "danger",
+  removed: "neutral",
+};
+
+/** The shoot's location: pressenti stays distinct from confirmed. */
+export const locationStatusTone: Record<string, Tone> = {
+  to_find: "neutral",
+  to_verify: "warning",
+  confirmed: "success",
+};
+
+/** An equipment line, from the need to its return. */
+export const equipmentStatusTone: Record<string, Tone> = {
+  need: "neutral",
+  quoted: "info",
+  to_verify: "warning",
+  retained: "info",
+  booked: "success",
+  picked_up: "info",
+  to_return: "warning",
+  returned: "success",
+  incident: "danger",
+};
+
+/** An estimate of the preproduction budget. */
+export const preprodBudgetTone: Record<string, Tone> = {
+  planned: "neutral",
+  to_estimate: "warning",
+  estimated: "info",
+  to_decide: "action",
+  validated: "success",
+  committed: "success",
+};
+
+/** A step of the backward schedule. */
+export const scheduleStepTone: Record<string, Tone> = {
+  done: "success",
+  late: "danger",
+  planned: "neutral",
+  untracked: "neutral",
+};
+
+/** A check before the shoot, confirmed by a person. */
+export const readinessTone: Record<string, Tone> = {
+  confirmed: "success",
+  open: "warning",
+  not_required: "neutral",
 };

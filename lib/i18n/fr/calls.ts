@@ -309,6 +309,19 @@ export const calls = {
       `Personne ne s'appelle « ${query} » dans l'équipe ni dans le Réseau.`,
     allPicked: "Tout le monde est déjà ajouté.",
     removeParticipant: (name: string) => `Retirer ${name}`,
+    // The summary checked before « Créer l'échange » (components/calls/call-recap.tsx).
+    recap: {
+      heading: "Récapitulatif",
+      body: "Rien n'est créé tant que vous n'avez pas confirmé.",
+      title: "Titre",
+      when: "Date",
+      format: "Format",
+      link: "Lien",
+      purpose: "Objectif",
+      participants: "Participants",
+      topics: "Sujets",
+      none: "Aucun",
+    },
   },
   errors: {
     invalid_input: "Vérifiez les champs du formulaire.",

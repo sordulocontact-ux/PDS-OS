@@ -1,0 +1,171 @@
+import { DeliveryStepButton } from "@/components/production/delivery-step-button";
+import { FinalFileButton } from "@/components/production/final-file-button";
+import { PageSection } from "@/components/shell/page-section";
+import { buttonVariants } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
+import { routes } from "@/lib/auth/redirects";
+import { fr } from "@/lib/i18n/fr";
+import type { DeliveryTabData } from "@/lib/production/delivery/queries";
+import type { Decision, DecisionReason } from "@/lib/production/delivery/rules";
+import { formatDate } from "@/lib/release/format";
+
+import { DecisionCard } from "./decision-card";
+
+const t = fr.productionDelivery.decisions;
+
+function reasonText(reason: DecisionReason): string {
+  switch (reason.key) {
+    case "to_check":
+    case "not_ok":
+    case "stale":
+      return t.reasons[reason.key](reason.count);
+    default:
+      return t.reasons[reason.key];
+  }
+}
+
+const texts = (decision: Decision) => decision.reasons.map(reasonText);
+
+/**
+ * Validation créative, contrôle technique, livraison (ticket § 20): three
+ * distinct decisions in their order, with who took each and when, or why
+ * it cannot be taken yet. The creative one is given on a version, in the
+ * Postproduction tab.
+ */
+export function DecisionsSection({
+  projectId,
+  deliverable,
+  data,
+  decisions,
+  canOrganize,
+}: {
+  projectId: string;
+  deliverable: { id: string; title: string };
+  data: DeliveryTabData;
+  decisions: { creative: Decision; technical: Decision; delivery: Decision };
+  canOrganize: boolean;
+}) {
+  const { delivery: d, version } = data;
+  const { creative, technical, delivery } = decisions;
+  const step = (key: "check" | "deliver" | "reopen") => (
+    <DeliveryStepButton
+      projectId={projectId}
+      deliverableId={deliverable.id}
+      title={deliverable.title}
+      step={key}
+      onVersion
+    />
+  );
+
+  return (
+    <PageSection id="decisions" title={t.title} description={t.description}>
+      <ol className="grid gap-3 lg:grid-cols-3">
+        <DecisionCard
+          number={1}
+          title={t.creative.title}
+          state={creative.state}
+          reasons={[]}
+          summary={
+            d?.approvedAt
+              ? version
+                ? t.creative.done(
+                    version.number,
+                    d.approvedBy ?? "—",
+                    formatDate(d.approvedAt),
+                  )
+                : t.creative.doneWithoutVersion(
+                    d.approvedBy ?? "—",
+                    formatDate(d.approvedAt),
+                  )
+              : t.creative.pending
+          }
+        >
+          <ViewLink
+            href={routes.projectProductionStep(
+              projectId,
+              deliverable.id,
+              "post",
+            )}
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+          >
+            {t.creative.open}
+          </ViewLink>
+          {d?.approvedAt && version?.href && (
+            <a
+              href={version.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ size: "sm", variant: "ghost" })}
+            >
+              {t.creative.openVersion}
+            </a>
+          )}
+        </DecisionCard>
+
+        <DecisionCard
+          number={2}
+          title={t.technical.title}
+          state={technical.state}
+          reasons={texts(technical)}
+          summary={
+            d?.checkedAt
+              ? t.technical.done(d.checkedBy ?? "—", formatDate(d.checkedAt))
+              : technical.reasons.length === 0
+                ? t.technical.ready
+                : null
+          }
+        >
+          {canOrganize &&
+            technical.state === "to_do" &&
+            technical.reasons.length === 0 &&
+            step("check")}
+        </DecisionCard>
+
+        <DecisionCard
+          number={3}
+          title={t.delivery.title}
+          state={delivery.state}
+          reasons={texts(delivery)}
+          summary={
+            d?.deliveredAt
+              ? t.delivery.done(d.deliveredBy ?? "—", formatDate(d.deliveredAt))
+              : delivery.state === "to_do"
+                ? t.delivery.ready
+                : null
+          }
+          note={
+            [
+              d?.deliveredAt ? t.delivery.notPublished : null,
+              canOrganize && d?.checkedAt ? t.delivery.reopenHint : null,
+            ]
+              .filter(Boolean)
+              .join(" ") || undefined
+          }
+        >
+          {d?.finalUrl && (
+            <a
+              href={d.finalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ size: "sm", variant: "outline" })}
+            >
+              {t.delivery.final}
+            </a>
+          )}
+          {canOrganize && delivery.state === "to_do" && step("deliver")}
+          {canOrganize && (
+            <FinalFileButton
+              projectId={projectId}
+              deliverableId={deliverable.id}
+              current={
+                d?.finalUrl ? { url: d.finalUrl, note: d.finalNote } : null
+              }
+              onVersion
+            />
+          )}
+          {canOrganize && d?.checkedAt && step("reopen")}
+        </DecisionCard>
+      </ol>
+    </PageSection>
+  );
+}

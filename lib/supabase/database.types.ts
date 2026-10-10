@@ -1145,10 +1145,11 @@ export type Database = {
           final_note: string | null
           final_set_at: string
           final_set_by: string | null
-          final_url: string
+          final_url: string | null
           id: string
           organization_id: string
           project_id: string
+          version_id: string | null
         }
         Insert: {
           approved_at?: string | null
@@ -1161,10 +1162,11 @@ export type Database = {
           final_note?: string | null
           final_set_at?: string
           final_set_by?: string | null
-          final_url: string
+          final_url?: string | null
           id?: string
           organization_id: string
           project_id: string
+          version_id?: string | null
         }
         Update: {
           approved_at?: string | null
@@ -1177,10 +1179,11 @@ export type Database = {
           final_note?: string | null
           final_set_at?: string
           final_set_by?: string | null
-          final_url?: string
+          final_url?: string | null
           id?: string
           organization_id?: string
           project_id?: string
+          version_id?: string | null
         }
         Relationships: [
           {
@@ -1223,6 +1226,1125 @@ export type Database = {
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "deliverable_deliveries_version_same_org"
+            columns: ["version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_calls: {
+        Row: {
+          call_id: string
+          created_at: string
+          deliverable_ids: string[]
+          document_ids: string[]
+          format: string
+          organization_id: string
+          participants: Json
+          project_id: string
+          purpose: string
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          deliverable_ids?: string[]
+          document_ids?: string[]
+          format: string
+          organization_id: string
+          participants?: Json
+          project_id: string
+          purpose: string
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          deliverable_ids?: string[]
+          document_ids?: string[]
+          format?: string
+          organization_id?: string
+          participants?: Json
+          project_id?: string
+          purpose?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_calls_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_calls_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_deliverables: {
+        Row: {
+          call_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          lever_id: string | null
+          note: string | null
+          organization_id: string
+          origin: string
+          project_id: string
+          status: string
+          strategy_deliverable_id: string | null
+          title: string | null
+        }
+        Insert: {
+          call_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lever_id?: string | null
+          note?: string | null
+          organization_id: string
+          origin: string
+          project_id: string
+          status?: string
+          strategy_deliverable_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          call_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lever_id?: string | null
+          note?: string | null
+          organization_id?: string
+          origin?: string
+          project_id?: string
+          status?: string
+          strategy_deliverable_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_deliverables_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_deliverables_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_deliverables_lever_same_org"
+            columns: ["lever_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "levers"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_deliverables_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_deliverables_strategy_same_org"
+            columns: ["strategy_deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_intentions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          design_deliverable_id: string | null
+          id: string
+          merged_into: string | null
+          organization_id: string
+          project_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string | null
+          source_quote: string | null
+          source_report_item_id: string | null
+          source_type: string
+          split_from: string | null
+          status: string
+          target: string
+          topic: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          design_deliverable_id?: string | null
+          id?: string
+          merged_into?: string | null
+          organization_id: string
+          project_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string | null
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_type?: string
+          split_from?: string | null
+          status?: string
+          target: string
+          topic: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          design_deliverable_id?: string | null
+          id?: string
+          merged_into?: string | null
+          organization_id?: string
+          project_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string | null
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_type?: string
+          split_from?: string | null
+          status?: string
+          target?: string
+          topic?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_intentions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_intentions_deliverable_same_org"
+            columns: ["design_deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_intentions_item_same_org"
+            columns: ["source_report_item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "report_items"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_intentions_merged_into_fkey"
+            columns: ["merged_into"]
+            isOneToOne: false
+            referencedRelation: "design_intentions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_intentions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_intentions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_intentions_source_same_org"
+            columns: ["source_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_sources"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_intentions_split_from_fkey"
+            columns: ["split_from"]
+            isOneToOne: false
+            referencedRelation: "design_intentions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_references: {
+        Row: {
+          bytes: number | null
+          created_at: string
+          created_by: string | null
+          file_name: string | null
+          id: string
+          kind: string
+          mime: string | null
+          note: string | null
+          organization_id: string
+          path: string | null
+          project_id: string
+          sha256: string | null
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          bytes?: number | null
+          created_at?: string
+          created_by?: string | null
+          file_name?: string | null
+          id?: string
+          kind?: string
+          mime?: string | null
+          note?: string | null
+          organization_id: string
+          path?: string | null
+          project_id: string
+          sha256?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          bytes?: number | null
+          created_at?: string
+          created_by?: string | null
+          file_name?: string | null
+          id?: string
+          kind?: string
+          mime?: string | null
+          note?: string | null
+          organization_id?: string
+          path?: string | null
+          project_id?: string
+          sha256?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_references_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_references_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_sources: {
+        Row: {
+          body: string | null
+          call_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string
+          title: string
+        }
+        Insert: {
+          body?: string | null
+          call_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          project_id: string
+          title: string
+        }
+        Update: {
+          body?: string | null
+          call_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_sources_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_sources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_sources_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_workspaces: {
+        Row: {
+          organization_id: string
+          project_id: string
+          started_at: string
+          started_by: string | null
+          validation_mode: string
+        }
+        Insert: {
+          organization_id: string
+          project_id: string
+          started_at?: string
+          started_by?: string | null
+          validation_mode?: string
+        }
+        Update: {
+          organization_id?: string
+          project_id?: string
+          started_at?: string
+          started_by?: string | null
+          validation_mode?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_workspaces_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_workspaces_started_by_fkey"
+            columns: ["started_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          ended_at: string | null
+          id: string
+          organization_id: string
+          person_id: string
+          project_id: string
+          scope: string
+          sheet_id: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          ended_at?: string | null
+          id?: string
+          organization_id: string
+          person_id: string
+          project_id: string
+          scope: string
+          sheet_id?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          ended_at?: string | null
+          id?: string
+          organization_id?: string
+          person_id?: string
+          project_id?: string
+          scope?: string
+          sheet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_assignments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_assignments_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_assignments_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_briefs: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          number: number
+          organization_id: string
+          project_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          number: number
+          organization_id: string
+          project_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          number?: number
+          organization_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_briefs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_briefs_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_decisions: {
+        Row: {
+          comment: string | null
+          decided_at: string
+          decided_by: string | null
+          decision: string
+          id: string
+          organization_id: string
+          project_id: string
+          section: string
+          submission_id: string
+        }
+        Insert: {
+          comment?: string | null
+          decided_at?: string
+          decided_by?: string | null
+          decision: string
+          id?: string
+          organization_id: string
+          project_id: string
+          section?: string
+          submission_id: string
+        }
+        Update: {
+          comment?: string | null
+          decided_at?: string
+          decided_by?: string | null
+          decision?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          section?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_decisions_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_decisions_submission_same_org"
+            columns: ["submission_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_submissions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_events: {
+        Row: {
+          actor: string | null
+          created_at: string
+          data: Json
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string
+          sheet_id: string | null
+          subject_id: string | null
+        }
+        Insert: {
+          actor?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          kind: string
+          organization_id: string
+          project_id: string
+          sheet_id?: string | null
+          subject_id?: string | null
+        }
+        Update: {
+          actor?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string | null
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_events_actor_fkey"
+            columns: ["actor"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_events_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_handoffs: {
+        Row: {
+          brief_id: string | null
+          confirmed_at: string
+          confirmed_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          submission_id: string
+        }
+        Insert: {
+          brief_id?: string | null
+          confirmed_at?: string
+          confirmed_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          submission_id: string
+        }
+        Update: {
+          brief_id?: string | null
+          confirmed_at?: string
+          confirmed_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_handoffs_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "design_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_handoffs_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_handoffs_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_handoffs_submission_same_org"
+            columns: ["submission_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_submissions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_intent_confirmations: {
+        Row: {
+          confirmed_at: string
+          confirmed_by: string | null
+          design_deliverable_id: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          snapshot: Json
+          target: string
+        }
+        Insert: {
+          confirmed_at?: string
+          confirmed_by?: string | null
+          design_deliverable_id?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          snapshot: Json
+          target: string
+        }
+        Update: {
+          confirmed_at?: string
+          confirmed_by?: string | null
+          design_deliverable_id?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          snapshot?: Json
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_intent_confirmations_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_intent_confirmations_deliverable_same_org"
+            columns: ["design_deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_intent_confirmations_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_reference_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          design_deliverable_id: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          reference_id: string
+          target: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          design_deliverable_id?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          reference_id: string
+          target: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          design_deliverable_id?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          reference_id?: string
+          target?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_reference_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_reference_links_deliverable_same_org"
+            columns: ["design_deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_reference_links_reference_same_org"
+            columns: ["reference_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_references"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_sheet_items: {
+        Row: {
+          created_at: string
+          delivery_date: string | null
+          id: string
+          notes: string | null
+          number: number
+          objective: string | null
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          number: number
+          objective?: string | null
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          number?: number
+          objective?: string | null
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_sheet_items_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      design_sheets: {
+        Row: {
+          budget_cents: number | null
+          budget_state: string
+          concept: string | null
+          constraints: string | null
+          created_at: string
+          created_by: string | null
+          delivery_date: string | null
+          dependencies: string | null
+          design_deliverable_id: string
+          duration_max_seconds: number | null
+          duration_min_seconds: number | null
+          id: string
+          intention: string | null
+          kind: string
+          notes: string | null
+          organization_id: string
+          post_deadline: string | null
+          post_start: string | null
+          production_notes: string | null
+          project_id: string
+          provenance: Json
+          ratios: string[]
+          shoot_date: string | null
+          subtitle_mode: string | null
+          subtitle_ratios: string[]
+          subtitles: boolean | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          variants: string | null
+        }
+        Insert: {
+          budget_cents?: number | null
+          budget_state?: string
+          concept?: string | null
+          constraints?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_date?: string | null
+          dependencies?: string | null
+          design_deliverable_id: string
+          duration_max_seconds?: number | null
+          duration_min_seconds?: number | null
+          id?: string
+          intention?: string | null
+          kind?: string
+          notes?: string | null
+          organization_id: string
+          post_deadline?: string | null
+          post_start?: string | null
+          production_notes?: string | null
+          project_id: string
+          provenance?: Json
+          ratios?: string[]
+          shoot_date?: string | null
+          subtitle_mode?: string | null
+          subtitle_ratios?: string[]
+          subtitles?: boolean | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          variants?: string | null
+        }
+        Update: {
+          budget_cents?: number | null
+          budget_state?: string
+          concept?: string | null
+          constraints?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivery_date?: string | null
+          dependencies?: string | null
+          design_deliverable_id?: string
+          duration_max_seconds?: number | null
+          duration_min_seconds?: number | null
+          id?: string
+          intention?: string | null
+          kind?: string
+          notes?: string | null
+          organization_id?: string
+          post_deadline?: string | null
+          post_start?: string | null
+          production_notes?: string | null
+          project_id?: string
+          provenance?: Json
+          ratios?: string[]
+          shoot_date?: string | null
+          subtitle_mode?: string | null
+          subtitle_ratios?: string[]
+          subtitles?: boolean | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          variants?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_sheets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_sheets_deliverable_same_org"
+            columns: ["design_deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_sheets_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_sheets_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_submissions: {
+        Row: {
+          closed_at: string | null
+          id: string
+          kind: string
+          mode: string
+          number: number
+          organization_id: string
+          project_id: string
+          sections: string[]
+          sheet_id: string | null
+          snapshot: Json
+          status: string
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          closed_at?: string | null
+          id?: string
+          kind: string
+          mode: string
+          number?: number
+          organization_id: string
+          project_id: string
+          sections: string[]
+          sheet_id?: string | null
+          snapshot: Json
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          closed_at?: string | null
+          id?: string
+          kind?: string
+          mode?: string
+          number?: number
+          organization_id?: string
+          project_id?: string
+          sections?: string[]
+          sheet_id?: string | null
+          snapshot?: Json
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_submissions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_submissions_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_submissions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_validators: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          person_id: string
+          project_id: string
+          scope: string
+          sheet_id: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          person_id: string
+          project_id: string
+          scope: string
+          sheet_id?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          person_id?: string
+          project_id?: string
+          scope?: string
+          sheet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_validators_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_validators_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_validators_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "design_validators_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "design_sheets"
             referencedColumns: ["id", "organization_id"]
           },
         ]
@@ -4770,6 +5892,1802 @@ export type Database = {
           },
         ]
       }
+      production_activation_handoffs: {
+        Row: {
+          confirmed_at: string
+          confirmed_by: string | null
+          constraints_note: string | null
+          deliverable_id: string
+          delivered_at: string
+          final_url: string | null
+          formats: string[]
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          version_id: string | null
+        }
+        Insert: {
+          confirmed_at?: string
+          confirmed_by?: string | null
+          constraints_note?: string | null
+          deliverable_id: string
+          delivered_at: string
+          final_url?: string | null
+          formats?: string[]
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          version_id?: string | null
+        }
+        Update: {
+          confirmed_at?: string
+          confirmed_by?: string | null
+          constraints_note?: string | null
+          deliverable_id?: string
+          delivered_at?: string
+          final_url?: string | null
+          formats?: string[]
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_activation_handoffs_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_activation_handoffs_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_activation_handoffs_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_activation_handoffs_version_same_org"
+            columns: ["version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_assignments: {
+        Row: {
+          availability: string
+          availability_set_at: string | null
+          availability_set_by: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          need_id: string
+          note: string | null
+          organization_id: string
+          person_id: string | null
+          project_id: string
+        }
+        Insert: {
+          availability?: string
+          availability_set_at?: string | null
+          availability_set_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          need_id: string
+          note?: string | null
+          organization_id: string
+          person_id?: string | null
+          project_id: string
+        }
+        Update: {
+          availability?: string
+          availability_set_at?: string | null
+          availability_set_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          need_id?: string
+          note?: string | null
+          organization_id?: string
+          person_id?: string | null
+          project_id?: string
+        }
+        Relationships: []
+      }
+      production_budget_lines: {
+        Row: {
+          amount_cents: number | null
+          category: string
+          created_at: string
+          created_by: string | null
+          equipment_id: string | null
+          id: string
+          label: string
+          note: string | null
+          organization_id: string
+          position: number
+          project_id: string
+          sheet_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          equipment_id?: string | null
+          id?: string
+          label: string
+          note?: string | null
+          organization_id: string
+          position?: number
+          project_id: string
+          sheet_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          equipment_id?: string | null
+          id?: string
+          label?: string
+          note?: string | null
+          organization_id?: string
+          position?: number
+          project_id?: string
+          sheet_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_budget_lines_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_budget_lines_equipment_same_org"
+            columns: ["equipment_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_equipment"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_budget_lines_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_budget_lines_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_call_items: {
+        Row: {
+          body: string
+          call_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          organization_id: string
+          position: number
+          project_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sheet_id: string
+          source: string
+          source_quote: string | null
+          source_report_item_id: string | null
+          status: string
+          topic: string
+        }
+        Insert: {
+          body: string
+          call_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          position?: number
+          project_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sheet_id: string
+          source?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          status?: string
+          topic: string
+        }
+        Update: {
+          body?: string
+          call_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          position?: number
+          project_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sheet_id?: string
+          source?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          status?: string
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_call_items_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_call_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_call_items_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_call_items_report_item_same_org"
+            columns: ["source_report_item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "report_items"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_call_items_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_call_items_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_call_sheets: {
+        Row: {
+          call_time: string | null
+          contacts_note: string | null
+          documents_note: string | null
+          emergencies: string | null
+          instructions: string | null
+          organization_id: string
+          project_id: string
+          schedule: string | null
+          sequences: string | null
+          sheet_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          call_time?: string | null
+          contacts_note?: string | null
+          documents_note?: string | null
+          emergencies?: string | null
+          instructions?: string | null
+          organization_id: string
+          project_id: string
+          schedule?: string | null
+          sequences?: string | null
+          sheet_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          call_time?: string | null
+          contacts_note?: string | null
+          documents_note?: string | null
+          emergencies?: string | null
+          instructions?: string | null
+          organization_id?: string
+          project_id?: string
+          schedule?: string | null
+          sequences?: string | null
+          sheet_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_call_sheets_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_call_sheets_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_call_sheets_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_calls: {
+        Row: {
+          call_id: string
+          created_at: string
+          format: string
+          organization_id: string
+          participants: Json
+          project_id: string
+          purpose: string
+          sheet_id: string
+        }
+        Insert: {
+          call_id: string
+          created_at?: string
+          format: string
+          organization_id: string
+          participants?: Json
+          project_id: string
+          purpose: string
+          sheet_id: string
+        }
+        Update: {
+          call_id?: string
+          created_at?: string
+          format?: string
+          organization_id?: string
+          participants?: Json
+          project_id?: string
+          purpose?: string
+          sheet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_calls_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_equipment: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          deposit_cents: number | null
+          id: string
+          incident_note: string | null
+          label: string
+          note: string | null
+          organization_id: string
+          period_end: string | null
+          period_start: string | null
+          position: number
+          price_cents: number | null
+          project_id: string
+          quantity: number | null
+          quote_file_id: string | null
+          return_contact_id: string | null
+          return_due: string | null
+          return_person_id: string | null
+          return_terms: string | null
+          returned_at: string | null
+          returned_by: string | null
+          sheet_id: string
+          status: string
+          supplier_contact_id: string | null
+          supplier_name: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          deposit_cents?: number | null
+          id?: string
+          incident_note?: string | null
+          label: string
+          note?: string | null
+          organization_id: string
+          period_end?: string | null
+          period_start?: string | null
+          position?: number
+          price_cents?: number | null
+          project_id: string
+          quantity?: number | null
+          quote_file_id?: string | null
+          return_contact_id?: string | null
+          return_due?: string | null
+          return_person_id?: string | null
+          return_terms?: string | null
+          returned_at?: string | null
+          returned_by?: string | null
+          sheet_id: string
+          status?: string
+          supplier_contact_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          deposit_cents?: number | null
+          id?: string
+          incident_note?: string | null
+          label?: string
+          note?: string | null
+          organization_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          position?: number
+          price_cents?: number | null
+          project_id?: string
+          quantity?: number | null
+          quote_file_id?: string | null
+          return_contact_id?: string | null
+          return_due?: string | null
+          return_person_id?: string | null
+          return_terms?: string | null
+          returned_at?: string | null
+          returned_by?: string | null
+          sheet_id?: string
+          status?: string
+          supplier_contact_id?: string | null
+          supplier_name?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_equipment_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_equipment_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_equipment_quote_same_org"
+            columns: ["quote_file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_equipment_return_contact_same_org"
+            columns: ["return_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_equipment_return_person_id_fkey"
+            columns: ["return_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_equipment_returned_by_fkey"
+            columns: ["returned_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_equipment_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_equipment_supplier_same_org"
+            columns: ["supplier_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_equipment_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_export_checks: {
+        Row: {
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          label: string
+          note: string | null
+          organization_id: string
+          position: number
+          project_id: string
+          result: string | null
+          sheet_id: string
+          url: string | null
+        }
+        Insert: {
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          label: string
+          note?: string | null
+          organization_id: string
+          position?: number
+          project_id: string
+          result?: string | null
+          sheet_id: string
+          url?: string | null
+        }
+        Update: {
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          label?: string
+          note?: string | null
+          organization_id?: string
+          position?: number
+          project_id?: string
+          result?: string | null
+          sheet_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_export_checks_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_export_checks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_export_checks_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_export_checks_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_files: {
+        Row: {
+          bytes: number
+          created_at: string
+          created_by: string | null
+          file_name: string
+          id: string
+          kind: string
+          mime: string
+          note: string | null
+          organization_id: string
+          path: string
+          project_id: string
+          sheet_id: string
+        }
+        Insert: {
+          bytes: number
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          id?: string
+          kind: string
+          mime: string
+          note?: string | null
+          organization_id: string
+          path: string
+          project_id: string
+          sheet_id: string
+        }
+        Update: {
+          bytes?: number
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          id?: string
+          kind?: string
+          mime?: string
+          note?: string | null
+          organization_id?: string
+          path?: string
+          project_id?: string
+          sheet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_files_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_files_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_files_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_incidents: {
+        Row: {
+          blocks_closing: boolean
+          blocks_post: boolean
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          follow_up: string | null
+          id: string
+          impact: string | null
+          organization_id: string
+          person_id: string | null
+          project_id: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          sheet_id: string
+          title: string
+        }
+        Insert: {
+          blocks_closing?: boolean
+          blocks_post?: boolean
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up?: string | null
+          id?: string
+          impact?: string | null
+          organization_id: string
+          person_id?: string | null
+          project_id: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          sheet_id: string
+          title: string
+        }
+        Update: {
+          blocks_closing?: boolean
+          blocks_post?: boolean
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          follow_up?: string | null
+          id?: string
+          impact?: string | null
+          organization_id?: string
+          person_id?: string | null
+          project_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          sheet_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_incidents_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_incidents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_incidents_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_incidents_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_incidents_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_incidents_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_needs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          family: string
+          headcount: number
+          id: string
+          label: string | null
+          note: string | null
+          organization_id: string
+          position: number
+          project_id: string
+          role_key: string
+          sheet_id: string
+          speciality: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          family: string
+          headcount?: number
+          id?: string
+          label?: string | null
+          note?: string | null
+          organization_id: string
+          position?: number
+          project_id: string
+          role_key: string
+          sheet_id: string
+          speciality?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          family?: string
+          headcount?: number
+          id?: string
+          label?: string | null
+          note?: string | null
+          organization_id?: string
+          position?: number
+          project_id?: string
+          role_key?: string
+          sheet_id?: string
+          speciality?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      production_plan_actions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          blocking: boolean
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          depends_on: string[]
+          due_date: string | null
+          id: string
+          item_id: string | null
+          note: string | null
+          organization_id: string
+          person_id: string | null
+          position: number
+          project_id: string
+          sheet_id: string
+          status: string
+          task_id: string | null
+          title: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          blocking?: boolean
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          depends_on?: string[]
+          due_date?: string | null
+          id?: string
+          item_id?: string | null
+          note?: string | null
+          organization_id: string
+          person_id?: string | null
+          position?: number
+          project_id: string
+          sheet_id: string
+          status?: string
+          task_id?: string | null
+          title: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          blocking?: boolean
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          depends_on?: string[]
+          due_date?: string | null
+          id?: string
+          item_id?: string | null
+          note?: string | null
+          organization_id?: string
+          person_id?: string | null
+          position?: number
+          project_id?: string
+          sheet_id?: string
+          status?: string
+          task_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_plan_actions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_plan_actions_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_plan_actions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_plan_actions_item_same_org"
+            columns: ["item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_call_items"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_plan_actions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_plan_actions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_plan_actions_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_plan_actions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_post_references: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_id: string | null
+          id: string
+          kind: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_id?: string | null
+          id?: string
+          kind: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_id?: string | null
+          id?: string
+          kind?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_post_references_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_post_references_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_post_references_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_post_references_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_post_steps: {
+        Row: {
+          access_note: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          ends_on: string | null
+          id: string
+          label: string | null
+          organization_id: string
+          person_id: string | null
+          position: number
+          project_id: string
+          responsibilities: string | null
+          sheet_id: string
+          starts_on: string | null
+          status: string
+          step_key: string
+          updated_at: string
+        }
+        Insert: {
+          access_note?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string | null
+          id?: string
+          label?: string | null
+          organization_id: string
+          person_id?: string | null
+          position?: number
+          project_id: string
+          responsibilities?: string | null
+          sheet_id: string
+          starts_on?: string | null
+          status?: string
+          step_key: string
+          updated_at?: string
+        }
+        Update: {
+          access_note?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string | null
+          id?: string
+          label?: string | null
+          organization_id?: string
+          person_id?: string | null
+          position?: number
+          project_id?: string
+          responsibilities?: string | null
+          sheet_id?: string
+          starts_on?: string | null
+          status?: string
+          step_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_post_steps_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_post_steps_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_post_steps_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_post_steps_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_post_steps_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_readiness_checks: {
+        Row: {
+          confirmed_at: string | null
+          confirmed_by: string | null
+          id: string
+          key: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          required: boolean
+          sheet_id: string
+          updated_at: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          id?: string
+          key: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          required: boolean
+          sheet_id: string
+          updated_at?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          id?: string
+          key?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          required?: boolean
+          sheet_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_readiness_checks_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_readiness_checks_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_readiness_checks_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_sheets: {
+        Row: {
+          brief_updated_at: string | null
+          brief_updated_by: string | null
+          budget_envelope_cents: number | null
+          camera_note: string | null
+          camera_setup: string | null
+          constraints_note: string | null
+          coverage: string | null
+          coverage_note: string | null
+          deliverable_id: string
+          delivery_date: string | null
+          director_contact_id: string | null
+          director_person_id: string | null
+          handoff_id: string | null
+          id: string
+          location_access: string | null
+          location_address: string | null
+          location_name: string | null
+          location_notes: string | null
+          location_status: string
+          mode: string
+          open_needs: string | null
+          opened_at: string
+          opened_by: string | null
+          organization_id: string
+          post_end: string | null
+          post_start: string | null
+          project_id: string
+          ready_at: string | null
+          ready_by: string | null
+          references_note: string | null
+          run_of_show: string | null
+          shoot_date: string | null
+          sound_capture: string | null
+          sound_note: string | null
+          source_version_id: string | null
+          staging_intent: string | null
+        }
+        Insert: {
+          brief_updated_at?: string | null
+          brief_updated_by?: string | null
+          budget_envelope_cents?: number | null
+          camera_note?: string | null
+          camera_setup?: string | null
+          constraints_note?: string | null
+          coverage?: string | null
+          coverage_note?: string | null
+          deliverable_id: string
+          delivery_date?: string | null
+          director_contact_id?: string | null
+          director_person_id?: string | null
+          handoff_id?: string | null
+          id?: string
+          location_access?: string | null
+          location_address?: string | null
+          location_name?: string | null
+          location_notes?: string | null
+          location_status?: string
+          mode: string
+          open_needs?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          organization_id: string
+          post_end?: string | null
+          post_start?: string | null
+          project_id: string
+          ready_at?: string | null
+          ready_by?: string | null
+          references_note?: string | null
+          run_of_show?: string | null
+          shoot_date?: string | null
+          sound_capture?: string | null
+          sound_note?: string | null
+          source_version_id?: string | null
+          staging_intent?: string | null
+        }
+        Update: {
+          brief_updated_at?: string | null
+          brief_updated_by?: string | null
+          budget_envelope_cents?: number | null
+          camera_note?: string | null
+          camera_setup?: string | null
+          constraints_note?: string | null
+          coverage?: string | null
+          coverage_note?: string | null
+          deliverable_id?: string
+          delivery_date?: string | null
+          director_contact_id?: string | null
+          director_person_id?: string | null
+          handoff_id?: string | null
+          id?: string
+          location_access?: string | null
+          location_address?: string | null
+          location_name?: string | null
+          location_notes?: string | null
+          location_status?: string
+          mode?: string
+          open_needs?: string | null
+          opened_at?: string
+          opened_by?: string | null
+          organization_id?: string
+          post_end?: string | null
+          post_start?: string | null
+          project_id?: string
+          ready_at?: string | null
+          ready_by?: string | null
+          references_note?: string | null
+          run_of_show?: string | null
+          shoot_date?: string | null
+          sound_capture?: string | null
+          sound_note?: string | null
+          source_version_id?: string | null
+          staging_intent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_sheets_brief_updated_by_fkey"
+            columns: ["brief_updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_contact_same_org"
+            columns: ["director_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_sheets_deliverable_same_org"
+            columns: ["deliverable_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_sheets_director_person_id_fkey"
+            columns: ["director_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_handoff_id_fkey"
+            columns: ["handoff_id"]
+            isOneToOne: false
+            referencedRelation: "design_handoffs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_opened_by_fkey"
+            columns: ["opened_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_sheets_ready_by_fkey"
+            columns: ["ready_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_version_fk"
+            columns: ["source_version_id"]
+            isOneToOne: false
+            referencedRelation: "design_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_shoots: {
+        Row: {
+          audio_sources: boolean
+          audio_sources_at: string | null
+          audio_sources_by: string | null
+          backup_verified: boolean
+          backup_verified_at: string | null
+          backup_verified_by: string | null
+          deviations: string | null
+          files_location: string | null
+          missing_sequences: string | null
+          observations: string | null
+          organization_id: string
+          project_id: string
+          report_note: string | null
+          report_validated_at: string | null
+          report_validated_by: string | null
+          sheet_id: string
+          state: string
+          updated_at: string
+          video_rushes: boolean
+          video_rushes_at: string | null
+          video_rushes_by: string | null
+        }
+        Insert: {
+          audio_sources?: boolean
+          audio_sources_at?: string | null
+          audio_sources_by?: string | null
+          backup_verified?: boolean
+          backup_verified_at?: string | null
+          backup_verified_by?: string | null
+          deviations?: string | null
+          files_location?: string | null
+          missing_sequences?: string | null
+          observations?: string | null
+          organization_id: string
+          project_id: string
+          report_note?: string | null
+          report_validated_at?: string | null
+          report_validated_by?: string | null
+          sheet_id: string
+          state?: string
+          updated_at?: string
+          video_rushes?: boolean
+          video_rushes_at?: string | null
+          video_rushes_by?: string | null
+        }
+        Update: {
+          audio_sources?: boolean
+          audio_sources_at?: string | null
+          audio_sources_by?: string | null
+          backup_verified?: boolean
+          backup_verified_at?: string | null
+          backup_verified_by?: string | null
+          deviations?: string | null
+          files_location?: string | null
+          missing_sequences?: string | null
+          observations?: string | null
+          organization_id?: string
+          project_id?: string
+          report_note?: string | null
+          report_validated_at?: string | null
+          report_validated_by?: string | null
+          sheet_id?: string
+          state?: string
+          updated_at?: string
+          video_rushes?: boolean
+          video_rushes_at?: string | null
+          video_rushes_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_shoots_audio_sources_by_fkey"
+            columns: ["audio_sources_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_shoots_backup_verified_by_fkey"
+            columns: ["backup_verified_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_shoots_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_shoots_report_validated_by_fkey"
+            columns: ["report_validated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_shoots_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_shoots_video_rushes_by_fkey"
+            columns: ["video_rushes_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_team_briefs: {
+        Row: {
+          fields: Json
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          snapshot: Json | null
+          source_version_id: string | null
+          team: string
+          transmitted_at: string | null
+          transmitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          fields?: Json
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          snapshot?: Json | null
+          source_version_id?: string | null
+          team: string
+          transmitted_at?: string | null
+          transmitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          fields?: Json
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          snapshot?: Json | null
+          source_version_id?: string | null
+          team?: string
+          transmitted_at?: string | null
+          transmitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_team_briefs_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_team_briefs_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_team_briefs_transmitted_by_fkey"
+            columns: ["transmitted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_version_comments: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          created_by: string | null
+          file_id: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          status: string
+          status_at: string | null
+          status_by: string | null
+          timecode_ms: number | null
+          version_id: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          file_id?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          status?: string
+          status_at?: string | null
+          status_by?: string | null
+          timecode_ms?: number | null
+          version_id: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          file_id?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          status?: string
+          status_at?: string | null
+          status_by?: string | null
+          timecode_ms?: number | null
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_version_comments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_version_comments_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_version_comments_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_version_comments_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_version_comments_status_by_fkey"
+            columns: ["status_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_version_comments_version_same_org"
+            columns: ["version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_versions: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          file_id: string | null
+          id: string
+          label: string | null
+          notes: string | null
+          number: number
+          organization_id: string
+          person_id: string | null
+          project_id: string
+          sheet_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          url: string | null
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          file_id?: string | null
+          id?: string
+          label?: string | null
+          notes?: string | null
+          number?: number
+          organization_id: string
+          person_id?: string | null
+          project_id: string
+          sheet_id: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          url?: string | null
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          file_id?: string | null
+          id?: string
+          label?: string | null
+          notes?: string | null
+          number?: number
+          organization_id?: string
+          person_id?: string | null
+          project_id?: string
+          sheet_id?: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_versions_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_versions_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_versions_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_versions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_versions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_versions_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_versions_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_assignments: {
         Row: {
           assigned_by: string | null
@@ -5718,6 +8636,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          document_id: string | null
           expires_at: string | null
           id: string
           organization_id: string
@@ -5729,6 +8648,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          document_id?: string | null
           expires_at?: string | null
           id?: string
           organization_id: string
@@ -5740,6 +8660,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          document_id?: string | null
           expires_at?: string | null
           id?: string
           organization_id?: string
@@ -5928,6 +8849,233 @@ export type Database = {
           },
         ]
       }
+      strategy_document_drafts: {
+        Row: {
+          config: Json
+          kind: string
+          organization_id: string
+          project_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          kind: string
+          organization_id: string
+          project_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_document_drafts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_drafts_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      strategy_document_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          decided_at: string | null
+          document_id: string
+          id: string
+          organization_id: string
+          person_id: string
+          reminded_at: string | null
+          state: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          decided_at?: string | null
+          document_id: string
+          id?: string
+          organization_id: string
+          person_id: string
+          reminded_at?: string | null
+          state?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          decided_at?: string | null
+          document_id?: string
+          id?: string
+          organization_id?: string
+          person_id?: string
+          reminded_at?: string | null
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_document_reviews_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_reviews_document_same_org"
+            columns: ["document_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_documents"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      strategy_documents: {
+        Row: {
+          change_comment: string | null
+          content: Json
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string
+          request_note: string | null
+          sent_at: string | null
+          state: string
+          validation_id: string | null
+          version: number
+        }
+        Insert: {
+          change_comment?: string | null
+          content: Json
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          project_id: string
+          request_note?: string | null
+          sent_at?: string | null
+          state?: string
+          validation_id?: string | null
+          version: number
+        }
+        Update: {
+          change_comment?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          request_note?: string | null
+          sent_at?: string | null
+          state?: string
+          validation_id?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_documents_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_documents_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "strategy_documents_validation_id_fkey"
+            columns: ["validation_id"]
+            isOneToOne: false
+            referencedRelation: "validations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategy_kpi_measures: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          measured_on: string
+          objective_id: string
+          organization_id: string
+          project_id: string
+          source_note: string | null
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          measured_on: string
+          objective_id: string
+          organization_id: string
+          project_id: string
+          source_note?: string | null
+          value: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          measured_on?: string
+          objective_id?: string
+          organization_id?: string
+          project_id?: string
+          source_note?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_kpi_measures_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_objectives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_kpi_measures_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       strategy_objectives: {
         Row: {
           created_at: string
@@ -5988,22 +9136,83 @@ export type Database = {
           },
         ]
       }
+      strategy_recommendations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          rule_key: string
+          state: string
+          task_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          rule_key: string
+          state: string
+          task_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          rule_key?: string
+          state?: string
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_recommendations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategy_recommendations_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "strategy_recommendations_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strategy_workspaces: {
         Row: {
           organization_id: string
           project_id: string
+          revision_opened_at: string | null
+          revision_opened_by: string | null
           started_at: string
           started_by: string | null
         }
         Insert: {
           organization_id: string
           project_id: string
+          revision_opened_at?: string | null
+          revision_opened_by?: string | null
           started_at?: string
           started_by?: string | null
         }
         Update: {
           organization_id?: string
           project_id?: string
+          revision_opened_at?: string | null
+          revision_opened_by?: string | null
           started_at?: string
           started_by?: string | null
         }
@@ -6500,6 +9709,28 @@ export type Database = {
         }
         Returns: string
       }
+      create_design_call: {
+        Args: {
+          p_agenda: Json
+          p_deliverable_ids: string[]
+          p_format: string
+          p_meeting_url: string
+          p_occurred_at: string
+          p_participants: Json
+          p_project_id: string
+          p_purpose: string
+          p_title: string
+        }
+        Returns: string
+      }
+      create_production_task: {
+        Args: {
+          p_action_id: string
+          p_assignee_person_id: string
+          p_due_date: string
+        }
+        Returns: string
+      }
       create_strategy_call: {
         Args: {
           p_agenda: Json
@@ -6565,6 +9796,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_strategy_document: {
+        Args: { p_content: Json; p_kind: string; p_project_id: string }
+        Returns: string
+      }
       credit_brief_engineer: {
         Args: {
           p_brief: Database["public"]["Tables"]["master_briefs"]["Row"]
@@ -6591,6 +9826,18 @@ export type Database = {
         Args: { p_decision: string; p_note: string; p_version_id: string }
         Returns: undefined
       }
+      decide_production_version: {
+        Args: {
+          p_version_id: string
+          p_decision: string
+          p_note: string | null
+        }
+        Returns: undefined
+      }
+      decide_strategy_document: {
+        Args: { p_approve: boolean; p_comment?: string; p_document_id: string }
+        Returns: undefined
+      }
       decide_validation: {
         Args: {
           p_approve: boolean
@@ -6615,6 +9862,21 @@ export type Database = {
         }[]
       }
       design_is_editable: { Args: { p_project_id: string }; Returns: boolean }
+      design_can_write: { Args: { p_project_id: string }; Returns: boolean }
+      design_is_open: { Args: { p_project_id: string }; Returns: boolean }
+      merge_design_intentions: { Args: { p_deliverable_id: string | null; p_ids: string[]; p_target: string; p_topic: string; p_value: string }; Returns: string }
+      split_design_intention: { Args: { p_id: string; p_parts: Json }; Returns: undefined }
+      confirm_design_intentions: { Args: { p_deliverable_id: string | null; p_project_id: string }; Returns: string }
+      assign_design_responsible: { Args: { p_person_id: string; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: string }
+      set_design_validators: { Args: { p_people: string[]; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: undefined }
+      set_design_validation_mode: { Args: { p_mode: string; p_project_id: string }; Returns: undefined }
+      design_is_responsible: { Args: { p_project_id: string }; Returns: boolean }
+      design_sheet_can_edit: { Args: { p_sheet_id: string }; Returns: boolean }
+      submit_design_direction: { Args: { p_project_id: string; p_sections: string[] }; Returns: string }
+      submit_design_sheet: { Args: { p_sheet_id: string }; Returns: string }
+      decide_design_submission: { Args: { p_comment: string | null; p_decision: string; p_section: string; p_submission_id: string }; Returns: undefined }
+      create_design_brief: { Args: { p_content: Json; p_project_id: string }; Returns: number }
+      handoff_design_sheet: { Args: { p_sheet_id: string }; Returns: string }
       design_is_in_progress: {
         Args: { p_project_id: string }
         Returns: boolean
@@ -6717,6 +9979,7 @@ export type Database = {
       }
       get_master_transmission: { Args: { p_token: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }
+      get_shared_strategy_document: { Args: { p_token: string }; Returns: Json }
       get_smartlink: { Args: { p_token: string }; Returns: Json }
       get_split_confirmation: { Args: { p_token: string }; Returns: Json }
       has_permission: {
@@ -6890,6 +10153,12 @@ export type Database = {
       master_is_live: { Args: { p_master_id: string }; Returns: boolean }
       new_split_confirmation: { Args: { p_entry_id: string }; Returns: string }
       normalize_email: { Args: { input: string }; Returns: string }
+      mark_production_ready: {
+        Args: {
+          p_sheet_id: string
+        }
+        Returns: undefined
+      }
       notify: {
         Args: {
           p_kind: string
@@ -6903,6 +10172,10 @@ export type Database = {
       open_formality: {
         Args: { p_key: string; p_master_id: string; p_project_id: string }
         Returns: string
+      }
+      open_strategy_revision: {
+        Args: { p_project_id: string }
+        Returns: undefined
       }
       open_master_delivery: {
         Args: { p_extension: string | null; p_master_id: string; p_token: string }
@@ -6919,6 +10192,104 @@ export type Database = {
       plan_check_editable: { Args: { p_project_id: string }; Returns: string }
       plan_items_valid: { Args: { p_items: Json }; Returns: boolean }
       project_artist_name: { Args: { p_project_id: string }; Returns: string }
+      create_production_call: {
+        Args: {
+          p_sheet_id: string
+          p_title: string
+          p_occurred_at: string
+          p_meeting_url: string
+          p_agenda: Json
+          p_purpose: string
+          p_participants: Json
+          p_format: string
+        }
+        Returns: string
+      }
+      open_production_sheet: {
+        Args: {
+          p_deliverable_id: string
+          p_mode: string
+        }
+        Returns: string
+      }
+      production_brief_can_write: {
+        Args: {
+          p_sheet_id: string
+        }
+        Returns: boolean
+      }
+      production_can_organize: {
+        Args: {
+          p_project_id: string
+        }
+        Returns: boolean
+      }
+      production_can_review: {
+        Args: {
+          p_project_id: string
+        }
+        Returns: boolean
+      }
+      production_check_default_required: {
+        Args: {
+          p_key: string
+        }
+        Returns: boolean
+      }
+      production_source_handoff: {
+        Args: {
+          p_deliverable_id: string
+        }
+        Returns: string
+      }
+      production_source_version: {
+        Args: {
+          p_deliverable_id: string
+        }
+        Returns: string
+      }
+      request_production_version_changes: {
+        Args: {
+          p_version_id: string
+          p_note: string | null
+        }
+        Returns: undefined
+      }
+      save_production_brief: {
+        Args: {
+          p_sheet_id: string
+          p_coverage: string | null
+          p_camera_setup: string | null
+          p_sound_capture: string | null
+          p_staging_intent: string | null
+          p_coverage_note: string | null
+          p_camera_note: string | null
+          p_sound_note: string | null
+          p_run_of_show: string | null
+          p_constraints_note: string | null
+          p_references_note: string | null
+          p_open_needs: string | null
+        }
+        Returns: undefined
+      }
+      set_production_check: {
+        Args: {
+          p_sheet_id: string
+          p_key: string
+          p_confirmed: boolean | null
+          p_required: boolean | null
+          p_note: string | null
+        }
+        Returns: undefined
+      }
+      set_production_director: {
+        Args: {
+          p_sheet_id: string
+          p_person_id: string | null
+          p_contact_id: string | null
+        }
+        Returns: undefined
+      }
       project_assignment_messages: {
         Args: { p_project_id: string }
         Returns: {
@@ -6997,6 +10368,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      remind_strategy_review: {
+        Args: { p_review_id: string }
+        Returns: undefined
+      }
       remove_clearance_rightsholder: {
         Args: { p_rightsholder_id: string }
         Returns: undefined
@@ -7061,6 +10436,10 @@ export type Database = {
         Returns: string
       }
       send_mix_feedback: { Args: { p_version_id: string }; Returns: undefined }
+      send_strategy_document: {
+        Args: { p_document_id: string; p_note?: string; p_reviewers?: string[] }
+        Returns: undefined
+      }
       set_master_contributor_roles: {
         Args: {
           p_contact_id: string | null
@@ -7084,6 +10463,10 @@ export type Database = {
         Args: { p_form_id: string; p_state: string }
         Returns: undefined
       }
+      share_strategy_document: {
+        Args: { p_document_id: string }
+        Returns: string
+      }
       split_content_hash: { Args: { p_version_id: string }; Returns: string }
       split_version_content: { Args: { p_version_id: string }; Returns: Json }
       start_strategy_stage: {
@@ -7102,6 +10485,29 @@ export type Database = {
           p_roles: string[]
           p_token: string
           p_version: number
+        }
+        Returns: string
+      }
+      submit_production_version: {
+        Args: {
+          p_version_id: string
+          p_target: string
+        }
+        Returns: undefined
+      }
+      transmit_production_team_brief: {
+        Args: {
+          p_sheet_id: string
+          p_team: string
+          p_snapshot: Json
+        }
+        Returns: undefined
+      }
+      transmit_to_activations: {
+        Args: {
+          p_sheet_id: string
+          p_formats: string[] | null
+          p_constraints: string | null
         }
         Returns: string
       }
@@ -7165,6 +10571,25 @@ export type Database = {
           p_response?: string
         }
         Returns: undefined
+      }
+      review_design_intention: {
+        Args: {
+          p_accept: boolean
+          p_deliverable_id?: string
+          p_intention_id: string
+          p_target?: string
+          p_value?: string
+        }
+        Returns: undefined
+      }
+      save_design_intention: {
+        Args: {
+          p_deliverable_id: string | null
+          p_project_id: string
+          p_topic: string
+          p_value: string
+        }
+        Returns: string
       }
       review_design_version: {
         Args: { p_approve: boolean; p_comment?: string; p_version_id: string }
@@ -7239,6 +10664,7 @@ export type Database = {
         Returns: undefined
       }
       start_stage: { Args: { p_stage_id: string }; Returns: undefined }
+      start_design: { Args: { p_project_id: string }; Returns: undefined }
       start_strategy: { Args: { p_project_id: string }; Returns: undefined }
       strategy_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       transmit_project: {
@@ -7286,6 +10712,12 @@ export type Database = {
           org_id: string
         }
         Returns: number
+      }
+      validate_production_shoot_report: {
+        Args: {
+          p_sheet_id: string
+        }
+        Returns: undefined
       }
       workflow_is_launched: {
         Args: { p_project_id: string; p_workflow: string }

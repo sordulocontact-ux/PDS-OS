@@ -149,7 +149,7 @@ projet : Vue d'ensemble, Travail, Budget, Calls, Fichiers, Historique.
 
 ### Points à trancher : les autres rôles (test UX du 09/10/2026, section 5)
 
-Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 decies), à confirmer :
+Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 undecies), à confirmer :
 
 - **Budget et directeur créatif.** Lignes de budget, leurs notes et tarifs du Brief Mix/Master
   sont réservés au responsable et à la direction. Restent lisibles par l'équipe créative :

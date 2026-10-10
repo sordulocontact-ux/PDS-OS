@@ -44,6 +44,8 @@ export const production = {
     deliver: "Les fichiers attendus sont remis : le livrable est livré.",
     reopen:
       "Les décisions prises sur ce fichier sont annulées : le livrable repasse à « Version à valider ».",
+    reopenOnVersion:
+      "Le contrôle technique et la livraison sont annulés ; la version validée reste validée.",
   },
   decided: {
     approve: (who: string, date: string) =>
@@ -58,6 +60,8 @@ export const production = {
   finalTitle: "Fichier final",
   finalDescription:
     "Le lien vers les exports (Drive, Frame.io, WeTransfer…). Un nouveau fichier annule les validations du précédent.",
+  finalDescriptionOnVersion:
+    "Le lien vers les exports (Drive, Frame.io, WeTransfer…). Un nouveau fichier rouvre le contrôle technique et la livraison ; la version validée reste validée.",
   finalUrl: "Lien du fichier",
   finalUrlHint: "Commence par https://",
   finalNote: "Note",

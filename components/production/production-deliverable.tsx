@@ -1,6 +1,9 @@
 import { DeliveryStepButton } from "@/components/production/delivery-step-button";
 import { FinalFileButton } from "@/components/production/final-file-button";
+import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ViewLink } from "@/components/ui/view-link";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { ProductionDeliverable } from "@/lib/production/queries";
 import { nextStep } from "@/lib/production/rules";
@@ -28,7 +31,14 @@ export function ProductionDeliverableItem({
   canApprove: boolean;
 }) {
   const step = nextStep(d.state);
-  const may = step === "approve" ? canApprove : step !== null ? canEdit : false;
+  // With a preparation, the creative validation is given on a version of
+  // the sheet (decide_production_version), not here.
+  const may =
+    step === "approve"
+      ? canApprove && !d.prepared
+      : step !== null
+        ? canEdit
+        : false;
   const decided = d.delivery
     ? (
         [
@@ -63,42 +73,59 @@ export function ProductionDeliverableItem({
         </StatusBadge>
       </header>
 
-      <p className="text-sm text-muted-foreground">
-        {d.approvedDesign ? (
-          <>
-            {t.source(d.approvedDesign.number)}
-            {d.approvedDesign.href && (
-              <>
-                {" · "}
-                <a
-                  href={d.approvedDesign.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-4"
-                >
-                  {t.openSource}
-                </a>
-              </>
-            )}
-          </>
-        ) : (
-          t.noSource
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          {d.approvedDesign ? (
+            <>
+              {t.source(d.approvedDesign.number)}
+              {d.approvedDesign.href && (
+                <>
+                  {" · "}
+                  <a
+                    href={d.approvedDesign.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-4"
+                  >
+                    {t.openSource}
+                  </a>
+                </>
+              )}
+            </>
+          ) : (
+            t.noSource
+          )}
+        </p>
+        {d.approvedDesign && (
+          <ViewLink
+            href={routes.projectProductionSheet(projectId, d.id)}
+            className={buttonVariants({
+              size: "sm",
+              variant: d.prepared ? "outline" : "default",
+            })}
+          >
+            {d.prepared
+              ? fr.productionPrep.openPrep
+              : fr.productionPrep.prepare}
+          </ViewLink>
         )}
-      </p>
+      </div>
 
       {d.delivery && (
         <div className="grid gap-1 text-sm">
-          <p>
-            <span className="text-muted-foreground">{t.final} · </span>
-            <a
-              href={d.delivery.finalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="break-all underline underline-offset-4"
-            >
-              {t.open}
-            </a>
-          </p>
+          {d.delivery.finalUrl && (
+            <p>
+              <span className="text-muted-foreground">{t.final} · </span>
+              <a
+                href={d.delivery.finalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="break-all underline underline-offset-4"
+              >
+                {t.open}
+              </a>
+            </p>
+          )}
           {d.delivery.finalNote && (
             <p className="break-words text-muted-foreground">
               « {d.delivery.finalNote} »
@@ -127,10 +154,11 @@ export function ProductionDeliverableItem({
               projectId={projectId}
               deliverableId={d.id}
               current={
-                d.delivery
+                d.delivery?.finalUrl
                   ? { url: d.delivery.finalUrl, note: d.delivery.finalNote }
                   : null
               }
+              onVersion={d.prepared}
             />
           )}
           {canEdit && d.delivery?.approvedAt && (
@@ -139,6 +167,7 @@ export function ProductionDeliverableItem({
               deliverableId={d.id}
               title={d.title}
               step="reopen"
+              onVersion={d.prepared}
             />
           )}
         </div>

@@ -18,12 +18,17 @@ const HTTP_STATUS: Partial<Record<CallErrorCode, number>> = {
 };
 
 // A step may add facts to its success (the extraction says if the Brief or
-// the Stratégie was filled).
+// the Stratégie or the Conception was filled).
 type Step = (
   supabase: Awaited<ReturnType<typeof createClient>>,
   callId: string,
 ) => Promise<
-  ActionResult & { briefFilled?: boolean; strategyFilled?: boolean }
+  ActionResult & {
+    briefFilled?: boolean;
+    strategyFilled?: boolean;
+    designFilled?: boolean;
+    productionDeliverableId?: string;
+  }
 >;
 
 /** Runs a pipeline step for an approved session and answers in JSON. */

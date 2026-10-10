@@ -1,5 +1,5 @@
 -- The Plan d'action remembers what a person decided against
--- (supabase/migrations/20261010000401_legal_plan_dismissals.sql).
+-- (supabase/migrations/20261010000402_legal_plan_dismissals.sql).
 -- Run with `supabase test db`.
 begin;
 select plan(7);

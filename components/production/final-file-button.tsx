@@ -17,10 +17,14 @@ export function FinalFileButton({
   projectId,
   deliverableId,
   current,
+  onVersion = false,
 }: {
   projectId: string;
   deliverableId: string;
   current: { url: string; note: string | null } | null;
+  // The creative decision rests on a validated version (a production
+  // sheet): a new file only reopens the check and the delivery.
+  onVersion?: boolean;
 }) {
   const t = fr.production;
   const [open, setOpen] = useState(false);
@@ -69,7 +73,9 @@ export function FinalFileButton({
           setOpen(next);
         }}
         title={t.finalTitle}
-        description={t.finalDescription}
+        description={
+          onVersion ? t.finalDescriptionOnVersion : t.finalDescription
+        }
         closeLabel={t.close}
       >
         <form noValidate className="flex flex-col gap-5" onSubmit={submit}>

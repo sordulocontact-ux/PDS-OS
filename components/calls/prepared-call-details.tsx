@@ -2,8 +2,9 @@ import { fr } from "@/lib/i18n/fr";
 import type { CallDetail } from "@/lib/calls/queries";
 
 /**
- * What a call prepared with « Préparer un échange » is for (Cadrage or
- * Stratégie): purpose, format, participants, documents.
+ * What a call prepared with « Préparer un échange » is for (Cadrage,
+ * Stratégie, Conception or Production): purpose, format, participants, documents, the
+ * deliverables of a creative exchange.
  */
 export function PreparedCallDetails({
   prepared,
@@ -12,15 +13,27 @@ export function PreparedCallDetails({
 }) {
   const framing = fr.framingIntel.call;
   const strategy = fr.strategyEntry.call;
+  const design = fr.conceptionCall;
   const isStrategy = prepared.kind === "strategy";
+  const isDesign = prepared.kind === "design";
+  const isProduction = prepared.kind === "production";
   const rows = [
     {
-      label: isStrategy ? strategy.detailsPurpose : framing.detailsPurpose,
+      label:
+        isStrategy || isDesign || isProduction
+          ? strategy.detailsPurpose
+          : framing.detailsPurpose,
       value: prepared.purpose,
     },
     prepared.format && {
       label: strategy.detailsFormat,
       value: strategy.formats[prepared.format],
+    },
+    prepared.deliverables.length > 0 && {
+      label: isProduction
+        ? fr.productionCall.detailsDeliverable
+        : design.detailsDeliverables,
+      value: prepared.deliverables.join(", "),
     },
     prepared.participants.length > 0 && {
       label: fr.calls.prepare.participants,
@@ -35,7 +48,13 @@ export function PreparedCallDetails({
   return (
     <div className="grid gap-2 rounded-lg border border-border p-4 text-sm">
       <h3 className="font-medium">
-        {isStrategy ? strategy.detailsTitle : framing.detailsTitle}
+        {isProduction
+          ? fr.productionCall.detailsTitle
+          : isDesign
+            ? design.detailsTitle
+            : isStrategy
+              ? strategy.detailsTitle
+              : framing.detailsTitle}
       </h3>
       {rows.map((row) => (
         <p key={row.label}>

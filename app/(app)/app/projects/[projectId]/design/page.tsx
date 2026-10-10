@@ -1,26 +1,19 @@
 import { notFound } from "next/navigation";
 
+import { ConceptionEntry } from "@/components/design/conception-entry";
+import { ConceptionTabs } from "@/components/design/conception-tabs";
 import {
   DesignNeedsStrategy,
   EarlyDepositLink,
 } from "@/components/design/design-needs-strategy";
-import { DesignProgress } from "@/components/design/design-progress";
-import {
-  DeliverableHeading,
-  DesignTrack,
-} from "@/components/design/design-track";
-import { BriefFieldCard } from "@/components/framing/brief-field-card";
 import { ValidationPanel } from "@/components/framing/validation-panel";
-import { EditAccessProvider } from "@/components/projects/edit-access";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { sectionCardClass } from "@/components/ui/section-card";
 import { requireApproved } from "@/lib/auth/dal";
-import { loadDesign } from "@/lib/design/queries";
+import { designSheetData } from "@/lib/design/call-sheet-data";
+import { loadConception } from "@/lib/design/conception";
+import { loadSheetSummaries } from "@/lib/design/sheet-summaries";
+import { conceptionState } from "@/lib/design/states";
+import { loadMembers, loadPendingValidation } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -28,14 +21,15 @@ import { requireLaunchedProject } from "@/lib/projects/queries";
 import { isStageValidated } from "@/lib/projects/types";
 import { allInOrder } from "@/lib/utils/parallel";
 
-const t = fr.design;
-
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = {
+  title: `${fr.conception.title} · ${fr.app.name}`,
+};
 
 /**
- * Conception stage: the Dossier de conception on one page — the creative
- * direction, then each deliverable committed by the Strategy, version after
- * version until one is approved.
+ * Conception, home (ticket « Conception » § 1): the context, the
+ * deliverables the validated Stratégie committed to and the needs added
+ * since, then the two ways in — a creative exchange PO prepares, or the
+ * direct work (/design/work).
  */
 export default async function DesignPage({
   params,
@@ -46,10 +40,12 @@ export default async function DesignPage({
     requireLaunchedProject(projectId),
     listProjectCreatives(projectId),
   ]);
+  // The creative team (not the owner) may deposit its leads in Fichiers
+  // before the Conception opens.
   const creative =
     !canEditProject(access, project) &&
     creatives.some((c) => c.personId === access.personId);
-  // The Conception designs what the validated Strategy committed to.
+  // The Conception starts from the decisions validated in the Stratégie.
   if (!isStageValidated(project.stages, "launch_strategy")) {
     return (
       <DesignNeedsStrategy
@@ -59,116 +55,62 @@ export default async function DesignPage({
       />
     );
   }
-  const data = await loadDesign(projectId, access);
+  const data = await loadConception(project, access);
   if (!data) notFound();
 
-  const state = data.stage?.state ?? "not_started";
-  const inProgress = state === "in_progress";
-  // The owner writes the Dossier's text only while in progress; the database
-  // enforces it (design_is_editable). Deposits follow their own rule.
-  const canWrite = canEditProject(access, project) && inProgress;
-  const status =
-    state === "not_started" ? t.notStarted : inProgress ? null : t.locked;
-  const track = {
-    organizationId: data.organizationId,
-    projectId,
-    canReview: data.canReview,
-    mePersonId: data.mePersonId,
-    inProgress,
-  };
+  const stage = data.started ? data.stage : null;
+  const [callSheet, pendingValidation, sheets] = await Promise.all([
+    data.canAdd ? designSheetData(project, data) : null,
+    stage
+      ? loadMembers(access).then((members) =>
+          loadPendingValidation(stage.id, members),
+        )
+      : null,
+    data.started ? loadSheetSummaries(projectId) : [],
+  ]);
+  // Where the Conception stands, computed by code (lib/design/states.ts).
+  const state = conceptionState({
+    started: data.started,
+    toArbitrate:
+      data.intentions.filter((i) => i.status === "proposed").length +
+      data.references.filter((r) => r.links.length === 0).length +
+      sheets.filter((s) => s.status === "rejected").length,
+    sheets: sheets.map((s) => s.status),
+  });
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t.title}</CardTitle>
-          <CardDescription>{t.description}</CardDescription>
-          {status && <p className="text-sm text-muted-foreground">{status}</p>}
-          {creative && state === "not_started" && (
-            <div className="grid justify-items-start gap-2 pt-1">
-              <p className="text-sm text-muted-foreground">{t.earlyDeposit}</p>
-              <EarlyDepositLink projectId={projectId} size="sm" />
-            </div>
-          )}
-        </CardHeader>
-        <CardContent className="grid divide-y divide-border">
-          <section className="grid gap-1 pb-4">
-            <h3 className="text-sm font-medium">{t.direction.title}</h3>
-            <p className="text-xs text-muted-foreground">{t.direction.hint}</p>
-            <EditAccessProvider canEdit={canWrite}>
-              {data.fields.map((field) => (
-                <BriefFieldCard
-                  key={`${field.key}-${field.value ?? ""}`}
-                  field={field}
-                  label={t.fields[field.key]}
-                  projectId={projectId}
-                />
-              ))}
-            </EditAccessProvider>
-            <div className="grid gap-3 pt-2">
-              <h4 className="text-sm font-medium">{t.direction.boards}</h4>
-              <DesignTrack
-                {...track}
-                track={data.direction}
-                depositTarget={t.deposit.directionTarget}
-                emptyLabel={t.direction.boardsEmpty}
-              />
-            </div>
-          </section>
-
-          <section className="grid gap-3 pt-4">
-            <div className="grid gap-1">
-              <h3 className="text-sm font-medium">{t.deliverables.title}</h3>
-              <p className="text-xs text-muted-foreground">
-                {t.deliverables.hint}
-              </p>
-            </div>
-            {data.deliverables.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t.deliverables.empty}
-              </p>
-            ) : (
-              <ul className="grid gap-3">
-                {data.deliverables.map((d) => (
-                  <li
-                    key={d.deliverableId}
-                    id={`deliverable-${d.deliverableId}`}
-                    className="scroll-mt-24"
-                  >
-                    <DesignTrack
-                      {...track}
-                      track={d}
-                      heading={<DeliverableHeading track={d} />}
-                      depositTarget={d.title}
-                      emptyLabel={t.version.none}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </CardContent>
-      </Card>
-
-      <aside className="grid content-start gap-6">
-        <Card>
-          <CardContent>
-            <ValidationPanel
-              stage={data.stage}
-              pendingValidation={data.pendingValidation}
-              projectId={projectId}
-              mePersonId={access.personId}
-              title={t.validation.title}
-              startLabel={t.validation.start}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <DesignProgress counts={data.counts} projectId={projectId} />
-          </CardContent>
-        </Card>
-      </aside>
+    <div className="flex flex-col gap-6">
+      {/* The other pages exist once the work is open. */}
+      {data.started && <ConceptionTabs projectId={projectId} />}
+      {creative && !data.started && (
+        <div className="flex flex-col items-start gap-2">
+          <p className="text-body-md text-muted-foreground">
+            {fr.design.earlyDeposit}
+          </p>
+          <EarlyDepositLink projectId={projectId} size="sm" />
+        </div>
+      )}
+      <ConceptionEntry
+        projectId={projectId}
+        context={{ title: project.title, artistName: project.artistName }}
+        data={data}
+        moduleState={state}
+        sheets={sheets}
+        callSheet={callSheet}
+      />
+      {/* Once the work is open: the Conception is validated as a whole. */}
+      {stage && (
+        <div className={sectionCardClass}>
+          <ValidationPanel
+            stage={stage}
+            pendingValidation={pendingValidation}
+            projectId={projectId}
+            mePersonId={access.personId}
+            title={fr.design.validation.title}
+            startLabel={fr.design.validation.start}
+          />
+        </div>
+      )}
     </div>
   );
 }

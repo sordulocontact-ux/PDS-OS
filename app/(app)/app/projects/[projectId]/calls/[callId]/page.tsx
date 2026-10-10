@@ -75,18 +75,26 @@ export default async function CallPage({
       doneAction={
         <Link
           href={
-            call.prepared?.kind === "strategy"
-              ? routes.projectStrategy(projectId)
-              : routes.projectFraming(projectId)
+            call.prepared?.productionDeliverableId
+              ? `${routes.projectProductionStep(projectId, call.prepared.productionDeliverableId, "preproduction")}#technical-call`
+              : call.prepared?.kind === "design"
+                ? routes.projectDesignWork(projectId)
+                : call.prepared?.kind === "strategy"
+                  ? routes.projectStrategy(projectId)
+                  : routes.projectFraming(projectId)
           }
           className={buttonVariants({
             size: "lg",
             className: "justify-self-start",
           })}
         >
-          {call.prepared?.kind === "strategy"
-            ? fr.strategyEntry.toStrategy
-            : t.page.done.toFraming}
+          {call.prepared?.productionDeliverableId
+            ? fr.productionCall.toPreproduction
+            : call.prepared?.kind === "design"
+              ? fr.conceptionCall.toConception
+              : call.prepared?.kind === "strategy"
+                ? fr.strategyEntry.toStrategy
+                : t.page.done.toFraming}
         </Link>
       }
       outcomes={

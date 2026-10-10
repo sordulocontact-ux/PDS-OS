@@ -4,7 +4,8 @@
 // code from the recorded decisions, never stored. Client-safe.
 
 export type ProductionDeliveryRow = {
-  finalUrl: string;
+  // The export link; null when the delivery rests on a validated version.
+  finalUrl: string | null;
   finalNote: string | null;
   approvedAt: string | null;
   checkedAt: string | null;
