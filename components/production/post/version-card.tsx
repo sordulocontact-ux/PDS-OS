@@ -1,0 +1,140 @@
+import { IconFile, IconLink } from "nucleo-sharp-essential";
+
+import { sectionCardClass } from "@/components/ui/section-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { fr } from "@/lib/i18n/fr";
+import { versionName } from "@/lib/production/post/labels";
+import { versionActions, type PostRole } from "@/lib/production/post/rules";
+import type {
+  PostPeople,
+  PostScope,
+  PostVersion,
+} from "@/lib/production/post/types";
+import { formatDateTime } from "@/lib/release/format";
+import { productionVersionTone } from "@/lib/ui/state-tones";
+import { cn } from "@/lib/utils";
+
+import { CommentAddButton } from "./comment-add-button";
+import { CommentList } from "./comment-list";
+import { CorrectionsBlock } from "./corrections-block";
+import { VersionControls } from "./version-controls";
+
+const t = fr.productionPost;
+
+/**
+ * One version in the Fiche Livrable: status, author (the provider, kept when
+ * another takes over), who deposited and submitted it, the file or link, the
+ * notes and the decision; then its feedback by timecode and the corrections
+ * to transmit. The actions follow the status and the role.
+ */
+export function VersionCard({
+  scope,
+  people,
+  version: v,
+  role,
+}: {
+  scope: PostScope;
+  people: PostPeople;
+  version: PostVersion;
+  role: PostRole;
+}) {
+  const name = versionName(v);
+  const can = versionActions(v.status, role);
+  const decided =
+    v.decidedBy &&
+    v.decidedAt &&
+    (v.status === "changes_requested" ||
+      v.status === "approved" ||
+      v.status === "refused")
+      ? t.versions.decided[v.status](v.decidedBy, formatDateTime(v.decidedAt))
+      : null;
+  const media = v.file?.href
+    ? { href: v.file.href, label: v.file.fileName, icon: IconFile }
+    : v.url
+      ? { href: v.url, label: t.versions.openLink, icon: IconLink }
+      : null;
+
+  return (
+    <article
+      aria-labelledby={`version-${v.id}`}
+      className={cn(sectionCardClass, "flex flex-col gap-5")}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 id={`version-${v.id}`} className="text-base font-semibold">
+              {name}
+            </h3>
+            <StatusBadge tone={productionVersionTone[v.status]}>
+              {t.versions.statuses[v.status]}
+            </StatusBadge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {t.versions.authorLine(v.author?.name ?? t.versions.authorNone)}
+            {" · "}
+            {t.versions.createdBy(v.createdBy, formatDateTime(v.createdAt))}
+            {v.submittedBy && v.submittedAt && (
+              <>
+                {" · "}
+                {t.versions.submittedOn(
+                  v.submittedBy,
+                  formatDateTime(v.submittedAt),
+                )}
+              </>
+            )}
+          </p>
+        </div>
+        <VersionControls scope={scope} people={people} version={v} can={can} />
+      </div>
+
+      {media ? (
+        <a
+          href={media.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-fit items-center gap-2 break-all underline underline-offset-4"
+        >
+          <media.icon aria-hidden className="size-4 shrink-0" />
+          {media.label}
+        </a>
+      ) : (
+        v.status === "draft" && (
+          <p className="text-sm text-muted-foreground">{t.versions.noMedia}</p>
+        )
+      )}
+      {v.notes && <p className="break-words whitespace-pre-line">{v.notes}</p>}
+      {decided && (
+        <p className="text-sm">
+          <span className="text-muted-foreground">{decided}</span>
+          {v.decisionNote && (
+            <span className="block break-words whitespace-pre-line">
+              {v.decisionNote}
+            </span>
+          )}
+        </p>
+      )}
+
+      {v.status !== "draft" && (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold">{t.comments.title}</h4>
+            {can.comment && (
+              <CommentAddButton
+                scope={scope}
+                versionId={v.id}
+                name={name}
+                canAttach={role.canOrganize}
+              />
+            )}
+          </div>
+          <CommentList
+            projectId={scope.projectId}
+            comments={v.comments}
+            canReview={role.canReview}
+          />
+        </div>
+      )}
+      <CorrectionsBlock version={v} />
+    </article>
+  );
+}

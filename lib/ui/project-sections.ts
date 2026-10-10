@@ -179,6 +179,10 @@ export function projectTrail(
     label: fr.shell.project.legalSteps.backToPlan,
     href: routes.projectLegalStep(projectId, "plan"),
   };
+  const conception = {
+    label: fr.conception.title,
+    href: routes.projectDesign(projectId),
+  };
   const subPages: Record<string, ProjectCrumb[]> = {
     [`${routes.projectMaster(projectId)}/brief`]: [
       { label: fr.masterWorkflow.brief.title },
@@ -194,7 +198,39 @@ export function projectTrail(
     [`${legal}/splits`]: [plan, { label: fr.legalSplits.page.title }],
     [`${legal}/clearances`]: [plan, { label: fr.legalClearance.page.title }],
     [`${legal}/formalities`]: [plan, { label: fr.legalFormalities.page.title }],
+    // Marketing › Conception (ticket « Conception »): the module has its own
+    // home under the Marketing, and its direct work below it.
+    [routes.projectDesign(projectId)]: [{ label: fr.conception.title }],
+    [routes.projectDesignWork(projectId)]: [
+      conception,
+      { label: fr.conception.workTitle },
+    ],
+    [routes.projectDesignReferences(projectId)]: [
+      conception,
+      { label: fr.conception.tabs.references },
+    ],
+    [routes.projectDesignDirection(projectId)]: [
+      conception,
+      { label: fr.conception.tabs.direction },
+    ],
+    [routes.projectDesignBrief(projectId)]: [
+      conception,
+      { label: fr.conception.tabs.brief },
+    ],
+    [routes.projectDesignSheets(projectId)]: [
+      conception,
+      { label: fr.conception.tabs.sheets },
+    ],
   };
+  // One Fiche Livrable: its own page below the list.
+  const sheets = routes.projectDesignSheets(projectId);
+  if (pathname.startsWith(`${sheets}/`))
+    return [
+      home,
+      conception,
+      { label: fr.conception.tabs.sheets, href: sheets },
+      { label: fr.conception.sheetTitle },
+    ];
   const below = subPages[pathname];
   return below ? [home, ...below] : [{ label: section.label }];
 }

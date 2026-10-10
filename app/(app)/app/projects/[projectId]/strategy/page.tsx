@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 
 import { ImportPanel } from "@/components/framing/import-panel";
-import { ValidationPanel } from "@/components/framing/validation-panel";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { BriefReminder } from "@/components/strategy/brief-reminder";
 import { BriefEntry } from "@/components/strategy/brief/brief-entry";
 import { DimensionWork } from "@/components/strategy/dimension-work";
+import { StrategyValidationCard } from "@/components/strategy/documents/strategy-validation-card";
+import { ValidatedStrategy } from "@/components/strategy/documents/validated-strategy";
 import { ProposeChoices } from "@/components/strategy/propose-choices";
 import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
@@ -14,7 +15,6 @@ import { StrategyEntry } from "@/components/strategy/strategy-entry";
 import { StrategyPilotage } from "@/components/strategy/strategy-pilotage";
 import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
-import { ViewLink } from "@/components/ui/view-link";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -28,6 +28,8 @@ import { importStrategyReport } from "@/lib/strategy/actions/import";
 import { isFramingValidated } from "@/lib/projects/types";
 import { briefReadiness } from "@/lib/strategy/brief";
 import { strategySheetData } from "@/lib/strategy/call-sheet-data";
+import { approvedOf, sentOf } from "@/lib/strategy/documents/model";
+import { loadStrategyDocuments } from "@/lib/strategy/documents/queries";
 import {
   dimensionStatuses,
   isStrategyDimension,
@@ -103,13 +105,22 @@ export default async function StrategyPage({
       />
     );
 
-  // The owner writes only while the strategy is in progress; the database
-  // enforces it (strategy_is_editable), this only decides what is offered.
-  const canWrite = isOwner && state === "in_progress";
+  const docs = await loadStrategyDocuments(projectId, data.members);
+  const reference = approvedOf(docs.documents, "brief");
+  const underReview = sentOf(docs.documents, "brief");
+  // The owner writes while the strategy is in progress, or during a revision
+  // of the validated one, never while a Brief version waits for its
+  // reviewers; the database enforces it (strategy_is_editable), this only
+  // decides what is offered.
+  const editable =
+    !underReview &&
+    (state === "in_progress" || (state === "validated" && docs.revisionOpen));
+  const canWrite = isOwner && editable;
+  const validated = state === "validated" && !docs.revisionOpen && reference;
   const status =
     state === "not_started"
       ? t.notStarted
-      : state === "in_progress"
+      : editable || validated
         ? null
         : t.locked;
 
@@ -131,6 +142,14 @@ export default async function StrategyPage({
     <div className="grid gap-12 pt-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <EditAccessProvider canEdit={canWrite}>
         <div className="flex min-w-0 flex-col gap-8">
+          {validated && (
+            <ValidatedStrategy
+              projectId={projectId}
+              version={reference.version}
+              documents={docs.documents}
+              canShare={isOwner}
+            />
+          )}
           <StrategyDictation
             projectId={projectId}
             actions={
@@ -154,10 +173,12 @@ export default async function StrategyPage({
             statuses={statuses}
             current={open?.key ?? null}
           />
-          <BriefEntry
-            projectId={projectId}
-            missing={briefReadiness(statuses).missing}
-          />
+          {!validated && (
+            <BriefEntry
+              projectId={projectId}
+              missing={briefReadiness(statuses).missing}
+            />
+          )}
         </div>
         {open && (
           <StrategyDimensionPanel
@@ -177,23 +198,10 @@ export default async function StrategyPage({
 
       <aside className="flex flex-col gap-4 self-start lg:sticky lg:top-6">
         <div className={block}>
-          <ValidationPanel
-            stage={data.stage}
-            pendingValidation={data.pendingValidation}
+          <StrategyValidationCard
             projectId={projectId}
-            mePersonId={access.personId}
-            title={t.validation.title}
-            startLabel={t.validation.start}
-            startBlocked={data.briefValidated ? null : t.validation.briefFirst}
-            // The validation is asked on the Brief de sortie (ticket § 8).
-            requestBlocked={
-              <ViewLink
-                href={routes.projectStrategyBrief(projectId)}
-                className="underline underline-offset-2"
-              >
-                {fr.strategyBrief.requestFromBrief}
-              </ViewLink>
-            }
+            stageState={state}
+            revisionOpen={docs.revisionOpen}
           />
         </div>
         <div className={block}>

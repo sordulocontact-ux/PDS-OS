@@ -794,8 +794,88 @@ livrable, les libellés ou l'action d'import en props.
   levier à arbitrer, échéance amont trop tard, budget à arbitrer ou dépassé), chacun menant à son
   panneau. **Modifier avec PO** = la dictée de la Stratégie (propositions relues avant écriture) ;
   **Demander la validation** = le circuit de l'étape (le DG décide), proposé seulement quand le
-  Brief est établi ; le pilotage renvoie vers le Brief pour la demander. Pas d'instantané stocké :
-  une stratégie soumise ou validée est figée en RLS, le Brief affiché est donc celui validé.
+  Brief est établi ; le pilotage renvoie vers le Brief pour la demander.
+- **Demande de validation et V1** (étape 9 ; migration `20261010000801_strategy_documents`) :
+  « Demander la validation » (`requestBriefValidation`) relit la stratégie côté serveur, écrit un
+  **instantané** (`lib/strategy/documents/brief-snapshot.ts`, même format pour le Brief en direct
+  et chaque version, rendu par `BriefSnapshotView`), crée la version (`create_strategy_document`)
+  et l'envoie (`send_strategy_document`) au **DG (toujours) + les directeurs créatifs du projet
+  choisis**. Une validation de `launch_strategy` sans version de Brief est refusée en SQL
+  (`validations_strategy_request`) ; la décision générique est refusée aussi
+  (`validations_strategy_guard`) : chacun décide sur sa revue (`decide_strategy_document`).
+  Pendant la revue : état « En attente de validation », stratégie figée, ni Plan ni Dossier
+  final. Écran : valideurs avec leur état (Validé, En attente, Non commencé = revue annulée par
+  une demande de modification), commentaires, **Relancer** (12 h minimum, notification),
+  historique des versions. Une demande de modification (commentaire obligatoire) rouvre l'étape.
+  Toutes les revues validées : étape validée, **« Brief de sortie — V1 »** figé dans
+  `strategy_documents.content`, consultable par `?v=n`, **PDF** immédiat
+  (`/api/projects/[id]/strategy-documents/[docId]`, `documentHtml` par type, budget inclus car
+  interne), **Partager** = lien interne de l'app (jamais public). Notifications
+  `strategy_review_*` (par trigger), ouvrant la version (`/strategy/document/[id]`).
+  **Révision** : « Réviser la stratégie » (`open_strategy_revision`) rend la stratégie
+  modifiable sans rouvrir l'étape ; V2 passe par le même circuit ; V1 reste la référence et
+  n'est jamais écrasée.
+- **Écran Stratégie validée** (étape 10) : trois documents (Brief de sortie ✓ Validé Vn ·
+  Voir · Partager · PDF · Versions ; Plan de sortie, état ou « À générer » ; Dossier de presse
+  « À générer · Bientôt »), puis la suite : Conception (contenus et assets des livrables),
+  Activations (influence, RP, diffusion, partage), Planning (échéances et dépendances). Rien
+  n'oblige à lancer la Conception. Le pilotage reste dessous, en lecture.
+- **Plan de sortie** (étape 11, `/strategy/release-plan?step=1..8`,
+  `lib/strategy/documents/release-plan-*`, `components/strategy/release-plan/`) : générateur en
+  8 étapes (entrée avec ce qui est déjà validé et ce qui reste, phases proposées par le code
+  depuis le calendrier — avant J-1 Teasing, J-1 à J+1 Sortie, après Amplification, modifiables
+  —, contenus repris des livrables, univers visuel choisi parmi photo d'artiste, images du
+  projet, artwork, dépôts et liens, direction proposée depuis les images derrière
+  `proposeDirection` (`lib/strategy/documents/direction.ts`, technologie interchangeable),
+  récapitulatif des pages (modifier, masquer, réordonner), génération, aperçu versionné).
+  Brouillon dans `strategy_document_drafts` ; visuels autorisés copiés dans le bucket public
+  `document-visuals` ; **un seul rendu HTML** (`releasePlanHtml`) pour l'aperçu, le lien public
+  `/d/[token]` (`get_shared_strategy_document`, sans session) et le PDF ; **jamais de budget**
+  (`assertNoBudget`) ; versions immuables, nouvelle génération = nouvelle version ;
+  « Demander validation » par le même circuit que le Brief. Fermé sans Brief validé ou
+  pendant qu'un Brief attend sa validation.
+- **Dossier de presse** (étape 12, `/strategy/press-kit?step=1..8`,
+  `lib/strategy/documents/press-kit-*`, `components/strategy/press-kit/`) : construit depuis le
+  Brief validé, la **fiche Artiste** (`artistPresentation`, fonction isolée pour un futur Artist
+  Deck / Kit Artiste réutilisable, non construit), le projet et sa sortie (date, format, label,
+  UPC, titres et ISRC), les visuels choisis. Textes préremplis par le code (présentation de
+  l'artiste : bio saisie, sinon Deezer, sinon Wikipédia ; actualité ; histoire ; narratif ;
+  informations presse à écrire), modifiables, retirables. **Liens d'écoute** : seulement ceux
+  que le projet détient (smartlink actif, URL de sortie confirmée, liens détectés, Spotify, Deezer
+  de l'artiste), jamais inventés. **Contact presse** : le responsable par défaut, modifiable.
+  Mêmes écrans que le Plan de sortie (prop `kind`), même rendu (`editorialHtml`), direction reprise
+  du Plan. Jamais de budget, versionné, lien public `/d/[token]`, PDF, validation par le même
+  circuit.
+- **Documents finalisés** (étape 13) : sur l'écran Stratégie validée, chaque document montre sa
+  version de référence et son état réel (À générer, Généré, En attente de validation, ✓ Validé,
+  Modification demandée, « Vn en cours »), son public (Interne, Équipe artiste, Médias) et
+  Voir · Partager (Brief = lien interne ; Plan et Dossier = lien public) · PDF · Versions
+  (historique conservé). Les trois validés : titre « Documents finalisés ».
+- **Suivi** (étape 14, `/strategy/follow-up`, ouvert une fois l'étape validée ; migration
+  `20261010004001_strategy_follow_up`) :
+  - **Avant la sortie** : uniquement Prêt / En cours / En attente / Bloqué, calculés par
+    `lib/strategy/follow-up*.ts` (ton `followUpTone`), avec une raison écrite par le code, par
+    domaine : contenus (livrables : livré → Prêt ; temps fort passé sans livraison ou échéance
+    amont dépassée → Bloqué ; fichier à approuver / contrôler / livrer ou version de conception
+    déposée → En attente ; sinon En cours), influence, RP, playlisting (leviers retenus dont le
+    libellé correspond, pire état de leurs livrables), coordination (tâches, échéances amont),
+    validations (documents et étapes en attente).
+  - **Après la sortie** : chaque KPI face à sa **dernière donnée réelle** (fans Deezer lus par
+    le code, ou valeur notée par une personne avec date et source dans `strategy_kpi_measures`),
+    pourcentage et écart calculés par le code ; KPI qualitatif = signal à observer, sans chiffre ;
+    sans donnée : « Pas encore de donnée ».
+  - **Recommandations** fondées uniquement sur des données réelles (`follow-up-results.ts`) :
+    KPI sous 80 % du prorata linéaire de sa cible, KPI manqué à l'échéance, échéance amont
+    dépassée, temps fort passé sans livraison. **Appliquer** = tâche du responsable à J+7,
+    **Ignorer**, **Parler à PO** (`AskPoButton`, question écrite par le code citant la donnée) ;
+    `strategy_recommendations` empêche de reproposer.
+- **Règles produit non négociables** (ticket Stratégie) : Brief = interne, Plan de sortie =
+  équipe artiste, Dossier de presse = médias ; le budget n'existe que dans le Brief ; PO réutilise
+  ce qui est connu avant de demander ; appels et documents préremplissent plusieurs dimensions ;
+  validation humaine obligatoire avant V1 ; documents liés aux données et versionnés ; décisions
+  → Conception, Activations, Planning ; Plan de sortie généré interactivement ; après lancement,
+  suivi et adaptation ; PO n'invente aucune donnée ; **rien n'est codé en dur pour un artiste ou
+  une sortie** (Piégée / Dioo ne sont que des exemples).
 - Champs texte : positionnement, publics, narratif (`field_values`, `deliverable = 'strategy'`,
   actions génériques `saveField` / `confirmField` / `rejectField`).
 - Dispositif : leviers par famille (taxonomie des besoins) ; un besoin confirmé du Brief
@@ -2259,15 +2339,264 @@ ni livré ni clos. Migration `20261010000301_production_delivery_and_review.sql`
   nouveau fichier annule les décisions du précédent ; « Rouvrir » aussi. Écritures seulement
   pendant l'étape `production` (démarrée par le responsable, validée par le DG comme les autres) ;
   sa validation est refusée tant qu'un livrable n'est pas livré (`deliveries_open`).
-- **Hors de cette tranche** (reste du ticket Production) : préproduction, équipes, call technique,
-  devis et matériel, feuille de service, tournage et rushes, retours horodatés, transmission à
-  Activations. À construire avec le ticket.
+- **Préparation d'un livrable, lot 1** (parcours 1 à 3 du ticket ; `/production/[deliverableId]`,
+  `lib/production/sheet.ts`, `components/production/prep/`, migration
+  `20261010003001_production_preparation.sql`, tests `production-preparation.test.sql`) :
+  - **Entrée** : depuis la liste Production, « Préparer » sur un livrable dont une version est
+    validée en Conception (la « Fiche Livrable validée » : faute de fiche dédiée côté Conception
+    à ce jour, c'est la dernière `design_versions` approuvée). `production_sheets` (une par
+    livrable engagé) garde la **version source** ; une version validée plus tard est signalée,
+    jamais substituée. L'**héritage** est lu, jamais recopié ni redemandé : levier, quantité,
+    échéance, responsable, intentions confirmées (livrable puis direction), références, dates du
+    calendrier rattachées, budget du levier (totaux par le code), dépendance à la version, points
+    ouverts (sujets sans réponse confirmée, propositions de PO non confirmées). Durée, ratios et
+    sous-titres n'existent pas encore en Conception : affichés « Non renseigné ».
+  - **Trois modes** (`open_production_sheet`) : direct, call, import. Le choix n'agit qu'à
+    l'intérieur de PDS OS ; le premier démarre l'étape `production` (comme `start_design`),
+    changer de mode garde le brief et les équipes.
+  - **Brief réalisateur** (colonnes de `production_sheets`, `save_production_brief`) : intention de
+    mise en scène, découpage, dispositif caméra, son, déroulé, contraintes, références, besoins à
+    confirmer. Trois choix fermés (plan-séquence / découpage / mixte ; une ou plusieurs caméras ;
+    playback / captation live / mixte) qui servent aux suggestions de postes. Écrit par le
+    responsable ou par le **réalisateur désigné** s'il est membre (`set_production_director`,
+    membre ou contact du Réseau, le responsable seul le désigne).
+  - **Besoins humains** (`production_needs`, `production_assignments`) : cinq familles séparées
+    (Réalisation, Équipe image, Équipe son, Musiciens / artistes, Production et régie), postes
+    préréglés par famille + « Autre » avec libellé (même liste en SQL et dans
+    `lib/production/roles.ts`), **spécialité** pour un musicien ou artiste (« Guitare » n'est pas
+    une catégorie). PO suggère des postes **calculés par le code** depuis les choix fermés
+    (`suggestNeeds`, jamais stockés) et des **profils connus** (contacts du Réseau du bon rôle) ;
+    seul le responsable ajoute un besoin, fixe le nombre, affecte et confirme une disponibilité
+    (qui / quand écrits par trigger). Une personne peut tenir plusieurs postes ; un poste n'a
+    jamais plus de personnes que son nombre (`need_full`, `headcount_below_assigned`). Le
+    réalisateur reste sur le brief : Réalisation l'affiche en tête, sans doublon.
+  - **Call de production** (`production_calls`, `create_production_call`, `lib/production/call-prep.ts`) :
+    sujets calculés par le code depuis ce qui manque (rubriques du brief, réalisateur, familles sans
+    poste, postes non pourvus — un « indisponible » ne compte pas comme affecté —, disponibilités à
+    confirmer), ordre du jour recalculé côté serveur ; détails affichés sur la page du call. Le
+    traitement du compte rendu en plan d'actions vient au lot suivant.
+  - **Importer une organisation** (`lib/production/import.ts`, `import-verify.ts`) : le texte collé
+    (≤ 20 000 caractères) n'arrive qu'en message utilisateur, jamais dans le prompt système ; PO
+    propose des valeurs du brief et des besoins, chacun avec une citation d'au moins 3 mots retrouvée
+    dans le texte (`locateQuote`), sinon écartée ; un nombre dans un texte proposé doit figurer dans le
+    texte collé ; jamais de nombre de personnes ni de nom (un intitulé ou une spécialité avec un chiffre
+    est écarté) ; poste inconnu → « Autre » s'il a un intitulé. Une rubrique déjà renseignée est
+    montrée avant → après, décochée par défaut. **Rien n'est stocké avant « Appliquer »** (ni le texte
+    ni les propositions) ; l'application insère les besoins puis fusionne le brief (deux écritures,
+    mêmes droits).
+  - Tout s'écrit pendant l'étape `production` en cours, se lit par quiconque voit le projet ;
+    tables en `revoke all` puis droits colonne par colonne (piège : sans `revoke`, les privilèges
+    par défaut de Supabase donnent tout à `authenticated`).
+- **Source = la Fiche Livrable transférée** (migration `20261010006201_production_post.sql`) :
+  `open_production_sheet` prend d'abord le dernier `design_handoffs` du livrable (via `design_sheets` →
+  `design_deliverables.strategy_deliverable_id`), sinon la version validée en Conception (repli du
+  lot 1). `production_sheets.handoff_id` garde le transfert d'origine ; un transfert plus récent est
+  signalé, jamais substitué. Le snapshot (`design_submissions.snapshot`) est lu par
+  `lib/production/fiche.ts` : durée, ratios, sous-titres, dates, budget prévisionnel, contraintes,
+  dépendances, points laissés à la Production, références, éléments d'une série.
+- **Lots 2 à 4 : une fiche, cinq onglets** (`/production/[deliverableId]` + `/preproduction`, `/shoot`,
+  `/post`, `/delivery`, mise en page commune `layout.tsx` : en-tête, source, **phase calculée** par
+  `lib/production/phase.ts` — À préparer → Préproduction → Prête pour tournage → Tournage en cours →
+  Tournage terminé → Postproduction → Contrôle final → Livrée → Transmise à Activations, chaque phase
+  lue dans ses propres données, jamais stockée). Dates et enveloppe : celles de Production si elles
+  sont saisies, sinon celles de la Fiche, divergence affichée (`lib/production/logistics.ts`).
+  - **Préproduction** (`20261010006001_production_preproduction.sql`) : briefs d'équipe
+    (`production_team_briefs`, champs propres à l'équipe + extrait calculé ; « Transmettre » garde un
+    instantané et la version source) ; ce que produit le call technique (`production_call_items` :
+    décision, hypothèse, action proposée, point à arbitrer, provenance manuelle ou compte rendu cité,
+    une proposition de PO reste « proposée » jusqu'à une décision humaine) ; plan de préproduction
+    (`production_plan_actions` : brouillon / approuvée / retirée, pressenti, échéance, dépendances,
+    bloquant ; une action approuvée ne devient une tâche de Travail que par `create_production_task`,
+    confirmation explicite, membre et date obligatoires) ; fichiers (`production_files`, bucket privé
+    `production-files`, 500 Mo, dépôt par le responsable, `lib/production/files/`) ; matériel
+    (`production_equipment`, Besoin → Devis reçu → À vérifier → Retenu → Réservé confirmé → Récupéré →
+    À rendre → Rendu / Incident ; qui a vérifié une ligne lue sur un devis et qui a confirmé un retour
+    sont écrits par trigger ; MVP sans extraction IA des devis) ; budget (`production_budget_lines`,
+    Prévu / À estimer / Estimé / À arbitrer / Validé / Engagé, seul « À estimer » sans montant ; ce n'est
+    pas la Finance : `budget_lines` restent les engagements du projet) ; feuille de service
+    (`production_call_sheets`, équipe et matériel lus dans leurs tables) ; contrôle avant tournage
+    (`production_readiness_checks` : lieu, équipe, matériel, planning, budget, feuille de service,
+    autorisations — facultatives par défaut ; `mark_production_ready` refuse tant qu'un contrôle requis
+    n'est pas confirmé, retirer ou exiger un contrôle rend la fiche non prête).
+  - **Tournage** (`20261010006101_production_shoot.sql`) : `production_shoots` (prévu, en cours, terminé,
+    partiel, reporté, interrompu ; démarre seulement si la fiche est prête ; partiel ou interrompu exige
+    les séquences manquantes) ; trois déclarations séparées — rushes vidéo, sources audio, sauvegarde
+    vérifiée — tamponnées qui / quand, **jamais présentées comme un contrôle des fichiers** ; compte
+    rendu validé par le responsable, rouvert si le tournage change ensuite ; incidents
+    (`production_incidents` : impact, suivi, résolution écrite = résolu ; bloquer la clôture ou la
+    postproduction est un choix humain).
+  - **Postproduction et livraison** (`20261010006201_production_post.sql`) : références et étapes
+    (`production_post_references`, `production_post_steps`, intervenant membre ou contact du Réseau,
+    jamais par défaut) ; versions illimitées (`production_versions`, numérotées par la base, seul un
+    brouillon se modifie ou se supprime, une version sans fichier ni lien n'est jamais soumise) ;
+    « Soumettre pour retours » et « Soumettre à validation finale » distincts
+    (`submit_production_version`) ; retours horodatés ou généraux (`production_version_comments`,
+    « corrigé déclaré » passe par « à vérifier ») ; décision du validateur créatif — responsable ou
+    directeur créatif du projet — Valider / Demander des corrections / Refuser
+    (`decide_production_version`, raison obligatoire sauf pour valider ; valider enregistre la décision
+    créative sur `deliverable_deliveries.version_id`, qui n'exige plus de lien) ; contrôle technique
+    (`production_export_checks`, une ligne par fichier attendu, proposée depuis la Fiche par
+    `expectedExports`) ; `advance_deliverable_delivery` : avec une fiche de production, « approve » est
+    refusé (la décision est sur la version) et « Exports contrôlés » exige toutes les lignes conformes ;
+    transmission à Activations (`production_activation_handoffs`, `transmit_to_activations`, seulement
+    une fois livré : une référence à la version livrée, rien n'est publié).
+  - Tests : `supabase/tests/production-workflow.test.sql` (parcours Piégée, 32 assertions).
+    Garde-fous ajoutés par `20261010006301_production_delivery_guards.sql` : « Exports contrôlés »
+    refuse une ligne contrôlée avant la dernière validation de version ou le dernier fichier final
+    (« à revérifier ») ; retirer une ligne après le contrôle le rouvre.
+- **Décisions prises faute de règle dans le ticket (10/10/2026)** :
+  - *Préproduction* (`lib/production/preprod/`) : navigation par tuiles liées aux ancres (pas de second
+    niveau d'onglets). Extrait de chaque brief d'équipe calculé par le code ; Production et régie ne
+    reçoit ni donnée créative ni budget ; « À retransmettre » quand le contenu diffère de
+    l'instantané ; rien n'est envoyé par e-mail. Call technique : six sujets pré-remplis depuis ce qui
+    manque, seuls ceux qui ont des questions cochés. `fillProductionFromCall` lit le premier compte
+    rendu d'un call de production une seule fois : une proposition n'est gardée que si sa citation
+    (≥ 3 mots) est retrouvée dans l'élément source et si chaque nombre y figure ; 40 au plus ; sujet le
+    plus proche, sinon « Autres ». États d'une action (Brouillon sans qui/quand, À examiner, Approuvée,
+    En exécution / Terminée selon sa tâche, Bloquée si une dépendance n'est pas finie) et du plan
+    calculés par le code. Matériel : une ligne saisie depuis un document démarre « À vérifier » ;
+    doublons = même catégorie et libellé normalisé, rapprochés seulement sur confirmation (quantités
+    additionnées). Rétroplanning à décalages fixes depuis le tournage J (brief J-21, lieu J-14, équipe
+    et estimations J-10, location J-7, feuille de service J-2, sauvegarde J+1) et la livraison L
+    (validation L-3, exports L-1) ; dates contradictoires signalées, jamais corrigées ; il reste dans
+    Production (pas de propagation au Planning dans ce lot). Budget : estimé = somme des montants,
+    reste = enveloppe − estimé, dépassement signalé sans rien bloquer.
+  - *Tournage* (`lib/production/shoot/`) : état global du retour (aucun / incident / tout rendu /
+    partiellement rendu / à rendre) calculé sur les lignes confirmées ; « Rendu » toujours confirmé ;
+    la postproduction attend, une fois le tournage fini, les trois déclarations et les incidents
+    marqués « bloque la postproduction » ; la clôture administrative attend le matériel rendu et les
+    incidents marqués « bloque la clôture » (pas d'action de clôture dans ce lot) ; les suivis
+    proposés (déclaration manquante, reprise, incident, retour en retard) deviennent une tâche
+    seulement quand une personne choisit qui et quand, la notification de la tâche tient lieu
+    d'alerte.
+  - *Postproduction* (`lib/production/post/`) : étapes proposées par le code (« Mixage de la captation
+    live » si le son est capté en direct ou mixte, « Sous-titrage » si la Fiche demande des
+    sous-titres), personne par défaut ; auteur d'une version facultatif ; pièce jointe d'un retour
+    réservée au responsable (le stockage n'accepte que lui) ; corrections à transmettre = retours
+    ouverts ou pris en compte, groupés par catégorie, triés par timecode, texte à copier.
+  - *Livraison* (`lib/production/delivery/`) : la checklist se crée depuis la Fiche, relue côté serveur,
+    tant qu'elle est vide ; changer le lien d'une ligne remet son résultat à zéro ; la transmission à
+    Activations est proposée une fois livré (formats = ratios de la Fiche, contraintes reprises) et à
+    nouveau seulement si la livraison a changé ; une transmission dépassée (livraison rouverte, version
+    ou lien changés) est signalée sur Activations (« une activation peut pointer vers une version
+    antérieure »), qui n'affiche que la dernière par livrable.
+  - *Compte rendu d'un call de production* : `app/api/calls/[callId]/extract/route.ts` appelle
+    `fillProductionFromCall` après la Conception ; la page de traitement et le lien « terminé » de la
+    page du call mènent à la Préproduction (`#technical-call`).
+- **Hors de ce lot** : extraction IA / OCR des devis et comparaison multi-devis (après MVP selon le
+  ticket), propagation du rétroplanning vers le Planning V1, événements et notifications propres à la
+  Production, partage des briefs d'équipe avec des intervenants sans compte, action de clôture
+  administrative.
 - **Suivi & bilan** (`/review`, `lib/review/`) : l'état de chaque workflow (lu par
   `loadWorkflowStates`), le bilan (résultats, ce qui a marché, à améliorer, `project_reviews`, écrit
   pendant l'étape `review`), puis « Bilan & clôture » : le DG valide, le projet est clos (l'étape
   `review` validée). Clôture refusée sans bilan écrit (`review_required`). Décision prise ici, faute
   de ticket : la clôture n'exige pas que les autres workflows soient terminés, la direction en juge
   en lisant l'état affiché.
+
+## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
+
+Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration
+`20261010000901_conception_entry.sql`, tests `supabase/tests/conception.test.sql`. La Stratégie dit
+quoi produire, pour qui et quand ; la Conception dit ce que chaque livrable raconte et à quoi il
+ressemble. Elle reste sous Marketing, les livrables avancent en parallèle (pas de tunnel).
+
+- **Accès** : la page attend la Stratégie **validée** (`DesignNeedsStrategy`). Fil d'Ariane
+  « Marketing / Conception » (`projectTrail`), « / Travail direct » sur `/design/work` ; le projet
+  est nommé par le sélecteur de la sidebar, comme partout ailleurs.
+- **Livrables de la Conception** (`design_deliverables`) : une ligne par livrable engagé dans la
+  Stratégie, créée **par trigger** à l'insertion d'un `strategy_deliverables` (titre, levier,
+  quantité, échéance lus là-bas, jamais recopiés), statut `confirmed` ; plus les **ajouts de
+  dernière minute** (« Ajouter un livrable », responsable seul, Conception ouverte = Stratégie
+  validée et Conception ni soumise ni validée, `design_is_open`) avec une provenance explicite :
+  `manual`, `strategy_decision` (un levier retenu) ou `call` (un call du projet). Un ajout est
+  toujours `to_qualify` : la colonne `status` n'est pas accordée en écriture, rien ne le valide ni ne
+  le planifie tout seul. Un besoin à qualifier peut être retiré (confirmé dans une modale). Toute
+  donnée de Conception pointe vers `design_deliverables.id`.
+- **Accueil** (`ConceptionEntry`) : projet, artiste, sortie, état de la Stratégie, résumé compact
+  « n confirmés · n à qualifier », liste dépliable (`<details>` natif), puis « Commencer
+  directement » (`start_design` : démarre l'étape `design` si besoin et ouvre `design_workspaces`)
+  et « Préparer un échange créatif ». Une fois commencé : « Reprendre le travail », le nombre de
+  propositions de PO à relire et la validation de l'étape (`ValidationPanel`).
+- **Chemin A, échange créatif** (`design_calls`, `create_design_call`) : objectif, participants,
+  livrables concernés, sujets (calculés par le code depuis les intentions manquantes, recalculés
+  côté serveur), date, format, récapitulatif avant création. Après traitement du call
+  (`app/api/calls/[callId]/extract`), `fillDesignFromCall` démarre la Conception, enregistre le call
+  comme **source** (`design_sources`, une seule fois par call) et PO propose des intentions depuis
+  les éléments du compte rendu ; la page s'ouvre sur le travail direct.
+- **Chemin B, travail direct** (`/design/work?d=<id|direction>`) : par cible (direction créative ou
+  livrable), ce qui est déjà connu (rôle, timing et échéances amont, public, narratif, contraintes
+  du Cadrage, dépendances), puis **une question à la fois** sur les seuls sujets sans réponse
+  (`story`, `look`, `tone`, `musts`, `lib/design/intentions.ts`). Réponse = `save_design_intention`
+  (la précédente passe en `replaced`, historique gardé). Références (liens https,
+  `design_references`) et import d'un brief existant (texte collé, `design_sources` kind `import`)
+  sont des actions du travail direct, pas un troisième parcours. Le dépôt de versions existant
+  (`design_versions`, dont dépend la Production) reste sous chaque livrable engagé.
+- **Propositions de PO** (`lib/design/propose.ts`) : extraction structurée sur la source (données,
+  jamais consignes), sujet en liste fermée, citation **vérifiée mot pour mot** par le code
+  (`locateQuote`), cibles vérifiées. Une décision qui concerne plusieurs livrables devient une
+  proposition par livrable pointant vers la **même source** ; une proposition que PO ne sait pas
+  rattacher reste `unassigned`. Signaux d'ambiguïté calculés par le code (concerne aussi…, diffère
+  de la réponse posée). Rien n'est confirmé sans une personne (`review_design_intention`).
+- **Qui écrit** : le responsable et l'équipe créative du projet, pendant l'étape en cours
+  (`design_can_write`) ; le responsable seul démarre, prépare les échanges et ajoute des livrables.
+- **Décisions prises ici, faute de ticket** : l'ancien « Dossier de conception » (champs
+  `design_doc`) est remplacé par les intentions de la direction créative (ses valeurs ne sont pas
+  reprises : aucune donnée réelle) ; les références sont des liens (les fichiers viendront avec les
+  moodboards) ; un besoin « à qualifier » n'a pas encore de geste pour devenir confirmé (étape
+  suivante du ticket).
+
+**Étapes 4 à 13** (migration `20261010005001_conception_direction_sheets.sql`, test d'acceptation
+`supabase/tests/conception-piegee.test.sql` sur la fixture Piégée, rejouée dans une transaction
+annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accueil, Intentions
+(`/design/work`), Références, Direction artistique, Brief créatif, Fiches Livrables.
+
+- **États** : tous calculés par `lib/design/states.ts` depuis les faits (jamais stockés) —
+  Conception (Non commencée → En cours → À arbitrer → Partiellement validée → Terminée), intentions
+  d'une cible (Brouillon → À confirmer → Confirmées → À réviser), direction artistique (À attribuer →
+  En préparation → Prête à soumettre → En attente → Validée / Modifications demandées / Refusée),
+  Fiche Livrable (Brouillon → À compléter → Prête à soumettre → En attente → Validée · Prête pour
+  Production → Transférée).
+- **Consolidation** : fusionner (`merge_design_intentions`, les originaux passent en `merged` avec
+  `merged_into`) ou dissocier (`split_design_intention`, parties `split_from`, même source) les
+  propositions ; le chef de projet confirme l'ensemble d'une cible (`confirm_design_intentions`,
+  refusé tant qu'une proposition attend) : instantané `design_intent_confirmations`. Un changement
+  ultérieur rend la cible « À réviser ».
+- **Responsables et validateurs** (`design_assignments`, `design_validators`) : désignés par le
+  chef de projet seul (`assign_design_responsible`, `set_design_validators`), une désignation
+  remplace la précédente (historique gardé). PO suggère (équipe créative d'abord), n'affecte jamais
+  et ne connaît pas les disponibilités. **Décision prise ici** : une personne désignée doit pouvoir
+  agir, donc être membre ; si elle ne voit pas le projet et a le travail créatif, la désignation
+  l'ajoute à l'équipe créative, sinon elle est refusée (`person_cannot_see_project`). Le Réseau n'a
+  pas de compte : il ne peut ni soumettre ni décider.
+- **Références** : une ressource (`design_references`, lien https ou fichier du bucket privé
+  `design-references`, 50 Mo, images / PDF / vidéos) liée à autant de cibles qu'il faut
+  (`design_reference_links`) ; sans lien = « À rattacher ». Même fichier (sha256) ou même lien =
+  une seule ressource, jamais un second import. Une référence reste une proposition tant qu'aucune
+  section approuvée de la direction ne la contient.
+- **Soumissions et décisions** (`design_submissions`, `design_decisions`) : pour la direction
+  (sections choisies par le responsable) et pour chaque fiche (la fiche, puis chaque élément d'une
+  série). L'instantané est écrit par la base à la soumission. Mode de validation du projet
+  (`design_workspaces.validation_mode`) : global (une décision) ou par section. Valider / Demander des
+  modifications / Refuser, commentaire obligatoire hors validation ; une décision par section (la
+  seconde concurrente est refusée, les décisions restent séparées) ; la version se ferme quand tout
+  est décidé, jamais par silence. Une nouvelle version n'écrase pas la précédente.
+- **Brief créatif global** (`design_briefs`) : versionné, contenu construit par le serveur sans IA
+  (contexte, objectifs, publics, narratif, principes, tonalité, à montrer / éviter, cohérence,
+  livrables, références validées, contraintes, décisions, sources, points ouverts). Il ne remplace
+  pas les fiches.
+- **Fiches Livrables** (`design_sheets`, `design_sheet_items`) : une par livrable, créée par le chef
+  de projet ; une série a autant d'éléments numérotés que décidé (jamais un nombre codé en dur).
+  Écrite par le chef de projet ou son responsable, **figée pendant une soumission en attente**
+  (`design_sheet_can_edit`). Provenance de chaque valeur (`provenance`), historique dans
+  `design_events` (écrit par triggers seuls). Contrôles bloquants / reportables à Production
+  calculés par le code ; PO propose seulement des formulations, acceptées par la personne.
+- **Transfert à Production** (`design_handoffs`, `handoff_design_sheet`) : chef de projet, dernière
+  version validée ; Production lit l'instantané de cette version et le Brief en vigueur, sans
+  ressaisie. Ne réserve rien, ne crée ni équipe, ni tâche, ni notification.
+- **Hors de cette étape** : notifications des soumissions et décisions (le Travail et la cloche
+  pourront les lire plus tard), annulation d'un livrable après validation, circuits de validation
+  complexes et délégations (après MVP).
 
 ## 9. Design (`docs/DESIGN.md`)
 
@@ -2355,6 +2684,11 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
 - Test de la dictée sans micro : Chrome headless en CDP, `getUserMedia` remplacé par un
   script qui joue un fichier (`say -v Thomas … -o x.aiff` puis `afconvert -f m4af -d aac`)
   dans un `MediaStreamDestination`.
+- **Nouvelle table = `revoke all` d'abord** : les privilèges par défaut de Supabase donnent
+  `insert/update/delete` sur toute table créée dans `public` à `anon` et `authenticated` ; un
+  `grant update (col…)` seul ne retire rien. Écrire `revoke all on table public.x from anon,
+  authenticated;` juste après `force row level security`, puis les droits voulus (repéré par le test
+  « a sheet is written by its functions only », 10/10/2026).
 - **Types de la base sans la CLI** (Windows) : le générateur du conteneur `pg_meta` est plus
   ancien que celui de la CLI et omet `isOneToOne` dans les relations (le typage des jointures
   casse). Ne pas remplacer `database.types.ts` par sa sortie : n'y reporter que les tables,

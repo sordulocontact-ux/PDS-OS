@@ -42,8 +42,15 @@ export function nextActionOf(
 ): NextAction {
   if (!stage) return { kind: "done", href: routes.project(projectId) };
   const href = stageHref(projectId, stage.key);
+  // A strategy is validated on its Brief de sortie, where reviewers decide.
   if (stage.state === "awaiting_validation")
-    return { kind: "await_validation", href };
+    return {
+      kind: "await_validation",
+      href:
+        stage.key === "launch_strategy"
+          ? routes.projectStrategyBrief(projectId)
+          : href,
+    };
 
   switch (stage.key) {
     // The Cadrage intelligent starts with PO or from an exchange: no call

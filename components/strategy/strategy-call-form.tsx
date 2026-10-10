@@ -3,12 +3,12 @@
 import { useActionState, useRef, useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { SubmitButton } from "@/components/auth/submit-button";
 import { AgendaTopicsField } from "@/components/calls/agenda-topics-field";
 import { CallFields, withOccurredAt } from "@/components/calls/call-fields";
+import { CallFormActions } from "@/components/calls/call-form-actions";
+import { CallFormatField } from "@/components/calls/call-format-field";
+import { CallRecap, type CallRecapData } from "@/components/calls/call-recap";
 import { ParticipantsField } from "@/components/calls/participants-field";
-import { Button } from "@/components/ui/button";
-import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { idleFormState } from "@/lib/auth/form-state";
@@ -16,13 +16,10 @@ import { EXTRA_TOPIC_MINUTES, agendaMinutes } from "@/lib/calls/prepare";
 import { fr } from "@/lib/i18n/fr";
 import { prepareStrategyCall } from "@/lib/strategy/actions/call";
 import { cn } from "@/lib/utils";
-import {
-  CALL_FORMATS,
-  type CallFormat,
-  type StrategyCallSheetData,
+import type {
+  CallFormat,
+  StrategyCallSheetData,
 } from "@/lib/strategy/call-prep";
-
-import { StrategyCallRecap, type CallRecap } from "./strategy-call-recap";
 
 /**
  * The exchange as PO prepared it — objective, topics, participants, date
@@ -53,7 +50,7 @@ export function StrategyCallForm({
   const [extra, setExtra] = useState<string[]>([]);
   const [people, setPeople] = useState<string[]>(data.people);
   const [format, setFormat] = useState<CallFormat>("video");
-  const [recap, setRecap] = useState<CallRecap | null>(null);
+  const [recap, setRecap] = useState<CallRecapData | null>(null);
   const [peopleMissing, setPeopleMissing] = useState(false);
 
   const toggle = (id: string) =>
@@ -140,19 +137,7 @@ export function StrategyCallForm({
           }}
           hint={peopleMissing ? t.noParticipants : undefined}
         />
-        <ChoiceCards
-          name="format"
-          legend={t.format}
-          required
-          columns={3}
-          value={format}
-          onChange={setFormat}
-          choices={CALL_FORMATS.map((value) => ({
-            value,
-            label: t.formats[value],
-            hint: t.formatHints[value],
-          }))}
-        />
+        <CallFormatField value={format} onChange={setFormat} />
         <CallFields
           idPrefix="strategy-call"
           defaultTitle={t.defaultTitle}
@@ -161,35 +146,17 @@ export function StrategyCallForm({
         />
       </div>
 
-      {recap && <StrategyCallRecap recap={recap} />}
+      {recap && <CallRecap id="strategy-call-recap" recap={recap} />}
 
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>
       )}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        {recap ? (
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              size="lg"
-              onClick={() => setRecap(null)}
-            >
-              {t.edit}
-            </Button>
-            <SubmitButton pendingLabel={t.creating}>{t.create}</SubmitButton>
-          </>
-        ) : (
-          <>
-            <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-              {t.cancel}
-            </Button>
-            <Button type="button" size="lg" onClick={review}>
-              {t.review}
-            </Button>
-          </>
-        )}
-      </div>
+      <CallFormActions
+        onSummary={recap !== null}
+        onCancel={onCancel}
+        onReview={review}
+        onEdit={() => setRecap(null)}
+      />
     </form>
   );
 }

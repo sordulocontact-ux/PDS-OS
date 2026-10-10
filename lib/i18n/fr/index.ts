@@ -12,6 +12,13 @@ import { catalog } from "./catalog";
 import { catalogFiles } from "./catalog-files";
 import { contracts } from "./contracts";
 import { core } from "./core";
+import { conception } from "./conception";
+import { conceptionCall } from "./conception-call";
+import { conceptionWork } from "./conception-work";
+import { conceptionDirection } from "./conception-direction";
+import { conceptionIntents } from "./conception-intents";
+import { conceptionRefs } from "./conception-refs";
+import { conceptionSheet } from "./conception-sheet";
 import { design } from "./design";
 import { facts } from "./facts";
 import { feedback } from "./feedback";
@@ -35,6 +42,15 @@ import { projectPlan } from "./project-plan";
 import { projectWork } from "./project-work";
 import { records } from "./records";
 import { production, projectReview } from "./production";
+import { productionBrief } from "./production-brief";
+import { productionCall } from "./production-call";
+import { productionDelivery } from "./production-delivery";
+import { productionImport } from "./production-import";
+import { productionNeeds } from "./production-needs";
+import { productionPost } from "./production-post";
+import { productionPrep } from "./production-prep";
+import { productionPreprod } from "./production-preprod";
+import { productionShoot } from "./production-shoot";
 import { release } from "./release";
 import { releaseDelivery } from "./release-delivery";
 import { shell } from "./shell";
@@ -43,10 +59,14 @@ import { strategyBrief } from "./strategy-brief";
 import { strategyBudget } from "./strategy-budget";
 import { strategyCalendar } from "./strategy-calendar";
 import { strategyDeliverables } from "./strategy-deliverables";
+import { strategyDocuments } from "./strategy-documents";
 import { strategyDispositif } from "./strategy-dispositif";
 import { strategyEntry } from "./strategy-entry";
+import { strategyFollowUp } from "./strategy-follow-up";
 import { strategyKpis } from "./strategy-kpis";
 import { strategyPilot } from "./strategy-pilot";
+import { strategyPressKit } from "./strategy-press-kit";
+import { strategyReleasePlan } from "./strategy-release-plan";
 import { transmission } from "./transmission";
 import { voice } from "./voice";
 import { work } from "./work";
@@ -70,9 +90,29 @@ export const fr = {
   strategyBudget,
   strategyKpis,
   strategyBrief,
+  strategyDocuments,
+  strategyReleasePlan,
+  strategyPressKit,
+  strategyFollowUp,
   strategyPilot,
   design,
+  conception,
+  conceptionCall,
+  conceptionWork,
+  conceptionIntents,
+  conceptionRefs,
+  conceptionDirection,
+  conceptionSheet,
   production,
+  productionPrep,
+  productionBrief,
+  productionNeeds,
+  productionCall,
+  productionImport,
+  productionPreprod,
+  productionShoot,
+  productionPost,
+  productionDelivery,
   projectReview,
   release,
   releaseDelivery,

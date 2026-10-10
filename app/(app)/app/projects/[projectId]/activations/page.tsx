@@ -1,5 +1,6 @@
 import { IconLayers } from "nucleo-sharp-essential";
 
+import { ActivationHandoffsSection } from "@/components/production/delivery/activation-handoffs-section";
 import { EditInStrategy } from "@/components/project-plan/edit-in-strategy";
 import { LeverList } from "@/components/project-plan/lever-list";
 import { ProjectPageActions } from "@/components/projects/project-page-actions";
@@ -41,6 +42,7 @@ export default async function ProjectActivationsPage({
           />
         }
       </ProjectPageActions>
+      <ActivationHandoffsSection projectId={projectId} access={access} />
       {levers.length === 0 ? (
         <EmptyState icon={IconLayers} title={t.emptyTitle} body={t.emptyBody} />
       ) : (

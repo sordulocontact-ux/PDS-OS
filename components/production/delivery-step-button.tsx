@@ -16,11 +16,14 @@ export function DeliveryStepButton({
   deliverableId,
   title,
   step,
+  onVersion = false,
 }: {
   projectId: string;
   deliverableId: string;
   title: string;
   step: Step;
+  // The creative decision rests on a validated version: « Rouvrir » keeps it.
+  onVersion?: boolean;
 }) {
   const t = fr.production;
   const [open, setOpen] = useState(false);
@@ -43,7 +46,11 @@ export function DeliveryStepButton({
           setOpen(next);
         }}
         title={`${label} · ${title}`}
-        description={t.stepHints[step]}
+        description={
+          onVersion && step === "reopen"
+            ? t.stepHints.reopenOnVersion
+            : t.stepHints[step]
+        }
         cancelLabel={t.cancel}
         closeLabel={t.close}
         confirmLabel={label}

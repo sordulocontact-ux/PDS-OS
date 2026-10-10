@@ -22,6 +22,8 @@ export type ProductionDeliverable = {
   dueDate: string | null;
   // The Conception's validated version: the creative source (ticket § 1).
   approvedDesign: { number: number; href: string | null } | null;
+  // Its preparation is opened (production_sheets).
+  prepared: boolean;
   delivery:
     | (ProductionDeliveryRow & {
         approvedBy: string | null;
@@ -59,6 +61,7 @@ export async function loadProduction(
     deliverablesRes,
     deliveriesRes,
     creativesRes,
+    sheetsRes,
     versions,
     members,
   ] = await Promise.all([
@@ -83,6 +86,10 @@ export async function loadProduction(
       .from("project_creatives")
       .select("person_id")
       .eq("project_id", projectId),
+    supabase
+      .from("production_sheets")
+      .select("deliverable_id")
+      .eq("project_id", projectId),
     listDesignVersions(supabase, projectId),
     loadMembers(access),
   ]);
@@ -94,6 +101,9 @@ export async function loadProduction(
   const stage = stageRes.data
     ? { id: stageRes.data.id, state: stageRes.data.state }
     : null;
+  const prepared = new Set(
+    (sheetsRes.data ?? []).map((row) => row.deliverable_id),
+  );
   const deliveries = new Map(
     (deliveriesRes.data ?? []).map((row) => [row.deliverable_id, row]),
   );
@@ -125,6 +135,7 @@ export async function loadProduction(
       approvedDesign: approved
         ? { number: approved.number, href: approved.href }
         : null,
+      prepared: prepared.has(d.id),
       delivery,
       state: deliveryStateOf(delivery),
     };

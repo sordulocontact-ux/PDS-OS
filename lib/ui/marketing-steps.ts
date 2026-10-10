@@ -49,6 +49,9 @@ export function marketingSteps(
         step.key === "strategy"
           ? [routes.projectStrategyBrief(projectId)]
           : undefined,
+      // Production and Conception have pages below their own (a
+      // deliverable's preparation; intentions, references, sheets…).
+      nested: step.key === "production" || step.key === "conception",
       done: step.stageKey !== null && validatedStages.includes(step.stageKey),
     };
   });

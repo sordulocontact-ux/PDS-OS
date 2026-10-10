@@ -160,10 +160,47 @@ export const routes = {
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
   // The Brief de sortie consolidé (ticket Stratégie § 8).
   projectStrategyBrief: (id: string) => `/app/projects/${id}/strategy/brief`,
+  // One stored version of the Brief de sortie (V1, V2…), as it was sent.
+  // A strategy document's version by its id: redirects to its page.
+  projectStrategyDocument: (id: string, documentId: string) =>
+    `/app/projects/${id}/strategy/document/${documentId}`,
+  projectStrategyBriefVersion: (id: string, version: number) =>
+    `/app/projects/${id}/strategy/brief?v=${version}`,
+  // A stored version of a strategy document as a PDF file.
+  projectStrategyDocumentPdf: (id: string, documentId: string) =>
+    `/api/projects/${id}/strategy-documents/${documentId}`,
+  // The Plan de sortie generator, one step at a time (ticket Stratégie § 11).
+  // Follow-up of a validated strategy, before and after the release.
+  projectStrategyFollowUp: (id: string) =>
+    `/app/projects/${id}/strategy/follow-up`,
+  projectStrategyReleasePlan: (id: string, step?: number) =>
+    `/app/projects/${id}/strategy/release-plan${step ? `?step=${step}` : ""}`,
+  // The Dossier de presse generator, one step at a time (ticket § 12).
+  projectStrategyPressKit: (id: string, step?: number) =>
+    `/app/projects/${id}/strategy/press-kit${step ? `?step=${step}` : ""}`,
+  // A shared external document of the Stratégie, read without an account.
+  sharedDocument: (token: string) => `/d/${token}`,
   // A dimension of the Stratégie open in its work panel.
   projectStrategyDimension: (id: string, dimension: string) =>
     `/app/projects/${id}/strategy?d=${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
+  // The Conception's direct work (Chemin B), on one target: a deliverable
+  // (design_deliverables.id) or « direction ».
+  projectDesignWork: (id: string, target?: string) =>
+    `/app/projects/${id}/design/work${target ? `?d=${target}` : ""}`,
+  // Moodboards and references, one resource linked to any number of targets.
+  projectDesignReferences: (id: string) =>
+    `/app/projects/${id}/design/references`,
+  // The artistic direction: responsible, validators, synthesis, submissions.
+  projectDesignDirection: (id: string) =>
+    `/app/projects/${id}/design/direction`,
+  // The Brief créatif global; `version` opens a stored one.
+  projectDesignBrief: (id: string, version?: number) =>
+    `/app/projects/${id}/design/brief${version ? `?v=${version}` : ""}`,
+  // The Fiches Livrables, then one of them.
+  projectDesignSheets: (id: string) => `/app/projects/${id}/design/sheets`,
+  projectDesignSheet: (id: string, sheetId: string) =>
+    `/app/projects/${id}/design/sheets/${sheetId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
@@ -179,6 +216,12 @@ export const routes = {
     `/app/projects/${id}/legal/${step}`,
   projectActivations: (id: string) => `/app/projects/${id}/activations`,
   projectProduction: (id: string) => `/app/projects/${id}/production`,
+  // Production of one committed deliverable: its preparation.
+  projectProductionSheet: (id: string, deliverableId: string) =>
+    `/app/projects/${id}/production/${deliverableId}`,
+  // Its other tabs: preproduction, shoot, post, delivery.
+  projectProductionStep: (id: string, deliverableId: string, step: string) =>
+    `/app/projects/${id}/production/${deliverableId}/${step}`,
   projectReview: (id: string) => `/app/projects/${id}/review`,
   projectWork: (id: string) => `/app/projects/${id}/work`,
   projectTeam: (id: string) => `/app/projects/${id}/team`,

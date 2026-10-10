@@ -22,3 +22,11 @@ export function agendaMinutes(
     extra.length * EXTRA_TOPIC_MINUTES
   );
 }
+
+// A prepared topic takes about this long per question, between 5 and 15 min.
+const MINUTES_PER_QUESTION = 4;
+
+/** Approximate length of a prepared topic, from its number of questions. */
+export function topicMinutes(questions: number): number {
+  return Math.min(15, Math.max(5, questions * MINUTES_PER_QUESTION));
+}

@@ -32,6 +32,13 @@ export type FramingErrorCode =
   | "invalid_owner"
   | "deliveries_open"
   | "review_required"
+  | "already_decided"
+  | "reminder_too_soon"
+  | "invalid_reviewer"
+  | "brief_not_validated"
+  | "brief_pending"
+  | "strategy_incomplete"
+  | "not_shareable"
   | "generic";
 
 export type ActionResult =
@@ -68,6 +75,12 @@ export function fromDatabaseError(
     "invalid_owner",
     "deliveries_open",
     "review_required",
+    "already_decided",
+    "reminder_too_soon",
+    "invalid_reviewer",
+    "brief_not_validated",
+    "brief_pending",
+    "not_shareable",
   ] as const) {
     if (message.includes(code)) return fail(code);
   }
@@ -75,7 +88,9 @@ export function fromDatabaseError(
     message.includes("stage_not_found") ||
     message.includes("validation_not_found") ||
     message.includes("version_not_found") ||
-    message.includes("brief_not_found")
+    message.includes("brief_not_found") ||
+    message.includes("document_not_found") ||
+    message.includes("review_not_found")
   )
     return fail("not_found");
   if (error?.code === "42501") return fail("forbidden");

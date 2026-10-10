@@ -17,6 +17,8 @@ export type SectionStep = {
   // Other pages the step covers (a sub-page opened from it): current there
   // too.
   also?: string[];
+  // Every page below its own (one per deliverable): current there too.
+  nested?: boolean;
 };
 
 /**
@@ -52,7 +54,10 @@ export function SectionSteps({
         href: step.built ? step.href : undefined,
         title: step.built ? undefined : (step.title ?? soon),
         done: step.done,
-        current: pathname === step.href || !!step.also?.includes(pathname),
+        current:
+          pathname === step.href ||
+          !!step.also?.includes(pathname) ||
+          (!!step.nested && pathname.startsWith(`${step.href}/`)),
       }))}
     />
   );

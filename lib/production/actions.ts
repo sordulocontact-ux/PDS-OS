@@ -16,6 +16,11 @@ function failure(error: { code?: string; message?: string }): ProductionResult {
   const message = error.message ?? "";
   if (error.code === "42501") return { ok: false, error: e.forbidden };
   if (message.includes("stage_locked")) return { ok: false, error: e.locked };
+  // With a production sheet (20261010006201_production_post.sql).
+  if (message.includes("approve_on_version"))
+    return { ok: false, error: fr.productionDelivery.errors.approveOnVersion };
+  if (message.includes("exports_not_checked"))
+    return { ok: false, error: fr.productionDelivery.errors.exportsNotChecked };
   if (message.includes("invalid_transition"))
     return { ok: false, error: e.order };
   if (error.code === "23514") return { ok: false, error: e.url };

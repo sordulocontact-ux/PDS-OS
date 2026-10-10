@@ -1,0 +1,85 @@
+import { notFound, redirect } from "next/navigation";
+
+import { DecisionsSection } from "@/components/production/delivery/decisions-section";
+import { ExportChecklistSection } from "@/components/production/delivery/export-checklist-section";
+import { HandoffSection } from "@/components/production/delivery/handoff-section";
+import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
+import { fr } from "@/lib/i18n/fr";
+import { loadDeliveryTab } from "@/lib/production/delivery/queries";
+import {
+  checkSince,
+  decisionsOf,
+  summarize,
+} from "@/lib/production/delivery/rules";
+import { loadProductionSheet } from "@/lib/production/sheet";
+import { requireLaunchedProject } from "@/lib/projects/queries";
+import { allInOrder } from "@/lib/utils/parallel";
+
+const t = fr.productionDelivery;
+
+export const metadata = { title: `${t.title} · ${fr.app.name}` };
+
+/**
+ * Marketing › Production › one deliverable › Livraison (ticket « Workflow
+ * Production complet », parcours 19 to 21): the three decisions before
+ * « Livré », the technical check of the exports, the transmission to
+ * Activations. Written by the owner while the « production » stage runs;
+ * read by whoever sees the project.
+ */
+export default async function ProductionDeliveryPage({
+  params,
+}: PageProps<"/app/projects/[projectId]/production/[deliverableId]/delivery">) {
+  const { projectId, deliverableId } = await params;
+  const [access] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+  ]);
+  const data = await loadProductionSheet(projectId, deliverableId, access);
+  if (!data) notFound();
+  if (!data.sheet)
+    redirect(routes.projectProductionSheet(projectId, deliverableId));
+
+  const tab = await loadDeliveryTab(data.sheet.id, deliverableId, data.members);
+  const since = checkSince(tab.delivery);
+  const decisions = decisionsOf({
+    approvedAt: tab.delivery?.approvedAt ?? null,
+    checkedAt: tab.delivery?.checkedAt ?? null,
+    deliveredAt: tab.delivery?.deliveredAt ?? null,
+    summary: summarize(tab.lines, since),
+  });
+  const status =
+    data.stageState !== "in_progress"
+      ? t.locked
+      : !data.canOrganize
+        ? t.readOnly
+        : null;
+
+  return (
+    <div className="flex flex-col gap-10">
+      {status && <p className="text-sm text-muted-foreground">{status}</p>}
+      <DecisionsSection
+        projectId={projectId}
+        deliverable={data.deliverable}
+        data={tab}
+        decisions={decisions}
+        canOrganize={data.canOrganize}
+      />
+      <ExportChecklistSection
+        projectId={projectId}
+        sheetId={data.sheet.id}
+        fiche={data.heritage.fiche}
+        lines={tab.lines}
+        since={since}
+        canOrganize={data.canOrganize}
+      />
+      <HandoffSection
+        projectId={projectId}
+        sheetId={data.sheet.id}
+        data={tab}
+        fiche={data.heritage.fiche}
+        canOrganize={data.canOrganize}
+      />
+    </div>
+  );
+}

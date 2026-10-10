@@ -13,6 +13,7 @@ import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { routes } from "@/lib/auth/redirects";
 import { personName } from "@/lib/projects/types";
 import { isCallFormat, type CallFormat } from "@/lib/strategy/call-prep";
+import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import {
   fromReportItemRows,
   type ReportItemRow,
@@ -50,15 +51,20 @@ export type CallDetail = CallSummary & {
   errorCode: string | null;
   agenda: AgendaItem[] | null;
   durationMinutes: number | null;
-  // Prepared from the Cadrage or the Stratégie (« Préparer un échange »):
+  // Prepared from the Cadrage, the Stratégie or the Conception (« Préparer un
+  // échange »):
   // its purpose, who takes part, the documents that go with it, and how a
-  // strategy call is held.
+  // strategy or creative call is held, and the deliverables a creative
+  // call (Conception) is about.
   prepared: {
-    kind: "framing" | "strategy";
+    kind: "framing" | "strategy" | "design" | "production";
     purpose: string;
     participants: string[];
     documents: Array<{ id: string; name: string }>;
     format: CallFormat | null;
+    deliverables: string[];
+    // A production call: the deliverable whose preparation it serves.
+    productionDeliverableId: string | null;
   } | null;
 };
 
@@ -209,7 +215,7 @@ async function preparedOfCall(
   supabase: Client,
   callId: string,
 ): Promise<CallDetail["prepared"]> {
-  const [framing, strategy] = await Promise.all([
+  const [framing, strategy, design, production] = await Promise.all([
     supabase
       .from("framing_calls")
       .select("purpose, participants, document_ids")
@@ -220,8 +226,28 @@ async function preparedOfCall(
       .select("purpose, participants, document_ids, format")
       .eq("call_id", callId)
       .maybeSingle(),
+    supabase
+      .from("design_calls")
+      .select("purpose, participants, document_ids, format, deliverable_ids")
+      .eq("call_id", callId)
+      .maybeSingle(),
+    // A production call (Production, a deliverable's preparation): no
+    // documents, the deliverable it prepares.
+    supabase
+      .from("production_calls")
+      .select(
+        "purpose, participants, format, production_sheets(deliverable_id, strategy_deliverables(title))",
+      )
+      .eq("call_id", callId)
+      .maybeSingle(),
   ]);
-  const data = strategy.data ?? framing.data;
+  const data =
+    design.data ??
+    strategy.data ??
+    framing.data ??
+    (production.data
+      ? { ...production.data, document_ids: [] as string[] }
+      : null);
   if (!data) return null;
   const { data: files } = data.document_ids.length
     ? await supabase
@@ -236,13 +262,50 @@ async function preparedOfCall(
           : [],
       )
     : [];
+  const productionTitle =
+    production.data?.production_sheets?.strategy_deliverables?.title ?? null;
+  const deliverables = design.data?.deliverable_ids.length
+    ? await deliverableTitles(supabase, design.data.deliverable_ids)
+    : productionTitle
+      ? [productionTitle]
+      : [];
   return {
-    kind: strategy.data ? "strategy" : "framing",
+    kind: design.data
+      ? "design"
+      : strategy.data
+        ? "strategy"
+        : production.data
+          ? "production"
+          : "framing",
     purpose: data.purpose,
     participants,
     documents: (files ?? []).map((f) => ({ id: f.id, name: f.file_name })),
     format: "format" in data && isCallFormat(data.format) ? data.format : null,
+    deliverables,
+    productionDeliverableId:
+      production.data?.production_sheets?.deliverable_id ?? null,
   };
+}
+
+/** The titles of the Conception deliverables a creative call is about. */
+async function deliverableTitles(
+  supabase: Client,
+  ids: string[],
+): Promise<string[]> {
+  const { data } = await supabase
+    .from("design_deliverables")
+    .select("id, title, strategy_deliverables(title, quantity)")
+    .in("id", ids);
+  return ids.flatMap((id) => {
+    const row = (data ?? []).find((d) => d.id === id);
+    if (!row) return [];
+    const committed = row.strategy_deliverables;
+    return [
+      committed
+        ? deliverableTitle(committed.title, committed.quantity)
+        : (row.title ?? ""),
+    ];
+  });
 }
 
 /**

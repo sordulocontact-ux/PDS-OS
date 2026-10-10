@@ -1,0 +1,37 @@
+import { ToneCallout } from "@/components/ui/tone-callout";
+import { fr } from "@/lib/i18n/fr";
+import type { GeneratorKind } from "@/lib/strategy/documents/generator-kind";
+
+/**
+ * Step 7 (ticket § 11): PO generates the real visual document from the
+ * validated strategy and the choices; steps not validated yet are said.
+ */
+export function GenerateStep({
+  complete,
+  children,
+  kind = "release_plan",
+}: {
+  kind?: GeneratorKind;
+  // Every choice step was validated.
+  complete: boolean;
+  // The « Générer » button, for the owner.
+  children: React.ReactNode;
+}) {
+  const t =
+    kind === "press_kit"
+      ? fr.strategyPressKit.generate
+      : fr.strategyReleasePlan.generate;
+  return (
+    <section
+      aria-labelledby="generate-title"
+      className="flex flex-col items-start gap-4"
+    >
+      <h2 id="generate-title" className="text-display-sm font-semibold">
+        {t.title}
+      </h2>
+      <p className="max-w-prose text-body-md text-muted-foreground">{t.body}</p>
+      {!complete && <ToneCallout tone="warning">{t.incomplete}</ToneCallout>}
+      {children}
+    </section>
+  );
+}
