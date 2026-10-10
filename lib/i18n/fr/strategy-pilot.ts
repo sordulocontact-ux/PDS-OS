@@ -61,6 +61,8 @@ export const strategyPilot = {
     milestones: (n: number) => plural(n, "temps fort", "temps forts"),
     release: (date: string) => `sortie le ${date}`,
     noReleaseDate: "date de sortie à fixer",
+    lateUpstream: (n: number) =>
+      n > 1 ? `${n} échéances amont trop tard` : "1 échéance amont trop tard",
     noBudget: "Aucune ligne de budget",
     budget: {
       committed: (amount: string) => `Engagé ${amount}`,

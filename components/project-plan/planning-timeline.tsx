@@ -9,7 +9,8 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { TimelineItem, TimelineMonth } from "@/lib/project-plan/timeline";
-import { dayOffset } from "@/lib/strategy/calendar";
+import { dayOffset, isMilestoneChannel } from "@/lib/strategy/calendar";
+import { overdueTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
 type MilestoneKind = keyof typeof fr.strategy.calendar.kinds;
@@ -36,10 +37,30 @@ function TimelineRow({
 }) {
   const t = fr.projectPlan.planning;
   const past = item.date < today;
+  const c = fr.strategyCalendar;
   const kind =
-    item.kind === "milestone" && item.milestoneKind
-      ? fr.strategy.calendar.kinds[item.milestoneKind as MilestoneKind]
-      : t.kinds[item.kind];
+    item.kind === "upstream"
+      ? c.upstream.planningKind
+      : item.kind === "milestone" && item.milestoneKind
+        ? fr.strategy.calendar.kinds[item.milestoneKind as MilestoneKind]
+        : t.kinds[item.kind];
+  const line =
+    item.kind === "milestone"
+      ? [
+          t.kinds.milestone,
+          kind,
+          isMilestoneChannel(item.channel) && c.channels[item.channel],
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : item.upstream
+        ? `${kind} · ${c.upstream.planningLine(
+            c.upstream.steps[item.upstream.step],
+            item.upstream.milestoneTitle,
+          )}`
+        : item.occurredAt
+          ? `${kind} · ${formatTime(item.occurredAt)}`
+          : kind;
 
   return (
     <li>
@@ -67,17 +88,15 @@ function TimelineRow({
           >
             {item.title}
           </span>
-          <span className="text-xs text-muted-foreground">
-            {item.kind === "milestone"
-              ? `${t.kinds.milestone} · ${kind}`
-              : item.occurredAt
-                ? `${kind} · ${formatTime(item.occurredAt)}`
-                : kind}
-          </span>
+          <span className="text-xs text-muted-foreground">{line}</span>
         </span>
         {item.done ? (
           <StatusBadge tone="success" size="sm">
             {t.taskDone}
+          </StatusBadge>
+        ) : item.upstream?.late ? (
+          <StatusBadge tone={overdueTone} size="sm">
+            {c.upstream.late}
           </StatusBadge>
         ) : (
           <span />

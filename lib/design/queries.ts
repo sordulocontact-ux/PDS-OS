@@ -12,6 +12,7 @@ import {
 } from "@/lib/framing/related";
 import { designStateOf, type DesignState } from "@/lib/design/rules";
 import { listDesignVersions, type DesignVersion } from "@/lib/design/versions";
+import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import { createClient } from "@/lib/supabase/server";
 
 /** One line of work of the Dossier: a deliverable, or the creative direction. */
@@ -78,7 +79,9 @@ export async function loadDesign(
       .eq("deliverable", "design_doc"),
     supabase
       .from("strategy_deliverables")
-      .select("id, title, assignee_person_id, due_date, levers(label)")
+      .select(
+        "id, title, quantity, assignee_person_id, due_date, levers(label)",
+      )
       .eq("project_id", projectId)
       .order("created_at"),
     supabase
@@ -104,7 +107,7 @@ export async function loadDesign(
     const own = versionsOf(d.id);
     return {
       deliverableId: d.id,
-      title: d.title,
+      title: deliverableTitle(d.title, d.quantity),
       leverLabel: d.levers?.label ?? null,
       assigneeName: d.assignee_person_id
         ? (nameOf.get(d.assignee_person_id) ?? null)

@@ -39,6 +39,9 @@ import { release } from "./release";
 import { releaseDelivery } from "./release-delivery";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
+import { strategyCalendar } from "./strategy-calendar";
+import { strategyDeliverables } from "./strategy-deliverables";
+import { strategyDispositif } from "./strategy-dispositif";
 import { strategyEntry } from "./strategy-entry";
 import { strategyPilot } from "./strategy-pilot";
 import { transmission } from "./transmission";
@@ -58,6 +61,9 @@ export const fr = {
   framingIntel,
   strategy,
   strategyEntry,
+  strategyDispositif,
+  strategyDeliverables,
+  strategyCalendar,
   strategyPilot,
   design,
   production,

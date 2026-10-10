@@ -17,6 +17,7 @@ import { workflowGate } from "@/lib/plan/queries";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadBudget } from "@/lib/budget/queries";
+import { todayInParis } from "@/lib/insights/dates";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { projectKindLabel } from "@/lib/projects/labels";
@@ -111,6 +112,7 @@ export default async function StrategyPage({
 
   const statuses = dimensionStatuses({
     ...data,
+    today: todayInParis(),
     budgetLines: budget.lines,
     envelopeCents: project.budgetCents,
   });

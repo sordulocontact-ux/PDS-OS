@@ -8,6 +8,7 @@ import { formatBriefDate } from "@/lib/framing/assess";
 import type { FieldState } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import type { ChoiceSuggestion, ChoiceValue } from "@/lib/strategy/choices";
+import { upstreamChains } from "@/lib/strategy/upstream";
 
 export const STRATEGY_DIMENSIONS = [
   "positioning",
@@ -56,12 +57,21 @@ export type DimensionInput = {
   levers: Array<{ id: string; state: string; review_status: string }>;
   openNeeds: unknown[];
   deliverables: Array<{
+    id: string;
+    title: string;
     lever_id: string;
     assignee_person_id: string | null;
     due_date: string | null;
   }>;
-  milestones: unknown[];
+  milestones: Array<{
+    id: string;
+    title: string;
+    occurs_on: string;
+    deliverable_id: string | null;
+  }>;
   referenceDate: string | null;
+  // "YYYY-MM-DD" in Paris: an upstream deadline already past is late.
+  today: string;
   objectives: Array<{ target: number | null }>;
   budgetLines: Pick<BudgetLine, "amountCents" | "status" | "leverId">[];
   envelopeCents: number | null;
@@ -154,9 +164,26 @@ function calendar(input: DimensionInput): Omit<DimensionStatus, "key"> {
     : s.noReleaseDate;
   if (input.milestones.length === 0)
     return { state: "to_complete", summary: join([s.noMilestone, release]) };
+  const late = upstreamChains(
+    input.milestones.map((m) => ({
+      id: m.id,
+      title: m.title,
+      occursOn: m.occurs_on,
+      deliverableId: m.deliverable_id,
+    })),
+    input.deliverables,
+    input.today,
+  ).flatMap((chain) => chain.steps.filter((step) => step.late)).length;
+  const summary = join([
+    s.milestones(input.milestones.length),
+    release,
+    late > 0 && s.lateUpstream(late),
+  ]);
+  // A deadline already missed asks for a decision (move the milestone…).
+  if (late > 0) return { state: "to_decide", summary };
   return {
     state: input.referenceDate ? "complete" : "in_progress",
-    summary: join([s.milestones(input.milestones.length), release]),
+    summary,
   };
 }
 

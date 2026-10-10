@@ -54,6 +54,9 @@ export type PlanMilestone = {
   title: string;
   occursOn: string;
   kind: string;
+  channel: string;
+  // The deliverable that comes out that day: its upstream deadlines follow.
+  deliverableId: string | null;
 };
 
 export type PlanCall = {
@@ -125,7 +128,7 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
       .order("created_at"),
     supabase
       .from("milestones")
-      .select("id, title, occurs_on, kind")
+      .select("id, title, occurs_on, kind, channel, deliverable_id")
       .eq("project_id", projectId)
       .order("occurs_on"),
     supabase
@@ -209,6 +212,8 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
       title: m.title,
       occursOn: m.occurs_on,
       kind: m.kind,
+      channel: m.channel,
+      deliverableId: m.deliverable_id,
     })),
     // On the timeline: a task without a date (the Juridique's) has no place.
     tasks: (tasksRes.data ?? []).flatMap((t) =>

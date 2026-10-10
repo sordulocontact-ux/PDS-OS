@@ -744,6 +744,34 @@ livrable, les libellés ou l'action d'import en props.
     échéance), saisis par une personne, jamais par PO ; écrits par le responsable
     pendant « en cours » (`strategy_is_editable`).
   - Les sujets de « Préparer un échange » suivent les 8 dimensions.
+- **Dispositif** (étape 3) : chaque levier est **Retenu / À arbitrer / Non retenu**, les trois
+  états côte à côte (`LeverStateControl`), un clic pour changer ; la base refuse de « dé-retenir »
+  un levier qui porte des livrables (`lever_has_deliverables`). **Leviers courants en un clic**
+  (`lib/strategy/lever-presets.ts` : social organique, influence, RP / médias, pitching
+  playlists, partenariats, publicité en ligne, radio, live / showcase, clip / contenus vidéo),
+  proposés par le code, ajoutés « à arbitrer », masqués une fois présents (même libellé, sans
+  accent ni casse). Le détail opérationnel d'un levier retenu se traite dans Activations.
+- **Livrables engagés** (étape 4 ; migration `20261010000601_strategy_calendar_channels`) :
+  saisis par une personne (nature, **quantité** `strategy_deliverables.quantity` 1 à 99, levier
+  retenu, responsable, échéance), groupés par levier retenu, modifiables en place
+  (`lib/strategy/actions/deliverables.ts`). **Jamais de liste prédéfinie** : nombre et nature
+  dépendent du projet. Titre avec quantité par `deliverableTitle` (« Capsules × 5 »), repris en
+  Conception, qui lit ces livrables une fois la Stratégie validée.
+- **Calendrier de lancement** (étape 5) : rétroplanning à deux niveaux, onglets **Temps forts**
+  (J-n / J0 / J+n calculés par `dayOffset` depuis la date de sortie de référence) et **Par canal**
+  (`milestones.channel` : Organique, Influence, RP / Médias, Sortie toujours affichés ; Live /
+  Event et Autre seulement s'ils ont un temps fort). Chaque temps fort s'ouvre et se modifie
+  dans la modale (`components/strategy/calendar/milestone-form.tsx`) : titre, **jour relatif
+  « J-10 »** converti en date par le code (synchronisé avec la date), type, canal (suit le type
+  tant qu'on ne l'a pas choisi), livrable qui sort ce jour-là, note (`milestones.notes`).
+  Toujours saisi par une personne, jamais par PO.
+  - **Échéances amont** calculées par le code (`lib/strategy/upstream.ts`) : pour chaque livrable
+    rattaché à un temps fort, depuis le **premier** où il sort, conception terminée à J-21,
+    production terminée à J-10, validation à J-4 (`UPSTREAM_LEAD_DAYS`, délais par défaut, à
+    ajuster là). Une étape déjà passée alors que le temps fort est à venir est « Trop tard » ;
+    la dimension Calendrier passe alors **À arbitrer**.
+  - **Propagées vers le Planning** : type `upstream` de `lib/project-plan/timeline.ts`, avec le
+    canal des temps forts ; un clic ouvre `/strategy?d=calendar`.
 - Champs texte : positionnement, publics, narratif (`field_values`, `deliverable = 'strategy'`,
   actions génériques `saveField` / `confirmField` / `rejectField`).
 - Dispositif : leviers par famille (taxonomie des besoins) ; un besoin confirmé du Brief

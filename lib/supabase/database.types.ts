@@ -4222,11 +4222,13 @@ export type Database = {
       }
       milestones: {
         Row: {
+          channel: string
           created_at: string
           created_by: string | null
           deliverable_id: string | null
           id: string
           kind: string
+          notes: string | null
           occurs_on: string
           organization_id: string
           project_id: string
@@ -4234,11 +4236,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          channel?: string
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
           id?: string
           kind?: string
+          notes?: string | null
           occurs_on: string
           organization_id: string
           project_id: string
@@ -4246,11 +4250,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          channel?: string
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
           id?: string
           kind?: string
+          notes?: string | null
           occurs_on?: string
           organization_id?: string
           project_id?: string
@@ -5753,6 +5759,7 @@ export type Database = {
           lever_id: string
           organization_id: string
           project_id: string
+          quantity: number | null
           title: string
           updated_at: string
         }
@@ -5765,6 +5772,7 @@ export type Database = {
           lever_id: string
           organization_id: string
           project_id: string
+          quantity?: number | null
           title: string
           updated_at?: string
         }
@@ -5777,6 +5785,7 @@ export type Database = {
           lever_id?: string
           organization_id?: string
           project_id?: string
+          quantity?: number | null
           title?: string
           updated_at?: string
         }
