@@ -82,7 +82,7 @@ export function briefHtml({
   h2 { font-size: 17px; line-height: 22px; font-weight: 600; margin-bottom: 12px; }
   dl { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 40px; }
   .fact { break-inside: avoid; }
-  dd { margin-top: 2px; font-weight: 600; }
+  dd { margin-top: 2px; font-weight: 600; white-space: pre-line; }
   dd ul { list-style: none; }
   dd.empty { font-weight: 500; color: #767676; }
 </style>

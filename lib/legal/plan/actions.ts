@@ -8,6 +8,8 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { todayInParis } from "@/lib/insights/dates";
+import { defaultDueOn } from "@/lib/legal/plan/due-dates";
 import { planItemPayload } from "@/lib/legal/plan/payload";
 import { proposeLegalPlan } from "@/lib/legal/plan/queries";
 import { getProject } from "@/lib/projects/queries";
@@ -68,6 +70,19 @@ export async function launchLegalPlan(
       return { ok: false, error: t.already };
     return { ok: false, error: t.failed };
   }
+  // What was removed is remembered: never « apparu depuis le lancement »
+  // nor re-created by « Ajouter au plan » (UX test of 09/10/2026).
+  const dismissed = proposal
+    .filter((item) => !keys.has(item.key))
+    .map((item) => item.key);
+  if (dismissed.length > 0) {
+    const { error: dismissError } = await supabase.rpc(
+      "dismiss_legal_plan_keys",
+      { p_project_id: id.data, p_keys: dismissed },
+    );
+    if (dismissError)
+      console.error("launchLegalPlan dismissed:", dismissError.message);
+  }
   // The tasks' people are notified by a trigger; the pushes leave now.
   await schedulePendingPushes();
   revalidatePath(routes.projectLegal(id.data), "layout");
@@ -91,19 +106,28 @@ export async function addLegalPlanItems(
   if (!project) return { ok: false, error: fr.auth.errors.forbidden };
 
   const supabase = await createClient();
-  const [proposal, existing, people] = await Promise.all([
+  const [proposal, existing, plan, people] = await Promise.all([
     proposeLegalPlan(project, access),
     supabase
       .from("legal_plan_items")
       .select("item_key")
       .eq("project_id", project.id),
+    supabase
+      .from("legal_plans")
+      .select("dismissed_keys")
+      .eq("project_id", project.id)
+      .maybeSingle(),
     access.organizationId
       ? supabase.rpc("list_legal_people", {
           p_organization_id: access.organizationId,
         })
       : Promise.resolve({ data: [], error: null }),
   ]);
-  const known = new Set((existing.data ?? []).map((row) => row.item_key));
+  // In the plan, or removed from it by a person: never added again.
+  const known = new Set([
+    ...(existing.data ?? []).map((row) => row.item_key),
+    ...(plan.data?.dismissed_keys ?? []),
+  ]);
   const fresh = proposal.filter((item) => !known.has(item.key));
   if (fresh.length === 0) return { ok: true };
   const owner = (people.data ?? []).some(
@@ -117,7 +141,7 @@ export async function addLegalPlanItems(
     p_items: fresh.map((item) =>
       planItemPayload(item, keys, {
         responsibleId: owner,
-        dueOn: project.dueDate,
+        dueOn: defaultDueOn(item.kind, project.dueDate, todayInParis()),
       }),
     ),
   });

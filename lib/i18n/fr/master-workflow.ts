@@ -302,19 +302,19 @@ export const masterWorkflow = {
     },
     transmitTitle: "Transmettre le dossier",
     transmitDescription:
-      "Un lien privé, valable 30 jours, donne accès au dossier et à ses fichiers, sans compte. Il n'est affiché qu'une fois : copiez-le ou envoyez-le tout de suite.",
+      "Un lien privé donne accès au dossier et à ses fichiers, sans compte, et permet à l'ingénieur de déposer ses versions. Il reste valable 14 jours après la date finale prévue au Brief (30 jours au moins). Il n'est affiché qu'une fois : copiez-le ou envoyez-le tout de suite.",
     modes: {
       remind: {
         label: "Relancer",
         title: "Relancer l'ingénieur",
         description:
-          "Un nouveau lien remplace le précédent (et renouvelle les fichiers pour 30 jours). Il n'est affiché qu'une fois.",
+          "Un nouveau lien remplace le précédent et renouvelle les fichiers, jusqu'à 14 jours après la date finale prévue au Brief (30 jours au moins). Il n'est affiché qu'une fois.",
       },
       resend: {
         label: "Renvoyer le dossier",
         title: "Renvoyer le dossier",
         description:
-          "Le dossier est recalculé tel qu'il est aujourd'hui (source, stems, Brief) et un nouveau lien remplace le précédent, pour 30 jours. Les retours déjà transmis y restent. Il n'est affiché qu'une fois.",
+          "Le dossier est recalculé tel qu'il est aujourd'hui (source, stems, Brief) et un nouveau lien remplace le précédent, jusqu'à 14 jours après la date finale prévue au Brief (30 jours au moins). Les retours déjà transmis y restent. Il n'est affiché qu'une fois.",
       },
     },
     note: "Message pour le mixeur",
@@ -396,6 +396,18 @@ export const masterWorkflow = {
     },
   },
   mixVersions: {
+    // Said under PO's synthesis when the code corrected it.
+    summaryChecked: (restored: number, removed: number) =>
+      [
+        restored > 0
+          ? `${restored} commentaire${restored > 1 ? "s" : ""} repris tel${restored > 1 ? "s" : ""} quel${restored > 1 ? "s" : ""} pour garder leurs chiffres`
+          : null,
+        removed > 0
+          ? `${removed} ligne${removed > 1 ? "s" : ""} retirée${removed > 1 ? "s" : ""} (remarque de PO ou chiffre que personne n'a dit)`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" ; ") + ". Relisez avant d'enregistrer.",
     needsBrief:
       "Les versions sont suivies dès que le Brief Mix/Master est enregistré : c'est lui qui désigne l'ingénieur et le validateur.",
     openBrief: "Ouvrir le Brief Mix/Master",
@@ -526,6 +538,33 @@ export const masterWorkflow = {
     acknowledging: "Envoi…",
     received: (date: string) => `Réception confirmée le ${date}. Merci !`,
     expires: (date: string) => `Lien valable jusqu'au ${date}.`,
+    // The engineer's deposit (UX test of 09/10/2026).
+    deliver: {
+      title: "Déposer ma version",
+      hint: {
+        mix: "Glissez votre mix ici, ou cliquez pour le choisir. Il arrive directement chez le label comme nouvelle version.",
+        mastering:
+          "Glissez votre master ici, ou cliquez pour le choisir. Il arrive directement chez le label comme nouvelle version.",
+      },
+      pending: "Envoi…",
+      done: (fileName: string) =>
+        `« ${fileName} » est bien arrivé chez le label.`,
+      sent: (fileName: string, date: string) =>
+        `${fileName} · déposé le ${date}`,
+      notAudio:
+        "Ce fichier n'est pas un fichier audio (WAV, AIFF, FLAC, MP3…).",
+      tooLarge:
+        "Ce fichier dépasse 50 Mo : envoyez-le par un autre moyen au label.",
+      errors: {
+        replaced:
+          "Ce lien a été remplacé par un envoi plus récent : utilisez le dernier lien reçu.",
+        expired: "Ce lien a expiré. Demandez un nouveau lien au label.",
+        too_many_deposits:
+          "Trop de dépôts en une heure sur ce lien. Réessayez un peu plus tard.",
+        title_not_in_package: "Ce titre ne fait plus partie du dossier.",
+        failed: "Le fichier n'a pas pu être envoyé. Réessayez.",
+      },
+    },
     replaced:
       "Ce lien a été remplacé par un envoi plus récent. Utilisez le dernier lien reçu.",
     expired: "Ce lien a expiré. Demandez un nouveau lien au label.",
@@ -579,6 +618,7 @@ export const masterWorkflow = {
       stemsKnown: "Disponibles",
       noStems: "Aucun fichier de pistes",
       namedInSession: "Nommé dans une session",
+      namedInFraming: "Désigné au Cadrage",
       nobody: "Personne n'est crédité",
     },
     sources: {
@@ -586,6 +626,7 @@ export const masterWorkflow = {
       sessions: "Sessions du titre",
       files: "Fichiers du titre",
       credits: "Crédits du titre",
+      framing: "Équipe du Cadrage",
     },
     version: (version: number) => `v${version}`,
     source: {
@@ -601,6 +642,8 @@ export const masterWorkflow = {
       dialogDescription:
         "La version que l'ingénieur du mix recevra. La dernière version détectée est proposée ; vous pouvez en choisir une autre.",
       legend: "Version audio",
+      notListed: "La bonne version n'est pas dans la liste ?",
+      importVersion: "Importer une version",
       submit: "Utiliser cette version",
       submitting: "Enregistrement…",
       cancel: "Annuler",
@@ -624,19 +667,9 @@ export const masterWorkflow = {
       credit: "Créditer",
       creditTitle: "Créditer un ingénieur",
     },
+    // The engineers of the Réseau, offered in the Brief (network-engineers.ts).
     network: {
-      title: "Ingénieurs du Réseau",
-      description:
-        "Les contacts au rôle d'ingénieur, et les titres de PDS qu'ils ont déjà mixés ou masterisés.",
-      empty: "Aucun ingénieur dans le Réseau.",
       add: "Ajouter un ingénieur",
-      columns: {
-        name: "Nom",
-        city: "Ville",
-        history: "Déjà fait avec PDS",
-        contact: "Coordonnées",
-      },
-      noHistory: "Aucun titre",
       mixHistory: (count: number) => `Mix sur ${titles(count)}`,
       masteringHistory: (count: number) => `Mastering sur ${titles(count)}`,
     },

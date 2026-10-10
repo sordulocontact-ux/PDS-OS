@@ -60,16 +60,18 @@ export function BriefForm({ view }: { view: BriefView }) {
             defaultValue={brief.mixContactId}
           />
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              name="mixRate"
-              label={f.mixRate}
-              hint={f.rateHint}
-              inputMode="decimal"
-              autoComplete="off"
-              suffix="€"
-              defaultValue={value("mixRate", rateInput(brief.mixRateCents))}
-              error={errors.mixRate}
-            />
+            {view.canSeeBudget && (
+              <Field
+                name="mixRate"
+                label={f.mixRate}
+                hint={f.rateHint}
+                inputMode="decimal"
+                autoComplete="off"
+                suffix="€"
+                defaultValue={value("mixRate", rateInput(brief.mixRateCents))}
+                error={errors.mixRate}
+              />
+            )}
             <Field
               name="revisions"
               type="number"
@@ -117,19 +119,21 @@ export function BriefForm({ view }: { view: BriefView }) {
               defaultValue={brief.masteringContactId}
             />
           )}
-          <Field
-            name="masteringRate"
-            label={f.masteringRate}
-            hint={f.rateHint}
-            inputMode="decimal"
-            autoComplete="off"
-            suffix="€"
-            defaultValue={value(
-              "masteringRate",
-              rateInput(brief.masteringRateCents),
-            )}
-            error={errors.masteringRate}
-          />
+          {view.canSeeBudget && (
+            <Field
+              name="masteringRate"
+              label={f.masteringRate}
+              hint={f.rateHint}
+              inputMode="decimal"
+              autoComplete="off"
+              suffix="€"
+              defaultValue={value(
+                "masteringRate",
+                rateInput(brief.masteringRateCents),
+              )}
+              error={errors.masteringRate}
+            />
+          )}
         </FormSection>
 
         <FormSection title={t.sections.direction.title}>

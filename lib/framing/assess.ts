@@ -61,6 +61,7 @@ export type FramingAssessment = {
   // Every required question known and nothing left to confirm.
   ready: boolean;
   blocking: QuestionState[];
+  optionalEmpty: QuestionState[];
 };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
@@ -109,6 +110,66 @@ export function displayOf(key: QuestionKey, answer: Answer): string {
       return String(answer.count);
   }
 }
+
+type Party = { name: string; roles: string[] };
+
+/**
+ * Everyone outside PDS the project involves, decided by code: the titles'
+ * credits, the team held by a contact or a name (never a member of the
+ * app), and the intervenants the Juridique added. One line per name, its
+ * roles merged (« Hugo Vasquez (direction créative, réalisation du clip) »).
+ */
+export function projectParties(k: FramingKnowledge): Party[] {
+  const t = fr.framingIntel.records;
+  const lower = (label: string) => label.toLowerCase();
+  const creditRole = (role: string) =>
+    role === "performer"
+      ? t.performer
+      : role === "featuring"
+        ? t.featuring
+        : lower(
+            (fr.masterPage.credits.roles as Record<string, string>)[role] ??
+              role,
+          );
+  const teamRoles = fr.framingGuide.team.roles as Record<string, string>;
+  const roles = new Map<string, { name: string; roles: Set<string> }>();
+  const add = (name: string, role: string | null) => {
+    const key = name.trim().toLowerCase();
+    if (!key) return;
+    const entry = roles.get(key) ?? { name: name.trim(), roles: new Set() };
+    if (role?.trim()) entry.roles.add(role.trim());
+    roles.set(key, entry);
+  };
+  for (const c of k.credits) add(c.name, creditRole(c.role));
+  for (const m of k.framing.team) {
+    if (m.person_id || m.review_status !== "confirmed") continue;
+    const role = m.role_key ? teamRoles[m.role_key] : m.role;
+    add(m.display_name, role ? lower(role) : null);
+  }
+  for (const c of k.legalContacts)
+    add(
+      c.name,
+      lower((fr.legalForms.roles as Record<string, string>)[c.role] ?? c.role),
+    );
+  return [...roles.values()].map((p) => ({
+    name: p.name,
+    roles: [...p.roles],
+  }));
+}
+
+const partiesSource = (k: FramingKnowledge) => {
+  const s = fr.framingIntel.sources;
+  const team = k.framing.team.some(
+    (m) => !m.person_id && m.review_status === "confirmed",
+  );
+  return [
+    k.credits.length > 0 && s.credits,
+    team && s.team,
+    k.legalContacts.length > 0 && s.legal,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+};
 
 type Record_ = { answer: Answer; label: string } | null;
 
@@ -163,7 +224,7 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
     }
     case "missing_skills": {
       const roles = teamBoard(k.framing.team, k.framing.needs, rolesContext(k))
-        .roles.filter((r) => !r.member)
+        .roles.filter((r) => !r.member && !r.holder)
         .map((r) => fr.framingGuide.team.roles[r.role]);
       return roles.length
         ? text(t.records.rolesToFind(roles), s.rolesToFind)
@@ -211,28 +272,25 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
         s.work,
       );
     }
-    case "legal_parties": {
-      const roles = new Map<string, Set<string>>();
-      const roleLabel = (role: string) =>
-        role === "performer"
-          ? t.records.performer
-          : role === "featuring"
-            ? t.records.featuring
-            : (
-                (fr.masterPage.credits.roles as Record<string, string>)[role] ??
-                role
-              ).toLowerCase();
-      for (const c of k.credits) {
-        const set = roles.get(c.name) ?? new Set<string>();
-        set.add(roleLabel(c.role));
-        roles.set(c.name, set);
-      }
+    case "legal_parties":
       return text(
-        [...roles]
-          .map(([name, set]) => t.records.party(name, [...set]))
-          .join(" · "),
-        s.credits,
+        t.records.parties(
+          projectParties(k).map((p) => t.records.party(p.name, p.roles)),
+        ),
+        partiesSource(k),
       );
+    case "legal_needs": {
+      // One agreement per party outside PDS: which contract each one
+      // takes is the Juridique's mapping, not the Cadrage's.
+      const parties = projectParties(k);
+      return parties.length
+        ? text(
+            t.records.needs(
+              parties.map((p) => t.records.party(p.name, p.roles)),
+            ),
+            t.questions.legal_parties.label,
+          )
+        : null;
     }
     case "legal_agreements":
       return text(
@@ -264,6 +322,7 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
 /** Whether the engineers' roles are offered (a music project with titles). */
 export const rolesContext = (k: FramingKnowledge) => ({
   music: k.project.type === "music_release" && k.titles.length > 0,
+  creatives: k.creatives,
 });
 
 type LineRow = { review_status: string };
@@ -293,6 +352,25 @@ function linesState(
   return { status: "missing", answer: null, proposed: false };
 }
 
+/**
+ * A value confirmed as the project recorded it (« Confirmer » on a record:
+ * imported, with a source label and no quote) whose records have changed
+ * since: offered again while the Cadrage is open (a team member added after
+ * the parties were confirmed). A value written by a person never is.
+ */
+function outdated(
+  row: FramingKnowledge["framing"]["briefRows"][number] | undefined,
+  record: Record_,
+  k: FramingKnowledge,
+): boolean {
+  const stage = k.framing.stage?.state ?? "not_started";
+  if (stage !== "not_started" && stage !== "in_progress") return false;
+  if (!row || !record || record.answer.kind !== "text") return false;
+  if (row.source_type !== "import" || !row.source_label || row.source_quote)
+    return false;
+  return row.value !== record.answer.text;
+}
+
 function questionState(key: QuestionKey, k: FramingKnowledge): QuestionState {
   const def = QUESTIONS[key];
   const row = k.framing.briefRows.find((r) => r.field_key === key);
@@ -307,7 +385,8 @@ function questionState(key: QuestionKey, k: FramingKnowledge): QuestionState {
   };
 
   if (def.kind === "text" || def.kind === "date" || def.kind === "money") {
-    if (stored && row?.status === "confirmed")
+    const record = row?.status === "rejected" ? null : recordOf(key, k);
+    if (stored && row?.status === "confirmed" && !outdated(row, record, k))
       return {
         ...base,
         status: "known",
@@ -323,7 +402,6 @@ function questionState(key: QuestionKey, k: FramingKnowledge): QuestionState {
         display: displayOf(key, stored),
         proposed: true,
       };
-    const record = row?.status === "rejected" ? null : recordOf(key, k);
     if (record)
       return {
         ...base,
@@ -471,6 +549,11 @@ export function assessFraming(k: FramingKnowledge): FramingAssessment {
       ) ?? null,
     ready: blocking.length === 0,
     blocking,
+    // Optional questions left empty (or set aside): they never block the
+    // Brief, but « complet » would be false while they are there.
+    optionalEmpty: all.filter(
+      (q) => q.status === "missing" && !QUESTIONS[q.key].required,
+    ),
   };
 }
 

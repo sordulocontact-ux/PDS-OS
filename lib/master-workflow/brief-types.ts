@@ -98,6 +98,9 @@ export type BriefView = {
   nextAgenda: AgendaItem[];
   // The project's owner: the only one who writes the brief.
   canEdit: boolean;
+  // The owner and the direction: the rates and the budget section are
+  // theirs (UX test of 09/10/2026); for anyone else the rates are null.
+  canSeeBudget: boolean;
   // manage_network: add an engineer to the Réseau from the form.
   canAddContact: boolean;
   organizationId: string | null;

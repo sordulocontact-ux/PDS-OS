@@ -1,11 +1,15 @@
 import "server-only";
 
+import { withoutSilence } from "@/lib/ai/silence";
+
 /**
  * The AI SDK validates every Groq verbose_json segment strictly (ten numeric
  * fields). On real recordings (silence, noise) Groq can return null for a
  * segment's metadata, and the whole transcription then fails with a misleading
  * "Invalid JSON response". We only use start / end / text: missing metadata is
- * filled with neutral values before the SDK validates the response.
+ * filled with neutral values before the SDK validates the response. Before
+ * that, the segments Whisper marks as silence (or invents on it) are dropped
+ * (lib/ai/silence.ts): a silent recording ends with an empty transcript.
  */
 
 const NUMERIC_METADATA = [
@@ -90,7 +94,12 @@ export const groqTolerantFetch: typeof fetch = async (input, init) => {
     });
   }
 
-  const { payload, filled } = normalizeGroqTranscription(body as Json);
+  // Silence first, on the raw metadata (null on silence), before neutral
+  // values fill it in for the SDK's validation.
+  const { payload: heard, dropped } = withoutSilence(body as Json);
+  if (dropped > 0)
+    console.warn(`[transcribe] dropped ${dropped} silent segment(s)`);
+  const { payload, filled } = normalizeGroqTranscription(heard);
   if (filled > 0)
     console.warn(`[transcribe] filled ${filled} missing Groq segment fields`);
   const headers = new Headers(response.headers);

@@ -51,6 +51,8 @@ export const projectWork = {
       placeholder: "Ex. Envoyer les stems au mixeur",
       assignee: "Responsable",
       dueDate: "Échéance",
+      deliverable: "Livrable concerné",
+      noDeliverable: "Aucun",
       submit: "Ajouter",
       cancel: "Annuler",
       hint: "Une tâche a toujours un responsable et une échéance.",

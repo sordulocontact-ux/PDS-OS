@@ -45,21 +45,41 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
         .describe(
           "Nom de l'artiste déjà au catalogue à modifier ; absent pour créer un artiste",
         ),
-      name: z.string().max(200).optional().describe("Nom d'artiste"),
+      name: z
+        .string()
+        .max(200)
+        .optional()
+        .describe(
+          "Nom d'artiste exactement tel qu'écrit, parenthèses et suffixes compris ; n'en déduis rien",
+        ),
       relation: z
         .enum(ARTIST_RELATIONS)
         .optional()
         .describe(
           "Relation avec PDS, seulement si l'utilisateur l'a dite : signed = signé au roster PDS, collaboration = projet ponctuel (un PDS Mic…) hors roster",
         ),
-      legalName: z.string().max(200).optional().describe("Nom civil"),
+      legalName: z
+        .string()
+        .max(200)
+        .optional()
+        .describe("Nom civil, recopié exactement s'il a été écrit"),
       country: z
         .string()
         .max(60)
         .optional()
-        .describe("Pays d'origine, en toutes lettres"),
-      bio: z.string().max(5000).optional().describe("Biographie"),
-      notes: z.string().max(5000).optional().describe("Notes internes"),
+        .describe("Pays, recopié exactement s'il a été écrit ; jamais supposé"),
+      bio: z
+        .string()
+        .max(5000)
+        .optional()
+        .describe("Biographie, recopiée exactement si elle a été écrite"),
+      notes: z
+        .string()
+        .max(5000)
+        .optional()
+        .describe(
+          "Notes, recopiées exactement si elles ont été écrites ; jamais une interprétation",
+        ),
       contacts: z
         .array(
           z.object({
@@ -96,11 +116,28 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
           };
       }
 
+      // Only what the user wrote: a country, a civil name, a bio or notes
+      // supposed by PO are left out (UX test of 09/10/2026: « France »,
+      // « label UX-D » invented).
+      const kept = (raw: string | undefined, label: string) => {
+        if (!raw?.trim()) return null;
+        const quote = verbatim.quote(raw);
+        if (!quote) warnings.push(t.notSaid(label));
+        return quote;
+      };
+      const nameQuote = kept(input.name, labels.name);
+      const after = nameQuote ? verbatim.parenthesisAfter(nameQuote) : null;
+      if (nameQuote && after) warnings.push(t.nameFollowedBy(nameQuote, after));
+      const legalName = kept(input.legalName, labels.legalName);
+      const bio = kept(input.bio, labels.bio);
+      const notes = kept(input.notes, labels.notes);
+      const countryQuote = kept(input.country, labels.country);
+
       let countryCode = current?.countryCode ?? null;
-      if (input.country) {
-        const code = countryCodeOf(input.country);
+      if (countryQuote) {
+        const code = countryCodeOf(countryQuote);
         if (code) countryCode = code;
-        else warnings.push(t.unknownCountry(input.country));
+        else warnings.push(t.unknownCountry(countryQuote));
       }
 
       const contacts: ContactDraft[] = (input.contacts ?? []).map((c) => {
@@ -123,12 +160,12 @@ export function proposeArtistTool({ access, verbatim }: ProposeContext) {
       });
 
       const values: ArtistDraft["values"] = {
-        name: input.name?.trim() || current?.name || "",
+        name: nameQuote || current?.name || "",
         relation: input.relation ?? current?.relation ?? null,
-        legalName: input.legalName?.trim() || current?.legalName || null,
+        legalName: legalName || current?.legalName || null,
         countryCode,
-        bio: input.bio?.trim() || current?.bio || null,
-        notes: input.notes?.trim() || current?.notes || null,
+        bio: bio || current?.bio || null,
+        notes: notes || current?.notes || null,
       };
 
       const changes: DraftChange[] = [];

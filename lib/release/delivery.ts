@@ -8,6 +8,8 @@
 
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { legalActionHref } from "@/lib/legal/plan/where";
+import type { TrackedItem } from "@/lib/legal/tracking/state";
 import type { Dependency } from "@/lib/workflow-status/rules";
 
 export type DeliveryCheck = {
@@ -34,6 +36,8 @@ export function deliveryReadiness(input: {
     plannedDate: string | null;
   };
   dependencies: Dependency[];
+  // The Juridique's actions (empty before its plan, or without the right).
+  legalItems?: TrackedItem[];
 }): DeliveryReadiness {
   const t = fr.releaseDelivery.checks;
   const prepare = routes.projectRelease(input.projectId);
@@ -72,6 +76,24 @@ export function deliveryReadiness(input: {
       detail: input.release.upc ?? t.upcLater,
       href: prepare,
     },
+    // Fiches, contracts, splits, SACEM still open: they do not block the
+    // delivery (only a borrowing does, ticket 08), but are said here
+    // (UX test of 09/10/2026: a release delivered with no signed contract
+    // and no alert).
+    ...(input.legalItems ?? [])
+      .filter(
+        (item) =>
+          item.kind !== "clearance" &&
+          item.current !== "done" &&
+          item.current !== "obsolete",
+      )
+      .map((item) => ({
+        key: `legal-${item.id}`,
+        label: item.subject ? `${item.label} · ${item.subject}` : item.label,
+        done: false,
+        detail: item.reason,
+        href: item.sourceHref ?? legalActionHref(input.projectId, item.kind),
+      })),
   ];
   return {
     ready: blocking.every((check) => check.done),

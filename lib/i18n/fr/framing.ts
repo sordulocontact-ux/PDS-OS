@@ -4,8 +4,11 @@ export const framing = {
   description:
     "Le Brief de la sortie : objectif, temporalité, besoins, cadre, équipe.",
   proposed: "proposé · à confirmer",
-  proposedHint:
-    "Proposé par PO à partir d'un call. Relisez, puis confirmez ou rejetez.",
+  // Never « from a call »: the source may be the initial context, a
+  // dictation or a call (UX test of 09/10/2026); said by `proposedFrom`.
+  proposedHint: "Proposé par PO. Relisez, puis confirmez ou écartez.",
+  proposedFrom: (source: string) =>
+    `Proposé par PO · ${source}. Relisez, puis confirmez ou écartez.`,
   empty: "Pas encore renseigné.",
   needsCall: {
     title: "Du call au Brief validé",

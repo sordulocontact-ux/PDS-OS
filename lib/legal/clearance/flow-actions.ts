@@ -163,13 +163,20 @@ export async function declareNothingToSecure(
 const replySchema = z.object({
   ...ids,
   body: z.string().trim().min(1).max(8000),
-  terms: z.object({
-    amountCents: z.number().int().min(0).max(100_000_000).nullable(),
-    share: z.string().trim().max(200),
-    credits: z.string().trim().max(500),
-    territory: z.string().trim().max(200),
-    duration: z.string().trim().max(200),
-  }),
+  // One line per right (the work, the recording), or one without right.
+  terms: z
+    .array(
+      z.object({
+        right: z.enum(["work", "master"]).nullable(),
+        amountCents: z.number().int().min(0).max(100_000_000).nullable(),
+        share: z.string().trim().max(200),
+        credits: z.string().trim().max(500),
+        territory: z.string().trim().max(200),
+        duration: z.string().trim().max(200),
+      }),
+    )
+    .min(1)
+    .max(4),
 });
 
 /** « Envoyer à la direction »: their answer kept in the journal, the
@@ -197,22 +204,24 @@ export async function submitClearanceReply(input: z.input<typeof replySchema>) {
     if (error) console.error("submitClearanceReply:", error.message);
     return failed();
   }
-  const proposed = await run(projectId, (s) =>
-    s.rpc("propose_clearance_terms", {
-      p_clearance_id: clearanceId,
-      p_communication_id: communicationId,
-      p_terms: {
-        right: null,
-        amount_cents: terms.amountCents,
-        share: terms.share,
-        credits: terms.credits,
-        territory: terms.territory,
-        duration: terms.duration,
-        other: "",
-      },
-    }),
-  );
-  if (!proposed.ok) return proposed;
+  for (const line of terms) {
+    const proposed = await run(projectId, (s) =>
+      s.rpc("propose_clearance_terms", {
+        p_clearance_id: clearanceId,
+        p_communication_id: communicationId,
+        p_terms: {
+          right: line.right ?? "",
+          amount_cents: line.amountCents,
+          share: line.share,
+          credits: line.credits,
+          territory: line.territory,
+          duration: line.duration,
+          other: "",
+        },
+      }),
+    );
+    if (!proposed.ok) return proposed;
+  }
   // The direction is notified (written by the terms' trigger).
   await schedulePendingPushes();
   return moveForward(supabase, projectId, clearanceId, ["negotiating"]);
@@ -249,7 +258,11 @@ export async function recordClearanceRefusal(
   );
 }
 
-const termsSchema = z.object({ ...ids, termsId: catalogIdSchema });
+// Every line of conditions waiting for the direction, decided at once.
+const termsSchema = z.object({
+  ...ids,
+  termsIds: z.array(catalogIdSchema).min(1).max(4),
+});
 
 /**
  * « Valider les conditions » (the direction). Validating the conditions is
@@ -265,7 +278,7 @@ export async function validateClearanceTerms(
 ) {
   const p = termsSchema.safeParse(input);
   if (!p.success) return failed();
-  const { projectId, clearanceId, termsId } = p.data;
+  const { projectId, clearanceId, termsIds } = p.data;
   const access = await requireApproved();
   if (!access.organizationId || !can(access, "validate"))
     return {
@@ -273,10 +286,12 @@ export async function validateClearanceTerms(
       error: fr.legalClearance.errors.termsNotAllowed,
     };
   const supabase = await createClient();
-  const decided = await run(projectId, (s) =>
-    s.rpc("decide_clearance_terms", { p_terms_id: termsId, p_accept: true }),
-  );
-  if (!decided.ok) return decided;
+  for (const termsId of termsIds) {
+    const decided = await run(projectId, (s) =>
+      s.rpc("decide_clearance_terms", { p_terms_id: termsId, p_accept: true }),
+    );
+    if (!decided.ok) return decided;
+  }
   // The responsible is notified (written by the terms' trigger).
   await schedulePendingPushes();
   const agreed = await moveForward(supabase, projectId, clearanceId, [
@@ -384,14 +399,17 @@ export async function counterClearanceTerms(
 ) {
   const p = termsSchema.safeParse(input);
   if (!p.success) return failed();
-  const decided = await run(p.data.projectId, (s) =>
-    s.rpc("decide_clearance_terms", {
-      p_terms_id: p.data.termsId,
-      p_accept: false,
-    }),
-  );
-  if (decided.ok) await schedulePendingPushes();
-  return decided;
+  for (const termsId of p.data.termsIds) {
+    const decided = await run(p.data.projectId, (s) =>
+      s.rpc("decide_clearance_terms", {
+        p_terms_id: termsId,
+        p_accept: false,
+      }),
+    );
+    if (!decided.ok) return decided;
+  }
+  await schedulePendingPushes();
+  return { ok: true as const };
 }
 
 // The contracts of a borrowing, once each.

@@ -4,6 +4,7 @@ import {
   IconFolderOpen,
   IconHandshake,
   IconHouse2,
+  IconLightbulbSparkle,
   IconMicrophone,
   IconMsgs,
   IconNodes,
@@ -58,4 +59,6 @@ export const NAV_ITEMS: readonly NavItem[] = [
   // Not in the Figma: the feedback page (the director's inbox, everyone
   // else's own feedback). Sending opens the feedback window instead.
   { href: routes.feedback, label: fr.shell.nav.feedback, icon: IconMsgs },
+  // Features on trial before they enter the app (TikTok screenshots → artists).
+  { href: routes.labo, label: fr.shell.nav.labo, icon: IconLightbulbSparkle },
 ] as const;

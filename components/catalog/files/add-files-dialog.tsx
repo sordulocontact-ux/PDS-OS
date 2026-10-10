@@ -17,7 +17,12 @@ import { fr } from "@/lib/i18n/fr";
 // What the modal asks: a category and a precision (a library), or the audio
 // state the files stand for (the audio versions of a title).
 export type AddFilesMode =
-  | { kind: "library"; suggested: string | null }
+  | {
+      kind: "library";
+      suggested: string | null;
+      // A scoped writer: only these categories are offered.
+      categories?: readonly string[];
+    }
   | { kind: "audio"; defaultState: AudioState };
 
 // Files just dropped or picked: where to classify them, then Ajouter. They
@@ -171,6 +176,7 @@ function AddFilesForm({
           onDescription={setDescription}
           categoryError={categoryError}
           disabled={pending}
+          categories={mode.kind === "library" ? mode.categories : undefined}
         />
       )}
       <p className="text-xs text-muted-foreground">{audio ? a.hint : t.hint}</p>

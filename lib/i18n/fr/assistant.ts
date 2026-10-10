@@ -138,6 +138,16 @@ export const assistant = {
     notSaved: "Rien n'est enregistré tant que vous n'avez pas validé.",
     review: "Relire et enregistrer",
     saved: "Enregistré",
+    savedNext: (label: string, next: string) =>
+      `Enregistré : ${label}. Suite : ${next}`,
+    savedAsReviewed:
+      "Enregistré tel que relu dans le formulaire : ouvrez la fiche pour voir les valeurs gardées.",
+    proposal: "Proposition de PO",
+    savedLabels: {
+      contract: "le contrat",
+      contact: "la fiche du contact",
+      meeting: "la réunion",
+    },
     open: "Ouvrir",
     loading: "Préparation du formulaire…",
     loadFailed: "Le formulaire n'a pas pu être préparé. Réessayez.",
@@ -210,6 +220,13 @@ export const assistant = {
     what: { artist: "Artiste", master: "Titre", project: "Projet" },
     understoodAs: (said: string, actual: string) =>
       `« ${said} » compris comme « ${actual} », le nom du catalogue.`,
+    // Not in the catalogue yet: picked by name when the form opens, once
+    // created (artist → titles → project in one answer).
+    toCreate: (name: string) => `${name} (à créer)`,
+    pendingArtist: (name: string) =>
+      `Artiste « ${name} » pas encore au catalogue : il sera repris dans le formulaire une fois créé.`,
+    pendingMaster: (title: string) =>
+      `Titre « ${title} » pas encore au catalogue : il sera repris dans le formulaire une fois créé.`,
     unknownArtist: (name: string) =>
       `« ${name} » n'est pas au catalogue : créez d'abord l'artiste, ou choisissez-le dans le formulaire.`,
     unknownFormat: (name: string) =>
@@ -221,7 +238,18 @@ export const assistant = {
     unknownCountry: (country: string) =>
       `Pays « ${country} » non reconnu : choisissez-le dans le formulaire.`,
     notSaid: (label: string) =>
-      `${label} non repris : il doit figurer tel quel dans votre message (avec l'année pour une date).`,
+      `${label} non repris : il doit figurer tel quel dans votre message.`,
+    nameFollowedBy: (name: string, after: string) =>
+      `Dans votre message, « ${name} » est suivi de « ${after} » : vérifiez le nom dans le formulaire.`,
+    // Dates read by code (lib/assistant/said-date.ts), never by PO.
+    understoodDate: (date: string, quote: string) =>
+      `${date} · dit « ${quote} »`,
+    dateVague: (label: string, quote: string) =>
+      `${label} : « ${quote} » n'est pas un jour précis. Choisissez-le dans le formulaire.`,
+    dateMismatch: (label: string, quote: string) =>
+      `${label} : dans « ${quote} », le jour de la semaine ne correspond pas à la date. Choisissez-la dans le formulaire.`,
+    dateUnparsed: (label: string, quote: string) =>
+      `${label} : « ${quote} » n'a pas été compris comme une date. Choisissez-la dans le formulaire.`,
     forbiddenFeedback:
       "Seul le directeur général lit et traite les retours de l'équipe.",
     topicNotFound:
@@ -282,9 +310,11 @@ export const assistant = {
   activityKinds: {
     call_created: "call créé",
     report_created: "compte rendu produit",
-    brief_proposed: "Brief proposé par PO",
-    brief_confirmed: "Brief confirmé",
-    brief_rejected: "Brief rejeté",
+    framing_proposed: "Cadrage : réponses proposées par PO",
+    framing_confirmed: "Cadrage : réponses confirmées",
+    framing_dismissed: "Cadrage : questions écartées",
+    brief_created: "Brief créé",
+    brief_sent: "Brief envoyé en validation",
     task_created: "tâche créée",
     task_done: "tâche faite",
     point_resolved: "point tranché",
@@ -294,6 +324,9 @@ export const assistant = {
     release_online: "sortie détectée en ligne",
     file_added: "document ajouté",
   } as Record<string, string>,
+  readFailed:
+    "Lecture impossible pour l'instant : la base n'a pas répondu. Rien ne permet de dire qu'il ne s'est rien passé.",
+  activityMore: (n: number) => `et ${n} autre${n > 1 ? "s" : ""}`,
   validationStates: {
     pending: "en attente",
     approved: "acceptée",
@@ -302,6 +335,7 @@ export const assistant = {
   cards: {
     tasks: "Mes tâches",
     tasksEmpty: "Aucune tâche à faire.",
+    deliverable: "Livrable",
     overdue: "En retard",
     due: (date: string) => `Échéance ${date}`,
     noDue: "Sans échéance",
@@ -315,7 +349,8 @@ export const assistant = {
     activity: "Activité récente",
     activityEmpty: "Rien sur les 7 derniers jours.",
     projects: "Projets en cours",
-    projectsEmpty: "Aucun projet pour l'instant.",
+    projectsEmpty: "Aucun projet en cours pour l'instant.",
+    loadError: "Lecture impossible pour l'instant. Rechargez la page.",
     allProjects: "Tous les projets",
     releases: "Sorties",
     releasesEmpty: "Aucune sortie enregistrée.",

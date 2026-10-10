@@ -42,6 +42,8 @@ export type KnownDecision = {
   callTitle: string;
 };
 export type KnownEngineer = { id: string; name: string };
+// An intervenant the Juridique added without a credit (lawyer, distributor…).
+export type KnownLegalContact = { name: string; role: string };
 export type FramingCallLink = {
   callId: string;
   title: string;
@@ -74,6 +76,7 @@ export type FramingKnowledge = {
   decisions: KnownDecision[];
   creatives: Array<{ personId: string; name: string }>;
   engineers: KnownEngineer[];
+  legalContacts: KnownLegalContact[];
   masterBriefStarted: boolean;
   legalIntakeStarted: boolean;
   completeSplits: number;
@@ -110,6 +113,7 @@ export async function loadFramingKnowledge(
     decidedRes,
     creatives,
     engineersRes,
+    legalContactsRes,
     masterBriefRes,
     legalRes,
     splitsRes,
@@ -169,6 +173,14 @@ export async function loadFramingKnowledge(
       .contains("roles", ["engineer"])
       .is("archived_at", null)
       .order("name"),
+    // Read under manage_legal only (RLS): empty for anyone else.
+    supabase
+      .from("legal_project_contacts")
+      .select(
+        "role, contact:network_contacts!legal_project_contacts_contact_same_org(name)",
+      )
+      .eq("project_id", projectId)
+      .order("created_at"),
     supabase.from("master_briefs").select("id").eq("project_id", projectId),
     supabase.from("legal_intakes").select("id").eq("project_id", projectId),
     masterIds.length
@@ -271,6 +283,9 @@ export async function loadFramingKnowledge(
       id: e.id,
       name: e.name,
     })),
+    legalContacts: (legalContactsRes.data ?? []).flatMap((row) =>
+      row.contact ? [{ name: row.contact.name, role: row.role }] : [],
+    ),
     masterBriefStarted: (masterBriefRes.data ?? []).length > 0,
     legalIntakeStarted: (legalRes.data ?? []).length > 0,
     completeSplits,

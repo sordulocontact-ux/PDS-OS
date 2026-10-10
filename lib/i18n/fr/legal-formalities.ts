@@ -47,9 +47,11 @@ export const legalFormalities = {
     iswc: "Seulement s'il est déjà connu : jamais inventé.",
     territories: "« Monde », ou les territoires exacts de la cession.",
     dep_dr:
-      "Au sein de chaque catégorie (auteurs, compositeurs…). Un choix explicite, jamais déduit de la répartition.",
+      "DEP : droits d'exécution publique (radio, télé, concerts, lieux publics). DR : droits de reproduction (disques, streaming). Ils suivent les parts Phono, ou se partagent à égalité dans chaque catégorie (auteurs, compositeurs, éditeurs), comme le prévoit le Règlement général de la SACEM. Un choix explicite, jamais déduit.",
     creators:
-      "Choisissez chaque personne dans le Réseau : son identité et son IPI viennent de sa fiche. La part Phono n'est pas recopiée de la répartition : elle se saisit, et le total doit faire 100 %.",
+      "Choisissez chaque personne dans le Réseau : son identité et son IPI viennent de sa fiche. Le total des parts Phono (créateurs et éditeurs) doit faire 100 %.",
+    phonoFromSplit:
+      "Parts Phono reprises de la répartition confirmée de ce titre : vérifiez-les avant d'enregistrer.",
   } as Record<string, string>,
   sources: {
     toVerify: "À vérifier",
@@ -62,8 +64,8 @@ export const legalFormalities = {
   },
   // Rubrique D of the bulletin.
   depDrChoices: {
-    follow_phono: "Suit les parts Phono",
-    statutory: "Partage égal du Règlement général",
+    follow_phono: "Comme les parts Phono",
+    statutory: "Partage égal du Règlement général de la SACEM",
   },
   arrangementScopes: {
     all: "Autorisé pour toutes les exploitations",
@@ -76,7 +78,10 @@ export const legalFormalities = {
     pseudonym: "Pseudonyme",
     ipi: "IPI / COAD",
     quality: "Qualité",
+    qualityHint:
+      "Son rôle dans l'œuvre : auteur (paroles), compositeur (musique), arrangeur, adaptateur (paroles traduites ou adaptées).",
     phono: "Part Phono",
+    phonoHint: "Sa part des droits de reproduction (disques, streaming), en %.",
     signs: "Signe le bulletin",
     add: "Ajouter un créateur",
     remove: "Retirer",
@@ -85,8 +90,11 @@ export const legalFormalities = {
     person: "Éditeur",
     inSplit: "Éditeur de la répartition",
     name: "Dénomination",
+    nameHint:
+      "Le nom de la société d'édition, tel qu'il est inscrit à la SACEM.",
     ipi: "IPI / COAD",
     phono: "Part Phono",
+    phonoHint: "La part de l'éditeur dans les droits de reproduction, en %.",
     add: "Ajouter un éditeur",
   },
   contract: {
@@ -160,6 +168,11 @@ export const legalFormalities = {
     version: (n: number) => `Version ${n}`,
     export: "Exporter en PDF",
     signatures: "Signatures",
+    // Before the bulletin exists: who will sign it (UX test of 09/10/2026).
+    willSign: "Qui signera le bulletin",
+    willSignHint:
+      "Les créateurs cochés « Signe le bulletin » et les éditeurs, d'après le dossier enregistré.",
+    publisherRole: "Éditeur",
     sign: "Marquer signé",
     signProof: "Preuve de la signature",
     signed: (date: string) => `Signé le ${date}`,

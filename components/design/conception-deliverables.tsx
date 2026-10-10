@@ -32,7 +32,17 @@ export function ConceptionDeliverables({
   const list = (items: ConceptionDeliverable[], removable: boolean) => (
     <ul className="flex flex-col gap-2">
       {items.map((d) => (
-        <li key={d.id}>
+        // Anchor of a committed deliverable (routes.projectDesignDeliverable):
+        // tasks and the home lead here by its strategy_deliverables id.
+        <li
+          key={d.id}
+          id={
+            d.strategyDeliverableId
+              ? `deliverable-${d.strategyDeliverableId}`
+              : undefined
+          }
+          className="scroll-mt-24"
+        >
           <ConceptionDeliverableRow
             projectId={projectId}
             deliverable={d}

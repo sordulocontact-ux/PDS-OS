@@ -62,6 +62,7 @@ export async function loadDelivery(
         plannedDate: release.planned_release_date,
       },
       dependencies: states?.dependencies ?? [],
+      legalItems: states?.details.legalItems ?? [],
     }),
     delivered: release.delivered_on
       ? {

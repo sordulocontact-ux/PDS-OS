@@ -62,6 +62,7 @@ export function QuestionScreen({
   nextHref,
   suggestions = [],
   hint,
+  nav,
   children,
 }: {
   projectId: string;
@@ -72,6 +73,8 @@ export function QuestionScreen({
   suggestions?: HelpSuggestion[];
   // What was said about it, when it helps to answer (the timing, said in a call).
   hint?: string | null;
+  // Previous / next question (QuestionPager), beside the surtitle.
+  nav?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   const t = fr.framingIntel.guide;
@@ -197,6 +200,7 @@ export function QuestionScreen({
   return (
     <FramingStepCard
       eyebrow={eyebrow}
+      nav={nav}
       title={titleOf(question)}
       description={
         <span className="flex flex-col gap-2">

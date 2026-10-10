@@ -1,7 +1,10 @@
 import "server-only";
 
 import { audioStateOf } from "@/lib/catalog/title-rules";
-import type { FlowCredit } from "@/lib/master-workflow/engineer-facts";
+import type {
+  FlowCredit,
+  FramingEngineer,
+} from "@/lib/master-workflow/engineer-facts";
 import type {
   FlowContact,
   FlowLinkedCredit,
@@ -16,11 +19,13 @@ import {
   creditsByTitle,
   currentSources,
   filesByTitle,
+  framingEngineersOf,
   linkedCreditsOf,
   sessionsByTitle,
 } from "@/lib/master-workflow/inventory-mappers";
 import {
   ENGINEER_ROLES,
+  type EngineerRole,
   type MasterSectionKey,
 } from "@/lib/master-workflow/types";
 import { createClient } from "@/lib/supabase/server";
@@ -46,6 +51,9 @@ export type MasterRows = {
   creditsOf: Map<string, FlowCredit[]>;
   // The source confirmed last for each title (earlier ones are history).
   sourceOf: Map<string, FlowSource>;
+  // Who mixes and who masters as the Cadrage confirmed them (a contact of
+  // the Réseau): offered to credit when a title has nobody.
+  framingEngineers: Map<EngineerRole, FramingEngineer>;
   contacts: FlowContact[];
   linkedCredits: FlowLinkedCredit[];
   failed: Partial<Record<MasterSectionKey | "network", boolean>>;
@@ -66,7 +74,7 @@ export async function readMasterRows(
   const titled = masterIds.length > 0;
   const none = Promise.resolve({ data: [], error: null });
 
-  const [masters, files, sessions, credits, contacts, linked, sources] =
+  const [masters, files, sessions, credits, contacts, linked, sources, team] =
     await Promise.all([
       titled
         ? supabase.from("masters").select("id, audio_state").in("id", masterIds)
@@ -121,11 +129,21 @@ export async function readMasterRows(
             .eq("project_id", projectId)
             .order("created_at", { ascending: false })
         : none,
+      supabase
+        .from("project_team_members")
+        .select("role_key, contact_id, display_name")
+        .eq("project_id", projectId)
+        .eq("review_status", "confirmed")
+        .in("role_key", [...ENGINEER_ROLES])
+        .not("contact_id", "is", null)
+        .order("created_at"),
     ]);
 
   const stateOf = new Map(
     (masters.data ?? []).map((row) => [row.id, audioStateOf(row.audio_state)]),
   );
+
+  const network = contactsOf(contacts.data ?? []);
 
   return {
     titles: projectMasters.map((master, position) => ({
@@ -137,7 +155,8 @@ export async function readMasterRows(
     sessionsOf: sessionsByTitle(sessions.data ?? []),
     creditsOf: creditsByTitle(credits.data ?? []),
     sourceOf: currentSources(sources.data ?? []),
-    contacts: contactsOf(contacts.data ?? []),
+    framingEngineers: framingEngineersOf(team.data ?? [], network),
+    contacts: network,
     linkedCredits: linkedCreditsOf(linked.data ?? []),
     failed: {
       sources:
@@ -149,7 +168,8 @@ export async function readMasterRows(
       engineers:
         failed("credits", credits.error) ||
         failed("sessions", sessions.error) ||
-        failed("network", contacts.error),
+        failed("network", contacts.error) ||
+        failed("framing team", team.error),
       network:
         failed("network", contacts.error) ||
         failed("linked credits", linked.error),

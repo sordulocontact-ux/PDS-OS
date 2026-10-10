@@ -242,10 +242,9 @@ export const getMaster = cache(
       .eq("id", masterId)
       .is("archived_at", null)
       .maybeSingle();
-    if (error) {
-      console.error("getMaster:", error.message);
-      return null;
-    }
+    // A failed read is not « not found »: thrown to the error page
+    // (app/(app)/app/error.tsx, « Réessayer »), never shown as a 404.
+    if (error) throw new Error(`getMaster: ${error.message}`);
     if (!data) return null;
     const projects = data.links
       .flatMap((l) => (l.project && !l.project.archived_at ? [l.project] : []))

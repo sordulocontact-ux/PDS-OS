@@ -20,6 +20,7 @@
 import { fr } from "@/lib/i18n/fr";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
 import { titleItems } from "@/lib/legal/plan/proposal-titles";
+import { featuredArtists, featuredKey } from "@/lib/legal/forms/people";
 import { normalizeSearch } from "@/lib/utils/search";
 
 export const PLAN_COLUMNS = ["now", "ongoing", "later"] as const;
@@ -106,6 +107,24 @@ export function proposePlan(input: {
       person.roles.add(fr.masterPage.credits.roles[credit.role]);
       people.set(key, person);
     }
+  // A featured artist is contracted as a performer too (UX test of
+  // 09/10/2026), on the person of their contact or as their own.
+  for (const artist of featuredArtists(rows)) {
+    const performer = fr.legalForms.roles.performer;
+    const same = artist.contact
+      ? [...people.values()].find((p) => p.contactId === artist.contact!.id)
+      : undefined;
+    if (same) {
+      same.roles.add(performer);
+      continue;
+    }
+    people.set(featuredKey(artist), {
+      name: artist.contact?.name ?? artist.name,
+      contactId: artist.contact?.id ?? null,
+      roles: new Set([performer]),
+      creditIds: [],
+    });
+  }
 
   // « PO détecte une Person incomplète » : no contact yet, or a fiche not
   // complete.

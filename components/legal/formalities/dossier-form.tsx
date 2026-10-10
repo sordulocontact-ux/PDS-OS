@@ -145,6 +145,11 @@ export function DossierForm({
                     creators={obj<Creator[]>("creators", [])}
                     publishers={obj<Publisher[]>("publishers", [])}
                     disabled={disabled}
+                    // Shares taken from the confirmed split, not typed yet.
+                    fromSplit={
+                      Boolean(title.prefill.phono_from_split) &&
+                      !entries.creators?.typed
+                    }
                     onCreators={(next) => set("creators", next)}
                     onPublishers={(next) => set("publishers", next)}
                   />

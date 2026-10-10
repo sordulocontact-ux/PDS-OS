@@ -44,11 +44,14 @@ export function FileImport({
   organizationId,
   owner,
   onAdded,
+  categories,
   children,
   ...target
 }: {
   organizationId: string;
   owner: FileOwner;
+  // A scoped writer (creative team): only these categories are offered.
+  categories?: readonly string[];
   // Once recorded, for a page other than the owner's (its own refreshes
   // from the server action).
   onAdded?: () => void;
@@ -95,7 +98,11 @@ export function FileImport({
     ? { kind: "audio", defaultState: target.audio.defaultState }
     : {
         kind: "library",
-        suggested: files && suggestedCategory(owner.kind, target.view, files),
+        suggested: allowedOrNull(
+          files && suggestedCategory(owner.kind, target.view, files),
+          categories,
+        ),
+        categories,
       };
 
   return (
@@ -211,4 +218,14 @@ export function FileImportEmpty({
       onClick={() => context?.pick()}
     />
   );
+}
+
+// A suggestion outside a scoped writer's categories is no suggestion.
+function allowedOrNull(
+  category: string | null,
+  categories: readonly string[] | undefined,
+): string | null {
+  return category && (!categories || categories.includes(category))
+    ? category
+    : null;
 }

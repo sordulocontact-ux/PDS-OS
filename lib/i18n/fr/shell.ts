@@ -23,6 +23,7 @@ export const shell = {
     files: "Fichiers",
     members: "Équipe",
     feedback: "Retours",
+    labo: "Labo",
     // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.
     pendingMembers: (count: number) =>
       count === 1
@@ -46,6 +47,70 @@ export const shell = {
     welcomeAnonymous: "Bonjour",
     body: "Suivez chaque sortie, du cadrage au bilan",
     toProjects: "Voir les projets",
+    // First visits (UX test of 09/10/2026): three points by what the
+    // member may do, never by the position's name.
+    welcomeCard: {
+      title: "Bienvenue dans PDS OS",
+      intro: "Trois repères pour commencer :",
+      dismiss: "J'ai compris",
+      dismissing: "…",
+      failed: "Impossible de fermer cette carte pour l'instant. Réessayez.",
+      direction: [
+        {
+          text: "Créez un projet et transmettez-le à un chef de projet.",
+          link: "Projets",
+        },
+        {
+          text: "Validez les étapes qu'on vous soumet : elles arrivent dans Travail.",
+          link: "Travail",
+        },
+        {
+          text: "Lisez et transmettez les retours de l'équipe sur l'app.",
+          link: "Retours",
+        },
+      ],
+      pilot: [
+        {
+          text: "Acceptez les projets qu'on vous transmet : ils s'affichent en tête de l'accueil.",
+          link: "Projets",
+        },
+        {
+          text: "Dans un projet lancé, menez le Cadrage, puis la Stratégie et les workflows.",
+          link: "Projets",
+        },
+        {
+          text: "Travail rassemble ce qui vous attend, projet par projet.",
+          link: "Travail",
+        },
+      ],
+      creative: [
+        {
+          text: "Vos livrables s'affichent dans Mes tâches et dans Travail.",
+          link: "Travail",
+        },
+        {
+          text: "Dès qu'un projet est lancé, déposez vos pistes dans ses Fichiers ; vos versions vont ensuite dans la Conception.",
+          link: "Projets",
+        },
+        {
+          text: "Une question sur un projet ? Demandez à PO, ici ou n'importe où avec Espace Espace.",
+          link: null,
+        },
+      ],
+      member: [
+        {
+          text: "Les projets que vous suivez sont dans Projets.",
+          link: "Projets",
+        },
+        { text: "Travail rassemble ce qui vous attend.", link: "Travail" },
+        {
+          text: "Une question ? Demandez à PO, ici ou n'importe où avec Espace Espace.",
+          link: null,
+        },
+      ],
+    },
+    // PO's suggestion when a project waits for the viewer's answer.
+    presentProject: (title: string) => `Présente-moi le projet « ${title} »`,
   },
 
   projectTypes: {

@@ -26,6 +26,10 @@ const fold = (text: string) =>
 export type Verbatim = {
   /** Null when the quote is not in what the user wrote. */
   quote: (value: string | undefined) => string | null;
+  /** The parenthesis written right after `value` (« Zélie Moreau (UX-D) » →
+   * « (ux-d) »), folded; null when there is none. A name is copied whole:
+   * what follows it is said, never read as something else (a label…). */
+  parenthesisAfter: (value: string | undefined) => string | null;
 };
 
 export function verbatimFrom(userTexts: string[]): Verbatim {
@@ -34,6 +38,13 @@ export function verbatimFrom(userTexts: string[]): Verbatim {
     quote(value) {
       const needle = value ? fold(value) : "";
       return needle && haystack.includes(needle) ? value!.trim() : null;
+    },
+    parenthesisAfter(value) {
+      const needle = value ? fold(value) : "";
+      const at = needle ? haystack.indexOf(needle) : -1;
+      if (at < 0) return null;
+      const m = /^ ?(\([^)]{1,40}\))/.exec(haystack.slice(at + needle.length));
+      return m ? m[1] : null;
     },
   };
 }
@@ -82,11 +93,22 @@ export function parseSaidDate(quote: string): string | null {
   return null;
 }
 
-/** "1 500 €", "1500 euros", "1 500,50" → cents. Null otherwise ("5k" included). */
+/** "1 500 €", "1500 euros", "2 000 € HT", "une avance de 2 000 €" → cents:
+ * the first amount written. Null otherwise ("5k" included). */
 export function parseSaidEuros(quote: string): number | null {
-  const cents = parseEurosToCents(
-    quote.replace(/\s*(euros?|eur)\s*$/i, "").trim(),
-  );
+  // A percentage is never an amount.
+  if (/%|pour ?cent/i.test(quote) && !/€|euro|\beur\b/i.test(quote))
+    return null;
+  const m = /\d[\d\s\u00a0\u202f.]*(?:,\d{1,2})?/.exec(quote);
+  if (!m) return null;
+  // « 5k », « 2 M » : an abbreviation is not read as an amount.
+  if (
+    /^\s*(?:k|m|md|mds|millions?|milliers?)\b/i.test(
+      quote.slice(m.index + m[0].length),
+    )
+  )
+    return null;
+  const cents = parseEurosToCents(m[0].replace(/\.(?=\d{3}\b)/g, "").trim());
   return cents ?? null;
 }
 

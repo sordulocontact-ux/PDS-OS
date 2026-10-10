@@ -37,6 +37,13 @@ export const NOTIFICATION_KINDS = [
   "strategy_review_approved",
   "strategy_review_changes_requested",
   "strategy_review_reminder",
+  // The creative team: the project launched, the Brief ready, a call.
+  "project_launched",
+  "brief_approved",
+  "call_invited",
+  // The engineer deposited a version through their link.
+  "master_delivery_received",
+  "master_mastering_delivery_received",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -81,13 +88,20 @@ export function notificationHref(
     return routes.contract(subjectId);
   if (kind === "meeting_invited" && subjectId) return routes.meeting(subjectId);
   if (!projectId) return routes.app;
+  if (kind === "call_invited" && subjectId)
+    return routes.projectCall(projectId, subjectId);
+  if (kind === "brief_approved") return routes.projectFramingBrief(projectId);
   // A borrowing opens on its panel, in the project's Emprunts.
   if (kind.startsWith("clearance_"))
     return subjectId
       ? `${routes.projectLegalStep(projectId, "clearances")}?emprunt=${subjectId}`
       : routes.projectLegalStep(projectId, "clearances");
   // The engineer confirmed the package: its follow-up, in the Master's Mix.
-  if (kind === "master_transmission_received" || kind.startsWith("master_mix_"))
+  if (
+    kind === "master_transmission_received" ||
+    kind === "master_delivery_received" ||
+    kind.startsWith("master_mix_")
+  )
     return routes.projectMasterStep(projectId, "mix");
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))

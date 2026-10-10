@@ -4,7 +4,10 @@
 import { SESSION_KINDS, oneOf } from "@/lib/catalog/master/rules";
 import { audioStateOf } from "@/lib/catalog/title-rules";
 import type { FlowAudio, FlowSource } from "@/lib/master-workflow/audio-source";
-import type { FlowCredit } from "@/lib/master-workflow/engineer-facts";
+import type {
+  FlowCredit,
+  FramingEngineer,
+} from "@/lib/master-workflow/engineer-facts";
 import type {
   FlowContact,
   FlowLinkedCredit,
@@ -169,4 +172,29 @@ export function linkedCreditsOf(
         ]
       : [],
   );
+}
+
+/** Who mixes and who masters, as the Cadrage confirmed them: a team role
+ * held by a contact of the Réseau (the first confirmed per role). Its name
+ * is the contact's current one; the name given at the Cadrage otherwise. */
+export function framingEngineersOf(
+  rows: Array<{
+    role_key: string | null;
+    contact_id: string | null;
+    display_name: string;
+  }>,
+  contacts: FlowContact[],
+): Map<EngineerRole, FramingEngineer> {
+  const nameOf = new Map(contacts.map((contact) => [contact.id, contact.name]));
+  const framingOf = new Map<EngineerRole, FramingEngineer>();
+  for (const row of rows) {
+    if (!row.contact_id || !row.role_key) continue;
+    const role = ENGINEER_ROLES.find((key) => key === row.role_key);
+    if (!role || framingOf.has(role)) continue;
+    framingOf.set(role, {
+      contactId: row.contact_id,
+      name: nameOf.get(row.contact_id) ?? row.display_name,
+    });
+  }
+  return framingOf;
 }

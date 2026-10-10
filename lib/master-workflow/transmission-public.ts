@@ -29,6 +29,16 @@ const publicSchema = z.discriminatedUnion("state", [
         }),
       )
       .default([]),
+    // What the engineer deposited through this link, newest first.
+    deliveries: z
+      .array(
+        z.object({
+          masterId: z.string(),
+          fileName: z.string(),
+          sentAt: z.string(),
+        }),
+      )
+      .default([]),
   }),
   z.object({ state: z.enum(["replaced", "expired"]) }),
 ]);

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/calls/format";
@@ -34,6 +35,8 @@ export function MixSummary({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [summary, setSummary] = useState(version.feedbackSummary ?? "");
+  // What the code corrected in PO's synthesis, said until the next one.
+  const [note, setNote] = useState<string | null>(null);
   const run = (action: () => Promise<MixResult>, done: string) =>
     startTransition(async () => {
       const result = await action();
@@ -68,6 +71,7 @@ export function MixSummary({
         value={summary}
         onChange={(event) => setSummary(event.target.value)}
       />
+      {note && <FormMessage kind="info">{note}</FormMessage>}
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
@@ -77,8 +81,9 @@ export function MixSummary({
           onClick={() =>
             startTransition(async () => {
               const result = await proposeMixSummary(projectId, version.id);
-              if (result.ok) setSummary(result.summary);
-              else toast.error(result.error);
+              if (!result.ok) return void toast.error(result.error);
+              setSummary(result.summary);
+              setNote(result.note);
             })
           }
         >

@@ -17,13 +17,15 @@ export async function loadReleasesOverview(
   limit = 5,
 ): Promise<ReleaseOverview[]> {
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("releases")
     .select(
       "project_id, title, planned_release_date, online_detected_at, release_links(source)",
     )
     .order("planned_release_date", { ascending: true, nullsFirst: false })
     .limit(limit);
+  // A failed read is said by the caller, never shown as « no release ».
+  if (error) throw new Error(`loadReleasesOverview: ${error.message}`);
   return (data ?? []).map((r) => ({
     projectId: r.project_id,
     title: r.title,

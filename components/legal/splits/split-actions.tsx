@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useShowLinks } from "@/components/ui/one-time-links";
 import { fr } from "@/lib/i18n/fr";
+import { mailtoHref } from "@/lib/utils/mailto";
 import {
   newSplitLink,
   proposeSplit,
@@ -74,15 +75,31 @@ export function SplitEditorButton({
 
 /** Shows the split's links once, in the dialog that outlives the page's
  * refresh (the button that asked for them moves to « En attente »). */
-function useShowSplitLinks(title: string) {
+/** The confirmation links of a split, shown once above the page (they
+ * survive its refresh). */
+export function useShowSplitLinks() {
   const router = useRouter();
   const show = useShowLinks();
   const t = fr.legalSplits.links;
-  return (links: SplitLink[]) =>
+  return (title: string, links: SplitLink[]) =>
     show({
       title: t.title(title),
       description: t.body,
-      links: links.map((l) => ({ key: l.entryId, label: l.name, url: l.url })),
+      links: links.map((l) => ({
+        key: l.entryId,
+        label: l.name,
+        url: l.url,
+        email: l.email
+          ? {
+              href: mailtoHref(
+                l.email,
+                t.emailSubject(title),
+                t.emailBody(l.name, title, l.url),
+              ),
+              label: t.email,
+            }
+          : undefined,
+      })),
       copyLabel: t.copy,
       copiedLabel: t.copied,
       closeLabel: t.close,
@@ -104,7 +121,8 @@ export function ProposeSplitButton({
 }) {
   const t = fr.legalSplits.page;
   const [pending, startTransition] = useTransition();
-  const setLinks = useShowSplitLinks(title);
+  const showLinks = useShowSplitLinks();
+  const setLinks = (links: SplitLink[]) => showLinks(title, links);
   return (
     <Button
       size="sm"
@@ -139,7 +157,8 @@ export function NewSplitLinkButton({
   title: string;
 }) {
   const [pending, startTransition] = useTransition();
-  const setLinks = useShowSplitLinks(title);
+  const showLinks = useShowSplitLinks();
+  const setLinks = (links: SplitLink[]) => showLinks(title, links);
   return (
     <Button
       variant="outline"
@@ -149,7 +168,7 @@ export function NewSplitLinkButton({
       onClick={() =>
         startTransition(async () => {
           const result = await newSplitLink(projectId, entryId);
-          if (result.ok) setLinks([{ entryId, name, url: result.data }]);
+          if (result.ok) setLinks([{ entryId, name, ...result.data }]);
           else toast.error(result.error);
         })
       }

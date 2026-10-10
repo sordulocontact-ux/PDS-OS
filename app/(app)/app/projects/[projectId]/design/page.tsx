@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 
 import { ConceptionEntry } from "@/components/design/conception-entry";
 import { ConceptionTabs } from "@/components/design/conception-tabs";
-import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
+import {
+  DesignNeedsStrategy,
+  EarlyDepositLink,
+} from "@/components/design/design-needs-strategy";
 import { ValidationPanel } from "@/components/framing/validation-panel";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { requireApproved } from "@/lib/auth/dal";
@@ -12,6 +15,7 @@ import { loadSheetSummaries } from "@/lib/design/sheet-summaries";
 import { conceptionState } from "@/lib/design/states";
 import { loadMembers, loadPendingValidation } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { listProjectCreatives } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { isStageValidated } from "@/lib/projects/types";
@@ -31,16 +35,23 @@ export default async function DesignPage({
   params,
 }: PageProps<"/app/projects/[projectId]/design">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
+  const [access, project, creatives] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
+    listProjectCreatives(projectId),
   ]);
+  // The creative team (not the owner) may deposit its leads in Fichiers
+  // before the Conception opens.
+  const creative =
+    !canEditProject(access, project) &&
+    creatives.some((c) => c.personId === access.personId);
   // The Conception starts from the decisions validated in the Stratégie.
   if (!isStageValidated(project.stages, "launch_strategy")) {
     return (
       <DesignNeedsStrategy
         projectId={projectId}
         canEdit={canEditProject(access, project)}
+        creative={creative}
       />
     );
   }
@@ -71,6 +82,14 @@ export default async function DesignPage({
     <div className="flex flex-col gap-6">
       {/* The other pages exist once the work is open. */}
       {data.started && <ConceptionTabs projectId={projectId} />}
+      {creative && !data.started && (
+        <div className="flex flex-col items-start gap-2">
+          <p className="text-body-md text-muted-foreground">
+            {fr.design.earlyDeposit}
+          </p>
+          <EarlyDepositLink projectId={projectId} size="sm" />
+        </div>
+      )}
       <ConceptionEntry
         projectId={projectId}
         context={{ title: project.title, artistName: project.artistName }}

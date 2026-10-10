@@ -3,8 +3,33 @@
 export const legalForms = {
   public: {
     title: "Fiche de renseignements",
-    intro: (person: string, project: string) =>
-      `Bonjour ${person}. Pour le projet « ${project} », l'équipe a besoin de quelques informations. Remplissez seulement ce qui vous concerne : vous n'avez pas besoin de compte.`,
+    intro: (person: string, project: string, organization: string | null) =>
+      `Bonjour ${person}. ${organization ?? "L'équipe"} prépare le projet « ${project} » et a besoin de quelques informations vous concernant. Remplissez seulement ce qui vous concerne : vous n'avez pas besoin de compte.`,
+    // Who asks and whom to write to (UX test of 09/10/2026).
+    requester: {
+      title: "Une question ?",
+      body: (contact: string) => `Écrivez à ${contact}, responsable du projet.`,
+      bodyNoEmail: (contact: string) =>
+        `${contact} est responsable du projet : contactez cette personne par le moyen habituel.`,
+      team: "Contactez l'équipe qui vous a envoyé ce lien.",
+    },
+    dataUse: {
+      title: "À quoi servent vos données",
+      purposes:
+        "À vos crédits sur les titres du projet, à vos contrats et aux déclarations auprès des organismes de gestion des droits (SACEM, SCPP…).",
+      access: (organization: string | null) =>
+        `Seule l'équipe ${organization ? `de ${organization} ` : ""}qui suit le projet y a accès.`,
+      retention:
+        "Elles sont gardées tant que les titres du projet sont exploités, puis le temps que la loi impose au label.",
+      rights:
+        "Vous pouvez les consulter, les corriger ou demander leur suppression en écrivant au responsable du projet (RGPD, articles 15 à 17).",
+    },
+    afterSubmit: {
+      title: "Et ensuite ?",
+      review: "L'équipe relit votre fiche.",
+      follow:
+        "Si votre rôle demande un contrat ou une répartition des droits, l'équipe vous les enverra à relire avant toute signature.",
+    },
     rolesTitle: "Quel est votre rôle sur ce projet ?",
     rolesHint: "Plusieurs choix possibles.",
     otherRole: "Précisez votre rôle",
@@ -131,12 +156,20 @@ export const legalForms = {
     namesake:
       "Quelqu'un de ce nom est déjà dans le Réseau : reliez d'abord son crédit sur l'État des lieux.",
     linkFirst: "Relier sur l'État des lieux",
+    // A featured artist without a contact linked to their artist page.
+    notInNetwork: (name: string) =>
+      `${name} est en featuring : ajoutez cette personne au Réseau, reliée à sa fiche artiste, avant de lui envoyer une fiche.`,
     newLink: "Nouveau lien",
     linkTitle: (name: string) => `Lien de la fiche de ${name}`,
     linkBody:
       "Copiez ce lien et envoyez-le à la personne. Il ne sera plus affiché : en cas de perte, créez-en un nouveau (l'ancien ne marchera plus). Il expire dans 30 jours.",
     copy: "Copier le lien",
     copied: "Lien copié",
+    // A ready e-mail to the person (their Réseau address), sent by the user.
+    email: "Envoyer par e-mail",
+    emailSubject: (project: string) => `Fiche de renseignements · ${project}`,
+    emailBody: (name: string, project: string, url: string) =>
+      `Bonjour ${name},\n\nPour le projet « ${project} », pouvez-vous remplir votre fiche de renseignements ? Cela prend quelques minutes, sans compte :\n${url}\n\nMerci !`,
     markSent: "Marquer comme envoyée",
     revoke: "Révoquer",
     answers: "Voir les réponses",

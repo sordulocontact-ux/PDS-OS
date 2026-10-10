@@ -147,7 +147,7 @@ update public.master_briefs set mix_contact_id = (select id from public.network_
 select pg_temp.act_as(pg_temp.id_of('owner'));
 create temp table tokens (t text) on commit drop;
 grant all on tokens to authenticated, anon;
-insert into tokens select public.create_master_transmission(pg_temp.id_of('project'), 'mix', '{}'::jsonb, null);
+insert into tokens select public.create_master_transmission(pg_temp.id_of('project'), 'mix', '{}'::jsonb, null, now() + interval '30 days');
 reset role;
 set local role anon;
 select is((select public.get_master_transmission((select t from tokens)) -> 'feedback' -> 0 ->> 'summary'),

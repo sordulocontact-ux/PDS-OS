@@ -23,7 +23,8 @@ import {
  * A network contact, created or edited in the modal: a person or an
  * organization, its roles, then how to reach it. A person may belong to an
  * organization of the network (picked, or added on the spot); a contact may
- * stand for a catalog artist.
+ * stand for a catalog artist, chosen when editing only (never listed at
+ * creation).
  */
 export function ContactForm({
   contact,
@@ -104,7 +105,12 @@ export function ContactForm({
           defaultId={contact?.parentId ?? initial?.parentId ?? null}
         />
       )}
-      {options.artists.length > 0 && (
+      {/* Creation never lists the catalog's artists (Sacha, 10/10/2026): a
+          link found by PO's draft is kept as is, the rest is set by editing. */}
+      {!contact && initial?.artistId && (
+        <input type="hidden" name="artistId" value={initial.artistId} />
+      )}
+      {contact && options.artists.length > 0 && (
         <OptionSelect
           name="artistId"
           label={t.artist}

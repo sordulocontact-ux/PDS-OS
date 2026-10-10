@@ -31,6 +31,7 @@ export const workflowStatus = {
     framing: "Cadrage",
     framingValidated: (date: string) => `Validé le ${date}`,
     framingOpen: "Ouvrir le Cadrage",
+    seeBrief: "Voir le Brief",
     actions: {
       title: "À faire ensuite",
       description: "Par échéance, les retards d'abord",
@@ -51,6 +52,8 @@ export const workflowStatus = {
         `${workflow} ne peut pas faire « ${toWhat.toLowerCase()} » tant que cet élément manque ; le reste de ses étapes avance.`,
       clearanceImpact:
         "Un titre avec un emprunt non sécurisé ne part pas au distributeur : la sortie attend.",
+      rightsCause:
+        "Contrainte de droits confirmée au cadrage : à sécuriser dans le Juridique.",
     },
     deadlines: {
       title: "Échéances",

@@ -1,10 +1,12 @@
 // What PDS OS already knows for each field of the bulletin, with where it
 // comes from (ticket Juridique 06, « PO préremplit les champs sourcés et
 // liste les valeurs manquantes »). Never a first exploitation, never an
-// ISWC that is not on the title, never a draft's duration, never the split
-// sheet's shares. A signed publishing contract of the project ticks « copie
-// jointe » (also done in SQL when the contract is signed later:
-// contracts_tick_formalities). Pure.
+// ISWC that is not on the title, never a draft's duration. The Phono shares
+// start from the title's confirmed split (UX test of 09/10/2026, decided
+// with Sacha on 10/10: they were retyped right after the confirmation),
+// matched by contact, never by name, and shown « à vérifier ». A signed
+// publishing contract of the project ticks « copie jointe » (also done in
+// SQL when the contract is signed later: contracts_tick_formalities). Pure.
 
 import type { ContributorRole } from "@/lib/catalog/master/rules";
 import {
@@ -18,6 +20,13 @@ export type Prefill = Record<
   string,
   { value: unknown; source: string } | undefined
 >;
+
+// A line of the title's confirmed split: exact share, « 33.3334 ».
+export type SplitShare = {
+  contactId: string | null;
+  role: string;
+  share: string;
+};
 
 export type PrefillContext = {
   title: string;
@@ -40,7 +49,24 @@ export type PrefillContext = {
   }>;
   // The project's signed publishing contract, by its title, if there is one.
   signedPublishingContract: string | null;
+  // The title's confirmed split, if there is one.
+  splitShares: SplitShare[] | null;
 };
+
+// The share of a person in the confirmed split: the line of their contact
+// with this role, else their only line. Never by name.
+function splitShareOf(
+  shares: SplitShare[] | null,
+  contactId: string | null,
+  role: string,
+): string {
+  if (!shares || !contactId) return "";
+  const own = shares.filter((s) => s.contactId === contactId);
+  return (
+    (own.find((s) => s.role === role) ?? (own.length === 1 ? own[0] : null))
+      ?.share ?? ""
+  );
+}
 
 const minutes = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -56,7 +82,7 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
       {
         ...creatorIdentity(c.name, c.details),
         quality,
-        phono: "",
+        phono: splitShareOf(ctx.splitShares, c.contactId, quality),
         signs: true,
         ...(c.contactId ? { contact_id: c.contactId } : {}),
       },
@@ -71,7 +97,7 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
       {
         name: p.name,
         ipi: p.details.ipi_coad || "",
-        phono: "",
+        phono: splitShareOf(ctx.splitShares, p.contactId, "publisher"),
         ...(p.contactId ? { contact_id: p.contactId } : {}),
       },
     ];
@@ -90,6 +116,11 @@ export function prefillSacem725(ctx: PrefillContext): Prefill {
     creators:
       creators.length > 0
         ? { value: creators, source: "Crédits et fiches de renseignements" }
+        : undefined,
+    // Not a field of the bulletin: says the shares came from the split.
+    phono_from_split:
+      ctx.splitShares && [...creators, ...publishers].some((p) => p.phono)
+        ? { value: true, source: "Répartition confirmée" }
         : undefined,
     publishers:
       publishers.length > 0

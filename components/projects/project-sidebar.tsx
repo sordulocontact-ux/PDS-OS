@@ -139,16 +139,22 @@ export function ProjectSidebar({
   projectId,
   projectTitle,
   canSeeLegal,
+  canSeeBudget = true,
   workflows,
   statuses,
 }: {
   projectId: string;
   projectTitle: string;
   canSeeLegal: boolean;
+  canSeeBudget?: boolean;
   workflows?: readonly string[];
   statuses?: SidebarStatuses;
 }) {
-  const items = projectSections(projectId, { legal: canSeeLegal, workflows });
+  const items = projectSections(projectId, {
+    legal: canSeeLegal,
+    budget: canSeeBudget,
+    workflows,
+  });
   const t = fr.shell.project.sidebar;
 
   return (
@@ -172,16 +178,22 @@ export function ProjectSidebarMobile({
   projectId,
   projectTitle,
   canSeeLegal,
+  canSeeBudget = true,
   workflows,
   statuses,
 }: {
   projectId: string;
   projectTitle: string;
   canSeeLegal: boolean;
+  canSeeBudget?: boolean;
   workflows?: readonly string[];
   statuses?: SidebarStatuses;
 }) {
-  const items = projectSections(projectId, { legal: canSeeLegal, workflows });
+  const items = projectSections(projectId, {
+    legal: canSeeLegal,
+    budget: canSeeBudget,
+    workflows,
+  });
   const t = fr.shell.project.sidebar;
   const [open, setOpen] = useState(false);
 

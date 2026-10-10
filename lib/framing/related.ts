@@ -116,6 +116,8 @@ export type PendingValidation = {
   validatorPersonId: string;
   validatorName: string;
   note: string | null;
+  // When it was asked: « demandée le … », written by code.
+  requestedAt: string | null;
 };
 
 /**
@@ -143,7 +145,7 @@ export async function loadPendingValidation(
   const supabase = await createClient();
   const { data } = await supabase
     .from("validations")
-    .select("id, validator_person_id, request_note")
+    .select("id, validator_person_id, request_note, requested_at")
     .eq("project_stage_id", stageId)
     .eq("state", "pending")
     .maybeSingle();
@@ -154,6 +156,7 @@ export async function loadPendingValidation(
     validatorName:
       members.find((m) => m.personId === data.validator_person_id)?.name ?? "—",
     note: data.request_note,
+    requestedAt: data.requested_at,
   };
 }
 

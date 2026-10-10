@@ -64,7 +64,11 @@ export function TitleFormButton({
           <ContributorForm
             masterId={action.masterId}
             contributor={null}
-            initial={{ name: action.name, role: action.role }}
+            initial={{
+              name: action.name,
+              role: action.role,
+              contactId: action.contactId,
+            }}
             onDone={done}
           />
         )}

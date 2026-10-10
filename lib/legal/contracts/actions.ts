@@ -92,10 +92,26 @@ export async function approveContractMapping(
     console.error("approveContractMapping:", error.message);
     return { ok: false, error: errorOf(error.message) };
   }
+  // An agreement unchecked here is not needed: its action of the Plan
+  // d'action and its task are retired (UX test of 09/10/2026: « Faire
+  // signer un contrat à … » stayed in Travail). Same key as the plan's
+  // (lib/legal/plan/proposal.ts, `contract:<person>`).
+  const notNeeded = parsed.data.items.flatMap((item) =>
+    item.needed ? [] : [`contract:${item.key}`],
+  );
+  if (notNeeded.length > 0) {
+    const { error: retireError } = await supabase.rpc(
+      "retire_legal_plan_items",
+      { p_project_id: loaded.project.id, p_keys: notNeeded },
+    );
+    if (retireError)
+      console.error("approveContractMapping retire:", retireError.message);
+  }
   // The agreements whose values are all there are generated at once.
   await loadAgreementsGenerated(loaded.project, loaded.access);
   revalidatePath(routes.projectLegal(loaded.project.id), "layout");
   revalidatePath(routes.contracts, "layout");
+  revalidatePath(routes.projectWork(loaded.project.id));
   return { ok: true };
 }
 

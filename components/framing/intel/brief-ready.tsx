@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { FramingStepCard } from "@/components/framing/guide/step-card";
 import { useFramingAction } from "@/components/framing/use-framing-action";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
 import { generateBrief } from "@/lib/framing/actions/brief-versions";
 import { fr } from "@/lib/i18n/fr";
 
@@ -19,14 +20,19 @@ export type Remaining = { key: string; label: string; href: string };
 export function BriefReady({
   projectId,
   remaining,
+  optional,
   editable,
   hasBrief,
   briefHref,
 }: {
   projectId: string;
   remaining: Remaining[];
+  // Optional questions still empty: the Brief can be created, but the
+  // Cadrage is not « complet » (UX test of 09/10/2026: « complet » at 21/23).
+  optional: Remaining[];
   editable: boolean;
-  // A version exists already: the button updates it.
+  // A version exists already (or a Cadrage validated before versions): the
+  // button updates it, and « Voir le Brief » opens it, even once frozen.
   hasBrief: boolean;
   briefHref: string;
 }) {
@@ -38,29 +44,55 @@ export function BriefReady({
   return (
     <FramingStepCard
       eyebrow={t.briefNav}
-      title={ready ? t.doneTitle : t.remainingTitle}
-      description={ready ? t.doneBody : t.remaining(remaining.length)}
+      title={
+        !ready
+          ? t.remainingTitle
+          : optional.length > 0
+            ? t.readyTitle
+            : t.doneTitle
+      }
+      description={
+        !ready
+          ? t.remaining(remaining.length)
+          : optional.length > 0
+            ? t.readyBody(optional.length)
+            : t.doneBody
+      }
       actions={
-        ready &&
-        editable && (
-          <Button
-            size="lg"
-            disabled={pending}
-            onClick={() =>
-              run(
-                () => generateBrief(projectId),
-                () => router.push(briefHref),
-              )
-            }
-          >
-            {pending ? t.generating : hasBrief ? t.update : t.generate}
-          </Button>
+        ((ready && editable) || hasBrief) && (
+          <>
+            {ready && editable && (
+              <Button
+                size="lg"
+                disabled={pending}
+                onClick={() =>
+                  run(
+                    () => generateBrief(projectId),
+                    () => router.push(briefHref),
+                  )
+                }
+              >
+                {pending ? t.generating : hasBrief ? t.update : t.generate}
+              </Button>
+            )}
+            {hasBrief && (
+              <ViewLink
+                href={briefHref}
+                className={buttonVariants({
+                  size: "lg",
+                  variant: ready && editable ? "outline" : "default",
+                })}
+              >
+                {t.seeBrief}
+              </ViewLink>
+            )}
+          </>
         )
       }
     >
-      {!ready && (
+      {(!ready || optional.length > 0) && (
         <ul className="flex flex-col gap-1">
-          {remaining.map((item) => (
+          {(ready ? optional : remaining).map((item) => (
             <li key={item.key}>
               <Link
                 href={item.href}

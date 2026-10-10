@@ -54,6 +54,7 @@ export function PublisherRow({
       <Field
         name={`p-name-${rowId}`}
         label={t.name}
+        hint={t.nameHint}
         value={publisher.name}
         disabled={disabled}
         onChange={(e) => onChange({ name: e.target.value })}
@@ -70,6 +71,7 @@ export function PublisherRow({
           <Field
             name={`p-phono-${rowId}`}
             label={t.phono}
+            hint={t.phonoHint}
             inputMode="decimal"
             suffix="%"
             value={publisher.phono.replace(".", ",")}

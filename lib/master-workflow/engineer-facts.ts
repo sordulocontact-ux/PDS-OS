@@ -1,6 +1,6 @@
 // Mix et mastering of the État du master, per title: who mixes, who masters,
-// read from the title's credits, then from its sessions, and whether each
-// person is in the Réseau. Pure, built by code from rows already read.
+// read from the title's credits, then from the Cadrage's team, then from its
+// sessions, and whether each person is in the Réseau. Pure, built by code from rows already read.
 
 import { routes } from "@/lib/auth/redirects";
 import type { SessionKind } from "@/lib/catalog/master/rules";
@@ -33,6 +33,9 @@ export type FlowCredit = {
   contactId: string | null;
 };
 
+/** Who the Cadrage confirmed for a role: a contact of the Réseau. */
+export type FramingEngineer = { contactId: string; name: string };
+
 // The session that names the engineer of a role.
 const SESSION_OF: Record<EngineerRole, SessionKind> = {
   mix_engineer: "mixing",
@@ -51,6 +54,9 @@ export type EngineerContext = {
   // The project's unlinked mix and mastering credits by name: the same
   // engineer on several titles is linked in one decision.
   sameName: Map<string, CreditLink[]>;
+  // Who mixes and who masters as the Cadrage confirmed them, and where.
+  framing: Map<EngineerRole, FramingEngineer>;
+  framingHref: string;
 };
 
 function roleFacts(
@@ -80,6 +86,32 @@ function roleFacts(
       ),
     }));
 
+  // Confirmed at the Cadrage, not yet credited on the title: the credit is
+  // a fact of the title, so a person makes it (already filled, linked).
+  const framed = context.framing.get(role);
+  if (framed)
+    return [
+      {
+        ...base,
+        key: `${role}-framing-${title.id}`,
+        label: framed.name,
+        detail: roleLabel,
+        source: t.sources.framing,
+        status: "to_confirm",
+        statusLabel: t.states.namedInFraming,
+        href: context.framingHref,
+        action: context.rights.link
+          ? {
+              kind: "credit_engineer",
+              masterId: title.id,
+              role,
+              name: framed.name,
+              contactId: framed.contactId,
+            }
+          : undefined,
+      },
+    ];
+
   // Named in a session but not credited: a person confirms by crediting.
   const session = sessions.find(
     (row) => row.kind === SESSION_OF[role] && row.engineer,
@@ -102,6 +134,7 @@ function roleFacts(
               masterId: title.id,
               role,
               name: session.engineer,
+              contactId: null,
             }
           : undefined,
       },
@@ -121,7 +154,13 @@ function roleFacts(
       statusLabel: t.states.nobody,
       href: routes.masterCredits(title.id),
       action: context.rights.link
-        ? { kind: "credit_engineer", masterId: title.id, role, name: null }
+        ? {
+            kind: "credit_engineer",
+            masterId: title.id,
+            role,
+            name: null,
+            contactId: null,
+          }
         : undefined,
     },
   ];

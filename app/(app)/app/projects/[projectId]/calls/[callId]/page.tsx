@@ -59,6 +59,17 @@ export default async function CallPage({
       audioUrl={audioUrl}
       canEdit={canEdit}
       back={{ href: routes.projectCalls(projectId), label: t.back }}
+      subtitle={
+        <p className="text-sm text-muted-foreground">
+          {t.project} :{" "}
+          <Link
+            href={routes.project(projectId)}
+            className="rounded-sm text-foreground underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            {project.title}
+          </Link>
+        </p>
+      }
       steps={t.page}
       doneAction={
         <Link
@@ -90,7 +101,6 @@ export default async function CallPage({
           <CallOutcomes
             outcomes={outcomes}
             members={members}
-            mePersonId={access.personId}
             projectId={projectId}
             projects={canEdit ? [{ id: project.id, title: project.title }] : []}
           />

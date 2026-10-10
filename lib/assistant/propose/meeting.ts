@@ -3,6 +3,11 @@ import "server-only";
 import { tool } from "ai";
 import { z } from "zod";
 
+import {
+  formatSaidDay,
+  readSaidDate,
+  understood,
+} from "@/lib/assistant/propose/said-date-field";
 import type { DraftChange } from "@/lib/assistant/drafts";
 import { change } from "@/lib/assistant/propose/match";
 import {
@@ -10,7 +15,7 @@ import {
   type ProposeContext,
 } from "@/lib/assistant/propose/result";
 import { namedMembers } from "@/lib/assistant/propose/targets";
-import { parseSaidDateTime, parseSaidUrl } from "@/lib/assistant/verbatim";
+import { parseSaidUrl } from "@/lib/assistant/verbatim";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
@@ -30,7 +35,7 @@ export function proposeMeetingTool({ access, verbatim }: ProposeContext) {
         .max(60)
         .optional()
         .describe(
-          "Date avec l'année et heure, recopiées exactement telles que l'utilisateur les a écrites",
+          "Date et heure recopiées exactement telles que l'utilisateur les a dites (« mardi 13 octobre à 10h », « vendredi à 14h »)",
         ),
       meetingUrl: z
         .string()
@@ -47,9 +52,18 @@ export function proposeMeetingTool({ access, verbatim }: ProposeContext) {
       const t = fr.assistantRecords;
       const labels = fr.calls.meeting;
       const warnings: string[] = [];
-      const whenQuote = verbatim.quote(input.when);
-      const occurredAtLocal = whenQuote ? parseSaidDateTime(whenQuote) : null;
-      if (input.when && !occurredAtLocal) warnings.push(t.dateTimeNotSaid);
+      // Never an hour the user did not say: without it the field stays empty
+      // (UX test of 09/10/2026: a meeting prefilled at today 20:00).
+      const when = readSaidDate(
+        verbatim,
+        input.when,
+        labels.fieldDate,
+        warnings,
+      );
+      const occurredAtLocal = when?.time ? `${when.date}T${when.time}` : null;
+      if (when && !when.time)
+        warnings.push(t.timeToChoose(formatSaidDay(when.date)));
+      if (!when) warnings.push(t.dateTimeToChoose);
       const urlQuote = verbatim.quote(input.meetingUrl);
       const meetingUrl = urlQuote ? parseSaidUrl(urlQuote) : null;
       if (input.meetingUrl && !meetingUrl)
@@ -64,7 +78,7 @@ export function proposeMeetingTool({ access, verbatim }: ProposeContext) {
         changes,
         labels.fieldDate,
         null,
-        occurredAtLocal ? t.dateTime(occurredAtLocal) : null,
+        when?.time ? understood(when) : null,
       );
       change(changes, fr.calls.create.fieldLink, null, meetingUrl);
       change(

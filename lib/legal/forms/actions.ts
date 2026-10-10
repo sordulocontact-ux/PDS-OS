@@ -20,7 +20,10 @@ import { createClient } from "@/lib/supabase/server";
 // write goes through a SQL function that checks manage_legal itself.
 
 export type PrepareResult =
-  { ok: true; url: string } | { ok: false; error: string };
+  // `email`: the person's Réseau address, for a ready e-mail; `project`:
+  // the project's title, for its subject.
+  | { ok: true; url: string; email: string | null; project: string }
+  | { ok: false; error: string };
 
 /**
  * Prepares the fiche of one credited person: their contact (created from the
@@ -50,6 +53,7 @@ export async function prepareLegalForm(
   const person = formPeople(rows).find((p) => p.key === personKey);
   if (!person) return { ok: false, error: t.failed };
   if (person.namesakeId) return { ok: false, error: t.namesake };
+  if (person.artistId) return { ok: false, error: t.notInNetwork(person.name) };
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("prepare_legal_form", {
@@ -67,8 +71,20 @@ export async function prepareLegalForm(
     if (error) console.error("prepareLegalForm:", error.message);
     return { ok: false, error: t.failed };
   }
+  const { data: contact } = person.contactId
+    ? await supabase
+        .from("network_contacts")
+        .select("email")
+        .eq("id", person.contactId)
+        .maybeSingle()
+    : { data: null };
   revalidatePath(routes.projectLegal(project.id), "layout");
-  return { ok: true, url: `${siteUrl()}${routes.legalForm(token)}` };
+  return {
+    ok: true,
+    url: `${siteUrl()}${routes.legalForm(token)}`,
+    email: contact?.email ?? null,
+    project: project.title,
+  };
 }
 
 const formAction = z.object({

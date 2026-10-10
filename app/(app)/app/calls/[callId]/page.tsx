@@ -87,7 +87,6 @@ export default async function MeetingPage({
               <CallOutcomes
                 outcomes={outcomes}
                 members={members}
-                mePersonId={access.personId}
                 projectId={null}
                 projects={projects}
               />

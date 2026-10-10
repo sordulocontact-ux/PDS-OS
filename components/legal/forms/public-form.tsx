@@ -13,8 +13,10 @@ import {
   type FormBlock,
   type FormRole,
 } from "@/lib/legal/forms/definition";
+import type { FormRequester } from "@/lib/legal/forms/public";
 import { submitLegalForm } from "@/lib/legal/forms/public-actions";
 
+import { RequesterNote } from "./requester-note";
 import { RoleStep } from "./role-step";
 
 /**
@@ -28,10 +30,12 @@ export function PublicForm({
   token,
   prefillRoles,
   known,
+  requester,
 }: {
   token: string;
   prefillRoles: FormRole[];
   known: Record<string, string>;
+  requester: FormRequester;
 }) {
   const t = fr.legalForms;
   const [step, setStep] = useState<"roles" | "fields" | "done">("roles");
@@ -69,11 +73,25 @@ export function PublicForm({
       }
     });
 
+  // The end says what happens next and whom to write to (UX test of
+  // 09/10/2026: a one-line message).
   if (step === "done")
     return (
-      <p className="rounded-2xl border bg-background p-6 text-center font-medium">
-        {t.public.done[status]}
-      </p>
+      <div className="flex flex-col gap-5 rounded-2xl border bg-background p-6">
+        <p role="status" className="text-lg font-semibold">
+          {t.public.done[status]}
+        </p>
+        <section className="flex flex-col gap-2">
+          <h2 className="text-base font-medium">
+            {t.public.afterSubmit.title}
+          </h2>
+          <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
+            <li>{t.public.afterSubmit.review}</li>
+            <li>{t.public.afterSubmit.follow}</li>
+          </ul>
+        </section>
+        <RequesterNote requester={requester} />
+      </div>
     );
 
   if (step === "roles")

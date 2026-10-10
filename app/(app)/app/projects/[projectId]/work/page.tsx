@@ -39,6 +39,7 @@ export default async function ProjectWorkPage({
           <AddTaskForm
             projectId={project.id}
             members={work.members}
+            deliverables={work.deliverables}
             defaultAssignee={access.personId}
           />
         )}

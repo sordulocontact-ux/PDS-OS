@@ -1,6 +1,7 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
+import { routes } from "@/lib/auth/redirects";
 import {
   networkIndex,
   unlinkedCreditsByName,
@@ -24,8 +25,7 @@ import { canEditProject } from "@/lib/projects/edit-access";
 
 /**
  * The État du master of a project, ready to display: what its titles hold
- * for their mix and mastering, every fact classified by code, and the
- * engineers of the Réseau. Read-only; each action opens the form of the
+ * for their mix and mastering, every fact classified by code. Read-only; each action opens the form of the
  * record's own page, whose permission the server checks here first
  * (manage_catalog for a title, manage_network for a contact) and the
  * database again.
@@ -41,16 +41,18 @@ export async function loadMasterInventory(
   const canEditCatalog = can(access, "manage_catalog");
   const canAddContact = can(access, "manage_network");
   const rows = await readMasterRows(project.id, project.masters);
-  const engineers = networkEngineers(rows.contacts, rows.linkedCredits);
   const context = {
     network: networkIndex(rows.contacts),
-    engineersInNetwork: engineers.length,
+    engineersInNetwork: networkEngineers(rows.contacts, rows.linkedCredits)
+      .length,
     rights: { addToNetwork: canAddContact, link: canEditCatalog },
     sameName: unlinkedCreditsByName(
       [...rows.creditsOf].flatMap(([masterId, credits]) =>
         credits.map((credit) => ({ ...credit, masterId })),
       ),
     ),
+    framing: rows.framingEngineers,
+    framingHref: routes.projectFramingStep(project.id, "team"),
   };
 
   const perTitle = (build: (title: FlowTitle) => MasterFact[]) =>
@@ -103,12 +105,7 @@ export async function loadMasterInventory(
   return {
     hasTitles: rows.titles.length > 0,
     sections,
-    engineers: {
-      rows: rows.failed.network ? [] : engineers,
-      failed: rows.failed.network ?? false,
-    },
     counts: countFacts(sections),
-    canAddContact,
     organizationId: canEditCatalog ? access.organizationId : null,
   };
 }

@@ -138,6 +138,7 @@ export function CallRecorder({
           paused={rec.status === "paused"}
           fromTab={rec.source === "tab"}
           tabSilent={rec.tabSilent}
+          micSilent={rec.micSilent}
           onKeepRecording={rec.dismissSilence}
           elapsed={rec.elapsed}
           meterRef={meter.ref}

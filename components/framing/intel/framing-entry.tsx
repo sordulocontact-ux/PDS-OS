@@ -23,7 +23,8 @@ const dateFormat = new Intl.DateTimeFormat("fr-FR", {
 /**
  * The entry of the Cadrage on the project's overview (ticket § 1): the
  * acceptance, what PO found already known, the next attention, and the two
- * ways in — straight with PO, or an exchange prepared from what is missing.
+ * ways in — an exchange prepared from what is missing (first: the Cadrage
+ * is mostly done in meetings), or straight with PO.
  */
 export function FramingEntry({
   projectId,
@@ -103,20 +104,31 @@ export function FramingEntry({
       {canEdit && (
         <div className="flex flex-wrap gap-2">
           {started ? (
-            <Link
-              href={routes.projectFraming(projectId)}
-              className={buttonVariants({ size: "lg" })}
-            >
-              {t.entry.resume}
-            </Link>
+            <>
+              <Link
+                href={routes.projectFraming(projectId)}
+                className={buttonVariants({ size: "lg" })}
+              >
+                {t.entry.resume}
+              </Link>
+              <FramingCallSheet projectId={projectId} data={callSheet} />
+            </>
           ) : (
-            <form action={startFramingWithPo.bind(null, projectId)}>
-              <SubmitButton pendingLabel={t.entry.starting}>
-                {t.entry.start}
-              </SubmitButton>
-            </form>
+            // A Cadrage is mostly done in meetings: the exchange leads,
+            // PO alone is the other way in.
+            <>
+              <FramingCallSheet
+                projectId={projectId}
+                data={callSheet}
+                variant="default"
+              />
+              <form action={startFramingWithPo.bind(null, projectId)}>
+                <SubmitButton pendingLabel={t.entry.starting} variant="outline">
+                  {t.entry.start}
+                </SubmitButton>
+              </form>
+            </>
           )}
-          <FramingCallSheet projectId={projectId} data={callSheet} />
         </div>
       )}
     </section>

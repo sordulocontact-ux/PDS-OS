@@ -6,6 +6,10 @@ export const design = {
   notStarted:
     "La conception n'a pas commencé. Le chef de projet la démarre une fois la Stratégie validée.",
   locked: "Dossier soumis ou validé : il n'est plus modifiable.",
+  // The creative team, before the Conception opens (UX test of 09/10/2026).
+  earlyDeposit:
+    "En attendant, déposez vos références et premières pistes dans Fichiers › Visuels : toute l'équipe les retrouve.",
+  toFiles: "Déposer dans Fichiers",
   needsStrategy: {
     title: "La conception suit la stratégie",
     body: "Faites valider la Stratégie de lancement : la conception s'ouvrira ensuite.",

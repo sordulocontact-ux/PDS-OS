@@ -107,11 +107,15 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
       }
 
       let credits: Credit[] = current?.credits ?? [];
+      const pendingCredits: Array<{ name: string; role: Credit["role"] }> = [];
       if (input.artists?.length) {
         const artists = await listArtistOptions();
         credits = input.artists.flatMap((a) => {
           const found = findNamed(artists, a.name, (x) => x.name, warnings);
-          if (!found) warnings.push(t.unknownArtist(a.name));
+          if (!found) {
+            warnings.push(t.pendingArtist(a.name));
+            pendingCredits.push({ name: a.name.trim(), role: a.role });
+          }
           return found
             ? [{ artistId: found.id, name: found.name, role: a.role }]
             : [];
@@ -156,6 +160,7 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
         isrc: isrc ?? base.isrc,
         duration: duration ?? base.duration,
         credits,
+        pendingCredits,
       };
 
       const changes: DraftChange[] = [];
@@ -164,7 +169,12 @@ export function proposeMasterTool({ access, verbatim }: ProposeContext) {
         changes,
         labels.artists,
         current ? formatCredits(current.credits) : null,
-        formatCredits(values.credits),
+        [
+          formatCredits(values.credits),
+          ...pendingCredits.map((c) => t.toCreate(c.name)),
+        ]
+          .filter(Boolean)
+          .join(", "),
       );
       const stateName = (value: string) => {
         const state = audioStateOf(value || null);

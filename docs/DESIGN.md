@@ -400,6 +400,14 @@ Règles de Sacha (07/10/2026), pour **toute** l'application :
   le Réseau mais seul le nom est gardé) et le titulaire du ℗ (pré-rempli par le label de la
   répartition master). Les réponses libres lues par PO (Cadrage juridique, questions du
   Cadrage) restent du texte.
+  **Pour un rôle, seuls ceux qui y correspondent sont listés avant de taper** (`suggest`,
+  10/10/2026 : pas d'ingé son proposé pour la direction artistique) ; taper cherche dans tout
+  le Réseau. Rôles d'équipe du Cadrage → rôles du Réseau (`NETWORK_ROLES_OF`,
+  `assign-role-dialog.tsx`) : direction artistique et créative = directeur·rice artistique
+  (rôle du Réseau ajouté le 10/10/2026), graphiste, photographe, vidéaste ; clip = vidéaste ; presse = média, prestataire ; influence = prestataire,
+  partenaire, média ; playlisting = prestataire, média ; mix et mastering = ingé son.
+  Dans une modale, la liste du sélecteur est dans le flux : la modale grandit au lieu de la
+  couper.
 - **Tout ce qu'on sait est pré-rempli** : identité, IPI, coordonnées, rôle, montants ou dates
   déjà connus ailleurs dans l'app arrivent remplis, avec leur source quand le formulaire en
   affiche une, et restent corrigeables. L'utilisateur ne retape jamais une information que

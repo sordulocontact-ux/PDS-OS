@@ -6,13 +6,11 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { transmissionExpiry } from "@/lib/master-workflow/link-expiry";
 import { loadStepView } from "@/lib/master-workflow/transmission";
 import type { MasterPackage } from "@/lib/master-workflow/transmission-types";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
-
-// The files of the package open as long as its link: 30 days.
-const LINK_SECONDS = 30 * 24 * 60 * 60;
 
 export type TransmitResult =
   { ok: true; token: string } | { ok: false; error: string };
@@ -50,6 +48,17 @@ export async function transmitPackage(
     return { ok: false, error: view.blockers[0] ?? t.failed };
 
   const supabase = await createClient();
+  // The link lives until the stage's final date plus a margin (never under
+  // 30 days); its files are signed for exactly as long.
+  const now = new Date();
+  const dates = view.brief.dates;
+  const expiresAt = transmissionExpiry(
+    now,
+    input.data.role === "mix"
+      ? dates.mixFinalDue
+      : (dates.masterFinalDue ?? dates.masteringDue),
+  );
+  const linkSeconds = Math.floor((expiresAt.getTime() - now.getTime()) / 1000);
   const sourceIds = view.titles.flatMap((title) =>
     title.source ? [title.source.id] : [],
   );
@@ -77,7 +86,7 @@ export async function transmitPackage(
   );
   const signed = await supabase.storage.from("master-files").createSignedUrls(
     kept.map((file) => file.path),
-    LINK_SECONDS,
+    linkSeconds,
   );
   if (signed.error) {
     console.error("transmitToMixer sign:", signed.error.message);
@@ -103,6 +112,7 @@ export async function transmitPackage(
       if (!source || !title.source) return [];
       return [
         {
+          masterId: title.id,
           title: title.title,
           artists: title.artists,
           source: {
@@ -145,6 +155,7 @@ export async function transmitPackage(
       p_role: input.data.role,
       p_package: pack,
       p_note: input.data.note,
+      p_expires_at: expiresAt.toISOString(),
     },
   );
   if (sendError || !token) {

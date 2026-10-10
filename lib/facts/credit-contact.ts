@@ -26,6 +26,8 @@ export type CreditContactAction =
       name: string;
       roles: NetworkRole[];
       links: CreditLink[];
+      // A featured artist: the new contact is linked to its artist page.
+      artistId?: string;
     }
   // Credits whose name matches a contact: link them (never automatic).
   | {
@@ -58,16 +60,23 @@ export function unlinkedCreditsByName(
 }
 
 /** Contacts of the Réseau by normalized name: a namesake only suggests the
- * contact to link a credit to. */
+ * contact to link a credit to. `byArtist`: the contact linked to an artist
+ * of the catalog (network_contacts.artist_id), a real link. */
 export type NetworkIndex = {
   byName: Map<string, { id: string; name: string }>;
+  byArtist: Map<string, { id: string; name: string }>;
 };
 
 export function networkIndex(
-  contacts: Array<{ id: string; name: string }>,
+  contacts: Array<{ id: string; name: string; artist_id?: string | null }>,
 ): NetworkIndex {
   return {
     byName: new Map(contacts.map((c) => [normalizeSearch(c.name), c])),
+    byArtist: new Map(
+      contacts.flatMap((c) =>
+        c.artist_id ? [[c.artist_id, { id: c.id, name: c.name }]] : [],
+      ),
+    ),
   };
 }
 

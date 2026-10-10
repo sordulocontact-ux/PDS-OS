@@ -52,6 +52,9 @@ export type WorkflowStates = {
     masterDates: Record<string, string | null> | null;
     releaseDate: string | null;
     legalItems: TrackedItem[];
+    // Rights constraints confirmed in the Cadrage: what the Plan du projet
+    // calls « blocages juridiques », shown until the Juridique tracks them.
+    rightsConstraints: Array<{ id: string; text: string }>;
   };
 };
 
@@ -247,12 +250,20 @@ export const loadWorkflowStates = cache(
     const has = (workflow: WorkflowKey) => workflows.includes(workflow);
     const legalAllowed = can(access, "manage_legal");
 
-    const [master, legal, strategyLaunched, distribution] = await Promise.all([
-      has("master") ? masterFacts(project, access.personId) : null,
-      has("legal") && legalAllowed ? legalFacts(project) : null,
-      has("marketing") ? isWorkflowLaunched(project.id, "strategy") : false,
-      has("distribution") ? distributionFacts(project.id) : null,
-    ]);
+    const supabase = await createClient();
+    const [master, legal, strategyLaunched, distribution, constraints] =
+      await Promise.all([
+        has("master") ? masterFacts(project, access.personId) : null,
+        has("legal") && legalAllowed ? legalFacts(project) : null,
+        has("marketing") ? isWorkflowLaunched(project.id, "strategy") : false,
+        has("distribution") ? distributionFacts(project.id) : null,
+        supabase
+          .from("framing_constraints")
+          .select("id, text")
+          .eq("project_id", project.id)
+          .eq("type", "rights")
+          .eq("review_status", "confirmed"),
+      ]);
 
     let states: WorkflowStates["states"] = {};
     if (master) states.master = master.state;
@@ -295,6 +306,7 @@ export const loadWorkflowStates = cache(
         masterDates: master?.dates ?? null,
         releaseDate: distribution?.plannedDate ?? null,
         legalItems: legal?.items ?? [],
+        rightsConstraints: constraints.data ?? [],
       },
     };
   },

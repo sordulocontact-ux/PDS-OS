@@ -8,6 +8,7 @@ import {
   Output,
   type LanguageModel,
   type LanguageModelUsage,
+  type UserContent,
 } from "ai";
 import type { z } from "zod";
 
@@ -71,6 +72,31 @@ export async function extract<T>(
   input: string,
   instructions: string,
 ): Promise<Extraction<T>> {
+  return generate(schema, `<data>\n${input}\n</data>`, instructions);
+}
+
+/**
+ * Same as `extract`, for one image (a screenshot): the image travels alone in
+ * the user message, as untrusted data. The default Mistral model
+ * (ministral-14b) reads images.
+ */
+export async function extractFromImage<T>(
+  schema: z.ZodType<T>,
+  image: { data: Uint8Array; mediaType: string },
+  instructions: string,
+): Promise<Extraction<T>> {
+  return generate(
+    schema,
+    [{ type: "image", image: image.data, mediaType: image.mediaType }],
+    instructions,
+  );
+}
+
+async function generate<T>(
+  schema: z.ZodType<T>,
+  content: UserContent,
+  instructions: string,
+): Promise<Extraction<T>> {
   const env = getServerEnv();
   const { model, modelId } = resolveModel(env);
   const startedAt = performance.now();
@@ -82,7 +108,7 @@ export async function extract<T>(
       model,
       temperature: 0,
       system: instructions,
-      messages: [{ role: "user", content: `<data>\n${input}\n</data>` }],
+      messages: [{ role: "user", content }],
       output: Output.object({ schema }),
     });
     output = result.output;

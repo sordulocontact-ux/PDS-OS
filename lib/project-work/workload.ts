@@ -25,7 +25,8 @@ export type WorkItem = {
   doneAt: string | null;
   // Validations: the other person of the circuit (validator).
   otherPersonId: string | null;
-  href: string;
+  // Null: nowhere else to go (a plain task, ticked right here).
+  href: string | null;
   // A task of the Juridique's plan still held back by another action.
   waitingOn?: string | null;
 };

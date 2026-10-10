@@ -13,6 +13,9 @@ export const NETWORK_ROLES = [
   "songwriter",
   "engineer",
   "producer",
+  // Who leads the look of a project (« Direction artistique » of the
+  // Cadrage's team, migration 20261010000501).
+  "art_director",
   "videographer",
   "photographer",
   "designer",
@@ -39,7 +42,7 @@ export const NETWORK_FAMILIES = {
     "engineer",
     "producer",
   ],
-  image: ["videographer", "photographer", "designer"],
+  image: ["art_director", "videographer", "photographer", "designer"],
   business: [
     "provider",
     "partner",

@@ -84,6 +84,10 @@ export const legalSplits = {
     copy: "Copier le lien",
     copied: "Lien copié",
     close: "Fermer",
+    email: "Envoyer par e-mail",
+    emailSubject: (title: string) => `Répartition à confirmer · ${title}`,
+    emailBody: (name: string, title: string, url: string) =>
+      `Bonjour ${name},\n\nVoici la répartition des droits de « ${title} » à relire et confirmer (ou contester), sans compte :\n${url}\n\nMerci !`,
   },
   errors: {
     total: "La répartition doit faire exactement 100 % pour être envoyée.",

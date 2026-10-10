@@ -1,7 +1,10 @@
 // The launched Plan d'action as the prototype of 07/10/2026 drew it (Sacha,
-// 08/10/2026: « presque comme sur le prototype »): one card per démarche,
-// one line per person, title or borrowing, each with its state in a badge,
-// the verb of what to do, and the panel where it is done. Built from the
+// 08/10/2026: « presque comme sur le prototype »), lightened after the UX
+// test of 09/10/2026 (≈ 250 actions for an EP): one line per person (their
+// fiche, then their contract), per title (its split, then its SACEM
+// bulletin) and per borrowing, each with the state of its most urgent step
+// in a badge, the verb of what to do — done at once when it needs no input
+// (`action`) — and the panel where every step is. Built from the
 // tracked plan (groups, delegation) and each branch's own data (the fiche,
 // the agreement, the split, the borrowing, the bulletin). Pure: the code
 // classifies, nothing here is stored.
@@ -33,7 +36,20 @@ export type BoardPanel =
   | { kind: "split"; split: TitleSplit }
   | { kind: "clearance"; clearance: Clearance }
   | { kind: "sacem"; title: TitleFormality }
-  | { kind: "link"; href: string };
+  | { kind: "link"; href: string }
+  // A person's or a title's steps (BoardRow.steps), in order.
+  | { kind: "steps" };
+
+/** What a line's verb does at once, when the step needs nothing typed
+ * (UX test of 09/10/2026: « Préparer la fiche » opened a panel with
+ * « Préparer la fiche »). Run by the client, then the panel opens. */
+export type RowAction =
+  | { kind: "prepareFiche"; personKey: string }
+  | { kind: "markSent"; formId: string }
+  | { kind: "generateContract"; needId: string }
+  | { kind: "submitContract"; contractId: string }
+  | { kind: "proposeSplit"; versionId: string; title: string }
+  | { kind: "openFormality"; masterId: string };
 
 export type BoardRow = {
   id: string;
@@ -48,6 +64,12 @@ export type BoardRow = {
   // The plan's action (delegation: who, by when).
   item: TrackedItem | null;
   panel: BoardPanel;
+  action?: RowAction;
+  // A person's or a title's steps, in order; the line shows the most
+  // urgent one (its badge, verb, action, delegation).
+  steps?: BoardRow[];
+  // Which step of `steps` the line shows.
+  current?: number;
 };
 
 export type BoardSection = {
@@ -64,26 +86,97 @@ export type PlanBoard = {
   counts: Record<TrackGroup, number>;
   // The borrowings not secured: what blocks the release (ticket 08).
   blocking: BoardRow[];
+  // What remains open besides the borrowings (fiches, contracts, splits,
+  // SACEM): it does not block, but the release is not « atteint » with it
+  // (UX test of 09/10/2026: « Atteint » with every contract unsigned).
+  remaining: BoardRow[];
   secured: number;
   borrowings: number;
 };
 
-// In the order they unlock: the fiches and the borrowings start together
-// (ticket 07), the contracts and the splits wait for the fiches, the SACEM
-// for the rest.
-const ORDER: PlanItemKind[] = [
-  "onboarding",
-  "clearance",
-  "contract",
-  "splits",
-  "formality",
-];
-const AFTER: Partial<Record<PlanItemKind, keyof typeof fr.legal.board.after>> =
+// In the order they unlock: the people (fiche, then contract) and the
+// borrowings start together (ticket 07), the titles (split, then SACEM)
+// follow.
+const SECTIONS: Array<{
+  kinds: PlanItemKind[];
+  title: () => string;
+  why: () => string;
+}> = [
   {
-    contract: "contract",
-    splits: "splits",
-    formality: "formality",
-  };
+    kinds: ["onboarding", "contract"],
+    title: () => fr.legal.board.sections.people,
+    why: () => fr.legal.board.why.people,
+  },
+  {
+    kinds: ["clearance"],
+    title: () => fr.legal.plan.groups.clearance,
+    why: () => fr.legal.board.why.clearance,
+  },
+  {
+    kinds: ["splits", "formality"],
+    title: () => fr.legal.board.sections.titles,
+    why: () => fr.legal.board.why.titles,
+  },
+];
+
+// Most urgent first: what decides the line's group, badge and verb.
+const URGENCY: BoardGroup[] = ["decision", "now", "waiting", "silent", "done"];
+
+/**
+ * One line per person and per title: their steps in order, shown by the
+ * most urgent one. A step alone stays a line of its own (a borrowing, the
+ * mapping, a contract without a fiche).
+ */
+function mergeSteps(
+  rows: BoardRow[],
+  mergeOf: Map<string, string>,
+  forms: FormRow[],
+): BoardRow[] {
+  const t = fr.legal.board;
+  const groups = new Map<string, BoardRow[]>();
+  const lines: Array<BoardRow | string> = [];
+  for (const row of rows) {
+    const key = mergeOf.get(row.id);
+    if (!key) {
+      lines.push(row);
+      continue;
+    }
+    if (!groups.has(key)) {
+      groups.set(key, []);
+      lines.push(key);
+    }
+    groups.get(key)!.push(row);
+  }
+  const nameOf = new Map(forms.map((f) => [`person:${f.key}`, f.name]));
+  return lines.map((line) => {
+    if (typeof line !== "string") return line;
+    const steps = groups.get(line)!;
+    if (steps.length === 1) return steps[0];
+    const current = steps.reduce(
+      (best, step, i) =>
+        URGENCY.indexOf(step.group) < URGENCY.indexOf(steps[best].group)
+          ? i
+          : best,
+      0,
+    );
+    const shown = steps[current];
+    const person = line.startsWith("person:");
+    return {
+      ...shown,
+      id: line,
+      section: steps[0].section,
+      label: person ? (nameOf.get(line) ?? shown.label) : shown.label,
+      meta: person ? steps[0].meta : shown.meta,
+      badge: {
+        ...shown.badge,
+        label: `${t.stepOf[shown.panel.kind] ?? ""}${shown.badge.label}`,
+      },
+      panel: { kind: "steps" },
+      steps,
+      current,
+    };
+  });
+}
 
 const finished = (item: TrackedItem) =>
   item.current === "done" || item.current === "obsolete";
@@ -105,17 +198,18 @@ function metaOf(item: TrackedItem | null, extra: Array<string | null>) {
 function ficheRow(row: FormRow, item: TrackedItem | null): BoardRow {
   const t = fr.legal.board;
   const s = fr.legalForms.page.states as Record<string, string>;
-  const group: BoardGroup = row.namesakeId
-    ? "now"
-    : ({
-        none: "now",
-        link_generated: "now",
-        expired: "now",
-        revoked: "now",
-        sent: "waiting",
-        action_required: "decision",
-        complete: "done",
-      }[row.state] as BoardGroup);
+  const group: BoardGroup =
+    row.namesakeId || row.artistId
+      ? "now"
+      : ({
+          none: "now",
+          link_generated: "now",
+          expired: "now",
+          revoked: "now",
+          sent: "waiting",
+          action_required: "decision",
+          complete: "done",
+        }[row.state] as BoardGroup);
   return {
     id: `fiche:${row.key}`,
     section: "onboarding",
@@ -123,23 +217,50 @@ function ficheRow(row: FormRow, item: TrackedItem | null): BoardRow {
     label: row.name,
     masterId: null,
     meta: metaOf(item, [
-      row.creditRoles.map((r) => fr.masterPage.credits.roles[r]).join(", "),
+      [
+        ...row.creditRoles.map((r) => fr.masterPage.credits.roles[r]),
+        // A featured artist: performer beside their credits.
+        ...(row.formRoles.includes("performer")
+          ? [fr.legalForms.roles.performer]
+          : []),
+      ].join(", "),
     ]),
     badge: row.namesakeId
       ? { label: t.namesake, tone: "warning" }
-      : { label: s[row.state] ?? row.state, tone: legalFormTone[row.state] },
+      : row.artistId
+        ? { label: t.notInNetwork, tone: "warning" }
+        : { label: s[row.state] ?? row.state, tone: legalFormTone[row.state] },
     verb: row.namesakeId
       ? t.verbs.link
-      : group === "done" || group === "waiting"
-        ? t.verbs.open
-        : row.state === "link_generated"
-          ? t.verbs.markSent
-          : row.state === "action_required"
-            ? t.verbs.review
-            : t.verbs.prepareFiche,
+      : row.artistId
+        ? t.verbs.addToNetwork
+        : group === "done" || group === "waiting"
+          ? t.verbs.open
+          : row.state === "link_generated"
+            ? t.verbs.markSent
+            : row.state === "action_required"
+              ? t.verbs.review
+              : t.verbs.prepareFiche,
     item,
     panel: { kind: "fiche", row },
+    action:
+      row.namesakeId || row.artistId
+        ? undefined
+        : row.state === "link_generated" && row.formId
+          ? { kind: "markSent", formId: row.formId }
+          : group === "now" && row.state !== "link_generated"
+            ? { kind: "prepareFiche", personKey: row.key }
+            : undefined,
   };
+}
+
+// The action a contract's verb does at once, if any.
+function contractAction(row: AgreementRow): RowAction | undefined {
+  if (row.state === "ready_to_generate" && row.needId)
+    return { kind: "generateContract", needId: row.needId };
+  if (row.state === "draft" && row.contract)
+    return { kind: "submitContract", contractId: row.contract.id };
+  return undefined;
 }
 
 function contractVerb(row: AgreementRow, canValidate: boolean) {
@@ -265,9 +386,15 @@ export function planBoard(input: {
     };
   };
 
-  // Fiches: one line per credited person.
+  // Which person or title a step belongs to (merged below).
+  const mergeOf = new Map<string, string>();
+  // Fiches: one per credited person.
   const onboarding = itemOf("onboarding") ?? null;
-  for (const form of input.forms) rows.push(ficheRow(form, onboarding));
+  for (const form of input.forms) {
+    const row = ficheRow(form, onboarding);
+    rows.push(row);
+    mergeOf.set(row.id, `person:${form.key}`);
+  }
 
   for (const item of input.items) {
     const [kind, ref] = [item.kind, item.key.slice(item.key.indexOf(":") + 1)];
@@ -302,7 +429,10 @@ export function planBoard(input: {
         panel: agreement
           ? { kind: "contract", row: agreement }
           : { kind: "link", href: item.sourceHref ?? "" },
+        action:
+          agreement && !blockedByFiche ? contractAction(agreement) : undefined,
       });
+      mergeOf.set(item.key, `person:${ref}`);
       continue;
     }
     if (kind === "splits") {
@@ -322,7 +452,16 @@ export function planBoard(input: {
         panel: split
           ? { kind: "split", split }
           : { kind: "link", href: item.sourceHref ?? "" },
+        action:
+          split?.draft && item.current !== "blocked"
+            ? {
+                kind: "proposeSplit",
+                versionId: split.draft.id,
+                title: split.title,
+              }
+            : undefined,
       });
+      mergeOf.set(item.key, `title:${ref}`);
       continue;
     }
     if (kind === "clearance") {
@@ -364,7 +503,12 @@ export function planBoard(input: {
       panel: title
         ? { kind: "sacem", title }
         : { kind: "link", href: item.sourceHref ?? "" },
+      action:
+        title && !title.formality && item.current !== "blocked"
+          ? { kind: "openFormality", masterId: title.masterId }
+          : undefined,
     });
+    mergeOf.set(item.key, `title:${ref}`);
   }
 
   // The mapping of the contracts: validated once for every person.
@@ -393,15 +537,16 @@ export function planBoard(input: {
       panel: { kind: "mapping" },
     });
 
-  const sections = ORDER.flatMap((kind): BoardSection[] => {
-    const theirs = rows.filter((r) => r.section === kind);
+  const lines = mergeSteps(rows, mergeOf, input.forms);
+  const sections = SECTIONS.flatMap((section): BoardSection[] => {
+    const theirs = lines.filter((r) => section.kinds.includes(r.section));
     if (theirs.length === 0) return [];
     return [
       {
-        kind,
-        title: fr.legal.plan.groups[kind],
-        why: t.why[kind],
-        after: AFTER[kind] ? t.after[AFTER[kind]] : null,
+        kind: section.kinds[0],
+        title: section.title(),
+        why: section.why(),
+        after: null,
         rows: theirs,
         done: theirs.filter((r) => r.group === "done").length,
       },
@@ -413,9 +558,9 @@ export function planBoard(input: {
     waiting: 0,
     silent: 0,
   };
-  for (const row of rows)
+  for (const row of lines)
     counts[row.group === "done" ? "silent" : row.group] += 1;
-  const borrowings = rows.filter((r) => r.panel.kind === "clearance");
+  const borrowings = lines.filter((r) => r.panel.kind === "clearance");
   const blocking = borrowings.filter(
     (r) =>
       r.panel.kind === "clearance" &&
@@ -425,6 +570,9 @@ export function planBoard(input: {
     sections,
     counts,
     blocking,
+    remaining: lines.filter(
+      (r) => r.group !== "done" && r.panel.kind !== "clearance",
+    ),
     secured: borrowings.length - blocking.length,
     borrowings: borrowings.length,
   };

@@ -30,6 +30,8 @@ export function SinglePicker({
   createLabel,
   noResultLabel,
   allSelectedLabel,
+  suggestedIds,
+  noSuggestionLabel,
   removeLabel,
   error,
 }: {
@@ -46,6 +48,8 @@ export function SinglePicker({
   createLabel: (query: string) => string;
   noResultLabel: (query: string) => string;
   allSelectedLabel: string;
+  suggestedIds?: ReadonlySet<string>;
+  noSuggestionLabel?: string;
   removeLabel: (label: string) => string;
   error?: string;
 }) {
@@ -98,6 +102,8 @@ export function SinglePicker({
             createLabel={createLabel}
             noResultLabel={noResultLabel}
             allSelectedLabel={allSelectedLabel}
+            suggestedIds={suggestedIds}
+            noSuggestionLabel={noSuggestionLabel}
             invalid={Boolean(error)}
             describedBy={error ? `${id}-error` : undefined}
           />

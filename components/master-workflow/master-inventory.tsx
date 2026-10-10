@@ -1,6 +1,4 @@
 import { MasterFactAction } from "@/components/master-workflow/master-fact-action";
-import { NetworkEngineersTable } from "@/components/master-workflow/network-engineers-table";
-import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
@@ -15,12 +13,13 @@ import type {
 
 /**
  * The Master's first step: what the project's titles already hold for their
- * mix and mastering, then the engineers of the Réseau. Each row leads to
+ * mix and mastering. Each row leads to
  * the page where the fact lives (Audio, Fichiers, Sessions, Crédits of the
  * title, contact); what is missing is completed with the forms of those
  * pages. Each section sits on its own white card, the tiles stay outside
  * (docs/DESIGN.md, « Cartes de section »). A tile filters the page to its
- * facts (`state`): only the sections that hold some, without the Réseau.
+ * facts (`state`): only the sections that hold some. The engineers of the
+ * Réseau are chosen in the Brief, which shows their card and history.
  */
 export function MasterInventory({
   inventory,
@@ -37,7 +36,6 @@ export function MasterInventory({
   state: FactStatus | null;
 }) {
   const t = fr.masterWorkflow.inventory;
-  const network = t.network;
   const sections = filterFactSections(inventory.sections, state).filter(
     (section) => !state || section.failed || section.facts.length > 0,
   );
@@ -72,38 +70,6 @@ export function MasterInventory({
         </>
       ) : (
         <EmptyNote>{t.noTitles}</EmptyNote>
-      )}
-
-      {!state && (
-        <PageSection
-          id="master-network"
-          title={network.title}
-          description={network.description}
-          card
-          action={
-            inventory.canAddContact &&
-            !inventory.engineers.failed && (
-              <AddToNetworkButton
-                header
-                label={network.add}
-                action={{
-                  kind: "add_to_network",
-                  name: "",
-                  roles: ["engineer"],
-                  links: [],
-                }}
-              />
-            )
-          }
-        >
-          {inventory.engineers.failed ? (
-            <EmptyNote>{fr.facts.failed}</EmptyNote>
-          ) : inventory.engineers.rows.length === 0 ? (
-            <EmptyNote>{network.empty}</EmptyNote>
-          ) : (
-            <NetworkEngineersTable engineers={inventory.engineers.rows} />
-          )}
-        </PageSection>
       )}
     </div>
   );

@@ -54,6 +54,10 @@ export const calls = {
     fieldLink: "Lien de visio",
     linkHint: "Meet, Zoom, Teams… : « Rejoindre » l'ouvrira le moment venu.",
     linkPlaceholder: "https://meet.google.com/…",
+    fieldAttendees: "Participants",
+    attendeesHint:
+      "L'équipe du projet. Les personnes choisies sont prévenues et le voient dans leurs calls à venir.",
+    noTeam: "Personne d'autre dans l'équipe du projet pour l'instant.",
     submit: "Créer le call",
     pending: "Création…",
     cancel: "Annuler",
@@ -143,6 +147,11 @@ export const calls = {
     silenceStop: "Arrêter l'enregistrement",
     silenceContinue: "Continuer",
     silenceTab: "(!) Aucun son du call",
+    micSilent:
+      "On n'entend rien depuis 30 secondes : vérifiez que le micro n'est pas coupé.",
+    quiet:
+      "Cet enregistrement semble muet : presque aucun son n'a été entendu. Écoutez-le avant de l'envoyer.",
+    sendAnyway: "Envoyer quand même",
     keepOpen:
       "Gardez cet onglet ouvert jusqu'à l'envoi : fermer la page perd l'enregistrement.",
     level: "Niveau sonore",
@@ -275,6 +284,8 @@ export const calls = {
     tokens: "Jetons entrée / sortie",
   },
   back: "Tous les calls",
+  // A project's call names its project under the date (link to its overview).
+  project: "Projet",
   // « Préparer un échange » (Cadrage, Stratégie): topics and participants.
   prepare: {
     addTopic: "Ajouter un sujet",
@@ -329,7 +340,8 @@ export const calls = {
       "Quota du fournisseur atteint. Réessayez dans quelques minutes.",
     provider_error:
       "Le fournisseur a refusé la requête (clé, format ou panne). Détail dans la console du serveur.",
-    transcript_empty: "La transcription est vide : aucune parole détectée.",
+    transcript_empty:
+      "Rien d'exploitable dans l'enregistrement : aucune parole n'a été entendue (micro coupé ?). Aucun compte rendu n'a été fait : réenregistrez, ou importez un autre fichier.",
     save_failed: "Le résultat n'a pas pu être enregistré. Réessayez.",
     network: "Le serveur ne répond pas.",
     unknown: "Une erreur inattendue est survenue.",

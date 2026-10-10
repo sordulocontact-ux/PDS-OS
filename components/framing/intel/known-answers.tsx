@@ -8,7 +8,7 @@ import { fr } from "@/lib/i18n/fr";
 /**
  * What the dimension already knows: the project's own facts (owner,
  * validator…) and the questions answered, each with its source. A known
- * answer opens again with « Modifier ».
+ * answer opens again with « Modifier », or « Voir » once it can't change.
  */
 export function KnownAnswers({
   projectId,
@@ -56,18 +56,16 @@ export function KnownAnswers({
                 </span>
                 <span className="flex flex-wrap items-center gap-x-3 text-caption text-muted-foreground">
                   {q.provenance && <span>{sourceLabel(q.provenance)}</span>}
-                  {editable && (
-                    <Link
-                      href={routes.projectFramingQuestion(
-                        projectId,
-                        q.dimension,
-                        q.key,
-                      )}
-                      className="text-foreground underline underline-offset-4"
-                    >
-                      {t.guide.modify}
-                    </Link>
-                  )}
+                  <Link
+                    href={routes.projectFramingQuestion(
+                      projectId,
+                      q.dimension,
+                      q.key,
+                    )}
+                    className="text-foreground underline underline-offset-4"
+                  >
+                    {editable ? t.guide.modify : t.guide.see}
+                  </Link>
                 </span>
               </dd>
             </div>

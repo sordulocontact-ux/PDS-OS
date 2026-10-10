@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { linkTeamToMembers } from "@/lib/framing/team-link";
 import { isBriefTextField } from "@/lib/framing/brief";
 import {
   fail,
@@ -192,7 +193,11 @@ export async function importReportIntoBrief(
   const results = await Promise.all([
     fields.length ? supabase.from("field_values").insert(fields) : null,
     needs.length ? supabase.from("needs").insert(needs) : null,
-    team.length ? supabase.from("project_team_members").insert(team) : null,
+    team.length
+      ? supabase
+          .from("project_team_members")
+          .insert(await linkTeamToMembers(supabase, team))
+      : null,
     constraints.length
       ? supabase.from("framing_constraints").insert(constraints)
       : null,

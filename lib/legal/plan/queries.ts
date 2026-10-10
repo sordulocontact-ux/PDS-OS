@@ -1,7 +1,9 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
+import { todayInParis } from "@/lib/insights/dates";
 import { completeFormContacts } from "@/lib/legal/forms/queries";
+import { defaultDueOn } from "@/lib/legal/plan/due-dates";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import {
   proposePlan,
@@ -164,6 +166,7 @@ export async function loadLegalPlan(
       ? project.ownerPersonId
       : null;
   const proposal = await proposeLegalPlan(project, access);
+  const today = todayInParis();
   return {
     state: "proposal",
     people: [...names].map(([personId, name]) => ({ personId, name })),
@@ -171,8 +174,9 @@ export async function loadLegalPlan(
       ...item,
       responsibleId: owner,
       responsibleName: owner ? (names.get(owner) ?? null) : null,
-      // The project's date, shown and changeable; an action may have none.
-      dueOn: project.dueDate,
+      // Proposed by kind from the release date, shown and changeable; an
+      // action may have none.
+      dueOn: defaultDueOn(item.kind, project.dueDate, today),
     })),
   };
 }

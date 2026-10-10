@@ -9,7 +9,9 @@ import { SubmissionDialog } from "@/components/legal/forms/submission-dialog";
 import { Button } from "@/components/ui/button";
 import { useShowLinks } from "@/components/ui/one-time-links";
 import { routes } from "@/lib/auth/redirects";
+import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { fr } from "@/lib/i18n/fr";
+import { mailtoHref } from "@/lib/utils/mailto";
 import { prepareLegalForm, setLegalFormState } from "@/lib/legal/forms/actions";
 import type { FormRow } from "@/lib/legal/forms/queries";
 
@@ -38,7 +40,21 @@ export function FormRowActions({
           title: t.linkTitle(row.name),
           description: t.linkBody,
           links: [
-            { key: row.key, label: t.linkTitle(row.name), url: result.url },
+            {
+              key: row.key,
+              label: t.linkTitle(row.name),
+              url: result.url,
+              email: result.email
+                ? {
+                    href: mailtoHref(
+                      result.email,
+                      t.emailSubject(result.project),
+                      t.emailBody(row.name, result.project, result.url),
+                    ),
+                    label: t.email,
+                  }
+                : undefined,
+            },
           ],
           copyLabel: t.copy,
           copiedLabel: t.copied,
@@ -58,6 +74,25 @@ export function FormRowActions({
 
   // A namesake in the Réseau: the credit is linked first (État des lieux),
   // otherwise the fiche would create a duplicate contact.
+  if (row.artistId)
+    return (
+      <div className="flex flex-col gap-1 sm:items-end">
+        <p className="text-caption text-muted-foreground">
+          {t.notInNetwork(row.name)}
+        </p>
+        <AddToNetworkButton
+          label={fr.legal.board.verbs.addToNetwork}
+          action={{
+            kind: "add_to_network",
+            name: row.name,
+            roles: ["artist"],
+            links: [],
+            artistId: row.artistId,
+          }}
+        />
+      </div>
+    );
+
   if (row.namesakeId)
     return (
       <div className="flex flex-col gap-1 sm:items-end">

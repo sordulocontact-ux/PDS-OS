@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { AssistantLauncher } from "@/components/assistant/assistant-launcher";
 import type { SavedLink } from "@/components/assistant/draft-forms";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import type { DraftProposal } from "@/lib/assistant/drafts";
+import { proposalOf, type DraftProposal } from "@/lib/assistant/drafts";
 import { fr } from "@/lib/i18n/fr";
 
 // Heavy and rarely shown: the forms load when a draft is opened.
@@ -32,6 +32,9 @@ type AssistantContextValue = {
   markSaved: (toolCallId: string, link: SavedLink) => void;
   launcherOpen: boolean;
   setLauncherOpen: (open: boolean) => void;
+  /** Questions the open page adds to the suggestions (a project to accept). */
+  pageSuggestions: string[];
+  setPageSuggestions: (suggestions: string[]) => void;
 };
 
 const AssistantContext = createContext<AssistantContextValue | null>(null);
@@ -63,6 +66,7 @@ export function AssistantProvider({
   );
   const [saved, setSaved] = useState<Record<string, SavedLink>>({});
   const [launcherOpen, setLauncherOpen] = useState(false);
+  const [pageSuggestions, setPageSuggestions] = useState<string[]>([]);
   const [reviewing, setReviewing] = useState<{
     toolCallId: string;
     proposal: DraftProposal;
@@ -74,6 +78,8 @@ export function AssistantProvider({
       saved,
       launcherOpen,
       setLauncherOpen,
+      pageSuggestions,
+      setPageSuggestions,
       review(toolCallId, proposal) {
         // Never two layers: the window gives way to the panel.
         setLauncherOpen(false);
@@ -83,15 +89,45 @@ export function AssistantProvider({
         setSaved((previous) => ({ ...previous, [toolCallId]: link }));
       },
     }),
-    [chat, saved, launcherOpen],
+    [chat, saved, launcherOpen, pageSuggestions],
   );
+
+  // The draft after `toolCallId` in the same answer, not saved yet: an
+  // artist, its titles and its project proposed together are reviewed one
+  // after the other (UX test of 09/10/2026: six forms reopened by hand).
+  function nextDraft(toolCallId: string, done: Record<string, SavedLink>) {
+    for (const message of chat.messages) {
+      const drafts = message.parts.flatMap((part) => {
+        if (!("toolCallId" in part) || part.state !== "output-available")
+          return [];
+        const proposal = proposalOf(part.output);
+        return proposal ? [{ toolCallId: part.toolCallId, proposal }] : [];
+      });
+      const at = drafts.findIndex((d) => d.toolCallId === toolCallId);
+      if (at < 0) continue;
+      return (
+        drafts
+          .slice(at + 1)
+          .find(
+            (d) => !done[d.toolCallId] && d.proposal.draft.kind !== "feedback",
+          ) ?? null
+      );
+    }
+    return null;
+  }
 
   function onSaved(link: SavedLink) {
     if (!reviewing) return;
     const { toolCallId } = reviewing;
-    setSaved((previous) => ({ ...previous, [toolCallId]: link }));
-    setReviewing(null);
-    toast.success(`${fr.assistant.drafts.saved} : ${link.label}`);
+    const done = { ...saved, [toolCallId]: link };
+    setSaved(done);
+    const next = nextDraft(toolCallId, done);
+    setReviewing(next);
+    toast.success(
+      next
+        ? fr.assistant.drafts.savedNext(link.label, next.proposal.title)
+        : `${fr.assistant.drafts.saved} : ${link.label}`,
+    );
   }
 
   return (

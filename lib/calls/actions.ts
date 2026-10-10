@@ -12,6 +12,7 @@ import {
   type ActionResult,
 } from "@/lib/calls/constants";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
+import { inviteProjectTeam } from "@/lib/calls/invite";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 
@@ -78,10 +79,29 @@ export async function createCall(
     console.error("[calls] create failed:", error?.message);
     return { ok: false, error: "not_found" };
   }
+  await inviteProjectTeam({
+    callId: data.id,
+    organizationId: session.access.organizationId!,
+    projectId,
+    mePersonId: session.access.personId,
+    personIds: attendeesOf(form) ?? [],
+  });
   redirect(routes.projectCall(projectId, data.id));
 }
 
 const attendeesSchema = z.array(z.uuid()).max(50);
+
+// The members picked in the form (a JSON list of person ids); null if invalid.
+function attendeesOf(form: FormData): string[] | null {
+  try {
+    const parsed = attendeesSchema.safeParse(
+      JSON.parse(text(form, "attendees") || "[]"),
+    );
+    return parsed.success ? [...new Set(parsed.data)] : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * An internal meeting: a call without a project, seen by its creator and the
@@ -103,18 +123,9 @@ export async function createMeeting(
     return { ok: false, error: "date_invalid" };
   const meetingUrl = meetingUrlOf(form);
   if (meetingUrl === undefined) return { ok: false, error: "link_invalid" };
-  let attendees: string[];
-  try {
-    const parsed = attendeesSchema.safeParse(
-      JSON.parse(text(form, "attendees") || "[]"),
-    );
-    if (!parsed.success) return { ok: false, error: "invalid_input" };
-    attendees = [...new Set(parsed.data)].filter(
-      (id) => id !== session.access.personId,
-    );
-  } catch {
-    return { ok: false, error: "invalid_input" };
-  }
+  const picked = attendeesOf(form);
+  if (!picked) return { ok: false, error: "invalid_input" };
+  const attendees = picked.filter((id) => id !== session.access.personId);
 
   const organizationId = session.access.organizationId!;
   const { data, error } = await session.supabase

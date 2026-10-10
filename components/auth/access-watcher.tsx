@@ -1,12 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   destinationFor,
   isAccessState,
   isOrganizationRole,
   routes,
+  safeReturnPath,
+  unavailableFrom,
   type AccessState,
   type OrganizationRole,
 } from "@/lib/auth/redirects";
@@ -16,21 +18,29 @@ import {
 // demotion removes the team screen. Renders nothing.
 //
 // Polling pauses while the tab is hidden and runs again right when it comes
-// back.
+// back. A database that does not answer once is a blip, not an outage: only
+// two « unavailable » in a row leave the page (which unmounts PO's
+// conversation), and /unavailable remembers the page to return to
+// (`returnTo`), instead of the home page.
 
 export function AccessWatcher({
   current,
   role = null,
   intervalMs = 10_000,
+  returnTo = null,
 }: {
   current: AccessState;
   role?: OrganizationRole | null;
   intervalMs?: number;
+  // On /unavailable: the page the person was on.
+  returnTo?: string | null;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     let stopped = false;
+    let unavailableInARow = 0;
 
     async function check() {
       if (stopped || document.visibilityState !== "visible") return;
@@ -44,7 +54,18 @@ export function AccessWatcher({
         if (stopped || !isAccessState(payload.state)) return;
         const nextRole = isOrganizationRole(payload.role) ? payload.role : null;
         if (payload.state === current && nextRole === role) return;
-        router.replace(destinationFor(payload.state));
+        if (payload.state === "unavailable") {
+          unavailableInARow += 1;
+          if (unavailableInARow < 2) return;
+          router.replace(unavailableFrom(pathname));
+          return;
+        }
+        unavailableInARow = 0;
+        router.replace(
+          payload.state === "approved" && returnTo
+            ? safeReturnPath(returnTo)
+            : destinationFor(payload.state),
+        );
         router.refresh();
       } catch {
         // Network failure: stay silent, the next tick retries.
@@ -58,7 +79,7 @@ export function AccessWatcher({
       clearInterval(timer);
       document.removeEventListener("visibilitychange", check);
     };
-  }, [current, role, intervalMs, router]);
+  }, [current, role, intervalMs, router, pathname, returnTo]);
 
   return null;
 }

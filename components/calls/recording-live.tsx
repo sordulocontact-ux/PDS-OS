@@ -12,6 +12,7 @@ export function RecordingLive({
   elapsed,
   fromTab,
   tabSilent,
+  micSilent,
   onKeepRecording,
   meterRef,
   onPauseToggle,
@@ -22,6 +23,8 @@ export function RecordingLive({
   /** Recording a shared tab: remind that hanging up does not stop it. */
   fromTab: boolean;
   tabSilent: boolean;
+  // Nothing heard at all for 30 s (microphone and tab).
+  micSilent: boolean;
   onKeepRecording: () => void;
   meterRef: Ref<HTMLSpanElement>;
   onPauseToggle: () => void;
@@ -40,6 +43,14 @@ export function RecordingLive({
       </div>
       {/* Live input level: bars moved by useAudioMeter, no re-render. */}
       <AudioMeter ref={meterRef} label={t.level} />
+      {micSilent && !tabSilent && (
+        <p
+          role="status"
+          className="text-sm text-[color:var(--tone-warning-fg)]"
+        >
+          {t.micSilent}
+        </p>
+      )}
       {tabSilent ? (
         // Inline, not a toast (docs/DESIGN.md § 8). While it is up it holds the
         // only actions, so "Stop" is never shown twice.

@@ -61,7 +61,7 @@ grant all on tokens to authenticated, anon;
 create function pg_temp.token_of(p text) returns text language sql as $$ select token from tokens where name = p $$;
 
 select throws_ok($$
-  select public.create_master_transmission(pg_temp.id_of('project'), 'mix', '{}'::jsonb, null)
+  select public.create_master_transmission(pg_temp.id_of('project'), 'mix', '{}'::jsonb, null, now() + interval '30 days')
 $$, 'P0001', 'no_engineer', 'no engineer in the brief: nothing to send');
 
 insert into public.master_briefs (organization_id, project_id, mix_contact_id)
@@ -69,7 +69,7 @@ values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('engineer'
 
 select lives_ok($$
   insert into tokens select 'first', public.create_master_transmission(
-    pg_temp.id_of('project'), 'mix', '{"titles": []}'::jsonb, '  Merci !  ')
+    pg_temp.id_of('project'), 'mix', '{"titles": []}'::jsonb, '  Merci !  ', now() + interval '30 days')
 $$, 'the owner sends the package to the brief''s engineer');
 select is((select (contact_id, note, created_by)::text from public.master_transmissions
             where project_id = pg_temp.id_of('project')),
@@ -103,7 +103,7 @@ select is((select count(*)::int from public.notifications
 -- A reminder replaces the link ----------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('owner'));
 insert into tokens select 'second', public.create_master_transmission(
-  pg_temp.id_of('project'), 'mix', '{"titles": []}'::jsonb, null);
+  pg_temp.id_of('project'), 'mix', '{"titles": []}'::jsonb, null, now() + interval '30 days');
 reset role;
 set local role anon;
 select is((select public.get_master_transmission(pg_temp.token_of('first')) ->> 'state'),
@@ -115,7 +115,7 @@ reset role;
 -- Others ------------------------------------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('director'));
 select throws_ok($$
-  select public.create_master_transmission(pg_temp.id_of('project'), 'mix', '{}'::jsonb, null)
+  select public.create_master_transmission(pg_temp.id_of('project'), 'mix', '{}'::jsonb, null, now() + interval '30 days')
 $$, '42501', null, 'the director does not send: only the owner writes');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other'));

@@ -43,14 +43,17 @@ const below =
 // and Distribution (the Sortie) — then the steering tools. Shared by the
 // sidebar and the tabs, so both list the same sections in the same order.
 // Without manage_legal (`legal`), the Juridique is listed as restricted.
+// Without `budget` (neither the owner nor the direction), the Budget is not
+// listed at all (UX test of 09/10/2026: the creative director read it).
 // `workflows`: the ones this project has (lib/workflow-status/rules.ts,
 // from its data); all four when not given.
 export function projectSections(
   projectId: string,
   {
     legal,
+    budget = true,
     workflows = ["master", "legal", "marketing", "distribution"],
-  }: { legal: boolean; workflows?: readonly string[] },
+  }: { legal: boolean; budget?: boolean; workflows?: readonly string[] },
 ): ProjectSection[] {
   const t = fr.shell.project.sidebar;
   const section = (
@@ -122,7 +125,16 @@ export function projectSections(
       routes.projectPlanning(projectId),
       "steering",
     ),
-    section("budget", t.budget, routes.projectBudget(projectId), "steering"),
+    ...(budget
+      ? [
+          section(
+            "budget",
+            t.budget,
+            routes.projectBudget(projectId),
+            "steering",
+          ),
+        ]
+      : []),
     section("calls", t.calls, routes.projectCalls(projectId), "production"),
     section(
       "deliverables",

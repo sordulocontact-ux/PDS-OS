@@ -9,7 +9,12 @@ import {
 } from "@/lib/legal/contracts/mapping";
 import { listTemplates } from "@/lib/legal/contracts/templates";
 import type { ValueContext } from "@/lib/legal/contracts/values";
-import { formPeople } from "@/lib/legal/forms/people";
+import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
+import {
+  featuredArtists,
+  featuredKey,
+  formPeople,
+} from "@/lib/legal/forms/people";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -93,7 +98,21 @@ export async function loadAgreements(
     if (result.error)
       console.error(`loadAgreements ${scope}:`, result.error.message);
 
-  const people = formPeople(rows);
+  const ficheRoles = await submittedRoles(
+    supabase,
+    (forms.data ?? []).map((f) => f.id),
+    new Map((forms.data ?? []).map((f) => [f.id, f.contact_id])),
+  );
+  // The roles a person ticked on their fiche count for their contract too.
+  const people = formPeople(rows).map((person) => {
+    const ticked = person.contactId ? ficheRoles.get(person.contactId) : null;
+    return ticked
+      ? {
+          ...person,
+          formRoles: [...new Set([...person.formRoles, ...ticked])],
+        }
+      : person;
+  });
   const contactIds = people.flatMap((p) => (p.contactId ? [p.contactId] : []));
   const formIds = (forms.data ?? []).map((f) => f.id);
   const [contacts, details, submissions, approver] = await Promise.all([
@@ -125,15 +144,23 @@ export async function loadAgreements(
       : Promise.resolve({ data: null, error: null }),
   ]);
 
-  // The titles each person is credited on (same key as formPeople).
+  // The titles each person is credited or featured on (same key as
+  // formPeople).
   const titlesOf = new Map<string, string[]>();
+  const addTitle = (key: string, title: string) => {
+    const list = titlesOf.get(key) ?? [];
+    if (!list.includes(title)) list.push(title);
+    titlesOf.set(key, list);
+  };
   for (const title of rows.titles)
-    for (const credit of rows.creditsOf.get(title.id) ?? []) {
-      const key = normalizeSearch(credit.name);
-      const list = titlesOf.get(key) ?? [];
-      if (!list.includes(title.title)) list.push(title.title);
-      titlesOf.set(key, list);
-    }
+    for (const credit of rows.creditsOf.get(title.id) ?? [])
+      addTitle(normalizeSearch(credit.name), title.title);
+  for (const artist of featuredArtists(rows)) {
+    const key =
+      people.find((p) => artist.contact && p.contactId === artist.contact.id)
+        ?.key ?? featuredKey(artist);
+    for (const title of artist.titles) addTitle(key, title);
+  }
 
   const detailsOf = new Map(
     (details.data ?? []).map((d) => [d.contact_id, asText(d.details)]),
@@ -204,4 +231,27 @@ export async function loadAgreements(
         }
       : null,
   };
+}
+
+// The roles ticked on each person's complete fiche, by contact.
+async function submittedRoles(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  formIds: string[],
+  contactOfForm: Map<string, string>,
+): Promise<Map<string, FormRole[]>> {
+  if (formIds.length === 0) return new Map();
+  const { data } = await supabase
+    .from("legal_form_submissions")
+    .select("form_id, roles")
+    .in("form_id", formIds);
+  const out = new Map<string, FormRole[]>();
+  for (const row of data ?? []) {
+    const contact = contactOfForm.get(row.form_id);
+    if (!contact) continue;
+    const roles = (row.roles ?? []).filter((r): r is FormRole =>
+      (FORM_ROLES as readonly string[]).includes(r),
+    );
+    out.set(contact, [...new Set([...(out.get(contact) ?? []), ...roles])]);
+  }
+  return out;
 }

@@ -58,7 +58,13 @@ export type MasterDraft = {
   kind: "master";
   masterId: string | null;
   // The title form's values (audio state and variant only when said).
-  values: MasterFormDefaults & { credits: Credit[] };
+  values: MasterFormDefaults & {
+    credits: Credit[];
+    // Artists named but not in the catalogue yet (proposed in the same
+    // answer): picked by name when the form opens, once created (UX test of
+    // 09/10/2026: artist → titles → project, nothing carried over).
+    pendingCredits?: Array<{ name: string; role: Credit["role"] }>;
+  };
 };
 
 export type ProjectDraft = {
@@ -72,6 +78,9 @@ export type ProjectDraft = {
     contentFormatId: string | null;
     artistId: string | null;
     masterIds: string[];
+    // Named but not created yet (same answer): picked when the form opens.
+    pendingArtist?: string | null;
+    pendingMasters?: string[];
     // Creation only: the team of a created project changes by transmission.
     assigneePersonId: string | null;
     creativePersonIds: string[];

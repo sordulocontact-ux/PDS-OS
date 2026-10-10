@@ -7,12 +7,14 @@ import { useLegalAction } from "@/components/legal/use-legal-action";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
+import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import { signFormality } from "@/lib/legal/formalities/step-actions";
 import type { FormalityView } from "@/lib/legal/formalities/types";
 import { formatDate } from "@/lib/release/format";
 
 /** « Le bulletin doit être signé par tous les ayants droit » : each signer
- * of the current version, recorded signed with its proof. */
+ * of the current version, recorded signed with its proof; before the
+ * bulletin exists, who will sign it, named (UX test of 09/10/2026). */
 export function SignaturesList({
   projectId,
   f,
@@ -24,7 +26,7 @@ export function SignaturesList({
   const [proofs, setProofs] = useState<Record<string, string>>({});
   const { pending, run } = useLegalAction();
   const latest = f.documents[0];
-  if (f.signatures.length === 0) return null;
+  if (f.signatures.length === 0) return <FutureSigners f={f} />;
   return (
     <section className="flex flex-col gap-2">
       <h3 className="font-medium">
@@ -40,7 +42,7 @@ export function SignaturesList({
               {s.signer}
               <span className="block text-sm text-muted-foreground">
                 {s.role === "publisher"
-                  ? fr.legalFormalities.publisher.name
+                  ? t.publisherRole
                   : (fr.legalFormalities.qualities[
                       s.role as keyof typeof fr.legalFormalities.qualities
                     ] ?? s.role)}
@@ -77,6 +79,53 @@ export function SignaturesList({
                   </Button>
                 </span>
               )
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+// The signers the saved dossier names: creators who sign, then publishers.
+function FutureSigners({ f }: { f: FormalityView }) {
+  const t = fr.legalFormalities;
+  const creators = Array.isArray(f.values.creators?.value)
+    ? (f.values.creators.value as Creator[])
+    : [];
+  const publishers = Array.isArray(f.values.publishers?.value)
+    ? (f.values.publishers.value as Publisher[])
+    : [];
+  const signers = [
+    ...creators
+      .filter((c) => c.signs)
+      .map((c) => {
+        const civil = [c.first_name, c.last_name].filter(Boolean).join(" ");
+        return {
+          name:
+            c.pseudonym && civil && c.pseudonym !== civil
+              ? `${c.pseudonym} (${civil})`
+              : c.pseudonym || civil,
+          role: c.quality ? t.qualities[c.quality] : "",
+        };
+      }),
+    ...publishers.map((p) => ({ name: p.name, role: t.page.publisherRole })),
+  ].filter((s) => s.name.trim());
+  if (signers.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5">
+        <h3 className="font-medium">{t.page.willSign}</h3>
+        <p className="text-sm text-muted-foreground">{t.page.willSignHint}</p>
+      </div>
+      <ul className="flex flex-col divide-y">
+        {signers.map((s, i) => (
+          <li key={`${s.name}-${i}`} className="py-2 break-words">
+            {s.name}
+            {s.role && (
+              <span className="block text-sm text-muted-foreground">
+                {s.role}
+              </span>
             )}
           </li>
         ))}

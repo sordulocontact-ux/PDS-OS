@@ -53,7 +53,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
 | `…20261006000301_delete_records` (numéroté `000101` à l'origine, en double avec le Cadrage intelligent) | Suppression définitive (§ 2 quater) : `delete_records(kind, ids[])` (SECURITY DEFINER, `archive_records`, 200 lignes au plus) renvoie une ligne par id (`error` nul = supprimée, sinon `not_found` / `forbidden` / `*_in_use` / `generic`), chaque id dans son sous-bloc ; un projet part avec tout son contenu (`delete_project_row`, enfants avant parents), un master / artiste / contact seulement s'il n'est plus utilisé ; crédits et parts d'un contact supprimé gardent le nom sans lien. Tests : `delete-records.test.sql`. |
-| `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
+| `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle ; une personne peut cumuler plusieurs rôles, une ligne chacun, et « Attribuer » propose aussi les directeurs créatifs, du projet puis de l'organisation pour la direction artistique ou créative, `assignRole` avec `personId` : Sacha, 10/10/2026), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
 | `…260927012001_catalog_file_library` | Bibliothèque de fichiers (retour n°6, § 2) : `artist_files.description` et `master_files.description` (précision libre, 200 car., `null` si vide) ; `manage_catalog` modifie nom, catégorie et précision (droits colonne, policies `*_update_catalog`), jamais un fichier audio de titre (`category <> 'audio'` avant et après) ; événement `file_updated` (`previous_category` si reclassé, privé si contrat avant **ou** après) ; lecture des objets `master-files` passée en positif comme `artist-files` (même faille que l'audit du 27/09). Tests : `file-library.test.sql`. |
@@ -592,6 +592,14 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   ailleurs (échéance et budget de la fiche, crédits, contrats…, `source_label`) est à
   confirmer ; sinon manquante. « Confirmer » relit la valeur côté serveur, jamais celle du
   client. « Écarter » / « Passer » écrit une ligne rejetée : la valeur n'est plus proposée.
+  **Parties impliquées** (`projectParties`, 10/10/2026) = tous ceux hors de PDS : crédits
+  des titres, équipe confirmée tenue par un contact du Réseau ou un nom (jamais un membre de
+  l'app), intervenants ajoutés au Juridique ; une ligne par nom (« – »), rôles fusionnés.
+  **Contrats et droits à prévoir** en découle : « Un accord avec chaque partie : … », à
+  confirmer (le type de contrat de chacun reste la cartographie du Juridique). Une valeur
+  confirmée telle que le projet l'enregistrait (importée, avec `source_label`, sans
+  citation) est **reproposée** si l'enregistrement a changé depuis, tant que le Cadrage est
+  ouvert (une personne ajoutée à l'équipe après coup) ; une valeur écrite à la main, jamais.
 - **Entrée** (`FramingEntry`, Vue d'ensemble et Cadrage) : « ✓ Prise en charge acceptée »,
   l'analyse par dimension, « Commencer le cadrage » (`startFramingWithPo` : ouvre le Cadrage
   sans call, démarre l'étape, PO lit **une fois** le contexte initial, marqueur
@@ -1304,7 +1312,9 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
   07/10/2026 pour les emprunts : l'œuvre d'un sample s'autorise auprès de son éditeur, le son
   auprès de son label, deux structures ajoutées une fois au Réseau et choisies ensuite ;
   une personne peut appartenir à une structure du réseau (`parent_id`, vérifié par trigger),
-  un contact peut renvoyer à un artiste du catalogue (`artist_id`). **Lu par tous les
+  un contact peut renvoyer à un artiste du catalogue (`artist_id`), choisi à la
+  modification seulement : la création ne liste pas les artistes (Sacha, 10/10/2026 ; un
+  lien trouvé par PO est gardé). **Lu par tous les
   membres actifs** (c'est l'annuaire partagé), écrit par `manage_network`, **archivé, jamais
   supprimé**, par le DG (`set_network_contact_archived`, refusé tant qu'un contrat non résilié
   le nomme). Onglets par famille de rôles (un contact apparaît dans chacune des siennes),
@@ -1956,6 +1966,46 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   Le Juridique **se lance depuis le Plan du Projet** (§ 6 ter) : layout `legal/` verrouillé
   tant que le plan ne l'a pas lancé, sauf s'il avait déjà commencé (Cadrage juridique).
 
+### Allègement du test UX du 09/10/2026 (section 6)
+
+« Complet mais lourd pour un non-juriste » (sévérité 2-3). Aucun changement de schéma.
+
+- **Une ligne par personne, par titre** (`mergeSteps`, `lib/legal/plan/board.ts`) : la fiche puis
+  le contrat d'une personne, la répartition puis le bulletin SACEM d'un titre, dans un seul
+  panneau à étapes ; la ligne montre l'étape la plus urgente (décision > à faire > en attente >
+  bloqué > fait), son badge préfixé (« Fiche · Envoyée »), son verbe, sa délégation. Sections :
+  Personnes, Emprunts, Titres. Les actions du plan et les tâches ne changent pas.
+- **Le panneau reste ouvert** : la ligne ouverte est celle du plan (`PlanSheetProvider`), écrite
+  dans l'URL (`?ligne=`, `history.replaceState`, sans aller-retour) ; après une action, la page
+  rafraîchie la rend ouverte même si elle a changé de groupe (toujours affichée, son repli
+  ouvert). « Suivant : … » ouvre la prochaine ligne qui attend l'équipe dans la vue. Le lien d'une
+  fiche préparée est gardé par le plan (survit au remontage).
+- **Verbe qui agit** (`RowAction`) quand l'étape n'a rien à saisir : préparer la fiche, marquer
+  envoyée, générer le contrat, le soumettre, envoyer la répartition (liens affichés une fois),
+  ouvrir le bulletin ; le panneau s'ouvre ensuite sur le résultat. « Valider le document » garde
+  son panneau (il faut lire le contrat).
+- **Featuring** (`featuredArtists`, `lib/legal/forms/people.ts`) : un artiste en featuring est
+  « Artiste interprète » dans le Juridique (fiche, plan, cartographie : le modèle interprète lui
+  est proposé), sur la personne du contact relié à sa fiche artiste (`network_contacts.artist_id`,
+  jamais par le nom) ou comme personne à part ; sans contact relié, « Ajouter au Réseau » (relié à
+  l'artiste) avant toute fiche. Les rôles cochés sur une fiche complète comptent pour le contrat.
+- **SACEM** : une phrase d'aide sous Qualité, Part Phono, Dénomination, et sur le partage DEP / DR
+  (Règlement général) ; **parts Phono pré-remplies depuis la répartition confirmée** du titre,
+  rapprochées par contact (décidé avec Sacha le 10/10/2026, contre la règle « jamais la
+  répartition »), signalées « à vérifier » tant qu'elles ne sont pas retouchées ; « Qui signera le
+  bulletin » nommé avant sa génération ; un éditeur signataire dit « Éditeur ».
+- **Questions de PO** : ce que le Cadrage a confirmé (contraintes de droits nommant le titre, ou
+  « aucun blocage » ; accords existants ou « aucun ») arrive comme réponse pré-remplie
+  (`lib/legal/intake/cadrage.ts`), lue par PO puis gardée par une personne ; bouton « Aucun
+  emprunt / Aucun accord / Pas d'éditeur » qui enregistre la réponse vide sans PO, et
+  « Enregistrer : aucun … » quand PO n'a rien gardé.
+- **Échéances** (`lib/legal/plan/due-dates.ts`, décision du 10/10/2026, aucun ticket) : fiches
+  aujourd'hui + 7 j, emprunts sortie − 45 j, contrats et répartitions − 30 j, SACEM − 15 j, jamais
+  avant aujourd'hui + 3 j ; sans date de sortie, seules les fiches ont une échéance.
+- **E-mail** : « Envoyer par e-mail » (`mailto:`, `lib/utils/mailto.ts`) à côté de chaque lien à
+  copier (fiche, répartition, dossier du mixeur), adressé au contact du Réseau. PDS OS n'envoie
+  aucun e-mail lui-même (pas de fournisseur : point à trancher).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique
@@ -2016,18 +2066,26 @@ lots, chacun utile seul.
   - **Mix et mastering** : par rôle, le crédit (`mix_engineer`, `mastering_engineer`) et son
     lien au Réseau, par la même règle que le Juridique (`creditContactState`,
     `lib/facts/credit-contact.ts` : relié = connu, homonyme = « Relier », absent = « Ajouter
-    au Réseau ») ; sinon l'ingénieur nommé dans une session de mixage / mastering, à
-    confirmer en le créditant ; sinon manquant, avec le nombre d'ingénieurs du Réseau (on ne
-    demande jamais si le Réseau en a un, le code le sait).
-  - **Ingénieurs du Réseau** : les contacts au rôle `engineer`, ceux avec qui PDS a le plus
-    travaillé d'abord (« Mix sur 2 titres · Mastering sur 1 titre », titres distincts), avec
-    structure, ville, coordonnées. Les tarifs et disponibilités n'existent pas encore dans le
-    Réseau.
+    au Réseau ») ; sinon l'ingénieur **confirmé au Cadrage** (rôle d'équipe tenu par un
+    contact du Réseau, `framingEngineers` de `readMasterRows`, « Désigné au Cadrage »), à
+    confirmer par « Créditer » (formulaire de crédit pré-rempli et déjà relié au contact :
+    un crédit est un fait du titre, posé par une personne, jamais automatiquement) ; sinon
+    l'ingénieur nommé dans une session de mixage / mastering, à confirmer en le créditant ;
+    sinon manquant, avec le nombre d'ingénieurs du Réseau (on ne demande jamais si le Réseau
+    en a un, le code le sait). Le Brief lit la même équipe du Cadrage (même lecture), pour que
+    les deux pages disent la même chose (retour de Sacha du 10/10/2026).
+  - **Ingénieurs du Réseau** : plus affichés sur la Préparation depuis le 10/10/2026 (liste
+    sans action, doublon du choix de l'ingénieur) ; leur historique avec PDS (« Mix sur 2
+    titres · Mastering sur 1 titre », `networkEngineers`) est montré dans le Brief, là où on
+    les choisit. Les tarifs et disponibilités n'existent pas encore dans le Réseau.
 - **Lot 2 : confirmer la source** (ticket § 1, migration `…20261004002001_master_flow_sources.sql`,
   tests `supabase/tests/master-flow.test.sql`). « Confirmer » ouvre la modale des versions
   audio du titre, la dernière détectée présélectionnée (« Utiliser cette version comme
   source ? »), les autres au choix (« Choisir une autre version ») ; « Utiliser cette
-  version » enregistre (`confirmMasterSource`). Règles, toutes en SQL :
+  version » enregistre (`confirmMasterSource`). Une version absente de la liste s'importe
+  depuis la modale (« Importer une version » : le même import audio que l'onglet Audio du
+  titre, `manage_catalog`, le fichier reste au titre) ; revenue avec la page rafraîchie, elle
+  est présélectionnée (10/10/2026). Règles, toutes en SQL :
   - **le responsable du projet seul** confirme (`is_project_owner`) ; tout membre qui voit
     le projet lit la source ;
   - le titre appartient au projet (clé composite sur `project_masters`), le fichier est une
@@ -2598,6 +2656,67 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
   pourront les lire plus tard), annulation d'un livrable après validation, circuits de validation
   complexes et délégations (après MVP).
 
+## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
+
+« Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,
+tests `supabase/tests/ux-roles.test.sql` (41).
+
+- **Accueil par permission** (`components/home/home-feed.tsx`) : « Validations » seulement avec
+  `validate`, « Propositions de PO » seulement avec `pilot_projects`, sur les projets dont on est
+  responsable (filtré dans `loadMyTodo`), et masquée quand il n'y a rien. « Mes tâches » = tâches +
+  **livrables assignés encore à concevoir** (`plateOf`, `Todo.deliverables` : sans version, ou
+  retouches demandées ; une version soumise attend le responsable, une approuvée est faite) ; la
+  page Travail lit la même liste (`myDeliverables`).
+- **Où mène une tâche** (`lib/project-work/task-href.ts`) : action du Juridique, question du Brief,
+  sinon le **livrable** qu'elle nomme (`tasks.deliverable_id`, même projet vérifié par trigger,
+  ancre `#deliverable-<id>` de la Conception), sinon le **Travail du projet** (plus jamais le
+  Cadrage) ; sur le Travail lui-même, la ligne n'est pas un lien (`CardRow` sans `href`). Le
+  formulaire de tâche propose « Livrable concerné » (facultatif).
+- **Notifications de l'équipe créative** (triggers) : `project_launched` à l'acceptation,
+  `brief_approved` quand une version du Brief est validée, `call_invited` pour un call de projet.
+  Un call de projet a désormais des **participants** (`call_attendees`), choisis par le
+  responsable **dans l'équipe du projet seulement** (responsable + directeurs créatifs,
+  `attendee_not_in_team`) : « Nouveau call » les propose tous cochés ; un échange préparé (Cadrage,
+  Stratégie) invite les membres de l'équipe dont le nom, proposé par le code depuis cette même
+  équipe, est resté dans la liste (`inviteProjectTeam`).
+- **Dépôt créatif avant la Conception** : un directeur créatif du projet écrit dans la
+  bibliothèque Fichiers **en Visuels et Autres**, modifie et supprime **ses** fichiers seulement
+  (`is_project_creative`, policies `project_files_*_creative`, `FileWriteScope` côté écran) ; Brief,
+  Contrats et Presse restent au responsable. La Conception non démarrée (ou la Stratégie non
+  validée) renvoie vers Fichiers › Visuels (`EarlyDepositLink`).
+- **Dépôt de l'ingénieur par son lien** (`/m/[token]`, sans compte, sans service role) :
+  `open_master_delivery` ouvre un **emplacement à usage unique** (chemin aléatoire du bucket
+  `master-files`, une heure, 20 par heure et par lien) où Storage accepte l'envoi anonyme
+  (`is_open_delivery_slot`), puis `record_master_delivery` vérifie que l'objet existe, lit sa
+  taille dans Storage et crée le fichier audio du titre à l'état **Mix** (lien de mix) ou
+  **Master** (lien de mastering) : la version suit (`create_mix_versions`), l'équipe et
+  l'expéditeur sont notifiés (`master_delivery_received`, `master_mastering_delivery_received`).
+  Seuls les dossiers envoyés depuis le 10/10/2026 portent `masterId` par titre : un ancien lien
+  n'offre pas le dépôt (« Relancer » en donne un nouveau). Limite : 50 Mo (celle du bucket).
+- **Durée du lien de l'ingénieur** (`lib/master-workflow/link-expiry.ts`) : 14 jours après la
+  date finale de l'étape au Brief (mix final, master final), jamais moins de 30 jours, au plus
+  179 ; les fichiers sont signés pour la même durée ; la base refuse hors de 1 à 180 jours.
+- **Fiche `/f/…`** : `get_legal_form` renvoie `requester` (nom de l'organisation, responsable du
+  projet et son e-mail) pour tout jeton connu ; la page dit qui demande, à qui écrire
+  (`RequesterNote`), à quoi servent les données (`DataUseNote`, RGPD art. 13 : finalités,
+  destinataires, conservation, droits art. 15 à 17) et, après l'envoi, la suite.
+- **Recrue** : carte « Bienvenue » sur l'accueil (`WelcomeCard`) pour un membre approuvé depuis
+  moins de 30 jours, trois repères choisis **par permission** (`welcomeVariantOf`), fermée en base
+  (`member_welcomes`). PO : `my_todo` commence par les projets à accepter et liste les livrables,
+  `find_projects` dit `status` et `waitingForYourAnswer`, `project_status` présente un projet non
+  lancé (contexte initial, échéance) ; la première suggestion de l'accueil devient « Présente-moi
+  le projet « X » » (`PageSuggestions`).
+- **Confidentialité d'une transmission** : `note` et `response` de `project_assignments` ne sont
+  plus lisibles directement (droits colonne) ; `project_assignment_messages()` les rend à la
+  personne transmise, à celle qui a transmis et aux membres `assign_projects`. Les autres voient
+  l'historique (qui, quand, la décision), pas les mots.
+- **Budget** : lignes (et leurs notes, et les tarifs du Brief Mix/Master inscrits au budget) lues
+  par le responsable et la direction seulement (`can_read_project_budget`) ; section absente de la
+  navigation et page 404 pour les autres (`canSeeProjectBudget`) ; les tarifs du Brief ne quittent
+  pas le serveur pour eux (`BriefView.canSeeBudget`). **Pas couvert** (point à trancher,
+  `docs/CONTEXTE-PROJET.md`) : l'enveloppe du Cadrage (dans le Brief partagé avec l'équipe), les
+  colonnes de tarif de `master_briefs` lues par l'API, ce qui se dit du budget dans les calls.
+
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices
@@ -2625,6 +2744,42 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
 Banc de test local sans authentification (404 en production, `lib/labo/guard.ts`) :
 transcription, compte rendu, préparation de call, détection ISRC. Faux call :
 `docs/labo/faux-call.m4a` (+ `.txt`). Interface jetable ; la logique vit dans `lib/`.
+
+### 10 bis. Labo de l'app (`/app/labo`) : artistes depuis des captures TikTok
+
+Demande d'Ibé (10/10/2026) : retrouver les artistes qu'il repère sur TikTok. Page de la
+navigation principale, **pour tout membre approuvé, en production aussi** (contrairement à
+`/labo`), où l'on essaie une fonction avant de la mettre dans l'app. Rien n'est enregistré.
+
+- **Pourquoi pas TikTok** : l'API officielle ne lit que le compte connecté (Display API) ;
+  la Research API est réservée aux chercheurs, sans usage commercial ; les scrapers violent
+  les conditions de TikTok. Une capture ne porte de toute façon aucun identifiant. Piste
+  gardée pour plus tard : un **lien** de vidéo collé → oEmbed public
+  (`tiktok.com/oembed?url=…`, sans clé) donne le compte.
+- **Lecture** (`lib/catalog/capture-artists.ts`, route `POST /api/catalog/capture-artists`) :
+  l'image part seule au modèle (`extractFromImage` de `lib/ai/llm.ts`, ministral-14b lit les
+  images), donnée jamais consigne. Le modèle **regroupe les noms d'une même personne** (nom
+  affiché + pseudo + « son original - X ») et propose un nom d'artiste avec son raisonnement.
+  Le code ne garde que les noms présents dans le texte que le modèle a lu (`visibleText`).
+- **Compte Deezer décidé par le code** : homonymes exacts de chaque nom (sans casse, accents
+  ni ponctuation) ; **« Compte trouvé »** quand les sorties d'un homonyme portent un autre
+  nom de la personne (Straat / huntrill → Huntrill : « BigSTRaat », « STRaatos ») ;
+  **« À vérifier »** quand un seul homonyme a un public (un homonyme sous 1 % des fans du
+  plus suivi ne compte pas) ; **« Plusieurs comptes »** sinon, l'humain choisit ;
+  « Déjà au catalogue » par `deezer_id`. Le nom affiché est celui du compte Deezer trouvé.
+- **TikTok et Instagram** (`lib/catalog/capture-socials.ts`, `lib/integrations/artist-socials.ts`),
+  sources publiques sans clé ni scraping, ordre décidé par le code : le pseudo lu sur la
+  capture est **confirmé par l'oEmbed officiel de TikTok** avant la recherche Deezer (un
+  pseudo inconnu de TikTok est écarté, le nom affiché qu'il renvoie rejoint les noms) ;
+  un Instagram écrit sur la capture (bio) est repris tel quel ; sinon, **MusicBrainz** puis
+  **Wikidata** (P2003 Instagram, P7085 TikTok) relient le compte Deezer trouvé à ses réseaux,
+  toujours par l'id Deezer, jamais par le nom, et seulement pour « Compte trouvé » ou « À
+  vérifier ». MusicBrainz : une requête par seconde (file dans le module). Chaque lien dit
+  sa source ; une source en panne est sautée, jamais bloquante. Huntrill → TikTok @huntrill
+  (confirmé par TikTok), Instagram @huntrillion (MusicBrainz).
+- Deux captures lues à la fois (palier gratuit Mistral, Deezer 50 requêtes / 5 s), 8 Mo
+  au plus, PNG / JPEG / WebP, collées (⌘V) ou déposées. Un artefact claude.ai ne peut pas
+  servir de banc : il n'atteint ni Mistral ni l'API Deezer (réseau bloqué).
 
 ---
 
@@ -2698,6 +2853,35 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
   son `useState` est démonté avec lui. Tout lien à usage unique passe par `useShowLinks()`
   (`components/ui/one-time-links.tsx`, fournisseur monté dans `app/(app)/layout.tsx`), dont la
   fenêtre survit au rafraîchissement.
+- **Une lecture qui échoue n'est jamais un état** (test UX du 09/10/2026, § 2) : `getProject`,
+  `getArtist`, `getMaster` lèvent une erreur au lieu de renvoyer `null` (sinon une base lente donne
+  une 404), rattrapée par `app/(app)/app/error.tsx` (« Réessayer ») ; `app/(app)/app/not-found.tsx`
+  et `app/not-found.tsx` disent la 404 en français. Les cartes de l'accueil reçoivent `error` (prop
+  `error` de `ListCard`) : jamais « Aucun projet » sur un timeout ; `loadMyTodo` renvoie `error`,
+  `loadRecentActivity` et `loadReleasesOverview` lèvent. `AccessWatcher` ne quitte la page qu'après
+  deux « unavailable » de suite et passe la page d'origine à `/unavailable?next=` (`safeReturnPath`),
+  où « Réessayer » ramène.
+- **Refuser un projet transmis, ou demander une précision** retire sa visibilité au chef de projet
+  (RLS) : `respondToAssignment` le renvoie sur son Travail (`?responded=`) qui dit où sa réponse est
+  partie, au lieu de laisser la page du projet finir en 404.
+- **Activité** (`lib/insights/activity.ts`) : seules les réponses du Cadrage (`deliverable = brief`,
+  clés de `QUESTION_KEYS`), une ligne par projet, jour et sorte (« Cadrage : réponses confirmées »
+  et les libellés des questions), plus les versions du Brief (créée, envoyée) ; jamais les clés
+  techniques, ni `<clé>_suggestions` lues comme « Brief rejeté ».
+- **Plan d'action juridique** : les actions retirées au lancement et celles retirées depuis
+  (accord décoché dans la cartographie : `retire_legal_plan_items`, action obsolète et tâche
+  supprimée) sont gardées dans `legal_plans.dismissed_keys` : jamais « apparues depuis le
+  lancement », jamais recréées par « Ajouter au plan ». « Prêt pour la sortie » : « Atteint »
+  seulement sans emprunt ouvert **ni** démarche ouverte (sinon « Démarches ouvertes » avec la
+  liste) ; ces démarches sont aussi « à suivre » sur la livraison au distributeur.
+- **Silence transcrit en texte** (test UX du 09/10/2026) : Whisper invente sur le silence
+  (« Sous-titrage Société Radio-Canada »). L'adaptateur Groq (`lib/ai/groq-tolerant-fetch.ts`)
+  retire d'abord les segments que Whisper marque comme silence (probabilité « pas de
+  parole » ≥ 0,6 et confiance < −1, ou métadonnées nulles) et les phrases inventées connues
+  (`lib/ai/silence.ts`) : un enregistrement muet arrive vide, l'appel finit en
+  `transcript_empty` (« Rien d'exploitable »), la dictée en `nothing_heard`, rien ne part à
+  PO. Côté navigateur, l'enregistreur compte les secondes avec du son (micro et onglet) :
+  alerte après 30 s sans rien, « semble muet » avant l'envoi, dictée muette jamais envoyée.
 - **Erreur d'une action ouverte en modale** : un toast passe inaperçu sous une fenêtre ;
   `useFramingAction({ inline: true })` rend l'erreur dans la fenêtre (`FormMessage`, `ConfirmDialog
   error`).

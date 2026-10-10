@@ -116,6 +116,7 @@ des `sources` (libellé + lien) que l'interface affiche.
 | `search_calls` | texte, id de projet facultatif | passages de comptes rendus correspondants, avec call, minutage et citation |
 | `find_artists` | texte facultatif, relation (signés / collaborations) facultative | artistes classés par **fans Deezer** (rang calculé par le code, lu en direct, 30 au plus), relation avec PDS, nombre de titres ; les écoutes ne sont pas branchées |
 | `find_masters` | artiste ou nom facultatifs | titres du catalogue avec artistes, état audio, ISRC, durée |
+| `team_members` | nom facultatif | les membres de l'équipe et leur poste ; pour un nom (« Nora », « Yannis »), la personne qu'il désigne, accents et fautes tolérés, ou « pas de certitude » (comparateur du code, `lib/assistant/fuzzy-name.ts`) ; un prénom n'est jamais cherché comme un projet |
 
 ## 3 bis. Les propositions (écriture avec validation humaine)
 
@@ -148,15 +149,35 @@ Le parcours :
 2. **Chiffres, dates, identifiants** (échéance, budget, ISRC, durée, email, téléphone) :
    le modèle recopie ce que l'utilisateur a écrit, le code vérifie que la citation figure
    **dans les messages de l'utilisateur** (jamais une transcription ni un résultat de
-   fonction), puis la lit lui-même (`lib/assistant/verbatim.ts`). Date sans année,
-   « 5k », citation introuvable → champ vide et avertissement.
+   fonction), puis la lit lui-même (`lib/assistant/verbatim.ts`). « 5k », un pourcentage
+   pris pour un montant, citation introuvable → champ vide et avertissement. Nom, nom civil,
+   pays, biographie et notes d'un artiste ou d'un contact ne sont gardés que s'ils sont
+   écrits tels quels ; une parenthèse qui suit un nom (« Zélie Moreau (UX-D) ») est signalée,
+   jamais interprétée.
+   **Dates d'une échéance, d'un projet ou d'une réunion** (test UX du 09/10/2026) : le modèle
+   recopie les mots (« vendredi », « demain », « dans 2 semaines », « mardi 13 octobre à
+   10h ») et le code les lit **par rapport à aujourd'hui, lu par le code**
+   (`lib/assistant/said-date.ts`, la date du jour n'entre toujours pas dans le contexte du
+   modèle). La carte montre la date comprise et les mots dits (« vendredi 16 octobre 2026 ·
+   dit « vendredi » »). « En mars », « la semaine prochaine » (pas un jour), un jour de la
+   semaine qui ne correspond pas à la date, ou rien de compris → champ vide et avertissement.
+   Une réunion sans heure dite garde son champ vide et obligatoire, jamais une heure
+   plausible. Les dates d'un contrat, d'une session ou d'une déclaration (souvent passées)
+   restent des dates complètes ; les dates d'un call ou du contexte initial aussi
+   (`lib/framing/said.ts`).
 3. La fonction renvoie un **brouillon** (`lib/assistant/drafts.ts`) et les lignes « avant
    → après » rédigées par le code. Rien n'est écrit.
 4. L'interface affiche une carte « Proposition de PO » ; « Relire et enregistrer » ouvre
    le **vrai formulaire** de l'app, pré-rempli, dans un panneau latéral. L'humain corrige
    et enregistre avec sa session : RLS, droits et validations habituels. Artiste : création
    (Deezer d'abord), puis identité et biographie, puis chaque contact, une étape à la fois.
-5. Une fois enregistrée, la carte passe à « Enregistré » avec le lien.
+5. Une fois enregistrée, la carte passe à « Enregistré » avec le lien ; la proposition de PO
+   reste lisible, repliée : les valeurs gardées sont celles du formulaire.
+6. **Création en chaîne** (artiste → titres → projet dans la même réponse) : un artiste ou
+   un titre pas encore au catalogue est gardé par son nom dans le brouillon
+   (`pendingCredits`, `pendingMasters`, `pendingArtist`) et repris à l'ouverture du
+   formulaire suivant dans les listes relues à ce moment (`matchByName`) ; après chaque
+   enregistrement, la proposition suivante du même message s'ouvre d'elle-même.
 
 Côté base : `update_master` et `update_project` (migration `…002101`) ; un projet ne se
 modifie que tant qu'il n'a pas d'étape (`projects_update_before_launch`). Les autres

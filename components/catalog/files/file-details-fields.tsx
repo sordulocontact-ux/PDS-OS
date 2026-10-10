@@ -19,6 +19,7 @@ export function FileDetailsFields({
   onDescription,
   categoryError,
   disabled = false,
+  categories,
 }: {
   kind: FileOwnerKind;
   category: string | null;
@@ -27,6 +28,8 @@ export function FileDetailsFields({
   onDescription: (description: string) => void;
   categoryError?: string;
   disabled?: boolean;
+  // A scoped writer: only these categories are offered.
+  categories?: readonly string[];
 }) {
   const t = fr.catalogFiles;
   const labels: Record<string, string> = t.categories[kind];
@@ -38,10 +41,9 @@ export function FileDetailsFields({
           name="category"
           legend={t.fields.category}
           required
-          options={FILES_TAB_CATEGORIES[kind].map((value) => ({
-            value: value as string,
-            label: labels[value],
-          }))}
+          options={(FILES_TAB_CATEGORIES[kind] as readonly string[])
+            .filter((value) => !categories || categories.includes(value))
+            .map((value) => ({ value, label: labels[value] }))}
           value={category}
           onChange={(value) => value && onCategory(value)}
           hint={

@@ -38,7 +38,7 @@ export async function loadTracking(
   const supabase = await createClient();
   const { data: plan, error } = await supabase
     .from("legal_plans")
-    .select("id, launched_at")
+    .select("id, launched_at, dismissed_keys")
     .eq("project_id", project.id)
     .maybeSingle();
   if (error) console.error("loadTracking plan:", error.message);
@@ -83,7 +83,11 @@ export async function loadTracking(
   const termsPending = new Set(
     (pendingTerms ?? []).map((row) => row.clearance_id),
   );
-  const planKeys = new Set((items.data ?? []).map((row) => row.item_key));
+  // Removed at the launch or retired since: not « apparu depuis ».
+  const planKeys = new Set([
+    ...(items.data ?? []).map((row) => row.item_key),
+    ...plan.dismissed_keys,
+  ]);
   const added = proposePlan({
     rows,
     completeContacts,
@@ -119,26 +123,30 @@ export async function loadTracking(
         updatedAt: c.updated_at,
         termsPending: termsPending.has(c.id),
       })),
-      items: (items.data ?? []).map((row) => ({
-        id: row.id,
-        key: row.item_key,
-        kind: row.kind as PlanItemKind,
-        masterId: row.master_id,
-        label: row.label,
-        detail: row.detail,
-        why: row.why ?? "",
-        subject: row.subject,
-        creditIds: row.credit_ids,
-        status: row.status as PlanItemStatus,
-        // The plan's column at launch; the Suivi regroups by current state.
-        column: "now",
-        dependsOn: row.depends_on,
-        responsibleId: row.responsible_person_id,
-        responsibleName: row.responsible_person_id
-          ? (names.get(row.responsible_person_id) ?? null)
-          : null,
-        dueOn: row.due_on,
-      })),
+      // Retired actions (an agreement no longer needed) leave the Suivi;
+      // what waited for them is free.
+      items: (items.data ?? [])
+        .filter((row) => !plan.dismissed_keys.includes(row.item_key))
+        .map((row) => ({
+          id: row.id,
+          key: row.item_key,
+          kind: row.kind as PlanItemKind,
+          masterId: row.master_id,
+          label: row.label,
+          detail: row.detail,
+          why: row.why ?? "",
+          subject: row.subject,
+          creditIds: row.credit_ids,
+          status: row.status as PlanItemStatus,
+          // The plan's column at launch; the Suivi regroups by current state.
+          column: "now",
+          dependsOn: row.depends_on,
+          responsibleId: row.responsible_person_id,
+          responsibleName: row.responsible_person_id
+            ? (names.get(row.responsible_person_id) ?? null)
+            : null,
+          dueOn: row.due_on,
+        })),
     }),
   };
 }

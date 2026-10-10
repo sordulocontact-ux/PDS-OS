@@ -1,6 +1,7 @@
 -- Files of a project (supabase/migrations/20260927013001_project_files.sql):
 -- read by whoever sees the project, contracts by its owner and the direction
--- only, written by the owner alone. Run with `supabase test db`.
+-- only, written by the owner (and the creative team in Visuels and Autres,
+-- ux-roles.test.sql). Run with `supabase test db`.
 begin;
 select plan(13);
 
@@ -88,13 +89,15 @@ select is((select count(*)::int from public.project_files
             where project_id = (select id from ids where name = 'project')),
           1, 'the creative team reads the files, never a contract (not even among all of them)');
 
+-- Since 10/10/2026 she adds Visuels and Autres (ux-roles.test.sql); the
+-- owner's categories stay closed to her.
 select throws_ok($$
   insert into public.project_files (organization_id, project_id, category, path, file_name, mime, bytes)
-  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'visual',
+  values ((select id from ids where name = 'org'), (select id from ids where name = 'project'), 'brief',
           (select id from ids where name = 'org') || '/' || (select id from ids where name = 'project') || '/'
-            || gen_random_uuid() || '.jpg',
-          'moodboard.jpg', 'image/jpeg', 10)
-$$, '42501', null, 'a creative director cannot add a file');
+            || gen_random_uuid() || '.pdf',
+          'brief-pirate.pdf', 'application/pdf', 10)
+$$, '42501', null, 'a creative director cannot add a Brief');
 
 update public.project_files set description = 'Piraté'
  where project_id = (select id from ids where name = 'project');

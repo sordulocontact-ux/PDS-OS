@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { parseSaidBudgetStatus } from "@/lib/assistant/verbatim";
 import { FRAMING_FACTS_INSTRUCTIONS } from "@/lib/ai/instructions/framing-facts";
 import { extract } from "@/lib/ai/llm";
 import { locateQuote, type QuoteLocation } from "@/lib/ai/provenance";
@@ -10,6 +11,7 @@ import {
   type FramingFacts,
 } from "@/lib/ai/schemas/framing-facts";
 import type { Transcript } from "@/lib/ai/schemas/transcript";
+import { linkTeamToMembers } from "@/lib/framing/team-link";
 import {
   QUESTIONS,
   type Dimension,
@@ -129,12 +131,32 @@ export async function analyseForFraming(
     q: { quote: string; at: QuoteLocation },
   ) => pending.push({ key, what, ...q });
 
+  // Numbers in a reworded value must be in its quote: « budget total
+  // 8 000 € » never becomes « 8 000 € engagés » (UX test of 09/10/2026).
+  const numbersOf = (text: string) =>
+    (text.match(/\d[\d\s\u00a0\u202f.,]*/g) ?? []).map((n) =>
+      n.replace(/[\s\u00a0\u202f.,]/g, ""),
+    );
+  const numbersKept = (value: string, quote: string) => {
+    const said = new Set(numbersOf(quote));
+    return numbersOf(value).every((n) => said.has(n));
+  };
+  const budgetQuote = found(facts.budget_quote)?.quote ?? null;
   for (const key of TEXT_KEYS) {
     const fact = facts[key];
     if (!fact?.value?.trim() || settled(key) || !open(QUESTIONS[key].dimension))
       continue;
     const q = found(fact.quote);
-    if (q) add(key, clean(fact.value), q);
+    if (!q || !numbersKept(fact.value, q.quote)) continue;
+    // An engagement is a spend said committed or paid, never the envelope.
+    if (
+      key === "commitments" &&
+      (parseSaidBudgetStatus(q.quote) === null ||
+        parseSaidBudgetStatus(q.quote) === "planned" ||
+        (budgetQuote !== null && q.quote.trim() === budgetQuote.trim()))
+    )
+      continue;
+    add(key, clean(fact.value), q);
   }
   if (!settled("target_date") && open("timing")) {
     const q = found(facts.target_date_quote);
@@ -303,7 +325,11 @@ export async function analyseForFraming(
     constraints.length
       ? supabase.from("framing_constraints").insert(constraints)
       : null,
-    team.length ? supabase.from("project_team_members").insert(team) : null,
+    team.length
+      ? supabase
+          .from("project_team_members")
+          .insert(await linkTeamToMembers(supabase, team))
+      : null,
   ]);
   for (const r of results)
     if (r?.error) console.error("analyseForFraming:", r.error.message);

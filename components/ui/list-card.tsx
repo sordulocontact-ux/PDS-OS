@@ -14,6 +14,7 @@ export function ListCard({
   count,
   action,
   empty,
+  error,
   className,
   children,
 }: {
@@ -22,6 +23,8 @@ export function ListCard({
   count?: number;
   action?: { label: string; href: string };
   empty?: string;
+  // The rows could not be read: said instead of a false « nothing ».
+  error?: string;
   // Grid placement only (a wider card), never a restyle.
   className?: string;
   children?: ReactNode;
@@ -53,7 +56,11 @@ export function ListCard({
           </Link>
         )}
       </div>
-      {empty ? (
+      {error ? (
+        <p role="alert" className="text-body-md text-error">
+          {error}
+        </p>
+      ) : empty ? (
         <p className="text-body-md text-muted-foreground">{empty}</p>
       ) : (
         <ul className="grid gap-1">{children}</ul>
@@ -65,6 +72,7 @@ export function ListCard({
 /**
  * One line of a card: main text linked to its page, secondary text below.
  * `leading` sits before the link, outside it (a checkbox stays its own control).
+ * No `href`: plain text (a task already on the page where it is done).
  */
 export function CardRow({
   href,
@@ -73,29 +81,37 @@ export function CardRow({
   badge,
   leading,
 }: {
-  href: string;
+  href?: string | null;
   main: string;
   sub?: string;
   badge?: ReactNode;
   leading?: ReactNode;
 }) {
+  const className = cn(
+    "-mx-2 flex items-start justify-between gap-3 rounded-lg px-2 py-1",
+    href && "hover:bg-[var(--control-bg-hover)]",
+    leading && "mx-0 min-w-0 flex-1",
+  );
+  const body = (
+    <>
+      {/* Never cut: a long title wraps, the badge keeps its width. */}
+      <span className="grid min-w-0 gap-1 text-body-md text-ink-800">
+        <span className="font-semibold break-words">{main}</span>
+        {sub && <span className="break-words">{sub}</span>}
+      </span>
+      {badge && <span className="shrink-0">{badge}</span>}
+    </>
+  );
   return (
     <li className={cn(leading && "flex items-start gap-2")}>
       {leading}
-      <Link
-        href={href}
-        className={cn(
-          "-mx-2 flex items-start justify-between gap-3 rounded-lg px-2 py-1 hover:bg-[var(--control-bg-hover)]",
-          leading && "mx-0 min-w-0 flex-1",
-        )}
-      >
-        {/* Never cut: a long title wraps, the badge keeps its width. */}
-        <span className="grid min-w-0 gap-1 text-body-md text-ink-800">
-          <span className="font-semibold break-words">{main}</span>
-          {sub && <span className="break-words">{sub}</span>}
-        </span>
-        {badge && <span className="shrink-0">{badge}</span>}
-      </Link>
+      {href ? (
+        <Link href={href} className={className}>
+          {body}
+        </Link>
+      ) : (
+        <div className={className}>{body}</div>
+      )}
     </li>
   );
 }

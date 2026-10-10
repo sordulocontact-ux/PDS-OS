@@ -14,14 +14,21 @@ import {
   interpretLegalAnswer,
   saveLegalAnswer,
 } from "@/lib/legal/intake/actions";
-import type { IntakeQuestion, ProposedFact } from "@/lib/legal/intake/types";
+import {
+  NONE_QUESTIONS,
+  type IntakeQuestion,
+  type ProposedFact,
+} from "@/lib/legal/intake/types";
 
 const FIELD_ID = "legal-answer";
+const NONE_FACT: ProposedFact = { kind: "none", value: {}, quote: null };
 
 /**
  * The one question asked now (ticket Juridique 01: « une seule question
  * dominante »): its reason, a free answer (typed or dictated), what PO read
- * in it, then « Enregistrer ». Nothing is written before that.
+ * in it, then « Enregistrer ». Nothing is written before that. What the
+ * Cadrage established comes as the answer; « Aucun emprunt / accord… »
+ * settles the question at once, without PO (UX test of 09/10/2026).
  */
 export function QuestionCard({
   projectId,
@@ -40,9 +47,13 @@ export function QuestionCard({
   const router = useRouter();
   const t = fr.legal.intake;
   const q = t.questions[question.key];
+  const fromCadrage = !correcting && question.suggestion !== null;
   const [text, setText] = useState(
-    correcting ? (question.lastAnswer ?? "") : "",
+    correcting ? (question.lastAnswer ?? "") : (question.suggestion ?? ""),
   );
+  const noneLabel = NONE_QUESTIONS.includes(question.key)
+    ? t.none[question.key]
+    : null;
   const [review, setReview] = useState<{
     facts: ProposedFact[];
     dropped: number;
@@ -71,15 +82,25 @@ export function QuestionCard({
         );
     });
 
-  const save = () =>
+  // Nothing kept in what PO read: on a question « nothing » settles, the
+  // answer is « nothing » rather than a dead end.
+  const kept = review
+    ? review.facts.length > 0
+      ? review.facts
+      : noneLabel
+        ? [NONE_FACT]
+        : []
+    : [];
+  const record = (answer: string, facts: ProposedFact[]) =>
     startSaving(async () => {
-      if (!review) return;
       setError(null);
-      const result = await saveLegalAnswer({ ...input, facts: review.facts });
+      const result = await saveLegalAnswer({ ...input, text: answer, facts });
       if (!result.ok) return setError(result.error);
       onSaved();
       router.refresh();
     });
+  const save = () => review && record(text, kept);
+  const saveNone = () => noneLabel && record(noneLabel, [NONE_FACT]);
 
   return (
     <PageSection
@@ -101,18 +122,23 @@ export function QuestionCard({
           }
         />
       ) : (
-        <TextareaField
-          id={FIELD_ID}
-          name="answer"
-          label={t.answerLabel}
-          aria-required
-          hint={q.hint}
-          rows={4}
-          maxLength={4000}
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          addon={<VoiceFieldControl fieldId={FIELD_ID} />}
-        />
+        <>
+          {fromCadrage && (
+            <p className="text-sm text-muted-foreground">{t.fromCadrage}</p>
+          )}
+          <TextareaField
+            id={FIELD_ID}
+            name="answer"
+            label={t.answerLabel}
+            aria-required
+            hint={q.hint}
+            rows={4}
+            maxLength={4000}
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            addon={<VoiceFieldControl fieldId={FIELD_ID} />}
+          />
+        </>
       )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -130,11 +156,15 @@ export function QuestionCard({
             <Button
               type="button"
               size="lg"
-              disabled={saving || review.facts.length === 0}
+              disabled={saving || kept.length === 0}
               aria-busy={saving || undefined}
               onClick={save}
             >
-              {saving ? t.saving : t.save}
+              {saving
+                ? t.saving
+                : review.facts.length === 0 && noneLabel
+                  ? `${t.save} : ${noneLabel.toLowerCase()}`
+                  : t.save}
             </Button>
           </>
         ) : (
@@ -150,10 +180,22 @@ export function QuestionCard({
                 {t.cancel}
               </Button>
             )}
+            {noneLabel && (
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                disabled={reading || saving}
+                aria-busy={saving || undefined}
+                onClick={saveNone}
+              >
+                {noneLabel}
+              </Button>
+            )}
             <Button
               type="button"
               size="lg"
-              disabled={reading || text.trim() === ""}
+              disabled={reading || saving || text.trim() === ""}
               aria-busy={reading || undefined}
               onClick={read}
             >

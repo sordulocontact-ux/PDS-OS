@@ -18,13 +18,11 @@ import { fr } from "@/lib/i18n/fr";
 export function CallOutcomes({
   outcomes,
   members,
-  mePersonId,
   projectId,
   projects,
 }: {
   outcomes: Outcomes;
   members: { personId: string; name: string }[];
-  mePersonId: string | null;
   // The call's project, or null for an internal meeting.
   projectId: string | null;
   // Where a task may go: the call's project when the viewer owns it, else
@@ -78,7 +76,6 @@ export function CallOutcomes({
             <CallActionList
               actions={outcomes.actions}
               members={members}
-              mePersonId={mePersonId}
               projectId={projectId}
               projects={projects}
             />

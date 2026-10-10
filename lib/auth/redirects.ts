@@ -92,6 +92,8 @@ export const routes = {
   meeting: (callId: string) => `/app/calls/${callId}`,
   // Every file the viewer may read, across artists, titles, projects, contracts.
   files: "/app/files",
+  // Features on trial before they enter the app (any member).
+  labo: "/app/labo",
   network: "/app/network",
   networkContact: (id: string) => `/app/network/${id}`,
   contracts: "/app/contracts",
@@ -201,6 +203,9 @@ export const routes = {
   projectDesignSheets: (id: string) => `/app/projects/${id}/design/sheets`,
   projectDesignSheet: (id: string, sheetId: string) =>
     `/app/projects/${id}/design/sheets/${sheetId}`,
+  // One deliverable of the Conception, by its anchor.
+  projectDesignDeliverable: (id: string, deliverableId: string) =>
+    `/app/projects/${id}/design#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
@@ -254,6 +259,22 @@ export function destinationFor(state: AccessState): string {
     case "disabled":
       return routes.accessDenied;
   }
+}
+
+/** Where to go back once the database answers again: a page of the app the
+ * person was on, never another site (an open redirect). */
+export function safeReturnPath(value: unknown): string {
+  return typeof value === "string" &&
+    /^\/app(\/|$|\?)/.test(value) &&
+    !value.includes("\\") &&
+    !value.startsWith("//")
+    ? value
+    : routes.app;
+}
+
+/** /unavailable, remembering the page to return to. */
+export function unavailableFrom(path: string): string {
+  return `${routes.unavailable}?next=${encodeURIComponent(safeReturnPath(path))}`;
 }
 
 export function isAccessState(value: unknown): value is AccessState {

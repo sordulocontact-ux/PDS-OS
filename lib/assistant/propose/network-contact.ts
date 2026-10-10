@@ -129,6 +129,20 @@ export function proposeNetworkContactTool({
       const email = coordinate(input.email, parseSaidEmail, labels.email);
       const phone = coordinate(input.phone, parseSaidPhone, labels.phone);
       const website = coordinate(input.website, parseSaidUrl, labels.website);
+      // Name copied whole, notes and city only as written (UX test of
+      // 09/10/2026: « (UX-C) » read as something else).
+      const kept = (raw: string | undefined, label: string) => {
+        if (!raw?.trim()) return null;
+        const quote = verbatim.quote(raw);
+        if (!quote) warnings.push(fr.assistant.drafts.notSaid(label));
+        return quote;
+      };
+      const nameQuote = kept(input.name, labels.name);
+      const after = nameQuote ? verbatim.parenthesisAfter(nameQuote) : null;
+      if (nameQuote && after)
+        warnings.push(fr.assistant.drafts.nameFollowedBy(nameQuote, after));
+      const city = kept(input.city, labels.city);
+      const notes = kept(input.notes, labels.notes);
 
       const roles = input.roles?.length
         ? [...new Set(input.roles)]
@@ -136,15 +150,15 @@ export function proposeNetworkContactTool({
       if (roles.length === 0) warnings.push(t.rolesToChoose);
       const values: NetworkContactDraft["values"] = {
         kind: input.kind ?? current?.kind ?? "person",
-        name: input.name?.trim() || current?.name || "",
+        name: nameQuote || current?.name || "",
         roles,
         parentId: organization?.id ?? current?.parentId ?? null,
         artistId: artist?.id ?? current?.artistId ?? null,
         email: email ?? current?.email ?? null,
         phone: phone ?? current?.phone ?? null,
         website: website ?? current?.website ?? null,
-        city: input.city?.trim() || current?.city || null,
-        notes: input.notes?.trim() || current?.notes || null,
+        city: city || current?.city || null,
+        notes: notes || current?.notes || null,
       };
 
       const changes: DraftChange[] = [];
@@ -166,8 +180,8 @@ export function proposeNetworkContactTool({
       change(changes, labels.email, current?.email, email);
       change(changes, labels.phone, current?.phone, phone);
       change(changes, labels.website, current?.website, website);
-      change(changes, labels.city, current?.city, input.city?.trim());
-      change(changes, labels.notes, current?.notes, input.notes?.trim());
+      change(changes, labels.city, current?.city, city);
+      change(changes, labels.notes, current?.notes, notes);
 
       return proposalResult({
         draft: {

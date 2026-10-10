@@ -2,15 +2,18 @@ import "server-only";
 
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { QUESTION_KEYS, type QuestionKey } from "@/lib/framing/dimensions";
 import { daysAgo } from "@/lib/insights/dates";
 import { createClient } from "@/lib/supabase/server";
 
 export type ActivityKind =
   | "call_created"
   | "report_created"
-  | "brief_proposed"
-  | "brief_confirmed"
-  | "brief_rejected"
+  | "framing_proposed"
+  | "framing_confirmed"
+  | "framing_dismissed"
+  | "brief_created"
+  | "brief_sent"
   | "task_created"
   | "task_done"
   | "point_resolved"
@@ -20,12 +23,12 @@ export type ActivityKind =
   | "release_online"
   | "file_added";
 
-// Human labels for Brief fields, so neither the UI nor the model sees raw keys.
-const BRIEF_FIELD_LABELS: Record<string, string> = {
-  objective: "Objectif",
-  timing: "Temporalité",
-  frame: "Cadre",
-};
+// The Cadrage's answers, one line per project, day and kind (UX test of
+// 09/10/2026: one line per answer, in raw keys, read as « Brief rejeté »).
+// The questions' own labels; how many more past the first three.
+const SHOWN_ANSWERS = 3;
+const answerLabel = (key: string) =>
+  fr.framingIntel.questions[key as QuestionKey]?.label ?? null;
 
 export type ActivityEvent = {
   at: string;
@@ -68,6 +71,7 @@ export async function loadRecentActivity(options: {
     validations,
     releases,
     files,
+    briefs,
   ] = await Promise.all([
     supabase.from("projects").select("id, title"),
     byProject(
@@ -84,9 +88,13 @@ export async function loadRecentActivity(options: {
         .gte("created_at", since),
     ),
     byProject(
+      // The Cadrage's answers only: not the Stratégie, nor PO's
+      // suggestions (`<key>_suggestions`) or its context analysis.
       supabase
         .from("field_values")
         .select("project_id, field_key, status, created_at")
+        .eq("deliverable", "brief")
+        .in("field_key", QUESTION_KEYS)
         .gte("created_at", since),
     ),
     byProject(
@@ -138,7 +146,32 @@ export async function loadRecentActivity(options: {
         .select("project_id, file_name, created_at")
         .gte("created_at", since),
     ),
+    // The Brief's versions: created, then sent for validation (the decision
+    // is the validation's own line).
+    byProject(
+      supabase
+        .from("framing_briefs")
+        .select("project_id, version, created_at, sent_at")
+        .or(`created_at.gte.${since},sent_at.gte.${since}`),
+    ),
   ]);
+
+  // A failed read is said by the caller, never shown as « nothing new ».
+  const failed = [
+    projects,
+    calls,
+    reports,
+    fields,
+    tasksCreated,
+    tasksDone,
+    points,
+    stages,
+    validations,
+    releases,
+    files,
+    briefs,
+  ].find((res) => res.error);
+  if (failed) throw new Error(`loadRecentActivity: ${failed.error?.message}`);
 
   const titles = new Map((projects.data ?? []).map((p) => [p.id, p.title]));
   const events: ActivityEvent[] = [];
@@ -181,20 +214,55 @@ export async function loadRecentActivity(options: {
         routes.projectCall(r.calls.project_id, r.calls.id),
       );
   const fieldKind = {
-    proposed: "brief_proposed",
-    confirmed: "brief_confirmed",
-    rejected: "brief_rejected",
+    proposed: "framing_proposed",
+    confirmed: "framing_confirmed",
+    rejected: "framing_dismissed",
   } as const;
+  const answers = new Map<
+    string,
+    { at: string; kind: ActivityKind; projectId: string; labels: string[] }
+  >();
   for (const f of fields.data ?? []) {
     const kind = fieldKind[f.status as keyof typeof fieldKind];
-    if (kind)
-      push(
-        f.created_at,
-        kind,
-        f.project_id,
-        BRIEF_FIELD_LABELS[f.field_key] ?? f.field_key,
-        routes.projectFraming(f.project_id),
-      );
+    const label = answerLabel(f.field_key);
+    if (!kind || !label) continue;
+    const key = `${f.project_id}|${f.created_at.slice(0, 10)}|${kind}`;
+    const group = answers.get(key) ?? {
+      at: f.created_at,
+      kind,
+      projectId: f.project_id,
+      labels: [],
+    };
+    if (f.created_at > group.at) group.at = f.created_at;
+    if (!group.labels.includes(label)) group.labels.push(label);
+    answers.set(key, group);
+  }
+  for (const g of answers.values())
+    push(
+      g.at,
+      g.kind,
+      g.projectId,
+      g.labels.length > SHOWN_ANSWERS
+        ? `${g.labels.slice(0, SHOWN_ANSWERS).join(", ")} ${fr.assistant.activityMore(g.labels.length - SHOWN_ANSWERS)}`
+        : g.labels.join(", "),
+      routes.projectFraming(g.projectId),
+    );
+  for (const b of briefs.data ?? []) {
+    const version = fr.framingIntel.brief.version(b.version);
+    push(
+      b.created_at,
+      "brief_created",
+      b.project_id,
+      version,
+      routes.projectFramingBrief(b.project_id),
+    );
+    push(
+      b.sent_at,
+      "brief_sent",
+      b.project_id,
+      version,
+      routes.projectFramingBrief(b.project_id),
+    );
   }
   for (const t of tasksCreated.data ?? [])
     push(

@@ -25,7 +25,9 @@ export function MasterFactAction({
         <TitleFileButton organizationId={organizationId} action={action} />
       ) : null;
     case "confirm_source":
-      return <ConfirmSourceButton action={action} />;
+      return (
+        <ConfirmSourceButton action={action} organizationId={organizationId} />
+      );
     case "add_session":
     case "credit_engineer":
       return <TitleFormButton action={action} />;

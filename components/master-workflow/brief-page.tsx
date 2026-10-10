@@ -114,14 +114,16 @@ export function BriefPage({
           start again from the saved brief. */}
       <BriefForm key={view.savedAt ?? "new"} view={view} />
 
-      <PageSection
-        id="brief-budget"
-        title={t.budget.title}
-        description={t.budget.description}
-        card
-      >
-        <BriefBudget view={view} />
-      </PageSection>
+      {view.canSeeBudget && (
+        <PageSection
+          id="brief-budget"
+          title={t.budget.title}
+          description={t.budget.description}
+          card
+        >
+          <BriefBudget view={view} />
+        </PageSection>
+      )}
     </div>
   );
 }

@@ -42,7 +42,9 @@ export function TeamLines({
   const router = useRouter();
   const { pending, run } = useFramingAction();
   const [assigning, setAssigning] = useState<RoleCard | null | undefined>();
-  const { roles, others } = teamBoard(team, needs, { music });
+  const { roles, others } = teamBoard(team, needs, { music, creatives });
+  // Named once: already on the « Direction créative » card when they hold it.
+  const listedCreatives = roles.some((card) => card.holder) ? [] : creatives;
   const proposed = team.some((m) => m.review_status === "proposed");
 
   return (
@@ -56,7 +58,7 @@ export function TeamLines({
               onClick={() => setAssigning(card)}
               className={cn(
                 "flex h-full min-h-24 w-full flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-                card.member
+                card.member || card.holder
                   ? "border-border bg-background"
                   : "border-dashed border-border bg-[var(--surface-soft)]",
                 editable && "hover:border-grey-300",
@@ -66,7 +68,7 @@ export function TeamLines({
                 {t.roles[card.role]}
               </span>
               <span className="text-caption text-muted-foreground">
-                {card.member?.display_name ?? t.toFind}
+                {card.member?.display_name ?? card.holder ?? t.toFind}
               </span>
               {card.member?.review_status === "proposed" && <ProposedBadge />}
             </button>
@@ -74,11 +76,11 @@ export function TeamLines({
         ))}
       </ul>
 
-      {(others.length > 0 || creatives.length > 0) && (
+      {(others.length > 0 || listedCreatives.length > 0) && (
         <div className="flex flex-col gap-2">
           <p className="text-caption text-muted-foreground">{t.others}</p>
           <ul className="flex flex-wrap gap-x-4 gap-y-1 text-body-md">
-            {creatives.map((c) => (
+            {listedCreatives.map((c) => (
               <li key={c.personId} className="flex items-center gap-2">
                 <span className="font-semibold">{c.name}</span>
                 <span className="text-muted-foreground">
@@ -148,6 +150,7 @@ export function TeamLines({
         projectId={projectId}
         card={assigning ?? null}
         team={team}
+        creatives={creatives}
         roles={roles.map((r) => r.role)}
         engineers={engineers}
         open={assigning !== undefined}

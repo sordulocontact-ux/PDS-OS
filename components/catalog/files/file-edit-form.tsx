@@ -15,10 +15,13 @@ import { fr } from "@/lib/i18n/fr";
 export function FileEditForm({
   owner,
   file,
+  categories,
   onDone,
 }: {
   owner: FileOwner;
   file: CatalogFile;
+  // A scoped writer: only these categories are offered.
+  categories?: readonly string[];
   onDone: () => void;
 }) {
   const t = fr.catalogFiles;
@@ -63,6 +66,7 @@ export function FileEditForm({
         description={description}
         onDescription={setDescription}
         disabled={pending}
+        categories={categories}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

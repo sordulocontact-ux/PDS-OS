@@ -13,6 +13,9 @@ export const masterPackageSchema = z.object({
   engineer: z.string(),
   titles: z.array(
     z.object({
+      // The title, where the engineer deposits a version (none in the
+      // packages sent before 10/10/2026: no deposit through those links).
+      masterId: z.uuid().nullable().default(null),
       title: z.string(),
       artists: z.string(),
       // The confirmed source (mix) or the validated Mix final (mastering):

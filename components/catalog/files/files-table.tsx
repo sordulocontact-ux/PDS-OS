@@ -16,10 +16,12 @@ import {
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
+  canWriteFile,
   fileFormat,
   formatFileSize,
   type CatalogFile,
   type FileOwner,
+  type FileWriteScope,
 } from "@/lib/catalog/file-rules";
 import { formatDuration } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
@@ -36,6 +38,7 @@ export function FilesTable({
   canEdit,
   organizationId = null,
   audio = false,
+  scope,
 }: {
   owner: FileOwner;
   files: CatalogFile[];
@@ -44,6 +47,8 @@ export function FilesTable({
   // Where a new version is uploaded (the writer's organization).
   organizationId?: string | null;
   audio?: boolean;
+  // A writer limited to some categories and her own files.
+  scope?: FileWriteScope | null;
 }) {
   const t = fr.catalogFiles;
   const labels: Record<string, string> = t.categories[owner.kind];
@@ -62,70 +67,74 @@ export function FilesTable({
         <DataTableActionsHead label={t.columns.actions} />
       </DataTableHeader>
       <DataTableBody>
-        {files.map((file) => (
-          <DataTableRow key={file.id}>
-            <DataTableCell>
-              <DataTableMedia
-                visual={<FileTypeIcon file={file} />}
-                title={
-                  <DataTableLink href={file.openUrl} newTab>
-                    <span className="sr-only">{t.open(file.fileName)}</span>
-                    <span aria-hidden>{file.fileName}</span>
-                  </DataTableLink>
-                }
-                subtitle={
-                  <>
-                    {/* The category (state) column is hidden on phones. */}
-                    <span className="sm:hidden">
-                      {audio
-                        ? file.audioState &&
-                          `${fr.catalog.audioStates[file.audioState]} · `
-                        : `${labels[file.category] ?? labels.other} · `}
-                    </span>
-                    {[
-                      file.version > 1 && t.versions.badge(file.version),
-                      file.description,
-                      fileFormat(file.fileName, file.mime),
-                      formatFileSize(file.bytes),
-                      file.durationSeconds &&
-                        formatDuration(file.durationSeconds),
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </>
-                }
-              />
-            </DataTableCell>
-            <DataTableCell hideBelow="sm">
-              {audio ? (
-                file.audioState ? (
-                  <AudioStateBadge state={file.audioState} size="sm" />
+        {files.map((file) => {
+          const writable = canEdit && canWriteFile(file, scope);
+          return (
+            <DataTableRow key={file.id}>
+              <DataTableCell>
+                <DataTableMedia
+                  visual={<FileTypeIcon file={file} />}
+                  title={
+                    <DataTableLink href={file.openUrl} newTab>
+                      <span className="sr-only">{t.open(file.fileName)}</span>
+                      <span aria-hidden>{file.fileName}</span>
+                    </DataTableLink>
+                  }
+                  subtitle={
+                    <>
+                      {/* The category (state) column is hidden on phones. */}
+                      <span className="sm:hidden">
+                        {audio
+                          ? file.audioState &&
+                            `${fr.catalog.audioStates[file.audioState]} · `
+                          : `${labels[file.category] ?? labels.other} · `}
+                      </span>
+                      {[
+                        file.version > 1 && t.versions.badge(file.version),
+                        file.description,
+                        fileFormat(file.fileName, file.mime),
+                        formatFileSize(file.bytes),
+                        file.durationSeconds &&
+                          formatDuration(file.durationSeconds),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </>
+                  }
+                />
+              </DataTableCell>
+              <DataTableCell hideBelow="sm">
+                {audio ? (
+                  file.audioState ? (
+                    <AudioStateBadge state={file.audioState} size="sm" />
+                  ) : (
+                    EMPTY_CELL
+                  )
                 ) : (
-                  EMPTY_CELL
-                )
-              ) : (
-                <StatusBadge tone="neutral" size="sm">
-                  {labels[file.category] ?? labels.other}
-                </StatusBadge>
-              )}
-            </DataTableCell>
-            <DataTableCell hideBelow="lg">
-              {file.authorName || EMPTY_CELL}
-            </DataTableCell>
-            <DataTableCell hideBelow="md" fill>
-              {formatShortDate(file.createdAt)}
-            </DataTableCell>
-            <DataTableActionsCell>
-              <FileActions
-                owner={owner}
-                file={file}
-                canEdit={canEdit && !audio}
-                canDelete={canEdit}
-                organizationId={audio ? null : organizationId}
-              />
-            </DataTableActionsCell>
-          </DataTableRow>
-        ))}
+                  <StatusBadge tone="neutral" size="sm">
+                    {labels[file.category] ?? labels.other}
+                  </StatusBadge>
+                )}
+              </DataTableCell>
+              <DataTableCell hideBelow="lg">
+                {file.authorName || EMPTY_CELL}
+              </DataTableCell>
+              <DataTableCell hideBelow="md" fill>
+                {formatShortDate(file.createdAt)}
+              </DataTableCell>
+              <DataTableActionsCell>
+                <FileActions
+                  owner={owner}
+                  file={file}
+                  canEdit={writable && !audio}
+                  canDelete={writable}
+                  organizationId={audio || !writable ? null : organizationId}
+                  categories={scope?.categories}
+                />
+              </DataTableActionsCell>
+            </DataTableRow>
+          );
+        })}
       </DataTableBody>
     </DataTable>
   );

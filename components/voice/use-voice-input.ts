@@ -59,7 +59,14 @@ export function useVoiceInput(onText: (text: string) => void) {
   }
 
   const rec = useRecorder(meter.push, (recording) => {
-    if (!cancelled.current) void send(recording);
+    if (cancelled.current) return;
+    // A dictation of several seconds in which nothing was heard is not sent:
+    // Whisper would invent a text, and Espace Espace would send it to PO.
+    if (recording.durationSeconds >= 4 && recording.heardSeconds === 0) {
+      setError("nothing_heard");
+      return;
+    }
+    void send(recording);
   });
 
   const { elapsed, status, stop } = rec;
