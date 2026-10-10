@@ -50,7 +50,11 @@ export function AddToNetworkButton({
       {(options, close) => (
         <ContactForm
           options={options}
-          initial={{ name: action.name, roles: action.roles }}
+          initial={{
+            name: action.name,
+            roles: action.roles,
+            ...(action.artistId ? { artistId: action.artistId } : {}),
+          }}
           stay
           onCancel={close}
           // The server links the credits of that name to the new contact.

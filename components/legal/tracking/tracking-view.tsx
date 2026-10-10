@@ -9,6 +9,8 @@ import { ContractPanel } from "@/components/legal/tracking/contract-panel";
 import { DelegateButton } from "@/components/legal/tracking/delegate-button";
 import { FichePanel } from "@/components/legal/tracking/fiche-panel";
 import { NextCard } from "@/components/legal/tracking/next-card";
+import { NextLineButton } from "@/components/legal/tracking/next-line-button";
+import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
 import {
   PlanRowSheet,
   type PlanRowView,
@@ -69,12 +71,15 @@ export function TrackingView({
   projectId,
   tracking,
   view,
+  selected,
   data,
   titles,
 }: {
   projectId: string;
   tracking: LegalTracking;
   view: TrackingViewKey;
+  // The line whose panel is open (`?ligne=`): always shown, its fold open.
+  selected: string | null;
   data: PlanData;
   // The project's titles, in order: their tag's hue.
   titles: Array<{ id: string; title: string }>;
@@ -118,7 +123,7 @@ export function TrackingView({
   const position = new Map(titles.map((title, i) => [title.id, i]));
 
   const shown = (row: BoardRow) =>
-    view === "all"
+    row.id === selected || view === "all"
       ? true
       : view === "act"
         ? row.group === "now" || row.group === "decision"
@@ -146,9 +151,45 @@ export function TrackingView({
     };
   };
 
-  const body = (row: BoardRow) => {
+  const body = (row: BoardRow): React.ReactNode => {
     const panel = row.panel;
     switch (panel.kind) {
+      case "steps":
+        return (
+          <ol className="flex flex-col gap-4">
+            {(row.steps ?? []).map((step, i) => {
+              const head = (
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">
+                    {i + 1}. {fr.legal.board.steps[step.panel.kind]}
+                  </span>
+                  <StatusBadge tone={step.badge.tone} size="sm">
+                    {step.badge.label}
+                  </StatusBadge>
+                </span>
+              );
+              return (
+                <li key={step.id} className="flex flex-col gap-3">
+                  {i === row.current ? (
+                    <>
+                      {head}
+                      {body(step)}
+                    </>
+                  ) : (
+                    <details className="group">
+                      <summary className="cursor-pointer list-none marker:hidden">
+                        {head}
+                      </summary>
+                      <div className="flex flex-col gap-4 pt-3">
+                        {body(step)}
+                      </div>
+                    </details>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        );
       case "fiche":
         return <FichePanel projectId={projectId} row={panel.row} />;
       case "mapping":
@@ -229,20 +270,25 @@ export function TrackingView({
         ) : (
           <span />
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          nativeButton={false}
-          render={<Link href={legalActionHref(projectId, row.section)} />}
-        >
-          {fr.legal.board.open}
-        </Button>
+        <span className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            nativeButton={false}
+            render={<Link href={legalActionHref(projectId, row.section)} />}
+          >
+            {fr.legal.board.open}
+          </Button>
+          <NextLineButton id={row.id} />
+        </span>
       </div>
     );
 
   const line = (row: BoardRow, section: BoardSection) => (
     <PlanRowSheet
       key={row.id}
+      id={row.id}
+      action={row.action}
       view={viewOf(row)}
       section={section.title}
       sub={row.meta.join(" · ")}
@@ -302,7 +348,11 @@ export function TrackingView({
           {open.map((row) => line(row, section))}
         </div>
         {folds.map((fold) => (
-          <details key={fold.key} className="border-t py-2">
+          <details
+            key={fold.key}
+            className="border-t py-2"
+            open={fold.rows.some((r) => r.id === selected) || undefined}
+          >
             <summary className="cursor-pointer list-none py-1 text-sm text-muted-foreground marker:hidden">
               {fold.label(
                 fold.rows.length,
@@ -323,141 +373,157 @@ export function TrackingView({
   const reached = ready && board.remaining.length === 0;
   const SHOWN_REMAINING = 5;
 
+  // The lines that wait for the team, in the plan's order and on screen in
+  // this view: « Suivant ».
+  const actionable = board.sections.flatMap((section) =>
+    section.rows
+      .filter((r) => shown(r) && (r.group === "now" || r.group === "decision"))
+      .map((r) => ({ id: r.id, label: r.label })),
+  );
+
   return (
-    <div className="grid gap-8">
-      <StatTiles
-        columns={4}
-        stats={TRACK_GROUPS.map((group) => ({
-          label: t.groups[group].title,
-          value: String(board.counts[group]),
-          href: hrefOf(view === group ? "act" : group),
-          view: { current: view === group },
-        }))}
-      />
-      <nav aria-label={t.viewsLabel} className="flex flex-wrap gap-2">
-        {(["act", "all"] as const).map((key) => (
-          <FilterChipLink
-            key={key}
-            href={hrefOf(key)}
-            current={view === key}
-            variant="soft"
-          >
-            {t.views[key]}
-          </FilterChipLink>
-        ))}
-      </nav>
-      {tracking.added > 0 && (
-        <AddedActions projectId={projectId} count={tracking.added} />
-      )}
-
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <div className="flex min-w-0 flex-col gap-4">
-          {cards.length > 0 ? (
-            cards
-          ) : (
-            <EmptyNote>{t.viewEmpty[view]}</EmptyNote>
-          )}
-          {hidden > 0 && view !== "all" && cards.length > 0 && (
-            <p className="text-sm text-muted-foreground">
-              {t.hidden(hidden)}{" "}
-              <Link
-                href={hrefOf("all")}
-                className="underline underline-offset-4"
-              >
-                {t.views.all}
-              </Link>
-            </p>
-          )}
-          <p className="text-sm text-muted-foreground">{t.integrations}</p>
-        </div>
-
-        <aside className="flex flex-col gap-3 rounded-2xl border bg-card p-4 lg:sticky lg:top-4">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="font-medium">{t.readiness.title}</h2>
-            <StatusBadge
-              tone={reached ? "success" : ready ? "info" : "warning"}
-              size="sm"
+    <PlanSheetProvider
+      projectId={projectId}
+      initialOpen={selected}
+      actionable={actionable}
+    >
+      <div className="grid gap-8">
+        <StatTiles
+          columns={4}
+          stats={TRACK_GROUPS.map((group) => ({
+            label: t.groups[group].title,
+            value: String(board.counts[group]),
+            href: hrefOf(view === group ? "act" : group),
+            view: { current: view === group },
+          }))}
+        />
+        <nav aria-label={t.viewsLabel} className="flex flex-wrap gap-2">
+          {(["act", "all"] as const).map((key) => (
+            <FilterChipLink
+              key={key}
+              href={hrefOf(key)}
+              current={view === key}
+              variant="soft"
             >
-              {reached
-                ? t.readiness.reached
-                : ready
-                  ? t.readiness.toFollow
-                  : t.readiness.notYet}
-            </StatusBadge>
+              {t.views[key]}
+            </FilterChipLink>
+          ))}
+        </nav>
+        {tracking.added > 0 && (
+          <AddedActions projectId={projectId} count={tracking.added} />
+        )}
+
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div className="flex min-w-0 flex-col gap-4">
+            {cards.length > 0 ? (
+              cards
+            ) : (
+              <EmptyNote>{t.viewEmpty[view]}</EmptyNote>
+            )}
+            {hidden > 0 && view !== "all" && cards.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                {t.hidden(hidden)}{" "}
+                <Link
+                  href={hrefOf("all")}
+                  className="underline underline-offset-4"
+                >
+                  {t.views.all}
+                </Link>
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">{t.integrations}</p>
           </div>
-          {board.borrowings > 0 ? (
-            <>
-              <ProgressBar
-                value={board.secured}
-                max={board.borrowings}
-                label={fr.legal.board.readiness.borrowings(
-                  board.secured,
-                  board.borrowings,
-                )}
-              />
-              <p className="text-sm tabular-nums">
-                {fr.legal.board.readiness.borrowings(
-                  board.secured,
-                  board.borrowings,
-                )}
+
+          <aside className="flex flex-col gap-3 rounded-2xl border bg-card p-4 lg:sticky lg:top-4">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-medium">{t.readiness.title}</h2>
+              <StatusBadge
+                tone={reached ? "success" : ready ? "info" : "warning"}
+                size="sm"
+              >
+                {reached
+                  ? t.readiness.reached
+                  : ready
+                    ? t.readiness.toFollow
+                    : t.readiness.notYet}
+              </StatusBadge>
+            </div>
+            {board.borrowings > 0 ? (
+              <>
+                <ProgressBar
+                  value={board.secured}
+                  max={board.borrowings}
+                  label={fr.legal.board.readiness.borrowings(
+                    board.secured,
+                    board.borrowings,
+                  )}
+                />
+                <p className="text-sm tabular-nums">
+                  {fr.legal.board.readiness.borrowings(
+                    board.secured,
+                    board.borrowings,
+                  )}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {fr.legal.board.readiness.noBorrowing}
               </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {fr.legal.board.readiness.noBorrowing}
-            </p>
-          )}
-          {reached ? (
-            <p className="text-sm text-muted-foreground">{t.readiness.ready}</p>
-          ) : ready ? (
-            <>
-              <p className="text-sm">
-                {t.readiness.remaining(board.remaining.length)}
+            )}
+            {reached ? (
+              <p className="text-sm text-muted-foreground">
+                {t.readiness.ready}
               </p>
-              <ul className="flex flex-col gap-1">
-                {board.remaining.slice(0, SHOWN_REMAINING).map((row) => (
-                  <li key={row.id}>
+            ) : ready ? (
+              <>
+                <p className="text-sm">
+                  {t.readiness.remaining(board.remaining.length)}
+                </p>
+                <ul className="flex flex-col gap-1">
+                  {board.remaining.slice(0, SHOWN_REMAINING).map((row) => (
+                    <li key={row.id}>
+                      <a
+                        href={`#legal-${row.section}`}
+                        className="text-sm break-words underline-offset-4 hover:underline"
+                      >
+                        {row.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                {board.remaining.length > SHOWN_REMAINING && (
+                  <p className="text-sm text-muted-foreground">
+                    {t.readiness.more(board.remaining.length - SHOWN_REMAINING)}
+                  </p>
+                )}
+              </>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {board.blocking.map((row) => (
+                  <li key={row.id} className="flex flex-col gap-1">
                     <a
                       href={`#legal-${row.section}`}
-                      className="text-sm break-words underline-offset-4 hover:underline"
+                      className="text-sm font-medium break-words underline-offset-4 hover:underline"
                     >
                       {row.label}
                     </a>
+                    <StatusBadge
+                      tone={row.badge.tone}
+                      size="sm"
+                      className="self-start"
+                    >
+                      {row.badge.label}
+                    </StatusBadge>
                   </li>
                 ))}
               </ul>
-              {board.remaining.length > SHOWN_REMAINING && (
-                <p className="text-sm text-muted-foreground">
-                  {t.readiness.more(board.remaining.length - SHOWN_REMAINING)}
-                </p>
-              )}
-            </>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {board.blocking.map((row) => (
-                <li key={row.id} className="flex flex-col gap-1">
-                  <a
-                    href={`#legal-${row.section}`}
-                    className="text-sm font-medium break-words underline-offset-4 hover:underline"
-                  >
-                    {row.label}
-                  </a>
-                  <StatusBadge
-                    tone={row.badge.tone}
-                    size="sm"
-                    className="self-start"
-                  >
-                    {row.badge.label}
-                  </StatusBadge>
-                </li>
-              ))}
-            </ul>
-          )}
-          <p className="border-t pt-3 text-caption text-muted-foreground">
-            {t.readiness.policy}
-          </p>
-        </aside>
+            )}
+            <p className="border-t pt-3 text-caption text-muted-foreground">
+              {t.readiness.policy}
+            </p>
+          </aside>
+        </div>
       </div>
-    </div>
+    </PlanSheetProvider>
   );
 }

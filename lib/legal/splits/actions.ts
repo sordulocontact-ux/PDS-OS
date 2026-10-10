@@ -23,7 +23,13 @@ import { createClient } from "@/lib/supabase/server";
 // ou vérifie la proposition » then « déclenche les demandes ». Every write is
 // a SQL function that checks manage_legal and the exact 100 % itself.
 
-export type SplitLink = { entryId: string; name: string; url: string };
+// `email`: the person's Réseau address when the line is linked to a contact.
+export type SplitLink = {
+  entryId: string;
+  name: string;
+  url: string;
+  email: string | null;
+};
 export type SplitResult<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
   | { ok: false; error: string };
@@ -172,9 +178,19 @@ async function sendVersion(
   }
   const { data: entries } = await supabase
     .from("legal_split_entries")
-    .select("id, name")
+    .select("id, name, contact_id")
     .eq("version_id", versionId);
   const nameOf = new Map((entries ?? []).map((e) => [e.id, e.name]));
+  const emails = await contactEmails(
+    supabase,
+    (entries ?? []).flatMap((e) => (e.contact_id ? [e.contact_id] : [])),
+  );
+  const emailOf = new Map(
+    (entries ?? []).map((e) => [
+      e.id,
+      e.contact_id ? (emails.get(e.contact_id) ?? null) : null,
+    ]),
+  );
   await schedulePendingPushes();
   revalidatePath(routes.projectLegal(projectId), "layout");
   return {
@@ -183,6 +199,7 @@ async function sendVersion(
       entryId: row.entry_id,
       name: nameOf.get(row.entry_id) ?? "",
       url: `${siteUrl()}${routes.legalSplit(row.token)}`,
+      email: emailOf.get(row.entry_id) ?? null,
     })),
   };
 }
@@ -191,7 +208,7 @@ async function sendVersion(
 export async function newSplitLink(
   projectId: string,
   entryId: string,
-): Promise<SplitResult<string>> {
+): Promise<SplitResult<{ url: string; email: string | null }>> {
   const ids = z.object({
     projectId: catalogIdSchema,
     entryId: catalogIdSchema,
@@ -208,6 +225,36 @@ export async function newSplitLink(
     if (error) console.error("newSplitLink:", error.message);
     return { ok: false, error: errorOf(error?.message ?? "") };
   }
+  const { data: entry } = await supabase
+    .from("legal_split_entries")
+    .select("contact_id")
+    .eq("id", parsed.data.entryId)
+    .maybeSingle();
+  const emails = await contactEmails(
+    supabase,
+    entry?.contact_id ? [entry.contact_id] : [],
+  );
   revalidatePath(routes.projectLegal(parsed.data.projectId), "layout");
-  return { ok: true, data: `${siteUrl()}${routes.legalSplit(data)}` };
+  return {
+    ok: true,
+    data: {
+      url: `${siteUrl()}${routes.legalSplit(data)}`,
+      email: entry?.contact_id ? (emails.get(entry.contact_id) ?? null) : null,
+    },
+  };
+}
+
+// The Réseau addresses of some contacts, for a ready e-mail.
+async function contactEmails(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ids: string[],
+): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const { data } = await supabase
+    .from("network_contacts")
+    .select("id, email")
+    .in("id", ids);
+  return new Map(
+    (data ?? []).flatMap((c) => (c.email ? [[c.id, c.email]] : [])),
+  );
 }

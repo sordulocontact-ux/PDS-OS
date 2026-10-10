@@ -5,7 +5,11 @@ import { IconXmark } from "nucleo-sharp-essential";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { factLabel } from "@/lib/legal/intake/labels";
-import type { ProposedFact, QuestionKey } from "@/lib/legal/intake/types";
+import {
+  NONE_QUESTIONS,
+  type ProposedFact,
+  type QuestionKey,
+} from "@/lib/legal/intake/types";
 
 /**
  * What PO read in the answer, before anything is kept: each fact with the
@@ -31,7 +35,11 @@ export function ProposalReview({
         <p className="text-sm text-muted-foreground">{t.reviewHint}</p>
       </div>
       {facts.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.nothingFound}</p>
+        <p className="text-sm text-muted-foreground">
+          {NONE_QUESTIONS.includes(question)
+            ? t.nothingFoundNone(t.none[question])
+            : t.nothingFound}
+        </p>
       ) : (
         <ul className="flex flex-col gap-2">
           {facts.map((fact, index) => {

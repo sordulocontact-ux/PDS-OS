@@ -8,6 +8,8 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { todayInParis } from "@/lib/insights/dates";
+import { defaultDueOn } from "@/lib/legal/plan/due-dates";
 import { planItemPayload } from "@/lib/legal/plan/payload";
 import { proposeLegalPlan } from "@/lib/legal/plan/queries";
 import { getProject } from "@/lib/projects/queries";
@@ -139,7 +141,7 @@ export async function addLegalPlanItems(
     p_items: fresh.map((item) =>
       planItemPayload(item, keys, {
         responsibleId: owner,
-        dueOn: project.dueDate,
+        dueOn: defaultDueOn(item.kind, project.dueDate, todayInParis()),
       }),
     ),
   });

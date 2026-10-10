@@ -156,12 +156,20 @@ export const legalForms = {
     namesake:
       "Quelqu'un de ce nom est déjà dans le Réseau : reliez d'abord son crédit sur l'État des lieux.",
     linkFirst: "Relier sur l'État des lieux",
+    // A featured artist without a contact linked to their artist page.
+    notInNetwork: (name: string) =>
+      `${name} est en featuring : ajoutez cette personne au Réseau, reliée à sa fiche artiste, avant de lui envoyer une fiche.`,
     newLink: "Nouveau lien",
     linkTitle: (name: string) => `Lien de la fiche de ${name}`,
     linkBody:
       "Copiez ce lien et envoyez-le à la personne. Il ne sera plus affiché : en cas de perte, créez-en un nouveau (l'ancien ne marchera plus). Il expire dans 30 jours.",
     copy: "Copier le lien",
     copied: "Lien copié",
+    // A ready e-mail to the person (their Réseau address), sent by the user.
+    email: "Envoyer par e-mail",
+    emailSubject: (project: string) => `Fiche de renseignements · ${project}`,
+    emailBody: (name: string, project: string, url: string) =>
+      `Bonjour ${name},\n\nPour le projet « ${project} », pouvez-vous remplir votre fiche de renseignements ? Cela prend quelques minutes, sans compte :\n${url}\n\nMerci !`,
     markSent: "Marquer comme envoyée",
     revoke: "Révoquer",
     answers: "Voir les réponses",

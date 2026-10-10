@@ -43,7 +43,7 @@ const summarySchema = z.object({
   content_urls: z.object({ desktop: z.object({ page: z.url() }) }),
 });
 
-async function wikidataItem(deezerId: number): Promise<string | null> {
+export async function wikidataItem(deezerId: number): Promise<string | null> {
   const url = new URL(WIKIDATA);
   url.search = new URLSearchParams({
     action: "query",

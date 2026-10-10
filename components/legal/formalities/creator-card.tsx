@@ -77,6 +77,7 @@ export function CreatorCard({
         key={`q-${rowId}-${creator.contact_id ?? ""}`}
         name={`c-quality-${rowId}`}
         label={t.quality}
+        hint={t.qualityHint}
         required
         items={Object.fromEntries(
           QUALITIES.map((q) => [q, fr.legalFormalities.qualities[q]]),
@@ -118,6 +119,7 @@ export function CreatorCard({
       <Field
         name={`c-phono-${rowId}`}
         label={t.phono}
+        hint={t.phonoHint}
         inputMode="decimal"
         suffix="%"
         value={creator.phono.replace(".", ",")}

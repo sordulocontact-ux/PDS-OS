@@ -127,6 +127,21 @@ export const legal = {
     progress: (answered: number, total: number) =>
       `${answered} question${answered > 1 ? "s" : ""} sur ${total} ${answered > 1 ? "ont" : "a"} une réponse`,
     answerLabel: "Votre réponse",
+    // An answer that says « nothing », saved without PO (UX test of
+    // 09/10/2026: « Enregistrer » greyed when the right answer was none).
+    none: {
+      third_party: "Aucun emprunt",
+      agreements: "Aucun accord",
+      publisher: "Pas d'éditeur",
+    } as Record<string, string>,
+    // What the Cadrage already established, offered as the answer.
+    fromCadrage:
+      "Repris du Cadrage : vérifiez, corrigez si besoin, puis faites lire la réponse à PO.",
+    cadrageNone: {
+      third_party:
+        "Aucun emprunt : ni sample, ni reprise, ni interpolation (Cadrage).",
+      agreements: "Aucun accord pour l'instant (Cadrage).",
+    } as Record<string, string>,
     read: "Lire ma réponse",
     reading: "PO lit votre réponse…",
     reviewTitle: "Ce que PO a compris",
@@ -134,6 +149,8 @@ export const legal = {
       "Retirez ce qui est faux, puis enregistrez. Rien n'est gardé avant.",
     nothingFound:
       "PO n'a rien relevé dans cette réponse. Reformulez, ou précisez les noms tels qu'ils doivent être écrits.",
+    nothingFoundNone: (label: string) =>
+      `PO n'a rien relevé dans cette réponse : enregistrez « ${label.toLowerCase()} », ou reformulez.`,
     dropped: (count: number) =>
       count === 1
         ? "Un élément n'a pas été retrouvé tel quel dans votre réponse : il a été écarté."
@@ -348,7 +365,7 @@ export const legal = {
     description:
       "Ce qui attend pour que les droits de la sortie soient en règle, démarche par démarche. L'état de chaque action est relu à chaque visite dans le Réseau, les Contrats et les fiches des titres.",
     integrations:
-      "Pas encore intégrés : la signature électronique (le contrat signé et sa preuve sont déposés à la main) et les dépôts SACEM. Les états viennent de ce qui est saisi dans PDS OS.",
+      "La signature des contrats et le dépôt SACEM se font hors de PDS OS : déposez ici le signé et sa preuve une fois faits. Chaque état vient de ce qui est saisi dans PDS OS.",
     groups: {
       now: {
         title: "À traiter maintenant",
@@ -568,7 +585,34 @@ export const legal = {
   },
   // The launched plan as the prototype drew it (lib/legal/plan/board.ts).
   board: {
+    // One line per person, per title (UX test of 09/10/2026).
+    sections: {
+      people: "Personnes",
+      titles: "Titres",
+    },
+    // The step a person's or a title's line shows, before its state.
+    stepOf: {
+      fiche: "Fiche · ",
+      contract: "Contrat · ",
+      split: "Répartition · ",
+      sacem: "SACEM · ",
+    } as Record<string, string>,
+    steps: {
+      fiche: "Fiche de renseignements",
+      contract: "Contrat",
+      split: "Répartition de l'édition",
+      sacem: "Bulletin SACEM",
+      mapping: "Cartographie des contrats",
+      clearance: "Emprunt",
+      link: "Démarche",
+      steps: "Démarche",
+    } as Record<string, string>,
+    next: (label: string) => `Suivant : ${label}`,
     why: {
+      people:
+        "Pour chaque personne : sa fiche de renseignements (par un lien, sans compte), puis son contrat.",
+      titles:
+        "Pour chaque titre : la répartition de l'édition confirmée par chacun, puis le bulletin SACEM.",
       onboarding:
         "Chaque personne créditée remplit sa fiche par un lien, sans compte. Ses contrats et la répartition en dépendent.",
       clearance:
@@ -592,6 +636,7 @@ export const legal = {
     waitsFor: (labels: string) => `Attend : ${labels}`,
     waitsFiche: (name: string) => `Attend la fiche de ${name}`,
     namesake: "Homonyme à relier",
+    notInNetwork: "Pas dans le Réseau",
     mapping: "Cartographie des contrats",
     edition: "Édition",
     bulletin: "Bulletin 725 · œuvre éditée",
@@ -601,6 +646,7 @@ export const legal = {
     verbs: {
       open: "Ouvrir",
       link: "Relier d'abord",
+      addToNetwork: "Ajouter au Réseau",
       prepareFiche: "Préparer la fiche",
       markSent: "Marquer comme envoyée",
       review: "Vérifier les réponses",

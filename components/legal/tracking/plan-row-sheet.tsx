@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
+import { usePlanSheet } from "@/components/legal/tracking/plan-sheet-context";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,6 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { StatusBadge } from "@/components/ui/status-badge";
+import type { RowAction } from "@/lib/legal/plan/board";
 import type { Hue } from "@/lib/ui/category-hues";
 import type { Tone } from "@/lib/ui/state-tones";
 
@@ -28,24 +28,31 @@ export type PlanRowView = {
 /**
  * One line of the Plan d'action (the prototype's): what it is about, its
  * state in a badge, the verb of what to do; the whole line opens the panel
- * where it is done, beside the plan. The panel's body comes from the
- * server (the fiche, the contract, the split, the bulletin…).
+ * where it is done, beside the plan. The verb acts at once when the step
+ * needs nothing typed (`action`), then the panel opens on the result. The
+ * open panel is the plan's (usePlanSheet): it stays open when an action
+ * moves the line elsewhere. The panel's body comes from the server.
  */
 export function PlanRowSheet({
+  id,
   view,
   section,
   sub,
-  defaultOpen = false,
+  action,
   children,
 }: {
+  id: string;
   view: PlanRowView;
   // The démarche, said at the top of the panel.
   section: string;
   sub: string;
-  defaultOpen?: boolean;
+  action?: RowAction;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const sheet = usePlanSheet();
+  const open = sheet.openId === id;
+  const busy = sheet.acting === id;
+  const setOpen = (next: boolean) => (next ? sheet.open(id) : sheet.close());
 
   return (
     <>
@@ -85,6 +92,8 @@ export function PlanRowSheet({
           <Button
             size="xs"
             tabIndex={-1}
+            disabled={busy}
+            aria-busy={busy || undefined}
             variant={
               view.emphasis === "decision"
                 ? "default"
@@ -94,7 +103,8 @@ export function PlanRowSheet({
             }
             onClick={(event) => {
               event.stopPropagation();
-              setOpen(true);
+              if (action) sheet.act(id, action);
+              else setOpen(true);
             }}
           >
             {view.verb}

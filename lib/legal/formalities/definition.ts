@@ -96,7 +96,8 @@ export type Creator = {
   pseudonym: string;
   ipi: string;
   quality: Quality | "";
-  // Exact share, « 33.3334 » (never copied from the split sheet).
+  // Exact share, « 33.3334 » (from the confirmed split when there is one,
+  // to verify).
   phono: string;
   signs: boolean;
   // The Réseau contact this creator was picked from (never by name).

@@ -23,6 +23,7 @@ export const shell = {
     files: "Fichiers",
     members: "Équipe",
     feedback: "Retours",
+    labo: "Labo",
     // Read after "Équipe" or "Ouvrir le menu" when requests are waiting.
     pendingMembers: (count: number) =>
       count === 1

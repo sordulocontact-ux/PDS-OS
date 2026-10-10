@@ -129,7 +129,7 @@ export async function readInventoryRows(
     titled
       ? supabase
           .from("network_contacts")
-          .select("id, name")
+          .select("id, name, artist_id")
           .is("archived_at", null)
           .limit(NETWORK_LIMIT)
       : none,

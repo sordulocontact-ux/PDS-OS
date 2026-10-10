@@ -82,4 +82,15 @@ export type IntakeQuestion = {
   lastAnswer: string | null;
   // The facts of the last answer that are still active.
   facts: FactValue[];
+  // What the Cadrage already established, offered as the answer while the
+  // question is open (UX test of 09/10/2026: PO asked it again); null if
+  // the Cadrage says nothing about it.
+  suggestion: string | null;
 };
+
+/** Questions a « nothing » answer settles (« Aucun emprunt »…). */
+export const NONE_QUESTIONS: readonly QuestionKey[] = [
+  "third_party",
+  "agreements",
+  "publisher",
+];

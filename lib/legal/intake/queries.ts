@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cadrageAnswers } from "@/lib/legal/intake/cadrage";
 import {
   answerKey,
   intakeQuestions,
@@ -44,49 +45,74 @@ export async function loadIntake(project: {
   const titled = masterIds.length > 0;
   const none = Promise.resolve({ data: [], error: null });
 
-  const [credits, publishers, contracts, answers, facts, clearances] =
-    await Promise.all([
-      titled
-        ? supabase
-            .from("master_contributors")
-            .select("master_id")
-            .in("master_id", masterIds)
-        : none,
-      titled
-        ? supabase
-            .from("master_splits")
-            .select("master_id")
-            .in("master_id", masterIds)
-            .eq("kind", "publishing")
-            .eq("role", "publisher")
-        : none,
-      supabase
-        .from("contracts")
-        .select("id", { count: "exact", head: true })
-        .eq("project_id", project.id),
-      supabase
-        .from("legal_answers")
-        .select("question_key, master_id, text, created_at")
-        .eq("project_id", project.id)
-        .order("created_at", { ascending: false })
-        .limit(ANSWERS_LIMIT),
-      supabase
-        .from("legal_facts")
-        .select("question_key, master_id, kind, value")
-        .eq("project_id", project.id)
-        .is("superseded_by_answer_id", null)
-        .order("created_at"),
-      supabase
-        .from("legal_clearances")
-        .select("id", { count: "exact", head: true })
-        .eq("project_id", project.id),
-    ]);
+  const [
+    credits,
+    publishers,
+    contracts,
+    answers,
+    facts,
+    clearances,
+    constraints,
+    briefLegal,
+  ] = await Promise.all([
+    titled
+      ? supabase
+          .from("master_contributors")
+          .select("master_id")
+          .in("master_id", masterIds)
+      : none,
+    titled
+      ? supabase
+          .from("master_splits")
+          .select("master_id")
+          .in("master_id", masterIds)
+          .eq("kind", "publishing")
+          .eq("role", "publisher")
+      : none,
+    supabase
+      .from("contracts")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", project.id),
+    supabase
+      .from("legal_answers")
+      .select("question_key, master_id, text, created_at")
+      .eq("project_id", project.id)
+      .order("created_at", { ascending: false })
+      .limit(ANSWERS_LIMIT),
+    supabase
+      .from("legal_facts")
+      .select("question_key, master_id, kind, value")
+      .eq("project_id", project.id)
+      .is("superseded_by_answer_id", null)
+      .order("created_at"),
+    supabase
+      .from("legal_clearances")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", project.id),
+    // What the Cadrage confirmed about rights and agreements.
+    supabase
+      .from("framing_constraints")
+      .select("text")
+      .eq("project_id", project.id)
+      .eq("type", "rights")
+      .eq("review_status", "confirmed")
+      .order("created_at"),
+    supabase
+      .from("current_field_values")
+      .select("field_key, value")
+      .eq("project_id", project.id)
+      .eq("deliverable", "brief")
+      .in("field_key", ["legal_agreements", "legal_blockers"])
+      .eq("status", "confirmed"),
+  ]);
   failed("credits", credits.error);
   failed("publishers", publishers.error);
   failed("contracts", contracts.error);
   failed("answers", answers.error);
   failed("facts", facts.error);
   failed("clearances", clearances.error);
+  failed("cadrage constraints", constraints.error);
+  failed("cadrage fields", briefLegal.error);
 
   // Active facts by question and title; a row the schema refuses is skipped.
   const factsOf = new Map<string, FactValue[]>();
@@ -109,9 +135,18 @@ export async function loadIntake(project: {
       answersOf.set(key, { text: row.text, facts: factsOf.get(key) ?? [] });
   }
 
+  const titles = project.masters.map((m) => ({ id: m.id, title: m.title }));
   return {
     questions: intakeQuestions({
-      titles: project.masters.map((m) => ({ id: m.id, title: m.title })),
+      titles,
+      cadrage: cadrageAnswers(titles, {
+        constraints: (constraints.data ?? []).map((row) => row.text),
+        fields: new Map(
+          (briefLegal.data ?? []).flatMap((row) =>
+            row.field_key ? [[row.field_key, row.value]] : [],
+          ),
+        ),
+      }),
       creditedTitles: new Set((credits.data ?? []).map((r) => r.master_id)),
       publishedTitles: new Set((publishers.data ?? []).map((r) => r.master_id)),
       hasContract: (contracts.count ?? 0) > 0,

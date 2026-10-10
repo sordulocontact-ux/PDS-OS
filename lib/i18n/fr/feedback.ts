@@ -21,7 +21,7 @@ export const feedback = {
   directDialog: {
     title: "Envoyer un retour sur Notion",
     description:
-      "Il part directement dans les tickets Notion, avec la priorité choisie.",
+      "Il part directement dans le suivi de l'équipe produit (Notion), avec la priorité choisie.",
   },
   directSubmit: "Envoyer sur Notion",
   directSubmitting: "Envoi sur Notion…",

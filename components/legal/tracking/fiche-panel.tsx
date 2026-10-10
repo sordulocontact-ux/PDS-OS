@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 
 import { NextCard } from "@/components/legal/tracking/next-card";
+import {
+  usePlanSheet,
+  type PreparedLink,
+} from "@/components/legal/tracking/plan-sheet-context";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
+import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { fr } from "@/lib/i18n/fr";
+import { mailtoHref } from "@/lib/utils/mailto";
 import {
   prepareLegalForm,
   reviewLegalForm,
@@ -40,7 +46,11 @@ export function FichePanel({
   const t = fr.legalForms.page;
   const p = fr.legal.panels.fiche;
   const router = useRouter();
-  const [url, setUrl] = useState<string | null>(null);
+  // Kept by the plan, not here: the panel may remount after the refresh.
+  const sheet = usePlanSheet();
+  const link = sheet.links[row.key] ?? null;
+  const setLink = (next: PreparedLink | null) => sheet.setLink(row.key, next);
+  const url = link?.url ?? null;
   const [pending, startTransition] = useTransition();
 
   const act = (action: () => Promise<{ ok: boolean; error?: string }>) =>
@@ -53,7 +63,7 @@ export function FichePanel({
     startTransition(async () => {
       const result = await prepareLegalForm(projectId, row.key);
       if (!result.ok) return void toast.error(result.error);
-      setUrl(result.url);
+      setLink(result);
       router.refresh();
     });
   const copy = async () => {
@@ -69,6 +79,24 @@ export function FichePanel({
     .map((role) => fr.masterPage.credits.roles[role])
     .join(", ")
     .toLowerCase();
+
+  // A featured artist not in the Réseau yet: added there, linked to the
+  // artist page, before any fiche.
+  if (row.artistId)
+    return (
+      <NextCard kind="act" label={p.next} title={t.notInNetwork(row.name)}>
+        <AddToNetworkButton
+          label={fr.legal.board.verbs.addToNetwork}
+          action={{
+            kind: "add_to_network",
+            name: row.name,
+            roles: ["artist"],
+            links: [],
+            artistId: row.artistId,
+          }}
+        />
+      </NextCard>
+    );
 
   if (row.namesakeId)
     return (
@@ -93,6 +121,25 @@ export function FichePanel({
             {t.copy}
           </Button>
         </div>
+        {link?.email && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="self-start"
+            nativeButton={false}
+            render={
+              <a
+                href={mailtoHref(
+                  link.email,
+                  t.emailSubject(link.project),
+                  t.emailBody(row.name, link.project, link.url),
+                )}
+              />
+            }
+          >
+            {t.email}
+          </Button>
+        )}
         <p className="text-sm text-muted-foreground">{p.once}</p>
         <Button
           className="self-start"
@@ -105,7 +152,7 @@ export function FichePanel({
                 row.formId,
                 "sent",
               );
-              if (result.ok) setUrl(null);
+              if (result.ok) setLink(null);
               return result;
             })
           }

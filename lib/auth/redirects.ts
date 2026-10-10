@@ -92,6 +92,8 @@ export const routes = {
   meeting: (callId: string) => `/app/calls/${callId}`,
   // Every file the viewer may read, across artists, titles, projects, contracts.
   files: "/app/files",
+  // Features on trial before they enter the app (any member).
+  labo: "/app/labo",
   network: "/app/network",
   networkContact: (id: string) => `/app/network/${id}`,
   contracts: "/app/contracts",

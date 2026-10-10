@@ -124,6 +124,7 @@ export default async function ProjectLegalPage({
         projectId={project.id}
         tracking={tracking}
         view={asTrackingView(query.view)}
+        selected={typeof query.ligne === "string" ? query.ligne : null}
         titles={project.masters.map((m) => ({ id: m.id, title: m.title }))}
         data={{
           forms,

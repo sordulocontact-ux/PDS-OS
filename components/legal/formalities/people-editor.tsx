@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { FieldError } from "@/components/auth/form-message";
 import { usePickerLoad } from "@/components/network/use-picker-load";
 import { Button } from "@/components/ui/button";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
@@ -58,6 +59,7 @@ export function PeopleEditor({
   publishers,
   disabled,
   errors,
+  fromSplit = false,
   onCreators,
   onPublishers,
 }: {
@@ -65,6 +67,8 @@ export function PeopleEditor({
   creators: Creator[];
   publishers: Publisher[];
   disabled: boolean;
+  // The Phono shares come from the confirmed split: to verify.
+  fromSplit?: boolean;
   errors: DossierErrors | null;
   onCreators: (next: Creator[]) => void;
   onPublishers: (next: Publisher[]) => void;
@@ -87,6 +91,9 @@ export function PeopleEditor({
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">{t.notes.creators}</p>
+      {fromSplit && !disabled && (
+        <ToneCallout tone="warning">{t.notes.phonoFromSplit}</ToneCallout>
+      )}
       <FieldError id={`creators-${masterId}-error`}>
         {errors?.fields.creators}
       </FieldError>

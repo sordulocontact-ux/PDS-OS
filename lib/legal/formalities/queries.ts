@@ -6,11 +6,15 @@ import {
   SACEM_725,
   type FormalityStatus,
 } from "@/lib/legal/formalities/definition";
-import { prefillSacem725 } from "@/lib/legal/formalities/prefill";
+import {
+  prefillSacem725,
+  type SplitShare,
+} from "@/lib/legal/formalities/prefill";
 import type {
   FormalityView,
   TitleFormality,
 } from "@/lib/legal/formalities/types";
+import { exactShare, unitsOf } from "@/lib/legal/splits/shares";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -102,42 +106,44 @@ export async function loadFormalities(
     ),
   ];
   const fIds = (formalities.data ?? []).map((f) => f.id);
-  const [details, values, documents, signatures, events] = await Promise.all([
-    contactIds.length > 0
-      ? supabase
-          .from("contact_legal_details")
-          .select("contact_id, details")
-          .in("contact_id", contactIds)
-      : Promise.resolve(none),
-    fIds.length > 0
-      ? supabase
-          .from("legal_formality_values")
-          .select("formality_id, field_key, value, source, status")
-          .in("formality_id", fIds)
-      : Promise.resolve(none),
-    fIds.length > 0
-      ? supabase
-          .from("legal_formality_documents")
-          .select("formality_id, version, created_at")
-          .in("formality_id", fIds)
-          .order("version", { ascending: false })
-      : Promise.resolve(none),
-    fIds.length > 0
-      ? supabase
-          .from("legal_formality_signatures")
-          .select(
-            "id, formality_id, document_version, signer, role, status, proof, signed_at",
-          )
-          .in("formality_id", fIds)
-      : Promise.resolve(none),
-    fIds.length > 0
-      ? supabase
-          .from("legal_formality_events")
-          .select("id, formality_id, kind, note, actor_person_id, created_at")
-          .in("formality_id", fIds)
-          .order("created_at", { ascending: false })
-      : Promise.resolve(none),
-  ]);
+  const [details, values, documents, signatures, events, splits] =
+    await Promise.all([
+      contactIds.length > 0
+        ? supabase
+            .from("contact_legal_details")
+            .select("contact_id, details")
+            .in("contact_id", contactIds)
+        : Promise.resolve(none),
+      fIds.length > 0
+        ? supabase
+            .from("legal_formality_values")
+            .select("formality_id, field_key, value, source, status")
+            .in("formality_id", fIds)
+        : Promise.resolve(none),
+      fIds.length > 0
+        ? supabase
+            .from("legal_formality_documents")
+            .select("formality_id, version, created_at")
+            .in("formality_id", fIds)
+            .order("version", { ascending: false })
+        : Promise.resolve(none),
+      fIds.length > 0
+        ? supabase
+            .from("legal_formality_signatures")
+            .select(
+              "id, formality_id, document_version, signer, role, status, proof, signed_at",
+            )
+            .in("formality_id", fIds)
+        : Promise.resolve(none),
+      fIds.length > 0
+        ? supabase
+            .from("legal_formality_events")
+            .select("id, formality_id, kind, note, actor_person_id, created_at")
+            .in("formality_id", fIds)
+            .order("created_at", { ascending: false })
+        : Promise.resolve(none),
+      confirmedSplits(supabase, project.id),
+    ]);
   const detailsOf = new Map(
     (details.data ?? []).map((d) => [d.contact_id, asText(d.details)]),
   );
@@ -176,6 +182,7 @@ export async function loadFormalities(
             details: s.contact_id ? (detailsOf.get(s.contact_id) ?? {}) : {},
           })),
         signedPublishingContract: publishing.data?.title ?? null,
+        splitShares: splits.get(m.id) ?? null,
       });
       let formality: FormalityView | null = null;
       if (f) {
@@ -247,4 +254,56 @@ export async function loadFormalities(
       };
     }),
   );
+}
+
+/**
+ * The confirmed split of each title (Répartitions, branch 04), by master:
+ * each line's contact, role and exact share. The bulletin's Phono shares
+ * start from it (UX test of 09/10/2026: shares retyped right after the
+ * split was confirmed), shown « à vérifier ».
+ */
+async function confirmedSplits(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  projectId: string,
+): Promise<Map<string, SplitShare[]>> {
+  const { data: sheets } = await supabase
+    .from("legal_split_sheets")
+    .select("id, master_id")
+    .eq("project_id", projectId);
+  if (!sheets?.length) return new Map();
+  const { data: versions } = await supabase
+    .from("legal_split_versions")
+    .select("id, sheet_id")
+    .in(
+      "sheet_id",
+      sheets.map((s) => s.id),
+    )
+    .eq("status", "confirmed");
+  if (!versions?.length) return new Map();
+  const { data: entries } = await supabase
+    .from("legal_split_entries")
+    .select("version_id, role, share, contact_id")
+    .in(
+      "version_id",
+      versions.map((v) => v.id),
+    );
+  const masterOfSheet = new Map(sheets.map((s) => [s.id, s.master_id]));
+  const masterOfVersion = new Map(
+    versions.map((v) => [v.id, masterOfSheet.get(v.sheet_id)]),
+  );
+  const byMaster = new Map<string, SplitShare[]>();
+  for (const e of entries ?? []) {
+    const master = masterOfVersion.get(e.version_id);
+    const units = unitsOf(String(e.share));
+    if (!master || units === null) continue;
+    byMaster.set(master, [
+      ...(byMaster.get(master) ?? []),
+      {
+        contactId: e.contact_id,
+        role: e.role,
+        share: exactShare(units).replace(",", "."),
+      },
+    ]);
+  }
+  return byMaster;
 }

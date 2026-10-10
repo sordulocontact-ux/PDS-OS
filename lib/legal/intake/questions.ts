@@ -34,6 +34,8 @@ export type IntakeKnowledge = {
   hasContract: boolean;
   // The last answer and its active facts, by question and title.
   answers: Map<string, { text: string; facts: FactValue[] }>;
+  // What the Cadrage established, by question and title (answerKey).
+  cadrage: Map<string, string>;
 };
 
 export const answerKey = (key: QuestionKey, masterId: string | null) =>
@@ -51,7 +53,8 @@ export function intakeQuestions(k: IntakeKnowledge): IntakeQuestion[] {
     key: QuestionKey,
     title: { id: string; title: string } | null,
   ): IntakeQuestion => {
-    const answer = k.answers.get(answerKey(key, title?.id ?? null));
+    const id = answerKey(key, title?.id ?? null);
+    const answer = k.answers.get(id);
     return {
       key,
       masterId: title?.id ?? null,
@@ -59,6 +62,7 @@ export function intakeQuestions(k: IntakeKnowledge): IntakeQuestion[] {
       answered: answer !== undefined,
       lastAnswer: answer?.text ?? null,
       facts: answer?.facts ?? [],
+      suggestion: answer ? null : (k.cadrage.get(id) ?? null),
     };
   };
   const answeredOr = (

@@ -165,6 +165,17 @@ Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 decies), �
   directeurs créatifs), pour qu'un invité voie toujours le projet. Inviter la direction ou un
   autre membre demanderait de l'ajouter à l'équipe.
 
+### Points à trancher : Juridique allégé (test UX du 09/10/2026, section 6)
+
+- **Envoi d'e-mails depuis PDS OS** : aujourd'hui un `mailto:` pré-rempli ouvre la messagerie de
+  l'utilisateur. Un vrai envoi demande un fournisseur (Resend, Postmark…), un domaine vérifié et
+  une clé serveur : choix du fournisseur et du domaine d'envoi.
+- **Échéances par démarche** (fiches + 7 j, emprunts − 45 j, contrats et répartitions − 30 j,
+  SACEM − 15 j) : validées le 10/10/2026 sans ticket, à ajuster avec l'usage.
+- **Parts Phono reprises de la répartition** : validé le 10/10/2026, affiché « à vérifier ». À
+  confirmer avec un juriste pour les œuvres où le partage Phono diffère de la répartition de
+  l'édition.
+
 ### Vocabulaire fixé
 
 Trois objets, trois noms. Ne jamais en introduire d'autres dans l'interface.

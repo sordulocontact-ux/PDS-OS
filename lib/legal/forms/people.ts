@@ -4,10 +4,13 @@
 // Réseau when there is one (it is linked first, by a human: « Relier »),
 // and the roles their credits already say (to pre-tick,
 // « Les rôles préremplis viennent du cadrage et restent corrigeables »).
-// Catalog performers are not here: their artist page is their source. The
-// people of the Réseau added to the legal file without a credit follow
-// (ticket « Architecture globale », lot 6), with the role chosen for them.
-// Pure.
+// Catalog performers are not here (their artist page is their source),
+// except a featured artist: a performer the label contracts with (UX test of
+// 09/10/2026: Maya, featured, was only « Auteur » and the performer template
+// was offered to no one). It joins through the contact linked to its artist
+// page (never by name), or waits to be added to the Réseau. The people of
+// the Réseau added to the legal file without a credit follow (ticket
+// « Architecture globale », lot 6), with the role chosen for them. Pure.
 
 import type { ContributorRole } from "@/lib/catalog/master/rules";
 import type { FormRole } from "@/lib/legal/forms/definition";
@@ -42,7 +45,40 @@ export type FormPerson = {
   creditRoles: ContributorRole[];
   formRoles: FormRole[];
   networkRoles: NetworkRole[];
+  // A featured artist whose page no contact is linked to yet: added to the
+  // Réseau (linked to the artist) before any fiche.
+  artistId: string | null;
 };
+
+export type FeaturedArtist = {
+  artistId: string;
+  name: string;
+  // The contact linked to the artist page, if any.
+  contact: { id: string; name: string } | null;
+  titles: string[];
+};
+
+/** Featured artists of the project's titles, once each, in title order. */
+export function featuredArtists(rows: InventoryRows): FeaturedArtist[] {
+  const featured = new Map<string, FeaturedArtist>();
+  for (const master of rows.titles)
+    for (const performer of rows.performersOf.get(master.id) ?? []) {
+      if (!performer.featuring || !performer.artistId) continue;
+      const entry = featured.get(performer.artistId) ?? {
+        artistId: performer.artistId,
+        name: performer.name,
+        contact: rows.network.byArtist.get(performer.artistId) ?? null,
+        titles: [],
+      };
+      if (!entry.titles.includes(master.title)) entry.titles.push(master.title);
+      featured.set(performer.artistId, entry);
+    }
+  return [...featured.values()];
+}
+
+/** The key of a featured artist's person in formPeople. */
+export const featuredKey = (artist: FeaturedArtist) =>
+  artist.contact ? `contact:${artist.contact.id}` : `artist:${artist.artistId}`;
 
 function addOnce<T>(list: T[], value: T) {
   if (!list.includes(value)) list.push(value);
@@ -62,6 +98,7 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
         creditRoles: [],
         formRoles: [],
         networkRoles: [],
+        artistId: null,
       };
       person.contactId ??= credit.contactId;
       if (!credit.contactId) person.unlinkedCreditIds.push(credit.id);
@@ -87,6 +124,31 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
       creditRoles: [],
       formRoles: [contact.role],
       networkRoles: [],
+      artistId: null,
     }));
-  return [...people.values(), ...added];
+  const all = [...people.values(), ...added];
+  // Featured artists: a performer role on the person of their contact, or
+  // a person of their own.
+  for (const artist of featuredArtists(rows)) {
+    const same = artist.contact
+      ? all.find((p) => p.contactId === artist.contact!.id)
+      : undefined;
+    if (same) {
+      addOnce(same.formRoles, "performer");
+      addOnce(same.networkRoles, "artist");
+      continue;
+    }
+    all.push({
+      key: featuredKey(artist),
+      name: artist.contact?.name ?? artist.name,
+      contactId: artist.contact?.id ?? null,
+      unlinkedCreditIds: [],
+      namesakeId: null,
+      creditRoles: [],
+      formRoles: ["performer"],
+      networkRoles: ["artist"],
+      artistId: artist.contact ? null : artist.artistId,
+    });
+  }
+  return all;
 }

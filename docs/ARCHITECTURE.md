@@ -1232,7 +1232,9 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
   07/10/2026 pour les emprunts : l'œuvre d'un sample s'autorise auprès de son éditeur, le son
   auprès de son label, deux structures ajoutées une fois au Réseau et choisies ensuite ;
   une personne peut appartenir à une structure du réseau (`parent_id`, vérifié par trigger),
-  un contact peut renvoyer à un artiste du catalogue (`artist_id`). **Lu par tous les
+  un contact peut renvoyer à un artiste du catalogue (`artist_id`), choisi à la
+  modification seulement : la création ne liste pas les artistes (Sacha, 10/10/2026 ; un
+  lien trouvé par PO est gardé). **Lu par tous les
   membres actifs** (c'est l'annuaire partagé), écrit par `manage_network`, **archivé, jamais
   supprimé**, par le DG (`set_network_contact_archived`, refusé tant qu'un contrat non résilié
   le nomme). Onglets par famille de rôles (un contact apparaît dans chacune des siennes),
@@ -1884,6 +1886,46 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   Le Juridique **se lance depuis le Plan du Projet** (§ 6 ter) : layout `legal/` verrouillé
   tant que le plan ne l'a pas lancé, sauf s'il avait déjà commencé (Cadrage juridique).
 
+### Allègement du test UX du 09/10/2026 (section 6)
+
+« Complet mais lourd pour un non-juriste » (sévérité 2-3). Aucun changement de schéma.
+
+- **Une ligne par personne, par titre** (`mergeSteps`, `lib/legal/plan/board.ts`) : la fiche puis
+  le contrat d'une personne, la répartition puis le bulletin SACEM d'un titre, dans un seul
+  panneau à étapes ; la ligne montre l'étape la plus urgente (décision > à faire > en attente >
+  bloqué > fait), son badge préfixé (« Fiche · Envoyée »), son verbe, sa délégation. Sections :
+  Personnes, Emprunts, Titres. Les actions du plan et les tâches ne changent pas.
+- **Le panneau reste ouvert** : la ligne ouverte est celle du plan (`PlanSheetProvider`), écrite
+  dans l'URL (`?ligne=`, `history.replaceState`, sans aller-retour) ; après une action, la page
+  rafraîchie la rend ouverte même si elle a changé de groupe (toujours affichée, son repli
+  ouvert). « Suivant : … » ouvre la prochaine ligne qui attend l'équipe dans la vue. Le lien d'une
+  fiche préparée est gardé par le plan (survit au remontage).
+- **Verbe qui agit** (`RowAction`) quand l'étape n'a rien à saisir : préparer la fiche, marquer
+  envoyée, générer le contrat, le soumettre, envoyer la répartition (liens affichés une fois),
+  ouvrir le bulletin ; le panneau s'ouvre ensuite sur le résultat. « Valider le document » garde
+  son panneau (il faut lire le contrat).
+- **Featuring** (`featuredArtists`, `lib/legal/forms/people.ts`) : un artiste en featuring est
+  « Artiste interprète » dans le Juridique (fiche, plan, cartographie : le modèle interprète lui
+  est proposé), sur la personne du contact relié à sa fiche artiste (`network_contacts.artist_id`,
+  jamais par le nom) ou comme personne à part ; sans contact relié, « Ajouter au Réseau » (relié à
+  l'artiste) avant toute fiche. Les rôles cochés sur une fiche complète comptent pour le contrat.
+- **SACEM** : une phrase d'aide sous Qualité, Part Phono, Dénomination, et sur le partage DEP / DR
+  (Règlement général) ; **parts Phono pré-remplies depuis la répartition confirmée** du titre,
+  rapprochées par contact (décidé avec Sacha le 10/10/2026, contre la règle « jamais la
+  répartition »), signalées « à vérifier » tant qu'elles ne sont pas retouchées ; « Qui signera le
+  bulletin » nommé avant sa génération ; un éditeur signataire dit « Éditeur ».
+- **Questions de PO** : ce que le Cadrage a confirmé (contraintes de droits nommant le titre, ou
+  « aucun blocage » ; accords existants ou « aucun ») arrive comme réponse pré-remplie
+  (`lib/legal/intake/cadrage.ts`), lue par PO puis gardée par une personne ; bouton « Aucun
+  emprunt / Aucun accord / Pas d'éditeur » qui enregistre la réponse vide sans PO, et
+  « Enregistrer : aucun … » quand PO n'a rien gardé.
+- **Échéances** (`lib/legal/plan/due-dates.ts`, décision du 10/10/2026, aucun ticket) : fiches
+  aujourd'hui + 7 j, emprunts sortie − 45 j, contrats et répartitions − 30 j, SACEM − 15 j, jamais
+  avant aujourd'hui + 3 j ; sans date de sortie, seules les fiches ont une échéance.
+- **E-mail** : « Envoyer par e-mail » (`mailto:`, `lib/utils/mailto.ts`) à côté de chaque lien à
+  copier (fiche, répartition, dossier du mixeur), adressé au contact du Réseau. PDS OS n'envoie
+  aucun e-mail lui-même (pas de fournisseur : point à trancher).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique
@@ -2373,6 +2415,42 @@ tests `supabase/tests/ux-roles.test.sql` (41).
 Banc de test local sans authentification (404 en production, `lib/labo/guard.ts`) :
 transcription, compte rendu, préparation de call, détection ISRC. Faux call :
 `docs/labo/faux-call.m4a` (+ `.txt`). Interface jetable ; la logique vit dans `lib/`.
+
+### 10 bis. Labo de l'app (`/app/labo`) : artistes depuis des captures TikTok
+
+Demande d'Ibé (10/10/2026) : retrouver les artistes qu'il repère sur TikTok. Page de la
+navigation principale, **pour tout membre approuvé, en production aussi** (contrairement à
+`/labo`), où l'on essaie une fonction avant de la mettre dans l'app. Rien n'est enregistré.
+
+- **Pourquoi pas TikTok** : l'API officielle ne lit que le compte connecté (Display API) ;
+  la Research API est réservée aux chercheurs, sans usage commercial ; les scrapers violent
+  les conditions de TikTok. Une capture ne porte de toute façon aucun identifiant. Piste
+  gardée pour plus tard : un **lien** de vidéo collé → oEmbed public
+  (`tiktok.com/oembed?url=…`, sans clé) donne le compte.
+- **Lecture** (`lib/catalog/capture-artists.ts`, route `POST /api/catalog/capture-artists`) :
+  l'image part seule au modèle (`extractFromImage` de `lib/ai/llm.ts`, ministral-14b lit les
+  images), donnée jamais consigne. Le modèle **regroupe les noms d'une même personne** (nom
+  affiché + pseudo + « son original - X ») et propose un nom d'artiste avec son raisonnement.
+  Le code ne garde que les noms présents dans le texte que le modèle a lu (`visibleText`).
+- **Compte Deezer décidé par le code** : homonymes exacts de chaque nom (sans casse, accents
+  ni ponctuation) ; **« Compte trouvé »** quand les sorties d'un homonyme portent un autre
+  nom de la personne (Straat / huntrill → Huntrill : « BigSTRaat », « STRaatos ») ;
+  **« À vérifier »** quand un seul homonyme a un public (un homonyme sous 1 % des fans du
+  plus suivi ne compte pas) ; **« Plusieurs comptes »** sinon, l'humain choisit ;
+  « Déjà au catalogue » par `deezer_id`. Le nom affiché est celui du compte Deezer trouvé.
+- **TikTok et Instagram** (`lib/catalog/capture-socials.ts`, `lib/integrations/artist-socials.ts`),
+  sources publiques sans clé ni scraping, ordre décidé par le code : le pseudo lu sur la
+  capture est **confirmé par l'oEmbed officiel de TikTok** avant la recherche Deezer (un
+  pseudo inconnu de TikTok est écarté, le nom affiché qu'il renvoie rejoint les noms) ;
+  un Instagram écrit sur la capture (bio) est repris tel quel ; sinon, **MusicBrainz** puis
+  **Wikidata** (P2003 Instagram, P7085 TikTok) relient le compte Deezer trouvé à ses réseaux,
+  toujours par l'id Deezer, jamais par le nom, et seulement pour « Compte trouvé » ou « À
+  vérifier ». MusicBrainz : une requête par seconde (file dans le module). Chaque lien dit
+  sa source ; une source en panne est sautée, jamais bloquante. Huntrill → TikTok @huntrill
+  (confirmé par TikTok), Instagram @huntrillion (MusicBrainz).
+- Deux captures lues à la fois (palier gratuit Mistral, Deezer 50 requêtes / 5 s), 8 Mo
+  au plus, PNG / JPEG / WebP, collées (⌘V) ou déposées. Un artefact claude.ai ne peut pas
+  servir de banc : il n'atteint ni Mistral ni l'API Deezer (réseau bloqué).
 
 ---
 

@@ -20,6 +20,7 @@ import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
 import { framingIntel } from "./framing-intel";
 import { labo } from "./labo";
+import { laboCaptures } from "./labo-captures";
 import { legal } from "./legal";
 import { legalClearance } from "./legal-clearance";
 import { legalContracts } from "./legal-contracts";
@@ -57,6 +58,7 @@ export const fr = {
   ...core,
   errors,
   labo,
+  laboCaptures,
   auth,
   shell,
   calls,
