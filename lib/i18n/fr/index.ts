@@ -37,8 +37,6 @@ import { records } from "./records";
 import { release } from "./release";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
-import { strategyDocs } from "./strategy-docs";
-import { strategyFlow } from "./strategy-flow";
 import { transmission } from "./transmission";
 import { voice } from "./voice";
 import { work } from "./work";
@@ -55,8 +53,6 @@ export const fr = {
   framingGuide,
   framingIntel,
   strategy,
-  strategyFlow,
-  strategyDocs,
   design,
   release,
   assistant,

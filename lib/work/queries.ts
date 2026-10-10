@@ -151,11 +151,7 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
     error,
     tasks: todo.tasks,
     toAccept,
-    // A document's review is for whoever was named, with or without
-    // « validate » (the project's creative directors).
-    validations: can(access, "validate")
-      ? todo.validations
-      : todo.validations.filter((v) => v.source === "document"),
+    validations: can(access, "validate") ? todo.validations : [],
     toRetransmit,
     awaitingAcceptance,
     ownedProjects,

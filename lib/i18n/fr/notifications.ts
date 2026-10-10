@@ -64,14 +64,6 @@ export const notifications = {
       `${actor} a validé les conditions de l'emprunt (« ${project} ») : le contrat est prêt à envoyer.`,
     clearance_terms_rejected: (actor: string, project: string) =>
       `${actor} demande une contre-proposition sur l'emprunt (« ${project} »).`,
-    strategy_review_requested: (actor: string, project: string) =>
-      `${actor} vous demande de valider un document de la stratégie (« ${project} »).`,
-    strategy_review_approved: (actor: string, project: string) =>
-      `${actor} a validé un document de la stratégie de « ${project} ».`,
-    strategy_review_changes_requested: (actor: string, project: string) =>
-      `${actor} demande une modification d'un document de la stratégie (« ${project} »).`,
-    strategy_review_reminder: (actor: string, project: string) =>
-      `${actor} vous relance : un document de la stratégie de « ${project} » attend votre validation.`,
   },
   open: "Ouvrir",
   push: {

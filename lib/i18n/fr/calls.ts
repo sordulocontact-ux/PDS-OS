@@ -186,8 +186,6 @@ export const calls = {
       "Quelques minutes pour une réunion longue. Gardez cette page ouverte : le compte rendu s'affichera ici.",
     done: "Compte rendu prêt.",
     briefFilled: "Brief pré-rempli depuis le call. Relisez et confirmez.",
-    strategyFilled:
-      "Stratégie pré-remplie depuis le call. Relisez et confirmez les propositions.",
   },
   page: {
     record: {

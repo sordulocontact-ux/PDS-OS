@@ -20,19 +20,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { idleFormState } from "@/lib/auth/form-state";
 import { prepareFramingCall } from "@/lib/framing/actions/call";
+import type { FramingTopic } from "@/lib/framing/call-prep";
 import { fr } from "@/lib/i18n/fr";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// A topic per dimension still open (Cadrage or Stratégie), by its key.
-export type CallTopic = {
-  dimension: string;
-  topic: string;
-  minutes: number;
-  questions: string[];
-};
-
 export type CallSheetData = {
-  topics: CallTopic[];
+  topics: FramingTopic[];
   purpose: string;
   // Who is proposed as participant (owner, creative team).
   people: string[];
@@ -50,17 +43,12 @@ export function FramingCallSheet({
   projectId,
   data,
   variant = "outline",
-  action = prepareFramingCall,
-  copy,
 }: {
   projectId: string;
   data: CallSheetData;
   variant?: "default" | "outline";
-  // The Strategy reuses the panel with its own action and words.
-  action?: typeof prepareFramingCall;
-  copy?: { title: string; body: string; defaultTitle: string };
 }) {
-  const t = { ...fr.framingIntel.call, ...copy };
+  const t = fr.framingIntel.call;
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -78,8 +66,6 @@ export function FramingCallSheet({
               <CallForm
                 projectId={projectId}
                 data={data}
-                action={action}
-                defaultTitle={t.defaultTitle}
                 onCancel={() => setOpen(false)}
               />
             </div>
@@ -93,18 +79,14 @@ export function FramingCallSheet({
 function CallForm({
   projectId,
   data,
-  action,
-  defaultTitle,
   onCancel,
 }: {
   projectId: string;
   data: CallSheetData;
-  action: typeof prepareFramingCall;
-  defaultTitle: string;
   onCancel: () => void;
 }) {
   const t = fr.framingIntel.call;
-  const [state, formAction] = useActionState(action, idleFormState);
+  const [state, formAction] = useActionState(prepareFramingCall, idleFormState);
   const [kept, setKept] = useState(
     () => new Set(data.topics.map((x) => x.dimension)),
   );
@@ -341,7 +323,7 @@ function CallForm({
 
       <CallFields
         idPrefix="framing-call"
-        defaultTitle={defaultTitle}
+        defaultTitle={t.defaultTitle}
         defaultOccurredAt={data.defaultOccurredAt}
       />
 

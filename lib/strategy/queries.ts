@@ -3,14 +3,11 @@ import "server-only";
 import type { Access } from "@/lib/auth/access";
 import {
   BRIEF_TEXT_FIELDS,
-  STRATEGY_EXTRA_FIELDS,
   STRATEGY_TEXT_FIELDS,
   toBriefField,
   toFieldState,
   type BriefFieldState,
-  type FieldState,
   type Provenance,
-  type StrategyExtraField,
   type StrategyFieldState,
   type StrategyTextField,
 } from "@/lib/framing/brief";
@@ -36,9 +33,6 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 
-// The marker of « Pas de budget dédié » (field_values, deliverable strategy).
-export const BUDGET_NONE_KEY = "strategy_budget_none";
-
 type Tables = Database["public"]["Tables"];
 export type Lever = Tables["levers"]["Row"] & {
   provenance: Provenance | null;
@@ -46,8 +40,6 @@ export type Lever = Tables["levers"]["Row"] & {
 };
 export type StrategyDeliverable = Tables["strategy_deliverables"]["Row"];
 export type Milestone = Tables["milestones"]["Row"];
-export type BudgetLine = Tables["strategy_budget_lines"]["Row"];
-export type Kpi = Tables["strategy_kpis"]["Row"];
 export type OpenNeed = { id: string; label: string; family: string };
 
 export type StrategyData = {
@@ -55,14 +47,6 @@ export type StrategyData = {
   briefValidated: boolean;
   pendingValidation: PendingValidation | null;
   fields: StrategyFieldState[];
-  // Narrative parts and the strategic objective (free answers).
-  extras: Record<StrategyExtraField, FieldState<StrategyExtraField>>;
-  budgetLines: BudgetLine[];
-  // « Pas de budget dédié » was confirmed: the Budget dimension is settled.
-  budgetNone: boolean;
-  // The envelope confirmed in the Cadrage (else the project sheet), for reference.
-  envelopeCents: number | null;
-  kpis: Kpi[];
   // Closed-choice answers per text field, and PO's pending pre-checks.
   choices: Record<StrategyTextField, ChoiceValue>;
   suggestions: Record<StrategyTextField, ChoiceSuggestion[]>;
@@ -87,7 +71,7 @@ export async function loadStrategy(
 
   const { data: project } = await supabase
     .from("projects")
-    .select("id, organization_id, due_date, budget_cents")
+    .select("id, organization_id, due_date")
     .eq("id", projectId)
     .maybeSingle();
   if (!project) return null;
@@ -100,8 +84,6 @@ export async function loadStrategy(
     deliverablesRes,
     milestonesRes,
     releaseRes,
-    budgetRes,
-    kpisRes,
     members,
     reports,
     validators,
@@ -146,16 +128,6 @@ export async function loadStrategy(
       .order("created_at")
       .limit(1)
       .maybeSingle(),
-    supabase
-      .from("strategy_budget_lines")
-      .select("*")
-      .eq("project_id", projectId)
-      .order("created_at"),
-    supabase
-      .from("strategy_kpis")
-      .select("*")
-      .eq("project_id", projectId)
-      .order("created_at"),
     loadMembers(access),
     loadImportableReports(projectId, "strategy"),
     loadValidators(project.organization_id),
@@ -195,32 +167,6 @@ export async function loadStrategy(
       const row = rowOf("strategy", key);
       return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
     }),
-    extras: Object.fromEntries(
-      STRATEGY_EXTRA_FIELDS.map((key) => {
-        const row = rowOf("strategy", key);
-        return [
-          key,
-          toFieldState("strategy", key, row, row ? provenanceOf(row) : null),
-        ];
-      }),
-    ) as StrategyData["extras"],
-    budgetLines: budgetRes.data ?? [],
-    budgetNone: (() => {
-      const row = rowOf("strategy", BUDGET_NONE_KEY);
-      return (
-        row?.status === "confirmed" &&
-        (row.value as { none?: unknown } | null)?.none === true
-      );
-    })(),
-    kpis: kpisRes.data ?? [],
-    envelopeCents: (() => {
-      const row = rowOf("brief", "budget_envelope");
-      return row?.status === "confirmed" &&
-        typeof row.value === "number" &&
-        Number.isInteger(row.value)
-        ? row.value
-        : project.budget_cents;
-    })(),
     choices: Object.fromEntries(
       STRATEGY_TEXT_FIELDS.map((key) => [
         key,

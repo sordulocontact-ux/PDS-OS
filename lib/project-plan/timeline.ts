@@ -1,15 +1,8 @@
 import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
 import type { ProjectPlan } from "@/lib/project-plan/queries";
 
 export type TimelineKind =
-  | "milestone"
-  | "call"
-  | "deliverable"
-  | "upstream"
-  | "task"
-  | "release"
-  | "project_due";
+  "milestone" | "call" | "deliverable" | "task" | "release" | "project_due";
 
 export type TimelineItem = {
   key: string;
@@ -19,8 +12,6 @@ export type TimelineItem = {
   // Milestone type key (strategy calendar kinds), for its badge.
   milestoneKind?: string;
   done?: boolean;
-  // An upstream deadline already passed with no approved version.
-  late?: boolean;
   // A call's timestamp, for its time of day.
   occurredAt?: string;
   href: string;
@@ -35,8 +26,7 @@ const kindOrder: Record<TimelineKind, number> = {
   milestone: 2,
   call: 3,
   deliverable: 4,
-  upstream: 5,
-  task: 6,
+  task: 5,
 };
 
 /** Every dated thing of the project, merged and grouped by month (code). */
@@ -46,7 +36,7 @@ export function buildTimeline(
   releaseTitle: string,
   projectDueTitle: string,
 ): TimelineMonth[] {
-  const strategy = routes.projectStrategyDimension(projectId, "calendar");
+  const strategy = routes.projectStrategy(projectId);
   const items: TimelineItem[] = [
     ...plan.milestones.map((m) => ({
       key: `m-${m.id}`,
@@ -76,19 +66,6 @@ export function buildTimeline(
             },
           ]
         : [],
-    ),
-    // Conception, production, validation before a deliverable goes out.
-    ...plan.upstream.flatMap((chain) =>
-      chain.steps
-        .filter((step) => step.step !== "publication")
-        .map((step) => ({
-          key: `u-${chain.deliverableId}-${step.step}`,
-          date: step.date,
-          kind: "upstream" as const,
-          title: `${fr.strategyFlow.calendar.steps[step.step]} · ${chain.title}`,
-          late: step.late,
-          href: routes.projectDeliverables(projectId),
-        })),
     ),
     ...plan.tasks.map((t) => ({
       key: `t-${t.id}`,

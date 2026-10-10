@@ -46,7 +46,6 @@ export function DeliverablesSection({
   const [lever, setLever] = useState("");
   const [assignee, setAssignee] = useState(NONE);
   const [due, setDue] = useState("");
-  const [quantity, setQuantity] = useState("");
   // Falls back to the first selected lever until one is picked.
   const leverId = selected.some((l) => l.id === lever)
     ? lever
@@ -68,11 +67,7 @@ export function DeliverablesSection({
           {deliverables.map((d) => (
             <li key={d.id} className={`${optionClass(false)} justify-between`}>
               <div className="flex min-w-0 flex-col gap-1">
-                <span className="font-semibold break-words">
-                  {d.quantity
-                    ? `${d.title} ${fr.strategyFlow.deliverables.quantityShort(d.quantity)}`
-                    : d.title}
-                </span>
+                <span className="font-semibold break-words">{d.title}</span>
                 <span className="text-caption text-muted-foreground">
                   {[
                     leverName.get(d.lever_id),
@@ -118,12 +113,10 @@ export function DeliverablesSection({
                     title,
                     assigneePersonId: assignee === NONE ? "" : assignee,
                     dueDate: due,
-                    quantity,
                   }),
                 () => {
                   setTitle("");
                   setDue("");
-                  setQuantity("");
                 },
               );
             }}
@@ -183,19 +176,6 @@ export function DeliverablesSection({
                 type="date"
                 value={due}
                 onChange={(e) => setDue(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="deliverable-quantity" className={labelClass}>
-                {fr.strategyFlow.deliverables.quantity}
-              </Label>
-              <Input
-                id="deliverable-quantity"
-                type="number"
-                min={1}
-                max={99}
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
               />
             </div>
             <Button

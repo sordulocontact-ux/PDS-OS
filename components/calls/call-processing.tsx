@@ -16,10 +16,7 @@ import { fr } from "@/lib/i18n/fr";
 
 type ErrorKey = keyof typeof fr.calls.errors;
 type Phase = "transcribing" | "extracting";
-type StepResult = ActionResult & {
-  briefFilled?: boolean;
-  strategyFilled?: boolean;
-};
+type StepResult = ActionResult & { briefFilled?: boolean };
 
 // A job started elsewhere (another tab, a reload): check back on it.
 const POLL_MS = 5000;
@@ -89,9 +86,6 @@ export function CallProcessing({
     if (extracted.briefFilled && projectId) {
       toast.success(t.briefFilled);
       router.push(routes.projectFramingReview(projectId, callId));
-    } else if (extracted.strategyFilled && projectId) {
-      toast.success(t.strategyFilled);
-      router.push(routes.projectStrategy(projectId));
     } else {
       toast.success(t.done);
       router.refresh();

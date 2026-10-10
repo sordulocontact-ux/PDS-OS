@@ -20,11 +20,6 @@ const deliverableInput = z.object({
   title: text(200),
   assigneePersonId: optional(id),
   dueDate: optional(isoDate),
-  // « Cinq capsules »: empty = one.
-  quantity: z
-    .union([z.literal(""), z.coerce.number().int().min(1).max(99)])
-    .optional()
-    .transform((v) => (v === "" || v === undefined ? null : v)),
 });
 
 export async function addDeliverable(
@@ -43,7 +38,6 @@ export async function addDeliverable(
     title: p.data.title,
     assignee_person_id: p.data.assigneePersonId,
     due_date: p.data.dueDate,
-    quantity: p.data.quantity,
   });
   return done(projectId, error);
 }

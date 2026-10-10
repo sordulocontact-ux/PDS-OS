@@ -205,20 +205,11 @@ async function framingOfCall(
   supabase: Client,
   callId: string,
 ): Promise<CallDetail["framing"]> {
-  // A framing exchange, or a strategy one: same purpose, people, documents.
-  const [framing, strategy] = await Promise.all([
-    supabase
-      .from("framing_calls")
-      .select("purpose, participants, document_ids")
-      .eq("call_id", callId)
-      .maybeSingle(),
-    supabase
-      .from("strategy_calls")
-      .select("purpose, participants, document_ids")
-      .eq("call_id", callId)
-      .maybeSingle(),
-  ]);
-  const data = framing.data ?? strategy.data;
+  const { data } = await supabase
+    .from("framing_calls")
+    .select("purpose, participants, document_ids")
+    .eq("call_id", callId)
+    .maybeSingle();
   if (!data) return null;
   const { data: files } = data.document_ids.length
     ? await supabase

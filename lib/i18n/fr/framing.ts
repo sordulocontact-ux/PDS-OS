@@ -185,23 +185,6 @@ export const framing = {
     plan_already_launched: "Le plan de ce projet est déjà lancé.",
     framing_not_validated: "Le plan se construit une fois le Brief validé.",
     invalid_owner: "Ce responsable n'est pas membre de l'équipe.",
-    brief_not_validated:
-      "Le Brief de sortie doit être validé avant de générer ce document.",
-    brief_pending:
-      "Une version du Brief de sortie attend sa validation : aucun document final n'est généré pendant ce temps.",
-    invalid_reviewer:
-      "Seuls les directeurs créatifs de l'équipe du projet peuvent être ajoutés à la validation.",
-    reminder_too_soon:
-      "Cette personne a déjà été relancée il y a moins de 12 heures.",
-    already_decided: "Cette décision a déjà été prise.",
-    not_shareable:
-      "Seuls le Plan de sortie et le Dossier de presse se partagent hors de l'équipe.",
-    use_strategy_brief:
-      "Cette validation se décide depuis le Brief de sortie, avec les autres valideurs.",
-    strategy_incomplete:
-      "La stratégie n'est pas assez renseignée : complétez les dimensions encore « À compléter » ou « En cours ».",
-    strategy_outdated:
-      "La stratégie a changé depuis cette version : mettez le Brief de sortie à jour avant de demander la validation.",
     generic: "Une erreur est survenue. Réessayez.",
   },
 } as const;

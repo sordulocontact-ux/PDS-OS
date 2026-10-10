@@ -59,7 +59,6 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260927012001_catalog_file_library` | Bibliothèque de fichiers (retour n°6, § 2) : `artist_files.description` et `master_files.description` (précision libre, 200 car., `null` si vide) ; `manage_catalog` modifie nom, catégorie et précision (droits colonne, policies `*_update_catalog`), jamais un fichier audio de titre (`category <> 'audio'` avant et après) ; événement `file_updated` (`previous_category` si reclassé, privé si contrat avant **ou** après) ; lecture des objets `master-files` passée en positif comme `artist-files` (même faille que l'audit du 27/09). Tests : `file-library.test.sql`. |
 | `…20261006000101_framing_intelligent` | Cadrage intelligent (§ 6) : `source_label` (field_values, needs, framing_constraints, project_team_members, vue `current_field_values` recréée), type de contrainte `human`, `project_team_members.contact_id` (Réseau), `framing_deadlines`, `report_items.brief_key` (genre `brief_fact`), `framing_briefs` (versions, `create_framing_brief`, `send_framing_brief`, `decide_framing_brief`, trigger `framing_brief_follow_validation`), `request_validation` refuse un Cadrage sans version (`brief_required`), `framing_key_dimension` / `framing_dimension_editable` + politiques restrictives par dimension, `framing_calls` + `create_framing_call`. Tests : `framing-intelligent.test.sql`. |
 | `…20261006000201_project_plan` | Plan du Projet (§ 6 ter) : `project_plans`, `project_plan_items`, `workflow_is_launched`, `launch_project_plan`, `launch_plan_workflow` ; `start_stage` refuse la Stratégie sans plan (`plan_required`). |
-| `…20261009000101_strategy_workflow` | Workflow Stratégie complet (§ 6 bis) : `strategy_workspaces` (`start_strategy`, `open_strategy_revision`), `strategy_is_editable` (en cours, ou révision ouverte, jamais pendant une relecture), `milestones.channel` / `notes`, `strategy_deliverables.quantity`, `strategy_budget_lines`, `strategy_kpis`, `strategy_documents` + `strategy_document_reviews` (`create_strategy_document`, `send_strategy_document`, `decide_strategy_document`, `remind_strategy_review`, garde `validations_strategy_guard`), `request_validation` refuse la Stratégie sans version, notifications `strategy_review_*`, `strategy_document_drafts`, `share_links.document_id` + `share_strategy_document` / `get_shared_strategy_document` (anon), bucket public `document-visuals`, `strategy_calls` + `create_strategy_call`, `strategy_recommendations`. Tests : `strategy-workflow.test.sql`. |
 | `…20261007000101_plan_add_workflow` | Audit du 07/10 : `launch_plan_workflow(projet, workflow, titre, raison)` ajoute au plan lancé, en Focus et au nom de qui le lance, un workflow qui n'y figure pas (retiré avant le lancement ou jamais proposé), puis le démarre ; `plan_required` sans plan, `invalid_transition` s'il est déjà lancé. Tests : `framing-intelligent.test.sql`. |
 | `…20261007000201_legal_confirm_without_questions` | Audit du 07/10 : `confirm_legal_intake` crée le dossier juridique s'il n'existe pas (projet sans question à poser), au lieu de `legal_intake_not_started`. Tests : `legal-intake.test.sql`. |
 | `…260927013001_project_files` | Documents d'un projet (§ 8 ter) : `project_files` (catégories `brief` / `visual` / `contract` / `press` / `other`, `description`), bucket privé `project-files` (`<org>/<projet>/<uuid>[.<ext>]`) ; lecture `can_see_project`, contrats via `can_read_project_contracts` (responsable ou `view_all_projects`) ; insertion, modification (nom, catégorie, précision) et suppression par `is_project_owner` ; objets lus en positif (responsable, ou ligne visible). Tests : `project-files.test.sql`. |
@@ -720,82 +719,7 @@ livrable, les libellés ou l'action d'import en props.
   Cocher des réponses **compose la réponse texte** (`lib/strategy/compose.ts`, code, pas
   d'IA ; phrases dans `fr.strategy.choices.phrases`), que le responsable retouche avant
   « Enregistrer la réponse » (choix + texte en une écriture).
-### Workflow Stratégie complet (ticket « Stratégie · Finalisation du workflow après cadrage », 09/10/2026)
-
-Migration `…20261009000101_strategy_workflow`, tests `strategy-workflow.test.sql` (30) et
-`strategy.test.sql` (mis à jour : on soumet une version du Brief de sortie). Le travail
-avait été commencé dans un stash (`stash@{0}`, « !!GitHub_Desktop<pre-prod> ») puis repris :
-sa migration, numérotée `20261006001001` comme `legal_forms_no_name_link`, est renumérotée.
-
-- **Pages** (onglets `StrategyTabs` : Pilotage · Brief de sortie · Documents · Suivi, sous un
-  layout qui garde Cadrage validé + Plan du Projet) : `/strategy` (entrée puis pilotage),
-  `/strategy/brief`, `/strategy/documents` (+ `/documents/[kind]?v=`, et `/documents/version?v=`
-  qui redirige, pour les notifications), `/strategy/release-plan?step=1..8`,
-  `/strategy/press-kit?step=1..4`, `/strategy/follow-up`. PDF :
-  `/api/projects/[id]/strategy-documents/[documentId]`. Lien public : `/d/[token]` (route
-  qui rend le HTML, CSP sans script, `noindex`).
-- **Entrée et pilotage** : « Commencer la stratégie » (`start_strategy`, `strategy_workspaces`)
-  ou « Préparer un échange » (`strategy_calls`, `create_strategy_call` ; son compte rendu
-  remplit la Stratégie, jamais le Cadrage : `fillStrategyFromCall`). Huit dimensions
-  (`lib/strategy/dimensions.ts`), état À compléter / En cours / À arbitrer / Complété décidé
-  par `lib/strategy/assess.ts` ; `?d=<dimension>` ouvre le panneau de travail.
-- **Dimensions** : narratif en 4 parties + l'angle (`field_values`), leviers courants en un clic,
-  livrables avec quantité, calendrier par canal (`milestones.channel`, `notes`) avec jalons
-  modifiables, **échéances amont** calculées par le code (`lib/strategy/upstream.ts` :
-  conception J-14, production J-7, validation J-2 avant publication, constantes à un seul
-  endroit) **propagées au Planning** (`ProjectPlan.upstream`, type `upstream` de la frise,
-  « En retard » si passée sans version approuvée en Conception). **Budget stratégie**
-  (`strategy_budget_lines` : montant par levier, validé ou à arbitrer, totaux par
-  `lib/strategy/budget.ts`, lu par qui voit le projet, jamais par PO, jamais dans un
-  document externe ; « Pas de budget dédié » possible). **Objectifs & KPIs** (`strategy_kpis`,
-  cible saisie, valeur réelle notée par le responsable ou lue en direct : fans Deezer).
-- **Brief de sortie** : instantané écrit par le serveur (`buildStrategySnapshot`), versionné
-  (`strategy_documents`, kind `brief`), « Générer » seulement quand aucune dimension n'est À
-  compléter ni En cours ; met en évidence le « Reste à arbitrer ». **Validation à plusieurs**
-  (`strategy_document_reviews`) : le DG toujours (seul valideur, `sole_validator`), plus les
-  directeurs créatifs du projet que le responsable nomme ; Non commencé (avant envoi) / En
-  attente / Validé, commentaires, « Relancer » (12 h minimum, notification), historique. Le
-  Brief passe par la validation de l'étape (Mon Travail, notifications) mais elle ne se
-  décide que via `decide_strategy_document` (garde `use_strategy_brief`). Validé par tous :
-  étape validée, **V1 figée**. « Réviser la stratégie » (`open_strategy_revision`) rouvre
-  l'écriture sans toucher l'étape ni V1 ; la V2 suit le même circuit.
-- **Documents externes** (`lib/strategy/documents/`) : un modèle de pages et de blocs
-  (`model.ts`), construit par le code depuis le Brief **validé** et les choix du générateur
-  (`build.ts`, jamais la section budget), rendu par **un seul** HTML (`render.ts`) pour
-  l'aperçu (iframe sans script), le lien public et le PDF (`htmlToPdf(..., { fullBleed })`).
-  Choix gardés entre deux visites dans `strategy_document_drafts` (`saveDocumentDraft`,
-  responsable seul). **Plan de sortie** : entrée (déjà connu / à compléter), phases proposées
-  depuis le calendrier (`phases.ts` : Teasing avant J0, Sortie, Amplification après ; leur
-  nombre et leurs noms restent ceux du responsable), contenus repris des livrables, univers
-  visuel (images du projet, des titres, de l'artiste, dépôt dans les fichiers du projet),
-  direction (proposée **par le code** dans le navigateur à partir des images : clarté,
-  saturation, palette ; trois thèmes fermés et une couleur d'accent, aucun modèle d'IA),
-  récapitulatif des pages (modifier, masquer, réordonner), génération, aperçu. **Dossier de
-  presse** : textes pré-remplis par le code (bio de l'artiste, actualité, histoire du morceau,
-  contact du responsable), visuels et direction (repris du Plan s'il existe), pages, aperçu ;
-  liens d'écoute = smartlink et liens détectés (onglet Sortie). Les visuels autorisés sont
-  **copiés à la génération** dans le bucket public `document-visuals`
-  (`<org>/<projet>/<uuid>.<ext>`, écriture par le responsable seul) : le lien public et le
-  PDF n'ont pas de session. Partage : `share_strategy_document` (Plan et Dossier seulement,
-  jamais le Brief interne), lu sans compte par `get_shared_strategy_document`.
-- **Suivi** (`lib/strategy/follow-up.ts`, pur ; `follow-up-data.ts`) : avant la sortie, Prêt /
-  En cours / En attente / Bloqué pour les contenus (versions de la Conception, échéances),
-  les leviers retenus, la coordination (tâches) et les validations ; après, KPIs contre leur
-  cible et une recommandation **seulement** sur une valeur réelle sous la cible (Appliquer :
-  une tâche pour le responsable à J+7 ; Ignorer ; Parler à PO, `AskPoButton`), recalculée
-  par le serveur, `strategy_recommendations` pour ne plus la reproposer.
-- **Notifications** : `strategy_review_requested`, `_approved`, `_changes_requested`,
-  `_reminder` (trigger sur `strategy_document_reviews`) ; une validation d'étape Stratégie
-  ouvre le Brief de sortie. Mon Travail liste aussi les relectures de documents à faire
-  (`TodoValidation.source = "document"`, visibles sans la permission `validate`).
-- **RLS** : documents et relectures lus via `is_strategy_reviewer` /
-  `strategy_document_visible` (security definer : les deux politiques se lisaient l'une
-  l'autre, récursion infinie trouvée par le test).
-- **Décisions prises sans le ticket** : « Modifier avec PO » renvoie au pilotage sur la première
-  dimension à régler (où PO dicte et propose) ; « Non commencé » = personne nommée avant
-  l'envoi ; la direction du document est calculée par le code (le ticket laisse la
-  technologie ouverte) ; pas de KPI alimenté automatiquement hors fans Deezer (Spotify n'a
-  plus d'API, `docs/CONTEXTE-PROJET.md` § 6).
+- Hors périmètre pour l'instant : export Plan de sortie (Playwright), lien partagé.
 
 ---
 

@@ -19,7 +19,6 @@ export function PdfExportButton({
   pendingLabel,
   failedLabel,
   variant = "default",
-  size = "lg",
 }: {
   href: string;
   fileName: string;
@@ -27,8 +26,6 @@ export function PdfExportButton({
   pendingLabel: string;
   failedLabel: string;
   variant?: "default" | "outline";
-  // `sm` among a document's actions (Strategy documents).
-  size?: "lg" | "sm";
 }) {
   const [exporting, setExporting] = useState(false);
 
@@ -51,7 +48,7 @@ export function PdfExportButton({
   }
 
   return (
-    <Button size={size} variant={variant} disabled={exporting} onClick={exportPdf}>
+    <Button size="lg" variant={variant} disabled={exporting} onClick={exportPdf}>
       {exporting ? (
         <IconLoader aria-hidden className="animate-spin" />
       ) : (

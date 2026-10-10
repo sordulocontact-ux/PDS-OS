@@ -1,188 +1,149 @@
-import Link from "next/link";
+import { notFound } from "next/navigation";
 
-import { DimensionNav } from "@/components/framing/intel/dimension-nav";
-import { FramingCallSheet } from "@/components/framing/intel/framing-call-sheet";
 import { ImportPanel } from "@/components/framing/import-panel";
+import { ValidationPanel } from "@/components/framing/validation-panel";
 import { EditAccessProvider } from "@/components/projects/edit-access";
-import { DimensionList } from "@/components/strategy/dimension-list";
-import { DimensionPanel } from "@/components/strategy/dimension-panel";
+import { BriefReminder } from "@/components/strategy/brief-reminder";
+import { CalendarSection } from "@/components/strategy/calendar-section";
+import { DeliverablesSection } from "@/components/strategy/deliverables-section";
+import { LeversSection } from "@/components/strategy/levers-section";
 import { ProposeChoices } from "@/components/strategy/propose-choices";
+import { StrategyChoices } from "@/components/strategy/strategy-choices";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
-import { StrategyEntry } from "@/components/strategy/strategy-entry";
-import { StrategyTabs } from "@/components/strategy/strategy-tabs";
-import { buttonVariants } from "@/components/ui/button";
-import { ToneCallout } from "@/components/ui/tone-callout";
-import { routes } from "@/lib/auth/redirects";
+import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
+import { WorkflowLocked } from "@/components/plan/workflow-locked";
+import { workflowGate } from "@/lib/plan/queries";
+import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
-import { todayInParis } from "@/lib/insights/dates";
-import { prepareStrategyCall } from "@/lib/strategy/actions/call";
+import { canEditProject } from "@/lib/projects/edit-access";
+import { requireLaunchedProject } from "@/lib/projects/queries";
 import { importStrategyReport } from "@/lib/strategy/actions/import";
-import { isStrategyDimension } from "@/lib/strategy/dimensions";
-import {
-  loadStrategyPage,
-  readyDeliverableIds,
-  strategyCallSheet,
-} from "@/lib/strategy/page-data";
-import { projectKindLabel } from "@/lib/strategy/project";
-import { upstreamChains } from "@/lib/strategy/upstream";
-import { strategyDimensionTone } from "@/lib/ui/state-tones";
+import { isFramingValidated } from "@/lib/projects/types";
+import { loadStrategy } from "@/lib/strategy/queries";
+import { allInOrder } from "@/lib/utils/parallel";
 
-const first = (value: string | string[] | undefined) =>
-  Array.isArray(value) ? value[0] : value;
-
-/**
- * The Strategy (docs/ARCHITECTURE.md § 6 bis): a plain entry at first, then
- * the pilot of the eight dimensions; a dimension opens in the work panel
- * (?d=<dimension>). The Brief de sortie, the documents and the follow-up
- * have their own pages.
- */
+/** Launch strategy stage: the Strategy on one page, built on the validated Brief. */
 export default async function StrategyPage({
   params,
-  searchParams,
 }: PageProps<"/app/projects/[projectId]/strategy">) {
   const { projectId } = await params;
-  const sp = await searchParams;
-  const page = await loadStrategyPage(projectId);
-  const { project, data, ctx, assessment, stage, canEdit, canWrite } = page;
-  const t = fr.strategyFlow;
-  const callSheet = canEdit ? await strategyCallSheet(page) : null;
-
-  if (!page.started)
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    requireLaunchedProject(projectId),
+  ]);
+  // The strategy is built on the validated Brief: nothing to open before.
+  if (!isFramingValidated(project.stages)) {
     return (
-      <StrategyEntry
+      <StrategyNeedsFraming
         projectId={projectId}
-        title={project.title}
-        artist={project.artistName}
-        kind={projectKindLabel(project)}
-        releaseDate={data.referenceDate}
-        status={
-          t.entry.statuses[stage as keyof typeof t.entry.statuses] ?? stage
-        }
-        canEdit={canEdit && stage === "in_progress"}
-        callSheet={
-          callSheet ?? {
-            topics: [],
-            purpose: "",
-            people: [],
-            documents: [],
-            defaultOccurredAt: "",
-          }
-        }
+        canEdit={canEditProject(access, project)}
       />
     );
-
-  const asked = first(sp.d);
-  const open = isStrategyDimension(asked)
-    ? assessment.dimensions.find((d) => d.dimension === asked)!
-    : null;
-  const done = assessment.counts.done;
-  const notice = !canWrite
-    ? canEdit && stage !== "in_progress" && !ctx.revisionOpen
-      ? t.pilot.locked
-      : null
-    : ctx.revisionOpen
-      ? t.pilot.revision
-      : null;
-
-  const toolbar = (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-body-md font-medium tabular-nums">
-        {t.pilot.progress(done, assessment.dimensions.length)}
-      </p>
-      {canWrite && callSheet && (
-        <FramingCallSheet
-          projectId={projectId}
-          data={callSheet}
-          action={prepareStrategyCall}
-          copy={t.call}
-        />
-      )}
-    </div>
-  );
-
-  let content: React.ReactNode;
-  if (open) {
-    const chains =
-      open.dimension === "calendar"
-        ? upstreamChains(
-            data.deliverables,
-            data.milestones,
-            todayInParis(),
-            await readyDeliverableIds(projectId),
-          )
-        : [];
-    content = (
-      <div className="grid gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <DimensionNav
-          label={t.pilot.label}
-          current={open.dimension}
-          items={assessment.dimensions.map((d, index) => ({
-            key: d.dimension,
-            href: routes.projectStrategyDimension(projectId, d.dimension),
-            title: `${t.dimensionNumber(index)} ${t.dimensions[d.dimension]}`,
-            line: t.states[d.state],
-            tone: strategyDimensionTone[d.state],
-            statusLabel: t.states[d.state],
-            done: d.state === "done",
-          }))}
-        />
-        <DimensionPanel
-          assessment={open}
-          data={data}
-          chains={chains}
-          projectId={projectId}
-        />
-      </div>
-    );
-  } else {
-    content = (
-      <div className="flex flex-col gap-6">
-        <DimensionList projectId={projectId} assessment={assessment} />
-        <ToneCallout tone={assessment.ready ? "success" : "neutral"}>
-          {assessment.ready ? t.pilot.briefReady : t.pilot.briefNotReady}
-        </ToneCallout>
-        <div>
-          <Link
-            href={routes.projectStrategyBrief(projectId)}
-            className={buttonVariants({
-              size: "lg",
-              variant: assessment.ready ? "default" : "outline",
-            })}
-          >
-            {t.pilot.toBrief}
-          </Link>
-        </div>
-        {canWrite && (
-          <div className="rounded-2xl border border-border bg-background p-5">
-            <ImportPanel
-              reports={data.reports}
-              projectId={projectId}
-              importAction={importStrategyReport}
-              title={fr.strategy.import.title}
-            />
-          </div>
-        )}
-      </div>
-    );
   }
+  // The Stratégie starts from the Plan du Projet, never on its own.
+  const gate = await workflowGate(project, "strategy");
+  if (gate)
+    return (
+      <WorkflowLocked
+        projectId={projectId}
+        name={fr.framingIntel.plan.workflows.strategy}
+        {...gate}
+      />
+    );
+  const data = await loadStrategy(projectId, access);
+  if (!data) notFound();
+  const t = fr.strategy;
+  const state = data.stage?.state ?? "not_started";
+
+  // The owner writes only while the strategy is in progress; the database
+  // enforces it (strategy_is_editable), this only decides what is offered.
+  const canWrite = canEditProject(access, project) && state === "in_progress";
+  const status =
+    state === "not_started"
+      ? t.notStarted
+      : state === "in_progress"
+        ? null
+        : t.locked;
+
+  // docs/DESIGN.md § 4, « Sélection et formulaires en étapes »: no card around
+  // the page, sections spaced out, only the answers and items outlined.
+  const block = "rounded-2xl border border-border bg-background p-5";
 
   return (
-    <div className="flex flex-col gap-6 pt-6">
-      <StrategyTabs projectId={projectId} />
-      {notice && <ToneCallout tone="neutral">{notice}</ToneCallout>}
+    <div className="grid gap-12 pt-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <EditAccessProvider canEdit={canWrite}>
-        {canWrite ? (
+        <div className="flex min-w-0 flex-col gap-12">
           <StrategyDictation
             projectId={projectId}
             actions={<ProposeChoices projectId={projectId} />}
           >
-            {toolbar}
+            <h2 className="text-display-md font-semibold break-words">
+              {t.title}
+            </h2>
+            {status && (
+              <p className="text-body-md text-muted-foreground">{status}</p>
+            )}
           </StrategyDictation>
-        ) : (
-          toolbar
-        )}
-        {content}
+          {data.fields.map((field) => (
+            // Remount when the saved answers change on the server.
+            <StrategyChoices
+              key={`${field.key}-${JSON.stringify(data.choices[field.key])}-${field.value ?? ""}-${field.status ?? ""}`}
+              field={field}
+              value={data.choices[field.key]}
+              suggestions={data.suggestions[field.key]}
+              projectId={projectId}
+            />
+          ))}
+          <LeversSection
+            levers={data.levers}
+            openNeeds={data.openNeeds}
+            projectId={projectId}
+          />
+          <DeliverablesSection
+            deliverables={data.deliverables}
+            levers={data.levers}
+            members={data.members}
+            projectId={projectId}
+          />
+          <CalendarSection
+            milestones={data.milestones}
+            deliverables={data.deliverables}
+            referenceDate={data.referenceDate}
+            projectId={projectId}
+          />
+        </div>
       </EditAccessProvider>
+
+      <aside className="flex flex-col gap-4 self-start lg:sticky lg:top-6">
+        <div className={block}>
+          <ValidationPanel
+            stage={data.stage}
+            pendingValidation={data.pendingValidation}
+            projectId={projectId}
+            mePersonId={access.personId}
+            title={t.validation.title}
+            startLabel={t.validation.start}
+            startBlocked={data.briefValidated ? null : t.validation.briefFirst}
+          />
+        </div>
+        <div className={block}>
+          <BriefReminder
+            brief={data.brief}
+            validated={data.briefValidated}
+            projectId={projectId}
+          />
+        </div>
+        {canWrite && (
+          <div className={block}>
+            <ImportPanel
+              reports={data.reports}
+              projectId={projectId}
+              importAction={importStrategyReport}
+              title={t.import.title}
+            />
+          </div>
+        )}
+      </aside>
     </div>
   );
 }

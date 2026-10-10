@@ -31,11 +31,6 @@ export const NOTIFICATION_KINDS = [
   "clearance_terms_proposed",
   "clearance_terms_validated",
   "clearance_terms_rejected",
-  // A Strategy document (Brief de sortie, Plan, Dossier) and its reviewers.
-  "strategy_review_requested",
-  "strategy_review_approved",
-  "strategy_review_changes_requested",
-  "strategy_review_reminder",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -93,11 +88,6 @@ export function notificationHref(
     return routes.projectMasterStep(projectId, "mastering");
   if (kind === "master_final_approved")
     return routes.projectMasterStep(projectId, "final");
-  // A Strategy document opens on its version (subjectId), where it is decided.
-  if (kind.startsWith("strategy_review_"))
-    return subjectId
-      ? routes.projectStrategyDocument(projectId, "version", subjectId)
-      : routes.projectStrategyDocuments(projectId);
   if (kind.startsWith("design_version_"))
     return routes.projectDesign(projectId);
   if (kind.startsWith("validation_")) {
@@ -105,7 +95,7 @@ export function notificationHref(
     // the decision and what was reopened.
     if (stageKey === "framing") return routes.projectFramingBrief(projectId);
     if (stageKey === "launch_strategy")
-      return routes.projectStrategyBrief(projectId);
+      return routes.projectStrategy(projectId);
     if (stageKey === "design") return routes.projectDesign(projectId);
   }
   return routes.project(projectId);

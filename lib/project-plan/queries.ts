@@ -3,7 +3,6 @@ import "server-only";
 import { isOverdue, todayInParis } from "@/lib/insights/dates";
 import { personName } from "@/lib/projects/types";
 import { referenceDate } from "@/lib/strategy/calendar";
-import { upstreamChains, type UpstreamChain } from "@/lib/strategy/upstream";
 import { createClient } from "@/lib/supabase/server";
 
 export type LeverFamily =
@@ -75,9 +74,6 @@ export type ProjectPlan = {
   milestones: PlanMilestone[];
   tasks: PlanTask[];
   calls: PlanCall[];
-  // Conception, production and validation before each dated deliverable
-  // (Stratégie, ticket § 5): propagated here, computed by code.
-  upstream: UpstreamChain[];
 };
 
 const isFamily = (value: string): value is LeverFamily =>
@@ -113,7 +109,6 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
     releaseRes,
     peopleRes,
     callsRes,
-    approvedRes,
   ] = await Promise.all([
     supabase.from("projects").select("due_date").eq("id", projectId).single(),
     supabase
@@ -130,7 +125,7 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
       .order("created_at"),
     supabase
       .from("milestones")
-      .select("id, title, occurs_on, kind, deliverable_id")
+      .select("id, title, occurs_on, kind")
       .eq("project_id", projectId)
       .order("occurs_on"),
     supabase
@@ -151,13 +146,6 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
       .select("id, title, occurred_at")
       .eq("project_id", projectId)
       .order("occurred_at"),
-    // A deliverable with an approved version has its steps behind it.
-    supabase
-      .from("design_versions")
-      .select("deliverable_id")
-      .eq("project_id", projectId)
-      .eq("status", "approved")
-      .not("deliverable_id", "is", null),
   ]);
 
   const names = new Map(
@@ -234,12 +222,6 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
             },
           ]
         : [],
-    ),
-    upstream: upstreamChains(
-      deliverablesRes.data ?? [],
-      milestonesRes.data ?? [],
-      today,
-      new Set((approvedRes.data ?? []).flatMap((v) => v.deliverable_id ?? [])),
     ),
     calls: (callsRes.data ?? []).map((c) => ({
       id: c.id,

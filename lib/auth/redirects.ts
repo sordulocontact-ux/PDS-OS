@@ -158,24 +158,6 @@ export const routes = {
   // The same Brief as a downloaded PDF file.
   projectFramingBriefPdf: (id: string) => `/api/projects/${id}/framing-brief`,
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
-  // One dimension of the Strategy open in the work panel.
-  projectStrategyDimension: (id: string, dimension: string) =>
-    `/app/projects/${id}/strategy?d=${dimension}`,
-  projectStrategyBrief: (id: string) => `/app/projects/${id}/strategy/brief`,
-  projectStrategyDocuments: (id: string) =>
-    `/app/projects/${id}/strategy/documents`,
-  // A document's version (?v=<id>), read in the app.
-  projectStrategyDocument: (id: string, kind: string, documentId?: string) =>
-    `/app/projects/${id}/strategy/documents/${kind}${documentId ? `?v=${documentId}` : ""}`,
-  projectStrategyReleasePlan: (id: string, step?: number) =>
-    `/app/projects/${id}/strategy/release-plan${step ? `?step=${step}` : ""}`,
-  projectStrategyPressKit: (id: string, step?: number) =>
-    `/app/projects/${id}/strategy/press-kit${step ? `?step=${step}` : ""}`,
-  projectStrategyFollowUp: (id: string) =>
-    `/app/projects/${id}/strategy/follow-up`,
-  // A strategy document's version as a downloaded PDF file.
-  strategyDocumentPdf: (id: string, documentId: string) =>
-    `/api/projects/${id}/strategy-documents/${documentId}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
@@ -204,8 +186,6 @@ export const routes = {
   // Public, no account: a fiche de renseignements (Juridique 02).
   legalForm: (token: string) => `/f/${token}`,
   legalSplit: (token: string) => `/s/${token}`,
-  // Public, no account: a shared Plan de sortie or Dossier de presse.
-  sharedDocument: (token: string) => `/d/${token}`,
 } as const;
 
 export function destinationFor(state: AccessState): string {
