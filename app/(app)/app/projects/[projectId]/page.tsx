@@ -2,11 +2,11 @@ import { notFound } from "next/navigation";
 
 import { FramingEntry } from "@/components/framing/intel/framing-entry";
 import { ProjectBoard } from "@/components/overview/project-board";
-import { WorkflowCards } from "@/components/overview/workflow-cards";
 import { ProjectPlanSection } from "@/components/plan/project-plan-section";
 import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { ProjectAttention } from "@/components/projects/project-attention";
+import { ProjectStages } from "@/components/projects/project-stages";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { FactList } from "@/components/ui/fact-list";
 import { CardRow, ListCard } from "@/components/ui/list-card";
@@ -38,8 +38,8 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
 });
 
 /**
- * Where a launched project opens. Until the plan runs: the Cadrage above
- * the workflows. Then the Plan du projet to launch; once launched, the
+ * Where a launched project opens. Until the Brief is validated: the Cadrage
+ * and the stages. Then the Plan du projet to launch; once launched, the
  * overview of the ticket « Architecture globale »: the workflows side by
  * side, next actions, blockers, deadlines (ProjectBoard, read from the
  * workflows themselves; docs/ARCHITECTURE.md § 6 ter and § 8 ter).
@@ -84,13 +84,13 @@ export default async function ProjectOverviewPage({
       framingValidated ? loadLaunchedPlan(project.id) : Promise.resolve(null),
     ]);
   // Second round, only for what the first one says is shown: the plan to
-  // propose (from the validated Cadrage), and the workflows (shared with
-  // the layout's reading in this request, so free).
+  // propose (from the validated Cadrage), or the workflows once it runs
+  // (shared with the layout's reading in this request).
   const [proposalKnowledge, flows] = await Promise.all([
     framingValidated && !plan
       ? loadFramingKnowledge(project.id, access)
       : Promise.resolve(null),
-    launched ? loadWorkflowStates(project.id) : Promise.resolve(null),
+    plan ? loadWorkflowStates(project.id) : Promise.resolve(null),
   ]);
 
   const creativeTeam = (
@@ -126,6 +126,10 @@ export default async function ProjectOverviewPage({
       }),
     ],
     [t.owner, project.ownerName ?? t.noOwner],
+    [
+      t.currentStage,
+      project.currentStage?.label ?? fr.shell.projects.allValidated,
+    ],
     [t.createdAt, dateFormatter.format(new Date(project.createdAt))],
   ];
 
@@ -184,33 +188,10 @@ export default async function ProjectOverviewPage({
         </>
       )}
 
-      {/* Before the plan runs, the workflows under the Cadrage, each in its
-          real state: no global sequence of stages (ticket « Architecture
-          globale » § 1). Launching them is the plan's job. */}
-      {!plan && flows && (
-        <section
-          aria-labelledby="workflows-title"
-          className="flex flex-col gap-3"
-        >
-          <div className="flex flex-col gap-1">
-            <h2 id="workflows-title" className="text-base font-medium">
-              {t.workflows}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {t.workflowsBeforePlan}
-            </p>
-          </div>
-          <WorkflowCards
-            projectId={project.id}
-            workflows={flows.workflows}
-            states={flows.states}
-            canLaunch={false}
-          />
-        </section>
-      )}
-
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="flex min-w-0 flex-col gap-8">
+          {/* The plan takes the stages' place once the Brief is validated. */}
+          {!framingValidated && <ProjectStages project={project} />}
           {creativeTeam}
           <AssignmentHistory assignments={project.assignments} />
         </div>

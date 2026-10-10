@@ -23,11 +23,8 @@ export const workflowStatus = {
     description:
       "Où en est chaque workflow, ce qui attend et ce qui bloque, lus dans les workflows eux-mêmes.",
     workflowsLabel: "Workflows du projet",
-    // A card: the steps really done out of the workflow's steps.
-    stepsDone: (done: number, total: number) => `${done} / ${total} étapes`,
-    stepsDoneLabel: (done: number, total: number) =>
-      `${done} étape${done > 1 ? "s" : ""} faite${done > 1 ? "s" : ""} sur ${total}`,
-    open: (name: string) => `Ouvrir ${name}`,
+    stepOf: (index: number, total: number) => `étape ${index} sur ${total}`,
+    dossierStep: "étape du dossier",
     launch: "Lancer",
     notApplicable: (names: string) =>
       `${names} ne s'applique${names.includes(" et ") ? "nt" : ""} pas à ce projet.`,
@@ -39,14 +36,6 @@ export const workflowStatus = {
       description: "Par échéance, les retards d'abord",
       empty: "Rien à faire pour l'instant.",
       overdue: "En retard",
-      views: "Filtrer par workflow",
-      all: "Tout",
-      columns: {
-        what: "Action",
-        workflow: "Workflow",
-        who: "Responsable",
-        due: "Échéance",
-      },
     },
     blockers: {
       title: "Blocages",
@@ -64,9 +53,7 @@ export const workflowStatus = {
         "Un titre avec un emprunt non sécurisé ne part pas au distributeur : la sortie attend.",
     },
     deadlines: {
-      title: "Prochaine échéance",
-      later: "Ensuite",
-      planning: "Voir le planning",
+      title: "Échéances",
       empty: "Aucune échéance datée.",
       project: "Échéance principale du projet",
       release: "Sortie prévue",
@@ -99,13 +86,6 @@ export const workflowStatus = {
       in_progress: "En cours",
       waiting: "En attente",
       blocked: "Bloqué",
-    },
-    // The Juridique closed to the viewer: that it provides, never what.
-    restricted: {
-      what: "Ce que le Juridique fournit aux autres workflows",
-      flow: "Juridique → autres workflows",
-      note: "Réservé à la direction et aux chefs de projet : emprunts, accords et contrats ne sont pas affichés.",
-      state: "Accès restreint",
     },
     master: {
       what: "Master final de chaque titre",

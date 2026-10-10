@@ -252,7 +252,6 @@ export const getProject = cache(
       artistId: data.artist_id,
       createdAt: data.created_at,
       artistName: artistNameOf(masters, data.artist),
-      mainArtistId: masters[0]?.credits[0]?.artistId ?? data.artist_id,
       ownerName: owner || null,
       ownerPersonId: data.owner_person_id,
       status: projectStatusOf(stages.length, assignments[0] ?? null),

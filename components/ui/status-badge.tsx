@@ -21,7 +21,7 @@ const statusBadgeVariants = cva(
         // Category hues (lib/ui/category-hues.ts): no state, only "which one".
         sky: "bg-[var(--hue-sky-bg)] text-[color:var(--hue-sky-fg)]",
         indigo: "bg-[var(--hue-indigo-bg)] text-[color:var(--hue-indigo-fg)]",
-        ink: "bg-[var(--hue-ink-bg)] text-[color:var(--hue-ink-fg)]",
+        violet: "bg-[var(--hue-violet-bg)] text-[color:var(--hue-violet-fg)]",
         pink: "bg-[var(--hue-pink-bg)] text-[color:var(--hue-pink-fg)]",
         orange: "bg-[var(--hue-orange-bg)] text-[color:var(--hue-orange-fg)]",
         yellow: "bg-[var(--hue-yellow-bg)] text-[color:var(--hue-yellow-fg)]",

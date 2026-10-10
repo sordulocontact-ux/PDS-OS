@@ -60,8 +60,7 @@ function ProjectSidebarList({
     <div className="flex flex-col gap-6">
       {toBlocks(items).map((block) => (
         <div key={block.group ?? "top"} className="flex flex-col gap-1">
-          {/* A group may go untitled (the tools at the bottom). */}
-          {block.group && groups[block.group] && (
+          {block.group && (
             <p
               id={`${idPrefix}-${block.group}`}
               className="px-4 text-caption text-[color:var(--nav-fg-muted)]"
@@ -72,9 +71,7 @@ function ProjectSidebarList({
           <ul
             className="flex flex-col gap-1"
             aria-labelledby={
-              block.group && groups[block.group]
-                ? `${idPrefix}-${block.group}`
-                : undefined
+              block.group ? `${idPrefix}-${block.group}` : undefined
             }
           >
             {block.items.map((item) => {

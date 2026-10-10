@@ -2,7 +2,6 @@
 // 24 grid, 2px stroke, square caps, mitered joins (docs/DESIGN.md § 1).
 export { IconArrowDown } from "./arrow-down";
 export { IconArrowLeft } from "./arrow-left";
-export { IconArrowRight } from "./arrow-right";
 export { IconArrowUp } from "./arrow-up";
 export { IconArrowUpRight } from "./arrow-up-right";
 export { IconBriefcase } from "./briefcase";

@@ -137,7 +137,7 @@ tons sémantiques, et seulement six (`--tone-*` dans `globals.css`) :
 | `warning` | attend l'action de quelqu'un           | validation attendue, transmis, invité, proposé |
 | `success` | fait, en ligne                         | validé, prêt, approuvé, en ligne          |
 | `danger`  | bloqué, refusé, en échec               | refusé, échec, en retard, citation introuvable |
-| `action`  | une validation attend une décision | étape « À valider », carte « Validations qui m'attendent » ; encre sur gris, **jamais violet** (ticket « Architecture globale » § 12, 09/10/2026) |
+| `action`  | une validation attend une décision | étape « À valider », carte « Validations qui m'attendent » |
 
 - La correspondance état → ton vit **uniquement** dans `lib/ui/state-tones.ts`. Un écran
   n'écrit jamais une couleur, il passe `tone={…Tone[état]}`.
@@ -173,7 +173,7 @@ en encre pleine : un filtre actif n'est pas une sélection de formulaire.
 Pour reconnaître d'un coup d'œil une **catégorie** dans un tableau, sans aucune valeur
 d'état : l'**étape** d'un projet (Cadrage bleu ciel, Stratégie indigo, Conception rose,
 Production orange, Livraison sarcelle, Défense jaune, Bilan ardoise) et son **type**
-(Musical encre, Contenu vert tilleul, Événement sable ; plus de violet depuis le 09/10/2026), distincts des étapes puisqu'ils
+(Musical violet, Contenu vert tilleul, Événement sable), distincts des étapes puisqu'ils
 sont sur la même ligne. Jetons `--hue-<teinte>-bg` / `-fg` (`app/globals.css`), variantes
 de `StatusBadge`, correspondance dans `lib/ui/category-hues.ts` seulement.
 Le **titre d'une ligne** dans les tableaux du Juridique est aussi une catégorie : un tag dans
@@ -264,11 +264,11 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   `lib/ui/marketing-steps.ts` ; une organisation, pas une séquence : chaque étape qui a une
   page s'ouvre seule, sauf la Stratégie avant son lancement ; Production et Suivi & bilan
   grisés tant qu'ils n'ont pas de page ; Défense, non tranchée, n'est montrée nulle part),
-  Juridique (**État des lieux · Cadrage juridique · Confirmation · Plan d'action · Suivi**,
-  sans numéro, `LegalSteps`, depuis le 09/10/2026 : les trois premiers ouvrent l'État des
-  lieux à leur bloc, les deux derniers la page du plan ; en noir, l'étape du dossier quand
-  la page la porte ; Confirmation, Plan d'action et Suivi grisés avec leur raison tant que
-  l'étape d'avant n'est pas faite), Master (**Préparation · Mixage · Mastering · Master
+  Juridique (**État des lieux · Plan d'action**, sans numéro,
+  `LegalSteps` ; le Cadrage et la Confirmation vivent sur l'État des lieux, le Suivi est le
+  Plan d'action lancé ; le chevron devient « Suivi » une fois le plan lancé, et sous les
+  chevrons une ligne « Étape du dossier · … » donne l'une des cinq étapes du DG, un état et
+  jamais un chevron : `legalPhase`), Master (**Préparation · Mixage · Mastering · Master
   final**, sans numéro, `SectionSteps`, une étape pouvant couvrir une sous-page : le Brief
   sous Préparation ; les validations du mix et du master vivent dans Mixage et Mastering,
   jamais une étape à part) et Distribution (**Préparation · En ligne** : la page Sortie en
@@ -279,20 +279,7 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   sous-page ouverte depuis une étape porte un `BackLink` vers elle, jamais une pastille.
   **Deux signaux jamais mélangés** : le fond noir = la page ouverte ; la coche dans le
   rond = l'étape vraiment validée (états réels, `project_stages` pour le Marketing, jamais
-  la position de la page). Étape sans page ou verrouillée : grisée, non cliquable, mais
-  **focalisable** : sa raison s'affiche dans une bulle (`Tooltip`) au survol ou au focus et
-  se lit après le libellé.
-- **Chevrons pleine largeur** : la rangée occupe toute la colonne, étapes de même largeur,
-  libellé centré, bouts arrondis 8 px (maquettes du 09/10/2026) ; plus étroite que ses
-  libellés, elle défile.
-- **Fil d'Ariane** (`ProjectBreadcrumb`, ticket « Architecture globale » § 6, 09/10/2026) :
-  en tête de toute page de projet, **← Projets › Artiste › Projet › Section › Étape**, gris,
-  la page ouverte en encre, flèche qui remonte d'un niveau. Un repère, jamais un troisième
-  menu : les étapes viennent des mêmes données que les chevrons.
-- **En-tête du projet** (`ProjectHeader`) sous le fil d'Ariane : pochette carrée 112 px
-  (80 px sur téléphone, disque sur gris sans image), type en surtitre majuscule, titre,
-  « Artiste · Sortie le … », pastille du statut du projet. Puis les chevrons du workflow
-  ouvert, puis la page.
+  la position de la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.
 - **Sidebar ou onglets : un seul interrupteur**, `DOUBLE_SIDEBAR` dans
   `lib/ui/project-sections.ts` (liste des sections partagée par les deux). `true` : la
   sidebar contextuelle ci-dessus, la barre principale repliée. `false` : une seule

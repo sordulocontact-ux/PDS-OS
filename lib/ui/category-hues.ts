@@ -8,7 +8,7 @@ import type { ProjectType } from "@/lib/projects/types";
 export type Hue =
   | "sky"
   | "indigo"
-  | "ink"
+  | "violet"
   | "pink"
   | "orange"
   | "yellow"
@@ -32,7 +32,7 @@ export const stageHue = (key: string): Hue => stageHues[key] ?? "slate";
 
 /** Distinct from every stage hue: both sit on the same row of the list. */
 export const projectTypeHue: Record<ProjectType, Hue> = {
-  music_release: "ink",
+  music_release: "violet",
   content: "lime",
   event: "sand",
 };
@@ -41,7 +41,7 @@ export const projectTypeHue: Record<ProjectType, Hue> = {
  * hue on every row, so its lines are found at a glance; cycles past ten. */
 const titleHues: Hue[] = [
   "sky",
-  "ink",
+  "violet",
   "orange",
   "teal",
   "pink",

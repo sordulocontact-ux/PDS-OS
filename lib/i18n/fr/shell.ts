@@ -244,8 +244,7 @@ export const shell = {
       groups: {
         workflows: "Workflows",
         steering: "Pilotage",
-        // Untitled (maquettes): « Production » is a step of the Marketing.
-        production: "",
+        production: "Production",
       },
       overview: "Vue d'ensemble",
       framing: "Cadrage",
@@ -265,16 +264,6 @@ export const shell = {
       validations: "Validations",
       activity: "Activité",
     },
-    header: {
-      releaseOn: (date: string) => `Sortie le ${date}`,
-    },
-    // Where one stands in a project: Projet > Workflow > Étape (ticket
-    // « Architecture globale » § 6), a landmark, not a menu.
-    breadcrumb: {
-      label: "Fil d'Ariane",
-      brief: "Brief",
-      back: (level: string) => `Revenir à « ${level} »`,
-    },
     legalSteps: {
       label: "Étapes juridiques",
       soon: "Bientôt disponible",
@@ -283,11 +272,9 @@ export const shell = {
       confirmation: "Confirmation",
       plan: "Plan d'action",
       tracking: "Suivi",
-      // Why a step is still closed (on its greyed chevron).
-      confirmationLocked:
-        "Disponible une fois toutes les questions du cadrage répondues",
       planLocked: "Disponible une fois le dossier confirmé",
-      trackingLocked: "Disponible une fois le plan d'action lancé",
+      // Under the chevrons: the DG's five steps, as the dossier's state.
+      phase: "Étape du dossier",
       // Back from a branch's page (opened by an action of the plan).
       backToPlan: "Plan d'action",
       // The branches' pages, each opened from an action of the plan.
@@ -325,12 +312,8 @@ export const shell = {
     },
     notFoundTitle: "Projet introuvable",
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",
-    // Why the write controls are missing (ticket « Architecture globale »
-    // § 9), naming who writes when the project has an owner.
-    readOnly: (owner: string | null) =>
-      owner
-        ? `Lecture seule : vous consultez ce projet ; seul ${owner}, chef de projet responsable, le modifie.`
-        : "Lecture seule : seul le chef de projet responsable modifie ce projet.",
+    readOnly:
+      "Lecture seule : seul le chef de projet responsable modifie ce projet.",
     readOnlyDesign:
       "Seul le chef de projet responsable écrit le Dossier et relit les versions ; l'équipe créative y dépose les siennes.",
     overview: {
@@ -347,9 +330,9 @@ export const shell = {
       owner: "Responsable",
       noOwner: "Non défini",
       createdAt: "Créé le",
-      workflows: "Workflows",
-      workflowsBeforePlan:
-        "Chacun démarre une fois le Cadrage validé et le plan du projet lancé, puis avance à son rythme.",
+      currentStage: "Étape en cours",
+      stages: "Étapes",
+      changedAt: "Mis à jour le",
       // Sections without a tab of their own, when the project uses tabs.
       moreSections: "Aussi dans ce projet",
     },

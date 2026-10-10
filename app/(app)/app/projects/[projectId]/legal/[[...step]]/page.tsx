@@ -34,7 +34,7 @@ import { loadLegalPlan } from "@/lib/legal/plan/queries";
 import { loadSplits } from "@/lib/legal/splits/queries";
 import { loadTracking } from "@/lib/legal/tracking/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { LEGAL_ANCHORS, builtLegalStepOf } from "@/lib/ui/legal-steps";
+import { builtLegalStepOf } from "@/lib/ui/legal-steps";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
@@ -169,18 +169,15 @@ export default async function ProjectLegalPage({
             projectId={project.id}
             confirmation={confirmation}
           />
-          {/* The Cadrage juridique's chevron opens here. */}
-          <div id={LEGAL_ANCHORS.framing} className="scroll-mt-6">
-            <IntakeWorkspace
-              // « Corriger » from the dossier reopens its question: a new
-              // workspace for it.
-              key={initialQuestion ?? "intake"}
-              projectId={project.id}
-              questions={intake.questions}
-              initialQuestion={initialQuestion}
-              embedded
-            />
-          </div>
+          <IntakeWorkspace
+            // « Corriger » from the dossier reopens its question: a new
+            // workspace for it.
+            key={initialQuestion ?? "intake"}
+            projectId={project.id}
+            questions={intake.questions}
+            initialQuestion={initialQuestion}
+            embedded
+          />
           <ConfirmationPanel
             projectId={project.id}
             confirmation={confirmation}

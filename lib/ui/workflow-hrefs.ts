@@ -1,10 +1,5 @@
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import {
-  LEGAL_STEP_KEYS,
-  legalChevronHref,
-  type LegalStepKey,
-} from "@/lib/ui/legal-steps";
 
 // Where each step of a workflow is done (lib/workflow-status/rules.ts names
 // the step): the overview's cards and actions open it. A step without a page
@@ -20,12 +15,9 @@ export function workflowStepHref(
         ? routes.projectMaster(projectId)
         : routes.projectMasterStep(projectId, step === "mixing" ? "mix" : step);
     case "legal":
-      return legalChevronHref(
-        projectId,
-        (LEGAL_STEP_KEYS as readonly string[]).includes(step)
-          ? (step as LegalStepKey)
-          : "inventory",
-      );
+      return step === "plan"
+        ? routes.projectLegalStep(projectId, "plan")
+        : routes.projectLegal(projectId);
     case "marketing":
       return step === "conception"
         ? routes.projectDesign(projectId)
@@ -43,7 +35,7 @@ export function workflowStepHref(
 // (the same keys as lib/workflow-status/rules.ts).
 const STEP_KEYS: Record<string, readonly string[]> = {
   master: ["prepare", "mixing", "mastering", "final"],
-  legal: LEGAL_STEP_KEYS,
+  legal: ["inventory", "plan"],
   marketing: ["strategy", "conception", "production", "activations", "review"],
   distribution: ["prepare", "online"],
 };
