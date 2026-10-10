@@ -1,18 +1,21 @@
 import type { SocialLink } from "@/lib/catalog/capture-artist-types";
 import { fr } from "@/lib/i18n/fr";
 
-/** TikTok and Instagram of a person, each with where it was found. */
+/** TikTok, Instagram and Spotify of a person, each with its source. */
 export function SocialLinks({
   tiktok,
   instagram,
+  spotify,
 }: {
   tiktok: SocialLink | null;
   instagram: SocialLink | null;
+  spotify: SocialLink | null;
 }) {
   const t = fr.laboCaptures.socials;
   const links = [
     { network: t.tiktok, link: tiktok },
     { network: t.instagram, link: instagram },
+    { network: t.spotify, link: spotify },
   ].flatMap(({ network, link }) => (link ? [{ network, link }] : []));
 
   if (links.length === 0)
@@ -30,7 +33,7 @@ export function SocialLinks({
               rel="noopener noreferrer"
               className="font-semibold break-all underline-offset-4 hover:underline"
             >
-              @{link.handle}
+              {link.label}
             </a>
             <span className="text-muted-foreground">
               {" "}

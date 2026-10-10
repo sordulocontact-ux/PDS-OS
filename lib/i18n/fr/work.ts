@@ -35,9 +35,9 @@ export const work = {
     build_strategy: "Construire la Stratégie et la soumettre",
     follow_design: "Suivre la conception avec l'équipe créative",
     prepare_release: "Préparer la sortie",
-    run_stage: "Faire avancer l'étape",
+    run_stage: "Faire avancer le projet",
     await_validation: "En attente de validation",
-    done: "Toutes les étapes sont validées",
+    done: "Projet terminé",
   },
 
   noDueDate: "Sans échéance",

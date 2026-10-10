@@ -237,19 +237,21 @@ export const assistant = {
       `« ${name} » n'est pas un membre possible pour ce rôle : choisissez-le dans le formulaire.`,
     unknownCountry: (country: string) =>
       `Pays « ${country} » non reconnu : choisissez-le dans le formulaire.`,
+    // No agreement to make with the label (UX test of 09/10/2026:
+    // « Échéance non repris : il doit… »).
     notSaid: (label: string) =>
-      `${label} non repris : il doit figurer tel quel dans votre message.`,
+      `« ${label} » n'a pas été repris : la valeur doit figurer telle quelle dans votre message. Saisissez-la dans le formulaire.`,
     nameFollowedBy: (name: string, after: string) =>
       `Dans votre message, « ${name} » est suivi de « ${after} » : vérifiez le nom dans le formulaire.`,
     // Dates read by code (lib/assistant/said-date.ts), never by PO.
     understoodDate: (date: string, quote: string) =>
       `${date} · dit « ${quote} »`,
     dateVague: (label: string, quote: string) =>
-      `${label} : « ${quote} » n'est pas un jour précis. Choisissez-le dans le formulaire.`,
+      `« ${label} » : « ${quote} » n'est pas un jour précis. Choisissez la date dans le formulaire.`,
     dateMismatch: (label: string, quote: string) =>
-      `${label} : dans « ${quote} », le jour de la semaine ne correspond pas à la date. Choisissez-la dans le formulaire.`,
+      `« ${label} » : dans « ${quote} », le jour de la semaine ne correspond pas à la date. Choisissez la date dans le formulaire.`,
     dateUnparsed: (label: string, quote: string) =>
-      `${label} : « ${quote} » n'a pas été compris comme une date. Choisissez-la dans le formulaire.`,
+      `« ${label} » : « ${quote} » n'a pas été compris comme une date. Choisissez la date dans le formulaire.`,
     forbiddenFeedback:
       "Seul le directeur général lit et traite les retours de l'équipe.",
     topicNotFound:

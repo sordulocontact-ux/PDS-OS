@@ -7,6 +7,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
 import { inviteProjectTeam } from "@/lib/calls/invite";
+import { participantRow, participantSchema } from "@/lib/calls/participants";
 import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
 import { assessFraming } from "@/lib/framing/assess";
 import { framingCallTopics } from "@/lib/framing/call-prep";
@@ -43,7 +44,7 @@ const callSchema = z.object({
   // « Préparer en détail »: the questions go with each topic.
   detailed: z.enum(["0", "1"]).transform((v) => v === "1"),
   extraTopics: json(z.array(z.string().trim().min(1).max(200)).max(10)),
-  participants: json(z.array(z.string().trim().min(1).max(120)).max(30)),
+  participants: json(z.array(participantSchema).max(30)),
   documentIds: json(z.array(z.uuid()).max(30)),
 });
 
@@ -97,7 +98,7 @@ export async function prepareFramingCall(
     p_meeting_url: p.meetingUrl ?? "",
     p_agenda: agenda,
     p_purpose: p.purpose,
-    p_participants: p.participants.map((name) => ({ name })),
+    p_participants: p.participants.map(participantRow),
     p_document_ids: p.documentIds,
   });
   if (error || !callId) {
@@ -115,7 +116,7 @@ export async function prepareFramingCall(
     organizationId: access.organizationId!,
     projectId: p.projectId,
     mePersonId: access.personId,
-    names: p.participants,
+    names: p.participants.map((person) => person.name),
   });
   redirect(routes.projectCall(p.projectId, callId));
 }

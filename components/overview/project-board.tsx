@@ -11,6 +11,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { projectDateLabel } from "@/lib/projects/labels";
+import type { ProjectType } from "@/lib/projects/types";
 import { formatDate } from "@/lib/release/format";
 import {
   boardActions,
@@ -35,6 +37,7 @@ export function ProjectBoard({
 }: {
   project: {
     id: string;
+    type: ProjectType;
     dueDate: string | null;
     stages: Array<{
       key: string;
@@ -51,6 +54,7 @@ export function ProjectBoard({
     projectId: project.id,
     today,
     projectDueDate: project.dueDate,
+    projectDateLabel: projectDateLabel(project.type),
     workflows: flows.workflows,
     states: flows.states,
     dependencies: flows.dependencies,

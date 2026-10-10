@@ -27,7 +27,8 @@ const NONE_FACT: ProposedFact = { kind: "none", value: {}, quote: null };
  * The one question asked now (ticket Juridique 01: « une seule question
  * dominante »): its reason, a free answer (typed or dictated), what PO read
  * in it, then « Enregistrer ». Nothing is written before that. What the
- * Cadrage established comes as the answer; « Aucun emprunt / accord… »
+ * Cadrage established, or the people already known on the title, comes as
+ * the answer; « Aucun emprunt / accord… »
  * settles the question at once, without PO (UX test of 09/10/2026).
  */
 export function QuestionCard({
@@ -47,7 +48,11 @@ export function QuestionCard({
   const router = useRouter();
   const t = fr.legal.intake;
   const q = t.questions[question.key];
-  const fromCadrage = !correcting && question.suggestion !== null;
+  const from = correcting ? null : question.suggestionFrom;
+  // Some people are already known: ask only for the others.
+  const known = from === "known" && question.key === "contributors";
+  const ask = known ? t.questions.contributors.askKnown : q.ask;
+  const why = known ? t.questions.contributors.whyKnown : q.why;
   const [text, setText] = useState(
     correcting ? (question.lastAnswer ?? "") : (question.suggestion ?? ""),
   );
@@ -106,8 +111,8 @@ export function QuestionCard({
     <PageSection
       card
       id="legal-question"
-      title={q.ask(question.title ?? "")}
-      description={q.why}
+      title={ask(question.title ?? "")}
+      description={why}
     >
       {review ? (
         <ProposalReview
@@ -123,8 +128,10 @@ export function QuestionCard({
         />
       ) : (
         <>
-          {fromCadrage && (
-            <p className="text-sm text-muted-foreground">{t.fromCadrage}</p>
+          {from && (
+            <p className="text-sm text-muted-foreground">
+              {from === "known" ? t.fromKnown : t.fromCadrage}
+            </p>
           )}
           <TextareaField
             id={FIELD_ID}

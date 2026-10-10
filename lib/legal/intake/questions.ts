@@ -16,6 +16,7 @@
 //   publisher    — « Éditeurs 1 à 3 ← Organization + PublishingAgreement »
 //                  (Juridique 06).
 
+import { knownAnswer, type KnownPerson } from "@/lib/legal/intake/known-people";
 import type {
   FactValue,
   IntakeQuestion,
@@ -36,6 +37,8 @@ export type IntakeKnowledge = {
   answers: Map<string, { text: string; facts: FactValue[] }>;
   // What the Cadrage established, by question and title (answerKey).
   cadrage: Map<string, string>;
+  // Who each title and the Cadrage already name, by title.
+  known: Map<string, KnownPerson[]>;
 };
 
 export const answerKey = (key: QuestionKey, masterId: string | null) =>
@@ -55,6 +58,14 @@ export function intakeQuestions(k: IntakeKnowledge): IntakeQuestion[] {
   ): IntakeQuestion => {
     const id = answerKey(key, title?.id ?? null);
     const answer = k.answers.get(id);
+    const people =
+      key === "contributors" && title ? (k.known.get(title.id) ?? []) : [];
+    const fromCadrage = k.cadrage.get(id) ?? null;
+    const suggestion = answer
+      ? null
+      : people.length > 0
+        ? knownAnswer(people)
+        : fromCadrage;
     return {
       key,
       masterId: title?.id ?? null,
@@ -62,7 +73,9 @@ export function intakeQuestions(k: IntakeKnowledge): IntakeQuestion[] {
       answered: answer !== undefined,
       lastAnswer: answer?.text ?? null,
       facts: answer?.facts ?? [],
-      suggestion: answer ? null : (k.cadrage.get(id) ?? null),
+      suggestion,
+      suggestionFrom:
+        suggestion === null ? null : people.length > 0 ? "known" : "cadrage",
     };
   };
   const answeredOr = (

@@ -9,6 +9,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadProjectPlan } from "@/lib/project-plan/queries";
 import { buildTimeline } from "@/lib/project-plan/timeline";
+import { projectDateLabel } from "@/lib/projects/labels";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -33,7 +34,7 @@ export default async function ProjectPlanningPage({
     projectId,
     plan,
     t.kinds.release,
-    t.kinds.project_due,
+    projectDateLabel(project.type),
   );
 
   return (

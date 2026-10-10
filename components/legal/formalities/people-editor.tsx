@@ -10,6 +10,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
+import { splitShareOf, type SplitShare } from "@/lib/legal/formalities/prefill";
 import {
   listSacemCreators,
   listSacemPublishers,
@@ -60,10 +61,13 @@ export function PeopleEditor({
   disabled,
   errors,
   fromSplit = false,
+  splitShares = null,
   onCreators,
   onPublishers,
 }: {
   masterId: string;
+  // The title's confirmed split: someone added by hand takes their share.
+  splitShares?: SplitShare[] | null;
   creators: Creator[];
   publishers: Publisher[];
   disabled: boolean;
@@ -83,16 +87,47 @@ export function PeopleEditor({
       unitsOf(p.phono.replace(",", ".") || "0"),
     ),
   );
+  // A person picked gets their share of the confirmed split, if theirs is
+  // still empty (UX test of 09/10/2026: « parts Phono connues, non
+  // pré-remplies »).
+  const [pickedShare, setPickedShare] = useState(false);
+  const shareOf = (
+    current: { phono: string; contact_id?: string },
+    change: { contact_id?: string },
+    role: string,
+  ) => {
+    if (current.phono || !change.contact_id) return {};
+    const phono = splitShareOf(splitShares, change.contact_id, role);
+    if (phono) setPickedShare(true);
+    return phono ? { phono } : {};
+  };
   const setCreator = (i: number, change: Partial<Creator>) =>
-    onCreators(creators.map((c, j) => (j === i ? { ...c, ...change } : c)));
+    onCreators(
+      creators.map((c, j) =>
+        j === i
+          ? {
+              ...c,
+              ...change,
+              ...shareOf(c, change, change.quality || c.quality),
+            }
+          : c,
+      ),
+    );
   const setPublisher = (i: number, change: Partial<Publisher>) =>
-    onPublishers(publishers.map((p, j) => (j === i ? { ...p, ...change } : p)));
+    onPublishers(
+      publishers.map((p, j) =>
+        j === i ? { ...p, ...change, ...shareOf(p, change, "publisher") } : p,
+      ),
+    );
 
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">{t.notes.creators}</p>
-      {fromSplit && !disabled && (
+      {(fromSplit || pickedShare) && !disabled && (
         <ToneCallout tone="warning">{t.notes.phonoFromSplit}</ToneCallout>
+      )}
+      {!splitShares && !disabled && (
+        <ToneCallout tone="neutral">{t.notes.noConfirmedSplit}</ToneCallout>
       )}
       <FieldError id={`creators-${masterId}-error`}>
         {errors?.fields.creators}

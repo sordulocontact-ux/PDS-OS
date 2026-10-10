@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { SearchPicker } from "@/components/catalog/search-picker";
+import { CreateContactDialog } from "@/components/network/create-contact-dialog";
 import { FilterChip } from "@/components/ui/filter-chip";
-import { Input } from "@/components/ui/input";
+import type { Participant } from "@/lib/calls/participants";
 import { fr } from "@/lib/i18n/fr";
+import {
+  listNetworkPeople,
+  type NetworkPersonOption,
+} from "@/lib/network/people-actions";
 
 /**
- * Who takes part in a prepared exchange: names proposed by PO (a chip
- * removes one) and names typed by the person (a member or someone outside).
+ * Who takes part in a prepared exchange: the team proposed by PO (a chip
+ * removes one), then anyone picked in one search over the team and the
+ * Réseau, or added to the Réseau without leaving the form (UX test of
+ * 09/10/2026: names typed freely were outside the Réseau).
  */
 export function ParticipantsField({
   id,
@@ -19,18 +26,50 @@ export function ParticipantsField({
 }: {
   // Heading id, for aria-labelledby.
   id: string;
-  people: string[];
-  onChange: (people: string[]) => void;
+  people: Participant[];
+  onChange: (people: Participant[]) => void;
   // Shown when the list is empty (when it is required).
   hint?: string;
 }) {
   const t = fr.calls.prepare;
-  const [draft, setDraft] = useState("");
-  const add = () => {
-    const name = draft.trim();
-    if (name && !people.includes(name)) onChange([...people, name]);
-    setDraft("");
+  // The team as PO proposed it: chosen again after being removed.
+  const [team] = useState(() => people.filter((p) => !p.contactId));
+  const [contacts, setContacts] = useState<NetworkPersonOption[]>([]);
+  const [creating, setCreating] = useState<string | null>(null);
+
+  useEffect(() => {
+    void listNetworkPeople().then(setContacts);
+  }, []);
+
+  const options = useMemo(
+    () => [
+      ...team.map((p) => ({
+        id: `n:${p.name}`,
+        label: p.name,
+        detail: t.teamDetail,
+      })),
+      ...contacts.map((c) => ({
+        id: `c:${c.id}`,
+        label: c.label,
+        detail: c.detail,
+      })),
+    ],
+    [team, contacts, t.teamDetail],
+  );
+  const keyOf = (p: Participant) =>
+    p.contactId ? `c:${p.contactId}` : `n:${p.name}`;
+  const picked = useMemo(() => new Set(people.map(keyOf)), [people]);
+
+  const add = (person: Participant) => {
+    if (!picked.has(keyOf(person))) onChange([...people, person]);
   };
+  const pick = (optionId: string) => {
+    const value = optionId.slice(2);
+    if (optionId.startsWith("n:")) return add({ name: value, contactId: null });
+    const contact = contacts.find((c) => c.id === value);
+    if (contact) add({ name: contact.label, contactId: contact.id });
+  };
+
   return (
     <section aria-labelledby={id} className="flex flex-col gap-3">
       <h3 id={id} className="text-sm font-medium">
@@ -38,39 +77,52 @@ export function ParticipantsField({
       </h3>
       {people.length > 0 ? (
         <div className="flex flex-wrap gap-2">
-          {people.map((name) => (
+          {people.map((person) => (
             <FilterChip
-              key={name}
+              key={keyOf(person)}
               pressed
-              aria-label={t.removeParticipant(name)}
-              onClick={() => onChange(people.filter((x) => x !== name))}
+              aria-label={t.removeParticipant(person.name)}
+              onClick={() =>
+                onChange(people.filter((p) => keyOf(p) !== keyOf(person)))
+              }
             >
-              {name}
+              {person.name}
             </FilterChip>
           ))}
         </div>
       ) : (
         hint && <p className="text-caption text-muted-foreground">{hint}</p>
       )}
-      <div className="flex flex-wrap gap-2">
-        <Input
-          aria-label={t.participantPlaceholder}
-          value={draft}
-          maxLength={120}
-          placeholder={t.participantPlaceholder}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              add();
-            }
-          }}
-          className="h-9 min-w-0 flex-1"
-        />
-        <Button type="button" size="sm" variant="outline" onClick={add}>
-          {t.addParticipant}
-        </Button>
-      </div>
+      <SearchPicker
+        label={t.searchLabel}
+        placeholder={t.participantPlaceholder}
+        options={options}
+        excludedIds={picked}
+        onPick={pick}
+        onCreate={(query) => setCreating(query)}
+        createLabel={(query) =>
+          query
+            ? fr.network.picker.createNamed(query)
+            : fr.network.picker.create
+        }
+        noResultLabel={t.noResult}
+        allSelectedLabel={t.allPicked}
+      />
+      <CreateContactDialog
+        open={creating !== null}
+        onOpenChange={(open) => !open && setCreating(null)}
+        name={creating ?? ""}
+        roles={[]}
+        onCreated={(contactId) => {
+          const name = creating ?? "";
+          setCreating(null);
+          void listNetworkPeople().then((list) => {
+            setContacts(list);
+            const contact = list.find((c) => c.id === contactId);
+            add({ name: contact?.label ?? name, contactId });
+          });
+        }}
+      />
     </section>
   );
 }

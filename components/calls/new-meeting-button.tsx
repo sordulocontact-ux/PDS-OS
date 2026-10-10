@@ -1,151 +1,143 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
-import { useActionState, useEffect, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 
-import { Field } from "@/components/auth/field";
-import { FormMessage } from "@/components/auth/form-message";
+import { CallPlanForm } from "@/components/calls/call-plan-form";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
-import { PeoplePicker } from "@/components/ui/people-picker";
 import { createMeeting } from "@/lib/calls/actions";
+import type { CallContact } from "@/lib/calls/invite";
+import type { SlotInput } from "@/lib/calls/slot";
 import { fr } from "@/lib/i18n/fr";
 
-type Person = { personId: string; name: string };
+/** What the meeting form needs, read by the server. */
+export type MeetingFormData = {
+  // Who can be invited in the app: the other active members.
+  members: { personId: string; name: string }[];
+  contacts: CallContact[];
+  // Google Calendar connected: a Meet link is created.
+  googleMeet: boolean;
+  // "YYYY-MM-DDTHH:mm", Paris time, or "" (nothing said by PO).
+  defaultOccurredAt: string;
+};
+
+type Composer = {
+  // Opens « Nouvelle réunion », on a slot picked in the calendar or not.
+  open: (slot?: SlotInput) => void;
+};
+
+const ComposerContext = createContext<Composer | null>(null);
+
+/** The meeting composer of the Calls page, used by its button and calendar. */
+export function useMeetingComposer(): Composer {
+  const composer = useContext(ComposerContext);
+  if (!composer) throw new Error("useMeetingComposer outside its provider");
+  return composer;
+}
 
 /**
- * "Nouvelle réunion" (Calls page): an internal meeting, outside any project,
- * in the modal. Created, it opens on its own page, ready to record.
+ * « Nouvelle réunion » (Calls page): an internal meeting, outside any project,
+ * in the modal, opened by the header's button or by a click (or a drag) on
+ * the calendar, as in Teams. Created, it opens on its own page.
  */
-export function NewMeetingButton({
-  members,
-  defaultOccurredAt,
+export function MeetingComposerProvider({
+  data,
+  children,
 }: {
-  // Who can be invited: the other active members.
-  members: Person[];
-  // "YYYY-MM-DDTHH:mm", Paris time (datetime-local).
-  defaultOccurredAt: string;
+  data: MeetingFormData;
+  children: React.ReactNode;
 }) {
   const t = fr.calls.meeting;
   const [open, setOpen] = useState(false);
+  const [slot, setSlot] = useState<SlotInput | null>(null);
+  const composer = useMemo<Composer>(
+    () => ({
+      open: (picked) => {
+        setSlot(picked ?? null);
+        setOpen(true);
+      },
+    }),
+    [],
+  );
 
   return (
-    <>
-      <Button type="button" size="lg" onClick={() => setOpen(true)}>
-        <IconPlus aria-hidden data-icon="inline-start" />
-        {t.new}
-      </Button>
+    <ComposerContext.Provider value={composer}>
+      {children}
       <FormDialog
         open={open}
         onOpenChange={setOpen}
         title={t.title}
         description={t.description}
         closeLabel={fr.calls.link.close}
+        size="wide"
       >
         <MeetingForm
-          members={members}
-          defaultOccurredAt={defaultOccurredAt}
+          {...data}
+          defaultOccurredAt={
+            slot ? `${slot.date}T${slot.start}` : data.defaultOccurredAt
+          }
+          defaultEnd={slot?.end}
           onCancel={() => setOpen(false)}
         />
       </FormDialog>
-    </>
+    </ComposerContext.Provider>
+  );
+}
+
+/** The header's « Nouvelle réunion », on the next round hour. */
+export function NewMeetingButton() {
+  const { open } = useMeetingComposer();
+  return (
+    <Button type="button" size="lg" onClick={() => open()}>
+      <IconPlus aria-hidden data-icon="inline-start" />
+      {fr.calls.meeting.new}
+    </Button>
   );
 }
 
 /**
- * The meeting's fields. Created, it opens on its page, unless `onSaved` is
- * given (PO's panel): then the page stays and gets the new meeting's id.
+ * The meeting's fields (CallPlanForm). Created, it opens on its page, unless
+ * `onSaved` is given (PO's panel): then the page stays and gets the new
+ * meeting's id.
  */
 export function MeetingForm({
   members,
+  contacts,
+  googleMeet,
   defaultOccurredAt,
+  defaultEnd,
   defaults,
   onSaved,
   onCancel,
-}: {
-  members: Person[];
-  defaultOccurredAt: string;
+}: MeetingFormData & {
+  defaultEnd?: string;
   // A draft of PO: title, link and guests already filled.
   defaults?: { title: string; meetingUrl: string; attendeeIds: string[] };
   onSaved?: (id: string) => void;
   onCancel: () => void;
 }) {
   const t = fr.calls.meeting;
-  const create = fr.calls.create;
-  const [state, formAction, pending] = useActionState(createMeeting, null);
-
-  useEffect(() => {
-    if (state?.ok && state.id) onSaved?.(state.id);
-    // onSaved changes with each render of the parent; the result is what counts.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
-
-  // datetime-local has no zone: convert with the browser's zone before sending.
-  const submit = (form: FormData) => {
-    const date = new Date(String(form.get("occurredAtLocal") ?? ""));
-    form.set(
-      "occurredAt",
-      Number.isNaN(date.getTime()) ? "" : date.toISOString(),
-    );
-    formAction(form);
-  };
-
   return (
-    <form action={submit} className="flex flex-col gap-5">
-      {onSaved && <input type="hidden" name="stay" value="1" />}
-      <Field
-        name="title"
-        label={create.fieldTitle}
-        required
-        maxLength={200}
-        autoComplete="off"
-        placeholder={t.titlePlaceholder}
-        defaultValue={defaults?.title}
-      />
-      <Field
-        name="occurredAtLocal"
-        type="datetime-local"
-        label={t.fieldDate}
-        required
-        defaultValue={defaultOccurredAt}
-        hint={create.dateHint}
-        className="h-10 w-fit text-base md:text-sm"
-      />
-      <Field
-        name="meetingUrl"
-        type="url"
-        inputMode="url"
-        label={create.fieldLink}
-        maxLength={500}
-        autoComplete="off"
-        placeholder={create.linkPlaceholder}
-        hint={create.linkHint}
-        defaultValue={defaults?.meetingUrl}
-      />
-      <PeoplePicker
-        name="attendees"
-        label={t.fieldAttendees}
-        hint={t.attendeesHint}
-        emptyLabel={t.noMembers}
-        candidates={members}
-        defaultSelectedIds={defaults?.attendeeIds ?? []}
-      />
-      {state && !state.ok && (
-        <FormMessage kind="error">{fr.calls.errors[state.error]}</FormMessage>
-      )}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-          {t.cancel}
-        </Button>
-        <Button
-          type="submit"
-          size="lg"
-          disabled={pending}
-          aria-busy={pending || undefined}
-        >
-          {pending ? t.pending : t.submit}
-        </Button>
-      </div>
-    </form>
+    <CallPlanForm
+      action={createMeeting}
+      hidden={onSaved ? { stay: "1" } : undefined}
+      defaultTitle={defaults?.title}
+      titlePlaceholder={t.titlePlaceholder}
+      defaultOccurredAt={defaultOccurredAt}
+      defaultEnd={defaultEnd}
+      members={members}
+      memberDetail={fr.calls.schedule.memberDetail}
+      defaultMemberIds={defaults?.attendeeIds ?? []}
+      contacts={contacts}
+      participantsHint={fr.calls.schedule.participantsHint}
+      googleMeet={googleMeet}
+      defaultUrl={defaults?.meetingUrl || undefined}
+      submitLabel={t.submit}
+      pendingLabel={t.pending}
+      cancelLabel={t.cancel}
+      onCancel={onCancel}
+      onSaved={onSaved}
+    />
   );
 }

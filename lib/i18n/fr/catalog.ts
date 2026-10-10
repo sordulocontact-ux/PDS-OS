@@ -147,6 +147,9 @@ export const catalog = {
       email: "Email",
       phone: "Téléphone",
       isPrimary: "Contact principal",
+      // The person, picked in the Réseau (UX test of 09/10/2026).
+      person: "Personne",
+      fromNetwork: "Repris de sa fiche Réseau, modifiable.",
       submit: "Enregistrer",
       submitting: "Enregistrement…",
       cancel: "Annuler",
@@ -232,6 +235,27 @@ export const catalog = {
     deezerInvalid: "Profil Deezer invalide. Relancez la recherche.",
     deezerUnavailable:
       "Deezer ne répond pas. Réessayez, ou créez l'artiste sans Deezer.",
+    // Picture and main contact, on the same screen (UX test of 09/10/2026:
+    // « Photo et contact absents de la création d'artiste (3 écrans) »).
+    picture: {
+      title: "Photo",
+      fromDeezer: "La photo de Deezer, remplaçable depuis sa fiche.",
+      add: "Ajouter une photo",
+      replace: "Remplacer",
+      remove: "Retirer",
+      hint: "JPG, PNG ou WebP, 5 Mo au plus.",
+      uploading: "Création et envoi de la photo…",
+      failed:
+        "L'artiste est créé, mais la photo n'a pas pu être envoyée. Ne recréez pas l'artiste : ajoutez-la depuis sa fiche.",
+      openArtist: "Continuer",
+    },
+    contact: {
+      title: "Contact principal",
+      hint: "La personne à joindre pour cet artiste, choisie dans le Réseau.",
+      role: "Rôle",
+      failed:
+        "L'artiste est créé, mais son contact n'a pas pu être enregistré. Ajoutez-le depuis sa fiche.",
+    },
     deezer: {
       label: "Rechercher sur Deezer",
       placeholder: "Nom de l'artiste ou lien Deezer",
@@ -282,7 +306,7 @@ export const catalog = {
       artists: "Artiste",
       audioState: "État audio",
       isrc: "ISRC",
-      release: "Release liée",
+      release: "Sortie liée",
       releaseDate: "Sortie officielle",
       status: "Statut",
     },
@@ -367,6 +391,21 @@ export const catalog = {
       audioFileHint:
         "Rattaché au titre à l'état audio choisi ; sa durée est lue quand c'est possible.",
     },
+    // The title's credits, entered with it (UX test of 09/10/2026).
+    credits: {
+      legend: "Crédits",
+      hint: "Qui a écrit, composé, produit ou mixé ce titre : une ligne par personne, avec tous ses rôles.",
+      add: "Ajouter une personne",
+      remove: (name: string) =>
+        name ? `Retirer ${name} des crédits` : "Retirer cette ligne",
+      personRequired: "Choisissez la personne de ce crédit.",
+      rolesRequired: "Choisissez au moins un rôle.",
+      invalid: "Un crédit est incomplet : chaque personne a au moins un rôle.",
+      missing: (count: number) =>
+        count === 1
+          ? "Un crédit est incomplet : complétez-le ou retirez la ligne."
+          : `${count} crédits sont incomplets : complétez-les ou retirez les lignes.`,
+    },
     submit: "Créer le titre",
     submitting: "Création…",
     uploading: "Envoi du fichier…",
@@ -415,6 +454,7 @@ export const catalog = {
     noResult: (query: string) => `Aucun titre ne correspond à « ${query} ».`,
     allSelected: "Tous les titres sont déjà rattachés.",
     create: "Créer un titre",
+    createNamed: (title: string) => `Créer le titre « ${title} »`,
     empty: "Aucun titre rattaché.",
     linked: "Titres rattachés",
     remove: (title: string) => `Retirer ${title}`,

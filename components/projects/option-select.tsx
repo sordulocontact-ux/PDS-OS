@@ -38,6 +38,10 @@ type SingleProps = CommonProps & {
 type MultipleProps = CommonProps & {
   multiple: true;
   defaultValue?: string[];
+  // Controlled: the form fills the choices itself (a credit's roles taken
+  // from the person picked).
+  value?: string[];
+  onValueChange?: (value: string[]) => void;
   // Past this many, the other choices are disabled (the database's limit).
   max?: number;
 };
@@ -113,13 +117,20 @@ function MultipleSelect({
   name,
   items,
   defaultValue,
+  value,
+  onValueChange,
   placeholder,
   max,
   trigger,
 }: MultipleProps & {
   trigger: React.ComponentProps<typeof SelectTrigger>;
 }) {
-  const [selected, setSelected] = useState<string[]>(defaultValue ?? []);
+  const [own, setOwn] = useState<string[]>(defaultValue ?? []);
+  const selected = value ?? own;
+  const setSelected = (next: string[]) => {
+    setOwn(next);
+    onValueChange?.(next);
+  };
   const order = Object.keys(items);
   // Listed in the menu's order, whatever the order they were ticked in.
   const summary = order

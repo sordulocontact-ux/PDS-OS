@@ -71,10 +71,36 @@ export const trackSchema = z.object({
     .pipe(z.uuid().nullable()),
 });
 
+// A JSON list sent by a client control (hidden input).
+const jsonList = <T extends z.ZodType>(item: T, message: string) =>
+  z
+    .string()
+    .optional()
+    .transform((raw, ctx) => {
+      try {
+        return JSON.parse(raw || "[]") as unknown;
+      } catch {
+        ctx.addIssue({ code: "custom", message });
+        return z.NEVER;
+      }
+    })
+    .pipe(z.array(item, { error: message }));
+
+// One person and all their roles on the title (UX test of 09/10/2026); the
+// rows of that person when editing (one per role).
 export const contributorSchema = z.object({
-  ...base,
+  masterId: catalogIdSchema,
+  itemIds: jsonList(z.uuid(), e.required).pipe(z.array(z.uuid()).max(20)),
   name: requiredText(200),
-  role: z.enum(CONTRIBUTOR_ROLES, { error: e.required }),
+  roles: jsonList(
+    z.enum(CONTRIBUTOR_ROLES),
+    t.credits.fields.rolesRequired,
+  ).pipe(
+    z
+      .array(z.enum(CONTRIBUTOR_ROLES))
+      .min(1, { error: t.credits.fields.rolesRequired })
+      .max(CONTRIBUTOR_ROLES.length),
+  ),
   detail: optionalText(200),
   // The person picked from the Réseau; empty for a name only.
   contactId: optionalId,
@@ -154,4 +180,6 @@ export const deleteItemSchema = z.object({
   masterId: catalogIdSchema,
   section: z.enum(MASTER_ITEM_SECTIONS),
   itemId: z.uuid(),
+  // The other rows of the same person (a contributor's other roles).
+  alsoIds: z.array(z.uuid()).max(20).optional(),
 });

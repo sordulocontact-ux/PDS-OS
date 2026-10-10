@@ -295,7 +295,8 @@ bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
   crédits) ; chaque variante a son propre ISRC. Le champ Variante ne fait que la nommer.
 - **Contributeurs & crédits** : les artistes interprètes restent `master_artists`
   (modifiés par « Modifier ») ; `master_contributors` porte tous les autres crédits (rôle
-  fermé, précision libre), triés dans l'ordre des rôles.
+  fermé, précision libre), **une ligne par rôle en base, une ligne par personne à l'écran**
+  avec tous ses rôles (`groupContributors`, § 2 nonies), triés dans l'ordre des rôles.
 - **Splits** : `master_splits`, deux types (master, édition), parts en % à deux décimales.
   **Total ≤ 100 % par type, vérifié au commit** (`split_total_over_100`, trigger différé) ;
   total, reste et statut calculés par le code (`splitTotal`, en centièmes). **Lus et écrits
@@ -401,6 +402,63 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   n'est jamais recréé par un onglet resté ouvert.
 - Seulement sur la page « Nouveau projet » : pas dans le panneau ouvert par PO (son
   brouillon est déjà la carte de PO), ni pour modifier un projet.
+
+### 2 nonies. Ne jamais faire retaper (test UX du 09/10/2026, section 8)
+
+Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
+(`credits-at-creation.test.sql`).
+
+- **Crédits à la création d'un titre** : « Nouveau titre » (page et modale du projet) a un
+  bloc « Crédits » (`CreditRowsField`) : une ligne par personne du Réseau (ou un nom), avec
+  tous ses rôles ; envoyé en un champ JSON `contributors` à `create_master`
+  (`p_contributors`), qui écrit une ligne par rôle dans la même transaction (titre refusé
+  si un crédit n'a pas de rôle, `contributor_requires_role`). Une ligne incomplète passe en
+  rouge à la validation, avec un `FormMessage` qui compte les manques.
+- **Une personne, plusieurs rôles** : `ContributorForm` choisit les rôles en une fois
+  (`OptionSelect multiple`) ; `set_master_contributor_roles` (security invoker) remplace les
+  lignes de cette personne : un rôle gardé garde sa ligne (son id, ce que le Juridique y a
+  relié), un rôle retiré est supprimé, un rôle ajouté est créé, jamais en double pour le même
+  contact (ou le même nom sans contact). La fiche du titre montre une ligne par personne ; le
+  « ⋯ » Supprimer retire tous ses rôles.
+- **Rôle repris du Réseau** (`creditRolesOf`, `lib/catalog/master/contributor-groups.ts`) :
+  auteur·rice-compositeur·rice → paroles + composition, beatmaker → composition + réalisation,
+  réalisateur·rice → réalisation, musicien·ne → musicien·ne ; un·e ingénieur·e du son laisse le
+  rôle à choisir (enregistrement, mixage ou mastering n'est pas su). Seulement quand aucun
+  rôle n'est encore choisi par la personne ; toujours corrigeable.
+- **Ce qui a été tapé est repris** : « Créer le titre « X » » depuis le sélecteur de titres
+  du projet ouvre la modale avec « X » ; le nom du projet prend celui de son seul titre tant
+  que personne n'en a tapé un autre (`onSelectionChange` de `MasterPicker`).
+- **Contact homonyme d'un artiste** : à la création d'un contact du Réseau, une personne
+  nommée exactement comme un artiste du catalogue y est reliée (correspondance du code, sans
+  accents ni casse, jamais PO), dit à l'écran et « Retirer » ; la liste des artistes reste
+  absente de la création (décision du 10/10/2026).
+- **Nouvel artiste en un écran** : sans Deezer, une photo se choisit dans la modale (envoyée
+  par le navigateur une fois l'artiste créé, dans la même soumission) ; le **contact
+  principal** (manager par défaut) est une personne du Réseau (`ContactPersonFields`, e-mail
+  et téléphone repris de sa fiche, modifiables), aussi sur la fiche artiste :
+  `artist_contacts.contact_id` (`on delete set null (contact_id)` : le contact supprimé du
+  Réseau reste un nom). Photo ou contact qui n'ont pas suivi : dit avant d'ouvrir la fiche.
+  Le brouillon de PO garde la relecture des contacts un par un.
+- **Participants des échanges préparés** (Cadrage, Stratégie) : une recherche sur l'équipe
+  proposée par PO et le Réseau, ou « Ajouter « X » au Réseau » ; plus de nom libre.
+  `participants` garde `{ name, contact_id? }` (`lib/calls/participants.ts`). Les calls et
+  réunions planifiés passaient déjà par `AttendeesField` (§ 4 bis).
+- **Fiche de renseignements v2** (`LEGAL_FORM_VERSION = 2`) : catégorie « Featuring » ;
+  `prefill.answers` (`formAnswersOf`) pré-remplit le nom d'artiste et le nom à créditer
+  (fiche artiste reliée par son contact, sinon le nom du crédit) et la catégorie
+  (featuring / principal) ; les réponses déjà données par la personne priment. L'artiste
+  principal crédité (auteur qui chante) a « Artiste interprète » coché sur sa fiche
+  (`formRolesOf`), sans changer ses rôles du plan ni de la cartographie des contrats.
+- **Parts Phono du bulletin SACEM** : la répartition confirmée est lue pour le titre dans
+  **n'importe quel projet** (la dernière version confirmée) ; un créateur ou un éditeur
+  ajouté à la main prend sa part ; un dossier enregistré avant la confirmation se complète
+  là où la part est vide. **Décision du 10/10/2026** : sans répartition confirmée, les splits
+  de la fiche du titre ne sont **pas** repris (non confirmés par les ayants droit), ce que le
+  dossier dit. Les questions de PO au Juridique disent « featuring du titre ».
+- **Piège corrigé** : quatre lectures de `master_contributors` triaient par `position`, une
+  colonne qui n'existe pas sur cette table (PostgREST renvoie une erreur, donc aucun crédit) :
+  le bulletin SACEM n'avait jamais ses créateurs, ni l'éditeur de répartition et les ayants
+  droit d'un emprunt les personnes créditées. Tri par `created_at`.
 
 ## 3. Authentification et navigation (étape 3)
 
@@ -546,6 +604,74 @@ s'afficher sans chargement.
   avec le Cadrage. Call de projet : son responsable crée la tâche dans le projet. Réunion
   interne : la tâche va dans un projet lancé **dont le lecteur est responsable**
   (`listOwnedProjects`) — la RLS de `tasks` ne laisse créer que le responsable.
+
+## 4 bis. Calls planifiés comme sur Teams (10/10/2026)
+
+Demande de Sacha : « un call comme sur Teams ». Deux vues de la page Calls, et une création
+de call qui donne un lien Google Meet.
+
+- **Deux vues** de `/app/calls`, choisies dans l'URL (`ViewToggle` dans l'en-tête) :
+  **Calendrier par défaut** (demande de Sacha, 10/10) et **Liste** (`?display=list`, Tous /
+  À venir / Passés). Le calendrier (`components/calls/calendar/`, places calculées par le
+  serveur sur l'heure de Paris, `lib/calls/calendar.ts`) reprend Teams :
+  - périodes **Semaine (défaut) et Mois** (`?mode=month&date=AAAA-MM-JJ`, sans `date` =
+    aujourd'hui ; Jour et Semaine de travail retirés à la demande de Sacha, 10/10), « Aujourd'hui »,
+    période précédente / suivante ; dans le mois, le numéro d'un jour et « n autres » ouvrent sa
+    semaine ;
+  - grille de 24 h défilante, arrivée sur 7 h 30 (ou le premier call), trait de l'heure actuelle,
+    calls côte à côte quand ils se chevauchent (`dayEvents`), teinte du projet (`projectHue`) ;
+  - **clic ou glisser sur une plage libre** → « Nouvelle réunion » sur ce créneau (pas de 30 min,
+    un clic = 30 min ; Mois : un clic sur un jour = 9 h) ; un seul formulaire pour le bouton et la
+    grille (`MeetingComposerProvider`) ;
+  - **glisser un de ses calls** pour le déplacer (autre jour compris, pas de 15 min), **son bord
+    bas** pour le rallonger, Échap annule ; affiché aussitôt puis enregistré
+    (`rescheduleCall`, remis en place si refusé) ; Mois : glisser vers un autre jour, même heure ;
+  - **clic sur un call** → sa fiche (`EventPeek`) : quand, projet, état, « Rejoindre »,
+    « Ouvrir le call », « Modifier l'horaire » (le même déplacement au clavier, WCAG 2.5.7) ;
+  - seul qui travaille sur le call le déplace (responsable du projet ou créateur de la réunion,
+    RLS `is_call_owner`), et seulement avant tout enregistrement (`audio_path` nul) ; s'il a un
+    événement Google, il suit (`moveMeetEvent`, Google prévient les invités) ; un refus de Google
+    n'annule pas le déplacement, il est dit ;
+  - sur téléphone, la période se lit en agenda de jours (`AgendaList`), sans geste.
+  Non construit : annuler / supprimer un call depuis le calendrier, réunions récurrentes,
+  disponibilités des participants, créer un call **de projet** depuis la grille (on crée une
+  réunion interne).
+- **Page d'un call = ses détails d'abord** (retour de Sacha, 10/10 : « quand je clique sur le
+  call, les informations avec le lien Google Meet ») : `CallDetails` en tête de `CallWorkspace`
+  (quand, rattachement, organisateur, **lien de visio écrit en clair** avec « Rejoindre » et
+  « Copier le lien », participants membres et invités). L'enregistrement passe dessous, replié
+  jusqu'à 15 min avant le call, réservé à qui y travaille ; un call qui a un lien de visio ne
+  demande plus « visio ou sur place » (`videoCall` de `CallRecorder`). La fiche du calendrier
+  (`EventPeek`) montre aussi le lien et « Copier le lien ».
+- **Créneau** : `calls.ends_at` (fin, après le début, vérifié en SQL ; 12 h au plus, vérifié
+  par le code). Un call sans fin (antérieur, ou préparé depuis un workflow) dure son ordre
+  du jour, sinon une heure (`callEndOf`). « À venir » et « Rejoindre » durent jusqu'à la fin
+  du créneau : un call en cours se rejoint encore.
+- **Création** (`CallPlanForm`, commun au « Nouveau call » d'un projet, à la « Nouvelle
+  réunion » de la page Calls et au brouillon de PO) dans l'ordre de Teams : nom, participants,
+  jour + début → fin (la fin suit le début en gardant la durée, durée affichée), visio. Champs
+  manquants en rouge au premier essai seulement (`docs/DESIGN.md` § 4).
+- **Participants** (`AttendeesField`) : une seule recherche sur les membres (l'équipe du
+  projet pour un call de projet, proposés d'office comme avant) et le **Réseau**, ou une
+  **adresse e-mail tapée** pour quelqu'un d'extérieur. Membres → `call_attendees` (notifiés
+  dans l'app, inchangé) ; contacts et adresses → `call_guests` (e-mail en minuscules, une
+  fois par call ; l'adresse d'un contact est relue dans le Réseau côté serveur, jamais prise
+  du navigateur ; un contact sans e-mail est refusé). Lus par qui voit le call, écrits par qui
+  y travaille (`is_call_owner`), supprimés avec le call.
+- **Lien Google Meet** (`lib/integrations/google-calendar.ts`, seul point d'entrée) : à la
+  création, PDS OS crée l'événement dans l'agenda du compte Google organisateur
+  (`conferenceDataVersion=1`, `hangoutsMeet`, `sendUpdates=all`) : **Google envoie
+  l'invitation par e-mail** au créateur, aux membres et aux invités ; le lien devient
+  `meeting_url`, l'événement `google_event_id`. Le call est enregistré **avant** l'appel à
+  Google : un refus ne perd jamais le call, sa page le dit (`?meet=failed`) et le lien peut
+  être collé à la main. Décoché, ou sans Google configuré, on colle le lien d'un autre outil.
+  Le créneau déplacé dans le calendrier met l'événement à jour ; changer les invités après
+  coup, non (non construit).
+- **Configurer Google** (facultatif, `.env.example`) : projet Google Cloud avec l'API Google
+  Calendar, client OAuth « Desktop app », puis
+  `node scripts/google-calendar-token.mjs <client id> <client secret>` connecté avec le
+  compte qui organisera les calls (celui de l'agence) → `GOOGLE_CALENDAR_REFRESH_TOKEN`.
+  Portée demandée : `calendar.events` seulement.
 
 ---
 
@@ -1919,6 +2045,17 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   (`lib/legal/intake/cadrage.ts`), lue par PO puis gardée par une personne ; bouton « Aucun
   emprunt / Aucun accord / Pas d'éditeur » qui enregistre la réponse vide sans PO, et
   « Enregistrer : aucun … » quand PO n'a rien gardé.
+- **Personnes déjà connues** (retour de Sacha du 10/10/2026, « le code connaît déjà des
+  choses ») : la question « Qui a participé » part de ce que PDS OS sait du titre
+  (`lib/legal/intake/known-people.ts`, lu par `known-queries.ts`) : ses artistes (interprètes),
+  les ingénieurs de mix et de mastering confirmés au Cadrage (contacts du Réseau, appliqués à
+  chaque titre du projet) et l'ingénieur noté sur une session d'enregistrement, de mixage ou
+  de mastering. Ils sont écrits en tête de la réponse, une ligne par personne avec sa source ;
+  la question devient « Qui d'autre a participé ? » (composition, texte, arrangement,
+  production, musiciens : rien de cela n'est déduit). À l'enregistrement, le serveur relit ces
+  personnes et relie le crédit d'un ingénieur du Cadrage à son contact (`contact_id` passé à
+  `record_legal_answer`, migration `20261010001801`, gardé seulement pour un contact actif de
+  l'organisation, jamais trouvé par le nom).
 - **Échéances** (`lib/legal/plan/due-dates.ts`, décision du 10/10/2026, aucun ticket) : fiches
   aujourd'hui + 7 j, emprunts sortie − 45 j, contrats et répartitions − 30 j, SACEM − 15 j, jamais
   avant aujourd'hui + 3 j ; sans date de sortie, seules les fiches ont une échéance.
@@ -2432,9 +2569,17 @@ navigation principale, **pour tout membre approuvé, en production aussi** (cont
   images), donnée jamais consigne. Le modèle **regroupe les noms d'une même personne** (nom
   affiché + pseudo + « son original - X ») et propose un nom d'artiste avec son raisonnement.
   Le code ne garde que les noms présents dans le texte que le modèle a lu (`visibleText`).
-- **Compte Deezer décidé par le code** : homonymes exacts de chaque nom (sans casse, accents
-  ni ponctuation) ; **« Compte trouvé »** quand les sorties d'un homonyme portent un autre
-  nom de la personne (Straat / huntrill → Huntrill : « BigSTRaat », « STRaatos ») ;
+- **Noms déduits par PO** (`searchNames`) : le nom d'artiste caché dans un pseudo
+  (« theodorabossladyy » → « Theodora ») ; seulement cherché, et gardé seulement s'il est
+  un morceau d'un nom écrit (PO ne peut rien inventer).
+- **Compte Deezer décidé par le code** (`lib/catalog/capture-deezer.ts`) : candidats = homonymes
+  exacts d'un nom écrit ou déduit (sans casse, accents ni ponctuation), plus les artistes d'un
+  son dont le titre est exactement un nom écrit (le nom affiché est souvent un titre :
+  « Miss KITOKO ») ; **« Compte trouvé »** quand une sortie du candidat correspond à un
+  **autre** indice de la capture que celui qui l'a fait trouver : un nom écrit, ou un mot du
+  lien de la bio (`linkClues` : « bemyvalentinemrdj.lnk.to/Th… » → « Be my Valentine ? /
+  MR. DJ » ; un morceau coupé par « … » est ignoré). Straat / huntrill → Huntrill
+  (« BigSTRaat ») et non Hef, dont un son s'appelle « Straat » ;
   **« À vérifier »** quand un seul homonyme a un public (un homonyme sous 1 % des fans du
   plus suivi ne compte pas) ; **« Plusieurs comptes »** sinon, l'humain choisit ;
   « Déjà au catalogue » par `deezer_id`. Le nom affiché est celui du compte Deezer trouvé.
@@ -2442,8 +2587,11 @@ navigation principale, **pour tout membre approuvé, en production aussi** (cont
   sources publiques sans clé ni scraping, ordre décidé par le code : le pseudo lu sur la
   capture est **confirmé par l'oEmbed officiel de TikTok** avant la recherche Deezer (un
   pseudo inconnu de TikTok est écarté, le nom affiché qu'il renvoie rejoint les noms) ;
-  un Instagram écrit sur la capture (bio) est repris tel quel ; sinon, **MusicBrainz** puis
-  **Wikidata** (P2003 Instagram, P7085 TikTok) relient le compte Deezer trouvé à ses réseaux,
+  un Instagram écrit sur la capture (bio) est repris tel quel (une faute de lecture reste
+  possible : source « lu sur la capture ») ; un **Linktree** écrit en entier est lu
+  (`lib/integrations/linktree.ts`, JSON `__NEXT_DATA__` de la page publique, format non
+  documenté) ; sinon, **MusicBrainz** puis **Wikidata** (P2003 Instagram, P7085 TikTok,
+  P1902 Spotify) relient le compte Deezer trouvé à ses réseaux, **Spotify** compris,
   toujours par l'id Deezer, jamais par le nom, et seulement pour « Compte trouvé » ou « À
   vérifier ». MusicBrainz : une requête par seconde (file dans le module). Chaque lien dit
   sa source ; une source en panne est sautée, jamais bloquante. Huntrill → TikTok @huntrill
@@ -2460,7 +2608,8 @@ Voir `.env.example` (commenté). Schémas zod : `lib/env.ts` (serveur) et
 `lib/env-public.ts` (`NEXT_PUBLIC_*`). Clés requises : Supabase (URL, anon), clé du
 fournisseur LLM choisi, clé Groq ; optionnelles : `LLM_MODEL`, `TRANSCRIPTION_MODEL`,
 `ODESLI_API_KEY`, `CRON_SECRET` (≥ 32 car.), `SUPABASE_SERVICE_ROLE_KEY` (cron),
-clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vault, § 8 bis).
+clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vault, § 8 bis),
+`GOOGLE_CALENDAR_CLIENT_ID` / `_CLIENT_SECRET` / `_REFRESH_TOKEN` / `_ID` (lien Meet, § 4 bis).
 
 ---
 

@@ -21,7 +21,7 @@ import type {
 import { fr } from "@/lib/i18n/fr";
 
 // "Nouvel artiste" modal (step A): search Deezer first, then confirm the
-// name, the relation with PDS and notes; "Créer sans Deezer" keeps the manual
+// name, the relation with PDS, the picture, the main contact and notes; "Créer sans Deezer" keeps the manual
 // form. From the artist list, the new (or taken) artist opens on its page;
 // from a picker, it is handed back instead, so the form behind keeps its
 // input.
@@ -81,6 +81,7 @@ export function ArtistForm({
   onCancel,
   onDone,
   pickerMode,
+  withContact = true,
 }: {
   initialName: string;
   initialNotes?: string;
@@ -88,6 +89,8 @@ export function ArtistForm({
   onCancel: () => void;
   onDone: (artist: ArtistOption) => void;
   pickerMode: boolean;
+  // false: PO's draft proposes the contacts, reviewed after.
+  withContact?: boolean;
 }) {
   const [step, setStep] = useState<Step>({
     kind: "search",
@@ -123,6 +126,7 @@ export function ArtistForm({
       onCancel={onCancel}
       onDone={onDone}
       pickerMode={pickerMode}
+      withContact={withContact}
     />
   );
 }

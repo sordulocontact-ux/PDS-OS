@@ -5,29 +5,26 @@ import type {
   SocialLink,
   SocialSource,
 } from "@/lib/catalog/capture-artist-types";
-import type { Matched, Person } from "@/lib/catalog/capture-artists";
+import type { Matched, Person } from "@/lib/catalog/capture-person";
+import { linktreeSlug } from "@/lib/catalog/capture-text";
 import {
   instagramUrl,
   socialsOfDeezerArtist,
+  spotifyUrl,
   tiktokProfile,
   tiktokUrl,
+  type SocialHandles,
 } from "@/lib/integrations/artist-socials";
+import { linktreeSocials } from "@/lib/integrations/linktree";
 
 /**
- * TikTok and Instagram of a person read on a screenshot (Labo). Decided by
- * the code: the handle read on the screenshot, confirmed by TikTok; then the
- * accounts MusicBrainz or Wikidata link to the Deezer profile found.
+ * TikTok, Instagram and Spotify of a person read on a screenshot (Labo),
+ * first source that knows wins: the screenshot itself (TikTok handle
+ * confirmed by TikTok, Instagram written in the bio), the artist's own
+ * Linktree, then what MusicBrainz or Wikidata link to the Deezer profile.
  */
 
-const link = (
-  network: "tiktok" | "instagram",
-  handle: string,
-  source: SocialSource,
-): SocialLink => ({
-  handle,
-  url: network === "tiktok" ? tiktokUrl(handle) : instagramUrl(handle),
-  source,
-});
+type Network = keyof SocialHandles;
 
 /**
  * The handle read on the screenshot, asked to TikTok before the Deezer
@@ -40,7 +37,7 @@ export async function confirmTikTok(person: Person): Promise<Person> {
   const profile = await tiktokProfile(handle);
   if (profile === null) return person;
   if (profile === undefined)
-    return { ...person, tiktok: link("tiktok", handle, "capture") };
+    return { ...person, tiktok: handleLink("tiktok", handle, "capture") };
   const known = person.names.some(
     (n) => n.toLowerCase() === profile.displayName.toLowerCase(),
   );
@@ -50,34 +47,73 @@ export async function confirmTikTok(person: Person): Promise<Person> {
       known || !profile.displayName
         ? person.names
         : [...person.names, profile.displayName],
-    tiktok: link("tiktok", profile.handle, "tiktok"),
+    tiktok: handleLink("tiktok", profile.handle, "tiktok"),
   };
 }
 
-// Only for an account the code is fairly sure of: never for homonyms.
 export async function withSocials(person: Matched): Promise<CaptureArtist> {
-  const { read, ...artist } = person;
-  const readInstagram = read.instagram
-    ? link("instagram", read.instagram, "capture")
-    : null;
+  const { read, links } = person;
+  // What the browser gets: search names, clues and links stay here.
+  const artist = {
+    names: person.names,
+    artistName: person.artistName,
+    role: person.role,
+    reasoning: person.reasoning,
+    tiktok: person.tiktok,
+    status: person.status,
+    account: person.account,
+    others: person.others,
+  };
+  const name = artist.account?.name ?? artist.artistName;
+  const link = (network: Network, value: string, source: SocialSource) =>
+    network === "spotify"
+      ? { label: name, url: spotifyUrl(value), source }
+      : handleLink(network, value, source);
+
+  const found: Record<Network, SocialLink | null> = {
+    tiktok: artist.tiktok,
+    instagram: read.instagram
+      ? link("instagram", read.instagram, "capture")
+      : null,
+    spotify: null,
+  };
+  const fill = (handles: SocialHandles | null, source: SocialSource) => {
+    for (const network of ["tiktok", "instagram", "spotify"] as const) {
+      const value = handles?.[network];
+      if (!found[network] && value)
+        found[network] = link(network, value, source);
+    }
+  };
+  const complete = () => Object.values(found).every(Boolean);
+
+  // The artist's own Linktree, when the screenshot shows it in full.
+  const slug = linktreeSlug(links);
+  if (slug && !complete())
+    fill(await linktreeSocials(slug).catch(() => null), "linktree");
+
+  // Only for an account the code is fairly sure of: never for homonyms.
   const sure =
     artist.account &&
     (artist.status === "linked" || artist.status === "single");
-  if (!sure || (artist.tiktok && readInstagram))
-    return { ...artist, instagram: readInstagram };
+  if (sure && !complete()) {
+    const linked = await socialsOfDeezerArtist(artist.account!.deezerId);
+    for (const network of ["tiktok", "instagram", "spotify"] as const) {
+      const value = linked[network];
+      if (!found[network] && value)
+        found[network] = link(network, value.handle, value.source);
+    }
+  }
+  return { ...artist, ...found };
+}
 
-  const found = await socialsOfDeezerArtist(artist.account!.deezerId);
+function handleLink(
+  network: "tiktok" | "instagram",
+  handle: string,
+  source: SocialSource,
+): SocialLink {
   return {
-    ...artist,
-    tiktok:
-      artist.tiktok ??
-      (found.tiktok
-        ? link("tiktok", found.tiktok.handle, found.tiktok.source)
-        : null),
-    instagram:
-      readInstagram ??
-      (found.instagram
-        ? link("instagram", found.instagram.handle, found.instagram.source)
-        : null),
+    label: `@${handle}`,
+    url: network === "tiktok" ? tiktokUrl(handle) : instagramUrl(handle),
+    source,
   };
 }

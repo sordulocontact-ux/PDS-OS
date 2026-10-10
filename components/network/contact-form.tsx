@@ -10,6 +10,7 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { fr } from "@/lib/i18n/fr";
+import { normalizeSearch } from "@/lib/utils/search";
 import { saveNetworkContact } from "@/lib/network/actions";
 import {
   NETWORK_KINDS,
@@ -24,7 +25,9 @@ import {
  * organization, its roles, then how to reach it. A person may belong to an
  * organization of the network (picked, or added on the spot); a contact may
  * stand for a catalog artist, chosen when editing only (never listed at
- * creation).
+ * creation). At creation, a person named exactly as an artist of the catalog
+ * is linked to it, said on screen and removable (UX test of 09/10/2026:
+ * « Artiste du catalogue : Aucun » for the namesake of the title's artist).
  */
 export function ContactForm({
   contact,
@@ -50,6 +53,15 @@ export function ContactForm({
   const [kind, setKind] = useState<NetworkKind>(
     contact?.kind ?? initial?.kind ?? "person",
   );
+  const [name, setName] = useState(contact?.name ?? initial?.name ?? "");
+  const [unlinked, setUnlinked] = useState(false);
+  // The catalog artist of the same name, found by the code (never by PO).
+  const namesake =
+    !contact && !initial?.artistId && kind === "person" && name.trim()
+      ? (options.artists.find(
+          (a) => normalizeSearch(a.name) === normalizeSearch(name),
+        ) ?? null)
+      : null;
 
   useEffect(() => {
     if (state?.ok) onSaved(state.id);
@@ -81,9 +93,17 @@ export function ContactForm({
         maxLength={200}
         autoComplete="off"
         placeholder={t.namePlaceholder[kind]}
-        defaultValue={contact?.name ?? initial?.name}
+        value={name}
+        onChange={(event) => setName(event.target.value)}
         error={error?.field === "name" ? error.error : undefined}
       />
+      {namesake && (
+        <ArtistNamesake
+          artist={namesake}
+          linked={!unlinked}
+          onToggle={() => setUnlinked((value) => !value)}
+        />
+      )}
       <OptionSelect
         multiple
         name="roles"
@@ -109,6 +129,9 @@ export function ContactForm({
           link found by PO's draft is kept as is, the rest is set by editing. */}
       {!contact && initial?.artistId && (
         <input type="hidden" name="artistId" value={initial.artistId} />
+      )}
+      {namesake && !unlinked && (
+        <input type="hidden" name="artistId" value={namesake.id} />
       )}
       {contact && options.artists.length > 0 && (
         <OptionSelect
@@ -183,5 +206,37 @@ export function ContactForm({
         </Button>
       </div>
     </form>
+  );
+}
+
+function ArtistNamesake({
+  artist,
+  linked,
+  onToggle,
+}: {
+  artist: { id: string; name: string };
+  linked: boolean;
+  onToggle: () => void;
+}) {
+  const t = fr.network.form;
+  return (
+    <div
+      role="status"
+      className="flex flex-wrap items-center gap-3 rounded-xl border border-border px-3 py-2.5"
+    >
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="text-sm font-medium">
+          {linked ? t.artistLinked(artist.name) : t.artistUnlinked}
+        </span>
+        {linked && (
+          <span className="text-xs text-muted-foreground">
+            {t.artistLinkedHint}
+          </span>
+        )}
+      </span>
+      <Button type="button" variant="outline" size="sm" onClick={onToggle}>
+        {linked ? t.artistUnlink : t.artistRelink(artist.name)}
+      </Button>
+    </div>
   );
 }

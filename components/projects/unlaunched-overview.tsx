@@ -5,7 +5,7 @@ import { TransmissionPanel } from "@/components/projects/transmission-panel";
 import { routes } from "@/lib/auth/redirects";
 import { masterLabel } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
-import { projectKindLabel } from "@/lib/projects/labels";
+import { projectDateLabel, projectKindLabel } from "@/lib/projects/labels";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { FactList } from "@/components/ui/fact-list";
 
@@ -51,7 +51,7 @@ export function UnlaunchedOverview({
       ? [[t.artist, project.artistName || null] as [string, string | null]]
       : []),
     [
-      t.dueDate,
+      projectDateLabel(project.type),
       project.dueDate
         ? dateFormatter.format(new Date(`${project.dueDate}T00:00:00`))
         : null,

@@ -52,7 +52,11 @@ export function CaptureArtistRow({ artist }: { artist: CaptureArtist }) {
 
       {account && <DeezerAccountCard account={account} />}
       <p className="text-sm">{why}</p>
-      <SocialLinks tiktok={artist.tiktok} instagram={artist.instagram} />
+      <SocialLinks
+        tiktok={artist.tiktok}
+        instagram={artist.instagram}
+        spotify={artist.spotify}
+      />
 
       {artist.others.length > 0 && (
         <div className="grid gap-2">

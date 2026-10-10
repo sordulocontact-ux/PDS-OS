@@ -7,9 +7,11 @@
 export type CaptureRole = "account" | "sound" | "mentioned";
 
 /**
- * - linked: a Deezer account named after one name, whose releases carry
- *   another name of the same person (Huntrill → « BigSTRaat »);
- * - single: the only Deezer artist with exactly that name, to check;
+ * - linked: a Deezer account named after one name (written, or found inside
+ *   one by PO), whose releases match another clue of the screenshot: a name
+ *   (Huntrill → « BigSTRaat », Theodora → « Miss Kitoko ») or the bio link
+ *   (bemyvalentinemrdj.lnk.to → « Be my Valentine ? / MR. DJ »);
+ * - single: the only Deezer artist of that name with an audience, to check;
  * - several: several homonyms, nothing tells them apart;
  * - none: no Deezer artist has exactly one of the names.
  */
@@ -22,7 +24,7 @@ export type DeezerAccount = {
   pictureUrl: string | null;
   fans: number;
   releaseCount: number;
-  // Releases whose title carries another name of the person.
+  // Releases whose title matches another clue of the screenshot.
   evidence: string[];
   // Already in the catalog under that Deezer profile.
   existing: { id: string; name: string } | null;
@@ -30,11 +32,14 @@ export type DeezerAccount = {
 
 /**
  * Where a social link comes from: read on the screenshot, confirmed by
- * TikTok's oEmbed, or linked to the Deezer profile by MusicBrainz / Wikidata.
+ * TikTok's oEmbed, on the artist's Linktree, or linked to the Deezer profile
+ * by MusicBrainz / Wikidata.
  */
-export type SocialSource = "capture" | "tiktok" | "musicbrainz" | "wikidata";
+export type SocialSource =
+  "capture" | "tiktok" | "linktree" | "musicbrainz" | "wikidata";
 
-export type SocialLink = { handle: string; url: string; source: SocialSource };
+// `label`: "@huntrill" for a handle, the artist's name for Spotify.
+export type SocialLink = { label: string; url: string; source: SocialSource };
 
 export type CaptureArtist = {
   names: string[];
@@ -46,6 +51,7 @@ export type CaptureArtist = {
   others: DeezerAccount[];
   tiktok: SocialLink | null;
   instagram: SocialLink | null;
+  spotify: SocialLink | null;
 };
 
 export type CaptureArtistsResult = {

@@ -17,6 +17,8 @@ const FORM_ROLE_OF: Record<NetworkRole, FormRole> = {
   photographer: "provider",
   designer: "provider",
   provider: "provider",
+  studio: "studio",
+  lawyer: "lawyer",
   partner: "other",
   label: "label",
   publisher: "publisher",

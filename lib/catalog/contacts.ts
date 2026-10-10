@@ -18,6 +18,8 @@ export type ArtistContact = {
   email: string | null;
   phone: string | null;
   isPrimary: boolean;
+  // The person of the Réseau this contact is, when picked there.
+  networkContactId: string | null;
 };
 
 export function isContactRole(value: unknown): value is ContactRole {

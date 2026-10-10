@@ -1,20 +1,20 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 
-import { CallFields, withOccurredAt } from "@/components/calls/call-fields";
+import { CallPlanForm } from "@/components/calls/call-plan-form";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PeoplePicker } from "@/components/ui/people-picker";
 import { createCall } from "@/lib/calls/actions";
+import type { CallContact } from "@/lib/calls/invite";
 import { fr } from "@/lib/i18n/fr";
 
 /**
  * "Nouveau call": a button that unfolds the form in place. When the project
  * has no call yet, the form is open from the start (it is the only action).
- * A title, a date, an optional video link and who takes part: recording
- * consent is given by contract.
+ * Planned as in Teams (CallPlanForm): name, who takes part, the slot, the
+ * Meet link; recording consent is given by contract.
  */
 export function CreateCallForm({
   projectId,
@@ -22,18 +22,21 @@ export function CreateCallForm({
   defaultTitle,
   initiallyOpen,
   team,
+  contacts,
+  googleMeet,
 }: {
   projectId: string;
   defaultOccurredAt: string;
   defaultTitle: string;
   initiallyOpen: boolean;
-  // Who can be invited (the project's team, the owner left out), all
-  // proposed: each one is notified (UX test of 09/10/2026).
+  // Who can be invited in the app (the project's team, the owner left out),
+  // all proposed: each one is notified (UX test of 09/10/2026).
   team: { personId: string; name: string }[];
+  contacts: CallContact[];
+  googleMeet: boolean;
 }) {
   const t = fr.calls.create;
   const [open, setOpen] = useState(initiallyOpen);
-  const [state, formAction, pending] = useActionState(createCall, null);
   const canEdit = useCanEditProject();
 
   if (!canEdit) return null;
@@ -46,49 +49,30 @@ export function CreateCallForm({
     );
   }
 
-  const submit = (form: FormData) => formAction(withOccurredAt(form));
-
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>{t.title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form action={submit} className="grid max-w-xl gap-5">
-          <input type="hidden" name="projectId" value={projectId} />
-          <CallFields
-            defaultTitle={defaultTitle}
-            defaultOccurredAt={defaultOccurredAt}
-          />
-          <PeoplePicker
-            name="attendees"
-            label={t.fieldAttendees}
-            hint={t.attendeesHint}
-            emptyLabel={t.noTeam}
-            candidates={team}
-            defaultSelectedIds={team.map((p) => p.personId)}
-          />
-          {state && !state.ok && (
-            <p role="alert" className="text-sm text-error">
-              {fr.calls.errors[state.error]}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            <Button type="submit" disabled={pending} className="h-10 px-4">
-              {pending ? t.pending : t.submit}
-            </Button>
-            {!initiallyOpen && (
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-10 px-4"
-                onClick={() => setOpen(false)}
-              >
-                {t.cancel}
-              </Button>
-            )}
-          </div>
-        </form>
+      <CardContent className="max-w-xl">
+        <CallPlanForm
+          action={createCall}
+          hidden={{ projectId }}
+          defaultTitle={defaultTitle}
+          titlePlaceholder={t.titlePlaceholder}
+          defaultOccurredAt={defaultOccurredAt}
+          members={team}
+          memberDetail={fr.calls.schedule.projectMemberDetail}
+          defaultMemberIds={team.map((p) => p.personId)}
+          contacts={contacts}
+          participantsHint={fr.calls.schedule.participantsProjectHint}
+          googleMeet={googleMeet}
+          submitLabel={t.submit}
+          pendingLabel={t.pending}
+          cancelLabel={t.cancel}
+          onCancel={initiallyOpen ? undefined : () => setOpen(false)}
+          footer="start"
+        />
       </CardContent>
     </Card>
   );

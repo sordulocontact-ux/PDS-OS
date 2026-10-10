@@ -163,26 +163,34 @@ export const masterPage = {
     emptyBody: "Créditez les auteurs, compositeurs, producteurs et musiciens.",
     emptyBodyReadOnly: "Les contributeurs du titre apparaîtront ici.",
     roles: {
-      composer: "Compositeur",
-      lyricist: "Auteur",
-      arranger: "Arrangeur",
-      producer: "Producteur",
-      co_producer: "Coproducteur",
-      recording_engineer: "Ingénieur d'enregistrement",
-      mix_engineer: "Ingénieur mixage",
-      mastering_engineer: "Ingénieur mastering",
-      musician: "Musicien",
+      composer: "Compositeur·rice",
+      lyricist: "Auteur·rice (paroles)",
+      arranger: "Arrangeur·se",
+      producer: "Réalisateur·rice",
+      co_producer: "Coréalisateur·rice",
+      recording_engineer: "Ingé son (enregistrement)",
+      mix_engineer: "Ingé son (mixage)",
+      mastering_engineer: "Ingé son (mastering)",
+      musician: "Musicien·ne",
       other: "Autre",
     },
     columns: {
       name: "Nom",
-      role: "Rôle",
+      role: "Rôles",
       detail: "Précision",
       actions: "Actions",
     },
     fields: {
       name: "Nom",
       role: "Rôle",
+      // One person, all their roles at once (UX test of 09/10/2026).
+      roles: "Rôles",
+      rolesPlaceholder: "Choisir un ou plusieurs rôles",
+      rolesRequired: "Choisissez au moins un rôle.",
+      rolesFromNetwork:
+        "Rôles repris de sa fiche Réseau, à corriger si besoin.",
+      rolesEngineer:
+        "Ingénieur·e au Réseau : précisez enregistrement, mixage ou mastering.",
       detail: "Précision",
       detailHint:
         "Instrument ou détail : « guitare », « production additionnelle ».",
@@ -193,7 +201,8 @@ export const masterPage = {
     editTitle: "Modifier le contributeur",
     formDescription: "Le nom tel qu'il doit apparaître dans les crédits.",
     confirmTitle: "Retirer ce contributeur ?",
-    confirmBody: (name: string) => `« ${name} » ne sera plus crédité.`,
+    confirmBody: (name: string) =>
+      `« ${name} » ne sera plus crédité sur ce titre, pour aucun de ses rôles.`,
   },
 
   splits: {
@@ -211,9 +220,10 @@ export const masterPage = {
     roles: {
       label: "Label",
       artist: "Artiste",
-      producer: "Producteur",
-      author: "Auteur",
-      composer: "Compositeur",
+      // The owner of the recording, not the artistic producer.
+      producer: "Producteur (phonographique)",
+      author: "Auteur·rice (paroles)",
+      composer: "Compositeur·rice",
       publisher: "Éditeur",
       other: "Autre",
     },

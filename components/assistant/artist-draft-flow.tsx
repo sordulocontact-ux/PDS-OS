@@ -63,6 +63,8 @@ export function ArtistDraftFlow({
         initialNotes={values.notes ?? ""}
         initialRelation={values.relation}
         pickerMode={false}
+        // The contacts PO proposes are reviewed one by one after.
+        withContact={contacts.length === 0}
         onCancel={onCancel}
         onDone={(artist) =>
           go(

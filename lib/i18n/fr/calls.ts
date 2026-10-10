@@ -1,5 +1,10 @@
 /** Calls, audio upload, transcripts and reports (step 4). */
+import { calendar, details, schedule } from "./calls-schedule";
+
 export const calls = {
+  schedule,
+  calendar,
+  details,
   list: {
     title: "Calls",
     description:
@@ -78,7 +83,6 @@ export const calls = {
     pending: "Création…",
     cancel: "Annuler",
     attendees: "Participants",
-    onlyCreator: "aucun invité",
     createdBy: (name: string) => `Organisée par ${name}`,
   },
   // Joining a call through its video link.
@@ -297,7 +301,13 @@ export const calls = {
     total: (n: number) => `Environ ${n} min`,
     participants: "Participants",
     addParticipant: "Ajouter",
-    participantPlaceholder: "Nom (artiste, manager…)",
+    // One search over the team and the Réseau (UX test of 09/10/2026).
+    searchLabel: "Ajouter un participant",
+    participantPlaceholder: "Chercher dans l'équipe ou le Réseau",
+    teamDetail: "Équipe du projet",
+    noResult: (query: string) =>
+      `Personne ne s'appelle « ${query} » dans l'équipe ni dans le Réseau.`,
+    allPicked: "Tout le monde est déjà ajouté.",
     removeParticipant: (name: string) => `Retirer ${name}`,
   },
   errors: {
@@ -305,6 +315,12 @@ export const calls = {
     title_required: "Donnez un titre au call.",
     date_invalid: "Date invalide.",
     link_invalid: "Le lien de visio doit commencer par https://.",
+    end_before_start: "La fin du call doit venir après son début.",
+    slot_too_long: "Un call dure 12 heures au plus : vérifiez les heures.",
+    guest_email_invalid:
+      "Une adresse invitée n'est pas valide : retirez-la et tapez-la à nouveau.",
+    guest_without_email:
+      "Un contact invité n'a pas d'e-mail dans le Réseau : retirez-le, ou tapez son adresse.",
     not_found: "Call introuvable ou inaccessible.",
     unauthorized: "Session expirée : reconnectez-vous.",
     forbidden:
@@ -326,7 +342,7 @@ export const calls = {
     provider_quota:
       "Quota du fournisseur atteint. Réessayez dans quelques minutes.",
     provider_error:
-      "Le fournisseur a refusé la requête (clé, format ou panne). Détail dans la console du serveur.",
+      "Le service de transcription n'a pas répondu. Réessayez dans un moment ; si ça continue, prévenez l'équipe technique.",
     transcript_empty:
       "Rien d'exploitable dans l'enregistrement : aucune parole n'a été entendue (micro coupé ?). Aucun compte rendu n'a été fait : réenregistrez, ou importez un autre fichier.",
     save_failed: "Le résultat n'a pas pu être enregistré. Réessayez.",

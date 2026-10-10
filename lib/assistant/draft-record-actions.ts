@@ -6,7 +6,9 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { loadBudget } from "@/lib/budget/queries";
 import type { BudgetLever } from "@/lib/budget/types";
+import type { MeetingFormData } from "@/components/calls/new-meeting-button";
 import { nextRoundHourInput } from "@/lib/calls/format";
+import { loadCallContacts } from "@/lib/calls/invite";
 import type { ContractType } from "@/lib/contracts/types";
 import { loadMembers, type Member } from "@/lib/framing/related";
 import {
@@ -25,6 +27,7 @@ import {
 } from "@/lib/catalog/master/rules";
 import { listTemplateSeries } from "@/lib/legal/contracts/templates";
 import type { FormRole } from "@/lib/legal/forms/definition";
+import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 
 // What PO's review panel needs to show the real form of a record draft
 // (draft-records.ts), read with the user's session when it opens.
@@ -76,16 +79,19 @@ export async function loadTaskMembers(): Promise<Member[]> {
   return loadMembers(await requireApproved());
 }
 
-/** The other members to invite, and the default time of a meeting. */
-export async function loadMeetingForm(): Promise<{
-  members: Member[];
-  defaultOccurredAt: string;
-}> {
+/** Who to invite, whether Google makes the Meet link, the default time. */
+export async function loadMeetingForm(): Promise<MeetingFormData> {
   const access = await requireApproved();
-  const members = (await loadMembers(access)).filter(
-    (member) => member.personId !== access.personId,
-  );
-  return { members, defaultOccurredAt: nextRoundHourInput(new Date()) };
+  const [members, contacts] = await Promise.all([
+    loadMembers(access),
+    loadCallContacts(),
+  ]);
+  return {
+    members: members.filter((member) => member.personId !== access.personId),
+    contacts,
+    googleMeet: googleMeetConfigured(),
+    defaultOccurredAt: nextRoundHourInput(new Date()),
+  };
 }
 
 /** The project's selected levers, the ones a spend can serve. */

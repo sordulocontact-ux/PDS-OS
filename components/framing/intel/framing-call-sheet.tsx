@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { idleFormState } from "@/lib/auth/form-state";
+import type { Participant } from "@/lib/calls/participants";
 import { prepareFramingCall } from "@/lib/framing/actions/call";
 import type { FramingTopic } from "@/lib/framing/call-prep";
 import type { Dimension } from "@/lib/framing/dimensions";
@@ -92,7 +93,9 @@ function CallForm({
   );
   const [detailed, setDetailed] = useState(false);
   const [extra, setExtra] = useState<string[]>([]);
-  const [people, setPeople] = useState<string[]>(data.people);
+  const [people, setPeople] = useState<Participant[]>(() =>
+    data.people.map((name) => ({ name, contactId: null })),
+  );
   const [documents, setDocuments] = useState<Set<string>>(new Set());
   const topics = data.topics.map((x) => ({ ...x, id: x.dimension }));
 

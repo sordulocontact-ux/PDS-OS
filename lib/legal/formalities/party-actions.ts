@@ -60,7 +60,7 @@ async function read(masterId: string, kind: "person" | "organization") {
       .select("role, contact_id")
       .eq("master_id", id.data)
       .not("contact_id", "is", null)
-      .order("position"),
+      .order("created_at"),
     supabase
       .from("master_splits")
       .select("contact_id")

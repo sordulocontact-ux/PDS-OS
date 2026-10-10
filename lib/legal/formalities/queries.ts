@@ -61,7 +61,7 @@ export async function loadFormalities(
       .from("master_contributors")
       .select("master_id, name, role, contact_id")
       .in("master_id", masterIds)
-      .order("position"),
+      .order("created_at"),
     supabase
       .from("legal_clearances")
       .select("master_id, work, status")
@@ -142,7 +142,7 @@ export async function loadFormalities(
             .in("formality_id", fIds)
             .order("created_at", { ascending: false })
         : Promise.resolve(none),
-      confirmedSplits(supabase, project.id),
+      confirmedSplits(supabase, masterIds),
     ]);
   const detailsOf = new Map(
     (details.data ?? []).map((d) => [d.contact_id, asText(d.details)]),
@@ -184,6 +184,8 @@ export async function loadFormalities(
         signedPublishingContract: publishing.data?.title ?? null,
         splitShares: splits.get(m.id) ?? null,
       });
+      // Kept for the people added by hand: they take their share too.
+      const splitShares = splits.get(m.id) ?? null;
       let formality: FormalityView | null = null;
       if (f) {
         const current = (documents.data ?? []).find(
@@ -247,6 +249,7 @@ export async function loadFormalities(
         masterId: m.id,
         title: m.title,
         prefill,
+        splitShares,
         borrowings: (clearances.data ?? [])
           .filter((c) => c.master_id === m.id)
           .map((c) => ({ work: c.work, status: c.status })),
@@ -260,16 +263,19 @@ export async function loadFormalities(
  * The confirmed split of each title (Répartitions, branch 04), by master:
  * each line's contact, role and exact share. The bulletin's Phono shares
  * start from it (UX test of 09/10/2026: shares retyped right after the
- * split was confirmed), shown « à vérifier ».
+ * split was confirmed), shown « à vérifier ». The latest version confirmed
+ * by everyone, in any project of the title (as on the title's page,
+ * lib/legal/splits/title-split.ts): a split confirmed for the EP serves
+ * the single's bulletin.
  */
 async function confirmedSplits(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  projectId: string,
+  masterIds: string[],
 ): Promise<Map<string, SplitShare[]>> {
   const { data: sheets } = await supabase
     .from("legal_split_sheets")
     .select("id, master_id")
-    .eq("project_id", projectId);
+    .in("master_id", masterIds);
   if (!sheets?.length) return new Map();
   const { data: versions } = await supabase
     .from("legal_split_versions")
@@ -278,19 +284,23 @@ async function confirmedSplits(
       "sheet_id",
       sheets.map((s) => s.id),
     )
-    .eq("status", "confirmed");
-  if (!versions?.length) return new Map();
+    .eq("status", "confirmed")
+    .order("proposed_at", { ascending: false });
+  const masterOfSheet = new Map(sheets.map((s) => [s.id, s.master_id]));
+  // The latest confirmed version of each title.
+  const latest = new Map<string, string>();
+  for (const v of versions ?? []) {
+    const master = masterOfSheet.get(v.sheet_id);
+    if (master && !latest.has(master)) latest.set(master, v.id);
+  }
+  if (latest.size === 0) return new Map();
+  const masterOfVersion = new Map(
+    [...latest].map(([master, version]) => [version, master]),
+  );
   const { data: entries } = await supabase
     .from("legal_split_entries")
     .select("version_id, role, share, contact_id")
-    .in(
-      "version_id",
-      versions.map((v) => v.id),
-    );
-  const masterOfSheet = new Map(sheets.map((s) => [s.id, s.master_id]));
-  const masterOfVersion = new Map(
-    versions.map((v) => [v.id, masterOfSheet.get(v.sheet_id)]),
-  );
+    .in("version_id", [...latest.values()]);
   const byMaster = new Map<string, SplitShare[]>();
   for (const e of entries ?? []) {
     const master = masterOfVersion.get(e.version_id);

@@ -115,7 +115,14 @@ export type CreateArtistState =
       // Set when the name is taken: the screen offers the existing artist.
       existing?: ArtistOption;
     }
-  | { status: "created"; artist: ArtistOption };
+  // `organizationId`: where the browser sends the picture chosen with it;
+  // `contactFailed`: its main contact could not be saved.
+  | {
+      status: "created";
+      artist: ArtistOption;
+      organizationId?: string;
+      contactFailed?: boolean;
+    };
 
 export const idleCreateArtistState: CreateArtistState = { status: "idle" };
 

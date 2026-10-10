@@ -9,6 +9,10 @@ import { Field } from "@/components/auth/field";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { ArtistPicker } from "@/components/catalog/artist-picker";
 import { AudioFileField } from "@/components/catalog/title/audio-file-field";
+import {
+  CreditRowsField,
+  useCreditRows,
+} from "@/components/catalog/title/credit-rows-field";
 import { TitleDetailsFields } from "@/components/catalog/title/title-details-fields";
 import { useTitleAudioUpload } from "@/components/catalog/title/use-title-audio-upload";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -65,6 +69,7 @@ export function CreateMasterForm({
 
   const [audioState, setAudioState] = useState(values.audioState ?? "");
   const audio = useTitleAudioUpload(organizationId ?? null);
+  const credits = useCreditRows();
   const handled = useRef<unknown>(null);
   // Once created on the page, the form gives way to what happens to the title:
   // an emptied form left on screen got the title created twice (UX test of
@@ -127,7 +132,10 @@ export function CreateMasterForm({
       noValidate
       className="flex flex-col gap-5"
       onSubmit={(event) => {
-        if (!audio.check(audioState)) event.preventDefault();
+        // Both checked, so every missing value is said at once.
+        const audioOk = audio.check(audioState);
+        const creditsOk = masterId ? true : credits.check();
+        if (!audioOk || !creditsOk) event.preventDefault();
       }}
     >
       <input type="hidden" name="intent" value={intent} />
@@ -150,6 +158,11 @@ export function CreateMasterForm({
         onArtistCreated={onArtistCreated}
         error={errors.credits}
       />
+
+      {/* At creation: an edit changes the credits on the title's page. */}
+      {!masterId && (
+        <CreditRowsField credits={credits} error={errors.contributors} />
+      )}
 
       <fieldset className="flex flex-col gap-5 border-t border-border pt-5">
         {/* At creation only: an edit is about what is already known. */}

@@ -10,7 +10,10 @@
 // was offered to no one). It joins through the contact linked to its artist
 // page (never by name), or waits to be added to the Réseau. The people of
 // the Réseau added to the legal file without a credit follow (ticket
-// « Architecture globale », lot 6), with the role chosen for them. Pure.
+// « Architecture globale », lot 6), with the role chosen for them. A main
+// artist who is also credited (an author who sings) has the performer role
+// ticked on their fiche, through the same contact (UX test of 09/10/2026,
+// section 8: « Artiste interprète » not pre-ticked). Pure.
 
 import type { ContributorRole } from "@/lib/catalog/master/rules";
 import type { FormRole } from "@/lib/legal/forms/definition";
@@ -48,6 +51,9 @@ export type FormPerson = {
   // A featured artist whose page no contact is linked to yet: added to the
   // Réseau (linked to the artist) before any fiche.
   artistId: string | null;
+  // The artist page the person performs as on the project's titles: its
+  // name (« nom d'artiste », « nom à créditer ») and whether featured.
+  performer: { name: string; featuring: boolean } | null;
 };
 
 export type FeaturedArtist = {
@@ -99,6 +105,7 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
         formRoles: [],
         networkRoles: [],
         artistId: null,
+        performer: null,
       };
       person.contactId ??= credit.contactId;
       if (!credit.contactId) person.unlinkedCreditIds.push(credit.id);
@@ -125,6 +132,7 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
       formRoles: [contact.role],
       networkRoles: [],
       artistId: null,
+      performer: null,
     }));
   const all = [...people.values(), ...added];
   // Featured artists: a performer role on the person of their contact, or
@@ -136,6 +144,7 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
     if (same) {
       addOnce(same.formRoles, "performer");
       addOnce(same.networkRoles, "artist");
+      same.performer = { name: artist.name, featuring: true };
       continue;
     }
     all.push({
@@ -148,7 +157,42 @@ export function formPeople(rows: InventoryRows): FormPerson[] {
       formRoles: ["performer"],
       networkRoles: ["artist"],
       artistId: artist.contact ? null : artist.artistId,
+      performer: { name: artist.name, featuring: true },
     });
   }
+  // Main artists stay off the list (their contracts and roles are not
+  // changed here), but one who is credited (by the contact linked to their
+  // artist page) is known as the performer they are, for their fiche.
+  for (const master of rows.titles)
+    for (const performer of rows.performersOf.get(master.id) ?? []) {
+      if (performer.featuring || !performer.artistId) continue;
+      const contact = rows.network.byArtist.get(performer.artistId);
+      const same = contact && all.find((p) => p.contactId === contact.id);
+      if (same && !same.performer)
+        same.performer = { name: performer.name, featuring: false };
+    }
   return all;
+}
+
+/** The roles ticked on the person's fiche: their credits, and performer for
+ * an artist of the titles. */
+export function formRolesOf(person: FormPerson): FormRole[] {
+  return person.performer && !person.formRoles.includes("performer")
+    ? [...person.formRoles, "performer"]
+    : person.formRoles;
+}
+
+/** What the fiche already knows of the person's contribution, to confirm
+ * rather than type (keys of FORM_FIELDS). Their own earlier answers win. */
+export function formAnswersOf(person: FormPerson): Record<string, string> {
+  const performer = person.performer;
+  return {
+    credit_name: performer?.name ?? person.name,
+    ...(performer
+      ? {
+          pseudonym: performer.name,
+          category: performer.featuring ? "featuring" : "main",
+        }
+      : {}),
+  };
 }

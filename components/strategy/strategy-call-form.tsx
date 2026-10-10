@@ -12,6 +12,7 @@ import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { idleFormState } from "@/lib/auth/form-state";
+import type { Participant } from "@/lib/calls/participants";
 import { EXTRA_TOPIC_MINUTES, agendaMinutes } from "@/lib/calls/prepare";
 import { fr } from "@/lib/i18n/fr";
 import { prepareStrategyCall } from "@/lib/strategy/actions/call";
@@ -51,7 +52,9 @@ export function StrategyCallForm({
   );
   const [detailed, setDetailed] = useState(false);
   const [extra, setExtra] = useState<string[]>([]);
-  const [people, setPeople] = useState<string[]>(data.people);
+  const [people, setPeople] = useState<Participant[]>(() =>
+    data.people.map((name) => ({ name, contactId: null })),
+  );
   const [format, setFormat] = useState<CallFormat>("video");
   const [recap, setRecap] = useState<CallRecap | null>(null);
   const [peopleMissing, setPeopleMissing] = useState(false);
@@ -76,7 +79,7 @@ export function StrategyCallForm({
       format,
       meetingUrl: String(values.get("meetingUrl") ?? "").trim(),
       purpose: String(values.get("purpose") ?? "").trim(),
-      participants: people,
+      participants: people.map((p) => p.name),
       topics: [
         ...topics
           .filter((x) => kept.has(x.id))

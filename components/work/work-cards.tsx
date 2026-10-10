@@ -3,6 +3,7 @@ import { CardRow, ListCard } from "@/components/ui/list-card";
 import { formatDay } from "@/lib/assistant/facts";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectListItem } from "@/lib/projects/types";
 import { overdueTone, stageTone } from "@/lib/ui/state-tones";
 import type { OwnedProject, WorkDeliverable } from "@/lib/work/queries";
@@ -28,7 +29,7 @@ export function OwnedProjectsCard({ projects }: { projects: OwnedProject[] }) {
             main={project.title}
             sub={
               stage
-                ? `${stage.label} · ${t.nextActions[action.kind]}`
+                ? `${progressLabel(stage)} · ${t.nextActions[action.kind]}`
                 : t.nextActions[action.kind]
             }
             badge={
@@ -106,7 +107,7 @@ export function CreativeProjectsCard({
             key={p.id}
             href={routes.project(p.id)}
             main={p.title}
-            sub={[p.artistName, stage?.label ?? t.allValidated]
+            sub={[p.artistName, progressLabel(stage)]
               .filter(Boolean)
               .join(" · ")}
             badge={

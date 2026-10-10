@@ -88,7 +88,7 @@ export async function listArtistContacts(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("artist_contacts")
-    .select("id, role, name, email, phone, is_primary")
+    .select("id, role, name, email, phone, is_primary, contact_id")
     .eq("artist_id", artistId)
     .order("created_at");
   if (error) {
@@ -103,6 +103,7 @@ export async function listArtistContacts(
       email: row.email,
       phone: row.phone,
       isPrimary: row.is_primary,
+      networkContactId: row.contact_id,
     })),
   );
 }

@@ -17,6 +17,11 @@ export const captureReadingSchema = z.object({
     .describe(
       "Chaque ligne de texte lisible sur la capture, recopiée telle quelle.",
     ),
+  links: z
+    .array(z.string())
+    .describe(
+      "Les liens écrits sur la capture (bio : linktr.ee/…, …lnk.to/…), tels quels, « … » compris s'ils sont coupés.",
+    ),
   people: z
     .array(
       z.object({
@@ -29,6 +34,11 @@ export const captureReadingSchema = z.object({
           .string()
           .describe(
             "Parmi « names », celui qui sert le plus probablement de nom d'artiste.",
+          ),
+        searchNames: z
+          .array(z.string())
+          .describe(
+            "Noms d'artiste probables cachés dans un pseudo ou un nom écrit, à chercher sur les plateformes : « theodorabossladyy » → « Theodora », « jul.officiel » → « Jul ». Chacun doit être un morceau d'un nom écrit. Liste vide sinon.",
           ),
         tiktokHandle: z
           .string()

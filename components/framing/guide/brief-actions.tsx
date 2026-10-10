@@ -1,9 +1,8 @@
 "use client";
 
 import { IconLink } from "nucleo-sharp-essential";
-import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { fr } from "@/lib/i18n/fr";
 
@@ -21,21 +20,13 @@ export function BriefActions({
   const t = fr.framingGuide.brief;
   return (
     <>
-      <Button
-        size="lg"
-        variant="outline"
-        onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(window.location.href);
-            toast.success(t.copied);
-          } catch {
-            toast.error(fr.framing.errors.generic);
-          }
-        }}
-      >
-        <IconLink aria-hidden />
-        {t.share}
-      </Button>
+      <CopyButton
+        value={() => window.location.href}
+        label={t.share}
+        copiedLabel={t.copied}
+        failedLabel={fr.framing.errors.generic}
+        icon={IconLink}
+      />
       <PdfExportButton
         href={pdfHref}
         fileName={fileName}

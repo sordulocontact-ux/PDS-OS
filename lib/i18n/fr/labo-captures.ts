@@ -34,7 +34,8 @@ export const laboCaptures = {
     none: "Pas sur Deezer",
   },
   matchWhy: {
-    linked: (titles: string) => `Ses sorties portent l'autre nom : ${titles}.`,
+    linked: (titles: string) =>
+      `Ses sorties correspondent à la capture : ${titles}.`,
     single:
       "Le compte Deezer de ce nom le plus suivi. Vérifiez que c'est bien lui.",
     several:
@@ -49,10 +50,12 @@ export const laboCaptures = {
     label: "Réseaux",
     tiktok: "TikTok",
     instagram: "Instagram",
-    none: "Aucun compte TikTok ni Instagram trouvé.",
+    spotify: "Spotify",
+    none: "Aucun compte TikTok, Instagram ni Spotify trouvé.",
     source: {
       capture: "lu sur la capture",
       tiktok: "confirmé par TikTok",
+      linktree: "sur son Linktree",
       musicbrainz: "via MusicBrainz",
       wikidata: "via Wikidata",
     },

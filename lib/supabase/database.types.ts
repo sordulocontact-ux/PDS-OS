@@ -146,6 +146,7 @@ export type Database = {
       artist_contacts: {
         Row: {
           artist_id: string
+          contact_id: string | null
           created_at: string
           created_by: string | null
           email: string | null
@@ -159,6 +160,7 @@ export type Database = {
         }
         Insert: {
           artist_id: string
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -172,6 +174,7 @@ export type Database = {
         }
         Update: {
           artist_id?: string
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -189,6 +192,13 @@ export type Database = {
             columns: ["artist_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "artist_contacts_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -458,6 +468,48 @@ export type Database = {
           },
         ]
       }
+      call_guests: {
+        Row: {
+          call_id: string
+          contact_id: string | null
+          created_at: string
+          email: string
+          name: string | null
+          organization_id: string
+        }
+        Insert: {
+          call_id: string
+          contact_id?: string | null
+          created_at?: string
+          email: string
+          name?: string | null
+          organization_id: string
+        }
+        Update: {
+          call_id?: string
+          contact_id?: string | null
+          created_at?: string
+          email?: string
+          name?: string | null
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_guests_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "call_guests_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       call_reports: {
         Row: {
           call_id: string
@@ -538,7 +590,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           duration_minutes: number | null
+          ends_at: string | null
           error_code: string | null
+          google_event_id: string | null
           id: string
           meeting_url: string | null
           occurred_at: string
@@ -562,7 +616,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           duration_minutes?: number | null
+          ends_at?: string | null
           error_code?: string | null
+          google_event_id?: string | null
           id?: string
           meeting_url?: string | null
           occurred_at?: string
@@ -586,7 +642,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           duration_minutes?: number | null
+          ends_at?: string | null
           error_code?: string | null
+          google_event_id?: string | null
           id?: string
           meeting_url?: string | null
           occurred_at?: string
@@ -6458,6 +6516,7 @@ export type Database = {
       create_master: {
         Args: {
           p_audio_state?: string
+          p_contributors?: Json
           p_credits: Json
           p_duration_seconds?: number
           p_isrc?: string
@@ -7002,6 +7061,17 @@ export type Database = {
         Returns: string
       }
       send_mix_feedback: { Args: { p_version_id: string }; Returns: undefined }
+      set_master_contributor_roles: {
+        Args: {
+          p_contact_id: string | null
+          p_detail: string | null
+          p_item_ids: string[]
+          p_master_id: string
+          p_name: string
+          p_roles: string[]
+        }
+        Returns: undefined
+      }
       set_contract_template_status: {
         Args: { p_status: string; p_template_id: string }
         Returns: undefined

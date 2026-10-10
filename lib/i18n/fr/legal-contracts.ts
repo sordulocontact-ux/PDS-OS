@@ -23,7 +23,7 @@ export const legalContracts = {
     network: "Réseau",
     project: "Projet",
     credits: "Crédits des titres",
-    mapping: "Cartographie des accords",
+    mapping: "Contrats à prévoir",
     organization: "Structure",
   } as Record<string, string>,
   // Where a missing value is filled.
@@ -32,7 +32,7 @@ export const legalContracts = {
     network: "à compléter dans le Réseau",
     project: "à compléter dans le projet",
     credits: "à compléter dans les crédits des titres",
-    mapping: "à saisir dans la cartographie",
+    mapping: "à saisir dans les contrats à prévoir",
     organization: "à compléter dans l'administration",
   } as Record<string, string>,
   templates: {
@@ -149,19 +149,19 @@ export const legalContracts = {
   agreements: {
     title: "Contrats",
     description:
-      "Chaque personne créditée, l'accord qu'il lui faut et le modèle proposé. Validez la cartographie : chaque contrat est préparé automatiquement dès que ses informations sont là, puis relu et validé avant l'envoi.",
+      "Chaque personne créditée, l'accord qu'il lui faut et le modèle proposé. Validez les contrats à prévoir : chaque contrat est préparé automatiquement dès que ses informations sont là, puis relu et validé avant l'envoi.",
     back: "Retour au suivi",
     templates: "Modèles de contrat",
     noTemplate:
       "Aucun modèle validé : ajoutez-en un dans la bibliothèque des modèles.",
     empty: "Aucune personne créditée sur les titres du projet.",
-    mappingTitle: "Cartographie des accords",
+    mappingTitle: "Contrats à prévoir",
     mappingDescription:
       "Proposée d'après les rôles et les modèles validés. Corrigez-la si besoin, puis validez-la en une fois.",
     mappingApproved: (name: string, date: string) =>
-      `Cartographie validée par ${name} le ${date}.`,
-    editMapping: "Modifier la cartographie",
-    approveMapping: "Valider la cartographie",
+      `Contrats à prévoir validés par ${name} le ${date}.`,
+    editMapping: "Modifier les contrats à prévoir",
+    approveMapping: "Valider les contrats à prévoir",
     approving: "Validation…",
     cancelEdit: "Annuler",
     columns: {
@@ -179,7 +179,7 @@ export const legalContracts = {
     existing: (title: string) => `Contrat existant : ${title}`,
     noContact: "Fiche à préparer d'abord",
     states: {
-      unmapped: "Cartographie à valider",
+      unmapped: "Contrats à prévoir à valider",
       not_needed: "Pas d'accord",
       needs_info: "Informations manquantes",
       ready_to_generate: "Prêt à générer",
@@ -236,7 +236,7 @@ export const legalContracts = {
     sendLabel: "Comment l'avez-vous envoyé ?",
     sendHint: "Canal, destinataire, date : c'est la preuve d'envoi.",
     events: {
-      "contract_mapping.approved": "Cartographie validée",
+      "contract_mapping.approved": "Contrats à prévoir validés",
       "contract.generated": "Contrat généré",
       "contract.revised": "Clause modifiée",
       "contract.submitted": "Envoyé en validation",

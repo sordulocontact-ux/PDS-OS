@@ -1,8 +1,8 @@
 "use client";
 
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/components/ui/copy-button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Input } from "@/components/ui/input";
 
@@ -38,14 +38,6 @@ export function LinksDialog({
   copiedLabel: string;
   closeLabel: string;
 }) {
-  const copy = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success(copiedLabel);
-    } catch {
-      // The field stays selectable: the link can be copied by hand.
-    }
-  };
   return (
     <FormDialog
       open={open}
@@ -78,9 +70,15 @@ export function LinksDialog({
                   {link.email.label}
                 </Button>
               )}
-              <Button type="button" size="lg" className="shrink-0" onClick={() => copy(link.url)}>
-                {copyLabel}
-              </Button>
+              {/* On failure, the field stays selectable: copied by hand. */}
+              <CopyButton
+                value={link.url}
+                label={copyLabel}
+                copiedLabel={copiedLabel}
+                icon={null}
+                variant="default"
+                className="shrink-0"
+              />
             </div>
           </li>
         ))}

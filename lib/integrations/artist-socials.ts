@@ -12,9 +12,15 @@ import { wikidataItem } from "@/lib/integrations/wikipedia";
  * Deezer id, never by name, so a homonym cannot be picked.
  */
 
-export type SocialHandles = { tiktok: string | null; instagram: string | null };
+// TikTok and Instagram usernames, Spotify artist id.
+export type SocialHandles = {
+  tiktok: string | null;
+  instagram: string | null;
+  spotify: string | null;
+};
 
-const NONE: SocialHandles = { tiktok: null, instagram: null };
+const NONE: SocialHandles = { tiktok: null, instagram: null, spotify: null };
+const SPOTIFY_ID = /^[A-Za-z0-9]{22}$/;
 
 // TikTok and Instagram usernames: letters, digits, "." and "_".
 const HANDLE = /^[A-Za-z0-9._]{1,30}$/;
@@ -23,6 +29,8 @@ export const tiktokUrl = (handle: string) =>
   `https://www.tiktok.com/@${handle}`;
 export const instagramUrl = (handle: string) =>
   `https://www.instagram.com/${handle}/`;
+export const spotifyUrl = (id: string) =>
+  `https://open.spotify.com/artist/${id}`;
 
 export const asHandle = (value: string | null | undefined) => {
   const handle = value?.trim().replace(/^@/, "") ?? "";
@@ -60,6 +68,32 @@ export async function tiktokProfile(
   }
 }
 
+// Spotify artist id out of open.spotify.com/artist/<id>?si=….
+function spotifyIdFrom(resource: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(resource);
+  } catch {
+    return null;
+  }
+  const [kind, id] = url.pathname.split("/").filter(Boolean);
+  return url.hostname === "open.spotify.com" &&
+    kind === "artist" &&
+    SPOTIFY_ID.test(id ?? "")
+    ? id
+    : null;
+}
+
+/** Every network of a list of profile URLs (an artist's own links). */
+export function socialsFromUrls(urls: string[]): SocialHandles {
+  return {
+    tiktok: urls.map((u) => handleFrom(u, "tiktok.com")).find(Boolean) ?? null,
+    instagram:
+      urls.map((u) => handleFrom(u, "instagram.com")).find(Boolean) ?? null,
+    spotify: urls.map(spotifyIdFrom).find(Boolean) ?? null,
+  };
+}
+
 // Handle out of a profile URL: instagram.com/huntrillion/ → huntrillion.
 function handleFrom(resource: string, host: string): string | null {
   let url: URL;
@@ -70,7 +104,7 @@ function handleFrom(resource: string, host: string): string | null {
   }
   if (url.hostname.replace(/^www\./, "") !== host) return null;
   const first = url.pathname.split("/").filter(Boolean)[0];
-  return asHandle(first);
+  return asHandle(first?.replace(/^@/, ""));
 }
 
 const MUSICBRAINZ = "https://musicbrainz.org/ws/2";
@@ -115,11 +149,7 @@ async function fromMusicBrainz(deezerId: number): Promise<SocialHandles> {
   const urls = parsed.success
     ? parsed.data.relations.flatMap((r) => r.url?.resource ?? [])
     : [];
-  return {
-    tiktok: urls.map((u) => handleFrom(u, "tiktok.com")).find(Boolean) ?? null,
-    instagram:
-      urls.map((u) => handleFrom(u, "instagram.com")).find(Boolean) ?? null,
-  };
+  return socialsFromUrls(urls);
 }
 
 const claimsSchema = z.object({
@@ -142,7 +172,8 @@ const claimsSchema = z.object({
   ),
 });
 
-// Wikidata: P2003 = Instagram username, P7085 = TikTok username.
+// Wikidata: P2003 = Instagram username, P7085 = TikTok username, P1902 =
+// Spotify artist id.
 async function fromWikidata(deezerId: number): Promise<SocialHandles> {
   const item = await wikidataItem(deezerId);
   if (!item) return NONE;
@@ -157,19 +188,28 @@ async function fromWikidata(deezerId: number): Promise<SocialHandles> {
   const claims = parsed.success ? parsed.data.entities[item]?.claims : null;
   const first = (property: string) => {
     const value = claims?.[property]?.[0]?.mainsnak.datavalue?.value;
-    return typeof value === "string" ? asHandle(value) : null;
+    return typeof value === "string" ? value : null;
   };
-  return { tiktok: first("P7085"), instagram: first("P2003") };
+  const spotify = first("P1902");
+  return {
+    tiktok: asHandle(first("P7085")),
+    instagram: asHandle(first("P2003")),
+    spotify: spotify && SPOTIFY_ID.test(spotify) ? spotify : null,
+  };
 }
 
 /**
  * The accounts linked to a Deezer profile, with where each one comes from.
  * A source that fails is skipped: the links are a bonus, never a blocker.
  */
-export async function socialsOfDeezerArtist(deezerId: number): Promise<{
-  tiktok: { handle: string; source: "musicbrainz" | "wikidata" } | null;
-  instagram: { handle: string; source: "musicbrainz" | "wikidata" } | null;
-}> {
+export async function socialsOfDeezerArtist(
+  deezerId: number,
+): Promise<
+  Record<
+    keyof SocialHandles,
+    { handle: string; source: "musicbrainz" | "wikidata" } | null
+  >
+> {
   const [mb, wd] = await Promise.all([
     fromMusicBrainz(deezerId).catch(() => NONE),
     fromWikidata(deezerId).catch(() => NONE),
@@ -180,5 +220,9 @@ export async function socialsOfDeezerArtist(deezerId: number): Promise<{
       : wd[key]
         ? { handle: wd[key], source: "wikidata" as const }
         : null;
-  return { tiktok: pick("tiktok"), instagram: pick("instagram") };
+  return {
+    tiktok: pick("tiktok"),
+    instagram: pick("instagram"),
+    spotify: pick("spotify"),
+  };
 }

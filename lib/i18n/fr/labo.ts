@@ -136,7 +136,7 @@ export const labo = {
     invalid_isrc:
       "ISRC invalide : 12 caractères, ex. FR-Z03-24-00001 ou FRZ032400001.",
     provider_error:
-      "Le fournisseur a refusé la requête (quota, clé ou panne). Détail dans la console du serveur.",
+      "Le service n'a pas répondu (quota, clé ou panne). Réessayez dans un moment.",
     network: "Le serveur ne répond pas.",
   },
 } as const;

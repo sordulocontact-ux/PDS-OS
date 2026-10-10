@@ -113,9 +113,17 @@ export async function saveContact(
       values: parsed.values,
     };
   }
-  const { artistId, contactId, role, name, email, phone, isPrimary } =
-    parsed.data;
-  const fields = { role, name, email, phone };
+  const {
+    artistId,
+    contactId,
+    networkContactId,
+    role,
+    name,
+    email,
+    phone,
+    isPrimary,
+  } = parsed.data;
+  const fields = { role, name, email, phone, contact_id: networkContactId };
 
   const supabase = await createClient();
   const { error } = contactId

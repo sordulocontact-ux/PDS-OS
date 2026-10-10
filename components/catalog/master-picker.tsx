@@ -34,6 +34,7 @@ export function MasterPicker({
   hint,
   error,
   required = false,
+  onSelectionChange,
 }: {
   masters: MasterOption[];
   artists: ArtistOption[];
@@ -45,12 +46,18 @@ export function MasterPicker({
   error?: string;
   // Shows the « * » after the legend (docs/DESIGN.md § 4).
   required?: boolean;
+  // Told of each change of the titles chosen (the project's name follows a
+  // single title).
+  onSelectionChange?: (selected: MasterOption[]) => void;
 }) {
   const t = fr.catalog.masterPicker;
   const [created, setCreated] = useState<MasterOption[]>([]);
   const [createdArtists, setCreatedArtists] = useState<ArtistOption[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>(defaultSelectedIds);
   const [dialogOpen, setDialogOpen] = useState(false);
+  // What was typed in the search: the new title's name (UX test of
+  // 09/10/2026, « nom tapé non repris dans « Créer un titre » »).
+  const [typed, setTyped] = useState("");
 
   const options = useMemo(() => {
     const known = new Set(masters.map((m) => m.id));
@@ -64,10 +71,13 @@ export function MasterPicker({
     return [...artists, ...createdArtists.filter((a) => !known.has(a.id))];
   }, [artists, createdArtists]);
 
-  const add = (id: string) =>
-    setSelectedIds((current) =>
-      current.includes(id) ? current : [...current, id],
-    );
+  const select = (next: string[], known = byId) => {
+    setSelectedIds(next);
+    onSelectionChange?.(next.flatMap((id) => known.get(id) ?? []));
+  };
+  const add = (id: string, known = byId) => {
+    if (!selectedIds.includes(id)) select([...selectedIds, id], known);
+  };
 
   const errorId = "masterIds-error";
   const hintId = "masterIds-hint";
@@ -107,9 +117,7 @@ export function MasterPicker({
                 variant="ghost"
                 size="icon"
                 onClick={() =>
-                  setSelectedIds((current) =>
-                    current.filter((id) => id !== master.id),
-                  )
+                  select(selectedIds.filter((id) => id !== master.id))
                 }
                 aria-label={t.remove(masterLabel(master))}
               >
@@ -130,9 +138,12 @@ export function MasterPicker({
             detail: m.artists,
           }))}
           excludedIds={excluded}
-          onPick={add}
-          onCreate={() => setDialogOpen(true)}
-          createLabel={() => t.create}
+          onPick={(id) => add(id)}
+          onCreate={(query) => {
+            setTyped(query);
+            setDialogOpen(true);
+          }}
+          createLabel={(query) => (query ? t.createNamed(query) : t.create)}
           noResultLabel={t.noResult}
           allSelectedLabel={t.allSelected}
           invalid={Boolean(error)}
@@ -156,13 +167,14 @@ export function MasterPicker({
           {dialogOpen && (
             <CreateMasterForm
               artists={allArtists}
+              defaults={{ title: typed }}
               onArtistCreated={(artist) =>
                 setCreatedArtists((current) => [...current, artist])
               }
               onCancel={() => setDialogOpen(false)}
               onCreated={(master) => {
                 setCreated((current) => [...current, master]);
-                add(master.id);
+                add(master.id, new Map(byId).set(master.id, master));
                 setDialogOpen(false);
               }}
             />

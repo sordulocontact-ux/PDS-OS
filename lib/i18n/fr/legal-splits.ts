@@ -3,9 +3,9 @@
 // contributor answers from.
 export const legalSplits = {
   roles: {
-    author: "Auteur (paroles)",
-    composer: "Compositeur",
-    arranger: "Arrangeur",
+    author: "Auteur·rice (paroles)",
+    composer: "Compositeur·rice",
+    arranger: "Arrangeur·se",
     publisher: "Éditeur",
     other: "Autre",
   },

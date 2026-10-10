@@ -14,6 +14,10 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { FormDialog } from "@/components/ui/form-dialog";
+import {
+  groupContributors,
+  type ContributorGroup,
+} from "@/lib/catalog/master/contributor-groups";
 import type { MasterContributor } from "@/lib/catalog/master/rules";
 import { fr } from "@/lib/i18n/fr";
 
@@ -25,7 +29,8 @@ import {
   useItemDialogs,
 } from "./item-dialogs";
 
-// Every credit that is not a performing artist, grouped by role order.
+// Every credit that is not a performing artist: one line per person with
+// all their roles (UX test of 09/10/2026), in the order of their first role.
 export function ContributorsSection({
   masterId,
   contributors,
@@ -36,7 +41,8 @@ export function ContributorsSection({
   canEdit: boolean;
 }) {
   const t = fr.masterPage.credits;
-  const dialogs = useItemDialogs<MasterContributor>();
+  const dialogs = useItemDialogs<ContributorGroup>();
+  const people = groupContributors(contributors);
 
   return (
     <PageSection
@@ -46,7 +52,7 @@ export function ContributorsSection({
       description={t.description}
       action={canEdit && <AddItemButton label={t.add} onClick={dialogs.add} />}
     >
-      {contributors.length === 0 ? (
+      {people.length === 0 ? (
         <EmptyNote>{canEdit ? t.emptyBody : t.emptyBodyReadOnly}</EmptyNote>
       ) : (
         <DataTable>
@@ -59,10 +65,12 @@ export function ContributorsSection({
             {canEdit && <DataTableActionsHead label={t.columns.actions} />}
           </DataTableHeader>
           <DataTableBody>
-            {contributors.map((contributor) => (
-              <DataTableRow key={contributor.id}>
+            {people.map((contributor) => (
+              <DataTableRow key={contributor.key}>
                 <DataTableCell>{contributor.name}</DataTableCell>
-                <DataTableCell>{t.roles[contributor.role]}</DataTableCell>
+                <DataTableCell>
+                  {contributor.roles.map((role) => t.roles[role]).join(", ")}
+                </DataTableCell>
                 <DataTableCell hideBelow="sm" fill>
                   {contributor.detail ?? EMPTY_CELL}
                 </DataTableCell>
@@ -99,7 +107,11 @@ export function ContributorsSection({
         section="contributor"
         item={
           dialogs.deleting
-            ? { id: dialogs.deleting.id, name: dialogs.deleting.name }
+            ? {
+                id: dialogs.deleting.itemIds[0],
+                name: dialogs.deleting.name,
+                alsoIds: dialogs.deleting.itemIds.slice(1),
+              }
             : null
         }
         title={t.confirmTitle}

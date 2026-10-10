@@ -4,10 +4,11 @@ import { ProjectPageActions } from "@/components/projects/project-page-actions";
 import { requireApproved } from "@/lib/auth/dal";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { toParisLocalInput } from "@/lib/calls/format";
-import { loadProjectTeam } from "@/lib/calls/invite";
+import { nextRoundHourInput } from "@/lib/calls/format";
+import { loadCallContacts, loadProjectTeam } from "@/lib/calls/invite";
 import { listCalls } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
+import { googleMeetConfigured } from "@/lib/integrations/google-calendar";
 import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -17,11 +18,12 @@ export default async function ProjectCallsPage({
   params,
 }: PageProps<"/app/projects/[projectId]/calls">) {
   const { projectId } = await params;
-  const [access, project, calls, team] = await allInOrder([
+  const [access, project, calls, team, contacts] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
     createClient().then((supabase) => listCalls(supabase, projectId)),
     loadProjectTeam(projectId),
+    loadCallContacts(),
   ]);
   const invitable = team.filter((p) => p.personId !== access.personId);
   const canEdit = canEditProject(access, project);
@@ -35,10 +37,12 @@ export default async function ProjectCallsPage({
         {!empty && (
           <CreateCallForm
             projectId={projectId}
-            defaultOccurredAt={toParisLocalInput(now)}
+            defaultOccurredAt={nextRoundHourInput(now)}
             defaultTitle=""
             initiallyOpen={false}
             team={invitable}
+            contacts={contacts}
+            googleMeet={googleMeetConfigured()}
           />
         )}
       </ProjectPageActions>
@@ -53,10 +57,12 @@ export default async function ProjectCallsPage({
           </div>
           <CreateCallForm
             projectId={projectId}
-            defaultOccurredAt={toParisLocalInput(now)}
+            defaultOccurredAt={nextRoundHourInput(now)}
             defaultTitle={t.firstCallTitle}
             initiallyOpen
             team={invitable}
+            contacts={contacts}
+            googleMeet={googleMeetConfigured()}
           />
         </section>
       ) : (

@@ -1,8 +1,7 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 
-import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { OptionSelect } from "@/components/projects/option-select";
@@ -16,8 +15,12 @@ import { saveContact } from "@/lib/catalog/profile-actions";
 import { fr } from "@/lib/i18n/fr";
 import { Checkbox } from "@/components/ui/checkbox";
 
+import { ContactPersonFields } from "./contact-person-fields";
+
 // Adds a contact, or edits `contact`. Closes itself once saved. `defaults`
-// pre-fills a new contact (one proposed by PO, reviewed before saving).
+// pre-fills a new contact (one proposed by PO, reviewed before saving). The
+// person is picked in the Réseau (UX test of 09/10/2026), their email and
+// phone filled from their fiche.
 export function ContactForm({
   artistId,
   contact,
@@ -40,6 +43,12 @@ export function ContactForm({
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const value = (field: string, fallback: string | null | undefined) =>
     values[field] ?? fallback ?? "";
+  const [role, setRole] = useState<ContactRole>(
+    (values.role as ContactRole | undefined) ??
+      contact?.role ??
+      defaults?.role ??
+      "manager",
+  );
 
   useEffect(() => {
     if (state.status === "saved") onDone();
@@ -57,41 +66,22 @@ export function ContactForm({
         label={t.form.role}
         required
         items={t.roles}
-        defaultValue={value(
-          "role",
-          contact?.role ?? defaults?.role ?? "manager",
-        )}
+        defaultValue={role}
+        onValueChange={(next) => setRole(next as ContactRole)}
         error={errors.role}
       />
-      <Field
-        name="name"
-        label={t.form.name}
+      <ContactPersonFields
+        // Remounted when the server sends the typed values back.
+        key={values.name ?? ""}
+        role={role}
         required
-        autoFocus
-        autoComplete="off"
-        maxLength={200}
-        defaultValue={value("name", contact?.name ?? defaults?.name)}
-        error={errors.name}
-      />
-      <Field
-        name="email"
-        type="email"
-        label={t.form.email}
-        inputMode="email"
-        autoComplete="off"
-        maxLength={320}
-        defaultValue={value("email", contact?.email ?? defaults?.email)}
-        error={errors.email}
-      />
-      <Field
-        name="phone"
-        type="tel"
-        label={t.form.phone}
-        inputMode="tel"
-        autoComplete="off"
-        maxLength={40}
-        defaultValue={value("phone", contact?.phone ?? defaults?.phone)}
-        error={errors.phone}
+        defaultNetworkId={
+          values.networkContactId ?? contact?.networkContactId ?? null
+        }
+        defaultName={value("name", contact?.name ?? defaults?.name) || null}
+        defaultEmail={value("email", contact?.email ?? defaults?.email)}
+        defaultPhone={value("phone", contact?.phone ?? defaults?.phone)}
+        errors={{ name: errors.name, email: errors.email, phone: errors.phone }}
       />
       {/* Already primary: stays so until another contact takes the place. */}
       {!contact?.isPrimary && (

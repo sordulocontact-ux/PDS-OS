@@ -12,8 +12,7 @@ import {
   type ActionResult,
 } from "@/lib/calls/constants";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
-import { inviteProjectTeam } from "@/lib/calls/invite";
-import { schedulePendingPushes } from "@/lib/notifications/push";
+import { meetingUrlSchema, planCall } from "@/lib/calls/plan-call";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -30,19 +29,9 @@ async function approvedSession() {
 const text = (form: FormData, key: string) =>
   String(form.get(key) ?? "").trim();
 
-// A video link (Meet, Zoom, Teams…): https only, as the database checks.
-// Blank means none.
-const meetingUrlSchema = z
-  .string()
-  .trim()
-  .max(500)
-  .transform((value) => value || null)
-  .refine((value) => value === null || /^https:\/\/\S+$/.test(value));
-
-function meetingUrlOf(form: FormData): string | null | undefined {
-  const parsed = meetingUrlSchema.safeParse(text(form, "meetingUrl"));
-  return parsed.success ? parsed.data : undefined;
-}
+// The call's page, telling when Google gave no Meet link.
+const withMeetNotice = (href: string, meetFailed: boolean) =>
+  meetFailed ? `${href}?meet=failed` : href;
 
 export async function createCall(
   _previous: ActionResult | null,
@@ -50,57 +39,14 @@ export async function createCall(
 ): Promise<ActionResult> {
   const session = await approvedSession();
   if (!session) return { ok: false, error: "unauthorized" };
-
   const projectId = text(form, "projectId");
-  const title = text(form, "title");
-  const occurredAt = new Date(text(form, "occurredAt"));
-  if (!title || title.length > 200)
-    return { ok: false, error: "title_required" };
-  if (Number.isNaN(occurredAt.getTime()))
-    return { ok: false, error: "date_invalid" };
-  if (!projectId) return { ok: false, error: "invalid_input" };
-  const meetingUrl = meetingUrlOf(form);
-  if (meetingUrl === undefined) return { ok: false, error: "link_invalid" };
-
-  const { data, error } = await session.supabase
-    .from("calls")
-    .insert({
-      organization_id: session.access.organizationId!,
-      project_id: projectId,
-      title,
-      occurred_at: occurredAt.toISOString(),
-      meeting_url: meetingUrl,
-      // Recording consent is given by contract.
-      consent: "granted",
-    })
-    .select("id")
-    .single();
-  if (error || !data) {
-    console.error("[calls] create failed:", error?.message);
-    return { ok: false, error: "not_found" };
-  }
-  await inviteProjectTeam({
-    callId: data.id,
-    organizationId: session.access.organizationId!,
-    projectId,
-    mePersonId: session.access.personId,
-    personIds: attendeesOf(form) ?? [],
-  });
-  redirect(routes.projectCall(projectId, data.id));
-}
-
-const attendeesSchema = z.array(z.uuid()).max(50);
-
-// The members picked in the form (a JSON list of person ids); null if invalid.
-function attendeesOf(form: FormData): string[] | null {
-  try {
-    const parsed = attendeesSchema.safeParse(
-      JSON.parse(text(form, "attendees") || "[]"),
-    );
-    return parsed.success ? [...new Set(parsed.data)] : null;
-  } catch {
-    return null;
-  }
+  if (!z.uuid().safeParse(projectId).success)
+    return { ok: false, error: "invalid_input" };
+  const result = await planCall(session, form, projectId);
+  if (!result.ok) return result;
+  redirect(
+    withMeetNotice(routes.projectCall(projectId, result.id), result.meetFailed),
+  );
 }
 
 /**
@@ -114,53 +60,11 @@ export async function createMeeting(
 ): Promise<ActionResult> {
   const session = await approvedSession();
   if (!session) return { ok: false, error: "unauthorized" };
-
-  const title = text(form, "title");
-  const occurredAt = new Date(text(form, "occurredAt"));
-  if (!title || title.length > 200)
-    return { ok: false, error: "title_required" };
-  if (Number.isNaN(occurredAt.getTime()))
-    return { ok: false, error: "date_invalid" };
-  const meetingUrl = meetingUrlOf(form);
-  if (meetingUrl === undefined) return { ok: false, error: "link_invalid" };
-  const picked = attendeesOf(form);
-  if (!picked) return { ok: false, error: "invalid_input" };
-  const attendees = picked.filter((id) => id !== session.access.personId);
-
-  const organizationId = session.access.organizationId!;
-  const { data, error } = await session.supabase
-    .from("calls")
-    .insert({
-      organization_id: organizationId,
-      title,
-      occurred_at: occurredAt.toISOString(),
-      meeting_url: meetingUrl,
-      consent: "granted",
-    })
-    .select("id")
-    .single();
-  if (error || !data) {
-    console.error("[calls] create meeting failed:", error?.message);
-    return { ok: false, error: "save_failed" };
-  }
-  if (attendees.length > 0) {
-    // Each invitation notifies its member (database trigger).
-    const { error: inviteError } = await session.supabase
-      .from("call_attendees")
-      .insert(
-        attendees.map((personId) => ({
-          call_id: data.id,
-          organization_id: organizationId,
-          person_id: personId,
-        })),
-      );
-    if (inviteError)
-      console.error("[calls] invite failed:", inviteError.message);
-    else await schedulePendingPushes();
-  }
+  const result = await planCall(session, form, null);
+  if (!result.ok) return result;
   // `stay`: created from PO's panel, which shows the link itself.
-  if (form.get("stay") === "1") return { ok: true, id: data.id };
-  redirect(routes.meeting(data.id));
+  if (form.get("stay") === "1") return { ok: true, id: result.id };
+  redirect(withMeetNotice(routes.meeting(result.id), result.meetFailed));
 }
 
 /** The video link of a call, added or changed before or after the fact. */

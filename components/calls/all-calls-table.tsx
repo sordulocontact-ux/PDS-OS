@@ -13,7 +13,7 @@ import {
   DataTableRow,
 } from "@/components/ui/data-table";
 import { JoinCallLink } from "@/components/calls/join-call-link";
-import { formatDateTime, isUpcoming } from "@/lib/calls/format";
+import { formatSlot, isUpcoming } from "@/lib/calls/format";
 import type { CallListItem } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 
@@ -50,9 +50,7 @@ export function AllCallsTable({
               />
             </DataTableCell>
             <DataTableCell hideBelow="sm">
-              <time dateTime={call.occurredAt}>
-                {formatDateTime(call.occurredAt)}
-              </time>
+              <time dateTime={call.occurredAt}>{formatSlot(call)}</time>
             </DataTableCell>
             <DataTableCell fill>
               <div className="flex flex-wrap items-center gap-3">

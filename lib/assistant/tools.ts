@@ -38,6 +38,7 @@ import { fr } from "@/lib/i18n/fr";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadMyTodo } from "@/lib/insights/todo";
 import { handoverOf } from "@/lib/projects/handover";
+import { progressLabel } from "@/lib/projects/progress";
 import { listProjects } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -117,7 +118,7 @@ export function createAssistantTools(
             status: p.status,
             waitingForYourAnswer: waiting.has(p.id),
             currentStage: p.currentStage
-              ? `${p.currentStage.label} (${p.currentStage.state})`
+              ? `${progressLabel(p.currentStage)} (${p.currentStage.state})`
               : null,
           })),
           sources: found.map((p): Source => ({

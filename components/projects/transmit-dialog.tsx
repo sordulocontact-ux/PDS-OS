@@ -20,33 +20,43 @@ import { fr } from "@/lib/i18n/fr";
 import { transmitProject } from "@/lib/projects/transmission-actions";
 
 // "Transmettre à un chef de projet": the director picks a project manager and
-// may add a message (the answer to a question, when transmitting again).
+// may add a message. `mode`: a first transmission, the answer to a question
+// (« Répondre et transmettre »), or after a refusal (« … à quelqu'un
+// d'autre »).
 export function TransmitDialog({
   projectId,
   people,
-  retransmit,
+  mode,
   defaultAssigneeId,
 }: {
   projectId: string;
   people: Array<{ personId: string; name: string }>;
-  retransmit: boolean;
+  mode: "first" | "answer" | "reassign";
   defaultAssigneeId?: string;
 }) {
   const t = fr.transmission;
   const [open, setOpen] = useState(false);
+  const label = {
+    first: t.panel.transmit,
+    answer: t.panel.answer,
+    reassign: t.panel.reassign,
+  }[mode];
+  const title = {
+    first: t.dialog.title,
+    answer: t.dialog.answerTitle,
+    reassign: t.dialog.reassignTitle,
+  }[mode];
 
   return (
     <>
       <Button size="lg" onClick={() => setOpen(true)}>
         <IconPaperPlane2 aria-hidden data-icon="inline-start" />
-        {retransmit ? t.panel.retransmit : t.panel.transmit}
+        {label}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent closeLabel={t.dialog.close}>
           <DialogHeader>
-            <DialogTitle>
-              {retransmit ? t.dialog.retransmitTitle : t.dialog.title}
-            </DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{t.dialog.description}</DialogDescription>
           </DialogHeader>
           {/* Mounted per opening: every opening starts from a blank state. */}

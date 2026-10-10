@@ -12,11 +12,14 @@ export function JoinCallLink({
   url,
   title,
   size = "default",
+  variant = "outline",
   inRow = false,
 }: {
   url: string;
   title: string;
   size?: "sm" | "default";
+  // `default`: the page's main action (a call's details).
+  variant?: "outline" | "default";
   inRow?: boolean;
 }) {
   const t = fr.calls.join;
@@ -27,7 +30,7 @@ export function JoinCallLink({
       rel="noopener noreferrer"
       aria-label={t.label(title)}
       className={cn(
-        buttonVariants({ variant: "outline", size }),
+        buttonVariants({ variant, size }),
         inRow && "relative z-10",
       )}
     >

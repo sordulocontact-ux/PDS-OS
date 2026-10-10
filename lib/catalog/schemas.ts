@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { CONTACT_ROLES } from "@/lib/catalog/contacts";
 import { COUNTRY_CODES } from "@/lib/catalog/countries";
+import { CONTRIBUTOR_ROLES } from "@/lib/catalog/master/rules";
 import {
   ARTIST_RELATIONS,
   CREDIT_ROLES,
@@ -50,6 +51,31 @@ export const createArtistSchema = z.object({
       error: fr.catalog.artistForm.deezerInvalid,
     })
     .transform((value) => (value === null ? null : Number(value))),
+  // The main contact, chosen on the same screen (UX test of 09/10/2026):
+  // a person of the Réseau or a name; none when left empty.
+  contactRole: z
+    .string()
+    .optional()
+    .transform((value) => value || "manager")
+    .pipe(z.enum(CONTACT_ROLES, { error: e.required })),
+  contactNetworkContactId: z
+    .string()
+    .optional()
+    .transform((value) => (value ? value : null))
+    .pipe(z.uuid().nullable()),
+  contactName: optionalText(200),
+  contactEmail: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(320, { error: e.tooLong })
+    .optional()
+    .transform((value) => (value ? value : null))
+    .pipe(z.email({ error: e.invalidEmail }).nullable()),
+  contactPhone: optionalText(40).refine(
+    (value) => value === null || /^[0-9+(). -]{3,40}$/.test(value),
+    { error: fr.catalog.profileForm.errors.phone },
+  ),
 });
 
 // A name, or a pasted Deezer link (share links carry tracking parameters).
@@ -83,6 +109,38 @@ const creditsSchema = z
 
 // A title: its name and main artist are the only required fields
 // (docs/ARCHITECTURE.md § 2 septies).
+// The credits entered with a new title (UX test of 09/10/2026): one person
+// of the Réseau (or a name) and all their roles.
+const contributorsSchema = z
+  .string()
+  .optional()
+  .transform((raw, ctx) => {
+    try {
+      return JSON.parse(raw || "[]") as unknown;
+    } catch {
+      ctx.addIssue({
+        code: "custom",
+        message: fr.catalog.masterForm.credits.invalid,
+      });
+      return z.NEVER;
+    }
+  })
+  .pipe(
+    z
+      .array(
+        z.object({
+          name: z.string().trim().min(1).max(200),
+          contactId: z.uuid().nullable(),
+          roles: z
+            .array(z.enum(CONTRIBUTOR_ROLES))
+            .min(1)
+            .max(CONTRIBUTOR_ROLES.length),
+        }),
+        { error: fr.catalog.masterForm.credits.invalid },
+      )
+      .max(30, { error: e.tooLong }),
+  );
+
 export const createMasterSchema = z.object({
   title: z
     .string({ error: e.required })
@@ -90,6 +148,7 @@ export const createMasterSchema = z.object({
     .min(1, { error: e.required })
     .max(200, { error: e.tooLong }),
   credits: creditsSchema,
+  contributors: contributorsSchema,
   // Empty or "Non renseigné" = unknown, never guessed.
   audioState: z
     .string()
@@ -155,6 +214,12 @@ export const contactSchema = z.object({
     .transform((value) => (value ? value : null))
     .pipe(z.uuid().nullable()),
   role: z.enum(CONTACT_ROLES, { error: e.required }),
+  // The person of the Réseau, when picked there; empty for a name only.
+  networkContactId: z
+    .string()
+    .optional()
+    .transform((value) => (value ? value : null))
+    .pipe(z.uuid().nullable()),
   name: z
     .string({ error: e.required })
     .trim()

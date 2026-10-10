@@ -3,6 +3,7 @@ import "server-only";
 import type { Access } from "@/lib/auth/access";
 import { fr } from "@/lib/i18n/fr";
 import { projectKindLabel } from "@/lib/projects/labels";
+import { progressLabel } from "@/lib/projects/progress";
 import { routes } from "@/lib/auth/redirects";
 import {
   familyLabel,
@@ -54,10 +55,10 @@ export async function projectStatus(projectId: string, access: Access) {
   );
   facts.push(
     project.stages.length === 0
-      ? `Projet pas encore lancé, aucune étape (${fr.transmission.statuses[project.status]}).`
+      ? `Projet pas encore lancé (${fr.transmission.statuses[project.status]}).`
       : project.currentStage
-        ? `Étape actuelle : ${project.currentStage.label} (${stageState(project.currentStage.state)}).`
-        : "Toutes les étapes sont validées.",
+        ? `Où en est le projet : ${progressLabel(project.currentStage)} (${stageState(project.currentStage.state)}).`
+        : "Projet terminé.",
   );
   // A project not launched yet is presented by what was known when it was
   // transmitted (its initial context is data, quoted as written).
@@ -67,9 +68,11 @@ export async function projectStatus(projectId: string, access: Access) {
     if (project.dueDate)
       facts.push(`Échéance du projet : ${formatDay(project.dueDate)}.`);
   }
+  // In the words of the workflows (UX test of 09/10/2026: seven stages
+  // beside four workflows); a stage not decided yet (Défense) is not said.
   for (const stage of project.stages) {
-    if (stage.state !== "not_started")
-      facts.push(`Étape ${stage.label} : ${stageState(stage.state)}.`);
+    if (stage.state !== "not_started" && stage.key !== "defense")
+      facts.push(`${progressLabel(stage)} : ${stageState(stage.state)}.`);
   }
   // The team as the project knows it (UX test of 09/10/2026: PO did not
   // know « Nora » was the creative director).

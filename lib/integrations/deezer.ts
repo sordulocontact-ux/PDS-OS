@@ -115,6 +115,35 @@ export async function searchArtists(
     .slice(0, limit);
 }
 
+/**
+ * Artists of the tracks whose title matches `query` exactly (case, accents
+ * and punctuation aside): a TikTok display name is often one of the
+ * artist's songs ("Miss KITOKO" → Theodora). Ids only, most relevant first.
+ */
+export async function findArtistIdsByTrackTitle(
+  query: string,
+  sameTitle: (title: string) => boolean,
+): Promise<number[]> {
+  const url = new URL(`${BASE}/search/track`);
+  url.searchParams.set("q", query);
+  url.searchParams.set("limit", "15");
+  const parsed = z
+    .object({
+      data: z.array(
+        z.object({ title: z.string(), artist: z.object({ id: z.number() }) }),
+      ),
+    })
+    .safeParse(await fetchJson("deezer", url));
+  if (!parsed.success) return [];
+  return [
+    ...new Set(
+      parsed.data.data
+        .filter((track) => sameTitle(track.title))
+        .map((track) => track.artist.id),
+    ),
+  ];
+}
+
 export async function getDeezerArtist(
   id: number,
 ): Promise<DeezerArtist | null> {

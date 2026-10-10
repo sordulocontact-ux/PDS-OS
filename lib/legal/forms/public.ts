@@ -28,9 +28,14 @@ const publicSchema = z.discriminatedUnion("state", [
     person: z.string(),
     project: z.string(),
     requester: requesterSchema,
+    // What PDS OS knows: the roles to tick, and answers to confirm (nom
+    // d'artiste, nom à créditer, catégorie).
     prefill: z
-      .object({ roles: z.array(z.enum(FORM_ROLES)).default([]) })
-      .catch({ roles: [] }),
+      .object({
+        roles: z.array(z.enum(FORM_ROLES)).default([]),
+        answers: z.record(z.string(), z.string()).default({}),
+      })
+      .catch({ roles: [], answers: {} }),
     known: z
       .record(z.string(), z.unknown())
       .transform((known) =>

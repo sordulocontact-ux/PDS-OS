@@ -20,7 +20,10 @@ export const transmission = {
     reason: "Motif",
     question: "Question",
     transmit: "Transmettre à un chef de projet",
-    retransmit: "Retransmettre",
+    // Transmitting again says why (UX test of 09/10/2026: « Retransmettre »
+    // to answer a question).
+    answer: "Répondre et transmettre",
+    reassign: "Transmettre à quelqu'un d'autre",
     noManager:
       "Aucun chef de projet actif dans l'équipe. Créez-en un depuis l'équipe pour pouvoir transmettre.",
     toMembers: "Ouvrir l'équipe",
@@ -28,7 +31,8 @@ export const transmission = {
 
   dialog: {
     title: "Transmettre à un chef de projet",
-    retransmitTitle: "Retransmettre le projet",
+    answerTitle: "Répondre et transmettre le projet",
+    reassignTitle: "Transmettre le projet à quelqu'un d'autre",
     description:
       "Le chef de projet pourra l'accepter, le refuser ou demander une précision.",
     assignee: "Chef de projet",
@@ -56,7 +60,7 @@ export const transmission = {
       refused:
         "Votre refus est parti à la direction. Le projet ne vous est plus transmis.",
       clarification_requested:
-        "Votre question est partie à la direction. Le projet vous sera retransmis avec sa réponse : vous serez notifié.",
+        "Votre question est partie à la direction. Le projet vous sera transmis à nouveau avec sa réponse : vous serez notifié.",
     },
     send: "Envoyer",
     sending: "Envoi…",
@@ -85,6 +89,6 @@ export const transmission = {
 
   cards: {
     toAccept: "Projets à accepter",
-    toRetransmit: "Projets à retransmettre",
+    toRetransmit: "Projets qui attendent votre réponse",
   },
 } as const;

@@ -84,8 +84,12 @@ export type IntakeQuestion = {
   facts: FactValue[];
   // What the Cadrage already established, offered as the answer while the
   // question is open (UX test of 09/10/2026: PO asked it again); null if
-  // the Cadrage says nothing about it.
+  // the Cadrage says nothing about it. On the people question, the people
+  // the title and the Cadrage already name (known-people.ts).
   suggestion: string | null;
+  // Where the suggestion comes from: the question and its help change when
+  // some people are already known.
+  suggestionFrom: "cadrage" | "known" | null;
 };
 
 /** Questions a « nothing » answer settles (« Aucun emprunt »…). */

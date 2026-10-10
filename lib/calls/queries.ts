@@ -33,6 +33,10 @@ export type CallSummary = {
   status: CallStatus;
   // Video link (Meet, Zoom…): "Rejoindre" opens it. Null when none.
   meetingUrl: string | null;
+  // End of its slot; null for a call planned before slots (or prepared
+  // from a workflow), which then lasts its agenda, or an hour.
+  endsAt: string | null;
+  durationMinutes: number | null;
 };
 
 export type CallAttendee = { personId: string; name: string };
@@ -42,14 +46,15 @@ export type CallDetail = CallSummary & {
   // Null: an internal meeting, outside any project.
   projectId: string | null;
   createdBy: string | null;
-  // Members invited to an internal meeting (none on a project call).
+  // Members invited (the project's team on a project call).
   attendees: CallAttendee[];
+  // People outside the team, invited by e-mail.
+  guests: Array<{ email: string; name: string | null }>;
   audioPath: string | null;
   audioMime: string | null;
   audioBytes: number | null;
   errorCode: string | null;
   agenda: AgendaItem[] | null;
-  durationMinutes: number | null;
   // Prepared from the Cadrage or the Stratégie (« Préparer un échange »):
   // its purpose, who takes part, the documents that go with it, and how a
   // strategy call is held.
@@ -92,7 +97,9 @@ export async function listCalls(
 ): Promise<CallSummary[]> {
   const { data, error } = await supabase
     .from("calls")
-    .select("id, title, occurred_at, status, meeting_url")
+    .select(
+      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url",
+    )
     .eq("project_id", projectId)
     .order("occurred_at", { ascending: false });
   if (error) throw new Error(`listCalls: ${error.message}`);
@@ -102,6 +109,8 @@ export async function listCalls(
     occurredAt: row.occurred_at,
     status: asCallStatus(row.status),
     meetingUrl: row.meeting_url,
+    endsAt: row.ends_at,
+    durationMinutes: row.duration_minutes,
   }));
 }
 
@@ -111,6 +120,8 @@ export type CallListItem = CallSummary & {
   projectTitle: string | null;
   // The call's own page: inside its project, or the meeting's page.
   href: string;
+  // Who works on it: the project's owner, or the meeting's creator.
+  ownerPersonId: string | null;
 };
 
 // Most recent first; a team of 3 to 5 people stays far below this.
@@ -121,12 +132,21 @@ const ALL_CALLS_LIMIT = 500;
  * visible projects and the internal meetings they created or were invited
  * to. RLS decides (can_see_call).
  */
-export async function listAllCalls(supabase: Client): Promise<CallListItem[]> {
-  const { data, error } = await supabase
+export async function listAllCalls(
+  supabase: Client,
+  // The calendar's week: the calls that start within it.
+  range?: { from: Date; to: Date },
+): Promise<CallListItem[]> {
+  let query = supabase
     .from("calls")
     .select(
-      "id, title, occurred_at, status, meeting_url, project_id, project:projects!calls_project_same_org(title)",
-    )
+      "id, title, occurred_at, ends_at, duration_minutes, status, meeting_url, project_id, created_by, project:projects!calls_project_same_org(title, owner_person_id)",
+    );
+  if (range)
+    query = query
+      .gte("occurred_at", range.from.toISOString())
+      .lt("occurred_at", range.to.toISOString());
+  const { data, error } = await query
     .order("occurred_at", { ascending: false })
     .limit(ALL_CALLS_LIMIT);
   if (error) throw new Error(`listAllCalls: ${error.message}`);
@@ -136,11 +156,16 @@ export async function listAllCalls(supabase: Client): Promise<CallListItem[]> {
     occurredAt: row.occurred_at,
     status: asCallStatus(row.status),
     meetingUrl: row.meeting_url,
+    endsAt: row.ends_at,
+    durationMinutes: row.duration_minutes,
     projectId: row.project_id,
     projectTitle: row.project?.title ?? null,
     href: row.project_id
       ? routes.projectCall(row.project_id, row.id)
       : routes.meeting(row.id),
+    ownerPersonId: row.project_id
+      ? (row.project?.owner_person_id ?? null)
+      : row.created_by,
   }));
 }
 
@@ -171,7 +196,7 @@ export async function getCall(
   const query = supabase
     .from("calls")
     .select(
-      "*, call_attendees(person_id, person:people!call_attendees_person_id_fkey(first_name, last_name))",
+      "*, call_attendees(person_id, person:people!call_attendees_person_id_fkey(first_name, last_name)), call_guests(email, name)",
     )
     .eq("id", callId);
   const { data } = await (
@@ -184,6 +209,7 @@ export async function getCall(
     occurredAt: data.occurred_at,
     status: asCallStatus(data.status),
     meetingUrl: data.meeting_url,
+    endsAt: data.ends_at,
     organizationId: data.organization_id,
     projectId: data.project_id,
     createdBy: data.created_by,
@@ -195,6 +221,11 @@ export async function getCall(
           : "",
       }))
       .sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    guests: data.call_guests
+      .map((g) => ({ email: g.email, name: g.name }))
+      .sort((a, b) =>
+        (a.name ?? a.email).localeCompare(b.name ?? b.email, "fr"),
+      ),
     audioPath: data.audio_path,
     audioMime: data.audio_mime,
     audioBytes: data.audio_bytes,

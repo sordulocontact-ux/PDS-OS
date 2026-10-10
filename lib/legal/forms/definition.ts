@@ -8,7 +8,8 @@
 // alimentent Person ; les rôles, crédits et conditions propres au morceau
 // alimentent Contribution »).
 
-export const LEGAL_FORM_VERSION = 1;
+// v2 (10/10/2026): « Featuring » among the categories of a performer.
+export const LEGAL_FORM_VERSION = 2;
 
 // « Quel est votre rôle sur ce projet ? », multi-selection with « Autre ».
 export const FORM_ROLES = [
@@ -21,6 +22,10 @@ export const FORM_ROLES = [
   "producer",
   "label",
   "provider",
+  // A studio, a lawyer: their fiche asks the provider's block (migration
+  // 20261010001901).
+  "studio",
+  "lawyer",
   "publisher",
   "other",
 ] as const;
@@ -41,6 +46,8 @@ export const BLOCKS_OF: Record<FormRole, FormBlock[]> = {
   producer: ["producer"],
   label: ["producer"],
   provider: ["provider"],
+  studio: ["provider"],
+  lawyer: ["provider"],
   publisher: ["publisher"],
   other: [],
 };
@@ -131,7 +138,7 @@ export const FORM_FIELDS: readonly FormField[] = [
     block: "artist",
     type: "select",
     target: "contribution",
-    options: ["main", "secondary", "musician", "backing"],
+    options: ["main", "featuring", "secondary", "musician", "backing"],
   },
   { id: "label_management", block: "artist", type: "text", target: "person" },
   {

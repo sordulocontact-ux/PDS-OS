@@ -102,6 +102,10 @@ export const legal = {
         hint: "Composition, texte, arrangement, production, enregistrement, mix, musiciens… Plusieurs personnes à la fois, comme vous le diriez.",
         why: "Les crédits de ce titre sont vides : ils servent aux contrats et à la déclaration SACEM.",
         short: "Participants",
+        // Some people are already known (known-people.ts): ask for the rest.
+        askKnown: (title: string) => `Qui d'autre a participé à « ${title} » ?`,
+        whyKnown:
+          "PDS OS connaît déjà les personnes ci-dessous. Il manque qui a composé, écrit, arrangé, produit ou joué : c'est ce que demandent les contrats et la déclaration SACEM.",
       },
       third_party: {
         ask: (title: string) =>
@@ -137,6 +141,26 @@ export const legal = {
     // What the Cadrage already established, offered as the answer.
     fromCadrage:
       "Repris du Cadrage : vérifiez, corrigez si besoin, puis faites lire la réponse à PO.",
+    // Who the title and the Cadrage already name (known-people.ts),
+    // offered as the start of the answer, one line per person.
+    fromKnown:
+      "Déjà connu, avec sa source : ajoutez à la suite les autres personnes et leur rôle, puis faites lire la réponse à PO.",
+    known: {
+      roles: {
+        performer: "interprète",
+        recording_engineer: "enregistrement",
+        mix_engineer: "mix",
+        mastering_engineer: "mastering",
+      } as Record<string, string>,
+      sources: {
+        title: "artiste du titre",
+        featuring: "featuring du titre",
+        cadrage: "Cadrage",
+        session: "session du titre",
+      } as Record<string, string>,
+      line: (name: string, roles: string[], sources: string[]) =>
+        `${name} : ${roles.join(" et ")} (${sources.join(", ")}).`,
+    },
     cadrageNone: {
       third_party:
         "Aucun emprunt : ni sample, ni reprise, ni interpolation (Cadrage).",
@@ -334,10 +358,10 @@ export const legal = {
     responsible: "Responsable",
     noResponsible: "À désigner",
     due: "Échéance",
-    launch: "Lancer le plan",
+    launch: "Lancer le plan d'action",
     launching: "Lancement…",
     notice:
-      "Lancer le plan crée une tâche par action dans Travail ; chacune se coche d'elle-même quand sa source dit que c'est fait. Rien n'est envoyé à l'extérieur et aucun contrat n'est créé.",
+      "Lancer le plan d'action crée une tâche par action dans Travail ; chacune se coche d'elle-même quand sa source dit que c'est fait. Rien n'est envoyé à l'extérieur et aucun contrat n'est créé.",
     nothing: "Le dossier ne demande aucune action pour l'instant.",
     needsConfirmation: {
       title: "Le dossier n'est pas encore confirmé",
@@ -529,8 +553,8 @@ export const legal = {
       waiting: "En attente d'un retour",
       atDirection: "Chez la direction",
       notNeeded:
-        "Pas de contrat prévu pour cette personne dans la cartographie.",
-      unmapped: "La cartographie des contrats est à valider d'abord.",
+        "Pas de contrat prévu pour cette personne dans les contrats à prévoir.",
+      unmapped: "Les contrats à prévoir sont à valider d'abord.",
       needsInfo: "Il manque des informations pour générer le contrat",
       needsInfoBody:
         "Chaque valeur se complète à sa source (la fiche de renseignements, le Réseau, le projet) : le contrat se génère tout seul dès que tout est là.",
@@ -602,7 +626,7 @@ export const legal = {
       contract: "Contrat",
       split: "Répartition de l'édition",
       sacem: "Bulletin SACEM",
-      mapping: "Cartographie des contrats",
+      mapping: "Contrats à prévoir",
       clearance: "Emprunt",
       link: "Démarche",
       steps: "Démarche",
@@ -625,7 +649,7 @@ export const legal = {
         "Le bulletin de chaque œuvre, pré-rempli depuis le dossier, signé puis déposé.",
     },
     after: {
-      contract: "Fiches, puis cartographie",
+      contract: "Fiches, puis contrats à prévoir",
       splits: "Fiches des auteurs",
       formality: "Répartitions et emprunts",
     },
@@ -637,7 +661,7 @@ export const legal = {
     waitsFiche: (name: string) => `Attend la fiche de ${name}`,
     namesake: "Homonyme à relier",
     notInNetwork: "Pas dans le Réseau",
-    mapping: "Cartographie des contrats",
+    mapping: "Contrats à prévoir",
     edition: "Édition",
     bulletin: "Bulletin 725 · œuvre éditée",
     toPropose: "À proposer",
@@ -650,7 +674,7 @@ export const legal = {
       prepareFiche: "Préparer la fiche",
       markSent: "Marquer comme envoyée",
       review: "Vérifier les réponses",
-      mapping: "Valider la cartographie",
+      mapping: "Valider les contrats à prévoir",
       missing: "Voir ce qui manque",
       generate: "Générer le contrat",
       submit: "Soumettre à la direction",
@@ -697,7 +721,7 @@ export const legal = {
         "Cette personne est déjà créditée sur un titre du projet : elle est connue par son crédit.",
       alreadyAdded: "Cette personne est déjà dans le dossier.",
       inUse:
-        "Un contrat est prévu pour cette personne dans la cartographie : retire-le d'abord.",
+        "Un contrat est prévu pour cette personne dans les contrats à prévoir : retirez-le d'abord.",
       failed: "L'intervenant n'a pas pu être enregistré. Réessaie.",
     },
   },

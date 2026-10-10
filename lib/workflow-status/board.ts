@@ -48,6 +48,8 @@ export type BoardInput = {
   projectId: string;
   today: string;
   projectDueDate: string | null;
+  // Its name: « Date de sortie visée » or « Échéance du projet ».
+  projectDateLabel: string;
   workflows: WorkflowKey[];
   states: Partial<Record<WorkflowKey, WorkflowState | "restricted">>;
   dependencies: Dependency[];
@@ -205,7 +207,7 @@ export function boardDeadlines(input: BoardInput, limit = 6): BoardDeadline[] {
     push(
       {
         key: "project",
-        label: t.project,
+        label: input.projectDateLabel,
         workflow: null,
         date: input.projectDueDate,
         href: workflowStepHref(input.projectId, "distribution", "prepare"),

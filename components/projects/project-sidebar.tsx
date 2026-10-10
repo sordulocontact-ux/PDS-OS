@@ -6,6 +6,7 @@ import { useId, useState } from "react";
 
 import { ProjectSwitcher } from "@/components/projects/project-switcher";
 import { Button } from "@/components/ui/button";
+import { WorkflowLegend } from "@/components/projects/workflow-legend";
 import { StatusDot } from "@/components/ui/status-dot";
 import { ViewLink } from "@/components/ui/view-link";
 import {
@@ -61,12 +62,15 @@ function ProjectSidebarList({
       {toBlocks(items).map((block) => (
         <div key={block.group ?? "top"} className="flex flex-col gap-1">
           {block.group && (
-            <p
-              id={`${idPrefix}-${block.group}`}
-              className="px-4 text-caption text-[color:var(--nav-fg-muted)]"
-            >
-              {groups[block.group]}
-            </p>
+            <div className="flex items-center justify-between gap-2 pr-2 pl-4">
+              <p
+                id={`${idPrefix}-${block.group}`}
+                className="text-caption text-[color:var(--nav-fg-muted)]"
+              >
+                {groups[block.group]}
+              </p>
+              {block.group === "workflows" && <WorkflowLegend />}
+            </div>
           )}
           <ul
             className="flex flex-col gap-1"
@@ -110,11 +114,13 @@ function ProjectSidebarList({
                       <StatusDot
                         tone={workflowStatusTone[statuses[item.key]!]}
                         label={
-                          fr.workflowStatus.statuses[
-                            statuses[
-                              item.key
-                            ] as keyof typeof fr.workflowStatus.statuses
-                          ]
+                          statuses[item.key] === "not_started"
+                            ? fr.workflowStatus.notStartedHint
+                            : fr.workflowStatus.statuses[
+                                statuses[
+                                  item.key
+                                ] as keyof typeof fr.workflowStatus.statuses
+                              ]
                         }
                       />
                     )}

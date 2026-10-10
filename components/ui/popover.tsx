@@ -17,11 +17,14 @@ function PopoverContent({
   side = "bottom",
   align = "end",
   sideOffset = 8,
+  anchor,
   ...props
 }: PopoverPrimitive.Popup.Props & {
   side?: PopoverPrimitive.Positioner.Props["side"];
   align?: PopoverPrimitive.Positioner.Props["align"];
   sideOffset?: number;
+  // Opened without a trigger (a calendar block): the element it points to.
+  anchor?: PopoverPrimitive.Positioner.Props["anchor"];
 }) {
   return (
     <PopoverPrimitive.Portal>
@@ -29,6 +32,7 @@ function PopoverContent({
         side={side}
         align={align}
         sideOffset={sideOffset}
+        anchor={anchor}
         collisionPadding={16}
         className="z-50"
       >

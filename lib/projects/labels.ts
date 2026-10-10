@@ -29,3 +29,10 @@ export function projectKindLabel(project: ProjectKind): string {
   const format = projectFormatLabel(project);
   return format ? `${type} · ${format}` : type;
 }
+
+/** The project's date, one name everywhere: the release a musical project
+ * aims for, the due date of any other. */
+export function projectDateLabel(type: ProjectType): string {
+  const t = fr.shell.projectDate;
+  return type === "music_release" ? t.music_release : t.other;
+}

@@ -10,18 +10,53 @@ export function formatDateTime(iso: string): string {
   return dateTime.format(new Date(iso));
 }
 
+const time = new Intl.DateTimeFormat("fr-FR", {
+  timeStyle: "short",
+  timeZone: "Europe/Paris",
+});
+
+export function formatTime(iso: string): string {
+  return time.format(new Date(iso));
+}
+
+/** When a call ends: its slot's end, else its agenda's length, else an hour. */
+export function callEndOf(call: {
+  occurredAt: string;
+  endsAt?: string | null;
+  durationMinutes?: number | null;
+}): string {
+  if (call.endsAt) return call.endsAt;
+  const start = new Date(call.occurredAt).getTime();
+  return new Date(start + (call.durationMinutes ?? 60) * 60_000).toISOString();
+}
+
+/** "10 oct. 2026, 14:00 – 14:30" for a slot, the start alone otherwise. */
+export function formatSlot(call: {
+  occurredAt: string;
+  endsAt?: string | null;
+}): string {
+  const start = formatDateTime(call.occurredAt);
+  return call.endsAt ? `${start} – ${formatTime(call.endsAt)}` : start;
+}
+
 export function formatMegabytes(bytes: number): string {
   return (bytes / (1024 * 1024)).toLocaleString("fr-FR", {
     maximumFractionDigits: 1,
   });
 }
 
-/** A planned call: still a draft (nothing recorded) and dated in the future. */
+/**
+ * A planned call: still a draft (nothing recorded) and not over yet — its
+ * slot's end when it has one (a call in progress can still be joined), its
+ * start otherwise.
+ */
 export function isUpcoming(
-  call: { status: string; occurredAt: string },
+  call: { status: string; occurredAt: string; endsAt?: string | null },
   now: Date,
 ): boolean {
-  return call.status === "draft" && new Date(call.occurredAt) > now;
+  return (
+    call.status === "draft" && new Date(call.endsAt ?? call.occurredAt) > now
+  );
 }
 
 /** "YYYY-MM-DDTHH:mm" in Paris time, the value format of datetime-local. */
@@ -62,7 +97,7 @@ export function asCallView(value: unknown): CallView | null {
 }
 
 export function callViewOf(
-  call: { status: string; occurredAt: string },
+  call: { status: string; occurredAt: string; endsAt?: string | null },
   now: Date,
 ): CallView {
   return isUpcoming(call, now) ? "upcoming" : "past";

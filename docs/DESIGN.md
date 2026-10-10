@@ -249,9 +249,10 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   projet non lancé ouvre sa première page ; « Tous les projets » en pied. Puis les sections en groupes
   titrés (ticket « Architecture globale », 08/10/2026) : **Vue d'ensemble** puis
   **Cadrage**, sans titre de groupe, au-dessus de tous les workflows ; **Workflows**
-  (Master, Juridique, Marketing, Distribution, menés en parallèle) ; **Pilotage** (Travail,
-  Équipe, Planning, Budget) ; **Production** (Calls, Livrables, Fichiers, Validations,
-  Activité). Plus rien ne s'appelle « Processus » ni « Workflow ». Liste et groupes :
+  (Master, Juridique, Marketing, Distribution, menés en parallèle ; un « ⓘ » donne la légende
+  de leurs points de statut, un point gris dit où se lancer) ; **Pilotage** (Travail, Équipe,
+  Planning, Budget, Validations, Activité) ; **Ressources** (Calls, Livrables, Fichiers ;
+  plus « Production », nom d'une étape du Marketing, test UX du 09/10/2026). Plus rien ne s'appelle « Processus » ni « Workflow ». Liste et groupes :
   `lib/ui/project-sections.ts`. Chaque section a sa page (Marketing = Stratégie,
   Conception, Activations, entrée par la Stratégie ; Distribution = la Sortie ; Master,
   ouvert par son État du master ; Juridique, ouvert par son État des lieux). Sans

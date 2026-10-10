@@ -22,6 +22,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectDraftItem } from "@/lib/projects/drafts";
 import type { ProjectListItem } from "@/lib/projects/types";
 import { stageHue } from "@/lib/ui/category-hues";
@@ -112,16 +113,15 @@ export function ProjectsTable({
             <DataTableCell hideBelow="md">
               <ProjectKindBadge kind={project} />
             </DataTableCell>
-            {/* The stage only, each in its hue: its state (en cours, à
-                venir…) is read on the project itself. Before the launch,
-                the handover status. */}
+            {/* Where it stands, in the words of the workflows, each in its
+                hue. Before the launch, the handover status. */}
             <DataTableCell fill>
               {project.currentStage ? (
                 <StatusBadge
                   tone={stageHue(project.currentStage.key)}
                   size="sm"
                 >
-                  {project.currentStage.label}
+                  {progressLabel(project.currentStage)}
                 </StatusBadge>
               ) : project.stageCount > 0 ? (
                 <StatusBadge tone={doneTone} size="sm">

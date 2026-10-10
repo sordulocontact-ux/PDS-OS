@@ -17,6 +17,8 @@ import {
   factValueSchema,
   type ProposedFact,
 } from "@/lib/legal/intake/types";
+import { knownContactOf } from "@/lib/legal/intake/known-people";
+import { loadKnownPeople } from "@/lib/legal/intake/known-queries";
 import { loadIntake } from "@/lib/legal/intake/queries";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -87,13 +89,25 @@ export async function saveLegalAnswer(
   if (!(await guard(parsed.data)))
     return { ok: false, error: fr.auth.errors.forbidden };
 
+  // A person the title or the Cadrage already knows as a Réseau contact is
+  // credited linked to it, read here again (never taken from the client).
+  const known =
+    questionKey === "contributors" && masterId
+      ? ((await loadKnownPeople(projectId, [masterId])).get(masterId) ?? [])
+      : [];
   const supabase = await createClient();
   const { error } = await supabase.rpc("record_legal_answer", {
     p_project_id: projectId,
     p_question_key: questionKey,
     p_master_id: masterId,
     p_text: text,
-    p_facts: facts.map(({ kind, value, quote }) => ({ kind, value, quote })),
+    p_facts: facts.map(({ kind, value, quote }) => ({
+      kind,
+      value,
+      quote,
+      contact_id:
+        kind === "contribution" ? knownContactOf(known, value.name) : null,
+    })),
   });
   if (error) {
     console.error("saveLegalAnswer:", error.message);

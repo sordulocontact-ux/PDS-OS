@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cadrageAnswers } from "@/lib/legal/intake/cadrage";
+import { loadKnownPeople } from "@/lib/legal/intake/known-queries";
 import {
   answerKey,
   intakeQuestions,
@@ -54,6 +55,7 @@ export async function loadIntake(project: {
     clearances,
     constraints,
     briefLegal,
+    known,
   ] = await Promise.all([
     titled
       ? supabase
@@ -104,6 +106,8 @@ export async function loadIntake(project: {
       .eq("deliverable", "brief")
       .in("field_key", ["legal_agreements", "legal_blockers"])
       .eq("status", "confirmed"),
+    // Who the titles and the Cadrage already name (people question).
+    loadKnownPeople(project.id, masterIds),
   ]);
   failed("credits", credits.error);
   failed("publishers", publishers.error);
@@ -150,6 +154,7 @@ export async function loadIntake(project: {
       creditedTitles: new Set((credits.data ?? []).map((r) => r.master_id)),
       publishedTitles: new Set((publishers.data ?? []).map((r) => r.master_id)),
       hasContract: (contracts.count ?? 0) > 0,
+      known,
       answers: answersOf,
     }),
     clearances: clearances.count ?? 0,

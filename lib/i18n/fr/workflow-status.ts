@@ -69,7 +69,16 @@ export const workflowStatus = {
       overdue: "En retard",
     },
   },
-  notLaunched: "Se lance depuis le Plan du projet",
+  // The dots of the project's sidebar (UX test of 09/10/2026).
+  legend: {
+    open: "Ce que disent les points de statut",
+    title: "Statut des workflows",
+    start:
+      "Un workflow non démarré se lance depuis le plan du projet, sur la Vue d'ensemble.",
+  },
+  notStartedHint:
+    "Non démarré · se lance depuis le plan du projet (Vue d'ensemble)",
+  notLaunched: "Se lance depuis le plan du projet, sur la Vue d'ensemble",
   // Ce qu'un workflow attend d'un autre (lot 5), calculé par le code depuis
   // les sources : jamais une table saisie à la main.
   dependencies: {

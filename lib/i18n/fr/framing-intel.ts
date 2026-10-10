@@ -412,8 +412,8 @@ export const framingIntel = {
     noDocuments: "Aucun document dans le projet.",
     date: "Date et heure",
     link: "Lien de visio",
-    launch: "Lancer",
-    launching: "Préparation…",
+    launch: "Créer l'échange",
+    launching: "Création…",
     failed: "L'échange n'a pas pu être préparé. Réessayez.",
     detailsTitle: "Échange de cadrage",
     detailsPurpose: "But",
@@ -555,10 +555,11 @@ export const framingIntel = {
     },
   },
   locked: {
-    title: (name: string) => `${name} se lance depuis le Plan du Projet`,
+    title: (name: string) =>
+      `${name} se lance depuis le plan du projet, sur la Vue d'ensemble`,
     body: "Le Brief est validé : ouvrez le plan pour décider de ce qui commence maintenant.",
     bodyBeforeBrief:
-      "Il démarrera une fois le cadrage validé et le plan du projet lancé.",
+      "Il démarrera une fois le cadrage validé et le plan du projet lancé depuis la Vue d'ensemble.",
     bodyWaiting:
       "Le plan le place en Ensuite : lancez-le depuis le plan quand le moment est venu.",
     bodyAbsent:

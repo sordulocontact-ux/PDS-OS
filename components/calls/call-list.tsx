@@ -3,7 +3,7 @@ import { IconChevronRight } from "nucleo-sharp-essential";
 
 import { CallStatusBadge } from "@/components/calls/call-badges";
 import { routes } from "@/lib/auth/redirects";
-import { formatDateTime, isUpcoming } from "@/lib/calls/format";
+import { formatSlot, isUpcoming } from "@/lib/calls/format";
 import type { CallSummary } from "@/lib/calls/queries";
 import { fr } from "@/lib/i18n/fr";
 
@@ -33,7 +33,7 @@ export function CallList({
                 dateTime={call.occurredAt}
                 className="text-sm text-muted-foreground"
               >
-                {formatDateTime(call.occurredAt)}
+                {formatSlot(call)}
               </time>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">

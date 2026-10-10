@@ -52,6 +52,10 @@ export const legalFormalities = {
       "Choisissez chaque personne dans le Réseau : son identité et son IPI viennent de sa fiche. Le total des parts Phono (créateurs et éditeurs) doit faire 100 %.",
     phonoFromSplit:
       "Parts Phono reprises de la répartition confirmée de ce titre : vérifiez-les avant d'enregistrer.",
+    // Decision of 10/10/2026: the splits of the title's page are not
+    // confirmed by the rightholders, so their shares are never taken.
+    noConfirmedSplit:
+      "Aucune répartition de l'édition confirmée pour ce titre : les parts Phono sont à saisir. Les splits de la fiche du titre ne sont pas repris tant que les ayants droit ne les ont pas confirmés.",
   } as Record<string, string>,
   sources: {
     toVerify: "À vérifier",

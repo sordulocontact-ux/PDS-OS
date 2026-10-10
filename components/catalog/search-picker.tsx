@@ -13,7 +13,9 @@ export type PickerOption = { id: string; label: string; detail?: string };
 // always the "create" shortcut, so a missing item never blocks the form.
 // `suggestedIds`: the only options listed before anything is typed (the
 // people who fit); typing searches them all. Inside a modal the list sits in
-// the flow, so the modal grows instead of clipping it.
+// the flow, so the modal grows instead of clipping it. `clearOnCreate`: the
+// shortcut adds at once (an e-mail address), so the field empties, unless
+// `onCreate` returns false (nothing added: the query stays to be fixed).
 export function SearchPicker({
   label,
   placeholder,
@@ -28,13 +30,14 @@ export function SearchPicker({
   noSuggestionLabel,
   invalid,
   describedBy,
+  clearOnCreate = false,
 }: {
   label: string;
   placeholder: string;
   options: PickerOption[];
   excludedIds: ReadonlySet<string>;
   onPick: (id: string) => void;
-  onCreate: (query: string) => void;
+  onCreate: (query: string) => void | false;
   createLabel: (query: string) => string;
   noResultLabel: (query: string) => string;
   allSelectedLabel: string;
@@ -43,6 +46,7 @@ export function SearchPicker({
   noSuggestionLabel?: string;
   invalid?: boolean;
   describedBy?: string;
+  clearOnCreate?: boolean;
 }) {
   const id = useId();
   const listId = `${id}-list`;
@@ -77,7 +81,11 @@ export function SearchPicker({
       setQuery("");
       setActive(0);
     } else {
-      onCreate(query.trim());
+      const created = onCreate(query.trim());
+      if (clearOnCreate && created !== false) {
+        setQuery("");
+        setActive(0);
+      }
       setOpen(false);
     }
   }

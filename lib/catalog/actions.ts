@@ -99,9 +99,38 @@ export async function createArtist(
     };
   }
 
+  // Its main contact, given on the same screen: with the user's session
+  // (artist_contacts: manage_catalog). The artist stays created if it
+  // fails; the contact is added from its page.
+  const contact = parsed.data;
+  let contactFailed = false;
+  if (contact.contactName) {
+    const { error: contactError } = await supabase
+      .from("artist_contacts")
+      .insert({
+        organization_id: access.organizationId,
+        artist_id: data.id,
+        role: contact.contactRole,
+        name: contact.contactName,
+        email: contact.contactEmail,
+        phone: contact.contactPhone,
+        contact_id: contact.contactNetworkContactId,
+        is_primary: true,
+      });
+    if (contactError) {
+      console.error("createArtist (contact):", contactError.message);
+      contactFailed = true;
+    }
+  }
+
   // Lists and every form offering artists (master form, project form).
   revalidatePath(routes.app, "layout");
-  return { status: "created", artist: data };
+  return {
+    status: "created",
+    artist: data,
+    organizationId: access.organizationId,
+    contactFailed,
+  };
 }
 
 // `intent=page` redirects to the new title; `intent=dialog` (from the
@@ -142,10 +171,24 @@ export async function createMaster(
     p_audio_state: input.audioState ?? undefined,
     p_isrc: input.isrc ?? undefined,
     p_duration_seconds: input.duration ?? undefined,
+    p_contributors: input.contributors.map((c) => ({
+      name: c.name,
+      contact_id: c.contactId,
+      roles: c.roles,
+    })),
   });
 
   if (error || !masterId) {
     const me = fr.catalog.masterForm.errors;
+    if (error?.message.includes("contributor_requires_role")) {
+      return {
+        status: "error",
+        fieldErrors: {
+          contributors: fr.catalog.masterForm.credits.invalid,
+        },
+        values,
+      };
+    }
     if (error?.code === UNIQUE_VIOLATION) {
       return { status: "error", fieldErrors: { isrc: me.isrcTaken }, values };
     }

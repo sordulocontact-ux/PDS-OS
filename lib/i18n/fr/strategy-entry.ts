@@ -26,7 +26,7 @@ export const strategyEntry = {
   prepare: "Préparer un échange",
   errors: {
     plan_required:
-      "La stratégie attend le plan du projet : lancez-la depuis le plan.",
+      "La stratégie attend le plan du projet : lancez-la depuis la Vue d'ensemble.",
     generic: "Impossible de commencer la stratégie pour l'instant. Réessayez.",
   },
   call: {

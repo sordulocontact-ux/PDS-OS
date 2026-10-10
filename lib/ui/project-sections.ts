@@ -11,7 +11,7 @@ export const DOUBLE_SIDEBAR = true;
 // Titled groups of the sidebar (ticket « Architecture globale », 08/10/2026:
 // the business workflows run in parallel under one heading). The tabs ignore
 // them: a tab bar has no headings.
-export type ProjectSectionGroup = "workflows" | "steering" | "production";
+export type ProjectSectionGroup = "workflows" | "steering" | "resources";
 
 export type ProjectSection = {
   key: string;
@@ -135,28 +135,31 @@ export function projectSections(
           ),
         ]
       : []),
-    section("calls", t.calls, routes.projectCalls(projectId), "production"),
-    section(
-      "deliverables",
-      t.deliverables,
-      routes.projectDeliverables(projectId),
-      "production",
-    ),
-    section("files", t.files, routes.projectFiles(projectId), "production"),
+    // With the steering: what was decided and what happened (UX test of
+    // 09/10/2026: Validations sat under « Production »).
     section(
       "validations",
       t.validations,
       routes.projectValidations(projectId),
-      "production",
+      "steering",
       "overview",
     ),
     section(
       "activity",
       t.activity,
       routes.projectActivity(projectId),
-      "production",
+      "steering",
       "overview",
     ),
+    // The project's resources: its calls, deliverables and files.
+    section("calls", t.calls, routes.projectCalls(projectId), "resources"),
+    section(
+      "deliverables",
+      t.deliverables,
+      routes.projectDeliverables(projectId),
+      "resources",
+    ),
+    section("files", t.files, routes.projectFiles(projectId), "resources"),
   ];
   const workflowKeys = ["master", "legal", "marketing", "distribution"];
   return all.filter(

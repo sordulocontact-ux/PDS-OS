@@ -227,6 +227,10 @@
      07/10/2026, elles sont collées au bord et pleine hauteur (Figma « PDS OS »,
      nœud 47:12047). */
   --shell-inset: 0px;
+  /* Calendrier de la page Calls : hauteur d'une heure, colonne des heures. */
+  --calendar-hour: 48px;
+  --calendar-gutter: 56px;
+  --calendar-viewport: max(420px, calc(100dvh - 260px));
   /* Pointe d'un chevron du fil des étapes (ProcessSteps, Figma 1510:3096) ;
      deux chevrons se chevauchent de la pointe moins 3 px : un filet du fond
      les sépare. */

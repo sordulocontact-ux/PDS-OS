@@ -45,6 +45,8 @@ export const network = {
     photographer: "Photographe",
     designer: "Graphiste",
     provider: "Prestataire",
+    studio: "Studio",
+    lawyer: "Avocat·e",
     partner: "Partenaire",
     label: "Label",
     publisher: "Éditeur",
@@ -91,6 +93,13 @@ export const network = {
     // « Garder seulement le nom » on the structure: a name is not a link.
     artist: "Artiste du catalogue",
     artistNone: "Aucun",
+    // A new contact named exactly as an artist of the catalog (UX test of
+    // 09/10/2026, section 8): linked unless removed.
+    artistLinked: (name: string) => `Relié à l'artiste du catalogue ${name}`,
+    artistLinkedHint: "Même nom que sa fiche artiste.",
+    artistUnlink: "Retirer",
+    artistUnlinked: "Pas relié à un artiste du catalogue.",
+    artistRelink: (name: string) => `Relier à ${name}`,
     email: "E-mail",
     phone: "Téléphone",
     website: "Site web",

@@ -189,6 +189,30 @@ Trois objets, trois noms. Ne jamais en introduire d'autres dans l'interface.
 _consolidation_, _récapitulatif_ utilisé comme nom d'objet, _mise en marché_,
 _document de stratégie_ en doublon de _Stratégie_.
 
+**Une chose, un nom** (test UX du 09/10/2026, section 7) :
+
+- **Avancement** : Cadrage → plan du projet (sur la Vue d'ensemble) → workflows Master,
+  Juridique, Marketing, Distribution. Les 7 étapes restent en base mais ne s'affichent plus :
+  « Où en est le projet » dit « Cadrage », « Plan du projet », « Marketing · Conception »,
+  « Distribution » (`lib/projects/progress.ts`). « Défense » n'est jamais dite (non décidée).
+- **Titre** pour un morceau ; **master** seulement pour l'état audio (Master, Master final) et
+  le workflow Master. **Sortie**, jamais « release ».
+- **Date de sortie visée** (projet musical) ou **Échéance du projet** (autre) : un seul nom,
+  partout (`projectDateLabel`) ; plus d'« Échéance principale ».
+- **Créer le projet** (il est transmis au chef de projet choisi) ; **Répondre et
+  transmettre** après une question, **Transmettre à quelqu'un d'autre** après un refus.
+- **Contrats à prévoir** (plus « cartographie ») ; **plan d'action** pour le Juridique,
+  **plan du projet** pour la Vue d'ensemble.
+- **Créer l'échange** pour un échange préparé (plus « Lancer »).
+- **Rôles** : mêmes libellés dans les crédits, les fiches, les répartitions et le Réseau
+  (Auteur·rice (paroles), Compositeur·rice, Réalisateur·rice…) ; « Producteur
+  (phonographique) » pour le propriétaire de l'enregistrement. Avocat·e et Studio ajoutés.
+- Barre latérale du projet : **Workflows**, **Pilotage** (Travail, Équipe, Planning, Budget,
+  Validations, Activité), **Ressources** (Calls, Livrables, Fichiers).
+
+**Reporté** (Sacha, 10/10/2026) : l'accord des postes au genre de chaque membre (« Directrice
+créative » pour Nora) ; aujourd'hui les postes restent au masculin.
+
 ---
 
 ## 3. Ce que le prototype fait bien, et qu'il faut conserver

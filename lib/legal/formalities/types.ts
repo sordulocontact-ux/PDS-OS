@@ -2,7 +2,7 @@
 // Client-safe.
 
 import type { FormalityStatus } from "@/lib/legal/formalities/definition";
-import type { Prefill } from "@/lib/legal/formalities/prefill";
+import type { Prefill, SplitShare } from "@/lib/legal/formalities/prefill";
 
 export type FormalityView = {
   id: string;
@@ -41,6 +41,9 @@ export type TitleFormality = {
   masterId: string;
   title: string;
   prefill: Prefill;
+  // The title's confirmed split: a creator or publisher added by hand takes
+  // their Phono share from it.
+  splitShares: SplitShare[] | null;
   borrowings: Array<{ work: string; status: string }>;
   formality: FormalityView | null;
 };

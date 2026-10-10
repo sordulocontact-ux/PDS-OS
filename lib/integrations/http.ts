@@ -32,3 +32,23 @@ export async function fetchJson(
     throw new IntegrationError(service, `http_${response.status}`);
   return response.json();
 }
+
+/** Same as `fetchJson`, for a public HTML page. */
+export async function fetchText(
+  service: string,
+  url: string | URL,
+): Promise<string> {
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      cache: "no-store",
+      headers: { "user-agent": USER_AGENT, accept: "text/html" },
+      signal: AbortSignal.timeout(8000),
+    });
+  } catch {
+    throw new IntegrationError(service, "unreachable");
+  }
+  if (!response.ok)
+    throw new IntegrationError(service, `http_${response.status}`);
+  return response.text();
+}

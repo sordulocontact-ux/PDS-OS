@@ -12,6 +12,7 @@ import {
 import { legalTaskInfo } from "@/lib/legal/tasks";
 import { taskHref } from "@/lib/project-work/task-href";
 import { listProjectCreatives } from "@/lib/projects/creatives";
+import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 import { stageHref } from "@/lib/work/next-action";
@@ -138,11 +139,13 @@ export async function loadProjectWork(
   for (const v of validations.data ?? []) {
     const stage = v.project_stages.stage_definitions;
     const href = stageHref(projectId, stage.key);
+    // In the words of the workflows (UX test of 09/10/2026).
+    const title = progressLabel({ key: stage.key, state: "in_progress" });
     items.push({
       ...base,
       id: `validate-${v.id}`,
       kind: "validate",
-      title: stage.label,
+      title,
       personId: v.validator_person_id,
       status: "todo",
       dueDate: null,
@@ -153,7 +156,7 @@ export async function loadProjectWork(
       ...base,
       id: `await-${v.id}`,
       kind: "awaitValidation",
-      title: stage.label,
+      title,
       personId: v.requested_by,
       status: "waiting",
       dueDate: null,

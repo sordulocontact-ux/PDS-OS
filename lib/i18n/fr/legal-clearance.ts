@@ -43,9 +43,9 @@ export const legalClearance = {
   rights: { work: "Œuvre", master: "Enregistrement" } as Record<string, string>,
   roles: {
     publisher: "Éditeur",
-    author: "Auteur",
-    composer: "Compositeur",
-    producer: "Producteur",
+    author: "Auteur·rice",
+    composer: "Compositeur·rice",
+    producer: "Producteur (phonographique)",
     label: "Label",
     other: "Autre",
   },

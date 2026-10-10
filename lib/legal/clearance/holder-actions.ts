@@ -49,7 +49,7 @@ async function titlePeople(supabase: Supabase, masterId: string | null) {
       .select("role, contact_id")
       .eq("master_id", masterId)
       .not("contact_id", "is", null)
-      .order("position"),
+      .order("created_at"),
     supabase
       .from("master_splits")
       .select("role, contact_id")

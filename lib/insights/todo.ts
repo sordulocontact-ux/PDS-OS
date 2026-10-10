@@ -6,6 +6,7 @@ import { isOverdue, todayInParis } from "@/lib/insights/dates";
 import { versionStatusOf } from "@/lib/design/rules";
 import { legalTaskInfo } from "@/lib/legal/tasks";
 import { taskHref } from "@/lib/project-work/task-href";
+import { progressLabel } from "@/lib/projects/progress";
 import { createClient } from "@/lib/supabase/server";
 
 export type TodoTask = {
@@ -75,7 +76,7 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
     supabase
       .from("validations")
       .select(
-        "id, requested_at, project_stage_id, project_stages!inner(project_id, stage_definitions!inner(label))",
+        "id, requested_at, project_stage_id, project_stages!inner(project_id, stage_definitions!inner(key))",
       )
       .eq("validator_person_id", me)
       .eq("state", "pending"),
@@ -170,7 +171,11 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
       id: v.id,
       projectId,
       projectTitle: titleOf(projectId),
-      stageLabel: v.project_stages.stage_definitions.label,
+      // In the words of the workflows (UX test of 09/10/2026).
+      stageLabel: progressLabel({
+        key: v.project_stages.stage_definitions.key,
+        state: "in_progress",
+      }),
       requestedAt: v.requested_at,
       href: routes.projectFraming(projectId),
     };

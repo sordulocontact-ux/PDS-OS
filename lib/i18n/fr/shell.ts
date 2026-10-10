@@ -113,6 +113,17 @@ export const shell = {
     presentProject: (title: string) => `Présente-moi le projet « ${title} »`,
   },
 
+  // One name for a project's date (UX test of 09/10/2026: « Date de sortie
+  // visée » became « Échéance principale »): by the project's type.
+  projectDate: {
+    music_release: "Date de sortie visée",
+    other: "Échéance du projet",
+  },
+  // Where a launched project stands (lib/projects/progress.ts).
+  progress: {
+    framing: "Cadrage",
+    plan: "Plan du projet",
+  },
   projectTypes: {
     music_release: "Musical",
     content: "Contenu",
@@ -146,7 +157,7 @@ export const shell = {
       title: "Titre",
       artist: "Artiste",
       type: "Type",
-      stage: "Étape en cours",
+      stage: "Où en est le projet",
     },
     allValidated: "Terminé",
     draft: "Brouillon",
@@ -169,6 +180,8 @@ export const shell = {
     },
     fields: {
       title: "Titre du projet",
+      titleFromMaster: (title: string) =>
+        `Repris du titre « ${title} », modifiable.`,
       type: "Type",
       eventSoon: "Bientôt",
       format: "Format",
@@ -178,10 +191,12 @@ export const shell = {
       },
       contentFormat: "Format PDS",
       artist: "Artiste",
-      master: "Master",
-      masters: "Masters",
-      singleHint: "Un seul master pour un single.",
-      dueDate: "Échéance principale",
+      // A song is a « titre » everywhere; « master » is only an audio state
+      // and the Master workflow (UX test of 09/10/2026).
+      master: "Titre",
+      masters: "Titres",
+      singleHint: "Un seul titre pour un single.",
+      dueDate: "Échéance du projet",
       releaseDate: "Date de sortie visée",
       releaseDateHint:
         "Remplacée par la date de l'onglet Sortie une fois celle-ci saisie.",
@@ -190,7 +205,7 @@ export const shell = {
       priorityHint: "Haute : en tête de l'accueil, de Travail et des projets.",
       initialContext: "Contexte initial",
       initialContextHint:
-        "Ajoutez ici les informations déjà connues au moment de transmettre le projet.",
+        "Ajoutez ici les informations déjà connues au moment de créer le projet.",
       team: "Équipe",
       manager: "Chef de projet",
       managerPlaceholder: "Choisir un chef de projet",
@@ -224,8 +239,10 @@ export const shell = {
       searchLabel: "Rattacher un artiste",
       remove: (name: string) => `Retirer ${name}`,
     },
-    submit: "Transmettre le projet",
-    submitting: "Transmission…",
+    // Creating transmits it to the chosen project manager (submitHint).
+    submit: "Créer le projet",
+    submitting: "Création…",
+    submitHint: "Il est transmis au chef de projet choisi.",
     // Kept as it is typed (feedback n°6), resumed from this page.
     draft: {
       idle: "Votre saisie est gardée en brouillon : vous pouvez quitter la page et la reprendre ici.",
@@ -252,9 +269,9 @@ export const shell = {
       notEditable:
         "Ce projet ne se modifie plus ici : il est lancé, ou vous n'en avez pas le droit.",
       mastersRequired:
-        "Un projet musical rattache au moins un master. Rattachez-en un, ou créez-le.",
+        "Un projet musical rattache au moins un titre. Rattachez-en un, ou créez-le.",
       singleOneMaster:
-        "Un single rattache un seul master. Retirez-en, ou choisissez un autre format.",
+        "Un single rattache un seul titre. Retirez-en, ou choisissez un autre format.",
       musicFormatRequired: "Choisissez le format de la sortie.",
       contentModeRequired:
         "Choisissez un format PDS existant ou un contenu ponctuel.",
@@ -311,7 +328,8 @@ export const shell = {
       groups: {
         workflows: "Workflows",
         steering: "Pilotage",
-        production: "Production",
+        // Not « Production »: the Marketing has a step of that name.
+        resources: "Ressources",
       },
       overview: "Vue d'ensemble",
       framing: "Cadrage",
@@ -375,7 +393,7 @@ export const shell = {
       review: "Suivi & bilan",
       soon: "Pas encore de page",
       strategyLocked:
-        "Se lance depuis le Plan du Projet, une fois le Brief validé",
+        "Se lance depuis le plan du projet (Vue d'ensemble), une fois le Brief validé",
     },
     notFoundTitle: "Projet introuvable",
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",
@@ -383,13 +401,28 @@ export const shell = {
       "Lecture seule : seul le chef de projet responsable modifie ce projet.",
     readOnlyDesign:
       "Seul le chef de projet responsable écrit le Dossier et relit les versions ; l'équipe créative y dépose les siennes.",
+    // How a project moves on (ProjectJourney): one model of progress.
+    journey: {
+      title: "Comment avance un projet",
+      framing: {
+        title: "Cadrage",
+        body: "Le chef de projet cadre le projet avec PO, puis la direction valide le Brief.",
+      },
+      plan: {
+        title: "Plan du projet",
+        body: "Ici, sur la Vue d'ensemble, une fois le Brief validé : il lance les workflows utiles.",
+      },
+      workflows: {
+        title: "Workflows",
+        body: "Master, Juridique, Marketing et Distribution, menés en parallèle, chacun avec ses étapes.",
+      },
+    },
     overview: {
       facts: "Informations",
       artist: "Artiste",
       type: "Type",
       masters: "Titres rattachés",
       noMasters: "Aucun titre rattaché.",
-      dueDate: "Échéance principale",
       budget: "Budget prévisionnel",
       priority: "Priorité",
       initialContext: "Contexte initial",
@@ -397,7 +430,7 @@ export const shell = {
       owner: "Responsable",
       noOwner: "Non défini",
       createdAt: "Créé le",
-      currentStage: "Étape en cours",
+      currentStage: "Où en est le projet",
       stages: "Étapes",
       changedAt: "Mis à jour le",
       // Sections without a tab of their own, when the project uses tabs.

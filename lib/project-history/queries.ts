@@ -2,6 +2,7 @@ import "server-only";
 
 import { getAudioUrl } from "@/lib/calls/queries";
 import { personName } from "@/lib/projects/types";
+import { progressLabel } from "@/lib/projects/progress";
 import { createClient } from "@/lib/supabase/server";
 import { stageHref } from "@/lib/work/next-action";
 
@@ -104,7 +105,11 @@ export async function listProjectValidations(
   return (data ?? []).map((v) => ({
     id: v.id,
     state: v.state,
-    stageLabel: v.project_stages.stage_definitions.label,
+    // In the words of the workflows, not the stage's (UX test of 09/10/2026).
+    stageLabel: progressLabel({
+      key: v.project_stages.stage_definitions.key,
+      state: "in_progress",
+    }),
     stageHref: stageHref(projectId, v.project_stages.stage_definitions.key),
     requestedByName: nameOf(v.requester),
     validatorName: nameOf(v.validator),

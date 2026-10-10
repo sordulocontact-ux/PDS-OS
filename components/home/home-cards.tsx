@@ -6,6 +6,7 @@ import { fr } from "@/lib/i18n/fr";
 import type { ActivityEvent } from "@/lib/insights/activity";
 import type { ReleaseOverview } from "@/lib/insights/releases";
 import type { Todo } from "@/lib/insights/todo";
+import { progressLabel } from "@/lib/projects/progress";
 import type { ProjectListItem } from "@/lib/projects/types";
 import {
   myValidationTone,
@@ -177,7 +178,14 @@ export function ProjectsCard({
           key={p.id}
           href={routes.project(p.id)}
           main={p.title}
-          sub={`${p.artistName}${p.currentStage ? ` · ${p.currentStage.label} · ${fr.shell.stageStates[p.currentStage.state]}` : ""}`}
+          sub={[
+            p.artistName,
+            p.currentStage
+              ? `${progressLabel(p.currentStage)} · ${fr.shell.stageStates[p.currentStage.state]}`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         />
       ))}
     </ListCard>

@@ -43,7 +43,8 @@ export default async function LegalFormPage({
           <PublicForm
             token={token}
             prefillRoles={form.prefill.roles}
-            known={form.known}
+            // Their own earlier answers win over what the project knows.
+            known={{ ...form.prefill.answers, ...form.known }}
             requester={form.requester}
           />
         ) : (

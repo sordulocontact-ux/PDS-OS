@@ -14,6 +14,7 @@ import {
   type Creator,
   type Publisher,
 } from "@/lib/legal/formalities/definition";
+import { splitShareOf } from "@/lib/legal/formalities/prefill";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 
 import { ArrangementField, ContractField } from "./dossier-fields";
@@ -56,21 +57,44 @@ export function DossierForm({
 }) {
   const t = fr.legalFormalities;
   const f = title.formality!;
-  const [entries, setEntries] = useState<Record<string, Entry>>(() =>
-    Object.fromEntries(
+  // A share left empty in a dossier saved before the split was confirmed is
+  // taken from it (UX test of 09/10/2026), « à vérifier » like the others.
+  const [initial] = useState(() => {
+    let filled = false;
+    const withShares = <T extends { phono: string; contact_id?: string }>(
+      people: T[],
+      roleOf: (person: T) => string,
+    ) =>
+      people.map((person) => {
+        if (person.phono) return person;
+        const phono = splitShareOf(
+          title.splitShares,
+          person.contact_id ?? null,
+          roleOf(person),
+        );
+        if (phono) filled = true;
+        return phono ? { ...person, phono } : person;
+      });
+    const entries: Record<string, Entry> = Object.fromEntries(
       SACEM_725_FIELDS.map((field) => {
         const stored = f.values[field.key];
         const sourced = title.prefill[field.key];
-        if (stored)
-          return [
-            field.key,
-            { value: stored.value, typed: stored.source === "Saisi" },
-          ];
+        if (stored) {
+          const value =
+            field.key === "creators" && Array.isArray(stored.value)
+              ? withShares(stored.value as Creator[], (c) => c.quality)
+              : field.key === "publishers" && Array.isArray(stored.value)
+                ? withShares(stored.value as Publisher[], () => "publisher")
+                : stored.value;
+          return [field.key, { value, typed: stored.source === "Saisi" }];
+        }
         if (sourced) return [field.key, { value: sourced.value, typed: false }];
         return [field.key, { value: null, typed: true }];
       }),
-    ),
-  );
+    );
+    return { entries, filled };
+  });
+  const [entries, setEntries] = useState(initial.entries);
   const { pending, run } = useLegalAction();
   // « Dossier enregistré » only once the server said so.
   const [saved, setSaved] = useState(false);
@@ -145,10 +169,12 @@ export function DossierForm({
                     creators={obj<Creator[]>("creators", [])}
                     publishers={obj<Publisher[]>("publishers", [])}
                     disabled={disabled}
+                    splitShares={title.splitShares}
                     // Shares taken from the confirmed split, not typed yet.
                     fromSplit={
-                      Boolean(title.prefill.phono_from_split) &&
-                      !entries.creators?.typed
+                      initial.filled ||
+                      (Boolean(title.prefill.phono_from_split) &&
+                        !entries.creators?.typed)
                     }
                     onCreators={(next) => set("creators", next)}
                     onPublishers={(next) => set("publishers", next)}

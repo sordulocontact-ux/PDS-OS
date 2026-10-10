@@ -10,7 +10,11 @@ import { siteUrl } from "@/lib/auth/site-url";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { LEGAL_FORM_VERSION } from "@/lib/legal/forms/definition";
-import { formPeople } from "@/lib/legal/forms/people";
+import {
+  formAnswersOf,
+  formPeople,
+  formRolesOf,
+} from "@/lib/legal/forms/people";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -63,7 +67,10 @@ export async function prepareLegalForm(
     p_network_roles: person.networkRoles,
     // Only a contact created now takes the credits (prepare_legal_form).
     p_credit_ids: person.contactId ? [] : person.unlinkedCreditIds,
-    p_prefill: { roles: person.formRoles },
+    p_prefill: {
+      roles: formRolesOf(person),
+      answers: formAnswersOf(person),
+    },
     p_version: LEGAL_FORM_VERSION,
   });
   const token = data?.[0]?.token;

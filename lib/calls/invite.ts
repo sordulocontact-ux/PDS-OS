@@ -1,5 +1,6 @@
 import "server-only";
 
+import { networkRolesOf, rolesText } from "@/lib/network/types";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import { personName } from "@/lib/projects/types";
@@ -67,4 +68,30 @@ export async function inviteProjectTeam(input: {
   );
   if (error) console.error("[calls] invite team failed:", error.message);
   else await schedulePendingPushes();
+}
+
+export type CallContact = {
+  contactId: string;
+  name: string;
+  // Null: the contact cannot be invited until the Réseau has an address.
+  email: string | null;
+  roles: string;
+};
+
+/** The Réseau contacts a call may invite by e-mail (archived ones left out). */
+export async function loadCallContacts(): Promise<CallContact[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("network_contacts")
+    .select("id, name, email, roles")
+    .is("archived_at", null)
+    .order("name")
+    .limit(1000);
+  if (error) console.error("[calls] load contacts failed:", error.message);
+  return (data ?? []).map((c) => ({
+    contactId: c.id,
+    name: c.name,
+    email: c.email,
+    roles: rolesText(networkRolesOf(c.roles)),
+  }));
 }

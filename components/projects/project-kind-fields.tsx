@@ -44,9 +44,12 @@ export function ProjectKindFields({
   artists,
   contentFormats,
   errors,
+  onMastersChange,
 }: {
   type: ProjectType | null;
   onTypeChange: (type: ProjectType) => void;
+  // The titles chosen: the project's name follows a single one.
+  onMastersChange?: (masters: MasterOption[]) => void;
   defaults: {
     musicFormat: MusicFormat | null;
     contentMode: ContentMode | null;
@@ -118,6 +121,7 @@ export function ProjectKindFields({
           max={single ? 1 : undefined}
           hint={single ? t.singleHint : undefined}
           error={errors.masterIds}
+          onSelectionChange={onMastersChange}
         />
       </div>
 

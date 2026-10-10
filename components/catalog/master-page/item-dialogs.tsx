@@ -86,7 +86,8 @@ export function DeleteItemDialog({
 }: {
   masterId: string;
   section: MasterItemSection;
-  item: { id: string; name: string } | null;
+  // `alsoIds`: the other rows of the same person (a contributor's roles).
+  item: { id: string; name: string; alsoIds?: string[] } | null;
   title: string;
   body: (name: string) => string;
   onClose: () => void;
@@ -107,6 +108,7 @@ export function DeleteItemDialog({
         masterId,
         section,
         itemId: item.id,
+        alsoIds: item.alsoIds,
       });
       if (result.ok) close();
       else setError(result.error);

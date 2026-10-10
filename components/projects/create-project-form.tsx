@@ -86,6 +86,18 @@ export function CreateProjectForm({
   const errors = state.status === "error" ? (state.fieldErrors ?? {}) : {};
   const [type, setType] = useState<ProjectType | null>(defaults.type);
   const [priority, setPriority] = useState(defaults.priority ?? null);
+  // The project's name takes the title of its only title (UX test of
+  // 09/10/2026, « Titre du projet non repris du titre rattaché »), as long
+  // as nobody typed another one.
+  const [title, setTitle] = useState(values.title ?? defaults.title);
+  const [titleFrom, setTitleFrom] = useState<string | null>(null);
+  const typedTitle = title.trim() !== "" && title !== titleFrom;
+  const [returned, setReturned] = useState(state);
+  if (returned !== state) {
+    setReturned(state);
+    if (state.status === "error" && state.values?.title !== undefined)
+      setTitle(state.values.title);
+  }
   const formRef = useRef<HTMLFormElement>(null);
   const withDraft = !projectId && !onSaved;
   const plain = !withDraft;
@@ -135,6 +147,12 @@ export function CreateProjectForm({
           artists={artists}
           contentFormats={contentFormats}
           errors={errors}
+          onMastersChange={(chosen) => {
+            if (typedTitle) return;
+            const only = chosen.length === 1 ? chosen[0].title : null;
+            setTitle(only ?? "");
+            setTitleFrom(only);
+          }}
         />
       </FormSection>
 
@@ -145,7 +163,13 @@ export function CreateProjectForm({
           required
           autoComplete="off"
           maxLength={200}
-          defaultValue={values.title ?? defaults.title}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          hint={
+            titleFrom && title === titleFrom
+              ? t.fields.titleFromMaster(titleFrom)
+              : undefined
+          }
           error={errors.title}
         />
         <div className="grid gap-5 sm:grid-cols-2">
@@ -212,6 +236,12 @@ export function CreateProjectForm({
 
       {state.status === "error" && state.formError && (
         <FormMessage kind="error">{state.formError}</FormMessage>
+      )}
+
+      {!projectId && (
+        <p className="text-sm text-muted-foreground sm:text-right">
+          {t.submitHint}
+        </p>
       )}
 
       {withDraft && (

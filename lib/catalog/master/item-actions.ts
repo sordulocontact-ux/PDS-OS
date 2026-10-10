@@ -74,20 +74,17 @@ export async function saveContributor(
 ): Promise<MasterFormState> {
   const parsed = await parseMasterForm(contributorSchema, formData);
   if (!parsed.ok) return parsed.state;
-  const { masterId, itemId, contactId, ...fields } = parsed.data;
-  const row = { ...fields, contact_id: contactId };
+  const { masterId, itemIds, name, roles, detail, contactId } = parsed.data;
   const supabase = await createClient();
-  const { error } = itemId
-    ? await supabase
-        .from("master_contributors")
-        .update(row)
-        .eq("id", itemId)
-        .eq("master_id", masterId)
-    : await supabase.from("master_contributors").insert({
-        ...row,
-        organization_id: parsed.organizationId,
-        master_id: masterId,
-      });
+  // One row per role, kept, removed or added in one transaction.
+  const { error } = await supabase.rpc("set_master_contributor_roles", {
+    p_master_id: masterId,
+    p_item_ids: itemIds,
+    p_name: name,
+    p_contact_id: contactId,
+    p_roles: roles,
+    p_detail: detail,
+  });
   return afterWrite("saveContributor", masterId, formData, error);
 }
 
@@ -104,16 +101,17 @@ export async function deleteMasterItem(input: {
   masterId: string;
   section: MasterItemSection;
   itemId: string;
+  alsoIds?: string[];
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const parsed = deleteItemSchema.safeParse(input);
   if (!parsed.success || !(await catalogOrganization()))
     return { ok: false, error: fr.auth.errors.forbidden };
-  const { masterId, section, itemId } = parsed.data;
+  const { masterId, section, itemId, alsoIds = [] } = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from(TABLES[section])
     .delete()
-    .eq("id", itemId)
+    .in("id", [itemId, ...alsoIds])
     .eq("master_id", masterId)
     .select("id");
   if (error || !data?.length) {

@@ -29,10 +29,14 @@ const noSubscribe = () => () => {};
 export function CallRecorder({
   callId,
   organizationId,
+  videoCall = false,
   alternative,
 }: {
   callId: string;
   organizationId: string;
+  // The call has a video link: it is held in visio, nothing to choose
+  // (Sacha, 10/10/2026) — the tab is recorded when the browser can.
+  videoCall?: boolean;
   /** The file picker: shown only before recording starts, one primary action at a time. */
   alternative?: ReactNode;
 }) {
@@ -103,26 +107,32 @@ export function CallRecorder({
     <div className="grid gap-4">
       {(rec.status === "idle" || rec.status === "requesting") && (
         <>
-          <ChoiceCards
-            name="recorder-source"
-            legend={t.sourceLabel}
-            value={source}
-            onChange={setChosen}
-            disabled={rec.status === "requesting"}
-            choices={[
-              {
-                value: "tab",
-                label: t.sources.tab.label,
-                hint: tabSupported ? t.sources.tab.hint : t.tabUnavailable,
-                disabled: !tabSupported,
-              },
-              {
-                value: "mic",
-                label: t.sources.mic.label,
-                hint: t.sources.mic.hint,
-              },
-            ]}
-          />
+          {videoCall && tabSupported ? (
+            <p className="text-sm text-muted-foreground">
+              {t.sources.tab.hint}
+            </p>
+          ) : (
+            <ChoiceCards
+              name="recorder-source"
+              legend={t.sourceLabel}
+              value={source}
+              onChange={setChosen}
+              disabled={rec.status === "requesting"}
+              choices={[
+                {
+                  value: "tab",
+                  label: t.sources.tab.label,
+                  hint: tabSupported ? t.sources.tab.hint : t.tabUnavailable,
+                  disabled: !tabSupported,
+                },
+                {
+                  value: "mic",
+                  label: t.sources.mic.label,
+                  hint: t.sources.mic.hint,
+                },
+              ]}
+            />
+          )}
           <p className="text-sm text-muted-foreground">{t.reminder}</p>
           <Button
             onClick={() => void rec.start(source)}

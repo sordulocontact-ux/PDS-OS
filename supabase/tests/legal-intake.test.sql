@@ -1,7 +1,7 @@
 -- Juridique, Cadrage juridique (supabase/migrations/20261004001001_legal_intake.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(24);
+select plan(28);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -134,6 +134,43 @@ select is((select status from public.legal_intakes where project_id = pg_temp.id
           'draft', 'a new answer reopens the confirmed dossier');
 select is((select confirmed_at from public.legal_intakes where project_id = pg_temp.id_of('project')),
           null, 'and clears its confirmation');
+
+-- A person already known as a Réseau contact (an engineer of the Cadrage)
+-- is credited linked to it (supabase/migrations/20261010001801_legal_answer_known_contact.sql).
+reset role;
+insert into public.network_contacts (organization_id, kind, name, roles)
+values (pg_temp.id_of('org'), 'person', 'Karim ' || (select v from vars where k = 'tag'), array['engineer']);
+insert into ids select 'engineer', id from public.network_contacts
+ where name = 'Karim ' || (select v from vars where k = 'tag');
+insert into vars select 'engineer_name', 'Karim ' || (select v from vars where k = 'tag');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select lives_ok(format($f$
+  select public.record_legal_answer(
+    pg_temp.id_of('project'), 'contributors', pg_temp.id_of('master'),
+    '%1$s : mix (Cadrage). Ever a composé, Samy au piano.',
+    jsonb_build_array(
+      jsonb_build_object('kind', 'contribution', 'value',
+        jsonb_build_object('name', '%1$s', 'role', 'mix_engineer'),
+        'quote', '%1$s : mix', 'contact_id', pg_temp.id_of('engineer')),
+      jsonb_build_object('kind', 'contribution', 'value',
+        jsonb_build_object('name', 'Ever', 'role', 'composer'),
+        'quote', 'Ever a composé', 'contact_id', 'not-a-uuid')))
+$f$, (select v from vars where k = 'engineer_name')),
+  'an answer carries the contact of a known person');
+select is((select contact_id from public.master_contributors
+            where master_id = pg_temp.id_of('master') and role = 'mix_engineer'),
+          pg_temp.id_of('engineer'), 'the credit is linked to that contact, not by its name');
+select is((select contact_id from public.master_contributors
+            where master_id = pg_temp.id_of('master') and name = 'Ever'),
+          null, 'a contact that is not a live contact of the organization is ignored');
+select public.record_legal_answer(
+  pg_temp.id_of('project'), 'contributors', pg_temp.id_of('master'), 'Le mixeur.',
+  jsonb_build_array(jsonb_build_object('kind', 'contribution', 'value',
+    jsonb_build_object('name', 'Le mixeur', 'role', 'mix_engineer'),
+    'quote', 'Le mixeur', 'contact_id', pg_temp.id_of('engineer'))));
+select is((select count(*)::int from public.master_contributors
+            where master_id = pg_temp.id_of('master') and role = 'mix_engineer'),
+          1, 'the same contact in the same role is not credited twice');
 
 -- Guards ------------------------------------------------------------------------
 select throws_ok($$

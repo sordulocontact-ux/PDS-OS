@@ -6,7 +6,7 @@ import { ProjectPlanSection } from "@/components/plan/project-plan-section";
 import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { ProjectAttention } from "@/components/projects/project-attention";
-import { ProjectStages } from "@/components/projects/project-stages";
+import { ProjectJourney } from "@/components/projects/project-journey";
 import { UnlaunchedOverview } from "@/components/projects/unlaunched-overview";
 import { FactList } from "@/components/ui/fact-list";
 import { CardRow, ListCard } from "@/components/ui/list-card";
@@ -21,6 +21,7 @@ import { proposePlan } from "@/lib/plan/propose";
 import { todayInParis } from "@/lib/insights/dates";
 import { loadLaunchedPlan } from "@/lib/plan/queries";
 import { projectKindLabel } from "@/lib/projects/labels";
+import { progressLabel } from "@/lib/projects/progress";
 import {
   listCreativePeople,
   listProjectCreatives,
@@ -126,10 +127,7 @@ export default async function ProjectOverviewPage({
       }),
     ],
     [t.owner, project.ownerName ?? t.noOwner],
-    [
-      t.currentStage,
-      project.currentStage?.label ?? fr.shell.projects.allValidated,
-    ],
+    [t.currentStage, progressLabel(project.currentStage)],
     [t.createdAt, dateFormatter.format(new Date(project.createdAt))],
   ];
 
@@ -191,7 +189,7 @@ export default async function ProjectOverviewPage({
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="flex min-w-0 flex-col gap-8">
           {/* The plan takes the stages' place once the Brief is validated. */}
-          {!framingValidated && <ProjectStages project={project} />}
+          {!framingValidated && <ProjectJourney project={project} />}
           {creativeTeam}
           <AssignmentHistory assignments={project.assignments} />
         </div>

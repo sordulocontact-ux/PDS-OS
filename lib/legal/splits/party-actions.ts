@@ -37,7 +37,7 @@ export async function listSplitPeople(
       .from("master_contributors")
       .select("id, name, role, contact_id")
       .eq("master_id", id.data)
-      .order("position"),
+      .order("created_at"),
     supabase
       .from("network_contacts")
       .select("id, name, roles")

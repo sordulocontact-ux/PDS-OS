@@ -55,7 +55,7 @@ export type PrefillContext = {
 
 // The share of a person in the confirmed split: the line of their contact
 // with this role, else their only line. Never by name.
-function splitShareOf(
+export function splitShareOf(
   shares: SplitShare[] | null,
   contactId: string | null,
   role: string,

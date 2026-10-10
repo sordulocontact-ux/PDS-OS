@@ -3,11 +3,12 @@ import { IconChevronLeft } from "nucleo-sharp-essential";
 
 import { CallAgenda } from "@/components/calls/call-agenda";
 import { CallStatusBadge } from "@/components/calls/call-badges";
-import { CallLinkButton } from "@/components/calls/call-link-button";
 import { CallAudio, CallRecording } from "@/components/calls/call-recording";
 import { CallResults } from "@/components/calls/call-results";
-import { JoinCallLink } from "@/components/calls/join-call-link";
+import { CallDetails } from "@/components/calls/call-details";
 import { PreparedCallDetails } from "@/components/calls/prepared-call-details";
+import { PageSection } from "@/components/shell/page-section";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import {
   Card,
   CardContent,
@@ -15,20 +16,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatDateTime, isUpcoming } from "@/lib/calls/format";
+import { isUpcoming } from "@/lib/calls/format";
 import type {
   CallDetail,
   StoredReport,
   StoredTranscript,
 } from "@/lib/calls/queries";
+import { fr } from "@/lib/i18n/fr";
 
 type StepTexts = { title: string; description: string };
 
+// The recording opens by itself from this long before the call.
+const RECORD_OPEN_MS = 15 * 60_000;
+
 /**
- * One call, one step at a time: record it, let the processing run by itself,
- * then its report, decisions and actions. Shared by a project's call and an
- * internal meeting; the page gives what differs (way back, subtitle, the
- * step texts, what follows the report).
+ * One call's page: first its details, as Teams shows a meeting (when, what it
+ * belongs to, the video link written out, who takes part), then its agenda,
+ * then one step at a time: record it (folded until the call's time comes),
+ * the processing that runs by itself, its report, decisions and actions.
+ * Shared by a project's call and an internal meeting; the page gives what
+ * differs (way back, what it belongs to, organizer, step texts, what follows
+ * the report).
  */
 export function CallWorkspace({
   call,
@@ -37,10 +45,12 @@ export function CallWorkspace({
   audioUrl,
   canEdit,
   back,
-  subtitle,
+  where,
+  organizer,
   steps,
   doneAction,
   outcomes,
+  meetFailed = false,
 }: {
   call: CallDetail;
   transcript: StoredTranscript | null;
@@ -49,22 +59,28 @@ export function CallWorkspace({
   // Whoever works on the call: the project's owner, the meeting's creator.
   canEdit: boolean;
   back: { href: string; label: string };
-  subtitle?: React.ReactNode;
+  // The project (a link) or « Réunion interne ».
+  where: React.ReactNode;
+  organizer: string | null;
   steps: { record: StepTexts; processing: StepTexts; done: StepTexts };
   // Under the recording once the report is ready (the project's framing).
   doneAction?: React.ReactNode;
   // Decisions and actions of the report.
   outcomes?: React.ReactNode;
+  // Google gave no Meet link at creation (?meet=failed): said until a link
+  // is added.
+  meetFailed?: boolean;
 }) {
   const step = !call.audioPath ? "record" : report ? "done" : "processing";
-  const upcoming = isUpcoming(call, new Date());
-  // The link is useful until the call is recorded.
-  const joinable = call.meetingUrl && !call.audioPath;
+  const now = new Date();
+  const upcoming = isUpcoming(call, now);
   // A strategy call held on site or by phone takes no video link.
   const linkable =
     canEdit &&
     !call.audioPath &&
     (!call.prepared?.format || call.prepared.format === "video");
+  const recordOpen =
+    new Date(call.occurredAt).getTime() - now.getTime() < RECORD_OPEN_MS;
 
   return (
     <div className="grid w-full max-w-3xl gap-6">
@@ -77,30 +93,22 @@ export function CallWorkspace({
           {back.label}
         </Link>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="grid gap-1">
-            <h2 className="text-lg font-semibold break-words">{call.title}</h2>
-            <time
-              dateTime={call.occurredAt}
-              className="text-sm text-muted-foreground"
-            >
-              {formatDateTime(call.occurredAt)}
-            </time>
-            {subtitle}
-          </div>
+          <h2 className="text-lg font-semibold break-words">{call.title}</h2>
           <CallStatusBadge status={call.status} upcoming={upcoming} />
         </div>
-        {(joinable || linkable) && (
-          <div className="flex flex-wrap items-center gap-2">
-            {joinable && call.meetingUrl && (
-              <JoinCallLink url={call.meetingUrl} title={call.title} />
-            )}
-            {linkable && (
-              <CallLinkButton callId={call.id} meetingUrl={call.meetingUrl} />
-            )}
-          </div>
+        {meetFailed && !call.meetingUrl && (
+          <ToneCallout tone="warning">
+            {fr.calls.schedule.meetFailed}
+          </ToneCallout>
         )}
       </header>
 
+      <CallDetails
+        call={call}
+        where={where}
+        organizer={organizer}
+        canEditLink={linkable}
+      />
       {call.prepared && <PreparedCallDetails prepared={call.prepared} />}
       {step === "record" && call.agenda && (
         <CallAgenda
@@ -111,26 +119,49 @@ export function CallWorkspace({
         />
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{steps[step].title}</CardTitle>
-          <CardDescription>{steps[step].description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {step === "done" ? (
-            <div className="grid gap-6">
-              {doneAction}
-              <CallAudio call={call} audioUrl={audioUrl} />
-            </div>
-          ) : (
+      {step === "record" ? (
+        canEdit && (
+          <PageSection
+            id="call-recording"
+            title={fr.calls.details.recordTitle}
+            description={
+              recordOpen
+                ? steps.record.description
+                : fr.calls.details.recordLater
+            }
+            card
+            collapsible
+            defaultOpen={recordOpen}
+          >
             <CallRecording
               call={call}
               audioUrl={audioUrl}
               hasTranscript={transcript !== null}
             />
-          )}
-        </CardContent>
-      </Card>
+          </PageSection>
+        )
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>{steps[step].title}</CardTitle>
+            <CardDescription>{steps[step].description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {step === "done" ? (
+              <div className="grid gap-6">
+                {doneAction}
+                <CallAudio call={call} audioUrl={audioUrl} />
+              </div>
+            ) : (
+              <CallRecording
+                call={call}
+                audioUrl={audioUrl}
+                hasTranscript={transcript !== null}
+              />
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {step === "done" && outcomes}
       {step === "done" && (

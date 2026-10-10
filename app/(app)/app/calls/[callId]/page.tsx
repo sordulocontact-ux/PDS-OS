@@ -28,9 +28,11 @@ export const metadata = { title: `${fr.calls.all.title} · ${fr.app.name}` };
  */
 export default async function MeetingPage({
   params,
+  searchParams,
 }: PageProps<"/app/calls/[callId]">) {
   const access = await requireApproved();
   const { callId } = await params;
+  const { meet } = await searchParams;
   const supabase = await createClient();
 
   const call = await getCall(supabase, null, callId);
@@ -54,7 +56,6 @@ export default async function MeetingPage({
   const canEdit =
     access.personId !== null && call.createdBy === access.personId;
   const creator = members.find((m) => m.personId === call.createdBy)?.name;
-  const attendees = call.attendees.map((a) => a.name).filter(Boolean);
 
   return (
     <PageContainer>
@@ -66,22 +67,10 @@ export default async function MeetingPage({
           audioUrl={audioUrl}
           canEdit={canEdit}
           back={{ href: routes.calls, label: t.back }}
-          subtitle={
-            <p className="text-sm text-muted-foreground">
-              {[
-                t.all.internal,
-                creator && t.meeting.createdBy(creator),
-                `${t.meeting.attendees} : ${
-                  attendees.length > 0
-                    ? attendees.join(", ")
-                    : t.meeting.onlyCreator
-                }`,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          }
+          where={t.all.internal}
+          organizer={creator ?? null}
           steps={t.meetingPage}
+          meetFailed={meet === "failed"}
           outcomes={
             outcomes && (
               <CallOutcomes

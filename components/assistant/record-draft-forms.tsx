@@ -178,9 +178,9 @@ export function MeetingDraftForm({
   const { occurredAtLocal, ...defaults } = draft.values;
   return (
     <Loading load={loadMeetingForm}>
-      {({ members }) => (
+      {(data) => (
         <MeetingForm
-          members={members}
+          {...data}
           // Only what the user said: an empty, required field rather than a
           // plausible hour (UX test of 09/10/2026: today 20:00).
           defaultOccurredAt={occurredAtLocal}

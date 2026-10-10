@@ -20,6 +20,10 @@ export const NETWORK_ROLES = [
   "photographer",
   "designer",
   "provider",
+  // A recording studio, a lawyer (UX test of 09/10/2026, migration
+  // 20261010001901).
+  "studio",
+  "lawyer",
   "partner",
   "label",
   // A music publisher (« Éditeur »): who authorises the work of a borrowing
@@ -45,6 +49,8 @@ export const NETWORK_FAMILIES = {
   image: ["art_director", "videographer", "photographer", "designer"],
   business: [
     "provider",
+    "studio",
+    "lawyer",
     "partner",
     "label",
     "publisher",

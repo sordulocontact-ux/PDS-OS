@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import { hueClass } from "@/lib/ui/category-hues";
 import { cn } from "@/lib/utils";
 
 // Pill with a semantic tone (docs/DESIGN.md § 3) or a category hue (§ 3 ter):
@@ -19,16 +20,7 @@ const statusBadgeVariants = cva(
         danger: "bg-[var(--tone-danger-bg)] text-[color:var(--tone-danger-fg)]",
         action: "bg-[var(--tone-action-bg)] text-[color:var(--tone-action-fg)]",
         // Category hues (lib/ui/category-hues.ts): no state, only "which one".
-        sky: "bg-[var(--hue-sky-bg)] text-[color:var(--hue-sky-fg)]",
-        indigo: "bg-[var(--hue-indigo-bg)] text-[color:var(--hue-indigo-fg)]",
-        violet: "bg-[var(--hue-violet-bg)] text-[color:var(--hue-violet-fg)]",
-        pink: "bg-[var(--hue-pink-bg)] text-[color:var(--hue-pink-fg)]",
-        orange: "bg-[var(--hue-orange-bg)] text-[color:var(--hue-orange-fg)]",
-        yellow: "bg-[var(--hue-yellow-bg)] text-[color:var(--hue-yellow-fg)]",
-        lime: "bg-[var(--hue-lime-bg)] text-[color:var(--hue-lime-fg)]",
-        teal: "bg-[var(--hue-teal-bg)] text-[color:var(--hue-teal-fg)]",
-        sand: "bg-[var(--hue-sand-bg)] text-[color:var(--hue-sand-fg)]",
-        slate: "bg-[var(--hue-slate-bg)] text-[color:var(--hue-slate-fg)]",
+        ...hueClass,
       },
       size: {
         sm: "h-5 px-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]",

@@ -70,7 +70,13 @@ export function TransmissionPanel({
             <TransmitDialog
               projectId={project.id}
               people={people}
-              retransmit={status !== "not_transmitted"}
+              mode={
+                status === "clarification_requested"
+                  ? "answer"
+                  : status === "refused"
+                    ? "reassign"
+                    : "first"
+              }
               defaultAssigneeId={latest?.assigneePersonId}
             />
           </div>

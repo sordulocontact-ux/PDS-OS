@@ -56,16 +56,20 @@ export const legalForms = {
     notice:
       "Ces informations servent à vos crédits, à vos contrats et à vos déclarations. Elles ne valent ni contrat, ni accord sur une répartition.",
   },
+  // The same words as the credits and the Réseau (UX test of 09/10/2026:
+  // three lists of roles).
   roles: {
-    author: "Auteur (paroles)",
-    composer: "Compositeur",
-    arranger: "Arrangeur",
+    author: "Auteur·rice (paroles)",
+    composer: "Compositeur·rice",
+    arranger: "Arrangeur·se",
     performer: "Artiste interprète",
-    musician: "Musicien",
+    musician: "Musicien·ne",
     backing_vocalist: "Choriste",
-    producer: "Producteur",
+    producer: "Réalisateur·rice",
     label: "Label",
-    provider: "Prestataire (mix, mastering, studio…)",
+    provider: "Prestataire (mix, mastering…)",
+    studio: "Studio",
+    lawyer: "Avocat·e",
     publisher: "Éditeur",
     other: "Autre",
   },
@@ -125,6 +129,7 @@ export const legalForms = {
     },
     category: {
       main: "Artiste principal",
+      featuring: "Featuring",
       secondary: "Artiste secondaire",
       musician: "Musicien",
       backing: "Choriste",
