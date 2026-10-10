@@ -12,6 +12,7 @@ const FORM_ROLE_OF: Record<NetworkRole, FormRole> = {
   songwriter: "composer",
   engineer: "provider",
   producer: "producer",
+  art_director: "provider",
   videographer: "provider",
   photographer: "provider",
   designer: "provider",

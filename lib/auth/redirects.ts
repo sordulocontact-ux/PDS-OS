@@ -208,6 +208,22 @@ export function destinationFor(state: AccessState): string {
   }
 }
 
+/** Where to go back once the database answers again: a page of the app the
+ * person was on, never another site (an open redirect). */
+export function safeReturnPath(value: unknown): string {
+  return typeof value === "string" &&
+    /^\/app(\/|$|\?)/.test(value) &&
+    !value.includes("\\") &&
+    !value.startsWith("//")
+    ? value
+    : routes.app;
+}
+
+/** /unavailable, remembering the page to return to. */
+export function unavailableFrom(path: string): string {
+  return `${routes.unavailable}?next=${encodeURIComponent(safeReturnPath(path))}`;
+}
+
 export function isAccessState(value: unknown): value is AccessState {
   return (
     typeof value === "string" && (ACCESS_STATES as string[]).includes(value)

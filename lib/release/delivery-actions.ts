@@ -76,6 +76,7 @@ export async function recordDelivery(
       plannedDate: release.planned_release_date,
     },
     dependencies: states?.dependencies ?? [],
+    legalItems: states?.details.legalItems ?? [],
   });
   if (!readiness.ready) return { ok: false, error: e.notReady };
   const { error } = await supabase.rpc("record_release_delivery", {

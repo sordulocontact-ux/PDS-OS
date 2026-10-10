@@ -9,6 +9,7 @@ import { mixFeedbackSchema } from "@/lib/ai/schemas/mix-feedback";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { checkSummary } from "@/lib/master-workflow/summary-check";
 import { MIX_DECISIONS } from "@/lib/master-workflow/mix-types";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
@@ -114,7 +115,10 @@ export async function sendMixFeedback(
 export async function proposeMixSummary(
   projectId: string,
   versionId: string,
-): Promise<{ ok: true; summary: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; summary: string; note: string | null }
+  | { ok: false; error: string }
+> {
   const input = ids.safeParse({ projectId, versionId });
   await requireApproved();
   if (!input.success) return { ok: false, error: t.propose };
@@ -157,9 +161,25 @@ export async function proposeMixSummary(
       `<titre>${master?.title ?? ""}</titre>\n<version>V${version.data.number}</version>\n<commentaires>\n${lines}\n</commentaires>`,
       MIX_FEEDBACK_INSTRUCTIONS,
     );
-    const summary = output.summary.replace(/\*\*|__/g, "").trim();
+    // The measures said are kept, none is added, no remark of PO's own
+    // reaches the engineer (lib/master-workflow/summary-check.ts).
+    const checked = checkSummary(
+      output.summary.replace(/\*\*|__/g, "").trim(),
+      comments.data.map((row) => row.body),
+    );
+    const summary = checked.summary.trim();
     return summary
-      ? { ok: true, summary: summary.slice(0, 4000) }
+      ? {
+          ok: true,
+          summary: summary.slice(0, 4000),
+          note:
+            checked.restored + checked.removed > 0
+              ? fr.masterWorkflow.mixVersions.summaryChecked(
+                  checked.restored,
+                  checked.removed,
+                )
+              : null,
+        }
       : { ok: false, error: t.propose };
   } catch (error) {
     console.error("proposeMixSummary:", error);

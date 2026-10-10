@@ -94,8 +94,9 @@ export const assistantRecords = {
   rolesToChoose:
     "Aucun rôle dit : choisissez-en au moins un dans le formulaire.",
   dueDateToChoose: "Échéance à choisir dans le formulaire.",
-  dateTimeNotSaid:
-    "Date et heure non reprises : elles doivent figurer telles quelles dans votre message, avec l'année et l'heure. La réunion est proposée à l'heure pleine suivante.",
+  dateTimeToChoose: "Date et heure à choisir dans le formulaire.",
+  timeToChoose: (day: string) =>
+    `Réunion le ${day} : l'heure n'a pas été dite, choisissez-la dans le formulaire.`,
   templateBodyNotPasted:
     "Texte du modèle non repris : PO n'écrit aucune clause, seul un texte collé par vous est gardé tel quel.",
   templateBodyToPaste: "Collez le texte du modèle dans le formulaire.",

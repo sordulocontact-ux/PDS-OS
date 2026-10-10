@@ -47,6 +47,59 @@ export function DraftCard({
         </StatusBadge>
       </div>
 
+      {link && !isFeedback ? (
+        // Once saved, the form's values are the truth, not PO's proposal
+        // (UX test of 09/10/2026: « est-ce ma correction ou la sienne ? »).
+        <>
+          <p className="text-xs text-muted-foreground">{t.savedAsReviewed}</p>
+          <details className="text-xs">
+            <summary className="cursor-pointer text-muted-foreground">
+              {t.proposal}
+            </summary>
+            <div className="grid gap-3 pt-2 opacity-70">
+              <DraftBody proposal={proposal} isFeedback={false} />
+            </div>
+          </details>
+        </>
+      ) : (
+        <DraftBody proposal={proposal} isFeedback={isFeedback} />
+      )}
+
+      {link ? (
+        <Link
+          href={link.href}
+          className="w-fit text-sm font-medium underline underline-offset-4"
+        >
+          {t.open} : {link.label}
+        </Link>
+      ) : isFeedback ? (
+        <FeedbackDraftActions toolCallId={toolCallId} draft={draft} />
+      ) : (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <Button size="sm" onClick={() => review(toolCallId, proposal)}>
+            {t.review}
+          </Button>
+          <span className="text-caption text-muted-foreground">
+            {t.notSaved}
+          </span>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// What PO proposes: the changes (previous value struck through), or nothing,
+// then what it could not fill.
+function DraftBody({
+  proposal,
+  isFeedback,
+}: {
+  proposal: DraftProposal;
+  isFeedback: boolean;
+}) {
+  const t = fr.assistant.drafts;
+  return (
+    <>
       {proposal.changes.length > 0 ? (
         <dl className="grid gap-2 text-xs">
           {proposal.changes.map((c) => (
@@ -79,26 +132,6 @@ export function DraftCard({
           ))}
         </ul>
       )}
-
-      {link ? (
-        <Link
-          href={link.href}
-          className="w-fit text-sm font-medium underline underline-offset-4"
-        >
-          {t.open} : {link.label}
-        </Link>
-      ) : isFeedback ? (
-        <FeedbackDraftActions toolCallId={toolCallId} draft={draft} />
-      ) : (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <Button size="sm" onClick={() => review(toolCallId, proposal)}>
-            {t.review}
-          </Button>
-          <span className="text-caption text-muted-foreground">
-            {t.notSaved}
-          </span>
-        </div>
-      )}
-    </section>
+    </>
   );
 }

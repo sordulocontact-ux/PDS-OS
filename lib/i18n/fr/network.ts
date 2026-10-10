@@ -26,6 +26,8 @@ export const network = {
     createNamed: (name: string) => `Ajouter « ${name} » au Réseau`,
     noResult: (name: string) => `Personne nommée « ${name} » dans le Réseau.`,
     allSelected: "Tout le Réseau est déjà proposé.",
+    noSuggestion:
+      "Personne du Réseau n'a encore ce rôle : tapez un nom pour chercher dans tout le Réseau.",
     remove: (name: string) => `Changer ${name}`,
     keepName: "Garder seulement le nom",
     search: "Chercher dans le Réseau",
@@ -38,6 +40,7 @@ export const network = {
     songwriter: "Auteur·rice-compositeur·rice",
     engineer: "Ingé son",
     producer: "Réalisateur·rice",
+    art_director: "Directeur·rice artistique",
     videographer: "Vidéaste",
     photographer: "Photographe",
     designer: "Graphiste",

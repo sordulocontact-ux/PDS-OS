@@ -43,7 +43,9 @@ export const framingFactsSchema = z.object({
     "Contraintes de calendrier (tournée, indisponibilité, période à éviter).",
   ),
   prerequisites: fact.describe("Ce qui doit être prêt avant de lancer."),
-  commitments: fact.describe("Dépenses déjà engagées ou payées."),
+  commitments: fact.describe(
+    "Dépenses déjà engagées, signées ou payées, avec le mot qui le dit. Jamais l'enveloppe ou le budget total du projet (budget_quote).",
+  ),
   decision_makers: fact.describe("Qui décide, qui valide."),
   missing_skills: fact.describe("Compétences ou ressources qui manquent."),
   current_state: fact.describe("Où en est réellement le projet."),

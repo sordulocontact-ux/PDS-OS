@@ -319,6 +319,9 @@ export function TrackingView({
   });
   const hidden = board.sections.length - cards.length;
   const ready = board.blocking.length === 0;
+  // Atteint only when nothing at all remains open.
+  const reached = ready && board.remaining.length === 0;
+  const SHOWN_REMAINING = 5;
 
   return (
     <div className="grid gap-8">
@@ -371,8 +374,15 @@ export function TrackingView({
         <aside className="flex flex-col gap-3 rounded-2xl border bg-card p-4 lg:sticky lg:top-4">
           <div className="flex items-center justify-between gap-2">
             <h2 className="font-medium">{t.readiness.title}</h2>
-            <StatusBadge tone={ready ? "success" : "warning"} size="sm">
-              {ready ? t.readiness.reached : t.readiness.notYet}
+            <StatusBadge
+              tone={reached ? "success" : ready ? "info" : "warning"}
+              size="sm"
+            >
+              {reached
+                ? t.readiness.reached
+                : ready
+                  ? t.readiness.toFollow
+                  : t.readiness.notYet}
             </StatusBadge>
           </div>
           {board.borrowings > 0 ? (
@@ -397,8 +407,31 @@ export function TrackingView({
               {fr.legal.board.readiness.noBorrowing}
             </p>
           )}
-          {ready ? (
+          {reached ? (
             <p className="text-sm text-muted-foreground">{t.readiness.ready}</p>
+          ) : ready ? (
+            <>
+              <p className="text-sm">
+                {t.readiness.remaining(board.remaining.length)}
+              </p>
+              <ul className="flex flex-col gap-1">
+                {board.remaining.slice(0, SHOWN_REMAINING).map((row) => (
+                  <li key={row.id}>
+                    <a
+                      href={`#legal-${row.section}`}
+                      className="text-sm break-words underline-offset-4 hover:underline"
+                    >
+                      {row.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              {board.remaining.length > SHOWN_REMAINING && (
+                <p className="text-sm text-muted-foreground">
+                  {t.readiness.more(board.remaining.length - SHOWN_REMAINING)}
+                </p>
+              )}
+            </>
           ) : (
             <ul className="flex flex-col gap-2">
               {board.blocking.map((row) => (

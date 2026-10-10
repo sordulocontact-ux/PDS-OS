@@ -34,10 +34,9 @@ export const getArtist = cache(
       .eq("id", artistId)
       .is("archived_at", null)
       .maybeSingle();
-    if (error) {
-      console.error("getArtist:", error.message);
-      return null;
-    }
+    // A failed read is not « not found »: thrown to the error page
+    // (app/(app)/app/error.tsx, « Réessayer »), never shown as a 404.
+    if (error) throw new Error(`getArtist: ${error.message}`);
     if (!data) return null;
 
     const liveMasters = data.credits.flatMap((c) =>

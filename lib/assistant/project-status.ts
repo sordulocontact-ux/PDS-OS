@@ -6,13 +6,15 @@ import { projectKindLabel } from "@/lib/projects/labels";
 import { routes } from "@/lib/auth/redirects";
 import {
   familyLabel,
-  fieldLabel,
   formatDay,
   lateness,
   reviewLabel,
   stageState,
 } from "@/lib/assistant/facts";
 import { type Source } from "@/lib/assistant/sources";
+import { assessFraming } from "@/lib/framing/assess";
+import { DIMENSIONS } from "@/lib/framing/dimensions";
+import { loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { loadFraming } from "@/lib/framing/queries";
 import { isOverdue, todayInParis } from "@/lib/insights/dates";
 import { getProject } from "@/lib/projects/queries";
@@ -24,8 +26,9 @@ export async function projectStatus(projectId: string, access: Access) {
   const project = await getProject(projectId);
   if (!project) return { found: false as const };
 
-  const [framing, release] = await Promise.all([
+  const [framing, knowledge, release] = await Promise.all([
     loadFraming(projectId, access),
+    loadFramingKnowledge(projectId, access),
     createClient().then((supabase) => getProjectRelease(supabase, projectId)),
   ]);
   const today = todayInParis();
@@ -60,17 +63,40 @@ export async function projectStatus(projectId: string, access: Access) {
     if (stage.state !== "not_started")
       facts.push(`Étape ${stage.label} : ${stageState(stage.state)}.`);
   }
+  // The team as the project knows it (UX test of 09/10/2026: PO did not
+  // know « Nora » was the creative director).
+  if (project.ownerName)
+    facts.push(`Chef de projet responsable : ${project.ownerName}.`);
+  for (const creative of knowledge?.creatives ?? [])
+    facts.push(`Directeur créatif du projet : ${creative.name}.`);
   if (framing?.pendingValidation) {
+    const asked = framing.pendingValidation.requestedAt;
     facts.push(
-      `Validation du Cadrage demandée à ${framing.pendingValidation.validatorName}, en attente de sa décision.`,
+      `Validation du Cadrage demandée${asked ? ` le ${formatDay(asked)}` : ""} à ${framing.pendingValidation.validatorName}, en attente de sa décision.`,
     );
   }
-  for (const field of framing?.fields ?? []) {
+  // The Cadrage as its page shows it (assessFraming), never the legacy free
+  // fields: « Temporalité : pas encore renseigné » was given as the cause of
+  // a Brief that could not be sent (UX test of 09/10/2026).
+  if (knowledge) {
+    const assessment = assessFraming(knowledge);
+    for (const dimension of DIMENSIONS) {
+      const d = assessment.dimensions.find((x) => x.dimension === dimension);
+      if (!d) continue;
+      facts.push(
+        `Cadrage — ${fr.framingIntel.dimensions[dimension]} : ${d.counts.known} connue(s), ${d.counts.to_confirm} à confirmer, ${d.counts.missing} manquante(s).`,
+      );
+    }
     facts.push(
-      field.value
-        ? `Brief — ${fieldLabel(field.key)} : ${field.status === "proposed" ? "proposé par PO, à confirmer" : "confirmé"} — « ${field.value} ».`
-        : `Brief — ${fieldLabel(field.key)} : pas encore renseigné.`,
+      assessment.ready
+        ? "Brief : toutes les informations nécessaires sont là, il peut être créé ou envoyé."
+        : `Brief : ${assessment.blocking.length} information(s) nécessaire(s) à confirmer ou à compléter avant de le créer.`,
     );
+    const validators = framing?.validators ?? [];
+    if (validators.length !== 1)
+      facts.push(
+        `Envoi en validation impossible : ${fr.framing.errors[validators.length === 0 ? "no_validator" : "multiple_validators"]}`,
+      );
   }
   for (const need of framing?.needs ?? []) {
     facts.push(

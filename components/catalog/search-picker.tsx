@@ -11,6 +11,9 @@ export type PickerOption = { id: string; label: string; detail?: string };
 // Search field + result list (ARIA combobox), shared by the artist and master
 // pickers. Picking adds to the selection kept by the parent; the last row is
 // always the "create" shortcut, so a missing item never blocks the form.
+// `suggestedIds`: the only options listed before anything is typed (the
+// people who fit); typing searches them all. Inside a modal the list sits in
+// the flow, so the modal grows instead of clipping it.
 export function SearchPicker({
   label,
   placeholder,
@@ -21,6 +24,8 @@ export function SearchPicker({
   createLabel,
   noResultLabel,
   allSelectedLabel,
+  suggestedIds,
+  noSuggestionLabel,
   invalid,
   describedBy,
 }: {
@@ -33,6 +38,9 @@ export function SearchPicker({
   createLabel: (query: string) => string;
   noResultLabel: (query: string) => string;
   allSelectedLabel: string;
+  suggestedIds?: ReadonlySet<string>;
+  // Said before typing when none of the options is suggested.
+  noSuggestionLabel?: string;
   invalid?: boolean;
   describedBy?: string;
 }) {
@@ -48,11 +56,16 @@ export function SearchPicker({
   );
   const results = useMemo(() => {
     const q = normalize(query);
-    if (!q) return available.slice(0, 8);
+    if (!q)
+      return (
+        suggestedIds
+          ? available.filter((o) => suggestedIds.has(o.id))
+          : available
+      ).slice(0, 8);
     return available
       .filter((o) => normalize(`${o.label} ${o.detail ?? ""}`).includes(q))
       .slice(0, 8);
-  }, [available, query]);
+  }, [available, query, suggestedIds]);
 
   // Rows: results, then the create shortcut.
   const rowCount = results.length + 1;
@@ -92,11 +105,13 @@ export function SearchPicker({
 
   const emptyMessage =
     results.length === 0
-      ? available.length === 0 && !query.trim()
-        ? options.length > 0
-          ? allSelectedLabel
-          : null
-        : noResultLabel(query.trim())
+      ? query.trim()
+        ? noResultLabel(query.trim())
+        : available.length === 0
+          ? options.length > 0
+            ? allSelectedLabel
+            : null
+          : (noSuggestionLabel ?? null)
       : null;
 
   return (
@@ -131,7 +146,7 @@ export function SearchPicker({
         className="h-10 pl-9 text-base md:text-sm"
       />
       {open && (
-        <div className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-popover shadow-elevation-1">
+        <div className="absolute inset-x-0 top-full z-20 mt-1 overflow-hidden rounded-lg border border-border bg-popover shadow-elevation-1 in-[[data-slot=dialog-content]]:static">
           {emptyMessage && (
             <p className="px-3 py-2 text-sm text-muted-foreground">
               {emptyMessage}

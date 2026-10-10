@@ -26,8 +26,12 @@ export const framingIntel = {
     ]
       .filter(Boolean)
       .join(" · "),
-  progress: (known: number, total: number) =>
-    `${known} sur ${total} informations confirmées`,
+  progress: (known: number, total: number, optionalEmpty = 0) =>
+    `${known} sur ${total} informations confirmées${
+      optionalEmpty > 0
+        ? ` · ${plural(optionalEmpty, "facultative vide", "facultatives vides")}`
+        : ""
+    }`,
   questionOf: (index: number, total: number) =>
     `Question ${index} sur ${total}`,
   none: "Rien à signaler",
@@ -292,12 +296,12 @@ export const framingIntel = {
   entry: {
     accepted: (date: string, name: string | null) =>
       `Prise en charge acceptée le ${date}${name ? ` par ${name}` : ""}`,
-    analysisTitle: "PO a analysé ce que le projet sait déjà",
+    analysisTitle: "Ce que le projet sait déjà",
     analysis: (known: number, toConfirm: number, missing: number) =>
       `${plural(known, "information connue", "informations connues")} · ${toConfirm} à confirmer · ${plural(missing, "manquante", "manquantes")}`,
     nextAttention: "Prochaine attention : le cadrage",
     nextAttentionBody:
-      "Complétez seulement ce qui manque, directement avec PO ou pendant un échange. Les deux mènent au même Brief.",
+      "Complétez seulement ce qui manque, pendant un échange ou directement avec PO. Les deux mènent au même Brief.",
     start: "Commencer le cadrage",
     starting: "PO lit le contexte…",
     resume: "Reprendre le cadrage",
@@ -351,6 +355,10 @@ export const framingIntel = {
     complete: "Compléter",
     dimensionDone: "Cette dimension est complète.",
     doneTitle: "Le cadrage est complet",
+    // Ready for the Brief, with optional questions still empty: not « complet ».
+    readyTitle: "Prêt pour le Brief",
+    readyBody: (n: number) =>
+      `Les informations nécessaires sont confirmées. ${plural(n, "information facultative reste vide", "informations facultatives restent vides")} : complétez-les si elles comptent pour ce projet.`,
     doneBody:
       "Toutes les informations nécessaires sont confirmées : le Brief peut être créé.",
     generate: "Créer le Brief",
@@ -415,8 +423,10 @@ export const framingIntel = {
   brief: {
     title: "Brief de cadrage",
     version: (n: number) => `Version ${n}`,
+    // `pending` is a version not sent yet (send_framing_brief makes it
+    // `sent`): never « en attente de validation » (UX test of 09/10/2026).
     states: {
-      pending: "En attente de validation",
+      pending: "À envoyer",
       sent: "En attente de validation",
       approved: "Brief validé",
       changes_requested: "Modification demandée",

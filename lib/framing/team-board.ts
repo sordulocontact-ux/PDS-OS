@@ -11,7 +11,14 @@ import { fr } from "@/lib/i18n/fr";
 
 type TeamRow = FramingData["team"][number];
 
-export type RoleCard = { role: TeamRoleKey; member: TeamRow | null };
+export type RoleCard = {
+  role: TeamRoleKey;
+  member: TeamRow | null;
+  // Who holds it on the project itself when no team row does: the
+  // project's creative directors for « Direction créative » (UX test of
+  // 09/10/2026: « à trouver » although the project had its creative director).
+  holder: string | null;
+};
 
 const isRoleKey = (value: string | null): value is TeamRoleKey =>
   value !== null && (TEAM_ROLE_KEYS as readonly string[]).includes(value);
@@ -24,7 +31,10 @@ const isRoleKey = (value: string | null): value is TeamRoleKey =>
 export function teamBoard(
   team: FramingData["team"],
   needs: FramingData["needs"],
-  context: { music?: boolean } = {},
+  context: {
+    music?: boolean;
+    creatives?: ReadonlyArray<{ name: string }>;
+  } = {},
 ): { roles: RoleCard[]; others: TeamRow[] } {
   const wanted = new Set<TeamRoleKey>(
     rolesForNeeds(
@@ -36,11 +46,19 @@ export function teamBoard(
   for (const member of team)
     if (isRoleKey(member.role_key)) wanted.add(member.role_key);
 
+  const creatives = (context.creatives ?? []).map((c) => c.name).join(", ");
   const roles = TEAM_ROLE_KEYS.filter((role) => wanted.has(role)).map(
-    (role) => ({
-      role,
-      member: team.find((m) => m.role_key === role) ?? null,
-    }),
+    (role) => {
+      const member = team.find((m) => m.role_key === role) ?? null;
+      return {
+        role,
+        member,
+        holder:
+          !member && role === "creative_direction" && creatives
+            ? creatives
+            : null,
+      };
+    },
   );
   const others = team.filter((m) => !isRoleKey(m.role_key));
   return { roles, others };

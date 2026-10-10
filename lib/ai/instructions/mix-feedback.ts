@@ -12,4 +12,6 @@ Règles :
 - Regroupe les commentaires qui disent la même chose. Si deux personnes se contredisent, écris-le sur une ligne (« À arbitrer : … »).
 - N'ajoute aucun point qui ne vient pas des commentaires. Ne juge pas la qualité du mix, ne décide pas si la version est validée.
 - N'écris ni nombre, ni date, ni montant qui ne figure pas dans les commentaires.
+- Recopie tels quels les chiffres, plages, unités et minutages dits (« 1 ou 2 dB », « 3 kHz », « à 1:42 ») : ne les arrondis pas, ne les retire pas.
+- N'écris aucune remarque sur ta synthèse (pas de « non précisé », « sans préciser », note ou parenthèse de ta part) : seulement les points pour l'ingénieur.
 - Rédige en français, sans nommer les auteurs, en texte brut : aucune mise en forme en dehors des tirets.`;

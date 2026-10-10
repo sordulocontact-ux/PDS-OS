@@ -36,6 +36,8 @@ export type Todo = {
   tasks: TodoTask[];
   validations: TodoValidation[];
   proposals: TodoProposals[];
+  // A query failed: the lists may be incomplete, never shown as « nothing ».
+  error: boolean;
 };
 
 /**
@@ -79,6 +81,15 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
       supabase.from("projects").select("id, title").is("archived_at", null),
     ]);
 
+  const failed = [
+    tasksRes,
+    validationsRes,
+    fieldsRes,
+    needsRes,
+    teamRes,
+    projectsRes,
+  ].find((res) => res.error);
+  if (failed) console.error("loadMyTodo:", failed.error?.message);
   const titles = new Map((projectsRes.data ?? []).map((p) => [p.id, p.title]));
   const titleOf = (id: string) => titles.get(id) ?? "—";
 
@@ -139,5 +150,5 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
     href: routes.projectFraming(projectId),
   }));
 
-  return { today, tasks, validations, proposals };
+  return { today, tasks, validations, proposals, error: Boolean(failed) };
 }

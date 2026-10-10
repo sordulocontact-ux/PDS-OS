@@ -199,6 +199,11 @@ export default async function FramingPage({
           label: `${t.dimensions[q.dimension]} · ${t.questions[q.key].label} · ${t.statuses[q.status].toLowerCase()}`,
           href: questionHref(q),
         }))}
+        optional={assessment.optionalEmpty.map((q) => ({
+          key: q.key,
+          label: `${t.dimensions[q.dimension]} · ${t.questions[q.key].label}`,
+          href: questionHref(q),
+        }))}
         editable={
           canEdit && (stage === "not_started" || stage === "in_progress")
         }
@@ -329,6 +334,7 @@ export default async function FramingPage({
         <FramingProgress
           known={assessment.counts.known}
           total={assessment.total}
+          optionalEmpty={assessment.optionalEmpty.length}
         />
       </div>
       {working && <FramingCallSheet projectId={projectId} data={sheet} />}

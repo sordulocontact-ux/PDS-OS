@@ -3,12 +3,10 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
-import { parseEurosToCents } from "@/lib/projects/schemas";
 import { advanceClearance } from "@/lib/legal/clearance/actions";
 import {
   counterClearanceTerms,
@@ -21,39 +19,42 @@ import {
   type MessageProposal,
 } from "@/lib/legal/clearance/interpret";
 import type { Clearance } from "@/lib/legal/clearance/types";
-import { formatFee } from "@/lib/legal/contracts/fields";
 import { formatDate } from "@/lib/release/format";
 
+import {
+  centsOf,
+  eurosOf,
+  firstBadAmount,
+  TermsLinesEditor,
+  TermsSummary,
+  type TermsLine,
+} from "@/components/legal/clearance/terms-lines";
 import { useLegalAction } from "@/components/legal/use-legal-action";
 
-// What PO read, as the person may correct it before it goes to the
-// direction: the amount in euros as typed, the rest as written.
-type Reading = {
-  refusal: boolean;
-  amount: string;
-  share: string;
-  credits: string;
-  territory: string;
-  duration: string;
+// What PO read, line by line (one per right), as the person may correct it.
+type Reading = { refusal: boolean; lines: TermsLine[] };
+
+const EMPTY_LINE: TermsLine = {
+  right: null,
+  amount: "",
+  share: "",
+  credits: "",
+  territory: "",
+  duration: "",
 };
 
-const euros = (cents: number | null) =>
-  cents === null ? "" : String(cents / 100).replace(".", ",");
-// « 2 000 € HT », « 2000,50 »… → cents; null when empty, undefined when
-// it is not an amount: then said on the field, never sent as "no amount"
-// (UX test of 09/10/2026: an advance of 2 000 € vanished before the DG).
-const cents = (amount: string) =>
-  parseEurosToCents(amount.replace(/\b(HT|TTC)\b/gi, ""));
-
 function readingOf(proposal: MessageProposal): Reading {
-  const t = proposal.terms;
+  const lines = proposal.terms.map((t) => ({
+    right: t.right,
+    amount: eurosOf(t.amountCents),
+    share: t.share ?? "",
+    credits: t.credits ?? "",
+    territory: t.territory ?? "",
+    duration: t.duration ?? "",
+  }));
   return {
     refusal: proposal.event === "refusal",
-    amount: euros(t?.amountCents ?? null),
-    share: t?.share ?? "",
-    credits: t?.credits ?? "",
-    territory: t?.territory ?? "",
-    duration: t?.duration ?? "",
+    lines: lines.length ? lines : [EMPTY_LINE],
   };
 }
 
@@ -74,10 +75,11 @@ export function NegotiateMoment({
   const [reply, setReply] = useState("");
   const [reading, setReading] = useState<Reading | null>(null);
   const [tried, setTried] = useState(false);
-  const [amountError, setAmountError] = useState(false);
+  // Lines whose amount is not one, at the last « Envoyer à la direction ».
+  const [badAmounts, setBadAmounts] = useState<ReadonlySet<number>>(new Set());
   const [reads, startReading] = useTransition();
 
-  const proposed = clearance.terms.find((x) => x.status === "proposed");
+  const proposed = clearance.terms.filter((x) => x.status === "proposed");
   const countered = clearance.terms.some((x) => x.status === "rejected");
   const lastIn = clearance.exchanges.find((e) => e.direction === "in");
   const names = clearance.holders.map((h) => h.name).join(" et ");
@@ -114,24 +116,13 @@ export function NegotiateMoment({
       </>
     );
 
-  // Conditions proposed: the direction's decision.
-  if (proposed) {
+  // Conditions proposed: the direction's decision, on every line at once.
+  if (proposed.length > 0) {
+    const termsIds = proposed.map((x) => x.id);
     const box = (
       <div className="flex flex-col gap-2 rounded-xl border bg-card p-4">
         <span className="text-sm text-muted-foreground">{t.termsRead}</span>
-        <span className="font-medium break-words">
-          {[
-            proposed.amountCents !== null
-              ? formatFee(proposed.amountCents)
-              : null,
-            proposed.share,
-            proposed.credits,
-            proposed.territory,
-            proposed.duration,
-          ]
-            .filter(Boolean)
-            .join(" · ") || "—"}
-        </span>
+        <TermsSummary terms={proposed} />
         {lastIn && (
           <blockquote className="border-l-2 pl-3 text-sm break-words text-muted-foreground">
             « {lastIn.body} »
@@ -163,7 +154,7 @@ export function NegotiateMoment({
                 validateClearanceTerms({
                   projectId,
                   clearanceId: clearance.id,
-                  termsId: proposed.id,
+                  termsIds,
                 }),
               )
             }
@@ -178,7 +169,7 @@ export function NegotiateMoment({
                 counterClearanceTerms({
                   projectId,
                   clearanceId: clearance.id,
-                  termsId: proposed.id,
+                  termsIds,
                 }),
               )
             }
@@ -271,36 +262,15 @@ export function NegotiateMoment({
             <span className="text-sm text-muted-foreground">
               {t.understood}
             </span>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Field
-                name={`amount-${clearance.id}`}
-                label={t.amount}
-                inputMode="decimal"
-                suffix="€"
-                value={reading.amount}
-                error={amountError ? t.amountInvalid : undefined}
-                onChange={(event) => {
-                  setAmountError(false);
-                  setReading({ ...reading, amount: event.target.value });
-                }}
-              />
-              <Field
-                name={`share-${clearance.id}`}
-                label={t.share}
-                value={reading.share}
-                onChange={(event) =>
-                  setReading({ ...reading, share: event.target.value })
-                }
-              />
-              <Field
-                name={`credits-${clearance.id}`}
-                label={t.credits}
-                value={reading.credits}
-                onChange={(event) =>
-                  setReading({ ...reading, credits: event.target.value })
-                }
-              />
-            </div>
+            <TermsLinesEditor
+              clearanceId={clearance.id}
+              lines={reading.lines}
+              badAmounts={badAmounts}
+              onChange={(lines) => {
+                setBadAmounts(new Set());
+                setReading({ ...reading, lines });
+              }}
+            />
             <blockquote className="border-l-2 pl-3 text-sm break-words text-muted-foreground">
               « {reply} »
             </blockquote>
@@ -310,12 +280,12 @@ export function NegotiateMoment({
             <Button
               disabled={pending}
               onClick={() => {
-                const amountCents = cents(reading.amount);
-                if (amountCents === undefined) {
-                  setAmountError(true);
-                  document
-                    .getElementsByName(`amount-${clearance.id}`)[0]
-                    ?.focus();
+                const bad = reading.lines.flatMap((line, i) =>
+                  centsOf(line.amount) === undefined ? [i] : [],
+                );
+                if (bad.length > 0) {
+                  setBadAmounts(new Set(bad));
+                  firstBadAmount(clearance.id, reading.lines);
                   return;
                 }
                 run(() =>
@@ -323,13 +293,14 @@ export function NegotiateMoment({
                     projectId,
                     clearanceId: clearance.id,
                     body: reply,
-                    terms: {
-                      amountCents,
-                      share: reading.share,
-                      credits: reading.credits,
-                      territory: reading.territory,
-                      duration: reading.duration,
-                    },
+                    terms: reading.lines.map((line) => ({
+                      right: line.right,
+                      amountCents: centsOf(line.amount) ?? null,
+                      share: line.share,
+                      credits: line.credits,
+                      territory: line.territory,
+                      duration: line.duration,
+                    })),
                   }),
                 );
               }}

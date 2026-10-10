@@ -231,10 +231,9 @@ export const getProject = cache(
       .is("archived_at", null)
       .maybeSingle();
 
-    if (error) {
-      console.error("getProject:", error.message);
-      return null;
-    }
+    // A failed read is not « not found »: thrown to the error page
+    // (app/(app)/app/error.tsx, « Réessayer »), never shown as a 404.
+    if (error) throw new Error(`getProject: ${error.message}`);
     if (!data) return null;
 
     const stages = toStages(data.project_stages as RawStage[]);

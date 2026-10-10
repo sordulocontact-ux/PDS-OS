@@ -18,14 +18,31 @@ import { listProjects } from "@/lib/projects/queries";
 
 // The home page cards. Streamed behind a Suspense boundary: the greeting
 // and PO show before these queries answer.
+// A read that fails is said on its card, never shown as an empty list
+// (UX test of 09/10/2026: « Aucun projet » on a database timeout).
 export async function HomeFeed({ access }: { access: Access }) {
-  const [todo, events, { projects }, releases] = await Promise.all([
-    loadMyTodo(access),
-    loadRecentActivity({ days: 7, limit: 5 }),
-    listProjects(),
-    loadReleasesOverview(),
-  ]);
+  const [todo, events, { projects, error: projectsError }, releases] =
+    await Promise.all([
+      loadMyTodo(access),
+      loadRecentActivity({ days: 7, limit: 5 }).then(
+        (rows) => ({ rows, error: false }),
+        (error: unknown) => {
+          console.error("HomeFeed activity:", error);
+          return { rows: [], error: true };
+        },
+      ),
+      listProjects(),
+      loadReleasesOverview().then(
+        (rows) => ({ rows, error: false }),
+        (error: unknown) => {
+          console.error("HomeFeed releases:", error);
+          return { rows: [], error: true };
+        },
+      ),
+    ]);
   const { toAccept, toRetransmit } = handoverOf(projects, access);
+  // « En cours »: launched projects only (accepted, with their stages).
+  const running = projects.filter((p) => p.status === "launched");
 
   return (
     <CardGrid>
@@ -41,12 +58,12 @@ export async function HomeFeed({ access }: { access: Access }) {
           projects={toRetransmit}
         />
       )}
-      <TasksCard tasks={todo.tasks} />
-      <ProjectsCard projects={projects} />
-      <ValidationsCard validations={todo.validations} />
-      <ProposalsCard proposals={todo.proposals} />
-      <ActivityCard events={events} />
-      <ReleasesCard releases={releases} />
+      <TasksCard tasks={todo.tasks} error={todo.error} />
+      <ProjectsCard projects={running} error={Boolean(projectsError)} />
+      <ValidationsCard validations={todo.validations} error={todo.error} />
+      <ProposalsCard proposals={todo.proposals} error={todo.error} />
+      <ActivityCard events={events.rows} error={events.error} />
+      <ReleasesCard releases={releases.rows} error={releases.error} />
     </CardGrid>
   );
 }

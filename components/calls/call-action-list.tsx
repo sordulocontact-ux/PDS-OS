@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { ActionTaskForm } from "@/components/project-work/action-task-form";
+import { matchByName } from "@/lib/assistant/fuzzy-name";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { CallAction } from "@/lib/calls/outcomes";
 import { createTask } from "@/lib/framing/actions/points-tasks";
@@ -23,13 +24,11 @@ const dueFormat = new Intl.DateTimeFormat("fr-FR", {
 export function CallActionList({
   actions,
   members,
-  mePersonId,
   projectId,
   projects,
 }: {
   actions: CallAction[];
   members: { personId: string; name: string }[];
-  mePersonId: string | null;
   projectId: string | null;
   projects: { id: string; title: string }[];
 }) {
@@ -74,7 +73,15 @@ export function CallActionList({
             <ActionTaskForm
               item={action}
               members={members}
-              defaultAssigneeId={mePersonId ?? members[0]?.personId ?? ""}
+              // The person named in the call when it clearly is a member
+              // (« Yannis » → Yanis Roche); otherwise nobody, chosen by hand
+              // (UX test of 09/10/2026: pre-assigned to whoever opened it).
+              defaultAssigneeId={
+                action.who
+                  ? (matchByName(members, action.who, (m) => m.name)
+                      ?.personId ?? "")
+                  : ""
+              }
               projectId={projectId ?? undefined}
               projects={projectId ? undefined : projects}
               pending={pending}

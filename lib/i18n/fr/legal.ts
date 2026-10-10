@@ -445,8 +445,14 @@ export const legal = {
           : `${count} points bloquent la sortie`,
       reached: "Atteint",
       notYet: "Pas encore",
+      toFollow: "Démarches ouvertes",
+      remaining: (count: number) =>
+        count === 1
+          ? "Les emprunts sont sécurisés, mais 1 démarche reste ouverte :"
+          : `Les emprunts sont sécurisés, mais ${count} démarches restent ouvertes :`,
+      more: (count: number) => `et ${count} de plus`,
       policy:
-        "Seul un emprunt non sécurisé bloque la sortie (ticket Juridique 08). Le caractère bloquant du reste (SACEM, contrats, factures) reste à décider.",
+        "Un emprunt non sécurisé bloque la sortie. Les fiches, contrats, répartitions et la SACEM ne la bloquent pas, mais restent à suivre.",
     },
     since: (date: string) => `depuis le ${date}`,
     overdue: (date: string) => `Échéance dépassée : ${date}`,

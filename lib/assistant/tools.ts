@@ -3,6 +3,8 @@ import "server-only";
 import { tool } from "ai";
 import { z } from "zod";
 
+import { personName } from "@/lib/projects/types";
+import { matchByName } from "@/lib/assistant/fuzzy-name";
 import {
   findArtistsTool,
   findMastersTool,
@@ -32,6 +34,7 @@ import {
 import { verbatimFrom } from "@/lib/assistant/verbatim";
 import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
+import { fr } from "@/lib/i18n/fr";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadMyTodo } from "@/lib/insights/todo";
 import { listProjects } from "@/lib/projects/queries";
@@ -118,6 +121,55 @@ export function createAssistantTools(
       },
     }),
 
+    team_members: tool({
+      description:
+        "Les membres de l'équipe PDS OS (nom et poste), et pour un nom donné, la personne qu'il désigne (accents et fautes tolérés). Un prénom ou un nom de personne se cherche ici, jamais dans les projets.",
+      inputSchema: z.object({
+        name: z
+          .string()
+          .max(100)
+          .optional()
+          .describe("Nom ou prénom cité, même approximatif"),
+      }),
+      execute: async ({ name }) => {
+        const supabase = await createClient();
+        const { data, error } = await supabase
+          .from("memberships")
+          .select(
+            "role, people!memberships_person_id_fkey(first_name, last_name)",
+          )
+          .eq("status", "approved");
+        if (error)
+          return { facts: [fr.assistant.readFailed], sources: [] as Source[] };
+        const members = (data ?? []).flatMap((m) =>
+          m.people
+            ? [
+                {
+                  name: personName(m.people.first_name, m.people.last_name),
+                  position:
+                    fr.auth.members.roles[
+                      m.role as keyof typeof fr.auth.members.roles
+                    ] ?? m.role,
+                },
+              ]
+            : [],
+        );
+        const wanted = name?.trim()
+          ? matchByName(members, name, (m) => m.name)
+          : null;
+        const facts = name?.trim()
+          ? wanted
+            ? [
+                `« ${name.trim()} » désigne ${wanted.name}, ${wanted.position.toLowerCase()}.`,
+              ]
+            : [
+                `« ${name.trim()} » ne désigne aucun membre de l'équipe avec certitude.`,
+              ]
+          : members.map((m) => `${m.name} : ${m.position.toLowerCase()}.`);
+        return { facts, sources: [] as Source[] };
+      },
+    }),
+
     project_status: tool({
       description:
         "État complet d'un projet : étapes, Brief, besoins, équipe, points ouverts, tâches (retards calculés), validation en attente, sortie. Appeler find_projects d'abord pour obtenir projectId.",
@@ -132,6 +184,7 @@ export function createAssistantTools(
       execute: async () => {
         const todo = await loadMyTodo(access);
         const facts = [
+          ...(todo.error ? [fr.assistant.readFailed] : []),
           ...todo.tasks.map(
             (t) =>
               `Tâche « ${t.title} » (${t.projectTitle}) : à faire, ${t.dueDate ? `échéance le ${formatDay(t.dueDate)}` : "sans échéance"}, ${lateness(t.overdue)}.`,
@@ -177,7 +230,17 @@ export function createAssistantTools(
         days: z.number().int().min(1).max(90).default(7),
       }),
       execute: async ({ projectId, days }) => {
-        const events = await loadRecentActivity({ projectId, days, limit: 30 });
+        const events = await loadRecentActivity({
+          projectId,
+          days,
+          limit: 30,
+        }).catch((error: unknown) => {
+          console.error("recent_activity:", error);
+          return null;
+        });
+        // A failed read is said as such, never as « nothing happened ».
+        if (!events)
+          return { days, facts: [fr.assistant.readFailed], sources: [] };
         return {
           days,
           facts: events.length

@@ -396,6 +396,18 @@ export const masterWorkflow = {
     },
   },
   mixVersions: {
+    // Said under PO's synthesis when the code corrected it.
+    summaryChecked: (restored: number, removed: number) =>
+      [
+        restored > 0
+          ? `${restored} commentaire${restored > 1 ? "s" : ""} repris tel${restored > 1 ? "s" : ""} quel${restored > 1 ? "s" : ""} pour garder leurs chiffres`
+          : null,
+        removed > 0
+          ? `${removed} ligne${removed > 1 ? "s" : ""} retirée${removed > 1 ? "s" : ""} (remarque de PO ou chiffre que personne n'a dit)`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" ; ") + ". Relisez avant d'enregistrer.",
     needsBrief:
       "Les versions sont suivies dès que le Brief Mix/Master est enregistré : c'est lui qui désigne l'ingénieur et le validateur.",
     openBrief: "Ouvrir le Brief Mix/Master",

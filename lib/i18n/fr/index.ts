@@ -2,6 +2,7 @@
  * French UI copy. Every user-facing string lives here, never inline in
  * components. One file per domain, so parallel work never edits the same file.
  */
+import { errors } from "./errors";
 import { artistActivity } from "./artist-activity";
 import { assistant } from "./assistant";
 import { assistantRecords } from "./assistant-records";
@@ -46,6 +47,7 @@ import { workflowStatus } from "./workflow-status";
 
 export const fr = {
   ...core,
+  errors,
   labo,
   auth,
   shell,

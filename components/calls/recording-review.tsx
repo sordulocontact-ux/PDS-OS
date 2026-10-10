@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import type { Recording } from "@/components/calls/use-recorder";
+import { QUIET_RATIO, type Recording } from "@/components/calls/use-recorder";
 import { MetaList } from "@/components/labo/meta-list";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,10 @@ export function RecordingReview({
   const [confirming, setConfirming] = useState(false);
   const canEdit = useCanEditProject();
   const url = useObjectUrl(recording.blob) ?? undefined;
+  // Almost nothing heard: said before sending, never sent unawares.
+  const quiet =
+    recording.durationSeconds >= 10 &&
+    recording.heardSeconds / recording.durationSeconds < QUIET_RATIO;
 
   return (
     <div className="grid gap-3 rounded-lg border border-border p-4">
@@ -44,6 +48,11 @@ export function RecordingReview({
           [t.size, `${formatMegabytes(recording.blob.size)} Mo`],
         ]}
       />
+      {quiet && (
+        <p role="alert" className="text-sm text-[color:var(--tone-warning-fg)]">
+          {t.quiet}
+        </p>
+      )}
       {recording.blob.size > FREE_TIER_BYTES && (
         <p className="text-xs text-muted-foreground">{t.freeTierNote}</p>
       )}
@@ -64,8 +73,12 @@ export function RecordingReview({
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          <Button onClick={onSend} disabled={sending}>
-            {sending ? t.sending : t.send}
+          <Button
+            variant={quiet ? "outline" : "default"}
+            onClick={onSend}
+            disabled={sending}
+          >
+            {sending ? t.sending : quiet ? t.sendAnyway : t.send}
           </Button>
           <Button
             variant="ghost"

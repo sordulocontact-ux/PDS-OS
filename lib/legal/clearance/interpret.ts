@@ -31,13 +31,15 @@ export type MessageProposal = {
     role: HolderRole;
     right: "work" | "master";
   }>;
-  terms: {
+  // One line per right (the work, the recording), or one without right.
+  terms: Array<{
+    right: "work" | "master" | null;
     amountCents: number | null;
     share: string | null;
     credits: string | null;
     territory: string | null;
     duration: string | null;
-  } | null;
+  }>;
 };
 
 const escape = (text: string) =>
@@ -94,17 +96,27 @@ export async function readClearanceMessage(
     const name = keep(h.name);
     return name ? [{ name, role: h.role, right: h.right }] : [];
   });
-  const amountText = keep(output.terms?.amount);
   const terms = output.terms
-    ? {
+    .map((line) => {
+      const amountText = keep(line.amount);
+      return {
+        right: line.right,
         amountCents: amountText ? parseSaidEuros(amountText) : null,
-        share: keep(output.terms.share),
-        credits: keep(output.terms.credits),
-        territory: keep(output.terms.territory),
-        duration: keep(output.terms.duration),
-      }
-    : null;
-  const anyTerm = terms && Object.values(terms).some((v) => v !== null);
+        share: keep(line.share),
+        credits: keep(line.credits),
+        territory: keep(line.territory),
+        duration: keep(line.duration),
+      };
+    })
+    .filter((line) =>
+      [
+        line.amountCents,
+        line.share,
+        line.credits,
+        line.territory,
+        line.duration,
+      ].some((v) => v !== null),
+    );
   return {
     ok: true,
     proposal: {
@@ -115,7 +127,7 @@ export async function readClearanceMessage(
         clearance.status as ClearanceStatus,
       ),
       holders,
-      terms: anyTerm ? terms : null,
+      terms,
     },
   };
 }

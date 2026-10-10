@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/framing/option-select";
@@ -10,7 +10,11 @@ import { Button } from "@/components/ui/button";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Label } from "@/components/ui/label";
-import { assignRole, releaseRole } from "@/lib/framing/actions/team-roles";
+import {
+  assignRole,
+  listCreativeCandidates,
+  releaseRole,
+} from "@/lib/framing/actions/team-roles";
 import type { FramingData } from "@/lib/framing/queries";
 import type { RoleCard } from "@/lib/framing/team-board";
 import {
@@ -24,7 +28,9 @@ import { listNetworkForRole } from "@/lib/network/role-people-actions";
 import type { NetworkRole } from "@/lib/network/types";
 
 /**
- * Gives a role to someone already in the team (one click) or to a person or
+ * Gives a role to someone already in the team (one click), to a creative
+ * director of the app (the project's, then for the artistic and creative
+ * direction the organization's: Sacha, 10/10/2026), or to a person or
  * structure of the Réseau (Sacha, 07/10/2026: picked, its contact kept in
  * project_team_members.contact_id; a name only as a last resort).
  * `card` fixes the role; without it, the role is chosen first.
@@ -33,6 +39,7 @@ export function AssignRoleDialog({
   projectId,
   card,
   team,
+  creatives = [],
   roles = TEAM_ROLE_KEYS,
   engineers = [],
   open,
@@ -41,6 +48,8 @@ export function AssignRoleDialog({
   projectId: string;
   card: RoleCard | null;
   team: FramingData["team"];
+  // The project's creative directors (members of the app).
+  creatives?: Creative[];
   // The roles offered when none is fixed.
   roles?: readonly TeamRoleKey[];
   // Engineers of the Réseau, listed first for the mix and mastering roles.
@@ -61,6 +70,7 @@ export function AssignRoleDialog({
         projectId={projectId}
         card={card}
         team={team}
+        creatives={creatives}
         roles={roles}
         engineers={engineers}
         onDone={() => onOpenChange(false)}
@@ -69,25 +79,45 @@ export function AssignRoleDialog({
   );
 }
 
-// The role a contact added to the Réseau from here starts with, and whose
-// holders the picker lists first.
-const NETWORK_ROLE_OF: Record<TeamRoleKey, NetworkRole> = {
-  artistic_direction: "other",
-  creative_direction: "other",
-  clip_production: "videographer",
-  press_relations: "provider",
-  influence_marketing: "provider",
-  playlisting: "provider",
-  mix_engineer: "engineer",
-  mastering_engineer: "engineer",
+// The roles of the Réseau that fit each role of the team: only their holders
+// are listed before typing (no sound engineer offered for the artistic
+// direction, Sacha 10/10/2026); typing searches the whole Réseau. The first
+// is the role a contact added from here starts with.
+const NETWORK_ROLES_OF: Record<TeamRoleKey, readonly NetworkRole[]> = {
+  artistic_direction: [
+    "art_director",
+    "designer",
+    "photographer",
+    "videographer",
+  ],
+  creative_direction: [
+    "art_director",
+    "designer",
+    "photographer",
+    "videographer",
+  ],
+  clip_production: ["videographer"],
+  press_relations: ["media", "provider"],
+  influence_marketing: ["provider", "partner", "media"],
+  playlisting: ["provider", "media"],
+  mix_engineer: ["engineer"],
+  mastering_engineer: ["engineer"],
 };
 
 type Picked = { contactId: string | null; name: string };
+type Creative = { personId: string; name: string };
+
+// Roles a creative director of the app may hold beyond their own project.
+const CREATIVE_ROLES: readonly TeamRoleKey[] = [
+  "artistic_direction",
+  "creative_direction",
+];
 
 function AssignForm({
   projectId,
   card,
   team,
+  creatives,
   roles,
   engineers,
   onDone,
@@ -95,6 +125,7 @@ function AssignForm({
   projectId: string;
   card: RoleCard | null;
   team: FramingData["team"];
+  creatives: Creative[];
   roles: readonly TeamRoleKey[];
   engineers: Array<{ id: string; name: string }>;
   onDone: () => void;
@@ -108,16 +139,43 @@ function AssignForm({
     contactId: holder?.contact_id ?? null,
     name: holder?.display_name ?? "",
   });
-  const people = team.filter((m) => m.role_key !== role);
+  // Each person of the team once (one row per role they hold), except who
+  // holds this role already; picking them adds the role to their others.
+  const identityOf = (m: FramingData["team"][number]) =>
+    m.person_id ?? m.contact_id ?? m.display_name.trim().toLowerCase();
+  const holders = new Set(
+    team.filter((m) => m.role_key === role).map(identityOf),
+  );
+  const people = [
+    ...new Map(
+      team
+        .filter((m) => !holders.has(identityOf(m)))
+        .map((m) => [identityOf(m), m]),
+    ).values(),
+  ];
+  // Members of the app with no row in the team yet: the project's creative
+  // directors, then (artistic or creative direction) the organization's.
+  const [orgCreatives, setOrgCreatives] = useState<Creative[]>([]);
+  useEffect(() => {
+    void listCreativeCandidates().then(setOrgCreatives);
+  }, []);
+  const inTeam = new Set(team.map((m) => m.person_id).filter(Boolean));
+  const projectCreatives = creatives.filter((c) => !inTeam.has(c.personId));
+  const shown = new Set([...inTeam, ...creatives.map((c) => c.personId)]);
+  const otherCreatives = CREATIVE_ROLES.includes(role)
+    ? orgCreatives.filter((c) => !shown.has(c.personId))
+    : [];
+  const giveTo = (person: { memberId: string } | { personId: string }) =>
+    run(() => assignRole(projectId, role, person), onDone);
   const roleOptions = Object.fromEntries(
     roles.map((key) => [key, t.roles[key]]),
   );
-  const networkRole = NETWORK_ROLE_OF[role];
+  const networkRoles = NETWORK_ROLES_OF[role];
   const name = picked.name.trim();
 
   // The page's engineers (those PDS worked with most) first for these roles.
   const load = async () => {
-    const options = await listNetworkForRole(networkRole);
+    const options = await listNetworkForRole([...networkRoles]);
     if (!isEngineerRole(role)) return options;
     const rank = (id: string) => {
       const index = engineers.findIndex((engineer) => engineer.id === id);
@@ -155,44 +213,61 @@ function AssignForm({
             value={role}
             onChange={(v) => {
               const next = v as TeamRoleKey;
-              if (NETWORK_ROLE_OF[next] !== networkRole)
+              if (NETWORK_ROLES_OF[next] !== networkRoles)
                 setPicked({ contactId: null, name: "" });
               setRole(next);
             }}
           />
         </div>
       )}
-      {people.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="text-caption text-muted-foreground">{t.team}</p>
-          <div className="flex flex-wrap gap-2">
-            {people.map((m) => (
-              <FilterChip
-                key={m.id}
-                pressed={false}
-                disabled={pending}
-                onClick={() =>
-                  run(
-                    () => assignRole(projectId, role, { memberId: m.id }),
-                    onDone,
-                  )
-                }
-              >
-                {m.display_name}
-              </FilterChip>
-            ))}
-          </div>
-        </div>
+      {(people.length > 0 || projectCreatives.length > 0) && (
+        <ChipGroup label={t.team}>
+          {people.map((m) => (
+            <FilterChip
+              key={m.id}
+              pressed={false}
+              disabled={pending}
+              onClick={() => giveTo({ memberId: m.id })}
+            >
+              {m.display_name}
+            </FilterChip>
+          ))}
+          {projectCreatives.map((c) => (
+            <FilterChip
+              key={c.personId}
+              pressed={false}
+              disabled={pending}
+              onClick={() => giveTo({ personId: c.personId })}
+            >
+              {c.name}
+            </FilterChip>
+          ))}
+        </ChipGroup>
+      )}
+      {otherCreatives.length > 0 && (
+        <ChipGroup label={t.creatives}>
+          {otherCreatives.map((c) => (
+            <FilterChip
+              key={c.personId}
+              pressed={false}
+              disabled={pending}
+              onClick={() => giveTo({ personId: c.personId })}
+            >
+              {c.name}
+            </FilterChip>
+          ))}
+        </ChipGroup>
       )}
       <PersonPickerField<RankedPerson>
-        key={networkRole}
+        key={role}
         refName="assign-contact"
         nameName="assign-name"
         legend={t.person}
         load={load}
         defaultRef={picked.contactId}
         defaultName={picked.contactId ? null : picked.name || null}
-        createRoles={[networkRole]}
+        createRoles={[networkRoles[0]]}
+        suggest={(option) => option.group !== "network"}
         required
         refOfContact={(id) => id}
         onPick={(option, typed) =>
@@ -224,5 +299,20 @@ function AssignForm({
         )}
       </div>
     </form>
+  );
+}
+
+function ChipGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-caption text-muted-foreground">{label}</p>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
   );
 }

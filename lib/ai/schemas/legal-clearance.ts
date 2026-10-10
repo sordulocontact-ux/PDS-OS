@@ -53,21 +53,31 @@ export const clearanceMessageSchema = z.object({
     )
     .describe("Les ayants droit ou interlocuteurs nommés dans le message."),
   terms: z
-    .object({
-      amount: z
-        .string()
-        .nullable()
-        .describe("Le montant tel qu'il est écrit (« 500 € »), ou null."),
-      share: z
-        .string()
-        .nullable()
-        .describe("La part demandée telle qu'elle est écrite, ou null."),
-      credits: z.string().nullable(),
-      territory: z.string().nullable(),
-      duration: z.string().nullable(),
-    })
-    .nullable()
+    .array(
+      z.object({
+        right: z
+          .enum(RIGHT_KINDS)
+          .nullable()
+          .describe(
+            "work : l'œuvre (édition, auteurs) ; master : l'enregistrement ; null si le message ne le dit pas.",
+          ),
+        amount: z
+          .string()
+          .nullable()
+          .describe(
+            "Le montant tel qu'il est écrit, devise et HT/TTC compris (« 2 000 € HT »), ou null.",
+          ),
+        share: z
+          .string()
+          .nullable()
+          .describe("La part demandée telle qu'elle est écrite, ou null."),
+        credits: z.string().nullable(),
+        territory: z.string().nullable(),
+        duration: z.string().nullable(),
+      }),
+    )
+    .max(4)
     .describe(
-      "Les conditions reçues, recopiées telles quelles ; null s'il n'y en a pas.",
+      "Les conditions reçues, une ligne par ayant droit ou par droit (l'œuvre, l'enregistrement), recopiées telles quelles ; vide s'il n'y en a pas.",
     ),
 });

@@ -5,19 +5,22 @@ import { fr } from "@/lib/i18n/fr";
 export function FramingProgress({
   known,
   total,
+  optionalEmpty = 0,
 }: {
   known: number;
   total: number;
+  // Optional questions still empty: said next to the count.
+  optionalEmpty?: number;
 }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-caption text-muted-foreground tabular-nums">
-        {fr.framingIntel.progress(known, total)}
+        {fr.framingIntel.progress(known, total, optionalEmpty)}
       </p>
       <ProgressBar
         value={known}
         max={total}
-        label={fr.framingIntel.progress(known, total)}
+        label={fr.framingIntel.progress(known, total, optionalEmpty)}
       />
     </div>
   );

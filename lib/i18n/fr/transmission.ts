@@ -50,7 +50,14 @@ export const transmission = {
     clarify: "Demander une précision",
     refuseLabel: "Motif du refus",
     clarifyLabel: "Votre question",
-    responseHint: "Le message est renvoyé au directeur général.",
+    responseHint: "Le message est envoyé à la direction.",
+    // Said on the Travail page once the answer has left.
+    sent: {
+      refused:
+        "Votre refus est parti à la direction. Le projet ne vous est plus transmis.",
+      clarification_requested:
+        "Votre question est partie à la direction. Le projet vous sera retransmis avec sa réponse : vous serez notifié.",
+    },
     send: "Envoyer",
     sending: "Envoi…",
     cancel: "Annuler",

@@ -6,12 +6,12 @@ import {
   STRATEGY_TEXT_FIELDS,
   toBriefField,
   toFieldState,
-  type BriefFieldState,
   type Provenance,
   type StrategyFieldState,
   type StrategyTextField,
 } from "@/lib/framing/brief";
 import { provenanceLookup } from "@/lib/framing/provenance";
+import { fr } from "@/lib/i18n/fr";
 import {
   loadImportableReports,
   loadMembers,
@@ -31,6 +31,7 @@ import {
   type ChoiceValue,
 } from "@/lib/strategy/choices";
 import { createClient } from "@/lib/supabase/server";
+import { snapshotOf, type BriefSnapshot } from "@/lib/framing/brief-snapshot";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Tables = Database["public"]["Tables"];
@@ -50,7 +51,10 @@ export type StrategyData = {
   // Closed-choice answers per text field, and PO's pending pre-checks.
   choices: Record<StrategyTextField, ChoiceValue>;
   suggestions: Record<StrategyTextField, ChoiceSuggestion[]>;
-  brief: BriefFieldState[];
+  // The Brief the strategy builds on: the validated version's objective and
+  // timing, as the validator read them; never a proposal set aside in the
+  // Cadrage (UX test of 09/10/2026: « Sortie début mars » came back).
+  brief: BriefReminderLine[];
   levers: Lever[];
   // Confirmed Brief needs no lever answers yet: the starting point.
   openNeeds: OpenNeed[];
@@ -87,6 +91,7 @@ export async function loadStrategy(
     members,
     reports,
     validators,
+    approvedBrief,
   ] = await Promise.all([
     supabase
       .from("project_stages")
@@ -131,6 +136,14 @@ export async function loadStrategy(
     loadMembers(access),
     loadImportableReports(projectId, "strategy"),
     loadValidators(project.organization_id),
+    supabase
+      .from("framing_briefs")
+      .select("content")
+      .eq("project_id", projectId)
+      .eq("state", "approved")
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const stages = stagesRes.data ?? [];
@@ -182,9 +195,15 @@ export async function loadStrategy(
         ];
       }),
     ) as Record<StrategyTextField, ChoiceSuggestion[]>,
-    // Read-only reminder: no provenance needed here.
-    brief: BRIEF_TEXT_FIELDS.map((key) =>
-      toBriefField(key, rowOf("brief", key), null),
+    brief: briefReminder(
+      snapshotOf(approvedBrief.data?.content),
+      BRIEF_TEXT_FIELDS.flatMap((key) => {
+        const row = rowOf("brief", key);
+        const field = toBriefField(key, row, null);
+        return row?.status === "confirmed" && field.value
+          ? [{ key, label: fr.framing.fields[key], value: field.value }]
+          : [];
+      }),
     ),
     levers: levers.map((l) => ({
       ...l,
@@ -202,4 +221,24 @@ export async function loadStrategy(
     members,
     validators,
   };
+}
+
+export type BriefReminderLine = { key: string; label: string; value: string };
+
+/** The validated Brief's objective and timing, line by line; before any
+ * validated version, only what the Cadrage confirmed. */
+function briefReminder(
+  snapshot: BriefSnapshot | null,
+  confirmed: BriefReminderLine[],
+): BriefReminderLine[] {
+  if (!snapshot) return confirmed;
+  return snapshot.dimensions
+    .filter((d) => d.dimension === "objective" || d.dimension === "timing")
+    .flatMap((d) =>
+      d.items.flatMap((item) => {
+        const value =
+          item.value ?? (item.lines.length ? item.lines.join("\n") : null);
+        return value ? [{ key: item.key, label: item.label, value }] : [];
+      }),
+    );
 }

@@ -10,6 +10,7 @@ Ta tâche : relever ce que le message affirme, selon le schéma demandé, sans r
 
 Règles :
 - Ne relève que ce qui est écrit. N'invente aucun nom, aucun montant, aucune condition. Dans le doute, n'ajoute rien.
-- Recopie les noms, les montants et les conditions exactement comme ils sont écrits.
+- Recopie les noms, les montants et les conditions exactement comme ils sont écrits : chaque montant avec sa devise et HT/TTC, chaque pourcentage.
+- Une ligne de conditions par ayant droit : si l'éditeur demande 25 % de l'édition et le label 15 % du master avec une avance, ce sont deux lignes (work, master).
 - "quote" est un passage du message recopié mot pour mot.
 - Tu ne décides de rien : pas d'autorisation, pas d'étape, pas de date. Un contact trouvé ou un accord de principe n'est pas une autorisation.`;

@@ -17,7 +17,7 @@ export function BriefReminder({
   projectId: string;
 }) {
   const t = fr.strategy.brief;
-  const filled = brief.filter((f) => f.value);
+  const filled = brief;
 
   return (
     <section className="flex flex-col gap-4">
@@ -37,7 +37,7 @@ export function BriefReminder({
           {filled.map((field) => (
             <div key={field.key} className="flex flex-col gap-0.5">
               <dt className="text-caption text-muted-foreground">
-                {fr.framing.fields[field.key]}
+                {field.label}
               </dt>
               <dd className="line-clamp-4 text-body-md whitespace-pre-wrap">
                 {field.value}

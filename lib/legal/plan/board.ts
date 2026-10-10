@@ -64,6 +64,10 @@ export type PlanBoard = {
   counts: Record<TrackGroup, number>;
   // The borrowings not secured: what blocks the release (ticket 08).
   blocking: BoardRow[];
+  // What remains open besides the borrowings (fiches, contracts, splits,
+  // SACEM): it does not block, but the release is not « atteint » with it
+  // (UX test of 09/10/2026: « Atteint » with every contract unsigned).
+  remaining: BoardRow[];
   secured: number;
   borrowings: number;
 };
@@ -425,6 +429,9 @@ export function planBoard(input: {
     sections,
     counts,
     blocking,
+    remaining: rows.filter(
+      (r) => r.group !== "done" && r.panel.kind !== "clearance",
+    ),
     secured: borrowings.length - blocking.length,
     borrowings: borrowings.length,
   };

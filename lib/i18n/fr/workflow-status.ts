@@ -51,6 +51,8 @@ export const workflowStatus = {
         `${workflow} ne peut pas faire « ${toWhat.toLowerCase()} » tant que cet élément manque ; le reste de ses étapes avance.`,
       clearanceImpact:
         "Un titre avec un emprunt non sécurisé ne part pas au distributeur : la sortie attend.",
+      rightsCause:
+        "Contrainte de droits confirmée au cadrage : à sécuriser dans le Juridique.",
     },
     deadlines: {
       title: "Échéances",

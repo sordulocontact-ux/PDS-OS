@@ -4,6 +4,10 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import {
+  readSaidDate,
+  understood,
+} from "@/lib/assistant/propose/said-date-field";
+import {
   centsToEuros,
   type DraftChange,
   type ProjectDraft,
@@ -14,7 +18,7 @@ import {
   proposalResult,
   type ProposeContext,
 } from "@/lib/assistant/propose/result";
-import { parseSaidDate, parseSaidEuros } from "@/lib/assistant/verbatim";
+import { parseSaidEuros } from "@/lib/assistant/verbatim";
 import { can } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { listArtistOptions, listMasterOptions } from "@/lib/catalog/queries";
@@ -83,7 +87,9 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         .max(10)
         .optional()
         .describe("Noms des directeurs créatifs"),
-      dueDate: said("Échéance avec l'année"),
+      dueDate: said(
+        "Échéance, recopiée telle que dite (« 4 décembre », « 4 décembre 2026 »)",
+      ),
       budget: said("Budget en euros"),
       priority: z.enum(PRIORITIES).optional(),
       notes: z
@@ -137,8 +143,11 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
       const artist = input.artist
         ? findNamed(artists, input.artist, (a) => a.name, warnings)
         : null;
-      if (input.artist && !artist) warnings.push(t.unknownArtist(input.artist));
+      const pendingArtist =
+        input.artist && !artist ? input.artist.trim() : null;
+      if (pendingArtist) warnings.push(t.pendingArtist(pendingArtist));
       let masters = current?.masters ?? [];
+      const pendingMasters: string[] = [];
       if (input.masters?.length) {
         masters = input.masters.flatMap((title) => {
           const found = findNamed(
@@ -147,7 +156,10 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
             (m) => masterLabel(m),
             warnings,
           );
-          if (!found) warnings.push(t.unknownMaster(title));
+          if (!found) {
+            warnings.push(t.pendingMaster(title));
+            pendingMasters.push(title.trim());
+          }
           return found ? [found] : [];
         });
       }
@@ -178,9 +190,13 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         });
       }
 
-      const dueQuote = verbatim.quote(input.dueDate);
-      const dueDate = dueQuote ? parseSaidDate(dueQuote) : null;
-      if (input.dueDate && !dueDate) warnings.push(t.notSaid(labels.dueDate));
+      const due = readSaidDate(
+        verbatim,
+        input.dueDate,
+        labels.dueDate,
+        warnings,
+      );
+      const dueDate = due?.date ?? null;
       const budgetQuote = verbatim.quote(input.budget);
       const budgetCents = budgetQuote ? parseSaidEuros(budgetQuote) : null;
       if (input.budget && budgetCents === null)
@@ -206,6 +222,8 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         contentFormatId,
         artistId: artist?.id ?? current?.artistId ?? null,
         masterIds: [...new Set(masters.map((m) => m.id))],
+        pendingArtist,
+        pendingMasters,
         assigneePersonId,
         creativePersonIds: [...new Set(creativePersonIds)],
         dueDate: dueDate ?? current?.dueDate ?? "",
@@ -250,11 +268,20 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         kindLabel(values),
       );
       if (artist) change(changes, labels.artist, null, artist.name);
+      else if (pendingArtist)
+        change(changes, labels.artist, null, t.toCreate(pendingArtist));
       change(
         changes,
         labels.masters,
         current ? mastersLabel(current.masters) : null,
-        mastersLabel(allMasters.filter((m) => values.masterIds.includes(m.id))),
+        [
+          mastersLabel(
+            allMasters.filter((m) => values.masterIds.includes(m.id)),
+          ),
+          ...pendingMasters.map(t.toCreate),
+        ]
+          .filter(Boolean)
+          .join(", "),
       );
       if (input.manager && assigneePersonId)
         change(changes, labels.manager, null, input.manager);
@@ -262,7 +289,11 @@ export function proposeProjectTool({ access, verbatim }: ProposeContext) {
         changes,
         labels.dueDate,
         current?.dueDate ? formatDay(current.dueDate) : null,
-        values.dueDate ? formatDay(values.dueDate) : null,
+        due
+          ? understood(due)
+          : values.dueDate
+            ? formatDay(values.dueDate)
+            : null,
       );
       change(
         changes,

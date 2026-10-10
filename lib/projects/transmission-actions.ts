@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
@@ -132,5 +133,10 @@ export async function respondToAssignment(
   // The other side is notified by a database trigger; the push leaves after.
   await schedulePendingPushes();
   revalidatePath(routes.app, "layout");
+  // Refused or questioned, the project is no longer the manager's to see
+  // (RLS): staying on its page ended on a 404 (UX test of 09/10/2026). They
+  // go to their Travail, which says where their answer went.
+  if (parsed.data.decision !== "accepted")
+    redirect(`${routes.work}?responded=${parsed.data.decision}`);
   return { status: "success" };
 }

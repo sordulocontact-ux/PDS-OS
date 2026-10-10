@@ -14,6 +14,7 @@ export function ListCard({
   count,
   action,
   empty,
+  error,
   className,
   children,
 }: {
@@ -22,6 +23,8 @@ export function ListCard({
   count?: number;
   action?: { label: string; href: string };
   empty?: string;
+  // The rows could not be read: said instead of a false « nothing ».
+  error?: string;
   // Grid placement only (a wider card), never a restyle.
   className?: string;
   children?: ReactNode;
@@ -53,7 +56,11 @@ export function ListCard({
           </Link>
         )}
       </div>
-      {empty ? (
+      {error ? (
+        <p role="alert" className="text-body-md text-error">
+          {error}
+        </p>
+      ) : empty ? (
         <p className="text-body-md text-muted-foreground">{empty}</p>
       ) : (
         <ul className="grid gap-1">{children}</ul>

@@ -107,7 +107,10 @@ export function ContractDraftForm({
           stay
           onCancel={onCancel}
           onSaved={(id) =>
-            onSaved({ label: values.title, href: routes.contract(id) })
+            onSaved({
+              label: fr.assistant.drafts.savedLabels.contract,
+              href: routes.contract(id),
+            })
           }
         />
       )}
@@ -131,7 +134,10 @@ export function NetworkContactDraftForm({
           stay
           onCancel={onCancel}
           onSaved={(id) =>
-            onSaved({ label: values.name, href: routes.networkContact(id) })
+            onSaved({
+              label: fr.assistant.drafts.savedLabels.contact,
+              href: routes.networkContact(id),
+            })
           }
         />
       )}
@@ -172,14 +178,19 @@ export function MeetingDraftForm({
   const { occurredAtLocal, ...defaults } = draft.values;
   return (
     <Loading load={loadMeetingForm}>
-      {({ members, defaultOccurredAt }) => (
+      {({ members }) => (
         <MeetingForm
           members={members}
-          defaultOccurredAt={occurredAtLocal || defaultOccurredAt}
+          // Only what the user said: an empty, required field rather than a
+          // plausible hour (UX test of 09/10/2026: today 20:00).
+          defaultOccurredAt={occurredAtLocal}
           defaults={defaults}
           onCancel={onCancel}
           onSaved={(id) =>
-            onSaved({ label: defaults.title, href: routes.meeting(id) })
+            onSaved({
+              label: fr.assistant.drafts.savedLabels.meeting,
+              href: routes.meeting(id),
+            })
           }
         />
       )}

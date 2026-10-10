@@ -85,14 +85,19 @@ export function linesOf(
         ...cards.flatMap((card) =>
           card.member
             ? [`${roles[card.role]} : ${card.member.display_name}`]
-            : [],
+            : card.holder
+              ? [`${roles[card.role]} : ${card.holder}`]
+              : [],
         ),
         ...others.map((m) =>
           m.role ? `${m.display_name} (${m.role})` : m.display_name,
         ),
-        ...k.creatives.map(
-          (c) => `${c.name} (${t.facts.creatives.toLowerCase()})`,
-        ),
+        // Named once: already under « Direction créative » when they hold it.
+        ...(cards.some((card) => card.holder)
+          ? []
+          : k.creatives.map(
+              (c) => `${c.name} (${t.facts.creatives.toLowerCase()})`,
+            )),
       ];
     }
     default:

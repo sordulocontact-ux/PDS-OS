@@ -75,7 +75,9 @@ export function ConstraintLines({
                       {sourceLabel(c.provenance)}
                     </span>
                   )}
-                  {c.review_status === "proposed" && <ProposedBadge />}
+                  {c.review_status === "proposed" && (
+                    <ProposedBadge provenance={c.provenance} />
+                  )}
                   <ProvenanceNote provenance={c.provenance} />
                 </span>
               </button>

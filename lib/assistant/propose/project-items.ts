@@ -3,8 +3,11 @@ import "server-only";
 import { tool } from "ai";
 import { z } from "zod";
 
+import {
+  readSaidDate,
+  understood,
+} from "@/lib/assistant/propose/said-date-field";
 import type { DraftChange } from "@/lib/assistant/drafts";
-import { formatDay } from "@/lib/assistant/facts";
 import { change } from "@/lib/assistant/propose/match";
 import {
   proposalResult,
@@ -17,7 +20,6 @@ import {
 } from "@/lib/assistant/propose/targets";
 import {
   parseSaidBudgetStatus,
-  parseSaidDate,
   parseSaidEuros,
 } from "@/lib/assistant/verbatim";
 import { centsToEuros } from "@/lib/assistant/drafts";
@@ -59,7 +61,9 @@ export function proposeTaskTool({
         .max(100)
         .optional()
         .describe("Nom de la personne responsable"),
-      dueDate: said("Échéance avec l'année"),
+      dueDate: said(
+        "Échéance, recopiée telle que dite (« vendredi », « 13 octobre », « dans 2 semaines »)",
+      ),
     }),
     execute: async (input) => {
       const t = fr.assistantRecords;
@@ -78,22 +82,20 @@ export function proposeTaskTool({
         input.assignee ? [input.assignee] : [],
         warnings,
       );
-      const quote = verbatim.quote(input.dueDate);
-      const dueDate = quote ? parseSaidDate(quote) : null;
-      if (input.dueDate && !dueDate)
-        warnings.push(fr.assistant.drafts.notSaid(labels.dueDate));
+      const due = readSaidDate(
+        verbatim,
+        input.dueDate,
+        labels.dueDate,
+        warnings,
+      );
+      const dueDate = due?.date ?? null;
       if (!dueDate) warnings.push(t.dueDateToChoose);
 
       const changes: DraftChange[] = [];
       change(changes, t.labels.project, null, target.title);
       change(changes, labels.label, null, input.title.trim());
       change(changes, labels.assignee, null, assignee?.name);
-      change(
-        changes,
-        labels.dueDate,
-        null,
-        dueDate ? formatDay(dueDate) : null,
-      );
+      change(changes, labels.dueDate, null, due ? understood(due) : null);
 
       return proposalResult({
         draft: {

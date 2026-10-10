@@ -19,12 +19,13 @@ export type RankedPerson = {
 /**
  * The Réseau to pick someone from (Sacha, 07/10/2026: pick, never retype):
  * the contacts already linked to the object first (`first`, with why they
- * are, in that order), then those holding `role`, then everyone else.
+ * are, in that order), then those holding `role` (or one of several), then
+ * everyone else.
  * Archived contacts are left out. Read with the user's session.
  */
 export async function rankedNetwork(
   supabase: SupabaseClient<Database>,
-  role: NetworkRole,
+  role: NetworkRole | readonly NetworkRole[],
   first: Map<string, string> = new Map(),
 ): Promise<RankedPerson[]> {
   const { data, error } = await supabase
@@ -50,8 +51,10 @@ export async function rankedNetwork(
       : [];
   });
   // "other" says nothing of the person: no group of its own.
-  const holds = (roles: NetworkRole[]) =>
-    role !== "other" && roles.includes(role);
+  const wanted: readonly NetworkRole[] = (
+    typeof role === "string" ? [role] : role
+  ).filter((r) => r !== "other");
+  const holds = (roles: NetworkRole[]) => roles.some((r) => wanted.includes(r));
   const rest = contacts.filter((c) => !first.has(c.id));
   return [
     ...linked,

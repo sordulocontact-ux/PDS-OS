@@ -79,7 +79,9 @@ export function DeadlineLines({
                       {d.provenance.quote ? ` · « ${d.provenance.quote} »` : ""}
                     </span>
                   )}
-                  {d.review_status === "proposed" && <ProposedBadge />}
+                  {d.review_status === "proposed" && (
+                    <ProposedBadge provenance={d.provenance} />
+                  )}
                 </span>
               </button>
             </li>

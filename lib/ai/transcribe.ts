@@ -4,6 +4,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { transcribe as sdkTranscribe, type TranscriptionModel } from "ai";
 
 import { groqTolerantFetch } from "@/lib/ai/groq-tolerant-fetch";
+import { isHallucination } from "@/lib/ai/silence";
 import { DEFAULT_TRANSCRIPTION_MODEL } from "@/lib/ai/providers";
 import type { Transcript } from "@/lib/ai/schemas/transcript";
 import { getServerEnv, type ServerEnv } from "@/lib/env";
@@ -57,12 +58,15 @@ export async function transcribe(audio: Uint8Array): Promise<Transcription> {
     },
   });
 
+  // Last guard (a provider without segments): a text Whisper invents on
+  // silence is no transcript at all (lib/ai/silence.ts).
+  const silent = isHallucination(result.text);
   return {
     transcript: {
-      text: result.text,
+      text: silent ? "" : result.text,
       language: result.language,
       durationSeconds: result.durationInSeconds,
-      segments: result.segments.map((segment) => ({
+      segments: (silent ? [] : result.segments).map((segment) => ({
         start: segment.startSecond,
         end: segment.endSecond,
         text: segment.text.trim(),

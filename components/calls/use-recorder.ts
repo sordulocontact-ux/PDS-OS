@@ -30,12 +30,20 @@ export type RecorderError =
 export const TAB_SILENCE_MS = 2 * 60 * 1000;
 // Below this level the tab counts as silent (a hung-up Meet tab sends digital zero).
 const SILENCE_LEVEL = 0.01;
+/** Nothing heard at all (microphone and tab) for this long: say it at once,
+ * a muted or wrong microphone records minutes of silence otherwise (UX test
+ * of 09/10/2026: 5 silent minutes sent, transcribed as subtitle credits). */
+export const MIC_SILENCE_MS = 30 * 1000;
+/** Under this share of seconds with sound, a recording is « presque muet ». */
+export const QUIET_RATIO = 0.05;
 
 export type Recording = {
   blob: Blob;
   mime: string;
   ext: string;
   durationSeconds: number;
+  // Seconds in which something was heard (microphone or tab), counted live.
+  heardSeconds: number;
 };
 
 export function useRecorder(
@@ -49,7 +57,10 @@ export function useRecorder(
   const [recording, setRecording] = useState<Recording | null>(null);
   const [source, setSource] = useState<RecorderSource | null>(null);
   const [tabSilent, setTabSilent] = useState(false);
+  const [micSilent, setMicSilent] = useState(false);
   const lastTabSound = useRef(0);
+  const lastSound = useRef(0);
+  const heard = useRef(0);
   const silenceTicker = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const capture = useRef<Capture | null>(null);
@@ -137,6 +148,7 @@ export function useRecorder(
         mime: format[1],
         ext: format[2],
         durationSeconds: Math.round(seconds()),
+        heardSeconds: heard.current,
       };
       setRecording(finished);
       setStatus("stopped");
@@ -152,8 +164,12 @@ export function useRecorder(
     ticker.current = setInterval(() => setElapsed(Math.floor(seconds())), 500);
 
     const samples = new Uint8Array(opened.analyser.fftSize);
+    const mixSamples = new Uint8Array(opened.analyser.fftSize);
     const tabSamples = new Uint8Array(opened.tabAnalyser?.fftSize ?? 0);
     lastTabSound.current = performance.now();
+    lastSound.current = performance.now();
+    heard.current = 0;
+    setMicSilent(false);
     // Meter: animation frames, which pause in a hidden tab (nobody sees it then).
     const read = () => {
       const paused = recorder.current?.state === "paused";
@@ -163,19 +179,27 @@ export function useRecorder(
     read();
 
     // Silence: a timer, because during the call the user is on the Meet tab and
-    // this one is hidden. Only the tab counts: people talking in the room after
-    // hanging up must not hide the silence.
+    // this one is hidden. Two checks:
+    //   * the whole mix: nothing heard at all for 30 s = a muted microphone,
+    //     said at once; each second with sound is counted for the review;
+    //   * the tab only, for the end of a call: people talking in the room
+    //     after hanging up must not hide the silence.
     const tabAnalyser = opened.tabAnalyser;
-    if (tabAnalyser) {
-      silenceTicker.current = setInterval(() => {
-        if (recorder.current?.state !== "recording") return;
-        const now = performance.now();
-        if (readLevel(tabAnalyser, tabSamples) > SILENCE_LEVEL)
-          lastTabSound.current = now;
-        const silent = now - lastTabSound.current > TAB_SILENCE_MS;
-        setTabSilent((was) => (was === silent ? was : silent));
-      }, 1000);
-    }
+    silenceTicker.current = setInterval(() => {
+      if (recorder.current?.state !== "recording") return;
+      const now = performance.now();
+      if (readLevel(opened.analyser, mixSamples) > SILENCE_LEVEL) {
+        lastSound.current = now;
+        heard.current += 1;
+      }
+      const mute = now - lastSound.current > MIC_SILENCE_MS;
+      setMicSilent((was) => (was === mute ? was : mute));
+      if (!tabAnalyser) return;
+      if (readLevel(tabAnalyser, tabSamples) > SILENCE_LEVEL)
+        lastTabSound.current = now;
+      const silent = now - lastTabSound.current > TAB_SILENCE_MS;
+      setTabSilent((was) => (was === silent ? was : silent));
+    }, 1000);
   }
 
   function pause() {
@@ -191,6 +215,7 @@ export function useRecorder(
     recorder.current.resume();
     clock.current.startedAt = performance.now();
     lastTabSound.current = performance.now();
+    lastSound.current = performance.now();
     setStatus("recording");
   }
 
@@ -205,6 +230,7 @@ export function useRecorder(
     setElapsed(0);
     setError(null);
     setTabSilent(false);
+    setMicSilent(false);
     setStatus("idle");
   }
 
@@ -215,6 +241,7 @@ export function useRecorder(
     recording,
     source,
     tabSilent,
+    micSilent,
     start,
     pause,
     resume,

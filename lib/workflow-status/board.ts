@@ -4,6 +4,7 @@
 // workflows' states and sources (lib/workflow-status/load.ts), never a copy.
 // Pure, unit-tested.
 
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { TrackedItem } from "@/lib/legal/tracking/state";
 import { legalActionHref } from "@/lib/legal/plan/where";
@@ -54,6 +55,9 @@ export type BoardInput = {
     masterDates: Record<string, string | null> | null;
     releaseDate: string | null;
     legalItems: TrackedItem[];
+    // Rights constraints confirmed in the Cadrage: what the Plan du projet
+    // calls « blocages juridiques », shown until the Juridique tracks them.
+    rightsConstraints: Array<{ id: string; text: string }>;
   };
 };
 
@@ -158,8 +162,24 @@ export function boardBlockers(input: BoardInput): BoardBlocker[] {
       href: dep.href,
     });
   }
-  for (const item of input.details.legalItems) {
-    if (item.kind !== "clearance" || CLOSED.has(item.current)) continue;
+  const clearances = input.details.legalItems.filter(
+    (item) => item.kind === "clearance",
+  );
+  // Before the Juridique tracks a borrowing, what the Cadrage confirmed is
+  // shown (the Plan du projet counts it as « blocage juridique »): never
+  // « Aucun blocage » right after it (UX test of 09/10/2026).
+  if (clearances.length === 0)
+    for (const c of input.details.rightsConstraints)
+      blockers.push({
+        key: `rights:${c.id}`,
+        workflow: "legal",
+        title: c.text,
+        cause: t.rightsCause,
+        impact: t.clearanceImpact,
+        href: routes.projectLegal(input.projectId),
+      });
+  for (const item of clearances) {
+    if (CLOSED.has(item.current)) continue;
     blockers.push({
       key: `legal:${item.id}`,
       workflow: "legal",

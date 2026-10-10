@@ -27,15 +27,19 @@ const countOf = (rows: unknown[], all?: boolean) =>
 export function TasksCard({
   tasks,
   all,
+  error,
 }: {
   tasks: Todo["tasks"];
   all?: boolean;
+  // The read failed: said, never « nothing ».
+  error?: boolean;
 }) {
   return (
     <ListCard
       title={t.tasks}
       count={countOf(tasks, all)}
       empty={tasks.length ? undefined : t.tasksEmpty}
+      error={error ? t.loadError : undefined}
     >
       {shown(tasks, all).map((task) => (
         <CardRow
@@ -59,15 +63,19 @@ export function TasksCard({
 export function ValidationsCard({
   validations,
   all,
+  error,
 }: {
   validations: Todo["validations"];
   all?: boolean;
+  // The read failed: said, never « nothing ».
+  error?: boolean;
 }) {
   return (
     <ListCard
       title={t.validations}
       count={countOf(validations, all)}
       empty={validations.length ? undefined : t.validationsEmpty}
+      error={error ? t.loadError : undefined}
     >
       {shown(validations, all).map((v) => (
         <CardRow
@@ -89,15 +97,19 @@ export function ValidationsCard({
 export function ProposalsCard({
   proposals,
   all,
+  error,
 }: {
   proposals: Todo["proposals"];
   all?: boolean;
+  // The read failed: said, never « nothing ».
+  error?: boolean;
 }) {
   return (
     <ListCard
       title={t.proposals}
       count={countOf(proposals, all)}
       empty={proposals.length ? undefined : t.proposalsEmpty}
+      error={error ? t.loadError : undefined}
     >
       {shown(proposals, all).map((p) => (
         <CardRow
@@ -115,11 +127,18 @@ export function ProposalsCard({
   );
 }
 
-export function ActivityCard({ events }: { events: ActivityEvent[] }) {
+export function ActivityCard({
+  events,
+  error,
+}: {
+  events: ActivityEvent[];
+  error?: boolean;
+}) {
   return (
     <ListCard
       title={t.activity}
       empty={events.length ? undefined : t.activityEmpty}
+      error={error ? t.loadError : undefined}
     >
       {events.slice(0, MAX).map((e, i) => (
         <CardRow
@@ -133,12 +152,19 @@ export function ActivityCard({ events }: { events: ActivityEvent[] }) {
   );
 }
 
-export function ProjectsCard({ projects }: { projects: ProjectListItem[] }) {
+export function ProjectsCard({
+  projects,
+  error,
+}: {
+  projects: ProjectListItem[];
+  error?: boolean;
+}) {
   return (
     <ListCard
       title={t.projects}
       action={{ label: t.allProjects, href: routes.projects }}
       empty={projects.length ? undefined : t.projectsEmpty}
+      error={error ? t.loadError : undefined}
     >
       {projects.slice(0, MAX).map((p) => (
         <CardRow
@@ -152,11 +178,18 @@ export function ProjectsCard({ projects }: { projects: ProjectListItem[] }) {
   );
 }
 
-export function ReleasesCard({ releases }: { releases: ReleaseOverview[] }) {
+export function ReleasesCard({
+  releases,
+  error,
+}: {
+  releases: ReleaseOverview[];
+  error?: boolean;
+}) {
   return (
     <ListCard
       title={t.releases}
       empty={releases.length ? undefined : t.releasesEmpty}
+      error={error ? t.loadError : undefined}
     >
       {releases.map((r) => (
         <CardRow

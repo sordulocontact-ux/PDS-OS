@@ -148,7 +148,7 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
   );
 
   return {
-    error,
+    error: error || todo.error,
     tasks: todo.tasks,
     toAccept,
     validations: can(access, "validate") ? todo.validations : [],

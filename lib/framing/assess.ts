@@ -61,6 +61,7 @@ export type FramingAssessment = {
   // Every required question known and nothing left to confirm.
   ready: boolean;
   blocking: QuestionState[];
+  optionalEmpty: QuestionState[];
 };
 
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
@@ -163,7 +164,7 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
     }
     case "missing_skills": {
       const roles = teamBoard(k.framing.team, k.framing.needs, rolesContext(k))
-        .roles.filter((r) => !r.member)
+        .roles.filter((r) => !r.member && !r.holder)
         .map((r) => fr.framingGuide.team.roles[r.role]);
       return roles.length
         ? text(t.records.rolesToFind(roles), s.rolesToFind)
@@ -264,6 +265,7 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
 /** Whether the engineers' roles are offered (a music project with titles). */
 export const rolesContext = (k: FramingKnowledge) => ({
   music: k.project.type === "music_release" && k.titles.length > 0,
+  creatives: k.creatives,
 });
 
 type LineRow = { review_status: string };
@@ -471,6 +473,11 @@ export function assessFraming(k: FramingKnowledge): FramingAssessment {
       ) ?? null,
     ready: blocking.length === 0,
     blocking,
+    // Optional questions left empty (or set aside): they never block the
+    // Brief, but « complet » would be false while they are there.
+    optionalEmpty: all.filter(
+      (q) => q.status === "missing" && !QUESTIONS[q.key].required,
+    ),
   };
 }
 

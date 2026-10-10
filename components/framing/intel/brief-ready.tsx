@@ -19,12 +19,16 @@ export type Remaining = { key: string; label: string; href: string };
 export function BriefReady({
   projectId,
   remaining,
+  optional,
   editable,
   hasBrief,
   briefHref,
 }: {
   projectId: string;
   remaining: Remaining[];
+  // Optional questions still empty: the Brief can be created, but the
+  // Cadrage is not « complet » (UX test of 09/10/2026: « complet » at 21/23).
+  optional: Remaining[];
   editable: boolean;
   // A version exists already: the button updates it.
   hasBrief: boolean;
@@ -38,8 +42,20 @@ export function BriefReady({
   return (
     <FramingStepCard
       eyebrow={t.briefNav}
-      title={ready ? t.doneTitle : t.remainingTitle}
-      description={ready ? t.doneBody : t.remaining(remaining.length)}
+      title={
+        !ready
+          ? t.remainingTitle
+          : optional.length > 0
+            ? t.readyTitle
+            : t.doneTitle
+      }
+      description={
+        !ready
+          ? t.remaining(remaining.length)
+          : optional.length > 0
+            ? t.readyBody(optional.length)
+            : t.doneBody
+      }
       actions={
         ready &&
         editable && (
@@ -58,9 +74,9 @@ export function BriefReady({
         )
       }
     >
-      {!ready && (
+      {(!ready || optional.length > 0) && (
         <ul className="flex flex-col gap-1">
-          {remaining.map((item) => (
+          {(ready ? optional : remaining).map((item) => (
             <li key={item.key}>
               <Link
                 href={item.href}

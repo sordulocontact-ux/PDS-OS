@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { SinglePicker } from "@/components/catalog/single-picker";
@@ -20,7 +20,8 @@ export type PersonOption = { id: string; label: string; detail?: string };
  * that name. Submitted as `refName` (the option's id, "" for a name only)
  * and `nameName` (the name shown). `onPick`: told of each choice the user
  * makes (an option, a name only, or nothing), so a controlled form can fill
- * what it knows of that person.
+ * what it knows of that person. `suggest`: the only options listed before
+ * typing (those who fit the role); typing searches the whole list.
  */
 export function PersonPickerField<T extends PersonOption = PersonOption>({
   refName,
@@ -35,6 +36,7 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
   onPick,
   matchName = true,
   allowNameOnly = true,
+  suggest,
   required = false,
   error,
 }: {
@@ -56,6 +58,7 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
   // false: the form needs a contact (a party of a contract), so no
   // « Garder seulement le nom ».
   allowNameOnly?: boolean;
+  suggest?: (option: T) => boolean;
   // Shows the « * » after the legend (docs/DESIGN.md § 4).
   required?: boolean;
   error?: string;
@@ -96,6 +99,15 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
   }, []);
 
   const picked = options?.find((o) => o.id === selected) ?? null;
+  const suggestedIds = useMemo(
+    () =>
+      suggest && options
+        ? new Set(options.filter(suggest).map((o) => o.id))
+        : undefined,
+    // `suggest` is a new function on each render of the form.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [options],
+  );
 
   return (
     <div className="flex flex-col gap-2">
@@ -120,6 +132,8 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
             createLabel={(query) => (query ? t.createNamed(query) : t.create)}
             noResultLabel={t.noResult}
             allSelectedLabel={t.allSelected}
+            suggestedIds={suggestedIds}
+            noSuggestionLabel={t.noSuggestion}
             removeLabel={t.remove}
             error={error}
           />

@@ -2620,6 +2620,7 @@ export type Database = {
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
+          dismissed_keys: string[]
           id: string
           launched_at: string | null
           launched_by: string | null
@@ -2632,6 +2633,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          dismissed_keys?: string[]
           id?: string
           launched_at?: string | null
           launched_by?: string | null
@@ -2644,6 +2646,7 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          dismissed_keys?: string[]
           id?: string
           launched_at?: string | null
           launched_by?: string | null
@@ -2652,7 +2655,36 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "legal_plans_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_plans_launched_by_fkey"
+            columns: ["launched_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_plans_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
       }
       legal_project_contacts: {
         Row: {
@@ -6340,6 +6372,10 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: boolean
       }
+      dismiss_legal_plan_keys: {
+        Args: { p_keys: string[]; p_project_id: string }
+        Returns: undefined
+      }
       drop_gone_push_subscription: {
         Args: { p_endpoint: string; p_secret: string }
         Returns: undefined
@@ -6717,6 +6753,10 @@ export type Database = {
           p_token: string
         }
         Returns: string
+      }
+      retire_legal_plan_items: {
+        Args: { p_keys: string[]; p_project_id: string }
+        Returns: undefined
       }
       review_legal_form: {
         Args: { p_accept: boolean; p_form_id: string }

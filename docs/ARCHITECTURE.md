@@ -53,7 +53,7 @@ service role n'est utilisée que par le cron (`lib/supabase/admin.ts`).
 | `…260926000201_team_roles_invitations` | Postes (renommés en `…000401`), statut `invited`, `invite_member(...)`, T10 réécrit pour ouvrir une invitation à la confirmation d'email. |
 | `…260927000701_archive_records` | Archivage (§ 2 quater) : permission `archive_records` (DG), `set_artist_archived` / `set_master_archived` / `set_project_archived` (SECURITY DEFINER, seul chemin d'écriture de `archived_at`, grant colonne retiré), refus `*_in_use` / `project_launched` / `*_uses_archived` / `artist_name_taken` ; ligne archivée non modifiable (politiques d'UPDATE), transmission d'un projet archivé gelée (trigger `b_guard_archived`). |
 | `…20261006000301_delete_records` (numéroté `000101` à l'origine, en double avec le Cadrage intelligent) | Suppression définitive (§ 2 quater) : `delete_records(kind, ids[])` (SECURITY DEFINER, `archive_records`, 200 lignes au plus) renvoie une ligne par id (`error` nul = supprimée, sinon `not_found` / `forbidden` / `*_in_use` / `generic`), chaque id dans son sous-bloc ; un projet part avec tout son contenu (`delete_project_row`, enfants avant parents), un master / artiste / contact seulement s'il n'est plus utilisé ; crédits et parts d'un contact supprimé gardent le nom sans lien. Tests : `delete-records.test.sql`. |
-| `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
+| `…260927001101_framing_team_roles`, `…001201_framing_constraints`, `…001401_framing_guided_review` | Cadrage en relecture guidée (§ 6) : `project_team_members.role_key` (rôle fixe, au plus une ligne par rôle ; une personne peut cumuler plusieurs rôles, une ligne chacun, et « Attribuer » propose aussi les directeurs créatifs, du projet puis de l'organisation pour la direction artistique ou créative, `assignRole` avec `personId` : Sacha, 10/10/2026), table `framing_constraints` (une ligne par contrainte typée, provenance, relue comme les besoins), source `voice` et changement de type autorisés, droits colonne sur `role_key`, lignes figées une fois le Cadrage soumis (`framing_is_editable`). |
 | `…260927001101_security_audit_fixes` | Correctifs de l'audit back du 27/09 : lecture des objets `artist-files` en **positif** (`manage_catalog`, ou une ligne `artist_files` visible — les contrats restent cachés) ; **Cadrage figé une fois soumis** (`framing_is_editable` : Brief, besoins, équipe écrits seulement en `not_started` / `in_progress`, policies restrictives insert + update) ; `project_masters` modifiable seulement avant lancement, sur un projet et un master non archivés (`project_masters_editable`) ; Web Push protégé par un secret serveur (§ 8 bis). Tests : `security-audit.test.sql`. |
 | `…260927004101_project_drafts` | Brouillons du formulaire « Nouveau projet » (retour n°6, § 2 octies) : `project_drafts.form_values` (objet JSON, 64 Ko au plus), auteur posé par trigger ; lus, modifiés et supprimés par leur auteur seul, tant qu'il a `create_projects`. Tests : `project-drafts.test.sql`. |
 | `…260927012001_catalog_file_library` | Bibliothèque de fichiers (retour n°6, § 2) : `artist_files.description` et `master_files.description` (précision libre, 200 car., `null` si vide) ; `manage_catalog` modifie nom, catégorie et précision (droits colonne, policies `*_update_catalog`), jamais un fichier audio de titre (`category <> 'audio'` avant et après) ; événement `file_updated` (`previous_category` si reclassé, privé si contrat avant **ou** après) ; lecture des objets `master-files` passée en positif comme `artist-files` (même faille que l'audit du 27/09). Tests : `file-library.test.sql`. |
@@ -2262,6 +2262,35 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
   son `useState` est démonté avec lui. Tout lien à usage unique passe par `useShowLinks()`
   (`components/ui/one-time-links.tsx`, fournisseur monté dans `app/(app)/layout.tsx`), dont la
   fenêtre survit au rafraîchissement.
+- **Une lecture qui échoue n'est jamais un état** (test UX du 09/10/2026, § 2) : `getProject`,
+  `getArtist`, `getMaster` lèvent une erreur au lieu de renvoyer `null` (sinon une base lente donne
+  une 404), rattrapée par `app/(app)/app/error.tsx` (« Réessayer ») ; `app/(app)/app/not-found.tsx`
+  et `app/not-found.tsx` disent la 404 en français. Les cartes de l'accueil reçoivent `error` (prop
+  `error` de `ListCard`) : jamais « Aucun projet » sur un timeout ; `loadMyTodo` renvoie `error`,
+  `loadRecentActivity` et `loadReleasesOverview` lèvent. `AccessWatcher` ne quitte la page qu'après
+  deux « unavailable » de suite et passe la page d'origine à `/unavailable?next=` (`safeReturnPath`),
+  où « Réessayer » ramène.
+- **Refuser un projet transmis, ou demander une précision** retire sa visibilité au chef de projet
+  (RLS) : `respondToAssignment` le renvoie sur son Travail (`?responded=`) qui dit où sa réponse est
+  partie, au lieu de laisser la page du projet finir en 404.
+- **Activité** (`lib/insights/activity.ts`) : seules les réponses du Cadrage (`deliverable = brief`,
+  clés de `QUESTION_KEYS`), une ligne par projet, jour et sorte (« Cadrage : réponses confirmées »
+  et les libellés des questions), plus les versions du Brief (créée, envoyée) ; jamais les clés
+  techniques, ni `<clé>_suggestions` lues comme « Brief rejeté ».
+- **Plan d'action juridique** : les actions retirées au lancement et celles retirées depuis
+  (accord décoché dans la cartographie : `retire_legal_plan_items`, action obsolète et tâche
+  supprimée) sont gardées dans `legal_plans.dismissed_keys` : jamais « apparues depuis le
+  lancement », jamais recréées par « Ajouter au plan ». « Prêt pour la sortie » : « Atteint »
+  seulement sans emprunt ouvert **ni** démarche ouverte (sinon « Démarches ouvertes » avec la
+  liste) ; ces démarches sont aussi « à suivre » sur la livraison au distributeur.
+- **Silence transcrit en texte** (test UX du 09/10/2026) : Whisper invente sur le silence
+  (« Sous-titrage Société Radio-Canada »). L'adaptateur Groq (`lib/ai/groq-tolerant-fetch.ts`)
+  retire d'abord les segments que Whisper marque comme silence (probabilité « pas de
+  parole » ≥ 0,6 et confiance < −1, ou métadonnées nulles) et les phrases inventées connues
+  (`lib/ai/silence.ts`) : un enregistrement muet arrive vide, l'appel finit en
+  `transcript_empty` (« Rien d'exploitable »), la dictée en `nothing_heard`, rien ne part à
+  PO. Côté navigateur, l'enregistreur compte les secondes avec du son (micro et onglet) :
+  alerte après 30 s sans rien, « semble muet » avant l'envoi, dictée muette jamais envoyée.
 - **Erreur d'une action ouverte en modale** : un toast passe inaperçu sous une fenêtre ;
   `useFramingAction({ inline: true })` rend l'erreur dans la fenêtre (`FormMessage`, `ConfirmDialog
   error`).

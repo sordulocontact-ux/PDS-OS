@@ -152,7 +152,7 @@ export function proposePlan(k: FramingKnowledge): ProposedItem[] {
     );
   for (const card of teamBoard(k.framing.team, k.framing.needs, rolesContext(k))
     .roles)
-    if (!card.member)
+    if (!card.member && !card.holder)
       notes.push(t.anticipate.role(fr.framingGuide.team.roles[card.role]));
   const envelopeRow = k.framing.briefRows.find(
     (r) => r.field_key === "budget_envelope",

@@ -363,7 +363,7 @@ export const contractStateTone: Record<string, Tone> = {
 /** A version of the Brief de cadrage (framing_briefs.state): waiting for the
  * validator, validated, sent back for a change, replaced by a newer one. */
 export const briefVersionTone: Record<string, Tone> = {
-  pending: "warning",
+  pending: "neutral",
   sent: "warning",
   approved: "success",
   changes_requested: "danger",
