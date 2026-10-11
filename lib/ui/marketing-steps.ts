@@ -21,7 +21,9 @@ const STEPS = [
     href: routes.projectProduction,
   },
   { key: "activations", stageKey: null, href: routes.projectActivations },
-  { key: "review", stageKey: "review", href: routes.projectReview },
+  // Checked by the Marketing's own closing (ticket « Suivi & bilan »), not
+  // by the « review » stage, which closes the whole project.
+  { key: "review", stageKey: null, href: routes.projectReview },
 ] as const;
 
 /** Every page of the workflow: where its chevrons show. */
@@ -33,7 +35,12 @@ export function marketingSteps(
   {
     strategyLaunched,
     validatedStages,
-  }: { strategyLaunched: boolean; validatedStages: readonly string[] },
+    marketingClosed = false,
+  }: {
+    strategyLaunched: boolean;
+    validatedStages: readonly string[];
+    marketingClosed?: boolean;
+  },
 ) {
   const t = fr.shell.project.marketingSteps;
   return STEPS.map((step) => {
@@ -49,10 +56,18 @@ export function marketingSteps(
         step.key === "strategy"
           ? [routes.projectStrategyBrief(projectId)]
           : undefined,
-      // Production and Conception have pages below their own (a
-      // deliverable's preparation; intentions, references, sheets…).
-      nested: step.key === "production" || step.key === "conception",
-      done: step.stageKey !== null && validatedStages.includes(step.stageKey),
+      // Production, Conception, Activations and Suivi & bilan have pages
+      // below their own (a deliverable's preparation; intentions, references,
+      // sheets…; an activation; a report, the closing).
+      nested:
+        step.key === "production" ||
+        step.key === "conception" ||
+        step.key === "activations" ||
+        step.key === "review",
+      done:
+        step.key === "review"
+          ? marketingClosed
+          : step.stageKey !== null && validatedStages.includes(step.stageKey),
     };
   });
 }
