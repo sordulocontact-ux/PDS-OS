@@ -4,7 +4,7 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { useState } from "react";
 
 import { OptionSelect } from "@/components/framing/option-select";
-import { labelClass } from "@/components/strategy/option-class";
+import { labelClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

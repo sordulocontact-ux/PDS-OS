@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * An outlined card of the Strategy: blue once chosen (docs/DESIGN.md § 4,
+ * An outlined choice card (Stratégie, Conception): blue once chosen (docs/DESIGN.md § 4,
  * « Sélection et formulaires en étapes »), white with an outline otherwise.
  */
 export const optionClass = (selected: boolean) =>
@@ -12,7 +12,7 @@ export const optionClass = (selected: boolean) =>
       : "border-border bg-background enabled:hover:border-[color:var(--border-hover)]",
   );
 
-/** Title of a Strategy section: the question or the block's name. */
+/** Title of a question or of a block (Stratégie, Conception). */
 export const sectionTitleClass =
   "text-display-sm font-semibold text-foreground";
 

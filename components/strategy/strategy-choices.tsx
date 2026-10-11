@@ -1,23 +1,17 @@
 "use client";
 
-import { IconCheck } from "nucleo-sharp-essential";
-import { useState } from "react";
-
 import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { ProvenanceNote } from "@/components/framing/provenance-note";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
-import { ChoicesReadOnly } from "@/components/strategy/choices-read-only";
-import { useCloseDimension } from "@/components/strategy/dimension-region";
-import {
-  labelClass,
-  optionClass,
-  sectionTitleClass,
-} from "@/components/strategy/option-class";
+import { useCloseAccordion } from "@/components/shell/accordion-region";
 import { SuggestionList } from "@/components/strategy/suggestion-list";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { ChoiceGrid } from "@/components/ui/choice-grid";
+import { ChoicesReadOnly } from "@/components/ui/choices-read-only";
+import { ComposedAnswerField } from "@/components/ui/composed-answer-field";
+import { sectionTitleClass } from "@/components/ui/option-class";
+import { useComposedAnswer } from "@/components/ui/use-composed-answer";
 import { confirmField, rejectField } from "@/lib/framing/actions/brief";
 import type { StrategyFieldState } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
@@ -52,73 +46,27 @@ export function StrategyChoices({
   const canEdit = useCanEditProject();
   const { pending, run } = useFramingAction();
   // On the pilotage, a saved or confirmed answer folds its dimension back.
-  const closeDimension = useCloseDimension() ?? undefined;
-  const [choices, setChoices] = useState<string[]>(value.choices);
-  const [otherOn, setOtherOn] = useState(value.other !== null);
-  const [other, setOther] = useState(value.other ?? "");
+  const closeDimension = useCloseAccordion() ?? undefined;
+  const answer = useComposedAnswer({
+    saved: value,
+    savedText: field.value,
+    compose: (v) => composeAnswer(key, v),
+  });
   const titleId = `choices-${key}`;
-  const answerId = `answer-${key}`;
-  const currentText = field.value;
-
-  // The text follows the choices until the owner types in it themselves.
-  const composedFromSaved = composeAnswer(key, value);
-  const [text, setText] = useState(currentText ?? composedFromSaved);
-  const [manual, setManual] = useState(
-    currentText !== null && currentText !== composedFromSaved,
-  );
-  const compose = (
-    nextChoices: string[],
-    nextOther: string,
-    otherShown: boolean,
-  ) =>
-    composeAnswer(key, {
-      choices: nextChoices,
-      other: otherShown && nextOther.trim() ? nextOther : null,
-    });
-  const follow = (
-    nextChoices: string[],
-    nextOther: string,
-    otherShown: boolean,
-  ) => {
-    if (!manual) setText(compose(nextChoices, nextOther, otherShown));
-  };
-
-  const saved =
-    JSON.stringify([...choices].sort()) ===
-      JSON.stringify([...value.choices].sort()) &&
-    (otherOn ? other.trim() : "") === (value.other ?? "") &&
-    text.trim() === (currentText ?? composedFromSaved).trim();
+  const saved = !answer.dirty;
 
   if (!canEdit)
-    return <ChoicesReadOnly field={key} value={value} text={currentText} />;
-
-  const toggle = (choice: string) => {
-    const next = choices.includes(choice)
-      ? choices.filter((c) => c !== choice)
-      : [...choices, choice];
-    setChoices(next);
-    follow(next, other, otherOn);
-  };
-
-  const card = (
-    id: string,
-    selected: boolean,
-    label: string,
-    onClick: () => void,
-  ) => (
-    <button
-      key={id}
-      type="button"
-      aria-pressed={selected}
-      onClick={onClick}
-      className={optionClass(selected)}
-    >
-      <span className="min-w-0 flex-1 font-medium break-words text-foreground">
-        {label}
-      </span>
-      {selected && <IconCheck aria-hidden className="mt-1 size-4 shrink-0" />}
-    </button>
-  );
+    return (
+      <ChoicesReadOnly
+        question={t.questions[key]}
+        chosen={[
+          ...value.choices.map((c) => labels[c]),
+          ...(value.other ? [value.other] : []),
+        ]}
+        text={field.value}
+        empty={t.none}
+      />
+    );
 
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-4">
@@ -126,78 +74,61 @@ export function StrategyChoices({
         {t.questions[key]}
       </h3>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {STRATEGY_CHOICES[key].map((choice) =>
-          card(choice, choices.includes(choice), labels[choice], () =>
-            toggle(choice),
-          ),
-        )}
-        {card("other", otherOn, t.other, () => {
-          setOtherOn(!otherOn);
-          follow(choices, other, !otherOn);
-        })}
-      </div>
-
-      {otherOn && (
-        <Input
-          aria-label={`${t.questions[key]} — ${t.other}`}
-          value={other}
-          onChange={(e) => {
-            setOther(e.target.value);
-            follow(choices, e.target.value, otherOn);
-          }}
-          placeholder={t.otherPlaceholder}
-          maxLength={300}
-          className="h-10 text-base md:text-sm"
-          autoFocus
-        />
-      )}
+      <ChoiceGrid
+        options={STRATEGY_CHOICES[key].map((c) => ({
+          key: c,
+          label: labels[c],
+        }))}
+        selected={answer.choices}
+        onToggle={answer.toggle}
+        other={{
+          label: t.other,
+          placeholder: t.otherPlaceholder,
+          ariaLabel: `${t.questions[key]} — ${t.other}`,
+          on: answer.otherOn,
+          value: answer.other,
+          maxLength: 300,
+          onToggle: answer.toggleOther,
+          onChange: answer.changeOther,
+        }}
+      />
 
       {suggestions.length > 0 && (
         <SuggestionList
           field={key}
           suggestions={suggestions}
           projectId={projectId}
-          onAccepted={(accepted) => {
-            const next = [...new Set([...choices, ...accepted])];
-            setChoices(next);
-            follow(next, other, otherOn);
-          }}
+          onAccepted={answer.add}
         />
       )}
 
-      {(choices.length > 0 || otherOn || text.trim() !== "") && (
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <label htmlFor={answerId} className={labelClass}>
-              {t.answer}
-            </label>
-            {field.status === "proposed" && <ProposedBadge />}
-            <ProvenanceNote provenance={field.provenance} />
-          </div>
-          <Textarea
-            id={answerId}
-            value={text}
-            rows={3}
-            onChange={(e) => {
-              setText(e.target.value);
-              setManual(true);
-            }}
-            className="text-base md:text-sm"
-          />
-        </div>
+      {(answer.choices.length > 0 ||
+        answer.otherOn ||
+        answer.text.trim() !== "") && (
+        <ComposedAnswerField
+          id={`answer-${key}`}
+          label={t.answer}
+          badges={
+            <>
+              {field.status === "proposed" && <ProposedBadge />}
+              <ProvenanceNote provenance={field.provenance} />
+            </>
+          }
+          value={answer.text}
+          onChange={answer.changeText}
+        />
       )}
 
-      {(manual || !saved || field.status === "proposed" || closeDimension) && (
+      {(answer.manual ||
+        !saved ||
+        field.status === "proposed" ||
+        closeDimension) && (
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-          {manual && (
+          {answer.manual && (
             <Button
               variant="ghost"
               disabled={pending}
-              onClick={() => {
-                setText(compose(choices, other, otherOn));
-                setManual(false);
-              }}
+              onClick={answer.recompose}
             >
               {t.recompose}
             </Button>
@@ -235,8 +166,8 @@ export function StrategyChoices({
                     saveStrategyAnswer(
                       projectId,
                       key,
-                      { choices, other: otherOn ? other : null },
-                      text,
+                      answer.value,
+                      answer.text,
                     ),
                   closeDimension,
                 )

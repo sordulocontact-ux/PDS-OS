@@ -1,4 +1,3 @@
-import { PoBubble } from "@/components/design/work/bubbles";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type {
   ConceptionData,
@@ -114,10 +113,10 @@ export function KnownFacts({
   const t = fr.conceptionWork.known;
   const facts = factsOf(known, deliverable, deliverableCount);
   return (
-    <PoBubble>
-      <p className="font-semibold">
+    <section className="flex flex-col gap-3">
+      <h3 className="text-body-md font-semibold">
         {deliverable ? t.title : t.titleDirection}
-      </p>
+      </h3>
       <dl className="grid gap-x-6 gap-y-4 rounded-2xl border border-border p-4 sm:grid-cols-2">
         {facts.map((fact) => (
           <div key={fact.label} className="flex min-w-0 flex-col gap-0.5">
@@ -139,6 +138,6 @@ export function KnownFacts({
       {deliverable?.status === "to_qualify" && (
         <ToneCallout tone="warning">{t.toQualify}</ToneCallout>
       )}
-    </PoBubble>
+    </section>
   );
 }

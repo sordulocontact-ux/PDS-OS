@@ -1,4 +1,4 @@
-import { optionClass } from "@/components/strategy/option-class";
+import { optionClass } from "@/components/ui/option-class";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import { dayOffset, isMilestoneChannel } from "@/lib/strategy/calendar";

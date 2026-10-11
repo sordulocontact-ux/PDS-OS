@@ -862,12 +862,12 @@ livrable, les libellés ou l'action d'import en props.
   calculés par le code (`dimensionStatuses`, ton `strategyDimensionTone`). « À arbitrer » =
   une proposition ou un choix attend une décision (proposition d'un call, choix pré-cochés,
   levier à arbitrer, devis à accepter, enveloppe dépassée). Au clic, la dimension **se déplie
-  sur place** sous sa ligne, chevron à droite (`?d=<dimension>`, `DimensionRegion`), une seule
+  sur place** sous sa ligne, chevron à droite (`?d=<dimension>`, `AccordionSteps` + `AccordionRegion`, communs avec la Conception), une seule
   à la fois ; recliquer la ligne la replie. Plus de panneau latéral (demande de Sacha,
   10/10/2026). L'URL garde la dimension ouverte : un rechargement, le Brief de sortie ou le
   Planning (`?d=calendar`) la retrouvent dépliée, et sa ligne est ramenée à l'écran si une
   autre, repliée au-dessus, l'a décalée. **Enregistrer replie** : une réponse enregistrée ou
-  confirmée (`StrategyChoices`, via `useCloseDimension`) referme la dimension ; sans rien à
+  confirmée (`StrategyChoices`, via `useCloseAccordion`) referme la dimension ; sans rien à
   enregistrer, « Terminé » prend la place du bouton. Les dimensions faites d'une liste
   (Dispositif, Livrables, Calendrier, Budget, KPIs) restent dépliées après chaque ajout, pour
   en saisir plusieurs (une dépense après l'autre au Budget), et se replient par « Terminé »
@@ -2803,10 +2803,20 @@ ressemble. Elle reste sous Marketing, les livrables avancent en parallèle (pas 
   (`app/api/calls/[callId]/extract`), `fillDesignFromCall` démarre la Conception, enregistre le call
   comme **source** (`design_sources`, une seule fois par call) et PO propose des intentions depuis
   les éléments du compte rendu ; la page s'ouvre sur le travail direct.
-- **Chemin B, travail direct** (`/design/work?d=<id|direction>`) : par cible (direction créative ou
-  livrable), ce qui est déjà connu (rôle, timing et échéances amont, public, narratif, contraintes
-  du Cadrage, dépendances), puis **une question à la fois** sur les seuls sujets sans réponse
-  (`story`, `look`, `tone`, `musts`, `lib/design/intentions.ts`). Réponse = `save_design_intention`
+- **Chemin B, travail direct** (`/design/work?d=<id|direction>&q=<topic>`) : les cibles (direction
+  créative, livrables) en pastilles au-dessus du titre (« n/4 » ; état, propositions et « À qualifier »
+  de la cible ouverte à côté de son titre, plus de colonne collante, retour de Sacha du 11/10/2026),
+  ce qui est déjà connu (rôle, timing et échéances amont, public, narratif, contraintes du Cadrage,
+  dépendances), puis **les quatre questions** (`story`, `look`, `tone`, `musts`,
+  `lib/design/intentions.ts`) **répondues comme celles de la Stratégie** (retour de Sacha du
+  11/10/2026 : l'ancienne conversation avec PO perdait l'utilisateur) : lignes numérotées dépliables
+  (`AccordionSteps`, une ouverte à la fois par `?q=`, À compléter / Complété, ton
+  `intentionTopicTone`), choix fermés en cartes + « Autre » qui composent la réponse par le code
+  (`lib/design/intention-choices.ts`, phrases dans `fr.conceptionWork.choices` ; pour `musts`,
+  « Doit y figurer » et « À éviter » séparés), réponse retouchable à la main ou à la voix,
+  « Enregistrer » replie la ligne. Les choix cochés sont gardés avec la réponse
+  (`design_intentions.choices`, forme vérifiée en SQL, clés vérifiées par l'action serveur) et
+  recochés à la réouverture ; une proposition de PO confirmée n'en a pas. Réponse = `save_design_intention`
   (la précédente passe en `replaced`, historique gardé). Références (liens https,
   `design_references`) et import d'un brief existant (texte collé, `design_sources` kind `import`)
   sont des actions du travail direct, pas un troisième parcours. Le dépôt de versions existant

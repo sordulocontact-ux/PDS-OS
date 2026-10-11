@@ -7,7 +7,7 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { KpiItem } from "@/components/strategy/kpi-item";
 import { ObjectiveForm } from "@/components/strategy/objective-form";
-import { labelClass } from "@/components/strategy/option-class";
+import { labelClass } from "@/components/ui/option-class";
 import type { FieldState } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import {

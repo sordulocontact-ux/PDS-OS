@@ -32,7 +32,8 @@ export const STRATEGY_CHOICES = {
 export type StrategyChoiceKey<F extends StrategyTextField> =
   (typeof STRATEGY_CHOICES)[F][number];
 
-export type ChoiceValue = { choices: string[]; other: string | null };
+import type { ChoiceValue } from "@/lib/ui/choice-value";
+export type { ChoiceValue };
 
 // One pre-checked answer, with the passage that justifies it. `source` is
 // "brief:<field>" or "item:<report item id>"; the quote was found verbatim

@@ -4,40 +4,40 @@ import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { fr } from "@/lib/i18n/fr";
 
-const CloseDimension = createContext<(() => void) | null>(null);
+const CloseAccordion = createContext<(() => void) | null>(null);
 
 /**
- * Closes the dimension unfolded on the pilotage, for a form that just saved
- * its answer (the pilotage folds back on save). Null outside the pilotage.
+ * Closes the row unfolded in an AccordionSteps list, for a form that just
+ * saved its answer (the list folds back on save). Null outside such a list.
  */
-export function useCloseDimension() {
-  return useContext(CloseDimension);
+export function useCloseAccordion() {
+  return useContext(CloseAccordion);
 }
 
 /**
- * The unfolded work of one dimension of the Stratégie, under its row. On
- * opening (a click, or a link from the Brief or the Planning) its row is
- * brought back into view if another dimension folding above pushed it away.
+ * The unfolded work of one row of an AccordionSteps list (the Stratégie's
+ * dimensions, the Conception's questions), under its row. On opening (a
+ * click, or a link from elsewhere) its row is brought back into view if
+ * another row folding above pushed it away.
  */
-export function DimensionRegion({
+export function AccordionRegion({
   id,
   headerId,
   closeHref,
   description,
-  withDone,
+  doneLabel,
   children,
 }: {
   id: string;
   // The row that unfolds this region, kept in view.
   headerId: string;
   closeHref: string;
-  // What the dimension decides, one sentence.
-  description: string;
-  // A dimension made of a list (levers, budget lines…) stays open while
-  // items are added one by one: « Terminé » folds it back.
-  withDone: boolean;
+  // What the row decides, one sentence.
+  description?: string;
+  // A row made of a list (levers, budget lines…) stays open while
+  // items are added one by one: this button (« Terminé ») folds it back.
+  doneLabel?: string;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -59,22 +59,24 @@ export function DimensionRegion({
   };
 
   return (
-    <CloseDimension.Provider value={close}>
+    <CloseAccordion.Provider value={close}>
       <div
         id={id}
         role="region"
         aria-labelledby={headerId}
         className="flex flex-col gap-6 px-4 pt-1 pb-5 transition-[opacity,translate] duration-[var(--duration-slide)] ease-[var(--ease-out)] motion-reduce:translate-none sm:pl-15 starting:-translate-y-1 starting:opacity-0"
       >
-        <p className="text-body-md text-muted-foreground">{description}</p>
+        {description && (
+          <p className="text-body-md text-muted-foreground">{description}</p>
+        )}
         <div className="flex flex-col gap-10">{children}</div>
-        {withDone && (
+        {doneLabel && (
           <div className="flex justify-end">
-            <Button onClick={close}>{fr.strategyPilot.done}</Button>
+            <Button onClick={close}>{doneLabel}</Button>
           </div>
         )}
       </div>
-    </CloseDimension.Provider>
+    </CloseAccordion.Provider>
   );
 }
 

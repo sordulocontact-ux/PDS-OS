@@ -6,7 +6,7 @@ import {
   LeverStateControl,
   type LeverState,
 } from "@/components/strategy/lever-state-control";
-import { optionClass } from "@/components/strategy/option-class";
+import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
