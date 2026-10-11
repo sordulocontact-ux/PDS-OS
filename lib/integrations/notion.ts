@@ -142,7 +142,7 @@ export type FeedbackPageInput = {
   priority: string;
   count: number;
   sentBy: string;
-  sentOn: string; // "2026-09-27"
+  sentOn: string; // ISO date and time, "2026-09-27T09:48:00.000Z"
   link: string;
   // Every screenshot of the topic, when the database has the column.
   captures?: string[];

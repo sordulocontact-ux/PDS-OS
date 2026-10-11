@@ -17,7 +17,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 // while it is shown: the selection only ever holds rows on screen, so a row
 // hidden by a search or gone after a refresh is never acted upon.
 
-export type SelectableRow = { id: string; name: string };
+// `draft`: a draft of the new project form, listed with the projects but
+// deleted on its own (useDeleteRecords).
+export type SelectableRow = { id: string; name: string; draft?: boolean };
 
 type RowSelectionValue = {
   // Ticked rows still on screen, in the order they were registered.
@@ -120,8 +122,8 @@ export function SelectRowCell({
   label: string;
 }) {
   const { isSelected, toggle, register } = useRowSelection();
-  const { id, name } = row;
-  useEffect(() => register({ id, name }), [register, id, name]);
+  const { id, name, draft } = row;
+  useEffect(() => register({ id, name, draft }), [register, id, name, draft]);
 
   return (
     <TableCell className="w-10 px-0 py-0.5 align-middle">
@@ -134,7 +136,7 @@ export function SelectRowCell({
   );
 }
 
-// A row that cannot be selected (a draft) keeps the column aligned.
+// A row that cannot be selected keeps the column aligned.
 export function SelectEmptyCell() {
   return <TableCell className="w-10 px-0 py-0.5" />;
 }

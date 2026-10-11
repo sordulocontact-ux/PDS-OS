@@ -135,10 +135,18 @@ export const records = {
       contact:
         "Chaque contact est supprimé du Réseau ; les crédits et les parts qui le nommaient gardent son nom, sans lien. Ceux encore nommés dans un contrat ou un dossier sont gardés et signalés. C'est définitif.",
     } satisfies Record<Kind, string>,
+    // Only drafts of the new project form ticked in the projects list.
+    drafts: {
+      titleMany: (n: number) => `Supprimer ${n}\u00a0brouillons ?`,
+      body: "La saisie de ce brouillon est perdue. C'est définitif.",
+      bodyMany: "La saisie de ces brouillons est perdue. C'est définitif.",
+    },
     confirm: "Supprimer définitivement",
     pending: "Suppression…",
     done: (kind: Kind, n: number) =>
       n === 1 ? "Supprimé." : `${count(kind, n)} supprimés.`,
+    draftsDone: (n: number) =>
+      n === 1 ? "Brouillon supprimé." : `${n}\u00a0brouillons supprimés.`,
     // Some rows of a selection stayed: one line each, with its reason.
     partial: (kind: Kind, n: number) =>
       n === 1

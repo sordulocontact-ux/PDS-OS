@@ -48,7 +48,7 @@ insert into ids select name || '_person', a.person_id
 select pg_temp.act_as(pg_temp.id_of('creative'));
 select lives_ok($$
   insert into public.network_contacts (organization_id, kind, name, roles)
-  values (pg_temp.id_of('org'), 'organization', 'Studio Lumière', array['provider', 'engineer'])
+  values (pg_temp.id_of('org'), 'organization', 'Studio Lumière', array['studio'])
 $$, 'every poste adds an organization to the network (manage_network)');
 insert into ids select 'studio', id from public.network_contacts where name = 'Studio Lumière'
  order by created_at desc limit 1;

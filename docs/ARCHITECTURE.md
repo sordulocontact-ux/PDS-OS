@@ -398,7 +398,10 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
   à la création.
 - **Fin** : « Créer le projet » supprime le brouillon (`createProject`, session de
   l'auteur) ; l'enregistrement s'arrête pendant l'envoi et reprend si la création est
-  refusée. « Supprimer le brouillon » (confirmé) le jette. Un brouillon supprimé ailleurs
+  refusée. « Supprimer le brouillon » (confirmé) le jette ; dans la liste Projets, chaque
+  brouillon a sa case à cocher comme un projet (retour du 11/10/2026) : son auteur peut en
+  supprimer un ou plusieurs, mêlés aux projets cochés par le DG (`deleteProjectDrafts`, RLS
+  de l'auteur ; `useDeleteRecords` envoie le reste à `delete_records`). Un brouillon supprimé ailleurs
   n'est jamais recréé par un onglet resté ouvert.
 - Seulement sur la page « Nouveau projet » : pas dans le panneau ouvert par PO (son
   brouillon est déjà la carte de PO), ni pour modifier un projet.
@@ -1420,7 +1423,7 @@ utile et le **transmet** avec une priorité à l'équipe qui construit l'outil.
   « Mettre à jour sur Notion » (propriétés, et retours arrivés depuis ajoutés au corps).
   Propriétés attendues, nom et type exacts : **Titre** (titre), **Résumé** (texte),
   **Type** (sélection), **Priorité** (sélection), **Retours** (nombre), **Transmis par**
-  (texte), **Transmis le** (date), **Lien** (URL) ; facultative : **Captures** (fichiers et
+  (texte), **Transmis le** (date et heure, pour trier par le plus récent ; vues triées dessus), **Lien** (URL) ; facultative : **Captures** (fichiers et
   médias), remplie seulement si la base l'a (schéma lu à chaque envoi). Les captures sont
   **téléversées** chez Notion (API *File Upload* : création, envoi en multipart, puis
   rattachement), jamais en lien : les URL signées de l'app expirent en une heure. Elles
@@ -1448,8 +1451,9 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
 - **Permissions** : `manage_network` (tous les postes) et `manage_contracts` (DG et chefs de
   projet), dans `role_permissions` comme les autres.
 - **Réseau** `/app/network` (`network_contacts`, `lib/network/`, `components/network/`) :
-  une personne ou une structure, **au moins un rôle** parmi une liste fermée (artiste,
-  beatmaker, musicien·ne, ingé son, prestataire, partenaire, label, éditeur…), coordonnées,
+  une personne ou une structure (organisation depuis le 11/10), des rôles parmi une liste
+  fermée (artiste, beatmaker, musicien·ne, ingé son, label, éditeur… ; facultatifs et
+  séparés du type de relation depuis le 11/10, ci-dessous), coordonnées,
   notes ; « Éditeur » (`publisher`, `…20261007000501_network_publisher_role.sql`) ajouté le
   07/10/2026 pour les emprunts : l'œuvre d'un sample s'autorise auprès de son éditeur, le son
   auprès de son label, deux structures ajoutées une fois au Réseau et choisies ensuite ;
@@ -1459,8 +1463,7 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
   lien trouvé par PO est gardé). **Lu par tous les
   membres actifs** (c'est l'annuaire partagé), écrit par `manage_network`, **archivé, jamais
   supprimé**, par le DG (`set_network_contact_archived`, refusé tant qu'un contrat non résilié
-  le nomme). Onglets par famille de rôles (un contact apparaît dans chacune des siennes),
-  recherche instantanée, Archivés pour le DG. **Onglet « Artistes »** (Sacha, 10/10/2026) :
+  le nomme). Recherche instantanée, Archivés pour le DG ; onglets et filtres ci-dessous. **Onglet « Artistes »** (Sacha, 10/10/2026) :
   rôles Artiste et Beatmaker, les artistes à contacter un jour, ni signés ni en collaboration
   (ceux-là sont au Catalogue), repérés sur TikTok depuis le Labo (§ 10 bis) ou ajoutés à la
   main ; « Musique » garde musicien·ne, auteur·rice, ingé son, réalisateur·rice. **Réseaux**
@@ -1470,6 +1473,37 @@ Ajouts du MVP du 15 octobre (`…260929000101` à `…000301`, tests
   accepte « @pseudo » ou le lien collé, la fiche affiche les liens, la liste montre le TikTok
   quand il n'y a ni e-mail ni téléphone. Les contacts d'artiste (`artist_contacts`) et
   les intervenants cités restent à part : pas de fusion automatique en V1.
+- **Personnes et organisations** (ticket « Retour PO / Réseau » du 11/10/2026 et retour
+  Notion « Restructuration et enrichissement de la page Réseau » du 10/10,
+  `…20261011200101_network_kinds_relations.sql`, test `network-kinds-relations.test.sql`) :
+  « Structure » s'appelle **Organisation** à l'écran. Deux informations distinctes :
+  **métiers** d'une personne ou **activités** d'une organisation (`roles`, une liste par type
+  dans `lib/network/types.ts` : `PERSON_ROLES`, `ORGANIZATION_ROLES` ; Agence, Société de
+  production et Entreprise ajoutées ; Management des deux côtés) et **type de relation**
+  (`relations` : client, prestataire, partenaire, fournisseur, plusieurs à la fois) ;
+  « Prestataire » et « Partenaire » ont quitté les rôles (déplacés par la migration).
+  **Seuls le type et le nom sont obligatoires.** La liste des rôles par type est une règle du
+  formulaire, pas une contrainte SQL : un rôle tenu avant le ticket et qui ne convient pas
+  au type reste affiché et choisi jusqu'à ce qu'on le retire (rien n'est perdu sans être vu).
+  Le formulaire s'adapte au type : une personne a une **organisation associée** (recherchée
+  dans le Réseau, facultative) et peut être reliée à un artiste du catalogue ; une
+  organisation n'a ni l'un ni l'autre (champs absents, ligne « Fiche artiste » absente de sa
+  fiche, mis à vide par le serveur). **Changer le type** d'un contact enregistré dit d'abord
+  ce qui part (rôles mis de côté, rendus si l'on revient au type d'avant, organisation
+  détachée, artiste délié) et que contrats, crédits et historique restent ; une organisation
+  qui a des personnes associées ne devient pas une personne (refus SQL, message clair).
+  **Doublons** : à la création, les contacts du même nom (sans casse, accents ni séparateurs,
+  ou mêmes mots dans un autre ordre, `lib/network/similar.ts`) sont signalés avec « Ouvrir la
+  fiche » (nouvel onglet depuis un formulaire qui reste ouvert), jamais bloquants ; trouvés
+  par le code, jamais par PO. **Onglets** : Tous / Personnes / Organisations / **Artistes
+  repérés** (rôle Artiste ou Beatmaker et relié à aucun artiste du catalogue : un artiste
+  repéré qui signe garde son contact, relié à sa fiche, et quitte l'onglet). **Filtres**
+  (bouton « Filtres », un choix par axe, dans l'URL avec l'onglet, pastilles qui les retirent) :
+  métier par domaine (Musique, Image & vidéo, Presse & influence, Affaires & conseil, Autres),
+  type de relation, ville ; le statut actif / archivé reste la vue « Archivés » du DG.
+  **Suppression** : un contact qui a des relevés datés (Marketing) n'est plus supprimable
+  (ils partaient avec lui) : on l'archive ; contrats, crédits, parts et projets le
+  protégeaient déjà (`contact_in_use`) ou gardent le nom.
 - **Contrats** `/app/contracts` (`contracts`, `contract_parties`, `contract_files`,
   `lib/contracts/`, `components/contracts/`) : titre, type (liste fermée), responsable
   (membre `manage_contracts` ; le DG choisit via `list_contract_owners`, les autres suivent
@@ -3321,7 +3355,7 @@ sans un clic : « Ajouter au Réseau » (ci-dessous).
   citée) ; une personne relit et enregistre (`manage_network`), on reste sur le Labo et le
   bouton devient « Ajouté au Réseau ». Déjà dans le Réseau = même compte TikTok, Instagram ou
   Deezer (`findContactsByAccounts`), **jamais par le nom** : « Dans le Réseau » mène au contact.
-  Le contact rejoint l'onglet **Artistes** du Réseau (§ 8 quinquies).
+  Le contact rejoint l'onglet **Artistes repérés** du Réseau (§ 8 quinquies).
 - Deux captures lues à la fois (palier gratuit Mistral, Deezer 50 requêtes / 5 s), 8 Mo
   au plus, PNG / JPEG / WebP, collées (⌘V) ou déposées. Un artefact claude.ai ne peut pas
   servir de banc : il n'atteint ni Mistral ni l'API Deezer (réseau bloqué).

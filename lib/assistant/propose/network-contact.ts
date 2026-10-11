@@ -23,7 +23,14 @@ import {
   listNetworkContacts,
   loadNetworkFormOptions,
 } from "@/lib/network/queries";
-import { NETWORK_KINDS, NETWORK_ROLES, rolesText } from "@/lib/network/types";
+import {
+  fitsKind,
+  NETWORK_KINDS,
+  NETWORK_RELATIONS,
+  NETWORK_ROLES,
+  relationsText,
+  rolesText,
+} from "@/lib/network/types";
 
 const said = (what: string) =>
   z
@@ -43,7 +50,7 @@ export function proposeNetworkContactTool({
 }: ProposeContext) {
   return tool({
     description:
-      "Prépare l'ajout d'une personne ou d'une structure au Réseau (ingé son, beatmaker, photographe, label, média, prestataire…), ou la modification d'un contact existant : nom, type, rôles, structure d'appartenance, artiste du catalogue, e-mail, téléphone, site, ville, notes. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
+      "Prépare l'ajout d'une personne ou d'une organisation au Réseau (ingé son, beatmaker, photographe, label, studio, média, agence…), ou la modification d'un contact existant : nom, type, métiers (personne) ou activités (organisation), type de relation (client, prestataire, partenaire, fournisseur), organisation associée, artiste du catalogue (personne seulement), e-mail, téléphone, site, ville, notes. N'enregistre RIEN : l'utilisateur relit le formulaire pré-rempli et enregistre lui-même.",
     inputSchema: z.object({
       existingContact: z
         .string()
@@ -54,12 +61,23 @@ export function proposeNetworkContactTool({
         ),
       kind: z.enum(NETWORK_KINDS).optional(),
       name: z.string().max(200).optional(),
-      roles: z.array(z.enum(NETWORK_ROLES)).max(8).optional(),
+      roles: z
+        .array(z.enum(NETWORK_ROLES))
+        .max(8)
+        .optional()
+        .describe("Métiers d'une personne ou activités d'une organisation"),
+      relations: z
+        .array(z.enum(NETWORK_RELATIONS))
+        .max(4)
+        .optional()
+        .describe(
+          "Comment PDS travaille avec ce contact : client, prestataire (provider), partenaire, fournisseur (supplier)",
+        ),
       organization: z
         .string()
         .max(200)
         .optional()
-        .describe("Structure du Réseau à laquelle la personne appartient"),
+        .describe("Organisation du Réseau à laquelle la personne est associée"),
       artist: z
         .string()
         .max(200)
@@ -144,16 +162,31 @@ export function proposeNetworkContactTool({
       const city = kept(input.city, labels.city);
       const notes = kept(input.notes, labels.notes);
 
+      const kind = input.kind ?? current?.kind ?? "person";
+      // Only the roles of its kind (ticket « Retour PO / Réseau »).
       const roles = input.roles?.length
-        ? [...new Set(input.roles)]
+        ? [...new Set(input.roles)].filter((role) => fitsKind(role, kind))
         : (current?.roles ?? []);
-      if (roles.length === 0) warnings.push(t.rolesToChoose);
+      const offKind = (input.roles ?? []).filter((r) => !fitsKind(r, kind));
+      if (offKind.length > 0)
+        warnings.push(
+          t.rolesOtherKind(rolesText(offKind), fr.network.kinds[kind]),
+        );
+      const relations = input.relations?.length
+        ? [...new Set(input.relations)]
+        : (current?.relations ?? []);
       const values: NetworkContactDraft["values"] = {
-        kind: input.kind ?? current?.kind ?? "person",
+        kind,
         name: nameQuote || current?.name || "",
         roles,
-        parentId: organization?.id ?? current?.parentId ?? null,
-        artistId: artist?.id ?? current?.artistId ?? null,
+        relations,
+        // Only a person has an organization or a catalog artist.
+        parentId:
+          kind === "person"
+            ? (organization?.id ?? current?.parentId ?? null)
+            : null,
+        artistId:
+          kind === "person" ? (artist?.id ?? current?.artistId ?? null) : null,
         email: email ?? current?.email ?? null,
         phone: phone ?? current?.phone ?? null,
         website: website ?? current?.website ?? null,
@@ -176,9 +209,15 @@ export function proposeNetworkContactTool({
       );
       change(
         changes,
-        labels.roles,
+        labels.roles[values.kind],
         current ? rolesText(current.roles) : null,
         rolesText(values.roles),
+      );
+      change(
+        changes,
+        labels.relations,
+        current ? relationsText(current.relations) : null,
+        relationsText(values.relations),
       );
       change(changes, labels.parent, current?.parentName, organization?.name);
       change(changes, labels.artist, current?.artistName, artist?.name);

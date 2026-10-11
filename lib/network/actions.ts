@@ -14,6 +14,7 @@ import {
 } from "@/lib/network/queries";
 import {
   NETWORK_KINDS,
+  NETWORK_RELATIONS,
   NETWORK_ROLES,
   type NetworkContactValues,
   type NetworkFormOptions,
@@ -71,7 +72,9 @@ const contactSchema = z.object({
   id: z.uuid().optional(),
   kind: z.enum(NETWORK_KINDS),
   name: z.string().trim().min(1).max(200),
-  roles: z.array(z.enum(NETWORK_ROLES)).min(1).max(8),
+  // Only the kind and the name are required (ticket of 11/10/2026).
+  roles: z.array(z.enum(NETWORK_ROLES)).max(8),
+  relations: z.array(z.enum(NETWORK_RELATIONS)).max(4),
   // "none": the select's "Aucune" choice.
   parentId: noneOrId,
   artistId: noneOrId,
@@ -114,6 +117,7 @@ export async function saveNetworkContact(
     kind: form.get("kind"),
     name: form.get("name") ?? "",
     roles: jsonListOf(form.get("roles")),
+    relations: jsonListOf(form.get("relations")),
     parentId: form.get("parentId") ?? "",
     artistId: form.get("artistId") ?? "",
     email: form.get("email") ?? "",
@@ -129,12 +133,8 @@ export async function saveNetworkContact(
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     const path = issue?.path[0];
-    if (path === "roles")
-      return {
-        ok: false,
-        error: fr.network.form.rolesRequired,
-        field: "roles",
-      };
+    if (path === "roles" || path === "relations")
+      return { ok: false, error: t.invalid };
     if (path === "email") return { ok: false, error: t.email, field: "email" };
     if (path === "website")
       return { ok: false, error: t.website, field: "website" };
@@ -147,10 +147,12 @@ export async function saveNetworkContact(
   const row = {
     kind,
     name: values.name,
-    roles: values.roles,
-    // Only a person belongs to an organization.
+    roles: [...new Set(values.roles)],
+    relations: [...new Set(values.relations)],
+    // Only a person belongs to an organization, or stands for a catalog
+    // artist (the form says so before a change of kind).
     parent_id: kind === "person" ? values.parentId : null,
-    artist_id: values.artistId,
+    artist_id: kind === "person" ? values.artistId : null,
     email: values.email,
     phone: values.phone,
     website: values.website,
@@ -178,6 +180,8 @@ export async function saveNetworkContact(
   if (error || !data) {
     if (error?.message.includes("network_parent_not_organization"))
       return { ok: false, error: t.parent };
+    if (error?.message.includes("network_organization_has_members"))
+      return { ok: false, error: t.members };
     if (error) console.error("saveNetworkContact:", error.message);
     return { ok: false, error: t.failed };
   }
@@ -201,7 +205,8 @@ export async function saveNetworkContact(
  * and the form's choices. Null when the contact is gone or archived.
  */
 export async function loadContactEdit(id: string): Promise<{
-  contact: NetworkContactValues;
+  // memberCount: an organization with people attached stays one.
+  contact: NetworkContactValues & { memberCount: number };
   options: NetworkFormOptions;
 } | null> {
   const access = await requireApproved();
@@ -212,7 +217,10 @@ export async function loadContactEdit(id: string): Promise<{
     loadNetworkFormOptions(),
   ]);
   if (!contact || contact.archived) return null;
-  return { contact, options };
+  return {
+    contact: { ...contact, memberCount: contact.members.length },
+    options,
+  };
 }
 
 /** The form's choices alone, for "Nouveau contact". */

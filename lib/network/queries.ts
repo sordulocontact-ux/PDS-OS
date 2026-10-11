@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  networkRelationsOf,
   networkRolesOf,
   type NetworkContactRow,
   type NetworkContactValues,
@@ -45,7 +46,7 @@ export async function listNetworkContacts(
   const query = supabase
     .from("network_contacts")
     .select(
-      "id, kind, name, roles, email, phone, city, parent_id, tiktok_handle",
+      "id, kind, name, roles, relations, email, phone, city, parent_id, artist_id, tiktok_handle",
     )
     .order("name")
     .limit(LIST_LIMIT);
@@ -65,7 +66,9 @@ export async function listNetworkContacts(
     kind: kindOf(row.kind),
     name: row.name,
     roles: networkRolesOf(row.roles),
+    relations: networkRelationsOf(row.relations),
     parentName: row.parent_id ? (parents.get(row.parent_id) ?? null) : null,
+    artistId: row.artist_id,
     email: row.email,
     phone: row.phone,
     city: row.city,
@@ -121,6 +124,7 @@ export async function getNetworkContact(
     kind: kindOf(row.kind),
     name: row.name,
     roles: networkRolesOf(row.roles),
+    relations: networkRelationsOf(row.relations),
     parentId: row.parent_id,
     artistId: row.artist_id,
     email: row.email,
@@ -155,14 +159,14 @@ export async function getNetworkContact(
   };
 }
 
-/** What the contact form offers: live organizations and catalog artists. */
+/** What the contact form offers: live organizations and catalog artists,
+ * and the live contacts a new one may duplicate. */
 export async function loadNetworkFormOptions(): Promise<NetworkFormOptions> {
   const supabase = await createClient();
-  const [organizations, artists] = await Promise.all([
+  const [contacts, artists] = await Promise.all([
     supabase
       .from("network_contacts")
-      .select("id, name")
-      .eq("kind", "organization")
+      .select("id, name, kind")
       .is("archived_at", null)
       .order("name")
       .limit(LIST_LIMIT),
@@ -173,14 +177,22 @@ export async function loadNetworkFormOptions(): Promise<NetworkFormOptions> {
       .order("name")
       .limit(LIST_LIMIT),
   ]);
-  if (organizations.error || artists.error)
+  if (contacts.error || artists.error)
     console.error(
       "loadNetworkFormOptions:",
-      organizations.error?.message ?? artists.error?.message,
+      contacts.error?.message ?? artists.error?.message,
     );
+  const all = (contacts.data ?? []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    kind: kindOf(c.kind),
+  }));
   return {
-    organizations: organizations.data ?? [],
+    organizations: all
+      .filter((c) => c.kind === "organization")
+      .map(({ id, name }) => ({ id, name })),
     artists: artists.data ?? [],
+    contacts: all,
   };
 }
 

@@ -19,7 +19,7 @@ import { todayInParis } from "@/lib/insights/dates";
 import { loadContactMarketing } from "@/lib/network/campaigns";
 import { getNetworkContact } from "@/lib/network/queries";
 import { socialLinksOf } from "@/lib/network/socials";
-import { rolesText } from "@/lib/network/types";
+import { relationsText, rolesText } from "@/lib/network/types";
 
 export const metadata = { title: `${fr.network.title} · ${fr.app.name}` };
 
@@ -27,8 +27,9 @@ const linkClass =
   "underline-offset-4 hover:underline focus-visible:underline outline-none";
 
 /**
- * A contact of the network: what it does, how to reach it, its organization
- * (or, for an organization, the people of the network who work there) and
+ * A contact of the network: what it does, how PDS works with it, how to
+ * reach it, its organization and catalog artist (a person), or the people
+ * of the network associated with it (an organization), and
  * the contracts it is a party to, among those the viewer may read ; its
  * Marketing campaigns and dated observations (influencers, media).
  */
@@ -54,9 +55,9 @@ export default async function NetworkContactPage({
       <BackLink href={routes.network}>{p.back}</BackLink>
       <PageHeader
         title={contact.name}
-        description={[t.kinds[contact.kind], rolesText(contact.roles)].join(
-          " · ",
-        )}
+        description={[t.kinds[contact.kind], rolesText(contact.roles)]
+          .filter(Boolean)
+          .join(" · ")}
         action={
           <ContactActions
             contact={contact}
@@ -152,6 +153,10 @@ export default async function NetworkContactPage({
             },
             { label: p.city, value: contact.city },
             {
+              label: p.relations,
+              value: relationsText(contact.relations) || null,
+            },
+            {
               label: p.accounts,
               value: accounts.length > 0 && (
                 <span className="flex flex-col gap-1">
@@ -185,17 +190,23 @@ export default async function NetworkContactPage({
                   },
                 ]
               : []),
-            {
-              label: p.artist,
-              value: contact.artistId && contact.artistName && (
-                <Link
-                  href={routes.artist(contact.artistId)}
-                  className={linkClass}
-                >
-                  {contact.artistName}
-                </Link>
-              ),
-            },
+            // A catalog artist is a person's link only (ticket « Retour PO /
+            // Réseau » of 11/10/2026: never on a label's page).
+            ...(contact.kind === "person"
+              ? [
+                  {
+                    label: p.artist,
+                    value: contact.artistId && contact.artistName && (
+                      <Link
+                        href={routes.artist(contact.artistId)}
+                        className={linkClass}
+                      >
+                        {contact.artistName}
+                      </Link>
+                    ),
+                  },
+                ]
+              : []),
             { label: p.notes, value: contact.notes },
           ]}
         />

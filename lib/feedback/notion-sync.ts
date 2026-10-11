@@ -176,7 +176,8 @@ export async function syncTopicToNotion(
         {
           ...withCaptures,
           sentBy: fullName(topic.reviewer),
-          sentOn: (topic.reviewed_at ?? new Date().toISOString()).slice(0, 10),
+          // Date and time, so the database sorts the latest first.
+          sentOn: new Date(topic.reviewed_at ?? Date.now()).toISOString(),
           link: `${siteUrl()}${routes.feedback}?view=sent`,
         },
         written.map(original),

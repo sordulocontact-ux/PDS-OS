@@ -73,7 +73,7 @@ export const FAMILY_NETWORK_ROLES: Record<NeedFamily, readonly string[]> = {
   camera: ["videographer", "photographer"],
   sound: ["engineer", "producer"],
   performers: ["musician", "artist"],
-  production: ["provider", "manager", "other"],
+  production: ["production_company", "manager", "other"],
 };
 
 export type NeedSuggestion = {
