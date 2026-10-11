@@ -210,8 +210,14 @@ export const routes = {
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
   projectRelease: (id: string) => `/app/projects/${id}/release`,
-  // Distribution, « En ligne »: detection on the platforms and the smartlink.
+  // Distribution in five steps (lib/ui/distribution-steps.ts): Préparation
+  // above, then the Dossier de livraison, the Suivi of the manual deposit,
+  // the Plateformes (detection, links, smartlink) and the Clôture.
+  projectReleaseDossier: (id: string) => `/app/projects/${id}/release/dossier`,
+  projectReleaseTracking: (id: string) =>
+    `/app/projects/${id}/release/tracking`,
   projectReleaseOnline: (id: string) => `/app/projects/${id}/release/online`,
+  projectReleaseClosure: (id: string) => `/app/projects/${id}/release/closure`,
   // Specialised workflows next to the 7 steps, one URL per internal step.
   projectMaster: (id: string) => `/app/projects/${id}/master`,
   projectMasterStep: (id: string, step: string) =>
@@ -220,6 +226,9 @@ export const routes = {
   projectLegalStep: (id: string, step: string) =>
     `/app/projects/${id}/legal/${step}`,
   projectActivations: (id: string) => `/app/projects/${id}/activations`,
+  // One activation followed by the Marketing, with its evidence.
+  projectActivation: (id: string, activationId: string) =>
+    `/app/projects/${id}/activations/${activationId}`,
   projectProduction: (id: string) => `/app/projects/${id}/production`,
   // Production of one committed deliverable: its preparation.
   projectProductionSheet: (id: string, deliverableId: string) =>
@@ -227,7 +236,20 @@ export const routes = {
   // Its other tabs: preproduction, shoot, post, delivery.
   projectProductionStep: (id: string, deliverableId: string, step: string) =>
     `/app/projects/${id}/production/${deliverableId}/${step}`,
+  // Marketing › Suivi & bilan (ticket « Suivi & bilan »): the dashboard.
   projectReview: (id: string) => `/app/projects/${id}/review`,
+  projectReviewReports: (id: string) => `/app/projects/${id}/review/reports`,
+  // Marketing › Clôture: preparing and deciding the Marketing closing.
+  projectReviewClosure: (id: string) => `/app/projects/${id}/review/closure`,
+  projectReviewReportNew: (id: string) =>
+    `/app/projects/${id}/review/reports/new`,
+  projectReviewReport: (id: string, reportId: string, compare?: string) =>
+    `/app/projects/${id}/review/reports/${reportId}${compare ? `?compare=${compare}` : ""}`,
+  projectReviewReportPdf: (id: string, reportId: string) =>
+    `/api/projects/${id}/marketing-reports/${reportId}`,
+  // Vue d'ensemble › Clôture du projet: the whole project's closing, a
+  // process apart from the Marketing closing.
+  projectClosure: (id: string) => `/app/projects/${id}/closure`,
   projectWork: (id: string) => `/app/projects/${id}/work`,
   projectTeam: (id: string) => `/app/projects/${id}/team`,
   projectDeliverables: (id: string) => `/app/projects/${id}/deliverables`,

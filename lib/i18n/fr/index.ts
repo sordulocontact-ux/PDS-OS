@@ -54,7 +54,9 @@ import { productionPrep } from "./production-prep";
 import { productionPreprod } from "./production-preprod";
 import { productionShoot } from "./production-shoot";
 import { release } from "./release";
-import { releaseDelivery } from "./release-delivery";
+import { distribution } from "./distribution";
+import { marketing } from "./marketing";
+import { marketingReview } from "./marketing-review";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
 import { strategyBrief } from "./strategy-brief";
@@ -117,9 +119,11 @@ export const fr = {
   productionShoot,
   productionPost,
   productionDelivery,
+  marketing,
+  marketingReview,
   projectReview,
   release,
-  releaseDelivery,
+  distribution,
   assistant,
   assistantRecords,
   voice,

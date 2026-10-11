@@ -3,6 +3,13 @@ export const core = {
   forms: {
     required: "obligatoire",
   },
+  // The generic dialogs (components/ui/dialog-button.tsx,
+  // confirm-button.tsx, dialog-form-actions.tsx).
+  dialogs: {
+    cancel: "Annuler",
+    close: "Fermer",
+    saving: "Enregistrement…",
+  },
   app: {
     name: "PDS OS",
     description: "Gestion du cycle de vie des sorties musicales.",

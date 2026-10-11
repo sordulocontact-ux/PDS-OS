@@ -5,6 +5,7 @@ import { cache } from "react";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { loadIntake } from "@/lib/legal/intake/queries";
+import { loadMarketingStanding } from "@/lib/marketing/closure/queries";
 import { summarizeTracking } from "@/lib/legal/tracking/summary";
 import { legalActionHref } from "@/lib/legal/plan/where";
 import { loadTracking } from "@/lib/legal/tracking/queries";
@@ -15,6 +16,7 @@ import type { MixVersionsView } from "@/lib/master-workflow/mix-types";
 import { loadStepView } from "@/lib/master-workflow/transmission";
 import { isWorkflowLaunched } from "@/lib/plan/queries";
 import { getProject } from "@/lib/projects/queries";
+import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
 import { formatDate } from "@/lib/release/format";
 import { createClient } from "@/lib/supabase/server";
 import type { LegalStepKey } from "@/lib/ui/legal-steps";
@@ -27,6 +29,7 @@ import {
   masterState,
   mastersFinal,
   type Dependency,
+  type DistributionFacts,
   type MasterFacts,
   type RoundFacts,
   type WorkflowKey,
@@ -200,29 +203,88 @@ async function legalFacts(project: Project) {
 
 async function distributionFacts(projectId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("releases")
-    .select(
-      "isrc, planned_release_date, online_detected_at, online_confirmed_on, delivered_on, network_contacts!releases_delivered_to_same_org(name)",
-    )
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  if (error) console.error("distributionFacts:", error.message);
+  const [release, versions, declarations, platforms, closures] =
+    await Promise.all([
+      supabase
+        .from("releases")
+        .select("isrc, planned_release_date")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("distribution_versions")
+        .select("number, status")
+        .eq("project_id", projectId)
+        .is("superseded_at", null)
+        .order("number", { ascending: false })
+        .limit(1),
+      supabase
+        .from("distribution_declarations")
+        .select("version_number, kind, declared_at")
+        .eq("project_id", projectId)
+        .is("withdrawn_at", null)
+        .order("declared_at", { ascending: false }),
+      supabase
+        .from("distribution_platforms")
+        .select("platform")
+        .eq("project_id", projectId)
+        .eq("verification", "verified")
+        .in("platform", [...REFERENCE_PLATFORMS]),
+      supabase
+        .from("distribution_closures")
+        .select("kind, status, reserves, proposed_at, decided_at, reopened_at")
+        .eq("project_id", projectId)
+        .is("reopened_at", null)
+        .in("status", ["pending", "closed"])
+        .limit(1)
+        .maybeSingle(),
+    ]);
+  const open = closures.data;
+  if (release.error) console.error("distributionFacts:", release.error.message);
+  const latest = versions.data?.[0] ?? null;
+  const status = latest?.status;
+  const version: DistributionFacts["version"] =
+    latest &&
+    (status === "pending" || status === "approved" || status === "rejected")
+      ? { number: latest.number, status }
+      : null;
+  // Only the current cycle's declarations, each kind read on its own.
+  const own = (declarations.data ?? []).filter(
+    (d) =>
+      version?.status === "approved" && d.version_number === version.number,
+  );
+  const deposit = own.find((d) => d.kind === "deposit");
+  const outcome = own.find(
+    (d) => d.kind === "corrections_requested" || d.kind === "accepted",
+  );
+  const data = release.data;
   const state = distributionState(
     {
       recorded: data !== null,
       isrc: Boolean(data?.isrc),
       plannedDate: data?.planned_release_date ?? null,
-      delivered: data?.delivered_on
-        ? {
-            on: data.delivered_on,
-            to: data.network_contacts?.name ?? "—",
-          }
-        : null,
-      onlineSince:
-        data?.online_detected_at ?? data?.online_confirmed_on ?? null,
+      version,
+      deposit: deposit ? { declaredAt: deposit.declared_at } : null,
+      outcome:
+        outcome?.kind === "corrections_requested" ||
+        outcome?.kind === "accepted"
+          ? outcome.kind
+          : null,
+      delivered: own.some((d) => d.kind === "platforms_delivered"),
+      platforms: {
+        verified: platforms.data?.length ?? 0,
+        reference: REFERENCE_PLATFORMS.length,
+      },
+      closure:
+        open && (open.status === "pending" || open.status === "closed")
+          ? {
+              status: open.status,
+              kind: open.kind === "normal" ? "normal" : "reserves",
+              on: open.decided_at ?? open.proposed_at,
+              reserves: Array.isArray(open.reserves) ? open.reserves.length : 0,
+            }
+          : null,
     },
     formatDate,
   );
@@ -251,19 +313,26 @@ export const loadWorkflowStates = cache(
     const legalAllowed = can(access, "manage_legal");
 
     const supabase = await createClient();
-    const [master, legal, strategyLaunched, distribution, constraints] =
-      await Promise.all([
-        has("master") ? masterFacts(project, access.personId) : null,
-        has("legal") && legalAllowed ? legalFacts(project) : null,
-        has("marketing") ? isWorkflowLaunched(project.id, "strategy") : false,
-        has("distribution") ? distributionFacts(project.id) : null,
-        supabase
-          .from("framing_constraints")
-          .select("id, text")
-          .eq("project_id", project.id)
-          .eq("type", "rights")
-          .eq("review_status", "confirmed"),
-      ]);
+    const [
+      master,
+      legal,
+      strategyLaunched,
+      distribution,
+      constraints,
+      marketingStanding,
+    ] = await Promise.all([
+      has("master") ? masterFacts(project, access.personId) : null,
+      has("legal") && legalAllowed ? legalFacts(project) : null,
+      has("marketing") ? isWorkflowLaunched(project.id, "strategy") : false,
+      has("distribution") ? distributionFacts(project.id) : null,
+      supabase
+        .from("framing_constraints")
+        .select("id, text")
+        .eq("project_id", project.id)
+        .eq("type", "rights")
+        .eq("review_status", "confirmed"),
+      has("marketing") ? loadMarketingStanding(project.id) : null,
+    ]);
 
     let states: WorkflowStates["states"] = {};
     if (master) states.master = master.state;
@@ -272,6 +341,7 @@ export const loadWorkflowStates = cache(
       states.marketing = marketingState({
         launched: strategyLaunched,
         stages: project.stages,
+        closure: marketingStanding?.status ?? "not_started",
       });
     if (distribution) states.distribution = distribution.state;
 

@@ -3,6 +3,7 @@ import "server-only";
 import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
 import { getArtistProfile } from "@/lib/catalog/artist-profile";
+import { platformLabel } from "@/lib/distribution/platforms";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { platformOf } from "@/lib/release/platforms";
@@ -71,7 +72,7 @@ export async function pressKitInput(
 ): Promise<PressKitInput> {
   const supabase = await createClient();
   const t = fr.strategyPressKit.links.known;
-  const [{ artist, masters }, release, owner] = await Promise.all([
+  const [{ artist, masters }, release, owner, platforms] = await Promise.all([
     projectArtist(project.id),
     getProjectRelease(supabase, project.id).catch((error: Error) => {
       console.error("pressKitInput release:", error.message);
@@ -84,6 +85,12 @@ export async function pressKitInput(
           .eq("id", project.ownerPersonId)
           .maybeSingle()
       : null,
+    // The official links a person verified on the Distribution's Plateformes.
+    supabase
+      .from("distribution_platforms")
+      .select("platform, label, url")
+      .eq("project_id", project.id)
+      .eq("verification", "verified"),
   ]);
   const auto =
     artist && !artist.bio?.trim() && artist.deezer_id
@@ -103,6 +110,8 @@ export async function pressKitInput(
   };
   if (r?.smartlink_enabled && r.smartlink_token)
     add(t.smartlink, `${siteUrl()}${routes.smartlink(r.smartlink_token)}`);
+  for (const platform of platforms.data ?? [])
+    add(platformLabel(platform), platform.url);
   add(t.confirmed, r?.online_confirmed_url);
   for (const link of release?.links ?? []) {
     const platform = platformOf(link.url);

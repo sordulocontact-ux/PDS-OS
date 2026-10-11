@@ -101,12 +101,12 @@ export const workflowStatus = {
     },
     master: {
       what: "Master final de chaque titre",
-      toWhat: "Livraison au distributeur",
+      toWhat: "Dépôt chez le distributeur",
       ready: "Chaque titre a son master final",
     },
     clearances: {
       what: "Emprunts sécurisés",
-      toWhat: "Livraison au distributeur",
+      toWhat: "Dépôt chez le distributeur",
       ready: (n: number) =>
         `${n} emprunt${n > 1 ? "s" : ""} sécurisé${n > 1 ? "s" : ""} sur ${n}`,
       open: (n: number, names: string) =>
@@ -169,6 +169,9 @@ export const workflowStatus = {
     toStart: (step: string) => `${step} à démarrer`,
     awaiting: (step: string) => `${step} à valider par la direction`,
     done: "Toutes les étapes du Marketing sont validées",
+    // Every stage validated: Suivi & bilan remains, until the Marketing's own
+    // closing (ticket « Suivi & bilan »).
+    review: (status: string) => `Suivi & bilan : ${status.toLowerCase()}`,
     progress: (done: number, total: number) =>
       `${done} étape${done > 1 ? "s" : ""} validée${done > 1 ? "s" : ""} sur ${total}`,
   },
@@ -176,10 +179,21 @@ export const workflowStatus = {
     record: "Sortie à enregistrer : titre, ISRC, date",
     isrc: "ISRC à renseigner",
     date: "Date de sortie à renseigner",
-    deliver: "Prête : à livrer au distributeur",
-    online: (delivered: string, to: string, planned: string | null) =>
-      `Livrée à ${to} le ${delivered} : pas encore en ligne${planned ? ` (sortie prévue le ${planned})` : ""}`,
-    done: (date: string) => `En ligne depuis le ${date}`,
-    progress: (done: number) => `Identifiants et date : ${done} sur 2`,
+    submit: "Dossier de livraison à soumettre à validation",
+    pending: (n: number) => `V${n} du dossier en attente de validation`,
+    rejected: (n: number) => `V${n} du dossier refusée : à reprendre`,
+    deposit: (n: number) =>
+      `Dossier V${n} validé : dépôt manuel à faire dans The Orchard, puis à déclarer`,
+    corrections: "Corrections demandées par le distributeur",
+    waiting: (deposited: string, planned: string | null) =>
+      `Dépôt déclaré le ${deposited} : en attente du distributeur${planned ? ` (sortie prévue le ${planned})` : ""}`,
+    platforms: (verified: number, total: number) =>
+      `Plateformes vérifiées : ${verified} sur ${total}`,
+    closure: "Plateformes vérifiées : clôture du suivi à faire",
+    closurePending: "Clôture proposée : en attente du validateur",
+    closedNormal: (date: string) => `Clôturée normalement le ${date}`,
+    closedReserves: (date: string, n: number) =>
+      `Clôturée avec réserves le ${date} (${n} réserve${n > 1 ? "s" : ""} non vérifiée${n > 1 ? "s" : ""})`,
+    progress: (done: number) => `Étapes déclarées : ${done} sur 4`,
   },
 };
