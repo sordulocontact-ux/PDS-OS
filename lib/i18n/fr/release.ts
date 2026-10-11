@@ -5,12 +5,12 @@ export const release = {
   page: {
     title: "Préparation",
     description:
-      "Les identifiants et la date de la sortie, une seule fois pour tout le projet.",
+      "Ce que le dépôt réutilise, vérifié dans chaque module source, puis les identifiants et la date de la sortie.",
   },
   online: {
-    title: "En ligne",
+    title: "Plateformes",
     description:
-      "La livraison au distributeur, puis la détection du titre sur les plateformes et le smartlink public.",
+      "La disponibilité publique et chaque plateforme, vérifiées par une personne ; puis la détection automatique (simple suggestion) et le smartlink public.",
     empty:
       "Enregistre d'abord la sortie dans la Préparation : la détection part de son ISRC.",
     toPrepare: "Aller à la Préparation",
