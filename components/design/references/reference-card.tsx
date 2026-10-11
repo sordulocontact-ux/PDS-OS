@@ -8,6 +8,7 @@ import {
 
 import { ExternalLink } from "@/components/catalog/artist-profile/external-link";
 import { ReferenceActions } from "@/components/design/references/reference-actions";
+import { ReferenceThumbnail } from "@/components/design/references/reference-thumbnail";
 import type { TargetOption } from "@/components/design/references/target-picker";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { targetKeyOf } from "@/lib/design/reference-rules";
@@ -45,27 +46,24 @@ export function ReferenceCard({
   const t = fr.conceptionRefs;
   const Icon = ICONS[r.media];
   const labelOf = new Map(targets.map((o) => [o.key, o.label]));
+  const kind = (
+    <span className="flex flex-col items-center gap-1 text-muted-foreground">
+      <Icon aria-hidden className="size-6" />
+      <span className="text-caption font-medium">{t.kinds[r.media]}</span>
+    </span>
+  );
   const others = r.links
     .map(targetKeyOf)
     .filter((key) => key !== currentKey)
     .flatMap((key) => (labelOf.has(key) ? [labelOf.get(key)!] : []));
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-border bg-background">
+    <article className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-background">
       <div className="relative flex aspect-[4/3] items-center justify-center bg-muted">
         {r.thumbnail ? (
-          // eslint-disable-next-line @next/next/no-img-element -- signed URL of a private bucket
-          <img
-            src={r.thumbnail}
-            alt=""
-            loading="lazy"
-            className="size-full object-cover"
-          />
+          <ReferenceThumbnail src={r.thumbnail} fallback={kind} />
         ) : (
-          <span className="flex flex-col items-center gap-1 text-muted-foreground">
-            <Icon aria-hidden className="size-6" />
-            <span className="text-caption font-medium">{t.kinds[r.media]}</span>
-          </span>
+          kind
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-3">

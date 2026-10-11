@@ -45,7 +45,9 @@ export default async function DesignReferencesPage({
   const data = await loadConception(project, access);
   if (!data) notFound();
   if (!data.started) redirect(routes.projectDesign(projectId));
-  const references = await loadReferenceViews(projectId, data.references);
+  const references = await loadReferenceViews(projectId, data.references, {
+    linkThumbnails: true,
+  });
 
   const t = fr.conceptionRefs;
   const targets = [

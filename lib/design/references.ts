@@ -10,6 +10,7 @@ import {
   validatedReferenceIds,
   type ReferenceStatus,
 } from "@/lib/design/reference-status";
+import { linkPreviewImage } from "@/lib/integrations/link-preview";
 import { createClient } from "@/lib/supabase/server";
 
 /** A reference as the references page shows it. */
@@ -19,7 +20,8 @@ export type ReferenceView = ConceptionReference & {
   // Opened in a new tab: a short-lived signed URL for a file, the address
   // for a link; null when the file could not be signed.
   href: string | null;
-  // Images only: the same signed URL, shown small.
+  // Images: the same signed URL, shown small; links: the picture the page
+  // announces (Open Graph), when asked for and found.
   thumbnail: string | null;
   // Its title, else its file name, else its address.
   name: string;
@@ -30,14 +32,22 @@ export type ReferenceView = ConceptionReference & {
 // Signed links are short-lived: the page is rendered on demand.
 const SIGNED_SECONDS = 15 * 60;
 
-/** Signs the files, reads the direction's decisions: one round trip each. */
+/**
+ * Signs the files, reads the direction's decisions: one round trip each.
+ * `linkThumbnails`: also looks up each link's picture (cached a day), for
+ * the pages that show thumbnails.
+ */
 export async function loadReferenceViews(
   projectId: string,
   references: ConceptionReference[],
+  { linkThumbnails = false }: { linkThumbnails?: boolean } = {},
 ): Promise<ReferenceView[]> {
   const supabase = await createClient();
   const paths = references.flatMap((r) => (r.path ? [r.path] : []));
-  const [signedRes, versionsRes] = await Promise.all([
+  const links = linkThumbnails
+    ? references.flatMap((r) => (r.kind === "link" && r.url ? [r.url] : []))
+    : [];
+  const [signedRes, versionsRes, previews] = await Promise.all([
     paths.length
       ? supabase.storage
           .from(REFERENCE_BUCKET)
@@ -48,7 +58,11 @@ export async function loadReferenceViews(
       .select("mode, snapshot, design_decisions(section, decision)")
       .eq("project_id", projectId)
       .eq("kind", "direction"),
+    Promise.all(
+      links.map(async (url) => [url, await linkPreviewImage(url)] as const),
+    ),
   ]);
+  const previewOf = new Map(previews);
 
   const signed = new Map(
     (signedRes?.data ?? []).flatMap((s) =>
@@ -70,7 +84,12 @@ export async function loadReferenceViews(
       ...r,
       media,
       href,
-      thumbnail: media === "image" ? href : null,
+      thumbnail:
+        media === "image"
+          ? href
+          : media === "link"
+            ? (previewOf.get(r.url ?? "") ?? null)
+            : null,
       name: r.title ?? r.fileName ?? r.url ?? "",
       status: referenceStatusOf(r.id, validated),
     };
