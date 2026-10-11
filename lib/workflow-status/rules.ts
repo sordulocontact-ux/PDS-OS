@@ -6,6 +6,10 @@
 // (rule 6). Pure: every rule here is unit-tested.
 
 import { fr } from "@/lib/i18n/fr";
+import {
+  isMarketingClosed,
+  type MarketingStatus,
+} from "@/lib/marketing/closure/status";
 import type { MasterTab } from "@/lib/ui/master-steps";
 import { workflowStepHref } from "@/lib/ui/workflow-hrefs";
 
@@ -321,12 +325,14 @@ const MARKETING_STAGES = [
   { step: "strategy", stage: "launch_strategy" },
   { step: "conception", stage: "design" },
   { step: "production", stage: "production" },
-  { step: "review", stage: "review" },
 ] as const;
 
 export type MarketingFacts = {
   launched: boolean;
   stages: Array<{ key: string; label: string; state: string }>;
+  // Suivi & bilan follows the Marketing's own closing (ticket « Suivi &
+  // bilan »), never the « review » stage: that one closes the whole project.
+  closure: MarketingStatus;
 };
 
 export function marketingState(facts: MarketingFacts): WorkflowState {
@@ -337,8 +343,23 @@ export function marketingState(facts: MarketingFacts): WorkflowState {
     row: facts.stages.find((stage) => stage.key === entry.stage) ?? null,
   })).filter((entry) => entry.row !== null);
   const validated = tracked.filter((entry) => entry.row!.state === "validated");
-  const done = validated.map((entry) => entry.step);
-  const progress = t.progress(validated.length, tracked.length);
+  const closed = isMarketingClosed(facts.closure);
+  const done: string[] = [
+    ...validated.map((entry) => entry.step),
+    ...(closed ? ["review"] : []),
+  ];
+  const progress = t.progress(done.length, tracked.length + 1);
+  // Closed (with or without reserves): the Marketing is done, whatever its
+  // stages say; the project itself is not closed by it.
+  if (closed)
+    return {
+      ...base,
+      status: "done",
+      step: "review",
+      reason: fr.marketingReview.status.values[facts.closure],
+      progress,
+      done,
+    };
   if (!facts.launched)
     return {
       ...base,
@@ -352,9 +373,9 @@ export function marketingState(facts: MarketingFacts): WorkflowState {
   if (!open)
     return {
       ...base,
-      status: "done",
+      status: facts.closure === "closure_preparing" ? "waiting" : "in_progress",
       step: "review",
-      reason: t.done,
+      reason: t.review(fr.marketingReview.status.values[facts.closure]),
       progress,
       done,
     };
@@ -377,14 +398,30 @@ export function marketingState(facts: MarketingFacts): WorkflowState {
 
 // ------------------------------------------------------------ Distribution
 
+// What the Distribution's state reads (ticket « Distribution » § 7), each
+// fact from its own source, never one deduced from another.
 export type DistributionFacts = {
   recorded: boolean;
   isrc: boolean;
   plannedDate: string | null;
-  // Recorded once it left for the distributor (lib/release/delivery.ts).
-  delivered: { on: string; to: string } | null;
-  // Detected by the cron, or confirmed by the owner.
-  onlineSince: string | null;
+  // The latest version of the dossier not superseded by a new preparation.
+  version: {
+    number: number;
+    status: "pending" | "approved" | "rejected";
+  } | null;
+  // Declarations of the current deposit cycle (lib/distribution/tracking.ts).
+  deposit: { declaredAt: string } | null;
+  outcome: "corrections_requested" | "accepted" | null;
+  delivered: boolean;
+  // Platforms of reference verified by a person (lib/distribution/platforms.ts).
+  platforms: { verified: number; reference: number };
+  // The follow-up closed and not reopened, or a closure waiting (lot 7).
+  closure: {
+    status: "pending" | "closed";
+    kind: "normal" | "reserves";
+    on: string;
+    reserves: number;
+  } | null;
 };
 
 export function distributionState(
@@ -394,63 +431,74 @@ export function distributionState(
   const t = fr.workflowStatus.distribution;
   const base = { workflow: "distribution" as const };
   const prepared = facts.recorded && facts.isrc && facts.plannedDate !== null;
+  const approved = facts.version?.status === "approved";
   const progress = t.progress(
-    [facts.isrc, facts.plannedDate !== null].filter(Boolean).length,
+    [prepared, approved, facts.deposit !== null, facts.delivered].filter(
+      Boolean,
+    ).length,
   );
   const done = [
     ...(prepared ? ["prepare"] : []),
-    ...(facts.onlineSince ? ["online"] : []),
+    ...(approved ? ["dossier"] : []),
+    ...(approved && facts.outcome === "accepted" && facts.delivered
+      ? ["tracking"]
+      : []),
+    ...(facts.platforms.verified === facts.platforms.reference
+      ? ["online"]
+      : []),
+    ...(facts.closure?.status === "closed" ? ["closure"] : []),
   ];
-  if (!facts.recorded)
-    return {
-      ...base,
-      status: "not_started",
-      step: "prepare",
-      reason: t.record,
-      progress,
-      done,
-    };
-  if (!prepared)
-    return {
-      ...base,
-      status: "in_progress",
-      step: "prepare",
-      reason: !facts.isrc ? t.isrc : t.date,
-      progress,
-      done,
-    };
-  if (facts.onlineSince)
-    return {
-      ...base,
-      status: "done",
-      step: "online",
-      reason: t.done(formatDate(facts.onlineSince)),
-      progress,
-      done,
-    };
-  // Prepared: the owner delivers it to the distributor (« En ligne » step),
-  // then it waits for the platforms.
-  if (!facts.delivered)
-    return {
-      ...base,
-      status: "in_progress",
-      step: "online",
-      reason: t.deliver,
-      progress,
-      done,
-    };
-  return {
-    ...base,
-    status: "waiting",
-    step: "online",
-    reason: t.online(
-      formatDate(facts.delivered.on),
-      facts.delivered.to,
-      facts.plannedDate ? formatDate(facts.plannedDate) : null,
-    ),
-    progress,
-    done,
-  };
+  const state = (
+    status: WorkflowState["status"],
+    step: string,
+    reason: string,
+  ): WorkflowState => ({ ...base, status, step, reason, progress, done });
+
+  // Closed: done, and said with its reserves (never « distribué » when
+  // closed with reserves).
+  if (facts.closure?.status === "closed")
+    return state(
+      "done",
+      "closure",
+      facts.closure.kind === "normal"
+        ? t.closedNormal(formatDate(facts.closure.on))
+        : t.closedReserves(
+            formatDate(facts.closure.on),
+            facts.closure.reserves,
+          ),
+    );
+  if (facts.closure?.status === "pending")
+    return state("waiting", "closure", t.closurePending);
+  if (!facts.recorded && !facts.version)
+    return state("not_started", "prepare", t.record);
+  if (!prepared && !facts.version)
+    return state("in_progress", "prepare", !facts.isrc ? t.isrc : t.date);
+  if (!facts.version) return state("in_progress", "dossier", t.submit);
+  if (facts.version.status === "pending")
+    return state("waiting", "dossier", t.pending(facts.version.number));
+  if (facts.version.status === "rejected")
+    return state("in_progress", "dossier", t.rejected(facts.version.number));
+  // Validated: the owner deposits by hand, then follows the distributor.
+  if (!facts.deposit)
+    return state("in_progress", "tracking", t.deposit(facts.version.number));
+  if (facts.outcome === "corrections_requested")
+    return state("in_progress", "tracking", t.corrections);
+  if (facts.outcome !== "accepted" || !facts.delivered)
+    return state(
+      "waiting",
+      "tracking",
+      t.waiting(
+        formatDate(facts.deposit.declaredAt),
+        facts.plannedDate ? formatDate(facts.plannedDate) : null,
+      ),
+    );
+  if (facts.platforms.verified < facts.platforms.reference)
+    return state(
+      "in_progress",
+      "online",
+      t.platforms(facts.platforms.verified, facts.platforms.reference),
+    );
+  return state("in_progress", "closure", t.closure);
 }
 
 // ------------------------------------------------------------ Dependencies
@@ -583,9 +631,9 @@ export function dependencies(facts: DependencyFacts): Dependency[] {
 }
 
 /** A dependency blocks only the action that needs it (ticket § 3): the
- * Distribution, ready to be delivered, is Bloqué while what the delivery
- * expects is not there; its preparation never is, nor a release already
- * delivered (it waits for the platforms). */
+ * Distribution, validated and ready to be deposited by hand (step Suivi), is
+ * Bloqué while what the deposit expects is not there; its preparation and
+ * its dossier never are, nor a deposit already declared. */
 export function withDependencies(
   states: DependencyFacts["states"],
   deps: Dependency[],
@@ -596,7 +644,7 @@ export function withDependencies(
   );
   if (
     !distribution ||
-    distribution.step !== "online" ||
+    distribution.step !== "tracking" ||
     distribution.status !== "in_progress" ||
     missing.length === 0
   )

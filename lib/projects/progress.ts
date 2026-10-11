@@ -15,7 +15,6 @@ const MARKETING_STEP_OF: Record<
   production: "production",
   // Not decided yet (docs/CONTEXTE-PROJET.md): the Marketing, no step.
   defense: null,
-  review: "review",
 };
 
 /** « Cadrage », « Plan du projet », « Marketing · Conception »… */
@@ -30,6 +29,9 @@ export function progressLabel(
   if (stage.key === "launch_strategy" && stage.state === "not_started")
     return t.plan;
   if (stage.key === "delivery") return s.sidebar.distribution;
+  // The review stage closes the whole project, apart from the Marketing
+  // (ticket « Suivi & bilan »).
+  if (stage.key === "review") return fr.projectReview.title;
   const step = MARKETING_STEP_OF[stage.key];
   return step
     ? `${s.sidebar.marketing} · ${s.marketingSteps[step]}`

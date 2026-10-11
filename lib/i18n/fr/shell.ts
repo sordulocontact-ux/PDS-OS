@@ -386,12 +386,15 @@ export const shell = {
     // Le workflow Marketing (ticket « Architecture globale », § 4) : une
     // organisation, pas une séquence ; chaque étape s'ouvre dès que sa page
     // existe et que ses prérequis réels sont là (lib/ui/marketing-steps.ts).
-    // La Distribution (ticket « Architecture globale ») : la page Sortie en
-    // deux étapes, sans nouvelle capacité (lib/ui/distribution-steps.ts).
+    // La Distribution (ticket « Distribution ») : cinq étapes, du contrôle
+    // des sources à la clôture (lib/ui/distribution-steps.ts).
     distributionSteps: {
       label: "Étapes de la Distribution",
       prepare: "Préparation",
-      online: "En ligne",
+      dossier: "Dossier",
+      tracking: "Suivi",
+      online: "Plateformes",
+      closure: "Clôture",
     },
     marketingSteps: {
       label: "Étapes du Marketing",

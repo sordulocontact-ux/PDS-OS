@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { DialogFormActions } from "@/components/production/prep/need-dialog-actions";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { fr } from "@/lib/i18n/fr";

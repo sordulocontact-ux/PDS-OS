@@ -76,7 +76,10 @@ export function projectSections(
       key: "overview",
       label: t.overview,
       href: routes.project(projectId),
-      match: (p) => p === routes.project(projectId),
+      // Its own pages below: the Clôture du projet (ticket « Suivi & bilan »).
+      match: (p) =>
+        p === routes.project(projectId) ||
+        below(routes.projectClosure(projectId))(p),
     },
     // No section for the Plan du Projet: it is the overview itself once the
     // Brief is validated (docs/ARCHITECTURE.md § 6 ter).
@@ -198,6 +201,8 @@ export function projectTrail(
     href: routes.projectDesign(projectId),
   };
   const subPages: Record<string, ProjectCrumb[]> = {
+    // Vue d'ensemble › Clôture du projet, apart from the Marketing closing.
+    [routes.projectClosure(projectId)]: [{ label: fr.projectReview.title }],
     [routes.projectFramingBrief(projectId)]: [
       { label: fr.framingIntel.brief.title },
     ],

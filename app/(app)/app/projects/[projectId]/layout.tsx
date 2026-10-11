@@ -150,6 +150,8 @@ export default async function ProjectLayout({
                 validatedStages: project.stages
                   .filter((stage) => stage.state === "validated")
                   .map((stage) => stage.key),
+                marketingClosed:
+                  stateOf("marketing")?.done.includes("review") ?? false,
               })}
             />
             <SectionSteps

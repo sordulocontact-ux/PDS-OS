@@ -92,15 +92,6 @@ export const productionDeliveryTone: Record<
   delivered: "success",
 };
 
-/** A release before its distributor: blocked, ready to leave, delivered. */
-export const releaseDeliveryTone: Record<
-  "not_ready" | "ready" | "delivered",
-  Tone
-> = {
-  not_ready: "warning",
-  ready: "info",
-  delivered: "success",
-};
 export const overdueTone: Tone = "danger";
 
 /**
@@ -767,4 +758,178 @@ export const collaborationStageTone: Record<string, Tone> = {
   cancelled: "neutral",
   dispute: "danger",
   declined: "neutral",
+};
+
+/** Where the Distribution preparation stands (lib/distribution/readiness.ts):
+ * ready for the checks is not a validation, so never green. */
+export const distributionPreparationTone: Record<
+  "to_prepare" | "partial" | "ready",
+  Tone
+> = {
+  to_prepare: "neutral",
+  partial: "warning",
+  ready: "info",
+};
+
+/** An element the Distribution reuses (lib/distribution/readiness.ts):
+ * validated at its source, present in a module without validation, present
+ * but not validated, missing (danger only when it blocks the dossier), or
+ * closed to the viewer. */
+export const distributionSourceTone = (
+  state: "validated" | "available" | "unvalidated" | "missing" | "restricted",
+  blocking: boolean,
+): Tone =>
+  state === "validated"
+    ? "success"
+    : state === "available"
+      ? "info"
+      : state === "unvalidated"
+        ? "warning"
+        : state === "missing"
+          ? blocking
+            ? "danger"
+            : "warning"
+          : "neutral";
+
+// Marketing › Suivi & bilan: an activation as the review groups it
+// (marketing_review_activations: planned, running, done or set aside); an
+// evidence declared (nothing checked yet), to verify (contested or
+// unreachable), verified (a person checked).
+export const reviewActivationStatusTone: Record<string, Tone> = {
+  planned: "neutral",
+  in_progress: "info",
+  done: "success",
+  cancelled: "neutral",
+};
+
+export const evidenceVerificationTone: Record<string, Tone> = {
+  declared: "neutral",
+  to_verify: "warning",
+  verified: "success",
+};
+
+// A statistic: a partial figure is waited on, an unavailable one is a gap.
+export const evidenceAvailabilityTone: Record<string, Tone> = {
+  available: "neutral",
+  partial: "warning",
+  unavailable: "danger",
+};
+
+/** A Distribution check recorded by a person (lib/distribution/checks.ts):
+ * « conforme » only once someone checked; never by the code alone. */
+export const distributionCheckTone: Record<
+  "unchecked" | "compliant" | "non_compliant" | "not_applicable",
+  Tone
+> = {
+  unchecked: "warning",
+  compliant: "success",
+  non_compliant: "danger",
+  not_applicable: "neutral",
+};
+
+/** The code's own reading of a check: never green (it is not a check). */
+export const distributionComputedTone: Record<
+  "coherent" | "gap" | "human",
+  Tone
+> = {
+  coherent: "info",
+  gap: "danger",
+  human: "warning",
+};
+
+/** A version of the Distribution dossier (lib/distribution/validation.ts). */
+export const distributionVersionTone: Record<
+  "pending" | "approved" | "rejected" | "superseded",
+  Tone
+> = {
+  pending: "warning",
+  approved: "success",
+  rejected: "danger",
+  superseded: "neutral",
+};
+
+/** A Distribution declaration (lib/distribution/tracking.ts): said by a
+ * person, with or without a proof — never green, nothing was verified. */
+export const distributionEvidenceTone: Record<
+  "none" | "declared" | "proven" | "corrections",
+  Tone
+> = {
+  none: "neutral",
+  declared: "warning",
+  proven: "info",
+  corrections: "danger",
+};
+
+// A Marketing report version (ticket « Suivi & bilan »): generated, waiting
+// for the validator, approved as a provisional review, sent back, put off,
+// replaced by a newer version, or the reference of the closing.
+export const marketingReportTone: Record<string, Tone> = {
+  generated: "neutral",
+  to_validate: "action",
+  approved_provisional: "success",
+  changes_requested: "warning",
+  postponed: "warning",
+  superseded: "neutral",
+  finalized: "success",
+};
+
+/** Public availability of a release (lib/distribution/platforms.ts): green
+ * only once a person verified every platform of reference. */
+export const distributionAvailabilityTone: Record<
+  "not_declared" | "declared" | "partially_verified" | "verified",
+  Tone
+> = {
+  not_declared: "neutral",
+  declared: "warning",
+  partially_verified: "info",
+  verified: "success",
+};
+
+/** One platform as a person verified it, and its compliance. */
+export const platformVerificationTone: Record<
+  "unchecked" | "verified" | "unavailable",
+  Tone
+> = { unchecked: "warning", verified: "success", unavailable: "danger" };
+export const platformComplianceTone: Record<
+  "unchecked" | "compliant" | "non_compliant",
+  Tone
+> = { unchecked: "neutral", compliant: "success", non_compliant: "danger" };
+
+/** A Distribution anomaly (lib/distribution/anomalies.ts): its severity and
+ * where its correction stands. */
+export const anomalySeverityTone: Record<"minor" | "major" | "blocking", Tone> =
+  { minor: "neutral", major: "warning", blocking: "danger" };
+export const anomalyStateTone: Record<
+  "open" | "in_correction" | "resolved" | "dismissed",
+  Tone
+> = {
+  open: "warning",
+  in_correction: "info",
+  resolved: "success",
+  dismissed: "neutral",
+};
+
+// A Marketing reserve (ticket « Suivi & bilan »): to arbitrate, to lift
+// before the closing, followed after it, accepted as a limit, lifted or
+// closed.
+export const marketingReserveTone: Record<string, Tone> = {
+  open: "action",
+  blocking: "danger",
+  follow_up: "warning",
+  accepted_limit: "neutral",
+  lifted: "success",
+  closed: "neutral",
+};
+
+// The Marketing as a whole (ticket « Suivi & bilan »): closed is done, a
+// closing asked waits for the direction, reopened runs again.
+export const marketingStatusTone: Record<string, Tone> = {
+  not_started: "neutral",
+  in_progress: "info",
+  review_preparing: "info",
+  provisional_approved: "info",
+  closure_preparing: "action",
+  closed_with_reserves: "success",
+  closed_clean: "success",
+  reopened: "warning",
 };

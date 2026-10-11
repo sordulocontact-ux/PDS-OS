@@ -19,9 +19,9 @@ import {
 } from "@/lib/production/roles";
 import type { ProductionNeed } from "@/lib/production/sheet";
 
-import { DialogFormActions } from "./need-dialog-actions";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { roleLabel } from "./need-label";
-import { usePrepSubmit } from "./use-prep-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionNeeds;
 
@@ -60,7 +60,7 @@ export function NeedForm({
     label?: boolean;
     headcount?: boolean;
   }>({});
-  const { pending, error, run } = usePrepSubmit(
+  const { pending, error, run } = useWriteSubmit(
     onDone,
     need ? t.edit.done : t.add.done,
   );

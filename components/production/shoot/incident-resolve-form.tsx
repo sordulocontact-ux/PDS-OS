@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { TextareaField } from "@/components/auth/textarea-field";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import { resolveShootIncident } from "@/lib/production/shoot/incident-actions";
 
@@ -22,7 +22,7 @@ export function IncidentResolveForm({
   onDone: () => void;
 }) {
   const [missing, setMissing] = useState(false);
-  const { pending, error, run } = usePrepSubmit(onDone, t.resolvedDone);
+  const { pending, error, run } = useWriteSubmit(onDone, t.resolvedDone);
   const id = `incident-${incidentId}-resolution`;
 
   function submit(form: HTMLFormElement) {

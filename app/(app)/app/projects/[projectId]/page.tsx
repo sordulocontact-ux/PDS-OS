@@ -12,6 +12,7 @@ import { FactList } from "@/components/ui/fact-list";
 import { CardRow, ListCard } from "@/components/ui/list-card";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { assessFraming } from "@/lib/framing/assess";
 import { callSheetData } from "@/lib/framing/call-sheet-data";
 import { framingStarted, loadFramingKnowledge } from "@/lib/framing/knowledge";
@@ -206,6 +207,20 @@ export default async function ProjectOverviewPage({
               facts={facts.map(([label, value]) => ({ label, value }))}
             />
           </section>
+          {/* The whole project's closing, apart from the Marketing closing
+              (ticket « Suivi & bilan »). */}
+          <ListCard title={fr.projectReview.title}>
+            <CardRow
+              href={routes.projectClosure(project.id)}
+              main={fr.projectReview.stage}
+              sub={
+                project.stages.find((s) => s.key === "review")?.state ===
+                "validated"
+                  ? fr.projectReview.closed
+                  : undefined
+              }
+            />
+          </ListCard>
           {/* With tabs, the sections that have no tab are reached from here. */}
           {!DOUBLE_SIDEBAR && (
             <ListCard title={t.moreSections}>

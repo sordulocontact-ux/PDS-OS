@@ -1203,8 +1203,8 @@ l'écran tant que le DG ne l'a pas rattachée. Sans `manage_legal`, le Juridique
 `restricted` (grisé, cadenas, raison), jamais un lien ; sa page répond toujours 404 (pas
 de fuite par lien profond). Pas de fil d'Ariane pour l'instant (décision de Sacha).
 
-**Lot 2** : Master en 4 chevrons (§ 8 septies) ; **Distribution** = la page Sortie en deux
-étapes sans nouvelle capacité, **Préparation** (`/release`, identifiants et date) puis **En
+**Lot 2** : Master en 4 chevrons (§ 8 septies) ; **Distribution** (remplacée depuis par les
+cinq étapes du § 8 octies) = la page Sortie en deux étapes sans nouvelle capacité, **Préparation** (`/release`, identifiants et date) puis **En
 ligne** (`/release/online`, détection et smartlink, qui dit attendre la Préparation tant
 qu'aucune sortie n'est enregistrée ; actions revalidées en `layout` pour les deux pages) ;
 **Juridique** : le chevron du plan devient « Suivi » une fois lancé, et « Étape du dossier »
@@ -2535,29 +2535,88 @@ lots, chacun utile seul.
   Budget à quatre états (Estimé / Proposé / Engagé / Payé) étendra `budget_lines` au lot
   suivant ; le Brief n'en garde que les tarifs estimés.
 
-## 8 octies. Distribution : livraison au distributeur et mise en ligne
+## 8 octies. Distribution : dossier, dépôt manuel déclaré, plateformes, clôture
 
-Retour du test UX du 09/10/2026 (`docs/TEST-UX-2026-10-09-PARCOURS-COMPLET.md` § 1.5) : une sortie
-ne pouvait être ni livrée au distributeur ni passée « en ligne » à la main. Source : ticket
-Juridique 08 (Récap Sortie), MVP : « La validation finale précède l'action manuelle The Orchard »,
-« Aucune intégration externe absente n'est présentée comme terminée ».
+Ticket « Distribution » (11/10/2026), livré en 7 lots. **Décision V1 : PDS OS prépare, contrôle et
+suit un dépôt MANUEL dans The Orchard ; il n'envoie rien, n'importe rien, ne lit aucune capture**
+(CA07, CA18). Le module référence ses sources (Catalogue, Master, Juridique, Conception, Projet) et
+ne les recopie jamais en données modifiables (CA03) ; seuls ses paramètres propres et les
+déclarations des personnes sont stockés. Aucun état n'est déduit d'un autre (§ 7) : chaque état lit
+ses propres déclarations. Rappel « dépôt manuel, rien n'est transmis » en tête de chaque étape.
 
-- **Rien n'est envoyé par PDS OS** : la livraison se fait chez le distributeur, le responsable du
-  projet l'enregistre (`record_release_delivery` : distributeur choisi dans le Réseau, date,
-  note). Colonnes de `releases` écrites par ces fonctions seulement (migration
-  `20261010000201_release_delivery.sql`).
-- **Prête à livrer** est calculé par le code (`lib/release/delivery.ts`, deux listes comme dans le
-  ticket) : bloquent l'ISRC, la date de sortie et ce que les autres workflows doivent à la
-  Distribution (`dependencies` : master final de chaque titre, emprunts sécurisés). L'UPC est à
-  suivre sans bloquer (« L'UPC appartient à la Release », souvent donné par le distributeur).
-  L'action serveur revérifie avec la même règle.
-- **« Livré ne signifie pas Publié »** (ticket Production § 21) : la mise en ligne reste détectée par
-  le cron (`online_detected_at`), ou confirmée à la main une fois livrée (`confirm_release_online`,
-  date entre la livraison et aujourd'hui, lien d'écoute facultatif). « Rouvrir la livraison » est
-  refusé une fois en ligne.
-- Statut commun : préparée → « Prête : à livrer » (En cours, Bloqué si une dépendance manque) →
-  livrée → En attente de la mise en ligne → Terminé. Tout se passe sur l'étape **En ligne**
-  (`DeliveryCard` en tête de page).
+**Cinq chevrons** (`lib/ui/distribution-steps.ts`, `/release/…`) : Préparation · Dossier · Suivi ·
+Plateformes (`/online`) · Clôture. L'ancienne livraison (`record_release_delivery`,
+`confirm_release_online`, `DeliveryCard`) n'a plus d'écran : remplacée par le dépôt déclaré et les
+plateformes. Ses colonnes de `releases` restent (données), plus rien ne les écrit depuis l'app.
+
+- **Préparation** (`/release`) : contrôle de préparation calculé par le code
+  (`lib/distribution/readiness.ts`, pur, lu par `lib/distribution/sources.ts`) classé par module
+  source, chaque élément avec sa provenance, son état (Validé à la source, Disponible — module
+  sans validation —, Non validé, Manquant, Accès restreint), sa date et « Corriger » vers le module
+  propriétaire ; en tête, l'état du § 7 calculé par le code : À préparer (aucun élément bloquant
+  prêt), Incomplet, Prêt pour contrôle (jamais en vert : ce n'est pas une validation). Bloquent : titre et artiste principal, ISRC, compositeur ou auteur, ligne ℗ (par
+  titre), master final (validé ou déjà au Catalogue), pochette validée, sortie et date. Ne bloquent
+  pas : UPC, actions juridiques autres qu'un emprunt (le Juridique ne se lit qu'avec
+  `manage_legal`, sinon « Accès restreint »), contraintes de droits du Cadrage. **Pochette** : la
+  Fiche Livrable de la Conception choisie dans les paramètres, sinon devinée par son titre
+  (« pochette », « cover », « artwork ») et signalée comme telle — la Conception n'a pas de type
+  « pochette ». Puis le formulaire de la sortie (identifiants, date), inchangé.
+- **Dossier** (`/release/dossier`) : validation, six contrôles, paramètres, puis le **dossier de
+  livraison** en sections proches de The Orchard (Release, Tracks, Artwork, Territories & Rights,
+  Pricing & Dates, Notes ; `lib/distribution/delivery-file.ts`), chaque champ avec sa source.
+  **Paramètres** (`distribution_dossiers`, une ligne par projet, responsable seul, droits colonne par
+  colonne) : territoires (monde / seulement / monde sauf, codes ISO), précommande et avant-première
+  (oui / non / à renseigner, date facultative), catégorie tarifaire (Front, Mid, Budget, à
+  confirmer), notes, pochette. **Six contrôles** (`distribution_checks`,
+  `record_distribution_check`, responsable ou validateur désigné) : Non vérifié / Conforme / Non
+  conforme (note obligatoire) / Non applicable, qui et quand écrits par la base ; à côté, le
+  **calcul de PDS OS** (`lib/distribution/checks.ts`) — Cohérent, Écart ou « À confirmer par une
+  personne », jamais « Conforme » : Droits et territoires n'est jamais « Cohérent » (aucun droit
+  structuré par territoire n'existe). **Validation** : le responsable désigne le **validateur
+  Distribution** parmi les détenteurs de `validate`, jamais lui-même (lecture la plus stricte du
+  § 11 tant que la séparation n'est pas arbitrée) ; sans lui, rien ne peut être demandé.
+  `submit_distribution_version` fige une **version** numérotée avec l'**instantané** construit par
+  le serveur (`snapshotOf`) ; refusée tant qu'un élément bloque, qu'un paramètre manque, qu'un
+  contrôle est non conforme ; les contrôles non vérifiés sont dits, pas bloquants.
+  `decide_distribution_version` (validateur demandé seul, refus motivé). Paramètres figés tant
+  qu'une version attend ou est validée (policy restrictive `distribution_dossier_editable`).
+  **Écarts depuis la version** (`snapshotDrift`) : ce qui a changé à la source depuis la Vn (§ 13).
+- **Suivi** (`/release/tracking`) : `distribution_declarations`, jamais réécrites — dépôt manuel
+  (après validation seulement, CA06), réception, corrections demandées (note obligatoire),
+  acceptation, livraison aux plateformes ; date indiquée, identifiant The Orchard et **preuve**
+  (fichier du bucket privé `distribution-proofs`, envoyé par le navigateur puis enregistré, ou lien
+  https) facultatifs, leur absence affichée (CA08). Badges « Déclaré, sans preuve » / « Déclaré,
+  preuve jointe », jamais verts. Une erreur se **retire** (motif), elle reste barrée dans la
+  chronologie. Un cycle = une version déposée. **Anomalies** (`distribution_anomalies`) : type,
+  description, plateforme, gravité, module où corriger (lien vers lui, CA12), état suivi (ouverte →
+  en correction → résolue / écartée, motif). **Nouvelle version** (`prepare_distribution_version`,
+  depuis la validation du Dossier) : la version validée est marquée remplacée avec son cycle, les
+  six contrôles repartent à « non vérifié » (anciens résultats dans l'historique), CA13.
+- **Plateformes** (`/release/online`) : `distribution_platforms` — Spotify, Apple Music, Deezer,
+  YouTube Music, Amazon Music, d'autres par leur nom ; lien officiel et disponibilité déclarée
+  (responsable), **vérification** (disponible / indisponible) et **conformité** (conforme / non
+  conforme) par une personne qui a ouvert le lien, qui et quand, et ses anomalies ouvertes (§ 12,
+  traitées dans le Suivi). Un nouveau lien remet les deux à vérifier. **Disponibilité publique** (`lib/distribution/platforms.ts`) : non déclarée → déclarée
+  (déclaration « available » du cycle, ou une plateforme déclarée) → vérifiée partiellement →
+  vérifiée (les cinq de référence vérifiées par une personne, CA16). La **détection** existante
+  (cron, `release_links`) ne fait que **suggérer** un lien ; le smartlink reste. Le dossier de presse
+  lit les liens vérifiés.
+- **Clôture** (`/release/closure`) : `distribution_closures`. Le responsable propose, le validateur
+  désigné décide (refus motivé). **Normale** seulement si tout est rempli (même règle en SQL,
+  `distribution_closure_ready`, revérifiée à la décision) ; sinon **avec réserves** : réserves
+  calculées par le serveur (`lib/distribution/closure.ts`) et regroupées par cause — les cinq
+  plateformes non vérifiées font une seule réserve, détail gardé —, arbitrage et case « ces réserves
+  restent non vérifiées » obligatoires. « Clôturée avec réserves » n'est jamais en vert ni dit
+  « distribué ». **Rouvrir** (motif) ajoute la réouverture sans effacer la décision.
+  **Historique** : `distribution_events`, écrit par les fonctions et triggers seuls, rendu en
+  phrases (`lib/distribution/history.ts`) : qui, quoi, quand, avec ou sans preuve (CA17).
+- **Statut commun** (`distributionState`, `rules.ts`) : Préparation → Dossier (à soumettre, en
+  attente, refusée) → Suivi (dépôt à déclarer — Bloqué si une dépendance manque —, en attente du
+  distributeur, corrections) → Plateformes (n sur 5 vérifiées) → Clôture (en attente) → Terminé
+  (« Clôturée normalement » ou « Clôturée avec réserves (n) »). Coches : prepare, dossier (version
+  validée), tracking (accepté et livré déclarés), online (5 vérifiées), closure.
+- Migrations `20261011100101_distribution_dossier` à `…100601_distribution_closure` (7 lots) ;
+  tests `supabase/tests/distribution.test.sql` (103, fixture Piégée simulée).
 
 ## 8 nonies. Marketing : Production et Suivi & bilan
 
@@ -2720,12 +2779,13 @@ ni livré ni clos. Migration `20261010000301_production_delivery_and_review.sql`
   ticket), propagation du rétroplanning vers le Planning V1, événements et notifications propres à la
   Production, partage des briefs d'équipe avec des intervenants sans compte, action de clôture
   administrative.
-- **Suivi & bilan** (`/review`, `lib/review/`) : l'état de chaque workflow (lu par
-  `loadWorkflowStates`), le bilan (résultats, ce qui a marché, à améliorer, `project_reviews`, écrit
-  pendant l'étape `review`), puis « Bilan & clôture » : le DG valide, le projet est clos (l'étape
-  `review` validée). Clôture refusée sans bilan écrit (`review_required`). Décision prise ici, faute
-  de ticket : la clôture n'exige pas que les autres workflows soient terminés, la direction en juge
-  en lisant l'état affiché.
+- **Clôture du projet** (`/closure`, `lib/review/`, ex-« Suivi & bilan » ; déplacée le 11/10/2026 sous
+  la Vue d'ensemble par le ticket « Suivi & bilan », § 8 terdecies) : l'état de chaque workflow (lu
+  par `loadWorkflowStates`), le bilan (résultats, ce qui a marché, à améliorer, `project_reviews`,
+  écrit pendant l'étape `review`), puis « Bilan & clôture du projet » : le DG valide, le projet est
+  clos (l'étape `review` validée). Clôture refusée sans bilan écrit (`review_required`). Décision
+  prise ici, faute de ticket : la clôture n'exige pas que les autres workflows soient terminés, la
+  direction en juge en lisant l'état affiché (dont l'encart « Volet Marketing »).
 
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
@@ -2807,38 +2867,42 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
   (`design_reference_links`) ; sans lien = « À rattacher ». Même fichier (sha256) ou même lien =
   une seule ressource, jamais un second import. Une référence reste une proposition tant qu'aucune
   section approuvée de la direction ne la contient.
-- **Références semblables (Are.na)** (11/10/2026, demande de Sacha : « que PO cherche d'autres
-  images qui ressemblent à celles envoyées, pour agrandir le moodboard », sur Are.na ; Openverse
-  ajouté puis **coupé le jour même** : « toutes les images c'est Openverse, fais que des recherches
-  Are.na pour le moment ») : « Chercher des références semblables » sur la page Références, pour
-  qui écrit dans la Conception (`design_can_write`, vérifié avant tout appel). Deux actions
-  serveur (`lib/design/actions/reference-similar.ts`) :
-  1. **Are.na par rebond** (gratuit, sans jeton, toujours actif, `similar-arena.ts`) : depuis les
-     images Are.na déjà gardées dans la base choisie (3 au plus) et le lien Are.na facultatif
-     collé dans la fenêtre (une image `are.na/block/…` ou une chaîne `are.na/<compte>/<chaîne>`,
-     lu par le code, seul l'id ou le nom de la chaîne part vers l'API), le code ouvre les chaînes
-     où ces images ont été rangées (4 au plus) et en propose les images (16 par chaîne, textes et
-     liens écartés). Sans image Are.na ni lien : « Rien pour partir ».
-  2. **Recherche par mots** : **Are.na ne se cherche par mots qu'avec un compte Premium**
-     (`/v3/search` ; l'ancienne API v2 bloque tout accès automatisé, vérifié le 11/10). Avec
-     `ARENA_TOKEN` (jeton personnel en lecture d'un compte Premium, facultatif), PO lit d'abord
-     les 4 dernières images lisibles de la base (JPEG / PNG / WebP / GIF de 5 Mo au plus,
-     `extractFromImages`, images = données), rend ce qu'il voit et 3 ou 4 recherches en anglais
-     nettoyées par le code (`cleanSearches`), lancées sur Are.na (12 images chacune). Sans
-     jeton, PO ne lit rien (`moodboardIsRead`) et la fenêtre l'explique. **Openverse**
-     (`lib/integrations/openverse.ts`, licences libres, gratuit, `OPENVERSE_CLIENT_*` facultatifs
-     contre la limite de 200 recherches par jour) reste dans le code, éteint par
-     `OPENVERSE_ENABLED` ; le rallumer y envoie aussi les recherches de PO.
-  Un groupe par chaîne et par recherche, chaque image une fois, celles déjà gardées écartées,
-  groupes vides masqués, un appel échoué n'empêche pas les autres. L'écran montre « Ce que PO
-  voit » (s'il a lu), les groupes en pastilles (décocher masque leurs images) et la grille à
-  cocher ; **rien n'est ajouté sans clic**. Garder une image : seuls la source et l'id viennent du
-  navigateur, le serveur relit l'image à sa source, télécharge son fichier (version « large »
-  d'Are.na, 15 Mo au plus, type d'image vérifié), la range dans le bucket avec la session de
-  l'utilisateur et l'enregistre comme un fichier déposé (dédoublonné par sha256), rattachée par
-  défaut à la cible de départ (la direction pour « Toutes les images »). La note crédite l'image
-  et garde son adresse (`are.na/block/<id>`) : c'est ce qui l'écarte d'une recherche suivante et
-  ce dont Are.na rebondit, sans colonne de plus.
+- **Références semblables (Unsplash + Tumblr)** (11/10/2026, demande de Sacha : « que PO cherche
+  d'autres images qui ressemblent à celles envoyées, pour agrandir le moodboard ». Essayé dans la
+  journée : Are.na, puis Are.na + Openverse ; retenu : « Unsplash + Tumblr, et pour le moment tu
+  peux laisser de côté Are.na ». Pinterest et Cosmos écartés : pas d'API de recherche ouverte,
+  seulement les épingles du compte connecté pour Pinterest, des aspirateurs tiers pour Cosmos.)
+  « Chercher des références semblables » sur la page Références, pour qui écrit dans la Conception
+  (`design_can_write`, vérifié avant tout appel). **Sources** (`lib/design/similar-sources.ts`, le
+  seul endroit qui dit lesquelles sont allumées) : **Unsplash** (`lib/integrations/unsplash.ts`,
+  `UNSPLASH_ACCESS_KEY`, gratuit, 50 appels par heure en mode démo) et **Tumblr**
+  (`lib/integrations/tumblr.ts`, `TUMBLR_API_KEY`, gratuit, 1 000 appels par heure), chacune
+  allumée par sa clé ; sans aucune clé, la fenêtre le dit. **Are.na** (`ARENA_ENABLED`, rebond par
+  ses chaînes, recherche par mots seulement avec un compte Premium) et **Openverse**
+  (`OPENVERSE_ENABLED`) restent dans le code, éteints. Deux actions serveur
+  (`lib/design/actions/reference-similar.ts`) :
+  1. PO lit les 4 dernières images lisibles de la base choisie (une cible, ou « Toutes les
+     images » ; JPEG / PNG / WebP / GIF de 5 Mo au plus, `similar-rules.ts`) en un seul message
+     (`extractFromImages`, images = données) et rend ce qu'il voit, 3 ou 4 **recherches** pour
+     Unsplash (2 à 4 mots) et 3 ou 4 **tags** pour Tumblr (1 ou 2 mots, `/v2/tagged` ne cherche
+     que par tag), nettoyés par le code (`cleanSearches`).
+  2. Chaque source allumée reçoit ses mots, 12 images par recherche ou tag (Tumblr : 3 images
+     par billet au plus, photos d'un billet classique ou `<img>` d'un billet au nouveau format).
+  Un groupe par source et par recherche, chaque image une fois, celles déjà gardées écartées,
+  groupes vides masqués ; un appel échoué n'empêche pas les autres, l'erreur nomme la source.
+  L'écran montre « Ce que PO voit », les groupes en pastilles (« Unsplash · grainy film portrait
+  · 12 » ; décocher masque leurs images) et la grille à cocher, auteur et licence sous chaque
+  image ; **rien n'est ajouté sans clic**. Les propositions s'affichent depuis les adresses des
+  sources (règle « hotlinking » d'Unsplash). Garder une image : seuls la source et l'id viennent
+  du navigateur (Tumblr : `<blog>:<billet>:<rang>`), le serveur relit l'image à sa source,
+  télécharge son fichier (Unsplash « regular », 1 080 px ; 15 Mo au plus, type d'image vérifié),
+  la range dans le bucket avec la session de l'utilisateur et l'enregistre comme un fichier déposé
+  (dédoublonné par sha256), rattachée par défaut à la cible de départ (la direction pour « Toutes
+  les images ») ; **Unsplash est prévenu de chaque photo gardée** (`download_location`, règle de
+  son API). La note crédite l'image et garde son adresse (`unsplash.com/photos/<id>`,
+  `tumblr.com/<blog>/<billet>#<rang>`) : c'est ce qui l'écarte d'une recherche suivante, sans
+  colonne de plus. Les images de Tumblr appartiennent à leurs auteurs : de l'inspiration, jamais à
+  publier telles quelles.
 - **Soumissions et décisions** (`design_submissions`, `design_decisions`) : pour la direction
   (sections choisies par le responsable) et pour chaque fiche (la fiche, puis chaque élément d'une
   série). L'instantané est écrit par la base à la soumission. Mode de validation du projet
@@ -3031,6 +3095,101 @@ Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
   que s'il est écrit dans le libellé (« Micro (10k-100k) ») ; agrégations cross-projets,
   vérification automatique des liens, collecte API, synchronisation planifiée : après MVP.
 - **Dépendance** : `read-excel-file` (lecture seule d'un .xlsx côté serveur).
+## 8 terdecies. Marketing : Suivi & bilan et clôture du Marketing (`/review`, `lib/marketing/`, `components/marketing/`)
+
+Ticket « Suivi & bilan » (11/10/2026), livré en six lots, chacun testé (pgTAP
+`supabase/tests/marketing-review.test.sql`, 95 assertions sur la fixture fictive Piégée / Dioo /
+Alka, plus vérification à l'écran). Quatre objets distincts : le **tableau de bord** vivant, le
+**rapport** figé et versionné, la **validation d'un bilan provisoire** avec réserves, la **clôture
+du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'étape `review`, sur
+`/closure` (§ 8 nonies).
+
+- **Lot 1 — activations et preuves lues** (`20261011000601_marketing_review_sources.sql`) : **un seul
+  modèle d'activations**, celui du ticket « Activations » (§ 8 duodecies). Les deux tickets ont été
+  menés en parallèle le 11/10 ; à la fusion (décision de Sacha), le registre minimal que créait ce lot
+  (`marketing_activations` à quatre statuts, `marketing_evidence`, page « Suivi des activations »)
+  a été retiré et le Suivi & bilan **lit** les activations par deux vues `security_invoker` (la RLS
+  des Activations s'applique), jamais stockées :
+  `marketing_review_activations` regroupe le statut opérationnel en quatre (**Prévue** = brouillon,
+  à préparer, prête ; **En cours** = en cours, suspendue, bloquée ; **Réalisée** = réalisée déclarée,
+  clôturée ; **Annulée**), l'échéance tient lieu de fin de période, la description de note ; une
+  activation n'est jamais archivée. `marketing_review_evidence` = les preuves (publication ; retombée
+  = retombée, diffusion, interview, autre) et les statistiques (**dernier relevé valide** de chaque
+  sujet, métrique et unité, comme `lib/activations/totals.ts`) ; niveau **Déclarée** (aucun
+  contrôle), **À vérifier** (dernier contrôle : contestée ou indisponible, lien signalé
+  inaccessible), **Vérifiée** (dernier contrôle vérifié : qui et quand) ; une preuve retirée est
+  archivée. Une statistique est toujours « Disponible » (un relevé a une valeur) ; un pourcentage
+  n'est jamais additionné. Noms des sources et des métriques : ceux des Activations
+  (`lib/marketing/review-labels.ts`). Contributeurs du bilan : le responsable et les directeurs
+  créatifs du projet (`marketing_can_contribute`). `marketing_events` = audit des rapports,
+  validations, réserves et clôture, écrit par triggers seuls (les activations gardent leur journal
+  `activation_events`).
+- **Lot 2 — tableau de bord** (`/review`, `lib/marketing/dashboard.ts`) : calculé à chaque ouverture,
+  filtres dans l'URL (période, type, responsable, statut, déclarant, niveau, réserve), chaque chiffre
+  ouvre son détail (`?detail=`) avec sa **règle de calcul** et la provenance des preuves comptées.
+  Les compteurs déclaré / à vérifier / vérifié sont exclusifs ; « Liens manquants » = publications
+  sans lien. Totaux par mesure : seules les valeurs existantes s'additionnent, déclaré et vérifié à
+  part, « Indisponible » sinon. Budget : lignes du budget du projet, seulement pour qui le lit.
+  Les règles sont versionnées (`RULES_VERSION`) : un rapport garde sa version et
+  `reportFigures` le relit avec elle, jamais recalculé en silence.
+- **Lot 3 — rapport figé** (`20261011000701_marketing_reports.sql`, `/review/reports`,
+  `lib/marketing/reports/`) : préparation (périmètre, période, sections du « Contenu recommandé »,
+  résumé et recommandations écrits par l'auteur) ; avant génération, le code montre données
+  manquantes, incohérences, activations exclues et **propose des réserves** (cochées par défaut ;
+  une catégorie déjà couverte par une réserve ouverte n'est pas reproposée, elle est « reprise »).
+  `generate_marketing_report` construit l'instantané **en SQL** depuis les tables (jamais envoyé par
+  le navigateur), le numérote, calcule son **empreinte SHA-256** et remplace les versions encore en
+  attente ; une version approuvée le reste. Le budget de la version est dans
+  `marketing_report_budgets`, lu seulement par qui lit le budget. Un rapport n'est jamais réécrit
+  (`report_frozen`). Comparaison avec une autre version (`?compare=`), export PDF
+  (`/api/projects/[id]/marketing-reports/[reportId]`) portant numéro, identifiant et empreinte.
+- **Lot 4 — bilan provisoire** (`20261011000801_marketing_report_approvals.sql`) : le responsable
+  soumet la version courante (validateur obligatoire : `no_validator`) ; le DG décide **sur cette
+  version** (`p_expected_version`, sinon `report_superseded`) : « Approuver le bilan provisoire
+  (avec réserves) », « Demander des corrections », « Reporter » (commentaire obligatoire pour les
+  deux derniers). Les réserves de la version sont stockées avec la décision. Séparation des rôles :
+  qui a généré ou soumis ne décide pas (`self_approval`). Approuver ne vérifie aucune donnée, ne lève
+  aucune réserve, ne clôt rien.
+- **Lot 5 — réserves et préparation** (`20261011000901_marketing_reserve_arbitration.sql`,
+  `/review/closure`) : statut À arbitrer → arbitrée → levée / fermée. Arbitrages : à lever avant
+  clôture (bloque), à suivre après clôture (qui — un membre —, échéance, canal), limite acceptée
+  (motif, **direction seule**), non applicable (motif), doublon (réserve gardée, fermée sans perdre
+  l'historique). Le responsable arbitre et lève ; la personne qui suit note et lève, jamais la
+  décision. Aucune tâche automatique : rattacher une tâche du projet ou en créer une dans Travail,
+  volontairement. La page montre le rapport de référence, ce qui bloque (calculé par
+  `lib/marketing/closure/readiness.ts`), les activations non terminées, les paiements
+  administratifs (engagé / payé), le Juridique, les preuves.
+- **Lot 6 — clôture du Marketing** (`20261011001001_marketing_closure.sql`) : le responsable demande
+  (rapport de référence = dernier bilan provisoire approuvé, ou finalisé par une clôture rouverte ;
+  aucune réserve à arbitrer ni bloquante) ; le DG — jamais le demandeur — clôture **sans réserve**
+  (rien ne reste), **avec réserves** (suivis ou limites restent), demande des corrections ou
+  reporte. Effets : rapport finalisé, réserves stockées avec la décision, volet en **lecture
+  contrôlée** (trigger `marketing_closed` : plus d'activation ni de réserve nouvelle, arbitrages
+  figés ; suivis, preuves complémentaires et nouvelles versions acceptés). Réouverture par la
+  direction avec motif ; la décision passée reste. Statut du volet calculé
+  (`lib/marketing/closure/status.ts`) : Non démarré → En cours → Bilan en préparation → Bilan
+  provisoire approuvé → Clôture en préparation → Clôturé avec / sans réserve → Réouvert. Le chevron
+  « Suivi & bilan » et la carte Marketing suivent cette clôture, plus l'étape `review`.
+  **ProjectClosureLink** : encart « Volet Marketing » sur `/closure` (statut, suivis encore ouverts,
+  écart visible si le projet est clos avec des suivis ouverts).
+- **Décisions prises faute de règle dans le ticket** :
+  - un « contributeur Marketing » = le responsable du projet et ses directeurs créatifs ; ils
+    préparent rapports et réserves ; seul le responsable soumet et demande la clôture ; le
+    « validateur Marketing » = le titulaire de `validate` (le DG) ; « Direction » pour les limites et
+    la réouverture = `validate` aussi ;
+  - activation = celle du ticket « Activations » (§ 8 duodecies), lue par les vues du lot 1 ; la
+    saisie des activations, preuves et statistiques se fait sur leurs pages, jamais ici ;
+  - « Déclarée » et « À vérifier » viennent du dernier contrôle de la preuve (Activations) ; la
+    vérification reste une action à part, confirmée et tracée ;
+  - le volet Marketing clôturé fige aussi les activations (trigger `marketing_closed` sur
+    `marketing_activations`) : plus de création ni de modification, preuves et relevés acceptés ;
+  - une statistique sans période est signalée « donnée manquante », pas bloquante ;
+  - un rapport généré après la clôture est accepté (le ticket le permet) ; il ne touche pas à la
+    clôture en vigueur ;
+  - pas de notification propre ni d'export multi-format (après MVP selon le ticket) ;
+  - la clôture du projet (`review`) ne regarde toujours pas la clôture Marketing : elle l'affiche.
+- **Fixture** : les noms Piégée / Dioo / Alka n'existent que dans le test pgTAP (tout est annulé à la
+  fin) ; jamais dans le code, le seed ni comme valeur par défaut.
 
 ## 9. Design (`docs/DESIGN.md`)
 

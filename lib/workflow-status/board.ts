@@ -110,7 +110,8 @@ export function boardActions(input: BoardInput): BoardAction[] {
           : state.step === "mastering"
             ? (input.details.masterDates?.masterFinalDue ?? null)
             : null
-        : workflow === "distribution" && state.step === "online"
+        : workflow === "distribution" &&
+            (state.step === "tracking" || state.step === "online")
           ? input.details.releaseDate
           : null;
     actions.push({

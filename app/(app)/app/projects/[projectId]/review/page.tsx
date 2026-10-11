@@ -1,136 +1,170 @@
+import { IconRocket } from "nucleo-sharp-essential";
+import Link from "next/link";
+
 import { ActivationsReview } from "@/components/activations/activations-review";
-import { ValidationPanel } from "@/components/framing/validation-panel";
-import { ReviewForm } from "@/components/review/review-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatusDot } from "@/components/ui/status-dot";
+import { DashboardFigures } from "@/components/marketing/review/dashboard-figures";
+import { DashboardFilterBar } from "@/components/marketing/review/dashboard-filters";
+import { FigureDetail } from "@/components/marketing/review/figure-detail";
+import { MetricTotals } from "@/components/marketing/review/metric-totals";
+import { EmptyState } from "@/components/shell/empty-state";
+import { Button } from "@/components/ui/button";
 import { loadActivationsBoard } from "@/lib/activations/board";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { canEditProject } from "@/lib/projects/edit-access";
+import {
+  computeDashboard,
+  filtersFromParams,
+  hasFilters,
+  isFigureKey,
+  type DashboardFilters,
+} from "@/lib/marketing/dashboard";
+import { loadMarketingStanding } from "@/lib/marketing/closure/queries";
+import { isMarketingClosed } from "@/lib/marketing/closure/status";
+import { loadDashboardInput } from "@/lib/marketing/dashboard-data";
+import { loadReserves, reserveFacts } from "@/lib/marketing/reserves/queries";
+import {
+  ACTIVATION_KINDS,
+  ACTIVATION_STATUSES,
+  VERIFICATIONS,
+} from "@/lib/marketing/model";
+import { formatLongDay, formatTime } from "@/lib/project-history/format";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { loadReview } from "@/lib/review/queries";
-import { workflowStatusTone } from "@/lib/ui/state-tones";
+import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
-import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
-const t = fr.projectReview;
+const t = fr.marketingReview.dashboard;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = {
+  title: `${fr.marketingReview.title} · ${fr.app.name}`,
+};
 
 /**
- * Marketing › Suivi & bilan: where each workflow stands, what each activation
- * brings to the review (its three axes and reserves), the review written
- * by the owner, then « Bilan & clôture » validated by the direction, which
- * closes the project (docs/ARCHITECTURE.md § 8 nonies).
+ * Marketing › Suivi & bilan, the dashboard (ticket « Suivi & bilan », écran 1):
+ * a live view computed on each opening from the activations and their
+ * evidence, filtered by the URL, every figure opening its detail and rule.
+ * A report is a frozen snapshot of it, made on the Rapports tab. Below,
+ * what each activation brings to the review: its three axes and reserves
+ * (ticket « Activations »). The project's own closing is on /closure.
  */
-export default async function ProjectReviewPage({
+export default async function MarketingDashboardPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/review">) {
   const { projectId } = await params;
+  const query = await searchParams;
   const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
-  const [data, states, activations] = await Promise.all([
-    loadReview(projectId, access),
-    loadWorkflowStates(projectId),
+  const [reserves, standing, board] = await Promise.all([
+    loadReserves(projectId, access),
+    loadMarketingStanding(projectId),
     loadActivationsBoard(projectId),
   ]);
-
-  const state = data.stage?.state ?? "not_started";
-  const inProgress = state === "in_progress";
-  const canEdit = canEditProject(access, project) && inProgress;
-  const status =
-    state === "validated"
-      ? t.closed
-      : state === "not_started"
-        ? t.notStarted
-        : inProgress
-          ? null
-          : t.locked;
+  const { input, data } = await loadDashboardInput(
+    projectId,
+    access,
+    project,
+    reserveFacts(reserves, isMarketingClosed(standing.status)),
+  );
+  const filters = filtersFromParams(query, {
+    kinds: ACTIVATION_KINDS,
+    statuses: ACTIVATION_STATUSES,
+    levels: VERIFICATIONS,
+  });
+  const dashboard = computeDashboard(input, filters);
+  const detail = isFigureKey(query.detail) ? query.detail : null;
+  const path = routes.projectReview(projectId);
+  const filterParams = (f: DashboardFilters) => ({
+    from: f.from,
+    to: f.to,
+    kind: f.kind,
+    owner: f.owner,
+    status: f.status,
+    source: f.source,
+    level: f.level,
+    reserve: f.reserve,
+  });
+  const now = new Date().toISOString();
+  const live = data.activations.filter((a) => a.archivedAt === null);
+  const sources = [
+    ...new Set(
+      data.evidence.flatMap((e) => (e.reportedBy ? [e.reportedBy.trim()] : [])),
+    ),
+  ].sort((a, b) => a.localeCompare(b, "fr"));
 
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="grid content-start gap-6">
-          {states && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.workflows}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="divide-y">
-                  {states.workflows.map((workflow) => {
-                    const s = states.states[workflow];
-                    return (
-                      <li
-                        key={workflow}
-                        className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5 text-sm"
-                      >
-                        <span className="font-medium">
-                          {fr.shell.project.sidebar[workflow]}
-                        </span>
-                        {s && s !== "restricted" ? (
-                          <span className="flex min-w-0 items-baseline gap-2">
-                            <StatusDot
-                              tone={workflowStatusTone[s.status]}
-                              label={fr.workflowStatus.statuses[s.status]}
-                              showLabel
-                            />
-                            <span className="break-words text-muted-foreground">
-                              {s.reason}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">
-                            {fr.workflowStatus.restricted}
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </CardContent>
-            </Card>
+    <div className="grid gap-8">
+      <div className="grid gap-1">
+        <p className="text-sm text-muted-foreground">{t.description}</p>
+        <p className="text-caption text-muted-foreground">
+          {t.computedAt(
+            formatLongDay(now),
+            formatTime(now),
+            dashboard.rulesVersion,
           )}
-          <ActivationsReview
-            projectId={projectId}
-            rows={activations.summaries}
-          />
-          <Card>
-            <CardHeader>
-              <CardTitle>{t.stage}</CardTitle>
-              {status && (
-                <p className="text-sm text-muted-foreground">{status}</p>
-              )}
-            </CardHeader>
-            <CardContent>
-              <ReviewForm
-                projectId={projectId}
-                review={data.review}
-                canEdit={canEdit}
-              />
-            </CardContent>
-          </Card>
-        </div>
-        <aside className="grid content-start gap-6">
-          <Card>
-            <CardContent className="grid gap-3">
-              <ValidationPanel
-                stage={data.stage}
-                pendingValidation={data.pendingValidation}
-                projectId={projectId}
-                mePersonId={access.personId}
-                title={t.stage}
-                startLabel={t.start}
-              />
-              {inProgress && (
-                <p className="text-xs text-muted-foreground">{t.closeHint}</p>
-              )}
-            </CardContent>
-          </Card>
-        </aside>
+        </p>
       </div>
+      {live.length === 0 ? (
+        <EmptyState
+          icon={IconRocket}
+          title={fr.marketing.activations.emptyTitle}
+          body={t.empty}
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              render={<Link href={routes.projectActivations(projectId)} />}
+              nativeButton={false}
+            >
+              {t.emptyAction}
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          <DashboardFilterBar
+            action={path}
+            filters={filters}
+            owners={data.members.filter((m) =>
+              live.some((a) => a.ownerPersonId === m.personId),
+            )}
+            sources={sources}
+          />
+          {hasFilters(filters) &&
+            dashboard.excludedActivationIds.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                {dashboard.figures.activations.value === 0
+                  ? t.filteredEmpty
+                  : t.excluded(dashboard.excludedActivationIds.length)}
+              </p>
+            )}
+          {detail && (
+            <FigureDetail
+              projectId={projectId}
+              figure={detail}
+              dashboard={dashboard}
+              activations={data.activations}
+              evidence={data.evidence}
+              closeHref={viewHref(path, filterParams(filters))}
+            />
+          )}
+          <DashboardFigures
+            dashboard={dashboard}
+            budgetRestricted={input.budgetRestricted}
+            detail={detail}
+            hrefOf={(key) =>
+              viewHref(path, {
+                ...filterParams(filters),
+                detail: detail === key ? null : key,
+              })
+            }
+          />
+          <MetricTotals metrics={dashboard.metrics} />
+          <ActivationsReview projectId={projectId} rows={board.summaries} />
+        </>
+      )}
     </div>
   );
 }

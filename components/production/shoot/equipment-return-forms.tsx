@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -33,7 +33,7 @@ export function ReturnIncidentForm({
   onDone: () => void;
 }) {
   const [missing, setMissing] = useState(false);
-  const { pending, error, run } = usePrepSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.done);
   const id = `return-${line.id}-incident`;
 
   function submit(form: HTMLFormElement) {
@@ -98,7 +98,7 @@ export function ReturnHolderForm({
   onDone: () => void;
 }) {
   const [holder, setHolder] = useState(holderValue(line.holder));
-  const { pending, error, run } = usePrepSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.done);
 
   function submit(form: HTMLFormElement) {
     const returnDue = String(new FormData(form).get("returnDue") ?? "");

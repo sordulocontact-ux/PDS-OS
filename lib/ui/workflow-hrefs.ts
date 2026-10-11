@@ -1,5 +1,13 @@
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import {
+  DISTRIBUTION_STEPS,
+  distributionStepHref,
+  type DistributionStep,
+} from "@/lib/ui/distribution-steps";
+
+const isDistributionStep = (step: string): step is DistributionStep =>
+  (DISTRIBUTION_STEPS as readonly string[]).includes(step);
 
 // Where each step of a workflow is done (lib/workflow-status/rules.ts names
 // the step): the overview's cards and actions open it.
@@ -28,8 +36,8 @@ export function workflowStepHref(
               ? routes.projectReview(projectId)
               : routes.projectStrategy(projectId);
     default:
-      return step === "online"
-        ? routes.projectReleaseOnline(projectId)
+      return isDistributionStep(step)
+        ? distributionStepHref(projectId, step)
         : routes.projectRelease(projectId);
   }
 }
@@ -40,7 +48,7 @@ const STEP_KEYS: Record<string, readonly string[]> = {
   master: ["source", "brief", "mixing", "mastering", "final"],
   legal: ["inventory", "plan"],
   marketing: ["strategy", "conception", "production", "activations", "review"],
-  distribution: ["prepare", "online"],
+  distribution: DISTRIBUTION_STEPS,
 };
 
 export function workflowSteps(

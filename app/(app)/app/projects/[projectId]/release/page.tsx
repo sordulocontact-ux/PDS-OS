@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { ReadinessList } from "@/components/distribution/readiness-list";
+import { ReadinessSummary } from "@/components/distribution/readiness-summary";
 import { ReleaseForm } from "@/components/release/release-form";
 import {
   Card,
@@ -9,9 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { requireApproved } from "@/lib/auth/dal";
+import { distributionReadiness } from "@/lib/distribution/readiness";
+import { loadDistributionSources } from "@/lib/distribution/sources";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { fr } from "@/lib/i18n/fr";
+import { formatDate } from "@/lib/release/format";
 import { getProjectRelease } from "@/lib/release/queries";
 import { isUuid } from "@/lib/release/uuid";
 import { createClient } from "@/lib/supabase/server";
@@ -23,20 +29,23 @@ const t = fr.release;
 
 export const metadata: Metadata = { title: `${t.page.title} · ${fr.app.name}` };
 
-// Distribution, Préparation: the release's identifiers and date. Detection
-// and smartlink live on the next step, En ligne (./online).
+// Distribution, Préparation (ticket « Distribution » § 6.2-6.3): the
+// contrôle de préparation — what the deposit reuses, read in each owner
+// module, corrected there — then the release's own identifiers and date.
 export default async function ReleasePage({
   params,
 }: PageProps<"/app/projects/[projectId]/release">) {
   const { projectId } = await params;
   if (!isUuid(projectId)) notFound();
-  const [, , data] = await allInOrder([
+  const [access, project, data] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
     createClient().then((supabase) => getProjectRelease(supabase, projectId)),
   ]);
   if (!data) notFound();
-  const { project, release } = data;
+  const { release } = data;
+  const sources = await loadDistributionSources(project, access);
+  const readiness = distributionReadiness(sources.input, formatDate);
 
   const initial = {
     title: release?.title ?? project.title,
@@ -53,7 +62,11 @@ export default async function ReleasePage({
         <p className="text-sm text-muted-foreground">{t.page.description}</p>
       </header>
 
-      <Card className="max-w-3xl">
+      <ToneCallout tone="info">{fr.distribution.manualNotice}</ToneCallout>
+      <ReadinessSummary readiness={readiness} failed={sources.failed} />
+      <ReadinessList items={readiness.items} />
+
+      <Card id="release-form" className="max-w-3xl scroll-mt-6">
         <CardHeader>
           <CardTitle>
             {release ? t.form.titleEdit : t.form.titleCreate}

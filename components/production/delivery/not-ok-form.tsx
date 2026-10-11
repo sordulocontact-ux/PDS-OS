@@ -4,8 +4,8 @@ import { useState, type FormEvent } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { DialogFormActions } from "@/components/production/prep/need-dialog-actions";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import { setExportCheckResult } from "@/lib/production/delivery/checklist-actions";
 
@@ -24,7 +24,7 @@ export function NotOkForm({
   onDone: () => void;
 }) {
   const [missing, setMissing] = useState<string>();
-  const { pending, error, run } = usePrepSubmit(onDone, t.checklist.marked);
+  const { pending, error, run } = useWriteSubmit(onDone, t.checklist.marked);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
