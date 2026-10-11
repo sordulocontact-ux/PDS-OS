@@ -41,19 +41,22 @@ export type ActivationFormSource = {
 /**
  * Creates an activation (by hand or from a source, its title and kind
  * proposed from the source) or modifies one (`activation`). A created one
- * opens on its page. The mode only exists for Influence and RP.
+ * opens on its page. The mode only exists for Influence and RP. A new one is
+ * proposed to the project's owner (`defaultOwnerId`), who may change it.
  */
 export function ActivationForm({
   projectId,
   members,
   activation,
   source,
+  defaultOwnerId = null,
   onDone,
 }: {
   projectId: string;
   members: Member[];
   activation?: ActivationRecord;
   source?: ActivationFormSource;
+  defaultOwnerId?: string | null;
   onDone: () => void;
 }) {
   const router = useRouter();
@@ -185,7 +188,7 @@ export function ActivationForm({
         label={t.create.owner}
         members={members}
         noneLabel={t.create.ownerNone}
-        defaultValue={activation?.ownerPersonId ?? null}
+        defaultValue={activation ? activation.ownerPersonId : defaultOwnerId}
       />
       <ChipChoice
         name="priority"

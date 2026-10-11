@@ -14,11 +14,13 @@ export function AttachSection({
   items,
   members,
   canCreate,
+  defaultOwnerId,
 }: {
   projectId: string;
   items: Attachable[];
   members: Member[];
   canCreate: boolean;
+  defaultOwnerId: string | null;
 }) {
   if (items.length === 0) return null;
   return (
@@ -44,6 +46,7 @@ export function AttachSection({
               <NewActivationButton
                 projectId={projectId}
                 members={members}
+                defaultOwnerId={defaultOwnerId}
                 source={{
                   kind: item.sourceKind,
                   id: item.sourceId,

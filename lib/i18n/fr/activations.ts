@@ -29,14 +29,11 @@ export const activations = {
       "L'agence garde son tableau ; PDS le lit, décide et capitalise, sans compte pour l'agence.",
   },
   statuses: {
-    draft: "Brouillon",
     to_prepare: "À préparer",
-    ready: "Prête",
     in_progress: "En cours",
     done_declared: "Réalisée déclarée",
     closed: "Clôturée",
     cancelled: "Annulée",
-    suspended: "Suspendue",
     blocked: "Bloquée",
   },
   priorities: { high: "Haute", normal: "Normale", low: "Basse" },
@@ -128,7 +125,7 @@ export const activations = {
     titlePlaceholder: "Campagne TikTok de sortie",
     objective: "Objectif",
     owner: "Responsable de l'activation",
-    ownerNone: "Le responsable du projet",
+    ownerNone: "Personne pour l'instant",
     due: "Échéance",
     starts: "Début",
     priority: "Priorité",
@@ -190,10 +187,22 @@ export const activations = {
     title: "Statut opérationnel",
     change: "Changer le statut",
     reason: "Raison",
-    reasonHint: "Obligatoire pour annuler, suspendre ou bloquer.",
+    reasonHint: "Obligatoire pour annuler ou bloquer.",
     declaredWarning:
       "« Réalisée déclarée » ne signifie ni publiée, ni vérifiée, ni mesurée.",
     saved: "Statut enregistré.",
+    // « Prête », computed: what starting (En cours, Réalisée déclarée) needs.
+    launch: {
+      label: "Pour lancer",
+      ready: "Prête : responsable, échéance, rien de bloquant",
+      missing: (list: string) => `Il reste à ${list}`,
+      gaps: {
+        owner: "désigner un responsable",
+        due: "fixer l'échéance",
+        blocker: "lever les blocages ouverts",
+        dependency: "résoudre les dépendances bloquantes",
+      },
+    },
   },
   next: {
     title: "Prochaine action",
@@ -225,9 +234,14 @@ export const activations = {
         label: "Désigner un responsable",
         reason: "Personne n'est assigné à cette activation.",
       },
-      prepare: {
-        label: "Préparer l'activation",
-        reason: "Elle est encore en brouillon.",
+      due_missing: {
+        label: "Fixer l'échéance",
+        reason: "Sans échéance, l'activation ne peut pas être lancée.",
+      },
+      launch: {
+        label: "Lancer l'activation",
+        reason:
+          "Elle est prête : un responsable, une échéance, rien de bloquant. Passez-la « En cours ».",
       },
       blocker: {
         label: (what: string) => `Lever le blocage : ${what}`,
@@ -675,6 +689,8 @@ export const activations = {
     labelRequired: "Donnez un libellé.",
     personRequired: "Choisissez une personne.",
     transition: "Ce changement n'est pas possible depuis l'état actuel.",
+    notReady: (list: string) =>
+      `Pour lancer l'activation, il faut d'abord ${list}.`,
     fileTooLarge: "Le fichier dépasse 200 Mo.",
     uploadFailed: "L'envoi du fichier a échoué.",
     withdrawn: "Cette preuve a été retirée.",

@@ -1,9 +1,11 @@
 // Words for what lib/activations/states.ts computes: alerts, rule steps,
 // reserves. Client-safe.
 
+import type { LaunchGap } from "@/lib/activations/model";
 import type { Alert, Reserve, RuleStep } from "@/lib/activations/states";
 import { fr } from "@/lib/i18n/fr";
 import { formatDate } from "@/lib/release/format";
+import { joinList } from "@/lib/utils/sentences";
 
 const t = fr.activations;
 
@@ -49,7 +51,8 @@ export function stepText(s: RuleStep): { label: string; reason: string } {
         reason: r.overdue.reason(formatDate(s.subject ?? "")),
       };
     case "owner_missing":
-    case "prepare":
+    case "due_missing":
+    case "launch":
     case "evidence_missing":
     case "evidence_unverified":
     case "evidence_problem":
@@ -68,4 +71,12 @@ export function reserveText(r: Reserve): string {
   if (r.key === "open_targets") return l.open_targets(r.count ?? 0);
   const label = l[r.key as keyof typeof l];
   return typeof label === "string" ? label : r.key;
+}
+
+/** « désigner un responsable et fixer l'échéance ». */
+export function launchGapsText(gaps: readonly LaunchGap[]): string {
+  return joinList(
+    gaps.map((g) => t.status.launch.gaps[g]),
+    "et",
+  );
 }

@@ -9,6 +9,7 @@ import type {
   CheckResult,
   EvidenceKind,
   EvidenceSource,
+  LaunchGap,
   Metric,
   MetricSource,
   MetricUnit,
@@ -151,6 +152,8 @@ export type ActivationSummary = ActivationRecord & {
   next: NextAction | null;
   reserves: Reserve[];
   openBlockerCount: number;
+  // What starting still needs; empty = « Prête ».
+  launchGaps: LaunchGap[];
   lastChangeAt: string;
 };
 

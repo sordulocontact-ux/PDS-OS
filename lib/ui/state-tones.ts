@@ -690,14 +690,11 @@ export const readinessTone: Record<string, Tone> = {
 /** Marketing › Activations (lib/activations/states.ts): the operational
  * status, set by a person; « Réalisée déclarée » waits for its proof. */
 export const activationStatusTone: Record<string, Tone> = {
-  draft: "neutral",
   to_prepare: "neutral",
-  ready: "info",
   in_progress: "info",
   done_declared: "warning",
   closed: "success",
   cancelled: "neutral",
-  suspended: "warning",
   blocked: "danger",
 };
 

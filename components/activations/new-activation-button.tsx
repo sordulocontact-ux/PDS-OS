@@ -11,15 +11,18 @@ import { ActivationForm, type ActivationFormSource } from "./activation-form";
 const t = fr.activations.create;
 
 /** « Nouvelle activation », or « Créer l'activation » from a source of the
- * Stratégie or the Production (`source`). */
+ * Stratégie or the Production (`source`) ; the owner proposed is the
+ * project's (`defaultOwnerId`). */
 export function NewActivationButton({
   projectId,
   members,
   source,
+  defaultOwnerId,
 }: {
   projectId: string;
   members: Member[];
   source?: ActivationFormSource;
+  defaultOwnerId: string | null;
 }) {
   return (
     <DialogButton
@@ -35,6 +38,7 @@ export function NewActivationButton({
           projectId={projectId}
           members={members}
           source={source}
+          defaultOwnerId={defaultOwnerId}
           onDone={close}
         />
       )}

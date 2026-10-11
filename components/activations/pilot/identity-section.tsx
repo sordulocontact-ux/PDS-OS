@@ -1,5 +1,7 @@
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
+import { launchGapsText } from "@/lib/activations/describe";
+import { NOT_STARTED_STATUSES } from "@/lib/activations/model";
 import type { ActivationSummary } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
@@ -52,6 +54,17 @@ export function IdentitySection({
           },
           ...(a.statusReason
             ? [{ label: t.status.reason, value: a.statusReason }]
+            : []),
+          ...(NOT_STARTED_STATUSES.includes(a.status)
+            ? [
+                {
+                  label: t.status.launch.label,
+                  value:
+                    a.launchGaps.length === 0
+                      ? t.status.launch.ready
+                      : t.status.launch.missing(launchGapsText(a.launchGaps)),
+                },
+              ]
             : []),
           ...(a.description
             ? [{ label: t.identity.description, value: a.description }]

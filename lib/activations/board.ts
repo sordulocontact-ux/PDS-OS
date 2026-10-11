@@ -9,6 +9,7 @@ import { loadModuleFacts, moduleSignals } from "@/lib/activations/modules";
 import {
   alertsOf,
   isBlocked,
+  launchGaps,
   measureState,
   proofState,
   reservesOf,
@@ -143,6 +144,7 @@ export const loadActivationsBoard = cache(async (projectId: string) => {
       next: nextActionOf(a, data, steps),
       reserves: reservesOf(facts),
       openBlockerCount: facts.openBlockers.length,
+      launchGaps: launchGaps(facts),
       lastChangeAt: changes.at(-1) ?? a.updatedAt,
     };
   });

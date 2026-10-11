@@ -17,15 +17,14 @@ export type ActivationMode = (typeof ACTIVATION_MODES)[number];
 export const kindHasMode = (kind: ActivationKind) =>
   kind === "influence" || kind === "press";
 
+// « Prête » is computed (`launchGaps`), « Suspendue » merged into « Bloquée »
+// (supabase/migrations/20261011300101_activation_statuses.sql).
 export const ACTIVATION_STATUSES = [
-  "draft",
   "to_prepare",
-  "ready",
   "in_progress",
   "done_declared",
   "closed",
   "cancelled",
-  "suspended",
   "blocked",
 ] as const;
 export type ActivationStatus = (typeof ACTIVATION_STATUSES)[number];
@@ -36,9 +35,20 @@ export const SETTABLE_STATUSES = ACTIVATION_STATUSES.filter(
 /** Those that need a written reason. */
 export const REASONED_STATUSES: readonly ActivationStatus[] = [
   "cancelled",
-  "suspended",
   "blocked",
 ];
+/** Starting = from these to `STARTED_STATUSES`, refused by the database while
+ * something of `LAUNCH_GAPS` is missing. */
+export const NOT_STARTED_STATUSES: readonly ActivationStatus[] = [
+  "to_prepare",
+  "blocked",
+];
+export const STARTED_STATUSES: readonly ActivationStatus[] = [
+  "in_progress",
+  "done_declared",
+];
+export const LAUNCH_GAPS = ["owner", "due", "blocker", "dependency"] as const;
+export type LaunchGap = (typeof LAUNCH_GAPS)[number];
 
 export const PRIORITIES = ["high", "normal", "low"] as const;
 export type Priority = (typeof PRIORITIES)[number];

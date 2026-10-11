@@ -62,7 +62,11 @@ export default async function ProjectActivationsPage({
     <div className="grid gap-6">
       {canCreate && (
         <ProjectPageActions>
-          <NewActivationButton projectId={projectId} members={members} />
+          <NewActivationButton
+            projectId={projectId}
+            members={members}
+            defaultOwnerId={project.ownerPersonId}
+          />
         </ProjectPageActions>
       )}
       {all.length === 0 ? (
@@ -132,6 +136,7 @@ export default async function ProjectActivationsPage({
         items={attachables}
         members={members}
         canCreate={canCreate}
+        defaultOwnerId={project.ownerPersonId}
       />
     </div>
   );

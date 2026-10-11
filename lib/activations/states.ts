@@ -3,13 +3,15 @@
 // sont affichés séparément », « Une statistique n'est jamais déduite à zéro »).
 // Pure functions, client-safe.
 
-import type {
-  ActivationStatus,
-  BlockerCategory,
-  CheckResult,
-  DependencyKind,
-  MetricVerification,
-  Severity,
+import {
+  NOT_STARTED_STATUSES,
+  type ActivationStatus,
+  type BlockerCategory,
+  type CheckResult,
+  type DependencyKind,
+  type LaunchGap,
+  type MetricVerification,
+  type Severity,
 } from "@/lib/activations/model";
 
 export type ProofState =
@@ -70,16 +72,29 @@ export type ActivationFacts = {
 };
 
 const OPEN_WORK: readonly ActivationStatus[] = [
-  "draft",
   "to_prepare",
-  "ready",
   "in_progress",
-  "suspended",
   "blocked",
 ];
 
 export const isOpen = (status: ActivationStatus) =>
   status !== "closed" && status !== "cancelled";
+
+/**
+ * What an activation still lacks to start (« Prête » when none), as the
+ * database checks it (`activation_launch_gaps`) : an owner, a due date, no
+ * open blocker, no blocking dependency unresolved. A dependency this session
+ * cannot read is left to the database.
+ */
+export function launchGaps(f: ActivationFacts): LaunchGap[] {
+  const gaps: LaunchGap[] = [];
+  if (!f.ownerPersonId) gaps.push("owner");
+  if (!f.dueOn) gaps.push("due");
+  if (f.openBlockers.length > 0) gaps.push("blocker");
+  if (f.dependencies.some((d) => d.blocking && d.resolved === false))
+    gaps.push("dependency");
+  return gaps;
+}
 
 /** An evidence's own state: its latest check, else not verified. */
 export function evidenceState(e: EvidenceFact): ProofState {
@@ -220,8 +235,7 @@ export function viewsOf(f: ActivationFacts, alerts: Alert[]): ActivationView[] {
   const measure = measureState(f);
   const blocked = isBlocked(f, alerts);
   if (!isOpen(f.status)) return ["closed"];
-  if (["draft", "to_prepare", "ready"].includes(f.status))
-    views.push("to_launch");
+  if (f.status === "to_prepare") views.push("to_launch");
   if (f.status === "in_progress") views.push("in_progress");
   if (
     ["provided_unverified", "contested", "unavailable"].includes(proof) ||
@@ -264,7 +278,8 @@ export function reservesOf(f: ActivationFacts): Reserve[] {
 
 export type RuleKey =
   | "owner_missing"
-  | "prepare"
+  | "due_missing"
+  | "launch"
   | "blocker"
   | "dependency"
   | "overdue"
@@ -286,9 +301,9 @@ export type RuleStep = {
 
 /**
  * The next action recommended by rules, in order of what unblocks the most:
- * an owner, the preparation, what blocks, the module's own next step, an
- * overdue date, the proof, the statistics, then the closure. Rules a person
- * set aside are skipped.
+ * an owner, a due date, what blocks, the module's own next step, the start
+ * once nothing is missing, an overdue date, the proof, the statistics, then
+ * the closure. Rules a person set aside are skipped.
  */
 export function ruleSteps(
   f: ActivationFacts,
@@ -298,13 +313,16 @@ export function ruleSteps(
   if (!isOpen(f.status)) return [];
   const steps: RuleStep[] = [];
   if (!f.ownerPersonId) steps.push({ key: "owner_missing" });
-  if (f.status === "draft") steps.push({ key: "prepare" });
+  const notStarted = NOT_STARTED_STATUSES.includes(f.status);
+  if (notStarted && !f.dueOn) steps.push({ key: "due_missing" });
   for (const b of f.openBlockers)
     steps.push({ key: "blocker", subject: b.description });
   for (const d of f.dependencies)
     if (d.blocking && d.resolved === false)
       steps.push({ key: "dependency", subject: d.label });
   steps.push(...moduleSteps);
+  if (f.status === "to_prepare" && launchGaps(f).length === 0)
+    steps.push({ key: "launch" });
   if (f.dueOn && f.dueOn < today && OPEN_WORK.includes(f.status))
     steps.push({ key: "overdue", subject: f.dueOn });
   const proof = proofState(f);

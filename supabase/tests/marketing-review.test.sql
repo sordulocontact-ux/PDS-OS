@@ -86,6 +86,11 @@ select is((select count(*)::int from public.marketing_review_activations where p
           8, 'the review reads the eight activations of the fixture: one model, no second register');
 select is((select status from public.marketing_review_activations where id = pg_temp.id_of('press')),
           'planned', 'a draft activation is « Prévue » for the review');
+-- Starting needs an owner and a due date (20261011300101).
+update public.marketing_activations
+   set owner_person_id = coalesce(owner_person_id, pg_temp.id_of('manager_person')),
+       due_on = coalesce(due_on, date '2026-10-20')
+ where project_id = pg_temp.id_of('project');
 update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('session');
 update public.marketing_activations set status = 'in_progress'
  where project_id = pg_temp.id_of('project') and id <> pg_temp.id_of('session');

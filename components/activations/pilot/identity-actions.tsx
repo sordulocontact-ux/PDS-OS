@@ -1,7 +1,7 @@
 "use client";
 
 import { DialogButton } from "@/components/ui/dialog-button";
-import type { ActivationRecord } from "@/lib/activations/types";
+import type { ActivationSummary } from "@/lib/activations/types";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 
@@ -15,7 +15,7 @@ export function IdentityActions({
   activation,
   members,
 }: {
-  activation: ActivationRecord;
+  activation: ActivationSummary;
   members: Member[];
 }) {
   return (
@@ -32,6 +32,7 @@ export function IdentityActions({
             activationId={activation.id}
             current={activation.status}
             reason={activation.statusReason}
+            gaps={activation.launchGaps}
             onDone={close}
           />
         )}

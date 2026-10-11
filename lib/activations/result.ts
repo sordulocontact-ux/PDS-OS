@@ -2,6 +2,8 @@ import "server-only";
 
 import { revalidatePath } from "next/cache";
 
+import { launchGapsText } from "@/lib/activations/describe";
+import { LAUNCH_GAPS, type LaunchGap } from "@/lib/activations/model";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -43,6 +45,16 @@ export function activationFailure(error: { code?: string; message?: string }): {
   error: string;
 } {
   const message = error.message ?? "";
+  // « activation_not_ready:owner,due » : what starting still needs.
+  const notReady = /activation_not_ready:([a-z,]+)/.exec(message);
+  if (notReady) {
+    const gaps = notReady[1]
+      .split(",")
+      .filter((g): g is LaunchGap =>
+        (LAUNCH_GAPS as readonly string[]).includes(g),
+      );
+    return { ok: false, error: e.notReady(launchGapsText(gaps)) };
+  }
   for (const [code, sentence] of MESSAGES)
     if (message.includes(code)) return { ok: false, error: sentence };
   if (message.includes("not_found")) return { ok: false, error: e.notFound };

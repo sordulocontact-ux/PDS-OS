@@ -3065,9 +3065,9 @@ Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
   le changement de mode garde tout l'historique. Une activation vient d'un levier retenu, d'un
   livrable engagé ou d'un transfert de la Production (un lien, jamais une copie ; un livrable ou
   un transfert n'a qu'une activation, un levier peut en porter plusieurs), ou est créée à la main.
-- **Trois axes, jamais fusionnés** : le **statut opérationnel** (Brouillon → À préparer → Prête →
-  En cours → Réalisée déclarée → Clôturée, + Annulée / Suspendue / Bloquée avec raison), posé par
-  une personne ; la **preuve** (`activation_evidence` : lien, fichier ou source de la déclaration ;
+- **Trois axes, jamais fusionnés** : le **statut opérationnel** (À préparer → En cours →
+  Réalisée déclarée → Clôturée, + Annulée / Bloquée avec raison ; voir « Statuts » ci-dessous), posé
+  par une personne ; la **preuve** (`activation_evidence` : lien, fichier ou source de la déclaration ;
   `activation_evidence_checks` : chaque contrôle avec méthode, auteur, date, append-only ; une
   preuve retirée reste historisée) ; la **mesure** (`activation_metrics` : relevés datés avec
   source, période, méthode, toujours « déclarés » à l'enregistrement, vérifiés à part, invalidés
@@ -3087,6 +3087,23 @@ Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
   par triggers et fonctions seulement. Clôture `close_activation` (définitive ou avec réserves
   listées par le code et gardées telles que montrées ; définitive malgré des réserves = motif),
   réouverture `reopen_activation` avec raison.
+- **Statuts (Sacha, 11/10/2026, migration `20261011300101`)** : le ticket liste Brouillon → À
+  préparer → Prête → En cours → Réalisée déclarée → Clôturée, + Annulée / Suspendue / Bloquée ; à
+  l'écran, les trois premiers ne servaient qu'à trier la liste et Suspendue avait l'effet de Bloquée.
+  Ils sont fusionnés en **À préparer** (anciennes lignes reprises, Suspendue → Bloquée avec sa
+  raison) et **« Prête » est calculée**, comme le dit le flux du ticket (« Préparation : […] les
+  contrôles n'empêchent pas une préparation partielle, mais signalent ce qui bloque le passage à
+  l'état suivant ») : **lancer** une activation (de À préparer ou Bloquée vers En cours ou Réalisée
+  déclarée) exige un responsable, une échéance (« calendrier »), aucun blocage ouvert et aucune
+  dépendance bloquante non résolue. Vérifié en SQL (`marketing_activations_check`,
+  `activation_launch_gaps`, refus `activation_not_ready:<manques>`), dit à l'écran par le code
+  (`launchGaps`, ligne « Pour lancer » de l'identité, refus du formulaire de statut, règles
+  `due_missing` puis `launch` de la prochaine action). Ce que chaque statut change : À préparer =
+  vue « À lancer » ; En cours = vue « En cours » ; Réalisée déclarée = ouvre preuve, statistiques,
+  « Prête pour bilan » et la clôture, arrête l'alerte de retard ; Bloquée = vue et compteur ;
+  Annulée = sort des alertes, compteurs et bilan. Une nouvelle activation propose le responsable du
+  projet comme responsable (modifiable, « Personne pour l'instant » possible). Non fait : condition
+  propre aux modules (cadrage validé avant de lancer une Influence) — à trancher.
 - **Qui écrit** : le responsable du projet et le responsable de l'activation
   (`activation_can_write`) ; **validateur PDS** = le DG ou un directeur créatif du projet
   (`marketing_can_validate`) : il vérifie preuves et statistiques, décide des fiches et des

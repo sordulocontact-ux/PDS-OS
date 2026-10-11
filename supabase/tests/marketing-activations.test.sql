@@ -1,10 +1,11 @@
 -- Marketing › Activations : the core, Influence, agency mode and RP
--- (supabase/migrations/20261011000101 to 20261011000501). Fixture « Piégée /
+-- (supabase/migrations/20261011000101 to 20261011000501, statuses
+-- 20261011300101). Fixture « Piégée /
 -- Dioo / Alka » and ATYR figures : simulation only, rolled back. Nothing
 -- real is contacted, published, verified or paid.
 -- Run with `supabase test db`.
 begin;
-select plan(52);
+select plan(56);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -83,6 +84,33 @@ insert into ids select 'press', id from public.marketing_activations where proje
 
 select throws_ok($$ update public.marketing_activations set status = 'cancelled' where id = pg_temp.id_of('session') $$,
                  '23514', null, 'cancelling says why');
+-- « Prête » is computed : starting (En cours, Réalisée déclarée) needs an owner,
+-- a due date, no open blocker, no blocking dependency left open.
+select throws_ok($$ update public.marketing_activations set status = 'suspended', status_reason = 'x'
+                    where id = pg_temp.id_of('session') $$,
+                 '23514', null, '« Suspendue » is merged into « Bloquée », « Prête » is no longer ticked');
+select throws_ok($$ update public.marketing_activations set status = 'in_progress' where id = pg_temp.id_of('session') $$,
+                 '23514', 'activation_not_ready:owner,due', 'no start without an owner nor a due date');
+update public.marketing_activations
+   set owner_person_id = pg_temp.id_of('manager_person'), due_on = date '2026-10-15'
+ where id = pg_temp.id_of('session');
+insert into public.activation_blockers (organization_id, project_id, activation_id, category, description)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'production',
+        'Montage en retard (simulation)');
+select throws_ok($$ update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('session') $$,
+                 '23514', 'activation_not_ready:blocker', 'an open blocker stops the start');
+update public.activation_blockers set status = 'resolved', resolution_note = 'Montage livré (simulation)'
+ where activation_id = pg_temp.id_of('session');
+insert into public.tasks (organization_id, project_id, title, assignee_person_id, due_date)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Valider le montage (simulation)',
+        pg_temp.id_of('manager_person'), date '2026-10-14');
+insert into ids select 'montage', id from public.tasks
+ where project_id = pg_temp.id_of('project') and title = 'Valider le montage (simulation)';
+insert into public.activation_dependencies (organization_id, project_id, activation_id, kind, task_id)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'task', pg_temp.id_of('montage'));
+select throws_ok($$ update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('session') $$,
+                 '23514', 'activation_not_ready:dependency', 'a blocking dependency left open stops the start');
+update public.tasks set status = 'done', done_at = now() where id = pg_temp.id_of('montage');
 update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('session');
 select ok(exists (select 1 from public.activation_events where activation_id = pg_temp.id_of('session')
                    and kind = 'activation.status' and actor = pg_temp.id_of('manager_person')),
