@@ -2867,6 +2867,11 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
   (`design_reference_links`) ; sans lien = « À rattacher ». Même fichier (sha256) ou même lien =
   une seule ressource, jamais un second import. Une référence reste une proposition tant qu'aucune
   section approuvée de la direction ne la contient.
+  Miniature d'un lien (`lib/integrations/link-preview.ts`, page Références seule) : image YouTube
+  connue, adresse d'image directe, sinon l'image Open Graph / Twitter de la page lue par le serveur
+  (hôtes publics seulement, chaque redirection revérifiée, 2 Mo et 5 s au plus, cache d'un jour ;
+  un échec réseau n'est pas mis en cache). L'image est chargée par le navigateur
+  (`referrerPolicy="no-referrer"`) ; refusée par le site, la carte reprend l'icône « Lien ».
 - **Références semblables (Unsplash + Tumblr)** (11/10/2026, demande de Sacha : « que PO cherche
   d'autres images qui ressemblent à celles envoyées, pour agrandir le moodboard ». Essayé dans la
   journée : Are.na, puis Are.na + Openverse ; retenu : « Unsplash + Tumblr, et pour le moment tu

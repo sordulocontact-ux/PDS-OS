@@ -36,8 +36,8 @@ export function ReferenceSection({
       ) : (
         <ul className="grid grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-3">
           {references.map((reference) => (
-            <li key={reference.id} className="flex">
-              <div className="flex-1">
+            <li key={reference.id} className="flex min-w-0">
+              <div className="min-w-0 flex-1">
                 <ReferenceCard
                   projectId={projectId}
                   reference={reference}

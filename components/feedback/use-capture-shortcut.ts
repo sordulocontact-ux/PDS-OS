@@ -17,8 +17,9 @@ export function useCaptureShortcut(enabled: boolean, onStart: () => void) {
   useEffect(() => {
     if (!enabled) return;
     const onKey = (event: KeyboardEvent) => {
+      // Autofill fires keydown events with no key.
       if (
-        event.key.toLowerCase() !== CAPTURE_KEY ||
+        event.key?.toLowerCase() !== CAPTURE_KEY ||
         event.repeat ||
         event.metaKey ||
         event.ctrlKey ||
