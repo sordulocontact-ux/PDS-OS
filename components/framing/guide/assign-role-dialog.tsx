@@ -97,9 +97,11 @@ const NETWORK_ROLES_OF: Record<TeamRoleKey, readonly NetworkRole[]> = {
     "videographer",
   ],
   clip_production: ["videographer"],
-  press_relations: ["media", "provider"],
-  influence_marketing: ["provider", "partner", "media"],
-  playlisting: ["provider", "media"],
+  // « Prestataire » and « Partenaire » are relation types since the ticket
+  // « Retour PO / Réseau » of 11/10/2026: an agency is what they were.
+  press_relations: ["media", "journalist", "agency"],
+  influence_marketing: ["influencer", "agency", "media"],
+  playlisting: ["agency", "media"],
   mix_engineer: ["engineer"],
   mastering_engineer: ["engineer"],
 };

@@ -10,6 +10,7 @@ import { ProjectPageTitle } from "@/components/projects/project-page-title";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
 import { SectionSteps } from "@/components/projects/section-steps";
+import { BackLink } from "@/components/shell/back-link";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -100,6 +101,9 @@ export default async function ProjectLayout({
           />
         ) : (
           <header className="flex flex-col gap-1">
+            {/* No sidebar before launch, so no switcher either: the only
+                way back to the list (retour du 11/10/2026). */}
+            <BackLink href={routes.projects}>{fr.shell.project.back}</BackLink>
             <h1 className="text-2xl font-semibold tracking-tight break-words">
               {project.title}
             </h1>

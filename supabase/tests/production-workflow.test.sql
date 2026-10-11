@@ -66,7 +66,7 @@ insert into public.design_versions (organization_id, project_id, deliverable_id,
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('deliverable'), 'link',
         'https://frame.example.com/fiche', 'approved', now(), pg_temp.id_of('creative_person'));
 insert into public.network_contacts (organization_id, kind, name, roles)
-values (pg_temp.id_of('org'), 'organization', 'Thibo ' || (select v from vars where k = 'tag'), array['provider']);
+values (pg_temp.id_of('org'), 'organization', 'Thibo ' || (select v from vars where k = 'tag'), array['production_company']);
 insert into ids select 'thibo', id from public.network_contacts where name = 'Thibo ' || (select v from vars where k = 'tag');
 
 select pg_temp.act_as(pg_temp.id_of('manager'));

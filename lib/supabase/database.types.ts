@@ -8696,6 +8696,7 @@ export type Database = {
           organization_id: string
           parent_id: string | null
           phone: string | null
+          relations: string[]
           roles: string[]
           spotify_artist_id: string | null
           tiktok_handle: string | null
@@ -8718,6 +8719,7 @@ export type Database = {
           organization_id: string
           parent_id?: string | null
           phone?: string | null
+          relations?: string[]
           roles: string[]
           spotify_artist_id?: string | null
           tiktok_handle?: string | null
@@ -8740,6 +8742,7 @@ export type Database = {
           organization_id?: string
           parent_id?: string | null
           phone?: string | null
+          relations?: string[]
           roles?: string[]
           spotify_artist_id?: string | null
           tiktok_handle?: string | null

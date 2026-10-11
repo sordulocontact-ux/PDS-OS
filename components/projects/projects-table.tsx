@@ -45,12 +45,15 @@ export function ProjectsTable({
   drafts?: ProjectDraftItem[];
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
-  // Checkboxes to delete several at once (main list, director only).
+  // Checkboxes to delete several at once (main list): projects for the
+  // director, drafts for their author.
   selectable?: boolean;
 }) {
   const t = fr.shell.projects;
   const withActions = rights && (rights.canEdit || rights.canArchive);
-  const withSelection = selectable && rights?.canArchive;
+  // The director ticks projects; anyone ticks their own drafts.
+  const canSelectProjects = selectable && Boolean(rights?.canArchive);
+  const withSelection = canSelectProjects || (selectable && drafts.length > 0);
   const selection = fr.records.selection;
 
   const table = (
@@ -64,34 +67,49 @@ export function ProjectsTable({
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
       <DataTableBody>
-        {drafts.map((draft) => (
-          <DataTableRow key={`draft-${draft.id}`}>
-            {/* A draft is deleted from its form. */}
-            {withSelection && <SelectEmptyCell />}
-            <DataTableCell>
-              <DataTableLink href={`${routes.projectsNew}?draft=${draft.id}`}>
-                {draft.title || fr.shell.newProject.draft.untitled}
-              </DataTableLink>
-            </DataTableCell>
-            <DataTableCell hideBelow="sm">{EMPTY_CELL}</DataTableCell>
-            <DataTableCell hideBelow="md">
-              {draft.kind ? <ProjectKindBadge kind={draft.kind} /> : EMPTY_CELL}
-            </DataTableCell>
-            <DataTableCell fill>
-              <StatusBadge tone={draftTone} size="sm">
-                {t.draft}
-              </StatusBadge>
-            </DataTableCell>
-            {withActions && <DataTableActionsCell>{null}</DataTableActionsCell>}
-          </DataTableRow>
-        ))}
+        {drafts.map((draft) => {
+          const name = draft.title || fr.shell.newProject.draft.untitled;
+          return (
+            <DataTableRow key={`draft-${draft.id}`}>
+              {withSelection && (
+                <SelectRowCell
+                  row={{ id: draft.id, name, draft: true }}
+                  label={selection.row(name)}
+                />
+              )}
+              <DataTableCell>
+                <DataTableLink href={`${routes.projectsNew}?draft=${draft.id}`}>
+                  {name}
+                </DataTableLink>
+              </DataTableCell>
+              <DataTableCell hideBelow="sm">{EMPTY_CELL}</DataTableCell>
+              <DataTableCell hideBelow="md">
+                {draft.kind ? (
+                  <ProjectKindBadge kind={draft.kind} />
+                ) : (
+                  EMPTY_CELL
+                )}
+              </DataTableCell>
+              <DataTableCell fill>
+                <StatusBadge tone={draftTone} size="sm">
+                  {t.draft}
+                </StatusBadge>
+              </DataTableCell>
+              {withActions && (
+                <DataTableActionsCell>{null}</DataTableActionsCell>
+              )}
+            </DataTableRow>
+          );
+        })}
         {projects.map((project) => (
           <DataTableRow key={project.id}>
-            {withSelection && (
+            {canSelectProjects ? (
               <SelectRowCell
                 row={{ id: project.id, name: project.title }}
                 label={selection.row(project.title)}
               />
+            ) : (
+              withSelection && <SelectEmptyCell />
             )}
             <DataTableCell>
               <span className="flex flex-wrap items-center gap-2">

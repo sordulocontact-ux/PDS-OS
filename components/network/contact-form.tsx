@@ -5,30 +5,47 @@ import { useActionState, useEffect, useState } from "react";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import {
+  ArtistNamesake,
+  DuplicateNotice,
+  KindChangeNotice,
+} from "@/components/network/contact-form-notices";
+import { ContactCoordinatesFields } from "@/components/network/contact-coordinates-fields";
 import { ContactSocialsFields } from "@/components/network/contact-socials-fields";
 import { ParentOrganizationField } from "@/components/network/parent-organization-field";
+import { useKindRoles } from "@/components/network/use-kind-roles";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { fr } from "@/lib/i18n/fr";
 import { normalizeSearch } from "@/lib/utils/search";
 import { saveNetworkContact } from "@/lib/network/actions";
+import { similarContacts } from "@/lib/network/similar";
 import {
+  fitsKind,
   NETWORK_KINDS,
-  NETWORK_ROLES,
+  NETWORK_RELATIONS,
+  networkRolesOf,
+  rolesOfKind,
+  rolesText,
   type NetworkContactValues,
   type NetworkFormOptions,
   type NetworkKind,
+  type NetworkRole,
 } from "@/lib/network/types";
 
 /**
  * A network contact, created or edited in the modal: a person or an
- * organization, its roles, then how to reach it. A person may belong to an
- * organization of the network (picked, or added on the spot); a contact may
- * stand for a catalog artist, chosen when editing only (never listed at
- * creation). At creation, a person named exactly as an artist of the catalog
- * is linked to it, said on screen and removable (UX test of 09/10/2026:
- * « Artiste du catalogue : Aucun » for the namesake of the title's artist).
+ * organization, what it does (its kind's roles: « métiers » or
+ * « activités ») and how PDS works with it (relation types), then how to
+ * reach it; only the kind and the name are required (ticket « Retour PO /
+ * Réseau » of 11/10/2026). A person may belong to an organization of the
+ * network (picked, or added on the spot) and stand for a catalog artist,
+ * chosen when editing only (never listed at creation); an organization has
+ * neither. At creation, a person named exactly as an artist of the catalog
+ * is linked to it, said on screen and removable (UX test of 09/10/2026), and
+ * contacts of the same name are said, never blocking. A change of kind of a
+ * saved contact says what goes with it before saving.
  */
 export function ContactForm({
   contact,
@@ -38,8 +55,8 @@ export function ContactForm({
   onSaved,
   onCancel,
 }: {
-  // Absent: a new contact.
-  contact?: NetworkContactValues;
+  // Absent: a new contact. `memberCount`: people attached to an organization.
+  contact?: NetworkContactValues & { memberCount?: number };
   // A new contact already filled: a credit of a title (name and roles), a
   // draft of PO, or an artist spotted on TikTok in the Labo.
   initial?: Partial<Omit<NetworkContactValues, "id">>;
@@ -51,11 +68,19 @@ export function ContactForm({
 }) {
   const t = fr.network.form;
   const [state, formAction, pending] = useActionState(saveNetworkContact, null);
-  const [kind, setKind] = useState<NetworkKind>(
-    contact?.kind ?? initial?.kind ?? "person",
+  const startRoles = contact?.roles ?? initial?.roles ?? [];
+  const { kind, setKind, roles, setRoles, aside } = useKindRoles(
+    contact?.kind ?? initial?.kind ?? kindOfRoles(startRoles),
+    startRoles,
   );
   const [name, setName] = useState(contact?.name ?? initial?.name ?? "");
   const [unlinked, setUnlinked] = useState(false);
+  const duplicates = contact ? [] : similarContacts(name, options.contacts);
+  // A role held before the per-kind lists stays listed while chosen.
+  const roleItems = [
+    ...rolesOfKind(kind),
+    ...roles.filter((role) => !fitsKind(role, kind)),
+  ];
   // The catalog artist of the same name, found by the code (never by PO).
   const namesake =
     !contact && !initial?.artistId && kind === "person" && name.trim()
@@ -87,6 +112,26 @@ export function ContactForm({
         value={kind}
         onChange={(value) => value && setKind(value)}
       />
+      {(contact ? kind !== contact.kind : aside.length > 0) && (
+        <KindChangeNotice
+          saved={!!contact}
+          kind={kind}
+          roles={aside.length > 0 ? rolesText(aside) : null}
+          parentName={
+            contact?.parentId
+              ? (options.organizations.find((o) => o.id === contact.parentId)
+                  ?.name ?? null)
+              : null
+          }
+          artistName={
+            contact?.artistId
+              ? (options.artists.find((a) => a.id === contact.artistId)?.name ??
+                null)
+              : null
+          }
+          memberCount={contact?.memberCount ?? 0}
+        />
+      )}
       <Field
         name="name"
         label={t.name}
@@ -98,6 +143,9 @@ export function ContactForm({
         onChange={(event) => setName(event.target.value)}
         error={error?.field === "name" ? error.error : undefined}
       />
+      {duplicates.length > 0 && (
+        <DuplicateNotice matches={duplicates} newTab={stay} />
+      )}
       {namesake && (
         <ArtistNamesake
           artist={namesake}
@@ -108,16 +156,29 @@ export function ContactForm({
       <OptionSelect
         multiple
         name="roles"
-        label={t.roles}
-        required
-        placeholder={t.rolesPlaceholder}
+        label={t.roles[kind]}
+        placeholder={t.rolesPlaceholder[kind]}
         items={Object.fromEntries(
-          NETWORK_ROLES.map((value) => [value, fr.network.roles[value]]),
+          roleItems.map((value) => [value, fr.network.roles[value]]),
         )}
-        defaultValue={contact?.roles ?? initial?.roles ?? []}
+        value={roles}
+        onValueChange={(value) => setRoles(networkRolesOf(value))}
         // The database accepts up to 8 roles (network_contacts_roles_check).
         max={8}
-        error={error?.field === "roles" ? error.error : undefined}
+      />
+      <OptionSelect
+        multiple
+        name="relations"
+        label={t.relations}
+        placeholder={t.relationsPlaceholder}
+        hint={t.relationsHint}
+        items={Object.fromEntries(
+          NETWORK_RELATIONS.map((value) => [
+            value,
+            fr.network.relations[value],
+          ]),
+        )}
+        defaultValue={contact?.relations ?? initial?.relations ?? []}
       />
       {kind === "person" && (
         <ParentOrganizationField
@@ -128,13 +189,13 @@ export function ContactForm({
       )}
       {/* Creation never lists the catalog's artists (Sacha, 10/10/2026): a
           link found by PO's draft is kept as is, the rest is set by editing. */}
-      {!contact && initial?.artistId && (
+      {!contact && kind === "person" && initial?.artistId && (
         <input type="hidden" name="artistId" value={initial.artistId} />
       )}
       {namesake && !unlinked && (
         <input type="hidden" name="artistId" value={namesake.id} />
       )}
-      {contact && options.artists.length > 0 && (
+      {contact && kind === "person" && options.artists.length > 0 && (
         <OptionSelect
           name="artistId"
           label={t.artist}
@@ -145,43 +206,7 @@ export function ContactForm({
           defaultValue={contact?.artistId ?? initial?.artistId ?? "none"}
         />
       )}
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          name="email"
-          type="email"
-          label={t.email}
-          autoComplete="off"
-          maxLength={320}
-          defaultValue={contact?.email ?? initial?.email ?? ""}
-          error={error?.field === "email" ? error.error : undefined}
-        />
-        <Field
-          name="phone"
-          type="tel"
-          label={t.phone}
-          autoComplete="off"
-          maxLength={40}
-          defaultValue={contact?.phone ?? initial?.phone ?? ""}
-        />
-        <Field
-          name="website"
-          type="url"
-          inputMode="url"
-          label={t.website}
-          autoComplete="off"
-          maxLength={500}
-          placeholder={t.websitePlaceholder}
-          defaultValue={contact?.website ?? initial?.website ?? ""}
-          error={error?.field === "website" ? error.error : undefined}
-        />
-        <Field
-          name="city"
-          label={t.city}
-          autoComplete="off"
-          maxLength={120}
-          defaultValue={contact?.city ?? initial?.city ?? ""}
-        />
-      </div>
+      <ContactCoordinatesFields values={contact ?? initial} error={error} />
       <ContactSocialsFields values={contact ?? initial} error={error} />
       <TextareaField
         name="notes"
@@ -211,34 +236,13 @@ export function ContactForm({
   );
 }
 
-function ArtistNamesake({
-  artist,
-  linked,
-  onToggle,
-}: {
-  artist: { id: string; name: string };
-  linked: boolean;
-  onToggle: () => void;
-}) {
-  const t = fr.network.form;
-  return (
-    <div
-      role="status"
-      className="flex flex-wrap items-center gap-3 rounded-xl border border-border px-3 py-2.5"
-    >
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-sm font-medium">
-          {linked ? t.artistLinked(artist.name) : t.artistUnlinked}
-        </span>
-        {linked && (
-          <span className="text-xs text-muted-foreground">
-            {t.artistLinkedHint}
-          </span>
-        )}
-      </span>
-      <Button type="button" variant="outline" size="sm" onClick={onToggle}>
-        {linked ? t.artistUnlink : t.artistRelink(artist.name)}
-      </Button>
-    </div>
-  );
+// A contact filled from elsewhere without a kind (a credit, a borrowing):
+// an organization when every role is an organization's.
+function kindOfRoles(roles: readonly NetworkRole[]): NetworkKind {
+  return roles.length > 0 &&
+    roles.every(
+      (role) => !fitsKind(role, "person") && fitsKind(role, "organization"),
+    )
+    ? "organization"
+    : "person";
 }

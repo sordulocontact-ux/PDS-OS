@@ -31,9 +31,7 @@ export function SourceForm({
   const [kind, setKind] = useState<Kind>("google_sheet");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const loadAgencies = usePickerLoad(() =>
-    listNetworkForRole(["partner", "provider"]),
-  );
+  const loadAgencies = usePickerLoad(() => listNetworkForRole(["agency"]));
 
   function submit(event: FormEvent<HTMLFormElement>) {
     if (event.target !== event.currentTarget) return;
@@ -107,7 +105,7 @@ export function SourceForm({
         load={loadAgencies}
         defaultRef={null}
         defaultName={null}
-        createRoles={["partner"]}
+        createRoles={["agency"]}
         createKind="organization"
         refOfContact={(id) => id}
         allowNameOnly={false}

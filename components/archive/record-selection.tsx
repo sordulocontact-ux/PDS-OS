@@ -56,6 +56,8 @@ function SelectionBar({ kind }: { kind: ArchiveKind }) {
   }
 
   const single = count === 1 ? selected[0] : null;
+  // Drafts of the projects list alone: nothing but the typing is lost.
+  const onlyDrafts = count > 0 && selected.every((row) => row.draft);
 
   return (
     <>
@@ -96,9 +98,21 @@ function SelectionBar({ kind }: { kind: ArchiveKind }) {
         open={confirming && count > 0}
         onOpenChange={(next) => !next && !pending && setConfirming(false)}
         title={
-          single ? t.delete.title(single.name) : t.delete.titleMany(kind, count)
+          single
+            ? t.delete.title(single.name)
+            : onlyDrafts
+              ? t.delete.drafts.titleMany(count)
+              : t.delete.titleMany(kind, count)
         }
-        description={single ? t.delete.body[kind] : t.delete.bodyMany[kind]}
+        description={
+          onlyDrafts
+            ? single
+              ? t.delete.drafts.body
+              : t.delete.drafts.bodyMany
+            : single
+              ? t.delete.body[kind]
+              : t.delete.bodyMany[kind]
+        }
         cancelLabel={t.cancel}
         closeLabel={t.edit.close}
         confirmLabel={t.delete.confirm}

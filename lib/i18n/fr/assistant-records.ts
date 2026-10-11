@@ -91,8 +91,9 @@ export const assistantRecords = {
     "Aucun titre nommé et PO n'a pas été ouvert depuis la fiche d'un titre : demandez de quel titre il s'agit.",
   whichOrganism:
     "Organisme de la déclaration à préciser : SACEM, SCPP, SPPF, ADAMI ou SPEDIDAM.",
-  rolesToChoose:
-    "Aucun rôle dit : choisissez-en au moins un dans le formulaire.",
+  // A role of the other kind (a « Label » for a person): left out.
+  rolesOtherKind: (roles: string, kind: string) =>
+    `Rôles écartés, ils ne conviennent pas à une ${kind.toLowerCase()} : ${roles}.`,
   dueDateToChoose: "Échéance à choisir dans le formulaire.",
   dateTimeToChoose: "Date et heure à choisir dans le formulaire.",
   timeToChoose: (day: string) =>

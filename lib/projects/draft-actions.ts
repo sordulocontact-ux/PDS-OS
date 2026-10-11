@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { MAX_DELETE } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -60,17 +61,34 @@ export async function saveProjectDraft(
 export async function deleteProjectDraft(
   draftId: string,
 ): Promise<{ ok: boolean }> {
+  const result = await deleteProjectDrafts([draftId]);
+  return { ok: result.ok };
+}
+
+export type DeleteDraftsResult =
+  { ok: true; deleted: string[] } | { ok: false };
+
+/**
+ * Deletes drafts ticked in the projects list, with the author's session:
+ * RLS only lets a draft go by its author, so a foreign id is just not in
+ * `deleted`.
+ */
+export async function deleteProjectDrafts(
+  draftIds: string[],
+): Promise<DeleteDraftsResult> {
   await requireApproved();
-  if (!z.uuid().safeParse(draftId).success) return { ok: false };
+  if (!z.array(z.uuid()).min(1).max(MAX_DELETE).safeParse(draftIds).success)
+    return { ok: false };
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("project_drafts")
     .delete()
-    .eq("id", draftId);
+    .in("id", draftIds)
+    .select("id");
   if (error) {
-    console.error("deleteProjectDraft:", error.message);
+    console.error("deleteProjectDrafts:", error.message);
     return { ok: false };
   }
   revalidatePath(routes.projects);
-  return { ok: true };
+  return { ok: true, deleted: data.map((row) => row.id) };
 }

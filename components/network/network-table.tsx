@@ -22,7 +22,11 @@ import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { rolesText, type NetworkContactRow } from "@/lib/network/types";
+import {
+  relationsText,
+  rolesText,
+  type NetworkContactRow,
+} from "@/lib/network/types";
 
 // The network, by name: a person or an organization (its icon), what it
 // does, how to reach it; the row opens its page, "⋯" edits, archives or
@@ -94,8 +98,15 @@ export function NetworkTable({
               />
             </DataTableCell>
             <DataTableCell hideBelow="md">
-              <span className="line-clamp-2 whitespace-normal">
-                {rolesText(contact.roles)}
+              <span className="flex min-w-0 flex-col">
+                <span className="line-clamp-2 whitespace-normal">
+                  {rolesText(contact.roles) || EMPTY_CELL}
+                </span>
+                {contact.relations.length > 0 && (
+                  <span className="truncate text-sm text-muted-foreground">
+                    {relationsText(contact.relations)}
+                  </span>
+                )}
               </span>
             </DataTableCell>
             <DataTableCell hideBelow="lg">

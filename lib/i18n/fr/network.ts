@@ -2,29 +2,57 @@
 export const network = {
   title: "Réseau",
   description:
-    "Les personnes et les structures avec qui PDS travaille : artistes, beatmakers, musiciens, prestataires, partenaires…",
+    "Les personnes et les organisations avec qui PDS travaille : artistes, techniciens, labels, studios, médias, prestataires…",
   new: "Nouveau contact",
   viewsLabel: "Filtrer le réseau",
-  // Tabs: every contact, then role families (a contact is in each family
-  // where it has a role).
+  // Tabs: every contact, by kind, and the spotted artists (ticket « Retour
+  // PO / Réseau » of 11/10/2026).
   views: {
     all: "Tous",
-    artists: "Artistes",
-    music: "Musique",
-    image: "Image",
-    business: "Prestataires & partenaires",
-    influencers: "Influenceurs",
-    press: "Médias & journalistes",
-    other: "Autres",
+    people: "Personnes",
+    organizations: "Organisations",
+    spotted: "Artistes repérés",
+  },
+  // Filters under the tabs: domains of roles, then relation types.
+  filters: {
+    domainLabel: "Métier",
+    domainAll: "Tous les métiers",
+    domains: {
+      music: "Musique",
+      image: "Image & vidéo",
+      press: "Presse & influence",
+      business: "Affaires & conseil",
+      other: "Autres",
+    },
+    relationLabel: "Type de relation",
+    relationAll: "Toutes les relations",
+    cityLabel: "Ville",
+    cityAll: "Toutes les villes",
+    button: "Filtres",
+    buttonCount: (count: number) => `Filtres · ${count}`,
+    remove: "Retirer le filtre",
   },
   kinds: {
     person: "Personne",
-    organization: "Structure",
+    organization: "Organisation",
+  },
+  relations: {
+    client: "Client",
+    provider: "Prestataire",
+    partner: "Partenaire",
+    supplier: "Fournisseur",
+  },
+  // Plural, for the relation filter.
+  relationsPlural: {
+    client: "Clients",
+    provider: "Prestataires",
+    partner: "Partenaires",
+    supplier: "Fournisseurs",
   },
   // Picking someone of the Réseau from another form (a credit, a share).
   picker: {
     searchLabel: "Chercher dans le Réseau",
-    placeholder: "Nom d'une personne ou d'une structure du Réseau…",
+    placeholder: "Nom d'une personne ou d'une organisation du Réseau…",
     create: "Ajouter au Réseau",
     createNamed: (name: string) => `Ajouter « ${name} » au Réseau`,
     noResult: (name: string) => `Personne nommée « ${name} » dans le Réseau.`,
@@ -47,55 +75,64 @@ export const network = {
     videographer: "Vidéaste",
     photographer: "Photographe",
     designer: "Graphiste",
-    provider: "Prestataire",
-    studio: "Studio",
     lawyer: "Avocat·e",
-    partner: "Partenaire",
-    label: "Label",
-    publisher: "Éditeur",
-    distributor: "Distributeur",
-    media: "Média",
     journalist: "Journaliste",
     influencer: "Influenceur·se",
     manager: "Management",
+    label: "Label",
+    studio: "Studio",
+    agency: "Agence",
+    production_company: "Société de production",
+    publisher: "Éditeur",
+    distributor: "Distributeur",
+    media: "Média",
+    company: "Entreprise",
     other: "Autre",
   },
   columns: {
     name: "Nom",
-    roles: "Rôles",
+    roles: "Métier ou activité",
     contact: "Coordonnées",
     city: "Ville",
     actions: "Actions",
   },
   search: {
     label: "Rechercher dans le réseau",
-    placeholder: "Nom, rôle, structure, ville…",
+    placeholder: "Nom, métier, organisation, ville…",
     noResult: (query: string) =>
       `Personne ne correspond à « ${query} » dans le réseau.`,
   },
   emptyTitle: "Le réseau est vide",
   emptyBody:
-    "Ajoutez les personnes et les structures avec qui vous travaillez : elles seront partagées avec toute l'équipe et pourront être parties d'un contrat.",
+    "Ajoutez les personnes et les organisations avec qui vous travaillez : elles seront partagées avec toute l'équipe et pourront être parties d'un contrat.",
   emptyViewTitle: (view: string) => `Personne dans « ${view} »`,
   emptyViewBody: "Les autres contacts restent dans l'onglet « Tous ».",
+  emptyFilterTitle: "Aucun contact pour ce filtre",
+  emptyFilterBody: "Changez de métier ou de type de relation.",
   loadError: "Le réseau n'a pas pu être chargé. Rechargez la page.",
   // A person's organization, under their name.
   memberOf: (organization: string) => `chez ${organization}`,
   form: {
     createTitle: "Nouveau contact",
     createDescription:
-      "Une personne ou une structure : elle sera partagée avec toute l'équipe.",
+      "Une personne ou une organisation : elle sera partagée avec toute l'équipe.",
     kind: "Type",
     name: "Nom",
     namePlaceholder: {
       person: "Ex. Inès Morel",
       organization: "Ex. Studio Lumière",
     },
-    roles: "Rôles",
-    rolesPlaceholder: "Choisir un ou plusieurs rôles",
-    rolesRequired: "Choisissez au moins un rôle.",
-    parent: "Structure",
-    // « Garder seulement le nom » on the structure: a name is not a link.
+    // « Métiers » of a person, « Activités » of an organization.
+    roles: { person: "Métiers", organization: "Activités" },
+    rolesPlaceholder: {
+      person: "Choisir un ou plusieurs métiers",
+      organization: "Choisir une ou plusieurs activités",
+    },
+    relations: "Type de relation",
+    relationsPlaceholder: "Client, prestataire, partenaire…",
+    relationsHint: "Comment PDS travaille avec ce contact.",
+    parent: "Organisation associée",
+    // « Garder seulement le nom » on the organization: a name is not a link.
     artist: "Artiste du catalogue",
     artistNone: "Aucun",
     // A new contact named exactly as an artist of the catalog (UX test of
@@ -105,6 +142,29 @@ export const network = {
     artistUnlink: "Retirer",
     artistUnlinked: "Pas relié à un artiste du catalogue.",
     artistRelink: (name: string) => `Relier à ${name}`,
+    // Contacts of the Réseau of the same name (ticket of 11/10/2026):
+    // never blocking, people may share a name.
+    duplicates: (count: number) =>
+      count > 1
+        ? `${count} contacts du Réseau portent déjà ce nom.`
+        : "Un contact du Réseau porte déjà ce nom.",
+    duplicatesHint:
+      "Ouvrez sa fiche pour le réutiliser, ou continuez si c'est quelqu'un d'autre.",
+    openContact: "Ouvrir la fiche",
+    // Changing the kind of a saved contact: what goes with it, said before.
+    kindChange: {
+      title: (kind: string) => `En passant en « ${kind} » :`,
+      roles: (roles: string) => `ces rôles sont retirés : ${roles} ;`,
+      parent: (name: string) =>
+        `l'organisation associée ${name} est détachée ;`,
+      artist: (name: string) =>
+        `le lien avec l'artiste du catalogue ${name} est retiré ;`,
+      members: (count: number) =>
+        count > 1
+          ? `${count} personnes y sont rattachées : détachez-les d'abord de leur fiche.`
+          : "une personne y est rattachée : détachez-la d'abord de sa fiche.",
+      kept: "contrats, crédits, projets et historique restent liés au contact.",
+    },
     email: "E-mail",
     phone: "Téléphone",
     website: "Site web",
@@ -129,7 +189,7 @@ export const network = {
     close: "Fermer",
   },
   errors: {
-    invalid: "Vérifiez le nom, les rôles et les coordonnées.",
+    invalid: "Vérifiez le nom, les métiers et les coordonnées.",
     email: "Adresse e-mail invalide.",
     website: "Le site doit commencer par http:// ou https://.",
     accounts: {
@@ -140,26 +200,29 @@ export const network = {
       deezer: "Lien Deezer illisible : la page deezer.com/artist/…",
     },
     forbidden: "Vous ne pouvez pas modifier le réseau.",
-    parent: "La structure choisie n'existe plus dans le réseau.",
+    parent: "L'organisation choisie n'existe plus dans le réseau.",
+    members:
+      "Des personnes sont rattachées à cette organisation : détachez-les avant d'en faire une personne.",
     failed: "Le contact n'a pas pu être enregistré. Réessayez.",
   },
   page: {
     back: "Tout le réseau",
     facts: "Coordonnées",
     kind: "Type",
-    roles: "Rôles",
+    roles: "Métiers",
+    relations: "Type de relation",
     email: "E-mail",
     phone: "Téléphone",
     website: "Site web",
     city: "Ville",
-    parent: "Structure",
+    parent: "Organisation associée",
     artist: "Fiche artiste",
     notes: "Notes",
     accounts: "Réseaux",
     none: "non renseigné",
-    members: "Membres de la structure",
+    members: "Personnes associées",
     membersDescription: "Les personnes du réseau qui y travaillent.",
-    membersEmpty: "Aucune personne du réseau rattachée à cette structure.",
+    membersEmpty: "Aucune personne du réseau rattachée à cette organisation.",
     contracts: "Contrats",
     contractsDescription:
       "Les contrats où ce contact est partie, parmi ceux que vous pouvez lire.",
