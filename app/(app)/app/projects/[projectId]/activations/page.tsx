@@ -1,5 +1,6 @@
 import { IconLayers } from "nucleo-sharp-essential";
 
+import { ActivationsSection } from "@/components/marketing/activations-section";
 import { ActivationHandoffsSection } from "@/components/production/delivery/activation-handoffs-section";
 import { EditInStrategy } from "@/components/project-plan/edit-in-strategy";
 import { LeverList } from "@/components/project-plan/lever-list";
@@ -9,6 +10,7 @@ import { PageSection } from "@/components/shell/page-section";
 import { StatTiles } from "@/components/ui/stat-tiles";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
+import { loadMarketing } from "@/lib/marketing/queries";
 import { LEVER_FAMILIES, loadProjectPlan } from "@/lib/project-plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -18,8 +20,10 @@ const t = fr.projectPlan.activations;
 
 export const metadata = { title: `${t.title} · ${fr.app.name}` };
 
-// The launch set-up, family by family (docs/CONTEXTE-PROJET.md § 4): what
-// is selected, still to decide or set aside. Written in the Strategy.
+// The activations followed by the Marketing and their evidence (ticket
+// « Suivi & bilan »), the hand-offs from Production, then the launch set-up,
+// family by family (docs/CONTEXTE-PROJET.md § 4): what is selected, still to
+// decide or set aside. The set-up is written in the Strategy.
 export default async function ProjectActivationsPage({
   params,
 }: PageProps<"/app/projects/[projectId]/activations">) {
@@ -29,6 +33,7 @@ export default async function ProjectActivationsPage({
     requireLaunchedProject(projectId),
     loadProjectPlan(projectId),
   ]);
+  const marketing = await loadMarketing(projectId, access);
   const count = (state: string) =>
     levers.filter((l) => l.state === state).length;
 
@@ -42,6 +47,7 @@ export default async function ProjectActivationsPage({
           />
         }
       </ProjectPageActions>
+      <ActivationsSection projectId={projectId} data={marketing} />
       <ActivationHandoffsSection projectId={projectId} access={access} />
       {levers.length === 0 ? (
         <EmptyState icon={IconLayers} title={t.emptyTitle} body={t.emptyBody} />
