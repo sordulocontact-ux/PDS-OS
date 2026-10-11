@@ -9,7 +9,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { listOwnedProjects, loadCallOutcomes } from "@/lib/calls/outcomes";
 import {
-  getAudioUrl,
+  getCallAudioUrls,
   getCall,
   loadLatestReport,
   loadLatestTranscript,
@@ -37,10 +37,10 @@ export default async function MeetingPage({
 
   const call = await getCall(supabase, null, callId);
   if (!call) notFound();
-  const [transcript, report, audioUrl, members] = await Promise.all([
+  const [transcript, report, audioUrls, members] = await Promise.all([
     loadLatestTranscript(supabase, callId),
     loadLatestReport(supabase, callId),
-    call.audioPath ? getAudioUrl(supabase, call.audioPath) : null,
+    getCallAudioUrls(supabase, call),
     loadMembers(access),
   ]);
   const [outcomes, projects] = report
@@ -64,7 +64,7 @@ export default async function MeetingPage({
           call={call}
           transcript={transcript}
           report={report}
-          audioUrl={audioUrl}
+          audioUrls={audioUrls}
           canEdit={canEdit}
           back={{ href: routes.calls, label: t.back }}
           where={t.all.internal}

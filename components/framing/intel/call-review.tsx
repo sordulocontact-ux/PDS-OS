@@ -3,11 +3,13 @@
 import Link from "next/link";
 
 import { FramingStepCard } from "@/components/framing/guide/step-card";
+import { SourceLine } from "@/components/framing/source-line";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { confirmQuestion } from "@/lib/framing/actions/questions";
 import type { QuestionStatus } from "@/lib/framing/assess";
+import type { Provenance } from "@/lib/framing/brief";
 import type { Dimension } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
 import { factTone } from "@/lib/ui/state-tones";
@@ -19,6 +21,11 @@ export type ReviewRow = {
   status: QuestionStatus;
   value: string | null;
   quote: string | null;
+  provenance: Provenance | null;
+  sourceState: "proposed" | "record" | "known";
+  confirmed?: { by: string | null; at: string | null };
+  // A sentence to structure before confirming (objective, items).
+  needsStructure: boolean;
   // Proposed from this call: what PO understood, to confirm.
   fromCall: boolean;
   href: string;
@@ -91,9 +98,17 @@ export function CallReview({
                         « {row.quote} »
                       </span>
                     )}
+                    {row.status !== "missing" && (
+                      <SourceLine
+                        projectId={projectId}
+                        provenance={row.provenance}
+                        state={row.sourceState}
+                        confirmed={row.confirmed}
+                      />
+                    )}
                     {editable && row.status !== "known" && (
                       <span className="flex flex-wrap gap-2 pt-1">
-                        {row.status === "to_confirm" && (
+                        {row.status === "to_confirm" && !row.needsStructure && (
                           <Button
                             size="sm"
                             disabled={pending}
@@ -113,7 +128,9 @@ export function CallReview({
                         >
                           {row.status === "missing"
                             ? t.guide.complete
-                            : t.guide.modify}
+                            : row.needsStructure
+                              ? t.guide.structure
+                              : t.guide.modify}
                         </Link>
                       </span>
                     )}

@@ -27,7 +27,9 @@ export function isDimension(value: unknown): value is Dimension {
  * - date: a real date, chosen or confirmed by a person, never parsed by PO;
  * - money: an amount in cents;
  * - needs / constraints / rights / deadlines / team: reviewable lines of
- *   their own tables, with a « rien à signaler » marker when there are none.
+ *   their own tables, with a « rien à signaler » marker when there are none;
+ * - parties: the legal parties read from the project's records, each one
+ *   qualified by a person (framing_legal_parties, PROJ-BUG-03).
  */
 export type QuestionKind =
   | "text"
@@ -37,7 +39,8 @@ export type QuestionKind =
   | "constraints"
   | "rights"
   | "deadlines"
-  | "team";
+  | "team"
+  | "parties";
 
 export type QuestionDef = {
   dimension: Dimension;
@@ -49,6 +52,10 @@ export type QuestionDef = {
   allowNone: boolean;
   // « M'aider à définir » asks PO for sourced formulations (text only).
   poHelp: boolean;
+  // A text answered in structured form (PROJ-UX-04, UX-05): a measurable
+  // objective, or several items each with its state. A sentence (a call's
+  // proposal, an older answer) still reads, and is structured on « Modifier ».
+  shape?: "measure" | "items";
 };
 
 const q = (
@@ -67,13 +74,16 @@ const q = (
 // In the order they are asked, dimension by dimension.
 export const QUESTIONS = {
   objective: q("objective", "text", true, false),
-  success_criteria: q("objective", "text", true, false),
+  success_criteria: {
+    ...q("objective", "text", true, false),
+    shape: "measure",
+  },
   main_priority: q("objective", "text", true, false),
   needs: q("objective", "needs", true, true),
   target_date: q("timing", "date", true, false),
   deadlines: q("timing", "deadlines", false, true),
   calendar_constraints: q("timing", "text", false, true),
-  prerequisites: q("timing", "text", false, true),
+  prerequisites: { ...q("timing", "text", false, true), shape: "items" },
   budget_envelope: q("budget", "money", true, true),
   commitments: q("budget", "text", false, true),
   constraints: q("budget", "constraints", true, true),
@@ -81,10 +91,10 @@ export const QUESTIONS = {
   decision_makers: q("team", "text", false, false),
   missing_skills: q("team", "text", false, true),
   current_state: q("start", "text", true, false),
-  existing_elements: q("start", "text", false, true),
+  existing_elements: { ...q("start", "text", false, true), shape: "items" },
   decisions_made: q("start", "text", false, true),
-  work_started: q("start", "text", false, true),
-  legal_parties: q("legal", "text", true, true),
+  work_started: { ...q("start", "text", false, true), shape: "items" },
+  legal_parties: q("legal", "parties", true, true),
   legal_agreements: q("legal", "text", false, true),
   legal_needs: q("legal", "text", false, true),
   legal_secured: q("legal", "text", false, true),
@@ -122,3 +132,21 @@ export const FIELD_QUESTION_KINDS: readonly QuestionKind[] = [
 /** A constraint line belongs to « Cadre juridique » when it is about rights. */
 export const dimensionOfConstraint = (type: string): Dimension =>
   type === "rights" ? "legal" : "budget";
+
+/** The states an item of a structured answer can be in (PROJ-UX-05). */
+export const ITEM_STATES = [
+  "exists",
+  "in_progress",
+  "done",
+  "decided",
+  "planned",
+] as const;
+export type ItemState = (typeof ITEM_STATES)[number];
+export type AnswerItem = { label: string; state: ItemState };
+/** A measurable objective: metric, target and horizon, its source if any. */
+export type Measure = {
+  metric: string;
+  target: number;
+  period: string;
+  source: string | null;
+};

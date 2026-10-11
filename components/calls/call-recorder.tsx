@@ -15,29 +15,42 @@ import {
   type RecorderSource,
 } from "@/components/calls/recorder-media";
 import { RecordingLive } from "@/components/calls/recording-live";
+import { RecordingRecovery } from "@/components/calls/recording-recovery";
 import { RecordingReview } from "@/components/calls/recording-review";
+import { useMicDiagnosis } from "@/components/calls/use-mic-diagnosis";
 import { useRecorder } from "@/components/calls/use-recorder";
+import { useRecordingSaver } from "@/components/calls/use-recording-saver";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { useAudioMeter } from "@/components/ui/use-audio-meter";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
-import { uploadCallAudio, type UploadError } from "@/lib/calls/upload-audio";
+import type { CallErrorCode } from "@/lib/calls/constants";
+import { savedMs, type SavedTake } from "@/lib/calls/recording";
+import { discardRecording, sendRecording } from "@/lib/calls/recording-actions";
 import { fr } from "@/lib/i18n/fr";
 
 const noSubscribe = () => () => {};
 
-/** Record the call from the browser, listen back, then send it like an uploaded file. */
+/**
+ * Record the call from the browser, saved while it happens (PROJ-BUG-01):
+ * a reload or a lost microphone keeps what is saved, and the recording can
+ * be resumed, sent as it is, replaced by a file, or deleted.
+ */
 export function CallRecorder({
   callId,
   organizationId,
+  saved,
   videoCall = false,
   alternative,
 }: {
   callId: string;
   organizationId: string;
+  // Takes saved earlier and not sent (found again after a reload).
+  saved: SavedTake[];
   // The call has a video link: it is held in visio, nothing to choose
   // (Sacha, 10/10/2026) — the tab is recorded when the browser can.
   videoCall?: boolean;
-  /** The file picker: shown only before recording starts, one primary action at a time. */
+  /** The file picker: shown only when nothing is being recorded. */
   alternative?: ReactNode;
 }) {
   const t = fr.calls.recorder;
@@ -52,24 +65,27 @@ export function CallRecorder({
   );
   const [chosen, setChosen] = useState<RecorderSource>("tab");
   const source: RecorderSource = tabSupported ? chosen : "mic";
-  const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState<UploadError | null>(null);
-  const rec = useRecorder(meter.push);
+  const [sending, setSending] = useState<"saving" | "sending" | null>(null);
+  const [sendError, setSendError] = useState<CallErrorCode | null>(null);
+  const saver = useRecordingSaver({ callId, organizationId, saved });
+  const rec = useRecorder(meter.push, saver.flush, {
+    prepare: saver.prepare,
+    onChunk: saver.onChunk,
+  });
+  const live = rec.status === "recording" || rec.status === "paused";
+  const diagnosis = useMicDiagnosis(!live && rec.status !== "requesting");
+  const hasSaved = savedMs(saver.takes) > 0 || saver.unsavedMs > 0;
 
-  // Leaving the page would lose an unsent recording: let the browser ask first.
-  const unsent =
-    rec.status === "recording" ||
-    rec.status === "paused" ||
-    rec.status === "stopped";
+  // Leaving now would lose what is not saved yet: let the browser ask first.
+  const unsaved = live || saver.unsavedMs > 0 || sending !== null;
   useEffect(() => {
-    if (!unsent) return;
+    if (!unsaved) return;
     const guard = (event: BeforeUnloadEvent) => event.preventDefault();
     window.addEventListener("beforeunload", guard);
     return () => window.removeEventListener("beforeunload", guard);
-  }, [unsent]);
+  }, [unsaved]);
 
   // During the call the user sits on the Meet tab: the tab title carries the state.
-  const live = rec.status === "recording" || rec.status === "paused";
   useEffect(() => {
     if (!live) return;
     const original = document.title;
@@ -82,26 +98,63 @@ export function CallRecorder({
   }, [live, rec.status, rec.tabSilent, t]);
 
   async function send() {
-    if (!rec.recording) return;
-    setSending(true);
     setSendError(null);
-    const { blob, ext, mime } = rec.recording;
-    const result = await uploadCallAudio({
-      callId,
-      organizationId,
-      body: blob,
-      ext,
-      mime,
-    });
-    setSending(false);
+    // Only what the server holds is sent: the last seconds are saved first.
+    setSending("saving");
+    await saver.whenSaved();
+    setSending("sending");
+    const result = await sendRecording(callId).catch(
+      () => ({ ok: false, error: "save_failed" }) as const,
+    );
+    setSending(null);
     if (!result.ok) return setSendError(result.error);
+    saver.forget();
     rec.discard();
     toast.success(t.sent);
     router.refresh();
   }
 
+  async function discard() {
+    const result = await discardRecording(callId).catch(
+      () => ({ ok: false, error: "save_failed" }) as const,
+    );
+    if (!result.ok) return setSendError(result.error);
+    saver.forget();
+    rec.discard();
+  }
+
   // Recording writes the call's audio: owner only. Hooks above stay unconditional.
   if (!canEdit) return null;
+
+  const sendingLabel =
+    sending === "saving"
+      ? t.savingRest
+      : sending === "sending"
+        ? t.sending
+        : null;
+  const problem = rec.error ?? diagnosis;
+  const problemText = problem ? t.errors[problem] : null;
+  const interrupted = rec.status === "stopped" && rec.interruption !== null;
+  const recovering =
+    interrupted ||
+    ((rec.status === "idle" || rec.status === "requesting") && hasSaved);
+
+  if (recovering)
+    return (
+      <RecordingRecovery
+        takes={saver.takes}
+        interruption={rec.interruption}
+        unsavedMs={saver.unsavedMs}
+        failing={saver.failing}
+        starting={rec.status === "requesting"}
+        sendingLabel={sendingLabel}
+        error={problemText ?? (sendError ? fr.calls.errors[sendError] : null)}
+        onResume={() => void rec.start(rec.source ?? source)}
+        onSend={() => void send()}
+        onDiscard={() => void discard()}
+        alternative={alternative}
+      />
+    );
 
   return (
     <div className="grid gap-4">
@@ -134,16 +187,21 @@ export function CallRecorder({
             />
           )}
           <p className="text-sm text-muted-foreground">{t.reminder}</p>
+          {problemText && (
+            <ToneCallout tone={rec.error ? "danger" : "warning"} role="alert">
+              {problemText}
+            </ToneCallout>
+          )}
           <Button
             onClick={() => void rec.start(source)}
             disabled={rec.status === "requesting"}
             className="justify-self-start"
           >
-            {rec.status === "requesting" ? t.requesting : t.start}
+            {rec.status === "requesting" ? t.starting : t.start}
           </Button>
         </>
       )}
-      {(rec.status === "recording" || rec.status === "paused") && (
+      {live && (
         <RecordingLive
           paused={rec.status === "paused"}
           fromTab={rec.source === "tab"}
@@ -154,18 +212,24 @@ export function CallRecorder({
           meterRef={meter.ref}
           onPauseToggle={rec.status === "paused" ? rec.resume : rec.pause}
           onStop={rec.stop}
+          savedMs={saver.recordedMs - saver.unsavedMs}
+          unsavedMs={saver.unsavedMs}
+          failing={saver.failing}
         />
       )}
       {rec.status === "stopped" && rec.recording && (
         <RecordingReview
           recording={rec.recording}
-          sending={sending}
+          takes={saver.takes}
+          unsavedMs={saver.unsavedMs}
+          failing={saver.failing}
+          sendingLabel={sendingLabel}
           sendError={sendError}
           onSend={() => void send()}
-          onDiscard={rec.discard}
+          onDiscard={() => void discard()}
         />
       )}
-      {rec.error && (
+      {rec.status === "stopped" && rec.error && (
         <p role="alert" className="text-sm text-error">
           {t.errors[rec.error]}
         </p>

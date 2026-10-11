@@ -14,16 +14,32 @@ import {
   type QuestionKey,
 } from "@/lib/framing/dimensions";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
+import {
+  ITEM_STATES,
+  type AnswerItem,
+  type Measure,
+} from "@/lib/framing/dimensions";
+import {
+  framingConflicts,
+  type FramingConflict,
+} from "@/lib/framing/conflicts";
+import { legalPartyBoard } from "@/lib/framing/legal-parties";
 import { teamBoard } from "@/lib/framing/team-board";
 import { fr } from "@/lib/i18n/fr";
 
 export type QuestionStatus = "known" | "to_confirm" | "missing";
 
 export type Answer =
-  | { kind: "text"; text: string }
+  // `items` / `measure`: the structured form of a text answer (PROJ-UX-04/05).
+  | { kind: "text"; text: string; items?: AnswerItem[]; measure?: Measure }
   | { kind: "date"; date: string }
-  | { kind: "money"; cents: number }
+  // `certainty`: the envelope is confirmed or only estimated (PROJ-UX-05).
+  | { kind: "money"; cents: number; certainty?: "confirmed" | "estimated" }
   | { kind: "none" }
+  // « Non applicable » with its reason, « À définir plus tard » with its
+  // follow-up task (PROJ-UX-04): answered, never left silent.
+  | { kind: "na"; reason: string }
+  | { kind: "later"; due: string; taskId: string | null }
   | { kind: "lines"; count: number };
 
 export type QuestionState = {
@@ -41,6 +57,8 @@ export type QuestionState = {
   proposed: boolean;
   // A person set this question aside (« Écarter »): not offered again.
   dismissed: boolean;
+  // Known: who confirmed (or wrote) the answer, and when (PROJ-BUG-02).
+  confirmed?: { by: string | null; at: string | null };
 };
 
 export type DimensionState = {
@@ -58,6 +76,8 @@ export type FramingAssessment = {
   total: number;
   // The question to ask now: the first one not known, in order.
   next: QuestionState | null;
+  // Answers that contradict each other or the records (PROJ-BUG-04).
+  conflicts: FramingConflict[];
   // Every required question known and nothing left to confirm.
   ready: boolean;
   blocking: QuestionState[];
@@ -78,21 +98,114 @@ const isIsoDate = (v: unknown): v is string =>
 
 /** A stored Brief value, read by its question's kind. */
 export function answerOf(key: QuestionKey, value: unknown): Answer | null {
-  if (value && typeof value === "object" && "none" in value) {
-    return (value as { none: unknown }).none === true ? { kind: "none" } : null;
-  }
+  const o =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : null;
+  if (o && "none" in o) return o.none === true ? { kind: "none" } : null;
+  if (o?.na === true && typeof o.reason === "string")
+    return { kind: "na", reason: o.reason };
+  if (o?.later === true && isIsoDate(o.due))
+    return {
+      kind: "later",
+      due: o.due,
+      taskId: typeof o.taskId === "string" ? o.taskId : null,
+    };
   const kind = QUESTIONS[key].kind;
   if (kind === "date")
     return isIsoDate(value) ? { kind: "date", date: value } : null;
-  if (kind === "money")
-    return typeof value === "number" && Number.isInteger(value) && value >= 0
-      ? { kind: "money", cents: value }
-      : null;
-  if (kind === "text")
-    return typeof value === "string" && value.trim() !== ""
-      ? { kind: "text", text: value }
-      : null;
+  if (kind === "money") {
+    const cents = o ? o.cents : value;
+    if (typeof cents !== "number" || !Number.isInteger(cents) || cents < 0)
+      return null;
+    return o?.certainty === "estimated" || o?.certainty === "confirmed"
+      ? { kind: "money", cents, certainty: o.certainty }
+      : { kind: "money", cents };
+  }
+  if (kind === "text") {
+    if (typeof value === "string")
+      return value.trim() !== "" ? { kind: "text", text: value } : null;
+    const items = itemsOf(o?.items);
+    if (items?.length) return { kind: "text", text: itemsText(items), items };
+    const measure = measureOf(o?.measure);
+    if (measure) return { kind: "text", text: measureText(measure), measure };
+  }
   return null;
+}
+
+function itemsOf(value: unknown): AnswerItem[] | null {
+  if (!Array.isArray(value)) return null;
+  return value.flatMap((item: unknown) => {
+    const i = item as { label?: unknown; state?: unknown } | null;
+    return typeof i?.label === "string" &&
+      i.label.trim() &&
+      (ITEM_STATES as readonly unknown[]).includes(i.state)
+      ? [{ label: i.label.trim(), state: i.state as AnswerItem["state"] }]
+      : [];
+  });
+}
+
+function measureOf(value: unknown): Measure | null {
+  const m = value as Partial<Measure> | null;
+  return m &&
+    typeof m.metric === "string" &&
+    m.metric.trim() &&
+    typeof m.target === "number" &&
+    Number.isFinite(m.target) &&
+    typeof m.period === "string" &&
+    m.period.trim()
+    ? {
+        metric: m.metric.trim(),
+        target: m.target,
+        period: m.period.trim(),
+        source:
+          typeof m.source === "string" && m.source.trim() ? m.source : null,
+      }
+    : null;
+}
+
+const number = new Intl.NumberFormat("fr-FR");
+
+/** « Mix (en cours) · Pochette (terminé) ». */
+export const itemsText = (items: AnswerItem[]) =>
+  items
+    .map(
+      (i) =>
+        `${i.label} (${fr.framingIntel.itemStates[i.state].toLowerCase()})`,
+    )
+    .join(" · ");
+
+/** « 500 000 streams · premier mois · source : Spotify for Artists ». */
+export const measureText = (m: Measure) =>
+  fr.framingIntel.measure.text(
+    number.format(m.target),
+    m.metric,
+    m.period,
+    m.source,
+  );
+
+/** An answer as a Brief row stores it (field_values.value). */
+export function storedValue(answer: Answer): unknown {
+  switch (answer.kind) {
+    case "text":
+      return answer.items
+        ? { items: answer.items }
+        : answer.measure
+          ? { measure: answer.measure }
+          : answer.text;
+    case "date":
+      return answer.date;
+    case "money":
+      return answer.certainty
+        ? { cents: answer.cents, certainty: answer.certainty }
+        : answer.cents;
+    case "na":
+      return { na: true, reason: answer.reason };
+    case "later":
+      return { later: true, due: answer.due, taskId: answer.taskId };
+    default:
+      return { none: true };
+  }
 }
 
 export function displayOf(key: QuestionKey, answer: Answer): string {
@@ -100,76 +213,22 @@ export function displayOf(key: QuestionKey, answer: Answer): string {
   switch (answer.kind) {
     case "none":
       return (t.questions[key] as { none?: string }).none ?? t.none;
+    case "na":
+      return t.answerStates.na(answer.reason);
+    case "later":
+      return t.answerStates.later(formatBriefDate(answer.due));
     case "text":
       return answer.text;
     case "date":
       return formatBriefDate(answer.date);
     case "money":
-      return formatEuros(answer.cents);
+      return answer.certainty === "estimated"
+        ? t.measure.estimated(formatEuros(answer.cents))
+        : formatEuros(answer.cents);
     case "lines":
       return String(answer.count);
   }
 }
-
-type Party = { name: string; roles: string[] };
-
-/**
- * Everyone outside PDS the project involves, decided by code: the titles'
- * credits, the team held by a contact or a name (never a member of the
- * app), and the intervenants the Juridique added. One line per name, its
- * roles merged (« Hugo Vasquez (direction créative, réalisation du clip) »).
- */
-export function projectParties(k: FramingKnowledge): Party[] {
-  const t = fr.framingIntel.records;
-  const lower = (label: string) => label.toLowerCase();
-  const creditRole = (role: string) =>
-    role === "performer"
-      ? t.performer
-      : role === "featuring"
-        ? t.featuring
-        : lower(
-            (fr.masterPage.credits.roles as Record<string, string>)[role] ??
-              role,
-          );
-  const teamRoles = fr.framingGuide.team.roles as Record<string, string>;
-  const roles = new Map<string, { name: string; roles: Set<string> }>();
-  const add = (name: string, role: string | null) => {
-    const key = name.trim().toLowerCase();
-    if (!key) return;
-    const entry = roles.get(key) ?? { name: name.trim(), roles: new Set() };
-    if (role?.trim()) entry.roles.add(role.trim());
-    roles.set(key, entry);
-  };
-  for (const c of k.credits) add(c.name, creditRole(c.role));
-  for (const m of k.framing.team) {
-    if (m.person_id || m.review_status !== "confirmed") continue;
-    const role = m.role_key ? teamRoles[m.role_key] : m.role;
-    add(m.display_name, role ? lower(role) : null);
-  }
-  for (const c of k.legalContacts)
-    add(
-      c.name,
-      lower((fr.legalForms.roles as Record<string, string>)[c.role] ?? c.role),
-    );
-  return [...roles.values()].map((p) => ({
-    name: p.name,
-    roles: [...p.roles],
-  }));
-}
-
-const partiesSource = (k: FramingKnowledge) => {
-  const s = fr.framingIntel.sources;
-  const team = k.framing.team.some(
-    (m) => !m.person_id && m.review_status === "confirmed",
-  );
-  return [
-    k.credits.length > 0 && s.credits,
-    team && s.team,
-    k.legalContacts.length > 0 && s.legal,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-};
 
 type Record_ = { answer: Answer; label: string } | null;
 
@@ -179,6 +238,10 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
   const s = t.sources;
   const text = (value: string, label: string): Record_ =>
     value.trim() ? { answer: { kind: "text", text: value }, label } : null;
+  const items = (list: AnswerItem[], label: string): Record_ =>
+    list.length
+      ? { answer: { kind: "text", text: itemsText(list), items: list }, label }
+      : null;
   switch (key) {
     case "target_date":
       return k.project.dueDate
@@ -237,60 +300,85 @@ function recordOf(key: QuestionKey, k: FramingKnowledge): Record_ {
             t.records.titleState(
               title.title,
               title.audioState
-                ? fr.catalog.audioStates[title.audioState]
+                ? t.records.audioStates[title.audioState]
                 : t.records.noAudioState,
             ),
           )
           .join(" · "),
         s.catalog,
       );
-    case "existing_elements":
-      return k.files.length
-        ? text(
-            t.records.files(
-              k.files.length,
-              k.files.slice(0, 5).map((f) => f.name),
-            ),
-            s.files,
-          )
-        : null;
+    case "existing_elements": {
+      // What the project holds, each « existe » (PROJ-UX-05): read from the
+      // files, confirmed by a person, never asked again from scratch.
+      const files = k.files
+        .slice(0, 10)
+        .map((f): AnswerItem => ({ label: f.name, state: "exists" }));
+      return items(
+        k.files.length > files.length
+          ? [
+              ...files,
+              {
+                label: t.records.moreFiles(k.files.length - files.length),
+                state: "exists",
+              },
+            ]
+          : files,
+        s.files,
+      );
+    }
     case "decisions_made":
       return text(k.decisions.map((d) => d.what).join(" ; "), s.decisions);
     case "work_started": {
+      // From the Catalogue: each title's step, never « mix » alone — a mix
+      // received is « en cours », only the final master is « terminé ».
+      const steps = k.titles.flatMap((title): AnswerItem[] =>
+        title.audioState
+          ? [
+              {
+                label: t.records.titleState(
+                  title.title,
+                  t.records.audioStates[title.audioState],
+                ),
+                state:
+                  title.audioState === "final_master" ? "done" : "in_progress",
+              },
+            ]
+          : [],
+      );
       const done = k.framing.tasks.filter(
         (task) => task.status === "done",
       ).length;
       const open = k.framing.tasks.length - done;
-      return text(
+      return items(
         [
-          t.records.tasks(done, open),
-          k.masterBriefStarted && t.records.masterBrief,
-          k.legalIntakeStarted && t.records.legalIntake,
-        ]
-          .filter(Boolean)
-          .join(" · "),
+          ...steps,
+          ...(k.framing.tasks.length
+            ? [
+                {
+                  label: t.records.tasks(done, open),
+                  state: open > 0 ? "in_progress" : "done",
+                } as AnswerItem,
+              ]
+            : []),
+          ...(k.masterBriefStarted
+            ? [
+                {
+                  label: t.records.masterBrief,
+                  state: "in_progress",
+                } as AnswerItem,
+              ]
+            : []),
+          ...(k.legalIntakeStarted
+            ? [
+                {
+                  label: t.records.legalIntake,
+                  state: "in_progress",
+                } as AnswerItem,
+              ]
+            : []),
+        ],
         s.work,
       );
-    }
-    case "legal_parties":
-      return text(
-        t.records.parties(
-          projectParties(k).map((p) => t.records.party(p.name, p.roles)),
-        ),
-        partiesSource(k),
-      );
-    case "legal_needs": {
-      // One agreement per party outside PDS: which contract each one
-      // takes is the Juridique's mapping, not the Cadrage's.
-      const parties = projectParties(k);
-      return parties.length
-        ? text(
-            t.records.needs(
-              parties.map((p) => t.records.party(p.name, p.roles)),
-            ),
-            t.questions.legal_parties.label,
-          )
-        : null;
     }
     case "legal_agreements":
       return text(
@@ -325,6 +413,28 @@ export const rolesContext = (k: FramingKnowledge) => ({
   creatives: k.creatives,
 });
 
+/**
+ * The legal parties (PROJ-BUG-03): known once a person has qualified every
+ * one of them; to confirm while one is not; « Personne en dehors de PDS »
+ * only stands while the records name nobody.
+ */
+function partiesState(
+  k: FramingKnowledge,
+  marker: Answer | null,
+): Pick<QuestionState, "status" | "answer" | "proposed"> {
+  const board = legalPartyBoard(k);
+  const count = board.lines.length;
+  if (count === 0)
+    return isMarker(marker)
+      ? { status: "known", answer: marker, proposed: false }
+      : { status: "missing", answer: null, proposed: false };
+  return {
+    status: board.undecided > 0 ? "to_confirm" : "known",
+    answer: { kind: "lines", count },
+    proposed: false,
+  };
+}
+
 type LineRow = { review_status: string };
 
 function linesState(
@@ -347,10 +457,14 @@ function linesState(
       answer: { kind: "lines", count: live.length + extraKnown },
       proposed: false,
     };
-  if (marker?.kind === "none")
+  if (isMarker(marker))
     return { status: "known", answer: marker, proposed: false };
   return { status: "missing", answer: null, proposed: false };
 }
+
+/** « Rien à signaler », « Non applicable », « À définir plus tard ». */
+const isMarker = (a: Answer | null): a is Answer =>
+  a?.kind === "none" || a?.kind === "na" || a?.kind === "later";
 
 /**
  * A value confirmed as the project recorded it (« Confirmer » on a record:
@@ -368,7 +482,10 @@ function outdated(
   if (!row || !record || record.answer.kind !== "text") return false;
   if (row.source_type !== "import" || !row.source_label || row.source_quote)
     return false;
-  return row.value !== record.answer.text;
+  // Compared as stored: a sentence, or items (PROJ-UX-05).
+  return (
+    JSON.stringify(row.value) !== JSON.stringify(storedValue(record.answer))
+  );
 }
 
 function questionState(key: QuestionKey, k: FramingKnowledge): QuestionState {
@@ -393,6 +510,7 @@ function questionState(key: QuestionKey, k: FramingKnowledge): QuestionState {
         answer: stored,
         display: displayOf(key, stored),
         proposed: false,
+        confirmed: { by: row.authorName ?? null, at: row.created_at },
       };
     if (stored && row?.status === "proposed")
       return {
@@ -443,6 +561,8 @@ function questionState(key: QuestionKey, k: FramingKnowledge): QuestionState {
       case "team":
         // The creative team is recorded on the project: known intervenants.
         return linesState(key, k.framing.team, marker, k.creatives.length);
+      case "parties":
+        return partiesState(k, marker);
       default:
         return linesState(key, [], marker);
     }
@@ -451,7 +571,9 @@ function questionState(key: QuestionKey, k: FramingKnowledge): QuestionState {
     ...base,
     ...lines,
     display:
-      lines.answer?.kind === "none" ? displayOf(key, lines.answer) : null,
+      lines.answer && isMarker(lines.answer)
+        ? displayOf(key, lines.answer)
+        : null,
     provenance: null,
   };
 }
@@ -469,14 +591,12 @@ function factsOf(dimension: Dimension, k: FramingKnowledge) {
             },
           ]
         : [];
+    // The date and envelope of the project sheet are not repeated beside the
+    // confirmed answer: one current value per field (PROJ-BUG-04); when they
+    // differ, the Brief says « initial » next to the answer.
     case "timing":
-      return p.dueDate
-        ? [{ label: t.dueDate, value: formatBriefDate(p.dueDate) }]
-        : [];
     case "budget":
-      return p.budgetCents !== null
-        ? [{ label: t.envelope, value: formatEuros(p.budgetCents) }]
-        : [];
+      return [];
     case "team":
       return [
         { label: t.owner, value: p.ownerName ?? t.none },
@@ -533,6 +653,7 @@ export function assessFraming(k: FramingKnowledge): FramingAssessment {
     };
   });
   const all = dimensions.flatMap((d) => d.questions);
+  const conflicts = framingConflicts(k, all, legalPartyBoard(k));
   const blocking = all.filter(
     (q) =>
       q.status === "to_confirm" ||
@@ -547,7 +668,9 @@ export function assessFraming(k: FramingKnowledge): FramingAssessment {
         (q) =>
           q.status !== "known" && !(q.dismissed && !QUESTIONS[q.key].required),
       ) ?? null,
-    ready: blocking.length === 0,
+    // Never over a contradiction: a person resolves it first (PROJ-BUG-04).
+    ready: blocking.length === 0 && conflicts.length === 0,
+    conflicts,
     blocking,
     // Optional questions left empty (or set aside): they never block the
     // Brief, but « complet » would be false while they are there.

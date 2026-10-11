@@ -6,7 +6,7 @@
 // before « Lancer le plan ». Client-safe.
 
 import { formatEuros } from "@/lib/budget/types";
-import { formatBriefDate, rolesContext } from "@/lib/framing/assess";
+import { answerOf, formatBriefDate, rolesContext } from "@/lib/framing/assess";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import { teamBoard } from "@/lib/framing/team-board";
 import { fr } from "@/lib/i18n/fr";
@@ -157,10 +157,13 @@ export function proposePlan(k: FramingKnowledge): ProposedItem[] {
   const envelopeRow = k.framing.briefRows.find(
     (r) => r.field_key === "budget_envelope",
   );
-  const envelope =
-    envelopeRow?.status === "confirmed" && typeof envelopeRow.value === "number"
-      ? envelopeRow.value
+  // An amount, or { cents, certainty } since PROJ-UX-05 (read by answerOf).
+  const envelopeAnswer =
+    envelopeRow?.status === "confirmed"
+      ? answerOf("budget_envelope", envelopeRow.value)
       : null;
+  const envelope =
+    envelopeAnswer?.kind === "money" ? envelopeAnswer.cents : null;
   const engaged = k.budgetLines
     .filter((l) => l.status === "committed" || l.status === "paid")
     .reduce((sum, l) => sum + l.amountCents, 0);

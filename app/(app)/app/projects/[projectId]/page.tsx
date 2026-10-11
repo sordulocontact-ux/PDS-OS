@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import { BriefDrift } from "@/components/plan/brief-drift";
+import { briefDrift } from "@/lib/framing/brief-drift";
 import { FramingEntry } from "@/components/framing/intel/framing-entry";
 import { ProjectBoard } from "@/components/overview/project-board";
 import { ProjectPlanSection } from "@/components/plan/project-plan-section";
@@ -88,8 +90,10 @@ export default async function ProjectOverviewPage({
   // Second round, only for what the first one says is shown: the plan to
   // propose (from the validated Cadrage), or the workflows once it runs
   // (shared with the layout's reading in this request).
+  // Read with the plan launched too: the plan says when the Brief it rests on
+  // no longer matches the Cadrage (PROJ-BUG-04).
   const [proposalKnowledge, flows] = await Promise.all([
-    framingValidated && !plan
+    framingValidated
       ? loadFramingKnowledge(project.id, access)
       : Promise.resolve(null),
     plan ? loadWorkflowStates(project.id) : Promise.resolve(null),
@@ -155,6 +159,12 @@ export default async function ProjectOverviewPage({
           planLaunchedAt={null}
         />
       )}
+      {framingValidated && proposalKnowledge && (
+        <BriefDrift
+          projectId={project.id}
+          changes={briefDrift(proposalKnowledge)}
+        />
+      )}
       {framingValidated && plan && flows && (
         <ProjectBoard
           project={project}
@@ -176,7 +186,7 @@ export default async function ProjectOverviewPage({
             canEdit={canEdit}
             launched={null}
             proposal={
-              proposalKnowledge
+              proposalKnowledge && !plan
                 ? {
                     items: proposePlan(proposalKnowledge),
                     members: proposalKnowledge.framing.members,

@@ -32,7 +32,9 @@ type Client = SupabaseClient<Database>;
 // already confirmed is never touched; a closed dimension is left alone.
 
 export type AnalysisSource =
-  | { kind: "context"; text: string }
+  // `label`: where the words come from, said as the provenance (default:
+  // « Contexte initial »; with the transmission's clarifications, PROJ-UX-02).
+  | { kind: "context"; text: string; label?: string }
   | { kind: "call"; reportId: string; transcript: Transcript };
 
 const TEXT_KEYS = [
@@ -48,7 +50,8 @@ const TEXT_KEYS = [
   "existing_elements",
   "decisions_made",
   "work_started",
-  "legal_parties",
+  // Not legal_parties: the parties come from the records and each one is
+  // qualified by a person (PROJ-BUG-03), never written by PO.
   "legal_agreements",
   "legal_needs",
   "legal_secured",
@@ -103,7 +106,9 @@ export async function analyseForFraming(
   const org = k.framing.project.organizationId;
   const projectId = k.project.id;
   const open = editableDimensions(k);
-  const label = fr.framingIntel.sources.initialContext;
+  const label =
+    (source.kind === "context" && source.label) ||
+    fr.framingIntel.sources.initialContext;
   const stored = new Map(k.framing.briefRows.map((r) => [r.field_key, r]));
   // A question already confirmed or proposed is not proposed again.
   const settled = (key: QuestionKey) => {

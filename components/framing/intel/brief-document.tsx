@@ -1,4 +1,7 @@
-import type { BriefSnapshot } from "@/lib/framing/brief-snapshot";
+import {
+  summaryGroups,
+  type BriefSnapshot,
+} from "@/lib/framing/brief-snapshot";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
 
@@ -15,6 +18,7 @@ export function BriefDocument({
   eyebrow: React.ReactNode;
 }) {
   const t = fr.framingIntel;
+  const groups = summaryGroups(snapshot);
   return (
     <article className="flex flex-col gap-10 rounded-3xl border border-border bg-background p-5 md:p-10">
       <header className="flex flex-col gap-2">
@@ -30,6 +34,33 @@ export function BriefDocument({
             .join(" · ")}
         </p>
       </header>
+
+      {groups.length > 0 && (
+        <section
+          aria-labelledby="brief-summary"
+          className="flex flex-col gap-4"
+        >
+          <h3 id="brief-summary" className="text-display-sm font-semibold">
+            {t.summary.title}
+          </h3>
+          <dl className="grid gap-x-10 gap-y-5 md:grid-cols-2">
+            {groups.map(([label, lines]) => (
+              <div key={label} className="flex min-w-0 flex-col gap-1">
+                <dt className="text-caption text-muted-foreground">{label}</dt>
+                <dd>
+                  <ul className="flex flex-col gap-0.5 text-body-md font-semibold">
+                    {lines.map((line) => (
+                      <li key={line} className="break-words">
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
 
       {DIMENSIONS.map((dimension, index) => {
         const d = snapshot.dimensions.find((x) => x.dimension === dimension);
@@ -76,6 +107,11 @@ export function BriefDocument({
                     ) : (
                       <span className="text-body-md text-muted-foreground">
                         {t.notProvided}
+                      </span>
+                    )}
+                    {item.initial && (
+                      <span className="text-caption text-muted-foreground">
+                        {item.initial}
                       </span>
                     )}
                     {item.source && (

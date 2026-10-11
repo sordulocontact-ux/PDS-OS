@@ -165,10 +165,21 @@ export async function confirmQuestion(
   if (state.status !== "to_confirm") return fail("invalid_transition");
   const kind = QUESTIONS[key].kind;
 
+  // A sentence where a structure is asked is precised first (PROJ-UX-04/05).
+  if (
+    QUESTIONS[key].shape &&
+    state.answer?.kind === "text" &&
+    !state.answer.items &&
+    !state.answer.measure
+  )
+    return fail("invalid_transition");
   if (kind === "text" || kind === "date" || kind === "money") {
     const row = confirmedRow(state, knowledge);
     return row ? appendRow(projectId, key, row) : fail("not_found");
   }
+  // Each legal party is qualified on its own, never confirmed in bulk
+  // (PROJ-BUG-03).
+  if (kind === "parties") return fail("invalid_transition");
   const supabase = await createClient();
   const { error } = await confirmLines(supabase, projectId, key);
   return finish(projectId, error);
@@ -192,6 +203,8 @@ const deadlineInput = z.object({
     .max(200)
     .transform((v) => v || null),
   dueDate: z.iso.date(),
+  // Ferme or estimée (PROJ-UX-05); an older client sends nothing: ferme.
+  confidence: z.enum(["firm", "estimated"]).default("firm"),
 });
 
 export async function addDeadline(
@@ -214,6 +227,7 @@ export async function addDeadline(
     kind: p.data.kind,
     label: p.data.label,
     due_date: p.data.dueDate,
+    confidence: p.data.confidence,
   });
   return finish(projectId, error);
 }
@@ -239,6 +253,7 @@ export async function updateDeadline(
       kind: p.data.kind,
       label: p.data.label,
       due_date: p.data.dueDate,
+      confidence: p.data.confidence,
       review_status: "confirmed",
     })
     .eq("id", deadlineId)

@@ -157,6 +157,10 @@ export function proposePlan(input: {
         (c) => person.contactId && c.partyIds.includes(person.contactId),
       );
       if (theirs.some((c) => c.status === "signed")) return [];
+      // Qualified in the Cadrage as needing no new contract (existing, not
+      // needed, not applicable): no « Faire signer » (PROJ-BUG-03).
+      if (rows.settledParties.has(normalizeSearch(person.name.trim())))
+        return [];
       const running = theirs.some(
         (c) => c.status !== "terminated" && c.status !== "signed",
       );

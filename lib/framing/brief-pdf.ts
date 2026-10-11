@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { BriefSnapshot } from "@/lib/framing/brief-snapshot";
+import { summaryGroups } from "@/lib/framing/brief-snapshot";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
 
@@ -55,11 +56,21 @@ export function briefHtml({
           ? `<ul>${item.lines.map((l) => `<li>${escape(l)}</li>`).join("")}</ul>`
           : escape(item.value ?? t.notProvided);
         const empty = !item.lines.length && !item.value;
-        return `<div class="fact"><dt>${escape(item.label)}</dt><dd class="${empty ? "empty" : ""}">${value}</dd>${item.source ? `<p class="source">${escape(item.source)}</p>` : ""}</div>`;
+        return `<div class="fact"><dt>${escape(item.label)}</dt><dd class="${empty ? "empty" : ""}">${value}</dd>${item.initial ? `<p class="source">${escape(item.initial)}</p>` : ""}${item.source ? `<p class="source">${escape(item.source)}</p>` : ""}</div>`;
       }),
     ].join("");
     return `<section><h2>${escape(`${t.dimensionNumber(index)} ${t.dimensions[dimension]}`)}</h2><dl>${rows}</dl></section>`;
   }).join("");
+  // The summary first: what to act on (PROJ-BUG-04).
+  const groups = summaryGroups(snapshot);
+  const summary = groups.length
+    ? `<section><h2>${escape(t.summary.title)}</h2><dl>${groups
+        .map(
+          ([label, lines]) =>
+            `<div class="fact"><dt>${escape(label)}</dt><dd><ul>${lines.map((l) => `<li>${escape(l)}</li>`).join("")}</ul></dd></div>`,
+        )
+        .join("")}</dl></section>`
+    : "";
   const sources = snapshot.sources.length
     ? `<section><h2>${escape(t.brief.sources)}</h2><p>${escape(snapshot.sources.join(" · "))}</p></section>`
     : "";
@@ -91,6 +102,7 @@ export function briefHtml({
   <p class="eyebrow">${escape(header)}</p>
   <h1>${escape(snapshot.project.title)}</h1>
   <p class="kind">${escape([snapshot.project.kind, snapshot.project.artist].filter(Boolean).join(" · "))}</p>
+  ${summary}
   ${sections}
   ${sources}
 </body>

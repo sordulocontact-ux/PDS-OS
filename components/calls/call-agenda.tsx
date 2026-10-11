@@ -1,32 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { IconTrash } from "nucleo-sharp-essential";
 import { toast } from "sonner";
 
+import { AgendaEditor, cleanAgenda } from "@/components/calls/agenda-editor";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { updateCallAgenda } from "@/lib/calls/actions";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { fr } from "@/lib/i18n/fr";
 
+const day = new Intl.DateTimeFormat("fr-FR", {
+  dateStyle: "long",
+  timeStyle: "short",
+  timeZone: "Europe/Paris",
+});
+
 /**
  * Points to cover and their approximate time, prepared before the call.
- * Editable (add, rename, retime, remove a point) until the call is recorded;
- * the total is always the sum of the points, never typed by hand.
+ * Editable until the call is recorded (PROJ-UX-03): points and their
+ * questions written, added, removed, put in order; the total is always the
+ * sum of the points; the last change says who and when.
  */
 export function CallAgenda({
   callId,
   agenda,
   durationMinutes,
   canEdit,
+  edited = null,
 }: {
   callId: string;
   agenda: AgendaItem[];
   durationMinutes: number | null;
   canEdit: boolean;
+  edited?: { at: string; by: string | null } | null;
 }) {
   const t = fr.calls.agenda;
+  const dimensions = fr.framingIntel.dimensions;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(agenda);
   const [pending, setPending] = useState(false);
@@ -55,6 +64,11 @@ export function CallAgenda({
             {t.total(durationMinutes)}
           </p>
         )}
+        {edited && (
+          <p className="text-xs text-muted-foreground">
+            {t.edited(edited.by, day.format(new Date(edited.at)))}
+          </p>
+        )}
         <ol className="grid list-decimal gap-2 pl-5 text-sm">
           {agenda.map((item, index) => (
             <li key={index}>
@@ -64,6 +78,13 @@ export function CallAgenda({
                   {t.duration(item.minutes)}
                 </span>
               </span>
+              {item.dimension && item.dimension in dimensions && (
+                <span className="text-xs text-muted-foreground">
+                  {t.feeds(
+                    dimensions[item.dimension as keyof typeof dimensions],
+                  )}
+                </span>
+              )}
               {item.questions && item.questions.length > 0 && (
                 <ul className="mt-1 grid list-disc gap-0.5 pl-5 text-xs text-muted-foreground">
                   {item.questions.map((question) => (
@@ -78,23 +99,9 @@ export function CallAgenda({
     );
   }
 
-  const total = draft.reduce((sum, item) => sum + item.minutes, 0);
-
-  const setItem = (index: number, patch: Partial<AgendaItem>) =>
-    setDraft((items) =>
-      items.map((item, i) => (i === index ? { ...item, ...patch } : item)),
-    );
-  const removeItem = (index: number) =>
-    setDraft((items) => items.filter((_, i) => i !== index));
-  const addItem = () =>
-    setDraft((items) => [...items, { topic: "", minutes: 10 }]);
-
   const save = async () => {
     setPending(true);
-    const result = await updateCallAgenda(
-      callId,
-      draft.filter((item) => item.topic.trim() !== ""),
-    );
+    const result = await updateCallAgenda(callId, cleanAgenda(draft));
     setPending(false);
     if (result.ok) setEditing(false);
     else toast.error(fr.calls.errors[result.error]);
@@ -102,51 +109,14 @@ export function CallAgenda({
 
   return (
     <div className="grid gap-3 rounded-lg border border-border p-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-sm font-medium">{t.title}</h3>
-        <p className="text-xs text-muted-foreground">{t.total(total)}</p>
-      </div>
-
-      <div className="grid gap-2">
-        {draft.length === 0 && (
-          <p className="text-sm text-muted-foreground">{t.empty}</p>
-        )}
-        {draft.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <Input
-              value={item.topic}
-              onChange={(e) => setItem(index, { topic: e.target.value })}
-              placeholder={t.topicPlaceholder}
-              maxLength={200}
-              className="h-9 flex-1"
-            />
-            <Input
-              type="number"
-              min={1}
-              max={240}
-              value={item.minutes}
-              onChange={(e) =>
-                setItem(index, { minutes: Number(e.target.value) || 1 })
-              }
-              className="h-9 w-20 text-right"
-            />
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="ghost"
-              aria-label={t.remove}
-              onClick={() => removeItem(index)}
-            >
-              <IconTrash aria-hidden />
-            </Button>
-          </div>
-        ))}
-      </div>
+      <h3 className="text-sm font-medium">{t.title}</h3>
+      <AgendaEditor
+        value={draft}
+        onChange={setDraft}
+        idPrefix={`agenda-${callId}`}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" size="sm" variant="outline" onClick={addItem}>
-          {t.add}
-        </Button>
         <div className="flex-1" />
         <Button
           type="button"

@@ -12,6 +12,7 @@ Règles :
 - Pour chaque élément, "quote" est un extrait recopié mot pour mot du texte, assez long pour être retrouvé (au moins cinq mots).
 - Ne calcule aucune date, aucune durée, aucun montant. Une date ou un montant se recopient tels qu'écrits, dans "target_date_quote", "budget_quote" ou la citation d'une échéance.
 - Une contrainte de droits (sample, autorisation, contrat manquant) est de type "rights".
+- Juridique : un arrangement de production (mix calé avec un ingénieur, studio réservé, date de livraison convenue) n'est ni un accord juridique ni un contrat ; ne le mets pas dans "legal_agreements". Un intervenant technique (mixeur, ingénieur de mastering, studio) n'est pas une partie juridique du seul fait qu'il travaille sur le projet. Ne qualifie jamais toi-même un contrat comme existant : rapporte seulement ce qui est dit.
 - Ne décide de rien : rapporte ce qui est dit, sans le juger ni le compléter.
 - Familles de besoins : creation_content (création et contenus), promotion_distribution (promotion et diffusion), experiences_activations (expériences et activations), other.
 - Rédige en français, de façon concise, sans mise en forme.`;

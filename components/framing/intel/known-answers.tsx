@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { sourceLabel } from "@/components/framing/guide/source-quote";
+import { SourceLine } from "@/components/framing/source-line";
 import type { DimensionState } from "@/lib/framing/assess";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -54,8 +54,13 @@ export function KnownAnswers({
                 <span className="text-body-md break-words whitespace-pre-line">
                   {items.length ? items.join(" · ") : q.display}
                 </span>
+                <SourceLine
+                  projectId={projectId}
+                  provenance={q.provenance}
+                  state="known"
+                  confirmed={q.confirmed}
+                />
                 <span className="flex flex-wrap items-center gap-x-3 text-caption text-muted-foreground">
-                  {q.provenance && <span>{sourceLabel(q.provenance)}</span>}
                   <Link
                     href={routes.projectFramingQuestion(
                       projectId,

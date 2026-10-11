@@ -11,6 +11,7 @@ import {
   type ActionResult,
 } from "@/lib/framing/result";
 import type { Database } from "@/lib/supabase/database.types";
+import { normalizeSearch } from "@/lib/utils/search";
 
 type Client = SupabaseClient<Database>;
 
@@ -87,13 +88,17 @@ export async function importReportIntoBrief(
   projectId: string,
   reportId: string,
 ): Promise<ActionResult> {
-  const { data: items } = await supabase
+  const { data: all } = await supabase
     .from("report_items")
     .select("*")
     .eq("report_id", reportId)
     .order("position");
-  if (!items?.length) return fail("not_found");
-  const itemIds = items.map((i) => i.id);
+  if (!all?.length) return fail("not_found");
+  // Same rule as PO's reading for the Cadrage (lib/framing/analyse.ts): a
+  // quote that is not in the transcription is no source, so the item is not
+  // proposed (PROJ-BUG-02). It stays readable in the call's report.
+  const items = all.filter((i) => i.located !== "missing");
+  const itemIds = all.map((i) => i.id);
 
   const [f, n, t, o, c] = await Promise.all([
     supabase
@@ -137,6 +142,38 @@ export async function importReportIntoBrief(
       .map((c) => c.field_key),
   );
 
+  // What the project already lists, so a call never repeats it (PROJ-BUG-03:
+  // no duplicate in a section). Compared without accents nor case.
+  const [knownNeeds, knownTeam, knownConstraints] = await Promise.all([
+    supabase
+      .from("needs")
+      .select("label")
+      .eq("project_id", projectId)
+      .neq("review_status", "rejected"),
+    supabase
+      .from("project_team_members")
+      .select("display_name")
+      .eq("project_id", projectId)
+      .neq("review_status", "rejected"),
+    supabase
+      .from("framing_constraints")
+      .select("text")
+      .eq("project_id", projectId)
+      .neq("review_status", "rejected"),
+  ]);
+  const seen = (values: string[]) => {
+    const set = new Set(values.map((v) => normalizeSearch(v.trim())));
+    return (value: string) => {
+      const key = normalizeSearch(value.trim());
+      if (set.has(key)) return true;
+      set.add(key);
+      return false;
+    };
+  };
+  const needSeen = seen((knownNeeds.data ?? []).map((n) => n.label));
+  const teamSeen = seen((knownTeam.data ?? []).map((m) => m.display_name));
+  const constraintSeen = seen((knownConstraints.data ?? []).map((c) => c.text));
+
   const source = (item: (typeof items)[number]) => ({
     organization_id: organizationId,
     project_id: projectId,
@@ -156,7 +193,7 @@ export async function importReportIntoBrief(
       status: "proposed",
     }));
   const needs = items
-    .filter((i) => i.kind === "need" && i.need_family)
+    .filter((i) => i.kind === "need" && i.need_family && !needSeen(i.what))
     .map((i) => ({
       ...source(i),
       label: i.what,
@@ -164,7 +201,7 @@ export async function importReportIntoBrief(
       review_status: "proposed",
     }));
   const team = items
-    .filter((i) => i.kind === "team")
+    .filter((i) => i.kind === "team" && !teamSeen(i.what))
     .map((i) => ({
       ...source(i),
       display_name: i.what,
@@ -174,7 +211,7 @@ export async function importReportIntoBrief(
   // The report does not type a constraint: it arrives as "other" and the
   // person picks budget, production… while reviewing it.
   const constraints = items
-    .filter((i) => i.kind === "frame")
+    .filter((i) => i.kind === "frame" && !constraintSeen(i.what))
     .map((i) => ({
       ...source(i),
       type: "other",

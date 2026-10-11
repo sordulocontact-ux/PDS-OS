@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { idleFormState } from "@/lib/auth/form-state";
 import { fr } from "@/lib/i18n/fr";
@@ -47,6 +48,16 @@ export function RespondPanel({ assignmentId }: { assignmentId: string }) {
         <form action={action} noValidate className="flex flex-col gap-3">
           <input type="hidden" name="assignmentId" value={assignmentId} />
           <input type="hidden" name="decision" value={mode} />
+          {mode === "clarification_requested" && (
+            <OptionSelect
+              name="subject"
+              label={t.subjectLabel}
+              required
+              items={fr.transmission.subjects}
+              defaultValue={values.subject ?? "budget"}
+              error={errors.subject}
+            />
+          )}
           <TextareaField
             name="response"
             label={mode === "refused" ? t.refuseLabel : t.clarifyLabel}

@@ -18,6 +18,7 @@ import {
   type BriefRow,
 } from "@/lib/framing/confirm";
 import { QUESTIONS } from "@/lib/framing/dimensions";
+import { legalPartyBoard } from "@/lib/framing/legal-parties";
 import {
   loadFramingKnowledge,
   type FramingKnowledge,
@@ -77,6 +78,25 @@ async function fillQuestion(
       (q.status === "to_confirm" && confirmedRow(q, k)) ||
       manual(fakeValue(q, k));
     return logged(await brief(row), `framing ${q.key}`);
+  }
+  // Legal parties: each one qualified « À vérifier », the one status that
+  // asserts nothing (PROJ-BUG-03), never confirmed in bulk.
+  if (kind === "parties" && q.status === "to_confirm") {
+    const undecided = legalPartyBoard(k).lines.filter((l) => !l.decision);
+    return logged(
+      await supabase.from("framing_legal_parties").insert(
+        undecided.map((l) => ({
+          organization_id: organizationId,
+          project_id: projectId,
+          party_key: l.key,
+          name: l.name,
+          contact_id: l.contactId,
+          roles: l.roles,
+          document_status: "to_verify",
+        })),
+      ),
+      "framing legal parties",
+    );
   }
   if (q.status === "to_confirm")
     return logged(

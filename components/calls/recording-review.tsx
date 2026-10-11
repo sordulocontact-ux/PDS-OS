@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 
+import { SaveState } from "@/components/calls/recording-live";
+import { GapList } from "@/components/calls/recording-recovery";
 import { QUIET_RATIO, type Recording } from "@/components/calls/use-recorder";
 import { MetaList } from "@/components/labo/meta-list";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { useObjectUrl } from "@/components/ui/use-object-url";
 import { formatClock, formatMegabytes } from "@/lib/calls/format";
-import type { UploadError } from "@/lib/calls/upload-audio";
+import { filledTakes, savedMs, type SavedTake } from "@/lib/calls/recording";
+import type { CallErrorCode } from "@/lib/calls/constants";
 import { fr } from "@/lib/i18n/fr";
 
 const FREE_TIER_BYTES = 25 * 1024 * 1024;
@@ -16,18 +19,27 @@ const FREE_TIER_BYTES = 25 * 1024 * 1024;
 /** After stopping: listen back, then send. Discarding asks for confirmation first. */
 export function RecordingReview({
   recording,
-  sending,
   sendError,
   onSend,
   onDiscard,
+  takes,
+  unsavedMs,
+  failing,
+  sendingLabel,
 }: {
   recording: Recording;
-  sending: boolean;
-  sendError: UploadError | null;
+  // Every take of the call (earlier ones from before a reload included).
+  takes: SavedTake[];
+  unsavedMs: number;
+  failing: boolean;
+  // While sending: saving the last seconds, then sending.
+  sendingLabel: string | null;
+  sendError: CallErrorCode | null;
   onSend: () => void;
   onDiscard: () => void;
 }) {
   const t = fr.calls.recorder;
+  const sending = sendingLabel !== null;
   const [confirming, setConfirming] = useState(false);
   const canEdit = useCanEditProject();
   const url = useObjectUrl(recording.blob) ?? undefined;
@@ -48,6 +60,19 @@ export function RecordingReview({
           [t.size, `${formatMegabytes(recording.blob.size)} Mo`],
         ]}
       />
+      {(unsavedMs > 0 || failing) && (
+        <SaveState
+          savedMs={savedMs(takes)}
+          unsavedMs={unsavedMs}
+          failing={failing}
+        />
+      )}
+      {filledTakes(takes).length > 1 && (
+        <p className="text-sm text-muted-foreground">
+          {t.recovery.parts(filledTakes(takes).length)}
+        </p>
+      )}
+      <GapList takes={takes} />
       {quiet && (
         <p role="alert" className="text-sm text-[color:var(--tone-warning-fg)]">
           {t.quiet}
@@ -78,7 +103,7 @@ export function RecordingReview({
             onClick={onSend}
             disabled={sending}
           >
-            {sending ? t.sending : quiet ? t.sendAnyway : t.send}
+            {sendingLabel ?? (quiet ? t.sendAnyway : t.send)}
           </Button>
           <Button
             variant="ghost"
@@ -89,7 +114,6 @@ export function RecordingReview({
           </Button>
         </div>
       )}
-      <p className="text-xs text-muted-foreground">{t.keepOpen}</p>
     </div>
   );
 }

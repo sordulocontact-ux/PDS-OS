@@ -129,7 +129,27 @@ export type Assignment = {
   response: string | null;
   respondedAt: string | null;
   createdAt: string;
+  // What a request for clarification is about (PROJ-UX-02).
+  subject: ClarificationSubject | null;
 };
+
+export const CLARIFICATION_SUBJECTS = [
+  "budget",
+  "timing",
+  "scope",
+  "team",
+  "other",
+] as const;
+export type ClarificationSubject = (typeof CLARIFICATION_SUBJECTS)[number];
+
+export function isClarificationSubject(
+  value: unknown,
+): value is ClarificationSubject {
+  return (
+    typeof value === "string" &&
+    (CLARIFICATION_SUBJECTS as readonly string[]).includes(value)
+  );
+}
 
 export function isAssignmentStatus(value: unknown): value is AssignmentStatus {
   return (

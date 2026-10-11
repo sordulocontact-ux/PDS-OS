@@ -47,7 +47,13 @@ export type FramingData = {
   fields: BriefFieldState[];
   // Every current Brief row (questions of the Cadrage intelligent, « rien à
   // signaler » markers, suggestions), with where it comes from.
-  briefRows: Array<FieldRow & { provenance: Provenance | null }>;
+  briefRows: Array<
+    FieldRow & {
+      provenance: Provenance | null;
+      // Who wrote the current row, said for a confirmed value (PROJ-BUG-02).
+      authorName: string | null;
+    }
+  >;
   needs: Array<Need & { provenance: Provenance | null }>;
   team: Array<TeamMember & { provenance: Provenance | null }>;
   constraints: Array<Constraint & { provenance: Provenance | null }>;
@@ -191,6 +197,8 @@ export async function loadFraming(
     briefRows: fieldRows.map((row) => ({
       ...row,
       provenance: provenanceOf(row),
+      authorName:
+        members.find((m) => m.personId === row.created_by)?.name ?? null,
     })),
     fields: BRIEF_TEXT_FIELDS.map((key) => {
       const row = fieldRows.find((r) => r.field_key === key);

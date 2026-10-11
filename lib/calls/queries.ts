@@ -10,6 +10,10 @@ import {
   type CallStatus,
 } from "@/lib/calls/constants";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
+import {
+  loadCallRecording,
+  type CallRecordingState,
+} from "@/lib/calls/recording-queries";
 import { routes } from "@/lib/auth/redirects";
 import { personName } from "@/lib/projects/types";
 import { isCallFormat, type CallFormat } from "@/lib/strategy/call-prep";
@@ -54,8 +58,13 @@ export type CallDetail = CallSummary & {
   audioPath: string | null;
   audioMime: string | null;
   audioBytes: number | null;
+  // Saved while recording in the app (PROJ-BUG-01): unsent takes, or the
+  // files of a recording sent in several takes.
+  recording: CallRecordingState;
   errorCode: string | null;
   agenda: AgendaItem[] | null;
+  // The agenda's last change after creation (PROJ-UX-03).
+  agendaEdited: { at: string; by: string | null } | null;
   // Prepared from the Cadrage, the Stratégie or the Conception (« Préparer un
   // échange »):
   // its purpose, who takes part, the documents that go with it, and how a
@@ -179,12 +188,22 @@ function toAgenda(value: unknown): AgendaItem[] | null {
   if (!Array.isArray(value)) return null;
   const items = value.flatMap((item: unknown) => {
     if (typeof item !== "object" || item === null) return [];
-    const { topic, minutes, questions } = item as Record<string, unknown>;
+    const { topic, minutes, questions, dimension } = item as Record<
+      string,
+      unknown
+    >;
     const asked = Array.isArray(questions)
       ? questions.filter((q): q is string => typeof q === "string")
       : [];
     return typeof topic === "string" && typeof minutes === "number"
-      ? [{ topic, minutes, ...(asked.length ? { questions: asked } : {}) }]
+      ? [
+          {
+            topic,
+            minutes,
+            ...(asked.length ? { questions: asked } : {}),
+            ...(typeof dimension === "string" ? { dimension } : {}),
+          },
+        ]
       : [];
   });
   return items.length > 0 ? items : null;
@@ -202,13 +221,17 @@ export async function getCall(
   const query = supabase
     .from("calls")
     .select(
-      "*, call_attendees(person_id, person:people!call_attendees_person_id_fkey(first_name, last_name)), call_guests(email, name)",
+      "*, call_attendees(person_id, person:people!call_attendees_person_id_fkey(first_name, last_name)), call_guests(email, name), agenda_editor:people!calls_agenda_edited_by_fkey(first_name, last_name)",
     )
     .eq("id", callId);
   const { data } = await (
     projectId ? query.eq("project_id", projectId) : query.is("project_id", null)
   ).maybeSingle();
   if (!data) return null;
+  const [prepared, recording] = await Promise.all([
+    preparedOfCall(supabase, data.id),
+    loadCallRecording(supabase, data.id, data.audio_path),
+  ]);
   return {
     id: data.id,
     title: data.title,
@@ -237,8 +260,20 @@ export async function getCall(
     audioBytes: data.audio_bytes,
     errorCode: data.error_code,
     agenda: toAgenda(data.agenda),
+    agendaEdited: data.agenda_edited_at
+      ? {
+          at: data.agenda_edited_at,
+          by: data.agenda_editor
+            ? personName(
+                data.agenda_editor.first_name,
+                data.agenda_editor.last_name,
+              )
+            : null,
+        }
+      : null,
     durationMinutes: data.duration_minutes,
-    prepared: await preparedOfCall(supabase, data.id),
+    prepared,
+    recording,
   };
 }
 
@@ -352,6 +387,20 @@ export async function getAudioUrl(
     .from(AUDIO_BUCKET)
     .createSignedUrl(path, 15 * 60, download ? { download } : undefined);
   return data?.signedUrl ?? null;
+}
+
+/** URLs of the call's audio for the player: each take when recorded in parts. */
+export async function getCallAudioUrls(
+  supabase: Client,
+  call: CallDetail,
+): Promise<Array<string | null>> {
+  const paths =
+    call.recording.parts.length > 1
+      ? call.recording.parts
+      : call.audioPath
+        ? [call.audioPath]
+        : [];
+  return Promise.all(paths.map((path) => getAudioUrl(supabase, path)));
 }
 
 type Segment = Transcript["segments"][number];

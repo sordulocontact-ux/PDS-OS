@@ -1,5 +1,6 @@
 /** Calls, audio upload, transcripts and reports (step 4). */
 import { calendar, details, schedule } from "./calls-schedule";
+import { microphoneErrors } from "./microphone";
 
 export const calls = {
   schedule,
@@ -121,6 +122,7 @@ export const calls = {
     uploaded: "Enregistrement déposé.",
     size: (mb: string) => `${mb} Mo`,
     playerUnavailable: "Lecture impossible pour le moment.",
+    part: (n: number) => `Partie ${n}`,
   },
   recorder: {
     title: "Enregistrer depuis l'application",
@@ -157,7 +159,7 @@ export const calls = {
       "Cet enregistrement semble muet : presque aucun son n'a été entendu. Écoutez-le avant de l'envoyer.",
     sendAnyway: "Envoyer quand même",
     keepOpen:
-      "Gardez cet onglet ouvert jusqu'à l'envoi : fermer la page perd l'enregistrement.",
+      "Sauvegardé toutes les 20 secondes : si la page se ferme, la partie sauvegardée vous attend ici.",
     level: "Niveau sonore",
     review: "Écoutez si besoin, puis envoyez l'enregistrement.",
     duration: "Durée",
@@ -172,16 +174,39 @@ export const calls = {
     freeTierNote:
       "Au-delà de 25 Mo (environ 1 h 45), la transcription exige le palier payant du fournisseur.",
     or: "Déposer un fichier audio à la place",
-    errors: {
-      unsupported:
-        "Votre navigateur ne permet pas d'enregistrer. Utilisez Chrome ou Edge sur ordinateur.",
-      permission_denied:
-        "Accès refusé. Autorisez le micro (et le partage d'onglet) dans votre navigateur, puis réessayez.",
-      no_tab_audio:
-        "L'onglet a été partagé sans son. Recommencez en cochant « Partager aussi l'audio de l'onglet ».",
-      device_error:
-        "Impossible d'accéder au micro. Vérifiez qu'il est branché et libre.",
-      too_large: "Enregistrement arrêté : la limite de 100 Mo est atteinte.",
+    errors: microphoneErrors,
+    // Before any prompt: what the browser already says (PROJ-BUG-01).
+    diagnosis: "Avant de commencer",
+    starting: "Démarrage du micro…",
+    // Stopped without the user: kept, said, and what can follow.
+    interruptions: {
+      permission_revoked:
+        "L'accès au micro a été retiré pendant l'enregistrement.",
+      device_lost: "Le micro s'est déconnecté pendant l'enregistrement.",
+      recorder_failed:
+        "Le navigateur a arrêté l'enregistrement : plus aucun son ne lui parvenait.",
+    },
+    savedLive: (clock: string) => `Sauvegardé : ${clock}`,
+    pendingLive: (clock: string) => `${clock} en attente de sauvegarde`,
+    saveFailing:
+      "La sauvegarde ne passe plus (connexion ?). Elle reprend seule : gardez cet onglet ouvert.",
+    savingRest: "Sauvegarde des dernières secondes…",
+    recovery: {
+      title: "Enregistrement interrompu",
+      saved: (clock: string, at: string) =>
+        `${clock} sauvegardées, jusqu'à ${at}.`,
+      parts: (n: number) =>
+        `En ${n} parties : elles seront transcrites dans l'ordre.`,
+      nothingSaved: "Rien n'a été sauvegardé.",
+      gapsTitle: "Audio manquant",
+      gap: (from: string, to: string, minutes: number) =>
+        `Entre ${from} et ${to} (environ ${minutes} min) : ce passage ne sera pas dans la transcription.`,
+      resume: "Reprendre l'enregistrement",
+      retry: "Réessayer",
+      sendSaved: "Envoyer la partie sauvegardée",
+      discard: "Supprimer",
+      confirmDiscard:
+        "Supprimer ce qui est sauvegardé ? Il ne sera ni transcrit ni résumé.",
     },
   },
   process: {
@@ -247,6 +272,22 @@ export const calls = {
     cancel: "Annuler",
     saving: "Enregistrement…",
     empty: "Aucun point pour l'instant.",
+    // Editing a point and its questions (PROJ-UX-03).
+    min: "min",
+    topicLabel: (n: number) => `Point ${n}`,
+    minutesLabel: (n: number) => `Durée du point ${n}, en minutes`,
+    moveUp: (n: number) => `Monter le point ${n}`,
+    moveDown: (n: number) => `Descendre le point ${n}`,
+    questionLabel: (n: number) => `Question ${n}`,
+    questionUp: (n: number) => `Monter la question ${n}`,
+    questionDown: (n: number) => `Descendre la question ${n}`,
+    questionRemove: (n: number) => `Retirer la question ${n}`,
+    addQuestion: "Ajouter une question",
+    feeds: (dimension: string) => `Alimente le cadrage : ${dimension}`,
+    edited: (name: string | null, date: string) =>
+      `Modifié${name ? ` par ${name}` : ""} le ${date}`,
+    suggested:
+      "Questions proposées par PO à partir de ce qui manque : modifiez, retirez ou complétez-les. Elles entrent dans l'ordre du jour quand vous lancez le call.",
   },
   // Decisions and next actions of the report; an action becomes a task.
   outcomes: {

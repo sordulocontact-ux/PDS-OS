@@ -8,11 +8,7 @@ import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
 import { inviteProjectTeam } from "@/lib/calls/invite";
 import { participantRow, participantSchema } from "@/lib/calls/participants";
-import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
-import { assessFraming } from "@/lib/framing/assess";
-import { framingCallTopics } from "@/lib/framing/call-prep";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
-import { loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,11 +35,23 @@ const callSchema = z.object({
     .transform((value) => value || null)
     .refine((value) => value === null || /^https:\/\/\S+$/.test(value)),
   purpose: z.string().trim().min(1).max(500),
-  // The topics PO prepared that the person kept, by dimension.
-  dimensions: json(z.array(z.enum(DIMENSIONS)).max(DIMENSIONS.length)),
-  // « Préparer en détail »: the questions go with each topic.
-  detailed: z.enum(["0", "1"]).transform((v) => v === "1"),
-  extraTopics: json(z.array(z.string().trim().min(1).max(200)).max(10)),
+  // The agenda as the person edited it from PO's draft (PROJ-UX-03): points,
+  // durations, questions and the Cadrage dimension each point feeds.
+  agenda: json(
+    z
+      .array(
+        z.object({
+          topic: z.string().trim().min(1).max(200),
+          minutes: z.number().int().min(1).max(240),
+          questions: z
+            .array(z.string().trim().min(1).max(300))
+            .max(20)
+            .optional(),
+          dimension: z.enum(DIMENSIONS).optional(),
+        }),
+      )
+      .max(20),
+  ),
   participants: json(z.array(participantSchema).max(30)),
   documentIds: json(z.array(z.uuid()).max(30)),
 });
@@ -65,7 +73,6 @@ export async function prepareFramingCall(
   const parsed = callSchema.safeParse({
     ...values,
     meetingUrl: values.meetingUrl ?? "",
-    detailed: values.detailed ?? "0",
   });
   if (!parsed.success)
     return {
@@ -76,19 +83,11 @@ export async function prepareFramingCall(
   const p = parsed.data;
 
   const access = await requireApproved();
-  const knowledge = await loadFramingKnowledge(p.projectId, access);
-  if (!knowledge) return { status: "error", formError: t.failed, values };
-  const kept = new Set(p.dimensions);
-  const agenda = [
-    ...framingCallTopics(assessFraming(knowledge))
-      .filter((topic) => kept.has(topic.dimension))
-      .map((topic) => ({
-        topic: topic.topic,
-        minutes: topic.minutes,
-        ...(p.detailed ? { questions: topic.questions } : {}),
-      })),
-    ...p.extraTopics.map((topic) => ({ topic, minutes: EXTRA_TOPIC_MINUTES })),
-  ];
+  // The person's own agenda: written by them, from PO's draft; the total is
+  // its sum (create_framing_call), never typed.
+  const agenda = p.agenda;
+  if (agenda.reduce((sum, item) => sum + item.minutes, 0) > 12 * 60)
+    return { status: "error", formError: t.failed, values };
 
   const supabase = await createClient();
   const { data: callId, error } = await supabase.rpc("create_framing_call", {

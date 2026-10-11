@@ -578,6 +578,32 @@ s'afficher sans chargement.
     suspendues dans un onglet caché) ; titre de l'onglet = état de l'enregistrement.
   - Pièges : `AudioContext` souvent suspendu après l'autorisation → `resume()` ;
     Chrome ne partage le son d'un onglet que si la vidéo est demandée (elle est coupée).
+- **Sauvegarde au fil de l'eau** (PROJ-BUG-01, 11/10/2026, `…20261011400101`) : avant, tout
+  l'enregistrement restait en mémoire jusqu'à « Envoyer » (un rechargement le perdait) et un
+  micro débranché ou retiré laissait « Enregistrement en cours » sur du silence. Désormais :
+  - une **partie** (`call_recording_takes`, numérotée en SQL par `begin_recording_take`) par
+    session d'enregistrement, ouverte avant le premier son ; ses **morceaux** de 20 s
+    (`call_recording_pieces`, `PIECE_MS`) sont envoyés **dans l'ordre** par le navigateur
+    (`use-recording-saver.ts` : Storage `org/call/takes/<take>/<seq>.webm` puis ligne en
+    `on conflict do nothing`, réessayés sans fin) ; un morceau n'est « sauvegardé » qu'une
+    fois sa ligne écrite, le reste est affiché « en attente » ;
+  - « Enregistrement en cours » seulement quand des données sonores arrivent (micro `live`,
+    `AudioContext` `running`), sinon arrêt après 5 s ; micro `ended` → interruption
+    (`permission_revoked` si la permission est passée à `denied`, sinon `device_lost`) ;
+  - diagnostics distincts (`lib/i18n/fr/microphone.ts`, partagés avec la dictée) :
+    autorisation refusée / bloquée pour le site / bloquée par le système, aucun micro, micro
+    occupé, partage d'onglet annulé ; avant tout clic, lecture **sans demande**
+    (`permissions.query`, `enumerateDevices`, `use-mic-diagnosis.ts`) ;
+  - après un rechargement ou une interruption, `RecordingRecovery` : durée sauvegardée et
+    jusqu'à quelle heure, **audio manquant entre deux parties** (`recordingGaps`), puis
+    « Reprendre l'enregistrement » (nouvelle partie), « Envoyer la partie sauvegardée »,
+    déposer un fichier, ou « Supprimer » (`discarded_at`, rien n'est effacé) ;
+  - « Envoyer » (`sendRecording`) attend la fin des envois, assemble chaque partie en un
+    fichier (ses morceaux bout à bout = la sortie du MediaRecorder), idempotent ; la première
+    partie devient `calls.audio_path`, la transcription lit **toutes** les parties dans
+    l'ordre (`joinTranscripts`, temps décalés, aucun texte ajouté) et le lecteur les montre
+    l'une après l'autre. Pas de « Continuer sans enregistrement » : un call sans audio n'a
+    pas d'état métier (point à trancher).
 - Envoi (fichier ou enregistrement) : `lib/calls/upload-audio.ts` → Storage direct depuis
   le navigateur (RLS) → `attachAudio` (vérifie chemin, type, taille).
 - Pipeline (`lib/calls/pipeline.ts`, routes `app/api/calls/[callId]/{transcribe,extract}`) :
@@ -736,14 +762,54 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   ailleurs (échéance et budget de la fiche, crédits, contrats…, `source_label`) est à
   confirmer ; sinon manquante. « Confirmer » relit la valeur côté serveur, jamais celle du
   client. « Écarter » / « Passer » écrit une ligne rejetée : la valeur n'est plus proposée.
-  **Parties impliquées** (`projectParties`, 10/10/2026) = tous ceux hors de PDS : crédits
-  des titres, équipe confirmée tenue par un contact du Réseau ou un nom (jamais un membre de
-  l'app), intervenants ajoutés au Juridique ; une ligne par nom (« – »), rôles fusionnés.
-  **Contrats et droits à prévoir** en découle : « Un accord avec chaque partie : … », à
-  confirmer (le type de contrat de chacun reste la cartographie du Juridique). Une valeur
+  **Parties impliquées** (PROJ-BUG-03, 11/10/2026, `lib/framing/legal-parties.ts`,
+  `…20261011400201`) : les candidats sont lus par le code (crédits des titres, équipe
+  confirmée tenue par un contact du Réseau ou un nom, jamais un membre de l'app, intervenants
+  du Juridique ; une ligne par nom, rôles fusionnés) ; **chaque partie est qualifiée par une
+  personne** (`framing_legal_parties` : relation avec PDS, document existant / à vérifier /
+  à préparer / non nécessaire / non applicable, contrat qui le prouve, qui suit, raison) ;
+  « Existant » exige un contrat **signé** de Contrats dont la personne est partie (SQL),
+  « Non nécessaire » / « Non applicable » une raison ; le code n'indique un statut que sur
+  preuve (« Contrat trouvé dans Contrats »), jamais d'après le rôle ; un rôle non attribué
+  n'est pas une partie. La question est « connue » quand toutes les parties sont qualifiées,
+  jamais confirmée en bloc. **Contrats et droits à prévoir** n'est plus proposé par le code
+  (fini « Un accord avec chaque partie ») : il garde les autres besoins (autorisations…).
+  Le Juridique lit ces qualifications : drapeaux de l'État des lieux, et pas de « Faire
+  signer un contrat » pour une partie existante, non nécessaire ou non applicable
+  (`InventoryRows.settledParties`). PO ne lit plus `legal_parties` dans un texte ; la
+  consigne lui interdit de prendre un arrangement de production pour un accord juridique.
+- **Provenance** (PROJ-BUG-02, `components/framing/source-line.tsx`) : toute valeur dit son
+  état (« Suggestion de PO · à confirmer », « Repris de … · à vérifier », « Confirmé par X
+  le … ») et sa source ; une source de call ouvre **le passage** de la transcription
+  (`/calls/<id>#t-<seconde>`, segments ancrés dans `TranscriptPanel`), ou dit « Source
+  introuvable ». Sous une question de liste, « Sources des propositions » (`LineSources`).
+  Un élément du compte rendu dont la citation est introuvable n'est plus proposé au Cadrage
+  (`import-report.ts`, même règle que la lecture par PO) ; besoins, équipe et contraintes
+  déjà listés ne sont pas importés deux fois. Une valeur
   confirmée telle que le projet l'enregistrait (importée, avec `source_label`, sans
   citation) est **reproposée** si l'enregistrement a changé depuis, tant que le Cadrage est
   ouvert (une personne ajoutée à l'équipe après coup) ; une valeur écrite à la main, jamais.
+- **Transmission** (PROJ-UX-02, 11/10/2026, `…20261011400401`) : avant d'accepter,
+  « Ce que vous acceptez » (transmis / manquant, calculé par le code, `HandoverSummary`) ;
+  une demande de précision porte un **sujet** (`project_assignments.clarification_subject`,
+  `respond_to_assignment(…, p_subject)`) et l'historique la montre structurée (auteur, date,
+  sujet, question, réponse de la direction, statut : `clarificationsOf`, `ClarificationList`),
+  y compris après l'acceptation. Les **réponses de la direction** sont lues par PO avec le
+  contexte initial au démarrage du Cadrage (`startFramingWithPo`, `clarificationsOf`, données
+  jamais consignes) : ses propositions portent la provenance « Contexte initial et précisions
+  de la direction ». **Les deux entrées** (`FramingEntry`) disent ce qu'elles font ; la
+  recommandée vient en tête, choisie par le code (plus d'informations manquantes que
+  connues ou à confirmer → un échange ; sinon PO). Préparer un échange crée seulement le
+  call (`create_framing_call`), sans démarrer ni valider le Cadrage.
+- **Ordre du jour d'un call** (PROJ-UX-03, `…20261011400501`) : un seul éditeur
+  (`AgendaEditor`) avant la création (« Préparer un échange » : le brouillon de PO, sujets
+  et questions, relu et modifié, envoyé tel quel ; chaque point garde la dimension du Cadrage
+  qu'il alimente, `AgendaItem.dimension`) et après (page du call, jusqu'à l'enregistrement) :
+  titres, durées, questions ajoutées, modifiées, retirées, remises dans l'ordre (boutons
+  monter / descendre, accessibles au clavier, à la place d'un glisser-déposer), total
+  recalculé à chaque changement ; dernière modification « par qui, quand » écrite par un
+  trigger (`calls.agenda_edited_at` / `_by`). Les autres formulaires de préparation
+  (Stratégie, Conception, Production) gardent `AgendaTopicsField`.
 - **Entrée** (`FramingEntry`, Vue d'ensemble et Cadrage) : « ✓ Prise en charge acceptée »,
   l'analyse par dimension, « Commencer le cadrage » (`startFramingWithPo` : ouvre le Cadrage
   sans call, démarre l'étape, PO lit **une fois** le contexte initial, marqueur
@@ -785,6 +851,40 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   ligne à ligne avec la version d'avant). Export PDF de la dernière version
   (`lib/framing/brief-pdf.ts`). L'instantané est écrit par le serveur avec la session du
   responsable : c'est ce que le valideur lit, donc ce qu'il valide.
+- **Réponses structurées et états** (PROJ-UX-04 et UX-05, 11/10/2026) :
+  - **objectif mesurable** (`success_criteria`, `shape: "measure"`) : métrique, cible,
+    période, source (`{ measure }` dans `field_values.value`), tous obligatoires sauf la
+    source ; la cible est lue par le code dans la phrase dite, jamais par PO ;
+  - **éléments à états** (`prerequisites`, `existing_elements`, `work_started`,
+    `shape: "items"`) : plusieurs éléments, chacun Existe / En cours / Terminé / Décidé /
+    Prévu (`{ items }`), suggestions en un clic, pré-remplis depuis le Catalogue (étape audio
+    de chaque titre : « mix reçu, pas encore validé » = en cours, seul le master final est
+    terminé) et les fichiers ; une phrase proposée (call, contexte) se « précise » avant
+    d'être confirmée, sa source gardée (`answerItems` / `answerMeasure`, `keepSource`) ;
+  - **« Non applicable »** (raison obligatoire) et **« À définir plus tard »** (date + tâche de
+    suivi pour qui répond, dimension vérifiée ouverte avant de créer la tâche) sur toute
+    question sauf les parties ; réponses comptées, listées « restent ouverts » avant le
+    Brief et dans sa synthèse (`lib/framing/actions/answers.ts`) ;
+  - **« M'aider à définir »** : la formulation choisie ouvre la réponse, modifiable ; rien
+    n'est enregistré sans « Enregistrer » (`chooseHelp(…, edited)`, source gardée) ;
+  - **enveloppe confirmée ou estimée** (`{ cents, certainty }`), « Pas d'enveloppe dédiée »
+    pour non définie ; **dépenses** du projet listées sous « Engagements existants » et
+    ajoutées avec le formulaire du Budget (`ExpenseLines`) ;
+  - **équipe** : « Rôles tenus » et « Rôles à attribuer » séparés, un rôle vacant est une
+    action ; **échéances** : Ferme / Estimée (`framing_deadlines.confidence`,
+    `…20261011400301`) et le workflow alimenté, dit par le code (`deadlineWorkflows`) ;
+  - progression : ce qui bloque encore le Brief, toujours affiché.
+- **Cohérence du Brief** (PROJ-BUG-04, 11/10/2026) : une seule valeur courante par champ
+  (plus d'« Échéance / Enveloppe à la création » à côté de la réponse confirmée ; « Modifié ·
+  initial (fiche projet) : … » quand elles diffèrent) ; **contradictions** trouvées par le
+  code (`lib/framing/conflicts.ts` : jalon de production après la date cible, échéance de
+  sortie ≠ date cible, dépenses engagées au-delà de l'enveloppe, « Existant » dont le contrat
+  n'est plus signé) listées dans « À résoudre avant le Brief » et bloquantes
+  (`assessment.ready`), jamais résolues en remplaçant une valeur ; **synthèse** du Brief
+  écrite par le code (décisions, points ouverts, risques, prérequis, responsables :
+  `summaryOf`, instantané `schema: 2`) en tête du document et du PDF ; le **plan** dit quand
+  le Brief validé ne correspond plus au Cadrage (`briefDrift`, `BriefDrift` au-dessus du
+  plan, versions `schema: 2` seulement), sans rien recalculer.
 - **Validation** : « Envoyer en validation » = `send_framing_brief` (passe par
   `request_validation` : notification, Mon Travail, Validations du projet ; une validation du
   Cadrage sans version en attente est refusée, `brief_required`). Le valideur (DG,

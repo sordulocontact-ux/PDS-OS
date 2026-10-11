@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { HandoverSummary } from "@/components/projects/handover-summary";
 import { RespondPanel } from "@/components/projects/respond-panel";
 import { TransmitDialog } from "@/components/projects/transmit-dialog";
 import { buttonVariants } from "@/components/ui/button";
@@ -100,6 +101,7 @@ export function TransmissionPanel({
               {latest.note}
             </blockquote>
           )}
+          <HandoverSummary project={project} />
           <RespondPanel assignmentId={latest.id} />
         </>
       )}

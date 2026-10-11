@@ -23,7 +23,12 @@ export type KnownTitle = {
   artists: string;
   audioState: AudioState | null;
 };
-export type KnownCredit = { masterId: string; name: string; role: string };
+export type KnownCredit = {
+  masterId: string;
+  name: string;
+  role: string;
+  contactId: string | null;
+};
 export type KnownContract = {
   id: string;
   title: string;
@@ -43,7 +48,19 @@ export type KnownDecision = {
 };
 export type KnownEngineer = { id: string; name: string };
 // An intervenant the Juridique added without a credit (lawyer, distributor…).
-export type KnownLegalContact = { name: string; role: string };
+export type KnownLegalContact = {
+  name: string;
+  role: string;
+  contactId: string;
+};
+// A contract a contact is party to (Contrats), for the legal parties.
+export type PartyContract = {
+  id: string;
+  title: string;
+  status: string;
+  contactId: string;
+};
+type LegalPartyRow = Tables["framing_legal_parties"]["Row"];
 export type FramingCallLink = {
   callId: string;
   title: string;
@@ -77,6 +94,9 @@ export type FramingKnowledge = {
   creatives: Array<{ personId: string; name: string }>;
   engineers: KnownEngineer[];
   legalContacts: KnownLegalContact[];
+  // What a person decided for each legal party (PROJ-BUG-03).
+  legalPartyDecisions: LegalPartyRow[];
+  partyContracts: PartyContract[];
   masterBriefStarted: boolean;
   legalIntakeStarted: boolean;
   completeSplits: number;
@@ -134,7 +154,7 @@ export async function loadFramingKnowledge(
     masterIds.length
       ? supabase
           .from("master_contributors")
-          .select("master_id, name, role")
+          .select("master_id, name, role, contact_id")
           .in("master_id", masterIds)
       : none,
     masterIds.length
@@ -177,7 +197,7 @@ export async function loadFramingKnowledge(
     supabase
       .from("legal_project_contacts")
       .select(
-        "role, contact:network_contacts!legal_project_contacts_contact_same_org(name)",
+        "contact_id, role, contact:network_contacts!legal_project_contacts_contact_same_org(name)",
       )
       .eq("project_id", projectId)
       .order("created_at"),
@@ -221,13 +241,55 @@ export async function loadFramingKnowledge(
       masterId: p.master_id,
       name: p.artist.name,
       role: p.role === "featuring" ? "featuring" : "performer",
+      contactId: null,
     })),
     ...(contributorsRes.data ?? []).map((c) => ({
       masterId: c.master_id,
       name: c.name,
       role: c.role,
+      contactId: c.contact_id,
     })),
   ];
+
+  const legalContacts: KnownLegalContact[] = (
+    legalContactsRes.data ?? []
+  ).flatMap((row) =>
+    row.contact
+      ? [{ name: row.contact.name, role: row.role, contactId: row.contact_id }]
+      : [],
+  );
+  // The legal parties' contacts, and the contracts each one is party to:
+  // the only proof that lets code suggest « Existant » (PROJ-BUG-03).
+  const contactIds = [
+    ...new Set([
+      ...credits.flatMap((c) => (c.contactId ? [c.contactId] : [])),
+      ...framing.team.flatMap((m) =>
+        m.contact_id && !m.person_id ? [m.contact_id] : [],
+      ),
+      ...legalContacts.map((c) => c.contactId),
+    ]),
+  ];
+  const [legalPartiesRes, partiesRes] = await Promise.all([
+    supabase
+      .from("framing_legal_parties")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at"),
+    contactIds.length
+      ? supabase
+          .from("contract_parties")
+          .select("contact_id, contract:contracts!inner(id, title, status)")
+          .in("contact_id", contactIds)
+      : none,
+  ]);
+  const partyContracts: PartyContract[] = (partiesRes.data ?? []).map(
+    (row) => ({
+      id: row.contract.id,
+      title: row.contract.title,
+      status: row.contract.status,
+      contactId: row.contact_id,
+    }),
+  );
 
   // A title's split is complete at 100 % per kind (computed by code).
   const totals = new Map<string, number>();
@@ -283,9 +345,9 @@ export async function loadFramingKnowledge(
       id: e.id,
       name: e.name,
     })),
-    legalContacts: (legalContactsRes.data ?? []).flatMap((row) =>
-      row.contact ? [{ name: row.contact.name, role: row.role }] : [],
-    ),
+    legalContacts,
+    legalPartyDecisions: legalPartiesRes.data ?? [],
+    partyContracts,
     masterBriefStarted: (masterBriefRes.data ?? []).length > 0,
     legalIntakeStarted: (legalRes.data ?? []).length > 0,
     completeSplits,

@@ -52,10 +52,9 @@ export const framingFactsSchema = z.object({
   existing_elements: fact.describe("Ce qui existe déjà (maquettes, visuels…)."),
   decisions_made: fact.describe("Décisions déjà prises."),
   work_started: fact.describe("Travail déjà commencé."),
-  legal_parties: fact.describe(
-    "Personnes ou structures impliquées juridiquement (auteurs, producteurs…).",
+  legal_agreements: fact.describe(
+    "Contrats ou accords juridiques dont l'existence est dite explicitement (signé, conclu). Pas un arrangement de production (mix calé, studio réservé, ingénieur choisi).",
   ),
-  legal_agreements: fact.describe("Accords ou contrats qui existent déjà."),
   legal_needs: fact.describe("Contrats ou droits qu'il faudra sans doute."),
   legal_secured: fact.describe("Ce qui est déjà sécurisé juridiquement."),
   target_date_quote: z

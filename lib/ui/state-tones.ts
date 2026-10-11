@@ -205,6 +205,22 @@ export const splitStatusTone: Record<string, Tone> = {
 /** A fact of a workflow's first step (lib/facts/types.ts: Juridique, Master),
  * toned like the Cadrage's steps: absent is nothing yet (not a block),
  * present but unsettled waits for a check, settled is done. */
+/** A request for clarification of a transmission (PROJ-UX-02). */
+export const clarificationTone: Record<string, Tone> = {
+  answered: "success",
+  waiting: "warning",
+  retransmitted: "neutral",
+};
+
+/** What a legal party of the Cadrage needs, decided by a person (PROJ-BUG-03). */
+export const partyStatusTone: Record<string, Tone> = {
+  existing: "success",
+  to_verify: "warning",
+  to_prepare: "action",
+  not_needed: "neutral",
+  not_applicable: "neutral",
+};
+
 export const factTone: Record<string, Tone> = {
   known: "success",
   to_confirm: "warning",

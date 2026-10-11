@@ -8,6 +8,7 @@ import { OptionSelect } from "@/components/framing/option-select";
 import { sourceLabel } from "@/components/framing/guide/source-quote";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import {
 } from "@/lib/framing/actions/questions";
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
+import { deadlineWorkflows } from "@/lib/framing/deadline-workflows";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +74,22 @@ export function DeadlineLines({
                 <span className="flex min-w-0 flex-col items-start gap-1">
                   <span className="text-body-md">
                     {d.due_date ? formatBriefDate(d.due_date) : t.noDate}
+                    {" · "}
+                    {
+                      t.confidences[
+                        d.confidence === "estimated" ? "estimated" : "firm"
+                      ]
+                    }
                   </span>
+                  {deadlineWorkflows(d.kind).length > 0 && (
+                    <span className="text-caption text-muted-foreground">
+                      {t.feeds(
+                        deadlineWorkflows(d.kind)
+                          .map((w) => t.workflows[w])
+                          .join(", "),
+                      )}
+                    </span>
+                  )}
                   {d.provenance && (
                     <span className="text-caption text-muted-foreground">
                       {sourceLabel(d.provenance)}
@@ -153,7 +170,11 @@ function DeadlineForm({
   const [kind, setKind] = useState(deadline?.kind ?? "master_final");
   const [label, setLabel] = useState(deadline?.label ?? "");
   const [date, setDate] = useState(deadline?.due_date ?? "");
-  const input = { kind: kind as "other", label, dueDate: date };
+  const [confidence, setConfidence] = useState<"firm" | "estimated">(
+    deadline?.confidence === "estimated" ? "estimated" : "firm",
+  );
+  const input = { kind: kind as "other", label, dueDate: date, confidence };
+  const feeds = deadlineWorkflows(kind);
   return (
     <form
       className="flex flex-col gap-4"
@@ -207,6 +228,23 @@ function DeadlineForm({
           autoFocus
         />
       </div>
+      <ChoiceCards
+        name="deadline-confidence"
+        legend={t.confidence}
+        required
+        columns={3}
+        value={confidence}
+        onChange={setConfidence}
+        choices={[
+          { value: "firm", label: t.confidences.firm },
+          { value: "estimated", label: t.confidences.estimated },
+        ]}
+      />
+      {feeds.length > 0 && (
+        <p className="text-caption text-muted-foreground">
+          {t.feeds(feeds.map((w) => t.workflows[w]).join(", "))}
+        </p>
+      )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-wrap gap-2">
         <Button

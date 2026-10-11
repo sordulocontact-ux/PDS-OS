@@ -12,7 +12,10 @@ import { DimensionNav } from "@/components/framing/intel/dimension-nav";
 import { FramingCallSheet } from "@/components/framing/intel/framing-call-sheet";
 import { FramingEntry } from "@/components/framing/intel/framing-entry";
 import { FramingProgress } from "@/components/framing/intel/framing-progress";
+import { ExpenseLines } from "@/components/framing/intel/expense-lines";
 import { KnownAnswers } from "@/components/framing/intel/known-answers";
+import { LineSources } from "@/components/framing/intel/line-sources";
+import { PartyLines } from "@/components/framing/intel/party-lines";
 import { NeedsLines } from "@/components/framing/intel/needs-lines";
 import { QuestionPager } from "@/components/framing/intel/question-pager";
 import { QuestionScreen } from "@/components/framing/intel/question-screen";
@@ -23,11 +26,14 @@ import { routes } from "@/lib/auth/redirects";
 import { editableDimensions } from "@/lib/framing/analyse";
 import {
   assessFraming,
+  formatBriefDate,
   nextAfter,
   rolesContext,
   type QuestionState,
 } from "@/lib/framing/assess";
+import type { Provenance } from "@/lib/framing/brief";
 import { linesOf } from "@/lib/framing/brief-snapshot";
+import { legalPartyBoard } from "@/lib/framing/legal-parties";
 import { callSheetData } from "@/lib/framing/call-sheet-data";
 import {
   DIMENSIONS,
@@ -147,9 +153,11 @@ export default async function FramingPage({
     const callId = first(sp.call);
     const call = k.calls.find((c) => c.callId === callId);
     if (!call) notFound();
-    const fromCall = (q: QuestionState) => {
-      if (q.provenance?.kind === "call" && q.provenance.callId === call.callId)
-        return true;
+    // The provenance of a question, or of its first line proposed from this
+    // call (a list question has none of its own): every proposal shows its
+    // source (PROJ-BUG-02).
+    const sourceOf = (q: QuestionState) => {
+      if (q.provenance) return q.provenance;
       const rows =
         q.key === "needs"
           ? k.framing.needs
@@ -164,12 +172,18 @@ export default async function FramingPage({
               : q.key === "deadlines"
                 ? k.deadlines
                 : [];
-      return rows.some(
-        (r) =>
-          r.review_status === "proposed" &&
-          r.provenance?.kind === "call" &&
-          r.provenance.callId === call.callId,
+      return (
+        rows.find(
+          (r) =>
+            r.review_status === "proposed" &&
+            r.provenance?.kind === "call" &&
+            r.provenance.callId === call.callId,
+        )?.provenance ?? null
       );
+    };
+    const fromCall = (q: QuestionState) => {
+      const p = sourceOf(q);
+      return p?.kind === "call" && p.callId === call.callId;
     };
     const rows: ReviewRow[] = assessment.dimensions.flatMap((d) =>
       d.questions.map((q) => ({
@@ -181,7 +195,16 @@ export default async function FramingPage({
           const all = linesOf(q.key, k, { proposed: true });
           return all.length ? all.join(" · ") : q.display;
         })(),
-        quote: q.provenance?.quote ?? null,
+        quote: sourceOf(q)?.quote ?? null,
+        provenance: sourceOf(q),
+        sourceState:
+          q.status === "known" ? "known" : q.fromRecord ? "record" : "proposed",
+        confirmed: q.confirmed,
+        needsStructure:
+          !!QUESTIONS[q.key].shape &&
+          q.answer?.kind === "text" &&
+          !q.answer.items &&
+          !q.answer.measure,
         fromCall: fromCall(q),
         href: questionHref(q),
       })),
@@ -201,11 +224,31 @@ export default async function FramingPage({
     screen = (
       <BriefReady
         projectId={projectId}
-        remaining={assessment.blocking.map((q) => ({
-          key: q.key,
-          label: `${t.dimensions[q.dimension]} · ${t.questions[q.key].label} · ${t.statuses[q.status].toLowerCase()}`,
-          href: questionHref(q),
-        }))}
+        remaining={[
+          ...assessment.blocking.map((q) => ({
+            key: q.key,
+            label: `${t.dimensions[q.dimension]} · ${t.questions[q.key].label} · ${t.statuses[q.status].toLowerCase()}`,
+            href: questionHref(q),
+          })),
+          // Contradictions: resolved by a person, never overwritten (PROJ-BUG-04).
+          ...assessment.conflicts.map((c) => ({
+            key: c.key,
+            label: `${t.dimensions[c.dimension]} · ${t.conflicts.title} · ${c.text}`,
+            href: routes.projectFramingQuestion(
+              projectId,
+              c.dimension,
+              c.question,
+            ),
+          })),
+        ]}
+        deferred={assessment.dimensions
+          .flatMap((d) => d.questions)
+          .filter((q) => q.answer?.kind === "later")
+          .map((q) => ({
+            key: q.key,
+            label: `${t.dimensions[q.dimension]} · ${t.questions[q.key].label} · ${q.display ?? ""}`,
+            href: questionHref(q),
+          }))}
         optional={assessment.optionalEmpty.map((q) => ({
           key: q.key,
           label: `${t.dimensions[q.dimension]} · ${t.questions[q.key].label}`,
@@ -250,6 +293,15 @@ export default async function FramingPage({
       if (!question) return null;
       const nextHref = nextHrefOf(question);
       const common = { projectId, editable, nextHref };
+      // Several expenses, recorded in the Budget (PROJ-UX-05).
+      if (question.key === "commitments")
+        return (
+          <ExpenseLines
+            projectId={projectId}
+            lines={k.budgetLines}
+            editable={editable}
+          />
+        );
       switch (QUESTIONS[question.key].kind) {
         case "needs":
           return (
@@ -290,8 +342,64 @@ export default async function FramingPage({
               {...common}
             />
           );
+        case "parties": {
+          const legacy = k.framing.briefRows.find(
+            (r) => r.field_key === question.key && r.status !== "rejected",
+          )?.value;
+          return (
+            <PartyLines
+              board={legalPartyBoard(k)}
+              members={k.framing.members}
+              legacy={typeof legacy === "string" ? legacy : null}
+              {...common}
+            />
+          );
+        }
         default:
           return null;
+      }
+    })();
+
+    // Every proposed line of the question, with its source (PROJ-BUG-02).
+    const proposedLines = (() => {
+      if (!question) return [];
+      const proposed = <T extends { review_status: string; id: string }>(
+        rows: T[],
+        label: (row: T) => string,
+      ) =>
+        rows
+          .filter((r) => r.review_status === "proposed")
+          .map((r) => ({
+            id: r.id,
+            label: label(r),
+            provenance:
+              (r as T & { provenance?: Provenance | null }).provenance ?? null,
+          }));
+      switch (QUESTIONS[question.key].kind) {
+        case "needs":
+          return proposed(k.framing.needs, (n) => n.label);
+        case "constraints":
+          return proposed(
+            k.framing.constraints.filter((c) => c.type !== "rights"),
+            (c) => c.text,
+          );
+        case "rights":
+          return proposed(
+            k.framing.constraints.filter((c) => c.type === "rights"),
+            (c) => c.text,
+          );
+        case "deadlines":
+          return proposed(
+            k.deadlines,
+            (d) =>
+              `${d.kind === "other" && d.label ? d.label : t.deadlineKinds[d.kind as keyof typeof t.deadlineKinds]} · ${d.due_date ? formatBriefDate(d.due_date) : t.guide.deadlines.noDate}`,
+          );
+        case "team":
+          return proposed(k.framing.team, (m) =>
+            m.role ? `${m.display_name} (${m.role})` : m.display_name,
+          );
+        default:
+          return [];
       }
     })();
 
@@ -312,6 +420,11 @@ export default async function FramingPage({
               />
             }
             suggestions={suggestions}
+            // One click per item; production steps, then what is produced.
+            itemPresets={[
+              ...t.itemPresets,
+              ...Object.values(fr.framing.needs.presets),
+            ]}
             hint={
               question.key === "target_date" && timingSaid
                 ? t.sources.timingSaid(timingSaid)
@@ -319,6 +432,7 @@ export default async function FramingPage({
             }
           >
             {body}
+            <LineSources projectId={projectId} items={proposedLines} />
           </QuestionScreen>
         ) : (
           <ToneCallout tone="success">{t.guide.dimensionDone}</ToneCallout>
@@ -348,6 +462,7 @@ export default async function FramingPage({
           known={assessment.counts.known}
           total={assessment.total}
           optionalEmpty={assessment.optionalEmpty.length}
+          blocking={assessment.blocking.length + assessment.conflicts.length}
         />
       </div>
       {working && <FramingCallSheet projectId={projectId} data={sheet} />}

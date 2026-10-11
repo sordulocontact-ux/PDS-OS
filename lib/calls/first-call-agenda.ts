@@ -10,6 +10,9 @@ export type AgendaItem = {
   topic: string;
   minutes: number;
   questions?: string[];
+  // The Cadrage dimension the point feeds (« Préparer un échange »), so what
+  // is answered in the call is read back into it (PROJ-UX-03).
+  dimension?: string;
 };
 
 export const FIRST_CALL_AGENDA: readonly AgendaItem[] = [

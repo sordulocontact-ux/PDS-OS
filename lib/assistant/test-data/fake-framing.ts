@@ -25,8 +25,6 @@ export const FAKE_FRAMING_TEXTS: Partial<Record<QuestionKey, string>> = {
     "Maquette, photos de presse et premières pistes de pochette.",
   decisions_made: "Sortie en single d'abord, clip tourné à Paris.",
   work_started: "Sessions d'enregistrement terminées, mixeur choisi.",
-  legal_parties:
-    "L'artiste, le producteur, le réalisateur du clip et l'éditeur.",
   legal_agreements:
     "Contrat d'artiste signé ; contrat de réalisation du clip à rédiger.",
   legal_needs:

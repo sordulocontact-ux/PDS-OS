@@ -11,6 +11,7 @@ import { routes } from "@/lib/auth/redirects";
 import { parseForm, retainedValues } from "@/lib/auth/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
+import { CLARIFICATION_SUBJECTS } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 // Both calls go through SQL functions (transmit_project,
@@ -89,6 +90,8 @@ const respondSchema = z
     assignmentId: z.uuid(),
     decision: z.enum(["accepted", "refused", "clarification_requested"]),
     response: optionalMessage,
+    // What the clarification is about (PROJ-UX-02).
+    subject: z.enum(CLARIFICATION_SUBJECTS).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.decision !== "accepted" && !data.response) {
@@ -120,6 +123,10 @@ export async function respondToAssignment(
     p_assignment_id: parsed.data.assignmentId,
     p_decision: parsed.data.decision,
     p_response: parsed.data.response ?? undefined,
+    p_subject:
+      parsed.data.decision === "clarification_requested"
+        ? (parsed.data.subject ?? "other")
+        : undefined,
   });
   if (error) {
     console.error("respondToAssignment:", error.message);

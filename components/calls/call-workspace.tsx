@@ -42,7 +42,7 @@ export function CallWorkspace({
   call,
   transcript,
   report,
-  audioUrl,
+  audioUrls,
   canEdit,
   back,
   where,
@@ -55,7 +55,8 @@ export function CallWorkspace({
   call: CallDetail;
   transcript: StoredTranscript | null;
   report: StoredReport | null;
-  audioUrl: string | null;
+  // One per take when the call was recorded in parts.
+  audioUrls: Array<string | null>;
   // Whoever works on the call: the project's owner, the meeting's creator.
   canEdit: boolean;
   back: { href: string; label: string };
@@ -116,6 +117,7 @@ export function CallWorkspace({
           agenda={call.agenda}
           durationMinutes={call.durationMinutes}
           canEdit={canEdit}
+          edited={call.agendaEdited}
         />
       )}
 
@@ -131,11 +133,14 @@ export function CallWorkspace({
             }
             card
             collapsible
-            defaultOpen={recordOpen}
+            // A recording interrupted earlier is never hidden.
+            defaultOpen={
+              recordOpen || call.recording.takes.some((t) => t.pieces > 0)
+            }
           >
             <CallRecording
               call={call}
-              audioUrl={audioUrl}
+              audioUrls={audioUrls}
               hasTranscript={transcript !== null}
             />
           </PageSection>
@@ -150,12 +155,12 @@ export function CallWorkspace({
             {step === "done" ? (
               <div className="grid gap-6">
                 {doneAction}
-                <CallAudio call={call} audioUrl={audioUrl} />
+                <CallAudio call={call} audioUrls={audioUrls} />
               </div>
             ) : (
               <CallRecording
                 call={call}
-                audioUrl={audioUrl}
+                audioUrls={audioUrls}
                 hasTranscript={transcript !== null}
               />
             )}

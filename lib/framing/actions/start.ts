@@ -9,6 +9,8 @@ import { routes } from "@/lib/auth/redirects";
 import { analyseForFraming } from "@/lib/framing/analyse";
 import { loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { openFraming } from "@/lib/framing/open";
+import { fr } from "@/lib/i18n/fr";
+import { clarificationsOf } from "@/lib/projects/clarifications";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -37,11 +39,34 @@ export async function startFramingWithPo(projectId: string) {
   const analysed = knowledge?.framing.briefRows.some(
     (r) => r.field_key === CONTEXT_ANALYSIS_KEY,
   );
-  const context = project.initialContext?.trim();
+  // The transmission's clarifications are read with the initial context
+  // (PROJ-UX-02): the director's answer about the budget is proposed in the
+  // Cadrage with its provenance, never typed again. Only the answered ones,
+  // and only what this person may read (project_assignment_messages).
+  const answered = clarificationsOf(project.assignments).filter(
+    (c) => c.question && c.answer,
+  );
+  const context = [
+    project.initialContext?.trim(),
+    ...answered.map((c) =>
+      fr.transmission.clarifications.forPo(
+        c.subject
+          ? fr.transmission.subjects[c.subject]
+          : fr.transmission.subjects.other,
+        c.question!,
+        c.answer!,
+      ),
+    ),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
   if (knowledge && context && !analysed) {
     const result = await analyseForFraming(supabase, knowledge, {
       kind: "context",
       text: context,
+      label: answered.length
+        ? fr.framingIntel.sources.contextAndClarifications
+        : undefined,
     });
     // Recorded once read, even with nothing found; not on a provider
     // failure, so the next start tries again.

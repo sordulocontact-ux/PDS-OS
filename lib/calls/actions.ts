@@ -11,6 +11,7 @@ import {
   MAX_AUDIO_BYTES,
   type ActionResult,
 } from "@/lib/calls/constants";
+import { setCallAudio } from "@/lib/calls/attach";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import { meetingUrlSchema, planCall } from "@/lib/calls/plan-call";
 import { createClient } from "@/lib/supabase/server";
@@ -113,33 +114,12 @@ export async function attachAudio(input: {
   if (!Number.isInteger(bytes) || bytes <= 0 || bytes > MAX_AUDIO_BYTES)
     return { ok: false, error: "file_too_large" };
 
-  const { data: call } = await session.supabase
-    .from("calls")
-    .select("consent, audio_path")
-    .eq("id", callId)
-    .maybeSingle();
-  if (!call) return { ok: false, error: "not_found" };
-  if (call.consent !== "granted")
-    return { ok: false, error: "consent_required" };
-  if (call.audio_path) return { ok: false, error: "audio_exists" };
-
-  const { data: updated, error } = await session.supabase
-    .from("calls")
-    .update({
-      audio_path: path,
-      audio_mime: mime,
-      audio_bytes: bytes,
-      status: "uploaded",
-      error_code: null,
-    })
-    .eq("id", callId)
-    .is("audio_path", null)
-    .eq("consent", "granted")
-    .select("id");
-  if (error || !updated?.length) {
-    console.error("[calls] attach audio failed:", error?.message);
-    return { ok: false, error: "save_failed" };
-  }
+  const attached = await setCallAudio(session.supabase, callId, {
+    path,
+    mime,
+    bytes,
+  });
+  if (!attached.ok) return attached;
   refresh();
   return { ok: true };
 }
@@ -149,7 +129,8 @@ const agendaSchema = z
     z.object({
       topic: z.string().trim().min(1).max(200),
       minutes: z.number().int().min(1).max(240),
-      questions: z.array(z.string().max(300)).max(20).optional(),
+      questions: z.array(z.string().trim().min(1).max(300)).max(20).optional(),
+      dimension: z.string().max(20).optional(),
     }),
   )
   .max(20);

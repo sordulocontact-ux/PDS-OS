@@ -132,6 +132,10 @@ export const framingGuide = {
       mastering_engineer: "Mastering",
     },
     toFind: "À trouver",
+    // Kept apart (PROJ-UX-05): a vacant role is an action, not a member.
+    confirmedRoles: "Rôles tenus",
+    vacantRoles: "Rôles à attribuer · cliquez pour attribuer",
+    assignVacant: "Attribuer",
     others: "Autres personnes",
     confirm: "Confirmer l'équipe",
     assign: "Attribuer un rôle",

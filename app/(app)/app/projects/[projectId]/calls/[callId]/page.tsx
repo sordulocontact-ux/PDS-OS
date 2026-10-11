@@ -8,7 +8,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadCallOutcomes } from "@/lib/calls/outcomes";
 import {
-  getAudioUrl,
+  getCallAudioUrls,
   getCall,
   loadLatestReport,
   loadLatestTranscript,
@@ -39,10 +39,10 @@ export default async function CallPage({
 
   const call = await getCall(supabase, projectId, callId);
   if (!call) notFound();
-  const [transcript, report, audioUrl] = await Promise.all([
+  const [transcript, report, audioUrls] = await Promise.all([
     loadLatestTranscript(supabase, callId),
     loadLatestReport(supabase, callId),
-    call.audioPath ? getAudioUrl(supabase, call.audioPath) : null,
+    getCallAudioUrls(supabase, call),
   ]);
   const canEdit = canEditProject(access, project);
   const [outcomes, members] = report
@@ -58,7 +58,7 @@ export default async function CallPage({
       call={call}
       transcript={transcript}
       report={report}
-      audioUrl={audioUrl}
+      audioUrls={audioUrls}
       canEdit={canEdit}
       back={{ href: routes.projectCalls(projectId), label: t.back }}
       where={

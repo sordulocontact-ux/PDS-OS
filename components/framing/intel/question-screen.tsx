@@ -6,15 +6,24 @@ import { toast } from "sonner";
 
 import { GuideRow } from "@/components/framing/guide/guide-row";
 import { FramingStepCard } from "@/components/framing/guide/step-card";
-import { sourceLabel } from "@/components/framing/guide/source-quote";
-import { ProvenanceNote } from "@/components/framing/provenance-note";
+import { SourceLine } from "@/components/framing/source-line";
+import {
+  LaterForm,
+  NotApplicableForm,
+} from "@/components/framing/intel/answer-states";
+import {
+  ItemsAnswer,
+  MeasureAnswer,
+} from "@/components/framing/intel/structured-answer";
 import { useFramingAction } from "@/components/framing/use-framing-action";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { answerEnvelope } from "@/lib/framing/actions/answers";
 import {
   chooseHelp,
   dismissHelp,
@@ -34,7 +43,8 @@ import type { HelpSuggestion } from "@/lib/framing/help";
 import { fr } from "@/lib/i18n/fr";
 import { factTone, reviewTone } from "@/lib/ui/state-tones";
 
-type Mode = "view" | "write";
+// na / later: « Non applicable », « À définir plus tard » (PROJ-UX-04).
+type Mode = "view" | "write" | "na" | "later";
 
 /** The question in words: asked when missing, to confirm when proposed. */
 function titleOf(q: QuestionState): string {
@@ -63,6 +73,7 @@ export function QuestionScreen({
   suggestions = [],
   hint,
   nav,
+  itemPresets = [],
   children,
 }: {
   projectId: string;
@@ -75,6 +86,8 @@ export function QuestionScreen({
   hint?: string | null;
   // Previous / next question (QuestionPager), beside the surtitle.
   nav?: React.ReactNode;
+  // Items to pick in one click for a structured list (PROJ-UX-05).
+  itemPresets?: string[];
   children?: React.ReactNode;
 }) {
   const t = fr.framingIntel.guide;
@@ -87,11 +100,21 @@ export function QuestionScreen({
       ? "write"
       : "view",
   );
+  // A PO suggestion picked: it opens the answer, editable, never saved as
+  // is (« M'aider à définir » proposes, a person decides; PROJ-UX-04).
+  const [picked, setPicked] = useState<string | null>(null);
   const next = () => router.push(nextHref);
   const busy = pending || helping;
   const isField =
     def.kind === "text" || def.kind === "date" || def.kind === "money";
   const provenance = question.provenance;
+  // A sentence where a structure is asked (a call's proposal): structured
+  // before it is confirmed, its source kept.
+  const unstructured =
+    !!def.shape &&
+    question.answer?.kind === "text" &&
+    !question.answer.items &&
+    !question.answer.measure;
 
   const help = () =>
     startHelp(async () => {
@@ -104,6 +127,26 @@ export function QuestionScreen({
 
   const secondary = editable && (
     <>
+      {question.status !== "known" && def.kind !== "parties" && (
+        <>
+          <Button
+            size="lg"
+            variant="outline"
+            disabled={busy}
+            onClick={() => setMode("na")}
+          >
+            {fr.framingIntel.answerStates.naAction}
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            disabled={busy}
+            onClick={() => setMode("later")}
+          >
+            {fr.framingIntel.answerStates.laterAction}
+          </Button>
+        </>
+      )}
       {question.status === "missing" && def.allowNone && (
         <Button
           size="lg"
@@ -147,15 +190,21 @@ export function QuestionScreen({
     mode === "view" &&
     (question.status === "to_confirm" ? (
       <>
-        <Button
-          size="lg"
-          disabled={busy}
-          onClick={() =>
-            run(() => confirmQuestion(projectId, question.key), next)
-          }
-        >
-          {t.confirm}
-        </Button>
+        {unstructured ? (
+          <Button size="lg" disabled={busy} onClick={() => setMode("write")}>
+            {t.structure}
+          </Button>
+        ) : (
+          <Button
+            size="lg"
+            disabled={busy}
+            onClick={() =>
+              run(() => confirmQuestion(projectId, question.key), next)
+            }
+          >
+            {t.confirm}
+          </Button>
+        )}
         <Button
           size="lg"
           variant="outline"
@@ -226,19 +275,23 @@ export function QuestionScreen({
           <p className="text-body-lg font-semibold break-words whitespace-pre-line">
             {question.display}
           </p>
-          {provenance && (
-            <span className="text-caption text-muted-foreground">
-              {question.status === "known"
-                ? t.knownFrom(sourceLabel(provenance))
-                : t.proposedFrom(sourceLabel(provenance))}
-            </span>
-          )}
+          <SourceLine
+            projectId={projectId}
+            provenance={provenance}
+            state={
+              question.status === "known"
+                ? "known"
+                : question.fromRecord
+                  ? "record"
+                  : "proposed"
+            }
+            confirmed={question.confirmed}
+          />
           {question.status === "to_confirm" && provenance?.quote && (
             <ToneCallout tone={reviewTone.proposed}>
               « {provenance.quote} »
             </ToneCallout>
           )}
-          <ProvenanceNote provenance={provenance} />
         </div>
       )}
 
@@ -258,19 +311,64 @@ export function QuestionScreen({
             questionKey={question.key}
             suggestions={suggestions}
             editable={editable}
-            onChosen={next}
+            onPick={(text) => {
+              setPicked(text);
+              setMode("write");
+            }}
           />
         )}
 
-      {isField && editable && mode === "write" && (
-        <AnswerForm
+      {isField &&
+        editable &&
+        mode === "write" &&
+        (def.shape === "items" ? (
+          <ItemsAnswer
+            projectId={projectId}
+            question={question}
+            draft={picked}
+            keepSource={question.proposed && !picked}
+            presets={itemPresets}
+            onCancel={() => setMode("view")}
+            onDone={next}
+          />
+        ) : def.shape === "measure" ? (
+          <MeasureAnswer
+            projectId={projectId}
+            question={question}
+            draft={picked}
+            keepSource={question.proposed && !picked}
+            onCancel={() => setMode("view")}
+            onDone={next}
+          />
+        ) : (
+          <AnswerForm
+            projectId={projectId}
+            question={question}
+            picked={picked}
+            onCancel={
+              question.status === "missing" && def.kind !== "text" && !picked
+                ? undefined
+                : () => {
+                    setPicked(null);
+                    setMode("view");
+                  }
+            }
+            onDone={next}
+          />
+        ))}
+      {editable && mode === "na" && (
+        <NotApplicableForm
           projectId={projectId}
-          question={question}
-          onCancel={
-            question.status === "missing" && def.kind !== "text"
-              ? undefined
-              : () => setMode("view")
-          }
+          questionKey={question.key}
+          onCancel={() => setMode("view")}
+          onDone={next}
+        />
+      )}
+      {editable && mode === "later" && (
+        <LaterForm
+          projectId={projectId}
+          questionKey={question.key}
+          onCancel={() => setMode("view")}
           onDone={next}
         />
       )}
@@ -285,13 +383,14 @@ function Suggestions({
   questionKey,
   suggestions,
   editable,
-  onChosen,
+  onPick,
 }: {
   projectId: string;
   questionKey: string;
   suggestions: HelpSuggestion[];
   editable: boolean;
-  onChosen: () => void;
+  // The formulation picked opens the answer to edit, nothing is saved yet.
+  onPick: (text: string) => void;
 }) {
   const t = fr.framingIntel.guide;
   const { pending, run } = useFramingAction();
@@ -315,10 +414,7 @@ function Suggestions({
         <div className="flex flex-wrap gap-2">
           <Button
             disabled={pending || picked === null}
-            onClick={() =>
-              picked &&
-              run(() => chooseHelp(projectId, questionKey, picked), onChosen)
-            }
+            onClick={() => picked && onPick(picked)}
           >
             {t.choose}
           </Button>
@@ -347,27 +443,41 @@ const initialOf = (q: QuestionState): string => {
 function AnswerForm({
   projectId,
   question,
+  picked,
   onCancel,
   onDone,
 }: {
   projectId: string;
   question: QuestionState;
+  // A PO suggestion to start from, saved with its source if kept or edited.
+  picked: string | null;
   onCancel?: () => void;
   onDone: () => void;
 }) {
   const t = fr.framingIntel.guide;
   const kind = QUESTIONS[question.key].kind;
   const { pending, run } = useFramingAction();
-  const [value, setValue] = useState(initialOf(question));
+  const [value, setValue] = useState(picked ?? initialOf(question));
+  const envelope = question.key === "budget_envelope";
+  const [certainty, setCertainty] = useState<"confirmed" | "estimated">(
+    question.answer?.kind === "money" &&
+      question.answer.certainty === "estimated"
+      ? "estimated"
+      : "confirmed",
+  );
   const id = `answer-${question.key}`;
   const submit = () =>
     run(
       () =>
         kind === "date"
           ? answerDate(projectId, question.key, value)
-          : kind === "money"
-            ? answerMoney(projectId, question.key, value)
-            : answerText(projectId, question.key, value),
+          : envelope
+            ? answerEnvelope(projectId, question.key, value, certainty)
+            : kind === "money"
+              ? answerMoney(projectId, question.key, value)
+              : picked
+                ? chooseHelp(projectId, question.key, picked, value)
+                : answerText(projectId, question.key, value),
       onDone,
     );
   return (
@@ -409,6 +519,20 @@ function AnswerForm({
           />
         )}
       </div>
+      {envelope && (
+        <ChoiceCards
+          name="envelope-certainty"
+          legend={fr.framingIntel.certainty.label}
+          required
+          columns={3}
+          value={certainty}
+          onChange={setCertainty}
+          choices={[
+            { value: "confirmed", label: fr.framingIntel.certainty.confirmed },
+            { value: "estimated", label: fr.framingIntel.certainty.estimated },
+          ]}
+        />
+      )}
       <div className="flex flex-wrap gap-2">
         <Button
           type="submit"

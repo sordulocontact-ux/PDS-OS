@@ -54,6 +54,7 @@ export const transmission = {
     clarify: "Demander une précision",
     refuseLabel: "Motif du refus",
     clarifyLabel: "Votre question",
+    subjectLabel: "Elle porte sur",
     responseHint: "Le message est envoyé à la direction.",
     // Said on the Travail page once the answer has left.
     sent: {
@@ -67,6 +68,43 @@ export const transmission = {
     cancel: "Annuler",
   },
 
+  // Before accepting (PROJ-UX-02).
+  summary: {
+    title: "Ce que vous acceptez",
+    known: (items: string) => `Transmis : ${items}.`,
+    missing: (items: string) =>
+      `Manque : ${items}. Le Cadrage vous le demandera.`,
+    next: "En acceptant, vous devenez responsable du projet et le Cadrage s'ouvre : ce qui est transmis y sera proposé à confirmer, rien n'est à ressaisir. Une question avant ? « Demander une précision ».",
+    date: "la date",
+    budget: "le budget",
+    titles: "les titres",
+    artist: "l'artiste",
+    context: "le contexte initial",
+  },
+  // What a request for clarification is about (PROJ-UX-02).
+  subjects: {
+    budget: "Le budget",
+    timing: "Les dates",
+    scope: "Le périmètre (titres, livrables)",
+    team: "L'équipe",
+    other: "Autre chose",
+  },
+  clarifications: {
+    title: "Demandes de précision",
+    asked: (name: string, date: string) => `${name}, le ${date}`,
+    question: "Question",
+    answer: "Réponse",
+    answeredBy: (name: string, date: string) => `${name}, le ${date}`,
+    statuses: {
+      answered: "Répondue",
+      waiting: "En attente de la direction",
+      retransmitted: "Retransmis sans réponse écrite",
+    },
+    hidden: "Le message est réservé à la personne concernée et à la direction.",
+    // Given to PO as data with the initial context, at the Cadrage's start.
+    forPo: (subject: string, question: string, answer: string) =>
+      `Précision demandée (${subject}) : ${question}\nRéponse de la direction : ${answer}`,
+  },
   history: {
     title: "Historique des transmissions",
     transmitted: (by: string, to: string) => `${by} → ${to}`,

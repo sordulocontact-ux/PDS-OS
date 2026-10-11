@@ -12,6 +12,8 @@ import {
 } from "@/lib/calls/constants";
 import { classifyProviderError } from "@/lib/calls/provider-error";
 import { loadLatestTranscript } from "@/lib/calls/queries";
+import { audioParts } from "@/lib/calls/recording-queries";
+import { joinTranscripts } from "@/lib/calls/join-transcripts";
 import { toReportItemRows } from "@/lib/calls/report-mapping";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -91,30 +93,45 @@ export async function runTranscription(
   if (typeof call === "string") return { ok: false, error: call };
   const fail = (error: CallErrorCode) => finish(supabase, callId, { error });
 
-  const { data: blob, error: downloadError } = await supabase.storage
-    .from(AUDIO_BUCKET)
-    .download(call.audio_path!);
-  if (downloadError || !blob) {
-    console.error("[calls] audio download failed:", downloadError?.message);
+  // Recorded in the app across several takes (a reload, a lost microphone):
+  // each take is its own file, transcribed in order (PROJ-BUG-01).
+  let paths: string[];
+  try {
+    const parts = await audioParts(supabase, callId, call.audio_path!);
+    paths = parts.length > 1 ? parts : [call.audio_path!];
+  } catch {
     return fail("audio_unavailable");
   }
 
-  let result: Awaited<ReturnType<typeof transcribe>>;
-  try {
-    result = await transcribe(new Uint8Array(await blob.arrayBuffer()));
-  } catch (error) {
-    // The cause carries the real reason (HTTP status, schema path), no content.
-    const cause =
-      error instanceof Error && error.cause instanceof Error
-        ? error.cause.message.slice(0, 500)
-        : undefined;
-    console.error(
-      "[calls] transcription failed:",
-      error,
-      cause ? `cause: ${cause}` : "",
-    );
-    return fail(classifyProviderError(error));
+  const results: Awaited<ReturnType<typeof transcribe>>[] = [];
+  for (const path of paths) {
+    const { data: blob, error: downloadError } = await supabase.storage
+      .from(AUDIO_BUCKET)
+      .download(path);
+    if (downloadError || !blob) {
+      console.error("[calls] audio download failed:", downloadError?.message);
+      return fail("audio_unavailable");
+    }
+    try {
+      results.push(await transcribe(new Uint8Array(await blob.arrayBuffer())));
+    } catch (error) {
+      // The cause carries the real reason (HTTP status, schema path), no content.
+      const cause =
+        error instanceof Error && error.cause instanceof Error
+          ? error.cause.message.slice(0, 500)
+          : undefined;
+      console.error(
+        "[calls] transcription failed:",
+        error,
+        cause ? `cause: ${cause}` : "",
+      );
+      return fail(classifyProviderError(error));
+    }
   }
+  const result = {
+    ...results[0]!,
+    transcript: joinTranscripts(results.map((r) => r.transcript)),
+  };
   if (!result.transcript.text.trim()) return fail("transcript_empty");
 
   const { transcript } = result;
@@ -127,7 +144,7 @@ export async function runTranscription(
     segments: transcript.segments,
     provider: result.provider,
     model: result.model,
-    processing_ms: result.durationMs,
+    processing_ms: results.reduce((sum, r) => sum + r.durationMs, 0),
   });
   if (error) {
     console.error("[calls] transcript insert failed:", error.message);

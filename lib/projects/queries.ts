@@ -19,6 +19,7 @@ import {
 import {
   currentStageOf,
   isAssignmentStatus,
+  isClarificationSubject,
   isMusicFormat,
   isPriority,
   isProjectType,
@@ -109,7 +110,7 @@ const FORMAT_SELECT =
   "content_format:content_formats!projects_content_format_same_org(id, name, description)";
 
 const ASSIGNMENTS_SELECT =
-  "assignments:project_assignments!project_assignments_project_same_org(id, status, responded_at, created_at, assignee_person_id, assignee:people!project_assignments_assignee_person_id_fkey(first_name, last_name), assigner:people!project_assignments_assigned_by_fkey(first_name, last_name))";
+  "assignments:project_assignments!project_assignments_project_same_org(id, status, responded_at, created_at, assignee_person_id, clarification_subject, assignee:people!project_assignments_assignee_person_id_fkey(first_name, last_name), assigner:people!project_assignments_assigned_by_fkey(first_name, last_name))";
 
 type RawAssignment = {
   id: string;
@@ -117,6 +118,7 @@ type RawAssignment = {
   responded_at: string | null;
   created_at: string;
   assignee_person_id: string;
+  clarification_subject: string | null;
   assignee: { first_name: string; last_name: string | null } | null;
   assigner: { first_name: string; last_name: string | null } | null;
 };
@@ -147,6 +149,9 @@ function toAssignments(
               response: messages.get(a.id)?.response ?? null,
               respondedAt: a.responded_at,
               createdAt: a.created_at,
+              subject: isClarificationSubject(a.clarification_subject)
+                ? a.clarification_subject
+                : null,
             },
           ]
         : [],

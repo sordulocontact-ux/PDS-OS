@@ -2314,6 +2314,94 @@ export type Database = {
           },
         ]
       }
+      call_recording_pieces: {
+        Row: {
+          bytes: number
+          call_id: string
+          end_ms: number
+          organization_id: string
+          path: string
+          saved_at: string
+          seq: number
+          take_id: string
+        }
+        Insert: {
+          bytes: number
+          call_id: string
+          end_ms: number
+          organization_id: string
+          path: string
+          saved_at?: string
+          seq: number
+          take_id: string
+        }
+        Update: {
+          bytes?: number
+          call_id?: string
+          end_ms?: number
+          organization_id?: string
+          path?: string
+          saved_at?: string
+          seq?: number
+          take_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_recording_pieces_take_same_call"
+            columns: ["take_id", "call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "call_recording_takes"
+            referencedColumns: ["id", "call_id", "organization_id"]
+          },
+        ]
+      }
+      call_recording_takes: {
+        Row: {
+          bytes: number | null
+          call_id: string
+          discarded_at: string | null
+          ext: string
+          id: string
+          mime: string
+          organization_id: string
+          path: string | null
+          started_at: string
+          take: number
+        }
+        Insert: {
+          bytes?: number | null
+          call_id: string
+          discarded_at?: string | null
+          ext: string
+          id?: string
+          mime: string
+          organization_id: string
+          path?: string | null
+          started_at?: string
+          take: number
+        }
+        Update: {
+          bytes?: number | null
+          call_id?: string
+          discarded_at?: string | null
+          ext?: string
+          id?: string
+          mime?: string
+          organization_id?: string
+          path?: string | null
+          started_at?: string
+          take?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_recording_takes_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       call_reports: {
         Row: {
           call_id: string
@@ -2383,6 +2471,8 @@ export type Database = {
       }
       calls: {
         Row: {
+          agenda_edited_at: string | null
+          agenda_edited_by: string | null
           agenda: Json | null
           audio_bytes: number | null
           audio_mime: string | null
@@ -2409,6 +2499,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agenda_edited_at?: string | null
+          agenda_edited_by?: string | null
           agenda?: Json | null
           audio_bytes?: number | null
           audio_mime?: string | null
@@ -2435,6 +2527,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agenda_edited_at?: string | null
+          agenda_edited_by?: string | null
           agenda?: Json | null
           audio_bytes?: number | null
           audio_mime?: string | null
@@ -2461,6 +2555,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "calls_agenda_edited_by_fkey"
+            columns: ["agenda_edited_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "calls_consent_recorded_by_fkey"
             columns: ["consent_recorded_by"]
@@ -4831,6 +4932,7 @@ export type Database = {
       }
       framing_deadlines: {
         Row: {
+          confidence: string
           created_at: string
           created_by: string | null
           due_date: string | null
@@ -4848,6 +4950,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          confidence?: string
           created_at?: string
           created_by?: string | null
           due_date?: string | null
@@ -4865,6 +4968,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          confidence?: string
           created_at?: string
           created_by?: string | null
           due_date?: string | null
@@ -4898,6 +5002,75 @@ export type Database = {
           },
           {
             foreignKeyName: "framing_deadlines_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      framing_legal_parties: {
+        Row: {
+          contact_id: string | null
+          contract_id: string | null
+          created_at: string
+          decided_at: string
+          decided_by: string | null
+          document_status: string
+          id: string
+          name: string
+          note: string | null
+          organization_id: string
+          owner_person_id: string | null
+          party_key: string
+          project_id: string
+          relation: string | null
+          roles: string[]
+        }
+        Insert: {
+          contact_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          decided_at?: string
+          decided_by?: string | null
+          document_status: string
+          id?: string
+          name: string
+          note?: string | null
+          organization_id: string
+          owner_person_id?: string | null
+          party_key: string
+          project_id: string
+          relation?: string | null
+          roles?: string[]
+        }
+        Update: {
+          contact_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          decided_at?: string
+          decided_by?: string | null
+          document_status?: string
+          id?: string
+          name?: string
+          note?: string | null
+          organization_id?: string
+          owner_person_id?: string | null
+          party_key?: string
+          project_id?: string
+          relation?: string | null
+          roles?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "framing_legal_parties_contract_same_org"
+            columns: ["contract_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "framing_legal_parties_project_same_org"
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -10996,6 +11169,7 @@ export type Database = {
       }
       project_assignments: {
         Row: {
+          clarification_subject: string | null
           assigned_by: string | null
           assignee_person_id: string
           created_at: string
@@ -11008,6 +11182,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          clarification_subject?: string | null
           assigned_by?: string | null
           assignee_person_id: string
           created_at?: string
@@ -11020,6 +11195,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          clarification_subject?: string | null
           assigned_by?: string | null
           assignee_person_id?: string
           created_at?: string
@@ -13169,6 +13345,15 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: boolean
       }
+      begin_recording_take: {
+        Args: { p_call_id: string; p_ext: string; p_mime: string }
+        Returns: {
+          id: string
+          started_at: string
+          take: number
+        }[]
+      }
+      call_awaits_audio: { Args: { p_call_id: string }; Returns: boolean }
       can_see_call: { Args: { p_call_id: string }; Returns: boolean }
       can_see_contract: { Args: { p_contract_id: string }; Returns: boolean }
       can_see_project: { Args: { p_project_id: string }; Returns: boolean }
@@ -14222,6 +14407,7 @@ export type Database = {
           p_assignment_id: string
           p_decision: string
           p_response?: string
+          p_subject?: string
         }
         Returns: undefined
       }

@@ -49,6 +49,14 @@ export const framing = {
       name ? `Dicté par ${name}` : "Dicté à la voix",
     missing:
       "Citation introuvable dans la transcription : à vérifier avant de confirmer.",
+    // A value's state and source, said the same way everywhere (PROJ-BUG-02).
+    suggestion: "Suggestion de PO · à confirmer",
+    toVerify: (label: string) => `Repris de ${label} · à vérifier`,
+    confirmed: (name: string | null, date: string | null) =>
+      `Confirmé${name ? ` par ${name}` : ""}${date ? ` le ${date}` : ""}`,
+    notFound: "Source introuvable",
+    openPassage: (time: string) => `Voir le passage (${time})`,
+    openTranscript: "Voir la transcription",
   },
   import: {
     title: "Importer depuis un call",

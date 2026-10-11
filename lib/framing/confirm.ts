@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { QuestionState } from "@/lib/framing/assess";
+import { storedValue, type QuestionState } from "@/lib/framing/assess";
 import { QUESTIONS, type QuestionKey } from "@/lib/framing/dimensions";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import type { createClient } from "@/lib/supabase/server";
@@ -34,14 +34,7 @@ export function confirmedRow(
 ): BriefRow | null {
   const answer = state.answer;
   if (state.status !== "to_confirm" || !answer) return null;
-  const value =
-    answer.kind === "text"
-      ? answer.text
-      : answer.kind === "date"
-        ? answer.date
-        : answer.kind === "money"
-          ? answer.cents
-          : { none: true };
+  const value = storedValue(answer);
   if (state.fromRecord)
     return {
       value,
@@ -97,3 +90,5 @@ export function confirmLines(
     .eq("project_id", projectId)
     .eq("review_status", "proposed");
 }
+
+export { storedValue };

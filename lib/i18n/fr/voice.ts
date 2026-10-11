@@ -1,3 +1,5 @@
+import { microphoneErrors } from "./microphone";
+
 /** Dictation: fill or edit a stage form by voice, common to every stage. */
 export const voice = {
   start: "Dicter",
@@ -47,11 +49,7 @@ export const voice = {
     provider_quota:
       "Le service de transcription est saturé. Réessayez dans une minute.",
     provider_error: "Le service n'a pas répondu. Réessayez.",
-    permission_denied:
-      "Le micro est bloqué. Autorisez-le dans la barre d'adresse, puis réessayez.",
-    device_error: "Aucun micro utilisable n'a été trouvé.",
-    unsupported: "La dictée nécessite un micro et un navigateur récent.",
-    no_tab_audio: "Le micro n'a pas pu être ouvert.",
+    ...microphoneErrors,
     too_large: "La dictée est trop longue. Faites plus court.",
   },
 } as const;

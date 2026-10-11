@@ -8,11 +8,11 @@ import { fr } from "@/lib/i18n/fr";
 /** Record (or drop a file) when there is no audio yet, then the automatic processing. */
 export function CallRecording({
   call,
-  audioUrl,
+  audioUrls,
   hasTranscript,
 }: {
   call: CallDetail;
-  audioUrl: string | null;
+  audioUrls: Array<string | null>;
   hasTranscript: boolean;
 }) {
   if (!call.audioPath) {
@@ -21,6 +21,7 @@ export function CallRecording({
       <CallRecorder
         callId={call.id}
         organizationId={call.organizationId}
+        saved={call.recording.takes}
         videoCall={call.meetingUrl !== null}
         alternative={
           <details className="group border-t border-[color:var(--border-hairline)] pt-4">
@@ -48,28 +49,41 @@ export function CallRecording({
         errorCode={call.errorCode}
         hasTranscript={hasTranscript}
       />
-      <CallAudio call={call} audioUrl={audioUrl} />
+      <CallAudio call={call} audioUrls={audioUrls} />
     </div>
   );
 }
 
-/** The stored recording, to listen back. */
+/** The stored recording, to listen back: each take in order when in parts. */
 export function CallAudio({
   call,
-  audioUrl,
+  audioUrls,
 }: {
   call: CallDetail;
-  audioUrl: string | null;
+  audioUrls: Array<string | null>;
 }) {
   const t = fr.calls.audio;
+  const parts = audioUrls.length > 1;
   return (
     <div className="grid gap-2 border-t border-[color:var(--border-hairline)] pt-4">
-      {audioUrl ? (
-        <audio controls preload="metadata" src={audioUrl} className="w-full">
-          <track kind="captions" />
-        </audio>
-      ) : (
+      {audioUrls.length === 0 || audioUrls.some((url) => url === null) ? (
         <p className="text-sm text-muted-foreground">{t.playerUnavailable}</p>
+      ) : (
+        audioUrls.map((url, i) => (
+          <div key={url} className="grid gap-1">
+            {parts && (
+              <p className="text-xs text-muted-foreground">{t.part(i + 1)}</p>
+            )}
+            <audio
+              controls
+              preload="metadata"
+              src={url ?? undefined}
+              className="w-full"
+            >
+              <track kind="captions" />
+            </audio>
+          </div>
+        ))
       )}
       {call.audioBytes !== null && (
         <p className="text-xs text-muted-foreground">

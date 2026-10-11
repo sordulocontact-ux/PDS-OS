@@ -6,16 +6,20 @@ export function FramingProgress({
   known,
   total,
   optionalEmpty = 0,
+  blocking,
 }: {
   known: number;
   total: number;
   // Optional questions still empty: said next to the count.
   optionalEmpty?: number;
+  // Required answers missing or to confirm, and contradictions.
+  blocking: number;
 }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="text-caption text-muted-foreground tabular-nums">
-        {fr.framingIntel.progress(known, total, optionalEmpty)}
+        {fr.framingIntel.progress(known, total, optionalEmpty)} ·{" "}
+        {fr.framingIntel.remaining(blocking)}
       </p>
       <ProgressBar
         value={known}

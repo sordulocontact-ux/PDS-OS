@@ -45,6 +45,9 @@ export type InventoryRows = {
   network: NetworkIndex;
   contracts: InventoryContract[];
   flags: InventoryFlag[];
+  // Parties the Cadrage qualified as needing no new contract (existing, not
+  // needed, not applicable), by normalised name (PROJ-BUG-03).
+  settledParties: Set<string>;
   // People of the Réseau in the legal file without a credit (lot 6).
   projectContacts: Array<{
     id: string;
@@ -71,8 +74,9 @@ export async function readInventoryRows(
   const artistsOf = new Map(projectMasters.map((m) => [m.id, m.artists]));
   const titled = masterIds.length > 0;
   const none = Promise.resolve({ data: [], error: null });
+  // Not legal_parties: the parties are qualified one by one (below), an
+  // older free-text answer is no current fact (PROJ-BUG-03).
   const BRIEF_LEGAL_KEYS = [
-    "legal_parties",
     "legal_agreements",
     "legal_needs",
     "legal_secured",
@@ -89,6 +93,7 @@ export async function readInventoryRows(
     flags,
     briefLegal,
     projectContacts,
+    legalParties,
   ] = await Promise.all([
     titled
       ? supabase
@@ -164,7 +169,13 @@ export async function readInventoryRows(
       )
       .eq("project_id", projectId)
       .order("created_at"),
+    supabase
+      .from("framing_legal_parties")
+      .select("id, party_key, name, document_status")
+      .eq("project_id", projectId)
+      .order("created_at"),
   ]);
+  failed("legal parties", legalParties.error);
 
   const byId = new Map(
     (masters.data ?? []).map((row): [string, InventoryMaster] => [
@@ -230,7 +241,21 @@ export async function readInventoryRows(
             ]
           : [],
       ),
+      ...(legalParties.data ?? []).map((row) => ({
+        id: row.id,
+        text: `${fr.framingIntel.questions.legal_parties.label} : ${row.name} · ${fr.framingIntel.parties.statuses[row.document_status as keyof typeof fr.framingIntel.parties.statuses]}`,
+        proposed: false,
+      })),
     ],
+    settledParties: new Set(
+      (legalParties.data ?? [])
+        .filter((row) =>
+          ["existing", "not_needed", "not_applicable"].includes(
+            row.document_status,
+          ),
+        )
+        .map((row) => row.party_key),
+    ),
     failed: {
       titles: failed("masters", masters.error),
       people:

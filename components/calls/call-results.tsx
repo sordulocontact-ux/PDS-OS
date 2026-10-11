@@ -26,7 +26,7 @@ export function CallResults({
 
   return (
     <>
-      <Card>
+      <Card id="transcript" className="scroll-mt-6">
         <CardHeader>
           <CardTitle>{t.transcript.title}</CardTitle>
         </CardHeader>

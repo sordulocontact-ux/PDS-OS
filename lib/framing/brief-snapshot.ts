@@ -4,6 +4,7 @@
 // what the validator reads is exactly what was sent; two versions compare
 // key by key for the history of changes. Client-safe.
 
+import { formatEuros } from "@/lib/budget/types";
 import {
   assessFraming,
   formatBriefDate,
@@ -16,9 +17,11 @@ import {
   type Dimension,
 } from "@/lib/framing/dimensions";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
+import { legalPartyBoard, partyLineText } from "@/lib/framing/legal-parties";
 import { teamBoard } from "@/lib/framing/team-board";
 import { fr } from "@/lib/i18n/fr";
 import { projectKindLabel } from "@/lib/projects/labels";
+import { normalizeSearch } from "@/lib/utils/search";
 
 export type SnapshotItem = {
   key: string;
@@ -28,10 +31,22 @@ export type SnapshotItem = {
   // A list question: one entry per line.
   lines: string[];
   source: string | null;
+  // The project sheet said otherwise: « Modifié · initial : … » (PROJ-BUG-04).
+  initial?: string | null;
+};
+
+/** What to act on, without reading the whole Cadrage (PROJ-BUG-04). */
+export type BriefSummary = {
+  decisions: string[];
+  open: string[];
+  risks: string[];
+  prerequisites: string[];
+  owners: string[];
 };
 
 export type BriefSnapshot = {
-  schema: 1;
+  // 2 (11/10/2026): summary, initial values, qualified legal parties.
+  schema: 1 | 2;
   project: { title: string; kind: string; artist: string };
   dimensions: Array<{
     dimension: Dimension;
@@ -39,6 +54,7 @@ export type BriefSnapshot = {
     facts: Array<{ label: string; value: string }>;
   }>;
   sources: string[];
+  summary?: BriefSummary;
 };
 
 /** The confirmed lines of a list question, in words. */
@@ -57,7 +73,15 @@ export function linesOf(
     );
   switch (QUESTIONS[key as keyof typeof QUESTIONS]?.kind) {
     case "needs":
-      return confirmed(k.framing.needs).map((n) => n.label);
+      // One line per need, even typed twice (PROJ-BUG-03).
+      return [
+        ...new Map(
+          confirmed(k.framing.needs).map((n) => [
+            normalizeSearch(n.label.trim()),
+            n.label,
+          ]),
+        ).values(),
+      ];
     case "constraints":
       return confirmed(k.framing.constraints)
         .filter((c) => c.type !== "rights")
@@ -72,7 +96,7 @@ export function linesOf(
     case "deadlines":
       return confirmed(k.deadlines).map(
         (d) =>
-          `${d.kind === "other" && d.label ? d.label : t.deadlineKinds[d.kind as keyof typeof t.deadlineKinds]} · ${d.due_date ? formatBriefDate(d.due_date) : t.guide.deadlines.noDate}`,
+          `${d.kind === "other" && d.label ? d.label : t.deadlineKinds[d.kind as keyof typeof t.deadlineKinds]} · ${d.due_date ? formatBriefDate(d.due_date) : t.guide.deadlines.noDate}${d.confidence === "estimated" ? ` · ${t.guide.deadlines.confidences.estimated.toLowerCase()}` : ""}`,
       );
     case "team": {
       const roles = fr.framingGuide.team.roles as Record<string, string>;
@@ -98,6 +122,19 @@ export function linesOf(
           : k.creatives.map(
               (c) => `${c.name} (${t.facts.creatives.toLowerCase()})`,
             )),
+      ];
+    }
+    case "parties": {
+      // Each party with what a person decided (PROJ-BUG-03); a role nobody
+      // holds is said once, never turned into a party.
+      const board = legalPartyBoard(k);
+      const nameOf = (personId: string) =>
+        k.framing.members.find((m) => m.personId === personId)?.name ?? null;
+      return [
+        ...board.lines.map((line) => partyLineText(line, nameOf)),
+        ...(board.unassignedRoles.length
+          ? [t.parties.unassigned(board.unassignedRoles)]
+          : []),
       ];
     }
     default:
@@ -135,13 +172,14 @@ export function buildBriefSnapshot(k: FramingKnowledge): BriefSnapshot {
         value: known ? q.display : null,
         lines,
         source,
+        initial: known ? initialOf(q, k) : null,
       };
     }),
   }));
   for (const call of k.framing.reports)
     sources.add(fr.framingGuide.brief.callTitle(call.callTitle));
   return {
-    schema: 1,
+    schema: 2,
     project: {
       title: k.project.title,
       kind: projectKindLabel({
@@ -153,13 +191,105 @@ export function buildBriefSnapshot(k: FramingKnowledge): BriefSnapshot {
     },
     dimensions,
     sources: [...sources],
+    summary: summaryOf(k, assessment),
+  };
+}
+
+/** The project sheet's value, when the confirmed answer differs from it. */
+function initialOf(
+  q: FramingAssessment["dimensions"][number]["questions"][number],
+  k: FramingKnowledge,
+): string | null {
+  const t = fr.framingIntel.facts;
+  if (q.key === "target_date" && q.answer?.kind === "date")
+    return k.project.dueDate && k.project.dueDate !== q.answer.date
+      ? t.initial(formatBriefDate(k.project.dueDate))
+      : null;
+  if (q.key === "budget_envelope" && q.answer?.kind === "money")
+    return k.project.budgetCents !== null &&
+      k.project.budgetCents !== q.answer.cents
+      ? t.initial(formatEuros(k.project.budgetCents))
+      : null;
+  return null;
+}
+
+/**
+ * The Brief around what to act on, written by code from the answers only:
+ * decisions, open points, risks, prerequisites, who is responsible. Nothing
+ * is added that the Cadrage does not say.
+ */
+function summaryOf(
+  k: FramingKnowledge,
+  assessment: FramingAssessment,
+): BriefSummary {
+  const t = fr.framingIntel.summary;
+  const labels = fr.framingIntel.questions;
+  const all = assessment.dimensions.flatMap((d) => d.questions);
+  const said = (key: keyof typeof labels) => {
+    const q = all.find((x) => x.key === key);
+    return q?.status === "known" && q.answer?.kind === "text"
+      ? [q.answer.text]
+      : [];
+  };
+  const parties = legalPartyBoard(k);
+  const nameOf = (personId: string) =>
+    k.framing.members.find((m) => m.personId === personId)?.name ?? null;
+  const statuses = fr.framingIntel.parties.statuses;
+  return {
+    decisions: [...said("main_priority"), ...said("decisions_made")],
+    open: [
+      ...assessment.optionalEmpty.map((q) =>
+        t.notProvided(labels[q.key].label),
+      ),
+      ...all
+        .filter((q) => q.answer?.kind === "later")
+        .map((q) => `${labels[q.key].label} : ${q.display ?? ""}`),
+      ...k.framing.openPoints
+        .filter((p) => p.status === "open")
+        .map((p) => t.openPoint(p.question)),
+      ...parties.lines
+        .filter((l) => l.decision?.document_status === "to_verify")
+        .map((l) =>
+          t.partyAction(
+            statuses.to_verify,
+            l.name,
+            l.decision?.owner_person_id
+              ? nameOf(l.decision.owner_person_id)
+              : null,
+          ),
+        ),
+    ],
+    risks: [
+      ...linesOf("legal_blockers", k).map(t.blocker),
+      ...linesOf("constraints", k).map(t.constraint),
+    ],
+    prerequisites: [
+      ...said("prerequisites"),
+      ...linesOf("deadlines", k).map(t.deadline),
+      ...parties.lines
+        .filter((l) => l.decision?.document_status === "to_prepare")
+        .map((l) =>
+          t.partyAction(
+            statuses.to_prepare,
+            l.name,
+            l.decision?.owner_person_id
+              ? nameOf(l.decision.owner_person_id)
+              : null,
+          ),
+        ),
+    ],
+    owners: [
+      ...(k.project.ownerName ? [t.owner(k.project.ownerName)] : []),
+      ...k.framing.validators.map((v) => t.validator(v.name)),
+    ],
   };
 }
 
 /** A stored version's content, read back defensively (it is JSON). */
 export function snapshotOf(content: unknown): BriefSnapshot | null {
   const s = content as Partial<BriefSnapshot> | null;
-  if (!s || s.schema !== 1 || !Array.isArray(s.dimensions)) return null;
+  if (!s || (s.schema !== 1 && s.schema !== 2) || !Array.isArray(s.dimensions))
+    return null;
   return s as BriefSnapshot;
 }
 
@@ -199,4 +329,22 @@ export function briefChanges(
 /** Whether the live Cadrage still says what a version says. */
 export function snapshotMatches(a: BriefSnapshot, b: BriefSnapshot): boolean {
   return briefChanges(a, b).length === 0;
+}
+
+/** The summary's non-empty groups, in reading order, with their titles. */
+export function summaryGroups(
+  snapshot: BriefSnapshot,
+): Array<[string, string[]]> {
+  const t = fr.framingIntel.summary;
+  const s = snapshot.summary;
+  if (!s) return [];
+  return (
+    [
+      [t.decisions, s.decisions],
+      [t.open, s.open],
+      [t.risks, s.risks],
+      [t.prerequisites, s.prerequisites],
+      [t.owners, s.owners],
+    ] as Array<[string, string[]]>
+  ).filter(([, lines]) => lines.length > 0);
 }

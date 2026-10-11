@@ -17,6 +17,9 @@ export function RecordingLive({
   meterRef,
   onPauseToggle,
   onStop,
+  savedMs,
+  unsavedMs,
+  failing,
 }: {
   paused: boolean;
   elapsed: number;
@@ -29,6 +32,10 @@ export function RecordingLive({
   meterRef: Ref<HTMLSpanElement>;
   onPauseToggle: () => void;
   onStop: () => void;
+  // This take: confirmed saved, and recorded but not saved yet (PROJ-BUG-01).
+  savedMs: number;
+  unsavedMs: number;
+  failing: boolean;
 }) {
   const t = fr.calls.recorder;
   return (
@@ -78,7 +85,34 @@ export function RecordingLive({
         </div>
       )}
       {fromTab && <p className="text-sm">{t.endReminder}</p>}
-      <p className="text-xs text-muted-foreground">{t.keepOpen}</p>
+      <SaveState savedMs={savedMs} unsavedMs={unsavedMs} failing={failing} />
     </div>
+  );
+}
+
+/** What is saved, never more: a piece counts once the server has it. */
+export function SaveState({
+  savedMs,
+  unsavedMs,
+  failing,
+}: {
+  savedMs: number;
+  unsavedMs: number;
+  failing: boolean;
+}) {
+  const t = fr.calls.recorder;
+  if (failing)
+    return (
+      <p role="alert" className="text-sm text-[color:var(--tone-warning-fg)]">
+        {t.saveFailing}
+      </p>
+    );
+  return (
+    <p className="text-xs text-muted-foreground tabular-nums">
+      {t.savedLive(formatClock(savedMs / 1000))}
+      {unsavedMs > 0 && ` · ${t.pendingLive(formatClock(unsavedMs / 1000))}`}
+      {" · "}
+      {t.keepOpen}
+    </p>
   );
 }

@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { SubmitButton } from "@/components/auth/submit-button";
-import { AgendaTopicsField } from "@/components/calls/agenda-topics-field";
+import { AgendaEditor, cleanAgenda } from "@/components/calls/agenda-editor";
 import { CallFields, withOccurredAt } from "@/components/calls/call-fields";
 import { ParticipantsField } from "@/components/calls/participants-field";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,10 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { idleFormState } from "@/lib/auth/form-state";
+import type { AgendaItem } from "@/lib/calls/first-call-agenda";
 import type { Participant } from "@/lib/calls/participants";
 import { prepareFramingCall } from "@/lib/framing/actions/call";
 import type { FramingTopic } from "@/lib/framing/call-prep";
-import type { Dimension } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -88,16 +88,20 @@ function CallForm({
 }) {
   const t = fr.framingIntel.call;
   const [state, formAction] = useActionState(prepareFramingCall, idleFormState);
-  const [kept, setKept] = useState(
-    () => new Set(data.topics.map((x) => x.dimension)),
+  // PO's topics and questions, a draft the person edits before launching
+  // (PROJ-UX-03): nothing enters the agenda unseen.
+  const [agenda, setAgenda] = useState<AgendaItem[]>(() =>
+    data.topics.map((x) => ({
+      topic: x.topic,
+      minutes: x.minutes,
+      questions: x.questions,
+      dimension: x.dimension,
+    })),
   );
-  const [detailed, setDetailed] = useState(false);
-  const [extra, setExtra] = useState<string[]>([]);
   const [people, setPeople] = useState<Participant[]>(() =>
     data.people.map((name) => ({ name, contactId: null })),
   );
   const [documents, setDocuments] = useState<Set<string>>(new Set());
-  const topics = data.topics.map((x) => ({ ...x, id: x.dimension }));
 
   const toggle = <T,>(set: Set<T>, value: T) => {
     const next = new Set(set);
@@ -114,11 +118,9 @@ function CallForm({
       <input type="hidden" name="projectId" value={projectId} />
       <input
         type="hidden"
-        name="dimensions"
-        value={JSON.stringify([...kept])}
+        name="agenda"
+        value={JSON.stringify(cleanAgenda(agenda))}
       />
-      <input type="hidden" name="detailed" value={detailed ? "1" : "0"} />
-      <input type="hidden" name="extraTopics" value={JSON.stringify(extra)} />
       <input type="hidden" name="participants" value={JSON.stringify(people)} />
       <input
         type="hidden"
@@ -140,17 +142,22 @@ function CallForm({
         />
       </div>
 
-      <AgendaTopicsField
-        id="framing-call-topics"
-        title={t.topics}
-        topics={topics}
-        kept={kept}
-        onToggle={(id) => setKept((set) => toggle(set, id as Dimension))}
-        extra={extra}
-        onExtraChange={setExtra}
-        detailed={detailed}
-        onDetailedChange={setDetailed}
-      />
+      <section
+        aria-labelledby="framing-call-topics"
+        className="flex flex-col gap-2"
+      >
+        <h3 id="framing-call-topics" className="text-sm font-medium">
+          {t.topics}
+        </h3>
+        <p className="text-caption text-muted-foreground">
+          {fr.calls.agenda.suggested}
+        </p>
+        <AgendaEditor
+          value={agenda}
+          onChange={setAgenda}
+          idPrefix="framing-call"
+        />
+      </section>
 
       <ParticipantsField
         id="framing-call-people"

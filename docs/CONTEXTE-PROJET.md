@@ -165,6 +165,18 @@ Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 undecies),
   directeurs créatifs), pour qu'un invité voie toujours le projet. Inviter la direction ou un
   autre membre demanderait de l'ajouter à l'équipe.
 
+### Points à trancher : retours BUG + UX consolidés (11/10/2026)
+
+- **Quel document pour quel rôle** (PROJ-BUG-03). Le ticket donne les statuts (existant, à
+  vérifier, à préparer, non nécessaire, non applicable) et les principes (un intervenant
+  opérationnel n'est pas une partie contractuelle par défaut, un accord de production n'est pas
+  un contrat sans preuve), mais aucune règle « tel rôle → tel document ». Aujourd'hui chaque
+  partie est qualifiée par une personne ; le code ne propose un statut que sur preuve (un
+  contrat de Contrats dont la personne est partie). Une règle par rôle (producteur, mixeur,
+  masteriseur…) est à donner par le label, avec sa source.
+- **« Continuer sans enregistrement »** (PROJ-BUG-01). Un call sans audio n'a pas d'état
+  aujourd'hui (pas de « tenu sans enregistrement ») : à définir avant d'offrir ce choix.
+
 ### Points à trancher : Juridique allégé (test UX du 09/10/2026, section 6)
 
 - **Envoi d'e-mails depuis PDS OS** : aujourd'hui un `mailto:` pré-rempli ouvre la messagerie de

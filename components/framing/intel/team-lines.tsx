@@ -47,34 +47,62 @@ export function TeamLines({
   const listedCreatives = roles.some((card) => card.holder) ? [] : creatives;
   const proposed = team.some((m) => m.review_status === "proposed");
 
+  // Who is confirmed apart from the roles still to attribute (PROJ-UX-05):
+  // a vacant role is an action, never a member.
+  const filled = roles.filter((card) => card.member || card.holder);
+  const vacant = roles.filter((card) => !card.member && !card.holder);
+  const cards = (list: RoleCard[]) => (
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {list.map((card) => (
+        <li key={card.role}>
+          <button
+            type="button"
+            disabled={!editable}
+            onClick={() => setAssigning(card)}
+            className={cn(
+              "flex h-full min-h-24 w-full flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              card.member || card.holder
+                ? "border-border bg-background"
+                : "border-dashed border-border bg-[var(--surface-soft)]",
+              editable && "hover:border-[color:var(--border-hover)]",
+            )}
+          >
+            <span className="text-body-md font-semibold">
+              {t.roles[card.role]}
+            </span>
+            <span className="text-caption text-muted-foreground">
+              {card.member?.display_name ?? card.holder ?? t.toFind}
+            </span>
+            {editable && !card.member && !card.holder && (
+              <span className="mt-auto text-caption font-semibold underline underline-offset-4">
+                {t.assignVacant}
+              </span>
+            )}
+            {card.member?.review_status === "proposed" && <ProposedBadge />}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <div className="flex flex-col gap-4">
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {roles.map((card) => (
-          <li key={card.role}>
-            <button
-              type="button"
-              disabled={!editable}
-              onClick={() => setAssigning(card)}
-              className={cn(
-                "flex h-full min-h-24 w-full flex-col items-start gap-1 rounded-2xl border p-4 text-left transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-                card.member || card.holder
-                  ? "border-border bg-background"
-                  : "border-dashed border-border bg-[var(--surface-soft)]",
-                editable && "hover:border-[color:var(--border-hover)]",
-              )}
-            >
-              <span className="text-body-md font-semibold">
-                {t.roles[card.role]}
-              </span>
-              <span className="text-caption text-muted-foreground">
-                {card.member?.display_name ?? card.holder ?? t.toFind}
-              </span>
-              {card.member?.review_status === "proposed" && <ProposedBadge />}
-            </button>
-          </li>
-        ))}
-      </ul>
+      {filled.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h4 className="text-caption text-muted-foreground">
+            {t.confirmedRoles}
+          </h4>
+          {cards(filled)}
+        </section>
+      )}
+      {vacant.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h4 className="text-caption text-muted-foreground">
+            {t.vacantRoles}
+          </h4>
+          {cards(vacant)}
+        </section>
+      )}
 
       {(others.length > 0 || listedCreatives.length > 0) && (
         <div className="flex flex-col gap-2">

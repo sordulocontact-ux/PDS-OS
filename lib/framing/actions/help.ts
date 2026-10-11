@@ -106,6 +106,8 @@ export async function chooseHelp(
   projectId: string,
   key: string,
   text: string,
+  // The formulation as the person edited it before saving (PROJ-UX-04).
+  edited?: string,
 ): Promise<ActionResult> {
   const access = await requireApproved();
   if (
@@ -129,7 +131,7 @@ export async function chooseHelp(
     project_id: projectId,
     deliverable: "brief",
     field_key: key,
-    value: chosen.text,
+    value: edited?.trim() ? edited.trim().slice(0, 2000) : chosen.text,
     status: "confirmed",
     source_type: fromCall ? "call" : fromContext ? "import" : "manual",
     source_report_item_id: fromCall ? itemId : null,

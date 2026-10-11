@@ -46,6 +46,8 @@ export function FramingEntry({
 }) {
   const t = fr.framingIntel;
   const { counts } = assessment;
+  // Most of it unknown: a conversation gathers it faster than PO's reading.
+  const exchangeFirst = counts.missing > counts.known + counts.to_confirm;
   return (
     <section
       aria-labelledby="framing-entry-title"
@@ -114,20 +116,60 @@ export function FramingEntry({
               <FramingCallSheet projectId={projectId} data={callSheet} />
             </>
           ) : (
-            // A Cadrage is mostly done in meetings: the exchange leads,
-            // PO alone is the other way in.
-            <>
-              <FramingCallSheet
-                projectId={projectId}
-                data={callSheet}
-                variant="default"
-              />
-              <form action={startFramingWithPo.bind(null, projectId)}>
-                <SubmitButton pendingLabel={t.entry.starting} variant="outline">
-                  {t.entry.start}
-                </SubmitButton>
-              </form>
-            </>
+            // Two ways in, each said with what it does (PROJ-UX-02), the
+            // recommended one first — decided by code from what is missing.
+            <ul className="grid w-full gap-3 md:grid-cols-2">
+              {(exchangeFirst
+                ? (["exchange", "direct"] as const)
+                : (["direct", "exchange"] as const)
+              ).map((way, index) => (
+                <li
+                  key={way}
+                  className="flex flex-col gap-3 rounded-2xl border border-border p-4"
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className="flex flex-wrap items-center gap-2 text-body-md font-semibold">
+                      {t.entry.ways[way].title}
+                      {index === 0 && (
+                        <StatusBadge tone="info" size="sm">
+                          {t.entry.recommended}
+                        </StatusBadge>
+                      )}
+                    </span>
+                    <span className="text-caption text-muted-foreground">
+                      {t.entry.ways[way].body}
+                    </span>
+                    {index === 0 && (
+                      <span className="text-caption">
+                        {exchangeFirst
+                          ? t.entry.why.exchange(counts.missing)
+                          : t.entry.why.direct(
+                              counts.known + counts.to_confirm,
+                            )}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-auto">
+                    {way === "exchange" ? (
+                      <FramingCallSheet
+                        projectId={projectId}
+                        data={callSheet}
+                        variant={index === 0 ? "default" : "outline"}
+                      />
+                    ) : (
+                      <form action={startFramingWithPo.bind(null, projectId)}>
+                        <SubmitButton
+                          pendingLabel={t.entry.starting}
+                          variant={index === 0 ? "default" : "outline"}
+                        >
+                          {t.entry.start}
+                        </SubmitButton>
+                      </form>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       )}

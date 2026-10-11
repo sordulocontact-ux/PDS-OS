@@ -32,6 +32,11 @@ export const framingIntel = {
         ? ` · ${plural(optionalEmpty, "facultative vide", "facultatives vides")}`
         : ""
     }`,
+  // What is left, said at all times (PROJ-UX-04).
+  remaining: (blocking: number) =>
+    blocking > 0
+      ? `${plural(blocking, "point bloque", "points bloquent")} encore le Brief`
+      : "Plus rien ne bloque le Brief",
   questionOf: (index: number, total: number) =>
     `Question ${index} sur ${total}`,
   none: "Rien à signaler",
@@ -178,8 +183,8 @@ export const framingIntel = {
     legal_parties: {
       label: "Parties impliquées",
       ask: "Qui est impliqué juridiquement ?",
-      confirm: "Ces parties sont-elles justes ?",
-      why: "Auteurs, compositeurs, producteurs, interprètes, partenaires.",
+      confirm: "Qualifiez chaque partie",
+      why: "Pour chacun, le document qu'il faut. Travailler sur le projet ne fait pas d'un intervenant une partie au contrat.",
       placeholder: "Ex. Dioo (interprète, autrice), Jo (compositeur)",
       none: "Personne en dehors de PDS",
     },
@@ -193,9 +198,9 @@ export const framingIntel = {
     },
     legal_needs: {
       label: "Contrats et droits à prévoir",
-      ask: "Quels contrats ou droits faudra-t-il sans doute ?",
+      ask: "Quels autres contrats ou droits faudra-t-il sans doute ?",
       confirm: "Est-ce bien ce qu'il faudra prévoir ?",
-      why: "Le Juridique partira de là.",
+      why: "En plus des parties qualifiées : une autorisation, un droit à l'image… Le Juridique partira de là.",
       placeholder: "Ex. une autorisation pour le sample du refrain",
       none: "Rien à prévoir",
     },
@@ -216,9 +221,170 @@ export const framingIntel = {
       none: "Aucun blocage connu",
     },
   },
+  // The Brief's summary, written by code from the answers (PROJ-BUG-04).
+  summary: {
+    title: "Synthèse",
+    decisions: "Décisions",
+    open: "Points ouverts",
+    risks: "Risques",
+    prerequisites: "Prérequis",
+    owners: "Responsables",
+    notProvided: (label: string) => `${label} : non renseigné`,
+    openPoint: (question: string) => `Question d'un call : ${question}`,
+    partyAction: (status: string, name: string, owner: string | null) =>
+      `${status} : ${name}${owner ? ` (suivi : ${owner})` : ""}`,
+    owner: (name: string) => `Responsable du projet : ${name}`,
+    validator: (name: string) => `Valide le Brief : ${name}`,
+    blocker: (text: string) => `Blocage juridique : ${text}`,
+    constraint: (text: string) => `Contrainte : ${text}`,
+    deadline: (text: string) => `Échéance : ${text}`,
+  },
+  // Production steps offered as items (with the needs' presets).
+  itemPresets: ["Enregistrement", "Mix", "Mastering", "Master final"],
+  // An item of a structured answer (PROJ-UX-05): never « mix » alone.
+  itemStates: {
+    exists: "Existe",
+    in_progress: "En cours",
+    done: "Terminé",
+    decided: "Décidé",
+    planned: "Prévu",
+  },
+  items: {
+    label: "Éléments",
+    add: "Ajouter un élément",
+    itemLabel: "Élément",
+    stateLabel: "État",
+    remove: "Retirer",
+    presets: "Suggestions",
+    required: "Ajoutez au moins un élément.",
+    labelRequired: "Nommez l'élément.",
+  },
+  // A measurable objective (PROJ-UX-04): metric, target, horizon.
+  measure: {
+    text: (
+      target: string,
+      metric: string,
+      period: string,
+      source: string | null,
+    ) =>
+      `${target} ${metric} · ${period}${source ? ` · source : ${source}` : ""}`,
+    estimated: (amount: string) => `${amount} (estimée)`,
+    metric: "Métrique",
+    metricPlaceholder: "Ex. streams",
+    target: "Cible",
+    targetPlaceholder: "Ex. 500 000",
+    period: "Période",
+    periodPlaceholder: "Ex. le premier mois",
+    source: "Où le mesurer",
+    sourcePlaceholder: "Ex. Spotify for Artists",
+    said: (text: string) => `Dit : « ${text} »`,
+    metricRequired: "Dites ce qui se mesure.",
+    targetRequired: "Donnez une cible chiffrée.",
+    periodRequired: "Dites sur quelle période.",
+  },
+  // Answered without a value (PROJ-UX-04).
+  answerStates: {
+    na: (reason: string) => `Non applicable · ${reason}`,
+    later: (date: string) => `À définir plus tard · suivi avant le ${date}`,
+    naAction: "Non applicable",
+    laterAction: "À définir plus tard",
+    naTitle: "Pourquoi ce point ne s'applique pas ?",
+    reason: "Raison",
+    reasonRequired: "Dites pourquoi, en une phrase.",
+    laterTitle: "Quand faut-il le définir ?",
+    due: "À définir avant le",
+    dueRequired: "Choisissez une date.",
+    task: (label: string) => `Définir : ${label}`,
+    save: "Enregistrer",
+  },
+  expenses: {
+    title: "Dépenses du projet (Budget)",
+    empty: "Aucune dépense enregistrée.",
+    add: "Ajouter une dépense",
+  },
+  certainty: {
+    label: "Cette enveloppe est",
+    confirmed: "Confirmée",
+    estimated: "Estimée",
+  },
+  // The plan rests on a Brief the Cadrage no longer matches (PROJ-BUG-04).
+  drift: {
+    body: (labels: string[]) =>
+      `Le plan s'appuie sur le Brief validé, qui ne correspond plus au Cadrage : ${labels.join(", ")}. Vérifiez le plan avant d'avancer.`,
+    open: "Voir le Brief",
+  },
+  // Contradictions found by code before the Brief (PROJ-BUG-04).
+  conflicts: {
+    title: "À résoudre avant le Brief",
+    afterTarget: (label: string, date: string, target: string) =>
+      `${label} le ${date}, après la date cible du ${target}.`,
+    releaseDiffers: (date: string, target: string) =>
+      `Échéance de sortie le ${date}, mais date cible le ${target}.`,
+    overEnvelope: (engaged: string, envelope: string) =>
+      `Dépenses engagées (${engaged}) au-delà de l'enveloppe confirmée (${envelope}).`,
+    proofLost: (name: string, contract: string) =>
+      `${name} : « Existant », mais le contrat « ${contract} » n'est plus signé.`,
+  },
+  // The legal parties, qualified one by one (PROJ-BUG-03).
+  parties: {
+    undecided: "À qualifier",
+    qualify: "Qualifier",
+    edit: "Modifier",
+    clear: "Retirer la qualification",
+    found: (origins: string) => `Trouvé dans : ${origins}`,
+    suggestion: (status: string, contract: string) =>
+      `Contrat trouvé dans Contrats : « ${contract} ». Statut possible : ${status}.`,
+    decidedBy: (name: string | null, date: string) =>
+      `Qualifié${name ? ` par ${name}` : ""} le ${date}`,
+    unassigned: (roles: string[]) =>
+      `Rôles non attribués : ${roles.join(", ")}. Ils seront qualifiés une fois attribués : pas de partie, pas de document à prévoir d'ici là.`,
+    legacy: (text: string) => `Réponse écrite avant la qualification : ${text}`,
+    none: "Aucune partie dans les crédits, l'équipe ou le Juridique.",
+    relationLabel: "Relation avec PDS",
+    relationNone: "Non précisée",
+    statusLabel: "Document",
+    statusRequired: "Choisissez le document qu'il faut avec cette partie.",
+    contractLabel: "Contrat qui le prouve",
+    contractNone: "Aucun contrat",
+    contractRequired:
+      "« Existant » demande le contrat signé qui le prouve : un accord de production n'est pas un contrat.",
+    noSignedContract:
+      "Aucun contrat signé de cette personne dans Contrats : « Existant » n'est pas possible.",
+    ownerLabel: "Qui suit",
+    ownerNone: "Personne",
+    noteLabel: "Pourquoi",
+    noteRequired: "Dites pourquoi aucun document n'est nécessaire.",
+    save: "Enregistrer la qualification",
+    title: (name: string) => `Qualifier ${name}`,
+    contract: (title: string) => `Contrat : ${title}`,
+    owner: (name: string) => `Suivi : ${name}`,
+    relations: {
+      client: "Client",
+      provider: "Prestataire",
+      partner: "Partenaire",
+      supplier: "Fournisseur",
+      other: "Autre",
+    },
+    statuses: {
+      existing: "Existant",
+      to_verify: "À vérifier",
+      to_prepare: "À préparer",
+      not_needed: "Non nécessaire",
+      not_applicable: "Non applicable",
+    },
+    statusHints: {
+      existing: "Un contrat signé le couvre déjà.",
+      to_verify: "Un accord est évoqué ou en cours : à vérifier.",
+      to_prepare: "Un document est à préparer avec cette partie.",
+      not_needed: "Aucun document n'est nécessaire avec cette partie.",
+      not_applicable:
+        "Cette personne n'est pas une partie juridique du projet.",
+    },
+  },
   sources: {
     projectSheet: "Fiche projet",
     initialContext: "Contexte initial",
+    contextAndClarifications: "Contexte initial et précisions de la direction",
     budget: "Budget du projet",
     team: "Équipe du projet",
     rolesToFind: "Rôles à pourvoir",
@@ -241,8 +407,17 @@ export const framingIntel = {
     rolesToFind: (roles: string[]) => `À trouver : ${roles.join(", ")}`,
     titleState: (title: string, state: string) => `${title} : ${state}`,
     noAudioState: "état audio non renseigné",
-    files: (count: number, names: string[]) =>
-      `${plural(count, "document", "documents")} : ${names.join(", ")}${count > names.length ? "…" : ""}`,
+    // The Cadrage's words for a title's audio (PROJ-UX-05): a mix received
+    // is not a finished mix.
+    audioStates: {
+      demo: "maquette",
+      rough_mix: "mise à plat",
+      mix: "mix reçu, pas encore validé",
+      master: "master reçu, pas encore validé",
+      final_master: "master final",
+    },
+    moreFiles: (count: number) =>
+      count > 1 ? `${count} autres fichiers` : "1 autre fichier",
     tasks: (done: number, open: number) =>
       [
         done > 0 && plural(done, "tâche faite", "tâches faites"),
@@ -252,12 +427,6 @@ export const framingIntel = {
         .join(", "),
     masterBrief: "Brief Mix/Master commencé",
     legalIntake: "Cadrage juridique commencé",
-    party: (name: string, roles: string[]) =>
-      roles.length ? `${name} (${roles.join(", ")})` : name,
-    // One line per party, read as a list (Brief, PDF: white-space pre-line).
-    parties: (parties: string[]) => parties.map((p) => `– ${p}`).join("\n"),
-    needs: (parties: string[]) =>
-      `Un accord avec chaque partie :\n${parties.map((p) => `– ${p}`).join("\n")}`,
     performer: "interprète",
     featuring: "featuring",
     contract: (title: string, status: string) => `${title} (${status})`,
@@ -278,8 +447,8 @@ export const framingIntel = {
     creatives: "Équipe créative",
     type: "Type de projet",
     titles: "Titres",
-    envelope: "Enveloppe à la création",
-    dueDate: "Échéance à la création",
+    // Beside a confirmed answer that differs from the project sheet (PROJ-BUG-04).
+    initial: (value: string) => `Modifié · initial (fiche projet) : ${value}`,
     contracts: "Contrats rattachés",
     none: "Aucun",
   },
@@ -311,6 +480,24 @@ export const framingIntel = {
     starting: "PO lit le contexte…",
     resume: "Reprendre le cadrage",
     prepare: "Préparer un échange",
+    recommended: "Recommandé",
+    // What each way in does (PROJ-UX-02).
+    ways: {
+      exchange: {
+        title: "Préparer un échange",
+        body: "PO prépare l'ordre du jour d'un call à partir de ce qui manque. Vous le relisez, choisissez participants et date : le call est créé, rien du cadrage n'est validé. Après le call, PO propose ce qui a été dit, vous confirmez.",
+      },
+      direct: {
+        title: "Commencer le cadrage",
+        body: "PO lit le contexte initial et les précisions de la direction, propose ce qu'il y trouve, puis vous répondez question par question. Rien n'est confirmé sans vous.",
+      },
+    },
+    why: {
+      exchange: (missing: number) =>
+        `${plural(missing, "information manque", "informations manquent")} : un échange les rassemble plus vite.`,
+      direct: (known: number) =>
+        `Le projet en dit déjà assez (${plural(known, "information", "informations")}) : PO propose, vous confirmez.`,
+    },
     readOnly:
       "Le chef de projet responsable mène le cadrage ; vous le suivez ici.",
     awaiting: (name: string) => `Brief envoyé en validation à ${name}`,
@@ -347,8 +534,10 @@ export const framingIntel = {
     dateLabel: "Date",
     amountLabel: "Montant en euros",
     fromSource: (label: string) => `D'après : ${label}`,
-    proposedFrom: (label: string) => `Proposé · ${label}`,
-    knownFrom: (label: string) => `Confirmé · ${label}`,
+    structure: "Préciser et confirmer",
+    deferredTitle:
+      "Restent ouverts dans le Brief (à définir plus tard, une tâche suit chacun) :",
+    lineSources: "Sources des propositions",
     helpEmpty:
       "PO n'a rien trouvé de vérifiable sur ce point : écrivez-le vous-même.",
     helpErrors: {
@@ -389,6 +578,14 @@ export const framingIntel = {
       date: "Date",
       remove: "Retirer",
       noDate: "date à choisir",
+      confidence: "Cette date est",
+      confidences: { firm: "Ferme", estimated: "Estimée" },
+      feeds: (workflows: string) => `Alimente : ${workflows}`,
+      workflows: {
+        master: "Master (date du master final du Brief Mix/Master)",
+        distribution: "Distribution",
+        marketing: "Marketing",
+      },
     },
     proposedLine: "proposé",
     review: {
