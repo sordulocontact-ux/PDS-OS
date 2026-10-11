@@ -17,9 +17,11 @@ const number = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
  * figure exists, the partial and unavailable readings counted beside. */
 export function MetricTotals({ metrics }: { metrics: MetricTotal[] }) {
   if (metrics.length === 0) return null;
-  const show = (v: number | null) =>
+  const show = (v: number | null, notAddable: boolean) =>
     v === null ? (
-      <span className="text-muted-foreground">{t.unavailable}</span>
+      <span className="text-muted-foreground">
+        {notAddable ? t.metrics.notAddable : t.unavailable}
+      </span>
     ) : (
       number.format(v)
     );
@@ -41,10 +43,10 @@ export function MetricTotals({ metrics }: { metrics: MetricTotal[] }) {
             <DataTableRow key={m.metric}>
               <DataTableCell fill>{m.metric}</DataTableCell>
               <DataTableCell className="tabular-nums">
-                {show(m.declared)}
+                {show(m.declared, m.notAddable)}
               </DataTableCell>
               <DataTableCell className="tabular-nums">
-                {show(m.verified)}
+                {show(m.verified, m.notAddable)}
               </DataTableCell>
               <DataTableCell hideBelow="sm" className="text-muted-foreground">
                 {t.metrics.gapsText(m.partial, m.unavailable)}

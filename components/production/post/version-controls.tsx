@@ -19,7 +19,7 @@ import {
 
 import { PostRowMenu } from "./post-row-menu";
 import { RequestChangesButton } from "./request-changes-button";
-import { usePostSubmit } from "./use-post-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { VersionDialog } from "./version-dialog";
 
 const t = fr.productionPost.versions;
@@ -47,7 +47,7 @@ export function VersionControls({
   const [editing, setEditing] = useState(false);
   const [submitting, setSubmitting] = useState<Submit | null>(null);
   const close = () => setSubmitting(null);
-  const { pending, error, setError, run } = usePostSubmit(close, t.saved);
+  const { pending, error, setError, run } = useWriteSubmit(close, t.saved);
 
   const confirm = (target: Submit) =>
     run(

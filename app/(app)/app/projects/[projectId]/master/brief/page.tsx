@@ -25,7 +25,7 @@ export default async function ProjectMasterBriefPage({
     loadMasterBrief(project, access),
     loadBriefQuestions(project, access),
   ]);
-  // Opened from « Préparer »: the way back is the trail above
-  // (« Master / Brief Mix/Master », ProjectPageTitle).
+  // The Brief step of the Master (lib/ui/master-steps.ts): its chevron
+  // names it, the title stays « Master » (ProjectPageTitle).
   return <BriefPage view={view} questions={questions} />;
 }

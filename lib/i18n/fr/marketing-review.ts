@@ -112,11 +112,12 @@ export const marketingReview = {
     metrics: {
       title: "Chiffres relevés par mesure",
       description:
-        "Seules les valeurs qui existent sont additionnées, déclarées et vérifiées à part ; une mesure sans aucun chiffre disponible reste « Indisponible ».",
+        "Le dernier relevé de chaque mesure, additionné entre activations, déclaré et vérifié à part ; un taux ne s'additionne jamais.",
       metric: "Mesure",
       declared: "Déclaré",
       verified: "Vérifié",
       gaps: "Manques",
+      notAddable: "Taux non additionnables",
       gapsText: (partial: number, unavailable: number) =>
         [
           partial > 0 && `${partial} partiel${partial > 1 ? "s" : ""}`,

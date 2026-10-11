@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { FilterChip } from "@/components/ui/filter-chip";
@@ -42,7 +42,7 @@ export function TransmitButton({
   const [open, setOpen] = useState(false);
   const [formats, setFormats] = useState<string[]>(proposal.formats);
   const close = () => setOpen(false);
-  const { pending, error, run } = useDialogSubmit(close, t.done);
+  const { pending, error, run } = useWriteSubmit(close, t.done);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

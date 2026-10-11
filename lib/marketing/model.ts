@@ -1,12 +1,12 @@
-// Marketing activations and their evidence (ticket « Suivi & bilan », lot 1;
-// supabase/migrations/20261011000101_marketing_activations.sql). The same
-// lists as the SQL checks. Pure, client-safe.
+// The activations and their evidence as the review reads them (ticket « Suivi
+// & bilan », lot 1; supabase/migrations/20261011000601_marketing_review_sources.sql):
+// the views marketing_review_activations and marketing_review_evidence group
+// the Activations' own records (lib/activations/). Pure, client-safe.
 
 export const ACTIVATION_KINDS = [
   "content",
   "influence",
   "press",
-  "social",
   "event",
   "other",
 ] as const;
@@ -23,8 +23,8 @@ export type ActivationStatus = (typeof ACTIVATION_STATUSES)[number];
 export const EVIDENCE_KINDS = ["publication", "coverage", "statistic"] as const;
 export type EvidenceKind = (typeof EVIDENCE_KINDS)[number];
 
-// Declared: someone says so. To verify: a check is expected. Verified: a
-// person checked (who and when written by the database).
+// Declared: no check yet. To verify: the last check contested it or found it
+// unreachable. Verified: the last check verified it (who and when kept).
 export const VERIFICATIONS = ["declared", "to_verify", "verified"] as const;
 export type Verification = (typeof VERIFICATIONS)[number];
 
@@ -59,6 +59,8 @@ export type Evidence = {
   platform: string | null;
   metric: string | null;
   value: number | null;
+  // A statistic's unit: count, percent (never added up) or eur.
+  unit: string | null;
   periodStart: string | null;
   periodEnd: string | null;
   availability: Availability | null;

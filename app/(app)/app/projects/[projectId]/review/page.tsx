@@ -1,12 +1,14 @@
 import { IconRocket } from "nucleo-sharp-essential";
 import Link from "next/link";
 
+import { ActivationsReview } from "@/components/activations/activations-review";
 import { DashboardFigures } from "@/components/marketing/review/dashboard-figures";
 import { DashboardFilterBar } from "@/components/marketing/review/dashboard-filters";
 import { FigureDetail } from "@/components/marketing/review/figure-detail";
 import { MetricTotals } from "@/components/marketing/review/metric-totals";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
+import { loadActivationsBoard } from "@/lib/activations/board";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -41,7 +43,9 @@ export const metadata = {
  * Marketing › Suivi & bilan, the dashboard (ticket « Suivi & bilan », écran 1):
  * a live view computed on each opening from the activations and their
  * evidence, filtered by the URL, every figure opening its detail and rule.
- * A report is a frozen snapshot of it, made on the Rapports tab.
+ * A report is a frozen snapshot of it, made on the Rapports tab. Below,
+ * what each activation brings to the review: its three axes and reserves
+ * (ticket « Activations »). The project's own closing is on /closure.
  */
 export default async function MarketingDashboardPage({
   params,
@@ -53,9 +57,10 @@ export default async function MarketingDashboardPage({
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
-  const [reserves, standing] = await Promise.all([
+  const [reserves, standing, board] = await Promise.all([
     loadReserves(projectId, access),
     loadMarketingStanding(projectId),
+    loadActivationsBoard(projectId),
   ]);
   const { input, data } = await loadDashboardInput(
     projectId,
@@ -157,6 +162,7 @@ export default async function MarketingDashboardPage({
             }
           />
           <MetricTotals metrics={dashboard.metrics} />
+          <ActivationsReview projectId={projectId} rows={board.summaries} />
         </>
       )}
     </div>

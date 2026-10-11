@@ -10,7 +10,7 @@ import {
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { Activation } from "@/lib/marketing/model";
-import { activationStatusTone } from "@/lib/ui/state-tones";
+import { reviewActivationStatusTone } from "@/lib/ui/state-tones";
 
 const t = fr.marketing.activations;
 
@@ -45,7 +45,10 @@ export function ActivationTable({
             </DataTableCell>
             <DataTableCell hideBelow="sm">{t.kinds[a.kind]}</DataTableCell>
             <DataTableCell>
-              <StatusBadge tone={activationStatusTone[a.status]} size="sm">
+              <StatusBadge
+                tone={reviewActivationStatusTone[a.status]}
+                size="sm"
+              >
                 {t.statuses[a.status]}
               </StatusBadge>
             </DataTableCell>

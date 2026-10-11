@@ -6,7 +6,7 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import { centsToInput } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
@@ -24,7 +24,7 @@ import {
 } from "@/lib/production/preprod/types";
 
 import { DialogButton } from "@/components/ui/dialog-button";
-import { RecordMenu } from "./record-menu";
+import { RecordMenu } from "@/components/ui/record-menu";
 
 const t = fr.productionPreprod.budget;
 
@@ -82,7 +82,7 @@ function BudgetLineForm({
   line,
   onDone,
 }: Props & { line: PreprodBudgetLine | null; onDone: () => void }) {
-  const { pending, error, run } = useDialogSubmit(
+  const { pending, error, run } = useWriteSubmit(
     onDone,
     line ? t.updated : t.added,
   );

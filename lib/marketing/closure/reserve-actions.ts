@@ -10,7 +10,7 @@ import { RESERVE_DECISIONS } from "@/lib/marketing/closure/reserves";
 import { RESERVE_CATEGORIES } from "@/lib/marketing/reports/model";
 import { marketingFailure } from "@/lib/marketing/result";
 import { createClient } from "@/lib/supabase/server";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // Écran 4 (ticket « Suivi & bilan »): arbitrating each reserve, following it,
 // lifting it, a task behind it only when the owner asks. The database
@@ -19,7 +19,7 @@ import type { ActionOutcome } from "@/lib/utils/action-outcome";
 
 const e = fr.marketingReview.closure.errors;
 
-function failure(error: { code?: string; message?: string }): ActionOutcome {
+function failure(error: { code?: string; message?: string }): WriteResult {
   const m = error.message ?? "";
   const known: [string, string][] = [
     ["limit_needs_direction", e.limitNeedsDirection],
@@ -41,7 +41,7 @@ async function run(
   call: (
     supabase: Awaited<ReturnType<typeof createClient>>,
   ) => PromiseLike<{ error: { code?: string; message?: string } | null }>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   await requireApproved();
   const { error } = await call(await createClient());
   if (error) return failure(error);
@@ -68,7 +68,7 @@ const arbitrateInput = z.object({
 /** « Arbitrer » a reserve. */
 export async function arbitrateReserve(
   input: z.input<typeof arbitrateInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = arbitrateInput.safeParse(input);
   if (!p.success) return invalid;
   const d = p.data;
@@ -96,7 +96,7 @@ const noteInput = z.object({
 /** « Lever la réserve », with what was done. */
 export async function liftReserve(
   input: z.input<typeof noteInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = noteInput.safeParse(input);
   if (!p.success || p.data.note.length > 1000) return invalid;
   const d = p.data;
@@ -111,7 +111,7 @@ export async function liftReserve(
 /** « Noter le suivi »: where a follow-up stands. */
 export async function noteReserve(
   input: z.input<typeof noteInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = noteInput.safeParse(input);
   if (!p.success) return invalid;
   const d = p.data;
@@ -132,7 +132,7 @@ const taskInput = z.object({
 /** Links an existing task of the project (or unlinks it). */
 export async function linkReserveTask(
   input: z.input<typeof taskInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = taskInput.safeParse(input);
   if (!p.success) return invalid;
   const d = p.data;
@@ -148,7 +148,7 @@ export async function linkReserveTask(
 export async function createReserveTask(input: {
   projectId: string;
   reserveId: string;
-}): Promise<ActionOutcome> {
+}): Promise<WriteResult> {
   const p = taskInput.safeParse({ ...input, taskId: "" });
   if (!p.success) return invalid;
   const d = p.data;
@@ -167,7 +167,7 @@ const addInput = z.object({
 /** « Proposer une réserve » by hand (contributors). */
 export async function addReserve(
   input: z.input<typeof addInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = addInput.safeParse(input);
   if (!p.success) return invalid;
   const access = await requireApproved();

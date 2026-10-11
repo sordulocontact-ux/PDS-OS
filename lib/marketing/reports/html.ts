@@ -137,7 +137,7 @@ export function marketingReportHtml({
             ? `<h3>${e(d.metrics.title)}</h3><table><thead><tr><th>${e(d.metrics.metric)}</th><th>${e(d.metrics.declared)}</th><th>${e(d.metrics.verified)}</th><th>${e(d.metrics.gaps)}</th></tr></thead><tbody>${figures.metrics
                 .map(
                   (m) =>
-                    `<tr><td>${e(m.metric)}</td><td>${e(m.declared === null ? d.unavailable : number.format(m.declared))}</td><td>${e(m.verified === null ? d.unavailable : number.format(m.verified))}</td><td>${e(d.metrics.gapsText(m.partial, m.unavailable))}</td></tr>`,
+                    `<tr><td>${e(m.metric)}</td><td>${e(m.declared === null ? (m.notAddable ? d.metrics.notAddable : d.unavailable) : number.format(m.declared))}</td><td>${e(m.verified === null ? (m.notAddable ? d.metrics.notAddable : d.unavailable) : number.format(m.verified))}</td><td>${e(d.metrics.gapsText(m.partial, m.unavailable))}</td></tr>`,
                 )
                 .join("")}</tbody></table>`
             : ""),

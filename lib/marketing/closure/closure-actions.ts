@@ -9,7 +9,7 @@ import { fr } from "@/lib/i18n/fr";
 import { CLOSURE_DECISIONS } from "@/lib/marketing/closure/status";
 import { marketingFailure } from "@/lib/marketing/result";
 import { createClient } from "@/lib/supabase/server";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // Écran 5 (ticket « Suivi & bilan »): asking for the Marketing closing,
 // deciding it, reopening it. The database checks the reserves again and who
@@ -18,7 +18,7 @@ import type { ActionOutcome } from "@/lib/utils/action-outcome";
 
 const e = fr.marketingReview.decision.errors;
 
-function failure(error: { code?: string; message?: string }): ActionOutcome {
+function failure(error: { code?: string; message?: string }): WriteResult {
   const m = error.message ?? "";
   const known: [string, string][] = [
     ["already_closed", e.alreadyClosed],
@@ -44,7 +44,7 @@ function failure(error: { code?: string; message?: string }): ActionOutcome {
   return marketingFailure(error);
 }
 
-function done(projectId: string): ActionOutcome {
+function done(projectId: string): WriteResult {
   // The chevrons, the workflow cards and the project's closing read it too.
   revalidatePath(routes.project(projectId), "layout");
   return { ok: true };
@@ -61,7 +61,7 @@ const requestInput = z.object({
 /** « Demander la clôture du Marketing ». */
 export async function requestClosure(
   input: z.input<typeof requestInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = requestInput.safeParse(input);
   if (!p.success) return invalid;
   await requireApproved();
@@ -84,7 +84,7 @@ const decideInput = z.object({
 /** The validator's decision on the closing asked. */
 export async function decideClosure(
   input: z.input<typeof decideInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = decideInput.safeParse(input);
   if (!p.success) return invalid;
   const d = p.data;
@@ -112,7 +112,7 @@ const reopenInput = z.object({
 /** « Rouvrir le Marketing », with a reason (the direction). */
 export async function reopenClosure(
   input: z.input<typeof reopenInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = reopenInput.safeParse(input);
   if (!p.success) return { ok: false, error: e.reasonRequired };
   await requireApproved();

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -96,7 +96,7 @@ function ConfirmCheckForm({
   row: CheckRow;
   onDone: () => void;
 }) {
-  const { pending, error, run } = useDialogSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.done);
   return (
     <form
       className="flex flex-col gap-5"

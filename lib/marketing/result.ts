@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 const e = fr.marketing.errors;
 
-export const okOutcome: ActionOutcome = { ok: true };
-export const failOutcome = (error: string): ActionOutcome => ({
+export const okOutcome: WriteResult = { ok: true };
+export const failOutcome = (error: string): WriteResult => ({
   ok: false,
   error,
 });
@@ -18,13 +18,9 @@ export const failOutcome = (error: string): ActionOutcome => ({
 export function marketingFailure(error: {
   code?: string;
   message?: string;
-}): ActionOutcome {
+}): WriteResult {
   const message = error.message ?? "";
   if (message.includes("marketing_closed")) return failOutcome(e.closed);
-  if (message.includes("marketing_evidence_verified_check"))
-    return failOutcome(e.linkRequired);
-  if (message.includes("marketing_evidence_statistic_check"))
-    return failOutcome(e.valueRequired);
   if (message.includes("not_found")) return failOutcome(e.notFound);
   if (error.code === "42501") return failOutcome(e.forbidden);
   if (error.code === "23514" || error.code === "22P02")
@@ -37,7 +33,7 @@ export function marketingFailure(error: {
 export function marketingDone(
   projectId: string,
   error: { code?: string; message?: string } | null,
-): ActionOutcome {
+): WriteResult {
   if (error) return marketingFailure(error);
   revalidatePath(routes.projectActivations(projectId), "layout");
   revalidatePath(routes.projectReview(projectId), "layout");

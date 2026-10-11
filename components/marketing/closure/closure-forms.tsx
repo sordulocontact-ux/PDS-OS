@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import {
   decideClosure,
@@ -19,7 +19,7 @@ import {
   CLOSURE_DECISIONS,
   type ClosureDecision,
 } from "@/lib/marketing/closure/status";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 const t = fr.marketingReview.decision;
 
@@ -97,9 +97,9 @@ function TextDialogForm({
   submitLabel: string;
   done: string;
   onDone: () => void;
-  run: (text: string) => Promise<ActionOutcome>;
+  run: (text: string) => Promise<WriteResult>;
 }) {
-  const submit = useDialogSubmit(onDone, done);
+  const submit = useWriteSubmit(onDone, done);
   return (
     <form
       className="flex flex-col gap-5"
@@ -145,7 +145,7 @@ export function ClosureDecisionForm({
 }) {
   const [decision, setDecision] = useState<ClosureDecision>(suggested);
   const [comment, setComment] = useState("");
-  const submit = useDialogSubmit(() => undefined, t.decided);
+  const submit = useWriteSubmit(() => undefined, t.decided);
   const needsComment =
     decision === "changes_requested" || decision === "postponed";
   return (

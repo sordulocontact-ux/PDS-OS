@@ -4,11 +4,11 @@ import { revalidatePath } from "next/cache";
 
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // The outcome of a preparation write (sheet, brief, needs, call): an error
 // already in French, as the rest of Production (lib/production/actions.ts).
-export type PrepResult = ActionOutcome;
+export type PrepResult = WriteResult;
 
 const e = fr.productionPrep.errors;
 

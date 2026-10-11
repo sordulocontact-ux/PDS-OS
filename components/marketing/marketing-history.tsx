@@ -60,9 +60,7 @@ export function MarketingHistory({
                   </time>
                   <span className="grid min-w-0 gap-0.5 text-body-md">
                     <span className="font-semibold">
-                      {t.labels[event.kind] ??
-                        fr.marketingReview.events[event.kind] ??
-                        t.other}
+                      {fr.marketingReview.events[event.kind] ?? t.other}
                       {event.actorName && (
                         <span className="font-medium text-muted-foreground">
                           {" "}

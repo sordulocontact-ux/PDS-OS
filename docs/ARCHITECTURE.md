@@ -2162,7 +2162,10 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   l'organisation, jamais trouvé par le nom).
 - **Échéances** (`lib/legal/plan/due-dates.ts`, décision du 10/10/2026, aucun ticket) : fiches
   aujourd'hui + 7 j, emprunts sortie − 45 j, contrats et répartitions − 30 j, SACEM − 15 j, jamais
-  avant aujourd'hui + 3 j ; sans date de sortie, seules les fiches ont une échéance.
+  avant aujourd'hui + 3 j ; sans date de sortie, seules les fiches ont une échéance. **Jamais due
+  avant ce dont elle dépend** (Sacha, 11/10/2026 : contrats au 13, fiches au 17) : au moins 7 j
+  après la dernière échéance de ses dépendances, même au-delà de la sortie (`planDueDates`, aussi
+  pour une action ajoutée après le lancement, qui part des échéances du plan).
 - **E-mail** : « Envoyer par e-mail » (`mailto:`, `lib/utils/mailto.ts`) à côté de chaque lien à
   copier (fiche, répartition, dossier du mixeur), adressé au contact du Réseau. PDS OS n'envoie
   aucun e-mail lui-même (pas de fournisseur : point à trancher).
@@ -2198,6 +2201,17 @@ lots, chacun utile seul.
   disant pas quel tour (limite connue). `masterSteps(projectId, done)` accepte les étapes
   faites, branchées au lot 3.
   - **Master final** (`/master/final`) inchangé.
+- **Cinq étapes depuis le 11/10/2026** (Sacha, après un proto comparant cinq placements du
+  Brief) : **Source · Brief · Mixage · Mastering · Master final**, le parcours du ticket
+  « Workflow Master ». Le Brief, rangé sous Préparation le 08/10, ne s'ouvrait que depuis la
+  carte « Où en est la préparation » : il a maintenant son chevron (`/master/brief`, titre
+  « Master » comme toute étape, plus de fil d'Ariane). **Source** = `/master` (la carte, puis
+  l'État du master). Statut commun (`masterState`) : étape Source tant qu'une source n'est pas
+  confirmée, Brief tant que le Brief ou son ingénieur du mix manque, puis **Mixage**, où se fait
+  l'envoi au mixeur (raison « Dossier à envoyer au mixeur ») ; coche Source = toutes les sources
+  confirmées, coche Brief = Brief enregistré avec son ingénieur, coche Mixage = envoyé et chaque
+  mix final validé. L'échéance « Mix V1 » de la Vue d'ensemble reste affichée jusqu'à la première
+  version du mix (le chargeur la retire alors), au lieu de disparaître à l'envoi.
 
 - **Qui voit, qui écrit** (décision du 04/10/2026, en attendant le DG) : pas de permission
   dédiée. La page se lit par **quiconque voit le projet** (DG, chef de projet, directeur
@@ -2766,7 +2780,7 @@ ni livré ni clos. Migration `20261010000301_production_delivery_and_review.sql`
   Production, partage des briefs d'équipe avec des intervenants sans compte, action de clôture
   administrative.
 - **Clôture du projet** (`/closure`, `lib/review/`, ex-« Suivi & bilan » ; déplacée le 11/10/2026 sous
-  la Vue d'ensemble par le ticket « Suivi & bilan », § 8 duodecies) : l'état de chaque workflow (lu
+  la Vue d'ensemble par le ticket « Suivi & bilan », § 8 terdecies) : l'état de chaque workflow (lu
   par `loadWorkflowStates`), le bilan (résultats, ce qui a marché, à améliorer, `project_reviews`,
   écrit pendant l'étape `review`), puis « Bilan & clôture du projet » : le DG valide, le projet est
   clos (l'étape `review` validée). Clôture refusée sans bilan écrit (`review_required`). Décision
@@ -2868,6 +2882,42 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
   (hôtes publics seulement, chaque redirection revérifiée, 2 Mo et 5 s au plus, cache d'un jour ;
   un échec réseau n'est pas mis en cache). L'image est chargée par le navigateur
   (`referrerPolicy="no-referrer"`) ; refusée par le site, la carte reprend l'icône « Lien ».
+- **Références semblables (Unsplash + Tumblr)** (11/10/2026, demande de Sacha : « que PO cherche
+  d'autres images qui ressemblent à celles envoyées, pour agrandir le moodboard ». Essayé dans la
+  journée : Are.na, puis Are.na + Openverse ; retenu : « Unsplash + Tumblr, et pour le moment tu
+  peux laisser de côté Are.na ». Pinterest et Cosmos écartés : pas d'API de recherche ouverte,
+  seulement les épingles du compte connecté pour Pinterest, des aspirateurs tiers pour Cosmos.)
+  « Chercher des références semblables » sur la page Références, pour qui écrit dans la Conception
+  (`design_can_write`, vérifié avant tout appel). **Sources** (`lib/design/similar-sources.ts`, le
+  seul endroit qui dit lesquelles sont allumées) : **Unsplash** (`lib/integrations/unsplash.ts`,
+  `UNSPLASH_ACCESS_KEY`, gratuit, 50 appels par heure en mode démo) et **Tumblr**
+  (`lib/integrations/tumblr.ts`, `TUMBLR_API_KEY`, gratuit, 1 000 appels par heure), chacune
+  allumée par sa clé ; sans aucune clé, la fenêtre le dit. **Are.na** (`ARENA_ENABLED`, rebond par
+  ses chaînes, recherche par mots seulement avec un compte Premium) et **Openverse**
+  (`OPENVERSE_ENABLED`) restent dans le code, éteints. Deux actions serveur
+  (`lib/design/actions/reference-similar.ts`) :
+  1. PO lit les 4 dernières images lisibles de la base choisie (une cible, ou « Toutes les
+     images » ; JPEG / PNG / WebP / GIF de 5 Mo au plus, `similar-rules.ts`) en un seul message
+     (`extractFromImages`, images = données) et rend ce qu'il voit, 3 ou 4 **recherches** pour
+     Unsplash (2 à 4 mots) et 3 ou 4 **tags** pour Tumblr (1 ou 2 mots, `/v2/tagged` ne cherche
+     que par tag), nettoyés par le code (`cleanSearches`).
+  2. Chaque source allumée reçoit ses mots, 12 images par recherche ou tag (Tumblr : 3 images
+     par billet au plus, photos d'un billet classique ou `<img>` d'un billet au nouveau format).
+  Un groupe par source et par recherche, chaque image une fois, celles déjà gardées écartées,
+  groupes vides masqués ; un appel échoué n'empêche pas les autres, l'erreur nomme la source.
+  L'écran montre « Ce que PO voit », les groupes en pastilles (« Unsplash · grainy film portrait
+  · 12 » ; décocher masque leurs images) et la grille à cocher, auteur et licence sous chaque
+  image ; **rien n'est ajouté sans clic**. Les propositions s'affichent depuis les adresses des
+  sources (règle « hotlinking » d'Unsplash). Garder une image : seuls la source et l'id viennent
+  du navigateur (Tumblr : `<blog>:<billet>:<rang>`), le serveur relit l'image à sa source,
+  télécharge son fichier (Unsplash « regular », 1 080 px ; 15 Mo au plus, type d'image vérifié),
+  la range dans le bucket avec la session de l'utilisateur et l'enregistre comme un fichier déposé
+  (dédoublonné par sha256), rattachée par défaut à la cible de départ (la direction pour « Toutes
+  les images ») ; **Unsplash est prévenu de chaque photo gardée** (`download_location`, règle de
+  son API). La note crédite l'image et garde son adresse (`unsplash.com/photos/<id>`,
+  `tumblr.com/<blog>/<billet>#<rang>`) : c'est ce qui l'écarte d'une recherche suivante, sans
+  colonne de plus. Les images de Tumblr appartiennent à leurs auteurs : de l'inspiration, jamais à
+  publier telles quelles.
 - **Soumissions et décisions** (`design_submissions`, `design_decisions`) : pour la direction
   (sections choisies par le responsable) et pour chaque fiche (la fiche, puis chaque élément d'une
   série). L'instantané est écrit par la base à la soumission. Mode de validation du projet
@@ -2953,7 +3003,114 @@ tests `supabase/tests/ux-roles.test.sql` (41).
   `docs/CONTEXTE-PROJET.md`) : l'enveloppe du Cadrage (dans le Brief partagé avec l'équipe), les
   colonnes de tarif de `master_briefs` lues par l'API, ce qui se dit du budget dans les calls.
 
-## 8 duodecies. Marketing : Suivi & bilan et clôture du Marketing (`/review`, `lib/marketing/`, `components/marketing/`)
+## 8 duodecies. Marketing : Activations (`/activations`, `lib/activations/`, `components/activations/`)
+
+Tickets « Marketing / Activations — Vue d'ensemble et pilotage », « … / Influence » et « … /
+Relations presse (RP) » (Drive, 11/10/2026). Migrations `20261011000101` (socle) à
+`20261011000501` (RP), tests `supabase/tests/marketing-activations.test.sql` (52, fixture
+Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
+
+- **Modèle (la décision structurante)** : une **activation** (`marketing_activations`) est
+  l'unité de pilotage Marketing (contenu, influence, RP, événement / session, autre). Influence
+  et RP ont un **mode** (Gestion interne / Agence externe) : un seul module, un parcours par mode,
+  le changement de mode garde tout l'historique. Une activation vient d'un levier retenu, d'un
+  livrable engagé ou d'un transfert de la Production (un lien, jamais une copie ; un livrable ou
+  un transfert n'a qu'une activation, un levier peut en porter plusieurs), ou est créée à la main.
+- **Trois axes, jamais fusionnés** : le **statut opérationnel** (Brouillon → À préparer → Prête →
+  En cours → Réalisée déclarée → Clôturée, + Annulée / Suspendue / Bloquée avec raison), posé par
+  une personne ; la **preuve** (`activation_evidence` : lien, fichier ou source de la déclaration ;
+  `activation_evidence_checks` : chaque contrôle avec méthode, auteur, date, append-only ; une
+  preuve retirée reste historisée) ; la **mesure** (`activation_metrics` : relevés datés avec
+  source, période, méthode, toujours « déclarés » à l'enregistrement, vérifiés à part, invalidés
+  sans effacement). États de preuve et de mesure **calculés par le code** (`lib/activations/states.ts`),
+  jamais stockés ; une statistique manquante n'est jamais un zéro.
+- **Pilotage** (`board.ts`) : alertes calculées (responsable absent, échéance passée, réalisée sans
+  preuve ou sans statistiques, preuve contestée, dépendance bloquante ou changée, écart agence /
+  PDS, droits publicitaires expirés), vues (À lancer, En cours, À vérifier, Bloquées, À mesurer,
+  Prêtes pour bilan, Clôturées), compteurs avec leur règle affichée, **prochaine action** : celle
+  d'une personne d'abord, sinon la première règle non écartée (les règles des modules —
+  cadrage, concepts, versions, messages, propositions d'agence, bilan — passent avant preuve et
+  mesure). **Rien n'est créé dans Travail sans « Créer une tâche »** (`create_activation_task`,
+  `tasks.activation_id`, la tâche ramène à l'activation). Blocages saisis (`activation_blockers`,
+  résolution gardée), **dépendances** liées à un livrable, un contrat, un emprunt ou une tâche,
+  état relu à la source, « version observée » gardée pour signaler un changement
+  (`activation_dependencies`, `dependencies.ts`). Journal append-only `activation_events`, écrit
+  par triggers et fonctions seulement. Clôture `close_activation` (définitive ou avec réserves
+  listées par le code et gardées telles que montrées ; définitive malgré des réserves = motif),
+  réouverture `reopen_activation` avec raison.
+- **Qui écrit** : le responsable du projet et le responsable de l'activation
+  (`activation_can_write`) ; **validateur PDS** = le DG ou un directeur créatif du projet
+  (`marketing_can_validate`) : il vérifie preuves et statistiques, décide des fiches et des
+  versions de contenu. Les montants (propositions, paiements, factures, preuves de paiement) sont
+  réservés aux lecteurs du budget (`can_read_project_budget`, fichiers `restricted`).
+- **Communs Influence / RP** : **fiches versionnées** `activation_sheets` (cadrage, concept
+  générique, concept par influenceur), champs vérifiés par l'app (`lib/activations/sheets.ts`),
+  chacun avec sa provenance, préremplies depuis les réponses **confirmées** de la Stratégie et les
+  temps forts du canal (`framingPrefill`) ; Brouillon → À valider → Validée / Corrections
+  demandées / Refusée (`decide_activation_sheet`) ; toute modification après validation ouvre une
+  version ; une Stratégie modifiée après la validation est signalée, jamais réécrite. **Cibles**
+  `activation_targets` (un profil du Réseau par campagne, unique : un doublon ouvre l'existante ;
+  alertes calculées avant ajout et confirmées : déjà proposé / contacté / collaboré, refus
+  antérieur, audience absente ou de plus de 6 mois). **Messages** `activation_messages`
+  (Brouillon → À valider → Validé → Envoi déclaré ; prouvé = déclaré avec preuve ; jamais envoyé
+  par PDS OS, « Copier » et `mailto:` seulement) ; relance refusée après refus, opportunité
+  ouverte ou clôture sans dérogation écrite.
+- **Influence interne** (`lib/activations/influence/`) : collaboration = cible ; **étape calculée**
+  (`stage.ts`, Candidate → … → Publiée vérifiée → Administration, sorties par l'issue) ;
+  propositions immuables, conditions validées par décision explicite sur la dernière position ;
+  **accord express** `/i/<jeton>` (64 hex, seul le hash gardé, 30 jours, nouveau lien = ancien
+  révoqué) : version exacte (empreinte), nom + consentement, première ouverture notée, « Demander
+  une modification » devient une position du créateur ; ce n'est **pas** une signature qualifiée
+  (mention affichée) ; droits **organiques et publicitaires séparés**, acceptés / refusés /
+  révoqués / expirés chacun, nouvelle version après décision, le « Bon pour accord » n'accepte
+  que les blocs montrés ; versions de contenu sans limite, retours horodatés (timecode,
+  catégorie, statut « corrigé déclaré » ≠ « résolu »), décision sur une version précise ;
+  publication = preuve de la collaboration ; **paiement administratif** (Bon à payer exige un
+  accord accepté, Payé vérifié une preuve à accès restreint ; aucun virement ni coordonnée
+  bancaire) ; brief externe composé par le code depuis le concept validé, les conditions et les
+  droits (`brief.ts`).
+- **RP interne** (`lib/activations/press/`) : cadrage commun aux deux modes + le **Dossier de
+  presse de la Stratégie** (jamais dupliqué ; validé ≠ envoyé : compté par les messages envoyés
+  qui le joignent) ; modèle commun validé puis un brouillon par cible (salutation et angle de la
+  cible ajoutés par le code) ; opportunités / interviews (`press_opportunities`, créneau confirmé
+  = date + qui a confirmé et par quel canal, heure saisie en heure de Paris) ; brief d'interview
+  composé par le code depuis le cadrage validé, sans réponse inventée ; retombées = preuves
+  vérifiées à part.
+- **Agence (Influence et RP, un seul module)** (`lib/activations/agency/`) : sources en lecture
+  seule (`agency_sources` : lien Google Sheets lu par son export CSV public, fichier Excel / CSV
+  déposé à chaque actualisation — l'onglet portant le nom de la source, sinon le premier —, ou
+  saisie à la main pour un PDF) ; « Actualiser » lit, mappe (correspondance proposée par le code
+  d'après les en-têtes, confirmée par une personne, `fields.ts`) et signale sans corriger
+  (#REF!, texte dans un nombre, lien invalide, catégorie dont l'audience dépasse le seuil écrit
+  dans son libellé) ; **aperçu** enregistré (`record_agency_preview` : ajout / modification /
+  inchangée / absente) puis **confirmation** totale ou partielle (`apply_agency_snapshot`) ;
+  instantanés et lignes brutes gardés ; une ligne absente est marquée, jamais supprimée ; la
+  **décision PDS** et la note interne (`agency_rows`) ne sont jamais touchées par une
+  actualisation ; écart statut agence / décision signalé (`divergence.ts`, lecture des mots du
+  statut) ; retour à l'agence = brouillon écrit par le code depuis les décisions, sans les notes ;
+  statistiques importées en relevés « Agence » datés ; bilan (`agency_reports`) gardé tel que
+  reçu, décidé provisoirement avec réserves (listées par le code côté serveur), compléments,
+  archivé, ou validé (motif si réserves) ; synthèse par source et totale « données agence ».
+- **Réseau** : rôles `influencer` et `journalist`, onglets « Influenceurs » et « Médias &
+  journalistes » ; **relevés datés** `network_observations` (abonnés, engagement, tarif connu,
+  catégorie ; jamais écrasés, invalidés avec raison) ; la fiche contact montre ses campagnes
+  (cibles et lignes d'agence rattachées, projets visibles seulement).
+- **Suivi & bilan** reçoit chaque activation avec ses trois axes et ses réserves
+  (`ActivationsReview`) ; le volet Marketing n'est dit clôturé que quand l'étape `review` est
+  validée.
+- **Décisions prises faute de règle dans les tickets (11/10/2026)** : validateur PDS = DG ou
+  directeur créatif du projet, sans interdiction d'auto-validation (option « séparation des
+  rôles » non activée) ; « En vérification » (preuve) non modélisé (pas d'état en cours stocké) ;
+  séries de retours de contenu non modélisées (retours unitaires avec statut) ; fusion de
+  doublons du Réseau non construite (rattachement manuel + alertes, comme le socle MVP) ;
+  journaliste rattaché à un média par la structure du Réseau, sans historique daté des
+  rattachements ; adresse IP non gardée dans la preuve d'accord (« si légalement autorisé » :
+  au Juridique de trancher), user-agent gardé ; un aperçu d'accord ouvert par un robot de
+  prévisualisation compte comme « affiché » ; le seuil d'une catégorie d'agence n'est contrôlé
+  que s'il est écrit dans le libellé (« Micro (10k-100k) ») ; agrégations cross-projets,
+  vérification automatique des liens, collecte API, synchronisation planifiée : après MVP.
+- **Dépendance** : `read-excel-file` (lecture seule d'un .xlsx côté serveur).
+## 8 terdecies. Marketing : Suivi & bilan et clôture du Marketing (`/review`, `lib/marketing/`, `components/marketing/`)
 
 Ticket « Suivi & bilan » (11/10/2026), livré en six lots, chacun testé (pgTAP
 `supabase/tests/marketing-review.test.sql`, 95 assertions sur la fixture fictive Piégée / Dioo /
@@ -2962,20 +3119,26 @@ Alka, plus vérification à l'écran). Quatre objets distincts : le **tableau de
 du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'étape `review`, sur
 `/closure` (§ 8 nonies).
 
-- **Lot 1 — activations suivies et preuves** (`20261011000101_marketing_activations.sql`, page
-  Activations « Suivi des activations », `/activations/[activationId]`) : aucune activation
-  n'existait en base (le ticket « Vue d'ensemble Activations » n'est pas fait) ; un registre minimal
-  est créé ici et pourra être enrichi par ce ticket. `marketing_activations` (type, statut
-  opérationnel Prévue / En cours / Réalisée / Annulée, responsable, livrable ou levier de la
-  Stratégie, période ; archivée, jamais supprimée). `marketing_evidence` : publication, retombée ou
-  statistique ; niveau **Déclarée / À vérifier / Vérifiée** (qui et quand par trigger, une
-  publication vérifiée a toujours un lien, un lien ou une valeur modifiés repassent « À vérifier ») ;
-  une statistique a une disponibilité **Disponible / Partielle / Indisponible** et une indisponible
-  n'a **jamais de valeur** (jamais zéro) ; provenance : déclarant (auteur ou organisme), date
-  d'observation, date d'import ; lien signalé inaccessible sans perdre la preuve.
-  Contributeurs : le responsable et les directeurs créatifs du projet (`marketing_can_contribute`).
-  `marketing_events` = audit du module (action, auteur, date, avant, après, motif), écrit par
-  triggers seuls.
+- **Lot 1 — activations et preuves lues** (`20261011000601_marketing_review_sources.sql`) : **un seul
+  modèle d'activations**, celui du ticket « Activations » (§ 8 duodecies). Les deux tickets ont été
+  menés en parallèle le 11/10 ; à la fusion (décision de Sacha), le registre minimal que créait ce lot
+  (`marketing_activations` à quatre statuts, `marketing_evidence`, page « Suivi des activations »)
+  a été retiré et le Suivi & bilan **lit** les activations par deux vues `security_invoker` (la RLS
+  des Activations s'applique), jamais stockées :
+  `marketing_review_activations` regroupe le statut opérationnel en quatre (**Prévue** = brouillon,
+  à préparer, prête ; **En cours** = en cours, suspendue, bloquée ; **Réalisée** = réalisée déclarée,
+  clôturée ; **Annulée**), l'échéance tient lieu de fin de période, la description de note ; une
+  activation n'est jamais archivée. `marketing_review_evidence` = les preuves (publication ; retombée
+  = retombée, diffusion, interview, autre) et les statistiques (**dernier relevé valide** de chaque
+  sujet, métrique et unité, comme `lib/activations/totals.ts`) ; niveau **Déclarée** (aucun
+  contrôle), **À vérifier** (dernier contrôle : contestée ou indisponible, lien signalé
+  inaccessible), **Vérifiée** (dernier contrôle vérifié : qui et quand) ; une preuve retirée est
+  archivée. Une statistique est toujours « Disponible » (un relevé a une valeur) ; un pourcentage
+  n'est jamais additionné. Noms des sources et des métriques : ceux des Activations
+  (`lib/marketing/review-labels.ts`). Contributeurs du bilan : le responsable et les directeurs
+  créatifs du projet (`marketing_can_contribute`). `marketing_events` = audit des rapports,
+  validations, réserves et clôture, écrit par triggers seuls (les activations gardent leur journal
+  `activation_events`).
 - **Lot 2 — tableau de bord** (`/review`, `lib/marketing/dashboard.ts`) : calculé à chaque ouverture,
   filtres dans l'URL (période, type, responsable, statut, déclarant, niveau, réserve), chaque chiffre
   ouvre son détail (`?detail=`) avec sa **règle de calcul** et la provenance des preuves comptées.
@@ -2984,7 +3147,7 @@ du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'�
   part, « Indisponible » sinon. Budget : lignes du budget du projet, seulement pour qui le lit.
   Les règles sont versionnées (`RULES_VERSION`) : un rapport garde sa version et
   `reportFigures` le relit avec elle, jamais recalculé en silence.
-- **Lot 3 — rapport figé** (`20261011000201_marketing_reports.sql`, `/review/reports`,
+- **Lot 3 — rapport figé** (`20261011000701_marketing_reports.sql`, `/review/reports`,
   `lib/marketing/reports/`) : préparation (périmètre, période, sections du « Contenu recommandé »,
   résumé et recommandations écrits par l'auteur) ; avant génération, le code montre données
   manquantes, incohérences, activations exclues et **propose des réserves** (cochées par défaut ;
@@ -2995,14 +3158,14 @@ du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'�
   `marketing_report_budgets`, lu seulement par qui lit le budget. Un rapport n'est jamais réécrit
   (`report_frozen`). Comparaison avec une autre version (`?compare=`), export PDF
   (`/api/projects/[id]/marketing-reports/[reportId]`) portant numéro, identifiant et empreinte.
-- **Lot 4 — bilan provisoire** (`20261011000301_marketing_report_approvals.sql`) : le responsable
+- **Lot 4 — bilan provisoire** (`20261011000801_marketing_report_approvals.sql`) : le responsable
   soumet la version courante (validateur obligatoire : `no_validator`) ; le DG décide **sur cette
   version** (`p_expected_version`, sinon `report_superseded`) : « Approuver le bilan provisoire
   (avec réserves) », « Demander des corrections », « Reporter » (commentaire obligatoire pour les
   deux derniers). Les réserves de la version sont stockées avec la décision. Séparation des rôles :
   qui a généré ou soumis ne décide pas (`self_approval`). Approuver ne vérifie aucune donnée, ne lève
   aucune réserve, ne clôt rien.
-- **Lot 5 — réserves et préparation** (`20261011000401_marketing_reserve_arbitration.sql`,
+- **Lot 5 — réserves et préparation** (`20261011000901_marketing_reserve_arbitration.sql`,
   `/review/closure`) : statut À arbitrer → arbitrée → levée / fermée. Arbitrages : à lever avant
   clôture (bloque), à suivre après clôture (qui — un membre —, échéance, canal), limite acceptée
   (motif, **direction seule**), non applicable (motif), doublon (réserve gardée, fermée sans perdre
@@ -3011,7 +3174,7 @@ du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'�
   volontairement. La page montre le rapport de référence, ce qui bloque (calculé par
   `lib/marketing/closure/readiness.ts`), les activations non terminées, les paiements
   administratifs (engagé / payé), le Juridique, les preuves.
-- **Lot 6 — clôture du Marketing** (`20261011000501_marketing_closure.sql`) : le responsable demande
+- **Lot 6 — clôture du Marketing** (`20261011001001_marketing_closure.sql`) : le responsable demande
   (rapport de référence = dernier bilan provisoire approuvé, ou finalisé par une clôture rouverte ;
   aucune réserve à arbitrer ni bloquante) ; le DG — jamais le demandeur — clôture **sans réserve**
   (rien ne reste), **avec réserves** (suivis ou limites restent), demande des corrections ou
@@ -3029,10 +3192,12 @@ du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'�
     préparent rapports et réserves ; seul le responsable soumet et demande la clôture ; le
     « validateur Marketing » = le titulaire de `validate` (le DG) ; « Direction » pour les limites et
     la réouverture = `validate` aussi ;
-  - activation = registre propre au Marketing, éventuellement rattaché à un livrable ou un levier de
-    la Stratégie (lu, jamais recopié) ;
-  - « Déclarée » et « À vérifier » sont deux niveaux distincts posés par une personne ; la
-    vérification est une action à part, confirmée et tracée ;
+  - activation = celle du ticket « Activations » (§ 8 duodecies), lue par les vues du lot 1 ; la
+    saisie des activations, preuves et statistiques se fait sur leurs pages, jamais ici ;
+  - « Déclarée » et « À vérifier » viennent du dernier contrôle de la preuve (Activations) ; la
+    vérification reste une action à part, confirmée et tracée ;
+  - le volet Marketing clôturé fige aussi les activations (trigger `marketing_closed` sur
+    `marketing_activations`) : plus de création ni de modification, preuves et relevés acceptés ;
   - une statistique sans période est signalée « donnée manquante », pas bloquante ;
   - un rapport généré après la clôture est accepté (le ticket le permet) ; il ne touche pas à la
     clôture en vigueur ;

@@ -9,7 +9,7 @@ import { OptionSelect } from "@/components/projects/option-select";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   ANOMALY_KINDS,
   ANOMALY_MODULES,
@@ -73,7 +73,7 @@ function ReportForm({
   const [module, setModule] = useState<AnomalyModule>(DEFAULT_MODULE.metadata);
   const [severity, setSeverity] = useState<Severity>("major");
   const [descriptionError, setDescriptionError] = useState<string>();
-  const { pending, error, run } = useDialogSubmit(onDone, t.form.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.form.saved);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     if (event.target !== event.currentTarget) return;
@@ -201,7 +201,7 @@ function StateForm({
     state === "open" ? "in_correction" : state,
   );
   const [noteError, setNoteError] = useState<string>();
-  const { pending, error, run } = useDialogSubmit(onDone, t.form.stateSaved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.form.stateSaved);
   const closing = next === "resolved" || next === "dismissed";
 
   function submit(event: FormEvent<HTMLFormElement>) {

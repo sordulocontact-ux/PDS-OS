@@ -14,7 +14,7 @@ import type { CallItem } from "@/lib/production/preprod/types";
 import { callItemStatusTone } from "@/lib/ui/state-tones";
 
 import { CallItemForm } from "./call-item-form";
-import { RecordMenu } from "./record-menu";
+import { RecordMenu } from "@/components/ui/record-menu";
 
 const t = fr.productionPreprod.call;
 

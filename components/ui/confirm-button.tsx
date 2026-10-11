@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { fr } from "@/lib/i18n/fr";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 const t = fr.dialogs;
 
@@ -34,7 +34,7 @@ export function ConfirmButton({
   confirmLabel: string;
   pendingLabel: string;
   done: string;
-  run: () => Promise<ActionOutcome>;
+  run: () => Promise<WriteResult>;
 }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();

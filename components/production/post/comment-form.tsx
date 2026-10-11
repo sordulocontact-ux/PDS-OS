@@ -25,8 +25,8 @@ import {
 import { parseTimecode } from "@/lib/production/post/timecode";
 import type { PostScope } from "@/lib/production/post/types";
 
-import { FilePickField } from "./file-pick-field";
-import { usePostSubmit } from "./use-post-submit";
+import { FilePickField } from "@/components/ui/file-pick-field";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionPost.comments;
 
@@ -49,7 +49,7 @@ export function CommentForm({
   const [category, setCategory] = useState<CommentCategory>("edit");
   const [file, setFile] = useState<File | null>(null);
   const [missing, setMissing] = useState<"timecode" | "body" | null>(null);
-  const { pending, error, run } = usePostSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.done);
 
   function submit(form: HTMLFormElement) {
     const data = new FormData(form);

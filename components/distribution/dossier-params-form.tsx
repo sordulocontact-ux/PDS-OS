@@ -8,7 +8,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { countryItems } from "@/lib/catalog/countries";
 import { saveDossierParams } from "@/lib/distribution/actions";
 import {
@@ -45,7 +45,7 @@ export function DossierParamsForm({
     yesNoOf(params.prelisten),
   );
   const [countriesError, setCountriesError] = useState<string>();
-  const { pending, error, run } = useDialogSubmit(onDone, t.params.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.params.saved);
 
   const yesNoChoices = [
     { value: "" as const, label: t.form.notSaid },

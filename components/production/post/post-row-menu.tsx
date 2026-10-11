@@ -8,7 +8,7 @@ import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { fr } from "@/lib/i18n/fr";
 import type { PostResult } from "@/lib/production/post/result";
 
-import { usePostSubmit } from "./use-post-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionPost;
 
@@ -30,7 +30,7 @@ export function PostRowMenu({
 }) {
   const [confirming, setConfirming] = useState(false);
   const close = () => setConfirming(false);
-  const { pending, error, setError, run } = usePostSubmit(close, remove.done);
+  const { pending, error, setError, run } = useWriteSubmit(close, remove.done);
   const actions: RowAction[] = [
     ...(onEdit
       ? [

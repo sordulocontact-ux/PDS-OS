@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   COMPLIANCES,
   VERIFICATIONS,
@@ -84,7 +84,7 @@ function PlatformForm({
   const [available, setAvailable] = useState<"yes" | "no">(
     declared ? "yes" : "no",
   );
-  const { pending, error, run } = useDialogSubmit(onDone, t.form.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.form.saved);
   const custom = platform === "" || platform.startsWith("other_");
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -222,7 +222,7 @@ function VerifyForm({
   const [noteError, setNoteError] = useState<{ seen?: string; match?: string }>(
     {},
   );
-  const { pending, error, run } = useDialogSubmit(onDone, t.form.verified);
+  const { pending, error, run } = useWriteSubmit(onDone, t.form.verified);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     if (event.target !== event.currentTarget) return;

@@ -7,7 +7,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import { addReserve } from "@/lib/marketing/closure/reserve-actions";
 import { RESERVE_CATEGORIES } from "@/lib/marketing/reports/model";
@@ -50,7 +50,7 @@ function AddReserveForm({
   activations: { id: string; title: string }[];
   onDone: () => void;
 }) {
-  const { pending, error, run } = useDialogSubmit(onDone, t.added);
+  const { pending, error, run } = useWriteSubmit(onDone, t.added);
   return (
     <form
       className="flex flex-col gap-5"

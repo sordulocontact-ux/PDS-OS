@@ -3,7 +3,7 @@
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { fr } from "@/lib/i18n/fr";
@@ -34,7 +34,7 @@ export function CallItemForm({
   topics: string[];
   onDone: () => void;
 }) {
-  const { pending, error, run } = useDialogSubmit(
+  const { pending, error, run } = useWriteSubmit(
     onDone,
     item ? t.updated : t.added,
   );

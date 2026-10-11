@@ -9,7 +9,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Reserve } from "@/lib/distribution/closure";
 import {
   decideDistributionClosure,
@@ -58,7 +58,7 @@ function ReservesForm({
   onDone: () => void;
 }) {
   const [errors, setErrors] = useState<{ note?: string; ack?: string }>({});
-  const { pending, error, run } = useDialogSubmit(onDone, t.proposed);
+  const { pending, error, run } = useWriteSubmit(onDone, t.proposed);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     if (event.target !== event.currentTarget) return;

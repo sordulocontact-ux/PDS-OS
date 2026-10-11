@@ -103,11 +103,13 @@ export const isFigureKey = (v: unknown): v is FigureKey =>
   (FIGURE_KEYS as readonly unknown[]).includes(v);
 
 // A metric's totals: declared and verified kept apart; null = no available
-// value (every figure unavailable), never 0.
+// value (every figure unavailable), never 0 — or rates that cannot be added
+// (notAddable: a percentage is never summed, lib/activations/totals.ts).
 export type MetricTotal = {
   metric: string;
   declared: number | null;
   verified: number | null;
+  notAddable: boolean;
   partial: number;
   unavailable: number;
 };
@@ -309,10 +311,16 @@ export function computeDashboard(
       : list.reduce((total, e) => total + (e.value ?? 0), 0);
   const metrics: MetricTotal[] = [...byMetric.values()].map((list) => {
     const withValue = list.filter((e) => e.value !== null);
+    const declared = withValue.filter((e) => e.verification !== "verified");
+    const verified = withValue.filter((e) => e.verification === "verified");
+    const rate = list[0].unit === "percent";
+    const total = (part: Evidence[]) =>
+      rate && part.length > 1 ? null : sum(part);
     return {
       metric: list[0].metric ?? "",
-      declared: sum(withValue.filter((e) => e.verification !== "verified")),
-      verified: sum(withValue.filter((e) => e.verification === "verified")),
+      declared: total(declared),
+      verified: total(verified),
+      notAddable: rate && (declared.length > 1 || verified.length > 1),
       partial: list.filter((e) => e.availability === "partial").length,
       unavailable: list.filter((e) => e.availability === "unavailable").length,
     };

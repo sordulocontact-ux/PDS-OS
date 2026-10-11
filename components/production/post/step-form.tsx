@@ -32,7 +32,7 @@ import {
   HolderSelect,
   holderValue,
 } from "@/components/production/holder-select";
-import { usePostSubmit } from "./use-post-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionPost.steps;
 
@@ -59,7 +59,7 @@ export function StepForm({
   const [key, setKey] = useState<PostStepKey>(step?.key ?? initialKey);
   const [holder, setHolder] = useState(holderValue(step?.holder ?? null));
   const [missing, setMissing] = useState<"label" | "dates" | null>(null);
-  const { pending, error, run } = usePostSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.done);
 
   function submit(form: HTMLFormElement) {
     const data = new FormData(form);

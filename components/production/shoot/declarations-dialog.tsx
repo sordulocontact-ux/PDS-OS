@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -61,7 +61,7 @@ function DeclarationsForm({
   shoot: ShootRecord;
   onDone: () => void;
 }) {
-  const { pending, error, run } = useDialogSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.done);
 
   function submit(form: HTMLFormElement) {
     const data = new FormData(form);

@@ -22,7 +22,7 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
  * written by the owner, then « Bilan & clôture du projet » validated by the
  * direction, which closes the whole project (docs/ARCHITECTURE.md § 8 nonies).
  * A process apart: the Marketing closing never triggers it (ticket « Suivi &
- * bilan », docs/ARCHITECTURE.md § 8 duodecies).
+ * bilan », docs/ARCHITECTURE.md § 8 terdecies).
  */
 export default async function ProjectClosurePage({
   params,

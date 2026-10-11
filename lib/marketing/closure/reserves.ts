@@ -1,5 +1,5 @@
 // A Marketing reserve's arbitration (ticket « Suivi & bilan », écran 4;
-// supabase/migrations/20261011000401_marketing_reserve_arbitration.sql): the
+// supabase/migrations/20261011000901_marketing_reserve_arbitration.sql): the
 // same lists as the SQL checks. Pure, client-safe.
 
 export const RESERVE_STATUSES = [

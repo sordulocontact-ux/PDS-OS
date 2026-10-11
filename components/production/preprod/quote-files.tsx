@@ -15,7 +15,7 @@ import { deleteProductionFile } from "@/lib/production/preprod/actions-files";
 import type { NetworkOption } from "@/lib/production/sheet";
 
 import { AddEquipmentButton } from "./equipment-actions";
-import { RecordMenu } from "./record-menu";
+import { RecordMenu } from "@/components/ui/record-menu";
 
 const t = fr.productionPreprod.equipment;
 

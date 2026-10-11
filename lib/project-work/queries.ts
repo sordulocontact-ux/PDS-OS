@@ -58,7 +58,7 @@ export async function loadProjectWork(
       supabase
         .from("tasks")
         .select(
-          "id, project_id, title, assignee_person_id, due_date, status, done_at, legal_plan_item_id, master_question_id, deliverable_id",
+          "id, project_id, title, assignee_person_id, due_date, status, done_at, legal_plan_item_id, master_question_id, deliverable_id, activation_id",
         )
         .eq("project_id", projectId),
       supabase

@@ -5,16 +5,13 @@ export const masterWorkflow = {
   steps: {
     label: "Étapes du master",
     soon: "Bientôt disponible",
-    state: "État du master",
-    brief: "Brief Mix/Master",
-    mix: "Mix",
+    // The five steps shown (lib/ui/master-steps.ts, Sacha, 11/10/2026):
+    // the path of the ticket « Workflow Master », the Brief its own step.
+    source: "Source",
+    brief: "Brief",
+    mixing: "Mixage",
     mastering: "Mastering",
     final: "Master final",
-    // The four steps shown (lib/ui/master-steps.ts, ticket « Architecture
-    // globale »): mix and mastering are two business milestones.
-    prepare: "Préparation",
-    mixing: "Mixage",
-    backToPrepare: "Préparation",
   },
   // One page per round (lib/ui/master-steps.ts, ticket « Architecture
   // globale »): the validations live inside, never a step of their own.
@@ -46,7 +43,8 @@ export const masterWorkflow = {
         `S'ouvre quand chaque titre a son mix final (${done} sur ${total} pour l'instant).`,
     },
   },
-  // « Préparer » (lib/ui/master-steps.ts): where the preparation stands.
+  // At the top of the Source step (lib/ui/master-steps.ts): where the
+  // preparation of the mix stands.
   prepare: {
     title: "Où en est la préparation",
     description:
@@ -81,7 +79,7 @@ export const masterWorkflow = {
     send: {
       title: "Envoi au mixeur",
       ready: "Tout est prêt : le dossier peut partir.",
-      sent: "Le dossier est parti : la suite se passe dans Mix et mastering.",
+      sent: "Le dossier est parti : la suite se passe dans Mixage.",
       action: "Passer au mix",
       follow: "Suivre le mix",
       nothing: "Rien à envoyer : chaque titre a déjà son master final.",

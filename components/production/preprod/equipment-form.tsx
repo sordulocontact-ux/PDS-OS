@@ -4,7 +4,7 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { Member } from "@/lib/framing/related";
@@ -50,7 +50,7 @@ export function EquipmentForm({
   contacts: NetworkOption[];
   onDone: () => void;
 }) {
-  const { pending, error, run } = useDialogSubmit(
+  const { pending, error, run } = useWriteSubmit(
     onDone,
     item ? t.updated : t.added,
   );

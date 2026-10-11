@@ -176,8 +176,7 @@ export type ProjectCrumb = { label: string; href?: string };
 // Title of a project page (Figma « PDS OS », node 76:3145): the name of the
 // section it belongs to, nothing about the project (the switcher of the
 // sidebar names it). A page opened from inside a section rather than from
-// its chevrons — the Brief Mix/Master, a branch of the Juridique, the Brief
-// de cadrage — adds its own name after the section's, which becomes a link:
+// its chevrons — a branch of the Juridique, the Brief de cadrage — adds its own name after the section's, which becomes a link:
 // the trail replaces the « ← … » links those pages had. The steps of a
 // workflow (Mixage, Plan d'action…) add nothing: their chevrons name them.
 // The last crumb is the page's h1; none outside every section.
@@ -204,9 +203,6 @@ export function projectTrail(
   const subPages: Record<string, ProjectCrumb[]> = {
     // Vue d'ensemble › Clôture du projet, apart from the Marketing closing.
     [routes.projectClosure(projectId)]: [{ label: fr.projectReview.title }],
-    [`${routes.projectMaster(projectId)}/brief`]: [
-      { label: fr.masterWorkflow.brief.title },
-    ],
     [routes.projectFramingBrief(projectId)]: [
       { label: fr.framingIntel.brief.title },
     ],

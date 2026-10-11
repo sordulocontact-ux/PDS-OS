@@ -17,7 +17,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import {
   createReserveTask,
@@ -26,7 +26,7 @@ import {
   noteReserve,
 } from "@/lib/marketing/closure/reserve-actions";
 import type { ReserveDecision } from "@/lib/marketing/closure/reserves";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 const t = fr.marketingReview.closure.reserves;
 const NONE = "none";
@@ -269,9 +269,9 @@ function TextForm({
   submitLabel: string;
   done: string;
   onDone: () => void;
-  run: (text: string) => Promise<ActionOutcome>;
+  run: (text: string) => Promise<WriteResult>;
 }) {
-  const submit = useDialogSubmit(onDone, done);
+  const submit = useWriteSubmit(onDone, done);
   return (
     <form
       className="flex flex-col gap-5"
@@ -312,9 +312,9 @@ function LinkTaskForm({
   tasks: { id: string; title: string }[];
   current: string | null;
   onDone: () => void;
-  run: (taskId: string) => Promise<ActionOutcome>;
+  run: (taskId: string) => Promise<WriteResult>;
 }) {
-  const submit = useDialogSubmit(onDone, t.taskLinked);
+  const submit = useWriteSubmit(onDone, t.taskLinked);
   return (
     <form
       className="flex flex-col gap-5"

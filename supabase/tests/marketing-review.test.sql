@@ -1,13 +1,13 @@
 -- Marketing › Suivi & bilan (ticket « Suivi & bilan », docs/ARCHITECTURE.md
--- § 8 duodecies): activations and evidence, reports, provisional approval,
--- reserves, Marketing closing.
+-- § 8 terdecies): the activations and evidence as the review reads them,
+-- reports, provisional approval, reserves, Marketing closing.
 -- Fixture « Piégée / Dioo / Alka »: SIMULATION ONLY. Eight activations — one
 -- acoustic session declared published, five capsules to verify, one influence
--- campaign to verify, one press push with reserves —, zero verified
--- publication, zero verified coverage, no real statistic. Everything rolls
+-- campaign, one press push with reserves —, zero verified publication, zero
+-- verified coverage, statistics only declared. Everything rolls
 -- back. Run with `supabase test db`.
 begin;
-select plan(95);
+select plan(92);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -60,106 +60,126 @@ insert into public.project_stages (organization_id, project_id, stage_definition
 select pg_temp.id_of('org'), pg_temp.id_of('project'), d.id from public.stage_definitions d
  where d.organization_id = pg_temp.id_of('org') and d.archived_at is null;
 
--- 1. Activations and evidence -------------------------------------------------
+-- 1. Activations and evidence, as the review reads them -------------------------
+-- They are the Activations' own records (marketing-activations.test.sql tests
+-- how they are written); here, how the two views group them.
 select pg_temp.act_as(pg_temp.id_of('manager'));
-insert into public.marketing_activations (organization_id, project_id, title, kind, status)
-values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Session acoustique Dioo', 'content', 'done');
+insert into public.marketing_activations (organization_id, project_id, title, kind, due_on)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Session acoustique Dioo', 'content', date '2026-10-15');
 insert into ids select 'session', id from public.marketing_activations
  where project_id = pg_temp.id_of('project') and title = 'Session acoustique Dioo';
-insert into public.marketing_activations (organization_id, project_id, title, kind, status)
-select pg_temp.id_of('org'), pg_temp.id_of('project'), 'Capsule ' || n, 'content', 'in_progress'
+insert into public.marketing_activations (organization_id, project_id, title, kind)
+select pg_temp.id_of('org'), pg_temp.id_of('project'), 'Capsule ' || n, 'content'
   from generate_series(1, 5) n;
-insert into public.marketing_activations (organization_id, project_id, title, kind, status)
-values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Campagne Influence Alka', 'influence', 'in_progress'),
-       (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Relations presse Piégée', 'press', 'in_progress');
+insert into public.marketing_activations (organization_id, project_id, title, kind, mode, owner_person_id)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Campagne Influence Alka', 'influence', 'internal', null),
+       (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Relations presse Piégée', 'press', 'agency',
+        pg_temp.id_of('creative_person'));
 insert into ids select 'press', id from public.marketing_activations
  where project_id = pg_temp.id_of('project') and kind = 'press';
 insert into ids select 'capsule1', id from public.marketing_activations
  where project_id = pg_temp.id_of('project') and title = 'Capsule 1';
+insert into ids select 'capsule5', id from public.marketing_activations
+ where project_id = pg_temp.id_of('project') and title = 'Capsule 5';
 
-select is((select count(*)::int from public.marketing_activations where project_id = pg_temp.id_of('project')),
-          8, 'the owner records the eight activations of the fixture');
+select is((select count(*)::int from public.marketing_review_activations where project_id = pg_temp.id_of('project')),
+          8, 'the review reads the eight activations of the fixture: one model, no second register');
+select is((select status from public.marketing_review_activations where id = pg_temp.id_of('press')),
+          'planned', 'a draft activation is « Prévue » for the review');
+update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('session');
+update public.marketing_activations set status = 'in_progress'
+ where project_id = pg_temp.id_of('project') and id <> pg_temp.id_of('session');
+select is((select row(status, ends_on)::text from public.marketing_review_activations where id = pg_temp.id_of('session')),
+          '(done,2026-10-15)', 'done declared is « Réalisée », its due date ends the period');
+update public.marketing_activations set status = 'blocked', status_reason = 'Montage en retard (simulation)'
+ where id = pg_temp.id_of('capsule5');
+select is((select status from public.marketing_review_activations where id = pg_temp.id_of('capsule5')),
+          'in_progress', 'a blocked activation is still « En cours » for the review');
+update public.marketing_activations set status = 'in_progress', status_reason = null
+ where id = pg_temp.id_of('capsule5');
 select is((select created_by from public.marketing_activations where id = pg_temp.id_of('session')),
           pg_temp.id_of('manager_person'), 'who created an activation is written by the database');
 
--- The session is declared published (no one checked); capsules wait for a check.
-insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, url, reported_by, observed_on)
+-- The session is declared published; the capsules' publications are contested.
+insert into public.activation_evidence (organization_id, project_id, activation_id, kind, platform, url,
+                                        declared_source, declared_on)
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'publication',
-        'Session sur YouTube', 'https://video.example.test/session', 'Équipe Dioo', date '2026-10-01');
-insert into ids select 'session_pub', id from public.marketing_evidence where activation_id = pg_temp.id_of('session');
-insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, verification)
-select pg_temp.id_of('org'), pg_temp.id_of('project'), a.id, 'publication', 'Capsule publiée', 'to_verify'
+        'YouTube', 'https://video.example.test/session', 'creator', date '2026-10-01');
+insert into ids select 'session_pub', id from public.activation_evidence where activation_id = pg_temp.id_of('session');
+insert into public.activation_evidence (organization_id, project_id, activation_id, kind, declaration_note)
+select pg_temp.id_of('org'), pg_temp.id_of('project'), a.id, 'publication', 'Capsule publiée'
   from public.marketing_activations a
  where a.project_id = pg_temp.id_of('project') and a.title like 'Capsule %';
+insert into public.activation_evidence_checks (organization_id, project_id, evidence_id, result, method, note)
+select pg_temp.id_of('org'), pg_temp.id_of('project'), e.id, 'contested', 'other', 'Aucun lien reçu (simulation)'
+  from public.activation_evidence e join public.marketing_activations a on a.id = e.activation_id
+ where a.project_id = pg_temp.id_of('project') and a.title like 'Capsule %';
 
-select throws_ok($$ update public.marketing_evidence set verification = 'verified'
-                     where activation_id = pg_temp.id_of('capsule1') $$,
-                 '23514', null, 'a publication without a link is never verified');
-select throws_ok($$ insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, metric, availability, value)
-                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'),
-                            'statistic', 'Vues YouTube', 'Vues', 'unavailable', 0) $$,
-                 '23514', null, 'an unavailable statistic has no value: never a zero');
-select lives_ok($$ insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, metric, availability, reported_by)
-                   values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'),
-                           'statistic', 'Vues YouTube', 'Vues', 'unavailable', 'YouTube Studio') $$,
-                'an unavailable statistic is recorded as such');
-select throws_ok($$ insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, value)
-                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'),
-                            'coverage', 'Article', 12) $$,
-                 '23514', null, 'only a statistic carries a value');
+select is((select row(kind, label, verification, reported_by, observed_on)::text
+             from public.marketing_review_evidence where id = pg_temp.id_of('session_pub')),
+          '(publication,YouTube,declared,creator,2026-10-01)',
+          'a publication without any check is « Déclarée », with who declared it and when');
+select is((select count(*)::int from public.marketing_review_evidence
+            where project_id = pg_temp.id_of('project') and kind = 'publication' and verification = 'to_verify'),
+          5, 'a contested publication is « À vérifier »');
 
--- Verification is stamped by the database; a changed link must be checked again.
-update public.marketing_evidence set verification = 'verified' where id = pg_temp.id_of('session_pub');
-select is((select verified_by from public.marketing_evidence where id = pg_temp.id_of('session_pub')),
-          pg_temp.id_of('manager_person'), 'who verified is written by the database');
-update public.marketing_evidence set url = 'https://video.example.test/session-v2' where id = pg_temp.id_of('session_pub');
-select is((select row(verification, verified_by is null)::text from public.marketing_evidence
-            where id = pg_temp.id_of('session_pub')),
-          '(to_verify,t)', 'a verified link that changes goes back to « to verify »');
-update public.marketing_evidence set verification = 'declared' where id = pg_temp.id_of('session_pub');
+-- The level follows the last check: verified, then found unreachable.
+insert into public.activation_evidence_checks (organization_id, project_id, evidence_id, result, method)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session_pub'), 'verified', 'link_opened');
+select is((select row(verification, verified_by = pg_temp.id_of('manager_person'))::text
+             from public.marketing_review_evidence where id = pg_temp.id_of('session_pub')),
+          '(verified,t)', 'a verified check makes it « Vérifiée », with who checked');
+insert into public.activation_evidence_checks (organization_id, project_id, evidence_id, result, method)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session_pub'), 'unavailable', 'link_opened');
+select is((select row(verification, verified_by is null, link_unreachable_at is not null)::text
+             from public.marketing_review_evidence where id = pg_temp.id_of('session_pub')),
+          '(to_verify,t,t)', 'a link found unreachable goes back to « À vérifier », the evidence stays');
 
--- A link that became unreachable: flagged, the evidence is kept.
-update public.marketing_evidence set link_unreachable_at = now() where id = pg_temp.id_of('session_pub');
-select is((select link_reported_by from public.marketing_evidence where id = pg_temp.id_of('session_pub')),
-          pg_temp.id_of('manager_person'), 'an unreachable link is flagged by a person, the evidence stays');
-select throws_ok($$ update public.marketing_evidence set verified_by = pg_temp.id_of('creative_person')
-                     where id = pg_temp.id_of('session_pub') $$,
-                 '42501', null, 'who verified is never written by the client');
-
--- Contributors: the owner and the project's creative directors; not an outsider.
+-- A broadcast is a coverage for the review; the activation's owner declares it.
 select pg_temp.act_as(pg_temp.id_of('creative'));
-select lives_ok($$ insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, reported_by)
+select lives_ok($$ insert into public.activation_evidence (organization_id, project_id, activation_id, kind,
+                                                            platform, declared_source, declaration_note)
                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('press'),
-                           'coverage', 'Chronique radio', 'Agence RP') $$,
-                'a creative director of the project adds a declared coverage');
-select pg_temp.act_as(pg_temp.id_of('outsider'));
-select is((select count(*)::int from public.marketing_activations where project_id = pg_temp.id_of('project')),
-          0, 'a manager outside the project sees no activation');
-select throws_ok($$ insert into public.marketing_activations (organization_id, project_id, title)
-                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Intrus') $$,
-                 '42501', null, 'nor writes one');
-select pg_temp.act_as(pg_temp.id_of('director'));
-select is((select count(*)::int from public.marketing_activations where project_id = pg_temp.id_of('project')),
-          8, 'the director reads every activation');
-update public.marketing_activations set status = 'cancelled' where id = pg_temp.id_of('session');
-select is((select status from public.marketing_activations where id = pg_temp.id_of('session')),
-          'done', 'the director reads, the owner writes');
+                           'broadcast', 'Radio locale', 'agency', 'Chronique radio annoncée par l''agence') $$,
+                'the person holding the press activation declares a broadcast');
+select is((select kind from public.marketing_review_evidence
+            where activation_id = pg_temp.id_of('press') and platform = 'Radio locale'),
+          'coverage', 'a broadcast is a coverage (retombée) for the review');
 
--- Logical deletion keeps the row; the audit says who, when, before, after.
+-- Statistics: only the latest valid reading of a metric counts.
 select pg_temp.act_as(pg_temp.id_of('manager'));
-update public.marketing_activations set archived_at = now() where id = pg_temp.id_of('capsule1');
-select is((select archived_by from public.marketing_activations where id = pg_temp.id_of('capsule1')),
-          pg_temp.id_of('manager_person'), 'an activation is archived, never deleted');
-update public.marketing_activations set archived_at = null where id = pg_temp.id_of('capsule1');
-select throws_ok($$ delete from public.marketing_activations where id = pg_temp.id_of('capsule1') $$,
-                 '42501', null, 'no one deletes an activation');
-select is((select count(*)::int from public.marketing_events
-            where subject_id = pg_temp.id_of('capsule1') and kind in ('activation.archived', 'activation.restored')),
-          2, 'archiving and restoring are in the audit');
-select is((select old_value ->> 'url' from public.marketing_events
-            where subject_id = pg_temp.id_of('session_pub') and old_value ? 'url'
-            order by created_at limit 1),
-          'https://video.example.test/session', 'the audit keeps the old value');
+insert into public.activation_metrics (organization_id, project_id, activation_id, metric, value, source, collected_on)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'views', 1000, 'platform', date '2026-10-02'),
+       (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'views', 1500, 'platform', date '2026-10-05'),
+       (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'views', 9999, 'creator', date '2026-10-06');
+update public.activation_metrics set invalidation_reason = 'Chiffre non sourcé (simulation)'
+ where activation_id = pg_temp.id_of('session') and value = 9999;
+select is((select string_agg(row(metric, value::int, unit, availability, verification)::text, ';')
+             from public.marketing_review_evidence
+            where activation_id = pg_temp.id_of('session') and kind = 'statistic'),
+          '(views,1500,count,available,declared)',
+          'one statistic per metric: the latest valid reading, an invalidated one never counts');
+
+-- A withdrawn proof is archived, never lost.
+insert into public.activation_evidence (organization_id, project_id, activation_id, kind, declaration_note)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('capsule1'), 'other', 'Doublon (simulation)');
+update public.activation_evidence set withdrawn_reason = 'Doublon'
+ where activation_id = pg_temp.id_of('capsule1') and kind = 'other';
+select is((select archived_at is not null from public.marketing_review_evidence
+            where activation_id = pg_temp.id_of('capsule1') and label = 'Doublon (simulation)'),
+          true, 'a withdrawn proof is archived for the review');
+
+-- The views keep the activations' RLS.
+select pg_temp.act_as(pg_temp.id_of('outsider'));
+select is((select count(*)::int from public.marketing_review_activations where project_id = pg_temp.id_of('project'))
+          + (select count(*)::int from public.marketing_review_evidence where project_id = pg_temp.id_of('project')),
+          0, 'a manager outside the project reads neither activations nor evidence');
+select pg_temp.act_as(pg_temp.id_of('director'));
+select is((select count(*)::int from public.marketing_review_activations where project_id = pg_temp.id_of('project')),
+          8, 'the director reads every activation');
+update public.marketing_activations set status = 'cancelled', status_reason = 'x' where id = pg_temp.id_of('session');
+select is((select status from public.marketing_activations where id = pg_temp.id_of('session')),
+          'done_declared', 'the director reads, the owner writes');
 select throws_ok($$ insert into public.marketing_events (organization_id, project_id, kind)
                     values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'forged') $$,
                  '42501', null, 'the audit is written by triggers only');
@@ -201,19 +221,20 @@ select throws_ok($$ select public.generate_marketing_report(pg_temp.id_of('proje
 
 -- New data updates the dashboard, never a generated report.
 select pg_temp.act_as(pg_temp.id_of('manager'));
-insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, metric, availability, value, reported_by)
-values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'),
-        'statistic', 'Écoutes', 'Écoutes', 'available', 1200, 'Plateforme');
-update public.marketing_activations set archived_at = now() where id = pg_temp.id_of('capsule1');
+insert into public.activation_metrics (organization_id, project_id, activation_id, metric, value, source, collected_on)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'), 'streams', 1200, 'platform', date '2026-10-07');
+update public.marketing_activations set status = 'cancelled', status_reason = 'Capsule abandonnée (simulation)'
+ where id = pg_temp.id_of('capsule1');
 select is((select row(jsonb_array_length(snapshot -> 'evidence'),
                       (select count(*) from jsonb_array_elements(snapshot -> 'activations') a
                         where a ->> 'id' = pg_temp.id_of('capsule1')::text))::text
              from public.marketing_reports where id = pg_temp.id_of('report1')),
-          '(8,1)', 'a later statistic or an archived activation leave the report as it was');
-select throws_ok($$ select public.generate_marketing_report(pg_temp.id_of('project'), array[pg_temp.id_of('capsule1')],
+          '(8,1)', 'a later statistic or a cancelled activation leave the report as it was');
+select throws_ok($$ select public.generate_marketing_report(pg_temp.id_of('project'), array[gen_random_uuid()],
                       null, null, array['summary'], null, null, '[]'::jsonb, 1) $$,
-                 '23514', 'invalid_scope', 'an archived activation is not in a new scope');
-update public.marketing_activations set archived_at = null where id = pg_temp.id_of('capsule1');
+                 '23514', 'invalid_scope', 'an activation outside the project is not in a scope');
+update public.marketing_activations set status = 'in_progress', status_reason = null
+ where id = pg_temp.id_of('capsule1');
 reset role;
 select throws_ok($$ update public.marketing_reports set snapshot = '{}'::jsonb where id = pg_temp.id_of('report1') $$,
                  '42501', 'report_frozen', 'a report is never rewritten, even by the database owner');
@@ -251,7 +272,7 @@ select throws_ok($$ select public.decide_marketing_report(pg_temp.id_of('report2
                  'P0001', 'report_superseded', 'the decision names the version that was read');
 select throws_ok($$ select public.decide_marketing_report(pg_temp.id_of('report2'), 2, 'postponed', '  ') $$,
                  '23514', 'comment_required', 'postponing says why');
-insert into vars select 'verified_before', count(*)::text from public.marketing_evidence
+insert into vars select 'verified_before', count(*)::text from public.marketing_review_evidence
  where project_id = pg_temp.id_of('project') and verification = 'verified';
 select lives_ok($$ select public.decide_marketing_report(pg_temp.id_of('report2'), 2, 'approved_provisional', null) $$,
                 'the director approves the provisional review with its reserves');
@@ -260,7 +281,7 @@ select is((select row(r.state, a.validator_person_id = pg_temp.id_of('director_p
              from public.marketing_reports r join public.marketing_report_approvals a on a.report_id = r.id
             where r.id = pg_temp.id_of('report2')),
           '(approved_provisional,t,3)', 'the decision targets version 2 and stores its three reserves');
-select is((select count(*)::text from public.marketing_evidence
+select is((select count(*)::text from public.marketing_review_evidence
             where project_id = pg_temp.id_of('project') and verification = 'verified'),
           (select v from vars where k = 'verified_before'),
           'approving verifies nothing: the declared / verified levels are unchanged');
@@ -275,9 +296,9 @@ select is((select row(count(*), max(actor::text) = pg_temp.id_of('director_perso
 -- New data after the approval: the dashboard moves, the approved report not.
 select pg_temp.act_as(pg_temp.id_of('manager'));
 insert into vars select 'hash2', content_hash from public.marketing_reports where id = pg_temp.id_of('report2');
-insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, url, reported_by)
+insert into public.activation_evidence (organization_id, project_id, activation_id, kind, platform, url, declared_source)
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('press'),
-        'coverage', 'Article en ligne', 'https://media.example.test/article', 'Agence RP');
+        'coverage', 'Média en ligne', 'https://media.example.test/article', 'agency');
 select is((select row(content_hash = (select v from vars where k = 'hash2'),
                       jsonb_array_length(snapshot -> 'evidence'))::text
              from public.marketing_reports where id = pg_temp.id_of('report2')),
@@ -426,8 +447,8 @@ select is((select s.state from public.project_stages s join public.stage_definit
 
 -- Lecture contrôlée after the closing; the follow-ups go on.
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select throws_ok($$ insert into public.marketing_activations (organization_id, project_id, title)
-                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Nouvelle activation') $$,
+select throws_ok($$ insert into public.marketing_activations (organization_id, project_id, title, kind)
+                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Nouvelle activation', 'content') $$,
                  '42501', 'marketing_closed', 'no new activation once closed');
 select throws_ok($$ select public.arbitrate_marketing_reserve(pg_temp.id_of('r_pay'), 'blocking', null, null, null, null, null) $$,
                  '42501', 'marketing_closed', 'the arbitrations are frozen');
@@ -436,9 +457,9 @@ select lives_ok($$ select public.lift_marketing_reserve(pg_temp.id_of('r_links')
                 'a follow-up after the closing is lifted by the person following it');
 select pg_temp.act_as(pg_temp.id_of('manager'));
 insert into vars select 'hash2b', content_hash from public.marketing_reports where id = pg_temp.id_of('report2');
-select lives_ok($$ insert into public.marketing_evidence (organization_id, project_id, activation_id, kind, label, url, verification)
+select lives_ok($$ insert into public.activation_evidence (organization_id, project_id, activation_id, kind, platform, url)
                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('session'),
-                           'publication', 'Session sur une plateforme', 'https://video.example.test/v3', 'verified') $$,
+                           'publication', 'Plateforme vidéo', 'https://video.example.test/v3') $$,
                 'complementary evidence is still accepted');
 select is((select content_hash from public.marketing_reports where id = pg_temp.id_of('report2')),
           (select v from vars where k = 'hash2b'), 'and the closed report stays identical');
@@ -458,8 +479,8 @@ select is((select row(count(*) filter (where kind = 'closure.closed_with_reserve
              from public.marketing_events where subject_id = pg_temp.id_of('closure')),
           '(1,1)', 'the decision and the reopening are in the audit, with their reason');
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select lives_ok($$ insert into public.marketing_activations (organization_id, project_id, title)
-                   values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Campagne de décembre') $$,
+select lives_ok($$ insert into public.marketing_activations (organization_id, project_id, title, kind)
+                   values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'Campagne de décembre', 'content') $$,
                 'once reopened, the Marketing is written again');
 
 -- 6. Recette Piégée / Dioo / Alka (simulation) -----------------------------------
@@ -467,9 +488,9 @@ select is((select count(*)::int from public.marketing_reports r, jsonb_array_ele
             where r.id = pg_temp.id_of('report2') and e ->> 'kind' in ('publication', 'coverage') and e ->> 'verification' = 'verified'),
           0, 'the approved review holds zero verified publication and zero verified coverage');
 select is((select count(*)::int from public.marketing_reports r, jsonb_array_elements(r.snapshot -> 'evidence') e
-            where r.id = pg_temp.id_of('report2') and e ->> 'kind' = 'statistic' and e ->> 'availability' = 'unavailable'
-              and e -> 'value' = 'null'::jsonb),
-          1, 'its unavailable statistic is frozen without a value, never a zero');
+            where r.id = pg_temp.id_of('report2') and e ->> 'kind' = 'statistic' and e ->> 'verification' = 'declared'
+              and e ->> 'availability' = 'available'),
+          2, 'its statistics are frozen as declared readings, the latest of each metric');
 select lives_ok($$ select public.request_marketing_closure(pg_temp.id_of('project'), pg_temp.id_of('report2'), 'Nouvelle demande après réouverture') $$,
                 'after a reopening, the closing can be asked again on the finalized reference');
 select is((select count(*)::int from public.marketing_closures where project_id = pg_temp.id_of('project')),

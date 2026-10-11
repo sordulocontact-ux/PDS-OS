@@ -22,7 +22,7 @@ import type { NetworkOption, ProductionNeed } from "@/lib/production/sheet";
 import { AvailabilityChoices, availabilityOf } from "./assignment-availability";
 import { holderGroups, type HolderOption } from "./assignment-holders";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionNeeds;
 
@@ -47,7 +47,7 @@ export function AssignmentForm({
   const groups = holderGroups(need, members, contacts);
   const [holder, setHolder] = useState<string | null>(null);
   const [missing, setMissing] = useState(false);
-  const { pending, error, run } = useDialogSubmit(onDone, t.assign.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.assign.done);
   const id = `assign-${need.id}`;
 
   const all = [...groups.known, ...groups.members, ...groups.network];

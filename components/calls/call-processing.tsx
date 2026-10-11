@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   ProcessingSteps,
   type StepState,
-} from "@/components/calls/processing-steps";
+} from "@/components/ui/processing-steps";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";

@@ -10,7 +10,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { DeclarationKind } from "@/lib/distribution/tracking";
 import { withdrawDistributionDeclaration } from "@/lib/distribution/tracking-actions";
 import { declareWithProof } from "@/lib/distribution/upload-proof";
@@ -66,7 +66,7 @@ function DeclarationForm({
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [noteError, setNoteError] = useState<string>();
-  const { pending, error, run } = useDialogSubmit(onDone, t.form.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.form.saved);
   const corrections = kind === "corrections_requested";
 
   function submit(event: FormEvent<HTMLFormElement>) {

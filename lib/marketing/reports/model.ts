@@ -1,5 +1,5 @@
 // A Marketing report version (ticket « Suivi & bilan », écran 2;
-// supabase/migrations/20261011000201_marketing_reports.sql): its snapshot
+// supabase/migrations/20261011000701_marketing_reports.sql): its snapshot
 // read back into the same shapes as the live data, so the figures of a
 // version are computed by the same code, with the rules of its version.
 // Pure, client-safe.
@@ -18,6 +18,10 @@ import {
   type Activation,
   type Evidence,
 } from "@/lib/marketing/model";
+import {
+  reviewMetricName,
+  reviewSourceName,
+} from "@/lib/marketing/review-labels";
 
 export const REPORT_SECTIONS = [
   "summary",
@@ -186,12 +190,13 @@ export function parseSnapshot(raw: Json): ReportSnapshot {
         label: str(e.label) ?? "",
         url: str(e.url),
         platform: str(e.platform),
-        metric: str(e.metric),
+        metric: reviewMetricName(str(e.metric), str(e.unit)),
         value: num(e.value),
+        unit: str(e.unit),
         periodStart: str(e.period_start),
         periodEnd: str(e.period_end),
         availability: isAvailability(e.availability) ? e.availability : null,
-        reportedBy: str(e.reported_by),
+        reportedBy: reviewSourceName(e.kind, str(e.reported_by)),
         observedOn: str(e.observed_on),
         verification: e.verification,
         verifiedAt: str(e.verified_at),

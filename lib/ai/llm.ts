@@ -85,9 +85,26 @@ export async function extractFromImage<T>(
   image: { data: Uint8Array; mediaType: string },
   instructions: string,
 ): Promise<Extraction<T>> {
+  return extractFromImages(schema, [image], instructions);
+}
+
+/**
+ * Same as `extractFromImage`, for a few images read together (a moodboard):
+ * they travel alone in one user message, as untrusted data.
+ */
+export async function extractFromImages<T>(
+  schema: z.ZodType<T>,
+  images: Array<{ data: Uint8Array; mediaType: string }>,
+  instructions: string,
+): Promise<Extraction<T>> {
   return generate(
     schema,
-    [{ type: "image", image: image.data, mediaType: image.mediaType }],
+    // A file part with an image type: the AI SDK's form for images.
+    images.map((image) => ({
+      type: "file" as const,
+      data: image.data,
+      mediaType: image.mediaType,
+    })),
     instructions,
   );
 }

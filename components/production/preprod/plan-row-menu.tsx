@@ -22,7 +22,7 @@ import type { NetworkOption } from "@/lib/production/sheet";
 
 import { PlanActionForm } from "./plan-action-form";
 import { PlanTaskForm } from "./plan-task-form";
-import { RecordMenu } from "./record-menu";
+import { RecordMenu } from "@/components/ui/record-menu";
 
 const t = fr.productionPreprod.plan;
 

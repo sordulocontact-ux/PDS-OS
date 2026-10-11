@@ -18,7 +18,7 @@ export function workflowStepHref(
 ): string {
   switch (workflow) {
     case "master":
-      return step === "prepare"
+      return step === "source"
         ? routes.projectMaster(projectId)
         : routes.projectMasterStep(projectId, step === "mixing" ? "mix" : step);
     case "legal":
@@ -45,7 +45,7 @@ export function workflowStepHref(
 // Each workflow's chevrons, in order, as the overview's cards draw them
 // (the same keys as lib/workflow-status/rules.ts).
 const STEP_KEYS: Record<string, readonly string[]> = {
-  master: ["prepare", "mixing", "mastering", "final"],
+  master: ["source", "brief", "mixing", "mastering", "final"],
   legal: ["inventory", "plan"],
   marketing: ["strategy", "conception", "production", "activations", "review"],
   distribution: DISTRIBUTION_STEPS,

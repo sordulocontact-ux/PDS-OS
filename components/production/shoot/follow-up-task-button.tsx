@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -65,7 +65,7 @@ function TaskForm({
   onDone: () => void;
 }) {
   const [missing, setMissing] = useState<Missing>({});
-  const { pending, error, run } = useDialogSubmit(onDone, t.created);
+  const { pending, error, run } = useWriteSubmit(onDone, t.created);
   const prefix = `follow-up-${followUp.key.replace(/[^a-z0-9-]/gi, "-")}`;
 
   function submit(form: HTMLFormElement) {

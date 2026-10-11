@@ -9,7 +9,7 @@ import { fr } from "@/lib/i18n/fr";
 import { APPROVAL_DECISIONS } from "@/lib/marketing/reports/model";
 import { marketingFailure } from "@/lib/marketing/result";
 import { createClient } from "@/lib/supabase/server";
-import type { ActionOutcome } from "@/lib/utils/action-outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // Écran 3 (ticket « Suivi & bilan »): submitting a version, then the
 // validator's decision on that precise version. Who may do what is decided
@@ -21,7 +21,7 @@ const e = fr.marketingReview.approval.errors;
 function failure(
   error: { code?: string; message?: string },
   forbidden: string,
-): ActionOutcome {
+): WriteResult {
   const m = error.message ?? "";
   if (m.includes("report_superseded"))
     return { ok: false, error: e.superseded };
@@ -37,7 +37,7 @@ function failure(
   return marketingFailure(error);
 }
 
-function done(projectId: string): ActionOutcome {
+function done(projectId: string): WriteResult {
   revalidatePath(routes.projectReview(projectId), "layout");
   return { ok: true };
 }
@@ -47,7 +47,7 @@ const submitInput = z.object({ projectId: z.uuid(), reportId: z.uuid() });
 /** « Soumettre à validation ». */
 export async function submitReport(
   input: z.input<typeof submitInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = submitInput.safeParse(input);
   if (!p.success) return { ok: false, error: fr.marketing.errors.invalid };
   await requireApproved();
@@ -69,7 +69,7 @@ const decideInput = z.object({
 /** The validator's decision, on the version they read (`version`). */
 export async function decideReport(
   input: z.input<typeof decideInput>,
-): Promise<ActionOutcome> {
+): Promise<WriteResult> {
   const p = decideInput.safeParse(input);
   if (!p.success) return { ok: false, error: fr.marketing.errors.invalid };
   if (p.data.decision !== "approved_provisional" && p.data.comment === "")

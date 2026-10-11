@@ -1,122 +1,117 @@
-import { notFound } from "next/navigation";
-
-import { ActivationMenu } from "@/components/marketing/activation-menu";
-import { EvidenceList } from "@/components/marketing/evidence-list";
-import { MarketingHistory } from "@/components/marketing/marketing-history";
-import { BackLink } from "@/components/shell/back-link";
-import { PageSection } from "@/components/shell/page-section";
-import { FactList } from "@/components/ui/fact-list";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { EvidenceSection } from "@/components/activations/evidence/evidence-section";
+import { JournalSection } from "@/components/activations/journal-section";
+import { MetricsSection } from "@/components/activations/metrics/metrics-section";
+import { BlockersSection } from "@/components/activations/pilot/blockers-section";
+import { ClosureSection } from "@/components/activations/pilot/closure-section";
+import { DependenciesSection } from "@/components/activations/pilot/dependencies-section";
+import { IdentitySection } from "@/components/activations/pilot/identity-section";
+import { NextActionPanel } from "@/components/activations/pilot/next-action-panel";
+import { canWriteActivation } from "@/lib/activations/access";
+import { loadDependencyOptions } from "@/lib/activations/dependency-options";
+import { loadActivationFiche } from "@/lib/activations/fiche";
+import { loadActivationFiles } from "@/lib/activations/files/queries";
+import { loadActivationJournal } from "@/lib/activations/journal";
 import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
-import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
-import { EVIDENCE_KINDS } from "@/lib/marketing/model";
-import { loadMarketing, loadMarketingEvents } from "@/lib/marketing/queries";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { activationStatusTone } from "@/lib/ui/state-tones";
-import { allInOrder } from "@/lib/utils/parallel";
+import { todayInParis } from "@/lib/insights/dates";
 
-const t = fr.marketing.activations;
-
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = {
+  title: `${fr.activations.tabs.pilotage} · ${fr.app.name}`,
+};
 
 /**
- * One activation followed by the Marketing: what it is, then its
- * publications, coverage and statistics, each with its level and where it
- * comes from, then its history (ticket « Suivi & bilan », lot 1).
+ * An activation's Pilotage (ticket « Vue d'ensemble et pilotage », § 3 to 5) :
+ * identity and status, the next action, what blocks and what it depends on,
+ * the proofs and statistics — declared and verified kept apart — the closure
+ * and the journal.
  */
-export default async function ActivationPage({
+export default async function ActivationPilotPage({
   params,
 }: PageProps<"/app/projects/[projectId]/activations/[activationId]">) {
   const { projectId, activationId } = await params;
-  const [access] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
+  const access = await requireApproved();
+  const fiche = await loadActivationFiche(projectId, activationId, access);
+  const {
+    activation: a,
+    board,
+    members,
+    canWrite,
+    canValidate,
+    project,
+  } = fiche;
+  const [options, files, journal] = await Promise.all([
+    canWrite ? loadDependencyOptions(projectId) : null,
+    loadActivationFiles(a.id),
+    loadActivationJournal(a.id, members),
   ]);
-  const [data, events] = await Promise.all([
-    loadMarketing(projectId, access),
-    loadMarketingEvents(projectId, access, { activationId }),
-  ]);
-  const activation = data.activations.find((a) => a.id === activationId);
-  if (!activation) notFound();
-  const archived = activation.archivedAt !== null;
-  const canContribute = data.canContribute && !archived;
-  const evidence = data.evidence.filter(
-    (e) => e.activationId === activation.id && e.archivedAt === null,
-  );
-  const f = t.facts;
-  const source = activation.deliverableTitle
-    ? t.fields.deliverable(activation.deliverableTitle)
-    : activation.leverLabel
-      ? t.fields.lever(activation.leverLabel)
-      : null;
+  const scope = {
+    organizationId: access.organizationId ?? "",
+    projectId,
+    activationId: a.id,
+  };
+  const mine = <T extends { activationId: string }>(list: T[]) =>
+    list.filter((x) => x.activationId === a.id);
+  const canReopen = canWriteActivation(access, project, {
+    ...a,
+    status: "in_progress",
+  });
+  const defaultKind =
+    a.kind === "press"
+      ? "coverage"
+      : a.kind === "event"
+        ? "broadcast"
+        : "publication";
 
   return (
-    <div className="flex flex-col gap-8 pt-6">
-      <header className="flex flex-col gap-3">
-        <BackLink href={routes.projectActivations(projectId)}>
-          {t.back}
-        </BackLink>
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className="text-display-sm font-semibold break-words">
-            {activation.title}
-          </h2>
-          {archived ? (
-            <StatusBadge tone="neutral">{t.archivedBadge}</StatusBadge>
-          ) : (
-            <StatusBadge tone={activationStatusTone[activation.status]}>
-              {t.statuses[activation.status]}
-            </StatusBadge>
-          )}
-          {data.canContribute && !data.marketingClosed && (
-            <span className="ml-auto">
-              <ActivationMenu
-                projectId={projectId}
-                activation={activation}
-                options={{
-                  members: data.members,
-                  deliverables: data.deliverables,
-                  levers: data.levers,
-                }}
-                size="icon-lg"
-              />
-            </span>
-          )}
-        </div>
-      </header>
-      <FactList
-        emptyLabel={f.none}
-        facts={[
-          { label: f.kind, value: t.kinds[activation.kind] },
-          { label: f.owner, value: activation.ownerName },
-          { label: f.source, value: source },
-          {
-            label: f.period,
-            value:
-              activation.startsOn || activation.endsOn
-                ? f.periodRange(
-                    activation.startsOn && formatBriefDate(activation.startsOn),
-                    activation.endsOn && formatBriefDate(activation.endsOn),
-                  )
-                : null,
-          },
-          { label: f.note, value: activation.note },
-        ]}
+    <div className="grid gap-8">
+      <IdentitySection activation={a} members={members} canWrite={canWrite} />
+      <NextActionPanel
+        projectId={projectId}
+        activationId={a.id}
+        next={a.next}
+        members={members}
+        canWrite={canWrite}
       />
-      {EVIDENCE_KINDS.map((kind) => (
-        <EvidenceList
-          key={kind}
-          projectId={projectId}
-          activationId={activation.id}
-          kind={kind}
-          evidence={evidence.filter((e) => e.kind === kind)}
-          canContribute={canContribute}
-        />
-      ))}
-      <PageSection id="history" title={t.history}>
-        <MarketingHistory events={events} emptyLabel={t.historyEmpty} />
-      </PageSection>
+      <BlockersSection
+        projectId={projectId}
+        activationId={a.id}
+        alerts={a.alerts}
+        blockers={mine(board.data.blockers)}
+        members={members}
+        canWrite={canWrite}
+      />
+      <DependenciesSection
+        projectId={projectId}
+        activationId={a.id}
+        dependencies={mine(board.dependencies)}
+        options={
+          options ?? { deliverable: [], contract: [], clearance: [], task: [] }
+        }
+        canWrite={canWrite}
+      />
+      <EvidenceSection
+        scope={scope}
+        evidences={mine(board.data.evidences)}
+        files={files}
+        members={members}
+        canWrite={canWrite}
+        canVerify={canValidate}
+        defaultKind={defaultKind}
+      />
+      <MetricsSection
+        scope={scope}
+        metrics={mine(board.data.metrics)}
+        canWrite={canWrite}
+        canVerify={canValidate}
+        today={todayInParis()}
+      />
+      <ClosureSection
+        activation={a}
+        members={members}
+        canWrite={canWrite}
+        canReopen={canReopen && a.status === "closed"}
+      />
+      <JournalSection entries={journal} />
     </div>
   );
 }

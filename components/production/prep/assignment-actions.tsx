@@ -18,7 +18,7 @@ import type { ProductionAssignment } from "@/lib/production/sheet";
 
 import { AvailabilityChoices, availabilityOf } from "./assignment-availability";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionNeeds.assignment;
 
@@ -112,7 +112,7 @@ function AvailabilityForm({
   assignment: ProductionAssignment;
   onDone: () => void;
 }) {
-  const { pending, error, run } = useDialogSubmit(onDone, t.changed);
+  const { pending, error, run } = useWriteSubmit(onDone, t.changed);
   return (
     <form
       className="flex flex-col gap-5"

@@ -8,7 +8,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import { arbitrateReserve } from "@/lib/marketing/closure/reserve-actions";
 import type { ReserveDecision } from "@/lib/marketing/closure/reserves";
@@ -51,7 +51,7 @@ export function ArbitrateForm({
       ? current.decision
       : decisions[0],
   );
-  const { pending, error, run } = useDialogSubmit(onDone, t.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.saved);
   const needsReason =
     decision === "accepted_limit" || decision === "not_applicable";
 

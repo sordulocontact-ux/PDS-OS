@@ -7,7 +7,7 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import {
   CHECK_RESULTS,
   type CheckKey,
@@ -67,7 +67,7 @@ function CheckForm({
     result === "unchecked" ? "compliant" : result,
   );
   const [noteError, setNoteError] = useState<string>();
-  const { pending, error, run } = useDialogSubmit(onDone, t.form.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.form.saved);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     if (event.target !== event.currentTarget) return;

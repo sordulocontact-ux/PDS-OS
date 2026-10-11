@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { DistributionResult } from "@/lib/distribution/result";
 import { fr } from "@/lib/i18n/fr";
 
@@ -29,7 +29,7 @@ export function NoteForm({
   send: (note: string) => Promise<DistributionResult>;
 }) {
   const [noteError, setNoteError] = useState<string>();
-  const { pending, error, run } = useDialogSubmit(onDone, done);
+  const { pending, error, run } = useWriteSubmit(onDone, done);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     if (event.target !== event.currentTarget) return;

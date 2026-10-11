@@ -11,17 +11,18 @@ import {
   type Activation,
   type Evidence,
 } from "@/lib/marketing/model";
+import {
+  reviewMetricName,
+  reviewSourceName,
+} from "@/lib/marketing/review-labels";
 import { createClient } from "@/lib/supabase/server";
 
-export type ActivationOption = { id: string; label: string };
+type ActivationOption = { id: string; label: string };
 
 export type MarketingData = {
   activations: Activation[];
   evidence: Evidence[];
   members: { personId: string; name: string }[];
-  // What an activation can carry out: the Strategy's commitments.
-  deliverables: ActivationOption[];
-  levers: ActivationOption[];
   canContribute: boolean;
   // Closed: read under control — activations and reserves no longer move,
   // evidence and follow-ups go on.
@@ -31,11 +32,13 @@ export type MarketingData = {
 const ACTIVATION_COLUMNS =
   "id, title, kind, status, owner_person_id, deliverable_id, lever_id, starts_on, ends_on, note, archived_at, created_at";
 const EVIDENCE_COLUMNS =
-  "id, activation_id, kind, label, url, platform, metric, value, period_start, period_end, availability, reported_by, observed_on, verification, verified_at, verified_by, link_unreachable_at, archived_at, created_at";
+  "id, activation_id, kind, label, url, platform, metric, value, unit, period_start, period_end, availability, reported_by, observed_on, verification, verified_at, verified_by, link_unreachable_at, archived_at, created_at";
 
 /**
- * The project's activations and their evidence, archived ones included (the
- * screen decides what to show), with the user's session: RLS decides.
+ * The project's activations and their evidence as the review groups them
+ * (marketing_review_* views over the Activations' records), withdrawn
+ * evidence included (the screen decides what to show), with the user's
+ * session: RLS decides.
  */
 export async function loadMarketing(
   projectId: string,
@@ -52,12 +55,12 @@ export async function loadMarketing(
     closedRes,
   ] = await Promise.all([
     supabase
-      .from("marketing_activations")
+      .from("marketing_review_activations")
       .select(ACTIVATION_COLUMNS)
       .eq("project_id", projectId)
       .order("created_at"),
     supabase
-      .from("marketing_evidence")
+      .from("marketing_review_evidence")
       .select(EVIDENCE_COLUMNS)
       .eq("project_id", projectId)
       .order("created_at"),
@@ -91,7 +94,11 @@ export async function loadMarketing(
     id ? (list.find((o) => o.id === id)?.label ?? null) : null;
 
   const activations: Activation[] = (activationsRes.data ?? []).flatMap((a) =>
-    isActivationKind(a.kind) && isActivationStatus(a.status)
+    a.id &&
+    a.title &&
+    a.created_at &&
+    isActivationKind(a.kind) &&
+    isActivationStatus(a.status)
       ? [
           {
             id: a.id,
@@ -114,7 +121,12 @@ export async function loadMarketing(
       : [],
   );
   const evidence: Evidence[] = (evidenceRes.data ?? []).flatMap((e) =>
-    isEvidenceKind(e.kind) && isVerification(e.verification)
+    e.id &&
+    e.activation_id &&
+    e.label &&
+    e.created_at &&
+    isEvidenceKind(e.kind) &&
+    isVerification(e.verification)
       ? [
           {
             id: e.id,
@@ -123,14 +135,15 @@ export async function loadMarketing(
             label: e.label,
             url: e.url,
             platform: e.platform,
-            metric: e.metric,
+            metric: reviewMetricName(e.metric, e.unit),
             value: e.value === null ? null : Number(e.value),
+            unit: e.unit,
             periodStart: e.period_start,
             periodEnd: e.period_end,
             availability: isAvailability(e.availability)
               ? e.availability
               : null,
-            reportedBy: e.reported_by,
+            reportedBy: reviewSourceName(e.kind, e.reported_by),
             observedOn: e.observed_on,
             verification: e.verification,
             verifiedAt: e.verified_at,
@@ -146,8 +159,6 @@ export async function loadMarketing(
     activations,
     evidence,
     members,
-    deliverables,
-    levers,
     canContribute: canRes.data === true,
     marketingClosed: closedRes.data === true,
   };

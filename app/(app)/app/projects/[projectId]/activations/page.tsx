@@ -1,80 +1,138 @@
 import { IconLayers } from "nucleo-sharp-essential";
 
-import { ActivationsSection } from "@/components/marketing/activations-section";
-import { ActivationHandoffsSection } from "@/components/production/delivery/activation-handoffs-section";
-import { EditInStrategy } from "@/components/project-plan/edit-in-strategy";
-import { LeverList } from "@/components/project-plan/lever-list";
+import { ActivationsCounters } from "@/components/activations/activations-counters";
+import { ActivationsHeader } from "@/components/activations/activations-header";
+import { ActivationsTable } from "@/components/activations/activations-table";
+import { AttachSection } from "@/components/activations/attach-section";
+import { NewActivationButton } from "@/components/activations/new-activation-button";
 import { ProjectPageActions } from "@/components/projects/project-page-actions";
-import { EmptyState } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
-import { StatTiles } from "@/components/ui/stat-tiles";
+import { EmptyNote, EmptyState } from "@/components/shell/empty-state";
+import { DataTableViews } from "@/components/ui/data-table";
+import { FilterChipLink } from "@/components/ui/filter-chip";
+import { loadAttachables } from "@/lib/activations/attachables";
+import { loadActivationsBoard } from "@/lib/activations/board";
+import { ACTIVATION_KINDS, asOf } from "@/lib/activations/model";
+import { ACTIVATION_VIEWS } from "@/lib/activations/states";
 import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
+import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
-import { loadMarketing } from "@/lib/marketing/queries";
-import { LEVER_FAMILIES, loadProjectPlan } from "@/lib/project-plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { viewHref } from "@/lib/ui/view-href";
 import { allInOrder } from "@/lib/utils/parallel";
 
-const t = fr.projectPlan.activations;
+const t = fr.activations;
 
 export const metadata = { title: `${t.title} · ${fr.app.name}` };
 
-// The activations followed by the Marketing and their evidence (ticket
-// « Suivi & bilan »), the hand-offs from Production, then the launch set-up,
-// family by family (docs/CONTEXTE-PROJET.md § 4): what is selected, still to
-// decide or set aside. The set-up is written in the Strategy.
+/**
+ * Marketing › Activations: every activation of the project, whatever its
+ * nature or mode (ticket « Activations — Vue d'ensemble et pilotage »,
+ * docs/ARCHITECTURE.md § 8 duodecies). Views and type in the URL; states,
+ * counters and next actions computed by code at each visit.
+ */
 export default async function ProjectActivationsPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/activations">) {
   const { projectId } = await params;
-  const [access, project, { levers, deliverables }] = await allInOrder([
+  const query = await searchParams;
+  const [access, project, board] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
-    loadProjectPlan(projectId),
+    loadActivationsBoard(projectId),
   ]);
-  const marketing = await loadMarketing(projectId, access);
-  const count = (state: string) =>
-    levers.filter((l) => l.state === state).length;
+  const [members, attachables] = await Promise.all([
+    loadMembers(access),
+    loadAttachables(projectId, board.summaries),
+  ]);
+  const canCreate = canEditProject(access, project);
+  const view = asOf(ACTIVATION_VIEWS, query.view);
+  const kind = asOf(ACTIVATION_KINDS, query.kind);
+  const path = routes.projectActivations(projectId);
+  const all = board.summaries;
+  const ofKind = kind ? all.filter((a) => a.kind === kind) : all;
+  const rows = view ? ofKind.filter((a) => a.views.includes(view)) : ofKind;
+  const marketingClosed = project.stages.some(
+    (s) => s.key === "review" && s.state === "validated",
+  );
 
   return (
     <div className="grid gap-6">
-      <ProjectPageActions>
-        {
-          <EditInStrategy
-            projectId={projectId}
-            canEdit={canEditProject(access, project)}
-          />
-        }
-      </ProjectPageActions>
-      <ActivationsSection projectId={projectId} data={marketing} />
-      <ActivationHandoffsSection projectId={projectId} access={access} />
-      {levers.length === 0 ? (
+      {canCreate && (
+        <ProjectPageActions>
+          <NewActivationButton projectId={projectId} members={members} />
+        </ProjectPageActions>
+      )}
+      {all.length === 0 ? (
         <EmptyState icon={IconLayers} title={t.emptyTitle} body={t.emptyBody} />
       ) : (
         <>
-          <StatTiles
-            stats={[
-              { label: t.stats.selected, value: String(count("selected")) },
-              { label: t.stats.toDecide, value: String(count("to_decide")) },
-              { label: t.stats.rejected, value: String(count("rejected")) },
-              {
-                label: t.stats.deliverables,
-                value: String(deliverables.length),
-              },
-            ]}
+          <ActivationsHeader
+            rows={all}
+            ownerName={project.ownerName}
+            marketingClosed={marketingClosed}
           />
-          {LEVER_FAMILIES.map((family) => (
-            <PageSection
-              key={family}
-              id={`family-${family}`}
-              title={fr.framing.needs.families[family]}
+          <ActivationsCounters rows={all} />
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label={t.kindFilter}
+          >
+            <FilterChipLink
+              href={viewHref(path, { view })}
+              current={kind === null}
             >
-              <LeverList levers={levers.filter((l) => l.family === family)} />
-            </PageSection>
-          ))}
+              {t.kindAll}
+            </FilterChipLink>
+            {ACTIVATION_KINDS.filter((k) => all.some((a) => a.kind === k)).map(
+              (k) => (
+                <FilterChipLink
+                  key={k}
+                  href={viewHref(path, { view, kind: k })}
+                  current={kind === k}
+                >
+                  {t.kinds[k]}
+                </FilterChipLink>
+              ),
+            )}
+          </div>
+          <DataTableViews
+            label={t.views.label}
+            views={[
+              {
+                label: t.views.all,
+                count: ofKind.length,
+                current: view === null,
+                href: viewHref(path, { kind }),
+              },
+              ...ACTIVATION_VIEWS.map((v) => ({
+                label: t.views[v],
+                count: ofKind.filter((a) => a.views.includes(v)).length,
+                current: view === v,
+                href: viewHref(path, { view: v, kind }),
+              })),
+            ]}
+          >
+            {rows.length === 0 ? (
+              <EmptyNote>{t.emptyView}</EmptyNote>
+            ) : (
+              <ActivationsTable
+                projectId={projectId}
+                rows={rows}
+                members={members}
+              />
+            )}
+          </DataTableViews>
         </>
       )}
+      <AttachSection
+        projectId={projectId}
+        items={attachables}
+        members={members}
+        canCreate={canCreate}
+      />
     </div>
   );
 }

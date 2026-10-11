@@ -4,7 +4,7 @@ import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { DialogFormActions } from "@/components/ui/dialog-form-actions";
-import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { fr } from "@/lib/i18n/fr";
 import { saveLocation } from "@/lib/production/preprod/actions-logistics";
@@ -55,7 +55,7 @@ function LocationForm({
   logistics: SheetLogistics;
   onDone: () => void;
 }) {
-  const { pending, error, run } = useDialogSubmit(onDone, t.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.saved);
   return (
     <form
       className="flex flex-col gap-5"

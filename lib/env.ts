@@ -47,6 +47,14 @@ export const serverEnvSchema = z
     CRON_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
     /** Optional: Odesli closed its public API, keys come from a whitelist. */
     ODESLI_API_KEY: optionalSecret,
+    /** Unsplash and Tumblr: optional, each turns its source on (similar references). */
+    UNSPLASH_ACCESS_KEY: optionalSecret,
+    TUMBLR_API_KEY: optionalSecret,
+    /** Are.na: optional, a Premium token opens its search by words. */
+    ARENA_TOKEN: optionalSecret,
+    /** Openverse: optional, raise the free anonymous search limit. */
+    OPENVERSE_CLIENT_ID: optionalSecret,
+    OPENVERSE_CLIENT_SECRET: optionalSecret,
     /** Notion: optional, sent feedback stays in the app without them. */
     NOTION_TOKEN: optionalSecret,
     NOTION_FEEDBACK_DATABASE_ID: z.preprocess(

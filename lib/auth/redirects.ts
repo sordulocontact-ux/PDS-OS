@@ -231,9 +231,19 @@ export const routes = {
   projectLegalStep: (id: string, step: string) =>
     `/app/projects/${id}/legal/${step}`,
   projectActivations: (id: string) => `/app/projects/${id}/activations`,
-  // One activation followed by the Marketing, with its evidence.
   projectActivation: (id: string, activationId: string) =>
     `/app/projects/${id}/activations/${activationId}`,
+  // framing, concepts, targets, agency, report.
+  projectActivationTab: (id: string, activationId: string, tab: string) =>
+    `/app/projects/${id}/activations/${activationId}/${tab}`,
+  // A collaboration (Influence) or a press target (RP).
+  projectActivationTarget: (
+    id: string,
+    activationId: string,
+    targetId: string,
+  ) => `/app/projects/${id}/activations/${activationId}/targets/${targetId}`,
+  // The creator's express agreement, without account.
+  influenceAgreement: (token: string) => `/i/${token}`,
   projectProduction: (id: string) => `/app/projects/${id}/production`,
   // Production of one committed deliverable: its preparation.
   projectProductionSheet: (id: string, deliverableId: string) =>
