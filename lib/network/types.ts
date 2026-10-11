@@ -32,6 +32,11 @@ export const NETWORK_ROLES = [
   "publisher",
   "distributor",
   "media",
+  // Marketing › Activations (migration 20261011000201): a journalist (a
+  // person, often of a media of the Réseau) and an influencer, kept once
+  // and linked to every campaign.
+  "journalist",
+  "influencer",
   "manager",
   "other",
 ] as const;
@@ -55,9 +60,12 @@ export const NETWORK_FAMILIES = {
     "label",
     "publisher",
     "distributor",
-    "media",
     "manager",
   ],
+  // Réseau › Influenceurs and › Médias & journalistes (tickets Influence and
+  // RP): the durable identities the campaigns enrich.
+  influencers: ["influencer"],
+  press: ["media", "journalist"],
   other: ["other"],
 } as const satisfies Record<string, readonly NetworkRole[]>;
 export type NetworkFamily = keyof typeof NETWORK_FAMILIES;

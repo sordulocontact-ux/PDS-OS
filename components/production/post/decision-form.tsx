@@ -13,7 +13,7 @@ import {
   type VersionDecision,
 } from "@/lib/production/post/rules";
 
-import { usePostSubmit } from "./use-post-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionPost.decision;
 
@@ -28,7 +28,7 @@ export function DecisionForm({
 }) {
   const [decision, setDecision] = useState<VersionDecision | null>(null);
   const [missing, setMissing] = useState<"choice" | "note" | null>(null);
-  const { pending, error, run } = usePostSubmit(() => {
+  const { pending, error, run } = useWriteSubmit(() => {
     setDecision(null);
     setMissing(null);
   }, t.done);

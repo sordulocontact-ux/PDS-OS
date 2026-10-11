@@ -9,7 +9,7 @@ import type { StepView } from "@/lib/master-workflow/transmission";
 import { cn } from "@/lib/utils";
 
 /**
- * Where the preparation of the mix stands, at the top of « Préparer »: the
+ * Where the preparation of the mix stands, at the top of the Source step: the
  * source of each title, the Brief Mix/Master, then the sending to the mix
  * engineer — each line with the one way forward (Sacha, 07/10/2026: « la
  * plus simple, la plus fluide »). Read from the Mix step's own view: the

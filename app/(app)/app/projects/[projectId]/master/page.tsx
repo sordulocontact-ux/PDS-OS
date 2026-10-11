@@ -13,9 +13,10 @@ export const metadata = {
   title: `${fr.shell.project.sidebar.master} · ${fr.app.name}`,
 };
 
-// Master: « Préparer » at /master — where the preparation stands (sources,
-// Brief, sending to the mix engineer), then the État du master; the Brief
-// opens below (/master/brief), the mix and mastering at /master/mix. Read by whoever sees the project; each
+// Master: the Source step at /master — where the preparation of the mix
+// stands (sources, Brief, sending to the mix engineer), then the État du
+// master; the Brief is the next step (/master/brief), then the mix
+// (/master/mix) and the mastering. Read by whoever sees the project; each
 // completion opens the form of the record's own page, under its own
 // permission.
 export default async function ProjectMasterPage({

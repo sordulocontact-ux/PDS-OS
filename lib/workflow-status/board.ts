@@ -64,12 +64,12 @@ export type BoardInput = {
 };
 
 const CLOSED = new Set(["done", "obsolete"]);
-const MASTER_ORDER = ["prepare", "mixing", "mastering", "final"];
+const MASTER_ORDER = ["source", "brief", "mixing", "mastering", "final"];
 // The last Master step during which each date of the Brief's calendar is
-// still to meet: the Mix V1 is met once the mixing has a version (the step
-// after Préparation), the start of the mastering once it runs.
+// still to meet: the Mix V1 until the mixing has a version (the loader
+// drops the date then), the start of the mastering once it runs.
 const DATE_STEP: Record<string, string> = {
-  mixV1Due: "prepare",
+  mixV1Due: "mixing",
   mixFinalDue: "mixing",
   masteringDue: "mixing",
   masterFinalDue: "mastering",

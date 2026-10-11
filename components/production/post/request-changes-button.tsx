@@ -10,7 +10,7 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { fr } from "@/lib/i18n/fr";
 import { requestPostVersionChanges } from "@/lib/production/post/review-actions";
 
-import { usePostSubmit } from "./use-post-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionPost;
 
@@ -27,7 +27,7 @@ export function RequestChangesButton({
 }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
-  const { pending, error, run } = usePostSubmit(
+  const { pending, error, run } = useWriteSubmit(
     close,
     t.versions.requestChangesDone,
   );

@@ -9,7 +9,7 @@ import { fr } from "@/lib/i18n/fr";
 import { saveSchedule } from "@/lib/production/preprod/actions-logistics";
 import type { SheetLogistics } from "@/lib/production/sheet";
 
-import { DialogButton } from "./dialog-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 
 const t = fr.productionPreprod.schedule;
 

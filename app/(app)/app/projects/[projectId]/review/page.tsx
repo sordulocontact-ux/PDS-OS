@@ -1,7 +1,9 @@
+import { ActivationsReview } from "@/components/activations/activations-review";
 import { ValidationPanel } from "@/components/framing/validation-panel";
 import { ReviewForm } from "@/components/review/review-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusDot } from "@/components/ui/status-dot";
+import { loadActivationsBoard } from "@/lib/activations/board";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -16,7 +18,8 @@ const t = fr.projectReview;
 export const metadata = { title: `${t.title} · ${fr.app.name}` };
 
 /**
- * Marketing › Suivi & bilan: where each workflow stands, the review written
+ * Marketing › Suivi & bilan: where each workflow stands, what each activation
+ * brings to the review (its three axes and reserves), the review written
  * by the owner, then « Bilan & clôture » validated by the direction, which
  * closes the project (docs/ARCHITECTURE.md § 8 nonies).
  */
@@ -28,9 +31,10 @@ export default async function ProjectReviewPage({
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
-  const [data, states] = await Promise.all([
+  const [data, states, activations] = await Promise.all([
     loadReview(projectId, access),
     loadWorkflowStates(projectId),
+    loadActivationsBoard(projectId),
   ]);
 
   const state = data.stage?.state ?? "not_started";
@@ -89,6 +93,10 @@ export default async function ProjectReviewPage({
               </CardContent>
             </Card>
           )}
+          <ActivationsReview
+            projectId={projectId}
+            rows={activations.summaries}
+          />
           <Card>
             <CardHeader>
               <CardTitle>{t.stage}</CardTitle>

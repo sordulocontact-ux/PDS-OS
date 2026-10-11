@@ -125,7 +125,8 @@ export function masterState(facts: MasterFacts): WorkflowState {
   const t = fr.workflowStatus.master;
   const base = { workflow: "master" as const };
   const p = facts.prepare;
-  const prepared = p.sources === p.sourcesTotal && p.brief && p.sent;
+  const sourced = p.sources === p.sourcesTotal;
+  const prepared = sourced && p.brief && p.sent;
   const masterDone = mastersFinal(facts);
   const delivered =
     masterDone && facts.deliverables.received >= facts.deliverables.expected;
@@ -135,20 +136,19 @@ export function masterState(facts: MasterFacts): WorkflowState {
   const done: MasterTab[] = !started
     ? []
     : [
-        ...(prepared ? (["prepare"] as const) : []),
+        ...(sourced ? (["source"] as const) : []),
+        ...(p.brief ? (["brief"] as const) : []),
         ...(prepared && mixDone(facts) ? (["mixing"] as const) : []),
         ...(masterDone ? (["mastering"] as const) : []),
         ...(delivered ? (["final"] as const) : []),
       ];
-  const prepareCount = [p.sources === p.sourcesTotal, p.brief, p.sent].filter(
-    Boolean,
-  ).length;
+  const prepareCount = [sourced, p.brief, p.sent].filter(Boolean).length;
 
   if (!facts.launched)
     return {
       ...base,
       status: "not_started",
-      step: "prepare",
+      step: "source",
       reason: fr.workflowStatus.notLaunched,
       progress:
         facts.mix.titles === 0
@@ -160,22 +160,23 @@ export function masterState(facts: MasterFacts): WorkflowState {
     return {
       ...base,
       status: "not_started",
-      step: "prepare",
+      step: "source",
       reason: t.noTitle,
       progress: t.progressPrepare(0),
       done,
     };
+  // Before the mix: the sources, then the Brief, then the sending, which
+  // is done on the Mixage page (its step).
   if (!prepared)
     return {
       ...base,
       status: "in_progress",
-      step: "prepare",
-      reason:
-        p.sources < p.sourcesTotal
-          ? t.sources(p.sourcesTotal - p.sources)
-          : !p.brief
-            ? t.brief
-            : t.send,
+      step: !sourced ? "source" : !p.brief ? "brief" : "mixing",
+      reason: !sourced
+        ? t.sources(p.sourcesTotal - p.sources)
+        : !p.brief
+          ? t.brief
+          : t.send,
       progress: t.progressPrepare(prepareCount),
       done,
     };
@@ -575,7 +576,7 @@ export function dependencies(facts: DependencyFacts): Dependency[] {
         : t.engineers.missing,
       due: null,
       who: facts.owner,
-      href: href("master", "prepare"),
+      href: href("master", "brief"),
     });
   }
   return deps;

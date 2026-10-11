@@ -23,8 +23,8 @@ import {
   type PreprodBudgetLine,
 } from "@/lib/production/preprod/types";
 
-import { DialogButton } from "./dialog-button";
-import { RecordMenu } from "./record-menu";
+import { DialogButton } from "@/components/ui/dialog-button";
+import { RecordMenu } from "@/components/ui/record-menu";
 
 const t = fr.productionPreprod.budget;
 

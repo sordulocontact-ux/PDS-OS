@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ImportPanel } from "@/components/framing/import-panel";
+import { ValidationPanel } from "@/components/framing/validation-panel";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { BriefReminder } from "@/components/strategy/brief-reminder";
 import { BriefEntry } from "@/components/strategy/brief/brief-entry";
@@ -192,11 +193,27 @@ export default async function StrategyPage({
 
       <aside className="flex flex-col gap-4 self-start lg:sticky lg:top-6">
         <div className={block}>
-          <StrategyValidationCard
-            projectId={projectId}
-            stageState={state}
-            revisionOpen={docs.revisionOpen}
-          />
+          {/* A request made the generic way, before the Brief circuit (no
+              version of the Brief under review): decided here by its
+              validator, which the database allows (validations_strategy_guard
+              only guards requests tied to a Brief version). */}
+          {!underReview && data.pendingValidation ? (
+            <ValidationPanel
+              stage={data.stage}
+              pendingValidation={data.pendingValidation}
+              projectId={projectId}
+              mePersonId={access.personId}
+              title={t.validation.title}
+              startLabel={t.validation.start}
+            />
+          ) : (
+            <StrategyValidationCard
+              projectId={projectId}
+              stageState={state}
+              revisionOpen={docs.revisionOpen}
+              reviews={underReview?.reviews ?? []}
+            />
+          )}
         </div>
         <div className={block}>
           <BriefReminder

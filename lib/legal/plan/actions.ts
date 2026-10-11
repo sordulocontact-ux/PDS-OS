@@ -9,7 +9,7 @@ import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
-import { defaultDueOn } from "@/lib/legal/plan/due-dates";
+import { planDueDates } from "@/lib/legal/plan/due-dates";
 import { planItemPayload } from "@/lib/legal/plan/payload";
 import { proposeLegalPlan } from "@/lib/legal/plan/queries";
 import { getProject } from "@/lib/projects/queries";
@@ -110,7 +110,7 @@ export async function addLegalPlanItems(
     proposeLegalPlan(project, access),
     supabase
       .from("legal_plan_items")
-      .select("item_key")
+      .select("item_key, due_on")
       .eq("project_id", project.id),
     supabase
       .from("legal_plans")
@@ -136,12 +136,18 @@ export async function addLegalPlanItems(
     ? project.ownerPersonId
     : null;
   const keys = new Set([...known, ...fresh.map((item) => item.key)]);
+  const dues = planDueDates(
+    fresh,
+    project.dueDate,
+    todayInParis(),
+    new Map((existing.data ?? []).map((row) => [row.item_key, row.due_on])),
+  );
   const { error } = await supabase.rpc("add_legal_plan_items", {
     p_project_id: project.id,
     p_items: fresh.map((item) =>
       planItemPayload(item, keys, {
         responsibleId: owner,
-        dueOn: defaultDueOn(item.kind, project.dueDate, todayInParis()),
+        dueOn: dues.get(item.key) ?? null,
       }),
     ),
   });

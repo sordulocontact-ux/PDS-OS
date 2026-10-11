@@ -28,8 +28,8 @@ export function MasterInventory({
   lead,
 }: {
   inventory: Inventory;
-  // Between the header and the tiles: where the preparation stands (the
-  // « Préparer » step).
+  // Between the header and the tiles: where the preparation of the mix
+  // stands (the Source step).
   lead?: React.ReactNode;
   // The page's URL, for the tiles' filters.
   basePath: string;

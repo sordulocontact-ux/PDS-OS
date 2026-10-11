@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ContractStateBadge } from "@/components/contracts/contract-state-badge";
 import { ContactActions } from "@/components/network/contact-actions";
+import { ContactMarketing } from "@/components/network/contact-marketing";
 import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
@@ -14,6 +15,8 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { asContractStatus } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
+import { todayInParis } from "@/lib/insights/dates";
+import { loadContactMarketing } from "@/lib/network/campaigns";
 import { getNetworkContact } from "@/lib/network/queries";
 import { socialLinksOf } from "@/lib/network/socials";
 import { rolesText } from "@/lib/network/types";
@@ -26,14 +29,21 @@ const linkClass =
 /**
  * A contact of the network: what it does, how to reach it, its organization
  * (or, for an organization, the people of the network who work there) and
- * the contracts it is a party to, among those the viewer may read.
+ * the contracts it is a party to, among those the viewer may read ; its
+ * Marketing campaigns and dated observations (influencers, media).
  */
 export default async function NetworkContactPage({
   params,
 }: PageProps<"/app/network/[contactId]">) {
   const access = await requireApproved();
   const { contactId } = await params;
-  const contact = await getNetworkContact(contactId);
+  const [contact, marketing] = await Promise.all([
+    getNetworkContact(contactId),
+    loadContactMarketing(contactId, {
+      target: routes.projectActivationTarget,
+      activation: routes.projectActivation,
+    }),
+  ]);
   if (!contact) notFound();
   const t = fr.network;
   const p = t.page;
@@ -100,6 +110,13 @@ export default async function NetworkContactPage({
               />
             ))}
           </ListCard>
+          <ContactMarketing
+            contactId={contact.id}
+            campaigns={marketing.campaigns}
+            observations={marketing.observations}
+            canWrite={can(access, "manage_network") && !contact.archived}
+            today={todayInParis()}
+          />
         </div>
         <FactList
           emptyLabel={p.none}

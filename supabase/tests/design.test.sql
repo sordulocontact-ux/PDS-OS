@@ -183,7 +183,7 @@ select lives_ok($$ select public.review_design_version(pg_temp.id_of('v3'), true
                 'the owner approves it');
 
 -- Submitted: frozen ------------------------------------------------------------
-select public.request_validation(pg_temp.id_of('design'), pg_temp.id_of('director_person'), null);
+select public.request_validation(pg_temp.id_of('design'), null);
 select throws_ok($$
   insert into public.field_values (organization_id, project_id, deliverable, field_key, value, status, source_type)
   values (pg_temp.org(), pg_temp.prj(), 'design_doc', 'references', '"x"', 'confirmed', 'manual')

@@ -17,8 +17,8 @@ import {
   type TeamFields,
 } from "@/lib/production/preprod/team-briefs";
 
-import { ConfirmButton } from "./confirm-button";
-import { DialogButton } from "./dialog-button";
+import { ConfirmButton } from "@/components/ui/confirm-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 
 const t = fr.productionPreprod.briefs;
 

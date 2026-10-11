@@ -5,7 +5,7 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { fr } from "@/lib/i18n/fr";
 
 import { CallItemForm } from "./call-item-form";
-import { DialogButton } from "./dialog-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 
 const t = fr.productionPreprod.call;
 

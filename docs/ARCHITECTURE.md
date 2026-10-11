@@ -2162,7 +2162,10 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   l'organisation, jamais trouvé par le nom).
 - **Échéances** (`lib/legal/plan/due-dates.ts`, décision du 10/10/2026, aucun ticket) : fiches
   aujourd'hui + 7 j, emprunts sortie − 45 j, contrats et répartitions − 30 j, SACEM − 15 j, jamais
-  avant aujourd'hui + 3 j ; sans date de sortie, seules les fiches ont une échéance.
+  avant aujourd'hui + 3 j ; sans date de sortie, seules les fiches ont une échéance. **Jamais due
+  avant ce dont elle dépend** (Sacha, 11/10/2026 : contrats au 13, fiches au 17) : au moins 7 j
+  après la dernière échéance de ses dépendances, même au-delà de la sortie (`planDueDates`, aussi
+  pour une action ajoutée après le lancement, qui part des échéances du plan).
 - **E-mail** : « Envoyer par e-mail » (`mailto:`, `lib/utils/mailto.ts`) à côté de chaque lien à
   copier (fiche, répartition, dossier du mixeur), adressé au contact du Réseau. PDS OS n'envoie
   aucun e-mail lui-même (pas de fournisseur : point à trancher).
@@ -2198,6 +2201,17 @@ lots, chacun utile seul.
   disant pas quel tour (limite connue). `masterSteps(projectId, done)` accepte les étapes
   faites, branchées au lot 3.
   - **Master final** (`/master/final`) inchangé.
+- **Cinq étapes depuis le 11/10/2026** (Sacha, après un proto comparant cinq placements du
+  Brief) : **Source · Brief · Mixage · Mastering · Master final**, le parcours du ticket
+  « Workflow Master ». Le Brief, rangé sous Préparation le 08/10, ne s'ouvrait que depuis la
+  carte « Où en est la préparation » : il a maintenant son chevron (`/master/brief`, titre
+  « Master » comme toute étape, plus de fil d'Ariane). **Source** = `/master` (la carte, puis
+  l'État du master). Statut commun (`masterState`) : étape Source tant qu'une source n'est pas
+  confirmée, Brief tant que le Brief ou son ingénieur du mix manque, puis **Mixage**, où se fait
+  l'envoi au mixeur (raison « Dossier à envoyer au mixeur ») ; coche Source = toutes les sources
+  confirmées, coche Brief = Brief enregistré avec son ingénieur, coche Mixage = envoyé et chaque
+  mix final validé. L'échéance « Mix V1 » de la Vue d'ensemble reste affichée jusqu'à la première
+  version du mix (le chargeur la retire alors), au lieu de disparaître à l'envoi.
 
 - **Qui voit, qui écrit** (décision du 04/10/2026, en attendant le DG) : pas de permission
   dédiée. La page se lit par **quiconque voit le projet** (DG, chef de projet, directeur
@@ -2793,6 +2807,38 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
   (`design_reference_links`) ; sans lien = « À rattacher ». Même fichier (sha256) ou même lien =
   une seule ressource, jamais un second import. Une référence reste une proposition tant qu'aucune
   section approuvée de la direction ne la contient.
+- **Références semblables (Are.na)** (11/10/2026, demande de Sacha : « que PO cherche d'autres
+  images qui ressemblent à celles envoyées, pour agrandir le moodboard », sur Are.na ; Openverse
+  ajouté puis **coupé le jour même** : « toutes les images c'est Openverse, fais que des recherches
+  Are.na pour le moment ») : « Chercher des références semblables » sur la page Références, pour
+  qui écrit dans la Conception (`design_can_write`, vérifié avant tout appel). Deux actions
+  serveur (`lib/design/actions/reference-similar.ts`) :
+  1. **Are.na par rebond** (gratuit, sans jeton, toujours actif, `similar-arena.ts`) : depuis les
+     images Are.na déjà gardées dans la base choisie (3 au plus) et le lien Are.na facultatif
+     collé dans la fenêtre (une image `are.na/block/…` ou une chaîne `are.na/<compte>/<chaîne>`,
+     lu par le code, seul l'id ou le nom de la chaîne part vers l'API), le code ouvre les chaînes
+     où ces images ont été rangées (4 au plus) et en propose les images (16 par chaîne, textes et
+     liens écartés). Sans image Are.na ni lien : « Rien pour partir ».
+  2. **Recherche par mots** : **Are.na ne se cherche par mots qu'avec un compte Premium**
+     (`/v3/search` ; l'ancienne API v2 bloque tout accès automatisé, vérifié le 11/10). Avec
+     `ARENA_TOKEN` (jeton personnel en lecture d'un compte Premium, facultatif), PO lit d'abord
+     les 4 dernières images lisibles de la base (JPEG / PNG / WebP / GIF de 5 Mo au plus,
+     `extractFromImages`, images = données), rend ce qu'il voit et 3 ou 4 recherches en anglais
+     nettoyées par le code (`cleanSearches`), lancées sur Are.na (12 images chacune). Sans
+     jeton, PO ne lit rien (`moodboardIsRead`) et la fenêtre l'explique. **Openverse**
+     (`lib/integrations/openverse.ts`, licences libres, gratuit, `OPENVERSE_CLIENT_*` facultatifs
+     contre la limite de 200 recherches par jour) reste dans le code, éteint par
+     `OPENVERSE_ENABLED` ; le rallumer y envoie aussi les recherches de PO.
+  Un groupe par chaîne et par recherche, chaque image une fois, celles déjà gardées écartées,
+  groupes vides masqués, un appel échoué n'empêche pas les autres. L'écran montre « Ce que PO
+  voit » (s'il a lu), les groupes en pastilles (décocher masque leurs images) et la grille à
+  cocher ; **rien n'est ajouté sans clic**. Garder une image : seuls la source et l'id viennent du
+  navigateur, le serveur relit l'image à sa source, télécharge son fichier (version « large »
+  d'Are.na, 15 Mo au plus, type d'image vérifié), la range dans le bucket avec la session de
+  l'utilisateur et l'enregistre comme un fichier déposé (dédoublonné par sha256), rattachée par
+  défaut à la cible de départ (la direction pour « Toutes les images »). La note crédite l'image
+  et garde son adresse (`are.na/block/<id>`) : c'est ce qui l'écarte d'une recherche suivante et
+  ce dont Are.na rebondit, sans colonne de plus.
 - **Soumissions et décisions** (`design_submissions`, `design_decisions`) : pour la direction
   (sections choisies par le responsable) et pour chaque fiche (la fiche, puis chaque élément d'une
   série). L'instantané est écrit par la base à la soumission. Mode de validation du projet
@@ -2877,6 +2923,114 @@ tests `supabase/tests/ux-roles.test.sql` (41).
   pas le serveur pour eux (`BriefView.canSeeBudget`). **Pas couvert** (point à trancher,
   `docs/CONTEXTE-PROJET.md`) : l'enveloppe du Cadrage (dans le Brief partagé avec l'équipe), les
   colonnes de tarif de `master_briefs` lues par l'API, ce qui se dit du budget dans les calls.
+
+## 8 duodecies. Marketing : Activations (`/activations`, `lib/activations/`, `components/activations/`)
+
+Tickets « Marketing / Activations — Vue d'ensemble et pilotage », « … / Influence » et « … /
+Relations presse (RP) » (Drive, 11/10/2026). Migrations `20261011000101` (socle) à
+`20261011000501` (RP), tests `supabase/tests/marketing-activations.test.sql` (52, fixture
+Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
+
+- **Modèle (la décision structurante)** : une **activation** (`marketing_activations`) est
+  l'unité de pilotage Marketing (contenu, influence, RP, événement / session, autre). Influence
+  et RP ont un **mode** (Gestion interne / Agence externe) : un seul module, un parcours par mode,
+  le changement de mode garde tout l'historique. Une activation vient d'un levier retenu, d'un
+  livrable engagé ou d'un transfert de la Production (un lien, jamais une copie ; un livrable ou
+  un transfert n'a qu'une activation, un levier peut en porter plusieurs), ou est créée à la main.
+- **Trois axes, jamais fusionnés** : le **statut opérationnel** (Brouillon → À préparer → Prête →
+  En cours → Réalisée déclarée → Clôturée, + Annulée / Suspendue / Bloquée avec raison), posé par
+  une personne ; la **preuve** (`activation_evidence` : lien, fichier ou source de la déclaration ;
+  `activation_evidence_checks` : chaque contrôle avec méthode, auteur, date, append-only ; une
+  preuve retirée reste historisée) ; la **mesure** (`activation_metrics` : relevés datés avec
+  source, période, méthode, toujours « déclarés » à l'enregistrement, vérifiés à part, invalidés
+  sans effacement). États de preuve et de mesure **calculés par le code** (`lib/activations/states.ts`),
+  jamais stockés ; une statistique manquante n'est jamais un zéro.
+- **Pilotage** (`board.ts`) : alertes calculées (responsable absent, échéance passée, réalisée sans
+  preuve ou sans statistiques, preuve contestée, dépendance bloquante ou changée, écart agence /
+  PDS, droits publicitaires expirés), vues (À lancer, En cours, À vérifier, Bloquées, À mesurer,
+  Prêtes pour bilan, Clôturées), compteurs avec leur règle affichée, **prochaine action** : celle
+  d'une personne d'abord, sinon la première règle non écartée (les règles des modules —
+  cadrage, concepts, versions, messages, propositions d'agence, bilan — passent avant preuve et
+  mesure). **Rien n'est créé dans Travail sans « Créer une tâche »** (`create_activation_task`,
+  `tasks.activation_id`, la tâche ramène à l'activation). Blocages saisis (`activation_blockers`,
+  résolution gardée), **dépendances** liées à un livrable, un contrat, un emprunt ou une tâche,
+  état relu à la source, « version observée » gardée pour signaler un changement
+  (`activation_dependencies`, `dependencies.ts`). Journal append-only `activation_events`, écrit
+  par triggers et fonctions seulement. Clôture `close_activation` (définitive ou avec réserves
+  listées par le code et gardées telles que montrées ; définitive malgré des réserves = motif),
+  réouverture `reopen_activation` avec raison.
+- **Qui écrit** : le responsable du projet et le responsable de l'activation
+  (`activation_can_write`) ; **validateur PDS** = le DG ou un directeur créatif du projet
+  (`marketing_can_validate`) : il vérifie preuves et statistiques, décide des fiches et des
+  versions de contenu. Les montants (propositions, paiements, factures, preuves de paiement) sont
+  réservés aux lecteurs du budget (`can_read_project_budget`, fichiers `restricted`).
+- **Communs Influence / RP** : **fiches versionnées** `activation_sheets` (cadrage, concept
+  générique, concept par influenceur), champs vérifiés par l'app (`lib/activations/sheets.ts`),
+  chacun avec sa provenance, préremplies depuis les réponses **confirmées** de la Stratégie et les
+  temps forts du canal (`framingPrefill`) ; Brouillon → À valider → Validée / Corrections
+  demandées / Refusée (`decide_activation_sheet`) ; toute modification après validation ouvre une
+  version ; une Stratégie modifiée après la validation est signalée, jamais réécrite. **Cibles**
+  `activation_targets` (un profil du Réseau par campagne, unique : un doublon ouvre l'existante ;
+  alertes calculées avant ajout et confirmées : déjà proposé / contacté / collaboré, refus
+  antérieur, audience absente ou de plus de 6 mois). **Messages** `activation_messages`
+  (Brouillon → À valider → Validé → Envoi déclaré ; prouvé = déclaré avec preuve ; jamais envoyé
+  par PDS OS, « Copier » et `mailto:` seulement) ; relance refusée après refus, opportunité
+  ouverte ou clôture sans dérogation écrite.
+- **Influence interne** (`lib/activations/influence/`) : collaboration = cible ; **étape calculée**
+  (`stage.ts`, Candidate → … → Publiée vérifiée → Administration, sorties par l'issue) ;
+  propositions immuables, conditions validées par décision explicite sur la dernière position ;
+  **accord express** `/i/<jeton>` (64 hex, seul le hash gardé, 30 jours, nouveau lien = ancien
+  révoqué) : version exacte (empreinte), nom + consentement, première ouverture notée, « Demander
+  une modification » devient une position du créateur ; ce n'est **pas** une signature qualifiée
+  (mention affichée) ; droits **organiques et publicitaires séparés**, acceptés / refusés /
+  révoqués / expirés chacun, nouvelle version après décision, le « Bon pour accord » n'accepte
+  que les blocs montrés ; versions de contenu sans limite, retours horodatés (timecode,
+  catégorie, statut « corrigé déclaré » ≠ « résolu »), décision sur une version précise ;
+  publication = preuve de la collaboration ; **paiement administratif** (Bon à payer exige un
+  accord accepté, Payé vérifié une preuve à accès restreint ; aucun virement ni coordonnée
+  bancaire) ; brief externe composé par le code depuis le concept validé, les conditions et les
+  droits (`brief.ts`).
+- **RP interne** (`lib/activations/press/`) : cadrage commun aux deux modes + le **Dossier de
+  presse de la Stratégie** (jamais dupliqué ; validé ≠ envoyé : compté par les messages envoyés
+  qui le joignent) ; modèle commun validé puis un brouillon par cible (salutation et angle de la
+  cible ajoutés par le code) ; opportunités / interviews (`press_opportunities`, créneau confirmé
+  = date + qui a confirmé et par quel canal, heure saisie en heure de Paris) ; brief d'interview
+  composé par le code depuis le cadrage validé, sans réponse inventée ; retombées = preuves
+  vérifiées à part.
+- **Agence (Influence et RP, un seul module)** (`lib/activations/agency/`) : sources en lecture
+  seule (`agency_sources` : lien Google Sheets lu par son export CSV public, fichier Excel / CSV
+  déposé à chaque actualisation — l'onglet portant le nom de la source, sinon le premier —, ou
+  saisie à la main pour un PDF) ; « Actualiser » lit, mappe (correspondance proposée par le code
+  d'après les en-têtes, confirmée par une personne, `fields.ts`) et signale sans corriger
+  (#REF!, texte dans un nombre, lien invalide, catégorie dont l'audience dépasse le seuil écrit
+  dans son libellé) ; **aperçu** enregistré (`record_agency_preview` : ajout / modification /
+  inchangée / absente) puis **confirmation** totale ou partielle (`apply_agency_snapshot`) ;
+  instantanés et lignes brutes gardés ; une ligne absente est marquée, jamais supprimée ; la
+  **décision PDS** et la note interne (`agency_rows`) ne sont jamais touchées par une
+  actualisation ; écart statut agence / décision signalé (`divergence.ts`, lecture des mots du
+  statut) ; retour à l'agence = brouillon écrit par le code depuis les décisions, sans les notes ;
+  statistiques importées en relevés « Agence » datés ; bilan (`agency_reports`) gardé tel que
+  reçu, décidé provisoirement avec réserves (listées par le code côté serveur), compléments,
+  archivé, ou validé (motif si réserves) ; synthèse par source et totale « données agence ».
+- **Réseau** : rôles `influencer` et `journalist`, onglets « Influenceurs » et « Médias &
+  journalistes » ; **relevés datés** `network_observations` (abonnés, engagement, tarif connu,
+  catégorie ; jamais écrasés, invalidés avec raison) ; la fiche contact montre ses campagnes
+  (cibles et lignes d'agence rattachées, projets visibles seulement).
+- **Suivi & bilan** reçoit chaque activation avec ses trois axes et ses réserves
+  (`ActivationsReview`) ; le volet Marketing n'est dit clôturé que quand l'étape `review` est
+  validée.
+- **Décisions prises faute de règle dans les tickets (11/10/2026)** : validateur PDS = DG ou
+  directeur créatif du projet, sans interdiction d'auto-validation (option « séparation des
+  rôles » non activée) ; « En vérification » (preuve) non modélisé (pas d'état en cours stocké) ;
+  séries de retours de contenu non modélisées (retours unitaires avec statut) ; fusion de
+  doublons du Réseau non construite (rattachement manuel + alertes, comme le socle MVP) ;
+  journaliste rattaché à un média par la structure du Réseau, sans historique daté des
+  rattachements ; adresse IP non gardée dans la preuve d'accord (« si légalement autorisé » :
+  au Juridique de trancher), user-agent gardé ; un aperçu d'accord ouvert par un robot de
+  prévisualisation compte comme « affiché » ; le seuil d'une catégorie d'agence n'est contrôlé
+  que s'il est écrit dans le libellé (« Micro (10k-100k) ») ; agrégations cross-projets,
+  vérification automatique des liens, collecte API, synchronisation planifiée : après MVP.
+- **Dépendance** : `read-excel-file` (lecture seule d'un .xlsx côté serveur).
 
 ## 9. Design (`docs/DESIGN.md`)
 

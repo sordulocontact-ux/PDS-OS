@@ -65,6 +65,87 @@ export const conceptionRefs = {
     nothing: "Choisissez au moins un fichier, ou collez un lien.",
   },
 
+  similar: {
+    open: "Chercher des références semblables",
+    title: "Références semblables",
+    description:
+      "Des images de la même famille, trouvées sur Are.na à partir de votre moodboard. Rien n'est ajouté sans votre choix.",
+    close: "Fermer",
+    baseLegend: "À partir de",
+    allImages: "Toutes les images",
+    baseCount: (label: string, n: number) =>
+      `${label} · ${n === 1 ? "1 image" : `${n} images`}`,
+    noImage:
+      "Aucune image lisible par PO dans le moodboard (JPEG, PNG, WebP ou GIF, 5 Mo au plus) : collez un lien Are.na pour partir de là.",
+    rebound:
+      "Are.na ne se cherche par mots qu'avec un compte Premium : la recherche part des chaînes où sont rangées les images Are.na de ce moodboard, et du lien collé.",
+    linkLabel: "Lien Are.na",
+    linkPlaceholder: "https://www.are.na/…",
+    linkHint:
+      "Une image ou une chaîne Are.na qui a la bonne ambiance : ses chaînes voisines sont explorées.",
+    search: "Chercher des images",
+    stepsLabel: "Recherche en cours",
+    stepDone: "terminé",
+    stepRead: "PO regarde les images",
+    stepSearch: "Recherche sur Are.na",
+    lookLabel: "Ce que PO voit",
+    groupsLegend: "D'où viennent les images",
+    groupsHint: "Décochez une pastille pour masquer ses images.",
+    group: (source: string, label: string, n: number) =>
+      `${source} · ${label} · ${n}`,
+    sources: { arena: "Are.na", openverse: "Openverse" },
+    resultsLabel: "Images trouvées",
+    nothing: "Rien de nouveau trouvé à partir de ces images.",
+    nothingShown: "Toutes les pastilles sont décochées.",
+    pick: (title: string) => `Garder ${title}`,
+    untitled: "Image sans titre",
+    onSource: (source: string) => `Voir sur ${source}`,
+    credit: (author: string | null, license: string | null) =>
+      [author, license].filter(Boolean).join(" · "),
+    targetsLegend: "Sert à",
+    targetsHint: "Aucun choix : les images restent « À rattacher ».",
+    again: "Nouvelle recherche",
+    submit: (n: number) =>
+      n === 0 ? "Ajouter" : n === 1 ? "Ajouter 1 image" : `Ajouter ${n} images`,
+    adding: (done: number, total: number) => `Ajout ${done} sur ${total}…`,
+    pickFirst: "Cochez au moins une image à garder.",
+    added: (n: number) =>
+      n === 1
+        ? "1 image ajoutée au moodboard"
+        : `${n} images ajoutées au moodboard`,
+    deduped: "Une image était déjà dans le projet : rattachée en plus.",
+    noSource:
+      "Rien pour partir : collez un lien Are.na (une image ou une chaîne), ou gardez d'abord une image d'Are.na dans ce moodboard.",
+    // Kept in the reference's note: credits the image, and its address is
+    // how a later search leaves it out (and where Are.na rebounds from).
+    note: (
+      source: string,
+      image: { pageUrl: string; author: string | null; license: string | null },
+    ) => {
+      const credit = [image.author, image.license].filter(Boolean).join(", ");
+      return `Trouvée sur ${source}${credit ? ` (${credit})` : ""} : ${image.pageUrl}`.slice(
+        0,
+        500,
+      );
+    },
+    errors: {
+      badLink:
+        "Ce lien n'est pas une adresse Are.na d'image (are.na/block/…) ou de chaîne (are.na/<compte>/<chaîne>).",
+      unauthorized:
+        "Are.na refuse le jeton de l'application (ARENA_TOKEN) : il faut en créer un nouveau.",
+      premium:
+        "La recherche par mots d'Are.na est réservée aux comptes Premium : le jeton de l'application vient d'un compte gratuit.",
+      rateLimited:
+        "La source limite les recherches pour l'instant. Réessayez dans une minute.",
+      unreachable: "La source n'a pas répondu. Réessayez.",
+      tooLarge:
+        "Cette image est trop lourde pour le moodboard (15 Mo au plus).",
+      generic: "La recherche n'a pas abouti. Réessayez.",
+      gone: "Cette image n'est plus disponible à sa source.",
+      notImage: "Ce fichier n'est pas une image que le moodboard accepte.",
+    },
+  },
+
   actions: {
     label: (name: string) => `Actions sur ${name}`,
     attach: "Rattacher",

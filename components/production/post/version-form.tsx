@@ -15,12 +15,12 @@ import type { PostScope, PostVersion } from "@/lib/production/post/types";
 import { savePostVersion } from "@/lib/production/post/version-actions";
 import type { NetworkOption } from "@/lib/production/sheet";
 
-import { FilePickField } from "./file-pick-field";
+import { FilePickField } from "@/components/ui/file-pick-field";
 import {
   HolderSelect,
   holderValue,
 } from "@/components/production/holder-select";
-import { usePostSubmit } from "./use-post-submit";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionPost.versions;
 const HTTPS = /^https:\/\/\S+$/;
@@ -56,7 +56,7 @@ export function VersionForm({
     review: t.submittedReview,
     final: t.submittedFinal,
   };
-  const { pending, error, run } = usePostSubmit(onDone, t.saved);
+  const { pending, error, run } = useWriteSubmit(onDone, t.saved);
 
   function submit(form: HTMLFormElement) {
     const data = new FormData(form);

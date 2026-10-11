@@ -150,7 +150,16 @@ async function masterFacts(project: Project, personId: string | null) {
   return {
     state: masterState(facts),
     allFinal: mastersFinal(facts),
-    dates: mixView.brief?.dates ?? null,
+    // The Mix V1 is met once a title has a mix version: no longer a
+    // deadline to show (lib/workflow-status/board.ts).
+    dates: mixView.brief?.dates
+      ? {
+          ...mixView.brief.dates,
+          ...(mixVersions.titles.some((title) => title.versions.length > 0)
+            ? { mixV1Due: null }
+            : {}),
+        }
+      : null,
     engineers: {
       mix: mixView.engineer?.name ?? null,
       mastering: final.engineer,

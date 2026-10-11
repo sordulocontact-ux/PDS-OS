@@ -69,6 +69,967 @@ export type Database = {
           },
         ]
       }
+      activation_blockers: {
+        Row: {
+          activation_id: string
+          blocking_object: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          expected_resolution: string | null
+          id: string
+          impact: string | null
+          organization_id: string
+          owner_person_id: string | null
+          project_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          activation_id: string
+          blocking_object?: string | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          expected_resolution?: string | null
+          id?: string
+          impact?: string | null
+          organization_id: string
+          owner_person_id?: string | null
+          project_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          activation_id?: string
+          blocking_object?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          expected_resolution?: string | null
+          id?: string
+          impact?: string | null
+          organization_id?: string
+          owner_person_id?: string | null
+          project_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_blockers_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_blockers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_blockers_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_blockers_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activation_dependencies: {
+        Row: {
+          activation_id: string
+          blocking: boolean
+          clearance_id: string | null
+          contract_id: string | null
+          created_at: string
+          created_by: string | null
+          deliverable_id: string | null
+          id: string
+          kind: string
+          observed: Json | null
+          organization_id: string
+          project_id: string
+          task_id: string | null
+        }
+        Insert: {
+          activation_id: string
+          blocking?: boolean
+          clearance_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          id?: string
+          kind: string
+          observed?: Json | null
+          organization_id: string
+          project_id: string
+          task_id?: string | null
+        }
+        Update: {
+          activation_id?: string
+          blocking?: boolean
+          clearance_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          id?: string
+          kind?: string
+          observed?: Json | null
+          organization_id?: string
+          project_id?: string
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_dependencies_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_dependencies_clearance_id_fkey"
+            columns: ["clearance_id"]
+            isOneToOne: false
+            referencedRelation: "legal_clearances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_dependencies_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_dependencies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_dependencies_deliverable_id_fkey"
+            columns: ["deliverable_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_dependencies_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activation_events: {
+        Row: {
+          activation_id: string
+          actor: string | null
+          at: string
+          id: string
+          kind: string
+          new_value: Json | null
+          note: string | null
+          old_value: Json | null
+          organization_id: string
+          project_id: string
+          subject_id: string | null
+        }
+        Insert: {
+          activation_id: string
+          actor?: string | null
+          at?: string
+          id?: string
+          kind: string
+          new_value?: Json | null
+          note?: string | null
+          old_value?: Json | null
+          organization_id: string
+          project_id: string
+          subject_id?: string | null
+        }
+        Update: {
+          activation_id?: string
+          actor?: string | null
+          at?: string
+          id?: string
+          kind?: string
+          new_value?: Json | null
+          note?: string | null
+          old_value?: Json | null
+          organization_id?: string
+          project_id?: string
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_events_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_events_actor_fkey"
+            columns: ["actor"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activation_evidence: {
+        Row: {
+          activation_id: string
+          agency_row_id: string | null
+          created_at: string
+          created_by: string | null
+          declaration_note: string | null
+          declared_on: string | null
+          declared_source: string
+          file_id: string | null
+          id: string
+          kind: string
+          organization_id: string
+          platform: string | null
+          project_id: string
+          target_id: string | null
+          url: string | null
+          withdrawn_at: string | null
+          withdrawn_by: string | null
+          withdrawn_reason: string | null
+        }
+        Insert: {
+          activation_id: string
+          agency_row_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          declaration_note?: string | null
+          declared_on?: string | null
+          declared_source?: string
+          file_id?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          platform?: string | null
+          project_id: string
+          target_id?: string | null
+          url?: string | null
+          withdrawn_at?: string | null
+          withdrawn_by?: string | null
+          withdrawn_reason?: string | null
+        }
+        Update: {
+          activation_id?: string
+          agency_row_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          declaration_note?: string | null
+          declared_on?: string | null
+          declared_source?: string
+          file_id?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          platform?: string | null
+          project_id?: string
+          target_id?: string | null
+          url?: string | null
+          withdrawn_at?: string | null
+          withdrawn_by?: string | null
+          withdrawn_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_evidence_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_evidence_agency_row_same_org"
+            columns: ["agency_row_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "agency_rows"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_evidence_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_evidence_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_evidence_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_evidence_withdrawn_by_fkey"
+            columns: ["withdrawn_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activation_evidence_checks: {
+        Row: {
+          checked_at: string
+          checked_by: string | null
+          evidence_id: string
+          id: string
+          method: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          result: string
+        }
+        Insert: {
+          checked_at?: string
+          checked_by?: string | null
+          evidence_id: string
+          id?: string
+          method: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          result: string
+        }
+        Update: {
+          checked_at?: string
+          checked_by?: string | null
+          evidence_id?: string
+          id?: string
+          method?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          result?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_evidence_checks_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_evidence_checks_evidence_same_org"
+            columns: ["evidence_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_evidence"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      activation_files: {
+        Row: {
+          activation_id: string
+          bytes: number
+          created_at: string
+          created_by: string | null
+          file_name: string
+          id: string
+          kind: string
+          mime: string
+          organization_id: string
+          path: string
+          project_id: string
+          restricted: boolean
+        }
+        Insert: {
+          activation_id: string
+          bytes: number
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          id?: string
+          kind: string
+          mime: string
+          organization_id: string
+          path: string
+          project_id: string
+          restricted?: boolean
+        }
+        Update: {
+          activation_id?: string
+          bytes?: number
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          id?: string
+          kind?: string
+          mime?: string
+          organization_id?: string
+          path?: string
+          project_id?: string
+          restricted?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_files_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_files_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activation_messages: {
+        Row: {
+          activation_id: string
+          body: string
+          channel: string
+          created_at: string
+          created_by: string | null
+          derogation_reason: string | null
+          due_on: string | null
+          id: string
+          kind: string
+          organization_id: string
+          press_kit_document_id: string | null
+          project_id: string
+          review_comment: string | null
+          sent_declared_at: string | null
+          sent_declared_by: string | null
+          sent_note: string | null
+          sent_on: string | null
+          sent_proof_url: string | null
+          status: string
+          subject: string | null
+          target_id: string | null
+          updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          activation_id: string
+          body: string
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          derogation_reason?: string | null
+          due_on?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          press_kit_document_id?: string | null
+          project_id: string
+          review_comment?: string | null
+          sent_declared_at?: string | null
+          sent_declared_by?: string | null
+          sent_note?: string | null
+          sent_on?: string | null
+          sent_proof_url?: string | null
+          status?: string
+          subject?: string | null
+          target_id?: string | null
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          activation_id?: string
+          body?: string
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          derogation_reason?: string | null
+          due_on?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          press_kit_document_id?: string | null
+          project_id?: string
+          review_comment?: string | null
+          sent_declared_at?: string | null
+          sent_declared_by?: string | null
+          sent_note?: string | null
+          sent_on?: string | null
+          sent_proof_url?: string | null
+          status?: string
+          subject?: string | null
+          target_id?: string | null
+          updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_messages_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_messages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_messages_sent_declared_by_fkey"
+            columns: ["sent_declared_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_messages_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_messages_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activation_metrics: {
+        Row: {
+          activation_id: string
+          agency_row_id: string | null
+          collected_on: string
+          created_at: string
+          created_by: string | null
+          id: string
+          invalidated_at: string | null
+          invalidated_by: string | null
+          invalidation_reason: string | null
+          label: string | null
+          method: string | null
+          metric: string
+          organization_id: string
+          period_end: string | null
+          period_start: string | null
+          platform: string | null
+          project_id: string
+          source: string
+          target_id: string | null
+          unit: string
+          value: number
+          verification: string
+        }
+        Insert: {
+          activation_id: string
+          agency_row_id?: string | null
+          collected_on: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          label?: string | null
+          method?: string | null
+          metric: string
+          organization_id: string
+          period_end?: string | null
+          period_start?: string | null
+          platform?: string | null
+          project_id: string
+          source: string
+          target_id?: string | null
+          unit?: string
+          value: number
+          verification?: string
+        }
+        Update: {
+          activation_id?: string
+          agency_row_id?: string | null
+          collected_on?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          label?: string | null
+          method?: string | null
+          metric?: string
+          organization_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          platform?: string | null
+          project_id?: string
+          source?: string
+          target_id?: string | null
+          unit?: string
+          value?: number
+          verification?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_metrics_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_metrics_agency_row_same_org"
+            columns: ["agency_row_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "agency_rows"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_metrics_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_metrics_invalidated_by_fkey"
+            columns: ["invalidated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_metrics_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      activation_next_actions: {
+        Row: {
+          activation_id: string
+          created_at: string
+          created_by: string | null
+          due_on: string | null
+          expected_person_id: string | null
+          id: string
+          label: string
+          organization_id: string
+          origin: string
+          project_id: string
+          status: string
+          task_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          activation_id: string
+          created_at?: string
+          created_by?: string | null
+          due_on?: string | null
+          expected_person_id?: string | null
+          id?: string
+          label: string
+          organization_id: string
+          origin: string
+          project_id: string
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activation_id?: string
+          created_at?: string
+          created_by?: string | null
+          due_on?: string | null
+          expected_person_id?: string | null
+          id?: string
+          label?: string
+          organization_id?: string
+          origin?: string
+          project_id?: string
+          status?: string
+          task_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_next_actions_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_next_actions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_next_actions_expected_person_id_fkey"
+            columns: ["expected_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_next_actions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activation_sheets: {
+        Row: {
+          activation_id: string
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_comment: string | null
+          fields: Json
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          target_id: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          activation_id: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_comment?: string | null
+          fields?: Json
+          id?: string
+          kind: string
+          organization_id: string
+          project_id: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          target_id?: string | null
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          activation_id?: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_comment?: string | null
+          fields?: Json
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          target_id?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_sheets_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_sheets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_sheets_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_sheets_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_sheets_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      activation_targets: {
+        Row: {
+          activation_id: string
+          angle: string | null
+          confirmed_warnings: string[]
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          journalist_contact_id: string | null
+          justification: string | null
+          organization_id: string
+          outcome: string | null
+          outcome_at: string | null
+          outcome_by: string | null
+          outcome_reason: string | null
+          owner_person_id: string | null
+          priority: string
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          activation_id: string
+          angle?: string | null
+          confirmed_warnings?: string[]
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journalist_contact_id?: string | null
+          justification?: string | null
+          organization_id: string
+          outcome?: string | null
+          outcome_at?: string | null
+          outcome_by?: string | null
+          outcome_reason?: string | null
+          owner_person_id?: string | null
+          priority?: string
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          activation_id?: string
+          angle?: string | null
+          confirmed_warnings?: string[]
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          journalist_contact_id?: string | null
+          justification?: string | null
+          organization_id?: string
+          outcome?: string | null
+          outcome_at?: string | null
+          outcome_by?: string | null
+          outcome_reason?: string | null
+          owner_person_id?: string | null
+          priority?: string
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activation_targets_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_targets_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_targets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_targets_journalist_same_org"
+            columns: ["journalist_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "activation_targets_outcome_by_fkey"
+            columns: ["outcome_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activation_targets_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_events: {
         Row: {
           actor_person_id: string | null
@@ -139,6 +1100,374 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_reports: {
+        Row: {
+          activation_id: string
+          body: string | null
+          comment: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          file_id: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          received_on: string
+          reserves: Json | null
+          status: string
+          url: string | null
+        }
+        Insert: {
+          activation_id: string
+          body?: string | null
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          file_id?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          received_on: string
+          reserves?: Json | null
+          status?: string
+          url?: string | null
+        }
+        Update: {
+          activation_id?: string
+          body?: string | null
+          comment?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          file_id?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          received_on?: string
+          reserves?: Json | null
+          status?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_reports_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "agency_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_reports_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_reports_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      agency_rows: {
+        Row: {
+          absent_since: string | null
+          activation_id: string
+          agency_status: string | null
+          contact_id: string | null
+          created_at: string
+          current: Json
+          decided_at: string | null
+          decided_by: string | null
+          first_snapshot_id: string | null
+          id: string
+          last_snapshot_id: string | null
+          organization_id: string
+          pds_decision: string
+          pds_note: string | null
+          project_id: string
+          raw: Json
+          row_key: string
+          source_id: string
+          updated_at: string
+        }
+        Insert: {
+          absent_since?: string | null
+          activation_id: string
+          agency_status?: string | null
+          contact_id?: string | null
+          created_at?: string
+          current?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          first_snapshot_id?: string | null
+          id?: string
+          last_snapshot_id?: string | null
+          organization_id: string
+          pds_decision?: string
+          pds_note?: string | null
+          project_id: string
+          raw?: Json
+          row_key: string
+          source_id: string
+          updated_at?: string
+        }
+        Update: {
+          absent_since?: string | null
+          activation_id?: string
+          agency_status?: string | null
+          contact_id?: string | null
+          created_at?: string
+          current?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          first_snapshot_id?: string | null
+          id?: string
+          last_snapshot_id?: string | null
+          organization_id?: string
+          pds_decision?: string
+          pds_note?: string | null
+          project_id?: string
+          raw?: Json
+          row_key?: string
+          source_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_rows_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "agency_rows_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_rows_source_same_org"
+            columns: ["source_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "agency_sources"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      agency_snapshot_rows: {
+        Row: {
+          change: string
+          errors: Json
+          id: string
+          mapped: Json | null
+          organization_id: string
+          position: number | null
+          raw: Json | null
+          row_key: string
+          snapshot_id: string
+        }
+        Insert: {
+          change: string
+          errors?: Json
+          id?: string
+          mapped?: Json | null
+          organization_id: string
+          position?: number | null
+          raw?: Json | null
+          row_key: string
+          snapshot_id: string
+        }
+        Update: {
+          change?: string
+          errors?: Json
+          id?: string
+          mapped?: Json | null
+          organization_id?: string
+          position?: number | null
+          raw?: Json | null
+          row_key?: string
+          snapshot_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_snapshot_rows_snapshot_same_org"
+            columns: ["snapshot_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "agency_snapshots"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      agency_snapshots: {
+        Row: {
+          activation_id: string
+          applied_at: string | null
+          applied_by: string | null
+          errors: Json
+          file_id: string | null
+          headers: string[]
+          id: string
+          organization_id: string
+          project_id: string
+          source_id: string
+          status: string
+          taken_at: string
+          taken_by: string | null
+        }
+        Insert: {
+          activation_id: string
+          applied_at?: string | null
+          applied_by?: string | null
+          errors?: Json
+          file_id?: string | null
+          headers?: string[]
+          id?: string
+          organization_id: string
+          project_id: string
+          source_id: string
+          status?: string
+          taken_at?: string
+          taken_by?: string | null
+        }
+        Update: {
+          activation_id?: string
+          applied_at?: string | null
+          applied_by?: string | null
+          errors?: Json
+          file_id?: string | null
+          headers?: string[]
+          id?: string
+          organization_id?: string
+          project_id?: string
+          source_id?: string
+          status?: string
+          taken_at?: string
+          taken_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_snapshots_applied_by_fkey"
+            columns: ["applied_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_snapshots_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "agency_snapshots_source_same_org"
+            columns: ["source_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "agency_sources"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "agency_snapshots_taken_by_fkey"
+            columns: ["taken_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_sources: {
+        Row: {
+          activation_id: string
+          agency_contact_id: string | null
+          agency_person: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          key_fields: string[]
+          kind: string
+          label: string
+          mapping: Json
+          organization_id: string
+          project_id: string
+          sheet_gid: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          activation_id: string
+          agency_contact_id?: string | null
+          agency_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          key_fields?: string[]
+          kind: string
+          label: string
+          mapping?: Json
+          organization_id: string
+          project_id: string
+          sheet_gid?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          activation_id?: string
+          agency_contact_id?: string | null
+          agency_person?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          key_fields?: string[]
+          kind?: string
+          label?: string
+          mapping?: Json
+          organization_id?: string
+          project_id?: string
+          sheet_gid?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_sources_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "agency_sources_agency_same_org"
+            columns: ["agency_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "agency_sources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
             referencedColumns: ["id"]
           },
         ]
@@ -2967,6 +4296,524 @@ export type Database = {
           },
         ]
       }
+      influence_agreements: {
+        Row: {
+          activation_id: string
+          comment: string | null
+          content: Json
+          content_hash: string
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          displayed_at: string | null
+          evidence: Json | null
+          expires_at: string
+          id: string
+          identity_name: string | null
+          organization_id: string
+          project_id: string
+          proposal_id: string
+          status: string
+          target_id: string
+          token_hash: string
+        }
+        Insert: {
+          activation_id: string
+          comment?: string | null
+          content: Json
+          content_hash: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          displayed_at?: string | null
+          evidence?: Json | null
+          expires_at: string
+          id?: string
+          identity_name?: string | null
+          organization_id: string
+          project_id: string
+          proposal_id: string
+          status?: string
+          target_id: string
+          token_hash: string
+        }
+        Update: {
+          activation_id?: string
+          comment?: string | null
+          content?: Json
+          content_hash?: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          displayed_at?: string | null
+          evidence?: Json | null
+          expires_at?: string
+          id?: string
+          identity_name?: string | null
+          organization_id?: string
+          project_id?: string
+          proposal_id?: string
+          status?: string
+          target_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_agreements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_agreements_proposal_same_org"
+            columns: ["proposal_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "influence_proposals"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "influence_agreements_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      influence_contents: {
+        Row: {
+          activation_id: string
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision: string | null
+          decision_comment: string | null
+          file_id: string | null
+          id: string
+          label: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          target_id: string
+          url: string | null
+        }
+        Insert: {
+          activation_id: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          decision_comment?: string | null
+          file_id?: string | null
+          id?: string
+          label: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          target_id: string
+          url?: string | null
+        }
+        Update: {
+          activation_id?: string
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision?: string | null
+          decision_comment?: string | null
+          file_id?: string | null
+          id?: string
+          label?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          target_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_contents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_contents_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_contents_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "influence_contents_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      influence_feedback: {
+        Row: {
+          category: string
+          comment: string
+          content_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          project_id: string
+          status: string
+          status_at: string | null
+          status_by: string | null
+          timecode: string | null
+        }
+        Insert: {
+          category?: string
+          comment: string
+          content_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          project_id: string
+          status?: string
+          status_at?: string | null
+          status_by?: string | null
+          timecode?: string | null
+        }
+        Update: {
+          category?: string
+          comment?: string
+          content_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          project_id?: string
+          status?: string
+          status_at?: string | null
+          status_by?: string | null
+          timecode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_feedback_content_same_org"
+            columns: ["content_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "influence_contents"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "influence_feedback_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_feedback_status_by_fkey"
+            columns: ["status_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      influence_payments: {
+        Row: {
+          activation_id: string
+          amount: number
+          beneficiary: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          documents_requested: string | null
+          due_on: string | null
+          id: string
+          invoice_file_id: string | null
+          organization_id: string
+          project_id: string
+          proof_file_id: string | null
+          status: string
+          status_note: string | null
+          target_id: string
+          updated_at: string
+        }
+        Insert: {
+          activation_id: string
+          amount: number
+          beneficiary?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          documents_requested?: string | null
+          due_on?: string | null
+          id?: string
+          invoice_file_id?: string | null
+          organization_id: string
+          project_id: string
+          proof_file_id?: string | null
+          status?: string
+          status_note?: string | null
+          target_id: string
+          updated_at?: string
+        }
+        Update: {
+          activation_id?: string
+          amount?: number
+          beneficiary?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          documents_requested?: string | null
+          due_on?: string | null
+          id?: string
+          invoice_file_id?: string | null
+          organization_id?: string
+          project_id?: string
+          proof_file_id?: string | null
+          status?: string
+          status_note?: string | null
+          target_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_payments_invoice_same_org"
+            columns: ["invoice_file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "influence_payments_proof_same_org"
+            columns: ["proof_file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "influence_payments_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      influence_proposals: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          activation_id: string
+          ads_usage: string | null
+          conditions: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          deliverables: string | null
+          exclusivity: string | null
+          expenses: string | null
+          fee_amount: number | null
+          id: string
+          note: string | null
+          organic_usage: string | null
+          organization_id: string
+          party: string
+          project_id: string
+          schedule: string | null
+          target_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          activation_id: string
+          ads_usage?: string | null
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deliverables?: string | null
+          exclusivity?: string | null
+          expenses?: string | null
+          fee_amount?: number | null
+          id?: string
+          note?: string | null
+          organic_usage?: string | null
+          organization_id: string
+          party: string
+          project_id: string
+          schedule?: string | null
+          target_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          activation_id?: string
+          ads_usage?: string | null
+          conditions?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deliverables?: string | null
+          exclusivity?: string | null
+          expenses?: string | null
+          fee_amount?: number | null
+          id?: string
+          note?: string | null
+          organic_usage?: string | null
+          organization_id?: string
+          party?: string
+          project_id?: string
+          schedule?: string | null
+          target_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_proposals_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_proposals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_proposals_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      influence_rights: {
+        Row: {
+          activation_id: string
+          created_at: string
+          created_by: string | null
+          credit_required: boolean
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          ends_on: string | null
+          id: string
+          kind: string
+          modification_allowed: boolean
+          organization_id: string
+          platforms: string[]
+          project_id: string
+          remuneration: string
+          remuneration_note: string | null
+          restrictions: string | null
+          starts_on: string | null
+          status: string
+          superseded_at: string | null
+          supports: string | null
+          target_id: string
+          territory: string | null
+          updated_at: string
+        }
+        Insert: {
+          activation_id: string
+          created_at?: string
+          created_by?: string | null
+          credit_required?: boolean
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          ends_on?: string | null
+          id?: string
+          kind: string
+          modification_allowed?: boolean
+          organization_id: string
+          platforms?: string[]
+          project_id: string
+          remuneration?: string
+          remuneration_note?: string | null
+          restrictions?: string | null
+          starts_on?: string | null
+          status?: string
+          superseded_at?: string | null
+          supports?: string | null
+          target_id: string
+          territory?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activation_id?: string
+          created_at?: string
+          created_by?: string | null
+          credit_required?: boolean
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          ends_on?: string | null
+          id?: string
+          kind?: string
+          modification_allowed?: boolean
+          organization_id?: string
+          platforms?: string[]
+          project_id?: string
+          remuneration?: string
+          remuneration_note?: string | null
+          restrictions?: string | null
+          starts_on?: string | null
+          status?: string
+          superseded_at?: string | null
+          supports?: string | null
+          target_id?: string
+          territory?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influence_rights_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_rights_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "influence_rights_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       legal_agreement_needs: {
         Row: {
           approved_at: string
@@ -4184,6 +6031,149 @@ export type Database = {
           },
           {
             foreignKeyName: "levers_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      marketing_activations: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closure_kind: string | null
+          closure_note: string | null
+          closure_reserves: Json | null
+          created_at: string
+          created_by: string | null
+          deliverable_id: string | null
+          description: string | null
+          due_on: string | null
+          evidence_expected: boolean
+          handoff_id: string | null
+          id: string
+          kind: string
+          lever_id: string | null
+          metrics_expected: boolean
+          mode: string | null
+          objective: string | null
+          organization_id: string
+          owner_person_id: string | null
+          priority: string
+          project_id: string
+          source_kind: string
+          starts_on: string | null
+          status: string
+          status_reason: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_kind?: string | null
+          closure_note?: string | null
+          closure_reserves?: Json | null
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          description?: string | null
+          due_on?: string | null
+          evidence_expected?: boolean
+          handoff_id?: string | null
+          id?: string
+          kind: string
+          lever_id?: string | null
+          metrics_expected?: boolean
+          mode?: string | null
+          objective?: string | null
+          organization_id: string
+          owner_person_id?: string | null
+          priority?: string
+          project_id: string
+          source_kind?: string
+          starts_on?: string | null
+          status?: string
+          status_reason?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_kind?: string | null
+          closure_note?: string | null
+          closure_reserves?: Json | null
+          created_at?: string
+          created_by?: string | null
+          deliverable_id?: string | null
+          description?: string | null
+          due_on?: string | null
+          evidence_expected?: boolean
+          handoff_id?: string | null
+          id?: string
+          kind?: string
+          lever_id?: string | null
+          metrics_expected?: boolean
+          mode?: string | null
+          objective?: string | null
+          organization_id?: string
+          owner_person_id?: string | null
+          priority?: string
+          project_id?: string
+          source_kind?: string
+          starts_on?: string | null
+          status?: string
+          status_reason?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_activations_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_activations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_activations_deliverable_id_fkey"
+            columns: ["deliverable_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_activations_handoff_id_fkey"
+            columns: ["handoff_id"]
+            isOneToOne: false
+            referencedRelation: "production_activation_handoffs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_activations_lever_id_fkey"
+            columns: ["lever_id"]
+            isOneToOne: false
+            referencedRelation: "levers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_activations_owner_person_id_fkey"
+            columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_activations_project_same_org"
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -5691,6 +7681,95 @@ export type Database = {
           },
         ]
       }
+      network_observations: {
+        Row: {
+          activation_id: string | null
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          invalidated_at: string | null
+          invalidated_by: string | null
+          invalidation_reason: string | null
+          kind: string
+          note: string | null
+          observed_on: string
+          organization_id: string
+          platform: string | null
+          source: string
+          text_value: string | null
+          unit: string | null
+          value: number | null
+        }
+        Insert: {
+          activation_id?: string | null
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          kind: string
+          note?: string | null
+          observed_on: string
+          organization_id: string
+          platform?: string | null
+          source: string
+          text_value?: string | null
+          unit?: string | null
+          value?: number | null
+        }
+        Update: {
+          activation_id?: string | null
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          invalidation_reason?: string | null
+          kind?: string
+          note?: string | null
+          observed_on?: string
+          organization_id?: string
+          platform?: string | null
+          source?: string
+          text_value?: string | null
+          unit?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_observations_activation_same_org"
+            columns: ["activation_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_activations"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "network_observations_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "network_observations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_observations_invalidated_by_fkey"
+            columns: ["invalidated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_person_id: string | null
@@ -5901,6 +7980,119 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      press_opportunities: {
+        Row: {
+          activation_id: string
+          brief: string | null
+          confirmation_channel: string | null
+          confirmation_proof_url: string | null
+          confirmed_at: string | null
+          confirmed_by_name: string | null
+          constraints_note: string | null
+          created_at: string
+          created_by: string | null
+          format: string | null
+          id: string
+          location: string | null
+          organization_id: string
+          origin_message_id: string | null
+          participants: string | null
+          pds_person_id: string | null
+          project_id: string
+          scheduled_at: string | null
+          status: string
+          status_note: string | null
+          subject: string | null
+          target_id: string
+          timezone: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          activation_id: string
+          brief?: string | null
+          confirmation_channel?: string | null
+          confirmation_proof_url?: string | null
+          confirmed_at?: string | null
+          confirmed_by_name?: string | null
+          constraints_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          format?: string | null
+          id?: string
+          location?: string | null
+          organization_id: string
+          origin_message_id?: string | null
+          participants?: string | null
+          pds_person_id?: string | null
+          project_id: string
+          scheduled_at?: string | null
+          status?: string
+          status_note?: string | null
+          subject?: string | null
+          target_id: string
+          timezone?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          activation_id?: string
+          brief?: string | null
+          confirmation_channel?: string | null
+          confirmation_proof_url?: string | null
+          confirmed_at?: string | null
+          confirmed_by_name?: string | null
+          constraints_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          format?: string | null
+          id?: string
+          location?: string | null
+          organization_id?: string
+          origin_message_id?: string | null
+          participants?: string | null
+          pds_person_id?: string | null
+          project_id?: string
+          scheduled_at?: string | null
+          status?: string
+          status_note?: string | null
+          subject?: string | null
+          target_id?: string
+          timezone?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_opportunities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_opportunities_origin_message_id_fkey"
+            columns: ["origin_message_id"]
+            isOneToOne: false
+            referencedRelation: "activation_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_opportunities_pds_person_id_fkey"
+            columns: ["pds_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_opportunities_target_same_org"
+            columns: ["target_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "activation_targets"
+            referencedColumns: ["id", "organization_id"]
           },
         ]
       }
@@ -9247,6 +11439,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          activation_id: string | null
           assignee_person_id: string
           created_at: string
           created_by: string | null
@@ -9264,6 +11457,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          activation_id?: string | null
           assignee_person_id: string
           created_at?: string
           created_by?: string | null
@@ -9281,6 +11475,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          activation_id?: string | null
           assignee_person_id?: string
           created_at?: string
           created_by?: string | null
@@ -9526,9 +11721,17 @@ export type Database = {
       }
     }
     Functions: {
+      accept_influence_terms: {
+        Args: { p_proposal_id: string }
+        Returns: undefined
+      }
       acknowledge_master_transmission: {
         Args: { p_token: string }
         Returns: string
+      }
+      activation_can_write: {
+        Args: { p_activation_id: string }
+        Returns: boolean
       }
       add_clearance_rightsholder: {
         Args: {
@@ -9552,6 +11755,16 @@ export type Database = {
         Args: { p_items: Json; p_project_id: string }
         Returns: number
       }
+      advance_activation_message: {
+        Args: {
+          p_action: string
+          p_comment: string | null
+          p_message_id: string
+          p_proof_url: string | null
+          p_sent_on: string | null
+        }
+        Returns: undefined
+      }
       advance_clearance: {
         Args: { p_clearance_id: string; p_note: string | null; p_status: string }
         Returns: undefined
@@ -9569,9 +11782,22 @@ export type Database = {
         Args: { p_deliverable_id: string; p_step: string }
         Returns: undefined
       }
+      advance_influence_payment: {
+        Args: {
+          p_note: string | null
+          p_payment_id: string
+          p_proof_file_id: string | null
+          p_status: string
+        }
+        Returns: undefined
+      }
       answer_master_question: {
         Args: { p_choices?: string[]; p_question_id: string; p_text: string }
         Returns: undefined
+      }
+      apply_agency_snapshot: {
+        Args: { p_keys: string[] | null; p_snapshot_id: string }
+        Returns: string
       }
       apply_master_question: {
         Args: { p_question_id: string }
@@ -9672,6 +11898,15 @@ export type Database = {
         Returns: string[]
       }
       clearance_rights: { Args: { p_scope: string }; Returns: string[] }
+      close_activation: {
+        Args: {
+          p_activation_id: string
+          p_kind: string
+          p_note: string | null
+          p_reserves: Json | null
+        }
+        Returns: undefined
+      }
       complete_formality: {
         Args: {
           p_external_id: string | null
@@ -9690,6 +11925,16 @@ export type Database = {
         Returns: undefined
       }
       contract_placeholders: { Args: { p_body: string }; Returns: string[] }
+      create_activation_task: {
+        Args: {
+          p_activation_id: string
+          p_assignee_person_id: string
+          p_due_date: string
+          p_label: string
+          p_origin: string
+        }
+        Returns: string
+      }
       create_contract_template: {
         Args: {
           p_body: string
@@ -9821,6 +12066,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      decide_activation_sheet: {
+        Args: { p_action: string; p_comment: string; p_sheet_id: string }
+        Returns: undefined
+      }
+      decide_agency_report: {
+        Args: {
+          p_comment: string | null
+          p_decision: string
+          p_report_id: string
+          p_reserves: Json | null
+        }
+        Returns: undefined
+      }
       decide_clearance_terms: {
         Args: { p_accept: boolean; p_terms_id: string }
         Returns: undefined
@@ -9832,6 +12090,14 @@ export type Database = {
           p_dimensions?: string[]
           p_validation_id: string
         }
+        Returns: undefined
+      }
+      decide_influence_content: {
+        Args: { p_comment: string; p_content_id: string; p_decision: string }
+        Returns: undefined
+      }
+      decide_influence_rights: {
+        Args: { p_decision: string; p_note: string; p_rights_id: string }
         Returns: undefined
       }
       decide_mix_version: {
@@ -9892,6 +12158,10 @@ export type Database = {
       design_is_in_progress: {
         Args: { p_project_id: string }
         Returns: boolean
+      }
+      discard_agency_snapshot: {
+        Args: { p_snapshot_id: string }
+        Returns: undefined
       }
       dismiss_legal_plan_keys: {
         Args: { p_keys: string[]; p_project_id: string }
@@ -10162,6 +12432,10 @@ export type Database = {
         Returns: undefined
       }
       mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number }
+      marketing_can_validate: {
+        Args: { p_project_id: string }
+        Returns: boolean
+      }
       master_is_live: { Args: { p_master_id: string }; Returns: boolean }
       new_split_confirmation: { Args: { p_entry_id: string }; Returns: string }
       normalize_email: { Args: { input: string }; Returns: string }
@@ -10334,6 +12608,7 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: undefined
       }
+      get_influence_agreement: { Args: { p_token: string }; Returns: Json }
       get_legal_form: { Args: { p_token: string }; Returns: Json }
       legal_name_key: { Args: { p_name: string }; Returns: string }
       launch_legal_plan: {
@@ -10392,6 +12667,10 @@ export type Database = {
         Args: { p_id: string }
         Returns: undefined
       }
+      reopen_activation: {
+        Args: { p_activation_id: string; p_reason: string }
+        Returns: undefined
+      }
       reopen_release_delivery: {
         Args: { p_release_id: string }
         Returns: undefined
@@ -10399,6 +12678,17 @@ export type Database = {
       require_formality_action: {
         Args: { p_fields: string[]; p_formality_id: string; p_note: string }
         Returns: undefined
+      }
+      respond_influence_agreement: {
+        Args: {
+          p_comment: string | null
+          p_consent: boolean | null
+          p_decision: string
+          p_hash: string | null
+          p_name: string | null
+          p_token: string | null
+        }
+        Returns: string
       }
       respond_split_confirmation: {
         Args: {
@@ -10531,6 +12821,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      prepare_influence_agreement: {
+        Args: { p_proposal_id: string }
+        Returns: string
+      }
       prepare_legal_form: {
         Args: {
           p_contact_id: string | null
@@ -10553,6 +12847,16 @@ export type Database = {
           p_project_id: string
           p_question_key: string
           p_text: string
+        }
+        Returns: string
+      }
+      record_agency_preview: {
+        Args: {
+          p_errors: Json | null
+          p_file_id: string | null
+          p_headers: string[] | null
+          p_rows: Json
+          p_source_id: string
         }
         Returns: string
       }
@@ -10611,7 +12915,20 @@ export type Database = {
         Args: { p_action: string; p_priority?: string; p_topic: string }
         Returns: undefined
       }
+      revoke_influence_agreement: {
+        Args: { p_agreement_id: string }
+        Returns: undefined
+      }
       role_permissions: { Args: { p_role: string }; Returns: string[] }
+      save_activation_sheet: {
+        Args: {
+          p_activation_id: string
+          p_fields: Json
+          p_kind: string
+          p_target_id: string | null
+        }
+        Returns: string
+      }
       save_call_report: {
         Args: {
           p_call_id: string

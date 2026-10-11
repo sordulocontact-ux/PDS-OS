@@ -176,6 +176,24 @@ Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 undecies),
   confirmer avec un juriste pour les œuvres où le partage Phono diffère de la répartition de
   l'édition.
 
+### Points à trancher : Marketing / Activations (tickets du 11/10/2026)
+
+Construit sur le socle MVP des trois tickets (`docs/ARCHITECTURE.md` § 8 duodecies). Non prévu
+par les tickets ou laissé « à confirmer », donc décidé provisoirement ou reporté :
+
+- **Validateur PDS** : DG ou directeur créatif du projet ; la séparation des rôles (interdire
+  l'auto-validation) n'est pas activée. À confirmer avec le DG.
+- **Accord express** : valeur probatoire, mentions, durée de conservation et base légale à valider
+  par le Juridique avant toute donnée réelle (exigence du ticket). L'adresse IP n'est pas gardée.
+- **Paiement administratif** : rôle « Finance / administration » absent de l'app ; les montants et
+  justificatifs sont lus par le responsable du projet et la direction (`can_read_project_budget`).
+- **Agence** : Google Sheets lu par son export CSV public (le tableau doit être partagé « lecteur
+  avec le lien ») ; pas de synchronisation planifiée ni d'OCR des PDF (après MVP).
+- **Réseau** : fusion de doublons, historique daté des rattachements d'un journaliste à ses médias,
+  demandes RGPD (effacement, restriction) : non construits.
+- **Bilan Marketing** : le ticket « Bilan, validation et clôture » n'est pas codé ; Suivi & bilan
+  lit déjà les trois axes et les réserves de chaque activation.
+
 ### Vocabulaire fixé
 
 Trois objets, trois noms. Ne jamais en introduire d'autres dans l'interface.

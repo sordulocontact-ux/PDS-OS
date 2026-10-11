@@ -6,10 +6,18 @@ import { parsePublicEnv } from "@/lib/env-public";
 import type { Database } from "@/lib/supabase/database.types";
 
 // Paths that never need a session: public smartlinks, fiches de
-// renseignements and the Master's packages (their token is checked by the
-// database), the shared strategy documents (/d/) and the cron job
+// renseignements, the Master's packages and the creators' express agreements
+// (/i/ : their token is checked by the database), the shared strategy documents (/d/) and the cron job
 // (authenticated by its own secret). Skipping them saves an auth round trip.
-const SESSIONLESS_PREFIXES = ["/l/", "/f/", "/m/", "/s/", "/d/", "/api/cron/"];
+const SESSIONLESS_PREFIXES = [
+  "/l/",
+  "/f/",
+  "/m/",
+  "/s/",
+  "/d/",
+  "/i/",
+  "/api/cron/",
+];
 
 function isProtected(pathname: string): boolean {
   return pathname === routes.app || pathname.startsWith(`${routes.app}/`);

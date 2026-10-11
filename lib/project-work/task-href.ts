@@ -5,12 +5,14 @@ type LinkedTask = {
   project_id: string;
   master_question_id: string | null;
   deliverable_id: string | null;
+  activation_id: string | null;
 };
 
 /**
  * Where a task leads: where it is done (UX test of 09/10/2026, section 5:
  * « Livrer la miniature » opened the Cadrage). The Juridique's action, the
- * Brief's question, the deliverable in the Conception; otherwise the
+ * Brief's question, the deliverable in the Conception, the Marketing
+ * activation it was created from; otherwise the
  * project's Travail, where it is ticked — `null` when already there.
  */
 export function taskHref(
@@ -25,5 +27,7 @@ export function taskHref(
       task.project_id,
       task.deliverable_id,
     );
+  if (task.activation_id)
+    return routes.projectActivation(task.project_id, task.activation_id);
   return onWorkPage ? null : routes.projectWork(task.project_id);
 }

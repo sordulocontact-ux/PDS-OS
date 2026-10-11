@@ -24,6 +24,8 @@ const FORM_ROLE_OF: Record<NetworkRole, FormRole> = {
   publisher: "publisher",
   distributor: "other",
   media: "other",
+  journalist: "other",
+  influencer: "provider",
   manager: "other",
   other: "other",
 };

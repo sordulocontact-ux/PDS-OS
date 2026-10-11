@@ -688,3 +688,83 @@ export const readinessTone: Record<string, Tone> = {
   open: "warning",
   not_required: "neutral",
 };
+
+/** Marketing › Activations (lib/activations/states.ts): the operational
+ * status, set by a person; « Réalisée déclarée » waits for its proof. */
+export const activationStatusTone: Record<string, Tone> = {
+  draft: "neutral",
+  to_prepare: "neutral",
+  ready: "info",
+  in_progress: "info",
+  done_declared: "warning",
+  closed: "success",
+  cancelled: "neutral",
+  suspended: "warning",
+  blocked: "danger",
+};
+
+/** The proof of an activation, computed: only a successful check is green. */
+export const proofTone: Record<string, Tone> = {
+  not_expected: "neutral",
+  to_provide: "warning",
+  provided_unverified: "action",
+  verified: "success",
+  contested: "danger",
+  unavailable: "danger",
+};
+
+/** The statistics of an activation: declared ones are not verified ones. */
+export const measureTone: Record<string, Tone> = {
+  not_expected: "neutral",
+  to_collect: "warning",
+  partial: "warning",
+  available_declared: "action",
+  available_verified: "success",
+};
+
+/** A versioned sheet (framing, concept) and a message to an outside party. */
+export const activationSheetTone: Record<string, Tone> = {
+  draft: "neutral",
+  to_validate: "action",
+  validated: "success",
+  changes_requested: "warning",
+  refused: "danger",
+};
+export const activationMessageTone: Record<string, Tone> = {
+  draft: "neutral",
+  to_validate: "action",
+  validated: "info",
+  sent_declared: "success",
+  cancelled: "neutral",
+};
+
+/** A blocker's severity, an alert's. */
+export const severityTone: Record<string, Tone> = {
+  low: "neutral",
+  medium: "warning",
+  high: "danger",
+};
+
+/** An influence collaboration's step (lib/activations/influence/stage.ts). */
+export const collaborationStageTone: Record<string, Tone> = {
+  candidate: "neutral",
+  concept_to_validate: "action",
+  validated_internal: "info",
+  to_contact: "info",
+  negotiation: "info",
+  agreement_to_obtain: "warning",
+  agreed: "info",
+  content_in_progress: "info",
+  in_validation: "action",
+  ready_to_publish: "info",
+  published_declared: "warning",
+  published_verified: "success",
+  administration: "warning",
+  closed: "success",
+  refused: "neutral",
+  no_response: "neutral",
+  abandoned: "neutral",
+  cancelled: "neutral",
+  dispute: "danger",
+  declined: "neutral",
+};

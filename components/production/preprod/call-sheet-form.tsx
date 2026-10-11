@@ -13,7 +13,7 @@ import {
   type CallSheet,
 } from "@/lib/production/preprod/types";
 
-import { DialogButton } from "./dialog-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 
 const t = fr.productionPreprod.callSheet;
 

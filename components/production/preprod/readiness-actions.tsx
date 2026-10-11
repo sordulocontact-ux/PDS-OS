@@ -15,8 +15,8 @@ import {
 } from "@/lib/production/preprod/actions-readiness";
 import type { CheckRow } from "@/lib/production/preprod/readiness";
 
-import { ConfirmButton } from "./confirm-button";
-import { DialogButton } from "./dialog-button";
+import { ConfirmButton } from "@/components/ui/confirm-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 
 const t = fr.productionPreprod.readiness;
 

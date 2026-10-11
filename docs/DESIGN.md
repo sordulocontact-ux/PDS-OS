@@ -293,8 +293,8 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   « Budget », 28 px medium, `text-display-md` ; plus grand que la maquette à la demande de Sacha), puis les chevrons du workflow s'il en a, puis le contenu.
   Plus de titre du projet (le sélecteur de la sidebar le nomme), ni d'artiste, ni de h2 +
   phrase d'en-tête sur la page : l'étape est dite par son chevron. Une sous-page ouverte
-  depuis la section (Brief Mix/Master, branches du Juridique, Brief de cadrage) a un **fil
-  d'Ariane** à la place : « Master / Brief Mix/Master », parents en gris et en lien
+  depuis la section (branches du Juridique, Brief de cadrage) a un **fil
+  d'Ariane** à la place : « Juridique / Plan d'action / … », parents en gris et en lien
   (`ProjectPageTitle`, `projectTrail` dans `lib/ui/project-sections.ts`). L'action d'une
   page (« Nouveau call », « Ajouter une tâche ») reste, à droite au-dessus du contenu
   (`ProjectPageActions`). Projet non lancé : son titre et son type restent l'en-tête.
@@ -308,9 +308,9 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   `LegalSteps` ; le Cadrage et la Confirmation vivent sur l'État des lieux, le Suivi est le
   Plan d'action lancé ; le chevron devient « Suivi » une fois le plan lancé, et sous les
   chevrons une ligne « Étape du dossier · … » donne l'une des cinq étapes du DG, un état et
-  jamais un chevron : `legalPhase`), Master (**Préparation · Mixage · Mastering · Master
-  final**, sans numéro, `SectionSteps`, une étape pouvant couvrir une sous-page : le Brief
-  sous Préparation ; les validations du mix et du master vivent dans Mixage et Mastering,
+  jamais un chevron : `legalPhase`), Master (**Source · Brief · Mixage · Mastering · Master
+  final**, sans numéro, `SectionSteps`, depuis le 11/10/2026 : le Brief a son chevron, plus
+  de sous-page cachée sous une étape ; l'envoi au mixeur se fait dans Mixage ; les validations du mix et du master vivent dans Mixage et Mastering,
   jamais une étape à part) et Distribution (**Préparation · En ligne** : la page Sortie en
   deux, `lib/ui/distribution-steps.ts`). Le
   Cadrage n'a pas de chevrons : il est au-dessus des workflows (les 7 chevrons du parcours,

@@ -16,8 +16,8 @@ import {
 } from "@/lib/production/post/rules";
 import type { PostScope } from "@/lib/production/post/types";
 
-import { FilePickField } from "./file-pick-field";
-import { usePostSubmit } from "./use-post-submit";
+import { FilePickField } from "@/components/ui/file-pick-field";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 
 const t = fr.productionPost.references;
 const HTTPS = /^https:\/\/\S+$/;
@@ -33,7 +33,7 @@ export function ReferenceForm({
   const [kind, setKind] = useState<ReferenceKind>("link");
   const [file, setFile] = useState<File | null>(null);
   const [missing, setMissing] = useState<string | null>(null);
-  const { pending, error, run } = usePostSubmit(onDone, t.done);
+  const { pending, error, run } = useWriteSubmit(onDone, t.done);
 
   function submit(form: HTMLFormElement) {
     const data = new FormData(form);

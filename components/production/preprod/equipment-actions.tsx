@@ -14,10 +14,10 @@ import {
 import type { Equipment } from "@/lib/production/preprod/types";
 import type { NetworkOption } from "@/lib/production/sheet";
 
-import { ConfirmButton } from "./confirm-button";
-import { DialogButton } from "./dialog-button";
+import { ConfirmButton } from "@/components/ui/confirm-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 import { EquipmentForm } from "./equipment-form";
-import { RecordMenu } from "./record-menu";
+import { RecordMenu } from "@/components/ui/record-menu";
 
 const t = fr.productionPreprod.equipment;
 
