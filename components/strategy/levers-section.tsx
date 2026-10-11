@@ -4,7 +4,7 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { LeverForm } from "@/components/strategy/lever-form";
 import { LeverRow } from "@/components/strategy/lever-row";
-import { labelClass } from "@/components/strategy/option-class";
+import { labelClass } from "@/components/ui/option-class";
 import { fr } from "@/lib/i18n/fr";
 import {
   addLever,

@@ -187,9 +187,14 @@ export const routes = {
     `/app/projects/${id}/strategy?d=${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
   // The Conception's direct work (Chemin B), on one target: a deliverable
-  // (design_deliverables.id) or « direction ».
-  projectDesignWork: (id: string, target?: string) =>
-    `/app/projects/${id}/design/work${target ? `?d=${target}` : ""}`,
+  // (design_deliverables.id) or « direction »; `topic` unfolds one question.
+  projectDesignWork: (id: string, target?: string, topic?: string) => {
+    const query = new URLSearchParams({
+      ...(target ? { d: target } : {}),
+      ...(topic ? { q: topic } : {}),
+    }).toString();
+    return `/app/projects/${id}/design/work${query ? `?${query}` : ""}`;
+  },
   // Moodboards and references, one resource linked to any number of targets.
   projectDesignReferences: (id: string) =>
     `/app/projects/${id}/design/references`,

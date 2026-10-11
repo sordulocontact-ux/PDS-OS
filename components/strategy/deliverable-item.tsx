@@ -1,6 +1,6 @@
 "use client";
 
-import { optionClass } from "@/components/strategy/option-class";
+import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";

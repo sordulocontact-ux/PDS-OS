@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { labelClass } from "@/components/strategy/option-class";
+import { labelClass } from "@/components/ui/option-class";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";

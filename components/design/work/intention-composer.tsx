@@ -30,7 +30,7 @@ export function IntentionComposer({
   const t = fr.conceptionWork.composer;
   return (
     <form
-      className="ml-auto flex w-full max-w-[85%] flex-col gap-2"
+      className="flex w-full flex-col gap-2"
       onSubmit={(e) => {
         e.preventDefault();
         const text = String(new FormData(e.currentTarget).get("text") ?? "");

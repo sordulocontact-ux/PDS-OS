@@ -1,31 +1,27 @@
-import { sectionTitleClass } from "@/components/strategy/option-class";
-import type { StrategyTextField } from "@/lib/framing/brief";
-import { fr } from "@/lib/i18n/fr";
-import type { ChoiceValue } from "@/lib/strategy/choices";
+import { sectionTitleClass } from "@/components/ui/option-class";
 
-// A Strategy question for anyone who only reads: the chosen answers in blue,
-// then the answer text.
+/**
+ * A closed-choice question for anyone who only reads (Stratégie,
+ * Conception): the chosen answers in blue, then the answer text.
+ */
 export function ChoicesReadOnly({
-  field,
-  value,
+  question,
+  chosen,
   text,
+  empty,
 }: {
-  field: StrategyTextField;
-  value: ChoiceValue;
+  question: string;
+  // Labels of the checked choices, then the « Autre » text.
+  chosen: string[];
   text: string | null;
+  // Shown when nothing is answered yet.
+  empty: string;
 }) {
-  const t = fr.strategy.choices;
-  const labels: Record<string, string> = t.options[field];
-  const chosen = [
-    ...value.choices.map((c) => labels[c]),
-    ...(value.other ? [value.other] : []),
-  ];
-
   return (
     <section className="flex flex-col gap-4">
-      <h3 className={sectionTitleClass}>{t.questions[field]}</h3>
+      <h3 className={sectionTitleClass}>{question}</h3>
       {chosen.length === 0 && !text ? (
-        <p className="text-body-md text-muted-foreground">{t.none}</p>
+        <p className="text-body-md text-muted-foreground">{empty}</p>
       ) : (
         <>
           {chosen.length > 0 && (

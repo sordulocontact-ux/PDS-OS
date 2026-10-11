@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { labelClass } from "@/components/strategy/option-class";
+import { labelClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FilterChip } from "@/components/ui/filter-chip";

@@ -4,8 +4,13 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { designDone, type DesignResult } from "@/lib/design/actions/shared";
+import {
+  isIntentionChoice,
+  MAX_OTHER_CHARS,
+} from "@/lib/design/intention-choices";
 import { DESIGN_TOPICS } from "@/lib/design/intentions";
 import { fr } from "@/lib/i18n/fr";
+import type { ChoiceValue } from "@/lib/ui/choice-value";
 import { createClient } from "@/lib/supabase/server";
 
 // Every write goes through the user's session: the database lets the owner
@@ -18,12 +23,16 @@ const invalid: DesignResult = {
   error: fr.conceptionWork.errors.invalid,
 };
 
-/** A person's answer to one question: the confirmed intention of a topic. */
+/**
+ * A person's answer to one question: the confirmed intention of a topic,
+ * with the choices checked to write it (shown again when reopened).
+ */
 export async function saveDesignIntention(
   projectId: string,
   deliverableId: string | null,
   topic: string,
   text: string,
+  choices: ChoiceValue,
 ): Promise<DesignResult> {
   const parsed = z
     .object({
@@ -31,16 +40,28 @@ export async function saveDesignIntention(
       deliverableId: z.uuid().nullable(),
       topic: z.enum(DESIGN_TOPICS),
       text: value,
+      choices: z.object({
+        choices: z.array(z.string()).max(20),
+        other: z.string().trim().max(MAX_OTHER_CHARS).nullable(),
+      }),
     })
-    .safeParse({ projectId, deliverableId, topic, text });
+    .refine((p) =>
+      p.choices.choices.every((c) => isIntentionChoice(p.topic, c)),
+    )
+    .safeParse({ projectId, deliverableId, topic, text, choices });
   if (!parsed.success) return invalid;
   await requireApproved();
+  const p = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_design_intention", {
-    p_project_id: parsed.data.projectId,
-    p_deliverable_id: parsed.data.deliverableId,
-    p_topic: parsed.data.topic,
-    p_value: parsed.data.text,
+    p_project_id: p.projectId,
+    p_deliverable_id: p.deliverableId,
+    p_topic: p.topic,
+    p_value: p.text,
+    p_choices: {
+      choices: [...new Set(p.choices.choices)],
+      other: p.choices.other || null,
+    },
   });
   return designDone(projectId, error, "saveDesignIntention");
 }

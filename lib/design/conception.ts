@@ -13,9 +13,11 @@ import {
   type IntentionStatus,
   type IntentionTarget,
 } from "@/lib/design/intentions";
+import { toIntentionChoices } from "@/lib/design/intention-choices";
 import { todayInParis } from "@/lib/insights/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { referenceDate } from "@/lib/strategy/calendar";
+import type { ChoiceValue } from "@/lib/ui/choice-value";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import { upstreamChains, type UpstreamStep } from "@/lib/strategy/upstream";
 import { createClient } from "@/lib/supabase/server";
@@ -52,6 +54,8 @@ export type ConceptionIntention = {
   deliverableId: string | null;
   topic: DesignTopic;
   value: string;
+  // The choices checked to write it (empty for a proposal of PO).
+  choices: ChoiceValue;
   status: Exclude<IntentionStatus, "rejected">;
   sourceType: IntentionSourceType;
   sourceId: string | null;
@@ -162,7 +166,7 @@ export async function loadConception(
     supabase
       .from("design_intentions")
       .select(
-        "id, target, design_deliverable_id, topic, value, status, source_type, source_id, source_quote, created_at",
+        "id, target, design_deliverable_id, topic, value, choices, status, source_type, source_id, source_quote, created_at",
       )
       .eq("project_id", projectId)
       .in("status", ["proposed", "confirmed"])
@@ -259,6 +263,7 @@ export async function loadConception(
               deliverableId: row.design_deliverable_id,
               topic: row.topic,
               value: row.value,
+              choices: toIntentionChoices(row.topic, row.choices),
               status: row.status,
               sourceType: row.source_type as IntentionSourceType,
               sourceId: row.source_id,

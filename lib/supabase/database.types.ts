@@ -3175,6 +3175,7 @@ export type Database = {
       }
       design_intentions: {
         Row: {
+          choices: Json | null
           created_at: string
           created_by: string | null
           design_deliverable_id: string | null
@@ -3196,6 +3197,7 @@ export type Database = {
           value: string
         }
         Insert: {
+          choices?: Json | null
           created_at?: string
           created_by?: string | null
           design_deliverable_id?: string | null
@@ -3217,6 +3219,7 @@ export type Database = {
           value: string
         }
         Update: {
+          choices?: Json | null
           created_at?: string
           created_by?: string | null
           design_deliverable_id?: string | null
@@ -14234,6 +14237,7 @@ export type Database = {
       }
       save_design_intention: {
         Args: {
+          p_choices?: Json
           p_deliverable_id: string | null
           p_project_id: string
           p_topic: string

@@ -229,6 +229,13 @@ export const strategyDimensionTone: Record<string, Tone> = {
   complete: "success",
 };
 
+/** A question of the Conception's intentions: no confirmed answer yet, or
+ * answered — the same tones as the Stratégie's dimensions. */
+export const intentionTopicTone: Record<"to_complete" | "complete", Tone> = {
+  to_complete: strategyDimensionTone.to_complete,
+  complete: strategyDimensionTone.complete,
+};
+
 /** A version of a strategy document: ready to send, waiting for its
  * reviewers, validated, to correct, or replaced by a newer one. */
 export const strategyDocumentTone: Record<string, Tone> = {

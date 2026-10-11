@@ -3,7 +3,7 @@
 -- « à qualifier »), creative calls, sources, intentions and references.
 -- Run with `supabase test db`.
 begin;
-select plan(27);
+select plan(30);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -170,6 +170,16 @@ select lives_ok($$ select public.save_design_intention(pg_temp.prj(), pg_temp.id
 select is((select string_agg(status, ',' order by created_at) from public.design_intentions
             where design_deliverable_id = pg_temp.id_of('dd') and topic = 'story'),
           'replaced,confirmed', 'one confirmed answer per topic, the previous one kept');
+select lives_ok($$ select public.save_design_intention(pg_temp.prj(), pg_temp.id_of('dd'), 'look',
+                   'L''image est sombre et contrastée.', '{"choices": ["dark"], "other": null}'::jsonb) $$,
+                'an answer is saved with the choices checked to write it');
+select is((select choices from public.design_intentions
+            where design_deliverable_id = pg_temp.id_of('dd') and topic = 'look' and status = 'confirmed'),
+          '{"choices": ["dark"], "other": null}'::jsonb,
+          'the choices are kept with the answer');
+select throws_ok($$ select public.save_design_intention(pg_temp.prj(), pg_temp.id_of('dd'), 'tone',
+                   'Intime', '["intimate"]'::jsonb) $$,
+                 '23514', null, 'choices keep their shape');
 
 -- A source feeding two targets with one passage, and one PO could not place.
 with x as (

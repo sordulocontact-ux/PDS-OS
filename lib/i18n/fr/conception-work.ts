@@ -2,7 +2,7 @@
 export const conceptionWork = {
   title: "Travail direct",
   intro:
-    "PO part de ce que la Stratégie et le Cadrage disent déjà, et ne pose que les questions qui manquent.",
+    "PO reprend ce que la Stratégie et le Cadrage disent déjà. Pour chaque question, cochez des choix : la réponse s'écrit, retouchez-la puis enregistrez.",
   readOnly:
     "Lecture seule : le chef de projet et l'équipe créative écrivent ici pendant la conception.",
 
@@ -10,6 +10,7 @@ export const conceptionWork = {
     label: "Ce que vous travaillez",
     direction: "Direction créative",
     answered: (n: number, total: number) => `${n} sur ${total} posées`,
+    count: (n: number, total: number) => `${n}/${total}`,
     proposals: (n: number) => (n === 1 ? "1 proposition" : `${n} propositions`),
     toQualify: "À qualifier",
   },
@@ -59,31 +60,119 @@ export const conceptionWork = {
       musts:
         "Qu'est-ce qui doit se retrouver partout, ou n'apparaître nulle part ?",
     },
-    remaining: (n: number) =>
-      n === 1
-        ? "Encore 1 question après celle-ci."
-        : `Encore ${n} questions après celle-ci.`,
-    allDone:
-      "Les intentions sont posées. Vous pouvez les modifier à tout moment.",
-    allDoneDirection:
-      "La direction créative est posée. Vous pouvez la modifier à tout moment.",
-    skipped:
-      "Questions laissées pour plus tard. Elles reviendront à votre prochain passage.",
-    restart: "Reprendre les questions",
   },
 
+  // The four questions, numbered and unfolded in place like the Stratégie's
+  // dimensions (lib/design/intention-choices.ts).
+  topicsLabel: "Questions de la conception",
+  topicStates: {
+    to_complete: "À compléter",
+    complete: "Complété",
+  },
+  // One sentence atop an unfolded question: what it decides.
+  topicPurposes: {
+    story: "Le propos : ce que l'on met en scène.",
+    look: "L'image : esthétique, lumière, couleurs.",
+    tone: "L'émotion que l'on veut faire ressentir.",
+    musts: "Ce qui doit absolument y être, et ce qui ne doit pas y apparaître.",
+  },
+  notDefined: "Pas encore défini",
+
+  choices: {
+    options: {
+      story: {
+        artist_story: "L'histoire derrière le titre",
+        lyrics: "Les paroles mises en images",
+        portrait: "Un portrait de l'artiste",
+        performance: "L'artiste en performance",
+        concept: "Un concept, une métaphore visuelle",
+        universe: "La suite de l'univers de l'artiste",
+      },
+      look: {
+        minimal: "Épuré, minimaliste",
+        cinematic: "Cinématographique",
+        raw: "Brut, documentaire",
+        colorful: "Coloré, pop",
+        dark: "Sombre, contrasté",
+        retro: "Rétro, grain vintage",
+      },
+      tone: {
+        intimate: "Intime",
+        energetic: "Énergique",
+        melancholic: "Mélancolique",
+        bright: "Solaire, joyeux",
+        offbeat: "Décalé, drôle",
+        committed: "Engagé",
+      },
+      musts: {
+        artist_on_screen: "L'artiste à l'écran",
+        lyrics_on_screen: "Les paroles à l'écran",
+        visual_identity: "L'identité visuelle de l'artiste (logo, couleurs)",
+        vertical_format: "Une déclinaison verticale pour les réseaux",
+        no_brands: "Aucune marque visible",
+        no_explicit: "Rien d'explicite",
+      },
+    },
+    // Fragments used to write the answer from the checked choices (code, not AI).
+    phrases: {
+      story: {
+        artist_story: "l'histoire personnelle derrière le titre",
+        lyrics: "les paroles du titre, mises en images",
+        portrait: "un portrait de l'artiste",
+        performance: "l'artiste en performance",
+        concept: "un concept, une métaphore visuelle",
+        universe: "la suite de l'univers de l'artiste",
+      },
+      look: {
+        minimal: "épurée et minimaliste",
+        cinematic: "cinématographique",
+        raw: "brute, façon documentaire",
+        colorful: "colorée et pop",
+        dark: "sombre et contrastée",
+        retro: "rétro, avec un grain vintage",
+      },
+      tone: {
+        intimate: "intime",
+        energetic: "énergique",
+        melancholic: "mélancolique",
+        bright: "solaire et joyeux",
+        offbeat: "décalé et drôle",
+        committed: "engagé",
+      },
+      musts: {
+        artist_on_screen: "l'artiste à l'écran",
+        lyrics_on_screen: "les paroles à l'écran",
+        visual_identity: "l'identité visuelle de l'artiste (logo, couleurs)",
+        vertical_format: "une déclinaison verticale pour les réseaux",
+        no_brands: "toute marque visible",
+        no_explicit: "tout contenu explicite",
+      },
+    },
+    sentences: {
+      story: (list: string) => `On raconte ${list}.`,
+      look: (list: string) => `L'image est ${list}.`,
+      tone: (list: string) => `Le ton est ${list}.`,
+      musts: (list: string) => `Doit y figurer : ${list}.`,
+      avoid: (list: string) => `À éviter : ${list}.`,
+    },
+    and: "et",
+    answer: "Réponse",
+    recompose: "Recomposer depuis les choix",
+    other: "Autre, préciser",
+    otherPlaceholder: "Précisez",
+    save: "Enregistrer la réponse",
+    saving: "Enregistrement…",
+    none: "Pas encore de réponse.",
+    saved: "Intention enregistrée",
+    // Folds the question back when there is nothing left to save.
+    done: "Terminé",
+  },
+
+  // Rewording one of PO's proposals before confirming it.
   composer: {
     label: "Votre réponse",
     placeholder: "Écrivez ou dictez l'intention.",
-    send: "Envoyer",
     sending: "Envoi…",
-    later: "Plus tard",
-    edit: "Modifier",
-    cancel: "Annuler",
-    save: "Enregistrer",
-    you: "Vous",
-    po: "PO",
-    saved: "Intention enregistrée",
   },
 
   proposals: {
