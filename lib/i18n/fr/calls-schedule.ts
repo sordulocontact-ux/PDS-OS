@@ -135,6 +135,22 @@ export const details = {
   nobody: "Personne d'autre n'est invité.",
   member: "Équipe PDS",
   guest: "Invité par e-mail",
+  // The call's sheet, shared with people outside the label.
+  share: "Partager avec l'extérieur",
+  shareHint:
+    "La fiche reprend l'horaire, la durée, l'ordre du jour et le lien de la visio. PDS OS n'envoie rien lui-même.",
+  shareCopy: "Copier la fiche du call",
+  shareCopied: "Fiche du call copiée.",
+  shareCopyFailed: "Copie impossible : votre navigateur l'a refusée.",
+  shareEmail: "Envoyer par e-mail",
+  sheet: {
+    agenda: "Ordre du jour",
+    agendaItem: (position: number, topic: string, minutes: number) =>
+      `${position}. ${topic} (${minutes} min)`,
+    estimated: (minutes: number) => `Durée estimée : environ ${minutes} min`,
+    link: (url: string) => `Lien de la visio : ${url}`,
+    noLink: "Lien de la visio : à venir",
+  },
   // The recording, folded until the call's time comes.
   recordTitle: "Enregistrer le call",
   recordLater:

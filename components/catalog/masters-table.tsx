@@ -133,7 +133,9 @@ export function MastersTable({
   );
 
   return withSelection ? (
-    <RecordSelection kind="master">{table}</RecordSelection>
+    <RecordSelection kind="master" archived={rights?.archived}>
+      {table}
+    </RecordSelection>
   ) : (
     table
   );

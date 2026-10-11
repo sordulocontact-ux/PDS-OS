@@ -1,8 +1,14 @@
 "use client";
 
-import { IconTrash, IconXmark } from "nucleo-sharp-essential";
+import {
+  IconArrowDottedRotateAnticlockwise,
+  IconBoxArchive,
+  IconTrash,
+  IconXmark,
+} from "nucleo-sharp-essential";
 import { useEffect, useState } from "react";
 
+import { useArchiveRecords } from "@/components/archive/use-archive-records";
 import { useDeleteRecords } from "@/components/archive/use-delete-records";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -13,29 +19,46 @@ import { fr } from "@/lib/i18n/fr";
 /**
  * Selection of a main list (artists, titles, projects, network): checkboxes
  * in the table (SelectAllHead, SelectRowCell), and a bar floating at the
- * bottom of the screen once a row is ticked, to delete them together.
+ * bottom of the screen once a row is ticked, to archive (or restore, in the
+ * archive) or delete them together.
  */
 export function RecordSelection({
   kind,
+  archived = false,
   children,
 }: {
   kind: ArchiveKind;
+  // The list shows the archive: the selection is restored, not archived.
+  archived?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <RowSelection>
       {children}
-      <SelectionBar kind={kind} />
+      <SelectionBar kind={kind} archived={archived} />
     </RowSelection>
   );
 }
 
-function SelectionBar({ kind }: { kind: ArchiveKind }) {
+type Confirming = "none" | "archive" | "delete";
+
+function SelectionBar({
+  kind,
+  archived,
+}: {
+  kind: ArchiveKind;
+  archived: boolean;
+}) {
   const t = fr.records;
   const { selected, clear, toggle } = useRowSelection();
-  const [confirming, setConfirming] = useState(false);
+  const [open, setOpen] = useState<Confirming>("none");
+  const confirming = open !== "none";
   const { pending, remove } = useDeleteRecords(kind);
+  const archiving = useArchiveRecords(kind, archived);
   const count = selected.length;
+  // Drafts of the projects list are deleted, never archived.
+  const archivable = selected.filter((row) => !row.draft);
+  const words = archived ? t.restore : t.archive;
 
   // Escape lets go of the selection (the dialog handles its own Escape).
   useEffect(() => {
@@ -51,9 +74,19 @@ function SelectionBar({ kind }: { kind: ArchiveKind }) {
     remove(selected, (deleted) => {
       // Rows kept by the database stay ticked, to be seen.
       for (const id of deleted) toggle(id, false);
-      setConfirming(false);
+      setOpen("none");
     });
   }
+
+  function confirmArchive() {
+    archiving.run(archivable, (done) => {
+      // Rows kept by the database stay ticked, to be seen.
+      for (const id of done) toggle(id, false);
+      setOpen("none");
+    });
+  }
+
+  const singleArchivable = archivable.length === 1 ? archivable[0] : null;
 
   const single = count === 1 ? selected[0] : null;
   // Drafts of the projects list alone: nothing but the typing is lost.
@@ -73,11 +106,29 @@ function SelectionBar({ kind }: { kind: ArchiveKind }) {
           >
             {t.selection.count(count)}
           </span>
+          {archivable.length > 0 && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setOpen("archive")}
+            >
+              {archived ? (
+                <IconArrowDottedRotateAnticlockwise
+                  aria-hidden
+                  data-icon="inline-start"
+                />
+              ) : (
+                <IconBoxArchive aria-hidden data-icon="inline-start" />
+              )}
+              {archived ? t.selection.restore : t.selection.archive}
+            </Button>
+          )}
           <Button
             type="button"
             variant="destructive"
             size="sm"
-            onClick={() => setConfirming(true)}
+            onClick={() => setOpen("delete")}
           >
             <IconTrash aria-hidden data-icon="inline-start" />
             {t.selection.delete}
@@ -95,8 +146,25 @@ function SelectionBar({ kind }: { kind: ArchiveKind }) {
       )}
 
       <ConfirmDialog
-        open={confirming && count > 0}
-        onOpenChange={(next) => !next && !pending && setConfirming(false)}
+        open={open === "archive" && archivable.length > 0}
+        onOpenChange={(next) => !next && !archiving.pending && setOpen("none")}
+        title={
+          singleArchivable
+            ? words.title(singleArchivable.name)
+            : words.titleMany(kind, archivable.length)
+        }
+        description={singleArchivable ? words.body[kind] : words.bodyMany[kind]}
+        cancelLabel={t.cancel}
+        closeLabel={t.edit.close}
+        confirmLabel={words.confirm}
+        pendingLabel={words.pending}
+        pending={archiving.pending}
+        onConfirm={confirmArchive}
+      />
+
+      <ConfirmDialog
+        open={open === "delete" && count > 0}
+        onOpenChange={(next) => !next && !pending && setOpen("none")}
         title={
           single
             ? t.delete.title(single.name)

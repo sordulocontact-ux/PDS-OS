@@ -136,7 +136,9 @@ export function NetworkTable({
   );
 
   return withSelection ? (
-    <RecordSelection kind="contact">{table}</RecordSelection>
+    <RecordSelection kind="contact" archived={rights?.archived}>
+      {table}
+    </RecordSelection>
   ) : (
     table
   );

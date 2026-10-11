@@ -24,6 +24,15 @@ export type ArchiveErrorCode =
 export type ArchiveResult =
   { ok: true } | { ok: false; error: ArchiveErrorCode };
 
+/** A selection archived or restored: the rows refused, one by one. */
+export type ArchiveManyResult =
+  | {
+      ok: true;
+      done: string[];
+      failed: { id: string; error: ArchiveErrorCode }[];
+    }
+  | { ok: false; error: ArchiveErrorCode };
+
 /** `?view=archived` on a list page shows the archive (director only). */
 export function isArchivedView(value: unknown): boolean {
   return value === "archived";
@@ -42,7 +51,7 @@ export type RecordRights = {
 
 // Deleting for good, one row or a selection (…20261006000101_delete_records).
 
-/** Rows deleted in one call, at most (checked again by the database). */
+/** Rows deleted (or archived) in one call, at most. */
 export const MAX_DELETE = 200;
 
 /** Translated in fr.records.delete.errors. */

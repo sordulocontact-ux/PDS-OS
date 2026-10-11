@@ -32,6 +32,8 @@ export const records = {
     bar: "Actions sur la sélection",
     count: (n: number) => (n === 1 ? "1 sélectionné" : `${n} sélectionnés`),
     clear: "Tout désélectionner",
+    archive: "Archiver",
+    restore: "Restaurer",
     delete: "Supprimer",
   },
   // The list filter: live rows, or the archive (director only).
@@ -78,9 +80,26 @@ export const records = {
       contact:
         "Le contact disparaît du réseau et des sélecteurs. Sa fiche est conservée : vous pourrez le restaurer depuis « Archivés ».",
     } satisfies Record<Kind, string>,
+    titleMany: (kind: Kind, n: number) => `Archiver ${count(kind, n)} ?`,
+    bodyMany: {
+      artist:
+        "Les artistes disparaissent du catalogue et des sélecteurs. Leurs fiches, contacts et fichiers sont conservés : vous pourrez les restaurer depuis « Archivés ». Ceux encore crédités sur un titre actif sont gardés et signalés.",
+      master:
+        "Les titres disparaissent du catalogue et des sélecteurs. Ils sont conservés : vous pourrez les restaurer depuis « Archivés ». Ceux qu'un projet actif utilise sont gardés et signalés.",
+      project:
+        "Les projets disparaissent des listes, et leurs transmissions en attente sont suspendues. Ils sont conservés : vous pourrez les restaurer depuis « Archivés ». Les projets lancés sont gardés et signalés.",
+      contact:
+        "Les contacts disparaissent du réseau et des sélecteurs. Leurs fiches sont conservées : vous pourrez les restaurer depuis « Archivés ». Ceux encore partie à un contrat en cours sont gardés et signalés.",
+    } satisfies Record<Kind, string>,
     confirm: "Archiver",
     pending: "Archivage…",
     done: "Archivé.",
+    doneMany: (kind: Kind, n: number) =>
+      n === 1 ? "Archivé." : `${count(kind, n)} archivés.`,
+    partial: (kind: Kind, n: number) =>
+      n === 1
+        ? "1 élément n'a pas pu être archivé."
+        : `${count(kind, n)} n'ont pas pu être archivés.`,
     // Known before asking: the dialog explains instead of confirming.
     blockedTitle: (name: string) => `« ${name} » ne peut pas être archivé`,
     blocked: {
@@ -108,9 +127,26 @@ export const records = {
         "Le projet revient dans les listes, avec sa transmission en attente s'il en avait une.",
       contact: "Le contact revient dans le réseau, tel qu'il a été archivé.",
     } satisfies Record<Kind, string>,
+    titleMany: (kind: Kind, n: number) => `Restaurer ${count(kind, n)} ?`,
+    bodyMany: {
+      artist:
+        "Les artistes reviennent dans le catalogue et les sélecteurs, tels qu'ils ont été archivés.",
+      master:
+        "Les titres reviennent dans le catalogue et les sélecteurs, tels qu'ils ont été archivés. Ceux qui créditent un artiste archivé sont gardés et signalés.",
+      project:
+        "Les projets reviennent dans les listes, avec leur transmission en attente s'ils en avaient une. Ceux qui utilisent un titre ou un artiste archivé sont gardés et signalés.",
+      contact:
+        "Les contacts reviennent dans le réseau, tels qu'ils ont été archivés.",
+    } satisfies Record<Kind, string>,
     confirm: "Restaurer",
     pending: "Restauration…",
     done: "Restauré.",
+    doneMany: (kind: Kind, n: number) =>
+      n === 1 ? "Restauré." : `${count(kind, n)} restaurés.`,
+    partial: (kind: Kind, n: number) =>
+      n === 1
+        ? "1 élément n'a pas pu être restauré."
+        : `${count(kind, n)} n'ont pas pu être restaurés.`,
   },
   delete: {
     title: (name: string) => `Supprimer « ${name} » ?`,

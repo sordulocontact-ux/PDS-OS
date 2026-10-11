@@ -1,45 +1,22 @@
+import { IconClipboard, IconPaperPlane2 } from "nucleo-sharp-essential";
+
 import { CallLinkButton } from "@/components/calls/call-link-button";
 import { JoinCallLink } from "@/components/calls/join-call-link";
 import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { sectionCardClass } from "@/components/ui/section-card";
-import { formatTime } from "@/lib/calls/format";
 import type { CallDetail } from "@/lib/calls/queries";
+import { callSheetSubject, callSheetText, callWhen } from "@/lib/calls/sheet";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
-
-const longDay = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "Europe/Paris",
-});
-
-/** « Jeudi 8 octobre 2026 · 13:30 – 16:00 · 2 h 30 ». */
-function whenOf(call: CallDetail): string {
-  const start = new Date(call.occurredAt);
-  const parts = [longDay.format(start)];
-  if (call.endsAt) {
-    parts.push(
-      fr.calls.calendar.timeRange(
-        formatTime(call.occurredAt),
-        formatTime(call.endsAt),
-      ),
-      fr.calls.schedule.duration(
-        Math.round(
-          (new Date(call.endsAt).getTime() - start.getTime()) / 60_000,
-        ),
-      ),
-    );
-  } else parts.push(formatTime(call.occurredAt));
-  return parts.join(" · ");
-}
+import { mailtoHref } from "@/lib/utils/mailto";
 
 /**
  * A call's details, as Teams shows a meeting: when, what it belongs to, who
  * organizes it, its video link written out (« Rejoindre », « Copier le
- * lien »), and who takes part. The first thing read on a call's page.
+ * lien »), who takes part, and its sheet to share with people outside the
+ * label. The first thing read on a call's page.
  */
 export function CallDetails({
   call,
@@ -55,6 +32,7 @@ export function CallDetails({
   canEditLink: boolean;
 }) {
   const t = fr.calls.details;
+  const sheet = callSheetText(call);
   const people = [
     ...call.attendees
       .filter((a) => a.name)
@@ -78,7 +56,7 @@ export function CallDetails({
         <div className="flex flex-col gap-0.5 sm:col-span-2">
           <dt className="text-xs text-muted-foreground">{t.when}</dt>
           <dd className="font-medium first-letter:uppercase">
-            <time dateTime={call.occurredAt}>{whenOf(call)}</time>
+            <time dateTime={call.occurredAt}>{callWhen(call)}</time>
           </dd>
         </div>
         <div className="flex flex-col gap-0.5">
@@ -162,6 +140,39 @@ export function CallDetails({
             ))}
           </ul>
         )}
+      </div>
+
+      <div className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] pt-5">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-xs text-muted-foreground">{t.share}</h3>
+          <p className="text-sm text-muted-foreground">{t.shareHint}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <CopyButton
+            value={sheet}
+            label={t.shareCopy}
+            copiedLabel={t.shareCopied}
+            failedLabel={t.shareCopyFailed}
+            icon={IconClipboard}
+            size="default"
+          />
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <a
+                href={mailtoHref(
+                  call.guests.map((g) => g.email).join(","),
+                  callSheetSubject(call),
+                  sheet,
+                )}
+              />
+            }
+          >
+            <IconPaperPlane2 data-icon="inline-start" aria-hidden />
+            {t.shareEmail}
+          </Button>
+        </div>
       </div>
     </section>
   );

@@ -170,7 +170,9 @@ export function ProjectsTable({
   );
 
   return withSelection ? (
-    <RecordSelection kind="project">{table}</RecordSelection>
+    <RecordSelection kind="project" archived={rights?.archived}>
+      {table}
+    </RecordSelection>
   ) : (
     table
   );

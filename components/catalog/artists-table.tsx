@@ -111,7 +111,9 @@ export function ArtistsTable({
   );
 
   return withSelection ? (
-    <RecordSelection kind="artist">{table}</RecordSelection>
+    <RecordSelection kind="artist" archived={rights?.archived}>
+      {table}
+    </RecordSelection>
   ) : (
     table
   );

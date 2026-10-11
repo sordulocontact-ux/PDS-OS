@@ -181,6 +181,13 @@ Principes :
   sélecteurs, de PO et de leur fiche (404), mais restent en base avec leur historique,
   leurs contacts et leurs fichiers. Restaurables par le DG depuis le filtre « Archivés »
   des pages de liste (`?view=archived`, ignoré pour les autres postes).
+- **Archiver une sélection** (demande de Sacha du 11/10/2026) : la barre de sélection
+  propose « Archiver » avant « Supprimer » (« Restaurer » dans la vue Archivés), confirmé
+  comme pour une ligne. `setManyArchived` (`lib/archive/actions.ts`) appelle les mêmes
+  fonctions `set_*_archived` ligne par ligne avec la session : ce qui peut l'être est
+  archivé, chaque ligne refusée (lancée, encore utilisée…) est signalée avec sa raison et
+  reste cochée. Les brouillons de projet ne s'archivent pas : ils sont laissés de côté
+  (le bouton disparaît si seuls des brouillons sont cochés).
 - **Supprimer** (demande de Sacha du 06/10/2026, qui remplace la règle « aucune
   suppression » du 27/09) : « Supprimer » dans le « ⋯ » de chaque ligne et fiche
   (actif ou archivé), et **cases à cocher** sur les quatre pages de liste (Artistes,
@@ -646,6 +653,14 @@ de call qui donne un lien Google Meet.
   jusqu'à 15 min avant le call, réservé à qui y travaille ; un call qui a un lien de visio ne
   demande plus « visio ou sur place » (`videoCall` de `CallRecorder`). La fiche du calendrier
   (`EventPeek`) montre aussi le lien et « Copier le lien ».
+- **Fiche du call pour l'extérieur** (retour du 10/10 : « partager le call à des personnes
+  extérieures… heure, plan du call, durée et le lien ») : en bas de `CallDetails`, « Copier la
+  fiche du call » et « Envoyer par e-mail » (`mailto:` adressé aux invités par e-mail, rien
+  n'est envoyé par PDS OS). Le texte est écrit par le code (`lib/calls/sheet.ts`) : titre, jour,
+  début – fin et durée (sans fin : durée estimée de l'ordre du jour), ordre du jour avec les
+  minutes, lien de visio. Rien sur le projet ni l'équipe, et les questions préparées d'un point
+  restent dans l'app. Pas de page publique : la fiche est un instantané, à recopier si le call
+  bouge.
 - **Créneau** : `calls.ends_at` (fin, après le début, vérifié en SQL ; 12 h au plus, vérifié
   par le code). Un call sans fin (antérieur, ou préparé depuis un workflow) dure son ordre
   du jour, sinon une heure (`callEndOf`). « À venir » et « Rejoindre » durent jusqu'à la fin
