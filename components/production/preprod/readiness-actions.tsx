@@ -5,8 +5,8 @@ import { toast } from "sonner";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { DialogFormActions } from "@/components/production/prep/need-dialog-actions";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -15,8 +15,8 @@ import {
 } from "@/lib/production/preprod/actions-readiness";
 import type { CheckRow } from "@/lib/production/preprod/readiness";
 
-import { ConfirmButton } from "./confirm-button";
-import { DialogButton } from "./dialog-button";
+import { ConfirmButton } from "@/components/ui/confirm-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 
 const t = fr.productionPreprod.readiness;
 
@@ -96,7 +96,7 @@ function ConfirmCheckForm({
   row: CheckRow;
   onDone: () => void;
 }) {
-  const { pending, error, run } = usePrepSubmit(onDone, t.done);
+  const { pending, error, run } = useDialogSubmit(onDone, t.done);
   return (
     <form
       className="flex flex-col gap-5"

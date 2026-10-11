@@ -49,7 +49,7 @@ export function DialogButton({
         onOpenChange={setOpen}
         title={title}
         description={description}
-        closeLabel={fr.productionPreprod.close}
+        closeLabel={fr.dialogs.close}
         size={wide ? "wide" : "default"}
       >
         {children(close)}

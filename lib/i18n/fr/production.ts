@@ -82,10 +82,13 @@ export const production = {
   },
 } as const;
 
-/** Marketing › Suivi & bilan: the review that closes the project. */
+/** Vue d'ensemble › Clôture du projet: the review that closes the whole project,
+ * a process apart from the Marketing closing (ticket « Suivi & bilan »). */
 export const projectReview = {
-  title: "Suivi & bilan",
-  stage: "Bilan & clôture",
+  title: "Clôture du projet",
+  description:
+    "Le bilan du projet entier, validé par la direction, clôt le projet. La clôture du Marketing est une décision à part.",
+  stage: "Bilan & clôture du projet",
   start: "Commencer le bilan",
   notStarted: "Commencez le bilan pour l'écrire, puis demandez la clôture.",
   locked: "Le bilan est envoyé : il ne change plus.",

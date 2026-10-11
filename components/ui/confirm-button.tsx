@@ -6,9 +6,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { fr } from "@/lib/i18n/fr";
-import type { PrepResult } from "@/lib/production/prep-result";
+import type { ActionOutcome } from "@/lib/utils/action-outcome";
 
-const t = fr.productionPreprod;
+const t = fr.dialogs;
 
 /**
  * A button whose action is asked first (« Transmettre », « Rapprocher »,
@@ -34,7 +34,7 @@ export function ConfirmButton({
   confirmLabel: string;
   pendingLabel: string;
   done: string;
-  run: () => Promise<PrepResult>;
+  run: () => Promise<ActionOutcome>;
 }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();

@@ -4,8 +4,8 @@ import { useState, type FormEvent } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
-import { DialogFormActions } from "@/components/production/prep/need-dialog-actions";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
 import { FilterChip } from "@/components/ui/filter-chip";
 import { fr } from "@/lib/i18n/fr";
 import { saveExportCheck } from "@/lib/production/delivery/checklist-actions";
@@ -33,7 +33,10 @@ export function ExportCheckForm({
 }) {
   const [kind, setKind] = useState<ExportCheckKind>(line?.kind ?? "export");
   const [errors, setErrors] = useState<{ label?: string; url?: string }>({});
-  const { pending, error, run } = usePrepSubmit(onDone, t.checklist.form.saved);
+  const { pending, error, run } = useDialogSubmit(
+    onDone,
+    t.checklist.form.saved,
+  );
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

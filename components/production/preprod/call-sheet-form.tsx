@@ -3,8 +3,8 @@
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { DialogFormActions } from "@/components/production/prep/need-dialog-actions";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
 import { fr } from "@/lib/i18n/fr";
 import { saveCallSheet } from "@/lib/production/preprod/actions-readiness";
 import {
@@ -13,7 +13,7 @@ import {
   type CallSheet,
 } from "@/lib/production/preprod/types";
 
-import { DialogButton } from "./dialog-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 
 const t = fr.productionPreprod.callSheet;
 
@@ -58,7 +58,7 @@ function CallSheetForm({
   callSheet: CallSheet | null;
   onDone: () => void;
 }) {
-  const { pending, error, run } = usePrepSubmit(onDone, t.saved);
+  const { pending, error, run } = useDialogSubmit(onDone, t.saved);
   return (
     <form
       className="flex flex-col gap-5"

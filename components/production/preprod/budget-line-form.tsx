@@ -5,8 +5,8 @@ import { IconPlus } from "nucleo-sharp-essential";
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { DialogFormActions } from "@/components/production/prep/need-dialog-actions";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import { centsToInput } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
@@ -23,7 +23,7 @@ import {
   type PreprodBudgetLine,
 } from "@/lib/production/preprod/types";
 
-import { DialogButton } from "./dialog-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 import { RecordMenu } from "./record-menu";
 
 const t = fr.productionPreprod.budget;
@@ -82,7 +82,7 @@ function BudgetLineForm({
   line,
   onDone,
 }: Props & { line: PreprodBudgetLine | null; onDone: () => void }) {
-  const { pending, error, run } = usePrepSubmit(
+  const { pending, error, run } = useDialogSubmit(
     onDone,
     line ? t.updated : t.added,
   );

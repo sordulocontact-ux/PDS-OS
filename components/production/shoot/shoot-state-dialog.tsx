@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { TextareaField } from "@/components/auth/textarea-field";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { FormDialog } from "@/components/ui/form-dialog";
@@ -76,7 +76,7 @@ function ShootStateForm({
 }) {
   const [state, setState] = useState<ShootState>(shoot.state);
   const [missing, setMissing] = useState(false);
-  const { pending, error, run } = usePrepSubmit(onDone, t.done);
+  const { pending, error, run } = useDialogSubmit(onDone, t.done);
   const current = shoot.saved ? shoot.state : null;
 
   function submit(form: HTMLFormElement) {

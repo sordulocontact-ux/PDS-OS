@@ -2,8 +2,8 @@
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
-import { DialogFormActions } from "@/components/production/prep/need-dialog-actions";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
+import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
 import { OptionSelect } from "@/components/projects/option-select";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
@@ -28,7 +28,7 @@ export function PlanTaskForm({
   members: Member[];
   onDone: () => void;
 }) {
-  const { pending, error, run } = usePrepSubmit(onDone, t.taskCreated);
+  const { pending, error, run } = useDialogSubmit(onDone, t.taskCreated);
   const pressenti =
     action.holder?.kind === "person" &&
     members.some((m) => m.personId === action.holder?.id)

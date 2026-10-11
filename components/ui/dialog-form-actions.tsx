@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 
-/** « Annuler » then the main button, at the bottom of a needs dialog. */
+/** « Annuler » then the main button, at the bottom of a dialog form. */
 export function DialogFormActions({
   pending,
   submitLabel,
@@ -13,7 +13,7 @@ export function DialogFormActions({
   submitLabel: string;
   onCancel: () => void;
 }) {
-  const t = fr.productionNeeds;
+  const t = fr.dialogs;
   return (
     <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
       <Button type="button" variant="ghost" size="lg" onClick={onCancel}>

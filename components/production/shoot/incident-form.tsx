@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { usePrepSubmit } from "@/components/production/prep/use-prep-submit";
+import { useDialogSubmit } from "@/components/ui/use-dialog-submit";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
@@ -46,7 +46,7 @@ export function IncidentForm({
   const incident = draft.incident;
   const [holder, setHolder] = useState(holderValue(incident?.holder ?? null));
   const [missingTitle, setMissingTitle] = useState(false);
-  const { pending, error, run } = usePrepSubmit(
+  const { pending, error, run } = useDialogSubmit(
     onDone,
     incident ? t.saved : t.added,
   );

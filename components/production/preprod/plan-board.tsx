@@ -14,7 +14,7 @@ import type { ActionState } from "@/lib/production/preprod/plan";
 import type { PlanAction } from "@/lib/production/preprod/types";
 import type { NetworkOption } from "@/lib/production/sheet";
 
-import { DialogButton } from "./dialog-button";
+import { DialogButton } from "@/components/ui/dialog-button";
 import { PlanActionForm } from "./plan-action-form";
 import { PlanTable } from "./plan-table";
 
