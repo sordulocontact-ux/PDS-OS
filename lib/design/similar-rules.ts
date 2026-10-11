@@ -51,12 +51,12 @@ export function similarBases(
     : [...perTarget, all];
 }
 
-// Where an image comes from: Are.na by rebound (the channels holding an
-// image already chosen), Openverse by PO's searches.
-export type SimilarSource = "arena" | "openverse";
+// Where an image comes from: Unsplash and Tumblr by PO's searches; Are.na
+// (by rebound, or by words with Premium) and Openverse, switched off for now.
+export type SimilarSource = "unsplash" | "tumblr" | "arena" | "openverse";
 export type SimilarImage = ExternalImage & { source: SimilarSource };
 
-/** One set of proposals: an Are.na channel, or one search on Openverse. */
+/** One set of proposals: one search on a source, or an Are.na channel. */
 export type SimilarGroup = {
   key: string;
   source: SimilarSource;
@@ -69,17 +69,25 @@ export const similarKey = (source: SimilarSource, id: string) =>
 
 // A reference kept from a source carries the image's address in its note:
 // that is how a later search leaves it out, and where Are.na rebounds from.
-const ADDRESSES: Array<[SimilarSource, RegExp]> = [
-  ["arena", /are\.na\/block\/(\d+)/g],
-  ["openverse", /openverse\.org\/image\/([0-9a-f-]{36})/g],
+const ADDRESSES: Array<
+  [SimilarSource, RegExp, (m: RegExpMatchArray) => string]
+> = [
+  ["unsplash", /unsplash\.com\/photos\/([A-Za-z0-9_-]{1,40})/g, (m) => m[1]],
+  [
+    "tumblr",
+    /tumblr\.com\/([a-z0-9-]{1,64})\/(\d{1,20})(?:#(\d))?/gi,
+    (m) => `${m[1]}:${m[2]}:${m[3] ?? "0"}`,
+  ],
+  ["arena", /are\.na\/block\/(\d+)/g, (m) => m[1]],
+  ["openverse", /openverse\.org\/image\/([0-9a-f-]{36})/g, (m) => m[1]],
 ];
 
 export function keptKeysIn(notes: Array<string | null>): Set<string> {
   const keys = new Set<string>();
   for (const note of notes)
-    for (const [source, pattern] of ADDRESSES)
+    for (const [source, pattern, idOf] of ADDRESSES)
       for (const match of (note ?? "").matchAll(pattern))
-        keys.add(similarKey(source, match[1]));
+        keys.add(similarKey(source, idOf(match)));
   return keys;
 }
 

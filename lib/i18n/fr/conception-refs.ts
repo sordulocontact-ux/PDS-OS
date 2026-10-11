@@ -68,15 +68,21 @@ export const conceptionRefs = {
   similar: {
     open: "Chercher des références semblables",
     title: "Références semblables",
-    description:
-      "Des images de la même famille, trouvées sur Are.na à partir de votre moodboard. Rien n'est ajouté sans votre choix.",
+    description: (sources: string) =>
+      `PO regarde votre moodboard et cherche des images de la même famille sur ${sources}. Rien n'est ajouté sans votre choix.`,
+    and: (labels: string[]) =>
+      labels.length > 1
+        ? `${labels.slice(0, -1).join(", ")} et ${labels[labels.length - 1]}`
+        : (labels[0] ?? ""),
+    notConfigured:
+      "Aucune source d'images n'est branchée : il manque la clé Unsplash (UNSPLASH_ACCESS_KEY) et la clé Tumblr (TUMBLR_API_KEY) de l'application.",
+    noImage:
+      "Aucune image lisible par PO dans le moodboard (JPEG, PNG, WebP ou GIF, 5 Mo au plus) : déposez-en une d'abord.",
     close: "Fermer",
     baseLegend: "À partir de",
     allImages: "Toutes les images",
     baseCount: (label: string, n: number) =>
       `${label} · ${n === 1 ? "1 image" : `${n} images`}`,
-    noImage:
-      "Aucune image lisible par PO dans le moodboard (JPEG, PNG, WebP ou GIF, 5 Mo au plus) : collez un lien Are.na pour partir de là.",
     rebound:
       "Are.na ne se cherche par mots qu'avec un compte Premium : la recherche part des chaînes où sont rangées les images Are.na de ce moodboard, et du lien collé.",
     linkLabel: "Lien Are.na",
@@ -87,13 +93,18 @@ export const conceptionRefs = {
     stepsLabel: "Recherche en cours",
     stepDone: "terminé",
     stepRead: "PO regarde les images",
-    stepSearch: "Recherche sur Are.na",
+    stepSearch: (sources: string) => `Recherche sur ${sources}`,
     lookLabel: "Ce que PO voit",
     groupsLegend: "D'où viennent les images",
     groupsHint: "Décochez une pastille pour masquer ses images.",
     group: (source: string, label: string, n: number) =>
       `${source} · ${label} · ${n}`,
-    sources: { arena: "Are.na", openverse: "Openverse" },
+    sources: {
+      unsplash: "Unsplash",
+      tumblr: "Tumblr",
+      arena: "Are.na",
+      openverse: "Openverse",
+    },
     resultsLabel: "Images trouvées",
     nothing: "Rien de nouveau trouvé à partir de ces images.",
     nothingShown: "Toutes les pastilles sont décochées.",
@@ -115,7 +126,7 @@ export const conceptionRefs = {
         : `${n} images ajoutées au moodboard`,
     deduped: "Une image était déjà dans le projet : rattachée en plus.",
     noSource:
-      "Rien pour partir : collez un lien Are.na (une image ou une chaîne), ou gardez d'abord une image d'Are.na dans ce moodboard.",
+      "Rien pour partir : déposez d'abord une image dans ce moodboard (JPEG, PNG, WebP ou GIF, 5 Mo au plus).",
     // Kept in the reference's note: credits the image, and its address is
     // how a later search leaves it out (and where Are.na rebounds from).
     note: (
@@ -131,13 +142,16 @@ export const conceptionRefs = {
     errors: {
       badLink:
         "Ce lien n'est pas une adresse Are.na d'image (are.na/block/…) ou de chaîne (are.na/<compte>/<chaîne>).",
-      unauthorized:
-        "Are.na refuse le jeton de l'application (ARENA_TOKEN) : il faut en créer un nouveau.",
+      someSource: "La source",
+      unauthorized: (source: string) =>
+        `${source} refuse la clé de l'application : il faut la vérifier.`,
       premium:
         "La recherche par mots d'Are.na est réservée aux comptes Premium : le jeton de l'application vient d'un compte gratuit.",
-      rateLimited:
-        "La source limite les recherches pour l'instant. Réessayez dans une minute.",
-      unreachable: "La source n'a pas répondu. Réessayez.",
+      rateLimited: (source: string) =>
+        source === "Unsplash"
+          ? "Unsplash limite les recherches (50 par heure tant que l'application n'est pas validée par Unsplash). Réessayez plus tard."
+          : `${source} limite les recherches pour l'instant. Réessayez dans une minute.`,
+      unreachable: (source: string) => `${source} n'a pas répondu. Réessayez.`,
       tooLarge:
         "Cette image est trop lourde pour le moodboard (15 Mo au plus).",
       generic: "La recherche n'a pas abouti. Réessayez.",

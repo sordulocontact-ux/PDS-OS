@@ -23,21 +23,22 @@ import {
   cleanSearches,
   readMoodboard,
   searchSimilar,
+  type MoodboardWords,
 } from "@/lib/design/similar-references";
+import { getSimilarImage } from "@/lib/design/similar-sources";
 import {
   ALL_IMAGES,
   parseArenaLink,
   type SimilarGroup,
 } from "@/lib/design/similar-rules";
 import { fr } from "@/lib/i18n/fr";
-import { getArenaImage } from "@/lib/integrations/arena";
 import { IntegrationError } from "@/lib/integrations/http";
 import { downloadImageOf, type ExternalImage } from "@/lib/integrations/images";
-import { getOpenverseImage } from "@/lib/integrations/openverse";
+import { pingUnsplashDownload } from "@/lib/integrations/unsplash";
 import { createClient } from "@/lib/supabase/server";
 
-// « Chercher des références semblables » (étape 6): PO reads, Are.na (and
-// Openverse when it is on) finds, a human keeps. Only the writers of the Conception get
+// « Chercher des références semblables » (étape 6): PO reads, the sources on
+// (Unsplash, Tumblr) find, a human keeps. Only the writers of the Conception get
 // there (the same check as RLS, before any model or outside call); what is
 // kept is written with the user's session, like a deposited file.
 
@@ -49,14 +50,21 @@ const base = z.union([
 ]);
 
 function sourceFailure(error: unknown, where: string): Failed {
-  const t = fr.conceptionRefs.similar.errors;
-  const reason = error instanceof IntegrationError ? error.reason : null;
-  console.error(`${where}:`, reason ?? error);
-  if (reason === "rate_limited") return { ok: false, error: t.rateLimited };
-  if (reason === "unauthorized") return { ok: false, error: t.unauthorized };
+  const { errors: t, sources } = fr.conceptionRefs.similar;
+  const known = error instanceof IntegrationError ? error : null;
+  const reason = known?.reason ?? null;
+  const source =
+    known && known.service in sources
+      ? sources[known.service as keyof typeof sources]
+      : t.someSource;
+  console.error(`${where}:`, known ? `${known.service} ${reason}` : error);
+  if (reason === "rate_limited")
+    return { ok: false, error: t.rateLimited(source) };
+  if (reason === "unauthorized")
+    return { ok: false, error: t.unauthorized(source) };
   if (reason === "premium_required") return { ok: false, error: t.premium };
   if (reason === "too_large") return { ok: false, error: t.tooLarge };
-  if (reason) return { ok: false, error: t.unreachable };
+  if (reason) return { ok: false, error: t.unreachable(source) };
   return { ok: false, error: t.generic };
 }
 
@@ -78,7 +86,7 @@ export async function readSimilarMoodboard(input: {
   projectId: string;
   base: string;
 }): Promise<
-  { ok: true; reading: { look: string; searches: string[] } | null } | Failed
+  { ok: true; reading: ({ look: string } & MoodboardWords) | null } | Failed
 > {
   const parsed = z.object({ projectId: z.uuid(), base }).safeParse(input);
   if (!parsed.success) return invalid();
@@ -101,6 +109,7 @@ export async function searchSimilarReferences(input: {
   projectId: string;
   base: string;
   searches: string[];
+  tags: string[];
   arenaLink: string;
 }): Promise<{ ok: true; groups: SimilarGroup[] } | Failed> {
   const parsed = z
@@ -108,6 +117,7 @@ export async function searchSimilarReferences(input: {
       projectId: z.uuid(),
       base,
       searches: z.array(z.string().max(80)).max(6),
+      tags: z.array(z.string().max(80)).max(6),
       arenaLink: z.string().trim().max(500),
     })
     .safeParse(input);
@@ -122,6 +132,7 @@ export async function searchSimilarReferences(input: {
     const groups = await searchSimilar(session.supabase, v.projectId, {
       base: v.base,
       searches: cleanSearches(v.searches),
+      tags: cleanSearches(v.tags),
       link,
     });
     if (!groups) return { ok: false, error: t.noSource };
@@ -153,8 +164,8 @@ export async function keepSimilarImage(input: {
   const parsed = z
     .object({
       projectId: z.uuid(),
-      source: z.enum(["arena", "openverse"]),
-      imageId: z.string().max(64),
+      source: z.enum(["unsplash", "tumblr", "arena", "openverse"]),
+      imageId: z.string().max(100),
       targets,
     })
     .safeParse(input);
@@ -167,10 +178,7 @@ export async function keepSimilarImage(input: {
   let image: ExternalImage | null;
   let file: { data: Uint8Array; mime: string };
   try {
-    image =
-      v.source === "arena"
-        ? await getArenaImage(v.imageId)
-        : await getOpenverseImage(v.imageId);
+    image = await getSimilarImage(v.source, v.imageId);
     if (!image) return { ok: false, error: t.errors.gone };
     file = await downloadImageOf(v.source, image);
   } catch (error) {
@@ -213,5 +221,7 @@ export async function keepSimilarImage(input: {
     targets: v.targets,
   });
   if (!result.ok) await bucket.remove([path]);
+  // Unsplash's rules: every photo kept is reported to it.
+  else if (image.downloadPing) await pingUnsplashDownload(image.downloadPing);
   return result;
 }

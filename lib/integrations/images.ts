@@ -2,8 +2,8 @@ import "server-only";
 
 import { IntegrationError } from "@/lib/integrations/http";
 
-// What the image sources (Are.na, Openverse) share: one image as the app
-// proposes it, and the download of its file.
+// What the image sources (Unsplash, Tumblr, Are.na, Openverse) share: one
+// image as the app proposes it, and the download of its file.
 
 export const IMAGE_USER_AGENT = "PDS-OS/0.1 (internal release tracker)";
 // The largest file kept as a reference, far below the bucket's 50 MB.
@@ -24,8 +24,12 @@ export type ExternalImage = {
   // Its page at the source, written in the reference's note.
   pageUrl: string;
   author: string | null;
-  // Openverse only: « CC BY-SA 2.0 », « CC0 ».
+  // Its licence when the source gives one: « CC BY-SA 2.0 » (Openverse),
+  // « Licence Unsplash ».
   license: string | null;
+  // Unsplash only: the address to call when the image is kept (its rules
+  // count every download).
+  downloadPing?: string;
 };
 
 export const httpsUrl = (value: unknown): value is string =>

@@ -2,8 +2,9 @@ import { z } from "zod";
 
 /**
  * Reading a moodboard: what its images share, and the words to find more of
- * the same on Are.na. A proposal only — the code keeps a few short searches
- * (lib/design/similar-references.ts) and a human picks what is kept.
+ * the same (searches for Unsplash, tags for Tumblr). A proposal only — the
+ * code keeps a few short ones (lib/design/similar-references.ts) and a human
+ * picks what is kept.
  * `look` leads, or ministral-14b answers the schema itself.
  */
 export const moodboardReadingSchema = z.object({
@@ -16,6 +17,11 @@ export const moodboardReadingSchema = z.object({
     .array(z.string())
     .describe(
       "3 ou 4 recherches en anglais, de 2 à 4 mots chacune, pour trouver d'autres images de la même famille visuelle (ex. « grainy film portrait », « brutalist concrete shadow »). Pas de nom de personne ni de marque.",
+    ),
+  tags: z
+    .array(z.string())
+    .describe(
+      "3 ou 4 tags Tumblr en anglais, de 1 ou 2 mots, tels que les gens les écrivent sous des images de cette famille (ex. « 35mm », « film photography », « y2k aesthetic », « grunge »). Pas de nom de personne ni de marque.",
     ),
 });
 

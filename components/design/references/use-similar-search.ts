@@ -25,7 +25,11 @@ export function useSimilarSearch(projectId: string, reads: boolean) {
 
   async function run(base: string, arenaLink: string) {
     // PO reads only when its searches have somewhere to run (`reads`).
-    let reading: { look: string; searches: string[] } | null = null;
+    let reading: {
+      look: string;
+      searches: string[];
+      tags: string[];
+    } | null = null;
     if (reads) {
       setState({ phase: "reading" });
       const read = await readSimilarMoodboard({ projectId, base });
@@ -37,6 +41,7 @@ export function useSimilarSearch(projectId: string, reads: boolean) {
       projectId,
       base,
       searches: reading?.searches ?? [],
+      tags: reading?.tags ?? [],
       arenaLink: arenaLink.trim(),
     });
     if (!found.ok) return setState({ phase: "start", error: found.error });

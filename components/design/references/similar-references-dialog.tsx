@@ -13,8 +13,9 @@ import { FormDialog } from "@/components/ui/form-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProcessingSteps } from "@/components/ui/processing-steps";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { DIRECTION_TARGET } from "@/lib/design/reference-rules";
-import { ALL_IMAGES } from "@/lib/design/similar-rules";
+import { ALL_IMAGES, type SimilarSource } from "@/lib/design/similar-rules";
 import { fr } from "@/lib/i18n/fr";
 
 /** A moodboard PO can start from: the images of one target, or all of them. */
@@ -24,14 +25,16 @@ type Props = {
   projectId: string;
   bases: SimilarBase[];
   options: TargetOption[];
-  // PO reads the moodboard: its searches can run (an Are.na Premium token).
-  reads: boolean;
+  // From the server (similar-sources.ts): the sources on, whether PO reads
+  // the moodboard, whether an Are.na link can be pasted.
+  setup: { sources: SimilarSource[]; reads: boolean; arenaLink: boolean };
 };
 
 /** « Chercher des références semblables »: PO reads, the sources find, a human keeps. */
 export function SimilarReferencesDialog(props: Props) {
   const t = fr.conceptionRefs.similar;
   const [open, setOpen] = useState(false);
+  const names = t.and(props.setup.sources.map((s) => t.sources[s]));
   return (
     <>
       <Button variant="outline" onClick={() => setOpen(true)}>
@@ -42,7 +45,7 @@ export function SimilarReferencesDialog(props: Props) {
         open={open}
         onOpenChange={setOpen}
         title={t.title}
-        description={t.description}
+        description={names ? t.description(names) : t.notConfigured}
         closeLabel={t.close}
         size="wide"
       >
@@ -56,10 +59,12 @@ function SimilarSearchBody({
   projectId,
   bases,
   options,
-  reads,
+  setup,
   onDone,
 }: Props & { onDone: () => void }) {
   const t = fr.conceptionRefs.similar;
+  const { reads, arenaLink } = setup;
+  const names = t.and(setup.sources.map((s) => t.sources[s]));
   const { state, run, reset } = useSimilarSearch(projectId, reads);
   const [base, setBase] = useState(
     () =>
@@ -91,7 +96,7 @@ function SimilarSearchBody({
               : []),
             {
               key: "search",
-              label: t.stepSearch,
+              label: t.stepSearch(names),
               state: state.phase === "searching" ? "active" : "waiting",
             },
           ]}
@@ -112,6 +117,21 @@ function SimilarSearchBody({
         onDone={onDone}
       />
     );
+
+  const cancel = (
+    <Button type="button" variant="ghost" size="lg" onClick={onDone}>
+      {fr.conceptionRefs.add.cancel}
+    </Button>
+  );
+  if (setup.sources.length === 0)
+    return (
+      <>
+        <ToneCallout tone="warning">{t.notConfigured}</ToneCallout>
+        <div className="flex justify-end">{cancel}</div>
+      </>
+    );
+  // Nothing to start from: no image to read, no Are.na link to paste.
+  const startable = bases.length > 0 || arenaLink;
 
   return (
     <form
@@ -141,38 +161,42 @@ function SimilarSearchBody({
           </div>
         </div>
       ) : (
-        reads && <p className="text-sm text-muted-foreground">{t.noImage}</p>
+        <p className="text-sm text-muted-foreground">{t.noImage}</p>
       )}
-      {!reads && <p className="text-sm text-muted-foreground">{t.rebound}</p>}
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="similar-arena-link">{t.linkLabel}</Label>
-        <Input
-          id="similar-arena-link"
-          type="url"
-          inputMode="url"
-          maxLength={500}
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
-          placeholder={t.linkPlaceholder}
-          aria-describedby="similar-arena-link-hint"
-        />
-        <p
-          id="similar-arena-link-hint"
-          className="text-sm text-muted-foreground"
-        >
-          {t.linkHint}
-        </p>
-      </div>
+      {arenaLink && (
+        <div className="flex flex-col gap-1.5">
+          {!reads && (
+            <p className="text-sm text-muted-foreground">{t.rebound}</p>
+          )}
+          <Label htmlFor="similar-arena-link">{t.linkLabel}</Label>
+          <Input
+            id="similar-arena-link"
+            type="url"
+            inputMode="url"
+            maxLength={500}
+            value={link}
+            onChange={(e) => setLink(e.target.value)}
+            placeholder={t.linkPlaceholder}
+            aria-describedby="similar-arena-link-hint"
+          />
+          <p
+            id="similar-arena-link-hint"
+            className="text-sm text-muted-foreground"
+          >
+            {t.linkHint}
+          </p>
+        </div>
+      )}
 
       {state.error && <FormMessage kind="error">{state.error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onDone}>
-          {fr.conceptionRefs.add.cancel}
-        </Button>
-        <Button type="submit" size="lg">
-          {t.search}
-        </Button>
+        {cancel}
+        {startable && (
+          <Button type="submit" size="lg">
+            {t.search}
+          </Button>
+        )}
       </div>
     </form>
   );

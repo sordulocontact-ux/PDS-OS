@@ -16,20 +16,17 @@ import {
   type SimilarGroup,
 } from "@/lib/design/similar-rules";
 import {
-  arenaChannelImages,
-  arenaSearchReady,
-  searchArenaImages,
-} from "@/lib/integrations/arena";
-import { searchOpenverseImages } from "@/lib/integrations/openverse";
+  ARENA_ENABLED,
+  similarSetup,
+  wordCalls,
+} from "@/lib/design/similar-sources";
+import { arenaChannelImages } from "@/lib/integrations/arena";
 
-// « Chercher des références semblables » (Conception, étape 6): Are.na is
-// opened by rebound from the images already chosen there (free); PO reads a
-// few images of the moodboard and proposes searches by words, run on Are.na
-// with a Premium token, and on Openverse when it is on. The code drops what
-// the project already holds. Nothing is written here: a human picks.
-
-// Openverse is off for now: Are.na only (Sacha, 11/10/2026). Its code stays.
-const OPENVERSE_ENABLED = false;
+// « Chercher des références semblables » (Conception, étape 6): PO reads a
+// few images of the moodboard and proposes searches (Unsplash) and tags
+// (Tumblr); the sources on are asked (similar-sources.ts), Are.na also by
+// rebound when it is on. The code drops what the project already holds.
+// Nothing is written here: a human picks.
 
 const MAX_IMAGES = 4;
 const MAX_SEARCHES = 4;
@@ -87,18 +84,16 @@ export function cleanSearches(searches: string[]): string[] {
     .slice(0, MAX_SEARCHES);
 }
 
-/** PO reads the moodboard only when its searches have somewhere to run. */
-export function moodboardIsRead(): boolean {
-  return OPENVERSE_ENABLED || arenaSearchReady();
-}
+export type MoodboardWords = { searches: string[]; tags: string[] };
 
 /** What PO sees in the base's latest images; null when none is read. */
 export async function readMoodboard(
   supabase: Supabase,
   projectId: string,
   base: string,
-): Promise<{ look: string; searches: string[] } | null> {
-  if (!moodboardIsRead()) return null;
+): Promise<({ look: string } & MoodboardWords) | null> {
+  // PO reads only when its words have somewhere to run.
+  if (!similarSetup().reads) return null;
   const rows = (await projectReferences(supabase, projectId))
     .filter(
       (r) =>
@@ -128,61 +123,55 @@ export async function readMoodboard(
   return {
     look: reading.output.look.trim(),
     searches: cleanSearches(reading.output.searches),
+    tags: cleanSearches(reading.output.tags),
   };
 }
 
 /**
- * The proposals: one group per Are.na channel, then one per search (Are.na
- * with a Premium token, Openverse when on); each image once, never one the project already kept. One
- * failed call does not sink the others; null = nothing to start from.
+ * The proposals: one group per search or tag of each source on (and per
+ * Are.na channel when it is on); each image once, never one the project
+ * already kept. One failed call does not sink the others; null = nothing to
+ * start from.
  */
 export async function searchSimilar(
   supabase: Supabase,
   projectId: string,
-  input: { base: string; searches: string[]; link: ArenaLink | null },
+  input: MoodboardWords & { base: string; link: ArenaLink | null },
 ): Promise<SimilarGroup[] | null> {
   const rows = await projectReferences(supabase, projectId);
   const kept = keptKeysIn(rows.map((r) => r.note));
-  const arenaSeeds = [
-    ...keptKeysIn(rows.filter(inBase(input.base)).map((r) => r.note)),
-  ]
-    .filter((key) => key.startsWith("arena:"))
-    .map((key) => key.slice("arena:".length))
-    .slice(0, ARENA_SEEDS);
-  const searches = moodboardIsRead() ? input.searches : [];
-  if (arenaSeeds.length === 0 && !input.link && searches.length === 0)
+  // Are.na rebounds from the images already kept from it in this base.
+  const arenaSeeds = ARENA_ENABLED
+    ? [...keptKeysIn(rows.filter(inBase(input.base)).map((r) => r.note))]
+        .filter((key) => key.startsWith("arena:"))
+        .map((key) => key.slice("arena:".length))
+        .slice(0, ARENA_SEEDS)
+    : [];
+  const link = ARENA_ENABLED ? input.link : null;
+  const words = similarSetup().reads
+    ? { searches: input.searches, tags: input.tags }
+    : { searches: [], tags: [] };
+  if (
+    arenaSeeds.length === 0 &&
+    !link &&
+    words.searches.length + words.tags.length === 0
+  )
     return null;
 
-  const channels = await arenaChannelsFor(arenaSeeds, input.link).catch(
-    (error: unknown) => {
-      console.error("searchSimilar (Are.na channels):", error);
-      return [];
-    },
-  );
+  const channels =
+    arenaSeeds.length || link
+      ? await arenaChannelsFor(arenaSeeds, link).catch((error: unknown) => {
+          console.error("searchSimilar (Are.na channels):", error);
+          return [];
+        })
+      : [];
   const calls: Array<Promise<SimilarGroup>> = [
     ...channels.map((channel) =>
       arenaChannelImages(channel.id).then((images) =>
         arenaGroup(channel, images),
       ),
     ),
-    ...(arenaSearchReady() ? searches : []).map((search) =>
-      searchArenaImages(search, PER_SEARCH).then((images): SimilarGroup => ({
-        key: `arena-search:${search}`,
-        source: "arena",
-        label: search,
-        images: images.map((image) => ({ ...image, source: "arena" })),
-      })),
-    ),
-    ...(OPENVERSE_ENABLED ? searches : []).map((search) =>
-      searchOpenverseImages(search, PER_SEARCH).then(
-        (images): SimilarGroup => ({
-          key: `openverse:${search}`,
-          source: "openverse",
-          label: search,
-          images: images.map((image) => ({ ...image, source: "openverse" })),
-        }),
-      ),
-    ),
+    ...wordCalls(words),
   ];
   const settled = await Promise.allSettled(calls);
   const failed = settled.find((s) => s.status === "rejected");

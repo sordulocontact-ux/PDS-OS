@@ -11,7 +11,7 @@ import { routes } from "@/lib/auth/redirects";
 import { loadConception } from "@/lib/design/conception";
 import { DIRECTION_TARGET, targetKeyOf } from "@/lib/design/reference-rules";
 import { loadReferenceViews } from "@/lib/design/references";
-import { moodboardIsRead } from "@/lib/design/similar-references";
+import { similarSetup } from "@/lib/design/similar-sources";
 import { similarBases } from "@/lib/design/similar-rules";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -29,7 +29,7 @@ export const metadata = {
  * one with no target waits « à rattacher ». No global moodboard imposed:
  * a whole moodboard, separate references, or both. A reference stays a
  * proposal until a validated section of the direction carries it. PO can
- * look for similar images on Are.na; a human keeps them.
+ * look for similar images (Unsplash, Tumblr); a human keeps them.
  */
 export default async function DesignReferencesPage({
   params,
@@ -90,7 +90,7 @@ export default async function DesignReferencesPage({
                 t.similar.allImages,
               )}
               options={targets}
-              reads={moodboardIsRead()}
+              setup={similarSetup()}
             />
           </div>
         )}
