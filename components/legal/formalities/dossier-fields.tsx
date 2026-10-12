@@ -4,7 +4,6 @@ import { Field } from "@/components/auth/field";
 import { FieldError } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/projects/option-select";
 import { fr } from "@/lib/i18n/fr";
-import { Checkbox } from "@/components/ui/checkbox";
 
 type Arrangement = { scope: string; detail: string };
 type Contract = { provided: boolean; rubric_g: string };
@@ -76,14 +75,11 @@ export function ContractField({
   const t = fr.legalFormalities.contract;
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex items-center gap-2 font-medium">
-        <Checkbox
-          disabled={disabled}
-          checked={value.provided}
-          onChange={(e) => onChange({ ...value, provided: e.target.checked })}
-        />
-        {t.provided}
-      </label>
+      {/* Derived from the publishers' contracts, never ticked by hand
+          (JUR-25): a copy is joined only when there is a piece. */}
+      <p className="text-sm font-medium">
+        {value.provided ? t.providedYes : t.providedNo}
+      </p>
       <FieldError id={`${id}-contract-error`}>{error}</FieldError>
       {!value.provided && (
         <Field

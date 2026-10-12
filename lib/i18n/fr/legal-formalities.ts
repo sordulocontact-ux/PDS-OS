@@ -4,6 +4,23 @@ export const legalFormalities = {
   definitions: {
     SACEM_725_EDITED_WORK: "Bulletin SACEM 725 · œuvre éditée",
   } as Record<string, string>,
+  // The dossier step by step, then its recap (JUR-21).
+  recap: {
+    stepsLabel: "Étapes du dossier",
+    step: (n: number, label: string) => `${n}. ${label}`,
+    title: "Récapitulatif",
+    body: "Chaque champ du bulletin : confirmé, proposé d'après une source et à vérifier, ou manquant. Validez quand tout est juste.",
+    previous: "Précédent",
+    next: "Suivant",
+    toRecap: "Voir le récapitulatif",
+    states: {
+      confirmed: "Confirmé",
+      proposed: "Proposé, à vérifier",
+      toVerify: "À vérifier (SACEM)",
+      missing: "Manquant",
+      empty: "Non renseigné",
+    },
+  },
   // What an action changed, said once it succeeded (JUR-28).
   transitions: {
     generated: "Bulletin généré : à faire signer par chaque signataire.",
@@ -107,6 +124,8 @@ export const legalFormalities = {
     specific: "Autorisé pour certaines exploitations déterminées",
   },
   creator: {
+    totals: (creators: string, publishers: string) =>
+      `Créateurs : ${creators} · Éditeurs : ${publishers}`,
     person: "Créateur",
     lastName: "Nom",
     firstName: "Prénom",
@@ -131,9 +150,21 @@ export const legalFormalities = {
     phono: "Part Phono",
     phonoHint: "La part de l'éditeur dans les droits de reproduction, en %.",
     add: "Ajouter un éditeur",
+    // JUR-22 / JUR-25: whom it publishes, under which contract.
+    represents: "Éditeur de",
+    noCreator: "Ajoutez d'abord les créateurs du bulletin.",
+    creatorAt: (position: number) => `Créateur ${position}`,
+    contract: "Contrat d'édition qui fonde ce lien",
+    contractHint:
+      "Un contrat d'édition ou de coédition du projet. Sans contrat, il est à obtenir : la rubrique G donne alors sa date.",
+    toObtain: "À obtenir",
   },
   contract: {
     provided: "La copie du contrat d'édition est jointe",
+    providedYes:
+      "Copie jointe : chaque éditeur a son contrat d'édition rattaché.",
+    providedNo:
+      "Pas de copie jointe : rattachez le contrat de chaque éditeur, ou donnez la date de la rubrique G.",
     rubricG: "Date du contrat de cession et d'édition (rubrique G)",
     rubricGHint:
       "Le contrat conclu conjointement entre les créateurs et les éditeurs du bulletin.",
@@ -149,6 +180,7 @@ export const legalFormalities = {
     genre: "Le genre de l'œuvre",
     creator_first: (i: string) => `Le prénom ou le pseudonyme du créateur ${i}`,
     publisher_name: (i: string) => `La dénomination de l'éditeur ${i}`,
+    publisher_link: (i: string) => `Les créateurs que publie l'éditeur ${i}`,
     phono_total: "Des parts Phono qui font exactement 100 %",
     dep_dr: "Le partage des DEP et DR",
     arrangement: "La portée de l'autorisation d'arrangement",
@@ -170,6 +202,8 @@ export const legalFormalities = {
       "Donnez le prénom, ou le pseudonyme sous lequel la personne est déclarée.",
     publisher_name:
       "La dénomination de la société d'édition, telle qu'elle est déclarée à la SACEM.",
+    publisher_link:
+      "Cochez le ou les créateurs dont cet éditeur publie la part (coédition : plusieurs éditeurs pour un créateur).",
     creator_quality:
       "Choisissez la qualité : auteur, compositeur, arrangeur ou adaptateur.",
     phono_total:

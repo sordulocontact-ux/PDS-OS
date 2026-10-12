@@ -1,7 +1,7 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { FieldError } from "@/components/auth/form-message";
 import { usePickerLoad } from "@/components/network/use-picker-load";
@@ -12,8 +12,10 @@ import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import type { DossierErrors } from "@/lib/legal/formalities/field-errors";
 import { splitShareOf, type SplitShare } from "@/lib/legal/formalities/prefill";
 import {
+  listPublishingContracts,
   listSacemCreators,
   listSacemPublishers,
+  type PublishingContractOption,
 } from "@/lib/legal/formalities/party-actions";
 import {
   FULL,
@@ -56,6 +58,7 @@ function useRowIds(count: number) {
  * 100 %. */
 export function PeopleEditor({
   masterId,
+  formalityId,
   creators,
   publishers,
   disabled,
@@ -66,6 +69,8 @@ export function PeopleEditor({
   onPublishers,
 }: {
   masterId: string;
+  // The project's publishing contracts are read through it (JUR-25).
+  formalityId: string;
   // The title's confirmed split: someone added by hand takes their share.
   splitShares?: SplitShare[] | null;
   creators: Creator[];
@@ -82,6 +87,24 @@ export function PeopleEditor({
   const publisherRows = useRowIds(publishers.length);
   const loadCreators = usePickerLoad(() => listSacemCreators(masterId));
   const loadPublishers = usePickerLoad(() => listSacemPublishers(masterId));
+  const [contracts, setContracts] = useState<PublishingContractOption[]>([]);
+  useEffect(() => {
+    let active = true;
+    listPublishingContracts(formalityId).then((list) => {
+      if (active) setContracts(list);
+    });
+    return () => {
+      active = false;
+    };
+  }, [formalityId]);
+  // The creators by position, named, for « Éditeur de » (JUR-22).
+  const creatorNames = creators.map((c, i) => ({
+    position: i + 1,
+    name: c.pseudonym || [c.first_name, c.last_name].filter(Boolean).join(" "),
+  }));
+  // Totals by category (JUR-23): creators and publishers, then Phono.
+  const sumOf = (list: Array<{ phono: string }>) =>
+    totalUnits(list.map((p) => unitsOf(p.phono.replace(",", ".") || "0")));
   const total = totalUnits(
     [...creators, ...publishers].map((p) =>
       unitsOf(p.phono.replace(",", ".") || "0"),
@@ -144,6 +167,16 @@ export function PeopleEditor({
           onRemove={() => {
             creatorRows.remove(i);
             onCreators(creators.filter((_, j) => j !== i));
+            // The publishers' links follow the creators' new positions.
+            const removed = i + 1;
+            onPublishers(
+              publishers.map((p) => ({
+                ...p,
+                represents: (p.represents ?? [])
+                  .filter((n) => n !== removed)
+                  .map((n) => (n > removed ? n - 1 : n)),
+              })),
+            );
           }}
         />
       ))}
@@ -156,6 +189,8 @@ export function PeopleEditor({
           disabled={disabled}
           onChange={(change) => setPublisher(i, change)}
           errors={errors?.publishers[i]}
+          creators={creatorNames}
+          contracts={contracts}
           onRemove={() => {
             publisherRows.remove(i);
             onPublishers(publishers.filter((_, j) => j !== i));
@@ -192,6 +227,12 @@ export function PeopleEditor({
           </div>
         )}
         <div className="flex flex-col items-end gap-1">
+          <span className="text-sm text-muted-foreground tabular-nums">
+            {t.creator.totals(
+              formatShare(sumOf(creators)),
+              formatShare(sumOf(publishers)),
+            )}
+          </span>
           <span
             className={cn(
               "font-medium",

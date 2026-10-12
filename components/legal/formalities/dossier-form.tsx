@@ -18,6 +18,8 @@ import { splitShareOf } from "@/lib/legal/formalities/prefill";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 
 import { ArrangementField, ContractField } from "./dossier-fields";
+import { DossierRecap } from "./dossier-recap";
+import { DossierStepButtons, DossierStepChips } from "./dossier-steps";
 import { PeopleEditor } from "./people-editor";
 import { useDossierErrors } from "./use-dossier-errors";
 import { useLegalAction } from "@/components/legal/use-legal-action";
@@ -95,6 +97,10 @@ export function DossierForm({
     return { entries, filled };
   });
   const [entries, setEntries] = useState(initial.entries);
+  // Step by step (JUR-21): one section at a time, then the recap; « all »
+  // once a validation was tried, so every field in red can be reached.
+  const [step, setStep] = useState<number | "all">(0);
+  const RECAP = SECTIONS.length;
   const { pending, run } = useLegalAction();
   // « Dossier enregistré » only once the server said so.
   const [saved, setSaved] = useState(false);
@@ -128,9 +134,11 @@ export function DossierForm({
 
   return (
     <div ref={root} className="flex flex-col gap-8">
-      {SECTIONS.map((section) => (
+      <DossierStepChips sections={SECTIONS} step={step} onStep={setStep} />
+      {SECTIONS.map((section, index) => (
         <section
           key={section}
+          hidden={step !== "all" && step !== index}
           className="grid gap-x-4 gap-y-5 border-t border-[color:var(--border-hairline)] pt-6 sm:grid-cols-2"
         >
           <h3 className="text-base font-medium sm:col-span-2">
@@ -165,6 +173,7 @@ export function DossierForm({
                 {field.kind === "creators" && (
                   <PeopleEditor
                     masterId={title.masterId}
+                    formalityId={f.id}
                     errors={errors}
                     creators={obj<Creator[]>("creators", [])}
                     publishers={obj<Publisher[]>("publishers", [])}
@@ -177,7 +186,19 @@ export function DossierForm({
                         !entries.creators?.typed)
                     }
                     onCreators={(next) => set("creators", next)}
-                    onPublishers={(next) => set("publishers", next)}
+                    onPublishers={(next) => {
+                      set("publishers", next);
+                      // « Copie jointe » only with every publisher's
+                      // contract chosen (JUR-25).
+                      set("publishing_contract", {
+                        ...obj("publishing_contract", {
+                          provided: false,
+                          rubric_g: "",
+                        }),
+                        provided:
+                          next.length > 0 && next.every((p) => p.contract_id),
+                      });
+                    }}
                   />
                 )}
                 {field.kind === "dep_dr" && (
@@ -229,7 +250,22 @@ export function DossierForm({
           })}
         </section>
       ))}
-      {EDITABLE.includes(f.status) && (
+      {step === RECAP && (
+        <DossierRecap
+          entries={entries}
+          toVerify={
+            new Set(
+              Object.entries(f.values)
+                .filter(([, v]) => v.status === "to_verify")
+                .map(([k]) => k),
+            )
+          }
+        />
+      )}
+      {typeof step === "number" && (
+        <DossierStepButtons step={step} last={RECAP} onStep={setStep} />
+      )}
+      {EDITABLE.includes(f.status) && (step === RECAP || step === "all") && (
         <div className="flex flex-col items-end gap-3 border-t border-[color:var(--border-hairline)] pt-6">
           {errors && errors.count > 0 && !pending && (
             <FormMessage kind="error" className="self-stretch">
@@ -244,6 +280,8 @@ export function DossierForm({
             aria-busy={pending || undefined}
             onClick={() => {
               setSaved(false);
+              // Every section shown: the first field in red takes the focus.
+              setStep("all");
               attempt();
               run(
                 () =>

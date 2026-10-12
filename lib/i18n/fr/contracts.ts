@@ -82,6 +82,27 @@ export const contracts = {
     close: "Fermer",
     saved: "Contrat enregistré.",
   },
+  // « Nouveau contrat » asks what is being made first (JUR-18).
+  creation: {
+    legend: "Que voulez-vous faire ?",
+    import: "Enregistrer un contrat qui existe déjà",
+    importHint:
+      "Un contrat signé ou en cours, rédigé hors de PDS OS : vous l'enregistrez, puis vous ajoutez ses parties et son fichier.",
+    importSteps: [
+      "Remplissez ce qui le décrit : titre, type, projet, dates.",
+      "Sur sa page, ajoutez ses parties depuis le Réseau.",
+      "Déposez son fichier, puis soumettez-le à la validation de la direction.",
+    ],
+    generate: "Le générer depuis un modèle",
+    generateHint:
+      "Un contrat rempli d'après un modèle validé : il se prépare dans le Juridique d'un projet, d'après les contrats nécessaires et les fiches de renseignements.",
+    template: "Créer un modèle réutilisable",
+    templateHint:
+      "Un texte type, avec ses champs à remplir, que la direction valide avant qu'il serve à générer des contrats.",
+    openProjectContracts: "Ouvrir les contrats du projet",
+    chooseProject: "Choisir le projet",
+    openTemplates: "Ouvrir les modèles de contrat",
+  },
   page: {
     // The contract's origin in the Juridique (JUR-17).
     legalOrigin: {

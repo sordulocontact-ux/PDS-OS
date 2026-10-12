@@ -18,7 +18,7 @@ export type DossierErrors = {
     { last_name?: string; first_name?: string; quality?: string }
   >;
   // By publisher's position, from 0 (JUR-24).
-  publishers: Record<number, { name?: string }>;
+  publishers: Record<number, { name?: string; link?: string }>;
   phono?: string;
   count: number;
 };
@@ -85,6 +85,15 @@ export function dossierErrors(
       case "publisher_name":
         if (publishers[index] && blank(publishers[index].name)) {
           out.publishers[index] = { name: t.publisher_name };
+          out.count += 1;
+        }
+        break;
+      case "publisher_link":
+        if (publishers[index] && !(publishers[index].represents ?? []).length) {
+          out.publishers[index] = {
+            ...out.publishers[index],
+            link: t.publisher_link,
+          };
           out.count += 1;
         }
         break;

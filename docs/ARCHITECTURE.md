@@ -2520,9 +2520,19 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   changé (`useLegalAction` `done`) ; l'Historique s'exporte en CSV (UTC et Paris) ; les champs
   corrigés d'une fiche ne sont plus répétés dans ses réponses.
 
-- **Reste à part (lot suivant)** : relation éditeur ↔ créateurs et coédition (JUR-22, JUR-25),
-  répartitions Phono / DEP / DR en blocs (JUR-23), assistant SACEM pas à pas (JUR-21), assistant
-  de création de contrat (JUR-18).
+- **SACEM et contrats avancés (lot 5)** : un éditeur du bulletin dit quels créateurs il publie
+  (`Publisher.represents`, positions 1 à 5, plusieurs éditeurs pour un créateur = coédition ;
+  manque `publisher_link:i`) et le contrat d'édition du projet qui fonde le lien, ou « À obtenir »
+  (`Publisher.contract_id`, `listPublishingContracts`). « Copie jointe » n'est plus une case : elle
+  se déduit des contrats rattachés, et `formality_missing` ne la croit qu'avec une pièce (chaque
+  contrat choisi, ou un contrat d'édition signé du projet), sinon la rubrique G (migration
+  `20261012100701`). Totaux Créateurs / Éditeurs sous le Phono (JUR-23). Le dossier se remplit
+  pas à pas (`DossierStepChips`, `DossierStepButtons` : une section à la fois) jusqu'au
+  **Récapitulatif** (`DossierRecap` : confirmé, proposé à vérifier, manquant) où l'on valide ;
+  après un essai, toutes les sections s'affichent pour atteindre chaque champ en rouge (JUR-21).
+  « Nouveau contrat » demande d'abord le cas (`ContractCreation`) : enregistrer un contrat
+  existant (avec les étapes suivantes), le générer depuis un modèle (Juridique du projet) ou
+  créer un modèle (JUR-18). Pas encore : aperçu chiffré du partage statutaire des DEP / DR.
 
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 

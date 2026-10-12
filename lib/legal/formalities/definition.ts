@@ -109,6 +109,12 @@ export type Publisher = {
   ipi: string;
   phono: string;
   contact_id?: string;
+  // The creators it publishes, by their position on the bulletin (1 to 5):
+  // a publisher is never a free line (JUR-22).
+  represents?: number[];
+  // The project's publishing (or co-publishing) contract that founds the
+  // link; none = « à obtenir » (JUR-25).
+  contract_id?: string;
 };
 
 // What the bulletin takes of a person, from their name in the Réseau and
@@ -146,6 +152,8 @@ export function formalityMissingLabel(code: string): string {
       return t.creator_first(arg);
     case "publisher_name":
       return t.publisher_name(arg);
+    case "publisher_link":
+      return t.publisher_link(arg);
     case "borrowing":
       return t.borrowing(arg);
     case "to_verify":

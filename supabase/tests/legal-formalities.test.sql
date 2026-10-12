@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
 -- shares, signatures, deposit, registration and ISWC here are SIMULATED).
 begin;
-select plan(22);
+select plan(24);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -115,6 +115,17 @@ select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
     jsonb_build_object('name', '', 'phono', '50')), 'source', 'Saisi')));
 select ok(public.formality_missing(pg_temp.id_of('f')) @> array['creator_first:1', 'publisher_name:1'],
           'a first name or pseudonym, and the publisher''s denomination, are required');
+-- JUR-22 / JUR-25 (…20261012100701): a publisher says whom it publishes, and
+-- « copie jointe » needs a piece.
+select ok('publisher_link:1' = any (public.formality_missing(pg_temp.id_of('f'))),
+          'a publisher publishes at least one creator of the bulletin');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'publishers', jsonb_build_object('value', jsonb_build_array(
+    jsonb_build_object('name', 'Éditions PDS', 'phono', '50', 'represents', jsonb_build_array(1))), 'source', 'Saisi'),
+  'publishing_contract', jsonb_build_object('value', jsonb_build_object('provided', true, 'rubric_g', ''), 'source', 'Saisi')));
+select ok(not ('publisher_link:1' = any (public.formality_missing(pg_temp.id_of('f'))))
+          and 'rubric_g' = any (public.formality_missing(pg_temp.id_of('f'))),
+          'a copy « joined » without any contract counts as no copy: the rubric G is asked');
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi'),
   'publishers', jsonb_build_object('value', '[]'::jsonb, 'source', 'Saisi')));

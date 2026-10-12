@@ -139,3 +139,41 @@ export async function listSacemPublishers(
     ...options.filter((o) => !data.publishers.has(o.id)),
   ];
 }
+
+export type PublishingContractOption = {
+  id: string;
+  title: string;
+  status: string;
+};
+
+/**
+ * The project's publishing contracts a publisher of the bulletin may rest
+ * on (JUR-25), whatever their state: the bulletin says which one founds
+ * each creator–publisher link. Read with the user's session (RLS).
+ */
+export async function listPublishingContracts(
+  formalityId: string,
+): Promise<PublishingContractOption[]> {
+  await requireApproved();
+  const id = catalogIdSchema.safeParse(formalityId);
+  if (!id.success) return [];
+  const supabase = await createClient();
+  const { data: formality } = await supabase
+    .from("legal_formalities")
+    .select("project_id")
+    .eq("id", id.data)
+    .maybeSingle();
+  if (!formality) return [];
+  const { data, error } = await supabase
+    .from("contracts")
+    .select("id, title, status")
+    .eq("project_id", formality.project_id)
+    .eq("type", "publishing")
+    .order("created_at");
+  if (error) console.error("listPublishingContracts:", error.message);
+  return (data ?? []).map((c) => ({
+    id: c.id,
+    title: c.title,
+    status: c.status,
+  }));
+}
