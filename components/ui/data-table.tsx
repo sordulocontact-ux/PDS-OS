@@ -88,7 +88,9 @@ export function DataTableBody({ children }: { children: React.ReactNode }) {
   );
 }
 
-// `relative`: a DataTableLink inside covers the whole row.
+// `relative`: a DataTableLink inside covers the whole row. Safari (26.3 still)
+// ignores `relative` on a <tr>: every link then covers the whole table and the
+// last row catches every click. A transform makes the row the containing block.
 export function DataTableRow({
   children,
   className,
@@ -97,7 +99,12 @@ export function DataTableRow({
   className?: string;
 }) {
   return (
-    <TableRow className={cn("relative border-0 hover:bg-transparent", className)}>
+    <TableRow
+      className={cn(
+        "relative [transform:translate(0)] border-0 hover:bg-transparent",
+        className,
+      )}
+    >
       {children}
     </TableRow>
   );
