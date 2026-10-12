@@ -3290,6 +3290,25 @@ lots, chacun utile seul.
   Budget à quatre états (Estimé / Proposé / Engagé / Payé) étendra `budget_lines` au lot
   suivant ; le Brief n'en garde que les tarifs estimés.
 
+### Fil avec l'ingénieur (PROJ-AMEL-02, lot 10)
+
+Migration `…20261012101801_engineer_messages`.
+
+- Sur sa page `/m/…` (sans compte), l'ingénieur a un **fil avec le label** et trois actions
+  rapides : « Poser une question », « Signaler un retard » (nombre de jours, 1 à 90), « Signaler un
+  fichier manquant », ou un message simple (`post_master_engineer_message`, anon, jeton vérifié
+  par `open_transmission_of`). Chaque message est daté et rattaché à l'envoi et à son étape
+  (Mixage / Mastering) ; l'historique **suit le lien** quand le même ingénieur passe au mastering
+  (`master_link_chain`, `get_master_engineer_messages`). Les blocs « Fichiers » et « Brief » de sa
+  page se replient avec un résumé (titres, dates), l'état est gardé au rafraîchissement.
+- Le chef de projet est notifié (`master_engineer_signal`) **une fois tant qu'il n'a pas lu** :
+  pas de rafale. Sous Mixage et Mastering, « Fil avec l'ingénieur » (`EngineerThreadPanel`) :
+  répondre (lu par l'ingénieur sur sa page), marquer un signalement traité ou le rouvrir (qui et
+  quand gardés). Pour un retard, le code propose les **échéances touchées** du Brief (étape en cours
+  et suivantes encore à venir, décalées du retard, `delayImpact`) et dit si le master final passe
+  après la sortie ; **rien ne bouge sans « Appliquer ces dates »** (recalculé côté serveur, ordre
+  du calendrier vérifié en SQL).
+
 ## 8 octies. Distribution : dossier, dépôt manuel déclaré, plateformes, clôture
 
 Ticket « Distribution » (11/10/2026), livré en 7 lots. **Décision V1 : PDS OS prépare, contrôle et

@@ -3,6 +3,7 @@ import {
   mixRoundDone,
   roundCount,
 } from "@/components/master-workflow/production-page";
+import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadMixVersions } from "@/lib/master-workflow/mix-versions";
@@ -35,11 +36,14 @@ export default async function ProjectMasterMasteringPage({
   const open = mixRoundDone(view);
   const mastered = roundCount(versions, view);
   return (
-    <ProductionPage
-      stage="mastering"
-      round={{ view, versions }}
-      done={open && mastered.total > 0 && mastered.finals === mastered.total}
-      waiting={open ? null : roundCount(mixVersions, view)}
-    />
+    <>
+      <ProductionPage
+        stage="mastering"
+        round={{ view, versions }}
+        done={open && mastered.total > 0 && mastered.finals === mastered.total}
+        waiting={open ? null : roundCount(mixVersions, view)}
+      />
+      <EngineerThreadSection view={view} />
+    </>
   );
 }

@@ -1,12 +1,15 @@
 import { AcknowledgeButton } from "@/components/master-workflow/acknowledge-button";
 import { DeliverVersion } from "@/components/master-workflow/deliver-version";
+import { EngineerThread } from "@/components/master-workflow/engineer-thread";
 import { PublicRefresh } from "@/components/master-workflow/public-refresh";
 import { PublicVersions } from "@/components/master-workflow/public-versions";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { fr } from "@/lib/i18n/fr";
+import type { EngineerMessage } from "@/lib/master-workflow/engineer-messages";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
+import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/release/format";
 
 type Open = Extract<PublicPackage, { state: "open" | "received" }>;
@@ -20,11 +23,15 @@ type Open = Extract<PublicPackage, { state: "open" | "received" }>;
 export function PublicPackageView({
   token,
   data,
+  messages,
 }: {
   token: string;
   data: Open;
+  // The thread with the label (PROJ-AMEL-02).
+  messages: EngineerMessage[];
 }) {
   const t = fr.masterWorkflow.publicPackage;
+  const th = fr.masterWorkflow.engineerThread;
   const p = fr.masterWorkflow.mix.package;
   const pack = data.package;
   const date = (value: string | null) =>
@@ -39,8 +46,15 @@ export function PublicPackageView({
           <p className="mt-2 text-sm whitespace-pre-wrap">{data.note}</p>
         </section>
       )}
-      <section className={sectionCardClass}>
-        <h2 className="text-base font-medium">{t.files}</h2>
+      {/* Folded or not, the reader's choice survives the page's refresh
+          (PROJ-AMEL-02): the summary says what is inside. */}
+      <details open className={cn(sectionCardClass, "group")}>
+        <summary className="flex cursor-pointer list-none items-baseline justify-between gap-3 marker:hidden">
+          <h2 className="text-base font-medium">{t.files}</h2>
+          <span className="text-sm text-[color:var(--text-secondary)]">
+            {th.sections.summaryFiles(pack.titles.length)}
+          </span>
+        </summary>
         <ul className="mt-4 flex flex-col gap-5">
           {pack.titles.map((title) => (
             <li key={title.title} className="flex flex-col gap-2">
@@ -80,9 +94,22 @@ export function PublicPackageView({
             </li>
           ))}
         </ul>
-      </section>
-      <section className={sectionCardClass}>
-        <h2 className="mb-4 text-base font-medium">{t.brief}</h2>
+      </details>
+      <details open className={sectionCardClass}>
+        <summary className="mb-4 flex cursor-pointer list-none items-baseline justify-between gap-3 marker:hidden">
+          <h2 className="text-base font-medium">{t.brief}</h2>
+          <span className="text-sm text-[color:var(--text-secondary)]">
+            {th.sections.summaryBrief(
+              [
+                pack.mixV1Due,
+                pack.mixFinalDue,
+                pack.masteringDue,
+                pack.masterFinalDue,
+                pack.releaseDue,
+              ].filter(Boolean).length,
+            )}
+          </span>
+        </summary>
         <FactList
           emptyLabel={p.none}
           facts={[
@@ -109,7 +136,8 @@ export function PublicPackageView({
             { label: p.constraints, value: pack.constraints },
           ]}
         />
-      </section>
+      </details>
+      <EngineerThread token={token} messages={messages} />
       {data.state === "received" && data.acknowledgedAt ? (
         <p className="text-sm font-medium">
           {t.received(formatShortDate(data.acknowledgedAt))}

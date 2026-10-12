@@ -1,5 +1,10 @@
 import "server-only";
 
+import {
+  ENGINEER_SIGNALS,
+  type EngineerMessage,
+} from "@/lib/master-workflow/engineer-messages";
+
 import { cache } from "react";
 import { z } from "zod";
 
@@ -90,4 +95,26 @@ export async function noteOpened(token: string): Promise<void> {
     p_token: token,
   });
   if (error) console.error("noteOpened:", error.message);
+}
+
+/** The thread of a link (PROJ-AMEL-02), as the engineer reads it. */
+export async function getEngineerThread(
+  token: string,
+): Promise<EngineerMessage[]> {
+  if (!TOKEN.test(token)) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_master_engineer_messages", {
+    p_token: token,
+  });
+  if (error) console.error("getEngineerThread:", error.message);
+  return (data ?? []).map((m) => ({
+    id: m.id,
+    stage: m.stage === "mastering" ? "mastering" : "mix",
+    kind: ENGINEER_SIGNALS.find((k) => k === m.kind) ?? ("message" as const),
+    author: m.author === "team" ? "team" : "engineer",
+    body: m.body,
+    delayDays: m.delay_days,
+    status: m.status === "open" || m.status === "handled" ? m.status : null,
+    createdAt: m.created_at,
+  }));
 }

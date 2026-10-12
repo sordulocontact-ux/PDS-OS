@@ -314,6 +314,12 @@ export const strategyDocumentTone: Record<string, Tone> = {
   superseded: "neutral",
 };
 
+/** A signal of the engineer (PROJ-AMEL-02): to handle, handled. */
+export const engineerSignalTone: Record<string, Tone> = {
+  open: "warning",
+  handled: "success",
+};
+
 /** A studio session (retour Catalogue 28): planned, held, cancelled. */
 export const sessionStatusTone: Record<string, Tone> = {
   planned: "info",

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PublicPackageView } from "@/components/master-workflow/public-package";
 import { fr } from "@/lib/i18n/fr";
 import {
+  getEngineerThread,
   getPublicPackage,
   noteOpened,
 } from "@/lib/master-workflow/transmission-public";
@@ -46,7 +47,11 @@ export default async function MasterPackagePage({
           )}
         </header>
         {data.state === "open" || data.state === "received" ? (
-          <PublicPackageView token={token} data={data} />
+          <PublicPackageView
+            token={token}
+            data={data}
+            messages={await getEngineerThread(token)}
+          />
         ) : (
           <p className="text-muted-foreground">{t[data.state]}</p>
         )}

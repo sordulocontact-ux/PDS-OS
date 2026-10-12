@@ -688,6 +688,68 @@ export const masterWorkflow = {
           : `Modification demandée le ${date}`,
     },
   },
+  // PROJ-AMEL-02: the thread with the engineer and their signals.
+  engineerThread: {
+    title: "Échanges avec le label",
+    teamTitle: "Fil avec l'ingénieur",
+    teamDescription:
+      "Questions, retards et fichiers manquants signalés depuis le lien de l'ingénieur, et vos réponses. Un retard ne change aucune date sans votre accord.",
+    empty: "Aucun échange pour l'instant.",
+    kinds: {
+      message: "Message",
+      question: "Question",
+      delay: "Retard",
+      missing_file: "Fichier manquant",
+    },
+    actions: {
+      message: "Écrire un message",
+      question: "Poser une question",
+      delay: "Signaler un retard",
+      missing_file: "Signaler un fichier manquant",
+    },
+    placeholders: {
+      message: "Votre message au label…",
+      question: "Votre question…",
+      delay: "Ce qui retarde le travail…",
+      missing_file: "Le fichier qui manque, et pour quel titre…",
+    },
+    bodyLabel: "Votre message",
+    delayDays: "Retard prévu, en jours",
+    delayDaysRequired: "Dites de combien de jours, entre 1 et 90.",
+    send: "Envoyer",
+    sent: "Envoyé au label.",
+    invalid: "Écrivez votre message (2 000 caractères au plus).",
+    linkClosed: "Ce lien n'est plus actif : contactez le label directement.",
+    failed: "Le message n'a pas pu être envoyé. Réessayez.",
+    stages: { mix: "Mixage", mastering: "Mastering" },
+    you: "Vous",
+    label: "Le label",
+    engineer: "L'ingénieur",
+    days: (n: number) => (n === 1 ? "1 jour" : `${n} jours`),
+    statuses: { open: "À traiter", handled: "Traité" },
+    reply: "Répondre",
+    replyLabel: "Votre réponse à l'ingénieur",
+    replied: "Réponse envoyée : l'ingénieur la lit sur sa page.",
+    handle: "Marquer comme traité",
+    handled: "Signalement traité.",
+    reopen: "Rouvrir",
+    impactTitle: "Échéances touchées",
+    impactIntro: (days: string) =>
+      `Si le retard de ${days} est confirmé, voici ce que le code propose :`,
+    impactLine: (label: string, from: string, to: string) =>
+      `${label} : ${from} → ${to}`,
+    impactNone: "Aucune échéance à venir n'est touchée.",
+    beyondRelease:
+      "Le master final passerait après la date de sortie prévue : à arbitrer avec la direction.",
+    applyDates: "Appliquer ces dates",
+    applied: "Dates du Brief mises à jour.",
+    sections: {
+      summaryFiles: (titles: number) =>
+        titles === 1 ? "1 titre" : `${titles} titres`,
+      summaryBrief: (dates: number) =>
+        dates === 0 ? "Aucune date" : dates === 1 ? "1 date" : `${dates} dates`,
+    },
+  },
   publicPackage: {
     pageTitle: "Dossier",
     title: { mix: "Dossier Mix", mastering: "Dossier Mastering" },

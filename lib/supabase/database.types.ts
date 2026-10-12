@@ -8178,6 +8178,86 @@ export type Database = {
           },
         ]
       }
+      master_engineer_messages: {
+        Row: {
+          author: string
+          author_person_id: string | null
+          body: string
+          created_at: string
+          delay_days: number | null
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          kind: string
+          organization_id: string
+          project_id: string
+          stage: string
+          status: string | null
+          transmission_id: string
+        }
+        Insert: {
+          author: string
+          author_person_id?: string | null
+          body: string
+          created_at?: string
+          delay_days?: number | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          kind: string
+          organization_id: string
+          project_id: string
+          stage: string
+          status?: string | null
+          transmission_id: string
+        }
+        Update: {
+          author?: string
+          author_person_id?: string | null
+          body?: string
+          created_at?: string
+          delay_days?: number | null
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          kind?: string
+          organization_id?: string
+          project_id?: string
+          stage?: string
+          status?: string | null
+          transmission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_engineer_messages_author_person_id_fkey"
+            columns: ["author_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_engineer_messages_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_engineer_messages_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_engineer_messages_transmission_id_fkey"
+            columns: ["transmission_id"]
+            isOneToOne: false
+            referencedRelation: "master_transmissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_file_comments: {
         Row: {
           at_seconds: number | null
@@ -14186,6 +14266,15 @@ export type Database = {
         }
         Returns: string
       }
+      post_master_engineer_message: {
+        Args: {
+          p_body: string
+          p_delay_days?: number
+          p_kind: string
+          p_token: string
+        }
+        Returns: string
+      }
       prepare_distribution_version: {
         Args: { p_note: string; p_project_id: string }
         Returns: undefined
@@ -14883,6 +14972,19 @@ export type Database = {
       generate_legal_contract: {
         Args: { p_fields: Json; p_need_id: string }
         Returns: string
+      }
+      get_master_engineer_messages: {
+        Args: { p_token: string }
+        Returns: {
+          author: string
+          body: string
+          created_at: string
+          delay_days: number
+          id: string
+          kind: string
+          stage: string
+          status: string
+        }[]
       }
       get_master_transmission: { Args: { p_token: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }

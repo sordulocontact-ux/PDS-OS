@@ -9,6 +9,7 @@ import {
   deliveryNameOk,
 } from "@/lib/master-workflow/delivery-rules";
 import { fr } from "@/lib/i18n/fr";
+import { ENGINEER_MESSAGE_KINDS } from "@/lib/master-workflow/engineer-messages";
 import { TOKEN } from "@/lib/master-workflow/transmission-public";
 import { createClient } from "@/lib/supabase/server";
 
@@ -114,5 +115,49 @@ export async function recordMasterDelivery(
     return { ok: false, error: deliveryError(error.message) };
   }
   revalidatePath(`/m/${token}`);
+  return { ok: true };
+}
+
+const engineerMessage = z.object({
+  token: z.string().regex(TOKEN),
+  kind: z.enum(ENGINEER_MESSAGE_KINDS),
+  body: z.string().trim().min(1).max(2000),
+  delayDays: z.number().int().min(1).max(90).nullable(),
+});
+
+/**
+ * A message or a signal from the engineer's page (PROJ-AMEL-02): « Poser une
+ * question », « Signaler un retard » (how many days), « Signaler un fichier
+ * manquant ». The database checks the token, dates it, ties it to the
+ * stage and tells the project's owner (post_master_engineer_message).
+ */
+export async function postEngineerMessage(
+  input: z.input<typeof engineerMessage>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const t = fr.masterWorkflow.engineerThread;
+  const parsed = engineerMessage.safeParse(input);
+  if (!parsed.success) return { ok: false, error: t.invalid };
+  const v = parsed.data;
+  if (v.kind === "delay" && !v.delayDays)
+    return { ok: false, error: t.delayDaysRequired };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("post_master_engineer_message", {
+    p_token: v.token,
+    p_kind: v.kind,
+    p_body: v.body,
+    p_delay_days: v.kind === "delay" ? (v.delayDays ?? undefined) : undefined,
+  });
+  if (error) {
+    console.error("postEngineerMessage:", error.message);
+    const message = error.message ?? "";
+    return {
+      ok: false,
+      error:
+        message.includes("expired") || message.includes("replaced")
+          ? t.linkClosed
+          : t.failed,
+    };
+  }
+  revalidatePath(`/m/${v.token}`);
   return { ok: true };
 }

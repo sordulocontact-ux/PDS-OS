@@ -21,6 +21,7 @@ export const NOTIFICATION_KINDS = [
   "contract_changes_requested",
   "meeting_invited",
   "call_report_shared",
+  "master_engineer_signal",
   "master_transmission_received",
   "master_mix_version_received",
   "master_mix_approved",
@@ -112,6 +113,9 @@ export function notificationHref(
     kind.startsWith("master_mix_")
   )
     return routes.projectMasterStep(projectId, "mix");
+  // A message or a signal of the engineer: the thread, under the Mix.
+  if (kind === "master_engineer_signal")
+    return `${routes.projectMasterStep(projectId, "mix")}#engineer-thread`;
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))
     return routes.projectMasterStep(projectId, "mastering");
