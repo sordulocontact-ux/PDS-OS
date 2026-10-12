@@ -17,6 +17,8 @@ const isoDate = z.iso.date();
 const optional = <T extends z.ZodType>(schema: T) =>
   z.union([schema, z.literal("")]).transform((v) => (v === "" ? null : v));
 
+// MKT-S1-10: delivery, validation and publication apart from the
+// announcement, the teaser and the release (same list in SQL).
 const MILESTONE_KINDS = [
   "release",
   "announcement",
@@ -24,6 +26,9 @@ const MILESTONE_KINDS = [
   "content",
   "live",
   "press",
+  "delivery",
+  "validation",
+  "publication",
   "other",
 ] as const;
 
@@ -98,5 +103,66 @@ export async function removeMilestone(
     .delete()
     .eq("id", milestoneId)
     .eq("project_id", projectId);
+  return done(projectId, error);
+}
+
+// MKT-S1-10: the upstream milestones ticked by a person, created at once
+// (delivery, validation), each tied to its deliverable.
+const upstreamInput = z
+  .array(
+    z.object({
+      kind: z.enum(["delivery", "validation"]),
+      title: text(200),
+      occursOn: isoDate,
+      deliverableId: id,
+    }),
+  )
+  .min(1)
+  .max(20);
+
+export async function addUpstreamMilestones(
+  projectId: string,
+  input: z.input<typeof upstreamInput>,
+): Promise<ActionResult> {
+  const p = upstreamInput.safeParse(input);
+  const organizationId = await orgId();
+  if (!p.success || !organizationId || !id.safeParse(projectId).success)
+    return fail("invalid_input");
+  const supabase = await createClient();
+  const { error } = await supabase.from("milestones").insert(
+    p.data.map((m) => ({
+      organization_id: organizationId,
+      project_id: projectId,
+      title: m.title,
+      occurs_on: m.occursOn,
+      kind: m.kind,
+      channel: "other",
+      deliverable_id: m.deliverableId,
+    })),
+  );
+  return done(projectId, error);
+}
+
+// MKT-S1-10: « Déplacer au … » once its impact was shown and confirmed;
+// the upstream deadlines follow (they are computed from it).
+export async function moveMilestone(
+  projectId: string,
+  milestoneId: string,
+  occursOn: string,
+): Promise<ActionResult> {
+  if (
+    !id.safeParse(projectId).success ||
+    !id.safeParse(milestoneId).success ||
+    !isoDate.safeParse(occursOn).success
+  )
+    return fail("invalid_input");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("milestones")
+    .update({ occurs_on: occursOn })
+    .eq("id", milestoneId)
+    .eq("project_id", projectId)
+    .select("id");
+  if (!error && data.length === 0) return fail("stage_locked");
   return done(projectId, error);
 }

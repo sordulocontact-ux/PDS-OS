@@ -107,6 +107,8 @@ export type DimensionInput = {
     label: string;
     state: string;
     review_status: string;
+    // MKT-S1-08: said to need no deliverable (not an oversight).
+    no_deliverables?: boolean;
   }>;
   openNeeds: unknown[];
   deliverables: Array<
@@ -221,7 +223,11 @@ function selectedLeverIds(input: DimensionInput): string[] {
 }
 
 function deliverables(input: DimensionInput): Omit<DimensionStatus, "key"> {
-  const selected = selectedLeverIds(input);
+  // A lever said to need none is never counted as « sans livrable ».
+  const needless = new Set(
+    input.levers.filter((l) => l.no_deliverables).map((l) => l.id),
+  );
+  const selected = selectedLeverIds(input).filter((id) => !needless.has(id));
   const list = input.deliverables;
   if (list.length === 0)
     return {

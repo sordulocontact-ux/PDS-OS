@@ -1,11 +1,13 @@
 import { formatMilestoneDate } from "@/components/strategy/calendar/milestone-row";
 import { UpstreamArbitration } from "@/components/strategy/calendar/upstream-arbitration";
+import { UpstreamProposals } from "@/components/strategy/calendar/upstream-proposals";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import { dayOffset } from "@/lib/strategy/calendar";
 import {
   UPSTREAM_STEPS,
+  upstreamMilestones,
   type UpstreamChain,
   type UpstreamDeliverable,
   type UpstreamStepKey,
@@ -24,11 +26,16 @@ export function UpstreamChains({
   chains,
   referenceDate,
   deliverables,
+  milestones,
+  today,
   projectId,
   canEdit,
   onMoveMilestone,
 }: {
   chains: UpstreamChain[];
+  // The calendar's milestones: upstream ones already there are not proposed.
+  milestones: Array<{ kind: string; deliverable_id: string | null }>;
+  today: string;
   referenceDate: string | null;
   deliverables: UpstreamDeliverable[];
   projectId: string;
@@ -121,12 +128,21 @@ export function UpstreamChains({
                 </span>
               )}
               {canEdit && (
-                <UpstreamArbitration
-                  projectId={projectId}
-                  chain={chain}
-                  current={leadsOf(chain.deliverableId)}
-                  onMoveMilestone={() => onMoveMilestone(chain.milestoneId)}
-                />
+                <>
+                  <UpstreamArbitration
+                    projectId={projectId}
+                    chain={chain}
+                    current={leadsOf(chain.deliverableId)}
+                    today={today}
+                    onMoveMilestone={() => onMoveMilestone(chain.milestoneId)}
+                  />
+                  <span>
+                    <UpstreamProposals
+                      projectId={projectId}
+                      proposals={upstreamMilestones(chain, milestones, today)}
+                    />
+                  </span>
+                </>
               )}
             </li>
           ))}

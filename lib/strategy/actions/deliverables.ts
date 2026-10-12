@@ -29,6 +29,7 @@ const deliverableInput = z.object({
   leverId: id,
   title: text(200),
   quantity,
+  format: optional(text(80)).optional(),
   assigneePersonId: optional(id),
   dueDate: optional(z.iso.date()),
 });
@@ -38,6 +39,7 @@ const columns = (p: z.output<typeof deliverableInput>) => ({
   lever_id: p.leverId,
   title: p.title,
   quantity: p.quantity,
+  format: p.format ?? null,
   assignee_person_id: p.assigneePersonId,
   due_date: p.dueDate,
 });
@@ -92,5 +94,76 @@ export async function removeDeliverable(
     .delete()
     .eq("id", deliverableId)
     .eq("project_id", projectId);
+  return done(projectId, error);
+}
+
+// MKT-S1-08: a lot created in one go — the ticked titles of one lever, with
+// the same responsible and deadline. One insert: all or nothing.
+const lotInput = z.object({
+  leverId: id,
+  items: z
+    .array(z.object({ title: text(200), quantity }))
+    .min(1)
+    .max(20),
+  assigneePersonId: optional(id),
+  dueDate: optional(z.iso.date()),
+});
+export type LotInput = z.input<typeof lotInput>;
+
+export async function addDeliverableLot(
+  projectId: string,
+  input: LotInput,
+): Promise<ActionResult> {
+  const p = lotInput.safeParse(input);
+  const organizationId = await orgId();
+  if (!p.success || !organizationId || !id.safeParse(projectId).success)
+    return fail("invalid_input");
+  const supabase = await createClient();
+  const { error } = await supabase.from("strategy_deliverables").insert(
+    p.data.items.map((item) => ({
+      organization_id: organizationId,
+      project_id: projectId,
+      lever_id: p.data.leverId,
+      title: item.title,
+      quantity: item.quantity,
+      assignee_person_id: p.data.assigneePersonId,
+      due_date: p.data.dueDate,
+    })),
+  );
+  return done(projectId, error);
+}
+
+// MKT-S1-08: the same responsible or deadline for several deliverables. An
+// empty field leaves that column as it is.
+const bulkInput = z.object({
+  ids: z.array(id).min(1).max(100),
+  assigneePersonId: optional(id),
+  dueDate: optional(z.iso.date()),
+});
+export type BulkInput = z.input<typeof bulkInput>;
+
+export async function updateDeliverables(
+  projectId: string,
+  input: BulkInput,
+): Promise<ActionResult> {
+  const p = bulkInput.safeParse(input);
+  if (!p.success || !id.safeParse(projectId).success)
+    return fail("invalid_input");
+  const patch = {
+    ...(p.data.assigneePersonId
+      ? { assignee_person_id: p.data.assigneePersonId }
+      : {}),
+    ...(p.data.dueDate ? { due_date: p.data.dueDate } : {}),
+  };
+  if (Object.keys(patch).length === 0) return fail("invalid_input");
+  await requireApproved();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("strategy_deliverables")
+    .update(patch)
+    .in("id", p.data.ids)
+    .eq("project_id", projectId)
+    .select("id");
+  if (!error && data.length === 0) return fail("stage_locked");
   return done(projectId, error);
 }

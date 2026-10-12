@@ -121,3 +121,62 @@ export function upstreamChains(
     })
     .sort((a, b) => a.steps[0].date.localeCompare(b.steps[0].date));
 }
+
+/**
+ * The earliest date the milestone could keep with these lead times, from
+ * today (MKT-S1-10): the impact of moving it, said before anything moves.
+ * Null when no deadline has passed.
+ */
+export function firstFeasibleDate(
+  chain: UpstreamChain,
+  today: string,
+): { date: string; shiftDays: number } | null {
+  const passed = chain.steps.filter((s) => s.passed);
+  if (passed.length === 0) return null;
+  const longest = Math.max(...passed.map((s) => s.leadDays));
+  const date = addDays(today, longest);
+  return { date, shiftDays: dayOffset(date, chain.milestoneDate) };
+}
+
+export type UpstreamMilestone = {
+  kind: "delivery" | "validation";
+  date: string;
+  deliverableId: string;
+  deliverableTitle: string;
+};
+
+/**
+ * The upstream milestones a chain calls for (MKT-S1-10): the delivery at the
+ * end of production, the validation before going out — proposed by code,
+ * created only once a person ticks them, never twice for the same
+ * deliverable, never on a date already past.
+ */
+export function upstreamMilestones(
+  chain: UpstreamChain,
+  existing: Array<{ kind: string; deliverable_id: string | null }>,
+  today: string,
+): UpstreamMilestone[] {
+  const has = (kind: string) =>
+    existing.some(
+      (m) => m.kind === kind && m.deliverable_id === chain.deliverableId,
+    );
+  const proposals: UpstreamMilestone[] = [];
+  const step = (key: UpstreamStepKey) => chain.steps.find((s) => s.key === key);
+  const production = step("production");
+  const validation = step("validation");
+  if (production && production.date >= today && !has("delivery"))
+    proposals.push({
+      kind: "delivery",
+      date: production.date,
+      deliverableId: chain.deliverableId,
+      deliverableTitle: chain.deliverableTitle,
+    });
+  if (validation && validation.date >= today && !has("validation"))
+    proposals.push({
+      kind: "validation",
+      date: validation.date,
+      deliverableId: chain.deliverableId,
+      deliverableTitle: chain.deliverableTitle,
+    });
+  return proposals;
+}

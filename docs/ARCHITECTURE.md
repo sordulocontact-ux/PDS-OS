@@ -1354,6 +1354,26 @@ livrable, les libellés ou l'action d'import en props.
 
 ---
 
+### Retours Marketing du 11/10/2026, lot 9c (MKT-S1-08, 10)
+
+Migration `…20261012101301_deliverables_calendar`.
+
+- **Livrables par lots** : sous chaque levier retenu, « Proposer un lot » (`lotForLever`,
+  règles du code selon les mots du levier : clip, réseaux, influence, presse, playlists,
+  publicité, radio, live, partenariat ; titres déjà présents écartés), cochés, quantités
+  ajustées, responsable et échéance communs, créés en une fois (`addDeliverableLot`) ;
+  cases à cocher sur les livrables et barre « Appliquer à la sélection » (`updateDeliverables`,
+  un champ vide ne change rien) ; **format** d'un livrable ; jalons liés écrits sous lui.
+- **« Aucun livrable requis »** (`levers.no_deliverables`) : une décision, plus compté
+  « levier sans livrable » ; un livrable ajouté ensuite la reprend (trigger).
+- **Calendrier** : types Livraison, Validation, Publication à part de l'annonce, du teaser
+  et de la sortie (canal « autre » pour les étapes internes) ; pour un livrable sur un temps
+  fort, « Proposer les jalons amont » (livraison en fin de production, validation avant la
+  sortie, datés par ses délais, jamais en double ni dans le passé, `upstreamMilestones`) ; une
+  échéance passée dit la **première date tenable** avec son décalage (`firstFeasibleDate`) et
+  propose « Déplacer au … », confirmé avec son impact (`moveMilestone`), les échéances amont
+  suivant la nouvelle date. Délais configurables par livrable (lot 1).
+
 ### Retours Marketing du 11/10/2026, lot 9b (MKT-S1-05, 07, 13, 14)
 
 Migration `…20261012101201_strategy_audiences_kpi_owner`.

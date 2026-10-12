@@ -64,7 +64,8 @@ export function isMilestoneChannel(value: unknown): value is MilestoneChannel {
 
 /** The channel a new milestone of this kind most likely sits on. */
 export function channelOfKind(kind: string): MilestoneChannel {
-  return kind === "release" || kind === "press" || kind === "live"
-    ? kind
-    : "organic";
+  if (kind === "release" || kind === "press" || kind === "live") return kind;
+  // Internal steps of the team (MKT-S1-10): no audience channel.
+  if (kind === "delivery" || kind === "validation") return "other";
+  return "organic";
 }

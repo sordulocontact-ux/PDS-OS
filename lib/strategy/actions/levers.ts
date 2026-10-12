@@ -68,6 +68,8 @@ export async function leverFromNeed(
 const leverPatch = z.object({
   state: z.enum(STATES).optional(),
   review_status: z.enum(REVIEW).optional(),
+  // MKT-S1-08: « Aucun livrable requis », a decision, not an oversight.
+  no_deliverables: z.boolean().optional(),
 });
 
 export async function updateLever(

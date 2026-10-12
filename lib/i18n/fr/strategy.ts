@@ -165,6 +165,9 @@ export const strategy = {
       content: "Contenu",
       live: "Live",
       press: "Presse",
+      delivery: "Livraison",
+      validation: "Validation",
+      publication: "Publication",
       other: "Autre",
     },
     dayOffset: (days: number) =>

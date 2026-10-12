@@ -6860,6 +6860,7 @@ export type Database = {
           id: string
           label: string
           need_id: string | null
+          no_deliverables: boolean
           organization_id: string
           project_id: string
           review_status: string
@@ -6877,6 +6878,7 @@ export type Database = {
           id?: string
           label: string
           need_id?: string | null
+          no_deliverables?: boolean
           organization_id: string
           project_id: string
           review_status?: string
@@ -6894,6 +6896,7 @@ export type Database = {
           id?: string
           label?: string
           need_id?: string | null
+          no_deliverables?: boolean
           organization_id?: string
           project_id?: string
           review_status?: string
@@ -12756,61 +12759,64 @@ export type Database = {
       }
       strategy_deliverables: {
         Row: {
-          conception_lead_days: number | null
-          production_lead_days: number | null
-          validation_lead_days: number | null
-          upstream_risk_accepted_at: string | null
-          upstream_risk_accepted_by: string | null
-          upstream_risk_accepted_for: string | null
           assignee_person_id: string | null
+          conception_lead_days: number | null
           created_at: string
           created_by: string | null
           due_date: string | null
+          format: string | null
           id: string
           lever_id: string
           organization_id: string
+          production_lead_days: number | null
           project_id: string
           quantity: number | null
           title: string
           updated_at: string
+          upstream_risk_accepted_at: string | null
+          upstream_risk_accepted_by: string | null
+          upstream_risk_accepted_for: string | null
+          validation_lead_days: number | null
         }
         Insert: {
-          conception_lead_days?: number | null
-          production_lead_days?: number | null
-          validation_lead_days?: number | null
-          upstream_risk_accepted_at?: string | null
-          upstream_risk_accepted_by?: string | null
-          upstream_risk_accepted_for?: string | null
           assignee_person_id?: string | null
+          conception_lead_days?: number | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
+          format?: string | null
           id?: string
           lever_id: string
           organization_id: string
+          production_lead_days?: number | null
           project_id: string
           quantity?: number | null
           title: string
           updated_at?: string
-        }
-        Update: {
-          conception_lead_days?: number | null
-          production_lead_days?: number | null
-          validation_lead_days?: number | null
           upstream_risk_accepted_at?: string | null
           upstream_risk_accepted_by?: string | null
           upstream_risk_accepted_for?: string | null
+          validation_lead_days?: number | null
+        }
+        Update: {
           assignee_person_id?: string | null
+          conception_lead_days?: number | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
+          format?: string | null
           id?: string
           lever_id?: string
           organization_id?: string
+          production_lead_days?: number | null
           project_id?: string
           quantity?: number | null
           title?: string
           updated_at?: string
+          upstream_risk_accepted_at?: string | null
+          upstream_risk_accepted_by?: string | null
+          upstream_risk_accepted_for?: string | null
+          validation_lead_days?: number | null
         }
         Relationships: [
           {

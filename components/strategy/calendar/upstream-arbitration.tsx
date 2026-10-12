@@ -6,12 +6,18 @@ import { FormMessage } from "@/components/auth/form-message";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { LeadDaysForm } from "@/components/strategy/calendar/lead-days-form";
 import { Button } from "@/components/ui/button";
+import { ConfirmButton } from "@/components/ui/confirm-button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
+import { moveMilestone } from "@/lib/strategy/actions/plan";
 import { acceptUpstreamRisk } from "@/lib/strategy/actions/upstream";
-import type { UpstreamChain, UpstreamStepKey } from "@/lib/strategy/upstream";
+import {
+  firstFeasibleDate,
+  type UpstreamChain,
+  type UpstreamStepKey,
+} from "@/lib/strategy/upstream";
 
 /**
  * Under a chain whose deadline is really past (MKT-S1-04), the three ways
@@ -22,10 +28,13 @@ export function UpstreamArbitration({
   projectId,
   chain,
   current,
+  today,
   onMoveMilestone,
 }: {
   projectId: string;
   chain: UpstreamChain;
+  // "YYYY-MM-DD" in Paris: the first feasible date counts from it.
+  today: string;
   current: Record<UpstreamStepKey, number | null>;
   onMoveMilestone?: () => void;
 }) {
@@ -35,16 +44,52 @@ export function UpstreamArbitration({
   });
   const [confirming, setConfirming] = useState(false);
   const passed = chain.steps.some((s) => s.passed);
+  // MKT-S1-10: an option with its impact, not only « Trop tard ».
+  const feasible = firstFeasibleDate(chain, today);
+  const u = fr.strategyCalendar.upstream;
   if (!passed && !chain.customLeads) return null;
 
   return (
     <div className="flex flex-col gap-2">
+      {feasible && (
+        <p className="text-caption text-[color:var(--text-secondary)]">
+          {u.feasible(formatBriefDate(feasible.date), feasible.shiftDays)}
+        </p>
+      )}
       {chain.riskAccepted && (
         <p className="text-caption text-muted-foreground">
           {t.accepted(formatBriefDate(chain.milestoneDate))}
         </p>
       )}
       <div className="flex flex-wrap gap-2">
+        {feasible && (
+          <ConfirmButton
+            label={u.moveTo(formatBriefDate(feasible.date))}
+            size="xs"
+            title={u.moveTitle}
+            body={u.moveBody(
+              chain.milestoneTitle,
+              formatBriefDate(chain.milestoneDate),
+              formatBriefDate(feasible.date),
+            )}
+            confirmLabel={u.moveTo(formatBriefDate(feasible.date))}
+            pendingLabel={fr.dialogs.saving}
+            done={u.moved}
+            run={async () => {
+              const result = await moveMilestone(
+                projectId,
+                chain.milestoneId,
+                feasible.date,
+              );
+              return result.ok
+                ? { ok: true as const }
+                : {
+                    ok: false as const,
+                    error: fr.framing.errors[result.error],
+                  };
+            }}
+          />
+        )}
         {passed && onMoveMilestone && (
           <Button size="xs" variant="outline" onClick={onMoveMilestone}>
             {t.move}

@@ -44,6 +44,7 @@ export function DeliverableForm({
   const leverIds = Object.keys(levers);
   const [title, setTitle] = useState(initial?.title ?? "");
   const [quantity, setQuantity] = useState(initial?.quantity ?? "");
+  const [format, setFormat] = useState(initial?.format ?? "");
   const [lever, setLever] = useState(initial?.leverId ?? "");
   const [assignee, setAssignee] = useState(initial?.assigneePersonId || NONE);
   const [due, setDue] = useState(initial?.dueDate ?? "");
@@ -60,6 +61,7 @@ export function DeliverableForm({
           leverId,
           title,
           quantity,
+          format,
           assigneePersonId: assignee === NONE ? "" : assignee,
           dueDate: due,
         });
@@ -110,6 +112,24 @@ export function DeliverableForm({
           className="text-caption text-muted-foreground"
         >
           {d.quantityHint}
+        </p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={id("format")} className={labelClass}>
+          {d.format}
+        </Label>
+        <Input
+          id={id("format")}
+          maxLength={80}
+          value={format}
+          aria-describedby={id("format-hint")}
+          onChange={(e) => setFormat(e.target.value)}
+        />
+        <p
+          id={id("format-hint")}
+          className="text-caption text-muted-foreground"
+        >
+          {d.formatHint}
         </p>
       </div>
       <div className="flex flex-col gap-2">

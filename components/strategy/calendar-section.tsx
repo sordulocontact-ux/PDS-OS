@@ -53,6 +53,7 @@ export function CalendarSection({
   const deliverableTitle = (id: string | null) =>
     id ? (titles.get(id) ?? null) : null;
   const onOpen = canEdit ? (m: Milestone) => setOpen(m) : undefined;
+  const today = todayInParis();
   const chains = upstreamChains(
     milestones.map((m) => ({
       id: m.id,
@@ -61,7 +62,7 @@ export function CalendarSection({
       deliverableId: m.deliverable_id,
     })),
     deliverables,
-    todayInParis(),
+    today,
   );
   const editing = open === "new" ? null : open;
   const close = () => setOpen(null);
@@ -125,6 +126,8 @@ export function CalendarSection({
         chains={chains}
         referenceDate={referenceDate}
         deliverables={deliverables}
+        milestones={milestones}
+        today={today}
         projectId={projectId}
         canEdit={canEdit}
         onMoveMilestone={(id) => {

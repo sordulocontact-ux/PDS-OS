@@ -43,6 +43,26 @@ export const strategyCalendar = {
     remove: "Retirer le temps fort",
   },
   upstream: {
+    // MKT-S1-10: upstream milestones proposed, and the impact of a move.
+    proposals: {
+      button: "Proposer les jalons amont",
+      title: (deliverable: string) => `Jalons amont de « ${deliverable} »`,
+      description:
+        "Datés depuis les délais du livrable. Cochez ceux à ajouter au calendrier : ils restent liés au livrable.",
+      label: (kind: "delivery" | "validation", deliverable: string) =>
+        `${kind === "delivery" ? "Livraison" : "Validation"} · ${deliverable}`,
+      create: (count: number) =>
+        count > 1 ? `Ajouter ${count} jalons` : "Ajouter le jalon",
+      created: (count: number) =>
+        count > 1 ? `${count} jalons ajoutés.` : "Jalon ajouté.",
+    },
+    feasible: (date: string, shift: number) =>
+      `Première date tenable avec ces délais : ${date} (${shift > 0 ? `+${shift}` : shift} j).`,
+    moveTo: (date: string) => `Déplacer au ${date}`,
+    moveTitle: "Déplacer le temps fort ?",
+    moveBody: (title: string, from: string, to: string) =>
+      `« ${title} » passe du ${from} au ${to}. Les échéances amont de ses livrables sont recalculées depuis cette date.`,
+    moved: "Temps fort déplacé.",
     title: "Échéances amont",
     description:
       "Pour chaque livrable rattaché à un temps fort, ce qui doit être prêt avant. Calculé depuis le premier temps fort où il sort.",
