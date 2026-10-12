@@ -14,6 +14,12 @@ import {
   type SplitKind,
 } from "@/lib/catalog/master/rules";
 import { fr } from "@/lib/i18n/fr";
+import type { SplitEvent } from "@/lib/catalog/master/split-queries";
+import {
+  splitReviewState,
+  type SplitGap,
+  type SplitValidation,
+} from "@/lib/catalog/master/split-review";
 import type { ConfirmedSplit } from "@/lib/legal/splits/title-split";
 import { splitStatusTone } from "@/lib/ui/state-tones";
 
@@ -23,22 +29,40 @@ import {
   useItemDialogs,
 } from "./item-dialogs";
 import { ConfirmedSplitNote } from "./confirmed-split-note";
+import { SplitReviewBar } from "./split-review-bar";
+import {
+  SplitGapsNote,
+  SplitHistory,
+  SplitValidationNote,
+} from "./split-review-notes";
 import { SplitForm } from "./split-form";
 import { SplitsTable } from "./splits-table";
 
-// Shares of the master and of the publishing, one section each: total and
-// remainder computed by code (splitTotal), never above 100 % (SQL).
+// Shares of the master and of the publishing, one section each, never
+// sharing a total: total and remainder computed by code (splitTotal), never
+// above 100 % (SQL); « Complet » is the arithmetic, the validation is apart
+// (retours Catalogue 40, 44 à 53): its state, the validated version when the
+// lines changed since, the gaps with the credits, every change.
 export function SplitsSection({
   masterId,
   splits,
   canEdit,
   confirmed = null,
+  validations = {},
+  events = [],
+  gaps = [],
+  canValidate = false,
 }: {
   masterId: string;
   splits: MasterSplit[];
   canEdit: boolean;
   // The Juridique's confirmed publishing split, when there is one.
   confirmed?: ConfirmedSplit | null;
+  validations?: Partial<Record<SplitKind, SplitValidation>>;
+  events?: SplitEvent[];
+  gaps?: SplitGap[];
+  // The legal side (manage_legal) validates a complete split.
+  canValidate?: boolean;
 }) {
   const t = fr.masterPage.splits;
   const dialogs = useItemDialogs<MasterSplit>();
@@ -54,6 +78,8 @@ export function SplitsSection({
       {SPLIT_KINDS.map((kind) => {
         const rows = splits.filter((s) => s.kind === kind);
         const total = splitTotal(splits, kind);
+        const validation = validations[kind] ?? null;
+        const review = splitReviewState(splits, kind, validation);
         return (
           <PageSection
             card
@@ -68,6 +94,13 @@ export function SplitsSection({
                     ? t.status.incomplete(formatShare(total.remaining))
                     : t.status[total.status]}
                 </StatusBadge>
+                <SplitReviewBar
+                  masterId={masterId}
+                  kind={kind}
+                  state={review}
+                  complete={total.status === "complete"}
+                  canValidate={canValidate}
+                />
                 {canEdit && total.status !== "complete" && (
                   <AddItemButton
                     label={t.add}
@@ -80,6 +113,8 @@ export function SplitsSection({
               </div>
             }
           >
+            <SplitValidationNote state={review} validation={validation} />
+            {kind === "publishing" && <SplitGapsNote gaps={gaps} />}
             {kind === "publishing" && confirmed && (
               <ConfirmedSplitNote
                 masterId={masterId}
@@ -101,6 +136,7 @@ export function SplitsSection({
             <p className="text-sm text-muted-foreground tabular-nums">
               {t.total(formatShare(total.total))}
             </p>
+            <SplitHistory events={events.filter((e) => e.kind === kind)} />
           </PageSection>
         );
       })}

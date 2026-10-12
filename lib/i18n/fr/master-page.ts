@@ -161,7 +161,7 @@ export const masterPage = {
   variants: {
     title: "Variantes",
     description:
-      "Les autres variantes du même titre, pour les mêmes artistes : radio edit, instrumental, remix… Chacune a son propre ISRC.",
+      "La famille du titre : l'original et ses variantes (acoustique, instrumentale, remix, live…), reliées à lui. Chacune garde ses fichiers, ses crédits et son ISRC.",
     add: "Nouvelle variante",
     emptyBody:
       "Créez une variante pour une radio edit, une instrumentale ou un remix.",
@@ -343,6 +343,7 @@ export const masterPage = {
       artist: "Artiste",
       // The owner of the recording, not the artistic producer.
       producer: "Producteur (phonographique)",
+      coproducer: "Coproducteur (phonographique)",
       author: "Auteur·rice (paroles)",
       composer: "Compositeur·rice",
       publisher: "Éditeur",
@@ -359,6 +360,45 @@ export const masterPage = {
       complete: "Complet",
       incomplete: (remaining: string) => `Reste ${remaining}`,
       empty: "À répartir",
+    },
+    // « Complet » is the arithmetic only; the validation is separate
+    // (retours 44, 46, 48).
+    review: {
+      states: {
+        preparing: "En préparation",
+        to_check: "À vérifier",
+        validated: "Validée",
+        changed: "Modifiée depuis la validation",
+      },
+      validate: "Valider la répartition",
+      validateTitle: (kind: string) => `Valider la répartition ${kind} ?`,
+      validateBody:
+        "La répartition telle qu'elle est maintenant devient la version validée. Une modification ultérieure ne la remplace pas : elle devra être validée à son tour.",
+      validated: "Répartition validée.",
+      notComplete: "Seule une répartition à 100 % se valide.",
+      failed: "La validation n'a pas pu être enregistrée. Réessayez.",
+      validatedBy: (who: string) =>
+        who ? `Validée par ${who} le` : "Validée le",
+      changedNote: (who: string) =>
+        `Les parts ont changé depuis la validation${who ? ` de ${who}` : ""}. La version validée reste celle-ci tant que la nouvelle n'est pas validée :`,
+      notLegal:
+        "Une répartition complète n'est pas une preuve de droits : seule sa validation l'atteste.",
+    },
+    // Retour 47: every change, with before and after.
+    history: {
+      title: (count: number) => `Historique des modifications (${count})`,
+      added: (party: string, share: string) => `${party} ajouté à ${share}`,
+      updated: (before: string, after: string) => `${before} → ${after}`,
+      removed: (party: string, share: string) => `${party} retiré (${share})`,
+      validated: "Répartition validée",
+      by: (who: string) => (who ? ` · ${who}` : ""),
+    },
+    // Retour 52: never a share added, only said.
+    gaps: {
+      title: "Cohérence à vérifier",
+      line: (name: string, roles: string) =>
+        `${name} est crédité ${roles} sans part d'édition visible.`,
+      note: "Ce peut être voulu. Aucune part n'est proposée ni ajoutée automatiquement.",
     },
     // The publishing split confirmed by everyone in the Juridique.
     confirmed: {
@@ -392,6 +432,7 @@ export const masterPage = {
       share: "Indiquez une part entre 0,01 et 100.",
       overTotal:
         "Le total dépasserait 100 %. Réduisez cette part ou une autre.",
+      roleKind: "Ce rôle ne correspond pas à ce type de part.",
     },
     confirmTitle: "Supprimer cette part ?",
     confirmBody: (name: string) => `La part de « ${name} » sera supprimée.`,
@@ -543,7 +584,36 @@ export const masterPage = {
 
   projects: {
     title: "Projets",
-    emptyBody: "Aucun projet ne rattache ce titre pour l'instant.",
+    emptyBody:
+      "Aucun projet ne rattache ce titre pour l'instant : créez-en un, ou rattachez-le à un EP ou un album déjà créé.",
+    create: "Créer un projet",
+    // Retours 16 et 64: join an existing project instead of a duplicate.
+    link: {
+      button: "Rattacher à un projet existant",
+      title: "Rattacher ce titre à un projet",
+      description:
+        "Un projet musical pas encore lancé : le titre y est relié, jamais copié. Un single garde un seul titre.",
+      field: "Projet",
+      none: "Aucun projet ne peut accueillir ce titre : un projet lancé ne change plus de titres, un single en a déjà un.",
+      submit: "Rattacher",
+      done: "Titre rattaché au projet.",
+      errors: {
+        failed: "Le rattachement n'a pas abouti. Réessayez.",
+        single: "Ce projet est un single : il a déjà son titre.",
+        launched:
+          "Ce projet est lancé : ses titres ne changent plus. Seule la direction rattache un titre avant le lancement.",
+      },
+    },
+    // Retours 55 et 66: three dates kept apart, never one replacing another.
+    dates: {
+      title: "Dates de sortie",
+      description:
+        "La date visée du projet, la date confirmée de sa sortie, la date où elle a été vue en ligne : chacune garde sa valeur.",
+      project: "Projet",
+      target: "Visée",
+      confirmed: "Confirmée",
+      effective: "Effective",
+    },
   },
 
   files: {

@@ -22,15 +22,28 @@ export function TitleDetailsFields({
   values,
   errors,
   onAudioStateChange,
+  variantOf,
 }: {
   // Field ids are prefixed in a modal: the form behind has fields too.
   prefix: string;
   values: Partial<MasterFormDefaults>;
   errors: Record<string, string | undefined>;
   onAudioStateChange?: (state: string) => void;
+  // « Nouvelle variante » of this title (retour 08): it is not an original,
+  // and which variant it is must be chosen, never assumed.
+  variantOf?: string;
 }) {
   const t = fr.catalog.masterForm.fields;
-  const [variant, setVariant] = useState(values.variant || DEFAULT_VARIANT);
+  const [variant, setVariant] = useState(
+    values.variant || (variantOf ? "" : DEFAULT_VARIANT),
+  );
+  const variantItems = variantOf
+    ? Object.fromEntries(
+        Object.entries(fr.catalog.variants).filter(
+          ([key]) => key !== DEFAULT_VARIANT,
+        ),
+      )
+    : fr.catalog.variants;
 
   return (
     <>
@@ -52,8 +65,10 @@ export function TitleDetailsFields({
           id={`${prefix}variant`}
           name="variant"
           label={t.variant}
-          items={fr.catalog.variants}
-          defaultValue={values.variant || DEFAULT_VARIANT}
+          items={variantItems}
+          hint={variantOf ? t.variantOfHint(variantOf) : undefined}
+          required={!!variantOf}
+          defaultValue={values.variant || (variantOf ? null : DEFAULT_VARIANT)}
           error={errors.variant}
           onValueChange={setVariant}
         />

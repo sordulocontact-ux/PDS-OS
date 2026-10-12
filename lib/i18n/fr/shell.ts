@@ -248,8 +248,9 @@ export const shell = {
       singleHint: "Un seul titre pour un single.",
       dueDate: "Échéance du projet",
       releaseDate: "Date de sortie visée",
+      // Retour Catalogue 66: kept apart from the confirmed and effective dates.
       releaseDateHint:
-        "Remplacée par la date de l'onglet Sortie une fois celle-ci saisie.",
+        "L'intention de départ. La date confirmée se saisit ensuite dans la Sortie, sans effacer celle-ci.",
       budget: "Budget prévisionnel",
       priority: "Priorité",
       priorityHint: "Haute : en tête de l'accueil, de Travail et des projets.",
@@ -258,10 +259,19 @@ export const shell = {
         "Ajoutez ici les informations déjà connues au moment de créer le projet.",
       team: "Équipe",
       manager: "Chef de projet",
+      // Retour Catalogue 71: two responsibilities, two kinds of access.
+      managerHint:
+        "Pilotage opérationnel : il reçoit le projet, l'accepte et le mène. Seul lui écrit dans le projet lancé.",
       managerPlaceholder: "Choisir un chef de projet",
       managerNone:
         "Aucun chef de projet dans l'organisation : créez d'abord son compte depuis Membres.",
       creatives: "Direction créative",
+      creativesHint:
+        "Responsabilité créative : conçoit les livrables et répond aux questions de direction artistique. Touchez un nom pour l'ajouter ou le retirer.",
+      creativesSelected: (names: string[]) =>
+        names.length === 0
+          ? "Aucun directeur créatif choisi."
+          : `Choisi${names.length > 1 ? "s" : ""} : ${names.join(", ")}.`,
       creativesNone: "Aucun directeur créatif dans l'organisation.",
     },
     contentFormatPicker: {

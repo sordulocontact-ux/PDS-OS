@@ -33,12 +33,25 @@ export const SPLIT_ROLES = [
   "label",
   "artist",
   "producer",
+  "coproducer",
   "author",
   "composer",
   "publisher",
   "other",
 ] as const;
 export type SplitRole = (typeof SPLIT_ROLES)[number];
+
+/** The roles each kind offers (retours Catalogue 43, 50): the recording's
+ * owners for the master, the work's right holders for the publishing. SQL
+ * checks the same pairs (master_splits_role_kind_check). */
+export const SPLIT_ROLES_OF_KIND = {
+  master: ["label", "artist", "producer", "coproducer", "other"],
+  publishing: ["author", "composer", "publisher", "other"],
+} as const satisfies Record<SplitKind, readonly SplitRole[]>;
+
+export function roleFitsKind(role: SplitRole, kind: SplitKind): boolean {
+  return (SPLIT_ROLES_OF_KIND[kind] as readonly SplitRole[]).includes(role);
+}
 
 export const ORGANISMS = [
   "sacem",

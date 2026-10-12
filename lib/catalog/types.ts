@@ -57,6 +57,9 @@ export type MasterListItem = MasterOption & {
   // When an approved Master final validated it (retour Catalogue 01): the
   // title is « Finalisé » then, never because one was only deposited.
   finalValidatedAt: string | null;
+  // The original a variant was created from (retour 08); null for an
+  // original.
+  sourceMasterId: string | null;
 };
 
 /** A row of the masters list: the master and the release shown for it. */

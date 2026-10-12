@@ -40,6 +40,7 @@ export function CreateMasterForm({
   defaultCredits,
   defaults,
   masterId,
+  variantOf,
   onCreated,
   onCancel,
   onArtistCreated,
@@ -50,6 +51,8 @@ export function CreateMasterForm({
   defaultCredits?: Credit[];
   defaults?: Partial<MasterFormDefaults>;
   masterId?: string;
+  // « Nouvelle variante »: the original it is created from (retour 08).
+  variantOf?: { id: string; title: string };
   onCreated?: (master: MasterOption) => void;
   onCancel?: () => void;
   onArtistCreated?: (artist: ArtistOption) => void;
@@ -140,6 +143,9 @@ export function CreateMasterForm({
     >
       <input type="hidden" name="intent" value={intent} />
       {masterId && <input type="hidden" name="masterId" value={masterId} />}
+      {variantOf && (
+        <input type="hidden" name="variantOf" value={variantOf.id} />
+      )}
       <Field
         id={`${prefix}title`}
         name="title"
@@ -174,6 +180,7 @@ export function CreateMasterForm({
         <TitleDetailsFields
           prefix={prefix}
           values={values}
+          variantOf={variantOf?.title}
           errors={{
             ...errors,
             audioState: errors.audioState ?? audio.stateError,

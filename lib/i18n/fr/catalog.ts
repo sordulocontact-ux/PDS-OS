@@ -291,10 +291,12 @@ export const catalog = {
   },
   variants: {
     original: "Original",
-    radio_edit: "Radio Edit",
+    acoustic: "Acoustique",
     instrumental: "Instrumental",
-    acapella: "Acapella",
     remix: "Remix",
+    radio_edit: "Radio Edit",
+    live: "Live",
+    acapella: "Acapella",
     other: "Autre",
   },
 
@@ -387,15 +389,21 @@ export const catalog = {
       title: "Titre",
       artists: "Artistes",
       audioState: "État audio",
-      audioStateHint: "Il avance tout seul avec les fichiers audio.",
+      audioStateHint:
+        "Il avance avec les fichiers audio déposés ; un dépôt ne vaut pas validation.",
       audioStateUnknown: "Non renseigné",
       variant: "Variante",
+      variantOfHint: (title: string) =>
+        `Variante de « ${title} », reliée à lui.`,
       variantLabel: "Précisez la variante",
       variantLabelHint: "« Version live », « Slowed »…",
       isrc: "ISRC",
-      isrcHint: "Les tirets et les espaces sont acceptés.",
+      // Retour Catalogue 09: never generated, never the work's ISWC.
+      isrcHint:
+        "Code de l'enregistrement, à ajouter quand il est attribué (jamais inventé). Différent de l'ISWC, qui identifie l'œuvre. Tirets et espaces acceptés.",
       duration: "Durée",
-      durationHint: "Minutes et secondes, par exemple 3:07 pour 3 min 7 s.",
+      durationHint:
+        "En minutes et secondes (m:ss). Lue sur le fichier audio quand c'est possible ; sinon laissez vide, elle restera « non renseignée ».",
       durationPlaceholder: "m:ss",
       audioFile: "Fichier audio",
       audioFileHint:
@@ -437,6 +445,8 @@ export const catalog = {
         "Durée invalide : utilisez le format m:ss, par exemple 3:07.",
       audioStateInvalid: "Choisissez un état audio de la liste.",
       variantInvalid: "Choisissez une variante de la liste.",
+      // A variant created from its original (retour 08) is not an original.
+      variantRequired: "Choisissez de quelle variante il s'agit.",
       fileNeedsAudioState:
         "Choisissez l'état audio du fichier : maquette, mise à plat, master ou master final.",
     },

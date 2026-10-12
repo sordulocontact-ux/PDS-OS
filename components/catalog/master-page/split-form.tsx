@@ -3,6 +3,7 @@
 import { Field } from "@/components/auth/field";
 import { OptionSelect } from "@/components/projects/option-select";
 import {
+  SPLIT_ROLES_OF_KIND,
   formatShare,
   type MasterSplit,
   type SplitKind,
@@ -39,27 +40,25 @@ export function SplitForm({
   onCancel?: () => void;
 }) {
   const t = fr.masterPage.splits;
+  // The section it was opened from fixes the kind (retour 49): never asked
+  // again, so a share of the publishing cannot land in the master.
+  const fixedKind = split?.kind ?? kind;
+  const roles = Object.fromEntries(
+    SPLIT_ROLES_OF_KIND[fixedKind].map((role) => [role, t.roles[role]]),
+  );
   return (
     <MasterForm
       action={saveSplit}
       defaults={defaults}
-      hidden={{ masterId, itemId: split?.id }}
+      hidden={{ masterId, itemId: split?.id, kind: fixedKind }}
       onDone={onDone}
       onCancel={onCancel}
     >
       {({ value, error }) => (
         <>
-          <OptionSelect
-            name="kind"
-            label={t.fields.kind}
-            required
-            items={t.kinds}
-            defaultValue={value("kind", split?.kind ?? kind)}
-            error={error("kind")}
-          />
           <SplitPartyField
             masterId={masterId}
-            kind={split?.kind ?? kind}
+            kind={fixedKind}
             role={split?.role ?? (kind === "master" ? "label" : "author")}
             split={split}
             defaultName={value("party", split?.party) || null}
@@ -69,7 +68,7 @@ export function SplitForm({
             name="role"
             label={t.fields.role}
             required
-            items={t.roles}
+            items={roles}
             defaultValue={value(
               "role",
               split?.role ?? (kind === "master" ? "label" : "author"),

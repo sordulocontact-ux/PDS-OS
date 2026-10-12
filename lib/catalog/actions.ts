@@ -15,6 +15,7 @@ import {
   masterOption,
 } from "@/lib/catalog/queries";
 import { createArtistSchema, createMasterSchema } from "@/lib/catalog/schemas";
+import { DEFAULT_VARIANT } from "@/lib/catalog/title-rules";
 import type { CreateArtistState, CreateMasterState } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { getDeezerArtist, type DeezerArtist } from "@/lib/integrations/deezer";
@@ -157,6 +158,14 @@ export async function createMaster(
     };
   }
   const input = parsed.data;
+  // A variant created from its original is not an original (retour 08).
+  if (input.variantOf && input.variant === DEFAULT_VARIANT) {
+    return {
+      status: "error",
+      fieldErrors: { variant: fr.catalog.masterForm.errors.variantRequired },
+      values,
+    };
+  }
 
   const supabase = await createClient();
   const { data: masterId, error } = await supabase.rpc("create_master", {
@@ -201,6 +210,17 @@ export async function createMaster(
     }
     console.error("createMaster:", error?.message);
     return { status: "error", formError: databaseErrorMessage(error), values };
+  }
+
+  // A variant names its original (SQL checks it is one); a failure leaves
+  // the title created, said rather than hidden.
+  if (input.variantOf) {
+    const linked = await supabase
+      .from("masters")
+      .update({ source_master_id: input.variantOf })
+      .eq("id", masterId);
+    if (linked.error)
+      console.error("createMaster (variant source):", linked.error.message);
   }
 
   revalidatePath(routes.app, "layout");

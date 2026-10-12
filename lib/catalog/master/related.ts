@@ -4,57 +4,34 @@ import {
   releaseStatusOf,
   type MasterReleaseStatus,
 } from "@/lib/catalog/master-release";
-import type { Credit } from "@/lib/catalog/types";
 import { createClient } from "@/lib/supabase/server";
 
 // What the title page reads around a title ("master" in the code): its other
 // variants and the releases of the projects carrying it.
 
-const normalizeTitle = (title: string) => title.trim().toLowerCase();
-
-// Artists a variant must share: the main ones, or every credit if none.
-function keyArtists(credits: Credit[]): Set<string> {
-  const main = credits.filter((c) => c.role === "main");
-  return new Set((main.length > 0 ? main : credits).map((c) => c.artistId));
-}
-
 /**
- * Other live titles of the same name (case and surrounding spaces ignored)
- * crediting one of the title's main artists: radio edit, instrumental,
- * remix… (docs/ARCHITECTURE.md § 2 sexies). Decided by code, whatever the
- * variant field says: it only names each one.
+ * The other titles of the family (retour Catalogue 08): the original and
+ * every variant that names it (`source_master_id`), this title aside. The
+ * link is explicit, written when the variant is created: never guessed
+ * from a name.
  */
 export async function listMasterVariantIds(master: {
   id: string;
-  title: string;
-  credits: Credit[];
+  sourceMasterId: string | null;
 }): Promise<{ ids: string[]; error: boolean }> {
   const supabase = await createClient();
-  const pattern = master.title.trim().replace(/[\\%_]/g, (c) => `\\${c}`);
+  const root = master.sourceMasterId ?? master.id;
   const { data, error } = await supabase
     .from("masters")
-    .select(
-      "id, title, credits:master_artists!master_artists_master_same_org(artist_id)",
-    )
-    .ilike("title", `%${pattern}%`)
+    .select("id")
+    .or(`id.eq.${root},source_master_id.eq.${root}`)
     .is("archived_at", null)
     .neq("id", master.id);
   if (error) {
     console.error("listMasterVariantIds:", error.message);
     return { ids: [], error: true };
   }
-  const title = normalizeTitle(master.title);
-  const artists = keyArtists(master.credits);
-  return {
-    ids: (data ?? [])
-      .filter(
-        (row) =>
-          normalizeTitle(row.title) === title &&
-          row.credits.some((c) => artists.has(c.artist_id)),
-      )
-      .map((row) => row.id),
-    error: false,
-  };
+  return { ids: (data ?? []).map((row) => row.id), error: false };
 }
 
 export type MasterDistributionRelease = {
@@ -113,4 +90,58 @@ export async function listMasterDistribution(masterId: string): Promise<{
     return y.localeCompare(x);
   });
   return { releases, error: false };
+}
+
+export type MasterReleaseDates = {
+  project: { id: string; title: string };
+  // The project's target date (projects.due_date), the confirmed release
+  // date (releases.planned_release_date), the day it was seen online.
+  target: string | null;
+  confirmed: string | null;
+  effective: string | null;
+};
+
+/**
+ * The three release dates of each live project carrying the title, kept
+ * apart (retours Catalogue 55 et 66): a confirmed date never replaces the
+ * target one. Read with the viewer's session (RLS).
+ */
+export async function listMasterReleaseDates(masterId: string): Promise<{
+  dates: MasterReleaseDates[];
+  error: boolean;
+}> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_masters")
+    .select(
+      "project:projects!project_masters_project_same_org(id, title, due_date, archived_at, releases:releases!releases_project_same_org(planned_release_date, online_detected_at))",
+    )
+    .eq("master_id", masterId);
+  if (error) {
+    console.error("listMasterReleaseDates:", error.message);
+    return { dates: [], error: true };
+  }
+  return {
+    dates: (data ?? []).flatMap((row) => {
+      const p = row.project;
+      if (!p || p.archived_at) return [];
+      const planned = p.releases
+        .map((r) => r.planned_release_date)
+        .filter((d): d is string => d !== null)
+        .sort();
+      const online = p.releases
+        .map((r) => r.online_detected_at)
+        .filter((d): d is string => d !== null)
+        .sort();
+      return [
+        {
+          project: { id: p.id, title: p.title },
+          target: p.due_date,
+          confirmed: planned[0] ?? null,
+          effective: online[0] ?? null,
+        },
+      ];
+    }),
+    error: false,
+  };
 }

@@ -11,6 +11,8 @@ import {
   listMasterContributors,
   listMasterSplits,
 } from "@/lib/catalog/master/queries";
+import { loadSplitReview } from "@/lib/catalog/master/split-queries";
+import { publishingGaps } from "@/lib/catalog/master/split-review";
 import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { confirmedSplitOf } from "@/lib/legal/splits/title-split";
@@ -19,13 +21,15 @@ import { allInOrder } from "@/lib/utils/parallel";
 // Credits: the performing artists (edited in "Modifier"), every other credit
 // of the title, then the splits of the master and of the publishing
 // (#splits-master), read and written with manage_catalog only (RLS agrees):
-// the block is not even shown to anyone else.
+// the block is not even shown to anyone else. Each split says its
+// validation (the legal side validates), its history and, for the
+// publishing, the credited authors without a share (retours 44 à 53).
 export default async function MasterCreditsPage({
   params,
 }: PageProps<"/app/catalog/masters/[masterId]/credits">) {
   const { masterId } = await params;
   const accessPromise = requireApproved();
-  const [access, master, { contributors, error }, shares, confirmed] =
+  const [access, master, { contributors, error }, shares, confirmed, review] =
     await allInOrder([
       accessPromise,
       getMaster(masterId),
@@ -36,6 +40,9 @@ export default async function MasterCreditsPage({
       // Read only with manage_legal (RLS): null for anyone else.
       accessPromise.then((known) =>
         can(known, "manage_legal") ? confirmedSplitOf(masterId) : null,
+      ),
+      accessPromise.then((known) =>
+        can(known, "manage_catalog") ? loadSplitReview(masterId) : null,
       ),
     ]);
   if (!master) notFound();
@@ -69,6 +76,10 @@ export default async function MasterCreditsPage({
             splits={shares.splits}
             canEdit
             confirmed={confirmed}
+            validations={review?.validations}
+            events={review?.events}
+            gaps={publishingGaps(contributors, shares.splits)}
+            canValidate={can(access, "manage_legal")}
           />
         ))}
     </>

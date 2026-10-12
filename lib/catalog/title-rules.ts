@@ -38,12 +38,15 @@ export const UNKNOWN_AUDIO_STATE = "unknown";
 export const audioStateOf = (value: string | null): AudioState | null =>
   isAudioState(value) ? value : null;
 
+// Retour Catalogue 08: Acoustique and Live join the list.
 export const VARIANTS = [
   "original",
-  "radio_edit",
+  "acoustic",
   "instrumental",
-  "acapella",
   "remix",
+  "radio_edit",
+  "live",
+  "acapella",
   "other",
 ] as const;
 export type Variant = (typeof VARIANTS)[number];

@@ -11,9 +11,10 @@ import { routes } from "@/lib/auth/redirects";
 import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Variants block of the title overview: the other titles of the same name
-// for the same artists, in the table of the Titres page. A new variant starts
-// from this title's name and credits.
+// Variants block of the title overview: the other titles of its family (the
+// original and the variants that name it, retour 08), in the table of the
+// Catalogue, the original named as such. A new variant starts from this
+// title's name and credits and is linked to the family's original.
 export function VariantsSection({
   masterId,
   masters,
@@ -51,7 +52,7 @@ export function VariantsSection({
           {rights.canEdit ? t.emptyBody : t.emptyBodyReadOnly}
         </EmptyNote>
       ) : (
-        <MastersTable masters={masters} rights={rights} />
+        <MastersTable masters={masters} rights={rights} family />
       )}
     </PageSection>
   );

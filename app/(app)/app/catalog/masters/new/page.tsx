@@ -10,7 +10,8 @@ import { fr } from "@/lib/i18n/fr";
 
 // ?artist=<id>: opened from an artist page — that artist is already credited
 // as main artist. ?variantOf=<id>: a new variant of that title — its name
-// and credits are copied. Credits stay editable (featuring, other artists,
+// and credits are copied, and it is linked to the family's original (a
+// variant of a variant names the same original, retour 08). Credits stay editable (featuring, other artists,
 // order).
 export default async function NewMasterPage({
   searchParams,
@@ -51,6 +52,14 @@ export default async function NewMasterPage({
             artists={artists}
             organizationId={access.organizationId}
             defaults={original ? { title: original.title } : undefined}
+            variantOf={
+              original
+                ? {
+                    id: original.sourceMasterId ?? original.id,
+                    title: original.title,
+                  }
+                : undefined
+            }
             defaultCredits={
               original
                 ? original.credits

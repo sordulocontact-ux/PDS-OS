@@ -7,7 +7,11 @@ import {
   afterWrite,
   parseMasterForm,
 } from "@/lib/catalog/master/action-helpers";
-import type { MasterFormState } from "@/lib/catalog/master/rules";
+import {
+  SPLIT_KINDS,
+  type MasterFormState,
+  type SplitKind,
+} from "@/lib/catalog/master/rules";
 import {
   declarationSchema,
   rightsSchema,
@@ -173,5 +177,36 @@ export async function confirmMasterRights(
     };
   }
   revalidatePath(routes.masterRights(id.data));
+  return { ok: true };
+}
+
+/**
+ * « Valider la répartition » (retours Catalogue 15, 44, 48): the legal side
+ * takes a snapshot of a split at exactly 100 %; it stays the validated
+ * version whatever changes after (validate_master_split).
+ */
+export async function validateMasterSplit(
+  masterId: string,
+  kind: SplitKind,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requireApproved();
+  const t = fr.masterPage.splits.review;
+  if (
+    !catalogIdSchema.safeParse(masterId).success ||
+    !SPLIT_KINDS.includes(kind)
+  )
+    return { ok: false, error: t.failed };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("validate_master_split", {
+    p_master_id: masterId,
+    p_kind: kind,
+  });
+  if (error) {
+    if (error.message.includes("split_not_complete"))
+      return { ok: false, error: t.notComplete };
+    console.error("validateMasterSplit:", error.message);
+    return { ok: false, error: t.failed };
+  }
+  revalidatePath(routes.masterCredits(masterId));
   return { ok: true };
 }

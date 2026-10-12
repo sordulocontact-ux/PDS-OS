@@ -219,6 +219,14 @@ export const audioValidationTone: Record<string, Tone> = {
   superseded: "neutral",
 };
 
+/** A split's validation, apart from its total (retours Catalogue 44, 46). */
+export const splitReviewTone: Record<string, Tone> = {
+  preparing: "neutral",
+  to_check: "warning",
+  validated: "success",
+  changed: "warning",
+};
+
 /** A title's distribution, apart from its audio state (retour Catalogue 01). */
 export const titleDistributionTone: Record<string, Tone> = {
   not_prepared: "neutral",

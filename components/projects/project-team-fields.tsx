@@ -36,6 +36,7 @@ export function ProjectTeamFields({
         <OptionSelect
           name="assigneePersonId"
           label={t.manager}
+          hint={t.managerHint}
           required
           placeholder={t.managerPlaceholder}
           items={managerItems}
@@ -48,6 +49,8 @@ export function ProjectTeamFields({
         label={t.creatives}
         emptyLabel={t.creativesNone}
         candidates={creatives}
+        hint={t.creativesHint}
+        summary={t.creativesSelected}
         defaultSelectedIds={defaultCreativeIds}
         error={errors.creativePersonIds}
       />

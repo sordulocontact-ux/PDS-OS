@@ -94,9 +94,13 @@ export function ChipMultiChoice<V extends string>({
   emptyLabel,
   hint,
   error,
+  summary,
 }: {
   name: string;
   legend: string;
+  // What is chosen, said in words under the chips (a chip alone does not
+  // say it is chosen, retour Catalogue 68).
+  summary?: (labels: string[]) => string;
   // Shows the « * » after the legend (docs/DESIGN.md § 4).
   required?: boolean;
   options: ChipOption<V>[];
@@ -143,6 +147,15 @@ export function ChipMultiChoice<V extends string>({
             </FilterChip>
           ))}
         </div>
+      )}
+      {summary && options.length > 0 && (
+        <p className="text-sm text-[color:var(--text-secondary)]" aria-live="polite">
+          {summary(
+            options
+              .filter((option) => selected.includes(option.value))
+              .map((option) => option.label),
+          )}
+        </p>
       )}
       {error ? (
         <FieldError id={`${id}-error`}>{error}</FieldError>

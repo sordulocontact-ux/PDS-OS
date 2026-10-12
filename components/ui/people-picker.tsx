@@ -14,6 +14,7 @@ export function PeoplePicker({
   candidates,
   defaultSelectedIds,
   error,
+  summary,
 }: {
   name: string;
   label: string;
@@ -24,6 +25,7 @@ export function PeoplePicker({
   candidates: { personId: string; name: string }[];
   defaultSelectedIds: string[];
   error?: string;
+  summary?: (names: string[]) => string;
 }) {
   return (
     <ChipMultiChoice
@@ -38,6 +40,7 @@ export function PeoplePicker({
         label: person.name,
       }))}
       defaultValue={defaultSelectedIds}
+      summary={summary}
     />
   );
 }

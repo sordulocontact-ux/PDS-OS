@@ -31,12 +31,15 @@ export function MastersTable({
   masters,
   rights,
   selectable = false,
+  family = false,
 }: {
   masters: MasterRow[];
   // Row actions ("⋯"); none when the viewer may neither edit nor archive.
   rights?: RecordRights;
   // Checkboxes to delete several at once (main list, director only).
   selectable?: boolean;
+  // A title's family (retour 08): the original is named as such too.
+  family?: boolean;
 }) {
   const t = fr.catalog.masters;
   const withActions = rights && (rights.canEdit || rights.canArchive);
@@ -76,7 +79,10 @@ export function MastersTable({
                     {master.title}
                   </DataTableLink>
                 }
-                subtitle={variantText(master)}
+                subtitle={
+                  variantText(master) ??
+                  (family ? fr.catalog.variants.original : null)
+                }
               />
             </DataTableCell>
             <DataTableCell>{master.artists}</DataTableCell>

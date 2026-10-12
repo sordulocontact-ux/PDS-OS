@@ -8462,6 +8462,91 @@ export type Database = {
           },
         ]
       }
+      master_split_events: {
+        Row: {
+          action: string
+          actor_person_id: string | null
+          after: Json | null
+          before: Json | null
+          created_at: string
+          id: string
+          kind: string
+          master_id: string
+          organization_id: string
+          split_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_person_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          kind: string
+          master_id: string
+          organization_id: string
+          split_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_person_id?: string | null
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: string
+          kind?: string
+          master_id?: string
+          organization_id?: string
+          split_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_split_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_split_validations: {
+        Row: {
+          id: string
+          kind: string
+          lines: Json
+          master_id: string
+          organization_id: string
+          validated_at: string
+          validated_by: string | null
+        }
+        Insert: {
+          id?: string
+          kind: string
+          lines: Json
+          master_id: string
+          organization_id: string
+          validated_at?: string
+          validated_by?: string | null
+        }
+        Update: {
+          id?: string
+          kind?: string
+          lines?: Json
+          master_id?: string
+          organization_id?: string
+          validated_at?: string
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_split_validations_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_splits: {
         Row: {
           artist_id: string | null
@@ -8705,6 +8790,7 @@ export type Database = {
           rights_confirmed_by: string | null
           rights_holder: string | null
           rights_year: number | null
+          source_master_id: string | null
           title: string
           updated_at: string
           variant: string
@@ -8726,6 +8812,7 @@ export type Database = {
           rights_confirmed_by?: string | null
           rights_holder?: string | null
           rights_year?: number | null
+          source_master_id?: string | null
           title: string
           updated_at?: string
           variant?: string
@@ -8747,6 +8834,7 @@ export type Database = {
           rights_confirmed_by?: string | null
           rights_holder?: string | null
           rights_year?: number | null
+          source_master_id?: string | null
           title?: string
           updated_at?: string
           variant?: string
@@ -13449,6 +13537,10 @@ export type Database = {
         Args: { p_note: string; p_reserve_id: string }
         Returns: undefined
       }
+      link_master_to_project: {
+        Args: { p_master_id: string; p_project_id: string }
+        Returns: undefined
+      }
       link_reserve_task: {
         Args: { p_reserve_id: string; p_task_id: string }
         Returns: undefined
@@ -13558,6 +13650,10 @@ export type Database = {
           p_title: string | null
         }
         Returns: undefined
+      }
+      validate_master_split: {
+        Args: { p_kind: string; p_master_id: string }
+        Returns: string
       }
       verify_distribution_platform: {
         Args: {

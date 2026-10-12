@@ -156,6 +156,8 @@ export function parseSaidVariant(quote: string): Variant | null {
   if (/instru/.test(text)) return "instrumental";
   if (/a ?cc?apella/.test(text)) return "acapella";
   if (/remix/.test(text)) return "remix";
+  if (/acousti/.test(text)) return "acoustic";
+  if (/\blive\b|en public/.test(text)) return "live";
   if (/original/.test(text)) return "original";
   return null;
 }

@@ -296,10 +296,15 @@ bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
   Ajout par « Ajouter un fichier audio » ou dépôt sur le bloc : la modale de la
   bibliothèque (`AddFilesDialog` en mode `audio`) demande l'état, présélectionné sur celui du
   titre (§ 2 septies). Puis Sessions et Pistes.
-- **Variantes** (`/variants`) : décidées par le code (`listMasterVariantIds`) : les autres
-  titres actifs **de même nom** (casse et espaces ignorés) qui créditent un des artistes
-  principaux. « Nouvelle variante » ouvre `/masters/new?variantOf=<id>` pré-rempli (nom,
-  crédits) ; chaque variante a son propre ISRC. Le champ Variante ne fait que la nommer.
+- **Variantes** (retour Catalogue 08, migration `…20261012101001`) : Original, Acoustique,
+  Instrumental, Remix, Radio Edit, Live, Acapella, Autre. **Lien explicite** : une variante
+  nomme son original (`masters.source_master_id`, posé à la création par « Nouvelle
+  variante » → `/masters/new?variantOf=<id>`, nom et crédits repris, la variante à choisir,
+  jamais « Original ») ; l'original est lui-même un original, sans chaîne (trigger), et un
+  titre repassé en Original perd sa source. La famille = l'original + les titres qui le
+  nomment (`listMasterVariantIds`), l'original nommé dans le tableau. Les variantes
+  existantes ont été reliées à l'original de même nom et de même artiste principal quand il
+  était unique. Chaque variante garde ses fichiers, crédits et ISRC.
 - **Contributeurs & crédits** : les artistes interprètes restent `master_artists`
   (modifiés par « Modifier ») ; `master_contributors` porte tous les autres crédits (rôle
   fermé, précision libre), **une ligne par rôle en base, une ligne par personne à l'écran**
@@ -308,7 +313,27 @@ bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
   **Total ≤ 100 % par type, vérifié au commit** (`split_total_over_100`, trigger différé) ;
   total, reste et statut calculés par le code (`splitTotal`, en centièmes). **Lus et écrits
   avec `manage_catalog` seulement** (comme les contrats) : le bloc est masqué aux autres,
-  leurs événements de journal sont `catalog_only`.
+  leurs événements de journal sont `catalog_only`. Retours Catalogue 15, 40, 43 à 53 :
+  - **Le type n'est plus demandé** : la section d'où l'on ajoute le fixe ; **rôles par
+    type** (`SPLIT_ROLES_OF_KIND`, contrainte SQL `master_splits_role_kind_check`, non
+    validée sur l'existant) : Master = label, artiste, producteur, coproducteur
+    phonographiques, autre ; Édition = auteur, compositeur, éditeur, autre.
+  - **« Complet » = total à 100 %, rien de plus.** La validation est à part
+    (`splitReviewState`) : En préparation / À vérifier / Validée / Modifiée depuis la
+    validation. « Valider la répartition » (`validate_master_split`, `manage_legal`, à
+    100 % tout juste) prend un **instantané** des lignes (`master_split_validations`, jamais
+    réécrit) : une modification ultérieure laisse cet instantané comme version validée,
+    affichée, jusqu'à une nouvelle validation.
+  - **Historique** de chaque changement (`master_split_events`, trigger : avant / après,
+    qui, quand, et les validations), replié sous chaque section.
+  - **Écarts crédits / répartitions** (`publishingGaps`) : un compositeur, auteur ou
+    arrangeur crédité sans part d'édition visible (par son contact, sinon son nom) est
+    signalé « à vérifier », sans jamais proposer ni ajouter de part.
+  - **Source de vérité** (retours 03 et 41) : le titre porte la donnée source (crédits,
+    parts, audio, identifiants, ℗) que Projets, Master, Juridique et Distribution relisent ;
+    une décision validée est un objet à part qui ne se réécrit pas en silence : instantané
+    de répartition, ℗ confirmé (repris si l'année ou le titulaire change), version audio
+    validée (§ 2 septies), répartition confirmée du Juridique (feuille versionnée).
 - **Droits & déclarations** : colonnes `masters.iswc` (normalisé `T` + 10 chiffres),
   `rights_holder`, `rights_year` (mention ℗ composée par le code) ; `master_declarations` une
   ligne par organisme (SACEM, SCPP, SPPF, ADAMI, SPEDIDAM) une fois déposée : Déposée,
@@ -316,6 +341,15 @@ bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
 - **Distribution** : lecture seule, les sorties (`releases`) des projets actifs qui portent
   le master, avec UPC, date, statut (`releaseStatusOf`) et liens détectés ; on modifie dans
   la Sortie du projet.
+- **Projets & sorties** (retours 16, 64 à 72) : « Créer un projet » et **« Rattacher à un
+  projet existant »** (`link_master_to_project`, security invoker : RLS de `project_masters`
+  = direction avant le lancement ; forme vérifiée comme à la création, un single garde un
+  titre, un contenu n'en prend pas) ; **trois dates de sortie séparées** par projet
+  (`ReleaseDatesSection`) : visée (`projects.due_date`), confirmée
+  (`releases.planned_release_date`), effective (`online_detected_at`) — la confirmée ne
+  remplace jamais la visée. Au formulaire « Nouveau projet », le chef de projet (pilotage
+  opérationnel) et la direction créative (responsabilité créative) disent leur rôle, et les
+  directeurs créatifs choisis sont écrits en toutes lettres sous les pastilles.
 - **Projets**, **Fichiers**, **Activité** : mêmes tableaux et composants que la fiche
   artiste. Fichiers : `master_files` + bucket privé `master-files` (stems, pochette, contrat,
   autre ; les fichiers `audio` ont leur onglet), contrats réservés à `manage_catalog` ; composants et

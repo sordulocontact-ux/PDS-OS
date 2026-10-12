@@ -8,6 +8,7 @@ import {
   SESSION_KINDS,
   SPLIT_KINDS,
   SPLIT_ROLES,
+  roleFitsKind,
   normalizeIswc,
 } from "@/lib/catalog/master/rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
@@ -118,25 +119,31 @@ const partyRef = z
     },
   );
 
-export const splitSchema = z.object({
-  ...base,
-  kind: z.enum(SPLIT_KINDS, { error: e.required }),
-  party: requiredText(200),
-  partyRef,
-  role: z.enum(SPLIT_ROLES, { error: e.required }),
-  // "33,33" or "33.33": at most two decimals, between 0.01 and 100.
-  share: z
-    .string({ error: t.splits.errors.share })
-    .trim()
-    .transform((value) => value.replace(",", ".").replace(/\s|%/g, ""))
-    .refine((value) => /^\d{1,3}(\.\d{1,2})?$/.test(value), {
-      error: t.splits.errors.share,
-    })
-    .transform(Number)
-    .refine((value) => value > 0 && value <= 100, {
-      error: t.splits.errors.share,
-    }),
-});
+export const splitSchema = z
+  .object({
+    ...base,
+    kind: z.enum(SPLIT_KINDS, { error: e.required }),
+    party: requiredText(200),
+    partyRef,
+    role: z.enum(SPLIT_ROLES, { error: e.required }),
+    // "33,33" or "33.33": at most two decimals, between 0.01 and 100.
+    share: z
+      .string({ error: t.splits.errors.share })
+      .trim()
+      .transform((value) => value.replace(",", ".").replace(/\s|%/g, ""))
+      .refine((value) => /^\d{1,3}(\.\d{1,2})?$/.test(value), {
+        error: t.splits.errors.share,
+      })
+      .transform(Number)
+      .refine((value) => value > 0 && value <= 100, {
+        error: t.splits.errors.share,
+      }),
+  })
+  // A role of its kind only (retour 43).
+  .refine((input) => roleFitsKind(input.role, input.kind), {
+    path: ["role"],
+    error: t.splits.errors.roleKind,
+  });
 
 export const declarationSchema = z.object({
   masterId: catalogIdSchema,
