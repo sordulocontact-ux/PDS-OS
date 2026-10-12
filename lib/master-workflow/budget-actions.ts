@@ -61,7 +61,8 @@ export async function addBriefRateToBudget(
     label: t.lineLabel(t.roles[input.data.role], engineer ?? null),
     amount_cents: cents,
     status: "planned",
-    family: "creation_content",
+    // A studio's work is a service (MKT-S1-11).
+    family: "services",
     master_role: input.data.role,
   });
   if (error) {

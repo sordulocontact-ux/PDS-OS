@@ -1628,8 +1628,28 @@ date de sortie de la Stratégie, NDA : à décider).
   validations, en attente d'abord, décision sur la page de l'étape (`stageHref`) ; journal
   reconstruit par `loadRecentActivity` (filtré par projet dans la requête), groupé par jour.
 - **Budget** (`lib/budget/`) : enveloppe = `projects.budget_cents` (fixée à la création),
-  Prévu = lignes prévues, Engagé = engagées + payées, Reste = enveloppe − engagé,
   dépassement écrit en toutes lettres. Le responsable seul écrit ; PO ne lit pas la table.
+  Retours Marketing du 11/10/2026 (MKT-S1-11, 12, 15 ; migration `…20261012101101_budget_model`) :
+  - **Statuts** : Estimé → Proposé → Engagé → **Facturé** → Payé. **Trois montants, trois
+    restes** (`budgetTotals`) : prévisionnel (toutes les lignes), engagé (engagé, facturé,
+    payé), réel (facturé, payé), chacun retiré de l'enveloppe ; un budget nul, inconnu ou non
+    ventilé reste valable.
+  - **Familles** de dépense distinctes des familles de leviers : Production de contenus,
+    Publicité & promotion, Événements & activations, Prestations, Déplacements, Frais divers,
+    Autre (`family_detail` obligatoire, contrainte non validée sur l'existant) ; anciennes
+    valeurs reprises par la migration (création → production, promotion → publicité,
+    expériences → événements). Chaque famille a sa définition et ses exemples ; le **code**
+    propose une famille depuis le libellé (`suggestBudgetFamily`, avec le mot qui la
+    suggère) et un livrable dont le titre partage un mot (`suggestBudgetLink`) : « Utiliser »,
+    jamais un choix silencieux.
+  - Une ligne peut payer un **livrable** (`deliverable_id`, même projet) et porter sa
+    **pièce** (`attachment_file_id`) : un fichier des Fichiers du projet (catégorie Autres),
+    jamais un second stockage.
+  - **« Ajouter une dépense » partout dans le Marketing** (`AddExpenseButton` dans le layout
+    du projet, pages Stratégie, Conception, Production, Activations, Suivi & bilan) : même
+    formulaire, même ligne que la page Budget ; libellé, montant et statut suffisent.
+  - **Brief de stratégie** : prévisionnel, engagé, réel et à arbitrer, un reste par type ;
+    les leviers sans dépense n'y sont plus listés (comptés en une ligne).
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 

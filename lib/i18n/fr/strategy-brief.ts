@@ -62,8 +62,19 @@ export const strategyBrief = {
     qualitative: "Qualitatif",
     target: (value: string) => `Cible : ${value}`,
     noTarget: "Cible à fixer",
-    budgetTotals: (proposed: string, validated: string, toDecide: string) =>
-      `Proposé ${proposed} · validé ${validated} · à arbitrer ${toDecide}`,
+    budgetTotals: (
+      proposed: string,
+      validated: string,
+      toDecide: string,
+      real: string,
+    ) =>
+      `Prévisionnel ${proposed} · engagé ${validated} · réel ${real} · à arbitrer ${toDecide}`,
+    // MKT-S1-12: a remainder per kind, never one for all.
+    remainders: (forecast: string, validated: string, real: string) =>
+      `Reste sur le prévisionnel ${forecast} · sur l'engagé ${validated} · sur le réel ${real}`,
+    // MKT-S1-12 / 14: levers without any amount are not listed.
+    hiddenZero: (count: number) =>
+      `${count} levier${count > 1 ? "s" : ""} sans dépense non affiché${count > 1 ? "s" : ""}.`,
     envelope: (envelope: string, remaining: string) =>
       `Enveloppe ${envelope} · reste ${remaining}`,
     noEnvelope: "Pas d'enveloppe fixée",

@@ -50,13 +50,29 @@ export function BudgetTable({
               <DataTableMedia
                 title={<span className="truncate">{line.label}</span>}
                 subtitle={
-                  [
-                    line.family && fr.framing.needs.families[line.family],
-                    line.leverLabel,
-                    line.note,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ") || undefined
+                  <>
+                    {[
+                      line.family === "other" && line.familyDetail
+                        ? `${fr.budget.families.other} : ${line.familyDetail}`
+                        : line.family && fr.budget.families[line.family],
+                      line.leverLabel,
+                      line.deliverableTitle,
+                      line.note,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    {line.attachment?.url && (
+                      <>
+                        {" · "}
+                        <a
+                          href={line.attachment.url}
+                          className="relative z-10 underline underline-offset-4"
+                        >
+                          {t.form.attachmentKept(line.attachment.name)}
+                        </a>
+                      </>
+                    )}
+                  </>
                 }
               />
             </DataTableCell>

@@ -2169,9 +2169,12 @@ export type Database = {
       budget_lines: {
         Row: {
           amount_cents: number
+          attachment_file_id: string | null
           created_at: string
           created_by: string | null
+          deliverable_id: string | null
           family: string | null
+          family_detail: string | null
           id: string
           label: string
           lever_id: string | null
@@ -2184,9 +2187,12 @@ export type Database = {
         }
         Insert: {
           amount_cents: number
+          attachment_file_id?: string | null
           created_at?: string
           created_by?: string | null
+          deliverable_id?: string | null
           family?: string | null
+          family_detail?: string | null
           id?: string
           label: string
           lever_id?: string | null
@@ -2199,9 +2205,12 @@ export type Database = {
         }
         Update: {
           amount_cents?: number
+          attachment_file_id?: string | null
           created_at?: string
           created_by?: string | null
+          deliverable_id?: string | null
           family?: string | null
+          family_detail?: string | null
           id?: string
           label?: string
           lever_id?: string | null
@@ -2213,6 +2222,20 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "budget_lines_deliverable_id_fkey"
+            columns: ["deliverable_id"]
+            isOneToOne: false
+            referencedRelation: "strategy_deliverables"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_lines_attachment_file_id_fkey"
+            columns: ["attachment_file_id"]
+            isOneToOne: false
+            referencedRelation: "project_files"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "budget_lines_created_by_fkey"
             columns: ["created_by"]

@@ -164,6 +164,8 @@ export const budgetStatusTone: Record<string, Tone> = {
   // A quote waits for someone's decision (accept it or not).
   proposed: "warning",
   committed: "info",
+  // Invoiced: a bill to pay.
+  invoiced: "action",
   paid: "success",
 };
 

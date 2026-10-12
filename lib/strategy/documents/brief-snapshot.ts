@@ -131,8 +131,16 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
       l.review_status !== "rejected" &&
       (l.state === "to_decide" || l.review_status === "proposed"),
   );
-  const totals = (p: number, v: number, d: number) =>
-    t.budgetTotals(formatEuros(p), formatEuros(v), formatEuros(d));
+  const totals = (p: number, v: number, d: number, r: number) =>
+    t.budgetTotals(
+      formatEuros(p),
+      formatEuros(v),
+      formatEuros(d),
+      formatEuros(r),
+    );
+  // Levers with nothing spent stay off the Brief (MKT-S1-12, MKT-S1-14).
+  const spentLevers = budget.byLever.filter((l) => l.proposedCents > 0);
+  const hiddenLevers = budget.byLever.length - spentLevers.length;
 
   const items: Record<StrategyDimension, SnapshotItem[]> = {
     positioning: [text(field("positioning"))],
@@ -222,6 +230,7 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
               budget.proposedCents,
               budget.validatedCents,
               budget.toDecideCents,
+              budget.realCents,
             )
           : null,
         empty: t.empty,
@@ -234,11 +243,35 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
               budget.envelope === "undefined" ||
               (budget.remainingCents !== null && budget.remainingCents < 0),
           },
-          ...budget.byLever.map((l) => ({
+          ...(budget.lineCount &&
+          budget.remaining.forecast !== null &&
+          budget.remaining.validated !== null &&
+          budget.remaining.real !== null
+            ? [
+                {
+                  head: null,
+                  rest: t.remainders(
+                    formatEuros(budget.remaining.forecast),
+                    formatEuros(budget.remaining.validated),
+                    formatEuros(budget.remaining.real),
+                  ),
+                  warn: budget.remaining.validated < 0,
+                },
+              ]
+            : []),
+          ...spentLevers.map((l) => ({
             head: l.label,
-            rest: totals(l.proposedCents, l.validatedCents, l.toDecideCents),
+            rest: totals(
+              l.proposedCents,
+              l.validatedCents,
+              l.toDecideCents,
+              l.realCents,
+            ),
             warn: l.toDecideCents > 0,
           })),
+          ...(hiddenLevers > 0
+            ? [{ head: null, rest: t.hiddenZero(hiddenLevers), warn: false }]
+            : []),
         ],
       },
     ],

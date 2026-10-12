@@ -3,8 +3,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { formatEuros, type BudgetTotals } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Envelope and totals, all computed by code from the lines. An overrun is
-// said in words; the danger tone only reinforces it.
+// Envelope, then the forecast, the committed and the real spend, each with
+// its own remainder (MKT-S1-12), all computed by code from the lines. An
+// overrun is said in words; the danger tone only reinforces it.
 export function BudgetSummary({
   envelopeCents,
   totals,
@@ -13,11 +14,17 @@ export function BudgetSummary({
   totals: BudgetTotals;
 }) {
   const t = fr.budget;
-  const remaining = totals.remainingCents;
+  const rest = (cents: number | null) =>
+    cents === null
+      ? undefined
+      : cents < 0
+        ? t.tiles.overrunOf(formatEuros(-cents))
+        : t.tiles.restOf(formatEuros(cents));
+  const remaining = totals.remaining.committed;
   return (
     <div className="flex flex-col gap-3">
       <StatTiles
-        columns={6}
+        columns={4}
         stats={[
           {
             label: t.tiles.envelope,
@@ -25,31 +32,36 @@ export function BudgetSummary({
               envelopeCents === null
                 ? t.noEnvelope
                 : formatEuros(envelopeCents),
+            hint: t.envelopeHint,
           },
-          { label: t.tiles.planned, value: formatEuros(totals.plannedCents) },
           {
-            label: t.tiles.proposed,
-            value: formatEuros(totals.proposedCents),
+            label: t.tiles.forecast,
+            value: formatEuros(totals.forecastCents),
+            hint: [rest(totals.remaining.forecast), t.tiles.hints.forecast]
+              .filter(Boolean)
+              .join(" · "),
           },
           {
             label: t.tiles.committed,
             value: formatEuros(totals.committedCents),
+            hint: [rest(totals.remaining.committed), t.tiles.hints.committed]
+              .filter(Boolean)
+              .join(" · "),
           },
-          { label: t.tiles.paid, value: formatEuros(totals.paidCents) },
           {
-            label: t.tiles.remaining,
-            value: remaining === null ? "—" : formatEuros(remaining),
+            label: t.tiles.real,
+            value: formatEuros(totals.realCents),
+            hint: [rest(totals.remaining.real), t.tiles.hints.real]
+              .filter(Boolean)
+              .join(" · "),
           },
         ]}
       />
-      <div className="flex flex-wrap items-center gap-3">
-        {remaining !== null && remaining < 0 && (
-          <StatusBadge tone="danger">
-            {t.overrun(formatEuros(-remaining))}
-          </StatusBadge>
-        )}
-        <p className="text-caption text-muted-foreground">{t.envelopeHint}</p>
-      </div>
+      {remaining !== null && remaining < 0 && (
+        <StatusBadge tone="danger" className="self-start">
+          {t.overrun(formatEuros(-remaining))}
+        </StatusBadge>
+      )}
     </div>
   );
 }

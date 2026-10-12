@@ -155,7 +155,7 @@ function refresh(owner: FileOwner) {
 // The browser uploaded the object (storage RLS); this records it.
 export async function recordCatalogFile(
   input: z.input<typeof recordSchema>,
-): Promise<Result> {
+): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const t = fr.catalogFiles;
   const parsed = recordSchema.safeParse(input);
   const organizationId = parsed.success
@@ -207,13 +207,14 @@ export async function recordCatalogFile(
           .insert({ ...row, contract_id: owner.id });
     }
   };
-  const { error } = await insert();
-  if (error) {
-    console.error("recordCatalogFile:", error.message);
+  const { data, error } = await insert().select("id").single();
+  if (error || !data) {
+    console.error("recordCatalogFile:", error?.message);
     return { ok: false, error: t.failed };
   }
   refresh(owner);
-  return { ok: true };
+  // The new file, for a record that keeps it (a budget line's proof).
+  return { ok: true, id: data.id };
 }
 
 // Name, category and precision: reclassifying moves the one file from a

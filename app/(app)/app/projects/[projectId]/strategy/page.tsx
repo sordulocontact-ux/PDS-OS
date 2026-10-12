@@ -179,6 +179,7 @@ export default async function StrategyPage({
                 budget={budget}
                 envelopeCents={project.budgetCents}
                 projectId={projectId}
+                organizationId={access.organizationId}
               />
             )}
           </StrategyPilotage>

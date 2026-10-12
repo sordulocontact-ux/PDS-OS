@@ -180,7 +180,7 @@ export function proposeBudgetLineTool({
         changes,
         labels.family,
         null,
-        input.family ? fr.framing.needs.families[input.family] : null,
+        input.family ? fr.budget.families[input.family] : null,
       );
       change(changes, labels.note, null, input.note?.trim());
 

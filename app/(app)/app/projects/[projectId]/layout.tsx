@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { LegalSteps } from "@/components/projects/legal-steps";
+import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import {
   ProjectSidebar,
@@ -96,12 +97,18 @@ export default async function ProjectLayout({
             sidebar's switcher names it, Figma node 76:3145). Before, no
             sections: the project itself is the page. */}
         {project.stages.length > 0 ? (
-          <ProjectPageTitle
-            projectId={project.id}
-            canSeeLegal={canSeeLegal}
-            canSeeBudget={canSeeBudget}
-            workflows={flows?.workflows}
-          />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <ProjectPageTitle
+              projectId={project.id}
+              canSeeLegal={canSeeLegal}
+              canSeeBudget={canSeeBudget}
+              workflows={flows?.workflows}
+            />
+            {/* MKT-S1-15: a spend is added where it shows up. */}
+            {canEdit && canSeeBudget && (
+              <AddExpenseButton projectId={project.id} />
+            )}
+          </div>
         ) : (
           <header className="flex flex-col gap-1">
             {/* No sidebar before launch, so no switcher either: the only

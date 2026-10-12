@@ -8,7 +8,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import type { BudgetLever, BudgetLine } from "@/lib/budget/types";
+import type {
+  BudgetDeliverable,
+  BudgetLever,
+  BudgetLine,
+} from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 
 // Side panel to add a line (line = null) or edit one. Mounted per opening,
@@ -17,12 +21,16 @@ export function BudgetLineSheet({
   projectId,
   line,
   levers,
+  deliverables,
+  organizationId,
   open,
   onOpenChange,
 }: {
   projectId: string;
   line: BudgetLine | null;
   levers: BudgetLever[];
+  deliverables?: BudgetDeliverable[];
+  organizationId?: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -40,6 +48,8 @@ export function BudgetLineSheet({
               projectId={projectId}
               line={line}
               levers={levers}
+              deliverables={deliverables}
+              organizationId={organizationId}
               onDone={() => onOpenChange(false)}
             />
           </div>

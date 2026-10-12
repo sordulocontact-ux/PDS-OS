@@ -13,6 +13,8 @@ export type LeverBudget = {
   proposedCents: number;
   validatedCents: number;
   toDecideCents: number;
+  // Invoiced or paid: the real spend (MKT-S1-12).
+  realCents: number;
 };
 
 /**
@@ -39,15 +41,24 @@ export type StrategyBudget = {
   proposedCents: number;
   validatedCents: number;
   toDecideCents: number;
+  realCents: number;
   // Envelope minus validated; null without an envelope. Negative = overrun.
   remainingCents: number | null;
+  // MKT-S1-12: one remainder per kind (forecast, validated, real).
+  remaining: {
+    forecast: number | null;
+    validated: number | null;
+    real: number | null;
+  };
   byLever: LeverBudget[];
 };
 
 type Line = Pick<BudgetLine, "amountCents" | "status" | "leverId">;
 
-// Validated = committed or paid; to arbitrate = estimated or quoted.
-const VALIDATED = new Set(["committed", "paid"]);
+// Validated = committed, invoiced or paid; to arbitrate = estimated or
+// quoted; real = invoiced or paid.
+const VALIDATED = new Set(["committed", "invoiced", "paid"]);
+const REAL = new Set(["invoiced", "paid"]);
 
 function sums(lines: Line[]) {
   const total = (keep: (l: Line) => boolean) =>
@@ -56,6 +67,7 @@ function sums(lines: Line[]) {
     proposedCents: total(() => true),
     validatedCents: total((l) => VALIDATED.has(l.status)),
     toDecideCents: total((l) => !VALIDATED.has(l.status)),
+    realCents: total((l) => REAL.has(l.status)),
   };
 }
 
@@ -94,13 +106,19 @@ export function strategyBudget(
     });
 
   const total = sums(lines);
+  const rest = (spent: number) =>
+    envelopeCents === null ? null : envelopeCents - spent;
   return {
     envelopeCents,
     envelope: envelopeState(envelopeCents, envelopeToConfirm),
     lineCount: lines.length,
     ...total,
-    remainingCents:
-      envelopeCents === null ? null : envelopeCents - total.validatedCents,
+    remainingCents: rest(total.validatedCents),
+    remaining: {
+      forecast: rest(total.proposedCents),
+      validated: rest(total.validatedCents),
+      real: rest(total.realCents),
+    },
     byLever,
   };
 }

@@ -5,7 +5,13 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { BUDGET_FAMILIES, BUDGET_STATUSES } from "@/lib/budget/types";
+import { loadBudget } from "@/lib/budget/queries";
+import {
+  BUDGET_FAMILIES,
+  BUDGET_STATUSES,
+  type BudgetDeliverable,
+  type BudgetLever,
+} from "@/lib/budget/types";
 import {
   fail,
   fromDatabaseError,
@@ -40,7 +46,15 @@ const lineInput = z.object({
     .optional()
     .transform((v) => v || null)
     .pipe(z.enum(BUDGET_FAMILIES).nullable()),
+  familyDetail: z
+    .string()
+    .trim()
+    .max(120)
+    .optional()
+    .transform((v) => v || null),
   leverId: optionalId,
+  deliverableId: optionalId,
+  attachmentFileId: optionalId,
   note: z
     .string()
     .trim()
@@ -56,7 +70,8 @@ function done(
   error: { code?: string; message?: string } | null,
 ): ActionResult {
   if (error) return fromDatabaseError(error);
-  revalidatePath(routes.projectBudget(projectId));
+  // The same line is read by the Budget page, the Strategy and its Brief.
+  revalidatePath(routes.project(projectId), "layout");
   return ok;
 }
 
@@ -69,6 +84,9 @@ export async function saveBudgetLine(
   const access = await requireApproved();
   if (!p.success || !z.uuid().safeParse(projectId).success)
     return fail("invalid_input");
+  // « Autre » says what it is (MKT-S1-11).
+  if (p.data.family === "other" && !p.data.familyDetail)
+    return fail("invalid_input");
   if (!access.organizationId) return fail("forbidden");
 
   const values = {
@@ -76,7 +94,13 @@ export async function saveBudgetLine(
     amount_cents: p.data.amount,
     status: p.data.status,
     family: p.data.family,
+    family_detail: p.data.family === "other" ? p.data.familyDetail : null,
     lever_id: p.data.leverId,
+    deliverable_id: p.data.deliverableId,
+    // Kept when the form does not send one (an edit without a new file).
+    ...(p.data.attachmentFileId
+      ? { attachment_file_id: p.data.attachmentFileId }
+      : {}),
     note: p.data.note,
   };
   const supabase = await createClient();
@@ -118,4 +142,21 @@ export async function deleteBudgetLine(
     .select("id");
   if (!error && !data?.length) return fail("forbidden");
   return done(projectId, error);
+}
+
+/**
+ * What « Ajouter une dépense » needs from anywhere in the Marketing
+ * (MKT-S1-15): the project's levers and deliverables, and where a proof is
+ * uploaded. Read with the user's session.
+ */
+export async function loadExpenseForm(projectId: string): Promise<{
+  levers: BudgetLever[];
+  deliverables: BudgetDeliverable[];
+  organizationId: string | null;
+}> {
+  const access = await requireApproved();
+  if (!z.uuid().safeParse(projectId).success)
+    return { levers: [], deliverables: [], organizationId: null };
+  const { levers, deliverables } = await loadBudget(projectId);
+  return { levers, deliverables, organizationId: access.organizationId };
 }

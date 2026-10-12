@@ -20,11 +20,12 @@ export default async function ProjectBudgetPage({
   params,
 }: PageProps<"/app/projects/[projectId]/budget">) {
   const { projectId } = await params;
-  const [access, project, { error, lines, levers }] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-    loadBudget(projectId),
-  ]);
+  const [access, project, { error, lines, levers, deliverables }] =
+    await allInOrder([
+      requireApproved(),
+      requireLaunchedProject(projectId),
+      loadBudget(projectId),
+    ]);
   if (!canSeeProjectBudget(access, project)) notFound();
   const t = fr.budget;
 
@@ -35,7 +36,13 @@ export default async function ProjectBudgetPage({
         envelopeCents={project.budgetCents}
         totals={budgetTotals(lines, project.budgetCents)}
       />
-      <BudgetLines projectId={projectId} lines={lines} levers={levers} />
+      <BudgetLines
+        projectId={projectId}
+        lines={lines}
+        levers={levers}
+        deliverables={deliverables}
+        organizationId={access.organizationId}
+      />
     </div>
   );
 }

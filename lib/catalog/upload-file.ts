@@ -26,7 +26,7 @@ export async function uploadCatalogFile(input: {
   // An audio version of a title (category "audio").
   audioState?: AudioState;
   durationSeconds?: number | null;
-}): Promise<{ ok: true } | { ok: false; error: string }> {
+}): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const t = fr.catalogFiles;
   if (input.file.size === 0) return { ok: false, error: t.empty };
   if (input.file.size > MAX_FILE_BYTES) return { ok: false, error: t.tooLarge };

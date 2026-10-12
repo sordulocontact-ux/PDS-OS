@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { DataTableViews } from "@/components/ui/data-table";
 import {
+  type BudgetDeliverable,
   BUDGET_STATUSES,
   type BudgetLever,
   type BudgetLine,
@@ -24,10 +25,14 @@ export function BudgetLines({
   projectId,
   lines,
   levers,
+  deliverables,
+  organizationId,
 }: {
   projectId: string;
   lines: BudgetLine[];
   levers: BudgetLever[];
+  deliverables?: BudgetDeliverable[];
+  organizationId?: string | null;
 }) {
   const t = fr.budget;
   const canEdit = useCanEditProject();
@@ -96,6 +101,8 @@ export function BudgetLines({
         projectId={projectId}
         line={editing}
         levers={levers}
+        deliverables={deliverables}
+        organizationId={organizationId}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
       />

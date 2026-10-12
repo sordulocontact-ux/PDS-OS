@@ -22,6 +22,13 @@ const FAMILY: Record<string, string> = {
   creation_content: "création & contenus",
   promotion_distribution: "promotion & diffusion",
   experiences_activations: "expériences & activations",
+  // Spending families (MKT-S1-11).
+  content_production: "production de contenus",
+  advertising: "publicité & promotion",
+  events: "événements & activations",
+  services: "prestations",
+  travel: "déplacements",
+  misc: "frais divers",
   other: "autre",
 };
 const REVIEW: Record<string, string> = {

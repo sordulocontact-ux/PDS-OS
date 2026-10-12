@@ -25,12 +25,15 @@ export function DimensionWork({
   budget,
   envelopeCents,
   projectId,
+  organizationId,
 }: {
   dimension: StrategyDimension;
   data: StrategyData;
   budget: BudgetData;
   envelopeCents: number | null;
   projectId: string;
+  // Where a spend's proof is uploaded.
+  organizationId: string | null;
 }) {
   // Remounts when the saved answers change on the server.
   const choices = (key: StrategyTextField) => {
@@ -115,6 +118,8 @@ export function DimensionWork({
               projectId={projectId}
               lines={budget.lines}
               levers={budget.levers}
+              deliverables={budget.deliverables}
+              organizationId={organizationId}
             />
           </div>
         </>
