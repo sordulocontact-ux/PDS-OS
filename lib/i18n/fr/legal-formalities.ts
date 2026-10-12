@@ -119,6 +119,45 @@ export const legalFormalities = {
     follow_phono: "Comme les parts Phono",
     statutory: "Partage égal du Règlement général de la SACEM",
   },
+  // JUR-23: what the rubrique D does to the DEP and DR, computed by the code.
+  sharing: {
+    title: "Aperçu des DEP et DR",
+    intro:
+      "Phono, DEP et DR sont trois partages différents : ils ne s'additionnent jamais. Les DEP et DR sont d'abord répartis entre catégories par la règle, puis au sein de chaque catégorie.",
+    columns: {
+      name: "Ayant droit",
+      category: "Catégorie",
+      phono: "Phono",
+      dep: "DEP",
+      dr: "DR",
+    },
+    publisher: "Éditeur",
+    notComputed: "Non calculé",
+    effectTitle: "Effet de la rubrique D",
+    effectNone:
+      "Cocher ou non la rubrique D ne change rien ici : chaque catégorie n'a qu'un ayant droit, ou des parts Phono égales.",
+    effect: (name: string, kind: string, before: string, after: string) =>
+      `${name} : ${kind} ${before} → ${after}`,
+    effectIntro:
+      "Avec l'autre choix, seules les parts au sein des catégories changeraient :",
+    rule: (source: string) => `Règle : ${source}.`,
+    confirm:
+      "Résultat calculé par PDS OS, à confirmer par la personne responsable avant le dépôt. Il ne prouve pas la conformité des contrats.",
+    alerts: {
+      phono_total: (total: string) =>
+        `Total Phono à ${total} : il doit faire exactement 100 %, créateurs et éditeurs réunis.`,
+      empty_category: (category: string) =>
+        `Aucun ${category} : sa part des DEP et DR reste sans ayant droit.`,
+      not_covered: (name: string, quality: string) =>
+        `${name} (${quality}) : la règle V1 ne calcule pas cette catégorie, à confirmer avec le référent juridique.`,
+      unknown_rule: "La règle enregistrée avec ce dossier n'est plus connue.",
+    },
+    categories: {
+      author: "auteur",
+      composer: "compositeur",
+      publisher: "éditeur",
+    },
+  },
   arrangementScopes: {
     all: "Autorisé pour toutes les exploitations",
     specific: "Autorisé pour certaines exploitations déterminées",

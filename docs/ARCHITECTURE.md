@@ -2728,6 +2728,17 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   fiche, le chef de projet, la direction) et mène à l'écran de correction (fiche → Fiches de
   renseignements). Même liste dans le panneau du plan et la fenêtre « Générer »
   (`ContractValueList`) ; recalculée par le serveur à chaque changement (`ProjectLive`).
+- **DEP / DR (JUR-23, lot 10)** : sous la rubrique D du dossier SACEM, un aperçu calculé par le code
+  (`lib/legal/formalities/sharing-rule.ts`, `DepDrPreview`) : Phono, DEP et DR montrés côte à côte,
+  jamais additionnés ; DEP et DR répartis d'abord entre catégories par une **règle versionnée**
+  (`SACEM_725_V1` : DEP un tiers auteurs / compositeurs / éditeurs, DR moitié éditeurs, un quart
+  par catégorie de créateurs ; sans éditeur, moitié / moitié), puis au sein de chaque catégorie à
+  parts égales (D vide) ou selon les parts Phono (D cochée), en unités exactes (plus grand reste,
+  total toujours 100 %). L'effet de l'autre choix est dit ligne par ligne ; alertes : total Phono
+  différent de 100 %, catégorie sans ayant droit, arrangeur ou adaptateur non calculé par V1, règle
+  inconnue. La règle utilisée est **gardée avec le dossier** (`dep_dr.rule`) : une V2 ne change
+  pas un dossier ni un bulletin déjà fait. **Point à trancher** : fractions de V1 et part des
+  arrangeurs / adaptateurs, à confirmer par le référent juridique avant production (ticket).
 - **Fiches (JUR-11, JUR-13, JUR-14)** : `legal_forms.opened_at`, noté une fois par
   `note_legal_form_opened` (anon) à l'ouverture de `/f/…` (« lien ouvert le … » dans la liste) ;
   une fiche reçue notifie qui l'a préparée et le responsable du projet (`legal_form_received`,

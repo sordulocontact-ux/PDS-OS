@@ -46,6 +46,8 @@ const VALUE: Record<string, z.ZodType> = {
   publishers: z.array(publisher).max(3),
   dep_dr: z.object({
     choice: z.enum(DEP_DR_CHOICES).or(z.literal("")),
+    // The sharing rule the dossier was computed with (JUR-23).
+    rule: z.string().max(40).optional(),
   }),
   arrangement: z.object({
     scope: z.enum(["all", "specific"]).or(z.literal("")),

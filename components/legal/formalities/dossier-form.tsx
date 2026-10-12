@@ -17,18 +17,20 @@ import {
 import { splitShareOf } from "@/lib/legal/formalities/prefill";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
 
+import { DepDrPreview } from "./dep-dr-preview";
 import { ArrangementField, ContractField } from "./dossier-fields";
 import { DossierRecap } from "./dossier-recap";
 import { DossierStepButtons, DossierStepChips } from "./dossier-steps";
 import { PeopleEditor } from "./people-editor";
 import { useDossierErrors } from "./use-dossier-errors";
 import { useLegalAction } from "@/components/legal/use-legal-action";
+import { CURRENT_SHARING_RULE } from "@/lib/legal/formalities/sharing-rule";
 import { cn } from "@/lib/utils";
 
 type Entry = { value: unknown; typed: boolean };
 // Short fields side by side from `sm`; the people, arrangement and contract
 // blocks take the whole width.
-const HALF: readonly string[] = ["text", "date", "dep_dr"];
+const HALF: readonly string[] = ["text", "date"];
 // Publishers are edited with the creators (one Phono total); in a section,
 // the required fields come first.
 const sectionFields = (section: string) =>
@@ -213,7 +215,29 @@ export function DossierForm({
                       obj<{ choice: string }>("dep_dr", { choice: "" })
                         .choice || null
                     }
-                    onValueChange={(v) => set("dep_dr", { choice: v })}
+                    onValueChange={(v) =>
+                      set("dep_dr", {
+                        choice: v,
+                        // The rule the preview used is kept with the
+                        // dossier: a later rule never changes it (JUR-23).
+                        rule:
+                          obj<{ rule?: string }>("dep_dr", {}).rule ??
+                          CURRENT_SHARING_RULE,
+                      })
+                    }
+                  />
+                )}
+                {field.kind === "dep_dr" && (
+                  <DepDrPreview
+                    creators={obj<Creator[]>("creators", [])}
+                    publishers={obj<Publisher[]>("publishers", [])}
+                    choice={
+                      obj<{ choice: string }>("dep_dr", { choice: "" }).choice
+                    }
+                    ruleId={
+                      obj<{ rule?: string }>("dep_dr", {}).rule ??
+                      CURRENT_SHARING_RULE
+                    }
                   />
                 )}
                 {field.kind === "arrangement" && (
