@@ -20,6 +20,12 @@ export const core = {
     downloadFailed:
       "Le PDF est prêt, mais le téléchargement a échoué. Réessayez.",
   },
+  // « Filtres » of a list page (components/ui/url-filters.tsx).
+  urlFilters: {
+    button: "Filtres",
+    buttonCount: (count: number) => `Filtres · ${count}`,
+    remove: "Retirer le filtre",
+  },
   // components/ui/audio-file.tsx
   audioFile: {
     download: "Télécharger",

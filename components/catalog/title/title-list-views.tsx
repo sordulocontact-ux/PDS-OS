@@ -9,21 +9,27 @@ import {
 import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
 
-// Views of the Titres list, in the URL: the audio state as tabs (Hors
-// maquettes by default, each state, Tous, with their counts) and, for the
-// director, live or archived records at the end of the bar. Two separate
-// axes: each one keeps the other's choice. Same shape as ArtistListViews.
+// Views of the Catalogue, in the URL: where the song stands as tabs (Tous,
+// En création, En production, Finalisés, with their counts) and, for the
+// director, live or archived records at the end of the bar. Each axis keeps
+// the others' choice (the filters included). Same shape as ArtistListViews.
 export function TitleListViews({
   view,
   counts,
   archived,
   canArchive,
+  filters,
+  filterBar,
   children,
 }: {
   view: TitleView;
   counts: Record<TitleView, number>;
   archived: boolean;
   canArchive: boolean;
+  // The active filters (?audio=, ?artist=, ?project=), kept by the tabs.
+  filters: Record<string, string | null>;
+  // « Filtres » (UrlFilters), before the archive toggle.
+  filterBar: React.ReactNode;
   children: React.ReactNode;
 }) {
   const t = fr.catalog.masters.views;
@@ -34,6 +40,7 @@ export function TitleListViews({
       label={t.label}
       views={TITLE_VIEWS.map((value) => ({
         href: viewHref(routes.masters, {
+          ...filters,
           state: titleViewParam(value),
           view: archived ? "archived" : null,
         }),
@@ -42,13 +49,20 @@ export function TitleListViews({
         current: view === value,
       }))}
       action={
-        canArchive && (
-          <ArchiveViewToggle
-            path={routes.masters}
-            archived={archived}
-            params={state ? { state } : undefined}
-          />
-        )
+        <div className="flex flex-wrap items-center gap-2">
+          {filterBar}
+          {canArchive && (
+            <ArchiveViewToggle
+              path={routes.masters}
+              archived={archived}
+              params={Object.fromEntries(
+                Object.entries({ ...filters, state }).filter(
+                  (entry): entry is [string, string] => entry[1] !== null,
+                ),
+              )}
+            />
+          )}
+        </div>
       }
     >
       {children}

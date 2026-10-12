@@ -280,6 +280,8 @@ export const catalog = {
   },
 
   // Audio state and variant of a title: two separate facts.
+  // A title whose audio step nobody gave (retour Catalogue 02).
+  audioStateUnknown: "Non renseigné",
   audioStates: {
     demo: "Maquette",
     rough_mix: "Mise à plat",
@@ -305,51 +307,58 @@ export const catalog = {
       title: "Titre",
       artists: "Artiste",
       audioState: "État audio",
-      isrc: "ISRC",
-      release: "Sortie liée",
-      releaseDate: "Sortie officielle",
-      status: "Statut",
+      project: "Projet associé",
+      lastChange: "Dernière modification",
+      release: "Sortie",
     },
-    otherReleases: {
+    // Next to the audio step, once the Master final was approved.
+    validated: "Validé",
+    otherProjects: {
       short: (count: number) => `+${count}`,
       full: (count: number) =>
-        count > 1 ? `et ${count} autres sorties` : "et 1 autre sortie",
+        count > 1 ? `et ${count} autres projets` : "et 1 autre projet",
     },
     releaseStatus: {
       online: "En ligne",
       planned: "Prévue",
       undated: "Sans date",
     },
-    // Views of the list by audio state. The default one leaves the demos
-    // out: they stay titles, one tab away.
+    // Where the song stands (retour Catalogue 01). « Finalisés » = a Master
+    // final validated, never only deposited.
     views: {
-      label: "État audio",
-      withoutDemos: "Hors maquettes",
-      demo: "Maquettes",
-      rough_mix: "Mises à plat",
-      mix: "Mix",
-      master: "Masters",
-      final_master: "Masters finaux",
+      label: "Avancement",
       all: "Tous",
+      creation: "En création",
+      production: "En production",
+      finalised: "Finalisés",
     },
     filteredEmpty: {
-      withoutDemos: "Aucun titre au-delà de la maquette",
-      demo: "Aucune maquette",
-      rough_mix: "Aucune mise à plat",
-      mix: "Aucun mix",
-      master: "Aucun master",
-      final_master: "Aucun master final",
+      creation: "Aucun titre en création",
+      production: "Aucun titre en production",
+      finalised: "Aucun titre finalisé",
     },
     filteredEmptyBody:
-      "L'état audio se choisit à la création, se modifie dans « Modifier » et avance tout seul quand on ajoute un fichier audio plus avancé.",
+      "Un titre passe en production dès sa mise à plat, et devient « Finalisé » quand son master final est validé dans l'onglet Audio.",
+    // The audio step, artist and project filters (retour Catalogue 02).
+    filters: {
+      audioLabel: "État audio",
+      audioAll: "Tous les états",
+      none: "Non renseigné",
+      artistLabel: "Artiste",
+      artistAll: "Tous les artistes",
+      projectLabel: "Projet associé",
+      projectAll: "Tous les projets",
+    },
+    filtersEmpty: "Aucun titre ne correspond à ces filtres.",
+    filtersEmptyBody: "Retirez un filtre pour élargir la liste.",
     search: {
       label: "Rechercher un titre",
       placeholder: "Rechercher par titre, artiste ou ISRC",
       noResult: (query: string) => `Aucun titre ne correspond à « ${query} ».`,
     },
-    emptyTitle: "Aucun titre pour l'instant",
+    emptyTitle: "Tous vos morceaux, de la première maquette au master final.",
     emptyBody:
-      "Créez un titre dès qu'un morceau existe, même à l'état de maquette.",
+      "Créez un titre dès qu'un morceau existe, même sans audio : il avancera avec ses versions.",
     emptyBodyReadOnly: "Les titres apparaîtront ici dès qu'ils seront créés.",
     loadError: "Impossible de charger les titres. Rechargez la page.",
   },

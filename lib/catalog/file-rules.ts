@@ -152,25 +152,36 @@ export function fileKind(file: {
   return "document";
 }
 
-/** Audio files the browser can usually read (its duration included). */
-export const AUDIO_ACCEPT = "audio/*,.wav,.aif,.aiff,.mp3,.flac,.m4a,.aac,.ogg";
+// The audio formats accepted for a title's versions (retour Catalogue 20):
+// one list for the file picker, the check before upload, the server and the
+// help text, so what is said is what is accepted.
+export const AUDIO_FORMATS = {
+  WAV: ["wav"],
+  AIFF: ["aif", "aiff"],
+  FLAC: ["flac"],
+  MP3: ["mp3"],
+  M4A: ["m4a"],
+  AAC: ["aac"],
+  OGG: ["ogg"],
+} as const;
 
+const AUDIO_EXTENSIONS = new Set<string>(Object.values(AUDIO_FORMATS).flat());
+
+/** « WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG ». */
+export const AUDIO_FORMAT_LIST = new Intl.ListFormat("fr-FR", {
+  type: "disjunction",
+}).format(Object.keys(AUDIO_FORMATS));
+
+/** The file picker offers exactly the accepted formats. */
+export const AUDIO_ACCEPT = [...AUDIO_EXTENSIONS]
+  .map((ext) => `.${ext}`)
+  .join(",");
+
+/** An accepted audio file, by its extension (its type varies by browser). */
 export function isAudioFile(file: { name: string; type: string }): boolean {
-  if (file.type.startsWith("audio/")) return true;
   const ext = fileExtension(file.name);
   return ext !== null && AUDIO_EXTENSIONS.has(ext);
 }
-
-const AUDIO_EXTENSIONS = new Set([
-  "wav",
-  "aif",
-  "aiff",
-  "mp3",
-  "flac",
-  "m4a",
-  "aac",
-  "ogg",
-]);
 
 export type FileCategory<K extends FileOwnerKind = FileOwnerKind> =
   (typeof FILE_CATEGORIES)[K][number];

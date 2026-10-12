@@ -788,7 +788,7 @@ export const masterWorkflow = {
       sent: (fileName: string, date: string) =>
         `${fileName} · déposé le ${date}`,
       notAudio:
-        "Ce fichier n'est pas un fichier audio (WAV, AIFF, FLAC, MP3…).",
+        "Ce format n'est pas accepté : déposez un fichier WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.",
       tooLarge:
         "Ce fichier dépasse 50 Mo : envoyez-le par un autre moyen au label.",
       errors: {

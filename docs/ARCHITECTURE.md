@@ -366,10 +366,57 @@ Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.t
   titre (`intent=upload`), puis `useTitleAudioUpload` l'envoie et ouvre la fiche. Un
   fichier sans état audio est refusé avant l'envoi (pas d'état deviné) ; un envoi raté
   laisse le titre créé, toast et ouverture de l'onglet Audio.
-- **Catalogue** (liste des titres, « Titres » jusqu'au 04/10/2026) : onglets par état audio dans l'URL (`?state=`) : **Hors maquettes (par
-  défaut)**, Maquettes, Mises à plat, Mix, Masters, Masters finaux, Tous ; un titre « Non
-  renseigné » n'est jamais caché ; Archivés du DG en pastilles, comme Artistes. Colonne
-  État audio.
+- **Catalogue** (liste des titres, retours Catalogue 01, 02 et 04 du 11/10/2026) : quatre
+  onglets dans l'URL (`?state=`, `lib/catalog/title-views.ts`) : **Tous** (défaut), **En
+  création** (sans audio ou maquette), **En production** (de la mise à plat au master final
+  non validé), **Finalisés** (`masters.final_validated_at` : un master final **validé**, jamais
+  seulement déposé). Les étapes audio deviennent un filtre (`?audio=`, « Non renseigné »
+  compris), avec l'artiste (`?artist=`) et le projet associé (`?project=`) : bouton
+  « Filtres » commun (`UrlFilters`, aussi au Réseau), combinable avec la recherche ; les
+  onglets comptent ce que les filtres gardent. Colonnes Titre · Artiste · État audio
+  (« Validé » à côté, `TitleAudioState`) · Projet associé · Dernière modification (le titre
+  ou le dernier événement de son journal) · Sortie. État vide : « Tous vos morceaux, de la
+  première maquette au master final. » Pas d'onglet « Distribués ».
+- **Versions et validation** (retours Catalogue 07, 10, 13, 18 à 26 ; migration
+  `…20261012100901_master_audio_review.sql`, `lib/catalog/audio-versions.ts`,
+  `components/catalog/master-page/audio/`) :
+  - **Déposer n'est pas valider.** Chaque fichier audio porte sa décision
+    (`master_files.review_status` : null = pas examinée, `changes_requested` avec la note de
+    ce qu'il faut corriger, `approved` ; qui et quand), prise par `review_master_audio`
+    (`manage_catalog`, titre actif) **une seule fois** : pour changer d'avis, on dépose une
+    nouvelle version. Une décision du workflow Master d'un projet (`decide_mix_version`) est
+    recopiée sur le fichier (trigger `z_mirror_review`). Un master final approuvé pose
+    `masters.final_validated_at` (trigger) : le titre passe dans « Finalisés ».
+  - **Numéro de version** (Mix V2) : rang du fichier parmi ceux de la même étape, du plus
+    ancien au plus récent, calculé par le code (`numberAudioVersions`), jamais lu dans le nom ;
+    « Suit Mix V1 ». Sans décision : « En attente de validation » pour la dernière de son
+    étape, « Non examinée » pour une plus ancienne (`audioValidationTone`). En tête de
+    l'onglet : étape atteinte, dernière version déposée, dernière version validée (elles
+    peuvent différer) ; version de référence = la validée de l'étape la plus avancée.
+  - **Corriger l'étape** d'une version déposée au mauvais endroit (`reclassify_master_audio`)
+    tant que personne ne l'a examinée ni utilisée ; le titre suit ses fichiers.
+  - **Suppression protégée** : jamais une version validée ni une version qu'un workflow de
+    projet utilise (version du mix, source confirmée : `master_file_in_use`) — politique RLS
+    et message clair (`audioDeleteBlock`) ; sinon confirmée avec son impact.
+  - **Écoute et retours** : lecteur dans la fiche (plus d'onglet du navigateur), retours
+    horodatés `master_file_comments` (moment en secondes ou toute la version, « Moment de
+    l'écoute » reprend la position du lecteur, clic sur un moment = le lecteur y va), écrits
+    par tout membre, jamais réécrits. Journal : « Version Mix … validée », « Corrections
+    demandées… », « … reclassé de … en … » (`audio_reviewed`).
+  - **Formats** : une seule liste (`AUDIO_FORMATS` : WAV, AIFF, FLAC, MP3, M4A, AAC, OGG) pour
+    le sélecteur, le contrôle avant envoi, le serveur (`recordCatalogFile`) et l'aide ; 50 Mo
+    par fichier (limite du bucket), dit avant le dépôt et en cas de dépassement. Les gros
+    fichiers de travail (ZIP, stems) relèvent des fichiers de travail (à venir).
+- **Vue d'ensemble d'un titre** (retours 01, 11, 12) : d'abord « Où en est le titre »
+  (`TitleStatusCard` : état audio, version de référence, projet associé, **distribution
+  séparée de l'audio** — Non préparée / En préparation / Livrée / Disponible,
+  `loadDistributionState` : sortie en ligne, dépôt déclaré à The Orchard, dossier ou date de
+  sortie — puis **une prochaine action** décidée par le code, `titleNextAction` : première
+  version, version à examiner, version corrigée à déposer, étape suivante, projet à rattacher,
+  pièce manquante). Puis « Complétude du dossier », **repliée**, avec son compteur, ce qui
+  compte pour la sortie d'abord (« Pour la sortie ») et seulement les déclarations
+  applicables ; « Master final validé » remplace « déposé ». Les cinq tuiles de compteurs
+  ont disparu.
 - **Création automatique depuis Studio (à venir)** : elle devra appeler `create_master`,
   seule porte d'entrée, avec l'état `demo` et le fichier rattaché comme ci-dessus, sans
   inventer titre, artiste, crédits, splits ni ISRC : même objet qu'une création manuelle.

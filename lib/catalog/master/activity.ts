@@ -10,6 +10,7 @@ import {
   SESSION_KINDS,
   oneOf,
 } from "@/lib/catalog/master/rules";
+import { AUDIO_REVIEWS } from "@/lib/catalog/audio-versions";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { AUDIO_STATES } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
@@ -32,6 +33,8 @@ const detailSchema = z.object({
   category: z.string().optional().catch(undefined),
   previous_category: z.string().optional().catch(undefined),
   audio_state: z.enum(AUDIO_STATES).nullish().catch(undefined),
+  previous_audio_state: z.enum(AUDIO_STATES).nullish().catch(undefined),
+  decision: z.enum(AUDIO_REVIEWS).nullish().catch(undefined),
 });
 type Detail = z.infer<typeof detailSchema>;
 
@@ -87,8 +90,22 @@ function sentence(kind: string, d: Detail): string | null {
             quoted(d.name, fr.artistActivity.aFile),
           )
         : s.fileAdded(quoted(d.name, fr.artistActivity.aFile));
+    case "audio_reviewed": {
+      const name = quoted(d.name, fr.artistActivity.aFile);
+      const state = d.audio_state ? fr.catalog.audioStates[d.audio_state] : "";
+      if (d.decision === "approved") return s.audioApproved(state, name);
+      if (d.decision === "changes_requested")
+        return s.audioChangesRequested(state, name);
+      return null;
+    }
     case "file_updated": {
       const name = quoted(d.name, fr.artistActivity.aFile);
+      if (d.previous_audio_state && d.audio_state)
+        return s.audioReclassified(
+          name,
+          fr.catalog.audioStates[d.previous_audio_state],
+          fr.catalog.audioStates[d.audio_state],
+        );
       const labels: Record<string, string> = fr.catalogFiles.categories.master;
       return d.previous_category && d.category && labels[d.category]
         ? s.fileMoved(name, labels[d.category])

@@ -1,6 +1,6 @@
 import { RecordSelection } from "@/components/archive/record-selection";
 import { MasterActions } from "@/components/catalog/master-actions";
-import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
+import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { IconDisc } from "@/components/icons";
 import {
   DataTable,
@@ -18,10 +18,11 @@ import {
 } from "@/components/ui/data-table";
 import { SelectAllHead, SelectRowCell } from "@/components/ui/row-selection";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Timestamp } from "@/components/ui/timestamp";
 import type { RecordRights } from "@/lib/archive/types";
 import { routes } from "@/lib/auth/redirects";
 import { variantText } from "@/lib/catalog/title-rules";
-import { formatIsrc, type MasterRow } from "@/lib/catalog/types";
+import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
 import { masterReleaseTone } from "@/lib/ui/state-tones";
@@ -49,10 +50,11 @@ export function MastersTable({
         <DataTableHead>{t.columns.title}</DataTableHead>
         <DataTableHead>{t.columns.artists}</DataTableHead>
         <DataTableHead hideBelow="sm">{t.columns.audioState}</DataTableHead>
-        <DataTableHead hideBelow="md">{t.columns.isrc}</DataTableHead>
-        <DataTableHead hideBelow="lg">{t.columns.release}</DataTableHead>
-        <DataTableHead hideBelow="sm">{t.columns.releaseDate}</DataTableHead>
-        <DataTableHead fill>{t.columns.status}</DataTableHead>
+        <DataTableHead hideBelow="md">{t.columns.project}</DataTableHead>
+        <DataTableHead hideBelow="xl">{t.columns.lastChange}</DataTableHead>
+        <DataTableHead hideBelow="2xl" fill>
+          {t.columns.release}
+        </DataTableHead>
         {withActions && <DataTableActionsHead label={fr.records.menu.column} />}
       </DataTableHeader>
       <DataTableBody>
@@ -79,26 +81,22 @@ export function MastersTable({
             </DataTableCell>
             <DataTableCell>{master.artists}</DataTableCell>
             <DataTableCell hideBelow="sm">
-              {master.audioState ? (
-                <AudioStateBadge state={master.audioState} size="sm" />
-              ) : (
-                EMPTY_CELL
-              )}
+              <TitleAudioState
+                state={master.audioState}
+                validated={master.finalValidatedAt !== null}
+              />
             </DataTableCell>
             <DataTableCell hideBelow="md">
-              {master.isrc ? formatIsrc(master.isrc) : EMPTY_CELL}
-            </DataTableCell>
-            <DataTableCell hideBelow="lg">
-              {master.release ? (
+              {master.projects[0] ? (
                 <span className="flex items-baseline gap-1.5">
-                  {master.release.title}
-                  {master.release.otherCount > 0 && (
+                  {master.projects[0].title}
+                  {master.projects.length > 1 && (
                     <span className="text-[color:var(--text-tertiary)]">
                       <span aria-hidden>
-                        {t.otherReleases.short(master.release.otherCount)}
+                        {t.otherProjects.short(master.projects.length - 1)}
                       </span>
                       <span className="sr-only">
-                        {t.otherReleases.full(master.release.otherCount)}
+                        {t.otherProjects.full(master.projects.length - 1)}
                       </span>
                     </span>
                   )}
@@ -107,18 +105,22 @@ export function MastersTable({
                 EMPTY_CELL
               )}
             </DataTableCell>
-            <DataTableCell hideBelow="sm">
-              {master.release?.plannedReleaseDate
-                ? formatShortDate(master.release.plannedReleaseDate)
-                : EMPTY_CELL}
+            <DataTableCell hideBelow="xl">
+              <Timestamp iso={master.lastChangedAt} show="day" />
             </DataTableCell>
-            <DataTableCell fill>
-              {master.release ? (
-                <StatusBadge tone={masterReleaseTone[master.release.status]}>
-                  {t.releaseStatus[master.release.status]}
-                </StatusBadge>
-              ) : (
+            <DataTableCell hideBelow="2xl" fill>
+              {!master.release ? (
                 EMPTY_CELL
+              ) : master.release.status === "online" ? (
+                <StatusBadge tone={masterReleaseTone.online} size="sm">
+                  {t.releaseStatus.online}
+                </StatusBadge>
+              ) : master.release.plannedReleaseDate ? (
+                formatShortDate(master.release.plannedReleaseDate)
+              ) : (
+                <span className="text-[color:var(--text-tertiary)]">
+                  {t.releaseStatus.undated}
+                </span>
               )}
             </DataTableCell>
             {withActions && (

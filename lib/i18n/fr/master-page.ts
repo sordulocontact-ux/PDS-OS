@@ -34,17 +34,46 @@ export const masterPage = {
   archivedNote: "Ce titre est archivé : il n'est plus modifiable.",
 
   overview: {
-    figures: {
-      audioFiles: "Fichiers audio",
-      variants: "Variantes",
-      sessions: "Sessions",
-      contributors: "Contributeurs",
-      projects: "Projets",
-    },
     facts: "Informations",
     artists: "Artistes",
+    // The head of the overview (retour Catalogue 11): where the title
+    // stands and what to do next.
+    status: {
+      title: "Où en est le titre",
+      audio: "État audio",
+      reference: "Version de référence",
+      noReference: "Aucune version validée",
+      projects: "Projet associé",
+      noProject: "Aucun",
+      distribution: "Distribution",
+      next: "Prochaine action",
+      open: "Y aller",
+    },
+    distributionStates: {
+      not_prepared: "Non préparée",
+      preparing: "En préparation",
+      delivered: "Livrée",
+      available: "Disponible",
+    },
+    nextActions: {
+      add_first_version: "Ajouter une première version audio",
+      review: (label: string) => `Examiner ${label}`,
+      awaiting_review: (label: string) =>
+        `${label} attend la validation de l'équipe catalogue`,
+      deposit_correction: (label: string) =>
+        `Déposer la version corrigée de ${label}`,
+      deposit_next: (state: string) => `Déposer une version « ${state} »`,
+      link_project: "Créer ou rattacher un projet pour ce titre",
+      complete: (label: string) => `Compléter : ${label}`,
+      none: "Rien à faire pour l'instant : le dossier est complet.",
+    },
     checklist: {
-      title: "Dossier du titre",
+      title: "Complétude du dossier",
+      // « Complet » is not « validé » (retour 12).
+      description:
+        "Ce qui manque pour sortir le titre d'abord. Un dossier complet n'est pas un dossier validé juridiquement.",
+      count: (done: number, total: number) => `${done} sur ${total}`,
+      high: "Pour la sortie",
       done: "Fait",
       todo: "À compléter",
       isrc: "ISRC renseigné",
@@ -63,7 +92,7 @@ export const masterPage = {
         ]
           .filter(Boolean)
           .join(" · "),
-      masterFile: "Fichier Master final déposé",
+      masterFile: "Master final validé",
     },
   },
 
@@ -141,14 +170,16 @@ export const masterPage = {
 
   // Successive audio files of the title, grouped by audio state.
   audio: {
-    title: "Évolution du morceau",
+    title: "Versions audio",
     description:
-      "Chaque fichier garde l'état audio qu'il représente. Le titre avance tout seul vers l'état le plus avancé déposé.",
+      "Chaque version garde son étape et son numéro. Déposer fait avancer l'étape atteinte, jamais la validation : une version se valide ici.",
     add: "Ajouter un fichier audio",
     stateLabel: "État audio du fichier",
-    hint: "WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG, 50 Mo au plus. La durée est lue quand le navigateur le peut.",
-    notAudio:
-      "Choisissez un fichier audio : WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.",
+    // `formats` = AUDIO_FORMAT_LIST, the same list the server accepts.
+    hint: (formats: string) =>
+      `${formats}, 50 Mo au plus par fichier. La durée est lue quand le navigateur le peut.`,
+    notAudio: (formats: string) =>
+      `Ce format n'est pas accepté : choisissez un fichier ${formats}.`,
     dialog: {
       description: "À quel état du morceau correspond-il ?",
       descriptionMany: "Ils correspondront tous au même état du morceau.",
@@ -156,6 +187,87 @@ export const masterPage = {
     emptyBody:
       "Déposez la maquette, puis les mises à plat et les masters : ils restent tous rattachés à ce titre.",
     emptyBodyReadOnly: "Les fichiers audio du titre apparaîtront ici.",
+    // Versions, decisions and comments (retours Catalogue 10, 13, 18 à 26).
+    versions: {
+      summary: {
+        reached: "Étape atteinte",
+        latestDeposited: "Dernière version déposée",
+        latestValidated: "Dernière version validée",
+        none: "Aucune",
+      },
+      label: (state: string, number: number) => `${state} V${number}`,
+      deposited: (author: string, date: string) =>
+        author ? `Déposée par ${author} le ${date}` : `Déposée le ${date}`,
+      follows: (label: string) => `Suit ${label}`,
+      validation: {
+        approved: "Validée",
+        changes_requested: "Corrections demandées",
+        pending: "En attente de validation",
+        superseded: "Non examinée",
+      },
+      decided: (who: string, date: string) =>
+        who ? `${who}, le ${date}` : `le ${date}`,
+      approve: "Valider cette version",
+      approveTitle: (label: string) => `Valider ${label} ?`,
+      approveBody:
+        "La validation est attachée à ce fichier précis et ne se reprend pas. Pour changer d'avis, déposez une nouvelle version.",
+      approveFinalBody:
+        "Ce master final validé fait passer le titre dans « Finalisés ». La validation ne se reprend pas.",
+      requestChanges: "Demander des corrections",
+      requestChangesTitle: (label: string) =>
+        `Demander des corrections sur ${label}`,
+      requestChangesLabel: "Ce qu'il faut corriger",
+      requestChangesHint:
+        "La demande reste attachée à cette version, même quand la suivante arrive.",
+      approved: "Version validée.",
+      changesRequested: "Corrections demandées.",
+      reclassify: "Corriger l'étape",
+      reclassifyTitle: (label: string) => `Corriger l'étape de ${label}`,
+      reclassifyLabel: "Étape de ce fichier",
+      reclassifyHint:
+        "Possible tant que personne n'a examiné ni utilisé cette version. Les numéros V1, V2… suivent.",
+      reclassified: "Étape corrigée.",
+      listen: (label: string) => `Écouter ${label}`,
+      open: "Ouvrir",
+      download: "Télécharger",
+      delete: "Supprimer",
+      deleteTitle: (label: string) => `Supprimer ${label} ?`,
+      deleteBody: (label: string) =>
+        `Le fichier de ${label} sera supprimé définitivement, avec ses commentaires. Le journal du titre garde la trace de son dépôt et de sa suppression.`,
+      deleteBlocked: {
+        approved:
+          "Cette version est validée : elle ne se supprime pas, pour que l'historique des décisions reste vrai.",
+        inUse:
+          "Un projet utilise cette version dans son workflow Master : elle ne se supprime pas.",
+      },
+      comments: {
+        title: (count: number) =>
+          count === 0 ? "Retours" : `${count} retour${count > 1 ? "s" : ""}`,
+        empty: "Aucun retour sur cette version.",
+        whole: "Toute la version",
+        at: (timecode: string) => `à ${timecode}`,
+        bodyLabel: "Votre retour",
+        atLabel: "Moment (min:s)",
+        atHint:
+          "Vide = toute la version. « Moment de l'écoute » reprend la position du lecteur.",
+        fromPlayer: "Moment de l'écoute",
+        send: "Ajouter le retour",
+        sent: "Retour ajouté.",
+        atInvalid:
+          "Écrivez le moment en minutes et secondes, par exemple 1:23.",
+        bodyRequired: "Écrivez votre retour.",
+      },
+      errors: {
+        failed: "La décision n'a pas pu être enregistrée. Réessayez.",
+        noteRequired: "Dites ce qu'il faut corriger.",
+        alreadyReviewed:
+          "Cette version a déjà été examinée : la décision ne se reprend pas.",
+        locked:
+          "Cette version a déjà été examinée ou un projet l'utilise : son étape ne change plus.",
+        commentInvalid: "Ce retour n'a pas pu être lu. Vérifiez-le.",
+        commentFailed: "Le retour n'a pas pu être ajouté. Réessayez.",
+      },
+    },
   },
 
   credits: {
@@ -471,6 +583,12 @@ export const masterPage = {
       audioRemoved: (state: string, name: string) =>
         `Fichier audio ${name} supprimé (${state})`,
       audioStateSet: (state: string) => `État audio : ${state}`,
+      audioReclassified: (name: string, from: string, to: string) =>
+        `Fichier audio ${name} reclassé de ${from} en ${to}`,
+      audioApproved: (state: string, name: string) =>
+        `Version ${state} ${name} validée`,
+      audioChangesRequested: (state: string, name: string) =>
+        `Corrections demandées sur la version ${state} ${name}`,
       projectCreated: (title: string) => `Projet ${title} créé avec ce titre`,
       projectLinked: (title: string) => `Titre rattaché au projet ${title}`,
     },

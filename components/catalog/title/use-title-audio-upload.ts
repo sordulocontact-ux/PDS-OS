@@ -3,7 +3,11 @@
 import { useRef, useState } from "react";
 
 import { readAudioDuration } from "@/lib/catalog/audio-duration";
-import { MAX_FILE_BYTES, isAudioFile } from "@/lib/catalog/file-rules";
+import {
+  AUDIO_FORMAT_LIST,
+  MAX_FILE_BYTES,
+  isAudioFile,
+} from "@/lib/catalog/file-rules";
 import { isAudioState } from "@/lib/catalog/title-rules";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { fr } from "@/lib/i18n/fr";
@@ -28,7 +32,7 @@ export function useTitleAudioUpload(organizationId: string | null) {
     setStateError(undefined);
     setDuration(null);
     if (next && !isAudioFile(next)) {
-      setFileError(fr.masterPage.audio.notAudio);
+      setFileError(fr.masterPage.audio.notAudio(AUDIO_FORMAT_LIST));
       return;
     }
     if (next && next.size > MAX_FILE_BYTES) {

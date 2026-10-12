@@ -28,9 +28,6 @@ export const network = {
     relationAll: "Toutes les relations",
     cityLabel: "Ville",
     cityAll: "Toutes les villes",
-    button: "Filtres",
-    buttonCount: (count: number) => `Filtres · ${count}`,
-    remove: "Retirer le filtre",
   },
   kinds: {
     person: "Personne",

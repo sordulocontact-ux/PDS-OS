@@ -49,7 +49,7 @@ export function toCredits(raw: RawCredit[]): Credit[] {
 
 // The columns of a title every list reads.
 export const MASTER_COLUMNS =
-  "id, title, variant, variant_label, audio_state, isrc, duration_seconds";
+  "id, title, variant, variant_label, audio_state, isrc, duration_seconds, final_validated_at";
 
 export type RawMaster = {
   id: string;
@@ -59,6 +59,7 @@ export type RawMaster = {
   audio_state: string | null;
   isrc: string | null;
   duration_seconds: number | null;
+  final_validated_at: string | null;
   credits: RawCredit[];
 };
 
@@ -72,6 +73,7 @@ export function toMasterListItem(row: RawMaster): MasterListItem {
     artists: formatCredits(toCredits(row.credits)),
     isrc: row.isrc,
     durationSeconds: row.duration_seconds,
+    finalValidatedAt: row.final_validated_at,
   };
 }
 
@@ -163,7 +165,11 @@ export async function findArtistsByDeezerIds(
 
 // Releases of the master's live projects, for the release column of the list.
 const MASTER_RELEASES_SELECT =
-  "links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(archived_at, releases:releases!releases_project_same_org(title, planned_release_date, online_detected_at)))";
+  "links:project_masters!project_masters_master_same_org(project:projects!project_masters_project_same_org(id, title, created_at, archived_at, releases:releases!releases_project_same_org(title, planned_release_date, online_detected_at)))";
+
+// The latest event of each title's journal (« Dernière modification »).
+const LAST_EVENT_SELECT =
+  "last:activity_events!activity_events_master_same_org(created_at)";
 
 /**
  * Live masters, newest first; `ids` narrows to those (an artist's),
@@ -181,7 +187,11 @@ export async function listMasters(filter?: {
   const supabase = await createClient();
   const select = supabase
     .from("masters")
-    .select(`${MASTER_COLUMNS}, ${CREDITS_SELECT}, ${MASTER_RELEASES_SELECT}`);
+    .select(
+      `${MASTER_COLUMNS}, updated_at, ${CREDITS_SELECT}, ${MASTER_RELEASES_SELECT}, ${LAST_EVENT_SELECT}`,
+    )
+    .order("created_at", { referencedTable: "last", ascending: false })
+    .limit(1, { referencedTable: "last" });
   let query = filter?.archived
     ? select.not("archived_at", "is", null)
     : select.is("archived_at", null);
@@ -194,22 +204,39 @@ export async function listMasters(filter?: {
     return { masters: [], error: true };
   }
   return {
-    masters: (data ?? []).map((row) => ({
-      ...toMasterListItem(row as RawMaster),
-      projectCount: row.links.filter((l) => l.project && !l.project.archived_at)
-        .length,
-      release: pickMasterRelease(
-        row.links.flatMap((l) =>
-          l.project && !l.project.archived_at
-            ? l.project.releases.map((r) => ({
-                title: r.title,
-                plannedReleaseDate: r.planned_release_date,
-                onlineDetectedAt: r.online_detected_at,
-              }))
-            : [],
+    masters: (data ?? []).map((row) => {
+      const live = row.links
+        .flatMap((l) =>
+          l.project && !l.project.archived_at ? [l.project] : [],
+        )
+        .sort((a, b) => a.created_at.localeCompare(b.created_at));
+      const lastEvent = row.last[0]?.created_at ?? null;
+      return {
+        ...toMasterListItem(row as RawMaster),
+        projectCount: live.length,
+        projects: live.map((p) => ({ id: p.id, title: p.title })),
+        credited: toCredits(row.credits).map((c) => ({
+          id: c.artistId,
+          name: c.name,
+        })),
+        // Compared as instants: the two strings may differ in precision.
+        lastChangedAt:
+          lastEvent && Date.parse(lastEvent) > Date.parse(row.updated_at)
+            ? lastEvent
+            : row.updated_at,
+        release: pickMasterRelease(
+          row.links.flatMap((l) =>
+            l.project && !l.project.archived_at
+              ? l.project.releases.map((r) => ({
+                  title: r.title,
+                  plannedReleaseDate: r.planned_release_date,
+                  onlineDetectedAt: r.online_detected_at,
+                }))
+              : [],
+          ),
         ),
-      ),
-    })),
+      };
+    }),
     error: false,
   };
 }

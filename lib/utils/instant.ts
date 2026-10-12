@@ -29,6 +29,11 @@ export function formatInstant(iso: string): string {
   return `${day.format(date)} à ${hour.format(date)}`;
 }
 
+/** « 11 oct. 2026 », the day of an instant (a « last change » column). */
+export function formatInstantDay(iso: string): string {
+  return day.format(new Date(iso));
+}
+
 /** « 16:42 », for a list already grouped by day. */
 export function formatHour(iso: string): string {
   return hour.format(new Date(iso));

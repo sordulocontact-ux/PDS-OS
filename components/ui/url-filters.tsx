@@ -17,10 +17,9 @@ import { FilterChipLink } from "@/components/ui/filter-chip";
 import { fr } from "@/lib/i18n/fr";
 import { viewHref } from "@/lib/ui/view-href";
 
-export type NetworkFilterKey = "domain" | "relation" | "city";
-
-export type NetworkFilterGroup = {
-  key: NetworkFilterKey;
+export type UrlFilterGroup = {
+  // The URL param it writes (?domain=, ?audio=…).
+  key: string;
   label: string;
   allLabel: string;
   // Only the values some contact of the tab holds.
@@ -32,12 +31,12 @@ export type NetworkFilterGroup = {
 const ALL = "all";
 
 /**
- * « Filtres » of the Réseau (tickets « Retour PO / Réseau » of 10 and
- * 11/10/2026): métier, relation type and city, each one choice, kept in the
- * URL with the tab; the active ones are pills that remove them. Archived
- * contacts stay the director's « Archivés » view.
+ * « Filtres » of a list page: each group one choice, kept in the URL with
+ * the page's other params (tab, archive); the active ones are pills that
+ * remove them. Réseau (métier, relation, city), Catalogue (audio state,
+ * artist, project).
  */
-export function NetworkFilters({
+export function UrlFilters({
   path,
   params,
   groups,
@@ -45,14 +44,14 @@ export function NetworkFilters({
   path: string;
   // The URL's other params (tab, archive), kept by every filter.
   params: Record<string, string | null>;
-  groups: NetworkFilterGroup[];
+  groups: UrlFilterGroup[];
 }) {
-  const t = fr.network.filters;
+  const t = fr.urlFilters;
   const router = useRouter();
   const current = Object.fromEntries(
     groups.map((group) => [group.key, group.current]),
   );
-  const hrefWith = (key: NetworkFilterKey, value: string | null) =>
+  const hrefWith = (key: string, value: string | null) =>
     viewHref(path, { ...params, ...current, [key]: value });
   const offered = groups.filter((group) => group.options.length > 0);
   const active = groups.filter((group) => group.current !== null);

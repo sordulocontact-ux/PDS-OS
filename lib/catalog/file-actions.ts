@@ -10,11 +10,13 @@ import {
   FILE_BUCKETS,
   MAX_DESCRIPTION_LENGTH,
   MAX_FILE_BYTES,
+  isAudioFile,
   isCatalogFilePath,
   isFileCategory,
   isLibraryCategory,
   type FileOwner,
 } from "@/lib/catalog/file-rules";
+import { audioDeleteBlock, audioReviewOf } from "@/lib/catalog/audio-versions";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { AUDIO_STATES } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
@@ -91,6 +93,13 @@ const recordSchema = z
     (input) =>
       (input.category === "audio" && input.owner.kind === "master") ===
       Boolean(input.audioState),
+  )
+  // An audio version is one of the announced formats (retour Catalogue 20).
+  .refine(
+    (input) =>
+      input.category !== "audio" ||
+      input.owner.kind !== "master" ||
+      isAudioFile({ name: input.fileName, type: input.mime }),
   );
 
 const deleteSchema = z.object({ owner: ownerSchema, fileId: z.uuid() });
@@ -263,6 +272,16 @@ export async function deleteCatalogFile(
 
   const supabase = await createClient();
   const { table, ownerColumn } = sharedFiles(supabase, owner);
+  // An approved audio version, or one a project's workflow uses, stays
+  // (retour Catalogue 24; RLS refuses it too): said, not a silent failure.
+  if (owner.kind === "master") {
+    const blocked = await audioDeletionBlock(supabase, owner.id, fileId);
+    if (blocked)
+      return {
+        ok: false,
+        error: fr.masterPage.audio.versions.deleteBlocked[blocked],
+      };
+  }
   const remove = () =>
     table()
       .delete()
@@ -282,4 +301,25 @@ export async function deleteCatalogFile(
     console.error("deleteCatalogFile (object):", removed.error.message);
   refresh(owner);
   return { ok: true };
+}
+
+async function audioDeletionBlock(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  masterId: string,
+  fileId: string,
+): Promise<"approved" | "inUse" | null> {
+  const { data } = await supabase
+    .from("master_files")
+    .select("category, review_status")
+    .eq("id", fileId)
+    .eq("master_id", masterId)
+    .maybeSingle();
+  if (!data || data.category !== "audio") return null;
+  const { data: inUse } = await supabase.rpc("master_file_in_use", {
+    p_file_id: fileId,
+  });
+  return audioDeleteBlock({
+    review: audioReviewOf(data.review_status),
+    inUse: inUse === true,
+  });
 }

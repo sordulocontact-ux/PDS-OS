@@ -2,10 +2,7 @@ import { IconBoxArchive, IconNodes } from "nucleo-sharp-essential";
 
 import { ArchiveViewToggle } from "@/components/archive/archive-view-toggle";
 import { FormMessage } from "@/components/auth/form-message";
-import {
-  NetworkFilters,
-  type NetworkFilterGroup,
-} from "@/components/network/network-filters";
+import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { NetworkList } from "@/components/network/network-list";
 import { NewContactButton } from "@/components/network/new-contact-button";
 import { EmptyState } from "@/components/shell/empty-state";
@@ -109,7 +106,7 @@ export default async function NetworkPage({
           ]}
           action={
             <div className="flex flex-wrap items-center gap-2">
-              <NetworkFilters
+              <UrlFilters
                 path={routes.network}
                 params={{ tab, view }}
                 groups={filterGroups(ofTab, filters)}
@@ -180,7 +177,7 @@ function filterGroups(
     relation: string | null;
     city: string | null;
   },
-): NetworkFilterGroup[] {
+): UrlFilterGroup[] {
   const t = fr.network;
   const cities = new Map<string, string>();
   for (const c of contacts)

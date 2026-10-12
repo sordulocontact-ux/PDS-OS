@@ -210,6 +210,23 @@ export const declarationStatusTone: Record<string, Tone> = {
   not_applicable: "neutral",
 };
 
+/** Where an audio version stands (retours Catalogue 13, 18): decided, or
+ * waiting (the latest of its step), or left for a newer one. */
+export const audioValidationTone: Record<string, Tone> = {
+  approved: "success",
+  changes_requested: "warning",
+  pending: "action",
+  superseded: "neutral",
+};
+
+/** A title's distribution, apart from its audio state (retour Catalogue 01). */
+export const titleDistributionTone: Record<string, Tone> = {
+  not_prepared: "neutral",
+  preparing: "info",
+  delivered: "warning",
+  available: "success",
+};
+
 /** Shares of a kind of split (splitTotal): complete at 100 %, else to do. */
 export const splitStatusTone: Record<string, Tone> = {
   empty: "warning",

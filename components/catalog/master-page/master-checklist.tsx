@@ -5,9 +5,10 @@ import type { ChecklistItem } from "@/lib/catalog/master/overview";
 import { fr } from "@/lib/i18n/fr";
 import { checklistTone } from "@/lib/ui/state-tones";
 
-// What the master's file still needs, each line opening the tab where it is
-// completed, listed without frame nor rules (it sits on a card). States
-// computed by code (masterChecklist).
+// What the title's dossier still needs, each line opening the tab where it
+// is completed, what the release needs marked (retour Catalogue 12), listed
+// without frame nor rules (it sits on a card). States and order computed by
+// code (masterChecklist).
 export function MasterChecklist({ items }: { items: ChecklistItem[] }) {
   const t = fr.masterPage.overview.checklist;
   return (
@@ -27,9 +28,16 @@ export function MasterChecklist({ items }: { items: ChecklistItem[] }) {
           ) : (
             <span className="min-w-0 text-sm font-medium">{item.label}</span>
           )}
-          <StatusBadge tone={checklistTone(item.done)} size="sm">
-            {item.done ? t.done : t.todo}
-          </StatusBadge>
+          <span className="flex shrink-0 items-center gap-2">
+            {item.priority === "high" && !item.done && (
+              <span className="text-sm text-[color:var(--text-tertiary)]">
+                {t.high}
+              </span>
+            )}
+            <StatusBadge tone={checklistTone(item.done)} size="sm">
+              {item.done ? t.done : t.todo}
+            </StatusBadge>
+          </span>
         </li>
       ))}
     </ul>

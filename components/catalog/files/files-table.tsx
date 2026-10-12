@@ -1,6 +1,5 @@
 import { FileActions } from "@/components/catalog/files/file-actions";
 import { FileTypeIcon } from "@/components/catalog/files/file-type-icon";
-import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
 import {
   DataTable,
   DataTableActionsCell,
@@ -28,16 +27,13 @@ import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
 
 // Files of an artist or a title, newest first: name (opens the file in a new
-// tab), precision, format and size, category, author, date, then "⋯".
-// `audio`: the audio versions of a title (Audio tab), so their audio state
-// instead of the category, the duration beside the size, and no editing
-// (their state is set on upload).
+// tab), precision, format and size, category, author, date, then "⋯". A
+// title's audio versions have their own list (AudioVersionList).
 export function FilesTable({
   owner,
   files,
   canEdit,
   organizationId = null,
-  audio = false,
   scope,
 }: {
   owner: FileOwner;
@@ -46,7 +42,6 @@ export function FilesTable({
   canEdit: boolean;
   // Where a new version is uploaded (the writer's organization).
   organizationId?: string | null;
-  audio?: boolean;
   // A writer limited to some categories and her own files.
   scope?: FileWriteScope | null;
 }) {
@@ -57,9 +52,7 @@ export function FilesTable({
     <DataTable>
       <DataTableHeader>
         <DataTableHead>{t.columns.name}</DataTableHead>
-        <DataTableHead hideBelow="sm">
-          {audio ? t.columns.audioState : t.columns.category}
-        </DataTableHead>
+        <DataTableHead hideBelow="sm">{t.columns.category}</DataTableHead>
         <DataTableHead hideBelow="lg">{t.columns.addedBy}</DataTableHead>
         <DataTableHead hideBelow="md" fill>
           {t.columns.addedAt}
@@ -82,12 +75,9 @@ export function FilesTable({
                   }
                   subtitle={
                     <>
-                      {/* The category (state) column is hidden on phones. */}
+                      {/* The category column is hidden on phones. */}
                       <span className="sm:hidden">
-                        {audio
-                          ? file.audioState &&
-                            `${fr.catalog.audioStates[file.audioState]} · `
-                          : `${labels[file.category] ?? labels.other} · `}
+                        {`${labels[file.category] ?? labels.other} · `}
                       </span>
                       {[
                         file.version > 1 && t.versions.badge(file.version),
@@ -104,17 +94,9 @@ export function FilesTable({
                 />
               </DataTableCell>
               <DataTableCell hideBelow="sm">
-                {audio ? (
-                  file.audioState ? (
-                    <AudioStateBadge state={file.audioState} size="sm" />
-                  ) : (
-                    EMPTY_CELL
-                  )
-                ) : (
-                  <StatusBadge tone="neutral" size="sm">
-                    {labels[file.category] ?? labels.other}
-                  </StatusBadge>
-                )}
+                <StatusBadge tone="neutral" size="sm">
+                  {labels[file.category] ?? labels.other}
+                </StatusBadge>
               </DataTableCell>
               <DataTableCell hideBelow="lg">
                 {file.authorName || EMPTY_CELL}
@@ -126,9 +108,9 @@ export function FilesTable({
                 <FileActions
                   owner={owner}
                   file={file}
-                  canEdit={writable && !audio}
+                  canEdit={writable}
                   canDelete={writable}
-                  organizationId={audio || !writable ? null : organizationId}
+                  organizationId={writable ? organizationId : null}
                   categories={scope?.categories}
                 />
               </DataTableActionsCell>

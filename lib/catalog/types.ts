@@ -54,6 +54,9 @@ export type MasterListItem = MasterOption & {
   audioState: AudioState | null;
   isrc: string | null;
   durationSeconds: number | null;
+  // When an approved Master final validated it (retour Catalogue 01): the
+  // title is « Finalisé » then, never because one was only deposited.
+  finalValidatedAt: string | null;
 };
 
 /** A row of the masters list: the master and the release shown for it. */
@@ -61,6 +64,12 @@ export type MasterRow = MasterListItem & {
   release: MasterRelease | null;
   // Live projects using it: archiving waits for them.
   projectCount: number;
+  // Those projects, oldest first (« Projet associé », the project filter).
+  projects: Array<{ id: string; title: string }>;
+  // The credited artists (the artist filter).
+  credited: Array<{ id: string; name: string }>;
+  // The title's last change: itself, or the latest event of its journal.
+  lastChangedAt: string;
 };
 
 /** The title form's values, as text (a select or field each). */

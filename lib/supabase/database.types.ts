@@ -8032,6 +8032,54 @@ export type Database = {
           },
         ]
       }
+      master_file_comments: {
+        Row: {
+          at_seconds: number | null
+          body: string
+          created_at: string
+          created_by: string | null
+          file_id: string
+          id: string
+          master_id: string
+          organization_id: string
+        }
+        Insert: {
+          at_seconds?: number | null
+          body: string
+          created_at?: string
+          created_by?: string | null
+          file_id: string
+          id?: string
+          master_id: string
+          organization_id: string
+        }
+        Update: {
+          at_seconds?: number | null
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          file_id?: string
+          id?: string
+          master_id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_file_comments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_file_comments_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "master_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_files: {
         Row: {
           audio_state: string | null
@@ -8048,6 +8096,10 @@ export type Database = {
           organization_id: string
           path: string
           replaces_id: string | null
+          review_note: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           series_id: string
           version: number
         }
@@ -8066,6 +8118,10 @@ export type Database = {
           organization_id: string
           path: string
           replaces_id?: string | null
+          review_note?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           series_id?: string
           version?: number
         }
@@ -8084,6 +8140,10 @@ export type Database = {
           organization_id?: string
           path?: string
           replaces_id?: string | null
+          review_note?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           series_id?: string
           version?: number
         }
@@ -8091,6 +8151,13 @@ export type Database = {
           {
             foreignKeyName: "master_files_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_files_reviewed_by_fkey"
+            columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -8623,17 +8690,19 @@ export type Database = {
       }
       masters: {
         Row: {
-          rights_confirmed_at: string | null
-          rights_confirmed_by: string | null
           archived_at: string | null
           audio_state: string | null
           created_at: string
           created_by: string | null
           duration_seconds: number | null
+          final_validated_at: string | null
+          final_validated_by: string | null
           id: string
           isrc: string | null
           iswc: string | null
           organization_id: string
+          rights_confirmed_at: string | null
+          rights_confirmed_by: string | null
           rights_holder: string | null
           rights_year: number | null
           title: string
@@ -8642,17 +8711,19 @@ export type Database = {
           variant_label: string | null
         }
         Insert: {
-          rights_confirmed_at?: string | null
-          rights_confirmed_by?: string | null
           archived_at?: string | null
           audio_state?: string | null
           created_at?: string
           created_by?: string | null
           duration_seconds?: number | null
+          final_validated_at?: string | null
+          final_validated_by?: string | null
           id?: string
           isrc?: string | null
           iswc?: string | null
           organization_id: string
+          rights_confirmed_at?: string | null
+          rights_confirmed_by?: string | null
           rights_holder?: string | null
           rights_year?: number | null
           title: string
@@ -8661,17 +8732,19 @@ export type Database = {
           variant_label?: string | null
         }
         Update: {
-          rights_confirmed_at?: string | null
-          rights_confirmed_by?: string | null
           archived_at?: string | null
           audio_state?: string | null
           created_at?: string
           created_by?: string | null
           duration_seconds?: number | null
+          final_validated_at?: string | null
+          final_validated_by?: string | null
           id?: string
           isrc?: string | null
           iswc?: string | null
           organization_id?: string
+          rights_confirmed_at?: string | null
+          rights_confirmed_by?: string | null
           rights_holder?: string | null
           rights_year?: number | null
           title?: string
@@ -13385,6 +13458,7 @@ export type Database = {
         Returns: undefined
       }
       marketing_is_closed: { Args: { p_project_id: string }; Returns: boolean }
+      master_file_in_use: { Args: { p_file_id: string }; Returns: boolean }
       move_project_plan_item: { Args: { p_item_id: string; p_offset: number }; Returns: undefined }
       note_marketing_reserve: {
         Args: { p_note: string; p_reserve_id: string }
@@ -13392,6 +13466,10 @@ export type Database = {
       }
       note_master_transmission_opened: { Args: { p_token: string }; Returns: undefined }
       note_legal_form_opened: { Args: { p_token: string }; Returns: undefined }
+      reclassify_master_audio: {
+        Args: { p_file_id: string; p_state: string }
+        Returns: undefined
+      }
       reopen_distribution_closure: {
         Args: { p_note: string; p_project_id: string }
         Returns: undefined
@@ -13424,6 +13502,10 @@ export type Database = {
       resolve_framing_brief_request: {
         Args: { p_note?: string; p_request_id: string }
         Returns: string
+      }
+      review_master_audio: {
+        Args: { p_decision: string; p_file_id: string; p_note?: string }
+        Returns: undefined
       }
       revoke_master_transmission: {
         Args: { p_reason: string; p_transmission_id: string }

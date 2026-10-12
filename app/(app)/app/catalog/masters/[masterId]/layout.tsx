@@ -5,7 +5,7 @@ import { Suspense } from "react";
 
 import { MasterActions } from "@/components/catalog/master-actions";
 import { MasterTabs } from "@/components/catalog/master-page/master-tabs";
-import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
+import { TitleAudioState } from "@/components/catalog/title/title-audio-state";
 import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
@@ -44,7 +44,12 @@ export default async function MasterLayout({
       <PageHeader
         title={master.title}
         badge={
-          master.audioState && <AudioStateBadge state={master.audioState} />
+          master.audioState && (
+            <TitleAudioState
+              state={master.audioState}
+              validated={master.finalValidatedAt !== null}
+            />
+          )
         }
         description={[master.artists, variantText(master)]
           .filter(Boolean)

@@ -15,13 +15,15 @@ import { cn } from "@/lib/utils";
 // of 192 px (20 px gap) and a last column taking the rest. Built on the
 // shadcn Table primitives.
 
-type Hide = "sm" | "md" | "lg";
+type Hide = "sm" | "md" | "lg" | "xl" | "2xl";
 
 // Literal classes: Tailwind only generates what it reads in full.
 const hideBelow: Record<Hide, string> = {
   sm: "hidden sm:table-cell",
   md: "hidden md:table-cell",
   lg: "hidden lg:table-cell",
+  xl: "hidden xl:table-cell",
+  "2xl": "hidden 2xl:table-cell",
 };
 
 type ColumnProps = {

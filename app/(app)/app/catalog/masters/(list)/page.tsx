@@ -9,20 +9,29 @@ import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { buttonVariants } from "@/components/ui/button";
+import { UrlFilters, type UrlFilterGroup } from "@/components/ui/url-filters";
 import { isArchivedView } from "@/lib/archive/types";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { listMasters } from "@/lib/catalog/queries";
 import {
+  AUDIO_FILTERS,
+  audioFilterOf,
   countTitleViews,
   inTitleView,
+  matchesTitleFilters,
   titleViewOf,
+  titleViewParam,
+  type TitleFilters,
 } from "@/lib/catalog/title-views";
+import type { MasterRow } from "@/lib/catalog/types";
 import { fr } from "@/lib/i18n/fr";
 
-// Titres ("masters" in the code): tabs by audio state, the demos left out
-// by default (docs/ARCHITECTURE.md § 2 septies).
+// Catalogue ("masters" in the code, retours Catalogue 01, 02 et 04): tabs by
+// where the song stands (Tous, En création, En production, Finalisés), the
+// audio step, artist and project as combinable filters, all in the URL
+// (docs/ARCHITECTURE.md § 2 septies).
 export default async function MastersPage({
   searchParams,
 }: PageProps<"/app/catalog/masters">) {
@@ -33,9 +42,20 @@ export default async function MastersPage({
   // The archive is the director's: anyone else always sees live titles.
   const archived = canArchive && isArchivedView(params.view);
   const view = titleViewOf(params.state);
+  const one = (value: unknown) => (typeof value === "string" ? value : null);
+  const filters: TitleFilters = {
+    audio: audioFilterOf(params.audio),
+    artist: one(params.artist),
+    project: one(params.project),
+  };
   // One read for the tab counts and the rows: the catalog stays small.
   const { masters: all, error } = await listMasters({ archived });
-  const masters = all.filter((master) => inTitleView(master, view));
+  // The tabs count what the filters keep; the filters offer what the tab
+  // holds.
+  const filtered = all.filter((master) => matchesTitleFilters(master, filters));
+  const ofView = all.filter((master) => inTitleView(master, view));
+  const masters = filtered.filter((master) => inTitleView(master, view));
+  const filtering = Object.values(filters).some((value) => value !== null);
   const newMaster =
     can(access, "manage_catalog") && !archived ? (
       <Link href={routes.mastersNew} className={buttonVariants({ size: "lg" })}>
@@ -56,16 +76,35 @@ export default async function MastersPage({
       ) : (
         <TitleListViews
           view={view}
-          counts={countTitleViews(all)}
+          counts={countTitleViews(filtered)}
           archived={archived}
           canArchive={canArchive}
+          filters={{ ...filters }}
+          filterBar={
+            all.length > 0 && (
+              <UrlFilters
+                path={routes.masters}
+                params={{
+                  state: titleViewParam(view),
+                  view: archived ? "archived" : null,
+                }}
+                groups={filterGroups(ofView, filters)}
+              />
+            )
+          }
         >
           {masters.length === 0 ? (
-            archived ? (
+            archived && !filtering ? (
               <EmptyState
                 icon={IconBoxArchive}
                 title={fr.records.archivedEmpty.master}
                 body={fr.records.archivedEmptyBody}
+              />
+            ) : filtering ? (
+              <EmptyState
+                icon={IconDisc}
+                title={t.filtersEmpty}
+                body={t.filtersEmptyBody}
               />
             ) : all.length > 0 && view !== "all" ? (
               <EmptyState
@@ -96,4 +135,51 @@ export default async function MastersPage({
       )}
     </PageContainer>
   );
+}
+
+// What the tab's titles hold: their audio steps, their artists, their
+// projects, each by name.
+function filterGroups(
+  titles: MasterRow[],
+  current: TitleFilters,
+): UrlFilterGroup[] {
+  const t = fr.catalog.masters.filters;
+  const byName = (map: Map<string, string>) =>
+    [...map.entries()]
+      .sort((a, b) => a[1].localeCompare(b[1], "fr"))
+      .map(([value, label]) => ({ value, label }));
+  const artists = new Map<string, string>();
+  const projects = new Map<string, string>();
+  for (const title of titles) {
+    for (const a of title.credited) artists.set(a.id, a.name);
+    for (const p of title.projects) projects.set(p.id, p.title);
+  }
+  return [
+    {
+      key: "audio",
+      label: t.audioLabel,
+      allLabel: t.audioAll,
+      options: AUDIO_FILTERS.filter((value) =>
+        titles.some((title) => (title.audioState ?? "none") === value),
+      ).map((value) => ({
+        value,
+        label: value === "none" ? t.none : fr.catalog.audioStates[value],
+      })),
+      current: current.audio,
+    },
+    {
+      key: "artist",
+      label: t.artistLabel,
+      allLabel: t.artistAll,
+      options: byName(artists),
+      current: current.artist,
+    },
+    {
+      key: "project",
+      label: t.projectLabel,
+      allLabel: t.projectAll,
+      options: byName(projects),
+      current: current.project,
+    },
+  ];
 }

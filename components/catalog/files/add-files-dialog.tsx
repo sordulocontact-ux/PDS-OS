@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import { ChipChoice } from "@/components/ui/chip-choice";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { readAudioDuration } from "@/lib/catalog/audio-duration";
-import { isAudioFile, type FileOwner } from "@/lib/catalog/file-rules";
+import {
+  AUDIO_FORMAT_LIST,
+  isAudioFile,
+  type FileOwner,
+} from "@/lib/catalog/file-rules";
 import { AUDIO_STATES, type AudioState } from "@/lib/catalog/title-rules";
 import { uploadCatalogFile } from "@/lib/catalog/upload-file";
 import { fr } from "@/lib/i18n/fr";
@@ -179,8 +183,12 @@ function AddFilesForm({
           categories={mode.kind === "library" ? mode.categories : undefined}
         />
       )}
-      <p className="text-xs text-muted-foreground">{audio ? a.hint : t.hint}</p>
-      {notAudio && <FormMessage kind="error">{a.notAudio}</FormMessage>}
+      <p className="text-xs text-muted-foreground">
+        {audio ? a.hint(AUDIO_FORMAT_LIST) : t.hint}
+      </p>
+      {notAudio && (
+        <FormMessage kind="error">{a.notAudio(AUDIO_FORMAT_LIST)}</FormMessage>
+      )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
