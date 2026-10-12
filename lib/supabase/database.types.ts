@@ -12445,6 +12445,12 @@ export type Database = {
       }
       strategy_deliverables: {
         Row: {
+          conception_lead_days: number | null
+          production_lead_days: number | null
+          validation_lead_days: number | null
+          upstream_risk_accepted_at: string | null
+          upstream_risk_accepted_by: string | null
+          upstream_risk_accepted_for: string | null
           assignee_person_id: string | null
           created_at: string
           created_by: string | null
@@ -12458,6 +12464,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          conception_lead_days?: number | null
+          production_lead_days?: number | null
+          validation_lead_days?: number | null
+          upstream_risk_accepted_at?: string | null
+          upstream_risk_accepted_by?: string | null
+          upstream_risk_accepted_for?: string | null
           assignee_person_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -12471,6 +12483,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          conception_lead_days?: number | null
+          production_lead_days?: number | null
+          validation_lead_days?: number | null
+          upstream_risk_accepted_at?: string | null
+          upstream_risk_accepted_by?: string | null
+          upstream_risk_accepted_for?: string | null
           assignee_person_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -12743,6 +12761,7 @@ export type Database = {
       }
       strategy_objectives: {
         Row: {
+          metric: string | null
           created_at: string
           created_by: string | null
           due_on: string | null
@@ -12757,6 +12776,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          metric?: string | null
           created_at?: string
           created_by?: string | null
           due_on?: string | null
@@ -12771,6 +12791,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          metric?: string | null
           created_at?: string
           created_by?: string | null
           due_on?: string | null

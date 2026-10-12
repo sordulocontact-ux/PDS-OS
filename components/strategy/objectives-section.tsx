@@ -15,7 +15,7 @@ import {
   removeObjective,
   updateObjective,
 } from "@/lib/strategy/actions/objectives";
-import { isKpiKind, type KpiActual } from "@/lib/strategy/kpis";
+import { isKpiKind, isKpiMetric, type KpiActual } from "@/lib/strategy/kpis";
 import type { StrategyObjective } from "@/lib/strategy/queries";
 
 /**
@@ -79,6 +79,7 @@ export function ObjectivesSection({
                           ? ""
                           : String(o.target).replace(".", ","),
                       unit: o.unit ?? "",
+                      metric: isKpiMetric(o.metric) ? o.metric : "other",
                       source: o.source === "deezer_fans" ? o.source : "manual",
                       dueOn: o.due_on ?? "",
                     }}

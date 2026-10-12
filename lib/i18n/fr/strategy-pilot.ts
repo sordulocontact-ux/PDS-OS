@@ -64,8 +64,13 @@ export const strategyPilot = {
     noReleaseDate: "date de sortie à fixer",
     lateUpstream: (n: number) =>
       n > 1 ? `${n} échéances amont trop tard` : "1 échéance amont trop tard",
-    noBudget: "Aucune ligne de budget",
     budget: {
+      undefinedEnvelope: "Budget non défini, à arbitrer",
+      envelopeToConfirm: (amount: string | null) =>
+        amount ? `Enveloppe de ${amount} à confirmer` : "Enveloppe à confirmer",
+      zero: "Budget à 0 €, aucune dépense",
+      envelopeOnly: (amount: string) =>
+        `Enveloppe de ${amount}, pas encore ventilée`,
       validated: (amount: string) => `Validé ${amount}`,
       toDecide: (amount: string) => `${amount} à arbitrer`,
       envelope: (amount: string) => `sur ${amount}`,

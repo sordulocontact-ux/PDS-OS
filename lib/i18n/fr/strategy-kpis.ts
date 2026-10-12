@@ -16,12 +16,34 @@ export const strategyKpis = {
     qualitative: "Signal observé",
   },
   labelPlaceholder: {
-    quantitative: "Streams Spotify, fans Deezer, dates de concert…",
+    quantitative: "Streams du single le premier mois, fans Deezer…",
     qualitative: "Retours de la presse spécialisée, reprises en playlists…",
+  },
+  metric: "Métrique",
+  metrics: {
+    streams: "Streams",
+    fans: "Fans / abonnés",
+    views: "Vues",
+    playlists: "Ajouts en playlist",
+    other: "Autre",
+  },
+  unitPlaceholders: {
+    streams: "streams",
+    fans: "fans",
+    views: "vues",
+    playlists: "playlists",
+    other: "unité",
+  },
+  noSource:
+    "Aucune source n'est encore connectée pour cette métrique : ce KPI se suit à la main.",
+  tracking: {
+    deezer:
+      "Source : Deezer, fans de l'artiste principal du projet, relevés à chaque ouverture à partir de la sortie",
+    manual: "Suivi manuel",
+    to_connect: "Source à connecter, suivi manuel en attendant",
   },
   target: "Cible",
   unit: "Unité",
-  unitPlaceholder: "streams",
   dueOn: "Échéance",
   source:
     "Mesurer automatiquement les fans Deezer de l'artiste après la sortie",

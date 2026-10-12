@@ -121,7 +121,17 @@ export function CalendarSection({
         </ol>
       )}
 
-      <UpstreamChains chains={chains} referenceDate={referenceDate} />
+      <UpstreamChains
+        chains={chains}
+        referenceDate={referenceDate}
+        deliverables={deliverables}
+        projectId={projectId}
+        canEdit={canEdit}
+        onMoveMilestone={(id) => {
+          const milestone = milestones.find((m) => m.id === id);
+          if (milestone) setOpen(milestone);
+        }}
+      />
 
       {canEdit && (
         <FormDialog

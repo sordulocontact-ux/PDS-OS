@@ -9,7 +9,10 @@ import type { FieldState } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import type { ChoiceSuggestion, ChoiceValue } from "@/lib/strategy/choices";
 import { strategyBudget } from "@/lib/strategy/budget";
-import { upstreamChains } from "@/lib/strategy/upstream";
+import {
+  upstreamChains,
+  type UpstreamDeliverable,
+} from "@/lib/strategy/upstream";
 
 export const STRATEGY_DIMENSIONS = [
   "positioning",
@@ -62,13 +65,13 @@ export type DimensionInput = {
     review_status: string;
   }>;
   openNeeds: unknown[];
-  deliverables: Array<{
-    id: string;
-    title: string;
-    lever_id: string;
-    assignee_person_id: string | null;
-    due_date: string | null;
-  }>;
+  deliverables: Array<
+    UpstreamDeliverable & {
+      lever_id: string;
+      assignee_person_id: string | null;
+      due_date: string | null;
+    }
+  >;
   milestones: Array<{
     id: string;
     title: string;
@@ -82,6 +85,8 @@ export type DimensionInput = {
   objectives: Array<{ kind: string; target: number | null }>;
   budgetLines: Pick<BudgetLine, "amountCents" | "status" | "leverId">[];
   envelopeCents: number | null;
+  // The Cadrage left the envelope to confirm (estimate, « plus tard »).
+  envelopeToConfirm: boolean;
 };
 
 const s = fr.strategyPilot.summaries;
@@ -195,27 +200,51 @@ function calendar(input: DimensionInput): Omit<DimensionStatus, "key"> {
 }
 
 function budget(input: DimensionInput): Omit<DimensionStatus, "key"> {
-  if (input.budgetLines.length === 0)
-    return { state: "to_complete", summary: s.noBudget };
   const b = strategyBudget(
     input.budgetLines,
     input.levers,
     input.envelopeCents,
+    input.envelopeToConfirm,
   );
+  const amount = b.envelopeCents === null ? null : formatEuros(b.envelopeCents);
+  // No expense yet: the envelope alone is a valid budget (MKT-S1-02); only
+  // an unknown or unconfirmed one is left to arbitrate, never blocking.
+  if (input.budgetLines.length === 0) {
+    switch (b.envelope) {
+      case "undefined":
+        return { state: "to_decide", summary: s.budget.undefinedEnvelope };
+      case "to_confirm":
+        return {
+          state: "to_decide",
+          summary: s.budget.envelopeToConfirm(amount),
+        };
+      case "zero":
+        return { state: "complete", summary: s.budget.zero };
+      case "set":
+        return {
+          state: "in_progress",
+          summary: s.budget.envelopeOnly(amount ?? ""),
+        };
+    }
+  }
   const overrun = b.remainingCents !== null && b.remainingCents < 0;
   const selected = new Set(selectedLeverIds(input));
   const uncovered = b.byLever.filter(
     (l) =>
       l.leverId !== null && selected.has(l.leverId) && l.validatedCents === 0,
   ).length;
+  const toConfirm = b.envelope === "to_confirm";
   const summary = join([
     s.budget.validated(formatEuros(b.validatedCents)),
     b.toDecideCents > 0 && s.budget.toDecide(formatEuros(b.toDecideCents)),
-    b.envelopeCents !== null && s.budget.envelope(formatEuros(b.envelopeCents)),
+    amount !== null && !toConfirm && s.budget.envelope(amount),
+    toConfirm && s.budget.envelopeToConfirm(amount),
+    b.envelope === "undefined" && s.budget.undefinedEnvelope,
     overrun && s.budget.overrun,
     uncovered > 0 && s.budget.uncovered(uncovered),
   ]);
-  if (b.toDecideCents > 0 || overrun) return { state: "to_decide", summary };
+  if (b.toDecideCents > 0 || overrun || toConfirm)
+    return { state: "to_decide", summary };
   return { state: uncovered > 0 ? "in_progress" : "complete", summary };
 }
 

@@ -3,7 +3,7 @@
 // validation are due before. Pure date arithmetic, written by code — never
 // by PO (CLAUDE.md, rule 6). Client-safe.
 
-import { addDays } from "@/lib/strategy/calendar";
+import { addDays, dayOffset } from "@/lib/strategy/calendar";
 
 // Lead times before the content goes out, in days (defaults of the label,
 // the same for every deliverable until the team asks for finer ones):
@@ -23,7 +23,14 @@ export const UPSTREAM_STEPS = Object.keys(
 export type UpstreamStep = {
   key: UpstreamStepKey;
   date: string;
+  // Days before the milestone (the default, or the deliverable's own).
+  leadDays: number;
+  // Days from today to the deadline: negative once it has passed.
+  marginDays: number;
   // The deadline has passed while the content is still to come out.
+  passed: boolean;
+  // Passed, and nobody accepted the risk for this milestone date: what
+  // asks for a decision (MKT-S1-04).
   late: boolean;
 };
 
@@ -34,12 +41,36 @@ export type UpstreamChain = {
   milestoneId: string;
   milestoneTitle: string;
   milestoneDate: string;
+  // The late deadlines were accepted for this milestone's date.
+  riskAccepted: boolean;
+  // Lead times changed for this deliverable.
+  customLeads: boolean;
   steps: UpstreamStep[];
 };
 
+// A strategy deliverable as the chains read it; the lead times and the
+// accepted risk are optional (other modules pass only id and title).
+export type UpstreamDeliverable = {
+  id: string;
+  title: string;
+  conception_lead_days?: number | null;
+  production_lead_days?: number | null;
+  validation_lead_days?: number | null;
+  upstream_risk_accepted_for?: string | null;
+};
+
+/** The lead time of a step for a deliverable: its own, else the default. */
+export function leadDaysOf(
+  deliverable: UpstreamDeliverable,
+  key: UpstreamStepKey,
+): number {
+  return deliverable[`${key}_lead_days`] ?? UPSTREAM_LEAD_DAYS[key];
+}
+
 /**
  * One chain per deliverable linked to a milestone, counted back from its
- * earliest milestone, sorted by first deadline. `today` is "YYYY-MM-DD".
+ * earliest milestone, sorted by first deadline. `today` is "YYYY-MM-DD"
+ * (Paris): dates without time compare as days, never as instants.
  */
 export function upstreamChains(
   milestones: Array<{
@@ -48,27 +79,45 @@ export function upstreamChains(
     occursOn: string;
     deliverableId: string | null;
   }>,
-  deliverables: Array<{ id: string; title: string }>,
+  deliverables: UpstreamDeliverable[],
   today: string,
 ): UpstreamChain[] {
-  const titles = new Map(deliverables.map((d) => [d.id, d.title]));
+  const byId = new Map(deliverables.map((d) => [d.id, d]));
   const first = new Map<string, (typeof milestones)[number]>();
   for (const m of milestones) {
-    if (!m.deliverableId || !titles.has(m.deliverableId)) continue;
+    if (!m.deliverableId || !byId.has(m.deliverableId)) continue;
     const known = first.get(m.deliverableId);
     if (!known || m.occursOn < known.occursOn) first.set(m.deliverableId, m);
   }
   return [...first.entries()]
-    .map(([deliverableId, m]) => ({
-      deliverableId,
-      deliverableTitle: titles.get(deliverableId)!,
-      milestoneId: m.id,
-      milestoneTitle: m.title,
-      milestoneDate: m.occursOn,
-      steps: UPSTREAM_STEPS.map((key) => {
-        const date = addDays(m.occursOn, -UPSTREAM_LEAD_DAYS[key]);
-        return { key, date, late: date < today && m.occursOn >= today };
-      }),
-    }))
+    .map(([deliverableId, m]) => {
+      const deliverable = byId.get(deliverableId)!;
+      const riskAccepted =
+        deliverable.upstream_risk_accepted_for === m.occursOn;
+      return {
+        deliverableId,
+        deliverableTitle: deliverable.title,
+        milestoneId: m.id,
+        milestoneTitle: m.title,
+        milestoneDate: m.occursOn,
+        riskAccepted,
+        customLeads: UPSTREAM_STEPS.some(
+          (key) => deliverable[`${key}_lead_days`] != null,
+        ),
+        steps: UPSTREAM_STEPS.map((key) => {
+          const leadDays = leadDaysOf(deliverable, key);
+          const date = addDays(m.occursOn, -leadDays);
+          const passed = date < today && m.occursOn >= today;
+          return {
+            key,
+            date,
+            leadDays,
+            marginDays: dayOffset(date, today),
+            passed,
+            late: passed && !riskAccepted,
+          };
+        }),
+      };
+    })
     .sort((a, b) => a.steps[0].date.localeCompare(b.steps[0].date));
 }

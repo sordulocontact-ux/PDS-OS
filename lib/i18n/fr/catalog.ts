@@ -386,7 +386,8 @@ export const catalog = {
       isrc: "ISRC",
       isrcHint: "Les tirets et les espaces sont acceptés.",
       duration: "Durée",
-      durationHint: "Au format m:ss, par exemple 3:07.",
+      durationHint: "Minutes et secondes, par exemple 3:07 pour 3 min 7 s.",
+      durationPlaceholder: "m:ss",
       audioFile: "Fichier audio",
       audioFileHint:
         "Rattaché au titre à l'état audio choisi ; sa durée est lue quand c'est possible.",

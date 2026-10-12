@@ -71,6 +71,8 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
     defaultName && !defaultRef ? "name" : "pick",
   );
   const [creating, setCreating] = useState<string | null>(null);
+  // What is typed in the search: « Garder seulement le nom » keeps it.
+  const [query, setQuery] = useState("");
 
   const reload = (select?: string) =>
     load(Boolean(select)).then((list) => {
@@ -136,6 +138,7 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
             noSuggestionLabel={t.noSuggestion}
             removeLabel={t.remove}
             error={error}
+            onQueryChange={setQuery}
           />
         )
       ) : (
@@ -165,7 +168,12 @@ export function PersonPickerField<T extends PersonOption = PersonOption>({
             type="button"
             variant="ghost"
             size="xs"
-            onClick={() => setMode("name")}
+            onClick={() => {
+              const name = query.trim() || freeName;
+              setFreeName(name);
+              onPick?.(null, name);
+              setMode("name");
+            }}
           >
             {t.keepName}
           </Button>

@@ -55,6 +55,36 @@ export const strategyCalendar = {
       validation: "Validation",
     },
     late: "Trop tard",
+    // The calculation behind each deadline (MKT-S1-04).
+    lead: (days: number) => `${days} j avant le temps fort`,
+    margin: (days: number) =>
+      days === 0
+        ? "aujourd'hui"
+        : days > 0
+          ? `dans ${days} j`
+          : `dépassée de ${-days} j`,
+    customLeads: "Délais ajustés pour ce livrable",
+    riskAccepted: "Risque accepté",
+    arbitrate: {
+      move: "Déplacer le temps fort",
+      leads: "Ajuster les délais",
+      leadsTitle: (deliverable: string) => `Délais de « ${deliverable} »`,
+      leadsBody:
+        "Combien de jours avant le temps fort chaque étape doit être finie. Laissez vide pour garder le délai par défaut.",
+      defaultHint: (days: number) => `Par défaut : ${days} j.`,
+      daysSuffix: "j",
+      orderError:
+        "La conception finit avant la production, et la production avant la validation : les délais doivent aller en décroissant.",
+      saveLeads: "Enregistrer les délais",
+      accept: "Accepter le risque",
+      accepting: "Enregistrement…",
+      acceptTitle: "Accepter le risque ?",
+      acceptBody: (deliverable: string, milestone: string, date: string) =>
+        `Les échéances dépassées de « ${deliverable} » ne seront plus signalées pour « ${milestone} » du ${date}. Si le temps fort change de date, la question reviendra.`,
+      accepted: (date: string) =>
+        `Risque accepté pour le temps fort du ${date} : les échéances dépassées ne sont plus à arbitrer.`,
+      withdraw: "Ne plus accepter le risque",
+    },
     planningKind: "Échéance amont",
     planningLine: (step: string, milestone: string) =>
       `${step} · pour « ${milestone} »`,

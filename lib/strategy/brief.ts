@@ -12,7 +12,11 @@ import type {
   DimensionStatus,
   StrategyDimension,
 } from "@/lib/strategy/dimensions";
-import { upstreamChains } from "@/lib/strategy/upstream";
+import {
+  upstreamChains,
+  type UpstreamDeliverable,
+} from "@/lib/strategy/upstream";
+import { formatBriefDate } from "@/lib/framing/assess";
 
 /**
  * The Brief is established once every dimension is at least started: none
@@ -48,7 +52,7 @@ export type ArbitrationInput = {
     state: string;
     review_status: string;
   }>;
-  deliverables: Array<{ id: string; title: string }>;
+  deliverables: UpstreamDeliverable[];
   milestones: Array<{
     id: string;
     title: string;
@@ -120,14 +124,36 @@ export function arbitrations(input: ArbitrationInput): Arbitration[] {
       items.push({
         key: `late-${chain.deliverableId}-${step.key}`,
         dimension: "calendar",
-        text: t.late(
-          fr.strategyCalendar.upstream.steps[step.key],
-          chain.deliverableTitle,
-          chain.milestoneTitle,
-        ),
+        // The whole calculation, so a « déjà passée » can be checked.
+        text: t.late({
+          step: fr.strategyCalendar.upstream.steps[step.key],
+          deliverable: chain.deliverableTitle,
+          milestone: chain.milestoneTitle,
+          milestoneDate: formatBriefDate(chain.milestoneDate),
+          date: formatBriefDate(step.date),
+          leadDays: step.leadDays,
+          overdueDays: -step.marginDays,
+        }),
       });
 
   const { budget } = input;
+  // Never blocking (MKT-S1-02): an unknown or unconfirmed envelope is said.
+  if (budget.envelope === "undefined")
+    items.push({
+      key: "budget-envelope",
+      dimension: "budget",
+      text: t.envelopeUndefined,
+    });
+  if (budget.envelope === "to_confirm")
+    items.push({
+      key: "budget-envelope",
+      dimension: "budget",
+      text: t.envelopeToConfirm(
+        budget.envelopeCents === null
+          ? null
+          : formatEuros(budget.envelopeCents),
+      ),
+    });
   if (budget.toDecideCents > 0)
     items.push({
       key: "budget-to-decide",

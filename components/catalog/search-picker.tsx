@@ -31,6 +31,7 @@ export function SearchPicker({
   invalid,
   describedBy,
   clearOnCreate = false,
+  onQueryChange,
 }: {
   label: string;
   placeholder: string;
@@ -47,10 +48,16 @@ export function SearchPicker({
   invalid?: boolean;
   describedBy?: string;
   clearOnCreate?: boolean;
+  // Told of what is typed (« Garder seulement le nom » takes it).
+  onQueryChange?: (query: string) => void;
 }) {
   const id = useId();
   const listId = `${id}-list`;
-  const [query, setQuery] = useState("");
+  const [query, setQueryState] = useState("");
+  const setQuery = (value: string) => {
+    setQueryState(value);
+    onQueryChange?.(value);
+  };
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
 

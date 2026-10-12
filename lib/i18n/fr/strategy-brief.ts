@@ -27,9 +27,23 @@ export const strategyBrief = {
       `${field} : réponses proposées par PO, à confirmer`,
     lever: (lever: string) => `Levier « ${lever} » à arbitrer`,
     budget: (amount: string) => `Budget : ${amount} à arbitrer`,
+    envelopeUndefined:
+      "Budget : aucune enveloppe fixée (0 €, montant ou « à confirmer » à choisir)",
+    envelopeToConfirm: (amount: string | null) =>
+      amount
+        ? `Budget : enveloppe de ${amount} à confirmer`
+        : "Budget : enveloppe à confirmer",
     overrun: (amount: string) => `Budget : enveloppe dépassée de ${amount}`,
-    late: (step: string, deliverable: string, milestone: string) =>
-      `${step} de « ${deliverable} » déjà passée pour « ${milestone} »`,
+    late: (c: {
+      step: string;
+      deliverable: string;
+      milestone: string;
+      milestoneDate: string;
+      date: string;
+      leadDays: number;
+      overdueDays: number;
+    }) =>
+      `${c.step} de « ${c.deliverable} » : prévue le ${c.date}, ${c.leadDays} j avant « ${c.milestone} » du ${c.milestoneDate}, dépassée de ${c.overdueDays} j (déplacer le temps fort, réduire le délai ou accepter le risque)`,
   },
   modifyWithPo: "Modifier avec PO",
   requestFromBrief: "La validation se demande depuis le Brief de sortie.",
@@ -53,5 +67,14 @@ export const strategyBrief = {
     envelope: (envelope: string, remaining: string) =>
       `Enveloppe ${envelope} · reste ${remaining}`,
     noEnvelope: "Pas d'enveloppe fixée",
+    envelopeStates: {
+      undefined: "Budget non défini",
+      zero: "Budget à 0 €",
+      set: (envelope: string) => `Enveloppe ${envelope} · pas encore ventilée`,
+      toConfirm: (envelope: string | null) =>
+        envelope
+          ? `Enveloppe ${envelope} à confirmer`
+          : "Enveloppe à confirmer",
+    },
   },
 } as const;

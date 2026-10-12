@@ -15,8 +15,27 @@ export type LeverBudget = {
   toDecideCents: number;
 };
 
+/**
+ * What the envelope says on its own (MKT-S1-02), four valid states, none of
+ * them needing an expense to establish the Brief: not set, zero, set, or
+ * still to confirm (the Cadrage left it « à définir plus tard » or gave an
+ * estimate).
+ */
+export type EnvelopeState = "undefined" | "zero" | "set" | "to_confirm";
+
+export function envelopeState(
+  envelopeCents: number | null,
+  toConfirm: boolean,
+): EnvelopeState {
+  if (toConfirm) return "to_confirm";
+  if (envelopeCents === null) return "undefined";
+  return envelopeCents === 0 ? "zero" : "set";
+}
+
 export type StrategyBudget = {
   envelopeCents: number | null;
+  envelope: EnvelopeState;
+  lineCount: number;
   proposedCents: number;
   validatedCents: number;
   toDecideCents: number;
@@ -44,6 +63,7 @@ export function strategyBudget(
   lines: Line[],
   levers: Array<{ id: string; label: string; state: string }>,
   envelopeCents: number | null,
+  envelopeToConfirm = false,
 ): StrategyBudget {
   const known = new Map(levers.map((l) => [l.id, l]));
   const linesOf = (leverId: string | null) =>
@@ -76,6 +96,8 @@ export function strategyBudget(
   const total = sums(lines);
   return {
     envelopeCents,
+    envelope: envelopeState(envelopeCents, envelopeToConfirm),
+    lineCount: lines.length,
     ...total,
     remainingCents:
       envelopeCents === null ? null : envelopeCents - total.validatedCents,

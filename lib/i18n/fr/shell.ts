@@ -303,6 +303,8 @@ export const shell = {
       notFound:
         "Ce brouillon n'existe plus : le projet a sans doute déjà été créé.",
       delete: "Supprimer le brouillon",
+      resume: "Reprendre la création",
+      actions: (name: string) => `Actions pour le brouillon « ${name} »`,
       confirmTitle: "Supprimer ce brouillon ?",
       confirmDescription:
         "Ce qui a été saisi sera perdu. Aucun projet n'a été créé.",

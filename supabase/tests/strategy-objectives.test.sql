@@ -1,7 +1,7 @@
 -- Stratégie, étape 2 (…20261010000201): « Objectifs & KPIs », written by the
 -- owner while the strategy is in progress only. Run with `supabase test db`.
 begin;
-select plan(17);
+select plan(19);
 
 
 
@@ -130,9 +130,18 @@ select throws_ok($$
   values (pg_temp.org(), pg_temp.prj(), 'Qualitatif mesuré', 'qualitative', 'deezer_fans')
 $$, '23514', null, 'only a figure can be measured automatically');
 select lives_ok($$
-  insert into public.strategy_objectives (organization_id, project_id, label, target, source)
-  values (pg_temp.org(), pg_temp.prj(), 'Fans Deezer', 15000, 'deezer_fans')
-$$, 'a quantitative KPI can be fed by Deezer');
+  insert into public.strategy_objectives (organization_id, project_id, label, target, metric, source)
+  values (pg_temp.org(), pg_temp.prj(), 'Fans Deezer', 15000, 'fans', 'deezer_fans')
+$$, 'a fans KPI can be fed by Deezer');
+-- MKT-S1-03 (…20261012100101): streams and fans are distinct metrics.
+select throws_ok($$
+  insert into public.strategy_objectives (organization_id, project_id, label, target, metric, source)
+  values (pg_temp.org(), pg_temp.prj(), 'Streams du single', 500000, 'streams', 'deezer_fans')
+$$, '23514', null, 'a streams target is never measured by the Deezer fans count');
+select throws_ok($$
+  insert into public.strategy_objectives (organization_id, project_id, label, kind, metric)
+  values (pg_temp.org(), pg_temp.prj(), 'Signal chiffré', 'qualitative', 'streams')
+$$, '23514', null, 'a qualitative signal has no metric');
 select throws_ok($$
   insert into public.strategy_objectives (organization_id, project_id, label, source)
   values (pg_temp.org(), pg_temp.prj(), 'Inconnu', 'spotify')

@@ -1,7 +1,7 @@
 // Writes a Strategy answer from the checked choices: deterministic code, no
 // AI. The owner then edits or completes it freely. Client-safe.
 
-import type { StrategyTextField } from "@/lib/framing/brief";
+import type { FieldState, StrategyTextField } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import type { ChoiceValue } from "@/lib/strategy/choices";
 import { asSentence, joinList } from "@/lib/utils/sentences";
@@ -20,4 +20,20 @@ export function composeAnswer(
     value.other ? asSentence(value.other) : "",
   ];
   return parts.filter(Boolean).join(" ");
+}
+
+/**
+ * The answer of a question as the rest of the strategy reads it (MKT-S1-01):
+ * the saved text, else the sentence composed from the confirmed choices —
+ * checked by the owner, so a confirmed answer, never « Non renseigné ».
+ */
+export function answerWithChoices<K extends StrategyTextField>(
+  field: FieldState<K>,
+  value: ChoiceValue,
+): FieldState<K> {
+  if (field.value) return field;
+  const composed = composeAnswer(field.key, value);
+  return composed
+    ? { ...field, value: composed, status: "confirmed", provenance: null }
+    : field;
 }

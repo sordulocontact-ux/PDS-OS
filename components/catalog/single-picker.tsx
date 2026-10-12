@@ -34,6 +34,7 @@ export function SinglePicker({
   noSuggestionLabel,
   removeLabel,
   error,
+  onQueryChange,
 }: {
   name: string;
   legend: string;
@@ -52,6 +53,7 @@ export function SinglePicker({
   noSuggestionLabel?: string;
   removeLabel: (label: string) => string;
   error?: string;
+  onQueryChange?: (query: string) => void;
 }) {
   const id = useId();
   const selected = options.find((o) => o.id === selectedId) ?? null;
@@ -106,6 +108,7 @@ export function SinglePicker({
             noSuggestionLabel={noSuggestionLabel}
             invalid={Boolean(error)}
             describedBy={error ? `${id}-error` : undefined}
+            onQueryChange={onQueryChange}
           />
         </div>
       )}

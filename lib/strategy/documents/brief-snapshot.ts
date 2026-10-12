@@ -13,6 +13,7 @@ import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
 import type { Arbitration } from "@/lib/strategy/brief";
 import type { StrategyBudget } from "@/lib/strategy/budget";
+import { isKpiMetric, kpiTracking } from "@/lib/strategy/kpis";
 import { dayOffset } from "@/lib/strategy/calendar";
 import { deliverableTitle } from "@/lib/strategy/deliverable-title";
 import {
@@ -84,9 +85,31 @@ export type SnapshotInput = {
   today: string;
 };
 
+/** The envelope as the Brief says it, in each of its four states. */
+function envelopeLine(budget: StrategyBudget): string {
+  const t = fr.strategyBrief.sections;
+  const amount =
+    budget.envelopeCents === null ? null : formatEuros(budget.envelopeCents);
+  switch (budget.envelope) {
+    case "undefined":
+      return t.envelopeStates.undefined;
+    case "zero":
+      return budget.lineCount && budget.remainingCents !== null
+        ? t.envelope(formatEuros(0), formatEuros(budget.remainingCents))
+        : t.envelopeStates.zero;
+    case "to_confirm":
+      return t.envelopeStates.toConfirm(amount);
+    case "set":
+      return budget.lineCount && budget.remainingCents !== null
+        ? t.envelope(amount ?? "", formatEuros(budget.remainingCents))
+        : t.envelopeStates.set(amount ?? "");
+  }
+}
+
 export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
   const { data, budget } = input;
   const t = fr.strategyBrief.sections;
+  const kpiText = fr.strategyKpis;
   const parts = fr.strategyPilot.narrative.parts;
   const families = fr.framing.needs.families;
   const field = (key: "positioning" | "audiences" | "narrative") =>
@@ -193,23 +216,23 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
     budget: [
       {
         label: null,
-        value: totals(
-          budget.proposedCents,
-          budget.validatedCents,
-          budget.toDecideCents,
-        ),
+        // No expense: the envelope's own state says the budget (MKT-S1-02).
+        value: budget.lineCount
+          ? totals(
+              budget.proposedCents,
+              budget.validatedCents,
+              budget.toDecideCents,
+            )
+          : null,
         empty: t.empty,
         lines: [
           {
             head: null,
-            rest:
-              budget.envelopeCents === null || budget.remainingCents === null
-                ? t.noEnvelope
-                : t.envelope(
-                    formatEuros(budget.envelopeCents),
-                    formatEuros(budget.remainingCents),
-                  ),
-            warn: budget.remainingCents !== null && budget.remainingCents < 0,
+            rest: envelopeLine(budget),
+            warn:
+              budget.envelope === "to_confirm" ||
+              budget.envelope === "undefined" ||
+              (budget.remainingCents !== null && budget.remainingCents < 0),
           },
           ...budget.byLever.map((l) => ({
             head: l.label,
@@ -241,6 +264,20 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
                     [number.format(o.target), o.unit].filter(Boolean).join(" "),
                   ),
             o.due_on ? formatBriefDate(o.due_on) : null,
+            // Metric and source said plainly (MKT-S1-03).
+            o.kind === "qualitative"
+              ? null
+              : [
+                  isKpiMetric(o.metric) ? kpiText.metrics[o.metric] : null,
+                  kpiText.tracking[
+                    kpiTracking(
+                      isKpiMetric(o.metric) ? o.metric : null,
+                      o.source,
+                    )
+                  ],
+                ]
+                  .filter(Boolean)
+                  .join(", "),
           ]),
           warn: false,
         })),

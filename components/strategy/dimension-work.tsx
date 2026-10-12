@@ -101,6 +101,7 @@ export function DimensionWork({
         budget.lines,
         data.levers,
         envelopeCents,
+        data.envelopeToConfirm,
       );
       return (
         <>

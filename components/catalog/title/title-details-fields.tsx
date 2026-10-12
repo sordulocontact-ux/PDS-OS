@@ -92,7 +92,7 @@ export function TitleDetailsFields({
           label={t.duration}
           hint={t.durationHint}
           autoComplete="off"
-          placeholder="3:07"
+          placeholder={t.durationPlaceholder}
           maxLength={8}
           defaultValue={values.duration ?? ""}
           error={errors.duration}

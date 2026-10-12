@@ -1,4 +1,5 @@
 import { RecordSelection } from "@/components/archive/record-selection";
+import { DraftRowActions } from "@/components/projects/draft-row-actions";
 import { ProjectActions } from "@/components/projects/project-actions";
 import { ProjectKindBadge } from "@/components/projects/project-kind-badge";
 import {
@@ -52,7 +53,11 @@ export function ProjectsTable({
   selectable?: boolean;
 }) {
   const t = fr.shell.projects;
-  const withActions = rights && (rights.canEdit || rights.canArchive);
+  const projectActions = Boolean(
+    rights && (rights.canEdit || rights.canArchive),
+  );
+  // A draft always has its « ⋯ » (resume, delete): its author owns it.
+  const withActions = projectActions || drafts.length > 0;
   // The director ticks projects; anyone ticks their own drafts.
   const canSelectProjects = selectable && Boolean(rights?.canArchive);
   const withSelection = canSelectProjects || (selectable && drafts.length > 0);
@@ -111,7 +116,9 @@ export function ProjectsTable({
                 {EMPTY_CELL}
               </DataTableCell>
               {withActions && (
-                <DataTableActionsCell>{null}</DataTableActionsCell>
+                <DataTableActionsCell>
+                  <DraftRowActions draftId={draft.id} name={name} />
+                </DataTableActionsCell>
               )}
             </DataTableRow>
           );
@@ -192,14 +199,16 @@ export function ProjectsTable({
               </DataTableCell>
               {withActions && (
                 <DataTableActionsCell>
-                  <ProjectActions
-                    project={{
-                      id: project.id,
-                      title: project.title,
-                      launched: project.stageCount > 0,
-                    }}
-                    rights={rights}
-                  />
+                  {projectActions && rights && (
+                    <ProjectActions
+                      project={{
+                        id: project.id,
+                        title: project.title,
+                        launched: project.stageCount > 0,
+                      }}
+                      rights={rights}
+                    />
+                  )}
                 </DataTableActionsCell>
               )}
             </DataTableRow>

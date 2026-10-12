@@ -25,7 +25,9 @@ import {
   type Member,
   type PendingValidation,
 } from "@/lib/framing/related";
+import { answerOf } from "@/lib/framing/assess";
 import { referenceDate } from "@/lib/strategy/calendar";
+import { answerWithChoices } from "@/lib/strategy/compose";
 import {
   choicesKey,
   suggestionsKey,
@@ -63,6 +65,7 @@ export type StrategyData = {
   // What the release must accomplish (« Objectifs & KPIs »), then its KPIs.
   strategicObjective: FieldState<typeof STRATEGIC_OBJECTIVE>;
   objectives: StrategyObjective[];
+  envelopeToConfirm: boolean;
   // Closed-choice answers per text field, and PO's pending pre-checks.
   choices: Record<StrategyTextField, ChoiceValue>;
   suggestions: Record<StrategyTextField, ChoiceSuggestion[]>;
@@ -216,7 +219,10 @@ export async function loadStrategy(
     pendingValidation,
     fields: STRATEGY_TEXT_FIELDS.map((key) => {
       const row = rowOf("strategy", key);
-      return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
+      return answerWithChoices(
+        toFieldState("strategy", key, row, row ? provenanceOf(row) : null),
+        toChoiceValue(key, rowOf("strategy", choicesKey(key))?.value),
+      );
     }),
     narrativeParts: NARRATIVE_PARTS.map((key) => {
       const row = rowOf("strategy", key);
@@ -232,6 +238,18 @@ export async function loadStrategy(
       );
     })(),
     objectives: objectivesRes.data ?? [],
+    // MKT-S1-02: the Cadrage's envelope is an estimate, « à définir plus
+    // tard » or a proposal nobody confirmed yet.
+    envelopeToConfirm: (() => {
+      const row = rowOf("brief", "budget_envelope");
+      if (!row || row.status === "rejected") return false;
+      if (row.status === "proposed") return true;
+      const answer = answerOf("budget_envelope", row.value);
+      return (
+        answer?.kind === "later" ||
+        (answer?.kind === "money" && answer.certainty === "estimated")
+      );
+    })(),
     choices: Object.fromEntries(
       STRATEGY_TEXT_FIELDS.map((key) => [
         key,

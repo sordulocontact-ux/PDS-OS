@@ -10,13 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fr } from "@/lib/i18n/fr";
 import type { ObjectiveInput } from "@/lib/strategy/actions/objectives";
-import { KPI_KINDS, type KpiKind } from "@/lib/strategy/kpis";
+import {
+  KPI_KINDS,
+  KPI_METRICS,
+  kpiTracking,
+  type KpiKind,
+  type KpiMetric,
+} from "@/lib/strategy/kpis";
 
 /**
  * A KPI, typed by a person: quantitative (what is measured, the target —
- * to set later if unknown —, its unit, by when, optionally measured from
- * Deezer after the release) or qualitative (the signal looked for, no
- * figure). The caller remounts it (key) to empty it once saved.
+ * to set later if unknown —, its metric and unit, by when, measured from
+ * Deezer after the release only when it counts fans: MKT-S1-03) or
+ * qualitative (the signal looked for, no figure). The caller remounts it (key) to empty it once saved.
  */
 export function ObjectiveForm({
   idPrefix,
@@ -39,8 +45,11 @@ export function ObjectiveForm({
   const [target, setTarget] = useState(initial?.target ?? "");
   const [unit, setUnit] = useState(initial?.unit ?? "");
   const [dueOn, setDueOn] = useState(initial?.dueOn ?? "");
+  const [metric, setMetric] = useState<KpiMetric>(initial?.metric ?? "other");
   const [measured, setMeasured] = useState(initial?.source === "deezer_fans");
   const quantitative = kind === "quantitative";
+  // Deezer measures the artist's fans, nothing else.
+  const measurable = metric === "fans";
   const id = (field: string) => `${idPrefix}-${field}`;
 
   return (
@@ -53,7 +62,9 @@ export function ObjectiveForm({
           label,
           target: quantitative ? target : "",
           unit: quantitative ? unit : "",
-          source: quantitative && measured ? "deezer_fans" : "manual",
+          metric,
+          source:
+            quantitative && measurable && measured ? "deezer_fans" : "manual",
           dueOn,
         });
       }}
@@ -89,6 +100,25 @@ export function ObjectiveForm({
       </div>
       {quantitative && (
         <>
+          <div
+            role="group"
+            aria-label={t.metric}
+            className="flex flex-col gap-2 sm:col-span-3"
+          >
+            <span className={labelClass}>{t.metric}</span>
+            <div className="flex flex-wrap gap-1.5">
+              {KPI_METRICS.map((m) => (
+                <FilterChip
+                  key={m}
+                  variant="soft"
+                  pressed={metric === m}
+                  onClick={() => setMetric(m)}
+                >
+                  {t.metrics[m]}
+                </FilterChip>
+              ))}
+            </div>
+          </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor={id("target")} className={labelClass}>
               {t.target}
@@ -109,7 +139,7 @@ export function ObjectiveForm({
               id={id("unit")}
               maxLength={40}
               value={unit}
-              placeholder={t.unitPlaceholder}
+              placeholder={t.unitPlaceholders[metric]}
               onChange={(e) => setUnit(e.target.value)}
             />
           </div>
@@ -127,7 +157,7 @@ export function ObjectiveForm({
           className="w-fit"
         />
       </div>
-      {quantitative && (
+      {quantitative && measurable && (
         <label className="flex items-start gap-3 text-body-md sm:col-span-3">
           <Checkbox
             className="mt-1"
@@ -136,6 +166,11 @@ export function ObjectiveForm({
           />
           <span>{t.source}</span>
         </label>
+      )}
+      {quantitative && kpiTracking(metric, "manual") === "to_connect" && (
+        <p className="text-caption text-muted-foreground sm:col-span-3">
+          {t.noSource}
+        </p>
       )}
       <div className="flex flex-wrap gap-2 sm:col-span-3">
         <Button

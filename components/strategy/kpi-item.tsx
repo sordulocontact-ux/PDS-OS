@@ -4,7 +4,12 @@ import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
-import { isKpiKind, type KpiActual } from "@/lib/strategy/kpis";
+import {
+  isKpiKind,
+  isKpiMetric,
+  kpiTracking,
+  type KpiActual,
+} from "@/lib/strategy/kpis";
 import type { StrategyObjective } from "@/lib/strategy/queries";
 
 const number = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
@@ -54,6 +59,7 @@ export function KpiItem({
             [number.format(kpi.target), kpi.unit].filter(Boolean).join(" "),
           );
   const measured = actualLine(actual);
+  const metric = isKpiMetric(kpi.metric) ? kpi.metric : null;
 
   return (
     <li className={`${optionClass(false)} justify-between`}>
@@ -72,6 +78,16 @@ export function KpiItem({
               : t.noDueOn,
           ].join(" · ")}
         </span>
+        {kind === "quantitative" && (
+          <span className="text-caption text-muted-foreground">
+            {[
+              metric ? t.metrics[metric] : null,
+              t.tracking[kpiTracking(metric, kpi.source)],
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </span>
+        )}
         {measured && (
           <span className="text-caption text-foreground tabular-nums">
             {measured}

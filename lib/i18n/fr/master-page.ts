@@ -138,8 +138,9 @@ export const masterPage = {
       "Chaque fichier garde l'état audio qu'il représente. Le titre avance tout seul vers l'état le plus avancé déposé.",
     add: "Ajouter un fichier audio",
     stateLabel: "État audio du fichier",
-    hint: "WAV, AIFF, MP3, FLAC… 50 Mo au plus. La durée est lue quand le navigateur le peut.",
-    notAudio: "Choisissez un fichier audio (WAV, AIFF, MP3, FLAC…).",
+    hint: "WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG, 50 Mo au plus. La durée est lue quand le navigateur le peut.",
+    notAudio:
+      "Choisissez un fichier audio : WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.",
     dialog: {
       description: "À quel état du morceau correspond-il ?",
       descriptionMany: "Ils correspondront tous au même état du morceau.",

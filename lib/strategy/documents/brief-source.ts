@@ -54,6 +54,7 @@ export async function loadBriefSource(
     budgetData.lines,
     data.levers,
     project.budgetCents,
+    data.envelopeToConfirm,
   );
   const snapshot = buildBriefSnapshot({
     data,

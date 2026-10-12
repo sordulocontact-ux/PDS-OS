@@ -1087,7 +1087,16 @@ livrable, les libellés ou l'action d'import en props.
     rattaché à un temps fort, depuis le **premier** où il sort, conception terminée à J-21,
     production terminée à J-10, validation à J-4 (`UPSTREAM_LEAD_DAYS`, délais par défaut, à
     ajuster là). Une étape déjà passée alors que le temps fort est à venir est « Trop tard » ;
-    la dimension Calendrier passe alors **À arbitrer**.
+    la dimension Calendrier passe alors **À arbitrer**. **MKT-S1-04** (retours du 11/10,
+    migration `20261012100101`) : chaque étape affiche son délai (« 21 j avant le temps fort »)
+    et sa marge depuis aujourd'hui (« dans 5 j », « dépassée de 3 j »), dates sans heure
+    comparées en jours de Paris ; l'arbitrage du Brief donne tout le calcul. Une échéance
+    vraiment passée propose trois sorties au responsable (`UpstreamArbitration`) :
+    **déplacer le temps fort** (sa modale), **ajuster les délais** du livrable
+    (`strategy_deliverables.*_lead_days`, vide = défaut, décroissants vérifiés par le code,
+    0 à 365 j en SQL) ou **accepter le risque** pour la date du temps fort
+    (`upstream_risk_accepted_for`, auteur et date par trigger) : l'échéance n'est plus à
+    arbitrer (`late` ≠ `passed`), et la question revient si le temps fort change de date.
   - **Propagées vers le Planning** : type `upstream` de `lib/project-plan/timeline.ts`, avec le
     canal des temps forts ; un clic ouvre `/strategy?d=calendar`.
 - **Budget stratégie** (étape 6) : lecture stratégie des `budget_lines` (`lib/strategy/budget.ts`,
@@ -1096,6 +1105,13 @@ livrable, les libellés ou l'action d'import en props.
   retenu, même à 0 €, puis les autres leviers qui portent des lignes, puis « Hors levier »).
   Panneau : tuiles, tableau par levier, puis l'éditeur de lignes de la page Budget. La dimension
   est « À arbitrer » s'il reste un montant à arbitrer ou si l'enveloppe est dépassée.
+  **MKT-S1-02** (retours du 11/10) : jamais besoin d'une dépense pour établir le Brief. Sans
+  ligne, l'enveloppe dit le budget en quatre états (`envelopeState`) : **non défini** (aucune
+  enveloppe, « À arbitrer »), **0 €** (complet), **enveloppe seule** (commencée, « pas encore
+  ventilée ») et **à confirmer** (le Cadrage l'a laissée « à définir plus tard », estimée, ou
+  proposée sans confirmation : `envelopeToConfirm` de `loadStrategy`, « À arbitrer ») ; les deux
+  derniers cas incertains vont dans « Restant à arbitrer », sans bloquer. La dimension Budget
+  n'est donc jamais « À compléter ».
   **Strictement interne** : dans le Brief de sortie, jamais dans le Plan de sortie ni le Dossier
   de presse (règle pour les générateurs à venir).
 - **Objectifs & KPIs** (étape 7 ; migration `20261010000701_strategy_kpis`) : l'**objectif
@@ -1104,6 +1120,19 @@ livrable, les libellés ou l'action d'import en props.
   Un KPI quantitatif peut être alimenté automatiquement par les **fans Deezer de l'artiste**
   (`source = 'deezer_fans'`, `lib/strategy/kpi-actuals.ts`), lus par le code **après la
   date de sortie** ; sans donnée : « Donnée indisponible ». Aucune valeur inventée, jamais par PO.
+  **MKT-S1-03** (migration `20261012100101`) : un KPI chiffré dit sa **métrique**
+  (`metric` : streams, fans, vues, ajouts en playlist, autre ; aucune pour un qualitatif) ; la
+  source Deezer ne va qu'avec une métrique « fans » (`sourceFits`, contrainte
+  `strategy_objectives_source_metric_check`), la case n'apparaît que pour elle. Le KPI et le
+  Brief disent le suivi (`kpiTracking`) : Deezer (artiste principal, relevé à chaque ouverture
+  après la sortie), suivi manuel, ou « source à connecter » pour streams, vues et playlists.
+  Les KPI existants ont reçu la métrique lue dans leur libellé ; une source Deezer posée sur
+  autre chose que des fans est redevenue manuelle.
+- **Réponses à choix (MKT-S1-01)** : Positionnement, Publics et Angle se lisent partout par
+  `answerWithChoices` (`lib/strategy/compose.ts`, appliqué dans `loadStrategy`) : le texte
+  enregistré, sinon la phrase composée par le code depuis les **choix confirmés**. Avant, accepter
+  les pré-cochages de PO n'enregistrait que les choix : la carte restait « En cours » et le Brief
+  disait « Non renseigné » malgré des réponses données.
 - **Brief de sortie consolidé** (étape 8, `/strategy/brief`, `components/strategy/brief/`) :
   établi quand **aucune dimension n'est « À compléter »** (`briefReadiness`, `lib/strategy/brief.ts`) ;
   sinon la page et le pilotage nomment les dimensions manquantes. Document interne de référence,
