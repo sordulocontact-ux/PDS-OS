@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CallOutcomes } from "@/components/calls/call-outcomes";
+import { CallClosureSection } from "@/components/calls/closure/call-closure-section";
 import { CallWorkspace } from "@/components/calls/call-workspace";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { PageContainer } from "@/components/shell/page-container";
@@ -72,13 +73,25 @@ export default async function MeetingPage({
           steps={t.meetingPage}
           meetFailed={meet === "failed"}
           outcomes={
-            outcomes && (
-              <CallOutcomes
-                outcomes={outcomes}
-                members={members}
-                projectId={null}
-                projects={projects}
-              />
+            outcomes &&
+            report && (
+              <>
+                <CallOutcomes
+                  outcomes={outcomes}
+                  members={members}
+                  projectId={null}
+                  projects={projects}
+                />
+                <CallClosureSection
+                  call={call}
+                  hasTranscript={transcript !== null}
+                  report={report}
+                  outcomes={outcomes}
+                  canEdit={canEdit}
+                  members={members}
+                  mePersonId={access.personId}
+                />
+              </>
             )
           }
         />

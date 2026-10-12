@@ -2295,6 +2295,57 @@ export type Database = {
           },
         ]
       }
+      call_closures: {
+        Row: {
+          call_id: string
+          closed_at: string
+          closed_by: string | null
+          content: Json
+          id: string
+          note: string | null
+          organization_id: string
+          unreviewed: Json
+          version: number
+        }
+        Insert: {
+          call_id: string
+          closed_at?: string
+          closed_by?: string | null
+          content: Json
+          id?: string
+          note?: string | null
+          organization_id: string
+          unreviewed?: Json
+          version: number
+        }
+        Update: {
+          call_id?: string
+          closed_at?: string
+          closed_by?: string | null
+          content?: Json
+          id?: string
+          note?: string | null
+          organization_id?: string
+          unreviewed?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_closures_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "call_closures_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_guests: {
         Row: {
           call_id: string
@@ -2422,6 +2473,64 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "calls"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      call_report_shares: {
+        Row: {
+          call_id: string
+          closure_id: string
+          id: string
+          organization_id: string
+          recipient_person_ids: string[]
+          recipients: Json
+          scope: string
+          shared_at: string
+          shared_by: string | null
+        }
+        Insert: {
+          call_id: string
+          closure_id: string
+          id?: string
+          organization_id: string
+          recipient_person_ids?: string[]
+          recipients: Json
+          scope: string
+          shared_at?: string
+          shared_by?: string | null
+        }
+        Update: {
+          call_id?: string
+          closure_id?: string
+          id?: string
+          organization_id?: string
+          recipient_person_ids?: string[]
+          recipients?: Json
+          scope?: string
+          shared_at?: string
+          shared_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_report_shares_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "call_report_shares_closure_same_org"
+            columns: ["closure_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "call_closures"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "call_report_shares_shared_by_fkey"
+            columns: ["shared_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -14303,6 +14412,10 @@ export type Database = {
       auth_person_id: { Args: never; Returns: string }
       brief_field_dimension: { Args: { p_field_key: string }; Returns: string }
       brief_snapshot: { Args: { p_project_id: string }; Returns: Json }
+      call_report_shared_with_me: {
+        Args: { p_closure_id: string }
+        Returns: boolean
+      }
       can_admin_person: { Args: { target_person_id: string }; Returns: boolean }
       can_deposit_design_version: {
         Args: { p_deliverable_id: string; p_project_id: string }

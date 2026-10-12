@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { CallOutcomes } from "@/components/calls/call-outcomes";
+import { CallClosureSection } from "@/components/calls/closure/call-closure-section";
 import { CallWorkspace } from "@/components/calls/call-workspace";
 import { buttonVariants } from "@/components/ui/button";
 import { requireApproved } from "@/lib/auth/dal";
@@ -98,13 +99,27 @@ export default async function CallPage({
         </Link>
       }
       outcomes={
-        outcomes && (
-          <CallOutcomes
-            outcomes={outcomes}
-            members={members}
-            projectId={projectId}
-            projects={canEdit ? [{ id: project.id, title: project.title }] : []}
-          />
+        outcomes &&
+        report && (
+          <>
+            <CallOutcomes
+              outcomes={outcomes}
+              members={members}
+              projectId={projectId}
+              projects={
+                canEdit ? [{ id: project.id, title: project.title }] : []
+              }
+            />
+            <CallClosureSection
+              call={call}
+              hasTranscript={transcript !== null}
+              report={report}
+              outcomes={outcomes}
+              canEdit={canEdit}
+              members={members}
+              mePersonId={access.personId}
+            />
+          </>
         )
       }
     />

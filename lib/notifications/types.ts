@@ -20,6 +20,7 @@ export const NOTIFICATION_KINDS = [
   "contract_approved",
   "contract_changes_requested",
   "meeting_invited",
+  "call_report_shared",
   "master_transmission_received",
   "master_mix_version_received",
   "master_mix_approved",
@@ -89,6 +90,9 @@ export function notificationHref(
   if (kind.startsWith("contract_") && subjectId)
     return routes.contract(subjectId);
   if (kind === "meeting_invited" && subjectId) return routes.meeting(subjectId);
+  // A call's report shared with a member: that report only (PROJ-AMEL-01).
+  if (kind === "call_report_shared" && subjectId)
+    return routes.callReport(subjectId);
   if (!projectId) return routes.app;
   if (kind === "call_invited" && subjectId)
     return routes.projectCall(projectId, subjectId);

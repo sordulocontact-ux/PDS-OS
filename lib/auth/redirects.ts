@@ -90,6 +90,10 @@ export const routes = {
   calls: "/app/calls",
   // An internal meeting: a call without a project.
   meeting: (callId: string) => `/app/calls/${callId}`,
+  // PROJ-AMEL-01: a call's closed report, as a recipient reads it.
+  callReport: (callId: string) => `/app/calls/${callId}/report`,
+  callReportPdf: (callId: string, version: number, scope: string) =>
+    `/api/calls/${callId}/report?v=${version}&scope=${scope}`,
   // Every file the viewer may read, across artists, titles, projects, contracts.
   files: "/app/files",
   // Features on trial before they enter the app (any member).

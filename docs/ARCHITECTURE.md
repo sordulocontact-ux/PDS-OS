@@ -803,6 +803,22 @@ s'afficher sans chargement.
   avec le Cadrage. Call de projet : son responsable crée la tâche dans le projet. Réunion
   interne : la tâche va dans un projet lancé **dont le lecteur est responsable**
   (`listOwnedProjects`) — la RLS de `tasks` ne laisse créer que le responsable.
+- **Clôture et partage d'un call** (PROJ-AMEL-01, lot 10, migration `…20261012101701`) : sous les
+  décisions et actions, « Compte rendu et clôture » distingue les **cinq sorties** (transcription,
+  résumé, décisions, actions avec combien en tâches, propositions de cadrage avec combien à revoir)
+  et ce qui reste à revoir. « Clôturer le call » fige le compte rendu en une **version**
+  (`call_closures` : résumé, décisions, actions avec responsable et échéance de leur tâche, points
+  ouverts, titre et date du call, et ce qui restait à revoir), écrit par le code (`lib/calls/closure.ts`) ;
+  « Corriger le compte rendu » en fait la suivante, les précédentes restent. Seul le propriétaire du
+  call clôture et partage (`is_call_owner`). « Partager le compte rendu » : complet ou synthèse
+  (résumé et décisions), **jamais la transcription ni l'audio** ; les membres choisis sont notifiés
+  (`call_report_shared`) et lisent cette version seulement (`/app/calls/[id]/report`, RLS
+  `call_report_shared_with_me`, dans le périmètre partagé) ; les adresses extérieures reçoivent
+  l'e-mail écrit depuis la messagerie de l'utilisateur (`mailto:`), PDF à côté
+  (`/api/calls/[id]/report`). Chaque partage garde qui, quand, quel périmètre et à qui
+  (`call_report_shares`). **Point à trancher** : le ticket demande une information et une
+  confirmation explicites avant tout enregistrement ; le consentement reste donné par contrat
+  (décision de Sacha, aucun écran) tant qu'elle n'est pas revue.
 
 ## 4 bis. Calls planifiés comme sur Teams (10/10/2026)
 

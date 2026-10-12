@@ -43,6 +43,8 @@ export const notifications = {
       `${actor} demande des modifications sur votre contrat.`,
     meeting_invited: (actor: string) =>
       `${actor} vous invite à une réunion interne.`,
+    call_report_shared: (actor: string) =>
+      `${actor} vous partage le compte rendu d'un call.`,
     // The engineer has no account: no actor, the project names it.
     master_transmission_received: (_actor: string, project: string) =>
       `Le mixeur a bien reçu le dossier de « ${project} ».`,

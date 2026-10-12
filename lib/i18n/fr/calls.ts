@@ -403,4 +403,102 @@ export const calls = {
     network: "Le serveur ne répond pas.",
     unknown: "Une erreur inattendue est survenue.",
   },
+  // PROJ-AMEL-01: what a call produced, its closing and its sharing.
+  closure: {
+    title: "Compte rendu et clôture",
+    description:
+      "Les cinq sorties du call, puis sa clôture : le compte rendu figé, partageable sans la transcription ni l'audio.",
+    outputs: {
+      transcript: "Transcription",
+      summary: "Résumé",
+      decisions: (n: number) =>
+        n === 0 ? "Aucune décision" : n === 1 ? "1 décision" : `${n} décisions`,
+      actions: (n: number, tasks: number) =>
+        n === 0
+          ? "Aucune action"
+          : `${n === 1 ? "1 action" : `${n} actions`}, ${tasks === n ? "toutes en tâches" : `${tasks} en tâche${tasks > 1 ? "s" : ""}`}`,
+      proposals: (n: number, pending: number) =>
+        n === 0
+          ? "Aucune proposition de cadrage"
+          : `${n === 1 ? "1 proposition de cadrage" : `${n} propositions de cadrage`}${pending ? `, ${pending} à revoir` : ", toutes revues"}`,
+      ready: "Prêt",
+      missing: "Pas encore",
+    },
+    close: "Clôturer le call",
+    correct: "Corriger le compte rendu",
+    closeTitle: "Clôturer le call ?",
+    closeBody:
+      "Le compte rendu est figé tel quel, en une version datée. Une correction plus tard en crée une nouvelle, la précédente reste.",
+    unreviewed: (actions: number, proposals: number) =>
+      [
+        actions
+          ? `${actions === 1 ? "1 action n'est" : `${actions} actions ne sont`} pas encore en tâche`
+          : null,
+        proposals
+          ? `${proposals === 1 ? "1 proposition de cadrage reste" : `${proposals} propositions de cadrage restent`} à revoir`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" ; ") +
+      ". Vous pouvez clôturer quand même : ce sera dit dans le compte rendu.",
+    allReviewed: "Tout est revu : actions en tâches, propositions traitées.",
+    noteLabel: "Note de clôture",
+    closed: "Call clôturé.",
+    closedOn: (version: number, date: string, name: string) =>
+      `Version ${version}, clôturée le ${date} par ${name}`,
+    leftToReview: (text: string) => `À la clôture : ${text}`,
+    share: "Partager le compte rendu",
+    shareTitle: "Partager le compte rendu",
+    shareBody:
+      "Les membres choisis sont prévenus et lisent ce compte rendu seulement. Pour les autres, PDS OS prépare un e-mail que vous envoyez de votre messagerie, avec le PDF.",
+    scope: "Ce qui est partagé",
+    scopes: {
+      full: "Le compte rendu complet",
+      summary: "La synthèse",
+    },
+    scopeHints: {
+      full: "Résumé, décisions, actions avec responsables et échéances, points ouverts.",
+      summary: "Le résumé et les décisions.",
+    },
+    members: "Membres de l'équipe",
+    noMembers: "Aucun autre membre.",
+    emails: "Adresses e-mail extérieures",
+    emailsHint: "Une adresse par ligne : les invités du call sont proposés.",
+    recipientsMissing: "Choisissez au moins un destinataire.",
+    emailInvalid: (email: string) =>
+      `« ${email} » n'est pas une adresse e-mail.`,
+    shared: "Compte rendu partagé.",
+    mailto: "Écrire l'e-mail",
+    pdf: "Télécharger le PDF",
+    history: "Historique",
+    sharedLine: (
+      name: string,
+      date: string,
+      scope: string,
+      recipients: string,
+    ) =>
+      `${name} a partagé ${scope.toLowerCase()} le ${date} avec ${recipients}`,
+    version: (n: number) => `Version ${n}`,
+    report: {
+      heading: (title: string, date: string) =>
+        `Compte rendu — ${title} (${date})`,
+      meta: (date: string, version: number) =>
+        `Call du ${date} · compte rendu, version ${version}`,
+      summary: "Résumé",
+      decisions: "Décisions",
+      actions: "Actions",
+      open: "Points ouverts",
+      due: (date: string) => `avant le ${date}`,
+      subject: (title: string) => `Compte rendu : ${title}`,
+    },
+    page: {
+      title: "Compte rendu",
+      notShared: "Aucun compte rendu de ce call ne vous a été partagé.",
+    },
+    errors: {
+      not_closed: "Clôturez le call avant de partager son compte rendu.",
+      no_report: "Le call n'a pas encore de compte rendu.",
+      failed: "L'action n'a pas pu être faite. Réessayez.",
+    },
+  },
 } as const;
