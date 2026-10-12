@@ -6,10 +6,17 @@ import { StrategyBudgetSummary } from "@/components/strategy/budget/strategy-bud
 import { CalendarSection } from "@/components/strategy/calendar-section";
 import { DeliverablesSection } from "@/components/strategy/deliverables-section";
 import { LeversSection } from "@/components/strategy/levers-section";
+import { NarrativeSummary } from "@/components/strategy/narrative-summary";
 import { ObjectivesWork } from "@/components/strategy/objectives-work";
+import { RedraftButton } from "@/components/strategy/redraft-button";
 import { StrategyChoices } from "@/components/strategy/strategy-choices";
 import type { BudgetData } from "@/lib/budget/queries";
-import type { StrategyTextField } from "@/lib/framing/brief";
+import type {
+  FieldState,
+  NarrativePart,
+  PositioningPart,
+  StrategyTextField,
+} from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import { strategyBudget as computeStrategyBudget } from "@/lib/strategy/budget";
 import type { StrategyDimension } from "@/lib/strategy/dimensions";
@@ -53,6 +60,31 @@ export function DimensionWork({
     );
   };
 
+  // A part of the positioning or the narrative: an anchor for the card's
+  // « premier manque » and the draft's questions, and « Proposer à nouveau »
+  // while it is not confirmed (MKT-S1-06).
+  const partCard = (
+    part: FieldState<PositioningPart | NarrativePart>,
+    label: string,
+  ) => (
+    <div
+      key={`${part.key}-${part.value ?? ""}-${part.status ?? ""}`}
+      id={`answer-${part.key}`}
+      className="scroll-mt-24"
+    >
+      <BriefFieldCard
+        field={part}
+        label={label}
+        projectId={projectId}
+        actions={
+          part.status !== "confirmed" ? (
+            <RedraftButton projectId={projectId} field={part.key} />
+          ) : undefined
+        }
+      />
+    </div>
+  );
+
   switch (dimension) {
     case "positioning":
       return (
@@ -62,18 +94,9 @@ export function DimensionWork({
             <h3 className="text-body-md font-semibold">
               {fr.strategyPilot.positioning.title}
             </h3>
-            {data.positioningParts.map((part) => (
-              <BriefFieldCard
-                key={`${part.key}-${part.value ?? ""}-${part.status ?? ""}`}
-                field={part}
-                label={
-                  fr.strategyPilot.positioning.parts[
-                    part.key as keyof typeof fr.strategyPilot.positioning.parts
-                  ]
-                }
-                projectId={projectId}
-              />
-            ))}
+            {data.positioningParts.map((part) =>
+              partCard(part, fr.strategyPilot.positioning.parts[part.key]),
+            )}
           </div>
         </>
       );
@@ -104,19 +127,15 @@ export function DimensionWork({
     case "narrative":
       return (
         <>
+          <NarrativeSummary
+            field={data.narrativeSummary}
+            parts={data.narrativeParts}
+            projectId={projectId}
+          />
           <div className="flex flex-col gap-3">
-            {data.narrativeParts.map((part) => (
-              <BriefFieldCard
-                key={`${part.key}-${part.value ?? ""}-${part.status ?? ""}`}
-                field={part}
-                label={
-                  fr.strategyPilot.narrative.parts[
-                    part.key as keyof typeof fr.strategyPilot.narrative.parts
-                  ]
-                }
-                projectId={projectId}
-              />
-            ))}
+            {data.narrativeParts.map((part) =>
+              partCard(part, fr.strategyPilot.narrative.parts[part.key]),
+            )}
           </div>
           {choices("narrative")}
         </>

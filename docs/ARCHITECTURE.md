@@ -1354,6 +1354,36 @@ livrable, les libellés ou l'action d'import en props.
 
 ---
 
+### Retours Marketing du 11/10/2026, lot 9d (MKT-S1-06, 09)
+
+Migration `…20261012101401_strategy_generated_drafts`.
+
+- **Brouillon de stratégie** (« Préparer un brouillon », MKT-S1-09, `lib/strategy/draft.ts`,
+  `draft-plan.ts`) : PO lit les réponses texte confirmées du Cadrage (sauf juridiques), le
+  contexte initial et les comptes rendus de calls (session de l'utilisateur, données jamais
+  consignes) et rédige les champs encore non confirmés : réponses Positionnement / Publics /
+  Angle, quatre points du positionnement, quatre parties du récit. Le code ne garde qu'un
+  champ demandé, une fois, appuyé sur une source connue et une citation d'au moins trois mots
+  trouvée mot pour mot. Chaque proposition est une ligne `field_values` de type
+  **`generated`**, **toujours `proposed`** (contrainte SQL), avec `source_label`,
+  `source_quote` et une **confiance calculée par le code** (`draft-confidence.ts` : part des
+  mots du texte présents dans la source, un champ du Cadrage compte un peu plus ; haute,
+  moyenne, faible « à relire »), jamais par le modèle (règle 6). L'objectif stratégique est
+  repris tel quel de l'objectif confirmé du Cadrage (code, sans IA). **Rien de confirmé n'est
+  remplacé.** Ce que les sources ne fondent pas revient en **questions prioritaires** par
+  dimension (`priorityQuestions`), chacune un lien vers sa réponse. Confirmer un brouillon tel
+  quel garde sa source (ligne `import` avec le même libellé et la même citation) ;
+  l'historique distingue importé, généré et saisi. Un compte rendu de call n'est pas cité par
+  son id (`field_values_call_source` le réserve au type `call`) : son titre est dans le libellé.
+- **Synthèse du récit** (MKT-S1-06, champ `narrative_summary`) : « Rédiger la synthèse » à
+  partir des parties écrites et de l'angle, ton (sobre, chaleureux, percutant) et longueur
+  (courte, développée) choisis, proposition à confirmer ; une synthèse confirmée ne se
+  réécrit qu'à la main. **À arbitrer** : les répétitions entre parties (cinq mots de suite,
+  trouvées par le code à chaque affichage) et les contradictions signalées par PO, gardées
+  seulement si chaque citation est dans sa partie (`narrative-review.ts`). Chaque partie non
+  confirmée (récit et positionnement) a « Proposer à nouveau » (ce seul champ). Le Brief
+  montre la synthèse en tête du récit.
+
 ### Retours Marketing du 11/10/2026, lot 9c (MKT-S1-08, 10)
 
 Migration `…20261012101301_deliverables_calendar`.

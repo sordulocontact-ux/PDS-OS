@@ -176,6 +176,17 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
         : []),
     ],
     narrative: [
+      // MKT-S1-06: the synthesis first, when there is one.
+      ...(data.narrativeSummary.value
+        ? [
+            {
+              label: t.narrativeSummary,
+              value: data.narrativeSummary.value,
+              lines: [],
+              empty: t.empty,
+            },
+          ]
+        : []),
       ...data.narrativeParts.map((p) => ({
         label: parts[p.key as keyof typeof parts],
         value: p.value,

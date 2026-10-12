@@ -147,6 +147,8 @@ const sourceOf = (
 ): string | null => {
   if (!provenance) return null;
   if (provenance.kind === "record") return provenance.label;
+  if (provenance.kind === "generated")
+    return fr.framing.provenance.generatedFrom(provenance.label);
   if (provenance.kind === "voice")
     return fr.framing.provenance.dictatedBy(provenance.author);
   return provenance.callTitle

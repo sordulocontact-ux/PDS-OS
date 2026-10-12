@@ -19,16 +19,19 @@ import { fr } from "@/lib/i18n/fr";
 
 /**
  * One deliverable text field (Brief or Strategy), edited in place. A proposal
- * is confirmed, rejected or rewritten.
+ * is confirmed, rejected or rewritten. `actions`: more buttons of the
+ * caller's after these (« Proposer à nouveau » of a Strategy part).
  */
 export function BriefFieldCard({
   field,
   label,
   projectId,
+  actions,
 }: {
   field: FieldState;
   label: string;
   projectId: string;
+  actions?: React.ReactNode;
 }) {
   const t = fr.framing;
   const [editing, setEditing] = useState(false);
@@ -133,6 +136,7 @@ export function BriefFieldCard({
           >
             {field.value ? t.actions.edit : t.actions.fill}
           </Button>
+          {actions}
         </div>
       )}
     </section>

@@ -4,6 +4,7 @@ import type { Access } from "@/lib/auth/access";
 import {
   BRIEF_TEXT_FIELDS,
   NARRATIVE_PARTS,
+  NARRATIVE_SUMMARY,
   POSITIONING_PARTS,
   STRATEGIC_OBJECTIVE,
   STRATEGY_TEXT_FIELDS,
@@ -80,6 +81,8 @@ export type StrategyData = {
   fields: StrategyFieldState[];
   // The story parts of the narrative (its angle is the `narrative` field).
   narrativeParts: FieldState<NarrativePart>[];
+  // MKT-S1-06: the narrative in one text, drafted by PO.
+  narrativeSummary: FieldState;
   // The positioning in four parts (MKT-S1-05) and the publics, row by row.
   positioningParts: FieldState<PositioningPart>[];
   audiences: StrategyAudience[];
@@ -270,6 +273,15 @@ export async function loadStrategy(
       const row = rowOf("strategy", key);
       return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
     }),
+    narrativeSummary: (() => {
+      const row = rowOf("strategy", NARRATIVE_SUMMARY);
+      return toFieldState(
+        "strategy",
+        NARRATIVE_SUMMARY,
+        row,
+        row ? provenanceOf(row) : null,
+      );
+    })(),
     positioningParts: POSITIONING_PARTS.map((key) => {
       const row = rowOf("strategy", key);
       return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);

@@ -42,6 +42,11 @@ export type PositioningPart = (typeof POSITIONING_PARTS)[number];
 // accomplish, in the team's words; the KPIs are strategy_objectives rows.
 export const STRATEGIC_OBJECTIVE = "strategic_objective";
 
+// The narrative told in one text, drafted by PO from the parts above
+// (MKT-S1-06): shown first in the narrative and in the Brief, always a
+// proposal until a person confirms it.
+export const NARRATIVE_SUMMARY = "narrative_summary";
+
 export const DESIGN_TEXT_FIELDS = [
   "creative_direction",
   "visual_codes",
@@ -56,6 +61,7 @@ export const TEXT_FIELDS = {
     ...NARRATIVE_PARTS,
     ...POSITIONING_PARTS,
     STRATEGIC_OBJECTIVE,
+    NARRATIVE_SUMMARY,
   ],
   design_doc: DESIGN_TEXT_FIELDS,
 } as const;
@@ -94,7 +100,20 @@ export type Provenance =
       kind: "record";
       label: string;
       quote: string | null;
+    }
+  | {
+      /**
+       * Drafted by PO from the Cadrage and the calls (MKT-S1-09): where it
+       * leans (`label`, the verified `quote`) and how sure the code judges it
+       * (`confidence`, lib/strategy/draft-confidence.ts).
+       */
+      kind: "generated";
+      label: string;
+      quote: string | null;
+      confidence: DraftConfidence | null;
     };
+
+export type DraftConfidence = "high" | "medium" | "low";
 
 export type FieldState<K extends string = string> = {
   deliverable: TextDeliverable;

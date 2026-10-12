@@ -71,6 +71,7 @@ export const strategyBrief = {
   sections: {
     empty: "Non renseigné.",
     narrativeAngle: "Angle",
+    narrativeSummary: "Synthèse du récit",
     leversNone: "Aucun levier retenu.",
     deliverablesNone: "Aucun livrable engagé.",
     milestonesNone: "Aucun temps fort.",

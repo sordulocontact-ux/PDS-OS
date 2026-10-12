@@ -11,6 +11,7 @@ import { ValidatedStrategy } from "@/components/strategy/documents/validated-str
 import { ProposeChoices } from "@/components/strategy/propose-choices";
 import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
+import { StrategyDraftButton } from "@/components/strategy/strategy-draft-button";
 import { StrategyEntry } from "@/components/strategy/strategy-entry";
 import { StrategyPilotage } from "@/components/strategy/strategy-pilotage";
 import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
@@ -153,6 +154,7 @@ export default async function StrategyPage({
             projectId={projectId}
             actions={
               <>
+                <StrategyDraftButton projectId={projectId} />
                 <ProposeChoices projectId={projectId} />
                 {callSheet && (
                   <StrategyCallSheet projectId={projectId} data={callSheet} />

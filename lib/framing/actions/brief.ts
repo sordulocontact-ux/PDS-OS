@@ -50,7 +50,10 @@ async function append(
   if (row.keepSource && !current) return fail("not_found");
 
   // Confirming a proposal as is keeps its call provenance; an edit is manual.
+  // A draft of PO confirmed as is keeps where it leaned, as a value taken
+  // from the project (« generated » is only ever a proposal, in SQL).
   const keep = row.keepSource && current?.source_type === "call";
+  const drafted = row.keepSource && current?.source_type === "generated";
   const { error } = await supabase.from("field_values").insert({
     organization_id: access.organizationId,
     project_id: projectId,
@@ -58,10 +61,11 @@ async function append(
     field_key: fieldKey,
     value: (row.value ?? current?.value ?? "") as string,
     status: row.status,
-    source_type: keep ? "call" : "manual",
+    source_type: keep ? "call" : drafted ? "import" : "manual",
     source_report_item_id: keep ? current?.source_report_item_id : null,
-    source_quote: keep ? current?.source_quote : null,
+    source_quote: keep || drafted ? current?.source_quote : null,
     source_start_seconds: keep ? current?.source_start_seconds : null,
+    source_label: drafted ? current?.source_label : null,
   });
   // The strategy and the Dossier are only written while in progress
   // (restrictive RLS policies).

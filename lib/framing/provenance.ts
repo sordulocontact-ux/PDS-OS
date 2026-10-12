@@ -71,6 +71,7 @@ type ProvenanceRow = {
   source_start_seconds?: number | null;
   source_label?: string | null;
   created_by?: string | null;
+  confidence?: string | null;
 };
 
 /**
@@ -95,6 +96,18 @@ export async function provenanceLookup(
         kind: "voice",
         quote: row.source_quote ?? "",
         author: row.created_by ? (nameOf.get(row.created_by) ?? null) : null,
+      };
+    if (row.source_type === "generated")
+      return {
+        kind: "generated",
+        label: row.source_label ?? "",
+        quote: row.source_quote ?? null,
+        confidence:
+          row.confidence === "high" ||
+          row.confidence === "medium" ||
+          row.confidence === "low"
+            ? row.confidence
+            : null,
       };
     if (row.source_label)
       return {

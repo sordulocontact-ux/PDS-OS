@@ -55,6 +55,14 @@ export const framing = {
     confirmed: (name: string | null, date: string | null) =>
       `Confirmé${name ? ` par ${name}` : ""}${date ? ` le ${date}` : ""}`,
     notFound: "Source introuvable",
+    // MKT-S1-09: a draft written by PO, with where it leans and how sure.
+    generatedFrom: (label: string) =>
+      label ? `Rédigé par PO d'après ${label}` : "Rédigé par PO",
+    confidence: {
+      high: "Confiance haute",
+      medium: "Confiance moyenne",
+      low: "Confiance faible · à relire",
+    },
     openPassage: (time: string) => `Voir le passage (${time})`,
     openTranscript: "Voir la transcription",
   },

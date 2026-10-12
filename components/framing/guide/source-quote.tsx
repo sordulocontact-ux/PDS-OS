@@ -7,6 +7,8 @@ export function sourceLabel(provenance: Provenance): string {
   if (provenance.kind === "voice")
     return fr.framing.provenance.dictatedBy(provenance.author);
   if (provenance.kind === "record") return provenance.label;
+  if (provenance.kind === "generated")
+    return fr.framing.provenance.generatedFrom(provenance.label);
   return provenance.callTitle
     ? fr.framingGuide.brief.callTitle(provenance.callTitle)
     : fr.framingGuide.unknownCall;

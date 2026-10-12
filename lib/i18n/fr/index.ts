@@ -74,6 +74,7 @@ import { strategyCalendar } from "./strategy-calendar";
 import { strategyDeliverables } from "./strategy-deliverables";
 import { strategyDocuments } from "./strategy-documents";
 import { strategyDispositif } from "./strategy-dispositif";
+import { strategyDraft } from "./strategy-draft";
 import { strategyEntry } from "./strategy-entry";
 import { strategyFollowUp } from "./strategy-follow-up";
 import { strategyKpis } from "./strategy-kpis";
@@ -112,6 +113,7 @@ export const fr = {
   strategyPressKit,
   strategyFollowUp,
   strategyPilot,
+  strategyDraft,
   design,
   conception,
   conceptionCall,

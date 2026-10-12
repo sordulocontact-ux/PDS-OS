@@ -4654,6 +4654,7 @@ export type Database = {
       }
       field_values: {
         Row: {
+          confidence: string | null
           created_at: string
           created_by: string | null
           deliverable: string
@@ -4670,6 +4671,7 @@ export type Database = {
           value: Json
         }
         Insert: {
+          confidence?: string | null
           created_at?: string
           created_by?: string | null
           deliverable: string
@@ -4686,6 +4688,7 @@ export type Database = {
           value: Json
         }
         Update: {
+          confidence?: string | null
           created_at?: string
           created_by?: string | null
           deliverable?: string
@@ -13460,6 +13463,7 @@ export type Database = {
     Views: {
       current_field_values: {
         Row: {
+          confidence: string | null
           created_at: string | null
           created_by: string | null
           deliverable: string | null

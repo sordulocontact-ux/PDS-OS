@@ -69,6 +69,16 @@ export const reviewTone: Record<string, Tone> = {
   rejected: "danger",
 };
 
+/**
+ * How sure the code judges a draft of PO (MKT-S1-09): a low one asks to be
+ * read again; never the green of a confirmed value.
+ */
+export const draftConfidenceTone: Record<string, Tone> = {
+  high: "info",
+  medium: "neutral",
+  low: "warning",
+};
+
 /** A validation request waits for its validator, then is settled. */
 export const validationTone: Record<string, Tone> = {
   pending: "warning",

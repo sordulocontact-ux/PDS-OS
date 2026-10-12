@@ -154,7 +154,7 @@ function answer(
   const structure: Element[] =
     key === "positioning"
       ? input.positioningParts.map((part) =>
-          fieldElement(part, `strategy-${part.key}`),
+          fieldElement(part, `answer-${part.key}`),
         )
       : input.audiences.length === 0
         ? [{ state: "missing", anchor: "audience-new" }]
