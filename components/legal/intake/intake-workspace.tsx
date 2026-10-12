@@ -47,12 +47,20 @@ export function IntakeWorkspace({
     : undefined;
   const active = corrected ?? questions.find((q) => !q.answered);
   const answered = questions.filter((q) => q.answered);
+  // JUR-05: an answer taken from the Cadrage is proposed, not confirmed.
+  const proposed = questions.filter(
+    (q) => !q.answered && q.suggestionFrom === "cadrage" && q.suggestion,
+  ).length;
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
       {questions.length > 0 && (active || !embedded) && (
         <p className="text-sm text-muted-foreground tabular-nums">
-          {t.progress(answered.length, questions.length)}
+          {t.progressDetail(
+            answered.length,
+            proposed,
+            questions.length - answered.length - proposed,
+          )}
         </p>
       )}
       {active ? (

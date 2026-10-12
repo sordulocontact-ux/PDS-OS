@@ -154,14 +154,25 @@ export function ContractPanel({
     </Button>
   );
   const head = (
-    <p className="text-sm text-muted-foreground">
-      {[
-        row.template ? `${row.template.name} · v${row.template.version}` : null,
-        row.proposal.feeCents ? formatFee(row.proposal.feeCents) : null,
-      ]
-        .filter(Boolean)
-        .join(" · ")}
-    </p>
+    <div className="flex flex-col gap-1">
+      {row.template && (
+        <p className="text-sm text-muted-foreground">
+          {`${row.template.name} · v${row.template.version}`}
+        </p>
+      )}
+      {/* JUR-15: the fee recorded, with where it comes from. */}
+      <p className="text-sm">
+        <span className="text-muted-foreground">{t.financial.title} · </span>
+        {row.proposal.feeCents
+          ? t.financial.amount(
+              formatFee(row.proposal.feeCents),
+              row.proposal.feeFromFiche
+                ? t.financial.fromFiche
+                : t.financial.fromMapping,
+            )
+          : t.financial.none}
+      </p>
+    </div>
   );
 
   switch (row.state) {

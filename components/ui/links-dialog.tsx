@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 export type OneTimeLink = {
   key: string;
   label: string;
-  url: string;
+  // Null: nothing new to send, `note` says why (a link kept, JUR-27).
+  url: string | null;
+  note?: string;
   /** A ready e-mail carrying the link (`mailto:`), when the address is known. */
   email?: { href: string; label: string };
 };
@@ -51,6 +53,9 @@ export function LinksDialog({
         {links.map((link) => (
           <li key={link.key} className="flex flex-col gap-2">
             {links.length > 1 && <span className="font-medium">{link.label}</span>}
+            {link.url === null ? (
+              <p className="text-sm text-muted-foreground">{link.note}</p>
+            ) : (
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 readOnly
@@ -80,6 +85,7 @@ export function LinksDialog({
                 className="shrink-0"
               />
             </div>
+            )}
           </li>
         ))}
       </ul>

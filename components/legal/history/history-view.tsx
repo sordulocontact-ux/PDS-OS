@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { HistoryCsvButton } from "@/components/legal/history/history-csv-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { DayGroups } from "@/components/ui/day-groups";
 import { FilterChipLink } from "@/components/ui/filter-chip";
@@ -40,20 +41,28 @@ export function HistoryView({
   return (
     <div className="flex flex-col gap-6">
       <p className="text-body-md text-muted-foreground">{t.description}</p>
-      <nav aria-label={t.filtersLabel} className="flex flex-wrap gap-1.5">
-        <FilterChipLink href={base} current={branch === null}>
-          {t.branches.all}
-        </FilterChipLink>
-        {HISTORY_BRANCHES.map((key) => (
-          <FilterChipLink
-            key={key}
-            href={`${base}?branche=${key}`}
-            current={branch === key}
-          >
-            {t.branches[key]}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <nav aria-label={t.filtersLabel} className="flex flex-wrap gap-1.5">
+          <FilterChipLink href={base} current={branch === null}>
+            {t.branches.all}
           </FilterChipLink>
-        ))}
-      </nav>
+          {HISTORY_BRANCHES.map((key) => (
+            <FilterChipLink
+              key={key}
+              href={`${base}?branche=${key}`}
+              current={branch === key}
+            >
+              {t.branches[key]}
+            </FilterChipLink>
+          ))}
+        </nav>
+        <HistoryCsvButton
+          events={shown}
+          fileName={t.csv.fileName(
+            branch ? t.branches[branch] : t.branches.all,
+          )}
+        />
+      </div>
       {!history.complete && <ToneCallout tone="warning">{t.error}</ToneCallout>}
       {shown.length === 0 ? (
         <EmptyNote>{branch ? t.emptyBranch : t.empty}</EmptyNote>

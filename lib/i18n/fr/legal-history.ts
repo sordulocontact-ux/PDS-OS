@@ -51,4 +51,20 @@ export const legalHistory = {
   } as Record<string, string>,
   signature: (signer: string) => `Signature de ${signer} enregistrée`,
   sacem: (title: string) => `SACEM · ${title}`,
+  csv: {
+    export: "Exporter en CSV",
+    fileName: (part: string) =>
+      `historique-juridique-${part.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.csv`,
+    columns: [
+      "Identifiant",
+      "Instant (UTC)",
+      "Instant (Paris)",
+      "Partie du dossier",
+      "Action",
+      "Objet",
+      "Auteur",
+      "Note",
+      "Preuve déclarée",
+    ],
+  },
 } as const;

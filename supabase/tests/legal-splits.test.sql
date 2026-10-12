@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
 -- confirmations here are SIMULATED): an equal split between Ever, Samy, Le J.
 begin;
-select plan(18);
+select plan(21);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -138,13 +138,23 @@ select isnt((select evidence ->> 'content_hash' from public.legal_split_confirma
 select pg_temp.act_as(pg_temp.id_of('manager'));
 insert into ids select 'v2', public.save_split_draft(pg_temp.id_of('project'), pg_temp.id_of('master'),
   pg_temp.entries(array['40', '30', '30']), 'Le J apporte moins');
-delete from links;
-insert into links select p.entry_id, p.token, e.position from public.propose_split_version(pg_temp.id_of('v2')) p
-  join public.legal_split_entries e on e.id = p.entry_id;
+-- JUR-27 (…20261012100601): everyone keeps the link they were sent, which
+-- now opens the new version; nothing to send again.
+create temp table links2 (entry uuid, token text) on commit drop;
+insert into links2 select p.entry_id, p.token from public.propose_split_version(pg_temp.id_of('v2')) p;
+reset role;
 select is((select status from public.legal_split_versions where id = pg_temp.id_of('v1')), 'superseded',
           'a new version supersedes the previous one');
 select is((select status from public.legal_split_versions where id = pg_temp.id_of('v2')), 'proposed',
           'and needs its own confirmations');
+select is((select count(*)::int from links2 where token is null), 3,
+          'a person already sent a link keeps it: no new link to send');
+select is((select version_id from public.legal_split_confirmations
+            where token_hash = encode(sha256(convert_to((select token from links where pos = 3), 'UTF8')), 'hex')),
+          pg_temp.id_of('v2'), 'the same link now opens the new version');
+select is((select count(*)::int from public.legal_split_confirmations
+            where version_id = pg_temp.id_of('v1') and status = 'confirmed'), 3,
+          'the answers to the previous version stay, with their proof');
 
 reset role;
 set local role anon;

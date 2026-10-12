@@ -82,8 +82,11 @@ export function SignaturesList({
                     onClick={() => {
                       setTried((x) => ({ ...x, [s.id]: true }));
                       if (!(proofs[s.id] ?? "").trim()) return;
-                      run(() =>
-                        signFormality(projectId, s.id, proofs[s.id] ?? ""),
+                      run(
+                        () =>
+                          signFormality(projectId, s.id, proofs[s.id] ?? ""),
+                        undefined,
+                        fr.legalFormalities.transitions.signed(s.signer),
                       );
                     }}
                   >

@@ -9,13 +9,18 @@ import { FactList } from "@/components/ui/fact-list";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { fr } from "@/lib/i18n/fr";
 import { reviewLegalForm } from "@/lib/legal/forms/actions";
+import { formatInstant } from "@/lib/utils/instant";
 import type { FormRow } from "@/lib/legal/forms/queries";
 
-const facts = (values: Record<string, string>) =>
-  Object.entries(values).map(([id, value]) => ({
-    label: fr.legalForms.fields[id] ?? id,
-    value: fr.legalForms.options[id]?.[value] ?? value,
-  }));
+// A field to review is said once, in « avant → après » (JUR-14), never
+// again in the answers above it.
+const facts = (values: Record<string, string>, skip: ReadonlySet<string>) =>
+  Object.entries(values)
+    .filter(([id]) => !skip.has(id))
+    .map(([id, value]) => ({
+      label: fr.legalForms.fields[id] ?? id,
+      value: fr.legalForms.options[id]?.[value] ?? value,
+    }));
 
 /** The answers of a fiche, the person's apart from this project's, and the
  * corrections to accept or not (« revue avant propagation »). */
@@ -33,6 +38,9 @@ export function SubmissionDialog({
   const s = row.submission;
   if (!s) return null;
   const corrections = Object.entries(s.corrections);
+  const reviewed = new Set(
+    row.state === "action_required" ? corrections.map(([id]) => id) : [],
+  );
 
   const review = (accept: boolean) =>
     startTransition(async () => {
@@ -57,9 +65,7 @@ export function SubmissionDialog({
         open={open}
         onOpenChange={setOpen}
         title={t.answersTitle(row.name)}
-        description={t.since(
-          new Date(s.submittedAt).toLocaleDateString("fr-FR"),
-        )}
+        description={t.since(formatInstant(s.submittedAt))}
         closeLabel={fr.masterPage.form.close}
         size="wide"
       >
@@ -82,12 +88,12 @@ export function SubmissionDialog({
           />
           <section className="flex flex-col gap-2">
             <h3 className="text-sm font-medium">{t.person}</h3>
-            <FactList facts={facts(s.person)} />
+            <FactList facts={facts(s.person, reviewed)} />
           </section>
           {Object.keys(s.contribution).length > 0 && (
             <section className="flex flex-col gap-2">
               <h3 className="text-sm font-medium">{t.contribution}</h3>
-              <FactList facts={facts(s.contribution)} />
+              <FactList facts={facts(s.contribution, reviewed)} />
             </section>
           )}
           {row.state === "action_required" && corrections.length > 0 && (

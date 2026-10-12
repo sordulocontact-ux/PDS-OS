@@ -9,18 +9,28 @@ import { fr } from "@/lib/i18n/fr";
 
 /**
  * Tells a viewer without edit rights why the write controls are missing. On
- * the Conception, the creative team still deposits versions: said so.
+ * the Conception, the creative team still deposits versions: said so. On
+ * the Juridique, whoever holds manage_legal acts (direction and project
+ * managers, checked in SQL): said so instead of « Lecture seule » (JUR-04).
  */
 export function ReadOnlyNotice({
   projectId,
+  legalWriter,
   className,
 }: {
   projectId: string;
+  legalWriter: boolean;
   className?: string;
 }) {
   const canEdit = useCanEditProject();
   const pathname = usePathname();
   if (canEdit) return null;
+  if (pathname.startsWith(routes.projectLegal(projectId)))
+    return legalWriter ? (
+      <FormMessage kind="info" className={className}>
+        {fr.shell.project.legalShared}
+      </FormMessage>
+    ) : null;
   const onDesign = pathname.startsWith(routes.projectDesign(projectId));
   return (
     <FormMessage kind="info" className={className}>

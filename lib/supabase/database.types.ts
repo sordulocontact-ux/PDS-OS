@@ -2846,6 +2846,8 @@ export type Database = {
       }
       contract_templates: {
         Row: {
+          retired_by: string | null
+          retired_reason: string | null
           body: string
           created_at: string
           created_by: string | null
@@ -2866,6 +2868,8 @@ export type Database = {
           version: number
         }
         Insert: {
+          retired_by?: string | null
+          retired_reason?: string | null
           body: string
           created_at?: string
           created_by?: string | null
@@ -2886,6 +2890,8 @@ export type Database = {
           version: number
         }
         Update: {
+          retired_by?: string | null
+          retired_reason?: string | null
           body?: string
           created_at?: string
           created_by?: string | null
@@ -14571,10 +14577,15 @@ export type Database = {
         }
         Returns: undefined
       }
-      set_contract_template_status: {
-        Args: { p_status: string; p_template_id: string }
-        Returns: undefined
-      }
+      set_contract_template_status:
+        | {
+            Args: { p_status: string; p_template_id: string }
+            Returns: undefined
+          }
+        | {
+            Args: { p_reason: string | null; p_status: string; p_template_id: string }
+            Returns: undefined
+          }
       set_deliverable_final: {
         Args: { p_deliverable_id: string; p_note: string; p_url: string }
         Returns: undefined

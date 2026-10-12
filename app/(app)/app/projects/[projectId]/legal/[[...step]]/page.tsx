@@ -32,7 +32,7 @@ import { loadForms } from "@/lib/legal/forms/queries";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { isHistoryBranch } from "@/lib/legal/history/types";
 import { loadIntake } from "@/lib/legal/intake/queries";
-import { loadLegalPlan } from "@/lib/legal/plan/queries";
+import { loadLegalPlan, proposeLegalPlan } from "@/lib/legal/plan/queries";
 import { loadSplits } from "@/lib/legal/splits/queries";
 import { loadTracking } from "@/lib/legal/tracking/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -158,6 +158,11 @@ export default async function ProjectLegalPage({
     loadLegalInventory(project, access),
     loadConfirmation(project, access),
   ]);
+  // JUR-06: before confirming, the démarches the plan will hold.
+  const preview =
+    confirmation.status !== "confirmed" && confirmation.openQuestions === 0
+      ? await proposeLegalPlan(project, access)
+      : [];
   const initialQuestion =
     typeof query.question === "string" ? query.question : null;
   return (
@@ -182,6 +187,7 @@ export default async function ProjectLegalPage({
           <ConfirmationPanel
             projectId={project.id}
             confirmation={confirmation}
+            planPreview={preview.map((item) => item.kind)}
           />
         </>
       }

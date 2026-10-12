@@ -53,7 +53,9 @@ export const legal = {
       },
       declarations: {
         title: "Déclarations",
-        description: "Dépôts auprès des sociétés de gestion collective.",
+        // JUR-02: three different things, said once.
+        description:
+          "Dépôts auprès des sociétés de gestion collective. La déclaration dépose l'œuvre ; l'ISWC est le numéro que la SACEM donne ensuite à l'œuvre ; l'ISRC identifie l'enregistrement et vient du producteur : l'un n'entraîne pas l'autre.",
       },
       flags: {
         title: "Points signalés au cadrage",
@@ -70,7 +72,14 @@ export const legal = {
       featuring: "Artiste interprète · Featuring",
       noContract: "Aucun contrat",
       declarations: "Déclarations",
+      secured: {
+        master: "Droits master sécurisés",
+        publishing: "Droits d'édition sécurisés",
+      },
     },
+    declarationRef: (reference: string) => `Réf. ${reference}`,
+    declarationOn: (date: string) => `déposée le ${date}`,
+    declarationNoDate: "date du dépôt non renseignée",
     states: {
       filled: "Renseigné",
       catalogArtist: "Artiste du catalogue",
@@ -78,8 +87,21 @@ export const legal = {
       noContributor: "Aucun contributeur",
       noContract: "Aucun contrat rattaché au projet",
       noDeclaration: "Aucune déclaration déposée",
-      flagged: "Signalé au cadrage",
+      // JUR-01: a split filled in is not yet rights secured.
+      splitFilled: "Répartition renseignée",
+      securedConfirmed: "Confirmée par chaque personne",
+      securedToConfirm: "À faire confirmer par chaque personne",
+      securedSigned: "Contrat signé avec chaque partie",
+      securedMissing: (parties: string) =>
+        `Contrat signé manquant : ${parties}`,
       flaggedProposed: "Proposé, à confirmer au cadrage",
+      // JUR-03: what to do with a confirmed constraint.
+      flaggedToHandle:
+        "À traiter : ouvrir un emprunt, ou dire qu'il n'y a rien à sécuriser",
+      flaggedFollowed: (n: number) =>
+        n === 1
+          ? "Suivi dans l'emprunt du projet : vérifiez qu'il le couvre"
+          : `Suivi dans les ${n} emprunts du projet : vérifiez qu'ils le couvrent`,
     },
     sources: {
       title: "Fiche du titre",
@@ -89,6 +111,7 @@ export const legal = {
       declarations: "Droits du titre",
       contracts: "Contrats",
       framing: "Cadrage",
+      legalSplits: "Répartitions du Juridique",
     },
   },
   intake: {
@@ -128,8 +151,17 @@ export const legal = {
       },
     },
     project: "Projet",
-    progress: (answered: number, total: number) =>
-      `${answered} question${answered > 1 ? "s" : ""} sur ${total} ${answered > 1 ? "ont" : "a"} une réponse`,
+    // JUR-05: confirmed here, taken from the Cadrage, still open.
+    progressDetail: (confirmed: number, proposed: number, open: number) =>
+      [
+        `${confirmed} confirmée${confirmed > 1 ? "s" : ""}`,
+        proposed > 0
+          ? `${proposed} reprise${proposed > 1 ? "s" : ""} du Cadrage, à confirmer`
+          : null,
+        open > 0 ? `${open} sans réponse` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
     answerLabel: "Votre réponse",
     // An answer that says « nothing », saved without PO (UX test of
     // 09/10/2026: « Enregistrer » greyed when the right answer was none).
@@ -275,7 +307,29 @@ export const legal = {
         ? "Une question reste sans réponse : répondez-y avant de confirmer."
         : `${count} questions restent sans réponse : répondez-y avant de confirmer.`,
     resume: "Reprendre le cadrage",
-    confirm: "Confirmer le dossier",
+    // JUR-06: the button says what it does.
+    confirm: "Confirmer et générer le plan d'action",
+    preview: {
+      title: "Le plan d'action qui sera généré",
+      empty: "Aucune démarche à prévoir avec le dossier tel qu'il est.",
+      kind: {
+        onboarding: (n: number) =>
+          n === 1
+            ? "1 fiche de renseignements à recueillir"
+            : `${n} fiches de renseignements à recueillir`,
+        contract: (n: number) =>
+          n === 1 ? "1 contrat à préparer" : `${n} contrats à préparer`,
+        splits: (n: number) =>
+          n === 1
+            ? "1 répartition de l'édition à faire confirmer"
+            : `${n} répartitions de l'édition à faire confirmer`,
+        clearance: (n: number) =>
+          n === 1 ? "1 emprunt à sécuriser" : `${n} emprunts à sécuriser`,
+        formality: (n: number) =>
+          n === 1 ? "1 déclaration SACEM" : `${n} déclarations SACEM`,
+      },
+      then: "Vous gardez ou retirez chaque action, et choisissez responsables et échéances avant de lancer le plan. Rien n'est envoyé à personne.",
+    },
     confirming: "Confirmation…",
     confirmed: (date: string, name: string | null) =>
       name
@@ -586,6 +640,14 @@ export const legal = {
       markSigned: "Marquer comme signé",
       signed: "Signé, avec sa preuve",
       openContract: "Ouvrir le contrat",
+      // The fee as recorded, with its source (JUR-15).
+      financial: {
+        title: "Conditions financières",
+        amount: (fee: string, source: string) => `${fee}, ${source}`,
+        fromFiche: "d'après la fiche de renseignements",
+        fromMapping: "saisi dans les contrats nécessaires",
+        none: "aucune rémunération enregistrée",
+      },
       // Which fiche is awaited, for which contract (JUR-10).
       missingFromFiche: (name: string, fields: string) =>
         `Il manque les renseignements de ${name} pour préparer son contrat : ${fields}. Ils arrivent avec sa fiche de renseignements, à l'étape 1 ci-dessus.`,

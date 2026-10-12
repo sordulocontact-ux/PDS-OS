@@ -27,7 +27,9 @@ import { createClient } from "@/lib/supabase/server";
 export type SplitLink = {
   entryId: string;
   name: string;
-  url: string;
+  // Null: the person keeps the link already sent, which opens the new
+  // version (JUR-27).
+  url: string | null;
   email: string | null;
 };
 export type SplitResult<T = undefined> =
@@ -198,7 +200,7 @@ async function sendVersion(
     data: data.map((row) => ({
       entryId: row.entry_id,
       name: nameOf.get(row.entry_id) ?? "",
-      url: `${siteUrl()}${routes.legalSplit(row.token)}`,
+      url: row.token ? `${siteUrl()}${routes.legalSplit(row.token)}` : null,
       email: emailOf.get(row.entry_id) ?? null,
     })),
   };

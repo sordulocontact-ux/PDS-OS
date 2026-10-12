@@ -75,6 +75,8 @@ export async function createContractTemplate(
 export async function setContractTemplateStatus(
   templateId: string,
   status: "validated" | "retired",
+  // Refusing or retiring may say why (JUR-19).
+  reason: string | null = null,
 ): Promise<TemplateActionResult> {
   const t = fr.legalContracts.templates;
   const id = catalogIdSchema.safeParse(templateId);
@@ -82,9 +84,11 @@ export async function setContractTemplateStatus(
   if (!id.success || (status !== "validated" && status !== "retired"))
     return { ok: false, error: fr.auth.errors.forbidden };
   const supabase = await createClient();
+  const why = reason?.trim().slice(0, 2000) || null;
   const { error } = await supabase.rpc("set_contract_template_status", {
     p_template_id: id.data,
     p_status: status,
+    p_reason: why,
   });
   if (error) {
     if (error.code === "42501") return { ok: false, error: t.forbidden };

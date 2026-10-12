@@ -4,6 +4,20 @@ export const legalFormalities = {
   definitions: {
     SACEM_725_EDITED_WORK: "Bulletin SACEM 725 · œuvre éditée",
   } as Record<string, string>,
+  // What an action changed, said once it succeeded (JUR-28).
+  transitions: {
+    generated: "Bulletin généré : à faire signer par chaque signataire.",
+    signed: (signer: string) => `Signature de ${signer} enregistrée.`,
+    partial:
+      "Déclaration partielle enregistrée : le bulletin peut être déposé.",
+    submit:
+      "Dépôt enregistré : en attente de la réponse de la SACEM, à saisir avec « Enregistrer le résultat ».",
+    processing: "Marquée en traitement par la SACEM.",
+    correction:
+      "Correction demandée : les champs concernés sont rouverts dans le dossier.",
+    complete:
+      "Résultat enregistré : la déclaration est terminée et reste dans l'Historique du dossier.",
+  },
   // The declaration's frise, from the dossier to the registration (JUR-26).
   timeline: {
     label: "Avancement de la déclaration",

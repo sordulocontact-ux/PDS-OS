@@ -1,8 +1,10 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
-import { todayInParis } from "@/lib/contracts/types";
+import { contractStateOf, todayInParis } from "@/lib/contracts/types";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
+import { createClient } from "@/lib/supabase/server";
+import { splitStates, type SplitState } from "@/lib/legal/splits/queries";
 import { unlinkedCreditsByName } from "@/lib/facts/credit-contact";
 import { peopleFacts } from "@/lib/legal/people-facts";
 import { agreementFacts, flagFacts } from "@/lib/legal/project-facts";
@@ -34,7 +36,28 @@ export async function loadLegalInventory(
   // (credits, shares, rights, declarations). The database checks it again.
   const readSplits = can(access, "manage_catalog");
   const canEditCatalog = readSplits;
-  const rows = await readInventoryRows(project.id, project.masters, readSplits);
+  const supabase = await createClient();
+  const [rows, splitOf, clearances] = await Promise.all([
+    readInventoryRows(project.id, project.masters, readSplits),
+    readSplits
+      ? splitStates(project.id)
+      : Promise.resolve(new Map<string, SplitState>()),
+    supabase
+      .from("legal_clearances")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", project.id)
+      .neq("status", "abandoned"),
+  ]);
+  // The borrowings the project follows: where a Cadrage constraint goes.
+  const borrowings = clearances.count ?? 0;
+  const today = todayInParis(new Date());
+  // What proves the rights of a complete split (JUR-01): a signed contract
+  // still in force.
+  const signedPartyIds = new Set(
+    rows.contracts
+      .filter((c) => contractStateOf(c, today) === "signed")
+      .flatMap((c) => c.partyIds),
+  );
   const titles = rows.titles.map(titleRow);
 
   const perTitle = (build: (master: InventoryMaster) => LegalFact[]) =>
@@ -74,15 +97,22 @@ export async function loadLegalInventory(
                 master,
                 rows.splitsOf.get(master.id) ?? [],
                 canEditCatalog,
+                {
+                  signedPartyIds,
+                  publishing: splitOf.has(master.id)
+                    ? {
+                        confirmed:
+                          splitOf.get(master.id)!.status === "confirmed",
+                        since: splitOf.get(master.id)!.since,
+                      }
+                    : null,
+                },
               ),
             ),
           ),
         ]
       : []),
-    section(
-      "agreements",
-      agreementFacts(rows.contracts, todayInParis(new Date())),
-    ),
+    section("agreements", agreementFacts(rows.contracts, today)),
     section(
       "declarations",
       perTitle((master) =>
@@ -93,7 +123,7 @@ export async function loadLegalInventory(
         ),
       ),
     ),
-    section("flags", flagFacts(project.id, rows.flags)),
+    section("flags", flagFacts(project.id, rows.flags, borrowings)),
   ];
 
   return {

@@ -2489,6 +2489,37 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   pas). La déclaration a sa frise (`formalityTimeline` : dossier, bulletin, signatures « x sur
   y » ou partielle, dépôt, enregistrement ; `ProcessingSteps idle`), et chaque signature
   s'enregistre par « Enregistrer la signature de X » avec « Comment X a signé » expliqué.
+### Le reste du Juridique (retours du 11/10/2026, lot 4)
+
+- **Droits (JUR-01)** : une répartition à 100 % est « Répartition renseignée » ; quand elle est
+  complète, un second fait dit si les droits sont sécurisés (`securedFact`) : master = un contrat
+  signé et en vigueur avec chaque partie qui a une part (sinon « Contrat signé manquant : … »),
+  édition = la répartition confirmée par chaque personne dans le Juridique.
+- **Déclarations (JUR-02)** : chaque dépôt montre sa référence et sa date ; la section explique
+  déclaration / ISWC / ISRC.
+- **Alertes du Cadrage (JUR-03)** : une contrainte proposée se confirme au Cadrage ; confirmée,
+  elle se traite dans les Emprunts (« À traiter… », ou « Suivi dans les n emprunts du projet »).
+- **Droits d'agir (JUR-04)** : sur le Juridique, un titulaire de `manage_legal` qui n'est pas
+  responsable du projet ne voit plus « Lecture seule » mais « la direction et les chefs de
+  projet y agissent ».
+- **Cadrage juridique (JUR-05)** : compteur en trois parts (confirmées · reprises du Cadrage, à
+  confirmer · sans réponse).
+- **Confirmation (JUR-06)** : « Confirmer et générer le plan d'action », avec avant la liste des
+  démarches qui seront créées (`proposeLegalPlan`, la même proposition que le lancement).
+- **Contrats nécessaires (JUR-09, JUR-15)** : « Confirmer les contrats nécessaires » (ce n'est ni
+  valider leur contenu ni les générer) et l'étape suivante dite ; le panneau d'un contrat montre
+  les conditions financières (montant, source : fiche ou contrats nécessaires).
+- **Modèles (JUR-19)** : le DG refuse un brouillon avec sa raison
+  (`set_contract_template_status(id, status, reason)`, `retired_reason` / `retired_by`, migration
+  `20261012100501`), visible sur la page du modèle ; retirer peut dire pourquoi.
+- **Liens stables (JUR-27)** : une nouvelle version d'une répartition garde le lien déjà envoyé
+  à chaque personne (même contact, sinon même nom) : il ouvre la nouvelle version, les réponses
+  aux versions précédentes restent avec leur preuve ; seul un nouveau venu reçoit un lien
+  (`propose_split_version`, migration `20261012100601`, « Même lien qu'avant » dans la fenêtre).
+- **Transitions et journal (JUR-14, JUR-28, JUR-29)** : chaque action SACEM dit ce qu'elle a
+  changé (`useLegalAction` `done`) ; l'Historique s'exporte en CSV (UTC et Paris) ; les champs
+  corrigés d'une fiche ne sont plus répétés dans ses réponses.
+
 - **Reste à part (lot suivant)** : relation éditeur ↔ créateurs et coédition (JUR-22, JUR-25),
   répartitions Phono / DEP / DR en blocs (JUR-23), assistant SACEM pas à pas (JUR-21), assistant
   de création de contrat (JUR-18).

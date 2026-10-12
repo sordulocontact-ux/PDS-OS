@@ -89,16 +89,18 @@ export function useShowSplitLinks() {
         key: l.entryId,
         label: l.name,
         url: l.url,
-        email: l.email
-          ? {
-              href: mailtoHref(
-                l.email,
-                t.emailSubject(title),
-                t.emailBody(l.name, title, l.url),
-              ),
-              label: t.email,
-            }
-          : undefined,
+        note: t.kept,
+        email:
+          l.email && l.url
+            ? {
+                href: mailtoHref(
+                  l.email,
+                  t.emailSubject(title),
+                  t.emailBody(l.name, title, l.url),
+                ),
+                label: t.email,
+              }
+            : undefined,
       })),
       copyLabel: t.copy,
       copiedLabel: t.copied,

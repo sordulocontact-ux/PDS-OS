@@ -1,6 +1,15 @@
 import Link from "next/link";
 
 import { ConfirmButton } from "@/components/legal/confirmation/confirm-button";
+import type { PlanItemKind } from "@/lib/legal/plan/proposal";
+
+const PLAN_KINDS: PlanItemKind[] = [
+  "onboarding",
+  "contract",
+  "splits",
+  "clearance",
+  "formality",
+];
 import { SynthesisAction } from "@/components/legal/confirmation/synthesis-action";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -50,9 +59,12 @@ export function ConfirmationStatus({
 export function ConfirmationPanel({
   projectId,
   confirmation: c,
+  planPreview,
 }: {
   projectId: string;
   confirmation: Confirmation;
+  // The kinds of the démarches the plan will hold, one per action (JUR-06).
+  planPreview: PlanItemKind[];
 }) {
   const t = fr.legal.confirmation;
   if (c.status === "not_started" || c.openQuestions > 0) return null;
@@ -87,9 +99,33 @@ export function ConfirmationPanel({
           </section>
         ))}
         {!confirmed && (
-          <div className="flex flex-col items-end gap-3">
-            <p className="text-sm text-muted-foreground">{t.notice}</p>
-            <ConfirmButton projectId={projectId} />
+          <div className="flex flex-col gap-3">
+            {/* What confirming creates, said before (JUR-06). */}
+            <section className="flex flex-col gap-1 rounded-xl border p-4">
+              <h3 className="font-medium">{t.preview.title}</h3>
+              {planPreview.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {t.preview.empty}
+                </p>
+              ) : (
+                <ul className="flex list-disc flex-col gap-0.5 pl-5 text-sm">
+                  {PLAN_KINDS.filter((kind) => planPreview.includes(kind)).map(
+                    (kind) => (
+                      <li key={kind}>
+                        {t.preview.kind[kind](
+                          planPreview.filter((k) => k === kind).length,
+                        )}
+                      </li>
+                    ),
+                  )}
+                </ul>
+              )}
+              <p className="text-sm text-muted-foreground">{t.preview.then}</p>
+            </section>
+            <div className="flex flex-col items-end gap-3">
+              <p className="text-sm text-muted-foreground">{t.notice}</p>
+              <ConfirmButton projectId={projectId} />
+            </div>
           </div>
         )}
       </div>

@@ -15,6 +15,7 @@ import {
 } from "@/lib/catalog/master/rules";
 import { groupOf } from "@/lib/facts/types";
 import { fr } from "@/lib/i18n/fr";
+import { formatDate } from "@/lib/release/format";
 import {
   TITLE_IDENTIFIERS,
   type LegalFact,
@@ -80,16 +81,30 @@ const SPLIT_STATUS: Record<string, LegalFactStatus> = {
   empty: "missing",
 };
 
+// What proves the rights behind a complete split (JUR-01): the signed
+// contracts of the project's parties, and the publishing split confirmed by
+// each person in the Juridique.
+export type SplitProof = {
+  signedPartyIds: ReadonlySet<string>;
+  publishing: { confirmed: boolean; since: string | null } | null;
+};
+
+/**
+ * Two facts per split kind (JUR-01): the split as filled in (« Répartition
+ * renseignée »), and, once it is complete, whether the rights are secured
+ * (« Droits sécurisés ») — never the same thing.
+ */
 export function splitFacts(
   master: InventoryMaster,
   splits: MasterSplit[],
   canEdit: boolean,
+  proof: SplitProof,
 ): LegalFact[] {
   const labels = fr.masterPage.splits;
-  return (["master", "publishing"] as const satisfies SplitKind[]).map(
+  return (["master", "publishing"] as const satisfies SplitKind[]).flatMap(
     (kind) => {
       const total = splitTotal(splits, kind);
-      return {
+      const filled: LegalFact = {
         key: `split-${kind}-${master.id}`,
         label: labels.kinds[kind],
         detail: null,
@@ -98,7 +113,7 @@ export function splitFacts(
         status: SPLIT_STATUS[total.status],
         statusLabel:
           total.status === "complete"
-            ? labels.status.complete
+            ? t.states.splitFilled
             : total.status === "empty"
               ? labels.status.empty
               : labels.status.incomplete(formatShare(total.remaining)),
@@ -113,8 +128,51 @@ export function splitFacts(
             }
           : undefined,
       };
+      if (total.status !== "complete") return [filled];
+      return [filled, securedFact(master, kind, splits, proof)];
     },
   );
+}
+
+function securedFact(
+  master: InventoryMaster,
+  kind: SplitKind,
+  splits: MasterSplit[],
+  proof: SplitProof,
+): LegalFact {
+  const base = {
+    key: `split-secured-${kind}-${master.id}`,
+    label: t.facts.secured[kind],
+    detail: null,
+    group: groupOf(master),
+  };
+  if (kind === "publishing") {
+    const confirmed = proof.publishing?.confirmed ?? false;
+    return {
+      ...base,
+      source: t.sources.legalSplits,
+      status: confirmed ? "known" : "to_confirm",
+      statusLabel: confirmed
+        ? t.states.securedConfirmed
+        : t.states.securedToConfirm,
+      href: routes.masterSplits(master.id),
+    };
+  }
+  // Master: every party with a share has a signed contract in the project.
+  const parties = splits.filter((s) => s.kind === kind && s.share > 0);
+  const missing = parties.filter(
+    (s) => !s.contactId || !proof.signedPartyIds.has(s.contactId),
+  );
+  return {
+    ...base,
+    source: t.sources.contracts,
+    status: missing.length === 0 ? "known" : "to_confirm",
+    statusLabel:
+      missing.length === 0
+        ? t.states.securedSigned
+        : t.states.securedMissing(missing.map((s) => s.party).join(", ")),
+    href: routes.masterSplits(master.id),
+  };
 }
 const DECLARATION_STATUS: Record<DeclarationStatus, LegalFactStatus> = {
   confirmed: "known",
@@ -158,7 +216,16 @@ export function declarationFacts(
   return rows.map((declaration) => ({
     key: `declaration-${declaration.organism}-${master.id}`,
     label: labels.organisms[declaration.organism],
-    detail: declaration.reference,
+    // Its reference and the day it was filed (JUR-02): what the state rests on.
+    detail:
+      [
+        declaration.reference ? t.declarationRef(declaration.reference) : null,
+        declaration.date
+          ? t.declarationOn(formatDate(declaration.date))
+          : t.declarationNoDate,
+      ]
+        .filter(Boolean)
+        .join(" · ") || null,
     group: groupOf(master),
     source: t.sources.declarations,
     status: DECLARATION_STATUS[declaration.status],

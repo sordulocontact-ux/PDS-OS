@@ -31,6 +31,8 @@ export type ContractTemplate = {
   status: TemplateStatus;
   validatedBy: string | null;
   validatedAt: string | null;
+  // Why the director refused it, or why it was retired (JUR-19).
+  retiredReason: string | null;
   source: { path: string; name: string } | null;
 };
 
@@ -54,7 +56,7 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
   const { data, error } = await supabase
     .from("contract_templates")
     .select(
-      "id, series_id, version, name, type, roles, usage, body, fields, status, validated_by, validated_at, source_path, source_name",
+      "id, series_id, version, name, type, roles, usage, body, fields, status, validated_by, validated_at, retired_reason, source_path, source_name",
     )
     .order("name")
     .order("version", { ascending: false })
@@ -92,6 +94,7 @@ export async function listTemplates(): Promise<ContractTemplate[]> {
       ? (nameOf.get(row.validated_by) ?? null)
       : null,
     validatedAt: row.validated_at,
+    retiredReason: row.retired_reason,
     source:
       row.source_path && row.source_name
         ? { path: row.source_path, name: row.source_name }

@@ -64,7 +64,13 @@ export function StepsPanel({
             <Button
               size="sm"
               disabled={pending}
-              onClick={() => run(() => generateFormality(projectId, f.id))}
+              onClick={() =>
+                run(
+                  () => generateFormality(projectId, f.id),
+                  undefined,
+                  fr.legalFormalities.transitions.generated,
+                )
+              }
             >
               {t.generate}
             </Button>
@@ -89,7 +95,11 @@ export function StepsPanel({
             variant="outline"
             disabled={pending}
             onClick={() =>
-              run(() => formalityStep(projectId, f.id, "processing", ""))
+              run(
+                () => formalityStep(projectId, f.id, "processing", ""),
+                undefined,
+                fr.legalFormalities.transitions.processing,
+              )
             }
           >
             {t.processing}
@@ -205,6 +215,7 @@ export function StepsPanel({
                             extra.iswc,
                           ),
                   close,
+                  fr.legalFormalities.transitions[open ?? "complete"],
                 )
               }
             >

@@ -79,6 +79,8 @@ export const legalSplits = {
     notInNetwork: "pas encore dans le Réseau",
   },
   links: {
+    // JUR-27: the person keeps the link already sent.
+    kept: "Même lien qu'avant : il ouvre maintenant cette version, rien à renvoyer.",
     title: (title: string) => `Liens de confirmation · ${title}`,
     body: "Envoyez à chaque personne son lien (WhatsApp, e-mail…). Il n'est affiché qu'une fois : en cas de perte, créez-en un nouveau, l'ancien ne marchera plus. Il expire dans 30 jours.",
     copy: "Copier le lien",

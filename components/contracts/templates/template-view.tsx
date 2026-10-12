@@ -19,6 +19,11 @@ export function TemplateView({ template }: { template: TemplateSeries }) {
           )}
         </p>
       )}
+      {template.status === "retired" && template.retiredReason && (
+        <p className="text-sm text-muted-foreground">
+          {t.retiredBecause(template.retiredReason)}
+        </p>
+      )}
       {template.source && (
         <section className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">{t.source.title}</h3>

@@ -72,10 +72,16 @@ export function agreementFacts(
     };
   });
 }
-/** A rights constraint of the Cadrage is a point to check, never settled. */
+/**
+ * A rights constraint of the Cadrage, said as what to do (JUR-03): a
+ * proposal is confirmed at the Cadrage; a confirmed one is handled in the
+ * Emprunts (open one, or say nothing is to secure), and reads « suivi dans
+ * les emprunts » once the project has some. Never settled by itself.
+ */
 export function flagFacts(
   projectId: string,
   flags: InventoryFlag[],
+  borrowings: number,
 ): LegalFact[] {
   return flags.map((flag) => ({
     key: `flag-${flag.id}`,
@@ -83,7 +89,13 @@ export function flagFacts(
     detail: null,
     source: t.sources.framing,
     status: "to_confirm",
-    statusLabel: flag.proposed ? t.states.flaggedProposed : t.states.flagged,
-    href: routes.projectFramingStep(projectId, "legal"),
+    statusLabel: flag.proposed
+      ? t.states.flaggedProposed
+      : borrowings > 0
+        ? t.states.flaggedFollowed(borrowings)
+        : t.states.flaggedToHandle,
+    href: flag.proposed
+      ? routes.projectFramingStep(projectId, "legal")
+      : routes.projectLegalStep(projectId, "clearances"),
   }));
 }

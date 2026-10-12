@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 import { TemplateForm } from "@/components/contracts/templates/template-form";
 import { TemplateView } from "@/components/contracts/templates/template-view";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ReasonForm } from "@/components/ui/reason-form";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions, type RowAction } from "@/components/ui/row-actions";
 import { fr } from "@/lib/i18n/fr";
@@ -33,8 +33,10 @@ export function TemplateRowActions({
 }) {
   const t = fr.legalContracts.templates;
   const router = useRouter();
-  const [open, setOpen] = useState<"view" | "version" | "retire" | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [open, setOpen] = useState<
+    "view" | "version" | "retire" | "refuse" | null
+  >(null);
+  const [, startTransition] = useTransition();
 
   const setStatus = (status: "validated" | "retired") =>
     startTransition(async () => {
@@ -58,6 +60,17 @@ export function TemplateRowActions({
             label: t.validate,
             icon: IconCheck,
             onSelect: () => setStatus("validated"),
+          },
+        ]
+      : []),
+    // A draft refused by the director, with its reason (JUR-19).
+    ...(template.can.validate
+      ? [
+          {
+            key: "refuse",
+            label: t.refuse,
+            icon: IconXmark,
+            onSelect: () => setOpen("refuse"),
           },
         ]
       : []),
@@ -127,19 +140,27 @@ export function TemplateRowActions({
           }}
         />
       </FormDialog>
-      <ConfirmDialog
-        open={open === "retire"}
-        onOpenChange={(next) => !next && !pending && setOpen(null)}
-        title={t.confirmRetireTitle}
-        description={t.confirmRetireBody}
-        cancelLabel={t.cancel}
+      <FormDialog
+        open={open === "retire" || open === "refuse"}
+        onOpenChange={(next) => !next && setOpen(null)}
+        title={open === "refuse" ? t.refuseTitle : t.confirmRetireTitle}
+        description={open === "refuse" ? t.refuseBody : t.confirmRetireBody}
         closeLabel={t.close}
-        confirmLabel={t.retire}
-        pendingLabel={t.retire}
-        pending={pending}
-        destructive
-        onConfirm={() => setStatus("retired")}
-      />
+      >
+        <ReasonForm
+          label={open === "refuse" ? t.refuseReason : t.retireReason}
+          required={open === "refuse"}
+          submitLabel={open === "refuse" ? t.refuse : t.retire}
+          doneMessage={open === "refuse" ? t.refused : t.retired}
+          run={(reason) =>
+            setContractTemplateStatus(template.id, "retired", reason)
+          }
+          onDone={() => {
+            setOpen(null);
+            router.refresh();
+          }}
+        />
+      </FormDialog>
     </>
   );
 }

@@ -57,6 +57,16 @@ export const legalContracts = {
     },
     states: { draft: "À valider", validated: "Validé", retired: "Retiré" },
     // Who decides on a draft (JUR-19), said to whoever cannot.
+    // A draft refused by the director, with its reason (JUR-19).
+    refuse: "Refuser",
+    refuseTitle: "Refuser ce modèle ?",
+    refuseBody:
+      "Il ne sera proposé pour aucun contrat. La raison reste visible avec cette version ; une correction se fait par une nouvelle version.",
+    refuseReason: "Pourquoi le refuser",
+    refused: "Modèle refusé.",
+    retireReason: "Pourquoi le retirer",
+    retired: "Modèle retiré.",
+    retiredBecause: (reason: string) => `Retiré ou refusé : ${reason}`,
     whoValidates:
       "À valider par le directeur général : tant qu'il n'est pas validé, ce modèle n'est proposé pour aucun contrat.",
     backToLibrary: "Tous les modèles",
@@ -157,7 +167,7 @@ export const legalContracts = {
   agreements: {
     title: "Contrats",
     description:
-      "Chaque personne créditée, l'accord qu'il lui faut et le modèle proposé. Validez les contrats à prévoir : chaque contrat est préparé automatiquement dès que ses informations sont là, puis relu et validé avant l'envoi.",
+      "Chaque personne créditée, l'accord qu'il lui faut et le modèle proposé. Confirmez les contrats nécessaires : chaque contrat est ensuite préparé automatiquement dès que ses informations sont là, puis relu et validé avant l'envoi.",
     back: "Retour au suivi",
     templates: "Modèles de contrat",
     noTemplate:
@@ -165,12 +175,13 @@ export const legalContracts = {
     empty: "Aucune personne créditée sur les titres du projet.",
     mappingTitle: "Contrats à prévoir",
     mappingDescription:
-      "Proposée d'après les rôles et les modèles validés. Corrigez-la si besoin, puis validez-la en une fois.",
+      "Proposés d'après les rôles et les modèles validés. Corrigez si besoin, puis confirmez en une fois quels contrats sont nécessaires : ce n'est ni valider leur contenu, ni les générer. Étape suivante : chaque contrat se prépare seul dès que ses informations sont là.",
     mappingApproved: (name: string, date: string) =>
-      `Contrats à prévoir validés par ${name} le ${date}.`,
+      `Contrats nécessaires confirmés par ${name} le ${date}.`,
     editMapping: "Modifier les contrats à prévoir",
-    approveMapping: "Valider les contrats à prévoir",
-    approving: "Validation…",
+    // JUR-09: the need is confirmed, not the content nor the generation.
+    approveMapping: "Confirmer les contrats nécessaires",
+    approving: "Confirmation…",
     cancelEdit: "Annuler",
     columns: {
       person: "Personne",
@@ -187,7 +198,7 @@ export const legalContracts = {
     existing: (title: string) => `Contrat existant : ${title}`,
     noContact: "Fiche à préparer d'abord",
     states: {
-      unmapped: "Contrats à prévoir à valider",
+      unmapped: "Contrats nécessaires à confirmer",
       not_needed: "Pas d'accord",
       needs_info: "Informations manquantes",
       ready_to_generate: "Prêt à générer",
@@ -244,7 +255,7 @@ export const legalContracts = {
     sendLabel: "Comment l'avez-vous envoyé ?",
     sendHint: "Canal, destinataire, date : c'est la preuve d'envoi.",
     events: {
-      "contract_mapping.approved": "Contrats à prévoir validés",
+      "contract_mapping.approved": "Contrats nécessaires confirmés",
       "contract.generated": "Contrat généré",
       "contract.revised": "Clause modifiée",
       "contract.submitted": "Envoyé en validation",
