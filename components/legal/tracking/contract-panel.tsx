@@ -8,9 +8,9 @@ import { toast } from "sonner";
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-slot";
+import { ContractValueList } from "@/components/legal/contracts/contract-value-list";
 import { NextCard } from "@/components/legal/tracking/next-card";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { advanceContract } from "@/lib/contracts/actions";
@@ -18,10 +18,10 @@ import type { ContractProof } from "@/lib/contracts/proof";
 import { todayInParis } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
+import { isBlocking } from "@/lib/legal/contracts/completeness";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
 import { withReturn } from "@/lib/ui/return-to";
-import { factTone } from "@/lib/ui/state-tones";
 
 /** The values of the contract, each with its source (« Rempli
  * automatiquement » / « Manquant », ticket Juridique 03). */
@@ -34,11 +34,13 @@ function Values({
   open: boolean;
   projectId: string;
 }) {
-  const t = fr.legalContracts;
   const p = fr.legal.panels.contract;
-  const missingFields = row.fields.filter((f) => f.value === null);
-  const missing = missingFields.length;
-  const fromFiche = missingFields.filter((f) => f.home === "fiche");
+  const blocking = row.fields.filter((f) => isBlocking(f.status));
+  const missing = blocking.length;
+  // Not asked yet: the fiche is to prepare or send (a sent one is waiting).
+  const fromFiche = blocking.filter(
+    (f) => f.status === "missing" && f.home === "fiche",
+  );
   // Back to this person's panel once the value is completed (JUR-10).
   const back = `${routes.projectLegalStep(projectId, "plan")}?ligne=person:${row.key}`;
   const fixHref = (home: string): string | null =>
@@ -48,7 +50,9 @@ function Values({
         ? routes.projectLegalStep(projectId, "contracts")
         : home === "credits"
           ? routes.projectLegal(projectId)
-          : null;
+          : home === "fiche"
+            ? routes.projectLegalStep(projectId, "forms")
+            : null;
   return (
     <details open={open} className="group rounded-xl border p-4">
       <summary className="cursor-pointer list-none text-sm text-muted-foreground marker:hidden">
@@ -62,44 +66,13 @@ function Values({
           )}
         </ToneCallout>
       )}
-      <ul className="mt-3 flex flex-col divide-y">
-        {row.fields.map((field) => (
-          <li
-            key={field.id}
-            className="flex flex-col gap-1 py-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
-          >
-            <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="text-sm text-muted-foreground">
-                {field.label}
-              </span>
-              <span className="font-medium break-words">
-                {field.value ?? t.fillIn[field.home]}
-              </span>
-            </span>
-            <span className="flex shrink-0 flex-col gap-1 sm:items-end">
-              <StatusBadge
-                tone={factTone[field.value ? "known" : "missing"]}
-                size="sm"
-              >
-                {field.value ? t.agreements.filled : t.agreements.missing}
-              </StatusBadge>
-              {field.source && (
-                <span className="text-sm text-muted-foreground">
-                  {t.sources[field.source]}
-                </span>
-              )}
-              {!field.value && fixHref(field.home) && (
-                <Link
-                  href={fixHref(field.home)!}
-                  className="text-sm font-medium underline underline-offset-4"
-                >
-                  {p.complete}
-                </Link>
-              )}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <div className="mt-3">
+        <ContractValueList
+          fields={row.fields}
+          personName={row.name}
+          fixHref={(field) => fixHref(field.home)}
+        />
+      </div>
     </details>
   );
 }

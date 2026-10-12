@@ -654,8 +654,8 @@ export const legal = {
       complete: "Compléter",
       values: (total: number, missing: number) =>
         missing > 0
-          ? `Valeurs du contrat · ${missing} manquante${missing > 1 ? "s" : ""} sur ${total}`
-          : `Valeurs du contrat · ${total}, toutes remplies`,
+          ? `Valeurs du contrat · ${missing} bloquante${missing > 1 ? "s" : ""} sur ${total}`
+          : `Valeurs du contrat · ${total}, rien ne bloque`,
       failed: "L'action n'a pas pu être faite. Réessayez.",
     },
     split: {

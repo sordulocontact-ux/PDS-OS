@@ -11,6 +11,13 @@ import {
   type FieldSource,
 } from "@/lib/legal/contracts/fields";
 import {
+  isBlocking,
+  providerOf,
+  valueStatus,
+  type ValueProvider,
+  type ValueStatus,
+} from "@/lib/legal/contracts/completeness";
+import {
   agreementStateOf,
   type AgreementState,
 } from "@/lib/legal/contracts/state";
@@ -35,6 +42,10 @@ export type AgreementField = {
   source: FieldSource | null;
   // Where it is kept: where a missing value is filled in.
   home: FieldSource;
+  // JUR-16: its state, whether it blocks, who provides it.
+  status: ValueStatus;
+  required: boolean;
+  provider: ValueProvider;
 };
 
 export type AgreementRow = {
@@ -76,6 +87,8 @@ export type MappingInput = {
   ficheFeeOf: Map<string, number>;
   financialNeedOf: Map<string, number>;
   mappingApproved: boolean;
+  // Contacts whose fiche is out, not back yet (JUR-16).
+  ficheWaitingOf?: Set<string>;
 };
 
 const overlap = (a: readonly string[], b: readonly string[]) =>
@@ -121,16 +134,32 @@ export function agreementRows(input: MappingInput): AgreementRow[] {
       : null;
     const fields: AgreementField[] = (template?.fields ?? []).map((id) => {
       const found = values && isContractField(id) ? values[id] : null;
+      const home = isContractField(id) ? FIELD_HOME[id] : "fiche";
+      const status = valueStatus({
+        id,
+        value: found?.value ?? null,
+        source: found?.source ?? null,
+        notApplicable: found?.notApplicable === true,
+        ficheWaiting: person.contactId
+          ? (input.ficheWaitingOf?.has(person.contactId) ?? false)
+          : false,
+      });
       return {
         id,
         label: fr.legalContracts.fields[id] ?? id,
         value: found?.value ?? null,
         source: found?.source ?? null,
-        home: isContractField(id) ? FIELD_HOME[id] : "fiche",
+        home,
+        status,
+        // Every value its template writes is required, unless it does not
+        // apply to this person.
+        required: status !== "not_applicable",
+        provider: providerOf(home),
       };
     });
     const ready =
-      template?.status === "validated" && fields.every((f) => f.value !== null);
+      template?.status === "validated" &&
+      fields.every((f) => !isBlocking(f.status));
 
     return {
       key: person.key,

@@ -2718,6 +2718,16 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   est l'étape 1 du même panneau) ; une valeur manquante d'ailleurs a « Compléter » (fiche Réseau
   avec `?retour=` qui rouvre le panneau, contrats à prévoir, État des lieux). `safeReturn` accepte
   désormais une requête simple (`?ligne=…`) après un chemin de projet.
+- **Complétude d'un contrat (JUR-16, lot 10)** : chaque valeur d'un modèle a un état calculé par
+  le code (`lib/legal/contracts/completeness.ts`) : Rempli, À vérifier (repris du Réseau, la fiche
+  ne l'a pas confirmé, ne bloque pas), Sans objet (SIREN et raison sociale d'une personne qui agit
+  en personne physique, IPI sans société de gestion : d'après sa fiche, jamais supposé ; le contrat
+  écrit « Sans objet »), En attente de la fiche (envoyée, pas revenue), Invalide (e-mail, SIREN /
+  SIRET, IPI, téléphone hors format), Manquant. Les trois derniers **bloquent** la génération
+  (`agreementRows`, `ready`) ; chacun dit s'il est obligatoire, qui le fournit (la personne par sa
+  fiche, le chef de projet, la direction) et mène à l'écran de correction (fiche → Fiches de
+  renseignements). Même liste dans le panneau du plan et la fenêtre « Générer »
+  (`ContractValueList`) ; recalculée par le serveur à chaque changement (`ProjectLive`).
 - **Fiches (JUR-11, JUR-13, JUR-14)** : `legal_forms.opened_at`, noté une fois par
   `note_legal_form_opened` (anon) à l'ouverture de `/f/…` (« lien ouvert le … » dans la liste) ;
   une fiche reçue notifie qui l'a préparée et le responsable du projet (`legal_form_received`,

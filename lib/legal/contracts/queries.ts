@@ -65,9 +65,9 @@ export async function loadAgreements(
         .eq("project_id", project.id),
       supabase
         .from("legal_forms")
-        .select("id, contact_id")
+        .select("id, contact_id, status")
         .eq("project_id", project.id)
-        .eq("status", "complete"),
+        .neq("status", "revoked"),
       supabase
         .from("financial_needs")
         .select("contract_id, amount_cents")
@@ -98,10 +98,22 @@ export async function loadAgreements(
     if (result.error)
       console.error(`loadAgreements ${scope}:`, result.error.message);
 
+  // Only complete fiches give values; the others still wait for the
+  // person (JUR-16: « en attente d'un tiers »).
+  const complete = (forms.data ?? []).filter((f) => f.status === "complete");
+  const ficheWaitingOf = new Set(
+    (forms.data ?? [])
+      .filter(
+        (f) =>
+          f.status !== "complete" &&
+          !complete.some((c) => c.contact_id === f.contact_id),
+      )
+      .map((f) => f.contact_id),
+  );
   const ficheRoles = await submittedRoles(
     supabase,
-    (forms.data ?? []).map((f) => f.id),
-    new Map((forms.data ?? []).map((f) => [f.id, f.contact_id])),
+    complete.map((f) => f.id),
+    new Map(complete.map((f) => [f.id, f.contact_id])),
   );
   // The roles a person ticked on their fiche count for their contract too.
   const people = formPeople(rows).map((person) => {
@@ -114,7 +126,7 @@ export async function loadAgreements(
       : person;
   });
   const contactIds = people.flatMap((p) => (p.contactId ? [p.contactId] : []));
-  const formIds = (forms.data ?? []).map((f) => f.id);
+  const formIds = complete.map((f) => f.id);
   const [contacts, details, submissions, approver] = await Promise.all([
     contactIds.length > 0
       ? supabase
@@ -184,9 +196,7 @@ export async function loadAgreements(
 
   // « Rémunération convenue » of the latest complete fiche, when it is a
   // plain amount.
-  const contactOfForm = new Map(
-    (forms.data ?? []).map((f) => [f.id, f.contact_id]),
-  );
+  const contactOfForm = new Map(complete.map((f) => [f.id, f.contact_id]));
   const ficheFeeOf = new Map<string, number>();
   for (const s of submissions.data ?? []) {
     const contact = contactOfForm.get(s.form_id);
@@ -220,6 +230,7 @@ export async function loadAgreements(
         (money.data ?? []).map((m) => [m.contract_id, m.amount_cents]),
       ),
       mappingApproved: approval.data !== null,
+      ficheWaitingOf,
     }),
     hasValidatedTemplate: templates.some((t) => t.status === "validated"),
     approval: approval.data

@@ -22,7 +22,18 @@ export type ValueContext = {
   organizationName: string | null;
 };
 
-export type FieldValue = { value: string; source: FieldSource } | null;
+export type FieldValue = {
+  value: string;
+  source: FieldSource;
+  // JUR-16: not asked for this person (« Sans objet » in the contract).
+  notApplicable?: true;
+} | null;
+
+const notApplicable: FieldValue = {
+  value: fr.legalContracts.notApplicable,
+  source: "fiche",
+  notApplicable: true,
+};
 
 const text = (value: string | null | undefined) => {
   const clean = value?.trim();
@@ -54,12 +65,20 @@ function read(id: ContractFieldId, ctx: ValueContext): FieldValue {
       return from(d.address, "fiche");
     case "personne.statut":
       return from(fr.legalForms.options.entity_type[d.entity_type], "fiche");
+    // Acting as a person: no company, no SIREN. No collecting society: no
+    // IPI (JUR-16). Said by their fiche, never supposed.
     case "personne.societe":
-      return from(d.company_name, "fiche");
+      return d.entity_type === "person"
+        ? notApplicable
+        : from(d.company_name, "fiche");
     case "personne.siret":
-      return from(d.siret, "fiche");
+      return d.entity_type === "person"
+        ? notApplicable
+        : from(d.siret, "fiche");
     case "personne.ipi":
-      return from(d.ipi_coad, "fiche");
+      return d.management_org === "none"
+        ? notApplicable
+        : from(d.ipi_coad, "fiche");
     case "personne.roles":
       return from(
         ctx.creditRoles

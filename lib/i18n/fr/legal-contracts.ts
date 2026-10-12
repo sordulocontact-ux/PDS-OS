@@ -26,6 +26,33 @@ export const legalContracts = {
     mapping: "Contrats à prévoir",
     organization: "Structure",
   } as Record<string, string>,
+  // JUR-16: a value that does not apply to the person, as the contract says it.
+  notApplicable: "Sans objet",
+  checklist: {
+    status: {
+      filled: "Rempli",
+      unconfirmed: "À vérifier",
+      not_applicable: "Sans objet",
+      waiting: "En attente de la fiche",
+      invalid: "Invalide",
+      missing: "Manquant",
+    },
+    statusHint: {
+      unconfirmed:
+        "Repris du Réseau : la fiche de la personne ne l'a pas confirmé. Ne bloque pas.",
+      not_applicable: "Ne s'applique pas à cette personne d'après sa fiche.",
+      waiting: "Sa fiche est envoyée : la valeur arrivera avec sa réponse.",
+      invalid: "Le format ne convient pas : à corriger à sa source.",
+    } as Record<string, string>,
+    required: "Obligatoire",
+    optional: "Facultatif ici",
+    provider: {
+      person: (name: string) => `Fournie par ${name}, dans sa fiche`,
+      owner: "Fournie par le chef de projet",
+      direction: "Fournie par la direction",
+    },
+    fix: "Compléter",
+  },
   // Where a missing value is filled.
   fillIn: {
     fiche: "à demander dans la fiche de renseignements",

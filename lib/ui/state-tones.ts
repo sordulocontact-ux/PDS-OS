@@ -314,6 +314,16 @@ export const strategyDocumentTone: Record<string, Tone> = {
   superseded: "neutral",
 };
 
+/** A value of a contract to generate (JUR-16): blocking ones in red. */
+export const contractValueTone: Record<string, Tone> = {
+  filled: "success",
+  unconfirmed: "warning",
+  not_applicable: "neutral",
+  waiting: "info",
+  invalid: "danger",
+  missing: "danger",
+};
+
 /** An item of the Brief between two versions (MKT-S1-16). */
 export const briefChangeTone: Record<string, Tone> = {
   added: "success",
