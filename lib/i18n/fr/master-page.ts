@@ -321,6 +321,8 @@ export const masterPage = {
       requestChangesLabel: "Ce qu'il faut corriger",
       requestChangesHint:
         "La demande reste attachée à cette version, même quand la suivante arrive.",
+      requestChangesFromComments:
+        "Repris des retours d'écoute de cette version : corrigez ou complétez avant d'envoyer.",
       approved: "Version validée.",
       changesRequested: "Corrections demandées.",
       reclassify: "Corriger l'étape",
@@ -342,17 +344,23 @@ export const masterPage = {
         inUse:
           "Un projet utilise cette version dans son workflow Master : elle ne se supprime pas.",
       },
+      // Listening notes: anyone, as many as needed; never a decision.
       comments: {
         title: (count: number) =>
-          count === 0 ? "Retours" : `${count} retour${count > 1 ? "s" : ""}`,
+          count === 0 ? "Retours d'écoute" : `Retours d'écoute (${count})`,
         empty: "Aucun retour sur cette version.",
         whole: "Toute la version",
         at: (timecode: string) => `à ${timecode}`,
         bodyLabel: "Votre retour",
         atLabel: "Moment (min:s)",
-        atHint:
-          "Vide = toute la version. « Moment de l'écoute » reprend la position du lecteur.",
-        fromPlayer: "Moment de l'écoute",
+        atHint: "Repris de la position du lecteur. Vide = toute la version.",
+        showMore: (n: number) =>
+          n === 1 ? "Voir l'autre retour" : `Voir les ${n} autres retours`,
+        showLess: "Réduire",
+        add: "Ajouter un retour",
+        addTitle: (label: string) => `Ajouter un retour sur ${label}`,
+        addHint:
+          "Un avis d'écoute, partagé avec l'équipe. Il ne valide rien et ne demande aucune correction.",
         send: "Ajouter le retour",
         sent: "Retour ajouté.",
         atInvalid:

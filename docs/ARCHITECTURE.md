@@ -478,9 +478,15 @@ Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.t
     projet utilise (version du mix, source confirmée : `master_file_in_use`) — politique RLS
     et message clair (`audioDeleteBlock`) ; sinon confirmée avec son impact.
   - **Écoute et retours** : lecteur dans la fiche (plus d'onglet du navigateur), retours
-    horodatés `master_file_comments` (moment en secondes ou toute la version, « Moment de
-    l'écoute » reprend la position du lecteur, clic sur un moment = le lecteur y va), écrits
-    par tout membre, jamais réécrits. Journal : « Version Mix … validée », « Corrections
+    d'écoute horodatés `master_file_comments` (moment en secondes ou toute la version, clic sur
+    un moment = le lecteur y va), écrits par tout membre, jamais réécrits. **Retour ≠ décision**
+    (Sacha, 12/10/2026) : un retour est un avis, sans effet sur la version ; « Demander des
+    corrections » est la décision unique de la version (`manage_catalog`), qui attend une
+    nouvelle version. À l'écran, sous chaque version : les deux derniers retours écrits (dans
+    l'ordre du morceau), « Voir les n autres retours », puis un seul rang de boutons : « Ajouter
+    un retour » en modale (moment repris de la position du lecteur), « Demander des
+    corrections » (note pré-remplie avec les retours de la version, `commentsAsNote`,
+    modifiable) et « Valider cette version ». Jamais de formulaire répété sous chaque version. Journal : « Version Mix … validée », « Corrections
     demandées… », « … reclassé de … en … » (`audio_reviewed`).
   - **Formats** : une seule liste (`AUDIO_FORMATS` : WAV, AIFF, FLAC, MP3, M4A, AAC, OGG) pour
     le sélecteur, le contrôle avant envoi, le serveur (`recordCatalogFile`) et l'aide ; 50 Mo

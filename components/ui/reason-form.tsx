@@ -12,12 +12,16 @@ import type { WriteResult } from "@/lib/utils/write-result";
 const t = fr.dialogs;
 
 /** A dialog's body that asks one written reason before acting (withdraw a
- * proof, invalidate a figure, resolve a blocker, reopen, refuse…). */
+ * proof, invalidate a figure, resolve a blocker, reopen, refuse…).
+ * `defaultValue`: a text already known, to correct rather than retype (the
+ * listening notes of an audio version); `hint` says where it comes from. */
 export function ReasonForm({
   label,
   submitLabel,
   doneMessage,
   required = true,
+  defaultValue,
+  hint,
   run,
   onDone,
 }: {
@@ -25,6 +29,8 @@ export function ReasonForm({
   submitLabel: string;
   doneMessage: string;
   required?: boolean;
+  defaultValue?: string;
+  hint?: string;
   run: (reason: string) => Promise<WriteResult>;
   onDone: () => void;
 }) {
@@ -46,8 +52,10 @@ export function ReasonForm({
         name="reason"
         label={label}
         required={required}
-        rows={3}
+        rows={defaultValue ? 6 : 3}
         maxLength={2000}
+        defaultValue={defaultValue}
+        hint={hint}
         error={missing ? t.reasonRequired : undefined}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}

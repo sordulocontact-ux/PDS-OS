@@ -168,3 +168,28 @@ export function parseTimecode(text: string): number | null {
   const total = Number(h ?? 0) * 3600 + Number(m) * 60 + Number(s);
   return total <= 86399 ? total : null;
 }
+
+/**
+ * The listening notes of a version, as the note of « Demander des
+ * corrections » starts from them (one line each, its moment first, oldest
+ * first), cut to the note's 2 000 characters: never retyped, always
+ * editable before sending.
+ */
+export function commentsAsNote(
+  comments: AudioComment[],
+  whole: string,
+): string {
+  const lines = [...comments]
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    .map(
+      (c) =>
+        `- ${c.atSeconds === null ? whole : formatTimecode(c.atSeconds)} : ${c.body.replace(/\s+/g, " ").trim()}`,
+    );
+  let note = "";
+  for (const line of lines) {
+    const next = note ? `${note}\n${line}` : line;
+    if (next.length > 2000) break;
+    note = next;
+  }
+  return note;
+}

@@ -91,14 +91,8 @@ export function AudioVersionList({
                 canEdit={canEdit}
               />
             </div>
-            {canEdit && version.validation === "pending" && (
-              <AudioReviewButtons
-                masterId={masterId}
-                fileId={version.id}
-                label={label}
-                final={version.audioState === "final_master"}
-              />
-            )}
+            {/* Listen, read the notes, then one row of buttons: add a note
+                (modal), and the decision when one is expected. */}
             <AudioVersionListening
               masterId={masterId}
               fileId={version.id}
@@ -106,6 +100,18 @@ export function AudioVersionList({
               listenUrl={version.openUrl}
               downloadUrl={version.downloadUrl}
               comments={version.comments}
+              decision={
+                canEdit &&
+                version.validation === "pending" && (
+                  <AudioReviewButtons
+                    masterId={masterId}
+                    fileId={version.id}
+                    label={label}
+                    final={version.audioState === "final_master"}
+                    comments={version.comments}
+                  />
+                )
+              }
             />
           </li>
         );
