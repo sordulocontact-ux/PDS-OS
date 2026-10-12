@@ -20,9 +20,12 @@ const t = fr.activations;
 export function ActivationHeader({
   projectId,
   activation: a,
+  briefVersion = null,
 }: {
   projectId: string;
   activation: ActivationSummary;
+  // Created by the plan of this Brief version (MKT-S1-16).
+  briefVersion?: number | null;
 }) {
   const source =
     a.sourceKind === "manual"
@@ -47,6 +50,20 @@ export function ActivationHeader({
           {[t.kinds[a.kind], a.mode ? t.modes[a.mode] : null, source]
             .filter(Boolean)
             .join(" · ")}
+          {briefVersion && (
+            <>
+              {" · "}
+              <ViewLink
+                href={routes.projectStrategyBriefVersion(
+                  projectId,
+                  briefVersion,
+                )}
+                className="underline underline-offset-4 hover:text-foreground"
+              >
+                {t.source.fromBrief(briefVersion)}
+              </ViewLink>
+            </>
+          )}
         </p>
       </div>
       <dl className="flex flex-wrap gap-x-6 gap-y-2 text-sm">

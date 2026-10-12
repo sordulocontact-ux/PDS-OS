@@ -162,6 +162,8 @@ export const activations = {
     deliverable: (label: string) => `Livrable « ${label} » de la Stratégie`,
     handoff: (label: string) => `« ${label} » transmis par la Production`,
     removed: "Source supprimée depuis",
+    // MKT-S1-16: created by the execution plan of a validated Brief.
+    fromBrief: (version: number) => `Plan d'exécution du Brief V${version}`,
   },
   identity: {
     title: "Identité",

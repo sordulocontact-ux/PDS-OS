@@ -49,6 +49,8 @@ const snapshotSchema = z.object({
       key: z.string(),
       dimension: z.enum(STRATEGY_DIMENSIONS),
       text: z.string(),
+      // MKT-S1-16: to accept by name before approving (older versions: none).
+      critical: z.boolean().optional(),
     }),
   ),
   sections: z.array(

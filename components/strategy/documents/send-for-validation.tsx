@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import type { ActionResult } from "@/lib/framing/result";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -31,6 +32,7 @@ export function SendForValidation({
   creatives,
   title,
   description,
+  recap,
 }: {
   projectId: string;
   target: { brief: true } | { documentId: string };
@@ -39,6 +41,8 @@ export function SendForValidation({
   // Dialog copy; defaults to the Brief de sortie's.
   title?: string;
   description?: string;
+  // What is sent, said above the reviewers (MKT-S1-16).
+  recap?: string;
 }) {
   const t = fr.strategyDocuments;
   const [open, setOpen] = useState(false);
@@ -62,6 +66,7 @@ export function SendForValidation({
           }
           directorName={directorName}
           creatives={creatives}
+          recap={recap}
           onDone={() => {
             setOpen(false);
             toast.success(t.request.sent);
@@ -76,11 +81,13 @@ function SendForm({
   send,
   directorName,
   creatives,
+  recap,
   onDone,
 }: {
   send: (reviewerIds: string[], note: string) => Promise<ActionResult>;
   directorName: string | null;
   creatives: Person[];
+  recap?: string;
   onDone: () => void;
 }) {
   const t = fr.strategyDocuments.request;
@@ -103,6 +110,7 @@ function SendForm({
         run(() => send([...chosen], note), onDone);
       }}
     >
+      {recap && <ToneCallout tone="info">{recap}</ToneCallout>}
       <p className="text-body-md">
         <span className="font-semibold">{directorName ?? t.director}</span>
         <span className="text-muted-foreground">
@@ -124,7 +132,13 @@ function SendForm({
                 checked={chosen.has(c.personId)}
                 onChange={() => toggle(c.personId)}
               />
-              {c.name}
+              <span>
+                {c.name}
+                <span className="text-muted-foreground">
+                  {" · "}
+                  {t.creativeRole}
+                </span>
+              </span>
             </label>
           ))
         )}

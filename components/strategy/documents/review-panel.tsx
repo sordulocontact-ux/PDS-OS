@@ -3,11 +3,15 @@
 import { toast } from "sonner";
 
 import { useFramingAction } from "@/components/framing/use-framing-action";
-import { DecisionForm } from "@/components/strategy/documents/decision-form";
+import {
+  DecisionForm,
+  type CriticalAlert,
+} from "@/components/strategy/documents/decision-form";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
 import { fr } from "@/lib/i18n/fr";
+import type { Member } from "@/lib/framing/related";
 import { remindStrategyReview } from "@/lib/strategy/actions/documents";
 import type { DocumentReview } from "@/lib/strategy/documents/queries";
 import { strategyReviewTone } from "@/lib/ui/state-tones";
@@ -25,6 +29,8 @@ export function ReviewPanel({
   requestNote,
   meId,
   canRemind,
+  criticalAlerts,
+  members,
 }: {
   projectId: string;
   documentId: string;
@@ -32,6 +38,9 @@ export function ReviewPanel({
   requestNote: string | null;
   meId: string | null;
   canRemind: boolean;
+  // The Brief only (MKT-S1-16): alerts to accept, who may own a reserve.
+  criticalAlerts?: CriticalAlert[];
+  members?: Member[];
 }) {
   const t = fr.strategyDocuments.review;
   const states = fr.strategyDocuments.reviewStates;
@@ -82,6 +91,9 @@ export function ReviewPanel({
                 {r.decidedAt
                   ? t.decidedOn(formatDay(r.decidedAt))
                   : t.remindedOn(formatDay(r.remindedAt!))}
+                {r.withReserves && ` · ${t.withReserves}`}
+                {r.acceptedAlerts.length > 0 &&
+                  ` · ${t.accepted(r.acceptedAlerts.length)}`}
               </span>
             )}
           </li>
@@ -104,7 +116,14 @@ export function ReviewPanel({
         </div>
       )}
 
-      {mine && <DecisionForm projectId={projectId} documentId={documentId} />}
+      {mine && (
+        <DecisionForm
+          projectId={projectId}
+          documentId={documentId}
+          criticalAlerts={criticalAlerts}
+          members={members}
+        />
+      )}
     </section>
   );
 }

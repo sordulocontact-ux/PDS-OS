@@ -1354,6 +1354,40 @@ livrable, les libellés ou l'action d'import en props.
 
 ---
 
+### Retours Marketing du 11/10/2026, lot 9e (MKT-S1-16)
+
+Migration `…20261012101501_strategy_reserves_execution`.
+
+- **Avant l'envoi** : la fenêtre « Demander la validation » dit ce qui part (V suivante, figée
+  à l'envoi, en attente) et combien d'alertes critiques devront être acceptées ; chaque
+  valideur avec son rôle, le message.
+- **Alertes critiques** : le code marque `critical` dans le Brief une étape amont déjà passée
+  et un budget au-delà de l'enveloppe (`arbitrations`, champ `toDecide[].critical` de
+  l'instantané). Valider exige de les accepter **une par une** (cases du formulaire,
+  `strategy_critical_alerts` relu en SQL dans `decide_strategy_document`, sinon
+  `critical_alert_unaccepted`) ; sinon on demande une modification. L'avis garde les alertes
+  acceptées (`accepted_alerts`).
+- **« Valider avec réserves »** : chaque réserve a un texte, un responsable (membre de PDS) et
+  une échéance à venir, vérifiés en SQL (`strategy_document_reserves`, `with_reserves` sur
+  l'avis) ; elle devient une **tâche** de son responsable (`tasks.strategy_reserve_id`),
+  cochée quand elle est levée (`lift_strategy_reserve`, par son responsable ou le chef de
+  projet, avec une note). Listées à côté du Brief, ouvertes d'abord.
+- **Révisions** : chaque version reste figée ; « Changements depuis la V… » compare la version
+  affichée (ou le Brief en cours d'une révision) à la version validée précédente, élément par
+  élément (`briefChanges`, ajouté / retiré / modifié, avant barré → après). Auteur, dates et
+  commentaires restent dans l'historique.
+- **Plan d'exécution** (`executionPlan`, code) : une fois le Brief validé, une activation par
+  levier retenu qui n'en a pas (genre lu dans le levier, `kindOfLever`, mode interne pour
+  l'influence et la presse) et une tâche « Livrer : … » par livrable qui a responsable et
+  échéance ; les livrables sans eux sont à planifier d'abord ; la Conception a déjà chaque
+  livrable engagé (miroir), la Production les y lit. Le chef de projet coche ce qu'il garde et
+  **confirme** avant toute création (`apply_strategy_execution`, security invoker : les
+  politiques des activations et des tâches décident ; plan recalculé côté serveur). Chaque
+  élément est d'abord inscrit par sa source (`strategy_execution_items`, unique
+  `(project_id, item_key)`) : rejouer ne crée jamais deux fois. Lien dans les deux sens : le
+  Brief liste ce qui a été créé avec sa version, l'activation affiche « Plan d'exécution du
+  Brief V… » vers cette version, la tâche mène à son livrable.
+
 ### Retours Marketing du 11/10/2026, lot 9d (MKT-S1-06, 09)
 
 Migration `…20261012101401_strategy_generated_drafts`.

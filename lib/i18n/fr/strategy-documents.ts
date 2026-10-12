@@ -40,6 +40,16 @@ export const strategyDocuments = {
     sent: "Brief envoyé en validation.",
     notReady:
       "Le Brief de sortie doit être établi (chaque dimension au moins commencée) avant d'être envoyé.",
+    // MKT-S1-16: what is sent, said before sending.
+    recap: (version: number, critical: number) =>
+      `Envoyé : Brief de sortie V${version}, figé à l'envoi, en attente de validation.${
+        critical === 0
+          ? ""
+          : critical === 1
+            ? " 1 alerte critique devra être acceptée par qui valide."
+            : ` ${critical} alertes critiques devront être acceptées par qui valide.`
+      }`,
+    creativeRole: "Directeur créatif du projet",
   },
   review: {
     title: "Validation",
@@ -58,6 +68,94 @@ export const strategyDocuments = {
     approve: "Valider",
     requestChanges: "Demander une modification",
     changeRequested: (comment: string) => `Modification demandée : ${comment}`,
+    // MKT-S1-16.
+    approveWithReserves: "Valider avec réserves",
+    approveReserves: (n: number) =>
+      n === 1 ? "Valider avec 1 réserve" : `Valider avec ${n} réserves`,
+    addReserve: "Ajouter une réserve",
+    cancelReserves: "Valider sans réserve",
+    missing: (n: number) =>
+      n === 1
+        ? "1 point à compléter avant d'envoyer votre décision."
+        : `${n} points à compléter avant d'envoyer votre décision.`,
+    alertsTitle: "Alertes critiques à accepter",
+    alertsHint:
+      "Valider, c'est accepter chacune en connaissance de cause. Sinon, demandez une modification.",
+    alertsMissing: "Acceptez chaque alerte, ou demandez une modification.",
+    accepted: (n: number) =>
+      n === 1
+        ? "1 alerte critique acceptée"
+        : `${n} alertes critiques acceptées`,
+    withReserves: "avec réserves",
+  },
+  reserves: {
+    title: "Réserves",
+    number: (n: number) => `Réserve ${n}`,
+    remove: (n: number) => `Retirer la réserve ${n}`,
+    text: "Ce qui doit être levé",
+    owner: "Responsable",
+    due: "Échéance",
+    textRequired: "Dites ce qui doit être levé.",
+    ownerRequired: "Choisissez qui la lève.",
+    dueRequired: "Donnez une échéance.",
+    duePast: "L'échéance est déjà passée.",
+    listTitle: "Réserves de validation",
+    open: "À lever",
+    lifted: "Levée",
+    line: (owner: string, due: string) => `${owner} · avant le ${due}`,
+    liftedLine: (name: string, date: string) => `Levée par ${name} le ${date}`,
+    from: (name: string, version: number) =>
+      `Posée par ${name} sur la V${version}`,
+    lift: "Lever",
+    liftTitle: "Lever la réserve",
+    liftBody:
+      "Dites comment elle a été levée : la note reste dans l'historique de la réserve.",
+    liftNote: "Comment elle a été levée",
+    liftedToast: "Réserve levée.",
+  },
+  changes: {
+    title: (n: number) => `Changements depuis la V${n}`,
+    none: "Aucun changement de contenu depuis la version précédente.",
+    added: "Ajouté",
+    removed: "Retiré",
+    changed: "Modifié",
+    before: "Avant",
+    after: "Après",
+    main: "Texte principal",
+  },
+  execution: {
+    title: "Plan d'exécution",
+    body: "Ce que le Brief validé devient dans l'exécution, proposé par le code. Rien n'est créé avant votre confirmation, et rien deux fois.",
+    activation: (title: string) => `Activation · ${title}`,
+    task: (title: string, who: string, due: string) =>
+      `Tâche « Livrer : ${title} » · ${who} · ${due}`,
+    conception: (n: number) =>
+      n === 0
+        ? "Aucun livrable engagé dans la Conception."
+        : n === 1
+          ? "1 livrable engagé est déjà dans la Conception, qui alimente la Production."
+          : `${n} livrables engagés sont déjà dans la Conception, qui alimente la Production.`,
+    unplanned: (titles: string) =>
+      `Sans responsable ou sans échéance, à planifier d'abord dans la Stratégie : ${titles}.`,
+    existing: (n: number) =>
+      n === 1 ? "1 élément déjà en place." : `${n} éléments déjà en place.`,
+    nothing: "Tout ce que le Brief engage est déjà en place.",
+    create: (n: number) =>
+      n === 1 ? "Créer 1 élément" : `Créer ${n} éléments`,
+    confirmTitle: "Confirmer le plan d'exécution",
+    confirmBody: (n: number, version: number) =>
+      `${n === 1 ? "1 élément sera créé" : `${n} éléments seront créés`}, chacun relié à son levier ou à son livrable et au Brief V${version}. Un élément déjà créé n'est jamais refait.`,
+    creating: "Création…",
+    created: (n: number) =>
+      n === 0
+        ? "Rien de nouveau : tout était déjà créé."
+        : n === 1
+          ? "1 élément créé."
+          : `${n} éléments créés.`,
+    madeTitle: "Créé depuis le Brief",
+    made: (label: string, version: number | null) =>
+      version ? `${label} · Brief V${version}` : label,
+    open: "Ouvrir",
   },
   history: {
     title: "Historique",

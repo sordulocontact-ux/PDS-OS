@@ -15,6 +15,7 @@ import { schedulePendingPushes } from "@/lib/notifications/push";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
 import { loadBriefSource } from "@/lib/strategy/documents/brief-source";
+import { loadExecution } from "@/lib/strategy/execution-queries";
 import { createClient } from "@/lib/supabase/server";
 
 // The strategy's documents go through database functions only: they check
@@ -94,17 +95,32 @@ export async function requestBriefValidation(
   return settle(projectId, sent.error);
 }
 
-/** A reviewer's decision: approve, or ask for a change with its reason. */
+const reserveInput = z.object({
+  text: z.string().trim().min(1).max(1000),
+  ownerPersonId: id,
+  dueOn: z.iso.date(),
+});
+
+/**
+ * A reviewer's decision: approve (accepting the critical alerts by name,
+ * with reserves or not), or ask for a change with its reason. The database
+ * checks every alert is accepted and every reserve complete.
+ */
 export async function decideStrategyDocument(
   projectId: string,
   documentId: string,
   approve: boolean,
   comment: string,
+  acceptedAlerts: string[] = [],
+  reserves: Array<z.input<typeof reserveInput>> = [],
 ): Promise<ActionResult> {
   const c = z.string().trim().max(2000).safeParse(comment);
+  const a = z.array(z.string().max(200)).max(100).safeParse(acceptedAlerts);
+  const r = z.array(reserveInput).max(20).safeParse(reserves);
   if (!id.safeParse(projectId).success || !id.safeParse(documentId).success)
     return fail("invalid_input");
-  if (!c.success) return fail("invalid_input");
+  if (!c.success || !a.success) return fail("invalid_input");
+  if (!r.success) return fail("invalid_reserve");
   if (!approve && c.data === "") return fail("reason_required");
   await requireApproved();
   const supabase = await createClient();
@@ -112,8 +128,74 @@ export async function decideStrategyDocument(
     p_document_id: documentId,
     p_approve: approve,
     p_comment: c.data,
+    p_accepted_alerts: approve ? a.data : [],
+    p_reserves: approve
+      ? r.data.map((x) => ({
+          text: x.text,
+          owner_person_id: x.ownerPersonId,
+          due_on: x.dueOn,
+        }))
+      : [],
   });
   return settle(projectId, error);
+}
+
+/** « Lever la réserve »: its owner or the project's owner, with a note. */
+export async function liftStrategyReserve(
+  projectId: string,
+  reserveId: string,
+  liftNote: string,
+): Promise<ActionResult> {
+  const n = z.string().trim().max(1000).safeParse(liftNote);
+  if (!id.safeParse(projectId).success || !id.safeParse(reserveId).success)
+    return fail("invalid_input");
+  if (!n.success) return fail("invalid_input");
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("lift_strategy_reserve", {
+    p_reserve_id: reserveId,
+    p_note: n.data,
+  });
+  return settle(projectId, error);
+}
+
+/**
+ * « Confirmer le plan d'exécution »: the plan is computed again here by the
+ * code (never taken from the browser), only the elements the owner kept are
+ * created, with the user's session; one already created is skipped in SQL.
+ */
+export async function applyExecutionPlan(
+  projectId: string,
+  documentId: string,
+  keys: string[],
+): Promise<ActionResult & { created?: number }> {
+  const k = z.array(z.string().max(100)).max(200).safeParse(keys);
+  if (!id.safeParse(projectId).success || !id.safeParse(documentId).success)
+    return fail("invalid_input");
+  if (!k.success) return fail("invalid_input");
+  await requireApproved();
+  const { plan } = await loadExecution(projectId);
+  const kept = new Set(k.data);
+  const items = plan.items
+    .filter((i) => kept.has(i.key))
+    .map((i) =>
+      i.kind === "activation"
+        ? {
+            kind: "activation",
+            lever_id: i.leverId,
+            activation_kind: i.activationKind,
+          }
+        : { kind: "task", deliverable_id: i.deliverableId },
+    );
+  if (items.length === 0) return fail("invalid_input");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("apply_strategy_execution", {
+    p_document_id: documentId,
+    p_items: items,
+  });
+  if (error) return fromDatabaseError(error);
+  const settled = await settle(projectId, null);
+  return settled.ok ? { ok: true, created: data ?? 0 } : settled;
 }
 
 /** « Relancer » a reviewer who has not answered (12 hours apart at most). */

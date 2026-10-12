@@ -45,6 +45,9 @@ export type FramingErrorCode =
   | "brief_unchanged"
   | "justification_required"
   | "item_not_found"
+  | "critical_alert_unaccepted"
+  | "invalid_reserve"
+  | "deliverable_not_planned"
   | "generic";
 
 export type ActionResult =
@@ -91,6 +94,9 @@ export function fromDatabaseError(
     "requests_open",
     "brief_unchanged",
     "justification_required",
+    "critical_alert_unaccepted",
+    "invalid_reserve",
+    "deliverable_not_planned",
   ] as const) {
     if (message.includes(code)) return fail(code);
   }
@@ -102,6 +108,7 @@ export function fromDatabaseError(
     message.includes("document_not_found") ||
     message.includes("review_not_found") ||
     message.includes("request_not_found") ||
+    message.includes("reserve_not_found") ||
     message.includes("item_not_found")
   )
     return fail("not_found");

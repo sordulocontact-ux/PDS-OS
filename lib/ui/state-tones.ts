@@ -314,6 +314,19 @@ export const strategyDocumentTone: Record<string, Tone> = {
   superseded: "neutral",
 };
 
+/** An item of the Brief between two versions (MKT-S1-16). */
+export const briefChangeTone: Record<string, Tone> = {
+  added: "success",
+  removed: "danger",
+  changed: "info",
+};
+
+/** A reserve put on a validated Brief (MKT-S1-16): to lift, or lifted. */
+export const strategyReserveTone: Record<string, Tone> = {
+  open: "warning",
+  lifted: "success",
+};
+
 /** A reviewer of a strategy document: waiting, validated, asked for a
  * change, or the round ended before they answered. */
 export const strategyReviewTone: Record<string, Tone> = {

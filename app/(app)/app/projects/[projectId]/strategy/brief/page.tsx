@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { BriefSnapshotView } from "@/components/strategy/brief/brief-snapshot-view";
 import { BriefValidationAside } from "@/components/strategy/documents/brief-validation-aside";
+import { BriefVersionChanges } from "@/components/strategy/documents/brief-version-changes";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { ViewLink } from "@/components/ui/view-link";
@@ -16,10 +17,12 @@ import { workflowGate } from "@/lib/plan/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { isFramingValidated } from "@/lib/projects/types";
+import { briefChanges } from "@/lib/strategy/documents/brief-diff";
 import { briefSnapshotOf } from "@/lib/strategy/documents/brief-snapshot";
 import { loadBriefSource } from "@/lib/strategy/documents/brief-source";
 import { approvedOf, sentOf, versionsOf } from "@/lib/strategy/documents/model";
 import { loadStrategyDocuments } from "@/lib/strategy/documents/queries";
+import { loadExecution, loadReserves } from "@/lib/strategy/execution-queries";
 import { allInOrder } from "@/lib/utils/parallel";
 import { cn } from "@/lib/utils";
 
@@ -73,6 +76,27 @@ export default async function StrategyBriefPage({
   if (Number.isInteger(asked) && !shown) notFound();
   const snapshot = shown ? briefSnapshotOf(shown.content) : source.snapshot;
   const canWrite = isOwner && editable && !shown;
+
+  // MKT-S1-16: what a version changed since the reference before it (the
+  // live Brief of a revision: since the validated one).
+  const base = shown
+    ? (versions.find(
+        (v) => v.version < shown.version && v.state === "approved",
+      ) ?? versions.find((v) => v.version === shown.version - 1))
+    : docs.revisionOpen
+      ? approved
+      : null;
+  const baseSnapshot = base ? briefSnapshotOf(base.content) : null;
+  const changes =
+    baseSnapshot && snapshot ? briefChanges(baseSnapshot, snapshot) : null;
+  const [reserves, execution] = await Promise.all([
+    loadReserves(projectId, data.members),
+    approved ? loadExecution(projectId) : null,
+  ]);
+  const sentSnapshot = sent ? briefSnapshotOf(sent.content) : null;
+  const criticalAlerts = (sentSnapshot?.toDecide ?? []).filter(
+    (a) => a.critical,
+  );
 
   const heading = shown
     ? shown.state === "approved"
@@ -136,10 +160,18 @@ export default async function StrategyBriefPage({
               </ul>
             </section>
           ) : snapshot ? (
-            <BriefSnapshotView
-              snapshot={snapshot}
-              projectId={shown ? null : projectId}
-            />
+            <>
+              {base && changes && (
+                <BriefVersionChanges
+                  previous={base.version}
+                  changes={changes}
+                />
+              )}
+              <BriefSnapshotView
+                snapshot={snapshot}
+                projectId={shown ? null : projectId}
+              />
+            </>
           ) : (
             <p className="text-body-md text-muted-foreground">
               {td.versionView.notFound}
@@ -164,6 +196,14 @@ export default async function StrategyBriefPage({
           meId={access.personId}
           directorName={data.validators[0]?.name ?? null}
           creatives={docs.creatives}
+          criticalAlerts={criticalAlerts}
+          members={data.members}
+          reserves={reserves}
+          execution={execution}
+          recap={td.request.recap(
+            (versions[0]?.version ?? 0) + 1,
+            source.snapshot.toDecide.filter((a) => a.critical).length,
+          )}
         />
       </aside>
     </div>

@@ -18,6 +18,9 @@ export type DocumentReview = {
   comment: string | null;
   decidedAt: string | null;
   remindedAt: string | null;
+  // MKT-S1-16: the critical alerts accepted, an approval with reserves.
+  acceptedAlerts: string[];
+  withReserves: boolean;
 };
 
 export type StrategyDocument = {
@@ -91,6 +94,8 @@ export const loadStrategyDocuments = cache(
             comment: r.comment,
             decidedAt: r.decided_at,
             remindedAt: r.reminded_at,
+            acceptedAlerts: r.accepted_alerts,
+            withReserves: r.with_reserves,
           }))
           .sort((a, b) => a.name.localeCompare(b.name, "fr")),
       })),

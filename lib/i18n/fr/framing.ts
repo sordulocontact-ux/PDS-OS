@@ -230,6 +230,13 @@ export const framing = {
     justification_required:
       "Rien n'a changé à cet endroit depuis la demande : mettez le Brief à jour, ou écrivez pourquoi vous ne le modifiez pas.",
     item_not_found: "Cette étape n'existe plus.",
+    // MKT-S1-16.
+    critical_alert_unaccepted:
+      "Acceptez chaque alerte critique avant de valider, ou demandez une modification.",
+    invalid_reserve:
+      "Chaque réserve a un texte, un responsable de l'équipe et une échéance à venir.",
+    deliverable_not_planned:
+      "Un livrable sans responsable ni échéance ne devient pas une tâche : planifiez-le d'abord.",
     generic: "Une erreur est survenue. Réessayez.",
   },
 } as const;

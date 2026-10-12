@@ -36,6 +36,12 @@ export type Arbitration = {
   key: string;
   dimension: StrategyDimension;
   text: string;
+  /**
+   * MKT-S1-16: a step already overdue in the calendar or a budget over its
+   * envelope. Whoever approves the Brief accepts it by name, or asks for a
+   * change (decide_strategy_document).
+   */
+  critical?: boolean;
 };
 
 export type ArbitrationInput = {
@@ -124,6 +130,7 @@ export function arbitrations(input: ArbitrationInput): Arbitration[] {
       items.push({
         key: `late-${chain.deliverableId}-${step.key}`,
         dimension: "calendar",
+        critical: true,
         // The whole calculation, so a « déjà passée » can be checked.
         text: t.late({
           step: fr.strategyCalendar.upstream.steps[step.key],
@@ -164,6 +171,7 @@ export function arbitrations(input: ArbitrationInput): Arbitration[] {
     items.push({
       key: "budget-overrun",
       dimension: "budget",
+      critical: true,
       text: t.overrun(formatEuros(-budget.remainingCents)),
     });
 

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { kindOfLever } from "@/lib/activations/kind-of-lever";
 import type { ActivationKind } from "@/lib/activations/model";
 import type { ActivationRecord } from "@/lib/activations/types";
 import { createClient } from "@/lib/supabase/server";
@@ -13,23 +14,6 @@ export type Attachable = {
   // Activations already made from this lever (a lever may run several).
   existing: number;
 };
-
-const normalize = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
-
-/** A lever's kind, read in its words (« Influence », « Relations presse »,
- * « Live / showcase »…); anything else is « Autre ». */
-export function kindOfLever(label: string): ActivationKind {
-  const l = normalize(label);
-  if (/influen/.test(l)) return "influence";
-  if (/(presse|press|media|rp\b|relations)/.test(l)) return "press";
-  if (/(live|showcase|session|concert|evenement|event)/.test(l)) return "event";
-  if (/(clip|video|contenu|content|capsule)/.test(l)) return "content";
-  return "other";
-}
 
 /**
  * What the Stratégie and the Production decided that has no activation yet
