@@ -8138,7 +8138,9 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           series_id: string
+          session_id: string | null
           version: number
+          work_status: string | null
         }
         Insert: {
           audio_state?: string | null
@@ -8160,7 +8162,9 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           series_id?: string
+          session_id?: string | null
           version?: number
+          work_status?: string | null
         }
         Update: {
           audio_state?: string | null
@@ -8182,19 +8186,14 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           series_id?: string
+          session_id?: string | null
           version?: number
+          work_status?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "master_files_created_by_fkey"
             columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "master_files_reviewed_by_fkey"
-            columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -8212,6 +8211,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_files_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_files_session_same_org"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "master_sessions"
+            referencedColumns: ["id", "organization_id"]
           },
         ]
       }
@@ -8435,43 +8448,101 @@ export type Database = {
           },
         ]
       }
+      master_session_titles: {
+        Row: {
+          created_by: string | null
+          linked_at: string
+          master_id: string
+          organization_id: string
+          session_id: string
+        }
+        Insert: {
+          created_by?: string | null
+          linked_at?: string
+          master_id: string
+          organization_id: string
+          session_id: string
+        }
+        Update: {
+          created_by?: string | null
+          linked_at?: string
+          master_id?: string
+          organization_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_session_titles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_session_titles_master_same_org"
+            columns: ["master_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "masters"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_session_titles_session_same_org"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "master_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       master_sessions: {
         Row: {
           created_at: string
           created_by: string | null
+          ends_at: string | null
           engineer: string | null
+          engineer_contact_id: string | null
           id: string
           kind: string
           master_id: string
           notes: string | null
           organization_id: string
           session_date: string | null
+          starts_at: string | null
+          status: string
           studio: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          ends_at?: string | null
           engineer?: string | null
+          engineer_contact_id?: string | null
           id?: string
           kind: string
           master_id: string
           notes?: string | null
           organization_id: string
           session_date?: string | null
+          starts_at?: string | null
+          status?: string
           studio?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          ends_at?: string | null
           engineer?: string | null
+          engineer_contact_id?: string | null
           id?: string
           kind?: string
           master_id?: string
           notes?: string | null
           organization_id?: string
           session_date?: string | null
+          starts_at?: string | null
+          status?: string
           studio?: string | null
           updated_at?: string
         }
@@ -8482,6 +8553,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_sessions_engineer_contact_same_org"
+            columns: ["engineer_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "master_sessions_master_same_org"
@@ -8806,6 +8884,64 @@ export type Database = {
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      master_work_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string
+          master_id: string
+          organization_id: string
+          session_id: string | null
+          url: string
+          work_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label: string
+          master_id: string
+          organization_id: string
+          session_id?: string | null
+          url: string
+          work_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string
+          master_id?: string
+          organization_id?: string
+          session_id?: string | null
+          url?: string
+          work_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_work_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_work_links_master_same_org"
+            columns: ["master_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "masters"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_work_links_session_same_org"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "master_sessions"
             referencedColumns: ["id", "organization_id"]
           },
         ]
@@ -14512,6 +14648,10 @@ export type Database = {
       design_is_open: { Args: { p_project_id: string }; Returns: boolean }
       marketing_can_contribute: {
         Args: { p_project_id: string }
+        Returns: boolean
+      }
+      master_session_writable: {
+        Args: { p_session_id: string }
         Returns: boolean
       }
       merge_design_intentions: { Args: { p_deliverable_id: string | null; p_ids: string[]; p_target: string; p_topic: string; p_value: string }; Returns: string }

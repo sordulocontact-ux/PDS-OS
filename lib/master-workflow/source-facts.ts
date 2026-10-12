@@ -23,7 +23,10 @@ export type FlowTitle = FactTitle & {
   audioState: AudioState | null;
 };
 
-export type FlowSession = MasterSession & { createdAt: string };
+export type FlowSession = Pick<
+  MasterSession,
+  "id" | "kind" | "date" | "studio" | "engineer" | "notes"
+> & { createdAt: string };
 
 const t = fr.masterWorkflow.inventory;
 

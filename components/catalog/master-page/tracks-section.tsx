@@ -26,7 +26,8 @@ import {
 import { sessionLabel } from "@/lib/catalog/master/session-label";
 import { TrackForm } from "./track-form";
 
-// Tracks of the multitrack: name, performer, the session they come from.
+// Tracks typed one by one before the working files (retour Catalogue 36):
+// kept for the history, read only and folded, never offered for new ones.
 export function TracksSection({
   masterId,
   tracks,
@@ -38,6 +39,7 @@ export function TracksSection({
   sessions: MasterSession[];
   canEdit: boolean;
 }) {
+  const legacy = fr.masterPage.workFiles;
   const t = fr.masterPage.tracks;
   const dialogs = useItemDialogs<MasterTrack>();
   const sessionsById = new Map(sessions.map((s) => [s.id, sessionLabel(s)]));
@@ -46,8 +48,10 @@ export function TracksSection({
     <PageSection
       card
       id="tracks"
-      title={t.title}
-      description={t.description}
+      title={legacy.legacyTitle}
+      description={legacy.legacyDescription}
+      collapsible
+      defaultOpen={false}
       action={canEdit && <AddItemButton label={t.add} onClick={dialogs.add} />}
     >
       {tracks.length === 0 ? (

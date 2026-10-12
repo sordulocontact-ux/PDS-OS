@@ -28,15 +28,32 @@ export async function saveSession(
 ): Promise<MasterFormState> {
   const parsed = await parseMasterForm(sessionSchema, formData);
   if (!parsed.ok) return parsed.state;
-  const { masterId, itemId, date, ...fields } = parsed.data;
-  const row = { ...fields, session_date: date };
+  const { masterId, itemId, date, startsAt, endsAt, engineerRef, ...fields } =
+    parsed.data;
+  const row = {
+    ...fields,
+    session_date: date,
+    starts_at: startsAt,
+    ends_at: endsAt,
+    engineer_contact_id: engineerRef,
+  };
   const supabase = await createClient();
+  // A session is edited from any title it is linked to (retour 29): the
+  // link says it belongs to this title, RLS decides the rest.
+  if (itemId) {
+    const { data: link } = await supabase
+      .from("master_session_titles")
+      .select("session_id")
+      .eq("session_id", itemId)
+      .eq("master_id", masterId)
+      .maybeSingle();
+    if (!link)
+      return afterWrite("saveSession", masterId, formData, {
+        message: "session_not_of_title",
+      });
+  }
   const { error } = itemId
-    ? await supabase
-        .from("master_sessions")
-        .update(row)
-        .eq("id", itemId)
-        .eq("master_id", masterId)
+    ? await supabase.from("master_sessions").update(row).eq("id", itemId)
     : await supabase.from("master_sessions").insert({
         ...row,
         organization_id: parsed.organizationId,

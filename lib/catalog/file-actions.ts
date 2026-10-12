@@ -17,6 +17,7 @@ import {
   type FileOwner,
 } from "@/lib/catalog/file-rules";
 import { audioDeleteBlock, audioReviewOf } from "@/lib/catalog/audio-versions";
+import { WORK_STATUSES } from "@/lib/catalog/master/rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { AUDIO_STATES } from "@/lib/catalog/title-rules";
 import { fr } from "@/lib/i18n/fr";
@@ -87,7 +88,15 @@ const recordSchema = z
     // duration the browser read from it (null when it could not).
     audioState: z.enum(AUDIO_STATES).nullish(),
     durationSeconds: z.number().int().min(1).max(86399).nullish(),
+    // A working file of a title (retours 36 et 38): its session, its state.
+    sessionId: z.uuid().nullish(),
+    workStatus: z.enum(WORK_STATUSES).nullish(),
   })
+  .refine(
+    (input) =>
+      (!input.sessionId && !input.workStatus) ||
+      (input.owner.kind === "master" && input.category === "stems"),
+  )
   .refine((input) => isFileCategory(input.owner.kind, input.category))
   .refine(
     (input) =>
@@ -194,9 +203,13 @@ export async function recordCatalogFile(
           .from("artist_files")
           .insert({ ...row, artist_id: owner.id });
       case "master":
-        return supabase
-          .from("master_files")
-          .insert({ ...row, ...audio, master_id: owner.id });
+        return supabase.from("master_files").insert({
+          ...row,
+          ...audio,
+          master_id: owner.id,
+          session_id: parsed.data.sessionId ?? null,
+          work_status: parsed.data.workStatus ?? null,
+        });
       case "project":
         return supabase
           .from("project_files")

@@ -123,6 +123,10 @@ export function oneOf<T extends string>(
     : fallback;
 }
 
+/** A session planned, held or cancelled (retour Catalogue 28). */
+export const SESSION_STATUSES = ["planned", "done", "cancelled"] as const;
+export type SessionStatus = (typeof SESSION_STATUSES)[number];
+
 export type MasterSession = {
   id: string;
   kind: SessionKind;
@@ -130,6 +134,40 @@ export type MasterSession = {
   studio: string | null;
   engineer: string | null;
   notes: string | null;
+  status: SessionStatus;
+  // "HH:MM", optional.
+  startsAt: string | null;
+  endsAt: string | null;
+  // The engineer's contact of the Réseau, when picked there.
+  engineerContactId: string | null;
+  // Every title the session is linked to (retour 27): one row, several titles.
+  titles: Array<{ id: string; title: string }>;
+};
+
+/** Provisional or final (retour 36). */
+export const WORK_STATUSES = ["provisional", "final"] as const;
+export type WorkStatus = (typeof WORK_STATUSES)[number];
+
+/**
+ * A working file of a title (retours 36 et 38): stored once in the title's
+ * files (category « stems »), or a link when it exceeds the storage limit.
+ */
+export type WorkItem = {
+  id: string;
+  kind: "file" | "link";
+  name: string;
+  // The file's precision or the link's label.
+  description: string | null;
+  version: number;
+  sessionId: string | null;
+  status: WorkStatus | null;
+  createdAt: string;
+  authorName: string;
+  // A link's address.
+  url: string | null;
+  // A file's signed URLs (an hour), to open or download it.
+  openUrl: string | null;
+  downloadUrl: string | null;
 };
 
 export type MasterTrack = {

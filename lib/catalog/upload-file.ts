@@ -26,6 +26,9 @@ export async function uploadCatalogFile(input: {
   // An audio version of a title (category "audio").
   audioState?: AudioState;
   durationSeconds?: number | null;
+  // A working file of a title (retours 36 et 38).
+  sessionId?: string | null;
+  workStatus?: "provisional" | "final" | null;
 }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const t = fr.catalogFiles;
   if (input.file.size === 0) return { ok: false, error: t.empty };
@@ -55,6 +58,8 @@ export async function uploadCatalogFile(input: {
     replacesId: input.replacesId,
     audioState: input.audioState,
     durationSeconds: input.durationSeconds,
+    sessionId: input.sessionId,
+    workStatus: input.workStatus,
   });
   // Not recorded: the object would be orphaned, remove it.
   if (!result.ok) await bucket.remove([path]);

@@ -314,6 +314,19 @@ export const strategyDocumentTone: Record<string, Tone> = {
   superseded: "neutral",
 };
 
+/** A studio session (retour Catalogue 28): planned, held, cancelled. */
+export const sessionStatusTone: Record<string, Tone> = {
+  planned: "info",
+  done: "success",
+  cancelled: "neutral",
+};
+
+/** A working file of a title (retour 36): provisional or final. */
+export const workStatusFileTone: Record<string, Tone> = {
+  provisional: "warning",
+  final: "success",
+};
+
 /** A value of a contract to generate (JUR-16): blocking ones in red. */
 export const contractValueTone: Record<string, Tone> = {
   filled: "success",

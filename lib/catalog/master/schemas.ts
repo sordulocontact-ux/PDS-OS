@@ -6,6 +6,7 @@ import {
   MASTER_ITEM_SECTIONS,
   ORGANISMS,
   SESSION_KINDS,
+  SESSION_STATUSES,
   SPLIT_KINDS,
   SPLIT_ROLES,
   roleFitsKind,
@@ -51,14 +52,38 @@ const optionalId = z
 
 const base = { masterId: catalogIdSchema, itemId: optionalId };
 
-export const sessionSchema = z.object({
-  ...base,
-  kind: z.enum(SESSION_KINDS, { error: e.required }),
-  date: optionalDate,
-  studio: optionalText(200),
-  engineer: optionalText(200),
-  notes: optionalText(2000),
-});
+// "" = none; otherwise "HH:MM" from a time input.
+const optionalTime = z
+  .string()
+  .optional()
+  .transform((value) => (value ? value : null))
+  .refine((value) => value === null || /^\d{2}:\d{2}$/.test(value), {
+    error: e.required,
+  });
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const sessionSchema = z
+  .object({
+    ...base,
+    kind: z.enum(SESSION_KINDS, { error: e.required }),
+    status: z.enum(SESSION_STATUSES).optional().default("done"),
+    date: optionalDate,
+    startsAt: optionalTime,
+    endsAt: optionalTime,
+    studio: optionalText(200),
+    engineer: optionalText(200),
+    // The Réseau contact picked (retour 31): "" when only a name is kept.
+    engineerRef: z
+      .string()
+      .optional()
+      .transform((value) => (value && UUID.test(value) ? value : null)),
+    notes: optionalText(2000),
+  })
+  .refine((v) => !v.startsAt || !v.endsAt || v.endsAt > v.startsAt, {
+    error: t.sessions.endsBeforeStart,
+    path: ["endsAt"],
+  });
 
 export const trackSchema = z.object({
   ...base,

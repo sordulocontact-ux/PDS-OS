@@ -3,7 +3,9 @@ import { fr } from "@/lib/i18n/fr";
 import { formatShortDate } from "@/lib/release/format";
 
 /** "Enregistrement · Studio Ferber · 12 sept. 2026", to name a session. */
-export function sessionLabel(session: MasterSession): string {
+export function sessionLabel(
+  session: Pick<MasterSession, "kind" | "studio" | "date">,
+): string {
   return [
     fr.masterPage.sessions.kinds[session.kind],
     session.studio,

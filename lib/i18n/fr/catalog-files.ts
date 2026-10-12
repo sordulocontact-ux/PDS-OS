@@ -23,7 +23,8 @@ export const catalogFiles = {
     },
     master: {
       all: "Tous",
-      stems: "Stems",
+      // Retour Catalogue 36: stems, session folders, ZIP, DAW projects.
+      stems: "Fichiers de travail",
       artwork: "Pochettes",
       contract: "Contrats",
       other: "Autres",
@@ -64,7 +65,7 @@ export const catalogFiles = {
     },
     master: {
       audio: "Audio",
-      stems: "Stems",
+      stems: "Fichier de travail",
       artwork: "Pochette",
       contract: "Contrat",
       other: "Autre",
@@ -120,7 +121,7 @@ export const catalogFiles = {
         other: "Ex. Fiche technique",
       },
       master: {
-        stems: "Ex. Stems V2",
+        stems: "Ex. Session Pro Tools du 3 octobre",
         artwork: "Ex. Pochette finale",
         contract: "Ex. Contrat de licence",
         other: "Ex. Fiche technique",

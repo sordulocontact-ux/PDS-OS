@@ -128,7 +128,109 @@ export const masterPage = {
     formDescription: "Seuls le type et la date servent au classement.",
     confirmTitle: "Supprimer cette session ?",
     confirmBody: (name: string) =>
-      `« ${name} » sera supprimée. Ses pistes restent, sans session.`,
+      `« ${name} » sera supprimée. Ses fichiers de travail restent, sans session.`,
+    // Retours 27 à 35: one session, several titles.
+    statuses: {
+      planned: "Prévue",
+      done: "Réalisée",
+      cancelled: "Annulée",
+    },
+    fields2: {
+      status: "Statut",
+      startsAt: "Début",
+      endsAt: "Fin",
+    },
+    endsBeforeStart: "La fin vient après le début.",
+    alsoOn: (titles: string) => `Aussi sur ${titles}`,
+    attach: "Rattacher une session",
+    attachTitle: "Rattacher une session existante",
+    attachDescription:
+      "Une session qui a servi à plusieurs titres reste une seule session : rattachez-la plutôt que d'en créer une copie.",
+    attachEmpty: "Aucune autre session dans le Catalogue.",
+    attachAction: "Rattacher",
+    attached: "Session rattachée.",
+    onTitles: (titles: string) => `Sur ${titles}`,
+    detach: "Détacher de ce titre",
+    detachTitle: "Détacher cette session ?",
+    detachBody: (name: string, others: string) =>
+      `« ${name} » reste sur ${others} avec son historique. Sur ce titre, ses fichiers de travail restent, sans session.`,
+    detached: "Session détachée.",
+    deleted: "Session supprimée.",
+    sharedDelete: (others: string) =>
+      `Cette session sert aussi à ${others} : détachez-la de ce titre plutôt que de la supprimer.`,
+    deleteDependencies: (files: number) =>
+      files === 0
+        ? ""
+        : files === 1
+          ? " 1 fichier de travail y est rattaché : il reste, sans session."
+          : ` ${files} fichiers de travail y sont rattachés : ils restent, sans session.`,
+    times: (start: string | null, end: string | null) =>
+      start && end ? `${start} – ${end}` : (start ?? end ?? ""),
+    errors: {
+      session_shared:
+        "Cette session sert à d'autres titres : détachez-la au lieu de la supprimer.",
+      session_last_title:
+        "C'est le seul titre de cette session : supprimez-la plutôt.",
+      session_not_of_title: "Cette session n'est pas rattachée à ce titre.",
+      failed: "L'action n'a pas pu être faite. Réessayez.",
+    },
+  },
+
+  // Retours 36 à 38: what the session really produced, stored once.
+  workFiles: {
+    title: "Fichiers de travail",
+    description:
+      "Dossiers de session, ZIP, projets Pro Tools ou Logic, multipistes, stems : le contenu réel des séances, versionné, rattaché au titre et, si vous la connaissez, à une session.",
+    add: "Déposer un fichier",
+    addLink: "Ajouter un lien",
+    empty: "Aucun fichier de travail pour l'instant.",
+    emptyReadOnly: "Les fichiers de travail du titre apparaîtront ici.",
+    limit:
+      "50 Mo au plus par fichier déposé (limite du stockage). Au-delà, ajoutez un lien vers l'endroit où il est partagé : il n'est jamais copié.",
+    columns: {
+      name: "Fichier",
+      session: "Session",
+      status: "Statut",
+      added: "Déposé",
+    },
+    statuses: {
+      provisional: "Provisoire",
+      final: "Définitif",
+    },
+    noStatus: "—",
+    noSession: "Sans session",
+    link: "Lien",
+    version: (n: number) => `v${n}`,
+    addedBy: (name: string) => `par ${name}`,
+    fields: {
+      file: "Fichier",
+      description: "Ce que c'est",
+      descriptionHint: "« Session Pro Tools du 3 octobre », « Stems V2 »…",
+      label: "Nom du lien",
+      url: "Adresse du lien",
+      urlHint: "Une adresse https (WeTransfer, Drive, Dropbox…).",
+      session: "Session",
+      noSession: "Aucune",
+      status: "Statut",
+    },
+    addTitle: "Déposer un fichier de travail",
+    addLinkTitle: "Ajouter un lien vers un fichier de travail",
+    editTitle: "Modifier le fichier de travail",
+    formDescription:
+      "La session est facultative : un fichier peut rester sur le titre seul.",
+    save: "Enregistrer",
+    saved: "Fichier de travail enregistré.",
+    deleted: "Fichier de travail supprimé.",
+    deleteTitle: "Supprimer ce fichier de travail ?",
+    deleteBody: (name: string) =>
+      `« ${name} » sera supprimé du titre et de sa session.`,
+    urlInvalid: "Saisissez une adresse qui commence par https://.",
+    fileRequired: "Choisissez un fichier.",
+    tooLarge:
+      "Fichier trop lourd : 50 Mo au plus. Ajoutez plutôt un lien vers l'endroit où il est partagé.",
+    legacyTitle: "Anciennes pistes",
+    legacyDescription:
+      "Notées une par une avant les fichiers de travail, gardées pour l'historique.",
   },
 
   tracks: {

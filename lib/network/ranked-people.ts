@@ -30,7 +30,7 @@ export async function rankedNetwork(
 ): Promise<RankedPerson[]> {
   const { data, error } = await supabase
     .from("network_contacts")
-    .select("id, name, roles")
+    .select("id, name, roles, kind")
     .is("archived_at", null)
     .order("name")
     .limit(1000);
@@ -39,10 +39,17 @@ export async function rankedNetwork(
     id: c.id,
     label: c.name,
     roles: c.roles as NetworkRole[],
+    organization: c.kind === "organization",
   }));
   const byId = new Map(contacts.map((c) => [c.id, c]));
-  const rolesOf = (roles: NetworkRole[]) =>
-    roles.map((r) => fr.network.roles[r]).join(", ");
+  // A structure says so (retour Catalogue 30): never taken for a person.
+  const detailOf = (c: { roles: NetworkRole[]; organization: boolean }) =>
+    [
+      c.organization ? fr.network.picker.structure : null,
+      c.roles.map((r) => fr.network.roles[r]).join(", "),
+    ]
+      .filter(Boolean)
+      .join(" · ");
 
   const linked = [...first].flatMap(([id, detail]) => {
     const contact = byId.get(id);
@@ -63,7 +70,7 @@ export async function rankedNetwork(
       .map((c) => ({
         id: c.id,
         label: c.label,
-        detail: rolesOf(c.roles),
+        detail: detailOf(c),
         group: "role" as const,
       })),
     ...rest
@@ -71,7 +78,7 @@ export async function rankedNetwork(
       .map((c) => ({
         id: c.id,
         label: c.label,
-        detail: rolesOf(c.roles) || undefined,
+        detail: detailOf(c) || undefined,
         group: "network" as const,
       })),
   ];

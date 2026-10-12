@@ -10,6 +10,7 @@ import { AudioSummary } from "@/components/catalog/master-page/audio/audio-summa
 import { AudioVersionList } from "@/components/catalog/master-page/audio/audio-version-list";
 import { SessionsSection } from "@/components/catalog/master-page/sessions-section";
 import { TracksSection } from "@/components/catalog/master-page/tracks-section";
+import { WorkFilesSection } from "@/components/catalog/master-page/work-files-section";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { can } from "@/lib/auth/access";
@@ -19,7 +20,10 @@ import {
   numberAudioVersions,
 } from "@/lib/catalog/audio-versions";
 import { listAudioVersions } from "@/lib/catalog/master/audio";
-import { listMasterSessions } from "@/lib/catalog/master/queries";
+import {
+  listMasterSessions,
+  listWorkItems,
+} from "@/lib/catalog/master/queries";
 import { getMaster } from "@/lib/catalog/queries";
 import { fr } from "@/lib/i18n/fr";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -29,20 +33,23 @@ import { allInOrder } from "@/lib/utils/parallel";
 // its step (Mix V2), with its validation, its player and its comments.
 // Adding one at a later step moves the title forward (SQL trigger), never
 // validates it: manage_catalog validates or asks for corrections, on that
-// exact file (docs/ARCHITECTURE.md § 2 septies). Then the sessions and the
-// tracks of its multitrack (#sessions, #tracks). Everyone listens and
-// comments.
+// exact file (docs/ARCHITECTURE.md § 2 septies). Then its sessions, shared
+// with other titles, and its working files (#sessions, #work-files); the old
+// tracks typed one by one stay folded below for the history. Everyone
+// listens and comments.
 export default async function MasterAudioPage({
   params,
 }: PageProps<"/app/catalog/masters/[masterId]/audio">) {
   const { masterId } = await params;
   const owner = { kind: "master", id: masterId } as const;
-  const [access, master, { versions: raw, error }, made] = await allInOrder([
-    requireApproved(),
-    getMaster(masterId),
-    listAudioVersions(masterId),
-    listMasterSessions(masterId),
-  ]);
+  const [access, master, { versions: raw, error }, made, work] =
+    await allInOrder([
+      requireApproved(),
+      getMaster(masterId),
+      listAudioVersions(masterId),
+      listMasterSessions(masterId),
+      listWorkItems(masterId),
+    ]);
   if (!master) notFound();
   const organizationId = can(access, "manage_catalog")
     ? access.organizationId
@@ -101,14 +108,32 @@ export default async function MasterAudioPage({
           <SessionsSection
             masterId={master.id}
             sessions={made.sessions}
+            workCountOf={Object.fromEntries(
+              made.sessions.map((s) => [
+                s.id,
+                work.items.filter((i) => i.sessionId === s.id).length,
+              ]),
+            )}
             canEdit={!!organizationId}
           />
-          <TracksSection
-            masterId={master.id}
-            tracks={made.tracks}
-            sessions={made.sessions}
-            canEdit={!!organizationId}
-          />
+          {work.error ? (
+            <FormMessage kind="error">{fr.masterPage.loadError}</FormMessage>
+          ) : (
+            <WorkFilesSection
+              masterId={master.id}
+              organizationId={organizationId}
+              items={work.items}
+              sessions={made.sessions}
+            />
+          )}
+          {made.tracks.length > 0 && (
+            <TracksSection
+              masterId={master.id}
+              tracks={made.tracks}
+              sessions={made.sessions}
+              canEdit={false}
+            />
+          )}
         </>
       )}
     </>

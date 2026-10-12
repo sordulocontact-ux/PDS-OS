@@ -48,6 +48,8 @@ export const network = {
   },
   // Picking someone of the Réseau from another form (a credit, a share).
   picker: {
+    // Before the roles of an organization (retour Catalogue 30).
+    structure: "Organisation",
     searchLabel: "Chercher dans le Réseau",
     placeholder: "Nom d'une personne ou d'une organisation du Réseau…",
     create: "Ajouter au Réseau",

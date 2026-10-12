@@ -58,6 +58,13 @@ export function SessionForm({
             onValueChange={(next) => isSessionKind(next) && setKind(next)}
             error={error("kind")}
           />
+          <OptionSelect
+            name="status"
+            label={t.fields2.status}
+            items={t.statuses}
+            defaultValue={value("status", session?.status ?? "done")}
+            error={error("status")}
+          />
           <Field
             name="date"
             type="date"
@@ -65,6 +72,22 @@ export function SessionForm({
             defaultValue={value("date", session?.date)}
             error={error("date")}
           />
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              name="startsAt"
+              type="time"
+              label={t.fields2.startsAt}
+              defaultValue={value("startsAt", session?.startsAt)}
+              error={error("startsAt")}
+            />
+            <Field
+              name="endsAt"
+              type="time"
+              label={t.fields2.endsAt}
+              defaultValue={value("endsAt", session?.endsAt)}
+              error={error("endsAt")}
+            />
+          </div>
           <Field
             name="studio"
             label={t.fields.studio}
@@ -77,6 +100,9 @@ export function SessionForm({
             masterId={masterId}
             kind={kind}
             defaultName={value("engineer", session?.engineer)}
+            defaultRef={
+              value("engineerRef", session?.engineerContactId) || null
+            }
             error={error("engineer")}
           />
           <TextareaField

@@ -21,19 +21,23 @@ type Loaded = {
  * engineers credited on the title first, then the Réseau's engineers. With
  * no engineer saved, the one PDS knows for that kind of session (credit, or
  * the Brief Mix/Master) is proposed, and follows the kind until the user
- * picks. master_sessions.engineer is text: the name chosen is what is saved
- * (`engineer`), the contact is not kept (no engineer_contact_id column).
+ * picks. The name chosen is saved (`engineer`) and, when picked in the
+ * Réseau, its contact too (`engineerRef` → engineer_contact_id, retour 31):
+ * a name kept alone can be linked later without retyping.
  */
 export function SessionEngineerField({
   masterId,
   kind,
   defaultName,
+  defaultRef = null,
   error,
 }: {
   masterId: string;
   kind: SessionKind;
   // The saved or typed name, "" when none.
   defaultName: string;
+  // The saved contact of the Réseau, if any.
+  defaultRef?: string | null;
   error?: string;
 }) {
   const t = fr.masterPage.sessions;
@@ -70,7 +74,7 @@ export function SessionEngineerField({
             ? (await listSessionEngineers(masterId)).options
             : loaded.options
         }
-        defaultRef={suggestion?.ref ?? null}
+        defaultRef={defaultRef ?? suggestion?.ref ?? null}
         defaultName={defaultName || suggestion?.name || null}
         createRoles={["engineer"]}
         refOfContact={(id) => id}

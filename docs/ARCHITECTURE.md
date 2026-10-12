@@ -376,6 +376,38 @@ bloc ; `routes.masterSessions` & co. donnent directement l'onglet + l'ancre.
   politiques RLS) ; lecture par tout membre (splits exceptés). Toute écriture rafraîchit
   le layout du master (`revalidatePath(…, "layout")`).
 
+#### Sessions partagées et fichiers de travail (retours Catalogue 17, 21, 27 à 38, lot 10)
+
+Migration `…20261012101601_sessions_work_files`.
+
+- **Une session, plusieurs titres** (retours 27, 29, 32) : `master_session_titles` relie une session à
+  chaque titre qu'elle a servi ; `master_sessions.master_id` reste son titre d'origine. Lue depuis
+  l'onglet Audio de chacun (« Aussi sur … »), modifiée depuis n'importe lequel
+  (`master_session_writable`), **jamais copiée** : « Rattacher une session » propose celles du
+  Catalogue avec les titres qu'elles servent (`listAttachableSessions`).
+- **Formulaire** (retour 28) : statut Prévue / Réalisée / Annulée, début et fin facultatifs (fin
+  après début, vérifié en SQL), l'ingénieur choisi dans le Réseau gardé par son contact
+  (`engineer_contact_id`) à côté du nom (retour 31 : un nom seul reste un nom, reliable plus tard) ;
+  le sélecteur du Réseau écrit « Organisation » devant une structure (retour 30, `rankedNetwork`).
+- **Détacher ≠ supprimer** (retour 35) : « Détacher de ce titre » laisse la session sur ses autres
+  titres (le titre d'origine passe au suivant, les fichiers de travail de ce titre gardent leur
+  fichier sans le lien) ; « Supprimer » n'existe que pour une session d'un seul titre (refus
+  `session_shared` en SQL sinon, la fenêtre l'explique), avec les fichiers rattachés dits ; détacher
+  le dernier titre est refusé (`session_last_title`). Un titre supprimé passe ses sessions
+  partagées au titre suivant (`masters_hand_over_sessions`).
+- **Fichiers de travail à la place des Pistes** (retours 36 à 38) : la catégorie « stems » des
+  fichiers du titre s'appelle « Fichiers de travail » (dossiers de session, ZIP, projets Pro Tools
+  ou Logic, multipistes, stems), avec une session facultative (du titre, trigger
+  `master_work_session_check`) et un statut Provisoire / Définitif (`master_files.session_id`,
+  `work_status`, sur toutes les versions) ; **stockés une fois** : l'onglet Fichiers, l'onglet
+  Audio (`WorkFilesSection`) et la session lisent les mêmes lignes. Les pistes saisies une par une
+  restent visibles, repliées et en lecture seule (« Anciennes pistes ») ; rien ne les crée plus.
+- **Limite** (retour 21) : 50 Mo par fichier, la limite réelle du stockage (bucket `master-files`
+  et offre Supabase), dite avant le dépôt ; au-delà, un **lien** vers l'endroit où le fichier est
+  partagé (`master_work_links`, https), jamais une copie.
+- **Hors périmètre, à cadrer** (retours 27, 28, 34) : fiche Session unique, participants, artistes
+  et projets d'une session, lien au Calendrier : ticket Sessions Studio séparé.
+
 ### 2 septies. Titre, état audio, variante (retour n°5)
 
 Migration `…004001_titles_audio_state.sql`, règles `lib/catalog/title-rules.ts`, vues
