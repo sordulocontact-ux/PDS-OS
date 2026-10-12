@@ -49,12 +49,55 @@ export const ORGANISMS = [
 ] as const;
 export type Organism = (typeof ORGANISMS)[number];
 
+// The final list of the Catalogue's feedback (retour 63): « À effectuer » is
+// a real status, « Non applicable » takes a declaration out of the file.
 export const DECLARATION_STATUSES = [
+  "to_verify",
+  "to_do",
   "submitted",
   "confirmed",
+  "to_correct",
   "rejected",
+  "not_applicable",
 ] as const;
 export type DeclarationStatus = (typeof DECLARATION_STATUSES)[number];
+
+// Filed with the organism (or nothing more to do): what counts as done.
+const DECLARATION_DONE: ReadonlySet<DeclarationStatus> = new Set([
+  "submitted",
+  "confirmed",
+]);
+
+/**
+ * Where a title's declarations stand (retours 14 and 61): only the
+ * applicable ones count. An organism with no declaration noted, or « À
+ * vérifier », is still to qualify (applicable or not); « Non applicable »
+ * is out of the file. Pure.
+ */
+export function declarationsSummary(
+  rows: Array<{ organism: Organism; status: DeclarationStatus }>,
+): { done: number; applicable: number; toQualify: number } {
+  const byOrganism = new Map(rows.map((r) => [r.organism, r.status]));
+  let done = 0;
+  let applicable = 0;
+  let toQualify = 0;
+  for (const organism of ORGANISMS) {
+    const status = byOrganism.get(organism);
+    if (!status || status === "to_verify") toQualify += 1;
+    else if (status !== "not_applicable") {
+      applicable += 1;
+      if (DECLARATION_DONE.has(status)) done += 1;
+    }
+  }
+  return { done, applicable, toQualify };
+}
+
+/** Confirmed with its proof attached: a confirmation verified, not only
+ * said (retour 59). */
+export const declarationVerified = (d: {
+  status: DeclarationStatus;
+  proofFileId: string | null;
+}) => d.status === "confirmed" && d.proofFileId !== null;
 
 /** Narrows a database string to one of `values`, else `fallback`. */
 export function oneOf<T extends string>(
@@ -112,12 +155,20 @@ export type MasterDeclaration = {
   reference: string | null;
   date: string | null;
   notes: string | null;
+  // Who follows it when a third party does (retour 61).
+  thirdParty: string | null;
+  // The proof: a file of the title (retour 60).
+  proofFileId: string | null;
 };
 
 export type MasterRights = {
   iswc: string | null;
   rightsHolder: string | null;
   rightsYear: number | null;
+  // A person confirmed the holder and year (retours 54 and 58); null while
+  // it is only proposed, or since one of them changed.
+  confirmedAt?: string | null;
+  confirmedBy?: string | null;
 };
 
 // Shares are summed in hundredths: 33.33 + 33.33 + 33.34 is exactly 100.

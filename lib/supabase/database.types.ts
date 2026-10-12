@@ -7887,8 +7887,40 @@ export type Database = {
           },
         ]
       }
+      master_declaration_events: {
+        Row: {
+          actor_person_id: string | null
+          changes: Json
+          created_at: string
+          id: string
+          master_id: string
+          organism: string
+          organization_id: string
+        }
+        Insert: {
+          actor_person_id?: string | null
+          changes: Json
+          created_at?: string
+          id?: string
+          master_id: string
+          organism: string
+          organization_id: string
+        }
+        Update: {
+          actor_person_id?: string | null
+          changes?: Json
+          created_at?: string
+          id?: string
+          master_id?: string
+          organism?: string
+          organization_id?: string
+        }
+        Relationships: []
+      }
       master_declarations: {
         Row: {
+          proof_file_id: string | null
+          third_party: string | null
           created_at: string
           created_by: string | null
           declared_on: string | null
@@ -7902,6 +7934,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          proof_file_id?: string | null
+          third_party?: string | null
           created_at?: string
           created_by?: string | null
           declared_on?: string | null
@@ -7915,6 +7949,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          proof_file_id?: string | null
+          third_party?: string | null
           created_at?: string
           created_by?: string | null
           declared_on?: string | null
@@ -8587,6 +8623,8 @@ export type Database = {
       }
       masters: {
         Row: {
+          rights_confirmed_at: string | null
+          rights_confirmed_by: string | null
           archived_at: string | null
           audio_state: string | null
           created_at: string
@@ -8604,6 +8642,8 @@ export type Database = {
           variant_label: string | null
         }
         Insert: {
+          rights_confirmed_at?: string | null
+          rights_confirmed_by?: string | null
           archived_at?: string | null
           audio_state?: string | null
           created_at?: string
@@ -8621,6 +8661,8 @@ export type Database = {
           variant_label?: string | null
         }
         Update: {
+          rights_confirmed_at?: string | null
+          rights_confirmed_by?: string | null
           archived_at?: string | null
           audio_state?: string | null
           created_at?: string
@@ -13287,6 +13329,7 @@ export type Database = {
       }
     }
     Functions: {
+      confirm_master_rights: { Args: { p_master_id: string }; Returns: undefined }
       accept_influence_terms: {
         Args: { p_proposal_id: string }
         Returns: undefined

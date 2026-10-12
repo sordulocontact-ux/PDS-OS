@@ -174,9 +174,15 @@ function securedFact(
     href: routes.masterSplits(master.id),
   };
 }
+// A filed declaration is to confirm; an unqualified one too; only « À
+// effectuer », « À corriger » and a refusal miss something.
 const DECLARATION_STATUS: Record<DeclarationStatus, LegalFactStatus> = {
   confirmed: "known",
+  not_applicable: "known",
   submitted: "to_confirm",
+  to_verify: "to_confirm",
+  to_do: "missing",
+  to_correct: "missing",
   rejected: "missing",
 };
 

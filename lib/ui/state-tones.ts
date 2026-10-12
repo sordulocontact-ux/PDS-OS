@@ -201,10 +201,13 @@ export const feedbackPriorityTone: Record<string, Tone> = {
 /** Declaration of a master to a collecting society: still to file waits for
  * the team, filed waits for the organism, then confirmed or refused. */
 export const declarationStatusTone: Record<string, Tone> = {
-  todo: "warning",
+  to_verify: "neutral",
+  to_do: "warning",
   submitted: "info",
   confirmed: "success",
+  to_correct: "warning",
   rejected: "danger",
+  not_applicable: "neutral",
 };
 
 /** Shares of a kind of split (splitTotal): complete at 100 %, else to do. */

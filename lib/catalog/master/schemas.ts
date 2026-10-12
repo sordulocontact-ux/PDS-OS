@@ -145,6 +145,13 @@ export const declarationSchema = z.object({
   reference: optionalText(100),
   date: optionalDate,
   notes: optionalText(2000),
+  // Retours 60 and 61: who follows it, and its proof (a file of the title).
+  thirdParty: optionalText(200),
+  proofFileId: z
+    .string()
+    .optional()
+    .transform((v) => (v && v !== "none" ? v : null))
+    .pipe(catalogIdSchema.nullable()),
 });
 
 export const rightsSchema = z.object({

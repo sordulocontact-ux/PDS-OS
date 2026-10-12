@@ -3,9 +3,14 @@ import "server-only";
 import { routes } from "@/lib/auth/redirects";
 import { listMasterSplits } from "@/lib/catalog/master/queries";
 import {
+  DECLARATION_STATUSES,
   ORGANISMS,
+  declarationsSummary,
+  oneOf,
   splitTotal,
+  type DeclarationStatus,
   type MasterRights,
+  type Organism,
 } from "@/lib/catalog/master/rules";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +21,8 @@ import { createClient } from "@/lib/supabase/server";
 export type MasterCounts = {
   sessions: number;
   contributors: number;
-  declarationsFiled: number;
+  // Each declaration noted, for the applicability summary (retour 14).
+  declarations: Array<{ organism: Organism; status: DeclarationStatus }>;
   // Audio versions of the title, and those at "Master final".
   audioFiles: number;
   finalMasterFiles: number;
@@ -39,9 +45,8 @@ export async function countMasterItems(
         .eq("master_id", masterId),
       supabase
         .from("master_declarations")
-        .select("id", count)
-        .eq("master_id", masterId)
-        .neq("status", "rejected"),
+        .select("organism, status")
+        .eq("master_id", masterId),
       supabase
         .from("master_files")
         .select("id", count)
@@ -60,7 +65,10 @@ export async function countMasterItems(
   return {
     sessions: sessions.count ?? 0,
     contributors: contributors.count ?? 0,
-    declarationsFiled: declarations.count ?? 0,
+    declarations: (declarations.data ?? []).map((d) => ({
+      organism: oneOf(ORGANISMS, d.organism, "sacem"),
+      status: oneOf(DECLARATION_STATUSES, d.status, "to_verify"),
+    })),
     audioFiles: audio.count ?? 0,
     finalMasterFiles: final.count ?? 0,
   };
@@ -131,12 +139,16 @@ export async function masterChecklist(input: {
     );
   }
   items.push(
-    {
-      key: "declarations",
-      label: t.declarations(counts.declarationsFiled, ORGANISMS.length),
-      done: counts.declarationsFiled === ORGANISMS.length,
-      href: routes.masterRights(masterId),
-    },
+    (() => {
+      // Only the applicable declarations count (retour 14).
+      const d = declarationsSummary(counts.declarations);
+      return {
+        key: "declarations",
+        label: t.declarations(d.done, d.applicable, d.toQualify),
+        done: d.toQualify === 0 && d.done === d.applicable,
+        href: routes.masterRights(masterId),
+      };
+    })(),
     {
       key: "masterFile",
       label: t.masterFile,

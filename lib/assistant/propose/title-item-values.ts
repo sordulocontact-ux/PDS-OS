@@ -61,9 +61,14 @@ function parseSaidShare(
 const parseSaidYear = (quote: string) =>
   /^(19|20)\d{2}$/.test(quote.trim()) ? quote.trim() : null;
 
-/** "déposée", "confirmée", "refusée" in the user's words. */
+/** The final list's statuses (retour 63) in the user's words. */
 function parseSaidDeclarationStatus(quote: string): DeclarationStatus | null {
   const text = fold(quote);
+  if (/non applicable|pas concern|ne concerne pas/.test(text))
+    return "not_applicable";
+  if (/a corriger|corrig/.test(text)) return "to_correct";
+  if (/a effectuer|a faire|a deposer/.test(text)) return "to_do";
+  if (/a verifier/.test(text)) return "to_verify";
   if (/refus|rejet/.test(text)) return "rejected";
   if (/confirm|valid|accept|enregistr/.test(text)) return "confirmed";
   if (/depos|declar|envoy|soumis/.test(text)) return "submitted";

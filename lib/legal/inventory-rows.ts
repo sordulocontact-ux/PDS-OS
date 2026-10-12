@@ -127,7 +127,7 @@ export async function readInventoryRows(
       ? supabase
           .from("master_declarations")
           .select(
-            "id, master_id, organism, status, reference, declared_on, notes",
+            "id, master_id, organism, status, reference, declared_on, notes, third_party, proof_file_id",
           )
           .in("master_id", masterIds)
       : none,

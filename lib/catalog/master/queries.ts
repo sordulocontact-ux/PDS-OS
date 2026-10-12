@@ -16,8 +16,10 @@ import {
   type MasterSession,
   type MasterSplit,
   type MasterTrack,
+  type Organism,
 } from "@/lib/catalog/master/rules";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
+import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 // Sections of the master page, read with the user's session: RLS decides
@@ -35,15 +37,28 @@ export const getMasterRights = cache(
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("masters")
-      .select("iswc, rights_holder, rights_year")
+      .select(
+        "iswc, rights_holder, rights_year, rights_confirmed_at, rights_confirmed_by",
+      )
       .eq("id", masterId)
       .maybeSingle();
     if (error) failed("getMasterRights", error.message);
     if (!data) return null;
+    const { data: person } = data.rights_confirmed_by
+      ? await supabase
+          .from("people")
+          .select("first_name, last_name")
+          .eq("id", data.rights_confirmed_by)
+          .maybeSingle()
+      : { data: null };
     return {
       iswc: data.iswc,
       rightsHolder: data.rights_holder,
       rightsYear: data.rights_year,
+      confirmedAt: data.rights_confirmed_at,
+      confirmedBy: person
+        ? personName(person.first_name, person.last_name)
+        : null,
     };
   },
 );
@@ -156,7 +171,9 @@ export async function listMasterDeclarations(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("master_declarations")
-    .select("id, organism, status, reference, declared_on, notes")
+    .select(
+      "id, organism, status, reference, declared_on, notes, third_party, proof_file_id",
+    )
     .eq("master_id", masterId);
   if (error) {
     failed("listMasterDeclarations", error.message);
@@ -166,11 +183,66 @@ export async function listMasterDeclarations(
     declarations: (data ?? []).map((row) => ({
       id: row.id,
       organism: oneOf(ORGANISMS, row.organism, "sacem"),
-      status: oneOf(DECLARATION_STATUSES, row.status, "submitted"),
+      status: oneOf(DECLARATION_STATUSES, row.status, "to_verify"),
       reference: row.reference,
       date: row.declared_on,
       notes: row.notes,
+      thirdParty: row.third_party,
+      proofFileId: row.proof_file_id,
     })),
     error: false,
   };
+}
+
+export type DeclarationEvent = {
+  id: string;
+  organism: Organism;
+  at: string;
+  by: string | null;
+  // field → [before, after], as the database recorded them.
+  changes: Record<string, [unknown, unknown]>;
+};
+
+/**
+ * Each change of a title's declarations, newest first (retour 62): who,
+ * when, the old and the new value of status, reference, date, third party
+ * and proof. Written by a trigger, never rewritten.
+ */
+export async function listDeclarationEvents(
+  masterId: string,
+): Promise<DeclarationEvent[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("master_declaration_events")
+    .select("id, organism, changes, actor_person_id, created_at")
+    .eq("master_id", masterId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) {
+    failed("listDeclarationEvents", error.message);
+    return [];
+  }
+  const ids = [
+    ...new Set(
+      (data ?? []).flatMap((e) =>
+        e.actor_person_id ? [e.actor_person_id] : [],
+      ),
+    ),
+  ];
+  const { data: people } = ids.length
+    ? await supabase
+        .from("people")
+        .select("id, first_name, last_name")
+        .in("id", ids)
+    : { data: [] };
+  const nameOf = new Map(
+    (people ?? []).map((p) => [p.id, personName(p.first_name, p.last_name)]),
+  );
+  return (data ?? []).map((e) => ({
+    id: e.id,
+    organism: oneOf(ORGANISMS, e.organism, "sacem"),
+    at: e.created_at,
+    by: e.actor_person_id ? (nameOf.get(e.actor_person_id) ?? null) : null,
+    changes: (e.changes ?? {}) as Record<string, [unknown, unknown]>,
+  }));
 }

@@ -53,8 +53,16 @@ export const masterPage = {
       contributors: "Au moins un contributeur crédité",
       masterSplits: "Splits du master complets (100 %)",
       publishingSplits: "Splits de l'édition complets (100 %)",
-      declarations: (done: number, total: number) =>
-        `Déclarations déposées (${done} sur ${total})`,
+      // Only the applicable declarations count (retour 14).
+      declarations: (done: number, applicable: number, toQualify: number) =>
+        [
+          `Déclarations faites (${done} sur ${applicable} applicable${applicable > 1 ? "s" : ""})`,
+          toQualify > 0
+            ? `${toQualify} organisme${toQualify > 1 ? "s" : ""} à qualifier`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
       masterFile: "Fichier Master final déposé",
     },
   },
@@ -281,15 +289,32 @@ export const masterPage = {
     title: "Droits",
     description: "L'œuvre et le titulaire des droits sur l'enregistrement.",
     edit: "Modifier",
+    // Proposed, then confirmed by a person (retours 54 and 58).
+    confirm: "Confirmer le titulaire du ℗",
+    confirmDone: "Titulaire du ℗ confirmé.",
+    confirmTitle: "Confirmer le titulaire et l'année du ℗ ?",
+    confirmBody:
+      "La mention ℗ sera tenue pour vérifiée. Si le titulaire ou l'année change ensuite, elle redeviendra à confirmer.",
+    confirmed: (date: string, by: string | null) =>
+      by ? `Confirmé le ${date} par ${by}` : `Confirmé le ${date}`,
+    proposed: "Proposé, à confirmer selon les accords",
+    review: (name: string) =>
+      `À revoir : la répartition master propose désormais « ${name} ».`,
+    confirmIncomplete: "Renseignez le titulaire et l'année avant de confirmer.",
+    confirmFailed: "La confirmation n'a pas pu être enregistrée. Réessayez.",
     fields: {
       iswc: "ISWC",
-      iswcHint: "Code de l'œuvre, par exemple T-034.524.680-1.",
+      // Retour 57: facultative, never made up, not the ISRC.
+      iswcHint:
+        "Facultatif : le code de l'œuvre, attribué par la SACEM après la déclaration, par exemple T-034.524.680-1. Ce n'est pas l'ISRC, qui identifie l'enregistrement.",
       rightsHolder: "Titulaire du ℗",
       rightsHolderHint: "Le producteur phonographique.",
       rightsHolderSuggested: (role: "label" | "producer") =>
         `Proposé d'après la répartition master du titre (${role === "label" ? "label" : "producteur"}).`,
       rightsYear: "Année du ℗",
-      rightsYearHint: "Année de première publication.",
+      // Retour 55: never the release dates of a project.
+      rightsYearHint:
+        "Année de première publication de l'enregistrement : elle ne suit pas les dates de sortie d'un projet, et une réédition garde la sienne.",
     },
     pLine: "Mention ℗",
     editTitle: "Modifier les droits",
@@ -303,7 +328,8 @@ export const masterPage = {
 
   declarations: {
     title: "Déclarations",
-    description: "Dépôts auprès des sociétés de gestion collective.",
+    description:
+      "Dépôts auprès des sociétés de gestion collective. Qualifiez chaque organisme : à vérifier, à effectuer ou non applicable ; seules les démarches applicables comptent dans le dossier.",
     organisms: {
       sacem: "SACEM",
       scpp: "SCPP",
@@ -318,13 +344,44 @@ export const masterPage = {
       adami: "Artistes interprètes principaux",
       spedidam: "Musiciens et artistes d'accompagnement",
     },
+    // The final list (retour 63).
     statuses: {
-      todo: "À déposer",
+      to_verify: "À vérifier",
+      to_do: "À effectuer",
       submitted: "Déposée",
       confirmed: "Confirmée",
+      to_correct: "À corriger",
       rejected: "Refusée",
+      not_applicable: "Non applicable",
     },
-    declare: "Déclarer",
+    statusHints: {
+      to_verify: "On ne sait pas encore si la déclaration est nécessaire.",
+      to_do: "La déclaration doit être réalisée.",
+      submitted: "La déclaration a été transmise à l'organisme.",
+      confirmed:
+        "L'organisme l'a confirmée ; avec un justificatif, la confirmation est vérifiée.",
+      to_correct: "Des modifications sont nécessaires.",
+      rejected: "L'organisme a refusé la déclaration.",
+      not_applicable: "Cette déclaration ne concerne pas le titre.",
+    },
+    verified: "Vérifiée (justificatif)",
+    declaredOnly: "Confirmée, sans justificatif",
+    followedBy: (who: string) => `Suivie par ${who}`,
+    proof: "Justificatif",
+    noProof: "Aucun justificatif",
+    history: "Historique",
+    historyEmpty: "Aucun changement enregistré.",
+    historyLine: (field: string, before: string, after: string) =>
+      `${field} : ${before} → ${after}`,
+    historyFields: {
+      status: "Statut",
+      reference: "Référence",
+      declared_on: "Date",
+      third_party: "Suivi par",
+      proof_file_id: "Justificatif",
+    } as Record<string, string>,
+    empty: "—",
+    declare: "Qualifier",
     columns: {
       organism: "Organisme",
       status: "Statut",
@@ -337,12 +394,20 @@ export const masterPage = {
       reference: "Référence du dépôt",
       date: "Date du dépôt",
       notes: "Notes",
+      thirdParty: "Suivie par un tiers",
+      thirdPartyHint:
+        "Le nom de la personne ou de la structure qui fait la démarche, quand ce n'est pas l'équipe.",
+      proof: "Justificatif",
+      proofHint:
+        "Un fichier du titre : récépissé, confirmation ou document de l'organisme. Déposez-le d'abord dans l'onglet Fichiers.",
+      noProof: "Aucun",
     },
     dialogTitle: (organism: string) => `Déclaration ${organism}`,
-    formDescription: "Notez le dépôt tel que l'organisme l'a enregistré.",
+    formDescription:
+      "Notez où en est la démarche. Un statut renseigné n'est pas une preuve : joignez le justificatif quand l'organisme confirme.",
     confirmTitle: "Retirer cette déclaration ?",
     confirmBody: (name: string) =>
-      `La déclaration ${name} repassera « À déposer ».`,
+      `La déclaration ${name} repassera « À vérifier ».`,
   },
 
   distribution: {

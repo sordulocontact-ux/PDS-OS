@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { retainedValues } from "@/lib/auth/schemas";
 import {
   afterWrite,
@@ -11,6 +13,9 @@ import {
   rightsSchema,
   splitSchema,
 } from "@/lib/catalog/master/schemas";
+import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
+import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 
@@ -60,8 +65,14 @@ export async function saveDeclaration(
 ): Promise<MasterFormState> {
   const parsed = await parseMasterForm(declarationSchema, formData);
   if (!parsed.ok) return parsed.state;
-  const { masterId, organism, date, ...fields } = parsed.data;
-  const row = { ...fields, declared_on: date };
+  const { masterId, organism, date, thirdParty, proofFileId, ...fields } =
+    parsed.data;
+  const row = {
+    ...fields,
+    declared_on: date,
+    third_party: thirdParty,
+    proof_file_id: proofFileId,
+  };
   const supabase = await createClient();
   const { data: existing } = await supabase
     .from("master_declarations")
@@ -111,4 +122,56 @@ export async function saveMasterRights(
     );
   }
   return afterWrite("saveMasterRights", masterId, formData, error);
+}
+
+/**
+ * The title's files a declaration's proof may be (retour 60): the same
+ * file as in its Fichiers tab, never deposited twice. Read with the user's
+ * session (RLS hides what they may not read).
+ */
+export async function listDeclarationProofs(
+  masterId: string,
+): Promise<Array<{ id: string; name: string }>> {
+  await requireApproved();
+  const id = catalogIdSchema.safeParse(masterId);
+  if (!id.success) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("master_files")
+    .select("id, file_name")
+    .eq("master_id", id.data)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) console.error("listDeclarationProofs:", error.message);
+  return (data ?? []).map((f) => ({ id: f.id, name: f.file_name }));
+}
+
+/**
+ * « Confirmer le titulaire du ℗ » (retours 54 and 58): a person confirms
+ * the proposed holder and year; changing one of them later takes the
+ * confirmation back (trigger). manage_catalog, active title (SQL).
+ */
+export async function confirmMasterRights(
+  masterId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requireApproved();
+  const id = catalogIdSchema.safeParse(masterId);
+  if (!id.success)
+    return { ok: false, error: fr.masterPage.rights.confirmFailed };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("confirm_master_rights", {
+    p_master_id: id.data,
+  });
+  if (error) {
+    if (!error.message.includes("rights_incomplete"))
+      console.error("confirmMasterRights:", error.message);
+    return {
+      ok: false,
+      error: error.message.includes("rights_incomplete")
+        ? fr.masterPage.rights.confirmIncomplete
+        : fr.masterPage.rights.confirmFailed,
+    };
+  }
+  revalidatePath(routes.masterRights(id.data));
+  return { ok: true };
 }

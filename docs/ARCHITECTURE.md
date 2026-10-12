@@ -486,6 +486,27 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
   le bulletin SACEM n'avait jamais ses créateurs, ni l'éditeur de répartition et les ayants
   droit d'un emprunt les personnes créditées. Tri par `created_at`.
 
+### Déclarations et droits ℗ (retours Catalogue du 11/10/2026, lot 6)
+
+- **Statuts définitifs (retour 63)** : À vérifier, À effectuer, Déposée, Confirmée, À corriger,
+  Refusée, Non applicable (`DECLARATION_STATUSES`, contrainte SQL). Un organisme sans déclaration
+  notée se lit « À vérifier » (plus « À déposer »).
+- **Applicabilité (retours 14 et 61)** : le dossier du titre ne compte que les démarches
+  applicables (`declarationsSummary` : faites sur applicables, et organismes encore à qualifier) ;
+  « Non applicable » sort du dossier ; une démarche peut être suivie par un tiers (`third_party`).
+- **Justificatif (retours 59 et 60)** : choisi parmi les fichiers du titre (`proof_file_id`, même
+  titre vérifié par trigger, jamais déposé deux fois) ; « Confirmée » avec justificatif = vérifiée,
+  sans = confirmation seulement déclarée (`declarationVerified`).
+- **Historique (retour 62)** : `master_declaration_events` en ajout seul, écrit par trigger (auteur,
+  instant `clock_timestamp`, ancienne et nouvelle valeur de statut, référence, date, tiers,
+  justificatif), affiché sous les déclarations.
+- **Titulaire du ℗ (retours 54 à 58)** : la valeur proposée d'après la répartition master reste
+  « proposée » tant qu'une personne ne la confirme pas (`confirm_master_rights`, `manage_catalog`,
+  qui et quand) ; changer le titulaire ou l'année reprend la confirmation (trigger) ; une
+  confirmation qui ne correspond plus à ce que propose la répartition est dite « À revoir ».
+  Aides : ISWC facultatif et distinct de l'ISRC, année du ℗ distincte des dates de sortie.
+  Migration `20261012100801`.
+
 ## 3. Authentification et navigation (étape 3)
 
 - Portée d'Ibé : `lib/auth/{access,dal,redirects,actions,errors,schemas,form-state,site-url}.ts`,

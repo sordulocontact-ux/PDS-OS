@@ -110,6 +110,8 @@ export function declarationsByTitle(
     reference: string | null;
     declared_on: string | null;
     notes: string | null;
+    third_party: string | null;
+    proof_file_id: string | null;
   }>,
 ): Map<string, Map<Organism, MasterDeclaration>> {
   const groups = groupBy(
@@ -122,10 +124,12 @@ export function declarationsByTitle(
         {
           id: row.id,
           organism,
-          status: oneOf(DECLARATION_STATUSES, row.status, "submitted"),
+          status: oneOf(DECLARATION_STATUSES, row.status, "to_verify"),
           reference: row.reference,
           date: row.declared_on,
           notes: row.notes,
+          thirdParty: row.third_party,
+          proofFileId: row.proof_file_id,
         },
       ];
     },
