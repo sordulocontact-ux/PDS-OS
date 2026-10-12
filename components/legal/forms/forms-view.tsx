@@ -4,8 +4,8 @@ import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { FormRow } from "@/lib/legal/forms/queries";
-import { formatDate } from "@/lib/release/format";
 import { legalFormTone } from "@/lib/ui/state-tones";
+import { formatInstant } from "@/lib/utils/instant";
 
 /**
  * Fiches de renseignements of a project (ticket Juridique 02): each credited
@@ -44,7 +44,7 @@ export function FormsView({
                   <div className="flex items-center gap-2">
                     {row.since && row.state !== "none" && (
                       <span className="text-sm text-muted-foreground">
-                        {t.since(formatDate(row.since))}
+                        {t.since(formatInstant(row.since))}
                       </span>
                     )}
                     <StatusBadge tone={legalFormTone[row.state]}>

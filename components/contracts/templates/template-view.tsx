@@ -3,8 +3,8 @@ import { TemplateSourceLink } from "@/components/contracts/templates/template-so
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { TemplateSeries } from "@/lib/legal/contracts/templates";
-import { formatDate } from "@/lib/release/format";
 import { templateStatusTone } from "@/lib/ui/state-tones";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** A template as it stands: its text, the values it injects, its versions. */
 export function TemplateView({ template }: { template: TemplateSeries }) {
@@ -15,7 +15,7 @@ export function TemplateView({ template }: { template: TemplateSeries }) {
         <p className="text-sm text-muted-foreground">
           {t.validatedBy(
             template.validatedBy,
-            formatDate(template.validatedAt),
+            formatInstant(template.validatedAt),
           )}
         </p>
       )}

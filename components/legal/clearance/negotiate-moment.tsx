@@ -19,7 +19,6 @@ import {
   type MessageProposal,
 } from "@/lib/legal/clearance/interpret";
 import type { Clearance } from "@/lib/legal/clearance/types";
-import { formatDate } from "@/lib/release/format";
 
 import {
   centsOf,
@@ -30,6 +29,7 @@ import {
   type TermsLine,
 } from "@/components/legal/clearance/terms-lines";
 import { useLegalAction } from "@/components/legal/use-legal-action";
+import { formatInstant } from "@/lib/utils/instant";
 
 // What PO read, line by line (one per right), as the person may correct it.
 type Reading = { refusal: boolean; lines: TermsLine[] };
@@ -199,7 +199,7 @@ export function NegotiateMoment({
       <p className="text-sm text-muted-foreground">
         {t.askedTo(
           names || fr.legalClearance.flow.holdersFallback,
-          askedOn ? formatDate(askedOn) : "",
+          askedOn ? formatInstant(askedOn) : "",
         )}
       </p>
       {reading === null ? (

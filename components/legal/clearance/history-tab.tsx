@@ -1,6 +1,6 @@
 import { fr } from "@/lib/i18n/fr";
 import type { Clearance } from "@/lib/legal/clearance/types";
-import { formatDateTime } from "@/lib/release/format";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** « Historique » : every change, who and when, never rewritten. */
 export function HistoryTab({ clearance }: { clearance: Clearance }) {
@@ -16,7 +16,7 @@ export function HistoryTab({ clearance }: { clearance: Clearance }) {
             {e.to && ` · ${t.statuses[e.to] ?? e.to}`}
           </span>
           <span className="text-sm text-muted-foreground">
-            {[e.by, formatDateTime(e.at)].filter(Boolean).join(" · ")}
+            {[e.by, formatInstant(e.at)].filter(Boolean).join(" · ")}
           </span>
           {e.note && <span className="text-sm break-words">{e.note}</span>}
         </li>

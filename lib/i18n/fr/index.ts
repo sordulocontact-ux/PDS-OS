@@ -40,6 +40,7 @@ import { legalClearance } from "./legal-clearance";
 import { legalContracts } from "./legal-contracts";
 import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
+import { legalHistory } from "./legal-history";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { masterPage } from "./master-page";
@@ -154,6 +155,7 @@ export const fr = {
   legalContracts,
   legalFormalities,
   legalForms,
+  legalHistory,
   legalSplits,
   masterWorkflow,
   artistActivity,

@@ -26,6 +26,7 @@ import {
   splitVersionTone,
   type Tone,
 } from "@/lib/ui/state-tones";
+import { formatInstant } from "@/lib/utils/instant";
 
 export type BoardGroup = TrackGroup | "done";
 
@@ -190,7 +191,7 @@ function metaOf(item: TrackedItem | null, extra: Array<string | null>) {
     item?.responsibleName ?? null,
     item?.dueOn ? t.due(formatDate(item.dueOn)) : null,
     item?.group === "waiting" && item.since
-      ? t.since(formatDate(item.since))
+      ? t.since(formatInstant(item.since))
       : null,
   ].filter((x): x is string => !!x);
 }

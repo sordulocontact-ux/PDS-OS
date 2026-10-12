@@ -2427,6 +2427,40 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   copier (fiche, répartition, dossier du mixeur), adressé au contact du Réseau. PDS OS n'envoie
   aucun e-mail lui-même (pas de fournisseur : point à trancher).
 
+### Synchronisation, horodatage et historique (retours Juridique du 11/10/2026, lot 2)
+
+- **Pages à jour sans recharger (JUR-12, JUR-28)** : table `project_live` (une ligne par projet,
+  `version` + `changed_at`, migration `20261012100201`), incrémentée par le trigger
+  `project_live_tick` sur toutes les tables du Juridique, les contrats et les tâches (ligne
+  rattachée au projet par son `project_id` ou par son emprunt, sa formalité, sa répartition ou
+  son contrat), y compris quand l'écriture vient d'une page publique (fiche, confirmation de
+  répartition). `ProjectLive` (monté dans le layout du projet) l'écoute en **Realtime** (RLS :
+  seul qui voit le projet l'entend), puis appelle `refreshProjectData` qui fait
+  `revalidatePath` sur tout le projet : la page ouverte est relue aussitôt, les autres à leur
+  prochaine visite (jamais un cache client périmé), avec « Mise à jour… » pendant la relecture.
+  Aussi au retour sur l'onglet, au retour du réseau et à la reconnexion du canal. Le signal ne
+  porte aucune donnée : tout est relu avec la session de la personne. Pour un autre module,
+  ajouter un trigger `zz_project_live` sur ses tables suffit. Les attentes du Suivi disent qui
+  ou quoi est attendu et quelle action débloque la suite (« Déposée : en attente de la réponse
+  de la SACEM, à saisir avec « Enregistrer le résultat » »).
+- **Date et heure (JUR-20)** : tout instant enregistré s'affiche « 11 oct. 2026 à 16:42 », heure
+  de Paris (`formatInstant`, `lib/utils/instant.ts` ; `Timestamp` pour un `<time>` avec le
+  détail au survol). Une échéance sans heure reste une date (`formatDate`), jamais une heure
+  inventée. Appliqué aux signatures, dépôts, résultats, réponses de répartition, envois de
+  fiches, validations, journaux des contrats, des emprunts et du plan.
+- **Historique du Juridique (JUR-29)** : `/legal/history`, lien « Historique du dossier » en tête
+  de chaque page du Juridique. Il **lit** les journaux existants (append-only), sans rien
+  dupliquer : `legal_plan_events`, lancement et validation du plan, confirmation du dossier,
+  instants des fiches, `contract_events`, `legal_clearance_events`, `legal_split_events`,
+  `legal_formality_events` et les signatures (`loadLegalHistory`, traduits par
+  `buildLegalEvents`, pur). Chaque ligne : heure, action, objet (titre, version, personne),
+  auteur (« par la personne, via son lien » pour une réponse extérieure, « automatiquement »
+  pour la base), note ; une preuve saisie à la main est dite « Déclaration manuelle non
+  vérifiée ». Filtres par partie du dossier (`?branche=`), groupes par jour (`DayGroups`, commun
+  avec l'Activité du projet). Un journal illisible est dit, jamais montré comme un historique
+  complet. Une démarche terminée quitte les listes actives du Suivi mais reste ici. Pas encore :
+  export CSV / PDF, comparateur de versions.
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique

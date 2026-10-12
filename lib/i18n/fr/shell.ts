@@ -401,6 +401,8 @@ export const shell = {
       validations: "Validations",
       activity: "Activité",
     },
+    // The project's pages read again after a change (JUR-12 / JUR-28).
+    live: { updating: "Mise à jour…" },
     legalSteps: {
       label: "Étapes juridiques",
       soon: "Bientôt disponible",
@@ -424,6 +426,7 @@ export const shell = {
         // element taken from another work is an « Emprunt » on screen.
         clearances: "Emprunts",
         formalities: "SACEM",
+        history: "Historique",
       },
     },
     // Le workflow Marketing (ticket « Architecture globale », § 4) : une

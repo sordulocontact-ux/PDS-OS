@@ -11,8 +11,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { SplitLine } from "@/lib/legal/splits/queries";
 import { formatShare, totalUnits } from "@/lib/legal/splits/shares";
-import { formatDate } from "@/lib/release/format";
 import { splitConfirmationTone } from "@/lib/ui/state-tones";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** The lines of a version (or of the title's page, not sent yet): who,
  * which role, which share (rounded for reading), and each person's answer;
@@ -61,7 +61,7 @@ export function SplitLines({
                   </StatusBadge>
                   {line.confirmation.at && (
                     <span className="text-sm text-muted-foreground">
-                      {t.answeredOn(formatDate(line.confirmation.at))}
+                      {t.answeredOn(formatInstant(line.confirmation.at))}
                     </span>
                   )}
                   {open &&

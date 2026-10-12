@@ -10,8 +10,8 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { formalityMissingLabel } from "@/lib/legal/formalities/definition";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
-import { formatDate, formatDateTime } from "@/lib/release/format";
 import { clearanceTone, formalityTone } from "@/lib/ui/state-tones";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** One title's SACEM 725: where it stands, what it still needs, its
  * borrowings, the dossier, the steps, the history. */
@@ -57,12 +57,12 @@ export function FormalityCard({
             <div className="flex flex-wrap items-center gap-2">
               {f.submittedAt && (
                 <span className="text-sm text-muted-foreground">
-                  {t.page.submittedNote(formatDate(f.submittedAt))}
+                  {t.page.submittedNote(formatInstant(f.submittedAt))}
                 </span>
               )}
               {f.completedAt && (
                 <span className="text-sm text-muted-foreground">
-                  {t.page.completed(formatDate(f.completedAt))}
+                  {t.page.completed(formatInstant(f.completedAt))}
                 </span>
               )}
             </div>
@@ -124,7 +124,7 @@ export function FormalityCard({
               <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
                 {f.history.map((e) => (
                   <li key={e.id}>
-                    {[t.events[e.kind] ?? e.kind, e.by, formatDateTime(e.at)]
+                    {[t.events[e.kind] ?? e.kind, e.by, formatInstant(e.at)]
                       .filter(Boolean)
                       .join(" · ")}
                     {e.note && (

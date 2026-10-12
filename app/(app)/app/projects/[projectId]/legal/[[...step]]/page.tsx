@@ -8,6 +8,7 @@ import {
   ConfirmationStatus,
 } from "@/components/legal/confirmation/confirmation-view";
 import { FormsView } from "@/components/legal/forms/forms-view";
+import { HistoryView } from "@/components/legal/history/history-view";
 import { IntakeWorkspace } from "@/components/legal/intake/intake-workspace";
 import { PlanView } from "@/components/legal/plan/plan-view";
 import { SplitsView } from "@/components/legal/splits/splits-view";
@@ -28,6 +29,8 @@ import { loadAgreementsGenerated } from "@/lib/legal/contracts/auto-generate";
 import { loadFormalities } from "@/lib/legal/formalities/queries";
 import { loadLegalInventory } from "@/lib/legal/inventory";
 import { loadForms } from "@/lib/legal/forms/queries";
+import { loadLegalHistory } from "@/lib/legal/history/queries";
+import { isHistoryBranch } from "@/lib/legal/history/types";
 import { loadIntake } from "@/lib/legal/intake/queries";
 import { loadLegalPlan } from "@/lib/legal/plan/queries";
 import { loadSplits } from "@/lib/legal/splits/queries";
@@ -73,6 +76,16 @@ export default async function ProjectLegalPage({
   if (current === "tracking")
     redirect(routes.projectLegalStep(projectId, "plan"));
 
+  if (current === "history") {
+    const history = await loadLegalHistory(project, access);
+    return (
+      <HistoryView
+        projectId={project.id}
+        history={history}
+        branch={isHistoryBranch(query.branche) ? query.branche : null}
+      />
+    );
+  }
   if (current === "formalities") {
     const titles = await loadFormalities(project, access);
     return <FormalitiesView projectId={project.id} titles={titles} />;

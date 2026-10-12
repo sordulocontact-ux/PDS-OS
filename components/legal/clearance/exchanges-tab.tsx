@@ -1,6 +1,6 @@
 import { fr } from "@/lib/i18n/fr";
 import type { Clearance } from "@/lib/legal/clearance/types";
-import { formatDateTime } from "@/lib/release/format";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** The exchanges of a borrowing (sent, received, notes), newest first, in
  * the panel's « Journal » — each written by its moment: the request sent,
@@ -16,7 +16,7 @@ export function ExchangesTab({ clearance }: { clearance: Clearance }) {
           <span className="text-sm text-muted-foreground">
             {t.kinds[e.kind as keyof typeof t.kinds]} ·{" "}
             {t.directions[e.direction as keyof typeof t.directions]} ·{" "}
-            {formatDateTime(e.at)}
+            {formatInstant(e.at)}
             {e.by && ` · ${e.by}`}
           </span>
           <span className="break-words whitespace-pre-wrap">{e.body}</span>

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ProcessSteps } from "@/components/ui/process-steps";
@@ -61,12 +62,22 @@ export function LegalSteps({
           };
         })}
       />
-      <p className="text-caption text-muted-foreground">
-        {t.phase} ·{" "}
-        <span className="font-medium text-foreground">
-          {t[legalPhase(done)]}
-        </span>
-      </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <p className="text-caption text-muted-foreground">
+          {t.phase} ·{" "}
+          <span className="font-medium text-foreground">
+            {t[legalPhase(done)]}
+          </span>
+        </p>
+        {/* The dossier's journal, from every page of the section (JUR-29). */}
+        <Link
+          href={routes.projectLegalStep(projectId, "history")}
+          aria-current={page === "history" ? "page" : undefined}
+          className="text-caption font-medium underline underline-offset-4"
+        >
+          {fr.legalHistory.link}
+        </Link>
+      </div>
     </div>
   );
 }

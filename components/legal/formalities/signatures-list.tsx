@@ -10,7 +10,7 @@ import { fr } from "@/lib/i18n/fr";
 import type { Creator, Publisher } from "@/lib/legal/formalities/definition";
 import { signFormality } from "@/lib/legal/formalities/step-actions";
 import type { FormalityView } from "@/lib/legal/formalities/types";
-import { formatDate } from "@/lib/release/format";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** « Le bulletin doit être signé par tous les ayants droit » : each signer
  * of the current version, recorded signed with its proof; before the
@@ -46,12 +46,12 @@ export function SignaturesList({
                   : (fr.legalFormalities.qualities[
                       s.role as keyof typeof fr.legalFormalities.qualities
                     ] ?? s.role)}
-                {s.at && ` · ${t.signed(formatDate(s.at))}`}
+                {s.at && ` · ${t.signed(formatInstant(s.at))}`}
               </span>
             </span>
             {s.status === "signed" ? (
               <StatusBadge tone="success" size="sm">
-                {t.signed(formatDate(s.at ?? ""))}
+                {t.signed(s.at ? formatInstant(s.at) : "")}
               </StatusBadge>
             ) : (
               f.status === "signatures_pending" && (

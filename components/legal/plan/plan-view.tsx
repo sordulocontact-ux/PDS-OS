@@ -9,11 +9,12 @@ import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { formatInstant } from "@/lib/utils/instant";
 import { PLAN_COLUMNS } from "@/lib/legal/plan/proposal";
 import { groupActions, lineOf } from "@/lib/legal/plan/groups";
 import type { LegalPlan, PlanRow } from "@/lib/legal/plan/queries";
 import { groupAction } from "@/lib/legal/plan/where";
-import { formatDate, formatDateTime } from "@/lib/release/format";
+import { formatDate } from "@/lib/release/format";
 
 /** Juridique's fourth step: the plan to launch, or the plan launched. */
 export function PlanView({
@@ -57,7 +58,7 @@ export function PlanView({
   return (
     <div className="grid gap-8">
       <ToneCallout tone="success">
-        {t.launched(formatDateTime(plan.launchedAt), plan.launchedBy)}{" "}
+        {t.launched(formatInstant(plan.launchedAt), plan.launchedBy)}{" "}
         <Link
           href={routes.projectLegalStep(projectId, "plan")}
           className="underline underline-offset-4"

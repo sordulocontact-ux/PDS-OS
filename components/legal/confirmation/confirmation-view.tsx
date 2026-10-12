@@ -9,7 +9,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { Confirmation } from "@/lib/legal/confirmation/queries";
-import { formatDateTime } from "@/lib/release/format";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** Where the dossier stands, said once at the top of the État des lieux:
  * confirmed (by whom, when, and the way to the plan), or reopened by a
@@ -25,7 +25,7 @@ export function ConfirmationStatus({
   if (c.status === "confirmed" && c.confirmedAt)
     return (
       <ToneCallout tone="success">
-        {t.confirmed(formatDateTime(c.confirmedAt), c.confirmedBy)}{" "}
+        {t.confirmed(formatInstant(c.confirmedAt), c.confirmedBy)}{" "}
         {t.confirmedNote}{" "}
         <Link
           href={routes.projectLegalStep(projectId, "plan")}

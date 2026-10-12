@@ -6,6 +6,7 @@ import {
   ProjectSidebar,
   ProjectSidebarMobile,
 } from "@/components/projects/project-sidebar";
+import { ProjectLive } from "@/components/projects/project-live";
 import { ProjectPageTitle } from "@/components/projects/project-page-title";
 import { ProjectTabs } from "@/components/projects/project-tabs";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
@@ -75,6 +76,8 @@ export default async function ProjectLayout({
 
   return (
     <div className="flex flex-1">
+      {/* Pages read again when the project changes elsewhere (JUR-12). */}
+      <ProjectLive projectId={project.id} />
       {/* Sits right against the main sidebar (collapsed to icons on a
           project page), so the two read as one "double sidebar" (Figma). */}
       {DOUBLE_SIDEBAR && project.stages.length > 0 && (

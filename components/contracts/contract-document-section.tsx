@@ -7,7 +7,7 @@ import { fr } from "@/lib/i18n/fr";
 import type { ContractDocument } from "@/lib/legal/contracts/document";
 import { documentFileName } from "@/lib/legal/contracts/document-name";
 import { formatFee } from "@/lib/legal/contracts/fields";
-import { formatDateTime } from "@/lib/release/format";
+import { formatInstant } from "@/lib/utils/instant";
 
 /**
  * The document of a contract generated from a template (Juridique 03): the
@@ -86,7 +86,7 @@ export function ContractDocumentSection({
           <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
             {document.events.map((e) => (
               <li key={e.id}>
-                {t.eventLine(e.label, e.by, formatDateTime(e.at))}
+                {t.eventLine(e.label, e.by, formatInstant(e.at))}
                 {e.note && <span className="text-foreground"> — {e.note}</span>}
               </li>
             ))}

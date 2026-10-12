@@ -8,7 +8,7 @@ import { MappingForm } from "@/components/legal/contracts/mapping-form";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
-import { formatDate } from "@/lib/release/format";
+import { formatInstant } from "@/lib/utils/instant";
 
 /** The mapping to approve, or approved (with « Modifier la cartographie »). */
 export function MappingPanel({
@@ -41,7 +41,7 @@ export function MappingPanel({
       {approval && (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted-foreground">
-            {t.mappingApproved(approval.by, formatDate(approval.at))}
+            {t.mappingApproved(approval.by, formatInstant(approval.at))}
           </p>
           <Button
             type="button"

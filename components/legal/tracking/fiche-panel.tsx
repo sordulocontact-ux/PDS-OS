@@ -23,7 +23,7 @@ import {
   setLegalFormState,
 } from "@/lib/legal/forms/actions";
 import type { FormRow } from "@/lib/legal/forms/queries";
-import { formatDate } from "@/lib/release/format";
+import { formatInstant } from "@/lib/utils/instant";
 
 const facts = (values: Record<string, string>) =>
   Object.entries(values).map(([id, value]) => ({
@@ -218,7 +218,7 @@ export function FichePanel({
       <NextCard
         kind="wait"
         label={p.waiting}
-        title={p.sent(row.since ? formatDate(row.since) : "")}
+        title={p.sent(row.since ? formatInstant(row.since) : "")}
       >
         <p className="text-sm text-muted-foreground">{p.sentBody}</p>
         <div className="flex flex-wrap gap-2">

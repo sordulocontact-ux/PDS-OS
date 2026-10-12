@@ -33,6 +33,8 @@ export const LEGAL_BRANCH_PAGES = [
   "splits",
   "clearances",
   "formalities",
+  // The dossier's journal (JUR-29), reached from the head of the section.
+  "history",
 ] as const;
 export type LegalBranchPage = (typeof LEGAL_BRANCH_PAGES)[number];
 

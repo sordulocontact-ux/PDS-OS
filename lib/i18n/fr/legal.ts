@@ -419,14 +419,16 @@ export const legal = {
       waitsForFiche: "Attend la fiche de la personne",
       noLongerCredited: "Plus créditée sur les titres du projet",
       signed: "Contrat signé",
-      sentForSignature: "Envoyé pour signature",
+      // An awaited return says from whom and what unlocks it (JUR-28).
+      sentForSignature:
+        "Envoyé pour signature : en attente du contrat signé, à déposer avec sa preuve",
       awaitingDirector: "À valider par la direction",
       noContract: "Aucun contrat pour l'instant",
       titleRemoved: "Le titre n'est plus dans le projet",
       splitConfirmed: "Répartition confirmée par tous",
       splitDisputed: "Répartition contestée",
       splitWaiting: (confirmed: number, total: number) =>
-        `${confirmed} confirmation${confirmed > 1 ? "s" : ""} sur ${total}`,
+        `${confirmed} confirmation${confirmed > 1 ? "s" : ""} sur ${total} : en attente de la réponse des autres personnes, par leur lien`,
       splitToDo: "Répartition à proposer",
       splitOnTitle: "Répartie sur la fiche du titre, à faire confirmer",
       clearanceGone: "Plus à sécuriser",
@@ -435,11 +437,13 @@ export const legal = {
         refused: "Refusé par les ayants droit",
         action_required: "Action requise",
       },
-      clearanceWaiting: "En attente des ayants droit",
+      clearanceWaiting:
+        "En attente de la réponse des ayants droit, à consigner dans l'emprunt",
       clearanceTermsPending: "Conditions à valider par la direction",
       toInvestigate: "À instruire",
       declared: "Déclaration confirmée",
-      submitted: "Déposée, en traitement",
+      submitted:
+        "Déposée : en attente de la réponse de la SACEM, à saisir avec « Enregistrer le résultat »",
       rejected: "Déclaration refusée",
       toDeclare: "À déclarer",
       waitsForOthers: "Attend une autre action",

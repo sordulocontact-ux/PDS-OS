@@ -11949,6 +11949,35 @@ export type Database = {
           },
         ]
       }
+      project_live: {
+        Row: {
+          changed_at: string
+          organization_id: string
+          project_id: string
+          version: number
+        }
+        Insert: {
+          changed_at?: string
+          organization_id: string
+          project_id: string
+          version?: number
+        }
+        Update: {
+          changed_at?: string
+          organization_id?: string
+          project_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_live_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           archived_at: string | null

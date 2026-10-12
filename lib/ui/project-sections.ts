@@ -214,6 +214,7 @@ export function projectTrail(
     [`${legal}/splits`]: [plan, { label: fr.legalSplits.page.title }],
     [`${legal}/clearances`]: [plan, { label: fr.legalClearance.page.title }],
     [`${legal}/formalities`]: [plan, { label: fr.legalFormalities.page.title }],
+    [`${legal}/history`]: [{ label: fr.legalHistory.title }],
     // Marketing › Conception (ticket « Conception »): the module has its own
     // home under the Marketing, and its direct work below it.
     [routes.projectDesign(projectId)]: [{ label: fr.conception.title }],
