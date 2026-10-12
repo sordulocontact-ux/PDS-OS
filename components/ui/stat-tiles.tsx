@@ -12,6 +12,8 @@ export type StatTile = {
   // The tile is a filter of the page it sits on (État du master: only the
   // missing facts): a preloaded view, marked while it is the one shown.
   view?: { current: boolean };
+  // What the figure counts, in one line (Suivi du Juridique, JUR-08).
+  hint?: string;
 };
 
 // Key figures in bordered tiles: value large, grey label below. A tile with
@@ -51,6 +53,11 @@ export function StatTiles({
         >
           <dt className="text-caption text-[color:var(--text-secondary)]">
             {stat.label}
+            {stat.hint && (
+              <span className="mt-0.5 block text-caption text-muted-foreground">
+                {stat.hint}
+              </span>
+            )}
           </dt>
           <dd className="text-body-xl font-medium tabular-nums">
             {stat.href && stat.view ? (

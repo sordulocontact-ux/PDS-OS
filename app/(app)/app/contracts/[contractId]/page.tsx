@@ -7,6 +7,8 @@ import { ContractFlow } from "@/components/contracts/contract-flow";
 import { ContractParties } from "@/components/contracts/contract-parties";
 import { EditContractButton } from "@/components/contracts/edit-contract-button";
 import { BackLink } from "@/components/shell/back-link";
+import { ToneCallout } from "@/components/ui/tone-callout";
+import { legalOriginOf } from "@/lib/contracts/legal-origin";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
@@ -40,9 +42,10 @@ export default async function ContractPage({
   if (!contract) notFound();
 
   const owner = { kind: "contract" as const, id: contract.id };
-  const [library, document] = await Promise.all([
+  const [library, document, origin] = await Promise.all([
     listCatalogFiles(owner),
     getContractDocument(contract.id),
+    legalOriginOf(contract.id),
   ]);
   const t = fr.contracts;
   const p = t.page;
@@ -55,6 +58,24 @@ export default async function ContractPage({
   return (
     <PageContainer>
       <BackLink href={routes.contracts}>{p.back}</BackLink>
+      {origin && (
+        // Where it comes from in the Juridique, and the way back (JUR-17).
+        <ToneCallout
+          tone="info"
+          className="flex flex-wrap items-center justify-between gap-3"
+        >
+          <span>
+            {origin.kind === "agreement"
+              ? p.legalOrigin.agreement(contract.projectTitle ?? "")
+              : p.legalOrigin.clearance(origin.element)}
+          </span>
+          <Link href={origin.href} className="underline underline-offset-4">
+            {origin.kind === "agreement"
+              ? p.legalOrigin.backToPlan
+              : p.legalOrigin.backToClearance}
+          </Link>
+        </ToneCallout>
+      )}
       <PageHeader
         title={contract.title}
         description={[t.types[contract.type], contract.parties.join(", ")]

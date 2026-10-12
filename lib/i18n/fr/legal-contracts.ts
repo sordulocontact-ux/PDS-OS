@@ -56,6 +56,14 @@ export const legalContracts = {
       status: "État",
     },
     states: { draft: "À valider", validated: "Validé", retired: "Retiré" },
+    // Who decides on a draft (JUR-19), said to whoever cannot.
+    whoValidates:
+      "À valider par le directeur général : tant qu'il n'est pas validé, ce modèle n'est proposé pour aucun contrat.",
+    backToLibrary: "Tous les modèles",
+    validateTitle: "Valider ce modèle ?",
+    validateBody:
+      "Une fois validé, il pourra être proposé pour générer des contrats. Il ne se modifie plus : une correction se fait par une nouvelle version.",
+    validating: "Validation…",
     version: (n: number) => `v${n}`,
     form: {
       title: "Nouveau modèle",

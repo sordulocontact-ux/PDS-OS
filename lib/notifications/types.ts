@@ -44,6 +44,8 @@ export const NOTIFICATION_KINDS = [
   // The engineer deposited a version through their link.
   "master_delivery_received",
   "master_mastering_delivery_received",
+  // A fiche de renseignements came back through its link (JUR-11).
+  "legal_form_received",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -91,6 +93,9 @@ export function notificationHref(
   if (kind === "call_invited" && subjectId)
     return routes.projectCall(projectId, subjectId);
   if (kind === "brief_approved") return routes.projectFramingBrief(projectId);
+  // A fiche received: the project's Fiches de renseignements.
+  if (kind === "legal_form_received")
+    return routes.projectLegalStep(projectId, "forms");
   // A borrowing opens on its panel, in the project's Emprunts.
   if (kind.startsWith("clearance_"))
     return subjectId

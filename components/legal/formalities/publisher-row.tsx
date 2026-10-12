@@ -18,6 +18,7 @@ export function PublisherRow({
   disabled,
   onChange,
   onRemove,
+  errors,
 }: {
   rowId: string;
   publisher: Publisher;
@@ -25,6 +26,7 @@ export function PublisherRow({
   disabled: boolean;
   onChange: (change: Partial<Publisher>) => void;
   onRemove: () => void;
+  errors?: { name?: string };
 }) {
   const t = fr.legalFormalities.publisher;
   return (
@@ -57,6 +59,7 @@ export function PublisherRow({
         hint={t.nameHint}
         value={publisher.name}
         disabled={disabled}
+        error={errors?.name}
         onChange={(e) => onChange({ name: e.target.value })}
       />
       <Field

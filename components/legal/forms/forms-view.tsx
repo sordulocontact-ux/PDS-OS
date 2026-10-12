@@ -44,7 +44,9 @@ export function FormsView({
                   <div className="flex items-center gap-2">
                     {row.since && row.state !== "none" && (
                       <span className="text-sm text-muted-foreground">
-                        {t.since(formatInstant(row.since))}
+                        {row.openedAt
+                          ? t.opened(formatInstant(row.openedAt))
+                          : t.since(formatInstant(row.since))}
                       </span>
                     )}
                     <StatusBadge tone={legalFormTone[row.state]}>

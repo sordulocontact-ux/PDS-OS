@@ -41,7 +41,8 @@ export type FormalityField = {
 export const SACEM_725_FIELDS: readonly FormalityField[] = [
   { key: "title", section: "work", kind: "text", required: true },
   { key: "subtitle", section: "work", kind: "text", required: false },
-  { key: "genre", section: "work", kind: "text", required: false },
+  // Required since JUR-24: an official bulletin went out without it.
+  { key: "genre", section: "work", kind: "text", required: true },
   { key: "duration", section: "work", kind: "text", required: true },
   { key: "group_name", section: "work", kind: "text", required: false },
   { key: "iswc", section: "work", kind: "text", required: false },
@@ -141,6 +142,10 @@ export function formalityMissingLabel(code: string): string {
       return t.creator_name(arg);
     case "creator_quality":
       return t.creator_quality(arg);
+    case "creator_first":
+      return t.creator_first(arg);
+    case "publisher_name":
+      return t.publisher_name(arg);
     case "borrowing":
       return t.borrowing(arg);
     case "to_verify":

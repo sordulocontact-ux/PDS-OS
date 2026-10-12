@@ -83,6 +83,9 @@ export const notifications = {
       `L'ingénieur a déposé une nouvelle version du mix de « ${project} ».`,
     master_mastering_delivery_received: (_actor: string, project: string) =>
       `L'ingénieur a déposé une nouvelle version du mastering de « ${project} ».`,
+    // Sent through a public link: no actor, the project names it.
+    legal_form_received: (_actor: string, project: string) =>
+      `Une fiche de renseignements de « ${project} » est arrivée : elle est à vérifier.`,
   },
   open: "Ouvrir",
   push: {

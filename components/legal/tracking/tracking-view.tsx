@@ -37,7 +37,7 @@ import {
 import { legalActionHref } from "@/lib/legal/plan/where";
 import type { TitleSplit } from "@/lib/legal/splits/queries";
 import type { LegalTracking } from "@/lib/legal/tracking/queries";
-import { TRACK_GROUPS } from "@/lib/legal/tracking/state";
+import { TRACK_GROUPS, type TrackGroup } from "@/lib/legal/tracking/state";
 import { titleHue } from "@/lib/ui/category-hues";
 import { viewHref } from "@/lib/ui/view-href";
 
@@ -343,6 +343,10 @@ export function TrackingView({
           <span className="text-sm text-muted-foreground tabular-nums">
             {fr.legal.board.progress(section.done, section.rows.length)}
           </span>
+          {/* What « fait » means for this démarche (JUR-07). */}
+          <span className="text-sm text-muted-foreground">
+            {fr.legal.board.doneWhen[section.kind]}
+          </span>
         </div>
         <div className="flex flex-col">
           {open.map((row) => line(row, section))}
@@ -393,10 +397,23 @@ export function TrackingView({
           stats={TRACK_GROUPS.map((group) => ({
             label: t.groups[group].title,
             value: String(board.counts[group]),
+            hint: t.groups[group].description,
             href: hrefOf(view === group ? "act" : group),
             view: { current: view === group },
           }))}
         />
+        {(TRACK_GROUPS as readonly string[]).includes(view) && (
+          // The active filter said and removable (JUR-08).
+          <p className="-mt-4 text-sm text-muted-foreground">
+            {t.activeFilter(t.groups[view as TrackGroup].title)}{" "}
+            <Link
+              href={hrefOf("act")}
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              {t.clearFilter}
+            </Link>
+          </p>
+        )}
         <nav aria-label={t.viewsLabel} className="flex flex-wrap gap-2">
           {(["act", "all"] as const).map((key) => (
             <FilterChipLink

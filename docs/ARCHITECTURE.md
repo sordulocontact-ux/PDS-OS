@@ -2461,6 +2461,38 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   complet. Une démarche terminée quitte les listes actives du Suivi mais reste ici. Pas encore :
   export CSV / PDF, comparateur de versions.
 
+### Finitions par branche (retours Juridique du 11/10/2026, lot 3)
+
+- **Suivi (JUR-07, JUR-08)** : chaque tuile dit ce qu'elle compte (`StatTiles` `hint`), le filtre
+  actif est écrit avec « Retirer le filtre » ; chaque démarche dit quand elle est terminée
+  (`fr.legal.board.doneWhen`, les mêmes règles que `lib/legal/tracking/sources.ts`).
+- **Contrat bloqué par une fiche (JUR-10)** : le panneau nomme la personne et les valeurs qui
+  viennent de sa fiche (« Il manque les renseignements de X pour préparer son contrat… », la fiche
+  est l'étape 1 du même panneau) ; une valeur manquante d'ailleurs a « Compléter » (fiche Réseau
+  avec `?retour=` qui rouvre le panneau, contrats à prévoir, État des lieux). `safeReturn` accepte
+  désormais une requête simple (`?ligne=…`) après un chemin de projet.
+- **Fiches (JUR-11, JUR-13, JUR-14)** : `legal_forms.opened_at`, noté une fois par
+  `note_legal_form_opened` (anon) à l'ouverture de `/f/…` (« lien ouvert le … » dans la liste) ;
+  une fiche reçue notifie qui l'a préparée et le responsable du projet (`legal_form_received`,
+  trigger `legal_forms_notify_received`), migration `20261012100301`. Le champ de part s'appelle
+  « Votre part d'auteur ou de compositeur, à votre avis », avec son aide (indicatif, n'engage
+  personne). La fiche publique passe par **Vérifier** (récapitulatif par bloc, `FormReview`),
+  **Consentir** (case distincte, jamais un bouton désactivé) puis **Envoyer**, et finit par un
+  reçu daté.
+- **Contrats (JUR-17, JUR-19)** : la page d'un contrat dit son origine juridique (contrats à
+  prévoir d'un projet, ou autorisation d'un emprunt : `legalOriginOf`) et y ramène. Un modèle a sa
+  page `/app/contracts/templates/[seriesId]` (ligne cliquable) avec « Valider » pour le DG et, pour
+  les autres, qui valide. Pas encore : refus motivé d'un modèle.
+- **SACEM (JUR-24, JUR-26)** : `formality_missing` exige aussi le genre, un prénom ou un
+  pseudonyme par créateur et la dénomination de chaque éditeur (migration `20261012100401`,
+  dossiers non générés rejugés) ; l'IPI / COAD reste facultatif (un créateur non membre n'en a
+  pas). La déclaration a sa frise (`formalityTimeline` : dossier, bulletin, signatures « x sur
+  y » ou partielle, dépôt, enregistrement ; `ProcessingSteps idle`), et chaque signature
+  s'enregistre par « Enregistrer la signature de X » avec « Comment X a signé » expliqué.
+- **Reste à part (lot suivant)** : relation éditeur ↔ créateurs et coédition (JUR-22, JUR-25),
+  répartitions Phono / DEP / DR en blocs (JUR-23), assistant SACEM pas à pas (JUR-21), assistant
+  de création de contrat (JUR-18).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique

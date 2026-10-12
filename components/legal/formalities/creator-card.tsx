@@ -34,7 +34,7 @@ export function CreatorCard({
   creator: Creator;
   load: (fresh?: boolean) => Promise<CreatorOption[]>;
   disabled: boolean;
-  errors?: { last_name?: string; quality?: string };
+  errors?: { last_name?: string; first_name?: string; quality?: string };
   onChange: (change: Partial<Creator>) => void;
   onRemove: () => void;
 }) {
@@ -100,6 +100,7 @@ export function CreatorCard({
         label={t.firstName}
         value={creator.first_name}
         disabled={disabled}
+        error={errors?.first_name}
         onChange={(e) => onChange({ first_name: e.target.value })}
       />
       <Field

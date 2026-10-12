@@ -83,6 +83,15 @@ export const contracts = {
     saved: "Contrat enregistré.",
   },
   page: {
+    // The contract's origin in the Juridique (JUR-17).
+    legalOrigin: {
+      agreement: (project: string) =>
+        `Contrat préparé dans le Juridique du projet « ${project} ».`,
+      clearance: (element: string) =>
+        `Contrat d'autorisation de l'emprunt « ${element} ».`,
+      backToPlan: "Revenir au Plan d'action",
+      backToClearance: "Revenir à l'emprunt",
+    },
     back: "Tous les contrats",
     facts: "Informations",
     type: "Type",

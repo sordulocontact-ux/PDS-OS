@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -5,6 +6,7 @@ import { ContractStateBadge } from "@/components/contracts/contract-state-badge"
 import { ContactActions } from "@/components/network/contact-actions";
 import { ContactMarketing } from "@/components/network/contact-marketing";
 import { BackLink } from "@/components/shell/back-link";
+import { ReturnBanner } from "@/components/shell/return-banner";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { FactList } from "@/components/ui/fact-list";
@@ -53,6 +55,10 @@ export default async function NetworkContactPage({
   return (
     <PageContainer>
       <BackLink href={routes.network}>{p.back}</BackLink>
+      {/* Opened from a contract of the Juridique to complete it (JUR-10). */}
+      <Suspense fallback={null}>
+        <ReturnBanner scope={contact.id} />
+      </Suspense>
       <PageHeader
         title={contact.name}
         description={[t.kinds[contact.kind], rolesText(contact.roles)]

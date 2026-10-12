@@ -7,7 +7,7 @@ import {
   RequesterNote,
 } from "@/components/legal/forms/requester-note";
 import { fr } from "@/lib/i18n/fr";
-import { getPublicForm } from "@/lib/legal/forms/public";
+import { getPublicForm, noteFormOpened } from "@/lib/legal/forms/public";
 
 const t = fr.legalForms.public;
 
@@ -25,6 +25,7 @@ export default async function LegalFormPage({
   const { token } = await params;
   const form = await getPublicForm(token);
   if (!form) notFound();
+  if (form.state === "open") await noteFormOpened(token);
 
   return (
     <main className="flex flex-1 justify-center bg-muted/40 px-4 py-12 sm:py-16">

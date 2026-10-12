@@ -31,6 +31,8 @@ export type FormRow = FormPerson & {
   state: FormState;
   // When the state began (sent, submitted, completed).
   since: string | null;
+  // When the person opened their link, while it waits (JUR-11).
+  openedAt: string | null;
   submission: FormSubmission | null;
 };
 
@@ -61,7 +63,7 @@ export async function loadForms(
     supabase
       .from("legal_forms")
       .select(
-        "id, contact_id, status, expires_at, sent_at, submitted_at, completed_at, created_at",
+        "id, contact_id, status, expires_at, sent_at, submitted_at, completed_at, created_at, opened_at",
       )
       .eq("project_id", project.id)
       .order("created_at", { ascending: false }),
@@ -117,6 +119,7 @@ export async function loadForms(
         formId: null,
         state: "none",
         since: null,
+        openedAt: null,
         submission: null,
       };
     const open = form.status === "link_generated" || form.status === "sent";
@@ -131,6 +134,7 @@ export async function loadForms(
         form.submitted_at ??
         form.sent_at ??
         form.created_at,
+      openedAt: open ? form.opened_at : null,
       submission: submissionOf.get(form.id) ?? null,
     };
   });

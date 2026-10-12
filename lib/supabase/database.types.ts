@@ -6309,6 +6309,7 @@ export type Database = {
       }
       legal_forms: {
         Row: {
+          opened_at: string | null
           completed_at: string | null
           contact_id: string
           created_at: string
@@ -6327,6 +6328,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          opened_at?: string | null
           completed_at?: string | null
           contact_id: string
           created_at?: string
@@ -6345,6 +6347,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          opened_at?: string | null
           completed_at?: string | null
           contact_id?: string
           created_at?: string
@@ -13339,6 +13342,7 @@ export type Database = {
         Returns: undefined
       }
       note_master_transmission_opened: { Args: { p_token: string }; Returns: undefined }
+      note_legal_form_opened: { Args: { p_token: string }; Returns: undefined }
       reopen_distribution_closure: {
         Args: { p_note: string; p_project_id: string }
         Returns: undefined

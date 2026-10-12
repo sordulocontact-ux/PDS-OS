@@ -9,8 +9,12 @@ export function ProcessingSteps({
   label,
   doneLabel,
   steps,
+  idle = false,
 }: {
   label: string;
+  // The step in progress waits for a person, not for the machine: a dot,
+  // never a spinner (the SACEM declaration's frise).
+  idle?: boolean;
   // Read after a finished step: the check mark alone is not announced.
   doneLabel: string;
   steps: Array<{ key: string; label: string; state: StepState }>;
@@ -37,9 +41,12 @@ export function ProcessingSteps({
             )}
           >
             {step.state === "done" && <IconCheck className="size-3.5" />}
-            {step.state === "active" && (
-              <IconLoader className="size-3.5 animate-spin motion-reduce:animate-none" />
-            )}
+            {step.state === "active" &&
+              (idle ? (
+                <span className="size-2 rounded-full bg-foreground" />
+              ) : (
+                <IconLoader className="size-3.5 animate-spin motion-reduce:animate-none" />
+              ))}
           </span>
           {step.label}
           {step.state === "done" && (

@@ -16,6 +16,9 @@ import {
 import type { FormRequester } from "@/lib/legal/forms/public";
 import { submitLegalForm } from "@/lib/legal/forms/public-actions";
 
+import { formatInstant } from "@/lib/utils/instant";
+
+import { FormReview } from "./form-review";
 import { RequesterNote } from "./requester-note";
 import { RoleStep } from "./role-step";
 
@@ -38,7 +41,11 @@ export function PublicForm({
   requester: FormRequester;
 }) {
   const t = fr.legalForms;
-  const [step, setStep] = useState<"roles" | "fields" | "done">("roles");
+  const [step, setStep] = useState<"roles" | "fields" | "review" | "done">(
+    "roles",
+  );
+  // When the fiche left: the receipt says it (JUR-14).
+  const [sentAt, setSentAt] = useState<string | null>(null);
   const [roles, setRoles] = useState<FormRole[]>(prefillRoles);
   const [otherRole, setOtherRole] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>(known);
@@ -66,10 +73,14 @@ export function PublicForm({
       });
       if (result.ok) {
         setStatus(result.status);
+        setSentAt(new Date().toISOString());
         setStep("done");
       } else {
         setError(result.error);
-        setFlagged([...(result.missing ?? []), ...(result.invalid ?? [])]);
+        const flags = [...(result.missing ?? []), ...(result.invalid ?? [])];
+        setFlagged(flags);
+        // A field to fix: back to the fields, with it in red.
+        if (flags.length > 0) setStep("fields");
       }
     });
 
@@ -81,6 +92,11 @@ export function PublicForm({
         <p role="status" className="text-lg font-semibold">
           {t.public.done[status]}
         </p>
+        {sentAt && (
+          <p className="text-sm text-muted-foreground">
+            {t.public.review.receipt(formatInstant(sentAt))}
+          </p>
+        )}
         <section className="flex flex-col gap-2">
           <h2 className="text-base font-medium">
             {t.public.afterSubmit.title}
@@ -106,6 +122,20 @@ export function PublicForm({
     );
 
   const fields = fieldsFor(roles);
+  if (step === "review")
+    return (
+      <FormReview
+        roles={roles}
+        otherRole={otherRole}
+        fields={fields}
+        answers={answers}
+        organization={requester.organization}
+        pending={pending}
+        error={error}
+        onBack={() => setStep("fields")}
+        onSend={submit}
+      />
+    );
   const blocks = [...new Set(fields.map((f) => f.block))] as FormBlock[];
   return (
     <div className="flex flex-col gap-6">
@@ -120,7 +150,13 @@ export function PublicForm({
             .filter((field) => field.block === block)
             .map((field) => {
               const label = t.fields[field.id];
-              const hint = known[field.id] ? t.public.known : undefined;
+              const hint =
+                [
+                  t.fieldHints[field.id],
+                  known[field.id] ? t.public.known : null,
+                ]
+                  .filter(Boolean)
+                  .join(" ") || undefined;
               const err = flagged.includes(field.id)
                 ? field.required && !answers[field.id]
                   ? t.public.required
@@ -175,7 +211,6 @@ export function PublicForm({
             })}
         </fieldset>
       ))}
-      <p className="text-sm text-muted-foreground">{t.public.notice}</p>
       {error && <FormMessage kind="error">{error}</FormMessage>}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
         <Button
@@ -190,11 +225,12 @@ export function PublicForm({
         <Button
           type="button"
           size="lg"
-          disabled={pending}
-          aria-busy={pending || undefined}
-          onClick={submit}
+          onClick={() => {
+            setError(null);
+            setStep("review");
+          }}
         >
-          {pending ? t.public.submitting : t.public.submit}
+          {t.public.review.next}
         </Button>
       </div>
     </div>

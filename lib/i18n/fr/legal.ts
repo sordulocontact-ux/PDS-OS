@@ -458,6 +458,8 @@ export const legal = {
       formality: "Ouvrir la déclaration",
     },
     views: { act: "Ce qui attend une action", all: "Tout le plan" },
+    activeFilter: (group: string) => `Filtre : ${group}.`,
+    clearFilter: "Retirer le filtre",
     viewsLabel: "Affichage du plan",
     viewEmpty: {
       act: "Rien n'attend l'équipe : tout est en attente d'un retour, ou fait.",
@@ -584,6 +586,10 @@ export const legal = {
       markSigned: "Marquer comme signé",
       signed: "Signé, avec sa preuve",
       openContract: "Ouvrir le contrat",
+      // Which fiche is awaited, for which contract (JUR-10).
+      missingFromFiche: (name: string, fields: string) =>
+        `Il manque les renseignements de ${name} pour préparer son contrat : ${fields}. Ils arrivent avec sa fiche de renseignements, à l'étape 1 ci-dessus.`,
+      complete: "Compléter",
       values: (total: number, missing: number) =>
         missing > 0
           ? `Valeurs du contrat · ${missing} manquante${missing > 1 ? "s" : ""} sur ${total}`
@@ -613,6 +619,19 @@ export const legal = {
   },
   // The launched plan as the prototype drew it (lib/legal/plan/board.ts).
   board: {
+    // When a démarche counts as done, said once on its card (JUR-07); the
+    // same rules the code applies (lib/legal/tracking/sources.ts).
+    doneWhen: {
+      onboarding: "Terminé quand chaque personne a une fiche complète.",
+      contract:
+        "Terminé quand chaque contrat est signé, avec le signé et sa preuve dans ses fichiers.",
+      splits:
+        "Terminé quand chaque personne a confirmé la dernière version de la répartition.",
+      clearance:
+        "Terminé quand l'emprunt est sécurisé : contrat signé et preuve déposés.",
+      formality:
+        "Terminé quand la SACEM a confirmé l'enregistrement de la déclaration.",
+    },
     // One line per person, per title (UX test of 09/10/2026).
     sections: {
       people: "Personnes",

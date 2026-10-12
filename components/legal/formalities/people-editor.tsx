@@ -155,6 +155,7 @@ export function PeopleEditor({
           load={loadPublishers}
           disabled={disabled}
           onChange={(change) => setPublisher(i, change)}
+          errors={errors?.publishers[i]}
           onRemove={() => {
             publisherRows.remove(i);
             onPublishers(publishers.filter((_, j) => j !== i));

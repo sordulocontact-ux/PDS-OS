@@ -13,7 +13,12 @@ export type DossierErrors = {
   // publishing_contract).
   fields: Record<string, string>;
   // By creator's position, from 0.
-  creators: Record<number, { last_name?: string; quality?: string }>;
+  creators: Record<
+    number,
+    { last_name?: string; first_name?: string; quality?: string }
+  >;
+  // By publisher's position, from 0 (JUR-24).
+  publishers: Record<number, { name?: string }>;
   phono?: string;
   count: number;
 };
@@ -33,13 +38,22 @@ export function dossierErrors(
     provided?: boolean;
     rubric_g?: string;
   } | null;
-  const out: DossierErrors = { fields: {}, creators: {}, count: 0 };
+  const out: DossierErrors = {
+    fields: {},
+    creators: {},
+    publishers: {},
+    count: 0,
+  };
   const field = (key: string, message: string) => {
     if (out.fields[key]) return;
     out.fields[key] = message;
     out.count += 1;
   };
-  const creator = (i: number, key: "last_name" | "quality", text: string) => {
+  const creator = (
+    i: number,
+    key: "last_name" | "first_name" | "quality",
+    text: string,
+  ) => {
     out.creators[i] = { ...out.creators[i], [key]: text };
     out.count += 1;
   };
@@ -50,6 +64,7 @@ export function dossierErrors(
     switch (what) {
       case "title":
       case "duration":
+      case "genre":
         if (blank(values[what])) field(what, t[what]);
         break;
       case "creators":
@@ -58,6 +73,20 @@ export function dossierErrors(
       case "creator_name":
         if (creators[index] && blank(creators[index].last_name))
           creator(index, "last_name", t.creator_name);
+        break;
+      case "creator_first":
+        if (
+          creators[index] &&
+          blank(creators[index].first_name) &&
+          blank(creators[index].pseudonym)
+        )
+          creator(index, "first_name", t.creator_first);
+        break;
+      case "publisher_name":
+        if (publishers[index] && blank(publishers[index].name)) {
+          out.publishers[index] = { name: t.publisher_name };
+          out.count += 1;
+        }
         break;
       case "creator_quality":
         if (creators[index] && !creators[index].quality)

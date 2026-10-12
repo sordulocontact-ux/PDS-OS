@@ -99,6 +99,9 @@ export const routes = {
   contracts: "/app/contracts",
   contract: (id: string) => `/app/contracts/${id}`,
   contractTemplates: "/app/contracts/templates",
+  // One template, its own page (JUR-19), by its series.
+  contractTemplate: (seriesId: string) =>
+    `/app/contracts/templates/${seriesId}`,
   contractDocumentPdf: (id: string) => `/api/contracts/${id}/document`,
   formalityDocumentPdf: (id: string, version: number) =>
     `/api/legal/formalities/${id}/document?version=${version}`,

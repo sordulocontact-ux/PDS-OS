@@ -4,6 +4,23 @@ export const legalFormalities = {
   definitions: {
     SACEM_725_EDITED_WORK: "Bulletin SACEM 725 · œuvre éditée",
   } as Record<string, string>,
+  // The declaration's frise, from the dossier to the registration (JUR-26).
+  timeline: {
+    label: "Avancement de la déclaration",
+    done: "fait",
+    dossier: "Dossier complet",
+    correction: "Correction demandée par la SACEM",
+    generated: "Bulletin généré",
+    signed: (signed: number, total: number) =>
+      signed === total
+        ? `Signé par les ${total} signataires`
+        : `Signatures : ${signed} sur ${total}`,
+    partial: (signed: number, total: number) =>
+      `Déclaration partielle : ${signed} signature${signed > 1 ? "s" : ""} sur ${total}`,
+    signedNone: "Signatures",
+    submitted: "Déposé à la SACEM",
+    completed: "Enregistré par la SACEM",
+  },
   statuses: {
     none: "Pas encore ouverte",
     collecting_data: "Données à compléter",
@@ -115,6 +132,9 @@ export const legalFormalities = {
     publishers_max: "Trois éditeurs au plus",
     creator_name: (i: string) => `Le nom du créateur ${i}`,
     creator_quality: (i: string) => `La qualité du créateur ${i}`,
+    genre: "Le genre de l'œuvre",
+    creator_first: (i: string) => `Le prénom ou le pseudonyme du créateur ${i}`,
+    publisher_name: (i: string) => `La dénomination de l'éditeur ${i}`,
     phono_total: "Des parts Phono qui font exactement 100 %",
     dep_dr: "Le partage des DEP et DR",
     arrangement: "La portée de l'autorisation d'arrangement",
@@ -131,6 +151,11 @@ export const legalFormalities = {
       "Obligatoire : la durée du master final, qui n'est pas encore reçu.",
     creators: "Le bulletin nomme au moins un créateur.",
     creator_name: "Le nom civil est obligatoire pour la SACEM.",
+    genre: "Obligatoire sur le bulletin : chanson, rap, musique électronique…",
+    creator_first:
+      "Donnez le prénom, ou le pseudonyme sous lequel la personne est déclarée.",
+    publisher_name:
+      "La dénomination de la société d'édition, telle qu'elle est déclarée à la SACEM.",
     creator_quality:
       "Choisissez la qualité : auteur, compositeur, arrangeur ou adaptateur.",
     phono_total:
@@ -177,8 +202,14 @@ export const legalFormalities = {
     willSignHint:
       "Les créateurs cochés « Signe le bulletin » et les éditeurs, d'après le dossier enregistré.",
     publisherRole: "Éditeur",
-    sign: "Marquer signé",
-    signProof: "Preuve de la signature",
+    // Who signs, and what the proof is (JUR-26).
+    sign: (signer: string) => `Enregistrer la signature de ${signer}`,
+    signProof: (signer: string) => `Comment ${signer} a signé`,
+    signProofHint:
+      "Par exemple « PDF signé reçu par e-mail le 11/10 » ou « signé en studio ». C'est la preuve gardée avec la signature.",
+    signProofMissing: "Dites comment la personne a signé : c'est la preuve.",
+    signedCount: (signed: number, total: number) =>
+      `${signed} signée${signed > 1 ? "s" : ""} sur ${total}`,
     signed: (date: string) => `Signé le ${date}`,
     partial: "Déclaration partielle",
     partialReason: "Pourquoi certaines signatures manquent",

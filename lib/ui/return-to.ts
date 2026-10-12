@@ -2,7 +2,10 @@
 // another page (PROJ-BUG-10): the way back travels in the URL (`?retour=`),
 // and only a path of a project of the app is ever followed. Client-safe.
 
-const PROJECT_PATH = /^\/app\/projects\/[0-9a-f-]{36}(\/[a-z0-9/-]*)?$/;
+// A project page, with at most a plain query (« ?ligne=person:… » reopens
+// the plan's panel, JUR-10): never another origin, never a script.
+const PROJECT_PATH =
+  /^\/app\/projects\/[0-9a-f-]{36}(\/[a-z0-9/-]*)?(\?[A-Za-z0-9=&:%._-]*)?$/;
 
 export const RETURN_PARAM = "retour";
 

@@ -11,9 +11,11 @@ import {
   DataTableHeader,
   DataTableIcon,
   DataTableMedia,
+  DataTableLink,
   DataTableRow,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { TemplateSeries } from "@/lib/legal/contracts/templates";
 import { templateStatusTone } from "@/lib/ui/state-tones";
@@ -44,7 +46,13 @@ export function TemplatesTable({
             <DataTableCell>
               <DataTableMedia
                 visual={<DataTableIcon icon={IconFile} />}
-                title={`${template.name} · ${t.version(template.version)}`}
+                title={
+                  <DataTableLink
+                    href={routes.contractTemplate(template.seriesId)}
+                  >
+                    {`${template.name} · ${t.version(template.version)}`}
+                  </DataTableLink>
+                }
                 subtitle={[fr.contracts.types[template.type], template.usage]
                   .filter(Boolean)
                   .join(" · ")}

@@ -72,3 +72,16 @@ export const getPublicForm = cache(
     return parsed.success ? parsed.data : null;
   },
 );
+
+/**
+ * The person opened their link (JUR-11): noted once by the database, never
+ * read as an answer. A failure only loses that mark.
+ */
+export async function noteFormOpened(token: string): Promise<void> {
+  if (!TOKEN.test(token)) return;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("note_legal_form_opened", {
+    p_token: token,
+  });
+  if (error) console.error("noteFormOpened:", error.message);
+}

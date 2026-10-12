@@ -24,9 +24,12 @@ import type { TemplateSeries } from "@/lib/legal/contracts/templates";
 export function TemplateRowActions({
   template,
   organizationId,
+  size,
 }: {
   template: TemplateSeries;
   organizationId: string;
+  // On the template's own page header (JUR-19).
+  size?: "icon-sm" | "icon-lg";
 }) {
   const t = fr.legalContracts.templates;
   const router = useRouter();
@@ -86,6 +89,7 @@ export function TemplateRowActions({
       <RowActions
         label={fr.records.menu.label(template.name)}
         actions={actions}
+        size={size}
       />
       <FormDialog
         open={open === "view"}

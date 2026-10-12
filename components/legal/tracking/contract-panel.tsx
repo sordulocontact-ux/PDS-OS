@@ -20,18 +20,48 @@ import { fr } from "@/lib/i18n/fr";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
+import { withReturn } from "@/lib/ui/return-to";
 import { factTone } from "@/lib/ui/state-tones";
 
 /** The values of the contract, each with its source (« Rempli
  * automatiquement » / « Manquant », ticket Juridique 03). */
-function Values({ row, open }: { row: AgreementRow; open: boolean }) {
+function Values({
+  row,
+  open,
+  projectId,
+}: {
+  row: AgreementRow;
+  open: boolean;
+  projectId: string;
+}) {
   const t = fr.legalContracts;
-  const missing = row.fields.filter((f) => f.value === null).length;
+  const p = fr.legal.panels.contract;
+  const missingFields = row.fields.filter((f) => f.value === null);
+  const missing = missingFields.length;
+  const fromFiche = missingFields.filter((f) => f.home === "fiche");
+  // Back to this person's panel once the value is completed (JUR-10).
+  const back = `${routes.projectLegalStep(projectId, "plan")}?ligne=person:${row.key}`;
+  const fixHref = (home: string): string | null =>
+    home === "network" && row.contactId
+      ? withReturn(routes.networkContact(row.contactId), back)
+      : home === "mapping"
+        ? routes.projectLegalStep(projectId, "contracts")
+        : home === "credits"
+          ? routes.projectLegal(projectId)
+          : null;
   return (
     <details open={open} className="group rounded-xl border p-4">
       <summary className="cursor-pointer list-none text-sm text-muted-foreground marker:hidden">
         {fr.legal.panels.contract.values(row.fields.length, missing)}
       </summary>
+      {fromFiche.length > 0 && (
+        <ToneCallout tone="warning" className="mt-3">
+          {p.missingFromFiche(
+            row.name,
+            fromFiche.map((f) => f.label).join(", "),
+          )}
+        </ToneCallout>
+      )}
       <ul className="mt-3 flex flex-col divide-y">
         {row.fields.map((field) => (
           <li
@@ -57,6 +87,14 @@ function Values({ row, open }: { row: AgreementRow; open: boolean }) {
                 <span className="text-sm text-muted-foreground">
                   {t.sources[field.source]}
                 </span>
+              )}
+              {!field.value && fixHref(field.home) && (
+                <Link
+                  href={fixHref(field.home)!}
+                  className="text-sm font-medium underline underline-offset-4"
+                >
+                  {p.complete}
+                </Link>
               )}
             </span>
           </li>
@@ -137,7 +175,7 @@ export function ContractPanel({
           <NextCard kind="act" label={t.next} title={t.needsInfo}>
             <p className="text-sm text-muted-foreground">{t.needsInfoBody}</p>
           </NextCard>
-          <Values row={row} open />
+          <Values row={row} open projectId={projectId} />
         </>
       );
     case "ready_to_generate":
@@ -155,7 +193,7 @@ export function ContractPanel({
               {fr.legalContracts.agreements.generate}
             </Button>
           </NextCard>
-          <Values row={row} open={false} />
+          <Values row={row} open={false} projectId={projectId} />
         </>
       );
     case "draft":
@@ -171,7 +209,7 @@ export function ContractPanel({
               {open}
             </div>
           </NextCard>
-          <Values row={row} open={false} />
+          <Values row={row} open={false} projectId={projectId} />
         </>
       );
     case "review_required":
@@ -183,7 +221,7 @@ export function ContractPanel({
                 {t.reviewWaitBody}
               </p>
             </NextCard>
-            <Values row={row} open={false} />
+            <Values row={row} open={false} projectId={projectId} />
           </>
         );
       return (
@@ -235,7 +273,7 @@ export function ContractPanel({
               {open}
             </div>
           </NextCard>
-          <Values row={row} open />
+          <Values row={row} open projectId={projectId} />
         </>
       );
     case "ready_for_signature":

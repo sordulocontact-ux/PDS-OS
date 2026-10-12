@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
 -- shares, signatures, deposit, registration and ISWC here are SIMULATED).
 begin;
-select plan(21);
+select plan(22);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -83,9 +83,9 @@ select public.legal_plan_item_task((select id from public.legal_plan_items where
 
 create function pg_temp.creators(p_shares text[]) returns jsonb language sql as $$
   select jsonb_build_array(
-    jsonb_build_object('last_name', 'Ever', 'quality', 'composer', 'phono', p_shares[1], 'signs', true),
-    jsonb_build_object('last_name', 'Samy', 'quality', 'composer', 'phono', p_shares[2], 'signs', true),
-    jsonb_build_object('last_name', 'Le J', 'quality', 'author', 'phono', p_shares[3], 'signs', true))
+    jsonb_build_object('last_name', 'Ever', 'first_name', 'Ever', 'quality', 'composer', 'phono', p_shares[1], 'signs', true),
+    jsonb_build_object('last_name', 'Samy', 'pseudonym', 'Samy', 'quality', 'composer', 'phono', p_shares[2], 'signs', true),
+    jsonb_build_object('last_name', 'Le J', 'first_name', 'Jérémy', 'quality', 'author', 'phono', p_shares[3], 'signs', true))
 $$;
 create function pg_temp.status() returns text language sql as $$
   select status from public.legal_formalities where project_id = pg_temp.id_of('project')
@@ -93,11 +93,12 @@ $$;
 
 select pg_temp.act_as(pg_temp.id_of('manager'));
 insert into ids select 'f', public.open_formality(pg_temp.id_of('project'), pg_temp.id_of('master'), 'SACEM_725_EDITED_WORK');
-select ok(public.formality_missing(pg_temp.id_of('f')) @> array['title', 'duration', 'creators', 'dep_dr', 'borrowing:Humanisme'],
+select ok(public.formality_missing(pg_temp.id_of('f')) @> array['title', 'duration', 'genre', 'creators', 'dep_dr', 'borrowing:Humanisme'],
           'the formality lists what the bulletin still needs');
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'title', jsonb_build_object('value', 'Piégée', 'source', 'Titre'),
   'duration', jsonb_build_object('value', '3:12', 'source', 'Master final'),
+  'genre', jsonb_build_object('value', 'Rap', 'source', 'Saisi'),
   'performers', jsonb_build_object('value', 'Dioo', 'source', 'Artistes du titre'),
   'creators', jsonb_build_object('value', pg_temp.creators(array['33.33', '33.33', '33.33']), 'source', 'Saisi'),
   'dep_dr', jsonb_build_object('value', jsonb_build_object('choice', 'follow_phono'), 'source', 'Saisi')));
@@ -105,6 +106,18 @@ select ok('phono_total' = any (public.formality_missing(pg_temp.id_of('f'))), 't
 select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
   'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi')));
 select is(public.formality_missing(pg_temp.id_of('f')), array['borrowing:Humanisme'], 'only the unsecured borrowing remains');
+-- JUR-24 (…20261012100401): a creator without first name nor pseudonym,
+-- and a publisher without denomination, block the bulletin.
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'creators', jsonb_build_object('value', jsonb_build_array(
+    jsonb_build_object('last_name', 'Ever', 'quality', 'composer', 'phono', '50', 'signs', true)), 'source', 'Saisi'),
+  'publishers', jsonb_build_object('value', jsonb_build_array(
+    jsonb_build_object('name', '', 'phono', '50')), 'source', 'Saisi')));
+select ok(public.formality_missing(pg_temp.id_of('f')) @> array['creator_first:1', 'publisher_name:1'],
+          'a first name or pseudonym, and the publisher''s denomination, are required');
+select public.save_formality_values(pg_temp.id_of('f'), jsonb_build_object(
+  'creators', jsonb_build_object('value', pg_temp.creators(array['33.3334', '33.3333', '33.3333']), 'source', 'Saisi'),
+  'publishers', jsonb_build_object('value', '[]'::jsonb, 'source', 'Saisi')));
 select is(pg_temp.status(), 'collecting_data', 'an unsecured Humanisme keeps the formality from being finalised');
 select throws_ok(format($$ select public.generate_formality_document(%L) $$, pg_temp.id_of('f')),
                  'P0001', 'formality_not_ready', 'no bulletin before the borrowing is secured');

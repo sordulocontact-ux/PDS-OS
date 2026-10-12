@@ -24,13 +24,17 @@ export function SignaturesList({
 }) {
   const t = fr.legalFormalities.page;
   const [proofs, setProofs] = useState<Record<string, string>>({});
+  // A signature tried without its proof: said under its field.
+  const [tried, setTried] = useState<Record<string, boolean>>({});
   const { pending, run } = useLegalAction();
   const latest = f.documents[0];
   if (f.signatures.length === 0) return <FutureSigners f={f} />;
+  const signed = f.signatures.filter((s) => s.status === "signed").length;
   return (
     <section className="flex flex-col gap-2">
       <h3 className="font-medium">
-        {t.signatures} · {t.version(latest?.version ?? 1)}
+        {t.signatures} · {t.version(latest?.version ?? 1)} ·{" "}
+        {t.signedCount(signed, f.signatures.length)}
       </h3>
       <ul className="flex flex-col divide-y">
         {f.signatures.map((s) => (
@@ -58,9 +62,15 @@ export function SignaturesList({
                 <span className="flex flex-wrap items-end gap-2">
                   <Field
                     name={`${s.id}-proof`}
-                    label={t.signProof}
-                    aria-required
+                    label={t.signProof(s.signer)}
+                    hint={t.signProofHint}
+                    required
                     value={proofs[s.id] ?? ""}
+                    error={
+                      tried[s.id] && !(proofs[s.id] ?? "").trim()
+                        ? t.signProofMissing
+                        : undefined
+                    }
                     onChange={(e) =>
                       setProofs((p) => ({ ...p, [s.id]: e.target.value }))
                     }
@@ -68,14 +78,16 @@ export function SignaturesList({
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={pending || !(proofs[s.id] ?? "").trim()}
-                    onClick={() =>
+                    disabled={pending}
+                    onClick={() => {
+                      setTried((x) => ({ ...x, [s.id]: true }));
+                      if (!(proofs[s.id] ?? "").trim()) return;
                       run(() =>
                         signFormality(projectId, s.id, proofs[s.id] ?? ""),
-                      )
-                    }
+                      );
+                    }}
                   >
-                    {t.sign}
+                    {t.sign(s.signer)}
                   </Button>
                 </span>
               )

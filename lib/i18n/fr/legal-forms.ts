@@ -37,6 +37,18 @@ export const legalForms = {
     back: "Modifier mes rôles",
     known: "Déjà connu : vérifiez et corrigez si besoin.",
     submit: "Envoyer ma fiche",
+    // Vérifier, consentir, envoyer, then a dated receipt (JUR-14).
+    review: {
+      next: "Vérifier ma fiche",
+      title: "Vérifiez votre fiche",
+      roles: "Vos rôles",
+      edit: "Modifier mes réponses",
+      consentTitle: "Votre accord",
+      consent: (organization: string | null) =>
+        `J'accepte que ${organization ?? "l'équipe"} utilise ces informations pour mes crédits, mes contrats et mes déclarations auprès des organismes de gestion des droits.`,
+      consentMissing: "Cochez la case pour envoyer votre fiche.",
+      receipt: (date: string) => `Fiche envoyée le ${date}.`,
+    },
     submitting: "Envoi…",
     required: "Obligatoire",
     missing: "Complétez les champs obligatoires.",
@@ -81,6 +93,11 @@ export const legalForms = {
     provider: "Prestation",
     publisher: "Édition",
   },
+  // A field's own help, under its label (the public fiche).
+  fieldHints: {
+    proposed_split:
+      "En pourcentage, par exemple 50 %. C'est indicatif et n'engage personne : la répartition officielle vous sera proposée à part, par un lien de confirmation.",
+  } as Record<string, string>,
   fields: {
     legal_first_name: "Prénom (état civil)",
     legal_last_name: "Nom (état civil)",
@@ -97,7 +114,8 @@ export const legalForms = {
     declared_pseudonym: "Pseudonyme déclaré",
     publisher: "Votre éditeur",
     contribution: "Votre contribution au morceau",
-    proposed_split: "Part que vous proposez",
+    // JUR-13: which share, in what unit, and that it binds nobody.
+    proposed_split: "Votre part d'auteur ou de compositeur, à votre avis",
     credit_name: "Nom à créditer",
     performance: "Nature de l'interprétation",
     category: "Catégorie",
@@ -188,6 +206,8 @@ export const legalForms = {
     accept: "Accepter les corrections",
     refuse: "Garder les anciennes valeurs",
     since: (date: string) => `le ${date}`,
+    // The link was opened, not yet answered (JUR-11).
+    opened: (date: string) => `lien ouvert le ${date}`,
     failed: "L'action n'a pas pu être faite. Réessayez.",
   },
 } as const;
