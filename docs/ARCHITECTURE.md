@@ -241,6 +241,19 @@ Principes :
   l'ouverture (`lib/catalog/edit-form-actions.ts`, `lib/projects/edit-form-actions.ts`) ;
   un projet ne se modifie qu'avant lancement. Même menu dans l'en-tête des fiches artiste,
   master et projet non lancé ; après archivage depuis une fiche, retour à la liste.
+- **Matrice des actions d'un projet** (PROJ-TEST-01, vérifiée par `project-actions`,
+  `archive`, `delete-records` et `project-drafts.test.sql`) : aucune action n'est ajoutée,
+  chacune a ses conditions.
+
+  | Statut | Modifier | Archiver | Supprimer | Reprendre |
+  | --- | --- | --- | --- | --- |
+  | Brouillon (`project_drafts`) | — (pas encore un projet) | — | son auteur seul, confirmé, la saisie est perdue | « Reprendre la création » (son auteur) |
+  | Transmis, à accepter | `create_projects` (`update_project`) | DG, confirmé ; rien n'est effacé, la transmission est gelée | DG, confirmé, avec tout son contenu | — |
+  | En cours (lancé) | non (`project_not_editable`) : son contenu se modifie dans ses étapes | refusé (`project_launched`), raison dite | DG, confirmé, avec tout son contenu | — |
+  | Archivé (vue Archivés, DG) | non (`project_not_editable`) | « Restaurer », après son master et son artiste | DG, confirmé | — |
+
+  Un chef de projet ne voit ni Archiver ni Supprimer (permission `archive_records`, refus
+  `not_allowed_to_archive` / `forbidden` en SQL même s'il appelait la fonction).
 
 ### 2 quinquies. Relation d'un artiste avec PDS (Signé / Collaboration)
 
