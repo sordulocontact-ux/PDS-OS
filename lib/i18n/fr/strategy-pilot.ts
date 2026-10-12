@@ -36,7 +36,48 @@ export const strategyPilot = {
     to_decide: "À arbitrer",
     complete: "Complété",
   },
+  // MKT-S1-05: each public with what makes it actionable.
+  audiences: {
+    title: "Les publics, un par un",
+    empty: "Aucun public décrit pour l'instant.",
+    add: "Ajouter un public",
+    edit: "Modifier",
+    remove: "Retirer",
+    save: "Enregistrer le public",
+    saved: "Public enregistré.",
+    segment: "Segment",
+    segmentHint:
+      "Qui : « fans de rap FR 18-25 ans », « médias musique urbaine »…",
+    segmentRequired: "Nommez ce public.",
+    priority: "Priorité",
+    priorities: { primary: "Cœur de cible", secondary: "À conquérir ensuite" },
+    insight: "Besoin ou insight",
+    insightHint: "Ce qui le touche, ce qu'il attend de cette sortie.",
+    channel: "Canal pressenti",
+    channelHint: "Où le toucher : TikTok, radio, presse spécialisée, live…",
+    toFill: "à renseigner",
+  },
+  // MKT-S1-05: the positioning in plain words, no jargon required.
+  positioning: {
+    title: "Le positionnement en quatre points",
+    parts: {
+      positioning_promise: "Promesse : ce que la sortie apporte",
+      positioning_difference: "Différence : ce qui la distingue",
+      positioning_proof: "Preuve : ce qui le montre",
+      positioning_tone: "Tonalité : comment on en parle",
+    },
+  },
   summaries: {
+    // MKT-S1-05: said on the card, the first missing one a click away.
+    counts: (c: { confirmed: number; toDecide: number; missing: number }) =>
+      [
+        c.confirmed > 0 &&
+          `${c.confirmed} confirmé${c.confirmed > 1 ? "s" : ""}`,
+        c.toDecide > 0 && `${c.toDecide} à arbitrer`,
+        c.missing > 0 && `${c.missing} à renseigner`,
+      ]
+        .filter(Boolean)
+        .join(" · "),
     notDefined: "Pas encore défini",
     proposed: (value: string) => `Proposé : ${value}`,
     toConfirm: "Réponses proposées par PO, à confirmer",

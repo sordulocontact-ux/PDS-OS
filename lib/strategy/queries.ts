@@ -4,12 +4,14 @@ import type { Access } from "@/lib/auth/access";
 import {
   BRIEF_TEXT_FIELDS,
   NARRATIVE_PARTS,
+  POSITIONING_PARTS,
   STRATEGIC_OBJECTIVE,
   STRATEGY_TEXT_FIELDS,
   toBriefField,
   toFieldState,
   type FieldState,
   type NarrativePart,
+  type PositioningPart,
   type Provenance,
   type StrategyFieldState,
   type StrategyTextField,
@@ -36,6 +38,8 @@ import {
   type ChoiceSuggestion,
   type ChoiceValue,
 } from "@/lib/strategy/choices";
+import { personName } from "@/lib/projects/types";
+import { isLegalItem } from "@/lib/strategy/legal-items";
 import { createClient } from "@/lib/supabase/server";
 import { snapshotOf, type BriefSnapshot } from "@/lib/framing/brief-snapshot";
 import type { Database } from "@/lib/supabase/database.types";
@@ -48,7 +52,21 @@ export type Lever = Tables["levers"]["Row"] & {
 export type StrategyDeliverable = Tables["strategy_deliverables"]["Row"];
 export type Milestone = Tables["milestones"]["Row"];
 export type StrategyObjective = Tables["strategy_objectives"]["Row"];
+export type StrategyAudience = Tables["strategy_audiences"]["Row"];
+// The Cadrage's objective, as confirmed there (MKT-S1-13): its words and,
+// when it was said measurably, the metric, the target and the horizon.
+export type FramingObjective = {
+  text: string | null;
+  measure: { metric: string; target: number; period: string } | null;
+};
 export type OpenNeed = { id: string; label: string; family: string };
+export type LegalDependency = {
+  id: string;
+  label: string;
+  status: string;
+  dueOn: string | null;
+  responsibleName: string | null;
+};
 
 export type StrategyData = {
   stage: { id: string; state: string } | null;
@@ -62,6 +80,10 @@ export type StrategyData = {
   fields: StrategyFieldState[];
   // The story parts of the narrative (its angle is the `narrative` field).
   narrativeParts: FieldState<NarrativePart>[];
+  // The positioning in four parts (MKT-S1-05) and the publics, row by row.
+  positioningParts: FieldState<PositioningPart>[];
+  audiences: StrategyAudience[];
+  framingObjective: FramingObjective;
   // What the release must accomplish (« Objectifs & KPIs »), then its KPIs.
   strategicObjective: FieldState<typeof STRATEGIC_OBJECTIVE>;
   objectives: StrategyObjective[];
@@ -76,6 +98,11 @@ export type StrategyData = {
   levers: Lever[];
   // Confirmed Brief needs no lever answers yet: the starting point.
   openNeeds: OpenNeed[];
+  // MKT-S1-07: legal prerequisites are dependencies, never levers — the
+  // Cadrage's legal-looking needs, and the Juridique's open actions (read
+  // with manage_legal only: empty for anyone else).
+  legalNeeds: OpenNeed[];
+  legalDependencies: LegalDependency[];
   deliverables: StrategyDeliverable[];
   milestones: Milestone[];
   referenceDate: string | null;
@@ -113,6 +140,8 @@ export async function loadStrategy(
     workspaceRes,
     reportCountRes,
     objectivesRes,
+    audiencesRes,
+    legalRes,
   ] = await Promise.all([
     supabase
       .from("project_stages")
@@ -179,6 +208,19 @@ export async function loadStrategy(
       .select("*")
       .eq("project_id", projectId)
       .order("created_at"),
+    supabase
+      .from("strategy_audiences")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at"),
+    supabase
+      .from("legal_plan_items")
+      .select(
+        "id, label, status, due_on, responsible:people!legal_plan_items_responsible_person_id_fkey(first_name, last_name)",
+      )
+      .eq("project_id", projectId)
+      .not("status", "in", "(done,obsolete)")
+      .order("due_on", { nullsFirst: false }),
   ]);
 
   const stages = stagesRes.data ?? [];
@@ -228,6 +270,31 @@ export async function loadStrategy(
       const row = rowOf("strategy", key);
       return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
     }),
+    positioningParts: POSITIONING_PARTS.map((key) => {
+      const row = rowOf("strategy", key);
+      return toFieldState("strategy", key, row, row ? provenanceOf(row) : null);
+    }),
+    audiences: audiencesRes.data ?? [],
+    framingObjective: (() => {
+      const confirmed = (key: "objective" | "success_criteria") => {
+        const row = rowOf("brief", key);
+        return row?.status === "confirmed" ? answerOf(key, row.value) : null;
+      };
+      const objective = confirmed("objective");
+      const criteria = confirmed("success_criteria");
+      return {
+        text:
+          objective?.kind === "text" && objective.text ? objective.text : null,
+        measure:
+          criteria?.kind === "text" && criteria.measure
+            ? {
+                metric: criteria.measure.metric,
+                target: criteria.measure.target,
+                period: criteria.measure.period,
+              }
+            : null,
+      };
+    })(),
     strategicObjective: (() => {
       const row = rowOf("strategy", STRATEGIC_OBJECTIVE);
       return toFieldState(
@@ -280,7 +347,21 @@ export async function loadStrategy(
       provenance: provenanceOf(l),
       needLabel: l.need_id ? (needLabel.get(l.need_id) ?? null) : null,
     })),
-    openNeeds: needs.filter((n) => !answered.has(n.id)),
+    openNeeds: needs.filter(
+      (n) => !answered.has(n.id) && !isLegalItem(n.label),
+    ),
+    legalNeeds: needs.filter(
+      (n) => !answered.has(n.id) && isLegalItem(n.label),
+    ),
+    legalDependencies: (legalRes.data ?? []).map((item) => ({
+      id: item.id,
+      label: item.label,
+      status: item.status,
+      dueOn: item.due_on,
+      responsibleName: item.responsible
+        ? personName(item.responsible.first_name, item.responsible.last_name)
+        : null,
+    })),
     deliverables: deliverablesRes.data ?? [],
     milestones: milestonesRes.data ?? [],
     referenceDate: referenceDate(

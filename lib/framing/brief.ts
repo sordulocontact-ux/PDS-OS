@@ -27,6 +27,17 @@ export const NARRATIVE_PARTS = [
 ] as const;
 export type NarrativePart = (typeof NARRATIVE_PARTS)[number];
 
+// The positioning, said in four plain parts (MKT-S1-05): what the release
+// promises, what makes it different, what proves it, its tone. The
+// `positioning` answer above stays its summary.
+export const POSITIONING_PARTS = [
+  "positioning_promise",
+  "positioning_difference",
+  "positioning_proof",
+  "positioning_tone",
+] as const;
+export type PositioningPart = (typeof POSITIONING_PARTS)[number];
+
 // « Objectifs & KPIs » (ticket Stratégie § 7): what the release must
 // accomplish, in the team's words; the KPIs are strategy_objectives rows.
 export const STRATEGIC_OBJECTIVE = "strategic_objective";
@@ -40,7 +51,12 @@ export type DesignTextField = (typeof DESIGN_TEXT_FIELDS)[number];
 
 export const TEXT_FIELDS = {
   brief: BRIEF_TEXT_FIELDS,
-  strategy: [...STRATEGY_TEXT_FIELDS, ...NARRATIVE_PARTS, STRATEGIC_OBJECTIVE],
+  strategy: [
+    ...STRATEGY_TEXT_FIELDS,
+    ...NARRATIVE_PARTS,
+    ...POSITIONING_PARTS,
+    STRATEGIC_OBJECTIVE,
+  ],
   design_doc: DESIGN_TEXT_FIELDS,
 } as const;
 export type TextDeliverable = keyof typeof TEXT_FIELDS;

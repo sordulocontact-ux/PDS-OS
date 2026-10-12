@@ -35,6 +35,7 @@ function actualLine(actual: KpiActual | undefined): string | null {
  */
 export function KpiItem({
   kpi,
+  ownerName,
   actual,
   canEdit,
   pending,
@@ -42,6 +43,8 @@ export function KpiItem({
   onRemove,
 }: {
   kpi: StrategyObjective;
+  // Who follows it (MKT-S1-13), read by the caller from the members.
+  ownerName: string | null;
   actual: KpiActual | undefined;
   canEdit: boolean;
   pending: boolean;
@@ -86,6 +89,25 @@ export function KpiItem({
             ]
               .filter(Boolean)
               .join(" · ")}
+          </span>
+        )}
+        {kind === "quantitative" && (
+          <span className="text-caption text-muted-foreground">
+            {[
+              t.definitions[metric ?? "other"].definition,
+              t.definitions[metric ?? "other"].formula,
+              t.sources[kpiTracking(metric, kpi.source)],
+              t.period(
+                kpi.due_on
+                  ? dueFormat.format(new Date(`${kpi.due_on}T00:00:00Z`))
+                  : null,
+              ),
+            ].join(" ")}
+          </span>
+        )}
+        {ownerName && (
+          <span className="text-caption text-muted-foreground">
+            {t.ownerLine(ownerName)}
           </span>
         )}
         {measured && (

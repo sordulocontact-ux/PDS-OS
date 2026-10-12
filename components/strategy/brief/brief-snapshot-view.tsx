@@ -2,6 +2,7 @@ import {
   BriefBlock,
   BriefEmpty,
 } from "@/components/strategy/brief/brief-block";
+import { BriefSummary } from "@/components/strategy/brief/brief-summary";
 import { BriefToDecide } from "@/components/strategy/brief/brief-to-decide";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
@@ -27,22 +28,29 @@ export function BriefSnapshotView({
 }) {
   return (
     <>
+      <BriefSummary snapshot={snapshot} />
       <BriefToDecide projectId={projectId} items={snapshot.toDecide} />
-      <article
-        aria-label={fr.strategyBrief.title}
-        className={cn(sectionCardClass, "flex flex-col gap-8")}
-      >
-        {snapshot.sections.map((section, index) => (
-          <BriefBlock
-            key={section.dimension}
-            dimension={section.dimension}
-            index={index}
-            toDecide={section.toDecide}
-          >
-            <SnapshotItems items={section.items} />
-          </BriefBlock>
-        ))}
-      </article>
+      {/* MKT-S1-14: the detail behind the summary, unfolded on demand. */}
+      <details className={cn(sectionCardClass, "group")}>
+        <summary className="cursor-pointer text-body-md font-semibold select-none">
+          {fr.strategyBrief.summary.details}
+        </summary>
+        <article
+          aria-label={fr.strategyBrief.title}
+          className="mt-6 flex flex-col gap-8"
+        >
+          {snapshot.sections.map((section, index) => (
+            <BriefBlock
+              key={section.dimension}
+              dimension={section.dimension}
+              index={index}
+              toDecide={section.toDecide}
+            >
+              <SnapshotItems items={section.items} />
+            </BriefBlock>
+          ))}
+        </article>
+      </details>
     </>
   );
 }
@@ -64,6 +72,9 @@ function SnapshotItems({ items }: { items: SnapshotItem[] }) {
           <BriefEmpty key={index}>{item.empty}</BriefEmpty>
         ) : (
           <div key={index} className="flex flex-col gap-1">
+            {item.label && (
+              <p className="text-caption text-muted-foreground">{item.label}</p>
+            )}
             {item.value !== null && (
               <p className="whitespace-pre-wrap tabular-nums">{item.value}</p>
             )}

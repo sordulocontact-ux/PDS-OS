@@ -15,8 +15,21 @@ import {
   removeObjective,
   updateObjective,
 } from "@/lib/strategy/actions/objectives";
-import { isKpiKind, isKpiMetric, type KpiActual } from "@/lib/strategy/kpis";
-import type { StrategyObjective } from "@/lib/strategy/queries";
+import { Button } from "@/components/ui/button";
+import { saveField } from "@/lib/framing/actions/brief";
+import { STRATEGIC_OBJECTIVE } from "@/lib/framing/brief";
+import type { Member } from "@/lib/framing/related";
+import type { ObjectiveInput } from "@/lib/strategy/actions/objectives";
+import {
+  isKpiKind,
+  isKpiMetric,
+  kpiFromFraming,
+  type KpiActual,
+} from "@/lib/strategy/kpis";
+import type {
+  FramingObjective,
+  StrategyObjective,
+} from "@/lib/strategy/queries";
 
 /**
  * « Objectifs & KPIs » (ticket Stratégie § 7): the strategic objective in
@@ -29,9 +42,16 @@ export function ObjectivesSection({
   objectives,
   actuals,
   projectId,
+  members,
+  framingObjective,
+  referenceDate,
 }: {
   strategicObjective: FieldState;
   objectives: StrategyObjective[];
+  members: Member[];
+  // MKT-S1-13: what the Cadrage already said, proposed instead of retyped.
+  framingObjective: FramingObjective;
+  referenceDate: string | null;
   // Real values of the measured KPIs, by id (lib/strategy/kpi-actuals.ts).
   actuals: Record<string, KpiActual>;
   projectId: string;
@@ -42,6 +62,16 @@ export function ObjectivesSection({
   const [editing, setEditing] = useState<string | null>(null);
   // Bumped once a new KPI is saved: its form starts empty again.
   const [formKey, setFormKey] = useState(0);
+  // The Cadrage's measurable objective, loaded into the new KPI's form.
+  const [prefill, setPrefill] = useState<ObjectiveInput | undefined>();
+  const nameOf = (personId: string | null) =>
+    members.find((m) => m.personId === personId)?.name ?? null;
+  const measure = framingObjective.measure;
+  const measureText = measure
+    ? `${new Intl.NumberFormat("fr-FR").format(measure.target)} ${measure.metric} · ${measure.period}`
+    : null;
+  const kpiFromCadrageExists =
+    measure !== null && objectives.some((o) => o.target === measure.target);
 
   return (
     <div className="flex flex-col gap-8">
@@ -53,6 +83,28 @@ export function ObjectivesSection({
           projectId={projectId}
         />
         <p className="text-caption text-muted-foreground">{t.objectiveHint}</p>
+        {canEdit && !strategicObjective.value && framingObjective.text && (
+          <p className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--text-secondary)]">
+            {t.fromFraming.objective(framingObjective.text)}
+            <Button
+              size="xs"
+              variant="outline"
+              disabled={pending}
+              onClick={() =>
+                run(() =>
+                  saveField(
+                    projectId,
+                    "strategy",
+                    STRATEGIC_OBJECTIVE,
+                    framingObjective.text ?? "",
+                  ),
+                )
+              }
+            >
+              {t.fromFraming.useObjective}
+            </Button>
+          </p>
+        )}
       </div>
 
       <section aria-labelledby="kpis-title" className="flex flex-col gap-4">
@@ -82,7 +134,9 @@ export function ObjectivesSection({
                       metric: isKpiMetric(o.metric) ? o.metric : "other",
                       source: o.source === "deezer_fans" ? o.source : "manual",
                       dueOn: o.due_on ?? "",
+                      ownerPersonId: o.owner_person_id ?? "",
                     }}
+                    members={members}
                     pending={pending}
                     submitLabel={t.save}
                     onSubmit={(input) =>
@@ -98,6 +152,7 @@ export function ObjectivesSection({
                 <KpiItem
                   key={o.id}
                   kpi={o}
+                  ownerName={nameOf(o.owner_person_id)}
                   actual={actuals[o.id]}
                   canEdit={canEdit}
                   pending={pending}
@@ -108,16 +163,41 @@ export function ObjectivesSection({
             )}
           </ul>
         )}
+        {canEdit &&
+          editing === null &&
+          measureText &&
+          !kpiFromCadrageExists &&
+          !prefill && (
+            <p className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--text-secondary)]">
+              {t.fromFraming.kpi(measureText)}
+              <Button
+                size="xs"
+                variant="outline"
+                onClick={() => {
+                  if (!measure) return;
+                  setPrefill(kpiFromFraming(measure, referenceDate));
+                  setFormKey((k) => k + 1);
+                }}
+              >
+                {t.fromFraming.useKpi}
+              </Button>
+            </p>
+          )}
         {canEdit && editing === null && (
           <ObjectiveForm
             key={formKey}
+            initial={prefill}
+            members={members}
             idPrefix="objective-new"
             pending={pending}
             submitLabel={t.add}
             onSubmit={(input) =>
               run(
                 () => addObjective(projectId, input),
-                () => setFormKey((k) => k + 1),
+                () => {
+                  setPrefill(undefined);
+                  setFormKey((k) => k + 1);
+                },
               )
             }
           />

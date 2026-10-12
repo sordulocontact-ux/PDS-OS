@@ -6529,7 +6529,15 @@ export type Database = {
           updated_at?: string
           why?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "legal_plan_items_responsible_person_id_fkey"
+            columns: ["responsible_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       legal_plans: {
         Row: {
@@ -12659,6 +12667,45 @@ export type Database = {
           },
         ]
       }
+      strategy_audiences: {
+        Row: {
+          channel: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          insight: string | null
+          organization_id: string
+          priority: string
+          project_id: string
+          segment: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insight?: string | null
+          organization_id: string
+          priority?: string
+          project_id: string
+          segment: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insight?: string | null
+          organization_id?: string
+          priority?: string
+          project_id?: string
+          segment?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       strategy_calls: {
         Row: {
           call_id: string
@@ -13025,14 +13072,15 @@ export type Database = {
       }
       strategy_objectives: {
         Row: {
-          metric: string | null
           created_at: string
           created_by: string | null
           due_on: string | null
           id: string
           kind: string
           label: string
+          metric: string | null
           organization_id: string
+          owner_person_id: string | null
           project_id: string
           source: string
           target: number | null
@@ -13040,14 +13088,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          metric?: string | null
           created_at?: string
           created_by?: string | null
           due_on?: string | null
           id?: string
           kind?: string
           label: string
+          metric?: string | null
           organization_id: string
+          owner_person_id?: string | null
           project_id: string
           source?: string
           target?: number | null
@@ -13055,14 +13104,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          metric?: string | null
           created_at?: string
           created_by?: string | null
           due_on?: string | null
           id?: string
           kind?: string
           label?: string
+          metric?: string | null
           organization_id?: string
+          owner_person_id?: string | null
           project_id?: string
           source?: string
           target?: number | null

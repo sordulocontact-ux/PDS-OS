@@ -3,6 +3,7 @@
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { useCanEditProject } from "@/components/projects/edit-access";
 import { LeverForm } from "@/components/strategy/lever-form";
+import { LegalDependencies } from "@/components/strategy/legal-dependencies";
 import { LeverRow } from "@/components/strategy/lever-row";
 import { labelClass } from "@/components/ui/option-class";
 import { fr } from "@/lib/i18n/fr";
@@ -24,8 +25,13 @@ type Family = keyof typeof fr.framing.needs.families;
 export function LeversSection({
   levers,
   openNeeds,
+  legalNeeds,
+  legalDependencies,
   projectId,
-}: Pick<StrategyData, "levers" | "openNeeds"> & { projectId: string }) {
+}: Pick<
+  StrategyData,
+  "levers" | "openNeeds" | "legalNeeds" | "legalDependencies"
+> & { projectId: string }) {
   const t = fr.strategy.levers;
   const d = fr.strategyDispositif;
   const families = fr.framing.needs.families;
@@ -84,6 +90,8 @@ export function LeversSection({
           onFromNeed={(needId) => run(() => leverFromNeed(projectId, needId))}
         />
       )}
+
+      <LegalDependencies dependencies={legalDependencies} needs={legalNeeds} />
 
       <p className="text-caption text-muted-foreground">{d.activations}</p>
     </section>

@@ -1,5 +1,22 @@
 /** Brief de sortie consolidé of the Stratégie (step 8). */
 export const strategyBrief = {
+  // MKT-S1-14: read first, before the detail.
+  summary: {
+    title: "L'essentiel",
+    established: (date: string) =>
+      `Établi le ${date}, depuis la stratégie à cette date.`,
+    objective: "Objectif",
+    audiences: "Publics",
+    angle: "Angle",
+    levers: "Dispositif",
+    milestones: "Jalons clés",
+    budget: "Budget",
+    kpis: "KPI",
+    risks: "Risques et manques",
+    none: "Non renseigné",
+    noRisk: "Aucun point ouvert.",
+    details: "Le détail des huit dimensions",
+  },
   title: "Brief de sortie",
   body: "Le document interne de référence de la sortie, établi par PO depuis les huit dimensions de la stratégie. Il est interne : le budget n'apparaît jamais dans le Plan de sortie ni le Dossier de presse.",
   asOf: (date: string) => `État au ${date}`,
@@ -62,6 +79,7 @@ export const strategyBrief = {
     qualitative: "Qualitatif",
     target: (value: string) => `Cible : ${value}`,
     noTarget: "Cible à fixer",
+    dependencies: "Prérequis / dépendances",
     budgetTotals: (
       proposed: string,
       validated: string,

@@ -1,7 +1,9 @@
 import "server-only";
 
 import { formatDay } from "@/lib/assistant/facts";
+import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
+import { briefSummary } from "@/lib/strategy/documents/brief-summary";
 import type { BriefSnapshot } from "@/lib/strategy/documents/brief-snapshot";
 
 export const escapeHtml = (value: string) =>
@@ -44,6 +46,16 @@ export function strategyBriefHtml({
         .map((x) => `<li>${e(x.text)}</li>`)
         .join("")}</ul></div>`
     : `<p class="none">${e(tb.toDecide.none)}</p>`;
+  // MKT-S1-14: « L'essentiel » first, the PDF keeps the screen's order.
+  const ts = tb.summary;
+  const summary = `<div class="summary"><h2>${e(ts.title)}</h2><p class="label">${e(ts.established(formatBriefDate(snapshot.generatedOn)))}</p><dl>${briefSummary(
+    snapshot,
+  )
+    .map(
+      (r) =>
+        `<dt>${e(r.label)}</dt><dd class="${r.warn ? "warn" : ""}">${e(r.value ?? (r.key === "risks" ? ts.noRisk : ts.none))}</dd>`,
+    )
+    .join("")}</dl></div>`;
   const sections = snapshot.sections
     .map((s, index) => {
       const items = s.items
@@ -79,6 +91,8 @@ export function strategyBriefHtml({
   body { font-family: "Google Sans Flex", system-ui, sans-serif; font-weight: 500;
     color: #000000; letter-spacing: -0.02em; font-size: 14px; line-height: 20px; }
   .eyebrow, .label { font-size: 12px; line-height: 17px; color: #767676; }
+  .summary { margin: 16px 0 24px; } .summary dl { display: grid; grid-template-columns: 130px 1fr; gap: 6px 16px; margin: 8px 0 0; }
+  .summary dt { color: #767676; } .summary dd { margin: 0; } .summary dd.warn { color: #9a5b00; }
   h1 { font-size: 28px; line-height: 34px; font-weight: 600; letter-spacing: -0.04em; margin: 6px 0 4px; }
   .kind { color: #767676; margin-bottom: 24px; }
   .decide-box { background: #fff4e0; color: #8a4b00; border-radius: 10px; padding: 12px 14px; margin-bottom: 28px; }
@@ -102,6 +116,7 @@ export function strategyBriefHtml({
   <p class="eyebrow">${e(header)}</p>
   <h1>${e(p.title)}</h1>
   <p class="kind">${e([p.artist, p.kind, p.releaseDate ? formatDay(p.releaseDate) : null].filter(Boolean).join(" · "))}</p>
+  ${summary}
   ${toDecide}
   ${sections}
 </body>

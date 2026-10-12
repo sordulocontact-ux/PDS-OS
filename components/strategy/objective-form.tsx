@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { OptionSelect } from "@/components/framing/option-select";
 import { labelClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,10 +14,13 @@ import type { ObjectiveInput } from "@/lib/strategy/actions/objectives";
 import {
   KPI_KINDS,
   KPI_METRICS,
+  METRIC_UNITS,
   kpiTracking,
   type KpiKind,
   type KpiMetric,
 } from "@/lib/strategy/kpis";
+
+const NO_OWNER = "none";
 
 /**
  * A KPI, typed by a person: quantitative (what is measured, the target —
@@ -27,6 +31,7 @@ import {
 export function ObjectiveForm({
   idPrefix,
   initial,
+  members = [],
   pending,
   submitLabel,
   onSubmit,
@@ -34,6 +39,8 @@ export function ObjectiveForm({
 }: {
   idPrefix: string;
   initial?: ObjectiveInput;
+  // Who may follow it (MKT-S1-13).
+  members?: Array<{ personId: string; name: string }>;
   pending: boolean;
   submitLabel: string;
   onSubmit: (input: ObjectiveInput) => void;
@@ -47,6 +54,9 @@ export function ObjectiveForm({
   const [dueOn, setDueOn] = useState(initial?.dueOn ?? "");
   const [metric, setMetric] = useState<KpiMetric>(initial?.metric ?? "other");
   const [measured, setMeasured] = useState(initial?.source === "deezer_fans");
+  const [owner, setOwner] = useState(initial?.ownerPersonId ?? "");
+  // The unit follows the metric when it has one (MKT-S1-13).
+  const fixedUnit = METRIC_UNITS[metric];
   const quantitative = kind === "quantitative";
   // Deezer measures the artist's fans, nothing else.
   const measurable = metric === "fans";
@@ -61,8 +71,9 @@ export function ObjectiveForm({
           kind,
           label,
           target: quantitative ? target : "",
-          unit: quantitative ? unit : "",
+          unit: quantitative ? (fixedUnit ?? unit) : "",
           metric,
+          ownerPersonId: owner,
           source:
             quantitative && measurable && measured ? "deezer_fans" : "manual",
           dueOn,
@@ -138,10 +149,20 @@ export function ObjectiveForm({
             <Input
               id={id("unit")}
               maxLength={40}
-              value={unit}
+              value={fixedUnit ?? unit}
+              readOnly={fixedUnit !== null}
+              aria-describedby={fixedUnit ? id("unit-hint") : undefined}
               placeholder={t.unitPlaceholders[metric]}
               onChange={(e) => setUnit(e.target.value)}
             />
+            {fixedUnit && (
+              <p
+                id={id("unit-hint")}
+                className="text-caption text-muted-foreground"
+              >
+                {t.unitFixed}
+              </p>
+            )}
           </div>
         </>
       )}
@@ -157,6 +178,23 @@ export function ObjectiveForm({
           className="w-fit"
         />
       </div>
+      {members.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor={id("owner")} className={labelClass}>
+            {t.owner}
+          </Label>
+          <OptionSelect
+            id={id("owner")}
+            label={t.owner}
+            options={{
+              [NO_OWNER]: t.ownerNone,
+              ...Object.fromEntries(members.map((m) => [m.personId, m.name])),
+            }}
+            value={owner || NO_OWNER}
+            onChange={(value) => setOwner(value === NO_OWNER ? "" : value)}
+          />
+        </div>
+      )}
       {quantitative && measurable && (
         <label className="flex items-start gap-3 text-body-md sm:col-span-3">
           <Checkbox

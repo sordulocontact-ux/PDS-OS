@@ -157,6 +157,9 @@ export const framing = {
   },
   errors: {
     invalid_input: "Saisie invalide.",
+    // MKT-S1-07: a contract or a right is followed in the Juridique.
+    legal_not_lever:
+      "C'est un prérequis juridique, pas un levier marketing : il est suivi dans le Juridique et apparaît ici comme dépendance.",
     not_found: "Élément introuvable.",
     already_imported: "Ce compte rendu a déjà été importé.",
     invalid_transition: "Cette action n'est pas possible dans l'état actuel.",

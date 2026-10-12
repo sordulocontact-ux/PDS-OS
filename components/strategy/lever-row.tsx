@@ -10,6 +10,7 @@ import { optionClass } from "@/components/ui/option-class";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
+import { legalWordOf } from "@/lib/strategy/legal-items";
 import type { Lever } from "@/lib/strategy/queries";
 import { leverTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
@@ -39,6 +40,8 @@ export function LeverRow({
   const a = fr.framing.actions;
   const state = lever.state as LeverState;
   const proposed = lever.review_status === "proposed";
+  // MKT-S1-07: a lever written before the rule, said and easy to move out.
+  const legalWord = legalWordOf(lever.label);
 
   return (
     <li
@@ -70,6 +73,21 @@ export function LeverRow({
           </span>
         )}
         {lever.provenance && <ProvenanceNote provenance={lever.provenance} />}
+        {legalWord && state !== "rejected" && (
+          <span className="flex flex-wrap items-center gap-2 text-caption text-[color:var(--text-secondary)]">
+            {fr.strategyDispositif.legal.flagged(legalWord)}
+            {canEdit && (
+              <Button
+                size="xs"
+                variant="outline"
+                disabled={pending}
+                onClick={() => onPatch({ state: "rejected" })}
+              >
+                {fr.strategyDispositif.legal.remove}
+              </Button>
+            )}
+          </span>
+        )}
       </div>
       {canEdit &&
         (proposed ? (

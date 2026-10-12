@@ -47,7 +47,8 @@ export function StrategyPilotage({
           label: t.states[d.state],
           tone: strategyDimensionTone[d.state],
         },
-        href: routes.projectStrategyDimension(projectId, d.key),
+        // MKT-S1-05: straight to the first thing to do inside it.
+        href: `${routes.projectStrategyDimension(projectId, d.key)}${d.anchor ? `#${d.anchor}` : ""}`,
       }))}
       current={current}
       closeHref={routes.projectStrategy(projectId)}

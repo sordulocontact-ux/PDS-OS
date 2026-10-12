@@ -47,12 +47,56 @@ export type DimensionStatus = {
   key: StrategyDimension;
   state: DimensionState;
   summary: string;
+  // MKT-S1-05: what is confirmed, to arbitrate, missing, and where the
+  // first thing to do is (an element id inside the unfolded dimension).
+  counts?: { confirmed: number; toDecide: number; missing: number };
+  anchor?: string;
 };
+
+// One element of an answer dimension: confirmed, proposed (to arbitrate)
+// or missing, and where it sits on the page.
+type Element = { state: "confirmed" | "proposed" | "missing"; anchor: string };
+
+function tally(elements: Element[]) {
+  const count = (state: Element["state"]) =>
+    elements.filter((e) => e.state === state).length;
+  const first =
+    elements.find((e) => e.state === "proposed") ??
+    elements.find((e) => e.state === "missing");
+  return {
+    counts: {
+      confirmed: count("confirmed"),
+      toDecide: count("proposed"),
+      missing: count("missing"),
+    },
+    anchor: first?.anchor,
+  };
+}
+
+const fieldElement = (
+  field: FieldState | undefined,
+  anchor: string,
+): Element => ({
+  state:
+    field?.status === "confirmed" && field.value
+      ? "confirmed"
+      : field?.status === "proposed" && field.value
+        ? "proposed"
+        : "missing",
+  anchor,
+});
 
 // What the strategy holds, as loadStrategy and loadBudget read it.
 export type DimensionInput = {
   fields: FieldState<"positioning" | "audiences" | "narrative">[];
   narrativeParts: FieldState[];
+  positioningParts: FieldState[];
+  audiences: Array<{
+    id: string;
+    segment: string;
+    insight: string | null;
+    channel: string | null;
+  }>;
   choices: Record<"positioning" | "audiences" | "narrative", ChoiceValue>;
   suggestions: Record<
     "positioning" | "audiences" | "narrative",
@@ -99,15 +143,43 @@ function answer(
 ): Omit<DimensionStatus, "key"> {
   const field = input.fields.find((f) => f.key === key);
   const choice = input.choices[key];
-  if (field?.status === "confirmed" && field.value)
-    return { state: "complete", summary: field.value };
-  if (field?.status === "proposed" && field.value)
-    return { state: "to_decide", summary: s.proposed(field.value) };
-  if (input.suggestions[key].length > 0)
-    return { state: "to_decide", summary: s.toConfirm };
-  if (choice.choices.length > 0 || choice.other)
-    return { state: "in_progress", summary: s.notDefined };
-  return { state: "to_complete", summary: s.notDefined };
+  // The answer (closed choices + words), then its structure: the four
+  // parts of the positioning, or each public with its insight and channel.
+  const main: Element =
+    input.suggestions[key].length > 0 && field?.status !== "confirmed"
+      ? { state: "proposed", anchor: `answer-${key}` }
+      : fieldElement(field, `answer-${key}`);
+  const structure: Element[] =
+    key === "positioning"
+      ? input.positioningParts.map((part) =>
+          fieldElement(part, `strategy-${part.key}`),
+        )
+      : input.audiences.length === 0
+        ? [{ state: "missing", anchor: "audience-new" }]
+        : input.audiences.map((a) => ({
+            state: a.insight && a.channel ? "confirmed" : "missing",
+            anchor: `audience-${a.id}`,
+          }));
+  const { counts, anchor } = tally([main, ...structure]);
+  const head =
+    field?.status === "confirmed" && field.value
+      ? field.value
+      : field?.status === "proposed" && field.value
+        ? s.proposed(field.value)
+        : input.suggestions[key].length > 0
+          ? s.toConfirm
+          : s.notDefined;
+  const summary = join([head, s.counts(counts)]);
+  const base = { summary, counts, anchor };
+  if (counts.toDecide > 0) return { state: "to_decide", ...base };
+  if (counts.missing === 0) return { state: "complete", ...base };
+  if (
+    counts.confirmed > 0 ||
+    choice.choices.length > 0 ||
+    Boolean(choice.other)
+  )
+    return { state: "in_progress", ...base };
+  return { state: "to_complete", ...base };
 }
 
 function narrative(input: DimensionInput): Omit<DimensionStatus, "key"> {

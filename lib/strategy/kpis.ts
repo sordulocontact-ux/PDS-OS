@@ -67,3 +67,43 @@ export type KpiActual =
   | { status: "pending" }
   | { status: "unavailable" }
   | { status: "measured"; value: number; on: string };
+
+// MKT-S1-13: the unit a metric is counted in — fixed, never typed again.
+export const METRIC_UNITS: Record<KpiMetric, string | null> = {
+  streams: "streams",
+  fans: "fans",
+  views: "vues",
+  playlists: "playlists",
+  other: null,
+};
+
+/** The metric a phrase of the Cadrage names (« 500 000 streams »). */
+export function metricOfWords(text: string): KpiMetric {
+  const t = text.toLowerCase();
+  if (/stream|écoute|ecoute/.test(t)) return "streams";
+  if (/fan|abonn/.test(t)) return "fans";
+  if (/vue|view|visionn/.test(t)) return "views";
+  if (/playlist/.test(t)) return "playlists";
+  return "other";
+}
+
+/**
+ * A KPI proposed from the Cadrage's measurable objective (MKT-S1-13): its
+ * words, target and metric, the unit of that metric and, as a date to
+ * check, the release date. Proposed in the form, saved only by a person.
+ */
+export function kpiFromFraming(
+  measure: { metric: string; target: number; period: string },
+  releaseDate: string | null,
+) {
+  const metric = metricOfWords(measure.metric);
+  return {
+    kind: "quantitative" as const,
+    label: `${measure.metric} · ${measure.period}`,
+    target: String(measure.target).replace(".", ","),
+    unit: METRIC_UNITS[metric] ?? measure.metric,
+    metric,
+    source: "manual" as const,
+    dueOn: releaseDate ?? "",
+  };
+}

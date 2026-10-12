@@ -1,5 +1,47 @@
 /** Objectifs & KPIs of the Stratégie (step 7). */
 export const strategyKpis = {
+  // MKT-S1-13: how each KPI is measured, said by code from its metric.
+  definitions: {
+    streams: {
+      definition: "Écoutes du titre sur les plateformes de streaming.",
+      formula: "Somme des écoutes comptées par les plateformes sur la période.",
+    },
+    fans: {
+      definition: "Fans de l'artiste sur Deezer.",
+      formula: "Nombre de fans au jour du relevé (pas une somme).",
+    },
+    views: {
+      definition: "Vues des vidéos liées à la sortie.",
+      formula: "Somme des vues comptées par chaque plateforme sur la période.",
+    },
+    playlists: {
+      definition: "Playlists éditoriales ou tierces qui reprennent le titre.",
+      formula: "Nombre de playlists distinctes au jour du relevé.",
+    },
+    other: {
+      definition: "Ce que dit son libellé.",
+      formula: "À préciser avec l'équipe.",
+    },
+  },
+  sources: {
+    deezer: "Source : Deezer, relevé chaque jour après la sortie.",
+    manual: "Source : relevé à la main, une fois par semaine.",
+    to_connect:
+      "Source à connecter : relevé à la main en attendant, une fois par semaine.",
+  },
+  period: (due: string | null) =>
+    due ? `Période : de la sortie au ${due}` : "Période : à fixer",
+  owner: "Responsable",
+  ownerNone: "Personne",
+  ownerLine: (name: string) => `Suivi par ${name}`,
+  unitFixed: "L'unité suit la mesure choisie.",
+  // MKT-S1-13: the Cadrage's objective, proposed, never typed again.
+  fromFraming: {
+    objective: (text: string) => `Le Cadrage dit : « ${text} »`,
+    useObjective: "Reprendre comme objectif stratégique",
+    kpi: (text: string) => `Objectif mesurable du Cadrage : ${text}`,
+    useKpi: "Préparer ce KPI",
+  },
   objectiveLabel: "Objectif stratégique",
   objectiveHint: "Ce que la sortie doit accomplir, en une ou deux phrases.",
   kpisTitle: "KPIs",

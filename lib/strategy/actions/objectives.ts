@@ -10,6 +10,7 @@ import {
   KPI_KINDS,
   KPI_METRICS,
   KPI_SOURCES,
+  METRIC_UNITS,
   sourceFits,
 } from "@/lib/strategy/kpis";
 import { createClient } from "@/lib/supabase/server";
@@ -40,6 +41,7 @@ const objectiveInput = z
     metric: z.enum(KPI_METRICS),
     source: z.enum(KPI_SOURCES),
     dueOn: optional(z.iso.date()),
+    ownerPersonId: optional(z.uuid()).optional(),
   })
   .transform((v) =>
     v.kind === "qualitative"
@@ -50,7 +52,8 @@ const objectiveInput = z
           metric: null,
           source: "manual" as const,
         }
-      : v,
+      : // The unit follows the metric when it has one (MKT-S1-13).
+        { ...v, unit: (v.metric && METRIC_UNITS[v.metric]) ?? v.unit },
   )
   // A Deezer fans count never follows a streams target (MKT-S1-03; also
   // checked in SQL, strategy_objectives_source_metric_check).
@@ -65,6 +68,7 @@ const row = (p: z.output<typeof objectiveInput>) => ({
   metric: p.metric,
   source: p.source,
   due_on: p.dueOn,
+  owner_person_id: p.ownerPersonId ?? null,
 });
 
 export async function addObjective(

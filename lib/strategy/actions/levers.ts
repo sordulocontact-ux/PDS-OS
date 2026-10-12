@@ -12,6 +12,7 @@ import {
 } from "@/lib/framing/actions/shared";
 import { fail, type ActionResult } from "@/lib/framing/result";
 import { done } from "@/lib/strategy/actions/shared";
+import { isLegalItem } from "@/lib/strategy/legal-items";
 import { createClient } from "@/lib/supabase/server";
 
 const STATES = ["to_decide", "selected", "rejected"] as const;
@@ -26,6 +27,7 @@ export async function addLever(
     .safeParse({ projectId, label, family });
   const organizationId = await orgId();
   if (!p.success || !organizationId) return fail("invalid_input");
+  if (isLegalItem(p.data.label)) return fail("legal_not_lever");
   const supabase = await createClient();
   const { error } = await supabase.from("levers").insert({
     organization_id: organizationId,
@@ -52,6 +54,7 @@ export async function leverFromNeed(
     .eq("project_id", projectId)
     .maybeSingle();
   if (!need) return fail("not_found");
+  if (isLegalItem(need.label)) return fail("legal_not_lever");
   const { error } = await supabase.from("levers").insert({
     organization_id: organizationId,
     project_id: projectId,

@@ -12,7 +12,11 @@ export async function ObjectivesWork({
 }: {
   data: Pick<
     StrategyData,
-    "strategicObjective" | "objectives" | "referenceDate"
+    | "strategicObjective"
+    | "objectives"
+    | "referenceDate"
+    | "members"
+    | "framingObjective"
   >;
   projectId: string;
 }) {
@@ -27,6 +31,9 @@ export async function ObjectivesWork({
       objectives={data.objectives}
       actuals={actuals}
       projectId={projectId}
+      members={data.members}
+      framingObjective={data.framingObjective}
+      referenceDate={data.referenceDate}
     />
   );
 }

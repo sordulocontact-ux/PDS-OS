@@ -143,8 +143,38 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
   const hiddenLevers = budget.byLever.length - spentLevers.length;
 
   const items: Record<StrategyDimension, SnapshotItem[]> = {
-    positioning: [text(field("positioning"))],
-    audiences: [text(field("audiences"))],
+    // MKT-S1-05: the answer, then its structure (four parts, each public).
+    positioning: [
+      text(field("positioning")),
+      ...data.positioningParts
+        .filter((p) => p.value)
+        .map((p) => ({
+          label:
+            fr.strategyPilot.positioning.parts[
+              p.key as keyof typeof fr.strategyPilot.positioning.parts
+            ],
+          value: p.value,
+          lines: [],
+          empty: t.empty,
+        })),
+    ],
+    audiences: [
+      text(field("audiences")),
+      ...(data.audiences.length
+        ? [
+            {
+              label: null,
+              value: null,
+              empty: t.empty,
+              lines: data.audiences.map((a) => ({
+                head: `${a.segment} (${fr.strategyPilot.audiences.priorities[a.priority === "secondary" ? "secondary" : "primary"]})`,
+                rest: joined([a.insight, a.channel]),
+                warn: !a.insight || !a.channel,
+              })),
+            },
+          ]
+        : []),
+    ],
     narrative: [
       ...data.narrativeParts.map((p) => ({
         label: parts[p.key as keyof typeof parts],
@@ -184,6 +214,33 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
           })),
         ],
       },
+      // MKT-S1-07: « Dispositif retenu » apart from « Prérequis /
+      // dépendances », read from the Juridique.
+      ...(data.legalDependencies.length || data.legalNeeds.length
+        ? [
+            {
+              label: t.dependencies,
+              value: null,
+              empty: t.empty,
+              lines: [
+                ...data.legalDependencies.map((d) => ({
+                  head: d.label,
+                  rest: joined([
+                    d.responsibleName,
+                    d.dueOn ? formatBriefDate(d.dueOn) : null,
+                    fr.strategyDispositif.legal.source,
+                  ]),
+                  warn: d.status === "blocked",
+                })),
+                ...data.legalNeeds.map((n) => ({
+                  head: n.label,
+                  rest: fr.strategyDispositif.legal.source,
+                  warn: false,
+                })),
+              ],
+            },
+          ]
+        : []),
     ],
     deliverables: [
       {

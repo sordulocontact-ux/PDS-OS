@@ -1354,6 +1354,34 @@ livrable, les libellés ou l'action d'import en props.
 
 ---
 
+### Retours Marketing du 11/10/2026, lot 9b (MKT-S1-05, 07, 13, 14)
+
+Migration `…20261012101201_strategy_audiences_kpi_owner`.
+
+- **Cartes du pilotage** : chaque dimension « réponse » compte ses éléments confirmés, à
+  arbitrer et à renseigner (`DimensionStatus.counts`), et la carte mène au **premier
+  manque** (`anchor` : la question, une partie, un public), calculé par le code.
+- **Positionnement en quatre points** (champs `positioning_promise`, `_difference`,
+  `_proof`, `_tone` de `field_values`, comme les parties du narratif) sous la réponse à choix ;
+  **publics un par un** (`strategy_audiences` : segment, priorité cœur de cible / à
+  conquérir, besoin ou insight, canal pressenti ; écrit par le responsable tant que la
+  stratégie est ouverte), les choix cochés proposés comme publics à décrire.
+- **Juridique ≠ levier** (`lib/strategy/legal-items.ts`) : un libellé de contrat, droits,
+  cession, licence, autorisation, SACEM… est refusé comme levier (`legal_not_lever`), un
+  besoin juridique du Cadrage n'est plus proposé comme levier ; un ancien levier juridique
+  est signalé avec « Retirer du Dispositif ». Le Dispositif montre en dessous les
+  **prérequis et dépendances** lus dans le Juridique (actions ouvertes du plan, responsable,
+  date, source), et le Brief les sépare du dispositif retenu.
+- **Objectifs & KPI** : l'objectif du Cadrage est proposé (« Reprendre comme objectif
+  stratégique ») et son objectif mesurable prépare un KPI (`kpiFromFraming` : cible,
+  métrique, unité, date de sortie à vérifier) ; l'unité suit la métrique (`METRIC_UNITS`) ;
+  chaque KPI dit définition, calcul, source et fréquence (manuel, Deezer, source à
+  connecter), période et **responsable** (`owner_person_id`).
+- **Brief de sortie** : **« L'essentiel »** d'abord (`briefSummary` : objectif, publics, angle,
+  dispositif, jalons clés, budget, KPI, risques et manques, date d'établissement), tiré des
+  sections du même instantané ; le détail des huit dimensions est replié à l'écran, déplié
+  dans le PDF qui garde le même ordre.
+
 ## 6 ter. Plan du Projet
 
 Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `components/plan/*`, migration

@@ -4,6 +4,7 @@
  */
 export type FramingErrorCode =
   | "invalid_input"
+  | "legal_not_lever"
   | "not_found"
   | "already_imported"
   | "invalid_transition"

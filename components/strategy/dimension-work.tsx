@@ -1,5 +1,6 @@
 import { BudgetLines } from "@/components/budget/budget-lines";
 import { BriefFieldCard } from "@/components/framing/brief-field-card";
+import { AudiencesSection } from "@/components/strategy/audiences-section";
 import { LeverBudgetTable } from "@/components/strategy/budget/lever-budget-table";
 import { StrategyBudgetSummary } from "@/components/strategy/budget/strategy-budget-summary";
 import { CalendarSection } from "@/components/strategy/calendar-section";
@@ -39,20 +40,67 @@ export function DimensionWork({
   const choices = (key: StrategyTextField) => {
     const field = data.fields.find((f) => f.key === key)!;
     return (
-      <StrategyChoices
-        key={`${key}-${JSON.stringify(data.choices[key])}-${field.value ?? ""}-${field.status ?? ""}`}
-        field={field}
-        value={data.choices[key]}
-        suggestions={data.suggestions[key]}
-        projectId={projectId}
-      />
+      // The card's « premier manque » may point here (MKT-S1-05).
+      <div id={`answer-${key}`} className="scroll-mt-24">
+        <StrategyChoices
+          key={`${key}-${JSON.stringify(data.choices[key])}-${field.value ?? ""}-${field.status ?? ""}`}
+          field={field}
+          value={data.choices[key]}
+          suggestions={data.suggestions[key]}
+          projectId={projectId}
+        />
+      </div>
     );
   };
 
   switch (dimension) {
     case "positioning":
-    case "audiences":
-      return choices(dimension);
+      return (
+        <>
+          {choices("positioning")}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-body-md font-semibold">
+              {fr.strategyPilot.positioning.title}
+            </h3>
+            {data.positioningParts.map((part) => (
+              <BriefFieldCard
+                key={`${part.key}-${part.value ?? ""}-${part.status ?? ""}`}
+                field={part}
+                label={
+                  fr.strategyPilot.positioning.parts[
+                    part.key as keyof typeof fr.strategyPilot.positioning.parts
+                  ]
+                }
+                projectId={projectId}
+              />
+            ))}
+          </div>
+        </>
+      );
+    case "audiences": {
+      const described = new Set(
+        data.audiences.map((a) => a.segment.trim().toLowerCase()),
+      );
+      const labels = fr.strategy.choices.options.audiences as Record<
+        string,
+        string
+      >;
+      return (
+        <>
+          {choices("audiences")}
+          <AudiencesSection
+            projectId={projectId}
+            audiences={data.audiences}
+            suggested={data.choices.audiences.choices
+              .map((c) => labels[c])
+              .filter(
+                (label): label is string =>
+                  !!label && !described.has(label.toLowerCase()),
+              )}
+          />
+        </>
+      );
+    }
     case "narrative":
       return (
         <>
@@ -78,6 +126,8 @@ export function DimensionWork({
         <LeversSection
           levers={data.levers}
           openNeeds={data.openNeeds}
+          legalNeeds={data.legalNeeds}
+          legalDependencies={data.legalDependencies}
           projectId={projectId}
         />
       );
