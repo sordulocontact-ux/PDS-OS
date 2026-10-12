@@ -1,5 +1,11 @@
 /** Authenticated shell: navigation, projects list, project sidebar. */
 export const shell = {
+  // components/shell/return-banner.tsx (PROJ-BUG-10).
+  returnTo: {
+    body: "Vous corrigez ce titre depuis un projet : une fois enregistré, vous y revenez.",
+    back: "Revenir au projet",
+    dismiss: "Rester ici",
+  },
   // Read after a validated step of a process (ProcessSteps), by screen readers.
   processSteps: { done: "validée" },
   // The chevron of a collapsible PageSection, read with the section's title.
@@ -163,11 +169,46 @@ export const shell = {
     subtitle: "Sorties musicales, contenus et événements.",
     newProject: "Nouveau projet",
     columns: {
-      title: "Titre",
+      title: "Projet",
       artist: "Artiste",
+      responsible: "Responsable",
       type: "Type",
+      due: "Échéance",
+      status: "Statut",
+      phase: "Phase",
       stage: "Où en est le projet",
     },
+    // PROJ-UX-01: steer 30 to 50 projects.
+    noDue: "Non définie",
+    views: { all: "Tous", drafts: "Brouillons", active: "Actifs" },
+    search: "Rechercher un projet, un artiste, un responsable...",
+    searchLabel: "Rechercher dans les projets",
+    filters: {
+      type: "Type",
+      responsible: "Responsable",
+      status: "Statut",
+      due: "Échéance",
+      any: "Tous",
+      anyone: "Tout le monde",
+      dues: {
+        any: "Toutes",
+        next30: "Dans les 30 jours",
+        overdue: "Dépassée",
+        none: "Non définie",
+      },
+      clear: "Effacer les filtres",
+      noMatch: "Aucun projet ne correspond à ces filtres.",
+    },
+    adminStatuses: {
+      draft: "Brouillon",
+      not_transmitted: "Non transmis",
+      pending: "Transmis, à accepter",
+      clarification_requested: "Précision demandée",
+      refused: "Refusé",
+      running: "En cours",
+      done: "Terminé",
+    },
+    phases: { delivery: "Diffusion" },
     allValidated: "Terminé",
     draft: "Brouillon",
     noStage: "—",

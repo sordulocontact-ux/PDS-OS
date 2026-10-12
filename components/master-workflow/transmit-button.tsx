@@ -3,38 +3,35 @@
 import { IconPaperPlane2 } from "nucleo-sharp-essential";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { TransmitReview } from "@/components/master-workflow/transmit-review";
 import { Button } from "@/components/ui/button";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { useShowLinks } from "@/components/ui/one-time-links";
 import { fr } from "@/lib/i18n/fr";
-import type { PackageRole } from "@/lib/master-workflow/transmission";
+import type { StepView } from "@/lib/master-workflow/transmission";
 import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
 
 export type TransmitMode = "first" | "remind" | "resend";
 
 /**
- * "Transmettre au mixeur", "Relancer" (no answer yet) or "Renvoyer le
- * dossier" (received, but the package changed or its link expired): a note,
- * then the private link, shown once (only its hash is stored): copy it, or
- * open an e-mail to the engineer with it (`useShowLinks`). The follow-up
- * refreshes when the modal closes.
+ * "Transmettre au mixeur", "Renouveler le lien" (no answer yet) or
+ * "Renvoyer le dossier" (received, but the package changed or its link
+ * expired): first the review of what leaves and what the private link opens
+ * (PROJ-UX-09), the message, then the link, shown once (only its hash is
+ * stored): copy it, or open an e-mail to the engineer with it
+ * (`useShowLinks`). The follow-up refreshes when the modal closes.
  */
 export function TransmitButton({
-  projectId,
-  projectTitle,
-  engineerEmail,
+  view,
   mode,
-  role,
 }: {
-  projectId: string;
-  projectTitle: string;
-  engineerEmail: string | null;
+  view: StepView;
   // After the first sending, a new link always replaces the previous one.
   mode: TransmitMode;
-  role: PackageRole;
 }) {
   const t = fr.masterWorkflow.mix;
   const router = useRouter();
@@ -51,7 +48,7 @@ export function TransmitButton({
         onClick={() => setOpen(true)}
       >
         <IconPaperPlane2 aria-hidden data-icon="inline-start" />
-        {mode === "first" ? t.transmitTo[role] : t.modes[mode].label}
+        {mode === "first" ? t.transmitTo[view.role] : t.modes[mode].label}
       </Button>
       <FormDialog
         open={open}
@@ -61,46 +58,49 @@ export function TransmitButton({
           mode === "first" ? t.transmitDescription : t.modes[mode].description
         }
         closeLabel={t.close}
+        size="wide"
       >
-        <TransmitForm
-          projectId={projectId}
-          projectTitle={projectTitle}
-          engineerEmail={engineerEmail}
-          role={role}
-          onClose={() => close(false)}
-        />
+        <TransmitForm view={view} onClose={() => close(false)} />
       </FormDialog>
     </>
   );
 }
 
 function TransmitForm({
-  projectId,
-  projectTitle,
-  engineerEmail,
-  role,
+  view,
   onClose,
 }: {
-  projectId: string;
-  projectTitle: string;
-  engineerEmail: string | null;
-  role: PackageRole;
+  view: StepView;
   onClose: () => void;
 }) {
   const t = fr.masterWorkflow.mix;
   const showLinks = useShowLinks();
   const [error, setError] = useState<string | null>(null);
+  const [withoutStems, setWithoutStems] = useState(false);
   const [pending, startTransition] = useTransition();
+  const engineerEmail = view.engineer?.email ?? null;
+  const role = view.role;
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const note = String(new FormData(event.currentTarget).get("note") ?? "");
     setError(null);
     startTransition(async () => {
-      const result = await transmitPackage(projectId, role, note);
+      const result = await transmitPackage(
+        view.projectId,
+        role,
+        note,
+        withoutStems,
+      );
       if (!result.ok) return setError(result.error);
-      // The page refreshes and this button may move ("Relancer"): the link
-      // is shown by the dialog above the page, which survives it.
+      // The same engineer keeps their mix link: nothing new to share.
+      if (result.continued) {
+        onClose();
+        toast.success(t.continued(view.engineer?.name ?? ""));
+        return;
+      }
+      // The page refreshes and this button may move: the link is shown by
+      // the dialog above the page, which survives it.
       const link = `${window.location.origin}/m/${result.token}`;
       onClose();
       showLinks({
@@ -113,7 +113,7 @@ function TransmitForm({
             url: link,
             email: engineerEmail
               ? {
-                  href: `mailto:${engineerEmail}?subject=${encodeURIComponent(t.emailSubject[role](projectTitle))}&body=${encodeURIComponent(t.emailBody(link))}`,
+                  href: `mailto:${engineerEmail}?subject=${encodeURIComponent(t.emailSubject[role](view.projectTitle))}&body=${encodeURIComponent(t.emailBody(link))}`,
                   label: t.email,
                 }
               : undefined,
@@ -128,12 +128,18 @@ function TransmitForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
+      <TransmitReview
+        view={view}
+        withoutStems={withoutStems}
+        onWithoutStems={setWithoutStems}
+      />
       <TextareaField
         name="note"
-        label={t.note}
+        label={t.note[role]}
         hint={t.noteHint}
         rows={3}
         maxLength={2000}
+        defaultValue={view.brief?.message ?? ""}
         disabled={pending}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}

@@ -21,13 +21,7 @@ export function PackageSections({ view }: { view: StepView }) {
   const latest = view.history[0];
   const ready = view.canEdit && view.blockers.length === 0;
   const button = (mode: TransmitMode) => (
-    <TransmitButton
-      projectId={view.projectId}
-      projectTitle={view.projectTitle}
-      engineerEmail={view.engineer?.email ?? null}
-      mode={mode}
-      role={view.role}
-    />
+    <TransmitButton view={view} mode={mode} />
   );
   return (
     <>
@@ -58,7 +52,12 @@ export function PackageSections({ view }: { view: StepView }) {
         {view.history.length === 0 ? (
           <EmptyNote>{t.history.empty}</EmptyNote>
         ) : (
-          <TransmissionHistory rows={view.history} />
+          <TransmissionHistory
+            rows={view.history}
+            role={view.role}
+            projectId={view.projectId}
+            canEdit={view.canEdit}
+          />
         )}
       </PageSection>
     </>

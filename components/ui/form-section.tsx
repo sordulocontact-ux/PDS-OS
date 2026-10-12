@@ -6,12 +6,15 @@ import { cn } from "@/lib/utils";
 // A titled block of a long form, on its own white card (the "Nouveau
 // projet" page: Le projet, Informations initiales, Équipe). `plain`: the
 // same block without the card, inside a modal or a side panel.
+// `description`: one line under the title, what the block is for.
 export function FormSection({
   title,
+  description,
   plain = false,
   children,
 }: {
   title: string;
+  description?: string;
   plain?: boolean;
   children: React.ReactNode;
 }) {
@@ -24,9 +27,14 @@ export function FormSection({
         !plain && sectionCardClass,
       )}
     >
-      <h2 id={id} className="text-base font-medium">
-        {title}
-      </h2>
+      <div className="flex flex-col gap-0.5">
+        <h2 id={id} className="text-base font-medium">
+          {title}
+        </h2>
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+      </div>
       {children}
     </section>
   );

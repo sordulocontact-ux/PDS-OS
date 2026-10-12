@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
-import { FieldError } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import type { BriefDate } from "@/lib/master-workflow/brief-types";
-import { proposeMasterCalendar } from "@/lib/master-workflow/calendar";
+import {
+  calendarOrderErrors,
+  proposeMasterCalendar,
+} from "@/lib/master-workflow/calendar";
 import { formatShortDate } from "@/lib/release/format";
 
 const STEPS = ["mixV1Due", "mixFinalDue", "masteringDue"] as const;
@@ -19,10 +21,11 @@ const STEPS = ["mixV1Due", "mixFinalDue", "masteringDue"] as const;
  */
 export function BriefCalendarFields({
   initial,
-  error,
+  errors = {},
 }: {
   initial: Record<BriefDate, string | null>;
-  error?: string;
+  // The server's refusal, field by field (values kept, PROJ-BUG-07).
+  errors?: Partial<Record<BriefDate, string>>;
 }) {
   const t = fr.masterWorkflow.brief;
   const [dates, setDates] = useState(() => ({
@@ -32,6 +35,17 @@ export function BriefCalendarFields({
     masterFinalDue: initial.masterFinalDue ?? "",
   }));
   const proposal = proposeMasterCalendar(dates.masterFinalDue || null);
+  // The same rule as the server, said as soon as a date breaks the order.
+  const order = calendarOrderErrors({
+    mixV1Due: dates.mixV1Due || null,
+    mixFinalDue: dates.mixFinalDue || null,
+    masteringDue: dates.masteringDue || null,
+    masterFinalDue: dates.masterFinalDue || null,
+  });
+  const errorOf = (field: BriefDate) => {
+    const after = order[field];
+    return after ? t.orderError(t.fields[after]) : errors[field];
+  };
   const set =
     (field: BriefDate) => (event: React.ChangeEvent<HTMLInputElement>) =>
       setDates((current) => ({ ...current, [field]: event.target.value }));
@@ -45,6 +59,7 @@ export function BriefCalendarFields({
         hint={t.fields.masterFinalHint}
         value={dates.masterFinalDue}
         onChange={set("masterFinalDue")}
+        error={errorOf("masterFinalDue")}
       />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-[color:var(--text-secondary)]">
@@ -77,11 +92,10 @@ export function BriefCalendarFields({
             label={t.fields[step]}
             value={dates[step]}
             onChange={set(step)}
-            aria-describedby={error ? "brief-calendar-error" : undefined}
+            error={errorOf(step)}
           />
         ))}
       </div>
-      <FieldError id="brief-calendar-error">{error}</FieldError>
     </div>
   );
 }

@@ -15,6 +15,8 @@ export type MixComment = {
   body: string;
   author: string | null;
   createdAt: string;
+  // Where in the track, in seconds (PROJ-BUG-08).
+  timecodeSeconds: number | null;
 };
 
 export type MixVersion = {
@@ -22,6 +24,9 @@ export type MixVersion = {
   masterId: string;
   number: number;
   fileName: string;
+  // Signed links to listen and download, for whoever reads the version.
+  openUrl: string | null;
+  downloadUrl: string | null;
   createdAt: string;
   createdBy: string | null;
   status: MixVersionStatus;
@@ -54,3 +59,31 @@ export type MixVersionsView = {
   // Who decides, named on the page.
   decider: string | null;
 };
+
+/** « 1:23 » or « 83 » → 83 seconds; null when it is not a position. */
+export function parseTimecode(text: string): number | null {
+  const value = text.trim();
+  if (!value) return null;
+  const match = /^(?:(\d{1,2}):)?(\d{1,2}):(\d{2})$|^(\d{1,5})$/.exec(value);
+  if (!match) return Number.NaN;
+  if (match[4] !== undefined) return Number(match[4]);
+  const hours = Number(match[1] ?? 0);
+  const minutes = Number(match[2]);
+  const seconds = Number(match[3]);
+  if (seconds > 59 || (match[1] !== undefined && minutes > 59))
+    return Number.NaN;
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+/** 83 → « 1:23 ». */
+export function formatTimecode(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = String(seconds % 60).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+}
+
+/** Whether a comment was there when the feedback left (then it is in it). */
+export const commentSent = (comment: MixComment, version: MixVersion) =>
+  version.feedbackSentAt !== null &&
+  comment.createdAt <= version.feedbackSentAt;

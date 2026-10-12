@@ -1,4 +1,9 @@
+import Link from "next/link";
+
 import { DeliverablesChecklist } from "@/components/master-workflow/deliverables-checklist";
+import { AudioFile } from "@/components/ui/audio-file";
+import { buttonVariants } from "@/components/ui/button";
+import { routes } from "@/lib/auth/redirects";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
@@ -37,6 +42,13 @@ export function FinalPage({ view }: { view: FinalView }) {
             card
           >
             <div className="grid gap-6">
+              {(title.final ?? title.before) && (
+                <AudioFile
+                  label={t.listen(title.title)}
+                  listenUrl={(title.final ?? title.before)!.listenUrl}
+                  downloadUrl={(title.final ?? title.before)!.downloadUrl}
+                />
+              )}
               <FactList
                 emptyLabel={t.noFinal}
                 facts={[
@@ -63,7 +75,28 @@ export function FinalPage({ view }: { view: FinalView }) {
                     : [{ label: t.facts.engineer, value: view.engineer }]),
                   {
                     label: t.facts.catalogue,
-                    value: finalLabel(title.audioState),
+                    // Said attached only once the Catalogue really says so
+                    // (PROJ-BUG-10).
+                    value:
+                      title.audioState === "final_master" &&
+                      (title.final ?? title.before)
+                        ? t.attached
+                        : finalLabel(title.audioState),
+                  },
+                  {
+                    label: t.facts.lineage,
+                    value:
+                      [
+                        title.lineage.source &&
+                          t.lineageSource(title.lineage.source.fileName),
+                        title.lineage.mixFinal &&
+                          t.lineageMix(
+                            title.lineage.mixFinal.number,
+                            title.lineage.mixFinal.fileName,
+                          ),
+                      ]
+                        .filter(Boolean)
+                        .join(" → ") || null,
                   },
                 ]}
               />
@@ -77,9 +110,19 @@ export function FinalPage({ view }: { view: FinalView }) {
           </PageSection>
         ))
       )}
-      <p className="text-caption text-[color:var(--text-secondary)]">
-        {t.distribution}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-caption text-[color:var(--text-secondary)]">
+          {allDone ? t.nextDistribution : t.distribution}
+        </p>
+        {allDone && (
+          <Link
+            href={routes.projectRelease(view.projectId)}
+            className={buttonVariants({ size: "sm" })}
+          >
+            {t.toDistribution}
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

@@ -4732,6 +4732,78 @@ export type Database = {
         }
         Relationships: []
       }
+      framing_brief_requests: {
+        Row: {
+          body: string
+          brief_id: string
+          created_at: string
+          created_by: string | null
+          dimension: string
+          id: string
+          mandatory: boolean
+          organization_id: string
+          project_id: string
+          question_key: string | null
+          resolution: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_brief_id: string | null
+          resolved_by: string | null
+          state: string
+        }
+        Insert: {
+          body: string
+          brief_id: string
+          created_at?: string
+          created_by?: string | null
+          dimension: string
+          id?: string
+          mandatory?: boolean
+          organization_id: string
+          project_id: string
+          question_key?: string | null
+          resolution?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_brief_id?: string | null
+          resolved_by?: string | null
+          state?: string
+        }
+        Update: {
+          body?: string
+          brief_id?: string
+          created_at?: string
+          created_by?: string | null
+          dimension?: string
+          id?: string
+          mandatory?: boolean
+          organization_id?: string
+          project_id?: string
+          question_key?: string | null
+          resolution?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_brief_id?: string | null
+          resolved_by?: string | null
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "framing_brief_requests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "framing_brief_requests_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       framing_briefs: {
         Row: {
           change_comment: string | null
@@ -4746,6 +4818,7 @@ export type Database = {
           reopened_dimensions: string[] | null
           sent_at: string | null
           state: string
+          unchanged_reason: string | null
           validation_id: string | null
           version: number
         }
@@ -4762,6 +4835,7 @@ export type Database = {
           reopened_dimensions?: string[] | null
           sent_at?: string | null
           state?: string
+          unchanged_reason?: string | null
           validation_id?: string | null
           version: number
         }
@@ -4778,6 +4852,7 @@ export type Database = {
           reopened_dimensions?: string[] | null
           sent_at?: string | null
           state?: string
+          unchanged_reason?: string | null
           validation_id?: string | null
           version?: number
         }
@@ -7614,7 +7689,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           deliverables: string[]
+          delivery_formats: string | null
           direction: string | null
+          engineer_message: string | null
           id: string
           master_final_due: string | null
           mastering_contact_id: string | null
@@ -7638,7 +7715,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deliverables?: string[]
+          delivery_formats?: string | null
           direction?: string | null
+          engineer_message?: string | null
           id?: string
           master_final_due?: string | null
           mastering_contact_id?: string | null
@@ -7662,7 +7741,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deliverables?: string[]
+          delivery_formats?: string | null
           direction?: string | null
+          engineer_message?: string | null
           id?: string
           master_final_due?: string | null
           mastering_contact_id?: string | null
@@ -8047,29 +8128,35 @@ export type Database = {
       master_mix_comments: {
         Row: {
           body: string
+          client_key: string | null
           created_at: string
           created_by: string | null
           id: string
           organization_id: string
           project_id: string
+          timecode_seconds: number | null
           version_id: string
         }
         Insert: {
           body: string
+          client_key?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           organization_id: string
           project_id: string
+          timecode_seconds?: number | null
           version_id: string
         }
         Update: {
           body?: string
+          client_key?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           organization_id?: string
           project_id?: string
+          timecode_seconds?: number | null
           version_id?: string
         }
         Relationships: [
@@ -8399,45 +8486,69 @@ export type Database = {
         Row: {
           acknowledged_at: string | null
           contact_id: string
+          continues_id: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
+          derogations: Json
           expires_at: string
           id: string
+          link_sent_at: string | null
+          link_sent_by: string | null
           note: string | null
+          opened_at: string | null
           organization_id: string
           package: Json
           project_id: string
+          revoke_reason: string | null
           revoked_at: string | null
+          revoked_by: string | null
           role: string
           token_hash: string
         }
         Insert: {
           acknowledged_at?: string | null
           contact_id: string
+          continues_id?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
+          derogations?: Json
           expires_at: string
           id?: string
+          link_sent_at?: string | null
+          link_sent_by?: string | null
           note?: string | null
+          opened_at?: string | null
           organization_id: string
           package: Json
           project_id: string
+          revoke_reason?: string | null
           revoked_at?: string | null
+          revoked_by?: string | null
           role: string
           token_hash: string
         }
         Update: {
           acknowledged_at?: string | null
           contact_id?: string
+          continues_id?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
+          derogations?: Json
           expires_at?: string
           id?: string
+          link_sent_at?: string | null
+          link_sent_by?: string | null
           note?: string | null
+          opened_at?: string | null
           organization_id?: string
           package?: Json
           project_id?: string
+          revoke_reason?: string | null
           revoked_at?: string | null
+          revoked_by?: string | null
           role?: string
           token_hash?: string
         }
@@ -11441,9 +11552,58 @@ export type Database = {
           },
         ]
       }
+      project_plan_events: {
+        Row: {
+          actor_person_id: string | null
+          created_at: string
+          detail: Json
+          id: string
+          item_id: string | null
+          kind: string
+          organization_id: string
+          plan_id: string
+          project_id: string
+        }
+        Insert: {
+          actor_person_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          item_id?: string | null
+          kind: string
+          organization_id: string
+          plan_id: string
+          project_id: string
+        }
+        Update: {
+          actor_person_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          item_id?: string | null
+          kind?: string
+          organization_id?: string
+          plan_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_plan_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_plan_items: {
         Row: {
           column_key: string
+          depends_on: string[]
+          done_at: string | null
+          done_by: string | null
+          due_date: string | null
+          executor_person_id: string | null
           id: string
           launched_at: string | null
           launched_by: string | null
@@ -11453,11 +11613,18 @@ export type Database = {
           position: number
           project_id: string
           title: string
+          updated_at: string | null
+          updated_by: string | null
           why: string | null
           workflow: string | null
         }
         Insert: {
           column_key: string
+          depends_on?: string[]
+          done_at?: string | null
+          done_by?: string | null
+          due_date?: string | null
+          executor_person_id?: string | null
           id?: string
           launched_at?: string | null
           launched_by?: string | null
@@ -11467,11 +11634,18 @@ export type Database = {
           position?: number
           project_id: string
           title: string
+          updated_at?: string | null
+          updated_by?: string | null
           why?: string | null
           workflow?: string | null
         }
         Update: {
           column_key?: string
+          depends_on?: string[]
+          done_at?: string | null
+          done_by?: string | null
+          due_date?: string | null
+          executor_person_id?: string | null
           id?: string
           launched_at?: string | null
           launched_by?: string | null
@@ -11481,6 +11655,8 @@ export type Database = {
           position?: number
           project_id?: string
           title?: string
+          updated_at?: string | null
+          updated_by?: string | null
           why?: string | null
           workflow?: string | null
         }
@@ -11495,6 +11671,13 @@ export type Database = {
           {
             foreignKeyName: "project_plan_items_owner_person_id_fkey"
             columns: ["owner_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_plan_items_executor_person_id_fkey"
+            columns: ["executor_person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -13049,6 +13232,18 @@ export type Database = {
         Args: { p_proposal_id: string }
         Returns: undefined
       }
+      add_project_plan_item: {
+        Args: {
+          p_column: string
+          p_depends_on: string[]
+          p_due_date: string | null
+          p_executor: string | null
+          p_owner: string | null
+          p_project_id: string
+          p_title: string
+        }
+        Returns: string
+      }
       arbitrate_marketing_reserve: {
         Args: {
           p_decision: string
@@ -13066,6 +13261,15 @@ export type Database = {
         Args: { p_closure_id: string; p_comment: string; p_decision: string }
         Returns: undefined
       }
+      declare_mix_final: {
+        Args: {
+          p_file_id: string
+          p_master_id: string
+          p_note?: string
+          p_project_id: string
+        }
+        Returns: string
+      }
       lift_marketing_reserve: {
         Args: { p_note: string; p_reserve_id: string }
         Returns: undefined
@@ -13074,11 +13278,17 @@ export type Database = {
         Args: { p_reserve_id: string; p_task_id: string }
         Returns: undefined
       }
+      mark_master_transmission_sent: {
+        Args: { p_transmission_id: string }
+        Returns: undefined
+      }
       marketing_is_closed: { Args: { p_project_id: string }; Returns: boolean }
+      move_project_plan_item: { Args: { p_item_id: string; p_offset: number }; Returns: undefined }
       note_marketing_reserve: {
         Args: { p_note: string; p_reserve_id: string }
         Returns: undefined
       }
+      note_master_transmission_opened: { Args: { p_token: string }; Returns: undefined }
       reopen_distribution_closure: {
         Args: { p_note: string; p_project_id: string }
         Returns: undefined
@@ -13108,6 +13318,14 @@ export type Database = {
         Args: { p_note: string; p_project_id: string; p_report_id: string }
         Returns: string
       }
+      resolve_framing_brief_request: {
+        Args: { p_note?: string; p_request_id: string }
+        Returns: string
+      }
+      revoke_master_transmission: {
+        Args: { p_reason: string; p_transmission_id: string }
+        Returns: undefined
+      }
       set_distribution_anomaly_state: {
         Args: { p_anomaly_id: string; p_note: string; p_state: string }
         Returns: undefined
@@ -13136,8 +13354,24 @@ export type Database = {
         }
         Returns: string
       }
+      set_project_plan_item_done: {
+        Args: { p_done: boolean; p_item_id: string }
+        Returns: undefined
+      }
       submit_marketing_report: {
         Args: { p_report_id: string }
+        Returns: undefined
+      }
+      update_project_plan_item: {
+        Args: {
+          p_column: string
+          p_depends_on: string[]
+          p_due_date: string | null
+          p_executor: string | null
+          p_item_id: string
+          p_owner: string | null
+          p_title: string | null
+        }
         Returns: undefined
       }
       verify_distribution_platform: {
@@ -13545,6 +13779,7 @@ export type Database = {
       }
       create_master_transmission: {
         Args: {
+          p_derogations?: Json
           p_expires_at: string
           p_note: string
           p_package: Json
@@ -13606,6 +13841,7 @@ export type Database = {
           p_approve: boolean
           p_comment?: string
           p_dimensions?: string[]
+          p_requests?: Json
           p_validation_id: string
         }
         Returns: undefined
@@ -13986,7 +14222,12 @@ export type Database = {
         Returns: undefined
       }
       open_master_delivery: {
-        Args: { p_extension: string | null; p_master_id: string; p_token: string }
+        Args: {
+          p_extension: string
+          p_file_name?: string
+          p_master_id: string
+          p_token: string
+        }
         Returns: string
       }
       person_has_permission: {
@@ -14161,6 +14402,7 @@ export type Database = {
       }
       record_master_delivery: {
         Args: {
+          p_bytes?: number
           p_file_name: string
           p_mime: string
           p_path: string
@@ -14256,7 +14498,7 @@ export type Database = {
         Returns: string
       }
       send_framing_brief: {
-        Args: { p_brief_id: string; p_note?: string }
+        Args: { p_brief_id: string; p_note?: string; p_unchanged_reason?: string }
         Returns: string
       }
       send_mix_feedback: { Args: { p_version_id: string }; Returns: undefined }
@@ -14570,6 +14812,10 @@ export type Database = {
         Args: {
           p_sheet_id: string
         }
+        Returns: undefined
+      }
+      withdraw_framing_brief_request: {
+        Args: { p_reason: string; p_request_id: string }
         Returns: undefined
       }
       workflow_is_launched: {

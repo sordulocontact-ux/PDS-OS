@@ -5,25 +5,41 @@ import { IconVolumeUp } from "nucleo-sharp-essential";
 import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
+import { Button } from "@/components/ui/button";
 import { FileDropZone } from "@/components/ui/file-drop-zone";
+import { useObjectUrl } from "@/components/ui/use-object-url";
 import {
   AUDIO_ACCEPT,
   fileExtension,
+  formatFileSize,
   isAudioFile,
   MAX_FILE_BYTES,
 } from "@/lib/catalog/file-rules";
 import { fr } from "@/lib/i18n/fr";
+import {
+  DELIVERY_EXTENSIONS,
+  deliveryNameOk,
+} from "@/lib/master-workflow/delivery-rules";
 import {
   openMasterDelivery,
   recordMasterDelivery,
 } from "@/lib/master-workflow/transmission-public-actions";
 import { createClient } from "@/lib/supabase/client";
 
+const timeFormat = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/Paris",
+});
+
 /**
- * « Déposer ma version », on the engineer's page, for one title: the
- * database opens a one-time path, the browser uploads the file there, then
- * the database records it as the title's new version (UX test of
- * 09/10/2026: the project's owner re-entered every file).
+ * « Déposer ma version », on the engineer's page, for one title. Choosing a
+ * file never sends it (PROJ-BUG-09): the file waits in a confirmation step
+ * (name, size, format, listening, « Remplacer »), and only « Confirmer
+ * l'envoi » uploads it. The database then checks that the stored file has
+ * the confirmed size, and the page says what the label received.
  */
 export function DeliverVersion({
   token,
@@ -36,17 +52,36 @@ export function DeliverVersion({
 }) {
   const t = fr.masterWorkflow.publicPackage.deliver;
   const router = useRouter();
+  const [chosen, setChosen] = useState<File | null>(null);
+  const preview = useObjectUrl(chosen);
   const [message, setMessage] = useState<{
     kind: "error" | "info";
     text: string;
   } | null>(null);
   const [pending, startTransition] = useTransition();
 
+  // The precise reason, before anything is sent (PROJ-BUG-08).
+  function choose(file: File) {
+    const extension = fileExtension(file.name);
+    const refusal = !isAudioFile(file)
+      ? t.notAudio
+      : !extension || !DELIVERY_EXTENSIONS.includes(extension)
+        ? t.errors.invalid_extension
+        : !deliveryNameOk(file.name)
+          ? t.errors.invalid_file_name
+          : file.size > MAX_FILE_BYTES
+            ? t.tooLarge
+            : null;
+    if (refusal) {
+      setChosen(null);
+      setMessage({ kind: "error", text: refusal });
+      return;
+    }
+    setMessage(null);
+    setChosen(file);
+  }
+
   function send(file: File) {
-    if (!isAudioFile(file))
-      return setMessage({ kind: "error", text: t.notAudio });
-    if (file.size > MAX_FILE_BYTES)
-      return setMessage({ kind: "error", text: t.tooLarge });
     setMessage(null);
     startTransition(async () => {
       const slot = await openMasterDelivery(token, masterId, file.name);
@@ -67,24 +102,77 @@ export function DeliverVersion({
         slot.path,
         file.name,
         mime,
+        file.size,
       );
       if (!recorded.ok)
         return setMessage({ kind: "error", text: recorded.error });
-      setMessage({ kind: "info", text: t.done(file.name) });
+      setChosen(null);
+      setMessage({
+        kind: "info",
+        text: t.received(
+          file.name,
+          formatFileSize(file.size),
+          timeFormat.format(new Date()),
+        ),
+      });
       router.refresh();
     });
   }
 
   return (
     <div className="flex flex-col gap-2" aria-busy={pending || undefined}>
-      <FileDropZone
-        label={pending ? t.pending : t.title}
-        hint={t.hint[role]}
-        accept={AUDIO_ACCEPT}
-        icon={IconVolumeUp}
-        disabled={pending}
-        onFiles={([file]) => file && send(file)}
-      />
+      {chosen ? (
+        <div className="flex flex-col gap-3 rounded-2xl border border-border p-4">
+          <p className="text-sm font-medium">{t.confirmTitle}</p>
+          <p className="text-sm break-words">
+            {chosen.name}
+            <span className="text-[color:var(--text-secondary)]">
+              {" "}
+              · {formatFileSize(chosen.size)} ·{" "}
+              {(fileExtension(chosen.name) ?? "").toUpperCase()}
+            </span>
+          </p>
+          {preview && (
+            <audio
+              controls
+              preload="metadata"
+              src={preview}
+              aria-label={t.listen(chosen.name)}
+              className="h-9 w-full"
+            />
+          )}
+          <p className="text-caption text-[color:var(--text-secondary)]">
+            {t.confirmHint[role]}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              disabled={pending}
+              aria-busy={pending || undefined}
+              onClick={() => send(chosen)}
+            >
+              {pending ? t.pending : t.confirm}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={pending}
+              onClick={() => setChosen(null)}
+            >
+              {t.replace}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <FileDropZone
+          label={t.title}
+          hint={t.hint[role]}
+          accept={AUDIO_ACCEPT}
+          icon={IconVolumeUp}
+          disabled={pending}
+          onFiles={([file]) => file && choose(file)}
+        />
+      )}
       {message && <FormMessage kind={message.kind}>{message.text}</FormMessage>}
     </div>
   );

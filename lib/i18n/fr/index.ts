@@ -13,6 +13,7 @@ import { artistActivity } from "./artist-activity";
 import { assistant } from "./assistant";
 import { assistantRecords } from "./assistant-records";
 import { auth } from "./auth";
+import { briefRequests } from "./brief-requests";
 import { budget } from "./budget";
 import { calls } from "./calls";
 import { catalog } from "./catalog";
@@ -46,6 +47,7 @@ import { masterWorkflow } from "./master-workflow";
 import { network } from "./network";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
+import { planSteps } from "./plan-steps";
 import { projectPlan } from "./project-plan";
 import { projectWork } from "./project-work";
 import { records } from "./records";
@@ -94,6 +96,8 @@ export const fr = {
   framing,
   framingGuide,
   framingIntel,
+  briefRequests,
+  planSteps,
   strategy,
   strategyEntry,
   strategyDispositif,

@@ -61,3 +61,55 @@ export function calendarInOrder(
   ].filter((date): date is string => Boolean(date));
   return given.every((date, index) => index === 0 || given[index - 1] <= date);
 }
+
+const ORDER: readonly BriefDate[] = [
+  "mixV1Due",
+  "mixFinalDue",
+  "masteringDue",
+  "masterFinalDue",
+];
+
+/**
+ * Each date that comes before the one it should follow, with that one
+ * (PROJ-BUG-07): the same rule as calendarInOrder and the database, said on
+ * the field itself, in the form as on the server.
+ */
+export function calendarOrderErrors(
+  dates: Record<BriefDate, string | null>,
+): Partial<Record<BriefDate, BriefDate>> {
+  const errors: Partial<Record<BriefDate, BriefDate>> = {};
+  let previous: BriefDate | null = null;
+  for (const field of ORDER) {
+    const date = dates[field];
+    if (!date) continue;
+    if (previous && dates[previous]! > date) errors[field] = previous;
+    else previous = field;
+  }
+  return errors;
+}
+
+export type DateWarning =
+  | { kind: "past"; field: BriefDate }
+  | { kind: "after_release"; field: BriefDate };
+
+/**
+ * What does not hold in the dates before a sending (PROJ-BUG-07): a date
+ * of the stage already past, a date after the planned release.
+ */
+export function dateWarnings(
+  dates: Record<BriefDate, string | null>,
+  today: string,
+  releaseDue: string | null,
+  role: "mix" | "mastering",
+): DateWarning[] {
+  const fields: BriefDate[] =
+    role === "mix" ? ORDER.slice() : ["masteringDue", "masterFinalDue"];
+  return fields.flatMap((field): DateWarning[] => {
+    const date = dates[field];
+    if (!date) return [];
+    if (date < today) return [{ kind: "past", field }];
+    if (releaseDue && date > releaseDue)
+      return [{ kind: "after_release", field }];
+    return [];
+  });
+}

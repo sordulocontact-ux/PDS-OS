@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { toast } from "sonner";
 
+import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -54,8 +54,8 @@ export function MixDecision({
         note,
       );
       if (!result.ok) {
+        // Kept in the dialog that asked (a toast under a modal goes unseen).
         setError(result.error);
-        if (decision === "changes_requested") toast.error(result.error);
         return;
       }
       setDialog(null);
@@ -79,6 +79,9 @@ export function MixDecision({
         {version.decisionNote && (
           <p className="text-sm whitespace-pre-wrap">{version.decisionNote}</p>
         )}
+        <p className="text-caption text-[color:var(--text-secondary)]">
+          {t.engineerSees}
+        </p>
       </div>
     );
   if (finalNumber !== null && version.number > finalNumber)
@@ -131,10 +134,18 @@ export function MixDecision({
           <TextareaField
             name="note"
             label={t.requestNote}
-            hint={t.requestNoteHint}
+            hint={
+              version.feedbackSentAt
+                ? t.requestNoteComplement
+                : version.feedbackSummary
+                  ? t.requestNoteSaved
+                  : t.requestNoteRequired
+            }
             rows={3}
             maxLength={2000}
+            required={!version.feedbackSentAt && !version.feedbackSummary}
           />
+          {error && <FormMessage kind="error">{error}</FormMessage>}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               type="button"

@@ -1,6 +1,7 @@
 import { IconPlus } from "nucleo-sharp-essential";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { MasterActions } from "@/components/catalog/master-actions";
 import { MasterTabs } from "@/components/catalog/master-page/master-tabs";
@@ -8,6 +9,7 @@ import { AudioStateBadge } from "@/components/catalog/title/audio-state-badge";
 import { BackLink } from "@/components/shell/back-link";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
+import { ReturnBanner } from "@/components/shell/return-banner";
 import { buttonVariants } from "@/components/ui/button";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -36,6 +38,9 @@ export default async function MasterLayout({
   return (
     <PageContainer className="max-w-6xl">
       <BackLink href={routes.masters}>{t.back}</BackLink>
+      <Suspense fallback={null}>
+        <ReturnBanner scope={master.id} />
+      </Suspense>
       <PageHeader
         title={master.title}
         badge={

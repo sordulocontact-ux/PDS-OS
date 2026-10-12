@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { FramingDictation } from "@/components/framing/framing-dictation";
@@ -43,6 +44,13 @@ import {
   type Dimension,
 } from "@/lib/framing/dimensions";
 import type { HelpSuggestion } from "@/lib/framing/help";
+import {
+  isOpenRequest,
+  requestAnchor,
+  requestHref,
+  requestsAt,
+} from "@/lib/framing/brief-request-view";
+import { loadBriefRequests } from "@/lib/framing/brief-requests";
 import { framingStarted, loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { isFramingOpen } from "@/lib/framing/queries";
 import { fr } from "@/lib/i18n/fr";
@@ -72,8 +80,14 @@ export default async function FramingPage({
     isFramingOpen(projectId),
   ]);
   const canEdit = canEditProject(access, project);
-  const k = await loadFramingKnowledge(projectId, access);
+  const [k, loadedRequests] = await Promise.all([
+    loadFramingKnowledge(projectId, access),
+    loadBriefRequests(projectId),
+  ]);
   if (!k) notFound();
+  // The validator's requests still open (PROJ-UX-06): each one opens its
+  // question, and the question says what was asked.
+  const openRequests = (loadedRequests ?? []).filter(isOpenRequest);
   const assessment = assessFraming(k);
   const sheet = callSheetData(k, assessment);
 
@@ -403,8 +417,28 @@ export default async function FramingPage({
       }
     })();
 
+    const asking = question
+      ? [
+          ...requestsAt(openRequests, view, question.key),
+          ...requestsAt(openRequests, view, null),
+        ]
+      : [];
     screen = (
       <div className="flex min-w-0 flex-col gap-8">
+        {asking.length > 0 && (
+          <ToneCallout tone="warning">
+            <span className="flex flex-col gap-1">
+              <span className="font-semibold">
+                {fr.briefRequests.atQuestion}
+              </span>
+              {asking.map((r) => (
+                <span key={r.id} className="whitespace-pre-line">
+                  {r.body}
+                </span>
+              ))}
+            </span>
+          </ToneCallout>
+        )}
         {question ? (
           <QuestionScreen
             key={`${question.key}-${question.status}-${question.display ?? ""}`}
@@ -470,13 +504,41 @@ export default async function FramingPage({
   );
   return (
     <div className="flex flex-col gap-5">
-      {reopened && request?.change_comment && (
-        <ToneCallout tone="warning">
-          {t.guide.correction(
-            request.change_comment,
-            reopened.map((d) => t.dimensions[d as Dimension]).join(", "),
-          )}
-        </ToneCallout>
+      {openRequests.length > 0 ? (
+        <div className="flex flex-col gap-2 rounded-2xl bg-[var(--tone-warning-bg)] px-4 py-3 text-body-md font-medium text-[color:var(--tone-warning-fg)]">
+          <p className="font-semibold">
+            {fr.briefRequests.callout(openRequests.length)}
+          </p>
+          <ul className="flex flex-col gap-1">
+            {openRequests.map((r) => (
+              <li key={r.id} className="break-words">
+                <Link
+                  href={requestHref(projectId, r)}
+                  className="underline underline-offset-4"
+                >
+                  {requestAnchor(r)}
+                </Link>{" "}
+                : {r.body}
+              </li>
+            ))}
+          </ul>
+          <Link
+            href={`${routes.projectFramingBrief(projectId)}#demandes`}
+            className="self-start underline underline-offset-4"
+          >
+            {fr.briefRequests.seeAll}
+          </Link>
+        </div>
+      ) : (
+        reopened &&
+        request?.change_comment && (
+          <ToneCallout tone="warning">
+            {t.guide.correction(
+              request.change_comment,
+              reopened.map((d) => t.dimensions[d as Dimension]).join(", "),
+            )}
+          </ToneCallout>
+        )
       )}
       {working && !reopened ? (
         // The dictation's button sits on the progress row, its panel below.

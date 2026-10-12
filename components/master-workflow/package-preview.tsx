@@ -49,21 +49,14 @@ export function PackagePreview({ view }: { view: StepView }) {
                   .join(" · ")
               : null,
           },
-          ...(view.role === "mix"
-            ? [
-                { label: p.mixV1Due, value: date(brief?.dates.mixV1Due) },
-                { label: p.mixFinalDue, value: date(brief?.dates.mixFinalDue) },
-              ]
-            : [
-                {
-                  label: p.masteringDue,
-                  value: date(brief?.dates.masteringDue),
-                },
-                {
-                  label: p.masterFinalDue,
-                  value: date(brief?.dates.masterFinalDue),
-                },
-              ]),
+          // Every date of the Brief leaves, each with its meaning
+          // (PROJ-BUG-07), and the planned release.
+          { label: p.mixV1Due, value: date(brief?.dates.mixV1Due) },
+          { label: p.mixFinalDue, value: date(brief?.dates.mixFinalDue) },
+          { label: p.masteringDue, value: date(brief?.dates.masteringDue) },
+          { label: p.masterFinalDue, value: date(brief?.dates.masterFinalDue) },
+          { label: p.releaseDue, value: date(view.releaseDue) },
+          { label: p.formats, value: brief?.formats ?? null },
           {
             label: p.revisions,
             value: brief?.revisions == null ? null : String(brief.revisions),

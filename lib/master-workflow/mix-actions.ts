@@ -23,15 +23,25 @@ function refresh(projectId: string) {
   revalidatePath(routes.projectMasterStep(projectId, "mix"));
 }
 
-/** A comment of a member who sees the project (RLS). */
+/**
+ * A comment of a member who sees the project (RLS), with its timecode. The
+ * browser's key makes it idempotent (PROJ-BUG-08): a request sent twice
+ * adds the comment once, the second answer is a success.
+ */
 export async function addMixComment(
   projectId: string,
   versionId: string,
   body: string,
+  timecodeSeconds: number | null,
+  clientKey: string,
 ): Promise<MixResult> {
   const input = ids
-    .extend({ body: z.string().trim().min(1).max(2000) })
-    .safeParse({ projectId, versionId, body });
+    .extend({
+      body: z.string().trim().min(1).max(2000),
+      timecodeSeconds: z.number().int().min(0).max(86399).nullable(),
+      clientKey: z.uuid(),
+    })
+    .safeParse({ projectId, versionId, body, timecodeSeconds, clientKey });
   const access = await requireApproved();
   if (!input.success || !access.organizationId)
     return { ok: false, error: t.comment };
@@ -41,7 +51,13 @@ export async function addMixComment(
     project_id: input.data.projectId,
     version_id: input.data.versionId,
     body: input.data.body,
+    timecode_seconds: input.data.timecodeSeconds,
+    client_key: input.data.clientKey,
   });
+  if (error?.code === "23505") {
+    refresh(input.data.projectId);
+    return { ok: true };
+  }
   if (error) {
     console.error("addMixComment:", error.code, error.message);
     return {
@@ -215,9 +231,12 @@ export async function decideMixVersion(
   });
   if (error) {
     console.error("decideMixVersion:", error.code, error.message);
-    const known = ["already_decided", "not_latest", "already_final"].find(
-      (code) => error.message.includes(code),
-    );
+    const known = [
+      "already_decided",
+      "not_latest",
+      "already_final",
+      "note_required",
+    ].find((code) => error.message.includes(code));
     return {
       ok: false,
       error:
@@ -229,5 +248,52 @@ export async function decideMixVersion(
     };
   }
   refresh(input.data.projectId);
+  return { ok: true };
+}
+
+/**
+ * « Utiliser ce mix comme mix final » (PROJ-BUG-06): an existing « Mix »
+ * file of the Catalogue becomes the title's Mix final, once, without a new
+ * mixing round; the database checks the owner, the file and that the title
+ * has no Mix final yet (declare_mix_final).
+ */
+export async function declareMixFinal(
+  projectId: string,
+  masterId: string,
+  fileId: string,
+  note: string,
+): Promise<MixResult> {
+  const input = z
+    .object({
+      projectId: z.uuid(),
+      masterId: z.uuid(),
+      fileId: z.uuid(),
+      note: z.string().trim().max(2000),
+    })
+    .safeParse({ projectId, masterId, fileId, note });
+  await requireApproved();
+  if (!input.success) return { ok: false, error: t.decide };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("declare_mix_final", {
+    p_project_id: input.data.projectId,
+    p_master_id: input.data.masterId,
+    p_file_id: input.data.fileId,
+    p_note: input.data.note || undefined,
+  });
+  if (error) {
+    console.error("declareMixFinal:", error.code, error.message);
+    return {
+      ok: false,
+      error:
+        error.code === "42501"
+          ? t.forbidden
+          : error.message.includes("already_final")
+            ? t.decisionRefused.already_final
+            : error.message.includes("already_a_version")
+              ? t.alreadyVersion
+              : t.decide,
+    };
+  }
+  revalidatePath(routes.projectMaster(input.data.projectId), "layout");
   return { ok: true };
 }

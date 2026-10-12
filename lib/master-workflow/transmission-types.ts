@@ -30,23 +30,38 @@ export const masterPackageSchema = z.object({
   // Worded ("Mix final", "Instrumental").
   deliverables: z.array(z.string()),
   revisions: z.number().nullable(),
+  // Every date of the Brief, each with its meaning (PROJ-BUG-07), and the
+  // project's planned release; never merged into one.
   mixV1Due: z.string().nullable().default(null),
   mixFinalDue: z.string().nullable().default(null),
   masteringDue: z.string().nullable().default(null),
   masterFinalDue: z.string().nullable().default(null),
+  releaseDue: z.string().nullable().default(null),
+  // « Livrables et formats » and the formats asked (PROJ-UX-08).
+  formats: z.string().nullable().default(null),
 });
 export type MasterPackage = z.infer<typeof masterPackageSchema>;
 
 /** A sending to the mix engineer, as the follow-up lists it. */
 export type TransmissionRow = {
   id: string;
+  // When the link was created (« Créé »).
   sentAt: string;
   sentBy: string | null;
   engineer: string;
   note: string | null;
+  // PROJ-UX-09: each step of the link's life, apart and dated.
+  linkSentAt: string | null;
+  openedAt: string | null;
   acknowledgedAt: string | null;
+  deliveredAt: string | null;
   revokedAt: string | null;
+  revokeReason: string | null;
   expiresAt: string;
+  // Titles sent without stems, on purpose.
+  withoutStems: string[];
+  // Added to the mix link of the same engineer (PROJ-BUG-09).
+  continued: boolean;
 };
 
 // Without an answer this long after a sending, it is time to remind
@@ -60,6 +75,7 @@ export const TRANSMISSION_STATES = [
   "to_remind",
   "expired",
   "replaced",
+  "revoked",
 ] as const;
 export type TransmissionState = (typeof TRANSMISSION_STATES)[number];
 
@@ -69,13 +85,21 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export function transmissionState(
   row: Pick<
     TransmissionRow,
-    "sentAt" | "acknowledgedAt" | "revokedAt" | "expiresAt"
+    "sentAt" | "acknowledgedAt" | "revokedAt" | "expiresAt" | "revokeReason"
   >,
   now: Date,
 ): TransmissionState {
+  if (row.revokedAt && row.revokeReason) return "revoked";
   if (row.acknowledgedAt) return "received";
   if (row.revokedAt) return "replaced";
   if (Date.parse(row.expiresAt) < now.getTime()) return "expired";
   const days = (now.getTime() - Date.parse(row.sentAt)) / DAY_MS;
   return days >= REMIND_AFTER_DAYS ? "to_remind" : "waiting";
 }
+
+// An open link this close to its end says so before it surprises anyone.
+export const EXPIRY_WARNING_DAYS = 3;
+
+/** Whole days left before a link expires (negative once expired). */
+export const daysLeft = (expiresAt: string, now: Date) =>
+  Math.floor((Date.parse(expiresAt) - now.getTime()) / DAY_MS);

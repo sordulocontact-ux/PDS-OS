@@ -384,6 +384,22 @@ Premier admin : `supabase/seed.sql` pose `admin@pds.test` en local. En productio
 
 ---
 
+### 2 septies bis. Liste des projets pilotable (retours du 11/10/2026, PROJ-UX-01)
+
+- Colonnes **Projet** (artiste en sous-ligne pour un projet musical) | **Responsable** (le
+  responsable du projet lancé, sinon la personne à qui il est transmis) | **Type** | **Échéance**
+  (`due_date`, « Non définie ») | **Statut** (administratif : Brouillon, Non transmis, Transmis à
+  accepter, Précision demandée, Refusé, En cours, Terminé, `adminStatus`) | **Phase** (où il en est
+  dans ses workflows, `phaseLabel` : jamais le vocabulaire musical pour un Contenu).
+- Onglets **Tous | Brouillons | Actifs | Archivés** (`ProjectsBrowser`) : Tous exclut les archives,
+  Brouillons = brouillons du formulaire + projets non transmis, Actifs = transmis, à accepter ou en
+  cours ; les compteurs sont **les lignes affichées**, filtres compris. Recherche sur projet,
+  artiste, responsable ; filtres **combinables** Type, Responsable, Statut, Échéance (dans les
+  30 jours, dépassée, non définie) ; onglet et filtres dans l'URL (`?vue=`, `?q=`, `?type=`,
+  `?responsable=`, `?statut=`, `?echeance=`), la liste étant déjà chargée (pas de requête de plus).
+  Décision prise sans le ticket : un projet refusé ou en précision demandée est « Actif » (il est
+  dans le circuit de transmission).
+
 ### 2 octies. Brouillon d'un nouveau projet (retour n°6)
 
 - **Problème** : un DG quitte « Nouveau projet » (pour créer le compte d'un chef de projet,
@@ -907,6 +923,48 @@ liste), est obligatoire ou non, accepte ou non « Rien à signaler » (`{"none":
   (`lib/master-workflow/framing-defaults.ts`, les crédits des titres d'abord) ; l'État des
   lieux du Juridique liste les réponses confirmées de la dimension 06.
 
+### Demandes de correction du Brief et versions (retours du 11/10/2026, PROJ-UX-06 et PROJ-BUG-05)
+
+Migration `…20261011500101_brief_requests_plan_steps.sql`, tests
+`brief-requests-plan-steps.test.sql`.
+
+- **Une demande = une ligne** (`framing_brief_requests`) : « Demander une modification » n'est plus
+  un commentaire et des dimensions cochées mais une liste (`BriefRequestForm`), chaque demande
+  ancrée à une dimension et, si elle en nomme une, une question (même dimension, vérifié en SQL),
+  obligatoire ou facultative. Les dimensions rouvertes en découlent ; le commentaire de la
+  validation reprend les demandes (historique inchangé). L'ancien appel (commentaire +
+  dimensions) marche toujours.
+- **Résoudre exige une modification ou une justification** : `resolve_framing_brief_request`
+  (responsable seul) compare la dernière version à celle de la demande sur ce qu'elle vise
+  (`framing_brief_answers`, mots et lignes, jamais les sources) : changé = « Corrigée » (la
+  version qui porte le changement est gardée), sinon justification écrite obligatoire
+  (« Justifiée »). Le valideur qui a demandé peut **lever** une demande avec sa raison
+  (« Levée », `withdraw_framing_brief_request`) : c'est la seule dérogation. Rien n'est effacé.
+- **Blocages** : `send_framing_brief` refuse tant qu'une demande obligatoire est ouverte
+  (`requests_open`) et refuse une version qui dit exactement ce que disait la dernière version
+  envoyée sans **dérogation écrite**, gardée sur la version (`unchanged_reason`, affichée dans
+  l'historique) ; `decide_framing_brief` refuse de valider avec une demande obligatoire ouverte.
+  Décision prise sans le ticket : une demande facultative ne bloque rien.
+- **Écrans** : page du Brief = demandes (onglets Ouvertes / Toutes, `?demandes=toutes`), chaque
+  demande avec son ancre (lien qui ouvre la question), auteur, date, version, statut, résolution ;
+  les demandes aussi **à leur place dans le document** ; « Comparer les versions »
+  (`BriefCompare`, par défaut avec la dernière version envoyée, `?comparer=n`) ; complétude
+  (`framingReadiness`) : « Cadrage complet » ≠ prérequis opérationnels satisfaits (éléments
+  Terminé ou Existe de la question Prérequis). Page du Cadrage : les demandes ouvertes en tête,
+  et sur la question visée. Les deux comptes lisent la même table (RLS : le projet ou le valideur).
+- **Export PDF** (PROJ-BUG-05, cause trouvée et vérifiée sur la trace du build) : les clés de
+  `outputFileTracingIncludes` sont des globs **picomatch** : `/api/projects/[projectId]/…` non
+  échappé y est une classe de caractères et ne correspondait à **aucune route**, si bien que le
+  binaire de `@sparticuz/chromium` n'a jamais été embarqué dans la fonction Vercel (et le
+  formulaire SACEM 725 non plus) ; avec pnpm, le chemin des fichiers doit en plus viser le dossier
+  réel `.pnpm/@sparticuz+chromium@*/…/bin/**`, pas le lien symbolique. `next.config.ts` échappe
+  les crochets (`routeGlob`) pour les cinq routes : le `.nft.json` de chaque route PDF contient
+  maintenant `bin/`. L'export suit la version affichée (`?version=n`, 404 si elle n'existe pas),
+  un PDF vide lève une erreur journalisée avec le projet et la version ; `PdfExportButton`
+  distingue génération (statut, session expirée) et téléchargement, ne sauvegarde rien qui ne
+  commence pas par `%PDF-` et ne révoque l'URL qu'après une minute (Safari annulait le
+  téléchargement).
+
 ### Dictée (bouton « Dicter » : Cadrage et Stratégie)
 
 Remplir ou modifier un formulaire d'étape à la voix. Commun à toutes les étapes ; une étape
@@ -1201,6 +1259,27 @@ Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `com
   plus de page `/plan`** (supprimée le 08/10/2026) ni de section « Plan du projet » dans
   `project-sections.ts` : `routes.projectPlan` = la Vue d'ensemble, ancre `#plan` (liens du
   Brief, du Travail et du workflow verrouillé). Un ancien lien vers `/plan` répond 404.
+- **Plan pilotable** (retours du 11/10/2026, PROJ-UX-07) : chaque étape a un **pilote**
+  (`owner_person_id`) et un **exécutant** distinct (`executor_person_id`, « le pilote » par
+  défaut), une **échéance** (proposée depuis l'échéance du Cadrage de son type :
+  master final → Master, livraison et sortie → Livraison, temps fort → Stratégie,
+  `framingDueDate`) et ses **dépendances** (liens vers ces étapes). Le **statut réel** est lu
+  dans le workflow (`stepStatus`, `lib/plan/steps.ts` ; Stratégie et Conception = chevrons du
+  Marketing), jamais stocké. Les **incohérences** sont dites sur l'étape (`stepIssues`) :
+  colonne qui contredit l'avancement, dépendance placée plus tard ou retirée, échéance après la
+  date cible ou avant celle d'une dépendance, blocage (dépendance des workflows, lien),
+  **« À revoir »** quand le Cadrage a changé depuis le Brief validé (dimensions → workflows
+  nourris, `workflowsToReview`). Avant le lancement : modifier (`PlanStepForm`), monter /
+  descendre, retirer, **ajouter une étape** (sans workflow, rien n'est lancé par elle), puis une
+  **revue** avant « Lancer le plan » (`PlanLaunchReview` : ce qui démarre, ce qui attend, ce qui
+  suit son étape, les ajouts, les retraits, le nombre d'incohérences). Après : « Étapes du plan »
+  sous la Vue d'ensemble (`PlanStepsSection`, onglets par statut), modifier / ajouter / déplacer
+  / marquer faite une étape ajoutée (`update_project_plan_item`, `add_project_plan_item`,
+  `move_project_plan_item`, `set_project_plan_item_done`, responsable seul), **historique du
+  plan** (`project_plan_events` : lancement, lancement d'un workflow, ajout, modification avec
+  avant / après, déplacement). « Lancer » d'une carte de workflow est confirmé (ce qui démarre,
+  le pilote) ; qui a lancé le plan est dit sous le titre. `LaunchedPlan` (jamais affiché depuis
+  le lot 4) supprimé. Déplacer une étape ne lance jamais rien.
 - **Le Juridique sur la Vue d'ensemble** : `LegalOverview` a été supprimé le 08/10/2026 (lot 4
   de l'architecture globale) ; le Juridique y est sa carte de workflow, ses actions (décisions
   et actions libres du Suivi, `summarizeTracking` et `trackPlan` inchangés) dans « À faire
@@ -2679,6 +2758,81 @@ lots, chacun utile seul.
   date du master final (échéance confirmée) (`framing-defaults.ts`). Le Master **se lance
   depuis le Plan du Projet** (§ 6 ter) : layout `master/` verrouillé tant que le plan ne l'a
   pas lancé, sauf s'il avait déjà commencé (Brief ou source confirmée).
+- **Un seul fil de retours avec l'ingénieur** (retours du 11/10/2026, PROJ-BUG-08, migration
+  `…20261011500201_mix_feedback_flow.sql`) : « Demander une modification » gardait une note que
+  l'ingénieur ne lisait jamais (sa page ne montrait que les synthèses envoyées) et obligeait à
+  écrire deux fois la même remarque. Désormais, pour une version sans rien de transmis, la
+  demande **envoie** la synthèse enregistrée ou, à défaut, sa note, qui **devient** le retour de
+  la version (écrite une fois, montrée une fois ; `note_required` si les deux manquent) ; si les
+  retours sont déjà partis, la note les **complète**. La page `/m/…` liste **chaque version** de
+  l'étape de l'ingénieur (`get_master_transmission` → `versions`) : état (En écoute, Retours
+  envoyés, Modification demandée, Mix / Master validé), retours, décision avec date et auteur,
+  étape suivante ; le Mix validé ne valide jamais le Master. Elle se **met à jour seule** toutes
+  les 30 s quand elle est au premier plan et le dit (`PublicRefresh` : page sans compte, donc
+  sans canal Realtime). Un retour de l'équipe porte son **minutage** et sa clé d'idempotence
+  (`client_key`, un envoi répété l'ajoute une fois) et dit s'il est parti dans les retours
+  transmis ; chaque version reste **écoutable et téléchargeable** (URL signées avec la session,
+  les règles du stockage décident). Le **dépôt** de l'ingénieur refuse un fichier dont le format
+  ou le nom n'est pas celui d'un fichier audio, avec un message précis
+  (`lib/master-workflow/delivery-rules.ts`, mêmes règles en SQL : `master_delivery_name_ok`).
+- **Brief et transmission lisibles** (retours du 11/10/2026, PROJ-UX-08 et PROJ-UX-09, migration
+  `…20261011500301_brief_transmission_ux.sql`) : la page du Brief dit **à quoi il sert et ce qu'il
+  produit** (le dossier de l'ingénieur), puis cinq sections : **Conditions de prestation**
+  (ingénieurs, tarifs, révisions, validateur), **Direction artistique**, **Livrables et formats**
+  (`delivery_formats`), **Dates**, **Message** (`engineer_message`, repris dans « Message pour le
+  mixeur » / « … l'ingénieur mastering » à la transmission, modifiable). « Enregistrer le Brief »
+  n'est actif qu'après une modification (`useFormDirty` compare le formulaire à ce qu'il montrait),
+  la dernière mise à jour (date, heure, auteur) est dite à côté, et un bloc **« Étape suivante :
+  transmettre le dossier »** dit ce qui manque encore (mêmes blocages que Mixage) et mène à Mixage ;
+  une fois le dossier parti, il prévient qu'une modification n'atteint l'ingénieur qu'avec un
+  nouvel envoi (décision : le Brief reste modifiable après la transmission, point à confirmer).
+  **Transmission** : une **revue avant l'envoi** (`TransmitReview` : destinataire et e-mail, sources
+  ou mix finals, stems, dates qui partent, ce que le lien ouvre, pour qui, jusqu'à quand, et que le
+  suivant désactive l'ancien) ; un titre sans stems ne part **qu'avec « Envoyer sans stems »**,
+  gardé sur l'envoi (`derogations.withoutStems`, vérifié en SQL : `stems_missing`). Le **suivi**
+  donne chaque étape du lien à part et datée : **créé**, **envoyé** (« J'ai envoyé le lien » :
+  PDS OS n'envoie aucun e-mail), **ouvert** (noté par la page `/m/…`, jamais pris pour une prise en
+  charge), **prise en charge confirmée** (action de l'ingénieur, inchangée), **fichier reçu**
+  (premier dépôt, `delivered_at` par trigger) ; l'expiration est dite, en alerte à 3 jours ;
+  **« Révoquer le lien »** avec sa raison (l'ingénieur lit « désactivé par le label ») ;
+  « Relancer » s'appelle **« Renouveler le lien »** (nouveau lien, l'ancien désactivé). Le lien
+  n'étant affiché qu'une fois (seul son empreinte est gardée), « Copier » n'existe qu'à la création.
+- **Dossier daté et continuité Mixage → Mastering** (retours du 11/10/2026, PROJ-BUG-07 et
+  PROJ-BUG-09, migration `…20261011500401_master_link_continuity.sql`) : le dossier de l'ingénieur
+  porte **toutes les dates du Brief** (Mix V1, Mix final, Mastering, Master final), la **sortie
+  prévue** du projet (`releaseDue`) et les formats, chacune avec son sens, jamais fusionnées ; la
+  revue avant l'envoi signale une date déjà passée ou postérieure à la sortie (`dateWarnings`). Une
+  date hors d'ordre est dite **sur le champ** qui casse l'ordre, dans le formulaire et au retour du
+  serveur (même règle : `calendarOrderErrors`), la saisie gardée. Le nom d'un contact du Réseau est
+  « Nom ou nom professionnel » : les nom et prénom civils restent demandés par la fiche de
+  renseignements seulement. **Même ingénieur** pour le mix et le mastering (même contact du Réseau,
+  jamais un nom semblable) et lien du mix vivant : « Transmettre au mastering » **ajoute le dossier
+  au même lien** (`continues_id`, aucun nouveau jeton, durée du lien prolongée), la page montre le
+  dossier de mastering et les versions des deux étapes ; un ingénieur **différent** reçoit son propre
+  lien, qui ne montre que les versions du mastering. Les dépôts et l'accusé de réception visent
+  l'envoi en cours du lien (`master_transmission_current`). « Message pour le mixeur » devient
+  « Message pour l'ingénieur mastering » au mastering. La revue liste **les fichiers qui partent**
+  (écoute, « Changer »). Côté ingénieur, **choisir n'est pas envoyer** : le fichier attend dans un
+  sas (nom, taille, format, écoute, « Remplacer »), « Confirmer l'envoi » le dépose, la base vérifie
+  que le fichier stocké a la taille confirmée (`file_mismatch`), et la page dit ce qui est arrivé et
+  quand.
+- **Partir de la source réelle, master final accessible** (retours du 11/10/2026, PROJ-BUG-06 et
+  PROJ-BUG-10, migration `…20261011500501_master_existing_mix_final.sql`, tests
+  `master-existing-mix.test.sql`) : l'étape Source commence par **« Où en est le mix de chaque
+  titre »** (`MixDiagnosis`, calculé dans `loadStepView`) : Mix à faire, Mix en cours, Mix terminé,
+  Master final déjà là ; un **mix déjà au Catalogue** (fichier « Mix » sans version du mixage)
+  peut être déclaré mix final par le responsable (`declare_mix_final` : une version du mixage
+  validée, même fichier, raison gardée), le titre passe alors au mastering **sans nouveau mixage
+  ni stems** ; un titre qui a son mix final ne repart plus dans le dossier du mixeur ; une
+  divergence Brief / crédits sur l'ingénieur du mix est signalée, jamais écrasée. **Master final** :
+  le fichier est **écoutable et téléchargeable** (URL signées, `AudioFile`), sa **filiation** est
+  dite (source confirmée → mix final V… → master final V…), « Rattaché au titre du Catalogue »
+  seulement quand le titre est réellement à l'état Master final, puis « Aller à la Distribution ».
+  La **Distribution** lit le même `loadFinalView` : le prérequis « Master final » porte le même
+  fichier à écouter et télécharger, sans import. Un prérequis du Catalogue (ISRC, crédits, ℗)
+  s'ouvre avec `?retour=` (`lib/ui/return-to.ts`, chemin de projet seulement) : la fiche du titre
+  affiche « Revenir au projet » (`ReturnBanner`, gardé pour l'onglet en `sessionStorage`, aide de
+  navigation, jamais une donnée métier) et « Modifier » ramène à la Préparation une fois enregistré.
 - **Pas encore là** : la brique Distribution n'existe pas, ses exigences ne sont pas codées
   en dur (ticket § 14). Le
   Budget à quatre états (Estimé / Proposé / Engagé / Payé) étendra `budget_lines` au lot

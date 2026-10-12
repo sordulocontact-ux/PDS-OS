@@ -1,9 +1,48 @@
+import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  requestsAt,
+  type BriefRequest,
+} from "@/lib/framing/brief-request-view";
 import {
   summaryGroups,
   type BriefSnapshot,
 } from "@/lib/framing/brief-snapshot";
-import { DIMENSIONS } from "@/lib/framing/dimensions";
+import {
+  DIMENSIONS,
+  isQuestionKey,
+  type Dimension,
+} from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
+import { briefRequestTone } from "@/lib/ui/state-tones";
+
+/** The validator's requests where they point, in the document itself. */
+function RequestNotes({ requests }: { requests: BriefRequest[] }) {
+  const t = fr.briefRequests;
+  if (requests.length === 0) return null;
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {requests.map((r) => {
+        const state = r.resolution ?? "open";
+        return (
+          <li
+            key={r.id}
+            className="flex flex-col gap-1 rounded-xl bg-[var(--surface-soft)] px-3 py-2"
+          >
+            <span className="flex flex-wrap items-center gap-2 text-caption text-muted-foreground">
+              {t.atQuestion}
+              <StatusBadge tone={briefRequestTone[state]} size="sm">
+                {t.states[state]}
+              </StatusBadge>
+            </span>
+            <span className="text-body-md break-words whitespace-pre-line">
+              {r.body}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 /**
  * A version of the Brief de cadrage, read as one document: the six
@@ -13,10 +52,15 @@ import { fr } from "@/lib/i18n/fr";
 export function BriefDocument({
   snapshot,
   eyebrow,
+  requests = [],
 }: {
   snapshot: BriefSnapshot;
   eyebrow: React.ReactNode;
+  // Shown where they point (PROJ-UX-06).
+  requests?: BriefRequest[];
 }) {
+  const at = (dimension: Dimension, key: string | null) =>
+    requestsAt(requests, dimension, key && isQuestionKey(key) ? key : null);
   const t = fr.framingIntel;
   const groups = summaryGroups(snapshot);
   return (
@@ -77,6 +121,7 @@ export function BriefDocument({
             >
               {t.dimensionNumber(index)} {t.dimensions[dimension]}
             </h3>
+            <RequestNotes requests={at(dimension, null)} />
             <dl className="grid gap-x-10 gap-y-5 md:grid-cols-2">
               {d.facts.map((fact) => (
                 <div key={fact.label} className="flex flex-col gap-1">
@@ -118,6 +163,9 @@ export function BriefDocument({
                       <span className="text-caption text-muted-foreground">
                         {item.source}
                       </span>
+                    )}
+                    {isQuestionKey(item.key) && (
+                      <RequestNotes requests={at(dimension, item.key)} />
                     )}
                   </dd>
                 </div>

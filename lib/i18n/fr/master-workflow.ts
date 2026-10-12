@@ -43,6 +43,35 @@ export const masterWorkflow = {
         `S'ouvre quand chaque titre a son mix final (${done} sur ${total} pour l'instant).`,
     },
   },
+  // Where each title stands for its mix (PROJ-BUG-06).
+  diagnosis: {
+    title: "Où en est le mix de chaque titre",
+    description:
+      "Le parcours s'adapte à la source réelle : un titre déjà mixé passe directement au mastering, sans nouveau mixage ni pistes séparées.",
+    states: {
+      todo: "Mix à faire",
+      running: "Mix en cours",
+      done: "Mix terminé",
+      master_final: "Master final déjà là",
+    },
+    next: {
+      todo: "Le mix part au mixeur avec le dossier du Mixage.",
+      running: "Les versions arrivent dans le Mixage, le validateur décide.",
+      done: "Le mix final est là : ce titre passe au mastering.",
+      master_final: "Rien à mixer ni à masteriser pour ce titre.",
+    },
+    existing: (fileName: string) =>
+      `Un mix existe déjà au Catalogue (« ${fileName} ») : s'il est final, le titre peut passer au mastering sans nouveau mixage.`,
+    divergence: (brief: string, catalogue: string) =>
+      `Le Brief confie le mix à ${brief}, le Catalogue crédite ${catalogue} : vérifiez avant d'envoyer (rien n'est remplacé).`,
+    declare: "Utiliser ce mix comme mix final",
+    declareTitle: (title: string) =>
+      `Utiliser ce mix comme mix final de « ${title} » ?`,
+    declareBody: (fileName: string) =>
+      `« ${fileName} » devient le mix final du titre, définitivement : le mastering partira de ce fichier, sans copie. Le mix n'est pas envoyé au mixeur.`,
+    declareNote: "Pourquoi (facultatif)",
+    declared: "Mix final enregistré : le titre passe au mastering.",
+  },
   // At the top of the Source step (lib/ui/master-steps.ts): where the
   // preparation of the mix stands.
   prepare: {
@@ -100,25 +129,51 @@ export const masterWorkflow = {
     submitting: "Enregistrement…",
     savedToast: "Brief enregistré.",
     none: "Pas encore choisi",
+    // What the Brief is for and what comes out of it (PROJ-UX-08).
+    purpose:
+      "Le Brief dit à l'ingénieur du mix puis à celui du mastering ce qu'on attend d'eux. Résultat attendu : le dossier qu'ils recevront par leur lien privé, avec la direction, les conditions, les livrables, les dates et votre message.",
+    savedAt: (date: string, by: string | null) =>
+      by ? `Enregistré le ${date} par ${by}` : `Enregistré le ${date}`,
+    unchanged: "Aucune modification à enregistrer.",
+    orderError: (after: string) =>
+      `Cette date tombe avant « ${after} » : les échéances vont dans l'ordre (Mix V1, Mix final, Mastering, Master final).`,
+    dirty: "Modifications non enregistrées.",
+    next: {
+      title: "Étape suivante : transmettre le dossier",
+      body: "Le dossier se transmet depuis Mixage : vous le relisez, puis un lien privé est créé pour l'ingénieur.",
+      ready: "Tout ce qu'il faut pour transmettre est là.",
+      missing: "Avant de transmettre :",
+      action: "Aller à Mixage",
+      sentAlready: (date: string) =>
+        `Le dossier est parti le ${date} : une modification du Brief n'atteint l'ingénieur qu'avec un nouvel envoi (« Renvoyer le dossier » dans Mixage).`,
+    },
     sections: {
       sources: {
         title: "Source",
         description: "La version de chaque titre, sa session et ses pistes.",
       },
-      mix: {
-        title: "Mix",
-      },
-      mastering: {
-        title: "Mastering",
+      conditions: {
+        title: "Conditions de prestation",
+        description:
+          "Qui fait le mix et le mastering, à quel tarif estimé, combien d'allers-retours, et qui valide les versions.",
       },
       direction: {
         title: "Direction artistique",
+        description: "Ce que le mix doit faire entendre.",
       },
       deliverables: {
-        title: "Livrables",
+        title: "Livrables et formats",
+        description: "Ce que l'ingénieur rend, et sous quelle forme.",
       },
       calendar: {
-        title: "Calendrier",
+        title: "Dates",
+        description:
+          "Les échéances, dans l'ordre : elles partent telles quelles dans le dossier de l'ingénieur.",
+      },
+      message: {
+        title: "Message",
+        description:
+          "Affiché en tête du dossier ; repris quand vous transmettez, modifiable à ce moment-là.",
       },
     },
     fields: {
@@ -140,6 +195,11 @@ export const masterWorkflow = {
       direction: "Direction",
       constraints: "Contraintes",
       deliverables: "Livrables",
+      formats: "Formats de livraison",
+      formatsHint:
+        "Par exemple : WAV 24 bits / 48 kHz, -14 LUFS, un fichier par titre.",
+      message: "Message pour les ingénieurs",
+      messageHint: "Ce que vous voulez leur dire en ouvrant le dossier.",
       mixV1Due: "Mix V1",
       mixFinalDue: "Mix final",
       masteringDue: "Mastering",
@@ -279,6 +339,8 @@ export const masterWorkflow = {
       mixFinalDue: "Mix final attendu le",
       masteringDue: "Mastering attendu le",
       masterFinalDue: "Master final attendu le",
+      releaseDue: "Sortie prévue le",
+      formats: "Formats de livraison",
       none: "Non renseigné",
       notSent: "Les tarifs restent internes : ils ne sont pas dans le dossier.",
     },
@@ -291,6 +353,8 @@ export const masterWorkflow = {
         `Le mix final de « ${title} » n'est pas encore validé.`,
       noTitle:
         "Tous les titres du projet ont déjà leur master final : il n'y a rien à mixer.",
+      allMixed:
+        "Chaque titre a déjà son mix final : rien à envoyer au mixeur, le mastering peut commencer.",
       source: (title: string) =>
         `Confirmez la source de « ${title} » sur l'État du master.`,
     },
@@ -303,7 +367,7 @@ export const masterWorkflow = {
       "Un lien privé donne accès au dossier et à ses fichiers, sans compte, et permet à l'ingénieur de déposer ses versions. Il reste valable 14 jours après la date finale prévue au Brief (30 jours au moins). Il n'est affiché qu'une fois : copiez-le ou envoyez-le tout de suite.",
     modes: {
       remind: {
-        label: "Relancer",
+        label: "Renouveler le lien",
         title: "Relancer l'ingénieur",
         description:
           "Un nouveau lien remplace le précédent et renouvelle les fichiers, jusqu'à 14 jours après la date finale prévue au Brief (30 jours au moins). Il n'est affiché qu'une fois.",
@@ -315,8 +379,7 @@ export const masterWorkflow = {
           "Le dossier est recalculé tel qu'il est aujourd'hui (source, stems, Brief) et un nouveau lien remplace le précédent, jusqu'à 14 jours après la date finale prévue au Brief (30 jours au moins). Les retours déjà transmis y restent. Il n'est affiché qu'une fois.",
       },
     },
-    note: "Message pour le mixeur",
-    noteHint: "Affiché en tête du dossier.",
+    noteHint: "Affiché en tête du dossier. Repris du Brief, modifiable ici.",
     submit: "Créer le lien",
     submitting: "Création du lien…",
     cancel: "Annuler",
@@ -335,20 +398,104 @@ export const masterWorkflow = {
     close: "Fermer",
     history: {
       title: "Suivi",
-      description: "Chaque envoi, et ce que l'ingénieur en a fait.",
+      description:
+        "Chaque envoi par destinataire, et chaque étape du lien : créé, envoyé, ouvert, prise en charge, fichier reçu.",
       empty: "Rien n'a encore été transmis.",
       columns: { sentAt: "Envoyé le", to: "À", by: "Par", state: "État" },
+      sending: (n: number, to: string) => `Envoi ${n} · ${to}`,
+      lifeLabel: "Étapes du lien",
       states: {
         received: (date: string) => `Reçu le ${date}`,
         waiting: "En attente de confirmation",
         to_remind: "Sans réponse, à relancer",
         expired: "Lien expiré",
         replaced: "Remplacé par un nouvel envoi",
+        revoked: "Lien révoqué",
       },
     },
     errors: {
       forbidden: "Seul le chef de projet responsable transmet le dossier.",
       failed: "Le dossier n'a pas pu être créé. Réessayez.",
+      stemsMissing: (titles: string[]) =>
+        `Pas de pistes séparées pour ${titles.map((x) => `« ${x} »`).join(", ")} : cochez « Envoyer sans stems » pour transmettre quand même.`,
+    },
+    continued: (name: string) =>
+      `Le dossier de mastering est ajouté au lien déjà envoyé à ${name} : il le retrouve sur la même page, avec l'historique du mix.`,
+    // The review before sending and the life of a link (PROJ-UX-09).
+    review: {
+      sameLink: (name: string) =>
+        `${name} a fait le mix : le dossier s'ajoute à son lien actuel, aucun nouveau lien n'est créé.`,
+      otherLink:
+        "Un autre ingénieur que celui du mix : il reçoit un lien à lui, sans les échanges du mix.",
+      files: "Fichiers qui partent",
+      listen: (title: string) => `Écouter « ${title} »`,
+      change: "Changer",
+      datePast: (label: string, date: string) =>
+        `« ${label} » (${date}) est déjà passé : corrigez le Brief ou prévenez l'ingénieur.`,
+      dateAfterRelease: (label: string, release: string) =>
+        `« ${label} » tombe après la sortie prévue le ${release}.`,
+      title: "Avant d'envoyer",
+      engineer: (name: string, email: string | null) =>
+        email
+          ? `Destinataire : ${name} (${email})`
+          : `Destinataire : ${name}, sans e-mail connu : vous lui transmettrez le lien vous-même`,
+      sources: (n: number) =>
+        n === 1
+          ? "La source du titre est confirmée."
+          : `Les sources des ${n} titres sont confirmées.`,
+      finals: (n: number) =>
+        n === 1
+          ? "Le mix final du titre est validé."
+          : `Les mix finals des ${n} titres sont validés.`,
+      stemsOk: "Chaque titre a ses pistes séparées.",
+      stemsMissing: (titles: string[]) =>
+        `Sans pistes séparées : ${titles.join(", ")}.`,
+      withoutStems: "Envoyer sans stems pour ces titres",
+      withoutStemsHint:
+        "Le mix peut se faire sans stems : votre choix est gardé sur l'envoi.",
+      dates: (dates: string) => `Dates du dossier : ${dates}.`,
+      noDates: "Aucune date dans le Brief : l'ingénieur n'aura pas d'échéance.",
+      linkTitle: "Le lien privé",
+      linkScope:
+        "Il ouvre, sans compte, le dossier, ses fichiers à télécharger et le dépôt des versions. Seule la personne qui a le lien y accède : ne le transmettez qu'à l'ingénieur.",
+      linkExpiry: (date: string, days: number) =>
+        `Valable jusqu'au ${date} (${days} jours), fichiers compris.`,
+      linkPolicy:
+        "Il n'est affiché qu'une fois. Un nouvel envoi crée un nouveau lien et désactive aussitôt l'ancien.",
+    },
+    note: {
+      mix: "Message pour le mixeur",
+      mastering: "Message pour l'ingénieur mastering",
+    },
+    life: {
+      created: "Lien créé",
+      sent: "Lien envoyé",
+      opened: "Ouvert par l'ingénieur",
+      acknowledged: "Prise en charge confirmée",
+      delivered: "Fichier reçu",
+      notYet: "pas encore",
+      notSaid: "à confirmer",
+      by: (name: string | null) => (name ? ` par ${name}` : ""),
+      expires: (date: string, days: number) =>
+        days < 0
+          ? `Lien expiré le ${date}.`
+          : days === 0
+            ? `Le lien expire aujourd'hui (${date}) : renouvelez-le si l'ingénieur en a encore besoin.`
+            : `Le lien expire le ${date} (dans ${days} jour${days > 1 ? "s" : ""}).`,
+      revoked: (reason: string) => `Lien révoqué : ${reason}`,
+      continued: "Ajouté au lien du mix (même ingénieur).",
+      withoutStems: (titles: string[]) =>
+        `Envoyé sans stems pour ${titles.join(", ")}.`,
+      markSent: "J'ai envoyé le lien",
+      markedSent: "Envoi du lien noté.",
+      revoke: "Révoquer le lien",
+      revokeTitle: "Révoquer le lien",
+      revokeBody:
+        "Le lien ne fonctionnera plus, tout de suite. L'ingénieur verra que le label l'a désactivé. Pour lui en redonner un, utilisez « Renouveler ».",
+      revokeLabel: "Pourquoi vous le révoquez",
+      revoked_toast: "Lien révoqué.",
+      onlyOnce:
+        "Le lien n'est affiché qu'une fois, à sa création : pour le renvoyer, renouvelez-le (l'ancien est désactivé).",
     },
   },
   mastering: {
@@ -378,7 +525,17 @@ export const masterWorkflow = {
       engineer: "Ingénieur du mastering",
       validated: "Validé",
       catalogue: "État au Catalogue",
+      lineage: "Filiation",
     },
+    // PROJ-BUG-06 and PROJ-BUG-10.
+    attached: "Rattaché au titre du Catalogue (Master final), même fichier",
+    lineageSource: (file: string) => `Source confirmée : ${file}`,
+    lineageMix: (number: number, file: string) =>
+      `Mix final V${number} : ${file}`,
+    listen: (title: string) => `Écouter le master final de « ${title} »`,
+    nextDistribution:
+      "Étape suivante : la Distribution reprend ce même fichier, écoutable et téléchargeable, sans nouvel import.",
+    toDistribution: "Aller à la Distribution",
     version: (number: number, file: string) => `V${number} · ${file}`,
     validated: (date: string, by: string | null) =>
       by ? `le ${date} par ${by}` : `le ${date}`,
@@ -485,14 +642,34 @@ export const masterWorkflow = {
       noComment: "Il n'y a encore aucun retour à synthétiser.",
       propose: "PO n'a pas pu rédiger de synthèse. Réessayez ou écrivez-la.",
       decide: "La décision n'a pas pu être enregistrée. Réessayez.",
+      alreadyVersion:
+        "Ce fichier est déjà une version du mixage : il se valide dans le Mixage.",
       decisionRefused: {
         already_decided: "Cette version a déjà été tranchée.",
         not_latest:
           "Une version plus récente est arrivée : c'est elle qui se tranche.",
         already_final:
           "Ce titre a déjà sa version finale validée : elle ne change plus.",
+        note_required:
+          "Rien n'a encore été transmis à l'ingénieur pour cette version : écrivez ce qu'il faut changer, ce sera son retour.",
       },
     },
+    // One flow of feedback with the engineer (PROJ-BUG-08).
+    timecode: "Minutage",
+    timecodeHint: "Facultatif : « 1:23 » ou « 83 » secondes.",
+    timecodeInvalid: "Écrivez un minutage comme « 1:23 », ou laissez vide.",
+    at: (time: string) => `à ${time}`,
+    commentSent: "Transmis à l'ingénieur",
+    commentNotSent: "Pas encore transmis",
+    listen: (number: number) => `Écouter la V${number}`,
+    downloadVersion: "Télécharger",
+    engineerSees: "L'ingénieur voit cette décision sur sa page.",
+    requestNoteRequired:
+      "Rien n'est encore transmis pour cette version : ce texte sera le retour envoyé à l'ingénieur.",
+    requestNoteComplement:
+      "Les retours sont déjà transmis : ce texte les complète, l'ingénieur le voit à côté.",
+    requestNoteSaved:
+      "La synthèse enregistrée part à l'ingénieur avec la demande ; ce texte la complète si besoin.",
     decider: (name: string) => `Décision : ${name}`,
     approving: "Validation…",
     requestChange: "Demander une modification",
@@ -500,7 +677,7 @@ export const masterWorkflow = {
     requestDescription:
       "La version reste dans l'historique ; la suivante sera tranchée à son tour. Les retours de l'équipe passent par la synthèse.",
     requestNote: "Ce qu'il faut changer",
-    requestNoteHint: "Visible par l'équipe.",
+    requestNoteHint: "Visible par l'équipe et par l'ingénieur.",
     requestSubmit: "Demander la modification",
     cancel: "Annuler",
     close: "Fermer",
@@ -521,9 +698,60 @@ export const masterWorkflow = {
         `${engineer}, voici le dossier du mastering de « ${project} ».`,
     },
     from: "Message du label",
-    feedback: "Retours sur vos versions",
-    feedbackOf: (title: string, number: number, date: string) =>
-      `${title} · V${number} · ${date}`,
+    continued:
+      "Le label vous confie aussi le mastering : son dossier s'ajoute ici, au même lien, avec l'historique du mix.",
+    // One entry per version, written once (PROJ-BUG-08).
+    versions: {
+      title: "Vos versions",
+      heading: (title: string, number: number, date: string) =>
+        `${title} · V${number} · reçue le ${date}`,
+      states: {
+        mix: {
+          received: "En écoute",
+          feedback_sent: "Retours envoyés",
+          changes_requested: "Modification demandée",
+          approved: "Mix validé",
+        },
+        mastering: {
+          received: "En écoute",
+          feedback_sent: "Retours envoyés",
+          changes_requested: "Modification demandée",
+          approved: "Master validé",
+        },
+      },
+      feedbackSent: (date: string) => `Retours du label, le ${date} :`,
+      decided: {
+        mix: {
+          approved: (date: string, by: string | null) =>
+            by
+              ? `Mix final validé le ${date} par ${by}.`
+              : `Mix final validé le ${date}.`,
+          changes_requested: (date: string, by: string | null) =>
+            by
+              ? `Modification demandée le ${date} par ${by}.`
+              : `Modification demandée le ${date}.`,
+        },
+        mastering: {
+          approved: (date: string, by: string | null) =>
+            by
+              ? `Master final validé le ${date} par ${by}.`
+              : `Master final validé le ${date}.`,
+          changes_requested: (date: string, by: string | null) =>
+            by
+              ? `Modification demandée le ${date} par ${by}.`
+              : `Modification demandée le ${date}.`,
+        },
+      },
+      note: (text: string) => `Précision : ${text}`,
+      next: {
+        mix: "Étape suivante : le mastering, avec l'ingénieur qui en est chargé. Le mix validé ne valide pas le master.",
+        mastering:
+          "Étape suivante : le label prépare la livraison du master final.",
+      },
+      listening: "Le label écoute cette version : ses retours arriveront ici.",
+      refreshed: (time: string) =>
+        `Page à jour à ${time} : elle se met à jour toute seule toutes les 30 secondes.`,
+    },
     files: "Fichiers",
     download: "Télécharger",
     source: {
@@ -545,8 +773,18 @@ export const masterWorkflow = {
           "Glissez votre master ici, ou cliquez pour le choisir. Il arrive directement chez le label comme nouvelle version.",
       },
       pending: "Envoi…",
-      done: (fileName: string) =>
-        `« ${fileName} » est bien arrivé chez le label.`,
+      // Choosing is not sending (PROJ-BUG-09).
+      confirmTitle: "Fichier choisi, pas encore envoyé",
+      confirmHint: {
+        mix: "Écoutez-le si besoin : c'est exactement ce fichier qui partira comme nouvelle version du mix.",
+        mastering:
+          "Écoutez-le si besoin : c'est exactement ce fichier qui partira comme nouvelle version du master.",
+      },
+      listen: (fileName: string) => `Écouter « ${fileName} »`,
+      confirm: "Confirmer l'envoi",
+      replace: "Remplacer",
+      received: (fileName: string, size: string, date: string) =>
+        `Envoi confirmé : « ${fileName} » (${size}) est arrivé chez le label le ${date}.`,
       sent: (fileName: string, date: string) =>
         `${fileName} · déposé le ${date}`,
       notAudio:
@@ -554,18 +792,26 @@ export const masterWorkflow = {
       tooLarge:
         "Ce fichier dépasse 50 Mo : envoyez-le par un autre moyen au label.",
       errors: {
+        invalid_extension:
+          "Ce format n'est pas accepté : déposez un fichier WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.",
+        invalid_file_name:
+          "Ce nom de fichier n'est pas accepté : de 3 à 200 caractères, sans « / » ni « \\ », terminé par l'extension audio (ex. « Titre - Mix V2.wav »).",
         replaced:
           "Ce lien a été remplacé par un envoi plus récent : utilisez le dernier lien reçu.",
         expired: "Ce lien a expiré. Demandez un nouveau lien au label.",
         too_many_deposits:
           "Trop de dépôts en une heure sur ce lien. Réessayez un peu plus tard.",
         title_not_in_package: "Ce titre ne fait plus partie du dossier.",
+        file_mismatch:
+          "Le fichier reçu ne correspond pas à celui confirmé (taille différente) : il n'a pas été enregistré. Réessayez.",
         failed: "Le fichier n'a pas pu être envoyé. Réessayez.",
       },
     },
     replaced:
       "Ce lien a été remplacé par un envoi plus récent. Utilisez le dernier lien reçu.",
     expired: "Ce lien a expiré. Demandez un nouveau lien au label.",
+    revoked:
+      "Le label a désactivé ce lien. Demandez-lui un nouveau lien si vous en avez encore besoin.",
     failed: "La confirmation n'a pas pu être envoyée. Réessayez.",
   },
   inventory: {

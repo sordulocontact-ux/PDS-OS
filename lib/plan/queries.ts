@@ -10,8 +10,23 @@ export type LaunchedItem = {
   workflow: PlanWorkflow | null;
   title: string;
   why: string | null;
+  ownerPersonId: string | null;
   ownerName: string | null;
+  executorPersonId: string | null;
+  executorName: string | null;
+  dueDate: string | null;
+  dependsOn: PlanWorkflow[];
   launchedAt: string | null;
+  doneAt: string | null;
+};
+
+export type PlanEvent = {
+  id: string;
+  itemId: string | null;
+  kind: string;
+  detail: Record<string, unknown>;
+  actorName: string | null;
+  createdAt: string;
 };
 
 export type LaunchedPlan = {
@@ -19,9 +34,15 @@ export type LaunchedPlan = {
   launchedAt: string;
   launchedByName: string | null;
   items: LaunchedItem[];
+  events: PlanEvent[];
 };
 
-/** The plan of a project once launched, with its items in order. */
+const nameOf = (
+  person: { first_name: string; last_name: string | null } | null,
+) => (person ? personName(person.first_name, person.last_name) : null);
+
+/** The plan of a project once launched, its steps in order and its history
+ * (PROJ-UX-07), newest change first. */
 export async function loadLaunchedPlan(
   projectId: string,
 ): Promise<LaunchedPlan | null> {
@@ -34,29 +55,54 @@ export async function loadLaunchedPlan(
     .eq("project_id", projectId)
     .maybeSingle();
   if (!plan) return null;
-  const { data: items } = await supabase
-    .from("project_plan_items")
-    .select(
-      "id, column_key, workflow, title, why, launched_at, owner:people!project_plan_items_owner_person_id_fkey(first_name, last_name)",
-    )
-    .eq("plan_id", plan.id)
-    .order("position");
+  const [{ data: items }, { data: events }] = await Promise.all([
+    supabase
+      .from("project_plan_items")
+      .select(
+        "id, column_key, workflow, title, why, launched_at, owner_person_id, executor_person_id, due_date, depends_on, done_at, owner:people!project_plan_items_owner_person_id_fkey(first_name, last_name), executor:people!project_plan_items_executor_person_id_fkey(first_name, last_name)",
+      )
+      .eq("plan_id", plan.id)
+      .order("position"),
+    supabase
+      .from("project_plan_events")
+      .select(
+        "id, item_id, kind, detail, created_at, actor:people!project_plan_events_actor_person_id_fkey(first_name, last_name)",
+      )
+      .eq("plan_id", plan.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
+  ]);
   return {
     id: plan.id,
     launchedAt: plan.launched_at,
-    launchedByName: plan.launcher
-      ? personName(plan.launcher.first_name, plan.launcher.last_name)
-      : null,
+    launchedByName: nameOf(plan.launcher),
     items: (items ?? []).map((item) => ({
       id: item.id,
       column: item.column_key as PlanColumn,
       workflow: item.workflow as PlanWorkflow | null,
       title: item.title,
       why: item.why,
-      ownerName: item.owner
-        ? personName(item.owner.first_name, item.owner.last_name)
-        : null,
+      ownerPersonId: item.owner_person_id,
+      ownerName: nameOf(item.owner),
+      executorPersonId: item.executor_person_id,
+      executorName: nameOf(item.executor),
+      dueDate: item.due_date,
+      dependsOn: (item.depends_on ?? []) as PlanWorkflow[],
       launchedAt: item.launched_at,
+      doneAt: item.done_at,
+    })),
+    events: (events ?? []).map((event) => ({
+      id: event.id,
+      itemId: event.item_id,
+      kind: event.kind,
+      detail:
+        event.detail &&
+        typeof event.detail === "object" &&
+        !Array.isArray(event.detail)
+          ? (event.detail as Record<string, unknown>)
+          : {},
+      actorName: nameOf(event.actor),
+      createdAt: event.created_at,
     })),
   };
 }

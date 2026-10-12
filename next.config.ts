@@ -1,16 +1,32 @@
 import type { NextConfig } from "next";
 
+// Chromium for serverless functions, as pnpm installs it.
+const CHROMIUM_BIN =
+  "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/bin/**";
+
+// A route path as the picomatch glob `outputFileTracingIncludes` expects.
+const routeGlob = (route: string) => route.replace(/[[\]]/g, "\\$&");
+
 const nextConfig: NextConfig = {
   // PDF export (lib/pdf/render.ts): loaded from node_modules at run time,
   // never bundled; Chromium's compressed binary is read from its bin folder,
   // which file tracing cannot see on its own.
   serverExternalPackages: ["playwright-core", "@sparticuz/chromium"],
   outputFileTracingIncludes: {
-    "/api/projects/[projectId]/framing-brief": [
-      "./node_modules/@sparticuz/chromium/bin/**",
-    ],
+    // Every route that prints a PDF (PROJ-BUG-05, export failed on Vercel).
+    // The keys are picomatch globs: `[projectId]` unescaped is a character
+    // class and matched no route, so nothing was ever included. The files:
+    // the real folder, not the pnpm symlink `node_modules/@sparticuz/…`.
+    ...Object.fromEntries(
+      [
+        "/api/projects/[projectId]/framing-brief",
+        "/api/projects/[projectId]/strategy-documents/[documentId]",
+        "/api/projects/[projectId]/marketing-reports/[reportId]",
+        "/api/contracts/[contractId]/document",
+      ].map((route) => [routeGlob(route), [CHROMIUM_BIN]]),
+    ),
     // The official SACEM 725 bulletin the formality fills, read at run time.
-    "/api/legal/formalities/[formalityId]/document": [
+    [routeGlob("/api/legal/formalities/[formalityId]/document")]: [
       "./lib/legal/formalities/assets/**",
     ],
   },

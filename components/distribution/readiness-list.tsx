@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PageSection } from "@/components/shell/page-section";
+import { AudioFile } from "@/components/ui/audio-file";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -69,6 +70,13 @@ function ReadinessRow({ item }: { item: ReadinessItem }) {
         </p>
         {meta.length > 0 && (
           <p className="text-sm text-muted-foreground">{meta.join(" · ")}</p>
+        )}
+        {item.media && (
+          <AudioFile
+            label={t.listen(item.media.fileName)}
+            listenUrl={item.media.listenUrl}
+            downloadUrl={item.media.downloadUrl}
+          />
         )}
       </div>
       <div className="flex shrink-0 items-center gap-2">

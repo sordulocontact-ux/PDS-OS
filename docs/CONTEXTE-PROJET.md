@@ -176,6 +176,15 @@ Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 undecies),
   masteriseur…) est à donner par le label, avec sa source.
 - **« Continuer sans enregistrement »** (PROJ-BUG-01). Un call sans audio n'a pas d'état
   aujourd'hui (pas de « tenu sans enregistrement ») : à définir avant d'offrir ce choix.
+- **Décisions prises sans le ticket pour les lots 6 à 11 et UX-01** (12/10/2026), à confirmer :
+  une demande de correction **facultative** du Brief ne bloque rien (seules les obligatoires
+  bloquent l'envoi et la validation) et la seule dérogation à une demande obligatoire est sa
+  **levée** motivée par le valideur ; le Brief Mix/Master **reste modifiable après la
+  transmission** (un nouvel envoi porte les changements) ; envoyer un dossier de mix **sans stems**
+  demande une case « Envoyer sans stems » (pas de raison écrite) ; « même ingénieur » = **même
+  contact du Réseau** ; un projet refusé ou en précision demandée est rangé dans **Actifs** ; seul
+  un fichier à l'état « Mix » peut être déclaré mix final sans nouveau mixage ; les formats
+  acceptés au dépôt de l'ingénieur sont WAV, AIFF, FLAC, MP3, M4A, AAC, OGG.
 
 ### Points à trancher : Juridique allégé (test UX du 09/10/2026, section 6)
 

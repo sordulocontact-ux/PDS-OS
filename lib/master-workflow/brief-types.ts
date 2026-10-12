@@ -53,6 +53,9 @@ export type MasterBrief = {
   direction: string | null;
   constraints: string | null;
   deliverables: BriefDeliverable[];
+  // « Livrables et formats », « Message » (PROJ-UX-08): reused by the sending.
+  formats: string | null;
+  message: string | null;
   dates: Record<BriefDate, string | null>;
 };
 

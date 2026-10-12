@@ -13,7 +13,11 @@ import {
   type BriefDate,
 } from "@/lib/master-workflow/brief-types";
 import { writeBrief } from "@/lib/master-workflow/brief-row";
-import { calendarInOrder, isIsoDate } from "@/lib/master-workflow/calendar";
+import {
+  calendarInOrder,
+  calendarOrderErrors,
+  isIsoDate,
+} from "@/lib/master-workflow/calendar";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,7 +36,12 @@ const text = (value: FormDataEntryValue | null) => {
   return trimmed === "" ? null : trimmed;
 };
 
-const TEXT_FIELDS = ["references", "direction", "constraints"] as const;
+const TEXT_FIELDS = [
+  "references",
+  "direction",
+  "constraints",
+  "message",
+] as const;
 
 /**
  * Saves the Brief Mix/Master of a project (one per project, created on the
@@ -93,6 +102,8 @@ export async function saveMasterBrief(
   for (const field of TEXT_FIELDS)
     if ((text(formData.get(field))?.length ?? 0) > MAX_TEXT)
       errors[field] = t.tooLong;
+  if ((text(formData.get("formats"))?.length ?? 0) > 500)
+    errors.formats = t.tooLong;
 
   const dates = Object.fromEntries(
     BRIEF_DATES.map((field) => [field, text(formData.get(field))]),
@@ -102,7 +113,19 @@ export async function saveMasterBrief(
     if (date && !isIsoDate(date)) errors[field] = t.date;
   }
   if (Object.keys(errors).length > 0) return fail(errors);
-  if (!calendarInOrder(dates)) return fail({ calendar: t.calendar });
+  // Said on the date that breaks the order (PROJ-BUG-07), as the form does.
+  const order = calendarOrderErrors(dates);
+  if (!calendarInOrder(dates))
+    return fail(
+      Object.fromEntries(
+        Object.entries(order).map(([field, after]) => [
+          field,
+          fr.masterWorkflow.brief.orderError(
+            fr.masterWorkflow.brief.fields[after],
+          ),
+        ]),
+      ),
+    );
 
   let deliverables: string[] = [];
   try {
@@ -128,6 +151,8 @@ export async function saveMasterBrief(
     references_text: text(formData.get("references")),
     direction: text(formData.get("direction")),
     constraints_text: text(formData.get("constraints")),
+    delivery_formats: text(formData.get("formats")),
+    engineer_message: text(formData.get("message")),
     deliverables: briefDeliverablesOf(deliverables),
     mix_v1_due: dates.mixV1Due,
     mix_final_due: dates.mixFinalDue,

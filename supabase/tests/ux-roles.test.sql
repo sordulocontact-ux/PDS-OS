@@ -4,7 +4,7 @@
 -- requester, the privacy of a transmission's words and of the budget, the
 -- welcome card. Run with `supabase test db`.
 begin;
-select plan(41);
+select plan(44);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -203,9 +203,16 @@ select throws_ok($$
   select public.create_master_transmission(pg_temp.id_of('project'), 'mix', '{}'::jsonb, null,
     now() + interval '2 years')
 $$, 'P0001', 'invalid_expiry', 'a link lives 180 days at most');
+select throws_ok($$
+  select public.create_master_transmission(pg_temp.id_of('project'), 'mix',
+    jsonb_build_object('titles', jsonb_build_array(jsonb_build_object('masterId', pg_temp.id_of('title'),
+                                                                      'title', 'Titre'))),
+    null, now() + interval '60 days')
+$$, '23514', 'stems_missing', 'a title without stems goes only on purpose (PROJ-UX-09)');
 insert into tokens select 'link', public.create_master_transmission(pg_temp.id_of('project'), 'mix',
-  jsonb_build_object('titles', jsonb_build_array(jsonb_build_object('masterId', pg_temp.id_of('title')))),
-  null, now() + interval '60 days');
+  jsonb_build_object('titles', jsonb_build_array(jsonb_build_object('masterId', pg_temp.id_of('title'),
+                                                                    'title', 'Titre'))),
+  null, now() + interval '60 days', '{"withoutStems": ["Titre"]}'::jsonb);
 reset role;
 select is((select expires_at::date from public.master_transmissions where project_id = pg_temp.id_of('project')),
           (now() + interval '60 days')::date, 'the link lives as long as code decided');
@@ -217,7 +224,11 @@ select throws_ok($$ select public.open_master_delivery(pg_temp.token_of('link'),
   'P0001', 'title_not_in_package', 'only a title of the package receives a deposit');
 select throws_ok($$ select public.open_master_delivery(repeat('0', 64), pg_temp.id_of('title'), 'wav') $$,
   'P0001', 'unknown', 'an unknown token opens nothing');
-insert into tokens select 'path', public.open_master_delivery(pg_temp.token_of('link'), pg_temp.id_of('title'), 'wav');
+select throws_ok($$ select public.open_master_delivery(pg_temp.token_of('link'), pg_temp.id_of('title'), 'pdf', 'Contrat.pdf') $$,
+  'P0001', 'invalid_extension', 'a file that is not audio is refused (PROJ-BUG-08)');
+select throws_ok($$ select public.open_master_delivery(pg_temp.token_of('link'), pg_temp.id_of('title'), 'wav', '../../x.wav') $$,
+  'P0001', 'invalid_file_name', 'a name that reads as a path is refused');
+insert into tokens select 'path', public.open_master_delivery(pg_temp.token_of('link'), pg_temp.id_of('title'), 'wav', 'Mix V2.wav');
 select ok(pg_temp.token_of('path') like pg_temp.id_of('org') || '/' || pg_temp.id_of('title') || '/%.wav',
           'the slot is a path of the title in master-files');
 select lives_ok($$

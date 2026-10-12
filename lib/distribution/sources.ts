@@ -125,6 +125,16 @@ export async function loadDistributionSources(
             }
           : null,
         before: fin?.before ? { addedAt: fin.before.addedAt } : null,
+        finalFile: (() => {
+          const file = fin?.final ?? fin?.before ?? null;
+          return file
+            ? {
+                fileName: file.fileName,
+                listenUrl: file.listenUrl,
+                downloadUrl: file.downloadUrl,
+              }
+            : null;
+        })(),
       },
     ];
   });

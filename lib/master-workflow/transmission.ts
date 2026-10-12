@@ -42,15 +42,40 @@ export type StepView = {
   // What prevents the sending, worded; empty when it can go.
   blockers: string[];
   history: TransmissionRow[];
+  // A link to listen to each title's file before it leaves (PROJ-BUG-09).
+  sourceUrls: Record<string, string>;
+  // The project's planned release, for the dates' checks (PROJ-BUG-07).
+  releaseDue: string | null;
+  // Mastering only: the engineer did the mix and their link lives, so the
+  // package is added to it (PROJ-BUG-09).
+  reusesMixLink: boolean;
+  // Where each title of the project stands for its mix (PROJ-BUG-06).
+  diagnosis: MixDiagnosisRow[];
   canEdit: boolean;
   // Where a version's file is stored; null without manage_catalog.
   organizationId: string | null;
 };
 
 const HISTORY_SELECT =
-  "id, created_at, note, acknowledged_at, revoked_at, expires_at, sender:people!master_transmissions_created_by_fkey(first_name, last_name), contact:network_contacts!master_transmissions_contact_same_org(name)";
+  "id, created_at, note, acknowledged_at, revoked_at, revoke_reason, expires_at, link_sent_at, opened_at, delivered_at, derogations, continues_id, sender:people!master_transmissions_created_by_fkey(first_name, last_name), contact:network_contacts!master_transmissions_contact_same_org(name)";
 
 export type MixView = StepView;
+
+export type MixDiagnosisRow = {
+  id: string;
+  title: string;
+  state: "todo" | "running" | "done" | "master_final";
+  // A « Mix » file of the Catalogue that may already be the Mix final.
+  existingMix: { id: string; fileName: string } | null;
+  // Who mixes, when the Brief and the title's credits differ.
+  divergence: { brief: string; catalogue: string } | null;
+};
+
+// The titles a sending went without stems for (derogations, PROJ-UX-09).
+const withoutStemsOf = (derogations: unknown): string[] => {
+  const list = (derogations as { withoutStems?: unknown } | null)?.withoutStems;
+  return Array.isArray(list) ? list.map(String) : [];
+};
 
 /**
  * The Mix or Mastering step: what the package for the engineer holds
@@ -63,6 +88,7 @@ export async function loadStepView(
     id: string;
     title: string;
     ownerPersonId: string | null;
+    dueDate?: string | null;
     masters: Array<{ id: string; title: string; artists: string }>;
   },
   access: Access,
@@ -86,11 +112,18 @@ export async function loadStepView(
     supabase
       .from("master_mix_versions")
       .select(
-        "master_id, file:master_files!master_mix_versions_file_id_fkey(id, file_name, audio_state, version, created_at)",
+        "master_id, stage, decision, file:master_files!master_mix_versions_file_id_fkey(id, file_name, audio_state, version, created_at)",
       )
       .eq("project_id", project.id)
-      .eq("decision", "approved"),
+      .eq("stage", "mix"),
   ]);
+  // Every version of the mix round, for where each title stands (PROJ-BUG-06).
+  const mixVersions = finals.data ?? [];
+  const mixFinal = new Set(
+    mixVersions
+      .filter((row) => row.decision === "approved")
+      .map((row) => row.master_id),
+  );
   if (history.error) console.error("loadMixView:", history.error.message);
   const brief = briefRow.data ? briefFromRow(briefRow.data) : null;
   const engineerId =
@@ -99,29 +132,77 @@ export async function loadStepView(
       : brief?.masteringContactId;
   const contact = rows.contacts.find((c) => c.id === engineerId);
   const finalOf = new Map(
-    (finals.data ?? []).flatMap((row) => {
-      const state = audioStateOf(row.file?.audio_state ?? null);
-      return row.file && state
-        ? [
-            [
-              row.master_id,
-              {
-                id: row.file.id,
-                fileName: row.file.file_name,
-                audioState: state,
-                version: row.file.version,
-                createdAt: row.file.created_at,
-              },
-            ] as const,
-          ]
-        : [];
-    }),
+    mixVersions
+      .filter((row) => row.decision === "approved")
+      .flatMap((row) => {
+        const state = audioStateOf(row.file?.audio_state ?? null);
+        return row.file && state
+          ? [
+              [
+                row.master_id,
+                {
+                  id: row.file.id,
+                  fileName: row.file.file_name,
+                  audioState: state,
+                  version: row.file.version,
+                  createdAt: row.file.created_at,
+                },
+              ] as const,
+            ]
+          : [];
+      }),
   );
 
-  // A title already at its master final needs no mix: it is not sent.
+  // Where each title stands (PROJ-BUG-06): a mix to do, a mix round
+  // running, a Mix final already there (mixed here, or an existing mix
+  // declared), or a master final already.
+  const diagnosis: MixDiagnosisRow[] = rows.titles.map((title) => {
+    const audio = rows.audioOf.get(title.id) ?? [];
+    const state: MixDiagnosisRow["state"] = hasMasterFinal(audio)
+      ? "master_final"
+      : mixFinal.has(title.id)
+        ? "done"
+        : mixVersions.some((row) => row.master_id === title.id)
+          ? "running"
+          : "todo";
+    const existing =
+      state === "todo"
+        ? (audio.find((file) => file.audioState === "mix") ?? null)
+        : null;
+    // The Brief and the Catalogue disagree on who mixes: said, never
+    // overwritten (PROJ-BUG-06).
+    const credited = (rows.creditsOf.get(title.id) ?? []).filter(
+      (credit) => credit.role === "mix_engineer",
+    );
+    const briefMixer = brief?.mixContactId
+      ? rows.contacts.find((c) => c.id === brief.mixContactId)
+      : null;
+    const divergence =
+      briefMixer &&
+      credited.length > 0 &&
+      !credited.some((credit) => credit.contactId === briefMixer.id)
+        ? {
+            brief: briefMixer.name,
+            catalogue: credited.map((credit) => credit.name).join(", "),
+          }
+        : null;
+    return {
+      id: title.id,
+      title: title.title,
+      state,
+      existingMix: existing
+        ? { id: existing.id, fileName: existing.fileName }
+        : null,
+      divergence,
+    };
+  });
+
+  // A title already at its master final needs no mix: it is not sent; nor
+  // is a title of the mix round that has its Mix final (never mixed twice).
   const titles: PlannedTitle[] = rows.titles.flatMap((title) => {
     const audio = rows.audioOf.get(title.id) ?? [];
     if (hasMasterFinal(audio)) return [];
+    if (role === "mix" && mixFinal.has(title.id)) return [];
     const sourceId = rows.sourceOf.get(title.id)?.fileId;
     return [
       {
@@ -137,10 +218,60 @@ export async function loadStepView(
     ];
   });
 
+  // Signed with the viewer's session: the storage policies decide.
+  const sourceIds = titles.flatMap((title) =>
+    title.source ? [[title.id, title.source.id] as const] : [],
+  );
+  const sourceUrls: Record<string, string> = {};
+  if (sourceIds.length > 0) {
+    const { data: files } = await supabase
+      .from("master_files")
+      .select("id, path")
+      .in(
+        "id",
+        sourceIds.map(([, id]) => id),
+      );
+    const signed = files?.length
+      ? await supabase.storage.from("master-files").createSignedUrls(
+          files.map((file) => file.path),
+          3600,
+        )
+      : null;
+    const urlOfPath = new Map(
+      (signed?.data ?? []).flatMap((entry) =>
+        entry.path && entry.signedUrl ? [[entry.path, entry.signedUrl]] : [],
+      ),
+    );
+    for (const [titleId, fileId] of sourceIds) {
+      const path = files?.find((file) => file.id === fileId)?.path;
+      const url = path ? urlOfPath.get(path) : undefined;
+      if (url) sourceUrls[titleId] = url;
+    }
+  }
+
+  const reusesMixLink =
+    role === "mastering" && contact
+      ? (
+          await supabase
+            .from("master_transmissions")
+            .select("id")
+            .eq("project_id", project.id)
+            .eq("role", "mix")
+            .eq("contact_id", contact.id)
+            .is("revoked_at", null)
+            .gt("expires_at", new Date().toISOString())
+            .limit(1)
+        ).data?.length === 1
+      : false;
+
   const t = fr.masterWorkflow.mix.blockers;
+  const mixedAll =
+    role === "mix" &&
+    titles.length === 0 &&
+    diagnosis.some((row) => row.state === "done");
   const blockers = [
     ...(contact ? [] : [role === "mix" ? t.engineer : t.masteringEngineer]),
-    ...(titles.length === 0 ? [t.noTitle] : []),
+    ...(titles.length === 0 ? [mixedAll ? t.allMixed : t.noTitle] : []),
     ...titles
       .filter((title) => !title.source)
       .map((title) =>
@@ -167,10 +298,20 @@ export async function loadStepView(
         : null,
       engineer: row.contact?.name ?? "",
       note: row.note,
+      linkSentAt: row.link_sent_at,
+      openedAt: row.opened_at,
       acknowledgedAt: row.acknowledged_at,
+      deliveredAt: row.delivered_at,
       revokedAt: row.revoked_at,
+      revokeReason: row.revoke_reason,
       expiresAt: row.expires_at,
+      withoutStems: withoutStemsOf(row.derogations),
+      continued: row.continues_id !== null,
     })),
+    sourceUrls,
+    releaseDue: project.dueDate ?? null,
+    reusesMixLink,
+    diagnosis,
     canEdit: canEditProject(access, project),
     organizationId: can(access, "manage_catalog")
       ? access.organizationId

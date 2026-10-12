@@ -8,6 +8,7 @@
 import { routes } from "@/lib/auth/redirects";
 import type { SheetStatus } from "@/lib/design/states";
 import { fr } from "@/lib/i18n/fr";
+import { withReturn } from "@/lib/ui/return-to";
 import { masterStepHref } from "@/lib/ui/master-steps";
 
 export const SOURCE_MODULES = [
@@ -42,6 +43,9 @@ export type ReadinessItem = {
   updatedAt: string | null;
   // Where it is corrected: always its owner module, never Distribution.
   href: string;
+  // The master final itself, listened and downloaded here without a new
+  // import: the same file as the Master's (PROJ-BUG-10).
+  media?: { fileName: string; listenUrl: string; downloadUrl: string | null };
 };
 
 export type ReadinessTitle = {
@@ -58,6 +62,12 @@ export type ReadinessTitle = {
   updatedAt: string | null;
   final: { number: number; decidedAt: string; decidedBy: string | null } | null;
   before: { addedAt: string } | null;
+  // The final file's signed links, when the viewer may read it.
+  finalFile: {
+    fileName: string;
+    listenUrl: string | null;
+    downloadUrl: string | null;
+  } | null;
 };
 
 export type ReadinessLegal =
@@ -119,6 +129,9 @@ export function distributionReadiness(
   const d = t.details;
   const items: ReadinessItem[] = [];
   const many = input.titles.length > 1;
+  // A title's page, opened from here, brings back to this step once
+  // corrected (PROJ-BUG-10).
+  const back = routes.projectRelease(input.projectId);
 
   for (const title of input.titles) {
     const subject = many ? title.label : null;
@@ -138,7 +151,7 @@ export function distributionReadiness(
         detail: title.hasMainArtist
           ? `${title.label} · ${title.artists}`
           : d.noMainArtist,
-        href: routes.master(title.id),
+        href: withReturn(routes.master(title.id), back),
       },
       {
         ...catalog,
@@ -146,7 +159,7 @@ export function distributionReadiness(
         label: t.items.isrc,
         state: title.isrc ? "available" : "missing",
         detail: title.isrc ?? d.noIsrc,
-        href: routes.master(title.id),
+        href: withReturn(routes.master(title.id), back),
       },
       {
         ...catalog,
@@ -156,7 +169,7 @@ export function distributionReadiness(
         detail: title.hasSongwriter
           ? d.credits(title.contributorCount)
           : d.noCredits,
-        href: routes.masterCredits(title.id),
+        href: withReturn(routes.masterCredits(title.id), back),
       },
       {
         ...catalog,
@@ -167,7 +180,7 @@ export function distributionReadiness(
           title.rightsHolder && title.rightsYear
             ? d.pLine(title.rightsHolder, title.rightsYear)
             : d.noPLine,
-        href: routes.masterRights(title.id),
+        href: withReturn(routes.masterRights(title.id), back),
       },
     );
     items.push({
@@ -201,6 +214,15 @@ export function distributionReadiness(
               updatedAt: null,
             }),
       href: masterStepHref(input.projectId, "final"),
+      ...(title.finalFile?.listenUrl
+        ? {
+            media: {
+              fileName: title.finalFile.fileName,
+              listenUrl: title.finalFile.listenUrl,
+              downloadUrl: title.finalFile.downloadUrl,
+            },
+          }
+        : {}),
     });
   }
 

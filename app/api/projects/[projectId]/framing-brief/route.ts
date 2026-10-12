@@ -8,12 +8,13 @@ import { htmlToPdf } from "@/lib/pdf/render";
 export const maxDuration = 60;
 
 /**
- * The Brief as a PDF file, downloaded (never the print dialog): its latest
- * version as it was written, or the Cadrage as it stands when no version
- * exists yet. Read with the user's session: RLS decides who sees it.
+ * The Brief as a PDF file, downloaded (never the print dialog): the version
+ * the page shows (`?version=n`, the latest by default) exactly as it was
+ * written, or the Cadrage as it stands when no version exists yet. Read with
+ * the user's session: RLS decides who sees it.
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: RouteContext<"/api/projects/[projectId]/framing-brief">,
 ) {
   const access = await getAccess();
@@ -25,7 +26,17 @@ export async function GET(
   if (!knowledge) {
     return Response.json({ ok: false, error: "not_found" }, { status: 404 });
   }
-  const latest = knowledge.briefs[0];
+  const asked = new URL(request.url).searchParams.get("version");
+  const latest = asked
+    ? knowledge.briefs.find((b) => String(b.version) === asked)
+    : knowledge.briefs[0];
+  // A version that does not exist is never replaced by another one.
+  if (asked && !latest) {
+    return Response.json(
+      { ok: false, error: "version_not_found" },
+      { status: 404 },
+    );
+  }
   const snapshot =
     (latest ? snapshotOf(latest.content) : null) ??
     buildBriefSnapshot(knowledge);
@@ -40,7 +51,10 @@ export async function GET(
       }),
     );
   } catch (error) {
-    console.error("[framing-brief] pdf failed:", error);
+    console.error(
+      `[framing-brief] pdf failed (project ${projectId}, version ${latest?.version ?? "live"}):`,
+      error,
+    );
     return Response.json({ ok: false, error: "pdf_failed" }, { status: 500 });
   }
 

@@ -184,7 +184,7 @@ export async function listProjects(filter?: {
   const select = supabase
     .from("projects")
     .select(
-      `id, title, type, music_format, priority, owner_person_id, artist:artists!projects_artist_same_org(name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
+      `id, title, type, music_format, priority, owner_person_id, due_date, artist:artists!projects_artist_same_org(name), owner:people!projects_owner_person_id_fkey(first_name, last_name), ${FORMAT_SELECT}, ${MASTERS_SELECT}, ${STAGES_SELECT}, ${ASSIGNMENTS_SELECT}`,
     );
   let query = filter?.archived
     ? select.not("archived_at", "is", null)
@@ -218,6 +218,12 @@ export async function listProjects(filter?: {
         : null,
       currentStage: currentStageOf(stages),
       stageCount: stages.length,
+      responsibleName: row.owner
+        ? personName(row.owner.first_name, row.owner.last_name)
+        : latest?.assigneeName || null,
+      responsiblePersonId:
+        row.owner_person_id ?? latest?.assigneePersonId ?? null,
+      dueDate: row.due_date,
     };
   });
   // Stable: newest first inside each priority.

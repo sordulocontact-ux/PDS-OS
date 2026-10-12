@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
+import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { MixDecision } from "@/components/master-workflow/mix-decision";
 import { MixSummary } from "@/components/master-workflow/mix-summary";
+import { AudioFile } from "@/components/ui/audio-file";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDateTime } from "@/lib/calls/format";
@@ -15,7 +17,13 @@ import {
   addMixComment,
   type MixResult,
 } from "@/lib/master-workflow/mix-actions";
-import type { MixVersion, VersionStage } from "@/lib/master-workflow/mix-types";
+import {
+  commentSent,
+  formatTimecode,
+  parseTimecode,
+  type MixVersion,
+  type VersionStage,
+} from "@/lib/master-workflow/mix-types";
 import { mixVersionTone } from "@/lib/ui/state-tones";
 
 /**
@@ -47,6 +55,9 @@ export function MixVersionItem({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const commentForm = useRef<HTMLFormElement>(null);
+  // One key per comment being written: sent twice, it is added once.
+  const [clientKey, setClientKey] = useState(() => crypto.randomUUID());
+  const [timecodeError, setTimecodeError] = useState<string | undefined>();
   const run = (action: () => Promise<MixResult>) =>
     startTransition(async () => {
       const result = await action();
@@ -70,6 +81,12 @@ export function MixVersionItem({
         </StatusBadge>
       </header>
 
+      <AudioFile
+        label={t.listen(version.number)}
+        listenUrl={version.openUrl}
+        downloadUrl={version.downloadUrl}
+      />
+
       <MixDecision
         projectId={projectId}
         title={title}
@@ -91,6 +108,12 @@ export function MixVersionItem({
                 <span className="text-[color:var(--text-secondary)]">
                   {" "}
                   · {formatDateTime(comment.createdAt)}
+                  {comment.timecodeSeconds !== null &&
+                    ` · ${t.at(formatTimecode(comment.timecodeSeconds))}`}
+                  {" · "}
+                  {commentSent(comment, version)
+                    ? t.commentSent
+                    : t.commentNotSent}
                 </span>
                 <p className="whitespace-pre-wrap">{comment.body}</p>
               </li>
@@ -101,14 +124,31 @@ export function MixVersionItem({
           <form
             ref={commentForm}
             className="grid gap-2"
+            noValidate
             onSubmit={(event) => {
               event.preventDefault();
-              const body = String(
-                new FormData(event.currentTarget).get("body") ?? "",
+              const data = new FormData(event.currentTarget);
+              const body = String(data.get("body") ?? "");
+              const timecode = parseTimecode(
+                String(data.get("timecode") ?? ""),
               );
+              if (Number.isNaN(timecode)) {
+                setTimecodeError(t.timecodeInvalid);
+                return;
+              }
+              setTimecodeError(undefined);
               run(async () => {
-                const result = await addMixComment(projectId, version.id, body);
-                if (result.ok) commentForm.current?.reset();
+                const result = await addMixComment(
+                  projectId,
+                  version.id,
+                  body,
+                  timecode,
+                  clientKey,
+                );
+                if (result.ok) {
+                  commentForm.current?.reset();
+                  setClientKey(crypto.randomUUID());
+                }
                 return result;
               });
             }}
@@ -121,6 +161,15 @@ export function MixVersionItem({
               rows={2}
               maxLength={2000}
               required
+            />
+            <Field
+              id={`timecode-${version.id}`}
+              name="timecode"
+              label={t.timecode}
+              hint={t.timecodeHint}
+              inputMode="numeric"
+              autoComplete="off"
+              error={timecodeError}
             />
             <div>
               <Button

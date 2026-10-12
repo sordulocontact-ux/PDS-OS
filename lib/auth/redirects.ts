@@ -158,7 +158,9 @@ export const routes = {
   // The shareable Brief, printable as a PDF.
   projectFramingBrief: (id: string) => `/app/projects/${id}/framing/brief`,
   // The same Brief as a downloaded PDF file.
-  projectFramingBriefPdf: (id: string) => `/api/projects/${id}/framing-brief`,
+  // `version`: the version the page shows (PROJ-BUG-05), the latest otherwise.
+  projectFramingBriefPdf: (id: string, version?: number | null) =>
+    `/api/projects/${id}/framing-brief${version ? `?version=${version}` : ""}`,
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
   // The Brief de sortie consolidé (ticket Stratégie § 8).
   projectStrategyBrief: (id: string) => `/app/projects/${id}/strategy/brief`,

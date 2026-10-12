@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { fileExtension } from "@/lib/catalog/file-rules";
+import {
+  DELIVERY_EXTENSIONS,
+  deliveryNameOk,
+} from "@/lib/master-workflow/delivery-rules";
 import { fr } from "@/lib/i18n/fr";
 import { TOKEN } from "@/lib/master-workflow/transmission-public";
 import { createClient } from "@/lib/supabase/server";
@@ -34,6 +38,9 @@ export type DeliveryResult =
   { ok: true; path: string } | { ok: false; error: string };
 
 const DELIVERY_ERRORS = [
+  "file_mismatch",
+  "invalid_extension",
+  "invalid_file_name",
   "replaced",
   "expired",
   "too_many_deposits",
@@ -59,11 +66,18 @@ export async function openMasterDelivery(
 ): Promise<DeliveryResult> {
   if (!TOKEN.test(token) || !z.uuid().safeParse(masterId).success)
     return { ok: false, error: deliveryError(undefined) };
+  // Checked here for the message, then by the database (PROJ-BUG-08).
+  const extension = fileExtension(fileName);
+  if (!extension || !DELIVERY_EXTENSIONS.includes(extension))
+    return { ok: false, error: deliveryError("invalid_extension") };
+  if (!deliveryNameOk(fileName))
+    return { ok: false, error: deliveryError("invalid_file_name") };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("open_master_delivery", {
     p_token: token,
     p_master_id: masterId,
-    p_extension: fileExtension(fileName),
+    p_extension: extension,
+    p_file_name: fileName,
   });
   if (error || !data) {
     console.error("openMasterDelivery:", error?.message);
@@ -82,14 +96,18 @@ export async function recordMasterDelivery(
   path: string,
   fileName: string,
   mime: string,
+  // The size of the file the engineer confirmed (PROJ-BUG-09).
+  bytes: number,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!TOKEN.test(token)) return { ok: false, error: deliveryError(undefined) };
+  if (!TOKEN.test(token) || !Number.isSafeInteger(bytes) || bytes <= 0)
+    return { ok: false, error: deliveryError(undefined) };
   const supabase = await createClient();
   const { error } = await supabase.rpc("record_master_delivery", {
     p_token: token,
     p_path: path,
     p_file_name: fileName.slice(0, 255),
     p_mime: mime,
+    p_bytes: bytes,
   });
   if (error) {
     console.error("recordMasterDelivery:", error.message);

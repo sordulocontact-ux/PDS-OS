@@ -29,11 +29,14 @@ export async function htmlToPdf(html: string): Promise<Uint8Array> {
     await page.setContent(html, { waitUntil: "load" });
     // The fonts come from Google Fonts: printed only once they are ready.
     await page.evaluate(() => document.fonts.ready);
-    return await page.pdf({
+    const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
       margin: { top: "18mm", bottom: "18mm", left: "16mm", right: "16mm" },
     });
+    // Never an empty file handed out as a PDF (PROJ-BUG-05).
+    if (pdf.length === 0) throw new Error("empty_pdf");
+    return pdf;
   } finally {
     await browser.close();
   }

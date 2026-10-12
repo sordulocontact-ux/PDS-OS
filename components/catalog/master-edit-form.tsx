@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { toast } from "sonner";
 
 import { EditPanel } from "@/components/archive/edit-panel";
+import { useReturnAfterSave } from "@/components/shell/return-banner";
 import { loadMasterEdit } from "@/lib/catalog/edit-form-actions";
 import { fr } from "@/lib/i18n/fr";
 
@@ -24,6 +25,9 @@ export function MasterEditForm({
   onSaved: () => void;
   onCancel: () => void;
 }) {
+  // Opened from a project step to correct it: back there once saved
+  // (PROJ-BUG-10).
+  const goBack = useReturnAfterSave(masterId);
   return (
     <EditPanel load={() => loadMasterEdit(masterId)}>
       {(data) => (
@@ -35,6 +39,7 @@ export function MasterEditForm({
           onCreated={() => {
             onSaved();
             toast.success(fr.records.edit.saved);
+            goBack();
           }}
           onCancel={onCancel}
         />

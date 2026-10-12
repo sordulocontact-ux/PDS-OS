@@ -26,7 +26,7 @@ export type BriefFields = Omit<
 >;
 
 export const BRIEF_COLUMNS =
-  "mix_contact_id, mastering_same_engineer, mastering_contact_id, mix_rate_cents, mastering_rate_cents, revisions, validator_person_id, references_text, direction, constraints_text, deliverables, mix_v1_due, mix_final_due, mastering_due, master_final_due";
+  "mix_contact_id, mastering_same_engineer, mastering_contact_id, mix_rate_cents, mastering_rate_cents, revisions, validator_person_id, references_text, direction, constraints_text, deliverables, mix_v1_due, mix_final_due, mastering_due, master_final_due, delivery_formats, engineer_message";
 
 type BriefRow = Pick<
   Row,
@@ -45,6 +45,8 @@ type BriefRow = Pick<
   | "mix_final_due"
   | "mastering_due"
   | "master_final_due"
+  | "delivery_formats"
+  | "engineer_message"
 >;
 
 export function briefFromRow(row: BriefRow): MasterBrief {
@@ -60,6 +62,8 @@ export function briefFromRow(row: BriefRow): MasterBrief {
     direction: row.direction,
     constraints: row.constraints_text,
     deliverables: briefDeliverablesOf(row.deliverables),
+    formats: row.delivery_formats,
+    message: row.engineer_message,
     dates: {
       mixV1Due: row.mix_v1_due,
       mixFinalDue: row.mix_final_due,
@@ -83,6 +87,8 @@ export function emptyBrief(validatorPersonId: string | null): MasterBrief {
     direction: null,
     constraints: null,
     deliverables: DEFAULT_DELIVERABLES,
+    formats: null,
+    message: null,
     dates: {
       mixV1Due: null,
       mixFinalDue: null,

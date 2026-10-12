@@ -1,5 +1,7 @@
 import { AcknowledgeButton } from "@/components/master-workflow/acknowledge-button";
 import { DeliverVersion } from "@/components/master-workflow/deliver-version";
+import { PublicRefresh } from "@/components/master-workflow/public-refresh";
+import { PublicVersions } from "@/components/master-workflow/public-versions";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
@@ -29,25 +31,8 @@ export function PublicPackageView({
     value ? formatShortDate(value) : null;
   return (
     <div className="flex flex-col gap-6">
-      {data.feedback.length > 0 && (
-        <section className={sectionCardClass}>
-          <h2 className="text-base font-medium">{t.feedback}</h2>
-          <ul className="mt-4 flex flex-col gap-5">
-            {data.feedback.map((item) => (
-              <li key={`${item.title}-${item.number}`} className="grid gap-1">
-                <p className="text-sm font-medium">
-                  {t.feedbackOf(
-                    item.title,
-                    item.number,
-                    formatShortDate(item.sentAt),
-                  )}
-                </p>
-                <p className="text-sm whitespace-pre-wrap">{item.summary}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {data.continued && <p className="text-sm font-medium">{t.continued}</p>}
+      <PublicVersions role={pack.role} versions={data.versions} />
       {data.note && (
         <section className={sectionCardClass}>
           <h2 className="text-base font-medium">{t.from}</h2>
@@ -101,15 +86,16 @@ export function PublicPackageView({
         <FactList
           emptyLabel={p.none}
           facts={[
-            ...(pack.role === "mix"
-              ? [
-                  { label: p.mixV1Due, value: date(pack.mixV1Due) },
-                  { label: p.mixFinalDue, value: date(pack.mixFinalDue) },
-                ]
-              : [
-                  { label: p.masteringDue, value: date(pack.masteringDue) },
-                  { label: p.masterFinalDue, value: date(pack.masterFinalDue) },
-                ]),
+            // Every date of the Brief, each with its meaning (PROJ-BUG-07):
+            // a package sent before shows the ones it carried.
+            ...[
+              { label: p.mixV1Due, value: date(pack.mixV1Due) },
+              { label: p.mixFinalDue, value: date(pack.mixFinalDue) },
+              { label: p.masteringDue, value: date(pack.masteringDue) },
+              { label: p.masterFinalDue, value: date(pack.masterFinalDue) },
+              { label: p.releaseDue, value: date(pack.releaseDue) },
+            ].filter((fact) => fact.value !== null),
+            { label: p.formats, value: pack.formats },
             {
               label: p.revisions,
               value: pack.revisions === null ? null : String(pack.revisions),
@@ -134,6 +120,7 @@ export function PublicPackageView({
       <p className="text-caption text-[color:var(--text-secondary)]">
         {t.expires(formatShortDate(data.expiresAt))}
       </p>
+      <PublicRefresh />
     </div>
   );
 }

@@ -8,12 +8,15 @@ import {
   type MixVersionsView,
   type VersionStage,
 } from "@/lib/master-workflow/mix-types";
+import { withDownloadName } from "@/lib/catalog/file-rules";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 const name = (
   person: { first_name: string; last_name: string | null } | null,
 ) => (person ? personName(person.first_name, person.last_name) : null);
+
+const SIGNED_URL_SECONDS = 3600;
 
 const statusOf = (value: string): MixVersionStatus =>
   MIX_VERSION_STATUSES.find((status) => status === value) ?? "received";
@@ -40,7 +43,7 @@ export async function loadMixVersions(
     supabase
       .from("master_mix_versions")
       .select(
-        "id, master_id, number, status, feedback_summary, feedback_sent_at, decision, decision_note, decided_at, created_at, file:master_files!master_mix_versions_file_id_fkey(file_name), author:people!master_mix_versions_created_by_fkey(first_name, last_name), decider:people!master_mix_versions_decided_by_fkey(first_name, last_name)",
+        "id, master_id, number, status, feedback_summary, feedback_sent_at, decision, decision_note, decided_at, created_at, file:master_files!master_mix_versions_file_id_fkey(file_name, path), author:people!master_mix_versions_created_by_fkey(first_name, last_name), decider:people!master_mix_versions_decided_by_fkey(first_name, last_name)",
       )
       .eq("project_id", projectId)
       .eq("stage", stage)
@@ -48,7 +51,7 @@ export async function loadMixVersions(
     supabase
       .from("master_mix_comments")
       .select(
-        "id, version_id, body, created_at, author:people!master_mix_comments_created_by_fkey(first_name, last_name)",
+        "id, version_id, body, created_at, timecode_seconds, author:people!master_mix_comments_created_by_fkey(first_name, last_name)",
       )
       .eq("project_id", projectId)
       .order("created_at"),
@@ -74,12 +77,28 @@ export async function loadMixVersions(
       body: row.body,
       author: name(row.author),
       createdAt: row.created_at,
+      timecodeSeconds: row.timecode_seconds,
     });
     commentsOf.set(row.version_id, list);
   }
 
   const deciderId = brief.data?.validator_person_id ?? project.ownerPersonId;
   const rows = versions.data ?? [];
+  // Every version stays listenable and downloadable (PROJ-BUG-08), with the
+  // viewer's session: the storage policies decide.
+  const paths = rows.flatMap((row) => (row.file?.path ? [row.file.path] : []));
+  const signed = paths.length
+    ? await supabase.storage
+        .from("master-files")
+        .createSignedUrls(paths, SIGNED_URL_SECONDS)
+    : { data: [], error: null };
+  if (signed.error)
+    console.error("loadMixVersions (sign):", signed.error.message);
+  const urlOf = new Map(
+    (signed.data ?? []).flatMap((entry) =>
+      entry.path && entry.signedUrl ? [[entry.path, entry.signedUrl]] : [],
+    ),
+  );
   return {
     stage,
     failed: Boolean(versions.error || comments.error),
@@ -101,6 +120,11 @@ export async function loadMixVersions(
           masterId: row.master_id,
           number: row.number,
           fileName: row.file?.file_name ?? "",
+          openUrl: (row.file && urlOf.get(row.file.path)) ?? null,
+          downloadUrl:
+            row.file && urlOf.get(row.file.path)
+              ? withDownloadName(urlOf.get(row.file.path)!, row.file.file_name)
+              : null,
           createdAt: row.created_at,
           createdBy: name(row.author),
           status: statusOf(row.status),

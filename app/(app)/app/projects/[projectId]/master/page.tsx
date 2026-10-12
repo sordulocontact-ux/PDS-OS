@@ -1,4 +1,5 @@
 import { MasterInventory } from "@/components/master-workflow/master-inventory";
+import { MixDiagnosis } from "@/components/master-workflow/mix-diagnosis";
 import { PrepareSummary } from "@/components/master-workflow/prepare-summary";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -39,7 +40,12 @@ export default async function ProjectMasterPage({
       basePath={routes.projectMaster(projectId)}
       // Only the facts of one status (a tile), all without it.
       state={asFactStatus(state)}
-      lead={<PrepareSummary view={mix} />}
+      lead={
+        <>
+          <PrepareSummary view={mix} />
+          <MixDiagnosis view={mix} />
+        </>
+      }
     />
   );
 }

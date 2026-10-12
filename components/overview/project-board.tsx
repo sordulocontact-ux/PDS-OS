@@ -19,6 +19,7 @@ import {
   boardBlockers,
   boardDeadlines,
 } from "@/lib/workflow-status/board";
+import type { LaunchedPlan } from "@/lib/plan/queries";
 import type { WorkflowStates } from "@/lib/workflow-status/load";
 
 /**
@@ -34,6 +35,7 @@ export function ProjectBoard({
   flows,
   today,
   canLaunch,
+  plan,
 }: {
   project: {
     id: string;
@@ -48,7 +50,10 @@ export function ProjectBoard({
   flows: WorkflowStates;
   today: string;
   canLaunch: boolean;
+  plan?: LaunchedPlan;
 }) {
+  const pilotOf = (w: "strategy" | "master" | "legal") =>
+    plan?.items.find((i) => i.workflow === w)?.ownerName ?? null;
   const t = fr.workflowStatus.board;
   const input = {
     projectId: project.id,
@@ -105,6 +110,11 @@ export function ProjectBoard({
         states={flows.states}
         legalDone={flows.legalDone}
         canLaunch={canLaunch}
+        pilots={{
+          strategy: pilotOf("strategy"),
+          master: pilotOf("master"),
+          legal: pilotOf("legal"),
+        }}
       />
       {absent.length > 0 && (
         <p className="text-caption text-muted-foreground">

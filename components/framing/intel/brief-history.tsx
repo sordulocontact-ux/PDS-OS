@@ -1,3 +1,4 @@
+import { BriefChangeList } from "@/components/framing/intel/brief-change-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { briefChanges, snapshotOf } from "@/lib/framing/brief-snapshot";
 import type { Dimension } from "@/lib/framing/dimensions";
@@ -76,33 +77,19 @@ export function BriefHistory({ versions }: { versions: BriefVersion[] }) {
                   )}
                 </div>
               )}
+              {version.unchanged_reason && (
+                <p className="text-caption text-muted-foreground">
+                  {fr.briefRequests.unchanged.derogation(
+                    version.unchanged_reason,
+                  )}
+                </p>
+              )}
               {previous && (
                 <div className="flex flex-col gap-2">
                   <p className="text-caption text-muted-foreground">
                     {t.brief.changesFrom(previous.version)}
                   </p>
-                  {changes.length === 0 ? (
-                    <p className="text-body-md text-muted-foreground">
-                      {t.brief.noChange}
-                    </p>
-                  ) : (
-                    <ul className="flex flex-col gap-2">
-                      {changes.map((change) => (
-                        <li
-                          key={`${change.dimension}-${change.label}`}
-                          className="grid gap-1 text-body-md"
-                        >
-                          <span className="font-semibold">
-                            {t.dimensions[change.dimension]} · {change.label}
-                          </span>
-                          <span className="text-muted-foreground line-through decoration-1">
-                            {change.before}
-                          </span>
-                          <span>{change.after}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <BriefChangeList changes={changes} />
                 </div>
               )}
             </li>

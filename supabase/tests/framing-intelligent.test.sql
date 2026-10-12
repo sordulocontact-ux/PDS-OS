@@ -139,7 +139,10 @@ select lives_ok($$
    where project_id = pg_temp.id_of('project') and kind = 'master_final'
 $$, 'the reopened dimension is corrected');
 
-insert into ids select 'v2', public.create_framing_brief(pg_temp.id_of('project'), '{"dimensions":[]}');
+-- The correction changes what the Brief says (an unchanged version is refused,
+-- brief-requests-plan-steps.test.sql).
+insert into ids select 'v2', public.create_framing_brief(pg_temp.id_of('project'),
+  '{"dimensions":[{"dimension":"timing","items":[{"key":"deadlines","value":null,"lines":["Master final · 5 octobre"]}]}]}');
 select is((select version from public.framing_briefs where id = pg_temp.id_of('v2')), 2,
           'the correction is a new version');
 select is((select reopened_dimensions from public.framing_briefs where id = pg_temp.id_of('v2')),

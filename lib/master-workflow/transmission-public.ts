@@ -18,14 +18,27 @@ const publicSchema = z.discriminatedUnion("state", [
     sentAt: z.string(),
     expiresAt: z.string(),
     acknowledgedAt: z.string().nullable(),
-    // The syntheses sent for the versions of the mix, newest first.
-    feedback: z
+    // The mastering added to the mix link of the same engineer.
+    continued: z.boolean().default(false),
+    // Every version of the engineer's stage, newest first, with what the
+    // label sent and decided: one entry per version (PROJ-BUG-08).
+    versions: z
       .array(
         z.object({
+          masterId: z.string(),
           title: z.string(),
           number: z.number(),
-          summary: z.string(),
-          sentAt: z.string(),
+          // The stage of the version: a link carried on from the mix to the
+          // mastering shows both (PROJ-BUG-09).
+          stage: z.enum(["mix", "mastering"]).optional(),
+          fileName: z.string().nullable(),
+          receivedAt: z.string(),
+          summary: z.string().nullable(),
+          sentAt: z.string().nullable(),
+          decision: z.enum(["approved", "changes_requested"]).nullable(),
+          decidedAt: z.string().nullable(),
+          decidedBy: z.string().nullable(),
+          decisionNote: z.string().nullable(),
         }),
       )
       .default([]),
@@ -40,7 +53,7 @@ const publicSchema = z.discriminatedUnion("state", [
       )
       .default([]),
   }),
-  z.object({ state: z.enum(["replaced", "expired"]) }),
+  z.object({ state: z.enum(["replaced", "expired", "revoked"]) }),
 ]);
 
 export type PublicPackage = z.infer<typeof publicSchema>;
@@ -65,3 +78,16 @@ export const getPublicPackage = cache(
     return parsed.success ? parsed.data : null;
   },
 );
+
+/**
+ * The engineer opened their link (PROJ-UX-09): noted once by the database,
+ * never read as a taking charge. A failure only loses that mark.
+ */
+export async function noteOpened(token: string): Promise<void> {
+  if (!TOKEN.test(token)) return;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("note_master_transmission_opened", {
+    p_token: token,
+  });
+  if (error) console.error("noteOpened:", error.message);
+}

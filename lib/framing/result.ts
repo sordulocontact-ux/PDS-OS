@@ -39,6 +39,11 @@ export type FramingErrorCode =
   | "brief_pending"
   | "strategy_incomplete"
   | "not_shareable"
+  | "requests_required"
+  | "requests_open"
+  | "brief_unchanged"
+  | "justification_required"
+  | "item_not_found"
   | "generic";
 
 export type ActionResult =
@@ -81,6 +86,10 @@ export function fromDatabaseError(
     "brief_not_validated",
     "brief_pending",
     "not_shareable",
+    "requests_required",
+    "requests_open",
+    "brief_unchanged",
+    "justification_required",
   ] as const) {
     if (message.includes(code)) return fail(code);
   }
@@ -90,7 +99,9 @@ export function fromDatabaseError(
     message.includes("version_not_found") ||
     message.includes("brief_not_found") ||
     message.includes("document_not_found") ||
-    message.includes("review_not_found")
+    message.includes("review_not_found") ||
+    message.includes("request_not_found") ||
+    message.includes("item_not_found")
   )
     return fail("not_found");
   if (error?.code === "42501") return fail("forbidden");

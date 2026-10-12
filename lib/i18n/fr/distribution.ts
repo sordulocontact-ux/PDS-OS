@@ -14,6 +14,7 @@ export const distribution = {
     project: "Projet",
   },
   readiness: {
+    listen: (file: string) => `Écouter « ${file} »`,
     title: "Contrôle de préparation",
     description:
       "Ce que le dépôt réutilise, lu dans le module qui en est propriétaire. On corrige à la source : rien n'est recopié ici.",

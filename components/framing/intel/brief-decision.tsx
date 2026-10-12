@@ -8,31 +8,43 @@ import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
+import { TextareaField } from "@/components/auth/textarea-field";
+import { BriefRequestForm } from "@/components/framing/intel/brief-request-form";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import {
   decideBrief,
   generateBrief,
   sendBrief,
 } from "@/lib/framing/actions/brief-versions";
-import { DIMENSIONS, type Dimension } from "@/lib/framing/dimensions";
 import { fr } from "@/lib/i18n/fr";
-import { Checkbox } from "@/components/ui/checkbox";
 
-/** The owner's moves on the latest version: update it, or send it. */
+/**
+ * The owner's moves on the latest version: update it, or send it. A version
+ * that says what the last one sent said asks why it goes again unchanged
+ * (PROJ-BUG-05).
+ */
 export function BriefOwnerActions({
   projectId,
   briefId,
   outdated,
+  unchangedFrom,
 }: {
   projectId: string;
   briefId: string;
   outdated: boolean;
+  // The version sent before, when this one says exactly the same thing.
+  unchangedFrom: number | null;
 }) {
   const t = fr.framingIntel.brief;
+  const tu = fr.briefRequests.unchanged;
   const { pending, run, error, clearError } = useFramingAction();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
+  const [reason, setReason] = useState("");
+  const [tried, setTried] = useState(false);
+  const reasonMissing = unchangedFrom !== null && !reason.trim();
 
   if (outdated)
     return (
@@ -63,15 +75,37 @@ export function BriefOwnerActions({
       >
         <form
           className="flex flex-col gap-4"
+          noValidate
           onSubmit={(event) => {
             event.preventDefault();
+            setTried(true);
+            if (reasonMissing) return;
             run(
-              () => sendBrief(projectId, briefId, note),
+              () => sendBrief(projectId, briefId, note, reason),
               () => setOpen(false),
               { inline: true },
             );
           }}
         >
+          {unchangedFrom !== null && (
+            <>
+              <ToneCallout tone="warning">
+                {tu.warning(unchangedFrom)}
+              </ToneCallout>
+              <TextareaField
+                name="unchanged-reason"
+                label={tu.reasonLabel}
+                required
+                rows={3}
+                maxLength={1000}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                error={
+                  tried && reasonMissing ? fr.dialogs.reasonRequired : undefined
+                }
+              />
+            </>
+          )}
           <div className="grid gap-1.5">
             <Label htmlFor="brief-note">{t.sendNote}</Label>
             <Textarea
@@ -95,33 +129,28 @@ export function BriefOwnerActions({
 }
 
 /**
- * The validator's decision (ticket § 8): « Valider le Brief », or
- * « Demander une modification » with a precise comment and only the
- * dimensions to reopen.
+ * The validator's decision (ticket § 8): « Valider le Brief », refused while
+ * a mandatory request is open (said in the dialog, PROJ-BUG-05), or
+ * « Demander une modification » as anchored requests (PROJ-UX-06).
  */
 export function BriefValidatorActions({
   projectId,
   validationId,
+  openMandatory,
 }: {
   projectId: string;
   validationId: string;
+  openMandatory: number;
 }) {
   const t = fr.framingIntel.brief;
+  const tr = fr.briefRequests;
   const router = useRouter();
   const { pending, run, error, clearError } = useFramingAction({
     inline: true,
   });
   const [approving, setApproving] = useState(false);
   const [asking, setAsking] = useState(false);
-  const [comment, setComment] = useState("");
-  const [dimensions, setDimensions] = useState<Set<Dimension>>(new Set());
-  const toggle = (d: Dimension) =>
-    setDimensions((set) => {
-      const next = new Set(set);
-      if (next.has(d)) next.delete(d);
-      else next.add(d);
-      return next;
-    });
+  const blocked = openMandatory > 0;
 
   return (
     <>
@@ -137,22 +166,25 @@ export function BriefValidatorActions({
           clearError();
           setApproving(next);
         }}
-        title={t.approveTitle}
-        description={t.approveBody}
+        title={blocked ? tr.approveBlockedTitle : t.approveTitle}
+        description={blocked ? tr.blocking(openMandatory) : t.approveBody}
         cancelLabel={fr.framingIntel.guide.cancel}
         closeLabel={fr.framingGuide.close}
         confirmLabel={t.approve}
         pendingLabel={t.sending}
         pending={pending}
         error={error}
-        onConfirm={() =>
-          run(
-            () => decideBrief(projectId, validationId, true, "", []),
-            () => {
-              setApproving(false);
-              router.refresh();
-            },
-          )
+        onConfirm={
+          blocked
+            ? undefined
+            : () =>
+                run(
+                  () => decideBrief(projectId, validationId, true, "", []),
+                  () => {
+                    setApproving(false);
+                    router.refresh();
+                  },
+                )
         }
       />
       <FormDialog
@@ -161,64 +193,23 @@ export function BriefValidatorActions({
           clearError();
           setAsking(next);
         }}
-        title={t.requestChange}
-        description={t.requestBody}
+        title={tr.form.title}
+        description={tr.form.intro}
         closeLabel={fr.framingGuide.close}
+        size="wide"
       >
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
+        <BriefRequestForm
+          pending={pending}
+          error={error}
+          onCancel={() => setAsking(false)}
+          onSubmit={(requests, comment) =>
             run(
               () =>
-                decideBrief(projectId, validationId, false, comment, [
-                  ...dimensions,
-                ]),
+                decideBrief(projectId, validationId, false, comment, requests),
               () => setAsking(false),
-            );
-          }}
-        >
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-medium">
-              {t.dimensionsLabel}
-            </legend>
-            {DIMENSIONS.map((d, index) => (
-              <label key={d} className="flex items-center gap-3 text-body-md">
-                <Checkbox
-                  checked={dimensions.has(d)}
-                  onChange={() => toggle(d)}
-                />
-                {fr.framingIntel.dimensionNumber(index)}{" "}
-                {fr.framingIntel.dimensions[d]}
-              </label>
-            ))}
-          </fieldset>
-          <div className="grid gap-1.5">
-            <Label htmlFor="brief-comment" required>
-              {t.commentLabel}
-            </Label>
-            <Textarea
-              id="brief-comment"
-              value={comment}
-              maxLength={2000}
-              rows={4}
-              onChange={(e) => setComment(e.target.value)}
-              required
-            />
-          </div>
-          {error && <FormMessage kind="error">{error}</FormMessage>}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="submit"
-              size="lg"
-              disabled={
-                pending || comment.trim() === "" || dimensions.size === 0
-              }
-            >
-              {t.submitChange}
-            </Button>
-          </div>
-        </form>
+            )
+          }
+        />
       </FormDialog>
     </>
   );

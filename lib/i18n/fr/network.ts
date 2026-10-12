@@ -118,8 +118,19 @@ export const network = {
       "Une personne ou une organisation : elle sera partagée avec toute l'équipe.",
     kind: "Type",
     name: "Nom",
+    // A professional name is an identity on its own (PROJ-BUG-07): the civil
+    // names are asked only where a document needs them.
+    nameLabel: {
+      person: "Nom ou nom professionnel",
+      organization: "Nom",
+    },
+    nameHint: {
+      person:
+        "Le nom sous lequel la personne travaille. Ses nom et prénom civils ne sont demandés que pour un contrat ou une fiche de renseignements.",
+      organization: "",
+    },
     namePlaceholder: {
-      person: "Ex. Inès Morel",
+      person: "Ex. Inès Morel, ou DJ Lumen",
       organization: "Ex. Studio Lumière",
     },
     // « Métiers » of a person, « Activités » of an organization.

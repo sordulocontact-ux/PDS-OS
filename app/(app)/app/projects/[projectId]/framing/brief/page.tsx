@@ -8,19 +8,32 @@ import {
   BriefOwnerActions,
   BriefValidatorActions,
 } from "@/components/framing/intel/brief-decision";
+import {
+  BriefCompare,
+  defaultComparison,
+} from "@/components/framing/intel/brief-compare";
 import { BriefHistory } from "@/components/framing/intel/brief-history";
+import { FramingReadiness } from "@/components/framing/intel/framing-readiness";
+import { BriefRequestsSection } from "@/components/framing/requests/brief-requests-section";
 import { EmptyState } from "@/components/shell/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { assessFraming } from "@/lib/framing/assess";
 import { briefFileName } from "@/lib/framing/brief-pdf";
+import {
+  blocksValidation,
+  isOpenRequest,
+} from "@/lib/framing/brief-request-view";
+import { loadBriefRequests } from "@/lib/framing/brief-requests";
 import {
   buildBriefSnapshot,
   snapshotMatches,
   snapshotOf,
 } from "@/lib/framing/brief-snapshot";
+import { framingReadiness } from "@/lib/framing/readiness";
 import type { Dimension } from "@/lib/framing/dimensions";
 import { loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { fr } from "@/lib/i18n/fr";
@@ -42,14 +55,38 @@ const dateFormat = new Intl.DateTimeFormat("fr-FR", {
  */
 export default async function FramingBriefPage({
   params,
+  searchParams,
 }: PageProps<"/app/projects/[projectId]/framing/brief">) {
   const { projectId } = await params;
+  const sp = await searchParams;
+  const showAll = sp.demandes === "toutes";
+  const compareParam = Number(
+    Array.isArray(sp.comparer) ? sp.comparer[0] : sp.comparer,
+  );
   const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
-  const k = await loadFramingKnowledge(projectId, access);
+  const [k, loadedRequests] = await Promise.all([
+    loadFramingKnowledge(projectId, access),
+    loadBriefRequests(projectId),
+  ]);
   if (!k) notFound();
+  const requests = loadedRequests ?? [];
+  // The page's URL with its filter and comparison, one changed at a time.
+  const hrefWith = (change: { all?: boolean; compare?: number | null }) => {
+    const params = new URLSearchParams();
+    if (change.all ?? showAll) params.set("demandes", "toutes");
+    const compare =
+      change.compare === undefined
+        ? Number.isInteger(compareParam) && compareParam > 0
+          ? compareParam
+          : null
+        : change.compare;
+    if (compare) params.set("comparer", String(compare));
+    const query = params.toString();
+    return `${routes.projectFramingBrief(projectId)}${query ? `?${query}` : ""}`;
+  };
   const t = fr.framingIntel;
   const canEdit = canEditProject(access, project);
   const stage = k.framing.stage?.state ?? "not_started";
@@ -61,7 +98,7 @@ export default async function FramingBriefPage({
   const tools = (
     <div className="flex flex-wrap justify-end gap-2">
       <BriefActions
-        pdfHref={routes.projectFramingBriefPdf(projectId)}
+        pdfHref={routes.projectFramingBriefPdf(projectId, latest?.version)}
         fileName={briefFileName(project.title)}
       />
     </div>
@@ -105,6 +142,31 @@ export default async function FramingBriefPage({
   const isValidator =
     latest.state === "sent" && pending?.validatorPersonId === access.personId;
   const request = k.briefs.find((b) => b.change_comment);
+  const openRequests = requests.filter(isOpenRequest);
+  // The last version sent before this one, when this one says the same thing
+  // (PROJ-BUG-05): sending it again asks why.
+  const lastSent = k.briefs.find(
+    (b) => b.version < latest.version && b.sent_at,
+  );
+  const lastSentSnapshot = lastSent ? snapshotOf(lastSent.content) : null;
+  const unchangedFrom =
+    lastSent && lastSentSnapshot && snapshotMatches(lastSentSnapshot, stored)
+      ? lastSent.version
+      : null;
+  const against =
+    Number.isInteger(compareParam) && compareParam > 0
+      ? compareParam
+      : defaultComparison(k.briefs, latest);
+  const working =
+    canEdit && (stage === "not_started" || stage === "in_progress");
+  // Shown in the document: what is open, and what was asked on or answered
+  // by this version.
+  const inPlace = requests.filter(
+    (r) =>
+      isOpenRequest(r) ||
+      r.briefId === latest.id ||
+      r.resolvedBriefId === latest.id,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -128,15 +190,25 @@ export default async function FramingBriefPage({
           </Link>
         </div>
       )}
-      {latest.state === "changes_requested" && request?.change_comment && (
+      {openRequests.length > 0 ? (
         <ToneCallout tone="danger">
-          {t.guide.correction(
-            request.change_comment,
-            (latest.reopened_dimensions ?? [])
-              .map((d) => t.dimensions[d as Dimension])
-              .join(", "),
-          )}
+          <span className="font-semibold">
+            {fr.briefRequests.callout(openRequests.length)}
+          </span>{" "}
+          {fr.briefRequests.calloutBody}
         </ToneCallout>
+      ) : (
+        latest.state === "changes_requested" &&
+        request?.change_comment && (
+          <ToneCallout tone="danger">
+            {t.guide.correction(
+              request.change_comment,
+              (latest.reopened_dimensions ?? [])
+                .map((d) => t.dimensions[d as Dimension])
+                .join(", "),
+            )}
+          </ToneCallout>
+        )
       )}
       {outdated && <ToneCallout tone="warning">{t.brief.outdated}</ToneCallout>}
 
@@ -161,6 +233,7 @@ export default async function FramingBriefPage({
               projectId={projectId}
               briefId={latest.id}
               outdated={outdated}
+              unchangedFrom={unchangedFrom}
             />
           )}
           {canEdit && latest.state === "changes_requested" && (
@@ -175,13 +248,31 @@ export default async function FramingBriefPage({
             <BriefValidatorActions
               projectId={projectId}
               validationId={pending.id}
+              openMandatory={requests.filter(blocksValidation).length}
             />
           )}
         </div>
       </div>
 
+      <FramingReadiness readiness={framingReadiness(assessFraming(k))} />
+      <BriefRequestsSection
+        projectId={projectId}
+        requests={requests}
+        versions={k.briefs}
+        showAll={showAll}
+        hrefOf={(all) => hrefWith({ all })}
+        canAnswer={working}
+        viewerPersonId={access.personId}
+      />
+      <BriefCompare
+        versions={k.briefs}
+        shown={latest}
+        against={against}
+        hrefOf={(version) => hrefWith({ compare: version })}
+      />
       <BriefDocument
         snapshot={stored}
+        requests={inPlace}
         eyebrow={
           <>
             <span>{t.brief.title}</span>

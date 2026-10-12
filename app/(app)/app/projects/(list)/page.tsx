@@ -4,10 +4,11 @@ import {
   IconPlus,
 } from "nucleo-sharp-essential";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { archiveViews } from "@/components/archive/archive-views";
 import { FormMessage } from "@/components/auth/form-message";
-import { ProjectsTable } from "@/components/projects/projects-table";
+import { ProjectsBrowser } from "@/components/projects/projects-browser";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
@@ -19,6 +20,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { viewHref } from "@/lib/ui/view-href";
 import { listProjectDrafts } from "@/lib/projects/drafts";
 import { listProjects } from "@/lib/projects/queries";
 
@@ -55,39 +57,41 @@ export default async function ProjectsPage({
       />
       {error ? (
         <FormMessage kind="error">{t.loadError}</FormMessage>
-      ) : (
+      ) : !listed && !archived && !counts?.archived ? (
+        <EmptyState
+          icon={IconFolderOpen}
+          title={t.emptyTitle}
+          body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
+          action={newProject}
+        />
+      ) : !listed && archived ? (
         <DataTableViews
           label={fr.records.view.label}
           views={archiveViews({ path: routes.projects, archived, counts })}
         >
-          {!listed ? (
-            archived ? (
-              <EmptyState
-                icon={IconBoxArchive}
-                title={fr.records.archivedEmpty.project}
-                body={fr.records.archivedEmptyBody}
-              />
-            ) : (
-              <EmptyState
-                icon={IconFolderOpen}
-                title={t.emptyTitle}
-                body={canCreate ? t.emptyBody : t.emptyBodyReadOnly}
-                action={newProject}
-              />
-            )
-          ) : (
-            <ProjectsTable
-              selectable
-              projects={projects}
-              drafts={drafts}
-              rights={{
-                canEdit: can(access, "create_projects"),
-                canArchive,
-                archived,
-              }}
-            />
-          )}
+          <EmptyState
+            icon={IconBoxArchive}
+            title={fr.records.archivedEmpty.project}
+            body={fr.records.archivedEmptyBody}
+          />
         </DataTableViews>
+      ) : (
+        // Search, combined filters and tabs with exact counts (PROJ-UX-01).
+        <Suspense fallback={null}>
+          <ProjectsBrowser
+            projects={projects}
+            drafts={drafts}
+            archived={archived}
+            archivedCount={counts ? counts.archived : null}
+            archivedHref={viewHref(routes.projects, { view: "archived" })}
+            liveHref={routes.projects}
+            rights={{
+              canEdit: can(access, "create_projects"),
+              canArchive,
+              archived,
+            }}
+          />
+        </Suspense>
       )}
     </PageContainer>
   );

@@ -11,7 +11,12 @@ import {
   snapshotMatches,
   snapshotOf,
 } from "@/lib/framing/brief-snapshot";
-import { DIMENSIONS } from "@/lib/framing/dimensions";
+import {
+  DIMENSIONS,
+  QUESTION_KEYS,
+  QUESTIONS,
+  type QuestionKey,
+} from "@/lib/framing/dimensions";
 import { loadFramingKnowledge } from "@/lib/framing/knowledge";
 import {
   fail,
@@ -57,19 +62,25 @@ export async function generateBrief(projectId: string): Promise<ActionResult> {
   return done(projectId, error);
 }
 
-/** « Envoyer en validation »: the latest version, if it is still the Cadrage. */
+/**
+ * « Envoyer en validation »: the latest version, if it is still the Cadrage.
+ * A version that says exactly what the last one sent said goes only with a
+ * written reason (PROJ-BUG-05), checked again by the database.
+ */
 export async function sendBrief(
   projectId: string,
   briefId: string,
   note: string,
+  unchangedReason = "",
 ): Promise<ActionResult> {
   const p = z
     .object({
       projectId: z.uuid(),
       briefId: z.uuid(),
       note: z.string().max(500),
+      unchangedReason: z.string().trim().max(1000),
     })
-    .safeParse({ projectId, briefId, note });
+    .safeParse({ projectId, briefId, note, unchangedReason });
   if (!p.success) return fail("invalid_input");
   const access = await requireApproved();
   const knowledge = await loadFramingKnowledge(projectId, access);
@@ -82,39 +93,59 @@ export async function sendBrief(
   const { error } = await supabase.rpc("send_framing_brief", {
     p_brief_id: briefId,
     p_note: note,
+    p_unchanged_reason: p.data.unchangedReason || undefined,
   });
   return done(projectId, error);
 }
 
+const request = z.object({
+  dimension: z.enum(DIMENSIONS),
+  questionKey: z
+    .enum(QUESTION_KEYS as [QuestionKey, ...QuestionKey[]])
+    .nullable(),
+  body: z.string().trim().min(1).max(2000),
+  mandatory: z.boolean(),
+});
+export type BriefRequestInput = z.input<typeof request>;
+
 /**
- * The validator's decision: « Valider le Brief », or « Demander une
- * modification » with a precise comment and the dimensions to reopen.
+ * The validator's decision: « Valider le Brief » (refused while a mandatory
+ * request is open), or « Demander une modification » as a list of requests,
+ * each anchored to a dimension or a question (PROJ-UX-06); the dimensions to
+ * reopen follow from them.
  */
 export async function decideBrief(
   projectId: string,
   validationId: string,
   approve: boolean,
   comment: string,
-  dimensions: string[],
+  requests: BriefRequestInput[],
 ): Promise<ActionResult> {
   const p = z
     .object({
       validationId: z.uuid(),
       comment: z.string().trim().max(2000),
-      dimensions: z.array(z.enum(DIMENSIONS)).max(DIMENSIONS.length),
+      requests: z.array(request).max(30),
     })
-    .safeParse({ validationId, comment, dimensions });
+    .safeParse({ validationId, comment, requests });
   if (!p.success) return fail("invalid_input");
-  if (!approve && !p.data.comment) return fail("reason_required");
-  if (!approve && p.data.dimensions.length === 0)
-    return fail("dimensions_required");
+  // A question always belongs to the dimension it is asked under.
+  if (
+    p.data.requests.some(
+      (r) =>
+        r.questionKey && QUESTIONS[r.questionKey].dimension !== r.dimension,
+    )
+  )
+    return fail("invalid_input");
+  if (!approve && p.data.requests.length === 0)
+    return fail("requests_required");
   await requireApproved();
   const supabase = await createClient();
   const { error } = await supabase.rpc("decide_framing_brief", {
     p_validation_id: p.data.validationId,
     p_approve: approve,
     p_comment: p.data.comment,
-    p_dimensions: approve ? undefined : p.data.dimensions,
+    p_requests: approve ? undefined : (p.data.requests as never),
   });
   return done(projectId, error);
 }

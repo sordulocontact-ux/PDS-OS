@@ -134,7 +134,8 @@ export function ContactForm({
       )}
       <Field
         name="name"
-        label={t.name}
+        label={t.nameLabel[kind]}
+        hint={t.nameHint[kind] || undefined}
         required
         maxLength={200}
         autoComplete="off"

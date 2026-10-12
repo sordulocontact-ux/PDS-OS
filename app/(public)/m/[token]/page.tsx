@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 
 import { PublicPackageView } from "@/components/master-workflow/public-package";
 import { fr } from "@/lib/i18n/fr";
-import { getPublicPackage } from "@/lib/master-workflow/transmission-public";
+import {
+  getPublicPackage,
+  noteOpened,
+} from "@/lib/master-workflow/transmission-public";
 
 const t = fr.masterWorkflow.publicPackage;
 
@@ -21,6 +24,8 @@ export default async function MasterPackagePage({
   const { token } = await params;
   const data = await getPublicPackage(token);
   if (!data) notFound();
+  if (data.state === "open" || data.state === "received")
+    await noteOpened(token);
 
   return (
     <main className="flex flex-1 justify-center bg-muted/40 px-4 py-12 sm:py-16">

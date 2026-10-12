@@ -13,7 +13,10 @@ import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export type TransmitResult =
-  { ok: true; token: string } | { ok: false; error: string };
+  // `continued`: added to the mix link of the same engineer, no new link.
+  | { ok: true; token: string; continued: false }
+  | { ok: true; token: null; continued: true }
+  | { ok: false; error: string };
 
 /**
  * "Transmettre au mixeur" / "… au mastering", or "Relancer" (a new sending
@@ -28,6 +31,8 @@ export async function transmitPackage(
   projectId: string,
   role: string,
   note: string,
+  // The owner chose to send the titles without stems (PROJ-UX-09).
+  withoutStems = false,
 ): Promise<TransmitResult> {
   const t = fr.masterWorkflow.mix.errors;
   const input = z
@@ -133,20 +138,25 @@ export async function transmitPackage(
     constraints: view.brief.constraints,
     deliverables: view.brief.deliverables.map((key) => b.deliverables[key]),
     revisions: view.brief.revisions,
-    ...(input.data.role === "mix"
-      ? {
-          mixV1Due: view.brief.dates.mixV1Due,
-          mixFinalDue: view.brief.dates.mixFinalDue,
-          masteringDue: null,
-          masterFinalDue: null,
-        }
-      : {
-          mixV1Due: null,
-          mixFinalDue: null,
-          masteringDue: view.brief.dates.masteringDue,
-          masterFinalDue: view.brief.dates.masterFinalDue,
-        }),
+    // Every date of the Brief goes, each with its meaning (PROJ-BUG-07).
+    mixV1Due: view.brief.dates.mixV1Due,
+    mixFinalDue: view.brief.dates.mixFinalDue,
+    masteringDue: view.brief.dates.masteringDue,
+    masterFinalDue: view.brief.dates.masterFinalDue,
+    releaseDue: project.dueDate,
+    formats: view.brief.formats,
   };
+
+  // A mix package without stems for a title leaves only on purpose, the
+  // titles named on the sending (the database checks it again).
+  const noStems =
+    input.data.role === "mix"
+      ? pack.titles
+          .filter((title) => title.stems.length === 0)
+          .map((x) => x.title)
+      : [];
+  if (noStems.length > 0 && !withoutStems)
+    return { ok: false, error: t.stemsMissing(noStems) };
 
   const { data: token, error: sendError } = await supabase.rpc(
     "create_master_transmission",
@@ -156,15 +166,91 @@ export async function transmitPackage(
       p_package: pack,
       p_note: input.data.note,
       p_expires_at: expiresAt.toISOString(),
+      p_derogations: noStems.length ? { withoutStems: noStems } : {},
     },
   );
   if (sendError || !token) {
     console.error("transmitToMixer:", sendError?.code, sendError?.message);
     return {
       ok: false,
-      error: sendError?.code === "42501" ? t.forbidden : t.failed,
+      error:
+        sendError?.code === "42501"
+          ? t.forbidden
+          : sendError?.message.includes("stems_missing")
+            ? t.stemsMissing(noStems)
+            : t.failed,
     };
   }
   revalidatePath(routes.projectMasterStep(project.id, input.data.role));
-  return { ok: true, token };
+  return token === "continued"
+    ? { ok: true, token: null, continued: true }
+    : { ok: true, token, continued: false };
+}
+
+const transmissionId = z.object({ projectId: z.uuid(), id: z.uuid() });
+
+/**
+ * « J'ai envoyé le lien » (PROJ-UX-09): the owner says the link left by
+ * e-mail or message; PDS OS sends nothing itself.
+ */
+export async function markTransmissionSent(
+  projectId: string,
+  id: string,
+  role: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const t = fr.masterWorkflow.mix.errors;
+  const input = transmissionId
+    .extend({ role: z.enum(["mix", "mastering"]) })
+    .safeParse({ projectId, id, role });
+  if (!input.success) return { ok: false, error: t.failed };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("mark_master_transmission_sent", {
+    p_transmission_id: input.data.id,
+  });
+  if (error) {
+    console.error("markTransmissionSent:", error.code, error.message);
+    return {
+      ok: false,
+      error: error.code === "42501" ? t.forbidden : t.failed,
+    };
+  }
+  revalidatePath(
+    routes.projectMasterStep(input.data.projectId, input.data.role),
+  );
+  return { ok: true };
+}
+
+/** « Révoquer le lien »: it stops working at once, with its reason. */
+export async function revokeTransmission(
+  projectId: string,
+  id: string,
+  role: string,
+  reason: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const t = fr.masterWorkflow.mix.errors;
+  const input = transmissionId
+    .extend({
+      role: z.enum(["mix", "mastering"]),
+      reason: z.string().trim().min(1).max(500),
+    })
+    .safeParse({ projectId, id, role, reason });
+  if (!input.success) return { ok: false, error: fr.dialogs.reasonRequired };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("revoke_master_transmission", {
+    p_transmission_id: input.data.id,
+    p_reason: input.data.reason,
+  });
+  if (error) {
+    console.error("revokeTransmission:", error.code, error.message);
+    return {
+      ok: false,
+      error: error.code === "42501" ? t.forbidden : t.failed,
+    };
+  }
+  revalidatePath(
+    routes.projectMasterStep(input.data.projectId, input.data.role),
+  );
+  return { ok: true };
 }

@@ -42,12 +42,15 @@ export function WorkflowCards({
   states,
   legalDone,
   canLaunch,
+  pilots = {},
 }: {
   projectId: string;
   workflows: WorkflowKey[];
   states: Partial<Record<WorkflowKey, WorkflowState | "restricted">>;
   legalDone: LegalStepKey[];
   canLaunch: boolean;
+  // Who pilots each launchable workflow in the plan (PROJ-UX-07).
+  pilots?: Partial<Record<"strategy" | "master" | "legal", string | null>>;
 }) {
   const t = fr.workflowStatus;
   return (
@@ -156,7 +159,11 @@ export function WorkflowCards({
             {state.status === "not_started" && canLaunch && launch && (
               // Above the stretched link: its own control.
               <div className="relative z-10">
-                <LaunchWorkflowButton projectId={projectId} workflow={launch} />
+                <LaunchWorkflowButton
+                  projectId={projectId}
+                  workflow={launch}
+                  pilot={pilots[launch] ?? null}
+                />
               </div>
             )}
           </li>

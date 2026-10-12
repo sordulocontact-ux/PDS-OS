@@ -4,7 +4,7 @@
 -- reminder replacing the previous link, never written directly.
 -- Run with `supabase test db`.
 begin;
-select plan(14);
+select plan(24);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -110,6 +110,62 @@ select is((select public.get_master_transmission(pg_temp.token_of('first')) ->> 
           'replaced', 'the previous link is replaced');
 select is(public.acknowledge_master_transmission(pg_temp.token_of('first')), 'replaced',
           'a replaced link cannot be acknowledged');
+reset role;
+
+-- A sending's life (PROJ-UX-09) -------------------------------------------------
+set local role anon;
+select public.note_master_transmission_opened(pg_temp.token_of('second'));
+reset role;
+select ok((select opened_at is not null and acknowledged_at is null from public.master_transmissions
+            where token_hash = encode(sha256(convert_to(pg_temp.token_of('second'), 'UTF8')), 'hex')),
+          'opening the link is noted, and is not taking charge');
+select pg_temp.act_as(pg_temp.id_of('owner'));
+insert into tokens select 'second_id', id::text from public.master_transmissions
+ where token_hash = encode(sha256(convert_to(pg_temp.token_of('second'), 'UTF8')), 'hex');
+select lives_ok($$ select public.mark_master_transmission_sent(pg_temp.token_of('second_id')::uuid) $$,
+                'the owner says the link was sent');
+select throws_ok($$ select public.revoke_master_transmission(pg_temp.token_of('second_id')::uuid, ' ') $$,
+                 '23514', 'reason_required', 'revoking a link says why');
+select lives_ok($$ select public.revoke_master_transmission(pg_temp.token_of('second_id')::uuid,
+                    'Mauvais destinataire') $$, 'the owner revokes the link');
+reset role;
+set local role anon;
+select is((select public.get_master_transmission(pg_temp.token_of('second')) ->> 'state'),
+          'revoked', 'a revoked link says it was turned off');
+reset role;
+
+-- Mix then mastering (PROJ-BUG-09) ---------------------------------------------
+select pg_temp.act_as(pg_temp.id_of('owner'));
+insert into tokens select 'third', public.create_master_transmission(
+  pg_temp.id_of('project'), 'mix', '{"titles": []}'::jsonb, null, now() + interval '30 days');
+update public.master_briefs set mastering_same_engineer = true where project_id = pg_temp.id_of('project');
+select is(public.create_master_transmission(pg_temp.id_of('project'), 'mastering',
+            '{"role": "mastering", "titles": []}'::jsonb, null, now() + interval '90 days'),
+          'continued', 'the same engineer keeps their link: the mastering is added to it');
+reset role;
+set local role anon;
+select is((select (public.get_master_transmission(pg_temp.token_of('third')) ->> 'continued')
+           || ' ' || (public.get_master_transmission(pg_temp.token_of('third')) -> 'package' ->> 'role')),
+          'true mastering', 'the mix link now shows the mastering package');
+select ok((select (public.get_master_transmission(pg_temp.token_of('third')) ->> 'expiresAt')::timestamptz
+                  > now() + interval '80 days'),
+          'the link lives as long as the mastering needs');
+reset role;
+insert into public.network_contacts (organization_id, kind, name, roles)
+values (pg_temp.id_of('org'), 'person', 'Mixeur ' || (select v from vars where k = 'tag') || ' bis',
+        array['engineer']);
+update public.master_briefs set mastering_same_engineer = false,
+       mastering_contact_id = (select id from public.network_contacts
+                                where name = 'Mixeur ' || (select v from vars where k = 'tag') || ' bis')
+ where project_id = pg_temp.id_of('project');
+select pg_temp.act_as(pg_temp.id_of('owner'));
+select ok(public.create_master_transmission(pg_temp.id_of('project'), 'mastering',
+            '{"role": "mastering", "titles": []}'::jsonb, null, now() + interval '90 days') ~ '^[0-9a-f]{64}$',
+          'another engineer gets a link of their own, even with a look-alike name');
+reset role;
+set local role anon;
+select is((select public.get_master_transmission(pg_temp.token_of('third')) -> 'package' ->> 'role'),
+          null, 'the mix link no longer carries a mastering sent to someone else');
 reset role;
 
 -- Others ------------------------------------------------------------------------

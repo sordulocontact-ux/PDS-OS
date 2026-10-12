@@ -186,6 +186,11 @@ export type ProjectListItem = {
   latestAssignment: Pick<Assignment, "status" | "assigneePersonId"> | null;
   currentStage: ProjectStage | null;
   stageCount: number;
+  // PROJ-UX-01: who answers for it (the owner once launched, otherwise the
+  // person it was handed to) and its date (null: « Non définie »).
+  responsibleName: string | null;
+  responsiblePersonId: string | null;
+  dueDate: string | null;
 };
 
 export type ProjectDetail = {

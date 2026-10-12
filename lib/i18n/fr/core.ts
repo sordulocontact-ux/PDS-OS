@@ -10,6 +10,20 @@ export const core = {
     close: "Fermer",
     saving: "Enregistrement…",
   },
+  // « Exporter en PDF » (components/ui/pdf-export-button.tsx): the
+  // generation and the download fail separately (PROJ-BUG-05).
+  pdf: {
+    ready: "PDF téléchargé.",
+    expired: "Votre session a expiré. Reconnectez-vous, puis réessayez.",
+    notPdf:
+      "Le serveur n'a pas renvoyé de PDF : rien n'a été téléchargé. Réessayez.",
+    downloadFailed:
+      "Le PDF est prêt, mais le téléchargement a échoué. Réessayez.",
+  },
+  // components/ui/audio-file.tsx
+  audioFile: {
+    download: "Télécharger",
+  },
   app: {
     name: "PDS OS",
     description: "Gestion du cycle de vie des sorties musicales.",

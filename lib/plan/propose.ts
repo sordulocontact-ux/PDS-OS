@@ -42,7 +42,38 @@ export type ProposedItem = {
   dependsOn: PlanWorkflow[];
   specialized: string | null;
   ownerPersonId: string | null;
+  // PROJ-UX-07: who does it (the pilot by default) and for when (the
+  // Cadrage's deadline of its kind, when there is one).
+  executorPersonId: string | null;
+  dueDate: string | null;
 };
+
+// The Cadrage's deadlines that date a workflow (PROJ-UX-07: « une échéance
+// de cadrage alimente le bon workflow »).
+const DEADLINE_WORKFLOW: Record<string, PlanWorkflow> = {
+  master_final: "master",
+  delivery: "delivery",
+  release: "delivery",
+  promotion: "strategy",
+};
+
+/** The earliest confirmed deadline of the Cadrage that dates a workflow. */
+export function framingDueDate(
+  k: FramingKnowledge,
+  workflow: PlanWorkflow,
+): string | null {
+  return (
+    k.deadlines
+      .filter(
+        (d) =>
+          d.review_status === "confirmed" &&
+          d.due_date &&
+          DEADLINE_WORKFLOW[d.kind] === workflow,
+      )
+      .map((d) => d.due_date as string)
+      .sort()[0] ?? null
+  );
+}
 
 // A target date this close makes the production the critical path.
 const CRITICAL_DAYS = 42;
@@ -82,6 +113,8 @@ export function proposePlan(k: FramingKnowledge): ProposedItem[] {
       dependsOn: [],
       specialized: null,
       ownerPersonId: owner,
+      executorPersonId: null,
+      dueDate: framingDueDate(k, key),
       ...extra,
     });
 
@@ -184,6 +217,8 @@ export function proposePlan(k: FramingKnowledge): ProposedItem[] {
       dependsOn: [],
       specialized: null,
       ownerPersonId: null,
+      executorPersonId: null,
+      dueDate: null,
     }),
   );
   return items;

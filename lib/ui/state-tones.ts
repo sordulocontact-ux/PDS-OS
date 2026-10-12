@@ -25,6 +25,18 @@ export const projectStatusTone: Record<string, Tone> = {
   launched: "info",
 };
 
+/** A project's administrative status in the list (PROJ-UX-01), apart from
+ * its phase: the handover's tones, then running and done. */
+export const adminStatusTone: Record<string, Tone> = {
+  draft: "neutral",
+  not_transmitted: "neutral",
+  pending: "warning",
+  clarification_requested: "warning",
+  refused: "danger",
+  running: "info",
+  done: "success",
+};
+
 /** A draft of the new project form, listed with the projects: nothing yet. */
 export const draftTone: Tone = "neutral";
 
@@ -377,6 +389,7 @@ export const transmissionStateTone: Record<string, Tone> = {
   to_remind: "warning",
   expired: "danger",
   replaced: "neutral",
+  revoked: "neutral",
 };
 
 /** A version of the mix (lib/master-workflow/mix-types.ts): the team's
@@ -421,12 +434,13 @@ export const briefVersionTone: Record<string, Tone> = {
   superseded: "neutral",
 };
 
-/** A workflow of the Plan du Projet: started, waiting for its go, or
- * following its own stage (Conception, Livraison). */
-export const planWorkflowTone: Record<string, Tone> = {
-  launched: "info",
-  waiting: "neutral",
-  follows: "neutral",
+/** A request on the Brief (PROJ-UX-06): open asks for work, a correction or
+ * a withdrawal closes it, a justification closes it without change. */
+export const briefRequestTone: Record<string, Tone> = {
+  open: "warning",
+  modified: "success",
+  justified: "neutral",
+  withdrawn: "neutral",
 };
 
 // Common status of a workflow (ticket « Architecture globale » § 8,

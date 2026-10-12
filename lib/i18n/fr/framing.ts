@@ -211,6 +211,14 @@ export const framing = {
     strategy_incomplete:
       "Complétez les dimensions de la stratégie : le Brief de sortie n'est pas encore établi.",
     not_shareable: "Ce document ne se partage pas par lien.",
+    requests_required: "Ajoutez au moins une demande de correction.",
+    requests_open:
+      "Une demande de correction obligatoire est encore ouverte : elle doit être corrigée, justifiée ou levée d'abord.",
+    brief_unchanged:
+      "Cette version dit exactement la même chose que la précédente : corrigez le cadrage, ou expliquez pourquoi vous la renvoyez telle quelle.",
+    justification_required:
+      "Rien n'a changé à cet endroit depuis la demande : mettez le Brief à jour, ou écrivez pourquoi vous ne le modifiez pas.",
+    item_not_found: "Cette étape n'existe plus.",
     generic: "Une erreur est survenue. Réessayez.",
   },
 } as const;

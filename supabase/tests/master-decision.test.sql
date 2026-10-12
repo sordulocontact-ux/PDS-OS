@@ -2,7 +2,7 @@
 -- (supabase/migrations/20261005014001_master_mix_decisions.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(12);
+select plan(19);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -97,8 +97,11 @@ select throws_ok($$ select public.decide_mix_version(pg_temp.version(1), 'approv
 select lives_ok($$ select public.decide_mix_version(pg_temp.version(2), 'changes_requested', '  Plus de basse  ') $$,
   'the validator asks for a change');
 select is((select (decision, decision_note, decided_by)::text from public.master_mix_versions where id = pg_temp.version(2)),
-          ('changes_requested', 'Plus de basse', pg_temp.id_of('creative_person'))::text,
-          'the decision, its note and who decided are kept');
+          ('changes_requested', null, pg_temp.id_of('creative_person'))::text,
+          'the decision and who decided are kept');
+select is((select (feedback_summary, status)::text from public.master_mix_versions where id = pg_temp.version(2)),
+          ('Plus de basse', 'feedback_sent')::text,
+          'with nothing sent yet, the note is the feedback sent to the engineer, written once (PROJ-BUG-08)');
 select throws_ok($$ select public.decide_mix_version(pg_temp.version(2), 'approved', null) $$,
   'P0001', 'already_decided', 'a decision is never changed');
 reset role;
@@ -131,12 +134,40 @@ select is((select number from public.master_mix_versions
 -- Without a validator, the owner -----------------------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('owner'));
 update public.master_briefs set validator_person_id = null where project_id = pg_temp.id_of('project');
-select lives_ok($$ select public.decide_mix_version(pg_temp.version(4), 'changes_requested', null) $$,
+select throws_ok($$ select public.decide_mix_version(pg_temp.version(4), 'changes_requested', null) $$,
+  '23514', 'note_required', 'a change request with nothing sent says what to change');
+select lives_ok($$ select public.decide_mix_version(pg_temp.version(4), 'changes_requested', 'Moins de réverb') $$,
   'without a validator, the owner decides');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other'));
 select throws_ok($$ select public.decide_mix_version(pg_temp.version(4), 'approved', null) $$,
   '42501', null, 'nobody else decides');
+reset role;
+
+-- One flow of feedback (PROJ-BUG-08) -------------------------------------------------------
+reset role;
+insert into ids values ('key', gen_random_uuid());
+select pg_temp.act_as(pg_temp.id_of('owner'));
+select lives_ok($$ insert into public.master_mix_comments
+    (organization_id, project_id, version_id, body, timecode_seconds, client_key)
+  values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.version(4), 'Voix trop basse', 83,
+          pg_temp.id_of('key')) $$, 'a comment keeps its timecode');
+select throws_ok($$ insert into public.master_mix_comments
+    (organization_id, project_id, version_id, body, client_key)
+  values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.version(4), 'Voix trop basse',
+          pg_temp.id_of('key')) $$, '23505', null, 'the same request sent twice adds the comment once');
+select throws_ok($$ insert into public.master_mix_comments
+    (organization_id, project_id, version_id, body, timecode_seconds)
+  values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.version(4), 'x', -3) $$,
+  '23514', null, 'a timecode is a position in the track');
+select pg_temp.add_audio('v5', 'mix');
+update public.master_mix_versions set feedback_summary = 'Synthèse de l''équipe' where id = pg_temp.version(5);
+select public.send_mix_feedback(pg_temp.version(5));
+select lives_ok($$ select public.decide_mix_version(pg_temp.version(5), 'changes_requested', 'Et la caisse claire') $$,
+  'a change request after the synthesis was sent');
+select is((select (feedback_summary, decision_note)::text from public.master_mix_versions where id = pg_temp.version(5)),
+          ('Synthèse de l''équipe', 'Et la caisse claire')::text,
+          'the synthesis stays as sent, the note completes it');
 reset role;
 
 select * from finish();

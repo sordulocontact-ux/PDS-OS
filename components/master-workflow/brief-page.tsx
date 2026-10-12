@@ -2,6 +2,10 @@ import { BriefBudget } from "@/components/master-workflow/brief-budget";
 import { BriefExchanges } from "@/components/master-workflow/brief-exchanges";
 import { BriefForm } from "@/components/master-workflow/brief-form";
 import { BriefHeader } from "@/components/master-workflow/brief-header";
+import {
+  BriefNextStep,
+  type NextStep,
+} from "@/components/master-workflow/brief-next-step";
 import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { MasterFactAction } from "@/components/master-workflow/master-fact-action";
 import { PrepareExchangeButton } from "@/components/master-workflow/prepare-exchange-button";
@@ -14,7 +18,7 @@ import { toParisLocalInput } from "@/lib/calls/format";
 import { fr } from "@/lib/i18n/fr";
 import type { BriefView } from "@/lib/master-workflow/brief-types";
 import type { BriefQuestionsView } from "@/lib/master-workflow/question-types";
-import { formatShortDate } from "@/lib/release/format";
+import { formatDateTime } from "@/lib/calls/format";
 
 /**
  * The Brief Mix/Master of a project: the source of each title as the État
@@ -27,9 +31,12 @@ import { formatShortDate } from "@/lib/release/format";
 export function BriefPage({
   view,
   questions,
+  next,
 }: {
   view: BriefView;
   questions: BriefQuestionsView;
+  // What the sending still needs, and whether it already left (PROJ-UX-08).
+  next: NextStep;
 }) {
   const t = fr.masterWorkflow.brief;
   return (
@@ -52,11 +59,14 @@ export function BriefPage({
           )
         }
       />
-      <p className="-mt-4 text-caption text-[color:var(--text-secondary)]">
-        {view.savedAt
-          ? t.saved(formatShortDate(view.savedAt), view.savedBy)
-          : t.notSaved}
-      </p>
+      <div className="-mt-4 flex flex-col gap-1">
+        <p className="text-body-md">{t.purpose}</p>
+        <p className="text-caption text-[color:var(--text-secondary)]">
+          {view.savedAt
+            ? t.savedAt(formatDateTime(view.savedAt), view.savedBy)
+            : t.notSaved}
+        </p>
+      </div>
       {view.allFinal && <ToneCallout tone="success">{t.allFinal}</ToneCallout>}
 
       <PageSection
@@ -113,6 +123,8 @@ export function BriefPage({
       {/* Remounted on each save (an answer applied included): the fields
           start again from the saved brief. */}
       <BriefForm key={view.savedAt ?? "new"} view={view} />
+
+      {view.canEdit && <BriefNextStep next={next} />}
 
       {view.canSeeBudget && (
         <PageSection
