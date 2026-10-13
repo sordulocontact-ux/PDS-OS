@@ -3995,6 +3995,32 @@ Migration `…20261013100601_proposal_retouches`, tests ajoutés à `supabase/te
 - **Brief créatif** : chaque livrable dit sa **proposition retenue** (dernier concept approuvé) et
   combien son historique en compte (`deliverables[].retained`, `lib/design/brief-proposals.ts`).
 
+### Retours Marketing du 12/10/2026, lot C10 (MKT-C2-11, demandes de validation)
+
+Migration `…20261013100701_design_requests`, tests `supabase/tests/conception-requests.test.sql` (10).
+
+- **Avant l'envoi** (`RequestReviewDialog`, direction et fiches) : objet, numéro de la version, **chaque
+  section incluse** (direction et livrables, ou la fiche et ses contenus), qui décide et comment, un
+  **message** et la **date de décision attendue** (`design_submissions.message`, `due_on`), puis ce
+  qui suit (version figée, valideurs notifiés, contenu changé = à renvoyer). Le bouton dit à qui
+  (« Soumettre à … »). `submit_design_direction` / `submit_design_sheet` prennent ces deux
+  paramètres (nouvelles signatures).
+- **Périmètre immuable** : `decide_design_submission` refuse une demande dont le contenu a changé
+  depuis l'envoi (`submission_outdated`, comparaison de l'instantané) — jamais d'approbation
+  silencieuse ; `design_submission_is_current` le dit sur la page de décision. Le demandeur (ou le
+  chef de projet) la **retire** (`withdraw_design_submission`, état « Retirée », gardée) et renvoie
+  une version. Une demande retirée compte comme aucune (`states.ts`).
+- **Décider** : valider, **valider avec réserves** (`design_decisions.reserves`, avec une approbation
+  seulement), demander des modifications, refuser ; la décision garde son rôle (`decided_role` :
+  valideur ou délégué). Personne ne décide ce qu'il a soumis (C2-08).
+- **Notifications et file** : les valideurs du périmètre (et délégués actifs) reçoivent
+  `design_submission_requested`, l'auteur `design_submission_decided` ; les deux mènent à la **page
+  de décision** `/design/decisions/[submissionId]` (demande figée, message, échéance, valideurs,
+  contrôles, retrait), comme la carte « Mes décisions de conception » du Travail.
+- **Validation globale** : sur l'accueil, au-dessus de la demande de validation du dossier, les
+  décisions déjà prises (direction, fiches validées) restent dites : la validation globale s'y
+  ajoute sans les masquer.
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

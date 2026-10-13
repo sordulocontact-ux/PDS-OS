@@ -199,6 +199,9 @@ export const routes = {
   projectStrategyDimension: (id: string, dimension: string) =>
     `/app/projects/${id}/strategy?d=${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
+  // A validation request of the Conception, to decide (MKT-C2-11).
+  projectDesignDecision: (id: string, submissionId: string) =>
+    `/app/projects/${id}/design/decisions/${submissionId}`,
   // A creative proposal: redirects to its deliverable's work (MKT-C2-10).
   projectDesignVersion: (id: string, versionId: string) =>
     `/app/projects/${id}/design/versions/${versionId}`,

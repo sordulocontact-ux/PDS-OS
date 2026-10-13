@@ -37,6 +37,10 @@ export const notifications = {
       `${actor} demande des retouches sur votre version (« ${project} »).`,
     design_version_discarded: (actor: string, project: string) =>
       `${actor} a écarté votre proposition créative (« ${project} »).`,
+    design_submission_requested: (actor: string, project: string) =>
+      `${actor} vous demande une décision sur la conception (« ${project} »).`,
+    design_submission_decided: (actor: string, project: string) =>
+      `${actor} a décidé sur votre demande de validation (« ${project} »).`,
     // A contract or a meeting may have no project: the text never names one.
     contract_review_requested: (actor: string) =>
       `${actor} vous demande de valider un contrat.`,

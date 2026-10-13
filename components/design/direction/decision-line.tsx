@@ -22,6 +22,16 @@ export function DecisionLine({ decision }: { decision: DirectionDecision }) {
       {decision.comment && (
         <p className="text-body-md break-words">{decision.comment}</p>
       )}
+      {decision.reserves && (
+        <p className="text-body-md break-words">
+          {fr.conceptionDirection.versions.reserves(decision.reserves)}
+        </p>
+      )}
+      {decision.decidedRole === "delegate" && (
+        <p className="text-caption text-muted-foreground">
+          {fr.conceptionDirection.versions.asDelegate}
+        </p>
+      )}
     </div>
   );
 }

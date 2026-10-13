@@ -3971,10 +3971,12 @@ export type Database = {
           comment: string | null
           decided_at: string
           decided_by: string | null
+          decided_role: string | null
           decision: string
           id: string
           organization_id: string
           project_id: string
+          reserves: string | null
           section: string
           submission_id: string
         }
@@ -3982,10 +3984,12 @@ export type Database = {
           comment?: string | null
           decided_at?: string
           decided_by?: string | null
+          decided_role?: string | null
           decision: string
           id?: string
           organization_id: string
           project_id: string
+          reserves?: string | null
           section?: string
           submission_id: string
         }
@@ -3993,10 +3997,12 @@ export type Database = {
           comment?: string | null
           decided_at?: string
           decided_by?: string | null
+          decided_role?: string | null
           decision?: string
           id?: string
           organization_id?: string
           project_id?: string
+          reserves?: string | null
           section?: string
           submission_id?: string
         }
@@ -4433,8 +4439,10 @@ export type Database = {
       design_submissions: {
         Row: {
           closed_at: string | null
+          due_on: string | null
           id: string
           kind: string
+          message: string | null
           mode: string
           number: number
           organization_id: string
@@ -4448,8 +4456,10 @@ export type Database = {
         }
         Insert: {
           closed_at?: string | null
+          due_on?: string | null
           id?: string
           kind: string
+          message?: string | null
           mode: string
           number?: number
           organization_id: string
@@ -4463,8 +4473,10 @@ export type Database = {
         }
         Update: {
           closed_at?: string | null
+          due_on?: string | null
           id?: string
           kind?: string
+          message?: string | null
           mode?: string
           number?: number
           organization_id?: string
@@ -14330,6 +14342,18 @@ export type Database = {
       }
     }
     Functions: {
+      design_submission_is_current: {
+        Args: {
+          p_submission_id: string
+        }
+        Returns: boolean
+      }
+      withdraw_design_submission: {
+        Args: {
+          p_submission_id: string
+        }
+        Returns: undefined
+      }
       revoke_design_delegation: {
         Args: {
           p_delegation_id: string
@@ -15155,9 +15179,29 @@ export type Database = {
       set_design_validation_mode: { Args: { p_mode: string; p_project_id: string }; Returns: undefined }
       design_is_responsible: { Args: { p_project_id: string }; Returns: boolean }
       design_sheet_can_edit: { Args: { p_sheet_id: string }; Returns: boolean }
-      submit_design_direction: { Args: { p_project_id: string; p_sections: string[] }; Returns: string }
-      submit_design_sheet: { Args: { p_sheet_id: string }; Returns: string }
-      decide_design_submission: { Args: { p_comment: string | null; p_decision: string; p_section: string; p_submission_id: string }; Returns: undefined }
+      submit_design_direction: {
+        Args: {
+          p_due_on?: string | null
+          p_message?: string | null
+          p_project_id: string
+          p_sections: string[]
+        }
+        Returns: string
+      }
+      submit_design_sheet: {
+        Args: { p_due_on?: string | null; p_message?: string | null; p_sheet_id: string }
+        Returns: string
+      }
+      decide_design_submission: {
+        Args: {
+          p_comment: string | null
+          p_decision: string
+          p_reserves?: string | null
+          p_section: string
+          p_submission_id: string
+        }
+        Returns: undefined
+      }
       create_design_brief: { Args: { p_content: Json; p_project_id: string }; Returns: number }
       handoff_design_sheet: { Args: { p_sheet_id: string }; Returns: string }
       design_is_in_progress: {

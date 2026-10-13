@@ -620,6 +620,7 @@ export const designReviewTone: Record<string, Tone> = {
   transferred: "success",
   changes_requested: "danger",
   rejected: "danger",
+  withdrawn: "neutral",
 };
 
 // Production of a deliverable (lib/production/phase.ts).

@@ -32,7 +32,7 @@ export type SheetItemView = {
   concept: string | null;
   referenceUrl: string | null;
   // Its own decision in the latest version, if decided.
-  decision: Exclude<SubmissionStatus, "pending"> | null;
+  decision: Exclude<SubmissionStatus, "pending" | "withdrawn"> | null;
 };
 
 type Editing = { item: SheetItemView | null } | null;

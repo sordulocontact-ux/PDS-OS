@@ -57,6 +57,13 @@ export const conceptionDirection = {
   },
 
   versions: {
+    // MKT-C2-11: approving with reserves, deciding as a delegate.
+    withReserves: "Valider avec réserves…",
+    reservesLabel: "Réserves",
+    reservesPlaceholder: "Ce qui reste à corriger, sans bloquer la validation.",
+    approveWithReserves: "Valider avec ces réserves",
+    reserves: (text: string) => `Réserves : ${text}`,
+    asDelegate: "Décidé par délégation.",
     title: "Versions soumises",
     description:
       "Chaque version garde son contenu, ses décisions et leurs commentaires.",

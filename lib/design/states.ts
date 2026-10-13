@@ -36,22 +36,31 @@ export function intentionsState({
 // ---------------------------------------------------------------- Validation
 
 export type SubmissionStatus =
-  "pending" | "approved" | "changes_requested" | "rejected";
+  "pending" | "approved" | "changes_requested" | "rejected" | "withdrawn";
 
 export function submissionStatusOf(value: string): SubmissionStatus {
   return value === "approved" ||
     value === "changes_requested" ||
-    value === "rejected"
+    value === "rejected" ||
+    value === "withdrawn"
     ? value
     : "pending";
 }
+
+// A withdrawn request (MKT-C2-11) counts as none: the work is back to
+// preparing a new version.
+const live = <T extends { status: SubmissionStatus }>(latest: T | null) =>
+  latest?.status === "withdrawn" ? null : latest;
 
 // ------------------------------------------------------- Direction artistique
 
 // À attribuer → En préparation → Prête à soumettre → En attente →
 // Validée / Modifications demandées / Refusée.
 export type DirectionState =
-  "to_assign" | "in_preparation" | "ready" | SubmissionStatus;
+  | "to_assign"
+  | "in_preparation"
+  | "ready"
+  | Exclude<SubmissionStatus, "withdrawn">;
 
 export function directionState({
   hasResponsible,
@@ -66,10 +75,11 @@ export function directionState({
   // The latest submission of the direction, if any.
   latest: { status: SubmissionStatus } | null;
 }): DirectionState {
+  latest = live(latest);
   if (latest?.status === "pending") return "pending";
   if (latest?.status === "approved") return "approved";
   if (!hasResponsible) return "to_assign";
-  if (latest) return latest.status;
+  if (latest && latest.status !== "withdrawn") return latest.status;
   return hasContent && hasValidators ? "ready" : "in_preparation";
 }
 
@@ -104,6 +114,7 @@ export function sheetStatus({
   // The sheet changed after its latest validated version.
   editedSinceApproval: boolean;
 }): SheetStatus {
+  latest = live(latest);
   if (latest?.status === "pending") return "pending";
   if (latest?.status === "approved" && !editedSinceApproval)
     return transferredVersion === latest.number

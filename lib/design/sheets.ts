@@ -21,10 +21,13 @@ export type SheetItemRow = Tables["design_sheet_items"]["Row"];
 
 export type SheetDecision = {
   section: string;
-  decision: Exclude<SubmissionStatus, "pending">;
+  decision: Exclude<SubmissionStatus, "pending" | "withdrawn">;
   comment: string | null;
   decidedBy: string | null;
   decidedAt: string;
+  // MKT-C2-11.
+  reserves: string | null;
+  decidedRole: "validator" | "delegate" | null;
 };
 
 export type SheetVersion = {
@@ -72,7 +75,7 @@ export async function loadFacts(
       supabase
         .from("design_submissions")
         .select(
-          "id, sheet_id, number, status, mode, sections, snapshot, submitted_by, submitted_at, design_decisions(section, decision, comment, decided_by, decided_at)",
+          "id, sheet_id, number, status, mode, sections, snapshot, submitted_by, submitted_at, design_decisions(section, decision, comment, decided_by, decided_at, reserves, decided_role)",
         )
         .eq("project_id", projectId)
         .eq("kind", "sheet")
@@ -115,6 +118,11 @@ export async function loadFacts(
         comment: d.comment,
         decidedBy: d.decided_by,
         decidedAt: d.decided_at,
+        reserves: d.reserves,
+        decidedRole: (d.decided_role === "delegate" ||
+        d.decided_role === "validator"
+          ? d.decided_role
+          : null) as SheetDecision["decidedRole"],
       })),
     },
   }));

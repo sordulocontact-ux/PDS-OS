@@ -24,10 +24,13 @@ export type DirectionDecision = {
   id: string;
   // '' = the whole version (global mode).
   section: string;
-  decision: Exclude<SubmissionStatus, "pending">;
+  decision: Exclude<SubmissionStatus, "pending" | "withdrawn">;
   comment: string | null;
   decidedByName: string;
   decidedAt: string;
+  // MKT-C2-11: an approval's reserves, and the role it was taken as.
+  reserves?: string | null;
+  decidedRole?: "validator" | "delegate" | null;
 };
 
 export type DirectionSubmission = {
@@ -92,7 +95,7 @@ function toSnapshot(value: unknown): SnapshotSection[] {
 
 function toDecision(value: string): DirectionDecision["decision"] {
   const status = submissionStatusOf(value);
-  return status === "pending" ? "approved" : status;
+  return status === "pending" || status === "withdrawn" ? "approved" : status;
 }
 
 /** The artistic direction's versions and decisions (RLS: who sees the project). */
@@ -110,7 +113,7 @@ export async function loadDirection(
     supabase
       .from("design_submissions")
       .select(
-        "id, number, status, mode, sections, snapshot, submitted_by, submitted_at, closed_at, design_decisions(id, section, decision, comment, decided_by, decided_at)",
+        "id, number, status, mode, sections, snapshot, submitted_by, submitted_at, closed_at, message, due_on, design_decisions(id, section, decision, comment, decided_by, decided_at, reserves, decided_role)",
       )
       .eq("project_id", projectId)
       .eq("kind", "direction")
@@ -163,6 +166,11 @@ export async function loadDirection(
           comment: d.comment,
           decidedByName: name(d.decided_by),
           decidedAt: d.decided_at,
+          reserves: d.reserves,
+          decidedRole:
+            d.decided_role === "delegate" || d.decided_role === "validator"
+              ? d.decided_role
+              : null,
         })),
     })),
   };

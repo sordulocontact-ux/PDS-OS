@@ -78,6 +78,13 @@ export async function MyWorkCards({ access }: { access: Access }) {
           </>
         )}
 
+        {work.myDesignDecisions.length > 0 && (
+          <DeliverablesCard
+            title={fr.conceptionRequests.myDecisions}
+            empty={fr.conceptionRequests.myDecisionsEmpty}
+            deliverables={work.myDesignDecisions}
+          />
+        )}
         {work.myConception.length > 0 && (
           <DeliverablesCard
             title={t.cards.myConception}

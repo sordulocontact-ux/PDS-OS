@@ -25,6 +25,7 @@ import { conception } from "./conception";
 import { conceptionCall } from "./conception-call";
 import { conceptionJourney } from "./conception-journey";
 import { conceptionKinds } from "./conception-kinds";
+import { conceptionRequests } from "./conception-requests";
 import { conceptionRoles } from "./conception-roles";
 import { conceptionWork } from "./conception-work";
 import { conceptionDirection } from "./conception-direction";
@@ -124,6 +125,7 @@ export const fr = {
   conceptionCall,
   conceptionJourney,
   conceptionKinds,
+  conceptionRequests,
   conceptionRoles,
   conceptionWork,
   conceptionIntents,

@@ -20,6 +20,8 @@ export function SheetReview({
   isValidator,
   blockedSelf = null,
   nameOf,
+  validatorNames = "",
+  today,
 }: {
   projectId: string;
   sheet: SheetFull;
@@ -30,6 +32,9 @@ export function SheetReview({
   // MKT-C2-08: the viewer's id when the governance forbids approving one's
   // own submission (else null): their own versions show why, not controls.
   blockedSelf?: string | null;
+  // MKT-C2-11: who decides, named on the request.
+  validatorNames?: string;
+  today: string;
 }) {
   const t = fr.conceptionSheet;
   const latest = s.versions[0] ?? null;
@@ -62,6 +67,21 @@ export function SheetReview({
           projectId={projectId}
           sheetId={s.sheet.id}
           blocked={s.checks.blockers.length > 0}
+          title={s.sheet.title}
+          nextVersion={(latest?.number ?? 0) + 1}
+          sections={[
+            t.review.sectionSheet,
+            ...(s.sheet.kind === "series" ? s.items.map((i) => i.title) : []),
+          ]}
+          modeLabel={
+            s.sheet.tracking === "global"
+              ? t.tracking.globalHint
+              : s.sheet.tracking === "per_item"
+                ? t.tracking.perItemHint
+                : t.tracking.project
+          }
+          validatorNames={validatorNames}
+          today={today}
         />
       )}
 

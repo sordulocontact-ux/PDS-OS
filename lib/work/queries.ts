@@ -47,6 +47,8 @@ export type MyWork = {
   // Anyone (MKT-C2-08): what the person is responsible for in a Conception —
   // the release's direction, a Fiche Livrable — designated or delegated.
   myConception: WorkDeliverable[];
+  // MKT-C2-11: the Conception's requests waiting for the person's decision.
+  myDesignDecisions: WorkDeliverable[];
 };
 
 type RawDeliverable = {
@@ -68,32 +70,56 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
   const pilots = can(access, "pilot_projects");
   const creative = can(access, "creative_work");
 
-  const [todo, { projects, error }, creativesRes, designRes, delegatedRes] =
-    await Promise.all([
-      loadMyTodo(access),
-      listProjects(),
-      creative
-        ? supabase
-            .from("project_creatives")
-            .select("project_id")
-            .eq("person_id", me)
-        : Promise.resolve({ data: [] as { project_id: string }[] }),
-      supabase
-        .from("design_assignments")
+  const [
+    todo,
+    { projects, error },
+    creativesRes,
+    designRes,
+    delegatedRes,
+    validatorRes,
+  ] = await Promise.all([
+    loadMyTodo(access),
+    listProjects(),
+    creative
+      ? supabase
+          .from("project_creatives")
+          .select("project_id")
+          .eq("person_id", me)
+      : Promise.resolve({ data: [] as { project_id: string }[] }),
+    supabase
+      .from("design_assignments")
+      .select(
+        "project_id, scope, sheet_id, design_sheets(title, delivery_date)",
+      )
+      .eq("person_id", me)
+      .is("ended_at", null),
+    supabase
+      .from("design_delegations")
+      .select(
+        "project_id, scope, sheet_id, role, ends_on, design_sheets(title, delivery_date)",
+      )
+      .eq("to_person_id", me)
+      .is("revoked_at", null)
+      .gte("ends_on", todayInParis()),
+    supabase
+      .from("design_validators")
+      .select("project_id, scope, sheet_id")
+      .eq("person_id", me),
+  ]);
+  // Where the person decides: named validator, or delegated.
+  const decides = [
+    ...(validatorRes.data ?? []),
+    ...(delegatedRes.data ?? []).filter((d) => d.role === "validator"),
+  ];
+  const { data: requests } = decides.length
+    ? await supabase
+        .from("design_submissions")
         .select(
-          "project_id, scope, sheet_id, design_sheets(title, delivery_date)",
+          "id, project_id, kind, sheet_id, number, due_on, submitted_by, design_sheets(title)",
         )
-        .eq("person_id", me)
-        .is("ended_at", null),
-      supabase
-        .from("design_delegations")
-        .select(
-          "project_id, scope, sheet_id, role, ends_on, design_sheets(title, delivery_date)",
-        )
-        .eq("to_person_id", me)
-        .is("revoked_at", null)
-        .gte("ends_on", todayInParis()),
-    ]);
+        .eq("status", "pending")
+        .in("project_id", [...new Set(decides.map((d) => d.project_id))])
+    : { data: [] };
 
   const today = todo.today;
   const titles = new Map(projects.map((p) => [p.id, p.title]));
@@ -189,6 +215,36 @@ export async function loadMyWork(access: Access): Promise<MyWork> {
     creativeProjects: projects.filter(
       (p) => p.status === "launched" && creativeIds.has(p.id),
     ),
+    myDesignDecisions: (requests ?? [])
+      .filter(
+        (r) =>
+          r.submitted_by !== me &&
+          decides.some(
+            (d) =>
+              d.project_id === r.project_id &&
+              d.scope === r.kind &&
+              d.sheet_id === r.sheet_id,
+          ),
+      )
+      .map((r) => {
+        const c = fr.conceptionRequests;
+        return {
+          id: r.id,
+          title: c.decisionItem(
+            r.kind === "sheet" && r.design_sheets
+              ? c.sheetObject(r.design_sheets.title)
+              : c.directionObject,
+            r.number,
+          ),
+          dueDate: r.due_on,
+          overdue: r.due_on ? isOverdue(r.due_on, today) : false,
+          hasAssignee: true,
+          projectId: r.project_id,
+          projectTitle: titles.get(r.project_id) ?? "—",
+          href: routes.projectDesignDecision(r.project_id, r.id),
+        };
+      })
+      .sort(byDue),
     myConception: [
       ...(designRes.data ?? []).map((a) => ({ ...a, role: "responsible" })),
       ...(delegatedRes.data ?? []),

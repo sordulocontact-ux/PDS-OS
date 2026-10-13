@@ -21,12 +21,23 @@ const invalid: DesignResult = {
 export async function submitDesignSheet(
   projectId: string,
   sheetId: string,
+  // MKT-C2-11: a message to the validators, the date expected.
+  note: { message: string; dueOn: string } = { message: "", dueOn: "" },
 ): Promise<DesignResult> {
-  if (!z.uuid().safeParse(sheetId).success) return invalid;
+  const p = z
+    .object({
+      sheetId: z.uuid(),
+      message: z.string().trim().max(2000),
+      dueOn: z.union([z.literal(""), z.iso.date()]),
+    })
+    .safeParse({ sheetId, ...note });
+  if (!p.success) return invalid;
   await requireApproved();
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_design_sheet", {
-    p_sheet_id: sheetId,
+    p_sheet_id: p.data.sheetId,
+    p_message: p.data.message || null,
+    p_due_on: p.data.dueOn || null,
   });
   return designDone(projectId, error, "submitDesignSheet");
 }

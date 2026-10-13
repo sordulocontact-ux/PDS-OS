@@ -196,6 +196,8 @@ export default async function DesignDirectionPage({
           globalMissing={globalMissing}
           validatorNames={scope.validators.map((v) => v.name).join(", ")}
           modeLabel={fr.conception.validationModes[direction.mode]}
+          nextVersion={(direction.submissions[0]?.number ?? 0) + 1}
+          today={todayInParis()}
         />
       </PageSection>
 

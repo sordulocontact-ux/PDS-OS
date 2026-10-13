@@ -154,6 +154,8 @@ export const conception = {
 
   errors: {
     generic: "L'action n'a pas abouti. Réessayez.",
+    submissionOutdated:
+      "Le contenu envoyé a changé depuis la demande : elle ne peut pas être décidée telle quelle. Le demandeur la retire et envoie une nouvelle version.",
     selfApproval:
       "Vous avez soumis ou déposé cette version : une autre personne la décide, sauf si la gouvernance du projet l'autorise.",
     invalidDelegation:
@@ -226,6 +228,8 @@ export const conception = {
     approved: "Validée",
     changes_requested: "Modifications demandées",
     rejected: "Refusée",
+    // MKT-C2-11: a request withdrawn by its author.
+    withdrawn: "Retirée",
   },
   sheetStatuses: {
     draft: "Brouillon",

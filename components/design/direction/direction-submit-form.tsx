@@ -3,10 +3,9 @@
 import { useState } from "react";
 
 import { SummarySectionCard } from "@/components/design/direction/summary-section-card";
-import { useDesignAction } from "@/components/design/work/use-design-action";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { RequestReviewDialog } from "@/components/design/request-review-dialog";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { submitDesignDirection } from "@/lib/design/actions/direction";
 import {
@@ -18,7 +17,9 @@ import { fr } from "@/lib/i18n/fr";
 /**
  * The synthesis before sending (ticket § 7): every section with what it
  * carries and what is missing; the responsible ticks the sections to
- * submit, then confirms on a summary. The database writes the version.
+ * submit, then confirms on the request (MKT-C2-11: every section named,
+ * the version, who decides, a message and a date). The database writes
+ * the version.
  */
 export function DirectionSubmitForm({
   projectId,
@@ -28,6 +29,8 @@ export function DirectionSubmitForm({
   globalMissing,
   validatorNames,
   modeLabel,
+  nextVersion,
+  today,
 }: {
   projectId: string;
   sections: SummarySection[];
@@ -38,13 +41,15 @@ export function DirectionSubmitForm({
   globalMissing: string[];
   validatorNames: string;
   modeLabel: string;
+  // The number the version will have, and today (Paris) for the due date.
+  nextVersion: number;
+  today: string;
 }) {
   const t = fr.conceptionDirection.summary;
   const [selected, setSelected] = useState(
     () => new Set(sections.filter(hasContent).map((s) => s.key)),
   );
   const [confirming, setConfirming] = useState(false);
-  const { pending, run } = useDesignAction();
   const chosen = sections.filter((s) => selected.has(s.key));
 
   const toggle = (key: string) =>
@@ -91,31 +96,28 @@ export function DirectionSubmitForm({
           )}
           <Button
             size="lg"
-            disabled={Boolean(blocked) || chosen.length === 0 || pending}
+            disabled={Boolean(blocked) || chosen.length === 0}
             onClick={() => setConfirming(true)}
           >
-            {t.submit}
+            {fr.conceptionRequests.submitTo(validatorNames)}
           </Button>
         </div>
       )}
-      <ConfirmDialog
+      <RequestReviewDialog
         open={confirming}
         onOpenChange={setConfirming}
-        title={t.confirmTitle}
-        description={t.confirmBody(chosen.length, validatorNames, modeLabel)}
-        cancelLabel={t.cancel}
-        closeLabel={t.close}
-        confirmLabel={t.submit}
-        pendingLabel={t.submitting}
-        pending={pending}
-        onConfirm={() =>
-          run(
-            () =>
-              submitDesignDirection(
-                projectId,
-                chosen.map((s) => s.key),
-              ),
-            { success: t.submitted, onSuccess: () => setConfirming(false) },
+        object={fr.conceptionRequests.directionObject}
+        version={nextVersion}
+        sections={chosen.map((s) => s.title ?? t.direction)}
+        validators={validatorNames}
+        modeLabel={modeLabel}
+        today={today}
+        done={t.submitted}
+        run={(note) =>
+          submitDesignDirection(
+            projectId,
+            chosen.map((s) => s.key),
+            note,
           )
         }
       />

@@ -61,6 +61,8 @@ export function SheetVersionCard({
           comment: d.comment,
           decidedByName: nameOf(d.decidedBy),
           decidedAt: d.decidedAt,
+          reserves: d.reserves,
+          decidedRole: d.decidedRole,
         }
       : null;
   };

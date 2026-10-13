@@ -185,6 +185,28 @@ export default async function DesignPage({
           aria-label={fr.conceptionJourney.validationTitle}
           className={cn(sectionCardClass, "scroll-mt-6")}
         >
+          {/* MKT-C2-11: the decisions already taken stay visible. */}
+          <div className="mb-4 flex flex-col gap-1 text-caption text-muted-foreground">
+            <span className="font-medium text-foreground">
+              {fr.conceptionRequests.localTitle}
+            </span>
+            <span>
+              {fr.conceptionRequests.localDirection(
+                fr.conception.directionStates[input.direction.state],
+              )}
+            </span>
+            <span>
+              {fr.conceptionRequests.localSheets(
+                input.deliverables.filter(
+                  (d) =>
+                    d.sheet?.status === "ready_for_production" ||
+                    d.sheet?.status === "transferred",
+                ).length,
+                input.deliverables.length,
+              )}
+            </span>
+            <span>{fr.conceptionRequests.localHint}</span>
+          </div>
           <ValidationPanel
             stage={stage}
             pendingValidation={pendingValidation}

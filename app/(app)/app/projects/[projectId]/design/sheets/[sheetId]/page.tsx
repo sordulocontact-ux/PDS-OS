@@ -264,6 +264,8 @@ export default async function DesignSheetPage({
               isValidator={isValidator}
               nameOf={nameOf}
               blockedSelf={roles.allowSelfApproval ? null : me}
+              validatorNames={scope.validators.map((v) => v.name).join(", ")}
+              today={todayInParis()}
             />
           </PageSection>
           <PageSection id="sheet-history" title={t.sections.history} card>

@@ -18,6 +18,9 @@ export function designError(error: NonNullable<DbError>): string {
   // MKT-C2-08: approval apart from creation, delegations.
   if (error.message.includes("self_approval")) return t.selfApproval;
   if (error.message.includes("invalid_delegation")) return t.invalidDelegation;
+  // MKT-C2-11: what was sent changed since.
+  if (error.message.includes("submission_outdated"))
+    return t.submissionOutdated;
   if (error.code === "42501")
     return error.message.includes("not_the_project_owner")
       ? t.forbidden
