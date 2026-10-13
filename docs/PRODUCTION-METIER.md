@@ -171,7 +171,10 @@ Chaque lot reste une étape à part ; aucun n'est commencé.
    (réalisateur pour sa proposition, chef op pour sa liste, monteur pour ses versions) ; ce qui
    revient est une proposition que le chef de projet valide.
 
-## 9. Questions à Ibé (envoyées le 14/10/2026, sans réponse à ce jour)
+## 9. Questions à Ibé
+
+Version courte envoyée le 14/10/2026 (8 questions) : n° 1+3, 2, 8+10, 12, 13+14, 5+16+22+34,
+30+33, 41+43. Les autres attendent ses tickets. Sans réponse à ce jour.
 
 Chaque question donne **notre hypothèse** : un « oui » suffit si elle est juste. Les blocs A et B
 conditionnent tous les écrans ; le reste peut attendre ses tickets. Reporter chaque réponse ici
