@@ -339,6 +339,9 @@ export const calls = {
     detail: "Préparer en détail",
     hideDetail: "Masquer le détail",
     minutes: (n: number) => `${n} min`,
+    // The time of a topic, editable in place.
+    minutesUnit: "min",
+    minutesLabel: (topic: string) => `Durée de « ${topic} », en minutes`,
     total: (n: number) => `Environ ${n} min`,
     participants: "Participants",
     addParticipant: "Ajouter",

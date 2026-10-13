@@ -14,7 +14,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { idleFormState } from "@/lib/auth/form-state";
 import type { Participant } from "@/lib/calls/participants";
 import { nextRoundHourInput } from "@/lib/calls/format";
-import { EXTRA_TOPIC_MINUTES, agendaMinutes } from "@/lib/calls/prepare";
+import {
+  agendaMinutes,
+  agendaRecap,
+  type ExtraTopic,
+  type TopicDurations,
+} from "@/lib/calls/prepare";
 import { fr } from "@/lib/i18n/fr";
 import type { CallFormat } from "@/lib/production/call-prep";
 import { createTechnicalCall } from "@/lib/production/preprod/actions-call";
@@ -62,7 +67,8 @@ export function TechnicalCallForm({
       ),
   );
   const [detailed, setDetailed] = useState(true);
-  const [extra, setExtra] = useState<string[]>([]);
+  const [extra, setExtra] = useState<ExtraTopic[]>([]);
+  const [durations, setDurations] = useState<TopicDurations>({});
   const [people, setPeople] = useState<Participant[]>(() =>
     data.people.map((name) => ({ name, contactId: null })),
   );
@@ -91,13 +97,8 @@ export function TechnicalCallForm({
       meetingUrl: String(values.get("meetingUrl") ?? "").trim(),
       purpose: String(values.get("purpose") ?? "").trim(),
       participants: people.map((p) => p.name),
-      topics: [
-        ...topics
-          .filter((x) => kept.has(x.id))
-          .map((x) => ({ topic: x.topic, minutes: x.minutes })),
-        ...extra.map((topic) => ({ topic, minutes: EXTRA_TOPIC_MINUTES })),
-      ],
-      minutes: agendaMinutes(topics, kept, extra),
+      topics: agendaRecap(topics, kept, extra, durations),
+      minutes: agendaMinutes(topics, kept, extra, durations),
     });
   };
 
@@ -118,6 +119,11 @@ export function TechnicalCallForm({
       <input type="hidden" name="topics" value={JSON.stringify([...kept])} />
       <input type="hidden" name="detailed" value={detailed ? "1" : "0"} />
       <input type="hidden" name="extraTopics" value={JSON.stringify(extra)} />
+      <input
+        type="hidden"
+        name="topicMinutes"
+        value={JSON.stringify(durations)}
+      />
       <input type="hidden" name="participants" value={JSON.stringify(people)} />
 
       <div className={cn("flex flex-col gap-6", recap && "hidden")}>
@@ -142,6 +148,8 @@ export function TechnicalCallForm({
           onToggle={toggle}
           extra={extra}
           onExtraChange={setExtra}
+          durations={durations}
+          onDurationsChange={setDurations}
           detailed={detailed}
           onDetailedChange={setDetailed}
           empty={t.noTopics}

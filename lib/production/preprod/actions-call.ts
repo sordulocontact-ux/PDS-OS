@@ -7,7 +7,11 @@ import { requireApproved } from "@/lib/auth/dal";
 import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
 import { participantRow, participantSchema } from "@/lib/calls/participants";
-import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
+import { buildAgenda } from "@/lib/calls/prepare";
+import {
+  extraTopicsSchema,
+  topicMinutesSchema,
+} from "@/lib/calls/prepare-schema";
 import { fr } from "@/lib/i18n/fr";
 import { CALL_FORMATS } from "@/lib/production/call-prep";
 import { effectiveLogistics } from "@/lib/production/logistics";
@@ -46,7 +50,9 @@ const callSchema = z.object({
   purpose: z.string().trim().min(1).max(500),
   topics: json(z.array(z.enum(TECHNICAL_TOPICS)).max(TECHNICAL_TOPICS.length)),
   detailed: z.enum(["0", "1"]).transform((v) => v === "1"),
-  extraTopics: json(z.array(z.string().trim().min(1).max(200)).max(10)),
+  extraTopics: json(extraTopicsSchema),
+  // The time the person gave PO's topics, by key.
+  topicMinutes: json(topicMinutesSchema),
   participants: json(z.array(participantSchema).min(1).max(30)),
 });
 
@@ -69,6 +75,7 @@ export async function createTechnicalCall(
     ...values,
     meetingUrl: values.meetingUrl ?? "",
     detailed: values.detailed ?? "0",
+    topicMinutes: values.topicMinutes || "{}",
   });
   if (!parsed.success)
     return {
@@ -97,17 +104,10 @@ export async function createTechnicalCall(
     data.heritage.fiche,
   );
 
-  const kept = new Set(p.topics);
-  const agenda = [
-    ...technicalCallTopics({ data, preprod, logistics })
-      .filter((topic) => kept.has(topic.key))
-      .map(({ topic, minutes, questions }) => ({
-        topic,
-        minutes,
-        ...(p.detailed && questions.length ? { questions } : {}),
-      })),
-    ...p.extraTopics.map((topic) => ({ topic, minutes: EXTRA_TOPIC_MINUTES })),
-  ];
+  const agenda = buildAgenda(
+    technicalCallTopics({ data, preprod, logistics }),
+    p,
+  );
 
   const supabase = await createClient();
   const { data: callId, error } = await supabase.rpc("create_production_call", {

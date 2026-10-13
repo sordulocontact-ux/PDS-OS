@@ -1,0 +1,50 @@
+"use client";
+
+import { useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import { TOPIC_MINUTES_MAX, TOPIC_MINUTES_MIN } from "@/lib/calls/prepare";
+import { fr } from "@/lib/i18n/fr";
+
+/**
+ * The time given to a topic of the agenda, in minutes, typed in place.
+ * Emptied while typing, it comes back to the last valid value on leaving.
+ */
+export function MinutesInput({
+  topic,
+  value,
+  onChange,
+}: {
+  topic: string;
+  value: number;
+  onChange: (minutes: number) => void;
+}) {
+  const t = fr.calls.prepare;
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <span className="flex shrink-0 items-center gap-1.5 text-body-md text-muted-foreground">
+      <Input
+        type="number"
+        inputMode="numeric"
+        min={TOPIC_MINUTES_MIN}
+        max={TOPIC_MINUTES_MAX}
+        step={1}
+        aria-label={t.minutesLabel(topic)}
+        value={draft ?? String(value)}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          const n = Number(e.target.value);
+          if (
+            Number.isInteger(n) &&
+            n >= TOPIC_MINUTES_MIN &&
+            n <= TOPIC_MINUTES_MAX
+          )
+            onChange(n);
+        }}
+        onBlur={() => setDraft(null)}
+        className="h-8 w-16 text-right tabular-nums"
+      />
+      {t.minutesUnit}
+    </span>
+  );
+}

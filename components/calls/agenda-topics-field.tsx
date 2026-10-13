@@ -5,17 +5,21 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MinutesInput } from "@/components/calls/minutes-input";
 import { Input } from "@/components/ui/input";
 import {
   EXTRA_TOPIC_MINUTES,
   agendaMinutes,
   type AgendaTopic,
+  type ExtraTopic,
+  type TopicDurations,
 } from "@/lib/calls/prepare";
 import { fr } from "@/lib/i18n/fr";
 
 /**
  * The topics of a prepared exchange: PO's, each kept or removed and detailed
- * on demand with its questions, then the person's own topics.
+ * on demand with its questions, then the person's own topics. The time of
+ * each kept topic is PO's estimate until the person changes it.
  */
 export function AgendaTopicsField({
   id,
@@ -25,6 +29,8 @@ export function AgendaTopicsField({
   onToggle,
   extra,
   onExtraChange,
+  durations,
+  onDurationsChange,
   detailed,
   onDetailedChange,
   empty,
@@ -35,8 +41,11 @@ export function AgendaTopicsField({
   topics: AgendaTopic[];
   kept: Set<string>;
   onToggle: (id: string) => void;
-  extra: string[];
-  onExtraChange: (extra: string[]) => void;
+  extra: ExtraTopic[];
+  onExtraChange: (extra: ExtraTopic[]) => void;
+  // The time the person gave PO's topics, by id.
+  durations: TopicDurations;
+  onDurationsChange: (durations: TopicDurations) => void;
   // « Préparer en détail »: the questions go with each topic.
   detailed: boolean;
   onDetailedChange: (detailed: boolean) => void;
@@ -47,7 +56,8 @@ export function AgendaTopicsField({
   const [draft, setDraft] = useState("");
   const add = () => {
     const topic = draft.trim();
-    if (topic && !extra.includes(topic)) onExtraChange([...extra, topic]);
+    if (topic && !extra.some((x) => x.topic === topic))
+      onExtraChange([...extra, { topic, minutes: EXTRA_TOPIC_MINUTES }]);
     setDraft("");
   };
   return (
@@ -57,7 +67,7 @@ export function AgendaTopicsField({
           {title}
         </h3>
         <span className="text-caption text-muted-foreground tabular-nums">
-          {t.total(agendaMinutes(topics, kept, extra))}
+          {t.total(agendaMinutes(topics, kept, extra, durations))}
         </span>
       </div>
       {topics.length === 0 && extra.length === 0 && empty && (
@@ -65,20 +75,15 @@ export function AgendaTopicsField({
       )}
       <ul className="flex flex-col gap-2">
         {topics.map((topic) => (
-          <li key={topic.id}>
-            <label className="flex items-start gap-3 text-body-md">
+          <li key={topic.id} className="flex items-start justify-between gap-3">
+            <label className="flex min-w-0 flex-1 items-start gap-3 text-body-md">
               <Checkbox
                 className="mt-1"
                 checked={kept.has(topic.id)}
                 onChange={() => onToggle(topic.id)}
               />
               <span className="flex min-w-0 flex-col">
-                <span className="font-semibold">
-                  {topic.topic}{" "}
-                  <span className="font-medium text-muted-foreground tabular-nums">
-                    · {t.minutes(topic.minutes)}
-                  </span>
-                </span>
+                <span className="font-semibold break-words">{topic.topic}</span>
                 {detailed && kept.has(topic.id) && (
                   <ul className="mt-1 flex list-disc flex-col gap-0.5 pl-5 text-caption text-muted-foreground">
                     {topic.questions.map((q) => (
@@ -88,25 +93,48 @@ export function AgendaTopicsField({
                 )}
               </span>
             </label>
+            {kept.has(topic.id) ? (
+              <MinutesInput
+                topic={topic.topic}
+                value={durations[topic.id] ?? topic.minutes}
+                onChange={(minutes) =>
+                  onDurationsChange({ ...durations, [topic.id]: minutes })
+                }
+              />
+            ) : (
+              <span className="shrink-0 text-body-md text-muted-foreground tabular-nums">
+                {t.minutes(durations[topic.id] ?? topic.minutes)}
+              </span>
+            )}
           </li>
         ))}
-        {extra.map((topic) => (
+        {extra.map((item) => (
           <li
-            key={topic}
+            key={item.topic}
             className="flex items-center justify-between gap-3 text-body-md"
           >
-            <span className="font-semibold">
-              {topic}{" "}
-              <span className="font-medium text-muted-foreground">
-                · {t.minutes(EXTRA_TOPIC_MINUTES)}
-              </span>
+            <span className="min-w-0 flex-1 font-semibold break-words">
+              {item.topic}
             </span>
+            <MinutesInput
+              topic={item.topic}
+              value={item.minutes}
+              onChange={(minutes) =>
+                onExtraChange(
+                  extra.map((x) =>
+                    x.topic === item.topic ? { ...x, minutes } : x,
+                  ),
+                )
+              }
+            />
             <Button
               type="button"
               size="icon-sm"
               variant="ghost"
-              aria-label={t.removeTopic(topic)}
-              onClick={() => onExtraChange(extra.filter((x) => x !== topic))}
+              aria-label={t.removeTopic(item.topic)}
+              onClick={() =>
+                onExtraChange(extra.filter((x) => x.topic !== item.topic))
+              }
             >
               <IconTrash aria-hidden className="size-4" />
             </Button>

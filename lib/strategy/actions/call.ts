@@ -8,7 +8,11 @@ import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
 import { inviteProjectTeam } from "@/lib/calls/invite";
 import { participantRow, participantSchema } from "@/lib/calls/participants";
-import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
+import { buildAgenda } from "@/lib/calls/prepare";
+import {
+  extraTopicsSchema,
+  topicMinutesSchema,
+} from "@/lib/calls/prepare-schema";
 import { fr } from "@/lib/i18n/fr";
 import {
   CALL_FORMATS,
@@ -47,7 +51,9 @@ const callSchema = z.object({
   topics: json(z.array(z.enum(STRATEGY_TOPICS)).max(STRATEGY_TOPICS.length)),
   // « Préparer en détail »: the questions go with each topic.
   detailed: z.enum(["0", "1"]).transform((v) => v === "1"),
-  extraTopics: json(z.array(z.string().trim().min(1).max(200)).max(10)),
+  extraTopics: json(extraTopicsSchema),
+  // The time the person gave PO's topics, by key.
+  topicMinutes: json(topicMinutesSchema),
   participants: json(z.array(participantSchema).min(1).max(30)),
 });
 
@@ -69,6 +75,7 @@ export async function prepareStrategyCall(
     ...values,
     meetingUrl: values.meetingUrl ?? "",
     detailed: values.detailed ?? "0",
+    topicMinutes: values.topicMinutes || "{}",
   });
   if (!parsed.success)
     return {
@@ -84,17 +91,10 @@ export async function prepareStrategyCall(
     loadBudget(p.projectId),
   ]);
   if (!data) return { status: "error", formError: t.failed, values };
-  const kept = new Set(p.topics);
-  const agenda = [
-    ...strategyCallTopics({ ...data, budgetLines: budget.lines })
-      .filter((topic) => kept.has(topic.key))
-      .map(({ topic, minutes, questions }) => ({
-        topic,
-        minutes,
-        ...(p.detailed ? { questions } : {}),
-      })),
-    ...p.extraTopics.map((topic) => ({ topic, minutes: EXTRA_TOPIC_MINUTES })),
-  ];
+  const agenda = buildAgenda(
+    strategyCallTopics({ ...data, budgetLines: budget.lines }),
+    p,
+  );
 
   const supabase = await createClient();
   const { data: callId, error } = await supabase.rpc("create_strategy_call", {
