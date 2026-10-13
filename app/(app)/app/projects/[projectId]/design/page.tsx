@@ -25,6 +25,7 @@ import { can } from "@/lib/auth/access";
 import { loadSheetSummaries } from "@/lib/design/sheet-summaries";
 import { conceptionState } from "@/lib/design/states";
 import { loadMembers, loadPendingValidation } from "@/lib/framing/related";
+import { briefRequestBlock } from "@/lib/design/brief-status";
 import { fr } from "@/lib/i18n/fr";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
@@ -214,6 +215,12 @@ export default async function DesignPage({
             mePersonId={access.personId}
             title={fr.conceptionJourney.validationTitle}
             startLabel={fr.design.validation.start}
+            // MKT-C2-12: the request carries an up-to-date Brief créatif.
+            requestBlocked={briefRequestBlock(
+              input.brief.latest,
+              !input.brief.upToDate,
+              fr.conceptionDirection.brief.document,
+            )}
           />
         </section>
       )}

@@ -223,6 +223,9 @@ export const routes = {
   // The Brief créatif global; `version` opens a stored one.
   projectDesignBrief: (id: string, version?: number) =>
     `/app/projects/${id}/design/brief${version ? `?v=${version}` : ""}`,
+  // A stored version of the Brief créatif as a PDF (MKT-C2-12).
+  projectDesignBriefPdf: (id: string, version: number) =>
+    `/api/projects/${id}/creative-briefs/${version}`,
   // The Fiches Livrables, then one of them.
   projectDesignSheets: (id: string) => `/app/projects/${id}/design/sheets`,
   projectDesignSheet: (id: string, sheetId: string) =>

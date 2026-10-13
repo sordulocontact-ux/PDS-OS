@@ -7,6 +7,7 @@ import {
   type BriefIdentity,
 } from "@/lib/design/brief-identity";
 import { briefOpenPoints } from "@/lib/design/brief-open-points";
+import { loadBriefSheets, type BriefSheet } from "@/lib/design/brief-sheets";
 import {
   loadRetainedProposals,
   type RetainedProposal,
@@ -52,8 +53,21 @@ export type CreativeBriefContent = {
     // The creative proposal retained, and how many its history holds
     // (MKT-C2-10).
     retained?: RetainedProposal;
+    // MKT-C2-12: its Fiche Livrable — responsible, validators, date, and a
+    // series' contents.
+    sheet?: Omit<BriefSheet, "deliverableId">;
   }>;
-  references: Array<{ label: string; url: string | null; targets: string[] }>;
+  // MKT-C2-12: needs still to qualify, left out of the dossier by rule.
+  excluded?: string[];
+  references: Array<{
+    label: string;
+    url: string | null;
+    targets: string[];
+    // MKT-C2-12: what it is, its caption and its rights of use.
+    type?: string;
+    note?: string | null;
+    usage?: string | null;
+  }>;
   constraints: Array<{ type: string; text: string }>;
   decisions: Array<{
     version: number;
@@ -61,6 +75,8 @@ export type CreativeBriefContent = {
     decision: string;
     comment: string | null;
     at: string;
+    // MKT-C2-12: reserves of an approval.
+    reserves?: string | null;
   }>;
   sources: Array<{ kind: "strategy" | "call" | "import"; label: string }>;
   openPoints: string[];
@@ -103,6 +119,19 @@ async function loadStrategyExtras(projectId: string) {
   };
 }
 
+// A deliverable's sheet as the Brief stores it: without its own id.
+function sheetOf(sheets: BriefSheet[], deliverableId: string) {
+  const sheet = sheets.find((s) => s.deliverableId === deliverableId);
+  if (!sheet) return undefined;
+  return {
+    kind: sheet.kind,
+    responsible: sheet.responsible,
+    validators: sheet.validators,
+    deliveryDate: sheet.deliveryDate,
+    items: sheet.items,
+  };
+}
+
 /** The Brief as the project stands now, ready to be stored as a version. */
 export async function buildCreativeBrief(
   project: { id: string; title: string; artistName: string },
@@ -110,11 +139,17 @@ export async function buildCreativeBrief(
   directionData: DirectionData,
 ): Promise<CreativeBriefContent> {
   const t = fr.conceptionDirection.brief;
-  const [extras, identity, retained] = await Promise.all([
+  const [extras, identity, retained, sheets] = await Promise.all([
     loadStrategyExtras(project.id),
     loadBriefIdentity(project.id),
     loadRetainedProposals(project.id),
+    loadBriefSheets(project.id),
   ]);
+  // MKT-C2-12: a need still to qualify is left out of the dossier, by rule.
+  const kept = data.deliverables.filter((d) => d.status === "confirmed");
+  const excluded = data.deliverables
+    .filter((d) => d.status !== "confirmed")
+    .map((d) => d.title);
   const titleOf = new Map(data.deliverables.map((d) => [d.id, d.title]));
   const directionTitle = fr.conceptionDirection.summary.direction;
 
@@ -177,9 +212,13 @@ export async function buildCreativeBrief(
         value: e.value,
         deliverables: [...e.deliverables],
       })),
-    deliverables: data.deliverables.map((d) => ({
+    ...(excluded.length ? { excluded } : {}),
+    deliverables: kept.map((d) => ({
       title: d.title,
       status: d.status,
+      ...(sheets.some((s) => s.deliverableId === d.id)
+        ? { sheet: sheetOf(sheets, d.id) }
+        : {}),
       ...(d.strategyDeliverableId && retained.has(d.strategyDeliverableId)
         ? { retained: retained.get(d.strategyDeliverableId) }
         : {}),
@@ -209,6 +248,9 @@ export async function buildCreativeBrief(
       .map((r) => ({
         label: r.title ?? r.fileName ?? r.url ?? "",
         url: r.url,
+        type: r.type,
+        note: r.note,
+        usage: r.usage,
         targets: r.links.map((l) =>
           l.deliverableId
             ? (titleOf.get(l.deliverableId) ?? "")
@@ -223,6 +265,7 @@ export async function buildCreativeBrief(
         decision: fr.conception.decided[d.decision],
         comment: d.comment,
         at: d.decidedAt,
+        ...(d.reserves ? { reserves: d.reserves } : {}),
       })),
     ),
     sources: [

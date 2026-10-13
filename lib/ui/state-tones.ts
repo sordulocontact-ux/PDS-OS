@@ -1077,3 +1077,12 @@ export const marketingStatusTone: Record<string, Tone> = {
   closed_clean: "success",
   reopened: "warning",
 };
+
+/** A version of the Brief créatif (MKT-C2-12, lib/design/brief-status.ts). */
+export const creativeBriefTone: Record<string, Tone> = {
+  current: "success",
+  outdated: "warning",
+  superseded: "neutral",
+  in_review: "action",
+  validated: "success",
+};

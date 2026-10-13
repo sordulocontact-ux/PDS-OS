@@ -27,9 +27,15 @@ const toneCalloutVariants = cva(
 export function ToneCallout({
   tone,
   className,
+  as = "p",
   ...props
-}: React.ComponentProps<"p"> & VariantProps<typeof toneCalloutVariants>) {
+}: React.ComponentProps<"p"> &
+  VariantProps<typeof toneCalloutVariants> & {
+    // "div" when it holds a list or several paragraphs.
+    as?: "p" | "div";
+  }) {
+  const Tag = as;
   return (
-    <p className={cn(toneCalloutVariants({ tone }), className)} {...props} />
+    <Tag className={cn(toneCalloutVariants({ tone }), className)} {...props} />
   );
 }

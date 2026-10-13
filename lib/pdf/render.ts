@@ -22,7 +22,14 @@ async function launch(): Promise<Browser> {
   return playwright.launch({ channel: "chrome", headless: true });
 }
 
-export async function htmlToPdf(html: string): Promise<Uint8Array> {
+// « 3 / 12 » at the foot of each page; Chromium fills the two spans.
+const PAGE_NUMBERS =
+  '<div style="width:100%;font-size:9px;text-align:center;color:#767676;font-family:system-ui,sans-serif"><span class="pageNumber"></span> / <span class="totalPages"></span></div>';
+
+export async function htmlToPdf(
+  html: string,
+  options: { pageNumbers?: boolean } = {},
+): Promise<Uint8Array> {
   const browser = await launch();
   try {
     const page = await browser.newPage();
@@ -33,6 +40,13 @@ export async function htmlToPdf(html: string): Promise<Uint8Array> {
       format: "A4",
       printBackground: true,
       margin: { top: "18mm", bottom: "18mm", left: "16mm", right: "16mm" },
+      ...(options.pageNumbers
+        ? {
+            displayHeaderFooter: true,
+            headerTemplate: "<span></span>",
+            footerTemplate: PAGE_NUMBERS,
+          }
+        : {}),
     });
     // Never an empty file handed out as a PDF (PROJ-BUG-05).
     if (pdf.length === 0) throw new Error("empty_pdf");

@@ -1,50 +1,16 @@
+import { BriefDeliverablesPart } from "@/components/design/brief/brief-deliverables-part";
 import { BriefIdentitySection } from "@/components/design/brief/brief-identity-section";
+import { Lines, Part } from "@/components/design/brief/brief-part";
 import { FactList } from "@/components/ui/fact-list";
 import { ViewLink } from "@/components/ui/view-link";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { formatBriefDate } from "@/lib/framing/assess";
 import type { CreativeBriefContent } from "@/lib/design/brief";
+import {
+  coherenceLine,
+  decisionLine,
+  referenceLine,
+} from "@/lib/design/brief-text";
+import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
-import { conceptionDeliverableTone } from "@/lib/ui/state-tones";
-
-type Sections = typeof fr.conceptionDirection.brief.sections;
-
-/** One titled part of the Brief; an empty part says so rather than vanish. */
-function Part({
-  name,
-  children,
-  empty,
-}: {
-  name: keyof Sections;
-  children?: React.ReactNode;
-  empty: boolean;
-}) {
-  const t = fr.conceptionDirection.brief;
-  return (
-    <section aria-labelledby={`brief-${name}`} className="flex flex-col gap-2">
-      <h3 id={`brief-${name}`} className="text-body-lg font-semibold">
-        {t.sections[name]}
-      </h3>
-      {empty ? (
-        <p className="text-body-md text-muted-foreground">{t.none}</p>
-      ) : (
-        <div className="flex flex-col gap-2 text-body-md">{children}</div>
-      )}
-    </section>
-  );
-}
-
-function Lines({ items }: { items: string[] }) {
-  return (
-    <ul className="flex list-disc flex-col gap-1 pl-5">
-      {items.map((item, index) => (
-        <li key={`${index}-${item}`} className="break-words">
-          {item}
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 /**
  * The Brief créatif global as written by code: the common frame of every
@@ -61,8 +27,6 @@ export function CreativeBriefView({
   callLinks?: Record<string, string>;
 }) {
   const t = fr.conceptionDirection.brief;
-  const topic = (key: keyof typeof fr.conceptionDirection.topics) =>
-    fr.conceptionDirection.topics[key];
   return (
     <div className="flex flex-col gap-8">
       <Part name="context" empty={false}>
@@ -118,75 +82,20 @@ export function CreativeBriefView({
         <Lines items={c.showAvoid} />
       </Part>
       <Part name="coherence" empty={!c.coherence.length}>
-        <Lines
-          items={c.coherence.map(
-            (x) =>
-              `${topic(x.topic)} : ${x.value} — ${t.sharedBy(x.deliverables)}`,
-          )}
-        />
+        <Lines items={c.coherence.map(coherenceLine)} />
       </Part>
-      <Part name="deliverables" empty={!c.deliverables.length}>
-        <ul className="flex flex-col gap-3">
-          {c.deliverables.map((d, index) => (
-            <li key={`${index}-${d.title}`} className="flex flex-col gap-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold">{d.title}</span>
-                <StatusBadge
-                  tone={conceptionDeliverableTone[d.status]}
-                  size="sm"
-                >
-                  {t.deliverableStatus[d.status]}
-                </StatusBadge>
-              </div>
-              {d.intentions.length > 0 && (
-                <Lines
-                  items={d.intentions.map(
-                    (i) => `${topic(i.topic)} : ${i.value}`,
-                  )}
-                />
-              )}
-              {d.retained && (
-                <p className="text-caption text-muted-foreground">
-                  {t.retained(
-                    d.retained.number,
-                    d.retained.approvedOn
-                      ? formatBriefDate(d.retained.approvedOn)
-                      : null,
-                    d.retained.total,
-                  )}
-                </p>
-              )}
-              {d.inherits && d.inherits.length > 0 && (
-                <p className="text-caption text-muted-foreground">
-                  {t.inherits(
-                    d.inherits
-                      .map((x) => fr.conception.directionTopics[x])
-                      .join(", "),
-                  )}
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
-      </Part>
+      <BriefDeliverablesPart
+        deliverables={c.deliverables}
+        excluded={c.excluded ?? []}
+      />
       <Part name="references" empty={!c.references.length}>
-        <Lines
-          items={c.references.map(
-            (r) => `${r.label} — ${r.targets.join(", ")}`,
-          )}
-        />
+        <Lines items={c.references.map(referenceLine)} />
       </Part>
       <Part name="constraints" empty={!c.constraints.length}>
         <Lines items={c.constraints.map((x) => x.text)} />
       </Part>
       <Part name="decisions" empty={!c.decisions.length}>
-        <Lines
-          items={c.decisions.map(
-            (d) =>
-              t.decision(d.version, d.section, d.decision) +
-              (d.comment ? ` — ${d.comment}` : ""),
-          )}
-        />
+        <Lines items={c.decisions.map(decisionLine)} />
       </Part>
       <Part name="sources" empty={!c.sources.length}>
         <ul className="flex list-disc flex-col gap-1 pl-5">

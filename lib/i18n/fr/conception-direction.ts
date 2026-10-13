@@ -124,6 +124,92 @@ export const conceptionDirection = {
           ? ` (${total} propositions dans l'historique du livrable)`
           : ""
       }.`,
+    // MKT-C2-12: the dossier as a document.
+    checks: {
+      title: "Avant de créer la version",
+      blockingTitle: "Bloquant",
+      reservedTitle: "Inclus avec réserve",
+      excludedTitle: "Exclu du dossier",
+      none: "Rien ne manque : le dossier est complet.",
+      noDirection:
+        "La direction de la sortie n'a aucune réponse confirmée : un dossier sans direction n'est pas créé.",
+      directionNotConfirmed:
+        "La direction de la sortie n'est pas confirmée dans son ensemble.",
+      proposals: (n: number) =>
+        n === 1
+          ? "1 proposition de PO attend encore une personne."
+          : `${n} propositions de PO attendent encore une personne.`,
+      incomplete: (title: string) =>
+        `« ${title} » n'a pas ses quatre réponses (propres ou héritées).`,
+      sheetNotValidated: (title: string) =>
+        `La fiche de « ${title} » n'est pas validée.`,
+      excluded: (title: string) =>
+        `« ${title} » est encore à qualifier : il n'entre pas dans le dossier.`,
+    },
+    document: {
+      title: (n: number) => `Brief créatif V${n}`,
+      meta: (name: string, date: string) =>
+        name ? `Créé par ${name} le ${date}` : `Créé le ${date}`,
+      statuses: {
+        current: "En vigueur, à jour",
+        outdated: "En vigueur, plus à jour",
+        superseded: "Remplacée par une version plus récente",
+        in_review: "En validation",
+        validated: "Validé",
+      },
+      pdf: "Télécharger le PDF",
+      validate: "Demander la validation du dossier",
+      validationTitle: "Validation du dossier",
+      validationHint:
+        "La demande part avec cette version du brief : le valideur ouvre ce document figé et son PDF.",
+      changesSince: (n: number, parts: string) =>
+        `Changé depuis la V${n} : ${parts}.`,
+      changesLive: (n: number, parts: string) =>
+        `Le projet a évolué depuis la V${n} : ${parts}. Créez une nouvelle version pour les inclure.`,
+      internal:
+        "Document interne à l'équipe du projet : il ne contient ni budget ni conditions de contrat.",
+      excluded: "Exclus du dossier (à qualifier)",
+      sheetLine: (
+        kind: string,
+        responsible: string | null,
+        validators: string,
+        date: string | null,
+      ) =>
+        [
+          kind,
+          responsible ? `responsable : ${responsible}` : null,
+          validators ? `valideurs : ${validators}` : null,
+          date ? `livraison : ${date}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      kinds: { single: "Fiche unique", series: "Série" },
+      item: (n: number, title: string) => `${n}. ${title}`,
+      itemLine: (
+        concept: string | null,
+        responsible: string | null,
+        date: string | null,
+      ) =>
+        [
+          concept,
+          responsible ? `par ${responsible}` : null,
+          date ? `pour le ${date}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      reserves: (text: string) => `Réserves : ${text}`,
+      referenceKind: (type: string, usage: string | null) =>
+        usage ? `${type}, ${usage}` : type,
+      exporting: "Préparation du PDF…",
+      exportFailed: "Le PDF n'a pas pu être préparé. Réessayez.",
+      pdfFileName: (project: string, n: number) =>
+        `Brief créatif V${n} - ${project}.pdf`,
+      requestNeedsBrief:
+        "Créez d'abord le brief créatif : la validation porte sur une version du dossier.",
+      requestNeedsUpToDate: (n: number) =>
+        `La V${n} du brief n'est plus à jour : créez une nouvelle version avant de demander la validation.`,
+      toc: "Sommaire",
+    },
     // MKT-C2-04: the artist's identity the release used.
     identity: {
       title: "Identité de l'artiste",

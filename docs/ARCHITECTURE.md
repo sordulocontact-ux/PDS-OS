@@ -4021,6 +4021,39 @@ Migration `…20261013100701_design_requests`, tests `supabase/tests/conception-
   décisions déjà prises (direction, fiches validées) restent dites : la validation globale s'y
   ajoute sans les masquer.
 
+### Retours Marketing du 12/10/2026, lot C11 (MKT-C2-12, Brief créatif en document)
+
+Pas de migration : le contenu d'une version (`design_briefs.content`) s'enrichit.
+
+- **Contrôles avant la version** (`lib/design/brief-checks.ts`, calculés par le code, dits avant
+  « Créer la V1 » par `BriefChecksList`) : **bloquant** = aucune réponse confirmée de la direction de
+  la sortie (`createCreativeBrief` refuse) ; **avec réserve** = direction pas validée dans son
+  ensemble (dernière demande non approuvée), livrable sans ses quatre réponses (propres ou
+  héritées), proposition de PO en attente, livrable sans fiche validée ; **exclu** = besoin encore
+  « à qualifier », hors du dossier (`content.excluded`).
+- **Contenu** : chaque livrable porte sa fiche (`sheet` : responsable, valideurs, date, contenus
+  d'une série avec concept, responsable et date — `brief-sheets.ts`), les références leur type,
+  légende et droits d'usage, les décisions leurs réserves. Une seule formulation pour la page et le
+  PDF : `lib/design/brief-text.ts`. `liveCreativeBrief` (`brief-live.ts`) construit le brief en
+  direct + ses contrôles pour l'action, la page et le PDF.
+- **Document** (`BriefDocumentCard`) : Vn, auteur, date, **statut calculé** (`brief-status.ts` :
+  en vigueur à jour / plus à jour, remplacée, en validation, validé — depuis l'étape Conception),
+  ce qui a changé (`brief-diff.ts`, par partie : depuis la version précédente, ou depuis la dernière
+  version quand le projet a bougé) et « Télécharger le PDF ».
+- **PDF** : `GET /api/projects/[id]/creative-briefs/[n]` (`creativeBriefHtml`, session de
+  l'utilisateur, RLS), tiré du contenu figé de la version : en-tête version · statut, auteur et
+  date, mention « interne », sommaire, parties dans l'ordre de la page, **numéros de page**
+  (`htmlToPdf(html, { pageNumbers: true })`).
+- **Validation du dossier** : sur la page du brief (et toujours sur l'accueil), `ValidationPanel`
+  avec `requestBlocked` tant qu'il n'y a pas de brief ou que la dernière version n'est plus à jour
+  (`briefRequestBlock`) : la demande porte sur une version figée. Les notifications `validation_*`
+  de l'étape Conception mènent à la page du brief. Blocage côté interface seulement, comme la
+  Stratégie (la fonction SQL de demande est commune aux étapes).
+- **Décisions prises** : le brief ne contient ni budget ni conditions de contrat (document interne
+  à l'équipe, dit dans le PDF). Dépendances, droits et risques sont couverts par les contraintes
+  communes, les droits d'usage des références et les points encore ouverts ; pas de section
+  « risques » séparée.
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

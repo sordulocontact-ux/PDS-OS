@@ -146,7 +146,8 @@ export function notificationHref(
     if (stageKey === "framing") return routes.projectFramingBrief(projectId);
     if (stageKey === "launch_strategy")
       return routes.projectStrategyBrief(projectId);
-    if (stageKey === "design") return routes.projectDesign(projectId);
+    // MKT-C2-12: the dossier is validated on its Brief créatif.
+    if (stageKey === "design") return routes.projectDesignBrief(projectId);
   }
   return routes.project(projectId);
 }
