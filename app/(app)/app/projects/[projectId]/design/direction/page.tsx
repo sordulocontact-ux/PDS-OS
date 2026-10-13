@@ -6,14 +6,21 @@ import { DirectionSubmitForm } from "@/components/design/direction/direction-sub
 import { ValidationModeField } from "@/components/design/direction/validation-mode-field";
 import { VersionCard } from "@/components/design/direction/version-card";
 import { ResponsiblePicker } from "@/components/design/people/responsible-picker";
+import { DelegationsPanel } from "@/components/design/roles/delegations-panel";
+import { RightsMatrix } from "@/components/design/roles/rights-matrix";
+import { SelfApprovalSwitch } from "@/components/design/roles/self-approval-switch";
 import { ValidatorsPicker } from "@/components/design/people/validators-picker";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ToneCallout } from "@/components/ui/tone-callout";
+import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { loadConception } from "@/lib/design/conception";
+import { delegatedTo, loadDesignRoles } from "@/lib/design/delegations";
 import { loadDirection } from "@/lib/design/direction";
+import { todayInParis } from "@/lib/insights/dates";
 import { directionSummary, hasContent } from "@/lib/design/direction-summary";
 import { loadDesignPeople } from "@/lib/design/people";
 import { directionState } from "@/lib/design/states";
@@ -52,13 +59,19 @@ export default async function DesignDirectionPage({
   if (!data) notFound();
   if (!data.started) redirect(routes.projectDesign(projectId));
   const people = await loadDesignPeople(projectId, data.organizationId, access);
-  const direction = await loadDirection(projectId, people.members);
+  const [direction, roles] = await Promise.all([
+    loadDirection(projectId, people.members),
+    loadDesignRoles(projectId, people.members),
+  ]);
 
   const t = fr.conceptionDirection;
   const me = access.personId;
   const scope = people.direction;
   const inProgress = data.stage?.state === "in_progress";
-  const isResponsible = scope.responsible?.personId === me;
+  // MKT-C2-08: a delegation acts as the role it hands over.
+  const isResponsible =
+    scope.responsible?.personId === me ||
+    delegatedTo(roles, me, "direction", null, "responsible");
   const canSubmit = inProgress && (data.isOwner || isResponsible);
   const latest = direction.submissions[0] ?? null;
   const sections = directionSummary({
@@ -81,7 +94,15 @@ export default async function DesignDirectionPage({
       : scope.validators.length === 0
         ? t.summary.globalMissing.validators
         : null;
-  const isValidator = scope.validators.some((v) => v.personId === me);
+  const isValidator =
+    scope.validators.some((v) => v.personId === me) ||
+    delegatedTo(roles, me, "direction", null, "validator");
+  // The owner works in place of the designated responsible: exceptional,
+  // traced (MKT-C2-08).
+  const substitute =
+    data.isOwner && inProgress && scope.responsible && !isResponsible
+      ? scope.responsible.name
+      : null;
 
   return (
     <div className="flex flex-col gap-10 pt-6">
@@ -96,6 +117,11 @@ export default async function DesignDirectionPage({
         <p className="max-w-prose text-body-md text-muted-foreground">
           {!inProgress ? t.locked : canSubmit ? t.intro : t.readOnly}
         </p>
+        {substitute && (
+          <ToneCallout tone="info">
+            {fr.conceptionRoles.substitution(substitute)}
+          </ToneCallout>
+        )}
       </header>
 
       <PageSection
@@ -127,7 +153,34 @@ export default async function DesignDirectionPage({
             mode={direction.mode}
             canEdit={data.isOwner && inProgress}
           />
+          <DelegationsPanel
+            projectId={projectId}
+            scope="direction"
+            sheetId={null}
+            delegations={roles.delegations.filter(
+              (d) => d.scope === "direction",
+            )}
+            responsible={scope.responsible}
+            validators={scope.validators}
+            members={people.members}
+            canManage={data.isOwner && inProgress}
+            today={todayInParis()}
+          />
+          <SelfApprovalSwitch
+            projectId={projectId}
+            allowed={roles.allowSelfApproval}
+            canChange={can(access, "validate")}
+          />
         </div>
+      </PageSection>
+
+      <PageSection
+        id="direction-rights"
+        title={fr.conceptionRoles.matrixTitle}
+        collapsible
+        defaultOpen={false}
+      >
+        <RightsMatrix />
       </PageSection>
 
       <PageSection
@@ -159,6 +212,9 @@ export default async function DesignDirectionPage({
                   projectId={projectId}
                   submission={s}
                   isValidator={isValidator}
+                  selfSubmitted={
+                    s.submittedBy === me && !roles.allowSelfApproval
+                  }
                   open={index === 0}
                 />
               </li>

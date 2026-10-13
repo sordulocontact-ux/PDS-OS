@@ -16,11 +16,15 @@ export function VersionCard({
   projectId,
   submission: s,
   isValidator,
+  selfSubmitted = false,
   open,
 }: {
   projectId: string;
   submission: DirectionSubmission;
   isValidator: boolean;
+  // MKT-C2-08: the viewer submitted it and the governance forbids
+  // approving one's own: told why instead of the controls.
+  selfSubmitted?: boolean;
   // The latest version is shown unfolded.
   open: boolean;
 }) {
@@ -67,6 +71,10 @@ export function VersionCard({
               {s.mode === "per_section" &&
                 (decision ? (
                   <DecisionLine decision={decision} />
+                ) : pending && isValidator && selfSubmitted ? (
+                  <p className="text-caption text-muted-foreground">
+                    {fr.conceptionRoles.selfApproval}
+                  </p>
                 ) : pending && isValidator ? (
                   <DecisionControls
                     projectId={projectId}
@@ -84,6 +92,10 @@ export function VersionCard({
         {s.mode === "global" &&
           (whole ? (
             <DecisionLine decision={whole} />
+          ) : pending && isValidator && selfSubmitted ? (
+            <p className="text-caption text-muted-foreground">
+              {fr.conceptionRoles.selfApproval}
+            </p>
           ) : pending && isValidator ? (
             <DecisionControls
               projectId={projectId}

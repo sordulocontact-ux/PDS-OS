@@ -78,6 +78,14 @@ export async function MyWorkCards({ access }: { access: Access }) {
           </>
         )}
 
+        {work.myConception.length > 0 && (
+          <DeliverablesCard
+            title={t.cards.myConception}
+            empty={t.cards.myConceptionEmpty}
+            deliverables={work.myConception}
+          />
+        )}
+
         <TasksCard tasks={work.tasks} all />
       </CardGrid>
     </>

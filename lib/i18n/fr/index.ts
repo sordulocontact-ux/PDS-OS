@@ -24,6 +24,7 @@ import { artistIdentity } from "./artist-identity";
 import { conception } from "./conception";
 import { conceptionCall } from "./conception-call";
 import { conceptionJourney } from "./conception-journey";
+import { conceptionRoles } from "./conception-roles";
 import { conceptionWork } from "./conception-work";
 import { conceptionDirection } from "./conception-direction";
 import { conceptionIntents } from "./conception-intents";
@@ -121,6 +122,7 @@ export const fr = {
   conception,
   conceptionCall,
   conceptionJourney,
+  conceptionRoles,
   conceptionWork,
   conceptionIntents,
   conceptionRefs,

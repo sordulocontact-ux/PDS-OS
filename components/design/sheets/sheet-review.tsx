@@ -18,6 +18,7 @@ export function SheetReview({
   canSubmit,
   isOwner,
   isValidator,
+  blockedSelf = null,
   nameOf,
 }: {
   projectId: string;
@@ -26,6 +27,9 @@ export function SheetReview({
   isOwner: boolean;
   isValidator: boolean;
   nameOf: (personId: string | null) => string;
+  // MKT-C2-08: the viewer's id when the governance forbids approving one's
+  // own submission (else null): their own versions show why, not controls.
+  blockedSelf?: string | null;
 }) {
   const t = fr.conceptionSheet;
   const latest = s.versions[0] ?? null;
@@ -100,7 +104,12 @@ export function SheetReview({
               projectId={projectId}
               version={v}
               nameOf={nameOf}
-              isValidator={isValidator}
+              isValidator={isValidator && v.submittedBy !== blockedSelf}
+              selfSubmitted={
+                isValidator &&
+                blockedSelf !== null &&
+                v.submittedBy === blockedSelf
+              }
               open={i === 0}
             />
           ))

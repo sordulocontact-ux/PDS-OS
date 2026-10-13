@@ -15,6 +15,9 @@ type DbError = { code?: string; message: string } | null;
 export function designError(error: NonNullable<DbError>): string {
   const t = fr.conception.errors;
   if (error.message.includes("not_a_validator")) return t.notValidator;
+  // MKT-C2-08: approval apart from creation, delegations.
+  if (error.message.includes("self_approval")) return t.selfApproval;
+  if (error.message.includes("invalid_delegation")) return t.invalidDelegation;
   if (error.code === "42501")
     return error.message.includes("not_the_project_owner")
       ? t.forbidden

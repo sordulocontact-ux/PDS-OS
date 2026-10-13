@@ -3916,6 +3916,35 @@ Migration `…20261013100301_series_items`, tests `supabase/tests/conception-ser
 - La fiche montre aussi ce que le livrable hérite de la direction (C2-06).
 - Reste pour C2-12 : le PDF du dossier restitue série, cadre commun et contenus.
 
+### Retours Marketing du 12/10/2026, lot C7 (MKT-C2-08, rôles et délégations)
+
+Migration `…20261013100401_design_roles`, tests `supabase/tests/conception-roles.test.sql` (11,
+quatre comptes : DG, chef de projet, DA responsable, directeur créatif hors projet).
+
+- **Approbation séparée de la création** : `decide_design_submission` refuse à qui a soumis la
+  version (`self_approval`), `review_design_version` au chef de projet sur une version qu'il a
+  déposée — sauf si la **gouvernance** du projet l'autorise explicitement
+  (`design_workspaces.allow_self_approval`, posée par un valideur avec raison,
+  `set_design_self_approval`, tracée `governance.*`). L'interface remplace alors les boutons par la
+  phrase qui dit pourquoi (`selfSubmitted`, `blockedSelf`, `VersionItem`).
+- **Délégations** (`design_delegations`, `delegate_design_role`, `revoke_design_delegation`) : le chef
+  de projet confie le rôle de responsable ou de valideur qu'une personne **tient** sur un périmètre
+  (direction ou fiche) à un autre membre, avec raison, début et fin ; même règle de visibilité qu'une
+  désignation (`design_person_check`). Active aujourd'hui (Paris) et non révoquée, elle agit comme le
+  rôle : `design_delegated` est lu par `design_is_responsible`, `design_sheet_can_edit`,
+  `submit_design_sheet`, `submit_design_direction`, `decide_design_submission`. Révoquée, jamais
+  effacée. `DelegationsPanel` sur la Direction artistique et chaque fiche.
+- **Audit** : délégations données / révoquées et anciennes versions déposées / décidées entrent dans
+  `design_events` (`design_audit_extra`), à côté des soumissions et décisions.
+- **Chef de projet à la place du responsable** : autorisé (il reste propriétaire du projet), mais dit
+  comme exceptionnel et tracé (bandeau `conceptionRoles.substitution` sur la direction et la fiche).
+- **Matrice des droits** (« Qui fait quoi », `RightsMatrix`, Direction artistique) : chef de projet,
+  responsable créatif, valideur, délégué, équipe créative, observateur.
+- **Travail** : carte « Ma conception » pour quiconque est responsable (désigné ou délégué) de la
+  direction ou d'une fiche, ou valideur délégué (`MyWork.myConception`).
+- **Décisions prises ici** : pas de compte « artiste » dans l'app (l'artiste reste au Réseau) ; la
+  gouvernance d'exception est posée par un valideur (DG), pas par le chef de projet.
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

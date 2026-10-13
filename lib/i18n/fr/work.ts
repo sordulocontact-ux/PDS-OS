@@ -13,6 +13,9 @@ export const work = {
   loadError: "Impossible de charger votre travail. Rechargez la page.",
 
   cards: {
+    // MKT-C2-08: designated or delegated in a Conception.
+    myConception: "Ma conception",
+    myConceptionEmpty: "Aucune responsabilité de conception.",
     toRetransmitEmpty: "Aucun projet refusé ni de précision demandée.",
     awaitingAcceptance: "En attente d'un chef de projet",
     awaitingAcceptanceEmpty: "Tous les projets transmis ont été acceptés.",
@@ -44,4 +47,13 @@ export const work = {
   noAssignee: "Sans responsable",
   inDesign: "En conception",
   allValidated: "Terminé",
+  // What the person is responsible for in a Conception (MKT-C2-08).
+  conception: {
+    direction: "Direction de la sortie",
+    sheet: (title: string) => `Fiche « ${title} »`,
+    decide: (title: string | null) =>
+      title
+        ? `Décider sur la fiche « ${title} » (délégation)`
+        : "Décider sur la direction (délégation)",
+  },
 } as const;

@@ -4,6 +4,7 @@ import { ConceptionTabs } from "@/components/design/conception-tabs";
 import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
 import { ResponsiblePicker } from "@/components/design/people/responsible-picker";
 import { ValidatorsPicker } from "@/components/design/people/validators-picker";
+import { DelegationsPanel } from "@/components/design/roles/delegations-panel";
 import { SheetChecksPanel } from "@/components/design/sheets/sheet-checks-panel";
 import { SheetForm } from "@/components/design/sheets/sheet-form";
 import { SheetHeader } from "@/components/design/sheets/sheet-header";
@@ -14,9 +15,12 @@ import { SheetReferences } from "@/components/design/sheets/sheet-references";
 import { SheetReview } from "@/components/design/sheets/sheet-review";
 import { SheetView } from "@/components/design/sheets/sheet-view";
 import { PageSection } from "@/components/shell/page-section";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
+import { delegatedTo, loadDesignRoles } from "@/lib/design/delegations";
 import { loadReferenceViews } from "@/lib/design/references";
+import { todayInParis } from "@/lib/insights/dates";
 import { toFormInput } from "@/lib/design/sheet-form";
 import { loadSheetEvents } from "@/lib/design/sheet-summaries";
 import { loadSheetsPage } from "@/lib/design/sheets-page";
@@ -59,7 +63,7 @@ export default async function DesignSheetPage({
   const deliverable =
     data.deliverables.find((d) => d.id === s.sheet.design_deliverable_id) ??
     null;
-  const [events, references] = await Promise.all([
+  const [events, references, roles] = await Promise.all([
     loadSheetEvents(projectId, sheetId),
     loadReferenceViews(
       projectId,
@@ -67,16 +71,26 @@ export default async function DesignSheetPage({
         r.links.some((l) => l.deliverableId === s.sheet.design_deliverable_id),
       ),
     ),
+    loadDesignRoles(projectId, people.members),
   ]);
 
   const t = fr.conceptionSheet;
   const me = access.personId;
   const scope = people.sheets[sheetId] ?? { responsible: null, validators: [] };
   const inProgress = data.stage?.state === "in_progress";
-  const isResponsible = me !== null && scope.responsible?.personId === me;
+  // MKT-C2-08: a delegation acts as the role it hands over.
+  const isResponsible =
+    (me !== null && scope.responsible?.personId === me) ||
+    delegatedTo(roles, me, "sheet", sheetId, "responsible");
   const canWrite = inProgress && (data.isOwner || isResponsible);
   const canEdit = canWrite && s.status !== "pending";
-  const isValidator = scope.validators.some((v) => v.personId === me);
+  const isValidator =
+    scope.validators.some((v) => v.personId === me) ||
+    delegatedTo(roles, me, "sheet", sheetId, "validator");
+  const substitute =
+    data.isOwner && inProgress && scope.responsible && !isResponsible
+      ? scope.responsible.name
+      : null;
   const names = new Map(people.members.map((m) => [m.personId, m.name]));
   const nameOf = (id: string | null) => (id ? (names.get(id) ?? "") : "");
   const intentions = data.intentions.filter(
@@ -116,6 +130,11 @@ export default async function DesignSheetPage({
             <p className="text-body-md text-muted-foreground">
               {s.status === "pending" ? t.frozen : t.readOnly}
             </p>
+          )}
+          {substitute && canEdit && (
+            <ToneCallout tone="info">
+              {fr.conceptionRoles.substitution(substitute)}
+            </ToneCallout>
           )}
           <PageSection id="sheet-intentions" title={t.sections.intentions} card>
             {intentions.length || inherited.length ? (
@@ -218,6 +237,19 @@ export default async function DesignSheetPage({
                 members={people.members}
                 canEdit={data.isOwner && inProgress && s.status !== "pending"}
               />
+              <DelegationsPanel
+                projectId={projectId}
+                scope="sheet"
+                sheetId={sheetId}
+                delegations={roles.delegations.filter(
+                  (d) => d.sheetId === sheetId,
+                )}
+                responsible={scope.responsible}
+                validators={scope.validators}
+                members={people.members}
+                canManage={data.isOwner && inProgress}
+                today={todayInParis()}
+              />
             </div>
           </PageSection>
           <PageSection id="sheet-checks-section" title={t.sections.checks} card>
@@ -231,6 +263,7 @@ export default async function DesignSheetPage({
               isOwner={data.isOwner}
               isValidator={isValidator}
               nameOf={nameOf}
+              blockedSelf={roles.allowSelfApproval ? null : me}
             />
           </PageSection>
           <PageSection id="sheet-history" title={t.sections.history} card>

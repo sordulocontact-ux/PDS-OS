@@ -27,8 +27,10 @@ export function VersionItem({
 }) {
   const t = fr.design.version;
   const submitted = version.status === "submitted";
-  const canWithdraw =
-    inProgress && submitted && version.authorPersonId === mePersonId;
+  const mine = version.authorPersonId === mePersonId;
+  const canWithdraw = inProgress && submitted && mine;
+  // MKT-C2-08: nobody approves a version they deposited themselves.
+  const review = canReview && submitted && !mine;
   const Icon = version.kind === "file" ? IconPaperclip : IconLink;
   const label =
     version.kind === "file"
@@ -95,12 +97,17 @@ export function VersionItem({
         </div>
       )}
 
-      {(canReview && submitted) || canWithdraw ? (
+      {canReview && submitted && mine && (
+        <p className="text-caption text-muted-foreground">
+          {fr.conceptionRoles.selfApproval}
+        </p>
+      )}
+      {review || canWithdraw ? (
         <VersionActions
           projectId={projectId}
           versionId={version.id}
           number={version.number}
-          canReview={canReview && submitted}
+          canReview={review}
           canWithdraw={canWithdraw}
         />
       ) : null}

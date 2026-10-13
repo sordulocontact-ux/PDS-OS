@@ -34,6 +34,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      design_delegations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ends_on: string
+          from_person_id: string
+          id: string
+          organization_id: string
+          project_id: string
+          reason: string
+          revoked_at: string | null
+          revoked_by: string | null
+          role: string
+          scope: string
+          sheet_id: string | null
+          starts_on: string
+          to_person_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ends_on: string
+          from_person_id: string
+          id?: string
+          organization_id: string
+          project_id: string
+          reason: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role: string
+          scope: string
+          sheet_id?: string | null
+          starts_on: string
+          to_person_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ends_on?: string
+          from_person_id?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          reason?: string
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role?: string
+          scope?: string
+          sheet_id?: string | null
+          starts_on?: string
+          to_person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_delegations_sheet_id_fkey"
+            columns: ["sheet_id"]
+            isOneToOne: false
+            referencedRelation: "design_sheets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_identity_versions: {
         Row: {
           artist_id: string
@@ -3730,6 +3792,7 @@ export type Database = {
       }
       design_workspaces: {
         Row: {
+          allow_self_approval: boolean
           identity_deviation: string | null
           identity_deviation_at: string | null
           identity_deviation_by: string | null
@@ -3742,6 +3805,7 @@ export type Database = {
           validation_mode: string
         }
         Insert: {
+          allow_self_approval?: boolean
           identity_deviation?: string | null
           identity_deviation_at?: string | null
           identity_deviation_by?: string | null
@@ -3754,6 +3818,7 @@ export type Database = {
           validation_mode?: string
         }
         Update: {
+          allow_self_approval?: boolean
           identity_deviation?: string | null
           identity_deviation_at?: string | null
           identity_deviation_by?: string | null
@@ -14240,6 +14305,43 @@ export type Database = {
       }
     }
     Functions: {
+      revoke_design_delegation: {
+        Args: {
+          p_delegation_id: string
+        }
+        Returns: undefined
+      }
+      delegate_design_role: {
+        Args: {
+          p_ends: string
+          p_from: string
+          p_project_id: string
+          p_reason: string
+          p_role: string
+          p_scope: string
+          p_sheet_id: string | null
+          p_starts: string
+          p_to: string
+        }
+        Returns: string
+      }
+      design_delegated: {
+        Args: {
+          p_project_id: string
+          p_role: string
+          p_scope: string
+          p_sheet_id: string | null
+        }
+        Returns: boolean
+      }
+      set_design_self_approval: {
+        Args: {
+          p_allow: boolean
+          p_project_id: string
+          p_reason: string
+        }
+        Returns: undefined
+      }
       start_design_without_exchange: {
         Args: {
           p_project_id: string

@@ -37,6 +37,7 @@ export type DirectionSubmission = {
   mode: "global" | "per_section";
   sections: string[];
   snapshot: SnapshotSection[];
+  submittedBy: string | null;
   submittedByName: string;
   submittedAt: string;
   closedAt: string | null;
@@ -149,6 +150,7 @@ export async function loadDirection(
       mode: mode(s.mode),
       sections: s.sections,
       snapshot: toSnapshot(s.snapshot),
+      submittedBy: s.submitted_by,
       submittedByName: name(s.submitted_by),
       submittedAt: s.submitted_at,
       closedAt: s.closed_at,

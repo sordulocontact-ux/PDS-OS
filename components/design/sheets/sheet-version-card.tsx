@@ -37,12 +37,15 @@ export function SheetVersionCard({
   version: v,
   nameOf,
   isValidator,
+  selfSubmitted = false,
   open,
 }: {
   projectId: string;
   version: SheetVersion;
   nameOf: (personId: string | null) => string;
   isValidator: boolean;
+  // MKT-C2-08: their own version, which they may not decide.
+  selfSubmitted?: boolean;
   open: boolean;
 }) {
   const t = fr.conceptionSheet.review;
@@ -72,7 +75,9 @@ export function SheetVersionCard({
         section={section}
       />
     ) : (
-      <p className="text-caption text-muted-foreground">{t.awaiting}</p>
+      <p className="text-caption text-muted-foreground">
+        {selfSubmitted ? fr.conceptionRoles.selfApproval : t.awaiting}
+      </p>
     );
   };
   const sectionTitle = (section: string) =>

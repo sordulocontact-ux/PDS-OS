@@ -154,6 +154,10 @@ export const conception = {
 
   errors: {
     generic: "L'action n'a pas abouti. Réessayez.",
+    selfApproval:
+      "Vous avez soumis ou déposé cette version : une autre personne la décide, sauf si la gouvernance du projet l'autorise.",
+    invalidDelegation:
+      "Délégation impossible : la personne qui délègue doit tenir ce rôle, et les dates doivent être à venir.",
     forbidden: "Seul le chef de projet responsable peut faire cela.",
     notAllowed:
       "Seuls le chef de projet et l'équipe créative écrivent, pendant la conception.",
