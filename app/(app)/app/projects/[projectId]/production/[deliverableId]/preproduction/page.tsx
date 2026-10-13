@@ -15,9 +15,9 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
 import { preprodOverview } from "@/lib/production/preprod/overview";
-import { loadPreprod } from "@/lib/production/preprod/queries";
 import { loadContactDetails } from "@/lib/production/preprod/reads";
 import { loadProductionSheet } from "@/lib/production/sheet";
+import { preprodFor } from "@/lib/production/tab-data";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -48,7 +48,8 @@ export default async function ProductionPreproductionPage({
   const sheet = data.sheet;
   if (!sheet) redirect(routes.projectProductionSheet(projectId, deliverableId));
 
-  const preprod = await loadPreprod(projectId, { ...data, sheet });
+  const preprod = await preprodFor(projectId, deliverableId, access);
+  if (!preprod) notFound();
   const contactIds = [
     ...(sheet.director?.kind === "contact" ? [sheet.director.id] : []),
     ...data.needs.flatMap((n) =>

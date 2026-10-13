@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 
+import { ProductionNextStep } from "@/components/production/next-step";
 import { SheetHeader } from "@/components/production/prep/sheet-header";
 import { SectionTabs } from "@/components/shell/section-tabs";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { loadProductionNext } from "@/lib/production/next/load";
 import { loadPhaseFacts, phaseOf } from "@/lib/production/phase";
 import { loadProductionSheet } from "@/lib/production/sheet";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -13,8 +15,8 @@ import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.productionPrep;
 
-// One deliverable's production: its header (source, phase) and one tab per
-// part of the ticket, each its own URL. The tabs other than Préparation
+// One deliverable's production: its header (source, phase), its one next
+// action (PROD-001) and one tab per part of the ticket, each its own URL. The tabs other than Préparation
 // appear once the preparation is opened. Pages check access themselves; the
 // sheet is read once per request (loadProductionSheet is cached).
 export default async function ProductionSheetLayout({
@@ -33,12 +35,23 @@ export default async function ProductionSheetLayout({
     data.sheet ? { id: data.sheet.id, readyAt: data.sheet.readyAt } : null,
     deliverableId,
   );
+  const phase = phaseOf(facts);
+  const next = await loadProductionNext(
+    projectId,
+    deliverableId,
+    access,
+    data,
+    phase,
+  );
   const step = (key: string) =>
     routes.projectProductionStep(projectId, deliverableId, key);
 
   return (
     <div className="flex flex-col gap-6 pt-6">
-      <SheetHeader projectId={projectId} data={data} phase={phaseOf(facts)} />
+      <SheetHeader projectId={projectId} data={data} phase={phase} />
+      {(data.heritage.fiche || data.heritage.source) && (
+        <ProductionNextStep next={next} />
+      )}
       {data.sheet && (
         <SectionTabs
           label={t.tabsLabel}

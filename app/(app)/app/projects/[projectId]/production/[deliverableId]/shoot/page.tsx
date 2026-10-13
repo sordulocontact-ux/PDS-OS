@@ -11,9 +11,9 @@ import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
 import { effectiveLogistics } from "@/lib/production/logistics";
 import { proposedFollowUps } from "@/lib/production/shoot/follow-ups";
-import { loadShootData } from "@/lib/production/shoot/queries";
 import { shootReport } from "@/lib/production/shoot/report";
 import { loadProductionSheet } from "@/lib/production/sheet";
+import { shootFor } from "@/lib/production/tab-data";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -43,12 +43,9 @@ export default async function ProductionShootPage({
   const sheet = data.sheet;
   if (!sheet) redirect(routes.projectProductionSheet(projectId, deliverableId));
 
-  const { shoot, incidents, equipment, openTaskTitles } = await loadShootData({
-    projectId,
-    sheetId: sheet.id,
-    members: data.members,
-    contacts: data.contacts,
-  });
+  const shootData = await shootFor(projectId, deliverableId, access);
+  if (!shootData) notFound();
+  const { shoot, incidents, equipment, openTaskTitles } = shootData;
   const today = todayInParis();
   const shootDate = effectiveLogistics(sheet.logistics, data.heritage.fiche)
     .shootDate.value;

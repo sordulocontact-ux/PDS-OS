@@ -1,9 +1,11 @@
 import { cn } from "@/lib/utils";
 
+export type NextCardKind = "act" | "decision" | "wait" | "done";
+
 /**
- * « Prochaine action », at the top of a plan's panel (the prototype's): what
- * to do now, in blue; a decision of the direction, in violet; a wait for
- * someone else, in grey — then the controls that do it.
+ * « Prochaine action » (the Juridique's plan, the Production's sheet): what
+ * to do now, in blue; a decision, in violet; a wait for someone else, in
+ * grey; a finished workflow, in green — then the controls that do it.
  */
 export function NextCard({
   kind,
@@ -11,7 +13,7 @@ export function NextCard({
   title,
   children,
 }: {
-  kind: "act" | "decision" | "wait";
+  kind: NextCardKind;
   label: string;
   title: string;
   children?: React.ReactNode;
@@ -25,6 +27,8 @@ export function NextCard({
         kind === "decision" &&
           "border-[color:var(--tone-action-fg)]/40 bg-[color:var(--tone-action-bg)]/50",
         kind === "wait" && "bg-muted",
+        kind === "done" &&
+          "border-[color:var(--tone-success-fg)]/30 bg-[color:var(--tone-success-bg)]/50",
       )}
     >
       <span
@@ -33,6 +37,7 @@ export function NextCard({
           kind === "act" && "text-[color:var(--selection)]",
           kind === "decision" && "text-[color:var(--tone-action-fg)]",
           kind === "wait" && "text-muted-foreground",
+          kind === "done" && "text-[color:var(--tone-success-fg)]",
         )}
       >
         {label}

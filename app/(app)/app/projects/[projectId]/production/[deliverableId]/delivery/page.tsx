@@ -6,13 +6,13 @@ import { HandoffSection } from "@/components/production/delivery/handoff-section
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { loadDeliveryTab } from "@/lib/production/delivery/queries";
 import {
   checkSince,
   decisionsOf,
   summarize,
 } from "@/lib/production/delivery/rules";
 import { loadProductionSheet } from "@/lib/production/sheet";
+import { deliveryFor } from "@/lib/production/tab-data";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -40,7 +40,8 @@ export default async function ProductionDeliveryPage({
   if (!data.sheet)
     redirect(routes.projectProductionSheet(projectId, deliverableId));
 
-  const tab = await loadDeliveryTab(data.sheet.id, deliverableId, data.members);
+  const tab = await deliveryFor(projectId, deliverableId, access);
+  if (!tab) notFound();
   const since = checkSince(tab.delivery);
   const decisions = decisionsOf({
     approvedAt: tab.delivery?.approvedAt ?? null,

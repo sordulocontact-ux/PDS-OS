@@ -1,6 +1,6 @@
 import { ProposeSplitButton } from "@/components/legal/splits/split-actions";
 import { SplitLines } from "@/components/legal/splits/split-lines";
-import { NextCard } from "@/components/legal/tracking/next-card";
+import { NextCard } from "@/components/ui/next-card";
 import { SplitEditorInline } from "@/components/legal/tracking/split-editor-inline";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { ToneCallout } from "@/components/ui/tone-callout";

@@ -8,7 +8,7 @@ import { AddedActions } from "@/components/legal/tracking/added-actions";
 import { ContractPanel } from "@/components/legal/tracking/contract-panel";
 import { DelegateButton } from "@/components/legal/tracking/delegate-button";
 import { FichePanel } from "@/components/legal/tracking/fiche-panel";
-import { NextCard } from "@/components/legal/tracking/next-card";
+import { NextCard } from "@/components/ui/next-card";
 import { NextLineButton } from "@/components/legal/tracking/next-line-button";
 import { PlanSheetProvider } from "@/components/legal/tracking/plan-sheet-context";
 import {

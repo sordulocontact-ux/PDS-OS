@@ -3623,6 +3623,25 @@ ni livré ni clos. Migration `20261010000301_production_delivery_and_review.sql`
   prise ici, faute de ticket : la clôture n'exige pas que les autres workflows soient terminés, la
   direction en juge en lisant l'état affiché (dont l'encart « Volet Marketing »).
 
+### Retours d'Ibé du 13/10/2026 sur la Production (PROD-001 à PROD-040)
+
+Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche `feat/production-ibe`.
+
+- **Prochaine action d'une fiche** (PROD-001, PROD-007 ; `lib/production/next/`,
+  `ProductionNextStep`) : sous l'en-tête de chaque onglet, une seule action — titre, pourquoi, qui
+  est attendu (« C'est à vous » ou « Attendu : Maël (chef de projet) »), ce qui manque encore, un
+  lien vers l'endroit où elle se fait (« Ouvre : … ») et la dernière étape franchie. Calculée par le
+  code dans l'ordre du workflow (`compute.ts` → `preproduction.ts`, `shoot-post.ts`,
+  `delivery.ts`) : brief du réalisateur, call technique (tant qu'il n'y a ni call ni matériel), puis
+  le travail derrière chaque contrôle avant tournage dans l'ordre (un contrôle dont le travail
+  existe est à confirmer par une personne), « prête », lancer puis finir le tournage, rushes,
+  incidents bloquants, étapes de post confiées, une décision par version, fichiers attendus,
+  contrôle, livraison, transmission. Une action d'un autre se lit « En attente » avec qui et
+  pourquoi. Seules les données de la phase atteinte sont lues, **une fois par requête** pour la mise
+  en page et l'onglet (`lib/production/tab-data.ts`, `cache`). Décision faute de règle : le call
+  technique n'est demandé que si aucun matériel n'est encore saisi (une petite production s'en
+  passe) ; « Feuille de service » compte comme travaillée dès que l'heure de convocation est écrite.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

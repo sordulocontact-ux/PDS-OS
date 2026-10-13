@@ -350,3 +350,7 @@ Au-delà des six étapes :
 - [x] JUR-29, fin (13/10) : chaîne causale par règle, signatures rendues caduques par un nouveau
       bulletin, filtres par personne et par mois, export CSV avec cause, comparateur de versions des
       répartitions (sans migration)
+- [x] Retours d'Ibé sur la Production (13/10), lot 1 (PROD-001, PROD-007) : une prochaine action par
+      fiche sur chaque onglet (pourquoi, qui est attendu, ce qui manque, lien direct, dernière étape
+      franchie), calculée par le code ; données de chaque onglet lues une fois par requête (sans
+      migration)

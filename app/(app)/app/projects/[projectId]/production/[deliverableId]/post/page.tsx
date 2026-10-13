@@ -8,9 +8,9 @@ import { VersionsSection } from "@/components/production/post/versions-section";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { loadPostProduction } from "@/lib/production/post/queries";
 import { suggestPostSteps } from "@/lib/production/post/suggestions";
 import { loadProductionSheet } from "@/lib/production/sheet";
+import { postFor } from "@/lib/production/tab-data";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -41,11 +41,8 @@ export default async function ProductionPostPage({
     redirect(routes.projectProductionSheet(projectId, deliverableId));
 
   const people = { members: data.members, contacts: data.contacts };
-  const post = await loadPostProduction({
-    projectId,
-    sheetId: sheet.id,
-    ...people,
-  });
+  const post = await postFor(projectId, deliverableId, access);
+  if (!post) notFound();
   const scope = {
     projectId,
     sheetId: sheet.id,

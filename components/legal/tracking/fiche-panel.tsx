@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
-import { NextCard } from "@/components/legal/tracking/next-card";
+import { NextCard } from "@/components/ui/next-card";
 import {
   usePlanSheet,
   type PreparedLink,

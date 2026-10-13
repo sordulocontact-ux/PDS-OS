@@ -9,7 +9,7 @@ import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-slot";
 import { ContractValueList } from "@/components/legal/contracts/contract-value-list";
-import { NextCard } from "@/components/legal/tracking/next-card";
+import { NextCard } from "@/components/ui/next-card";
 import { Button } from "@/components/ui/button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
