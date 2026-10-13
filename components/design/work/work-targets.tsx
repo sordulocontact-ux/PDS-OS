@@ -33,7 +33,8 @@ function targetsOf(
     ...data.deliverables.map((d) => ({
       key: d.id,
       title: d.title,
-      answered: d.answered,
+      // Inherited from the direction counts as answered (MKT-C2-06).
+      answered: d.answered + d.inherited,
       proposals: d.proposals,
       toQualify: d.status === "to_qualify",
     })),
@@ -109,7 +110,9 @@ export function TargetBadges({
     <div className="flex flex-wrap items-center gap-2">
       {state && (
         <StatusBadge tone={intentionsStateTone[state]} size="sm">
-          {fr.conception.intentionsStates[state]}
+          {current === DIRECTION_KEY
+            ? fr.conception.directionIntentionsStates[state]
+            : fr.conception.intentionsStates[state]}
         </StatusBadge>
       )}
       {target.proposals > 0 && (

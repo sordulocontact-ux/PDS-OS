@@ -3863,6 +3863,37 @@ Migration `…20261013100201_conception_exchanges`, tests `supabase/tests/concep
   compte rendu dit décidé et ce qu'une personne a confirmé ; « désaccords » sont des questions
   ouvertes (pas de catégorie à part dans le compte rendu).
 
+### Retours Marketing du 12/10/2026, lot C5 (MKT-C2-06, direction de la sortie)
+
+Sans migration : les quatre sujets stockés (`story`, `look`, `tone`, `musts`) restent, leur sens
+change selon la cible.
+
+- **La direction de la sortie est une décision, pas un livrable** : ses sujets deviennent
+  « Concept central et message », « Codes communs », « Ton », « Contraintes et lignes rouges »
+  (`fr.conception.directionTopics`, questions et objectifs propres) ; états Brouillon, À arbitrer,
+  Confirmée, Révisée (`directionIntentionsStates`) ; **plus de dépôt de versions** pour elle dans le
+  travail direct (les anciennes restent lisibles dans l'historique du projet). Nommée « Direction de
+  la sortie » partout.
+- **Héritage** : un sujet que la direction confirmée répond est **hérité** par chaque livrable qui
+  n'y répond pas lui-même — montré (« Hérité de la direction : … »), compté comme répondu
+  (`ConceptionDeliverable.inherited`, pastilles, parcours, Travail direct), jamais redemandé
+  (ordre du jour de l'échange créatif). La réponse propre d'un livrable sur un sujet hérité est
+  affichée comme **écart ou précision**, la note invite à dire pourquoi. Une fiche créée prend la
+  direction confirmée à ce moment-là pour ce que le livrable ne dit pas (« … (hérité de la
+  direction) »).
+- **Questions selon le format** (`lib/design/formats.ts`, par le code depuis titre et levier :
+  vidéo courte, pochette, clip, campagne, sinon générique ; `questions.formats`).
+- **Révision** : avant de reconfirmer une direction révisée, le panneau dit les sujets changés
+  depuis la dernière confirmation et les livrables qui en héritent, fiche déjà validée signalée
+  (`lib/design/direction-impacts.ts`) ; confirmations précédentes listées
+  (`Consolidation.directionHistory`).
+- **Brief créatif** : parties « Direction de la sortie · … » et « Concepts des livrables », chaque
+  livrable dit ce qu'il hérite (`deliverables[].inherits`) — l'identité de l'artiste est déjà à part
+  (C2-04). Un brief enregistré avant ce lot paraît « à mettre à jour » : son contenu gagne ce champ.
+- **Décision prise ici** : le format est déduit des mots du titre et du levier (pas de champ « type
+  de livrable » dans la Stratégie) ; un livrable mal classé garde les questions génériques
+  (`other`).
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

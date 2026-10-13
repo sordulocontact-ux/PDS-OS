@@ -61,6 +61,16 @@ export const conceptionIntents = {
         : `${n} propositions de PO attendent encore : confirmez-les ou écartez-les.`,
     blockedNothing: "Retenez au moins une intention avant de confirmer.",
     ownerOnly: "Seul le chef de projet confirme les intentions consolidées.",
+    // MKT-C2-06: what a revision of the release's direction touches.
+    impactsTitle: "Avant de reconfirmer : ce que cette révision touche",
+    impactsTopics: (topics: string) =>
+      `Changé depuis la dernière confirmation : ${topics}.`,
+    impactsDeliverables: "Livrables qui en héritent :",
+    impactsNone: "Aucun livrable n'en hérite : chacun a sa propre réponse.",
+    sheetValidated: "fiche déjà validée",
+    historyTitle: "Confirmations précédentes",
+    historyLine: (name: string, date: string) =>
+      name ? `${date} · ${name}` : date,
     cancel: "Annuler",
     close: "Fermer",
   },

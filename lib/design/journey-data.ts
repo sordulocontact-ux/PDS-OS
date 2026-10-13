@@ -94,7 +94,8 @@ export async function loadJourneyInput(
       return {
         id: d.id,
         title: d.title,
-        answered: d.answered,
+        // Inherited from the release's direction counts (MKT-C2-06).
+        answered: d.answered + d.inherited,
         proposals: d.proposals,
         sheet: sheet ? { id: sheet.id, status: sheet.status } : null,
       };

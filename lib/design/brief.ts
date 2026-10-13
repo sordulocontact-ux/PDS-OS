@@ -41,7 +41,10 @@ export type CreativeBriefContent = {
   deliverables: Array<{
     title: string;
     status: "confirmed" | "to_qualify";
+    // Its own answers: a precision or a deviation from the direction.
     intentions: Array<{ topic: DesignTopic; value: string }>;
+    // What it takes from the release's direction as is (MKT-C2-06).
+    inherits?: DesignTopic[];
   }>;
   references: Array<{ label: string; url: string | null; targets: string[] }>;
   constraints: Array<{ type: string; text: string }>;
@@ -169,6 +172,16 @@ export async function buildCreativeBrief(
     deliverables: data.deliverables.map((d) => ({
       title: d.title,
       status: d.status,
+      inherits: DESIGN_TOPICS.filter(
+        (topic) =>
+          direction(data, topic).length > 0 &&
+          !data.intentions.some(
+            (i) =>
+              i.status === "confirmed" &&
+              i.deliverableId === d.id &&
+              i.topic === topic,
+          ),
+      ),
       intentions: DESIGN_TOPICS.flatMap((topic) =>
         data.intentions
           .filter(

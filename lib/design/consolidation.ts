@@ -19,6 +19,9 @@ export type Consolidation = {
   // Per target key: a deliverable id, or « direction ».
   confirmations: Record<string, IntentConfirmation>;
   states: Record<string, IntentionsState>;
+  // Every confirmation of the release's direction, newest first (MKT-C2-06:
+  // its revision history).
+  directionHistory: IntentConfirmation[];
 };
 
 function snapshotOf(value: unknown): Array<{ intention_id: string }> {
@@ -50,7 +53,14 @@ export async function loadConsolidation(
     .order("confirmed_at", { ascending: false });
 
   const confirmations: Record<string, IntentConfirmation> = {};
+  const directionHistory: IntentConfirmation[] = [];
   for (const row of rows ?? []) {
+    if (!row.design_deliverable_id)
+      directionHistory.push({
+        snapshot: snapshotOf(row.snapshot),
+        confirmedBy: row.confirmed_by,
+        confirmedAt: row.confirmed_at,
+      });
     const key = row.design_deliverable_id ?? DIRECTION_KEY;
     // Newest first: the first one met is the one in force.
     confirmations[key] ??= {
@@ -78,7 +88,7 @@ export async function loadConsolidation(
       ];
     }),
   );
-  return { confirmations, states };
+  return { confirmations, states, directionHistory };
 }
 
 /**

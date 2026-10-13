@@ -1,6 +1,10 @@
 import "server-only";
 
 import type { Access } from "@/lib/auth/access";
+import {
+  deliverableFormat,
+  type DeliverableFormat,
+} from "@/lib/design/formats";
 import { NARRATIVE_PARTS, type NarrativePart } from "@/lib/framing/brief";
 import { loadMembers } from "@/lib/framing/related";
 import {
@@ -43,9 +47,14 @@ export type ConceptionDeliverable = {
   // from it by code (lib/strategy/upstream.ts).
   milestone: { title: string; date: string } | null;
   upstream: UpstreamStep[];
-  // Topics with a confirmed intention, PO's proposals waiting.
+  // Topics with a confirmed intention of its own, PO's proposals waiting.
   answered: number;
   proposals: number;
+  // Topics it has no answer of its own for but inherits from the confirmed
+  // direction of the release (MKT-C2-06): answered + inherited = complete.
+  inherited: number;
+  // What it is (clip, cover, short video, campaign…): its questions follow.
+  format: DeliverableFormat;
 };
 
 export type ConceptionIntention = {
@@ -297,6 +306,13 @@ export async function loadConception(
     todayInParis(),
   );
 
+  // The topics the release's direction answers: every deliverable inherits
+  // them unless it answers them itself (MKT-C2-06).
+  const directionTopics = new Set(
+    intentions
+      .filter((i) => i.target === "direction" && i.status === "confirmed")
+      .map((i) => i.topic),
+  );
   const deliverables: ConceptionDeliverable[] = rows.flatMap((d) => {
     if (!isDeliverableOrigin(d.origin)) return [];
     const committed = d.strategy_deliverables;
@@ -331,6 +347,14 @@ export async function loadConception(
         upstream: chain?.steps ?? [],
         answered: own.filter((i) => i.status === "confirmed").length,
         proposals: own.filter((i) => i.status === "proposed").length,
+        inherited: [...directionTopics].filter(
+          (topic) =>
+            !own.some((i) => i.status === "confirmed" && i.topic === topic),
+        ).length,
+        format: deliverableFormat(
+          committed?.title ?? d.title ?? "",
+          lever?.label ?? null,
+        ),
       },
     ];
   });

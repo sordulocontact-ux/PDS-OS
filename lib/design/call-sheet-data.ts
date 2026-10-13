@@ -32,12 +32,21 @@ function missingOf(
 export function designCallTargets(
   data: Pick<ConceptionData, "deliverables" | "intentions">,
 ): Pick<DesignCallSheetData, "deliverables" | "directionMissing"> {
+  const direction = new Set(
+    data.intentions
+      .filter((i) => i.status === "confirmed" && i.target === "direction")
+      .map((i) => i.topic),
+  );
   return {
+    // A topic the release's direction answers is inherited: never asked
+    // again about each deliverable (MKT-C2-06).
     deliverables: data.deliverables.map((d) => ({
       id: d.id,
       title: d.title,
       status: d.status,
-      missing: missingOf(data, { deliverableId: d.id }),
+      missing: missingOf(data, { deliverableId: d.id }).filter(
+        (topic) => !direction.has(topic),
+      ),
     })),
     directionMissing: missingOf(data, "direction"),
   };

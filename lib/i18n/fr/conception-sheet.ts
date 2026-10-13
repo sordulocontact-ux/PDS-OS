@@ -15,6 +15,9 @@ export const conceptionSheet = {
   empty: "Aucun livrable dans la Conception pour l'instant.",
 
   create: {
+    // MKT-C2-06: what the deliverable inherits from the release's direction.
+    inherited: (topic: string, value: string) =>
+      `${topic} (hérité de la direction) : ${value}`,
     open: "Créer la fiche",
     title: (deliverable: string) => `Créer la fiche · ${deliverable}`,
     description:

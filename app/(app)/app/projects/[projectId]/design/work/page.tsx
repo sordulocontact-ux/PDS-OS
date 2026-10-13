@@ -26,7 +26,9 @@ import {
   consolidationPanelData,
   loadConsolidation,
 } from "@/lib/design/consolidation";
+import { directionImpacts } from "@/lib/design/direction-impacts";
 import { loadDesignPeople } from "@/lib/design/people";
+import { loadSheetSummaries } from "@/lib/design/sheet-summaries";
 import {
   DESIGN_TOPICS,
   DIRECTION_KEY,
@@ -74,15 +76,20 @@ export default async function DesignWorkPage({
   ]);
   if (!data || !design) notFound();
   if (!data.started) redirect(routes.projectDesign(projectId));
-  const [consolidation, people] = await Promise.all([
+  const [consolidation, people, sheets] = await Promise.all([
     loadConsolidation(projectId, data),
     loadDesignPeople(projectId, data.organizationId, access),
+    typeof asked === "string" && asked !== DIRECTION_KEY
+      ? []
+      : loadSheetSummaries(projectId),
   ]);
 
   const t = fr.conceptionWork;
   const fallback =
     data.deliverables.find(
-      (d) => d.status === "confirmed" && d.answered < DESIGN_TOPICS.length,
+      (d) =>
+        d.status === "confirmed" &&
+        d.answered + d.inherited < DESIGN_TOPICS.length,
     )?.id ?? DIRECTION_KEY;
   const deliverable =
     data.deliverables.find(
@@ -158,6 +165,13 @@ export default async function DesignWorkPage({
             projectId={projectId}
             deliverable={deliverable}
             confirmed={confirmed}
+            inherited={Object.fromEntries(
+              data.intentions
+                .filter(
+                  (i) => i.status === "confirmed" && i.target === "direction",
+                )
+                .map((i) => [i.topic, i.value]),
+            )}
             current={isDesignTopic(topic) ? topic : null}
             canWrite={data.canWrite}
           />
@@ -170,6 +184,23 @@ export default async function DesignWorkPage({
               current,
             )}
             canConfirm={owner}
+            {...(deliverable
+              ? {}
+              : {
+                  impacts: directionImpacts(
+                    data,
+                    consolidation.confirmations[DIRECTION_KEY]?.snapshot.map(
+                      (x) => x.intention_id,
+                    ) ?? null,
+                    sheets,
+                  ),
+                  history: consolidation.directionHistory.map((h) => ({
+                    byName:
+                      people.members.find((m) => m.personId === h.confirmedBy)
+                        ?.name ?? "",
+                    at: h.confirmedAt,
+                  })),
+                })}
           />
         </div>
 
@@ -183,11 +214,13 @@ export default async function DesignWorkPage({
           />
         </PageSection>
 
-        {(!deliverable || deliverable.strategyDeliverableId) && (
+        {/* MKT-C2-06: the release's direction is a decision, not a
+            deliverable — no versions to deposit for it. */}
+        {deliverable?.strategyDeliverableId && (
           <TargetVersions
             design={design}
             projectId={projectId}
-            strategyDeliverableId={deliverable?.strategyDeliverableId ?? null}
+            strategyDeliverableId={deliverable.strategyDeliverableId}
             title={title}
           />
         )}

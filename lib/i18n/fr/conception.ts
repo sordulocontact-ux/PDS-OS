@@ -67,6 +67,10 @@ export const conception = {
     provenance: "Provenance",
     note: "Note",
     intentions: "Intentions",
+    inherited: (n: number) =>
+      n === 1
+        ? "dont 1 héritée de la direction"
+        : `dont ${n} héritées de la direction`,
     answered: (n: number, total: number) => `${n} sur ${total} posées`,
     proposals: (n: number) =>
       n === 1 ? "1 proposition de PO" : `${n} propositions de PO`,
@@ -136,13 +140,16 @@ export const conception = {
     tone: "Ton et émotion",
     musts: "Incontournables et interdits",
   },
+  // MKT-C2-06: the release's direction is a decision, not a deliverable —
+  // its concept and message, its common codes, its tone, its constraints
+  // and red lines, inherited by every deliverable.
   directionTopics: {
-    story: "Ce que raconte l'ensemble",
-    look: "Univers visuel commun",
-    tone: "Ton et émotion",
-    musts: "Incontournables et interdits",
+    story: "Concept central et message",
+    look: "Codes communs",
+    tone: "Ton",
+    musts: "Contraintes et lignes rouges",
   },
-  direction: "Direction créative",
+  direction: "Direction de la sortie",
   directionHint: "Ce que tous les livrables partagent.",
 
   errors: {
@@ -198,6 +205,14 @@ export const conception = {
     to_confirm: "À confirmer",
     confirmed: "Confirmées",
     to_revise: "À réviser",
+  },
+  // The release's direction (MKT-C2-06): brouillon, à arbitrer, confirmée,
+  // révisée (changed since its confirmation, to confirm again).
+  directionIntentionsStates: {
+    draft: "Brouillon",
+    to_confirm: "À arbitrer",
+    confirmed: "Confirmée",
+    to_revise: "Révisée, à reconfirmer",
   },
   directionStates: {
     to_assign: "À attribuer",

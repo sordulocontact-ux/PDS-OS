@@ -70,7 +70,7 @@ export const conceptionJourney = {
         ? "Relire la proposition de PO"
         : `Relire les ${n} propositions de PO`,
     assignDirection: "Désigner le responsable de la direction",
-    answerDirection: "Répondre aux questions de la direction créative",
+    answerDirection: "Répondre aux questions de la direction de la sortie",
     submitDirection: "Soumettre la direction créative",
     reviseDirection: "Reprendre la direction (modifications demandées)",
     createSheet: (title: string) => `Créer la fiche de « ${title} »`,
@@ -94,7 +94,7 @@ export const conceptionJourney = {
     brief: "Brief créatif",
     validation: "Accueil › Valider la conception",
     production: "Production",
-    directionTarget: "Direction créative",
+    directionTarget: "Direction de la sortie",
   },
   waitingFor: {
     direction: "la décision sur la direction créative",

@@ -2,7 +2,9 @@ import { ConfirmIntentionsButton } from "@/components/design/work/confirm-intent
 import { PageSection } from "@/components/shell/page-section";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatDay } from "@/lib/assistant/facts";
+import { DIRECTION_KEY } from "@/lib/design/intentions";
 import type { IntentionsState } from "@/lib/design/states";
 import { fr } from "@/lib/i18n/fr";
 import { intentionsStateTone } from "@/lib/ui/state-tones";
@@ -29,6 +31,8 @@ export function ConsolidationPanel({
   proposals,
   confirmation,
   canConfirm,
+  impacts = null,
+  history = [],
 }: {
   projectId: string;
   target: string;
@@ -38,6 +42,13 @@ export function ConsolidationPanel({
   proposals: number;
   confirmation: { byName: string; at: string } | null;
   canConfirm: boolean;
+  // The release's direction (MKT-C2-06): what a revision touches, shown
+  // before it is confirmed again, and its earlier confirmations.
+  impacts?: {
+    topics: string[];
+    deliverables: Array<{ title: string; sheetValidated: boolean }>;
+  } | null;
+  history?: Array<{ byName: string; at: string }>;
 }) {
   const t = fr.conceptionIntents.consolidation;
   const blocked =
@@ -53,7 +64,9 @@ export function ConsolidationPanel({
       description={t.hint}
       action={
         <StatusBadge tone={intentionsStateTone[state]}>
-          {fr.conception.intentionsStates[state]}
+          {target === DIRECTION_KEY
+            ? fr.conception.directionIntentionsStates[state]
+            : fr.conception.intentionsStates[state]}
         </StatusBadge>
       }
     >
@@ -92,6 +105,28 @@ export function ConsolidationPanel({
       ) : (
         <EmptyNote>{t.noneRetained}</EmptyNote>
       )}
+      {impacts && state !== "confirmed" && (
+        <ToneCallout tone="warning">
+          <span className="flex flex-col gap-1">
+            <span className="font-medium">{t.impactsTitle}</span>
+            <span>{t.impactsTopics(impacts.topics.join(", "))}</span>
+            {impacts.deliverables.length ? (
+              <span>
+                {t.impactsDeliverables}{" "}
+                {impacts.deliverables
+                  .map((d) =>
+                    d.sheetValidated
+                      ? `${d.title} (${t.sheetValidated})`
+                      : d.title,
+                  )
+                  .join(", ")}
+              </span>
+            ) : (
+              <span>{t.impactsNone}</span>
+            )}
+          </span>
+        </ToneCallout>
+      )}
       {canConfirm && state !== "confirmed" ? (
         <ConfirmIntentionsButton
           projectId={projectId}
@@ -103,6 +138,18 @@ export function ConsolidationPanel({
         state !== "confirmed" && (
           <p className="text-caption text-muted-foreground">{t.ownerOnly}</p>
         )
+      )}
+      {history.length > 1 && (
+        <details className="text-caption text-muted-foreground">
+          <summary className="cursor-pointer">{t.historyTitle}</summary>
+          <ul className="flex flex-col gap-1 pt-2">
+            {history.slice(1).map((h) => (
+              <li key={h.at}>
+                {t.historyLine(h.byName, formatDay(h.at.slice(0, 10)))}
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
     </PageSection>
   );

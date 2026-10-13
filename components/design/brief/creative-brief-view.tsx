@@ -145,6 +145,15 @@ export function CreativeBriefView({
                   )}
                 />
               )}
+              {d.inherits && d.inherits.length > 0 && (
+                <p className="text-caption text-muted-foreground">
+                  {t.inherits(
+                    d.inherits
+                      .map((x) => fr.conception.directionTopics[x])
+                      .join(", "),
+                  )}
+                </p>
+              )}
             </li>
           ))}
         </ul>

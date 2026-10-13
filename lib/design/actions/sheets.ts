@@ -45,27 +45,41 @@ export async function createDesignSheet(
   if (!access.organizationId) return fail(fr.conception.errors.generic);
   const supabase = await createClient();
 
-  const [{ data: deliverable }, { data: intentions }] = await Promise.all([
-    supabase
-      .from("design_deliverables")
-      .select("id, title, strategy_deliverables(title, due_date)")
-      .eq("id", deliverableId)
-      .eq("project_id", projectId)
-      .maybeSingle(),
-    supabase
-      .from("design_intentions")
-      .select("topic, value")
-      .eq("design_deliverable_id", deliverableId)
-      .eq("status", "confirmed")
-      .order("topic"),
-  ]);
+  const [{ data: deliverable }, { data: intentions }, { data: direction }] =
+    await Promise.all([
+      supabase
+        .from("design_deliverables")
+        .select("id, title, strategy_deliverables(title, due_date)")
+        .eq("id", deliverableId)
+        .eq("project_id", projectId)
+        .maybeSingle(),
+      supabase
+        .from("design_intentions")
+        .select("topic, value")
+        .eq("design_deliverable_id", deliverableId)
+        .eq("status", "confirmed")
+        .order("topic"),
+      // MKT-C2-06: the release's direction as confirmed when the sheet is
+      // created, inherited where the deliverable says nothing of its own.
+      supabase
+        .from("design_intentions")
+        .select("topic, value")
+        .eq("project_id", projectId)
+        .eq("target", "direction")
+        .eq("status", "confirmed")
+        .order("topic"),
+    ]);
   if (!deliverable) return fail(fr.conception.errors.generic);
   const committed = deliverable.strategy_deliverables;
   const title = committed?.title ?? deliverable.title ?? "";
   const topics = fr.conception.topics as Record<string, string>;
-  const intention = (intentions ?? [])
-    .map((i) => `${topics[i.topic] ?? i.topic} : ${i.value}`)
-    .join("\n");
+  const own = intentions ?? [];
+  const intention = [
+    ...own.map((i) => `${topics[i.topic] ?? i.topic} : ${i.value}`),
+    ...(direction ?? [])
+      .filter((d) => !own.some((i) => i.topic === d.topic))
+      .map((d) => t.create.inherited(topics[d.topic] ?? d.topic, d.value)),
+  ].join("\n");
   const provenance: SheetProvenance = {
     title: { source: committed ? "strategy" : "manual" },
     ...(intention ? { intention: { source: "intention" as const } } : {}),

@@ -8,7 +8,7 @@ export const conceptionWork = {
 
   targets: {
     label: "Ce que vous travaillez",
-    direction: "Direction créative",
+    direction: "Direction de la sortie",
     deliverablesLabel: "Conception par livrable",
     answered: (n: number, total: number) => `${n} sur ${total} posées`,
     count: (n: number, total: number) => `${n}/${total}`,
@@ -54,13 +54,61 @@ export const conceptionWork = {
       musts: (title: string) =>
         `Qu'est-ce qui doit absolument être dans « ${title} », ou en être absent ?`,
     },
-    direction: {
-      story: "Quelle histoire porte l'ensemble de la campagne ?",
-      look: "Quel univers visuel tous les livrables partagent-ils ?",
-      tone: "Quel ton, quelle émotion pour l'ensemble ?",
-      musts:
-        "Qu'est-ce qui doit se retrouver partout, ou n'apparaître nulle part ?",
+    // MKT-C2-06: the questions follow the deliverable's format.
+    formats: {
+      clip: {
+        story: (title: string) => `Quel scénario pour « ${title} » ?`,
+        look: (title: string) =>
+          `Quelle mise en scène, quels lieux, quelle image pour « ${title} » ?`,
+        tone: (title: string) =>
+          `Quel rythme, quelle émotion à l'écran pour « ${title} » ?`,
+        musts: (title: string) =>
+          `Qui et quoi doit apparaître à l'image dans « ${title} », ou en être absent ?`,
+      },
+      cover: {
+        story: (title: string) => `Quelle idée porte « ${title} » ?`,
+        look: (title: string) =>
+          `Quelle composition : photo, illustration, typographie pour « ${title} » ?`,
+        tone: (title: string) =>
+          `Quelle impression au premier regard pour « ${title} » ?`,
+        musts: (title: string) =>
+          `Quelles mentions, quel logo, quels interdits sur « ${title} » ?`,
+      },
+      short: {
+        story: (title: string) =>
+          `Quelle accroche pour « ${title} » : tendance, défi, extrait du son ?`,
+        look: (title: string) =>
+          `Quel cadrage vertical, quel décor pour « ${title} » ?`,
+        tone: (title: string) => `Quelle énergie pour « ${title} » ?`,
+        musts: (title: string) =>
+          `Durée, sous-titres, son, mentions : que doit respecter « ${title} » ?`,
+      },
+      campaign: {
+        story: (title: string) => `Quel message porte « ${title} » ?`,
+        look: (title: string) =>
+          `Quels visuels, quelles déclinaisons pour « ${title} » ?`,
+        tone: (title: string) => `Quel ton pour « ${title} » ?`,
+        musts: (title: string) =>
+          `Mentions légales, partenaires, logos : que doit contenir « ${title} » ?`,
+      },
     },
+    direction: {
+      story: "Quel concept central et quel message portent toute la sortie ?",
+      look: "Quels codes communs (visuels, sonores, typographiques) tous les livrables partagent-ils ?",
+      tone: "Quel ton pour toute la sortie ?",
+      musts:
+        "Quelles contraintes et quelles lignes rouges valent pour tous les livrables ?",
+    },
+  },
+
+  // A deliverable inherits the release's direction (MKT-C2-06).
+  inheritance: {
+    state: "Hérité",
+    stateOwn: "Propre au livrable",
+    summary: (value: string) => `Hérité de la direction : ${value}`,
+    note: (value: string) =>
+      `Hérité de la direction de la sortie : « ${value} ». Répondez seulement si ce livrable s'en écarte ou le précise ; dites pourquoi.`,
+    deviates: "Écart ou précision sur la direction",
   },
 
   // The four questions, numbered and unfolded in place like the Stratégie's
@@ -76,6 +124,15 @@ export const conceptionWork = {
     look: "L'image : esthétique, lumière, couleurs.",
     tone: "L'émotion que l'on veut faire ressentir.",
     musts: "Ce qui doit absolument y être, et ce qui ne doit pas y apparaître.",
+  },
+  // What a question of the release's direction decides (MKT-C2-06).
+  directionPurposes: {
+    story:
+      "L'idée qui relie tous les livrables, et ce que la sortie veut dire.",
+    look: "Ce que tous les livrables partagent : couleurs, matières, typographies, sons.",
+    tone: "La voix commune de la sortie.",
+    musts:
+      "Ce qui s'impose à tous les livrables, et ce qu'aucun ne doit faire.",
   },
   notDefined: "Pas encore défini",
 

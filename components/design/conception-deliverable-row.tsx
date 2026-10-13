@@ -79,7 +79,8 @@ export function ConceptionDeliverableRow({
             {[
               d.leverLabel,
               d.status === "confirmed" ? (due ?? t.noDue) : null,
-              t.answered(d.answered, DESIGN_TOPICS.length),
+              t.answered(d.answered + d.inherited, DESIGN_TOPICS.length),
+              d.inherited > 0 ? t.inherited(d.inherited) : null,
               d.proposals > 0 ? t.proposals(d.proposals) : null,
               sheet ? t.sheet(fr.conception.sheetStatuses[sheet.status]) : null,
             ]

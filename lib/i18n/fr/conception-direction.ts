@@ -109,6 +109,7 @@ export const conceptionDirection = {
       name ? `V${n} · ${name} · ${date}` : `V${n} · ${date}`,
     viewing: (n: number) => `Version V${n}`,
     backToLatest: "Revenir à la dernière version",
+    inherits: (topics: string) => `Hérite de la direction : ${topics}.`,
     // MKT-C2-04: the artist's identity the release used.
     identity: {
       title: "Identité de l'artiste",
@@ -124,11 +125,11 @@ export const conceptionDirection = {
       objectives: "Objectifs créatifs",
       audiences: "Publics et usages",
       narrative: "Narratif utile",
-      principles: "Principes de direction artistique",
-      tone: "Tonalité",
-      showAvoid: "À montrer ou à éviter",
+      principles: "Direction de la sortie · concept et codes communs",
+      tone: "Direction de la sortie · ton",
+      showAvoid: "Direction de la sortie · contraintes et lignes rouges",
       coherence: "Cohérence entre livrables",
-      deliverables: "Livrables",
+      deliverables: "Concepts des livrables",
       references: "Références validées",
       constraints: "Contraintes communes",
       decisions: "Décisions",
