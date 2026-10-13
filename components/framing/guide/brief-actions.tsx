@@ -25,7 +25,7 @@ export function BriefActions({
         label={t.share}
         copiedLabel={t.copied}
         failedLabel={fr.framing.errors.generic}
-        icon={IconLink}
+        icon={<IconLink aria-hidden />}
       />
       <PdfExportButton
         href={pdfHref}

@@ -153,7 +153,7 @@ export function CallDetails({
             label={t.shareCopy}
             copiedLabel={t.shareCopied}
             failedLabel={t.shareCopyFailed}
-            icon={IconClipboard}
+            icon={<IconClipboard aria-hidden />}
             size="default"
           />
           <Button

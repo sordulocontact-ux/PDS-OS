@@ -9,13 +9,14 @@ import { Button } from "@/components/ui/button";
  * Copies a text (a link) to the clipboard, said by a toast. `value` may be
  * read at click time (the page's own address). When the browser refuses,
  * `failedLabel` says so (the link stays readable next to it), or nothing.
+ * `icon` is an element, not a component: a server component can pass it.
  */
 export function CopyButton({
   value,
   label,
   copiedLabel,
   failedLabel,
-  icon: Icon = IconCopy,
+  icon = <IconCopy aria-hidden />,
   variant = "outline",
   size = "lg",
   className,
@@ -24,7 +25,7 @@ export function CopyButton({
   label: string;
   copiedLabel: string;
   failedLabel?: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
+  icon?: React.ReactNode;
   variant?: React.ComponentProps<typeof Button>["variant"];
   size?: React.ComponentProps<typeof Button>["size"];
   className?: string;
@@ -46,7 +47,7 @@ export function CopyButton({
         }
       }}
     >
-      {Icon && <Icon data-icon="inline-start" aria-hidden />}
+      {icon}
       {label}
     </Button>
   );
