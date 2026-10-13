@@ -12,6 +12,10 @@ import {
   type DeliveryState,
   type ProductionDeliveryRow,
 } from "@/lib/production/rules";
+import {
+  loadConceptionLinks,
+  type ConceptionLink,
+} from "@/lib/production/conception-links";
 import { createClient } from "@/lib/supabase/server";
 
 export type ProductionDeliverable = {
@@ -22,6 +26,8 @@ export type ProductionDeliverable = {
   dueDate: string | null;
   // The Conception's validated version: the creative source (ticket § 1).
   approvedDesign: { number: number; href: string | null } | null;
+  // MKT-C2-13: what the Conception handed over, or why not.
+  conception: ConceptionLink | null;
   // Its preparation is opened (production_sheets).
   prepared: boolean;
   delivery:
@@ -93,6 +99,7 @@ export async function loadProduction(
     listDesignVersions(supabase, projectId),
     loadMembers(access),
   ]);
+  const conception = await loadConceptionLinks(supabase, projectId);
 
   const nameOf = (personId: string | null) =>
     personId
@@ -136,6 +143,9 @@ export async function loadProduction(
         ? { number: approved.number, href: approved.href }
         : null,
       prepared: prepared.has(d.id),
+      // MKT-C2-13: what the Conception handed over, or why not (null
+      // while it handed nothing).
+      conception: conception.get(d.id) ?? null,
       delivery,
       state: deliveryStateOf(delivery),
     };

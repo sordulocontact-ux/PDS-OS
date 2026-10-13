@@ -12,8 +12,8 @@ import {
   DesignNeedsStrategy,
   EarlyDepositLink,
 } from "@/components/design/design-needs-strategy";
-import { ValidationPanel } from "@/components/framing/validation-panel";
-import { sectionCardClass } from "@/components/ui/section-card";
+import { ConceptionClosureSection } from "@/components/design/closure/conception-closure-section";
+import { ConceptionValidationSection } from "@/components/design/conception-validation-section";
 import { requireApproved } from "@/lib/auth/dal";
 import { designSheetData } from "@/lib/design/call-sheet-data";
 import { loadConception } from "@/lib/design/conception";
@@ -25,13 +25,13 @@ import { can } from "@/lib/auth/access";
 import { loadSheetSummaries } from "@/lib/design/sheet-summaries";
 import { conceptionState } from "@/lib/design/states";
 import { loadMembers, loadPendingValidation } from "@/lib/framing/related";
-import { briefRequestBlock } from "@/lib/design/brief-status";
+import { loadBriefSheets } from "@/lib/design/brief-sheets";
+import { loadConceptionClosure } from "@/lib/design/handoff-plan";
 import { fr } from "@/lib/i18n/fr";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { isStageValidated } from "@/lib/projects/types";
-import { cn } from "@/lib/utils";
 import { allInOrder } from "@/lib/utils/parallel";
 
 export const metadata = {
@@ -90,6 +90,16 @@ export default async function DesignPage({
     sheets,
   );
   const path = journey(input);
+  // MKT-C2-13: once validated, the closing and its transfer plan.
+  const closure =
+    stage?.state === "validated"
+      ? await loadConceptionClosure(
+          projectId,
+          data,
+          sheets,
+          await loadBriefSheets(projectId),
+        )
+      : null;
   // Where the Conception stands, computed by code (lib/design/states.ts).
   const state = conceptionState({
     started: data.started,
@@ -104,6 +114,14 @@ export default async function DesignPage({
     <div className="flex flex-col gap-6">
       {/* The other pages exist once the work is open. */}
       {data.started && <ConceptionTabs projectId={projectId} />}
+      {closure && (
+        <ConceptionClosureSection
+          projectId={projectId}
+          closure={closure}
+          isOwner={data.isOwner}
+          canReopen={can(access, "validate")}
+        />
+      )}
       {creative && !data.started && (
         <div className="flex flex-col items-start gap-2">
           <p className="text-body-md text-muted-foreground">
@@ -181,48 +199,13 @@ export default async function DesignPage({
       {/* Once the work is open: the dossier is validated as a whole, apart
           from the decisions on each object (step 5 of the journey). */}
       {stage && (
-        <section
-          id="conception-validation"
-          aria-label={fr.conceptionJourney.validationTitle}
-          className={cn(sectionCardClass, "scroll-mt-6")}
-        >
-          {/* MKT-C2-11: the decisions already taken stay visible. */}
-          <div className="mb-4 flex flex-col gap-1 text-caption text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {fr.conceptionRequests.localTitle}
-            </span>
-            <span>
-              {fr.conceptionRequests.localDirection(
-                fr.conception.directionStates[input.direction.state],
-              )}
-            </span>
-            <span>
-              {fr.conceptionRequests.localSheets(
-                input.deliverables.filter(
-                  (d) =>
-                    d.sheet?.status === "ready_for_production" ||
-                    d.sheet?.status === "transferred",
-                ).length,
-                input.deliverables.length,
-              )}
-            </span>
-            <span>{fr.conceptionRequests.localHint}</span>
-          </div>
-          <ValidationPanel
-            stage={stage}
-            pendingValidation={pendingValidation}
-            projectId={projectId}
-            mePersonId={access.personId}
-            title={fr.conceptionJourney.validationTitle}
-            startLabel={fr.design.validation.start}
-            // MKT-C2-12: the request carries an up-to-date Brief créatif.
-            requestBlocked={briefRequestBlock(
-              input.brief.latest,
-              !input.brief.upToDate,
-              fr.conceptionDirection.brief.document,
-            )}
-          />
-        </section>
+        <ConceptionValidationSection
+          projectId={projectId}
+          stage={stage}
+          pendingValidation={pendingValidation}
+          mePersonId={access.personId}
+          input={input}
+        />
       )}
     </div>
   );

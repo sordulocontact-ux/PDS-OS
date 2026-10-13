@@ -15,6 +15,7 @@ import { DELIVERY_STATES } from "@/lib/production/rules";
 import { loadProduction } from "@/lib/production/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { isStageValidated } from "@/lib/projects/types";
 import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.production;
@@ -43,6 +44,8 @@ export default async function ProjectProductionPage({
   const inProgress = state === "in_progress";
   const canEdit = canEditProject(access, project) && inProgress;
   const canApprove = inProgress && (data.isOwner || data.isCreative);
+  const handed = (d: (typeof data.deliverables)[number]) =>
+    !d.conception || d.conception.state === "handed";
   const status =
     state === "not_started" ? t.notStarted : inProgress ? null : t.locked;
 
@@ -80,8 +83,9 @@ export default async function ProjectProductionPage({
                     <ProductionDeliverableItem
                       projectId={projectId}
                       deliverable={deliverable}
-                      canEdit={canEdit}
-                      canApprove={canApprove}
+                      // MKT-C2-13: Production works on what was handed.
+                      canEdit={canEdit && handed(deliverable)}
+                      canApprove={canApprove && handed(deliverable)}
                     />
                   </li>
                 ))}
@@ -99,6 +103,11 @@ export default async function ProjectProductionPage({
                 mePersonId={access.personId}
                 title={t.stage}
                 startLabel={t.start}
+                startBlocked={
+                  isStageValidated(project.stages, "design")
+                    ? fr.conceptionClosure.production.startBlocked
+                    : null
+                }
               />
               {inProgress && (
                 <p className="text-xs text-muted-foreground">{t.finishHint}</p>

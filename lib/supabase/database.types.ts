@@ -34,6 +34,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      design_reopenings: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          reason: string
+          brief_id: string | null
+          impact: Json
+          reopened_by: string | null
+          reopened_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          reason: string
+          brief_id?: string | null
+          impact?: Json
+          reopened_by?: string | null
+          reopened_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          reason?: string
+          brief_id?: string | null
+          impact?: Json
+          reopened_by?: string | null
+          reopened_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_reopenings_reopened_by_fkey"
+            columns: ["reopened_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      design_handoff_exclusions: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          design_deliverable_id: string
+          reason: string
+          excluded_by: string | null
+          excluded_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          design_deliverable_id: string
+          reason: string
+          excluded_by?: string | null
+          excluded_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          design_deliverable_id?: string
+          reason?: string
+          excluded_by?: string | null
+          excluded_at?: string
+        }
+        Relationships: []
+      }
       design_delegations: {
         Row: {
           created_at: string
@@ -3802,6 +3873,8 @@ export type Database = {
       design_workspaces: {
         Row: {
           allow_self_approval: boolean
+          closed_at: string | null
+          closed_brief_id: string | null
           identity_deviation: string | null
           identity_deviation_at: string | null
           identity_deviation_by: string | null
@@ -3815,6 +3888,8 @@ export type Database = {
         }
         Insert: {
           allow_self_approval?: boolean
+          closed_at?: string | null
+          closed_brief_id?: string | null
           identity_deviation?: string | null
           identity_deviation_at?: string | null
           identity_deviation_by?: string | null
@@ -3828,6 +3903,8 @@ export type Database = {
         }
         Update: {
           allow_self_approval?: boolean
+          closed_at?: string | null
+          closed_brief_id?: string | null
           identity_deviation?: string | null
           identity_deviation_at?: string | null
           identity_deviation_by?: string | null
@@ -3840,6 +3917,13 @@ export type Database = {
           validation_mode?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "design_workspaces_closed_brief_id_fkey"
+            columns: ["closed_brief_id"]
+            isOneToOne: false
+            referencedRelation: "design_briefs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "design_workspaces_project_same_org"
             columns: ["project_id", "organization_id"]
@@ -13970,6 +14054,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           deliverable_id: string | null
+          design_decision_id: string | null
           design_version_id: string | null
           done_at: string | null
           due_date: string | null
@@ -13990,6 +14075,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
+          design_decision_id?: string | null
           design_version_id?: string | null
           done_at?: string | null
           due_date?: string | null
@@ -14010,6 +14096,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
+          design_decision_id?: string | null
           design_version_id?: string | null
           done_at?: string | null
           due_date?: string | null
@@ -14025,6 +14112,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_design_decision_id_fkey"
+            columns: ["design_decision_id"]
+            isOneToOne: false
+            referencedRelation: "design_decisions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_design_version_id_fkey"
             columns: ["design_version_id"]
@@ -14342,6 +14436,20 @@ export type Database = {
       }
     }
     Functions: {
+      reopen_design: {
+        Args: {
+          p_project_id: string
+          p_reason: string
+        }
+        Returns: undefined
+      }
+      pass_to_production: {
+        Args: {
+          p_exclusions?: Json
+          p_project_id: string
+        }
+        Returns: Json
+      }
       design_submission_is_current: {
         Args: {
           p_submission_id: string

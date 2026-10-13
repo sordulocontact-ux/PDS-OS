@@ -123,11 +123,12 @@ export function nextOf(input: JourneyInput, developDone: boolean): JourneyNext {
     const next = input.deliverables.find(
       (d) => d.sheet?.status === "ready_for_production",
     );
+    // MKT-C2-13: one guided transfer plan, from the closing banner.
     if (next?.sheet)
       return link(
-        a.transfer(next.title),
-        routes.projectDesignSheet(p, next.sheet.id),
-        w.sheet(next.title),
+        a.passToProduction,
+        `${routes.projectDesign(p)}#conception-closure`,
+        w.home,
       );
     return link(a.openProduction, routes.projectProduction(p), w.production);
   }

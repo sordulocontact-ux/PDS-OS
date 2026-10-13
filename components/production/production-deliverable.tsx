@@ -12,6 +12,18 @@ import { productionDeliveryTone } from "@/lib/ui/state-tones";
 
 const t = fr.production;
 
+// MKT-C2-13: where it comes from in the Conception.
+const conceptionLine = (
+  c: NonNullable<ProductionDeliverable["conception"]>,
+) => {
+  const tc = fr.conceptionClosure.production;
+  return c.state === "handed"
+    ? tc.handed(c.sheetVersion, c.briefNumber)
+    : c.state === "excluded"
+      ? tc.excluded(c.reason)
+      : tc.waiting;
+};
+
 /**
  * One deliverable in Production: its creative source (the Conception's
  * validated version), its final file, the decisions taken (who, when) and
@@ -63,6 +75,11 @@ export function ProductionDeliverableItem({
           <h3 className="font-medium break-words">{d.title}</h3>
           {meta.length > 0 && (
             <p className="text-sm text-muted-foreground">{meta.join(" · ")}</p>
+          )}
+          {d.conception && (
+            <p className="text-sm text-muted-foreground">
+              {conceptionLine(d.conception)}
+            </p>
           )}
         </div>
         <StatusBadge

@@ -4054,6 +4054,38 @@ Pas de migration : le contenu d'une version (`design_briefs.content`) s'enrichit
   communes, les droits d'usage des références et les points encore ouverts ; pas de section
   « risques » séparée.
 
+### Retours Marketing du 12/10/2026, lot C12 (MKT-C2-13, clôture et passage en Production)
+
+Migration `…20261013100801_conception_handoff`, tests `supabase/tests/conception-handoff.test.sql` (15).
+
+- **Clôture** : quand l'étape Conception passe à « Validée », un trigger (`design_stage_closed`)
+  inscrit le **brief créatif de référence** (`design_workspaces.closed_brief_id`, `closed_at`).
+  L'accueil affiche alors `ConceptionClosureSection` : date, validateur, commentaire, brief de
+  référence (lien), nombre de réserves, « n livrables sur m en Production », réouvertures passées.
+- **« Passer en Production »** (chef de projet, `pass_to_production(p_project_id, p_exclusions)`) :
+  le plan est **prévisualisé** (`HandoffPlanForm`, `lib/design/handoff-plan.ts`) — par livrable : fiche
+  validée Vn, responsable, date, dépendances, réserves ; décoché, il **reste en Conception avec un
+  motif** obligatoire (`design_handoff_exclusions`). À la confirmation : un transfert par fiche validée
+  encore à jour (`design_submission_is_current`) et non exclue, contre le brief de référence ; chaque
+  **réserve d'approbation devient une tâche** (responsable de la fiche, sinon le chef de projet ; date
+  de livraison de la fiche, sinon J+7 ; `tasks.design_decision_id` unique) ; l'étape Production démarre
+  si besoin. **Idempotent** : relancer ne crée ni transfert, ni tâche, ni démarrage en double.
+- **Bloquant / non bloquant** : une fiche avec des modifications demandées, refusée ou non soumise
+  n'est pas transférée (elle reste en Conception, avec son statut). Une réserve d'approbation ne
+  bloque jamais (valider avec réserves = valider, C2-11) : elle suit en tâche.
+- **Production** : chaque livrable dit d'où il vient (`lib/production/conception-links.ts` : « Fiche Vn
+  · Brief créatif Vm », « Resté en Conception : motif », « Pas encore transféré ») ; tant qu'un
+  livrable n'est pas transféré, ses actions de Production sont fermées (seulement si la Conception a
+  transféré quelque chose : un projet sans Conception fonctionne comme avant). « Commencer la
+  production » est remplacé par le passage depuis la Conception validée (`startBlocked`).
+- **Réouverture** (direction seule, `has_permission('validate')`, `reopen_design`) : motif obligatoire,
+  **analyse d'impact** enregistrée (`design_reopenings.impact` : livrables déjà en Production, version,
+  livré ou non), l'étape repasse « En cours » et devra être revalidée. Rien d'approuvé n'est réécrit :
+  briefs, décisions et transferts restent. Exception assumée à « une étape validée est définitive »,
+  demandée par le ticket, sur le modèle de `reopen_marketing_closure`.
+- La prochaine action du parcours, Conception validée, est « Passer en Production » (ancre
+  `#conception-closure`) ; le transfert fiche par fiche (`HandoffButton`) reste possible.
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

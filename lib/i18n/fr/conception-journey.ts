@@ -82,6 +82,8 @@ export const conceptionJourney = {
     updateBrief: (n: number) => `Mettre à jour le brief créatif (V${n})`,
     requestValidation: "Demander la validation du dossier",
     transfer: (title: string) => `Transférer « ${title} » en Production`,
+    // MKT-C2-13: the guided transition, from the closing banner.
+    passToProduction: "Passer en Production",
     openProduction: "Ouvrir la Production",
   },
   places: {
