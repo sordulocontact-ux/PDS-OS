@@ -171,10 +171,32 @@ Chaque lot reste une étape à part ; aucun n'est commencé.
    (réalisateur pour sa proposition, chef op pour sa liste, monteur pour ses versions) ; ce qui
    revient est une proposition que le chef de projet valide.
 
+## 8 bis. Les tickets d'Ibé : PROD-001 à PROD-040 (13/10/2026)
+
+Déposés dans le dossier Drive des retours, repris dans Notion « Retours ». **Ils confirment les § 1
+à 8** : prochaine action et transitions (001, 007, 018, 024, 038, 040), un responsable, un
+validateur et des droits par rôle pour chaque action (002), préremplissage sourcé (003, 027),
+compte rendu → tâches (005), plan et rétroplanning générés (006, 010), lieux comparés avec avis et
+décideur distincts (011 à 013), chaînes devis → matériel → contrôle → retour (014, 015, 017, 022),
+feuille de service structurée et versionnée (016), postproduction adaptée au contenu (025), et
+surtout **le prestataire dépose lui-même** ses versions et exports, sur « son espace » (026, 028,
+032, 036). Nouveautés par rapport au § 8 : **dérogation** tracée (motif, auteur) quand un
+prérequis manque (008, 017, 022) ; **un seul cycle par version** au lieu de « retours » et
+« validation finale » séparés (033) ; numéro de version automatique, sans champ libre (029) ;
+extraction IA des devis (014, sortie du MVP jusqu'ici) ; envoi **effectif** au prestataire, avec
+l'état envoyé / consulté / traité (031). Le call technique doit aussi être fiabilisé (004 : création,
+ouverture, enregistrement).
+
+**Ce que les tickets ne disent pas** : interne / externe / hybride (seulement dans son message),
+compte ou lien pour le prestataire (« son espace », « l'accès nécessaire »), qui décide (« la
+personne autorisée », « le décideur »), qui est le « responsable de tournage », par quel canal
+partent les notifications à un externe.
+
 ## 9. Questions à Ibé
 
-Version courte envoyée le 14/10/2026 (8 questions) : n° 1+3, 2, 8+10, 12, 13+14, 5+16+22+34,
-30+33, 41+43. Les autres attendent ses tickets. Sans réponse à ce jour.
+Version courte (14/10/2026), revue après lecture des tickets PROD : n° 1+3, 41 (canal d'envoi), 8+10+12,
+5+16+20+34 (qui décide), 2 (responsable de tournage), 13. Les n° 30 et 33 sont tranchés par PROD-028
+(lien Frame.io, Drive, Vimeo ou fichier). Sans réponse à ce jour.
 
 Chaque question donne **notre hypothèse** : un « oui » suffit si elle est juste. Les blocs A et B
 conditionnent tous les écrans ; le reste peut attendre ses tickets. Reporter chaque réponse ici
