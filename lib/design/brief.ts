@@ -2,6 +2,10 @@ import "server-only";
 
 import type { ConceptionData } from "@/lib/design/conception";
 import type { DirectionData } from "@/lib/design/direction";
+import {
+  loadBriefIdentity,
+  type BriefIdentity,
+} from "@/lib/design/brief-identity";
 import { briefOpenPoints } from "@/lib/design/brief-open-points";
 import { DESIGN_TOPICS, type DesignTopic } from "@/lib/design/intentions";
 import { validatedReferenceIds } from "@/lib/design/reference-status";
@@ -15,6 +19,9 @@ import { createClient } from "@/lib/supabase/server";
 
 export type CreativeBriefContent = {
   context: { project: string; artist: string; releaseDate: string | null };
+  // The artist's identity the release used, and its deviation (MKT-C2-04);
+  // absent when there is neither.
+  identity?: BriefIdentity;
   objectives: { strategic: string | null };
   audiences: { audiences: string | null; channels: string[] };
   narrative: {
@@ -93,7 +100,10 @@ export async function buildCreativeBrief(
   directionData: DirectionData,
 ): Promise<CreativeBriefContent> {
   const t = fr.conceptionDirection.brief;
-  const extras = await loadStrategyExtras(project.id);
+  const [extras, identity] = await Promise.all([
+    loadStrategyExtras(project.id),
+    loadBriefIdentity(project.id),
+  ]);
   const titleOf = new Map(data.deliverables.map((d) => [d.id, d.title]));
   const directionTitle = fr.conceptionDirection.summary.direction;
 
@@ -139,6 +149,7 @@ export async function buildCreativeBrief(
       artist: project.artistName,
       releaseDate: data.known.releaseDate,
     },
+    ...(identity ? { identity } : {}),
     objectives: { strategic: extras.strategic },
     audiences: { audiences: data.known.audiences, channels: extras.channels },
     narrative: {

@@ -31,6 +31,7 @@ export function ConceptionEntry({
   sheets,
   callSheet,
   journey,
+  identity,
   direction,
 }: {
   projectId: string;
@@ -44,6 +45,8 @@ export function ConceptionEntry({
   callSheet: DesignCallSheetData | null;
   // Once started: the journey, then the release's direction.
   journey?: React.ReactNode;
+  // The artist's identity, read-only (MKT-C2-04).
+  identity?: React.ReactNode;
   direction?: React.ReactNode;
 }) {
   const t = fr.conception.entry;
@@ -129,6 +132,7 @@ export function ConceptionEntry({
       )}
 
       {journey}
+      {identity}
       {direction}
 
       <ConceptionDeliverables

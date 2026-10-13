@@ -288,6 +288,14 @@ export const followUpTone: Record<string, Tone> = {
   blocked: "danger",
 };
 
+/** A version of an artist's identity (MKT-C2-04): waiting for a validator,
+ * in force or past, refused. */
+export const identityStatusTone: Record<string, Tone> = {
+  proposed: "warning",
+  approved: "success",
+  rejected: "danger",
+};
+
 /** A step of the Conception's journey (MKT-C2-03): done, the one in
  * progress, to come, or passed over on purpose. */
 export const journeyStepTone: Record<string, Tone> = {

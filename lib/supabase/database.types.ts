@@ -34,6 +34,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      artist_identity_versions: {
+        Row: {
+          artist_id: string
+          change_note: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_comment: string | null
+          id: string
+          manifesto: string | null
+          number: number
+          organization_id: string
+          palette: string | null
+          proposed_from_project_id: string | null
+          refs: Json
+          status: string
+          symbols: string | null
+          tone: string | null
+          typography: string | null
+        }
+        Insert: {
+          artist_id: string
+          change_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_comment?: string | null
+          id?: string
+          manifesto?: string | null
+          number: number
+          organization_id: string
+          palette?: string | null
+          proposed_from_project_id?: string | null
+          refs?: Json
+          status: string
+          symbols?: string | null
+          tone?: string | null
+          typography?: string | null
+        }
+        Update: {
+          artist_id?: string
+          change_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_comment?: string | null
+          id?: string
+          manifesto?: string | null
+          number?: number
+          organization_id?: string
+          palette?: string | null
+          proposed_from_project_id?: string | null
+          refs?: Json
+          status?: string
+          symbols?: string | null
+          tone?: string | null
+          typography?: string | null
+        }
+        Relationships: []
+      }
       distribution_closures: {
         Row: {
           arbitration: string | null
@@ -3545,6 +3608,7 @@ export type Database = {
           created_by: string | null
           file_name: string | null
           id: string
+          identity_version_id: string | null
           kind: string
           mime: string | null
           note: string | null
@@ -3561,6 +3625,7 @@ export type Database = {
           created_by?: string | null
           file_name?: string | null
           id?: string
+          identity_version_id?: string | null
           kind?: string
           mime?: string | null
           note?: string | null
@@ -3577,6 +3642,7 @@ export type Database = {
           created_by?: string | null
           file_name?: string | null
           id?: string
+          identity_version_id?: string | null
           kind?: string
           mime?: string | null
           note?: string | null
@@ -3664,6 +3730,10 @@ export type Database = {
       }
       design_workspaces: {
         Row: {
+          identity_deviation: string | null
+          identity_deviation_at: string | null
+          identity_deviation_by: string | null
+          identity_version_id: string | null
           organization_id: string
           project_id: string
           started_at: string
@@ -3671,6 +3741,10 @@ export type Database = {
           validation_mode: string
         }
         Insert: {
+          identity_deviation?: string | null
+          identity_deviation_at?: string | null
+          identity_deviation_by?: string | null
+          identity_version_id?: string | null
           organization_id: string
           project_id: string
           started_at?: string
@@ -3678,6 +3752,10 @@ export type Database = {
           validation_mode?: string
         }
         Update: {
+          identity_deviation?: string | null
+          identity_deviation_at?: string | null
+          identity_deviation_by?: string | null
+          identity_version_id?: string | null
           organization_id?: string
           project_id?: string
           started_at?: string
@@ -14147,6 +14225,49 @@ export type Database = {
       }
     }
     Functions: {
+      project_artist_id: {
+        Args: {
+          p_project_id: string
+        }
+        Returns: string
+      }
+      current_artist_identity: {
+        Args: {
+          p_artist_id: string
+        }
+        Returns: string
+      }
+      set_design_identity_deviation: {
+        Args: {
+          p_project_id: string
+          p_text: string | null
+        }
+        Returns: undefined
+      }
+      use_artist_identity_version: {
+        Args: {
+          p_project_id: string
+          p_version_id: string
+        }
+        Returns: undefined
+      }
+      decide_artist_identity: {
+        Args: {
+          p_approve: boolean
+          p_comment?: string | null
+          p_version_id: string
+        }
+        Returns: undefined
+      }
+      propose_artist_identity: {
+        Args: {
+          p_artist_id: string
+          p_change_note?: string | null
+          p_fields: Json
+          p_project_id?: string | null
+        }
+        Returns: string
+      }
       confirm_master_rights: { Args: { p_master_id: string }; Returns: undefined }
       accept_influence_terms: {
         Args: { p_proposal_id: string }

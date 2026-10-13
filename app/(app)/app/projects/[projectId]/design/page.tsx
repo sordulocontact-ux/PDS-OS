@@ -4,6 +4,7 @@ import { ConceptionCallSheet } from "@/components/design/conception-call-sheet";
 import { ConceptionDirectionCard } from "@/components/design/conception-direction-card";
 import { ConceptionEntry } from "@/components/design/conception-entry";
 import { ConceptionJourney } from "@/components/design/conception-journey";
+import { ConceptionIdentityCard } from "@/components/design/identity/conception-identity-card";
 import { ConceptionTabs } from "@/components/design/conception-tabs";
 import {
   DesignNeedsStrategy,
@@ -16,6 +17,8 @@ import { designSheetData } from "@/lib/design/call-sheet-data";
 import { loadConception } from "@/lib/design/conception";
 import { journey } from "@/lib/design/journey";
 import { loadJourneyInput } from "@/lib/design/journey-data";
+import { loadReleaseIdentity } from "@/lib/design/release-identity";
+import { can } from "@/lib/auth/access";
 import { loadSheetSummaries } from "@/lib/design/sheet-summaries";
 import { conceptionState } from "@/lib/design/states";
 import { loadMembers, loadPendingValidation } from "@/lib/framing/related";
@@ -67,14 +70,12 @@ export default async function DesignPage({
   if (!data) notFound();
 
   const stage = data.started ? data.stage : null;
-  const [callSheet, pendingValidation, sheets] = await Promise.all([
+  const members = await loadMembers(access);
+  const [callSheet, pendingValidation, sheets, identity] = await Promise.all([
     data.canAdd ? designSheetData(project, data) : null,
-    stage
-      ? loadMembers(access).then((members) =>
-          loadPendingValidation(stage.id, members),
-        )
-      : null,
+    stage ? loadPendingValidation(stage.id, members) : null,
     data.started ? loadSheetSummaries(projectId) : [],
+    loadReleaseIdentity(projectId, members),
   ]);
   const input = await loadJourneyInput(
     { id: project.id, title: project.title, artistName: project.artistName },
@@ -125,6 +126,16 @@ export default async function DesignPage({
               }
             />
           )
+        }
+        identity={
+          <ConceptionIdentityCard
+            projectId={projectId}
+            identity={identity}
+            canWrite={data.canWrite}
+            isOwner={data.isOwner}
+            open={data.canAdd}
+            validates={can(access, "validate")}
+          />
         }
         direction={
           data.started && (

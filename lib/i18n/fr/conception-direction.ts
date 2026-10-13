@@ -109,6 +109,16 @@ export const conceptionDirection = {
       name ? `V${n} · ${name} · ${date}` : `V${n} · ${date}`,
     viewing: (n: number) => `Version V${n}`,
     backToLatest: "Revenir à la dernière version",
+    // MKT-C2-04: the artist's identity the release used.
+    identity: {
+      title: "Identité de l'artiste",
+      version: (n: number, date: string | null) =>
+        date
+          ? `V${n} du référentiel, approuvée le ${date}`
+          : `V${n} du référentiel`,
+      deviation: "Dérogation de cette sortie",
+      noDeviation: "Aucune : la sortie suit l'identité habituelle.",
+    },
     sections: {
       context: "Contexte de la sortie",
       objectives: "Objectifs créatifs",

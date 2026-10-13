@@ -3805,6 +3805,37 @@ déjà commencés gardent leurs données et leur avancement (rien à migrer, rie
 - Reste au-delà de ce ticket : direction créative propre (C2-06), échanges sur l'accueil (C2-05),
   demande de validation depuis le brief (C2-12), clôture guidée (C2-13).
 
+### Retours Marketing du 12/10/2026, lot C3 (MKT-C2-04, identité artistique)
+
+Migration `…20261013100101_artist_identity`, tests `supabase/tests/artist-identity.test.sql` (17).
+
+- **L'identité appartient à l'artiste** (`artist_identity_versions`) : manifeste, tonalité,
+  palette, typographies, symboles, liens https par type (références, contre-références,
+  moodboards, `refs` jsonb). Versions numérotées ; l'identité **en vigueur** est la dernière
+  approuvée (`current_artist_identity`), en vigueur de son approbation à la suivante. Lue par tout
+  membre (comme l'artiste), écrite seulement par fonctions :
+  `propose_artist_identity` (gestion du catalogue ou travail créatif depuis la fiche ; depuis une
+  sortie, son chef de projet ou son équipe créative pour l'artiste de cette sortie) — **approuvée
+  d'emblée si l'auteur valide** (DG), sinon proposée ; `decide_artist_identity` (valideur, jamais
+  sur sa propre proposition, refus motivé). Une proposition ne change jamais l'identité en vigueur.
+  **Décision prise ici** : le « DA habilité » = poste avec `creative_work`.
+- **Fiche Artiste › Identité** (`/app/catalog/artists/[id]/identity`, `IdentityView`,
+  `IdentityForm` pré-rempli avec la version en vigueur, `IdentityHistory`, `IdentityDecision`).
+- **La sortie garde sa version** : `design_workspaces.identity_version_id`, posée à l'ouverture du
+  travail (trigger, version en vigueur) et jamais réécrite par une version suivante ; le chef de
+  projet peut passer volontairement à une plus récente tant que la Conception est ouverte
+  (`use_artist_identity_version`). L'artiste d'un projet : `project_artist_id` (premier artiste
+  du premier titre, sinon l'artiste d'un projet de contenu).
+- **Dans la Conception** (`ConceptionIdentityCard`, `lib/design/release-identity.ts`) : la version
+  utilisée en lecture seule ; « Ajouter aux références de la sortie » copie un lien en **référence
+  liée** (`design_references.identity_version_id`, vérifié contre l'artiste du projet par trigger),
+  rattachée à la direction ; **dérogation** en mots (`set_design_identity_deviation`, qui écrit dans
+  la Conception) ; « Proposer une évolution de l'identité » ouvre le formulaire de version avec la
+  sortie d'origine ; jamais d'édition directe de l'identité depuis une sortie.
+- **Brief créatif** : partie « Identité de l'artiste » (version utilisée, manifeste, tonalité,
+  dérogation dite même absente, `lib/design/brief-identity.ts`) ; absente quand il n'y a ni
+  version ni dérogation, pour qu'un brief sans identité garde le même contenu.
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

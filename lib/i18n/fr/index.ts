@@ -20,6 +20,7 @@ import { catalog } from "./catalog";
 import { catalogFiles } from "./catalog-files";
 import { contracts } from "./contracts";
 import { core } from "./core";
+import { artistIdentity } from "./artist-identity";
 import { conception } from "./conception";
 import { conceptionCall } from "./conception-call";
 import { conceptionJourney } from "./conception-journey";
@@ -116,6 +117,7 @@ export const fr = {
   strategyPilot,
   strategyDraft,
   design,
+  artistIdentity,
   conception,
   conceptionCall,
   conceptionJourney,

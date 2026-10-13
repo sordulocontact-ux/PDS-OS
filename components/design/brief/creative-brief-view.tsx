@@ -1,3 +1,4 @@
+import { BriefIdentitySection } from "@/components/design/brief/brief-identity-section";
 import { FactList } from "@/components/ui/fact-list";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatBriefDate } from "@/lib/framing/assess";
@@ -74,6 +75,7 @@ export function CreativeBriefView({
           emptyLabel={t.facts.noRelease}
         />
       </Part>
+      {c.identity && <BriefIdentitySection identity={c.identity} />}
       <Part name="objectives" empty={false}>
         <p className="break-words">{c.objectives.strategic ?? t.toDefine}</p>
       </Part>

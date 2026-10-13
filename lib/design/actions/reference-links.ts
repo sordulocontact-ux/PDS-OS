@@ -37,6 +37,9 @@ const linkSchema = z.object({
   title: text(200),
   note: text(500),
   targets,
+  // Copied from the artist's identity (MKT-C2-04): the version it comes
+  // from, checked against the project's artist by the database.
+  identityVersionId: z.uuid().nullish(),
 });
 
 /** A link reference; an address already gathered only gains links. */
@@ -61,6 +64,7 @@ export async function addLinkReference(
         url: v.url,
         title: v.title,
         note: v.note,
+        identity_version_id: v.identityVersionId ?? null,
       })
       .select("id")
       .single();
