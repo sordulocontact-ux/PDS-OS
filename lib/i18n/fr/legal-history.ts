@@ -51,6 +51,23 @@ export const legalHistory = {
   } as Record<string, string>,
   signature: (signer: string) => `Signature de ${signer} enregistrée`,
   sacem: (title: string) => `SACEM · ${title}`,
+  // JUR-29: the causal chain, person and period filters.
+  causes: {
+    follows: (action: string, time: string) =>
+      `Suite à « ${action} » (${time})`,
+    signaturesVoided: (n: number, count: number) =>
+      count === 1
+        ? `Rend caduque la signature déjà reçue sur la v${n} : à refaire sur la nouvelle version.`
+        : `Rend caduques les ${count} signatures déjà reçues sur la v${n} : à refaire sur la nouvelle version.`,
+  },
+  filters: {
+    person: "Personne",
+    everyone: "Tout le monde",
+    period: "Période",
+    anyPeriod: "Toute la période",
+    count: (n: number, total: number) =>
+      n === total ? `${total} évènements` : `${n} évènements sur ${total}`,
+  },
   csv: {
     export: "Exporter en CSV",
     fileName: (part: string) =>
@@ -65,6 +82,8 @@ export const legalHistory = {
       "Auteur",
       "Note",
       "Preuve déclarée",
+      "Suite à (identifiant)",
+      "Conséquence",
     ],
   },
 } as const;

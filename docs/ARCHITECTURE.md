@@ -2807,6 +2807,16 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   avec l'Activité du projet). Un journal illisible est dit, jamais montré comme un historique
   complet. Une démarche terminée quitte les listes actives du Suivi mais reste ici. Pas encore :
   export CSV / PDF, comparateur de versions.
+- **Historique, suite (JUR-29, 13/10/2026)** : chaque évènement porte son `kind` et son objet ;
+  la **chaîne causale** est calculée par règle (`lib/legal/history/causes.ts`, `FOLLOWS` : un
+  évènement suit le dernier évènement antérieur du même objet d'un type qui peut y mener —
+  demande de modification → révision → soumission → approbation → signature…), dite « Suite à … »
+  sur la ligne ; un bulletin SACEM **regénéré** dit qu'il rend caduques les signatures de la
+  version précédente. Filtres **par personne** (`?par=`) et **par mois** (`?mois=AAAA-MM`, Paris),
+  seulement ceux que l'historique contient (`UrlFilters`, `lib/legal/history/filter.ts`) ; l'export
+  CSV suit les filtres et ajoute la cause et la conséquence. **Comparateur de versions** des
+  répartitions (`splitChanges`, `SplitVersionChanges`) : chaque version contre la précédente —
+  personne ajoutée, retirée, rôle ou part changés. Sans migration.
 
 ### Finitions par branche (retours Juridique du 11/10/2026, lot 3)
 

@@ -3,6 +3,7 @@ import {
   SplitEditorButton,
 } from "@/components/legal/splits/split-actions";
 import { SplitLines } from "@/components/legal/splits/split-lines";
+import { SplitVersionChanges } from "@/components/legal/splits/split-version-changes";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -41,6 +42,13 @@ export function SplitCard({
 }) {
   const t = fr.legalSplits.page;
   const { active, draft } = split;
+  // JUR-29: each version against the one it follows.
+  const before = (v: SplitVersionView) =>
+    [...(active ? [active] : []), ...split.history]
+      .filter((x) => x.version < v.version)
+      .sort((a, b) => b.version - a.version)[0];
+  const activeBefore = active ? before(active) : undefined;
+  const draftBefore = draft ? before(draft) : undefined;
   const editorStart = draft?.lines ?? active?.lines ?? split.proposal;
   const action = (
     <div className="flex flex-wrap gap-2">
@@ -108,6 +116,9 @@ export function SplitCard({
       {active && (
         <div className="flex flex-col gap-3">
           <VersionHead version={active} />
+          {activeBefore && (
+            <SplitVersionChanges previous={activeBefore} version={active} />
+          )}
           {disputes.map((line) => (
             <ToneCallout key={line.id} tone="danger">
               {t.disputed(line.name, line.confirmation.comment ?? "")}
@@ -124,6 +135,9 @@ export function SplitCard({
       {draft && (
         <div className="flex flex-col gap-3">
           <VersionHead version={draft} />
+          {draftBefore && (
+            <SplitVersionChanges previous={draftBefore} version={draft} />
+          )}
           <SplitLines
             projectId={projectId}
             title={split.title}

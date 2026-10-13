@@ -35,6 +35,8 @@ export function HistoryCsvButton({
         e.by,
         e.note,
         e.manualProof,
+        e.causeId ?? null,
+        e.consequence ?? null,
       ]),
     ];
     const text = rows.map((r) => r.map(cell).join(";")).join("\n");

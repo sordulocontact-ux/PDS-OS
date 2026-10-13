@@ -25,6 +25,18 @@ export const legalSplits = {
     revoked: "Lien révoqué",
     expired: "Lien expiré",
   },
+  // JUR-29: the version comparator.
+  changes: {
+    title: (n: number) => `Changé depuis la v${n}`,
+    none: "Mêmes personnes, mêmes rôles, mêmes parts.",
+    added: (name: string, role: string, share: string) =>
+      `${name} ajouté·e (${role}, ${share})`,
+    removed: (name: string, share: string) => `${name} retiré·e (${share})`,
+    role: (name: string, from: string, to: string) =>
+      `${name} : ${from} → ${to}`,
+    share: (name: string, from: string, to: string) =>
+      `${name} : ${from} → ${to}`,
+  },
   page: {
     title: "Répartitions",
     description:

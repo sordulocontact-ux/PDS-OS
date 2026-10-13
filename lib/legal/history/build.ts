@@ -4,6 +4,7 @@
 
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { linkCauses } from "@/lib/legal/history/causes";
 import type { LegalEvent } from "@/lib/legal/history/types";
 import { formatDate } from "@/lib/release/format";
 import type { Database } from "@/lib/supabase/database.types";
@@ -111,6 +112,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
     if (i.confirmed_at)
       add({
         id: `intake:${i.id}`,
+        kind: "intake.confirmed",
+        object: `intake:${i.id}`,
         at: i.confirmed_at,
         branch: "inventory",
         action: t.intakeConfirmed,
@@ -123,6 +126,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
     if (plan.confirmed_at)
       add({
         id: `plan-confirmed:${plan.id}`,
+        kind: "plan.confirmed",
+        object: `plan:${plan.id}`,
         at: plan.confirmed_at,
         branch: "plan",
         action: t.planConfirmed,
@@ -133,6 +138,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
     if (plan.launched_at)
       add({
         id: `plan-launched:${plan.id}`,
+        kind: "plan.launched",
+        object: `plan:${plan.id}`,
         at: plan.launched_at,
         branch: "plan",
         action: t.planLaunched,
@@ -158,6 +165,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
           );
     add({
       id: `plan:${e.id}`,
+      kind: e.kind,
+      object: `plan-item:${e.item_id}`,
       at: e.created_at,
       branch: "plan",
       action: text,
@@ -180,6 +189,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
       if (at)
         add({
           id: `form-${kind}:${f.id}`,
+          kind: `form.${kind}`,
+          object: `form:${f.id}`,
           at,
           branch: "forms",
           action: t.forms[kind],
@@ -194,6 +205,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
   for (const e of r.contractEvents)
     add({
       id: `contract:${e.id}`,
+      kind: e.kind,
+      object: e.contract_id ? `contract:${e.contract_id}` : null,
       at: e.created_at,
       branch: "contracts",
       action: contractLabels[e.kind] ?? e.kind,
@@ -209,6 +222,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
   for (const e of r.clearanceEvents)
     add({
       id: `clearance:${e.id}`,
+      kind: e.kind,
+      object: `clearance:${e.clearance_id}`,
       at: e.created_at,
       branch: "clearances",
       action: fr.legalClearance.events[e.kind] ?? e.kind,
@@ -229,6 +244,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
     const person = e.entry_id ? entryName.get(e.entry_id) : null;
     add({
       id: `split:${e.id}`,
+      kind: e.kind,
+      object: v ? `split:${v.sheet_id}` : null,
       at: e.created_at,
       branch: "splits",
       action: t.splits[e.kind] ?? e.kind,
@@ -249,6 +266,8 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
   for (const e of r.formEvents)
     add({
       id: `formality:${e.id}`,
+      kind: e.kind,
+      object: `formality:${e.formality_id}`,
       at: e.created_at,
       branch: "formalities",
       action: fr.legalFormalities.events[e.kind] ?? e.kind,
@@ -261,6 +280,9 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
     if (s.signed_at)
       add({
         id: `signature:${s.id}`,
+        kind: "signature",
+        object: `formality:${s.formality_id}`,
+        version: s.document_version,
         at: s.signed_at,
         branch: "formalities",
         action: t.signature(s.signer),
@@ -279,5 +301,5 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
   events.sort((a, b) =>
     a.at === b.at ? a.id.localeCompare(b.id) : b.at.localeCompare(a.at),
   );
-  return events;
+  return linkCauses(events);
 }

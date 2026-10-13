@@ -38,6 +38,16 @@ export type LegalEvent = {
   manualProof: string | null;
   // Where the object is.
   href: string | null;
+  // The journal's own kind ("contract.revised", "form.sent"…) and the
+  // object it belongs to ("contract:<id>"): what the causes are read from.
+  kind: string;
+  object: string | null;
+  // A document's version the event is about (a SACEM signature).
+  version?: number;
+  // JUR-29: the earlier event of the same object it follows, and what it
+  // made void — computed by rule (lib/legal/history/causes.ts).
+  causeId?: string;
+  consequence?: string;
 };
 
 export type LegalHistory = { events: LegalEvent[]; complete: boolean };

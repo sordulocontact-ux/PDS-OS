@@ -30,6 +30,7 @@ import { loadFormalities } from "@/lib/legal/formalities/queries";
 import { loadLegalInventory } from "@/lib/legal/inventory";
 import { loadForms } from "@/lib/legal/forms/queries";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
+import { isMonth } from "@/lib/legal/history/filter";
 import { isHistoryBranch } from "@/lib/legal/history/types";
 import { loadIntake } from "@/lib/legal/intake/queries";
 import { loadLegalPlan, proposeLegalPlan } from "@/lib/legal/plan/queries";
@@ -82,7 +83,11 @@ export default async function ProjectLegalPage({
       <HistoryView
         projectId={project.id}
         history={history}
-        branch={isHistoryBranch(query.branche) ? query.branche : null}
+        filter={{
+          branch: isHistoryBranch(query.branche) ? query.branche : null,
+          person: typeof query.par === "string" ? query.par : null,
+          month: isMonth(query.mois) ? query.mois : null,
+        }}
       />
     );
   }
