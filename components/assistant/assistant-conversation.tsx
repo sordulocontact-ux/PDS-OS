@@ -15,12 +15,14 @@ import { fr } from "@/lib/i18n/fr";
 
 /**
  * The tab's PO conversation on its own page, opened by a question from the
- * home page: back to home, the title, a new conversation; the turns scroll
- * between the header and the input (docs/ASSISTANT.md § 2).
+ * home page or from a page (« Parler à PO »): back where it was opened
+ * from, with that page's trail under the title (MKT-C2-02), else to home;
+ * the title, a new conversation; the turns scroll between the header and
+ * the input (docs/ASSISTANT.md § 2).
  */
 export function AssistantConversation() {
   const t = fr.assistant;
-  const { chat } = useAssistant();
+  const { chat, origin, setOrigin } = useAssistant();
   const { messages, sendMessage, status, stop, error, setMessages } = useChat({
     chat,
   });
@@ -38,6 +40,7 @@ export function AssistantConversation() {
   function restart() {
     if (busy) void stop();
     setMessages([]);
+    setOrigin(null);
   }
 
   return (
@@ -48,14 +51,25 @@ export function AssistantConversation() {
           variant="outline"
           size="icon"
           nativeButton={false}
-          render={<Link href={routes.app} />}
-          aria-label={t.conversation.back}
+          render={<Link href={origin?.href ?? routes.app} />}
+          aria-label={origin ? t.conversation.backTo : t.conversation.back}
         >
           <IconArrowLeft aria-hidden className="size-5" />
         </Button>
-        <h1 className="truncate text-center text-body-lg font-medium">
-          {title}
-        </h1>
+        <div className="flex min-w-0 flex-col items-center gap-0.5">
+          <h1 className="w-full truncate text-center text-body-lg font-medium">
+            {title}
+          </h1>
+          {origin && (
+            <Link
+              href={origin.href}
+              className="max-w-full truncate rounded-sm text-caption text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              <span className="sr-only">{t.conversation.backTo} : </span>
+              {origin.trail.join(" › ")}
+            </Link>
+          )}
+        </div>
         <Button
           variant="outline"
           size="icon"

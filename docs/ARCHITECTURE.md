@@ -1380,11 +1380,12 @@ livrable, les libellés ou l'action d'import en props.
     le code, ou valeur notée par une personne avec date et source dans `strategy_kpi_measures`),
     pourcentage et écart calculés par le code ; KPI qualitatif = signal à observer, sans chiffre ;
     sans donnée : « Pas encore de donnée ».
-  - **Recommandations** fondées uniquement sur des données réelles (`follow-up-results.ts`) :
+  - **Recommandations** fondées uniquement sur des données réelles (`recommendations.ts`) :
     KPI sous 80 % du prorata linéaire de sa cible, KPI manqué à l'échéance, échéance amont
-    dépassée, temps fort passé sans livraison. **Appliquer** = tâche du responsable à J+7,
-    **Ignorer**, **Parler à PO** (`AskPoButton`, question écrite par le code citant la donnée) ;
-    `strategy_recommendations` empêche de reproposer.
+    dépassée, temps fort passé sans livraison. **Créer la tâche** (pré-remplie, corrigeable),
+    **Ignorer** avec motif, **Parler à PO** (`AskPoButton`, question écrite par le code citant la
+    donnée) ; `strategy_recommendations` empêche de reproposer. Niveaux, échéance proposée, lien
+    tâche ↔ recommandation : lot du 13/10 ci-dessous (MKT-C2-01, 02).
 - **Règles produit non négociables** (ticket Stratégie) : Brief = interne, Plan de sortie =
   équipe artiste, Dossier de presse = médias ; le budget n'existe que dans le Brief ; PO réutilise
   ce qui est connu avant de demander ; appels et documents préremplissent plusieurs dimensions ;
@@ -1420,6 +1421,51 @@ livrable, les libellés ou l'action d'import en props.
 - Hors périmètre pour l'instant : export Plan de sortie (Playwright), lien partagé.
 
 ---
+
+### Retours Marketing du 12/10/2026, lot C1 (MKT-C2-01, MKT-C2-02)
+
+Migration `…20261013100001_strategy_recommendation_actions`.
+
+- **Stratégie validée** (MKT-C2-01, `ValidatedStrategyHome`) : l'état, puis **une seule action
+  principale** au-dessus des documents, « Passer à la conception » (`ConceptionNextStep`) : elle
+  dit avec quoi la Conception s'ouvre (les livrables engagés, commencer directement ou préparer
+  un échange créatif) et que le Brief V*n* reste tel quel ; elle ouvre l'**accueil de la
+  Conception** (étape d'entrée avec le contexte du projet), rien ne démarre avant le choix du chef
+  de projet (`start_design`). Libellé selon l'étape `design` : Passer / Reprendre / Voir ; un
+  lecteur voit « Voir la conception » en contour. Chaque document dit son public **et son
+  usage** (`strategyDocuments.usage`), le Dossier de presse « Facultatif ». Les **réserves
+  ouvertes** de la validation s'affichent tant qu'une reste à lever (`ReservesList`, réutilisé du
+  Brief). Les **8 rubriques** passent dans un bloc repliable « Consulter la stratégie validée »,
+  replié par défaut (ouvert si `?d=`), résumé par état (« 5 rubriques complétées · 2 à compléter
+  : validées avec ces manques, elles restent signalées ») : un manque ne se lit jamais comme une
+  décision. Ensuite : Activations et Planning.
+- **Recommandations du suivi** (MKT-C2-02, `lib/strategy/recommendations.ts`, séparé des KPI
+  `follow-up-results.ts`) : chaque règle a un **niveau** fixé par le code — KPI manqué =
+  Information, KPI sous le rythme = Recommandation, étape amont en retard = Risque, temps fort
+  passé sans livraison = Blocage (ton `recommendationLevelTone`) — et la carte dit sa source, la
+  donnée, **pourquoi** elle apparaît, son **effet** sur le projet (aucune ne remet en cause la
+  validation) et l'action proposée. **Tâche proposée par le code** : responsable du livrable
+  sinon chef de projet, échéance à J+7 ou le jour du temps fort menacé s'il vient avant, base de
+  calcul et fuseau (Paris) écrits. « Créer la tâche » ouvre le formulaire pré-rempli
+  (`RecommendationTaskForm`) ; **`apply_strategy_recommendation`** (security definer, chef de
+  projet seul) écrit la recommandation et sa tâche ensemble : rejouer rend la même tâche (avant,
+  la tâche était insérée avant la recommandation, hors transaction → doublon possible).
+  « Ignorer » demande un **motif** (contrainte `not valid` : les anciennes lignes n'en ont pas).
+  La recommandation garde à l'enregistrement son niveau et son texte (`level`, `summary`), car la
+  règle peut cesser de s'appliquer ; « Déjà traitées » liste tâche (état, responsable, échéance)
+  ou motif. **Lien inverse** : une tâche issue d'une recommandation mène à elle (`taskHref`,
+  `routes.projectStrategyRecommendation`, ancre `reco-<id>`). Un lecteur lit « Seul le chef de
+  projet… » au lieu de boutons absents.
+- **Retour depuis PO** : `AskPoButton origin` (page + fil projet › Stratégie › Suivi ›
+  recommandation) gardé dans `AssistantProvider` (onglet, jamais stocké) ; la conversation montre
+  le fil sous son titre et « Retour au projet » ramène à la recommandation (ancre `rec-<règle>`).
+  Effacé par « Nouvelle conversation ».
+- Corrigé au passage : `ReservesList` (client) recevait une **fonction** `versionOf` depuis un
+  composant serveur (page Brief) — refusé par Next dès qu'une réserve existe ; remplacé par un
+  objet `versions`. Conversion d'erreur `ActionResult → WriteResult` unique : `lib/framing/written.ts`.
+- Tests : `strategy-follow-up.test.sql` (20) — motif obligatoire, une seule tâche par appel
+  rejoué, recommandation ignorée non transformable, responsable membre, autre chef de projet et
+  DG refusés, le responsable de la tâche la voit.
 
 ### Retours Marketing du 11/10/2026, lot 9e (MKT-S1-16)
 

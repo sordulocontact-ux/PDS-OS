@@ -13677,30 +13677,39 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          level: string | null
           organization_id: string
           project_id: string
+          reason: string | null
           rule_key: string
           state: string
+          summary: string | null
           task_id: string | null
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           id?: string
+          level?: string | null
           organization_id: string
           project_id: string
+          reason?: string | null
           rule_key: string
           state: string
+          summary?: string | null
           task_id?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string | null
           id?: string
+          level?: string | null
           organization_id?: string
           project_id?: string
+          reason?: string | null
           rule_key?: string
           state?: string
+          summary?: string | null
           task_id?: string | null
         }
         Relationships: [
@@ -14491,6 +14500,18 @@ export type Database = {
       apply_strategy_execution: {
         Args: { p_document_id: string; p_items: Json }
         Returns: number
+      }
+      apply_strategy_recommendation: {
+        Args: {
+          p_assignee: string
+          p_due_on: string
+          p_level: string
+          p_project_id: string
+          p_rule_key: string
+          p_summary: string | null
+          p_title: string
+        }
+        Returns: string
       }
       approve_contract_mapping: {
         Args: { p_items: Json; p_project_id: string }

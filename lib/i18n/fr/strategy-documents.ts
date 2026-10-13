@@ -196,14 +196,32 @@ export const strategyDocuments = {
     body: (n: number) =>
       `Le Brief de sortie — V${n} est la référence. Les documents externes se construisent depuis lui.`,
     documents: "Documents",
-    consequencesTitle: "Et maintenant",
+    // MKT-C2-01: the one next action, above the documents.
+    next: {
+      title: "Prochaine étape : la Conception",
+      start: "Passer à la conception",
+      resume: "Reprendre la conception",
+      view: "Voir la conception",
+      body: (n: number) =>
+        `La Conception s'ouvre sur son accueil avec ${
+          n === 0
+            ? "les livrables de cette stratégie"
+            : n === 1
+              ? "le livrable engagé par cette stratégie"
+              : `les ${n} livrables engagés par cette stratégie`
+        }, leurs échéances et leurs responsables. Vous y choisissez de commencer directement ou de préparer un échange créatif, dont PO tire des propositions d'intentions à confirmer.`,
+      keeps: (n: number) =>
+        `Le Brief de sortie V${n} reste tel quel : rien n'est recréé ni modifié.`,
+      started:
+        "La Conception est commencée : son accueil montre où en est chaque livrable.",
+      locked: "La Conception est soumise ou validée.",
+      readOnly:
+        "Le chef de projet démarre la Conception ; vous pouvez déjà consulter son accueil.",
+    },
+    consequencesTitle: "Ensuite, quand l'équipe est prête",
     consequencesBody:
-      "La validation n'oblige pas à lancer la suite tout de suite : chaque étape s'ouvre quand l'équipe est prête.",
+      "La validation n'oblige pas à tout lancer tout de suite : chaque étape s'ouvre quand l'équipe est prête.",
     consequences: {
-      design: {
-        title: "Conception",
-        body: "Transforme les livrables décidés en contenus et en assets.",
-      },
       activations: {
         title: "Activations",
         body: "Prépare et exécute l'influence, les RP, la diffusion et le partage.",
@@ -214,6 +232,37 @@ export const strategyDocuments = {
       },
     },
   },
+  // MKT-C2-01: the eight dimensions, folded under the validated strategy.
+  consult: {
+    title: "Consulter la stratégie validée",
+    summary: (counts: {
+      complete: number;
+      to_decide: number;
+      to_complete: number;
+      in_progress: number;
+    }) =>
+      [
+        counts.complete === 1
+          ? "1 rubrique complétée"
+          : `${counts.complete} rubriques complétées`,
+        counts.to_decide ? `${counts.to_decide} à arbitrer` : null,
+        counts.to_complete ? `${counts.to_complete} à compléter` : null,
+        counts.in_progress ? `${counts.in_progress} en cours` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") +
+      (counts.complete === 8
+        ? "."
+        : " : validées avec ces manques, elles restent signalées."),
+  },
+  // What each document is for (MKT-C2-01), under its audience.
+  usage: {
+    brief: "Référence interne validée : la source de vérité de la stratégie.",
+    release_plan:
+      "Version opérationnelle de la stratégie, pour l'équipe artiste.",
+    press_kit: "Support externe pour les médias.",
+  },
+  optional: "Facultatif",
   pdfFileName: (title: string, kind: string, n: number) =>
     `${kind} V${n} - ${title}.pdf`,
 } as const;

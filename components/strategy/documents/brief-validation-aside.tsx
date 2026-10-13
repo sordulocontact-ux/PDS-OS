@@ -155,7 +155,7 @@ export function BriefValidationAside({
       <ReservesList
         projectId={projectId}
         reserves={reserves}
-        versionOf={(id) => versions.find((v) => v.id === id)?.version ?? null}
+        versions={Object.fromEntries(versions.map((v) => [v.id, v.version]))}
         meId={meId}
         isOwner={isOwner}
       />

@@ -212,6 +212,8 @@ export const framing = {
     framing_not_validated: "Le plan se construit une fois le Brief validé.",
     invalid_owner: "Ce responsable n'est pas membre de l'équipe.",
     already_decided: "Cette version a déjà reçu une décision.",
+    recommendation_settled:
+      "Cette recommandation a déjà été traitée : elle est dans « Déjà traitées ».",
     reminder_too_soon:
       "Cette personne a déjà été relancée il y a moins de 12 heures.",
     invalid_reviewer:

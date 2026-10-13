@@ -10,6 +10,7 @@ import { ConfirmButton } from "@/components/ui/confirm-button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { formatBriefDate } from "@/lib/framing/assess";
+import { written } from "@/lib/framing/written";
 import { fr } from "@/lib/i18n/fr";
 import { moveMilestone } from "@/lib/strategy/actions/plan";
 import { acceptUpstreamRisk } from "@/lib/strategy/actions/upstream";
@@ -81,12 +82,7 @@ export function UpstreamArbitration({
                 chain.milestoneId,
                 feasible.date,
               );
-              return result.ok
-                ? { ok: true as const }
-                : {
-                    ok: false as const,
-                    error: fr.framing.errors[result.error],
-                  };
+              return written(result);
             }}
           />
         )}

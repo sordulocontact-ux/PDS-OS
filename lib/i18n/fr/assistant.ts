@@ -299,6 +299,7 @@ export const assistant = {
   conversation: {
     pageTitle: "Conversation avec PO",
     back: "Retour à l'accueil",
+    backTo: "Retour au projet",
     new: "Nouvelle conversation",
     reply: "Répondre…",
     resume: "Reprendre la conversation",

@@ -43,6 +43,8 @@ export type FollowUpInput = {
     title: string;
     quantity: number | null;
     lever_id: string;
+    // Who delivers it: the task proposed by a recommendation goes to them.
+    assignee_person_id?: string | null;
   }>;
   milestones: Array<{
     id: string;

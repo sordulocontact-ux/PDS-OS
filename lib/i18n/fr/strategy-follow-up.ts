@@ -122,12 +122,98 @@ export const strategyFollowUp = {
     title: "Recommandations",
     empty:
       "Aucune recommandation : rien dans les données réelles n'appelle d'action.",
-    hint: "Calculées depuis des données réelles uniquement ; chacune cite la donnée sur laquelle elle repose.",
-    apply: "Appliquer",
-    applyHint: "Crée une tâche pour le responsable du projet",
-    applied: "Tâche créée dans le Travail du projet.",
-    ignore: "Ignorer",
+    hint: "Calculées par le code depuis les données réelles du projet ; chacune cite la donnée sur laquelle elle repose. Aucune ne remet en cause la validation de la stratégie : créez la tâche proposée, ou ignorez-la en disant pourquoi.",
+    levels: {
+      information: "Information",
+      recommendation: "Recommandation",
+      risk: "Risque",
+      blocking: "Blocage",
+    },
+    // Where the recommendation comes from, beside its level.
+    sources: {
+      kpi_missed: "Objectif",
+      kpi_pace: "Objectif",
+      upstream: "Calendrier",
+      undelivered: "Jalon",
+    },
+    why: {
+      kpi_missed:
+        "L'échéance de l'objectif est passée et la dernière valeur relevée reste sous la cible.",
+      kpi_pace:
+        "La dernière valeur relevée est sous 80 % du rythme attendu : la cible répartie de la sortie à l'échéance.",
+      upstream:
+        "Une étape amont n'est pas faite à sa date : le jalon qui en dépend est menacé.",
+      undelivered:
+        "Le jalon est passé sans que le livrable qu'il attend soit livré.",
+    },
+    effect: {
+      information: "Ne bloque rien : à garder pour le bilan.",
+      recommendation: "Ne bloque rien : une action est conseillée.",
+      risk: "Ne bloque rien aujourd'hui, mais une échéance du calendrier est menacée.",
+      blocking:
+        "Bloquant : le jalon ne peut pas avoir lieu tant que le livrable n'est pas livré.",
+    },
+    proposedAction: (action: string) => `Action proposée : ${action}`,
+    proposal: (who: string, date: string, basis: string) =>
+      `Tâche proposée : ${who}, pour le ${date} (${basis}).`,
+    basis: {
+      week: "dans 7 jours, heure de Paris",
+      milestone: (title: string) => `jour de « ${title} », heure de Paris`,
+    },
+    noAssignee: "responsable à choisir",
+    readOnly:
+      "Seul le chef de projet crée la tâche ou ignore une recommandation. Vous pouvez en parler à PO.",
     askPo: "Parler à PO",
+    // The PO conversation's way back: project › Stratégie › Suivi › level.
+    trail: (project: string, level: string) => [
+      project,
+      "Stratégie",
+      "Suivi",
+      `Recommandation : ${level.toLowerCase()}`,
+    ],
+    task: {
+      open: "Créer la tâche",
+      title: "Créer la tâche",
+      body: "Pré-remplie depuis la recommandation : corrigez ce qu'il faut. Elle arrive dans le Travail de son responsable, avec un lien vers cette recommandation.",
+      context: "Contexte",
+      name: "Tâche",
+      assignee: "Responsable",
+      due: "Échéance",
+      dueHint: (basis: string) => `Proposée : ${basis}.`,
+      nameRequired: "Écrivez la tâche.",
+      assigneeRequired: "Choisissez qui la fait.",
+      dueRequired: "Choisissez une échéance.",
+      duePast: "L'échéance ne peut pas être passée.",
+      missing: (n: number) =>
+        n === 1 ? "1 champ à compléter." : `${n} champs à compléter.`,
+      submit: "Créer la tâche",
+      created: "Tâche créée dans le Travail du projet.",
+    },
+    ignore: {
+      open: "Ignorer",
+      title: "Ignorer la recommandation",
+      body: "Elle ne sera plus proposée. Le motif reste visible dans « Déjà traitées ».",
+      reason: "Pourquoi l'ignorer ?",
+      submit: "Ignorer",
+      done: "Recommandation ignorée.",
+    },
+    settled: {
+      title: "Déjà traitées",
+      applied: "Tâche créée",
+      ignored: "Ignorée",
+      by: (who: string | null) => (who ? `par ${who}` : ""),
+      noSummary: "Texte non conservé : traitée avant le 13/10/2026.",
+      reason: (reason: string) => `Motif : ${reason}`,
+      noReason: "Ignorée sans motif, avant le 13/10/2026.",
+      taskDone: "Faite",
+      taskOpen: "À faire",
+      taskLine: (title: string, who: string | null, due: string | null) =>
+        [title, who, due ? `échéance ${due}` : null]
+          .filter(Boolean)
+          .join(" · "),
+      taskGone: "La tâche a été supprimée.",
+      openWork: "Voir dans le Travail",
+    },
     belowPace: (
       label: string,
       value: string,

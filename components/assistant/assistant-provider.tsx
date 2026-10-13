@@ -23,6 +23,10 @@ const DraftSheetBody = dynamic(
   () => import("@/components/assistant/draft-sheet-body"),
 );
 
+/** Where a conversation opened from a page comes from (MKT-C2-02): the
+ * page to go back to and its trail — project, module, section, object. */
+export type PoOrigin = { href: string; trail: string[] };
+
 type AssistantContextValue = {
   chat: Chat<UIMessage>;
   /** Drafts saved in this tab, by tool call: the card shows the link. */
@@ -35,6 +39,9 @@ type AssistantContextValue = {
   /** Questions the open page adds to the suggestions (a project to accept). */
   pageSuggestions: string[];
   setPageSuggestions: (suggestions: string[]) => void;
+  /** The page the conversation was opened from, if any. */
+  origin: PoOrigin | null;
+  setOrigin: (origin: PoOrigin | null) => void;
 };
 
 const AssistantContext = createContext<AssistantContextValue | null>(null);
@@ -67,6 +74,7 @@ export function AssistantProvider({
   const [saved, setSaved] = useState<Record<string, SavedLink>>({});
   const [launcherOpen, setLauncherOpen] = useState(false);
   const [pageSuggestions, setPageSuggestions] = useState<string[]>([]);
+  const [origin, setOrigin] = useState<PoOrigin | null>(null);
   const [reviewing, setReviewing] = useState<{
     toolCallId: string;
     proposal: DraftProposal;
@@ -80,6 +88,8 @@ export function AssistantProvider({
       setLauncherOpen,
       pageSuggestions,
       setPageSuggestions,
+      origin,
+      setOrigin,
       review(toolCallId, proposal) {
         // Never two layers: the window gives way to the panel.
         setLauncherOpen(false);
@@ -89,7 +99,7 @@ export function AssistantProvider({
         setSaved((previous) => ({ ...previous, [toolCallId]: link }));
       },
     }),
-    [chat, saved, launcherOpen, pageSuggestions],
+    [chat, saved, launcherOpen, pageSuggestions, origin],
   );
 
   // The draft after `toolCallId` in the same answer, not saved yet: an

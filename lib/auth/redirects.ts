@@ -184,6 +184,9 @@ export const routes = {
   // Follow-up of a validated strategy, before and after the release.
   projectStrategyFollowUp: (id: string) =>
     `/app/projects/${id}/strategy/follow-up`,
+  // A recommendation of the follow-up, from its task or a PO conversation.
+  projectStrategyRecommendation: (id: string, recommendationId: string) =>
+    `/app/projects/${id}/strategy/follow-up#reco-${recommendationId}`,
   projectStrategyReleasePlan: (id: string, step?: number) =>
     `/app/projects/${id}/strategy/release-plan${step ? `?step=${step}` : ""}`,
   // The Dossier de presse generator, one step at a time (ticket § 12).

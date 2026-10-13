@@ -1,8 +1,10 @@
 -- Stratégie, étape 14 (…20261010004001): the follow-up — real values of a KPI
--- noted by the owner, recommendations applied or ignored once.
+-- noted by the owner, recommendations applied or ignored once; MKT-C2-02
+-- (…20261013100001): ignored with a reason, turned into one task only, by
+-- the owner alone (director, other project manager, assignee).
 -- Run with `supabase test db`.
 begin;
-select plan(10);
+select plan(20);
 
 
 
@@ -114,9 +116,13 @@ $$, '23514', null, 'a measure is never negative');
 
 -- Recommendations ------------------------------------------------------------------
 select lives_ok($$
+  insert into public.strategy_recommendations (organization_id, project_id, rule_key, state, reason)
+  values (pg_temp.org(), pg_temp.prj(), 'kpi_behind:abc', 'ignored', 'Campagne déjà relancée')
+$$, 'the owner ignores a recommendation, with a reason');
+select throws_ok($$
   insert into public.strategy_recommendations (organization_id, project_id, rule_key, state)
-  values (pg_temp.org(), pg_temp.prj(), 'kpi_behind:abc', 'ignored')
-$$, 'the owner ignores a recommendation');
+  values (pg_temp.org(), pg_temp.prj(), 'kpi_behind:noreason', 'ignored')
+$$, '23514', null, 'ignoring says why');
 select throws_ok($$
   insert into public.strategy_recommendations (organization_id, project_id, rule_key, state)
   values (pg_temp.org(), pg_temp.prj(), 'kpi_behind:abc', 'applied')
@@ -125,6 +131,30 @@ select throws_ok($$
   insert into public.strategy_recommendations (organization_id, project_id, rule_key, state)
   values (pg_temp.org(), pg_temp.prj(), 'kpi_behind:xyz', 'maybe')
 $$, '23514', null, 'only applied or ignored');
+
+-- « Créer la tâche »: one task, whatever the number of calls.
+insert into ids select 'task', public.apply_strategy_recommendation(pg_temp.prj(), 'undelivered:m1',
+  'blocking', '« Teaser » était prévu le 01/10.', 'Livrer « Cover »',
+  pg_temp.id_of('other_person'), current_date + 7);
+select isnt(pg_temp.id_of('task'), null, 'the owner turns a recommendation into a task');
+select is(public.apply_strategy_recommendation(pg_temp.prj(), 'undelivered:m1',
+  'blocking', '« Teaser » était prévu le 01/10.', 'Livrer « Cover »',
+  pg_temp.id_of('other_person'), current_date + 7), pg_temp.id_of('task'),
+  'replaying it returns the same task');
+select is((select count(*)::int from public.tasks where project_id = pg_temp.prj()
+            and title = 'Livrer « Cover »'), 1, 'never a second task');
+select is((select level || '/' || task_id::text from public.strategy_recommendations
+            where project_id = pg_temp.prj() and rule_key = 'undelivered:m1'),
+          'blocking/' || pg_temp.id_of('task')::text,
+          'the recommendation keeps its level and its task');
+select throws_ok($$
+  select public.apply_strategy_recommendation(pg_temp.prj(), 'kpi_behind:abc', 'risk', null,
+    'Relancer', pg_temp.id_of('owner_person'), current_date + 7)
+$$, '23505', null, 'an ignored recommendation is not turned into a task');
+select throws_ok($$
+  select public.apply_strategy_recommendation(pg_temp.prj(), 'kpi_pace:k', 'risk', null,
+    'Relancer', gen_random_uuid(), current_date + 7)
+$$, '23514', null, 'the assignee is a member of the organisation');
 
 reset role;
 select pg_temp.act_as(pg_temp.id_of('other'));
@@ -136,10 +166,20 @@ select throws_ok($$
   insert into public.strategy_recommendations (organization_id, project_id, rule_key, state)
   values (pg_temp.org(), pg_temp.prj(), 'late:x', 'ignored')
 $$, '42501', null, 'another project manager decides nothing');
+select throws_ok($$
+  select public.apply_strategy_recommendation(pg_temp.prj(), 'kpi_pace:k', 'risk', null,
+    'Relancer', pg_temp.id_of('other_person'), current_date + 7)
+$$, '42501', null, 'another project manager creates no task from it');
+select is((select count(*)::int from public.tasks where id = pg_temp.id_of('task')), 1,
+          'the assignee sees the task given to them');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
 select is((select count(*)::int from public.strategy_kpi_measures where project_id = pg_temp.prj()), 1,
           'the director reads the measures');
+select throws_ok($$
+  select public.apply_strategy_recommendation(pg_temp.prj(), 'kpi_pace:k', 'risk', null,
+    'Relancer', pg_temp.id_of('owner_person'), current_date + 7)
+$$, '42501', null, 'the director reads but does not act on a recommendation');
 
 select * from finish();
 rollback;

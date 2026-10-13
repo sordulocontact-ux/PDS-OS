@@ -48,6 +48,7 @@ export type FramingErrorCode =
   | "critical_alert_unaccepted"
   | "invalid_reserve"
   | "deliverable_not_planned"
+  | "recommendation_settled"
   | "generic";
 
 export type ActionResult =
@@ -97,9 +98,13 @@ export function fromDatabaseError(
     "critical_alert_unaccepted",
     "invalid_reserve",
     "deliverable_not_planned",
+    "recommendation_settled",
   ] as const) {
     if (message.includes(code)) return fail(code);
   }
+  // A recommendation applied or ignored twice (two tabs, two clicks).
+  if (message.includes("strategy_recommendations_key"))
+    return fail("recommendation_settled");
   if (
     message.includes("stage_not_found") ||
     message.includes("validation_not_found") ||

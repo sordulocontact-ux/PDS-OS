@@ -9,14 +9,17 @@ import {
   type FollowUpGroup,
   type FollowUpInput,
 } from "@/lib/strategy/follow-up";
-import {
-  kpiRows,
-  recommendations,
-  type KpiRow,
-  type Recommendation,
-} from "@/lib/strategy/follow-up-results";
+import { kpiRows, type KpiRow } from "@/lib/strategy/follow-up-results";
 import { loadKpiActuals } from "@/lib/strategy/kpi-actuals";
 import type { StrategyData } from "@/lib/strategy/queries";
+import {
+  recommendations,
+  type Recommendation,
+} from "@/lib/strategy/recommendations";
+import {
+  settledRecommendations,
+  type SettledRecommendation,
+} from "@/lib/strategy/settled-recommendations";
 import { createClient } from "@/lib/supabase/server";
 
 export type FollowUpData = {
@@ -27,6 +30,9 @@ export type FollowUpData = {
   groups: FollowUpGroup[];
   kpis: KpiRow[];
   recommendations: Recommendation[];
+  // Applied or ignored, newest first: what was said then, and what became
+  // of it — the task's state as the Travail shows it, or the reason.
+  settled: SettledRecommendation[];
 };
 
 const DOC_KINDS = ["brief", "release_plan", "press_kit"] as const;
@@ -90,8 +96,11 @@ export async function loadFollowUp(
       .order("created_at", { ascending: false }),
     supabase
       .from("strategy_recommendations")
-      .select("rule_key")
-      .eq("project_id", projectId),
+      .select(
+        "id, rule_key, state, level, summary, reason, created_at, created_by, tasks(id, title, status, due_date, assignee_person_id)",
+      )
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
     loadKpiActuals(projectId, data.referenceDate, data.objectives),
   ]);
 
@@ -162,5 +171,6 @@ export async function loadFollowUp(
       input,
       settled: new Set((settled.data ?? []).map((s) => s.rule_key)),
     }),
+    settled: settledRecommendations(settled.data ?? [], data.members),
   };
 }

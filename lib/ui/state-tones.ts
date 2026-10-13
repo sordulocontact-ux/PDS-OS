@@ -288,6 +288,15 @@ export const followUpTone: Record<string, Tone> = {
   blocked: "danger",
 };
 
+/** A recommendation of the follow-up (MKT-C2-02), by level: a fact to keep,
+ * an action advised, a deadline threatened, a milestone that cannot happen. */
+export const recommendationLevelTone: Record<string, Tone> = {
+  information: "neutral",
+  recommendation: "info",
+  risk: "warning",
+  blocking: "danger",
+};
+
 /** A dimension of the Stratégie's pilotage (lib/strategy/dimensions.ts):
  * nothing yet, started, a proposal or choice waiting for a decision, done. */
 export const strategyDimensionTone: Record<string, Tone> = {

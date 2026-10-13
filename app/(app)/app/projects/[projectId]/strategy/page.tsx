@@ -6,8 +6,8 @@ import { EditAccessProvider } from "@/components/projects/edit-access";
 import { BriefReminder } from "@/components/strategy/brief-reminder";
 import { BriefEntry } from "@/components/strategy/brief/brief-entry";
 import { DimensionWork } from "@/components/strategy/dimension-work";
+import { ValidatedStrategyHome } from "@/components/strategy/documents/validated-strategy-home";
 import { StrategyValidationCard } from "@/components/strategy/documents/strategy-validation-card";
-import { ValidatedStrategy } from "@/components/strategy/documents/validated-strategy";
 import { ProposeChoices } from "@/components/strategy/propose-choices";
 import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
@@ -30,6 +30,7 @@ import { briefReadiness } from "@/lib/strategy/brief";
 import { strategySheetData } from "@/lib/strategy/call-sheet-data";
 import { approvedOf, sentOf } from "@/lib/strategy/documents/model";
 import { loadStrategyDocuments } from "@/lib/strategy/documents/queries";
+import { loadReserves } from "@/lib/strategy/execution-queries";
 import {
   dimensionStatuses,
   isStrategyDimension,
@@ -40,7 +41,10 @@ import { allInOrder } from "@/lib/utils/parallel";
 /**
  * Launch strategy stage, built on the validated Brief: first its entry
  * (context, « Commencer la stratégie », « Préparer un échange »), then the
- * pilotage of its eight dimensions, each unfolded in place (?d=).
+ * pilotage of its eight dimensions, each unfolded in place (?d=). Once
+ * validated (MKT-C2-01): its state, the next action (« Passer à la
+ * conception ») and the documents first, the open reserves, and the eight
+ * dimensions folded under « Consulter la stratégie validée ».
  */
 export default async function StrategyPage({
   params,
@@ -133,6 +137,26 @@ export default async function StrategyPage({
   const open = isStrategyDimension(asked)
     ? statuses.find((d) => d.key === asked)
     : undefined;
+  const reserves = validated ? await loadReserves(projectId, data.members) : [];
+
+  const pilotage = (
+    <StrategyPilotage
+      projectId={projectId}
+      statuses={statuses}
+      current={open?.key ?? null}
+    >
+      {open && (
+        <DimensionWork
+          dimension={open.key}
+          data={data}
+          budget={budget}
+          envelopeCents={project.budgetCents}
+          projectId={projectId}
+          organizationId={access.organizationId}
+        />
+      )}
+    </StrategyPilotage>
+  );
 
   // docs/DESIGN.md § 4, « Sélection et formulaires en étapes »: no card around
   // the page, sections spaced out, only the answers and items outlined.
@@ -142,54 +166,54 @@ export default async function StrategyPage({
     <div className="grid gap-12 pt-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <EditAccessProvider canEdit={canWrite}>
         <div className="flex min-w-0 flex-col gap-8">
-          {validated && (
-            <ValidatedStrategy
+          {validated ? (
+            <ValidatedStrategyHome
               projectId={projectId}
               version={reference.version}
               documents={docs.documents}
-              canShare={isOwner}
-            />
-          )}
-          <StrategyDictation
-            projectId={projectId}
-            actions={
-              <>
-                <StrategyDraftButton projectId={projectId} />
-                <ProposeChoices projectId={projectId} />
-                {callSheet && (
-                  <StrategyCallSheet projectId={projectId} data={callSheet} />
-                )}
-              </>
-            }
-          >
-            <h2 className="text-display-md font-semibold break-words">
-              {t.title}
-            </h2>
-            {status && (
-              <p className="text-body-md text-muted-foreground">{status}</p>
-            )}
-          </StrategyDictation>
-          <StrategyPilotage
-            projectId={projectId}
-            statuses={statuses}
-            current={open?.key ?? null}
-          >
-            {open && (
-              <DimensionWork
-                dimension={open.key}
-                data={data}
-                budget={budget}
-                envelopeCents={project.budgetCents}
+              isOwner={isOwner}
+              meId={access.personId}
+              designState={
+                project.stages.find((st) => st.key === "design")?.state ??
+                "not_started"
+              }
+              deliverableCount={data.deliverables.length}
+              reserves={reserves}
+              statuses={statuses}
+              dimensionOpen={Boolean(open)}
+            >
+              {pilotage}
+            </ValidatedStrategyHome>
+          ) : (
+            <>
+              <StrategyDictation
                 projectId={projectId}
-                organizationId={access.organizationId}
+                actions={
+                  <>
+                    <StrategyDraftButton projectId={projectId} />
+                    <ProposeChoices projectId={projectId} />
+                    {callSheet && (
+                      <StrategyCallSheet
+                        projectId={projectId}
+                        data={callSheet}
+                      />
+                    )}
+                  </>
+                }
+              >
+                <h2 className="text-display-md font-semibold break-words">
+                  {t.title}
+                </h2>
+                {status && (
+                  <p className="text-body-md text-muted-foreground">{status}</p>
+                )}
+              </StrategyDictation>
+              {pilotage}
+              <BriefEntry
+                projectId={projectId}
+                missing={briefReadiness(statuses).missing}
               />
-            )}
-          </StrategyPilotage>
-          {!validated && (
-            <BriefEntry
-              projectId={projectId}
-              missing={briefReadiness(statuses).missing}
-            />
+            </>
           )}
         </div>
       </EditAccessProvider>

@@ -9,16 +9,20 @@ import type { StrategyDocument } from "@/lib/strategy/documents/queries";
 import { cn } from "@/lib/utils";
 
 /**
- * The validated strategy's screen (ticket § 10 and § 13): the three
- * documents — « Documents finalisés » once each has an approved version —,
- * then what follows — Conception, Activations, Planning — each opening its
- * page. Nothing has to start now: the validation obliges no next step.
+ * The validated strategy's screen (ticket § 10 and § 13, MKT-C2-01): where
+ * it stands, then its one next action — `next`, the Conception — before
+ * the three documents (« Documents finalisés » once each has an approved
+ * version), the reserves still open (`reserves`), the follow-up, then the
+ * other steps — Activations, Planning — each opening its page. Nothing has
+ * to start now: the validation obliges no next step.
  */
 export function ValidatedStrategy({
   projectId,
   version,
   documents,
   canShare,
+  next,
+  reserves,
 }: {
   projectId: string;
   // The project's owner: creates the external documents' public links.
@@ -26,13 +30,16 @@ export function ValidatedStrategy({
   // The reference Brief's version (V1, V2…).
   version: number;
   documents: StrategyDocument[];
+  // The next action (ConceptionNextStep), visible without scrolling.
+  next: React.ReactNode;
+  // The reserves of the validation, while one is still open.
+  reserves?: React.ReactNode;
 }) {
   const t = fr.strategyDocuments.validated;
   const done = allFinalised(documents);
   const f = fr.strategyPressKit.finalised;
   const c = t.consequences;
-  const next = [
-    { key: "design", href: routes.projectDesign(projectId), ...c.design },
+  const steps = [
     {
       key: "activations",
       href: routes.projectActivations(projectId),
@@ -54,6 +61,7 @@ export function ValidatedStrategy({
             {done ? f.body : t.body(version)}
           </p>
         </div>
+        {next}
         <h3 className="sr-only">{t.documents}</h3>
         <StrategyDocumentCards
           projectId={projectId}
@@ -61,6 +69,8 @@ export function ValidatedStrategy({
           canShare={canShare}
         />
       </section>
+
+      {reserves}
 
       {/* After the launch, the Stratégie watches and adapts (ticket § 14). */}
       <FollowUpLink projectId={projectId} />
@@ -77,8 +87,8 @@ export function ValidatedStrategy({
             {t.consequencesBody}
           </p>
         </div>
-        <ul className="grid gap-3 md:grid-cols-3">
-          {next.map((n) => (
+        <ul className="grid gap-3 md:grid-cols-2">
+          {steps.map((n) => (
             <li key={n.key}>
               <ViewLink
                 href={n.href}

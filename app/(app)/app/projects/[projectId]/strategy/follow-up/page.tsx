@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { FollowUpGroups } from "@/components/strategy/follow-up/follow-up-groups";
 import { KpiTable } from "@/components/strategy/follow-up/kpi-table";
 import { RecommendationCard } from "@/components/strategy/follow-up/recommendation-card";
+import { SettledRecommendations } from "@/components/strategy/follow-up/settled-recommendations";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { requireApproved } from "@/lib/auth/dal";
@@ -26,7 +27,9 @@ export const metadata = {
  * release, what is Prêt, En cours, En attente or Bloqué; after it, each KPI
  * against its latest real value. Recommendations rest on real data only.
  * States, gaps and recommendations are computed by code
- * (lib/strategy/follow-up*.ts); the owner acts, the others read.
+ * (lib/strategy/follow-up*.ts, recommendations.ts); the owner acts, the
+ * others read and are told so. Settled recommendations stay listed with
+ * their task or their reason (MKT-C2-02).
  */
 export default async function StrategyFollowUpPage({
   params,
@@ -122,12 +125,20 @@ export default async function StrategyFollowUpPage({
               <RecommendationCard
                 key={rec.ruleKey}
                 projectId={projectId}
+                projectTitle={project.title}
                 recommendation={rec}
                 canAct={canAct}
+                members={data.members}
+                ownerId={project.ownerPersonId}
+                today={followUp.today}
               />
             ))}
           </ul>
         )}
+        <SettledRecommendations
+          projectId={projectId}
+          items={followUp.settled}
+        />
       </section>
     </div>
   );

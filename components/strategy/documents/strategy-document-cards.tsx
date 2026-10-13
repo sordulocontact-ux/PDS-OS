@@ -16,7 +16,8 @@ import { strategyDocumentTone } from "@/lib/ui/state-tones";
 /**
  * The strategy's three documents (ticket § 10 and § 13): the Brief de sortie
  * (internal), the Plan de sortie (the artist's team) and the Dossier de
- * presse (the media). Each shows its reference version — the approved one,
+ * presse (the media, optional). Each says who it is for and what it is
+ * for (MKT-C2-01), and shows its reference version — the approved one,
  * else the latest — with its real state, and Voir · Partager · PDF ·
  * Versions; an external one is shared by its public link, the Brief only
  * inside the app. States come from strategy_documents, never decided here.
@@ -83,7 +84,9 @@ export function StrategyDocumentCards({
           </p>
           <p className="text-caption text-muted-foreground">
             {kind === "brief" ? f.internal : f.external(f.audiences[kind])}
+            {kind === "press_kit" && ` · ${t.optional}`}
           </p>
+          <p className="text-caption text-muted-foreground">{t.usage[kind]}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge

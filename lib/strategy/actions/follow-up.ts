@@ -14,7 +14,6 @@ import {
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
-import { addDays } from "@/lib/strategy/calendar";
 import { loadFollowUp } from "@/lib/strategy/follow-up-data";
 import { loadStrategy } from "@/lib/strategy/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -23,13 +22,21 @@ import { createClient } from "@/lib/supabase/server";
 // again. A recommendation is always recomputed here from the data, never
 // taken from the browser.
 
-const ruleInput = z.object({
+const ruleKey = z.string().regex(/^[a-z0-9_:-]{1,120}$/);
+
+const applyInput = z.object({
   projectId: z.uuid(),
-  ruleKey: z.string().regex(/^[a-z0-9_:-]{1,120}$/),
+  ruleKey,
+  title: z.string().trim().min(1).max(300),
+  assigneeId: z.uuid(),
+  dueOn: z.iso.date(),
 });
 
-// A task made from a recommendation is due a week later (code, rule 6).
-const TASK_DAYS = 7;
+const ignoreInput = z.object({
+  projectId: z.uuid(),
+  ruleKey,
+  reason: z.string().trim().min(1).max(1000),
+});
 
 async function ownerContext(projectId: string) {
   const access = await requireApproved();
@@ -58,67 +65,85 @@ function done(
   return ok;
 }
 
-/** « Appliquer »: the recommendation becomes a task for the project's owner. */
-export async function applyRecommendation(
+/** The recommendation as the code computes it now, never the browser's. */
+async function currentRecommendation(
+  ctx: NonNullable<Awaited<ReturnType<typeof ownerContext>>>,
   projectId: string,
-  ruleKey: string,
-): Promise<ActionResult> {
-  const p = ruleInput.safeParse({ projectId, ruleKey });
-  if (!p.success) return fail("invalid_input");
-  const ctx = await ownerContext(projectId);
-  if (!ctx) return fail("forbidden");
+  key: string,
+) {
   const data = await loadStrategy(projectId, ctx.access);
-  if (!data) return fail("not_found");
+  if (!data) return null;
   const followUp = await loadFollowUp(projectId, ctx.project.title, data);
-  const rec = followUp.recommendations.find(
-    (r) => r.ruleKey === p.data.ruleKey,
+  return followUp.recommendations.find((r) => r.ruleKey === key) ?? null;
+}
+
+/**
+ * « Créer la tâche » (MKT-C2-02): the recommendation becomes a task of the
+ * Travail, its title, assignee and due date prefilled by the code and
+ * corrected by the owner. One function writes both, once: replaying it
+ * returns the same task (apply_strategy_recommendation).
+ */
+export async function applyRecommendation(input: {
+  projectId: string;
+  ruleKey: string;
+  title: string;
+  assigneeId: string;
+  dueOn: string;
+}): Promise<ActionResult> {
+  const p = applyInput.safeParse(input);
+  if (!p.success) return fail("invalid_input");
+  const ctx = await ownerContext(p.data.projectId);
+  if (!ctx) return fail("forbidden");
+  const rec = await currentRecommendation(
+    ctx,
+    p.data.projectId,
+    p.data.ruleKey,
   );
   if (!rec) return fail("not_found");
 
   const supabase = await createClient();
-  const { data: task, error } = await supabase
-    .from("tasks")
-    .insert({
-      organization_id: ctx.organizationId,
-      project_id: projectId,
-      title: rec.action,
-      assignee_person_id: ctx.owner,
-      due_date: addDays(followUp.today, TASK_DAYS),
-    })
-    .select("id")
-    .single();
-  if (error || !task) return fromDatabaseError(error);
-  const { error: recError } = await supabase
-    .from("strategy_recommendations")
-    .insert({
-      organization_id: ctx.organizationId,
-      project_id: projectId,
-      rule_key: rec.ruleKey,
-      state: "applied",
-      task_id: task.id,
-    });
+  const { error } = await supabase.rpc("apply_strategy_recommendation", {
+    p_project_id: p.data.projectId,
+    p_rule_key: rec.ruleKey,
+    p_level: rec.level,
+    p_summary: rec.text,
+    p_title: p.data.title,
+    p_assignee: p.data.assigneeId,
+    p_due_on: p.data.dueOn,
+  });
+  if (error) return fromDatabaseError(error);
   await schedulePendingPushes();
-  revalidatePath(routes.projectWork(projectId));
-  return done(projectId, recError);
+  revalidatePath(routes.projectWork(p.data.projectId));
+  return done(p.data.projectId, null);
 }
 
-/** « Ignorer »: the recommendation is not offered again. */
-export async function ignoreRecommendation(
-  projectId: string,
-  ruleKey: string,
-): Promise<ActionResult> {
-  const p = ruleInput.safeParse({ projectId, ruleKey });
-  if (!p.success) return fail("invalid_input");
-  const ctx = await ownerContext(projectId);
+/** « Ignorer »: not offered again, with the reason, kept with what it said. */
+export async function ignoreRecommendation(input: {
+  projectId: string;
+  ruleKey: string;
+  reason: string;
+}): Promise<ActionResult> {
+  const p = ignoreInput.safeParse(input);
+  if (!p.success) return fail("reason_required");
+  const ctx = await ownerContext(p.data.projectId);
   if (!ctx) return fail("forbidden");
+  const rec = await currentRecommendation(
+    ctx,
+    p.data.projectId,
+    p.data.ruleKey,
+  );
+  if (!rec) return fail("not_found");
   const supabase = await createClient();
   const { error } = await supabase.from("strategy_recommendations").insert({
     organization_id: ctx.organizationId,
-    project_id: projectId,
-    rule_key: p.data.ruleKey,
+    project_id: p.data.projectId,
+    rule_key: rec.ruleKey,
     state: "ignored",
+    level: rec.level,
+    summary: rec.text,
+    reason: p.data.reason,
   });
-  return done(projectId, error);
+  return done(p.data.projectId, error);
 }
 
 // "12 500", "12500,5": the figure as typed, French decimal comma allowed.

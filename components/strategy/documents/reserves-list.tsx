@@ -5,15 +5,11 @@ import { ReasonForm } from "@/components/ui/reason-form";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDay } from "@/lib/assistant/facts";
 import { formatBriefDate } from "@/lib/framing/assess";
-import type { ActionResult } from "@/lib/framing/result";
+import { written } from "@/lib/framing/written";
 import { fr } from "@/lib/i18n/fr";
 import { liftStrategyReserve } from "@/lib/strategy/actions/documents";
 import type { StrategyReserve } from "@/lib/strategy/execution-queries";
 import { strategyReserveTone } from "@/lib/ui/state-tones";
-import type { WriteResult } from "@/lib/utils/write-result";
-
-const written = (result: ActionResult): WriteResult =>
-  result.ok ? result : { ok: false, error: fr.framing.errors[result.error] };
 
 /**
  * The reserves put on the Brief's versions (MKT-S1-16), open ones first:
@@ -23,13 +19,15 @@ const written = (result: ActionResult): WriteResult =>
 export function ReservesList({
   projectId,
   reserves,
-  versionOf,
+  versions,
   meId,
   isOwner,
 }: {
   projectId: string;
   reserves: StrategyReserve[];
-  versionOf: (documentId: string) => number | null;
+  // The Brief's version number of each document id (a plain object: a
+  // function cannot cross to a client component).
+  versions: Record<string, number>;
   meId: string | null;
   isOwner: boolean;
 }) {
@@ -63,7 +61,7 @@ export function ReservesList({
               {t.line(r.ownerName, formatBriefDate(r.dueOn))}
             </p>
             <p className="text-caption text-muted-foreground">
-              {t.from(r.createdByName, versionOf(r.documentId) ?? 0)}
+              {t.from(r.createdByName, versions[r.documentId] ?? 0)}
             </p>
             {r.status === "lifted" && r.liftedAt && (
               <p className="text-caption text-muted-foreground">
