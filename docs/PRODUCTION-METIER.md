@@ -3,7 +3,7 @@
 Source : messages d'Ibé du 13/10/2026 (16:30 et 16:52), écrits après son test de la Production,
 **avant** les tickets détaillés qu'il annonce. Ce fichier n'est pas un ticket : c'est le cadre
 dans lequel lire ces tickets et refaire les écrans. Une règle écrite ici sans citation d'Ibé est
-marquée « décision » ou « à trancher ».
+une hypothèse, soumise à Ibé au § 9.
 
 Code existant : `docs/ARCHITECTURE.md` § 8 nonies. Exemple suivi : un clip musical. La même logique
 doit valoir pour une capsule réseaux, une interview, etc.
@@ -171,16 +171,133 @@ Chaque lot reste une étape à part ; aucun n'est commencé.
    (réalisateur pour sa proposition, chef op pour sa liste, monteur pour ses versions) ; ce qui
    revient est une proposition que le chef de projet valide.
 
-## 9. À trancher
+## 9. Questions à Ibé (envoyées le 14/10/2026, sans réponse à ce jour)
 
-- **Externe** : que garde-t-on exactement côté PDS (le devis global de la boîte de prod comme
-  budget convenu ? ses livrables intermédiaires ? un interlocuteur unique ?).
-- **Hybride** : la répartition se fait-elle par partie (préprod / tournage / post) ou par rôle ?
-- **Qui valide** la proposition du réalisateur et le choix du lieu : le chef de projet seul, ou
-  aussi le directeur créatif ?
-- **À confirmer avec Ibé** : réalisateurs, chefs op et monteurs sont-ils bien des externes sans
-  compte (§ 2 bis) ? Le label a-t-il des salariés qui tiennent ces rôles ? Si oui, faut-il un
-  nouveau poste (ex. chargé de production) ? Aujourd'hui, dans un projet lancé, seul le
-  responsable écrit (`CLAUDE.md`, « Permissions »).
-- **Autres contenus** (capsule, interview) : mêmes étapes en version courte, ou gabarits
-  distincts ?
+Chaque question donne **notre hypothèse** : un « oui » suffit si elle est juste. Les blocs A et B
+conditionnent tous les écrans ; le reste peut attendre ses tickets. Reporter chaque réponse ici
+(« Réponse d'Ibé, JJ/MM : … ») puis dans les § 2 à 8.
+
+### A. Qui utilise PDS OS (bloquant)
+
+1. Réalisateur, chef op, directeur / chargé de production, régisseur, monteur : ce sont des
+   **externes** (freelances, boîte de prod) ? Ou certains sont **salariés du label** ?
+   *Hypothèse : tous externes.*
+2. Le **chargé de production** fait l'essentiel de la préparation. Chez PDS, c'est un salarié (il
+   lui faut alors un compte, donc un nouveau poste dans l'app), un externe, ou le chef de projet
+   lui-même sur les petites productions ? *Hypothèse : le chef de projet sur les petites, un
+   externe sur les grosses.*
+3. Pour les externes : un **lien privé sans compte** pour chaque rôle (comme le mixeur dans le
+   Master), ça vous va ? Ou vous voulez qu'ils aient un vrai compte ? *Hypothèse : le lien. Les
+   comptes externes sont hors V1.*
+4. Le **chef de projet de la Production** est-il toujours le responsable du projet (celui de la
+   Stratégie et de la Conception) ? *Hypothèse : oui.*
+5. Le **directeur créatif (DA)** : quel rôle en Production ? Il valide la proposition du
+   réalisateur, les lieux, les versions du montage ? *Hypothèse : il valide les versions, et donne
+   un avis sur le reste.*
+6. **L'artiste** intervient-il en Production (avis sur le traitement, le lieu, les versions) ?
+   Directement ou via le chef de projet ? *Hypothèse : via le chef de projet.*
+7. **Le DG** : doit-il valider quelque chose en Production (un devis, un dépassement de budget, le
+   tournage) ? Au-delà de quel montant ? *Hypothèse : seulement un dépassement de l'enveloppe.*
+
+### B. Interne, externe, hybride (bloquant)
+
+8. Le mode se choisit **par contenu** (ce clip en externe, ces capsules en interne) ou **pour tout
+   le projet** ? *Hypothèse : par contenu.*
+9. Qui le choisit, et à quel moment (dès la Conception, au début de la Production) ? Peut-il
+   changer en cours ? *Hypothèse : le chef de projet, au début de la Production, modifiable.*
+10. **Externe** : concrètement, que doit suivre le chef de projet dans PDS ? Le devis global signé,
+    les dates clés, la date de tournage, les versions à valider, la livraison ? Rien d'autre ?
+11. **Externe** : la boîte de prod doit-elle aussi avoir un lien (pour déposer ses versions, son
+    planning, sa feuille de service pour info) ? *Hypothèse : oui, un lien unique pour la boîte.*
+12. **Hybride** : peux-tu donner un exemple réel ? La répartition se fait-elle par étape (on
+    tourne nous-mêmes, une boîte fait le montage) ou par poste (on loue une équipe image à une
+    boîte) ?
+13. La Production couvre-t-elle aussi les contenus **sans tournage** (cover, visuels, photos,
+    motion) ? Si oui, quelles étapes leur restent ? *Hypothèse : oui, sans call technique, sans
+    repérages ni feuille de service.*
+14. Capsule réseaux, interview : mêmes étapes en plus court, ou un parcours à part ? Lesquelles
+    sauter ? *Hypothèse : même parcours, et le chef de projet décoche ce qui ne sert pas.*
+
+### C. Préproduction
+
+15. **Proposition du réalisateur** : c'est un document qu'il dépose (PDF du traitement), des
+    champs à remplir, ou les deux ? *Hypothèse : il dépose son document et PO en tire les champs.*
+16. Qui **valide** cette proposition ? Peut-elle faire plusieurs allers-retours (V1, V2) avant
+    accord ? *Hypothèse : le chef de projet et le DA, plusieurs versions possibles.*
+17. **Call technique** : toujours une vraie réunion (visio ou présentiel) ? Un seul ou plusieurs ?
+    Qui l'organise : le chargé de production ou le chef de projet ?
+18. On peut l'**enregistrer dans PDS** comme les autres calls, pour que PO en tire les besoins ?
+    (S'il est en présentiel à six : un téléphone posé sur la table suffit ?)
+19. Les **besoins de chaque métier** (liste caméra et lumière du chef op, besoins son…) arrivent
+    sous quelle forme : un fichier (Excel, PDF), un message, ou dits pendant le call ?
+20. **Repérages** : qui cherche les lieux ? Combien de lieux comparés en général ? Faut-il les
+    trois avis (réalisateur, chef op, production) avant de choisir ? Qui tranche ?
+21. **Autorisations de tournage** (mairie, propriétaire, lieu public) : PDS doit-il les suivre
+    comme des documents à obtenir ? *Hypothèse : oui, un contrôle avant tournage existe déjà.*
+22. **Devis** : qui demande les devis, qui les valide avant de réserver ? « Confirmer après les
+    validations nécessaires » : lesquelles exactement ?
+23. Faut-il **comparer plusieurs devis** pour un même besoin dans PDS, ou on garde seulement le
+    retenu ?
+24. **Budget** : l'enveloppe vient de la Stratégie. En cas de dépassement, qui arbitre ? On
+    bloque ou on signale seulement ? *Hypothèse : on signale, le chef de projet arbitre.*
+25. **Planning** : à quel niveau de détail (par jour, par séquence, à l'heure) ? Un tournage peut
+    durer plusieurs jours, sur plusieurs lieux ? *Hypothèse : oui, plusieurs jours possibles.*
+26. On a mis un **rétroplanning par défaut** (brief J-21, lieu J-14, équipe J-10, location J-7,
+    feuille de service J-2, sauvegarde J+1 ; validation du montage L-3, exports L-1). Ces délais
+    sont-ils réalistes ?
+27. **Feuille de service** : envoyée comment (PDF par mail, lien, WhatsApp) ? À qui ? Combien de
+    jours avant ? Elle peut changer après l'envoi ?
+28. **Contrôle avant tournage** : la liste est-elle bonne (lieu, équipe, matériel, planning,
+    budget, feuille de service, autorisations) ? Il manque quoi ? Qui dit « on est prêts » ? Avec
+    un manque non bloquant, on tourne quand même ?
+
+### D. Tournage
+
+29. Le jour J, **quelqu'un utilise PDS sur place** (téléphone) pour noter les imprévus et ce qui
+    est tourné, ou tout se renseigne après coup ? Qui ?
+30. **Rushes** : où sont-ils stockés (disques, Drive, Frame.io, WeTransfer…) ? Quel volume ?
+    *Hypothèse : PDS garde un lien et la déclaration « sauvegardé », pas les fichiers eux-mêmes.*
+31. Faut-il une **double sauvegarde** déclarée (règle courante en tournage) ?
+32. **Matériel loué** : qui le récupère et le rend ? PDS doit-il suivre le retour, la caution, la
+    casse ?
+
+### E. Postproduction et livraison
+
+33. Les **versions du montage** : le monteur les envoie avec quel outil aujourd'hui (Frame.io,
+    Vimeo, Drive, WeTransfer) ? PDS remplace cet outil, ou garde le lien et les retours ?
+34. **Qui fait des retours** sur une version (chef de projet, DA, réalisateur, artiste) ? Les
+    retours de l'artiste passent-ils par le chef de projet ? Qui a le dernier mot ?
+35. Le **réalisateur** valide-t-il le montage avant que le label le voie ?
+36. **Étalonnage, mixage son, sous-titres, habillage** : ce sont des personnes et des étapes
+    séparées, chacune avec ses versions, ou c'est fait dans le montage ?
+37. **Formats de livraison** : qui les fixe ? Ce sont ceux des Activations (formats réseaux) ?
+38. « Transmettre aux personnes chargées de la **diffusion** » : c'est l'équipe Activations dans
+    PDS, ou aussi des externes (distributeur, chaîne YouTube de l'artiste, média) ?
+39. **Clôturer une production** exige quoi : matériel rendu, factures reçues, techniciens payés,
+    rushes archivés ? Les factures et les paiements des techniciens sont-ils dans le périmètre ?
+    *Hypothèse : non, hors V1.*
+
+### F. Contrats et droits liés au tournage
+
+40. **Contrats des techniciens**, droit à l'image de l'artiste et des figurants, autorisation du
+    lieu : gérés dans la Production ou dans le Juridique ? *Hypothèse : le Juridique, la
+    Production vérifie qu'ils sont signés avant le tournage.*
+
+### G. Ce que PO fait tout seul
+
+41. « PO **sollicite** les bonnes personnes » : par quel canal ? Aujourd'hui PDS n'envoie aucun
+    e-mail (le chef de projet copie le lien). On garde ça, ou PDS doit envoyer lui-même ?
+42. PO doit-il **relancer** un intervenant qui n'a pas répondu ? Au bout de combien de temps ?
+43. « PO **comprend** quand c'est terminé » : il peut le déduire d'un dépôt (le monteur dépose =
+    version prête) ou il faut toujours une confirmation humaine ? *Hypothèse : un dépôt fait
+    avancer, une décision (valider, réserver, déclarer prêt) reste humaine.*
+
+### H. Pour la suite
+
+44. Les **tickets détaillés** de ton test : pour quand ? On attend, ou on commence par
+    « organisation interne/externe + prochaine action à chaque étape » ?
+45. Les **trois écrans** qui t'ont le plus gêné pendant ton test ?
+46. Un **vrai tournage** récent ou à venir qu'on pourrait suivre comme exemple (mode, taille de
+    l'équipe, nombre de jours, budget) ?
+47. Une production PDS **type** : combien de personnes, de jours de tournage, quel budget ?
+    Plutôt clips ou plutôt capsules ?
