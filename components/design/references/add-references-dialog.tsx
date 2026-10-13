@@ -7,6 +7,10 @@ import { toast } from "sonner";
 import { FormMessage } from "@/components/auth/form-message";
 import { ChosenFiles } from "@/components/design/references/chosen-files";
 import {
+  ReferenceKindFields,
+  type ChosenType,
+} from "@/components/design/references/reference-kind-fields";
+import {
   TargetPicker,
   type TargetOption,
 } from "@/components/design/references/target-picker";
@@ -18,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addLinkReference } from "@/lib/design/actions/reference-links";
+import type { DeliverableFormat } from "@/lib/design/formats";
 import { REFERENCE_ACCEPT } from "@/lib/design/reference-rules";
 import { uploadReferenceFile } from "@/lib/design/upload-reference";
 import { fr } from "@/lib/i18n/fr";
@@ -28,6 +33,8 @@ type Props = {
   options: TargetOption[];
   // Pre-chosen targets (the section it is opened from).
   initialTargets?: string[];
+  // The deliverable it is added from: the examples fit its format.
+  format?: DeliverableFormat;
 };
 
 /** « Déposer des références »: files or a link, for any number of targets. */
@@ -59,10 +66,13 @@ function AddReferencesForm({
   projectId,
   options,
   initialTargets = [],
+  format,
   onDone,
 }: Props & { onDone: () => void }) {
   const t = fr.conceptionRefs.add;
+  const k = fr.conceptionKinds;
   const [kind, setKind] = useState<"file" | "link">("file");
+  const [type, setType] = useState<ChosenType>("reference");
   const [files, setFiles] = useState<File[]>([]);
   const [targets, setTargets] = useState(initialTargets);
   const [busy, setBusy] = useState(false);
@@ -72,6 +82,7 @@ function AddReferencesForm({
     const title = String(form.get("title") ?? "");
     const note = String(form.get("note") ?? "");
     const url = String(form.get("url") ?? "").trim();
+    const usage = String(form.get("usage") ?? "") || null;
     if (kind === "file" ? files.length === 0 : !url)
       return setErrors([t.nothing]);
     setBusy(true);
@@ -85,6 +96,8 @@ function AddReferencesForm({
         title,
         note,
         targets,
+        type,
+        usage: usage as Parameters<typeof addLinkReference>[0]["usage"],
       });
       if (!result.ok) failed.push(result.error);
       else if (result.deduped) toast.info(t.deduped(url));
@@ -100,6 +113,8 @@ function AddReferencesForm({
           title: files.length === 1 ? title : "",
           note,
           targets,
+          type,
+          usage,
         });
         if (!result.ok) failed.push(result.error);
         else if (result.deduped) toast.info(t.deduped(file.name));
@@ -107,7 +122,18 @@ function AddReferencesForm({
       }
     }
     setBusy(false);
-    if (added > 0) toast.success(t.added(added));
+    if (added > 0)
+      // MKT-C2-09: where it went, said at once.
+      toast.success(t.added(added), {
+        description: targets.length
+          ? k.attached(
+              options
+                .filter((o) => targets.includes(o.key))
+                .map((o) => o.label)
+                .join(", "),
+            )
+          : k.unattached,
+      });
     if (failed.length) return setErrors(failed);
     onDone();
   }
@@ -193,6 +219,13 @@ function AddReferencesForm({
           disabled={busy}
         />
       </div>
+      <ReferenceKindFields
+        type={type}
+        onTypeChange={setType}
+        usage={null}
+        format={format}
+        disabled={busy}
+      />
       <TargetPicker
         legend={t.targetsLegend}
         hint={t.targetsHint}
@@ -202,6 +235,7 @@ function AddReferencesForm({
         disabled={busy}
       />
 
+      <p className="text-sm text-muted-foreground">{k.noReview}</p>
       {errors.map((error) => (
         <FormMessage key={error} kind="error">
           {error}

@@ -4,6 +4,11 @@ import { useState } from "react";
 
 import type { EditableReference } from "@/components/design/references/reference-actions";
 import {
+  ReferenceKindFields,
+  type ChosenType,
+} from "@/components/design/references/reference-kind-fields";
+import { OptionSelect } from "@/components/projects/option-select";
+import {
   TargetPicker,
   type TargetOption,
 } from "@/components/design/references/target-picker";
@@ -25,6 +30,8 @@ type DialogProps = {
   projectId: string;
   reference: EditableReference;
 };
+
+type Moodboard = { id: string; label: string };
 
 function Actions({
   pending,
@@ -114,15 +121,24 @@ function AttachForm({
   );
 }
 
-/** « Modifier »: the reference's title and what to keep from it. */
+/**
+ * « Modifier »: the reference's title and what to keep from it, what it is
+ * and its rights of use, and the moodboard it sits in (MKT-C2-09).
+ */
 export function EditReferenceDialog({
   open,
   onClose,
   projectId,
   reference,
-}: DialogProps) {
+  moodboards = [],
+}: DialogProps & { moodboards?: Moodboard[] }) {
   const t = fr.conceptionRefs;
+  const k = fr.conceptionKinds;
   const { pending, run } = useDesignAction();
+  const [type, setType] = useState<ChosenType>(
+    reference.type === "moodboard" ? "moodboard" : "reference",
+  );
+  const boards = moodboards.filter((m) => m.id !== reference.id);
   return (
     <FormDialog
       open={open}
@@ -138,12 +154,13 @@ export function EditReferenceDialog({
           const values = new FormData(e.currentTarget);
           run(
             () =>
-              updateReference(
-                projectId,
-                reference.id,
-                String(values.get("title") ?? ""),
-                String(values.get("note") ?? ""),
-              ),
+              updateReference(projectId, reference.id, {
+                title: String(values.get("title") ?? ""),
+                note: String(values.get("note") ?? ""),
+                type,
+                usage: String(values.get("usage") ?? "") || null,
+                moodboardId: String(values.get("moodboard") ?? "") || null,
+              }),
             { success: t.edit.saved, onSuccess: onClose },
           );
         }}
@@ -169,6 +186,22 @@ export function EditReferenceDialog({
             placeholder={t.add.notePlaceholder}
           />
         </div>
+        <ReferenceKindFields
+          type={type}
+          onTypeChange={setType}
+          usage={reference.usage}
+          disabled={pending}
+        />
+        {type === "reference" && boards.length > 0 && (
+          <OptionSelect
+            id="reference-moodboard"
+            name="moodboard"
+            label={k.moodboardLabel}
+            placeholder={k.noMoodboard}
+            items={Object.fromEntries(boards.map((m) => [m.id, m.label]))}
+            defaultValue={reference.moodboardId}
+          />
+        )}
         <Actions
           pending={pending}
           submit={t.edit.submit}

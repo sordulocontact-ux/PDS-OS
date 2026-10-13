@@ -36,14 +36,20 @@ export function ReferenceCard({
   currentKey,
   targets,
   canWrite,
+  moodboards = [],
 }: {
   projectId: string;
   reference: ReferenceView;
   currentKey: string | null;
   targets: TargetOption[];
   canWrite: boolean;
+  // The project's moodboards and how many references each holds.
+  moodboards?: Array<{ id: string; label: string; count: number }>;
 }) {
   const t = fr.conceptionRefs;
+  const k = fr.conceptionKinds;
+  const board = moodboards.find((m) => m.id === r.moodboardId);
+  const held = moodboards.find((m) => m.id === r.id)?.count ?? 0;
   const Icon = ICONS[r.media];
   const labelOf = new Map(targets.map((o) => [o.key, o.label]));
   const kind = (
@@ -82,13 +88,22 @@ export function ReferenceCard({
                 {r.name || t.unavailable}
               </span>
             )}
-            <StatusBadge
-              tone={referenceStatusTone[r.status]}
-              size="sm"
-              className="w-fit"
-            >
-              {t.statuses[r.status]}
-            </StatusBadge>
+            <span className="flex flex-wrap gap-1.5">
+              <StatusBadge
+                tone={r.type === "to_qualify" ? "warning" : "neutral"}
+                size="sm"
+                className="w-fit"
+              >
+                {k.types[r.type]}
+              </StatusBadge>
+              <StatusBadge
+                tone={referenceStatusTone[r.status]}
+                size="sm"
+                className="w-fit"
+              >
+                {t.statuses[r.status]}
+              </StatusBadge>
+            </span>
           </div>
           {canWrite && (
             <ReferenceActions
@@ -99,14 +114,29 @@ export function ReferenceCard({
                 title: r.title,
                 note: r.note,
                 targets: r.links.map(targetKeyOf),
+                type: r.type,
+                usage: r.usage,
+                moodboardId: r.moodboardId,
               }}
               options={targets}
+              moodboards={moodboards}
             />
           )}
         </div>
         {r.note && (
           <p className="text-caption break-words text-muted-foreground">
             {r.note}
+          </p>
+        )}
+        {(r.usage || board || r.type === "moodboard") && (
+          <p className="text-caption text-muted-foreground">
+            {[
+              r.usage ? k.usages[r.usage] : null,
+              board ? k.inMoodboard(board.label) : null,
+              r.type === "moodboard" ? k.moodboardCount(held) : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
         )}
         {others.length > 0 && (

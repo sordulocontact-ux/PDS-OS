@@ -37,6 +37,9 @@ export async function uploadReferenceFile(input: {
   title: string;
   note: string;
   targets: string[];
+  // MKT-C2-09: what it is, and its rights of use.
+  type: "reference" | "moodboard";
+  usage: string | null;
 }): Promise<ReferenceResult> {
   const t = fr.conceptionRefs.add;
   const { file } = input;
@@ -74,6 +77,9 @@ export async function uploadReferenceFile(input: {
     title: input.title,
     note: input.note,
     targets: input.targets,
+    type: input.type,
+    usage: input.usage as
+      "inspiration" | "free" | "licensed" | "to_license" | "owned" | null,
   });
   if (!result.ok) await bucket.remove([path]);
   return result;

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ConceptionTabs } from "@/components/design/conception-tabs";
 import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
 import { ResponsiblePicker } from "@/components/design/people/responsible-picker";
+import { AddReferencesDialog } from "@/components/design/references/add-references-dialog";
 import { ConsolidationPanel } from "@/components/design/work/consolidation-panel";
 import { ImportBriefDialog } from "@/components/design/work/import-brief-dialog";
 import { IntentionQuestions } from "@/components/design/work/intention-questions";
@@ -11,7 +12,6 @@ import {
   TargetProposals,
   UnassignedProposals,
 } from "@/components/design/work/proposals";
-import { ReferenceDialog } from "@/components/design/work/reference-dialog";
 import { ReferencesList } from "@/components/design/work/references-list";
 import { TargetVersions } from "@/components/design/work/target-versions";
 import {
@@ -35,6 +35,7 @@ import {
   isDesignTopic,
 } from "@/lib/design/intentions";
 import { loadDesign } from "@/lib/design/queries";
+import { DIRECTION_TARGET } from "@/lib/design/reference-rules";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
@@ -129,9 +130,20 @@ export default async function DesignWorkPage({
           </p>
           {data.canWrite && (
             <div className="flex flex-wrap gap-2">
-              <ReferenceDialog
+              {/* MKT-C2-09: one way to add references, the same as on the
+                  References page, set on the target being worked on. */}
+              <AddReferencesDialog
+                organizationId={data.organizationId}
                 projectId={projectId}
-                deliverableId={deliverableId}
+                options={[
+                  { key: DIRECTION_TARGET, label: t.targets.direction },
+                  ...data.deliverables.map((d) => ({
+                    key: d.id,
+                    label: d.title,
+                  })),
+                ]}
+                initialTargets={[deliverableId ?? DIRECTION_TARGET]}
+                format={deliverable?.format}
               />
               <ImportBriefDialog projectId={projectId} />
             </div>

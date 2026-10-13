@@ -3945,6 +3945,31 @@ quatre comptes : DG, chef de projet, DA responsable, directeur créatif hors pro
 - **Décisions prises ici** : pas de compte « artiste » dans l'app (l'artiste reste au Réseau) ; la
   gouvernance d'exception est posée par un valideur (DG), pas par le chef de projet.
 
+### Retours Marketing du 12/10/2026, lot C8 (MKT-C2-09, références et propositions)
+
+Migration `…20261013100501_reference_types`, tests `supabase/tests/reference-types.test.sql` (5).
+
+- **Taxonomie** (`lib/design/reference-kinds.ts`, `fr.conceptionKinds`) : une **référence** est une
+  source d'inspiration, un **moodboard** une sélection organisée avec son intention
+  (`design_references.type`), une **proposition créative** concrétise un concept (les
+  `design_versions` de la Conception, « Soumettre une proposition créative »), une **version de
+  travail** matérialise le livrable en cours (Production, « Déposer une version de travail »). Les
+  éléments ajoutés avant ce classement sont **« À qualifier »** (défaut de la colonne). Guide replié
+  « Ce que l'on range ici » sur la page Références.
+- **Droits et usage** (`design_references.usage`, liste fermée) et **moodboard** d'appartenance
+  (`moodboard_id`, même projet, jamais un moodboard dans un autre, trigger) ; saisis à l'ajout et à
+  la modification (`ReferenceKindFields`), montrés sur chaque carte avec le type.
+- **Un seul dialogue d'ajout** (fichiers ou lien, `AddReferencesDialog`) sur la page Références et
+  dans les Intentions (pré-réglé sur la cible ouverte, exemples selon le format du livrable) ;
+  l'ancien `ReferenceDialog` (liens seuls) et `addDesignReference` sont supprimés. Après l'ajout,
+  le toast dit **à quoi l'élément est rattaché** ; le dialogue dit qu'une référence n'est relue par
+  personne seule (elle entre dans la direction validée). Le dépôt d'une proposition dit qui la relit
+  (le chef de projet) et la décision attendue.
+- La recherche de semblables garde sa provenance (source et recherche, auteur, licence) et n'ajoute
+  rien sans clic (déjà en place) ; une image gardée est une « Référence ». **Décision prise ici** : la
+  référence d'origine d'une recherche n'est pas enregistrée (la recherche part d'une cible ou de
+  toutes les images, pas d'une seule référence).
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

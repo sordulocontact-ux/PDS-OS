@@ -125,8 +125,10 @@ export const productionPost = {
     description:
       "V1, V2, V3 et suivantes, sans limite : une nouvelle version ne remplace ni les précédentes, ni leurs retours, ni leurs décisions.",
     none: "Aucune version déposée.",
-    add: "Déposer une version",
-    addTitle: "Déposer une version",
+    // MKT-C2-09: Production holds work versions; a creative proposal is
+    // submitted in the Conception.
+    add: "Déposer une version de travail",
+    addTitle: "Déposer une version de travail",
     editTitle: (name: string) => `Modifier ${name}`,
     formDescription:
       "Le prestataire n'a pas de compte : vous déposez pour lui, il reste l'auteur de la version.",

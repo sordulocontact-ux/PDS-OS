@@ -18,6 +18,12 @@ import {
   type IntentionTarget,
 } from "@/lib/design/intentions";
 import { toIntentionChoices } from "@/lib/design/intention-choices";
+import {
+  referenceTypeOf,
+  referenceUsageOf,
+  type ReferenceType,
+  type ReferenceUsage,
+} from "@/lib/design/reference-kinds";
 import { todayInParis } from "@/lib/insights/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
 import { referenceDate } from "@/lib/strategy/calendar";
@@ -82,6 +88,11 @@ export type ConceptionSource = {
 
 export type ConceptionReference = {
   id: string;
+  // MKT-C2-09: reference, moodboard, or gathered before the rule.
+  type: ReferenceType;
+  usage: ReferenceUsage | null;
+  // The moodboard it sits in, if any.
+  moodboardId: string | null;
   // link = an https address; file = a file in the design-references bucket.
   kind: "link" | "file";
   title: string | null;
@@ -188,7 +199,7 @@ export async function loadConception(
     supabase
       .from("design_references")
       .select(
-        "id, kind, title, url, path, file_name, mime, bytes, note, created_by, created_at, design_reference_links(target, design_deliverable_id)",
+        "id, kind, title, url, path, file_name, mime, bytes, note, type, usage, moodboard_id, created_by, created_at, design_reference_links(target, design_deliverable_id)",
       )
       .eq("project_id", projectId)
       .order("created_at"),
@@ -386,6 +397,9 @@ export async function loadConception(
     references: (referencesRes.data ?? []).map((r) => ({
       id: r.id,
       kind: r.kind === "file" ? "file" : "link",
+      type: referenceTypeOf(r.type),
+      usage: referenceUsageOf(r.usage),
+      moodboardId: r.moodboard_id,
       title: r.title,
       url: r.url,
       path: r.path,

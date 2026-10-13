@@ -3673,13 +3673,16 @@ export type Database = {
           identity_version_id: string | null
           kind: string
           mime: string | null
+          moodboard_id: string | null
           note: string | null
           organization_id: string
           path: string | null
           project_id: string
           sha256: string | null
           title: string | null
+          type: string
           url: string | null
+          usage: string | null
         }
         Insert: {
           bytes?: number | null
@@ -3690,13 +3693,16 @@ export type Database = {
           identity_version_id?: string | null
           kind?: string
           mime?: string | null
+          moodboard_id?: string | null
           note?: string | null
           organization_id: string
           path?: string | null
           project_id: string
           sha256?: string | null
           title?: string | null
+          type?: string
           url?: string | null
+          usage?: string | null
         }
         Update: {
           bytes?: number | null
@@ -3707,13 +3713,16 @@ export type Database = {
           identity_version_id?: string | null
           kind?: string
           mime?: string | null
+          moodboard_id?: string | null
           note?: string | null
           organization_id?: string
           path?: string | null
           project_id?: string
           sha256?: string | null
           title?: string | null
+          type?: string
           url?: string | null
+          usage?: string | null
         }
         Relationships: [
           {

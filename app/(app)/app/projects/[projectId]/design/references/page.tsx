@@ -4,6 +4,7 @@ import { ConceptionTabs } from "@/components/design/conception-tabs";
 import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
 import { AddReferencesDialog } from "@/components/design/references/add-references-dialog";
 import { ReferenceSection } from "@/components/design/references/reference-section";
+import { ReferenceTypesGuide } from "@/components/design/references/reference-types-guide";
 import { SimilarReferencesDialog } from "@/components/design/references/similar-references-dialog";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { requireApproved } from "@/lib/auth/dal";
@@ -61,10 +62,19 @@ export default async function DesignReferencesPage({
   const serving = (key: string) =>
     references.filter((r) => r.links.some((l) => targetKeyOf(l) === key));
   const unattached = references.filter((r) => r.links.length === 0);
+  // MKT-C2-09: the moodboards, and how many references each holds.
+  const moodboards = references
+    .filter((r) => r.type === "moodboard")
+    .map((m) => ({
+      id: m.id,
+      label: m.name,
+      count: references.filter((r) => r.moodboardId === m.id).length,
+    }));
   const section = {
     projectId,
     targets,
     canWrite: data.canWrite,
+    moodboards,
   };
 
   return (
@@ -75,6 +85,7 @@ export default async function DesignReferencesPage({
         <p className="max-w-prose text-body-md text-muted-foreground">
           {data.canWrite ? t.description : t.readOnly}
         </p>
+        <ReferenceTypesGuide />
         {data.canWrite && (
           <div className="flex flex-wrap gap-2">
             <AddReferencesDialog

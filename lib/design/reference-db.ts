@@ -18,6 +18,15 @@ export const targets = z
   .array(z.union([z.literal(DIRECTION_TARGET), z.uuid()]))
   .max(60)
   .transform((list) => [...new Set(list)]);
+// MKT-C2-09: what an element is, and its rights of use.
+export const referenceType = z
+  .enum(["reference", "moodboard"])
+  .default("reference");
+export const referenceUsage = z
+  .enum(["inspiration", "free", "licensed", "to_license", "owned"])
+  .nullish()
+  .transform((v) => v ?? null);
+
 export const text = (max: number) =>
   z
     .string()

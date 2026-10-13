@@ -70,11 +70,13 @@ export const design = {
     cancel: "Annuler",
   },
   deposit: {
-    open: "Déposer une version",
-    title: (target: string) => `Nouvelle version · ${target}`,
+    // MKT-C2-09: in the Conception, a creative proposal (a work version is
+    // deposited in Production).
+    open: "Soumettre une proposition créative",
+    title: (target: string) => `Proposition créative · ${target}`,
     directionTarget: "Direction créative",
     description:
-      "La version part en relecture chez le chef de projet, qui l'approuve ou demande des retouches.",
+      "Une proposition concrétise un concept : rough, maquette, storyboard. Relue par le chef de projet, qui l'approuve ou demande des retouches. Une simple inspiration va dans les Références.",
     file: "Fichier",
     link: "Lien",
     fileLabel: "Fichier",
@@ -85,9 +87,10 @@ export const design = {
     urlPlaceholder: "https://…",
     urlHint:
       "Drive, Frame.io, WeTransfer… un lien https vers la version à relire.",
-    noteLabel: "Note pour la relecture",
-    notePlaceholder: "Ce qui a changé, ce qu'il faut regarder.",
-    submit: "Déposer",
+    noteLabel: "Ce que montre la proposition, ce que vous attendez",
+    notePlaceholder:
+      "Le concept, ce qui a changé, la décision attendue du relecteur.",
+    submit: "Soumettre la proposition",
     submitting: "Envoi…",
     cancel: "Annuler",
   },

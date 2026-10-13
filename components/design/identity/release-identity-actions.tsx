@@ -105,6 +105,8 @@ export function AddIdentityRefButton({
             note: identityRef.note ?? "",
             targets: [DIRECTION_TARGET],
             identityVersionId: versionId,
+            // MKT-C2-09: a moodboard of the identity stays a moodboard.
+            type: identityRef.kind === "moodboard" ? "moodboard" : "reference",
           });
           if (result.ok) toast.success(t.added);
           else toast.error(result.error);

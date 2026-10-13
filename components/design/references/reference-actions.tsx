@@ -21,6 +21,10 @@ export type EditableReference = {
   note: string | null;
   // Target keys it serves (« direction » or a deliverable id).
   targets: string[];
+  // MKT-C2-09: what it is, its rights of use, its moodboard.
+  type: "reference" | "moodboard" | "to_qualify";
+  usage: string | null;
+  moodboardId: string | null;
 };
 
 /** « ⋯ » of a reference: attach it to targets, edit it, take it back. */
@@ -28,10 +32,13 @@ export function ReferenceActions({
   projectId,
   reference,
   options,
+  moodboards = [],
 }: {
   projectId: string;
   reference: EditableReference;
   options: TargetOption[];
+  // The project's moodboards, to put the reference in one.
+  moodboards?: Array<{ id: string; label: string }>;
 }) {
   const t = fr.conceptionRefs;
   const [open, setOpen] = useState<"attach" | "edit" | "remove" | null>(null);
@@ -79,6 +86,7 @@ export function ReferenceActions({
         onClose={close}
         projectId={projectId}
         reference={reference}
+        moodboards={moodboards}
       />
       <ConfirmDialog
         open={open === "remove"}

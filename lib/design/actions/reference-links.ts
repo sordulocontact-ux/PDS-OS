@@ -10,12 +10,14 @@ import {
   type DesignResult,
 } from "@/lib/design/actions/shared";
 import {
+  type ReferenceResult,
   addLinks,
   existingReference,
   invalid,
+  referenceType,
+  referenceUsage,
   targets,
   text,
-  type ReferenceResult,
 } from "@/lib/design/reference-db";
 import {
   DIRECTION_TARGET,
@@ -40,6 +42,8 @@ const linkSchema = z.object({
   // Copied from the artist's identity (MKT-C2-04): the version it comes
   // from, checked against the project's artist by the database.
   identityVersionId: z.uuid().nullish(),
+  type: referenceType,
+  usage: referenceUsage,
 });
 
 /** A link reference; an address already gathered only gains links. */
@@ -65,6 +69,8 @@ export async function addLinkReference(
         title: v.title,
         note: v.note,
         identity_version_id: v.identityVersionId ?? null,
+        type: v.type,
+        usage: v.usage,
       })
       .select("id")
       .single();
@@ -128,8 +134,13 @@ export async function setReferenceTargets(
 export async function updateReference(
   projectId: string,
   referenceId: string,
-  title: string,
-  note: string,
+  values: {
+    title: string;
+    note: string;
+    type: "reference" | "moodboard";
+    usage: string | null;
+    moodboardId: string | null;
+  },
 ): Promise<DesignResult> {
   const parsed = z
     .object({
@@ -137,15 +148,24 @@ export async function updateReference(
       referenceId: z.uuid(),
       title: text(200),
       note: text(500),
+      type: referenceType,
+      usage: referenceUsage,
+      moodboardId: z.uuid().nullable(),
     })
-    .safeParse({ projectId, referenceId, title, note });
+    .safeParse({ projectId, referenceId, ...values });
   if (!parsed.success) return invalid();
   await requireApproved();
   const v = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("design_references")
-    .update({ title: v.title, note: v.note })
+    .update({
+      title: v.title,
+      note: v.note,
+      type: v.type,
+      usage: v.usage,
+      moodboard_id: v.type === "moodboard" ? null : v.moodboardId,
+    })
     .eq("id", v.referenceId)
     .eq("project_id", v.projectId)
     .select("id");

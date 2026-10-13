@@ -5,12 +5,14 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { designError, refreshConception } from "@/lib/design/actions/shared";
 import {
+  type ReferenceResult,
   addLinks,
   existingReference,
   invalid,
+  referenceType,
+  referenceUsage,
   targets,
   text,
-  type ReferenceResult,
 } from "@/lib/design/reference-db";
 import {
   MAX_REFERENCE_BYTES,
@@ -32,6 +34,8 @@ const fileSchema = z.object({
   title: text(200),
   note: text(500),
   targets,
+  type: referenceType,
+  usage: referenceUsage,
 });
 
 /** Same file already in the project? Then only its links are added. */
@@ -95,6 +99,8 @@ export async function recordReferenceFile(
       sha256: v.sha256,
       title: v.title,
       note: v.note,
+      type: v.type,
+      usage: v.usage,
     })
     .select("id")
     .single();

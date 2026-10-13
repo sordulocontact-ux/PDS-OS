@@ -18,6 +18,7 @@ export function ReferenceSection({
   currentKey,
   targets,
   canWrite,
+  moodboards = [],
 }: {
   id: string;
   title: string;
@@ -28,6 +29,7 @@ export function ReferenceSection({
   currentKey: string | null;
   targets: TargetOption[];
   canWrite: boolean;
+  moodboards?: Array<{ id: string; label: string; count: number }>;
 }) {
   return (
     <PageSection id={id} title={title} description={description}>
@@ -44,6 +46,7 @@ export function ReferenceSection({
                   currentKey={currentKey}
                   targets={targets}
                   canWrite={canWrite}
+                  moodboards={moodboards}
                 />
               </div>
             </li>
