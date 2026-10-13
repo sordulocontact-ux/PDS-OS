@@ -3734,6 +3734,7 @@ export type Database = {
           identity_deviation_at: string | null
           identity_deviation_by: string | null
           identity_version_id: string | null
+          no_exchange_reason: string | null
           organization_id: string
           project_id: string
           started_at: string
@@ -3745,6 +3746,7 @@ export type Database = {
           identity_deviation_at?: string | null
           identity_deviation_by?: string | null
           identity_version_id?: string | null
+          no_exchange_reason?: string | null
           organization_id: string
           project_id: string
           started_at?: string
@@ -3756,6 +3758,7 @@ export type Database = {
           identity_deviation_at?: string | null
           identity_deviation_by?: string | null
           identity_version_id?: string | null
+          no_exchange_reason?: string | null
           organization_id?: string
           project_id?: string
           started_at?: string
@@ -14225,6 +14228,13 @@ export type Database = {
       }
     }
     Functions: {
+      start_design_without_exchange: {
+        Args: {
+          p_project_id: string
+          p_reason: string
+        }
+        Returns: undefined
+      }
       project_artist_id: {
         Args: {
           p_project_id: string

@@ -4,31 +4,35 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
-import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
 import { designError, refreshConception } from "@/lib/design/actions/shared";
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 /**
- * « Commencer directement »: starts the Conception (its stage, if not yet)
- * and opens the direct work. Owner only, once the Stratégie is validated;
- * the database checks both (start_design).
+ * « Commencer sans échange » (MKT-C2-05): starts the Conception without a
+ * creative exchange, with the reason (start_design_without_exchange), and
+ * opens the direct work.
  */
-// Used with useActionState: the previous state it passes is not needed.
-export async function startConception(projectId: string): Promise<FormState> {
-  if (!z.uuid().safeParse(projectId).success)
-    return { status: "error", formError: fr.conception.errors.generic };
+export async function startConceptionWithoutExchange(
+  projectId: string,
+  reason: string,
+): Promise<WriteResult> {
+  const p = z
+    .object({ projectId: z.uuid(), reason: z.string().trim().min(1).max(1000) })
+    .safeParse({ projectId, reason });
+  if (!p.success) return { ok: false, error: fr.conception.errors.generic };
   await requireApproved();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("start_design", {
-    p_project_id: projectId,
+  const { error } = await supabase.rpc("start_design_without_exchange", {
+    p_project_id: p.data.projectId,
+    p_reason: p.data.reason,
   });
   if (error) {
-    console.error("startConception:", error.code, error.message);
-    return { status: "error", formError: designError(error) };
+    console.error("startConceptionWithoutExchange:", error.code, error.message);
+    return { ok: false, error: designError(error) };
   }
-  refreshConception(projectId);
-  // The layout's chevrons and dots follow the stage.
-  redirect(routes.projectDesignWork(projectId));
+  refreshConception(p.data.projectId);
+  redirect(routes.projectDesignWork(p.data.projectId));
 }

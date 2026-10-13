@@ -3836,6 +3836,33 @@ Migration `…20261013100101_artist_identity`, tests `supabase/tests/artist-iden
   dérogation dite même absente, `lib/design/brief-identity.ts`) ; absente quand il n'y a ni
   version ni dérogation, pour qu'un brief sans identité garde le même contenu.
 
+### Retours Marketing du 12/10/2026, lot C4 (MKT-C2-05, échanges créatifs)
+
+Migration `…20261013100201_conception_exchanges`, tests `supabase/tests/conception-exchanges.test.sql` (7).
+
+- **Échanges sur l'accueil** (`ConceptionExchanges`, `lib/design/exchanges.ts`) : chaque call de la
+  Conception (`design_calls`), à venir ou passé, sa **portée** (toute la sortie, ou les livrables
+  nommés), et une fois son compte rendu traité : décisions, questions ouvertes, actions
+  (`report_items` `decided` / `open` / `next_action`), **à part** les idées de PO à confirmer et
+  celles confirmées (intentions de la source du call). Rien n'est confirmé sans une personne.
+- **Rattacher un call existant** (`attachDesignCall`, chef de projet, RLS de `design_calls`) : un
+  call du projet devient un échange, pour la sortie ou des livrables ; son compte rendu déjà traité
+  est lu aussitôt (`fillDesignFromCall`). « Préparer l'échange créatif » reste à côté.
+- **Ordre du jour** préparé par le code (`designCallContext`, même lecture côté panneau et côté
+  action) : en plus des intentions manquantes, la question de l'identité (« la sortie reste-t-elle
+  dans l'identité Vn ? ») et les **points ouverts** du projet (5 au plus, `open_points`).
+- **Sans échange, avec justification** : « Commencer sans échange » demande la raison
+  (`start_design_without_exchange`, chef de projet), gardée dans
+  `design_workspaces.no_exchange_reason` et montrée sur l'étape passée du parcours.
+- **Tâches de suivi** : une action de compte rendu devient **une tâche au plus**
+  (`tasks_source_report_item_key`, message `task_exists`) ; celle d'un échange qui porte sur un seul
+  livrable est rattachée à ce livrable (`CallOutcomes deliverableId`).
+- **Du brief au call** : dans le Brief créatif, une source de type call ouvre la page du call
+  (`CreativeBriefView callLinks`, par titre de la source ; le contenu enregistré ne change pas).
+- Décision prise ici : « idées » = propositions de PO tirées du call, « décisions » = ce que le
+  compte rendu dit décidé et ce qu'une personne a confirmé ; « désaccords » sont des questions
+  ouvertes (pas de catégorie à part dans le compte rendu).
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

@@ -128,7 +128,16 @@ export default async function DesignBriefPage({
         </ToneCallout>
       ) : null}
 
-      <CreativeBriefView content={shown ? shown.content : live} />
+      <CreativeBriefView
+        content={shown ? shown.content : live}
+        callLinks={Object.fromEntries(
+          data.sources.flatMap((s) =>
+            s.kind === "call" && s.callId
+              ? [[s.title, routes.projectCall(projectId, s.callId)]]
+              : [],
+          ),
+        )}
+      />
     </div>
   );
 }

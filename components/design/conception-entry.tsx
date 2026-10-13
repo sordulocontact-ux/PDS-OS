@@ -31,6 +31,7 @@ export function ConceptionEntry({
   sheets,
   callSheet,
   journey,
+  exchanges,
   identity,
   direction,
 }: {
@@ -45,6 +46,8 @@ export function ConceptionEntry({
   callSheet: DesignCallSheetData | null;
   // Once started: the journey, then the release's direction.
   journey?: React.ReactNode;
+  // The creative exchanges, to come and past (MKT-C2-05).
+  exchanges?: React.ReactNode;
   // The artist's identity, read-only (MKT-C2-04).
   identity?: React.ReactNode;
   direction?: React.ReactNode;
@@ -132,6 +135,7 @@ export function ConceptionEntry({
       )}
 
       {journey}
+      {exchanges}
       {identity}
       {direction}
 

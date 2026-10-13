@@ -35,7 +35,10 @@ export const conceptionJourney = {
       n === 1
         ? "1 compte rendu utilisé comme source."
         : `${n} comptes rendus utilisés comme sources.`,
-    exchangeSkipped: "Commencée directement, sans échange créatif.",
+    exchangeSkipped: (reason: string | null) =>
+      reason
+        ? `Passée : ${reason}`
+        : "Commencée directement, sans échange créatif.",
     develop: (direction: string, validated: number, total: number) =>
       `Direction : ${direction.toLowerCase()} · fiches validées ${validated}/${total}.`,
     consolidateTodo: "Le brief créatif réunit ce qui a été retenu.",

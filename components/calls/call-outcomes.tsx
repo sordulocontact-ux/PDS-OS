@@ -20,6 +20,7 @@ export function CallOutcomes({
   members,
   projectId,
   projects,
+  deliverableId = null,
 }: {
   outcomes: Outcomes;
   members: { personId: string; name: string }[];
@@ -28,6 +29,8 @@ export function CallOutcomes({
   // Where a task may go: the call's project when the viewer owns it, else
   // (meeting) the launched projects they own. Empty: read only.
   projects: { id: string; title: string }[];
+  // The deliverable a creative exchange is about: its tasks point to it.
+  deliverableId?: string | null;
 }) {
   const t = fr.calls.outcomes;
   return (
@@ -78,6 +81,7 @@ export function CallOutcomes({
               members={members}
               projectId={projectId}
               projects={projects}
+              deliverableId={deliverableId}
             />
           )}
         </section>

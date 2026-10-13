@@ -27,11 +27,16 @@ export async function loadJourneyInput(
 ): Promise<JourneyInput> {
   const projectId = project.id;
   const supabase = await createClient();
-  const [callsRes, people, briefs] = await Promise.all([
+  const [callsRes, workspaceRes, people, briefs] = await Promise.all([
     supabase
       .from("design_calls")
-      .select("id", { count: "exact", head: true })
+      .select("call_id", { count: "exact", head: true })
       .eq("project_id", projectId),
+    supabase
+      .from("design_workspaces")
+      .select("no_exchange_reason")
+      .eq("project_id", projectId)
+      .maybeSingle(),
     data.started
       ? loadDesignPeople(projectId, data.organizationId, access)
       : null,
@@ -60,6 +65,7 @@ export async function loadJourneyInput(
     canWrite: data.canWrite,
     callsPlanned: callsRes.count ?? 0,
     callSources: data.sources.filter((s) => s.kind === "call").length,
+    noExchangeReason: workspaceRes.data?.no_exchange_reason ?? null,
     proposals: data.intentions.filter((i) => i.status === "proposed").length,
     unattachedReferences: data.references.filter((r) => r.links.length === 0)
       .length,

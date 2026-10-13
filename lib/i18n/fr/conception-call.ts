@@ -18,6 +18,7 @@ export const conceptionCall = {
     "Rien ne manque aux livrables choisis : ajoutez les sujets que vous voulez aborder.",
   noParticipants: "Ajoutez au moins une personne.",
   directionTopic: "Direction créative",
+  alreadyAttached: "Ce call est déjà un échange de la Conception.",
   deliverableTopic: (title: string) => `Livrable · ${title}`,
   questions: {
     direction: {
@@ -44,4 +45,48 @@ export const conceptionCall = {
   toConception: "Voir la conception",
   afterCall:
     "PO a relevé les intentions du call. Relisez et confirmez-les livrable par livrable.",
+  // The creative exchanges on the Conception's home (MKT-C2-05).
+  exchanges: {
+    title: "Échanges créatifs",
+    hint: "Les calls de la Conception, à venir et passés. Les idées de PO restent des propositions tant qu'une personne ne les confirme pas.",
+    empty: "Aucun échange créatif pour l'instant.",
+    skipped: (reason: string) => `Commencée sans échange : ${reason}`,
+    upcoming: "À venir",
+    past: "Passé",
+    scopeRelease: "Toute la sortie",
+    scopeDeliverables: (titles: string[]) => `Livrables : ${titles.join(", ")}`,
+    noReport: "Compte rendu pas encore traité.",
+    synthesis: (decisions: number, open: number, actions: number) =>
+      [
+        decisions === 1 ? "1 décision" : `${decisions} décisions`,
+        open === 1 ? "1 question ouverte" : `${open} questions ouvertes`,
+        actions === 1 ? "1 action" : `${actions} actions`,
+      ].join(" · "),
+    ideas: (proposed: number, confirmed: number) =>
+      [
+        proposed === 1
+          ? "1 idée de PO à confirmer"
+          : `${proposed} idées de PO à confirmer`,
+        confirmed === 1 ? "1 confirmée" : `${confirmed} confirmées`,
+      ].join(" · "),
+    open: "Ouvrir le call",
+    attach: "Rattacher un call existant",
+    attachTitle: "Rattacher un call existant",
+    attachBody:
+      "Un call du projet devient un échange de la Conception. Son compte rendu, s'il est déjà traité, est lu par PO : ses propositions attendent une personne.",
+    attachCall: "Call",
+    attachPurpose: "Objectif de l'échange",
+    attachPurposeDefault: "Échange créatif sur la sortie",
+    attachScope: "Livrables concernés",
+    attachScopeHint: "Aucun : l'échange porte sur toute la sortie.",
+    attachSubmit: "Rattacher",
+    attached: "Call rattaché à la Conception.",
+    noAttachable: "Aucun autre call du projet à rattacher.",
+    callRequired: "Choisissez un call.",
+    purposeRequired: "Écrivez l'objectif.",
+    // The agenda, prepared from the release's open points and identity.
+    openPointsTopic: "Points ouverts du projet",
+    identityQuestion: (n: number) =>
+      `La sortie reste-t-elle dans l'identité V${n} de l'artiste, ou s'en écarte-t-elle volontairement ?`,
+  },
 };

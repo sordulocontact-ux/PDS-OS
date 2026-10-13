@@ -49,6 +49,7 @@ export type FramingErrorCode =
   | "invalid_reserve"
   | "deliverable_not_planned"
   | "recommendation_settled"
+  | "task_exists"
   | "generic";
 
 export type ActionResult =
@@ -105,6 +106,9 @@ export function fromDatabaseError(
   // A recommendation applied or ignored twice (two tabs, two clicks).
   if (message.includes("strategy_recommendations_key"))
     return fail("recommendation_settled");
+  // An action of a call already turned into a task (MKT-C2-05).
+  if (message.includes("tasks_source_report_item_key"))
+    return fail("task_exists");
   if (
     message.includes("stage_not_found") ||
     message.includes("validation_not_found") ||

@@ -46,12 +46,30 @@ export default async function CallPage({
     getCallAudioUrls(supabase, call),
   ]);
   const canEdit = canEditProject(access, project);
-  const [outcomes, members] = report
+  const [outcomes, members, designCall] = report
     ? await Promise.all([
         loadCallOutcomes(supabase, report),
         canEdit ? loadMembers(access) : [],
+        // A creative exchange about one deliverable (MKT-C2-05): its tasks
+        // are about that deliverable too.
+        supabase
+          .from("design_calls")
+          .select("deliverable_ids")
+          .eq("call_id", callId)
+          .maybeSingle()
+          .then(async ({ data }) =>
+            data?.deliverable_ids.length === 1
+              ? ((
+                  await supabase
+                    .from("design_deliverables")
+                    .select("strategy_deliverable_id")
+                    .eq("id", data.deliverable_ids[0])
+                    .maybeSingle()
+                ).data?.strategy_deliverable_id ?? null)
+              : null,
+          ),
       ])
-    : [null, []];
+    : [null, [], null];
   const t = fr.calls;
 
   return (
@@ -106,6 +124,7 @@ export default async function CallPage({
               outcomes={outcomes}
               members={members}
               projectId={projectId}
+              deliverableId={designCall}
               projects={
                 canEdit ? [{ id: project.id, title: project.title }] : []
               }

@@ -1,5 +1,6 @@
 import { BriefIdentitySection } from "@/components/design/brief/brief-identity-section";
 import { FactList } from "@/components/ui/fact-list";
+import { ViewLink } from "@/components/ui/view-link";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { CreativeBriefContent } from "@/lib/design/brief";
@@ -52,8 +53,12 @@ function Lines({ items }: { items: string[] }) {
  */
 export function CreativeBriefView({
   content: c,
+  callLinks,
 }: {
   content: CreativeBriefContent;
+  // A call source's page, by its title (MKT-C2-05: from the Brief back to
+  // the call it comes from).
+  callLinks?: Record<string, string>;
 }) {
   const t = fr.conceptionDirection.brief;
   const topic = (key: keyof typeof fr.conceptionDirection.topics) =>
@@ -164,13 +169,29 @@ export function CreativeBriefView({
         />
       </Part>
       <Part name="sources" empty={!c.sources.length}>
-        <Lines
-          items={c.sources.map((s) =>
-            s.kind === "strategy"
-              ? s.label
-              : `${t.sourceKinds[s.kind]} : ${s.label}`,
-          )}
-        />
+        <ul className="flex list-disc flex-col gap-1 pl-5">
+          {c.sources.map((s, index) => {
+            const label =
+              s.kind === "strategy"
+                ? s.label
+                : `${t.sourceKinds[s.kind]} : ${s.label}`;
+            const href = s.kind === "call" ? callLinks?.[s.label] : undefined;
+            return (
+              <li key={`${index}-${s.label}`} className="break-words">
+                {href ? (
+                  <ViewLink
+                    href={href}
+                    className="underline underline-offset-2"
+                  >
+                    {label}
+                  </ViewLink>
+                ) : (
+                  label
+                )}
+              </li>
+            );
+          })}
+        </ul>
       </Part>
       <Part name="openPoints" empty={!c.openPoints.length}>
         <Lines items={c.openPoints} />

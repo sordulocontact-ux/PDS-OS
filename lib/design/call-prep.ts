@@ -1,8 +1,9 @@
 // « Préparer un échange créatif » of the Conception (Chemin A): PO compares
 // what each deliverable's intention still lacks and prepares only those
 // questions — one topic for the overall direction, one per chosen
-// deliverable. Written by code, no model (same idea as
-// lib/strategy/call-prep.ts). Client-safe.
+// deliverable — plus, since MKT-C2-05, the project's open points and
+// whether the release stays within the artist's identity. Written by code,
+// no model (same idea as lib/strategy/call-prep.ts). Client-safe.
 
 import type { DeliverableStatus, DesignTopic } from "@/lib/design/intentions";
 import { fr } from "@/lib/i18n/fr";
@@ -21,10 +22,18 @@ export type DesignCallDeliverable = {
   missing: DesignTopic[];
 };
 
+/** What the agenda also starts from (MKT-C2-05): the project's open points
+ * and the version of the artist's identity the release uses. */
+export type DesignCallContext = {
+  openPoints: string[];
+  identityVersion: number | null;
+};
+
 /** What « Préparer un échange créatif » opens with, prepared by code. */
 export type DesignCallSheetData = {
   deliverables: DesignCallDeliverable[];
   directionMissing: DesignTopic[];
+  context: DesignCallContext;
   // Checked when the panel opens: the deliverables that lack something.
   selected: string[];
   purpose: string;
@@ -44,6 +53,7 @@ export type DesignCallTopic = {
 };
 
 export const DIRECTION_TOPIC_KEY = "direction";
+export const OPEN_POINTS_TOPIC_KEY = "open_points";
 
 const MINUTES_PER_QUESTION = 4;
 
@@ -52,16 +62,21 @@ const minutesFor = (questions: number) =>
 
 /** The overall direction first (when it lacks anything), then each chosen deliverable. */
 export function designCallTopics(
-  data: Pick<DesignCallSheetData, "deliverables" | "directionMissing">,
+  data: Pick<
+    DesignCallSheetData,
+    "deliverables" | "directionMissing" | "context"
+  >,
   selectedIds: readonly string[],
 ): DesignCallTopic[] {
   const t = fr.conceptionCall;
   const chosen = new Set(selectedIds);
   const topics: DesignCallTopic[] = [];
-  if (data.directionMissing.length > 0) {
-    const questions = data.directionMissing.map(
-      (topic) => t.questions.direction[topic],
-    );
+  const identity = data.context.identityVersion;
+  if (data.directionMissing.length > 0 || identity !== null) {
+    const questions = [
+      ...(identity !== null ? [t.exchanges.identityQuestion(identity)] : []),
+      ...data.directionMissing.map((topic) => t.questions.direction[topic]),
+    ];
     topics.push({
       key: DIRECTION_TOPIC_KEY,
       topic: t.directionTopic,
@@ -83,6 +98,13 @@ export function designCallTopics(
       questions,
     });
   }
+  if (data.context.openPoints.length > 0)
+    topics.push({
+      key: OPEN_POINTS_TOPIC_KEY,
+      topic: t.exchanges.openPointsTopic,
+      minutes: minutesFor(data.context.openPoints.length),
+      questions: data.context.openPoints,
+    });
   return topics;
 }
 

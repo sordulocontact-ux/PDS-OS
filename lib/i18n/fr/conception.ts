@@ -30,6 +30,10 @@ export const conception = {
           ? "1 compte rendu de call peut servir de source."
           : `${n} comptes rendus de call peuvent servir de sources.`,
     start: "Commencer sans échange",
+    startTitle: "Commencer sans échange créatif",
+    startBody:
+      "L'échange créatif est le chemin conseillé. Sans lui, dites pourquoi : la raison reste sur l'étape « Organiser l'échange créatif ».",
+    startReason: "Pourquoi commencer sans échange ?",
     starting: "Ouverture…",
     resume: "Reprendre le travail",
     started: "Travail commencé",

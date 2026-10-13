@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 
 import { ConceptionCallSheet } from "@/components/design/conception-call-sheet";
 import { ConceptionDirectionCard } from "@/components/design/conception-direction-card";
+import { AttachCallButton } from "@/components/design/exchanges/attach-call-button";
+import { ConceptionExchanges } from "@/components/design/exchanges/conception-exchanges";
 import { ConceptionEntry } from "@/components/design/conception-entry";
 import { ConceptionJourney } from "@/components/design/conception-journey";
 import { ConceptionIdentityCard } from "@/components/design/identity/conception-identity-card";
@@ -15,6 +17,7 @@ import { sectionCardClass } from "@/components/ui/section-card";
 import { requireApproved } from "@/lib/auth/dal";
 import { designSheetData } from "@/lib/design/call-sheet-data";
 import { loadConception } from "@/lib/design/conception";
+import { loadDesignExchanges } from "@/lib/design/exchanges";
 import { journey } from "@/lib/design/journey";
 import { loadJourneyInput } from "@/lib/design/journey-data";
 import { loadReleaseIdentity } from "@/lib/design/release-identity";
@@ -71,12 +74,14 @@ export default async function DesignPage({
 
   const stage = data.started ? data.stage : null;
   const members = await loadMembers(access);
-  const [callSheet, pendingValidation, sheets, identity] = await Promise.all([
-    data.canAdd ? designSheetData(project, data) : null,
-    stage ? loadPendingValidation(stage.id, members) : null,
-    data.started ? loadSheetSummaries(projectId) : [],
-    loadReleaseIdentity(projectId, members),
-  ]);
+  const [callSheet, pendingValidation, sheets, identity, exchanges] =
+    await Promise.all([
+      data.canAdd ? designSheetData(project, data) : null,
+      stage ? loadPendingValidation(stage.id, members) : null,
+      data.started ? loadSheetSummaries(projectId) : [],
+      loadReleaseIdentity(projectId, members),
+      loadDesignExchanges(projectId, data),
+    ]);
   const input = await loadJourneyInput(
     { id: project.id, title: project.title, artistName: project.artistName },
     access,
@@ -119,9 +124,34 @@ export default async function DesignPage({
               steps={path.steps}
               next={path.next}
               blockers={path.blockers}
-              exchangeAction={
-                callSheet && (
-                  <ConceptionCallSheet projectId={projectId} data={callSheet} />
+            />
+          )
+        }
+        exchanges={
+          (data.started || exchanges.exchanges.length > 0) && (
+            <ConceptionExchanges
+              projectId={projectId}
+              exchanges={exchanges.exchanges}
+              skippedReason={input.noExchangeReason}
+              actions={
+                data.started &&
+                data.canAdd && (
+                  <>
+                    {callSheet && (
+                      <ConceptionCallSheet
+                        projectId={projectId}
+                        data={callSheet}
+                      />
+                    )}
+                    <AttachCallButton
+                      projectId={projectId}
+                      calls={exchanges.attachable}
+                      deliverables={data.deliverables.map((d) => ({
+                        id: d.id,
+                        title: d.title,
+                      }))}
+                    />
+                  </>
                 )
               }
             />

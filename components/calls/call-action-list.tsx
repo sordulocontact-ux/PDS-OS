@@ -26,11 +26,14 @@ export function CallActionList({
   members,
   projectId,
   projects,
+  deliverableId = null,
 }: {
   actions: CallAction[];
   members: { personId: string; name: string }[];
   projectId: string | null;
   projects: { id: string; title: string }[];
+  // The deliverable a creative exchange is about (MKT-C2-05).
+  deliverableId?: string | null;
 }) {
   const t = fr.calls.outcomes;
   const router = useRouter();
@@ -93,6 +96,7 @@ export function CallActionList({
                       assigneePersonId: values.assigneePersonId,
                       dueDate: values.dueDate,
                       sourceReportItemId: action.id,
+                      deliverableId,
                     }),
                   () => {
                     toast.success(t.created);

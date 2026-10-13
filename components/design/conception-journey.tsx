@@ -14,18 +14,15 @@ import { journeyStepTone } from "@/lib/ui/state-tones";
  * where it opens said before the click —, the six steps of the dossier with
  * their state and what each produced, and what blocks. Computed by code
  * (lib/design/journey.ts); a step's own screen opens from its object.
- * `exchangeAction`: preparing another creative exchange, on its step.
  */
 export function ConceptionJourney({
   steps,
   next,
   blockers,
-  exchangeAction,
 }: {
   steps: JourneyStep[];
   next: JourneyNext;
   blockers: JourneyLink[];
-  exchangeAction?: React.ReactNode;
 }) {
   const t = fr.conceptionJourney;
   return (
@@ -94,7 +91,6 @@ export function ConceptionJourney({
                   {step.summary}
                 </span>
               </div>
-              {step.key === "exchange" && exchangeAction}
               <StatusBadge
                 tone={journeyStepTone[step.state]}
                 size="sm"

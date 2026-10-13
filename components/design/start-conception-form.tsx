@@ -1,31 +1,33 @@
 "use client";
 
-import { useActionState } from "react";
-
-import { FormMessage } from "@/components/auth/form-message";
-import { SubmitButton } from "@/components/auth/submit-button";
-import { idleFormState } from "@/lib/auth/form-state";
-import { startConception } from "@/lib/design/actions/start";
+import { DialogButton } from "@/components/ui/dialog-button";
+import { ReasonForm } from "@/components/ui/reason-form";
+import { startConceptionWithoutExchange } from "@/lib/design/actions/start";
 import { fr } from "@/lib/i18n/fr";
 
-/** « Commencer sans échange » (MKT-C2-03: the creative exchange is the main
- * way in): opens the direct work; says why when it cannot. */
+/**
+ * « Commencer sans échange » (MKT-C2-03, 05): the creative exchange is the
+ * main way in; starting without one says why — the reason stays on the step
+ * it passes over. Opens the direct work.
+ */
 export function StartConceptionForm({ projectId }: { projectId: string }) {
   const t = fr.conception.entry;
-  const [state, action] = useActionState(
-    startConception.bind(null, projectId),
-    idleFormState,
-  );
   return (
-    <form action={action} className="contents">
-      <SubmitButton variant="outline" pendingLabel={t.starting}>
-        {t.start}
-      </SubmitButton>
-      {state.status === "error" && state.formError && (
-        <div className="basis-full">
-          <FormMessage kind="error">{state.formError}</FormMessage>
-        </div>
+    <DialogButton
+      label={t.start}
+      size="lg"
+      title={t.startTitle}
+      description={t.startBody}
+    >
+      {(close) => (
+        <ReasonForm
+          label={t.startReason}
+          submitLabel={t.start}
+          doneMessage={t.started}
+          run={(reason) => startConceptionWithoutExchange(projectId, reason)}
+          onDone={close}
+        />
       )}
-    </form>
+    </DialogButton>
   );
 }

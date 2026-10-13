@@ -42,6 +42,8 @@ export type JourneyInput = {
   // design_calls prepared, call reports already used as sources.
   callsPlanned: number;
   callSources: number;
+  // Why the Conception started without a creative exchange, if it did.
+  noExchangeReason: string | null;
   proposals: number;
   unattachedReferences: number;
   toQualify: number;
@@ -123,7 +125,7 @@ export function journey(input: JourneyInput): {
         : input.callsPlanned > 0
           ? s.exchangePlanned(input.callsPlanned)
           : input.started
-            ? s.exchangeSkipped
+            ? s.exchangeSkipped(input.noExchangeReason)
             : s.exchangeTodo,
     develop: s.develop(
       fr.conception.directionStates[input.direction.state],
