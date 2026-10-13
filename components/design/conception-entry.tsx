@@ -2,13 +2,9 @@ import { AddDeliverableDialog } from "@/components/design/add-deliverable-dialog
 import { ConceptionCallSheet } from "@/components/design/conception-call-sheet";
 import { ConceptionDeliverables } from "@/components/design/conception-deliverables";
 import { StartConceptionForm } from "@/components/design/start-conception-form";
-import { buttonVariants } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ToneCallout } from "@/components/ui/tone-callout";
-import { ViewLink } from "@/components/ui/view-link";
-import { routes } from "@/lib/auth/redirects";
 import type { DesignCallSheetData } from "@/lib/design/call-prep";
 import type { ConceptionData } from "@/lib/design/conception";
 import type { SheetSummary } from "@/lib/design/sheet-summaries";
@@ -19,11 +15,13 @@ import { conceptionStateTone, stageTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
 /**
- * The Conception's home (ticket Conception § 1): the project, the artist,
- * the release, where the Stratégie stands and a compact summary of the
- * deliverables — confirmed apart from the needs still to qualify — then the
- * two ways in: prepare a creative exchange, or start directly. No project
- * navigation repeated, no dashboard.
+ * The Conception's home (ticket Conception § 1, MKT-C2-03): its goal and the
+ * dossier it ends with in two sentences, the project, the artist, the
+ * release, where the Stratégie stands; before the start, the two ways in —
+ * the creative exchange first (main action), or start without one; once
+ * started, the journey (`journey`: next action, six steps, blockers), then
+ * the release's direction (`direction`) apart from the conception of each
+ * deliverable. No project navigation repeated.
  */
 export function ConceptionEntry({
   projectId,
@@ -32,6 +30,8 @@ export function ConceptionEntry({
   moduleState,
   sheets,
   callSheet,
+  journey,
+  direction,
 }: {
   projectId: string;
   context: { title: string; artistName: string };
@@ -42,16 +42,15 @@ export function ConceptionEntry({
   sheets: SheetSummary[];
   // Prepared by code for the owner while the Conception is open.
   callSheet: DesignCallSheetData | null;
+  // Once started: the journey, then the release's direction.
+  journey?: React.ReactNode;
+  direction?: React.ReactNode;
 }) {
   const t = fr.conception.entry;
   const state = data.stage?.state ?? "not_started";
   const locked = state === "awaiting_validation" || state === "validated";
   const strategyState = data.strategyState as keyof typeof t.strategyStates;
-  const pending = data.intentions.filter((i) => i.status === "proposed");
-  // Once started, anyone who sees the project reads the work (read-only
-  // unless they write).
-  const canResume = data.started;
-  const work = routes.projectDesignWork(projectId);
+  const j = fr.conceptionJourney;
 
   return (
     <section
@@ -66,8 +65,13 @@ export function ConceptionEntry({
           {t.title}
         </h2>
         <p className="max-w-prose text-body-md text-muted-foreground">
-          {data.isOwner ? t.body : t.readOnly}
+          {j.goal} {j.final}
         </p>
+        {!data.isOwner && !data.canWrite && (
+          <p className="max-w-prose text-caption text-muted-foreground">
+            {t.readOnly}
+          </p>
+        )}
       </div>
 
       <FactList
@@ -106,42 +110,26 @@ export function ConceptionEntry({
         <p className="text-body-md text-muted-foreground">{t.locked}</p>
       )}
 
-      {data.started && pending.length > 0 && (
-        <ToneCallout tone="info">
-          {t.proposals(pending.length)}{" "}
-          <ViewLink
-            href={work}
-            className="font-medium underline underline-offset-2"
-          >
-            {t.reviewProposals}
-          </ViewLink>
-        </ToneCallout>
-      )}
-
-      {(callSheet || canResume || (data.canAdd && !data.started)) && (
+      {!data.started && data.canAdd && (
         <div className="flex flex-col gap-3">
-          {data.canAdd && (
-            <p className="text-caption text-muted-foreground">
-              {t.sources(data.callReportCount)}
-            </p>
-          )}
+          <p className="text-caption text-muted-foreground">
+            {t.sources(data.callReportCount)}
+          </p>
           <div className="flex flex-wrap gap-2">
-            {data.started
-              ? canResume && (
-                  <ViewLink
-                    href={work}
-                    className={buttonVariants({ size: "lg" })}
-                  >
-                    {t.resume}
-                  </ViewLink>
-                )
-              : data.canAdd && <StartConceptionForm projectId={projectId} />}
             {callSheet && (
-              <ConceptionCallSheet projectId={projectId} data={callSheet} />
+              <ConceptionCallSheet
+                projectId={projectId}
+                data={callSheet}
+                variant="default"
+              />
             )}
+            <StartConceptionForm projectId={projectId} />
           </div>
         </div>
       )}
+
+      {journey}
+      {direction}
 
       <ConceptionDeliverables
         projectId={projectId}

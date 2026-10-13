@@ -29,7 +29,7 @@ export const conception = {
         : n === 1
           ? "1 compte rendu de call peut servir de source."
           : `${n} comptes rendus de call peuvent servir de sources.`,
-    start: "Commencer directement",
+    start: "Commencer sans échange",
     starting: "Ouverture…",
     resume: "Reprendre le travail",
     started: "Travail commencé",
@@ -42,7 +42,7 @@ export const conception = {
   },
 
   deliverables: {
-    title: "Livrables",
+    title: "Conception par livrable",
     summary: (confirmed: number, toQualify: number) =>
       [
         confirmed === 1 ? "1 confirmé" : `${confirmed} confirmés`,

@@ -41,9 +41,10 @@ function targetsOf(
 }
 
 /**
- * What can be worked on: the overall direction, then each deliverable, as a
- * row of pills with how many topics are answered (counted by code). Where
- * the open one stands is told next to its title (TargetBadges).
+ * What can be worked on: the release's direction, set apart, then each
+ * deliverable (MKT-C2-03: the two levels are not mixed), as pills with how
+ * many topics are answered (counted by code). Where the open one stands is
+ * told next to its title (TargetBadges).
  */
 export function WorkTargets({
   projectId,
@@ -55,27 +56,35 @@ export function WorkTargets({
   current: string;
 }) {
   const t = fr.conceptionWork.targets;
+  const [direction, ...deliverables] = targetsOf(data);
+  const pill = (target: Target) => (
+    <li key={target.key} className="min-w-0">
+      <FilterChipLink
+        href={routes.projectDesignWork(projectId, target.key)}
+        current={target.key === current}
+        className="max-w-full"
+      >
+        <span className="truncate">{target.title}</span>
+        <span aria-hidden className="tabular-nums opacity-70">
+          {t.count(target.answered, DESIGN_TOPICS.length)}
+        </span>
+        <span className="sr-only">
+          {t.answered(target.answered, DESIGN_TOPICS.length)}
+        </span>
+      </FilterChipLink>
+    </li>
+  );
   return (
-    <nav aria-label={t.label}>
-      <ul className="flex flex-wrap gap-2">
-        {targetsOf(data).map((target) => (
-          <li key={target.key} className="min-w-0">
-            <FilterChipLink
-              href={routes.projectDesignWork(projectId, target.key)}
-              current={target.key === current}
-              className="max-w-full"
-            >
-              <span className="truncate">{target.title}</span>
-              <span aria-hidden className="tabular-nums opacity-70">
-                {t.count(target.answered, DESIGN_TOPICS.length)}
-              </span>
-              <span className="sr-only">
-                {t.answered(target.answered, DESIGN_TOPICS.length)}
-              </span>
-            </FilterChipLink>
-          </li>
-        ))}
-      </ul>
+    <nav aria-label={t.label} className="flex flex-col gap-3">
+      <ul className="flex flex-wrap gap-2">{pill(direction)}</ul>
+      {deliverables.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-caption text-muted-foreground">
+            {t.deliverablesLabel}
+          </p>
+          <ul className="flex flex-wrap gap-2">{deliverables.map(pill)}</ul>
+        </div>
+      )}
     </nav>
   );
 }

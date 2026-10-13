@@ -22,6 +22,7 @@ import { contracts } from "./contracts";
 import { core } from "./core";
 import { conception } from "./conception";
 import { conceptionCall } from "./conception-call";
+import { conceptionJourney } from "./conception-journey";
 import { conceptionWork } from "./conception-work";
 import { conceptionDirection } from "./conception-direction";
 import { conceptionIntents } from "./conception-intents";
@@ -117,6 +118,7 @@ export const fr = {
   design,
   conception,
   conceptionCall,
+  conceptionJourney,
   conceptionWork,
   conceptionIntents,
   conceptionRefs,

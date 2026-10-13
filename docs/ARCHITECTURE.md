@@ -3768,6 +3768,43 @@ annulée : aucune action réelle). Pages du module sous `ConceptionTabs` : Accue
   pourront les lire plus tard), annulation d'un livrable après validation, circuits de validation
   complexes et délégations (après MVP).
 
+### Retours Marketing du 12/10/2026, lot C2 (MKT-C2-03, parcours global)
+
+Sans migration : tout est calculé à la lecture depuis les faits existants, donc les dossiers
+déjà commencés gardent leurs données et leur avancement (rien à migrer, rien de stocké).
+
+- **Un accueil unique** (`ConceptionEntry`) : le but de la Conception et le dossier final en
+  deux phrases (`fr.conceptionJourney`), le contexte ; avant le démarrage, **l'échange créatif est
+  l'action principale** (« Préparer l'échange créatif »), « Commencer sans échange » en contour
+  (l'étape 2 est alors « Passée », explicitement).
+- **Parcours en six étapes** (`lib/design/journey.ts`, pur ; faits lus par
+  `lib/design/journey-data.ts`) : Préparer la sortie (démarrée) · Organiser l'échange créatif
+  (compte rendu utilisé comme source, échange préparé, ou passé) · Développer les livrables
+  (direction validée et toutes les fiches validées) · Consolider le dossier (brief créatif créé et
+  **à jour**, `sameBrief` sur ce que le code construirait maintenant) · Valider la conception
+  (étape `design`) · Passer en Production (fiches transférées). Une étape n'est faite que si sa
+  sortie minimale existe ou a été passée ; la progression du dossier est distincte de celle de
+  chaque livrable (`ConceptionJourney`, ton `journeyStepTone`).
+- **Une seule prochaine action** (`lib/design/journey-next.ts`), dans l'ordre du parcours :
+  propositions de PO (sur la cible qui en a), responsable de la direction, direction à reprendre /
+  à répondre / à soumettre, puis par livrable : questions, fiche à créer, compléter, soumettre ;
+  puis brief à créer ou à mettre à jour, « Demander la validation du dossier »
+  (`#conception-validation`), puis transfert de chaque fiche et « Ouvrir la Production ». **Sa
+  destination est écrite avant le clic** (« Ouvre : Intentions › Cover »). Rien pour cette
+  personne : ce qu'on attend (direction, fiche, dossier) ; lecteur : il le lit.
+  « Reprendre le travail » disparaît.
+- **Ce qui bloque** : propositions en attente, direction sans responsable / à reprendre / refusée,
+  fiche refusée, livrables sans fiche, références à rattacher, besoins à qualifier, brief plus à
+  jour — chacun mène à son objet.
+- **Direction de la sortie séparée des livrables** : carte `ConceptionDirectionCard` sur
+  l'accueil, puis « Conception par livrable » ; dans le travail direct, la pastille de la
+  direction est seule, les livrables dessous sous leur titre (`WorkTargets`).
+- **Validation du dossier** : `ValidationPanel` sous « Valider la conception », ancre
+  `#conception-validation` visée par la prochaine action. Onglets dans l'ordre du parcours :
+  Accueil, Intentions, Références, Direction artistique, Fiches Livrables, Brief créatif.
+- Reste au-delà de ce ticket : direction créative propre (C2-06), échanges sur l'accueil (C2-05),
+  demande de validation depuis le brief (C2-12), clôture guidée (C2-13).
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

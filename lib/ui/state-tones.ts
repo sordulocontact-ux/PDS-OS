@@ -288,6 +288,15 @@ export const followUpTone: Record<string, Tone> = {
   blocked: "danger",
 };
 
+/** A step of the Conception's journey (MKT-C2-03): done, the one in
+ * progress, to come, or passed over on purpose. */
+export const journeyStepTone: Record<string, Tone> = {
+  done: "success",
+  current: "info",
+  todo: "neutral",
+  skipped: "neutral",
+};
+
 /** A recommendation of the follow-up (MKT-C2-02), by level: a fact to keep,
  * an action advised, a deadline threatened, a milestone that cannot happen. */
 export const recommendationLevelTone: Record<string, Tone> = {

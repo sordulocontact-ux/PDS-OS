@@ -8,7 +8,8 @@ import { idleFormState } from "@/lib/auth/form-state";
 import { startConception } from "@/lib/design/actions/start";
 import { fr } from "@/lib/i18n/fr";
 
-/** « Commencer directement »: opens the direct work; says why when it cannot. */
+/** « Commencer sans échange » (MKT-C2-03: the creative exchange is the main
+ * way in): opens the direct work; says why when it cannot. */
 export function StartConceptionForm({ projectId }: { projectId: string }) {
   const t = fr.conception.entry;
   const [state, action] = useActionState(
@@ -17,7 +18,9 @@ export function StartConceptionForm({ projectId }: { projectId: string }) {
   );
   return (
     <form action={action} className="contents">
-      <SubmitButton pendingLabel={t.starting}>{t.start}</SubmitButton>
+      <SubmitButton variant="outline" pendingLabel={t.starting}>
+        {t.start}
+      </SubmitButton>
       {state.status === "error" && state.formError && (
         <div className="basis-full">
           <FormMessage kind="error">{state.formError}</FormMessage>

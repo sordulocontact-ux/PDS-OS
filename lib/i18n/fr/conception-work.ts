@@ -9,6 +9,7 @@ export const conceptionWork = {
   targets: {
     label: "Ce que vous travaillez",
     direction: "Direction créative",
+    deliverablesLabel: "Conception par livrable",
     answered: (n: number, total: number) => `${n} sur ${total} posées`,
     count: (n: number, total: number) => `${n}/${total}`,
     proposals: (n: number) => (n === 1 ? "1 proposition" : `${n} propositions`),
