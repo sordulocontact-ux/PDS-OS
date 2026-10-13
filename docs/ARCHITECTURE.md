@@ -3894,6 +3894,28 @@ change selon la cible.
   de livrable » dans la Stratégie) ; un livrable mal classé garde les questions génériques
   (`other`).
 
+### Retours Marketing du 12/10/2026, lot C6 (MKT-C2-07, livrables et séries)
+
+Migration `…20261013100301_series_items`, tests `supabase/tests/conception-series.test.sql` (7).
+
+- **Contrôles selon le format** (`sheetChecks` reçoit le format, `SheetFacts.format` lu dans
+  `loadFacts`) : clip et vidéo courte exigent ratios, durée et sous-titres (date de tournage
+  rappelée) ; pochette et campagne, les ratios seulement ; « autre », seulement ce que tout livrable
+  exige (responsable, validateurs, livraison, dates dans l'ordre). Plus de questionnaire universel.
+- **Un élément de série = un contenu à part entière** : `design_sheet_items.responsible_person_id`
+  (membre approuvé, trigger), `concept`, `reference_url` (https), en plus de l'objectif, de la date et
+  des notes ; repris dans l'instantané de soumission (`to_jsonb`).
+- **Série en bloc ou contenu par contenu** (`design_sheets.tracking`, `SeriesTracking`) : en bloc =
+  une décision pour la série (`mode global`), contenu par contenu = une décision par élément
+  (`per_section`), sinon le mode du projet ; `submit_design_sheet` suit ce choix. Regrouper n'efface
+  rien : les décisions déjà prises restent sur leurs versions. La règle du statut agrégé est écrite
+  sur la fiche (le contenu le moins avancé l'emporte). **Décision prise ici** : pas de niveau
+  « sous-ensemble » (en bloc ou par contenu suffit au cas des cinq TikTok).
+- **Vue d'ensemble** : chaque livrable de l'accueil dit ses manques et sa prochaine étape
+  (`deliverableNext`, `SheetSummary.blockers`) ; les livrables avancent en parallèle.
+- La fiche montre aussi ce que le livrable hérite de la direction (C2-06).
+- Reste pour C2-12 : le PDF du dossier restitue série, cadre commun et contenus.
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

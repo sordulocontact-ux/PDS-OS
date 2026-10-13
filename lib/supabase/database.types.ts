@@ -4168,6 +4168,7 @@ export type Database = {
       }
       design_sheet_items: {
         Row: {
+          concept: string | null
           created_at: string
           delivery_date: string | null
           id: string
@@ -4176,11 +4177,14 @@ export type Database = {
           objective: string | null
           organization_id: string
           project_id: string
+          reference_url: string | null
+          responsible_person_id: string | null
           sheet_id: string
           title: string
           updated_at: string
         }
         Insert: {
+          concept?: string | null
           created_at?: string
           delivery_date?: string | null
           id?: string
@@ -4189,11 +4193,14 @@ export type Database = {
           objective?: string | null
           organization_id: string
           project_id: string
+          reference_url?: string | null
+          responsible_person_id?: string | null
           sheet_id: string
           title: string
           updated_at?: string
         }
         Update: {
+          concept?: string | null
           created_at?: string
           delivery_date?: string | null
           id?: string
@@ -4202,6 +4209,8 @@ export type Database = {
           objective?: string | null
           organization_id?: string
           project_id?: string
+          reference_url?: string | null
+          responsible_person_id?: string | null
           sheet_id?: string
           title?: string
           updated_at?: string
@@ -4245,6 +4254,7 @@ export type Database = {
           subtitle_ratios: string[]
           subtitles: boolean | null
           title: string
+          tracking: string | null
           updated_at: string
           updated_by: string | null
           variants: string | null
@@ -4277,6 +4287,7 @@ export type Database = {
           subtitle_ratios?: string[]
           subtitles?: boolean | null
           title: string
+          tracking?: string | null
           updated_at?: string
           updated_by?: string | null
           variants?: string | null
@@ -4309,6 +4320,7 @@ export type Database = {
           subtitle_ratios?: string[]
           subtitles?: boolean | null
           title?: string
+          tracking?: string | null
           updated_at?: string
           updated_by?: string | null
           variants?: string | null

@@ -127,6 +127,26 @@ export const conceptionJourney = {
         : `${n} besoins ajoutés restent à qualifier.`,
     briefOutdated: "Le brief créatif n'est plus à jour.",
   },
+  // One deliverable's next step on the home (MKT-C2-07).
+  deliverableNext: {
+    qualify: "Prochaine action : qualifier ce besoin",
+    questions: (n: number) =>
+      n === 1
+        ? "Prochaine action : 1 question de conception à répondre"
+        : `Prochaine action : ${n} questions de conception à répondre`,
+    createSheet: "Prochaine action : créer sa fiche",
+    completeSheet: (n: number) =>
+      n === 0
+        ? "Prochaine action : compléter sa fiche"
+        : n === 1
+          ? "Prochaine action : compléter sa fiche (1 manque)"
+          : `Prochaine action : compléter sa fiche (${n} manques)`,
+    rework: "Prochaine action : reprendre la fiche refusée",
+    submit: "Prochaine action : soumettre sa fiche",
+    waiting: "En attente de la décision des validateurs",
+    transfer: "Prochaine action : transférer en Production",
+    inProduction: "En Production",
+  },
   directionTitle: "Direction de la sortie",
   directionBody:
     "Ce que tous les livrables partagent : le récit, l'univers, le ton, ce qui doit figurer ou être évité.",

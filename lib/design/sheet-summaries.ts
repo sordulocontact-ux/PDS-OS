@@ -12,6 +12,8 @@ export type SheetSummary = {
   deliverableId: string;
   title: string;
   status: SheetStatus;
+  // What still blocks its submission (MKT-C2-07: the gaps per deliverable).
+  blockers: number;
 };
 
 /**
@@ -52,6 +54,7 @@ export async function loadSheetSummaries(
       deliverableId: f.sheet.design_deliverable_id,
       title: f.sheet.title,
       status: statusOf(f, checks.blockers.length),
+      blockers: checks.blockers.length,
     };
   });
 }

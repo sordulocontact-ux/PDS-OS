@@ -9,6 +9,7 @@ import type {
   JourneyLink,
   JourneyNext,
 } from "@/lib/design/journey";
+import type { SheetStatus } from "@/lib/design/states";
 import { fr } from "@/lib/i18n/fr";
 
 const ALL = DESIGN_TOPICS.length;
@@ -186,4 +187,34 @@ export function blockersOf(input: JourneyInput): JourneyLink[] {
   if (input.brief.latest !== null && !input.brief.upToDate)
     add(b.briefOutdated, routes.projectDesignBrief(p), w.brief);
   return list;
+}
+
+/**
+ * One deliverable's next step on the Conception's home (MKT-C2-07): its
+ * gaps and what to do next, in the order of the journey. Computed by code.
+ */
+export function deliverableNext(
+  d: { status: string; answered: number; inherited: number },
+  sheet: { status: SheetStatus; blockers: number } | null,
+): string {
+  const n = fr.conceptionJourney.deliverableNext;
+  if (d.status === "to_qualify") return n.qualify;
+  if (d.answered + d.inherited < ALL)
+    return n.questions(ALL - d.answered - d.inherited);
+  if (!sheet) return n.createSheet;
+  switch (sheet.status) {
+    case "draft":
+    case "to_complete":
+      return n.completeSheet(sheet.blockers);
+    case "rejected":
+      return n.rework;
+    case "ready":
+      return n.submit;
+    case "pending":
+      return n.waiting;
+    case "ready_for_production":
+      return n.transfer;
+    case "transferred":
+      return n.inProduction;
+  }
 }

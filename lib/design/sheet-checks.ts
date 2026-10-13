@@ -3,9 +3,27 @@
 // - blockers: the sheet cannot be submitted as is;
 // - warnings: to check or arbitrate, never blocking;
 // - deferred: left to Production on purpose (place, people, equipment).
+// MKT-C2-07: what is required depends on the deliverable's format — a cover
+// has no duration nor subtitles, a video has both; « other » asks only what
+// every deliverable needs (people, delivery date, dates in order).
 // Client-safe.
 
+import type { DeliverableFormat } from "@/lib/design/formats";
+
+// What each format requires beyond the common checks.
+const REQUIRES: Record<
+  DeliverableFormat,
+  { ratios: boolean; duration: boolean; subtitles: boolean; shoot: boolean }
+> = {
+  clip: { ratios: true, duration: true, subtitles: true, shoot: true },
+  short: { ratios: true, duration: true, subtitles: true, shoot: true },
+  cover: { ratios: true, duration: false, subtitles: false, shoot: false },
+  campaign: { ratios: true, duration: false, subtitles: false, shoot: false },
+  other: { ratios: false, duration: false, subtitles: false, shoot: false },
+};
+
 export type SheetCheckInput = {
+  format: DeliverableFormat;
   hasResponsible: boolean;
   validatorIds: string[];
   responsibleId: string | null;
@@ -70,11 +88,15 @@ export function sheetChecks(input: SheetCheckInput): SheetChecks {
     if (when) blockers.push(key);
   };
 
+  const needs = REQUIRES[input.format];
   add("responsible", !input.hasResponsible);
   add("validators", input.validatorIds.length === 0);
-  add("ratios", input.ratios.length === 0);
-  add("duration", input.durationMin === null && input.durationMax === null);
-  add("subtitles", input.subtitles === null);
+  add("ratios", needs.ratios && input.ratios.length === 0);
+  add(
+    "duration",
+    needs.duration && input.durationMin === null && input.durationMax === null,
+  );
+  add("subtitles", needs.subtitles && input.subtitles === null);
   add(
     "subtitleDetails",
     input.subtitles === true &&
@@ -105,7 +127,7 @@ export function sheetChecks(input: SheetCheckInput): SheetChecks {
     warnings.push("selfValidation");
   if (input.items.some((i) => i.deliveryDate === null))
     warnings.push("itemWithoutDate");
-  if (input.shootDate === null) warnings.push("noShootDate");
+  if (needs.shoot && input.shootDate === null) warnings.push("noShootDate");
 
   return { blockers, warnings, deferred: DEFERRED };
 }

@@ -8,6 +8,7 @@ import { SheetChecksPanel } from "@/components/design/sheets/sheet-checks-panel"
 import { SheetForm } from "@/components/design/sheets/sheet-form";
 import { SheetHeader } from "@/components/design/sheets/sheet-header";
 import { SheetHistory } from "@/components/design/sheets/sheet-history";
+import { SeriesTracking } from "@/components/design/sheets/series-tracking";
 import { SheetItems } from "@/components/design/sheets/sheet-items";
 import { SheetReferences } from "@/components/design/sheets/sheet-references";
 import { SheetReview } from "@/components/design/sheets/sheet-review";
@@ -83,6 +84,13 @@ export default async function DesignSheetPage({
       i.status === "confirmed" &&
       i.deliverableId === s.sheet.design_deliverable_id,
   );
+  // MKT-C2-06: what the deliverable takes from the release's direction.
+  const inherited = data.intentions.filter(
+    (i) =>
+      i.status === "confirmed" &&
+      i.target === "direction" &&
+      !intentions.some((own) => own.topic === i.topic),
+  );
   const latest = s.versions[0];
   const decisionOf = (itemId: string) =>
     latest?.decisions.find((d) => d.section === itemId)?.decision ?? null;
@@ -110,12 +118,20 @@ export default async function DesignSheetPage({
             </p>
           )}
           <PageSection id="sheet-intentions" title={t.sections.intentions} card>
-            {intentions.length ? (
+            {intentions.length || inherited.length ? (
               <ul className="flex flex-col gap-2 text-body-md">
                 {intentions.map((i) => (
                   <li key={i.id}>
                     <span className="text-muted-foreground">
                       {fr.conception.topics[i.topic]} :{" "}
+                    </span>
+                    {i.value}
+                  </li>
+                ))}
+                {inherited.map((i) => (
+                  <li key={i.id}>
+                    <span className="text-muted-foreground">
+                      {t.inheritedTopic(fr.conception.topics[i.topic])} :{" "}
                     </span>
                     {i.value}
                   </li>
@@ -140,20 +156,40 @@ export default async function DesignSheetPage({
           )}
           {s.sheet.kind === "series" && (
             <PageSection id="sheet-items" title={t.sections.items} card>
-              <SheetItems
-                projectId={projectId}
-                sheetId={sheetId}
-                canEdit={canEdit}
-                items={s.items.map((i) => ({
-                  id: i.id,
-                  number: i.number,
-                  title: i.title,
-                  objective: i.objective,
-                  deliveryDate: i.delivery_date,
-                  notes: i.notes,
-                  decision: decisionOf(i.id),
-                }))}
-              />
+              <div className="flex flex-col gap-6">
+                <SeriesTracking
+                  projectId={projectId}
+                  sheetId={sheetId}
+                  tracking={
+                    s.sheet.tracking === "global" ||
+                    s.sheet.tracking === "per_item"
+                      ? s.sheet.tracking
+                      : null
+                  }
+                  canEdit={canEdit}
+                />
+                <SheetItems
+                  projectId={projectId}
+                  sheetId={sheetId}
+                  canEdit={canEdit}
+                  members={people.members}
+                  items={s.items.map((i) => ({
+                    id: i.id,
+                    number: i.number,
+                    title: i.title,
+                    objective: i.objective,
+                    deliveryDate: i.delivery_date,
+                    notes: i.notes,
+                    responsiblePersonId: i.responsible_person_id,
+                    responsibleName: i.responsible_person_id
+                      ? nameOf(i.responsible_person_id)
+                      : null,
+                    concept: i.concept,
+                    referenceUrl: i.reference_url,
+                    decision: decisionOf(i.id),
+                  }))}
+                />
+              </div>
             </PageSection>
           )}
           <PageSection id="sheet-references" title={t.sections.references} card>

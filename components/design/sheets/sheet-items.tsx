@@ -26,6 +26,11 @@ export type SheetItemView = {
   objective: string | null;
   deliveryDate: string | null;
   notes: string | null;
+  // MKT-C2-07: its own responsible, concept and reference.
+  responsiblePersonId: string | null;
+  responsibleName: string | null;
+  concept: string | null;
+  referenceUrl: string | null;
   // Its own decision in the latest version, if decided.
   decision: Exclude<SubmissionStatus, "pending"> | null;
 };
@@ -33,20 +38,23 @@ export type SheetItemView = {
 type Editing = { item: SheetItemView | null } | null;
 
 /**
- * The numbered items of a series: each keeps its objective, date, notes and
- * its own decision. As many as the series needs, added or taken back while
- * the sheet can be edited.
+ * The numbered items of a series: each keeps its objective, date, notes,
+ * its own responsible, concept and reference (MKT-C2-07) and its own
+ * decision. As many as the series needs, added or taken back while the
+ * sheet can be edited.
  */
 export function SheetItems({
   projectId,
   sheetId,
   items,
   canEdit,
+  members,
 }: {
   projectId: string;
   sheetId: string;
   items: SheetItemView[];
   canEdit: boolean;
+  members: Array<{ personId: string; name: string }>;
 }) {
   const t = fr.conceptionSheet.items;
   const [editing, setEditing] = useState<Editing>(null);
@@ -78,11 +86,25 @@ export function SheetItems({
                     {i.objective}
                   </span>
                 )}
+                {i.concept && (
+                  <span className="text-body-md break-words">{i.concept}</span>
+                )}
+                {i.referenceUrl && (
+                  <a
+                    href={i.referenceUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="w-fit text-caption underline underline-offset-2"
+                  >
+                    {t.referenceOpen}
+                  </a>
+                )}
                 <span className="text-caption text-muted-foreground tabular-nums">
                   {[
                     i.deliveryDate
                       ? `${t.deliveryDate} · ${formatDay(i.deliveryDate)}`
                       : null,
+                    i.responsibleName ? t.by(i.responsibleName) : null,
                     i.notes,
                   ]
                     .filter(Boolean)
@@ -140,11 +162,15 @@ export function SheetItems({
         closeLabel={fr.conceptionSheet.create.close}
       >
         <SheetItemForm
+          members={members}
           initial={{
             title: item?.title ?? "",
             objective: item?.objective ?? "",
             deliveryDate: item?.deliveryDate ?? "",
             notes: item?.notes ?? "",
+            responsiblePersonId: item?.responsiblePersonId ?? "",
+            concept: item?.concept ?? "",
+            referenceUrl: item?.referenceUrl ?? "",
           }}
           save={(input) =>
             item

@@ -10,6 +10,7 @@ import { routes } from "@/lib/auth/redirects";
 import type { ConceptionDeliverable } from "@/lib/design/conception";
 import type { SheetSummary } from "@/lib/design/sheet-summaries";
 import { DESIGN_TOPICS } from "@/lib/design/intentions";
+import { deliverableNext } from "@/lib/design/journey-next";
 import { fr } from "@/lib/i18n/fr";
 import { conceptionDeliverableTone } from "@/lib/ui/state-tones";
 
@@ -83,6 +84,8 @@ export function ConceptionDeliverableRow({
               d.inherited > 0 ? t.inherited(d.inherited) : null,
               d.proposals > 0 ? t.proposals(d.proposals) : null,
               sheet ? t.sheet(fr.conception.sheetStatuses[sheet.status]) : null,
+              // MKT-C2-07: its gaps and next step, at a glance.
+              deliverableNext(d, sheet),
             ]
               .filter(Boolean)
               .join(" · ")}

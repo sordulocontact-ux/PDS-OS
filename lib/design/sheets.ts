@@ -1,5 +1,9 @@
 import "server-only";
 
+import {
+  deliverableFormat,
+  type DeliverableFormat,
+} from "@/lib/design/formats";
 import { sheetChecks, type SheetChecks } from "@/lib/design/sheet-checks";
 import { toProvenance, type SheetProvenance } from "@/lib/design/sheet-fields";
 import {
@@ -38,6 +42,8 @@ export type SheetVersion = {
 /** What the sheets of a project are made of, read with the user's session. */
 export type SheetFacts = {
   sheet: SheetRow;
+  // Its deliverable's format: what its checks require (MKT-C2-07).
+  format: DeliverableFormat;
   items: SheetItemRow[];
   // Newest first.
   versions: SheetVersion[];
@@ -55,27 +61,42 @@ export async function loadFacts(
     .select("*")
     .eq("project_id", projectId)
     .order("created_at");
-  const [sheetsRes, itemsRes, versionsRes, handoffsRes] = await Promise.all([
-    sheetId ? sheetsQuery.eq("id", sheetId) : sheetsQuery,
-    supabase
-      .from("design_sheet_items")
-      .select("*")
-      .eq("project_id", projectId)
-      .order("number"),
-    supabase
-      .from("design_submissions")
-      .select(
-        "id, sheet_id, number, status, mode, sections, snapshot, submitted_by, submitted_at, design_decisions(section, decision, comment, decided_by, decided_at)",
-      )
-      .eq("project_id", projectId)
-      .eq("kind", "sheet")
-      .order("number", { ascending: false }),
-    supabase
-      .from("design_handoffs")
-      .select("sheet_id, submission_id, confirmed_at")
-      .eq("project_id", projectId)
-      .order("confirmed_at", { ascending: false }),
-  ]);
+  const [sheetsRes, itemsRes, versionsRes, handoffsRes, deliverablesRes] =
+    await Promise.all([
+      sheetId ? sheetsQuery.eq("id", sheetId) : sheetsQuery,
+      supabase
+        .from("design_sheet_items")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("number"),
+      supabase
+        .from("design_submissions")
+        .select(
+          "id, sheet_id, number, status, mode, sections, snapshot, submitted_by, submitted_at, design_decisions(section, decision, comment, decided_by, decided_at)",
+        )
+        .eq("project_id", projectId)
+        .eq("kind", "sheet")
+        .order("number", { ascending: false }),
+      supabase
+        .from("design_handoffs")
+        .select("sheet_id, submission_id, confirmed_at")
+        .eq("project_id", projectId)
+        .order("confirmed_at", { ascending: false }),
+      supabase
+        .from("design_deliverables")
+        .select(
+          "id, title, strategy_deliverables(title, levers(label)), levers(label)",
+        )
+        .eq("project_id", projectId),
+    ]);
+  const formatOf = (deliverableId: string) => {
+    const d = (deliverablesRes.data ?? []).find((x) => x.id === deliverableId);
+    const committed = d?.strategy_deliverables;
+    return deliverableFormat(
+      committed?.title ?? d?.title ?? "",
+      (committed?.levers ?? d?.levers)?.label ?? null,
+    );
+  };
   const versions = (versionsRes.data ?? []).map((v) => ({
     sheetId: v.sheet_id,
     version: {
@@ -103,6 +124,7 @@ export async function loadFacts(
       .map((v) => v.version);
     return {
       sheet,
+      format: formatOf(sheet.design_deliverable_id),
       items: (itemsRes.data ?? []).filter((i) => i.sheet_id === sheet.id),
       versions: own,
       handoffs: (handoffsRes.data ?? [])
@@ -126,6 +148,7 @@ export type CheckContext = {
 export function checksOf(facts: SheetFacts, ctx: CheckContext): SheetChecks {
   const s = facts.sheet;
   return sheetChecks({
+    format: facts.format,
     hasResponsible: ctx.responsibleId !== null,
     responsibleId: ctx.responsibleId,
     validatorIds: ctx.validatorIds,

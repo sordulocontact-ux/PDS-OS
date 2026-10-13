@@ -167,6 +167,28 @@ export const conceptionSheet = {
     removed: "Élément retiré",
     added: "Élément ajouté",
     undecided: "Pas encore décidé",
+    // MKT-C2-07: each item may be its own content.
+    responsible: "Responsable de ce contenu",
+    noResponsible: "Le responsable de la fiche",
+    concept: "Concept de ce contenu",
+    reference: "Référence (lien https)",
+    referenceInvalid: "Un lien commence par https://",
+    referenceOpen: "Voir la référence",
+    by: (name: string) => `par ${name}`,
+  },
+  inheritedTopic: (topic: string) => `${topic} (hérité de la direction)`,
+  // MKT-C2-07: a series followed as one block, or content by content.
+  tracking: {
+    title: "Suivi de la série",
+    global: "En bloc",
+    globalHint: "Une seule décision pour toute la série.",
+    perItem: "Contenu par contenu",
+    perItemHint: "Une décision par contenu : chacun avance à son rythme.",
+    project: "Selon le mode du projet",
+    rule: "Statut de la série : celui de son contenu le moins avancé (Refusé, puis Modifications demandées, puis En attente, puis Validé).",
+    saved: "Suivi de la série enregistré.",
+    history:
+      "Les décisions déjà prises restent dans l'historique des versions.",
   },
 
   checks: {
