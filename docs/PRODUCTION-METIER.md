@@ -44,6 +44,29 @@ répartit davantage. Le rôle n'est donc pas une personne : c'est une mission qu
 | **Techniciens** | Mettent en œuvre les dispositifs le jour J | Leur convocation (feuille de service) | — |
 | **Monteur, étalonneur, son post, responsable post** | Transforment les rushes en contenu final | Les rushes, les documents, les retours à corriger | Versions (V1, V2…), exports |
 
+## 2 bis. Qui a un compte PDS OS
+
+Décision déjà écrite dans `docs/CONTEXTE-PROJET.md` (§ 4, principe 4, et « Hors V1 ») : **pas de
+compte pour les intervenants externes** ; les comptes, ce sont les 3 à 5 personnes du label (DG,
+chefs de projet, directeurs créatifs). Un réalisateur, un chef op, un régisseur ou un monteur
+est en général un **contact du Réseau**, sans compte.
+
+« Chacun retrouve ce qui le concerne » (Ibé) se lit donc ainsi :
+
+- **Le chef de projet** a la page Production de l'app : il voit tout, il sollicite, il valide.
+- **Chaque intervenant externe** reçoit un **lien privé à son rôle** (modèle déjà en place : la
+  fiche de renseignements du Juridique `/f/[token]`, le dossier du mixeur `/m/[token]`). Sa page
+  ne montre que sa part : le brief et de quoi déposer sa proposition pour le réalisateur, le
+  concept et sa liste caméra / lumière pour le chef op, les rushes, les retours et le dépôt de
+  version pour le monteur.
+- **Ce qu'il renvoie arrive en proposition** ; le chef de projet relit et valide, comme une
+  proposition de PO.
+- **Le chef de projet peut toujours saisir à sa place** (petite production, intervenant qui ne
+  passe pas par le lien) ou importer le document qu'il a envoyé (import existant). C'est le
+  recours, pas le chemin par défaut.
+- **Exception** : un rôle tenu par quelqu'un du label (le directeur créatif qui réalise, par
+  exemple) se fait dans l'app avec son compte, comme aujourd'hui pour le brief réalisateur.
+
 ## 3. L'organisation de la production : interne, externe, hybride
 
 C'est **la première décision** de la Production, avant toute préparation (Ibé, étape 1 « Définir
@@ -115,8 +138,9 @@ saisisse tout lui-même.
   techniciens et feuille de service à saisir.
 - **E2. Un seul acteur.** Tout s'écrit par le responsable du projet (seul le brief réalisateur
   s'ouvre au réalisateur s'il a un compte). Pas de chargé de production, de chef op, de régisseur
-  ni de monteur comme rôles ; personne ne voit « ce qui me concerne ». Pas d'accès pour un
-  intervenant **sans compte**, alors que le Master le fait déjà pour le mixeur (`/m/[token]`).
+  ni de monteur comme rôles ; personne ne voit « ce qui me concerne ». Pas de lien pour un
+  intervenant **sans compte** (§ 2 bis), alors que le Master le fait déjà pour le mixeur
+  (`/m/[token]`).
 - **E3. Pas de prochaine action.** La phase est calculée mais aucune page ne dit « voici ce qui
   reste, voici la suite » ; la Préproduction présente ses neuf parties d'un coup. La Conception a
   déjà ce mécanisme (`lib/design/journey-next.ts`) : le modèle à suivre.
@@ -136,14 +160,16 @@ Chaque lot reste une étape à part ; aucun n'est commencé.
    d'une fiche, qui décide des parties affichées ; un bandeau « où on en est / la suite » par
    fiche et sur la liste, calculé par le code comme `journey-next.ts`. C'est ce qui répond le plus
    directement à « je ne sais pas pourquoi je remplis, ni ce qui se passe ensuite ».
-2. **Rôles de production** (E2) : attribuer les rôles du § 2 à des membres ou à des contacts du
-   Réseau (cumul possible), une vue « Ma part » par rôle, droits d'écriture par rôle (RLS).
+2. **Rôles de production** (E2) : attribuer les rôles du § 2 à des contacts du Réseau ou à des
+   membres (cumul possible) ; la page du chef de projet dit, pour chaque rôle, ce qu'on attend
+   de lui et où il en est.
 3. **Chaînes d'information** (E5) : besoins du call → lignes de matériel / postes en brouillon ;
    feuille de service composée depuis lieu, planning et affectations confirmés ; chaque manque du
    contrôle avec son responsable et son caractère bloquant.
 4. **Repérages comparés** (E4).
-5. **Intervenants sans compte** (E2, E6) : lien à usage unique sur le modèle de `/m/[token]`
-   (réalisateur pour sa proposition, chef op pour sa liste, monteur pour ses versions).
+5. **Une page par rôle, par lien privé** (§ 2 bis, E2, E6) : sur le modèle de `/m/[token]`
+   (réalisateur pour sa proposition, chef op pour sa liste, monteur pour ses versions) ; ce qui
+   revient est une proposition que le chef de projet valide.
 
 ## 9. À trancher
 
@@ -152,8 +178,9 @@ Chaque lot reste une étape à part ; aucun n'est commencé.
 - **Hybride** : la répartition se fait-elle par partie (préprod / tournage / post) ou par rôle ?
 - **Qui valide** la proposition du réalisateur et le choix du lieu : le chef de projet seul, ou
   aussi le directeur créatif ?
-- **Droits** : un chef op ou un régisseur membre de l'app écrit-il seulement « sa part », ou
-  aussi la feuille de service ? (règle actuelle : dans un projet lancé, seul le responsable écrit —
-  `CLAUDE.md`, « Permissions » ; l'ouvrir par rôle est une décision de direction.)
+- **À confirmer avec Ibé** : réalisateurs, chefs op et monteurs sont-ils bien des externes sans
+  compte (§ 2 bis) ? Le label a-t-il des salariés qui tiennent ces rôles ? Si oui, faut-il un
+  nouveau poste (ex. chargé de production) ? Aujourd'hui, dans un projet lancé, seul le
+  responsable écrit (`CLAUDE.md`, « Permissions »).
 - **Autres contenus** (capsule, interview) : mêmes étapes en version courte, ou gabarits
   distincts ?
