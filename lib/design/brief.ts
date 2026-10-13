@@ -7,6 +7,10 @@ import {
   type BriefIdentity,
 } from "@/lib/design/brief-identity";
 import { briefOpenPoints } from "@/lib/design/brief-open-points";
+import {
+  loadRetainedProposals,
+  type RetainedProposal,
+} from "@/lib/design/brief-proposals";
 import { DESIGN_TOPICS, type DesignTopic } from "@/lib/design/intentions";
 import { validatedReferenceIds } from "@/lib/design/reference-status";
 import { isMilestoneChannel } from "@/lib/strategy/calendar";
@@ -45,6 +49,9 @@ export type CreativeBriefContent = {
     intentions: Array<{ topic: DesignTopic; value: string }>;
     // What it takes from the release's direction as is (MKT-C2-06).
     inherits?: DesignTopic[];
+    // The creative proposal retained, and how many its history holds
+    // (MKT-C2-10).
+    retained?: RetainedProposal;
   }>;
   references: Array<{ label: string; url: string | null; targets: string[] }>;
   constraints: Array<{ type: string; text: string }>;
@@ -103,9 +110,10 @@ export async function buildCreativeBrief(
   directionData: DirectionData,
 ): Promise<CreativeBriefContent> {
   const t = fr.conceptionDirection.brief;
-  const [extras, identity] = await Promise.all([
+  const [extras, identity, retained] = await Promise.all([
     loadStrategyExtras(project.id),
     loadBriefIdentity(project.id),
+    loadRetainedProposals(project.id),
   ]);
   const titleOf = new Map(data.deliverables.map((d) => [d.id, d.title]));
   const directionTitle = fr.conceptionDirection.summary.direction;
@@ -172,6 +180,9 @@ export async function buildCreativeBrief(
     deliverables: data.deliverables.map((d) => ({
       title: d.title,
       status: d.status,
+      ...(d.strategyDeliverableId && retained.has(d.strategyDeliverableId)
+        ? { retained: retained.get(d.strategyDeliverableId) }
+        : {}),
       inherits: DESIGN_TOPICS.filter(
         (topic) =>
           direction(data, topic).length > 0 &&

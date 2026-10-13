@@ -37,13 +37,22 @@ export const design = {
     noDueDate: "sans échéance",
     due: (date: string) => `pour le ${date}`,
   },
+  // MKT-C2-10: the states of a creative proposal, never of production.
   states: {
     to_design: "À concevoir",
-    submitted: "À relire",
-    changes_requested: "À reprendre",
-    approved: "Approuvé",
+    submitted: "Soumise · en relecture",
+    changes_requested: "Retouches demandées",
+    approved: "Concept approuvé",
+    discarded: "Écartée",
   },
   version: {
+    // MKT-C2-10: the zone of a retouche and its task.
+    scope: (zone: string) => `Zone : ${zone}`,
+    retoucheOpen: (name: string) =>
+      name
+        ? `Tâche de retouche ouverte pour ${name}.`
+        : "Tâche de retouche ouverte.",
+    retoucheDone: "Retouche faite.",
     label: (n: number) => `Version ${n}`,
     by: (name: string, date: string) =>
       name ? `Déposée par ${name} · ${date}` : `Déposée · ${date}`,
@@ -62,11 +71,20 @@ export const design = {
     withdrawLabel: (n: number) => `Retirer la version ${n}`,
   },
   review: {
-    approve: "Approuver",
+    approve: "Approuver le concept",
     requestChanges: "Demander des retouches",
     commentLabel: "Retouches attendues",
     commentPlaceholder: "Ce qu'il faut reprendre, précisément.",
+    // MKT-C2-10: a precise zone, and the task that follows.
+    scopeLabel: "Zone précise",
+    scopePlaceholder: "Plan 2 à 0:45, la typo du titre…",
+    taskNote:
+      "L'auteur reçoit une tâche de retouche dans son Travail ; elle se ferme quand il soumet la version suivante.",
     send: "Envoyer les retouches",
+    discardOpen: "Écarter",
+    discardLabel: "Pourquoi l'écarter ?",
+    discardPlaceholder: "La piste n'est pas retenue, une autre est choisie…",
+    discard: "Écarter la proposition",
     cancel: "Annuler",
   },
   deposit: {

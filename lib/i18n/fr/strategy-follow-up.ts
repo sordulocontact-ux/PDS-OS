@@ -48,7 +48,8 @@ export const strategyFollowUp = {
     designSubmitted: "Version déposée, à valider",
     designChanges: "Modifications demandées sur la conception",
     toDesign: "À concevoir",
-    designApproved: "Conception validée, production en cours",
+    // MKT-C2-10: a concept approved is never « produced » nor « delivered ».
+    designApproved: "Concept approuvé, production pas encore commencée",
     toApprove: "Version finale à valider",
     toCheck: "Contrôle technique à faire",
     toDeliver: "Livraison à confirmer",

@@ -4578,8 +4578,10 @@ export type Database = {
           path: string | null
           project_id: string
           review_comment: string | null
+          review_scope: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          reviewed_role: string | null
           status: string
           url: string | null
         }
@@ -4598,8 +4600,10 @@ export type Database = {
           path?: string | null
           project_id: string
           review_comment?: string | null
+          review_scope?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          reviewed_role?: string | null
           status?: string
           url?: string | null
         }
@@ -4618,8 +4622,10 @@ export type Database = {
           path?: string | null
           project_id?: string
           review_comment?: string | null
+          review_scope?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          reviewed_role?: string | null
           status?: string
           url?: string | null
         }
@@ -13952,6 +13958,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           deliverable_id: string | null
+          design_version_id: string | null
           done_at: string | null
           due_date: string | null
           id: string
@@ -13971,6 +13978,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
+          design_version_id?: string | null
           done_at?: string | null
           due_date?: string | null
           id?: string
@@ -13990,6 +13998,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deliverable_id?: string | null
+          design_version_id?: string | null
           done_at?: string | null
           due_date?: string | null
           id?: string
@@ -14004,6 +14013,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_design_version_id_fkey"
+            columns: ["design_version_id"]
+            isOneToOne: false
+            referencedRelation: "design_versions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_activation_id_fkey"
             columns: ["activation_id"]
@@ -15927,7 +15943,12 @@ export type Database = {
         Returns: string
       }
       review_design_version: {
-        Args: { p_approve: boolean; p_comment?: string; p_version_id: string }
+        Args: {
+          p_comment?: string | null
+          p_decision: string
+          p_scope?: string | null
+          p_version_id: string
+        }
         Returns: undefined
       }
       review_feedback_topic: {

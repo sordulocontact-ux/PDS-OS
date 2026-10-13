@@ -68,7 +68,7 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
     supabase
       .from("tasks")
       .select(
-        "id, title, due_date, project_id, legal_plan_item_id, master_question_id, deliverable_id, activation_id, strategy_recommendations(id)",
+        "id, title, due_date, project_id, legal_plan_item_id, master_question_id, deliverable_id, activation_id, strategy_recommendations(id), design_version_id",
       )
       .eq("assignee_person_id", me)
       .eq("status", "todo")

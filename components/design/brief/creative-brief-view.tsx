@@ -145,6 +145,17 @@ export function CreativeBriefView({
                   )}
                 />
               )}
+              {d.retained && (
+                <p className="text-caption text-muted-foreground">
+                  {t.retained(
+                    d.retained.number,
+                    d.retained.approvedOn
+                      ? formatBriefDate(d.retained.approvedOn)
+                      : null,
+                    d.retained.total,
+                  )}
+                </p>
+              )}
               {d.inherits && d.inherits.length > 0 && (
                 <p className="text-caption text-muted-foreground">
                   {t.inherits(

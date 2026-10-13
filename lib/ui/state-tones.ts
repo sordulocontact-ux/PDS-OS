@@ -186,6 +186,7 @@ export const designStateTone: Record<string, Tone> = {
   submitted: "warning",
   changes_requested: "danger",
   approved: "success",
+  discarded: "neutral",
 };
 
 /** Kind of a feedback about the app: a bug blocks someone, an idea is ahead. */

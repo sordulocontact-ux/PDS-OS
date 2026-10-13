@@ -199,6 +199,9 @@ export const routes = {
   projectStrategyDimension: (id: string, dimension: string) =>
     `/app/projects/${id}/strategy?d=${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
+  // A creative proposal: redirects to its deliverable's work (MKT-C2-10).
+  projectDesignVersion: (id: string, versionId: string) =>
+    `/app/projects/${id}/design/versions/${versionId}`,
   // The Conception's direct work (Chemin B), on one target: a deliverable
   // (design_deliverables.id) or « direction »; `topic` unfolds one question.
   projectDesignWork: (id: string, target?: string, topic?: string) => {

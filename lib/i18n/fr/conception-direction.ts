@@ -110,6 +110,13 @@ export const conceptionDirection = {
     viewing: (n: number) => `Version V${n}`,
     backToLatest: "Revenir à la dernière version",
     inherits: (topics: string) => `Hérite de la direction : ${topics}.`,
+    // MKT-C2-10: only the proposal retained; the others stay in its history.
+    retained: (n: number, date: string | null, total: number) =>
+      `Proposition retenue : V${n}${date ? `, concept approuvé le ${date}` : ""}${
+        total > 1
+          ? ` (${total} propositions dans l'historique du livrable)`
+          : ""
+      }.`,
     // MKT-C2-04: the artist's identity the release used.
     identity: {
       title: "Identité de l'artiste",

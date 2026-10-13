@@ -6,6 +6,8 @@ type LinkedTask = {
   master_question_id: string | null;
   deliverable_id: string | null;
   activation_id: string | null;
+  // The creative proposal a retouche task is about (MKT-C2-10).
+  design_version_id?: string | null;
   // The follow-up's recommendation it was created from (MKT-C2-02); empty
   // when the viewer cannot see the project's strategy (RLS).
   strategy_recommendations?: { id: string }[] | null;
@@ -26,6 +28,8 @@ export function taskHref(
 ): string | null {
   if (planHref) return planHref;
   if (task.master_question_id) return questionTaskHref(task.project_id);
+  if (task.design_version_id)
+    return routes.projectDesignVersion(task.project_id, task.design_version_id);
   if (task.deliverable_id)
     return routes.projectDesignDeliverable(
       task.project_id,

@@ -25,6 +25,9 @@ export type DesignVersion = {
   note: string | null;
   status: VersionStatus;
   reviewComment: string | null;
+  // MKT-C2-10: the zone a retouche is about, and its task in the Travail.
+  reviewScope: string | null;
+  retouche: { done: boolean; assigneeName: string } | null;
   reviewerName: string;
   reviewedAt: string | null;
   authorPersonId: string | null;
@@ -44,7 +47,7 @@ export async function listDesignVersions(
   const { data, error } = await supabase
     .from("design_versions")
     .select(
-      "id, deliverable_id, number, kind, path, file_name, bytes, url, note, status, review_comment, reviewed_at, created_by, created_at, author:people!design_versions_created_by_fkey(first_name, last_name), reviewer:people!design_versions_reviewed_by_fkey(first_name, last_name)",
+      "id, deliverable_id, number, kind, path, file_name, bytes, url, note, status, review_comment, review_scope, reviewed_at, created_by, created_at, author:people!design_versions_created_by_fkey(first_name, last_name), reviewer:people!design_versions_reviewed_by_fkey(first_name, last_name), tasks(status, assignee:people!tasks_assignee_person_id_fkey(first_name, last_name))",
     )
     .eq("project_id", projectId)
     .order("number", { ascending: false });
@@ -78,6 +81,13 @@ export async function listDesignVersions(
         note: row.note,
         status: versionStatusOf(row.status),
         reviewComment: row.review_comment,
+        reviewScope: row.review_scope,
+        retouche: row.tasks[0]
+          ? {
+              done: row.tasks[0].status === "done",
+              assigneeName: nameOf(row.tasks[0].assignee),
+            }
+          : null,
         reviewerName: nameOf(row.reviewer),
         reviewedAt: row.reviewed_at,
         authorPersonId: row.created_by,

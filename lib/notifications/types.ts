@@ -16,6 +16,7 @@ export const NOTIFICATION_KINDS = [
   "design_version_submitted",
   "design_version_approved",
   "design_version_changes_requested",
+  "design_version_discarded",
   "contract_review_requested",
   "contract_approved",
   "contract_changes_requested",
@@ -127,8 +128,11 @@ export function notificationHref(
     return subjectId
       ? routes.projectStrategyDocument(projectId, subjectId)
       : routes.projectStrategyBrief(projectId);
+  // The proposal itself, on its deliverable's work page (MKT-C2-10).
   if (kind.startsWith("design_version_"))
-    return routes.projectDesign(projectId);
+    return subjectId
+      ? routes.projectDesignVersion(projectId, subjectId)
+      : routes.projectDesign(projectId);
   if (kind.startsWith("validation_")) {
     // The Brief's own page: the validator decides there, the owner sees
     // the decision and what was reopened.

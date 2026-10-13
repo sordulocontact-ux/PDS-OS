@@ -2,7 +2,7 @@
 -- the owner and the creative team deposit versions, the owner reviews them;
 -- frozen once submitted. Run with `supabase test db`.
 begin;
-select plan(25);
+select plan(29);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -129,7 +129,7 @@ select lives_ok($$
   insert into public.design_versions (organization_id, project_id, kind, url)
   values (pg_temp.org(), pg_temp.prj(), 'link', 'https://example.com/moodboard')
 $$, 'a creative deposits a board for the creative direction');
-select throws_ok($$ select public.review_design_version(pg_temp.id_of('v2'), true, null) $$,
+select throws_ok($$ select public.review_design_version(pg_temp.id_of('v2'), 'approved', null) $$,
                  '42501', null, 'a creative does not review');
 reset role;
 
@@ -151,13 +151,15 @@ select is((select count(*)::int from public.notifications
 select pg_temp.act_as(pg_temp.id_of('owner'));
 select throws_ok($$
   select public.review_design_version((select id from public.design_versions
-    where deliverable_id = pg_temp.id_of('deliverable') and number = 1), true, null)
+    where deliverable_id = pg_temp.id_of('deliverable') and number = 1), 'approved', null)
 $$, 'P0001', 'version_superseded', 'only the latest version is reviewed');
-select throws_ok($$ select public.review_design_version(pg_temp.id_of('v2'), false, ' ') $$,
+select throws_ok($$ select public.review_design_version(pg_temp.id_of('v2'), 'changes_requested', ' ') $$,
                  'P0001', 'reason_required', 'asking for changes needs a comment');
-select lives_ok($$ select public.review_design_version(pg_temp.id_of('v2'), false, 'Plus de contraste') $$,
-                'the owner asks for changes');
-select throws_ok($$ select public.review_design_version(pg_temp.id_of('v2'), true, null) $$,
+select lives_ok($$ select public.review_design_version(pg_temp.id_of('v2'), 'changes_requested', 'Plus de contraste', 'Le titre') $$,
+                'the owner asks for changes, on a precise zone');
+select is((select review_scope || '/' || reviewed_role from public.design_versions where id = pg_temp.id_of('v2')),
+          'Le titre/project_owner', 'the decision keeps its scope and the role that took it');
+select throws_ok($$ select public.review_design_version(pg_temp.id_of('v2'), 'approved', null) $$,
                  'P0001', 'invalid_transition', 'a reviewed version is settled');
 reset role;
 
@@ -165,6 +167,10 @@ select is((select count(*)::int from public.notifications
             where recipient_person_id = pg_temp.id_of('creative_person')
               and kind = 'design_version_changes_requested' and subject_id = pg_temp.id_of('v2')), 1,
           'the author is told of the review');
+select is((select count(*)::int from public.tasks
+            where design_version_id = pg_temp.id_of('v2') and status <> 'done'
+              and assignee_person_id = pg_temp.id_of('creative_person')), 1,
+          'asking for changes gives the author a retouche task, once');
 
 select pg_temp.act_as(pg_temp.id_of('creative'));
 delete from public.design_versions where id = pg_temp.id_of('v2');
@@ -177,9 +183,13 @@ select lives_ok($$
   insert into ids select 'v3', id from v;
 $$, 'the creative deposits a new version');
 reset role;
+select is((select status from public.tasks where design_version_id = pg_temp.id_of('v2')), 'done',
+          'the new version closes the retouche task of the older one');
 
 select pg_temp.act_as(pg_temp.id_of('owner'));
-select lives_ok($$ select public.review_design_version(pg_temp.id_of('v3'), true, null) $$,
+select throws_ok($$ select public.review_design_version(pg_temp.id_of('v3'), 'discarded', null) $$,
+                 'P0001', 'reason_required', 'setting a proposal aside says why');
+select lives_ok($$ select public.review_design_version(pg_temp.id_of('v3'), 'approved', null) $$,
                 'the owner approves it');
 
 -- Submitted: frozen ------------------------------------------------------------

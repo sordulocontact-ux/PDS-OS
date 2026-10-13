@@ -31,6 +31,9 @@ export function VersionItem({
   const canWithdraw = inProgress && submitted && mine;
   // MKT-C2-08: nobody approves a version they deposited themselves.
   const review = canReview && submitted && !mine;
+  // MKT-C2-10: a proposal sent back may still be set aside.
+  const discard =
+    canReview && !mine && (submitted || version.status === "changes_requested");
   const Icon = version.kind === "file" ? IconPaperclip : IconLink;
   const label =
     version.kind === "file"
@@ -40,7 +43,8 @@ export function VersionItem({
       : version.href;
 
   return (
-    <article className="grid gap-2">
+    // The anchor a notification and a retouche task lead to (MKT-C2-10).
+    <article id={`version-${version.id}`} className="grid scroll-mt-24 gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <h4 className="text-sm font-medium">{t.label(version.number)}</h4>
@@ -83,9 +87,21 @@ export function VersionItem({
       )}
       {version.reviewedAt && (
         <div className="grid gap-0.5 border-l-2 border-border pl-3">
+          {version.reviewScope && (
+            <p className="text-xs text-muted-foreground">
+              {t.scope(version.reviewScope)}
+            </p>
+          )}
           {version.reviewComment && (
             <p className="text-sm whitespace-pre-wrap">
               {version.reviewComment}
+            </p>
+          )}
+          {version.retouche && (
+            <p className="text-xs text-muted-foreground">
+              {version.retouche.done
+                ? t.retoucheDone
+                : t.retoucheOpen(version.retouche.assigneeName)}
             </p>
           )}
           <p className="text-xs text-muted-foreground">
@@ -102,12 +118,13 @@ export function VersionItem({
           {fr.conceptionRoles.selfApproval}
         </p>
       )}
-      {review || canWithdraw ? (
+      {review || discard || canWithdraw ? (
         <VersionActions
           projectId={projectId}
           versionId={version.id}
           number={version.number}
           canReview={review}
+          canDiscard={discard}
           canWithdraw={canWithdraw}
         />
       ) : null}

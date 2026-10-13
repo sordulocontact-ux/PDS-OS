@@ -131,23 +131,36 @@ export async function withdrawDesignVersion(
   return ok;
 }
 
+/**
+ * A creative proposal's review (MKT-C2-10): the concept approved, changes
+ * asked (a reason, a zone if precise — the author's retouche task follows,
+ * once), or the proposal set aside (a reason). Never by its own author.
+ */
 export async function reviewDesignVersion(
   projectId: string,
   versionId: string,
-  approve: boolean,
+  decision: "approved" | "changes_requested" | "discarded",
   comment: string,
+  scope = "",
 ): Promise<ActionResult> {
   await requireApproved();
   const parsed = z
-    .object({ versionId: z.uuid(), comment: z.string().max(1000) })
-    .safeParse({ versionId, comment });
+    .object({
+      versionId: z.uuid(),
+      decision: z.enum(["approved", "changes_requested", "discarded"]),
+      comment: z.string().max(1000),
+      scope: z.string().max(500),
+    })
+    .safeParse({ versionId, decision, comment, scope });
   if (!parsed.success) return fail("invalid_input");
-  if (!approve && comment.trim() === "") return fail("reason_required");
+  if (decision !== "approved" && comment.trim() === "")
+    return fail("reason_required");
   const supabase = await createClient();
   const { error } = await supabase.rpc("review_design_version", {
     p_version_id: versionId,
-    p_approve: approve,
+    p_decision: decision,
     p_comment: comment,
+    p_scope: scope,
   });
   // stage_locked is raised with 42501 too: the message decides first.
   if (error?.message?.includes("stage_locked")) return fail("stage_locked");

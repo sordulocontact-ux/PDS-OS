@@ -3970,6 +3970,31 @@ Migration `…20261013100501_reference_types`, tests `supabase/tests/reference-t
   référence d'origine d'une recherche n'est pas enregistrée (la recherche part d'une cible ou de
   toutes les images, pas d'une seule référence).
 
+### Retours Marketing du 12/10/2026, lot C9 (MKT-C2-10, propositions et retouches)
+
+Migration `…20261013100601_proposal_retouches`, tests ajoutés à `supabase/tests/design.test.sql` (29).
+
+- **États d'une proposition créative** (`design_versions`, `VersionStatus`) : soumise · en relecture,
+  retouches demandées, **concept approuvé**, **écartée** (nouvelle : avec raison, par le chef de
+  projet, jamais supprimée). Un concept approuvé n'est jamais « produit » ni « livré » (états de
+  Production) : le suivi de la Stratégie dit « Concept approuvé, production pas encore commencée ».
+  Une proposition écartée laisse le livrable « À concevoir ». **Décision prise ici** : pas d'état
+  « brouillon » (une proposition existe quand elle est soumise ; l'auteur la retire avant relecture).
+- **Décision** : `review_design_version(p_version_id, p_decision, p_comment, p_scope)` (nouvelle
+  signature) garde l'auteur, le **rôle** (`reviewed_role`), la date, le motif et le **périmètre**
+  (`review_scope` : toute la proposition, ou une zone précise).
+- **Retouche → tâche** : demander des retouches crée la tâche de l'auteur dans son Travail, une seule
+  fois (`tasks.design_version_id`, index unique) ; la proposition suivante du même livrable **ferme**
+  les tâches de retouche ouvertes des précédentes (`design_versions_close_retouches`). La tâche mène à
+  la proposition (`taskHref`), la carte de la version dit si la retouche est ouverte ou faite.
+- **Historique** : V1 reste consultable après V2 (inchangé) ; chaque carte montre auteur, date,
+  note, zone, commentaire, décision et retouche.
+- **Notifications** : elles mènent à la proposition elle-même (`/design/versions/[versionId]`, qui
+  redirige vers le travail du livrable à l'ancre `#version-<id>`) ; nouvelle notification
+  `design_version_discarded`.
+- **Brief créatif** : chaque livrable dit sa **proposition retenue** (dernier concept approuvé) et
+  combien son historique en compte (`deliverables[].retained`, `lib/design/brief-proposals.ts`).
+
 ## 8 undecies. Les autres rôles (test UX du 09/10/2026, section 5)
 
 « Les autres rôles n'ont pas leur outil » (sévérité 3). Migrations `20261010001001` à `…1701`,

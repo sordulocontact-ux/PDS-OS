@@ -139,7 +139,7 @@ with v as (insert into public.design_versions (organization_id, project_id, deli
            values (pg_temp.org(), pg_temp.prj(), pg_temp.id_of('sd_caps'), 'link', 'https://example.com/v1')
            returning id)
 insert into ids select 'dv', id from v;
-select throws_ok($$ select public.review_design_version(pg_temp.id_of('dv'), true, null) $$,
+select throws_ok($$ select public.review_design_version(pg_temp.id_of('dv'), 'approved', null) $$,
   '42501', null, 'the owner does not approve a version they deposited');
 select is((select count(*)::int from public.design_events
             where project_id = pg_temp.prj() and kind = 'design_version.deposited'), 1,

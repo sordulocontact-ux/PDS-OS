@@ -5,22 +5,29 @@
 export const DESIGN_FILE_BUCKET = "design-files";
 export const MAX_DESIGN_FILE_BYTES = 50 * 1024 * 1024;
 
-export type VersionStatus = "submitted" | "approved" | "changes_requested";
+// A creative proposal (MKT-C2-10): submitted and under review, changes
+// requested, concept approved, or set aside (« écartée »).
+export type VersionStatus =
+  "submitted" | "approved" | "changes_requested" | "discarded";
 
-// Computed by code from the latest version, never stored.
-export type DesignState = "to_design" | VersionStatus;
+// Computed by code from the latest version, never stored. A concept
+// approved is never « produced » nor « delivered »: those are Production's.
+export type DesignState = "to_design" | Exclude<VersionStatus, "discarded">;
 
 export function versionStatusOf(value: string): VersionStatus {
-  return value === "approved" || value === "changes_requested"
+  return value === "approved" ||
+    value === "changes_requested" ||
+    value === "discarded"
     ? value
     : "submitted";
 }
 
-/** A deliverable's state is its latest version's; none yet = to design. */
+/** A deliverable's state is its latest version's; none yet, or the latest
+ * set aside, = to design. */
 export function designStateOf(
   latest: { status: VersionStatus } | undefined,
 ): DesignState {
-  return latest?.status ?? "to_design";
+  return !latest || latest.status === "discarded" ? "to_design" : latest.status;
 }
 
 // "<organization_id>/<project_id>/<uuid>[.<ext>]", as the database checks.
