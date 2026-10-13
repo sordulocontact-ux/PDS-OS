@@ -20,6 +20,7 @@ export function deliveryNext(ctx: NextContext): ProductionNext {
     owner({
       ...blank,
       kind: "act",
+      dueKey: "exports",
       title: t.steps.checklist.title,
       why: t.steps.checklist.why,
       done,
@@ -46,6 +47,7 @@ export function deliveryNext(ctx: NextContext): ProductionNext {
     return owner({
       ...blank,
       kind: "decision",
+      dueKey: "delivery",
       title: t.steps.deliver.title,
       why: t.steps.deliver.why,
       done: t.done.checked,
@@ -56,6 +58,7 @@ export function deliveryNext(ctx: NextContext): ProductionNext {
     return owner({
       ...blank,
       kind: "act",
+      dueKey: "exports",
       title: t.steps.notOk.title(s.not_ok),
       why: t.steps.notOk.why,
       done: approved,
@@ -66,6 +69,7 @@ export function deliveryNext(ctx: NextContext): ProductionNext {
     return owner({
       ...blank,
       kind: "act",
+      dueKey: "exports",
       title: stale
         ? t.steps.stale.title(s.stale)
         : t.steps.toCheck.title(s.to_check),
@@ -77,6 +81,7 @@ export function deliveryNext(ctx: NextContext): ProductionNext {
   return owner({
     ...blank,
     kind: "decision",
+    dueKey: "exports",
     title: t.steps.confirmChecked.title,
     why: t.steps.confirmChecked.why,
     done: approved,

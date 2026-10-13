@@ -7,7 +7,7 @@
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
-import { blank, nextContext } from "./context";
+import { blank, nextContext, nobody } from "./context";
 import { deliveryNext } from "./delivery";
 import { preproductionNext } from "./preproduction";
 import { postNext, shotNext } from "./shoot-post";
@@ -18,7 +18,6 @@ const t = fr.productionNext;
 export function productionNext(input: NextInput): ProductionNext {
   const ctx = nextContext(input);
   const { link, owner } = ctx;
-  const nobody = { ...blank, who: null, viewerIsWho: false };
 
   if (!input.hasSource)
     return {
@@ -77,6 +76,7 @@ export function productionNext(input: NextInput): ProductionNext {
       return owner({
         ...blank,
         kind: "act",
+        dueKey: "shoot",
         title:
           input.shoot?.state === "postponed"
             ? t.steps.launch.titlePostponed
@@ -89,6 +89,7 @@ export function productionNext(input: NextInput): ProductionNext {
       return owner({
         ...blank,
         kind: "act",
+        dueKey: "shoot",
         title: t.steps.endShoot.title,
         why: t.steps.endShoot.why,
         link: link(t.steps.endShoot.link, "shoot", "shoot-state", "shootState"),

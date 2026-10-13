@@ -8,6 +8,7 @@ import {
   handoffStaleness,
   summarize,
 } from "@/lib/production/delivery/rules";
+import { effectiveLogistics } from "@/lib/production/logistics";
 import type { ProductionPhase } from "@/lib/production/phase";
 import { stepLabel } from "@/lib/production/post/labels";
 import { isPendingCorrection } from "@/lib/production/post/rules";
@@ -15,6 +16,7 @@ import { isConfirmedEquipment } from "@/lib/production/preprod/equipment";
 import { preprodOverview } from "@/lib/production/preprod/overview";
 import type { CheckKey } from "@/lib/production/preprod/types";
 import type { ProductionSheetData } from "@/lib/production/sheet";
+import { retroSchedule } from "@/lib/production/preprod/schedule";
 import { postBlockers } from "@/lib/production/shoot/blockers";
 import {
   deliveryFor,
@@ -53,9 +55,20 @@ export async function loadProductionNext(
     sheet && DELIVERY.includes(phase) ? deliveryFor(...args) : null,
   ]);
   const ownerIsViewer = data.canOpen || data.canOrganize;
+  const today = todayInParis();
+  // The backward schedule's dates (nothing is « done » here: only dates).
+  const due: NextInput["due"] = {};
+  if (sheet)
+    for (const row of retroSchedule(
+      effectiveLogistics(sheet.logistics, data.heritage.fiche),
+      {},
+      today,
+    ).rows)
+      if (row.date) due[row.step] = row.end ?? row.date;
 
   const input: NextInput = {
     projectId,
+    due,
     deliverableId,
     phase,
     stageState: data.stageState,
@@ -88,7 +101,7 @@ export async function loadProductionNext(
   };
 
   if (preprod && sheet) {
-    const o = preprodOverview(data, preprod, todayInParis());
+    const o = preprodOverview(data, preprod, today);
     const { positions, filled, toConfirm } = o.staffing;
     const workDone: Record<CheckKey, boolean> = {
       location: sheet.logistics.locationStatus === "confirmed",

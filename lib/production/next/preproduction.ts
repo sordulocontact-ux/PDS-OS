@@ -4,6 +4,7 @@
 // Client-safe.
 
 import { fr } from "@/lib/i18n/fr";
+import type { ScheduleStep } from "@/lib/production/preprod/schedule";
 import type { CheckKey } from "@/lib/production/preprod/types";
 
 import { blank, type NextContext, type Place } from "./context";
@@ -16,19 +17,45 @@ const checkLabel = (key: CheckKey) =>
 // Where each check's work is done ("" = the Préparation tab).
 const CHECK_PLACES: Record<
   CheckKey,
-  { step: string; anchor: string; place: Place }
+  { step: string; anchor: string; place: Place; due: ScheduleStep }
 > = {
-  location: { step: "preproduction", anchor: "location", place: "location" },
-  team: { step: "", anchor: "production-needs", place: "needs" },
-  equipment: { step: "preproduction", anchor: "equipment", place: "equipment" },
-  schedule: { step: "preproduction", anchor: "schedule", place: "schedule" },
-  budget: { step: "preproduction", anchor: "preprod-budget", place: "budget" },
+  location: {
+    step: "preproduction",
+    anchor: "location",
+    place: "location",
+    due: "location",
+  },
+  team: { step: "", anchor: "production-needs", place: "needs", due: "team" },
+  equipment: {
+    step: "preproduction",
+    anchor: "equipment",
+    place: "equipment",
+    due: "rental",
+  },
+  schedule: {
+    step: "preproduction",
+    anchor: "schedule",
+    place: "schedule",
+    due: "brief",
+  },
+  budget: {
+    step: "preproduction",
+    anchor: "preprod-budget",
+    place: "budget",
+    due: "estimates",
+  },
   call_sheet: {
     step: "preproduction",
     anchor: "call-sheet",
     place: "callSheet",
+    due: "call_sheet",
   },
-  permits: { step: "preproduction", anchor: "readiness", place: "readiness" },
+  permits: {
+    step: "preproduction",
+    anchor: "readiness",
+    place: "readiness",
+    due: "call_sheet",
+  },
 };
 
 export function preproductionNext(ctx: NextContext): ProductionNext {
@@ -39,6 +66,7 @@ export function preproductionNext(ctx: NextContext): ProductionNext {
     owner({
       ...blank,
       kind: "act",
+      dueKey: "estimates",
       title: t.steps.technicalCall.title,
       why: t.steps.technicalCall.why,
       link: link(
@@ -55,6 +83,7 @@ export function preproductionNext(ctx: NextContext): ProductionNext {
     const step = {
       ...blank,
       kind: "act" as const,
+      dueKey: "brief" as const,
       title: t.steps.brief.title,
       why: t.steps.brief.why,
       link: link(t.steps.brief.link, "", "production-brief", "brief"),
@@ -81,6 +110,7 @@ export function preproductionNext(ctx: NextContext): ProductionNext {
     return owner({
       ...blank,
       kind: "decision",
+      dueKey: "call_sheet",
       title: t.steps.markReady.title,
       why: t.steps.markReady.why,
       link: readiness(t.steps.markReady.link),
@@ -89,6 +119,7 @@ export function preproductionNext(ctx: NextContext): ProductionNext {
     return owner({
       ...blank,
       kind: "decision",
+      dueKey: CHECK_PLACES[first.key].due,
       title: t.steps.confirmCheck.title(checkLabel(first.key)),
       why: t.steps.confirmCheck.why,
       missing: missing.slice(1),
@@ -112,6 +143,7 @@ export function preproductionNext(ctx: NextContext): ProductionNext {
   return owner({
     ...blank,
     kind: "act",
+    dueKey: where.due,
     title: work.title,
     why: work.why,
     missing: [...teamMissing, ...missing.slice(1)],

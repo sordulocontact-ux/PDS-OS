@@ -5,6 +5,8 @@ import { NextCard } from "@/components/ui/next-card";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
 import type { ProductionNext } from "@/lib/production/next/types";
+import { formatDate } from "@/lib/release/format";
+import { cn } from "@/lib/utils";
 
 const t = fr.productionNext;
 
@@ -24,8 +26,16 @@ export function whoLine(next: ProductionNext): string | null {
  * expected, what is still missing, and one link where it is done — the
  * place it opens said before the click. Computed by lib/production/next.
  */
-export function ProductionNextStep({ next }: { next: ProductionNext }) {
+export function ProductionNextStep({
+  next,
+  today,
+}: {
+  next: ProductionNext;
+  // Paris's date (ISO): a due date before it reads as late.
+  today: string;
+}) {
   const who = whoLine(next);
+  const late = next.due !== null && next.kind !== "done" && next.due < today;
   return (
     <div className="flex flex-col gap-2">
       {next.done && (
@@ -41,7 +51,25 @@ export function ProductionNextStep({ next }: { next: ProductionNext }) {
       )}
       <NextCard kind={next.kind} label={t.label[next.kind]} title={next.title}>
         <p className="text-sm text-pretty text-muted-foreground">{next.why}</p>
-        {who && <p className="text-sm font-medium">{who}</p>}
+        {(who || next.due) && (
+          <p className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
+            {who && <span className="font-medium">{who}</span>}
+            {next.due && (
+              <span
+                className={cn(
+                  "tabular-nums",
+                  late
+                    ? "font-medium text-[color:var(--tone-danger-fg)]"
+                    : "text-muted-foreground",
+                )}
+              >
+                {late
+                  ? t.late(formatDate(next.due))
+                  : t.due(formatDate(next.due))}
+              </span>
+            )}
+          </p>
+        )}
         {next.missing.length > 0 && (
           <div className="flex flex-col gap-1">
             <span className="text-caption font-medium text-muted-foreground">

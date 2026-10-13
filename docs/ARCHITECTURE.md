@@ -3641,6 +3641,7 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   en page et l'onglet (`lib/production/tab-data.ts`, `cache`). Décision faute de règle : le call
   technique n'est demandé que si aucun matériel n'est encore saisi (une petite production s'en
   passe) ; « Feuille de service » compte comme travaillée dès que l'heure de convocation est écrite.
+  L'échéance affichée est la date du rétroplanning de l'étape (en rouge si elle est passée).
 
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 

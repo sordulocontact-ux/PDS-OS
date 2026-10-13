@@ -28,6 +28,7 @@ export function shotNext(ctx: NextContext): ProductionNext {
     return owner({
       ...blank,
       kind: "act",
+      dueKey: "backup",
       title: t.steps.declarations.title,
       why: t.steps.declarations.why,
       missing: declarations,
@@ -97,6 +98,7 @@ export function postNext(ctx: NextContext): ProductionNext {
     const n = latest ? latest.number + 1 : 1;
     return {
       ...blank,
+      due: input.due.validation ?? null,
       kind: "wait",
       title: t.steps.awaitVersion.title(n, p.maker),
       why: t.steps.awaitVersion.why(n),
@@ -126,6 +128,7 @@ export function postNext(ctx: NextContext): ProductionNext {
       return by(reviewer, "reviewer", p.viewerReviews, {
         ...blank,
         kind: "decision",
+        dueKey: "validation",
         title: t.steps.review.title(latest.number),
         why: t.steps.review.why,
         link: versionsLink,
@@ -134,6 +137,7 @@ export function postNext(ctx: NextContext): ProductionNext {
       return by(reviewer, "reviewer", p.viewerReviews, {
         ...blank,
         kind: "decision",
+        dueKey: "validation",
         title: t.steps.validate.title(latest.number),
         why: t.steps.validate.why,
         link: link(t.steps.validate.link, "post", "decision", "decision"),

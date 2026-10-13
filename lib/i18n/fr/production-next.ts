@@ -8,6 +8,8 @@ export const productionNext = {
   },
   doneLabel: "Dernière étape franchie",
   missingTitle: "Il manque encore",
+  due: (date: string) => `Échéance : ${date}`,
+  late: (date: string) => `En retard : prévu le ${date}`,
   why: "Pourquoi",
   opens: (place: string) => `Ouvre : ${place}`,
   you: "C'est à vous.",

@@ -12,6 +12,7 @@ import type { ProductionPhase } from "@/lib/production/phase";
 import type { VersionStatus } from "@/lib/production/post/rules";
 import type { CheckKey } from "@/lib/production/preprod/types";
 import type { CheckState } from "@/lib/production/preprod/readiness";
+import type { ScheduleStep } from "@/lib/production/preprod/schedule";
 import type { PostBlocker } from "@/lib/production/shoot/blockers";
 import type { ShootState } from "@/lib/production/shoot/rules";
 
@@ -34,6 +35,8 @@ export type ProductionNext = {
   link: NextLink | null;
   // What was just finished, when the phase says it (PROD-007's recap).
   done: string | null;
+  // Its due date, read in the backward schedule (ISO date), if any.
+  due: string | null;
 };
 
 export type NextPerson = { name: string | null; isViewer: boolean };
@@ -41,6 +44,8 @@ export type NextPerson = { name: string | null; isViewer: boolean };
 /** What each phase needs to know, read only for the phase reached. */
 export type NextInput = {
   projectId: string;
+  // The backward schedule's dates (lib/production/preprod/schedule.ts).
+  due: Partial<Record<ScheduleStep, string>>;
   deliverableId: string;
   phase: ProductionPhase;
   stageState: string;

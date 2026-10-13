@@ -6,6 +6,7 @@ import { SectionTabs } from "@/components/shell/section-tabs";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { todayInParis } from "@/lib/insights/dates";
 import { loadProductionNext } from "@/lib/production/next/load";
 import { loadPhaseFacts, phaseOf } from "@/lib/production/phase";
 import { loadProductionSheet } from "@/lib/production/sheet";
@@ -50,7 +51,7 @@ export default async function ProductionSheetLayout({
     <div className="flex flex-col gap-6 pt-6">
       <SheetHeader projectId={projectId} data={data} phase={phase} />
       {(data.heritage.fiche || data.heritage.source) && (
-        <ProductionNextStep next={next} />
+        <ProductionNextStep next={next} today={todayInParis()} />
       )}
       {data.sheet && (
         <SectionTabs
