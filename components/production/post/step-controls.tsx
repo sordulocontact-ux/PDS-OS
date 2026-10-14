@@ -1,10 +1,12 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
+import { addSuggestedPostSteps } from "@/lib/production/post/step-actions";
 import { deletePostStep } from "@/lib/production/post/step-actions";
 import type { PostStepKey } from "@/lib/production/post/rules";
 import type { StepSuggestion } from "@/lib/production/post/suggestions";
@@ -52,17 +54,41 @@ export function StepSuggestions({
   scope,
   people,
   suggestions,
+  deliverableId,
 }: {
   scope: PostScope;
   people: PostPeople;
   suggestions: StepSuggestion[];
+  deliverableId: string;
 }) {
   const [key, setKey] = useState<PostStepKey | null>(null);
+  const [pending, startTransition] = useTransition();
+  const addAll = () =>
+    startTransition(async () => {
+      const result = await addSuggestedPostSteps({
+        projectId: scope.projectId,
+        deliverableId,
+      });
+      if (result.ok) toast.success(t.allAdded);
+      else toast.error(result.error);
+    });
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-0.5">
-        <h3 className="text-sm font-medium">{t.suggestionsTitle}</h3>
-        <p className="text-sm text-muted-foreground">{t.suggestionsHint}</p>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-sm font-medium">{t.suggestionsTitle}</h3>
+          <p className="text-sm text-muted-foreground">{t.suggestionsHint}</p>
+        </div>
+        {suggestions.length > 1 && (
+          <Button
+            size="sm"
+            disabled={pending}
+            aria-busy={pending || undefined}
+            onClick={addAll}
+          >
+            {t.addAll(suggestions.length)}
+          </Button>
+        )}
       </div>
       <ul className="flex flex-col gap-2">
         {suggestions.map((s) => (

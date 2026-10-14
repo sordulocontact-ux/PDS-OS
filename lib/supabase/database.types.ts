@@ -11346,12 +11346,14 @@ export type Database = {
         Row: {
           blocks_closing: boolean
           blocks_post: boolean
+          category: string
           contact_id: string | null
           created_at: string
           created_by: string | null
           follow_up: string | null
           id: string
           impact: string | null
+          impacts: string[]
           organization_id: string
           person_id: string | null
           project_id: string
@@ -11364,12 +11366,14 @@ export type Database = {
         Insert: {
           blocks_closing?: boolean
           blocks_post?: boolean
+          category?: string
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
           follow_up?: string | null
           id?: string
           impact?: string | null
+          impacts?: string[]
           organization_id: string
           person_id?: string | null
           project_id: string
@@ -11382,12 +11386,14 @@ export type Database = {
         Update: {
           blocks_closing?: boolean
           blocks_post?: boolean
+          category?: string
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
           follow_up?: string | null
           id?: string
           impact?: string | null
+          impacts?: string[]
           organization_id?: string
           person_id?: string | null
           project_id?: string
@@ -12469,19 +12475,30 @@ export type Database = {
           audio_sources: boolean
           audio_sources_at: string | null
           audio_sources_by: string | null
+          backup_contact_id: string | null
+          backup_location: string | null
+          backup_person_id: string | null
           backup_verified: boolean
           backup_verified_at: string | null
           backup_verified_by: string | null
           deviations: string | null
+          ended_at: string | null
           files_location: string | null
           missing_sequences: string | null
           observations: string | null
           organization_id: string
+          other_media: boolean
+          other_media_at: string | null
+          other_media_by: string | null
           project_id: string
           report_note: string | null
+          report_snapshot: Json | null
           report_validated_at: string | null
           report_validated_by: string | null
+          rushes_contact_id: string | null
+          rushes_person_id: string | null
           sheet_id: string
+          started_at: string | null
           state: string
           updated_at: string
           video_rushes: boolean
@@ -12492,19 +12509,30 @@ export type Database = {
           audio_sources?: boolean
           audio_sources_at?: string | null
           audio_sources_by?: string | null
+          backup_contact_id?: string | null
+          backup_location?: string | null
+          backup_person_id?: string | null
           backup_verified?: boolean
           backup_verified_at?: string | null
           backup_verified_by?: string | null
           deviations?: string | null
+          ended_at?: string | null
           files_location?: string | null
           missing_sequences?: string | null
           observations?: string | null
           organization_id: string
+          other_media?: boolean
+          other_media_at?: string | null
+          other_media_by?: string | null
           project_id: string
           report_note?: string | null
+          report_snapshot?: Json | null
           report_validated_at?: string | null
           report_validated_by?: string | null
+          rushes_contact_id?: string | null
+          rushes_person_id?: string | null
           sheet_id: string
+          started_at?: string | null
           state?: string
           updated_at?: string
           video_rushes?: boolean
@@ -12515,19 +12543,30 @@ export type Database = {
           audio_sources?: boolean
           audio_sources_at?: string | null
           audio_sources_by?: string | null
+          backup_contact_id?: string | null
+          backup_location?: string | null
+          backup_person_id?: string | null
           backup_verified?: boolean
           backup_verified_at?: string | null
           backup_verified_by?: string | null
           deviations?: string | null
+          ended_at?: string | null
           files_location?: string | null
           missing_sequences?: string | null
           observations?: string | null
           organization_id?: string
+          other_media?: boolean
+          other_media_at?: string | null
+          other_media_by?: string | null
           project_id?: string
           report_note?: string | null
+          report_snapshot?: Json | null
           report_validated_at?: string | null
           report_validated_by?: string | null
+          rushes_contact_id?: string | null
+          rushes_person_id?: string | null
           sheet_id?: string
+          started_at?: string | null
           state?: string
           updated_at?: string
           video_rushes?: boolean
@@ -12543,8 +12582,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "production_shoots_backup_contact_same_org"
+            columns: ["backup_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_shoots_backup_person_id_fkey"
+            columns: ["backup_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "production_shoots_backup_verified_by_fkey"
             columns: ["backup_verified_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_shoots_other_media_by_fkey"
+            columns: ["other_media_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -12559,6 +12619,20 @@ export type Database = {
           {
             foreignKeyName: "production_shoots_report_validated_by_fkey"
             columns: ["report_validated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_shoots_rushes_contact_same_org"
+            columns: ["rushes_contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_shoots_rushes_person_id_fkey"
+            columns: ["rushes_person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]

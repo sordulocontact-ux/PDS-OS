@@ -6,6 +6,10 @@ import { requireApproved } from "@/lib/auth/dal";
 import { parseHolder } from "@/lib/production/needs-rules";
 import { prepDone, type PrepResult } from "@/lib/production/prep-result";
 import { invalidInput, shootFailure } from "@/lib/production/shoot/result";
+import {
+  INCIDENT_CATEGORIES,
+  INCIDENT_IMPACTS,
+} from "@/lib/production/shoot/rules";
 import { createClient } from "@/lib/supabase/server";
 
 const optionalText = (max: number) =>
@@ -28,6 +32,9 @@ const incidentSchema = z.object({
   // A person's choice, never automatic.
   blocksClosing: z.boolean(),
   blocksPost: z.boolean(),
+  // PROD-021: what kind, and the areas it hits.
+  category: z.enum(INCIDENT_CATEGORIES).default("other"),
+  impacts: z.array(z.enum(INCIDENT_IMPACTS)).max(5).default([]),
 });
 
 /** « Signaler un incident » / « Modifier »: impact, who follows it, the
@@ -48,6 +55,8 @@ export async function saveShootIncident(
     follow_up: d.followUp,
     blocks_closing: d.blocksClosing,
     blocks_post: d.blocksPost,
+    category: d.category,
+    impacts: [...new Set(d.impacts)],
   };
   const access = await requireApproved();
   if (!access.organizationId) return shootFailure({ code: "42501" });

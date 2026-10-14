@@ -11,7 +11,10 @@ import {
 } from "@/lib/production/shoot/rules";
 import type { Database } from "@/lib/supabase/database.types";
 import { schedulePendingPushes } from "@/lib/notifications/push";
+import { holderSchema } from "@/lib/production/post/result";
 import { createClient } from "@/lib/supabase/server";
+import { loadShootData } from "@/lib/production/shoot/queries";
+import { shootReport } from "@/lib/production/shoot/report";
 
 type ShootPatch = Database["public"]["Tables"]["production_shoots"]["Update"];
 
@@ -60,6 +63,8 @@ const stateSchema = ref.extend({
   observations: optionalText(4000),
   missingSequences: optionalText(2000),
   deviations: optionalText(2000),
+  // « Reporté »: the new shoot date, written on the sheet (PROD-019).
+  newShootDate: z.union([z.iso.date(), z.literal("")]).default(""),
 });
 
 /** The shoot's state, observations, missing sequences and deviations. The
@@ -72,6 +77,17 @@ export async function saveShootState(
   const d = parsed.data;
   if (needsMissingSequences(d.state) && d.missingSequences === null)
     return shootFailure({ message: "missing_sequences_required" });
+  if (d.state === "postponed" && d.newShootDate === "") return invalidInput;
+  if (d.state === "postponed") {
+    // The sheet's date moves; the checks resting on it follow (z_recheck).
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("production_sheets")
+      .update({ shoot_date: d.newShootDate })
+      .eq("id", d.sheetId)
+      .eq("project_id", d.projectId);
+    if (error) return shootFailure(error);
+  }
   return writeShoot(d.projectId, d.sheetId, {
     state: d.state,
     observations: d.observations,
@@ -84,7 +100,11 @@ const declarationsSchema = ref.extend({
   videoRushes: z.boolean(),
   audioSources: z.boolean(),
   backupVerified: z.boolean(),
+  otherMedia: z.boolean().default(false),
   filesLocation: optionalText(1000),
+  backupLocation: z.string().default("").pipe(optionalText(1000)),
+  rushesHolder: z.string().default("").pipe(holderSchema),
+  backupHolder: z.string().default("").pipe(holderSchema),
 });
 
 /** The three declarations and where the files are: who and when are stamped
@@ -99,7 +119,13 @@ export async function saveShootDeclarations(
     video_rushes: d.videoRushes,
     audio_sources: d.audioSources,
     backup_verified: d.backupVerified,
+    other_media: d.otherMedia,
     files_location: d.filesLocation,
+    backup_location: d.backupLocation,
+    rushes_person_id: d.rushesHolder.personId,
+    rushes_contact_id: d.rushesHolder.contactId,
+    backup_person_id: d.backupHolder.personId,
+    backup_contact_id: d.backupHolder.contactId,
   });
 }
 
@@ -131,7 +157,42 @@ export async function validateShootReport(
   const { error } = await supabase.rpc("validate_production_shoot_report", {
     p_sheet_id: d.sheetId,
   });
-  return error ? shootFailure(error) : prepDone(d.projectId);
+  if (error) return shootFailure(error);
+  // The report as validated, frozen with its validation (PROD-023).
+  const access = await requireApproved();
+  if (access.organizationId) {
+    const data = await loadShootData({
+      projectId: d.projectId,
+      sheetId: d.sheetId,
+      members: [],
+      contacts: [],
+    });
+    const report = shootReport(data.shoot, data.incidents, data.equipment);
+    const { error: snapError } = await supabase
+      .from("production_shoots")
+      .update({
+        report_snapshot: {
+          state: data.shoot.state,
+          startedAt: data.shoot.startedAt,
+          endedAt: data.shoot.endedAt,
+          declarations: report.declarationsDone,
+          incidents: data.incidents.map((i) => ({
+            title: i.title,
+            impacts: i.impacts,
+            resolved: i.resolvedAt !== null,
+          })),
+          equipmentReturned: report.equipmentReturned,
+          equipmentTotal: report.equipmentTotal,
+          missingSequences: data.shoot.missingSequences,
+          deviations: data.shoot.deviations,
+          note: d.note,
+        },
+      })
+      .eq("sheet_id", d.sheetId);
+    if (snapError)
+      console.error("validateShootReport snapshot:", snapError.message);
+  }
+  return prepDone(d.projectId);
 }
 
 /** « Lancer le tournage » (PROD-018): the shoot goes « En cours », once —

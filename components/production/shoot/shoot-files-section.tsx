@@ -8,6 +8,8 @@ import { DECLARATIONS, type ShootRecord } from "@/lib/production/shoot/rules";
 import { shootDeclarationTone } from "@/lib/ui/state-tones";
 
 import { DeclarationsDialog } from "./declarations-dialog";
+import type { Member } from "@/lib/framing/related";
+import type { NetworkOption } from "@/lib/production/sheet";
 import { PostBlockersCallout } from "./post-blockers-callout";
 
 const t = fr.productionShoot.files;
@@ -22,12 +24,16 @@ export function ShootFilesSection({
   shoot,
   blockers,
   canOrganize,
+  members,
+  contacts,
 }: {
   projectId: string;
   sheetId: string;
   shoot: ShootRecord;
   blockers: PostBlocker[];
   canOrganize: boolean;
+  members: Member[];
+  contacts: NetworkOption[];
 }) {
   return (
     <PageSection
@@ -40,6 +46,8 @@ export function ShootFilesSection({
             projectId={projectId}
             sheetId={sheetId}
             shoot={shoot}
+            members={members}
+            contacts={contacts}
           />
         )
       }
@@ -80,6 +88,23 @@ export function ShootFilesSection({
               label: t.location,
               value: shoot.filesLocation,
               valueClassName: "break-all",
+            },
+            {
+              label: t.backupLocation,
+              value: shoot.backupLocation,
+              valueClassName: "break-all",
+            },
+            { label: t.rushesHolder, value: shoot.rushesHolder?.name ?? null },
+            { label: t.backupHolder, value: shoot.backupHolder?.name ?? null },
+            {
+              label: t.otherMedia,
+              value:
+                shoot.otherMedia.done && shoot.otherMedia.at
+                  ? t.declaredBy(
+                      shoot.otherMedia.byName ?? "—",
+                      formatDateTime(shoot.otherMedia.at),
+                    )
+                  : null,
             },
           ]}
         />

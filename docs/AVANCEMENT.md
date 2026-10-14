@@ -391,3 +391,7 @@ Au-delà des six étapes :
 - [x] Retours d'Ibé sur la Production, lot 10 (PROD-016) : feuille de service composée depuis les données
       validées, manques avant diffusion, versions datées, lien stable de l'équipe (`/fs/…`), membres
       prévenus à chaque version (migration `20261014000901`, 8 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 11 (PROD-019 à PROD-024) : début et fin du tournage horodatés,
+      report avec nouvelle date, responsables et emplacements des rushes et de la sauvegarde, autres
+      médias, incidents par catégorie et domaines touchés (clos sans suite si simple fait), compte rendu
+      figé à la validation, étapes de post créées d'un coup (migration `20261014001001`, 6 tests pgTAP)

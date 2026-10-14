@@ -2,6 +2,8 @@ import "server-only";
 
 import type { Member } from "@/lib/framing/related";
 import {
+  INCIDENT_CATEGORIES,
+  INCIDENT_IMPACTS,
   isReturnStatus,
   isShootState,
   RETURN_STATUSES,
@@ -48,7 +50,7 @@ export async function loadShootData({
     supabase
       .from("production_incidents")
       .select(
-        "id, title, impact, person_id, contact_id, follow_up, blocks_closing, blocks_post, resolution, resolved_by, resolved_at",
+        "id, title, impact, person_id, contact_id, follow_up, blocks_closing, blocks_post, resolution, resolved_by, resolved_at, category, impacts",
       )
       .eq("sheet_id", sheetId)
       .order("created_at"),
@@ -121,6 +123,22 @@ export async function loadShootData({
       ),
     },
     filesLocation: row?.files_location ?? null,
+    rushesHolder: holderOf(
+      row?.rushes_person_id ?? null,
+      row?.rushes_contact_id ?? null,
+    ),
+    backupHolder: holderOf(
+      row?.backup_person_id ?? null,
+      row?.backup_contact_id ?? null,
+    ),
+    backupLocation: row?.backup_location ?? null,
+    otherMedia: declaration(
+      row?.other_media,
+      row?.other_media_by,
+      row?.other_media_at,
+    ),
+    startedAt: row?.started_at ?? null,
+    endedAt: row?.ended_at ?? null,
     reportNote: row?.report_note ?? null,
     reportValidatedBy: nameOf(row?.report_validated_by ?? null),
     reportValidatedAt: row?.report_validated_at ?? null,
@@ -137,6 +155,8 @@ export async function loadShootData({
     resolution: i.resolution,
     resolvedBy: nameOf(i.resolved_by),
     resolvedAt: i.resolved_at,
+    category: INCIDENT_CATEGORIES.find((c) => c === i.category) ?? "other",
+    impacts: INCIDENT_IMPACTS.filter((x) => i.impacts.includes(x)),
   }));
 
   const equipment: ReturnLine[] = (equipmentRes.data ?? []).flatMap((e) =>

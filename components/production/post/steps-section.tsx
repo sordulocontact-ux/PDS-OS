@@ -30,6 +30,7 @@ export function StepsSection({
   suggestions,
   canOrganize,
   links,
+  deliverableId,
 }: {
   scope: PostScope;
   people: PostPeople;
@@ -38,6 +39,7 @@ export function StepsSection({
   canOrganize: boolean;
   // Each provider's current private link, by Réseau contact.
   links: Record<string, ProviderLinkState>;
+  deliverableId: string;
 }) {
   return (
     <PageSection
@@ -113,6 +115,7 @@ export function StepsSection({
           scope={scope}
           people={people}
           suggestions={suggestions}
+          deliverableId={deliverableId}
         />
       )}
     </PageSection>

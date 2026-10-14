@@ -96,6 +96,7 @@ export default async function ProductionPostPage({
         suggestions={suggestions}
         canOrganize={role.canOrganize}
         links={post.providerLinks}
+        deliverableId={deliverableId}
       />
       <VersionsSection
         scope={scope}

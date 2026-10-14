@@ -94,6 +94,20 @@ function IncidentItem({
         <div className="flex min-w-0 flex-col gap-2">
           <span className="text-sm font-semibold break-words">{i.title}</span>
           <div className="flex flex-wrap gap-1.5">
+            <StatusBadge size="sm" tone="neutral">
+              {fr.productionShoot.incidents.categories[i.category]}
+            </StatusBadge>
+            {i.impacts.length === 0 ? (
+              <StatusBadge size="sm" tone="neutral">
+                {fr.productionShoot.incidents.plainFact}
+              </StatusBadge>
+            ) : (
+              i.impacts.map((x) => (
+                <StatusBadge key={x} size="sm" tone="warning">
+                  {fr.productionShoot.incidents.impacts[x]}
+                </StatusBadge>
+              ))
+            )}
             <StatusBadge
               size="sm"
               tone={shootIncidentTone[resolved ? "resolved" : "open"]}

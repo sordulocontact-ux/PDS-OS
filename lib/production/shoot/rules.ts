@@ -61,6 +61,15 @@ export type ShootRecord = {
   deviations: string | null;
   declarations: Record<DeclarationKey, Declaration>;
   filesLocation: string | null;
+  // Who retrieves the rushes, who checks the backup, where the backup is,
+  // the other media declared on their own (PROD-020).
+  rushesHolder: Holder | null;
+  backupHolder: Holder | null;
+  backupLocation: string | null;
+  otherMedia: Declaration;
+  // Stamped by the database (PROD-019, PROD-023).
+  startedAt: string | null;
+  endedAt: string | null;
   reportNote: string | null;
   reportValidatedBy: string | null;
   reportValidatedAt: string | null;
@@ -77,7 +86,28 @@ export type ShootIncident = {
   resolution: string | null;
   resolvedBy: string | null;
   resolvedAt: string | null;
+  // PROD-021: what kind, and the areas it hits (none: a plain fact).
+  category: IncidentCategory;
+  impacts: IncidentImpact[];
 };
+
+export const INCIDENT_CATEGORIES = [
+  "equipment",
+  "people",
+  "location",
+  "weather",
+  "technical",
+  "other",
+] as const;
+export type IncidentCategory = (typeof INCIDENT_CATEGORIES)[number];
+export const INCIDENT_IMPACTS = [
+  "safety",
+  "schedule",
+  "budget",
+  "quality",
+  "deliverables",
+] as const;
+export type IncidentImpact = (typeof INCIDENT_IMPACTS)[number];
 
 // Equipment confirmed as rented or borrowed: from « Réservé confirmé » on.
 export const RETURN_STATUSES = [

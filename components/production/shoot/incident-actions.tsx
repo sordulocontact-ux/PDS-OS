@@ -80,6 +80,27 @@ export function IncidentActions({
           icon: IconCheck,
           onSelect: () => setDialog("resolve"),
         },
+    // A plain fact (no area hit) closes without a task (PROD-021).
+    ...(!resolved && incident.impacts.length === 0
+      ? [
+          {
+            key: "close",
+            label: fr.productionShoot.incidents.closeNoFollowUp,
+            icon: IconCheck,
+            onSelect: () =>
+              startTransition(async () => {
+                const result = await resolveShootIncident({
+                  projectId,
+                  incidentId: incident.id,
+                  resolution: fr.productionShoot.incidents.noFollowUpResolution,
+                });
+                if (result.ok)
+                  toast.success(fr.productionShoot.incidents.closedNoFollowUp);
+                else toast.error(result.error);
+              }),
+          },
+        ]
+      : []),
     {
       key: "delete",
       label: t.deleteAction,

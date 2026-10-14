@@ -73,6 +73,8 @@ export const productionPost = {
     formDescription:
       "Rien n'est affecté par défaut : choisissez qui s'en charge quand c'est confirmé.",
     suggestionsTitle: "Étapes proposées par PO",
+    addAll: (n: number) => `Créer les ${n} étapes proposées`,
+    allAdded: "Étapes créées : confiez chacune à son intervenant.",
     suggestionsHint:
       "Modulables : ajoutez celles qui servent, rien n'est créé sans vous.",
     addSuggestion: (label: string) => `Ajouter « ${label} »`,

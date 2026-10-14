@@ -8,6 +8,13 @@ import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { OptionSelect } from "@/components/framing/option-select";
+import { CheckboxField } from "@/components/ui/checkbox-field";
+import {
+  INCIDENT_CATEGORIES,
+  INCIDENT_IMPACTS,
+  type IncidentCategory,
+} from "@/lib/production/shoot/rules";
 import { saveShootIncident } from "@/lib/production/shoot/incident-actions";
 import type { ShootIncident } from "@/lib/production/shoot/rules";
 import type { NetworkOption } from "@/lib/production/sheet";
@@ -45,6 +52,9 @@ export function IncidentForm({
 }) {
   const incident = draft.incident;
   const [holder, setHolder] = useState(holderValue(incident?.holder ?? null));
+  const [category, setCategory] = useState<IncidentCategory>(
+    incident?.category ?? "other",
+  );
   const [missingTitle, setMissingTitle] = useState(false);
   const { pending, error, run } = useWriteSubmit(
     onDone,
@@ -72,6 +82,8 @@ export function IncidentForm({
         followUp: text("followUp"),
         blocksClosing: data.has("blocksClosing"),
         blocksPost: data.has("blocksPost"),
+        category,
+        impacts: INCIDENT_IMPACTS.filter((i) => data.has(`impact-${i}`)),
       }),
     );
   }
@@ -111,6 +123,29 @@ export function IncidentForm({
         defaultValue={incident ? incident.title : draft.title}
         error={missingTitle ? t.missingTitle : undefined}
       />
+      <OptionSelect
+        id={`${prefix}-category`}
+        label={t.fields.category}
+        options={Object.fromEntries(
+          INCIDENT_CATEGORIES.map((c) => [c, t.categories[c]]),
+        )}
+        value={category}
+        onChange={(v) => setCategory(v as IncidentCategory)}
+      />
+      <fieldset className="flex flex-col gap-2">
+        <legend className="text-sm font-medium">{t.fields.impacts}</legend>
+        <p className="text-xs text-muted-foreground">{t.fields.impactsHint}</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {INCIDENT_IMPACTS.map((i) => (
+            <CheckboxField
+              key={i}
+              name={`impact-${i}`}
+              label={t.impacts[i]}
+              defaultChecked={incident?.impacts.includes(i) ?? false}
+            />
+          ))}
+        </div>
+      </fieldset>
       <TextareaField
         id={`${prefix}-impact`}
         name="impact"

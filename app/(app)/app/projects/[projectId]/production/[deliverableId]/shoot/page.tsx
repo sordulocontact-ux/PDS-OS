@@ -99,6 +99,8 @@ export default async function ProductionShootPage({
         {...common}
         shoot={shoot}
         blockers={report.postBlockers}
+        members={data.members}
+        contacts={data.contacts}
       />
       <IncidentsSection
         {...common}

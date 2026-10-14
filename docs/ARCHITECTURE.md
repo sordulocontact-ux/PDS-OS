@@ -3796,6 +3796,19 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   (`/fs/[token]`, hors session, seul le hash gardé, un nouveau lien remplace l'ancien), qui montre
   toujours la dernière version et dit laquelle ; l'e-mail prêt vise les adresses connues de l'équipe.
 
+- **Tournage suivi** (PROD-019 à PROD-024 ; migration `20261014001001_production_shoot_followup.sql`,
+  tests `production-shoot-followup.test.sql`) : début et fin du tournage **horodatés par la base**
+  (`started_at`, `ended_at`) ; « Reporté » exige la **nouvelle date**, écrite sur la fiche (les
+  contrôles qui en dépendent se rouvrent). Rushes : **qui les récupère**, **qui vérifie la
+  sauvegarde**, emplacement principal et **emplacement de sauvegarde**, **autres médias** déclarés à
+  part (qui et quand). Incidents : **catégorie** (matériel, équipe, lieu, météo, technique, autre) et
+  **domaines touchés** (sécurité, planning, budget, qualité, livrables) ; sans domaine coché, c'est un
+  « simple fait » que « Clore sans suite » clôt sans tâche. Le compte rendu montre début et fin et est
+  **figé à sa validation** (`report_snapshot`, effacé si la validation est retirée). Postproduction :
+  **« Créer les N étapes proposées »** crée d'un coup les étapes adaptées au brief et à la Fiche, avec
+  « ce qui est attendu » prérempli, personne affecté par défaut ; la prochaine action y mène quand les
+  rushes sont déclarés et qu'aucun incident ne bloque.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

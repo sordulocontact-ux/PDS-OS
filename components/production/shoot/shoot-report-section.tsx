@@ -67,6 +67,15 @@ export function ShootReportSection({
           facts={[
             { label: t.facts.state, value: s.state.labels[shoot.state] },
             {
+              label: t.facts.times,
+              value: shoot.startedAt
+                ? t.times(
+                    formatDateTime(shoot.startedAt),
+                    shoot.endedAt ? formatDateTime(shoot.endedAt) : null,
+                  )
+                : null,
+            },
+            {
               label: t.facts.shootDate,
               value: shootDate ? formatDate(shootDate) : null,
             },

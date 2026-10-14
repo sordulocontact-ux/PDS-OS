@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,7 @@ function ShootStateForm({
 }) {
   const [state, setState] = useState<ShootState>(shoot.state);
   const [missing, setMissing] = useState(false);
+  const [missingDate, setMissingDate] = useState(false);
   const { pending, error, run } = useWriteSubmit(onDone, t.done);
   const current = shoot.saved ? shoot.state : null;
 
@@ -84,9 +86,17 @@ function ShootStateForm({
     const text = (name: string) => String(data.get(name) ?? "").trim();
     const missingSequences = text("missingSequences");
     const lacks = needsMissingSequences(state) && missingSequences === "";
+    // A postponed shoot says when it now takes place (PROD-019).
+    const newDate = text("newShootDate");
+    const lacksDate = state === "postponed" && newDate === "";
     setMissing(lacks);
-    if (lacks) {
-      form.querySelector<HTMLElement>("#shoot-missing")?.focus();
+    setMissingDate(lacksDate);
+    if (lacks || lacksDate) {
+      form
+        .querySelector<HTMLElement>(
+          lacks ? "#shoot-missing" : "#shoot-new-date",
+        )
+        ?.focus();
       return;
     }
     run(() =>
@@ -97,6 +107,7 @@ function ShootStateForm({
         observations: text("observations"),
         missingSequences,
         deviations: text("deviations"),
+        newShootDate: state === "postponed" ? newDate : "",
       }),
     );
   }
@@ -136,6 +147,17 @@ function ShootStateForm({
         placeholder={t.observationsPlaceholder}
         defaultValue={shoot.observations ?? ""}
       />
+      {state === "postponed" && (
+        <Field
+          id="shoot-new-date"
+          name="newShootDate"
+          type="date"
+          label={t.newShootDate}
+          hint={t.newShootDateHint}
+          required
+          error={missingDate ? t.newShootDateMissing : undefined}
+        />
+      )}
       <TextareaField
         id="shoot-missing"
         name="missingSequences"

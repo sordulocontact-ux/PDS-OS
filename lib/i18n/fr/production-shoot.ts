@@ -43,6 +43,10 @@ export const productionShoot = {
     due: (date: string) => `pour le ${date}`,
   },
   state: {
+    newShootDate: "Nouvelle date de tournage",
+    newShootDateHint:
+      "Elle remplace la date de la fiche ; le rétroplanning et la feuille de service suivent.",
+    newShootDateMissing: "Indiquez la nouvelle date.",
     title: "État du tournage",
     description:
       "Pendant et après le tournage : l'état, ce qui a été observé, ce qui manque et ce qui a changé.",
@@ -102,6 +106,16 @@ export const productionShoot = {
     notDeclared: "Non déclaré",
     declaredBy: (name: string, at: string) => `Déclaré par ${name}, ${at}`,
     location: "Emplacement des fichiers",
+    otherMedia: "Autres médias récupérés (photos, making-of)",
+    rushesHolder: "Qui récupère les rushes",
+    backupHolder: "Qui vérifie la sauvegarde",
+    backupHolderHint:
+      "La sauvegarde n'est déclarée vérifiée qu'après sa confirmation.",
+    holderNone: "À désigner",
+    backupLocation: "Emplacement de la sauvegarde",
+    backupLocationPlaceholder: "Disque n° 3, Drive « Clip X / Sauvegarde »…",
+    holders: (rushes: string, backup: string) =>
+      `Rushes : ${rushes} · Sauvegarde vérifiée par : ${backup}`,
     locationPlaceholder: "Drive « Clip X / Rushes », disque dur n° 2…",
     locationHint: "Une description : PDS OS n'ouvre pas cet emplacement.",
     notChecked: "Déclaré par une personne, non vérifié sur les fichiers.",
@@ -121,6 +135,25 @@ export const productionShoot = {
   },
 
   incidents: {
+    categories: {
+      equipment: "Matériel",
+      people: "Équipe ou personne",
+      location: "Lieu",
+      weather: "Météo",
+      technical: "Technique",
+      other: "Autre",
+    },
+    impacts: {
+      safety: "Sécurité",
+      schedule: "Planning",
+      budget: "Budget",
+      quality: "Qualité",
+      deliverables: "Livrables",
+    },
+    plainFact: "Simple fait",
+    closeNoFollowUp: "Clore sans suite",
+    closedNoFollowUp: "Incident clos sans suite.",
+    noFollowUpResolution: "Sans conséquence : noté pour mémoire.",
     title: "Incidents",
     description:
       "Ce qui s'est mal passé, son impact et qui le suit. Bloquer la clôture ou la postproduction est un choix, jamais automatique.",
@@ -142,6 +175,10 @@ export const productionShoot = {
     reopenAction: "Rouvrir",
     deleteAction: "Supprimer",
     fields: {
+      category: "Catégorie",
+      impacts: "Ce que ça touche",
+      impactsHint:
+        "Rien de coché : un simple fait, noté pour mémoire, qui se clôt sans tâche.",
       title: "Incident",
       titlePlaceholder: "Batterie de la caméra B hors service",
       impact: "Impact sur la livraison",
@@ -279,6 +316,8 @@ export const productionShoot = {
   },
 
   report: {
+    times: (start: string, end: string | null) =>
+      end ? `Lancé le ${start}, fini le ${end}` : `Lancé le ${start}`,
     title: "Compte rendu de tournage",
     description:
       "Consolidé par PO depuis ce qui a été renseigné. Vous le validez : il devient une source de la postproduction.",
@@ -292,6 +331,7 @@ export const productionShoot = {
     reopenNote:
       "Toute modification du tournage après validation rouvre le compte rendu.",
     facts: {
+      times: "Début et fin",
       state: "État",
       shootDate: "Date de tournage",
       declarations: "Déclarations",

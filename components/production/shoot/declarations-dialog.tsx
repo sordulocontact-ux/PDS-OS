@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { fr } from "@/lib/i18n/fr";
+import type { Member } from "@/lib/framing/related";
+import type { NetworkOption } from "@/lib/production/sheet";
+import {
+  HolderSelect,
+  holderValue,
+} from "@/components/production/holder-select";
 import { DECLARATIONS, type ShootRecord } from "@/lib/production/shoot/rules";
 import { saveShootDeclarations } from "@/lib/production/shoot/shoot-actions";
 
@@ -21,10 +27,14 @@ export function DeclarationsDialog({
   projectId,
   sheetId,
   shoot,
+  members,
+  contacts,
 }: {
   projectId: string;
   sheetId: string;
   shoot: ShootRecord;
+  members: Member[];
+  contacts: NetworkOption[];
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -43,6 +53,8 @@ export function DeclarationsDialog({
           projectId={projectId}
           sheetId={sheetId}
           shoot={shoot}
+          members={members}
+          contacts={contacts}
           onDone={() => setOpen(false)}
         />
       </FormDialog>
@@ -54,14 +66,20 @@ function DeclarationsForm({
   projectId,
   sheetId,
   shoot,
+  members,
+  contacts,
   onDone,
 }: {
   projectId: string;
   sheetId: string;
   shoot: ShootRecord;
+  members: Member[];
+  contacts: NetworkOption[];
   onDone: () => void;
 }) {
   const { pending, error, run } = useWriteSubmit(onDone, t.done);
+  const [rushes, setRushes] = useState(holderValue(shoot.rushesHolder));
+  const [backup, setBackup] = useState(holderValue(shoot.backupHolder));
 
   function submit(form: HTMLFormElement) {
     const data = new FormData(form);
@@ -72,7 +90,11 @@ function DeclarationsForm({
         videoRushes: data.has("video_rushes"),
         audioSources: data.has("audio_sources"),
         backupVerified: data.has("backup_verified"),
+        otherMedia: data.has("other_media"),
         filesLocation: String(data.get("filesLocation") ?? ""),
+        backupLocation: String(data.get("backupLocation") ?? ""),
+        rushesHolder: rushes,
+        backupHolder: backup,
       }),
     );
   }
@@ -99,6 +121,37 @@ function DeclarationsForm({
             {t.declarations[key]}
           </label>
         ))}
+        <label className="flex cursor-pointer items-center gap-3 text-sm font-medium">
+          <Checkbox
+            name="other_media"
+            size="md"
+            defaultChecked={shoot.otherMedia.done}
+          />
+          {t.otherMedia}
+        </label>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <HolderSelect
+          id="shoot-rushes-holder"
+          label={t.rushesHolder}
+          noneLabel={t.holderNone}
+          value={rushes}
+          current={shoot.rushesHolder}
+          members={members}
+          contacts={contacts}
+          onChange={setRushes}
+        />
+        <HolderSelect
+          id="shoot-backup-holder"
+          label={t.backupHolder}
+          noneLabel={t.holderNone}
+          hint={t.backupHolderHint}
+          value={backup}
+          current={shoot.backupHolder}
+          members={members}
+          contacts={contacts}
+          onChange={setBackup}
+        />
       </div>
       <Field
         id="shoot-files-location"
@@ -109,6 +162,15 @@ function DeclarationsForm({
         placeholder={t.locationPlaceholder}
         hint={t.locationHint}
         defaultValue={shoot.filesLocation ?? ""}
+      />
+      <Field
+        id="shoot-backup-location"
+        name="backupLocation"
+        label={t.backupLocation}
+        autoComplete="off"
+        maxLength={1000}
+        placeholder={t.backupLocationPlaceholder}
+        defaultValue={shoot.backupLocation ?? ""}
       />
       <ShootFormActions
         pending={pending}
