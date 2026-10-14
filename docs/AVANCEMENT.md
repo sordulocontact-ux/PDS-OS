@@ -407,3 +407,7 @@ Au-delà des six étapes :
       champ — dates et accès des étapes de post, budget repris du devis, incident de matériel, relances
       du tournage confiées aux responsables connus, feuille de service reprise du brief et de la Fiche,
       lien du fichier final (sans migration)
+- [x] Bugs du test Production du 13/10 (BUG-001 à BUG-007) : feuille de service confirmée seulement
+      diffusée avec urgences, contrôles ouverts nommés, lieu et dérogation expliqués, lecture des devis
+      fiabilisée (une requête, réessayer, formats refusés clairement), « Saisir à la main » (migration
+      `20261014001301`, 8 tests pgTAP ; test du parcours adapté)

@@ -116,8 +116,9 @@ insert into public.production_assignments (organization_id, project_id, need_id,
 select pg_temp.id_of('org'), pg_temp.id_of('project'), n.id, pg_temp.id_of('thibo'), 'available'
   from public.production_needs n where n.sheet_id = pg_temp.id_of('sheet');
 update public.production_equipment set status = 'booked' where id = pg_temp.id_of('mic');
-insert into public.production_call_sheets (sheet_id, organization_id, project_id, call_time)
-values (pg_temp.id_of('sheet'), pg_temp.id_of('org'), pg_temp.id_of('project'), '8h00 au studio');
+insert into public.production_call_sheets (sheet_id, organization_id, project_id, call_time, emergencies)
+values (pg_temp.id_of('sheet'), pg_temp.id_of('org'), pg_temp.id_of('project'), '8h00 au studio', 'SAMU 15');
+select public.publish_production_call_sheet(pg_temp.id_of('sheet'), '{"callTime": "8h00 au studio"}'::jsonb);
 select public.set_production_check(pg_temp.id_of('sheet'), k, true, null, null)
   from unnest(array['location', 'team', 'equipment', 'schedule', 'budget', 'call_sheet']) k;
 select public.set_production_check(pg_temp.id_of('sheet'), 'backup', true, null, 'Double copie sur deux disques');

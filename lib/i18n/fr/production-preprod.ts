@@ -376,10 +376,16 @@ export const productionPreprod = {
       confirmed: "Confirmé",
     },
     statusHints: {
-      to_find: "Aucun lieu pressenti.",
-      to_verify: "Un lieu est pressenti, rien n'est encore confirmé.",
+      to_find:
+        "Aucun lieu pressenti : comparez des candidats ci-dessous. Le contrôle « Lieu » avant tournage reste ouvert.",
+      to_verify:
+        "Un lieu est pressenti, rien n'est encore confirmé : retenez un candidat vérifié, ou passez l'état à « Confirmé ». D'ici là, le contrôle « Lieu » avant tournage reste ouvert.",
       confirmed: "Le lieu est confirmé pour le tournage.",
     },
+    // The readiness check confirmed by a derogation while the place is not
+    // (BUG-003): said here rather than an ambiguous state.
+    derogated: (who: string, date: string, reason: string) =>
+      `Le contrôle « Lieu » avant tournage a été confirmé par dérogation (${who}, le ${date} : ${reason}). Le lieu, lui, n'est pas confirmé.`,
     fields: {
       status: "État du lieu",
       name: "Lieu",
@@ -426,10 +432,13 @@ export const productionPreprod = {
       notFound: "Ce document n'existe plus.",
       forbidden: "Vous ne pouvez pas modifier ce matériel.",
       unreadable:
-        "Le texte de ce document n'a pas pu être lu : saisissez les lignes à la main.",
+        "Le texte de ce document n'a pas pu être lu (PDF scanné ?) : déposez-le en image (JPG, PNG), ou saisissez les lignes à la main.",
+      unsupported:
+        "Ce format n'est pas lu par PO : déposez le devis en PDF, en image (JPG, PNG, WebP) ou en texte, ou saisissez les lignes à la main.",
       provider:
         "PO n'a pas pu lire le devis. Réessayez, ou saisissez les lignes à la main.",
     },
+    retry: "Réessayer",
   },
 
   equipment: {
@@ -468,8 +477,10 @@ export const productionPreprod = {
     briefNeeds: (text: string) => `Besoins du brief : ${text}`,
     add: "Ajouter un article",
     addTitle: "Ajouter un article",
-    fromQuote: "Saisir depuis ce devis",
-    fromQuoteTitle: (file: string) => `Article lu sur « ${file} »`,
+    // Manual entry next to « Lire avec PO » (BUG-002: the former « Saisir
+    // depuis ce devis » read nothing and looked like an extraction).
+    fromQuote: "Saisir à la main",
+    fromQuoteTitle: (file: string) => `Saisir un article de « ${file} »`,
     fromQuoteNote:
       "La ligne démarre « À vérifier » : relisez-la contre le devis avant de la confirmer.",
     editTitle: (label: string) => `Modifier « ${label} »`,
@@ -773,6 +784,14 @@ export const productionPreprod = {
         noEnvelope: "Pas d'enveloppe.",
       },
       callSheet: (a: number, b: number) => `${a} / ${b} rubriques remplies`,
+      callSheetCheck: {
+        callTime: "l'heure de convocation",
+        emergencies: "les urgences",
+        publish: "la diffusion à l'équipe",
+        missing: (items: string[]) => `Manque : ${items.join(", ")}.`,
+        ready: (n: number) =>
+          `Heure de convocation et urgences écrites, V${n} diffusée à l'équipe.`,
+      },
       permits:
         "Selon le lieu et le tournage : la preuve est écrite à la confirmation.",
       backup:
@@ -823,10 +842,11 @@ export const productionPreprod = {
     ready: "Prête pour tournage.",
     readyBy: (who: string, date: string) =>
       `Prête pour tournage, marquée par ${who} le ${date}`,
-    openLeft: (n: number) =>
-      n === 1
-        ? "1 prérequis reste à confirmer avant de marquer prête."
-        : `${n} prérequis restent à confirmer avant de marquer prête.`,
+    // The open checks named, before « Marquer prête » (BUG-004).
+    openLeft: (names: string[]) =>
+      names.length === 1
+        ? `Reste à confirmer avant de marquer prête : ${names[0]}.`
+        : `Restent à confirmer avant de marquer prête : ${names.join(", ")}.`,
   },
 
   errors: {

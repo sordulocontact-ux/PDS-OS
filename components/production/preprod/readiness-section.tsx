@@ -119,7 +119,9 @@ export function ReadinessSection({
             </div>
           )
         ) : (
-          <p className="text-sm text-muted-foreground">{t.openLeft(open)}</p>
+          <p className="text-sm text-muted-foreground">
+            {t.openLeft(open.map((key) => t.checks[key]))}
+          </p>
         )}
       </div>
     </PageSection>

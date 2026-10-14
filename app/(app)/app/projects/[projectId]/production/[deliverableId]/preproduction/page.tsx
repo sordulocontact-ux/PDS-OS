@@ -25,6 +25,7 @@ import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { callSheetDefaults } from "@/lib/production/preprod/call-sheet-defaults";
+import { callSheetEvidence } from "@/lib/production/preprod/readiness";
 import { todayInParis } from "@/lib/insights/dates";
 import { preprodOverview } from "@/lib/production/preprod/overview";
 import {
@@ -165,7 +166,13 @@ export default async function ProductionPreproductionPage({
           reschedule: reschedulePlan({ actions: preprod.actions, due, today }),
         }}
       />
-      <LocationSection {...common} logistics={sheet.logistics}>
+      <LocationSection
+        {...common}
+        logistics={sheet.logistics}
+        derogation={
+          o.checks.find((c) => c.key === "location")?.derogation ?? null
+        }
+      >
         {access.organizationId && (
           <LocationsBoard
             scope={{
@@ -247,7 +254,13 @@ export default async function ProductionPreproductionPage({
       <ReadinessSection
         {...common}
         rows={o.checks}
-        evidence={o.evidence}
+        evidence={{
+          ...o.evidence,
+          call_sheet: callSheetEvidence(
+            preprod.callSheet,
+            versions[0]?.number ?? null,
+          ),
+        }}
         readyAt={sheet.readyAt}
         readyBy={sheet.readyBy}
         {...people}

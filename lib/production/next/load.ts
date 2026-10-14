@@ -111,7 +111,9 @@ export async function loadProductionNext(
         o.budget.envelopeCents !== null &&
         !o.budget.over &&
         o.budget.byStatus.to_decide.count === 0,
-      call_sheet: Boolean(preprod.callSheet?.callTime),
+      call_sheet: Boolean(
+        preprod.callSheet?.callTime && preprod.callSheet.emergencies,
+      ),
       permits: false,
       backup: false,
     };

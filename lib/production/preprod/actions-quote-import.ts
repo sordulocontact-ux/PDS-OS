@@ -29,6 +29,8 @@ import {
 
 const e = fr.productionPreprod.quoteImport.errors;
 const MAX_TEXT = 40_000;
+// The images the model reads.
+const READABLE_IMAGES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 const proposeSchema = z.object({
   projectId: z.uuid(),
@@ -68,10 +70,12 @@ export async function proposeQuoteImport(
     .download(file.path);
   if (downloadError || !blob) return { ok: false, error: e.unreadable };
   const bytes = new Uint8Array(await blob.arrayBuffer());
-  const isImage = file.mime.startsWith("image/");
-  const isPdf =
-    file.mime === "application/pdf" ||
-    file.file_name.toLowerCase().endsWith(".pdf");
+  const name = file.file_name.toLowerCase();
+  const isImage = READABLE_IMAGES.includes(file.mime);
+  const isPdf = file.mime === "application/pdf" || name.endsWith(".pdf");
+  const isText = file.mime.startsWith("text/") || /\.(txt|csv)$/.test(name);
+  // Anything else (Word, Excel, HEIC…) would reach the model as noise.
+  if (!isImage && !isPdf && !isText) return { ok: false, error: e.unsupported };
 
   let text: string | null = null;
   try {

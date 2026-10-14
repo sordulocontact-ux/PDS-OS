@@ -3857,6 +3857,18 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   (PROD-009) et un écart est signalé, jamais écrasé. Décisions faute de règle : pas d'intervenant
   proposé pour une étape de post (règle du lot « personne par défaut »), pas d'effectif deviné, pas
   de brief recopié de la Conception (le brief ne la répète pas).
+- **Bugs du test du 13/10** (BUG-001 à BUG-007 ; migration `20261014001301_production_bug_fixes.sql`,
+  tests `production-bug-fixes.test.sql`) : le contrôle « Feuille de service » ne se confirme plus sur
+  la seule heure de convocation — il faut aussi les urgences et **une version diffusée** à l'équipe
+  (un contrôle déjà confirmé sous l'ancienne règle se rouvre), la ligne dit ce qui manque
+  (`callSheetEvidence`) ; « Restent à confirmer : … » nomme les contrôles ouverts. La section Lieu dit
+  comment confirmer le lieu et signale une dérogation du contrôle « Lieu » quand le lieu ne l'est pas.
+  Devis : l'ancien « Saisir depuis ce devis » (une saisie manuelle qui semblait extraire) devient
+  « Saisir à la main » ; « Lire avec PO » ne part qu'une fois par clic, propose « Réessayer » après
+  une erreur, et refuse d'emblée un format qu'il ne lit pas (seuls PDF, texte, JPG, PNG, WebP, GIF).
+  BUG-005, 006 et 007 étaient déjà couverts (références du Brief, destinataire des corrections,
+  prochaine action). BUG-001 (call technique) : création, rattachement et durée vérifiés en base ; le
+  parcours dans l'écran n'a pas pu être rejoué (Chrome ne charge pas l'app connectée).
 
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 

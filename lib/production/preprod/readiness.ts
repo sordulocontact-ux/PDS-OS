@@ -5,7 +5,14 @@
 // Every check is required except the permits, unless the owner says
 // otherwise (same rule as production_check_default_required). Client-safe.
 
-import { CHECK_KEYS, type CheckKey, type ReadinessCheck } from "./types";
+import { fr } from "@/lib/i18n/fr";
+
+import {
+  CHECK_KEYS,
+  type CallSheet,
+  type CheckKey,
+  type ReadinessCheck,
+} from "./types";
 
 export const defaultRequired = (key: CheckKey) => key !== "permits";
 
@@ -51,4 +58,20 @@ export const canMarkReady = (rows: CheckRow[]) =>
   rows.every((r) => r.state !== "open");
 
 export const openChecks = (rows: CheckRow[]) =>
-  rows.filter((r) => r.state === "open").length;
+  rows.filter((r) => r.state === "open").map((r) => r.key);
+
+/** What « Feuille de service » rests on, as the database checks it: call
+ * time and emergencies written, a version published (BUG-004). */
+export function callSheetEvidence(
+  callSheet: CallSheet | null,
+  publishedNumber: number | null,
+): string {
+  const t = fr.productionPreprod.readiness.evidence.callSheetCheck;
+  const missing: string[] = [];
+  if (!callSheet?.callTime?.trim()) missing.push(t.callTime);
+  if (!callSheet?.emergencies?.trim()) missing.push(t.emergencies);
+  if (publishedNumber === null) missing.push(t.publish);
+  return missing.length > 0
+    ? t.missing(missing)
+    : t.ready(publishedNumber as number);
+}

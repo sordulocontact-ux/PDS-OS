@@ -55,6 +55,8 @@ export function QuoteImportButton({
   const { pending, error, run } = useWriteSubmit(close, t.applied);
 
   async function read() {
+    // One request at a time, whatever the clicks (BUG-002).
+    if (reading) return;
     setOpen(true);
     setReading(true);
     setReadError(null);
@@ -81,8 +83,14 @@ export function QuoteImportButton({
 
   return (
     <>
-      <Button size="sm" variant="outline" onClick={read}>
-        {t.button}
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={read}
+        disabled={reading}
+        aria-busy={reading || undefined}
+      >
+        {reading ? t.reading : t.button}
       </Button>
       <FormDialog
         open={open}
@@ -97,7 +105,12 @@ export function QuoteImportButton({
             {t.reading}
           </p>
         ) : readError ? (
-          <FormMessage kind="error">{readError}</FormMessage>
+          <div className="flex flex-col items-start gap-3">
+            <FormMessage kind="error">{readError}</FormMessage>
+            <Button size="sm" variant="outline" onClick={read}>
+              {t.retry}
+            </Button>
+          </div>
         ) : (
           proposals && (
             <form
