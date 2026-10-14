@@ -66,6 +66,7 @@ export default async function ProductionSheetLayout({
             { href: step("shoot"), label: t.tabs.shoot },
             { href: step("post"), label: t.tabs.post },
             { href: step("delivery"), label: t.tabs.delivery },
+            { href: step("history"), label: t.tabs.history },
           ]}
         />
       )}

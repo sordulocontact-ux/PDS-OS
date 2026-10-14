@@ -11018,6 +11018,70 @@ export type Database = {
           },
         ]
       }
+      production_events: {
+        Row: {
+          action: string
+          actor_person_id: string | null
+          after: Json | null
+          at: string
+          before: Json | null
+          entity: string
+          entity_id: string
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+        }
+        Insert: {
+          action: string
+          actor_person_id?: string | null
+          after?: Json | null
+          at?: string
+          before?: Json | null
+          entity: string
+          entity_id: string
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+        }
+        Update: {
+          action?: string
+          actor_person_id?: string | null
+          after?: Json | null
+          at?: string
+          before?: Json | null
+          entity?: string
+          entity_id?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_events_actor_person_id_fkey"
+            columns: ["actor_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_events_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_events_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       production_export_checks: {
         Row: {
           checked_at: string | null

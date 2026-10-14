@@ -58,6 +58,10 @@ export function StepForm({
 }) {
   const [key, setKey] = useState<PostStepKey>(step?.key ?? initialKey);
   const [holder, setHolder] = useState(holderValue(step?.holder ?? null));
+  // What is expected, proposed from the step (PROD-027) until edited.
+  const [expected, setExpected] = useState(
+    step?.responsibilities ?? t.expected[step?.key ?? initialKey],
+  );
   const [missing, setMissing] = useState<"label" | "dates" | null>(null);
   const { pending, error, run } = useWriteSubmit(onDone, t.done);
 
@@ -112,7 +116,9 @@ export function StepForm({
           value={key}
           onValueChange={(next) => {
             const parsed = postStepKeyOf(next);
-            if (parsed) setKey(parsed);
+            if (!parsed) return;
+            if (expected === t.expected[key]) setExpected(t.expected[parsed]);
+            setKey(parsed);
           }}
         >
           <SelectTrigger
@@ -150,20 +156,6 @@ export function StepForm({
         contacts={contacts}
         onChange={setHolder}
       />
-      <TextareaField
-        name="responsibilities"
-        label={t.responsibilities}
-        rows={3}
-        maxLength={2000}
-        defaultValue={step?.responsibilities ?? ""}
-      />
-      <Field
-        name="accessNote"
-        label={t.access}
-        maxLength={1000}
-        placeholder={t.accessPlaceholder}
-        defaultValue={step?.accessNote ?? ""}
-      />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
           name="startsOn"
@@ -179,16 +171,36 @@ export function StepForm({
           error={missing === "dates" ? t.missing.dates : undefined}
         />
       </div>
-      <ChoiceCards
-        name="status"
-        legend={t.status}
-        columns={3}
-        defaultValue={step?.status ?? POST_STEP_STATUSES[0]}
-        choices={POST_STEP_STATUSES.map((s) => ({
-          value: s,
-          label: t.statuses[s],
-        }))}
+      <TextareaField
+        name="responsibilities"
+        label={t.responsibilities}
+        hint={t.responsibilitiesHint}
+        rows={3}
+        maxLength={2000}
+        value={expected}
+        onChange={(event) => setExpected(event.target.value)}
       />
+      <Field
+        name="accessNote"
+        label={t.access}
+        hint={t.accessHint}
+        maxLength={1000}
+        placeholder={t.accessPlaceholder}
+        defaultValue={step?.accessNote ?? ""}
+      />
+      {/* A new step starts « À faire »: its status is asked once it exists. */}
+      {step && (
+        <ChoiceCards
+          name="status"
+          legend={t.status}
+          columns={3}
+          defaultValue={step?.status ?? POST_STEP_STATUSES[0]}
+          choices={POST_STEP_STATUSES.map((s) => ({
+            value: s,
+            label: t.statuses[s],
+          }))}
+        />
+      )}
       <FormMessage kind="error">{error}</FormMessage>
       <DialogFormActions
         pending={pending}

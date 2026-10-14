@@ -482,13 +482,20 @@ export const productionPreprod = {
       post_after_delivery: "La postproduction finit après la livraison.",
       post_before_shoot: "La postproduction commence avant le tournage.",
     },
-    fromFiche: "Fiche Livrable",
-    fromProduction: "Production",
+    fromFiche: "Proposée par la Fiche Livrable, à confirmer",
+    fromProduction: "Confirmée en Production",
+    toFill: "À renseigner",
+    owner: (name: string) =>
+      `La Fiche Livrable propose ; ${name} (chef de projet) confirme ou corrige.`,
+    ownerUnnamed:
+      "La Fiche Livrable propose ; le chef de projet confirme ou corrige.",
+    impact:
+      "La fiche est prête pour tournage : changer une date décale le rétroplanning, et la feuille de service sera à revoir avant de la renvoyer.",
     diverges: (fiche: string) => `Différent de la Fiche Livrable (${fiche})`,
     editDates: "Modifier les dates",
     datesTitle: "Dates et enveloppe",
     datesDescription:
-      "Vides, les valeurs de la Fiche Livrable s'appliquent. Remplies, elles priment et l'écart reste visible.",
+      "Les valeurs de la Fiche Livrable sont reprises : enregistrer les confirme. Un changement reste visible face à la Fiche et dans l'Historique.",
     fields: {
       shootDate: "Date de tournage",
       postStart: "Début de postproduction",

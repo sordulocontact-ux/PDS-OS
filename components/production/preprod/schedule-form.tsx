@@ -10,6 +10,7 @@ import { saveSchedule } from "@/lib/production/preprod/actions-logistics";
 import type { SheetLogistics } from "@/lib/production/sheet";
 
 import { DialogButton } from "@/components/ui/dialog-button";
+import { ToneCallout } from "@/components/ui/tone-callout";
 
 const t = fr.productionPreprod.schedule;
 
@@ -18,19 +19,27 @@ type Dates = Pick<
   "shootDate" | "postStart" | "postEnd" | "deliveryDate" | "budgetEnvelopeCents"
 >;
 
-/** « Modifier les dates »: Production's own dates and envelope; empty, the
- * Fiche Livrable's apply (shown under each field). */
+/** « Modifier les dates »: Production's own dates and envelope, the
+ * Fiche Livrable's proposed when Production has none (saving confirms them,
+ * PROD-009); the Fiche's value stays shown under each field, and a change on
+ * a sheet ready for the shoot warns of its impact. */
 export function ScheduleEditButton({
   projectId,
   sheetId,
   own,
   fiche,
+  ficheValues,
+  ready,
 }: {
   projectId: string;
   sheetId: string;
   own: Dates;
   // The Fiche's values, already formatted (null = none).
   fiche: Record<keyof Dates, string | null>;
+  // The same, raw: what the form proposes when Production has none (PROD-009).
+  ficheValues: Dates;
+  // The sheet is « prête pour tournage »: a change has an impact.
+  ready: boolean;
 }) {
   return (
     <DialogButton
@@ -44,6 +53,8 @@ export function ScheduleEditButton({
           sheetId={sheetId}
           own={own}
           fiche={fiche}
+          ficheValues={ficheValues}
+          ready={ready}
           onDone={close}
         />
       )}
@@ -56,12 +67,16 @@ function ScheduleForm({
   sheetId,
   own,
   fiche,
+  ficheValues,
+  ready,
   onDone,
 }: {
   projectId: string;
   sheetId: string;
   own: Dates;
   fiche: Record<keyof Dates, string | null>;
+  ficheValues: Dates;
+  ready: boolean;
   onDone: () => void;
 }) {
   const { pending, error, run } = useWriteSubmit(onDone, t.saved);
@@ -74,9 +89,10 @@ function ScheduleForm({
       type="date"
       label={t.fields[key]}
       hint={hint(key)}
-      defaultValue={own[key] ?? ""}
+      defaultValue={own[key] ?? ficheValues[key] ?? ""}
     />
   );
+  const envelope = own.budgetEnvelopeCents ?? ficheValues.budgetEnvelopeCents;
   return (
     <form
       className="flex flex-col gap-5"
@@ -110,12 +126,9 @@ function ScheduleForm({
         suffix="€"
         inputMode="decimal"
         hint={hint("budgetEnvelopeCents")}
-        defaultValue={
-          own.budgetEnvelopeCents === null
-            ? ""
-            : centsToInput(own.budgetEnvelopeCents)
-        }
+        defaultValue={envelope === null ? "" : centsToInput(envelope)}
       />
+      {ready && <ToneCallout tone="warning">{t.impact}</ToneCallout>}
       <FormMessage kind="error">{error}</FormMessage>
       <DialogFormActions
         pending={pending}

@@ -114,6 +114,8 @@ export default async function ProductionPreproductionPage({
         own={sheet.logistics}
         logistics={o.logistics}
         schedule={o.schedule}
+        ownerName={data.ownerName}
+        ready={sheet.readyAt !== null}
       >
         <BudgetBlock
           {...common}

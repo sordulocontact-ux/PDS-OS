@@ -3699,6 +3699,24 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   action (une personne les choisit) ; la cause exacte de l'échec vécu par Ibé n'a pas pu être rejouée
   (pas de session navigateur la nuit du 14/10) : à revérifier par l'équipe.
 
+- **Historique de la fiche** (PROD-002, PROD-008 ; migration `20261014000401_production_events.sql`,
+  tests `production-events.test.sql`) : `production_events`, écrit par **déclencheurs seuls**
+  (`production_log`), jamais modifié ni supprimé : versions (dépôt, statut), demandes de corrections
+  (destinataire, échéance, statut, relance), actions du plan (statut, responsable, échéance),
+  contrôles avant tournage (confirmé, requis), fiche (dates et enveloppe, lieu, « prête »), état du
+  tournage, exports (lien, contrôle), étapes de post (intervenant, statut), liens prestataires,
+  décisions de livraison — avec l'avant, l'après et la personne (aucune = le prestataire par son
+  lien, ou la base). Onglet **Historique** (`/history`) : une phrase par événement écrite par le
+  code (`lib/production/history-text.ts`), groupée par jour (`DayGroups`).
+- **Dates et enveloppe** (PROD-009) : chaque valeur dit son statut — « Proposée par la Fiche
+  Livrable, à confirmer », « Confirmée en Production », « À renseigner » — et qui la confirme (le
+  chef de projet, nommé) ; le formulaire **reprend les valeurs de la Fiche** (enregistrer les
+  confirme), un changement sur une fiche prête pour tournage avertit de son impact, et l'Historique
+  garde chaque modification.
+- **Formulaire d'étape** (PROD-027) : « Ce qui est attendu » proposé selon l'étape (modifiable,
+  remplacé si l'étape change tant qu'il n'a pas été touché), « Accès aux fichiers » expliqué, le
+  statut n'est demandé qu'une fois l'étape créée.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

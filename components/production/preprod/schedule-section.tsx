@@ -39,6 +39,8 @@ export function ScheduleSection({
   logistics,
   schedule,
   canOrganize,
+  ownerName,
+  ready,
   children,
 }: {
   projectId: string;
@@ -47,6 +49,8 @@ export function ScheduleSection({
   logistics: EffectiveLogistics;
   schedule: { rows: ScheduleRow[]; warnings: ScheduleWarning[] };
   canOrganize: boolean;
+  ownerName: string | null;
+  ready: boolean;
   children: React.ReactNode;
 }) {
   const day = (v: string | null) => (v ? formatShortDate(v) : null);
@@ -63,7 +67,7 @@ export function ScheduleSection({
           <span>{show(s.value)}</span>
           <span className="text-xs text-muted-foreground">
             {s.diverges
-              ? t.diverges(show(s.ficheValue) ?? EMPTY_CELL)
+              ? `${t.fromProduction} · ${t.diverges(show(s.ficheValue) ?? EMPTY_CELL)}`
               : s.source === "production"
                 ? t.fromProduction
                 : t.fromFiche}
@@ -96,12 +100,23 @@ export function ScheduleSection({
                 logistics.budgetEnvelopeCents.ficheValue,
               ),
             }}
+            ficheValues={{
+              shootDate: logistics.shootDate.ficheValue,
+              postStart: logistics.postStart.ficheValue,
+              postEnd: logistics.postEnd.ficheValue,
+              deliveryDate: logistics.deliveryDate.ficheValue,
+              budgetEnvelopeCents: logistics.budgetEnvelopeCents.ficheValue,
+            }}
+            ready={ready}
           />
         ) : undefined
       }
       card
     >
       <div className="flex flex-col gap-8">
+        <p className="text-sm text-muted-foreground">
+          {ownerName ? t.owner(ownerName) : t.ownerUnnamed}
+        </p>
         <FactList
           emptyLabel={fr.productionPreprod.notFilled}
           facts={[

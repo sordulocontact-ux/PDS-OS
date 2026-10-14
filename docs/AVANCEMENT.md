@@ -368,3 +368,7 @@ Au-delà des six étapes :
       compte rendu (responsable, échéance, plan approuvé, tâche du Travail sans doublon) ; prochaine
       action « relire les propositions » puis « planifier les actions » (migration `20261014000301`,
       2 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 5 (PROD-002, 008 en partie, 009, 027) : journal d'activité
+      par déclencheurs et onglet Historique, statut et responsable des dates et de l'enveloppe,
+      valeurs de la Fiche reprises, alerte d'impact, formulaire d'étape prérempli (migration
+      `20261014000401`, 9 tests pgTAP)

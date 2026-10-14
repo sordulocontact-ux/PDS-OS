@@ -98,9 +98,24 @@ export const productionPost = {
     holderNone: "À confirmer",
     members: "Membres de PDS",
     network: "Réseau",
-    responsibilities: "Responsabilités",
-    access: "Accès",
-    accessPlaceholder: "Dossier partagé, identifiants transmis…",
+    responsibilities: "Ce qui est attendu",
+    responsibilitiesHint:
+      "Proposé selon l'étape, à ajuster. Le prestataire le lit sur son lien.",
+    access: "Accès aux fichiers",
+    accessHint:
+      "Où trouver les rushes, les sons et les références. Le prestataire le lit sur son lien.",
+    accessPlaceholder: "Drive « Clip X / Rushes », Frame.io du projet…",
+    expected: {
+      files_prep:
+        "Récupérer les rushes et les sources, les organiser et les mettre à disposition du montage.",
+      edit: "Monter la V1 à partir des rushes et du brief, puis les versions suivantes jusqu'à validation.",
+      live_mix: "Mixer le son capté en direct et le livrer au montage.",
+      grading: "Étalonner la version validée et livrer les fichiers étalonnés.",
+      subtitles: "Écrire et caler les sous-titres de la version validée.",
+      exports_qc:
+        "Exporter chaque fichier attendu et contrôler sa conformité avant livraison.",
+      other: "",
+    },
     startsOn: "Début",
     endsOn: "Fin",
     status: "Avancement",
