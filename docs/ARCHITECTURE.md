@@ -3685,6 +3685,20 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   La prochaine action propose « Envoyer à X son lien de prestataire » quand l'intervenant du montage
   n'en a pas.
 
+- **Call technique fiable et compte rendu en actions** (PROD-004, PROD-005, migration
+  `20261014000301_production_call_reliability.sql`) : le call créé depuis la Préparation ou la
+  Préproduction a une **heure de fin** (minutes de l'ordre du jour, une heure sinon) comme tout call
+  planifié, et les **membres de l'équipe gardés comme participants sont invités** (notifiés,
+  `inviteProjectTeam`, comme la Stratégie) ; une erreur d'enregistrement est journalisée et montrée,
+  jamais un faux succès. Sur chaque action du compte rendu : **« Planifier »** (« Confirmer et
+  planifier » pour une proposition de PO) — qui (membre ou contact du Réseau, requis) et pour quand
+  (requis) ; l'action entre au plan **approuvée** et, confiée à un membre, devient **une tâche du
+  Travail** (`planCallAction` : une action par point, une tâche par action, jamais en double). La
+  prochaine action de la fiche demande d'abord de relire les propositions du compte rendu, puis de
+  planifier ses actions. Décision faute de règle : PO ne devine ni le responsable ni l'échéance d'une
+  action (une personne les choisit) ; la cause exacte de l'échec vécu par Ibé n'a pas pu être rejouée
+  (pas de session navigateur la nuit du 14/10) : à revérifier par l'équipe.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

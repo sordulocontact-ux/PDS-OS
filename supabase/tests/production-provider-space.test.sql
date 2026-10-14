@@ -4,7 +4,7 @@
 -- opens her link, reads her corrections, deposits her V2 and an export.
 -- Run with `supabase test db`.
 begin;
-select plan(22);
+select plan(24);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -169,6 +169,20 @@ select throws_ok($$ select public.deposit_production_version((select v from vars
                  'P0001', 'link_closed', 'a replaced link deposits nothing');
 select throws_ok($$ select * from public.production_provider_links $$,
                  '42501', null, 'the links are never read without an account');
+
+-- 5. The technical call has an end (PROD-004) ---------------------------------------------
+reset role;
+select pg_temp.act_as(pg_temp.id_of('manager'));
+insert into ids select 'call', public.create_production_call(pg_temp.id_of('sheet'), 'Call technique',
+  timestamptz '2026-11-02 10:00+01', null,
+  '[{"title": "Lumière", "minutes": 20}, {"title": "Son", "minutes": 25}]'::jsonb,
+  'Décider le dispositif', '[]'::jsonb, 'in_person');
+select is((select ends_at from public.calls where id = pg_temp.id_of('call')),
+          timestamptz '2026-11-02 10:45+01', 'the call ends after its agenda''s minutes');
+insert into ids select 'call2', public.create_production_call(pg_temp.id_of('sheet'), 'Call technique 2',
+  timestamptz '2026-11-03 10:00+01', null, '[]'::jsonb, 'Suite', '[]'::jsonb, 'phone');
+select is((select ends_at from public.calls where id = pg_temp.id_of('call2')),
+          timestamptz '2026-11-03 11:00+01', 'one hour when the agenda says none');
 
 select * from finish();
 rollback;

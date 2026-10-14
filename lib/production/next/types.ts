@@ -58,6 +58,10 @@ export type NextInput = {
   } | null;
   preprod: {
     hasTechnicalCall: boolean;
+    // From the call's report: PO's proposals to review, confirmed actions
+    // not planned yet (PROD-005).
+    callProposals: number;
+    unplannedActions: number;
     equipmentCount: number;
     staffing: { positions: number; filled: number; toConfirm: number };
     // In the readiness order; `workDone` = what the check rests on exists.

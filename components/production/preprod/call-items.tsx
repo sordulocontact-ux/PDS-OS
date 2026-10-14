@@ -4,6 +4,9 @@ import { CALL_ITEM_KINDS, type CallItem } from "@/lib/production/preprod/types";
 import { formatDate } from "@/lib/release/format";
 
 import { CallItemRow } from "./call-item-row";
+import type { PlannedAction } from "./plan-call-action";
+import type { Member } from "@/lib/framing/related";
+import type { NetworkOption } from "@/lib/production/sheet";
 
 const t = fr.productionPreprod.call;
 
@@ -18,11 +21,18 @@ export function CallItems({
   items,
   topics,
   canOrganize,
+  planning,
 }: {
   projectId: string;
   items: CallItem[];
   topics: string[];
   canOrganize: boolean;
+  planning: {
+    sheetId: string;
+    members: Member[];
+    contacts: NetworkOption[];
+    plannedByItem: Record<string, PlannedAction>;
+  };
 }) {
   const live = items.filter((i) => i.status !== "rejected");
   const rejected = items.filter((i) => i.status === "rejected");
@@ -44,6 +54,12 @@ export function CallItems({
       topics={topics}
       canOrganize={canOrganize}
       date={item.reviewedAt ? formatDate(item.reviewedAt) : null}
+      planning={{
+        sheetId: planning.sheetId,
+        members: planning.members,
+        contacts: planning.contacts,
+        planned: planning.plannedByItem[item.id] ?? null,
+      }}
     />
   );
 

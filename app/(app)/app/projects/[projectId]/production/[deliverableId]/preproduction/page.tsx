@@ -89,6 +89,8 @@ export default async function ProductionPreproductionPage({
         input={{ data: { ...data, sheet }, preprod, logistics: o.logistics }}
         calls={preprod.calls}
         canOrganize={can}
+        actions={preprod.actions}
+        {...people}
       />
       <PlanSection
         {...common}

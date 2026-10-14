@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import type { FormState } from "@/lib/auth/form-state";
 import { routes } from "@/lib/auth/redirects";
+import { inviteProjectTeam } from "@/lib/calls/invite";
 import { participantRow, participantSchema } from "@/lib/calls/participants";
 import { buildAgenda } from "@/lib/calls/prepare";
 import {
@@ -121,6 +122,7 @@ export async function createTechnicalCall(
     p_format: p.format,
   });
   if (error || !callId) {
+    console.error("production call:", error?.code, error?.message);
     const failure = error ? prepFailure(error) : null;
     return {
       status: "error",
@@ -128,5 +130,14 @@ export async function createTechnicalCall(
       values,
     };
   }
+  // The team members kept among the participants are invited (notified),
+  // as for the Stratégie's exchanges (PROD-004).
+  await inviteProjectTeam({
+    callId,
+    organizationId: access.organizationId!,
+    projectId: p.projectId,
+    mePersonId: access.personId,
+    names: p.participants.map((person) => person.name),
+  });
   redirect(routes.projectCall(p.projectId, callId));
 }

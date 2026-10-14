@@ -101,6 +101,26 @@ export function preproductionNext(ctx: NextContext): ProductionNext {
   if (!p || (!p.hasTechnicalCall && p.equipmentCount === 0))
     return technicalCall();
 
+  const callLink = (label: string) =>
+    link(label, "preproduction", "technical-call", "technicalCall");
+  if (p.callProposals > 0)
+    return owner({
+      ...blank,
+      kind: "decision",
+      title: t.steps.callProposals.title(p.callProposals),
+      why: t.steps.callProposals.why,
+      link: callLink(t.steps.callProposals.link),
+    });
+  if (p.unplannedActions > 0)
+    return owner({
+      ...blank,
+      kind: "act",
+      dueKey: "estimates",
+      title: t.steps.callActions.title(p.unplannedActions),
+      why: t.steps.callActions.why,
+      link: callLink(t.steps.callActions.link),
+    });
+
   const open = p.checks.filter((c) => c.state === "open");
   const missing = open.map((c) => t.missing.check(checkLabel(c.key)));
   const readiness = (label: string) =>

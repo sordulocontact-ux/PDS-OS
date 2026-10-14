@@ -12,8 +12,12 @@ import {
 } from "@/lib/production/preprod/actions-items";
 import type { CallItem } from "@/lib/production/preprod/types";
 import { callItemStatusTone } from "@/lib/ui/state-tones";
+import type { Member } from "@/lib/framing/related";
+import type { NetworkOption } from "@/lib/production/sheet";
+import { formatDate } from "@/lib/release/format";
 
 import { CallItemForm } from "./call-item-form";
+import { PlanCallActionButton, type PlannedAction } from "./plan-call-action";
 import { RecordMenu } from "@/components/ui/record-menu";
 
 const t = fr.productionPreprod.call;
@@ -29,9 +33,17 @@ export function CallItemRow({
   topics,
   canOrganize,
   date,
+  planning,
 }: {
   projectId: string;
   item: CallItem;
+  // Where an action goes once planned (PROD-005).
+  planning: {
+    sheetId: string;
+    members: Member[];
+    contacts: NetworkOption[];
+    planned: PlannedAction | null;
+  };
   // The topics a point may be filed under (the form's choices).
   topics: string[];
   canOrganize: boolean;
@@ -72,6 +84,17 @@ export function CallItemRow({
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <p className="text-sm font-medium break-words">{item.body}</p>
         <p className="text-xs break-words text-muted-foreground">{origin}</p>
+        {item.kind === "action" &&
+          planning.planned?.holder &&
+          planning.planned.dueDate && (
+            <p className="text-xs font-medium">
+              {t.planAction.planned(
+                planning.planned.holder,
+                formatDate(planning.planned.dueDate),
+              )}
+              {planning.planned.task && ` · ${t.planAction.withTask}`}
+            </p>
+          )}
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {item.status !== "confirmed" && (
@@ -79,6 +102,19 @@ export function CallItemRow({
             {t.statuses[item.status]}
           </StatusBadge>
         )}
+        {canOrganize &&
+          item.kind === "action" &&
+          item.status !== "rejected" &&
+          !planning.planned?.task && (
+            <PlanCallActionButton
+              projectId={projectId}
+              sheetId={planning.sheetId}
+              itemId={item.id}
+              proposed={item.status === "proposed"}
+              members={planning.members}
+              contacts={planning.contacts}
+            />
+          )}
         {canOrganize && item.status === "proposed" && (
           <>
             <Button

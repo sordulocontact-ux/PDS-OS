@@ -121,6 +121,16 @@ export async function loadProductionNext(
     };
     input.preprod = {
       hasTechnicalCall: preprod.calls.length > 0 || preprod.items.length > 0,
+      callProposals: preprod.items.filter((i) => i.status === "proposed")
+        .length,
+      unplannedActions: preprod.items.filter(
+        (i) =>
+          i.kind === "action" &&
+          i.status === "confirmed" &&
+          !preprod.actions.some(
+            (a) => a.itemId === i.id && a.status === "approved",
+          ),
+      ).length,
       equipmentCount: preprod.equipment.length,
       staffing: o.staffing,
       checks: o.checks.map((c) => ({

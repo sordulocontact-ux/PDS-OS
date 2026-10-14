@@ -175,6 +175,25 @@ export const productionPreprod = {
     afterCall:
       "Le compte rendu est arrivé dans la Préproduction : confirmez ou rejetez les propositions de PO.",
     noCalls: "Aucun call de production pour ce livrable.",
+    planAction: {
+      plan: "Planifier",
+      confirmAndPlan: "Confirmer et planifier",
+      title: "Planifier cette action",
+      description:
+        "Qui la fait et pour quand. Elle entre au plan de préproduction, validée ; confiée à un membre, elle devient aussi une tâche de son Travail.",
+      holder: "Qui s'en charge",
+      holderNone: "Choisir",
+      holderHint:
+        "Un membre de PDS (tâche dans son Travail) ou un contact du Réseau.",
+      due: "Pour quand",
+      submit: "Planifier",
+      done: "Action planifiée.",
+      missingHolder: "Choisissez qui s'en charge.",
+      missingDue: "Indiquez une échéance.",
+      planned: (who: string, date: string) =>
+        `Planifiée : ${who}, pour le ${date}`,
+      withTask: "tâche créée dans le Travail",
+    },
     kinds: {
       decision: "Décision",
       hypothesis: "Hypothèse",

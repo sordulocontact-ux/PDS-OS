@@ -363,3 +363,8 @@ Au-delà des six étapes :
       par lien privé `/p/…` (mission, corrections, dépôt de version par lien ou fichier, exports
       attendus, références), demandes « Consultées » à l'ouverture, version soumise aussitôt
       (migration `20261014000201`, 22 tests pgTAP ; dépôt vérifié dans Chrome sur la base locale)
+- [x] Retours d'Ibé sur la Production, lot 4 (PROD-004, PROD-005) : call technique avec heure de fin
+      et invitation des membres participants, erreurs journalisées ; « Planifier » une action du
+      compte rendu (responsable, échéance, plan approuvé, tâche du Travail sans doublon) ; prochaine
+      action « relire les propositions » puis « planifier les actions » (migration `20261014000301`,
+      2 tests pgTAP)

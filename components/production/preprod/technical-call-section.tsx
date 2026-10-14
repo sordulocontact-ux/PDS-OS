@@ -12,9 +12,11 @@ import {
   technicalTopicLabel,
   type TechnicalCallInput,
 } from "@/lib/production/preprod/call-topics";
-import type { PreprodData } from "@/lib/production/preprod/types";
+import type { PlanAction, PreprodData } from "@/lib/production/preprod/types";
 
 import { AddCallItemButton } from "./add-call-item-button";
+import type { Member } from "@/lib/framing/related";
+import type { NetworkOption } from "@/lib/production/sheet";
 import { CallItems } from "./call-items";
 import { TechnicalCallLauncher } from "./technical-call-launcher";
 
@@ -30,11 +32,18 @@ export function TechnicalCallSection({
   input,
   calls,
   canOrganize,
+  actions,
+  members,
+  contacts,
 }: {
   projectId: string;
   input: TechnicalCallInput & { data: { sheet: { id: string } } };
   calls: PreprodData["calls"];
   canOrganize: boolean;
+  // The plan, to say which action of the call is planned (PROD-005).
+  actions: PlanAction[];
+  members: Member[];
+  contacts: NetworkOption[];
 }) {
   const sheetId = input.data.sheet.id;
   const items = input.preprod.items;
@@ -94,6 +103,27 @@ export function TechnicalCallSection({
           items={items}
           topics={topics}
           canOrganize={canOrganize}
+          planning={{
+            sheetId,
+            members,
+            contacts,
+            plannedByItem: Object.fromEntries(
+              actions.flatMap((a) =>
+                a.itemId && a.status !== "removed"
+                  ? [
+                      [
+                        a.itemId,
+                        {
+                          holder: a.holder?.name ?? null,
+                          dueDate: a.dueDate,
+                          task: a.taskId !== null,
+                        },
+                      ],
+                    ]
+                  : [],
+              ),
+            ),
+          }}
         />
         {canOrganize && (
           <div>

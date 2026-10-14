@@ -70,6 +70,22 @@ export const productionNext = {
       why: "Réalisateur, chef opérateur, production et techniciens disent ce qu'il faut concrètement pour tourner : matériel, techniciens, installation, contraintes du lieu.",
       link: "Préparer le call",
     },
+    callProposals: {
+      title: (n: number) =>
+        n === 1
+          ? "Relire la proposition tirée du call technique"
+          : `Relire les ${n} propositions tirées du call technique`,
+      why: "PO a lu le compte rendu : chaque décision, action ou question ouverte attend votre confirmation avant de compter.",
+      link: "Ouvrir le compte rendu",
+    },
+    callActions: {
+      title: (n: number) =>
+        n === 1
+          ? "Planifier l'action décidée au call"
+          : `Planifier les ${n} actions décidées au call`,
+      why: "Chaque action reçoit qui la fait et pour quand ; confiée à un membre, elle devient une tâche de son Travail.",
+      link: "Planifier",
+    },
     work: {
       location: {
         title: "Trouver et confirmer le lieu",
