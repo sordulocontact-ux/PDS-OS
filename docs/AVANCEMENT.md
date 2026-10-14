@@ -411,6 +411,12 @@ Au-delà des six étapes :
       diffusée avec urgences, contrôles ouverts nommés, lieu et dérogation expliqués, lecture des devis
       fiabilisée (une requête, réessayer, formats refusés clairement), « Saisir à la main » (migration
       `20261014001301`, 8 tests pgTAP ; test du parcours adapté)
+- [x] Production en parcours (message d'Ibé du 14/10, proto validé par Sacha) : interne ou externe et
+      les rôles, parcours par étapes avec « Maintenant » selon la personne, responsable, validation,
+      prérequis et suite ; chargé de production qui organise ; devis vérifiés puis validés ;
+      proposition de réalisation validée ; liens privés de la société, du réalisateur et du chef op
+      (migration `20261014001401`, 24 tests pgTAP ; parcours externe et lien de la société testés
+      dans Chrome sur la base locale)
 - [x] Quota quotidien de requêtes à PO et passage possible à Claude Haiku 5.5 (14/10) : limite par
       membre (200 par défaut) changée par le DG dans Équipe (colonne « PO aujourd'hui », champ dans
       « Modifier »), page « Paramètres » avec l'utilisation du jour comme dans Claude, refus clair

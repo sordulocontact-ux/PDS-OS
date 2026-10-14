@@ -66,6 +66,14 @@ export const NOTIFICATION_KINDS = [
   // A deliverable transmitted to the person in charge of Activations
   // (PROD-039).
   "production_handed_off",
+  // The journey (Ibé, 14/10): a role given, a quote deposited, submitted,
+  // decided, the director's proposal submitted or decided.
+  "production_organized",
+  "production_quote_deposited",
+  "production_quote_submitted",
+  "production_quote_decided",
+  "production_direction_submitted",
+  "production_direction_decided",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -100,6 +108,24 @@ export function notificationText(
 // opens the Conception; a validation opens its stage's own page (the summary
 // screen, for the Cadrage's guided review, so the "Valider"/"Refuser"
 // buttons are the first thing in view); everything else the project overview.
+// Where a production notification opens: the deliverable's step and anchor
+// (the subject is the deliverable).
+const PRODUCTION_TARGETS: Partial<Record<NotificationKind, [string, string]>> =
+  {
+    production_export_deposited: ["delivery", "exports"],
+    production_shoot_started: ["shoot", "shoot-day"],
+    production_call_sheet_published: ["call-sheet", "call-sheet"],
+    production_step_done: ["post", "steps"],
+    production_handed_off: ["delivery", "activations"],
+    production_version_submitted: ["post", "decision"],
+    production_organized: ["organisation", "who-does-what"],
+    production_quote_deposited: ["quote", "quotes"],
+    production_quote_submitted: ["quote", "quotes"],
+    production_quote_decided: ["quote", "quotes"],
+    production_direction_submitted: ["direction", "direction-decision"],
+    production_direction_decided: ["direction", "direction-decision"],
+  };
+
 export function notificationHref(
   kind: NotificationKind,
   projectId: string | null,
@@ -116,20 +142,7 @@ export function notificationHref(
   // A production version: the deliverable's Postproduction (the subject is
   // the deliverable).
   if (kind.startsWith("production_") && subjectId) {
-    const [step, anchor] =
-      kind === "production_export_deposited"
-        ? ["delivery", "exports"]
-        : kind === "production_shoot_started"
-          ? ["shoot", "shoot-day"]
-          : kind === "production_call_sheet_published"
-            ? ["preproduction", "call-sheet"]
-            : kind === "production_step_done"
-              ? ["post", "steps"]
-              : kind === "production_handed_off"
-                ? ["delivery", "activations"]
-                : kind === "production_version_submitted"
-                  ? ["post", "decision"]
-                  : ["post", "versions"];
+    const [step, anchor] = PRODUCTION_TARGETS[kind] ?? ["post", "versions"];
     return `${routes.projectProductionStep(projectId, subjectId, step)}#${anchor}`;
   }
   if (kind === "call_invited" && subjectId)

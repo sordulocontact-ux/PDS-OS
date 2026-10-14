@@ -416,7 +416,8 @@ rapide : **un lien par prestataire** (et non plus par mission) qui rassemble tou
 en cours, sur tous les projets — l'expérience d'un compte (« mes missions ») sans connexion ; le
 jour où les comptes arrivent, ce lien devient son espace connecté.
 
-Ordre proposé (non commencé) : M1 (choix interne / externe et parcours externe, qui conditionne
-tout le reste) → M2 (validation du devis) → M3 (lien de la société de production, puis parts
-réalisateur / chef op / chargé de production) → M4 (vue par rôle).
+Fait le 14/10 (proto validé par Sacha, `docs/ARCHITECTURE.md` « Production en parcours ») : M1, M2,
+M3 (société, réalisateur, chef op par lien ; le chargé de production a un compte) et M4 (« Maintenant »
+et « À vous » selon la personne). Restent les réponses d'Ibé du § 9 (qui valide un devis, chargé de
+production salarié ou freelance, interne / externe par livrable).
 

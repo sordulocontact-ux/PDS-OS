@@ -1,3 +1,5 @@
+import { StepPanel } from "@/components/production/journey/step-panel";
+import { stepContext } from "@/lib/production/journey/context";
 import { notFound, redirect } from "next/navigation";
 
 import { ClosureSection } from "@/components/production/delivery/closure-section";
@@ -66,8 +68,13 @@ export default async function ProductionDeliveryPage({
         ? t.readOnly
         : null;
 
+  const { step: journeyStep, steps: journeySteps } = await stepContext(
+    projectId,
+    deliverableId,
+    "delivery",
+  );
   return (
-    <div className="flex flex-col gap-10">
+    <StepPanel step={journeyStep} steps={journeySteps}>
       {status && <p className="text-sm text-muted-foreground">{status}</p>}
       <DecisionsSection
         projectId={projectId}
@@ -107,6 +114,6 @@ export default async function ProductionDeliveryPage({
         }
         canOrganize={data.canOrganize}
       />
-    </div>
+    </StepPanel>
   );
 }

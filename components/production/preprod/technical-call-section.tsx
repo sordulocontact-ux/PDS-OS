@@ -35,6 +35,8 @@ export function TechnicalCallSection({
   actions,
   members,
   contacts,
+  launcher: withLauncher = true,
+  listCalls = true,
 }: {
   projectId: string;
   input: TechnicalCallInput & { data: { sheet: { id: string } } };
@@ -44,6 +46,10 @@ export function TechnicalCallSection({
   actions: PlanAction[];
   members: Member[];
   contacts: NetworkOption[];
+  // External production: the call is the presentation to the company,
+  // launched and listed by its own panel (ProductionCallPanel).
+  launcher?: boolean;
+  listCalls?: boolean;
 }) {
   const sheetId = input.data.sheet.id;
   const items = input.preprod.items;
@@ -56,20 +62,21 @@ export function TechnicalCallSection({
       t.otherTopic,
     ]),
   ];
-  const launcher = canOrganize ? (
-    <TechnicalCallLauncher
-      projectId={projectId}
-      data={{
-        sheetId,
-        deliverableId: input.data.deliverable.id,
-        deliverableTitle: input.data.deliverable.title,
-        topics: technicalCallTopics(input),
-        purpose: technicalCallPurpose(input.data.deliverable.title),
-        people: technicalCallPeople(input),
-        documents: technicalCallDocuments(input),
-      }}
-    />
-  ) : undefined;
+  const launcher =
+    canOrganize && withLauncher ? (
+      <TechnicalCallLauncher
+        projectId={projectId}
+        data={{
+          sheetId,
+          deliverableId: input.data.deliverable.id,
+          deliverableTitle: input.data.deliverable.title,
+          topics: technicalCallTopics(input),
+          purpose: technicalCallPurpose(input.data.deliverable.title),
+          people: technicalCallPeople(input),
+          documents: technicalCallDocuments(input),
+        }}
+      />
+    ) : undefined;
 
   return (
     <PageSection
@@ -80,19 +87,21 @@ export function TechnicalCallSection({
       card
     >
       <div className="flex flex-col gap-8">
-        <section
-          aria-labelledby="preprod-calls"
-          className="flex flex-col gap-3"
-        >
-          <h3 id="preprod-calls" className="text-base font-semibold">
-            {t.calls}
-          </h3>
-          {calls.length ? (
-            <ProductionCallList calls={calls} />
-          ) : (
-            <EmptyNote>{t.noCalls}</EmptyNote>
-          )}
-        </section>
+        {listCalls && (
+          <section
+            aria-labelledby="preprod-calls"
+            className="flex flex-col gap-3"
+          >
+            <h3 id="preprod-calls" className="text-base font-semibold">
+              {t.calls}
+            </h3>
+            {calls.length ? (
+              <ProductionCallList calls={calls} />
+            ) : (
+              <EmptyNote>{t.noCalls}</EmptyNote>
+            )}
+          </section>
+        )}
         {proposals > 0 && (
           <ToneCallout tone="warning">
             {t.proposalsTitle(proposals)}

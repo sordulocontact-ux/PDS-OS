@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { LinkJourneyView } from "@/components/production/provider/link-journey";
 import { ProviderSpaceView } from "@/components/production/provider/provider-space";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -8,6 +9,7 @@ import {
   getProviderSpace,
   noteProviderOpened,
 } from "@/lib/production/provider/public";
+import { getLinkJourney } from "@/lib/production/provider/journey";
 import { formatDate } from "@/lib/release/format";
 
 const t = fr.productionProvider;
@@ -27,6 +29,7 @@ export default async function ProviderSpacePage({
   const space = await getProviderSpace(token);
   if (!space) notFound();
   if (space.state === "open") await noteProviderOpened(token);
+  const journey = space.state === "open" ? await getLinkJourney(token) : null;
 
   return (
     <main className="flex flex-1 justify-center bg-muted/40 px-4 py-12 sm:py-16">
@@ -47,11 +50,15 @@ export default async function ProviderSpacePage({
             </>
           )}
         </header>
+        {space.state === "open" && journey && (
+          <LinkJourneyView token={token} journey={journey} />
+        )}
         {space.state === "open" ? (
           <ProviderSpaceView
             token={token}
             space={space}
             locations={await getProviderLocations(token)}
+            quiet={Boolean(journey && journey.roles.length > 0)}
           />
         ) : (
           <p className="text-muted-foreground">

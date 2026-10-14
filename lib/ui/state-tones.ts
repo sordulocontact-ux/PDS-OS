@@ -1094,3 +1094,11 @@ export const creativeBriefTone: Record<string, Tone> = {
   in_review: "action",
   validated: "success",
 };
+
+/** A step of a production's journey (lib/production/journey). */
+export const productionStepTone: Record<string, Tone> = {
+  done: "success",
+  current: "info",
+  blocked: "neutral",
+  upcoming: "neutral",
+};

@@ -22,6 +22,10 @@ import {
   soundCaptureOf,
   type ProductionBrief,
 } from "@/lib/production/brief";
+import {
+  organizationOf,
+  type SheetOrganization,
+} from "@/lib/production/organization";
 import { isNeedFamily, type NeedFamily } from "@/lib/production/roles";
 import { createClient } from "@/lib/supabase/server";
 
@@ -100,6 +104,7 @@ export type ProductionSheetData = {
   heritage: ProductionHeritage;
   // The project's owner (the chef de projet who prepares).
   ownerName: string | null;
+  ownerPersonId: string | null;
   stageState: string;
   sheet: {
     id: string;
@@ -114,6 +119,8 @@ export type ProductionSheetData = {
     logistics: SheetLogistics;
     readyAt: string | null;
     readyBy: string | null;
+    // Who produces and who holds each role (lib/production/organization.ts).
+    organization: SheetOrganization;
     // Closed by its owner once transmitted (PROD-040).
     closedAt: string | null;
     closedBy: string | null;
@@ -404,6 +411,7 @@ async function loadSheet(
         },
         readyAt: sheetRow.ready_at,
         readyBy: nameOf(sheetRow.ready_by),
+        organization: organizationOf(sheetRow, holderOf, nameOf),
         closedAt: sheetRow.closed_at,
         closedBy: nameOf(sheetRow.closed_by),
       }
@@ -419,6 +427,7 @@ async function loadSheet(
       assigneeName: nameOf(d.assignee_person_id),
     },
     ownerName: nameOf(project.owner_person_id),
+    ownerPersonId: project.owner_person_id,
     heritage: {
       fiche: handed.fiche,
       newerFiche: handed.newerVersion,
@@ -476,8 +485,15 @@ async function loadSheet(
       isOwner &&
       (handed.fiche !== null || sourceVersion !== null) &&
       (stageState === "not_started" || running),
-    // A closed production stays readable only (PROD-040).
-    canOrganize: isOwner && running && sheet !== null && !sheet.closedAt,
+    // The owner or the designated line producer; a closed production stays
+    // readable only (PROD-040).
+    canOrganize:
+      (isOwner ||
+        (access.personId !== null &&
+          sheet?.organization.lineProducer?.personId === access.personId)) &&
+      running &&
+      sheet !== null &&
+      !sheet.closedAt,
     canWriteBrief:
       running &&
       sheet !== null &&

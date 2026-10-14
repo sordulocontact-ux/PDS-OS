@@ -758,6 +758,9 @@ begin
         'reason', q.reason, 'depositedAt', q.deposited_at) order by q.deposited_at desc)
       from public.production_quotes q where q.sheet_id = s.id), '[]'::jsonb),
     'gearCount', (select count(*) from public.production_equipment e where e.sheet_id = s.id),
+    'locations', coalesce((select jsonb_agg(jsonb_build_object('name', o.name, 'status', o.status)
+        order by o.position, o.created_at)
+      from public.production_location_options o where o.sheet_id = s.id and o.status <> 'discarded'), '[]'::jsonb),
     'actions', coalesce((select jsonb_agg(jsonb_build_object('title', a.title, 'dueDate', a.due_date)
         order by a.due_date nulls last, a.position)
       from public.production_plan_actions a

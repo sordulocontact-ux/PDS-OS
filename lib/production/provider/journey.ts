@@ -1,0 +1,53 @@
+import "server-only";
+
+import { z } from "zod";
+
+import { TOKEN } from "@/lib/production/provider/public";
+import { createClient } from "@/lib/supabase/server";
+
+const text = z.string().nullable();
+const journeySchema = z.object({
+  roles: z.array(z.enum(["company", "director", "dop"])),
+  organization: z.enum(["internal", "external"]).nullable(),
+  envelopeCents: z.number().nullable(),
+  deliveryOn: text,
+  progress: z.record(z.string(), z.boolean()),
+  direction: z.object({
+    status: z.enum(["draft", "submitted", "approved", "changes"]),
+    comment: text,
+    stagingIntent: text,
+    runOfShow: text,
+    references: text,
+  }),
+  quotes: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string(),
+      amountCents: z.number(),
+      deliveryOn: text,
+      status: z.enum(["deposited", "submitted", "approved", "rejected"]),
+      reason: text,
+      depositedAt: z.string(),
+    }),
+  ),
+  gearCount: z.number(),
+  locations: z
+    .array(z.object({ name: z.string(), status: z.string() }))
+    .default([]),
+  actions: z.array(z.object({ title: z.string(), dueDate: text })),
+});
+export type LinkJourney = z.infer<typeof journeySchema>;
+
+/** The provider's part of the journey, by its link (Ibé, 14/10). */
+export async function getLinkJourney(
+  token: string,
+): Promise<LinkJourney | null> {
+  if (!TOKEN.test(token)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_production_link_journey", {
+    p_token: token,
+  });
+  if (error) console.error("getLinkJourney:", error.message);
+  const parsed = journeySchema.safeParse(data);
+  return parsed.success ? parsed.data : null;
+}

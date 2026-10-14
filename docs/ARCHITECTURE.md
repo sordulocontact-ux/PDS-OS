@@ -3911,6 +3911,33 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   (PROD-009) et un écart est signalé, jamais écrasé. Décisions faute de règle : pas d'intervenant
   proposé pour une étape de post (règle du lot « personne par défaut »), pas d'effectif deviné, pas
   de brief recopié de la Conception (le brief ne la répète pas).
+- **Production en parcours** (message d'Ibé du 14/10, `docs/PRODUCTION-METIER.md` § 0 ; migration
+  `20261014001401_production_journey.sql`, tests `production-journey.test.sql`) : la fiche d'un
+  livrable n'a plus d'onglets mais un **parcours** (`lib/production/journey/` : `steps.ts` pur,
+  `load.ts`, `context.ts` mis en cache par requête). Première étape : **interne ou externe** et les
+  rôles (`set_production_organization`, propriétaire seul : société, chargé de production,
+  validation des devis, réalisateur, chef op ; les fiches ouvertes avant valent interne). Étapes en
+  externe : Organisation, Call de présentation, Devis de la société, Proposition de réalisation,
+  Préproduction par la société, Lieux, Contrôle avant tournage ; en interne : Organisation,
+  Proposition, Call technique, Équipe et matériel, Lieux, Devis et budget, Planning et feuille de
+  service, Contrôle ; puis Tournage, Postproduction, Livraison (pages existantes). **Une page par
+  étape** (`/production/[id]/<étape>`, pas d'attrape-tout) qui réutilise les sections existantes ;
+  `/production/[id]` et l'ancien `/preproduction` redirigent vers l'étape de la personne
+  (`landingStep`). États calculés par le code à chaque lecture ; une étape « plus tard » reste
+  préparable. **Le chargé de production désigné** organise la Production du projet comme son
+  responsable (`production_can_organize`) et, comme le validateur des devis et un chef op membre,
+  **voit le projet** (`can_see_project_row`). **Devis** (`production_quotes`) : déposés par la
+  société sur son lien ou dans l'app, vérifiés point par point par le chargé de production (montant
+  et enveloppe, délai, périmètre : `quoteChecks`), soumis, validés ou refusés avec motif par leur
+  validateur seul. **Proposition de réalisation** : envoyée (`submit_production_direction`, ou par
+  le lien du réalisateur), validée ou renvoyée par le responsable ou un directeur créatif ; la
+  modifier ensuite la remet en brouillon. **Liens privés** : la société dépose son devis, coche
+  l'avancement de sa préproduction, propose des lieux ; le réalisateur écrit et envoie sa
+  proposition ; le chef op envoie sa liste matériel (lignes « Besoin ») ; chacun voit ses tâches
+  (`get_production_link_journey`). Notifications `production_organized`, `production_quote_*`,
+  `production_direction_*`. Décisions faute de règle (questions à Ibé) : le validateur des devis est
+  proposé à la direction générale ; un chargé de production peut organiser toutes les productions du
+  projet (droits par projet, pas par livrable).
 - **Bugs du test du 13/10** (BUG-001 à BUG-007 ; migration `20261014001301_production_bug_fixes.sql`,
   tests `production-bug-fixes.test.sql`) : le contrôle « Feuille de service » ne se confirme plus sur
   la seule heure de convocation — il faut aussi les urgences et **une version diffusée** à l'équipe

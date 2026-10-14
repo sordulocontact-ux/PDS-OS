@@ -1,3 +1,5 @@
+import { StepPanel } from "@/components/production/journey/step-panel";
+import { stepContext } from "@/lib/production/journey/context";
 import { notFound, redirect } from "next/navigation";
 
 import { EquipmentReturnSection } from "@/components/production/shoot/equipment-return-section";
@@ -73,8 +75,13 @@ export default async function ProductionShootPage({
         : null;
   const common = { projectId, sheetId: sheet.id, canOrganize };
 
+  const { step: journeyStep, steps: journeySteps } = await stepContext(
+    projectId,
+    deliverableId,
+    "shoot",
+  );
   return (
-    <div className="flex flex-col gap-10">
+    <StepPanel step={journeyStep} steps={journeySteps}>
       {status && <p className="text-sm text-muted-foreground">{status}</p>}
       <ShootStateSection
         {...common}
@@ -84,7 +91,7 @@ export default async function ProductionShootPage({
         preproductionHref={routes.projectProductionStep(
           projectId,
           deliverableId,
-          "preproduction",
+          "readiness",
         )}
       />
       {(sheet.readyAt !== null || shoot.state === "in_progress") && (
@@ -126,6 +133,6 @@ export default async function ProductionShootPage({
         followUps={followUps}
         members={data.members}
       />
-    </div>
+    </StepPanel>
   );
 }

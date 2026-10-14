@@ -1,5 +1,3 @@
-import { IconPlus } from "nucleo-sharp-essential";
-
 import {
   DataTable,
   DataTableBody,
@@ -10,7 +8,6 @@ import {
   DataTableRow,
   EMPTY_CELL,
 } from "@/components/ui/data-table";
-import { DialogButton } from "@/components/ui/dialog-button";
 import { formatEuros } from "@/lib/budget/types";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
@@ -24,7 +21,7 @@ import type { NetworkOption } from "@/lib/production/sheet";
 
 import { LocationCard } from "./location-card";
 import { LocationConsults } from "./location-consults";
-import { LocationOptionForm } from "./location-option-form";
+import { AddLocationButton } from "./add-location-button";
 
 const t = fr.productionLocations;
 
@@ -70,21 +67,10 @@ export function LocationsBoard({
           <p className="text-sm text-muted-foreground">{t.description}</p>
         </div>
         {canOrganize && (
-          <DialogButton
-            label={t.add}
-            icon={IconPlus}
-            title={t.addTitle}
-            description={t.formDescription}
-          >
-            {(close) => (
-              <LocationOptionForm
-                projectId={scope.projectId}
-                sheetId={scope.sheetId}
-                option={null}
-                onDone={close}
-              />
-            )}
-          </DialogButton>
+          <AddLocationButton
+            projectId={scope.projectId}
+            sheetId={scope.sheetId}
+          />
         )}
       </div>
       <LocationConsults

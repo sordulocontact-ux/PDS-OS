@@ -58,6 +58,18 @@ export const notifications = {
     production_export_deposited: (_actor: string, project: string) =>
       `Un prestataire a déposé un export de « ${project} » : il est à contrôler.`,
     // The provider has no account: no actor, the project names it.
+    production_organized: (actor: string, project: string) =>
+      `${actor} vous a donné un rôle dans la production de « ${project} » : votre part vous attend.`,
+    production_quote_deposited: (_actor: string, project: string) =>
+      `Un devis de « ${project} » est arrivé : il est à vérifier.`,
+    production_quote_submitted: (actor: string, project: string) =>
+      `${actor} a vérifié un devis de « ${project} » : il attend votre validation.`,
+    production_quote_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur un devis de « ${project} ».`,
+    production_direction_submitted: (actor: string, project: string) =>
+      `${actor} a envoyé la proposition de réalisation de « ${project} » : elle attend votre validation.`,
+    production_direction_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur la proposition de réalisation de « ${project} ».`,
     production_handed_off: (actor: string, project: string) =>
       `${actor} vous a transmis un livrable de « ${project} » pour les Activations : fichiers, formats et contraintes sont sur sa livraison.`,
     production_step_done: (_actor: string, project: string) =>

@@ -91,7 +91,11 @@ export function CallProcessing({
     if (extracted.productionDeliverableId && projectId) {
       toast.success(fr.productionPreprod.call.afterCall);
       router.push(
-        `${routes.projectProductionStep(projectId, extracted.productionDeliverableId, "preproduction")}#technical-call`,
+        routes.projectProductionStep(
+          projectId,
+          extracted.productionDeliverableId,
+          "call",
+        ),
       );
     } else if (extracted.designFilled && projectId) {
       toast.success(fr.conceptionCall.afterCall);

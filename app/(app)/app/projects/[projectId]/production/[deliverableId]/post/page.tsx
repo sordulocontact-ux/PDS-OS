@@ -1,3 +1,5 @@
+import { StepPanel } from "@/components/production/journey/step-panel";
+import { stepContext } from "@/lib/production/journey/context";
 import { notFound, redirect } from "next/navigation";
 
 import { DecisionSection } from "@/components/production/post/decision-section";
@@ -90,8 +92,13 @@ export default async function ProductionPostPage({
         ? t.readOnly
         : null;
 
+  const { step: journeyStep, steps: journeySteps } = await stepContext(
+    projectId,
+    deliverableId,
+    "post",
+  );
   return (
-    <div className="flex flex-col gap-10">
+    <StepPanel step={journeyStep} steps={journeySteps}>
       {status && <p className="text-sm text-muted-foreground">{status}</p>}
       {post.shootAlert && <ShootAlert alert={post.shootAlert} />}
       <ReferencesSection
@@ -127,6 +134,6 @@ export default async function ProductionPostPage({
         people={people}
         defaults={correctionDefaults}
       />
-    </div>
+    </StepPanel>
   );
 }

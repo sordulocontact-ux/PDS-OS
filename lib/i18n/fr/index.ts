@@ -66,7 +66,11 @@ import { productionClosure } from "./production-closure";
 import { productionCorrections } from "./production-corrections";
 import { productionCallSheetPage } from "./production-call-sheet-page";
 import { productionDelivery } from "./production-delivery";
+import { productionDirection } from "./production-direction";
+import { productionJourney } from "./production-journey";
+import { productionLink } from "./production-link";
 import { productionLocations } from "./production-locations";
+import { productionOrganization } from "./production-organization";
 import { productionHistory } from "./production-history";
 import { productionProvider } from "./production-provider";
 import { productionNext } from "./production-next";
@@ -74,6 +78,7 @@ import { productionImport } from "./production-import";
 import { productionNeeds } from "./production-needs";
 import { productionPost } from "./production-post";
 import { productionPrep } from "./production-prep";
+import { productionQuotes } from "./production-quotes";
 import { productionPreprod } from "./production-preprod";
 import { productionShoot } from "./production-shoot";
 import { release } from "./release";
@@ -145,6 +150,7 @@ export const fr = {
   conceptionSheet,
   production,
   productionPrep,
+  productionQuotes,
   productionBrief,
   productionNeeds,
   productionCall,
@@ -153,12 +159,16 @@ export const fr = {
   productionShoot,
   productionPost,
   productionDelivery,
+  productionDirection,
   productionNext,
   productionClosure,
   productionCorrections,
   productionProvider,
   productionHistory,
+  productionJourney,
+  productionLink,
   productionLocations,
+  productionOrganization,
   productionCallSheetPage,
   marketing,
   marketingReview,

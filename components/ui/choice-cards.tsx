@@ -17,7 +17,7 @@ export type Choice<V extends string> = {
  * Radio choices with their consequence spelled out under each option, so the
  * decision is informed. Native radios: keyboard and screen readers for free.
  * Uncontrolled (defaultValue, for forms) or controlled (value + onChange).
- * `columns={3}`: side by side from the small breakpoint, for short choices.
+ * `columns={2 | 3}`: side by side from the small breakpoint, for short choices.
  * The choice made shows in the selection colour (docs/DESIGN.md § 3 bis).
  * `variant="tile"`: a centred icon and label, the radio hidden (type of a
  * project).
@@ -48,7 +48,7 @@ export function ChoiceCards<V extends string>({
   // Controlled when given; null: nothing chosen yet.
   value?: V | null;
   onChange?: (value: V) => void;
-  columns?: 1 | 3;
+  columns?: 1 | 2 | 3;
   variant?: "card" | "tile";
 }) {
   const tile = variant === "tile";
@@ -57,6 +57,7 @@ export function ChoiceCards<V extends string>({
       className={cn(
         "grid gap-2",
         tile && "gap-3",
+        columns === 2 && "sm:grid-cols-2",
         columns === 3 && "sm:grid-cols-3",
       )}
       disabled={disabled}

@@ -16508,11 +16508,11 @@ export type Database = {
         Returns: undefined
       }
       decide_production_direction: {
-        Args: { p_approve: boolean; p_comment: string; p_sheet_id: string }
+        Args: { p_approve: boolean; p_comment: string | null; p_sheet_id: string }
         Returns: undefined
       }
       decide_production_quote: {
-        Args: { p_approve: boolean; p_quote_id: string; p_reason: string }
+        Args: { p_approve: boolean; p_quote_id: string; p_reason: string | null }
         Returns: undefined
       }
       decide_production_version: {
@@ -17381,7 +17381,7 @@ export type Database = {
         Returns: undefined
       }
       submit_production_quote: {
-        Args: { p_checks: Json; p_note: string; p_quote_id: string }
+        Args: { p_checks: Json; p_note: string | null; p_quote_id: string }
         Returns: undefined
       }
       submit_production_version: {

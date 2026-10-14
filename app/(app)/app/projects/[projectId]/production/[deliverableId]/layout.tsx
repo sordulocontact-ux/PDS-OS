@@ -1,76 +1,48 @@
-import { notFound } from "next/navigation";
-
-import { ProductionNextStep } from "@/components/production/next-step";
+import { JourneySpine } from "@/components/production/journey/journey-spine";
+import { NowCard } from "@/components/production/journey/now-card";
 import { SheetHeader } from "@/components/production/prep/sheet-header";
-import { SectionTabs } from "@/components/shell/section-tabs";
-import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
-import { fr } from "@/lib/i18n/fr";
-import { todayInParis } from "@/lib/insights/dates";
-import { loadProductionNext } from "@/lib/production/next/load";
-import { loadPhaseFacts, phaseOf } from "@/lib/production/phase";
-import { loadProductionSheet } from "@/lib/production/sheet";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { createClient } from "@/lib/supabase/server";
-import { allInOrder } from "@/lib/utils/parallel";
+import { journeyContext } from "@/lib/production/journey/context";
 
-const t = fr.productionPrep;
-
-// One deliverable's production: its header (source, phase), its one next
-// action (PROD-001) and one tab per part of the ticket, each its own URL. The tabs other than Préparation
-// appear once the preparation is opened. Pages check access themselves; the
-// sheet is read once per request (loadProductionSheet is cached).
+// One deliverable's production as a journey (Ibé, 14/10): its header (who
+// produces, what frames it), « Maintenant » for the person looking, then the
+// steps on the left and the open step on the right — one page per step.
+// Pages check access themselves; everything is read once per request
+// (journeyContext is cached).
 export default async function ProductionSheetLayout({
   children,
   params,
 }: LayoutProps<"/app/projects/[projectId]/production/[deliverableId]">) {
   const { projectId, deliverableId } = await params;
-  const [access] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-  const data = await loadProductionSheet(projectId, deliverableId, access);
-  if (!data) notFound();
-  const facts = await loadPhaseFacts(
-    await createClient(),
-    data.sheet ? { id: data.sheet.id, readyAt: data.sheet.readyAt } : null,
-    deliverableId,
-  );
-  const phase = phaseOf(facts);
-  const next = await loadProductionNext(
+  const { access, data, steps } = await journeyContext(
     projectId,
     deliverableId,
-    access,
-    data,
-    phase,
   );
-  const step = (key: string) =>
-    routes.projectProductionStep(projectId, deliverableId, key);
-
+  const started = Boolean(data.heritage.fiche || data.heritage.source);
+  const viewer =
+    data.members.find((m) => m.personId === access.personId)?.name ?? null;
   return (
     <div className="flex flex-col gap-6 pt-6">
-      <SheetHeader projectId={projectId} data={data} phase={phase} />
-      {(data.heritage.fiche || data.heritage.source) && (
-        <ProductionNextStep next={next} today={todayInParis()} />
-      )}
-      {data.sheet && (
-        <SectionTabs
-          label={t.tabsLabel}
-          tabs={[
-            {
-              href: routes.projectProductionSheet(projectId, deliverableId),
-              label: t.tabs.preparation,
-              exact: true,
-            },
-            { href: step("preproduction"), label: t.tabs.preproduction },
-            { href: step("shoot"), label: t.tabs.shoot },
-            { href: step("post"), label: t.tabs.post },
-            { href: step("delivery"), label: t.tabs.delivery },
-            { href: step("history"), label: t.tabs.history },
-          ]}
+      <SheetHeader projectId={projectId} data={data} />
+      {started && (
+        <NowCard
+          projectId={projectId}
+          deliverableId={deliverableId}
+          steps={steps}
+          viewerName={viewer}
         />
       )}
-      {children}
+      {started ? (
+        <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+          <JourneySpine
+            projectId={projectId}
+            deliverableId={deliverableId}
+            steps={steps}
+          />
+          <div className="min-w-0">{children}</div>
+        </div>
+      ) : (
+        children
+      )}
     </div>
   );
 }

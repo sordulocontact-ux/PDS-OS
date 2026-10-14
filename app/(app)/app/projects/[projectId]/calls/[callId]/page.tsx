@@ -95,7 +95,11 @@ export default async function CallPage({
         <Link
           href={
             call.prepared?.productionDeliverableId
-              ? `${routes.projectProductionStep(projectId, call.prepared.productionDeliverableId, "preproduction")}#technical-call`
+              ? routes.projectProductionStep(
+                  projectId,
+                  call.prepared.productionDeliverableId,
+                  "call",
+                )
               : call.prepared?.kind === "design"
                 ? routes.projectDesignWork(projectId)
                 : call.prepared?.kind === "strategy"
