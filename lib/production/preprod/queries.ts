@@ -156,6 +156,7 @@ export async function loadPreprod(
       holder: holderOf(a.person_id, a.contact_id),
       dueDate: a.due_date,
       dependsOn: a.depends_on,
+      templateKey: a.template_key,
       blocking: a.blocking,
       status: planStatusOf(a.status),
       approvedBy: nameOf(a.approved_by),

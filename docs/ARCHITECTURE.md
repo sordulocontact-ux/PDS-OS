@@ -3717,6 +3717,20 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   remplacé si l'étape change tant qu'il n'a pas été touché), « Accès aux fichiers » expliqué, le
   statut n'est demandé qu'une fois l'étape créée.
 
+- **Plan proposé et rétroplanning recalculé** (PROD-006, PROD-010 ; migration
+  `20261014000501_production_plan_template.sql`) : « Proposer un plan » crée en **brouillon** les étapes
+  habituelles d'un tournage (`lib/production/preprod/plan-template.ts` : brief du réalisateur, call
+  technique, lieu, autorisations, équipe, prise de son directe si le brief la prévoit, devis,
+  location, feuille de service, contrôle avant tournage, sauvegarde des rushes), chacune avec son
+  **échéance du rétroplanning** (`dueByStep`), ses **dépendances** et un responsable proposé (le
+  réalisateur pour son brief, sinon le chef de projet). Une date déjà passée n'est jamais posée en
+  silence : l'action arrive sans échéance, avec une note. `template_key` (unique par fiche) empêche de
+  proposer deux fois la même étape. Quand les dates de tournage ou de livraison changent,
+  « Recalculer N échéances » montre chaque échéance qui bouge (avant → après) et n'applique qu'après
+  confirmation ; une action retirée ou dont la tâche est faite ne bouge pas, une tâche déjà créée
+  garde sa date dans le Travail. La prochaine action propose le plan s'il n'existe pas, puis
+  l'approbation de ses brouillons.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

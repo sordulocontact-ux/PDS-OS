@@ -251,6 +251,42 @@ export const productionPreprod = {
   },
 
   plan: {
+    template: {
+      propose: "Proposer un plan",
+      proposeHint:
+        "PO propose les étapes habituelles d'un tournage, adaptées au brief du réalisateur, avec leurs échéances tirées du rétroplanning et leurs dépendances. Tout arrive en brouillon : ajustez, puis approuvez.",
+      proposeMore: (n: number) =>
+        n === 1
+          ? "Proposer 1 étape manquante"
+          : `Proposer ${n} étapes manquantes`,
+      proposed: (n: number) =>
+        n === 1
+          ? "1 action proposée en brouillon."
+          : `${n} actions proposées en brouillon.`,
+      pastNote: (date: string) =>
+        `Le rétroplanning la plaçait au ${date}, déjà passé : fixez une échéance.`,
+      reschedule: (n: number) =>
+        n === 1 ? "Recalculer 1 échéance" : `Recalculer ${n} échéances`,
+      rescheduleTitle: "Recalculer les échéances du plan",
+      rescheduleDescription:
+        "Les dates de tournage ou de livraison ont changé : voici les échéances du plan proposé qui bougent. Rien ne change avant votre confirmation ; une tâche déjà créée dans le Travail garde sa date.",
+      rescheduleConfirm: "Appliquer ces échéances",
+      rescheduled: "Échéances recalculées.",
+      none: "—",
+      titles: {
+        director_brief: "Valider le brief du réalisateur",
+        technical_call: "Tenir le call technique",
+        location: "Trouver et confirmer le lieu",
+        permits: "Obtenir les autorisations de tournage",
+        team: "Confirmer l'équipe et ses disponibilités",
+        live_sound: "Prévoir la prise de son directe",
+        quotes: "Demander et comparer les devis",
+        rental: "Réserver le matériel",
+        call_sheet: "Envoyer la feuille de service",
+        readiness: "Faire le contrôle avant tournage",
+        backup: "Sauvegarder et vérifier les rushes",
+      },
+    },
     title: "Plan de préproduction",
     description:
       "Les actions, qui est pressenti, l'échéance et ce dont elles dépendent. Une action n'entre dans Travail qu'après votre confirmation.",

@@ -2,7 +2,7 @@
 -- supabase/migrations/20261014000401_production_events.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(9);
+select plan(10);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -103,6 +103,12 @@ insert into public.production_shoots (organization_id, project_id, sheet_id, sta
 values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'planned');
 select is((select count(*)::int from public.production_events where entity = 'shoot'),
           1, 'the shoot''s state is logged');
+
+insert into public.production_plan_actions (organization_id, project_id, sheet_id, title, template_key)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'Trouver le lieu', 'location');
+select throws_ok($$ insert into public.production_plan_actions (organization_id, project_id, sheet_id, title, template_key)
+                    values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'Encore le lieu', 'location') $$,
+                 '23505', null, 'a proposed step is never in the plan twice (PROD-006)');
 
 select * from finish();
 rollback;

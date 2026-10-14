@@ -16,7 +16,7 @@ import { isConfirmedEquipment } from "@/lib/production/preprod/equipment";
 import { preprodOverview } from "@/lib/production/preprod/overview";
 import type { CheckKey } from "@/lib/production/preprod/types";
 import type { ProductionSheetData } from "@/lib/production/sheet";
-import { retroSchedule } from "@/lib/production/preprod/schedule";
+import { dueByStep } from "@/lib/production/preprod/schedule";
 import { postBlockers } from "@/lib/production/shoot/blockers";
 import {
   deliveryFor,
@@ -56,15 +56,9 @@ export async function loadProductionNext(
   ]);
   const ownerIsViewer = data.canOpen || data.canOrganize;
   const today = todayInParis();
-  // The backward schedule's dates (nothing is « done » here: only dates).
-  const due: NextInput["due"] = {};
-  if (sheet)
-    for (const row of retroSchedule(
-      effectiveLogistics(sheet.logistics, data.heritage.fiche),
-      {},
-      today,
-    ).rows)
-      if (row.date) due[row.step] = row.end ?? row.date;
+  const due: NextInput["due"] = sheet
+    ? dueByStep(effectiveLogistics(sheet.logistics, data.heritage.fiche), today)
+    : {};
 
   const input: NextInput = {
     projectId,
@@ -123,6 +117,8 @@ export async function loadProductionNext(
       hasTechnicalCall: preprod.calls.length > 0 || preprod.items.length > 0,
       callProposals: preprod.items.filter((i) => i.status === "proposed")
         .length,
+      planActions: preprod.actions.filter((a) => a.status !== "removed").length,
+      draftActions: preprod.actions.filter((a) => a.status === "draft").length,
       unplannedActions: preprod.items.filter(
         (i) =>
           i.kind === "action" &&

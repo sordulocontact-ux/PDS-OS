@@ -27,6 +27,7 @@ export const productionNext = {
     brief: "Préparation › Brief réalisateur",
     needs: "Préparation › Besoins humains",
     technicalCall: "Préproduction › Call technique",
+    plan: "Préproduction › Plan de préproduction",
     location: "Préproduction › Lieu",
     equipment: "Préproduction › Matériel",
     schedule: "Préproduction › Planning",
@@ -69,6 +70,19 @@ export const productionNext = {
       title: "Préparer le call technique",
       why: "Réalisateur, chef opérateur, production et techniciens disent ce qu'il faut concrètement pour tourner : matériel, techniciens, installation, contraintes du lieu.",
       link: "Préparer le call",
+    },
+    proposePlan: {
+      title: "Proposer le plan de préproduction",
+      why: "PO propose les étapes habituelles du tournage, avec leurs échéances tirées du rétroplanning : vous ajustez, puis vous approuvez.",
+      link: "Ouvrir le plan",
+    },
+    approvePlan: {
+      title: (n: number) =>
+        n === 1
+          ? "Approuver l'action en brouillon du plan"
+          : `Approuver les ${n} actions en brouillon du plan`,
+      why: "Une action approuvée a un responsable et une échéance ; elle peut devenir une tâche du Travail.",
+      link: "Ouvrir le plan",
     },
     callProposals: {
       title: (n: number) =>

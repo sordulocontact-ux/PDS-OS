@@ -121,6 +121,26 @@ export function preproductionNext(ctx: NextContext): ProductionNext {
       link: callLink(t.steps.callActions.link),
     });
 
+  const planLink = (label: string) =>
+    link(label, "preproduction", "plan", "plan");
+  if (p.planActions === 0)
+    return owner({
+      ...blank,
+      kind: "act",
+      dueKey: "brief",
+      title: t.steps.proposePlan.title,
+      why: t.steps.proposePlan.why,
+      link: planLink(t.steps.proposePlan.link),
+    });
+  if (p.draftActions > 0)
+    return owner({
+      ...blank,
+      kind: "decision",
+      title: t.steps.approvePlan.title(p.draftActions),
+      why: t.steps.approvePlan.why,
+      link: planLink(t.steps.approvePlan.link),
+    });
+
   const open = p.checks.filter((c) => c.state === "open");
   const missing = open.map((c) => t.missing.check(checkLabel(c.key)));
   const readiness = (label: string) =>

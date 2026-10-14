@@ -62,6 +62,9 @@ export type NextInput = {
     // not planned yet (PROD-005).
     callProposals: number;
     unplannedActions: number;
+    // The preproduction plan: none yet, or drafts waiting (PROD-006).
+    planActions: number;
+    draftActions: number;
     equipmentCount: number;
     staffing: { positions: number; filled: number; toConfirm: number };
     // In the readiness order; `workDone` = what the check rests on exists.

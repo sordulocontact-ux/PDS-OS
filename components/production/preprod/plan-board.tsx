@@ -17,6 +17,8 @@ import type { NetworkOption } from "@/lib/production/sheet";
 import { DialogButton } from "@/components/ui/dialog-button";
 import { PlanActionForm } from "./plan-action-form";
 import { PlanTable } from "./plan-table";
+import { PlanTemplateControls } from "./plan-template-controls";
+import type { Reschedule } from "@/lib/production/preprod/plan-template";
 
 const t = fr.productionPreprod.plan;
 
@@ -34,9 +36,16 @@ export function PlanBoard({
   members,
   contacts,
   canOrganize,
+  template,
 }: {
   projectId: string;
   sheetId: string;
+  // The proposed plan (PROD-006, PROD-010).
+  template: {
+    deliverableId: string;
+    missing: number;
+    reschedule: Reschedule[];
+  };
   actions: PlanAction[];
   states: Record<string, ActionState>;
   // Confirmed action points of the call not yet in the plan.
@@ -86,6 +95,13 @@ export function PlanBoard({
     <div className="flex flex-col gap-4">
       {canOrganize && (
         <div className="flex flex-wrap items-center gap-2">
+          <PlanTemplateControls
+            projectId={projectId}
+            deliverableId={template.deliverableId}
+            missing={template.missing}
+            hasPlan={live.length > 0}
+            reschedule={template.reschedule}
+          />
           {fromCall > 0 && (
             <Button
               size="sm"

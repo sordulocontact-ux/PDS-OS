@@ -372,3 +372,7 @@ Au-delà des six étapes :
       par déclencheurs et onglet Historique, statut et responsable des dates et de l'enveloppe,
       valeurs de la Fiche reprises, alerte d'impact, formulaire d'étape prérempli (migration
       `20261014000401`, 9 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 6 (PROD-006, PROD-010) : plan de préproduction proposé par
+      le code (étapes adaptées au brief, échéances du rétroplanning, dépendances, responsables
+      proposés, jamais de date passée en silence), échéances recalculées après confirmation
+      (migration `20261014000501`, 1 test pgTAP)

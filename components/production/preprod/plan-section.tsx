@@ -8,6 +8,7 @@ import type { NetworkOption } from "@/lib/production/sheet";
 import { planStateTone } from "@/lib/ui/state-tones";
 
 import { PlanBoard } from "./plan-board";
+import type { Reschedule } from "@/lib/production/preprod/plan-template";
 
 const t = fr.productionPreprod.plan;
 
@@ -22,9 +23,15 @@ export function PlanSection({
   members,
   contacts,
   canOrganize,
+  template,
 }: {
   projectId: string;
   sheetId: string;
+  template: {
+    deliverableId: string;
+    missing: number;
+    reschedule: Reschedule[];
+  };
   actions: PlanAction[];
   states: Map<string, ActionState>;
   planState: PlanState;
@@ -59,6 +66,7 @@ export function PlanSection({
         members={members}
         contacts={contacts}
         canOrganize={canOrganize}
+        template={template}
       />
     </PageSection>
   );

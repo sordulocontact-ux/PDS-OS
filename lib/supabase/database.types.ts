@@ -11400,6 +11400,7 @@ export type Database = {
           sheet_id: string
           status: string
           task_id: string | null
+          template_key: string | null
           title: string
         }
         Insert: {
@@ -11421,6 +11422,7 @@ export type Database = {
           sheet_id: string
           status?: string
           task_id?: string | null
+          template_key?: string | null
           title: string
         }
         Update: {
@@ -11442,6 +11444,7 @@ export type Database = {
           sheet_id?: string
           status?: string
           task_id?: string | null
+          template_key?: string | null
           title?: string
         }
         Relationships: [

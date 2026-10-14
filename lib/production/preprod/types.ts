@@ -158,6 +158,8 @@ export type PlanAction = {
   // The task's own state in Travail, when one was created.
   taskDone: boolean | null;
   note: string | null;
+  // The step of the proposed plan it comes from (PROD-006), if any.
+  templateKey: string | null;
 };
 
 export type Equipment = {

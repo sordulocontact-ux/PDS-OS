@@ -15,6 +15,11 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
 import { preprodOverview } from "@/lib/production/preprod/overview";
+import {
+  proposePlan,
+  reschedulePlan,
+} from "@/lib/production/preprod/plan-template";
+import { dueByStep } from "@/lib/production/preprod/schedule";
 import { loadContactDetails } from "@/lib/production/preprod/reads";
 import { loadProductionSheet } from "@/lib/production/sheet";
 import { preprodFor } from "@/lib/production/tab-data";
@@ -61,6 +66,7 @@ export default async function ProductionPreproductionPage({
   const details = await loadContactDetails(contactIds);
   const today = todayInParis();
   const o = preprodOverview(data, preprod, today);
+  const due = dueByStep(o.logistics, today);
   const can = data.canOrganize;
   const status =
     data.stageState !== "in_progress" ? t.locked : !can ? t.readOnly : null;
@@ -99,6 +105,21 @@ export default async function ProductionPreproductionPage({
         states={o.actionStates}
         planState={o.planState}
         items={preprod.items}
+        template={{
+          deliverableId,
+          missing: proposePlan({
+            brief: sheet.brief,
+            due,
+            today,
+            existing: new Set(
+              preprod.actions.flatMap((a) =>
+                a.templateKey ? [a.templateKey] : [],
+              ),
+            ),
+            hasDirector: sheet.director !== null,
+          }).length,
+          reschedule: reschedulePlan({ actions: preprod.actions, due, today }),
+        }}
       />
       <LocationSection {...common} logistics={sheet.logistics} />
       <EquipmentSection

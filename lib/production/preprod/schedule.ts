@@ -141,3 +141,16 @@ export function daysToShoot(
   const shoot = logistics.shootDate.value;
   return shoot ? dayOffset(shoot, today) : null;
 }
+
+/** The schedule's due date of each step (the end of a period), for the
+ * next action and the proposed plan (PROD-001, PROD-006): dates only,
+ * nothing is « done » here. */
+export function dueByStep(
+  logistics: EffectiveLogistics,
+  today: string,
+): Partial<Record<ScheduleStep, string>> {
+  const due: Partial<Record<ScheduleStep, string>> = {};
+  for (const row of retroSchedule(logistics, {}, today).rows)
+    if (row.date) due[row.step] = row.end ?? row.date;
+  return due;
+}
