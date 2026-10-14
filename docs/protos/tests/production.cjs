@@ -1,0 +1,65 @@
+// Run from the repository root: node docs/protos/tests/production.cjs
+// Screenshots go to $TMPDIR/pds-protos (never into docs/).
+const path = require("path"), os = require("os"), fs = require("fs");
+const html = path.resolve(__dirname, "..");
+const out = path.join(os.tmpdir(), "pds-protos"); fs.mkdirSync(out, { recursive: true });
+const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
+(async () => {
+  const b = await chromium.launch({ channel: "chrome", headless: true });
+  const p = await b.newPage({ viewport: { width: 1440, height: 1000 } });
+  const errs = [];
+  p.on("pageerror", e => errs.push(e.message));
+  p.on("console", m => { if (m.type() === "error") errs.push(m.text()); });
+  await p.goto("file://" + html + "/production.html");
+  const role = async r => { await p.selectOption("#roleSel", r); };
+  const click = async t => { await p.locator("button.btn", { hasText: t }).first().click(); };
+  const now = async () => (await p.locator('section[aria-label="Maintenant"] h2').first().textContent()).trim();
+  const log = [];
+  // External flow
+  await p.locator('[data-act="draft"][data-v="external"]').click(); await click("Lancer la production externe");
+  log.push("cp: " + await now());
+  await click("Planifier le call"); await click("Simuler"); await p.selectOption('select[data-p="p2"]', "societe");
+  await click("Confirmer et attribuer");
+  await role("societe"); log.push("societe portal h1: " + await p.locator("h1").first().textContent());
+  await click("Déposer le devis");
+  await role("charge"); log.push("charge: " + await now());
+  await click("Ouvrir l'étape");
+  await click("Soumettre à Claire Morel"); log.push("submit w/o checks error: " + (await p.locator("#qerr").count()));
+  for (const cb of await p.locator('[data-act="qcheck"]').all()) await cb.check();
+  await click("Soumettre à Claire Morel");
+  await role("dg"); log.push("dg: " + await now());
+  await click("Ouvrir l'étape"); await click("Valider le devis");
+  log.push("flash: " + (await p.locator(".flash b").first().textContent()));
+  await role("realExt"); await click("Envoyer à Nadia Benali");
+  await role("da"); await click("Ouvrir l'étape"); await click("Valider la proposition");
+  await role("societe");
+  for (const k of ["calls","gear","crew","schedule"]) await p.locator(`[data-act="prep"][data-k="${k}"]`).click();
+  await click("Envoyer les 3 lieux");
+  await role("da"); log.push("da: " + await now());
+  await p.locator('[data-act="op"][data-i="0"][data-v="ok"]').first().click();
+  await role("cp"); log.push("cp: " + await now());
+  await click("Ouvrir l'étape"); await p.locator('[data-act="locchoose"][data-i="0"]').click();
+  log.push("cp after loc: " + await now());
+  await click("Ouvrir l'étape"); await click("Marquer prêt pour tournage");
+  log.push("ready: " + (await p.locator(".flash b").first().textContent()));
+  await p.screenshot({ path: out + "/ext-end.png", fullPage: false });
+  // Internal scenario
+  await p.selectOption("#scenSel", "int-call");
+  log.push("int-call charge: " + await now());
+  await click("Confirmer et attribuer");
+  await role("chefop"); await click("Envoyer la liste");
+  await role("charge"); log.push("charge: " + await now());
+  await p.selectOption("#scenSel", "int-sheet");
+  await click("Ouvrir l'étape"); await click("Diffuser la V1"); log.push("sheet err shown: " + (await p.locator("#urge").count()));
+  await p.fill("#urg", "Hôpital Delafontaine, 01 42 35 61 40"); await click("Diffuser la V1");
+  log.push("after sheet: " + (await p.locator(".flash b").first().textContent()));
+  await p.setViewportSize({ width: 390, height: 900 });
+  const sw = await p.evaluate(() => document.documentElement.scrollWidth);
+  log.push("mobile scrollWidth: " + sw);
+  await p.screenshot({ path: out + "/mobile.png" });
+  await p.emulateMedia({ colorScheme: "dark" }); await p.setViewportSize({ width: 1440, height: 1000 });
+  await p.selectOption("#scenSel", "ext-locs");
+  await p.screenshot({ path: out + "/dark-locs.png" });
+  console.log(log.join("\n")); console.log("errors:", errs);
+  await b.close();
+})().catch(e => { console.error("FAIL", e.message); process.exit(1); });

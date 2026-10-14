@@ -1,0 +1,879 @@
+<title>Production PDS OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Layout: PDS OS shell — collapsed main nav, project nav, content with a
+   parcours spine (left) and the open step (right). Tokens mirror app/globals.css. */
+:root{
+  --app:#fbfbfb; --page:#ffffff; --raised:#ffffff; --soft:#f4f4f4; --sunken:#ececec; --pressed:#e2e2e2;
+  --inverse:#000000; --inverse-fg:#ffffff;
+  --text:#000000; --text-2:#5e5e5e; --text-3:#767676; --muted:#afafaf;
+  --hair:#ececec; --border:#d4d4d4; --field:#dcdcdc; --hover-border:#afafaf;
+  --sel:#155dfc; --sel-bg:rgb(21 93 252 / .07);
+  --info-bg:#e2eefc; --info-fg:#0b3d8c; --warn-bg:#fcefd2; --warn-fg:#6e4300;
+  --ok-bg:#daf3e2; --ok-fg:#0d5226; --bad-bg:#fce1df; --bad-fg:#9a1b1b;
+  --act-bg:#ece1fb; --act-fg:#4c1d9e; --neutral-bg:#ececec; --neutral-fg:#111111;
+  --glass:rgb(24 24 24 / .86); --glass-fg:#ffffff; --glass-2:#bdbdbd;
+  --shadow:0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .06);
+  --font:"Google Sans Flex", "Google Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08); --pressed:rgb(255 255 255 / .12);
+  --inverse:#ededed; --inverse-fg:#0f0f0f;
+  --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869;
+  --ok-bg:#0f2e1c; --ok-fg:#7fdca0; --bad-bg:#3a1616; --bad-fg:#ff9b94;
+  --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08); --pressed:rgb(255 255 255 / .12);
+  --inverse:#ededed; --inverse-fg:#0f0f0f;
+  --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869;
+  --ok-bg:#0f2e1c; --ok-fg:#7fdca0; --bad-bg:#3a1616; --bad-fg:#ff9b94;
+  --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--app);color:var(--text);font-family:var(--font);font-weight:500;font-size:16px;line-height:1.5;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.04em;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+ul{margin:0;padding:0;list-style:none}
+:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.cap{font-size:14px;color:var(--text-2)}
+.t3{color:var(--text-3)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:68px 200px minmax(0,1fr);min-height:100%}
+.mainnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px}
+.navbtn{width:44px;height:40px;border-radius:8px;display:grid;place-items:center;color:var(--text-2);border:0;background:none}
+.navbtn.on{background:var(--sunken);color:var(--text)}
+.mainnav .grow{flex:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-size:13px;font-weight:600;flex:none;color:var(--text)}
+.avatar.sm{width:24px;height:24px;font-size:11px}
+.projnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);padding:8px;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.switcher{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 10px 12px;border-bottom:1px solid var(--hair);margin-bottom:8px;font-weight:600}
+.group{font-size:13px;color:var(--text-3);padding:12px 10px 4px;letter-spacing:.01em}
+.pitem{display:flex;align-items:center;gap:10px;height:40px;padding:0 10px;border-radius:8px;color:var(--text-2);font-size:15px}
+.pitem.on{background:var(--sunken);color:var(--text)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.run{background:var(--sel)}
+.content{min-width:0;padding:28px 40px 120px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+@media (max-width:1100px){.shell{grid-template-columns:68px minmax(0,1fr)}.projnav{display:none}}
+@media (max-width:720px){.shell{grid-template-columns:minmax(0,1fr)}.mainnav{display:none}.content{padding:20px 16px 140px}}
+
+/* Page head */
+.chevrons{display:flex;flex-wrap:wrap;gap:6px}
+.chev{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--text-2);font-size:15px;border:0}
+.chev.on{background:var(--inverse);color:var(--inverse-fg)}
+.chev .ok{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok-fg)}
+.trail{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;font-size:28px;letter-spacing:-.04em}
+.trail a{color:var(--text-3);text-decoration:none;cursor:pointer}
+.trail a:hover{color:var(--text-2)}
+.headrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:15px;color:var(--text-2)}
+.facts b{color:var(--text);font-weight:600}
+
+/* Pills, buttons */
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;background:var(--neutral-bg);color:var(--neutral-fg);white-space:nowrap}
+.pill.info{background:var(--info-bg);color:var(--info-fg)}
+.pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.pill.bad{background:var(--bad-bg);color:var(--bad-fg)}
+.pill.act{background:var(--act-bg);color:var(--act-fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--inverse);color:var(--inverse-fg);font-weight:600;font-size:15px;cursor:pointer;transition:transform 140ms var(--ease),background-color 160ms ease;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.out{background:transparent;color:var(--text);border-color:var(--border)}
+.btn.ghost{background:transparent;color:var(--text-2);border-color:transparent}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+@media (hover:hover) and (pointer:fine){.btn.out:hover{border-color:var(--hover-border)}.btn.ghost:hover{background:var(--soft);color:var(--text)}.navbtn:hover,.pitem:hover{background:var(--soft);color:var(--text)}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Cards */
+.card{background:var(--raised);border:1px solid var(--hair);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:20px}
+.card h3{font-size:17px;font-weight:600;letter-spacing:-.02em}
+
+/* Now */
+.now{border-color:var(--border);box-shadow:var(--shadow)}
+.now .eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2)}
+.now h2{font-size:24px}
+.whom{display:flex;align-items:center;gap:10px;font-size:15px;color:var(--text-2)}
+.whom b{color:var(--text);font-weight:600}
+.waitlist{display:flex;flex-direction:column;gap:8px}
+.waitrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--soft);font-size:15px}
+.waitrow .grow{flex:1;min-width:0}
+.flash{background:var(--ok-bg);color:var(--ok-fg);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.flash .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.flash ul{display:flex;flex-direction:column;gap:2px;font-size:15px}
+.flash button{background:none;border:0;color:inherit;cursor:pointer;padding:4px;border-radius:6px}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+/* Spine */
+.spine{position:sticky;top:20px;display:flex;flex-direction:column;gap:2px;padding:12px;background:var(--raised);border:1px solid var(--hair);border-radius:12px}
+.spine h2{font-size:15px;color:var(--text-2);letter-spacing:-.02em;padding:4px 8px 8px}
+.step{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:9px 8px;border-radius:8px;border:0;background:none;text-align:left;cursor:pointer;width:100%;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;left:19px;top:34px;bottom:-6px;width:2px;background:var(--hair)}
+.step.sel{background:var(--sunken)}
+@media (hover:hover) and (pointer:fine){.step:not(.sel):hover{background:var(--soft)}}
+.mark{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:var(--raised);position:relative;z-index:1;color:var(--text-3)}
+.step.done .mark{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.step.current .mark{border-color:var(--sel);background:var(--sel-bg)}
+.step.current .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--sel)}
+.step.mine .mark{border-color:var(--sel);background:var(--sel)}
+.step.mine .mark::after{background:#fff}
+.step.blocked .mark{border-style:dashed}
+.step .t,.step .s{display:block}
+.step .t{font-size:15px;font-weight:600;line-height:1.3}
+.step.blocked .t,.step.upcoming .t{color:var(--text-3);font-weight:500}
+.step .s{font-size:13.5px;color:var(--text-2);line-height:1.35;margin-top:2px}
+.step .s.me{color:var(--sel);font-weight:600}
+
+/* Step detail */
+.dhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.dhead h2{font-size:24px}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta .k{font-size:13px;color:var(--text-3)}
+.meta .v{font-size:15px;line-height:1.35}
+.meta .v .okc{color:var(--ok-fg)}
+.meta .v .noc{color:var(--text-3)}
+.sect{display:flex;flex-direction:column;gap:10px}
+.sect>h3{font-size:16px}
+.note{font-size:14px;color:var(--text-2)}
+.po{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--act-fg);background:var(--act-bg);height:22px;padding:0 8px;border-radius:999px}
+.callout{border-radius:10px;padding:12px 14px;font-size:15px;display:flex;gap:10px;align-items:flex-start}
+.callout.info{background:var(--info-bg);color:var(--info-fg)}
+.callout.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.callout.bad{background:var(--bad-bg);color:var(--bad-fg)}
+.callout.ok{background:var(--ok-bg);color:var(--ok-fg)}
+
+/* Choice cards */
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.choices{grid-template-columns:minmax(0,1fr)}}
+.choice{border:1px solid var(--border);border-radius:12px;padding:16px;text-align:left;background:var(--raised);cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:border-color 160ms ease}
+.choice.on{border-color:var(--sel);background:var(--sel-bg);box-shadow:0 0 0 1px var(--sel) inset}
+.choice b{font-size:17px}
+.choice span{font-size:14.5px;color:var(--text-2)}
+
+/* Forms */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field label{font-size:14px;font-weight:600}
+.field .hint{font-size:13px;color:var(--text-3)}
+.field .err{font-size:13px;color:var(--bad-fg)}
+.in{height:40px;border:1px solid var(--field);border-radius:8px;background:var(--raised);padding:0 12px;width:100%;min-width:0}
+textarea.in{height:auto;padding:10px 12px;min-height:72px;resize:vertical}
+.in[aria-invalid="true"]{border-color:var(--bad-fg)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.grid2,.grid3{grid-template-columns:minmax(0,1fr)}}
+
+/* Rows */
+.rows{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--hair)}
+.row:last-child{border-bottom:0}
+.row .main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.row .main .q{font-size:13px;color:var(--text-3);font-style:italic}
+.row .side{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.row select.in,.row input.in{height:34px;font-size:14px}
+.row.off{opacity:.55}
+.cb{width:20px;height:20px;accent-color:var(--sel)}
+@media (max-width:760px){.row{grid-template-columns:28px minmax(0,1fr)}.row .side{grid-column:2;justify-content:flex-start}}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:8px;background:var(--soft)}
+.check .ic{flex:none;margin-top:2px}
+.check .grow{flex:1;min-width:0}
+.ic.ok{color:var(--ok-fg)} .ic.warn{color:var(--warn-fg)} .ic.bad{color:var(--bad-fg)}
+
+/* Mini timeline */
+.tl{display:flex;flex-wrap:wrap;gap:0;align-items:center}
+.tl .st{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-3)}
+.tl .st.d{color:var(--text)}
+.tl .st .b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border)}
+.tl .st.d .b{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.tl .st.c .b{border-color:var(--sel)}
+.tl .sep{width:32px;height:2px;background:var(--hair);margin:0 8px}
+
+/* Locations */
+.locs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:1000px){.locs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.locs{grid-template-columns:minmax(0,1fr)}}
+.loc{border:1px solid var(--hair);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;background:var(--raised)}
+.loc.chosen{border-color:var(--ok-fg);box-shadow:0 0 0 1px var(--ok-fg) inset}
+.loc .img{aspect-ratio:16/10;position:relative;display:flex;align-items:flex-end;padding:10px;color:#fff;font-size:13px;font-weight:600}
+.loc .img span{background:rgb(0 0 0 / .45);padding:2px 8px;border-radius:999px}
+.loc .bd{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.loc .ops{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
+.loc .op{display:flex;justify-content:space-between;gap:8px}
+.mb1{background:linear-gradient(135deg,#3a3f4a 0%,#7a6f62 55%,#c9a77a 100%)}
+.mb2{background:linear-gradient(160deg,#16324f 0%,#3f6e8c 50%,#d7c4a3 100%)}
+.mb3{background:linear-gradient(120deg,#2c2c2c 0%,#5b5b5b 50%,#9e9e9e 100%)}
+
+/* Progress */
+.bar{height:8px;border-radius:999px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sel);border-radius:999px;transition:transform 300ms var(--ease);transform-origin:left}
+
+/* List page */
+.table{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised)}
+.trow{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,.8fr) minmax(0,1.2fr) minmax(0,1.4fr);gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--hair);font-size:15px}
+.trow:last-child{border-bottom:0}
+.trow.h{font-size:13.5px;color:var(--text-3);background:var(--soft)}
+.trow.link{cursor:pointer}
+@media (hover:hover) and (pointer:fine){.trow.link:hover{background:var(--soft)}}
+@media (max-width:760px){.trow{grid-template-columns:minmax(0,1fr)}.trow.h{display:none}}
+
+/* Portal (private link) */
+.portal{min-height:100%;background:var(--app)}
+.pbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-bottom:1px solid var(--hair);background:var(--page)}
+.brand{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:8px;background:var(--inverse);color:var(--inverse-fg);font-weight:700;font-size:12px;letter-spacing:0}
+.pwrap{max-width:820px;margin:0 auto;padding:28px 16px 140px;display:flex;flex-direction:column;gap:18px}
+.phero h1{font-size:30px}
+.lock{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
+
+/* Proto bar & toast */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:260px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--inverse);color:var(--inverse-fg);padding:12px 16px;border-radius:12px;font-size:15px;box-shadow:var(--shadow);max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
+@media (max-width:720px){.proto label{display:none}.proto select{max-width:46vw}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+</style>
+
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label>
+  <select id="roleSel"></select>
+  <label for="scenSel">Aller à</label>
+  <select id="scenSel">
+    <option value="start">Début : choisir l'organisation</option>
+    <option value="ext-quote">Externe : devis reçu</option>
+    <option value="ext-locs">Externe : lieux proposés</option>
+    <option value="int-call">Interne : compte rendu du call technique</option>
+    <option value="int-sheet">Interne : feuille de service</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const ICON={
+  check:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  lock:'<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>',
+  spark:'<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z"/></svg>',
+  warn:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 11.6v.1"/></svg>',
+  ok:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  people:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="3"/><path d="M2 17c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5M13 4.5a3 3 0 010 5.5M15 12.5c1.7.6 2.7 2 3 4.5"/></svg>',
+  task:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M6.5 10l2.5 2.5 4.5-5"/></svg>',
+  cal:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>',
+  updown:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>'
+};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euro=n=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(n)+" € HT";
+const ENVELOPE=18000;
+
+/* People. « app » = a PDS account; « lien » = a private link (MVP, Ibé 14/10). */
+const PEOPLE={
+  cp:{name:"Lina Haddad",role:"Cheffe de projet",where:"app",ini:"LH"},
+  charge:{name:"Tom Mercier",role:"Chargé de production",where:"app",ini:"TM",note:"salarié de PDS (hypothèse, à confirmer avec Ibé)"},
+  dg:{name:"Claire Morel",role:"Directrice générale · valide les devis",where:"app",ini:"CM",note:"validatrice des devis (hypothèse, à confirmer avec Ibé)"},
+  da:{name:"Nadia Benali",role:"Directrice créative",where:"app",ini:"NB"},
+  realInt:{name:"Inès Duval",role:"Réalisatrice · freelance",where:"lien",ini:"ID"},
+  realExt:{name:"Bastien Roy",role:"Réalisateur · Studio Ressac",where:"lien",ini:"BR"},
+  chefop:{name:"Hugo Laine",role:"Chef opérateur · freelance",where:"lien",ini:"HL"},
+  societe:{name:"Studio Ressac",role:"Société de production",where:"lien",ini:"SR"}
+};
+const real=s=>s.mode==="internal"?"realInt":"realExt";
+function rolesFor(s){
+  if(s.mode==="external") return ["cp","charge","dg","da","realExt","societe"];
+  if(s.mode==="internal") return ["cp","charge","dg","da","realInt","chefop"];
+  return ["cp","charge","dg","da"];
+}
+const who=k=>PEOPLE[k];
+
+/* State */
+function fresh(){
+  return {view:"deliverable",role:"cp",mode:null,draft:null,selected:null,flash:null,
+    call:{status:"none"},proposals:[],tasks:[],
+    quote:{status:"none",checks:{amount:false,delay:false,open:false},note:"",reason:"",error:null},
+    direction:{status:"none",comment:"",creativeCall:false},
+    prep:{calls:false,gear:false,crew:false,schedule:false},
+    gear:{status:"none"},
+    locs:{status:"none",chosen:null,ops:{}},
+    sheet:{status:"none",urgences:"",error:false},
+    ready:false, readyError:false};
+}
+let S=fresh();
+
+/* The parcours of each mode: owner, validator, prerequisites, who acts now. */
+function defs(s){
+  const R=real(s);
+  const callStep=(id,title,owner,why)=>({id,title,owner,validator:null,why,
+    done:x=>x.call.status==="done",
+    actor:x=>({none:{r:owner,todo:"Planifier le call"},planned:{r:owner,todo:"Ouvrir le compte rendu du call"},report:{r:owner,todo:"Confirmer et attribuer les actions proposées par PO"}})[x.call.status]||null,
+    summary:x=>x.call.status==="done"?`${x.tasks.filter(t=>t.from===id).length} actions attribuées`:x.call.status==="planned"?"Prévu mar. 15/10 à 14 h":x.call.status==="report"?"Compte rendu prêt":""});
+  const quoteStep=(prereq,depositor)=>({id:"quote",title:s.mode==="external"?"Devis de Studio Ressac":"Devis des loueurs",owner:"charge",validator:"dg",prereq,
+    why:s.mode==="external"?"La société ne lance la préproduction qu'une fois son devis validé par PDS.":"Les locations ne se réservent qu'une fois les devis validés.",
+    done:x=>x.quote.status==="approved",
+    actor:x=>({none:{r:depositor,todo:s.mode==="external"?"Déposer le devis":"Ajouter les devis des loueurs"},rejected:{r:depositor,todo:"Déposer un devis corrigé"},deposited:{r:"charge",todo:"Vérifier le devis et le soumettre"},submitted:{r:"dg",todo:"Valider le devis"}})[x.quote.status]||null,
+    summary:x=>x.quote.status==="approved"?`Validé · ${euro(quoteAmount(x))}`:x.quote.status==="submitted"?"Soumis à Claire Morel":x.quote.status==="deposited"?"Reçu, à vérifier":x.quote.status==="rejected"?"Refusé, à corriger":""});
+  const directionStep=prereq=>({id:"direction",title:"Proposition de réalisation et découpage",owner:R,validator:"da",prereq,
+    why:"Le découpage dit ce qu'on tourne : calls techniques, matériel et lieux en partent.",
+    done:x=>x.direction.status==="approved",
+    actor:x=>({none:{r:R,todo:"Déposer la proposition et le découpage"},changes:{r:R,todo:"Revoir la proposition"},deposited:{r:"da",todo:"Valider la proposition de réalisation"}})[x.direction.status]||null,
+    summary:x=>x.direction.status==="approved"?"Validée par Nadia Benali":x.direction.status==="deposited"?"Déposée, à valider":x.direction.status==="changes"?"Modifications demandées":""});
+  const locStep=(prereq,proposer)=>({id:"locs",title:"Lieux",owner:proposer,validator:"cp",prereq,
+    why:"Le lieu retenu alimente la feuille de service et le contrôle avant tournage.",
+    done:x=>x.locs.status==="chosen",
+    actor:x=>x.locs.status==="none"?{r:proposer,todo:"Proposer des lieux"}:x.locs.status==="proposed"?{r:"cp",todo:"Retenir un lieu"}:null,
+    summary:x=>x.locs.status==="chosen"?LOCS[x.locs.chosen].name:x.locs.status==="proposed"?`3 lieux · ${opinionCount(x)} avis`:""});
+  const ready={id:"ready",title:"Contrôle avant tournage",owner:"cp",validator:null,
+    why:"Rien ne part en tournage sans lieu, devis et convocations confirmés.",
+    done:x=>x.ready,actor:()=>({r:"cp",todo:"Marquer prêt pour tournage"}),summary:x=>x.ready?"Prêt, le 23/10":""};
+  const later=(id,title,prereq)=>({id,title,owner:null,validator:null,prereq,later:true,done:()=>false,actor:()=>null,summary:()=>""});
+  const org={id:"org",title:"Organisation",owner:"cp",validator:null,prereq:[],
+    why:"Qui produit décide de tout le reste : qui agit, qui valide, ce que PDS saisit.",
+    done:x=>!!x.mode,actor:()=>({r:"cp",todo:"Choisir qui produit"}),
+    summary:x=>x.mode==="external"?"Externe · Studio Ressac":x.mode==="internal"?"Interne · 3 intervenants":""};
+  if(s.mode==="external") return [
+    org,
+    Object.assign(callStep("kickoff","Call de présentation à la société","cp"),{prereq:["org"],why:"Studio Ressac découvre le projet, les attentes, les contraintes et l'enveloppe avant de chiffrer."}),
+    quoteStep(["kickoff"],"societe"),
+    directionStep(["quote"]),
+    {id:"prep",title:"Préproduction par Studio Ressac",owner:"societe",validator:null,prereq:["direction"],
+      why:"La société organise calls techniques, matériel, équipes et planning. PDS suit.",
+      done:x=>prepDone(x)===4,actor:x=>prepDone(x)<4?{r:"societe",todo:"Mettre à jour la préproduction"}:null,summary:x=>`${prepDone(x)} / 4 faits`},
+    locStep(["direction"],"societe"),
+    Object.assign(ready,{prereq:["prep","locs"]}),
+    later("shoot","Tournage",["ready"]),later("post","Postproduction",["shoot"]),later("delivery","Livraison et clôture",["post"])
+  ];
+  return [
+    org,
+    directionStep(["org"]),
+    Object.assign(callStep("tech","Call technique","charge"),{prereq:["direction"],why:"Chaque métier dit ses besoins à partir du découpage ; PO en tire les actions."}),
+    {id:"gear",title:"Liste caméra et lumière",owner:"chefop",validator:null,prereq:["tech"],why:"Les besoins techniques du chef op deviennent les lignes de matériel à chiffrer.",
+      done:x=>x.gear.status==="deposited",actor:x=>x.gear.status==="none"?{r:"chefop",todo:"Déposer la liste matériel"}:null,summary:x=>x.gear.status==="deposited"?"5 lignes de matériel":""},
+    locStep(["tech"],"charge"),
+    quoteStep(["gear"],"charge"),
+    {id:"sheet",title:"Planning et feuille de service",owner:"charge",validator:null,prereq:["locs","quote"],
+      why:"Composée par PO depuis le lieu, l'équipe et le planning validés : jamais rédigée de zéro.",
+      done:x=>x.sheet.status==="published",actor:x=>x.sheet.status!=="published"?{r:"charge",todo:"Compléter et diffuser la feuille de service"}:null,summary:x=>x.sheet.status==="published"?"V1 diffusée à l'équipe":""},
+    Object.assign(ready,{prereq:["sheet"]}),
+    later("shoot","Tournage",["ready"]),later("post","Postproduction",["shoot"]),later("delivery","Livraison et clôture",["post"])
+  ];
+}
+function steps(s){
+  const list=s.mode?defs(s):[defs(s)[0]];
+  const byId={};
+  list.forEach(d=>{
+    const pre=(d.prereq||[]).every(p=>byId[p]&&byId[p].status==="done");
+    const done=d.done(s);
+    const status=done?"done":pre?(d.later?"upcoming":"current"):"blocked";
+    byId[d.id]=Object.assign({},d,{status,act:status==="current"?d.actor(s):null});
+  });
+  return list.map(d=>byId[d.id]);
+}
+const LOCS=[
+  {name:"Entrepôt Quai de Seine",place:"Aubervilliers",price:1400,cls:"mb1",tag:"Industriel, verrière",constraints:"Électricité 63 A sur place · accès camion"},
+  {name:"Rooftop Belleville",place:"Paris 20e",price:2200,cls:"mb2",tag:"Vue, coucher de soleil",constraints:"Autorisation copro · 6 personnes max sur le toit"},
+  {name:"Studio Rive Gauche",place:"Ivry-sur-Seine",price:1100,cls:"mb3",tag:"Cyclo blanc, régie",constraints:"Aucune contrainte · disponible 23 et 24/10"}
+];
+const quoteAmount=x=>x.mode==="external"?16400:2860;
+const prepDone=x=>["calls","gear","crew","schedule"].filter(k=>x.prep[k]).length;
+const opinionCount=x=>Object.values(x.locs.ops).reduce((n,o)=>n+Object.keys(o).length,0);
+
+/* Who gives an opinion on places, by mode. */
+const opinionRoles=s=>s.mode==="external"?["da","realExt"]:["da","realInt","chefop"];
+
+/* PO's proposals from a call's report (quoted from the transcript). */
+function proposalsFor(s){
+  if(s.mode==="external") return [
+    {id:"p1",text:"Envoyer le Brief créatif validé et les références à Studio Ressac",r:"cp",due:"2026-10-16",q:"« Tu nous envoies le brief et les refs dès demain ? »"},
+    {id:"p2",text:"Envoyer le devis complet, réalisation comprise",r:"societe",due:"2026-10-21",q:"« On revient vers vous avec un devis lundi prochain. »"},
+    {id:"p3",text:"Proposer un réalisateur pour le clip",r:"societe",due:"2026-10-21",q:"« On a deux noms en tête pour la réal. »"},
+    {id:"p4",text:"Confirmer la date de sortie au 05/12 pour caler la livraison",r:"cp",due:"2026-10-17",q:"« La sortie, c'est bien début décembre ? »"}
+  ];
+  return [
+    {id:"p1",text:"Liste caméra et lumière à partir du découpage",r:"chefop",due:"2026-10-20",q:"« Je vous fais la liste caméra-lumière d'ici lundi. »"},
+    {id:"p2",text:"Demander deux devis de location (FX6, kit lumière)",r:"charge",due:"2026-10-21",q:"« Tom, tu consultes deux loueurs ? »"},
+    {id:"p3",text:"Repérer trois lieux industriels ou rooftop",r:"charge",due:"2026-10-22",q:"« Il nous faut un lieu avec de la hauteur sous plafond. »"},
+    {id:"p4",text:"Revoir la séquence 3 (plan-séquence en extérieur)",r:"realInt",due:"2026-10-19",q:"« La 3, en plan-séquence dehors, c'est risqué si il pleut. »"}
+  ];
+}
+
+/* Rendering ---------------------------------------------------------------- */
+const app=document.getElementById("app");
+function render(){
+  const roles=rolesFor(S);
+  if(!roles.includes(S.role)) S.role="cp";
+  const sel=document.getElementById("roleSel");
+  sel.innerHTML=roles.map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(PEOPLE[k].name)} · ${esc(PEOPLE[k].role.split(" · ")[0])}${PEOPLE[k].where==="lien"?" (lien)":""}</option>`).join("");
+  app.innerHTML=who(S.role).where==="lien"?portal():shell();
+}
+function avatar(k,sm){return `<span class="avatar ${sm?"sm":""}" aria-hidden="true">${esc(PEOPLE[k].ini)}</span>`;}
+function person(k){return `${avatar(k,true)}<span><b>${esc(PEOPLE[k].name)}</b> · ${esc(PEOPLE[k].role)}</span>`;}
+
+function shell(){
+  const nav=[["home",""],["folder","on"],["task",""],["people",""],["cal",""]];
+  return `<div class="shell">
+  <nav class="mainnav" aria-label="Navigation principale">
+    ${nav.map(([i,c])=>`<button class="navbtn ${c}" type="button" aria-label="${i}">${ICON[i]}</button>`).join("")}
+    <div class="grow"></div>
+    <button class="navbtn" type="button" aria-label="Notifications">${ICON.bell}</button>
+    ${avatar(S.role)}
+  </nav>
+  <nav class="projnav" aria-label="Sections du projet">
+    <div class="switcher"><span>Néons</span><span class="t3">${ICON.updown}</span></div>
+    <div class="pitem">Vue d'ensemble</div><div class="pitem">Cadrage</div>
+    <div class="group">Workflows</div>
+    <div class="pitem"><span class="dot run"></span>Master</div>
+    <div class="pitem"><span class="dot run"></span>Juridique</div>
+    <div class="pitem on"><span class="dot run"></span>Marketing</div>
+    <div class="pitem"><span class="dot"></span>Distribution</div>
+    <div class="group">Pilotage</div>
+    <div class="pitem">Travail</div><div class="pitem">Équipe</div><div class="pitem">Budget</div><div class="pitem">Validations</div>
+    <div class="group">Ressources</div>
+    <div class="pitem">Calls</div><div class="pitem">Fichiers</div>
+  </nav>
+  <main class="content"><div class="wrap">
+    <div class="chevrons" aria-label="Étapes du Marketing">
+      <span class="chev"><span class="ok">${ICON.check}</span>Stratégie</span>
+      <span class="chev"><span class="ok">${ICON.check}</span>Conception</span>
+      <span class="chev on">Production</span>
+      <span class="chev">Activations</span><span class="chev">Suivi &amp; bilan</span>
+    </div>
+    ${S.view==="list"?listPage():deliverablePage()}
+  </div></main></div>`;
+}
+
+function listPage(){
+  const st=steps(S); const cur=st.find(x=>x.status==="current");
+  const mode=S.mode==="external"?'<span class="pill act">Externe</span>':S.mode==="internal"?'<span class="pill info">Interne</span>':'<span class="pill warn">À choisir</span>';
+  return `<h1 class="trail">Production</h1>
+  <p class="cap">Un livrable = une production. Chacun dit où il en est et qui est attendu.</p>
+  <div class="table" role="table">
+    <div class="trow h" role="row"><span>Livrable</span><span>Organisation</span><span>Étape</span><span>Attendu</span></div>
+    <div class="trow link" role="row" tabindex="0" data-act="open">
+      <span><b>Clip « Néons »</b><br><span class="cap">Sortie le 05/12</span></span><span>${mode}</span>
+      <span>${cur?esc(cur.title):"Prêt"}</span><span class="cap">${cur&&cur.act?esc(PEOPLE[cur.act.r].name)+" · "+esc(cur.act.todo.toLowerCase()):"—"}</span>
+    </div>
+    <div class="trow" role="row"><span><b>4 capsules TikTok</b><br><span class="cap">Avant la sortie</span></span><span><span class="pill info">Interne</span></span><span>Tournage le 24/10</span><span class="cap">Tom Mercier · diffuser la feuille de service</span></div>
+    <div class="trow" role="row"><span><b>Pochette du single</b><br><span class="cap">Visuel, sans tournage</span></span><span><span class="pill">À préciser</span></span><span>Conception</span><span class="cap">Parcours sans tournage, à trancher avec Ibé</span></div>
+  </div>`;
+}
+
+function deliverablePage(){
+  const st=steps(S);
+  if(!S.selected||!st.find(x=>x.id===S.selected)) S.selected=(st.find(x=>x.status==="current")||st[0]).id;
+  const step=st.find(x=>x.id===S.selected);
+  const modeTxt=S.mode==="external"?'<span class="pill act">Production externe</span>':S.mode==="internal"?'<span class="pill info">Production interne</span>':'<span class="pill warn">Organisation à choisir</span>';
+  return `<div class="headrow">
+      <h1 class="trail"><a data-act="list" tabindex="0">Production</a><span class="t3">/</span><span>Clip « Néons »</span></h1>
+      ${modeTxt}
+    </div>
+    <div class="facts"><span>Fiche Livrable <b>V2 validée</b></span><span>Enveloppe <b class="num">${euro(ENVELOPE)}</b></span><span>Tournage visé <b>23–24/10</b></span><span>Livraison <b>28/11</b></span><span>Sortie <b>05/12</b></span></div>
+    ${S.flash?flash():""}
+    ${nowCard(st)}
+    <div class="layout">
+      ${spine(st)}
+      <section class="card" aria-labelledby="dtitle">${detail(step,st)}</section>
+    </div>`;
+}
+
+function flash(){
+  return `<div class="flash" role="status"><span class="ic ok">${ICON.ok}</span><div class="grow"><b>${esc(S.flash.title)}</b><ul>${S.flash.lines.map(l=>`<li>${l}</li>`).join("")}</ul></div><button type="button" data-act="unflash" aria-label="Fermer">${ICON.x}</button></div>`;
+}
+
+/* « Maintenant »: what the viewer has to do, else what they wait for. */
+function nowCard(st){
+  const mine=st.filter(x=>x.act&&x.act.r===S.role);
+  // People consulted on the places: their opinion is their own next action.
+  const locs=st.find(x=>x.id==="locs");
+  if(locs&&S.locs.status==="proposed"&&opinionRoles(S).includes(S.role)&&LOCS.some((o,i)=>!(S.locs.ops[i]||{})[S.role]))
+    mine.push(Object.assign({},locs,{act:{r:S.role,todo:"Donner votre avis sur les lieux"},why:"Lina Haddad retient le lieu après les avis artistique et technique."}));
+  const tasks=S.tasks.filter(t=>t.r===S.role&&!t.done);
+  const others=st.filter(x=>x.act&&x.act.r!==S.role);
+  const me=who(S.role);
+  if(mine.length){
+    const m=mine[0];
+    return `<section class="card now" aria-label="Maintenant">
+      <div class="eyebrow"><span class="pill info">À vous</span><span>${esc(me.name)} · ${esc(m.title)}</span></div>
+      <h2>${esc(m.act.todo)}</h2>
+      <p class="note">${esc(m.why||"")}</p>
+      <div class="btnrow"><button class="btn" type="button" data-act="go" data-step="${m.id}">Ouvrir l'étape</button>
+      ${mine.length>1?`<span class="cap">Et ${mine.length-1} autre${mine.length>2?"s":""} : ${mine.slice(1).map(x=>esc(x.act.todo.toLowerCase())).join(" · ")}</span>`:""}</div>
+      ${tasks.length?taskList(tasks):""}
+    </section>`;
+  }
+  const waits=others.slice(0,3);
+  return `<section class="card now" aria-label="Maintenant">
+    <div class="eyebrow"><span class="pill">Rien à faire pour vous</span><span>${esc(me.name)}</span></div>
+    ${tasks.length?`<h2>Vos tâches issues des calls</h2>${taskList(tasks)}`:`<h2>${waits.length?"La production avance sans vous pour l'instant":"La préparation est terminée"}</h2>`}
+    ${waits.length?`<div class="waitlist">${waits.map(x=>`<div class="waitrow">${avatar(x.act.r,true)}<span class="grow">En attente de <b>${esc(PEOPLE[x.act.r].name)}</b> : ${esc(x.act.todo.toLowerCase())}</span><button class="btn ghost sm" type="button" data-act="go" data-step="${x.id}">Voir</button></div>`).join("")}</div>`:""}
+  </section>`;
+}
+function taskList(tasks){
+  return `<div class="rows">${tasks.map(t=>`<div class="row"><input class="cb" type="checkbox" id="t-${t.id}" data-act="taskdone" data-task="${t.id}"><label class="main" for="t-${t.id}"><span>${esc(t.text)}</span><span class="cap">Pour le ${fmt(t.due)} · issue du ${t.from==="kickoff"?"call de présentation":"call technique"}</span></label><span class="side"><span class="pill">${fmt(t.due)}</span></span></div>`).join("")}</div>`;
+}
+const fmt=d=>{const [y,m,dd]=String(d).split("-");return `${dd}/${m}`;};
+
+function spine(st){
+  return `<nav class="spine" aria-label="Parcours de la production"><h2>Parcours</h2>
+  ${st.map(x=>{
+    const mine=x.act&&x.act.r===S.role;
+    const sub=x.status==="done"?x.summary(S):x.act?`${PEOPLE[x.act.r].name} · ${x.act.todo.toLowerCase()}`:x.status==="blocked"?"Après : "+(x.prereq||[]).map(p=>st.find(y=>y.id===p).title).join(", "):x.status==="upcoming"?"Prochaine phase":"";
+    return `<button class="step ${x.status} ${mine?"mine":""} ${x.id===S.selected?"sel":""}" type="button" data-act="go" data-step="${x.id}" aria-current="${x.id===S.selected?"step":"false"}">
+      <span class="mark">${x.status==="done"?ICON.check:x.status==="blocked"?ICON.lock:""}</span>
+      <span><span class="t">${esc(x.title)}</span>${sub?`<span class="s ${mine?"me":""}">${mine?"À vous · ":""}${esc(sub)}</span>`:""}</span>
+    </button>`;}).join("")}
+  </nav>`;
+}
+
+function statusPill(x){
+  return x.status==="done"?'<span class="pill ok">Fait</span>':x.status==="current"?'<span class="pill info">En cours</span>':x.status==="upcoming"?'<span class="pill">À venir</span>':'<span class="pill">Bloqué</span>';
+}
+function detail(x,st){
+  const pre=(x.prereq||[]).map(p=>st.find(y=>y.id===p));
+  const next=st.filter(y=>(y.prereq||[]).includes(x.id));
+  const meta=`<div class="meta">
+    <div><div class="k">Responsable</div><div class="v">${x.owner?esc(PEOPLE[x.owner].name):"—"}${x.owner?`<br><span class="cap">${esc(PEOPLE[x.owner].role)}</span>`:""}</div></div>
+    <div><div class="k">Validation</div><div class="v">${x.validator?esc(PEOPLE[x.validator].name):"Aucune"}${x.validator?`<br><span class="cap">${esc(PEOPLE[x.validator].role.split(" · ")[0])}</span>`:""}</div></div>
+    <div><div class="k">Prérequis</div><div class="v">${pre.length?pre.map(p=>`<span class="${p.status==="done"?"okc":"noc"}">${p.status==="done"?"✓":"○"} ${esc(p.title)}</span>`).join("<br>"):"Fiche Livrable validée ✓"}</div></div>
+    <div><div class="k">Ensuite</div><div class="v">${next.length?next.map(n=>esc(n.title)).join("<br>"):"—"}</div></div>
+  </div>`;
+  return `<div class="dhead"><h2 id="dtitle">${esc(x.title)}</h2>${statusPill(x)}</div>
+    ${x.why?`<p class="note">${esc(x.why)}</p>`:""}${meta}${body(x,st)}`;
+}
+
+/* Step bodies, shared by the app and the private links. */
+function body(x,st){
+  const R=S.role;
+  if(x.status==="blocked") return `<div class="callout info">${ICON.lock}<span>Se débloque quand ${(x.prereq||[]).map(p=>esc(st.find(y=>y.id===p).title)).join(" et ")} ${x.prereq&&x.prereq.length>1?"sont faits":"est fait"}. PO vous préviendra.</span></div>`;
+  if(x.later) return `<div class="callout info"><span>Les étapes Tournage, Postproduction et Livraison existent déjà dans la branche ; elles suivront le même modèle (responsable, prérequis, validation, suite). Hors de ce proto.</span></div>`;
+  switch(x.id){
+    case "org": return orgBody(x);
+    case "kickoff": case "tech": return callBody(x);
+    case "quote": return quoteBody(x);
+    case "direction": return directionBody(x);
+    case "prep": return prepBody(x);
+    case "gear": return gearBody(x);
+    case "locs": return locsBody(x);
+    case "sheet": return sheetBody(x);
+    case "ready": return readyBody(x,st);
+  }
+  return "";
+}
+const waitFor=(k,todo)=>`<div class="waitrow">${avatar(k,true)}<span class="grow">En attente de <b>${esc(PEOPLE[k].name)}</b>${PEOPLE[k].where==="lien"?" (sur son lien privé)":""} : ${esc(todo)}</span></div>`;
+
+function orgBody(x){
+  if(x.status==="done"){
+    const rows=S.mode==="external"?[["societe","Produit le clip : préproduction, tournage, postproduction"],["charge","Vérifie le devis, suit l'avancement"],["dg","Valide les devis"],["da","Valide la proposition de réalisation"]]:[["realInt","Proposition, découpage, besoins artistiques"],["chefop","Besoins techniques, matériel"],["charge","Lieux, devis, locations, planning, logistique"],["dg","Valide les devis"],["da","Valide la proposition de réalisation"]];
+    return `<div class="sect"><h3>Qui fait quoi</h3><div class="rows">${rows.map(([k,t])=>`<div class="row"><span>${avatar(k,true)}</span><span class="main"><b>${esc(PEOPLE[k].name)}</b><span class="cap">${esc(t)}</span></span><span class="side">${PEOPLE[k].where==="lien"?'<span class="pill">Lien privé</span>':'<span class="pill">Compte PDS</span>'}</span></div>`).join("")}</div>
+      <p class="note">Chacun ne voit que sa part. Les freelances et la société passent par leur lien privé (MVP) ; Lina Haddad suit tout.</p></div>`;
+  }
+  if(S.role!=="cp") return waitFor("cp","choisir qui produit");
+  const d=S.draft;
+  return `<div class="sect"><h3>Qui produit ce clip ?</h3>
+    <div class="choices" role="radiogroup" aria-label="Organisation">
+      <button class="choice ${d==="internal"?"on":""}" type="button" role="radio" aria-checked="${d==="internal"}" data-act="draft" data-v="internal"><b>Interne</b><span>PDS pilote. Les intervenants, freelances compris, travaillent chacun sur leur part.</span></button>
+      <button class="choice ${d==="external"?"on":""}" type="button" role="radio" aria-checked="${d==="external"}" data-act="draft" data-v="external"><b>Externe</b><span>Une société de production gère l'opérationnel. PDS suit et valide.</span></button>
+    </div></div>
+    ${d?`<div class="sect"><h3>Les rôles</h3><p class="note">Proposés par PO d'après la Fiche Livrable et le Réseau, modifiables.</p>
+      <div class="grid2">
+      ${(d==="external"?[["Société de production","Studio Ressac","Réseau · a produit « Ressac » en 2025"],["Chargé de production (PDS)","Tom Mercier","Équipe PDS"],["Validation des devis","Claire Morel","Hypothèse, à confirmer avec Ibé"],["Validation créative","Nadia Benali","Directrice créative du projet"]]:[["Réalisatrice","Inès Duval","Réseau · citée dans le Brief créatif"],["Chef opérateur","Hugo Laine","Réseau · a tourné avec Inès Duval"],["Chargé de production","Tom Mercier","Équipe PDS"],["Validation des devis","Claire Morel","Hypothèse, à confirmer avec Ibé"]]).map(([l,v,h],i)=>`<div class="field"><label for="r${i}">${esc(l)}</label><select class="in" id="r${i}"><option>${esc(v)}</option><option>Choisir dans le Réseau…</option></select><span class="hint">${esc(h)}</span></div>`).join("")}
+      </div></div>
+      <div class="btnrow"><button class="btn" type="button" data-act="org">Lancer la production ${d==="external"?"externe":"interne"}</button><span class="cap">Modifiable tant que rien n'est engagé.</span></div>`:""}`;
+}
+
+function callBody(x){
+  const owner=x.owner; const isOwner=S.role===owner;
+  const title=x.id==="kickoff"?"Call de présentation":"Call technique";
+  const st=S.call.status;
+  if(st==="none"){
+    const agenda=x.id==="kickoff"?["Le projet, l'artiste et le Brief créatif validé","Ce qu'on attend : un clip de 3 min, 16:9 et 9:16","Contraintes : sortie le 05/12, livraison le 28/11","L'enveloppe : 18 000 € HT, à ne pas dépasser"]:["Le découpage d'Inès Duval (5 séquences)","Caméra, optiques, lumière : besoins d'Hugo Laine","Son : playback, pas de son direct","Lieux : hauteur sous plafond, accès camion"];
+    return `<div class="sect"><h3>Ordre du jour préparé par PO <span class="po">${ICON.spark} PO</span></h3><ul class="rows">${agenda.map(a=>`<li class="row"><span class="t3">•</span><span class="main">${esc(a)}</span><span></span></li>`).join("")}</ul></div>
+      ${isOwner?`<div class="btnrow"><button class="btn" type="button" data-act="callplan">Planifier le ${title.toLowerCase()}</button><span class="cap">Mar. 15/10 à 14 h · ${x.id==="kickoff"?"Lina Haddad, Tom Mercier, Studio Ressac":"Inès Duval, Hugo Laine, Tom Mercier"}</span></div>`:waitFor(owner,"planifier le call")}`;
+  }
+  if(st==="planned") return `<div class="callout info"><span>${title} prévu mardi 15/10 à 14 h. Il est enregistré dans PDS ; le compte rendu arrive tout seul après.</span></div>
+    ${isOwner?`<div class="btnrow"><button class="btn out" type="button" data-act="callreport">Simuler : le call a eu lieu</button></div>`:""}`;
+  if(st==="report"){
+    if(!isOwner) return waitFor(owner,"confirmer les actions du compte rendu");
+    return `<div class="sect"><h3>Actions proposées par PO <span class="po">${ICON.spark} PO</span></h3>
+      <p class="note">Tirées du compte rendu, chacune avec la phrase qui la justifie. Rien n'est attribué avant votre confirmation.</p>
+      <div class="rows">${S.proposals.map(p=>`<div class="row ${p.keep?"":"off"}">
+        <input class="cb" type="checkbox" ${p.keep?"checked":""} data-act="keep" data-p="${p.id}" aria-label="Garder : ${esc(p.text)}">
+        <span class="main"><span>${esc(p.text)}</span><span class="q">${esc(p.q)}</span></span>
+        <span class="side"><select class="in" data-p="${p.id}" data-f="r" aria-label="Attribuer à">${rolesFor(S).map(k=>`<option value="${k}" ${k===p.r?"selected":""}>${esc(PEOPLE[k].name)}</option>`).join("")}</select>
+        <input class="in num" type="date" value="${p.due}" data-p="${p.id}" data-f="due" aria-label="Échéance" style="width:150px"></span>
+      </div>`).join("")}</div>
+      <div class="btnrow"><button class="btn" type="button" data-act="callconfirm">Confirmer et attribuer ${S.proposals.filter(p=>p.keep).length} actions</button><span class="cap">Les intervenants les voient dans « Maintenant », ou sur leur lien.</span></div></div>`;
+  }
+  const mine=S.tasks.filter(t=>t.from===x.id);
+  return `<div class="sect"><h3>Actions attribuées</h3><div class="rows">${mine.map(t=>`<div class="row"><span>${t.done?`<span class="ic ok">${ICON.ok}</span>`:avatar(t.r,true)}</span><span class="main"><span>${esc(t.text)}</span><span class="cap">${esc(PEOPLE[t.r].name)} · pour le ${fmt(t.due)}</span></span><span class="side">${t.done?'<span class="pill ok">Fait</span>':'<span class="pill">À faire</span>'}</span></div>`).join("")}</div></div>`;
+}
+
+function quoteBody(x){
+  const q=S.quote, ext=S.mode==="external", amt=quoteAmount(S);
+  const tl=`<div class="tl" aria-label="Étapes du devis">
+    ${[["Déposé",ext?"Studio Ressac":"Tom Mercier",["deposited","submitted","approved"]],["Vérifié","Tom Mercier",["submitted","approved"]],["Validé","Claire Morel",["approved"]]].map(([l,b,doneIn],i)=>`${i?'<span class="sep"></span>':""}<span class="st ${doneIn.includes(q.status)?"d":""}"><span class="b">${doneIn.includes(q.status)?ICON.check:""}</span>${l}<span class="cap">· ${esc(b)}</span></span>`).join("")}
+  </div>`;
+  if(q.status==="none"||q.status==="rejected"){
+    const rej=q.status==="rejected"?`<div class="callout bad">${ICON.warn}<span>Refusé par Claire Morel : « ${esc(q.reason)} »</span></div>`:"";
+    if(ext){
+      if(S.role==="societe") return tl+rej+`<div class="sect"><h3>Votre devis</h3>
+        <div class="grid2"><div class="field"><label for="qf">Document</label><select class="in" id="qf"><option>Devis_Ressac_Neons_${q.status==="rejected"?"v2":"v1"}.pdf</option></select></div>
+        <div class="field"><label for="qa">Montant total HT *</label><input class="in num" id="qa" inputmode="decimal" value="${q.status==="rejected"?"15 900":"16 400"}"><span class="hint">Lu dans le PDF par PO, à vérifier</span></div>
+        <div class="field"><label for="qd">Livraison proposée *</label><input class="in" id="qd" type="date" value="2026-11-28"></div>
+        <div class="field"><label for="qr">Réalisateur</label><input class="in" id="qr" value="Bastien Roy (proposé)"></div></div>
+        <div class="btnrow"><button class="btn" type="button" data-act="qdeposit">Déposer le devis</button><span class="cap">Tom Mercier est prévenu pour le vérifier.</span></div></div>`;
+      return tl+rej+waitFor("societe",q.status==="rejected"?"déposer un devis corrigé":"déposer son devis");
+    }
+    if(S.role!=="charge") return tl+rej+waitFor("charge","ajouter les devis des loueurs");
+    return tl+rej+`<div class="sect"><h3>Devis des loueurs</h3><p class="note">Lignes reprises de la liste d'Hugo Laine ; prix lus dans les devis déposés.</p>
+      <div class="rows">${[["Sony FX6 + optiques Sigma Cine","Transpacam",1240],["Kit lumière 3 projecteurs LED","Transpacam",960],["Machinerie (slider, pieds)","Lumière & Co",660]].map(([l,s,p])=>`<div class="row"><span class="t3">•</span><span class="main"><span>${esc(l)}</span><span class="cap">${esc(s)} · 2 jours</span></span><span class="side num">${euro(p)}</span></div>`).join("")}</div>
+      <div class="btnrow"><button class="btn" type="button" data-act="qdeposit">Enregistrer les devis</button></div></div>`;
+  }
+  const checks=[
+    {k:"amount",l:`Montant : ${euro(amt)} pour une enveloppe de ${euro(ext?ENVELOPE:3500)}`,ok:true,h:`Marge de ${euro((ext?ENVELOPE:3500)-amt)}`},
+    {k:"delay",l:ext?"Livraison proposée le 28/11, sortie le 05/12":"Locations du 23 au 24/10, tournage les 23 et 24/10",ok:true,h:ext?"7 jours de marge pour les exports et la transmission":"Retrait le 22/10, retour le 25/10"},
+    {k:"open",l:ext?"Réalisateur proposé, pas encore validé par PDS":"Caution de 3 000 € demandée par Transpacam",ok:false,h:ext?"Se tranche à l'étape « Proposition de réalisation »":"À prévoir au budget, non incluse"}
+  ];
+  const checkRows=`<div class="sect"><h3>Vérification <span class="po">${ICON.spark} préparée par PO</span></h3>${checks.map(c=>`<div class="check"><span class="ic ${c.ok?"ok":"warn"}">${c.ok?ICON.ok:ICON.warn}</span><span class="grow">${esc(c.l)}<br><span class="cap">${esc(c.h)}</span></span>${q.status==="deposited"&&S.role==="charge"?`<label class="cap"><input class="cb" type="checkbox" ${q.checks[c.k]?"checked":""} data-act="qcheck" data-k="${c.k}"> Vérifié</label>`:q.checks[c.k]?'<span class="pill ok">Vérifié</span>':""}</div>`).join("")}</div>`;
+  if(q.status==="deposited"){
+    if(S.role!=="charge") return tl+checkRows+waitFor("charge","vérifier le devis");
+    const missing=Object.entries(q.checks).filter(([,v])=>!v).length;
+    return tl+checkRows+`<div class="field"><label for="qn">Note pour Claire Morel</label><textarea class="in" id="qn" placeholder="Ce qu'elle doit savoir pour décider">${esc(q.note)}</textarea></div>
+      ${q.error?`<div class="callout bad" id="qerr">${ICON.warn}<span>${missing} point${missing>1?"s":""} à vérifier avant de soumettre.</span></div>`:""}
+      <div class="btnrow"><button class="btn" type="button" data-act="qsubmit">Soumettre à Claire Morel</button><span class="cap">Elle est prévenue et voit votre vérification.</span></div>`;
+  }
+  if(q.status==="submitted"){
+    const noteBlock=q.note?`<div class="callout info"><span>Note de Tom Mercier : « ${esc(q.note)} »</span></div>`:"";
+    if(S.role!=="dg") return tl+checkRows+noteBlock+waitFor("dg","valider le devis");
+    return tl+checkRows+noteBlock+`<div class="field"><label for="qrz">Motif, si vous refusez</label><textarea class="in" id="qrz" placeholder="Ce qu'il faut corriger" ${q.error?'aria-invalid="true" aria-describedby="qrze"':""}></textarea>${q.error?'<span class="err" id="qrze">Un refus dit pourquoi : écrivez le motif.</span>':""}</div>
+      <div class="btnrow"><button class="btn" type="button" data-act="qapprove">Valider le devis</button><button class="btn out" type="button" data-act="qreject">Refuser</button></div>`;
+  }
+  return tl+`<div class="callout ok">${ICON.ok}<span>Validé par Claire Morel le 16/10 · ${euro(amt)}. ${ext?"Studio Ressac est prévenue sur son lien.":"Tom Mercier peut réserver."}</span></div>`;
+}
+
+function directionBody(x){
+  const d=S.direction, R=real(S);
+  const seq=[["1","Ouverture : la ville la nuit, néons en reflet","Extérieur, travelling"],["2","Couplet : l'artiste face caméra, entrepôt","Intérieur, plan fixe"],["3","Pont : plan-séquence sur le toit","Extérieur, steadicam"],["4","Refrain : lumière stroboscopique, danse","Intérieur, 3 caméras"],["5","Fin : le néon s'éteint","Intérieur, plan serré"]];
+  const doc=`<div class="sect"><h3>Proposition de ${esc(PEOPLE[R].name)}</h3>
+    <p class="note">« Un clip nocturne, presque muet, où la lumière des néons raconte la rupture. » · Traitement_Neons.pdf</p>
+    <div class="rows">${seq.map(([n,t,c])=>`<div class="row"><span class="num t3">${n}</span><span class="main"><span>${esc(t)}</span><span class="cap">${esc(c)}</span></span><span></span></div>`).join("")}</div></div>`;
+  const call=S.mode==="external"?(d.creativeCall?`<div class="callout ok">${ICON.ok}<span>Échange créatif prévu jeu. 17/10 avec ${esc(PEOPLE[R].name)} et Nadia Benali.</span></div>`:S.role==="da"||S.role==="cp"?`<div class="btnrow"><button class="btn out sm" type="button" data-act="creative">Planifier l'échange créatif avec le réalisateur</button><span class="cap">Ibé : réalisateur et partie créative de PDS travaillent ensemble la proposition.</span></div>`:""):"";
+  if(d.status==="none"||d.status==="changes"){
+    const ch=d.status==="changes"?`<div class="callout warn">${ICON.warn}<span>Nadia Benali demande : « ${esc(d.comment)} »</span></div>`:"";
+    if(S.role===R) return ch+call+`<div class="sect"><h3>Votre proposition</h3>
+      <div class="field"><label for="df">Traitement</label><select class="in" id="df"><option>Traitement_Neons${d.status==="changes"?"_v2":""}.pdf</option></select><span class="hint">PO en tire le découpage ci-dessous, modifiable</span></div>
+      ${doc}<div class="btnrow"><button class="btn" type="button" data-act="ddeposit">Envoyer à Nadia Benali</button></div></div>`;
+    return ch+call+waitFor(R,d.status==="changes"?"revoir la proposition":"déposer la proposition et le découpage");
+  }
+  if(d.status==="deposited"){
+    if(S.role!=="da") return doc+waitFor("da","valider la proposition");
+    return doc+`<div class="field"><label for="dc">Commentaire, si vous demandez des modifications</label><textarea class="in" id="dc" ${d.error?'aria-invalid="true"':""}></textarea>${d.error?'<span class="err">Dites ce qu\'il faut revoir.</span>':""}</div>
+      <div class="btnrow"><button class="btn" type="button" data-act="dapprove">Valider la proposition</button><button class="btn out" type="button" data-act="dchanges">Demander des modifications</button></div>`;
+  }
+  return `<div class="callout ok">${ICON.ok}<span>Validée par Nadia Benali le 18/10. Le découpage sert maintenant au call technique, au matériel et aux lieux.</span></div>`+doc;
+}
+
+function prepBody(x){
+  const items=[["calls","Calls techniques faits"],["gear","Matériel réservé"],["crew","Équipe confirmée"],["schedule","Planning de tournage envoyé"]];
+  const n=prepDone(S);
+  const head=`<div class="sect"><div class="bar" aria-label="${n} sur 4"><i style="transform:scaleX(${n/4})"></i></div><span class="cap">${n} sur 4 · mis à jour par Studio Ressac</span></div>`;
+  if(S.role==="societe") return head+`<div class="sect"><h3>Où en êtes-vous ?</h3>${items.map(([k,l])=>`<label class="check"><input class="cb" type="checkbox" ${S.prep[k]?"checked":""} data-act="prep" data-k="${k}"><span class="grow">${esc(l)}</span></label>`).join("")}<p class="note">PDS voit l'avancement sans vous demander de tout ressaisir : déposez vos documents si vous le souhaitez.</p></div>`;
+  return head+`<div class="sect">${items.map(([k,l])=>`<div class="check"><span class="ic ${S.prep[k]?"ok":""}">${S.prep[k]?ICON.ok:"○"}</span><span class="grow">${esc(l)}</span></div>`).join("")}</div><p class="note">Suivi en lecture : Studio Ressac tient ces éléments sur son lien.</p>`;
+}
+
+function gearBody(x){
+  const lines=[["Sony FX6 + optiques Sigma Cine 18–35 / 50–100","Image"],["3 projecteurs LED Aputure 600d","Lumière"],["Tubes néon RVB × 8","Lumière"],["Slider 1,2 m + tête fluide","Machinerie"],["Moniteur 7″ + transmission HF","Image"]];
+  if(S.gear.status==="deposited") return `<div class="sect"><h3>Lignes de matériel <span class="po">${ICON.spark} créées par PO</span></h3><div class="rows">${lines.map(([l,c])=>`<div class="row"><span class="t3">•</span><span class="main"><span>${esc(l)}</span><span class="cap">${c} · à chiffrer par Tom Mercier</span></span><span class="side"><span class="pill">Besoin</span></span></div>`).join("")}</div></div>`;
+  if(S.role!=="chefop") return waitFor("chefop","déposer la liste matériel");
+  return `<div class="sect"><h3>Votre liste caméra et lumière</h3><p class="note">Déposez votre fichier ou écrivez ici : PO en fait des lignes de matériel pour Tom Mercier.</p>
+    <div class="rows">${lines.map(([l,c])=>`<div class="row"><span class="t3">•</span><span class="main"><span>${esc(l)}</span><span class="cap">${c}</span></span><span></span></div>`).join("")}</div>
+    <div class="btnrow"><button class="btn" type="button" data-act="gear">Envoyer la liste à Tom Mercier</button></div></div>`;
+}
+
+function locsBody(x){
+  const l=S.locs, proposer=x.owner;
+  if(l.status==="none"){
+    if(S.role!==proposer) return waitFor(proposer,"proposer des lieux");
+    return `<div class="sect"><h3>Vos lieux à proposer</h3><p class="note">Photos, tarif et contraintes ; PDS donne son avis et en retient un.</p>
+      <div class="locs">${LOCS.map(o=>locCard(o,-1,false)).join("")}</div>
+      <div class="btnrow"><button class="btn" type="button" data-act="locpropose">Envoyer les 3 lieux à PDS</button></div></div>`;
+  }
+  const roles=opinionRoles(S);
+  const intro=l.status==="chosen"?`<div class="callout ok">${ICON.ok}<span>${esc(LOCS[l.chosen].name)} retenu par Lina Haddad. Il alimente la feuille de service et le contrôle avant tournage.</span></div>`:
+    `<p class="note">${roles.map(k=>esc(PEOPLE[k].name)).join(", ")} donnent leur avis ; Lina Haddad retient un lieu.</p>`;
+  return intro+`<div class="locs">${LOCS.map((o,i)=>locCard(o,i,true)).join("")}</div>`;
+}
+function locCard(o,i,withOps){
+  const l=S.locs, roles=opinionRoles(S);
+  const ops=withOps?`<div class="ops">${roles.map(k=>{const v=(l.ops[i]||{})[k];return `<div class="op"><span>${esc(PEOPLE[k].name.split(" ")[0])}</span>${v?`<span class="pill ${v==="ok"?"ok":"warn"}">${v==="ok"?"Favorable":"Réservé"}</span>`:'<span class="cap">Avis attendu</span>'}</div>`;}).join("")}</div>`:"";
+  const mineOp=withOps&&l.status==="proposed"&&roles.includes(S.role)?`<div class="btnrow"><button class="btn out sm" type="button" data-act="op" data-i="${i}" data-v="ok">Favorable</button><button class="btn ghost sm" type="button" data-act="op" data-i="${i}" data-v="no">Réservé</button></div>`:"";
+  const choose=withOps&&l.status==="proposed"&&S.role==="cp"?`<button class="btn sm" type="button" data-act="locchoose" data-i="${i}">Retenir ce lieu</button>`:"";
+  return `<article class="loc ${l.chosen===i?"chosen":""}"><div class="img ${o.cls}"><span>${esc(o.tag)}</span></div><div class="bd">
+    <b>${esc(o.name)}</b><span class="cap">${esc(o.place)} · <span class="num">${euro(o.price)}</span> / jour</span><span class="cap">${esc(o.constraints)}</span>${ops}${mineOp}${choose}</div></article>`;
+}
+
+function sheetBody(x){
+  const sh=S.sheet;
+  const loc=S.locs.chosen!=null?LOCS[S.locs.chosen]:LOCS[0];
+  const known=[["Date","Mer. 23 et jeu. 24/10","Planning"],["Convocation","7 h 30 sur place","Planning"],["Lieu",loc.name+", "+loc.place,"Lieu retenu"],["Équipe","Inès Duval, Hugo Laine, Tom Mercier + 2 assistants","Rôles confirmés"],["Matériel","5 lignes réservées chez Transpacam","Devis validé"],["Séquences","1 à 5, d'après le découpage validé","Proposition de réalisation"]];
+  const block=`<div class="sect"><h3>Composée par PO <span class="po">${ICON.spark} PO</span></h3><div class="rows">${known.map(([k,v,s])=>`<div class="row"><span class="t3">•</span><span class="main"><span><b>${esc(k)}</b> · ${esc(v)}</span><span class="cap">Source : ${esc(s)}</span></span><span></span></div>`).join("")}</div></div>`;
+  if(sh.status==="published") return `<div class="callout ok">${ICON.ok}<span>V1 diffusée le 21/10 : l'équipe la lit sur un lien stable, les membres sont prévenus.</span></div>`+block;
+  if(S.role!=="charge") return block+waitFor("charge","compléter et diffuser la feuille de service");
+  return block+`<div class="field"><label for="urg">Urgences *</label><input class="in" id="urg" value="${esc(sh.urgences)}" placeholder="Hôpital le plus proche, numéros utiles" ${sh.error?'aria-invalid="true" aria-describedby="urge"':""}>${sh.error?'<span class="err" id="urge">La seule rubrique que PO ne peut pas deviner : écrivez-la avant de diffuser.</span>':'<span class="hint">La seule rubrique que PO ne peut pas remplir</span>'}</div>
+    <div class="btnrow"><button class="btn" type="button" data-act="sheetpub">Diffuser la V1 à l'équipe</button></div>`;
+}
+
+function readyBody(x,st){
+  const ext=S.mode==="external";
+  const items=ext?[["Devis validé",S.quote.status==="approved"],["Proposition de réalisation validée",S.direction.status==="approved"],["Préproduction de Studio Ressac terminée",prepDone(S)===4],["Lieu retenu",S.locs.status==="chosen"]]:[["Lieu retenu",S.locs.status==="chosen"],["Devis validé, matériel réservé",S.quote.status==="approved"],["Feuille de service diffusée",S.sheet.status==="published"],["Équipe disponible les 23 et 24/10",true]];
+  const missing=items.filter(([,ok])=>!ok);
+  if(S.ready) return `<div class="callout ok">${ICON.ok}<span>Prêt pour tournage, marqué par Lina Haddad le 22/10. ${ext?"Studio Ressac":"L'équipe"} est prévenue ; place au tournage.</span></div>`;
+  return `<div class="sect">${items.map(([l,ok])=>`<div class="check"><span class="ic ${ok?"ok":"bad"}">${ok?ICON.ok:ICON.warn}</span><span class="grow">${esc(l)}</span></div>`).join("")}</div>
+    ${S.readyError&&missing.length?`<div class="callout bad">${ICON.warn}<span>Restent à confirmer : ${missing.map(([l])=>esc(l)).join(", ")}.</span></div>`:""}
+    ${S.role==="cp"?`<div class="btnrow"><button class="btn" type="button" data-act="ready">Marquer prêt pour tournage</button></div>`:waitFor("cp","marquer prêt pour tournage")}`;
+}
+
+/* Private link page (MVP): only the person's part. */
+function portal(){
+  const me=who(S.role), st=steps(S);
+  const mine=st.filter(x=>x.act&&x.act.r===S.role);
+  const tasks=S.tasks.filter(t=>t.r===S.role&&!t.done);
+  const related=st.filter(x=>x.owner===S.role||(x.id==="locs"&&opinionRoles(S).includes(S.role)&&S.locs.status!=="none"));
+  const done=related.filter(x=>x.status==="done");
+  const mission=S.role==="societe"?"Produire le clip « Néons » : devis, préproduction, lieux, tournage, postproduction. PDS suit et valide.":S.role==="chefop"?"Besoins techniques du clip : caméra, optiques, lumière.":"Proposition de réalisation, découpage et besoins artistiques du clip.";
+  const avis=S.locs.status==="proposed"&&opinionRoles(S).includes(S.role)&&!mine.find(x=>x.id==="locs");
+  return `<div class="portal">
+    <header class="pbar"><span style="display:flex;align-items:center;gap:10px"><span class="brand">PDS</span><b>Espace de ${esc(me.name)}</b></span><span class="lock">${ICON.lock} Lien privé · valable jusqu'au 31/12</span></header>
+    <div class="pwrap">
+      <div class="phero"><p class="cap">Néons · Clip « Néons » · ${esc(me.role)}</p><h1>${mine.length||tasks.length||avis?"Ce que PDS attend de vous":"Rien à faire pour l'instant"}</h1></div>
+      <section class="card"><h2>Votre mission</h2><p class="note">${esc(mission)}</p><div class="whom">${person("cp")}</div><span class="cap">Votre contact chez PDS</span></section>
+      ${mine.map(x=>`<section class="card"><div class="dhead"><h2>${esc(x.act.todo)}</h2><span class="pill info">À vous</span></div>${body(x,st)}</section>`).join("")}
+      ${avis?`<section class="card"><div class="dhead"><h2>Donner votre avis sur les lieux</h2><span class="pill info">À vous</span></div>${body(st.find(x=>x.id==="locs"),st)}</section>`:""}
+      ${tasks.length?`<section class="card"><h2>Vos tâches issues des calls</h2>${taskList(tasks)}</section>`:""}
+      ${!mine.length&&!tasks.length&&!avis?`<section class="card"><p class="note">PDS vous préviendra ici dès qu'une étape vous attend.</p>${st.filter(x=>x.act).slice(0,2).map(x=>waitFor(x.act.r,x.act.todo.toLowerCase())).join("")}</section>`:""}
+      ${done.length?`<section class="card"><h2>Déjà fait</h2><div class="rows">${done.map(x=>`<div class="row"><span class="ic ok">${ICON.ok}</span><span class="main"><span>${esc(x.title)}</span><span class="cap">${esc(x.summary(S))}</span></span><span></span></div>`).join("")}</div></section>`:""}
+    </div></div>`;
+}
+
+/* Actions ------------------------------------------------------------------- */
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.hidden=true;},3600);}
+function setFlash(title,lines){S.flash={title,lines};}
+function nextLines(){
+  const st=steps(S);
+  return st.filter(x=>x.act).slice(0,3).map(x=>`<b>${esc(PEOPLE[x.act.r].name)}</b> : ${esc(x.act.todo.toLowerCase())} <span class="t3">(${esc(x.title)})</span>`);
+}
+function goCurrent(){const st=steps(S);const m=st.find(x=>x.act&&x.act.r===S.role)||st.find(x=>x.status==="current");if(m)S.selected=m.id;}
+
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-act]"); if(!el) return;
+  const a=el.dataset.act;
+  // Keep what the person changed in PO's proposals before any re-render.
+  document.querySelectorAll("[data-f]").forEach(n=>{const p=S.proposals.find(x=>x.id===n.dataset.p); if(p) p[n.dataset.f]=n.value;});
+  const v=id=>{const n=document.getElementById(id);return n?n.value.trim():"";};
+  switch(a){
+    case "open": S.view="deliverable"; break;
+    case "list": S.view="list"; break;
+    case "go": S.selected=el.dataset.step; S.view="deliverable"; break;
+    case "unflash": S.flash=null; break;
+    case "draft": S.draft=el.dataset.v; break;
+    case "org":
+      S.mode=S.draft; S.proposals=[]; S.selected=null;
+      setFlash(`Production ${S.mode==="external"?"externe":"interne"} lancée`,nextLines());
+      toast("Les intervenants sont prévenus ; chacun voit sa part.");
+      break;
+    case "callplan": S.call.status="planned"; toast("Call planifié, invitations envoyées."); break;
+    case "callreport": S.call.status="report"; S.proposals=proposalsFor(S).map(p=>Object.assign({keep:true},p)); toast("Compte rendu prêt : PO propose 4 actions."); break;
+    case "keep": {const p=S.proposals.find(x=>x.id===el.dataset.p); p.keep=el.checked; break;}
+    case "callconfirm": {
+      document.querySelectorAll("[data-f]").forEach(n=>{const p=S.proposals.find(x=>x.id===n.dataset.p); if(p) p[n.dataset.f]=n.value;});
+      const kept=S.proposals.filter(p=>p.keep), from=S.mode==="external"?"kickoff":"tech";
+      kept.forEach(p=>S.tasks.push({id:from+p.id,from,text:p.text,r:p.r,due:p.due,done:false}));
+      S.call.status="done";
+      setFlash(`${kept.length} actions attribuées`,[...new Set(kept.map(p=>p.r))].map(k=>`<b>${esc(PEOPLE[k].name)}</b> : ${kept.filter(p=>p.r===k).length} action${kept.filter(p=>p.r===k).length>1?"s":""}`).concat(nextLines().slice(0,1).map(l=>"Ensuite, "+l)));
+      goCurrent(); toast("Actions attribuées."); break;
+    }
+    case "taskdone": {const t=S.tasks.find(x=>x.id===el.dataset.task); t.done=true; toast("Tâche faite."); break;}
+    case "qdeposit": S.quote.status="deposited"; S.quote.checks={amount:false,delay:false,open:false}; S.quote.error=null;
+      toast(S.mode==="external"?"Devis déposé : Tom Mercier est prévenu.":"Devis enregistrés : à vérifier."); break;
+    case "qcheck": S.quote.checks[el.dataset.k]=el.checked; return;
+    case "qsubmit": {
+      S.quote.note=v("qn");
+      if(Object.values(S.quote.checks).some(c=>!c)){S.quote.error=true; break;}
+      S.quote.status="submitted"; S.quote.error=null; toast("Soumis à Claire Morel."); break;
+    }
+    case "qapprove": S.quote.status="approved"; S.quote.error=null;
+      setFlash("Devis validé",nextLines()); goCurrent(); toast("Devis validé."); break;
+    case "qreject": {const r=v("qrz"); if(!r){S.quote.error=true; break;} S.quote.status="rejected"; S.quote.reason=r; S.quote.error=null; toast("Devis refusé, avec le motif."); break;}
+    case "creative": S.direction.creativeCall=true; toast("Échange créatif planifié jeu. 17/10."); break;
+    case "ddeposit": S.direction.status="deposited"; toast("Proposition envoyée à Nadia Benali."); break;
+    case "dapprove": S.direction.status="approved"; S.direction.error=false; setFlash("Proposition de réalisation validée",nextLines()); goCurrent(); toast("Proposition validée."); break;
+    case "dchanges": {const c=v("dc"); if(!c){S.direction.error=true; break;} S.direction.status="changes"; S.direction.comment=c; S.direction.error=false; toast("Modifications demandées."); break;}
+    case "prep": S.prep[el.dataset.k]=el.checked; if(prepDone(S)===4) setFlash("Préproduction terminée par Studio Ressac",nextLines()); break;
+    case "gear": S.gear.status="deposited"; toast("Liste envoyée : 5 lignes de matériel créées."); break;
+    case "locpropose": S.locs.status="proposed"; toast("3 lieux envoyés : avis attendus."); break;
+    case "op": {const i=+el.dataset.i; S.locs.ops[i]=Object.assign({},S.locs.ops[i],{[S.role]:el.dataset.v}); toast("Avis enregistré."); break;}
+    case "locchoose": S.locs.chosen=+el.dataset.i; S.locs.status="chosen"; setFlash(`${LOCS[S.locs.chosen].name} retenu`,nextLines()); goCurrent(); toast("Lieu retenu."); break;
+    case "sheetpub": {const u=v("urg"); S.sheet.urgences=u; if(!u){S.sheet.error=true; break;} S.sheet.status="published"; S.sheet.error=false; setFlash("Feuille de service V1 diffusée",nextLines()); goCurrent(); toast("V1 diffusée à l'équipe."); break;}
+    case "ready": {
+      const st=steps(S), r=st.find(x=>x.id==="ready");
+      if(r.status!=="current"){S.readyError=true; break;}
+      S.ready=true; setFlash("Prêt pour tournage",["Le tournage du 23/10 peut commencer : la vue « Le jour du tournage » s'ouvre ce matin-là."]); toast("Prêt pour tournage.");
+      break;
+    }
+    default: return;
+  }
+  render();
+  if(["callconfirm","qapprove","dapprove","locchoose","sheetpub","org"].includes(a)) window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches(".trow.link,.trail a")){e.preventDefault();e.target.click();}});
+
+/* Proto controls */
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.selected=null;goCurrent();render();window.scrollTo({top:0});});
+document.getElementById("resetBtn").addEventListener("click",()=>{S=fresh();document.getElementById("scenSel").value="start";render();window.scrollTo({top:0});});
+document.getElementById("scenSel").addEventListener("change",e=>{S=scenario(e.target.value);render();window.scrollTo({top:0});});
+function scenario(k){
+  const s=fresh();
+  const confirmAll=from=>{s.call.status="done";s.proposals=proposalsFor(s);s.proposals.forEach(p=>s.tasks.push({id:from+p.id,from,text:p.text,r:p.r,due:p.due,done:false}));};
+  if(k==="ext-quote"||k==="ext-locs"){s.mode="external";confirmAll("kickoff");s.tasks[0].done=true;s.quote.status="deposited";s.role="charge";}
+  if(k==="ext-locs"){s.quote.status="approved";s.quote.checks={amount:true,delay:true,open:true};s.direction.status="approved";s.direction.creativeCall=true;s.prep={calls:true,gear:true,crew:false,schedule:false};s.locs.status="proposed";s.locs.ops={0:{realExt:"ok"},1:{realExt:"ok"},2:{realExt:"no"}};s.role="da";}
+  if(k==="int-call"){s.mode="internal";s.direction.status="approved";s.call.status="report";s.proposals=proposalsFor(s).map(p=>Object.assign({keep:true},p));s.role="charge";}
+  if(k==="int-sheet"){s.mode="internal";s.direction.status="approved";confirmAll("tech");s.gear.status="deposited";s.locs.status="chosen";s.locs.chosen=0;s.quote.status="approved";s.quote.checks={amount:true,delay:true,open:true};s.role="charge";}
+  const keep=S; S=s; goCurrent(); S=keep;
+  return s;
+}
+
+render();
+})();
+</script>

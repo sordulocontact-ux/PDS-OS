@@ -1,0 +1,803 @@
+<title>PDS OS parcours guidés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Layout: PDS OS shell (main nav, project nav) and, in every module, the same
+   guided pattern — « Maintenant », the journey on the left, the open step on the
+   right. Tokens mirror app/globals.css. */
+:root{
+  --app:#fbfbfb; --page:#ffffff; --raised:#ffffff; --soft:#f4f4f4; --sunken:#ececec;
+  --inverse:#000; --inverse-fg:#fff;
+  --text:#000; --text-2:#5e5e5e; --text-3:#767676; --muted:#afafaf;
+  --hair:#ececec; --border:#d4d4d4; --field:#dcdcdc; --hover-border:#afafaf;
+  --sel:#155dfc; --sel-bg:rgb(21 93 252 / .07);
+  --info-bg:#e2eefc; --info-fg:#0b3d8c; --warn-bg:#fcefd2; --warn-fg:#6e4300;
+  --ok-bg:#daf3e2; --ok-fg:#0d5226; --bad-bg:#fce1df; --bad-fg:#9a1b1b;
+  --act-bg:#ece1fb; --act-fg:#4c1d9e; --neutral-bg:#ececec; --neutral-fg:#111;
+  --glass:rgb(24 24 24 / .86); --glass-fg:#fff; --glass-2:#bdbdbd;
+  --shadow:0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .06);
+  --font:"Google Sans Flex","Google Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--app);color:var(--text);font-family:var(--font);font-weight:500;font-size:16px;line-height:1.5;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.04em;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+ul,ol{margin:0;padding:0;list-style:none}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.cap{font-size:14px;color:var(--text-2)}
+.t3{color:var(--text-3)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:68px 200px minmax(0,1fr);min-height:100%}
+.shell.noproj{grid-template-columns:68px minmax(0,1fr)}
+.mainnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px}
+.brand{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--inverse);color:var(--inverse-fg);font-weight:700;font-size:12px;letter-spacing:0;margin-bottom:8px}
+.navbtn{position:relative;width:44px;height:40px;border-radius:8px;display:grid;place-items:center;color:var(--text-2);border:0;background:none;cursor:pointer}
+.navbtn.on{background:var(--sunken);color:var(--text)}
+.navbtn[disabled]{opacity:.35;cursor:not-allowed}
+.navbtn .cnt{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--inverse);color:var(--inverse-fg);font-size:10.5px;font-weight:700;display:grid;place-items:center;letter-spacing:0}
+.navbtn .tip{position:absolute;left:52px;top:50%;transform:translateY(-50%);background:var(--inverse);color:var(--inverse-fg);font-size:13px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 120ms ease;z-index:20}
+@media (hover:hover) and (pointer:fine){.navbtn:hover:not([disabled]){background:var(--soft);color:var(--text)}.navbtn:hover .tip{opacity:1}}
+.mainnav .grow{flex:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-size:12.5px;font-weight:600;flex:none;color:var(--text)}
+.avatar.sm{width:24px;height:24px;font-size:10.5px}
+.projnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);padding:8px;display:flex;flex-direction:column;gap:1px;overflow:auto}
+.switcher{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 10px 12px;border-bottom:1px solid var(--hair);margin-bottom:6px;font-weight:600}
+.group{font-size:13px;color:var(--text-3);padding:12px 10px 4px}
+.pitem{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 10px;border-radius:8px;color:var(--text-2);font-size:15px;border:0;background:none;text-align:left;cursor:pointer;width:100%}
+.pitem.on{background:var(--sunken);color:var(--text)}
+.pitem .grow{flex:1}
+@media (hover:hover) and (pointer:fine){.pitem:hover{background:var(--soft);color:var(--text)}}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.run{background:var(--sel)} .dot.wait{background:var(--warn-fg)} .dot.block{background:var(--bad-fg)} .dot.done{background:var(--ok-fg)}
+.mine{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+.content{min-width:0;padding:28px 40px 130px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+@media (max-width:1100px){.shell{grid-template-columns:68px minmax(0,1fr)}.projnav{display:none}}
+@media (max-width:720px){.shell,.shell.noproj{grid-template-columns:minmax(0,1fr)}.mainnav{display:none}.content{padding:20px 16px 150px}}
+
+/* Head */
+.h1{font-size:30px;letter-spacing:-.04em}
+.chevrons{display:flex;flex-wrap:wrap;gap:4px}
+.chev{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--text-2);font-size:15px;border:0;cursor:pointer}
+.chev.on{background:var(--inverse);color:var(--inverse-fg)}
+.chev .ok{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok-fg)}
+.chev .lock{opacity:.6}
+.headrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px;color:var(--text-2)}
+.facts b{color:var(--text);font-weight:600}
+
+/* Pills, buttons */
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;background:var(--neutral-bg);color:var(--neutral-fg);white-space:nowrap}
+.pill.info{background:var(--info-bg);color:var(--info-fg)} .pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ok{background:var(--ok-bg);color:var(--ok-fg)} .pill.bad{background:var(--bad-bg);color:var(--bad-fg)} .pill.act{background:var(--act-bg);color:var(--act-fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--inverse);color:var(--inverse-fg);font-weight:600;font-size:15px;cursor:pointer;transition:transform 140ms var(--ease),background-color 160ms ease;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.out{background:transparent;color:var(--text);border-color:var(--border)}
+.btn.ghost{background:transparent;color:var(--text-2)}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+@media (hover:hover) and (pointer:fine){.btn.out:hover{border-color:var(--hover-border)}.btn.ghost:hover{background:var(--soft);color:var(--text)}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Cards */
+.card{background:var(--raised);border:1px solid var(--hair);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:20px} .card h3{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.now{border-color:var(--border);box-shadow:var(--shadow)}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2);flex-wrap:wrap}
+.now h2{font-size:22px}
+.rowlist{display:flex;flex-direction:column;gap:8px}
+.wr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--soft);font-size:15px}
+.wr .grow{flex:1;min-width:0}
+.flash{background:var(--ok-bg);color:var(--ok-fg);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.flash .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.flash button{background:none;border:0;color:inherit;cursor:pointer;padding:4px;border-radius:6px}
+
+/* Layout + spine */
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.spine{position:sticky;top:20px;display:flex;flex-direction:column;gap:2px;padding:12px;background:var(--raised);border:1px solid var(--hair);border-radius:12px}
+.spine h2{font-size:15px;color:var(--text-2);letter-spacing:-.02em;padding:4px 8px 8px}
+.step{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:9px 8px;border-radius:8px;border:0;background:none;text-align:left;cursor:pointer;width:100%;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;left:19px;top:34px;bottom:-6px;width:2px;background:var(--hair)}
+.step.sel{background:var(--sunken)}
+@media (hover:hover) and (pointer:fine){.step:not(.sel):hover{background:var(--soft)}}
+.mark{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:var(--raised);position:relative;z-index:1;color:var(--text-3)}
+.step.done .mark{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.step.current .mark{border-color:var(--sel);background:var(--sel-bg)}
+.step.current .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--sel)}
+.step.me .mark{border-color:var(--sel);background:var(--sel)} .step.me .mark::after{background:#fff}
+.step.blocked .mark{border-style:dashed}
+.step .t,.step .s{display:block}
+.step .t{font-size:15px;font-weight:600;line-height:1.3}
+.step.blocked .t{color:var(--text-3);font-weight:500}
+.step .s{font-size:13.5px;color:var(--text-2);line-height:1.35;margin-top:2px}
+.step .s.me{color:var(--sel);font-weight:600}
+.dhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.dhead h2{font-size:22px}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta .k{font-size:13px;color:var(--text-3)} .meta .v{font-size:15px;line-height:1.35}
+.okc{color:var(--ok-fg)} .noc{color:var(--text-3)}
+.note{font-size:14.5px;color:var(--text-2)}
+.po{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--act-fg);background:var(--act-bg);height:22px;padding:0 8px;border-radius:999px}
+.callout{border-radius:10px;padding:12px 14px;font-size:15px;display:flex;gap:10px;align-items:flex-start}
+.callout.info{background:var(--info-bg);color:var(--info-fg)} .callout.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.callout.bad{background:var(--bad-bg);color:var(--bad-fg)} .callout.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.rows{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.row:last-child{border-bottom:0}
+.row .src{font-size:13px;color:var(--text-3)}
+.pick{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}.pick legend{padding:0;margin-bottom:2px}
+.opts{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.opt{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--hair);cursor:pointer}.opt:last-child{border-bottom:0}.opt .grow{flex:1;min-width:0}
+.opt input{accent-color:var(--sel);width:18px;height:18px;flex:none}.opt:has(input:checked){background:var(--sel-bg)}
+.hist{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--text-2)}
+.hist li{display:flex;gap:8px;align-items:flex-start}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+.in{min-height:40px;border:1px solid var(--field);border-radius:8px;background:var(--raised);padding:8px 12px;width:100%}
+textarea.in{min-height:64px;resize:vertical}
+.in[aria-invalid="true"]{border-color:var(--bad-fg)}
+.err{font-size:13px;color:var(--bad-fg)}
+
+/* Overview + lists */
+.wfgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.wfgrid{grid-template-columns:minmax(0,1fr)}}
+.wf{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--hair);border-radius:12px;background:var(--raised);text-align:left;cursor:pointer}
+@media (hover:hover) and (pointer:fine){.wf:hover{border-color:var(--hover-border)}}
+.bar{height:6px;border-radius:999px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sel);border-radius:999px;transform-origin:left;transition:transform 300ms var(--ease)}
+.table{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised)}
+.tr{display:grid;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--hair);font-size:15px}
+.tr:last-child{border-bottom:0}
+.tr.h{font-size:13.5px;color:var(--text-3);background:var(--soft)}
+.tr.link{cursor:pointer}
+@media (hover:hover) and (pointer:fine){.tr.link:hover{background:var(--soft)}}
+@media (max-width:760px){.tr{grid-template-columns:minmax(0,1fr)!important}.tr.h{display:none}}
+.cols4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.cols4{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--soft)}
+.col h3{font-size:14px;color:var(--text-2);font-weight:600}
+.chip{padding:10px 12px;border-radius:8px;background:var(--raised);border:1px solid var(--hair);font-size:14.5px}
+.po-input{display:flex;gap:8px;align-items:center;padding:8px 8px 8px 16px;border:1px solid var(--border);border-radius:16px;background:var(--raised)}
+.po-input input{flex:1;border:0;background:transparent;outline:none;min-width:0;height:36px}
+
+/* Portal */
+.portal{min-height:100%;background:var(--app)}
+.pbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-bottom:1px solid var(--hair);background:var(--page);flex-wrap:wrap}
+.pwrap{max-width:820px;margin:0 auto;padding:28px 16px 150px;display:flex;flex-direction:column;gap:18px}
+.lockline{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
+
+/* Proto bar & toast */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:280px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+@media (max-width:720px){.proto label{display:none}.proto select{max-width:44vw}}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--inverse);color:var(--inverse-fg);padding:12px 16px;border-radius:12px;font-size:15px;box-shadow:var(--shadow);max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+</style>
+
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label><select id="roleSel"></select>
+  <label for="scenSel">Aller à</label>
+  <select id="scenSel">
+    <option value="start">Le projet est à créer</option>
+    <option value="framing">Cadrage : Brief en validation</option>
+    <option value="running">Plan lancé : workflows en cours</option>
+    <option value="late">Six semaines avant la sortie</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const I={
+  check:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  lock:'<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>',
+  spark:'<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z"/></svg>',
+  ok:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>',
+  warn:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 11.6v.1"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+  updown:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>',
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  work:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  cal:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4.5" width="14" height="12.5" rx="2"/><path d="M3 8.5h14M7 2.5v3M13 2.5v3"/></svg>',
+  phone:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3h3l1.5 4-2 1.5a9 9 0 004 4l1.5-2 4 1.5v3a1.5 1.5 0 01-1.5 1.5A13.5 13.5 0 013.5 4.5 1.5 1.5 0 015 3z"/></svg>',
+  mic:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="7.5" y="2.5" width="5" height="10" rx="2.5"/><path d="M4.5 10a5.5 5.5 0 0011 0M10 15.5v2"/></svg>',
+  disc:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="7.5"/><circle cx="10" cy="10" r="2"/></svg>',
+  nodes:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/></svg>',
+  hand:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 10l4-4 3 2 3-2 4 4-5 5-2-1.5L7.5 15z"/></svg>',
+  file:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 2.5h6l4 4v11H5z"/><path d="M11 2.5v4h4"/></svg>',
+  people:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="7" cy="7" r="3"/><path d="M2 17c.5-3 2.5-4.5 5-4.5s4.5 1.5 5 4.5M13 4.5a3 3 0 010 5.5M15 12.5c1.7.6 2.7 2 3 4.5"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>',
+  send:'<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10l14-6-5 14-2.5-5.5z"/></svg>'
+};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* People: accounts of PDS, and outside people through a private link. */
+const P={
+  dg:{name:"Claire Morel",role:"Directrice générale",ini:"CM",where:"app"},
+  cp:{name:"Lina Haddad",role:"Cheffe de projet",ini:"LH",where:"app"},
+  da:{name:"Nadia Benali",role:"Directrice créative",ini:"NB",where:"app"},
+  charge:{name:"Tom Mercier",role:"Chargé de production",ini:"TM",where:"app"},
+  mix:{name:"Karim Haddou",role:"Ingénieur mix et mastering",ini:"KH",where:"lien",link:"/m/",place:"Son dossier du master"},
+  soc:{name:"Studio Ressac",role:"Société de production",ini:"SR",where:"lien",link:"/p/",place:"Son espace prestataire"},
+  collab:{name:"Sami Kader",role:"Compositeur, co-auteur",ini:"SK",where:"lien",link:"/f/",place:"Sa fiche de renseignements"}
+};
+const ROLE_ORDER=["dg","cp","da","charge","mix","soc","collab"];
+
+/* Every workflow: its steps, owner, validator, prerequisites, and the
+   actions that move it, in order (who does each one). */
+const W={};
+function wf(key,label,group,steps,extra){W[key]=Object.assign({key,label,group,steps},extra||{});}
+const A=(by,label,done,alt)=>({by,label,done,alt});
+
+wf("launch","Lancement","top",[
+  {id:"l1",title:"Création et transmission",why:"Le DG crée le projet avec ses titres et son contexte, puis le confie à une personne.",owner:"dg",prereq:[],
+   po:"PO peut préparer le brouillon du projet ; le DG relit le vrai formulaire et enregistre.",
+   facts:[["Type","Musical · Single","Créé par Claire Morel"],["Titre","« Néons » (Catalogue)","Mona Lys"],["Sortie visée","Ven. 05/12/2026","Contexte initial"],["Budget prévisionnel","25 000 € HT","Contexte initial"]],
+   acts:[A("dg","Créer et transmettre à Lina Haddad","Transmis à Lina Haddad")],reopenLabel:"Répondre et transmettre à nouveau"},
+  {id:"l2",title:"Acceptation",why:"Le chef de projet voit ce qu'il accepte ; accepter lance le projet et ouvre le Cadrage.",owner:"cp",prereq:["l1"],
+   readonly:true,
+   intro:"Ce que vous acceptez, tel que Claire Morel l'a saisi le 14/10 :",
+   facts:[["Artiste","Mona Lys","Catalogue · signée"],["Type et format","Musical · Single","Saisi par Claire Morel"],["Titre","« Néons » · maquette v3 (3 min 12)","Catalogue"],["Sortie visée","Ven. 05/12/2026","Saisi par Claire Morel"],["Budget prévisionnel","25 000 € HT","Saisi par Claire Morel"],["Priorité","Haute","Saisi par Claire Morel"],["Directrice créative","Nadia Benali","Saisi par Claire Morel"],["Contexte initial","« Premier single de l'album, on veut un clip fort et une vraie présence en playlists. »","Saisi par Claire Morel"],["Message de transmission","« Lina, je te confie Néons : c'est la priorité de la fin d'année. »","Claire Morel"]],
+   missing:["Ingénieurs mix et mastering","Objectif chiffré","Cadre juridique (co-auteurs, samples)"],
+   acts:[A("cp","Accepter le projet","Projet accepté et lancé",[{label:"Demander une précision",note:"Le budget de 25 000 € inclut-il le clip ?",reopen:"l1"},{label:"Refuser",note:"Je n'ai pas la disponibilité avant janvier.",reopen:"l1"}])]}
+]);
+wf("framing","Cadrage","top",[
+  {id:"c1",title:"Échange de cadrage",why:"Pas de cadrage sans compte rendu de call : l'ordre du jour part de ce qui manque.",owner:"cp",prereq:["l2"],
+   po:"PO prépare l'ordre du jour depuis les six dimensions encore vides, puis tire le compte rendu de l'enregistrement.",
+   facts:[["Ordre du jour","Objectif, temporalité, budget, équipe, état de départ, cadre juridique","Calculé"],["Participants","Lina Haddad, Mona Lys, son manager","Équipe du projet"]],
+   acts:[A("cp","Préparer l'échange de cadrage","Call prévu jeu. 16/10 à 11 h"),A("cp","Le call a eu lieu : lancer le compte rendu","Compte rendu prêt, 14 propositions de PO")]},
+  {id:"c2",title:"Relecture des 6 dimensions",why:"Une question à la fois : chaque valeur proposée par PO est citée, la personne confirme ou corrige.",owner:"cp",prereq:["c1"],
+   po:"PO propose des valeurs « à confirmer », chacune reliée à la phrase du call ; les dates et montants sont lus par le code.",
+   facts:[["01 Objectif","Installer Mona Lys en playlists urbaines","« on veut entrer dans les playlists » (call 16/10)"],["02 Temporalité","Sortie 05/12, master final 21/11","Lu par le code"],["03 Budget","25 000 € HT dont clip 18 000 €","« 18 pour le clip »"],["04 Équipe","Mix et mastering : Karim Haddou","Réseau"],["05 État de départ","Maquette validée, mix à faire","Catalogue"],["06 Cadre juridique","1 co-auteur, 1 sample à sécuriser","« il y a un sample de 4 s »"]],
+   acts:[A("cp","Confirmer les 14 propositions","Toutes les dimensions connues")]},
+  {id:"c3",title:"Brief de cadrage",why:"Le Brief fige ce qui est décidé ; validé, il ouvre le Plan du projet.",owner:"cp",validator:"dg",prereq:["c2"],
+   facts:[["Brief","V1, synthèse écrite par le code","Export PDF"],["Validation","Claire Morel, seule valideuse","Brief de cadrage"]],
+   acts:[A("cp","Créer le Brief et l'envoyer en validation","Brief V1 envoyé à Claire Morel"),A("dg","Valider le Brief","Brief V1 validé",{label:"Demander une modification",to:"cp",note:"Préciser l'objectif chiffré de streams."})]}
+]);
+wf("plan","Plan du projet","top",[
+  {id:"p1",title:"Plan du projet",why:"Le code propose le plan depuis le Brief ; lancer le plan démarre les workflows en Focus et Pendant ce temps.",owner:"cp",prereq:["c3"],
+   po:"Le plan est calculé par le code : Master en Focus car la sortie est à moins de 42 jours du master final.",
+   board:true,
+   acts:[A("cp","Lancer le plan","Plan lancé : Master, Juridique et Stratégie démarrent")]}
+]);
+wf("master","Master","workflows",[
+  {id:"m1",title:"Source",why:"La version de départ du mix, confirmée, jamais un master final.",owner:"cp",prereq:["p1"],
+   facts:[["Version source","Néons_maquette_v3.wav","v3 · dernière version détectée · 02/10","src"],["Stems","12 pistes · Stems_Neons_v3.zip","Session Ableton · 01/10","stems"]],acts:[A("cp","Confirmer la version source","Version source confirmée")]},
+  {id:"m2",title:"Brief Mix et Master",why:"Ce que l'ingénieur doit savoir : références, livrables, calendrier.",owner:"cp",validator:null,prereq:["m1"],
+   po:"Pré-rempli depuis le Cadrage : ingénieur, date du master final ; calendrier proposé par le code (Mix V1 J-6, Mix final J-3, Mastering J-1).",
+   facts:[["Ingénieur","Karim Haddou, mix et mastering","Cadrage, dimension 04","engineer"],["Validation des versions","Nadia Benali","Directrice créative","versions"],["Mix V1 attendu le","Dim. 15/11/2026","Calculé : 6 jours avant le master final","date"],["Mix final attendu le","Mer. 18/11/2026","Calculé : 3 jours avant le master final","date"],["Mastering attendu le","Ven. 20/11/2026","Calculé : 1 jour avant le master final","date"],["Master final attendu le","Sam. 21/11/2026","Cadrage, dimension 02","date"]],
+   acts:[A("cp","Confirmer le Brief","Brief Mix et Master prêt")]},
+  {id:"m3",title:"Mixage",why:"Les versions arrivent du mixeur par son lien ; chacune est validée ou corrigée.",owner:"mix",validator:"da",prereq:["m2"],
+   acts:[A("cp","Transmettre au mixeur","Dossier envoyé à Karim Haddou (lien valable 60 jours)"),A("mix","Déposer le Mix V1","Mix V1 déposé"),A("da","Valider le mix","Mix V2 validé : Mix final",{label:"Demander une modification",to:"mix",note:"Voix trop en avant sur le refrain."})]},
+  {id:"m4",title:"Mastering",why:"S'ouvre quand le mix final est validé.",owner:"mix",validator:"da",prereq:["m3"],
+   acts:[A("mix","Déposer le master","Master V1 déposé"),A("da","Valider le master","Master validé")]},
+  {id:"m5",title:"Master final",why:"La version validée devient le Master final : prérequis de la mise en ligne.",owner:"cp",prereq:["m4"],
+   acts:[A("cp","Confirmer le Master final","Master final au Catalogue")]}
+]);
+wf("legal","Juridique","workflows",[
+  {id:"j1",title:"État des lieux",why:"Ce que le projet sait déjà, classé connu, à confirmer ou manquant.",owner:"cp",prereq:["p1"],
+   facts:[["Titre","ISRC FR-PDS-26-00041","Connu"],["Crédits","Mona Lys, Sami Kader","Cadrage"],["Sample","4 s, ayant droit inconnu","À confirmer"]],
+   acts:[A("cp","Compléter l'état des lieux","État des lieux complet")]},
+  {id:"j2",title:"Cadrage juridique",why:"Des questions une à une ; PO montre ce qu'il a compris, la personne retire le faux.",owner:"cp",prereq:["j1"],
+   po:"« Ce que PO a compris » : Sami Kader co-écrit à 40 % ; le sample vient d'un disque de 1978, éditeur à retrouver.",
+   acts:[A("cp","Répondre aux questions","Cadrage juridique enregistré")]},
+  {id:"j3",title:"Confirmation",why:"Une synthèse écrite par le code, confirmée par une personne.",owner:"cp",prereq:["j2"],acts:[A("cp","Confirmer le dossier","Dossier confirmé")]},
+  {id:"j4",title:"Plan d'action",why:"Le code propose les démarches ; lancer en fait des tâches cochées par leurs sources.",owner:"cp",prereq:["j3"],
+   facts:[["Fiche de renseignements","Sami Kader","À lancer maintenant"],["Contrat de co-édition","Sami Kader","Après la fiche"],["Sécuriser le sample","Ayant droit à trouver","Bloque la sortie"],["SACEM","Bulletin 725","Après le contrat"]],
+   acts:[A("cp","Lancer le plan d'action","4 démarches lancées en tâches")]},
+  {id:"j5",title:"Fiche et contrat de Sami Kader",why:"La fiche remplie alimente le contrat ; le DG valide avant l'envoi.",owner:"cp",validator:"dg",prereq:["j4"],
+   acts:[A("collab","Remplir sa fiche de renseignements","Fiche reçue de Sami Kader"),A("cp","Générer le contrat et l'envoyer en relecture","Contrat de co-édition en relecture"),A("dg","Valider le contrat","Contrat validé",{label:"Demander une modification",to:"cp",note:"La part d'édition doit être de 40 %, pas 50 %."}),A("cp","Déposer le contrat signé","Contrat signé, besoin de paiement créé")]},
+  {id:"j6",title:"Sample sécurisé",why:"Un emprunt non sécurisé bloque la mise en ligne.",owner:"cp",validator:"dg",prereq:["j4"],
+   acts:[A("cp","Envoyer les conditions à la direction","Conditions envoyées : 800 € flat"),A("dg","Valider les conditions","Conditions validées, licence préparée"),A("cp","Déposer la licence signée","Sample sécurisé")]}
+]);
+wf("strategy","Stratégie","marketing",[
+  {id:"s1",title:"Échange stratégique",why:"Le call remplit la Stratégie : positionnement, publics, dispositif.",owner:"cp",prereq:["p1"],
+   acts:[A("cp","Préparer l'échange stratégique","Call prévu lun. 20/10"),A("cp","Le call a eu lieu : lancer le compte rendu","Compte rendu prêt")]},
+  {id:"s2",title:"Les 8 dimensions",why:"Positionnement, publics, narratif, dispositif, livrables, calendrier, budget, objectifs.",owner:"cp",prereq:["s1"],
+   po:"PO pré-coche les choix fermés depuis le Cadrage et le call ; il ne crée jamais un temps fort, un livrable ni un montant.",
+   facts:[["Dispositif","Clip, influence (12 créateurs), RP","3 leviers retenus"],["Livrables","Clip 16:9 et 9:16, pochette, 4 teasers","Engagés"],["Temps fort","Sortie du clip J+7","Calendrier"],["KPI","200 000 streams à 4 semaines","Objectif"]],
+   acts:[A("cp","Compléter les 8 dimensions","Brief de sortie prêt")]},
+  {id:"s3",title:"Validation de la stratégie",why:"Le DG valide toujours ; la stratégie est figée pendant la revue.",owner:"cp",validator:"dg",prereq:["s2"],
+   acts:[A("cp","Demander la validation","Stratégie envoyée à Claire Morel et Nadia Benali"),A("dg","Valider la stratégie","Brief de sortie V1 validé",{label:"Demander une modification",to:"cp",note:"Ajouter un temps fort radio."})]},
+  {id:"s4",title:"Documents de sortie",why:"Plan de sortie pour l'équipe de l'artiste, dossier de presse pour les médias.",owner:"cp",prereq:["s3"],
+   acts:[A("cp","Partager le Plan de sortie avec l'équipe de l'artiste","Plan de sortie partagé (lien public, sans budget)")]}
+],{chevron:"Stratégie"});
+wf("design","Conception","marketing",[
+  {id:"d1",title:"Échange créatif",why:"Ce que le clip et la pochette racontent, décidé avec l'artiste.",owner:"da",prereq:["s3"],
+   acts:[A("da","Organiser l'échange créatif","Échange créatif fait le 22/10")]},
+  {id:"d2",title:"Intentions et direction artistique",why:"Histoire, look, ton, incontournables ; la directrice créative écrit, la cheffe de projet confirme.",owner:"da",validator:"cp",prereq:["d1"],
+   po:"PO propose des intentions citées depuis l'échange et des références semblables ; rien n'est retenu sans un clic.",
+   acts:[A("da","Écrire la direction artistique","Direction artistique prête à soumettre"),A("cp","Confirmer les intentions","Intentions confirmées")]},
+  {id:"d3",title:"Fiches Livrables",why:"Chaque livrable engagé a sa fiche : format, ratios, durée, contraintes.",owner:"da",validator:"dg",prereq:["d2"],
+   facts:[["Clip","16:9 et 9:16, 3 min","Livrable engagé"],["Pochette","3000×3000","Livrable engagé"],["Teasers","4 × 15 s, 9:16","Livrable engagé"]],
+   acts:[A("da","Soumettre les 3 fiches","3 fiches envoyées en validation"),A("dg","Valider les fiches","Fiches validées",{label:"Demander une modification",to:"da",note:"Le clip doit aussi exister en 1:1."})]},
+  {id:"d4",title:"Passer en Production",why:"Les fiches validées partent en Production ; chaque réserve devient une tâche.",owner:"cp",prereq:["d3"],
+   acts:[A("cp","Passer en Production","3 livrables transférés à la Production")]}
+],{chevron:"Conception"});
+wf("production","Production","marketing",[
+  {id:"r1",title:"Clip : organisation",why:"Interne ou externe : ici externe, confié à Studio Ressac.",owner:"cp",prereq:["d4"],acts:[A("cp","Lancer la production externe","Studio Ressac reçoit son lien")]},
+  {id:"r2",title:"Clip : devis",why:"Vérifié point par point par le chargé de production, validé par la DG.",owner:"charge",validator:"dg",prereq:["r1"],
+   facts:[["Montant","16 400 € HT, enveloppe 18 000 €","Vérifié par le code"],["Livraison","28/11, sortie 05/12","Vérifié par le code"]],
+   acts:[A("soc","Déposer le devis","Devis de 16 400 € HT déposé"),A("charge","Vérifier et soumettre le devis","Devis soumis à Claire Morel"),A("dg","Valider le devis","Devis validé",{label:"Refuser",to:"soc",note:"Prévoir le 9:16 dans le devis."})]},
+  {id:"r3",title:"Clip : proposition de réalisation",why:"Le réalisateur de la société propose, la directrice créative valide.",owner:"soc",validator:"da",prereq:["r2"],
+   acts:[A("soc","Envoyer la proposition et le découpage","Proposition envoyée"),A("da","Valider la proposition","Proposition validée",{label:"Demander des modifications",to:"soc",note:"Plus de plans de nuit."})]},
+  {id:"r4",title:"Clip : lieux et préproduction",why:"La société propose ses lieux, PDS retient.",owner:"soc",validator:"cp",prereq:["r3"],
+   acts:[A("soc","Proposer 3 lieux","3 lieux proposés"),A("cp","Retenir un lieu","Entrepôt Quai de Seine retenu")]},
+  {id:"r5",title:"Clip : tournage et post",why:"Tournage les 23 et 24/11, versions validées par la directrice créative.",owner:"soc",validator:"da",prereq:["r4"],
+   acts:[A("cp","Marquer prêt pour tournage","Prêt pour tournage"),A("soc","Déposer la V1 du montage","V1 déposée"),A("da","Valider le montage","Montage validé")]},
+  {id:"r6",title:"Clip : livraison",why:"Les fichiers conformes partent aux Activations.",owner:"cp",prereq:["r5"],acts:[A("cp","Transmettre aux Activations","Clip transmis aux Activations")]}
+],{chevron:"Production"});
+wf("activations","Activations","marketing",[
+  {id:"a1",title:"Influence : 12 créateurs",why:"Cibles du Réseau, messages validés, accords express par lien.",owner:"cp",validator:"da",prereq:["s3"],
+   acts:[A("cp","Faire valider les messages","Messages envoyés en validation"),A("da","Valider les messages","Messages validés"),A("cp","Déclarer les accords reçus","8 accords sur 12")]},
+  {id:"a2",title:"Relations presse",why:"Le dossier de presse de la Stratégie, un brouillon par média.",owner:"cp",prereq:["s3"],acts:[A("cp","Envoyer le dossier aux médias","Dossier envoyé à 20 médias (déclaré)")]},
+  {id:"a3",title:"Lancement du clip",why:"Publié = preuve ; la directrice créative vérifie.",owner:"cp",validator:"da",prereq:["r6"],
+   acts:[A("cp","Déclarer la publication","Clip publié le 12/12 (déclaré)"),A("da","Vérifier la preuve","Preuve vérifiée")]}
+],{chevron:"Activations"});
+wf("review","Suivi & bilan","marketing",[
+  {id:"b1",title:"Bilan provisoire",why:"Le chef de projet soumet, le DG approuve ou demande des corrections.",owner:"cp",validator:"dg",prereq:["a3"],
+   acts:[A("cp","Soumettre le bilan provisoire","Bilan soumis"),A("dg","Approuver le bilan","Bilan approuvé avec réserves")]},
+  {id:"b2",title:"Clôture du Marketing",why:"Les réserves arbitrées, le DG clôture.",owner:"cp",validator:"dg",prereq:["b1"],
+   acts:[A("cp","Demander la clôture","Clôture demandée"),A("dg","Clôturer le Marketing","Marketing clôturé")]}
+],{chevron:"Suivi & bilan"});
+wf("distribution","Distribution","workflows",[
+  {id:"t1",title:"Préparation",why:"Les manques bloquants sont calculés : chaque « Corriger » mène au module.",owner:"cp",prereq:["p1"],
+   blockers:true,acts:[A("cp","Confirmer les métadonnées","Métadonnées prêtes pour contrôle")]},
+  {id:"t2",title:"Dossier The Orchard",why:"Une version figée, soumise au validateur Distribution.",owner:"cp",validator:"dg",prereq:["t1","m5","j6"],
+   acts:[A("cp","Soumettre le dossier","Dossier V1 soumis"),A("dg","Valider le dossier","Dossier validé",{label:"Refuser",to:"cp",note:"La ligne ℗ doit citer PDS."})]},
+  {id:"t3",title:"Dépôt et suivi",why:"PDS OS n'envoie rien : la personne déclare le dépôt manuel.",owner:"cp",prereq:["t2"],acts:[A("cp","Déclarer le dépôt chez The Orchard","Dépôt déclaré le 07/11")]},
+  {id:"t4",title:"Plateformes",why:"Les liens sont vérifiés par une personne ; la détection ne fait que suggérer.",owner:"cp",prereq:["t3"],acts:[A("cp","Vérifier les 5 plateformes","En ligne sur 5 plateformes")]}
+]);
+wf("closure","Clôture du projet","bottom",[
+  {id:"x1",title:"Bilan et clôture",why:"Bilan écrit, puis le DG valide la clôture.",owner:"cp",validator:"dg",prereq:["b2","t4"],
+   acts:[A("cp","Écrire le bilan et demander la clôture","Bilan écrit"),A("dg","Valider la clôture","Projet clôturé")]}
+]);
+
+const WORKFLOW_KEYS=["master","legal","marketing","distribution"];
+const MARKETING=["strategy","design","production","activations","review"];
+const ALL_STEPS=[];Object.values(W).forEach(w=>w.steps.forEach(s=>{s.wf=w.key;ALL_STEPS.push(s);}));
+const STEP=id=>ALL_STEPS.find(s=>s.id===id);
+
+/* State: how far each step has gone (index of the next action). */
+function fresh(){return {role:"dg",view:"home",wf:"overview",sel:null,ph:{},notes:{},log:[],flash:null,clock:0,edits:{},editing:null,pickSel:{},imported:{},playing:null};}
+let S=fresh();
+const ph=id=>S.ph[id]||0;
+const isDone=id=>ph(id)>=STEP(id).acts.length;
+function statusOf(id){
+  const s=STEP(id);
+  if(isDone(id)) return "done";
+  return s.prereq.every(isDone)?"current":"blocked";
+}
+function actorOf(id){const s=STEP(id);return statusOf(id)==="current"?s.acts[ph(id)]:null;}
+function wfSteps(k){return k==="marketing"?MARKETING.flatMap(m=>W[m].steps):W[k].steps;}
+function wfStatus(k){
+  const st=wfSteps(k).map(s=>statusOf(s.id));
+  if(st.every(x=>x==="done")) return ["done","Terminé"];
+  if(st.every(x=>x==="blocked")) return ["","Non démarré"];
+  const cur=wfSteps(k).filter(s=>statusOf(s.id)==="current");
+  if(cur.length&&cur.every(s=>{const a=actorOf(s.id);return a&&["dg","da"].includes(a.by)&&s.validator===a.by;})) return ["wait","En attente"];
+  return ["run","En cours"];
+}
+const myOpen=(role,keys)=>ALL_STEPS.filter(s=>(!keys||keys.includes(s.wf))&&actorOf(s.id)&&actorOf(s.id).by===role);
+const othersOpen=(role,keys)=>ALL_STEPS.filter(s=>(!keys||keys.includes(s.wf))&&actorOf(s.id)&&actorOf(s.id).by!==role);
+const wfOfStep=s=>MARKETING.includes(s.wf)?"marketing":s.wf;
+const stamp=()=>{S.clock++;const d=new Date(2026,9,15,9,0);d.setMinutes(d.getMinutes()+S.clock*37);return d.toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});};
+
+/* Render ------------------------------------------------------------------ */
+const app=document.getElementById("app");
+function render(){
+  document.getElementById("roleSel").innerHTML=ROLE_ORDER.map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role.split(",")[0])}${P[k].where==="lien"?" (lien)":""}</option>`).join("");
+  app.innerHTML=P[S.role].where==="lien"?portal():shell();
+}
+const av=(k,sm)=>`<span class="avatar ${sm?"sm":""}" aria-hidden="true">${esc(P[k].ini)}</span>`;
+function shell(){
+  const nav=[["home","home","Accueil"],["work","work","Travail"],["projects","folder","Projets"],["_cal","cal","Calendrier"],["calls","phone","Calls"],["artists","mic","Artistes"],["catalog","disc","Catalogue"],["network","nodes","Réseau"],["contracts","hand","Contrats"],["files","file","Fichiers"]];
+  if(S.role==="dg") nav.push(["team","people","Équipe"]);
+  const inProject=S.view==="project";
+  const count=myOpen(S.role).length;
+  return `<div class="shell ${inProject?"":"noproj"}">
+  <nav class="mainnav" aria-label="Navigation principale"><span class="brand">PDS</span>
+    ${nav.map(([v,i,l])=>`<button class="navbtn ${S.view===v||(v==="projects"&&inProject)?"on":""}" type="button" ${v==="_cal"?"disabled":""} data-act="nav" data-v="${v}" aria-label="${l}">${I[i]}${v==="work"&&count?`<span class="cnt">${count}</span>`:""}<span class="tip">${l}${v==="_cal"?" · bientôt":""}</span></button>`).join("")}
+    <div class="grow"></div>
+    <button class="navbtn" type="button" aria-label="Notifications">${I.bell}</button>${av(S.role)}
+  </nav>
+  ${inProject?projnav():""}
+  <main class="content"><div class="wrap">${page()}</div></main></div>`;
+}
+function projnav(){
+  const item=(k,l,dot)=>{const n=myOpen(S.role,k==="marketing"?MARKETING:k==="overview"?["launch","plan","closure"]:[k]).length;
+    return `<button class="pitem ${S.wf===k?"on":""}" type="button" data-act="wf" data-v="${k}">${dot!==undefined?`<span class="dot ${dot}"></span>`:""}<span class="grow">${l}</span>${n?`<span class="mine" title="À vous">${n}</span>`:""}</button>`;};
+  return `<nav class="projnav" aria-label="Sections du projet">
+    <div class="switcher"><span>Néons</span><span class="t3">${I.updown}</span></div>
+    ${item("overview","Vue d'ensemble")}${item("framing","Cadrage")}
+    <div class="group">Workflows</div>
+    ${WORKFLOW_KEYS.map(k=>item(k,k==="marketing"?"Marketing":W[k].label,wfStatus(k)[0])).join("")}
+    <div class="group">Pilotage</div>
+    ${[["ptravail","Travail"],["pvalid","Validations"],["pplanning","Planning"],["pbudget","Budget"],["pteam","Équipe"],["pactivity","Activité"]].map(([k,l])=>`<button class="pitem ${S.wf===k?"on":""}" type="button" data-act="wf" data-v="${k}"><span class="grow">${l}</span>${k==="pvalid"&&validationsFor(S.role).length?`<span class="mine">${validationsFor(S.role).length}</span>`:""}</button>`).join("")}
+    <div class="group">Ressources</div>
+    ${[["pcalls","Calls"],["pfiles","Fichiers"]].map(([k,l])=>`<button class="pitem ${S.wf===k?"on":""}" type="button" data-act="wf" data-v="${k}"><span class="grow">${l}</span></button>`).join("")}
+  </nav>`;
+}
+function page(){
+  switch(S.view){
+    case "home": return home();
+    case "work": return work();
+    case "projects": return projects();
+    case "project": return project();
+    case "calls": return calls(false);
+    default: return simplePage(S.view);
+  }
+}
+
+/* Accueil: « Maintenant » across every project for the person. */
+function home(){
+  const me=P[S.role], mine=myOpen(S.role), others=othersOpen(S.role).slice(0,4);
+  return `<h1 class="h1">Bonjour ${esc(me.name.split(" ")[0])}</h1>
+  <div class="po-input"><span class="po">${I.spark} PO</span><input aria-label="Demander à PO" placeholder="Demander à PO : « Où en est le mix de Néons ? »"><button class="btn sm" type="button" aria-label="Envoyer">${I.send}</button></div>
+  ${S.flash?flash():""}
+  <section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill ${mine.length?"info":""}">${mine.length?"À vous":"Rien à faire pour vous"}</span><span>${mine.length} action${mine.length>1?"s":""} sur vos projets</span></div>
+    ${mine.length?`<div class="rowlist">${mine.map(s=>nowRow(s)).join("")}</div>`:`<p class="note">Tout ce qui vous attend arrivera ici, avec le pourquoi et le lien direct.</p>`}
+  </section>
+  ${others.length?`<section class="card"><h2>Ce que vous attendez</h2><div class="rowlist">${others.map(s=>waitRow(s)).join("")}</div></section>`:""}
+  <section class="card"><h2>Projets en cours</h2>${projectTable(true)}</section>`;
+}
+function nowRow(s){
+  const a=actorOf(s.id);
+  return `<div class="wr"><span class="pill ${s.validator===a.by?"act":"info"}">${s.validator===a.by?"À valider":"À faire"}</span><span class="grow"><b>${esc(a.label)}</b><br><span class="cap">Néons · ${esc(wfLabel(s))} › ${esc(s.title)} · ${esc(s.why)}</span></span><button class="btn sm" type="button" data-act="open" data-step="${s.id}">Ouvrir</button></div>`;
+}
+function waitRow(s){
+  const a=actorOf(s.id);
+  return `<div class="wr">${av(a.by,true)}<span class="grow">En attente de <b>${esc(P[a.by].name)}</b>${P[a.by].where==="lien"?" (sur son lien privé)":""} : ${esc(a.label.toLowerCase())}<br><span class="cap">${esc(wfLabel(s))} › ${esc(s.title)}</span></span><button class="btn ghost sm" type="button" data-act="open" data-step="${s.id}">Voir</button></div>`;
+}
+const wfLabel=s=>MARKETING.includes(s.wf)?"Marketing › "+W[s.wf].label:W[s.wf].label;
+
+function work(){
+  const mine=myOpen(S.role), toValidate=mine.filter(s=>s.validator===actorOf(s.id).by), todo=mine.filter(s=>s.validator!==actorOf(s.id).by);
+  const waiting=othersOpen(S.role).filter(s=>s.owner===S.role||(s.validator===S.role));
+  const block=(t,list,f)=>`<section class="card"><h2>${t} <span class="t3">${list.length}</span></h2>${list.length?`<div class="rowlist">${list.map(f).join("")}</div>`:`<p class="note">Rien pour l'instant.</p>`}</section>`;
+  return `<h1 class="h1">Travail</h1><p class="cap">Un bloc par ce que vous avez à faire, calculé depuis les parcours de vos projets.</p>
+  ${block("À valider",toValidate,nowRow)}${block("À faire",todo,nowRow)}${block("En attente des autres",waiting,waitRow)}`;
+}
+function projectTable(compact){
+  const cur=ALL_STEPS.filter(s=>actorOf(s.id))[0];
+  const rows=[
+    ["Néons","Musical · Single · Mona Lys","Lina Haddad",cur?wfLabel(cur)+" › "+cur.title:"Clôturé",cur?P[actorOf(cur.id).by].name+" · "+actorOf(cur.id).label.toLowerCase():"—",true],
+    ["Ressac","Musical · EP · Ilan","Lina Haddad","Master › Mixage","Karim Haddou · déposer le Mix V2",false],
+    ["PDS Mic #12","Contenu · Format PDS","Lina Haddad","Production › Tournage","Tom Mercier · diffuser la feuille de service",false]
+  ];
+  return `<div class="table">${compact?"":`<div class="tr h" style="grid-template-columns:1.3fr 1.2fr 1fr 1.4fr 1.6fr"><span>Projet</span><span>Type</span><span>Responsable</span><span>Où il en est</span><span>Attendu</span></div>`}
+   ${rows.map(r=>`<div class="tr ${r[5]?"link":""}" style="grid-template-columns:1.3fr 1.2fr 1fr 1.4fr 1.6fr" ${r[5]?'data-act="project" tabindex="0"':""}><span><b>${r[0]}</b></span><span class="cap">${r[1]}</span><span>${r[2]}</span><span>${r[3]}</span><span class="cap">${r[4]}</span></div>`).join("")}</div>`;
+}
+function projects(){
+  return `<div class="headrow"><h1 class="h1">Projets</h1>${S.role==="dg"?`<button class="btn" type="button" data-act="open" data-step="l1">Nouveau projet</button>`:""}</div>
+  <p class="cap">Chaque projet dit où il en est et qui est attendu.</p>${projectTable(false)}`;
+}
+
+/* A launched project: overview, workflows, steering. */
+function project(){
+  const k=S.wf;
+  if(k==="overview") return overview();
+  if(k==="framing") return journeyPage("Cadrage",["launch","framing"]);
+  if(k==="pclosure") return journeyPage("Clôture du projet",["closure"]);
+  if(k==="marketing"){const sub=S.sub||"strategy";return journeyPage("Marketing",[sub],marketingChevrons(sub));}
+  if(W[k]) return journeyPage(W[k].label,[k],k==="master"?chevronsOf(W.master.steps):k==="distribution"?chevronsOf(W.distribution.steps):k==="legal"?chevronsOf(W.legal.steps):"");
+  return steering(k);
+}
+function chevronsOf(steps){return `<div class="chevrons" aria-label="Étapes">${steps.map(s=>`<button class="chev ${S.sel===s.id?"on":""}" type="button" data-act="sel" data-step="${s.id}">${statusOf(s.id)==="done"?`<span class="ok">${I.check}</span>`:statusOf(s.id)==="blocked"?`<span class="lock">${I.lock}</span>`:""}${esc(s.title)}</button>`).join("")}</div>`;}
+function marketingChevrons(sub){return `<div class="chevrons" aria-label="Étapes du Marketing">${MARKETING.map(m=>{const st=W[m].steps.map(s=>statusOf(s.id));const done=st.every(x=>x==="done"),locked=st.every(x=>x==="blocked");return `<button class="chev ${sub===m?"on":""}" type="button" data-act="sub" data-v="${m}">${done?`<span class="ok">${I.check}</span>`:locked?`<span class="lock">${I.lock}</span>`:""}${esc(W[m].label)}</button>`;}).join("")}</div>`;}
+function overview(){
+  const cur=["launch","framing","plan"].flatMap(k=>W[k].steps).find(s=>statusOf(s.id)!=="done");
+  const planDone=isDone("p1");
+  return `<h1 class="h1">Vue d'ensemble</h1>
+  <div class="facts"><span>Musical · Single <b>Néons</b></span><span>Mona Lys</span><span>Sortie <b>05/12/2026</b></span><span>Budget <b>25 000 € HT</b></span><span>Responsable <b>Lina Haddad</b></span></div>
+  ${S.flash?flash():""}
+  ${nowCard(null)}
+  ${!planDone?`<section class="card"><div class="dhead"><h2>${cur?esc(cur.title):""}</h2><span class="pill info">Avant les workflows</span></div><p class="note">Le projet avance dans cet ordre : Lancement, Cadrage, Plan du projet. Les workflows démarrent quand le plan est lancé.</p>${journeyInline(["launch","framing","plan"])}</section>`:""}
+  ${planDone?`<section class="card"><h2>Workflows</h2><div class="wfgrid">${WORKFLOW_KEYS.map(wfCard).join("")}</div></section>
+  <section class="card"><h2>Dépendances entre workflows</h2><div class="rows">
+    <div class="row"><span>Master final <span class="t3">→</span> Dossier de distribution</span><span class="pill ${isDone("m5")?"ok":"warn"}">${isDone("m5")?"Levé":"Bloque"}</span></div>
+    <div class="row"><span>Sample sécurisé <span class="t3">→</span> Dossier de distribution</span><span class="pill ${isDone("j6")?"ok":"warn"}">${isDone("j6")?"Levé":"Bloque"}</span></div>
+    <div class="row"><span>Stratégie validée <span class="t3">→</span> Conception, Activations</span><span class="pill ${isDone("s3")?"ok":"warn"}">${isDone("s3")?"Levé":"Bloque"}</span></div>
+  </div></section>
+  <section class="card"><div class="dhead"><h2>Clôture du projet</h2><span class="pill ${isDone("x1")?"ok":""}">${isDone("x1")?"Clôturé":statusOf("x1")==="current"?"À faire":"Plus tard"}</span></div><p class="note">Bilan écrit par la cheffe de projet, puis validé par la direction. Elle n'exige pas que tout soit terminé.</p><div><button class="btn out sm" type="button" data-act="open" data-step="x1">Ouvrir la clôture</button></div></section>`:""}`;
+}
+function wfCard(k){
+  const steps=wfSteps(k), done=steps.filter(s=>isDone(s.id)).length, [cls,label]=wfStatus(k);
+  const open=steps.filter(s=>actorOf(s.id));
+  return `<button class="wf" type="button" data-act="wf" data-v="${k}"><span class="dhead"><b>${k==="marketing"?"Marketing":esc(W[k].label)}</b><span class="pill ${cls==="done"?"ok":cls==="wait"?"warn":cls==="run"?"info":""}">${label}</span></span>
+   <span class="bar"><i style="transform:scaleX(${done/steps.length})"></i></span><span class="cap">Étape ${Math.min(done+1,steps.length)} sur ${steps.length}</span>
+   ${open.slice(0,2).map(s=>`<span class="cap">${esc(s.title)} · <b>${esc(P[actorOf(s.id).by].name)}</b> : ${esc(actorOf(s.id).label.toLowerCase())}</span>`).join("")||`<span class="cap">${done===steps.length?"Tout est fait.":"Démarre avec le plan du projet."}</span>`}</button>`;
+}
+
+/* « Maintenant » scoped to some workflows (null: the whole project). */
+function nowCard(keys,shown){
+  // On a journey, the step on screen already carries its action: the card
+  // only points to what else is waiting for the person.
+  const here=shown&&actorOf(shown)&&actorOf(shown).by===S.role;
+  const mine=myOpen(S.role,keys).filter(s=>s.id!==shown), others=othersOpen(S.role,keys);
+  const me=P[S.role];
+  if(mine.length){const s=mine[0],a=actorOf(s.id);
+    return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill info">${here?"Aussi à vous":"À vous"}</span><span>${esc(me.name)} · ${esc(wfLabel(s))} › ${esc(s.title)}</span></div>
+    <h2>${esc(a.label)}</h2><p class="note">${esc(s.why)}</p>
+    <div class="btnrow"><button class="btn" type="button" data-act="open" data-step="${s.id}">Ouvrir l'étape</button>${mine.length>1?`<span class="cap">Et ${mine.length-1} autre${mine.length>2?"s":""} : ${mine.slice(1,3).map(x=>esc(actorOf(x.id).label.toLowerCase())).join(" · ")}</span>`:""}</div>
+    ${others.length?`<div class="rowlist">${others.slice(0,2).map(waitRow).join("")}</div>`:""}</section>`;}
+  if(here) return "";
+  const elsewhere=keys?myOpen(S.role):[];
+  if(elsewhere.length){const s=elsewhere[0],a=actorOf(s.id);
+    return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill info">À vous, ailleurs</span><span>Rien ici · ${esc(wfLabel(s))} › ${esc(s.title)}</span></div>
+    <h2>${esc(a.label)}</h2><p class="note">${esc(s.why)}</p><div class="btnrow"><button class="btn" type="button" data-act="open" data-step="${s.id}">Ouvrir l'étape</button></div></section>`;}
+  return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill">Rien à faire pour vous</span><span>${esc(me.name)}</span></div>
+    <h2>${others.length?"Ça avance sans vous pour l'instant":"Tout est fait ici"}</h2>${others.length?`<div class="rowlist">${others.slice(0,3).map(waitRow).join("")}</div>`:""}</section>`;
+}
+function flash(){return `<div class="flash" role="status"><span>${I.ok}</span><div class="grow"><b>${esc(S.flash.title)}</b>${S.flash.lines.map(l=>`<span>${l}</span>`).join("")}</div><button type="button" data-act="unflash" aria-label="Fermer">${I.x}</button></div>`;}
+
+function journeyPage(title,keys,chevrons){
+  const steps=keys.flatMap(k=>W[k].steps);
+  if(!S.sel||!steps.find(s=>s.id===S.sel)) S.sel=(steps.find(s=>actorOf(s.id)&&actorOf(s.id).by===S.role)||steps.find(s=>statusOf(s.id)==="current")||steps[0]).id;
+  const step=STEP(S.sel);
+  return `<h1 class="h1">${esc(title)}</h1>${chevrons||""}${S.flash?flash():""}${nowCard(keys,step.id)}
+  <div class="layout"><nav class="spine" aria-label="Parcours"><h2>Parcours</h2>${steps.map(spineItem).join("")}</nav>
+  <section class="card" aria-labelledby="dtitle">${detail(step)}</section></div>`;
+}
+function journeyInline(keys){return `<div class="layout"><nav class="spine" aria-label="Parcours"><h2>Parcours</h2>${keys.flatMap(k=>W[k].steps).map(spineItem).join("")}</nav><section class="card">${detail(STEP(S.sel&&keys.flatMap(k=>W[k].steps).find(s=>s.id===S.sel)?S.sel:(keys.flatMap(k=>W[k].steps).find(s=>statusOf(s.id)==="current")||W[keys[0]].steps[0]).id))}</section></div>`;}
+function spineItem(s){
+  const st=statusOf(s.id),a=actorOf(s.id),me=a&&a.by===S.role;
+  const sub=st==="done"?lastResult(s):a?`${P[a.by].name} · ${a.label.toLowerCase()}`:"Après : "+s.prereq.map(p=>STEP(p).title).join(", ");
+  return `<button class="step ${st} ${me?"me":""} ${s.id===S.sel?"sel":""}" type="button" data-act="sel" data-step="${s.id}"><span class="mark">${st==="done"?I.check:st==="blocked"?I.lock:""}</span><span><span class="t">${esc(s.title)}</span><span class="s ${me?"me":""}">${me?"À vous · ":""}${esc(sub)}</span></span></button>`;
+}
+const lastResult=s=>s.acts[s.acts.length-1].done;
+
+function detail(s){
+  const st=statusOf(s.id), a=actorOf(s.id);
+  const pre=s.prereq.map(STEP), next=ALL_STEPS.filter(x=>x.prereq.includes(s.id));
+  const owner=P[s.owner], val=s.validator?P[s.validator]:null;
+  const done=s.acts.slice(0,ph(s.id));
+  return `<div class="dhead"><h2 id="dtitle">${esc(s.title)}</h2><span class="pill ${st==="done"?"ok":st==="current"?"info":""}">${st==="done"?"Fait":st==="current"?"En cours":"Plus tard"}</span></div>
+  <p class="note">${esc(s.why)}</p>
+  <div class="meta"><div><div class="k">Responsable</div><div class="v">${esc(owner.name)}<br><span class="cap">${esc(owner.role)}${owner.where==="lien"?" · lien privé":""}</span></div></div>
+   <div><div class="k">Validation</div><div class="v">${val?`${esc(val.name)}<br><span class="cap">${esc(val.role)}</span>`:"Aucune"}</div></div>
+   <div><div class="k">Prérequis</div><div class="v">${pre.length?pre.map(p=>`<span class="${isDone(p.id)?"okc":"noc"}">${isDone(p.id)?"✓":"○"} ${esc(wfLabelShort(p))}</span>`).join("<br>"):"Aucun"}</div></div>
+   <div><div class="k">Ensuite</div><div class="v">${next.length?next.slice(0,3).map(n=>esc(wfLabelShort(n))).join("<br>"):"—"}</div></div></div>
+  ${st==="blocked"?`<div class="callout info">${I.lock}<span>Se débloque quand ${pre.filter(p=>!isDone(p.id)).map(p=>esc(wfLabelShort(p))).join(" et ")} ${pre.filter(p=>!isDone(p.id)).length>1?"sont faits":"est fait"}.</span></div>`:""}
+  ${S.notes[s.id]?`<div class="callout warn">${I.warn}<span>${esc(S.notes[s.id])}</span></div>`:""}
+  ${s.po?`<div class="callout info"><span class="po">${I.spark} PO</span><span>${esc(s.po)}</span></div>`:""}
+  ${s.intro?`<p class="note"><b>${esc(s.intro)}</b></p>`:""}
+  ${s.facts?factsBlock(s):""}
+  ${s.missing&&statusOf(s.id)!=="done"?`<div class="callout warn">${I.warn}<span>Pas encore connu, sera cadré après l'acceptation : ${s.missing.map(esc).join(", ")}.</span></div>`:""}
+  ${s.board?board():""}${s.blockers?blockers():""}
+  ${done.length?`<ul class="hist" aria-label="Déjà fait">${done.map(x=>`<li><span class="okc">${I.check}</span><span>${esc(x.done)} <span class="t3">· ${esc(P[x.by].name)}</span></span></li>`).join("")}</ul>`:""}
+  ${a?(a.by===S.role?actionBlock(s,a):`<div class="wr">${av(a.by,true)}<span class="grow">En attente de <b>${esc(P[a.by].name)}</b>${P[a.by].where==="lien"?` (${esc(P[a.by].place.toLowerCase())}, lien privé)`:""} : ${esc(a.label.toLowerCase())}</span></div>`):""}
+  ${st==="done"?`<div class="callout ok">${I.ok}<span>${esc(lastResult(s))}.</span></div>`:""}`;
+}
+/* Values that are a file or a person are chosen, never retyped: the
+   title's versions (or an import), the people of the Réseau or the team. */
+const CHOICE={
+  src:{legend:"Versions audio du titre « Néons »",hint:"La dernière version détectée est proposée. L'ingénieur du mix recevra celle que vous choisissez ; un master final ne peut pas être une source.",submit:"Utiliser cette version",listen:true,add:["Importer une version","Néons_maquette_v4.wav","v4 · importée à l'instant"],
+    options:[["Néons_maquette_v3.wav","v3 · maquette · 02/10 · dernière version détectée"],["Néons_maquette_v2.wav","v2 · maquette · 18/09"],["Néons_mise_a_plat_v1.wav","v1 · mise à plat · 04/09"]]},
+  stems:{legend:"Pistes séparées du titre",hint:"Ce que l'ingénieur du mix reçoit pour travailler.",submit:"Utiliser ces pistes",add:["Importer des pistes","14 pistes · Stems_Neons_v4.zip","importées à l'instant"],
+    options:[["12 pistes · Stems_Neons_v3.zip","Session Ableton · 01/10"],["10 pistes · Stems_Neons_v2.zip","Session Ableton · 17/09"]]},
+  engineer:{legend:"Ingénieurs du Réseau",hint:"Les personnes déjà liées au projet d'abord.",submit:"Choisir",add:["Ajouter au Réseau","Nouvel ingénieur","créé dans le Réseau"],
+    options:[["Karim Haddou, mix et mastering","Désigné au Cadrage · Réseau"],["Léa Fontaine, mixage","Réseau · 3 projets"],["Studio Arpège, mastering","Réseau · 1 projet"]]},
+  versions:{legend:"Qui valide les versions",hint:"Un membre de l'équipe.",submit:"Choisir",
+    options:[["Nadia Benali","Directrice créative · désignée au Cadrage"],["Claire Morel","Directrice générale"]]}
+};
+/* Dates are shown in full, with their weekday, and edited in a date field. */
+const DAY=["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."];
+const frDate=iso=>{const [y,m,d]=iso.split("-").map(Number);return `${DAY[new Date(y,m-1,d).getDay()]} ${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`;};
+const isoOf=fr=>{const m=/(\d{2})\/(\d{2})\/(\d{4})/.exec(fr);return m?`${m[3]}-${m[2]}-${m[1]}`:"";};
+const factValue=(sid,i)=>{const e=S.edits[sid+":"+i];return e?e.value:STEP(sid).facts[i][1];};
+function choiceRow(key,k,cur,c){
+  const opts=c.options.concat(S.imported[key]&&c.add?[[c.add[1],c.add[2]]]:[]), sel=S.pickSel[key]||cur;
+  return `<div class="row" style="grid-template-columns:minmax(0,1fr)"><fieldset class="pick"><legend><b>${esc(k)}</b> · ${esc(c.legend)}</legend>${c.hint?`<span class="src">${esc(c.hint)}</span>`:""}
+  <div class="opts">${opts.map(([val,d])=>`<label class="opt"><input type="radio" name="pick" value="${esc(val)}" ${val===sel?"checked":""}><span class="grow"><b>${esc(val)}</b><br><span class="src">${esc(d)}</span></span>${c.listen?`<button class="btn ghost sm" type="button" data-act="listen" data-key="${key}" data-val="${esc(val)}" aria-pressed="${S.playing===val}">${S.playing===val?"Pause":"Écouter"}</button>`:""}</label>`).join("")}</div>
+  ${c.add&&!S.imported[key]?`<div><button class="btn out sm" type="button" data-act="pickadd" data-key="${key}">${esc(c.add[0])}</button></div>`:""}
+  <div class="btnrow"><button class="btn sm" type="button" data-act="picksave" data-key="${key}" data-label="${esc(k)}">${esc(c.submit)}</button><button class="btn ghost sm" type="button" data-act="editcancel">Annuler</button></div></fieldset></div>`;
+}
+/* Prefilled values: confirmed as they are, or corrected by the person in
+   charge — a corrected value says who changed it instead of its source. */
+function factsBlock(s){
+  const st=statusOf(s.id), canEdit=!s.readonly&&st==="current"&&(S.role===s.owner||(actorOf(s.id)&&actorOf(s.id).by===S.role));
+  return `<div class="rows">${s.facts.map(([k,v,src,ch],i)=>{
+    const key=s.id+":"+i, edited=S.edits[key], c=ch&&CHOICE[ch];
+    if(S.editing===key&&c) return choiceRow(key,k,edited?edited.value:v,c);
+    if(S.editing===key) return `<div class="row" style="grid-template-columns:minmax(0,1fr)"><div class="field"><label for="editval"><b>${esc(k)}</b></label>${ch==="date"?`<input class="in" id="editval" type="date" value="${isoOf(edited?edited.value:v)}" aria-describedby="editerr"><span class="err" id="editerr" hidden></span>`:`<input class="in" id="editval" value="${esc(edited?edited.value:v)}">`}<span class="src">Proposé : ${esc(v)} · ${esc(src)}</span><div class="btnrow"><button class="btn sm" type="button" data-act="editsave" data-key="${key}" data-label="${esc(k)}">Enregistrer</button><button class="btn ghost sm" type="button" data-act="editcancel">Annuler</button></div></div></div>`;
+    return `<div class="row"><span><b>${esc(k)}</b> · ${esc(edited?edited.value:v)}</span><span style="display:flex;align-items:center;gap:10px;justify-content:flex-end;flex-wrap:wrap"><span class="src">${edited?`${c?"Choisi":"Modifié"} par ${esc(edited.by)}`:esc(src)}</span>${canEdit?`<button class="btn ghost sm" type="button" data-act="edit" data-key="${key}" aria-label="${c?"Changer":"Modifier"} ${esc(k)}">${c?"Changer":"Modifier"}</button>`:""}</span></div>`;
+  }).join("")}</div>`;
+}
+const wfLabelShort=s=>(s.wf==="launch"||s.wf==="framing"||s.wf==="plan"||s.wf===S.wf||s.wf===S.sub?"":W[s.wf].label+" › ")+s.title;
+const altsOf=a=>a.alt?(Array.isArray(a.alt)?a.alt:[a.alt]):[];
+function actionBlock(s,a){
+  const alts=altsOf(a), label=s.reopenLabel&&S.notes[s.id]?s.reopenLabel:a.label;
+  return `<div class="btnrow"><button class="btn" type="button" data-act="do" data-step="${s.id}">${esc(label)}</button>${alts.map((x,i)=>`<button class="btn out" type="button" data-act="alt" data-step="${s.id}" data-i="${i}">${esc(x.label)}</button>`).join("")}</div>
+  ${alts.length?`<div class="field"><label for="altnote">Motif, si vous choisissez ${alts.map(x=>`« ${esc(x.label)} »`).join(" ou ")}</label><textarea class="in" id="altnote" placeholder="${esc(alts[0].note)}"></textarea><span class="err" id="alterr" hidden>Dites pourquoi : la personne concernée le lira.</span></div>`:""}`;
+}
+function board(){
+  const cols=[["Focus",["Master","Juridique (sample)","Stratégie"]],["Ensuite",["Conception","Distribution"]],["Pendant ce temps",["Juridique (contrats)"]],["À anticiper",["Activations","Suivi & bilan"]]];
+  return `<div class="cols4">${cols.map(([t,items])=>`<div class="col"><h3>${t}</h3>${items.map(i=>`<div class="chip">${esc(i)}</div>`).join("")}</div>`).join("")}</div>`;
+}
+function blockers(){
+  const b=[["Master final",isDone("m5"),"Master"],["Sample sécurisé",isDone("j6"),"Juridique"],["Pochette validée",isDone("d3"),"Conception"],["ISRC",true,"Catalogue"],["Date de sortie",true,"Cadrage"]];
+  return `<div class="rows">${b.map(([l,ok,src])=>`<div class="row"><span><span class="${ok?"okc":""}">${ok?"✓":"○"}</span> ${esc(l)}</span>${ok?`<span class="src">${esc(src)}</span>`:`<button class="btn out sm" type="button" data-act="wf" data-v="${src==="Conception"?"marketing":src==="Master"?"master":"legal"}">Corriger dans ${esc(src)}</button>`}</div>`).join("")}</div>`;
+}
+
+/* Steering of a project */
+function validationsFor(role){return ALL_STEPS.filter(s=>actorOf(s.id)&&actorOf(s.id).by===role&&s.validator===role);}
+function steering(k){
+  if(k==="ptravail"){
+    const people=["cp","dg","da","charge","mix","soc","collab"];
+    return `<h1 class="h1">Travail du projet</h1><p class="cap">Une carte par personne : ce qu'elle a à faire maintenant, tiré des parcours.</p>
+    <div class="wfgrid">${people.map(p=>{const l=myOpen(p);return `<section class="card"><div class="dhead"><h3>${esc(P[p].name)}</h3><span class="t3 cap">${esc(P[p].role.split(",")[0])}</span></div>${l.length?`<div class="rowlist">${l.map(s=>`<div class="wr"><span class="grow">${esc(actorOf(s.id).label)}<br><span class="cap">${esc(wfLabel(s))}</span></span><button class="btn ghost sm" type="button" data-act="open" data-step="${s.id}">Voir</button></div>`).join("")}</div>`:`<p class="note">Rien en attente.</p>`}</section>`;}).join("")}</div>
+    <section class="card"><h2>À décider</h2><p class="note">Les points ouverts ne sont jamais assignés ni datés : une décision non prise n'est pas une tâche.</p><div class="rows"><div class="row"><span>Faut-il une version acoustique pour la radio ?</span><span class="src">Call stratégique</span></div></div></section>`;
+  }
+  if(k==="pvalid"){
+    const pending=ALL_STEPS.filter(s=>actorOf(s.id)&&s.validator&&actorOf(s.id).by===s.validator);
+    const doneV=S.log.filter(l=>l.validation);
+    return `<h1 class="h1">Validations</h1><section class="card"><h2>En attente</h2>${pending.length?`<div class="rowlist">${pending.map(s=>`<div class="wr"><span class="pill act">${esc(P[s.validator].name)}</span><span class="grow">${esc(actorOf(s.id).label)}<br><span class="cap">${esc(wfLabel(s))}</span></span><button class="btn sm ${s.validator===S.role?"":"out"}" type="button" data-act="open" data-step="${s.id}">${s.validator===S.role?"Décider":"Voir"}</button></div>`).join("")}</div>`:`<p class="note">Aucune validation en attente.</p>`}</section>
+    <section class="card"><h2>Décidées</h2>${doneV.length?`<ul class="hist">${doneV.map(l=>`<li><span class="okc">${I.check}</span><span>${esc(l.text)} <span class="t3">· ${esc(l.who)}, ${esc(l.at)}</span></span></li>`).join("")}</ul>`:`<p class="note">Rien pour l'instant.</p>`}</section>`;
+  }
+  if(k==="pactivity") return `<h1 class="h1">Activité</h1><section class="card">${S.log.length?`<ul class="hist">${[...S.log].reverse().map(l=>`<li><span class="okc">${I.check}</span><span>${esc(l.text)} <span class="t3">· ${esc(l.who)}, ${esc(l.at)}</span></span></li>`).join("")}</ul>`:`<p class="note">Ce que chacun fait sur le projet s'inscrit ici, jour par jour.</p>`}</section>`;
+  if(k==="pplanning"){const d=[["16/10","Échange de cadrage","Cadrage"],["15/11","Mix V1","Master"],["21/11","Master final","Master"],["23–24/11","Tournage du clip","Production"],["28/11","Livraison du clip","Production"],["05/12","Sortie","Distribution"],["12/12","Sortie du clip","Activations"]];
+    return `<h1 class="h1">Planning</h1><p class="cap">En lecture : chaque date se change à sa source.</p><div class="table">${d.map(([a,b,c])=>`<div class="tr" style="grid-template-columns:120px 1fr 160px"><span class="num"><b>${a}</b></span><span>${b}</span><span class="cap">${c}</span></div>`).join("")}</div>`;}
+  if(k==="pbudget"){if(!["dg","cp"].includes(S.role)) return `<h1 class="h1">Budget</h1><div class="callout info">${I.lock}<span>Le budget n'est lu que par la cheffe de projet et la direction.</span></div>`;
+    const l=[["Clip (Studio Ressac)","16 400 €",isDone("r2")?"Engagé":"Proposé"],["Mix et mastering","2 200 €",isDone("m2")?"Engagé":"Estimé"],["Influence","4 000 €","Estimé"],["Licence du sample","800 €",isDone("j6")?"Engagé":"Estimé"]];
+    return `<h1 class="h1">Budget</h1><div class="facts"><span>Enveloppe <b>25 000 € HT</b></span><span>Prévisionnel <b>23 400 €</b></span></div><div class="table">${l.map(r=>`<div class="tr" style="grid-template-columns:1fr 140px 140px"><span>${r[0]}</span><span class="num">${r[1]}</span><span><span class="pill ${r[2]==="Engagé"?"ok":""}">${r[2]}</span></span></div>`).join("")}</div>`;}
+  if(k==="pteam") return `<h1 class="h1">Équipe</h1><div class="table">${ROLE_ORDER.map(p=>`<div class="tr" style="grid-template-columns:40px 1fr 1fr 160px">${av(p,true)}<span><b>${esc(P[p].name)}</b></span><span class="cap">${esc(P[p].role)}</span><span><span class="pill">${P[p].where==="lien"?"Lien privé "+P[p].link:"Compte PDS"}</span></span></div>`).join("")}</div><p class="note">Les personnes extérieures n'ont pas de compte : elles agissent sur leur part par un lien privé.</p>`;
+  if(k==="pcalls") return calls(true);
+  return `<h1 class="h1">Fichiers</h1><div class="table">${[["Brief de cadrage V1.pdf","Brief"],["Néons_maquette_v3.wav","Audio"],["Devis_Ressac_Neons.pdf","Contrats et devis"],["Pochette_v2.png","Visuels"]].map(r=>`<div class="tr" style="grid-template-columns:1fr 200px"><span>${r[0]}</span><span class="cap">${r[1]}</span></div>`).join("")}</div>`;
+}
+function calls(inProject){
+  const list=[["Échange de cadrage","jeu. 16/10, 11 h",ph("c1")>=2?"Compte rendu prêt":ph("c1")===1?"À venir":"À préparer","c1"],["Échange stratégique","lun. 20/10, 14 h",ph("s1")>=2?"Compte rendu prêt":ph("s1")===1?"À venir":"À préparer","s1"],["Échange créatif","mer. 22/10, 10 h",isDone("d1")?"Compte rendu prêt":"À préparer","d1"]];
+  return `<h1 class="h1">Calls</h1><p class="cap">Chaque call est préparé depuis ce qui manque à son module, enregistré dans l'app, et son compte rendu revient au module.</p>
+  <div class="table">${list.map(r=>`<div class="tr link" style="grid-template-columns:1fr 180px 180px" data-act="open" data-step="${r[3]}" tabindex="0"><span><b>${r[0]}</b> <span class="cap">· Néons</span></span><span class="cap">${r[1]}</span><span><span class="pill ${r[2]==="Compte rendu prêt"?"ok":r[2]==="À venir"?"info":""}">${r[2]}</span></span></div>`).join("")}</div>`;
+}
+function simplePage(v){
+  const data={
+    artists:["Artistes",[["Mona Lys","Signée · 1 projet en cours"],["Ilan","Signé · EP Ressac"]]],
+    catalog:["Catalogue",[["Néons",isDone("m5")?"Master final":isDone("m3")?"Mix":"Maquette"],["Ressac","Mix"]]],
+    network:["Réseau",[["Karim Haddou","Ingé son · prestataire"],["Studio Ressac","Société de production"],["Sami Kader","Compositeur"]]],
+    contracts:["Contrats",[["Co-édition · Sami Kader",ph("j5")>=4?"Signé":ph("j5")>=3?"Validé":ph("j5")>=2?"En relecture":"À générer"],["Licence du sample",isDone("j6")?"Signé":"À négocier"]]],
+    files:["Fichiers",[["Brief de cadrage V1.pdf","Néons"],["Pochette_v2.png","Néons"]]],
+    team:["Équipe",[["Lina Haddad","Cheffe de projet · quota PO 200 / jour"],["Nadia Benali","Directrice créative"],["Tom Mercier","Chargé de production"]]]
+  }[v]||["Page",[]];
+  return `<h1 class="h1">${data[0]}</h1><div class="table">${data[1].map(r=>`<div class="tr" style="grid-template-columns:1fr 1fr"><span><b>${esc(r[0])}</b></span><span class="cap">${esc(r[1])}</span></div>`).join("")}</div><p class="note">Dans ce proto, les parcours vivent dans le projet « Néons ».</p>`;
+}
+
+/* Private link page: only the person's part. */
+function portal(){
+  const me=P[S.role], mine=myOpen(S.role), done=ALL_STEPS.filter(s=>s.acts.slice(0,ph(s.id)).some(a=>a.by===S.role));
+  return `<div class="portal"><header class="pbar"><span style="display:flex;align-items:center;gap:10px"><span class="brand" style="margin:0">PDS</span><b>${esc(me.place)} · ${esc(me.name)}</b></span><span class="lockline">${I.lock} Lien privé ${me.link}… · sans compte</span></header>
+  <div class="pwrap"><div><p class="cap">Néons · Mona Lys · ${esc(me.role)}</p><h1 class="h1">${mine.length?"Ce que PDS attend de vous":"Rien à faire pour l'instant"}</h1></div>
+  <section class="card"><h2>Votre contact chez PDS</h2><div class="eyebrow">${av("cp",true)}<span><b>Lina Haddad</b> · Cheffe de projet</span></div></section>
+  ${mine.map(s=>`<section class="card"><div class="dhead"><h2>${esc(actorOf(s.id).label)}</h2><span class="pill info">À vous</span></div><p class="note">${esc(s.why)}</p>${S.notes[s.id]?`<div class="callout warn">${I.warn}<span>${esc(S.notes[s.id])}</span></div>`:""}${actionBlock(s,actorOf(s.id))}</section>`).join("")}
+  ${!mine.length?`<section class="card"><p class="note">PDS vous préviendra ici dès qu'une étape vous attend.</p></section>`:""}
+  ${done.length?`<section class="card"><h2>Déjà fait</h2><ul class="hist">${done.flatMap(s=>s.acts.slice(0,ph(s.id)).filter(a=>a.by===S.role).map(a=>`<li><span class="okc">${I.check}</span><span>${esc(a.done)}</span></li>`)).join("")}</ul></section>`:""}
+  </div></div>`;
+}
+
+/* Actions ----------------------------------------------------------------- */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.hidden=true;},3600);}
+function openStep(id){
+  const s=STEP(id);S.view="project";S.sel=id;
+  if(MARKETING.includes(s.wf)){S.wf="marketing";S.sub=s.wf;}
+  else if(["launch","framing"].includes(s.wf)) S.wf="framing";
+  else if(s.wf==="plan") S.wf="overview";
+  else if(s.wf==="closure") S.wf="pclosure";
+  else S.wf=s.wf;
+}
+function advance(id){
+  const s=STEP(id),a=actorOf(id);if(!a) return;
+  S.ph[id]=ph(id)+1;delete S.notes[id];
+  S.log.push({text:a.done,who:P[a.by].name,at:stamp(),validation:s.validator===a.by});
+  const unlocked=ALL_STEPS.filter(x=>x.prereq.includes(id)&&statusOf(x.id)==="current"&&ph(x.id)===0);
+  const next=isDone(id)?unlocked:[s];
+  S.flash={title:a.done,lines:next.slice(0,3).filter(x=>actorOf(x.id)).map(x=>`Ensuite : <b>${esc(P[actorOf(x.id).by].name)}</b> · ${esc(actorOf(x.id).label.toLowerCase())} <span class="t3">(${esc(wfLabel(x))})</span>`)};
+  toast(a.done+".");
+}
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-act]");if(!el) return;
+  const act=el.dataset.act;
+  switch(act){
+    case "nav": if(el.dataset.v==="_cal") return; S.view=el.dataset.v; S.flash=null; break;
+    case "project": S.view="project"; S.wf="overview"; break;
+    case "wf": S.view="project"; S.wf=el.dataset.v; S.sel=null; S.flash=null; break;
+    case "sub": S.sub=el.dataset.v; S.sel=null; break;
+    case "sel": S.sel=el.dataset.step; break;
+    case "open": openStep(el.dataset.step); S.flash=null; break;
+    case "unflash": S.flash=null; break;
+    case "do": S.editing=null; advance(el.dataset.step); break;
+    case "edit": S.editing=el.dataset.key; render(); {const n=document.getElementById("editval"); if(n){n.focus(); n.select();}} return;
+    case "editcancel": S.editing=null; S.pickSel={}; S.playing=null; break;
+    case "listen": {const r=document.querySelector('input[name="pick"]:checked'); if(r) S.pickSel[el.dataset.key]=r.value; S.playing=S.playing===el.dataset.val?null:el.dataset.val; break;}
+    case "pickadd": {const c=CHOICE[STEP(el.dataset.key.split(":")[0]).facts[+el.dataset.key.split(":")[1]][3]]; S.imported[el.dataset.key]=true; S.pickSel[el.dataset.key]=c.add[1]; toast(c.add[0]+" : "+c.add[1]+"."); break;}
+    case "picksave": {
+      const r=document.querySelector('input[name="pick"]:checked'), key=el.dataset.key, [sid,i]=key.split(":"), f=STEP(sid).facts[+i], cur=S.edits[key]?S.edits[key].value:f[1];
+      S.editing=null; S.pickSel={}; S.playing=null;
+      if(r&&r.value!==cur){S.edits[key]={value:r.value,by:P[S.role].name};S.log.push({text:`${el.dataset.label} : ${r.value}`,who:P[S.role].name,at:stamp(),validation:false});toast(`${el.dataset.label} : ${r.value}.`);}
+      break;
+    }
+    case "editsave": {
+      const n=document.getElementById("editval"); let value=n?n.value.trim():"";
+      if(!value){if(n){n.setAttribute("aria-invalid","true");n.focus();}return;}
+      if(n.type==="date"){
+        const [sid,i]=el.dataset.key.split(":"), dates=STEP(sid).facts.map((f,j)=>f[3]==="date"?(j===+i?value:isoOf(factValue(sid,j))):null).filter(Boolean);
+        if(dates.some((d,j)=>j&&d<dates[j-1])){const er=document.getElementById("editerr");er.textContent="Les dates doivent se suivre : Mix V1, Mix final, Mastering, puis Master final.";er.hidden=false;n.setAttribute("aria-invalid","true");n.focus();return;}
+        value=frDate(value);
+      }
+      S.edits[el.dataset.key]={value,by:P[S.role].name};S.editing=null;
+      S.log.push({text:`${el.dataset.label} modifié : ${value}`,who:P[S.role].name,at:stamp(),validation:false});
+      toast(`${el.dataset.label} modifié.`);break;
+    }
+    case "alt": {
+      const id=el.dataset.step,a=actorOf(id),note=(document.getElementById("altnote")||{}).value||"";
+      if(!note.trim()){const er=document.getElementById("alterr");if(er) er.hidden=false;const n=document.getElementById("altnote");if(n){n.setAttribute("aria-invalid","true");n.focus();}return;}
+      const alt=altsOf(a)[+(el.dataset.i||0)], back=alt.reopen||id;
+      if(alt.reopen){S.ph[alt.reopen]=Math.max(0,STEP(alt.reopen).acts.length-1);S.notes[alt.reopen]=`${P[a.by].name} (${alt.label.toLowerCase()}) : « ${note.trim()} »`;}
+      else{S.ph[id]=Math.max(0,ph(id)-1);S.notes[id]=`${P[a.by].name} : « ${note.trim()} »`;}
+      S.log.push({text:`${alt.label} : ${note.trim()}`,who:P[a.by].name,at:stamp(),validation:true});
+      S.flash={title:alt.label,lines:[`Retour à <b>${esc(P[STEP(back).acts[ph(back)].by].name)}</b> avec le motif.`]};toast(alt.label+".");break;
+    }
+    default: return;
+  }
+  render();
+  if(["do","open","alt","wf","nav","project"].includes(act)) window.scrollTo({top:0,behavior:"auto"});
+});
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ")&&e.target.matches(".tr.link")){e.preventDefault();e.target.click();}
+  if(e.target.id==="editval"){
+    if(e.key==="Enter"){e.preventDefault();document.querySelector('[data-act="editsave"]').click();}
+    if(e.key==="Escape"){e.preventDefault();document.querySelector('[data-act="editcancel"]').click();}
+  }
+});
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.flash=null;S.sel=null;render();window.scrollTo({top:0});});
+document.getElementById("resetBtn").addEventListener("click",()=>{S=fresh();document.getElementById("scenSel").value="start";render();window.scrollTo({top:0});});
+document.getElementById("scenSel").addEventListener("change",e=>{S=scenario(e.target.value);render();window.scrollTo({top:0});});
+function scenario(k){
+  const s=fresh();
+  const doneAll=ids=>ids.forEach(id=>{s.ph[id]=STEP(id).acts.length;});
+  if(k==="framing"){doneAll(["l1","l2","c1","c2"]);s.ph.c3=1;s.role="dg";s.view="home";}
+  if(k==="running"){doneAll(["l1","l2","c1","c2","c3","p1","m1","m2","j1","j2","j3","j4","s1","s2","t1"]);s.ph.m3=1;s.ph.j5=1;s.ph.s3=1;s.role="cp";s.view="project";s.wf="overview";}
+  if(k==="late"){doneAll(["l1","l2","c1","c2","c3","p1","m1","m2","m3","j1","j2","j3","j4","j5","s1","s2","s3","s4","d1","d2","d3","d4","r1","r2","r3","a2","t1"]);s.ph.m4=1;s.ph.j6=1;s.ph.r4=1;s.ph.a1=1;s.role="cp";s.view="home";}
+  ["c3","p1","m1","m2","m3","j5","s3","d3","r2"].forEach(id=>{if(s.ph[id]) s.log.push({text:STEP(id).acts[Math.min(s.ph[id],STEP(id).acts.length)-1].done,who:P[STEP(id).acts[Math.min(s.ph[id],STEP(id).acts.length)-1].by].name,at:"14/10",validation:!!STEP(id).validator});});
+  return s;
+}
+render();
+})();
+</script>
