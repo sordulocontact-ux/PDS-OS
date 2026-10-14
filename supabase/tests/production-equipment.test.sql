@@ -2,7 +2,7 @@
 -- supabase/migrations/20261014000801_production_equipment_tracking.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(4);
+select plan(5);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -84,6 +84,11 @@ select throws_ok($$ update public.production_equipment set return_issue = 'missi
 select lives_ok($$ update public.production_equipment set status = 'incident', incident_note = 'Une batterie manque', return_issue = 'missing'
                    where id = pg_temp.id_of('fx6') $$,
                 'a return incident says the item is missing or damaged (PROD-022)');
+
+insert into public.production_equipment (organization_id, project_id, sheet_id, category, label, status, period_end)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'light', 'Mandarine', 'booked', date '2026-11-21');
+select is((select return_due from public.production_equipment where label = 'Mandarine'),
+          date '2026-11-21', 'the return due date is taken from the rental period');
 
 select * from finish();
 rollback;

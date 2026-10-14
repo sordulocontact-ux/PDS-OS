@@ -72,3 +72,21 @@ begin
   end;
 end;
 $$;
+
+-- A line booked or beyond takes its return due date from the end of its
+-- rental period when nobody set one (PROD-022: « repris automatiquement »).
+create function public.production_equipment_return_due()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.return_due is null and new.period_end is not null and new.source <> 'owned'
+     and new.status in ('booked', 'picked_up', 'on_site', 'to_return') then
+    new.return_due := new.period_end;
+  end if;
+  return new;
+end;
+$$;
+create trigger c_return_due before insert or update on public.production_equipment
+  for each row execute function public.production_equipment_return_due();
