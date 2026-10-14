@@ -35,6 +35,13 @@ export function postFailure(error: {
     ["version_not_found", e.notFound],
     ["person_not_member", e.notMember],
     ["contact_not_found", e.contactNotFound],
+    ["recipient_required", e.recipientRequired],
+    ["due_required", e.dueRequired],
+    ["due_in_past", e.dueInPast],
+    ["nothing_to_correct", e.nothingToCorrect],
+    ["comment_not_pending", e.commentNotPending],
+    ["request_treated", e.requestTreated],
+    ["request_not_found", e.notFound],
   ];
   const hit = known.find(([key]) => message.includes(key));
   return hit ? { ok: false, error: hit[1] } : prepFailure(error);

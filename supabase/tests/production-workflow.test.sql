@@ -160,10 +160,11 @@ select throws_ok($$ update public.production_version_comments set status = 'reso
                  '23514', null, 'a correction declared fixed is verified before it is resolved');
 update public.production_version_comments set status = 'to_verify' where id = pg_temp.id_of('comment');
 update public.production_version_comments set status = 'resolved' where id = pg_temp.id_of('comment');
-select throws_ok($$ select public.decide_production_version(pg_temp.id_of('v'), 'approve', null) $$,
-                 'P0001', 'invalid_transition', 'no open feedback is not a validation: the version must be submitted to final validation');
+-- One cycle per version (PROD-033): the decision is taken on the version
+-- under review; a second submission « final » is refused.
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select public.submit_production_version(pg_temp.id_of('v'), 'final');
+select throws_ok($$ select public.submit_production_version(pg_temp.id_of('v'), 'final') $$,
+                 'P0001', 'invalid_transition', 'a version under review is not submitted a second time');
 select pg_temp.act_as(pg_temp.id_of('creative'));
 select throws_ok($$ select public.decide_production_version(pg_temp.id_of('v'), 'refuse', null) $$,
                  'P0001', 'reason_required', 'a refusal says why');

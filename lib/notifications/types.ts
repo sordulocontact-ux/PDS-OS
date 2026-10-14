@@ -51,6 +51,10 @@ export const NOTIFICATION_KINDS = [
   "master_mastering_delivery_received",
   // A fiche de renseignements came back through its link (JUR-11).
   "legal_form_received",
+  // Production: a version waits for its decision; corrections are asked to
+  // a member (PROD-028, PROD-031).
+  "production_version_submitted",
+  "production_corrections_sent",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -98,6 +102,12 @@ export function notificationHref(
   if (kind === "call_report_shared" && subjectId)
     return routes.callReport(subjectId);
   if (!projectId) return routes.app;
+  // A production version: the deliverable's Postproduction (the subject is
+  // the deliverable).
+  if (kind.startsWith("production_") && subjectId)
+    return `${routes.projectProductionStep(projectId, subjectId, "post")}#${
+      kind === "production_version_submitted" ? "decision" : "versions"
+    }`;
   if (kind === "call_invited" && subjectId)
     return routes.projectCall(projectId, subjectId);
   if (kind === "brief_approved") return routes.projectFramingBrief(projectId);

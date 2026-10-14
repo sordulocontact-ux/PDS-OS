@@ -5,8 +5,12 @@ import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { versionName } from "@/lib/production/post/labels";
-import { isPendingCorrection } from "@/lib/production/post/rules";
-import type { PostVersion } from "@/lib/production/post/types";
+import {
+  isPendingCorrection,
+  isUnderReview,
+} from "@/lib/production/post/rules";
+import type { PostPeople, PostVersion } from "@/lib/production/post/types";
+import type { Holder } from "@/lib/production/sheet";
 import { productionVersionTone } from "@/lib/ui/state-tones";
 
 import { DecisionForm } from "./decision-form";
@@ -15,25 +19,32 @@ const t = fr.productionPost.decision;
 const linkClass = "w-fit text-sm underline underline-offset-4";
 
 /**
- * « Validation finale de la version » (parcours 18): each version submitted
- * to the final validation, with what the validator checks (the version and
- * its feedback above, the Fiche Livrable), then the decision. No open
- * feedback is never a validation: only this decision validates.
+ * « Décision sur la version » (PROD-033): every version under review, who
+ * decides (named), its open feedback, then its one decision — valider,
+ * demander des corrections, refuser. Commenting is never deciding.
  */
 export function DecisionSection({
   projectId,
   deliverableId,
   versions,
   canReview,
+  reviewers,
+  people,
+  defaults,
 }: {
   projectId: string;
   deliverableId: string;
   versions: PostVersion[];
   canReview: boolean;
+  reviewers: string[];
+  people: PostPeople;
+  defaults: { recipient: Holder | null; dueOn: string | null };
 }) {
-  const waiting = versions.filter((v) => v.status === "final_review");
+  const waiting = versions.filter((v) => isUnderReview(v.status));
   const approved = versions.find((v) => v.status === "approved") ?? null;
   const ficheHref = `${routes.projectProductionSheet(projectId, deliverableId)}#heritage`;
+  const deciders =
+    reviewers.length > 0 ? t.deciders(reviewers.join(", ")) : t.decidersNone;
 
   return (
     <PageSection id="decision" title={t.title} description={t.description} card>
@@ -53,6 +64,7 @@ export function DecisionSection({
           <div key={v.id} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <p className="font-semibold">{t.waiting(versionName(v))}</p>
+              <p className="text-sm">{deciders}</p>
               <p className="text-sm text-muted-foreground">
                 {t.openComments(open)}
               </p>
@@ -66,7 +78,15 @@ export function DecisionSection({
               </div>
             </div>
             {canReview ? (
-              <DecisionForm projectId={projectId} versionId={v.id} />
+              <DecisionForm
+                projectId={projectId}
+                version={v}
+                people={people}
+                defaults={{
+                  recipient: v.author ?? defaults.recipient,
+                  dueOn: defaults.dueOn,
+                }}
+              />
             ) : (
               <p className="text-sm text-muted-foreground">{t.readOnly}</p>
             )}

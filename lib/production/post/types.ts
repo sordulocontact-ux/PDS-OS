@@ -47,6 +47,25 @@ export type PostComment = {
   authorName: string;
   createdAt: string;
   file: PostFile | null;
+  // The correction request it was sent with, if any (PROD-030).
+  requestId: string | null;
+};
+
+export type CorrectionStatus = "draft" | "sent" | "viewed" | "treated";
+
+/** « Demander des corrections », addressed to someone (PROD-031). */
+export type CorrectionRequest = {
+  id: string;
+  recipient: Holder;
+  dueOn: string;
+  message: string | null;
+  status: CorrectionStatus;
+  sentBy: string | null;
+  sentAt: string | null;
+  reminders: number;
+  viewedAt: string | null;
+  treatedAt: string | null;
+  treatedVersionNumber: number | null;
 };
 
 export type PostVersion = {
@@ -68,6 +87,9 @@ export type PostVersion = {
   decisionNote: string | null;
   // Sorted by timecode, general comments first.
   comments: PostComment[];
+  // The version it follows in the cycle (PROD-032).
+  previousNumber: number | null;
+  request: CorrectionRequest | null;
 };
 
 /** What the shoot report left missing (declarations not made once the shoot
@@ -88,6 +110,9 @@ export type PostProductionData = {
   versions: PostVersion[];
   shootAlert: ShootAlert | null;
   canReview: boolean;
+  // Who takes the decision on a version: the owner and the project's
+  // creative directors (PROD-033).
+  reviewers: string[];
 };
 
 /** Where a write goes: the project, its sheet, and the organisation the
@@ -97,6 +122,10 @@ export type PostScope = {
   sheetId: string;
   organizationId: string;
 };
+
+/** What a new version starts from: the editing step's provider as its
+ * author, and the number the database will give it. */
+export type VersionDefaults = { author: Holder | null; nextNumber: number };
 
 /** Who may do a step or have made a version: PDS's members and the Réseau. */
 export type PostPeople = { members: Member[]; contacts: NetworkOption[] };

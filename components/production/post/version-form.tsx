@@ -11,7 +11,11 @@ import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { uploadProductionFile } from "@/lib/production/files/upload";
 import type { VersionTarget } from "@/lib/production/post/rules";
-import type { PostScope, PostVersion } from "@/lib/production/post/types";
+import type {
+  PostScope,
+  PostVersion,
+  VersionDefaults,
+} from "@/lib/production/post/types";
 import { savePostVersion } from "@/lib/production/post/version-actions";
 import type { NetworkOption } from "@/lib/production/sheet";
 
@@ -28,25 +32,30 @@ const HTTPS = /^https:\/\/\S+$/;
 type Media = "file" | "link";
 
 /**
- * A version deposited for the provider: a number or label, its author, a
- * file or a link, notes; then « Enregistrer en brouillon », « Soumettre pour
- * retours » or « Soumettre à validation finale ». Without a file or a link
- * it is saved as a draft (the server says so). `version`: a draft modified.
+ * A version deposited: its number given by PDS OS (PROD-029), its author —
+ * the editing step's provider proposed —, a file or a link, notes; then
+ * « Enregistrer en brouillon » or « Soumettre aux retours » (one cycle,
+ * PROD-033). Without a file or a link it is saved as a draft (the server
+ * says so). `version`: a draft modified.
  */
 export function VersionForm({
   scope,
   version,
+  defaults,
   members,
   contacts,
   onDone,
 }: {
   scope: PostScope;
   version: PostVersion | null;
+  defaults: VersionDefaults;
   members: Member[];
   contacts: NetworkOption[];
   onDone: () => void;
 }) {
-  const [author, setAuthor] = useState(holderValue(version?.author ?? null));
+  const [author, setAuthor] = useState(
+    holderValue(version ? version.author : defaults.author),
+  );
   const [media, setMedia] = useState<Media>(version?.url ? "link" : "file");
   const [file, setFile] = useState<File | null>(null);
   const [urlError, setUrlError] = useState(false);
@@ -54,7 +63,6 @@ export function VersionForm({
   const done: Record<VersionTarget, string> = {
     draft: t.saved,
     review: t.submittedReview,
-    final: t.submittedFinal,
   };
   const { pending, error, run } = useWriteSubmit(onDone, t.saved);
 
@@ -85,7 +93,6 @@ export function VersionForm({
         projectId: scope.projectId,
         sheetId: scope.sheetId,
         versionId: version?.id,
-        label: String(data.get("label") ?? ""),
         holder: author,
         fileId,
         url,
@@ -99,7 +106,7 @@ export function VersionForm({
     <Button
       type="submit"
       size="lg"
-      variant={value === "final" ? "default" : "outline"}
+      variant={value === "review" ? "default" : "outline"}
       disabled={pending}
       onClick={() => (target.current = value)}
     >
@@ -116,13 +123,11 @@ export function VersionForm({
         submit(event.currentTarget);
       }}
     >
-      <Field
-        name="label"
-        label={t.label}
-        maxLength={120}
-        placeholder={t.labelPlaceholder}
-        defaultValue={version?.label ?? ""}
-      />
+      {!version && (
+        <p className="text-sm text-muted-foreground">
+          {t.numberHint(defaults.nextNumber)}
+        </p>
+      )}
       <HolderSelect
         id="post-version-author"
         label={t.author}
@@ -188,7 +193,6 @@ export function VersionForm({
         </Button>
         {submitButton("draft", t.saveDraft)}
         {submitButton("review", t.submitReview)}
-        {submitButton("final", t.submitFinal)}
       </div>
     </form>
   );

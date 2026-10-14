@@ -354,3 +354,8 @@ Au-delà des six étapes :
       fiche sur chaque onglet (pourquoi, qui est attendu, ce qui manque, lien direct, dernière étape
       franchie), calculée par le code ; données de chaque onglet lues une fois par requête (sans
       migration)
+- [x] Retours d'Ibé sur la Production, lot 2 (PROD-029 à PROD-033) : numéro de version automatique,
+      une seule soumission et une seule décision par version, demande de corrections adressée
+      (destinataire, échéance, retours gardés, transmise / relancée / réaffectée / traitée), version
+      suivante rattachée, notifications aux validateurs et au destinataire membre (migration
+      `20261014000101`, 25 tests pgTAP)

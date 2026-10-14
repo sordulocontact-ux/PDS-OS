@@ -38,7 +38,7 @@ export const productionNext = {
     incidents: "Tournage › Incidents",
     steps: "Postproduction › Étapes",
     versions: "Postproduction › Versions",
-    decision: "Postproduction › Validation finale",
+    decision: "Postproduction › Décision sur la version",
     exports: "Livraison › Fichiers attendus",
     decisions: "Livraison › Décisions",
     handoff: "Livraison › Transmission aux Activations",
@@ -163,14 +163,15 @@ export const productionNext = {
       link: "Ouvrir les versions",
     },
     review: {
-      title: (n: number) => `Donner les retours sur la V${n}`,
-      why: "Commenter, demander des corrections ou valider : une seule décision par version.",
-      link: "Ouvrir les versions",
+      title: (n: number) => `Relire la V${n} et décider`,
+      why: "Commenter, puis une seule décision : valider, demander des corrections ou refuser.",
+      link: "Ouvrir la décision",
     },
-    validate: {
-      title: (n: number) => `Valider la V${n}`,
-      why: "La validation créative clôt la revue et ouvre la préparation de la livraison.",
-      link: "Ouvrir la validation",
+    sendCorrections: {
+      title: (n: number) =>
+        `Transmettre la demande de corrections sur la V${n}`,
+      why: "La demande est prête mais pas encore transmise : le prestataire ne sait pas qu'il doit reprendre la version.",
+      link: "Ouvrir la demande",
     },
     refused: {
       title: "Relancer une nouvelle version",

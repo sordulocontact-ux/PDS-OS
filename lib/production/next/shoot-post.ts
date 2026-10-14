@@ -76,13 +76,21 @@ export function postNext(ctx: NextContext): ProductionNext {
 
   const latest = p.versions[0] ?? null;
   const versionsLink = link(
-    t.steps.review.link,
+    t.steps.submitDraft.link,
     "post",
     "versions",
     "versions",
   );
   const reviewer = { name: null, isViewer: p.viewerReviews };
 
+  if (latest?.status === "changes_requested" && latest.requestDraft)
+    return by(reviewer, "reviewer", p.viewerReviews, {
+      ...blank,
+      kind: "act",
+      title: t.steps.sendCorrections.title(latest.number),
+      why: t.steps.sendCorrections.why,
+      link: versionsLink,
+    });
   if (!latest || latest.status === "changes_requested") {
     // Before a version arrives, every step has its provider.
     const unassigned = p.steps.filter((s) => s.holder === null);
@@ -125,22 +133,14 @@ export function postNext(ctx: NextContext): ProductionNext {
         link: versionsLink,
       });
     case "in_review":
+    case "final_review":
       return by(reviewer, "reviewer", p.viewerReviews, {
         ...blank,
         kind: "decision",
         dueKey: "validation",
         title: t.steps.review.title(latest.number),
         why: t.steps.review.why,
-        link: versionsLink,
-      });
-    case "final_review":
-      return by(reviewer, "reviewer", p.viewerReviews, {
-        ...blank,
-        kind: "decision",
-        dueKey: "validation",
-        title: t.steps.validate.title(latest.number),
-        why: t.steps.validate.why,
-        link: link(t.steps.validate.link, "post", "decision", "decision"),
+        link: link(t.steps.review.link, "post", "decision", "decision"),
       });
     case "refused":
       return owner({

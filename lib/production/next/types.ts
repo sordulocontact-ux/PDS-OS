@@ -74,7 +74,12 @@ export type NextInput = {
     // The one who makes the versions: the editing step's holder, if any.
     maker: string | null;
     // Newest first.
-    versions: { number: number; status: VersionStatus }[];
+    versions: {
+      number: number;
+      status: VersionStatus;
+      // Its correction request is still a draft (not transmitted).
+      requestDraft: boolean;
+    }[];
     pendingCorrections: number;
   } | null;
   delivery: {

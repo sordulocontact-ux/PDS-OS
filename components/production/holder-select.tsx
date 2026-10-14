@@ -1,5 +1,6 @@
 "use client";
 
+import { FieldError } from "@/components/auth/form-message";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -36,6 +37,9 @@ export function HolderSelect({
   members,
   contacts,
   onChange,
+  hint,
+  required,
+  error,
 }: {
   id: string;
   label: string;
@@ -46,6 +50,10 @@ export function HolderSelect({
   members: Member[];
   contacts: NetworkOption[];
   onChange: (value: string) => void;
+  hint?: string;
+  // A required holder (« * »), and why it is missing after a first try.
+  required?: boolean;
+  error?: string;
 }) {
   const t = fr.productionPrep.holderGroups;
   const items: Record<string, string> = {
@@ -58,7 +66,9 @@ export function HolderSelect({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} required={required}>
+        {label}
+      </Label>
       <Select
         items={items}
         value={value === "" ? NONE : value}
@@ -68,6 +78,10 @@ export function HolderSelect({
       >
         <SelectTrigger
           id={id}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={
+            error ? `${id}-error` : hint ? `${id}-hint` : undefined
+          }
           className="w-full text-base data-[size=default]:h-10 md:text-sm"
         >
           <SelectValue placeholder={noneLabel} />
@@ -99,6 +113,12 @@ export function HolderSelect({
           )}
         </SelectContent>
       </Select>
+      {hint && !error && (
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      )}
+      <FieldError id={`${id}-error`}>{error}</FieldError>
     </div>
   );
 }

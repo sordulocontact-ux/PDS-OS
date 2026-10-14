@@ -16,26 +16,32 @@ import { cn } from "@/lib/utils";
 
 import { CommentAddButton } from "./comment-add-button";
 import { CommentList } from "./comment-list";
+import { CorrectionAnswers } from "./correction-answers";
+import { CorrectionRequestBlock } from "./correction-request";
 import { CorrectionsBlock } from "./corrections-block";
 import { VersionControls } from "./version-controls";
 
 const t = fr.productionPost;
 
 /**
- * One version in the Fiche Livrable: status, author (the provider, kept when
- * another takes over), who deposited and submitted it, the file or link, the
- * notes and the decision; then its feedback by timecode and the corrections
- * to transmit. The actions follow the status and the role.
+ * One version in the Fiche Livrable: status, the version it follows, author
+ * (the provider, kept when another takes over), who deposited and submitted
+ * it, the file or link, the notes and the decision; what the previous
+ * version had to correct (PROD-032); its feedback by timecode; its
+ * correction request (PROD-031), else the corrections still open.
  */
 export function VersionCard({
   scope,
   people,
   version: v,
+  previous,
   role,
 }: {
   scope: PostScope;
   people: PostPeople;
   version: PostVersion;
+  // The version it follows, when loaded.
+  previous: PostVersion | null;
   role: PostRole;
 }) {
   const name = versionName(v);
@@ -68,6 +74,11 @@ export function VersionCard({
             <StatusBadge tone={productionVersionTone[v.status]}>
               {t.versions.statuses[v.status]}
             </StatusBadge>
+            {v.previousNumber !== null && (
+              <span className="text-sm text-muted-foreground">
+                {t.versions.follows(v.previousNumber)}
+              </span>
+            )}
           </div>
           <p className="text-sm text-muted-foreground">
             {t.versions.authorLine(v.author?.name ?? t.versions.authorNone)}
@@ -114,6 +125,14 @@ export function VersionCard({
         </p>
       )}
 
+      {previous && (
+        <CorrectionAnswers
+          projectId={scope.projectId}
+          previous={previous}
+          canReview={role.canReview}
+        />
+      )}
+
       {v.status !== "draft" && (
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -134,7 +153,17 @@ export function VersionCard({
           />
         </div>
       )}
-      <CorrectionsBlock version={v} />
+      {v.request ? (
+        <CorrectionRequestBlock
+          projectId={scope.projectId}
+          version={v}
+          request={v.request}
+          people={people}
+          canReview={role.canReview}
+        />
+      ) : (
+        v.status !== "draft" && <CorrectionsBlock version={v} />
+      )}
     </article>
   );
 }

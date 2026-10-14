@@ -3643,6 +3643,27 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   passe) ; « Feuille de service » compte comme travaillée dès que l'heure de convocation est écrite.
   L'échéance affichée est la date du rétroplanning de l'étape (en rouge si elle est passée).
 
+- **Cycle de version** (PROD-029 à PROD-033, migration `20261014000101_production_version_cycle.sql`,
+  tests `production-version-cycle.test.sql`) : numéro donné par la base seule (le champ libellé
+  a disparu du formulaire, un ancien libellé reste affiché), chaque version **suit** la précédente
+  (`previous_version_id`, jamais déplacée). **Une seule soumission** (« Soumettre aux retours »,
+  les validateurs — responsable et directeurs créatifs — sont notifiés
+  `production_version_submitted`), puis **une seule décision** sur la version en revue, nommant
+  qui décide : valider (ouvre la livraison), demander des corrections, refuser (motif).
+  `final_review` n'est plus produit (lu comme « En revue »). **Demande de corrections**
+  (`production_correction_requests`, une par version, `request_production_corrections`) : les
+  retours ouverts gardés (tous cochés, un doublon décoché reste sur la version), **un destinataire**
+  (membre ou contact du Réseau), **une échéance** (pas dans le passé), un message ; états
+  brouillon → transmise → consultée → traitée. PDS OS n'envoie pas d'e-mail : « Copier et marquer
+  transmise » copie le texte (`requestText`) puis `send_production_corrections` (un membre est
+  notifié `production_corrections_sent`) ; « Relancer » compte une relance sur la même demande ;
+  « Réaffecter » (`update_production_corrections`) ne la duplique jamais. Soumettre la version
+  suivante marque traitées les demandes des versions précédentes ; la nouvelle carte affiche les
+  corrections demandées sur la précédente, à vérifier une à une. Les versions précédentes sont
+  repliées sous la version en cours. Proposé par le code : l'intervenant de l'étape « Montage »
+  comme auteur et destinataire, sa date de fin comme échéance. « Consultée » sera écrit par la page
+  du prestataire (lot 3).
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

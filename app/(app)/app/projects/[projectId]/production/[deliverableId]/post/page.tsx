@@ -8,6 +8,7 @@ import { VersionsSection } from "@/components/production/post/versions-section";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { todayInParis } from "@/lib/insights/dates";
 import { suggestPostSteps } from "@/lib/production/post/suggestions";
 import { loadProductionSheet } from "@/lib/production/sheet";
 import { postFor } from "@/lib/production/tab-data";
@@ -22,7 +23,8 @@ export const metadata = { title: `${t.title} · ${fr.app.name}` };
  * Marketing › Production › one deliverable › Postproduction (ticket
  * « Workflow Production complet », parcours 14 à 18): the references of the
  * edit, its steps and who does them, every version with its timed feedback
- * and the corrections to transmit, then the final validation. The owner
+ * and the corrections addressed to someone, then the one decision per version
+ * (PROD-029 to PROD-033). The owner
  * organises; the owner and the project's creative directors review, while
  * the « production » stage runs.
  */
@@ -54,6 +56,22 @@ export default async function ProductionPostPage({
     soundCapture: sheet.brief.soundCapture,
     subtitles: data.heritage.fiche?.subtitles ?? null,
   });
+  // The editing step's provider is proposed as a version's author and as
+  // the one who corrects it, its end date as the due date (PROD-031).
+  const editStep =
+    post.steps.find((s) => s.key === "edit" && s.holder) ??
+    post.steps.find((s) => s.holder) ??
+    null;
+  const today = todayInParis();
+  const correctionDefaults = {
+    recipient: editStep?.holder ?? null,
+    dueOn:
+      editStep?.endsOn && editStep.endsOn >= today ? editStep.endsOn : null,
+  };
+  const versionDefaults = {
+    author: editStep?.holder ?? null,
+    nextNumber: (post.versions[0]?.number ?? 0) + 1,
+  };
   const status =
     data.stageState !== "in_progress"
       ? t.locked
@@ -83,12 +101,16 @@ export default async function ProductionPostPage({
         people={people}
         versions={post.versions}
         role={role}
+        defaults={versionDefaults}
       />
       <DecisionSection
         projectId={projectId}
         deliverableId={deliverableId}
         versions={post.versions}
         canReview={role.canReview}
+        reviewers={post.reviewers}
+        people={people}
+        defaults={correctionDefaults}
       />
     </div>
   );

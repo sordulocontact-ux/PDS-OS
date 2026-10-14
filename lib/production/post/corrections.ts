@@ -9,7 +9,12 @@ import {
   type CommentCategory,
 } from "@/lib/production/post/rules";
 import { timecodeLabel, versionName } from "@/lib/production/post/labels";
-import type { PostComment, PostVersion } from "@/lib/production/post/types";
+import type {
+  CorrectionRequest,
+  PostComment,
+  PostVersion,
+} from "@/lib/production/post/types";
+import { formatDate } from "@/lib/release/format";
 
 const t = fr.productionPost;
 
@@ -47,6 +52,39 @@ export function correctionsText(
 ): string {
   return [
     t.corrections.heading(versionName(version)),
+    ...groups.flatMap((g) => [
+      "",
+      t.comments.categories[g.category],
+      ...g.comments.map((c) =>
+        t.corrections.line(timecodeLabel(c.timecodeMs), c.body),
+      ),
+    ]),
+  ].join("\n");
+}
+
+/** The feedback a request carries (the list sent is the list kept). */
+export const requestComments = (
+  version: Pick<PostVersion, "comments">,
+  request: Pick<CorrectionRequest, "id">,
+) => version.comments.filter((c) => c.requestId === request.id);
+
+/** The text copied for the provider: the version, the due date, the
+ * message, then the feedback kept, grouped by category. */
+export function requestText(
+  version: Pick<PostVersion, "number" | "label" | "comments">,
+  request: Pick<CorrectionRequest, "id" | "dueOn" | "message">,
+): string {
+  const kept = requestComments(version, request);
+  const groups = COMMENT_CATEGORIES.flatMap((category) => {
+    const list = kept.filter((c) => c.category === category).sort(byTimecode);
+    return list.length > 0 ? [{ category, comments: list }] : [];
+  });
+  return [
+    fr.productionCorrections.heading(
+      versionName(version),
+      formatDate(request.dueOn),
+    ),
+    ...(request.message ? ["", request.message] : []),
     ...groups.flatMap((g) => [
       "",
       t.comments.categories[g.category],

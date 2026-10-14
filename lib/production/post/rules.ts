@@ -30,10 +30,13 @@ export const VERSION_STATUSES = [
 ] as const;
 export type VersionStatus = (typeof VERSION_STATUSES)[number];
 
-// What the version form asks for: keep it a draft, or submit it.
-export const VERSION_TARGETS = ["draft", "review", "final"] as const;
+// What the version form asks for: keep it a draft, or submit it to the
+// feedback (one cycle per version, PROD-033).
+export const VERSION_TARGETS = ["draft", "review"] as const;
 export type VersionTarget = (typeof VERSION_TARGETS)[number];
 
+// « Demander des corrections » is a request addressed to someone
+// (request_production_corrections), not a bare decision.
 export const VERSION_DECISIONS = ["approve", "changes", "refuse"] as const;
 export type VersionDecision = (typeof VERSION_DECISIONS)[number];
 
@@ -76,23 +79,24 @@ export const commentStatusOf = oneOf(COMMENT_STATUSES);
  * (feedback, corrections, final decision). */
 export type PostRole = { canOrganize: boolean; canReview: boolean };
 
-/** What a version's status lets this person do. Only a draft is edited or
- * removed; a version under review may still go to the final validation (a V1
- * may go there directly); a decision is taken in final validation only. */
+/** A version waiting for its one decision (« final_review » is the former
+ * second submission, decided the same way). */
+export const isUnderReview = (status: VersionStatus) =>
+  status === "in_review" || status === "final_review";
+
+/** What a version's status lets this person do (PROD-033): a draft is
+ * edited, removed or submitted once; a version under review is commented,
+ * then decided — valider, demander des corrections, refuser. */
 export function versionActions(status: VersionStatus, role: PostRole) {
   const draft = status === "draft";
   return {
     edit: role.canOrganize && draft,
     remove: role.canOrganize && draft,
-    submitReview: role.canOrganize && draft,
-    submitFinal: role.canOrganize && (draft || status === "in_review"),
-    requestChanges: role.canReview && status === "in_review",
-    decide: role.canReview && status === "final_review",
+    submit: role.canOrganize && draft,
+    decide: role.canReview && isUnderReview(status),
     comment:
       role.canReview &&
-      (status === "in_review" ||
-        status === "changes_requested" ||
-        status === "final_review"),
+      (isUnderReview(status) || status === "changes_requested"),
   };
 }
 

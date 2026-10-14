@@ -52,6 +52,10 @@ export const notifications = {
     call_report_shared: (actor: string) =>
       `${actor} vous partage le compte rendu d'un call.`,
     // The engineer has no account: no actor, the project names it.
+    production_version_submitted: (actor: string, project: string) =>
+      `${actor} a soumis une version de « ${project} » : votre décision est attendue.`,
+    production_corrections_sent: (actor: string, project: string) =>
+      `${actor} vous demande des corrections sur une version de « ${project} ».`,
     master_engineer_signal: (_actor: string, project: string) =>
       `L'ingénieur de « ${project} » vous a écrit : question, retard ou fichier manquant à voir.`,
     // The engineer has no account: no actor, the project names it.

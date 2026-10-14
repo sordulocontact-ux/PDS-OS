@@ -11,6 +11,7 @@ import type {
   PostPeople,
   PostScope,
   PostVersion,
+  VersionDefaults,
 } from "@/lib/production/post/types";
 
 import { VersionForm } from "./version-form";
@@ -23,12 +24,14 @@ export function VersionDialog({
   people,
   open,
   version,
+  defaults,
   onClose,
 }: {
   scope: PostScope;
   people: PostPeople;
   open: boolean;
   version: PostVersion | null;
+  defaults: VersionDefaults;
   onClose: () => void;
 }) {
   return (
@@ -47,6 +50,7 @@ export function VersionDialog({
       <VersionForm
         scope={scope}
         version={version}
+        defaults={defaults}
         members={people.members}
         contacts={people.contacts}
         onDone={onClose}
@@ -59,9 +63,11 @@ export function VersionDialog({
 export function VersionAddButton({
   scope,
   people,
+  defaults,
 }: {
   scope: PostScope;
   people: PostPeople;
+  defaults: VersionDefaults;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -75,6 +81,7 @@ export function VersionAddButton({
         people={people}
         open={open}
         version={null}
+        defaults={defaults}
         onClose={() => setOpen(false)}
       />
     </>

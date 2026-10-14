@@ -146,6 +146,7 @@ export async function loadProductionNext(
       versions: post.versions.map((v) => ({
         number: v.number,
         status: v.status,
+        requestDraft: v.request?.status === "draft",
       })),
       pendingCorrections: latest
         ? latest.comments.filter((c) => isPendingCorrection(c.status)).length

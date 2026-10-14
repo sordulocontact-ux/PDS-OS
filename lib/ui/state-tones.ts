@@ -737,9 +737,17 @@ export const productionVersionTone: Record<string, Tone> = {
   draft: "neutral",
   in_review: "info",
   changes_requested: "warning",
-  final_review: "action",
+  final_review: "info",
   approved: "success",
   refused: "danger",
+};
+
+/** A correction request (PROD-031): a draft not sent yet waits on us. */
+export const correctionRequestTone: Record<string, Tone> = {
+  draft: "warning",
+  sent: "info",
+  viewed: "info",
+  treated: "success",
 };
 
 /** A feedback on a version: a correction declared fixed waits for someone to

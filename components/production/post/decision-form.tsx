@@ -4,53 +4,99 @@ import { useState } from "react";
 
 import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { holderValue } from "@/components/production/holder-select";
 import { Button } from "@/components/ui/button";
+import { CheckboxField } from "@/components/ui/checkbox-field";
 import { ChoiceCards } from "@/components/ui/choice-cards";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
+import { requestCorrections } from "@/lib/production/post/correction-actions";
+import { timecodeLabel } from "@/lib/production/post/labels";
 import { decidePostVersion } from "@/lib/production/post/review-actions";
 import {
+  isPendingCorrection,
   VERSION_DECISIONS,
   type VersionDecision,
 } from "@/lib/production/post/rules";
+import type { PostPeople, PostVersion } from "@/lib/production/post/types";
+import type { Holder } from "@/lib/production/sheet";
 
-import { useWriteSubmit } from "@/components/ui/use-write-submit";
+import { CorrectionFields, type CorrectionMissing } from "./correction-fields";
 
 const t = fr.productionPost.decision;
+const tc = fr.productionCorrections;
 
-/** « Valider », « Demander des corrections » or « Refuser » a version in
- * final validation; a reason is required for the last two. */
+type Missing = CorrectionMissing | "choice" | "note";
+
+/**
+ * The one decision on a version under review (PROD-033), each choice with
+ * its consequence: « Valider » (the creative validation, the delivery
+ * opens), « Demander des corrections » — the open feedback kept (all by
+ * default, a duplicate unticked), who must act and by when, prefilled from
+ * the editing step (PROD-031) —, or « Refuser » with a reason.
+ */
 export function DecisionForm({
   projectId,
-  versionId,
+  version,
+  people,
+  defaults,
 }: {
   projectId: string;
-  versionId: string;
+  version: PostVersion;
+  people: PostPeople;
+  defaults: { recipient: Holder | null; dueOn: string | null };
 }) {
+  const pending = version.comments.filter((c) => isPendingCorrection(c.status));
   const [decision, setDecision] = useState<VersionDecision | null>(null);
-  const [missing, setMissing] = useState<"choice" | "note" | null>(null);
-  const { pending, error, run } = useWriteSubmit(() => {
-    setDecision(null);
-    setMissing(null);
-  }, t.done);
-  const id = `decision-${versionId}`;
+  const [kept, setKept] = useState(new Set(pending.map((c) => c.id)));
+  const [recipient, setRecipient] = useState(holderValue(defaults.recipient));
+  const [missing, setMissing] = useState(new Set<Missing>());
+  const write = useWriteSubmit(
+    () => {
+      setDecision(null);
+      setMissing(new Set());
+    },
+    decision === "changes" ? tc.done : t.done,
+  );
+  const id = `decision-${version.id}`;
 
   function submit(form: HTMLFormElement) {
-    const note = String(new FormData(form).get("note") ?? "");
-    const lack = !decision
-      ? "choice"
-      : decision !== "approve" && note.trim() === ""
-        ? "note"
-        : null;
+    const data = new FormData(form);
+    const note = String(data.get("note") ?? "").trim();
+    const message = String(data.get("message") ?? "").trim();
+    const dueOn = String(data.get("dueOn") ?? "");
+    const lack = new Set<Missing>();
+    if (!decision) lack.add("choice");
+    if (decision === "refuse" && !note) lack.add("note");
+    if (decision === "changes") {
+      if (!recipient) lack.add("recipient");
+      if (!dueOn) lack.add("due");
+      if (kept.size === 0 && !message) lack.add("content");
+    }
     setMissing(lack);
-    if (!decision || lack) {
+    if (!decision || lack.size > 0) {
       form
         .querySelector<HTMLElement>(
-          lack === "note" ? "[aria-invalid=true]" : "input[type=radio]",
+          lack.has("choice") ? "input[type=radio]" : "[aria-invalid=true]",
         )
         ?.focus();
       return;
     }
-    run(() => decidePostVersion({ projectId, versionId, decision, note }));
+    if (decision === "changes")
+      write.run(() =>
+        requestCorrections({
+          projectId,
+          versionId: version.id,
+          commentIds: [...kept],
+          recipient,
+          dueOn,
+          message,
+        }),
+      );
+    else
+      write.run(() =>
+        decidePostVersion({ projectId, versionId: version.id, decision, note }),
+      );
   }
 
   return (
@@ -71,7 +117,7 @@ export function DecisionForm({
           value={decision}
           onChange={(next) => {
             setDecision(next);
-            setMissing(null);
+            setMissing(new Set());
           }}
           choices={VERSION_DECISIONS.map((d) => ({
             value: d,
@@ -79,31 +125,79 @@ export function DecisionForm({
             hint: t.choices[d].hint,
           }))}
         />
-        {missing === "choice" && (
+        {missing.has("choice") && (
           <FieldError id={`${id}-choice-error`}>{t.choiceMissing}</FieldError>
         )}
       </div>
-      <TextareaField
-        id={`${id}-note`}
-        name="note"
-        label={t.note}
-        hint={t.noteHint}
-        rows={3}
-        maxLength={2000}
-        aria-required={
-          (decision !== null && decision !== "approve") || undefined
-        }
-        error={missing === "note" ? t.noteMissing : undefined}
-      />
-      <FormMessage kind="error">{error}</FormMessage>
+
+      {decision === "changes" ? (
+        <>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="text-sm font-medium">{tc.comments}</legend>
+            <p className="text-xs text-muted-foreground">
+              {pending.length > 0 ? tc.commentsHint : tc.noComments}
+            </p>
+            {pending.map((c) => (
+              <CheckboxField
+                key={c.id}
+                label={`${timecodeLabel(c.timecodeMs)} — ${c.body}`}
+                hint={fr.productionPost.comments.categories[c.category]}
+                checked={kept.has(c.id)}
+                onChange={(on) =>
+                  setKept((prev) => {
+                    const next = new Set(prev);
+                    if (on) next.add(c.id);
+                    else next.delete(c.id);
+                    return next;
+                  })
+                }
+              />
+            ))}
+          </fieldset>
+          <CorrectionFields
+            idPrefix={id}
+            people={people}
+            recipient={recipient}
+            onRecipient={setRecipient}
+            dueOn={defaults.dueOn}
+            message={null}
+            missing={
+              new Set(
+                [...missing].filter(
+                  (m): m is CorrectionMissing => m !== "choice" && m !== "note",
+                ),
+              )
+            }
+          />
+        </>
+      ) : (
+        <TextareaField
+          id={`${id}-note`}
+          name="note"
+          label={t.note}
+          hint={t.noteHint}
+          rows={3}
+          maxLength={2000}
+          required={decision === "refuse"}
+          error={missing.has("note") ? t.noteMissing : undefined}
+        />
+      )}
+      {missing.size > 0 && !missing.has("choice") && (
+        <FormMessage kind="error">{tc.missingCount(missing.size)}</FormMessage>
+      )}
+      <FormMessage kind="error">{write.error}</FormMessage>
       <div className="flex justify-end">
         <Button
           type="submit"
           size="lg"
-          disabled={pending}
-          aria-busy={pending || undefined}
+          disabled={write.pending}
+          aria-busy={write.pending || undefined}
         >
-          {pending ? fr.productionPost.saving : t.submit}
+          {write.pending
+            ? fr.productionPost.saving
+            : decision === "changes"
+              ? tc.submit
+              : t.submit}
         </Button>
       </div>
     </form>

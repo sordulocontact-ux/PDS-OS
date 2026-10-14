@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import { versionName } from "@/lib/production/post/labels";
 import type { VersionActions } from "@/lib/production/post/rules";
@@ -18,19 +19,15 @@ import {
 } from "@/lib/production/post/version-actions";
 
 import { PostRowMenu } from "./post-row-menu";
-import { RequestChangesButton } from "./request-changes-button";
-import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { VersionDialog } from "./version-dialog";
 
 const t = fr.productionPost.versions;
 
-type Submit = "review" | "final";
-
 /**
- * A version's actions, as its status and the person's role allow
- * (versionActions): « Soumettre pour retours » and « Soumettre à validation
- * finale », two different actions, each confirmed; « Demander des
- * corrections » for a reviewer; « ⋯ » Modifier / Supprimer on a draft.
+ * A draft's actions (versionActions): « Soumettre aux retours », once and
+ * confirmed — the one cycle of PROD-033 —, and « ⋯ » Modifier / Supprimer.
+ * The decision on a submitted version is taken in « Décision sur la
+ * version ».
  */
 export function VersionControls({
   scope,
@@ -45,42 +42,16 @@ export function VersionControls({
 }) {
   const name = versionName(version);
   const [editing, setEditing] = useState(false);
-  const [submitting, setSubmitting] = useState<Submit | null>(null);
-  const close = () => setSubmitting(null);
+  const [submitting, setSubmitting] = useState(false);
+  const close = () => setSubmitting(false);
   const { pending, error, setError, run } = useWriteSubmit(close, t.saved);
 
-  const confirm = (target: Submit) =>
-    run(
-      () =>
-        submitPostVersion({
-          projectId: scope.projectId,
-          versionId: version.id,
-          target,
-        }),
-      target === "review" ? t.submittedReview : t.submittedFinal,
-    );
-
+  if (!can.submit && !can.edit) return null;
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {can.requestChanges && (
-        <RequestChangesButton
-          projectId={scope.projectId}
-          versionId={version.id}
-          name={name}
-        />
-      )}
-      {can.submitReview && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSubmitting("review")}
-        >
+      {can.submit && (
+        <Button size="sm" onClick={() => setSubmitting(true)}>
           {t.submitReview}
-        </Button>
-      )}
-      {can.submitFinal && (
-        <Button size="sm" onClick={() => setSubmitting("final")}>
-          {t.submitFinal}
         </Button>
       )}
       {can.edit && (
@@ -100,27 +71,30 @@ export function VersionControls({
         />
       )}
       <ConfirmDialog
-        open={submitting !== null}
+        open={submitting}
         onOpenChange={(open) => {
           if (open) return;
           setError(null);
           close();
         }}
-        title={
-          submitting === "final"
-            ? t.finalConfirmTitle(name)
-            : t.submitConfirmTitle(name)
-        }
-        description={
-          submitting === "final" ? t.finalConfirmBody : t.submitConfirmBody
-        }
+        title={t.submitConfirmTitle(name)}
+        description={t.submitConfirmBody}
         cancelLabel={fr.productionPost.cancel}
         closeLabel={fr.productionPost.close}
-        confirmLabel={submitting === "final" ? t.submitFinal : t.submitReview}
+        confirmLabel={t.submitReview}
         pendingLabel={fr.productionPost.saving}
         pending={pending}
         error={error}
-        onConfirm={() => submitting && confirm(submitting)}
+        onConfirm={() =>
+          run(
+            () =>
+              submitPostVersion({
+                projectId: scope.projectId,
+                versionId: version.id,
+              }),
+            t.submittedReview,
+          )
+        }
       />
       {can.edit && (
         <VersionDialog
@@ -128,6 +102,7 @@ export function VersionControls({
           people={people}
           open={editing}
           version={version}
+          defaults={{ author: version.author, nextNumber: version.number }}
           onClose={() => setEditing(false)}
         />
       )}

@@ -61,6 +61,7 @@ import { records } from "./records";
 import { production, projectReview } from "./production";
 import { productionBrief } from "./production-brief";
 import { productionCall } from "./production-call";
+import { productionCorrections } from "./production-corrections";
 import { productionDelivery } from "./production-delivery";
 import { productionNext } from "./production-next";
 import { productionImport } from "./production-import";
@@ -146,6 +147,7 @@ export const fr = {
   productionPost,
   productionDelivery,
   productionNext,
+  productionCorrections,
   marketing,
   marketingReview,
   projectReview,

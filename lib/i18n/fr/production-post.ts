@@ -131,11 +131,10 @@ export const productionPost = {
     addTitle: "Déposer une version de travail",
     editTitle: (name: string) => `Modifier ${name}`,
     formDescription:
-      "Le prestataire n'a pas de compte : vous déposez pour lui, il reste l'auteur de la version.",
+      "Le numéro est donné par PDS OS (V1, V2…). Si vous déposez pour le prestataire, il reste l'auteur de la version.",
+    numberHint: (n: number) => `Elle sera numérotée V${n}.`,
     name: (n: number) => `V${n}`,
     named: (n: number, label: string) => `V${n} · ${label}`,
-    label: "Numéro ou libellé",
-    labelPlaceholder: "Montage final, version courte…",
     author: "Auteur",
     authorNone: "Non renseigné",
     mediaLegend: "Fichier ou lien",
@@ -150,18 +149,17 @@ export const productionPost = {
     notes: "Notes",
     notesPlaceholder: "Ce qui a changé, ce qu'il faut regarder…",
     saveDraft: "Enregistrer en brouillon",
-    submitReview: "Soumettre pour retours",
-    submitFinal: "Soumettre à validation finale",
+    submitReview: "Soumettre aux retours",
     noMediaStaysDraft:
       "Version enregistrée en brouillon : ajoutez un fichier ou un lien pour la soumettre.",
     saved: "Version enregistrée.",
-    submittedReview: "Version soumise pour retours.",
-    submittedFinal: "Version soumise à validation finale.",
+    submittedReview:
+      "Version soumise aux retours : les validateurs sont prévenus.",
     statuses: {
       draft: "Brouillon",
       in_review: "En revue",
       changes_requested: "Corrections demandées",
-      final_review: "En validation finale",
+      final_review: "En revue",
       approved: "Validée",
       refused: "Refusée",
     },
@@ -181,20 +179,14 @@ export const productionPost = {
     removeBody: (name: string) =>
       `${name} n'a jamais été soumise : elle sera supprimée.`,
     removed: "Brouillon supprimé.",
-    requestChanges: "Demander des corrections",
-    requestChangesTitle: (name: string) =>
-      `Demander des corrections sur ${name}`,
-    requestChangesDescription:
-      "La version passe en « Corrections demandées » ; les retours ouverts restent à transmettre.",
-    requestChangesNote: "Message au prestataire",
-    requestChangesDone: "Corrections demandées.",
-    submitConfirmTitle: (name: string) => `Soumettre ${name} pour retours ?`,
+    submitConfirmTitle: (name: string) => `Soumettre ${name} aux retours ?`,
     submitConfirmBody:
-      "La version ne sera plus modifiable : les relecteurs pourront la commenter.",
-    finalConfirmTitle: (name: string) =>
-      `Soumettre ${name} à validation finale ?`,
-    finalConfirmBody:
-      "Le validateur choisira : Valider, Demander des corrections ou Refuser.",
+      "La version ne sera plus modifiable. Les validateurs la commentent, puis prennent une seule décision : valider, demander des corrections ou refuser.",
+    follows: (n: number) => `Suit la V${n}`,
+    earlier: (n: number) =>
+      n === 1 ? "1 version précédente" : `${n} versions précédentes`,
+    earlierHint:
+      "Leurs retours et décisions restent consultables, séparés de la version en cours.",
   },
 
   comments: {
@@ -255,11 +247,13 @@ export const productionPost = {
   },
 
   decision: {
-    title: "Validation finale",
+    title: "Décision sur la version",
     description:
-      "Soumettre pour retours et soumettre à validation finale sont deux actions différentes : l'absence de retour ouvert ne vaut pas validation.",
-    none: "Aucune version soumise à validation finale.",
-    waiting: (name: string) => `${name} attend la décision du validateur.`,
+      "Une seule décision par version soumise, après ses retours. Commenter n'est pas décider : rien ne change tant que la décision n'est pas prise.",
+    none: "Aucune version n'attend de décision.",
+    waiting: (name: string) => `${name} attend une décision.`,
+    deciders: (names: string) => `Décide : ${names}.`,
+    decidersNone: "Décide : le responsable du projet ou un directeur créatif.",
     readOnly:
       "Le responsable du projet ou un directeur créatif de l'équipe décide.",
     openComments: (n: number) =>
@@ -274,16 +268,20 @@ export const productionPost = {
     choices: {
       approve: {
         label: "Valider",
-        hint: "La version devient la version validée du livrable.",
+        hint: "Validation créative finale : la revue se clôt et la préparation de la livraison s'ouvre.",
       },
       changes: {
         label: "Demander des corrections",
-        hint: "Le prestataire reprend la version.",
+        hint: "Vous choisissez les retours à transmettre, à qui et pour quand ; une nouvelle version est attendue.",
       },
-      refuse: { label: "Refuser", hint: "La version est écartée." },
+      refuse: {
+        label: "Refuser",
+        hint: "La version est écartée sans corrections : une nouvelle version repart de zéro.",
+      },
     },
     note: "Motif",
-    noteHint: "Obligatoire pour demander des corrections ou refuser.",
+    noteHint: "Obligatoire pour refuser.",
+    toCorrections: "Préparer la demande de corrections",
     noteMissing: "Expliquez la décision.",
     choiceMissing: "Choisissez une décision.",
     submit: "Enregistrer la décision",
@@ -292,6 +290,15 @@ export const productionPost = {
   },
 
   errors: {
+    recipientRequired: "Choisissez qui doit faire les corrections.",
+    dueRequired: "Indiquez pour quand les corrections sont attendues.",
+    dueInPast: "L'échéance ne peut pas être dans le passé.",
+    nothingToCorrect:
+      "Gardez au moins un retour, ou écrivez un message au prestataire.",
+    commentNotPending:
+      "Un des retours a été traité ou clôturé entre-temps. Rechargez la page.",
+    requestTreated:
+      "Une nouvelle version a déjà répondu à cette demande : elle est traitée.",
     generic: "L'enregistrement a échoué. Réessayez.",
     invalid: "Certaines valeurs ne sont pas valides.",
     forbidden: "Vous ne pouvez pas faire cette modification.",

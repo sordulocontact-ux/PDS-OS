@@ -10735,6 +10735,129 @@ export type Database = {
           },
         ]
       }
+      production_correction_requests: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          due_on: string
+          id: string
+          message: string | null
+          organization_id: string
+          person_id: string | null
+          project_id: string
+          reminders: number
+          sent_at: string | null
+          sent_by: string | null
+          sheet_id: string
+          status: string
+          treated_at: string | null
+          treated_version_id: string | null
+          updated_at: string
+          version_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_on: string
+          id?: string
+          message?: string | null
+          organization_id: string
+          person_id?: string | null
+          project_id: string
+          reminders?: number
+          sent_at?: string | null
+          sent_by?: string | null
+          sheet_id: string
+          status?: string
+          treated_at?: string | null
+          treated_version_id?: string | null
+          updated_at?: string
+          version_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_on?: string
+          id?: string
+          message?: string | null
+          organization_id?: string
+          person_id?: string | null
+          project_id?: string
+          reminders?: number
+          sent_at?: string | null
+          sent_by?: string | null
+          sheet_id?: string
+          status?: string
+          treated_at?: string | null
+          treated_version_id?: string | null
+          updated_at?: string
+          version_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_correction_requests_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_correction_requests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_correction_requests_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_correction_requests_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_correction_requests_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_correction_requests_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_correction_requests_treated_same_org"
+            columns: ["treated_version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_correction_requests_version_same_org"
+            columns: ["version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_versions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       production_equipment: {
         Row: {
           category: string
@@ -11914,6 +12037,7 @@ export type Database = {
           id: string
           organization_id: string
           project_id: string
+          request_id: string | null
           sheet_id: string
           status: string
           status_at: string | null
@@ -11930,6 +12054,7 @@ export type Database = {
           id?: string
           organization_id: string
           project_id: string
+          request_id?: string | null
           sheet_id: string
           status?: string
           status_at?: string | null
@@ -11946,6 +12071,7 @@ export type Database = {
           id?: string
           organization_id?: string
           project_id?: string
+          request_id?: string | null
           sheet_id?: string
           status?: string
           status_at?: string | null
@@ -11973,6 +12099,13 @@ export type Database = {
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_version_comments_request_same_org"
+            columns: ["request_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_correction_requests"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -12013,6 +12146,7 @@ export type Database = {
           number: number
           organization_id: string
           person_id: string | null
+          previous_version_id: string | null
           project_id: string
           sheet_id: string
           status: string
@@ -12034,6 +12168,7 @@ export type Database = {
           number?: number
           organization_id: string
           person_id?: string | null
+          previous_version_id?: string | null
           project_id: string
           sheet_id: string
           status?: string
@@ -12055,6 +12190,7 @@ export type Database = {
           number?: number
           organization_id?: string
           person_id?: string | null
+          previous_version_id?: string | null
           project_id?: string
           sheet_id?: string
           status?: string
@@ -12097,6 +12233,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_versions_previous_same_org"
+            columns: ["previous_version_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_versions"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "production_versions_project_same_org"
@@ -15713,6 +15856,17 @@ export type Database = {
         }
         Returns: string
       }
+      request_production_corrections: {
+        Args: {
+          p_comment_ids: string[] | null
+          p_contact_id: string | null
+          p_due_on: string
+          p_message: string | null
+          p_person_id: string | null
+          p_version_id: string
+        }
+        Returns: string
+      }
       request_production_version_changes: {
         Args: {
           p_version_id: string
@@ -15918,6 +16072,10 @@ export type Database = {
         Returns: string
       }
       send_mix_feedback: { Args: { p_version_id: string }; Returns: undefined }
+      send_production_corrections: {
+        Args: { p_request_id: string }
+        Returns: undefined
+      }
       send_strategy_document: {
         Args: { p_document_id: string; p_note?: string; p_reviewers?: string[] }
         Returns: undefined
@@ -16208,6 +16366,16 @@ export type Database = {
           p_title: string
           p_variant?: string
           p_variant_label?: string
+        }
+        Returns: undefined
+      }
+      update_production_corrections: {
+        Args: {
+          p_contact_id: string | null
+          p_due_on: string
+          p_message: string | null
+          p_person_id: string | null
+          p_request_id: string
         }
         Returns: undefined
       }

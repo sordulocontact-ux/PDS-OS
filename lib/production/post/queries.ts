@@ -20,6 +20,8 @@ import type {
 import type { Holder, NetworkOption } from "@/lib/production/sheet";
 import { createClient } from "@/lib/supabase/server";
 
+import { loadCorrectionRequests } from "./requests";
+
 // States in which the shoot took place: its report may leave something
 // missing for the edit.
 const SHOT = new Set(["done", "partial", "interrupted"]);
@@ -62,7 +64,7 @@ export async function loadPostProduction(input: {
       supabase
         .from("production_version_comments")
         .select(
-          "id, version_id, timecode_ms, category, body, file_id, status, status_by, status_at, created_by, created_at",
+          "id, version_id, timecode_ms, category, body, file_id, status, status_by, status_at, created_by, created_at, request_id",
         )
         .eq("sheet_id", sheetId),
       supabase
@@ -125,8 +127,19 @@ export async function loadPostProduction(input: {
         authorName: nameOf(c.created_by) ?? "—",
         createdAt: c.created_at,
         file: fileOf(c.file_id),
+        requestId: c.request_id,
       }))
       .sort(byTimecode);
+
+  const versionRows = versions.data ?? [];
+  const numberOf = (id: string | null) =>
+    id ? (versionRows.find((v) => v.id === id)?.number ?? null) : null;
+  const { byVersion, reviewers } = await loadCorrectionRequests(
+    supabase,
+    projectId,
+    sheetId,
+    { holderOf, nameOf, numberOf },
+  );
 
   const s = shoot.data;
   const shot = s !== null && SHOT.has(s.state);
@@ -179,7 +192,7 @@ export async function loadPostProduction(input: {
           ]
         : [];
     }),
-    versions: (versions.data ?? []).map((v) => ({
+    versions: versionRows.map((v) => ({
       id: v.id,
       number: v.number,
       label: v.label,
@@ -196,8 +209,11 @@ export async function loadPostProduction(input: {
       decidedAt: v.decided_at,
       decisionNote: v.decision_note,
       comments: commentsOf(v.id),
+      previousNumber: numberOf(v.previous_version_id),
+      request: byVersion.get(v.id) ?? null,
     })),
     shootAlert: alertShows ? shootAlert : null,
     canReview: review.data === true,
+    reviewers,
   };
 }

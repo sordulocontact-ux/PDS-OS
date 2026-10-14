@@ -18,12 +18,14 @@ import {
 } from "@/lib/production/post/result";
 import { prepDone } from "@/lib/production/prep-result";
 import { createClient } from "@/lib/supabase/server";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 
-// Versions V1, V2, V3… (parcours 16): the owner deposits for the provider
-// (who has no account), who stays the author. A version is inserted as a
-// draft (numbered by the database), then submitted for feedback or for the
-// final validation (submit_production_version); without a file or a link it
-// stays a draft. Only a draft is edited or removed (RLS and trigger).
+// Versions V1, V2, V3… (parcours 16): numbered by the database only
+// (PROD-029), following the one before (PROD-032). The owner deposits for the
+// provider, who stays the author. A version is inserted as a draft, then
+// submitted once to the feedback (submit_production_version, PROD-033) —
+// the validators are notified; without a file or a link it stays a draft.
+// Only a draft is edited or removed (RLS and trigger).
 
 const t = fr.productionPost.versions;
 
@@ -33,7 +35,6 @@ const versionSchema = z
     sheetId: z.uuid(),
     // Absent: a new version.
     versionId: z.uuid().optional(),
-    label: optionalText(120),
     holder: holderSchema,
     fileId: z.uuid().nullable(),
     url: z.union([httpsUrl, z.literal("")]).transform((v) => v || null),
@@ -50,7 +51,6 @@ export async function savePostVersion(
   if (!parsed.success) return invalidPost;
   const v = parsed.data;
   const fields = {
-    label: v.label,
     person_id: v.holder.personId,
     contact_id: v.holder.contactId,
     file_id: v.fileId,
@@ -107,17 +107,13 @@ export async function savePostVersion(
     const failure = postFailure(error);
     return failure.ok ? failure : { ok: true, notice: failure.error };
   }
+  await schedulePendingPushes();
   return prepDone(v.projectId);
 }
 
-const submitSchema = z.object({
-  projectId: z.uuid(),
-  versionId: z.uuid(),
-  target: z.enum(["review", "final"]),
-});
+const submitSchema = z.object({ projectId: z.uuid(), versionId: z.uuid() });
 
-/** « Soumettre pour retours » / « Soumettre à validation finale » of a
- * version already saved. */
+/** « Soumettre aux retours » of a version already saved. */
 export async function submitPostVersion(
   input: z.input<typeof submitSchema>,
 ): Promise<PostResult> {
@@ -127,9 +123,11 @@ export async function submitPostVersion(
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_production_version", {
     p_version_id: parsed.data.versionId,
-    p_target: parsed.data.target,
+    p_target: "review",
   });
-  return error ? postFailure(error) : prepDone(parsed.data.projectId);
+  if (error) return postFailure(error);
+  await schedulePendingPushes();
+  return prepDone(parsed.data.projectId);
 }
 
 const refSchema = z.object({ projectId: z.uuid(), versionId: z.uuid() });

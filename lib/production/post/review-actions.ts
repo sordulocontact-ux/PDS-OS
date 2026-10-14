@@ -89,38 +89,17 @@ export async function setPostCommentStatus(
   return data.length === 0 ? forbiddenPost : prepDone(parsed.data.projectId);
 }
 
-const changesSchema = z.object({
-  projectId: z.uuid(),
-  versionId: z.uuid(),
-  note: z.string().trim().max(2000),
-});
-
-/** « Demander des corrections » on a version under review. */
-export async function requestPostVersionChanges(
-  input: z.input<typeof changesSchema>,
-): Promise<PostResult> {
-  await requireApproved();
-  const parsed = changesSchema.safeParse(input);
-  if (!parsed.success) return invalidPost;
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("request_production_version_changes", {
-    p_version_id: parsed.data.versionId,
-    p_note: parsed.data.note,
-  });
-  return error ? postFailure(error) : prepDone(parsed.data.projectId);
-}
-
 const decisionSchema = z
   .object({
     projectId: z.uuid(),
     versionId: z.uuid(),
-    decision: z.enum(VERSION_DECISIONS),
+    decision: z.enum(VERSION_DECISIONS).exclude(["changes"]),
     note: z.string().trim().max(2000),
   })
   .refine((d) => d.decision === "approve" || d.note !== "");
 
-/** « Valider », « Demander des corrections » or « Refuser » a version in
- * final validation; a reason is required for the last two. */
+/** « Valider » or « Refuser » a version under review (PROD-033); a refusal
+ * says why. Corrections go through requestCorrections (correction-actions). */
 export async function decidePostVersion(
   input: z.input<typeof decisionSchema>,
 ): Promise<PostResult> {
