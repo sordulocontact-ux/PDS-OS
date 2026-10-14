@@ -5,10 +5,54 @@ Source : messages d'Ibé du 13/10/2026 (16:30 et 16:52), écrits après son test
 dans lequel lire ces tickets et refaire les écrans. Une règle écrite ici sans citation d'Ibé est
 une hypothèse, soumise à Ibé au § 9.
 
+**Mise à jour du 14/10/2026** : Ibé a précisé la logique (message du 14/10, 13:45) ; ses réponses
+sont au § 0 et remplacent les hypothèses contraires plus bas (hybride abandonné, comptes plus tard).
+
 Code existant : `docs/ARCHITECTURE.md` § 8 nonies. Exemple suivi : un clip musical. La même logique
 doit valoir pour une capsule réseaux, une interview, etc.
 
 ---
+
+## 0. Ce qu'Ibé a tranché le 14/10/2026
+
+1. **Deux types seulement : interne et externe** (plus d'hybride). Une production **interne** peut
+   faire intervenir des freelances (cadreurs, monteurs, réalisateurs) : elle reste interne parce
+   que **PDS la pilote**.
+2. **Interne** : PDS organise et pilote ; chacun intervient dans PO **sur ce qui le concerne**,
+   au lieu que le chef de projet remplisse tout :
+   - réalisateur : proposition créative, découpage, besoins artistiques ;
+   - chef op / directeur technique : besoins techniques, dont le matériel ;
+   - chargé de production : lieux, devis, locations, planning, logistique ;
+   - chef de projet : suit l'avancement, coordonne, s'assure que les décisions sont prises et
+     validées.
+3. **Externe** : la production est confiée à une société. Déroulé :
+   1. brief créatif déjà validé chez PDS ;
+   2. **premier call** avec la société : projet, attentes, contraintes, budget ;
+   3. la société envoie **un devis** (pas forcément de proposition de réalisation : le réalisateur
+      n'est parfois pas encore trouvé) ;
+   4. le **chargé de production** vérifie devis, délais et cohérence avec l'enveloppe, puis le
+      **soumet à son supérieur hiérarchique** pour validation ;
+   5. devis validé → la société avance sur la préproduction et l'organisation du tournage ;
+   6. un **échange réalisateur ↔ partie créative de PDS** pour la proposition de réalisation et le
+      découpage ;
+   7. à partir du découpage, **la société** organise les calls techniques, le matériel, les
+      locations, les équipes, la logistique ;
+   8. elle **propose des lieux** (moodboard dans PO), PDS donne son avis et **valide un lieu** ;
+   9. la société gère l'opérationnel jusqu'au tournage ; **PDS suit et valide** ce qui doit l'être.
+4. **Comptes** : à terme, un **vrai compte prestataire** (future marketplace : missions, briefs,
+   moodboards, réunions, planning, consignes du réalisateur, tâches, historique). **Pour le MVP,
+   des liens privés** donnant accès à certaines parties du projet, comme le mixeur du Master. Une
+   société de production peut ainsi proposer ses lieux, déposer ses documents et mettre à jour ce
+   qui la concerne, sans voir toute l'organisation PDS. Ibé demande si un compte prestataire
+   simplifié serait rapide à faire (réponse proposée au § 10).
+5. **L'accompagnement de PO** : après chaque étape (devis validé, call technique…), PO sait la
+   suite, ce qui manque, qui doit intervenir, ce qui demande une validation ; il propose les
+   actions d'un compte rendu, préremplit et attribue après confirmation. Chaque étape a une
+   logique, un responsable, des prérequis et une suite claire. **L'expérience change selon le
+   rôle** (réalisateur, chargé de production, cadreur, monteur). « Les fonctionnalités sont déjà
+   en grande partie présentes, mais il faut maintenant les relier pour créer un véritable
+   parcours de production, plutôt qu'une succession de formulaires. » Les corrections précises
+   viendront en tickets.
 
 ## 1. Ce qu'Ibé reproche à l'écran actuel
 
@@ -67,7 +111,9 @@ est en général un **contact du Réseau**, sans compte.
 - **Exception** : un rôle tenu par quelqu'un du label (le directeur créatif qui réalise, par
   exemple) se fait dans l'app avec son compte, comme aujourd'hui pour le brief réalisateur.
 
-## 3. L'organisation de la production : interne, externe, hybride
+## 3. L'organisation de la production : interne, externe
+
+> 14/10 : l'hybride est abandonné (§ 0) ; « Hybride » ci-dessous est l'ancienne hypothèse.
 
 C'est **la première décision** de la Production, avant toute préparation (Ibé, étape 1 « Définir
 l'organisation »).
@@ -202,6 +248,15 @@ Chaque question donne **notre hypothèse** : un « oui » suffit si elle est jus
 conditionnent tous les écrans ; le reste peut attendre ses tickets. Reporter chaque réponse ici
 (« Réponse d'Ibé, JJ/MM : … ») puis dans les § 2 à 8.
 
+**Réponses du 14/10 (§ 0)** : n° 1 (interne : PDS pilote, freelances possibles ; externe : une
+société), 3 (liens privés pour le MVP, comptes plus tard), 8 à 12 (deux types, pas d'hybride ;
+déroulé externe complet ; la société a son accès pour lieux, documents et ce qui la concerne), 20
+(en externe, la société propose les lieux, PDS valide), 22 (le chargé de production vérifie le
+devis et le soumet à son supérieur). Restent ouvertes : n° 2 (le chargé de production est-il un
+salarié avec compte ou un freelance par lien ?), 7 et 22 (qui est « le supérieur hiérarchique » qui
+valide un devis : chef de projet, DG, selon un montant ?), 9 (où se choisit interne / externe : par
+livrable ?), 13 (contenus sans tournage).
+
 ### A. Qui utilise PDS OS (bloquant)
 
 1. Réalisateur, chef op, directeur / chargé de production, régisseur, monteur : ce sont des
@@ -326,3 +381,42 @@ conditionnent tous les écrans ; le reste peut attendre ses tickets. Reporter ch
     l'équipe, nombre de jours, budget) ?
 47. Une production PDS **type** : combien de personnes, de jours de tournage, quel budget ?
     Plutôt clips ou plutôt capsules ?
+
+## 10. Écart avec la branche `feat/production-ibe` (14/10/2026)
+
+Les 40 tickets PROD et 7 BUG sont codés (`docs/AVANCEMENT.md`, lots 1 à 14). Ce qui y répond déjà
+au § 0 : la prochaine action par fiche (calculée, avec qui est attendu), le préremplissage sourcé,
+le compte rendu du call → actions planifiées et attribuées après confirmation, les lieux comparés
+avec avis par rôle, le cycle de version, l'espace prestataire `/p/[token]` (mission, corrections,
+dépôt de versions et d'exports, avis sur les lieux), la feuille de service `/fs/[token]`.
+
+Ce qui manque encore :
+
+- **M1. Interne / externe n'existe pas.** Les modes d'ouverture (direct / call / import) disent
+  comment remplir, pas qui produit. L'externe doit dérouler son propre parcours (§ 0.3) : call avec
+  la société, devis global, validation du devis, échange réalisateur ↔ créatif, puis la société
+  qui organise.
+- **M2. Pas de validation de devis par le supérieur.** Le matériel et le budget ont des états, mais
+  aucun « soumettre le devis → validé / refusé » par une personne autorisée, qui débloquerait la
+  suite.
+- **M3. Le lien prestataire est étroit.** Il couvre la postproduction et l'avis sur les lieux. En
+  externe, la société doit pouvoir **proposer des lieux**, **déposer son devis et ses documents**,
+  et tenir matériel, équipes, planning et feuille de service ; en interne, le réalisateur
+  (découpage), le chef op (matériel) et le chargé de production (lieux, devis, planning) ont
+  chacun leur part.
+- **M4. La prochaine action parle au chef de projet.** Elle nomme qui est attendu, mais chaque
+  rôle n'a pas « ce que j'ai à faire » sur sa propre page.
+
+Réponse proposée à Ibé sur le **compte prestataire simplifié** : pas pour le MVP. Un compte
+change la sécurité de toute la base : aujourd'hui, un compte est un membre de PDS, et dès qu'il est
+rattaché à un projet il en lit toutes les tables (budget, contacts, juridique…) par
+`can_see_project` ; un prestataire connecté demanderait un nouveau type de compte restreint à sa
+mission, table par table, à revoir partout. Le lien privé obtient l'essentiel sans ce risque. Étape intermédiaire possible et
+rapide : **un lien par prestataire** (et non plus par mission) qui rassemble toutes ses missions
+en cours, sur tous les projets — l'expérience d'un compte (« mes missions ») sans connexion ; le
+jour où les comptes arrivent, ce lien devient son espace connecté.
+
+Ordre proposé (non commencé) : M1 (choix interne / externe et parcours externe, qui conditionne
+tout le reste) → M2 (validation du devis) → M3 (lien de la société de production, puis parts
+réalisateur / chef op / chargé de production) → M4 (vue par rôle).
+
