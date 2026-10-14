@@ -1,0 +1,38 @@
+// Run from the repository root: node docs/protos/tests/audio.cjs
+// Screenshots go to $TMPDIR/pds-protos (never into docs/).
+const path = require("path"), os = require("os"), fs = require("fs");
+const html = path.resolve(__dirname, "..");
+const fixtures = path.join(__dirname, "fixtures");
+const out = path.join(os.tmpdir(), "pds-protos"); fs.mkdirSync(out, { recursive: true });
+const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
+(async () => { const b = await chromium.launch({ channel: "chrome", headless: true, args:["--autoplay-policy=no-user-gesture-required"] }); const p = await b.newPage({ viewport:{width:1440,height:1100} }); p.setDefaultTimeout(15000);
+ const errs=[]; p.on("pageerror", e => errs.push(e.message));
+ await p.goto("file://" + html + "/pds-app.html");
+ const go = t => p.locator("button.btn", { hasText: t }).first().click();
+ const op = async () => { const l = p.locator("button.btn", { hasText: "Ouvrir" }); if (await l.count()) await l.first().click(); };
+ await p.selectOption("#scenSel","running"); 
+ await p.selectOption("#roleSel","mix");
+ await go("Envoyer le Mix V1"); console.log("no file:", await p.locator(".err").innerText());
+ await p.setInputFiles('input[data-up="m3"]', fixtures + "/contrat.pdf"); console.log("pdf:", await p.locator(".err").innerText());
+ await p.setInputFiles('input[data-up="m3"]', fixtures + "/mix-test.wav"); await p.waitForTimeout(500);
+ console.log("chosen:", (await p.locator(".drop").innerText()).replace(/\n/g," | "));
+ await p.screenshot({ path: out + "/portal-drop.png" });
+ await go("Envoyer le Mix V1"); console.log("flash:", await p.locator(".flash b").first().innerText());
+ console.log("portal versions:", (await p.locator(".ver").allInnerTexts()).map(t=>t.replace(/\n/g," | ")));
+ await p.selectOption("#roleSel","da"); await op();
+ await p.locator('[data-act="play"]').first().click(); await p.waitForTimeout(400);
+ console.log("playing pressed:", await p.locator('[data-act="play"][aria-pressed="true"]').count(), "| real audio playing:", await p.evaluate(()=>[...document.querySelectorAll("audio")].length));
+ await p.locator(".card").filter({ hasText: "Versions reçues" }).last().screenshot({ path: out + "/da-versions.png" });
+ await p.fill("#altnote","Voix trop en avant sur le refrain."); await go("Demander une modification");
+ await p.selectOption("#roleSel","mix");
+ console.log("mix sees:", (await p.locator(".ver").allInnerTexts()).map(t=>t.replace(/\n/g," | ")), "| note:", await p.locator(".ver-note").innerText());
+ await go("Utiliser un fichier d'exemple"); await go("Envoyer le Mix V2");
+ await p.selectOption("#roleSel","da"); await op(); await go("Valider le mix");
+ await p.selectOption("#roleSel","cp"); await p.locator('.pitem', { hasText: "Master" }).click(); await p.locator('.step[data-step="m3"]').click();
+ console.log("cp sees:", (await p.locator(".ver .pill").allInnerTexts()));
+ await p.selectOption("#roleSel","mix"); await go("Utiliser un fichier d'exemple"); await go("Envoyer le Master V1");
+ await p.selectOption("#roleSel","da"); await op(); await go("Valider le master");
+ await p.selectOption("#roleSel","cp"); await op();
+ console.log("master final:", (await p.locator(".vers").innerText()).replace(/\n/g," | "));
+ await p.selectOption("#scenSel","late"); await p.selectOption("#roleSel","da"); await p.locator('.navbtn[aria-label="Projets"]').click().catch(()=>{});
+ console.log("errors:", errs); await b.close(); })();

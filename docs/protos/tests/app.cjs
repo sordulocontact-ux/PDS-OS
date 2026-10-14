@@ -2,6 +2,7 @@
 // Screenshots go to $TMPDIR/pds-protos (never into docs/).
 const path = require("path"), os = require("os"), fs = require("fs");
 const html = path.resolve(__dirname, "..");
+const fixtures = path.join(__dirname, "fixtures");
 const out = path.join(os.tmpdir(), "pds-protos"); fs.mkdirSync(out, { recursive: true });
 const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
 (async () => {
@@ -35,7 +36,7 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
   await op(); await go("Confirmer le Brief"); await op(); await go("Transmettre au mixeur");
   await role("mix"); log.push("mix portal: " + (await p.locator("h1").first().textContent()));
   await p.screenshot({ path: out + "/app-portal-mix.png", fullPage: true });
-  await go("Déposer le Mix V1");
+  await go("Utiliser un fichier d'exemple"); await go("Envoyer le Mix V1");
   await role("da"); log.push("da home: " + await now());
   await p.screenshot({ path: out + "/app-home-da.png", fullPage: true });
   await role("cp"); await p.locator('.navbtn[aria-label="Projets"]').click(); await p.locator('.tr.link').click();

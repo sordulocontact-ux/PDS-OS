@@ -172,9 +172,22 @@ valent partout, dans l'app comme dans les protos.
     **chacune avec la phrase qui la justifie** ; on les attribue ou on les décoche, puis on
     confirme, et elles arrivent chez chacun. PO ne valide, ne transmet, ne signe jamais, et
     n'écrit ni état, ni date, ni montant : il les recopie, le code les vérifie.
-12. **Une décision non prise n'est pas une tâche.** Les points « À décider » ne sont jamais
+12. **Ce que PO a compris vient toujours d'une parole visible.** PO ne montre jamais une
+    information sortie de nulle part : elle vient d'une réponse que la personne vient de donner
+    (tapée ou dictée), d'un compte rendu de call ou d'un document, et **chaque élément porte sa
+    citation mot pour mot**. Le code écarte ce qui n'est pas écrit tel quel dans la source. Aucun
+    chiffre déduit (une part, un pourcentage) : seulement ce qui a été dit. Au Cadrage juridique,
+    PO pose une question à la fois (calculée par le code d'après ce qui manque, avec son
+    pourquoi), la réponse part de ce qui est déjà connu, puis « Ce que PO a compris » : on retire
+    le faux, on enregistre. *(Sacha 14/10 : « d'où viennent ces infos de PO ? »)*
+13. **Ce qu'on livre est le vrai fichier, et on l'écoute avant de décider.** Le mixeur dépose un
+    fichier audio par son lien (WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG, refusé sinon, avec la
+    raison) ; chaque version (Mix V1, V2…, Master V1…) a son lecteur, son statut (« À valider »,
+    « Modification demandée » avec le motif, « Validée ») et reste visible de tous, mixeur
+    compris. Le Master final montre le fichier validé. *(Sacha 14/10)*
+14. **Une décision non prise n'est pas une tâche.** Les points « À décider » ne sont jamais
     assignés ni datés.
-13. **Les mots sont ceux de l'app.** Libellés repris de `lib/i18n/fr/`, verbes précis
+15. **Les mots sont ceux de l'app.** Libellés repris de `lib/i18n/fr/`, verbes précis
     (« Confirmer la version source », pas « Valider »), le même mot du bouton au toast et au
     journal.
 
@@ -220,6 +233,8 @@ Erreurs trouvées en testant, chacune corrigée le 14/10 :
 | « Modifier » sur les informations d'un autre | Celui qui accepte réécrirait ce que le DG a transmis | Demander une précision ou refuser |
 | Un refus sans motif, ou pas d'issue « Refuser » | La personne ne sait pas quoi corriger | Règle 6 |
 | « Maintenant » qui répète l'étape affichée, avec « Ouvrir l'étape » vers la page où on est déjà | Bruit, et un bouton qui ne mène nulle part | La carte disparaît ; « Aussi à vous » pour une autre action |
+| Un encadré PO qui affirme des faits avant toute réponse, avec un « 40 % » inventé | On ne sait pas d'où ça vient, et l'IA ne produit pas de chiffre | Question, réponse, « Ce que PO a compris » avec citations (règle 12) |
+| « Déposer le Mix V1 » comme simple bouton | Ce qui se livre, c'est un fichier audio qu'on écoute | Dépôt audio et versions écoutables (règle 13) |
 | Une action ou « Modifier » sur une étape verrouillée | On prépare sur des prérequis pas faits | Lecture seule et « Se débloque quand… » |
 | Un « proto » qui est une page de présentation | On ne peut pas sentir le parcours | Le produit cliquable (`docs/PROTOS.md`) |
 

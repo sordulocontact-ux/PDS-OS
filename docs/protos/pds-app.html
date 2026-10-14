@@ -163,6 +163,26 @@ a{color:inherit}
 .field label{font-size:14px;font-weight:600}
 .in{min-height:40px;border:1px solid var(--field);border-radius:8px;background:var(--raised);padding:8px 12px;width:100%}
 textarea.in{min-height:64px;resize:vertical}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.lbl2{font-size:15px}
+.drop{position:relative;display:flex;align-items:center;gap:12px;min-height:72px;padding:14px 16px;border:1.5px dashed var(--border);border-radius:10px;background:var(--soft);cursor:pointer;transition:border-color 150ms ease,background-color 150ms ease}
+.drop.over{border-color:var(--sel);background:var(--sel-bg)} .drop.bad{border-color:var(--bad-fg)}
+.drop:focus-within{outline:2px solid var(--sel);outline-offset:2px}
+.drop .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+@media (hover:hover) and (pointer:fine){.drop:hover{border-color:var(--hover-border)}}
+.vers{display:flex;flex-direction:column;gap:8px}
+.field .src{font-size:14px;color:var(--text-2)}
+.qa{display:flex;flex-direction:column;gap:12px}.qh{font-size:18px;font-weight:600;letter-spacing:-.03em}
+.ver{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.rows .ver:last-child{border-bottom:0}
+.ver .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.ver-note{margin:0 14px 10px;border-radius:8px}
+.play{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--inverse);color:var(--inverse-fg);display:grid;place-items:center;cursor:pointer;transition:transform 120ms var(--ease)}
+.play:active{transform:scale(.94)} .play[aria-pressed="true"]{background:var(--sel);color:#fff}
+.wave{display:block;height:3px;margin-top:6px;border-radius:2px;background:var(--hair);overflow:hidden}
+.wave i{display:block;height:100%;width:100%;background:var(--sel);transform-origin:left;animation:wave 194s linear forwards}
+@keyframes wave{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.wave i{animation:none;transform:scaleX(.3)}}
 .in[aria-invalid="true"]{border-color:var(--bad-fg)}
 .err{font-size:13px;color:var(--bad-fg)}
 
@@ -231,6 +251,8 @@ const I={
   spark:'<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z"/></svg>',
   ok:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>',
   warn:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 11.6v.1"/></svg>',
+  play:'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.2v9.6L13 8z"/></svg>',
+  pause:'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="4" y="3" width="2.8" height="10" rx=".6"/><rect x="9.2" y="3" width="2.8" height="10" rx=".6"/></svg>',
   x:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
   updown:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>',
   home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
@@ -265,7 +287,7 @@ const ROLE_ORDER=["dg","cp","da","charge","mix","soc","collab"];
    actions that move it, in order (who does each one). */
 const W={};
 function wf(key,label,group,steps,extra){W[key]=Object.assign({key,label,group,steps},extra||{});}
-const A=(by,label,done,alt)=>({by,label,done,alt});
+const A=(by,label,done,alt,opt)=>Object.assign({by,label,done,alt},opt||{});
 
 wf("launch","Lancement","top",[
   {id:"l1",title:"Création et transmission",why:"Le DG crée le projet avec ses titres et son contexte, puis le confie à une personne.",owner:"dg",prereq:[],
@@ -306,9 +328,9 @@ wf("master","Master","workflows",[
    facts:[["Ingénieur","Karim Haddou, mix et mastering","Cadrage, dimension 04","engineer"],["Validation des versions","Nadia Benali","Directrice créative","versions"],["Mix V1 attendu le","Dim. 15/11/2026","Calculé : 6 jours avant le master final","date"],["Mix final attendu le","Mer. 18/11/2026","Calculé : 3 jours avant le master final","date"],["Mastering attendu le","Ven. 20/11/2026","Calculé : 1 jour avant le master final","date"],["Master final attendu le","Sam. 21/11/2026","Cadrage, dimension 02","date"]],
    acts:[A("cp","Confirmer le Brief","Brief Mix et Master prêt")]},
   {id:"m3",title:"Mixage",why:"Les versions arrivent du mixeur par son lien ; chacune est validée ou corrigée.",owner:"mix",validator:"da",prereq:["m2"],
-   acts:[A("cp","Transmettre au mixeur","Dossier envoyé à Karim Haddou (lien valable 60 jours)"),A("mix","Déposer le Mix V1","Mix V1 déposé"),A("da","Valider le mix","Mix V2 validé : Mix final",{label:"Demander une modification",to:"mix",note:"Voix trop en avant sur le refrain."})]},
+   acts:[A("cp","Transmettre au mixeur","Dossier envoyé à Karim Haddou (lien valable 60 jours)"),A("mix","Déposer une version du mix","Version du mix déposée",null,{upload:"mix"}),A("da","Valider le mix","Mix validé : il devient le Mix final",{label:"Demander une modification",to:"mix",note:"Voix trop en avant sur le refrain."})]},
   {id:"m4",title:"Mastering",why:"S'ouvre quand le mix final est validé.",owner:"mix",validator:"da",prereq:["m3"],
-   acts:[A("mix","Déposer le master","Master V1 déposé"),A("da","Valider le master","Master validé")]},
+   acts:[A("mix","Déposer une version du master","Version du master déposée",null,{upload:"master"}),A("da","Valider le master","Master validé",{label:"Demander une modification",to:"mix",note:"Un peu moins de compression sur le refrain."})]},
   {id:"m5",title:"Master final",why:"La version validée devient le Master final : prérequis de la mise en ligne.",owner:"cp",prereq:["m4"],
    acts:[A("cp","Confirmer le Master final","Master final au Catalogue")]}
 ]);
@@ -316,9 +338,8 @@ wf("legal","Juridique","workflows",[
   {id:"j1",title:"État des lieux",why:"Ce que le projet sait déjà, classé connu, à confirmer ou manquant.",owner:"cp",prereq:["p1"],
    facts:[["Titre","ISRC FR-PDS-26-00041","Connu"],["Crédits","Mona Lys, Sami Kader","Cadrage"],["Sample","4 s, ayant droit inconnu","À confirmer"]],
    acts:[A("cp","Compléter l'état des lieux","État des lieux complet")]},
-  {id:"j2",title:"Cadrage juridique",why:"Des questions une à une ; PO montre ce qu'il a compris, la personne retire le faux.",owner:"cp",prereq:["j1"],
-   po:"« Ce que PO a compris » : Sami Kader co-écrit à 40 % ; le sample vient d'un disque de 1978, éditeur à retrouver.",
-   acts:[A("cp","Répondre aux questions","Cadrage juridique enregistré")]},
+  {id:"j2",title:"Cadrage juridique",why:"PO pose une question à la fois sur ce que le projet ne sait pas encore. Vous répondez librement ; il relève les informations, vous les vérifiez avant qu'elles soient gardées.",owner:"cp",prereq:["j1"],qa:true,
+   acts:[A("cp","Répondre aux questions","Cadrage juridique enregistré : 2 réponses")]},
   {id:"j3",title:"Confirmation",why:"Une synthèse écrite par le code, confirmée par une personne.",owner:"cp",prereq:["j2"],acts:[A("cp","Confirmer le dossier","Dossier confirmé")]},
   {id:"j4",title:"Plan d'action",why:"Le code propose les démarches ; lancer en fait des tâches cochées par leurs sources.",owner:"cp",prereq:["j3"],
    facts:[["Fiche de renseignements","Sami Kader","À lancer maintenant"],["Contrat de co-édition","Sami Kader","Après la fiche"],["Sécuriser le sample","Ayant droit à trouver","Bloque la sortie"],["SACEM","Bulletin 725","Après le contrat"]],
@@ -397,7 +418,7 @@ const ALL_STEPS=[];Object.values(W).forEach(w=>w.steps.forEach(s=>{s.wf=w.key;AL
 const STEP=id=>ALL_STEPS.find(s=>s.id===id);
 
 /* State: how far each step has gone (index of the next action). */
-function fresh(){return {role:"dg",view:"home",wf:"overview",sel:null,ph:{},notes:{},log:[],flash:null,clock:0,edits:{},editing:null,pickSel:{},imported:{},playing:null};}
+function fresh(){return {role:"dg",view:"home",wf:"overview",sel:null,ph:{},notes:{},log:[],flash:null,clock:0,edits:{},editing:null,pickSel:{},imported:{},playing:null,deliveries:{},up:{},uperr:{},qa:null,qaErr:null};}
 let S=fresh();
 const ph=id=>S.ph[id]||0;
 const isDone=id=>ph(id)>=STEP(id).acts.length;
@@ -602,6 +623,7 @@ function detail(s){
   ${s.intro?`<p class="note"><b>${esc(s.intro)}</b></p>`:""}
   ${s.facts?factsBlock(s):""}
   ${s.missing&&statusOf(s.id)!=="done"?`<div class="callout warn">${I.warn}<span>Pas encore connu, sera cadré après l'acceptation : ${s.missing.map(esc).join(", ")}.</span></div>`:""}
+  ${s.qa?qaSaved():""}${s.id==="m3"||s.id==="m4"?versionsBlock(s.id):""}${s.id==="m5"?versionsBlock("m4","Master validé",d=>d.status==="approved"):""}
   ${s.board?board():""}${s.blockers?blockers():""}
   ${done.length?`<ul class="hist" aria-label="Déjà fait">${done.map(x=>`<li><span class="okc">${I.check}</span><span>${esc(x.done)} <span class="t3">· ${esc(P[x.by].name)}</span></span></li>`).join("")}</ul>`:""}
   ${a?(a.by===S.role?actionBlock(s,a):`<div class="wr">${av(a.by,true)}<span class="grow">En attente de <b>${esc(P[a.by].name)}</b>${P[a.by].where==="lien"?` (${esc(P[a.by].place.toLowerCase())}, lien privé)`:""} : ${esc(a.label.toLowerCase())}</span></div>`):""}
@@ -644,7 +666,82 @@ function factsBlock(s){
 }
 const wfLabelShort=s=>(s.wf==="launch"||s.wf==="framing"||s.wf==="plan"||s.wf===S.wf||s.wf===S.sub?"":W[s.wf].label+" › ")+s.title;
 const altsOf=a=>a.alt?(Array.isArray(a.alt)?a.alt:[a.alt]):[];
+/* Cadrage juridique: the questions are computed by code from what the
+   project lacks; the answer is the person's words (typed or dictated). PO
+   keeps an element only if it is written word for word in the answer, and
+   shows that quote; the person removes what is wrong, then saves. */
+const QA=[
+  {short:"Participants",ask:"Qui d'autre a participé à « Néons » ?",
+   why:"PDS OS connaît déjà les personnes ci-dessous. Il manque qui a composé, écrit, arrangé, produit ou joué : c'est ce que demandent les contrats et la déclaration SACEM.",
+   hint:"Composition, texte, arrangement, production, enregistrement, mix, musiciens… Plusieurs personnes à la fois, comme vous le diriez.",
+   start:"Mona Lys : interprète (artiste du titre)\nSami Kader : co-auteur (Cadrage)\nKarim Haddou : mix et mastering (Cadrage)\n",
+   startNote:"Déjà connu, avec sa source : ajoutez à la suite les autres personnes et leur rôle, puis faites lire la réponse à PO.",
+   example:"Mona a écrit le texte. Sami Kader a composé la musique avec elle. Yanis Morel a joué la basse.",
+   finds:[["Mona Lys · interprète","Mona Lys : interprète"],["Sami Kader · co-auteur","Sami Kader : co-auteur"],["Karim Haddou · mix et mastering","Karim Haddou : mix et mastering"],["Mona Lys · texte","Mona a écrit le texte"],["Sami Kader · composition","Sami Kader a composé la musique"],["Yanis Morel · musicien, basse","Yanis Morel a joué la basse"]]},
+  {short:"Élément repris",ask:"« Néons » reprend-il un élément d'une œuvre existante ?",
+   why:"Un emprunt à une œuvre existante exige l'autorisation préalable de ses ayants droit (bulletin SACEM).",
+   hint:"Une topline, un sample, une interpolation, une reprise… Précisez l'œuvre et, si vous le savez, son auteur. Sinon, répondez « non ».",
+   start:"Il y a un sample de 4 s",startNote:"Repris du Cadrage (« il y a un sample de 4 s ») : vérifiez, complétez si besoin, puis faites lire la réponse à PO.",
+   example:", tiré d'un disque de 1978, Night Lights des Velvetones. On ne sait pas qui a les droits.",
+   finds:[["Sample de 4 s","sample de 4 s"],["Œuvre : « Night Lights », The Velvetones","Night Lights des Velvetones"],["Disque de 1978","disque de 1978"],["Ayant droit : inconnu, à retrouver","On ne sait pas qui a les droits"]]}
+];
+const qaState=()=>S.qa||(S.qa={i:0,text:{},read:{},removed:{},saved:[]});
+const qaFound=(q,text)=>q.finds.map((f,j)=>({label:f[0],quote:f[1],j})).filter(f=>text.toLowerCase().includes(f.quote.toLowerCase()));
+function qaBlock(s){
+  const st=qaState(), i=st.i, q=QA[i], text=st.text[i]!=null?st.text[i]:q.start;
+  const head=`<div class="qa"><span class="cap">Question ${i+1} sur ${QA.length} · ${esc(q.short)}</span><h3 class="qh">${esc(q.ask)}</h3><p class="note">${esc(q.why)}</p>`;
+  if(!st.read[i]) return head+`<div class="field"><label for="qaText"><b>Votre réponse</b></label><span class="src">${esc(q.startNote)}</span>
+    <textarea class="in" id="qaText" rows="5" aria-describedby="qaHint">${esc(text)}</textarea><span class="src" id="qaHint">${esc(q.hint)} Vous pouvez aussi la dicter.</span>${S.qaErr?`<span class="err" role="alert">${esc(S.qaErr)}</span>`:""}</div>
+    <div class="btnrow"><button class="btn" type="button" data-act="qaread">Lire ma réponse</button><button class="btn ghost sm" type="button" data-act="qaexample">Compléter avec un exemple</button></div></div>`;
+  const found=qaFound(q,text).filter(f=>!st.removed[i+":"+f.j]);
+  return head+`<div class="field"><b>Ce que PO a compris</b><span class="src">Retirez ce qui est faux, puis enregistrez. Rien n'est gardé avant.</span></div>
+    ${found.length?`<div class="rows">${found.map(f=>`<div class="row"><span><b>${esc(f.label)}</b><br><span class="src">« ${esc(f.quote)} »</span></span><button class="btn ghost sm" type="button" data-act="qaremove" data-j="${f.j}" aria-label="Retirer « ${esc(f.label)} »">Retirer</button></div>`).join("")}</div>`
+      :`<div class="callout warn">${I.warn}<span>PO n'a rien relevé dans cette réponse. Reformulez, ou précisez les noms tels qu'ils doivent être écrits.</span></div>`}
+    <div class="btnrow">${found.length?`<button class="btn" type="button" data-act="qasave">Enregistrer</button>`:""}<button class="btn out" type="button" data-act="qaback">Revoir ma réponse</button></div></div>`;
+}
+function qaSaved(){
+  const st=S.qa; if(!st||!st.saved.length) return "";
+  return `<div class="vers"><h3>Réponses enregistrées</h3><div class="rows">${st.saved.map(r=>`<div class="row" style="grid-template-columns:minmax(0,1fr)"><span><b>${esc(r.short)}</b><br>${r.items.map(f=>`${esc(f.label)} <span class="src">« ${esc(f.quote)} »</span>`).join("<br>")}</span></div>`).join("")}</div></div>`;
+}
+/* Audio delivered by the engineer through their link: only an audio file
+   is accepted (the app's delivery-rules.ts), each version is listened to in
+   place before it is validated or sent back with a reason. */
+const AUDIO_EXT=["wav","aif","aiff","flac","mp3","m4a","aac","ogg"];
+const KIND={mix:{label:"Mix",step:"m3",sample:n=>[`Neons_Mix_V${n}_KH.wav`,"3 min 14 · 48 kHz · 24 bits · 112 Mo"]},master:{label:"Master",step:"m4",sample:n=>[`Neons_Master_V${n}_24-44.wav`,"3 min 14 · 44,1 kHz · 24 bits · 98 Mo"]}};
+const versionsOf=id=>S.deliveries[id]||[];
+const nextVersion=id=>versionsOf(id).length+1;
+const fmtDur=sec=>`${Math.floor(sec/60)} min ${String(Math.round(sec%60)).padStart(2,"0")}`;
+let player=null;
+function playToggle(d){
+  if(S.playing===d.id){S.playing=null;if(player) player.pause();return;}
+  if(player) player.pause();
+  S.playing=d.id;
+  if(d.url){player=new Audio(d.url);player.onended=()=>{if(S.playing===d.id){S.playing=null;render();}};player.play().catch(()=>{});}
+}
+const STATUS={pending:["info","À valider"],changes:["warn","Modification demandée"],approved:["ok","Validée"]};
+function versionRow(d){
+  const [tone,label]=STATUS[d.status];
+  return `<div class="ver"><button class="play" type="button" data-act="play" data-id="${d.id}" aria-pressed="${S.playing===d.id}" aria-label="${S.playing===d.id?"Pause":"Écouter"} ${esc(d.title)}">${S.playing===d.id?I.pause:I.play}</button>
+  <span class="grow"><b>${esc(d.title)}</b> · ${esc(d.name)}<br><span class="src">${esc(d.meta)} · déposée par ${esc(d.by)} le ${esc(d.at)}</span>${S.playing===d.id?`<span class="wave" aria-hidden="true"><i style="animation-duration:${d.sec||194}s"></i></span>`:""}</span>
+  <span class="pill ${tone}">${label}</span></div>${d.note?`<div class="callout warn ver-note">${I.warn}<span>${esc(d.note)}</span></div>`:""}`;
+}
+function versionsBlock(id,title,keep){
+  const v=versionsOf(id).filter(keep||(()=>true)).reverse();
+  return v.length?`<div class="vers"><h3>${esc(title||"Versions reçues")}</h3><div class="rows">${v.map(versionRow).join("")}</div></div>`:"";
+}
+function uploadBlock(s,a){
+  const k=KIND[a.upload], n=nextVersion(s.id), f=S.up[s.id], err=S.uperr[s.id];
+  return `<div class="field"><span class="lbl2"><b>${k.label} V${n}</b>${n>1?" · la version qui répond au retour":""}</span>
+  <label class="drop ${err?"bad":""}" data-step="${s.id}"><input type="file" data-up="${s.id}" accept=".${AUDIO_EXT.join(",.")},audio/*" class="sr">
+   ${f?`<span class="grow"><b>${esc(f.name)}</b><br><span class="src">${esc(f.meta)}</span></span><span class="btn ghost sm" aria-hidden="true">Remplacer</span>`
+     :`<span class="grow"><b>Glissez le fichier audio ici, ou choisissez-le</b><br><span class="src">WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG</span></span>`}</label>
+  ${err?`<span class="err" role="alert">${esc(err)}</span>`:""}
+  ${f?"":`<div><button class="btn ghost sm" type="button" data-act="sample" data-step="${s.id}">Utiliser un fichier d'exemple</button></div>`}</div>
+  <div class="btnrow"><button class="btn" type="button" data-act="do" data-step="${s.id}">Envoyer le ${k.label} V${n}</button></div>`;
+}
 function actionBlock(s,a){
+  if(s.qa) return qaBlock(s);
+  if(a.upload) return uploadBlock(s,a);
   const alts=altsOf(a), label=s.reopenLabel&&S.notes[s.id]?s.reopenLabel:a.label;
   return `<div class="btnrow"><button class="btn" type="button" data-act="do" data-step="${s.id}">${esc(label)}</button>${alts.map((x,i)=>`<button class="btn out" type="button" data-act="alt" data-step="${s.id}" data-i="${i}">${esc(x.label)}</button>`).join("")}</div>
   ${alts.length?`<div class="field"><label for="altnote">Motif, si vous choisissez ${alts.map(x=>`« ${esc(x.label)} »`).join(" ou ")}</label><textarea class="in" id="altnote" placeholder="${esc(alts[0].note)}"></textarea><span class="err" id="alterr" hidden>Dites pourquoi : la personne concernée le lira.</span></div>`:""}`;
@@ -704,10 +801,11 @@ function simplePage(v){
 function portal(){
   const me=P[S.role], mine=myOpen(S.role), done=ALL_STEPS.filter(s=>s.acts.slice(0,ph(s.id)).some(a=>a.by===S.role));
   return `<div class="portal"><header class="pbar"><span style="display:flex;align-items:center;gap:10px"><span class="brand" style="margin:0">PDS</span><b>${esc(me.place)} · ${esc(me.name)}</b></span><span class="lockline">${I.lock} Lien privé ${me.link}… · sans compte</span></header>
-  <div class="pwrap"><div><p class="cap">Néons · Mona Lys · ${esc(me.role)}</p><h1 class="h1">${mine.length?"Ce que PDS attend de vous":"Rien à faire pour l'instant"}</h1></div>
+  <div class="pwrap"><div><p class="cap">Néons · Mona Lys · ${esc(me.role)}</p><h1 class="h1">${mine.length?"Ce que PDS attend de vous":"Rien à faire pour l'instant"}</h1></div>${S.flash?flash():""}
   <section class="card"><h2>Votre contact chez PDS</h2><div class="eyebrow">${av("cp",true)}<span><b>Lina Haddad</b> · Cheffe de projet</span></div></section>
-  ${mine.map(s=>`<section class="card"><div class="dhead"><h2>${esc(actorOf(s.id).label)}</h2><span class="pill info">À vous</span></div><p class="note">${esc(s.why)}</p>${S.notes[s.id]?`<div class="callout warn">${I.warn}<span>${esc(S.notes[s.id])}</span></div>`:""}${actionBlock(s,actorOf(s.id))}</section>`).join("")}
+  ${mine.map(s=>`<section class="card"><div class="dhead"><h2>${esc(actorOf(s.id).label)}</h2><span class="pill info">À vous</span></div><p class="note">${esc(s.why)}</p>${S.notes[s.id]?`<div class="callout warn">${I.warn}<span>${esc(S.notes[s.id])}</span></div>`:""}${actionBlock(s,actorOf(s.id))}${versionsBlock(s.id,"Vos versions déjà envoyées")}</section>`).join("")}
   ${!mine.length?`<section class="card"><p class="note">PDS vous préviendra ici dès qu'une étape vous attend.</p></section>`:""}
+  ${["m3","m4"].filter(id=>!mine.some(x=>x.id===id)&&versionsOf(id).some(d=>d.by===me.name)).map(id=>`<section class="card">${versionsBlock(id,id==="m3"?"Vos versions du mix":"Vos versions du master")}</section>`).join("")}
   ${done.length?`<section class="card"><h2>Déjà fait</h2><ul class="hist">${done.flatMap(s=>s.acts.slice(0,ph(s.id)).filter(a=>a.by===S.role).map(a=>`<li><span class="okc">${I.check}</span><span>${esc(a.done)}</span></li>`)).join("")}</ul></section>`:""}
   </div></div>`;
 }
@@ -742,7 +840,31 @@ document.addEventListener("click",e=>{
     case "sel": S.sel=el.dataset.step; break;
     case "open": openStep(el.dataset.step); S.flash=null; break;
     case "unflash": S.flash=null; break;
-    case "do": S.editing=null; advance(el.dataset.step); break;
+    case "do": {
+      S.editing=null; const id=el.dataset.step, a=actorOf(id);
+      if(a&&a.upload){
+        const f=S.up[id], k=KIND[a.upload], n=nextVersion(id);
+        if(!f){S.uperr[id]=`Choisissez le fichier audio du ${k.label} V${n}.`;break;}
+        (S.deliveries[id]=S.deliveries[id]||[]).push({id:id+"-"+n,title:`${k.label} V${n}`,name:f.name,meta:f.meta,url:f.url||null,sec:f.sec||null,by:P[a.by].name,at:stamp(),status:"pending"});
+        delete S.up[id]; delete S.uperr[id]; advance(id);
+        S.flash.title=`${k.label} V${n} envoyé à PDS`; toast(`${k.label} V${n} envoyé.`); break;
+      }
+      const last=versionsOf(id).slice(-1)[0];
+      if(a&&last&&last.status==="pending"&&a.by===STEP(id).validator) last.status="approved";
+      advance(id); break;
+    }
+    case "qaexample": {const st=qaState(),n=document.getElementById("qaText"),q=QA[st.i];st.text[st.i]=(n?n.value:q.start)+q.example;S.qaErr=null;break;}
+    case "qaread": {const st=qaState(),n=document.getElementById("qaText"),v=n?n.value.trim():"";if(!v){S.qaErr="Écrivez ou dictez votre réponse : PO la lira.";break;}st.text[st.i]=v;st.read[st.i]=true;S.qaErr=null;break;}
+    case "qaback": {const st=qaState();st.read[st.i]=false;break;}
+    case "qaremove": {const st=qaState();st.removed[st.i+":"+el.dataset.j]=true;break;}
+    case "qasave": {
+      const st=qaState(),q=QA[st.i],items=qaFound(q,st.text[st.i]).filter(f=>!st.removed[st.i+":"+f.j]);
+      st.saved.push({short:q.short,items});S.log.push({text:`${q.short} : ${items.map(f=>f.label).join(", ")}`,who:P[S.role].name,at:stamp(),validation:false});
+      if(st.i+1<QA.length){st.i++;toast(`Réponse enregistrée. Question ${st.i+1} sur ${QA.length}.`);}else advance("j2");
+      break;
+    }
+    case "sample": {const id=el.dataset.step,k=KIND[actorOf(id).upload],[name,meta]=k.sample(nextVersion(id));S.up[id]={name,meta};delete S.uperr[id];break;}
+    case "play": {const d=Object.values(S.deliveries).flat().find(x=>x.id===el.dataset.id);if(d) playToggle(d);break;}
     case "edit": S.editing=el.dataset.key; render(); {const n=document.getElementById("editval"); if(n){n.focus(); n.select();}} return;
     case "editcancel": S.editing=null; S.pickSel={}; S.playing=null; break;
     case "listen": {const r=document.querySelector('input[name="pick"]:checked'); if(r) S.pickSel[el.dataset.key]=r.value; S.playing=S.playing===el.dataset.val?null:el.dataset.val; break;}
@@ -771,6 +893,7 @@ document.addEventListener("click",e=>{
       const alt=altsOf(a)[+(el.dataset.i||0)], back=alt.reopen||id;
       if(alt.reopen){S.ph[alt.reopen]=Math.max(0,STEP(alt.reopen).acts.length-1);S.notes[alt.reopen]=`${P[a.by].name} (${alt.label.toLowerCase()}) : « ${note.trim()} »`;}
       else{S.ph[id]=Math.max(0,ph(id)-1);S.notes[id]=`${P[a.by].name} : « ${note.trim()} »`;}
+      {const last=versionsOf(id).slice(-1)[0];if(last&&last.status==="pending"){last.status="changes";last.note=`${P[a.by].name} : « ${note.trim()} »`;}}
       S.log.push({text:`${alt.label} : ${note.trim()}`,who:P[a.by].name,at:stamp(),validation:true});
       S.flash={title:alt.label,lines:[`Retour à <b>${esc(P[STEP(back).acts[ph(back)].by].name)}</b> avec le motif.`]};toast(alt.label+".");break;
     }
@@ -779,6 +902,19 @@ document.addEventListener("click",e=>{
   render();
   if(["do","open","alt","wf","nav","project"].includes(act)) window.scrollTo({top:0,behavior:"auto"});
 });
+function takeFile(id,file){
+  if(!file) return;
+  const ext=(file.name.split(".").pop()||"").toLowerCase();
+  if(!AUDIO_EXT.includes(ext)){S.uperr[id]=`« ${file.name} » n'est pas un fichier audio. Formats acceptés : WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.`;delete S.up[id];render();return;}
+  const url=URL.createObjectURL(file), size=file.size<104858?`${Math.max(1,Math.round(file.size/1024))} Ko`:`${(file.size/1048576).toLocaleString("fr-FR",{maximumFractionDigits:1})} Mo`;
+  S.up[id]={name:file.name,meta:size,url};delete S.uperr[id];render();
+  const probe=new Audio(url);probe.onloadedmetadata=()=>{if(S.up[id]&&S.up[id].url===url&&isFinite(probe.duration)){S.up[id].meta=`${fmtDur(probe.duration)} · ${size}`;S.up[id].sec=probe.duration;render();}};
+}
+document.addEventListener("input",e=>{if(e.target.id==="qaText"){const st=qaState();st.text[st.i]=e.target.value;}});
+document.addEventListener("change",e=>{const t=e.target;if(t.matches&&t.matches("input[data-up]")) takeFile(t.dataset.up,t.files[0]);});
+document.addEventListener("dragover",e=>{const z=e.target.closest&&e.target.closest(".drop");if(z){e.preventDefault();z.classList.add("over");}});
+document.addEventListener("dragleave",e=>{const z=e.target.closest&&e.target.closest(".drop");if(z) z.classList.remove("over");});
+document.addEventListener("drop",e=>{const z=e.target.closest&&e.target.closest(".drop");if(z){e.preventDefault();takeFile(z.dataset.step,e.dataTransfer.files[0]);}});
 document.addEventListener("keydown",e=>{
   if((e.key==="Enter"||e.key===" ")&&e.target.matches(".tr.link")){e.preventDefault();e.target.click();}
   if(e.target.id==="editval"){
@@ -794,7 +930,10 @@ function scenario(k){
   const doneAll=ids=>ids.forEach(id=>{s.ph[id]=STEP(id).acts.length;});
   if(k==="framing"){doneAll(["l1","l2","c1","c2"]);s.ph.c3=1;s.role="dg";s.view="home";}
   if(k==="running"){doneAll(["l1","l2","c1","c2","c3","p1","m1","m2","j1","j2","j3","j4","s1","s2","t1"]);s.ph.m3=1;s.ph.j5=1;s.ph.s3=1;s.role="cp";s.view="project";s.wf="overview";}
-  if(k==="late"){doneAll(["l1","l2","c1","c2","c3","p1","m1","m2","m3","j1","j2","j3","j4","j5","s1","s2","s3","s4","d1","d2","d3","d4","r1","r2","r3","a2","t1"]);s.ph.m4=1;s.ph.j6=1;s.ph.r4=1;s.ph.a1=1;s.role="cp";s.view="home";}
+  if(k==="late"){doneAll(["l1","l2","c1","c2","c3","p1","m1","m2","m3","j1","j2","j3","j4","j5","s1","s2","s3","s4","d1","d2","d3","d4","r1","r2","r3","a2","t1"]);s.ph.m4=1;s.ph.j6=1;s.ph.r4=1;s.ph.a1=1;s.role="cp";s.view="home";
+    s.deliveries={m3:[{id:"m3-1",title:"Mix V1",name:"Neons_Mix_V1_KH.wav",meta:"3 min 14 · 48 kHz · 24 bits · 112 Mo",by:"Karim Haddou",at:"13/11 18:20",status:"changes",note:"Nadia Benali : « Voix trop en avant sur le refrain. »"},{id:"m3-2",title:"Mix V2",name:"Neons_Mix_V2_KH.wav",meta:"3 min 14 · 48 kHz · 24 bits · 112 Mo",by:"Karim Haddou",at:"16/11 11:05",status:"approved"}],
+      m4:[{id:"m4-1",title:"Master V1",name:"Neons_Master_V1_24-44.wav",meta:"3 min 14 · 44,1 kHz · 24 bits · 98 Mo",by:"Karim Haddou",at:"19/11 16:40",status:"pending"}]};}
+  if(s.ph.j2) s.qa={i:QA.length-1,text:{},read:{},removed:{},saved:QA.map(q=>({short:q.short,items:qaFound(q,q.start+q.example)}))};
   ["c3","p1","m1","m2","m3","j5","s3","d3","r2"].forEach(id=>{if(s.ph[id]) s.log.push({text:STEP(id).acts[Math.min(s.ph[id],STEP(id).acts.length)-1].done,who:P[STEP(id).acts[Math.min(s.ph[id],STEP(id).acts.length)-1].by].name,at:"14/10",validation:!!STEP(id).validator});});
   return s;
 }
