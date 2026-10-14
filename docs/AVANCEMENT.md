@@ -395,3 +395,6 @@ Au-delà des six étapes :
       report avec nouvelle date, responsables et emplacements des rushes et de la sauvegarde, autres
       médias, incidents par catégorie et domaines touchés (clos sans suite si simple fait), compte rendu
       figé à la validation, étapes de post créées d'un coup (migration `20261014001001`, 6 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 12 (PROD-025, 026, 034) : entrées et dépendances des étapes,
+      pas de démarrage sans intervenant, « Mission terminée » par le lien du prestataire, références du
+      Brief créatif reprises avec leur origine et leur auteur (migration `20261014001101`, 6 tests pgTAP)

@@ -22,6 +22,8 @@ export type PostReference = {
   note: string | null;
   file: PostFile | null;
   createdAt: string;
+  // Who added it (PROD-034).
+  createdBy: string | null;
 };
 
 export type PostStep = {

@@ -70,6 +70,8 @@ export const productionHistory = {
     notOk: (label: string) => `a contrôlé « ${label} » : non conforme`,
     reset: (label: string) => `Le contrôle de « ${label} » est à refaire`,
   },
+  stepCreated: (label: string) => `a ajouté l'étape « ${label} »`,
+  stepRemoved: (label: string) => `a retiré l'étape « ${label} »`,
   step: {
     holder: (label: string, change: string) =>
       `a confié l'étape « ${label} » : ${change}`,

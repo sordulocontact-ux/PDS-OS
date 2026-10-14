@@ -57,6 +57,9 @@ export const notifications = {
     // The provider has no account: no actor, the project names it.
     production_export_deposited: (_actor: string, project: string) =>
       `Un prestataire a déposé un export de « ${project} » : il est à contrôler.`,
+    // The provider has no account: no actor, the project names it.
+    production_step_done: (_actor: string, project: string) =>
+      `Un prestataire a terminé sa mission de postproduction sur « ${project} ».`,
     production_call_sheet_published: (actor: string, project: string) =>
       `${actor} a diffusé une nouvelle version de la feuille de service de « ${project} ».`,
     production_shoot_started: (actor: string, project: string) =>

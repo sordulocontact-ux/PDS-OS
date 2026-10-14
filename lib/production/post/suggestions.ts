@@ -6,6 +6,16 @@
 import type { SoundCapture } from "@/lib/production/brief";
 import type { PostStepKey } from "@/lib/production/post/rules";
 
+// What each step waits for (shown, PROD-025): the edit after the files are
+// prepared, the grading and subtitles after the edit, the exports last.
+export const STEP_AFTER: Partial<Record<PostStepKey, PostStepKey[]>> = {
+  edit: ["files_prep"],
+  live_mix: ["files_prep"],
+  grading: ["edit"],
+  subtitles: ["edit"],
+  exports_qc: ["edit", "grading", "live_mix", "subtitles"],
+};
+
 export type StepSuggestion = {
   key: Exclude<PostStepKey, "other">;
   because: "always" | "liveSound" | "subtitles";

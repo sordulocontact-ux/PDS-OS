@@ -3809,6 +3809,17 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   « ce qui est attendu » prérempli, personne affecté par défaut ; la prochaine action y mène quand les
   rushes sont déclarés et qu'aucun incident ne bloque.
 
+- **Missions de postproduction et références** (PROD-025, 026, 034 ; migration
+  `20261014001101_production_post_missions.sql`, tests `production-post-missions.test.sql`) : chaque
+  étape affiche ses **entrées**, ce qu'elle **attend** (« Après : Montage », `STEP_AFTER`) et ce qui est
+  attendu d'elle ; elle **ne démarre pas sans intervenant** (`step_without_holder`) ; ajout et retrait
+  d'étape entrent à l'Historique (pas lors de la suppression d'une fiche entière). Sur son lien,
+  l'intervenant déclare **« Mission terminée »** (`finish_production_step_by_link`, son étape seulement),
+  le chef de projet est notifié (`production_step_done`). Les références de la postproduction
+  reprennent celles de la Fiche **et du Brief créatif** (liens de la Conception, dédoublonnés), chacune
+  avec son **origine** ; une référence ajoutée dit qui l'a ajoutée et quand ; retirer une référence de
+  travail ne touche jamais la source.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

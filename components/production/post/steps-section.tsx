@@ -11,6 +11,7 @@ import type {
   ProviderLinkState,
 } from "@/lib/production/post/types";
 import { postStepTone } from "@/lib/ui/state-tones";
+import { STEP_AFTER } from "@/lib/production/post/suggestions";
 
 import { ProviderLinkButton } from "./provider-link-button";
 import { StepAddButton, StepMenu, StepSuggestions } from "./step-controls";
@@ -78,6 +79,19 @@ export function StepsSection({
                       </span>
                     )}
                   </p>
+                  {t.inputs[step.key] && (
+                    <Detail label={t.inputsLabel}>{t.inputs[step.key]}</Detail>
+                  )}
+                  {(() => {
+                    const before = (STEP_AFTER[step.key] ?? []).filter((k) =>
+                      steps.some((s) => s.key === k),
+                    );
+                    return before.length > 0 ? (
+                      <Detail label={t.afterLabel}>
+                        {before.map((k) => t.keys[k]).join(", ")}
+                      </Detail>
+                    ) : null;
+                  })()}
                   {step.responsibilities && (
                     <Detail label={t.responsibilities}>
                       {step.responsibilities}

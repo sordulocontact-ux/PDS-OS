@@ -24,6 +24,7 @@ const spaceSchema = z.discriminatedUnion("state", [
     manager: text,
     steps: z.array(
       z.object({
+        id: z.string(),
         key: z.string(),
         label: text,
         responsibilities: text,

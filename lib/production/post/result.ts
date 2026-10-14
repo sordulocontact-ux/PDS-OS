@@ -42,6 +42,7 @@ export function postFailure(error: {
     ["comment_not_pending", e.commentNotPending],
     ["request_treated", e.requestTreated],
     ["request_not_found", e.notFound],
+    ["step_without_holder", fr.productionPost.steps.withoutHolder],
   ];
   const hit = known.find(([key]) => message.includes(key));
   return hit ? { ok: false, error: hit[1] } : prepFailure(error);

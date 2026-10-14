@@ -132,6 +132,17 @@ export function describeEvent(e: HistoryEvent, names: Names): string {
         : a.result === "not_ok"
           ? t.export.notOk(str(a.label))
           : t.export.reset(str(a.label));
+    case "step.created":
+    case "step.removed": {
+      const v = e.action === "created" ? a : b;
+      const label = stepLabel({
+        key: postStepKeyOf(v.key) ?? "other",
+        label: str(v.label) || null,
+      });
+      return e.action === "created"
+        ? t.stepCreated(label)
+        : t.stepRemoved(label);
+    }
     case "step.holder":
     case "step.status": {
       const key = postStepKeyOf(a.key) ?? "other";

@@ -22,6 +22,7 @@ const ERRORS = [
   "too_many_deposits",
   "invalid_file_name",
   "line_not_found",
+  "step_not_found",
 ] as const;
 
 function failure(message: string | undefined): { ok: false; error: string } {
@@ -131,5 +132,25 @@ export async function reviewLocationByLink(
   });
   if (error) return failure(error.message);
   revalidatePath(`/p/${p.token}`);
+  return { ok: true };
+}
+
+const stepSchema = z.object({ token, stepId: z.uuid() });
+
+/** « Mission terminée » (PROD-026): the provider's own step is done, the
+ * label is told. */
+export async function finishStepByLink(
+  input: z.input<typeof stepSchema>,
+): Promise<Result> {
+  const parsed = stepSchema.safeParse(input);
+  if (!parsed.success) return failure(undefined);
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("finish_production_step_by_link", {
+    p_token: parsed.data.token,
+    p_step_id: parsed.data.stepId,
+  });
+  if (error) return failure(error.message);
+  await schedulePendingPushes();
+  revalidatePath(`/p/${parsed.data.token}`);
   return { ok: true };
 }

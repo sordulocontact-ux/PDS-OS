@@ -45,7 +45,7 @@ export async function loadPostProduction(input: {
     await Promise.all([
       supabase
         .from("production_post_references")
-        .select("id, kind, title, url, file_id, note, created_at")
+        .select("id, kind, title, url, file_id, note, created_at, created_by")
         .eq("sheet_id", sheetId)
         .order("created_at"),
       supabase
@@ -172,6 +172,7 @@ export async function loadPostProduction(input: {
               note: r.note,
               file: fileOf(r.file_id),
               createdAt: r.created_at,
+              createdBy: nameOf(r.created_by),
             },
           ]
         : [];

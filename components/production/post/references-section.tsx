@@ -1,6 +1,7 @@
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { fr } from "@/lib/i18n/fr";
+import { formatDate } from "@/lib/release/format";
 import type { HandedFiche } from "@/lib/production/fiche";
 import type { PostReference, PostScope } from "@/lib/production/post/types";
 
@@ -14,6 +15,8 @@ type Line = {
   label: string;
   href: string | null;
   note: string | null;
+  // Where it comes from (PROD-034).
+  origin: string;
 };
 
 /**
@@ -24,11 +27,14 @@ type Line = {
 export function ReferencesSection({
   scope,
   fiche,
+  brief,
   references,
   canOrganize,
 }: {
   scope: PostScope;
   fiche: HandedFiche | null;
+  // The Conception's references of this deliverable (links), not copied.
+  brief: { url: string; note: string | null }[];
   references: PostReference[];
   canOrganize: boolean;
 }) {
@@ -37,7 +43,19 @@ export function ReferencesSection({
     label: r.title ?? r.fileName ?? r.url ?? r.note ?? t.untitled,
     href: r.url,
     note: r.title || r.fileName || r.url ? r.note : null,
+    origin: t.originFiche(fiche?.version ?? 0),
   }));
+  const ficheUrls = new Set(fromFiche.flatMap((l) => (l.href ? [l.href] : [])));
+  const fromBrief: Line[] = brief
+    .filter((r) => !ficheUrls.has(r.url))
+    .map((r, index) => ({
+      key: `brief-${index}`,
+      label: r.url,
+      href: r.url,
+      note: r.note,
+      origin: t.originBrief,
+    }));
+  const inherited = [...fromFiche, ...fromBrief];
   const own = references.map((r) => ({
     id: r.id,
     line: {
@@ -49,6 +67,9 @@ export function ReferencesSection({
         (r.kind === "note" ? t.kinds.note.label : t.untitled),
       href: r.kind === "link" ? r.url : (r.file?.href ?? null),
       note: r.note,
+      origin: r.createdBy
+        ? t.originAdded(r.createdBy, formatDate(r.createdAt))
+        : t.originAddedUnknown(formatDate(r.createdAt)),
     },
   }));
 
@@ -63,11 +84,11 @@ export function ReferencesSection({
       <div className="grid gap-6 md:grid-cols-2">
         <div className="flex flex-col gap-3">
           <h3 className="text-sm text-muted-foreground">{t.fromFiche}</h3>
-          {fromFiche.length === 0 ? (
+          {inherited.length === 0 ? (
             <EmptyNote>{t.noneFromFiche}</EmptyNote>
           ) : (
             <ul className="flex flex-col gap-3">
-              {fromFiche.map((line) => (
+              {inherited.map((line) => (
                 <ReferenceLine key={line.key} line={line} />
               ))}
             </ul>
@@ -123,6 +144,7 @@ function ReferenceLine({ line, menu }: { line: Line; menu?: React.ReactNode }) {
             {line.note}
           </span>
         )}
+        <span className="text-xs text-muted-foreground">{line.origin}</span>
       </div>
       {menu}
     </li>

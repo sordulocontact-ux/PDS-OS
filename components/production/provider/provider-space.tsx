@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/release/format";
 import { productionVersionTone } from "@/lib/ui/state-tones";
 
 import { DepositVersion } from "./deposit-version";
+import { FinishStepButton } from "./finish-step-button";
 import { ExportLine } from "./export-line";
 import { ProviderLocationsList } from "./provider-locations";
 import { ProviderSection } from "./provider-section";
@@ -63,9 +64,20 @@ export function ProviderSpaceView({
           <p className="text-sm text-muted-foreground">{t.mission.none}</p>
         ) : (
           <ul className="flex flex-col divide-y divide-border">
-            {space.steps.map((s, i) => (
-              <li key={i} className="flex flex-col gap-1 py-3 first:pt-0">
-                <span className="font-medium">{stepName(s)}</span>
+            {space.steps.map((s) => (
+              <li key={s.id} className="flex flex-col gap-1 py-3 first:pt-0">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{stepName(s)}</span>
+                  {s.status === "done" ? (
+                    <StatusBadge tone="success" size="sm">
+                      {t.mission.done}
+                    </StatusBadge>
+                  ) : (
+                    space.writable && (
+                      <FinishStepButton token={token} stepId={s.id} />
+                    )
+                  )}
+                </span>
                 {period(s.startsOn, s.endsOn) && (
                   <span className="text-sm tabular-nums">
                     {period(s.startsOn, s.endsOn)}

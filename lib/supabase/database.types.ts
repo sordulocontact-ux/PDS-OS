@@ -16222,6 +16222,10 @@ export type Database = {
         }
         Returns: string
       }
+      finish_production_step_by_link: {
+        Args: { p_step_id: string; p_token: string }
+        Returns: undefined
+      }
       forget_push_subscription: {
         Args: { p_endpoint: string }
         Returns: undefined

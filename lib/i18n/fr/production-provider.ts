@@ -38,6 +38,9 @@ export const productionProvider = {
     from: (from: string) => `À partir du ${from}`,
     expected: "Ce qui est attendu",
     access: "Accès",
+    finish: "Mission terminée",
+    finished: "Mission marquée terminée : la production est prévenue.",
+    done: "Terminée",
   },
   references: {
     title: "Références",
@@ -118,6 +121,7 @@ export const productionProvider = {
     too_many_deposits: "Trop de dépôts en une heure : réessayez plus tard.",
     invalid_file_name: "Le nom du fichier n'est pas valable.",
     line_not_found: "Ce fichier attendu n'existe plus. Rechargez la page.",
+    step_not_found: "Cette étape ne vous est plus confiée. Rechargez la page.",
     upload: "L'envoi du fichier a échoué. Réessayez.",
     tooLarge: "Le fichier dépasse 500 Mo : déposez plutôt un lien.",
     failed: "Le dépôt a échoué. Réessayez.",
