@@ -56,6 +56,12 @@ const CHECK_PLACES: Record<
     place: "readiness",
     due: "call_sheet",
   },
+  backup: {
+    step: "preproduction",
+    anchor: "readiness",
+    place: "readiness",
+    due: "call_sheet",
+  },
 };
 
 export function preproductionNext(ctx: NextContext): ProductionNext {

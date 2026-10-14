@@ -10,6 +10,7 @@ import {
   SHOOT_STATES,
 } from "@/lib/production/shoot/rules";
 import type { Database } from "@/lib/supabase/database.types";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 
 type ShootPatch = Database["public"]["Tables"]["production_shoots"]["Update"];
@@ -131,4 +132,19 @@ export async function validateShootReport(
     p_sheet_id: d.sheetId,
   });
   return error ? shootFailure(error) : prepDone(d.projectId);
+}
+
+/** « Lancer le tournage » (PROD-018): the shoot goes « En cours », once —
+ * the database refuses it before « Prête pour tournage » (or derogated
+ * checks), stamps who and when in the log, and tells the team. */
+export async function startShoot(
+  input: z.input<typeof ref>,
+): Promise<PrepResult> {
+  const parsed = ref.safeParse(input);
+  if (!parsed.success) return invalidInput;
+  const result = await writeShoot(parsed.data.projectId, parsed.data.sheetId, {
+    state: "in_progress",
+  });
+  if (result.ok) await schedulePendingPushes();
+  return result;
 }

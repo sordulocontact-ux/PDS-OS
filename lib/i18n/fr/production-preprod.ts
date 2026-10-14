@@ -645,6 +645,7 @@ export const productionPreprod = {
       budget: "Budget ou arbitrage",
       call_sheet: "Feuille de service",
       permits: "Autorisations",
+      backup: "Sauvegarde prévue",
     },
     states: {
       confirmed: "Confirmé",
@@ -679,8 +680,37 @@ export const productionPreprod = {
         noEnvelope: "Pas d'enveloppe.",
       },
       callSheet: (a: number, b: number) => `${a} / ${b} rubriques remplies`,
-      permits: "Selon le lieu et le tournage.",
+      permits:
+        "Selon le lieu et le tournage : la preuve est écrite à la confirmation.",
+      backup:
+        "Où et comment les rushes seront copiés : écrit à la confirmation.",
     },
+    proofLabel: "Preuve",
+    proofHint: {
+      permits:
+        "L'autorisation obtenue (mairie, propriétaire, lieu) ou pourquoi aucune n'est nécessaire.",
+      backup: "Où et comment les rushes seront copiés, et qui vérifie.",
+    },
+    proofMissing:
+      "Écrivez la preuve : sans elle, le contrôle ne se confirme pas.",
+    responsible: (who: string) => `Responsable : ${who}`,
+    noResponsible: "Responsable : chef de projet",
+    assign: "Attribuer",
+    assignTitle: (check: string) => `Qui sécurise « ${check} » ?`,
+    assignDescription:
+      "La personne qui s'en occupe : un membre de PDS ou un contact du Réseau.",
+    assignLabel: "Responsable",
+    assignNone: "Chef de projet",
+    assigned: "Responsable enregistré.",
+    derogate: "Déroger",
+    derogateTitle: (check: string) => `Déroger à « ${check} » ?`,
+    derogateDescription:
+      "Le contrôle compte comme confirmé sans sa preuve habituelle. Le motif, votre nom et la date restent visibles et dans l'Historique.",
+    derogateReason: "Motif",
+    derogateMissing: "Écrivez pourquoi.",
+    derogated: "Dérogation enregistrée.",
+    derogatedBy: (who: string, date: string, reason: string) =>
+      `Dérogation de ${who} le ${date} : ${reason}`,
     confirm: "Confirmer",
     withdraw: "Retirer",
     require: "Rendre requis",
@@ -707,6 +737,10 @@ export const productionPreprod = {
   },
 
   errors: {
+    evidenceMissing:
+      "Ce que ce contrôle vérifie n'est pas encore en place : complétez sa section, ou dérogez avec un motif.",
+    proofRequired: "Écrivez la preuve pour confirmer ce contrôle.",
+    reasonRequired: "Un motif est obligatoire pour déroger.",
     checksOpen: "Des prérequis requis ne sont pas encore confirmés.",
     actionNotApproved: "Approuvez l'action avant de créer sa tâche.",
     taskAlreadyCreated: "La tâche existe déjà dans Travail.",

@@ -223,6 +223,15 @@ export async function loadPreprod(
               confirmedBy: nameOf(c.confirmed_by),
               confirmedAt: c.confirmed_at,
               note: c.note,
+              holder: holderOf(c.person_id, c.contact_id),
+              derogation:
+                c.derogation_reason && c.derogated_at
+                  ? {
+                      reason: c.derogation_reason,
+                      by: nameOf(c.derogated_by),
+                      at: c.derogated_at,
+                    }
+                  : null,
             },
           ]
         : [],

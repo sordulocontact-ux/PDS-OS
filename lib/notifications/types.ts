@@ -57,6 +57,8 @@ export const NOTIFICATION_KINDS = [
   "production_corrections_sent",
   // A provider deposited an expected export through their link (PROD-036).
   "production_export_deposited",
+  // The shoot started: the team members holding a position (PROD-018).
+  "production_shoot_started",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -110,9 +112,11 @@ export function notificationHref(
     const [step, anchor] =
       kind === "production_export_deposited"
         ? ["delivery", "exports"]
-        : kind === "production_version_submitted"
-          ? ["post", "decision"]
-          : ["post", "versions"];
+        : kind === "production_shoot_started"
+          ? ["shoot", "shoot-day"]
+          : kind === "production_version_submitted"
+            ? ["post", "decision"]
+            : ["post", "versions"];
     return `${routes.projectProductionStep(projectId, subjectId, step)}#${anchor}`;
   }
   if (kind === "call_invited" && subjectId)

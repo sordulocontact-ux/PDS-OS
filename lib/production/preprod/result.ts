@@ -28,6 +28,9 @@ export function preprodFailure(error: {
   const message = error.message ?? "";
   const known: [string, string][] = [
     ["checks_open", e.checksOpen],
+    ["evidence_missing", e.evidenceMissing],
+    ["proof_required", e.proofRequired],
+    ["reason_required", e.reasonRequired],
     ["action_not_approved", e.actionNotApproved],
     ["task_already_created", e.taskAlreadyCreated],
     ["invalid_task", e.invalidTask],

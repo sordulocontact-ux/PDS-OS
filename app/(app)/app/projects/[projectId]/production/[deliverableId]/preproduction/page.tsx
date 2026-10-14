@@ -161,6 +161,7 @@ export default async function ProductionPreproductionPage({
         evidence={o.evidence}
         readyAt={sheet.readyAt}
         readyBy={sheet.readyBy}
+        {...people}
       />
     </div>
   );

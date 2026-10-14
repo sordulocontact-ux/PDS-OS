@@ -112,6 +112,7 @@ export async function loadProductionNext(
         o.budget.byStatus.to_decide.count === 0,
       call_sheet: Boolean(preprod.callSheet?.callTime),
       permits: false,
+      backup: false,
     };
     input.preprod = {
       hasTechnicalCall: preprod.calls.length > 0 || preprod.items.length > 0,

@@ -12,6 +12,36 @@ export const productionShoot = {
   by: (name: string, at: string) => `${name}, ${at}`,
   at: (at: string) => `Le ${at}`,
 
+  launch: {
+    button: "Lancer le tournage",
+    title: "Lancer le tournage ?",
+    body: "Le tournage passe « En cours », avec votre nom et l'heure ; les membres de l'équipe sont prévenus.",
+    pending: "Lancement…",
+    done: "Tournage lancé.",
+  },
+  day: {
+    title: "Le jour du tournage",
+    description:
+      "Ce que l'équipe doit avoir sous les yeux : horaires, lieu, contacts, actions critiques et incidents. Tout vient de la préparation, rien n'est ressaisi.",
+    callTime: "Convocation",
+    schedule: "Horaires",
+    location: "Lieu",
+    access: "Accès",
+    team: "Équipe",
+    noTeam: "Personne n'est affecté.",
+    contacts: "Contacts utiles",
+    emergencies: "Urgences",
+    critical: "Actions critiques encore ouvertes",
+    noCritical: "Aucune action bloquante ouverte.",
+    incidents: (n: number) =>
+      n === 0
+        ? "Aucun incident déclaré."
+        : n === 1
+          ? "1 incident ouvert"
+          : `${n} incidents ouverts`,
+    toIncidents: "Voir les incidents",
+    due: (date: string) => `pour le ${date}`,
+  },
   state: {
     title: "État du tournage",
     description:

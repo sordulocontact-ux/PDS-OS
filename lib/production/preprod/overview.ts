@@ -152,6 +152,7 @@ export function preprodOverview(
               : t.budget.ok,
       call_sheet: t.callSheet(callSheetFilled, CALL_SHEET_FIELDS.length),
       permits: t.permits,
+      backup: t.backup,
     },
   };
 }

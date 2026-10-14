@@ -103,8 +103,24 @@ select throws_ok($$ insert into public.production_budget_lines (organization_id,
 
 select throws_ok($$ select public.mark_production_ready(pg_temp.id_of('sheet')) $$,
                  'P0001', 'checks_open', 'not ready while required checks are open');
+-- What each check rests on (PROD-008): a confirmed place, every position
+-- held, the equipment booked, the shoot date, the budget within its
+-- envelope, the call time; the backup plan written down.
+update public.production_sheets
+   set location_status = 'confirmed', location_name = 'Studio Pigalle', shoot_date = date '2026-11-20',
+       budget_envelope_cents = 500000
+ where id = pg_temp.id_of('sheet');
+insert into public.production_needs (organization_id, project_id, sheet_id, family, role_key, headcount)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'camera', 'camera_operator', 1);
+insert into public.production_assignments (organization_id, project_id, need_id, contact_id, availability)
+select pg_temp.id_of('org'), pg_temp.id_of('project'), n.id, pg_temp.id_of('thibo'), 'available'
+  from public.production_needs n where n.sheet_id = pg_temp.id_of('sheet');
+update public.production_equipment set status = 'booked' where id = pg_temp.id_of('mic');
+insert into public.production_call_sheets (sheet_id, organization_id, project_id, call_time)
+values (pg_temp.id_of('sheet'), pg_temp.id_of('org'), pg_temp.id_of('project'), '8h00 au studio');
 select public.set_production_check(pg_temp.id_of('sheet'), k, true, null, null)
   from unnest(array['location', 'team', 'equipment', 'schedule', 'budget', 'call_sheet']) k;
+select public.set_production_check(pg_temp.id_of('sheet'), 'backup', true, null, 'Double copie sur deux disques');
 select lives_ok($$ select public.mark_production_ready(pg_temp.id_of('sheet')) $$,
                 'ready once every required check is confirmed (permits not required by default)');
 select public.set_production_check(pg_temp.id_of('sheet'), 'permits', null, true, null);

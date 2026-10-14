@@ -3731,6 +3731,26 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   garde sa date dans le Travail. La prochaine action propose le plan s'il n'existe pas, puis
   l'approbation de ses brouillons.
 
+- **Contrôles qui ne mentent pas, lancement du tournage** (PROD-008, PROD-017, PROD-018 ; migration
+  `20261014000601_production_readiness_evidence.sql`, tests `production-readiness.test.sql`).
+  Prérequis de chaque contrôle (`production_check_evidence`, documentés ici) : **Lieu** = lieu
+  « Confirmé » ; **Équipe** = au moins un poste, chaque poste tenu autant de fois que son nombre et
+  aucune disponibilité « à confirmer » ; **Matériel** = au moins une ligne et toutes réservées ou
+  au-delà ; **Planning** = date de tournage saisie en Production ; **Budget** = enveloppe, aucun
+  poste à arbitrer, somme des montants dans l'enveloppe ; **Feuille de service** = heure de
+  convocation écrite ; **Autorisations** et **Sauvegarde prévue** (nouveau contrôle, requis) = une
+  preuve écrite. Confirmer sans ces prérequis est refusé (`evidence_missing`, `proof_required`) :
+  il reste **« Déroger »** (`derogate_production_check`, motif obligatoire, auteur et date gardés et
+  affichés en orange, dans l'Historique). Chaque contrôle a son **responsable**
+  (`assign_production_check`, chef de projet par défaut). Quand les données d'un contrôle changent
+  (lieu, date, enveloppe, postes, affectations, matériel, budget, feuille de service), les déclencheurs
+  `z_recheck` le **rouvrent** (sauf dérogation) et retirent « Prête pour tournage » si un contrôle
+  requis s'ouvre. **« Lancer le tournage »** n'apparaît que sur une fiche prête : le tournage passe
+  « En cours » (qui et quand dans l'Historique), les membres qui tiennent un poste sont notifiés
+  (`production_shoot_started`), et l'onglet Tournage montre **« Le jour du tournage »** (convocation,
+  horaires, lieu, accès, contacts, urgences, équipe, actions bloquantes ouvertes, incidents), tout lu
+  dans la préparation.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

@@ -9,6 +9,10 @@ import { CHECK_KEYS, type CheckKey, type ReadinessCheck } from "./types";
 
 export const defaultRequired = (key: CheckKey) => key !== "permits";
 
+/** Checks confirmed on a written proof rather than on the sheet's data. */
+export const needsProof = (key: CheckKey) =>
+  key === "permits" || key === "backup";
+
 export type CheckState = "confirmed" | "open" | "not_required";
 
 export type CheckRow = {
@@ -18,6 +22,8 @@ export type CheckRow = {
   confirmedBy: string | null;
   confirmedAt: string | null;
   note: string | null;
+  holder: ReadinessCheck["holder"];
+  derogation: ReadinessCheck["derogation"];
 };
 
 /** The seven checks in order, a check never written read as its default. */
@@ -33,6 +39,8 @@ export function checkRows(checks: ReadinessCheck[]): CheckRow[] {
       confirmedBy: c?.confirmedBy ?? null,
       confirmedAt: c?.confirmedAt ?? null,
       note: c?.note ?? null,
+      holder: c?.holder ?? null,
+      derogation: c?.derogation ?? null,
     };
   });
 }

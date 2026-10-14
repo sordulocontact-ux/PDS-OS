@@ -131,6 +131,11 @@ export const productionNext = {
         why: "Le document envoyé à l'équipe avant le tournage : convocations, horaires, lieu, contacts, déroulé.",
         link: "Ouvrir la feuille de service",
       },
+      backup: {
+        title: "Prévoir la sauvegarde des rushes",
+        why: "Où et comment les rushes seront copiés le jour même, et qui le vérifie : une perte de rushes ne se rattrape pas.",
+        link: "Ouvrir le contrôle avant tournage",
+      },
       permits: {
         title: "Obtenir les autorisations de tournage",
         why: "Autorisation du lieu, de la mairie ou du propriétaire, selon le tournage.",

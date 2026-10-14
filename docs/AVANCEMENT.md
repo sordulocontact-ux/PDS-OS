@@ -376,3 +376,7 @@ Au-delà des six étapes :
       le code (étapes adaptées au brief, échéances du rétroplanning, dépendances, responsables
       proposés, jamais de date passée en silence), échéances recalculées après confirmation
       (migration `20261014000501`, 1 test pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 7 (PROD-008, PROD-017, PROD-018) : contrôles confirmés sur
+      leurs preuves ou par dérogation motivée, responsable par contrôle, « Sauvegarde prévue »,
+      contrôles rouverts quand leurs données changent, lancement du tournage notifié et vue du jour
+      (migration `20261014000601`, 9 tests pgTAP, test du parcours Piégée adapté aux preuves)

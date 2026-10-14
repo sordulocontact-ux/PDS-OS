@@ -11751,10 +11751,15 @@ export type Database = {
         Row: {
           confirmed_at: string | null
           confirmed_by: string | null
+          contact_id: string | null
+          derogated_at: string | null
+          derogated_by: string | null
+          derogation_reason: string | null
           id: string
           key: string
           note: string | null
           organization_id: string
+          person_id: string | null
           project_id: string
           required: boolean
           sheet_id: string
@@ -11763,10 +11768,15 @@ export type Database = {
         Insert: {
           confirmed_at?: string | null
           confirmed_by?: string | null
+          contact_id?: string | null
+          derogated_at?: string | null
+          derogated_by?: string | null
+          derogation_reason?: string | null
           id?: string
           key: string
           note?: string | null
           organization_id: string
+          person_id?: string | null
           project_id: string
           required: boolean
           sheet_id: string
@@ -11775,10 +11785,15 @@ export type Database = {
         Update: {
           confirmed_at?: string | null
           confirmed_by?: string | null
+          contact_id?: string | null
+          derogated_at?: string | null
+          derogated_by?: string | null
+          derogation_reason?: string | null
           id?: string
           key?: string
           note?: string | null
           organization_id?: string
+          person_id?: string | null
           project_id?: string
           required?: boolean
           sheet_id?: string
@@ -11788,6 +11803,27 @@ export type Database = {
           {
             foreignKeyName: "production_readiness_checks_confirmed_by_fkey"
             columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_readiness_checks_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_readiness_checks_derogated_by_fkey"
+            columns: ["derogated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_readiness_checks_person_id_fkey"
+            columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -15203,6 +15239,15 @@ export type Database = {
         Args: { p_items: Json; p_project_id: string }
         Returns: undefined
       }
+      assign_production_check: {
+        Args: {
+          p_contact_id: string | null
+          p_key: string
+          p_person_id: string | null
+          p_sheet_id: string
+        }
+        Returns: undefined
+      }
       audio_state_rank: { Args: { p_state: string }; Returns: number }
       auth_organization_id: { Args: never; Returns: string }
       auth_person_id: { Args: never; Returns: string }
@@ -15570,6 +15615,10 @@ export type Database = {
           p_url: string | null
         }
         Returns: number
+      }
+      derogate_production_check: {
+        Args: { p_key: string; p_reason: string; p_sheet_id: string }
+        Returns: undefined
       }
       design_can_write: { Args: { p_project_id: string }; Returns: boolean }
       design_is_open: { Args: { p_project_id: string }; Returns: boolean }
@@ -16013,6 +16062,10 @@ export type Database = {
         Args: {
           p_key: string
         }
+        Returns: boolean
+      }
+      production_check_evidence: {
+        Args: { p_key: string; p_note: string; p_sheet_id: string }
         Returns: boolean
       }
       production_source_handoff: {

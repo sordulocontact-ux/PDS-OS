@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { prepDone, type PrepResult } from "@/lib/production/prep-result";
+import { holderSchema } from "@/lib/production/post/result";
 import { createClient } from "@/lib/supabase/server";
 
 import {
@@ -115,4 +116,54 @@ export async function markProductionReady(
     p_sheet_id: parsed.data.sheetId,
   });
   return error ? preprodFailure(error) : prepDone(parsed.data.projectId);
+}
+
+const derogateSchema = z.object({
+  projectId: z.uuid(),
+  sheetId: z.uuid(),
+  key: z.enum(CHECK_KEYS),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+/** « Déroger » (PROD-008): confirmed without its evidence, with a reason
+ * and its author kept by the database. */
+export async function derogateReadinessCheck(
+  input: z.input<typeof derogateSchema>,
+): Promise<PrepResult> {
+  await requireApproved();
+  const parsed = derogateSchema.safeParse(input);
+  if (!parsed.success) return invalid;
+  const p = parsed.data;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("derogate_production_check", {
+    p_sheet_id: p.sheetId,
+    p_key: p.key,
+    p_reason: p.reason,
+  });
+  return error ? preprodFailure(error) : prepDone(p.projectId);
+}
+
+const assignSchema = z.object({
+  projectId: z.uuid(),
+  sheetId: z.uuid(),
+  key: z.enum(CHECK_KEYS),
+  holder: holderSchema,
+});
+
+/** « Attribuer » (PROD-017): who secures a check; empty = the owner. */
+export async function assignReadinessCheck(
+  input: z.input<typeof assignSchema>,
+): Promise<PrepResult> {
+  await requireApproved();
+  const parsed = assignSchema.safeParse(input);
+  if (!parsed.success) return invalid;
+  const p = parsed.data;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("assign_production_check", {
+    p_sheet_id: p.sheetId,
+    p_key: p.key,
+    p_person_id: p.holder.personId,
+    p_contact_id: p.holder.contactId,
+  });
+  return error ? preprodFailure(error) : prepDone(p.projectId);
 }

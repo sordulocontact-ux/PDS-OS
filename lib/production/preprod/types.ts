@@ -95,6 +95,7 @@ export const CHECK_KEYS = [
   "budget",
   "call_sheet",
   "permits",
+  "backup",
 ] as const;
 export type CheckKey = (typeof CHECK_KEYS)[number];
 export const isCheckKey = (value: unknown): value is CheckKey =>
@@ -206,6 +207,9 @@ export type ReadinessCheck = {
   confirmedBy: string | null;
   confirmedAt: string | null;
   note: string | null;
+  // Who secures it (PROD-017), and a derogation's reason and author (PROD-008).
+  holder: Holder | null;
+  derogation: { reason: string; by: string | null; at: string } | null;
 };
 
 /** A production call of the sheet and the topics of its agenda. */

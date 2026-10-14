@@ -14,6 +14,8 @@ import { shootStateTone } from "@/lib/ui/state-tones";
 
 import { ShootStateDialog } from "./shoot-state-dialog";
 
+import { LaunchShootButton } from "./launch-shoot-button";
+
 const t = fr.productionShoot.state;
 
 /** Parcours 11: the shoot's state, what was observed, what is missing and
@@ -60,6 +62,11 @@ export function ShootStateSection({
             {t.labels[shoot.state]}
           </StatusBadge>
         </div>
+        {ready && notStarted && canOrganize && (
+          <div>
+            <LaunchShootButton projectId={projectId} sheetId={sheetId} />
+          </div>
+        )}
         {!ready && notStarted && (
           <div className="flex flex-col items-start gap-3">
             <ToneCallout tone="warning">{t.notReady}</ToneCallout>

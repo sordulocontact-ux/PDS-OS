@@ -13,23 +13,32 @@ import {
   markProductionReady,
   setReadinessCheck,
 } from "@/lib/production/preprod/actions-readiness";
-import type { CheckRow } from "@/lib/production/preprod/readiness";
+import { needsProof, type CheckRow } from "@/lib/production/preprod/readiness";
+import type { Member } from "@/lib/framing/related";
+import type { NetworkOption } from "@/lib/production/sheet";
+import { useState } from "react";
 
 import { ConfirmButton } from "@/components/ui/confirm-button";
 import { DialogButton } from "@/components/ui/dialog-button";
+import { AssignCheckButton, DerogateButton } from "./readiness-dialogs";
 
 const t = fr.productionPreprod.readiness;
 
-/** A check's actions: « Confirmer » (with a note, who and when kept by the
- * database), « Retirer », and whether it is required. */
+/** A check's actions: « Confirmer » (on its evidence, a written proof for
+ * permits and backup — PROD-008), « Déroger » with a reason, « Retirer »,
+ * « Attribuer » and whether it is required. */
 export function ReadinessActions({
   projectId,
   sheetId,
   row,
+  members,
+  contacts,
 }: {
   projectId: string;
   sheetId: string;
   row: CheckRow;
+  members: Member[];
+  contacts: NetworkOption[];
 }) {
   const [pending, startTransition] = useTransition();
   const set = (confirmed: boolean | null, required: boolean | null) =>
@@ -48,6 +57,13 @@ export function ReadinessActions({
   const label = t.checks[row.key];
   return (
     <div className="flex flex-wrap items-center justify-end gap-2">
+      <AssignCheckButton
+        projectId={projectId}
+        sheetId={sheetId}
+        row={row}
+        members={members}
+        contacts={contacts}
+      />
       <Button
         size="xs"
         variant="ghost"
@@ -66,20 +82,23 @@ export function ReadinessActions({
           {t.withdraw}
         </Button>
       ) : (
-        <DialogButton
-          label={t.confirm}
-          title={t.confirmTitle(label)}
-          description={t.confirmDescription}
-        >
-          {(close) => (
-            <ConfirmCheckForm
-              projectId={projectId}
-              sheetId={sheetId}
-              row={row}
-              onDone={close}
-            />
-          )}
-        </DialogButton>
+        <>
+          <DerogateButton projectId={projectId} sheetId={sheetId} row={row} />
+          <DialogButton
+            label={t.confirm}
+            title={t.confirmTitle(label)}
+            description={t.confirmDescription}
+          >
+            {(close) => (
+              <ConfirmCheckForm
+                projectId={projectId}
+                sheetId={sheetId}
+                row={row}
+                onDone={close}
+              />
+            )}
+          </DialogButton>
+        </>
       )}
     </div>
   );
@@ -97,14 +116,19 @@ function ConfirmCheckForm({
   onDone: () => void;
 }) {
   const { pending, error, run } = useWriteSubmit(onDone, t.done);
+  const proof = needsProof(row.key);
+  const [missing, setMissing] = useState(false);
   return (
     <form
+      noValidate
       className="flex flex-col gap-5"
       onSubmit={(event) => {
         event.preventDefault();
         const note = String(
           new FormData(event.currentTarget).get("note") ?? "",
         );
+        setMissing(proof && !note.trim());
+        if (proof && !note.trim()) return;
         run(() =>
           setReadinessCheck({
             projectId,
@@ -120,7 +144,14 @@ function ConfirmCheckForm({
       <TextareaField
         id={`check-${row.key}-note`}
         name="note"
-        label={t.noteLabel}
+        label={proof ? t.proofLabel : t.noteLabel}
+        hint={
+          row.key === "permits" || row.key === "backup"
+            ? t.proofHint[row.key]
+            : undefined
+        }
+        required={proof}
+        error={missing ? t.proofMissing : undefined}
         rows={2}
         maxLength={1000}
         defaultValue={row.note ?? ""}

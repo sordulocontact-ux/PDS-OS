@@ -12,6 +12,8 @@ import { formatDate } from "@/lib/release/format";
 import { readinessTone } from "@/lib/ui/state-tones";
 
 import { MarkReadyButton, ReadinessActions } from "./readiness-actions";
+import type { Member } from "@/lib/framing/related";
+import type { NetworkOption } from "@/lib/production/sheet";
 
 const t = fr.productionPreprod.readiness;
 
@@ -28,9 +30,13 @@ export function ReadinessSection({
   readyAt,
   readyBy,
   canOrganize,
+  members,
+  contacts,
 }: {
   projectId: string;
   sheetId: string;
+  members: Member[];
+  contacts: NetworkOption[];
   rows: CheckRow[];
   evidence: Record<CheckKey, string>;
   readyAt: string | null;
@@ -64,14 +70,30 @@ export function ReadinessSection({
                 <p className="text-xs text-muted-foreground">
                   {evidence[row.key]}
                 </p>
-                {row.confirmedBy && row.confirmedAt && (
-                  <p className="text-xs text-muted-foreground">
-                    {t.confirmedBy(
-                      row.confirmedBy,
-                      formatDate(row.confirmedAt),
+                <p className="text-xs text-muted-foreground">
+                  {row.holder
+                    ? t.responsible(row.holder.name)
+                    : t.noResponsible}
+                </p>
+                {row.derogation ? (
+                  <p className="text-xs font-medium text-[color:var(--tone-warning-fg)]">
+                    {t.derogatedBy(
+                      row.derogation.by ?? "—",
+                      formatDate(row.derogation.at),
+                      row.derogation.reason,
                     )}
-                    {row.note ? ` · ${row.note}` : ""}
                   </p>
+                ) : (
+                  row.confirmedBy &&
+                  row.confirmedAt && (
+                    <p className="text-xs text-muted-foreground">
+                      {t.confirmedBy(
+                        row.confirmedBy,
+                        formatDate(row.confirmedAt),
+                      )}
+                      {row.note ? ` · ${row.note}` : ""}
+                    </p>
+                  )
                 )}
               </div>
               {canOrganize && (
@@ -79,6 +101,8 @@ export function ReadinessSection({
                   projectId={projectId}
                   sheetId={sheetId}
                   row={row}
+                  members={members}
+                  contacts={contacts}
                 />
               )}
             </li>

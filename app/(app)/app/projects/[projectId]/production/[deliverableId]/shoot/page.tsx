@@ -5,6 +5,7 @@ import { IncidentsSection } from "@/components/production/shoot/incidents-sectio
 import { ShootFilesSection } from "@/components/production/shoot/shoot-files-section";
 import { ShootReportSection } from "@/components/production/shoot/shoot-report-section";
 import { ShootStateSection } from "@/components/production/shoot/shoot-state-section";
+import { ShootDay } from "@/components/production/shoot/shoot-day";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -13,7 +14,7 @@ import { effectiveLogistics } from "@/lib/production/logistics";
 import { proposedFollowUps } from "@/lib/production/shoot/follow-ups";
 import { shootReport } from "@/lib/production/shoot/report";
 import { loadProductionSheet } from "@/lib/production/sheet";
-import { shootFor } from "@/lib/production/tab-data";
+import { preprodFor, shootFor } from "@/lib/production/tab-data";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -43,7 +44,10 @@ export default async function ProductionShootPage({
   const sheet = data.sheet;
   if (!sheet) redirect(routes.projectProductionSheet(projectId, deliverableId));
 
-  const shootData = await shootFor(projectId, deliverableId, access);
+  const [shootData, preprod] = await Promise.all([
+    shootFor(projectId, deliverableId, access),
+    preprodFor(projectId, deliverableId, access),
+  ]);
   if (!shootData) notFound();
   const { shoot, incidents, equipment, openTaskTitles } = shootData;
   const today = todayInParis();
@@ -81,6 +85,16 @@ export default async function ProductionShootPage({
           "preproduction",
         )}
       />
+      {(sheet.readyAt !== null || shoot.state === "in_progress") && (
+        <ShootDay
+          callSheet={preprod?.callSheet ?? null}
+          logistics={sheet.logistics}
+          needs={data.needs}
+          actions={preprod?.actions ?? []}
+          openIncidents={incidents.filter((i) => i.resolvedAt === null).length}
+          incidentsHref="#shoot-incidents"
+        />
+      )}
       <ShootFilesSection
         {...common}
         shoot={shoot}
