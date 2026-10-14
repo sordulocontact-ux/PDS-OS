@@ -1,5 +1,9 @@
 import "server-only";
 
+import {
+  createAnthropic,
+  type AnthropicLanguageModelOptions,
+} from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createMistral } from "@ai-sdk/mistral";
 import {
@@ -8,16 +12,20 @@ import {
   Output,
   type LanguageModel,
   type LanguageModelUsage,
+  type SystemModelMessage,
   type UserContent,
 } from "ai";
 import type { z } from "zod";
 
-import { DEFAULT_LLM_MODEL } from "@/lib/ai/providers";
+import { DEFAULT_LLM_MODEL, type LlmProvider } from "@/lib/ai/providers";
+import { takeAiRequest } from "@/lib/ai/quota";
 import { getServerEnv, type ServerEnv } from "@/lib/env";
 
 /**
  * Single entry point for every LLM call. The provider comes from LLM_PROVIDER
  * (default: "mistral"); the Vercel AI SDK is the only layer between the app and it.
+ * Every call takes one request from the member's daily quota first
+ * (lib/ai/quota.ts): extractions here, PO messages in its route.
  */
 
 function resolveModel(env: ServerEnv): {
@@ -37,18 +45,94 @@ function resolveModel(env: ServerEnv): {
       });
       return { model: google(modelId), modelId };
     }
+    case "anthropic": {
+      const modelId = env.LLM_MODEL ?? DEFAULT_LLM_MODEL.anthropic;
+      const anthropic = createAnthropic({ apiKey: env.ANTHROPIC_API_KEY });
+      return { model: anthropic(modelId), modelId };
+    }
   }
 }
 
-/** The configured chat model, for the assistant's streamed conversation. */
-export function getChatModel(): {
+type ProviderSettings = Pick<
+  Parameters<typeof generateText>[0],
+  "temperature" | "providerOptions"
+>;
+
+/**
+ * Settings sent with every call, by provider.
+ * - Claude Haiku 5.5 answers 400 to any sampling parameter (temperature,
+ *   top_p, top_k), and thinks with effort "medium" by default: "low" keeps
+ *   PO's replies and the extractions fast.
+ * - The others take temperature 0: the same input gives the same output.
+ */
+function providerSettings(provider: LlmProvider): ProviderSettings {
+  switch (provider) {
+    case "anthropic":
+      return {
+        providerOptions: {
+          anthropic: { effort: "low" } satisfies AnthropicLanguageModelOptions,
+        },
+      };
+    case "mistral":
+    case "google":
+      return { temperature: 0 };
+  }
+}
+
+/**
+ * One piece of a system prompt. `stable`: identical from one call to the
+ * next (rules) — never a name, a date, a page or an identifier.
+ */
+export type InstructionPart = { text: string; stable: boolean };
+
+/**
+ * The system prompt as the provider takes it. With Anthropic, the stable
+ * parts come first and end on a cache breakpoint: tools (sent before the
+ * system prompt) and rules are then read from the prompt cache, the
+ * variable parts follow. Elsewhere, the parts are joined in their order.
+ */
+function systemPrompt(
+  provider: LlmProvider,
+  parts: InstructionPart[],
+): string | SystemModelMessage[] {
+  const join = (list: InstructionPart[]) => list.map((p) => p.text).join("");
+  if (provider !== "anthropic") return join(parts);
+  const stable = join(parts.filter((p) => p.stable));
+  const variable = join(parts.filter((p) => !p.stable));
+  return [
+    {
+      role: "system",
+      content: stable,
+      providerOptions: {
+        anthropic: { cacheControl: { type: "ephemeral" } },
+      },
+    },
+    ...(variable ? [{ role: "system" as const, content: variable }] : []),
+  ];
+}
+
+/**
+ * The configured chat model and its call settings (system prompt included),
+ * for the assistant's streamed conversation: spread `settings` into the
+ * call. The caller takes the quota request (one per message).
+ */
+export function getChatModel(instructions: InstructionPart[]): {
   model: LanguageModel;
   provider: string;
   modelId: string;
+  settings: ProviderSettings & { system: string | SystemModelMessage[] };
 } {
   const env = getServerEnv();
   const { model, modelId } = resolveModel(env);
-  return { model, provider: env.LLM_PROVIDER, modelId };
+  return {
+    model,
+    provider: env.LLM_PROVIDER,
+    modelId,
+    settings: {
+      ...providerSettings(env.LLM_PROVIDER),
+      system: systemPrompt(env.LLM_PROVIDER, instructions),
+    },
+  };
 }
 
 export type Extraction<T> = {
@@ -77,8 +161,8 @@ export async function extract<T>(
 
 /**
  * Same as `extract`, for one image (a screenshot): the image travels alone in
- * the user message, as untrusted data. The default Mistral model
- * (ministral-14b) reads images.
+ * the user message, as untrusted data. The default models read images
+ * (ministral-14b, Claude Haiku 5.5: PNG, JPEG, WebP, GIF).
  */
 export async function extractFromImage<T>(
   schema: z.ZodType<T>,
@@ -116,6 +200,7 @@ async function generate<T>(
 ): Promise<Extraction<T>> {
   const env = getServerEnv();
   const { model, modelId } = resolveModel(env);
+  await takeAiRequest();
   const startedAt = performance.now();
 
   let output: T;
@@ -123,7 +208,7 @@ async function generate<T>(
   try {
     const result = await generateText({
       model,
-      temperature: 0,
+      ...providerSettings(env.LLM_PROVIDER),
       system: instructions,
       messages: [{ role: "user", content }],
       output: Output.object({ schema }),

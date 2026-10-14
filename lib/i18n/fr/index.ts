@@ -3,6 +3,7 @@
  * components. One file per domain, so parallel work never edits the same file.
  */
 import { errors } from "./errors";
+import { aiUsage } from "./ai-usage";
 import { activations } from "./activations";
 import { activationWork } from "./activation-work";
 import { activationInfluence } from "./activation-influence";
@@ -100,6 +101,7 @@ import { work } from "./work";
 import { workflowStatus } from "./workflow-status";
 
 export const fr = {
+  aiUsage,
   ...core,
   errors,
   labo,

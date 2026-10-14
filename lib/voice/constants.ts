@@ -29,6 +29,7 @@ export type VoiceErrorCode =
   | "nothing_heard"
   | "nothing_understood"
   | "provider_quota"
+  | "ai_quota"
   | "provider_error";
 
 /** What the dictation route answers. `heard` is shown before the proposals. */

@@ -3,6 +3,10 @@ import "server-only";
 import { legalIntakeInstructions } from "@/lib/ai/instructions/legal-intake";
 import { extract } from "@/lib/ai/llm";
 import {
+  providerFailure,
+  type ProviderFailure,
+} from "@/lib/ai/provider-failure";
+import {
   legalAgreementsSchema,
   legalContributorsSchema,
   legalPublisherSchema,
@@ -19,7 +23,7 @@ export type Interpretation =
       // Items the model gave but the code could not find in the answer.
       dropped: number;
     }
-  | { ok: false; error: "provider" };
+  | ProviderFailure;
 
 const escape = (text: string) =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -147,6 +151,6 @@ export async function interpretAnswer(
     };
   } catch (error) {
     console.error("interpretAnswer:", error);
-    return { ok: false, error: "provider" };
+    return providerFailure(error);
   }
 }

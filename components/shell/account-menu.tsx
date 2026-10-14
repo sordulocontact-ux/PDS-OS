@@ -1,6 +1,11 @@
 "use client";
 
-import { IconCircleLogout, IconMsgSmile } from "nucleo-sharp-essential";
+import {
+  IconCircleLogout,
+  IconGauge3,
+  IconMsgSmile,
+} from "nucleo-sharp-essential";
+import Link from "next/link";
 import { useTransition } from "react";
 
 import { useOpenFeedback } from "@/components/feedback/feedback-provider";
@@ -18,12 +23,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "@/lib/auth/actions";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
 // Bottom of the desktop sidebar (Figma "PDS OS", node 47:12055): the signed-in
 // person's avatar and name, opening a menu with who they are, "Envoyer un
-// retour", the theme and "Se déconnecter". Collapsed, the avatar alone. The mobile drawer
+// retour", the settings (requests to PO of the day), the theme and "Se
+// déconnecter". Collapsed, the avatar alone. The mobile drawer
 // keeps UserPanel, which has room to list the same things.
 export function AccountMenu({
   name,
@@ -65,6 +72,10 @@ export function AccountMenu({
         <DropdownMenuItem onClick={() => openFeedback()}>
           <IconMsgSmile aria-hidden />
           {fr.feedback.navLink}
+        </DropdownMenuItem>
+        <DropdownMenuItem render={<Link href={routes.settings} />}>
+          <IconGauge3 aria-hidden />
+          {fr.aiUsage.settings.navLink}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup

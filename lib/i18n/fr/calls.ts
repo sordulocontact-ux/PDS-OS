@@ -398,6 +398,9 @@ export const calls = {
       "Fichier refusé par le service de transcription : le palier gratuit est limité à 25 Mo (100 Mo avec le palier payant). Compressez l'audio ou passez au palier payant.",
     provider_quota:
       "Quota du fournisseur atteint. Réessayez dans quelques minutes.",
+    // The member's daily limit of requests to PO (lib/ai/quota.ts).
+    ai_quota:
+      "Limite du jour de requêtes à PO atteinte : le compteur repart à zéro à minuit ; le directeur général peut l'augmenter dans Équipe.",
     provider_error:
       "Le service de transcription n'a pas répondu. Réessayez dans un moment ; si ça continue, prévenez l'équipe technique.",
     transcript_empty:

@@ -85,11 +85,12 @@ export function ValueSuggestions({
       // Back in reading order once applied.
       setRows(found.map((r) => applied.find((a) => a.excerpt === r.excerpt)!));
       setNotice(
-        result.partial
-          ? t.partial
-          : result.suggestions.length === 0
-            ? t.none
-            : null,
+        result.quota ??
+          (result.partial
+            ? t.partial
+            : result.suggestions.length === 0
+              ? t.none
+              : null),
       );
     });
 

@@ -69,6 +69,7 @@ export type CallErrorCode =
   | "audio_unavailable"
   | "audio_too_large"
   | "provider_quota"
+  | "ai_quota"
   | "provider_error"
   | "transcript_empty"
   | "save_failed"

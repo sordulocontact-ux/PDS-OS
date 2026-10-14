@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { DESIGN_INTENTIONS_INSTRUCTIONS } from "@/lib/ai/instructions/design-intentions";
 import { extract } from "@/lib/ai/llm";
+import {
+  providerFailure,
+  type ProviderFailure,
+} from "@/lib/ai/provider-failure";
 import { locateQuote } from "@/lib/ai/provenance";
 import { designIntentionsSchema } from "@/lib/ai/schemas/design-intentions";
 import type { ConceptionData } from "@/lib/design/conception";
@@ -21,7 +25,9 @@ export type DesignPassage = {
 };
 
 export type ProposeResult =
-  { ok: true; count: number } | { ok: false; error: "provider" | "write" };
+  | { ok: true; count: number }
+  | { ok: false; error: "provider" | "write" }
+  | ProviderFailure;
 
 // More would bury the page: the person confirms them one by one.
 const MAX_PROPOSALS = 40;
@@ -81,7 +87,7 @@ export async function proposeDesignIntentions(
     ));
   } catch (error) {
     console.error("proposeDesignIntentions:", error);
-    return { ok: false, error: "provider" };
+    return providerFailure(error);
   }
 
   // Already there (proposed or confirmed): not proposed twice.

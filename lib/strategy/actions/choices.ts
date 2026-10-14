@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import type { ProviderFailure } from "@/lib/ai/provider-failure";
 import { orgId } from "@/lib/framing/actions/shared";
 import {
   STRATEGY_TEXT_FIELDS,
@@ -186,7 +187,8 @@ export type ProposeResult =
   | {
       ok: false;
       error: "no_sources" | "provider" | "stage_locked" | "generic";
-    };
+    }
+  | ProviderFailure;
 
 /**
  * Pre-checks the three questions from the Brief and the call reports. Stores

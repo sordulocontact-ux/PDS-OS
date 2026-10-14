@@ -7,6 +7,27 @@ import { AssistantMessage } from "@/components/assistant/assistant-message";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
+// The route answers 429 {"error":"quota","limit":n} when the member's
+// requests of the day are used (lib/ai/quota.ts); the AI SDK puts that body
+// in the error's message.
+function quotaLimit(error: Error): number | null {
+  try {
+    const body: unknown = JSON.parse(error.message);
+    if (
+      body &&
+      typeof body === "object" &&
+      "error" in body &&
+      body.error === "quota" &&
+      "limit" in body &&
+      typeof body.limit === "number"
+    )
+      return body.limit;
+  } catch {
+    // Not a JSON body: any other failure.
+  }
+  return null;
+}
+
 /** The turns of a PO conversation, kept scrolled to the latest one. */
 export function AssistantThread({
   messages,
@@ -21,6 +42,7 @@ export function AssistantThread({
 }) {
   const t = fr.assistant;
   const endRef = useRef<HTMLDivElement>(null);
+  const reachedLimit = error ? quotaLimit(error) : null;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "nearest" });
@@ -39,7 +61,7 @@ export function AssistantThread({
       )}
       {error && (
         <p role="alert" className="text-sm text-error">
-          {t.error}
+          {reachedLimit === null ? t.error : fr.aiUsage.exceeded(reachedLimit)}
         </p>
       )}
       <div ref={endRef} />

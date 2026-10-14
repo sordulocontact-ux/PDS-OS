@@ -128,4 +128,5 @@ export type CaptureArtistsError =
   | "file_too_large"
   | "unsupported_type"
   | "provider_error"
+  | "ai_quota"
   | "deezer_unavailable";

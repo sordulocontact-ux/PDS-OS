@@ -1,3 +1,4 @@
+import { isAiQuotaExceeded } from "@/lib/ai/quota";
 import { getAccess } from "@/lib/auth/dal";
 import type { CaptureArtistsError } from "@/lib/catalog/capture-artist-types";
 import { readCaptureArtists } from "@/lib/catalog/capture-artists";
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
     if (error instanceof IntegrationError)
       return fail("deezer_unavailable", 502);
     console.error("capture-artists:", error);
+    if (isAiQuotaExceeded(error)) return fail("ai_quota", 429);
     return fail("provider_error", 502);
   }
 }

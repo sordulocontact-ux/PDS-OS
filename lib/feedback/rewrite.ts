@@ -2,6 +2,10 @@ import "server-only";
 
 import { FEEDBACK_REWRITE_INSTRUCTIONS } from "@/lib/ai/instructions/feedback-rewrite";
 import { extract } from "@/lib/ai/llm";
+import {
+  providerFailure,
+  type ProviderFailure,
+} from "@/lib/ai/provider-failure";
 import { feedbackRewriteSchema } from "@/lib/ai/schemas/feedback-rewrite";
 import {
   plainText,
@@ -14,7 +18,8 @@ const MAX_FEEDBACK = 40;
 
 export type RewriteResult =
   | { ok: true; title: string; summary: string }
-  | { ok: false; error: "not_found" | "provider" };
+  | { ok: false; error: "not_found" | "provider" }
+  | ProviderFailure;
 
 /**
  * PO's proposal for a topic's title and summary, from its original feedback
@@ -65,6 +70,6 @@ export async function proposeRewrite(
     return { ok: true, title, summary };
   } catch (error) {
     console.error("proposeRewrite:", error);
-    return { ok: false, error: "provider" };
+    return providerFailure(error);
   }
 }

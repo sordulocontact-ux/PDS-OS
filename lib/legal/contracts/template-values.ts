@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { contractTemplateValuesInstructions } from "@/lib/ai/instructions/contract-template-values";
 import { extract } from "@/lib/ai/llm";
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { templateValuesSchema } from "@/lib/ai/schemas/contract-template-values";
 import { can } from "@/lib/auth/access";
 import type { ContractType } from "@/lib/contracts/types";
@@ -50,6 +51,8 @@ export async function suggestTemplateValues(body: string): Promise<
       suggestions: ValueSuggestion[];
       about: TemplateAbout | null;
       partial: boolean;
+      /** The day's limit of requests to PO is reached: the sentence to show. */
+      quota: string | null;
     }
   | { ok: false; error: string }
 > {
@@ -64,6 +67,7 @@ export async function suggestTemplateValues(body: string): Promise<
 
   const candidates = valuesByShape(text);
   let partial = false;
+  let quota: string | null = null;
   let about: TemplateAbout | null = null;
   try {
     const { output } = await extract(
@@ -87,6 +91,7 @@ export async function suggestTemplateValues(body: string): Promise<
   } catch (error) {
     console.error("suggestTemplateValues:", error);
     partial = true;
+    quota = aiQuotaMessage(error);
   }
 
   const seen = new Set<string>();
@@ -104,6 +109,7 @@ export async function suggestTemplateValues(body: string): Promise<
   return {
     ok: true,
     partial,
+    quota,
     about,
     suggestions: suggestions
       .sort((a, b) => a.at - b.at)

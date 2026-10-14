@@ -2,6 +2,10 @@ import "server-only";
 
 import { FRAMING_OBJECTIVE_CHOICES_INSTRUCTIONS } from "@/lib/ai/instructions/framing-objective-choices";
 import { extract } from "@/lib/ai/llm";
+import {
+  providerFailure,
+  type ProviderFailure,
+} from "@/lib/ai/provider-failure";
 import { locateQuote } from "@/lib/ai/provenance";
 import { framingObjectiveChoicesSchema } from "@/lib/ai/schemas/framing-objective-choices";
 import { fr } from "@/lib/i18n/fr";
@@ -61,7 +65,8 @@ async function loadSources(projectId: string): Promise<Source[]> {
 
 export type SuggestObjectiveResult =
   | { ok: true; suggestions: ObjectiveSuggestion[] }
-  | { ok: false; error: "no_sources" | "provider" };
+  | { ok: false; error: "no_sources" | "provider" }
+  | ProviderFailure;
 
 /**
  * Asks the model for short objective rephrasings, then keeps only what the
@@ -87,7 +92,7 @@ export async function suggestFramingObjective(
     ));
   } catch (error) {
     console.error("suggestFramingObjective:", error);
-    return { ok: false, error: "provider" };
+    return providerFailure(error);
   }
 
   const byId = new Map(sources.map((s) => [s.id, s]));

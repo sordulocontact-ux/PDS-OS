@@ -6,6 +6,10 @@ import {
 } from "@/lib/ai/instructions/strategy-draft";
 import { extract } from "@/lib/ai/llm";
 import {
+  providerFailure,
+  type ProviderFailure,
+} from "@/lib/ai/provider-failure";
+import {
   narrativeSummarySchema,
   strategyDraftSchema,
 } from "@/lib/ai/schemas/strategy-draft";
@@ -157,7 +161,8 @@ export type DraftResult =
   | {
       ok: false;
       error: "no_sources" | "provider" | "stage_locked" | "write";
-    };
+    }
+  | ProviderFailure;
 
 /**
  * « Préparer un brouillon » (MKT-S1-09): the strategic objective taken as is
@@ -211,7 +216,7 @@ export async function draftStrategy(
       ));
     } catch (error) {
       console.error("draftStrategy:", error);
-      return { ok: false, error: "provider" };
+      return providerFailure(error);
     }
     const verified = verifyDrafts(output.drafts, sources, wanted);
     drafted = verified.map((d) => d.field);
@@ -249,7 +254,8 @@ export type SummaryResult =
         | "invalid"
         | "stage_locked"
         | "write";
-    };
+    }
+  | ProviderFailure;
 
 /**
  * « Rédiger la synthèse » (MKT-S1-06): the narrative parts written so far
@@ -288,7 +294,7 @@ export async function summarizeNarrative(
     ));
   } catch (error) {
     console.error("summarizeNarrative:", error);
-    return { ok: false, error: "provider" };
+    return providerFailure(error);
   }
   const summary = output.summary.trim();
   if (summary === "" || summary.length > 2000)

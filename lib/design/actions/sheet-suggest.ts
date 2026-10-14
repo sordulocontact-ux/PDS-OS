@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { SHEET_WORDING_INSTRUCTIONS } from "@/lib/ai/instructions/sheet-wording";
 import { extract } from "@/lib/ai/llm";
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { sheetWordingSchema } from "@/lib/ai/schemas/sheet-wording";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -75,6 +76,6 @@ export async function suggestSheetWording(
     return text ? { ok: true, text } : { ok: false, error: t.noSource };
   } catch (error) {
     console.error("suggestSheetWording:", error);
-    return { ok: false, error: t.failed };
+    return { ok: false, error: aiQuotaMessage(error) ?? t.failed };
   }
 }

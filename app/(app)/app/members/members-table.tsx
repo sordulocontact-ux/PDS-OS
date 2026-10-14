@@ -1,3 +1,4 @@
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { membershipTone } from "@/lib/ui/state-tones";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/data-table";
 import { signupUrl } from "@/lib/auth/site-url";
 import { fr } from "@/lib/i18n/fr";
+import { cn } from "@/lib/utils";
 import type { MembershipRow } from "@/lib/members/types";
 
 import { MemberRowActions } from "./member-row-actions";
@@ -37,6 +39,7 @@ export function MembersTable({
         <DataTableHead hideBelow="sm">{t.columns.role}</DataTableHead>
         <DataTableHead>{t.columns.status}</DataTableHead>
         <DataTableHead hideBelow="md">{t.columns.decision}</DataTableHead>
+        <DataTableHead hideBelow="lg">{fr.aiUsage.team.column}</DataTableHead>
         <DataTableHead fill align="end">
           {t.columns.actions}
         </DataTableHead>
@@ -90,6 +93,24 @@ export function MembersTable({
                       {row.decisionNote}
                     </span>
                   )}
+                </div>
+              </DataTableCell>
+              <DataTableCell hideBelow="lg">
+                <div className="flex w-24 flex-col gap-1.5">
+                  <span
+                    className={cn(
+                      "tabular-nums",
+                      row.ai.used >= row.ai.limit && "text-error",
+                    )}
+                  >
+                    {fr.aiUsage.team.count(row.ai.used, row.ai.limit)}
+                  </span>
+                  <ProgressBar
+                    value={row.ai.used}
+                    max={row.ai.limit}
+                    label={fr.aiUsage.team.barLabel(row.ai.used, row.ai.limit)}
+                    tone={row.ai.used >= row.ai.limit ? "error" : "ink"}
+                  />
                 </div>
               </DataTableCell>
               <DataTableCell fill align="end">

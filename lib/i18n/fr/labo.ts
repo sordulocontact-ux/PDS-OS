@@ -135,6 +135,9 @@ export const labo = {
     invalid_input: "Transcription vide ou trop longue.",
     invalid_isrc:
       "ISRC invalide : 12 caractères, ex. FR-Z03-24-00001 ou FRZ032400001.",
+    // Signed in, the labo counts against the member's daily limit (lib/ai/quota.ts).
+    ai_quota:
+      "Limite du jour de requêtes à PO atteinte : le compteur repart à zéro à minuit ; le directeur général peut l'augmenter dans Équipe.",
     provider_error:
       "Le service n'a pas répondu (quota, clé ou panne). Réessayez dans un moment.",
     network: "Le serveur ne répond pas.",

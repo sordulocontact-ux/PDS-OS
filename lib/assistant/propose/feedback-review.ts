@@ -164,7 +164,10 @@ export function feedbackReviewTools({ access, verbatim }: ProposeContext) {
             rewrite?.trim() ?? "",
           );
           if (result.ok) proposed = result;
-          else warnings.push(t.rewriteFailed);
+          else
+            warnings.push(
+              result.error === "quota" ? result.message : t.rewriteFailed,
+            );
         }
         const values = {
           feedbackKind: kind ?? topic.kind,

@@ -1,4 +1,5 @@
 import { extractCallReport } from "@/lib/ai/call-report";
+import { isAiQuotaExceeded } from "@/lib/ai/quota";
 import { transcriptSchema } from "@/lib/ai/schemas/transcript";
 import { isLaboEnabled, laboError } from "@/lib/labo/guard";
 
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     return Response.json(await extractCallReport(parsed.data));
   } catch (error) {
     console.error("[labo] extraction failed:", error);
+    if (isAiQuotaExceeded(error)) return laboError("ai_quota", 429);
     return laboError("provider_error", 502);
   }
 }

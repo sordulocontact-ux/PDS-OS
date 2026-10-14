@@ -2,6 +2,10 @@ import "server-only";
 
 import { framingHelpInstructions } from "@/lib/ai/instructions/framing-help";
 import { extract } from "@/lib/ai/llm";
+import {
+  providerFailure,
+  type ProviderFailure,
+} from "@/lib/ai/provider-failure";
 import { locateQuote } from "@/lib/ai/provenance";
 import { framingHelpSchema } from "@/lib/ai/schemas/framing-help";
 import {
@@ -94,7 +98,8 @@ async function loadSources(project: ProjectDetail): Promise<Source[]> {
 
 export type HelpResult =
   | { ok: true; suggestions: HelpSuggestion[] }
-  | { ok: false; error: "no_sources" | "provider" };
+  | { ok: false; error: "no_sources" | "provider" }
+  | ProviderFailure;
 
 /**
  * Asks the model for short answers to one question, then keeps only what
@@ -124,7 +129,7 @@ export async function helpWithQuestion(
     ));
   } catch (error) {
     console.error("helpWithQuestion:", error);
-    return { ok: false, error: "provider" };
+    return providerFailure(error);
   }
 
   const byId = new Map(sources.map((s) => [s.id, s]));

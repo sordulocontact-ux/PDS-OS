@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 
 import { z } from "zod";
 
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { requireApproved } from "@/lib/auth/dal";
 import {
   linkExistingFile,
@@ -58,6 +59,8 @@ function sourceFailure(error: unknown, where: string): Failed {
       ? sources[known.service as keyof typeof sources]
       : t.someSource;
   console.error(`${where}:`, known ? `${known.service} ${reason}` : error);
+  const quota = aiQuotaMessage(error);
+  if (quota) return { ok: false, error: quota };
   if (reason === "rate_limited")
     return { ok: false, error: t.rateLimited(source) };
   if (reason === "unauthorized")

@@ -114,15 +114,18 @@ export async function sendFeedback(
  * Asks PO to file the feedback still waiting into topics, before the director
  * reads them. Run from the director's feedback page, with their session.
  */
-export async function triageFeedback(): Promise<{ ok: boolean }> {
+export async function triageFeedback(): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
   const access = await requirePermission("read_feedback");
   if (!access.organizationId) return { ok: false };
-  const { ok, filed } = await triageUnfiledFeedback(
+  const { ok, filed, error } = await triageUnfiledFeedback(
     await createClient(),
     access.organizationId,
   );
   if (filed > 0) revalidatePath(routes.feedback);
-  return { ok };
+  return { ok, error };
 }
 
 const reviewInput = z.object({

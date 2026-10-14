@@ -81,9 +81,11 @@ export function QuestionCard({
         setReview({ facts: result.facts, dropped: result.dropped });
       else
         setError(
-          result.error === "provider"
-            ? t.errors.provider
-            : fr.auth.errors.forbidden,
+          result.error === "quota"
+            ? result.message
+            : result.error === "provider"
+              ? t.errors.provider
+              : fr.auth.errors.forbidden,
         );
     });
 

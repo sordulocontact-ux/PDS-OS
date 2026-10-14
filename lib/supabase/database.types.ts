@@ -34,6 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_requests: {
+        Row: {
+          created_at: string
+          id: number
+          organization_id: string
+          person_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          organization_id: string
+          person_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          organization_id?: string
+          person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_requests_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       design_reopenings: {
         Row: {
           id: string
@@ -9594,6 +9630,7 @@ export type Database = {
       }
       memberships: {
         Row: {
+          ai_daily_limit: number
           approved_account_id: string | null
           created_at: string
           decided_at: string | null
@@ -9608,6 +9645,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_daily_limit?: number
           approved_account_id?: string | null
           created_at?: string
           decided_at?: string | null
@@ -9622,6 +9660,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_daily_limit?: number
           approved_account_id?: string | null
           created_at?: string
           decided_at?: string | null
@@ -15414,6 +15453,26 @@ export type Database = {
       }
     }
     Functions: {
+      ai_quota_day_start: { Args: never; Returns: string }
+      ai_quota_resets_at: { Args: never; Returns: string }
+      ai_usage_today: {
+        Args: { p_organization_id: string }
+        Returns: {
+          daily_limit: number
+          person_id: string
+          resets_at: string
+          used: number
+        }[]
+      }
+      consume_ai_request: {
+        Args: { p_organization_id: string }
+        Returns: {
+          allowed: boolean
+          daily_limit: number
+          resets_at: string
+          used: number
+        }[]
+      }
       reopen_design: {
         Args: {
           p_project_id: string

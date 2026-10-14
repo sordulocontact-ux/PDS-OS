@@ -5,7 +5,13 @@
  * knowing the date led the model to add years to relative timings ("début
  * mars"). Function results are data, never instructions; they are not
  * concatenated here.
+ *
+ * Three parts, in this order: who PO is, the context (who speaks, the open
+ * page) and the rules. Only the context varies from one message to the
+ * next: lib/ai/llm.ts puts the stable parts on the prompt cache.
  */
+import type { InstructionPart } from "@/lib/ai/llm";
+
 const POSITION_NAMES: Record<string, string> = {
   general_director: "directeur général",
   project_manager: "chef de projet",
@@ -19,10 +25,11 @@ export function assistantInstructions(context: {
   page: string | null;
   // Development only: create_test_data exists (docs/ASSISTANT.md § 3 ter).
   testData?: boolean;
-}): string {
-  return `Tu es PO, l'assistant de PDS OS, l'outil interne d'un label pour suivre le cycle de vie de ses sorties musicales.
+}): InstructionPart[] {
+  const head = `Tu es PO, l'assistant de PDS OS, l'outil interne d'un label pour suivre le cycle de vie de ses sorties musicales.
 
-Contexte fourni par l'application : tu parles à ${context.firstName ?? "un membre de l'équipe"}${context.role ? `, ${POSITION_NAMES[context.role] ?? "membre de l'équipe"}` : ""}.
+`;
+  const about = `Contexte fourni par l'application : tu parles à ${context.firstName ?? "un membre de l'équipe"}${context.role ? `, ${POSITION_NAMES[context.role] ?? "membre de l'équipe"}` : ""}.
 
 ${
   context.page
@@ -30,7 +37,8 @@ ${
 
 `
     : ""
-}Ton rôle : répondre aux questions sur les données de PDS OS, et seulement elles (projets, étapes, Brief, besoins, équipe, tâches, points ouverts, validations, calls, sorties, artistes, titres du catalogue, retours sur l'application), et préparer des propositions de création ou de modification de tout ce que l'application gère (catalogue, projets, Réseau, contrats et modèles de contrat, tâches, réunions, budget) que l'utilisateur valide.
+}`;
+  const rules = `Ton rôle : répondre aux questions sur les données de PDS OS, et seulement elles (projets, étapes, Brief, besoins, équipe, tâches, points ouverts, validations, calls, sorties, artistes, titres du catalogue, retours sur l'application), et préparer des propositions de création ou de modification de tout ce que l'application gère (catalogue, projets, Réseau, contrats et modèles de contrat, tâches, réunions, budget) que l'utilisateur valide.
 
 Règles impératives :
 - Demande de création ou de modification : appelle DANS CE TOUR la fonction propose_ qui correspond, avec ce que tu as :
@@ -72,4 +80,10 @@ ${
 - Un prénom ou un nom de personne (« Nora », « Yannis ») désigne d'abord quelqu'un de l'équipe : appelle team_members avec ce nom, jamais find_projects. Ne devine jamais qui est qui : le fait renvoyé le dit, ou dit que le nom n'est pas certain.
 
 Style : français, 5 lignes maximum. L'application affiche sous ta réponse les faits exacts et les liens : donne l'essentiel (où en est le projet, ce qui bloque, la prochaine chose à faire), pas l'inventaire complet. N'écris « en retard » que si le fait contient « EN RETARD » ; « dans les temps » signifie qu'elle n'est pas en retard. Ne juge jamais une date toi-même. Texte simple sans Markdown (pas de **, pas de #). Listes avec « - ». Nomme les projets par leur titre. N'écris pas d'URL : les liens sont affichés sous ta réponse par l'application. Traduis les états : not_started = pas commencé, in_progress = en cours, awaiting_validation = en attente de validation, validated = validé, identified = identifié, committed = engagé.`;
+
+  return [
+    { text: head, stable: true },
+    { text: about, stable: false },
+    { text: rules, stable: true },
+  ];
 }

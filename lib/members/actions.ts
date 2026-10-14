@@ -11,6 +11,7 @@ import type { InviteState, MemberActionState } from "@/lib/members/types";
 import {
   inviteMemberSchema,
   membershipDecisionSchema,
+  membershipAiLimitSchema,
   membershipIdSchema,
   membershipRoleSchema,
   parseForm,
@@ -30,6 +31,7 @@ type MembershipPatch = {
   status?: "approved" | "rejected" | "suspended";
   role?: OrganizationRole;
   decision_note?: string | null;
+  ai_daily_limit?: number;
 };
 
 async function patchMembership(
@@ -117,17 +119,20 @@ export async function memberAction(
       });
     }
 
-    // "Modifier" modal: the name, and the position when the row allows it
-    // (the form only sends a role then). Two granted columns sets, two
-    // updates; the database refuses what the admin may not change.
+    // "Modifier" modal: the name, the daily requests to PO, and the position
+    // when the row allows it (the form only sends a role then). Two granted
+    // columns sets, two updates; the database refuses what the admin may not
+    // change.
     case "edit": {
       const parsed = parseForm(personNameSchema, formData);
       const withRole = formData.has("role");
       const role = withRole ? parseForm(membershipRoleSchema, formData) : null;
-      if (!parsed.ok || (role && !role.ok)) {
+      const aiLimit = parseForm(membershipAiLimitSchema, formData);
+      if (!parsed.ok || (role && !role.ok) || !aiLimit.ok) {
         const fieldErrors = {
           ...(parsed.ok ? {} : parsed.fieldErrors),
           ...(role && !role.ok ? role.fieldErrors : {}),
+          ...(aiLimit.ok ? {} : aiLimit.fieldErrors),
         };
         return {
           status: "error",
@@ -135,6 +140,7 @@ export async function memberAction(
             fieldErrors.firstName ??
             fieldErrors.lastName ??
             fieldErrors.role ??
+            fieldErrors.aiDailyLimit ??
             fr.auth.errors.required,
           fieldErrors,
           values: retainedValues(formData),
@@ -154,13 +160,10 @@ export async function memberAction(
       if (!data || data.length === 0)
         return { status: "error", error: fr.auth.errors.notFound };
 
-      if (role?.ok) {
-        return patchMembership(role.data.membershipId, {
-          role: role.data.role,
-        });
-      }
-      revalidatePath(routes.members);
-      return { status: "success" };
+      return patchMembership(aiLimit.data.membershipId, {
+        ai_daily_limit: aiLimit.data.aiDailyLimit,
+        ...(role?.ok ? { role: role.data.role } : {}),
+      });
     }
 
     default:

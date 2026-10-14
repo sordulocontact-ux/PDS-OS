@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { PRODUCTION_QUOTE_INSTRUCTIONS } from "@/lib/ai/instructions/production-quote";
 import { extract, extractFromImage } from "@/lib/ai/llm";
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { productionQuoteSchema } from "@/lib/ai/schemas/production-quote";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -101,7 +102,7 @@ export async function proposeQuoteImport(
     };
   } catch (error) {
     console.error("proposeQuoteImport:", error);
-    return { ok: false, error: e.provider };
+    return { ok: false, error: aiQuotaMessage(error) ?? e.provider };
   }
 }
 

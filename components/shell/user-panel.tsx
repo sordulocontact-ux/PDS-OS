@@ -1,9 +1,15 @@
+import { IconGauge3 } from "nucleo-sharp-essential";
+import Link from "next/link";
+
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { FeedbackNavButton } from "@/components/shell/feedback-nav-button";
+import { navItemClass } from "@/components/shell/nav-item";
 import { ThemeChips } from "@/components/shell/theme-chips";
+import { routes } from "@/lib/auth/redirects";
+import { fr } from "@/lib/i18n/fr";
 
 // Bottom of the navigation: who is signed in, feedback about the app, the
-// theme, and the way out. Both take the shape of a navigation item (nav-item.ts).
+// settings (requests to PO of the day), the theme, and the way out. Both take the shape of a navigation item (nav-item.ts).
 export function UserPanel({
   name,
   email,
@@ -22,6 +28,10 @@ export function UserPanel({
         )}
       </div>
       <FeedbackNavButton />
+      <Link href={routes.settings} data-close-nav className={navItemClass}>
+        <IconGauge3 className="size-5 shrink-0" aria-hidden />
+        {fr.aiUsage.settings.navLink}
+      </Link>
       <ThemeChips />
       <SignOutButton
         variant="ghost"

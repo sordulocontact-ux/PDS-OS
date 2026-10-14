@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { PRODUCTION_IMPORT_INSTRUCTIONS } from "@/lib/ai/instructions/production-import";
 import { extract } from "@/lib/ai/llm";
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { productionImportSchema } from "@/lib/ai/schemas/production-import";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -110,7 +111,7 @@ export async function proposeProductionImport(input: {
     ));
   } catch (error) {
     console.error("proposeProductionImport:", error);
-    return { ok: false, error: e.provider };
+    return { ok: false, error: aiQuotaMessage(error) ?? e.provider };
   }
   const existing = (needs ?? []).map((n) => ({
     family: n.family,

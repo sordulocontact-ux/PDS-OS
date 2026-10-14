@@ -46,6 +46,8 @@ export type MembershipRow = {
   requestedAt: string;
   decidedAt: string | null;
   decisionNote: string | null;
+  // Requests to PO (the language model) today and the daily limit.
+  ai: { used: number; limit: number };
   person: {
     id: string;
     firstName: string;

@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { legalClearanceInstructions } from "@/lib/ai/instructions/legal-clearance";
 import { extract } from "@/lib/ai/llm";
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { clearanceMessageSchema } from "@/lib/ai/schemas/legal-clearance";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -85,7 +86,7 @@ export async function readClearanceMessage(
     ));
   } catch (error) {
     console.error("readClearanceMessage:", error);
-    return { ok: false, error: t.providerError };
+    return { ok: false, error: aiQuotaMessage(error) ?? t.providerError };
   }
 
   // Only what is written in the message is kept.

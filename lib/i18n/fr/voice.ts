@@ -48,6 +48,9 @@ export const voice = {
       "PO n'a trouvé aucun changement à proposer dans ce qui a été dit.",
     provider_quota:
       "Le service de transcription est saturé. Réessayez dans une minute.",
+    // The member's daily limit of requests to PO (lib/ai/quota.ts).
+    ai_quota:
+      "Limite du jour de requêtes à PO atteinte : le compteur repart à zéro à minuit ; le directeur général peut l'augmenter dans Équipe.",
     provider_error: "Le service n'a pas répondu. Réessayez.",
     ...microphoneErrors,
     too_large: "La dictée est trop longue. Faites plus court.",

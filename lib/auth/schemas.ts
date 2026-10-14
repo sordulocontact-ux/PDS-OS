@@ -78,6 +78,20 @@ export const membershipRoleSchema = z.object({
   role: z.enum(ORGANIZATION_ROLES, { error: fr.auth.errors.invalidRole }),
 });
 
+// The director sets a member's daily requests to PO (0 stops them).
+export const membershipAiLimitSchema = z.object({
+  membershipId: z.uuid(),
+  // An empty field is an error, never 0.
+  aiDailyLimit: z.preprocess(
+    (value) => (typeof value === "string" && !value.trim() ? undefined : value),
+    z.coerce
+      .number({ error: fr.aiUsage.team.invalid })
+      .int({ error: fr.aiUsage.team.invalid })
+      .min(0, { error: fr.aiUsage.team.invalid })
+      .max(10000, { error: fr.aiUsage.team.invalid }),
+  ),
+});
+
 export const inviteMemberSchema = z.object({
   firstName: requiredNameSchema,
   lastName: optionalNameSchema,

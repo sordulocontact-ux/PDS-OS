@@ -42,6 +42,7 @@ export const serverEnvSchema = z
     TRANSCRIPTION_MODEL: optionalSecret,
     MISTRAL_API_KEY: optionalSecret,
     GOOGLE_GENERATIVE_AI_API_KEY: optionalSecret,
+    ANTHROPIC_API_KEY: optionalSecret,
     GROQ_API_KEY: optionalSecret,
     /** Shared secret of the Vercel cron (Authorization: Bearer <CRON_SECRET>). */
     CRON_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),

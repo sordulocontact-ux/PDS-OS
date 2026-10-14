@@ -36,7 +36,9 @@ export function TopicEditForm({
   const [title, setTitle] = useState(topic.title);
   const [summary, setSummary] = useState(topic.summary);
   const [request, setRequest] = useState("");
-  const [proposal, setProposal] = useState<"done" | "failed" | null>(null);
+  const [proposal, setProposal] = useState<"done" | { error: string } | null>(
+    null,
+  );
   const [errors, setErrors] = useState<{ title?: string; summary?: string }>(
     {},
   );
@@ -48,7 +50,9 @@ export function TopicEditForm({
     startRewrite(async () => {
       const result = await proposeTopicRewrite(topic.id, request);
       if (!result.ok) {
-        setProposal("failed");
+        setProposal({
+          error: result.error === "quota" ? result.message : t.rewrite.failed,
+        });
         return;
       }
       setTitle(result.title);
@@ -109,8 +113,8 @@ export function TopicEditForm({
             {proposal === "done" && t.rewrite.done}
           </p>
         </div>
-        {proposal === "failed" && (
-          <FormMessage kind="error">{t.rewrite.failed}</FormMessage>
+        {proposal && proposal !== "done" && (
+          <FormMessage kind="error">{proposal.error}</FormMessage>
         )}
       </div>
 

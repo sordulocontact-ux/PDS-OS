@@ -13,6 +13,7 @@ const HTTP_STATUS: Partial<Record<CallErrorCode, number>> = {
   audio_missing: 409,
   audio_too_large: 413,
   provider_quota: 429,
+  ai_quota: 429,
   provider_error: 502,
   audio_unavailable: 502,
 };

@@ -61,7 +61,8 @@ export function ImportBriefDialog({ projectId }: { projectId: string }) {
             startTransition(async () => {
               const result = await importDesignBrief(projectId, title, body);
               if (!result.ok) return void toast.error(result.error);
-              if (result.count === null) toast.warning(t.providerFailed);
+              if (result.count === null)
+                toast.warning(result.quota ?? t.providerFailed);
               else toast.success(t.done(result.count));
               setOpen(false);
               setBody("");

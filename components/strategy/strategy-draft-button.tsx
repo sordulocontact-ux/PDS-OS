@@ -52,7 +52,7 @@ export function StrategyDraftButton({ projectId }: { projectId: string }) {
       } else if (result.error === "no_sources") toast(t.noSources);
       else if (result.error === "stage_locked")
         toast.error(fr.framing.errors.stage_locked);
-      else toast.error(t.failed);
+      else toast.error(result.error === "quota" ? result.message : t.failed);
     });
   }
 

@@ -11,6 +11,7 @@ export type LaboErrorCode =
   | "unsupported_type"
   | "invalid_input"
   | "invalid_isrc"
+  | "ai_quota"
   | "provider_error";
 
 export function laboError(code: LaboErrorCode, status: number) {

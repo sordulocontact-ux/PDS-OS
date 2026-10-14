@@ -153,6 +153,9 @@ export const laboCaptures = {
     unsupported_type: "Format non pris en charge : PNG, JPEG ou WebP.",
     provider_error:
       "Mistral n'a pas pu lire l'image (quota, clé ou panne). Relisez-la dans un instant.",
+    // The member's daily limit of requests to PO (lib/ai/quota.ts).
+    ai_quota:
+      "Limite du jour de requêtes à PO atteinte : le compteur repart à zéro à minuit ; le directeur général peut l'augmenter dans Équipe.",
     deezer_unavailable:
       "Deezer ne répond pas. Relisez la capture dans un instant.",
     network: "Le serveur ne répond pas.",

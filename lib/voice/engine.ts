@@ -106,7 +106,9 @@ export async function transcribeDictation(
 
 function providerError(error: unknown): VoiceErrorCode {
   const code = classifyProviderError(error);
-  return code === "audio_too_large" || code === "provider_quota"
+  return code === "audio_too_large" ||
+    code === "provider_quota" ||
+    code === "ai_quota"
     ? code
     : "provider_error";
 }

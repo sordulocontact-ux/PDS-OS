@@ -411,3 +411,9 @@ Au-delà des six étapes :
       diffusée avec urgences, contrôles ouverts nommés, lieu et dérogation expliqués, lecture des devis
       fiabilisée (une requête, réessayer, formats refusés clairement), « Saisir à la main » (migration
       `20261014001301`, 8 tests pgTAP ; test du parcours adapté)
+- [x] Quota quotidien de requêtes à PO et passage possible à Claude Haiku 5.5 (14/10) : limite par
+      membre (200 par défaut) changée par le DG dans Équipe (colonne « PO aujourd'hui », champ dans
+      « Modifier »), page « Paramètres » avec l'utilisation du jour comme dans Claude, refus clair
+      partout où PO est appelé ; fournisseur `anthropic` (`claude-haiku-5-5`, effort `low`, sans
+      température, cache des règles de PO) prêt, Mistral reste actif tant que la clé n'est pas fournie
+      (migration `20261014100101`, 11 tests pgTAP)

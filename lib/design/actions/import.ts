@@ -13,8 +13,9 @@ import { createClient } from "@/lib/supabase/server";
 
 export type ImportBriefResult =
   | { ok: true; count: number }
-  // The brief is kept as a source, but PO could not read it.
-  | { ok: true; count: null }
+  // The brief is kept as a source, but PO could not read it; `quota`: the
+  // sentence to show when the day's limit of requests to PO is reached.
+  | { ok: true; count: null; quota?: string }
   | { ok: false; error: string };
 
 const importSchema = z.object({
@@ -76,5 +77,9 @@ export async function importDesignBrief(
   refreshConception(p.projectId);
   return proposed.ok
     ? { ok: true, count: proposed.count }
-    : { ok: true, count: null };
+    : {
+        ok: true,
+        count: null,
+        quota: proposed.error === "quota" ? proposed.message : undefined,
+      };
 }

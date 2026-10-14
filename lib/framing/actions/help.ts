@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import type { ProviderFailure } from "@/lib/ai/provider-failure";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { isTextQuestion, type QuestionKey } from "@/lib/framing/dimensions";
@@ -60,7 +61,8 @@ export type HelpActionResult =
       ok: false;
       error:
         "no_sources" | "provider" | "stage_locked" | "forbidden" | "generic";
-    };
+    }
+  | ProviderFailure;
 
 export async function proposeHelp(
   projectId: string,

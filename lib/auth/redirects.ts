@@ -111,6 +111,8 @@ export const routes = {
     `/api/legal/formalities/${id}/document?version=${version}`,
   feedback: "/app/feedback",
   members: "/app/members",
+  // Each member's own settings: their requests to PO of the day.
+  settings: "/app/settings",
   membersNew: "/app/members/new",
   artists: "/app/catalog/artists",
   artist: (id: string) => `/app/catalog/artists/${id}`,

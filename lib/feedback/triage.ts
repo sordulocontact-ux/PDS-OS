@@ -2,6 +2,7 @@ import "server-only";
 
 import { FEEDBACK_TRIAGE_INSTRUCTIONS } from "@/lib/ai/instructions/feedback-triage";
 import { extract } from "@/lib/ai/llm";
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { feedbackTriageSchema } from "@/lib/ai/schemas/feedback-triage";
 import {
   plainText,
@@ -37,7 +38,8 @@ export function triagePrompt(
   ].join("\n");
 }
 
-export type TriageResult = { ok: boolean; filed: number };
+// `error`: the sentence to show when the day's limit of requests to PO is reached.
+export type TriageResult = { ok: boolean; filed: number; error?: string };
 
 /**
  * Files every feedback still waiting into a topic, with the director's own
@@ -89,7 +91,7 @@ export async function triageUnfiledFeedback(
       ));
     } catch (error) {
       console.error("triageUnfiledFeedback:", error);
-      return { ok: false, filed };
+      return { ok: false, filed, error: aiQuotaMessage(error) ?? undefined };
     }
 
     const match = refs.find((t) => t.ref === output.topic.trim());

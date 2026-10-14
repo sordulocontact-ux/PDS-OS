@@ -907,8 +907,62 @@ de call qui donne un lien Google Meet.
 ## 5. IA (`lib/ai/`)
 
 - Points d'entrée uniques : `llm.ts` (`extract`, `getChatModel`) et `transcribe.ts`.
-  Fournisseurs et modèles par défaut : `providers.ts`. Mistral gratuit : quota nul sur
-  `small`/`medium` → `ministral-14b-latest` ; surcharge `LLM_MODEL`.
+  Fournisseurs et modèles par défaut : `providers.ts` (`mistral` | `google` | `anthropic`,
+  choisi par `LLM_PROVIDER`, surcharge `LLM_MODEL`). Mistral gratuit : quota nul sur
+  `small`/`medium` → `ministral-14b-latest` (défaut des tests locaux). **Production : Claude
+  Haiku 5.5** (`LLM_PROVIDER=anthropic`, `claude-haiku-5-5`, `ANTHROPIC_API_KEY`), choisi le
+  14/10/2026 (rapport intelligence / prix / vitesse, requêtes non utilisées pour
+  l'entraînement). L'audio reste chez Groq.
+- **Réglages par fournisseur** (`providerSettings` dans `llm.ts`, appliqués aux extractions
+  et à PO) : Haiku 5.5 renvoie 400 sur toute `temperature` / `top_p` / `top_k` → rien n'est
+  envoyé ; sa réflexion adaptative passe de `medium` (défaut) à `effort: "low"`
+  (`providerOptions.anthropic`). Mistral et Google gardent `temperature: 0`.
+  `@ai-sdk/anthropic` est épinglé à **4.0.75**, première version qui connaît
+  `claude-haiku-5-5` (avant, modèle « inconnu » : température transmise → 400).
+- **Cache des prompts de PO** : `assistantInstructions` rend des parties (`InstructionPart`,
+  `stable` ou non) ; avec Anthropic, `systemPrompt` envoie les parties stables (qui PO est,
+  règles) avec un `cacheControl` puis le contexte variable (prénom, poste, page ouverte) sans
+  cache. Les outils passent avant le prompt système : ils sont dans le préfixe en cache. Rien
+  de variable (date, identifiant, nom) ne doit entrer dans une partie `stable`. Ailleurs, les
+  parties sont jointes dans leur ordre (prompt de ministral inchangé).
+- **Sortie structurée** : Haiku 5.5 a la sortie structurée native (`output_config.format`
+  JSON Schema, vérifié sur la requête émise) ; les `min`/`max` de zod n'y sont qu'en
+  description et zod les revérifie à l'arrivée. `fromSchemaEcho` reste : propre à ministral,
+  sans effet ailleurs. Images (`extractFromImage(s)`) : PNG, JPEG, WebP, GIF en base64.
+
+### 5 bis. Quota quotidien de requêtes (`lib/ai/quota.ts`, 14/10/2026)
+
+Demande de Sacha : chaque membre a une limite de requêtes par jour, que le directeur général
+change dans Équipe, et voit son utilisation dans ses paramètres, comme dans Claude.
+
+- **Une requête = un appel au modèle** : un message à PO (une seule, quel que soit le nombre
+  d'étapes d'outils), une analyse, une extraction, une lecture d'image. La transcription
+  (Groq) ne compte pas.
+- **SQL** (`…20261014100101_ai_request_quota.sql`, tests `supabase/tests/ai-quota.test.sql`) :
+  `memberships.ai_daily_limit` (200 par défaut, 0 à 10 000, colonne accordée en écriture, la
+  policy existante la réserve aux administrateurs), table `ai_requests` (une ligne par
+  requête, lecture : soi ou administrateur, aucune écriture client).
+  `consume_ai_request(org)` verrouille le membership, compte la journée **de Paris**
+  (`ai_quota_day_start` / `ai_quota_resets_at`, minuit), refuse au-delà sans rien écrire,
+  sinon enregistre. `ai_usage_today(org)` (security invoker) : sa ligne pour un membre, toutes
+  pour le DG.
+- **Contrôle** : `takeAiRequest()` avant chaque appel — dans `generate` (`llm.ts`) pour les
+  extractions, dans `app/api/assistant/route.ts` pour un message de PO (réponse **429**
+  `{"error":"quota","limit":n}`, lue par `AssistantThread`). Sans session de membre : refus,
+  sauf le labo local (`isLaboEnabled`). Limite atteinte → `AiQuotaExceededError` ; les
+  appelants affichent `aiQuotaMessage(error)` (« Limite du jour atteinte… ») au lieu de leur
+  erreur générique ; ceux qui renvoient un code passent par `providerFailure(error)`
+  (`lib/ai/provider-failure.ts` : `"provider"` ou `"quota"` + message) ; calls, dictée,
+  captures TikTok et labo ont un code `ai_quota` (HTTP 429, `calls.error_code` est du texte
+  libre). Restent silencieux, volontairement, les appels qui retombent déjà sans message :
+  titre de PO d'un retour direct, suggestion entre homonymes, analyse du Cadrage, remplissages
+  lancés après le compte rendu d'un call (le compte rendu est enregistré, seules les
+  propositions de PO manquent).
+- **Écrans** : `/app/settings` (« Paramètres », menu du compte et panneau mobile) →
+  `AiUsageMeter` : part utilisée, barre (`ProgressBar tone="error"` à la limite), « 74 sur
+  200 », remise à zéro à minuit, qui fixe la limite ; avertissement à 80 %. Équipe : colonne
+  « PO aujourd'hui » (`listMemberships` lit `ai_usage_today`) et champ « Requêtes à PO par
+  jour » dans « Modifier » (`membershipAiLimitSchema`, champ vide = erreur, jamais 0).
 - Extraction du compte rendu : `call-report.ts`, schéma `schemas/call-report.ts`, consignes
   `instructions/call-report.ts` (la transcription n'arrive qu'en message utilisateur, dans
   `<data>`). « who »/« why » à null s'ils ne sont pas dits.

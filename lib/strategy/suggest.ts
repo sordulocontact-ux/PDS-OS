@@ -2,6 +2,10 @@ import "server-only";
 
 import { STRATEGY_CHOICES_INSTRUCTIONS } from "@/lib/ai/instructions/strategy-choices";
 import { extract } from "@/lib/ai/llm";
+import {
+  providerFailure,
+  type ProviderFailure,
+} from "@/lib/ai/provider-failure";
 import { locateQuote } from "@/lib/ai/provenance";
 import { strategyChoicesSchema } from "@/lib/ai/schemas/strategy-choices";
 import {
@@ -64,7 +68,8 @@ async function loadSources(projectId: string): Promise<Source[]> {
 
 export type SuggestResult =
   | { ok: true; suggestions: Record<StrategyTextField, ChoiceSuggestion[]> }
-  | { ok: false; error: "no_sources" | "provider" };
+  | { ok: false; error: "no_sources" | "provider" }
+  | ProviderFailure;
 
 /**
  * Asks the model which closed answers the sources support, then keeps only
@@ -90,7 +95,7 @@ export async function suggestStrategyChoices(
     ));
   } catch (error) {
     console.error("suggestStrategyChoices:", error);
-    return { ok: false, error: "provider" };
+    return providerFailure(error);
   }
 
   const byId = new Map(sources.map((s) => [s.id, s]));

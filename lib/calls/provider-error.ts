@@ -1,3 +1,4 @@
+import { isAiQuotaExceeded } from "@/lib/ai/quota";
 import type { CallErrorCode } from "@/lib/calls/constants";
 
 /**
@@ -23,6 +24,8 @@ function statusCodeOf(error: unknown, depth = 0): number | null {
 }
 
 export function classifyProviderError(error: unknown): CallErrorCode {
+  // The member's daily limit of requests to PO: the model was not called.
+  if (isAiQuotaExceeded(error)) return "ai_quota";
   const status = statusCodeOf(error);
   if (status === 413) return "audio_too_large";
   if (status === 429) return "provider_quota";

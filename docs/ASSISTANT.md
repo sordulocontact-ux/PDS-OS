@@ -39,11 +39,18 @@ une question utile.
 ## 2. Comment il fonctionne
 
 ```
-question ─► modèle (Mistral) ─► appelle une fonction ─► notre code interroge Supabase
-                                                          avec la session de l'utilisateur (RLS)
-réponse  ◄─ le modèle reformule ◄──────────────────────── faits + liens (sources)
+question ─► quota du jour ─► modèle (Claude Haiku 5.5 en production, ─► appelle une fonction
+            (1 requête)        ministral en local, LLM_PROVIDER)
+                                     notre code interroge Supabase avec la session de
+                                     l'utilisateur (RLS) ◄───────────────────────────┘
+réponse  ◄─ le modèle reformule ◄── faits + liens (sources)
           + sources affichées par le code sous la réponse
 ```
+
+Chaque message compte pour une requête du quota quotidien du membre (`lib/ai/quota.ts`,
+`docs/ARCHITECTURE.md` § 5 bis) ; limite atteinte → la route répond 429 et la conversation
+affiche « Limite du jour atteinte… ». Avec Anthropic, le prompt système est envoyé en deux
+parties : règles en cache (`cacheControl`), puis le contexte (prénom, poste, page).
 
 Six couches, chacune ferme une porte :
 

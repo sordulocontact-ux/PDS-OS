@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { MIX_FEEDBACK_INSTRUCTIONS } from "@/lib/ai/instructions/mix-feedback";
 import { extract } from "@/lib/ai/llm";
+import { aiQuotaMessage } from "@/lib/ai/quota";
 import { mixFeedbackSchema } from "@/lib/ai/schemas/mix-feedback";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -199,7 +200,7 @@ export async function proposeMixSummary(
       : { ok: false, error: t.propose };
   } catch (error) {
     console.error("proposeMixSummary:", error);
-    return { ok: false, error: t.propose };
+    return { ok: false, error: aiQuotaMessage(error) ?? t.propose };
   }
 }
 

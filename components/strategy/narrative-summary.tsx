@@ -69,7 +69,7 @@ export function NarrativeSummary({
       else if (result.error === "confirmed") toast(t.confirmed);
       else if (result.error === "stage_locked")
         toast.error(fr.framing.errors.stage_locked);
-      else toast.error(t.failed);
+      else toast.error(result.error === "quota" ? result.message : t.failed);
     });
   }
 

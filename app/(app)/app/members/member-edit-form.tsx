@@ -15,8 +15,9 @@ import {
   type MembershipRow,
 } from "@/lib/members/types";
 
-// Body of the "Modifier" modal of a team row: name, and the position when
-// it can change here (invitation or active access, never one's own).
+// Body of the "Modifier" modal of a team row: name, the position when it
+// can change here (invitation or active access, never one's own), and the
+// daily requests to PO.
 export function MemberEditForm({
   membership,
   isSelf,
@@ -27,7 +28,7 @@ export function MemberEditForm({
   onDone: (saved: boolean) => void;
 }) {
   const [state, action] = useActionState(memberAction, idleMemberActionState);
-  const { id, status, role, person } = membership;
+  const { id, status, role, person, ai } = membership;
   const t = fr.auth.members;
   const c = fr.auth.common;
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
@@ -89,6 +90,25 @@ export function MemberEditForm({
           <p className="text-xs text-muted-foreground">{roleLocked}</p>
         </div>
       )}
+      <Field
+        name="aiDailyLimit"
+        id={`aiDailyLimit-${id}`}
+        label={fr.aiUsage.team.field}
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={10000}
+        step={1}
+        autoComplete="off"
+        defaultValue={retainedMemberValue(
+          state,
+          "aiDailyLimit",
+          String(ai.limit),
+        )}
+        required
+        hint={fr.aiUsage.team.hint(ai.used)}
+        error={fieldErrors?.aiDailyLimit}
+      />
       {state.status === "error" && !state.fieldErrors && (
         <FormMessage kind="error">{state.error}</FormMessage>
       )}

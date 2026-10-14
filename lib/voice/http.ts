@@ -17,6 +17,7 @@ const HTTP_STATUS: Record<VoiceErrorCode, number> = {
   nothing_heard: 422,
   nothing_understood: 422,
   provider_quota: 429,
+  ai_quota: 429,
   provider_error: 502,
 };
 

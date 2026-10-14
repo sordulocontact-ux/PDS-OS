@@ -21,7 +21,8 @@ export function FeedbackTriage({
 }) {
   const t = fr.feedback.triage;
   const router = useRouter();
-  const [failed, setFailed] = useState(false);
+  // The reason shown when PO failed: the quota's sentence, else the generic one.
+  const [failed, setFailed] = useState<string | null>(null);
   const [, startRefresh] = useTransition();
   const started = useRef(false);
 
@@ -29,9 +30,9 @@ export function FeedbackTriage({
     triageFeedback().then(
       (result) => {
         if (result.ok) startRefresh(() => router.refresh());
-        else setFailed(true);
+        else setFailed(result.error ?? t.failed);
       },
-      () => setFailed(true),
+      () => setFailed(t.failed),
     );
 
   useEffect(() => {
@@ -47,12 +48,12 @@ export function FeedbackTriage({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <FormMessage kind="error" className="flex-1">
-            {t.failed}
+            {failed}
           </FormMessage>
           <Button
             variant="outline"
             onClick={() => {
-              setFailed(false);
+              setFailed(null);
               void run();
             }}
           >
