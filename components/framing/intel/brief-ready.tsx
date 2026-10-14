@@ -65,9 +65,20 @@ export function BriefReady({
       actions={
         ((ready && editable) || hasBrief) && (
           <>
+            {/* Once a Brief exists, seeing it is the main action; updating it
+                is secondary (Sacha, 14/10/2026). */}
+            {hasBrief && (
+              <ViewLink
+                href={briefHref}
+                className={buttonVariants({ size: "lg" })}
+              >
+                {t.seeBrief}
+              </ViewLink>
+            )}
             {ready && editable && (
               <Button
                 size="lg"
+                variant={hasBrief ? "outline" : "default"}
                 disabled={pending}
                 onClick={() =>
                   run(
@@ -78,17 +89,6 @@ export function BriefReady({
               >
                 {pending ? t.generating : hasBrief ? t.update : t.generate}
               </Button>
-            )}
-            {hasBrief && (
-              <ViewLink
-                href={briefHref}
-                className={buttonVariants({
-                  size: "lg",
-                  variant: ready && editable ? "outline" : "default",
-                })}
-              >
-                {t.seeBrief}
-              </ViewLink>
             )}
           </>
         )
