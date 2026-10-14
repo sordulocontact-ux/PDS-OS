@@ -12363,6 +12363,111 @@ export type Database = {
           },
         ]
       }
+      production_quotes: {
+        Row: {
+          amount_cents: number
+          check_note: string | null
+          checks: Json
+          decided_at: string | null
+          decided_by: string | null
+          delivery_on: string | null
+          deposited_at: string
+          deposited_by: string | null
+          file_id: string | null
+          id: string
+          label: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          reason: string | null
+          sheet_id: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          url: string | null
+        }
+        Insert: {
+          amount_cents: number
+          check_note?: string | null
+          checks?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          delivery_on?: string | null
+          deposited_at?: string
+          deposited_by?: string | null
+          file_id?: string | null
+          id?: string
+          label: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          reason?: string | null
+          sheet_id: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          url?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          check_note?: string | null
+          checks?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          delivery_on?: string | null
+          deposited_at?: string
+          deposited_by?: string | null
+          file_id?: string | null
+          id?: string
+          label?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          reason?: string | null
+          sheet_id?: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_quotes_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_quotes_deposited_by_fkey"
+            columns: ["deposited_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_quotes_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "production_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_quotes_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_quotes_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_readiness_checks: {
         Row: {
           confirmed_at: string | null
@@ -12469,15 +12574,26 @@ export type Database = {
           camera_setup: string | null
           closed_at: string | null
           closed_by: string | null
+          company_contact_id: string | null
+          company_progress: Json
+          company_progress_at: string | null
           constraints_note: string | null
           coverage: string | null
           coverage_note: string | null
           deliverable_id: string
           delivery_date: string | null
+          direction_comment: string | null
+          direction_decided_at: string | null
+          direction_decided_by: string | null
+          direction_status: string
+          direction_submitted_at: string | null
           director_contact_id: string | null
           director_person_id: string | null
+          dop_contact_id: string | null
+          dop_person_id: string | null
           handoff_id: string | null
           id: string
+          line_producer_person_id: string | null
           location_access: string | null
           location_address: string | null
           location_name: string | null
@@ -12487,10 +12603,14 @@ export type Database = {
           open_needs: string | null
           opened_at: string
           opened_by: string | null
+          organization: string | null
           organization_id: string
+          organized_at: string | null
+          organized_by: string | null
           post_end: string | null
           post_start: string | null
           project_id: string
+          quote_validator_person_id: string | null
           ready_at: string | null
           ready_by: string | null
           references_note: string | null
@@ -12509,15 +12629,26 @@ export type Database = {
           camera_setup?: string | null
           closed_at?: string | null
           closed_by?: string | null
+          company_contact_id?: string | null
+          company_progress?: Json
+          company_progress_at?: string | null
           constraints_note?: string | null
           coverage?: string | null
           coverage_note?: string | null
           deliverable_id: string
           delivery_date?: string | null
+          direction_comment?: string | null
+          direction_decided_at?: string | null
+          direction_decided_by?: string | null
+          direction_status?: string
+          direction_submitted_at?: string | null
           director_contact_id?: string | null
           director_person_id?: string | null
+          dop_contact_id?: string | null
+          dop_person_id?: string | null
           handoff_id?: string | null
           id?: string
+          line_producer_person_id?: string | null
           location_access?: string | null
           location_address?: string | null
           location_name?: string | null
@@ -12527,10 +12658,14 @@ export type Database = {
           open_needs?: string | null
           opened_at?: string
           opened_by?: string | null
+          organization?: string | null
           organization_id: string
+          organized_at?: string | null
+          organized_by?: string | null
           post_end?: string | null
           post_start?: string | null
           project_id: string
+          quote_validator_person_id?: string | null
           ready_at?: string | null
           ready_by?: string | null
           references_note?: string | null
@@ -12549,15 +12684,26 @@ export type Database = {
           camera_setup?: string | null
           closed_at?: string | null
           closed_by?: string | null
+          company_contact_id?: string | null
+          company_progress?: Json
+          company_progress_at?: string | null
           constraints_note?: string | null
           coverage?: string | null
           coverage_note?: string | null
           deliverable_id?: string
           delivery_date?: string | null
+          direction_comment?: string | null
+          direction_decided_at?: string | null
+          direction_decided_by?: string | null
+          direction_status?: string
+          direction_submitted_at?: string | null
           director_contact_id?: string | null
           director_person_id?: string | null
+          dop_contact_id?: string | null
+          dop_person_id?: string | null
           handoff_id?: string | null
           id?: string
+          line_producer_person_id?: string | null
           location_access?: string | null
           location_address?: string | null
           location_name?: string | null
@@ -12567,10 +12713,14 @@ export type Database = {
           open_needs?: string | null
           opened_at?: string
           opened_by?: string | null
+          organization?: string | null
           organization_id?: string
+          organized_at?: string | null
+          organized_by?: string | null
           post_end?: string | null
           post_start?: string | null
           project_id?: string
+          quote_validator_person_id?: string | null
           ready_at?: string | null
           ready_by?: string | null
           references_note?: string | null
@@ -12597,6 +12747,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "production_sheets_company_contact_id_fkey"
+            columns: ["company_contact_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "production_sheets_contact_same_org"
             columns: ["director_contact_id", "organization_id"]
             isOneToOne: false
@@ -12611,8 +12768,29 @@ export type Database = {
             referencedColumns: ["id", "organization_id"]
           },
           {
+            foreignKeyName: "production_sheets_direction_decided_by_fkey"
+            columns: ["direction_decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "production_sheets_director_person_id_fkey"
             columns: ["director_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_dop_contact_id_fkey"
+            columns: ["dop_contact_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_dop_person_id_fkey"
+            columns: ["dop_person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -12625,8 +12803,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "production_sheets_line_producer_person_id_fkey"
+            columns: ["line_producer_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "production_sheets_opened_by_fkey"
             columns: ["opened_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_organized_by_fkey"
+            columns: ["organized_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -12637,6 +12829,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_sheets_quote_validator_person_id_fkey"
+            columns: ["quote_validator_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "production_sheets_ready_by_fkey"
@@ -15876,6 +16075,21 @@ export type Database = {
         Args: { p_contact_id: string; p_project_id: string; p_role: string }
         Returns: string
       }
+      add_production_gear_by_link: {
+        Args: { p_lines: Json; p_token: string }
+        Returns: number
+      }
+      add_production_quote: {
+        Args: {
+          p_amount_cents: number
+          p_delivery_on: string | null
+          p_label: string
+          p_note: string | null
+          p_sheet_id: string
+          p_url: string | null
+        }
+        Returns: string
+      }
       add_project_creative: {
         Args: { p_person_id: string; p_project_id: string }
         Returns: undefined
@@ -16293,6 +16507,14 @@ export type Database = {
         Args: { p_decision: string; p_note: string; p_version_id: string }
         Returns: undefined
       }
+      decide_production_direction: {
+        Args: { p_approve: boolean; p_comment: string; p_sheet_id: string }
+        Returns: undefined
+      }
+      decide_production_quote: {
+        Args: { p_approve: boolean; p_quote_id: string; p_reason: string }
+        Returns: undefined
+      }
       decide_production_version: {
         Args: {
           p_version_id: string
@@ -16337,6 +16559,17 @@ export type Database = {
       design_is_editable: { Args: { p_project_id: string }; Returns: boolean }
       deposit_production_export: {
         Args: { p_line_id: string; p_token: string; p_url: string }
+        Returns: undefined
+      }
+      deposit_production_quote_by_link: {
+        Args: {
+          p_amount_cents: number
+          p_delivery_on: string | null
+          p_label: string
+          p_note: string | null
+          p_token: string
+          p_url: string | null
+        }
         Returns: undefined
       }
       deposit_production_version: {
@@ -16524,6 +16757,7 @@ export type Database = {
       get_master_transmission: { Args: { p_token: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }
       get_production_call_sheet: { Args: { p_token: string }; Returns: Json }
+      get_production_link_journey: { Args: { p_token: string }; Returns: Json }
       get_production_provider_locations: {
         Args: { p_token: string }
         Returns: Json
@@ -16900,6 +17134,18 @@ export type Database = {
         }
         Returns: string
       }
+      propose_production_location_by_link: {
+        Args: {
+          p_address: string | null
+          p_availability: string | null
+          p_constraints: string | null
+          p_name: string
+          p_price_cents: number | null
+          p_token: string
+          p_url: string | null
+        }
+        Returns: undefined
+      }
       propose_split_version: {
         Args: { p_version_id: string }
         Returns: {
@@ -17121,6 +17367,23 @@ export type Database = {
         }
         Returns: string
       }
+      submit_production_direction: {
+        Args: { p_sheet_id: string }
+        Returns: undefined
+      }
+      submit_production_direction_by_link: {
+        Args: {
+          p_references_note: string
+          p_run_of_show: string
+          p_staging_intent: string
+          p_token: string
+        }
+        Returns: undefined
+      }
+      submit_production_quote: {
+        Args: { p_checks: Json; p_note: string; p_quote_id: string }
+        Returns: undefined
+      }
       submit_production_version: {
         Args: {
           p_version_id: string
@@ -17319,6 +17582,22 @@ export type Database = {
       }
       set_network_contact_archived: {
         Args: { p_archived: boolean; p_contact_id: string }
+        Returns: undefined
+      }
+      set_production_organization: {
+        Args: {
+          p_company_contact_id: string | null
+          p_dop_contact_id: string | null
+          p_dop_person_id: string | null
+          p_line_producer_person_id: string | null
+          p_organization: string
+          p_quote_validator_person_id: string
+          p_sheet_id: string
+        }
+        Returns: undefined
+      }
+      set_production_progress_by_link: {
+        Args: { p_done: boolean; p_key: string; p_token: string }
         Returns: undefined
       }
       set_project_archived: {
