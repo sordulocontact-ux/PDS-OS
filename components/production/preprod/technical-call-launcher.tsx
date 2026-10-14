@@ -18,7 +18,12 @@ export function TechnicalCallLauncher({
 }) {
   const t = fr.productionPreprod.call;
   return (
-    <PrepareCallSheet label={t.prepare} title={t.sheetTitle} body={t.sheetBody}>
+    <PrepareCallSheet
+      label={t.prepare}
+      title={t.sheetTitle}
+      body={t.sheetBody}
+      variant="default"
+    >
       {(close) => (
         <TechnicalCallForm projectId={projectId} data={data} onCancel={close} />
       )}

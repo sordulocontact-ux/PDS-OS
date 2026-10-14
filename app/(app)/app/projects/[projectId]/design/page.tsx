@@ -160,6 +160,7 @@ export default async function DesignPage({
                       <ConceptionCallSheet
                         projectId={projectId}
                         data={callSheet}
+                        variant="default"
                       />
                     )}
                     <AttachCallButton

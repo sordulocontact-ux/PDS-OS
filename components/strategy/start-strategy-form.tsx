@@ -17,7 +17,9 @@ export function StartStrategyForm({ projectId }: { projectId: string }) {
   );
   return (
     <form action={action} className="contents">
-      <SubmitButton pendingLabel={t.starting}>{t.start}</SubmitButton>
+      <SubmitButton pendingLabel={t.starting} variant="outline">
+        {t.start}
+      </SubmitButton>
       {state.status === "error" && state.formError && (
         <div className="basis-full">
           <FormMessage kind="error">{state.formError}</FormMessage>

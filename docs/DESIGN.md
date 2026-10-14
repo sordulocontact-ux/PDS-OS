@@ -481,6 +481,19 @@ saisie : `--destructive` reste à l'encre pour les actions définitives (décisi
 Un champ redevient normal dès qu'il est corrigé. Le bouton n'est jamais désactivé pour
 cause de champs manquants.
 
+### Action principale d'une carte
+
+Une seule action pleine (`variant="default"`) par carte, le reste en contour.
+
+- **« Préparer un échange » est toujours l'action principale** de la carte qui le propose
+  (Cadrage, Stratégie, Conception, Production, Master), avant « Commencer… » ou
+  « Reprendre… », qui passent en contour (Sacha, 14/10/2026). Dans l'entrée du Cadrage,
+  la voie « Recommandé » reste choisie par le code et placée en premier, mais c'est
+  toujours le bouton de l'échange qui est plein. Les en-têtes de page (à côté de
+  « Dicter ») ne sont pas des cartes : l'échange y reste en contour.
+- **Brief existant** : « Voir le Brief » est plein, « Mettre à jour le Brief » en contour
+  (Sacha, 14/10/2026) ; sans Brief, « Créer le Brief » est plein.
+
 ### Modale : une seule, « verre »
 
 **Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,

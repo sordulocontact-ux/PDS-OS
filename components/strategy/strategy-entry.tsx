@@ -82,8 +82,14 @@ export function StrategyEntry({
             {t.sources(callReportCount)}
           </p>
           <div className="flex flex-wrap gap-2">
+            {/* In a card, preparing an exchange is the main action
+                (Sacha, 14/10/2026). */}
+            <StrategyCallSheet
+              projectId={projectId}
+              data={callSheet}
+              variant="default"
+            />
             <StartStrategyForm projectId={projectId} />
-            <StrategyCallSheet projectId={projectId} data={callSheet} />
           </div>
         </div>
       )}

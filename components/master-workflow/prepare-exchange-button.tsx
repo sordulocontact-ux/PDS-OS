@@ -31,7 +31,7 @@ export function PrepareExchangeButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button size="sm" onClick={() => setOpen(true)}>
         <IconPlus aria-hidden data-icon="inline-start" />
         {t.prepare}
       </Button>

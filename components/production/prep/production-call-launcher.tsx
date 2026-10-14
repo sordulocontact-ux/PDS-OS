@@ -19,7 +19,12 @@ export function ProductionCallLauncher({
 }) {
   const t = fr.productionCall;
   return (
-    <PrepareCallSheet label={t.prepare} title={t.title} body={t.body}>
+    <PrepareCallSheet
+      label={t.prepare}
+      title={t.title}
+      body={t.body}
+      variant="default"
+    >
       {(close) => (
         <ProductionCallForm
           projectId={projectId}

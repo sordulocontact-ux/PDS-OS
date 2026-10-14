@@ -107,17 +107,25 @@ export function FramingEntry({
         <div className="flex flex-wrap gap-2">
           {started ? (
             <>
+              {/* In a card, preparing an exchange is the main action
+                  (Sacha, 14/10/2026). */}
+              <FramingCallSheet
+                projectId={projectId}
+                data={callSheet}
+                variant="default"
+              />
               <Link
                 href={routes.projectFraming(projectId)}
-                className={buttonVariants({ size: "lg" })}
+                className={buttonVariants({ size: "lg", variant: "outline" })}
               >
                 {t.entry.resume}
               </Link>
-              <FramingCallSheet projectId={projectId} data={callSheet} />
             </>
           ) : (
             // Two ways in, each said with what it does (PROJ-UX-02), the
             // recommended one first — decided by code from what is missing.
+            // The exchange stays the primary button either way (Sacha,
+            // 14/10/2026).
             <ul className="grid w-full gap-3 md:grid-cols-2">
               {(exchangeFirst
                 ? (["exchange", "direct"] as const)
@@ -154,13 +162,13 @@ export function FramingEntry({
                       <FramingCallSheet
                         projectId={projectId}
                         data={callSheet}
-                        variant={index === 0 ? "default" : "outline"}
+                        variant="default"
                       />
                     ) : (
                       <form action={startFramingWithPo.bind(null, projectId)}>
                         <SubmitButton
                           pendingLabel={t.entry.starting}
-                          variant={index === 0 ? "default" : "outline"}
+                          variant="outline"
                         >
                           {t.entry.start}
                         </SubmitButton>
