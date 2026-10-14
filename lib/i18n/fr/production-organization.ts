@@ -23,7 +23,8 @@ export const productionOrganization = {
       "Lieux, devis, locations, planning, logistique. Sans lui, c'est la ou le chef de projet.",
     lineProducerNone: "La ou le chef de projet",
     validator: "Validation des devis",
-    validatorHint: "Proposé : la direction générale (à confirmer avec Ibé).",
+    validatorHint:
+      "Le DG valide les devis ; le chargé de production les vérifie avant.",
     director: "Réalisateur ou réalisatrice",
     directorHint:
       "Proposition de réalisation et découpage ; un contact du Réseau passe par son lien privé.",

@@ -252,10 +252,13 @@ conditionnent tous les écrans ; le reste peut attendre ses tickets. Reporter ch
 société), 3 (liens privés pour le MVP, comptes plus tard), 8 à 12 (deux types, pas d'hybride ;
 déroulé externe complet ; la société a son accès pour lieux, documents et ce qui la concerne), 20
 (en externe, la société propose les lieux, PDS valide), 22 (le chargé de production vérifie le
-devis et le soumet à son supérieur). Restent ouvertes : n° 2 (le chargé de production est-il un
-salarié avec compte ou un freelance par lien ?), 7 et 22 (qui est « le supérieur hiérarchique » qui
-valide un devis : chef de projet, DG, selon un montant ?), 9 (où se choisit interne / externe : par
-livrable ?), 13 (contenus sans tournage).
+devis et le soumet à son supérieur).
+
+**Réponses d'Ibé, 14/10 (22:14)** : **le DG valide les devis** ; le chargé de production les recueille,
+vérifie leur cohérence avec le budget et les délais, puis les soumet au DG (n° 7, 22). **Le chargé de
+production peut être salarié ou freelance**, selon le projet : seul son rôle compte (n° 2). **Interne ou
+externe se choisit par contenu**, pas par projet : un clip en externe et des capsules en interne sur une
+même sortie (n° 8, 9). Reste ouverte : n° 13 (contenus sans tournage).
 
 ### A. Qui utilise PDS OS (bloquant)
 
@@ -418,6 +421,8 @@ jour où les comptes arrivent, ce lien devient son espace connecté.
 
 Fait le 14/10 (proto validé par Sacha, `docs/ARCHITECTURE.md` « Production en parcours ») : M1, M2,
 M3 (société, réalisateur, chef op par lien ; le chargé de production a un compte) et M4 (« Maintenant »
-et « À vous » selon la personne). Restent les réponses d'Ibé du § 9 (qui valide un devis, chargé de
-production salarié ou freelance, interne / externe par livrable).
+et « À vous » selon la personne). Les réponses d'Ibé du 14/10 confirment le DG comme validateur des
+devis et le choix interne / externe par livrable (déjà le cas). **Écart restant** : un chargé de
+production **freelance** n'a pas de compte ; il faudrait soit lui ouvrir un compte limité à ce rôle,
+soit lui donner sa part par lien privé (lieux, devis, planning, feuille de service). À trancher.
 
