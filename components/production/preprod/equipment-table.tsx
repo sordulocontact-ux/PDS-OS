@@ -11,6 +11,7 @@ import {
   EMPTY_CELL,
 } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { quantityGap } from "@/lib/production/preprod/types";
 import { formatEuros } from "@/lib/budget/types";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
@@ -69,6 +70,10 @@ export function EquipmentTable({
           const subtitle = [
             t.categories[e.category],
             e.quantity ? `× ${e.quantity}` : null,
+            e.source !== "rental" ? t.sources[e.source] : null,
+            quantityGap(e)
+              ? t.gap(e.quantity ?? 0, e.receivedQuantity ?? 0)
+              : null,
             file ? t.sourceQuote(file) : null,
             e.verifiedBy && e.verifiedAt
               ? t.verifiedBy(e.verifiedBy, formatShortDate(e.verifiedAt))

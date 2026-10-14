@@ -5,7 +5,7 @@ import { z } from "zod";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 
 import { holderField, optionalDate, optionalText } from "./result";
-import { EQUIPMENT_CATEGORIES } from "./types";
+import { EQUIPMENT_CATEGORIES, EQUIPMENT_SOURCES } from "./types";
 import { EQUIPMENT_FORM_STATUSES } from "./equipment";
 
 // What lib/production/preprod/actions-equipment.ts checks before writing:
@@ -52,6 +52,15 @@ export const equipmentSchema = z
     returnDue: optionalDate,
     incidentNote: optionalText(1000),
     note: optionalText(1000),
+    source: z.enum(EQUIPMENT_SOURCES).default("rental"),
+    receivedQuantity: z
+      .string()
+      .trim()
+      .default("")
+      .transform((v) => (v === "" ? null : Number(v)))
+      .refine(
+        (v) => v === null || (Number.isInteger(v) && v >= 0 && v <= 1000),
+      ),
     quoteFileId: z
       .string()
       .optional()
@@ -81,5 +90,7 @@ export function equipmentRow(e: EquipmentInput) {
     return_due: e.returnDue,
     incident_note: e.incidentNote,
     note: e.note,
+    source: e.source,
+    received_quantity: e.receivedQuantity,
   };
 }

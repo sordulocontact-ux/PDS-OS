@@ -392,10 +392,53 @@ export const productionPreprod = {
     saved: "Lieu enregistré.",
   },
 
+  quoteImport: {
+    button: "Lire avec PO",
+    title: (file: string) => `Lire « ${file} » avec PO`,
+    description:
+      "PO relève les lignes du devis. Le code ne garde que ce qu'il retrouve dans le devis ; vous corrigez avant d'ajouter. Les lignes arrivent « À vérifier ».",
+    reading: "PO lit le devis…",
+    none: "Aucune ligne d'article n'a été retrouvée dans ce devis.",
+    fromImage:
+      "Devis lu sur une image : rien n'a pu être vérifié dans un texte, chaque ligne est à vérifier.",
+    supplier: "Loueur",
+    deposit: "Caution",
+    conditions: "Conditions de retrait et de retour",
+    taxes: (text: string) => `Taxes : ${text}`,
+    columns: {
+      keep: "Garder",
+      label: "Article",
+      category: "Catégorie",
+      quantity: "Quantité",
+      price: "Prix",
+    },
+    uncertain: "À vérifier : une valeur n'a pas été retrouvée dans le devis",
+    existing: "Existe déjà : la ligne sera mise à jour",
+    source: (quote: string) => `Lu : « ${quote} »`,
+    apply: (n: number) =>
+      n === 1
+        ? "Ajouter 1 ligne au matériel"
+        : `Ajouter ${n} lignes au matériel`,
+    applied: "Lignes ajoutées au matériel, à vérifier.",
+    nothingKept: "Gardez au moins une ligne.",
+    errors: {
+      invalid: "Ce devis ne peut pas être lu.",
+      notFound: "Ce document n'existe plus.",
+      forbidden: "Vous ne pouvez pas modifier ce matériel.",
+      unreadable:
+        "Le texte de ce document n'a pas pu être lu : saisissez les lignes à la main.",
+      provider:
+        "PO n'a pas pu lire le devis. Réessayez, ou saisissez les lignes à la main.",
+    },
+  },
+
   equipment: {
     title: "Matériel et devis",
     description:
       "Liste manuelle et devis déposés. Un article sur devis n'est ni réservé ni loué ; une ligne lue sur un devis reste à vérifier.",
+    sources: { rental: "Loué", loan: "Prêté", owned: "Possédé" },
+    gap: (booked: number, received: number) =>
+      `Écart : ${received} reçu${received > 1 ? "s" : ""} sur ${booked}`,
     categories: {
       image: "Image",
       light: "Lumière",
@@ -409,6 +452,7 @@ export const productionPreprod = {
       retained: "Retenu",
       booked: "Réservé confirmé",
       picked_up: "Récupéré",
+      on_site: "Sur place",
       to_return: "À rendre",
       returned: "Rendu",
       incident: "Incident de retour",
@@ -431,6 +475,10 @@ export const productionPreprod = {
     editTitle: (label: string) => `Modifier « ${label} »`,
     formDescription: "Ce que dit le devis ou ce qu'il faut trouver.",
     fields: {
+      source: "Provenance",
+      receivedQuantity: "Quantité reçue",
+      receivedHint:
+        "Ce qui est réellement arrivé ; un écart avec la quantité est signalé.",
       category: "Catégorie",
       label: "Article",
       quantity: "Quantité",

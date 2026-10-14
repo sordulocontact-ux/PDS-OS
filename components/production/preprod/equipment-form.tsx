@@ -15,6 +15,8 @@ import {
 } from "@/lib/production/preprod/actions-equipment";
 import { EQUIPMENT_FORM_STATUSES } from "@/lib/production/preprod/equipment";
 import {
+  EQUIPMENT_SOURCES,
+  equipmentSourceOf,
   EQUIPMENT_CATEGORIES,
   equipmentCategoryOf,
   type Equipment,
@@ -81,6 +83,8 @@ export function EquipmentForm({
           returnDue: text("returnDue"),
           incidentNote: text("incidentNote"),
           note: text("note"),
+          source: equipmentSourceOf(data.get("source")),
+          receivedQuantity: text("receivedQuantity"),
           quoteFileId: quoteFileId ?? undefined,
         };
         run(() =>
@@ -110,6 +114,27 @@ export function EquipmentForm({
           max={1000}
           label={t.fields.quantity}
           defaultValue={item?.quantity ?? ""}
+        />
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <OptionSelect
+          id={`${id}-source`}
+          name="source"
+          label={t.fields.source}
+          items={Object.fromEntries(
+            EQUIPMENT_SOURCES.map((s) => [s, t.sources[s]]),
+          )}
+          defaultValue={item?.source ?? "rental"}
+        />
+        <Field
+          id={`${id}-received`}
+          name="receivedQuantity"
+          type="number"
+          min={0}
+          max={1000}
+          label={t.fields.receivedQuantity}
+          hint={t.fields.receivedHint}
+          defaultValue={item?.receivedQuantity ?? ""}
         />
       </div>
       <Field

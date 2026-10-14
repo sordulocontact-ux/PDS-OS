@@ -3767,6 +3767,22 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   service lit le lieu de la fiche) ou « Écarter » (motif obligatoire, gardé avec ses avis,
   « Remettre en candidat »). Tout est dans l'Historique.
 
+- **Devis lus par PO, matériel suivi jusqu'au retour** (PROD-014, 015, 022 ; migration
+  `20261014000801_production_equipment_tracking.sql`, tests `production-equipment.test.sql`).
+  **« Lire avec PO »** sur un devis de « Devis et captures » (`actions-quote-import.ts`) : un PDF est lu
+  comme texte (`sourceText`, unpdf), une image comme image ; le modèle (`lib/ai/llm.ts`, consignes
+  `production-quote.ts`, le devis en message utilisateur, jamais en consigne) relève loueur, caution,
+  conditions, taxes et lignes avec leur passage ; **le code** (`quote-verify.ts`) ne garde une ligne
+  que si son passage est dans le devis et un montant ou une quantité que si ses chiffres y figurent ;
+  lu sur une image, rien n'est vérifiable : chaque ligne est « à vérifier ». La personne corrige,
+  décoche, puis « Ajouter au matériel » : lignes « À vérifier », reliées au devis, une ligne existante
+  (même catégorie et libellé) **mise à jour, jamais doublée**, la caution sur la première ligne. Le
+  matériel gagne **« Sur place »** (Réservé → Récupéré → Sur place → À rendre → Rendu), une
+  **provenance** (loué, prêté, possédé : un article possédé n'entre ni au contrôle « Matériel » ni au
+  retour) et la **quantité reçue** (écart signalé) ; un incident de retour dit **manquant ou
+  endommagé**. Décision faute de règle : PO ne pose aucune date de location (les dates restent à
+  saisir), et le total du devis n'est jamais recalculé.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

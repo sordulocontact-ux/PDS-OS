@@ -52,6 +52,7 @@ export const EQUIPMENT_STATUSES = [
   "retained",
   "booked",
   "picked_up",
+  "on_site",
   "to_return",
   "returned",
   "incident",
@@ -184,7 +185,25 @@ export type Equipment = {
   returnedAt: string | null;
   incidentNote: string | null;
   note: string | null;
+  // Rented, lent or owned (an owned item is never returned, PROD-022), how
+  // many arrived (PROD-015), and a return problem's nature.
+  source: EquipmentSource;
+  receivedQuantity: number | null;
+  returnIssue: "missing" | "damaged" | null;
 };
+
+export const EQUIPMENT_SOURCES = ["rental", "loan", "owned"] as const;
+export type EquipmentSource = (typeof EQUIPMENT_SOURCES)[number];
+export const equipmentSourceOf = (value: unknown): EquipmentSource =>
+  value === "loan" || value === "owned" ? value : "rental";
+
+/** Booked one number, received another: the gap to say (PROD-015). */
+export const quantityGap = (
+  e: Pick<Equipment, "quantity" | "receivedQuantity">,
+) =>
+  e.quantity !== null &&
+  e.receivedQuantity !== null &&
+  e.receivedQuantity !== e.quantity;
 
 export type PreprodBudgetLine = {
   id: string;

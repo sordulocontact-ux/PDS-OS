@@ -55,8 +55,10 @@ export async function loadShootData({
     supabase
       .from("production_equipment")
       .select(
-        "id, label, quantity, supplier_name, supplier_contact_id, status, return_person_id, return_contact_id, return_due, returned_by, returned_at, incident_note",
+        "id, label, quantity, supplier_name, supplier_contact_id, status, return_person_id, return_contact_id, return_due, returned_by, returned_at, incident_note, return_issue",
       )
+      // Owned items are never returned (PROD-022).
+      .neq("source", "owned")
       .eq("sheet_id", sheetId)
       .in("status", [...RETURN_STATUSES])
       .order("position")
@@ -155,6 +157,10 @@ export async function loadShootData({
             returnedBy: nameOf(e.returned_by),
             returnedAt: e.returned_at,
             incidentNote: e.incident_note,
+            returnIssue:
+              e.return_issue === "missing" || e.return_issue === "damaged"
+                ? e.return_issue
+                : null,
           },
         ]
       : [],

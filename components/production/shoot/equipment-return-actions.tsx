@@ -76,6 +76,16 @@ export function EquipmentReturnActions({
           },
         ]
       : []),
+    ...(s === "picked_up"
+      ? [
+          {
+            key: "on_site",
+            label: t.actions.onSite,
+            icon: IconHandTruck,
+            onSelect: () => move("on_site"),
+          },
+        ]
+      : []),
     ...(s !== "to_return"
       ? [
           {

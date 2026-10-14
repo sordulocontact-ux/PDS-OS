@@ -10876,13 +10876,16 @@ export type Database = {
           project_id: string
           quantity: number | null
           quote_file_id: string | null
+          received_quantity: number | null
           return_contact_id: string | null
           return_due: string | null
+          return_issue: string | null
           return_person_id: string | null
           return_terms: string | null
           returned_at: string | null
           returned_by: string | null
           sheet_id: string
+          source: string
           status: string
           supplier_contact_id: string | null
           supplier_name: string | null
@@ -10907,13 +10910,16 @@ export type Database = {
           project_id: string
           quantity?: number | null
           quote_file_id?: string | null
+          received_quantity?: number | null
           return_contact_id?: string | null
           return_due?: string | null
+          return_issue?: string | null
           return_person_id?: string | null
           return_terms?: string | null
           returned_at?: string | null
           returned_by?: string | null
           sheet_id: string
+          source?: string
           status?: string
           supplier_contact_id?: string | null
           supplier_name?: string | null
@@ -10938,13 +10944,16 @@ export type Database = {
           project_id?: string
           quantity?: number | null
           quote_file_id?: string | null
+          received_quantity?: number | null
           return_contact_id?: string | null
           return_due?: string | null
+          return_issue?: string | null
           return_person_id?: string | null
           return_terms?: string | null
           returned_at?: string | null
           returned_by?: string | null
           sheet_id?: string
+          source?: string
           status?: string
           supplier_contact_id?: string | null
           supplier_name?: string | null

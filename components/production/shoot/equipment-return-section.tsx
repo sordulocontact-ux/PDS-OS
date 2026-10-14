@@ -137,6 +137,8 @@ export function EquipmentReturnSection({
                       )}
                       {line.status === "incident" && line.incidentNote && (
                         <span className="text-xs whitespace-normal text-muted-foreground">
+                          {line.returnIssue &&
+                            `${fr.productionShoot.equipment.issues[line.returnIssue]} · `}
                           {line.incidentNote}
                         </span>
                       )}

@@ -83,6 +83,7 @@ export type ShootIncident = {
 export const RETURN_STATUSES = [
   "booked",
   "picked_up",
+  "on_site",
   "to_return",
   "returned",
   "incident",
@@ -102,6 +103,7 @@ export type ReturnLine = {
   returnedBy: string | null;
   returnedAt: string | null;
   incidentNote: string | null;
+  returnIssue: "missing" | "damaged" | null;
 };
 
 export type ReturnState =

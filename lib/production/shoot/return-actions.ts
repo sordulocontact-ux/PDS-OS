@@ -14,9 +14,11 @@ const statusSchema = z.object({
   equipmentId: z.uuid(),
   // « Rendu » only after the person confirmed it on screen; who and when
   // are stamped by the database.
-  status: z.enum(["picked_up", "to_return", "returned", "incident"]),
+  status: z.enum(["picked_up", "on_site", "to_return", "returned", "incident"]),
   // Required for an incident (the database checks it too).
   incidentNote: z.string().trim().max(1000),
+  // An incident's nature (PROD-022): missing or damaged.
+  issue: z.enum(["missing", "damaged"]).nullable().default(null),
 });
 
 /** Moves a confirmed line along its return. Only lines already confirmed
@@ -36,7 +38,9 @@ export async function setEquipmentReturnStatus(
     .from("production_equipment")
     .update({
       status: d.status,
-      ...(d.status === "incident" ? { incident_note: d.incidentNote } : {}),
+      ...(d.status === "incident"
+        ? { incident_note: d.incidentNote, return_issue: d.issue }
+        : { return_issue: null }),
     })
     .eq("id", d.equipmentId)
     .eq("project_id", d.projectId)

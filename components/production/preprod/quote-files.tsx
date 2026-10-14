@@ -17,12 +17,14 @@ import type { NetworkOption } from "@/lib/production/sheet";
 import { AddEquipmentButton } from "./equipment-actions";
 import { RecordMenu } from "@/components/ui/record-menu";
 
+import { QuoteImportButton } from "./quote-import";
+
 const t = fr.productionPreprod.equipment;
 
 /**
  * « Devis et captures »: documents dropped by the owner are kept as the
- * source (PDF = devis, image = capture). Lines are entered from a document
- * by a person and start « À vérifier »: nothing is read automatically.
+ * source (PDF = devis, image = capture). « Lire avec PO » proposes the
+ * lines (PROD-014), or a person enters them; they start « À vérifier ».
  */
 export function QuoteFiles({
   organizationId,
@@ -106,6 +108,11 @@ export function QuoteFiles({
               </div>
               {canOrganize && (
                 <>
+                  <QuoteImportButton
+                    projectId={projectId}
+                    sheetId={sheetId}
+                    file={{ id: file.id, fileName: file.fileName }}
+                  />
                   <AddEquipmentButton
                     {...common}
                     quote={{ id: file.id, fileName: file.fileName }}

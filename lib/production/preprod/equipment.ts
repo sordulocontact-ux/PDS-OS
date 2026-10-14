@@ -13,6 +13,7 @@ import type { Equipment, EquipmentStatus } from "./types";
 export const CONFIRMED_EQUIPMENT: readonly EquipmentStatus[] = [
   "booked",
   "picked_up",
+  "on_site",
   "to_return",
   "returned",
   "incident",
@@ -29,6 +30,7 @@ export const EQUIPMENT_FORM_STATUSES: readonly EquipmentStatus[] = [
   "retained",
   "booked",
   "picked_up",
+  "on_site",
   "to_return",
   "returned",
   "incident",

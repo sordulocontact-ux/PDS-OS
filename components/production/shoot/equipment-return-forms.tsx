@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
+import { ChoiceCards } from "@/components/ui/choice-cards";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import type { Member } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
@@ -33,6 +34,9 @@ export function ReturnIncidentForm({
   onDone: () => void;
 }) {
   const [missing, setMissing] = useState(false);
+  const [issue, setIssue] = useState<"missing" | "damaged">(
+    line.returnIssue ?? "damaged",
+  );
   const { pending, error, run } = useWriteSubmit(onDone, t.done);
   const id = `return-${line.id}-incident`;
 
@@ -49,6 +53,7 @@ export function ReturnIncidentForm({
         equipmentId: line.id,
         status: "incident",
         incidentNote: note,
+        issue,
       }),
     );
   }
@@ -62,6 +67,16 @@ export function ReturnIncidentForm({
         submit(event.currentTarget);
       }}
     >
+      <ChoiceCards
+        name={`${id}-issue`}
+        legend={t.issueLegend}
+        value={issue}
+        onChange={setIssue}
+        choices={(["missing", "damaged"] as const).map((v) => ({
+          value: v,
+          label: t.issues[v],
+        }))}
+      />
       <TextareaField
         id={id}
         name="incidentNote"

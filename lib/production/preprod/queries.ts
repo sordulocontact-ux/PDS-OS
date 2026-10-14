@@ -190,6 +190,12 @@ export async function loadPreprod(
       returnDue: e.return_due,
       returnedAt: e.returned_at,
       incidentNote: e.incident_note,
+      source: e.source === "loan" || e.source === "owned" ? e.source : "rental",
+      receivedQuantity: e.received_quantity,
+      returnIssue:
+        e.return_issue === "missing" || e.return_issue === "damaged"
+          ? e.return_issue
+          : null,
       note: e.note,
     })),
     budget: (budget.data ?? []).map((l) => ({

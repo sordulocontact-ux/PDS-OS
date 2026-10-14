@@ -190,6 +190,8 @@ export const productionShoot = {
   },
 
   equipment: {
+    issueLegend: "Le problème",
+    issues: { missing: "Manquant", damaged: "Endommagé" },
     title: "Retour du matériel",
     description:
       "Le matériel confirmé comme loué ou emprunté, avec qui le rend et quand. Rien n'est « Rendu » sans votre confirmation.",
@@ -205,6 +207,7 @@ export const productionShoot = {
     statuses: {
       booked: "Réservé",
       picked_up: "Récupéré",
+      on_site: "Sur place",
       to_return: "À rendre",
       returned: "Rendu",
       incident: "Incident de retour",
@@ -225,6 +228,7 @@ export const productionShoot = {
     menu: (label: string) => `Actions pour « ${label} »`,
     actions: {
       pickedUp: "Marquer récupéré",
+      onSite: "Marquer sur place",
       toReturn: "Marquer à rendre",
       returned: "Confirmer le retour",
       incident: "Signaler un incident de retour",
