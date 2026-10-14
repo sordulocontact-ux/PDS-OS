@@ -76,6 +76,7 @@ export const productionHistory = {
     status: (label: string, status: string) => `Étape « ${label} » : ${status}`,
   },
   link: (who: string) => `a créé le lien prestataire de ${who}`,
+  callSheet: (n: number) => `a diffusé la feuille de service V${n}`,
   place: {
     created: (name: string) => `a ajouté le lieu candidat « ${name} »`,
     chosen: (name: string) => `a retenu le lieu « ${name} »`,

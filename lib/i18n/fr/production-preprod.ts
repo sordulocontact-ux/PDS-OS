@@ -652,6 +652,42 @@ export const productionPreprod = {
   },
 
   callSheet: {
+    publish: {
+      title: "Diffusion à l'équipe",
+      hint: "La feuille diffusée est figée en version datée (V1, V2…) : l'équipe la lit sur un lien stable, toujours la dernière version, et les membres qui tiennent un poste sont prévenus.",
+      gapsTitle: "Avant de diffuser, il manque :",
+      gaps: {
+        shootDate: "la date de tournage",
+        location: "le lieu confirmé",
+        callTime: "l'heure de convocation",
+        team: "l'équipe",
+        availability: "des disponibilités confirmées",
+        emergencies: "les urgences",
+      },
+      ready: "Rien ne manque : la feuille peut partir.",
+      button: (n: number) => `Diffuser la V${n}`,
+      confirmTitle: (n: number) => `Diffuser la V${n} ?`,
+      confirmBody:
+        "La feuille est figée telle qu'elle est maintenant. Ce qui change ensuite fera une nouvelle version, signalée à l'équipe.",
+      pending: "Diffusion…",
+      done: "Feuille diffusée.",
+      versions: "Versions diffusées",
+      version: (n: number, who: string, date: string) =>
+        `V${n} · ${who} · ${date}`,
+      changedSince:
+        "Modifiée depuis la dernière diffusion : rediffusez pour que l'équipe la voie.",
+      link: "Lien de la feuille",
+      linkTitle: "Lien de la feuille de service",
+      linkDescription:
+        "Montré une seule fois : envoyez-le à l'équipe. Il montre toujours la dernière version diffusée. En refaire un remplace l'ancien.",
+      linkLabel: "Feuille de service",
+      email: "Écrire à l'équipe",
+      emailSubject: (deliverable: string) =>
+        `Feuille de service — ${deliverable}`,
+      copy: "Copier le lien",
+      copied: "Lien copié.",
+      close: "Fermer",
+    },
     title: "Feuille de service",
     description:
       "L'équipe et le matériel sont lus depuis leurs listes, jamais recopiés.",

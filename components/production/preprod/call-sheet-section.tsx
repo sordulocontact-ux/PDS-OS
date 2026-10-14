@@ -34,6 +34,7 @@ export function CallSheetSection({
   equipment,
   details,
   canOrganize,
+  children,
 }: {
   projectId: string;
   sheetId: string;
@@ -45,6 +46,8 @@ export function CallSheetSection({
   equipment: Equipment[];
   details: Details;
   canOrganize: boolean;
+  // Its diffusion to the team (PROD-016).
+  children?: React.ReactNode;
 }) {
   const contactOf = (h: Holder) =>
     h.kind === "contact"
@@ -160,6 +163,7 @@ export function CallSheetSection({
             {t.updatedBy(callSheet.updatedBy, formatDate(callSheet.updatedAt))}
           </p>
         )}
+        {children}
       </div>
     </PageSection>
   );

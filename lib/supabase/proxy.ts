@@ -14,6 +14,7 @@ const SESSIONLESS_PREFIXES = [
   "/f/",
   "/m/",
   "/p/",
+  "/fs/",
   "/s/",
   "/d/",
   "/i/",

@@ -59,6 +59,8 @@ export const NOTIFICATION_KINDS = [
   "production_export_deposited",
   // The shoot started: the team members holding a position (PROD-018).
   "production_shoot_started",
+  // A new version of the call sheet was published (PROD-016).
+  "production_call_sheet_published",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -114,9 +116,11 @@ export function notificationHref(
         ? ["delivery", "exports"]
         : kind === "production_shoot_started"
           ? ["shoot", "shoot-day"]
-          : kind === "production_version_submitted"
-            ? ["post", "decision"]
-            : ["post", "versions"];
+          : kind === "production_call_sheet_published"
+            ? ["preproduction", "call-sheet"]
+            : kind === "production_version_submitted"
+              ? ["post", "decision"]
+              : ["post", "versions"];
     return `${routes.projectProductionStep(projectId, subjectId, step)}#${anchor}`;
   }
   if (kind === "call_invited" && subjectId)

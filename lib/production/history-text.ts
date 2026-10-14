@@ -161,6 +161,8 @@ export function describeEvent(e: HistoryEvent, names: Names): string {
         ? t.place.verified(name)
         : t.place.unverified(name);
     }
+    case "callsheet.published":
+      return t.callSheet(num(a.number));
     case "link.sent":
       return t.link(names.holder(a.holder));
     case "delivery.decision": {

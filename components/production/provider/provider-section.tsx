@@ -1,7 +1,8 @@
 import { sectionCardClass } from "@/components/ui/section-card";
 import { cn } from "@/lib/utils";
 
-/** A card of the provider's page: a title, an optional hint, its content. */
+/** A card of a public page (the provider's space, the team's call sheet):
+ * a title, an optional hint, its content. */
 export function ProviderSection({
   title,
   hint,

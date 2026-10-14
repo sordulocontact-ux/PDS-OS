@@ -388,3 +388,6 @@ Au-delà des six étapes :
       le code avant d'entrer au matériel sans doublon ; statut « Sur place », provenance, quantité
       reçue et écart ; retour réservé au matériel loué ou prêté, manquant ou endommagé (migration
       `20261014000801`, 4 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 10 (PROD-016) : feuille de service composée depuis les données
+      validées, manques avant diffusion, versions datées, lien stable de l'équipe (`/fs/…`), membres
+      prévenus à chaque version (migration `20261014000901`, 8 tests pgTAP)

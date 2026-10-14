@@ -11,8 +11,15 @@ import { ScheduleSection } from "@/components/production/preprod/schedule-sectio
 import { TeamBriefsSection } from "@/components/production/preprod/team-briefs-section";
 import { TechnicalCallSection } from "@/components/production/preprod/technical-call-section";
 import { LocationsBoard } from "@/components/production/locations/locations-board";
+import { CallSheetPublish } from "@/components/production/preprod/call-sheet-publish";
 import { requireApproved } from "@/lib/auth/dal";
 import { loadLocations } from "@/lib/production/locations/queries";
+import {
+  callSheetContent,
+  callSheetGaps,
+  sameContent,
+} from "@/lib/production/preprod/call-sheet-snapshot";
+import { formatDateTime } from "@/lib/release/format";
 import { loadProviderLinks } from "@/lib/production/post/requests";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/auth/redirects";
@@ -67,14 +74,42 @@ export default async function ProductionPreproductionPage({
       ),
     ),
   ];
-  const [details, locations, links] = await Promise.all([
-    loadContactDetails(contactIds),
-    loadLocations(sheet.id, data, access),
-    loadProviderLinks(await createClient(), sheet.id),
-  ]);
+  const supabase = await createClient();
+  const [details, locations, links, versionsRes, projectRes] =
+    await Promise.all([
+      loadContactDetails(contactIds),
+      loadLocations(sheet.id, data, access),
+      loadProviderLinks(supabase, sheet.id),
+      supabase
+        .from("production_call_sheet_versions")
+        .select("number, published_at, published_by, content")
+        .eq("sheet_id", sheet.id)
+        .order("number", { ascending: false }),
+      supabase
+        .from("projects")
+        .select("title")
+        .eq("id", projectId)
+        .maybeSingle(),
+    ]);
   const today = todayInParis();
   const o = preprodOverview(data, preprod, today);
   const due = dueByStep(o.logistics, today);
+  // What the call sheet would publish now, and what it lacks (PROD-016).
+  const content = callSheetContent({
+    project: projectRes.data?.title ?? "",
+    deliverable: data.deliverable.title,
+    manager: data.ownerName,
+    shootDate: o.logistics.shootDate.value,
+    logistics: sheet.logistics,
+    director: sheet.director,
+    needs: data.needs,
+    equipment: preprod.equipment,
+    callSheet: preprod.callSheet,
+    details,
+  });
+  const versions = versionsRes.data ?? [];
+  const personName = (id: string | null) =>
+    data.members.find((m) => m.personId === id)?.name ?? "—";
   const can = data.canOrganize;
   const status =
     data.stageState !== "in_progress" ? t.locked : !can ? t.readOnly : null;
@@ -176,7 +211,33 @@ export default async function ProductionPreproductionPage({
         needs={data.needs}
         equipment={preprod.equipment}
         details={details}
-      />
+      >
+        <CallSheetPublish
+          projectId={projectId}
+          deliverableId={deliverableId}
+          sheetId={sheet.id}
+          deliverableTitle={data.deliverable.title}
+          gaps={callSheetGaps(content, {
+            locationConfirmed: sheet.logistics.locationStatus === "confirmed",
+            availabilityToConfirm: o.staffing.toConfirm,
+          })}
+          versions={versions.map((v) => ({
+            number: v.number,
+            line: fr.productionPreprod.callSheet.publish.version(
+              v.number,
+              personName(v.published_by),
+              formatDateTime(v.published_at),
+            ),
+          }))}
+          changedSince={
+            versions.length > 0 && !sameContent(versions[0].content, content)
+          }
+          emails={[
+            ...new Set(content.team.flatMap((m) => (m.email ? [m.email] : []))),
+          ]}
+          canOrganize={can}
+        />
+      </CallSheetSection>
       <ReadinessSection
         {...common}
         rows={o.checks}

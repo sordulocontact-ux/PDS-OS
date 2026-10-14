@@ -3783,6 +3783,19 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   endommagé**. Décision faute de règle : PO ne pose aucune date de location (les dates restent à
   saisir), et le total du devis n'est jamais recalculé.
 
+- **Feuille de service diffusée** (PROD-016 ; migration `20261014000901_production_call_sheet_versions.sql`,
+  tests `production-call-sheet.test.sql`) : la feuille est **composée par le code**
+  (`call-sheet-snapshot.ts` : projet, livrable, chef de projet, date de tournage, lieu et accès,
+  équipe avec téléphone et e-mail du Réseau, matériel réservé, horaires, séquences, consignes,
+  contacts, urgences, documents) ; **ce qui manque** est dit avant de diffuser (date, lieu confirmé,
+  convocation, équipe, disponibilités, urgences) sans bloquer. **« Diffuser la Vn »**
+  (`publish_production_call_sheet`) fige une **version datée et numérotée** (gardée), notifie les
+  membres qui tiennent un poste (`production_call_sheet_published`) et entre à l'Historique ;
+  « Modifiée depuis la dernière diffusion » s'affiche quand le contenu actuel diffère de la dernière
+  version (comparaison canonique, `sameContent`). **« Lien de la feuille »** : un lien stable par fiche
+  (`/fs/[token]`, hors session, seul le hash gardé, un nouveau lien remplace l'ancien), qui montre
+  toujours la dernière version et dit laquelle ; l'e-mail prêt vise les adresses connues de l'équipe.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

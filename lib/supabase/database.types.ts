@@ -10627,6 +10627,110 @@ export type Database = {
           },
         ]
       }
+      production_call_sheet_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          token_hash: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          token_hash: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_call_sheet_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_call_sheet_links_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_call_sheet_links_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_call_sheet_versions: {
+        Row: {
+          content: Json
+          id: string
+          number: number
+          organization_id: string
+          project_id: string
+          published_at: string
+          published_by: string | null
+          sheet_id: string
+        }
+        Insert: {
+          content: Json
+          id?: string
+          number: number
+          organization_id: string
+          project_id: string
+          published_at?: string
+          published_by?: string | null
+          sheet_id: string
+        }
+        Update: {
+          content?: Json
+          id?: string
+          number?: number
+          organization_id?: string
+          project_id?: string
+          published_at?: string
+          published_by?: string | null
+          sheet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_call_sheet_versions_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_call_sheet_versions_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_call_sheet_versions_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       production_call_sheets: {
         Row: {
           call_time: string | null
@@ -15769,6 +15873,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_production_call_sheet_link: {
+        Args: { p_sheet_id: string }
+        Returns: string
+      }
       create_production_provider_link: {
         Args: { p_contact_id: string; p_sheet_id: string }
         Returns: string
@@ -16125,6 +16233,7 @@ export type Database = {
       }
       get_master_transmission: { Args: { p_token: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }
+      get_production_call_sheet: { Args: { p_token: string }; Returns: Json }
       get_production_provider_locations: {
         Args: { p_token: string }
         Returns: Json
@@ -16506,6 +16615,10 @@ export type Database = {
           entry_id: string
           token: string
         }[]
+      }
+      publish_production_call_sheet: {
+        Args: { p_content: Json; p_sheet_id: string }
+        Returns: number
       }
       push_secret_matches: { Args: { p_secret: string }; Returns: boolean }
       confirm_legal_intake: {
