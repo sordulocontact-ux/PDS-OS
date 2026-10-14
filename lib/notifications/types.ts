@@ -55,6 +55,8 @@ export const NOTIFICATION_KINDS = [
   // a member (PROD-028, PROD-031).
   "production_version_submitted",
   "production_corrections_sent",
+  // A provider deposited an expected export through their link (PROD-036).
+  "production_export_deposited",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -104,10 +106,15 @@ export function notificationHref(
   if (!projectId) return routes.app;
   // A production version: the deliverable's Postproduction (the subject is
   // the deliverable).
-  if (kind.startsWith("production_") && subjectId)
-    return `${routes.projectProductionStep(projectId, subjectId, "post")}#${
-      kind === "production_version_submitted" ? "decision" : "versions"
-    }`;
+  if (kind.startsWith("production_") && subjectId) {
+    const [step, anchor] =
+      kind === "production_export_deposited"
+        ? ["delivery", "exports"]
+        : kind === "production_version_submitted"
+          ? ["post", "decision"]
+          : ["post", "versions"];
+    return `${routes.projectProductionStep(projectId, subjectId, step)}#${anchor}`;
+  }
   if (kind === "call_invited" && subjectId)
     return routes.projectCall(projectId, subjectId);
   if (kind === "brief_approved") return routes.projectFramingBrief(projectId);

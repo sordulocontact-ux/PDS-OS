@@ -23,11 +23,13 @@ import type {
   CorrectionRequest,
   PostPeople,
   PostVersion,
+  ProviderLinkState,
 } from "@/lib/production/post/types";
 import { formatDate, formatDateTime } from "@/lib/release/format";
 import { correctionRequestTone } from "@/lib/ui/state-tones";
 
 import { CorrectionFields, type CorrectionMissing } from "./correction-fields";
+import { ProviderLinkButton } from "./provider-link-button";
 
 const t = fr.productionCorrections;
 
@@ -39,16 +41,23 @@ const t = fr.productionCorrections;
  */
 export function CorrectionRequestBlock({
   projectId,
+  sheetId,
   version,
   request,
   people,
   canReview,
+  canOrganize,
+  link,
 }: {
   projectId: string;
+  sheetId: string;
   version: PostVersion;
   request: CorrectionRequest;
   people: PostPeople;
   canReview: boolean;
+  canOrganize: boolean;
+  // The recipient's private link, when a Réseau contact (PROD-026).
+  link: ProviderLinkState | null;
 }) {
   const [editing, setEditing] = useState(false);
   const send = useWriteSubmit(
@@ -112,7 +121,19 @@ export function CorrectionRequestBlock({
               {t.edit}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">{t.copyHint}</p>
+          <p className="text-xs text-muted-foreground">
+            {request.recipient.kind === "contact"
+              ? t.copyHintProvider
+              : t.copyHint}
+          </p>
+          {canOrganize && request.recipient.kind === "contact" && (
+            <ProviderLinkButton
+              projectId={projectId}
+              sheetId={sheetId}
+              holder={request.recipient}
+              link={link}
+            />
+          )}
           <FormMessage kind="error">{send.error}</FormMessage>
         </div>
       )}

@@ -53,6 +53,14 @@ export type PostComment = {
 
 export type CorrectionStatus = "draft" | "sent" | "viewed" | "treated";
 
+/** A provider's current private link (PROD-026). */
+export type ProviderLinkState = {
+  createdAt: string;
+  expiresAt: string;
+  firstOpenedAt: string | null;
+  lastOpenedAt: string | null;
+};
+
 /** « Demander des corrections », addressed to someone (PROD-031). */
 export type CorrectionRequest = {
   id: string;
@@ -113,6 +121,8 @@ export type PostProductionData = {
   // Who takes the decision on a version: the owner and the project's
   // creative directors (PROD-033).
   reviewers: string[];
+  // The current private link of each provider, by Réseau contact (PROD-026).
+  providerLinks: Record<string, ProviderLinkState>;
 };
 
 /** Where a write goes: the project, its sheet, and the organisation the

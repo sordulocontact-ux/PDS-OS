@@ -73,6 +73,8 @@ export type NextInput = {
     steps: { label: string; holder: string | null }[];
     // The one who makes the versions: the editing step's holder, if any.
     maker: string | null;
+    // A Réseau provider who has no private link yet (PROD-026).
+    makerNeedsLink: boolean;
     // Newest first.
     versions: {
       number: number;

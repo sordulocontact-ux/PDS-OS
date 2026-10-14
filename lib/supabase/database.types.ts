@@ -11606,6 +11606,80 @@ export type Database = {
           },
         ]
       }
+      production_provider_links: {
+        Row: {
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          first_opened_at: string | null
+          id: string
+          last_opened_at: string | null
+          organization_id: string
+          project_id: string
+          revoked_at: string | null
+          sheet_id: string
+          token_hash: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          expires_at: string
+          first_opened_at?: string | null
+          id?: string
+          last_opened_at?: string | null
+          organization_id: string
+          project_id: string
+          revoked_at?: string | null
+          sheet_id: string
+          token_hash: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          first_opened_at?: string | null
+          id?: string
+          last_opened_at?: string | null
+          organization_id?: string
+          project_id?: string
+          revoked_at?: string | null
+          sheet_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_provider_links_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_provider_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_provider_links_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_provider_links_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       production_readiness_checks: {
         Row: {
           confirmed_at: string | null
@@ -15244,6 +15318,10 @@ export type Database = {
         }
         Returns: string
       }
+      create_production_provider_link: {
+        Args: { p_contact_id: string; p_sheet_id: string }
+        Returns: string
+      }
       create_production_task: {
         Args: {
           p_action_id: string
@@ -15412,6 +15490,20 @@ export type Database = {
         }[]
       }
       design_is_editable: { Args: { p_project_id: string }; Returns: boolean }
+      deposit_production_export: {
+        Args: { p_line_id: string; p_token: string; p_url: string }
+        Returns: undefined
+      }
+      deposit_production_version: {
+        Args: {
+          p_file_name: string | null
+          p_notes: string | null
+          p_path: string | null
+          p_token: string
+          p_url: string | null
+        }
+        Returns: number
+      }
       design_can_write: { Args: { p_project_id: string }; Returns: boolean }
       design_is_open: { Args: { p_project_id: string }; Returns: boolean }
       marketing_can_contribute: {
@@ -15574,6 +15666,10 @@ export type Database = {
       }
       get_master_transmission: { Args: { p_token: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }
+      get_production_provider_space: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       get_shared_strategy_document: { Args: { p_token: string }; Returns: Json }
       get_smartlink: { Args: { p_token: string }; Returns: Json }
       get_split_confirmation: { Args: { p_token: string }; Returns: Json }
@@ -15762,6 +15858,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      note_production_provider_opened: {
+        Args: { p_token: string }
+        Returns: undefined
+      }
       notify: {
         Args: {
           p_kind: string
@@ -15811,6 +15911,10 @@ export type Database = {
           p_participants: Json
           p_format: string
         }
+        Returns: string
+      }
+      open_production_provider_slot: {
+        Args: { p_file_name: string; p_token: string }
         Returns: string
       }
       open_production_sheet: {

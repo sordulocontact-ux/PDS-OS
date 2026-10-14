@@ -104,6 +104,14 @@ export function postNext(ctx: NextContext): ProductionNext {
         link: link(t.steps.assignStep.link, "post", "steps", "steps"),
       });
     const n = latest ? latest.number + 1 : 1;
+    if (p.makerNeedsLink && p.maker)
+      return owner({
+        ...blank,
+        kind: "act",
+        title: t.steps.sendLink.title(p.maker),
+        why: t.steps.sendLink.why,
+        link: link(t.steps.sendLink.link, "post", "steps", "steps"),
+      });
     return {
       ...blank,
       due: input.due.validation ?? null,

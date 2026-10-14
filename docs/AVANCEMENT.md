@@ -359,3 +359,7 @@ Au-delà des six étapes :
       (destinataire, échéance, retours gardés, transmise / relancée / réaffectée / traitée), version
       suivante rattachée, notifications aux validateurs et au destinataire membre (migration
       `20261014000101`, 25 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 3 (PROD-026, 028, 031, 032, 036) : espace du prestataire
+      par lien privé `/p/…` (mission, corrections, dépôt de version par lien ou fichier, exports
+      attendus, références), demandes « Consultées » à l'ouverture, version soumise aussitôt
+      (migration `20261014000201`, 22 tests pgTAP ; dépôt vérifié dans Chrome sur la base locale)

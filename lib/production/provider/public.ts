@@ -1,0 +1,124 @@
+import "server-only";
+
+import { cache } from "react";
+import { z } from "zod";
+
+import { createClient } from "@/lib/supabase/server";
+
+// The provider's space as its public page sees it, read through
+// get_production_provider_space(token): the database checks the token, its
+// expiry and its replacement by a newer link (PROD-026).
+
+export const TOKEN = /^[0-9a-f]{64}$/;
+
+const text = z.string().nullable();
+
+const spaceSchema = z.discriminatedUnion("state", [
+  z.object({
+    state: z.literal("open"),
+    expiresAt: z.string(),
+    writable: z.boolean(),
+    provider: z.string(),
+    project: z.string(),
+    deliverable: z.string(),
+    manager: text,
+    steps: z.array(
+      z.object({
+        key: z.string(),
+        label: text,
+        responsibilities: text,
+        accessNote: text,
+        startsOn: text,
+        endsOn: text,
+        status: z.string(),
+      }),
+    ),
+    references: z.array(
+      z.object({
+        kind: z.string(),
+        title: text,
+        url: text,
+        note: text,
+        fileName: text,
+      }),
+    ),
+    requests: z.array(
+      z.object({
+        id: z.string(),
+        versionNumber: z.number(),
+        dueOn: z.string(),
+        message: text,
+        status: z.string(),
+        sentAt: text,
+        comments: z.array(
+          z.object({
+            timecodeMs: z.number().nullable(),
+            category: z.string(),
+            body: z.string(),
+            status: z.string(),
+          }),
+        ),
+      }),
+    ),
+    versions: z.array(
+      z.object({
+        number: z.number(),
+        status: z.string(),
+        url: text,
+        fileName: text,
+        mine: z.boolean(),
+        submittedAt: text,
+        createdAt: z.string(),
+      }),
+    ),
+    exports: z.array(
+      z.object({
+        id: z.string(),
+        label: z.string(),
+        kind: z.string(),
+        url: text,
+        result: text,
+        note: text,
+      }),
+    ),
+    approved: z.boolean(),
+  }),
+  z.object({ state: z.enum(["replaced", "expired"]) }),
+]);
+
+export type ProviderSpace = z.infer<typeof spaceSchema>;
+export type OpenProviderSpace = Extract<ProviderSpace, { state: "open" }>;
+
+/** Null for an unknown token. Read once per request. */
+export const getProviderSpace = cache(
+  async (token: string): Promise<ProviderSpace | null> => {
+    if (!TOKEN.test(token)) return null;
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc(
+      "get_production_provider_space",
+      { p_token: token },
+    );
+    if (error) {
+      console.error("getProviderSpace:", error.message);
+      return null;
+    }
+    if (!data) return null;
+    const parsed = spaceSchema.safeParse(data);
+    if (!parsed.success) {
+      console.error("getProviderSpace: unexpected shape");
+      return null;
+    }
+    return parsed.data;
+  },
+);
+
+/** The page was opened: the requests sent to this provider read
+ * « consultée » (PROD-031). */
+export async function noteProviderOpened(token: string): Promise<void> {
+  if (!TOKEN.test(token)) return;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("note_production_provider_opened", {
+    p_token: token,
+  });
+  if (error) console.error("noteProviderOpened:", error.message);
+}

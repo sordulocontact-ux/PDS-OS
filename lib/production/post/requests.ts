@@ -3,7 +3,11 @@ import "server-only";
 import type { createClient } from "@/lib/supabase/server";
 import type { Holder } from "@/lib/production/sheet";
 
-import type { CorrectionRequest, CorrectionStatus } from "./types";
+import type {
+  CorrectionRequest,
+  CorrectionStatus,
+  ProviderLinkState,
+} from "./types";
 
 type Client = Awaited<ReturnType<typeof createClient>>;
 
@@ -79,4 +83,30 @@ export async function loadCorrectionRequests(
     return name && name !== "—" ? [name] : [];
   });
   return { byVersion, reviewers };
+}
+
+/** The current link of each provider of the sheet (the newest not
+ * replaced), by contact (PROD-026). */
+export async function loadProviderLinks(
+  supabase: Client,
+  sheetId: string,
+): Promise<Record<string, ProviderLinkState>> {
+  const { data, error } = await supabase
+    .from("production_provider_links")
+    .select(
+      "contact_id, created_at, expires_at, first_opened_at, last_opened_at",
+    )
+    .eq("sheet_id", sheetId)
+    .is("revoked_at", null)
+    .order("created_at", { ascending: false });
+  if (error) console.error("loadProviderLinks:", error.message);
+  const links: Record<string, ProviderLinkState> = {};
+  for (const l of data ?? [])
+    links[l.contact_id] ??= {
+      createdAt: l.created_at,
+      expiresAt: l.expires_at,
+      firstOpenedAt: l.first_opened_at,
+      lastOpenedAt: l.last_opened_at,
+    };
+  return links;
 }

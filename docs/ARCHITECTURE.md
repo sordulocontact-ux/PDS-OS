@@ -3664,6 +3664,27 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   comme auteur et destinataire, sa date de fin comme échéance. « Consultée » sera écrit par la page
   du prestataire (lot 3).
 
+- **Espace du prestataire** (PROD-026, 028, 031, 032, 036 ; migration
+  `20261014000201_production_provider_links.sql`, tests `production-provider-space.test.sql`) : un
+  intervenant du Réseau (sans compte, `docs/PRODUCTION-METIER.md` § 2 bis) reçoit un **lien privé**
+  `/p/[token]` (hors session, `SESSIONLESS_PREFIXES`, jamais indexé), créé par le responsable depuis
+  son étape de postproduction ou sa demande de corrections (`create_production_provider_link` : il
+  doit tenir une étape ou une demande du livrable ; seul le SHA-256 est gardé, lien montré une fois
+  par `OneTimeLinksProvider`, un nouveau lien remplace l'ancien, durée 60 jours après la fin de ses
+  étapes, entre 30 et 180). Sa page (`get_production_provider_space`) : sa mission (ses étapes,
+  dates, attendus, accès), les corrections qui lui sont adressées (les demandes transmises), le dépôt
+  d'une version, les versions soumises, les **fichiers attendus** et les références — jamais le
+  budget, les contacts ni les demandes d'un autre. L'ouvrir passe ses demandes « Consultée »
+  (`note_production_provider_opened`). **Dépôt d'une version** (`deposit_production_version`) : un lien
+  https ou un fichier envoyé par le navigateur sur un emplacement à usage unique du bucket
+  `production-files` (`open_production_provider_slot`, une heure, 20 par heure, politique Storage
+  `is_open_production_slot`, comme le mixeur) ; la version est numérotée, signée de lui et **soumise
+  aussitôt** (validateurs notifiés, demandes traitées). **Dépôt d'un export attendu**
+  (`deposit_production_export`) : le lien de la ligne, son contrôle remis à zéro, le responsable
+  notifié (`production_export_deposited`). Tout dépôt est refusé hors de l'étape Production en cours.
+  La prochaine action propose « Envoyer à X son lien de prestataire » quand l'intervenant du montage
+  n'en a pas.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

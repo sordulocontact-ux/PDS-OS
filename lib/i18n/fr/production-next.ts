@@ -148,6 +148,11 @@ export const productionNext = {
       why: "Chaque étape a un intervenant identifié, qui reçoit sa mission et son échéance.",
       link: "Ouvrir les étapes",
     },
+    sendLink: {
+      title: (who: string) => `Envoyer à ${who} son lien de prestataire`,
+      why: "Sans compte, il retrouve sur ce lien sa mission, les références et les corrections, et dépose lui-même ses versions.",
+      link: "Ouvrir les étapes",
+    },
     awaitVersion: {
       title: (n: number, who: string | null) =>
         who ? `Recevoir la V${n} de ${who}` : `Recevoir la V${n}`,

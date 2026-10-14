@@ -54,6 +54,9 @@ export const notifications = {
     // The engineer has no account: no actor, the project names it.
     production_version_submitted: (actor: string, project: string) =>
       `${actor} a soumis une version de « ${project} » : votre décision est attendue.`,
+    // The provider has no account: no actor, the project names it.
+    production_export_deposited: (_actor: string, project: string) =>
+      `Un prestataire a déposé un export de « ${project} » : il est à contrôler.`,
     production_corrections_sent: (actor: string, project: string) =>
       `${actor} vous demande des corrections sur une version de « ${project} ».`,
     master_engineer_signal: (_actor: string, project: string) =>

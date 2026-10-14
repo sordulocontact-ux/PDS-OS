@@ -9,6 +9,7 @@ import type {
   PostPeople,
   PostScope,
   PostVersion,
+  ProviderLinkState,
 } from "@/lib/production/post/types";
 import { formatDateTime } from "@/lib/release/format";
 import { productionVersionTone } from "@/lib/ui/state-tones";
@@ -36,6 +37,7 @@ export function VersionCard({
   version: v,
   previous,
   role,
+  links,
 }: {
   scope: PostScope;
   people: PostPeople;
@@ -43,6 +45,7 @@ export function VersionCard({
   // The version it follows, when loaded.
   previous: PostVersion | null;
   role: PostRole;
+  links: Record<string, ProviderLinkState>;
 }) {
   const name = versionName(v);
   const can = versionActions(v.status, role);
@@ -160,6 +163,13 @@ export function VersionCard({
           request={v.request}
           people={people}
           canReview={role.canReview}
+          sheetId={scope.sheetId}
+          canOrganize={role.canOrganize}
+          link={
+            v.request.recipient.kind === "contact"
+              ? (links[v.request.recipient.id] ?? null)
+              : null
+          }
         />
       ) : (
         v.status !== "draft" && <CorrectionsBlock version={v} />

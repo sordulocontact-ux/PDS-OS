@@ -8,9 +8,11 @@ import type {
   PostPeople,
   PostScope,
   PostStep,
+  ProviderLinkState,
 } from "@/lib/production/post/types";
 import { postStepTone } from "@/lib/ui/state-tones";
 
+import { ProviderLinkButton } from "./provider-link-button";
 import { StepAddButton, StepMenu, StepSuggestions } from "./step-controls";
 
 const t = fr.productionPost.steps;
@@ -18,7 +20,8 @@ const t = fr.productionPost.steps;
 /**
  * « Organiser la postproduction » (parcours 15): the steps the owner kept,
  * each with who does it (or « Personne à confirmer »), dates, responsibilities
- * and access; then the steps PO suggests that are not organised yet.
+ * and access, and the provider's private link (PROD-026); then the steps PO
+ * suggests that are not organised yet.
  */
 export function StepsSection({
   scope,
@@ -26,12 +29,15 @@ export function StepsSection({
   steps,
   suggestions,
   canOrganize,
+  links,
 }: {
   scope: PostScope;
   people: PostPeople;
   steps: PostStep[];
   suggestions: StepSuggestion[];
   canOrganize: boolean;
+  // Each provider's current private link, by Réseau contact.
+  links: Record<string, ProviderLinkState>;
 }) {
   return (
     <PageSection
@@ -77,6 +83,16 @@ export function StepsSection({
                   )}
                   {step.accessNote && (
                     <Detail label={t.access}>{step.accessNote}</Detail>
+                  )}
+                  {canOrganize && step.holder?.kind === "contact" && (
+                    <div className="pt-1">
+                      <ProviderLinkButton
+                        projectId={scope.projectId}
+                        sheetId={scope.sheetId}
+                        holder={step.holder}
+                        link={links[step.holder.id] ?? null}
+                      />
+                    </div>
                   )}
                 </div>
                 {canOrganize && (

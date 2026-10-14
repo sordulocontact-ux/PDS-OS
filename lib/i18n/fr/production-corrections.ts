@@ -49,7 +49,9 @@ export const productionCorrections = {
     "La même demande, avec un autre destinataire, une autre échéance ou un autre message : rien n'est dupliqué.",
   editDone: "Demande mise à jour.",
   copyHint:
-    "Le texte est copié dans le presse-papiers : collez-le dans votre message au prestataire.",
+    "Le texte est copié dans le presse-papiers : collez-le dans votre message.",
+  copyHintProvider:
+    "Le texte est copié dans le presse-papiers. Envoyez-lui aussi son lien : il y retrouve ces corrections et dépose lui-même la version suivante ; la demande passe « Consultée » quand il l'ouvre.",
   // On the next version: what it had to correct (PROD-032).
   answersTitle: (n: number) => `Corrections demandées sur la V${n}`,
   answersHint:

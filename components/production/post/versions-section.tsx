@@ -6,6 +6,7 @@ import type {
   PostPeople,
   PostScope,
   PostVersion,
+  ProviderLinkState,
   VersionDefaults,
 } from "@/lib/production/post/types";
 
@@ -24,12 +25,14 @@ export function VersionsSection({
   versions,
   role,
   defaults,
+  links,
 }: {
   scope: PostScope;
   people: PostPeople;
   versions: PostVersion[];
   role: PostRole;
   defaults: VersionDefaults;
+  links: Record<string, ProviderLinkState>;
 }) {
   const card = (v: PostVersion) => (
     <VersionCard
@@ -39,6 +42,7 @@ export function VersionsSection({
       version={v}
       previous={versions.find((p) => p.number === v.previousNumber) ?? null}
       role={role}
+      links={links}
     />
   );
   const [current, ...earlier] = versions;

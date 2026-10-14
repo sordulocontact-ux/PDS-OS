@@ -143,6 +143,9 @@ export async function loadProductionNext(
         holder: s.holder?.name ?? null,
       })),
       maker: maker?.holder?.name ?? null,
+      makerNeedsLink:
+        maker?.holder?.kind === "contact" &&
+        !post.providerLinks[maker.holder.id],
       versions: post.versions.map((v) => ({
         number: v.number,
         status: v.status,

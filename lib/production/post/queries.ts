@@ -20,7 +20,7 @@ import type {
 import type { Holder, NetworkOption } from "@/lib/production/sheet";
 import { createClient } from "@/lib/supabase/server";
 
-import { loadCorrectionRequests } from "./requests";
+import { loadCorrectionRequests, loadProviderLinks } from "./requests";
 
 // States in which the shoot took place: its report may leave something
 // missing for the edit.
@@ -134,12 +134,14 @@ export async function loadPostProduction(input: {
   const versionRows = versions.data ?? [];
   const numberOf = (id: string | null) =>
     id ? (versionRows.find((v) => v.id === id)?.number ?? null) : null;
-  const { byVersion, reviewers } = await loadCorrectionRequests(
-    supabase,
-    projectId,
-    sheetId,
-    { holderOf, nameOf, numberOf },
-  );
+  const [{ byVersion, reviewers }, providerLinks] = await Promise.all([
+    loadCorrectionRequests(supabase, projectId, sheetId, {
+      holderOf,
+      nameOf,
+      numberOf,
+    }),
+    loadProviderLinks(supabase, sheetId),
+  ]);
 
   const s = shoot.data;
   const shot = s !== null && SHOT.has(s.state);
@@ -215,5 +217,6 @@ export async function loadPostProduction(input: {
     shootAlert: alertShows ? shootAlert : null,
     canReview: review.data === true,
     reviewers,
+    providerLinks,
   };
 }

@@ -95,6 +95,7 @@ export default async function ProductionPostPage({
         steps={post.steps}
         suggestions={suggestions}
         canOrganize={role.canOrganize}
+        links={post.providerLinks}
       />
       <VersionsSection
         scope={scope}
@@ -102,6 +103,7 @@ export default async function ProductionPostPage({
         versions={post.versions}
         role={role}
         defaults={versionDefaults}
+        links={post.providerLinks}
       />
       <DecisionSection
         projectId={projectId}
