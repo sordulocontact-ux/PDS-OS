@@ -35,8 +35,11 @@ export function proposedFollowUps({
   equipment,
   openTaskTitles,
   today,
+  directorPersonId = null,
 }: {
   deliverableTitle: string;
+  // The sheet's director when a member: who a retake goes to (PROD-003).
+  directorPersonId?: string | null;
   shoot: ShootRecord;
   incidents: ShootIncident[];
   equipment: ReturnLine[];
@@ -59,7 +62,10 @@ export function proposedFollowUps({
           key,
           title: t.proposals[key](deliverableTitle),
           reason: t.reasons[key],
-          assigneePersonId: null,
+          // Who the shoot named for the rushes or the backup.
+          assigneePersonId: memberOf(
+            key === "backup_verified" ? shoot.backupHolder : shoot.rushesHolder,
+          ),
           dueDate: null,
         });
 
@@ -68,7 +74,7 @@ export function proposedFollowUps({
       key: "retake",
       title: t.proposals.retake(deliverableTitle),
       reason: t.reasons.retake,
-      assigneePersonId: null,
+      assigneePersonId: directorPersonId,
       dueDate: null,
     });
 

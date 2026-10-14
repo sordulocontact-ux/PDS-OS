@@ -160,6 +160,11 @@ export function DecisionsSection({
               current={
                 d?.finalUrl ? { url: d.finalUrl, note: d.finalNote } : null
               }
+              proposed={
+                data.version?.url
+                  ? { url: data.version.url, version: data.version.number }
+                  : null
+              }
               onVersion
             />
           )}

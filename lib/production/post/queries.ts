@@ -70,7 +70,7 @@ export async function loadPostProduction(input: {
       supabase
         .from("production_shoots")
         .select(
-          "state, missing_sequences, video_rushes, audio_sources, backup_verified",
+          "state, missing_sequences, video_rushes, audio_sources, backup_verified, files_location",
         )
         .eq("sheet_id", sheetId)
         .maybeSingle(),
@@ -216,6 +216,7 @@ export async function loadPostProduction(input: {
       request: byVersion.get(v.id) ?? null,
     })),
     shootAlert: alertShows ? shootAlert : null,
+    rushesLocation: shoot.data?.files_location ?? null,
     canReview: review.data === true,
     reviewers,
     providerLinks,

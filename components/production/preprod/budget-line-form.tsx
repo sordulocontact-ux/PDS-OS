@@ -1,6 +1,7 @@
 "use client";
 
 import { IconPlus } from "nucleo-sharp-essential";
+import { useState } from "react";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
@@ -31,9 +32,16 @@ const t = fr.productionPreprod.budget;
 type Props = {
   projectId: string;
   sheetId: string;
-  // Equipment lines an estimate may point to.
-  equipment: { id: string; label: string }[];
+  // Equipment lines an estimate may point to, with the quoted price.
+  equipment: {
+    id: string;
+    label: string;
+    priceCents: number | null;
+    supplierName: string | null;
+  }[];
 };
+
+type Equipment = Props["equipment"][number];
 
 export function AddBudgetLineButton(props: Props) {
   return (
@@ -74,7 +82,9 @@ export function BudgetLineMenu({
 }
 
 /** One estimate: position, category, amount (only « À estimer » goes
- * without), state chosen by the person, an equipment line if it is one. */
+ * without), state chosen by the person, an equipment line if it is one. A
+ * new line pointing to an equipment line takes its label and quoted price,
+ * said so, still editable (PROD-003). */
 function BudgetLineForm({
   projectId,
   sheetId,
@@ -87,6 +97,9 @@ function BudgetLineForm({
     line ? t.updated : t.added,
   );
   const id = line ? `budget-${line.id}` : "budget-new";
+  const [picked, setPicked] = useState<Equipment | null>(null);
+  // Remounts the prefilled fields when another equipment line is picked.
+  const seed = picked?.id ?? "none";
   return (
     <form
       className="flex flex-col gap-5"
@@ -110,47 +123,7 @@ function BudgetLineForm({
         );
       }}
     >
-      <Field
-        id={`${id}-label`}
-        name="label"
-        label={t.fields.label}
-        required
-        maxLength={200}
-        defaultValue={line?.label ?? ""}
-      />
-      <div className="grid gap-5 sm:grid-cols-2">
-        <OptionSelect
-          id={`${id}-category`}
-          name="category"
-          label={t.fields.category}
-          required
-          items={Object.fromEntries(
-            BUDGET_CATEGORIES.map((c) => [c, t.categories[c]]),
-          )}
-          defaultValue={line?.category ?? "production"}
-        />
-        <OptionSelect
-          id={`${id}-status`}
-          name="status"
-          label={t.fields.status}
-          required
-          items={Object.fromEntries(
-            PREPROD_BUDGET_STATUSES.map((s) => [s, t.statuses[s]]),
-          )}
-          defaultValue={line?.status ?? "to_estimate"}
-        />
-      </div>
-      <Field
-        id={`${id}-amount`}
-        name="amount"
-        label={t.fields.amount}
-        suffix="€"
-        inputMode="decimal"
-        hint={t.amountRequired}
-        defaultValue={
-          line?.amountCents == null ? "" : centsToInput(line.amountCents)
-        }
-      />
+      {/* First: picking an equipment line fills what it knows. */}
       {equipment.length > 0 && (
         <OptionSelect
           id={`${id}-equipment`}
@@ -161,8 +134,67 @@ function BudgetLineForm({
             ...Object.fromEntries(equipment.map((e) => [e.id, e.label])),
           }}
           defaultValue={line?.equipmentId ?? "none"}
+          onValueChange={(value) => {
+            if (!line) setPicked(equipment.find((e) => e.id === value) ?? null);
+          }}
         />
       )}
+      <Field
+        id={`${id}-label`}
+        name="label"
+        label={t.fields.label}
+        required
+        maxLength={200}
+        defaultValue={line?.label ?? picked?.label ?? ""}
+        key={`label-${seed}`}
+      />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <OptionSelect
+          id={`${id}-category`}
+          name="category"
+          label={t.fields.category}
+          required
+          items={Object.fromEntries(
+            BUDGET_CATEGORIES.map((c) => [c, t.categories[c]]),
+          )}
+          defaultValue={line?.category ?? (picked ? "equipment" : "production")}
+          key={`category-${seed}`}
+        />
+        <OptionSelect
+          id={`${id}-status`}
+          name="status"
+          label={t.fields.status}
+          required
+          items={Object.fromEntries(
+            PREPROD_BUDGET_STATUSES.map((s) => [s, t.statuses[s]]),
+          )}
+          defaultValue={
+            line?.status ??
+            (picked?.priceCents != null ? "estimated" : "to_estimate")
+          }
+          key={`status-${seed}`}
+        />
+      </div>
+      <Field
+        id={`${id}-amount`}
+        name="amount"
+        label={t.fields.amount}
+        suffix="€"
+        inputMode="decimal"
+        hint={
+          !line && picked?.priceCents != null
+            ? t.fromQuote(picked.label, picked.supplierName)
+            : t.amountRequired
+        }
+        defaultValue={
+          line?.amountCents != null
+            ? centsToInput(line.amountCents)
+            : !line && picked?.priceCents != null
+              ? centsToInput(picked.priceCents)
+              : ""
+        }
+        key={`amount-${seed}`}
+      />
       <TextareaField
         id={`${id}-note`}
         name="note"

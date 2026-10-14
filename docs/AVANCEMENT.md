@@ -403,3 +403,7 @@ Au-delà des six étapes :
       le type de fichier ; transmission des seuls fichiers conformes à un responsable Activations
       notifié ; clôture avec récapitulatif, éléments ouverts bloquants, lecture seule ensuite (migration
       `20261014001201`, 15 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 14 (PROD-003) : préremplissage avec la source dans l'aide du
+      champ — dates et accès des étapes de post, budget repris du devis, incident de matériel, relances
+      du tournage confiées aux responsables connus, feuille de service reprise du brief et de la Fiche,
+      lien du fichier final (sans migration)

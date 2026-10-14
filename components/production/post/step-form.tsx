@@ -63,6 +63,12 @@ export function StepForm({
     step?.responsibilities ?? t.expected[step?.key ?? initialKey],
   );
   const [missing, setMissing] = useState<"label" | "dates" | null>(null);
+  // A new step starts from what the sheet knows (PROD-003), said so.
+  const known = step ? null : (scope.stepDefaults ?? null);
+  const datesHint =
+    known?.datesSource && (known.startsOn || known.endsOn)
+      ? t.prefill.dates[known.datesSource]
+      : undefined;
   const { pending, error, run } = useWriteSubmit(onDone, t.done);
 
   function submit(form: HTMLFormElement) {
@@ -161,13 +167,15 @@ export function StepForm({
           name="startsOn"
           type="date"
           label={t.startsOn}
-          defaultValue={step?.startsOn ?? ""}
+          defaultValue={step?.startsOn ?? known?.startsOn ?? ""}
+          hint={datesHint}
         />
         <Field
           name="endsOn"
           type="date"
           label={t.endsOn}
-          defaultValue={step?.endsOn ?? ""}
+          defaultValue={step?.endsOn ?? known?.endsOn ?? ""}
+          hint={datesHint}
           error={missing === "dates" ? t.missing.dates : undefined}
         />
       </div>
@@ -183,10 +191,10 @@ export function StepForm({
       <Field
         name="accessNote"
         label={t.access}
-        hint={t.accessHint}
+        hint={known?.accessNote ? t.prefill.access : t.accessHint}
         maxLength={1000}
         placeholder={t.accessPlaceholder}
-        defaultValue={step?.accessNote ?? ""}
+        defaultValue={step?.accessNote ?? known?.accessNote ?? ""}
       />
       {/* A new step starts « À faire »: its status is asked once it exists. */}
       {step && (

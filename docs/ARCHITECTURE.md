@@ -3843,6 +3843,20 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   terminée ». Décision faute de règle : la clôture fige l'app mais pas les droits SQL (ils sont par
   projet, `production_can_organize`) ; le bouton mène à l'activation créée depuis ce livrable, sinon à
   « Rattacher » des Activations (`#attach`).
+- **Préremplissage** (PROD-003, sans migration) : chaque formulaire de la Production part de ce que la
+  fiche sait déjà, dit d'où vient la valeur dans l'aide du champ, et reste corrigeable. Étape de
+  postproduction neuve : dates de postproduction de la fiche (ou de la Fiche Livrable, « à
+  confirmer ») et accès aux fichiers repris de l'emplacement des rushes (`PostScope.stepDefaults`).
+  Ligne de budget : choisir d'abord le matériel reprend son libellé, la catégorie Matériel et le prix
+  du devis (« Repris du devis de … »). Incident signalé depuis un retour de matériel : catégorie
+  Matériel et responsable du retour. Relances du tournage : rushes et sons à la personne responsable
+  des rushes, sauvegarde à celle de la sauvegarde, séquences à retourner au réalisateur (membre).
+  Feuille de service : une rubrique vide reprend le déroulé et les contraintes du brief de tournage,
+  les séquences de la Fiche (`callSheetDefaults`). Fichier final : le lien de la version validée.
+  Les dates de la fiche ne sont pas réécrites quand la Fiche change : enregistrer les confirme
+  (PROD-009) et un écart est signalé, jamais écrasé. Décisions faute de règle : pas d'intervenant
+  proposé pour une étape de post (règle du lot « personne par défaut »), pas d'effectif deviné, pas
+  de brief recopié de la Conception (le brief ne la répète pas).
 
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 

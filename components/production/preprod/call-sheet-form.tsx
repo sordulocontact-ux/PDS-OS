@@ -7,6 +7,7 @@ import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import { saveCallSheet } from "@/lib/production/preprod/actions-readiness";
+import type { CallSheetDefaults } from "@/lib/production/preprod/call-sheet-defaults";
 import {
   CALL_SHEET_FIELDS,
   CALL_SHEET_LIMITS,
@@ -18,15 +19,18 @@ import { DialogButton } from "@/components/ui/dialog-button";
 const t = fr.productionPreprod.callSheet;
 
 /** « Compléter la feuille »: its own sections; the team, the place and the
- * equipment come from their sections. */
+ * equipment come from their sections. An empty section starts from what the
+ * brief or the Fiche says, with its source (`proposed`). */
 export function CallSheetEditButton({
   projectId,
   sheetId,
   callSheet,
+  proposed,
 }: {
   projectId: string;
   sheetId: string;
   callSheet: CallSheet | null;
+  proposed: CallSheetDefaults;
 }) {
   return (
     <DialogButton
@@ -40,6 +44,7 @@ export function CallSheetEditButton({
           projectId={projectId}
           sheetId={sheetId}
           callSheet={callSheet}
+          proposed={proposed}
           onDone={close}
         />
       )}
@@ -51,11 +56,13 @@ function CallSheetForm({
   projectId,
   sheetId,
   callSheet,
+  proposed,
   onDone,
 }: {
   projectId: string;
   sheetId: string;
   callSheet: CallSheet | null;
+  proposed: CallSheetDefaults;
   onDone: () => void;
 }) {
   const { pending, error, run } = useWriteSubmit(onDone, t.saved);
@@ -89,7 +96,8 @@ function CallSheetForm({
             label={t.fields[key]}
             rows={3}
             maxLength={CALL_SHEET_LIMITS[key]}
-            defaultValue={callSheet?.[key] ?? ""}
+            defaultValue={callSheet?.[key] ?? proposed[key]?.value ?? ""}
+            hint={proposed[key] ? t.proposed[proposed[key].source] : undefined}
           />
         ),
       )}

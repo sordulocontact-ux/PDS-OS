@@ -119,6 +119,8 @@ export type PostProductionData = {
   // Newest first.
   versions: PostVersion[];
   shootAlert: ShootAlert | null;
+  // Where the shoot left the rushes (production_shoots.files_location).
+  rushesLocation: string | null;
   canReview: boolean;
   // Who takes the decision on a version: the owner and the project's
   // creative directors (PROD-033).
@@ -133,6 +135,16 @@ export type PostScope = {
   projectId: string;
   sheetId: string;
   organizationId: string;
+  // What a new step starts from (PROD-003): the postproduction dates of the
+  // sheet or the Fiche, where the shoot left the rushes. Never invented.
+  stepDefaults?: StepDefaults;
+};
+
+export type StepDefaults = {
+  startsOn: string | null;
+  endsOn: string | null;
+  datesSource: "production" | "conception" | null;
+  accessNote: string | null;
 };
 
 /** What a new version starts from: the editing step's provider as its

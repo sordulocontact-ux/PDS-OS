@@ -644,6 +644,10 @@ export const productionPreprod = {
     },
     noEquipment: "Aucun",
     amountRequired: "Un montant est attendu, sauf pour « À estimer ».",
+    fromQuote: (label: string, supplier: string | null) =>
+      supplier
+        ? `Repris du devis de ${supplier} pour « ${label} », à ajuster.`
+        : `Repris du prix de « ${label} » au matériel, à ajuster.`,
     added: "Poste ajouté.",
     updated: "Poste modifié.",
     deleteTitle: "Supprimer ce poste ?",
@@ -699,6 +703,11 @@ export const productionPreprod = {
       instructions: "Consignes",
       emergencies: "Urgences",
       documentsNote: "Documents utiles",
+    },
+    // Where an empty section's proposal comes from (PROD-003).
+    proposed: {
+      brief: "Repris du brief de tournage, à ajuster.",
+      fiche: "Repris de la Fiche Livrable, à ajuster.",
     },
     shoot: "Tournage",
     location: "Lieu",

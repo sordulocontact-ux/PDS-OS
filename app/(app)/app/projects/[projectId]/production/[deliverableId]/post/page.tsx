@@ -9,6 +9,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
+import { effectiveLogistics } from "@/lib/production/logistics";
 import { suggestPostSteps } from "@/lib/production/post/suggestions";
 import { loadProductionSheet } from "@/lib/production/sheet";
 import { postFor } from "@/lib/production/tab-data";
@@ -45,10 +46,20 @@ export default async function ProductionPostPage({
   const people = { members: data.members, contacts: data.contacts };
   const post = await postFor(projectId, deliverableId, access);
   if (!post) notFound();
+  const { postStart, postEnd } = effectiveLogistics(
+    sheet.logistics,
+    data.heritage.fiche,
+  );
   const scope = {
     projectId,
     sheetId: sheet.id,
     organizationId: access.organizationId,
+    stepDefaults: {
+      startsOn: postStart.value,
+      endsOn: postEnd.value,
+      datesSource: postStart.source ?? postEnd.source,
+      accessNote: post.rushesLocation,
+    },
   };
   const role = { canOrganize: data.canOrganize, canReview: post.canReview };
   const suggestions = suggestPostSteps({

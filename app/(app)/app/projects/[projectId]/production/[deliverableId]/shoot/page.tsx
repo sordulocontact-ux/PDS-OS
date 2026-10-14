@@ -61,6 +61,8 @@ export default async function ProductionShootPage({
     equipment,
     openTaskTitles,
     today,
+    directorPersonId:
+      sheet?.director?.kind === "person" ? sheet.director.id : null,
   });
   const canOrganize = data.canOrganize;
   const status =

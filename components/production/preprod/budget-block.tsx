@@ -50,7 +50,12 @@ export function BudgetBlock({
   const props = {
     projectId,
     sheetId,
-    equipment: equipment.map((e) => ({ id: e.id, label: e.label })),
+    equipment: equipment.map((e) => ({
+      id: e.id,
+      label: e.label,
+      priceCents: e.priceCents,
+      supplierName: e.supplierName,
+    })),
   };
   return (
     <section aria-labelledby="preprod-budget" className="flex flex-col gap-4">

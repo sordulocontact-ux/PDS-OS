@@ -39,7 +39,13 @@ export type HandoffRecord = {
 export type DeliveryTabData = {
   delivery: DeliveryRecord | null;
   // The validated version the delivery rests on (the creative decision).
-  version: { id: string; number: number; href: string | null } | null;
+  // `url`: its own link (not a signed file link), proposed as the final file.
+  version: {
+    id: string;
+    number: number;
+    href: string | null;
+    url: string | null;
+  } | null;
   lines: ExportCheckLine[];
   // Newest first.
   handoffs: HandoffRecord[];
@@ -141,7 +147,12 @@ export async function loadDeliveryTab(
         }
       : null,
     version: validated
-      ? { id: validated.id, number: validated.number, href }
+      ? {
+          id: validated.id,
+          number: validated.number,
+          href,
+          url: validated.url,
+        }
       : null,
     lines: (linesRes.data ?? []).map((l) => ({
       id: l.id,

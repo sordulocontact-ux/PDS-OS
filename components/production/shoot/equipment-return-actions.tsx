@@ -187,6 +187,8 @@ export function EquipmentReturnActions({
               .fromEquipment(line.label)
               .slice(0, 200),
             impact: line.incidentNote ?? "",
+            category: "equipment",
+            holder: line.holder,
           }}
           members={members}
           contacts={contacts}

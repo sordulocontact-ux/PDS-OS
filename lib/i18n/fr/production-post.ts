@@ -124,6 +124,17 @@ export const productionPost = {
     accessHint:
       "Où trouver les rushes, les sons et les références. Le prestataire le lit sur son lien.",
     accessPlaceholder: "Drive « Clip X / Rushes », Frame.io du projet…",
+    // What a new step starts from (PROD-003), with its origin.
+    prefill: {
+      dates: {
+        production:
+          "Proposé d'après les dates de postproduction de la fiche, à ajuster.",
+        conception:
+          "Proposé d'après la Fiche Livrable (dates de postproduction), à confirmer.",
+      },
+      access:
+        "Repris du tournage (emplacement des rushes), à compléter. Le prestataire le lit sur son lien.",
+    },
     expected: {
       files_prep:
         "Récupérer les rushes et les sources, les organiser et les mettre à disposition du montage.",

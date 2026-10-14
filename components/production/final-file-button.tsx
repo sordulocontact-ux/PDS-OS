@@ -18,10 +18,13 @@ export function FinalFileButton({
   deliverableId,
   current,
   onVersion = false,
+  proposed = null,
 }: {
   projectId: string;
   deliverableId: string;
   current: { url: string; note: string | null } | null;
+  // No file yet: the validated version's own link, said so (PROD-003).
+  proposed?: { url: string; version: number } | null;
   // The creative decision rests on a validated version (a production
   // sheet): a new file only reopens the check and the delivery.
   onVersion?: boolean;
@@ -82,13 +85,17 @@ export function FinalFileButton({
           <Field
             name="url"
             label={t.finalUrl}
-            hint={t.finalUrlHint}
+            hint={
+              !current && proposed
+                ? t.finalUrlProposed(proposed.version)
+                : t.finalUrlHint
+            }
             type="url"
             inputMode="url"
             required
             maxLength={2048}
             placeholder="https://"
-            defaultValue={current?.url ?? ""}
+            defaultValue={current?.url ?? proposed?.url ?? ""}
             error={urlError}
           />
           <TextareaField

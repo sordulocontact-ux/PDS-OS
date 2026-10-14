@@ -64,6 +64,8 @@ export const production = {
     "Le lien vers les exports (Drive, Frame.io, WeTransfer…). Un nouveau fichier rouvre le contrôle technique et la livraison ; la version validée reste validée.",
   finalUrl: "Lien du fichier",
   finalUrlHint: "Commence par https://",
+  finalUrlProposed: (n: number) =>
+    `Lien de la V${n} validée, à remplacer par le dossier des exports s'il est ailleurs.`,
   finalNote: "Note",
   finalNoteHint: "Par exemple : formats livrés, version.",
   open: "Ouvrir",

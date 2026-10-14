@@ -24,6 +24,7 @@ import { loadProviderLinks } from "@/lib/production/post/requests";
 import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { callSheetDefaults } from "@/lib/production/preprod/call-sheet-defaults";
 import { todayInParis } from "@/lib/insights/dates";
 import { preprodOverview } from "@/lib/production/preprod/overview";
 import {
@@ -205,6 +206,11 @@ export default async function ProductionPreproductionPage({
       <CallSheetSection
         {...common}
         callSheet={preprod.callSheet}
+        proposed={callSheetDefaults(
+          preprod.callSheet,
+          sheet.brief,
+          data.heritage.fiche,
+        )}
         shootDate={o.logistics.shootDate.value}
         logistics={sheet.logistics}
         director={sheet.director}

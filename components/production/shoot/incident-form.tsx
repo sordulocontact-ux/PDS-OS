@@ -31,7 +31,14 @@ const t = fr.productionShoot.incidents;
  * impact (a return incident reported as a shoot incident). */
 export type IncidentDraft =
   | { incident: ShootIncident }
-  | { incident: null; title: string; impact: string };
+  | {
+      incident: null;
+      title: string;
+      impact: string;
+      // Known from where the incident is reported (an equipment line).
+      category?: IncidentCategory;
+      holder?: ShootIncident["holder"];
+    };
 
 /** Adds or edits an incident: its impact, who follows it, the follow-up,
  * and what it blocks — only what the person ticks. */
@@ -51,9 +58,13 @@ export function IncidentForm({
   onDone: () => void;
 }) {
   const incident = draft.incident;
-  const [holder, setHolder] = useState(holderValue(incident?.holder ?? null));
+  const [holder, setHolder] = useState(
+    holderValue(
+      incident?.holder ?? (draft.incident ? null : draft.holder) ?? null,
+    ),
+  );
   const [category, setCategory] = useState<IncidentCategory>(
-    incident?.category ?? "other",
+    incident?.category ?? (draft.incident ? null : draft.category) ?? "other",
   );
   const [missingTitle, setMissingTitle] = useState(false);
   const { pending, error, run } = useWriteSubmit(

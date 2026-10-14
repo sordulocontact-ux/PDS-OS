@@ -2,6 +2,7 @@ import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactList } from "@/components/ui/fact-list";
 import { fr } from "@/lib/i18n/fr";
+import type { CallSheetDefaults } from "@/lib/production/preprod/call-sheet-defaults";
 import { isConfirmedEquipment } from "@/lib/production/preprod/equipment";
 import { teamMembers } from "@/lib/production/preprod/team";
 import type { CallSheet, Equipment } from "@/lib/production/preprod/types";
@@ -34,6 +35,7 @@ export function CallSheetSection({
   equipment,
   details,
   canOrganize,
+  proposed,
   children,
 }: {
   projectId: string;
@@ -46,6 +48,8 @@ export function CallSheetSection({
   equipment: Equipment[];
   details: Details;
   canOrganize: boolean;
+  // What its empty sections start from (brief, Fiche), PROD-003.
+  proposed: CallSheetDefaults;
   // Its diffusion to the team (PROD-016).
   children?: React.ReactNode;
 }) {
@@ -79,6 +83,7 @@ export function CallSheetSection({
             projectId={projectId}
             sheetId={sheetId}
             callSheet={callSheet}
+            proposed={proposed}
           />
         ) : undefined
       }
