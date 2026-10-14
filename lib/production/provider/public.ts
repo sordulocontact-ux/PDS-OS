@@ -80,6 +80,12 @@ const spaceSchema = z.discriminatedUnion("state", [
         url: text,
         result: text,
         note: text,
+        // What is expected of the file, its failing points (PROD-035, 037).
+        spec: text.optional().default(null),
+        failed: z
+          .array(z.object({ key: z.string(), note: text }))
+          .optional()
+          .default([]),
       }),
     ),
     approved: z.boolean(),

@@ -9,21 +9,19 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { RowActions } from "@/components/ui/row-actions";
 import { fr } from "@/lib/i18n/fr";
-import {
-  removeExportCheck,
-  setExportCheckResult,
-} from "@/lib/production/delivery/checklist-actions";
+import { removeExportCheck } from "@/lib/production/delivery/checklist-actions";
 import type {
   ExportCheckLine,
   ExportLineState,
 } from "@/lib/production/delivery/rules";
 
 import { ExportCheckForm } from "./export-check-form";
-import { NotOkForm } from "./not-ok-form";
+import { ExportPointsForm } from "./export-points-form";
 
 const t = fr.productionDelivery;
+const p = fr.productionClosure.points;
 
-/** A line's check (« Conforme », « Non conforme » with a note) and its
+/** A line's check, point by point once its file is deposited, and its
  * « ⋯ »: Modifier, Retirer (confirmed). The owner, while Production runs. */
 export function ExportCheckActions({
   projectId,
@@ -36,7 +34,7 @@ export function ExportCheckActions({
   line: ExportCheckLine;
   state: ExportLineState;
 }) {
-  const [dialog, setDialog] = useState<"not_ok" | "edit" | "remove" | null>(
+  const [dialog, setDialog] = useState<"check" | "edit" | "remove" | null>(
     null,
   );
   const [pending, startTransition] = useTransition();
@@ -45,18 +43,6 @@ export function ExportCheckActions({
     setError(null);
     setDialog(null);
   };
-
-  const markOk = () =>
-    startTransition(async () => {
-      const result = await setExportCheckResult({
-        projectId,
-        checkId: line.id,
-        result: "ok",
-        note: "",
-      });
-      if (result.ok) toast.success(t.checklist.marked);
-      else toast.error(result.error);
-    });
 
   const remove = () =>
     startTransition(async () => {
@@ -68,20 +54,17 @@ export function ExportCheckActions({
 
   return (
     <div className="flex shrink-0 flex-wrap items-center gap-1">
-      {state !== "ok" && (
+      {line.url && (
         <Button
           size="sm"
-          variant="outline"
-          disabled={pending}
-          aria-busy={pending || undefined}
-          onClick={markOk}
+          variant={state === "ok" ? "ghost" : "outline"}
+          onClick={() => setDialog("check")}
         >
-          {state === "stale" ? t.checklist.recheck : t.checklist.markOk}
-        </Button>
-      )}
-      {state !== "not_ok" && (
-        <Button size="sm" variant="ghost" onClick={() => setDialog("not_ok")}>
-          {t.checklist.markNotOk}
+          {state === "stale" || state === "ok"
+            ? p.again
+            : line.points.length > 0
+              ? p.resume
+              : p.open}
         </Button>
       )}
       <RowActions
@@ -102,18 +85,13 @@ export function ExportCheckActions({
         ]}
       />
       <FormDialog
-        open={dialog === "not_ok"}
+        open={dialog === "check"}
         onOpenChange={(open) => !open && close()}
-        title={t.checklist.notOk.title(line.label)}
-        description={t.checklist.notOk.description}
+        title={p.dialogTitle(line.label)}
+        description={p.dialogDescription}
         closeLabel={t.close}
       >
-        <NotOkForm
-          projectId={projectId}
-          checkId={line.id}
-          note={line.result === "not_ok" ? line.note : null}
-          onDone={close}
-        />
+        <ExportPointsForm projectId={projectId} line={line} onDone={close} />
       </FormDialog>
       <FormDialog
         open={dialog === "edit"}

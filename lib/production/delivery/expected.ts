@@ -11,18 +11,29 @@ import type { HandedFiche } from "@/lib/production/fiche";
 import { expectedExports } from "@/lib/production/logistics";
 
 const t = fr.productionDelivery.checklist;
+const s = fr.productionClosure.spec;
 
-/** The expected lines, labelled in French (« Export horizontal 16:9 »…). */
+/** The expected lines, labelled in French (« Export horizontal 16:9 »…),
+ * each with what is expected of it; what the Fiche does not say is marked
+ * « à confirmer » (PROD-035). */
 export function expectedLines(
   fiche: HandedFiche | null,
-): { label: string; kind: ExportCheckKind }[] {
+): { label: string; kind: ExportCheckKind; spec: string }[] {
   return expectedExports(fiche).map((line) => {
     if (line.kind === "subtitles")
       return {
         label: t.labels.subtitles(fiche?.subtitleMode ?? null),
         kind: line.kind,
+        spec: specOf([
+          subtitlesOf(fiche),
+          fiche && fiche.subtitleRatios.length > 0
+            ? s.subtitleRatios(fiche.subtitleRatios)
+            : null,
+          s.languageMissing,
+        ]),
       };
-    if (line.kind === "qc") return { label: t.labels.qc, kind: line.kind };
+    if (line.kind === "qc")
+      return { label: t.labels.qc, kind: line.kind, spec: s.qc };
     const orientation = orientationOf(line.label);
     return {
       label: t.labels.export(
@@ -30,8 +41,40 @@ export function expectedLines(
         line.label,
       ),
       kind: line.kind,
+      spec: specOf([
+        line.label,
+        durationOf(fiche),
+        subtitlesOf(fiche, line.label),
+      ]),
     };
   });
+}
+
+const specOf = (parts: (string | null)[]) => parts.filter(Boolean).join(" · ");
+
+function durationOf(fiche: HandedFiche | null): string {
+  const min = clock(fiche?.durationMinSeconds ?? null);
+  const max = clock(fiche?.durationMaxSeconds ?? null);
+  return min || max
+    ? s.duration(t.expected.durationRange(min, max))
+    : s.durationMissing;
+}
+
+/** The subtitles a file carries; for an export, only when the Fiche puts
+ * them on its ratio (no ratio listed: on every one). */
+function subtitlesOf(fiche: HandedFiche | null, ratio?: string): string {
+  if (!fiche || fiche.subtitles === null) return s.subtitles.unknown;
+  if (!fiche.subtitles) return s.subtitles.off;
+  if (
+    ratio &&
+    fiche.subtitleRatios.length > 0 &&
+    !fiche.subtitleRatios.includes(ratio)
+  )
+    return s.subtitles.off;
+  return (
+    (fiche.subtitleMode ? s.subtitles[fiche.subtitleMode] : null) ??
+    s.subtitles.on
+  );
 }
 
 function clock(seconds: number | null): string | null {

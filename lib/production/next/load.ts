@@ -81,6 +81,7 @@ export async function loadProductionNext(
               }
             : null,
           briefWritten: Boolean(sheet.brief.stagingIntent?.trim()),
+          closed: sheet.closedAt !== null,
         }
       : null,
     preprod: null,

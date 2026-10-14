@@ -3819,6 +3819,30 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   reprennent celles de la Fiche **et du Brief créatif** (liens de la Conception, dédoublonnés), chacune
   avec son **origine** ; une référence ajoutée dit qui l'a ajoutée et quand ; retirer une référence de
   travail ne touche jamais la source.
+- **Livraison et clôture** (PROD-035 à PROD-040 ; migration
+  `20261014001201_production_delivery_closure.sql`, tests `production-delivery-closure.test.sql`) :
+  chaque fichier attendu dit **ce qui est attendu** (`spec` : ratio, durée, sous-titres, langue repris
+  de la Fiche, « à confirmer » quand elle ne dit rien, `expectedLines`) ; « Ajouter ces fichiers »
+  propose ce que la Fiche attend et que la checklist n'a pas, sans jamais doubler une ligne ; ajout,
+  retrait et précision entrent à l'Historique. **Chaque dépôt est gardé** (`production_export_files`,
+  par déclencheur : qui — un membre, ou le prestataire par son lien — et quand), replié sous la ligne.
+  **Contrôle point par point** (`check_production_export`, liste `production_export_points(kind)` =
+  `EXPORT_POINTS`) : export = format, codec, ratio, résolution, durée, audio ; sous-titres =
+  synchronisation, orthographe, langue ; contrôle qualité = image, son, génériques ; autre =
+  conformité. Un point non conforme dit pourquoi ; la ligne n'est conforme que quand tous ses points
+  le sont, non conforme dès qu'un point échoue (sa note liste les points), et le prestataire voit les
+  points en échec sur son lien ; un nouveau fichier remet les points à contrôler. Les anciens boutons
+  « Conforme / Non conforme » ont disparu. **Transmission** (`transmit_production_to_activations`) :
+  refusée tant qu'un fichier n'est pas validé et conforme ; elle garde les fichiers et leur `spec`
+  (`exports`), et **un responsable Activations** (membre, requis, pré-rempli avec la personne à qui le
+  livrable est confié) est notifié `production_handed_off`. **Clôture** (`close_production_sheet`) :
+  récapitulatif (validations, contrôle, livraison, fichiers conformes, transmissions), ce qui reste
+  ouvert (pas transmis, transmission dépassée, matériel loué ou prêté non rendu, incident bloquant)
+  empêche la clôture, en base comme à l'écran ; qui et quand gardés ; ensuite la fiche est **en
+  lecture seule dans l'app** (`canOrganize`, `canWriteBrief`) et la prochaine action dit « Production
+  terminée ». Décision faute de règle : la clôture fige l'app mais pas les droits SQL (ils sont par
+  projet, `production_can_organize`) ; le bouton mène à l'activation créée depuis ce livrable, sinon à
+  « Rattacher » des Activations (`#attach`).
 
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 

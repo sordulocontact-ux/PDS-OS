@@ -7,7 +7,10 @@ import type { HandoffStaleness } from "@/lib/production/delivery/rules";
 import { formatDate } from "@/lib/release/format";
 import { activationHandoffTone } from "@/lib/ui/state-tones";
 
+import { HandoffExports } from "./handoff-exports";
+
 const t = fr.productionDelivery.handoff;
+const c = fr.productionClosure.handoff;
 
 /**
  * One transmission to Activations: the delivered version referenced (never
@@ -76,8 +79,15 @@ export function HandoffItem({
           {h.constraints}
         </p>
       )}
+      {h.exports.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-muted-foreground">{c.exports}</p>
+          <HandoffExports exports={h.exports} />
+        </div>
+      )}
       <p className="text-sm text-muted-foreground">
         {t.by(h.confirmedBy ?? "—", formatDate(h.confirmedAt))}
+        {h.recipient && ` · ${c.sentTo(h.recipient)}`}
       </p>
       {!earlier && staleness && (
         <ToneCallout tone={activationHandoffTone.stale}>

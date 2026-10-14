@@ -75,7 +75,7 @@ export const productionDelivery = {
   checklist: {
     title: "Checklist des exports",
     description:
-      "Une ligne par fichier attendu, contrôlée à part : seule une ligne cochée conforme vaut contrôle.",
+      "Une ligne par fichier attendu, contrôlée point par point : seul un fichier dont chaque point est conforme vaut contrôle.",
     expected: {
       title: "Ce que la Fiche Livrable attend",
       duration: "Durée",
@@ -101,10 +101,10 @@ export const productionDelivery = {
           : (min ?? max ?? "Non renseigné"),
     },
     points: {
-      title: "Points à contrôler sur chaque fichier",
+      title: "Points contrôlés",
       items:
-        "Présence, lisibilité, durée, ratio, cadrage, image, son, sous-titres, nommage, conformité au brief.",
-      note: "Un rappel pour guider le contrôle, jamais une preuve : la conformité se coche ligne par ligne.",
+        "Export : format, codec, ratio, résolution, durée, audio. Sous-titres : synchronisation, orthographe, langue. Contrôle qualité : image, son, génériques.",
+      note: "Chaque point se coche sur le fichier déposé ; un nouveau fichier remet ses points à contrôler.",
     },
     labels: {
       export: (orientation: string | null, ratio: string) =>
@@ -152,10 +152,6 @@ export const productionDelivery = {
     add: "Ajouter un fichier attendu",
     openFile: "Ouvrir le fichier",
     noFile: "Lien du fichier à ajouter",
-    markOk: "Conforme",
-    markNotOk: "Non conforme",
-    recheck: "Revérifier : conforme",
-    marked: "Contrôle enregistré.",
     menu: (label: string) => `Actions pour « ${label} »`,
     edit: "Modifier",
     remove: "Retirer",
@@ -171,13 +167,6 @@ export const productionDelivery = {
       urlHint: "Commence par https:// (Drive, Frame.io, WeTransfer…).",
       save: "Enregistrer",
       saved: "Fichier attendu enregistré.",
-    },
-    notOk: {
-      title: (label: string) => `Non conforme · ${label}`,
-      description:
-        "Dites ce qui ne va pas : la livraison reste impossible tant que la ligne n'est pas conforme.",
-      note: "Ce qui ne va pas",
-      confirm: "Enregistrer",
     },
     removeDialog: {
       title: "Retirer ce fichier attendu ?",

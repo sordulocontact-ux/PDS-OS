@@ -10332,11 +10332,13 @@ export type Database = {
           constraints_note: string | null
           deliverable_id: string
           delivered_at: string
+          exports: Json
           final_url: string | null
           formats: string[]
           id: string
           organization_id: string
           project_id: string
+          recipient_person_id: string | null
           sheet_id: string
           version_id: string | null
         }
@@ -10346,11 +10348,13 @@ export type Database = {
           constraints_note?: string | null
           deliverable_id: string
           delivered_at: string
+          exports?: Json
           final_url?: string | null
           formats?: string[]
           id?: string
           organization_id: string
           project_id: string
+          recipient_person_id?: string | null
           sheet_id: string
           version_id?: string | null
         }
@@ -10360,11 +10364,13 @@ export type Database = {
           constraints_note?: string | null
           deliverable_id?: string
           delivered_at?: string
+          exports?: Json
           final_url?: string | null
           formats?: string[]
           id?: string
           organization_id?: string
           project_id?: string
+          recipient_person_id?: string | null
           sheet_id?: string
           version_id?: string | null
         }
@@ -10382,6 +10388,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_activation_handoffs_recipient_person_id_fkey"
+            columns: ["recipient_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "production_activation_handoffs_sheet_same_org"
@@ -11195,6 +11208,67 @@ export type Database = {
           },
         ]
       }
+      production_export_check_items: {
+        Row: {
+          checked_at: string
+          checked_by: string | null
+          id: string
+          key: string
+          line_id: string
+          note: string | null
+          organization_id: string
+          project_id: string
+          result: string
+          sheet_id: string
+        }
+        Insert: {
+          checked_at?: string
+          checked_by?: string | null
+          id?: string
+          key: string
+          line_id: string
+          note?: string | null
+          organization_id: string
+          project_id: string
+          result: string
+          sheet_id: string
+        }
+        Update: {
+          checked_at?: string
+          checked_by?: string | null
+          id?: string
+          key?: string
+          line_id?: string
+          note?: string | null
+          organization_id?: string
+          project_id?: string
+          result?: string
+          sheet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_export_check_items_checked_by_fkey"
+            columns: ["checked_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_export_check_items_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "production_export_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_export_check_items_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       production_export_checks: {
         Row: {
           checked_at: string | null
@@ -11210,6 +11284,7 @@ export type Database = {
           project_id: string
           result: string | null
           sheet_id: string
+          spec: string | null
           url: string | null
         }
         Insert: {
@@ -11226,6 +11301,7 @@ export type Database = {
           project_id: string
           result?: string | null
           sheet_id: string
+          spec?: string | null
           url?: string | null
         }
         Update: {
@@ -11242,6 +11318,7 @@ export type Database = {
           project_id?: string
           result?: string | null
           sheet_id?: string
+          spec?: string | null
           url?: string | null
         }
         Relationships: [
@@ -11268,6 +11345,61 @@ export type Database = {
           },
           {
             foreignKeyName: "production_export_checks_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_export_files: {
+        Row: {
+          deposited_at: string
+          deposited_by: string | null
+          id: string
+          line_id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          url: string
+        }
+        Insert: {
+          deposited_at?: string
+          deposited_by?: string | null
+          id?: string
+          line_id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          url: string
+        }
+        Update: {
+          deposited_at?: string
+          deposited_by?: string | null
+          id?: string
+          line_id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_export_files_deposited_by_fkey"
+            columns: ["deposited_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_export_files_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "production_export_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_export_files_sheet_same_org"
             columns: ["sheet_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "production_sheets"
@@ -12296,6 +12428,8 @@ export type Database = {
           budget_envelope_cents: number | null
           camera_note: string | null
           camera_setup: string | null
+          closed_at: string | null
+          closed_by: string | null
           constraints_note: string | null
           coverage: string | null
           coverage_note: string | null
@@ -12334,6 +12468,8 @@ export type Database = {
           budget_envelope_cents?: number | null
           camera_note?: string | null
           camera_setup?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
           constraints_note?: string | null
           coverage?: string | null
           coverage_note?: string | null
@@ -12372,6 +12508,8 @@ export type Database = {
           budget_envelope_cents?: number | null
           camera_note?: string | null
           camera_setup?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
           constraints_note?: string | null
           coverage?: string | null
           coverage_note?: string | null
@@ -12408,6 +12546,13 @@ export type Database = {
           {
             foreignKeyName: "production_sheets_brief_updated_by_fkey"
             columns: ["brief_updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_sheets_closed_by_fkey"
+            columns: ["closed_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -15811,6 +15956,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_person: { Args: { target_person_id: string }; Returns: boolean }
+      check_production_export: {
+        Args: { p_line_id: string; p_points: Json }
+        Returns: undefined
+      }
       check_project_shape: {
         Args: { p_master_ids: string[]; p_music_format: string; p_type: string }
         Returns: undefined
@@ -15872,6 +16021,10 @@ export type Database = {
           p_note: string | null
           p_reserves: Json | null
         }
+        Returns: undefined
+      }
+      close_production_sheet: {
+        Args: { p_sheet_id: string }
         Returns: undefined
       }
       complete_formality: {
@@ -16602,6 +16755,7 @@ export type Database = {
         Args: { p_key: string; p_note: string; p_sheet_id: string }
         Returns: boolean
       }
+      production_export_points: { Args: { p_kind: string }; Returns: string[] }
       production_source_handoff: {
         Args: {
           p_deliverable_id: string
@@ -17122,6 +17276,15 @@ export type Database = {
       start_strategy: { Args: { p_project_id: string }; Returns: undefined }
       strategy_critical_alerts: { Args: { p_content: Json }; Returns: string[] }
       strategy_is_editable: { Args: { p_project_id: string }; Returns: boolean }
+      transmit_production_to_activations: {
+        Args: {
+          p_constraints: string | null
+          p_formats: string[]
+          p_recipient_person_id: string | null
+          p_sheet_id: string
+        }
+        Returns: string
+      }
       transmit_project: {
         Args: {
           p_assignee_person_id: string

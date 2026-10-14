@@ -55,6 +55,8 @@ export type NextInput = {
   sheet: {
     director: (NextPerson & { isMember: boolean }) | null;
     briefWritten: boolean;
+    // Closed by its owner once transmitted (PROD-040).
+    closed: boolean;
   } | null;
   preprod: {
     hasTechnicalCall: boolean;

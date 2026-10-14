@@ -4,15 +4,19 @@ import type {
   ExportCheckLine,
   ExportLineState,
 } from "@/lib/production/delivery/rules";
+import { EXPORT_POINTS } from "@/lib/production/delivery/points";
 import { formatDate } from "@/lib/release/format";
 import { exportCheckTone } from "@/lib/ui/state-tones";
 
 import { ExportCheckActions } from "./export-check-actions";
+import { ExportFilesHistory } from "./export-files-history";
 
 const t = fr.productionDelivery.checklist;
+const p = fr.productionClosure.points;
 
-/** One expected file: its link, its check (who, when, why not conforming)
- * and, for the owner, the actions. */
+/** One expected file: what is expected of it, its link and the files
+ * deposited before, its check point by point (who, when, why not
+ * conforming) and, for the owner, the actions. */
 export function ExportCheckRow({
   projectId,
   sheetId,
@@ -26,6 +30,8 @@ export function ExportCheckRow({
   state: ExportLineState;
   canOrganize: boolean;
 }) {
+  const total = EXPORT_POINTS[line.kind].length;
+  const failed = line.points.filter((point) => point.result === "not_ok");
   return (
     <li className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -35,6 +41,7 @@ export function ExportCheckRow({
             {t.states[state]}
           </StatusBadge>
         </div>
+        {line.spec && <p className="text-sm break-words">{line.spec}</p>}
         <p className="text-sm text-muted-foreground">
           {t.kinds[line.kind]}
           {" · "}
@@ -60,7 +67,23 @@ export function ExportCheckRow({
             )}
           </p>
         )}
-        {line.note && <p className="text-sm break-words">« {line.note} »</p>}
+        {failed.length > 0 ? (
+          <ul className="flex flex-col gap-0.5 text-sm">
+            {failed.map((point) => (
+              <li key={point.key} className="break-words">
+                {p.failed(p.labels[point.key] ?? point.key, point.note)}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          line.note && <p className="text-sm break-words">« {line.note} »</p>
+        )}
+        {line.points.length > 0 && line.points.length < total && (
+          <p className="text-sm text-muted-foreground">
+            {p.progress(line.points.length, total)}
+          </p>
+        )}
+        <ExportFilesHistory files={line.files} />
       </div>
       {canOrganize && (
         <ExportCheckActions

@@ -398,3 +398,8 @@ Au-delà des six étapes :
 - [x] Retours d'Ibé sur la Production, lot 12 (PROD-025, 026, 034) : entrées et dépendances des étapes,
       pas de démarrage sans intervenant, « Mission terminée » par le lien du prestataire, références du
       Brief créatif reprises avec leur origine et leur auteur (migration `20261014001101`, 6 tests pgTAP)
+- [x] Retours d'Ibé sur la Production, lot 13 (PROD-035 à PROD-040) : fichiers attendus avec ce qui est
+      attendu de chacun, sans doublon, historisés ; chaque dépôt gardé ; contrôle point par point selon
+      le type de fichier ; transmission des seuls fichiers conformes à un responsable Activations
+      notifié ; clôture avec récapitulatif, éléments ouverts bloquants, lecture seule ensuite (migration
+      `20261014001201`, 15 tests pgTAP)

@@ -2,7 +2,10 @@ import "server-only";
 
 import type { Access } from "@/lib/auth/access";
 import { loadMembers } from "@/lib/framing/related";
-import type { HandoffRecord } from "@/lib/production/delivery/queries";
+import {
+  exportsOf,
+  type HandoffRecord,
+} from "@/lib/production/delivery/queries";
 import {
   handoffStaleness,
   type HandoffStaleness,
@@ -29,7 +32,7 @@ export async function loadActivationHandoffs(
   const { data: rows, error } = await supabase
     .from("production_activation_handoffs")
     .select(
-      "id, deliverable_id, version_id, final_url, delivered_at, formats, constraints_note, confirmed_by, confirmed_at",
+      "id, deliverable_id, version_id, final_url, delivered_at, formats, constraints_note, confirmed_by, confirmed_at, exports, recipient_person_id",
     )
     .eq("project_id", projectId)
     .order("confirmed_at", { ascending: false });
@@ -89,6 +92,11 @@ export async function loadActivationHandoffs(
         ? (members.find((m) => m.personId === h.confirmed_by)?.name ?? "—")
         : null,
       confirmedAt: h.confirmed_at,
+      exports: exportsOf(h.exports),
+      recipient: h.recipient_person_id
+        ? (members.find((m) => m.personId === h.recipient_person_id)?.name ??
+          "—")
+        : null,
       staleness: handoffStaleness(
         {
           versionId: h.version_id,

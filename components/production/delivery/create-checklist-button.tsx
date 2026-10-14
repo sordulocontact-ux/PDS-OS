@@ -10,14 +10,19 @@ import { createExportChecklist } from "@/lib/production/delivery/checklist-actio
 
 const t = fr.productionDelivery;
 
-/** « Créer la checklist »: the lines proposed from the Fiche Livrable,
- * created by the person who clicks. */
+/** « Créer la checklist » or « Ajouter ces fichiers »: the lines proposed
+ * from the Fiche Livrable, created by the person who clicks; those already
+ * there are never doubled (PROD-035). */
 export function CreateChecklistButton({
   projectId,
   sheetId,
+  label = t.checklist.create,
+  done = t.checklist.created,
 }: {
   projectId: string;
   sheetId: string;
+  label?: string;
+  done?: string;
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -31,12 +36,12 @@ export function CreateChecklistButton({
           startTransition(async () => {
             setError(null);
             const result = await createExportChecklist({ projectId, sheetId });
-            if (result.ok) toast.success(t.checklist.created);
+            if (result.ok) toast.success(done);
             else setError(result.error);
           })
         }
       >
-        {pending ? t.saving : t.checklist.create}
+        {pending ? t.saving : label}
       </Button>
       {error && <FormMessage kind="error">{error}</FormMessage>}
     </div>

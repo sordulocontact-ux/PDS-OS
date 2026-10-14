@@ -63,6 +63,9 @@ export const NOTIFICATION_KINDS = [
   "production_call_sheet_published",
   // A provider said their postproduction mission is done (PROD-026).
   "production_step_done",
+  // A deliverable transmitted to the person in charge of Activations
+  // (PROD-039).
+  "production_handed_off",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -122,9 +125,11 @@ export function notificationHref(
             ? ["preproduction", "call-sheet"]
             : kind === "production_step_done"
               ? ["post", "steps"]
-              : kind === "production_version_submitted"
-                ? ["post", "decision"]
-                : ["post", "versions"];
+              : kind === "production_handed_off"
+                ? ["delivery", "activations"]
+                : kind === "production_version_submitted"
+                  ? ["post", "decision"]
+                  : ["post", "versions"];
     return `${routes.projectProductionStep(projectId, subjectId, step)}#${anchor}`;
   }
   if (kind === "call_invited" && subjectId)

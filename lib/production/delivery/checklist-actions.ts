@@ -26,8 +26,9 @@ const httpsUrl = z
 
 const createSchema = z.object({ projectId: z.uuid(), sheetId: z.uuid() });
 
-/** « Créer la checklist »: the lines the Fiche Livrable expects, read again
- * here (never from the browser); those already there are kept. */
+/** « Créer la checklist » or « Ajouter les fichiers manquants »: the lines
+ * the Fiche Livrable expects, read again here (never from the browser);
+ * those already there are kept, never doubled (PROD-035). */
 export async function createExportChecklist(
   input: z.input<typeof createSchema>,
 ): Promise<PrepResult> {
@@ -60,6 +61,7 @@ export async function createExportChecklist(
       sheet_id: sheetId,
       label: line.label,
       kind: line.kind,
+      spec: line.spec,
       position: start + i,
     }));
   if (rows.length === 0) return { ok: false, error: e.nothingToCreate };
@@ -76,11 +78,13 @@ const lineSchema = z.object({
   checkId: z.uuid().optional(),
   label: z.string().trim().min(1).max(120),
   kind: z.enum(EXPORT_CHECK_KINDS),
+  spec: z.string().trim().max(500),
   url: httpsUrl,
 });
 
 /** Adds an expected file, or edits one. A new link on a checked line clears
- * its result: the file is to check again (and the delivery reopens). */
+ * its result: the file is to check again (and the delivery reopens); the
+ * database keeps every file deposited. */
 export async function saveExportCheck(
   input: z.input<typeof lineSchema>,
 ): Promise<PrepResult> {
@@ -97,6 +101,7 @@ export async function saveExportCheck(
   if (!access.organizationId) return invalid;
   const { projectId, sheetId, checkId, label, kind } = parsed.data;
   const url = parsed.data.url || null;
+  const spec = parsed.data.spec || null;
   const supabase = await createClient();
 
   if (!checkId) {
@@ -113,6 +118,7 @@ export async function saveExportCheck(
       sheet_id: sheetId,
       label,
       kind,
+      spec,
       url,
       position: (last?.position ?? -1) + 1,
     });
@@ -132,53 +138,10 @@ export async function saveExportCheck(
     .update({
       label,
       kind,
+      spec,
       url,
       ...(fileChanged ? { result: null, note: null } : {}),
     })
-    .eq("id", checkId);
-  return error ? deliveryFailure(error) : prepDone(projectId);
-}
-
-const resultSchema = z
-  .object({
-    projectId: z.uuid(),
-    checkId: z.uuid(),
-    result: z.enum(["ok", "not_ok"]),
-    note: z.string().trim().max(1000),
-  })
-  .refine((v) => v.result === "ok" || v.note !== "", { path: ["note"] });
-
-/** « Conforme » / « Non conforme » (a note says why). Checking again with
- * the same result stamps a new check (who, when). */
-export async function setExportCheckResult(
-  input: z.input<typeof resultSchema>,
-): Promise<PrepResult> {
-  await requireApproved();
-  const parsed = resultSchema.safeParse(input);
-  if (!parsed.success)
-    return parsed.error.issues[0]?.path[0] === "note"
-      ? { ok: false, error: e.noteRequired }
-      : invalid;
-  const { projectId, checkId, result, note } = parsed.data;
-  const supabase = await createClient();
-  const { data: current } = await supabase
-    .from("production_export_checks")
-    .select("result")
-    .eq("id", checkId)
-    .eq("project_id", projectId)
-    .maybeSingle();
-  if (!current) return { ok: false, error: fr.productionPrep.errors.notFound };
-  // The database stamps who and when on a change of result only.
-  if (current.result === result) {
-    const { error } = await supabase
-      .from("production_export_checks")
-      .update({ result: null })
-      .eq("id", checkId);
-    if (error) return deliveryFailure(error);
-  }
-  const { error } = await supabase
-    .from("production_export_checks")
-    .update({ result, note: note || null })
     .eq("id", checkId);
   return error ? deliveryFailure(error) : prepDone(projectId);
 }

@@ -54,7 +54,10 @@ export async function loadProductionHistory(
       actorName: person(row.actor_person_id),
       at: row.at,
     };
-    const text = describeEvent(event, { holder });
+    const text = describeEvent(event, {
+      holder,
+      person: (id) => person(typeof id === "string" ? id : null) ?? t.someone,
+    });
     if (!text) return [];
     return [
       {

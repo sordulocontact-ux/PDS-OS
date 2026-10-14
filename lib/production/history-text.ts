@@ -21,7 +21,10 @@ export type HistoryEvent = {
   at: string;
 };
 
-type Names = { holder: (value: unknown) => string };
+type Names = {
+  holder: (value: unknown) => string;
+  person: (personId: unknown) => string;
+};
 
 const t = fr.productionHistory;
 const str = (v: unknown) => (typeof v === "string" ? v : "");
@@ -126,6 +129,16 @@ export function describeEvent(e: HistoryEvent, names: Names): string {
       );
     case "export.link":
       return t.export.link(str(a.label));
+    case "export.created":
+      return t.export.created(str(a.label));
+    case "export.removed":
+      return t.export.removed(str(b.label));
+    case "export.spec":
+      return t.export.spec(str(a.label), str(a.spec) || "—");
+    case "handoff.sent":
+      return t.handoff(a.recipient ? names.person(a.recipient) : null);
+    case "sheet.closed":
+      return t.closed;
     case "export.result":
       return a.result === "ok"
         ? t.export.ok(str(a.label))

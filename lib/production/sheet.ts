@@ -114,6 +114,9 @@ export type ProductionSheetData = {
     logistics: SheetLogistics;
     readyAt: string | null;
     readyBy: string | null;
+    // Closed by its owner once transmitted (PROD-040).
+    closedAt: string | null;
+    closedBy: string | null;
   } | null;
   needs: ProductionNeed[];
   // The owner, while Production may start or runs, on a validated sheet.
@@ -401,6 +404,8 @@ async function loadSheet(
         },
         readyAt: sheetRow.ready_at,
         readyBy: nameOf(sheetRow.ready_by),
+        closedAt: sheetRow.closed_at,
+        closedBy: nameOf(sheetRow.closed_by),
       }
     : null;
 
@@ -471,10 +476,12 @@ async function loadSheet(
       isOwner &&
       (handed.fiche !== null || sourceVersion !== null) &&
       (stageState === "not_started" || running),
-    canOrganize: isOwner && running && sheet !== null,
+    // A closed production stays readable only (PROD-040).
+    canOrganize: isOwner && running && sheet !== null && !sheet.closedAt,
     canWriteBrief:
       running &&
       sheet !== null &&
+      !sheet.closedAt &&
       (isOwner ||
         (sheet.director?.kind === "person" &&
           sheet.director.id === access.personId)),

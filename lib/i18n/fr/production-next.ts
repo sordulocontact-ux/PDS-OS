@@ -43,6 +43,7 @@ export const productionNext = {
     exports: "Livraison › Fichiers attendus",
     decisions: "Livraison › Décisions",
     handoff: "Livraison › Transmission aux Activations",
+    closure: "Livraison › Clôture",
     activations: "Marketing › Activations",
     conception: "Marketing › Conception",
   },
@@ -262,9 +263,14 @@ export const productionNext = {
         "La livraison a changé depuis la dernière transmission : les Activations pointent vers une version dépassée.",
       link: "Ouvrir la transmission",
     },
+    close: {
+      title: "Clôturer la production",
+      why: "Le livrable est transmis : vérifiez le récapitulatif, ce qui reste ouvert (matériel, incidents), puis clôturez.",
+      link: "Ouvrir la clôture",
+    },
     finished: {
       title: "Production terminée",
-      why: "La version livrée a été transmise aux Activations. Tout reste consultable ici.",
+      why: "La production est clôturée et la version livrée transmise aux Activations. Tout reste consultable ici.",
       link: "Ouvrir les Activations",
     },
   },

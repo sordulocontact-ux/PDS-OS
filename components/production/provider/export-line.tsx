@@ -14,6 +14,7 @@ import type { OpenProviderSpace } from "@/lib/production/provider/public";
 import type { Tone } from "@/lib/ui/state-tones";
 
 const t = fr.productionProvider.exports;
+const points = fr.productionClosure.points;
 const HTTPS = /^https:\/\/\S+$/;
 type Line = OpenProviderSpace["exports"][number];
 
@@ -74,11 +75,26 @@ export function ExportLine({
           {t.states[state]}
         </StatusBadge>
       </div>
-      {state === "not_ok" && line.note && (
-        <p className="text-sm break-words text-[color:var(--tone-danger-fg)]">
-          {line.note}
-        </p>
-      )}
+      {line.spec && <p className="text-sm break-words">{line.spec}</p>}
+      {state === "not_ok" &&
+        (line.failed.length > 0 ? (
+          <ul className="flex flex-col gap-0.5 text-sm break-words text-[color:var(--tone-danger-fg)]">
+            {line.failed.map((point) => (
+              <li key={point.key}>
+                {points.failed(
+                  points.labels[point.key] ?? point.key,
+                  point.note,
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          line.note && (
+            <p className="text-sm break-words text-[color:var(--tone-danger-fg)]">
+              {line.note}
+            </p>
+          )
+        ))}
       {line.url && (
         <a
           href={line.url}

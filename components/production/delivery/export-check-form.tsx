@@ -18,7 +18,8 @@ import { isHttpsLink } from "@/lib/production/rules";
 
 const t = fr.productionDelivery;
 
-/** An expected file of the checklist: label, type, link. */
+/** An expected file of the checklist: label, type, what is expected of it,
+ * link. */
 export function ExportCheckForm({
   projectId,
   sheetId,
@@ -44,6 +45,7 @@ export function ExportCheckForm({
     const data = new FormData(form);
     const label = String(data.get("label") ?? "").trim();
     const url = String(data.get("url") ?? "").trim();
+    const spec = String(data.get("spec") ?? "").trim();
     const next = {
       label: label ? undefined : t.errors.label,
       url: url === "" || isHttpsLink(url) ? undefined : t.errors.url,
@@ -61,6 +63,7 @@ export function ExportCheckForm({
         checkId: line?.id,
         label,
         kind,
+        spec,
         url,
       }),
     );
@@ -93,6 +96,13 @@ export function ExportCheckForm({
           ))}
         </div>
       </fieldset>
+      <Field
+        name="spec"
+        label={fr.productionClosure.spec.label}
+        hint={fr.productionClosure.spec.hint}
+        maxLength={500}
+        defaultValue={line?.spec ?? ""}
+      />
       <Field
         name="url"
         label={t.checklist.form.url}

@@ -23,6 +23,27 @@ export type ExportCheckLine = {
   checkedBy: string | null;
   checkedAt: string | null;
   note: string | null;
+  // What is expected of the file (format, ratio, duration…), PROD-035.
+  spec: string | null;
+  // Every file deposited on the line, newest first (PROD-036).
+  files: ExportFile[];
+  // The points checked on the current file (PROD-037).
+  points: ExportPoint[];
+};
+
+export type ExportFile = {
+  url: string;
+  // Null: a provider, through their link.
+  depositedBy: string | null;
+  depositedAt: string;
+};
+
+export type ExportPoint = {
+  key: string;
+  result: "ok" | "not_ok";
+  note: string | null;
+  checkedBy: string | null;
+  checkedAt: string;
 };
 
 // stale = checked before the current validated version or final file.

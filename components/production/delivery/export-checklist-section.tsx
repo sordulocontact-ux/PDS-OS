@@ -17,6 +17,7 @@ import { CreateChecklistButton } from "./create-checklist-button";
 import { ExportCheckRow } from "./export-check-row";
 
 const t = fr.productionDelivery.checklist;
+const c = fr.productionClosure;
 
 /**
  * The technical check of the exports (ticket § 19): what the Fiche expects
@@ -40,8 +41,11 @@ export function ExportChecklistSection({
   canOrganize: boolean;
 }) {
   const facts = expectedFacts(fiche);
-  // Proposed while the checklist is empty: a line removed stays removed.
-  const proposed = lines.length === 0 ? expectedLines(fiche) : [];
+  // What the Fiche expects and the checklist lacks: offered, never added
+  // on its own (a line removed stays removed until asked again).
+  const labels = new Set(lines.map((l) => l.label));
+  const proposed = expectedLines(fiche).filter((l) => !labels.has(l.label));
+  const missing = lines.length > 0;
 
   return (
     <PageSection
@@ -71,14 +75,28 @@ export function ExportChecklistSection({
         )}
         {proposed.length > 0 && (
           <div className="flex flex-col gap-3 rounded-xl border border-dashed border-border p-4 text-sm">
-            <p>{t.proposed(proposed.length)}</p>
+            <p>
+              {missing
+                ? c.missing.title(proposed.length)
+                : t.proposed(proposed.length)}
+            </p>
             <ul className="list-disc pl-5 text-muted-foreground">
               {proposed.map((line) => (
-                <li key={line.label}>{line.label}</li>
+                <li key={line.label}>
+                  {line.label}
+                  {line.spec && ` · ${line.spec}`}
+                </li>
               ))}
             </ul>
             {canOrganize && (
-              <CreateChecklistButton projectId={projectId} sheetId={sheetId} />
+              <CreateChecklistButton
+                projectId={projectId}
+                sheetId={sheetId}
+                {...(missing && {
+                  label: c.missing.add(proposed.length),
+                  done: c.missing.added,
+                })}
+              />
             )}
           </div>
         )}

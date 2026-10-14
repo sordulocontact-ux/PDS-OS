@@ -69,7 +69,16 @@ export const productionHistory = {
     ok: (label: string) => `a contrôlé « ${label} » : conforme`,
     notOk: (label: string) => `a contrôlé « ${label} » : non conforme`,
     reset: (label: string) => `Le contrôle de « ${label} » est à refaire`,
+    created: (label: string) => `a ajouté le fichier attendu « ${label} »`,
+    removed: (label: string) => `a retiré le fichier attendu « ${label} »`,
+    spec: (label: string, spec: string) =>
+      `a précisé ce qui est attendu de « ${label} » : ${spec}`,
   },
+  handoff: (who: string | null) =>
+    who
+      ? `a transmis le livrable aux Activations, pour ${who}`
+      : "a transmis le livrable aux Activations",
+  closed: "a clôturé la production",
   stepCreated: (label: string) => `a ajouté l'étape « ${label} »`,
   stepRemoved: (label: string) => `a retiré l'étape « ${label} »`,
   step: {

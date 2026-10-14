@@ -32,7 +32,21 @@ export function productionNext(input: NextInput): ProductionNext {
       },
     };
 
-  // Finished, whatever the stage: the transmission still stands.
+  // Transmitted and still standing: closed by its owner, then finished.
+  if (
+    input.phase === "handed_off" &&
+    !input.delivery?.handoffStale &&
+    !input.sheet?.closed &&
+    input.stageState === "in_progress"
+  )
+    return owner({
+      ...blank,
+      kind: "act",
+      title: t.steps.close.title,
+      why: t.steps.close.why,
+      done: t.done.handedOff,
+      link: link(t.steps.close.link, "delivery", "closure", "closure"),
+    });
   if (input.phase === "handed_off" && !input.delivery?.handoffStale)
     return {
       ...nobody,

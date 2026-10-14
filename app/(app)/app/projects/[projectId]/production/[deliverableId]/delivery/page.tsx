@@ -1,11 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 
+import { ClosureSection } from "@/components/production/delivery/closure-section";
 import { DecisionsSection } from "@/components/production/delivery/decisions-section";
 import { ExportChecklistSection } from "@/components/production/delivery/export-checklist-section";
 import { HandoffSection } from "@/components/production/delivery/handoff-section";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { loadClosureFacts } from "@/lib/production/delivery/closure-queries";
 import {
   checkSince,
   decisionsOf,
@@ -42,15 +44,23 @@ export default async function ProductionDeliveryPage({
 
   const tab = await deliveryFor(projectId, deliverableId, access);
   if (!tab) notFound();
+  const closure = await loadClosureFacts(
+    projectId,
+    data.sheet.id,
+    deliverableId,
+    tab.handoffs.map((h) => h.id),
+  );
   const since = checkSince(tab.delivery);
+  const summary = summarize(tab.lines, since);
   const decisions = decisionsOf({
     approvedAt: tab.delivery?.approvedAt ?? null,
     checkedAt: tab.delivery?.checkedAt ?? null,
     deliveredAt: tab.delivery?.deliveredAt ?? null,
-    summary: summarize(tab.lines, since),
+    summary,
   });
-  const status =
-    data.stageState !== "in_progress"
+  const status = data.sheet.closedAt
+    ? null
+    : data.stageState !== "in_progress"
       ? t.locked
       : !data.canOrganize
         ? t.readOnly
@@ -79,6 +89,22 @@ export default async function ProductionDeliveryPage({
         sheetId={data.sheet.id}
         data={tab}
         fiche={data.heritage.fiche}
+        canOrganize={data.canOrganize}
+        members={data.members}
+        recipientId={closure.assigneePersonId}
+      />
+      <ClosureSection
+        projectId={projectId}
+        sheetId={data.sheet.id}
+        title={data.deliverable.title}
+        data={tab}
+        summary={summary}
+        facts={closure}
+        closed={
+          data.sheet.closedAt
+            ? { at: data.sheet.closedAt, by: data.sheet.closedBy }
+            : null
+        }
         canOrganize={data.canOrganize}
       />
     </div>

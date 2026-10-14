@@ -58,6 +58,8 @@ export const notifications = {
     production_export_deposited: (_actor: string, project: string) =>
       `Un prestataire a déposé un export de « ${project} » : il est à contrôler.`,
     // The provider has no account: no actor, the project names it.
+    production_handed_off: (actor: string, project: string) =>
+      `${actor} vous a transmis un livrable de « ${project} » pour les Activations : fichiers, formats et contraintes sont sur sa livraison.`,
     production_step_done: (_actor: string, project: string) =>
       `Un prestataire a terminé sa mission de postproduction sur « ${project} ».`,
     production_call_sheet_published: (actor: string, project: string) =>

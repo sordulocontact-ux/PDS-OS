@@ -31,6 +31,9 @@ export type HandoffRecord = {
   constraints: string | null;
   confirmedBy: string | null;
   confirmedAt: string;
+  // The files sent and what was expected of each (PROD-039).
+  exports: { label: string; url: string | null; spec: string | null }[];
+  recipient: string | null;
 };
 
 export type DeliveryTabData = {
@@ -53,34 +56,53 @@ export async function loadDeliveryTab(
   members: Member[],
 ): Promise<DeliveryTabData> {
   const supabase = await createClient();
-  const [deliveryRes, versionsRes, linesRes, handoffsRes] = await Promise.all([
-    supabase
-      .from("deliverable_deliveries")
-      .select(
-        "version_id, final_url, final_note, final_set_at, approved_at, approved_by, checked_at, checked_by, delivered_at, delivered_by",
-      )
-      .eq("deliverable_id", deliverableId)
-      .maybeSingle(),
-    supabase
-      .from("production_versions")
-      .select("id, number, status, url, file_id")
-      .eq("sheet_id", sheetId)
-      .order("number", { ascending: false }),
-    supabase
-      .from("production_export_checks")
-      .select("id, label, kind, url, result, checked_by, checked_at, note")
-      .eq("sheet_id", sheetId)
-      .order("position")
-      .order("created_at"),
-    supabase
-      .from("production_activation_handoffs")
-      .select(
-        "id, version_id, final_url, delivered_at, formats, constraints_note, confirmed_by, confirmed_at",
-      )
-      .eq("sheet_id", sheetId)
-      .order("confirmed_at", { ascending: false }),
-  ]);
-  for (const res of [deliveryRes, versionsRes, linesRes, handoffsRes])
+  const [deliveryRes, versionsRes, linesRes, handoffsRes, filesRes, pointsRes] =
+    await Promise.all([
+      supabase
+        .from("deliverable_deliveries")
+        .select(
+          "version_id, final_url, final_note, final_set_at, approved_at, approved_by, checked_at, checked_by, delivered_at, delivered_by",
+        )
+        .eq("deliverable_id", deliverableId)
+        .maybeSingle(),
+      supabase
+        .from("production_versions")
+        .select("id, number, status, url, file_id")
+        .eq("sheet_id", sheetId)
+        .order("number", { ascending: false }),
+      supabase
+        .from("production_export_checks")
+        .select(
+          "id, label, kind, url, result, checked_by, checked_at, note, spec",
+        )
+        .eq("sheet_id", sheetId)
+        .order("position")
+        .order("created_at"),
+      supabase
+        .from("production_activation_handoffs")
+        .select(
+          "id, version_id, final_url, delivered_at, formats, constraints_note, confirmed_by, confirmed_at, exports, recipient_person_id",
+        )
+        .eq("sheet_id", sheetId)
+        .order("confirmed_at", { ascending: false }),
+      supabase
+        .from("production_export_files")
+        .select("line_id, url, deposited_by, deposited_at")
+        .eq("sheet_id", sheetId)
+        .order("deposited_at", { ascending: false }),
+      supabase
+        .from("production_export_check_items")
+        .select("line_id, key, result, note, checked_by, checked_at")
+        .eq("sheet_id", sheetId),
+    ]);
+  for (const res of [
+    deliveryRes,
+    versionsRes,
+    linesRes,
+    handoffsRes,
+    filesRes,
+    pointsRes,
+  ])
     if (res.error) console.error("loadDeliveryTab:", res.error.message);
 
   const nameOf = (personId: string | null) =>
@@ -130,6 +152,23 @@ export async function loadDeliveryTab(
       checkedBy: nameOf(l.checked_by),
       checkedAt: l.checked_at,
       note: l.note,
+      spec: l.spec,
+      files: (filesRes.data ?? [])
+        .filter((f) => f.line_id === l.id)
+        .map((f) => ({
+          url: f.url,
+          depositedBy: nameOf(f.deposited_by),
+          depositedAt: f.deposited_at,
+        })),
+      points: (pointsRes.data ?? [])
+        .filter((p) => p.line_id === l.id)
+        .map((p) => ({
+          key: p.key,
+          result: p.result === "ok" ? ("ok" as const) : ("not_ok" as const),
+          note: p.note,
+          checkedBy: nameOf(p.checked_by),
+          checkedAt: p.checked_at,
+        })),
     })),
     handoffs: (handoffsRes.data ?? []).map((h) => ({
       id: h.id,
@@ -141,6 +180,25 @@ export async function loadDeliveryTab(
       constraints: h.constraints_note,
       confirmedBy: nameOf(h.confirmed_by),
       confirmedAt: h.confirmed_at,
+      exports: exportsOf(h.exports),
+      recipient: nameOf(h.recipient_person_id),
     })),
   };
+}
+
+/** The files a transmission carried, read from its JSON. */
+export function exportsOf(value: unknown): HandoffRecord["exports"] {
+  if (!Array.isArray(value)) return [];
+  const text = (v: unknown) => (typeof v === "string" && v ? v : null);
+  return value.flatMap((item) =>
+    item && typeof item === "object"
+      ? [
+          {
+            label: text((item as Record<string, unknown>).label) ?? "—",
+            url: text((item as Record<string, unknown>).url),
+            spec: text((item as Record<string, unknown>).spec),
+          },
+        ]
+      : [],
+  );
 }

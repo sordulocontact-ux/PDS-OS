@@ -6,6 +6,7 @@ import {
   handoffStaleness,
   proposedFormats,
 } from "@/lib/production/delivery/rules";
+import type { Member } from "@/lib/framing/related";
 import type { HandedFiche } from "@/lib/production/fiche";
 import { formatDate } from "@/lib/release/format";
 
@@ -25,12 +26,17 @@ export function HandoffSection({
   data,
   fiche,
   canOrganize,
+  members,
+  recipientId,
 }: {
   projectId: string;
   sheetId: string;
   data: DeliveryTabData;
   fiche: HandedFiche | null;
   canOrganize: boolean;
+  members: Member[];
+  // Whom the deliverable is entrusted to: the default person in charge.
+  recipientId: string | null;
 }) {
   const { delivery, version, handoffs, lines } = data;
   const [latest] = handoffs;
@@ -58,7 +64,14 @@ export function HandoffSection({
               deliveredOn: formatDate(deliveredAt),
               formats: proposedFormats(fiche?.ratios ?? [], lines),
               constraints: fiche?.constraints ?? null,
+              exports: lines.map((l) => ({
+                label: l.label,
+                url: l.url,
+                spec: l.spec,
+              })),
+              recipientId,
             }}
+            members={members}
           />
         ) : undefined
       }
