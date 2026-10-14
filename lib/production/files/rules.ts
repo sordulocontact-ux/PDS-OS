@@ -14,6 +14,8 @@ export const PRODUCTION_FILE_KINDS = [
   "version",
   "attachment",
   "other",
+  // A candidate place's photos, videos, plans (PROD-011).
+  "location",
 ] as const;
 export type ProductionFileKind = (typeof PRODUCTION_FILE_KINDS)[number];
 

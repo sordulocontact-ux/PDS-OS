@@ -3751,6 +3751,22 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   horaires, lieu, accès, contacts, urgences, équipe, actions bloquantes ouvertes, incidents), tout lu
   dans la préparation.
 
+- **Recherche de lieux** (PROD-011, 012, 013 ; migration `20261014000701_production_locations.sql`,
+  tests `production-locations.test.sql` ; `lib/production/locations/`, `components/production/locations/`) :
+  sous « Lieu » (le lieu retenu, sur la fiche), **plusieurs lieux candidats**
+  (`production_location_options` : adresse, lien, contact, tarif, disponibilités, contraintes,
+  **vérification distincte de la décision**) avec leurs **médias** (fichier `production-files` de type
+  `location` ou lien), le **tableau** de cartes (photo, faits, ce qui manque) et un tableau de
+  **comparaison**. **Personnes consultées** (`production_location_consults`, membre ou contact du
+  Réseau, rôle : avis artistique / technique / faisabilité-coût-autorisations), qui a répondu et qui
+  est attendu. Un **avis** (`review_production_location`, ou `…_by_link` depuis la page du prestataire
+  `/p/…`, qui reçoit aussi « Lieux à comparer ») — favorable, avec réserves ou défavorable, motivé
+  sinon — est rattaché au lieu et à son auteur, sans jamais modifier le lieu. **Décision** du chef de
+  projet : « Retenir ce lieu » (vérifié d'abord, motif facultatif ; le lieu passe sur la fiche
+  « Confirmé », un ancien choix revient candidat et le contrôle « Lieu » se rouvre — la feuille de
+  service lit le lieu de la fiche) ou « Écarter » (motif obligatoire, gardé avec ses avis,
+  « Remettre en candidat »). Tout est dans l'Historique.
+
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration

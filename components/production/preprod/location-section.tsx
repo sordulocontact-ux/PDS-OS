@@ -9,17 +9,21 @@ import { LocationEditButton } from "./location-form";
 
 const t = fr.productionPreprod.location;
 
-/** « Lieu »: its state, then what is known of it. */
+/** « Lieu »: the place kept on the sheet (its state, what is known of it),
+ * then the candidates compared before it (PROD-011 to PROD-013). */
 export function LocationSection({
   projectId,
   sheetId,
   logistics,
   canOrganize,
+  children,
 }: {
   projectId: string;
   sheetId: string;
   logistics: SheetLogistics;
   canOrganize: boolean;
+  // The candidates' board.
+  children?: React.ReactNode;
 }) {
   return (
     <PageSection
@@ -55,6 +59,7 @@ export function LocationSection({
             { label: t.fields.notes, value: logistics.locationNotes },
           ]}
         />
+        {children}
       </div>
     </PageSection>
   );

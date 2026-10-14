@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ProviderSpaceView } from "@/components/production/provider/provider-space";
 import { fr } from "@/lib/i18n/fr";
 import {
+  getProviderLocations,
   getProviderSpace,
   noteProviderOpened,
 } from "@/lib/production/provider/public";
@@ -47,7 +48,11 @@ export default async function ProviderSpacePage({
           )}
         </header>
         {space.state === "open" ? (
-          <ProviderSpaceView token={token} space={space} />
+          <ProviderSpaceView
+            token={token}
+            space={space}
+            locations={await getProviderLocations(token)}
+          />
         ) : (
           <p className="text-muted-foreground">
             {space.state === "replaced" ? t.replaced : t.expiredPage}

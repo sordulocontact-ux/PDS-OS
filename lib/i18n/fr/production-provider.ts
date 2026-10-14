@@ -45,6 +45,11 @@ export const productionProvider = {
     open: "Ouvrir",
     file: (name: string) => `Fichier : ${name} (demandez-le à la production)`,
   },
+  locations: {
+    title: "Lieux à comparer",
+    hint: (role: string) =>
+      `Votre avis est demandé (${role}). Il est rattaché à chaque lieu et à votre nom.`,
+  },
   corrections: {
     title: "Corrections demandées",
     none: "Aucune correction ne vous est adressée.",

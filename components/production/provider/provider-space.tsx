@@ -2,12 +2,16 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import { formatTimecode } from "@/lib/production/post/timecode";
 import { postStepKeyOf } from "@/lib/production/post/rules";
-import type { OpenProviderSpace } from "@/lib/production/provider/public";
+import type {
+  OpenProviderSpace,
+  ProviderLocations,
+} from "@/lib/production/provider/public";
 import { formatDate } from "@/lib/release/format";
 import { productionVersionTone } from "@/lib/ui/state-tones";
 
 import { DepositVersion } from "./deposit-version";
 import { ExportLine } from "./export-line";
+import { ProviderLocationsList } from "./provider-locations";
 import { ProviderSection } from "./provider-section";
 
 const t = fr.productionProvider;
@@ -38,9 +42,12 @@ function period(from: string | null, to: string | null) {
 export function ProviderSpaceView({
   token,
   space,
+  locations,
 }: {
   token: string;
   space: OpenProviderSpace;
+  // The places this provider is consulted on (PROD-012), if any.
+  locations: ProviderLocations | null;
 }) {
   const open = space.requests.filter((r) => r.status !== "treated");
   const label = (s: string) =>
@@ -85,6 +92,21 @@ export function ProviderSpaceView({
           </ul>
         )}
       </ProviderSection>
+
+      {locations?.role && locations.options.length > 0 && (
+        <ProviderSection
+          title={t.locations.title}
+          hint={t.locations.hint(
+            fr.productionLocations.roles[locations.role].toLowerCase(),
+          )}
+        >
+          <ProviderLocationsList
+            token={token}
+            data={locations}
+            writable={space.writable}
+          />
+        </ProviderSection>
+      )}
 
       <ProviderSection title={t.corrections.title}>
         {open.length === 0 ? (

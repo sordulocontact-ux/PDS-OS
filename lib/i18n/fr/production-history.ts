@@ -76,6 +76,14 @@ export const productionHistory = {
     status: (label: string, status: string) => `Étape « ${label} » : ${status}`,
   },
   link: (who: string) => `a créé le lien prestataire de ${who}`,
+  place: {
+    created: (name: string) => `a ajouté le lieu candidat « ${name} »`,
+    chosen: (name: string) => `a retenu le lieu « ${name} »`,
+    discarded: (name: string) => `a écarté le lieu « ${name} »`,
+    restored: (name: string) => `a remis « ${name} » en candidat`,
+    verified: (name: string) => `a marqué « ${name} » comme vérifié`,
+    unverified: (name: string) => `a remis « ${name} » à vérifier`,
+  },
   delivery: {
     approved: "Validation créative enregistrée",
     checked: "a confirmé les exports contrôlés",

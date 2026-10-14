@@ -380,3 +380,7 @@ Au-delà des six étapes :
       leurs preuves ou par dérogation motivée, responsable par contrôle, « Sauvegarde prévue »,
       contrôles rouverts quand leurs données changent, lancement du tournage notifié et vue du jour
       (migration `20261014000601`, 9 tests pgTAP, test du parcours Piégée adapté aux preuves)
+- [x] Retours d'Ibé sur la Production, lot 8 (PROD-011, 012, 013) : lieux candidats avec médias,
+      tarif, disponibilités, contraintes et vérification ; comparaison ; avis par rôle des personnes
+      consultées (membres, ou prestataires par leur lien) ; décision retenir / écarter motivée, lieu
+      reporté sur la fiche et contrôle rouvert (migration `20261014000701`, 15 tests pgTAP)

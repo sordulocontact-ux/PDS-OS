@@ -41,6 +41,13 @@ export function preprodFailure(error: {
     ["person_not_member", e.holder],
     ["contact_not_found", e.holder],
     ["action_not_found", fr.productionPrep.errors.notFound],
+    ["not_consulted", fr.productionLocations.errors.not_consulted],
+    ["location_discarded", fr.productionLocations.errors.location_discarded],
+    ["location_chosen", fr.productionLocations.errors.location_chosen],
+    [
+      "location_not_verified",
+      fr.productionLocations.errors.location_not_verified,
+    ],
   ];
   const hit = known.find(([code]) => message.includes(code));
   if (hit) return { ok: false, error: hit[1] };
@@ -105,7 +112,8 @@ export async function nextPosition(
     | "production_call_items"
     | "production_plan_actions"
     | "production_equipment"
-    | "production_budget_lines",
+    | "production_budget_lines"
+    | "production_location_options",
   sheetId: string,
 ): Promise<number> {
   const { data } = await supabase

@@ -107,3 +107,29 @@ export async function depositProviderExport(
   revalidatePath(`/p/${parsed.data.token}`);
   return { ok: true };
 }
+
+const locationSchema = z.object({
+  token,
+  optionId: z.uuid(),
+  verdict: z.enum(["favorable", "reserved", "unfavorable"]),
+  comment: z.string().trim().max(2000),
+});
+
+/** « Donner mon avis » on a place, from the provider's page (PROD-012). */
+export async function reviewLocationByLink(
+  input: z.input<typeof locationSchema>,
+): Promise<Result> {
+  const parsed = locationSchema.safeParse(input);
+  if (!parsed.success) return failure(undefined);
+  const p = parsed.data;
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("review_production_location_by_link", {
+    p_token: p.token,
+    p_option_id: p.optionId,
+    p_verdict: p.verdict,
+    p_comment: p.comment,
+  });
+  if (error) return failure(error.message);
+  revalidatePath(`/p/${p.token}`);
+  return { ok: true };
+}

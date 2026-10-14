@@ -11329,6 +11329,332 @@ export type Database = {
           },
         ]
       }
+      production_location_consults: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          person_id: string | null
+          project_id: string
+          role: string
+          sheet_id: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          person_id?: string | null
+          project_id: string
+          role: string
+          sheet_id: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          person_id?: string | null
+          project_id?: string
+          role?: string
+          sheet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_location_consults_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_consults_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_location_consults_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_location_consults_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_consults_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_location_media: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_id: string | null
+          id: string
+          option_id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          url: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_id?: string | null
+          id?: string
+          option_id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          url?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_id?: string | null
+          id?: string
+          option_id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_location_media_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_location_media_file_same_org"
+            columns: ["file_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_files"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_media_option_same_org"
+            columns: ["option_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_location_options"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_media_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_media_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_location_options: {
+        Row: {
+          address: string | null
+          availability: string | null
+          constraints: string | null
+          contact_note: string | null
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
+          id: string
+          name: string
+          organization_id: string
+          position: number
+          price_cents: number | null
+          price_note: string | null
+          project_id: string
+          sheet_id: string
+          status: string
+          updated_at: string
+          url: string | null
+          verification: string
+        }
+        Insert: {
+          address?: string | null
+          availability?: string | null
+          constraints?: string | null
+          contact_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          position?: number
+          price_cents?: number | null
+          price_note?: string | null
+          project_id: string
+          sheet_id: string
+          status?: string
+          updated_at?: string
+          url?: string | null
+          verification?: string
+        }
+        Update: {
+          address?: string | null
+          availability?: string | null
+          constraints?: string | null
+          contact_note?: string | null
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_reason?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          position?: number
+          price_cents?: number | null
+          price_note?: string | null
+          project_id?: string
+          sheet_id?: string
+          status?: string
+          updated_at?: string
+          url?: string | null
+          verification?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_location_options_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_location_options_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_location_options_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_options_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      production_location_reviews: {
+        Row: {
+          comment: string | null
+          contact_id: string | null
+          created_at: string
+          id: string
+          option_id: string
+          organization_id: string
+          person_id: string | null
+          project_id: string
+          role: string
+          sheet_id: string
+          updated_at: string
+          verdict: string
+        }
+        Insert: {
+          comment?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          option_id: string
+          organization_id: string
+          person_id?: string | null
+          project_id: string
+          role: string
+          sheet_id: string
+          updated_at?: string
+          verdict: string
+        }
+        Update: {
+          comment?: string | null
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          option_id?: string
+          organization_id?: string
+          person_id?: string | null
+          project_id?: string
+          role?: string
+          sheet_id?: string
+          updated_at?: string
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_location_reviews_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_reviews_option_same_org"
+            columns: ["option_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_location_options"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_reviews_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_location_reviews_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "production_location_reviews_sheet_same_org"
+            columns: ["sheet_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "production_sheets"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       production_needs: {
         Row: {
           created_at: string
@@ -15302,6 +15628,10 @@ export type Database = {
         Args: { p_master_ids: string[]; p_music_format: string; p_type: string }
         Returns: undefined
       }
+      choose_production_location: {
+        Args: { p_option_id: string; p_reason: string }
+        Returns: undefined
+      }
       claim_push_deliveries: {
         Args: { p_secret: string }
         Returns: {
@@ -15671,6 +16001,10 @@ export type Database = {
         Args: { p_snapshot_id: string }
         Returns: undefined
       }
+      discard_production_location: {
+        Args: { p_option_id: string; p_reason: string }
+        Returns: undefined
+      }
       dismiss_legal_plan_keys: {
         Args: { p_keys: string[]; p_project_id: string }
         Returns: undefined
@@ -15782,6 +16116,10 @@ export type Database = {
       }
       get_master_transmission: { Args: { p_token: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }
+      get_production_provider_locations: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       get_production_provider_space: {
         Args: { p_token: string }
         Returns: Json
@@ -16263,6 +16601,19 @@ export type Database = {
       }
       review_legal_form: {
         Args: { p_accept: boolean; p_form_id: string }
+        Returns: undefined
+      }
+      review_production_location: {
+        Args: { p_comment: string; p_option_id: string; p_verdict: string }
+        Returns: undefined
+      }
+      review_production_location_by_link: {
+        Args: {
+          p_comment: string | null
+          p_option_id: string
+          p_token: string
+          p_verdict: string
+        }
         Returns: undefined
       }
       revise_contract_document: {

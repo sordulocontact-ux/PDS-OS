@@ -122,3 +122,41 @@ export async function noteProviderOpened(token: string): Promise<void> {
   });
   if (error) console.error("noteProviderOpened:", error.message);
 }
+
+const locationsSchema = z.object({
+  role: z.enum(["artistic", "technical", "production"]).nullable(),
+  options: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      address: text,
+      url: text,
+      availability: text,
+      constraints: text,
+      media: z.array(z.string()),
+      files: z.number(),
+      review: z
+        .object({
+          verdict: z.enum(["favorable", "reserved", "unfavorable"]),
+          comment: text,
+        })
+        .nullable(),
+    }),
+  ),
+});
+export type ProviderLocations = z.infer<typeof locationsSchema>;
+
+/** The places a consulted provider gives an opinion on (PROD-012). */
+export async function getProviderLocations(
+  token: string,
+): Promise<ProviderLocations | null> {
+  if (!TOKEN.test(token)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc(
+    "get_production_provider_locations",
+    { p_token: token },
+  );
+  if (error) console.error("getProviderLocations:", error.message);
+  const parsed = locationsSchema.safeParse(data);
+  return parsed.success ? parsed.data : null;
+}

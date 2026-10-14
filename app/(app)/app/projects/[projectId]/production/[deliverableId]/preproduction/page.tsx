@@ -10,7 +10,11 @@ import { ReadinessSection } from "@/components/production/preprod/readiness-sect
 import { ScheduleSection } from "@/components/production/preprod/schedule-section";
 import { TeamBriefsSection } from "@/components/production/preprod/team-briefs-section";
 import { TechnicalCallSection } from "@/components/production/preprod/technical-call-section";
+import { LocationsBoard } from "@/components/production/locations/locations-board";
 import { requireApproved } from "@/lib/auth/dal";
+import { loadLocations } from "@/lib/production/locations/queries";
+import { loadProviderLinks } from "@/lib/production/post/requests";
+import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
@@ -63,7 +67,11 @@ export default async function ProductionPreproductionPage({
       ),
     ),
   ];
-  const details = await loadContactDetails(contactIds);
+  const [details, locations, links] = await Promise.all([
+    loadContactDetails(contactIds),
+    loadLocations(sheet.id, data, access),
+    loadProviderLinks(await createClient(), sheet.id),
+  ]);
   const today = todayInParis();
   const o = preprodOverview(data, preprod, today);
   const due = dueByStep(o.logistics, today);
@@ -121,7 +129,21 @@ export default async function ProductionPreproductionPage({
           reschedule: reschedulePlan({ actions: preprod.actions, due, today }),
         }}
       />
-      <LocationSection {...common} logistics={sheet.logistics} />
+      <LocationSection {...common} logistics={sheet.logistics}>
+        {access.organizationId && (
+          <LocationsBoard
+            scope={{
+              projectId,
+              sheetId: sheet.id,
+              organizationId: access.organizationId,
+            }}
+            data={locations}
+            links={links}
+            canOrganize={can}
+            {...people}
+          />
+        )}
+      </LocationSection>
       <EquipmentSection
         {...common}
         {...people}

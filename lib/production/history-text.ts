@@ -147,6 +147,20 @@ export function describeEvent(e: HistoryEvent, names: Names): string {
         statuses[str(a.status) as keyof typeof statuses] ?? str(a.status),
       );
     }
+    case "place.created":
+      return t.place.created(str(a.name));
+    case "place.status": {
+      const name = str(a.name);
+      const reason = a.reason ? ` · ${t.note(str(a.reason))}` : "";
+      if (a.status !== b.status) {
+        if (a.status === "chosen") return t.place.chosen(name) + reason;
+        if (a.status === "discarded") return t.place.discarded(name) + reason;
+        return t.place.restored(name);
+      }
+      return a.verification === "verified"
+        ? t.place.verified(name)
+        : t.place.unverified(name);
+    }
     case "link.sent":
       return t.link(names.holder(a.holder));
     case "delivery.decision": {
