@@ -126,6 +126,7 @@ node docs/protos/tests/audio.cjs        # mixeur : dépôt audio (PDF refusé), 
 node docs/protos/tests/legal.cjs        # Cadrage juridique : question, réponse, « Ce que PO a compris », retirer
 node docs/protos/tests/mixer-package.cjs # dossier du mixeur : aperçu, tarifs exclus, lien affiché une fois, relance
 node docs/protos/tests/production.cjs   # proto Production, interne et externe
+node docs/protos/tests/production-v2.cjs # externe selon Ibé (15/10) : rôles, devis versionné, lieu remplacé, décisions, blocages, contrôle, livraison
 ```
 
 Chaque test finit par `errors: []` (aucune erreur JavaScript) et le mobile par

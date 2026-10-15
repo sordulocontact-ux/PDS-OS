@@ -1,0 +1,969 @@
+<title>Production externe V2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Layout: PDS OS shell (main nav, project nav) and, in every module, the same
+   guided pattern — « Maintenant », the journey on the left, the open step on the
+   right. Tokens mirror app/globals.css. */
+:root{
+  --app:#fbfbfb; --page:#ffffff; --raised:#ffffff; --soft:#f4f4f4; --sunken:#ececec;
+  --inverse:#000; --inverse-fg:#fff;
+  --text:#000; --text-2:#5e5e5e; --text-3:#767676; --muted:#afafaf;
+  --hair:#ececec; --border:#d4d4d4; --field:#dcdcdc; --hover-border:#afafaf;
+  --sel:#155dfc; --sel-bg:rgb(21 93 252 / .07);
+  --info-bg:#e2eefc; --info-fg:#0b3d8c; --warn-bg:#fcefd2; --warn-fg:#6e4300;
+  --ok-bg:#daf3e2; --ok-fg:#0d5226; --bad-bg:#fce1df; --bad-fg:#9a1b1b;
+  --act-bg:#ece1fb; --act-fg:#4c1d9e; --neutral-bg:#ececec; --neutral-fg:#111;
+  --glass:rgb(24 24 24 / .86); --glass-fg:#fff; --glass-2:#bdbdbd;
+  --shadow:0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .06);
+  --font:"Google Sans Flex","Google Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--app);color:var(--text);font-family:var(--font);font-weight:500;font-size:16px;line-height:1.5;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.04em;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+ul,ol{margin:0;padding:0;list-style:none}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.cap{font-size:14px;color:var(--text-2)}
+.t3{color:var(--text-3)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:68px 200px minmax(0,1fr);min-height:100%}
+.shell.noproj{grid-template-columns:68px minmax(0,1fr)}
+.mainnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px}
+.brand{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--inverse);color:var(--inverse-fg);font-weight:700;font-size:12px;letter-spacing:0;margin-bottom:8px}
+.navbtn{position:relative;width:44px;height:40px;border-radius:8px;display:grid;place-items:center;color:var(--text-2);border:0;background:none;cursor:pointer}
+.navbtn.on{background:var(--sunken);color:var(--text)}
+.navbtn[disabled]{opacity:.35;cursor:not-allowed}
+.navbtn .cnt{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--inverse);color:var(--inverse-fg);font-size:10.5px;font-weight:700;display:grid;place-items:center;letter-spacing:0}
+.navbtn .tip{position:absolute;left:52px;top:50%;transform:translateY(-50%);background:var(--inverse);color:var(--inverse-fg);font-size:13px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 120ms ease;z-index:20}
+@media (hover:hover) and (pointer:fine){.navbtn:hover:not([disabled]){background:var(--soft);color:var(--text)}.navbtn:hover .tip{opacity:1}}
+.mainnav .grow{flex:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-size:12.5px;font-weight:600;flex:none;color:var(--text)}
+.avatar.sm{width:24px;height:24px;font-size:10.5px}
+.projnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);padding:8px;display:flex;flex-direction:column;gap:1px;overflow:auto}
+.switcher{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 10px 12px;border-bottom:1px solid var(--hair);margin-bottom:6px;font-weight:600}
+.group{font-size:13px;color:var(--text-3);padding:12px 10px 4px}
+.pitem{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 10px;border-radius:8px;color:var(--text-2);font-size:15px;border:0;background:none;text-align:left;cursor:pointer;width:100%}
+.pitem.on{background:var(--sunken);color:var(--text)}
+.pitem .grow{flex:1}
+@media (hover:hover) and (pointer:fine){.pitem:hover{background:var(--soft);color:var(--text)}}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.run{background:var(--sel)} .dot.wait{background:var(--warn-fg)} .dot.block{background:var(--bad-fg)} .dot.done{background:var(--ok-fg)}
+.mine{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+.content{min-width:0;padding:28px 40px 130px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+@media (max-width:1100px){.shell{grid-template-columns:68px minmax(0,1fr)}.projnav{display:none}}
+@media (max-width:720px){.shell,.shell.noproj{grid-template-columns:minmax(0,1fr)}.mainnav{display:none}.content{padding:20px 16px 150px}}
+
+/* Head */
+.h1{font-size:30px;letter-spacing:-.04em}
+.chevrons{display:flex;flex-wrap:wrap;gap:4px}
+.chev{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--text-2);font-size:15px;border:0;cursor:pointer}
+.chev.on{background:var(--inverse);color:var(--inverse-fg)}
+.chev .ok{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok-fg)}
+.chev .lock{opacity:.6}
+.headrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px;color:var(--text-2)}
+.facts b{color:var(--text);font-weight:600}
+
+/* Pills, buttons */
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;background:var(--neutral-bg);color:var(--neutral-fg);white-space:nowrap}
+.pill.info{background:var(--info-bg);color:var(--info-fg)} .pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ok{background:var(--ok-bg);color:var(--ok-fg)} .pill.bad{background:var(--bad-bg);color:var(--bad-fg)} .pill.act{background:var(--act-bg);color:var(--act-fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--inverse);color:var(--inverse-fg);font-weight:600;font-size:15px;cursor:pointer;transition:transform 140ms var(--ease),background-color 160ms ease;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.out{background:transparent;color:var(--text);border-color:var(--border)}
+.btn.ghost{background:transparent;color:var(--text-2)}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+@media (hover:hover) and (pointer:fine){.btn.out:hover{border-color:var(--hover-border)}.btn.ghost:hover{background:var(--soft);color:var(--text)}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Cards */
+.card{background:var(--raised);border:1px solid var(--hair);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:20px} .card h3{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.now{border-color:var(--border);box-shadow:var(--shadow)}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2);flex-wrap:wrap}
+.now h2{font-size:22px}
+.rowlist{display:flex;flex-direction:column;gap:8px}
+.wr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--soft);font-size:15px}
+.wr .grow{flex:1;min-width:0}
+.flash{background:var(--ok-bg);color:var(--ok-fg);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.flash .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.flash button{background:none;border:0;color:inherit;cursor:pointer;padding:4px;border-radius:6px}
+
+/* Layout + spine */
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.spine{position:sticky;top:20px;display:flex;flex-direction:column;gap:2px;padding:12px;background:var(--raised);border:1px solid var(--hair);border-radius:12px}
+.spine h2{font-size:15px;color:var(--text-2);letter-spacing:-.02em;padding:4px 8px 8px}
+.step{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:9px 8px;border-radius:8px;border:0;background:none;text-align:left;cursor:pointer;width:100%;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;left:19px;top:34px;bottom:-6px;width:2px;background:var(--hair)}
+.step.sel{background:var(--sunken)}
+@media (hover:hover) and (pointer:fine){.step:not(.sel):hover{background:var(--soft)}}
+.mark{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:var(--raised);position:relative;z-index:1;color:var(--text-3)}
+.step.done .mark{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.step.current .mark{border-color:var(--sel);background:var(--sel-bg)}
+.step.current .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--sel)}
+.step.me .mark{border-color:var(--sel);background:var(--sel)} .step.me .mark::after{background:#fff}
+.step.blocked .mark{border-style:dashed}
+.step .t,.step .s{display:block}
+.step .t{font-size:15px;font-weight:600;line-height:1.3}
+.step.blocked .t{color:var(--text-3);font-weight:500}
+.step .s{font-size:13.5px;color:var(--text-2);line-height:1.35;margin-top:2px}
+.step .s.me{color:var(--sel);font-weight:600}
+.dhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.dhead h2{font-size:22px}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta .k{font-size:13px;color:var(--text-3)} .meta .v{font-size:15px;line-height:1.35}
+.okc{color:var(--ok-fg)} .noc{color:var(--text-3)}
+.note{font-size:14.5px;color:var(--text-2)}
+.po{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--act-fg);background:var(--act-bg);height:22px;padding:0 8px;border-radius:999px}
+.callout{border-radius:10px;padding:12px 14px;font-size:15px;display:flex;gap:10px;align-items:flex-start}
+.callout.info{background:var(--info-bg);color:var(--info-fg)} .callout.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.callout.bad{background:var(--bad-bg);color:var(--bad-fg)} .callout.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.rows{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.row:last-child{border-bottom:0}
+.row .src{font-size:13px;color:var(--text-3)}
+.pick{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}.pick legend{padding:0;margin-bottom:2px}
+.opts{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.opt{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--hair);cursor:pointer}.opt:last-child{border-bottom:0}.opt .grow{flex:1;min-width:0}
+.opt input{accent-color:var(--sel);width:18px;height:18px;flex:none}.opt:has(input:checked){background:var(--sel-bg)}
+.hist{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--text-2)}
+.hist li{display:flex;gap:8px;align-items:flex-start}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+.in{min-height:40px;border:1px solid var(--field);border-radius:8px;background:var(--raised);padding:8px 12px;width:100%}
+textarea.in{min-height:64px;resize:vertical}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.lbl2{font-size:15px}
+.drop{position:relative;display:flex;align-items:center;gap:12px;min-height:72px;padding:14px 16px;border:1.5px dashed var(--border);border-radius:10px;background:var(--soft);cursor:pointer;transition:border-color 150ms ease,background-color 150ms ease}
+.drop.over{border-color:var(--sel);background:var(--sel-bg)} .drop.bad{border-color:var(--bad-fg)}
+.drop:focus-within{outline:2px solid var(--sel);outline-offset:2px}
+.drop .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+@media (hover:hover) and (pointer:fine){.drop:hover{border-color:var(--hover-border)}}
+.vers{display:flex;flex-direction:column;gap:8px}
+.field .src,.vers>.src{font-size:14px;color:var(--text-2)}
+.linkbox{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px}.linkbox code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--raised);color:var(--text);padding:6px 10px;border-radius:8px;overflow-wrap:anywhere}
+.qa{display:flex;flex-direction:column;gap:12px}.qh{font-size:18px;font-weight:600;letter-spacing:-.03em}
+.ver{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.rows .ver:last-child{border-bottom:0}
+.ver .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.ver-note{margin:0 14px 10px;border-radius:8px}
+.play{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--inverse);color:var(--inverse-fg);display:grid;place-items:center;cursor:pointer;transition:transform 120ms var(--ease)}
+.play:active{transform:scale(.94)} .play[aria-pressed="true"]{background:var(--sel);color:#fff}
+.wave{display:block;height:3px;margin-top:6px;border-radius:2px;background:var(--hair);overflow:hidden}
+.wave i{display:block;height:100%;width:100%;background:var(--sel);transform-origin:left;animation:wave 194s linear forwards}
+@keyframes wave{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.wave i{animation:none;transform:scaleX(.3)}}
+.in[aria-invalid="true"]{border-color:var(--bad-fg)}
+.err{font-size:13px;color:var(--bad-fg)}
+
+/* Overview + lists */
+.wfgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.wfgrid{grid-template-columns:minmax(0,1fr)}}
+.wf{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--hair);border-radius:12px;background:var(--raised);text-align:left;cursor:pointer}
+@media (hover:hover) and (pointer:fine){.wf:hover{border-color:var(--hover-border)}}
+.bar{height:6px;border-radius:999px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sel);border-radius:999px;transform-origin:left;transition:transform 300ms var(--ease)}
+.table{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised)}
+.tr{display:grid;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--hair);font-size:15px}
+.tr:last-child{border-bottom:0}
+.tr.h{font-size:13.5px;color:var(--text-3);background:var(--soft)}
+.tr.link{cursor:pointer}
+@media (hover:hover) and (pointer:fine){.tr.link:hover{background:var(--soft)}}
+@media (max-width:760px){.tr{grid-template-columns:minmax(0,1fr)!important}.tr.h{display:none}}
+.cols4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.cols4{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--soft)}
+.col h3{font-size:14px;color:var(--text-2);font-weight:600}
+.chip{padding:10px 12px;border-radius:8px;background:var(--raised);border:1px solid var(--hair);font-size:14.5px}
+.po-input{display:flex;gap:8px;align-items:center;padding:8px 8px 8px 16px;border:1px solid var(--border);border-radius:16px;background:var(--raised)}
+.po-input input{flex:1;border:0;background:transparent;outline:none;min-width:0;height:36px}
+
+/* Portal */
+.portal{min-height:100%;background:var(--app)}
+.pbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-bottom:1px solid var(--hair);background:var(--page);flex-wrap:wrap}
+.pwrap{max-width:820px;margin:0 auto;padding:28px 16px 150px;display:flex;flex-direction:column;gap:18px}
+.lockline{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
+
+/* Proto bar & toast */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:280px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+@media (max-width:720px){.proto label{display:none}.proto select{max-width:44vw}}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--inverse);color:var(--inverse-fg);padding:12px 16px;border-radius:12px;font-size:15px;box-shadow:var(--shadow);max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+
+/* V2 — production externe selon le ticket d'Ibé du 15/10 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{height:40px;padding:0 14px;border:0;background:none;color:var(--text-2);font-size:15px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.tab.on{color:var(--text);border-bottom-color:var(--text)}
+.tab .n{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--sunken);font-size:12px;font-weight:700;display:grid;place-items:center}
+.strip{display:flex;flex-wrap:wrap;gap:8px}
+.chipbtn{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--hair);background:var(--raised);font-size:14px;cursor:pointer;color:var(--text)}
+.chipbtn .d{width:8px;height:8px;border-radius:50%}
+.d.bad{background:var(--bad-fg)} .d.warn{background:var(--warn-fg)} .d.info{background:var(--info-fg)}
+.meta5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta5 .k{font-size:13px;color:var(--text-3)} .meta5 .v{font-size:15px;line-height:1.35}
+.step.rework .mark{border-color:var(--warn-fg);background:var(--warn-bg)}
+.step .flag{display:inline-flex;margin-left:6px;vertical-align:1px}
+.kv{display:grid;grid-template-columns:180px minmax(0,1fr);gap:4px 14px;font-size:15px}
+@media (max-width:720px){.kv{grid-template-columns:minmax(0,1fr)}}
+.kv dt{color:var(--text-3);font-size:14px} .kv dd{margin:0}
+.locs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.locs{grid-template-columns:minmax(0,1fr)}}
+.loc{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised);display:flex;flex-direction:column}
+.loc.active{border-color:var(--ok-fg);box-shadow:0 0 0 1px var(--ok-fg)}
+.loc .ph{height:96px;display:grid;place-items:end start;padding:8px;color:#fff;font-size:12px;font-weight:600}
+.ph.p0{background:linear-gradient(135deg,#5b6170,#2f3540)} .ph.p1{background:linear-gradient(135deg,#d58a5b,#6b3a5a)} .ph.p2{background:linear-gradient(135deg,#e8e8e8,#b9bcc4);color:#222} .ph.p3{background:linear-gradient(135deg,#6d8f6a,#2f4a3a)}
+.loc .bd{padding:12px;display:flex;flex-direction:column;gap:6px;font-size:14.5px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.checks{display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.checks input{width:18px;height:18px;accent-color:var(--sel);margin-top:2px;flex:none}
+.syn .row .src{max-width:none}
+.miss{color:var(--bad-fg);font-weight:600}
+.dec .row{grid-template-columns:minmax(0,1fr) auto}
+.contra{border:1px solid var(--warn-fg);border-radius:10px;overflow:hidden}
+.contra .row{border-bottom:1px solid var(--hair)}
+.strike{text-decoration:line-through;color:var(--text-3)}
+select.in{height:40px}
+</style>
+
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label><select id="roleSel"></select>
+  <label for="scenSel">Aller à</label>
+  <select id="scenSel">
+    <option value="quote">Devis V1 reçu</option>
+    <option value="change">Préparation : le lieu ne tient plus</option>
+    <option value="ready">Contrôle avant tournage</option>
+    <option value="post">Après le tournage : montage V1</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const I={
+  check:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  lock:'<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>',
+  spark:'<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z"/></svg>',
+  ok:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>',
+  warn:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 11.6v.1"/></svg>',
+  stop:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M4 12l8-8"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+  updown:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>',
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  work:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  nodes:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>'
+};
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euro=n=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(n)+" € HT";
+const ENVELOPE=18000;
+
+/* People: accounts of PDS, or outside people through a private link. */
+const P={
+  cp:{name:"Lina Haddad",role:"Cheffe de projet",ini:"LH",where:"app"},
+  charge:{name:"Tom Mercier",role:"Chargé de production",ini:"TM",where:"app"},
+  dg:{name:"Claire Morel",role:"Directrice générale",ini:"CM",where:"app"},
+  da:{name:"Nadia Benali",role:"Directrice créative",ini:"NB",where:"app"},
+  societe:{name:"Studio Ressac",role:"Société de production",ini:"SR",where:"lien",link:"/p/"},
+  realExt:{name:"Bastien Roy",role:"Réalisateur · Studio Ressac",ini:"BR",where:"lien",link:"/p/"},
+  mgmt:{name:"Jade Petit",role:"Management de Mona Lys",ini:"JP",where:"lien",link:"/v/"}
+};
+const ROLE_ORDER=["cp","charge","dg","da","societe","realExt","mgmt"];
+const MEMBERS=["cp","charge","dg","da"];
+
+/* Responsibilities (Ibé § 5): who executes, who coordinates, who validates.
+   One person may hold several; a change keeps the previous holder. */
+const SLOTS=[
+  {k:"project",label:"Responsable du projet",kind:"Coordonne",what:"Suit l'ensemble, retient le lieu, confirme avant le tournage.",pool:MEMBERS},
+  {k:"production",label:"Responsable de production",kind:"Coordonne",what:"Vérifie les devis, suit la préproduction, les rushes et le transfert.",pool:MEMBERS},
+  {k:"exec",label:"Production exécutive",kind:"Exécute",what:"Devis, préproduction, lieux, tournage, montage.",pool:["societe"]},
+  {k:"director",label:"Réalisation",kind:"Exécute",what:"Traitement, moodboard, découpage technique.",pool:["realExt"]},
+  {k:"creative",label:"Responsable créatif",kind:"Coordonne",what:"Suit la création côté PDS.",pool:MEMBERS},
+  {k:"budget",label:"Validation budgétaire",kind:"Valide",what:"Valide les devis et les révisions de budget.",pool:MEMBERS},
+  {k:"creativeInt",label:"Validation créative interne",kind:"Valide",what:"Valide la proposition et les versions du montage.",pool:MEMBERS},
+  {k:"creativeExt",label:"Validation créative externe",kind:"Valide",what:"Valide en plus de la validation interne, jamais à sa place.",pool:["mgmt",""]}
+];
+const SLOT=k=>SLOTS.find(s=>s.k===k);
+const holder=k=>S.roles[k]||null;
+const nameOf=k=>k&&P[k]?P[k].name:"Personne";
+
+/* The journey. exec / coord / valid name slots, never people: changing a
+   holder never resets a step (Ibé § 5). */
+const STEPS=[
+  {id:"org",title:"Organisation et rôles",why:"Qui exécute, qui coordonne, qui valide : choisi au départ, modifiable sans rien réinitialiser.",exec:"project",coord:null,valid:[],prereq:[]},
+  {id:"kickoff",title:"Call de présentation",why:"Studio Ressac découvre le projet, les attentes, les contraintes et l'enveloppe avant de chiffrer.",exec:"project",coord:null,valid:[],prereq:["org"]},
+  {id:"quote",title:"Devis",why:"Déposé par la société, vérifié par la production, validé par la validation budgétaire. Un dépôt ne vaut jamais validation.",exec:"exec",coord:"production",valid:["budget"],prereq:["kickoff"]},
+  {id:"creative",title:"Proposition de réalisation",why:"Traitement, moodboard, découpage : ce qu'on tourne. Validé en interne, et en externe quand c'est requis.",exec:"director",coord:"creative",valid:["creativeInt","creativeExt"],prereq:["quote"]},
+  {id:"prep",title:"Préproduction",why:"Studio Ressac organise ; PDS suit les tâches, les échéances et les blocages.",exec:"exec",coord:"production",valid:[],prereq:["quote"]},
+  {id:"locs",title:"Lieux",why:"La société propose, PDS retient un lieu. Le remplacer crée une nouvelle décision, l'ancienne reste.",exec:"exec",coord:"production",valid:["project"],prereq:["creative"]},
+  {id:"ready",title:"Contrôle avant tournage",why:"La synthèse de ce qui est réellement prêt, confirmée explicitement, puis gardée telle quelle.",exec:"project",coord:"production",valid:[],prereq:["quote","creative","locs"]},
+  {id:"shoot",title:"Tournage",why:"Confirmer qu'il a eu lieu ; ensuite, les fichiers sont attendus.",exec:"exec",coord:"production",valid:["project"],prereq:["ready"]},
+  {id:"rushes",title:"Rushes et transfert",why:"Le lien des rushes, l'accès vérifié, puis le transfert à la postproduction.",exec:"exec",coord:"production",valid:[],prereq:["shoot"]},
+  {id:"post",title:"Montage et retours",why:"Chaque version a son lien et ses retours ; elle est en revue, à modifier ou validée.",exec:"exec",coord:"creative",valid:["creativeInt","creativeExt"],prereq:["rushes"]},
+  {id:"delivery",title:"Livraison et clôture",why:"Le fichier final validé, sa date, son valideur et son destinataire ; puis la clôture.",exec:"exec",coord:"project",valid:["project"],prereq:["post"]}
+];
+const STEP=id=>STEPS.find(s=>s.id===id);
+
+/* State ------------------------------------------------------------------- */
+const LOC_SEED=[
+  {name:"Entrepôt Quai de Seine",addr:"12 quai de Seine, Aubervilliers",price:1400,avail:"23 et 24/10",constraints:"Électricité 63 A sur place · accès camion par la cour",ph:"p0"},
+  {name:"Rooftop Belleville",addr:"48 rue de Belleville, Paris 20e",price:2200,avail:"23/10 seulement",constraints:"Autorisation de la copropriété · 6 personnes au plus sur le toit",ph:"p1"},
+  {name:"Studio Rive Gauche",addr:"5 rue Molière, Ivry-sur-Seine",price:1100,avail:"23 et 24/10",constraints:"Cyclo blanc, régie · aucune contrainte",ph:"p2"}
+];
+function fresh(){
+  return {role:"charge",tab:"parcours",sel:null,flash:null,log:[],clock:0,form:null,err:{},
+    roles:{project:"cp",production:"charge",exec:"societe",director:"realExt",creative:"da",budget:"dg",creativeInt:"da",creativeExt:"mgmt"},
+    roleHist:[],links:{societe:{state:"active",n:1},realExt:{state:"active",n:1},mgmt:{state:"active",n:1}},
+    tasks:[],quote:{versions:[],revision:null},creative:{versions:[],requested:null},
+    locs:{cands:[],active:null,decisions:[]},decisions:[],blockers:[],
+    ready:null,shoot:false,rushes:{link:null,verified:false,received:false,transfer:"to_send"},post:{versions:[]},delivery:{link:null,confirmed:null,closed:null}};
+}
+let S=fresh();
+const stamp=()=>{S.clock++;const d=new Date(...(S.base||[2026,9,16,18,30]));d.setMinutes(d.getMinutes()+S.clock*9);return d.toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(" ",", ");};
+const me=()=>S.role;
+const log=(text,who)=>S.log.unshift({text,who:who||P[me()].name,at:stamp()});
+let uid=0;const id=p=>p+(++uid);
+
+/* Derived ----------------------------------------------------------------- */
+const lastOf=a=>a[a.length-1]||null;
+const activeQuote=()=>[...S.quote.versions].reverse().find(v=>v.status==="approved")||null;
+const retainedCreative=()=>[...S.creative.versions].reverse().find(v=>v.int==="approved"&&(v.ext==="approved"||v.ext==="none"))||null;
+const prepOpen=()=>S.tasks.filter(t=>t.step==="prep"&&t.status!=="done");
+const contradictions=()=>{const g={};S.decisions.filter(d=>d.group).forEach(d=>{(g[d.group]=g[d.group]||[]).push(d);});return Object.values(g).filter(l=>!l.some(d=>d.foi));};
+function openBlockers(){
+  const list=S.blockers.filter(b=>b.open);
+  contradictions().forEach(l=>list.push({id:"c-"+l[0].group,text:`Informations contradictoires : ${l.map(d=>"« "+d.text+" »").join(" / ")}`,step:l[0].step,owner:holder("project"),next:"Indiquer l'information qui fait foi",auto:true,at:l[l.length-1].at}));
+  return list;
+}
+const reviewOpen=()=>S.tasks.filter(t=>t.origin&&t.origin.startsWith("Changement")&&t.status!=="done");
+function done(id){
+  switch(id){
+    case "org":case "kickoff":return true;
+    case "quote":return !!activeQuote();
+    case "creative":return !!retainedCreative();
+    case "prep":return S.tasks.some(t=>t.step==="prep")&&prepOpen().length===0;
+    case "locs":return S.locs.active!=null;
+    case "ready":return !!S.ready;
+    case "shoot":return S.shoot;
+    case "rushes":return S.rushes.transfer==="received";
+    case "post":return S.post.versions.some(v=>v.status==="approved");
+    case "delivery":return !!S.delivery.closed;
+  }
+}
+// A step done once stays done; a new version asked reopens it without
+// locking what follows (Ibé § 10: the project goes on where unaffected).
+function rework(id){
+  if(id==="quote") return !!activeQuote()&&(!!S.quote.revision||lastOf(S.quote.versions).status!=="approved");
+  if(id==="creative") return !!retainedCreative()&&(!!S.creative.requested||lastOf(S.creative.versions)!==retainedCreative());
+  if(id==="prep") return S.tasks.some(t=>t.step==="prep"&&t.status==="done")&&prepOpen().length>0&&!!S.locs.decisions.length&&reviewOpen().some(t=>t.step==="prep");
+  return false;
+}
+function statusOf(id){
+  const s=STEP(id);
+  if(!s.prereq.every(done)) return "blocked";
+  if(rework(id)) return "rework";
+  if(done(id)) return "done";
+  return "current";
+}
+/* Who is expected now on a step: one or several people in parallel. */
+function actorsOf(id){
+  const st=statusOf(id); if(st==="blocked"||st==="done") return [];
+  const A=(slot,todo,due)=>holder(slot)?[{r:holder(slot),todo,due,step:id}]:[];
+  const q=lastOf(S.quote.versions), c=lastOf(S.creative.versions);
+  switch(id){
+    case "quote":
+      if(!q||(S.quote.revision&&q.status==="approved")) return A("exec",S.quote.revision?"Déposer le devis révisé":"Déposer le devis","avant le 21/10");
+      if(q.status==="deposited") return A("production","Vérifier le devis");
+      if(q.status==="submitted") return A("budget","Valider le devis");
+      if(q.status==="changes"||q.status==="rejected") return A("exec","Déposer une version corrigée du devis","avant le 22/10");
+      return [];
+    case "creative":{
+      if(!c||(S.creative.requested&&c===retainedCreative())) return A("director",S.creative.requested?"Déposer une nouvelle version de la proposition":"Déposer la proposition de réalisation","avant le 18/10");
+      if(c.int==="changes"||c.ext==="changes") return A("director","Déposer une nouvelle version de la proposition","avant le 20/10");
+      const l=[];if(c.int==="pending") l.push(...A("creativeInt","Valider la proposition V"+c.n));if(c.ext==="pending") l.push(...A("creativeExt","Valider la proposition V"+c.n));return l;}
+    case "prep":{const by={};prepOpen().forEach(t=>{(by[t.r]=by[t.r]||[]).push(t);});return Object.entries(by).map(([r,l])=>({r,todo:l.length>1?`Faire avancer ${l.length} tâches de préproduction`:l[0].text,due:l[0].due?"pour le "+l[0].due:null,step:"prep"}));}
+    case "locs":
+      if(!S.locs.cands.length) return A("exec","Proposer des lieux","avant le 20/10");
+      if(S.locs.active==null) return A("project","Retenir un lieu");
+      return [];
+    case "ready": return S.ready?[]:A("project","Confirmer la préparation");
+    case "shoot": return S.shoot?[]:A("project","Confirmer que le tournage a eu lieu","après le 23/10");
+    case "rushes":
+      if(!S.rushes.link) return A("exec","Transmettre le lien des rushes","le 24/10");
+      if(!S.rushes.verified||!S.rushes.received) return A("production","Vérifier l'accès et marquer les rushes reçus");
+      if(S.rushes.transfer==="to_send") return A("production","Transférer à la postproduction");
+      if(S.rushes.transfer==="sent") return A("exec","Confirmer la réception pour le montage");
+      return [];
+    case "post":{const v=lastOf(S.post.versions);
+      if(!v||v.status==="changes") return A("exec",v?`Déposer le montage V${v.n+1}`:"Déposer le montage V1",v?"avant le 10/11":"le 06/11");
+      if(v.status==="review"){const l=[];if(v.int==="pending") l.push(...A("creativeInt",`Revoir le montage V${v.n}`));if(v.ext==="pending") l.push(...A("creativeExt",`Revoir le montage V${v.n}`));return l;}
+      return [];}
+    case "delivery":
+      if(S.delivery.closed) return [];
+      if(!S.delivery.link) return A("exec","Déposer le fichier final validé","le 28/11");
+      if(!S.delivery.confirmed) return A("project","Confirmer la livraison");
+      return A("project","Clôturer la production");
+  }
+  return [];
+}
+const allActions=()=>STEPS.flatMap(s=>actorsOf(s.id));
+function summary(id){
+  const q=activeQuote(), c=retainedCreative();
+  switch(id){
+    case "org":return "Externe · Studio Ressac";
+    case "kickoff":return `Fait le 15/10 · ${S.tasks.filter(t=>t.origin==="Call de présentation du 15/10").length} tâches confirmées`;
+    case "quote":return q?`Référence : V${q.n} · ${euro(q.amount)}`:"";
+    case "creative":return c?`Retenue : V${c.n}`:"";
+    case "prep":return `${S.tasks.filter(t=>t.step==="prep"&&t.status==="done").length} / ${S.tasks.filter(t=>t.step==="prep").length} tâches faites`;
+    case "locs":return S.locs.active!=null?S.locs.cands[S.locs.active].name:"";
+    case "ready":return S.ready?"Préparation validée — tournage à venir":"";
+    case "shoot":return S.shoot?"Tournage terminé — fichiers attendus":"";
+    case "rushes":return "Rushes reçus, transférés au montage";
+    case "post":{const v=[...S.post.versions].reverse().find(x=>x.status==="approved");return v?`Montage V${v.n} validé`:"";}
+    case "delivery":return S.delivery.closed?"Livré et clôturé":"";
+  }
+  return "";
+}
+
+/* Render ------------------------------------------------------------------ */
+const app=document.getElementById("app");
+const av=(k,sm)=>k&&P[k]?`<span class="avatar ${sm?"sm":""}" aria-hidden="true">${esc(P[k].ini)}</span>`:"";
+const isMember=k=>P[k]&&P[k].where==="app";
+const can=slot=>holder(slot)===me();
+const pill=(tone,t)=>`<span class="pill ${tone}">${esc(t)}</span>`;
+const errOf=k=>S.err[k]?`<span class="err" role="alert">${esc(S.err[k])}</span>`:"";
+const ta=(id,label,ph,req)=>`<div class="field"><label for="${id}"><b>${esc(label)}</b>${req?" *":""}</label><textarea class="in" id="${id}" rows="2" placeholder="${esc(ph||"")}"></textarea>${errOf(id)}</div>`;
+function render(){
+  document.getElementById("roleSel").innerHTML=ROLE_ORDER.map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role.split(" · ")[0])}${P[k].where==="lien"?" (lien)":""}</option>`).join("");
+  app.innerHTML=P[me()].where==="lien"?portal():shell();
+}
+function shell(){
+  const nav=[["home","Accueil"],["work","Travail"],["folder","Projets"],["nodes","Réseau"]];
+  const n=allActions().filter(a=>a.r===me()).length;
+  return `<div class="shell">
+  <nav class="mainnav" aria-label="Navigation principale"><span class="brand">PDS</span>
+    ${nav.map(([i,l])=>`<button class="navbtn ${i==="folder"?"on":""}" type="button" aria-label="${l}">${I[i]}${i==="work"&&n?`<span class="cnt">${n}</span>`:""}<span class="tip">${l}</span></button>`).join("")}
+    <div class="grow"></div><button class="navbtn" type="button" aria-label="Notifications">${I.bell}</button>${av(me())}</nav>
+  <nav class="projnav" aria-label="Sections du projet"><div class="switcher"><span>Néons</span><span class="t3">${I.updown}</span></div>
+    <button class="pitem" type="button">Vue d'ensemble</button><button class="pitem" type="button">Cadrage</button>
+    <div class="group">Workflows</div>
+    <button class="pitem" type="button"><span class="dot run"></span><span class="grow">Master</span></button>
+    <button class="pitem" type="button"><span class="dot run"></span><span class="grow">Juridique</span></button>
+    <button class="pitem on" type="button"><span class="dot run"></span><span class="grow">Marketing</span>${n?`<span class="mine">${n}</span>`:""}</button>
+    <button class="pitem" type="button"><span class="dot"></span><span class="grow">Distribution</span></button>
+    <div class="group">Pilotage</div><button class="pitem" type="button">Travail</button><button class="pitem" type="button">Validations</button><button class="pitem" type="button">Activité</button>
+  </nav>
+  <main class="content"><div class="wrap">
+    <div class="chevrons" aria-label="Étapes du Marketing">
+      <span class="chev"><span class="ok">${I.check}</span>Stratégie</span><span class="chev"><span class="ok">${I.check}</span>Conception</span>
+      <span class="chev on">Production</span><span class="chev">Activations</span><span class="chev">Suivi &amp; bilan</span></div>
+    <div class="headrow"><h1 class="h1">Clip « Néons »</h1>${pill("act","Production externe · Studio Ressac")}</div>
+    <div class="facts"><span>Enveloppe interne <b class="num">${euro(ENVELOPE)}</b></span><span>Tournage visé <b>Ven. 23/10/2026</b></span><span>Livraison <b>Sam. 28/11/2026</b></span><span>Sortie <b>Sam. 05/12/2026</b></span></div>
+    ${S.flash?flash():""}
+    ${nowCard()}
+    ${strip()}
+    <div class="tabs" role="tablist">${[["parcours","Parcours",0],["decisions","Décisions",S.decisions.filter(d=>!d.discarded&&!d.group&&(d.kind==="confirm"||d.kind==="pending")).length+contradictions().length],["tasks","Tâches",S.tasks.filter(t=>t.status!=="done").length],["history","Historique",0]].map(([k,l,c])=>`<button class="tab ${S.tab===k?"on":""}" type="button" role="tab" aria-selected="${S.tab===k}" data-act="tab" data-v="${k}">${l}${c?`<span class="n">${c}</span>`:""}</button>`).join("")}</div>
+    ${S.tab==="decisions"?decisionsView():S.tab==="tasks"?tasksView():S.tab==="history"?historyView():journey()}
+  </div></main></div>`;
+}
+function flash(){return `<div class="flash" role="status"><span>${I.ok}</span><div class="grow"><b>${esc(S.flash.title)}</b>${S.flash.lines.map(l=>`<span>${l}</span>`).join("")}</div><button type="button" data-act="unflash" aria-label="Fermer">${I.x}</button></div>`;}
+function nowCard(){
+  const mine=allActions().filter(a=>a.r===me());
+  const blk=openBlockers().filter(b=>b.owner===me());
+  const shownHere=S.tab==="parcours"&&mine.some(a=>a.step===S.sel);
+  const rest=mine.filter(a=>!(S.tab==="parcours"&&a.step===S.sel));
+  if(rest.length||blk.length&&!(S.tab==="parcours"&&blk.every(b=>b.step===S.sel))){
+    const a=rest[0];
+    if(!a){const b=blk[0];return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill bad">Blocage à lever</span><span>${esc(P[me()].name)} · ${esc(STEP(b.step).title)}</span></div><h2>${esc(b.next)}</h2><p class="note">${esc(b.text)}</p><div class="btnrow"><button class="btn" type="button" data-act="go" data-step="${b.step}">Ouvrir l'étape</button></div></section>`;}
+    return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill info">${shownHere?"Aussi à vous":"À vous"}</span><span>${esc(P[me()].name)} · ${esc(STEP(a.step).title)}${a.due?" · "+esc(a.due):""}</span></div>
+      <h2>${esc(a.todo)}</h2><p class="note">${esc(STEP(a.step).why)}</p>
+      <div class="btnrow"><button class="btn" type="button" data-act="go" data-step="${a.step}">Ouvrir l'étape</button>${rest.length>1?`<span class="cap">Et ${rest.length-1} autre${rest.length>2?"s":""} : ${rest.slice(1,3).map(x=>esc(x.todo.toLowerCase())).join(" · ")}</span>`:""}</div>
+      ${blk.length?`<div class="callout bad">${I.stop}<span>${blk.length} blocage${blk.length>1?"s":""} à lever par vous : ${blk.map(b=>esc(b.next.toLowerCase())).join(" · ")}</span></div>`:""}</section>`;
+  }
+  if(shownHere||blk.length) return "";
+  const others=allActions().filter(a=>a.r!==me()).slice(0,3);
+  return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill">Rien à faire pour vous</span><span>${esc(P[me()].name)}</span></div>
+    <h2>${others.length?"La production avance sans vous pour l'instant":S.delivery.closed?"Production livrée et clôturée":"Tout est à jour"}</h2>
+    ${others.length?`<div class="rowlist">${others.map(a=>`<div class="wr">${av(a.r,true)}<span class="grow">En attente de <b>${esc(P[a.r].name)}</b>${P[a.r].where==="lien"?" (lien privé)":""} : ${esc(a.todo.toLowerCase())}</span><button class="btn ghost sm" type="button" data-act="go" data-step="${a.step}">Voir</button></div>`).join("")}</div>`:""}</section>`;
+}
+/* The synthesis Ibé asks for: blockers, what to review, what is not yet a decision. */
+function strip(){
+  const b=openBlockers(), r=reviewOpen(), c=S.decisions.filter(d=>!d.discarded&&!d.group&&d.kind==="confirm");
+  if(!b.length&&!r.length&&!c.length) return "";
+  return `<div class="strip" aria-label="Points ouverts">
+   ${b.length?`<button class="chipbtn" type="button" data-act="go" data-step="${b[0].step}"><span class="d bad"></span>${b.length} blocage${b.length>1?"s":""}</button>`:""}
+   ${r.length?`<button class="chipbtn" type="button" data-act="tab" data-v="tasks"><span class="d warn"></span>${r.length} élément${r.length>1?"s":""} à revoir</button>`:""}
+   ${c.length?`<button class="chipbtn" type="button" data-act="tab" data-v="decisions"><span class="d info"></span>${c.length} information${c.length>1?"s":""} à confirmer</button>`:""}</div>`;
+}
+function journey(){
+  if(!S.sel){const a=allActions().find(x=>x.r===me());S.sel=a?a.step:(STEPS.find(s=>statusOf(s.id)==="current")||STEPS[0]).id;}
+  return `<div class="layout"><nav class="spine" aria-label="Parcours"><h2>Parcours</h2>${STEPS.map(spineItem).join("")}</nav>
+  <section class="card" aria-labelledby="dtitle">${detail(STEP(S.sel))}</section></div>`;
+}
+function spineItem(s){
+  const st=statusOf(s.id), acts=actorsOf(s.id), mine=acts.some(a=>a.r===me()), blk=openBlockers().some(b=>b.step===s.id);
+  const who=acts.length?acts.map(a=>P[a.r].name).join(" et ")+" · "+acts[0].todo.toLowerCase():"";
+  const sub=st==="blocked"?"Après : "+s.prereq.filter(p=>!done(p)).map(p=>STEP(p).title).join(", "):st==="rework"?"À revoir · "+(who||summary(s.id)):st==="done"?summary(s.id):who;
+  return `<button class="step ${st==="rework"?"current rework":st} ${mine?"me":""} ${s.id===S.sel?"sel":""}" type="button" data-act="go" data-step="${s.id}" aria-current="${s.id===S.sel?"step":"false"}"><span class="mark">${st==="done"?I.check:st==="blocked"?I.lock:""}</span><span><span class="t">${esc(s.title)}${blk?`<span class="flag" style="color:var(--bad-fg)" aria-label="Bloqué">${I.stop}</span>`:""}</span><span class="s ${mine?"me":""}">${mine?"À vous · ":""}${esc(sub)}</span></span></button>`;
+}
+function detail(s){
+  const st=statusOf(s.id);
+  const next=STEPS.filter(x=>x.prereq.includes(s.id));
+  const slotLine=k=>k&&holder(k)?`${esc(nameOf(holder(k)))}<br><span class="cap">${esc(SLOT(k).label)}${P[holder(k)].where==="lien"?" · lien privé":""}</span>`:"—";
+  const blk=openBlockers().filter(b=>b.step===s.id), rv=reviewOpen().filter(t=>t.step===s.id);
+  return `<div class="dhead"><h2 id="dtitle">${esc(s.title)}</h2>${pill(st==="done"?"ok":st==="rework"?"warn":st==="current"?"info":"",st==="done"?"Fait":st==="rework"?"À revoir":st==="current"?"En cours":"Plus tard")}</div>
+  <p class="note">${esc(s.why)}</p>
+  <div class="meta5"><div><div class="k">Exécute</div><div class="v">${slotLine(s.exec)}</div></div><div><div class="k">Coordonne</div><div class="v">${slotLine(s.coord)}</div></div>
+   <div><div class="k">Valide</div><div class="v">${s.valid.filter(holder).length?s.valid.filter(holder).map(slotLine).join("<br>"):"Aucune validation"}</div></div>
+   <div><div class="k">Prérequis</div><div class="v">${s.prereq.length?s.prereq.map(p=>`<span class="${done(p)?"okc":"noc"}">${done(p)?"✓":"○"} ${esc(STEP(p).title)}</span>`).join("<br>"):"Aucun"}</div></div>
+   <div><div class="k">Ensuite</div><div class="v">${next.length?next.map(n=>esc(n.title)).join("<br>"):"—"}</div></div></div>
+  ${st==="blocked"?`<div class="callout info">${I.lock}<span>S'ouvre quand ${s.prereq.filter(p=>!done(p)).map(p=>esc(STEP(p).title)).join(" et ")} ${s.prereq.filter(p=>!done(p)).length>1?"sont faits":"est fait"}.</span></div>`:""}
+  ${blk.map(blockerRow).join("")}
+  ${rv.length?`<div class="callout warn">${I.warn}<span>À revoir après un changement : ${rv.map(t=>esc(t.text)+" ("+esc(nameOf(t.r))+")").join(" · ")}</span></div>`:""}
+  ${st==="blocked"?"":BODY[s.id]()}
+  ${st!=="blocked"&&isMember(me())&&!done("delivery")?blockerForm(s.id):""}`;
+}
+function blockerRow(b){
+  const mine=b.owner===me()||holder("project")===me();
+  return `<div class="callout bad">${I.stop}<span class="grow"><b>Bloqué</b> · ${esc(b.text)}<br><span>Débloque : <b>${esc(nameOf(b.owner))}</b> · prochaine action : ${esc(b.next)} · signalé le ${esc(b.at)}${b.by?" par "+esc(b.by):""}</span>
+   ${mine&&!b.auto?`<span class="btnrow" style="margin-top:8px"><button class="btn out sm" type="button" data-act="lift" data-id="${b.id}">Lever le blocage</button></span>`:""}${b.auto?`<span class="btnrow" style="margin-top:8px"><button class="btn out sm" type="button" data-act="tab" data-v="decisions">Choisir ce qui fait foi</button></span>`:""}</span></div>`;
+}
+function blockerForm(stepId){
+  if(S.form!=="blocker:"+stepId) return `<div><button class="btn ghost sm" type="button" data-act="form" data-v="blocker:${stepId}">Signaler un blocage</button></div>`;
+  return `<div class="card" style="background:var(--soft)"><h3>Signaler un blocage</h3>${ta("bText","Ce qui bloque","Ex. : l'autorisation de stationnement n'est pas arrivée",true)}
+   <div class="grid2"><div class="field"><label for="bOwner"><b>Qui débloque</b> *</label><select class="in" id="bOwner">${ROLE_ORDER.map(k=>`<option value="${k}" ${k==="charge"?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role)}</option>`).join("")}</select></div>
+   <div class="field"><label for="bNext"><b>Prochaine action</b> *</label><input class="in" id="bNext" placeholder="Ex. : relancer la mairie">${errOf("bNext")}</div></div>
+   <div class="btnrow"><button class="btn sm" type="button" data-act="addblocker" data-step="${stepId}">Signaler</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`;
+}
+
+/* Step bodies, shared by the app and the private links ------------------- */
+const waitRow=(r,todo)=>`<div class="wr">${av(r,true)}<span class="grow">En attente de <b>${esc(P[r].name)}</b>${P[r].where==="lien"?" (lien privé)":""} : ${esc(todo.toLowerCase())}</span></div>`;
+function waits(id){return actorsOf(id).filter(a=>a.r!==me()).map(a=>waitRow(a.r,a.todo)).join("");}
+const BODY={
+  org(){
+    const count={};SLOTS.forEach(s=>{const h=holder(s.k);if(h) count[h]=(count[h]||0)+1;});
+    const multi=Object.entries(count).filter(([,n])=>n>1);
+    const editable=can("project");
+    return `<div class="vers"><h3>Qui fait quoi</h3><div class="rows">${SLOTS.map(s=>{
+      const h=holder(s.k);
+      if(S.form==="role:"+s.k) return `<div class="row" style="grid-template-columns:minmax(0,1fr)"><div class="field"><label for="roleNew"><b>${esc(s.label)}</b></label><select class="in" id="roleNew">${s.pool.map(k=>`<option value="${k}" ${k===h?"selected":""}>${k?esc(P[k].name)+" · "+esc(P[k].role):"Pas de validation externe"}</option>`).join("")}</select><span class="src">Les étapes déjà commencées restent intactes ; l'ancien titulaire reste dans l'historique.</span><div class="btnrow"><button class="btn sm" type="button" data-act="rolesave" data-v="${s.k}">Enregistrer</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div></div>`;
+      return `<div class="row"><span><b>${esc(s.label)}</b> ${pill(s.kind==="Valide"?"act":s.kind==="Exécute"?"info":"",s.kind)}<br><span class="eyebrow" style="margin-top:4px">${h?av(h,true)+`<span><b>${esc(P[h].name)}</b> · ${esc(P[h].role)}${P[h].where==="lien"?" · lien privé":""}</span>`:"<span>Aucune</span>"}</span><span class="src">${esc(s.what)}</span></span>${editable?`<button class="btn ghost sm" type="button" data-act="form" data-v="role:${s.k}" aria-label="Changer ${esc(s.label)}">Changer</button>`:""}</div>`;}).join("")}</div>
+     ${multi.length?`<p class="note">${multi.map(([k,n])=>`${esc(P[k].name)} tient ${n} rôles`).join(" · ")} : chaque action dit à quel titre elle est faite.</p>`:""}
+     ${S.roleHist.length?`<ul class="hist">${S.roleHist.map(h=>`<li><span class="noc">↺</span><span>${esc(h.label)} : ${esc(h.from)} → <b>${esc(h.to)}</b> · ${esc(h.by)}, ${esc(h.at)}</span></li>`).join("")}</ul>`:""}</div>
+    <div class="vers"><h3>Liens privés</h3><span class="src">Chaque lien ne montre que la part de la personne : ni l'enveloppe, ni les échanges internes, ni les autres prestataires.</span><div class="rows">${Object.entries(S.links).map(([k,l])=>`<div class="row"><span><b>${esc(P[k].name)}</b> · ${esc(P[k].role)}<br><span class="src">${l.state==="active"?`Lien n° ${l.n} actif`:`Révoqué le ${esc(l.at)} · ce qu'il a déposé reste`}</span></span>${editable?`<span class="btnrow">${l.state==="active"?`<button class="btn ghost sm" type="button" data-act="revoke" data-v="${k}">Révoquer</button>`:""}<button class="btn out sm" type="button" data-act="regen" data-v="${k}">Nouveau lien</button></span>`:""}</div>`).join("")}</div></div>`;
+  },
+  kickoff(){
+    const t=S.tasks.filter(x=>x.origin==="Call de présentation du 15/10");
+    return `<div class="callout info"><span class="po">${I.spark} PO</span><span>PO a proposé des tâches tirées du compte rendu, chacune avec sa phrase. Lina Haddad en a modifié, supprimé et ajouté avant de les confirmer. Une phrase ambiguë n'est pas devenue une décision : elle est « à confirmer » dans Décisions.</span></div>
+    <div class="vers"><h3>Tâches confirmées depuis le compte rendu</h3><div class="rows">${t.map(taskRow).join("")}</div></div>`;
+  },
+  quote(){
+    const v=[...S.quote.versions].reverse(), last=lastOf(S.quote.versions), act=activeQuote(), member=isMember(me());
+    let action="";
+    if(last&&last.status==="deposited"&&can("production")) action=`<div class="vers"><h3>Vérifier le devis V${last.n}</h3><div class="checks">
+       <div class="row" style="border:0;padding:0"><span class="${last.amount<=ENVELOPE?"okc":"miss"}">${last.amount<=ENVELOPE?"✓":"✕"} Montant ${euro(last.amount)} ${last.amount<=ENVELOPE?"≤":">"} enveloppe ${euro(ENVELOPE)} <span class="src">calculé par le code</span></span></div>
+       <label><input type="checkbox" id="qc1">Délais compatibles avec le tournage du 23/10 et la livraison du 28/11</label>
+       <label><input type="checkbox" id="qc2">Postes complets : réalisation, équipe, matériel, régie, postproduction</label></div>${errOf("qc")}
+       ${ta("qComment","Commentaire","Obligatoire pour demander une modification")}
+       <div class="btnrow"><button class="btn" type="button" data-act="qsubmit">Soumettre à ${esc(nameOf(holder("budget")))}</button><button class="btn out" type="button" data-act="qdecide" data-v="changes">Demander une modification</button></div></div>`;
+    else if(last&&last.status==="submitted"&&can("budget")) action=`<div class="vers"><h3>Décider du devis V${last.n}</h3><p class="note">Vérifié par ${esc(last.checkedBy||"")} : délais et postes cochés, montant dans l'enveloppe.</p>
+       ${ta("qComment","Commentaire","Obligatoire pour une modification ou un refus")}
+       <div class="btnrow"><button class="btn" type="button" data-act="qdecide" data-v="approved">Valider le devis V${last.n}</button><button class="btn out" type="button" data-act="qdecide" data-v="changes">Demander une modification</button><button class="btn ghost" type="button" data-act="qdecide" data-v="rejected">Refuser</button></div></div>`;
+    else if(can("exec")&&actorsOf("quote").some(a=>a.r===me())) action=quoteDeposit();
+    const revBtn=act&&!S.quote.revision&&last.status==="approved"&&(can("project")||can("production"))?(S.form==="revision"?`<div class="card" style="background:var(--soft)"><h3>Demander une révision du devis</h3><p class="note">La V${act.n} reste la référence jusqu'à la validation de la nouvelle version.</p>${ta("revReason","Motif","Ex. : régie supplémentaire après le changement de lieu",true)}<div class="btnrow"><button class="btn sm" type="button" data-act="revision">Demander à Studio Ressac</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`:`<div><button class="btn ghost sm" type="button" data-act="form" data-v="revision">Demander une révision du devis</button></div>`):"";
+    return `${act?`<div class="callout ok">${I.ok}<span><b>Référence active : V${act.n} · ${euro(act.amount)}</b>, validée par ${esc(act.decidedBy)} le ${esc(act.decidedAt)}.${S.quote.versions.length>1?" Les versions précédentes restent ci-dessous.":""}</span></div>`:""}
+    ${S.quote.revision?`<div class="callout warn">${I.warn}<span><b>Révision demandée</b> par ${esc(S.quote.revision.by)} le ${esc(S.quote.revision.at)} : « ${esc(S.quote.revision.reason)} »</span></div>`:""}
+    ${v.length?`<div class="vers"><h3>Versions du devis</h3><div class="rows">${v.map(quoteRow).join("")}</div></div>`:""}
+    ${action||waits("quote")}${revBtn}`;
+  },
+  creative(){
+    const v=[...S.creative.versions].reverse(), ret=retainedCreative(), last=lastOf(S.creative.versions);
+    let action="";
+    ["creativeInt","creativeExt"].forEach(slot=>{const f=slot==="creativeInt"?"int":"ext";if(last&&last[f]==="pending"&&can(slot)) action+=`<div class="vers"><h3>Votre décision sur la V${last.n} · ${esc(SLOT(slot).label.toLowerCase())}</h3>${ta("cComment","Commentaire","Obligatoire pour demander des modifications")}<div class="btnrow"><button class="btn" type="button" data-act="cdecide" data-v="approved" data-slot="${slot}">Valider la V${last.n}</button><button class="btn out" type="button" data-act="cdecide" data-v="changes" data-slot="${slot}">Demander des modifications</button></div></div>`;});
+    if(!action&&can("director")&&actorsOf("creative").some(a=>a.r===me())) action=creativeDeposit();
+    const reqBtn=ret&&!S.creative.requested&&last===ret&&(can("creative")||can("project"))?(S.form==="crequest"?`<div class="card" style="background:var(--soft)"><h3>Demander une nouvelle version</h3><p class="note">La V${ret.n} reste retenue jusqu'à la validation de la nouvelle.</p>${ta("crReason","Motif","",true)}<div class="btnrow"><button class="btn sm" type="button" data-act="crequest">Demander à ${esc(nameOf(holder("director")))}</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`:`<div><button class="btn ghost sm" type="button" data-act="form" data-v="crequest">Demander une nouvelle version</button></div>`):"";
+    return `${ret?`<div class="callout ok">${I.ok}<span><b>Version retenue : V${ret.n}</b>${last!==ret||S.creative.requested?` · une nouvelle version devra être validée à nouveau, en interne${holder("creativeExt")?" et en externe":""} ; la V${ret.n} reste retenue d'ici là.`:"."}</span></div>`:""}
+    ${S.creative.requested?`<div class="callout warn">${I.warn}<span><b>Nouvelle version demandée</b> par ${esc(S.creative.requested.by)} le ${esc(S.creative.requested.at)} : « ${esc(S.creative.requested.reason)} »</span></div>`:""}
+    ${v.length?`<div class="vers"><h3>Versions</h3>${v.map(creativeCard).join("")}</div>`:""}
+    ${action||waits("creative")}${reqBtn}`;
+  },
+  prep(){
+    const t=S.tasks.filter(x=>x.step==="prep"&&(isMember(me())||x.r===me()));
+    return `<div class="vers"><h3>Checklist de préproduction</h3><span class="src">Tenue par Studio Ressac depuis son lien ; PDS ajoute les tâches propres au projet. Les tâches faites restent ici.</span><div class="rows">${t.map(taskRow).join("")}</div></div>
+    ${isMember(me())?(S.form==="task"?`<div class="card" style="background:var(--soft)"><h3>Ajouter une tâche</h3><div class="field"><label for="tText"><b>Tâche</b> *</label><input class="in" id="tText" placeholder="Ex. : réserver 15 figurants">${errOf("tText")}</div>
+      <div class="grid2"><div class="field"><label for="tR"><b>Qui la fait</b></label><select class="in" id="tR">${ROLE_ORDER.filter(k=>k!=="mgmt").map(k=>`<option value="${k}" ${k==="societe"?"selected":""}>${esc(P[k].name)}</option>`).join("")}</select></div><div class="field"><label for="tDue"><b>Échéance</b></label><input class="in" id="tDue" type="date" value="2026-10-21"></div></div>
+      <div class="btnrow"><button class="btn sm" type="button" data-act="addtask">Ajouter</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`:`<div><button class="btn ghost sm" type="button" data-act="form" data-v="task">Ajouter une tâche</button></div>`):""}`;
+  },
+  locs(){
+    const L=S.locs, choose=L.active==null&&can("project")&&L.cands.length;
+    return `${L.active!=null?`<div class="callout ok">${I.ok}<span><b>Lieu retenu : ${esc(L.cands[L.active].name)}</b> · le même pour tous les intervenants autorisés.</span></div>`:""}
+    ${L.cands.length?`<div class="locs">${L.cands.map((o,i)=>locCard(o,i,choose)).join("")}</div>`:""}
+    ${L.decisions.length?`<div class="vers"><h3>Décisions sur le lieu</h3><ul class="hist">${L.decisions.map(d=>`<li><span class="${d.replacedAt?"noc":"okc"}">${d.replacedAt?"↺":I.check}</span><span>${esc(d.at)} · ${esc(d.by)} retient <b>${esc(L.cands[d.i].name)}</b>${d.reason?` : « ${esc(d.reason)} »`:""}${d.replacedAt?` · <span class="t3">remplacé le ${esc(d.replacedAt)}</span>`:""}</span></li>`).join("")}</ul></div>`:""}
+    ${L.active!=null&&can("project")?replaceForm():""}
+    ${can("exec")?locForm():waits("locs")}`;
+  },
+  ready(){
+    const rows=synthesis();
+    if(S.ready) return `<div class="callout ok">${I.ok}<span><b>Préparation validée — tournage à venir.</b> Confirmée par ${esc(S.ready.by)} le ${esc(S.ready.at)}${S.ready.forced?` malgré : « ${esc(S.ready.forced)} »`:""}. La synthèse ci-dessous est gardée telle qu'elle a été validée.</span></div>${synTable(S.ready.rows)}`;
+    const missing=rows.filter(r=>!r.ok);
+    return `<p class="note">Calculée à partir de ce qui est réellement validé : une information « à confirmer » ne compte jamais comme prête.</p>${synTable(rows)}
+    ${can("project")?`<div class="vers">${missing.length?`<div class="callout warn">${I.warn}<span>${missing.length} point${missing.length>1?"s":""} ne ${missing.length>1?"sont":"est"} pas prêt${missing.length>1?"s":""}. Vous pouvez confirmer quand même, en connaissance de cause et avec un motif.</span></div>
+      <div class="checks"><label><input type="checkbox" id="rForce">Je confirme la préparation malgré ${missing.map(m=>esc(m.k.toLowerCase())).join(", ")}</label></div>${ta("rReason","Motif","Ex. : autorisation promise par la mairie pour le 22/10",true)}${errOf("rForce")}`:""}
+      <div class="btnrow"><button class="btn" type="button" data-act="ready">Confirmer : préparation validée</button></div></div>`:waits("ready")}`;
+  },
+  shoot(){
+    return S.shoot?`<div class="callout ok">${I.ok}<span><b>Tournage terminé — fichiers attendus.</b> Confirmé par ${esc(S.shoot.by)} le ${esc(S.shoot.at)}.</span></div>`:`<p class="note">Prévu le Ven. 23/10/2026 à l'${esc(S.locs.active!=null?S.locs.cands[S.locs.active].name:"lieu retenu")}.</p>${can("project")?`<div class="btnrow"><button class="btn" type="button" data-act="shoot">Confirmer que le tournage a eu lieu</button></div>`:waits("shoot")}`;
+  },
+  rushes(){
+    const R=S.rushes;
+    const rows=[["Lien des rushes",R.link?`<a href="#" data-act="nolink">${esc(R.link.url)}</a> <span class="src">· transmis par ${esc(R.link.by)} le ${esc(R.link.at)}</span>`:"Attendu de Studio Ressac"],
+      ["Accès vérifié",R.verified?`Oui · ${esc(R.verified)}`:"Pas encore"],["Rushes reçus",R.received?`Oui · ${esc(R.received)}`:"Pas encore"],
+      ["Transfert à la postproduction",`Studio Ressac, montage · ${pill(R.transfer==="received"?"ok":R.transfer==="sent"?"info":"",R.transfer==="received"?"Reçu":R.transfer==="sent"?"Envoyé":"À envoyer")}`]];
+    let act="";
+    if(R.link&&can("production")){if(!R.verified) act=`<button class="btn" type="button" data-act="rverify">L'accès fonctionne</button>`;else if(!R.received) act=`<button class="btn" type="button" data-act="rreceive">Marquer les rushes reçus</button>`;else if(R.transfer==="to_send") act=`<button class="btn" type="button" data-act="rtransfer">Transférer au montage</button>`;}
+    if(can("exec")){if(!R.link) act=`<div class="field"><label for="rLink"><b>Lien de récupération des rushes</b> *</label><input class="in" id="rLink" placeholder="https://…">${errOf("rLink")}</div><div class="btnrow"><button class="btn" type="button" data-act="rlink">Transmettre le lien</button><button class="btn ghost sm" type="button" data-act="rsample">Utiliser un lien d'exemple</button></div>`;else if(R.transfer==="sent") act=`<button class="btn" type="button" data-act="rgot">Bien reçu pour le montage</button>`;}
+    return `<dl class="kv">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>${act?`<div class="btnrow">${act}</div>`:waits("rushes")}`;
+  },
+  post(){
+    const v=[...S.post.versions].reverse(), last=lastOf(S.post.versions);
+    let action="";
+    ["creativeInt","creativeExt"].forEach(slot=>{const f=slot==="creativeInt"?"int":"ext";if(last&&last.status==="review"&&last[f]==="pending"&&can(slot)) action+=`<div class="vers"><h3>Votre retour sur le montage V${last.n}</h3>${ta("pComment","Retours","Obligatoire pour demander des modifications")}<div class="btnrow"><button class="btn" type="button" data-act="pdecide" data-v="approved" data-slot="${slot}">Valider le montage V${last.n}</button><button class="btn out" type="button" data-act="pdecide" data-v="changes" data-slot="${slot}">Demander des modifications</button></div></div>`;});
+    if(!action&&can("exec")&&actorsOf("post").some(a=>a.r===me())) action=`<div class="field"><label for="pLink"><b>Lien du montage V${last?last.n+1:1}</b> *</label><input class="in" id="pLink" placeholder="https://…">${errOf("pLink")}</div><div class="btnrow"><button class="btn" type="button" data-act="plink">Déposer le montage V${last?last.n+1:1}</button><button class="btn ghost sm" type="button" data-act="psample">Utiliser un lien d'exemple</button></div>`;
+    return `${v.length?`<div class="vers"><h3>Versions du montage</h3>${v.map(postCard).join("")}</div>`:""}${action||waits("post")}`;
+  },
+  delivery(){
+    const D=S.delivery, ok=[...S.post.versions].reverse().find(x=>x.status==="approved");
+    let act="";
+    if(can("exec")&&!D.link) act=`<p class="note">La version validée : montage V${ok?ok.n:"—"}.</p><div class="btnrow"><button class="btn" type="button" data-act="dlink">Déposer le fichier final du montage V${ok?ok.n:""}</button></div>`;
+    else if(can("project")&&D.link&&!D.confirmed) act=`<div class="field"><label for="dTo"><b>Destinataire de la livraison</b></label><select class="in" id="dTo"><option>Lina Haddad, pour la Distribution</option><option>Nadia Benali, pour les Activations</option></select></div><div class="btnrow"><button class="btn" type="button" data-act="dconfirm">Confirmer la livraison</button></div>`;
+    else if(can("project")&&D.confirmed&&!D.closed) act=`<div class="btnrow"><button class="btn" type="button" data-act="dclose">Clôturer la production</button></div>`;
+    return `<dl class="kv"><dt>Fichier final</dt><dd>${D.link?`${esc(D.link.name)} <span class="src">· déposé par ${esc(D.link.by)} le ${esc(D.link.at)}</span>`:"Attendu"}</dd>
+      <dt>Validé par</dt><dd>${ok?esc(ok.validatedBy):"—"}</dd><dt>Livré à</dt><dd>${D.confirmed?`${esc(D.confirmed.to)} · le ${esc(D.confirmed.at)}`:"—"}</dd></dl>
+    ${D.closed?`<div class="callout ok">${I.ok}<span><b>Production clôturée</b> le ${esc(D.closed.at)} par ${esc(D.closed.by)}. La synthèse avant tournage et la version livrée restent consultables.</span></div>`:""}${act||waits("delivery")}`;
+  }
+};
+function taskRow(t){
+  const mine=t.r===me()&&t.status!=="done";
+  return `<div class="row"><span><b class="${t.status==="done"?"strike":""}">${esc(t.text)}</b><br><span class="src">${esc(nameOf(t.r))}${t.due?" · pour le "+esc(t.due):""} · origine : ${esc(t.origin)}${t.quote?" « "+esc(t.quote)+" »":""}${t.status==="done"?" · faite le "+esc(t.doneAt):""}</span></span>
+   <span class="btnrow">${t.status==="done"?pill("ok","Faite"):pill(t.origin&&t.origin.startsWith("Changement")?"warn":"",t.origin&&t.origin.startsWith("Changement")?"À revoir":"À faire")}${mine?`<button class="btn out sm" type="button" data-act="taskdone" data-id="${t.id}">Fait</button>`:""}</span></div>`;
+}
+const QSTATUS={deposited:["info","Déposé, à vérifier"],submitted:["info","Vérifié, à valider"],approved:["ok","Validé"],changes:["warn","Révision demandée"],rejected:["bad","Refusé"],replaced:["","Remplacé"]};
+function quoteRow(q){
+  const [tone,l]=q.status==="approved"&&activeQuote()!==q?QSTATUS.replaced:QSTATUS[q.status];
+  return `<div class="row"><span><b>V${q.n} · ${euro(q.amount)}</b> · ${esc(q.file)}<br><span class="src">Déposé par ${esc(q.by)} le ${esc(q.at)}${q.decidedAt?` · ${q.status==="approved"?"validé":"décidé"} par ${esc(q.decidedBy)} le ${esc(q.decidedAt)}`:""}</span>
+   ${q.comments.map(c=>`<span class="src">${esc(c.by)} : « ${esc(c.text)} »</span>`).join("<br>")}</span><span class="btnrow">${pill(tone,l)}<button class="btn ghost sm" type="button" data-act="open" data-v="${esc(q.file)}">Voir le devis</button></span></div>`;
+}
+function quoteDeposit(){
+  const n=S.quote.versions.length+1;
+  return `<div class="vers"><h3>Déposer le devis V${n}</h3>${S.quote.revision?`<p class="note">PDS demande une révision : « ${esc(S.quote.revision.reason)} »</p>`:""}
+   <div class="grid2"><div class="field"><label for="qAmount"><b>Montant total</b> *</label><input class="in" id="qAmount" inputmode="numeric" placeholder="En euros HT">${errOf("qAmount")}</div><div class="field"><label for="qFile"><b>Devis (PDF)</b> *</label><input class="in" id="qFile" placeholder="Devis_Ressac_Neons_V${n}.pdf">${errOf("qFile")}</div></div>
+   ${ta("qNote","Note pour PDS","")}<div class="btnrow"><button class="btn" type="button" data-act="qdeposit">Déposer le devis V${n}</button><button class="btn ghost sm" type="button" data-act="qsample">Remplir avec un exemple</button></div></div>`;
+}
+const CSTATE={pending:["info","À valider"],approved:["ok","Validée"],changes:["warn","Modifications demandées"],none:["","Pas de validation externe"]};
+function creativeCard(c){
+  const ret=retainedCreative()===c;
+  return `<div class="card" style="padding:14px;gap:8px"><div class="dhead"><h3>V${c.n}${ret?" · retenue":""}</h3><span class="cap">Déposée par ${esc(c.by)} le ${esc(c.at)}</span></div>
+   <div class="rows">${c.pieces.map(([k,f])=>`<div class="row"><span><b>${esc(k)}</b> · ${esc(f)}</span><button class="btn ghost sm" type="button" data-act="open" data-v="${esc(f)}">Ouvrir</button></div>`).join("")}</div>
+   <div class="strip">${pill(CSTATE[c.int][0],"Interne · "+CSTATE[c.int][1])}${pill(CSTATE[c.ext][0],c.ext==="none"?CSTATE.none[1]:"Externe · "+CSTATE[c.ext][1])}</div>
+   ${c.comments.map(x=>`<span class="src">${esc(x.by)} (${esc(x.as)}) : « ${esc(x.text)} »</span>`).join("")}</div>`;
+}
+function creativeDeposit(){
+  const n=S.creative.versions.length+1;
+  return `<div class="vers"><h3>Déposer la proposition V${n}</h3>${S.creative.requested?`<p class="note">PDS demande une nouvelle version : « ${esc(S.creative.requested.reason)} »</p>`:""}
+   <div class="rows">${["Traitement","Moodboard","Découpage technique"].map(k=>`<div class="row"><span><b>${k}</b> · ${S.cdraft?esc(`${k.split(" ")[0]}_Neons_V${n}.pdf`):"<span class=\"src\">aucun fichier</span>"}</span></div>`).join("")}</div>
+   <div class="btnrow"><button class="btn" type="button" data-act="cdeposit">Déposer la V${n}</button>${S.cdraft?"":`<button class="btn ghost sm" type="button" data-act="csample">Joindre les fichiers d'exemple</button>`}</div>${errOf("cdeposit")}</div>`;
+}
+function locCard(o,i,choose){
+  const L=S.locs, st=i===L.active?["ok","Retenu"]:o.replaced?["","Remplacé"]:L.active!=null||o.notRetained?["","Non retenu"]:["info","Proposé"];
+  return `<div class="loc ${i===L.active?"active":""}"><div class="ph ${o.ph}">Photos (4)</div><div class="bd"><div class="dhead"><b>${esc(o.name)}</b>${pill(st[0],st[1])}</div>
+   <span class="cap">${esc(o.addr)}</span><span>${euro(o.price)} la journée · ${esc(o.avail)}</span><span class="cap">${esc(o.constraints)}</span>
+   ${o.replaced?`<span class="cap">Remplacé le ${esc(o.replaced.at)} : « ${esc(o.replaced.reason)} »</span>`:""}<span class="src">Proposé par ${esc(o.by)}</span>
+   ${choose?`<button class="btn sm" type="button" data-act="retain" data-i="${i}">Retenir ce lieu</button>`:""}
+   ${can("exec")&&i!==L.active&&!o.replaced?`<button class="btn ghost sm" type="button" data-act="form" data-v="loc:${i}">Modifier</button>`:""}</div></div>`;
+}
+function locForm(){
+  const f=S.form||"", edit=f.startsWith("loc:")?S.locs.cands[+f.split(":")[1]]:null;
+  if(!f.startsWith("loc")) return `<div class="btnrow"><button class="btn out" type="button" data-act="form" data-v="locnew">Proposer un lieu</button></div>`;
+  const v=k=>edit?edit[k]:"";
+  return `<div class="card" style="background:var(--soft)"><h3>${edit?"Modifier "+esc(edit.name):"Proposer un lieu"}</h3>
+   <div class="grid2"><div class="field"><label for="lName"><b>Nom</b> *</label><input class="in" id="lName" value="${esc(v("name"))}">${errOf("lName")}</div><div class="field"><label for="lAddr"><b>Adresse</b></label><input class="in" id="lAddr" value="${esc(v("addr"))}"></div>
+   <div class="field"><label for="lPrice"><b>Tarif à la journée</b></label><input class="in" id="lPrice" inputmode="numeric" value="${edit?edit.price:""}"></div><div class="field"><label for="lAvail"><b>Disponibilités</b></label><input class="in" id="lAvail" value="${esc(v("avail"))}"></div></div>
+   <div class="field"><label for="lCons"><b>Contraintes techniques et logistiques</b></label><input class="in" id="lCons" value="${esc(v("constraints"))}"></div>
+   <div class="btnrow"><button class="btn sm" type="button" data-act="locsave" data-v="${edit?f.split(":")[1]:""}">${edit?"Enregistrer":"Proposer ce lieu"}</button>${edit?"":`<button class="btn ghost sm" type="button" data-act="locsample">Remplir avec un exemple</button>`}<button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`;
+}
+const REVIEW=[["creative","Découpage et scénario","director"],["gear","Matériel","exec"],["plan","Planning et feuille de service","exec"],["budget","Budget : révision du devis","exec"]];
+function replaceForm(){
+  if(S.form!=="replace") return `<div><button class="btn out sm" type="button" data-act="form" data-v="replace">Remplacer le lieu retenu</button></div>`;
+  const L=S.locs, others=L.cands.map((o,i)=>[o,i]).filter(([o,i])=>i!==L.active&&!o.replaced);
+  return `<div class="card" style="background:var(--soft)"><h3>Remplacer ${esc(L.cands[L.active].name)}</h3><p class="note">Une nouvelle décision : l'ancienne reste dans l'historique, avec sa validation. Le reste du projet continue.</p>
+   <div class="field"><label for="rpNew"><b>Nouveau lieu</b> *</label><select class="in" id="rpNew">${others.map(([o,i])=>`<option value="${i}">${esc(o.name)} · ${euro(o.price)}</option>`).join("")}</select></div>
+   ${ta("rpReason","Motif","Ex. : la copropriété refuse le tournage sur le toit",true)}
+   <div class="field"><b>Ce qu'il faut revoir</b><span class="src">Choisi par vous : chaque case crée une tâche pour la bonne personne.</span><div class="checks">${REVIEW.map(([k,l,slot])=>`<label><input type="checkbox" id="rv-${k}" checked>${esc(l)} <span class="src">→ ${esc(nameOf(holder(slot)))}</span></label>`).join("")}</div></div>
+   <div class="btnrow"><button class="btn sm" type="button" data-act="replace">Remplacer le lieu</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`;
+}
+function synthesis(){
+  const q=activeQuote(), c=retainedCreative(), L=S.locs, task=t=>S.tasks.find(x=>x.text===t);
+  const sched=S.decisions.find(d=>d.key==="schedule"&&!d.discarded&&(d.kind==="decided"));
+  const blk=openBlockers(), conf=S.decisions.filter(d=>!d.discarded&&!d.group&&d.kind==="confirm");
+  const T=(t,label)=>{const x=task(t);return {k:label,v:x?(x.status==="done"?`Fait · ${x.doneAt}`:`Pas encore · ${nameOf(x.r)}`):"Aucune tâche",ok:!!x&&x.status==="done"};};
+  return [
+    {k:"Lieu retenu",v:L.active!=null?L.cands[L.active].name:"Aucun lieu retenu",ok:L.active!=null},
+    {k:"Date et horaires",v:sched?`${sched.text} · décidé par ${sched.confirmedBy||sched.by}`:"Aucune décision validée",ok:!!sched},
+    T("Équipe confirmée","Équipe confirmée"),T("Planning envoyé","Planning et feuille de service"),T("Matériel réservé","Matériel"),
+    {k:"Devis",v:q?`V${q.n} validé · ${euro(q.amount)}${S.quote.revision||lastOf(S.quote.versions)!==q?" · révision en cours":""}`:"Aucun devis validé",ok:!!q&&!S.quote.revision&&lastOf(S.quote.versions)===q},
+    {k:"Proposition de réalisation",v:c?`V${c.n} validée${lastOf(S.creative.versions)!==c||S.creative.requested?" · nouvelle version en cours":""}`:"Pas encore validée",ok:!!c&&lastOf(S.creative.versions)===c&&!S.creative.requested},
+    {k:"Blocages actifs",v:blk.length?blk.map(b=>b.text).join(" · "):"Aucun",ok:!blk.length},
+    {k:"Informations à confirmer",v:conf.length?conf.map(d=>d.text).join(" · "):"Aucune",ok:!conf.length}
+  ];
+}
+function synTable(rows){return `<div class="rows syn">${rows.map(r=>`<div class="row"><span><b>${esc(r.k)}</b><br><span class="${r.ok?"":"miss"}">${esc(r.v)}</span></span>${pill(r.ok?"ok":"bad",r.ok?"Prêt":"Pas prêt")}</div>`).join("")}</div>`;}
+const PSTATE={review:["info","En revue"],changes:["warn","Modifications demandées"],approved:["ok","Validée"]};
+function postCard(v){
+  return `<div class="card" style="padding:14px;gap:8px"><div class="dhead"><h3>Montage V${v.n}</h3>${pill(PSTATE[v.status][0],PSTATE[v.status][1])}</div>
+   <span><a href="#" data-act="nolink">${esc(v.url)}</a> <span class="src">· déposé par ${esc(v.by)} le ${esc(v.at)}</span></span>
+   <div class="strip">${pill(CSTATE[v.int][0],"Interne · "+CSTATE[v.int][1])}${pill(CSTATE[v.ext][0],v.ext==="none"?CSTATE.none[1]:"Externe · "+CSTATE[v.ext][1])}</div>
+   ${v.comments.map(x=>`<span class="src">${esc(x.by)} : « ${esc(x.text)} »</span>`).join("")}</div>`;
+}
+
+/* Decisions (Ibé § 12): information, to confirm, pending, decided — never mixed. */
+const KIND={info:["","Information"],confirm:["warn","À confirmer"],pending:["info","En attente de décision"],decided:["ok","Décidé"]};
+function decRow(d,inContra){
+  const canAct=isMember(me())&&!d.discarded;
+  return `<div class="row"><span><b class="${d.discarded?"strike":""}">${esc(d.text)}</b><br><span class="src">${esc(d.source)} · noté par ${esc(d.by)} le ${esc(d.at)} · ${esc(STEP(d.step).title)}${d.confirmedBy?` · confirmé par ${esc(d.confirmedBy)} le ${esc(d.confirmedAt)}`:""}${d.discarded?" · écarté":""}${d.foi?" · fait foi":""}</span></span>
+   <span class="btnrow">${d.discarded?pill("","Écartée"):pill(KIND[d.kind][0],KIND[d.kind][1])}${inContra&&can("project")?`<button class="btn out sm" type="button" data-act="foi" data-id="${d.id}">Fait foi</button>`:""}
+   ${!inContra&&canAct&&(d.kind==="confirm"||d.kind==="pending")&&can("project")?`<button class="btn out sm" type="button" data-act="confirmdec" data-id="${d.id}">${d.kind==="pending"?"Décider":"Confirmer"}</button><button class="btn ghost sm" type="button" data-act="discard" data-id="${d.id}">Écarter</button>`:""}</span></div>`;
+}
+function decisionsView(){
+  const contra=contradictions(), inC=new Set(contra.flat().map(d=>d.id));
+  const live=S.decisions.filter(d=>!inC.has(d.id));
+  const group=(k,t)=>{const l=live.filter(d=>d.kind===k&&!d.discarded);return l.length?`<div class="vers"><h3>${t}</h3><div class="rows dec">${l.map(d=>decRow(d,false)).join("")}</div></div>`:"";};
+  const old=live.filter(d=>d.discarded);
+  return `<section class="card"><p class="note">Ce qui se dit au téléphone, sur WhatsApp ou par e-mail est noté ici avec sa source. Une information non confirmée ne fait jamais avancer une étape.</p>
+   ${contra.map(l=>`<div class="vers"><h3>Contradiction à trancher</h3><div class="contra rows dec">${l.map(d=>decRow(d,true)).join("")}</div><span class="src">Les deux restent ; celle qui fait foi est visible partout, l'autre reste dans l'historique. Tant que rien n'est tranché, c'est un blocage.</span></div>`).join("")}
+   ${group("pending","En attente de décision")}${group("confirm","À confirmer")}${group("decided","Décidé")}${group("info","Informations")}
+   ${old.length?`<div class="vers"><h3>Écartées ou remplacées</h3><div class="rows dec">${old.map(d=>decRow(d,false)).join("")}</div></div>`:""}
+   ${isMember(me())?decisionForm():""}</section>`;
+}
+function decisionForm(){
+  if(S.form!=="decision") return `<div><button class="btn out" type="button" data-act="form" data-v="decision">Noter une information</button></div>`;
+  return `<div class="card" style="background:var(--soft)"><h3>Noter une information</h3>
+   <div class="field"><label for="dText"><b>Ce qui a été dit</b> *</label><input class="in" id="dText" placeholder="Ex. : Mona Lys disponible jusqu'à 15 h le 23/10">${errOf("dText")}</div>
+   <div class="grid2"><div class="field"><label for="dSource"><b>Source</b></label><select class="in" id="dSource">${["Appel","WhatsApp","E-mail","Réunion","Autre"].map(x=>`<option>${x}</option>`).join("")}</select></div>
+   <div class="field"><label for="dKind"><b>Statut</b></label><select class="in" id="dKind">${Object.entries(KIND).map(([k,[,l]])=>`<option value="${k}" ${k==="confirm"?"selected":""}>${l}</option>`).join("")}</select></div>
+   <div class="field"><label for="dStep"><b>Étape concernée</b></label><select class="in" id="dStep">${STEPS.map(s=>`<option value="${s.id}" ${s.id==="ready"?"selected":""}>${esc(s.title)}</option>`).join("")}</select></div>
+   <div class="field"><label for="dVs"><b>Contredit</b></label><select class="in" id="dVs"><option value="">Rien</option>${S.decisions.filter(d=>!d.discarded).map(d=>`<option value="${d.id}">${esc(d.text)}</option>`).join("")}</select></div></div>
+   <div class="btnrow"><button class="btn sm" type="button" data-act="adddec">Noter</button><button class="btn ghost sm" type="button" data-act="form" data-v="">Annuler</button></div></div>`;
+}
+function tasksView(){
+  const f=S.taskFilter||"open", l=S.tasks.filter(t=>f==="all"||(f==="open"?t.status!=="done":t.status==="done"));
+  return `<section class="card"><div class="strip">${[["open","À faire"],["done","Terminées"],["all","Toutes"]].map(([k,t])=>`<button class="chipbtn" type="button" data-act="tfilter" data-v="${k}" aria-pressed="${f===k}" style="${f===k?"border-color:var(--text)":""}">${t}</button>`).join("")}</div>
+   ${l.length?`<div class="rows">${l.map(t=>taskRow(t).replace('<span><b',`<span><span class="cap">${esc(STEP(t.step).title)}</span><br><b`)).join("")}</div>`:`<p class="note">Aucune tâche ici.</p>`}</section>`;
+}
+function historyView(){return `<section class="card"><p class="note">Tout ce qui a changé : rôles, versions, décisions, lieux, blocages. Rien ne s'efface.</p><ul class="hist">${S.log.map(e=>`<li><span class="noc">•</span><span>${esc(e.at)} · <b>${esc(e.who)}</b> · ${esc(e.text)}</span></li>`).join("")}</ul></section>`;}
+
+/* Private link page: only the person's part (Ibé § 8). */
+function portal(){
+  const k=me(), l=S.links[k];
+  if(l.state!=="active") return `<div class="portal"><div class="pwrap"><section class="card"><h1 class="h1">Ce lien n'est plus valable</h1><p class="note">Demandez un nouveau lien à Lina Haddad. Ce que vous avez déjà déposé est conservé chez PDS.</p></section></div></div>`;
+  const acts=allActions().filter(a=>a.r===k);
+  const mineSteps=[...new Set(acts.map(a=>a.step))];
+  const mySteps=k==="societe"?["quote","locs","prep","rushes","post","delivery"]:k==="realExt"?["creative"]:["creative","post"];
+  const follow=mySteps.filter(s=>!mineSteps.includes(s)&&statusOf(s)!=="blocked");
+  return `<div class="portal"><header class="pbar"><span style="display:flex;align-items:center;gap:10px"><span class="brand" style="margin:0">PDS</span><b>Clip « Néons » · ${esc(P[k].name)}</b></span><span class="lockline">${I.lock} Lien privé ${P[k].link}… · sans compte</span></header>
+  <div class="pwrap"><div><p class="cap">Néons · Mona Lys · ${esc(P[k].role)}</p><h1 class="h1">${acts.length?"Ce que PDS attend de vous":"Rien à faire pour l'instant"}</h1></div>
+  ${S.flash?flash():""}
+  ${k==="societe"&&S.ready?`<div class="callout ok">${I.ok}<span><b>Préparation validée — tournage à venir.</b> Confirmée par ${esc(S.ready.by)} le ${esc(S.ready.at)} · lieu : ${esc(S.locs.cands[S.locs.active].name)}.</span></div>`:""}
+  ${mineSteps.map(s=>`<section class="card"><div class="dhead"><h2>${esc(STEP(s).title)}</h2><span class="pill info">À vous</span></div>${acts.filter(a=>a.step===s).map(a=>`<p class="note"><b>${esc(a.todo)}</b>${a.due?" · "+esc(a.due):""}</p>`).join("")}${BODY[s]()}</section>`).join("")}
+  ${follow.map(s=>`<section class="card"><div class="dhead"><h2>${esc(STEP(s).title)}</h2>${pill(statusOf(s)==="done"?"ok":"",statusOf(s)==="done"?"Fait":"Suivi")}</div>${BODY[s]()}</section>`).join("")}
+  <section class="card"><h2>Votre contact chez PDS</h2><div class="eyebrow">${av("cp",true)}<span><b>Lina Haddad</b> · Cheffe de projet</span></div></section></div></div>`;
+}
+
+/* Actions ------------------------------------------------------------------ */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.hidden=true;},3600);}
+const val=i=>{const n=document.getElementById(i);return n?n.value.trim():"";};
+const need=(i,msg)=>{if(val(i)) return true;S.err[i]=msg;return false;};
+function after(title){
+  const nx=allActions().filter(a=>a.r!==me()).slice(0,3);
+  S.flash={title,lines:nx.map(a=>`Ensuite : <b>${esc(P[a.r].name)}</b> · ${esc(a.todo.toLowerCase())} <span class="t3">(${esc(STEP(a.step).title)})</span>`)};
+  toast(title+".");
+}
+const closeReview=step=>S.tasks.filter(t=>t.step===step&&t.origin.startsWith("Changement")&&t.status!=="done").forEach(t=>{t.status="done";t.doneAt=stamp();});
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-act]");if(!el) return;
+  const a=el.dataset.act, who=P[me()].name;
+  if(a==="nolink"){e.preventDefault();toast("Lien externe, non ouvert dans le proto.");return;}
+  S.err={};
+  switch(a){
+    case "tab": S.tab=el.dataset.v; S.form=null; break;
+    case "go": S.tab="parcours"; S.sel=el.dataset.step; S.form=null; S.flash=null; window.scrollTo({top:0}); break;
+    case "unflash": S.flash=null; break;
+    case "form": S.form=el.dataset.v||null; S.cdraft=false; break;
+    case "open": toast(`Ouverture de ${el.dataset.v}.`); return;
+    case "tfilter": S.taskFilter=el.dataset.v; break;
+    case "rolesave": {const k=el.dataset.v,s=SLOT(k),from=holder(k),to=val("roleNew")||null;
+      if(to!==from){S.roles[k]=to;S.roleHist.unshift({label:s.label,from:nameOf(from),to:to?nameOf(to):"Aucune",by:who,at:stamp()});log(`${s.label} : ${nameOf(from)} → ${to?nameOf(to):"aucune"}`);
+        S.creative.versions.concat(S.post.versions).forEach(v=>{if(k==="creativeExt"&&!to&&v.ext==="pending") v.ext="none";});toast(`${s.label} : ${to?nameOf(to):"aucune"}.`);}
+      S.form=null;break;}
+    case "revoke": {const l=S.links[el.dataset.v];l.state="revoked";l.at=stamp();log(`Lien de ${P[el.dataset.v].name} révoqué`);toast("Lien révoqué. Ce qui a été déposé reste.");break;}
+    case "regen": {const l=S.links[el.dataset.v];l.state="active";l.n++;log(`Nouveau lien pour ${P[el.dataset.v].name}`);S.flash={title:`Nouveau lien pour ${P[el.dataset.v].name}`,lines:[`Affiché une seule fois : <span class="linkbox"><code>https://pds-os.app${P[el.dataset.v].link}${Math.random().toString(36).slice(2,10)}</code></span>`,"L'ancien lien ne fonctionne plus."]};break;}
+    case "taskdone": {const t=S.tasks.find(x=>x.id===el.dataset.id);t.status="done";t.doneAt=stamp();log(`Tâche faite : ${t.text}`);after("Tâche faite");break;}
+    case "addtask": {if(!need("tText","Dites ce qu'il faut faire.")) break;const d=val("tDue");S.tasks.push({id:id("t"),step:"prep",text:val("tText"),r:val("tR"),due:d?d.slice(8)+"/"+d.slice(5,7):null,status:"todo",origin:`Saisie par ${who}`});log(`Tâche ajoutée : ${val("tText")}`);S.form=null;toast("Tâche ajoutée.");break;}
+    case "addblocker": {if(!need("bText","Dites ce qui bloque.")|!need("bNext","Dites la prochaine action.")) break;S.blockers.push({id:id("b"),text:val("bText"),step:el.dataset.step,owner:val("bOwner"),next:val("bNext"),open:true,at:stamp(),by:who});log(`Blocage signalé : ${val("bText")}`);S.form=null;after("Blocage signalé");break;}
+    case "lift": {const b=S.blockers.find(x=>x.id===el.dataset.id);b.open=false;b.liftedAt=stamp();log(`Blocage levé : ${b.text}`);after("Blocage levé");break;}
+    case "qsample": {document.getElementById("qAmount").value=S.quote.revision?"17200":S.quote.versions.length?"16900":"16400";document.getElementById("qFile").value=`Devis_Ressac_Neons_V${S.quote.versions.length+1}.pdf`;const n=document.getElementById("qNote");if(n) n.value=S.quote.revision?"Régie et accès camion ajoutés pour l'entrepôt.":"Réalisation, équipe, matériel, régie et montage compris.";return;}
+    case "qdeposit": {const amt=parseInt(val("qAmount").replace(/\D/g,""),10);if(!amt){S.err.qAmount="Un montant en euros, par exemple 16 400.";}if(!need("qFile","Joignez le devis.")||!amt) break;
+      const n=S.quote.versions.length+1;S.quote.versions.push({n,amount:amt,file:val("qFile"),by:who,at:stamp(),status:"deposited",comments:val("qNote")?[{by:who,text:val("qNote")}]:[]});S.quote.revision=null;closeReview("quote");log(`Devis V${n} déposé : ${euro(amt)}`);after(`Devis V${n} déposé`);break;}
+    case "qsubmit": {const c1=document.getElementById("qc1").checked,c2=document.getElementById("qc2").checked;if(!c1||!c2){S.err.qc="Cochez ce que vous avez vérifié, ou demandez une modification.";break;}
+      const q=lastOf(S.quote.versions);q.status="submitted";q.checkedBy=who;log(`Devis V${q.n} vérifié et soumis à ${nameOf(holder("budget"))}`);after(`Devis V${q.n} soumis`);break;}
+    case "qdecide": {const q=lastOf(S.quote.versions),v=el.dataset.v,c=val("qComment");if(v!=="approved"&&!c){S.err.qComment="Dites ce qui doit changer : Studio Ressac le lira.";break;}
+      q.status=v;q.decidedBy=who;q.decidedAt=stamp();if(c) q.comments.push({by:who,text:c});log(`Devis V${q.n} : ${QSTATUS[v][1].toLowerCase()}${c?" · « "+c+" »":""}`);after(v==="approved"?`Devis V${q.n} validé`:v==="rejected"?`Devis V${q.n} refusé`:`Révision demandée sur le devis V${q.n}`);break;}
+    case "revision": {if(!need("revReason","Dites pourquoi.")) break;S.quote.revision={reason:val("revReason"),by:who,at:stamp()};log(`Révision du devis demandée : ${val("revReason")}`);S.form=null;after("Révision du devis demandée");break;}
+    case "csample": S.cdraft=true; break;
+    case "cdeposit": {if(!S.cdraft){S.err.cdeposit="Joignez au moins le traitement et le découpage.";break;}const n=S.creative.versions.length+1;
+      S.creative.versions.push({n,by:who,at:stamp(),pieces:[["Traitement",`Traitement_Neons_V${n}.pdf`],["Moodboard",`Moodboard_Neons_V${n}.pdf`],["Découpage technique",`Decoupage_Neons_V${n}.pdf`]],int:"pending",ext:holder("creativeExt")?"pending":"none",comments:[]});
+      S.creative.requested=null;S.cdraft=false;closeReview("creative");log(`Proposition V${n} déposée`);after(`Proposition V${n} déposée`);break;}
+    case "cdecide": {const c=lastOf(S.creative.versions),f=el.dataset.slot==="creativeInt"?"int":"ext",v=el.dataset.v,t=val("cComment");if(v==="changes"&&!t){S.err.cComment="Dites ce qui doit changer.";break;}
+      c[f]=v;if(t) c.comments.push({by:who,as:f==="int"?"interne":"externe",text:t});log(`Proposition V${c.n} · validation ${f==="int"?"interne":"externe"} : ${CSTATE[v][1].toLowerCase()}`);after(v==="approved"?`Proposition V${c.n} validée (${f==="int"?"interne":"externe"})`:"Modifications demandées");break;}
+    case "crequest": {if(!need("crReason","Dites pourquoi.")) break;S.creative.requested={reason:val("crReason"),by:who,at:stamp()};log(`Nouvelle version de la proposition demandée : ${val("crReason")}`);S.form=null;after("Nouvelle version demandée");break;}
+    case "locsample": {[["lName","Halle Pajol"],["lAddr","20 esplanade Nathalie-Sarraute, Paris 18e"],["lPrice","1600"],["lAvail","23 et 24/10"],["lCons","Verrière, lumière du jour · tournage avant 18 h"]].forEach(([k,v])=>{document.getElementById(k).value=v;});return;}
+    case "locsave": {if(!need("lName","Donnez un nom au lieu.")) break;const o={name:val("lName"),addr:val("lAddr"),price:parseInt(val("lPrice").replace(/\D/g,""),10)||0,avail:val("lAvail"),constraints:val("lCons")};
+      if(el.dataset.v!==""){Object.assign(S.locs.cands[+el.dataset.v],o);log(`Lieu modifié : ${o.name}`);toast("Lieu modifié.");}else{S.locs.cands.push(Object.assign(o,{by:who,ph:"p3"}));log(`Lieu proposé : ${o.name}`);after("Lieu proposé");}S.form=null;break;}
+    case "retain": {const i=+el.dataset.i;S.locs.active=i;S.locs.decisions.push({i,at:stamp(),by:who,reason:""});log(`Lieu retenu : ${S.locs.cands[i].name}`);after(`${S.locs.cands[i].name} retenu`);break;}
+    case "replace": {if(!need("rpReason","Dites pourquoi le lieu change.")) break;const L=S.locs,old=L.active,nw=+val("rpNew"),at=stamp(),r=val("rpReason");
+      L.cands[old].replaced={at,reason:r};lastOf(L.decisions).replacedAt=at;L.active=nw;L.decisions.push({i:nw,at,by:who,reason:r});
+      const origin=`Changement de lieu du ${at.split(",")[0]}`;
+      REVIEW.forEach(([k,l,slot])=>{if(!document.getElementById("rv-"+k).checked) return;
+        const step=k==="creative"?"creative":k==="budget"?"quote":"prep";
+        S.tasks.push({id:id("t"),step,text:k==="creative"?"Adapter le découpage au nouveau lieu":k==="budget"?"Réviser le devis pour le nouveau lieu":k==="gear"?"Revoir le matériel pour "+L.cands[nw].name:"Mettre à jour le planning et la feuille de service",r:holder(slot),due:"20/10",status:"todo",origin});
+        if(k==="creative") S.creative.requested={reason:`Changement de lieu : ${r}`,by:who,at};if(k==="budget") S.quote.revision={reason:`Changement de lieu : ${r}`,by:who,at};});
+      log(`Lieu remplacé : ${L.cands[old].name} → ${L.cands[nw].name} · « ${r} »`);S.form=null;after(`${L.cands[nw].name} remplace ${L.cands[old].name}`);break;}
+    case "ready": {const rows=synthesis(),miss=rows.filter(x=>!x.ok);let forced=null;
+      if(miss.length){const f=document.getElementById("rForce");if(!f||!f.checked||!val("rReason")){S.err.rForce="Cochez la confirmation et donnez le motif : des points ne sont pas prêts.";break;}forced=val("rReason");}
+      S.ready={by:who,at:stamp(),rows,forced};log(`Préparation validée${forced?" malgré : "+forced:""}`);after("Préparation validée — tournage à venir");break;}
+    case "shoot": S.base=[2026,9,23,16,30];S.clock=0;S.shoot={by:who,at:stamp()};log("Tournage confirmé");after("Tournage terminé — fichiers attendus");break;
+    case "rsample": document.getElementById("rLink").value="https://we.tl/t-Neons-rushes-2310";return;
+    case "rlink": if(!need("rLink","Collez le lien des rushes.")) break;S.base=[2026,9,24,10,0];S.clock=0;S.rushes.link={url:val("rLink"),by:who,at:stamp()};log("Lien des rushes transmis");after("Lien des rushes transmis");break;
+    case "rverify": S.rushes.verified=`${who}, ${stamp()}`;log("Accès aux rushes vérifié");toast("Accès vérifié.");break;
+    case "rreceive": S.rushes.received=`${who}, ${stamp()}`;log("Rushes reçus");toast("Rushes reçus.");break;
+    case "rtransfer": S.rushes.transfer="sent";log("Rushes transférés au montage");after("Rushes envoyés au montage");break;
+    case "rgot": S.rushes.transfer="received";log("Rushes bien reçus pour le montage");after("Rushes reçus pour le montage");break;
+    case "psample": document.getElementById("pLink").value=`https://frame.io/r/neons-v${(lastOf(S.post.versions)||{n:0}).n+1}`;return;
+    case "plink": {if(!need("pLink","Collez le lien du montage.")) break;const n=S.post.versions.length+1;S.base=n===1?[2026,10,6,18,0]:[2026,10,10,17,0];S.clock=0;S.post.versions.push({n,url:val("pLink"),by:who,at:stamp(),status:"review",int:"pending",ext:holder("creativeExt")?"pending":"none",comments:[]});log(`Montage V${n} déposé`);after(`Montage V${n} déposé`);break;}
+    case "pdecide": {const v=lastOf(S.post.versions),f=el.dataset.slot==="creativeInt"?"int":"ext",d=el.dataset.v,t=val("pComment");if(d==="changes"&&!t){S.err.pComment="Dites ce qui doit changer.";break;}
+      v[f]=d;if(t) v.comments.push({by:who,text:t});
+      v.status=v.int==="changes"||v.ext==="changes"?"changes":(v.int==="approved"&&(v.ext==="approved"||v.ext==="none"))?"approved":"review";if(v.status==="approved") v.validatedBy=[v.int==="approved"?nameOf(holder("creativeInt")):"",v.ext==="approved"?nameOf(holder("creativeExt")):""].filter(Boolean).join(" et ");
+      log(`Montage V${v.n} · ${f==="int"?"interne":"externe"} : ${CSTATE[d][1].toLowerCase()}`);after(v.status==="approved"?`Montage V${v.n} validé`:d==="changes"?"Modifications demandées":"Retour enregistré");break;}
+    case "dlink": {S.base=[2026,10,27,11,0];S.clock=0;const v=[...S.post.versions].reverse().find(x=>x.status==="approved");S.delivery.link={name:`Neons_Clip_V${v.n}_master.mov`,by:who,at:stamp()};log("Fichier final déposé");after("Fichier final déposé");break;}
+    case "dconfirm": S.delivery.confirmed={to:val("dTo"),at:stamp(),by:who};log(`Livraison confirmée à ${val("dTo")}`);after("Livraison confirmée");break;
+    case "dclose": S.delivery.closed={at:stamp(),by:who};log("Production clôturée");after("Production clôturée");break;
+    case "foi": {const d=S.decisions.find(x=>x.id===el.dataset.id);S.decisions.filter(x=>x.group===d.group).forEach(x=>{x.foi=x===d;if(x!==d){x.discarded=true;}});d.kind="decided";d.confirmedBy=who;d.confirmedAt=stamp();log(`Fait foi : « ${d.text} »`);after("Contradiction tranchée");break;}
+    case "confirmdec": {const d=S.decisions.find(x=>x.id===el.dataset.id);d.kind="decided";d.confirmedBy=who;d.confirmedAt=stamp();log(`Décidé : « ${d.text} »`);toast("Décision validée.");break;}
+    case "discard": {const d=S.decisions.find(x=>x.id===el.dataset.id);d.discarded=true;log(`Écarté : « ${d.text} »`);toast("Écarté, gardé dans l'historique.");break;}
+    case "adddec": {if(!need("dText","Écrivez ce qui a été dit.")) break;const vs=val("dVs"),d={id:id("d"),text:val("dText"),kind:val("dKind"),source:val("dSource"),by:who,at:stamp(),step:val("dStep")};
+      if(vs){const o=S.decisions.find(x=>x.id===vs);o.group=o.group||id("g");d.group=o.group;}S.decisions.push(d);log(`Information notée (${KIND[d.kind][1].toLowerCase()}) : « ${d.text} »`);S.form=null;toast(vs?"Notée : contradiction à trancher.":"Information notée.");break;}
+    default: return;
+  }
+  render();
+});
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.flash=null;S.sel=null;S.form=null;S.tab="parcours";render();window.scrollTo({top:0});});
+document.getElementById("resetBtn").addEventListener("click",()=>{S=scenario("quote");document.getElementById("scenSel").value="quote";render();window.scrollTo({top:0});});
+document.getElementById("scenSel").addEventListener("change",e=>{S=scenario(e.target.value);render();window.scrollTo({top:0});});
+
+/* Scenarios: moments of the « Néons » clip ---------------------------------- */
+function scenario(k){
+  const s=fresh(); S=s;
+  const T=(step,text,r,due,status,origin,quote)=>({id:id("t"),step,text,r,due,status,origin,quote,doneAt:status==="done"?"16/10, 10:12":null});
+  s.tasks.push(T("kickoff","Envoyer le Brief créatif validé et les références","cp","16/10","done","Call de présentation du 15/10","Tu nous envoies le brief et les refs dès demain ?"),
+    T("kickoff","Déposer le devis complet, réalisation comprise","societe","21/10","todo","Call de présentation du 15/10","On revient vers vous avec un devis lundi prochain."),
+    T("kickoff","Proposer un réalisateur","societe","18/10","done","Call de présentation du 15/10","On a deux noms en tête pour la réal."));
+  s.decisions.push({id:id("d"),text:"Tournage possible le 24/10 en plus du 23/10",kind:"confirm",source:"Call de présentation du 15/10 « on pourrait peut-être déborder sur le 24 »",by:"Lina Haddad",at:"15/10, 15:40",step:"ready"});
+  s.log.push({text:"Production externe choisie : Studio Ressac",who:"Lina Haddad",at:"14/10, 17:20"},{text:"Call de présentation : 3 tâches confirmées sur 4 proposées par PO",who:"Lina Haddad",at:"15/10, 15:40"});
+  s.log.reverse();
+  s.quote.versions.push({n:1,amount:16400,file:"Devis_Ressac_Neons_V1.pdf",by:"Studio Ressac",at:"16/10, 18:05",status:"deposited",comments:[{by:"Studio Ressac",text:"Réalisation, équipe, matériel, régie et montage compris."}]});
+  s.tasks[1].status="done";s.tasks[1].doneAt="16/10, 18:05";
+  if(k==="quote"){s.role="charge";s.base=[2026,9,16,18,30];return s;}
+  // The quote validated, the proposal validated, places proposed and one kept.
+  Object.assign(s.quote.versions[0],{status:"approved",checkedBy:"Tom Mercier",decidedBy:"Claire Morel",decidedAt:"17/10, 11:30"});
+  s.creative.versions.push({n:1,by:"Bastien Roy",at:"17/10, 19:10",pieces:[["Traitement","Traitement_Neons_V1.pdf"],["Moodboard","Moodboard_Neons_V1.pdf"],["Découpage technique","Decoupage_Neons_V1.pdf"]],int:"approved",ext:"approved",comments:[{by:"Jade Petit",as:"externe",text:"OK pour Mona, garder les plans serrés au refrain."}]});
+  s.locs.cands=LOC_SEED.map(o=>Object.assign({by:"Studio Ressac"},o));s.locs.active=1;s.locs.decisions.push({i:1,at:"19/10, 10:00",by:"Lina Haddad",reason:"Le coucher de soleil colle au traitement."});
+  s.tasks.push(T("prep","Calls techniques faits","societe","19/10","done","Checklist de préproduction"),T("prep","Matériel réservé","societe","20/10","done","Checklist de préproduction"),
+    T("prep","Équipe confirmée","societe","21/10","todo","Checklist de préproduction"),T("prep","Planning envoyé","societe","21/10","todo","Checklist de préproduction"),
+    T("prep","Réserver 15 figurants","charge","21/10","todo","Saisie par Lina Haddad"));
+  s.decisions.push({id:id("d"),key:"schedule",text:"Tournage le Ven. 23/10/2026, de 8 h à 19 h",kind:"decided",source:"Réunion du 18/10",by:"Lina Haddad",at:"18/10, 12:00",step:"ready",confirmedBy:"Lina Haddad",confirmedAt:"18/10, 12:00"});
+  const g=id("g");
+  s.decisions.push({id:id("d"),text:"Mona Lys disponible toute la journée le 23/10",kind:"confirm",source:"WhatsApp du management, 16/10",by:"Lina Haddad",at:"16/10, 21:14",step:"ready",group:g},
+    {id:id("d"),text:"Mona Lys disponible seulement jusqu'à 15 h le 23/10",kind:"confirm",source:"Appel du management, 20/10",by:"Tom Mercier",at:"20/10, 09:40",step:"ready",group:g},
+    {id:id("d"),text:"La copropriété refuse le tournage sur le toit",kind:"confirm",source:"WhatsApp de Studio Ressac, 21/10",by:"Tom Mercier",at:"21/10, 08:55",step:"locs"});
+  s.log.unshift({text:"Devis V1 validé : 16 400 € HT",who:"Claire Morel",at:"17/10, 11:30"},{text:"Proposition V1 validée (interne et externe)",who:"Nadia Benali",at:"18/10, 09:15"},{text:"Lieu retenu : Rooftop Belleville",who:"Lina Haddad",at:"19/10, 10:00"});
+  if(k==="change"){s.role="cp";s.sel="locs";s.base=[2026,9,21,9,0];return s;}
+  // After the change of place: everything re-done, one blocker left.
+  const at="21/10, 10:20", r="La copropriété refuse le tournage sur le toit";
+  s.locs.cands[1].replaced={at,reason:r};s.locs.decisions[0].replacedAt=at;s.locs.active=0;s.locs.decisions.push({i:0,at,by:"Lina Haddad",reason:r});
+  s.decisions.find(d=>d.text.startsWith("La copropriété")).kind="decided";
+  const two=s.decisions.filter(d=>d.group===g);two[0].discarded=true;Object.assign(two[1],{foi:true,kind:"decided",confirmedBy:"Lina Haddad",confirmedAt:"21/10, 10:05"});
+  const sch=s.decisions.find(d=>d.key==="schedule");sch.discarded=true;sch.key=null;
+  s.decisions.push({id:id("d"),key:"schedule",text:"Tournage le Ven. 23/10/2026, de 8 h à 15 h",kind:"decided",source:"Réunion du 21/10",by:"Lina Haddad",at:"21/10, 10:30",step:"ready",confirmedBy:"Lina Haddad",confirmedAt:"21/10, 10:30"});
+  const origin="Changement de lieu du 21/10";
+  s.tasks.push(T("creative","Adapter le découpage au nouveau lieu","realExt","20/10","done",origin),T("quote","Réviser le devis pour le nouveau lieu","societe","20/10","done",origin),T("prep","Revoir le matériel pour Entrepôt Quai de Seine","societe","22/10","done",origin));
+  s.quote.versions.push({n:2,amount:17200,file:"Devis_Ressac_Neons_V2.pdf",by:"Studio Ressac",at:"21/10, 16:00",status:"approved",checkedBy:"Tom Mercier",decidedBy:"Claire Morel",decidedAt:"21/10, 18:10",comments:[{by:"Studio Ressac",text:"Régie et accès camion ajoutés pour l'entrepôt."}]});
+  s.creative.versions.push({n:2,by:"Bastien Roy",at:"21/10, 17:30",pieces:[["Traitement","Traitement_Neons_V2.pdf"],["Moodboard","Moodboard_Neons_V2.pdf"],["Découpage technique","Decoupage_Neons_V2.pdf"]],int:"approved",ext:"approved",comments:[{by:"Nadia Benali",as:"interne",text:"La verrière remplace bien le coucher de soleil."}]});
+  s.tasks.filter(t=>t.step==="prep").forEach(t=>{if(t.text!=="Planning envoyé"){t.status="done";t.doneAt="22/10, 12:00";}});
+  s.blockers.push({id:id("b"),text:"L'autorisation de stationnement du camion n'est pas arrivée",step:"ready",owner:"charge",next:"Relancer la mairie d'Aubervilliers",open:true,at:"22/10, 09:30",by:"Tom Mercier"});
+  s.log.unshift({text:"Lieu remplacé : Rooftop Belleville → Entrepôt Quai de Seine · « "+r+" »",who:"Lina Haddad",at},{text:"Devis V2 validé : 17 200 € HT",who:"Claire Morel",at:"21/10, 18:10"},{text:"Proposition V2 validée (interne et externe)",who:"Nadia Benali",at:"22/10, 08:40"});
+  if(k==="ready"){s.role="cp";s.sel="ready";s.base=[2026,9,22,15,0];return s;}
+  // Shot; the rushes reached the edit; the first cut is in review.
+  s.tasks.forEach(t=>{if(t.status!=="done"){t.status="done";t.doneAt="22/10, 18:00";}});s.blockers[0].open=false;
+  s.ready={by:"Lina Haddad",at:"22/10, 19:00",rows:synthesis(),forced:null};s.shoot={by:"Lina Haddad",at:"23/10, 16:30"};
+  s.rushes={link:{url:"https://we.tl/t-Neons-rushes-2310",by:"Studio Ressac",at:"24/10, 10:00"},verified:"Tom Mercier, 24/10, 11:00",received:"Tom Mercier, 24/10, 11:05",transfer:"received"};
+  s.post.versions.push({n:1,url:"https://frame.io/r/neons-v1",by:"Studio Ressac",at:"06/11, 18:00",status:"review",int:"pending",ext:"pending",comments:[]});
+  s.log.unshift({text:"Préparation validée",who:"Lina Haddad",at:"22/10, 19:00"},{text:"Tournage confirmé",who:"Lina Haddad",at:"23/10, 16:30"},{text:"Montage V1 déposé",who:"Studio Ressac",at:"06/11, 18:00"});
+  s.role="da";s.base=[2026,10,7,10,0];return s;
+}
+S=scenario("quote");
+render();
+})();
+</script>

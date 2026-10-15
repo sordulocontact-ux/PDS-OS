@@ -186,9 +186,18 @@ valent partout, dans l'app comme dans les protos.
     raison) ; chaque version (Mix V1, V2…, Master V1…) a son lecteur, son statut (« À valider »,
     « Modification demandée » avec le motif, « Validée ») et reste visible de tous, mixeur
     compris. Le Master final montre le fichier validé. *(Sacha 14/10)*
-14. **Une décision non prise n'est pas une tâche.** Les points « À décider » ne sont jamais
+14. **Une décision se remplace, elle ne s'efface pas.** Un parcours n'est pas linéaire : un lieu, un
+    devis, une proposition déjà validés peuvent changer. La nouvelle version devient une nouvelle
+    décision ; l'ancienne reste dans l'historique avec sa validation ; ce qui en dépend est marqué
+    « à revoir » (choisi à la main pour le MVP) et tout le reste continue. Une information notée
+    (appel, WhatsApp, e-mail) est « à confirmer » tant qu'une personne ne l'a pas décidée ; deux
+    informations contradictoires restent toutes les deux, et tant qu'aucune ne fait foi, c'est un
+    blocage. *(Ticket d'Ibé du 15/10, « Retours prototype Artefact » ; proto
+    `docs/protos/production-v2.html`. Dans l'app, « une étape validée est définitive » devra évoluer
+    dans ce sens.)*
+15. **Une décision non prise n'est pas une tâche.** Les points « À décider » ne sont jamais
     assignés ni datés.
-15. **Les mots sont ceux de l'app.** Libellés repris de `lib/i18n/fr/`, verbes précis
+16. **Les mots sont ceux de l'app.** Libellés repris de `lib/i18n/fr/`, verbes précis
     (« Confirmer la version source », pas « Valider »), le même mot du bouton au toast et au
     journal.
 
