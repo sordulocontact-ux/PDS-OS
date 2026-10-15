@@ -124,6 +124,7 @@ node docs/protos/tests/source.cjs       # Source : choisir une version, écouter
 node docs/protos/tests/dates.cjs        # dates du Brief : champ date, ordre refusé, « Modifié par »
 node docs/protos/tests/audio.cjs        # mixeur : dépôt audio (PDF refusé), écoute, retour avec motif, V2, master
 node docs/protos/tests/legal.cjs        # Cadrage juridique : question, réponse, « Ce que PO a compris », retirer
+node docs/protos/tests/mixer-package.cjs # dossier du mixeur : aperçu, tarifs exclus, lien affiché une fois, relance
 node docs/protos/tests/production.cjs   # proto Production, interne et externe
 ```
 
