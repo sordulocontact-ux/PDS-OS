@@ -322,7 +322,7 @@ wf("plan","Plan du projet","top",[
 ]);
 wf("master","Master","workflows",[
   {id:"m1",title:"Source",why:"La version de départ du mix, confirmée, jamais un master final.",owner:"cp",prereq:["p1"],
-   facts:[["Version source","Néons_maquette_v3.wav","v3 · dernière version détectée · 02/10","src"],["Stems","12 pistes · Stems_Neons_v3.zip","Session Ableton · 01/10","stems"]],acts:[A("cp","Confirmer la version source","Version source confirmée")]},
+   facts:[["Version source","Néons_maquette_v3.wav","Catalogue › Néons › Audio · v3, la plus récente · ajoutée par Claire Morel le 02/10","src"],["Stems","12 pistes · Stems_Neons_v3.zip","Catalogue › Néons › Fichiers de travail · session Ableton du 01/10 · ajoutés par Lina Haddad","stems"]],acts:[A("cp","Confirmer la version source","Version source confirmée")]},
   {id:"m2",title:"Brief Mix et Master",why:"Ce que l'ingénieur doit savoir : références, livrables, calendrier.",owner:"cp",validator:null,prereq:["m1"],
    po:"Pré-rempli depuis le Cadrage : ingénieur, date du master final ; calendrier proposé par le code (Mix V1 J-6, Mix final J-3, Mastering J-1).",
    facts:[["Ingénieur","Karim Haddou, mix et mastering","Cadrage, dimension 04","engineer"],["Validation des versions","Nadia Benali","Directrice créative","versions"],["Mix V1 attendu le","Dim. 15/11/2026","Calculé : 6 jours avant le master final","date"],["Mix final attendu le","Mer. 18/11/2026","Calculé : 3 jours avant le master final","date"],["Mastering attendu le","Ven. 20/11/2026","Calculé : 1 jour avant le master final","date"],["Master final attendu le","Sam. 21/11/2026","Cadrage, dimension 02","date"]],
@@ -632,8 +632,8 @@ function detail(s){
 /* Values that are a file or a person are chosen, never retyped: the
    title's versions (or an import), the people of the Réseau or the team. */
 const CHOICE={
-  src:{legend:"Versions audio du titre « Néons »",hint:"La dernière version détectée est proposée. L'ingénieur du mix recevra celle que vous choisissez ; un master final ne peut pas être une source.",submit:"Utiliser cette version",listen:true,add:["Importer une version","Néons_maquette_v4.wav","v4 · importée à l'instant"],
-    options:[["Néons_maquette_v3.wav","v3 · maquette · 02/10 · dernière version détectée"],["Néons_maquette_v2.wav","v2 · maquette · 18/09"],["Néons_mise_a_plat_v1.wav","v1 · mise à plat · 04/09"]]},
+  src:{legend:"Versions audio du titre « Néons »",hint:"Les versions audio du titre au Catalogue ; la plus récente est proposée. L'ingénieur du mix recevra celle que vous choisissez ; un master final ne peut pas être une source.",submit:"Utiliser cette version",listen:true,add:["Importer une version","Néons_maquette_v4.wav","v4 · importée à l'instant, rangée aussi au Catalogue"],
+    options:[["Néons_maquette_v3.wav","v3 · maquette · ajoutée par Claire Morel le 02/10 · dernière version détectée"],["Néons_maquette_v2.wav","v2 · maquette · ajoutée par Claire Morel le 18/09"],["Néons_mise_a_plat_v1.wav","v1 · mise à plat · ajoutée par Mona Lys le 04/09"]]},
   stems:{legend:"Pistes séparées du titre",hint:"Ce que l'ingénieur du mix reçoit pour travailler.",submit:"Utiliser ces pistes",add:["Importer des pistes","14 pistes · Stems_Neons_v4.zip","importées à l'instant"],
     options:[["12 pistes · Stems_Neons_v3.zip","Session Ableton · 01/10"],["10 pistes · Stems_Neons_v2.zip","Session Ableton · 17/09"]]},
   engineer:{legend:"Ingénieurs du Réseau",hint:"Les personnes déjà liées au projet d'abord.",submit:"Choisir",add:["Ajouter au Réseau","Nouvel ingénieur","créé dans le Réseau"],
