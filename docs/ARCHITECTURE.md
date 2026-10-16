@@ -2198,7 +2198,7 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     `LegalStepFrame` (« Maintenant » + Parcours + étape ouverte) autour d'une petite page par étape
     (`components/legal/steps/`). Les briques du parcours sont **communes** (`components/shell/journey/` :
     `JourneySpine`, `NowCard`, `StepPanel`, types dans `lib/ui/journey.ts`, textes `fr.journey`) et
-    servent aussi la Production. Les chevrons (`LegalSteps`) montrent les 5 étapes, toutes liées. Les
+    servent aussi la Production. Pas de barre de chevrons au-dessus : elle répétait le Parcours (retour du 16/10), `LegalSteps` est supprimé. Les
     pages de branche (fiches, contrats, répartitions, emprunts, SACEM, historique) gardent leur pleine
     largeur ; le pied du Parcours porte le lien « Historique ». Le plan lancé n'est plus suivi sur
     `/plan` mais sur `/tracking`.

@@ -1,4 +1,4 @@
-import { IconCheck, IconLock } from "nucleo-sharp-essential";
+import { IconCheck } from "nucleo-sharp-essential";
 
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
@@ -15,9 +15,6 @@ export type ProcessStep = {
   current?: boolean;
   // Validated for real (computed by the code): a check instead of the number.
   done?: boolean;
-  // Waits for an earlier step: still linked (readable), marked by a lock in
-  // the `pills` look.
-  locked?: boolean;
 };
 
 // The steps of a process as chevrons, under the project header (Figma
@@ -28,18 +25,12 @@ export function ProcessSteps({
   label,
   steps,
   numbered = true,
-  look = "chevrons",
 }: {
   label: string;
   steps: ProcessStep[];
   // A circle with the step's number (or a check once validated).
   numbered?: boolean;
-  // `pills`: the guided journey's look (docs/VISION-UX.md § 4, proto
-  // `.chevrons`), separate pills that wrap, a green check when done, a lock
-  // when waiting.
-  look?: "chevrons" | "pills";
 }) {
-  if (look === "pills") return <StepPills label={label} steps={steps} />;
   return (
     <nav aria-label={label} className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
       <ol className="flex w-max overflow-hidden rounded-pill">
@@ -92,74 +83,6 @@ export function ProcessSteps({
                   aria-disabled
                   title={step.title}
                   className={cn(shape, "cursor-not-allowed text-muted-foreground")}
-                >
-                  {inner}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-    </nav>
-  );
-}
-
-function StepPills({ label, steps }: { label: string; steps: ProcessStep[] }) {
-  return (
-    <nav aria-label={label}>
-      <ol className="flex flex-wrap gap-1">
-        {steps.map((step) => {
-          const inner = (
-            <>
-              {step.done ? (
-                <span
-                  aria-hidden
-                  className={cn(
-                    "grid size-4 shrink-0 place-items-center rounded-full",
-                    // On the ink of the open step, green would clash: the
-                    // check takes the pill's own colours, inverted.
-                    step.current
-                      ? "bg-background text-foreground"
-                      : "bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]",
-                  )}
-                >
-                  <IconCheck className="size-3" />
-                </span>
-              ) : step.locked ? (
-                <IconLock aria-hidden className="size-3 shrink-0 opacity-60" />
-              ) : null}
-              <span className="text-body-sm">{step.label}</span>
-              {step.done && (
-                <span className="sr-only">, {fr.shell.processSteps.done}</span>
-              )}
-            </>
-          );
-          const shape = cn(
-            "inline-flex h-9 items-center gap-2 rounded-pill px-3.5 whitespace-nowrap no-underline",
-            step.current
-              ? "bg-foreground text-background"
-              : "bg-[var(--surface-soft)] text-[color:var(--text-secondary)]",
-          );
-          return (
-            <li key={step.key} className="flex">
-              {step.href ? (
-                <ViewLink
-                  href={step.href}
-                  aria-current={step.current ? "page" : undefined}
-                  className={cn(
-                    shape,
-                    "transition-[background-color,color] duration-[var(--duration-fast)] ease-[var(--ease-standard)]",
-                    !step.current &&
-                      "hover:bg-[var(--surface-sunken)] hover:text-foreground",
-                  )}
-                >
-                  {inner}
-                </ViewLink>
-              ) : (
-                <span
-                  aria-disabled
-                  title={step.title}
-                  className={cn(shape, "cursor-not-allowed")}
                 >
                   {inner}
                 </span>

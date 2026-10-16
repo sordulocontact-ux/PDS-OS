@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { LegalSteps } from "@/components/projects/legal-steps";
 import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import {
@@ -73,7 +72,6 @@ export default async function ProjectLayout({
   );
   const strategyLaunched =
     (stateOf("marketing")?.status ?? "not_started") !== "not_started";
-  const legalDone = flows?.legalDone ?? [];
 
   return (
     <div className="flex flex-1">
@@ -186,9 +184,6 @@ export default async function ProjectLayout({
                 (stateOf("master")?.done ?? []) as MasterTab[],
               )}
             />
-            {canSeeLegal && (
-              <LegalSteps projectId={project.id} done={legalDone} />
-            )}
           </>
         )}
 
