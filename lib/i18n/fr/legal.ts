@@ -23,19 +23,12 @@ export const legal = {
       title: "Titre",
       organism: "Organisme",
       allDeclared: "Tous les organismes sont déjà déclarés pour ce titre.",
-      editTitle: "Modifier le titre",
       editRights: "Modifier les droits",
+      complete: "Compléter",
+      view: "Voir",
     },
-    sections: {
-      titles: { title: "Titres" },
-      people: { title: "Personnes" },
-      splits: { title: "Répartitions" },
-      // « Accords » is the clearances' dossier (third-party elements):
-      // never the same word for the contracts.
-      agreements: { title: "Contrats" },
-      declarations: { title: "Déclarations" },
-      flags: { title: "Points signalés au cadrage" },
-    },
+    // Source of an intervenant non crédité.
+    contactSource: "Réseau",
     facts: {
       isrc: "ISRC",
       iswc: "ISWC",
@@ -753,8 +746,6 @@ export const legal = {
   // Intervenants non crédités (ticket « Architecture globale », lot 6) :
   // un avocat, un distributeur, un photographe… choisis dans le Réseau.
   projectContacts: {
-    title: "Intervenants non crédités",
-    empty: "Aucun intervenant non crédité.",
     add: "Ajouter un intervenant",
     addDescription:
       "Une personne du Réseau qui intervient sans être créditée : sa fiche et son contrat suivent ceux des crédités.",

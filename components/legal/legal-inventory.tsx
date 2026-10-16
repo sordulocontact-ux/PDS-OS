@@ -1,29 +1,22 @@
-import { NewContractButton } from "@/components/contracts/new-contract-button";
-import { AddContributorButton } from "@/components/legal/add-contributor-button";
-import { DeclareButton } from "@/components/legal/declare-button";
 import { FactAction } from "@/components/legal/fact-action";
-import { LegalTitlesTable } from "@/components/legal/legal-titles-table";
-import { ProjectContactsSection } from "@/components/legal/project-contacts-section";
+import { InventoryRow } from "@/components/legal/inventory/inventory-row";
+import { SectionButtons } from "@/components/legal/inventory/section-buttons";
+import { TitleRightsButton } from "@/components/legal/inventory/title-rights-button";
+import { RemoveProjectContactButton } from "@/components/legal/project-contact-controls";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { PageSection } from "@/components/shell/page-section";
-import { FactTable } from "@/components/ui/fact-table";
 import { fr } from "@/lib/i18n/fr";
 import type { FactStatus } from "@/lib/facts/types";
 import { filterFactSections } from "@/lib/facts/views";
-import type {
-  LegalInventory as Inventory,
-  LegalSection,
-} from "@/lib/legal/types";
+import type { LegalFact, LegalInventory as Inventory } from "@/lib/legal/types";
 
 /**
- * Juridique's first step: what the project already knows, read only. Each
- * row leads to the page where the fact is completed (title, network,
- * contract, Cadrage); nothing is written here. Each section sits on its
- * own white card, the tiles stay outside (docs/DESIGN.md, « Cartes de
- * section »).
+ * Juridique's first step: what the project already knows, as one list of
+ * facts (what it is and its state, its source, what to do). Each row leads
+ * to the page where the fact is completed; written only through the row's
+ * own controls.
  */
 export function LegalInventory({
-  inventory: all,
+  inventory,
   state,
 }: {
   inventory: Inventory;
@@ -32,94 +25,94 @@ export function LegalInventory({
   state: FactStatus | null;
 }) {
   const t = fr.legal.inventory;
-  const inventory: Inventory = state
-    ? {
-        ...all,
-        // A section with nothing of that status is left out while filtered.
-        sections: filterFactSections(all.sections, state).filter(
-          (section) => section.failed || section.facts.length > 0,
-        ),
-        titles: all.titles.filter((row) =>
-          Object.values(row.cells).some((cell) => cell.status === state),
-        ),
-      }
-    : all;
   // « Points signalés au cadrage » are what the Cadrage juridique asks about.
-  const sections = inventory.sections.filter((s) => s.key !== "flags");
+  const sections = filterFactSections(inventory.sections, state).filter(
+    (s) => s.key !== "flags",
+  );
+  const failed = sections.some((s) => s.failed);
+  const facts = sections.flatMap((s) => s.facts);
+  // Contacts are not a fact of the dossier: hidden while a tile filters.
+  const contacts = state ? [] : inventory.projectContacts;
+  // « Modifier les droits » sits on a title's first row of the Titres section.
+  const firstOfTitle = new Map<string, string>();
+  for (const fact of sections.find((s) => s.key === "titles")?.facts ?? [])
+    if (fact.group && !firstOfTitle.has(fact.group.key))
+      firstOfTitle.set(fact.group.key, fact.key);
+
   return (
-    <div className="grid gap-8">
-      {state && sections.length === 0 && (
+    <div className="flex flex-col gap-4 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5">
+      {state && facts.length === 0 && !failed ? (
         <EmptyNote>{t.filterEmpty[state]}</EmptyNote>
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {facts.map((fact) => (
+            <InventoryRow
+              key={fact.key}
+              label={fact.label}
+              statusLabel={fact.statusLabel}
+              detail={[fact.detail, fact.group?.title]
+                .filter(Boolean)
+                .join(" · ")}
+              source={fact.source}
+              status={fact.status}
+              href={fact.href}
+            >
+              {rowAction(fact, inventory, firstOfTitle)}
+            </InventoryRow>
+          ))}
+          {contacts.map((contact) => (
+            <InventoryRow
+              key={contact.id}
+              label={contact.name}
+              statusLabel={fr.legalForms.roles[contact.role]}
+              detail={null}
+              source={t.contactSource}
+              status="known"
+              href={null}
+            >
+              <RemoveProjectContactButton
+                projectId={inventory.projectId}
+                rowId={contact.id}
+                name={contact.name}
+              />
+            </InventoryRow>
+          ))}
+          {failed && (
+            <li>
+              <EmptyNote>{fr.facts.failed}</EmptyNote>
+            </li>
+          )}
+          {facts.length === 0 && contacts.length === 0 && !failed && (
+            <li>
+              <EmptyNote>{fr.facts.noMasters}</EmptyNote>
+            </li>
+          )}
+        </ul>
       )}
-      {sections.map((section) => (
-        <PageSection
-          key={section.key}
-          id={`legal-${section.key}`}
-          title={t.sections[section.key].title}
-          card
-          action={<SectionAction section={section} inventory={inventory} />}
-        >
-          <SectionBody section={section} inventory={inventory} />
-        </PageSection>
-      ))}
-      {/* Not a fact of the dossier: hidden while a tile filters it. */}
-      {!state && (
-        <ProjectContactsSection
-          projectId={all.projectId}
-          contacts={all.projectContacts}
-        />
-      )}
+      <SectionButtons inventory={inventory} />
     </div>
   );
 }
 
-// What a section's header offers, when the viewer may: credit someone,
-// declare a filing, create a contract attached to the project.
-function SectionAction({
-  section,
-  inventory,
-}: {
-  section: LegalSection;
-  inventory: Inventory;
-}) {
-  const titles = inventory.titles.map((row) => ({
-    id: row.masterId,
-    title: row.title,
-  }));
-  if (section.failed) return null;
-  if (section.key === "people" && inventory.canEditCatalog)
-    return <AddContributorButton titles={titles} />;
-  if (section.key === "declarations" && inventory.canEditCatalog)
-    return <DeclareButton titles={titles} declared={inventory.declared} />;
-  if (section.key === "agreements" && inventory.canCreateContract)
-    return <NewContractButton projectId={inventory.projectId} />;
-  return null;
-}
-
-// A title-based section is empty only when the project has no title; the
-// agreements always hold at least the "no contract" fact. Titres has its own
-// layout: one row per title, identifiers in columns.
-function SectionBody({
-  section,
-  inventory,
-}: {
-  section: LegalSection;
-  inventory: Inventory;
-}) {
-  if (section.failed) return <EmptyNote>{fr.facts.failed}</EmptyNote>;
-  if (section.facts.length === 0)
-    return <EmptyNote>{fr.facts.noMasters}</EmptyNote>;
-  if (section.key === "titles")
-    return (
-      <LegalTitlesTable
-        titles={inventory.titles}
-        canEdit={inventory.canEditCatalog}
-      />
-    );
+// The row's own controls: its action, plus the rights on a title's first row;
+// null falls back to « Compléter » / « Voir ».
+function rowAction(
+  fact: LegalFact,
+  inventory: Inventory,
+  firstOfTitle: Map<string, string>,
+) {
+  const first = fact.group && firstOfTitle.get(fact.group.key) === fact.key;
+  const title =
+    first && inventory.canEditCatalog
+      ? inventory.titles.find((row) => row.masterId === fact.group?.key)
+      : undefined;
+  if (!fact.action && !title) return null;
   return (
-    <FactTable
-      facts={section.facts}
-      renderAction={(action) => <FactAction action={action} />}
-    />
+    <>
+      {fact.action && <FactAction action={fact.action} />}
+      {title && (
+        <TitleRightsButton masterId={title.masterId} rights={title.rights} />
+      )}
+    </>
   );
 }
