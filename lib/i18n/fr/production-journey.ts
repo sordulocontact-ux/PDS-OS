@@ -3,7 +3,6 @@
 // each person.
 export const productionJourney = {
   label: "Parcours de la production",
-  title: "Parcours",
   steps: {
     organisation: {
       title: "Organisation",
@@ -117,36 +116,12 @@ export const productionJourney = {
     callSheet: (n: number) => `V${n} diffusée`,
     ready: "Prêt pour tournage",
   },
-  status: {
-    done: "Fait",
-    current: "En cours",
-    blocked: "Plus tard",
-    upcoming: "À venir",
-  },
-  after: (titles: string) => `Après : ${titles}`,
-  me: "À vous",
-  viaLink: "sur son lien privé",
   meta: {
-    owner: "Responsable",
-    validation: "Validation",
-    prereq: "Prérequis",
-    next: "Ensuite",
-    none: "Aucune",
     fiche: "Fiche Livrable validée",
   },
-  blocked: (titles: string) =>
-    `Normalement après ${titles}. Vous pouvez déjà préparer cette étape.`,
   now: {
-    label: "Maintenant",
-    mine: "À vous",
-    nothing: "Rien à faire pour vous",
-    open: "Ouvrir l'étape",
-    others: (n: number, list: string) =>
-      `Et ${n} autre${n > 1 ? "s" : ""} : ${list}`,
     waitingTitle: "La production avance sans vous pour l'instant",
     finished: "La production est terminée",
-    waitFor: (who: string) => `En attente de ${who}`,
-    see: "Voir",
   },
   roles: {
     owner: "Cheffe ou chef de projet",

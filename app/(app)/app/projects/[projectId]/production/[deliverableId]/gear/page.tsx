@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { ProductionNeedsSection } from "@/components/production/prep/needs-section";
 import { EquipmentSection } from "@/components/production/preprod/equipment-section";
 import { fr } from "@/lib/i18n/fr";
@@ -25,7 +25,11 @@ export default async function ProductionGearStepPage({
     deliverableId,
   );
   return (
-    <StepPanel step={step} steps={steps}>
+    <StepPanel
+      step={step}
+      steps={steps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       <ProductionNeedsSection
         projectId={projectId}
         sheetId={sheet.id}

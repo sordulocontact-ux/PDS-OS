@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { BudgetBlock } from "@/components/production/preprod/budget-block";
 import { QuotesSection } from "@/components/production/quotes/quotes-section";
 import { fr } from "@/lib/i18n/fr";
@@ -29,7 +29,11 @@ export default async function ProductionQuoteStepPage({
   const quotes = await loadQuotes(sheet.id, data.members);
   const external = org.kind === "external";
   return (
-    <StepPanel step={step} steps={steps}>
+    <StepPanel
+      step={step}
+      steps={steps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       <QuotesSection
         projectId={projectId}
         sheetId={sheet.id}

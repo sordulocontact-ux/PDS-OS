@@ -421,11 +421,6 @@ export const shell = {
       confirmation: "Confirmation",
       plan: "Plan d'action",
       tracking: "Suivi",
-      planLocked: "Disponible une fois le dossier confirmé",
-      // Under the chevrons: the DG's five steps, as the dossier's state.
-      phase: "Étape du dossier",
-      // Back from a branch's page (opened by an action of the plan).
-      backToPlan: "Plan d'action",
       // The branches' pages, each opened from an action of the plan.
       branches: {
         forms: "Fiches de renseignements",

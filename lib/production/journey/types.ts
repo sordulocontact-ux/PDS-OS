@@ -3,6 +3,11 @@
 // people recorded, never stored. Client-safe.
 
 import type {
+  JourneyActor,
+  JourneyPerson,
+  JourneyStep as GenericStep,
+} from "@/lib/ui/journey";
+import type {
   DirectionStatus,
   OrganizationKind,
 } from "@/lib/production/organization";
@@ -26,29 +31,20 @@ export type StepKey = (typeof STEP_KEYS)[number];
 export const isStepKey = (v: string): v is StepKey =>
   (STEP_KEYS as readonly string[]).includes(v);
 
-export type StepStatus = "done" | "current" | "blocked" | "upcoming";
+export type { JourneyActor, JourneyPerson } from "@/lib/ui/journey";
 
-/** Someone who holds a role: a member of PDS, or a contact through a link. */
-export type JourneyPerson = { name: string; viewer: boolean; viaLink: boolean };
-
-export type JourneyActor = JourneyPerson & { todo: string };
-
-export type JourneyStep = {
+/** The generic journey step, narrowed to Production's step keys. */
+export type JourneyStep = Omit<GenericStep, "key" | "prereq" | "next"> & {
   key: StepKey;
-  title: string;
-  why: string;
-  status: StepStatus;
-  owner: { name: string; role: string } | null;
-  validator: { name: string; role: string } | null;
   prereq: StepKey[];
   next: StepKey[];
-  actor: JourneyActor | null;
-  summary: string | null;
 };
 
 export type QuoteStatus = "deposited" | "submitted" | "approved" | "rejected";
 
 export type JourneyInput = {
+  projectId: string;
+  deliverableId: string;
   kind: OrganizationKind | null;
   opened: boolean;
   owner: JourneyPerson;

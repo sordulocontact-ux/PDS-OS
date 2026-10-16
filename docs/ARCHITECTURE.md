@@ -2185,7 +2185,24 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   bougent pas (les tickets interdisent de les confondre : 04, 05, 06) ; ce sont les **lieux**
   qui se regroupent (ticket 07 : « Le Plan d'action et le Suivi sont deux vues du même
   graphe ») :
-  - **Deux étapes à l'écran** (`LEGAL_TABS`, `LegalSteps`) : **État des lieux** (`/legal`), qui
+  - **Parcours du 16/10/2026** (remplace « Deux étapes à l'écran » ci-dessous, `docs/VISION-UX.md` § 4) :
+    le Juridique reprend le patron d'écran unique de la Production, en **5 étapes** (`inventory`,
+    `framing`, `confirmation`, `plan`, `tracking`), chacune sa page `/legal/<étape>`. `/legal` sans
+    segment **redirige** vers l'étape qui attend la personne (sinon l'étape en cours, sinon l'État
+    des lieux), en gardant `?question=` (→ `/framing`) et `?state=` (→ `/inventory`). Modèle pur
+    `lib/legal/journey.ts` (`legalJourney`, états calculés depuis ce qui est enregistré, jamais par
+    PO ; responsable de chaque étape = le chef de projet du projet ; l'étape en cours est « À vous »
+    pour **toute personne qui voit le Juridique**, puisque la direction et les chefs de projet y
+    agissent même sans être responsables, `ReadOnlyNotice`), données lues une fois par
+    requête dans `lib/legal/journey-context.ts` (`legalJourneyContext`, `cache()`), cadre
+    `LegalStepFrame` (« Maintenant » + Parcours + étape ouverte) autour d'une petite page par étape
+    (`components/legal/steps/`). Les briques du parcours sont **communes** (`components/shell/journey/` :
+    `JourneySpine`, `NowCard`, `StepPanel`, types dans `lib/ui/journey.ts`, textes `fr.journey`) et
+    servent aussi la Production. Les chevrons (`LegalSteps`) montrent les 5 étapes, toutes liées. Les
+    pages de branche (fiches, contrats, répartitions, emprunts, SACEM, historique) gardent leur pleine
+    largeur ; le pied du Parcours porte le lien « Historique ». Le plan lancé n'est plus suivi sur
+    `/plan` mais sur `/tracking`.
+  - ~~**Deux étapes à l'écran**~~ (07/10, remplacé par le parcours ci-dessus ; `LEGAL_TABS` supprimé) : **État des lieux** (`/legal`), qui
     porte aussi la question de PO en cours (`IntakeWorkspace embedded`), les réponses et le
     dossier à confirmer (`ConfirmationPanel`), puis **Plan d'action** (`/legal/plan`), grisé
     tant que le dossier n'est pas confirmé, qui devient le Suivi une fois lancé. Les anciennes

@@ -40,6 +40,7 @@ import { feedback } from "./feedback";
 import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
 import { framingIntel } from "./framing-intel";
+import { journey } from "./journey";
 import { labo } from "./labo";
 import { laboCaptures } from "./labo-captures";
 import { legal } from "./legal";
@@ -48,6 +49,7 @@ import { legalContracts } from "./legal-contracts";
 import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
 import { legalHistory } from "./legal-history";
+import { legalJourney } from "./legal-journey";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { masterPage } from "./master-page";
@@ -166,6 +168,7 @@ export const fr = {
   productionProvider,
   productionHistory,
   productionJourney,
+  journey,
   productionLink,
   productionLocations,
   productionOrganization,
@@ -196,6 +199,7 @@ export const fr = {
   legalFormalities,
   legalForms,
   legalHistory,
+  legalJourney,
   legalSplits,
   masterWorkflow,
   artistActivity,

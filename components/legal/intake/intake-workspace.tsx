@@ -25,16 +25,12 @@ export function IntakeWorkspace({
   projectId,
   questions,
   initialQuestion,
-  embedded = false,
 }: {
   projectId: string;
   questions: IntakeQuestion[];
   // `?question=<key>:<title|project>` (from the Confirmation's « Corriger »
   // or « Répondre »): that question opens first.
   initialQuestion: string | null;
-  // On the État des lieux, the dossier and its confirmation sit below: once
-  // every question is answered, nothing more is said here.
-  embedded?: boolean;
 }) {
   const t = fr.legal.intake;
   const [correcting, setCorrecting] = useState<string | null>(
@@ -54,7 +50,7 @@ export function IntakeWorkspace({
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
-      {questions.length > 0 && (active || !embedded) && (
+      {questions.length > 0 && (
         <p className="text-sm text-muted-foreground tabular-nums">
           {t.progressDetail(
             answered.length,
@@ -73,7 +69,7 @@ export function IntakeWorkspace({
           onCancel={() => setCorrecting(null)}
           onSaved={() => setCorrecting(null)}
         />
-      ) : embedded ? null : (
+      ) : (
         // Every question answered: the next step, never a dead end.
         <EmptyState
           icon={IconCheck}
@@ -82,7 +78,11 @@ export function IntakeWorkspace({
           action={
             <Button
               nativeButton={false}
-              render={<Link href={routes.projectLegal(projectId)} />}
+              render={
+                <Link
+                  href={routes.projectLegalStep(projectId, "confirmation")}
+                />
+              }
             >
               {t.done.action}
             </Button>

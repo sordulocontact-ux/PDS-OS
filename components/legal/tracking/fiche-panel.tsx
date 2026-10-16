@@ -103,7 +103,7 @@ export function FichePanel({
       <ToneCallout tone="warning">
         {t.namesake}{" "}
         <Link
-          href={routes.projectLegal(projectId)}
+          href={routes.projectLegalStep(projectId, "inventory")}
           className="underline underline-offset-4"
         >
           {t.linkFirst}

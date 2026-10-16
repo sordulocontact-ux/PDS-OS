@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { ProductionCallPanel } from "@/components/production/prep/production-call-sheet";
 import { PlanSection } from "@/components/production/preprod/plan-section";
 import { TeamBriefsSection } from "@/components/production/preprod/team-briefs-section";
@@ -30,7 +30,11 @@ export default async function ProductionCallStepPage({
   const external = sheet.organization.kind === "external";
   const calls = external ? await loadProductionCalls(projectId, sheet.id) : [];
   return (
-    <StepPanel step={step} steps={steps}>
+    <StepPanel
+      step={step}
+      steps={steps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       {external && (
         <ProductionCallPanel
           projectId={projectId}

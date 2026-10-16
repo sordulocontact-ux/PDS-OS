@@ -27,12 +27,8 @@ import type {
 export function LegalInventory({
   inventory: all,
   state,
-  lead,
 }: {
   inventory: Inventory;
-  // Shown between the header and the tiles (the État des lieux puts the
-  // Cadrage's question and the Confirmation there).
-  lead?: React.ReactNode;
   // `?state=`: the tile clicked, only its facts shown (lib/facts/views.ts,
   // as on the État du master). The counts stay those of the whole dossier.
   state: FactStatus | null;
@@ -52,14 +48,12 @@ export function LegalInventory({
     : all;
   return (
     <div className="grid gap-8">
-      {lead}
-
       <StatTiles
         columns={3}
         stats={factTiles(
           all.counts,
           t.counts,
-          routes.projectLegal(all.projectId),
+          routes.projectLegalStep(all.projectId, "inventory"),
           state,
         )}
       />

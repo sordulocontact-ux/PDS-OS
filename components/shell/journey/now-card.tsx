@@ -2,31 +2,39 @@ import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
-import { stepHref } from "@/lib/production/journey/href";
-import { nowOf } from "@/lib/production/journey/steps";
-import type { JourneyStep } from "@/lib/production/journey/types";
+import { type JourneyStep, nowOf } from "@/lib/ui/journey";
 
-const t = fr.productionJourney;
+const t = fr.journey;
 
 /**
- * « Maintenant » (Ibé, 14/10): what the viewer has to do on this production,
- * why, and the way to it; else who the production waits for. Computed by code
- * for the person looking (lib/production/journey).
+ * « Maintenant » (docs/VISION-UX.md § 4): what the viewer has to do in this
+ * module, why, and the way to it; else who it waits for. Computed by code for
+ * the person looking. It never repeats the step shown below: when `shownKey`
+ * is the viewer's own step it is left out, the card disappears if nothing else
+ * is theirs, and otherwise reads « Aussi à vous ».
  */
 export function NowCard({
-  projectId,
-  deliverableId,
   steps,
   viewerName,
+  shownKey,
+  labels,
 }: {
-  projectId: string;
-  deliverableId: string;
   steps: JourneyStep[];
   viewerName: string | null;
+  shownKey?: string;
+  labels?: { waitingTitle: string; finished: string };
 }) {
-  const { mine, waiting } = nowOf(steps);
-  const href = (s: JourneyStep) => stepHref(projectId, deliverableId, s.key);
+  const all = nowOf(steps);
+  const mine = shownKey ? all.mine.filter((s) => s.key !== shownKey) : all.mine;
+  const waiting = all.waiting;
+  const also = mine.length < all.mine.length;
+  if (also && mine.length === 0) return null;
+  const href = (s: JourneyStep) => s.href;
   const [first, ...more] = mine;
+  const texts = labels ?? {
+    waitingTitle: t.now.waitingTitle,
+    finished: t.now.finished,
+  };
   return (
     <section
       aria-label={t.now.label}
@@ -34,7 +42,7 @@ export function NowCard({
     >
       <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <StatusBadge size="sm" tone={first ? "info" : "neutral"}>
-          {first ? t.now.mine : t.now.nothing}
+          {first ? (also ? t.now.alsoMine : t.now.mine) : t.now.nothing}
         </StatusBadge>
         <span>{[viewerName, first?.title].filter(Boolean).join(" · ")}</span>
       </div>
@@ -60,7 +68,7 @@ export function NowCard({
         </>
       ) : (
         <h2 className="text-display-sm font-medium text-balance">
-          {waiting.length > 0 ? t.now.waitingTitle : t.now.finished}
+          {waiting.length > 0 ? texts.waitingTitle : texts.finished}
         </h2>
       )}
       {waiting.length > 0 && (

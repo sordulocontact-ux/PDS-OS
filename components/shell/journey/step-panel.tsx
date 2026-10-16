@@ -1,13 +1,13 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
-import type { JourneyStep, StepKey } from "@/lib/production/journey/types";
-import { productionStepTone } from "@/lib/ui/state-tones";
+import type { JourneyStep } from "@/lib/ui/journey";
+import { journeyStatusTone } from "@/lib/ui/state-tones";
 
-const t = fr.productionJourney;
+const t = fr.journey;
 
 /**
- * One step of the journey, as the right side of the deliverable: its title
+ * One step of the journey, as the right side of a module: its title
  * and state, why it matters, then who is responsible, who validates, what it
  * needs and what follows (Ibé: « chaque étape a une logique, un responsable,
  * des prérequis et une suite claire »), then its own content.
@@ -15,13 +15,16 @@ const t = fr.productionJourney;
 export function StepPanel({
   step,
   steps,
+  rootPrereq,
   children,
 }: {
   step: JourneyStep;
   steps: JourneyStep[];
+  // Shown when the step needs nothing before it.
+  rootPrereq?: string;
   children: React.ReactNode;
 }) {
-  const of = (key: StepKey) => steps.find((s) => s.key === key);
+  const of = (key: string) => steps.find((s) => s.key === key);
   const pre = step.prereq.map(of).filter((s): s is JourneyStep => Boolean(s));
   const next = step.next.map(of).filter((s): s is JourneyStep => Boolean(s));
   return (
@@ -37,7 +40,7 @@ export function StepPanel({
           >
             {step.title}
           </h2>
-          <StatusBadge tone={productionStepTone[step.status]}>
+          <StatusBadge tone={journeyStatusTone[step.status]}>
             {t.status[step.status]}
           </StatusBadge>
         </div>
@@ -69,7 +72,7 @@ export function StepPanel({
           </Meta>
           <Meta label={t.meta.prereq}>
             {pre.length === 0
-              ? `✓ ${t.meta.fiche}`
+              ? `✓ ${rootPrereq ?? t.meta.noPrereq}`
               : pre.map((p) => (
                   <span
                     key={p.key}

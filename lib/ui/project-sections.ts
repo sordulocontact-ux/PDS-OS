@@ -190,11 +190,11 @@ export function projectTrail(
 
   const home = { label: section.label, href: section.href };
   const legal = routes.projectLegal(projectId);
-  // A branch of the Juridique opens from an action of the Plan d'action:
+  // A branch of the Juridique opens from an action of the Suivi:
   // the trail goes back through it.
   const plan = {
-    label: fr.shell.project.legalSteps.backToPlan,
-    href: routes.projectLegalStep(projectId, "plan"),
+    label: fr.shell.project.legalSteps.tracking,
+    href: routes.projectLegalStep(projectId, "tracking"),
   };
   const conception = {
     label: fr.conception.title,

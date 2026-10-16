@@ -70,7 +70,7 @@ export function GenerateDialog({
               field.home === "fiche"
                 ? routes.projectLegalStep(projectId, "forms")
                 : field.home === "credits"
-                  ? routes.projectLegal(projectId)
+                  ? routes.projectLegalStep(projectId, "inventory")
                   : null
             }
           />

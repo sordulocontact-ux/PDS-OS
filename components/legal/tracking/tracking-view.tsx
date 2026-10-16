@@ -117,7 +117,7 @@ export function TrackingView({
     formalities: data.formalities,
     canValidate: data.clearances.canValidate,
   });
-  const path = routes.projectLegalStep(projectId, "plan");
+  const path = routes.projectLegalStep(projectId, "tracking");
   const hrefOf = (key: TrackingViewKey) =>
     viewHref(path, { view: key === "act" ? null : key });
   const position = new Map(titles.map((title, i) => [title.id, i]));

@@ -420,7 +420,7 @@ export const legal = {
     needsConfirmation: {
       title: "Le dossier n'est pas encore confirmé",
       body: "Le plan d'action part du dossier confirmé : relisez-le et confirmez-le d'abord.",
-      action: "Aller à l'état des lieux",
+      action: "Aller à la confirmation",
     },
     launched: (date: string, name: string | null) =>
       name ? `Plan lancé le ${date} par ${name}.` : `Plan lancé le ${date}.`,

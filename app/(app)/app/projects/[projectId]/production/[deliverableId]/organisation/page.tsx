@@ -3,7 +3,7 @@ import { IconBox2 } from "nucleo-sharp-essential";
 import { HeritageSection } from "@/components/production/prep/heritage-section";
 import { ScheduleSection } from "@/components/production/preprod/schedule-section";
 import { OrganisationForm } from "@/components/production/journey/organisation-form";
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { WhoDoesWhat } from "@/components/production/journey/who-does-what";
 import { EmptyState } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
@@ -83,7 +83,11 @@ export default async function ProductionOrganisationPage({
   );
 
   return (
-    <StepPanel step={step} steps={steps}>
+    <StepPanel
+      step={step}
+      steps={steps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       {step.status === "done" && prep ? (
         <>
           <WhoDoesWhat

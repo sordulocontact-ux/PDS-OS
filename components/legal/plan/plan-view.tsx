@@ -35,7 +35,11 @@ export function PlanView({
           action={
             <Button
               nativeButton={false}
-              render={<Link href={routes.projectLegal(projectId)} />}
+              render={
+                <Link
+                  href={routes.projectLegalStep(projectId, "confirmation")}
+                />
+              }
             >
               {t.needsConfirmation.action}
             </Button>
@@ -60,7 +64,7 @@ export function PlanView({
       <ToneCallout tone="success">
         {t.launched(formatInstant(plan.launchedAt), plan.launchedBy)}{" "}
         <Link
-          href={routes.projectLegalStep(projectId, "plan")}
+          href={routes.projectLegalStep(projectId, "tracking")}
           className="underline underline-offset-4"
         >
           {t.openTracking}
