@@ -1,5 +1,5 @@
 import {
-  AddProjectContactForm,
+  AddProjectContactButton,
   RemoveProjectContactButton,
 } from "@/components/legal/project-contact-controls";
 import { EmptyNote } from "@/components/shell/empty-state";
@@ -25,14 +25,14 @@ export function ProjectContactsSection({
     <PageSection
       id="legal-project-contacts"
       title={t.title}
-      description={t.description}
       card
+      action={<AddProjectContactButton projectId={projectId} />}
     >
       <div className="flex flex-col gap-4">
         {contacts.length === 0 ? (
           <EmptyNote>{t.empty}</EmptyNote>
         ) : (
-          <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)]">
+          <ul className="flex flex-col">
             {contacts.map((contact) => (
               <li
                 key={contact.id}
@@ -55,7 +55,6 @@ export function ProjectContactsSection({
             ))}
           </ul>
         )}
-        <AddProjectContactForm projectId={projectId} />
       </div>
     </PageSection>
   );

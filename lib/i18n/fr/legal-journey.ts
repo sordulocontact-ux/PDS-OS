@@ -6,6 +6,11 @@ export const legalJourney = {
   owner: "Cheffe ou chef de projet",
   validator: { name: "La direction", role: "Contrats et conditions d'emprunt" },
   rootPrereq: "Dossier ouvert",
+  // Several prerequisites arrive joined by « et ».
+  blocked: (prereqs: string) =>
+    prereqs.includes(" et ")
+      ? `Se débloque quand ${prereqs} sont faits.`
+      : `Se débloque quand ${prereqs} est fait.`,
   steps: {
     inventory: {
       title: "État des lieux",

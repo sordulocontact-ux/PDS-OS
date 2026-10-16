@@ -16,12 +16,15 @@ export function StepPanel({
   step,
   steps,
   rootPrereq,
+  blockedLabel,
   children,
 }: {
   step: JourneyStep;
   steps: JourneyStep[];
   // Shown when the step needs nothing before it.
   rootPrereq?: string;
+  // Replaces the generic « Normalement après… » of a blocked step.
+  blockedLabel?: (prereqs: string) => string;
   children: React.ReactNode;
 }) {
   const of = (key: string) => steps.find((s) => s.key === key);
@@ -98,7 +101,7 @@ export function StepPanel({
         </dl>
         {step.status === "blocked" && (
           <ToneCallout tone="info">
-            {t.blocked(
+            {(blockedLabel ?? t.blocked)(
               pre
                 .filter((p) => p.status !== "done")
                 .map((p) => p.title)

@@ -7,11 +7,9 @@ import { ProjectContactsSection } from "@/components/legal/project-contacts-sect
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
-import { StatTiles } from "@/components/ui/stat-tiles";
-import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { FactStatus } from "@/lib/facts/types";
-import { factTiles, filterFactSections } from "@/lib/facts/views";
+import { filterFactSections } from "@/lib/facts/views";
 import type {
   LegalInventory as Inventory,
   LegalSection,
@@ -46,27 +44,18 @@ export function LegalInventory({
         ),
       }
     : all;
+  // « Points signalés au cadrage » are what the Cadrage juridique asks about.
+  const sections = inventory.sections.filter((s) => s.key !== "flags");
   return (
     <div className="grid gap-8">
-      <StatTiles
-        columns={3}
-        stats={factTiles(
-          all.counts,
-          t.counts,
-          routes.projectLegalStep(all.projectId, "inventory"),
-          state,
-        )}
-      />
-
-      {state && inventory.sections.length === 0 && (
+      {state && sections.length === 0 && (
         <EmptyNote>{t.filterEmpty[state]}</EmptyNote>
       )}
-      {inventory.sections.map((section) => (
+      {sections.map((section) => (
         <PageSection
           key={section.key}
           id={`legal-${section.key}`}
           title={t.sections[section.key].title}
-          description={t.sections[section.key].description}
           card
           action={<SectionAction section={section} inventory={inventory} />}
         >
@@ -117,14 +106,9 @@ function SectionBody({
   section: LegalSection;
   inventory: Inventory;
 }) {
-  const t = fr.legal.inventory;
   if (section.failed) return <EmptyNote>{fr.facts.failed}</EmptyNote>;
   if (section.facts.length === 0)
-    return (
-      <EmptyNote>
-        {section.key === "flags" ? t.sections.flags.empty : fr.facts.noMasters}
-      </EmptyNote>
-    );
+    return <EmptyNote>{fr.facts.noMasters}</EmptyNote>;
   if (section.key === "titles")
     return (
       <LegalTitlesTable

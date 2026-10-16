@@ -34,12 +34,17 @@ const NONE_FACT: ProposedFact = { kind: "none", value: {}, quote: null };
 export function QuestionCard({
   projectId,
   question,
+  position,
+  total,
   correcting,
   onCancel,
   onSaved,
 }: {
   projectId: string;
   question: IntakeQuestion;
+  // 1-based place of this question among those of the step.
+  position: number;
+  total: number;
   // Opened from « Corriger »: the previous answer comes back to edit.
   correcting: boolean;
   onCancel: () => void;
@@ -113,6 +118,7 @@ export function QuestionCard({
     <PageSection
       card
       id="legal-question"
+      eyebrow={t.questionOf(position, total)}
       title={ask(question.title ?? "")}
       description={why}
     >

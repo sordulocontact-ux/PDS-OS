@@ -41,6 +41,7 @@ export async function LegalStepFrame({
           step={step}
           steps={steps}
           rootPrereq={fr.legalJourney.rootPrereq}
+          blockedLabel={fr.legalJourney.blocked}
         >
           {empty ? null : children}
         </StepPanel>

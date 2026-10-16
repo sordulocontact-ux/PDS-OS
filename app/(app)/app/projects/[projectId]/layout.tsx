@@ -195,7 +195,7 @@ export default async function ProjectLayout({
         {/* Only the owner writes inside a launched project; the database enforces it. */}
         <EditAccessProvider canEdit={canEdit}>
           {project.stages.length > 0 && (
-            <ReadOnlyNotice projectId={project.id} legalWriter={canSeeLegal} />
+            <ReadOnlyNotice projectId={project.id} />
           )}
           <div className="flex flex-col pb-8">{children}</div>
         </EditAccessProvider>
