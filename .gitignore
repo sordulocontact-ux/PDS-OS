@@ -55,3 +55,6 @@ backups/
 .claude/
 CLAUDE.md
 ux-tests/**/.secrets.json
+
+# Local export of the whole app
+/PDS-OS-toute-lapplication.html

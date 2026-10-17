@@ -3,8 +3,8 @@ import { fr } from "@/lib/i18n/fr";
 
 // The internal path of the Juridique workflow, as the DG defined it
 // (docs/CONTEXTE-PROJET.md § 2) — its own, never the project's 7 steps. Each
-// step has its own URL: the first is the section's entry (/legal), the
-// others a segment below it.
+// step has its own URL, a segment below /legal (the section's entry, which
+// redirects to the step that awaits the viewer).
 export const LEGAL_STEP_KEYS = [
   "inventory",
   "framing",
@@ -38,34 +38,19 @@ export const LEGAL_BRANCH_PAGES = [
 ] as const;
 export type LegalBranchPage = (typeof LEGAL_BRANCH_PAGES)[number];
 
-/** The built step or branch page a URL's segments open: none = the first
- * step; anything else (unknown, not built, deeper) = null, a 404. */
+/** The built step or branch page a URL's segments open: a single known
+ * segment; none, unknown or deeper = null (the section's entry redirects
+ * before asking). */
 export function builtLegalStepOf(
   segments: string[] | undefined,
 ): LegalStepKey | LegalBranchPage | null {
-  if (!segments || segments.length === 0) return LEGAL_STEP_KEYS[0];
-  if (segments.length > 1) return null;
+  if (!segments || segments.length !== 1) return null;
   return (
-    LEGAL_BUILT_STEPS.find(
-      (key) => key !== LEGAL_STEP_KEYS[0] && key === segments[0],
-    ) ??
+    LEGAL_BUILT_STEPS.find((key) => key === segments[0]) ??
     LEGAL_BRANCH_PAGES.find((key) => key === segments[0]) ??
     null
   );
 }
-
-// What the person sees (Sacha, 07/10/2026: « la partie juridique est très
-// compliquée »): two steps instead of five steps and five dossiers. The
-// État des lieux holds the Cadrage's questions and the Confirmation on the
-// same page; the Plan d'action becomes the Suivi once launched, and opens
-// the branches. The old URLs still answer, by a redirect.
-export const LEGAL_TABS = ["inventory", "plan"] as const;
-export type LegalTab = (typeof LEGAL_TABS)[number];
-
-export const legalTabOf = (page: LegalStepKey | LegalBranchPage): LegalTab =>
-  page === "inventory" || page === "framing" || page === "confirmation"
-    ? "inventory"
-    : "plan";
 
 /** Where the dossier stands, in the DG's five words (ticket « Architecture
  * globale » § 7: « État des lieux > Cadrage juridique > Confirmation > Plan
@@ -79,9 +64,7 @@ export function legalPhase(done: readonly LegalStepKey[]): LegalStepKey {
 }
 
 export const legalStepHref = (projectId: string, key: LegalStepKey) =>
-  key === LEGAL_STEP_KEYS[0]
-    ? routes.projectLegal(projectId)
-    : routes.projectLegalStep(projectId, key);
+  routes.projectLegalStep(projectId, key);
 
 export const legalStepLabel = (key: LegalStepKey) =>
   fr.shell.project.legalSteps[key];

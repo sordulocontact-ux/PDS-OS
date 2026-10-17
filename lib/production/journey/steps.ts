@@ -2,6 +2,9 @@
 // Pure, client-safe; every state comes from recorded data, never from PO.
 
 import { fr } from "@/lib/i18n/fr";
+import { nowOf } from "@/lib/ui/journey";
+
+import { stepHref } from "./href";
 
 import type {
   JourneyActor,
@@ -228,6 +231,7 @@ export function journeySteps(input: JourneyInput): JourneyStep[] {
     status.set(def.key, st);
     return {
       key: def.key,
+      href: stepHref(i.projectId, i.deliverableId, def.key),
       title: titleOf(def.key, i),
       why: whyOf(def.key, i),
       status: st,
@@ -267,18 +271,6 @@ function whyOf(key: StepKey, i: JourneyInput): string {
   if (key === "call") return s.call.why[kind];
   if (key === "quote") return s.quote.why[kind];
   return s[key].why;
-}
-
-/** The viewer's own open actions first, then what others are expected to do. */
-export function nowOf(steps: JourneyStep[]): {
-  mine: JourneyStep[];
-  waiting: JourneyStep[];
-} {
-  const open = steps.filter((s) => s.actor);
-  return {
-    mine: open.filter((s) => s.actor?.viewer),
-    waiting: open.filter((s) => !s.actor?.viewer),
-  };
 }
 
 /** Where the viewer lands on the deliverable: their first own step, else

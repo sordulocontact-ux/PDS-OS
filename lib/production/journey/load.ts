@@ -113,6 +113,8 @@ export const loadJourney = cache(
     const published = versionsRes?.data?.[0]?.number ?? null;
 
     const input: JourneyInput = {
+      projectId,
+      deliverableId,
       kind: org?.kind ?? null,
       opened: sheet !== null,
       owner,

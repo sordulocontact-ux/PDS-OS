@@ -119,7 +119,7 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
         action: t.intakeConfirmed,
         subject: null,
         by: who(i.confirmed_by),
-        href: routes.projectLegal(r.projectId),
+        href: routes.projectLegalStep(r.projectId, "confirmation"),
       });
 
   for (const plan of r.plans) {

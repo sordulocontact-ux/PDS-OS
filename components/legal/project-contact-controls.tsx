@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { PersonPickerField } from "@/components/network/person-picker-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
+import { DialogButton } from "@/components/ui/dialog-button";
 import { fr } from "@/lib/i18n/fr";
 import {
   addLegalProjectContact,
@@ -20,7 +21,13 @@ import {
  * a photographer…): picked or added to the Réseau on the spot, never a name
  * alone; their role pre-filled from their roles in the Réseau, correctable.
  */
-export function AddProjectContactForm({ projectId }: { projectId: string }) {
+export function AddProjectContactForm({
+  projectId,
+  onDone,
+}: {
+  projectId: string;
+  onDone: () => void;
+}) {
   const t = fr.legal.projectContacts;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -48,16 +55,15 @@ export function AddProjectContactForm({ projectId }: { projectId: string }) {
         role: String(data.get("role") ?? role),
       });
       if (!result.ok) toast.error(result.error);
-      else router.refresh();
+      else {
+        router.refresh();
+        onDone();
+      }
     });
   }
 
   return (
-    <form
-      noValidate
-      className="flex flex-col gap-3 rounded-xl border border-dashed border-border p-3"
-      onSubmit={submit}
-    >
+    <form noValidate className="flex flex-col gap-3" onSubmit={submit}>
       <PersonPickerField<LegalContactOption>
         refName="contactId"
         nameName="contactName"
@@ -121,5 +127,18 @@ export function RemoveProjectContactButton({
     >
       {t.removeShort}
     </Button>
+  );
+}
+
+/** « Ajouter un intervenant »: the form above, in the modal (the close
+ * callback cannot cross from a server component, hence this leaf). */
+export function AddProjectContactButton({ projectId }: { projectId: string }) {
+  const t = fr.legal.projectContacts;
+  return (
+    <DialogButton label={t.add} title={t.add} description={t.addDescription}>
+      {(close) => (
+        <AddProjectContactForm projectId={projectId} onDone={close} />
+      )}
+    </DialogButton>
   );
 }

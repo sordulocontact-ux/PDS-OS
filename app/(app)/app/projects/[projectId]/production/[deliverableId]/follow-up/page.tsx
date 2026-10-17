@@ -1,5 +1,5 @@
 import { CompanyProgress } from "@/components/production/journey/company-progress";
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { EquipmentSection } from "@/components/production/preprod/equipment-section";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
@@ -22,7 +22,11 @@ export default async function ProductionFollowUpStepPage({
     await prepContext(projectId, deliverableId);
   const company = sheet.organization.company;
   return (
-    <StepPanel step={step} steps={steps}>
+    <StepPanel
+      step={step}
+      steps={steps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       <CompanyProgress
         projectId={projectId}
         sheetId={sheet.id}

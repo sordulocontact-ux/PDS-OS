@@ -110,7 +110,7 @@ export const contracts = {
         `Contrat préparé dans le Juridique du projet « ${project} ».`,
       clearance: (element: string) =>
         `Contrat d'autorisation de l'emprunt « ${element} ».`,
-      backToPlan: "Revenir au Plan d'action",
+      backToPlan: "Revenir au Suivi",
       backToClearance: "Revenir à l'emprunt",
     },
     back: "Tous les contrats",

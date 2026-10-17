@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { ReadinessSection } from "@/components/production/preprod/readiness-section";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
@@ -33,7 +33,11 @@ export default async function ProductionReadinessStepPage({
     .order("number", { ascending: false })
     .limit(1);
   return (
-    <StepPanel step={step} steps={steps}>
+    <StepPanel
+      step={step}
+      steps={steps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       <ReadinessSection
         {...common}
         rows={o.checks}

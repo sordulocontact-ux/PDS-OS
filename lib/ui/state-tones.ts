@@ -1,3 +1,5 @@
+import type { JourneyStatus } from "@/lib/ui/journey";
+
 /**
  * Semantic tones of docs/DESIGN.md § 3, applied to every business state in one
  * place. neutral = nothing to do yet or settled aside; info = running;
@@ -1095,8 +1097,8 @@ export const creativeBriefTone: Record<string, Tone> = {
   validated: "success",
 };
 
-/** A step of a production's journey (lib/production/journey). */
-export const productionStepTone: Record<string, Tone> = {
+/** A step of a module's journey (lib/ui/journey, Production and Juridique). */
+export const journeyStatusTone: Record<JourneyStatus, Tone> = {
   done: "success",
   current: "info",
   blocked: "neutral",

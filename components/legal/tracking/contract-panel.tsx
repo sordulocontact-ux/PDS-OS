@@ -42,14 +42,14 @@ function Values({
     (f) => f.status === "missing" && f.home === "fiche",
   );
   // Back to this person's panel once the value is completed (JUR-10).
-  const back = `${routes.projectLegalStep(projectId, "plan")}?ligne=person:${row.key}`;
+  const back = `${routes.projectLegalStep(projectId, "tracking")}?ligne=person:${row.key}`;
   const fixHref = (home: string): string | null =>
     home === "network" && row.contactId
       ? withReturn(routes.networkContact(row.contactId), back)
       : home === "mapping"
         ? routes.projectLegalStep(projectId, "contracts")
         : home === "credits"
-          ? routes.projectLegal(projectId)
+          ? routes.projectLegalStep(projectId, "inventory")
           : home === "fiche"
             ? routes.projectLegalStep(projectId, "forms")
             : null;

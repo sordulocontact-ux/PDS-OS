@@ -7,11 +7,6 @@ export const legal = {
     // The page that holds the Cadrage's questions and the Confirmation too.
     dossierDescription:
       "Ce que le projet sait déjà, les questions de PO sur ce qui manque, puis le dossier à confirmer. Le plan d'action s'ouvre une fois le dossier confirmé.",
-    counts: {
-      known: "Informations connues",
-      to_confirm: "Informations à confirmer",
-      missing: "Informations manquantes",
-    },
     filterEmpty: {
       known: "Aucune information connue pour l'instant.",
       to_confirm: "Aucune information à confirmer.",
@@ -28,41 +23,12 @@ export const legal = {
       title: "Titre",
       organism: "Organisme",
       allDeclared: "Tous les organismes sont déjà déclarés pour ce titre.",
-      editTitle: "Modifier le titre",
       editRights: "Modifier les droits",
+      complete: "Compléter",
+      view: "Voir",
     },
-    sections: {
-      titles: {
-        title: "Titres",
-        description: "Identifiants et ayant droit de chaque titre du projet.",
-      },
-      people: {
-        title: "Personnes",
-        description:
-          "Les contributeurs crédités, et s'ils sont dans le Réseau.",
-      },
-      splits: {
-        title: "Répartitions",
-        description: "Parts du master et de l'édition, titre par titre.",
-      },
-      // « Accords » is the clearances' dossier (third-party elements):
-      // never the same word for the contracts.
-      agreements: {
-        title: "Contrats",
-        description: "Les contrats rattachés au projet.",
-      },
-      declarations: {
-        title: "Déclarations",
-        // JUR-02: three different things, said once.
-        description:
-          "Dépôts auprès des sociétés de gestion collective. La déclaration dépose l'œuvre ; l'ISWC est le numéro que la SACEM donne ensuite à l'œuvre ; l'ISRC identifie l'enregistrement et vient du producteur : l'un n'entraîne pas l'autre.",
-      },
-      flags: {
-        title: "Points signalés au cadrage",
-        description: "Les contraintes de droits notées dans le Cadrage.",
-        empty: "Aucun point juridique noté au cadrage.",
-      },
-    },
+    // Source of an intervenant non crédité.
+    contactSource: "Réseau",
     facts: {
       isrc: "ISRC",
       iswc: "ISWC",
@@ -151,17 +117,7 @@ export const legal = {
       },
     },
     project: "Projet",
-    // JUR-05: confirmed here, taken from the Cadrage, still open.
-    progressDetail: (confirmed: number, proposed: number, open: number) =>
-      [
-        `${confirmed} confirmée${confirmed > 1 ? "s" : ""}`,
-        proposed > 0
-          ? `${proposed} reprise${proposed > 1 ? "s" : ""} du Cadrage, à confirmer`
-          : null,
-        open > 0 ? `${open} sans réponse` : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
+    questionOf: (n: number, total: number) => `Question ${n} sur ${total}`,
     answerLabel: "Votre réponse",
     // An answer that says « nothing », saved without PO (UX test of
     // 09/10/2026: « Enregistrer » greyed when the right answer was none).
@@ -420,7 +376,7 @@ export const legal = {
     needsConfirmation: {
       title: "Le dossier n'est pas encore confirmé",
       body: "Le plan d'action part du dossier confirmé : relisez-le et confirmez-le d'abord.",
-      action: "Aller à l'état des lieux",
+      action: "Aller à la confirmation",
     },
     launched: (date: string, name: string | null) =>
       name ? `Plan lancé le ${date} par ${name}.` : `Plan lancé le ${date}.`,
@@ -790,10 +746,9 @@ export const legal = {
   // Intervenants non crédités (ticket « Architecture globale », lot 6) :
   // un avocat, un distributeur, un photographe… choisis dans le Réseau.
   projectContacts: {
-    title: "Intervenants non crédités",
-    description:
-      "Les personnes qui interviennent sans être créditées sur un titre : leur fiche et leur contrat suivent ceux des crédités.",
-    empty: "Aucun intervenant non crédité.",
+    add: "Ajouter un intervenant",
+    addDescription:
+      "Une personne du Réseau qui intervient sans être créditée : sa fiche et son contrat suivent ceux des crédités.",
     contact: "Personne du Réseau",
     role: "Rôle dans le projet",
     submit: "Ajouter",

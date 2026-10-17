@@ -421,11 +421,6 @@ export const shell = {
       confirmation: "Confirmation",
       plan: "Plan d'action",
       tracking: "Suivi",
-      planLocked: "Disponible une fois le dossier confirmé",
-      // Under the chevrons: the DG's five steps, as the dossier's state.
-      phase: "Étape du dossier",
-      // Back from a branch's page (opened by an action of the plan).
-      backToPlan: "Plan d'action",
       // The branches' pages, each opened from an action of the plan.
       branches: {
         forms: "Fiches de renseignements",
@@ -467,9 +462,6 @@ export const shell = {
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",
     readOnly:
       "Lecture seule : seul le chef de projet responsable modifie ce projet.",
-    // JUR-04: the Juridique is shared by the direction and project managers.
-    legalShared:
-      "Juridique : la direction et les chefs de projet y agissent, même sans être responsables du projet. Le reste du projet reste à son responsable.",
     readOnlyDesign:
       "Seul le chef de projet responsable écrit le Dossier et relit les versions ; l'équipe créative y dépose les siennes.",
     // How a project moves on (ProjectJourney): one model of progress.

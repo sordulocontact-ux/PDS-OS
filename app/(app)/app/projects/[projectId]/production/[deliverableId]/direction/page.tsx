@@ -1,5 +1,5 @@
 import { DirectionDecision } from "@/components/production/journey/direction-decision";
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { ProductionBriefSection } from "@/components/production/prep/brief-section";
 import { ProductionImportButton } from "@/components/production/prep/import-dialog";
 import { fr } from "@/lib/i18n/fr";
@@ -35,7 +35,11 @@ export default async function ProductionDirectionStepPage({
     data.ownerName ??
     "—";
   return (
-    <StepPanel step={step} steps={steps}>
+    <StepPanel
+      step={step}
+      steps={steps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       <ProductionImportButton
         projectId={projectId}
         sheetId={sheet.id}

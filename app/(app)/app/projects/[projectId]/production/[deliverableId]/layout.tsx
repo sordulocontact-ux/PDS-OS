@@ -1,6 +1,8 @@
-import { JourneySpine } from "@/components/production/journey/journey-spine";
-import { NowCard } from "@/components/production/journey/now-card";
 import { SheetHeader } from "@/components/production/prep/sheet-header";
+import { JourneySpine } from "@/components/shell/journey/journey-spine";
+import { NowCard } from "@/components/shell/journey/now-card";
+import { routes } from "@/lib/auth/redirects";
+import { fr } from "@/lib/i18n/fr";
 import { journeyContext } from "@/lib/production/journey/context";
 
 // One deliverable's production as a journey (Ibé, 14/10): its header (who
@@ -25,18 +27,23 @@ export default async function ProductionSheetLayout({
       <SheetHeader projectId={projectId} data={data} />
       {started && (
         <NowCard
-          projectId={projectId}
-          deliverableId={deliverableId}
           steps={steps}
           viewerName={viewer}
+          labels={fr.productionJourney.now}
         />
       )}
       {started ? (
         <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
           <JourneySpine
-            projectId={projectId}
-            deliverableId={deliverableId}
             steps={steps}
+            footer={{
+              href: routes.projectProductionStep(
+                projectId,
+                deliverableId,
+                "history",
+              ),
+              label: fr.productionJourney.history,
+            }}
           />
           <div className="min-w-0">{children}</div>
         </div>

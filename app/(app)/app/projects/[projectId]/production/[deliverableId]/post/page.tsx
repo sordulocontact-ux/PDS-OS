@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/production/journey/step-panel";
+import { StepPanel } from "@/components/shell/journey/step-panel";
 import { stepContext } from "@/lib/production/journey/context";
 import { notFound, redirect } from "next/navigation";
 
@@ -98,7 +98,11 @@ export default async function ProductionPostPage({
     "post",
   );
   return (
-    <StepPanel step={journeyStep} steps={journeySteps}>
+    <StepPanel
+      step={journeyStep}
+      steps={journeySteps}
+      rootPrereq={fr.productionJourney.meta.fiche}
+    >
       {status && <p className="text-sm text-muted-foreground">{status}</p>}
       {post.shootAlert && <ShootAlert alert={post.shootAlert} />}
       <ReferencesSection

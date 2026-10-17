@@ -9,6 +9,7 @@ import { sectionClass, sectionHeaderClass } from "./page-section-classes";
 export function PageSection({
   id,
   title,
+  eyebrow,
   description,
   action,
   card = false,
@@ -18,6 +19,8 @@ export function PageSection({
 }: {
   id: string;
   title: string;
+  // Small caption above the title (« Question 1 sur 2 »).
+  eyebrow?: string;
   description?: string;
   action?: React.ReactNode;
   card?: boolean;
@@ -28,6 +31,11 @@ export function PageSection({
   const titleId = `${id}-title`;
   const heading = (
     <div className="flex min-w-0 flex-col gap-0.5">
+      {eyebrow && (
+        <span className="text-sm text-muted-foreground tabular-nums">
+          {eyebrow}
+        </span>
+      )}
       <h2 id={titleId} className="text-base font-medium">
         {title}
       </h2>

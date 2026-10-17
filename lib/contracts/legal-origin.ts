@@ -34,7 +34,7 @@ export async function legalOriginOf(
     return {
       kind: "agreement",
       projectId: need.data.project_id,
-      href: routes.projectLegalStep(need.data.project_id, "plan"),
+      href: routes.projectLegalStep(need.data.project_id, "tracking"),
     };
   const clearanceId = clearance.data?.clearance_id;
   const { data: c } = clearanceId

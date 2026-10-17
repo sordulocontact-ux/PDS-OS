@@ -4,27 +4,27 @@ import { IconCheck, IconLock } from "nucleo-sharp-essential";
 import { usePathname } from "next/navigation";
 
 import { ViewLink } from "@/components/ui/view-link";
-import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { stepHref } from "@/lib/production/journey/href";
-import type { JourneyStep } from "@/lib/production/journey/types";
+import type { JourneyStep } from "@/lib/ui/journey";
 import { cn } from "@/lib/utils";
 
-const t = fr.productionJourney;
+const t = fr.journey;
 
 /**
- * The journey on the left of a deliverable (Ibé, 14/10): each step, its state,
- * who acts on it or what it gave, the viewer's own steps marked « À vous ».
- * The open step is the page shown on the right.
+ * The journey on the left of a module (docs/VISION-UX.md § 4): each step, its
+ * state, who acts on it or what it gave, the viewer's own steps marked
+ * « À vous ». The open step is the page shown on the right (`openKey`, else
+ * the one whose URL is the current path); `footer` is a link to the module's
+ * history.
  */
 export function JourneySpine({
-  projectId,
-  deliverableId,
   steps,
+  openKey,
+  footer,
 }: {
-  projectId: string;
-  deliverableId: string;
   steps: JourneyStep[];
+  openKey?: string;
+  footer?: { href: string; label: string };
 }) {
   const pathname = usePathname();
   const title = (key: string) => steps.find((s) => s.key === key)?.title ?? key;
@@ -38,8 +38,8 @@ export function JourneySpine({
       </h2>
       <ol className="flex flex-col gap-0.5">
         {steps.map((s, index) => {
-          const href = stepHref(projectId, deliverableId, s.key);
-          const open = pathname === href;
+          const href = s.href;
+          const open = openKey ? s.key === openKey : pathname === href;
           const mine = Boolean(s.actor?.viewer);
           const sub =
             s.status === "done"
@@ -121,18 +121,15 @@ export function JourneySpine({
           );
         })}
       </ol>
-      <ViewLink
-        href={routes.projectProductionStep(projectId, deliverableId, "history")}
-        aria-current={
-          pathname ===
-          routes.projectProductionStep(projectId, deliverableId, "history")
-            ? "page"
-            : undefined
-        }
-        className="mt-2 rounded-lg border-t border-[color:var(--border-hairline)] px-2 pt-3 pb-1 text-sm text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-      >
-        {t.history}
-      </ViewLink>
+      {footer && (
+        <ViewLink
+          href={footer.href}
+          aria-current={pathname === footer.href ? "page" : undefined}
+          className="mt-4 rounded-lg px-2 py-1 text-sm text-muted-foreground hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        >
+          {footer.label}
+        </ViewLink>
+      )}
     </nav>
   );
 }

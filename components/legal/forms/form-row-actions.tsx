@@ -98,7 +98,7 @@ export function FormRowActions({
       <div className="flex flex-col gap-1 sm:items-end">
         <p className="text-caption text-muted-foreground">{t.namesake}</p>
         <Link
-          href={routes.projectLegal(projectId)}
+          href={routes.projectLegalStep(projectId, "inventory")}
           className="text-sm underline underline-offset-4"
         >
           {t.linkFirst}

@@ -25,16 +25,12 @@ export function IntakeWorkspace({
   projectId,
   questions,
   initialQuestion,
-  embedded = false,
 }: {
   projectId: string;
   questions: IntakeQuestion[];
   // `?question=<key>:<title|project>` (from the Confirmation's « Corriger »
   // or « Répondre »): that question opens first.
   initialQuestion: string | null;
-  // On the État des lieux, the dossier and its confirmation sit below: once
-  // every question is answered, nothing more is said here.
-  embedded?: boolean;
 }) {
   const t = fr.legal.intake;
   const [correcting, setCorrecting] = useState<string | null>(
@@ -47,33 +43,22 @@ export function IntakeWorkspace({
     : undefined;
   const active = corrected ?? questions.find((q) => !q.answered);
   const answered = questions.filter((q) => q.answered);
-  // JUR-05: an answer taken from the Cadrage is proposed, not confirmed.
-  const proposed = questions.filter(
-    (q) => !q.answered && q.suggestionFrom === "cadrage" && q.suggestion,
-  ).length;
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
-      {questions.length > 0 && (active || !embedded) && (
-        <p className="text-sm text-muted-foreground tabular-nums">
-          {t.progressDetail(
-            answered.length,
-            proposed,
-            questions.length - answered.length - proposed,
-          )}
-        </p>
-      )}
       {active ? (
         <QuestionCard
           // A fresh card per question: its answer and review start empty.
           key={keyOf(active)}
           projectId={projectId}
           question={active}
+          position={questions.indexOf(active) + 1}
+          total={questions.length}
           correcting={corrected?.answered ?? false}
           onCancel={() => setCorrecting(null)}
           onSaved={() => setCorrecting(null)}
         />
-      ) : embedded ? null : (
+      ) : (
         // Every question answered: the next step, never a dead end.
         <EmptyState
           icon={IconCheck}
@@ -82,7 +67,11 @@ export function IntakeWorkspace({
           action={
             <Button
               nativeButton={false}
-              render={<Link href={routes.projectLegal(projectId)} />}
+              render={
+                <Link
+                  href={routes.projectLegalStep(projectId, "confirmation")}
+                />
+              }
             >
               {t.done.action}
             </Button>

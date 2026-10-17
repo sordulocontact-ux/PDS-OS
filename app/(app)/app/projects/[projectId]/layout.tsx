@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { LegalSteps } from "@/components/projects/legal-steps";
 import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import {
@@ -73,7 +72,6 @@ export default async function ProjectLayout({
   );
   const strategyLaunched =
     (stateOf("marketing")?.status ?? "not_started") !== "not_started";
-  const legalDone = flows?.legalDone ?? [];
 
   return (
     <div className="flex flex-1">
@@ -186,16 +184,13 @@ export default async function ProjectLayout({
                 (stateOf("master")?.done ?? []) as MasterTab[],
               )}
             />
-            {canSeeLegal && (
-              <LegalSteps projectId={project.id} done={legalDone} />
-            )}
           </>
         )}
 
         {/* Only the owner writes inside a launched project; the database enforces it. */}
         <EditAccessProvider canEdit={canEdit}>
           {project.stages.length > 0 && (
-            <ReadOnlyNotice projectId={project.id} legalWriter={canSeeLegal} />
+            <ReadOnlyNotice projectId={project.id} />
           )}
           <div className="flex flex-col pb-8">{children}</div>
         </EditAccessProvider>
