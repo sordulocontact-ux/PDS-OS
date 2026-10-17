@@ -108,6 +108,11 @@ juste, et les dates calculées suivent la règle du code (Mix V1 = master final 
 - Survol seulement sous `@media (hover: hover) and (pointer: fine)` ; mouvement réduit respecté.
 - Presque pas d'animation : l'enfoncement du bouton (`scale(.97)`), le toast. Rien sur la
   navigation, utilisée des dizaines de fois par jour.
+- **Le proto montre l'application finale.** Aucune note de chantier à l'écran (« dépend du
+  branchement de l'e-mail », « point à trancher », « à décider avec le label ») : on dessine
+  comme si tout était branché et tranché. Ces réserves vont dans la réponse et dans `docs/`.
+  Seuls les boutons qui simulent l'extérieur (« Proto : faire arriver leur réponse ») portent
+  le style de la barre du proto. *(Sacha 17/10)*
 - Chaque étape montre ses états : faite, en cours pour moi, en cours pour un autre (« En attente
   de… »), verrouillée, renvoyée avec motif. Chaque formulaire a son erreur (motif manquant, date
   hors ordre), affichée au premier essai, jamais avant.

@@ -33,8 +33,10 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  await role("cp"); await step("locs"); await go("Retenir ce lieu"); log("loc:", await p.locator(".callout.ok").first().innerText());
  // 4. Change of place
  await p.selectOption("#scenSel","change"); log("strip:", (await p.locator(".strip").first().innerText()).replace(/\n/g," | "));
- await go("Remplacer le lieu retenu"); await go("Remplacer le lieu"); log("no reason:", await errTxt());
+ await go("Remplacer le lieu retenu"); log("prefilled reason:", await p.inputValue("#rpReason"), "| linked info checked:", await p.locator('[id^="lk-"]').first().isChecked());
+ await p.fill("#rpReason",""); await go("Remplacer le lieu"); log("no reason:", await errTxt());
  await p.fill("#rpReason","La copropriété refuse le tournage sur le toit"); await go("Remplacer le lieu");
+ log("info confirmed by the replacement:", await p.evaluate(()=>document.body.innerText.includes("2 informations à confirmer")) ? "no" : "yes");
  log("after replace:", await p.locator(".flash b").first().innerText(), "| spine:", (await p.locator(".step.rework .t").allInnerTexts()).join(","));
  await p.screenshot({ path: out + "/v2-change.png", fullPage: true });
  await p.locator('.tab[data-v="decisions"]').click(); log("contra:", await p.locator(".contra .row").count());
@@ -52,8 +54,8 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  // 6. After the shoot
  await role("cp"); await step("shoot"); await go("Confirmer que le tournage a eu lieu");
  await role("societe"); await go("Utiliser un lien d'exemple"); await go("Transmettre le lien");
- await role("charge"); await step("rushes"); await go("L'accès fonctionne"); await go("Marquer les rushes reçus"); await go("Transférer au montage");
- await role("societe"); await go("Bien reçu pour le montage"); await go("Utiliser un lien d'exemple"); await go("Déposer le montage V1");
+ await role("charge"); await step("rushes"); await go("Rushes reçus");
+ await role("societe"); await go("Utiliser un lien d'exemple"); await go("Déposer le montage V1");
  await role("da"); await step("post"); await p.fill("#pComment","Raccourcir l'intro de 4 s."); await go("Demander des modifications");
  await role("societe"); await go("Utiliser un lien d'exemple"); await go("Déposer le montage V2");
  await role("da"); await step("post"); await go("Valider le montage V2"); await role("mgmt"); await go("Valider le montage V2");
@@ -67,7 +69,7 @@ const { chromium } = require(process.cwd() + "/node_modules/playwright-core");
  // 8. Blocker
  await p.selectOption("#scenSel","change"); await step("prep"); await go("Signaler un blocage"); await p.fill("#bText","Le loueur n'a plus de FX6"); await p.fill("#bNext","Trouver un autre loueur"); await go("Signaler");
  await role("charge"); log("charge now:", (await p.locator("section.now").innerText()).replace(/\n/g," | ").slice(0,160));
- await step("prep"); await p.locator('[data-act="lift"]').first().click(); log("lifted, blockers:", await p.locator('.step[data-step="prep"] .flag').count());
+ await step("prep"); await p.locator('[data-act="lift"]').first().click(); await p.locator('[data-act="liftok"]').click(); log("lift without note:", await errTxt()); await p.fill("#liftNote","Un autre loueur a une FX6"); await p.locator('[data-act="liftok"]').click(); log("lifted, blockers:", await p.locator('.step[data-step="prep"] .flag').count());
  await p.setViewportSize({ width: 390, height: 900 }); log("mobile:", await p.evaluate(() => document.documentElement.scrollWidth));
  await p.emulateMedia({ colorScheme: "dark" }); await p.setViewportSize({ width: 1440, height: 1100 }); await p.selectOption("#scenSel","ready"); await p.screenshot({ path: out + "/v2-dark.png" });
  console.log(L.join("\n")); console.log("errors:", errs); await b.close(); })().catch(e=>{console.error("FAIL", e.message.split("\n")[0]); process.exit(1);});

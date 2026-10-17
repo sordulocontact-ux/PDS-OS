@@ -87,8 +87,8 @@ Titre du module                                   [chevrons des sous-modules]
 │   Version confir.│ │ Responsable │ Validation │ Prérequis ✓/○ │ Ensuite      │
 │ ● Brief Mix…     │ │ [PO] ce que PO a pré-rempli et d'où                     │
 │   À vous · …     │ │ Faits pré-remplis, avec source        [Modifier/Changer]│
-│ ◌ Mixage         │ │ Déjà fait : …                                           │
-│   Après : Brief  │ │ [Action principale] [Issue avec motif]                  │
+│ ◌ Mixage         │ │ [Action principale] [Issue avec motif]                  │
+│   Après : Brief  │ │ Déjà fait : …                                           │
 └──────────────────┘ └─────────────────────────────────────────────────────────┘
 ```
 
@@ -104,8 +104,9 @@ Titre du module                                   [chevrons des sous-modules]
 - **Étape ouverte** (à droite). Titre et pastille d'état, pourquoi, les quatre colonnes
   Responsable / Validation / Prérequis / Ensuite, puis, dans cet ordre et seulement s'ils
   existent : « Se débloque quand X est fait », le motif d'un retour, l'encadré PO, les faits, ce
-  qui manque encore, l'historique « Déjà fait », l'action (ou « En attente de X (lien privé) :
-  … »), le résultat final.
+  qui manque encore, l'action (ou « En attente de X (lien privé) : … »), le résultat final, et
+  **tout en bas l'historique « Déjà fait »** : ce qui est fait ferme l'étape, sous tout ce qui
+  compte encore *(Sacha 17/10)*.
 - **On arrive au bon endroit.** Ouvrir un module ouvre l'étape qui attend la personne, sinon
   l'étape en cours. Une page qui n'a plus de raison d'être (ancienne fiche à onglets) redirige
   vers cette étape.
@@ -200,6 +201,48 @@ valent partout, dans l'app comme dans les protos.
 16. **Les mots sont ceux de l'app.** Libellés repris de `lib/i18n/fr/`, verbes précis
     (« Confirmer la version source », pas « Valider »), le même mot du bouton au toast et au
     journal.
+17. **Agir ne déplace rien.** Une carte, une section ou un bouton garde sa place après qu'on
+    s'en est servi : seule sa pastille change (« À vous » → « Suivi »). Les étapes d'un lien
+    privé suivent l'ordre du parcours **inversé**, la plus récente en haut (on ne descend pas de
+    plus en plus loin), et ce qui est attendu se résume en haut avec un lien vers chaque carte.
+    Une action qui retire ou lève quelque chose (un blocage) passe par la modale avec son
+    explication, jamais par un simple « Êtes-vous sûr ? ». Un bouton « Ajouter » vit dans l'en-tête de sa liste, pas sous la liste, qui
+    grandit. Les versions anciennes se replient, la dernière et la retenue restent ouvertes.
+    *(Sacha 17/10, carte Lieux du lien de la société)*
+18. **Le document qu'on décide passe en tête.** Un contrat, une licence, un bulletin : sa carte
+    commence par le fichier (nom, version, « Voir le PDF »), puis les valeurs qui le remplissent,
+    chacune avec sa source. Après un aller-retour, une ligne dit ce qui a changé depuis la version
+    d'avant (« Changé depuis la v1 : Part de composition 50 % → 40 % (Lina Haddad) »). Le
+    document se voit et se télécharge à chaque étape qui le suit (le bulletin SACEM de sa
+    génération au résultat). Le modèle d'un contrat se **choisit** dans un geste à part
+    (proposé d'après le rôle, « Pas d'accord nécessaire » avec motif) ; sans modèle qui
+    convient, on le crée dans la modale « Nouveau modèle de contrat » (fichier, nom, rôles
+    auxquels il s'applique, ce que PO a repéré) : c'est un objet de la bibliothèque, pas ce
+    contrat. La direction le valide dans l'étape avant toute génération. *(Sacha 17/10, proto Juridique)*
+20. **On ne redemande que ce qui manque.** Une personne déjà connue (Réseau, fiche artiste) ne
+    reçoit pas une fiche complète : son lien ne demande que les valeurs absentes du contrat, et
+    montre le reste en lecture. Ce que PDS fixe (une rémunération convenue) lui est montré à
+    confirmer, jamais à écrire. Ses réponses complètent sa fiche Réseau. *(Sacha 17/10, proto
+    Juridique)*
+19. **Ce que PDS OS sait envoyer, il l'envoie.** Le destinataire est connu (fiche, Réseau) : on
+    ne fait pas recopier une adresse puis raconter l'envoi. L'étape montre l'e-mail que PDS OS
+    enverra (destinataire avec sa source, objet, pièce jointe, message modifiable), et l'envoi
+    est lui-même la preuve, gardée dans l'historique. « Je l'ai remis autrement » (main propre,
+    outil de signature) reste en recours, avec sa date. Ce qui revient signé revient par le lien
+    privé de la personne quand elle en a un ; sinon (ayants droit d'un emprunt), **la réponse
+    revient dans le fil de l'e-mail** et PDS OS la rattache seul (réponse lue par PO avec ses
+    citations, licence signée en pièce jointe déposée dans l'étape, l'e-mail reçu faisant
+    preuve) ; coller la réponse reste le recours. Cela suppose l'accès en lecture à la boîte de
+    PO (Gmail, OAuth), pas seulement l'envoi. Si PDS OS n'a pas l'adresse (c'est la fiche de
+    renseignements qui la recueille), on crée le lien, on le copie, puis « Marquer comme
+    envoyée » : l'étape ne passe en attente qu'à ce moment. **Un lien privé reste visible dans
+    son étape** (lien, « Copier le lien », « Relancer », « Nouveau lien » qui révoque l'ancien,
+    créé et envoyé quand et par qui), jamais seulement dans un bandeau qu'on ferme : là où il
+    sert (dans l'attente de la personne, ou pendant qu'on l'envoie), sinon en référence sous
+    l'action, au-dessus de « Déjà fait ».
+    Dans l'app, cela suppose de garder le jeton récupérable (chiffré), plus seulement son
+    empreinte. *(Sacha 17/10, proto Juridique ; dépend du branchement de l'e-mail,
+    `docs/CONTEXTE-PROJET.md` § 2)*
 
 ## 6. Les parcours de référence
 

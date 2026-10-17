@@ -260,6 +260,27 @@ production peut être salarié ou freelance**, selon le projet : seul son rôle 
 externe se choisit par contenu**, pas par projet : un clip en externe et des capsules en interne sur une
 même sortie (n° 8, 9). Reste ouverte : n° 13 (contenus sans tournage).
 
+**Question du 17/10 (lieu et devis), sans réponse** : le devis est validé avant que la société propose
+les lieux. Son premier devis prévoit-il un montant pour les lieux, et le lieu retenu doit-il y tenir ?
+Qui décide d'un dépassement (le chef de projet demande une révision, ou le DG valide) ? *Hypothèse,
+codée dans le proto V2 : la société indique au dépôt « dont montant prévu pour les lieux », la
+vérification le contrôle ; le code compare le tarif du lieu (× jours de tournage) à ce montant et
+affiche « Compris dans le devis » ou « Dépasse de X € : révision du devis à prévoir » ; au
+remplacement d'un lieu, la case « Budget » n'est pré-cochée qu'en cas de dépassement, la demande
+reste un choix humain.*
+
+**Décisions prises dans le proto V2 le 17/10, faute de réponse (à confirmer par Ibé)** :
+- *Rushes* : un seul geste « Rushes reçus » (lien qui fonctionne et fichiers complets ; sinon un
+  blocage). Le transfert à la postproduction (§ 14 du ticket : à envoyer, envoyé, reçu) n'existe que
+  si le rôle « Postproduction » est tenu par quelqu'un d'autre que la société qui a tourné ; sinon le
+  montage commence directement.
+- *Livraison* : plusieurs destinataires, pré-cochés selon ce que PDS OS sait (Distribution,
+  Activations, valideur externe), les autres choisis dans le projet et le Réseau. Ibé ne dit pas qui
+  les reçoit.
+- *Informations à confirmer* : elles reviennent au responsable du projet (bloc « Maintenant », ligne
+  de la synthèse avant tournage avec le lien vers Décisions). Remplacer un lieu propose de confirmer
+  l'information de l'étape Lieux qui en est le motif (pré-cochée, motif pré-rempli).
+
 ### A. Qui utilise PDS OS (bloquant)
 
 1. Réalisateur, chef op, directeur / chargé de production, régisseur, monteur : ce sont des
