@@ -1,5 +1,6 @@
 import { IconCheck } from "nucleo-sharp-essential";
 
+import { MineBadge } from "@/components/ui/mine-badge";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
@@ -53,15 +54,7 @@ export function SubModuleTabs({
                 </span>
               )}
               {tab.label}
-              {tab.mine ? (
-                <span
-                  aria-label={t.mine(tab.mine)}
-                  role="img"
-                  className="grid h-4.5 min-w-4.5 place-items-center rounded-full bg-[var(--selection)] px-1 text-[length:var(--type-micro)] leading-none font-bold text-white"
-                >
-                  {tab.mine}
-                </span>
-              ) : null}
+              <MineBadge count={tab.mine ?? 0} />
             </>
           );
           return (

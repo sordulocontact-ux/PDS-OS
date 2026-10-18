@@ -43,17 +43,23 @@ export function Sidebar({
         <div
           className={cn(
             "flex items-center",
-            collapsed ? "justify-center pt-2" : "justify-between px-4 pt-4",
+            collapsed ? "flex-col gap-1" : "justify-between px-4 pt-4",
           )}
         >
-          {!collapsed && (
-            <Link
-              href={routes.app}
-              className="flex size-15 items-center justify-center rounded-2xl bg-[var(--nav-brand-bg)] text-body-lg font-bold text-[color:var(--nav-brand-fg)] no-underline"
-            >
-              {fr.shell.brand}
-            </Link>
-          )}
+          {/* Always there, even collapsed (proto « Projet complet »: 40 px
+              ink square); full width, the larger square of the Figma. */}
+          <Link
+            href={routes.app}
+            aria-label={collapsed ? fr.shell.brand : undefined}
+            className={cn(
+              "flex items-center justify-center bg-[var(--nav-brand-bg)] font-bold text-[color:var(--nav-brand-fg)] no-underline",
+              collapsed
+                ? "size-10 rounded-xl text-[length:var(--type-micro)] leading-none"
+                : "size-15 rounded-2xl text-[length:var(--type-body-lg)] leading-[var(--type-body-lg-lh)]",
+            )}
+          >
+            {fr.shell.brand}
+          </Link>
           <Button
             variant="ghost"
             size="icon"
