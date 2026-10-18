@@ -11,6 +11,7 @@ import {
 import { ActionGroup } from "@/components/legal/plan/action-group";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
+import { usePublishResult } from "@/components/shell/module/result-banner";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import { launchLegalPlan } from "@/lib/legal/plan/actions";
@@ -44,6 +45,7 @@ export function PlanForm({
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const publish = usePublishResult();
   // Only what is still in the plan holds an action back.
   const labelOf = new Map(
     items
@@ -58,8 +60,10 @@ export function PlanForm({
         projectId,
         items.map((item) => ({ key: item.key, ...choices[item.key] })),
       );
-      if (result.ok) router.refresh();
-      else setError(result.error);
+      if (!result.ok) return setError(result.error);
+      // The banner in the step and the toast (rule 7).
+      publish(result);
+      router.refresh();
     });
 
   if (items.length === 0) return <EmptyNote>{t.nothing}</EmptyNote>;
