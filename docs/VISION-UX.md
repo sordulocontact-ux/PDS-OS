@@ -157,7 +157,11 @@ valent partout, dans l'app comme dans les protos.
 7. **Après chaque geste, la suite est dite.** Un bandeau de résultat dit ce qui est fait et **qui
    doit agir ensuite** ; le toast reprend le même verbe que le bouton (« Confirmer » →
    « confirmée ») ; l'Activité l'horodate. On ne laisse jamais la personne devant une page qui ne
-   bouge plus.
+   bouge plus. **Le bandeau s'affiche là où on a cliqué**, dans l'étape, juste au-dessus du geste,
+   jamais seulement en haut de page où on ne le voit pas. Une suite d'états déclarés (un
+   distributeur qui reçoit, accepte, livre) se montre en **frise** dont chaque point se coche avec
+   sa date, et se déclare en **un seul geste** (on coche ce qu'on a appris), pas un bouton par
+   état. *(Sacha 18/10, proto Distribution)*
 8. **Pas de cul-de-sac.** Rien à faire dans ce module ? « Maintenant » renvoie vers l'action
    ailleurs. Un bloquant (Distribution) dit ce qui manque et propose **« Corriger dans X »** avec le
    lien.
@@ -219,6 +223,15 @@ valent partout, dans l'app comme dans les protos.
     convient, on le crée dans la modale « Nouveau modèle de contrat » (fichier, nom, rôles
     auxquels il s'applique, ce que PO a repéré) : c'est un objet de la bibliothèque, pas ce
     contrat. La direction le valide dans l'étape avant toute génération. *(Sacha 17/10, proto Juridique)*
+21. **Les retours restent dans l'équipe ; l'externe reçoit ce qui est décidé.** Sur une version
+    (mix, master, montage), chacun commente avec son minutage, artiste comprise par son lien ;
+    l'ingénieur ne reçoit que la demande de modification du valideur, ou des retours que le
+    responsable lui transmet explicitement (« Transmettre les retours sans décider »). L'écran le
+    dit sous les retours. *(Sacha 18/10, proto Master)*
+22. **Une désignation dit d'où elle vient.** Une personne présélectionnée (ingénieur, valideur)
+    porte la vraie raison (« Désigné au Cadrage › Équipe », citation), le Réseau n'étant qu'un
+    complément ; « Changer » ouvre la liste et recalcule ce qui en dépend (tarifs, révisions).
+    Personne de désigné : « À choisir », jamais une supposition. *(Sacha 18/10, proto Master)*
 20. **On ne redemande que ce qui manque.** Une personne déjà connue (Réseau, fiche artiste) ne
     reçoit pas une fiche complète : son lien ne demande que les valeurs absentes du contrat, et
     montre le reste en lecture. Ce que PDS fixe (une rémunération convenue) lui est montré à
@@ -228,7 +241,9 @@ valent partout, dans l'app comme dans les protos.
     ne fait pas recopier une adresse puis raconter l'envoi. L'étape montre l'e-mail que PDS OS
     enverra (destinataire avec sa source, objet, pièce jointe, message modifiable), et l'envoi
     est lui-même la preuve, gardée dans l'historique. « Je l'ai remis autrement » (main propre,
-    outil de signature) reste en recours, avec sa date. Ce qui revient signé revient par le lien
+    outil de signature) reste en recours, avec sa date. **L'aperçu montre le lien privé tel que la
+    personne le recevra**, dans un bloc fixe sous le message (ou « lien privé créé à l'envoi »
+    s'il n'existe pas encore). Ce qui revient signé revient par le lien
     privé de la personne quand elle en a un ; sinon (ayants droit d'un emprunt), **la réponse
     revient dans le fil de l'e-mail** et PDS OS la rattache seul (réponse lue par PO avec ses
     citations, licence signée en pièce jointe déposée dans l'étape, l'e-mail reçu faisant
@@ -243,11 +258,41 @@ valent partout, dans l'app comme dans les protos.
     Dans l'app, cela suppose de garder le jeton récupérable (chiffré), plus seulement son
     empreinte. *(Sacha 17/10, proto Juridique ; dépend du branchement de l'e-mail,
     `docs/CONTEXTE-PROJET.md` § 2)*
+21. **Une proposition se tranche une par une.** Ce que PO tire d'un call (réponses de la Stratégie,
+    intentions de la Conception, tâches d'un call de présentation) arrive **rangé là où il sert**
+    (par dimension, par livrable), jamais en liste à cocher : rien n'est coché d'avance. Chaque
+    proposition a « Confirmer », « Modifier » (corrigée, elle est confirmée et dit « Modifié par … »,
+    la citation restant dessous) et « Écarter » ; chaque groupe dit son état (« À arbitrer », mot
+    d'Ibé) et « n à confirmer », et
+    ce dont personne n'a parlé se voit (« Rien n'a été dit pendant l'échange »). « Ajouter » est
+    dans l'en-tête du groupe. Le call est une **source** des étapes, pas une étape à confirmer.
+    *(Sacha 18/10, proto Marketing)*
+22. **Pas d'onglets sous les chevrons.** Une information notée (appel, WhatsApp, e-mail) s'affiche
+    dans l'étape qu'elle concerne, avec « Noter une information » à côté de « Signaler un blocage » ;
+    la liste complète s'ouvre dans la modale depuis la pastille « n informations à confirmer ». Les
+    tâches et le journal sont dans la barre du projet (Travail, Activité) et dans le « Déjà fait » de
+    l'étape ; les rôles et les liens privés dans la modale « Qui fait quoi », à côté du titre. Le
+    sélecteur de livrable de la Production reste à part du parcours. *(Ibé, ticket « Architecture
+    globale » ; Sacha 18/10)*
+23. **Ce qui vient de l'extérieur est lu, daté, et jamais confondu avec ce que PDS a décidé.** Le
+    tableau d'une agence est relié (lecture seule), ses colonnes sont confirmées une fois, et
+    « Actualiser » montre d'abord ce qui change (ajouts, modifications, lignes retirées gardées,
+    erreurs à corriger chez l'agence) avant d'importer un instantané numéroté. Le statut de
+    l'agence s'affiche tel quel à côté de la décision PDS, qui ne bouge jamais à l'import ; un écart
+    (« Contacté » sans décision) est signalé, pas corrigé. Seul un changement sur ce que PDS a
+    décidé (tarif, audience, angle) rouvre la question. Une déclaration (publication, retombée,
+    bilan d'agence) reste « déclarée » jusqu'à une vérification à part, avec sa méthode. Un créateur
+    ou une personne sans compte agit par son lien privé ; dans le proto, son geste est simulé par un
+    bouton « Proto : … ». *(Ibé, tickets « Activations / Influence » et « Relations presse » ;
+    Sacha 18/10)*
 
 ## 6. Les parcours de référence
 
 Le détail est dans le proto `docs/protos/pds-app.html` (toute l'application) et
-`docs/protos/production.html` (la Production en interne et en externe).
+`docs/protos/production.html` (la Production en interne et en externe). Le Marketing complet, sur le patron
+de la Production V2 (chevrons cliquables, Décisions, Tâches, Historique, Rôles et liens), est dans
+`docs/protos/marketing.html` *(17/10)*. Ce qu'Ibé demande pour chaque partie du Marketing, et ce qui
+reste à faire : `docs/MARKETING-METIER.md` *(18/10)*.
 
 - **Lancement** : le DG crée le projet (type, format, titres du Catalogue, sortie, budget,
   priorité, chef de projet) et le transmet ; le chef de projet accepte, demande une précision ou

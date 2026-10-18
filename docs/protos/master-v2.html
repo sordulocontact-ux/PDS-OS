@@ -1,0 +1,1544 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Master V2 PDS OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Layout: PDS OS shell (main nav, project nav) and, in every module, the same
+   guided pattern — « Maintenant », the journey on the left, the open step on the
+   right. Tokens mirror app/globals.css. */
+:root{
+  --app:#fbfbfb; --page:#ffffff; --raised:#ffffff; --soft:#f4f4f4; --sunken:#ececec;
+  --inverse:#000; --inverse-fg:#fff;
+  --text:#000; --text-2:#5e5e5e; --text-3:#767676; --muted:#afafaf;
+  --hair:#ececec; --border:#d4d4d4; --field:#dcdcdc; --hover-border:#afafaf;
+  --sel:#155dfc; --sel-bg:rgb(21 93 252 / .07);
+  --info-bg:#e2eefc; --info-fg:#0b3d8c; --warn-bg:#fcefd2; --warn-fg:#6e4300;
+  --ok-bg:#daf3e2; --ok-fg:#0d5226; --bad-bg:#fce1df; --bad-fg:#9a1b1b;
+  --act-bg:#ece1fb; --act-fg:#4c1d9e; --neutral-bg:#ececec; --neutral-fg:#111;
+  --glass:rgb(24 24 24 / .86); --glass-fg:#fff; --glass-2:#bdbdbd;
+  --shadow:0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .06);
+  --font:"Google Sans Flex","Google Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--app);color:var(--text);font-family:var(--font);font-weight:500;font-size:16px;line-height:1.5;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.04em;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+ul,ol{margin:0;padding:0;list-style:none}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.cap{font-size:14px;color:var(--text-2)}
+.t3{color:var(--text-3)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:68px 200px minmax(0,1fr);min-height:100%}
+.shell.noproj{grid-template-columns:68px minmax(0,1fr)}
+.mainnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px}
+.brand{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--inverse);color:var(--inverse-fg);font-weight:700;font-size:12px;letter-spacing:0;margin-bottom:8px}
+.navbtn{position:relative;width:44px;height:40px;border-radius:8px;display:grid;place-items:center;color:var(--text-2);border:0;background:none;cursor:pointer}
+.navbtn.on{background:var(--sunken);color:var(--text)}
+.navbtn[disabled]{opacity:.35;cursor:not-allowed}
+.navbtn .cnt{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--inverse);color:var(--inverse-fg);font-size:10.5px;font-weight:700;display:grid;place-items:center;letter-spacing:0}
+.navbtn .tip{position:absolute;left:52px;top:50%;transform:translateY(-50%);background:var(--inverse);color:var(--inverse-fg);font-size:13px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 120ms ease;z-index:20}
+@media (hover:hover) and (pointer:fine){.navbtn:hover:not([disabled]){background:var(--soft);color:var(--text)}.navbtn:hover .tip{opacity:1}}
+.mainnav .grow{flex:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-size:12.5px;font-weight:600;flex:none;color:var(--text)}
+.avatar.sm{width:24px;height:24px;font-size:10.5px}
+.projnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);padding:8px;display:flex;flex-direction:column;gap:1px;overflow:auto}
+.switcher{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 10px 12px;border-bottom:1px solid var(--hair);margin-bottom:6px;font-weight:600}
+.group{font-size:13px;color:var(--text-3);padding:12px 10px 4px}
+.pitem{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 10px;border-radius:8px;color:var(--text-2);font-size:15px;border:0;background:none;text-align:left;cursor:pointer;width:100%}
+.pitem.on{background:var(--sunken);color:var(--text)}
+.pitem .grow{flex:1}
+@media (hover:hover) and (pointer:fine){.pitem:hover{background:var(--soft);color:var(--text)}}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.run{background:var(--sel)} .dot.wait{background:var(--warn-fg)} .dot.block{background:var(--bad-fg)} .dot.done{background:var(--ok-fg)}
+.mine{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+.content{min-width:0;padding:28px 40px 130px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+@media (max-width:1100px){.shell{grid-template-columns:68px minmax(0,1fr)}.projnav{display:none}}
+@media (max-width:720px){.shell,.shell.noproj{grid-template-columns:minmax(0,1fr)}.mainnav{display:none}.content{padding:20px 16px 150px}}
+
+/* Head */
+.h1{font-size:30px;letter-spacing:-.04em}
+.chevrons{display:flex;flex-wrap:wrap;gap:4px}
+.chev{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--text-2);font-size:15px;border:0;cursor:pointer}
+.chev.on{background:var(--inverse);color:var(--inverse-fg)}
+.chev .ok{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok-fg)}
+.chev .lock{opacity:.6}
+.headrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px;color:var(--text-2)}
+.facts b{color:var(--text);font-weight:600}
+
+/* Pills, buttons */
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;background:var(--neutral-bg);color:var(--neutral-fg);white-space:nowrap}
+.pill.info{background:var(--info-bg);color:var(--info-fg)} .pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ok{background:var(--ok-bg);color:var(--ok-fg)} .pill.bad{background:var(--bad-bg);color:var(--bad-fg)} .pill.act{background:var(--act-bg);color:var(--act-fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--inverse);color:var(--inverse-fg);font-weight:600;font-size:15px;cursor:pointer;transition:transform 140ms var(--ease),background-color 160ms ease;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.out{background:transparent;color:var(--text);border-color:var(--border)}
+.btn.ghost{background:transparent;color:var(--text-2)}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+@media (hover:hover) and (pointer:fine){.btn.out:hover{border-color:var(--hover-border)}.btn.ghost:hover{background:var(--soft);color:var(--text)}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Cards */
+.card{background:var(--raised);border:1px solid var(--hair);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:20px} .card h3{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.now{border-color:var(--border);box-shadow:var(--shadow)}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2);flex-wrap:wrap}
+.now h2{font-size:22px}
+.rowlist{display:flex;flex-direction:column;gap:8px}
+.wr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--soft);font-size:15px}
+.wr .grow{flex:1;min-width:0}
+.flash{background:var(--ok-bg);color:var(--ok-fg);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.flash .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.flash button{background:none;border:0;color:inherit;cursor:pointer;padding:4px;border-radius:6px}
+
+/* Layout + spine */
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.spine{position:sticky;top:20px;display:flex;flex-direction:column;gap:2px;padding:12px;background:var(--raised);border:1px solid var(--hair);border-radius:12px}
+.spine h2{font-size:15px;color:var(--text-2);letter-spacing:-.02em;padding:4px 8px 8px}
+.step{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:9px 8px;border-radius:8px;border:0;background:none;text-align:left;cursor:pointer;width:100%;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;left:19px;top:34px;bottom:-6px;width:2px;background:var(--hair)}
+.step.sel{background:var(--sunken)}
+@media (hover:hover) and (pointer:fine){.step:not(.sel):hover{background:var(--soft)}}
+.mark{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:var(--raised);position:relative;z-index:1;color:var(--text-3)}
+.step.done .mark{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.step.current .mark{border-color:var(--sel);background:var(--sel-bg)}
+.step.current .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--sel)}
+.step.me .mark{border-color:var(--sel);background:var(--sel)} .step.me .mark::after{background:#fff}
+.step.blocked .mark{border-style:dashed}
+.step .t,.step .s{display:block}
+.step .t{font-size:15px;font-weight:600;line-height:1.3}
+.step.blocked .t{color:var(--text-3);font-weight:500}
+.step .s{font-size:13.5px;color:var(--text-2);line-height:1.35;margin-top:2px}
+.step .s.me{color:var(--sel);font-weight:600}
+.dhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.dhead h2{font-size:22px}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta .k{font-size:13px;color:var(--text-3)} .meta .v{font-size:15px;line-height:1.35}
+.okc{color:var(--ok-fg)} .noc{color:var(--text-3)}
+.note{font-size:14.5px;color:var(--text-2)}
+.po{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--act-fg);background:var(--act-bg);height:22px;padding:0 8px;border-radius:999px}
+.callout{border-radius:10px;padding:12px 14px;font-size:15px;display:flex;gap:10px;align-items:flex-start}
+.callout.info{background:var(--info-bg);color:var(--info-fg)} .callout.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.callout.bad{background:var(--bad-bg);color:var(--bad-fg)} .callout.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.rows{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.row:last-child{border-bottom:0}
+.row .src{font-size:13px;color:var(--text-3)}
+.pick{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}.pick legend{padding:0;margin-bottom:2px}
+.opts{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.opt{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--hair);cursor:pointer}.opt:last-child{border-bottom:0}.opt .grow{flex:1;min-width:0}
+.opt input{accent-color:var(--sel);width:18px;height:18px;flex:none}.opt:has(input:checked){background:var(--sel-bg)}
+.hist{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--text-2)}
+.hist li{display:flex;gap:8px;align-items:flex-start}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+.in{min-height:40px;border:1px solid var(--field);border-radius:8px;background:var(--raised);padding:8px 12px;width:100%}
+textarea.in{min-height:64px;resize:vertical}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.lbl2{font-size:15px}
+.drop{position:relative;display:flex;align-items:center;gap:12px;min-height:72px;padding:14px 16px;border:1.5px dashed var(--border);border-radius:10px;background:var(--soft);cursor:pointer;transition:border-color 150ms ease,background-color 150ms ease}
+.drop.over{border-color:var(--sel);background:var(--sel-bg)} .drop.bad{border-color:var(--bad-fg)}
+.drop:focus-within{outline:2px solid var(--sel);outline-offset:2px}
+.drop .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+@media (hover:hover) and (pointer:fine){.drop:hover{border-color:var(--hover-border)}}
+.vers{display:flex;flex-direction:column;gap:8px}
+.field .src,.vers>.src{font-size:14px;color:var(--text-2)}
+.linkbox{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px}.linkbox code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--raised);color:var(--text);padding:6px 10px;border-radius:8px;overflow-wrap:anywhere}
+.qa{display:flex;flex-direction:column;gap:12px}.qh{font-size:18px;font-weight:600;letter-spacing:-.03em}
+.ver{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.rows .ver:last-child{border-bottom:0}
+.ver .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.ver-note{margin:0 14px 10px;border-radius:8px}
+.play{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--inverse);color:var(--inverse-fg);display:grid;place-items:center;cursor:pointer;transition:transform 120ms var(--ease)}
+.play:active{transform:scale(.94)} .play[aria-pressed="true"]{background:var(--sel);color:#fff}
+.wave{display:block;height:3px;margin-top:6px;border-radius:2px;background:var(--hair);overflow:hidden}
+.wave i{display:block;height:100%;width:100%;background:var(--sel);transform-origin:left;animation:wave 194s linear forwards}
+@keyframes wave{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.wave i{animation:none;transform:scaleX(.3)}}
+.in[aria-invalid="true"]{border-color:var(--bad-fg)}
+.err{font-size:13px;color:var(--bad-fg)}
+
+/* Overview + lists */
+.wfgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.wfgrid{grid-template-columns:minmax(0,1fr)}}
+.wf{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--hair);border-radius:12px;background:var(--raised);text-align:left;cursor:pointer}
+@media (hover:hover) and (pointer:fine){.wf:hover{border-color:var(--hover-border)}}
+.bar{height:6px;border-radius:999px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sel);border-radius:999px;transform-origin:left;transition:transform 300ms var(--ease)}
+.table{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised)}
+.tr{display:grid;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--hair);font-size:15px}
+.tr:last-child{border-bottom:0}
+.tr.h{font-size:13.5px;color:var(--text-3);background:var(--soft)}
+.tr.link{cursor:pointer}
+@media (hover:hover) and (pointer:fine){.tr.link:hover{background:var(--soft)}}
+@media (max-width:760px){.tr{grid-template-columns:minmax(0,1fr)!important}.tr.h{display:none}}
+.cols4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.cols4{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--soft)}
+.col h3{font-size:14px;color:var(--text-2);font-weight:600}
+.chip{padding:10px 12px;border-radius:8px;background:var(--raised);border:1px solid var(--hair);font-size:14.5px}
+.po-input{display:flex;gap:8px;align-items:center;padding:8px 8px 8px 16px;border:1px solid var(--border);border-radius:16px;background:var(--raised)}
+.po-input input{flex:1;border:0;background:transparent;outline:none;min-width:0;height:36px}
+
+/* Portal */
+.portal{min-height:100%;background:var(--app)}
+.pbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-bottom:1px solid var(--hair);background:var(--page);flex-wrap:wrap}
+.pwrap{max-width:820px;margin:0 auto;padding:28px 16px 150px;display:flex;flex-direction:column;gap:18px}
+.lockline{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
+
+/* Proto bar & toast */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:280px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+@media (max-width:720px){.proto label{display:none}.proto select{max-width:44vw}}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--inverse);color:var(--inverse-fg);padding:12px 16px;border-radius:12px;font-size:15px;box-shadow:var(--shadow);max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+
+/* V2 — production externe selon le ticket d'Ibé du 15/10 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{height:40px;padding:0 14px;border:0;background:none;color:var(--text-2);font-size:15px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.tab.on{color:var(--text);border-bottom-color:var(--text)}
+.tab .n{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--sunken);font-size:12px;font-weight:700;display:grid;place-items:center}
+.strip{display:flex;flex-wrap:wrap;gap:8px}
+.chipbtn{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--hair);background:var(--raised);font-size:14px;cursor:pointer;color:var(--text)}
+.chipbtn .d{width:8px;height:8px;border-radius:50%}
+.d.bad{background:var(--bad-fg)} .d.warn{background:var(--warn-fg)} .d.info{background:var(--info-fg)}
+.meta5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta5 .k{font-size:13px;color:var(--text-3)} .meta5 .v{font-size:15px;line-height:1.35}
+.step.rework .mark{border-color:var(--warn-fg);background:var(--warn-bg)}
+.step .flag{display:inline-flex;margin-left:6px;vertical-align:1px}
+.kv{display:grid;grid-template-columns:180px minmax(0,1fr);gap:4px 14px;font-size:15px}
+@media (max-width:720px){.kv{grid-template-columns:minmax(0,1fr)}}
+.kv dt{color:var(--text-3);font-size:14px} .kv dd{margin:0}
+.locs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.locs{grid-template-columns:minmax(0,1fr)}}
+.loc{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised);display:flex;flex-direction:column}
+.loc.active{border-color:var(--ok-fg);box-shadow:0 0 0 1px var(--ok-fg)}
+.loc .ph{position:relative;height:120px;background:var(--sunken);overflow:hidden}
+.loc .ph img{display:block;width:100%;height:100%;object-fit:cover}
+.phn{position:absolute;left:8px;bottom:8px;height:22px;padding:0 8px;border-radius:999px;background:rgb(0 0 0 / .6);color:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center}
+.ph.none{display:grid;place-items:center;color:var(--text-3);font-size:13px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px}
+.thumb{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;background:var(--sunken)}
+.thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.thumb button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgb(0 0 0 / .65);color:#fff;display:grid;place-items:center;cursor:pointer}
+
+.loc .bd{padding:12px;display:flex;flex-direction:column;gap:6px;font-size:14.5px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.checks{display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.checks input{width:18px;height:18px;accent-color:var(--sel);margin-top:2px;flex:none}
+.syn .row .src{max-width:none}
+.miss{color:var(--bad-fg);font-weight:600}
+.warnc{color:var(--warn-fg);font-weight:600}
+.src.warnc{color:var(--warn-fg)} .src.okc{color:var(--ok-fg)}
+.dec .row{grid-template-columns:minmax(0,1fr) auto}
+.contra{border:1px solid var(--warn-fg);border-radius:10px;overflow:hidden}
+.contra .row{border-bottom:1px solid var(--hair)}
+.strike{text-decoration:line-through;color:var(--text-3)}
+select.in{height:40px}
+/* A version list: the latest and the retained one open, older ones folded behind a chevron. */
+.vcard{background:var(--raised);border:1px solid var(--hair);border-radius:12px;min-width:0}
+.vcard>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-height:52px;padding:10px 14px;cursor:pointer;border-radius:12px}
+.vcard>summary::-webkit-details-marker{display:none}
+.vcard>summary h3{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.vcard>summary .cap{margin-left:auto}
+.vcard .chv{display:grid;place-items:center;width:20px;height:20px;color:var(--text-3);transition:transform 160ms var(--ease)}
+.vcard[open] .chv{transform:rotate(90deg)}
+.vcard .vb{display:flex;flex-direction:column;gap:8px;padding:0 14px 14px}
+@media (hover:hover) and (pointer:fine){.vcard>summary:hover .chv{color:var(--text)}}
+
+/* Juridique — the five steps of the dossier, then each launched démarche as a
+   step of its own (tickets Juridique 07 and 08). */
+.spine .sect{font-size:13px;color:var(--text-3);padding:12px 8px 4px;letter-spacing:-.01em}
+.spine .foot{border-top:1px solid var(--hair);margin-top:8px;padding-top:8px}
+.linkbtn{background:none;border:0;padding:6px 8px;border-radius:6px;color:var(--text-2);font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover) and (pointer:fine){.linkbtn:hover{color:var(--text)}}
+.step .s.wait{color:var(--warn-fg)}
+.step .s.bad{color:var(--bad-fg);font-weight:600}
+.step.waitst .mark{border-color:var(--warn-fg);background:var(--warn-bg)}
+.step.waitst .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn-fg)}
+.fact{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.fact:last-child{border-bottom:0}
+.fact .k{font-size:13.5px;color:var(--text-3)}
+.fact .v{overflow-wrap:anywhere}
+.fact .src{font-size:13px;color:var(--text-3)}
+.fact .side{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.fact.missing .v{color:var(--bad-fg)}
+.fact.changed .src{color:var(--sel)}
+.fact .edit{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
+@media (max-width:720px){.fact{grid-template-columns:minmax(0,1fr)}.fact .side{justify-content:flex-start}}
+.field .po{align-self:flex-start}
+.sub{font-size:15px;font-weight:600;letter-spacing:-.02em;color:var(--text-2);margin-top:4px}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.plan-row{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:10px;background:var(--raised);border:1px solid var(--hair)}
+.plan-row.off{opacity:.55}
+.plan-row .top{display:flex;gap:10px;align-items:flex-start}
+.plan-row .top input{width:18px;height:18px;accent-color:var(--sel);margin-top:3px;flex:none}
+.plan-row .ctl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.plan-row .ctl{grid-template-columns:minmax(0,1fr)}}
+.plan-row label.k{font-size:13px;color:var(--text-3)}
+.verdict{display:flex;gap:12px;align-items:center;padding:16px;border-radius:12px}
+.verdict.bad{background:var(--bad-bg);color:var(--bad-fg)} .verdict.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.verdict h3{font-size:20px;letter-spacing:-.03em}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--hair)}
+.split:last-child{border-bottom:0}
+.split .in{text-align:right}
+.total{display:flex;justify-content:space-between;padding:10px 14px;background:var(--soft);font-weight:600}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin 700ms linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+.btn[aria-busy="true"]{opacity:.8;cursor:progress}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.notask{font-size:14.5px;color:var(--text-2);display:flex;flex-direction:column;gap:4px}
+.ret{border-left:3px solid var(--warn-fg)}
+.doccard{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised);min-width:0}
+.dochead{display:flex;align-items:center;gap:12px;padding:14px;background:var(--soft);border-bottom:1px solid var(--hair)}
+.dochead .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.docchg{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;background:var(--info-bg);color:var(--info-fg);font-size:14.5px;border-bottom:1px solid var(--hair)}
+.doccard .rows{border:0;border-radius:0}
+.linkrow{display:flex;flex-direction:column;gap:6px;padding:12px 14px;min-width:0}
+.linkrow .linkbox{margin:0}
+.linkrow .src{font-size:13px;color:var(--text-3)}
+.protobtn{background:var(--glass);color:var(--glass-fg);border:1px dashed var(--glass-2)}
+.src a{color:inherit}
+.scrim{position:fixed;inset:0;z-index:70;background:rgb(0 0 0 / .45);display:grid;place-items:center;padding:16px}
+.dialog{width:min(580px,100%);max-height:calc(100vh - 32px);overflow:auto;overscroll-behavior:contain;background:color-mix(in srgb,var(--raised) 90%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:14px}
+.dialog h2{font-size:22px}
+.dialog:focus{outline:none}
+.dfoot{justify-content:flex-end}
+body.locked{overflow:hidden}
+.pick>.src{font-size:14px;color:var(--text-2)}
+.dagroup{display:flex;flex-direction:column;gap:2px;margin-bottom:6px}
+.dagroup .k{font-size:13.5px;color:var(--text-3)}
+.dalist{list-style:disc;padding-left:20px;margin:0}
+.dalist li{padding:1px 0}
+.maillink{margin:10px 14px;padding:10px 12px;border-radius:8px;background:var(--soft);display:flex;flex-direction:column;gap:4px;font-size:15px;overflow-wrap:anywhere}
+.maillink code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px}
+.mailfoot{margin:8px 16px 0;display:flex;flex-direction:column;gap:2px;font-size:15px;color:var(--text-2);overflow-wrap:anywhere}
+.mailfoot code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;color:var(--text)}
+.mailfoot .cap{font-size:13.5px;color:var(--text-3)}
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px;color:var(--text-3)}
+.crumbs button{background:none;border:0;padding:2px 0;color:var(--text-2);cursor:pointer;font-size:14px}
+@media (hover:hover) and (pointer:fine){.crumbs button:hover{color:var(--text);text-decoration:underline}}
+.crumbs [aria-current]{color:var(--text)}
+.trail{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0 0 4px;padding:0;list-style:none}
+.trail li{display:flex;gap:6px;align-items:flex-start;font-size:13.5px;color:var(--text-3)}
+.trail li.on{color:var(--text)}
+.trail .tdot{flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:grid;place-items:center;margin-top:1px}
+.trail li.on .tdot{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.trail .tdot svg{width:11px;height:11px}
+@media (max-width:720px){.trail{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label><select id="roleSel"></select>
+  <label for="scenSel">Aller à</label>
+  <select id="scenSel">
+    <option value="start">La source est détectée</option>
+    <option value="mixdone">Un mix existe déjà au Catalogue</option>
+    <option value="brief">Brief : commencer ou préparer un échange</option>
+    <option value="brieflots">Brief : beaucoup d'inconnues, l'échange recommandé</option>
+    <option value="noeng">Brief : aucun ingénieur désigné</option>
+    <option value="nostems">Envoi sans pistes : dérogation</option>
+    <option value="hugo">Ingénieur maison : Hugo Martin</option>
+    <option value="v1">Mix V1 reçu : retours et décision</option>
+    <option value="thread">Karim signale un retard</option>
+    <option value="vocals">Les voix définitives sont arrivées</option>
+    <option value="arp">Mastering chez Studio Arpège</option>
+    <option value="master">Master V1 reçu</option>
+    <option value="final">Master final : livrables et facture</option>
+    <option value="invoice">Facture de Karim reçue : à payer</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const I={
+  check:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  lock:'<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>',
+  spark:'<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6z"/></svg>',
+  ok:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>',
+  warn:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 11.6v.1"/></svg>',
+  stop:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M4 12l8-8"/></svg>',
+  clock:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 1.5"/></svg>',
+  info:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.9v.1"/></svg>',
+  file:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15"/></svg>',
+  chevR:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5l4.5 4.5L6 12.5"/></svg>',
+  mail:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8.5L10 3l7.5 5.5V17h-15z"/><path d="M2.5 8.5L10 13.2l7.5-4.7"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+  updown:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>',
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  work:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  nodes:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>',
+  play:'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.2v9.6L13 8z"/></svg>',
+  pause:'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="4" y="3" width="3" height="10" rx="1"/><rect x="9" y="3" width="3" height="10" rx="1"/></svg>',
+  wave:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3 10v0M6 7v6M9 4v12M12 7v6M15 9v2M18 10v0"/></svg>'
+};
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DAYS=["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."];
+const frDate=iso=>{if(!iso) return "";const [y,m,d]=iso.split("-").map(Number);const t=new Date(Date.UTC(y,m-1,d));return `${DAYS[t.getUTCDay()]} ${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`;};
+const addDays=(iso,n)=>{const [y,m,d]=iso.split("-").map(Number),t=new Date(Date.UTC(y,m-1,d+n));return t.toISOString().slice(0,10);};
+const RELEASE="2026-12-05";
+const euro=n=>new Intl.NumberFormat("fr-FR").format(n)+" € HT";
+
+/* People: accounts of PDS (app) or outside people through a private link (lien).
+   Engineers come from the Réseau; Hugo Martin is the in-house engineer, with an account. */
+const P={
+  cp:{name:"Lina Haddad",role:"Cheffe de projet",ini:"LH",where:"app"},
+  da:{name:"Nadia Benali",role:"Directrice créative",ini:"NB",where:"app"},
+  dg:{name:"Claire Morel",role:"Directrice générale",ini:"CM",where:"app"},
+  karim:{name:"Karim Haddou",first:"Karim",role:"Ingénieur mix et mastering",ini:"KH",where:"lien",link:"/m/",mail:"karim@haddou-studio.fr",
+    what:"Mix et mastering",does:["mix","mastering"],price:{mix:800,mastering:300},rev:2,past:"3 projets avec PDS, dernier : « Lumière » (06/2026)",linked:true},
+  lea:{name:"Léa Fontaine",first:"Léa",role:"Ingénieure mix et mastering",ini:"LF",where:"lien",link:"/m/",mail:"lea@fontaine-mix.fr",
+    what:"Mix et mastering",does:["mix","mastering"],price:{mix:950,mastering:350},rev:3,past:"1 projet avec PDS : « Rivages » (02/2026)"},
+  hugo:{name:"Hugo Martin",first:"Hugo",role:"Ingénieur maison",ini:"HM",where:"app",
+    what:"Mix et mastering · compte PDS",does:["mix","mastering"],price:null,rev:null,past:"Studio de PDS · 12 projets"},
+  arp:{name:"Studio Arpège",first:"Studio Arpège",role:"Mastering",ini:"SA",where:"lien",link:"/m/",mail:"mastering@studio-arpege.fr",
+    what:"Mastering seulement",does:["mastering"],price:{mastering:280},rev:1,past:"1 projet avec PDS : « Rivages » (02/2026)"},
+  mona:{name:"Mona Lys",role:"Artiste",ini:"ML",where:"lien",link:"/v/",mail:"mona@monalys.fr"}
+};
+const ENGINEER_KEYS=["karim","lea","hugo","arp"];
+const VALIDATORS=[["da","Directrice créative · désignée au Cadrage"],["cp","Cheffe de projet"]];
+
+/* The title's audio, as the Catalogue knows it. The latest one is detected. */
+const AUDIO={
+  v3:{name:"Néons_maquette_v3.wav",meta:"v3 · maquette · ajoutée par Claire Morel le 02/10",sec:194},
+  v2:{name:"Néons_maquette_v2.wav",meta:"v2 · maquette · ajoutée par Claire Morel le 18/09",sec:191},
+  v1:{name:"Néons_mise_a_plat_v1.wav",meta:"v1 · mise à plat · ajoutée par Mona Lys le 04/09",sec:188},
+  v4:{name:"Néons_v4_voix_definitives.wav",meta:"v4 · voix définitives du 2e couplet · session du Ven. 13/11 · Mona Lys",sec:194}
+};
+// A mix already finished, found in the Catalogue (PROJ-BUG-06 scenario).
+const DONE_MIX={name:"Néons_Mix_final_Studio.wav",meta:"Mix · ajouté par Claire Morel le 12/10 · Studio Ressac"};
+const STEMS={v3:"12 pistes · Stems_Neons_v3.zip",v4:"12 pistes · Stems_Neons_v4.zip"};
+const AUDIO_EXT=["wav","aif","aiff","flac","mp3","m4a","aac","ogg"];
+const KIND={mix:{label:"Mix",file:n=>`Neons_Mix_V${n}.wav`,meta:"3 min 14 · 48 kHz · 24 bits · 112 Mo",ok:"Mix validé"},
+  mastering:{label:"Master",file:n=>`Neons_Master_V${n}_24-44.wav`,meta:"3 min 14 · 44,1 kHz · 24 bits · 98 Mo",ok:"Master validé"}};
+// The Brief's deliverables: the two finals always, the others only if asked.
+const DELIV=[["mixFinal","Mix final",true],["masterFinal","Master final",true],["instru","Instrumental"],["radio","Radio edit"],["acap","A cappella"],["clean","Version clean"],["live","Version live / performance"],["tv","TV mix / backing track"],["stems","Stems"]];
+const DELIV_SRC={instru:"Cadrage · « on veut l'instru pour les vidéos TikTok »",radio:"Brief de cadrage › Activations · passages radio",acap:"Call du 20/10 · « il faudrait aussi une a cappella pour le remix »"};
+const DELIV_FILE={instru:"Neons_Instrumental_24-44.wav",radio:"Neons_Radio_Edit_24-44.wav",acap:"Neons_A_cappella_24-44.wav",clean:"Neons_Clean_24-44.wav",live:"Neons_Live_24-44.wav",tv:"Neons_TV_Mix_24-44.wav",stems:"Neons_Stems_Mix_final.zip"};
+// Dates: computed from the master final (calendar.ts), in this order.
+const DATES=[["v1","Mix V1 attendu le",6],["final","Mix final attendu le",3],["mastering","Mastering attendu le",1],["master","Master final attendu le",0]];
+
+const STEPS=[
+  {id:"source",title:"Source",why:"La version de départ du mix, confirmée. Jamais un master final.",owner:"cp",prereq:[],ext:[["Plan du projet lancé","Plan du projet · fait le 18/10"]]},
+  {id:"brief",title:"Brief",why:"Ce que l'ingénieur du mix puis celui du mastering doivent savoir : direction, livrables, formats, dates. C'est le dossier qu'ils recevront.",owner:"cp",prereq:["source:1"],ext:[["Équipe et temporalité","Cadrage › Brief de cadrage · validé le 16/10"]]},
+  {id:"mix",title:"Mixage",why:"Le dossier part au mixeur, les versions reviennent, la validatrice décide. Un mix validé ne change plus.",owner:"cp",validator:true,prereq:["brief"]},
+  {id:"mastering",title:"Mastering",why:"S'ouvre quand le mix final est validé : même mécanisme, sur le mix final.",owner:"cp",validator:true,prereq:["mix"]},
+  {id:"final",title:"Master final",why:"Le master validé devient le master final du titre au Catalogue ; la Distribution et le Juridique le lisent directement. Restent les autres livrables et la facture.",owner:"cp",prereq:["mastering"],next:[["Distribution","attend le master final avant le Sam. 21/11/2026"],["Juridique","durée du bulletin SACEM"]]}
+];
+const STEP=id=>STEPS.find(s=>s.id===id);
+
+/* State: what people did, never a status. */
+function fresh(){
+  return {role:"cp",view:"parcours",sel:null,flash:null,log:[],hist:{},clock:0,err:{},draft:{},editing:null,playing:null,histWho:"",
+    catalogMix:false,noStems:false,
+    src:{version:null,choice:null,useDone:null},watch:"none",
+    brief:{start:null,call:null,saved:null,dirty:false,version:0,da:null,daRead:false,daRemoved:{},daAdded:false,daFrom:null,
+      dates:{master:"2026-11-21",mastering:"2026-11-20",final:"2026-11-18",v1:"2026-11-15"},dateBy:{},deliv:{mixFinal:true,masterFinal:true,instru:true,radio:true},msg:null},
+    eng:{mix:"karim",mastering:"karim"},engBy:{},same:true,validator:"da",validatorBy:null,
+    links:{},budget:{},thread:[],inv:{},rib:{karim:{iban:"FR76 3000 4000 1200 0000 1234 567",bic:"BNPAFRPP",holder:"Karim Haddou",source:"Réseau"}},
+    mix:{sent:null,sentBrief:null,received:null,versions:[],comments:[],newSource:null,retours:{},waiver:null,resent:[]},
+    mastering:{sent:null,sentBrief:null,received:null,versions:[],comments:[],retours:{},waiver:null,resent:[]},
+    final:{got:{}},pick:{}};
+}
+let S=fresh();
+const stamp=()=>{S.clock++;const d=new Date(2026,9,19,9,0);d.setMinutes(d.getMinutes()+S.clock*17);return d.toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(" ",", ");};
+const me=()=>S.role;
+// Every gesture is logged with who did it and, when it follows from another, its cause.
+const log=(text,who,cause)=>{const e={text,who:who||P[me()].name,at:stamp(),cause:cause||null};S.log.unshift(e);return e;};
+const hist=(id,text,who,cause)=>{const e=log(text,who,cause);(S.hist[id]=S.hist[id]||[]).push(e);return e;};
+const dv=(id,def)=>S.draft[id]!==undefined?S.draft[id]:def;
+
+/* The direction question PO asks Nadia: kept only if written word for word. */
+const DA_EXAMPLE="Je veux la voix devant sur les refrains, des basses rondes, et garder l'énergie de la maquette. Références : Blinding Lights de The Weeknd et Djadja d'Aya Nakamura. Pas de reverb sur la voix du couplet.";
+const DA_FINDS=[["dir","Voix devant sur les refrains","la voix devant sur les refrains"],["dir","Basses rondes","des basses rondes"],["dir","Garder l'énergie de la maquette","garder l'énergie de la maquette"],["ref","« Blinding Lights », The Weeknd","Blinding Lights de The Weeknd"],["ref","« Djadja », Aya Nakamura","Djadja d'Aya Nakamura"],["con","Pas de reverb sur la voix du couplet","Pas de reverb sur la voix du couplet"],["ref","« Levitating », Dua Lipa","Levitating de Dua Lipa"]];
+const DA_GROUPS=[["dir","Direction"],["ref","Références"],["con","Contraintes"]];
+const daFound=t=>DA_FINDS.map((f,j)=>({g:f[0],label:f[1],quote:f[2],j})).filter(f=>t.toLowerCase().includes(f.quote.toLowerCase()));
+/* The exchange (« Préparer un échange »): what PO takes from the call's transcript,
+   each with the sentence it comes from. */
+const CALL_FINDS=[
+  {k:"da",g:"dir",label:"Voix devant sur les refrains",quote:"« je veux la voix devant sur les refrains » (Nadia Benali)"},
+  {k:"da",g:"dir",label:"Garder l'énergie de la maquette",quote:"« on garde l'énergie de la maquette » (Nadia Benali)"},
+  {k:"da",g:"ref",label:"« Blinding Lights », The Weeknd",quote:"« la référence c'est Blinding Lights » (Mona Lys)"},
+  {k:"deliv",d:"acap",label:"Livrable en plus : A cappella",quote:"« il faudrait aussi une a cappella pour le remix » (Lina Haddad)"},
+  {k:"msg",label:"Message : Karim peut livrer le Mix V1 le 14/11",quote:"« je peux te livrer une V1 le 14 » (Karim Haddou)"}];
+// Feedback examples Mona and the team leave on a version (minutage + words).
+const COMMENT_EX={mona:["0:42","La voix est trop basse dans le refrain, on n'entend pas « néons »."],da:["1:58","Le pont manque de largeur, ouvrir les synthés."],cp:["2:40","La fin coupe trop sec."],dg:["3:01","Le dernier refrain pourrait monter plus."]};
+
+/* Derived, recomputed at every render ---------------------------------------- */
+const engOf=k=>k==="mastering"&&!S.same?S.eng.mastering:S.eng.mix;
+const isIn=key=>!!key&&P[key].where==="app";
+const VAL=()=>P[S.validator].name;
+const lastV=k=>{const l=S[k].versions;return l[l.length-1]||null;};
+// A mix found finished in the Catalogue stands for the mix final (PROJ-BUG-06).
+const finalV=k=>k==="mix"&&S.src.useDone?{n:"",name:DONE_MIX.name,by:S.src.useDone.by,decidedAt:S.src.useDone.at,existing:true}:S[k].versions.find(v=>v.status==="approved")||null;
+const delivList=()=>DELIV.filter(([k,,fixed])=>!fixed&&S.brief.deliv[k]).map(([k,l])=>[k,l]);
+const delivMissing=()=>delivList().filter(([k])=>!S.final.got[k]);
+// Budget: one line per paid stage, Estimé → Proposé → Engagé → Payé (ticket Master § 9).
+const stages=()=>S.src.useDone?["mastering"]:["mix","mastering"];
+function budgetLine(k){
+  const ek=engOf(k); if(!ek||isIn(ek)) return null;
+  const b=S.budget[k];
+  const line=Object.assign({k,ek,state:"estimated",amount:P[ek].price[k]},b&&b.ek===ek?b:{}), i=S.inv&&S.inv[ek];
+  if(i&&i.paid) return Object.assign(line,{state:"paid",paidBy:i.paid.by,paidAt:frDate(i.paid.date)});
+  if(i&&i.received) return Object.assign(line,{state:"invoiced",invoice:i});
+  return line;
+}
+const unpaid=()=>stages().map(budgetLine).filter(l=>l&&l.state!=="paid");
+function srcConfirmed(){return !!S.src.version||!!S.src.useDone;}
+function briefMissing(){
+  const m=[];
+  if(!S.src.useDone&&!S.eng.mix) m.push("l'ingénieur du mix");
+  if(!S.same&&!S.eng.mastering) m.push("l'ingénieur du mastering");
+  if(!S.brief.daAdded) m.push("la direction artistique");
+  return m;
+}
+function briefState(){
+  if(briefMissing().length) return ["warn","Incomplet"];
+  if(S.brief.saved&&!S.brief.dirty) return ["ok","Prêt à transmettre"];
+  return ["","Brouillon"];
+}
+function done(id){
+  switch(id){
+    case "source":return srcConfirmed()&&(S.watch==="none"||S.watch==="replaced");
+    case "brief":return !!S.brief.saved;
+    case "mix":return !!finalV("mix");
+    case "mastering":return !!finalV("mastering");
+    case "final":return done("mastering")&&!delivMissing().length;
+  }
+}
+// Waiting for the final vocals keeps the mix closed; anticipating does not.
+const prereqOf=s=>s.id==="mix"&&S.src.choice==="wait"?s.prereq.concat("vocals"):s.id==="mastering"&&S.src.useDone?["source","brief"]:s.prereq;
+function preOk(p){
+  if(p==="source:1") return srcConfirmed();
+  if(p==="vocals") return S.watch==="replaced";
+  return done(p);
+}
+const preLabel=p=>p==="source:1"?"Source confirmée":p==="vocals"?"l'arrivée des voix définitives":STEP(p).title;
+function statusOf(id){const s=STEP(id);if(id==="mix"&&S.src.useDone) return "done";if(!prereqOf(s).every(preOk)) return "blocked";return done(id)?"done":"current";}
+const openThread=k=>S.thread.filter(t=>t.k===k&&t.status!=="closed");
+function actorsOf(id){
+  if(statusOf(id)!=="current") return [];
+  const A=(r,todo,o)=>Object.assign({r,todo,step:id},o||{});
+  switch(id){
+    case "source":
+      if(!srcConfirmed()) return [A("cp","Confirmer la source")];
+      if(S.watch==="waiting") return [A("cp","",{wait:true,waitWho:"Mona Lys",waitText:"enregistrer les voix définitives du 2e couplet (session du Ven. 13/11)"})];
+      if(S.watch==="arrived") return [A("cp","Remplacer la source")];
+      return [];
+    case "brief":{const b=S.brief,l=[];
+      if(!b.start) return [A("cp","Démarrer le Brief")];
+      if(b.start==="exchange"&&b.call&&b.call.stage==="prep") return [A("cp","Créer le call")];
+      if(b.start==="exchange"&&b.call&&b.call.stage==="planned") return [A("cp","",{wait:true,waitWho:"Le call",waitText:"prévu le Mar. 20/10 à 14 h, avec Nadia Benali, Mona Lys et Karim Haddou",waitCustom:"Le call a lieu le Mar. 20/10 à 14 h"})];
+      if(b.start==="exchange"&&b.call&&b.call.stage==="done") return [A("cp","Relire ce que PO a compris du call")];
+      if(!b.da&&!b.daAdded) l.push(A("da","Répondre à la question du Brief"));
+      else if(b.da&&!b.daAdded) l.push(A("cp","Ajouter la réponse au Brief"));
+      else l.push(A("cp",briefMissing().length?"Compléter le Brief":"Enregistrer le Brief"));
+      return l;}
+    case "mix":case "mastering":{
+      const o=S[id], K=KIND[id], ek=engOf(id), v=lastV(id), l=[];
+      if(!ek) return [A("cp","Choisir l'ingénieur du mastering")];
+      if(!o.sent) return [A("cp",isIn(ek)?`Assigner à ${P[ek].name}`:id==="mix"?"Transmettre au mixeur":"Transmettre au mastering")];
+      const link=S.links[ek];
+      if(link&&link.revoked) l.push(A("cp","Renouveler le lien"));
+      else if(!isIn(ek)&&!o.received) l.push(A(ek,"Prendre en charge le dossier",{ext:true}));
+      else if(!v||v.status==="changes"||v.status==="reopened") l.push(A(ek,`Déposer le ${K.label} V${v?v.n+1:1}`,{ext:!isIn(ek)}));
+      else if(v.status==="listen") l.push(A(S.validator,`Valider le ${K.label} V${v.n}`));
+      const ot=openThread(id), toCp=ot.filter(t=>t.status==="open");
+      if(toCp.length) l.push(A("cp",toCp.length>1?`Répondre à ${P[ek].first} (${toCp.length} messages)`:`Répondre à ${P[ek].first}`));
+      ot.filter(t=>t.status==="escalated").forEach(t=>l.push(A("dg",`Arbitrer le retard de ${P[t.eng].first}`)));
+      const bl=budgetLine(id); if(bl&&bl.state==="proposed") l.push(A("cp",`Accepter le tarif de ${P[bl.ek].first}`));
+      return l;}
+    case "final":{const l=[], n=delivMissing().length, ek=engOf("mastering");
+      if(n) l.push(A(ek,n>1?`Déposer ${n} livrables`:"Déposer le livrable",{ext:!isIn(ek)}));
+      return l;}
+  }
+  return [];
+}
+const allActors=()=>STEPS.flatMap(s=>actorsOf(s.id)).concat(payActors());
+const myActs=()=>allActors().filter(a=>a.r===me()&&!a.wait);
+// Lowercase only the first letter: « valider le Mix V1 », not « mix v1 ».
+const low=t=>t?t.charAt(0).toLowerCase()+t.slice(1):"";
+const deOf=n=>(/^[AEIOUÉÈÊÀ]/i.test(n)?"d'":"de ")+n;
+const waitLine=a=>a.waitCustom?`<b>${esc(a.waitCustom)}</b> : ${esc(a.waitText.replace(/^prévu le [^,]*, /,""))}`:a.wait?`En attente ${deOf(a.waitWho).slice(0,-a.waitWho.length)}<b>${esc(a.waitWho)}</b> : ${esc(a.waitText)}`:`En attente de <b>${esc(P[a.r].name)}</b>${P[a.r].where==="lien"?" (lien privé)":""} : ${low(esc(a.todo))}`;
+function summary(id){
+  switch(id){
+    case "source":return S.src.useDone?`Mix déjà terminé : ${DONE_MIX.name}`:`${AUDIO[S.src.version].name}${S.watch==="replaced"?" · voix définitives":""}`;
+    case "brief":return S.brief.dirty?"Modifications à enregistrer":"Prêt à transmettre";
+    case "mix":return S.src.useDone?"Non nécessaire : mix déjà terminé":`Mix final : V${finalV("mix").n}`;
+    case "mastering":return `Master final : V${finalV("mastering").n}`;
+    case "final":return `Au Catalogue · livrables reçus · ${payState()}`;
+  }
+  return "";
+}
+
+/* Render ------------------------------------------------------------------- */
+const app=document.getElementById("app");
+const av=(k,sm)=>k&&P[k]?`<span class="avatar ${sm?"sm":""}" aria-hidden="true">${esc(P[k].ini)}</span>`:"";
+const pill=(tone,t)=>`<span class="pill ${tone}">${esc(t)}</span>`;
+const errOf=k=>S.err[k]?`<span class="err" id="${k}-err" role="alert">${esc(S.err[k])}</span>`:"";
+const inv=k=>S.err[k]?` aria-invalid="true" aria-describedby="${k}-err"`:"";
+const fieldIn=(id,label,def,o)=>{o=o||{};return `<div class="field"><label for="${id}">${esc(label)}${o.req?" *":""}</label>${o.area?`<textarea class="in" id="${id}" rows="${o.rows||3}" placeholder="${esc(o.ph||"")}"${inv(id)}>${esc(dv(id,def||""))}</textarea>`:`<input class="in" id="${id}" type="${o.type||"text"}" value="${esc(dv(id,def||""))}" placeholder="${esc(o.ph||"")}"${o.min!==undefined?` min="${o.min}" max="${o.max}"`:""}${inv(id)}>`}${o.src?`<span class="src">${o.src}</span>`:""}${errOf(id)}</div>`;};
+const fact=(k,v,src,o)=>{o=o||{};return `<div class="fact ${o.cls||""}"><span>${k?`<span class="k">${esc(k)}</span><br>`:""}<span class="v">${v}</span>${src?`<br><span class="src">${src}</span>`:""}</span><span class="side">${o.side||""}</span>${o.edit||""}</div>`;};
+const btn=(act,label,o)=>{o=o||{};return `<button class="btn ${o.cls||""}" type="button" data-act="${act}"${o.step?` data-step="${o.step}"`:""}${o.v!==undefined?` data-v="${esc(o.v)}"`:""}${o.k?` data-k="${esc(o.k)}"`:""}>${esc(label)}</button>`;};
+const protoBtn=(act,label,v)=>`<button class="btn sm protobtn" type="button" data-act="${act}"${v?` data-v="${v}"`:""}>Proto : ${esc(label)}</button>`;
+// Who can be looked at: the team, the engineers in play, the artist.
+function roleOrder(){const l=["cp","da","dg"];stages().forEach(k=>{const e=engOf(k);if(e&&!l.includes(e)) l.push(e);});l.push("mona");return l;}
+function render(){
+  const order=roleOrder(); if(!order.includes(S.role)) order.splice(3,0,S.role);
+  document.getElementById("roleSel").innerHTML=order.map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role)}${P[k].where==="lien"?" (lien)":""}</option>`).join("");
+  if(P[me()].where==="lien"){const l=S.links[me()];if(l&&!l.opened&&!l.revoked){l.opened=stamp();S.clock--;}}
+  app.innerHTML=P[me()].where==="lien"?portal():shell();
+  const f=document.querySelector("[data-autofocus]");if(f) f.focus();
+}
+function shell(){
+  const nav=[["home","Accueil"],["work","Travail"],["folder","Projets"],["nodes","Réseau"]];
+  ensureSel();
+  const n=myActs().length;
+  return `<div class="shell">
+  <nav class="mainnav" aria-label="Navigation principale"><span class="brand">PDS</span>
+    ${nav.map(([i,l])=>`<button class="navbtn ${i==="folder"?"on":""}" type="button" aria-label="${l}">${I[i]}${i==="work"&&n?`<span class="cnt">${n}</span>`:""}<span class="tip">${l}</span></button>`).join("")}
+    <div class="grow"></div><button class="navbtn" type="button" aria-label="Notifications">${I.bell}</button>${av(me())}</nav>
+  <nav class="projnav" aria-label="Sections du projet"><div class="switcher"><span>Néons</span><span class="t3">${I.updown}</span></div>
+    <button class="pitem" type="button">Vue d'ensemble</button><button class="pitem" type="button">Cadrage</button>
+    <div class="group">Workflows</div>
+    <button class="pitem on" type="button" aria-current="page"><span class="dot ${done("final")?"done":"run"}"></span><span class="grow">Master</span>${n?`<span class="mine">${n}</span>`:""}</button>
+    <button class="pitem" type="button"><span class="dot run"></span><span class="grow">Juridique</span></button>
+    <button class="pitem" type="button"><span class="dot run"></span><span class="grow">Marketing</span></button>
+    <button class="pitem" type="button"><span class="dot ${done("mastering")?"run":"block"}"></span><span class="grow">Distribution</span></button>
+    <div class="group">Pilotage</div><button class="pitem" type="button">Travail</button><button class="pitem" type="button">Validations</button><button class="pitem" type="button">Activité</button>
+  </nav>
+  <main class="content"><div class="wrap">
+    <nav class="crumbs" aria-label="Fil d'Ariane"><button type="button" data-act="toast" data-v="Ouvre la Vue d'ensemble du projet.">Néons</button><span aria-hidden="true">›</span><button type="button" data-act="view" data-v="parcours">Master</button><span aria-hidden="true">›</span><span aria-current="page">${S.view==="history"?"Historique":esc(STEP(S.sel).title)}</span></nav>
+    <div class="headrow"><h1 class="h1">Master</h1></div>
+    <div class="facts"><span><b>« Néons »</b> · Mona Lys · single</span><span>Master final attendu le <b>${frDate(S.brief.dates.master)}</b></span><span>Sortie <b>${frDate(RELEASE)}</b></span></div>
+    ${S.flash?flash():""}
+    ${nowCard()}
+    ${S.view==="history"?historyView():journey()}
+  </div></main></div>`;
+}
+function flash(){return `<div class="flash" role="status"><span>${I.ok}</span><div class="grow"><b>${esc(S.flash.title)}</b>${S.flash.lines.map(l=>`<span>${l}</span>`).join("")}</div><button type="button" data-act="unflash" aria-label="Fermer">${I.x}</button></div>`;}
+function nowCard(){
+  const mine=myActs(), here=a=>S.view==="parcours"&&a.step===S.sel, rest=mine.filter(a=>!here(a));
+  if(rest.length){
+    const a=rest[0], s=STEP(a.step);
+    return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill info">${mine.length>rest.length?"Aussi à vous":"À vous"}</span><span>${esc(P[me()].name)} · Master › ${esc(s.title)}</span></div>
+      <h2>${esc(a.todo)}</h2><p class="note">${esc(s.why)}</p>
+      <div class="btnrow"><button class="btn" type="button" data-act="go" data-step="${a.step}">Ouvrir l'étape</button>${rest.length>1?`<span class="cap">Et ${rest.length-1} autre${rest.length>2?"s":""} : ${rest.slice(1,3).map(x=>low(esc(x.todo))).join(" · ")}</span>`:""}</div></section>`;
+  }
+  if(mine.length) return "";
+  const others=allActors().filter(a=>a.r!==me()||a.wait).slice(0,4);
+  return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill">Rien à faire pour vous</span><span>${esc(P[me()].name)}</span></div>
+    <h2>${others.length?"Le Master avance sans vous pour l'instant":"Le master final est au Catalogue"}</h2>
+    ${others.length?`<div class="rowlist">${others.map(a=>`<div class="wr">${a.wait?`<span class="avatar sm" aria-hidden="true">${I.clock}</span>`:av(a.r,true)}<span class="grow">${waitLine(a)} <span class="t3">· ${esc(STEP(a.step).title)}</span></span><button class="btn ghost sm" type="button" data-act="go" data-step="${a.step}">Voir</button></div>`).join("")}</div>`:""}</section>`;
+}
+// Opening the module lands on the step that waits for the person, else the one in progress.
+function ensureSel(){if(!S.sel){const a=myActs()[0];S.sel=a?a.step:(STEPS.find(s=>statusOf(s.id)==="current")||STEPS[STEPS.length-1]).id;}}
+function journey(){
+  ensureSel();
+  return `<div class="layout"><nav class="spine" aria-label="Parcours"><h2>Parcours</h2>${STEPS.map(spineItem).join("")}
+    <div class="foot"><button class="linkbtn" type="button" data-act="view" data-v="history">Historique du master</button></div></nav>
+  <section class="card" aria-labelledby="dtitle">${detail(STEP(S.sel))}</section></div>`;
+}
+function spineItem(s){
+  const st=statusOf(s.id), acts=actorsOf(s.id), mine=acts.some(a=>a.r===me()&&!a.wait), wait=acts.length&&acts.every(a=>a.wait||a.ext);
+  let sub, cls="";
+  if(st==="blocked") sub="Après : "+prereqOf(s).filter(p=>!preOk(p)).map(preLabel).join(", ");
+  else if(st==="done") sub=summary(s.id);
+  else if(mine) sub=acts.find(a=>a.r===me()&&!a.wait).todo;
+  else if(acts.length&&acts[0].wait){sub=acts[0].waitCustom||`En attente ${deOf(acts[0].waitWho)} · ${acts[0].waitText}`;cls="wait";}
+  else if(acts.length){sub=`${P[acts[0].r].name} · ${low(acts[0].todo)}`;cls=wait?"wait":"";}
+  const mk=st==="done"?"done":st==="blocked"?"blocked":wait&&!mine?"current waitst":"current";
+  return `<button class="step ${mk} ${mine?"me":""} ${s.id===S.sel?"sel":""}" type="button" data-act="go" data-step="${s.id}" aria-current="${s.id===S.sel?"step":"false"}"><span class="mark">${st==="done"?I.check:st==="blocked"?I.lock:""}</span><span><span class="t">${esc(s.title)}</span><span class="s ${mine?"me":cls}">${mine?"À vous · ":""}${esc(sub||"")}</span></span></button>`;
+}
+function detail(s){
+  const st=statusOf(s.id), acts=actorsOf(s.id), pre=prereqOf(s);
+  const next=STEPS.filter(x=>x.prereq.some(p=>p.split(":")[0]===s.id));
+  const pl=st==="done"?["ok",s.id==="mix"&&S.src.useDone?"Non nécessaire":"Fait"]:st==="blocked"?["","Plus tard"]:acts.length&&acts.every(a=>a.wait||a.ext)?["warn","En attente d'un retour"]:["info","En cours"];
+  const preRows=pre.map(p=>`<span class="${preOk(p)?"okc":"noc"}">${preOk(p)?"✓":"○"}</span> ${esc(preLabel(p).replace(/^l'arrivée/,"Arrivée"))}`).concat((s.ext||[]).map(([l,src])=>`<span class="okc">✓</span> ${esc(l)}<br><span class="cap">${esc(src)}</span>`));
+  let h=`<div class="dhead"><h2 id="dtitle">${esc(s.title)}</h2>${pill(pl[0],pl[1])}</div><p class="note">${esc(s.why)}</p>
+  <div class="meta">
+    <div><div class="k">Responsable</div><div class="v">${esc(P[s.owner].name)}<br><span class="cap">${esc(P[s.owner].role)}</span></div></div>
+    <div><div class="k">Validation</div><div class="v">${s.validator?`${esc(VAL())}<br><span class="cap">Valide les versions · désignée au Brief</span>`:"Aucune"}</div></div>
+    <div><div class="k">Prérequis</div><div class="v">${preRows.join("<br>")}</div></div>
+    <div><div class="k">Ensuite</div><div class="v">${next.map(x=>esc(x.title)).concat((s.next||[]).map(([l,d])=>`${esc(l)}<br><span class="cap">${esc(d)}</span>`)).join("<br>")}</div></div>
+  </div>`;
+  if(st==="blocked"){const miss=pre.filter(p=>!preOk(p)).map(preLabel);h+=`<div class="callout info">${I.lock}<span>Se débloque quand ${esc(miss.join(" et "))} ${miss.length>1?"sont faits":"est fait"}.</span></div>`;}
+  h+=BODY[s.id](s,st);
+  // What was done is history: it closes the step, under everything that still matters.
+  const past=S.hist[s.id]||[];
+  if(past.length) h+=`<div class="vers"><h3 class="sub">Déjà fait</h3><ul class="hist">${past.map(e=>`<li><span class="okc">✓</span><span>${esc(e.text)} <span class="t3">· ${esc(e.who)} · ${esc(e.at)}${e.cause?` · suite à : ${esc(e.cause)}`:""}</span></span></li>`).join("")}</ul></div>`;
+  return h;
+}
+const waitCallout=a=>`<div class="callout info">${I.clock}<span>${waitLine(a)}.</span></div>`;
+function mailCard(m){
+  return `<div class="doccard"><div class="dochead">${I.mail}<span class="grow"><b>L'e-mail que PDS OS enverra</b><br><span class="src">De : l'adresse de PO, au nom de Lina Haddad · gardé dans l'historique, c'est la preuve d'envoi</span></span></div>
+    <div class="rows">${fact("À",m.to.map(([n,e])=>`${esc(n)} &lt;${esc(e)}&gt;`).join("<br>"),esc(m.toSrc))}${fact("Objet",esc(m.subject),"")}</div>
+    <div style="padding:14px 14px 0">${fieldIn(m.id,"Message",m.body,{area:true,rows:3})}</div>
+    ${m.link!==undefined?`<div class="maillink"><span class="cap">Ajouté automatiquement à la fin de l'e-mail${m.same?`, avec le même lien que pour ${m.same}`:""} :</span><span>Ouvrir votre dossier : ${m.link?`<code>${esc(m.link)}</code>`:"<i>lien privé créé à l'envoi</i>"}</span><span class="src">Lien privé, sans compte · valable jusqu'au ${esc(linkUntil())}</span></div>`:""}
+    ${m.note?`<p class="src" style="padding:0 14px 14px">${esc(m.note)}</p>`:`<div style="height:14px"></div>`}</div>`;
+}
+/* The private link where it is used, with its life: created, sent, opened, taken
+   on, file received (PROJ-UX-09); revoked with a reason; renewed. */
+function linkInline(ek,k){
+  const l=S.links[ek]; if(!l) return "";
+  const own=me()==="cp", o=S[k||"mix"];
+  const trail=[["Créé",l.at],["Envoyé",l.sent],["Ouvert",l.opened],["Pris en charge",o.received],["Fichier reçu",lastV(k||"mix")?lastV(k||"mix").at:null]];
+  if(l.revoked) return `<div class="callout bad">${I.stop}<span><b>Lien révoqué le ${esc(l.revoked.at)}</b> par ${esc(l.revoked.by)} : « ${esc(l.revoked.reason)} ». ${esc(P[ek].name)} ne peut plus l'ouvrir ; ce qu'il a déposé reste.</span></div>${own?`<div class="btnrow">${btn("newlink","Renouveler le lien",{v:ek})}</div>`:""}`;
+  return `<div class="linkrow" style="padding:0">
+    <ol class="trail" aria-label="Où en est le lien">${trail.map(([t,at])=>`<li class="${at?"on":""}"><span class="tdot">${at?I.check:""}</span><span>${t}${at?`<br><span class="cap">${esc(at)}</span>`:""}</span></li>`).join("")}</ol>
+    ${l.expiring?`<div class="callout warn">${I.warn}<span>Le lien de ${esc(P[ek].first)} expire dans 3 jours (${esc(l.until)}).</span>${own?btn("newlink","Renouveler le lien",{cls:"sm",v:ek}):""}</div>`:""}
+    <span class="linkbox"><code>${esc(l.url)}</code><button class="btn out sm" type="button" data-act="copy" data-v="${esc(l.url)}">Copier le lien</button>${own?`${btn("nudge","Relancer",{cls:"ghost sm",v:ek})}${btn("newlink","Renouveler le lien",{cls:"ghost sm",v:ek})}${btn("revokeopen","Révoquer le lien",{cls:"ghost sm",v:ek})}`:""}</span>
+    <span class="src">Lien privé de ${esc(P[ek].name)} · valable jusqu'au ${esc(l.until)} · envoyé par PDS OS à ${esc(P[ek].mail)}</span>
+    ${S.draft["revoke-"+ek]&&own?`<div class="field">${fieldIn("revokeWhy-"+ek,"Pourquoi vous le révoquez","",{req:true,ph:"Le lien a été transféré par erreur à quelqu'un d'autre."})}<div class="btnrow">${btn("revoke","Révoquer le lien",{cls:"out sm",v:ek})}${btn("revokecancel","Annuler",{cls:"ghost sm",v:ek})}</div></div>`:""}</div>`;
+}
+const HIST_WHO=()=>[...new Set(S.log.map(e=>e.who))];
+function historyView(){
+  const w=S.histWho, l=S.log.filter(e=>!w||e.who===w);
+  return `<section class="card"><div class="dhead"><h2>Historique du master</h2><div class="btnrow">${btn("csv","Exporter en CSV",{cls:"out sm"})}${btn("view","← Parcours",{cls:"ghost sm",v:"parcours"})}</div></div>
+    <p class="note">Chaque geste, qui l'a fait, quand, et ce qui l'a déclenché. Une version validée ne se remplace jamais en silence.</p>
+    <div class="strip">${["",...HIST_WHO()].map(n=>`<button class="chipbtn" type="button" data-act="histwho" data-v="${esc(n)}" aria-pressed="${w===n}" style="${w===n?"border-color:var(--sel);background:var(--sel-bg)":""}">${n?esc(n):"Tout le monde"}</button>`).join("")}</div>
+    ${l.length?`<ul class="hist">${l.map(e=>`<li><span class="noc">•</span><span>${esc(e.at)} · <b>${esc(e.who)}</b> · ${esc(e.text)}${e.cause?` <span class="t3">· suite à : ${esc(e.cause)}</span>`:""}</span></li>`).join("")}</ul>`:`<p class="note">Rien pour l'instant.</p>`}</section>`;
+}
+
+/* Audio: every file is listened to where it is decided on. ------------------- */
+const playBtn=(id,label)=>`<button class="play" type="button" data-act="play" data-v="${id}" aria-pressed="${S.playing===id}" aria-label="${S.playing===id?"Pause":"Écouter"} ${esc(label)}">${S.playing===id?I.pause:I.play}</button>`;
+const waveBar=(id,sec)=>S.playing===id?`<span class="wave" aria-hidden="true"><i style="animation-duration:${sec||194}s"></i></span>`:"";
+const STATUS={listen:["info","En écoute"],changes:["warn","Modification demandée"],reopened:["warn","Rouverte"]};
+const statusOf2=(k,v)=>v.status==="approved"?["ok",KIND[k].ok]:v.status==="listen"&&S[k].retours[v.n]?["info","Retours envoyés"]:STATUS[v.status];
+const byWhere=(ek)=>isIn(ek)?"dans PDS OS":"par son lien";
+function verRow(k,v){
+  const K=KIND[k], id=k+v.n, st=statusOf2(k,v);
+  return `<div class="ver">${playBtn(id,`${K.label} V${v.n}`)}<span class="grow"><b>${K.label} V${v.n}</b> · ${esc(v.name)}<br><span class="src">${esc(K.meta)} · déposée par ${esc(P[v.eng].name)} ${byWhere(v.eng)} le ${esc(v.at)}${k==="mix"?` · sur ${esc(AUDIO[v.src].name)}`:""}</span>${waveBar(id)}</span>${pill(st[0],st[1])}</div>
+    ${v.note?`<div class="callout warn ver-note">${I.warn}<span><b>${esc(v.by)}</b> (demander une modification, le ${esc(v.decidedAt)}) : « ${esc(v.note)} »</span></div>`:""}
+    ${v.status==="approved"?`<div class="callout ok ver-note">${I.ok}<span>Validée par ${esc(v.by)} le ${esc(v.decidedAt)} : ${k==="mix"?"c'est le mix final, il ne changera plus":"c'est le master final du titre"}.</span></div>`:""}
+    ${v.status==="reopened"?`<div class="callout warn ver-note">${I.warn}<span>Validée par ${esc(v.by)} le ${esc(v.decidedAt)}, puis rouverte par ${esc(v.reopen.by)} le ${esc(v.reopen.at)} : « ${esc(v.reopen.reason)} ». Elle reste dans l'historique.</span></div>`:""}`;
+}
+// The version decided on leads the step; older ones fold (rule 17).
+function versionsCard(k){
+  const l=S[k].versions; if(!l.length) return "";
+  const K=KIND[k], last=l[l.length-1], keep=l.filter(v=>v===last||v.status==="approved"), old=l.filter(v=>!keep.includes(v)).reverse();
+  return `<div class="doccard"><div class="dochead">${I.wave}<span class="grow"><b>${K.label} · ${l.length} version${l.length>1?"s":""}</b><br><span class="src">Chacune s'écoute avant de décider</span></span></div>
+    <div class="rows">${keep.slice().reverse().map(v=>verRow(k,v)).join("")}</div>
+    ${old.length?`<details class="vb" style="padding:0"><summary class="linkbtn" style="display:block;padding:10px 14px">Versions précédentes (${old.length})</summary><div class="rows">${old.map(v=>verRow(k,v)).join("")}</div></details>`:""}</div>`;
+}
+const canComment=()=>["cp","da","dg"].includes(me());
+function commentsBlock(k,v){
+  const l=S[k].comments.filter(c=>c.v===v.n), ex=COMMENT_EX[me()]||COMMENT_EX.cp, ek=engOf(k);
+  return `<h3 class="sub">Retours sur le ${KIND[k].label} V${v.n}</h3>
+    ${l.length?`<div class="rows">${l.map(c=>fact("",`<b>${esc(c.t||"—")}</b> · « ${esc(c.text)} »`,`${esc(c.by)}${c.link?" (lien privé)":""} · ${esc(c.at)}`)).join("")}</div>`:`<p class="note">Aucun retour pour l'instant.</p>`}
+    ${canComment()?`<div class="grid2" style="grid-template-columns:120px minmax(0,1fr)">${fieldIn("cmT-"+k,"Minutage","",{ph:"0:42"})}${fieldIn("cmX-"+k,"Mon retour","",{ph:ex[1]})}</div>
+      <div class="btnrow">${btn("comment","Ajouter mon retour",{cls:"out sm",step:k})}${btn("commentex","Remplir avec un exemple",{cls:"ghost sm",step:k})}</div>`:""}
+    <p class="cap">Visible par l'équipe seulement : ${esc(P[ek].name)} reçoit la demande de modification décidée par ${esc(VAL())}, ou les retours que vous lui transmettez.</p>
+    ${me()==="cp"&&S.validator!=="cp"?transmitRetours(k,v):""}`;
+}
+// The project's owner may pass the feedback on before the decision.
+function transmitRetours(k,v){
+  const sent=S[k].retours[v.n], ek=engOf(k);
+  if(sent) return `<div class="callout info">${I.info}<span>Retours transmis à ${esc(P[ek].first)} le ${esc(sent.at)}, sans décision : « ${esc(sent.text)} »</span></div>`;
+  if(!S[k].comments.some(c=>c.v===v.n)) return "";
+  return `<details class="vcard" ${S.draft["trOpen-"+k]||S.err["tr-"+k]?"open":""}><summary data-act="tropen" data-step="${k}"><span class="chv">${I.chevR}</span><h3>Transmettre les retours sans décider</h3><span class="cap">${esc(P[ek].first)} avance pendant que ${esc(VAL())} écoute</span></summary><div class="vb">
+    <div class="btnrow"><button class="btn ghost sm" type="button" data-act="trsynth" data-step="${k}">${I.spark} Proposer une synthèse des retours</button></div>
+    ${fieldIn("tr-"+k,"Les retours à transmettre","",{req:true,area:true,rows:3,src:`${esc(P[ek].first)} les lit ${isIn(ek)?"dans PDS OS":"sur son lien"}. Ce n'est pas une décision : la version reste en écoute.`})}
+    <div class="btnrow">${btn("trsend",`Transmettre les retours à ${P[ek].first}`,{cls:"out",step:k})}</div></div></details>`;
+}
+function daList(items){
+  return DA_GROUPS.filter(([g])=>items.some(f=>f.g===g)).map(([g,l])=>`<div class="dagroup"><span class="k">${l}</span><ul class="dalist">${items.filter(f=>f.g===g).map(f=>`<li>${esc(f.label)}</li>`).join("")}</ul></div>`).join("");
+}
+// PO drafts the change request from what was said, each line keeping its author.
+const synthesis=(k,v)=>S[k].comments.filter(c=>c.v===v.n).map(c=>`${c.t?c.t+" — ":""}${c.text} (${c.by})`).join("\n");
+function decisionBlock(k,v){
+  const open=S.draft["decOpen-"+k]||S.err["dec-"+k], ek=engOf(k);
+  let h="";
+  if(k==="mix"&&!done("source")) h+=`<div class="callout warn">${I.warn}<span>Ce mix repose sur ${esc(AUDIO[v.src].name)}, une version de travail : les voix définitives ne sont pas encore là. Il ne peut pas devenir le mix final.</span></div>`;
+  h+=`<div class="btnrow">${btn("decide",`Valider ce ${k==="mix"?"mix":"master"}`,{step:k,v:"ok"})}</div>${errOf("decide-"+k)}
+    <details class="vcard" ${open?"open":""}><summary data-act="decopen" data-step="${k}"><span class="chv">${I.chevR}</span><h3>Demander une modification</h3></summary><div class="vb">
+    ${S[k].comments.some(c=>c.v===v.n)?`<div class="btnrow"><button class="btn ghost sm" type="button" data-act="synth" data-step="${k}">${I.spark} Proposer une synthèse des retours</button></div>`:""}
+    ${fieldIn("dec-"+k,"Ce qu'il faut changer","",{req:true,area:true,rows:4,ph:"La voix plus en avant sur les refrains…",src:`Visible par l'équipe et par ${esc(P[ek].name)}. Chaque ligne garde son auteur.`})}
+    <div class="btnrow">${btn("decide","Demander une modification",{cls:"out",step:k,v:"changes"})}</div></div></details>`;
+  return h;
+}
+const BRIEF_MSG="Merci ! La maquette v3 est la référence d'énergie. Les voix définitives du 2e couplet arrivent mi-novembre.";
+const briefMsg=()=>dv("briefMsg",S.brief.msg||BRIEF_MSG);
+function dossierRows(k){
+  const b=S.brief, da=b.daAdded&&b.da?b.da.items:[];
+  if(k==="mastering"){const m=finalV("mix");return `<div class="rows">
+    ${fact("Mix final à masteriser",`<b>${m.existing?"Mix déjà terminé":"Mix V"+m.n}</b> · ${esc(m.name)}`,m.existing?`Catalogue · utilisé comme mix final par ${esc(m.by)}`:`Validé par ${esc(m.by)} le ${esc(m.decidedAt)}`)}
+    ${fact("Direction artistique",daList(da)||"—",b.daFrom||"Réponse de Nadia Benali")}
+    ${fact("Formats de livraison","WAV 24 bits / 44,1 kHz","Distribution › exigences de The Orchard")}
+    ${fact("Échéances",`Mastering attendu le ${frDate(b.dates.mastering)}<br>Master final attendu le ${frDate(b.dates.master)}`,"Brief")}
+    ${fact("Message",esc(briefMsg()),"Brief")}</div>`;}
+  const src=AUDIO[S.src.version];
+  return `<div class="rows">
+    ${fact("Titre à mixer","« Néons » · Mona Lys · single","Catalogue")}
+    ${fact("Source",`${esc(src.name)}${S.watch==="waiting"?" · version de travail, voix définitives attendues":""}`,"Étape Source")}
+    ${fact("Pistes séparées",S.noStems?'<span class="miss">Aucune piste au Catalogue</span>':esc(STEMS[S.src.version]),"Catalogue › Fichiers de travail")}
+    ${fact("Direction artistique",daList(da)||"—",b.daFrom||"Réponse de Nadia Benali")}
+    ${fact("Livrables",["Mix final","Master final"].concat(delivList().map(d=>d[1])).join(", "),"Brief")}
+    ${fact("Formats de livraison","WAV 24 bits / 44,1 kHz","Distribution › exigences de The Orchard")}
+    ${fact("Échéances",DATES.map(([d,l])=>`${l} ${frDate(b.dates[d])}`).join("<br>")+`<br>Sortie prévue le ${frDate(RELEASE)}`,"Brief")}
+    ${fact("Révisions incluses",String(P[engOf("mix")].rev||"Selon le planning du studio"),"Brief")}
+    ${fact("Message",esc(briefMsg()),"Brief")}</div>`;
+}
+/* Before sending: what leaves, and what is missing. A missing prerequisite only
+   goes through with a written waiver (PROJ-UX-09). */
+function sendChecks(k){
+  const l=[["Source confirmée",true,k==="mix"?AUDIO[S.src.version].name:"Mix final "+finalV("mix").name],["Brief enregistré",!!S.brief.saved&&!S.brief.dirty,S.brief.dirty?"Des modifications ne sont pas enregistrées":"Prêt à transmettre"]];
+  if(k==="mix") l.push(["Pistes séparées",!S.noStems,S.noStems?"Aucune piste au Catalogue":STEMS[S.src.version]]);
+  l.push(["Dates à venir",true,`${k==="mix"?"Mix V1 attendu le "+frDate(S.brief.dates.v1):"Mastering attendu le "+frDate(S.brief.dates.mastering)}`]);
+  return l;
+}
+function transmitBlock(k){
+  const mix=k==="mix", ek=engOf(k), e=P[ek], checks=sendChecks(k), miss=checks.filter(c=>!c[1]&&c[0]==="Pistes séparées"), unsaved=checks.find(c=>c[0]==="Brief enregistré"&&!c[1]);
+  const same=!mix&&S.same&&S.links[ek];
+  let h=mix?"":`<div class="callout ok">${I.ok}<span><b>Le Mix final est validé. Le Mastering peut commencer.</b> ${S.same?`Même ingénieur que le mix : poursuivez avec ${esc(e.name)}.`:`Ingénieur du mastering : ${esc(e.name)}${isIn(ek)?"":", qui reçoit son propre lien : il ne voit que le mastering"}.`}</span></div>`;
+  h+=`<h3 class="sub">Avant d'envoyer</h3><div class="rows">${checks.map(([t,ok,d])=>fact(t,esc(d),"",{side:ok?pill("ok","Prêt"):pill(t==="Pistes séparées"?"bad":"warn",t==="Pistes séparées"?"Manquant":"À enregistrer")})).join("")}</div>
+    <div class="doccard"><div class="dochead">${I.file}<span class="grow"><b>${mix?"Dossier pour le mixeur":"Dossier pour le mastering"}</b><br><span class="src">Calculé à partir du Brief et des fichiers confirmés : c'est exactement ce que ${esc(e.first)} recevra. Les tarifs restent internes.</span></span></div>${dossierRows(k)}</div>`;
+  if(isIn(ek)) h+=`<div class="callout info">${I.info}<span>${esc(e.name)} a un compte PDS : il reçoit une tâche dans son Travail, avec ce dossier, et dépose ses versions dans PDS OS. Pas de lien, pas d'e-mail.</span></div>`;
+  else h+=mailCard({id:"mail-"+k,to:[[e.name,e.mail]],toSrc:"Réseau",subject:mix?"« Néons » : votre dossier de mix":"« Néons » : le mastering peut commencer",
+      body:mix?`Bonjour ${e.first}, voici le dossier du mix de « Néons ». Tout est sur votre lien privé : les fichiers, le Brief, les dates et le tarif. Lina Haddad, PDS`:same?`Bonjour ${e.first}, le mix final est validé : le dossier du mastering est sur votre lien. Lina Haddad, PDS`:`Bonjour, voici le dossier du mastering de « Néons » : le mix final, le Brief, les dates et le tarif. Lina Haddad, PDS`,
+      link:same?S.links[ek].url:null,same:same?"le mix":""});
+  if(unsaved) h+=`<div class="callout warn">${I.warn}<span>Le Brief a des modifications non enregistrées : enregistrez-le, sinon ${esc(e.first)} recevra l'ancien dossier.</span>${btn("go","Ouvrir le Brief",{cls:"sm",step:"brief"})}</div>`;
+  if(miss.length) h+=`<div class="callout bad">${I.stop}<span><b>Il manque les pistes séparées.</b> L'envoi n'est possible qu'avec une dérogation, écrite et gardée dans l'historique.</span></div>${fieldIn("waiver-"+k,"Pourquoi envoyer quand même","",{req:true,area:true,rows:2,ph:"Karim a déjà les pistes de la session du 01/10, on les dépose au Catalogue demain."})}`;
+  const label=isIn(ek)?`Assigner à ${e.name}`:miss.length?`Envoyer à ${e.name} avec une dérogation`:same?"Transmettre au mastering":`Envoyer à ${e.name}`;
+  return h+`<div class="btnrow">${btn("transmit",label,{step:k,cls:miss.length?"out":""})}</div>`;
+}
+const BUDGET_STATE={estimated:["","Estimé"],proposed:["info","Proposé"],engaged:["warn","Engagé"],invoiced:["info","Facturé"],paid:["ok","Payé"]};
+function budgetRows(ks,withActions){
+  return ks.map(k=>{const ek=engOf(k);if(!ek) return "";const lbl=k==="mix"?"Mix":"Mastering";
+    if(isIn(ek)) return fact(`${lbl} · ${P[ek].name}`,"Interne · pas de facture","Ingénieur maison");
+    const b=budgetLine(k), st=BUDGET_STATE[b.state];
+    const src=b.state==="estimated"?`Réseau · tarif habituel de ${P[ek].name}`:b.state==="proposed"?`Proposé par ${P[ek].name} le ${b.at}${b.amount!==P[ek].price[k]?` (estimé : ${euro(P[ek].price[k])})`:" · c'est le tarif estimé"}`:b.state==="engaged"?`Accepté par ${b.acceptedBy} le ${b.acceptedAt} · facture attendue`:b.state==="invoiced"?`Facture n° ${b.invoice.number} reçue le ${b.invoice.received} · à payer avant le ${dueOf(b.invoice.received)}`:`Facture payée le ${b.paidAt} · ${b.paidBy}`;
+    const side=pill(st[0],st[1])+(withActions&&me()==="cp"&&b.state==="proposed"?btn("budgetok","Accepter le tarif",{cls:"sm",step:k}):"");
+    return fact(`${lbl} · ${P[ek].name}`,euro(b.amount),esc(src),{side});}).join("");
+}
+/* The engineer's messages (PROJ-AMEL-02): a question gets an answer; a delay gets
+   its affected dates, applied or kept by a person; a missing file, a resent dossier. */
+function delayDates(t){
+  const keys=t.k==="mix"?(S.mix.versions.length?["final","mastering","master"]:["v1","final","mastering","master"]):["mastering","master"];
+  return keys.map(d=>[d,S.brief.dates[d],addDays(S.brief.dates[d],t.days)]);
+}
+function threadBlock(k){
+  const l=S.thread.filter(t=>t.k===k); if(!l.length) return "";
+  const open=l.filter(t=>t.status!=="closed"), closed=l.filter(t=>t.status==="closed");
+  const KINDS={question:"Question",delay:"Retard signalé",missing:"Fichier manquant"};
+  const item=t=>{
+    let h=`<div class="doccard"><div class="dochead">${I.mail}<span class="grow"><b>${KINDS[t.kind]}${t.kind==="delay"?` : ${t.days} jour${t.days>1?"s":""}`:""}</b> · ${esc(P[t.eng].name)}<br><span class="src">Reçu le ${esc(t.at)} par son lien</span></span>${pill(t.status==="escalated"?"bad":"warn",t.status==="escalated"?"Chez la direction":"À traiter")}</div><div style="padding:12px 14px;display:flex;flex-direction:column;gap:10px"><p>« ${esc(t.text)} »</p>`;
+    if(t.kind==="delay"){const dd=delayDates(t), late=dd.find(x=>x[0]==="master")[2]>RELEASE;
+      h+=`<div class="rows">${dd.map(([d,a,b])=>fact(DATES.find(x=>x[0]===d)[1],`${frDate(a)} → <b>${frDate(b)}</b>`,"Proposé : décalé de "+t.days+" jour"+(t.days>1?"s":""))).join("")}</div>`;
+      if(late) h+=`<div class="callout bad">${I.stop}<span>Le master final passerait le ${frDate(dd.find(x=>x[0]==="master")[2])}, après la sortie du ${frDate(RELEASE)} : c'est à la direction d'arbitrer.</span></div>`;
+      if(me()==="cp"&&t.status==="open") h+=`${fieldIn("reply-"+t.id,`Réponse à ${P[t.eng].first}`,"",{area:true,rows:2,ph:"Pas de souci, on décale."})}<div class="btnrow">${late?btn("escalate","Envoyer à la direction",{v:t.id}):btn("delayok","Appliquer ces dates",{v:t.id})}${btn("delayno","Garder les dates",{cls:"out",v:t.id})}</div>`;
+      if(me()==="dg"&&t.status==="escalated") h+=`${fieldIn("reply-"+t.id,`Réponse à ${P[t.eng].first}`,"",{area:true,rows:2,ph:"Impossible de décaler : la sortie est calée avec la radio."})}<div class="btnrow">${btn("delayok","Appliquer ces dates (la sortie est à revoir)",{v:t.id})}${btn("delayno","Refuser le retard",{cls:"out",v:t.id})}</div>`;
+    } else if(me()==="cp"&&t.status==="open"){
+      h+=`${fieldIn("reply-"+t.id,`Réponse à ${P[t.eng].first}`,"",{req:t.kind==="question",area:true,rows:2,ph:t.kind==="question"?"Oui, la v3 reste la référence d'énergie.":"Je vous renvoie le dossier avec les pistes."})}
+        <div class="btnrow">${t.kind==="missing"?btn("resend","Renvoyer le dossier",{step:k,v:t.id}):btn("reply","Répondre",{v:t.id})}</div>`;
+    }
+    return h+`</div></div>`;};
+  return `<h3 class="sub">Messages ${deOf(P[engOf(k)].first)}</h3>${open.map(item).join("")}
+    ${closed.length?`<details class="vb" style="padding:0"><summary class="linkbtn" style="display:block;padding:6px 0">Échanges traités (${closed.length})</summary><div class="rows">${closed.map(t=>fact(KINDS[t.kind],`« ${esc(t.text)} »`,`${esc(t.outcome)}${t.reply?` · réponse : « ${esc(t.reply)} »`:""}`)).join("")}</div></details>`:""}`;
+}
+function prodBody(k,st){
+  if(k==="mix"&&S.src.useDone) return `<div class="callout ok">${I.ok}<span><b>Non nécessaire : le mix existe déjà.</b> ${esc(DONE_MIX.name)}, utilisé comme mix final par ${esc(S.src.useDone.by)} le ${esc(S.src.useDone.at)} : « ${esc(S.src.useDone.reason)} ».</span></div>`;
+  if(st==="blocked") return k==="mastering"?`<p class="note">Le mastering partira du mix final validé.</p>`:"";
+  const o=S[k], acts=actorsOf(k), ek=engOf(k), v=lastV(k), main=acts[0];
+  let h=versionsCard(k), linkShown=false;
+  if(!o.sent) return h+(main&&main.r===me()?transmitBlock(k):main?waitCallout(main):"");
+  if(S.brief.version>o.sentBrief&&!done(k)) h+=`<div class="callout warn">${I.warn}<span>Le Brief a changé depuis l'envoi : ${esc(P[ek].first)} a toujours l'ancien dossier.</span>${me()==="cp"?btn("resend","Renvoyer le dossier",{cls:"sm",step:k}):""}</div>`;
+  h+=threadBlock(k);
+  const bl=budgetLine(k);
+  if(bl&&bl.state==="proposed") h+=`<h3 class="sub">Tarif</h3><div class="rows">${budgetRows([k],true)}</div><p class="cap">Un montant proposé ne consomme pas le budget : il ne compte qu'une fois accepté.</p>`;
+  if(main&&main.r===ek){
+    if(isIn(ek)&&me()===ek) h+=uploadBlock(k,`Déposer ma version · ${KIND[k].label} V${S[k].versions.length+1}`,true);
+    else if(!isIn(ek)){h+=`${waitCallout(main)}${linkInline(ek,k)}`;linkShown=true;}
+    else h+=waitCallout(main);
+  } else if(S.links[ek]&&S.links[ek].revoked){h+=linkInline(ek,k);linkShown=true;}
+  if(v&&v.status==="listen"){
+    h+=commentsBlock(k,v);
+    const dec=acts.find(a=>a.r===S.validator&&a.todo.startsWith("Valider"));
+    if(dec&&dec.r===me()) h+=decisionBlock(k,v); else if(dec) h+=waitCallout(dec);
+  }
+  if(st==="done"){const f=finalV(k), canReopen=me()==="cp"&&(k==="mix"?!S.mastering.sent:!Object.keys(S.final.got).length);
+    h+=`<div class="callout ok">${I.ok}<span><b>${KIND[k].label} V${f.n} validé par ${esc(f.by)}${k==="mix"?" : c'est le mix final":""}.</b> Plus aucun dépôt n'est possible sur ${k==="mix"?"le mix":"le master"}.</span></div>`;
+    if(canReopen) h+=S.draft["reopen-"+k]?`${fieldIn("reopenWhy-"+k,`Pourquoi rouvrir le ${k==="mix"?"mix":"master"}`,"",{req:true,area:true,rows:2,ph:"Mona veut une voix plus en avant sur le dernier refrain."})}<div class="btnrow">${btn("reopen",`Rouvrir le ${k==="mix"?"mix":"master"}`,{cls:"out",step:k})}${btn("reopencancel","Annuler",{cls:"ghost sm",step:k})}</div>`:`<div class="btnrow">${btn("reopenopen",`Rouvrir le ${k==="mix"?"mix":"master"}`,{cls:"ghost sm",step:k})}</div>`;
+  }
+  if(!linkShown&&S.links[ek]&&!isIn(ek)) h+=`<h3 class="sub">Lien privé ${deOf(P[ek].first)}</h3>${linkInline(ek,k)}`;
+  h+=`<details class="vb" style="padding:0"><summary class="linkbtn" style="display:block;padding:6px 0">Le dossier envoyé le ${esc(o.sent)}${o.resent.length?` · renvoyé le ${esc(o.resent[o.resent.length-1])}`:""}</summary>${dossierRows(k)}${me()==="cp"&&!done(k)?`<div class="btnrow" style="padding-top:8px">${btn("resend","Renvoyer le dossier",{cls:"ghost sm",step:k})}</div>`:""}</details>`;
+  return h;
+}
+
+const BODY={
+  source(s,st){
+    const own=me()==="cp", a=actorsOf("source")[0], voicesOk=S.catalogMix||S.noStems||S.watch==="replaced";
+    const diag=S.src.useDone?["Mix terminé · utilisé comme mix final","ok","Terminé"]:S.catalogMix?[`Mix terminé · ${DONE_MIX.name}`,"ok","Terminé"]:S.mix.versions.length?["Mix en cours","info","En cours"]:["Mix à faire · aucun mix au Catalogue","","À faire"];
+    const checks=`<h3 class="sub">Ce que PDS OS a vérifié</h3><div class="rows">
+      ${fact("Où en est le mix",esc(diag[0]),S.catalogMix?esc(DONE_MIX.meta):"Lu au Catalogue",{side:pill(diag[1],diag[2])})}
+      ${S.src.useDone?"":fact("Production définitive","Oui","Call de cadrage du 16/10 · « la prod est finie, on ne touche plus à l'instru »",{side:pill("ok","Prête")})}
+      ${S.src.useDone?"":fact("Pistes séparées",S.noStems?"0 sur 12 · aucune piste au Catalogue":"12 pistes sur 12",S.noStems?"Lu par le code":"Lu par le code · "+esc(STEMS.v3),{side:S.noStems?pill("bad","Manquantes"):pill("ok","Prêtes")})}
+      ${S.src.useDone?"":fact("Voix définitives",voicesOk?(S.watch==="replaced"?"Oui · session du Ven. 13/11":"Oui"):"Non · le 2e couplet est à refaire",S.watch==="replaced"?"Catalogue · "+esc(AUDIO.v4.name):voicesOk?"Fiche du titre":"Call de cadrage du 16/10 · « on refait la voix du deuxième couplet mi-novembre »",{side:voicesOk?pill("ok","Prêtes"):pill("warn","Pas encore")})}</div>`;
+    if(!srcConfirmed()){
+      if(!own) return checks+(a?waitCallout(a):"");
+      const cur=dv("srcV","v3"), ch=dv("srcChoice",""), dc=dv("doneChoice","");
+      let h="";
+      if(S.catalogMix){
+        h+=`${checks}<fieldset class="pick"><legend class="lbl2"><b>Un mix existe déjà au Catalogue : que fait-on ?</b> *</legend>
+          <div class="rows">${fact("Mix trouvé",`<b>${esc(DONE_MIX.name)}</b>`,esc(DONE_MIX.meta),{side:playBtn("done",DONE_MIX.name)})}</div>
+          <div class="opts"><label class="opt"><input type="radio" name="doneChoice" value="use" ${dc==="use"?"checked":""}><span class="grow"><b>Utiliser ce mix comme mix final</b><br><span class="src">Le titre passe directement au Mastering : pas de mixage, pas de pistes à envoyer.</span></span></label>
+          <label class="opt"><input type="radio" name="doneChoice" value="remix" ${dc==="remix"?"checked":""}><span class="grow"><b>Refaire un mixage</b><br><span class="src">On repart de la maquette : Brief, puis Mixage comme d'habitude.</span></span></label></div>${errOf("doneChoice")}</fieldset>`;
+        if(dc==="use") return h+`${fieldIn("doneWhy","Pourquoi ce mix est le bon","",{req:true,area:true,rows:2,ph:"Mix validé par Mona en studio le 12/10 ; seul le mastering reste à faire."})}<div class="btnrow">${btn("usedone","Utiliser ce mix comme mix final")}</div>`;
+        if(dc!=="remix") return h+`<div class="btnrow">${btn("usedone","Continuer")}</div>`;
+      }
+      h+=`<fieldset class="pick"><legend class="lbl2"><b>Dernière version détectée</b></legend><div class="opts">${["v3","v2","v1"].map(k=>`<label class="opt"><input type="radio" name="srcV" value="${k}" ${cur===k?"checked":""}><span class="grow">${esc(AUDIO[k].name)}<br><span class="src">${esc(AUDIO[k].meta)}${k==="v3"?" · la plus récente":""}</span>${waveBar("src"+k,AUDIO[k].sec)}</span>${playBtn("src"+k,AUDIO[k].name)}</label>`).join("")}</div>
+        <span class="src">Les versions audio du titre au Catalogue. Un master final ne peut pas être une source.</span></fieldset>
+        ${S.catalogMix?"":checks}`;
+      if(!voicesOk) h+=`<fieldset class="pick"><legend class="lbl2"><b>Les voix ne sont pas définitives : que fait-on ?</b> *</legend><span class="src"><span class="po">${I.spark} PO</span> propose deux façons de faire, chacune avec sa conséquence. Vous décidez.</span>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="srcChoice" value="wait" ${ch==="wait"?"checked":""}><span class="grow"><b>Attendre les voix définitives</b><br><span class="src">Le mix attend. Mona Lys enregistre le 2e couplet (session du Ven. 13/11) ; PDS OS surveille leur arrivée au Catalogue, vous confirmez la nouvelle source, puis le dossier part. Mix V1 attendu le ${frDate(S.brief.dates.v1)} : serré mais tenable.</span></span></label>
+          <label class="opt"><input type="radio" name="srcChoice" value="anticipate" ${ch==="anticipate"?"checked":""}><span class="grow"><b>Anticiper avec une version de travail</b><br><span class="src">Le mixeur commence sur la v3. À l'arrivée des voix définitives, PDS OS propose de remplacer la source, vous confirmez, il est prévenu. Aucun mix ne peut être validé avant.</span></span></label>
+        </div>${errOf("srcChoice")}</fieldset>`;
+      return h+`<div class="btnrow">${btn("srcok","Utiliser cette version")}</div>`;
+    }
+    if(S.src.useDone) return checks+`<div class="callout ok">${I.ok}<span><b>Mix déjà terminé, utilisé comme mix final.</b> ${esc(DONE_MIX.name)} · « ${esc(S.src.useDone.reason)} ». Le Mixage n'est pas nécessaire.</span></div>`;
+    let h=`<div class="rows">
+      ${fact("Source du mix",`<b>${esc(AUDIO[S.src.version].name)}</b>`,`${esc(AUDIO[S.src.version].meta)} · confirmée par Lina Haddad${S.watch==="waiting"||S.watch==="arrived"?" · version de travail":""}`,{side:playBtn("srcC",AUDIO[S.src.version].name)})}
+      ${S.src.choice?fact("Choix",S.src.choice==="wait"?"Attendre les voix définitives":"Anticiper avec une version de travail","Décidé par Lina Haddad"):""}</div>${checks}`;
+    if(S.watch==="waiting") h+=`${waitCallout(a)}<p class="cap">PDS OS surveille le Catalogue : à l'arrivée des voix, il propose de remplacer la source.</p><div class="btnrow">${protoBtn("vocals","les voix définitives arrivent au Catalogue")}</div>`;
+    if(S.watch==="arrived"){const ek=engOf("mix");
+      h+=`<div class="callout info">${I.info}<span><b>Nouvelle version reçue au Catalogue :</b> ${esc(AUDIO.v4.name)} (${esc(AUDIO.v4.meta)}).</span></div>
+        <div class="rows">${fact("Nouvelle source proposée",`<b>${esc(AUDIO.v4.name)}</b>`,esc(STEMS.v4),{side:playBtn("srcv4",AUDIO.v4.name)})}</div>`;
+      h+=own?`<p class="note">${S.mix.sent?`${esc(P[ek].first)} la trouvera ${isIn(ek)?"dans PDS OS":"sur son lien"}, avec ses pistes : ses prochaines versions partiront de là.`:"Le dossier partira avec cette source."}</p><div class="btnrow">${btn("replace",S.mix.sent?`Remplacer la source et prévenir ${P[ek].first}`:"Remplacer la source")}</div>`:waitCallout(a);
+    }
+    if(st==="done") h+=`<div class="callout ok">${I.ok}<span><b>Source confirmée${S.watch==="replaced"?" : voix définitives":""}.</b></span></div>`;
+    return h;
+  },
+  brief(s,st){
+    const b=S.brief, own=me()==="cp", bs=briefState(), miss=briefMissing();
+    if(!b.start){
+      if(!own){const a=actorsOf("brief")[0];return a?waitCallout(a):"";}
+      return `<div class="rows">${fact("Déjà pré-rempli","Ingénieur, validatrice, livrables, formats et dates","Cadrage, Réseau, Distribution")}</div>
+        <h3 class="sub">Comment voulez-vous remplir le Brief ?</h3>${briefStartChoice(miss)}`;
+    }
+    const edit=own;
+    let h=`<div class="doccard"><div class="dochead">${I.file}<span class="grow"><b>Brief_Mix_Master_Neons.pdf</b><br><span class="src">${b.saved?`Enregistré le ${esc(b.saved)} par Lina Haddad`:"Pas encore enregistré : ce qui est déjà connu du projet est pré-rempli"} · ce que l'ingénieur recevra, sans les tarifs</span></span>${pill(bs[0],bs[1])}${btn("toast","Voir le PDF",{cls:"out sm",v:"PDF non ouvert dans le proto."})}</div>
+      ${miss.length?`<p class="src" style="padding:10px 14px">Il manque : ${esc(miss.join(", "))}.</p>`:""}</div>`;
+    const sentK=stages().find(k=>S[k].sent);
+    if(sentK) h+=`<div class="callout info">${I.info}<span>Dossier envoyé le ${esc(S[sentK].sent)} : modifier le Brief ne change rien chez l'ingénieur tant que vous ne renvoyez pas le dossier.</span></div>`;
+    if(b.start==="exchange") h+=exchangeBlock();
+    if(me()==="da"&&!b.da&&!b.daAdded&&st==="current") h+=daQuestion();
+    h+=`<h3 class="sub">Conditions de prestation</h3><div class="rows">${engineerRows(edit)}</div>
+      <h3 class="sub">Direction artistique</h3>${daSection(st)}
+      <h3 class="sub">Livrables et formats</h3>
+      <div class="pchips">${DELIV.map(([k,l,fixed])=>{const on=fixed||b.deliv[k];return edit&&!fixed?`<button class="chipbtn" type="button" data-act="deliv" data-k="${k}" aria-pressed="${!!on}" style="${on?"border-color:var(--sel);background:var(--sel-bg)":""}">${on?I.check:""}${esc(l)}</button>`:on?`<span class="chipbtn" style="border-color:var(--sel);background:var(--sel-bg)">${I.check}${esc(l)}</span>`:"";}).join("")}</div>
+      <p class="cap">${delivList().map(([k,l])=>DELIV_SRC[k]?`${esc(l)} : ${esc(DELIV_SRC[k])}`:"").filter(Boolean).join(" · ")}</p>
+      <div class="rows">${fact("Formats de livraison","WAV 24 bits / 44,1 kHz","Distribution › exigences de The Orchard")}</div>
+      <h3 class="sub">Dates</h3><div class="rows">${DATES.filter(([d])=>!(S.src.useDone&&(d==="v1"||d==="final"))).map(([d,l,off])=>dateRow(d,l,off,edit)).join("")}</div>
+      <h3 class="sub">Message</h3>${edit?fieldIn("briefMsg","Message pour les ingénieurs",b.msg||BRIEF_MSG,{area:true,rows:2}):`<div class="rows">${fact("Message pour les ingénieurs",esc(briefMsg()),"")}</div>`}`;
+    if(edit) h+=`${S.err.briefInfo?`<div class="callout info">${I.info}<span>${esc(S.err.briefInfo)}</span></div>`:""}${errOf("brief")}<div class="btnrow">${btn("briefsave","Enregistrer le Brief")}</div>`;
+    return h;
+  },
+  mix(s,st){return prodBody("mix",st);},
+  mastering(s,st){return prodBody("mastering",st);},
+  final(s,st){
+    if(st==="blocked") return "";
+    const m=finalV("mastering"), mx=finalV("mix"), acts=actorsOf("final"), ek=engOf("mastering"), dl=acts.find(a=>a.r===ek);
+    let h=`<div class="doccard"><div class="dochead">${playBtn("final",m.name)}<span class="grow"><b>Master final · ${esc(m.name)}</b><br><span class="src">Master V${m.n} validé par ${esc(m.by)} le ${esc(m.decidedAt)}</span>${waveBar("final")}</span>${pill("ok","Au Catalogue")}</div>
+      <div class="rows">
+      ${fact("État au Catalogue","« Néons » · Master final · ISRC FR-PDS-26-00041","Rattaché au titre du Catalogue, même fichier")}
+      ${fact("Filiation",`${mx.existing?`Mix déjà terminé : ${esc(mx.name)}`:`Source confirmée : ${esc(AUDIO[S.src.version].name)}<br>Mix final V${mx.n} : ${esc(mx.name)}`}<br>Master final V${m.n} : ${esc(m.name)}`,"")}
+      ${fact("Ce que ça débloque","Distribution · prérequis « Master final » : fait<br>Juridique · durée du bulletin SACEM : 3 min 14","Lus directement sur ce master final, sans import",{side:btn("toast","Aller à la Distribution",{cls:"ghost sm",v:"Ouvre la Distribution (hors de ce proto)."})})}</div></div>
+      <h3 class="sub">Autres livrables attendus</h3><div class="rows">${delivList().map(([k,l])=>{const g=S.final.got[k];return fact(l,g?`<b>${esc(g.name)}</b>`:"Attendu",g?`Reçu le ${esc(g.at)} ${byWhere(ek)} · ${esc(P[ek].name)}`:"Demandé dans le Brief",{side:g?playBtn("d"+k,l)+pill("ok","Reçu"):pill("warn","Attendu")});}).join("")}</div>`;
+    if(dl){
+      if(isIn(ek)&&me()===ek) h+=delivMissing().map(([d,l])=>uploadBlock("d:"+d,l,true)).join("");
+      else h+=waitCallout(dl)+(isIn(ek)?"":linkInline(ek,"mastering"));
+    }
+    if(st==="done"){const ps=payState();h+=`<div class="callout ok">${I.ok}<span><b>Master final au Catalogue, livrables reçus.</b> ${ps==="facture payée"?"Facture payée : le Master est entièrement clos.":ps==="facture à payer"?"Le paiement reste à suivre : il ne bloque rien.":ps==="facture attendue"?"La facture est attendue : elle ne bloque rien.":"Ingénieur maison : pas de facture."}</span></div>`;}
+    h+=payBlock();
+    h+=`<h3 class="sub">Budget</h3><div class="rows">${budgetRows(stages(),true)}</div>`;
+    return h;
+  }
+};
+function engineerList(field){
+  const cur=field==="mix"?S.eng.mix:S.eng.mastering;
+  const keys=field==="mix"?ENGINEER_KEYS.filter(k=>P[k].does.includes("mix")):["arp",...ENGINEER_KEYS.filter(k=>k!=="arp"&&P[k].does.includes("mastering"))];
+  return `<div class="edit"><div class="opts">${keys.map(k=>{const x=P[k];return `<div class="opt" style="cursor:default"><span class="grow"><b>${esc(x.name)}</b>${x.linked?" · déjà lié au projet":""}${isIn(k)?" · compte PDS":""}<br><span class="src">${esc(x.what)}${x.price?" · "+Object.entries(x.price).map(([s,a])=>`${s==="mix"?"mix":"mastering"} ${euro(a)}`).join(" · "):" · interne, pas de facture"}${x.rev?` · ${x.rev} révision${x.rev>1?"s":""}`:""} · ${esc(x.past)}</span></span>${cur===k?pill("ok","Choisi"):`<button class="btn out sm" type="button" data-act="pickeng" data-k="${field}" data-v="${k}">Choisir</button>`}</div>`;}).join("")}</div>
+    <div class="btnrow"><button class="linkbtn" type="button" data-act="toast" data-v="Ajouter au Réseau ouvre le formulaire de contact, sans quitter le Brief.">Ajouter au Réseau</button>${cur?btn("pickengclose","Fermer",{cls:"ghost sm",k:field}):""}</div></div>`;
+}
+function engineerRows(edit){
+  const em=S.eng.mix?P[S.eng.mix]:null, ema=!S.same&&S.eng.mastering?P[S.eng.mastering]:null, vopen=S.draft.pickVal;
+  const srcOf=(field,e)=>!e?"Personne n'est désigné au Cadrage ni crédité sur le titre":S.engBy[field]?`Choisi par ${S.engBy[field]} · Réseau · ${e.past}`:`Désigné au Cadrage › Équipe · « Karim fait le mix et le master » (call du 16/10)<br>Réseau · ${e.what.toLowerCase()} · ${e.past}`;
+  let h="";
+  if(S.src.useDone) h+=fact("Ingénieur du mix","Pas de mixage : mix déjà terminé",esc(DONE_MIX.name));
+  else{const open=S.draft["pick-mix"]||(!em&&edit);
+    h+=fact("Ingénieur du mix",em?`<b>${esc(em.name)}</b>`:`<span class="miss">À choisir</span>`,srcOf("mix",em),{side:edit&&em&&!open?btn("pickengopen","Changer",{cls:"ghost sm",k:"mix"}):"",edit:open&&edit?engineerList("mix"):"",cls:S.engBy.mix?"changed":""});}
+  h+=errOf("engineer");
+  if(!S.src.useDone) h+=fact("Même ingénieur pour le mastering",S.same?"Oui":"Non","",{side:edit?`<span class="pchips">${[["1","Oui"],["0","Non"]].map(([v,l])=>`<button class="chipbtn" type="button" data-act="same" data-v="${v}" aria-pressed="${(v==="1")===S.same}" style="${(v==="1")===S.same?"border-color:var(--sel);background:var(--sel-bg)":""}">${l}</button>`).join("")}</span>`:""});
+  if(!S.same||S.src.useDone){const open=S.draft["pick-mastering"]||(!ema&&edit), e=S.src.useDone?P[engOf("mastering")]:ema;
+    h+=fact("Ingénieur du mastering",e?`<b>${esc(e.name)}</b>`:`<span class="miss">À choisir</span>`,e?(S.engBy.mastering?`Choisi par ${S.engBy.mastering} · Réseau · ${e.past}`:`Réseau · ${e.what.toLowerCase()} · ${e.past}`):"Choisissez dans le Réseau : il recevra son propre lien",{side:edit&&e&&!open?btn("pickengopen","Changer",{cls:"ghost sm",k:"mastering"}):"",edit:open&&edit?engineerList("mastering"):""});}
+  const revs=stages().map(k=>{const e=engOf(k);return e&&P[e].rev?`${k==="mix"?"Mix":"Mastering"} : ${P[e].rev} (${P[e].name})`:null;}).filter(Boolean);
+  if(revs.length) h+=fact("Révisions incluses",esc(revs.join(" · ")),"Réseau · leurs conditions habituelles");
+  h+=fact("Qui valide les versions",`<b>${esc(VAL())}</b>, ${S.validator==="da"?"directrice créative":"cheffe de projet"}`,S.validatorBy?`Choisie par ${S.validatorBy}`:"Désignée au Cadrage › Équipe",{side:edit&&!vopen?btn("pickvalopen","Changer",{cls:"ghost sm"}):"",edit:vopen&&edit?`<div class="edit"><div class="opts">${VALIDATORS.map(([k,d])=>`<div class="opt" style="cursor:default"><span class="grow"><b>${esc(P[k].name)}</b><br><span class="src">${esc(d)}</span></span>${S.validator===k?pill("ok","Choisie"):`<button class="btn out sm" type="button" data-act="pickval" data-v="${k}">Choisir</button>`}</div>`).join("")}</div></div>`:"",cls:S.validatorBy?"changed":""});
+  h+=budgetRows(stages().filter(k=>engOf(k)),false).replace(/<span class="k">(Mix|Mastering) · /g,'<span class="k">Tarif (interne) · $1 · ');
+  return h;
+}
+function dateRow(d,l,off,edit){
+  const key="date:"+d, b=S.brief, by=b.dateBy[d];
+  const src=by?`Modifié par ${by}`:off?`Calculé : ${off} jour${off>1?"s":""} avant le master final`:"Brief de cadrage › Temporalité · la date dont tout le reste dépend";
+  if(S.editing===key) return fact(l,`<input class="in" id="editIn" type="date" value="${esc(dv("editIn",b.dates[d]))}" data-autofocus aria-label="${esc(l)}"${inv("editIn")}>${errOf("editIn")}`,`Proposition : ${frDate(b.dates[d])} · ${src} — Entrée enregistre, Échap annule.`,{side:`${btn("editsave","Enregistrer",{cls:"sm",k:key})}${btn("editcancel","Annuler",{cls:"ghost sm"})}`});
+  return fact(l,`<b>${frDate(b.dates[d])}</b>`,src,{cls:by?"changed":"",side:edit?btn("edit","Modifier",{cls:"ghost sm",k:key}):""});
+}
+/* Starting the Brief (ticket Master § 3): with little missing, start directly; with much
+   missing, the exchange is the primary action. The reason is what the Brief does not know. */
+function briefStartChoice(miss){
+  const meet=miss.length>=2;
+  const why=`Il manque ${miss.length>1?miss.slice(0,-1).join(", ")+" et "+miss[miss.length-1]:miss[0]||"peu de choses"}`;
+  const direct=`<div class="doccard"><div style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="eyebrow"><b>Commencer directement</b>${meet?"":pill("info","Recommandé")}</span><span class="note">Tout ce qui est connu est déjà là. PO pose à Nadia Benali la question de la direction artistique ; vous complétez le reste.</span>${btn("briefstart","Commencer directement",{cls:meet?"out":"",v:"direct"})}</div></div>`;
+  const ex=`<div class="doccard"><div style="padding:16px;display:flex;flex-direction:column;gap:10px"><span class="eyebrow"><b>Préparer un échange</b>${meet?pill("info","Recommandé"):""}</span><span class="note">Un call avec l'équipe et l'ingénieur. L'ordre du jour vient de ce que le Brief ne sait pas encore ; PO propose ensuite les réponses, avec leurs citations.</span>${meet?`<span class="cap">${esc(why)} : un échange ira plus vite que des questions séparées.</span>`:""}${btn("briefstart","Préparer un échange",{cls:meet?"":"out",v:"exchange"})}</div></div>`;
+  return `<div class="grid2">${meet?ex+direct:direct+ex}</div>`;
+}
+/* « Préparer un échange »: the agenda comes from what the Brief does not know;
+   after the call, PO proposes answers quoting the transcript, a person applies them. */
+function exchangeBlock(){
+  const c=S.brief.call, own=me()==="cp";
+  const agenda=[["Direction artistique et références","Le Brief ne la connaît pas"],["Livrables en plus des deux finals","Instrumental et radio edit déjà demandés : à confirmer"],[`Disponibilité de ${P[S.eng.mix||"karim"].first} pour le Mix V1`,`Mix V1 attendu le ${frDate(S.brief.dates.v1)}`]];
+  if(c.stage==="prep") return `<div class="doccard"><div class="dochead">${I.clock}<span class="grow"><b>Préparer l'échange</b><br><span class="src">Ordre du jour calculé depuis ce que le Brief ne sait pas encore</span></span></div>
+    <div class="rows">${agenda.map(([t,w],i)=>fact(`Point ${i+1}`,`<b>${esc(t)}</b>`,esc(w))).join("")}${fact("Participants","Lina Haddad, Nadia Benali, Mona Lys, Karim Haddou","Équipe du projet · Réseau")}${fact("Quand","Mar. 20/10/2026 à 14 h · 45 min","Premier créneau commun")}</div></div>
+    ${own?`<div class="btnrow">${btn("callcreate","Créer le call")}${btn("briefstart","Commencer directement plutôt",{cls:"ghost sm",v:"direct"})}</div>`:""}`;
+  if(c.stage==="planned") return `<div class="callout info">${I.clock}<span><b>Call prévu le Mar. 20/10 à 14 h</b> avec Nadia Benali, Mona Lys et Karim Haddou. L'invitation est partie avec l'ordre du jour.</span></div><div class="btnrow">${protoBtn("callheld","le call a lieu (transcription)")}</div>`;
+  if(c.stage==="done"){const shown=CALL_FINDS.map((f,j)=>Object.assign({j},f)).filter(f=>!c.removed[f.j]);
+    return `<div class="field"><span class="po">${I.spark} Ce que PO a compris du call du 20/10</span><span class="src">Chaque élément cite la phrase dite. Retirez ce qui est faux, puis appliquez : rien n'entre dans le Brief avant.</span></div>
+      <div class="rows">${shown.map(f=>fact("",`<b>${esc(f.label)}</b>`,esc(f.quote),{side:own?`<button class="btn ghost sm" type="button" data-act="callremove" data-v="${f.j}" aria-label="Retirer « ${esc(f.label)} »">Retirer</button>`:""})).join("")}</div>
+      ${own?`<div class="btnrow">${btn("callapply","Appliquer au Brief")}</div>`:""}`;}
+  return `<div class="callout ok">${I.ok}<span>Réponses du call du 20/10 appliquées au Brief le ${esc(c.appliedAt)}.</span></div>`;
+}
+function daQuestion(){
+  const t=dv("daText",""), b=S.brief;
+  let h=`<div class="card" style="border-color:var(--sel);gap:12px"><span class="cap"><span class="po">${I.spark} Question de PO</span> · pour Nadia Benali · posée le 19/10</span><h3 class="qh">Quelle direction artistique et quelles références pour le mix de « Néons » ?</h3>
+    <p class="note">Le Brief ne la connaît pas : c'est à la directrice créative d'en décider. Votre réponse ira dans le dossier de l'ingénieur.</p>`;
+  if(!b.daRead) return h+`${fieldIn("daText","Votre réponse","",{area:true,rows:4,ph:"Ce que vous voulez entendre, vos références, ce qu'il ne faut pas faire…"})}
+    <div class="btnrow"><button class="btn" type="button" data-act="daread" ${b.reading?'aria-busy="true"':""}>${b.reading?'<span class="spin" aria-hidden="true"></span>PO lit votre réponse…':"Lire ma réponse"}</button>${btn("daex","Remplir avec un exemple",{cls:"ghost sm"})}</div></div>`;
+  const shown=daFound(t).filter(f=>!b.daRemoved[f.j]);
+  return h+`<div class="field"><span class="po">${I.spark} Ce que PO a compris</span><span class="src">Retirez ce qui est faux, puis envoyez. Rien n'est gardé avant.</span></div>
+    ${DA_GROUPS.filter(([g])=>shown.some(f=>f.g===g)).map(([g,l])=>`<span class="k">${l}</span><div class="rows">${shown.filter(f=>f.g===g).map(f=>fact("",`<b>${esc(f.label)}</b>`,`« ${esc(f.quote)} »`,{side:`<button class="btn ghost sm" type="button" data-act="daremove" data-v="${f.j}" aria-label="Retirer « ${esc(f.label)} »">Retirer</button>`})).join("")}</div>`).join("")}
+    ${errOf("daText")}<div class="btnrow">${btn("dasend","Envoyer la réponse")}${btn("daback","Modifier ma réponse",{cls:"out"})}</div></div>`;
+}
+function daSection(st){
+  const b=S.brief;
+  if(b.daAdded&&b.da) return `<div class="rows">${fact("",daList(b.da.items),`${b.daFrom?esc(b.daFrom):`Réponse de Nadia Benali, le ${esc(b.da.at)}`} · chaque élément est repris mot pour mot`)}</div>`;
+  if(!b.da) return `<div class="rows">${fact("Direction, références, contraintes",b.start==="exchange"?"À l'ordre du jour du call":"Demandée à Nadia Benali",b.start==="exchange"?"Préparer un échange":"Question posée par PO le 19/10 · dans son Travail",{side:pill("warn","En attente")})}</div>`;
+  const rows=`<div class="rows">${fact("",daList(b.da.items),`Réponse de Nadia Benali, le ${esc(b.da.at)} · chaque élément est repris mot pour mot`)}</div>`;
+  return `<div class="callout info">${I.info}<span><b>Nadia Benali a répondu</b> le ${esc(b.da.at)}. Rien n'entre dans le Brief avant que vous l'ajoutiez.</span></div>${rows}${me()==="cp"?`<div class="btnrow">${btn("daadd","Ajouter au Brief")}</div>`:""}`;
+}
+
+/* Invoicing (ticket Master § 9; ticket 08: a missing invoice never blocks the release).
+   Once the master final is validated, PDS OS asks each outside engineer for his invoice,
+   on his private link; the amount is checked against the engaged rate. The direction
+   pays from the bank, outside PDS OS, then records the date and the proof. Bank details
+   live in the Réseau, seen by the direction only; a changed RIB is confirmed by a person,
+   by phone, before any payment. */
+const PDS_BILLING=[["Raison sociale","PDS Records SAS"],["Adresse de facturation","12 rue de la Grange-aux-Belles, 75010 Paris"],["SIRET","912 345 678 00021"],["N° de TVA","FR 12 912345678"]];
+const maskIban=s=>{const c=String(s||"").replace(/\s/g,"");return c.length>8?`${c.slice(0,4)} •••• •••• ${c.slice(-4)}`:c;};
+// Engineers who invoice: outside ones only; the in-house engineer is internal.
+const billed=()=>[...new Set(stages().map(engOf).filter(e=>e&&!isIn(e)))];
+function engagedOf(ek){
+  const ls=stages().filter(k=>engOf(k)===ek).map(budgetLine).filter(Boolean);
+  return {total:ls.reduce((t,l)=>t+l.amount,0),parts:ls.map(l=>`${l.k==="mix"?"mix":"mastering"} ${new Intl.NumberFormat("fr-FR").format(l.amount)} €`).join(" · ")};
+}
+// Due 30 days after the invoice arrived.
+const dueOf=at=>{const m=/(\d{2})\/(\d{2})/.exec(at||"");return m?frDate(addDays(`2026-${m[2]}-${m[1]}`,30)):"";};
+function payActors(){
+  if(!finalV("mastering")) return [];
+  const l=[];
+  billed().forEach(ek=>{const i=S.inv[ek]||{}, r=S.rib[ek];
+    if(!i.received) l.push({r:ek,todo:"Déposer votre facture",ext:true,step:"final"});
+    else if(r&&r.pending) l.push({r:"dg",todo:`Confirmer le nouveau RIB de ${P[ek].first}`,step:"final"});
+    else if(!i.paid) l.push({r:"dg",todo:`Payer la facture de ${P[ek].first} avant le ${dueOf(i.received)}`,step:"final"});
+  });
+  return l;
+}
+function payState(){
+  const b=billed(); if(!b.length) return "interne, pas de facture";
+  const st=b.map(ek=>{const i=S.inv[ek]||{};return i.paid?"paid":i.received?"due":"wait";});
+  return st.every(x=>x==="paid")?"facture payée":st.some(x=>x==="due")?"facture à payer":"facture attendue";
+}
+function requestInvoices(){
+  billed().forEach(ek=>{if(S.inv[ek]&&S.inv[ek].asked) return;
+    const e=hist("final",`Facture demandée à ${P[ek].name} par PDS OS (${P[ek].mail})`,"PDS OS","Master final validé");
+    S.inv[ek]=Object.assign(S.inv[ek]||{},{asked:e.at});});
+}
+const invoiceMailBody=ek=>`Bonjour ${P[ek].first}, le master final de « Néons » est validé. Vous pouvez déposer votre facture. Lina Haddad, PDS`;
+// The e-mail already sent: read, not edited.
+function sentInvoiceMail(ek){
+  const l=S.links[ek], i=S.inv[ek]||{};
+  return `<div class="doccard"><div class="dochead">${I.mail}<span class="grow"><b>L'e-mail envoyé par PDS OS</b><br><span class="src">Le ${esc(i.asked||"")} · de l'adresse de PO, au nom de Lina Haddad</span></span></div>
+    <div class="rows">${fact("À",`${esc(P[ek].name)} &lt;${esc(P[ek].mail)}&gt;`,"Réseau")}${fact("Objet","« Néons » : votre facture","")}${fact("Message",esc(invoiceMailBody(ek)),"")}</div>
+    ${l?`<div class="maillink"><span class="cap">Ajouté automatiquement à la fin de l'e-mail, avec le même lien que pour le mix :</span><span>Ouvrir votre dossier : <code>${esc(l.url)}</code></span><span class="src">Lien privé, sans compte · valable jusqu'au ${esc(l.until)}</span></div>`:""}<div style="height:14px"></div></div>`;
+}
+// What an invoice needs, on the engineer's link (pre "inv-") or added by Lina (pre "invo-").
+function invoiceFields(pre,ek,portal){
+  const exp=engagedOf(ek), r=S.rib[ek], key=pre+ek, p=S.pick[key], change=S.draft[pre+"ribchange-"+ek];
+  let h=`<div class="field"><span class="lbl2"><b>La facture (PDF)</b> *</span><div class="drop ${S.err["up-"+key]?"bad":""}">${I.file}<span class="grow">${p?`<b>${esc(p.name)}</b><br><span class="src">Choisie, pas encore envoyée</span>`:`<span class="cap">Glissez le PDF ici, ou</span>`}</span>
+    <label class="btn out sm" for="up-${key}">${p?"Remplacer":"Choisir un fichier"}</label><input class="sr" type="file" id="up-${key}" data-key="${key}" accept=".pdf,application/pdf"></div>${errOf("up-"+key)}</div>
+    <div class="btnrow">${protoBtn("invex","déposer une facture d'exemple",key)}</div>
+    <div class="grid2">${fieldIn(pre+"num-"+ek,"Numéro de facture","",{req:true,ph:"KH-2026-118"})}${fieldIn(pre+"amt-"+ek,"Montant HT (€)",String(exp.total),{type:"number",req:true,src:"Pré-rempli avec le tarif engagé : corrigez s'il diffère."})}</div>
+    ${S.draft[pre+"mismatch-"+ek]?fieldIn(pre+"why-"+ek,"Pourquoi le montant diffère","",{req:true,area:true,rows:2,ph:"Une révision en plus sur le mix, accordée par Lina le 16/11."}):""}`;
+  if(r&&!change) h+=`<div class="rows">${fact(portal?"Votre RIB":`RIB de ${P[ek].name}`,`${esc(maskIban(r.iban))} · ${esc(r.holder)}`,portal?"Votre fiche chez PDS : le virement part sur ce compte":"Fiche Réseau · vérifié",{side:portal?btn("ribchange","Mon RIB a changé",{cls:"ghost sm",v:pre+ek}):""})}</div>`;
+  else h+=`<h3 class="sub">${portal?(r?"Votre nouveau RIB":"Votre RIB"):`RIB de ${esc(P[ek].name)}`}</h3>
+    <div class="grid2">${fieldIn(pre+"iban-"+ek,"IBAN","",{req:true,ph:"FR76 3000 4000 1200 0000 1234 567"})}${fieldIn(pre+"bic-"+ek,"BIC","",{ph:"BNPAFRPP"})}</div>
+    ${fieldIn(pre+"holder-"+ek,"Titulaire du compte",P[ek].name,{req:true})}
+    <p class="cap">${r?"Un nouveau RIB est vérifié par PDS, par téléphone, avant tout paiement.":`Gardé dans ${portal?"votre":"sa"} fiche chez PDS, visible seulement par la direction.`}</p>`;
+  return h;
+}
+function invoiceCard(ek){
+  const i=S.inv[ek]||{}, exp=engagedOf(ek), r=S.rib[ek];
+  if(i.received) return ["invoice","Votre facture",i.paid?pill("ok","Payée"):pill("","Suivi"),
+    `<div class="callout ${i.paid?"ok":"info"}">${i.paid?I.ok:I.info}<span>${i.paid?`<b>Facture n° ${esc(i.number)} payée le ${frDate(i.paid.date)}</b> par virement. Merci !`:`<b>Facture n° ${esc(i.number)} reçue le ${esc(i.received)}</b> (${euro(i.amount)}) : elle sera payée avant le ${dueOf(i.received)}.`}</span></div>
+    ${r&&r.pending&&!i.paid?`<p class="note">Votre nouveau RIB est vérifié par PDS avant le virement : on peut vous appeler pour le confirmer.</p>`:""}`];
+  return ["invoice","Votre facture",pill("info","À vous"),
+    `<p class="note">Le master final de « Néons » est validé : vous pouvez déposer votre facture.</p>
+    <h3 class="sub">Facturer à</h3><div class="rows">${PDS_BILLING.map(([k,v])=>fact(k,esc(v),"")).join("")}</div>
+    <div class="rows">${fact("Montant attendu",`<b>${euro(exp.total)}</b> (${esc(exp.parts)})`,"Le tarif engagé par PDS")}</div>
+    ${invoiceFields("inv-",ek,true)}
+    <div class="btnrow">${btn("invsend","Envoyer ma facture",{v:ek,k:"inv-"})}</div>`];
+}
+// In the Master final step: the invoice of each engineer, then what the direction pays.
+function invoiceBlock(ek){
+  const i=S.inv[ek]||{}, r=S.rib[ek], exp=engagedOf(ek), dg=me()==="dg", cp=me()==="cp";
+  if(!i.received){
+    let h=`<div class="rows">${fact(`Facture de ${P[ek].name}`,"Attendue",`Montant engagé : ${euro(exp.total)} (${esc(exp.parts)}) · demandée le ${esc(i.asked||"")} par e-mail, avec son lien`,{side:pill("warn","Attendue")})}</div>
+      <details class="vb" style="padding:0"><summary class="linkbtn" style="display:block;padding:6px 0">L'e-mail envoyé à ${esc(P[ek].first)}</summary>${sentInvoiceMail(ek)}</details>`;
+    if(cp) h+=`<details class="vcard" ${S.draft["invoOpen-"+ek]||Object.keys(S.err).some(k=>k.indexOf("invo-")>=0)?"open":""}><summary data-act="invoopen" data-v="${ek}"><span class="chv">${I.chevR}</span><h3>Ajouter une facture reçue autrement</h3><span class="cap">Par e-mail, en main propre…</span></summary>
+      <div class="vb">${invoiceFields("invo-",ek,false)}<div class="btnrow">${btn("invsend","Ajouter la facture",{cls:"out",v:ek,k:"invo-"})}</div></div></details>`;
+    return h;
+  }
+  const ok=i.amount===exp.total;
+  const ribRow=!r?"":dg?(r.pending?fact("RIB",`<b>${esc(maskIban(r.pending.iban))}</b> · ${esc(r.pending.holder)}`,`Modifié par ${esc(P[ek].name)} le ${esc(r.pending.at)} · avant : ${esc(maskIban(r.iban))}`,{side:pill("warn","À confirmer")})
+      :fact("RIB",`${esc(maskIban(r.iban))} · ${esc(r.holder)}`,r.confirmed&&r.confirmed.by?`Confirmé par ${esc(r.confirmed.by)} le ${esc(r.confirmed.at)}`:"Fiche Réseau · vérifié",{side:pill("ok","Vérifié")}))
+    :fact("RIB",r.pending?"Modifié : à confirmer par la direction":"Vérifié","Visible seulement par la direction",{side:pill(r.pending?"warn":"ok",r.pending?"À confirmer":"Vérifié")});
+  let h=`<div class="doccard"><div class="dochead">${I.file}<span class="grow"><b>Facture n° ${esc(i.number)} · ${esc(P[ek].name)}</b><br><span class="src">${esc(i.file)} · reçue le ${esc(i.received)} ${i.via==="lien"?"par son lien":`· ajoutée par ${esc(i.by)}`}</span></span>${btn("toast","Voir le PDF",{cls:"out sm",v:"PDF non ouvert dans le proto."})}</div>
+    <div class="rows">${fact("Montant",`<b>${euro(i.amount)}</b>`,ok?`Conforme au tarif engagé (${esc(exp.parts)})`:`Tarif engagé : ${euro(exp.total)} · « ${esc(i.why)} »`,{side:pill(ok?"ok":"warn",ok?"Conforme":"Écart")})}
+    ${fact("Échéance",i.paid?`Payée le <b>${frDate(i.paid.date)}</b>`:`À payer avant le <b>${dueOf(i.received)}</b>`,i.paid?`Virement · preuve : ${esc(i.paid.proof)} · ${esc(i.paid.by)}`:"30 jours après réception",{side:pill(i.paid?"ok":"info",i.paid?"Payée":"À payer")})}
+    ${ribRow}</div></div>`;
+  if(i.paid) return h;
+  if(r&&r.pending){
+    if(dg) return h+`<div class="callout warn">${I.warn}<span><b>Le RIB a changé.</b> Avant de payer, appelez ${esc(P[ek].name)} au numéro de sa fiche Réseau, pas à celui d'un e-mail, et vérifiez ce nouveau compte avec lui.</span></div>
+      <label class="checks" style="display:flex;flex-direction:row;align-items:center;gap:10px;font-size:15px;cursor:pointer"><input type="checkbox" id="ribcheck-${ek}" ${dv("ribcheck-"+ek,false)?"checked":""} style="width:18px;height:18px;accent-color:var(--sel)"><span>J'ai vérifié ce RIB par téléphone avec ${esc(P[ek].name)}</span></label>${errOf("ribcheck-"+ek)}
+      <div class="btnrow">${btn("ribok","Confirmer le nouveau RIB",{v:ek})}</div>`;
+    return h+waitCallout({r:"dg",todo:`Confirmer le nouveau RIB de ${P[ek].first}`});
+  }
+  if(!dg) return h+waitCallout({r:"dg",todo:`Payer la facture de ${P[ek].first} avant le ${dueOf(i.received)}`});
+  const pk="proof-"+ek, pr=S.pick[pk];
+  return h+`<p class="note">Faites le virement depuis la banque de PDS, puis notez-le ici.</p>
+    ${fieldIn("paydate-"+ek,"Virement fait le","",{type:"date",req:true})}
+    <div class="field"><span class="lbl2"><b>Preuve du virement</b> *</span><div class="drop ${S.err["up-"+pk]?"bad":""}">${I.file}<span class="grow">${pr?`<b>${esc(pr.name)}</b>`:`<span class="cap">Avis de virement ou capture de la banque</span>`}</span><label class="btn out sm" for="up-${pk}">${pr?"Remplacer":"Choisir un fichier"}</label><input class="sr" type="file" id="up-${pk}" data-key="${pk}" accept=".pdf,.png,.jpg,.jpeg"></div>${errOf("up-"+pk)}</div>
+    <div class="btnrow">${btn("paid","Marquer comme payée",{v:ek})}${protoBtn("proofex","déposer une preuve d'exemple",pk)}</div>`;
+}
+function payBlock(){
+  if(!finalV("mastering")) return "";
+  const b=billed();
+  if(!b.length) return `<h3 class="sub">Facture</h3><div class="rows">${fact("Ingénieur maison","Pas de facture : interne","Budget du projet")}</div>`;
+  return `<h3 class="sub">${me()==="dg"?"À payer":"Facture et paiement"}</h3>${b.map(invoiceBlock).join("")}`;
+}
+
+/* Private links: only the person's own part, most recent first (rule 17). ---- */
+function uploadBlock(key,label,inApp){
+  const p=S.pick[key];
+  return `<div class="field"><span class="lbl2"><b>${esc(label)}</b> *</span>
+    <div class="drop ${S.err["up-"+key]?"bad":""}">${I.file}<span class="grow">${p?`<b>${esc(p.name)}</b><br><span class="src">Fichier choisi, pas encore envoyé</span>`:`<span class="cap">Glissez le fichier ici, ou</span>`}</span>
+    <label class="btn out sm" for="up-${key}">${p?"Remplacer":"Choisir un fichier"}</label><input class="sr" type="file" id="up-${key}" data-key="${key}" accept="audio/*,.wav,.aif,.aiff,.flac,.mp3,.m4a,.aac,.ogg,.zip"></div>
+    <span class="src">WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG${inApp?" · rangé dans le titre, au Catalogue":""}.</span>${errOf("up-"+key)}</div>
+    <div class="btnrow">${p?btn("upsend","Confirmer l'envoi",{k:key}):""}${protoBtn("upex","déposer un fichier d'exemple",key)}</div>`;
+}
+const portalVersions=k=>S[k].versions.slice().reverse().map(v=>{const K=KIND[k], st=statusOf2(k,v);
+  return `<div class="ver">${playBtn(k+v.n,`${K.label} V${v.n}`)}<span class="grow"><b>« Néons » · V${v.n}</b> · reçue le ${esc(v.at)}<br><span class="src">${esc(v.name)}</span>${waveBar(k+v.n)}</span>${pill(st[0],st[1])}</div>
+    ${v.note?`<div class="callout warn ver-note">${I.warn}<span><b>Retours du label, le ${esc(v.decidedAt)} :</b> ${esc(v.note).replace(/\n/g,"<br>")}</span></div>`:""}
+    ${S[k].retours[v.n]&&v.status==="listen"?`<div class="callout info ver-note">${I.info}<span><b>Retours du label, le ${esc(S[k].retours[v.n].at)}</b> (pas encore une décision) : ${esc(S[k].retours[v.n].text).replace(/\n/g,"<br>")}</span></div>`:""}
+    ${v.status==="reopened"?`<div class="callout warn ver-note">${I.warn}<span><b>Rouvert le ${esc(v.reopen.at)}</b> : « ${esc(v.reopen.reason)} ». Déposez une nouvelle version.</span></div>`:""}`;}).join("");
+const activeStage=ek=>{const l=stages().filter(k=>engOf(k)===ek&&S[k].sent);return l.find(k=>!done(k))||l[l.length-1];};
+function takeOnBlock(k,ek){
+  const both=k==="mix"&&S.same&&!isIn(ek), ks=both?["mix","mastering"]:[k], ch=dv("rate",""), e=P[ek];
+  return `<h3 class="sub">Prendre en charge le dossier</h3>
+    <div class="rows">${ks.map(s=>fact(s==="mix"?"Mix":"Mastering",euro(e.price[s]),"Tarif estimé par PDS d'après vos tarifs habituels")).join("")}</div>
+    <div class="opts"><label class="opt"><input type="radio" name="rate" value="ok" ${ch==="ok"?"checked":""}><span class="grow">Je confirme ce tarif</span></label>
+    <label class="opt"><input type="radio" name="rate" value="other" ${ch==="other"?"checked":""}><span class="grow">Je propose un autre tarif</span></label></div>${errOf("rate")}
+    ${ch==="other"?`<div class="grid2">${ks.map(s=>fieldIn("prop-"+s,`${s==="mix"?"Mix":"Mastering"} (€ HT)`,String(e.price[s]),{type:"number",req:true})).join("")}</div>`:""}
+    <p class="cap">PDS valide votre tarif avant de l'engager.</p>
+    <div class="btnrow">${btn("takeon","Prendre en charge le dossier",{step:k})}</div>`;
+}
+function signalBlock(ek){
+  const k=activeStage(ek), mine=S.thread.filter(t=>t.eng===ek);
+  const KINDS={question:"Question",delay:"Retard signalé",missing:"Fichier manquant"};
+  return `${mine.length?`<div class="rows">${mine.slice().reverse().map(t=>fact(`${KINDS[t.kind]}${t.kind==="delay"?` · ${t.days} j`:""} · ${t.at}`,`« ${esc(t.text)} »`,t.status==="closed"?`${esc(t.outcome)}${t.reply?` · « ${esc(t.reply)} »`:""}`:"Envoyé à Lina Haddad : elle vous répond ici",{side:t.status==="closed"?pill("ok","Traité"):pill("warn","En attente")})).join("")}</div>`:""}
+    <details class="vcard" ${S.err["sigq"]?"open":""}><summary><span class="chv">${I.chevR}</span><h3>Poser une question</h3></summary><div class="vb">${fieldIn("sigq","Votre question","",{req:true,area:true,rows:2,ph:"La v3 reste-t-elle la référence d'énergie pour le refrain ?"})}<div class="btnrow">${btn("signal","Envoyer la question",{cls:"out",v:"question",step:k})}</div></div></details>
+    <details class="vcard" ${S.err["sigd"]||S.err["sigdays"]?"open":""}><summary><span class="chv">${I.chevR}</span><h3>Signaler un retard</h3></summary><div class="vb"><div class="grid2" style="grid-template-columns:140px minmax(0,1fr)">${fieldIn("sigdays","Combien de jours","3",{type:"number",req:true,min:1,max:90})}${fieldIn("sigd","Pourquoi","",{req:true,ph:"Le studio est fermé deux jours pour une panne de console."})}</div><div class="btnrow">${btn("signal","Signaler le retard",{cls:"out",v:"delay",step:k})}</div></div></details>
+    <details class="vcard" ${S.err["sigm"]?"open":""}><summary><span class="chv">${I.chevR}</span><h3>Signaler un fichier manquant</h3></summary><div class="vb">${fieldIn("sigm","Quel fichier","",{req:true,ph:"La piste de basse n'est pas dans le zip."})}<div class="btnrow">${btn("signal","Signaler le fichier manquant",{cls:"out",v:"missing",step:k})}</div></div></details>`;
+}
+function portal(){
+  const k=me(), acts=allActors().filter(a=>a.r===k), cards=[], l=S.links[k];
+  if(l&&l.revoked) return `<div class="portal"><div class="pwrap"><section class="card"><h1 class="h1">Ce lien n'est plus valable</h1><p class="note">Le label l'a désactivé. Ce que vous avez déjà déposé reste chez PDS ; demandez un nouveau lien à Lina Haddad.</p></section></div></div>`;
+  if(P[k].does){
+    stages().forEach(s=>{
+      if(engOf(s)!==k||!S[s].sent) return;
+      const o=S[s], e=P[k], a=acts.find(x=>x.step===s);
+      const files=s==="mix"?`${fact("Source",esc(AUDIO[S.src.version].name),S.watch==="waiting"?"Version de travail : les voix définitives arrivent":"",{side:btn("toast","Télécharger",{cls:"ghost sm",v:"Téléchargement non lancé dans le proto."})})}${fact("Pistes séparées",S.noStems?"Envoyées à part (voir le message)":esc(STEMS[S.src.version]),"",{side:S.noStems?"":btn("toast","Télécharger",{cls:"ghost sm",v:"Téléchargement non lancé dans le proto."})})}`
+        :`${fact("Mix final à masteriser",esc(finalV("mix").name),"",{side:btn("toast","Télécharger",{cls:"ghost sm",v:"Téléchargement non lancé dans le proto."})})}`;
+      const expect=s==="mix"?DATES.map(([d,lb])=>`${lb} ${frDate(S.brief.dates[d])}`).join("<br>"):`Mastering attendu le ${frDate(S.brief.dates.mastering)}<br>Master final attendu le ${frDate(S.brief.dates.master)} · WAV 24 bits / 44,1 kHz`;
+      cards.push(["dossier-"+s,s==="mix"?"Votre dossier":"Dossier du mastering",o.received?pill("ok","Pris en charge"):pill("info","À vous"),
+        `<p class="note"><b>${esc(e.name)}, voici le dossier ${s==="mix"?"du mix":"du mastering"} de « Néons ».</b></p>
+        ${s==="mix"&&S.mix.newSource?`<div class="callout info">${I.info}<span><b>Nouvelle source le ${esc(S.mix.newSource)} :</b> ${esc(AUDIO.v4.name)}, voix définitives du 2e couplet, et ses pistes. Vos prochaines versions partent de là.</span></div>`:""}
+        ${o.resent.length?`<div class="callout info">${I.info}<span><b>Dossier mis à jour le ${esc(o.resent[o.resent.length-1])}.</b></span></div>`:""}
+        <div class="rows">${fact("Message du label",esc(briefMsg()),"Lina Haddad")}${files}${fact("Ce qui est attendu",expect,"")}${fact("Direction artistique",daList(S.brief.daAdded&&S.brief.da?S.brief.da.items:[]),esc(S.brief.daFrom||"Nadia Benali"))}</div>
+        ${o.received?`<p class="cap">Pris en charge le ${esc(o.received)}. Merci !</p>`:takeOnBlock(s,k)}`]);
+      if(o.received){const f=finalV(s), v=lastV(s);
+        cards.push([s,s==="mix"?"Mix":"Mastering",a&&a.todo.startsWith("Déposer")?pill("info","À vous"):f?pill("ok",KIND[s].ok):pill("","Suivi"),
+          `${o.versions.length?`<div class="rows">${portalVersions(s)}</div>`:""}${a&&a.todo.startsWith("Déposer")?uploadBlock(s,`Déposer ma version · ${KIND[s].label} V${o.versions.length+1}`):f?`<p class="note">${KIND[s].label} V${f.n} validé le ${esc(f.decidedAt)} : plus aucun dépôt n'est possible sur ${s==="mix"?"le mix":"le master"}.${s==="mix"?" Le mix validé ne valide pas le master.":""}</p>`:v?`<p class="note">Votre version est en écoute chez le label.</p>`:""}`]);}
+    });
+    if(finalV("mastering")&&engOf("mastering")===k&&delivList().length) cards.push(["deliv","Autres livrables",delivMissing().length?pill("info","À vous"):pill("ok","Reçus"),
+      delivList().map(([d,lb])=>S.final.got[d]?`<div class="rows">${fact(lb,`<b>${esc(S.final.got[d].name)}</b>`,`Envoyé le ${esc(S.final.got[d].at)}`,{side:pill("ok","Reçu")})}</div>`:uploadBlock("d:"+d,lb)).join("")]);
+    if(finalV("mastering")&&billed().includes(k)) cards.push(invoiceCard(k));
+    if(stages().some(s=>engOf(s)===k&&S[s].sent)) cards.splice(1,0,["echanges","Échanges avec le label",S.thread.some(t=>t.eng===k&&t.status!=="closed")?pill("warn","En attente"):pill("","Ouvert"),signalBlock(k)]);
+  }
+  if(k==="mona"){
+    const k2=["mastering","mix"].find(x=>lastV(x)&&lastV(x).status==="listen");
+    if(k2){const v=lastV(k2),K=KIND[k2],mine=S[k2].comments.filter(c=>c.v===v.n&&c.by==="Mona Lys");
+      cards.push(["listen",`Le ${K.label} V${v.n} de « Néons »`,mine.length?pill("ok","Avis envoyé"):pill("info","À vous"),`<div class="rows"><div class="ver">${playBtn("m"+k2+v.n,`${K.label} V${v.n}`)}<span class="grow"><b>${K.label} V${v.n}</b> · ${esc(v.name)}<br><span class="src">Déposé par ${esc(P[v.eng].name)} le ${esc(v.at)}</span>${waveBar("m"+k2+v.n)}</span></div></div>
+        <p class="note">Écoutez-le et dites ce que vous en pensez : ${esc(VAL())} décide avec vos retours.</p>
+        ${mine.map(c=>`<div class="rows">${fact("Votre retour",`<b>${esc(c.t||"—")}</b> · « ${esc(c.text)} »`,esc(c.at))}</div>`).join("")}
+        <div class="grid2" style="grid-template-columns:120px minmax(0,1fr)">${fieldIn("monaT","Minutage","",{ph:"0:42"})}${fieldIn("monaX","Votre retour","",{ph:COMMENT_EX.mona[1]})}</div>
+        <div class="btnrow">${btn("monasend","Envoyer mon retour",{v:k2})}${btn("monaex","Remplir avec un exemple",{cls:"ghost sm"})}</div>`]);}
+  }
+  const todo=cards.some(c=>c[2].includes("À vous"));
+  return `<div class="portal"><header class="pbar"><span style="display:flex;align-items:center;gap:10px"><span class="brand" style="margin:0">PDS</span><b>« Néons » · ${esc(P[k].name)}</b></span><span class="lockline">${I.lock} Lien privé ${P[k].link}… · sans compte</span></header>
+  <div class="pwrap"><div><p class="cap">Néons · Mona Lys · single · ${esc(P[k].role)}</p><h1 class="h1">${cards.length?(todo?"Ce que PDS attend de vous":"Rien à faire pour l'instant"):"Rien pour l'instant"}</h1></div>
+  ${S.flash?flash():""}
+  ${!cards.length?`<section class="card"><p class="note">${P[k].does?"Lina Haddad ne vous a pas encore envoyé de dossier.":"Rien à écouter pour l'instant : vous recevrez un message quand une version sera prête."}</p></section>`:""}
+  ${cards.slice().reverse().map(([id,t,p,b])=>`<section class="card" id="pc-${id}" style="scroll-margin-top:16px"><div class="dhead"><h2>${esc(t)}</h2>${p}</div>${b}</section>`).join("")}
+  <section class="card"><h2>Votre contact chez PDS</h2><div class="eyebrow">${av("cp",true)}<span><b>Lina Haddad</b> · Cheffe de projet</span></div></section></div></div>`;
+}
+
+/* Actions -------------------------------------------------------------------- */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.hidden=true;},3600);}
+const snap=()=>Object.fromEntries(STEPS.map(s=>[s.id,statusOf(s.id)]));
+function after(id,title,before){
+  const lines=[];
+  actorsOf(id).forEach(a=>lines.push(a.wait?`Ensuite : ${a.waitCustom?esc(a.waitCustom):"en attente "+deOf(a.waitWho)+" · "+esc(a.waitText)}`:`Ensuite : <b>${esc(P[a.r].name)}</b>${P[a.r].where==="lien"?" (lien privé)":""} · ${low(esc(a.todo))}`));
+  STEPS.filter(s=>before[s.id]==="blocked"&&statusOf(s.id)==="current").forEach(s=>{const a=actorsOf(s.id)[0];lines.push(`Débloqué : <b>${esc(s.title)}</b>${a?` · ${esc(a.wait?(a.waitCustom||a.waitWho):P[a.r].name)}${a.todo?" · "+low(esc(a.todo)):""}`:""}`);});
+  S.flash={title,lines:lines.slice(0,4)};
+  toast(title+".");
+}
+const code=()=>Array.from({length:10},()=>"abcdefghjkmnpqrstuvwxyz23456789"[Math.floor(Math.random()*31)]).join("");
+// Valid 14 days after the master final, 30 days at least (link-expiry.ts).
+const linkUntil=()=>{const a=addDays(S.brief.dates.master,14), b=addDays("2026-10-19",30);return frDate(a>b?a:b);};
+const newLink=at=>({url:"https://pds-os.app/m/"+code(),at,sent:at,until:linkUntil(),opened:null});
+const dirty=()=>{S.brief.dirty=true;};
+function saveDate(key){
+  const d=key.split(":")[1], v=String(dv("editIn",S.brief.dates[d])), i=DATES.findIndex(x=>x[0]===d);
+  if(!v){S.err.editIn="Indiquez une date.";return false;}
+  const nd=Object.assign({},S.brief.dates,{[d]:v}), prev=DATES[i-1], next=DATES[i+1];
+  if(prev&&nd[prev[0]]>v){S.err.editIn=`Cette date tombe avant « ${prev[1].replace(" attendu le","")} » : les échéances vont dans l'ordre (Mix V1, Mix final, Mastering, Master final).`;return false;}
+  if(next&&nd[next[0]]<v){S.err.editIn=`Cette date tombe après « ${next[1].replace(" attendu le","")} » : les échéances vont dans l'ordre (Mix V1, Mix final, Mastering, Master final).`;return false;}
+  if(v!==S.brief.dates[d]){S.brief.dates[d]=v;S.brief.dateBy[d]=P[me()].name;hist("brief",`${DATES[i][1]} ${frDate(v)}`);dirty();toast("Date modifiée.");}
+  S.editing=null;delete S.draft.editIn;return true;
+}
+function addVersion(k,name,who){
+  const ek=engOf(k), n=S[k].versions.length+1, v={n,name:name||KIND[k].file(n),at:stamp(),src:S.src.version,status:"listen",eng:ek};S.clock--;
+  S[k].versions.push(v);hist(k,`${KIND[k].label} V${n} déposé`,who||P[ek].name);return v;
+}
+function decide(k,ok,note,who){
+  const v=lastV(k);v.by=who||P[me()].name;v.decidedAt=stamp();S.clock--;
+  if(ok){v.status="approved";hist(k,`${KIND[k].label} V${v.n} validé : ${k==="mix"?"c'est le mix final":"c'est le master final"}`,v.by);if(k==="mastering"){hist("final",`Master V${v.n} rattaché au titre du Catalogue : master final`,"PDS OS",`Master V${v.n} validé`);requestInvoices();}}
+  else{v.status="changes";v.note=note;hist(k,`Modification demandée sur le ${KIND[k].label} V${v.n}`,v.by);}
+}
+function transmit(k,waiver){
+  const ek=engOf(k), o=S[k], e=P[ek], at=stamp();S.clock--;
+  o.sent=at;o.sentBrief=S.brief.version;
+  if(isIn(ek)){o.received=at;hist(k,`Assigné à ${e.name} : tâche dans son Travail, avec le dossier`);}
+  else if(k==="mastering"&&S.links[ek]){o.received=at;hist(k,`Dossier du mastering ajouté au lien de ${e.name}, prévenu par PDS OS`);}
+  else{S.links[ek]=newLink(at);hist(k,`Dossier envoyé à ${e.name} par PDS OS (${e.mail})`);}
+  if(waiver){o.waiver=waiver;hist(k,`Envoyé sans pistes séparées, avec une dérogation : « ${waiver} »`);}
+}
+function takeOn(k,ek,amounts){
+  const o=S[k], at=stamp();S.clock--;o.received=at;
+  const ks=k==="mix"&&S.same?["mix","mastering"]:[k];
+  ks.forEach(s=>{S.budget[s]={ek,state:"proposed",amount:amounts[s]!=null?amounts[s]:P[ek].price[s],at};});
+  hist(k,`Dossier pris en charge · tarif proposé : ${ks.map(s=>`${s==="mix"?"mix":"mastering"} ${euro(S.budget[s].amount)}`).join(", ")}`,P[ek].name);
+}
+document.addEventListener("input",e=>{const t=e.target;if(t.type==="file") return;if(t.type==="radio"){S.draft[t.name]=t.value;return;}if(t.id){S.draft[t.id]=t.type==="checkbox"?t.checked:t.value;if(t.id==="briefMsg"){S.brief.msg=t.value;dirty();}}});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.type==="radio"&&t.name){S.draft[t.name]=t.value;if(["doneChoice","rate"].includes(t.name)) render();return;}
+  if(t.type==="file"&&t.files&&t.files[0]){const key=t.dataset.key,f=t.files[0],ext=(f.name.split(".").pop()||"").toLowerCase();S.err={};
+    if(key.startsWith("inv")&&ext!=="pdf"){S.err["up-"+key]=`« ${f.name} » n'est pas un PDF : déposez la facture en PDF.`;delete S.pick[key];}
+    else if(key.startsWith("proof")&&!["pdf","png","jpg","jpeg"].includes(ext)){S.err["up-"+key]=`« ${f.name} » : déposez un PDF ou une image.`;delete S.pick[key];}
+    else if(!key.startsWith("inv")&&!key.startsWith("proof")&&!AUDIO_EXT.includes(ext)&&!(key==="d:stems"&&ext==="zip")){S.err["up-"+key]=`« ${f.name} » n'est pas un fichier audio (${ext.toUpperCase()||"sans extension"}). Formats acceptés : WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.`;delete S.pick[key];}
+    else S.pick[key]={name:f.name};
+    render();}
+});
+document.addEventListener("keydown",e=>{
+  if(e.target.id==="editIn"){if(e.key==="Enter"){e.preventDefault();S.err={};saveDate(S.editing);render();}else if(e.key==="Escape"){S.editing=null;S.err={};delete S.draft.editIn;render();}}
+});
+document.addEventListener("click",e=>{
+  const sm=e.target.closest("summary");
+  if(sm){const a=sm.dataset.act;if(a==="invoopen") S.draft["invoOpen-"+sm.dataset.v]=!sm.parentElement.open;if(a==="decopen") S.draft["decOpen-"+sm.dataset.step]=!sm.parentElement.open;if(a==="tropen") S.draft["trOpen-"+sm.dataset.step]=!sm.parentElement.open;return;}
+  const el=e.target.closest("[data-act]"); if(!el) return;
+  const a=el.dataset.act, st=el.dataset.step, v=el.dataset.v, name=P[me()].name;
+  S.err={};
+  const before=snap(), th=id=>S.thread.find(t=>t.id===id);
+  switch(a){
+    case "go": S.view="parcours"; S.sel=st; S.flash=null; S.editing=null; window.scrollTo({top:0}); break;
+    case "view": S.view=v; S.flash=null; break;
+    case "unflash": S.flash=null; break;
+    case "toast": toast(v); return;
+    case "copy": try{navigator.clipboard&&navigator.clipboard.writeText(v).catch(()=>{});}catch(_){} toast("Lien copié."); return;
+    case "play": S.playing=S.playing===v?null:v; break;
+    case "histwho": S.histWho=v; break;
+    case "csv":{const rows=[["Date","Qui","Geste","Suite à"]].concat(S.log.slice().reverse().map(x=>[x.at,x.who,x.text,x.cause||""]));
+      const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
+      try{navigator.clipboard&&navigator.clipboard.writeText(csv).catch(()=>{});}catch(_){}
+      toast(`Historique copié en CSV (${rows.length-1} lignes) : collez-le dans un tableur.`);return;}
+    case "nudge": hist(activeStage(v)||"mix",`Relance envoyée à ${P[v].name} par PDS OS`); toast("Relance envoyée."); break;
+    case "newlink":{const l=newLink(stamp());S.clock--;S.links[v]=l;hist(activeStage(v)||"mix",`Lien renouvelé et envoyé à ${P[v].name} : l'ancien ne marche plus`);toast(`Nouveau lien envoyé à ${P[v].first}.`);break;}
+    case "revokeopen": S.draft["revoke-"+v]=true; break;
+    case "revokecancel": S.draft["revoke-"+v]=false; break;
+    case "revoke":{const r=String(dv("revokeWhy-"+v,"")).trim();if(!r){S.err["revokeWhy-"+v]="Dites pourquoi : c'est ce qui restera dans l'historique.";break;}
+      S.links[v].revoked={by:name,at:stamp(),reason:r};S.clock--;S.draft["revoke-"+v]=false;hist(activeStage(v)||"mix",`Lien de ${P[v].name} révoqué : « ${r} »`);toast("Lien révoqué.");break;}
+    // Source
+    case "usedone":{const dc=dv("doneChoice","");if(!dc){S.err.doneChoice="Choisissez : utiliser ce mix, ou refaire un mixage.";break;}
+      if(dc!=="use") break;
+      const r=String(dv("doneWhy","")).trim();if(!r){S.err.doneWhy="Dites pourquoi ce mix est le bon : c'est ce qui restera dans le dossier.";break;}
+      S.src.useDone={by:name,at:stamp(),reason:r};S.clock--;S.watch="none";S.same=false;S.eng.mastering=S.eng.mix;
+      hist("source",`Mix déjà terminé utilisé comme mix final : ${DONE_MIX.name}`);hist("mix","Mixage non nécessaire : mix déjà terminé","PDS OS","Mix déjà terminé utilisé comme mix final");
+      after("source","Mix déjà terminé : le titre passe au Mastering",before);break;}
+    case "srcok":{const vok=S.catalogMix||S.noStems, ch=dv("srcChoice","");if(!vok&&!ch){S.err.srcChoice="Choisissez : attendre les voix définitives, ou anticiper avec une version de travail.";break;}
+      const sv=dv("srcV","v3");S.src.version=sv;S.src.choice=vok?null:ch;S.watch=vok?"none":"waiting";
+      hist("source",`Source confirmée : ${AUDIO[sv].name}${vok?"":ch==="anticipate"?" (version de travail)":" · le mix attend les voix définitives"}`);after("source","Source confirmée",before);break;}
+    case "vocals": S.watch="arrived"; hist("source","Voix définitives reçues au Catalogue : "+AUDIO.v4.name,"PDS OS"); after("source","Les voix définitives sont arrivées",before); break;
+    case "replace":{S.src.version="v4";S.watch="replaced";hist("source","Source remplacée : "+AUDIO.v4.name);
+      if(S.mix.sent){const ek=engOf("mix");S.mix.newSource=S.log[0].at;hist("mix",`${P[ek].name} prévenu : nouvelle source et pistes`,"PDS OS","Source remplacée");}
+      after("source",S.mix.sent?`Source remplacée : ${P[engOf("mix")].first} est prévenu`:"Source remplacée",before);break;}
+    // Brief
+    case "briefstart": S.brief.start=v; if(v==="exchange") S.brief.call={stage:"prep",removed:{}}; else S.brief.call=null;
+      hist("brief",v==="direct"?"Brief commencé directement · question de la direction artistique posée à Nadia Benali par PO":"Échange préparé : ordre du jour calculé depuis ce que le Brief ne sait pas");after("brief",v==="direct"?"Brief commencé":"Échange en préparation",before);break;
+    case "callcreate": S.brief.call.stage="planned"; hist("brief","Call créé pour le Mar. 20/10 à 14 h · invitations envoyées avec l'ordre du jour"); after("brief","Call créé",before); break;
+    case "callheld": S.brief.call.stage="done"; hist("brief","Call du 20/10 transcrit · PO propose des réponses au Brief","PDS OS"); after("brief","Le call a eu lieu",before); break;
+    case "callremove": S.brief.call.removed[v]=true; break;
+    case "callapply":{const kept=CALL_FINDS.filter((f,j)=>!S.brief.call.removed[j]), b=S.brief;
+      const da=kept.filter(f=>f.k==="da").map(f=>({g:f.g,label:f.label,quote:f.quote}));
+      if(da.length){b.da={items:da,at:"20/10"};b.daAdded=true;b.daFrom="Call du 20/10";}
+      if(kept.some(f=>f.k==="deliv")) b.deliv.acap=true;
+      if(kept.some(f=>f.k==="msg")) b.msg=BRIEF_MSG+" Comme dit au call, une V1 le 14/11 nous va très bien.";
+      b.call.stage="applied";b.call.appliedAt=stamp();S.clock--;dirty();hist("brief",`${kept.length} réponse${kept.length>1?"s":""} du call appliquée${kept.length>1?"s":""} au Brief`,name,"Call du 20/10");after("brief","Réponses du call appliquées",before);break;}
+    case "daex": S.draft.daText=DA_EXAMPLE; break;
+    case "daread": if(!String(dv("daText","")).trim()){S.err.daText="Écrivez ou dictez votre réponse : PO ne lit que ce que vous dites.";break;}
+      S.brief.reading=true; render(); setTimeout(()=>{S.brief.reading=false;S.brief.daRead=true;render();},700); return;
+    case "daremove": S.brief.daRemoved[v]=true; break;
+    case "daback": S.brief.daRead=false; break;
+    case "dasend":{const items=daFound(dv("daText","")).filter(f=>!S.brief.daRemoved[f.j]);if(!items.length){S.err.daText="Rien n'est gardé : reprenez votre réponse.";break;}
+      S.brief.da={items,at:stamp()};S.clock--;hist("brief","Direction artistique donnée par Nadia Benali");after("brief","Réponse envoyée à Lina Haddad",before);break;}
+    case "daadd": S.brief.daAdded=true; dirty(); hist("brief","Réponse de Nadia Benali ajoutée au Brief"); toast("Ajouté au Brief."); break;
+    case "deliv": S.brief.deliv[el.dataset.k]=!S.brief.deliv[el.dataset.k]; dirty(); break;
+    case "edit": S.editing=el.dataset.k; delete S.draft.editIn; break;
+    case "editsave": saveDate(el.dataset.k); break;
+    case "editcancel": S.editing=null; delete S.draft.editIn; break;
+    case "same": S.same=v==="1"; if(!S.same){S.eng.mastering=null;S.draft["pick-mastering"]=true;} else S.eng.mastering=S.eng.mix; dirty(); hist("brief",S.same?"Même ingénieur pour le mix et le mastering":"Un autre ingénieur pour le mastering"); break;
+    case "pickengopen": S.draft["pick-"+el.dataset.k]=true; break;
+    case "pickengclose": S.draft["pick-"+el.dataset.k]=false; break;
+    case "pickeng":{const f=el.dataset.k;S.eng[f]=v;S.engBy[f]=name;if(f==="mix"&&S.same) S.eng.mastering=v;S.draft["pick-"+f]=false;dirty();
+      hist("brief",`Ingénieur ${f==="mix"?(S.same?"du mix et du mastering":"du mix"):"du mastering"} choisi : ${P[v].name}`);toast(`${P[v].name} choisi${isIn(v)?" : ingénieur maison, pas de facture":" : tarifs et révisions repris du Réseau"}.`);break;}
+    case "pickvalopen": S.draft.pickVal=true; break;
+    case "pickval": S.validator=v;S.validatorBy=name;S.draft.pickVal=false;dirty();hist("brief",`Validation des versions confiée à ${P[v].name}`);toast(`${P[v].name} valide les versions.`); break;
+    case "briefsave":{const m=briefMissing();
+      if(m.length){S.err.brief=`Il manque ${m.join(", ")}.`;if(!S.src.useDone&&!S.eng.mix) S.draft["pick-mix"]=true;break;}
+      if(S.brief.saved&&!S.brief.dirty){S.err.briefInfo=`Rien à enregistrer : le Brief n'a pas changé depuis le ${S.brief.saved}.`;break;}
+      S.brief.saved=stamp();S.clock--;S.brief.dirty=false;S.brief.version=(S.brief.version||0)+1;hist("brief",S.brief.version>1?"Brief modifié et enregistré":"Brief enregistré");after("brief","Brief enregistré",before);break;}
+    // Mix and mastering
+    case "transmit":{
+      if(S.brief.dirty||!S.brief.saved){S.err["waiver-"+st]="Enregistrez d'abord le Brief : le dossier partirait sans vos dernières modifications.";toast("Enregistrez d'abord le Brief.");break;}
+      let w=null;
+      if(st==="mix"&&S.noStems){w=String(dv("waiver-"+st,"")).trim();if(!w){S.err["waiver-"+st]="Écrivez pourquoi : la dérogation est gardée dans l'historique.";break;}}
+      transmit(st,w);const ek=engOf(st);
+      after(st,isIn(ek)?`Assigné à ${P[ek].name}`:st==="mix"?`Dossier envoyé à ${P[ek].name}`:"Dossier du mastering transmis",before);break;}
+    case "takeon":{const ek=me(), ch=dv("rate","");if(!ch){S.err.rate="Confirmez le tarif estimé, ou proposez le vôtre.";break;}
+      const ks=st==="mix"&&S.same?["mix","mastering"]:[st], am={};
+      if(ch==="other"){let ok=true;ks.forEach(s=>{const n=parseInt(dv("prop-"+s,String(P[ek].price[s])),10);if(!(n>0)){S.err["prop-"+s]="Indiquez un montant en euros.";ok=false;}else am[s]=n;});if(!ok) break;}
+      takeOn(st,ek,am);after(st,"Dossier pris en charge",before);S.flash={title:"Dossier pris en charge",lines:[ch==="other"?"Votre tarif est envoyé à Lina Haddad : elle le valide avant de l'engager.":"Merci ! Déposez votre version ici dès qu'elle est prête."]};break;}
+    case "budgetok":{const b=budgetLine(st);S.budget[st]=Object.assign({},S.budget[st],{state:"engaged",acceptedBy:name,acceptedAt:stamp()});S.clock--;
+      hist(st,`Tarif de ${P[b.ek].name} accepté : ${euro(b.amount)} engagés`,name,`Tarif proposé par ${P[b.ek].name}`);toast("Tarif accepté : le montant est engagé.");break;}
+    case "signal":{const ek=me(), k=st, kind=v, f={question:"sigq",delay:"sigd",missing:"sigm"}[kind], text=String(dv(f,"")).trim();
+      let days=null;if(kind==="delay"){days=parseInt(dv("sigdays","3"),10);if(!(days>=1&&days<=90)){S.err.sigdays="Entre 1 et 90 jours.";}}
+      if(!text) S.err[f]=kind==="question"?"Écrivez votre question.":kind==="delay"?"Dites pourquoi : PDS en a besoin pour arbitrer.":"Dites quel fichier manque.";
+      if(S.err[f]||S.err.sigdays) break;
+      const t={id:"t"+(S.thread.length+1),k,eng:ek,kind,text,days,at:stamp(),status:"open"};S.clock--;S.thread.push(t);delete S.draft[f];
+      hist(k,`${kind==="question"?"Question":kind==="delay"?`Retard de ${days} jour${days>1?"s":""} signalé`:"Fichier manquant signalé"} : « ${text} »`,P[ek].name);
+      S.flash={title:"Envoyé à Lina Haddad",lines:["Elle vous répond ici. Vous recevez aussi un e-mail."]};toast("Envoyé à Lina Haddad.");break;}
+    case "reply":{const t=th(v), r=String(dv("reply-"+v,"")).trim();if(!r){S.err["reply-"+v]="Écrivez votre réponse.";break;}
+      t.status="closed";t.reply=r;t.outcome=`Répondu par ${name} le ${stamp()}`;S.clock--;hist(t.k,`Réponse envoyée à ${P[t.eng].name}`,name,`Question de ${P[t.eng].name}`);toast("Réponse envoyée.");break;}
+    case "delayok":{const t=th(v), dd=delayDates(t), r=String(dv("reply-"+v,"")).trim();
+      dd.forEach(([d,,n])=>{S.brief.dates[d]=n;S.brief.dateBy[d]=`retard signalé par ${P[t.eng].name}`;});
+      t.status="closed";t.reply=r;t.outcome=`Dates décalées de ${t.days} jour${t.days>1?"s":""}, appliquées par ${name}`;
+      hist(t.k,`Nouvelles dates appliquées : master final le ${frDate(S.brief.dates.master)}`,name,`Retard signalé par ${P[t.eng].name}`);
+      S.brief.version=(S.brief.version||0)+1;S[t.k].sentBrief=S.brief.version;hist(t.k,`Nouvelles dates envoyées à ${P[t.eng].name}`,"PDS OS","Nouvelles dates appliquées");
+      after(t.k,"Nouvelles dates appliquées",before);break;}
+    case "delayno":{const t=th(v), r=String(dv("reply-"+v,"")).trim();if(!r){S.err["reply-"+v]=`Dites pourquoi à ${P[t.eng].first} : il le lira sur son lien.`;break;}
+      t.status="closed";t.reply=r;t.outcome=me()==="dg"?`Retard refusé par ${name}`:`Dates gardées par ${name}`;hist(t.k,t.outcome,name,`Retard signalé par ${P[t.eng].name}`);after(t.k,"Réponse envoyée",before);break;}
+    case "escalate":{const t=th(v);t.status="escalated";hist(t.k,"Retard envoyé à la direction : le master final passerait après la sortie",name,`Retard signalé par ${P[t.eng].name}`);after(t.k,"Envoyé à la direction",before);break;}
+    case "resend":{const o=S[st], ek=engOf(st), at=stamp();S.clock--;o.resent.push(at);o.sentBrief=S.brief.version;
+      const t=v?th(v):null;if(t){t.status="closed";t.reply=String(dv("reply-"+v,"")).trim();t.outcome=`Dossier renvoyé par ${name}`;}
+      hist(st,`Dossier renvoyé à ${P[ek].name}${isIn(ek)?"":" par PDS OS"}`,name,t?`Fichier manquant signalé par ${P[ek].name}`:"Brief modifié");toast("Dossier renvoyé.");break;}
+    case "upex":{const key=v,k=key.split(":");S.pick[key]={name:k[0]==="d"?DELIV_FILE[k[1]]:KIND[key].file(S[key].versions.length+1)};break;}
+    case "upsend":{const key=el.dataset.k,p=S.pick[key];if(!p){S.err["up-"+key]="Choisissez le fichier à envoyer.";break;}
+      if(key.startsWith("d:")){const d=key.slice(2);S.final.got[d]={name:p.name,at:stamp()};S.clock--;hist("final",`${DELIV.find(x=>x[0]===d)[1]} déposé`,P[engOf("mastering")].name);}
+      else addVersion(key,p.name);
+      delete S.pick[key];after(key.startsWith("d:")?"final":key,"Envoi confirmé : « "+p.name+" » est arrivé chez le label",before);break;}
+    case "comment":{const x=String(dv("cmX-"+st,"")).trim();if(!x){S.err["cmX-"+st]="Écrivez votre retour.";break;}
+      S[st].comments.push({v:lastV(st).n,t:String(dv("cmT-"+st,"")).trim(),text:x,by:name,at:stamp()});S.clock--;delete S.draft["cmX-"+st];delete S.draft["cmT-"+st];toast("Retour ajouté.");break;}
+    case "commentex":{const ex=COMMENT_EX[me()]||COMMENT_EX.cp;S.draft["cmT-"+st]=ex[0];S.draft["cmX-"+st]=ex[1];break;}
+    case "synth": S.draft["dec-"+st]=synthesis(st,lastV(st)); S.draft["decOpen-"+st]=true; break;
+    case "trsynth": S.draft["tr-"+st]=synthesis(st,lastV(st)); S.draft["trOpen-"+st]=true; break;
+    case "trsend":{const n=String(dv("tr-"+st,"")).trim();if(!n){S.err["tr-"+st]="Écrivez les retours à transmettre.";break;}
+      S[st].retours[lastV(st).n]={text:n,at:stamp(),by:name};S.clock--;delete S.draft["tr-"+st];hist(st,`Retours sur le ${KIND[st].label} V${lastV(st).n} transmis à ${P[engOf(st)].name}, sans décision`);toast("Retours transmis.");break;}
+    case "decide":
+      if(v==="ok"){if(st==="mix"&&!done("source")){S.err["decide-"+st]="Ce mix repose sur une version de travail : il ne peut pas devenir le mix final avant l'arrivée des voix définitives.";break;}
+        decide(st,true);after(st,`${KIND[st].label} V${lastV(st).n} validé`,before);}
+      else{const n=String(dv("dec-"+st,"")).trim();if(!n){S.err["dec-"+st]=`Écrivez ce qu'il faut changer : ce sera le retour de ${P[engOf(st)].first}.`;S.draft["decOpen-"+st]=true;break;}
+        decide(st,false,n);delete S.draft["dec-"+st];after(st,`Modification demandée à ${P[engOf(st)].name}`,before);}
+      break;
+    case "reopenopen": S.draft["reopen-"+st]=true; break;
+    case "reopencancel": S.draft["reopen-"+st]=false; break;
+    case "reopen":{const r=String(dv("reopenWhy-"+st,"")).trim();if(!r){S.err["reopenWhy-"+st]="Dites pourquoi : c'est ce que l'ingénieur lira, et ce qui restera dans l'historique.";break;}
+      const f=finalV(st);f.status="reopened";f.reopen={by:name,at:stamp(),reason:r};S.clock--;S.draft["reopen-"+st]=false;
+      hist(st,`${KIND[st].label} V${f.n} rouvert : « ${r} »`,name);after(st,`${st==="mix"?"Mix":"Master"} rouvert`,before);break;}
+    // Mona's link
+    case "invex": S.pick[v]={name:`Facture_${v.indexOf("karim")>=0?"KH-2026-118":v.indexOf("arp")>=0?"SA-0457":"LF-2026-31"}.pdf`}; break;
+    case "proofex": S.pick[v]={name:"Avis_de_virement_PDS.pdf"}; break;
+    case "ribchange": S.draft[v.replace(/(karim|lea|arp)$/,"ribchange-$1")]=true; break;
+    case "invsend":{const pre=el.dataset.k||"inv-", ek=v, exp=engagedOf(ek), key=pre+ek, p=S.pick[key];let ok=true;
+      if(!p){S.err["up-"+key]="Ajoutez la facture en PDF.";ok=false;}
+      const num=String(dv(pre+"num-"+ek,"")).trim();if(!num){S.err[pre+"num-"+ek]="Indiquez le numéro de la facture.";ok=false;}
+      const amt=parseFloat(String(dv(pre+"amt-"+ek,String(exp.total))).replace(",","."));let why=null;
+      if(!(amt>0)){S.err[pre+"amt-"+ek]="Indiquez le montant HT.";ok=false;}
+      else if(amt!==exp.total){why=String(dv(pre+"why-"+ek,"")).trim();if(!why){S.draft[pre+"mismatch-"+ek]=true;S.err[pre+"amt-"+ek]=`Le montant (${euro(amt)}) ne correspond pas au tarif engagé (${euro(exp.total)}). Expliquez la différence pour envoyer quand même.`;ok=false;}}
+      const r=S.rib[ek], change=!r||S.draft[pre+"ribchange-"+ek];let rib=null;
+      if(change){const ib=String(dv(pre+"iban-"+ek,"")).replace(/\s/g,"").toUpperCase(), ho=String(dv(pre+"holder-"+ek,P[ek].name)).trim();
+        if(!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(ib)){S.err[pre+"iban-"+ek]=ib?"Cet IBAN n'a pas le bon format : deux lettres, deux chiffres, puis le numéro du compte.":"Indiquez l'IBAN du compte à payer.";ok=false;}
+        if(!ho){S.err[pre+"holder-"+ek]="Indiquez le titulaire du compte.";ok=false;}
+        rib={iban:ib.replace(/(.{4})/g,"$1 ").trim(),bic:String(dv(pre+"bic-"+ek,"")).trim(),holder:ho};}
+      if(!ok) break;
+      const viaLink=pre==="inv-", who=viaLink?P[ek].name:name;
+      const e=hist("final",`Facture n° ${num} de ${P[ek].name} ${viaLink?"reçue par son lien":`ajoutée par ${name}`} : ${euro(amt)}${why?` (tarif engagé ${euro(exp.total)} · « ${why} »)`:""}`,who,"Facture demandée à la validation du master final");
+      S.inv[ek]=Object.assign(S.inv[ek]||{},{received:e.at,file:p.name,number:num,amount:amt,why,via:viaLink?"lien":"autrement",by:who});
+      if(rib){if(r){S.rib[ek]=Object.assign({},r,{pending:Object.assign(rib,{at:e.at})});hist("final",`Nouveau RIB de ${P[ek].name} reçu : à confirmer par la direction avant tout paiement`,"PDS OS",`Facture n° ${num}`);}
+        else{S.rib[ek]=Object.assign(rib,{source:"facture"});hist("final",`RIB de ${P[ek].name} gardé dans sa fiche Réseau`,"PDS OS",`Facture n° ${num}`);}}
+      delete S.pick[key];["num-","amt-","why-","mismatch-","iban-","bic-","holder-","ribchange-"].forEach(x=>delete S.draft[pre+x+ek]);
+      after("final",`Facture de ${P[ek].name} reçue`,before);
+      if(viaLink) S.flash={title:"Facture envoyée",lines:[`Merci. Elle sera payée avant le ${dueOf(e.at)}${rib&&r?" : votre nouveau RIB est vérifié par PDS avant le virement":""}.`]};
+      break;}
+    case "ribok":{const ek=v;if(!dv("ribcheck-"+ek,false)){S.err["ribcheck-"+ek]=`Cochez quand vous avez vérifié le RIB par téléphone avec ${P[ek].name}.`;break;}
+      const r=S.rib[ek], n=r.pending, e=hist("final",`Nouveau RIB de ${P[ek].name} confirmé après vérification par téléphone`,name,`RIB modifié par ${P[ek].name}`);
+      S.rib[ek]={iban:n.iban,bic:n.bic,holder:n.holder,previous:r.iban,confirmed:{by:name,at:e.at}};after("final","Nouveau RIB confirmé",before);break;}
+    case "paid":{const ek=v, d=String(dv("paydate-"+ek,"")).trim(), pr=S.pick["proof-"+ek];let ok=true;
+      if(!d){S.err["paydate-"+ek]="Indiquez la date du virement.";ok=false;}
+      if(!pr){S.err["up-proof-"+ek]="Ajoutez la preuve du virement : un PDF ou une capture de la banque.";ok=false;}
+      if(!ok) break;
+      const i=S.inv[ek], e=hist("final",`Facture n° ${i.number} de ${P[ek].name} payée le ${frDate(d)} : ${euro(i.amount)}`,name,`Facture reçue le ${i.received}`);
+      i.paid={date:d,proof:pr.name,by:name,at:e.at};delete S.pick["proof-"+ek];delete S.draft["paydate-"+ek];
+      after("final","Facture marquée payée",before);break;}
+    case "monaex": S.draft.monaT=COMMENT_EX.mona[0]; S.draft.monaX=COMMENT_EX.mona[1]; break;
+    case "monasend":{const x=String(dv("monaX","")).trim();if(!x){S.err.monaX="Écrivez votre retour.";break;}
+      S[v].comments.push({v:lastV(v).n,t:String(dv("monaT","")).trim(),text:x,by:"Mona Lys",link:true,at:stamp()});S.clock--;delete S.draft.monaX;delete S.draft.monaT;
+      S.flash={title:"Retour envoyé",lines:[`Merci. ${VAL()} le lira avant de décider.`]};toast("Retour envoyé.");break;}
+  }
+  render();
+});
+
+/* Proto controls: who is looking, and jumping to key moments. ---------------- */
+function toBrief(){S.src={version:"v3",choice:"anticipate",useDone:null};S.watch="waiting";hist("source","Source confirmée : "+AUDIO.v3.name+" (version de travail)","Lina Haddad");}
+function toDirect(){S.brief.start="direct";hist("brief","Brief commencé directement · question posée à Nadia Benali par PO","Lina Haddad");S.brief.da={items:daFound(DA_EXAMPLE).slice(0,6),at:stamp()};hist("brief","Direction artistique donnée par Nadia Benali","Nadia Benali");S.brief.daAdded=true;hist("brief","Réponse de Nadia Benali ajoutée au Brief","Lina Haddad");}
+function toSave(){S.brief.saved=stamp();S.brief.version=1;S.brief.dirty=false;hist("brief","Brief enregistré","Lina Haddad");}
+function toSent(k){transmit(k);S.log[0].who="Lina Haddad";S.hist[k][S.hist[k].length-1].who="Lina Haddad";const ek=engOf(k);if(!isIn(ek)&&!S[k].received){S.links[ek].opened=stamp();takeOn(k,ek,{});}}
+function toV1(){toBrief();toDirect();toSave();toSent("mix");addVersion("mix");S.mix.comments.push({v:1,t:COMMENT_EX.mona[0],text:COMMENT_EX.mona[1],by:"Mona Lys",link:true,at:stamp()});}
+function toVocals(){toV1();decide("mix",false,synthesis("mix",lastV("mix"))+"\nLe pont manque de largeur, ouvrir les synthés. (Nadia Benali)","Nadia Benali");S.watch="arrived";hist("source","Voix définitives reçues au Catalogue : "+AUDIO.v4.name,"PDS OS");}
+function toMixFinal(){toVocals();S.src.version="v4";S.watch="replaced";hist("source","Source remplacée : "+AUDIO.v4.name,"Lina Haddad");S.mix.newSource=stamp();addVersion("mix");decide("mix",true,null,"Nadia Benali");
+  ["mix","mastering"].forEach(k=>{if(S.budget[k]&&S.budget[k].state==="proposed") Object.assign(S.budget[k],{state:"engaged",acceptedBy:"Lina Haddad",acceptedAt:stamp()});});}
+function toMaster(){toMixFinal();toSent("mastering");S.log[0].who="Lina Haddad";addVersion("mastering");}
+function toFinal(){toMaster();decide("mastering",true,null,"Nadia Benali");S.final.got.instru={name:DELIV_FILE.instru,at:stamp()};hist("final","Instrumental déposé","Karim Haddou");}
+const SCEN={
+  start(){},
+  mixdone(){S.catalogMix=true;},
+  nostems(){S.noStems=true;S.src.version="v3";S.watch="none";hist("source","Source confirmée : "+AUDIO.v3.name,"Lina Haddad");toDirect();toSave();S.sel="mix";},
+  brief(){toBrief();S.sel="brief";},
+  noeng(){toBrief();toDirect();S.eng.mix=null;S.eng.mastering=null;S.sel="brief";},
+  brieflots(){toBrief();S.eng.mix=null;S.eng.mastering=null;S.sel="brief";},
+  hugo(){toBrief();toDirect();S.eng.mix="hugo";S.eng.mastering="hugo";S.engBy.mix="Lina Haddad";hist("brief","Ingénieur du mix et du mastering choisi : Hugo Martin","Lina Haddad");toSave();S.sel="mix";},
+  v1(){toV1();S.role="da";},
+  thread(){toBrief();toDirect();toSave();toSent("mix");S.links.karim.expiring=true;
+    S.thread.push({id:"t1",k:"mix",eng:"karim",kind:"delay",days:3,text:"Le studio est fermé deux jours pour une panne de console.",at:stamp(),status:"open"});hist("mix","Retard de 3 jours signalé : « Le studio est fermé deux jours pour une panne de console. »","Karim Haddou");
+    S.thread.push({id:"t2",k:"mix",eng:"karim",kind:"question",text:"La v3 reste-t-elle la référence d'énergie pour le refrain ?",at:stamp(),status:"open"});hist("mix","Question : « La v3 reste-t-elle la référence d'énergie pour le refrain ? »","Karim Haddou");S.sel="mix";},
+  vocals(){toVocals();},
+  arp(){toBrief();toDirect();S.same=false;S.eng.mastering="arp";S.engBy.mastering="Lina Haddad";hist("brief","Ingénieur du mastering choisi : Studio Arpège","Lina Haddad");toSave();toSent("mix");addVersion("mix");decide("mix",false,"La voix plus en avant. (Nadia Benali)","Nadia Benali");
+    S.watch="replaced";S.src.version="v4";addVersion("mix");decide("mix",true,null,"Nadia Benali");if(S.budget.mix) Object.assign(S.budget.mix,{state:"engaged",acceptedBy:"Lina Haddad",acceptedAt:stamp()});S.sel="mastering";},
+  master(){toMaster();S.role="da";},
+  final(){toFinal();S.sel="final";},
+  invoice(){toFinal();S.final.got.radio={name:DELIV_FILE.radio,at:stamp()};hist("final","Radio edit déposé","Karim Haddou");
+    const e=hist("final","Facture n° KH-2026-118 de Karim Haddou reçue par son lien : 1 100 € HT","Karim Haddou","Facture demandée à la validation du master final");
+    S.inv.karim=Object.assign(S.inv.karim||{},{received:e.at,file:"Facture_KH-2026-118.pdf",number:"KH-2026-118",amount:1100,why:null,via:"lien",by:"Karim Haddou"});
+    S.rib.karim=Object.assign({},S.rib.karim,{pending:{iban:"FR76 1027 8060 4100 0204 5678 912",bic:"CMCIFR2A",holder:"Karim Haddou",at:e.at}});
+    hist("final","Nouveau RIB de Karim Haddou reçu : à confirmer par la direction avant tout paiement","PDS OS","Facture n° KH-2026-118");S.role="dg";S.sel="final";}
+};
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.sel=null;S.flash=null;S.editing=null;S.view="parcours";render();window.scrollTo({top:0});});
+document.getElementById("scenSel").addEventListener("change",e=>{document.getElementById("toast").hidden=true;S=fresh();SCEN[e.target.value]();S.flash=null;render();window.scrollTo({top:0});});
+document.getElementById("resetBtn").addEventListener("click",()=>{document.getElementById("toast").hidden=true;S=fresh();document.getElementById("scenSel").value="start";render();window.scrollTo({top:0});});
+render();
+})();
+</script>
+</body>
+</html>

@@ -132,6 +132,9 @@ node docs/protos/tests/legal.cjs        # Cadrage juridique : question, réponse
 node docs/protos/tests/mixer-package.cjs # dossier du mixeur : aperçu, tarifs exclus, lien affiché une fois, relance
 node docs/protos/tests/production.cjs   # proto Production, interne et externe
 node docs/protos/tests/production-v2.cjs # externe selon Ibé (15/10) : rôles, devis versionné, lieu remplacé, décisions, blocages, contrôle, livraison
+node docs/protos/tests/distribution.cjs  # Distribution : paramètres, contrôles, V1 refusée, corrections de The Orchard, plateformes, clôture avec réserves (PROTO=… pour une copie)
+node docs/protos/tests/marketing.cjs     # Marketing complet : Stratégie, Conception, Production, Activations, Suivi & bilan jusqu'à la clôture
+node docs/protos/tests/projet.cjs        # Projet complet : Cadrage puis Master, Juridique, Marketing, Distribution dans une seule coquille, moments du projet, rôles, pages privées réunies
 ```
 
 Chaque test finit par `errors: []` (aucune erreur JavaScript) et le mobile par
@@ -162,3 +165,25 @@ Quand Sacha dit « code-le pareil que le proto », le proto devient la spécific
 (jamais stockés), les décisions par fonctions SQL, les composants existants d'abord
 (`docs/COMPOSANTS.md`). Exemple livré : la Production (`components/production/journey/`,
 `lib/production/journey/`).
+
+
+## 6. Le proto « Projet complet » (`docs/protos/projet.html`, 18/10/2026)
+
+Le parcours global du projet, construit en réunissant les protos existants plutôt qu'en les recopiant :
+`marketing.html` (qui porte aussi le **Cadrage** : démarrer, les 6 dimensions, le Brief de cadrage validé par
+la direction, le Plan du projet), `master-v2.html`, `juridique-v2.html` et `distribution.html`.
+
+- **Une coquille** : navigation du projet (Vue d'ensemble, Cadrage, Master, Juridique, Marketing,
+  Distribution, Travail, Validations, Activité), un « Voir comme » et un « Aller à » communs (moments du projet,
+  puis moments de chaque workflow). Avant « Lancer le plan », les workflows sont verrouillés.
+- **Chaque workflow garde son moteur** : son script est enveloppé dans une fonction `MOD_<nom>(api)` qui reçoit
+  ses écouteurs (`api.on`), ses commandes de proto cachées (`api.el`) et prévient la coquille quand il se
+  redessine (`api.changed`). Un clic est routé vers le workflow dont la zone (`data-mod`) le contient.
+- **Une page privée par personne** : les cartes de chaque workflow qui lui demande quelque chose, sous un seul
+  en-tête (Mona Lys voit son écoute du Master et sa répartition du Juridique).
+- **Un seul design system** : le CSS du Marketing fait foi ; d'un autre proto, on ne garde que les règles dont le
+  sélecteur n'existe pas dans ce socle, limitées à sa zone.
+- **Les cartes en double prennent la meilleure version** : choix de départ en cartes cliquables avec
+  « Recommandé » et sa raison ; préparation d'un call (participants en pastilles, date, heure, format, ordre du
+  jour modifiable et déplaçable, récapitulatif avant création) partout : Cadrage, Stratégie, Conception,
+  Production, Master.

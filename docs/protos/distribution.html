@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Distribution PDS OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@500;600;700&display=swap">
+<style>
+/* Layout: PDS OS shell (main nav, project nav) and, in every module, the same
+   guided pattern — « Maintenant », the journey on the left, the open step on the
+   right. Tokens mirror app/globals.css. */
+:root{
+  --app:#fbfbfb; --page:#ffffff; --raised:#ffffff; --soft:#f4f4f4; --sunken:#ececec;
+  --inverse:#000; --inverse-fg:#fff;
+  --text:#000; --text-2:#5e5e5e; --text-3:#767676; --muted:#afafaf;
+  --hair:#ececec; --border:#d4d4d4; --field:#dcdcdc; --hover-border:#afafaf;
+  --sel:#155dfc; --sel-bg:rgb(21 93 252 / .07);
+  --info-bg:#e2eefc; --info-fg:#0b3d8c; --warn-bg:#fcefd2; --warn-fg:#6e4300;
+  --ok-bg:#daf3e2; --ok-fg:#0d5226; --bad-bg:#fce1df; --bad-fg:#9a1b1b;
+  --act-bg:#ece1fb; --act-fg:#4c1d9e; --neutral-bg:#ececec; --neutral-fg:#111;
+  --glass:rgb(24 24 24 / .86); --glass-fg:#fff; --glass-2:#bdbdbd;
+  --shadow:0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .06);
+  --font:"Google Sans Flex","Google Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --app:#0a0a0a; --page:#0f0f0f; --raised:#161616; --soft:rgb(255 255 255 / .05); --sunken:rgb(255 255 255 / .08);
+  --inverse:#ededed; --inverse-fg:#0f0f0f; --text:#ededed; --text-2:#a8a8a8; --text-3:#8f8f8f; --muted:#5e5e5e;
+  --hair:rgb(255 255 255 / .08); --border:rgb(255 255 255 / .12); --field:rgb(255 255 255 / .14); --hover-border:rgb(255 255 255 / .28);
+  --sel:#3b7bff; --sel-bg:rgb(59 123 255 / .16);
+  --info-bg:#12233d; --info-fg:#9ec5ff; --warn-bg:#33260c; --warn-fg:#f5c869; --ok-bg:#0f2e1c; --ok-fg:#7fdca0;
+  --bad-bg:#3a1616; --bad-fg:#ff9b94; --act-bg:#2a1c47; --act-fg:#c9b2ff; --neutral-bg:#262626; --neutral-fg:#d4d4d4;
+  --glass:rgb(40 40 40 / .9); --glass-fg:#f2f2f2; --glass-2:#a8a8a8; --shadow:0 1px 2px rgb(0 0 0 / .4), 0 8px 24px rgb(0 0 0 / .4);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--app);color:var(--text);font-family:var(--font);font-weight:500;font-size:16px;line-height:1.5;letter-spacing:-.02em;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.04em;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+ul,ol{margin:0;padding:0;list-style:none}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
+.cap{font-size:14px;color:var(--text-2)}
+.t3{color:var(--text-3)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:68px 200px minmax(0,1fr);min-height:100%}
+.shell.noproj{grid-template-columns:68px minmax(0,1fr)}
+.mainnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px}
+.brand{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--inverse);color:var(--inverse-fg);font-weight:700;font-size:12px;letter-spacing:0;margin-bottom:8px}
+.navbtn{position:relative;width:44px;height:40px;border-radius:8px;display:grid;place-items:center;color:var(--text-2);border:0;background:none;cursor:pointer}
+.navbtn.on{background:var(--sunken);color:var(--text)}
+.navbtn[disabled]{opacity:.35;cursor:not-allowed}
+.navbtn .cnt{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--inverse);color:var(--inverse-fg);font-size:10.5px;font-weight:700;display:grid;place-items:center;letter-spacing:0}
+.navbtn .tip{position:absolute;left:52px;top:50%;transform:translateY(-50%);background:var(--inverse);color:var(--inverse-fg);font-size:13px;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 120ms ease;z-index:20}
+@media (hover:hover) and (pointer:fine){.navbtn:hover:not([disabled]){background:var(--soft);color:var(--text)}.navbtn:hover .tip{opacity:1}}
+.mainnav .grow{flex:1}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--sunken);display:grid;place-items:center;font-size:12.5px;font-weight:600;flex:none;color:var(--text)}
+.avatar.sm{width:24px;height:24px;font-size:10.5px}
+.projnav{position:sticky;top:0;height:100vh;border-right:1px solid var(--hair);background:var(--page);padding:8px;display:flex;flex-direction:column;gap:1px;overflow:auto}
+.switcher{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 10px 12px;border-bottom:1px solid var(--hair);margin-bottom:6px;font-weight:600}
+.group{font-size:13px;color:var(--text-3);padding:12px 10px 4px}
+.pitem{display:flex;align-items:center;gap:10px;min-height:38px;padding:0 10px;border-radius:8px;color:var(--text-2);font-size:15px;border:0;background:none;text-align:left;cursor:pointer;width:100%}
+.pitem.on{background:var(--sunken);color:var(--text)}
+.pitem .grow{flex:1}
+@media (hover:hover) and (pointer:fine){.pitem:hover{background:var(--soft);color:var(--text)}}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.dot.run{background:var(--sel)} .dot.wait{background:var(--warn-fg)} .dot.block{background:var(--bad-fg)} .dot.done{background:var(--ok-fg)}
+.mine{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--sel);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+.content{min-width:0;padding:28px 40px 130px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+@media (max-width:1100px){.shell{grid-template-columns:68px minmax(0,1fr)}.projnav{display:none}}
+@media (max-width:720px){.shell,.shell.noproj{grid-template-columns:minmax(0,1fr)}.mainnav{display:none}.content{padding:20px 16px 150px}}
+
+/* Head */
+.h1{font-size:30px;letter-spacing:-.04em}
+.chevrons{display:flex;flex-wrap:wrap;gap:4px}
+.chev{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--soft);color:var(--text-2);font-size:15px;border:0;cursor:pointer}
+.chev.on{background:var(--inverse);color:var(--inverse-fg)}
+.chev .ok{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok-fg)}
+.chev .lock{opacity:.6}
+.headrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:15px;color:var(--text-2)}
+.facts b{color:var(--text);font-weight:600}
+
+/* Pills, buttons */
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:600;background:var(--neutral-bg);color:var(--neutral-fg);white-space:nowrap}
+.pill.info{background:var(--info-bg);color:var(--info-fg)} .pill.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.pill.ok{background:var(--ok-bg);color:var(--ok-fg)} .pill.bad{background:var(--bad-bg);color:var(--bad-fg)} .pill.act{background:var(--act-bg);color:var(--act-fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;border:1px solid transparent;background:var(--inverse);color:var(--inverse-fg);font-weight:600;font-size:15px;cursor:pointer;transition:transform 140ms var(--ease),background-color 160ms ease;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.out{background:transparent;color:var(--text);border-color:var(--border)}
+.btn.ghost{background:transparent;color:var(--text-2)}
+.btn.sm{height:32px;padding:0 14px;font-size:14px}
+@media (hover:hover) and (pointer:fine){.btn.out:hover{border-color:var(--hover-border)}.btn.ghost:hover{background:var(--soft);color:var(--text)}}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Cards */
+.card{background:var(--raised);border:1px solid var(--hair);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{font-size:20px} .card h3{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.now{border-color:var(--border);box-shadow:var(--shadow)}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-2);flex-wrap:wrap}
+.now h2{font-size:22px}
+.rowlist{display:flex;flex-direction:column;gap:8px}
+.wr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--soft);font-size:15px}
+.wr .grow{flex:1;min-width:0}
+.flash{background:var(--ok-bg);color:var(--ok-fg);border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.flash .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.flash button{background:none;border:0;color:inherit;cursor:pointer;padding:4px;border-radius:6px}
+
+/* Layout + spine */
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.spine{position:sticky;top:20px;display:flex;flex-direction:column;gap:2px;padding:12px;background:var(--raised);border:1px solid var(--hair);border-radius:12px}
+.spine h2{font-size:15px;color:var(--text-2);letter-spacing:-.02em;padding:4px 8px 8px}
+.step{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;padding:9px 8px;border-radius:8px;border:0;background:none;text-align:left;cursor:pointer;width:100%;position:relative}
+.step:not(:last-child)::after{content:"";position:absolute;left:19px;top:34px;bottom:-6px;width:2px;background:var(--hair)}
+.step.sel{background:var(--sunken)}
+@media (hover:hover) and (pointer:fine){.step:not(.sel):hover{background:var(--soft)}}
+.mark{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:var(--raised);position:relative;z-index:1;color:var(--text-3)}
+.step.done .mark{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.step.current .mark{border-color:var(--sel);background:var(--sel-bg)}
+.step.current .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--sel)}
+.step.me .mark{border-color:var(--sel);background:var(--sel)} .step.me .mark::after{background:#fff}
+.step.blocked .mark{border-style:dashed}
+.step .t,.step .s{display:block}
+.step .t{font-size:15px;font-weight:600;line-height:1.3}
+.step.blocked .t{color:var(--text-3);font-weight:500}
+.step .s{font-size:13.5px;color:var(--text-2);line-height:1.35;margin-top:2px}
+.step .s.me{color:var(--sel);font-weight:600}
+.dhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.dhead h2{font-size:22px}
+.meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta .k{font-size:13px;color:var(--text-3)} .meta .v{font-size:15px;line-height:1.35}
+.okc{color:var(--ok-fg)} .noc{color:var(--text-3)}
+.note{font-size:14.5px;color:var(--text-2)}
+.po{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--act-fg);background:var(--act-bg);height:22px;padding:0 8px;border-radius:999px}
+.callout{border-radius:10px;padding:12px 14px;font-size:15px;display:flex;gap:10px;align-items:flex-start}
+.callout.info{background:var(--info-bg);color:var(--info-fg)} .callout.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.callout.bad{background:var(--bad-bg);color:var(--bad-fg)} .callout.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.rows{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.row:last-child{border-bottom:0}
+.row .src{font-size:13px;color:var(--text-3)}
+.pick{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;min-width:0}.pick legend{padding:0;margin-bottom:2px}
+.opts{display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.opt{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--hair);cursor:pointer}.opt:last-child{border-bottom:0}.opt .grow{flex:1;min-width:0}
+.opt input{accent-color:var(--sel);width:18px;height:18px;flex:none}.opt:has(input:checked){background:var(--sel-bg)}
+.hist{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--text-2)}
+.hist li{display:flex;gap:8px;align-items:flex-start}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:14px;font-weight:600}
+.in{min-height:40px;border:1px solid var(--field);border-radius:8px;background:var(--raised);padding:8px 12px;width:100%}
+textarea.in{min-height:64px;resize:vertical}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.lbl2{font-size:15px}
+.drop{position:relative;display:flex;align-items:center;gap:12px;min-height:72px;padding:14px 16px;border:1.5px dashed var(--border);border-radius:10px;background:var(--soft);cursor:pointer;transition:border-color 150ms ease,background-color 150ms ease}
+.drop.over{border-color:var(--sel);background:var(--sel-bg)} .drop.bad{border-color:var(--bad-fg)}
+.drop:focus-within{outline:2px solid var(--sel);outline-offset:2px}
+.drop .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+@media (hover:hover) and (pointer:fine){.drop:hover{border-color:var(--hover-border)}}
+.vers{display:flex;flex-direction:column;gap:8px}
+.field .src,.vers>.src{font-size:14px;color:var(--text-2)}
+.linkbox{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px}.linkbox code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:var(--raised);color:var(--text);padding:6px 10px;border-radius:8px;overflow-wrap:anywhere}
+.qa{display:flex;flex-direction:column;gap:12px}.qh{font-size:18px;font-weight:600;letter-spacing:-.03em}
+.ver{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.rows .ver:last-child{border-bottom:0}
+.ver .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.ver-note{margin:0 14px 10px;border-radius:8px}
+.play{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--inverse);color:var(--inverse-fg);display:grid;place-items:center;cursor:pointer;transition:transform 120ms var(--ease)}
+.play:active{transform:scale(.94)} .play[aria-pressed="true"]{background:var(--sel);color:#fff}
+.wave{display:block;height:3px;margin-top:6px;border-radius:2px;background:var(--hair);overflow:hidden}
+.wave i{display:block;height:100%;width:100%;background:var(--sel);transform-origin:left;animation:wave 194s linear forwards}
+@keyframes wave{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){.wave i{animation:none;transform:scaleX(.3)}}
+.in[aria-invalid="true"]{border-color:var(--bad-fg)}
+.err{font-size:13px;color:var(--bad-fg)}
+
+/* Overview + lists */
+.wfgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.wfgrid{grid-template-columns:minmax(0,1fr)}}
+.wf{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--hair);border-radius:12px;background:var(--raised);text-align:left;cursor:pointer}
+@media (hover:hover) and (pointer:fine){.wf:hover{border-color:var(--hover-border)}}
+.bar{height:6px;border-radius:999px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sel);border-radius:999px;transform-origin:left;transition:transform 300ms var(--ease)}
+.table{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised)}
+.tr{display:grid;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--hair);font-size:15px}
+.tr:last-child{border-bottom:0}
+.tr.h{font-size:13.5px;color:var(--text-3);background:var(--soft)}
+.tr.link{cursor:pointer}
+@media (hover:hover) and (pointer:fine){.tr.link:hover{background:var(--soft)}}
+@media (max-width:760px){.tr{grid-template-columns:minmax(0,1fr)!important}.tr.h{display:none}}
+.cols4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.cols4{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--soft)}
+.col h3{font-size:14px;color:var(--text-2);font-weight:600}
+.chip{padding:10px 12px;border-radius:8px;background:var(--raised);border:1px solid var(--hair);font-size:14.5px}
+.po-input{display:flex;gap:8px;align-items:center;padding:8px 8px 8px 16px;border:1px solid var(--border);border-radius:16px;background:var(--raised)}
+.po-input input{flex:1;border:0;background:transparent;outline:none;min-width:0;height:36px}
+
+/* Portal */
+.portal{min-height:100%;background:var(--app)}
+.pbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;border-bottom:1px solid var(--hair);background:var(--page);flex-wrap:wrap}
+.pwrap{max-width:820px;margin:0 auto;padding:28px 16px 150px;display:flex;flex-direction:column;gap:18px}
+.lockline{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3)}
+
+/* Proto bar & toast */
+.proto{position:fixed;left:0;right:0;margin-inline:auto;width:fit-content;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--glass);color:var(--glass-fg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:16px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+.proto .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--glass-2);padding:0 6px}
+.proto label{font-size:13px;color:var(--glass-2)}
+.proto select{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:rgb(255 255 255 / .08);color:var(--glass-fg);padding:0 10px;font-size:14px;max-width:280px}
+.proto select option{color:#000;background:#fff}
+.proto button{height:34px;border-radius:10px;border:1px solid rgb(255 255 255 / .18);background:none;color:var(--glass-fg);padding:0 12px;font-size:14px;cursor:pointer}
+@media (max-width:720px){.proto label{display:none}.proto select{max-width:44vw}}
+.toast{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--inverse);color:var(--inverse-fg);padding:12px 16px;border-radius:12px;font-size:15px;box-shadow:var(--shadow);max-width:min(420px,calc(100% - 40px));transition:opacity 180ms ease,transform 180ms var(--ease)}
+.toast[hidden]{display:block!important;opacity:0;transform:translateY(8px);pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{transition-duration:1ms!important}}
+
+/* V2 — production externe selon le ticket d'Ibé du 15/10 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{height:40px;padding:0 14px;border:0;background:none;color:var(--text-2);font-size:15px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.tab.on{color:var(--text);border-bottom-color:var(--text)}
+.tab .n{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--sunken);font-size:12px;font-weight:700;display:grid;place-items:center}
+.strip{display:flex;flex-wrap:wrap;gap:8px}
+.chipbtn{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--hair);background:var(--raised);font-size:14px;cursor:pointer;color:var(--text)}
+.chipbtn .d{width:8px;height:8px;border-radius:50%}
+.d.bad{background:var(--bad-fg)} .d.warn{background:var(--warn-fg)} .d.info{background:var(--info-fg)}
+.meta5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:14px;border-radius:10px;background:var(--soft)}
+@media (max-width:1200px){.meta5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.meta5 .k{font-size:13px;color:var(--text-3)} .meta5 .v{font-size:15px;line-height:1.35}
+.step.rework .mark{border-color:var(--warn-fg);background:var(--warn-bg)}
+.step .flag{display:inline-flex;margin-left:6px;vertical-align:1px}
+.kv{display:grid;grid-template-columns:180px minmax(0,1fr);gap:4px 14px;font-size:15px}
+@media (max-width:720px){.kv{grid-template-columns:minmax(0,1fr)}}
+.kv dt{color:var(--text-3);font-size:14px} .kv dd{margin:0}
+.locs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.locs{grid-template-columns:minmax(0,1fr)}}
+.loc{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised);display:flex;flex-direction:column}
+.loc.active{border-color:var(--ok-fg);box-shadow:0 0 0 1px var(--ok-fg)}
+.loc .ph{position:relative;height:120px;background:var(--sunken);overflow:hidden}
+.loc .ph img{display:block;width:100%;height:100%;object-fit:cover}
+.phn{position:absolute;left:8px;bottom:8px;height:22px;padding:0 8px;border-radius:999px;background:rgb(0 0 0 / .6);color:#fff;font-size:12px;font-weight:600;display:inline-flex;align-items:center}
+.ph.none{display:grid;place-items:center;color:var(--text-3);font-size:13px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px}
+.thumb{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;background:var(--sunken)}
+.thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.thumb button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgb(0 0 0 / .65);color:#fff;display:grid;place-items:center;cursor:pointer}
+
+.loc .bd{padding:12px;display:flex;flex-direction:column;gap:6px;font-size:14.5px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.checks{display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.checks input{width:18px;height:18px;accent-color:var(--sel);margin-top:2px;flex:none}
+.syn .row .src{max-width:none}
+.miss{color:var(--bad-fg);font-weight:600}
+.warnc{color:var(--warn-fg);font-weight:600}
+.src.warnc{color:var(--warn-fg)} .src.okc{color:var(--ok-fg)}
+.dec .row{grid-template-columns:minmax(0,1fr) auto}
+.contra{border:1px solid var(--warn-fg);border-radius:10px;overflow:hidden}
+.contra .row{border-bottom:1px solid var(--hair)}
+.strike{text-decoration:line-through;color:var(--text-3)}
+select.in{height:40px}
+/* A version list: the latest and the retained one open, older ones folded behind a chevron. */
+.vcard{background:var(--raised);border:1px solid var(--hair);border-radius:12px;min-width:0}
+.vcard>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-height:52px;padding:10px 14px;cursor:pointer;border-radius:12px}
+.vcard>summary::-webkit-details-marker{display:none}
+.vcard>summary h3{font-size:16px;font-weight:600;letter-spacing:-.02em}
+.vcard>summary .cap{margin-left:auto}
+.vcard .chv{display:grid;place-items:center;width:20px;height:20px;color:var(--text-3);transition:transform 160ms var(--ease)}
+.vcard[open] .chv{transform:rotate(90deg)}
+.vcard .vb{display:flex;flex-direction:column;gap:8px;padding:0 14px 14px}
+@media (hover:hover) and (pointer:fine){.vcard>summary:hover .chv{color:var(--text)}}
+
+/* Juridique — the five steps of the dossier, then each launched démarche as a
+   step of its own (tickets Juridique 07 and 08). */
+.spine .sect{font-size:13px;color:var(--text-3);padding:12px 8px 4px;letter-spacing:-.01em}
+.spine .foot{border-top:1px solid var(--hair);margin-top:8px;padding-top:8px}
+.linkbtn{background:none;border:0;padding:6px 8px;border-radius:6px;color:var(--text-2);font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover) and (pointer:fine){.linkbtn:hover{color:var(--text)}}
+.step .s.wait{color:var(--warn-fg)}
+.step .s.bad{color:var(--bad-fg);font-weight:600}
+.step.waitst .mark{border-color:var(--warn-fg);background:var(--warn-bg)}
+.step.waitst .mark::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn-fg)}
+.fact{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:11px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.fact:last-child{border-bottom:0}
+.fact .k{font-size:13.5px;color:var(--text-3)}
+.fact .v{overflow-wrap:anywhere}
+.fact .src{font-size:13px;color:var(--text-3)}
+.fact .side{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.fact.missing .v{color:var(--bad-fg)}
+.fact.changed .src{color:var(--sel)}
+.fact .edit{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
+@media (max-width:720px){.fact{grid-template-columns:minmax(0,1fr)}.fact .side{justify-content:flex-start}}
+.field .po{align-self:flex-start}
+.sub{font-size:15px;font-weight:600;letter-spacing:-.02em;color:var(--text-2);margin-top:4px}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.cols2{grid-template-columns:minmax(0,1fr)}}
+.plan-row{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:10px;background:var(--raised);border:1px solid var(--hair)}
+.plan-row.off{opacity:.55}
+.plan-row .top{display:flex;gap:10px;align-items:flex-start}
+.plan-row .top input{width:18px;height:18px;accent-color:var(--sel);margin-top:3px;flex:none}
+.plan-row .ctl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.plan-row .ctl{grid-template-columns:minmax(0,1fr)}}
+.plan-row label.k{font-size:13px;color:var(--text-3)}
+.verdict{display:flex;gap:12px;align-items:center;padding:16px;border-radius:12px}
+.verdict.bad{background:var(--bad-bg);color:var(--bad-fg)} .verdict.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.verdict h3{font-size:20px;letter-spacing:-.03em}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--hair)}
+.split:last-child{border-bottom:0}
+.split .in{text-align:right}
+.total{display:flex;justify-content:space-between;padding:10px 14px;background:var(--soft);font-weight:600}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin 700ms linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+.btn[aria-busy="true"]{opacity:.8;cursor:progress}
+.pchips{display:flex;flex-wrap:wrap;gap:6px}
+.notask{font-size:14.5px;color:var(--text-2);display:flex;flex-direction:column;gap:4px}
+.ret{border-left:3px solid var(--warn-fg)}
+.doccard{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--raised);min-width:0}
+.dochead{display:flex;align-items:center;gap:12px;padding:14px;background:var(--soft);border-bottom:1px solid var(--hair)}
+.dochead .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.docchg{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;background:var(--info-bg);color:var(--info-fg);font-size:14.5px;border-bottom:1px solid var(--hair)}
+.doccard .rows{border:0;border-radius:0}
+.linkrow{display:flex;flex-direction:column;gap:6px;padding:12px 14px;min-width:0}
+.linkrow .linkbox{margin:0}
+.linkrow .src{font-size:13px;color:var(--text-3)}
+.protobtn{background:var(--glass);color:var(--glass-fg);border:1px dashed var(--glass-2)}
+.src a{color:inherit}
+.scrim{position:fixed;inset:0;z-index:70;background:rgb(0 0 0 / .45);display:grid;place-items:center;padding:16px}
+.dialog{width:min(580px,100%);max-height:calc(100vh - 32px);overflow:auto;overscroll-behavior:contain;background:color-mix(in srgb,var(--raised) 90%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:14px}
+.dialog h2{font-size:22px}
+.dialog:focus{outline:none}
+.dfoot{justify-content:flex-end}
+body.locked{overflow:hidden}
+.pick>.src{font-size:14px;color:var(--text-2)}
+/* Distribution — the five chevrons of the code (Préparation, Dossier, Suivi,
+   Plateformes, Clôture) as one journey of steps (docs/VISION-UX.md § 3). */
+:root{--cover:linear-gradient(135deg,#1b0b3a 0%,#5b1d8f 45%,#ff3d9a 75%,#ffd36e 100%)}
+.dsec-h{padding:10px 14px 6px;font-size:13.5px;color:var(--text-3);font-weight:600;background:var(--soft);border-top:1px solid var(--hair)}
+.doccard .dsec:first-of-type .dsec-h{border-top:0}
+.cover{width:44px;height:44px;border-radius:6px;background:var(--cover);flex:none;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:700;letter-spacing:.04em}
+.fact .vrow{display:flex;align-items:center;gap:10px}
+.plat{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair)}
+.plat:last-child{border-bottom:0}
+.plat .top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.plat .top b{font-size:15.5px}
+.plat .grow{flex:1;min-width:0}
+.plat .src{font-size:13.5px;color:var(--text-3)}
+.plat code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chipbtn[aria-pressed="true"]{background:var(--sel-bg);border-color:var(--sel);color:var(--text)}
+.cond{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--hair);font-size:15px}
+.cond:last-child{border-bottom:0}
+.formmsg{font-size:14.5px;color:var(--bad-fg);font-weight:600}
+.step.reserve .mark{background:var(--warn-bg);border-color:transparent;color:var(--warn-fg)}
+.h1row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+@media (max-width:900px){.spine{position:static}}
+/* Distributor tracker: one node per declared state, like a parcel tracking. */
+.track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:18px 14px 14px;border:1px solid var(--hair);border-radius:12px;background:var(--raised)}
+.track li{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding-right:10px;min-width:0}
+.track li::before{content:"";position:absolute;left:28px;right:0;top:13px;height:2px;background:var(--hair)}
+.track li:last-child::before{display:none}
+.track li.done::before{background:var(--ok-fg)}
+.track .node{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:var(--raised);color:var(--text-3)}
+.track li.done .node{background:var(--ok-bg);border-color:transparent;color:var(--ok-fg)}
+.track li.cur .node{border-color:var(--warn-fg);background:var(--warn-bg)}
+.track li.cur .node::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn-fg)}
+.track b{font-size:15px;font-weight:600;margin-top:6px}
+.track .src{font-size:13px;color:var(--text-2);line-height:1.35}
+.track li.cur .src{color:var(--warn-fg);font-weight:600}
+@media (max-width:720px){.track{grid-template-columns:minmax(0,1fr);gap:14px}.track li{display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:12px;align-items:start}.track li::before{left:13px;right:auto;top:30px;bottom:-14px;width:2px;height:auto}.track b{margin-top:2px}.track .node{grid-row:span 2}}
+.tell{display:flex;flex-direction:column;gap:0;border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.tell .trow{display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px 12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--hair)}
+.tell .trow:last-child{border-bottom:0}
+.tell .trow input[type=checkbox]{width:20px;height:20px;accent-color:var(--sel)}
+.tell .trow.off{opacity:.45}
+.tell .src{font-size:13.5px;color:var(--text-2)}
+.tell .side{grid-column:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tell .pf{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--text-2);max-width:260px;overflow-wrap:anywhere}
+@media (max-width:720px){.tell .side{grid-column:2;justify-content:flex-start}}
+.track .linkbtn{padding:2px 0;font-size:13px}
+.tell .trow .in{width:170px}
+@media (max-width:720px){.tell .trow{grid-template-columns:24px minmax(0,1fr)}.tell .trow .in{width:100%}}
+.doccard .dsec .rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.doccard .dsec .fact:nth-child(odd){border-right:1px solid var(--hair)}
+@media (max-width:900px){.doccard .dsec .rows{grid-template-columns:minmax(0,1fr)}.doccard .dsec .fact:nth-child(odd){border-right:0}}
+.fact .v:has(.vrow){display:block;margin-top:4px}
+.fact .v:has(.vrow)+br{display:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="proto" role="region" aria-label="Commandes du prototype">
+  <span class="lbl">Proto</span>
+  <label for="roleSel">Voir comme</label><select id="roleSel"></select>
+  <label for="scenSel">Aller à</label>
+  <select id="scenSel">
+    <option value="start">Six semaines avant : sources incomplètes</option>
+    <option value="ready">Sources prêtes : dossier à contrôler</option>
+    <option value="review">Dossier V1 chez la validatrice</option>
+    <option value="orchard">Déposé : en attente de The Orchard</option>
+    <option value="online">Jour de sortie : plateformes à vérifier</option>
+    <option value="closing">Clôture : Amazon Music manque</option>
+  </select>
+  <button type="button" id="resetBtn">Recommencer</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+const I={
+  check:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>',
+  lock:'<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>',
+  ok:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.2l2 2 4-4.4"/></svg>',
+  warn:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2l6.5 11.5h-13z"/><path d="M8 6.5v3M8 11.6v.1"/></svg>',
+  stop:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M4 12l8-8"/></svg>',
+  clock:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 1.5"/></svg>',
+  info:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.2v4M8 4.9v.1"/></svg>',
+  file:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15"/></svg>',
+  up:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13V3.5M6 7.5l4-4 4 4M3.5 13v3.5h13V13"/></svg>',
+  play:'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 3.2v9.6L13 8z"/></svg>',
+  pause:'<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="4" y="3" width="3" height="10" rx="1"/><rect x="9" y="3" width="3" height="10" rx="1"/></svg>',
+  chevR:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5l4.5 4.5L6 12.5"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+  updown:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 6l3-3 3 3M5 10l3 3 3-3"/></svg>',
+  home:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 9l7-6 7 6v8H3z"/></svg>',
+  work:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="2.5" y="6" width="15" height="10.5" rx="2"/><path d="M7 6V4.5h6V6"/></svg>',
+  folder:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M2.5 5.5h5l2 2h8v8.5h-15z"/></svg>',
+  nodes:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="8" cy="15" r="2"/><path d="M6.7 6l6.4.6M14 8.8l-4.5 4.8M5.5 7l2 6"/></svg>',
+  bell:'<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13zM8.5 17.5h3"/></svg>'
+};
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const DAYS=["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."];
+const frDate=iso=>{if(!iso) return "";const [y,m,d]=iso.split("-").map(Number);const t=new Date(Date.UTC(y,m-1,d));return `${DAYS[t.getUTCDay()]} ${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`;};
+const RELEASE="2026-12-05", MASTER_FINAL="2026-11-21";
+const MANUAL="Le dépôt se fait à la main dans The Orchard. PDS OS ne transmet rien au distributeur : il prépare, contrôle et garde la trace de ce que vous déclarez.";
+
+/* People: accounts of PDS. The Orchard has no link: what it answers is declared. */
+const P={
+  cp:{name:"Lina Haddad",role:"Cheffe de projet",ini:"LH"},
+  dg:{name:"Claire Morel",role:"Directrice générale",ini:"CM"},
+  ds:{name:"Nadia Benali",role:"Directrice créative",ini:"NB"}
+};
+const ROLE_ORDER=["cp","dg","ds"];
+const VALIDATORS=["dg","ds"]; // members who hold « validate », never the responsable
+
+/* Fiches Livrables of the Conception that could be the cover. */
+const FICHES={
+  cover:{name:"Pochette « Néons »",ok:()=>S.src.cover,status:()=>S.src.cover?`v${S.coverV} · version validée en Conception`:"en attente de validation"},
+  teaser:{name:"Visuel teaser 1:1",ok:()=>false,status:()=>"en attente de validation"},
+  banner:{name:"Bannière Spotify « Néons »",ok:()=>false,status:()=>"brouillon"}
+};
+const TIERS={front:"Front (plein tarif)",mid:"Mid",budget:"Budget",to_confirm:"À confirmer"};
+const COUNTRIES=["France","Belgique","Suisse","Luxembourg","Canada","Royaume-Uni","États-Unis","Japon"];
+const MODULES=["Catalogue","Master","Juridique","Conception","Paramètres de distribution","Côté distributeur"];
+
+/* Distribution parameters: the only values the module owns (CA03). `def` is what
+   PDS OS proposes, with its source; null means nothing is known yet. */
+const PAR={
+  terr:{label:"Territoires",doneTxt:"Territoires modifiés",def:{mode:"world",countries:[]},src:"Par défaut · le contrôle « Droits et territoires » le confirme"},
+  pre:{label:"Précommande",doneTxt:"Précommande modifiée",def:{on:true,date:"2026-11-14"},src:"Stratégie › Temps forts · « pré-save trois semaines avant »",req:"Dites s'il y a une précommande."},
+  listen:{label:"Écoute en avant-première",doneTxt:"Écoute en avant-première renseignée",def:null,req:"Dites s'il y a une écoute en avant-première."},
+  tier:{label:"Catégorie tarifaire",doneTxt:"Catégorie tarifaire choisie",def:null,req:"Choisissez une catégorie tarifaire : The Orchard la demande."},
+  cover:{label:"Pochette",doneTxt:"Pochette changée",def:"cover",src:"Trouvée par son titre en Conception : confirmez-la",choose:true},
+  val:{label:"Validateur Distribution",doneTxt:"Validateur Distribution changé",def:"dg",src:"Proposé : la direction valide les dossiers. Jamais le responsable lui-même.",choose:true},
+  notes:{label:"Notes pour la saisie",doneTxt:"Notes pour la saisie modifiées",def:"",src:"Ce qu'il faut savoir au moment de remplir The Orchard"}
+};
+const parText=(k,v)=>{
+  if(v===undefined) v=S.par[k];
+  switch(k){
+    case "terr": return v.mode==="world"?"Monde entier":v.mode==="include"?`Seulement : ${v.countries.join(", ")}`:`Monde entier sauf : ${v.countries.join(", ")}`;
+    case "pre": case "listen": return v==null?"À renseigner":v.on?`Oui, à partir du ${frDate(v.date)}`:"Non";
+    case "tier": return v==null?"À renseigner":TIERS[v];
+    case "cover": return FICHES[v].name;
+    case "val": return `${P[v].name} · ${P[v].role}`;
+    case "notes": return v?v:"Aucune";
+  }
+};
+
+/* The six checks (lib/i18n/fr/distribution.ts) and what PDS OS computes beside
+   each one: Cohérent, Écart or « À confirmer par une personne », never Conforme. */
+const CHECKS=[
+  ["audio","Audio","Le master final référencé est bien la version validée."],
+  ["identity","Identité éditoriale","Le titre et les artistes publiés correspondent au Catalogue."],
+  ["identifiers","Identifiants et crédits","ISRC, crédits et métadonnées correspondent aux sources validées."],
+  ["rights","Droits et territoires","Les territoires choisis sont compatibles avec les droits et contrats."],
+  ["visual","Visuel","La pochette publiée correspond à la version validée en Conception."],
+  ["calendar","Calendrier et paramètres","Date de sortie et paramètres de distribution cohérents avec le Projet et le dossier."]
+];
+function computed(k){
+  switch(k){
+    case "audio": return S.src.master?["coherent","Chaque titre a un master final validé."]:["gap","Manque à la source : master final."];
+    case "identity": return ["coherent","Titre et artistes présents au Catalogue, sortie enregistrée."];
+    case "identifiers": return ["coherent","ISRC, crédits d'auteurs et ligne ℗ présents au Catalogue."];
+    case "rights": if(!S.src.borrow) return ["gap","Emprunt « Night Lights » non sécurisé au Juridique."]; return ["human","Aucune action juridique ouverte. PDS OS ne sait pas comparer les territoires aux contrats : une personne confirme."];
+    case "visual":{const f=FICHES[S.par.cover];if(S.drift&&S.par.cover==="cover") return ["gap",`La pochette a changé en Conception depuis le dossier validé : v${S.coverV-1} → v${S.coverV}.`];return f.ok()?["coherent",`« ${f.name} » est validée en Conception.`]:["gap",`« ${f.name} » n'est pas validée en Conception.`];}
+    case "calendar":{
+      if(S.par.pre&&S.par.pre.on&&S.par.pre.date>=RELEASE) return ["gap","La précommande ouvre le jour de la sortie ou après."];
+      if(S.par.listen&&S.par.listen.on&&S.par.listen.date>=RELEASE) return ["gap","L'avant-première commence le jour de la sortie ou après."];
+      if(S.par.tier==null||S.par.listen==null) return ["gap","Des paramètres de distribution restent à renseigner."];
+      return ["coherent",`Sortie prévue le ${frDate(RELEASE)}, paramètres renseignés.`];}
+  }
+}
+const COMP={coherent:["info","Cohérent"],gap:["warn","Écart"],human:["","À confirmer par une personne"]};
+const RES={compliant:["ok","Conforme"],non_compliant:["bad","Non conforme"],not_applicable:["","Non applicable"]};
+
+/* Platforms of reference; the detection (cron) only suggests a link. */
+const PLAT=[["spotify","Spotify","https://open.spotify.com/album/4mNe0nsLys26"],["apple","Apple Music","https://music.apple.com/fr/album/neons-single/1789204411"],["deezer","Deezer","https://www.deezer.com/album/684120931"],["youtube","YouTube Music","https://music.youtube.com/playlist?list=OLAK5uy_neonsLys"],["amazon","Amazon Music","https://music.amazon.fr/albums/B0DNEONS26"]];
+const allPlats=()=>PLAT.concat(S.extra.map(e=>[e.id,e.name,null,true]));
+const PNAME=k=>(allPlats().find(p=>p[0]===k)||[k,k])[1];
+/* Anomalies (ticket § 9): type, description, platform, gravity, state, author, date, source module. */
+const ANOM_TYPES=[["wrong_audio","Mauvais master audio","Master"],["metadata","Erreur de métadonnées","Catalogue"],["credit_isrc","Crédit ou ISRC incorrect","Catalogue"],["cover","Pochette incorrecte","Conception"],["platform_unavailable","Titre indisponible sur une plateforme","Côté distributeur"],["territory_rights","Problème de territoire ou de droits","Juridique"],["date","Date incorrecte","Paramètres de distribution"],["other","Autre anomalie","Côté distributeur"]];
+const typeLabel=k=>ANOM_TYPES.find(t=>t[0]===k)[1];
+const defMod=k=>ANOM_TYPES.find(t=>t[0]===k)[2];
+const SEV={minor:["","Mineure",1],major:["warn","Majeure",2],blocking:["bad","Bloquante",3]};
+const ASTATE={open:["bad","Ouverte"],in_correction:["warn","En correction à la source"],resolved:["","Résolue"],dismissed:["","Écartée"]};
+const isOpen=a=>a.state==="open"||a.state==="in_correction";
+
+/* What the distributor answers, declared by a person (lib/i18n/fr/distribution.ts). */
+const KIND={
+  deposit:{title:"Dépôt manuel effectué dans The Orchard",body:"Vous avez fait le dépôt vous-même dans The Orchard. Date, identifiant et preuve sont facultatifs : leur absence restera visible."},
+  received:{title:"Le distributeur a reçu le dossier",body:"Ce que vous savez de la réception. Cela ne vaut ni acceptation ni livraison."},
+  accepted:{title:"Le distributeur a accepté la sortie",body:"Ce que vous savez de l'acceptation. Cela ne vaut pas livraison aux plateformes."},
+  delivered:{title:"Le distributeur a livré les plateformes",body:"Ce que vous savez de la livraison. Cela ne vaut pas disponibilité publique, qui se vérifie plateforme par plateforme."}
+};
+
+/* The journey. An action: who does it (« val » = the validator chosen in the parameters). */
+const A=(by,label,done,o)=>Object.assign({by,label,done},o||{});
+const STEPS=[
+  {id:"prep",sect:"Dossier",title:"Préparation",why:"Ce que le dépôt réutilise, lu dans le module qui en est propriétaire. On corrige à la source : rien n'est recopié ici.",owner:null,prereq:[],acts:[]},
+  {id:"params",sect:"Dossier",title:"Paramètres de distribution",why:"Ce qui appartient à la distribution elle-même. Tout le reste se corrige dans son module source.",owner:"cp",prereq:[],acts:[A("cp","Confirmer les paramètres","Paramètres de distribution confirmés",{ui:"params"})]},
+  {id:"dossier",sect:"Dossier",title:"Dossier de livraison",why:"Ce que vous saisirez dans The Orchard, section par section, contrôlé par une personne puis validé avant le dépôt.",owner:"cp",validator:true,prereq:["params"],acts:[
+    A("cp","Soumettre à validation","Dossier soumis à validation",{ui:"submit"}),
+    A("val","Valider le dossier","Dossier validé : prêt à déposer",{ui:"decide",alt:{label:"Refuser",field:"Motif",ex:"La précommande doit ouvrir le 21/11, avec le clip : c'est ce qui est prévu dans la Stratégie."}})]},
+  {id:"deposit",sect:"Dépôt",title:"Dépôt dans The Orchard",why:"Vous saisissez le dossier validé dans The Orchard, puis vous déclarez le dépôt ici.",owner:"cp",prereq:["dossier"],acts:[A("cp","Déclarer le dépôt","Dépôt manuel déclaré effectué",{ui:"declare",kind:"deposit"})]},
+  {id:"orchard",sect:"Dépôt",title:"Réponse de The Orchard",why:"Réception, acceptation, puis livraison aux plateformes : chacune se déclare à part, aucune n'est déduite d'une autre.",owner:"cp",prereq:["deposit"],acts:[
+    A("cp","Déclarer la réception","Réception par The Orchard déclarée",{ui:"orchard",kind:"received",waitText:"recevoir le dossier"}),
+    A("cp","Déclarer l'acceptation","Sortie acceptée par The Orchard",{ui:"orchard",kind:"accepted",waitText:"accepter la sortie",alt:{label:"The Orchard demande des corrections",btn:"Déclarer les corrections demandées",field:"Ce que The Orchard demande",ex:"Le compositeur doit figurer sous son nom civil : Samir Kader, pas Sami Kader."}}),
+    A("cp","Déclarer la livraison aux plateformes","Livraison aux plateformes déclarée",{ui:"orchard",kind:"delivered",waitText:"livrer les plateformes"})]},
+  {id:"platforms",sect:"En ligne",title:"Plateformes",why:"Le lien officiel de chaque plateforme, puis ce qu'une personne a constaté en l'ouvrant. PDS OS ne vérifie rien tout seul.",owner:"cp",prereq:["orchard"],acts:[A("cp","Vérifier les plateformes","Cinq plateformes vérifiées",{ui:"platforms"})]},
+  {id:"closure",sect:"Clôture",title:"Clôture",why:"Fermer le suivi : normalement si tout est déclaré et vérifié, sinon avec des réserves arbitrées. Une réserve ne devient jamais une vérification.",owner:"cp",validator:true,prereq:["deposit"],acts:[
+    A("cp","Proposer la clôture","Clôture proposée",{ui:"closeprop"}),
+    A("val","Valider la clôture","Clôture validée",{ui:"closedec",alt:{label:"Refuser",field:"Motif",ex:"Relancez d'abord The Orchard pour Amazon Music : on clôture la semaine prochaine."}})]}
+];
+const STEP=id=>STEPS.find(s=>s.id===id);
+
+/* Sources owned by other modules that block the dossier (readiness.ts). */
+const BLOCK={
+  master:{label:"Master final",mod:"Master",path:"Master › Master final",who:"ds",todo:"Valider le Master V2",
+    why:"La Distribution l'attend : sans master final validé, le dossier de livraison ne peut pas être établi.",
+    off:"Pas encore de master final validé · Master V2 déposé par Karim Haddou, à valider",
+    on:()=>`Neons_master_V2.wav · version V2 validée le ${S.srcAt.master||"21/11"} par Nadia Benali`,done:"Master V2 validé : il devient le master final"},
+  cover:{label:"Pochette",mod:"Conception",path:"Conception › Pochette « Néons »",who:"ds",todo:"Valider la pochette",
+    why:"La Distribution l'attend : sans pochette validée, le dossier de livraison ne peut pas être établi.",
+    off:"Pochette « Néons » · en attente de validation",on:()=>`Pochette « Néons » · v${S.coverV} · version validée en Conception`,done:"Pochette « Néons » validée"},
+  borrow:{label:"Emprunt « Night Lights »",mod:"Juridique",path:"Juridique › Emprunt « Night Lights »",wait:"Éditions Nocturne et Velvet Records",waitText:"signer la licence de l'emprunt",
+    off:"Emprunt à sécuriser avant le dépôt · licence envoyée, signature attendue",on:()=>"Licence signée · emprunt sécurisé",done:"Licence signée reçue : emprunt sécurisé"}
+};
+
+/* State: what people did, never a status. */
+function fresh(){
+  return {role:"cp",view:"parcours",sel:null,flash:null,log:[],hist:{},clock:0,err:{},draft:{},editing:null,base:"2026-10-19",
+    ph:{},ret:{},src:{},srcAt:{},par:Object.fromEntries(Object.keys(PAR).map(k=>[k,JSON.parse(JSON.stringify(PAR[k].def))])),parBy:{},
+    chk:{},chkOpen:null,chkEdit:{},v:1,vers:[],fixed:false,decl:{},proof:{},plat:{},detected:false,verifying:null,linking:null,anom:[],resolving:null,
+    close:null,closeRes:null,playing:false,oproof:{},rechk:{},extra:[],adding:false,reporting:false,anomEdit:null,coverV:2,drift:false,whyV:{}};
+}
+let S=fresh();
+const stamp=()=>{S.clock++;const [y,m,d]=S.base.split("-").map(Number);const t=new Date(y,m-1,d,9,0);t.setMinutes(t.getMinutes()+S.clock*17);return t.toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(" ",", ");};
+const me=()=>S.role;
+const log=(text,who)=>{const e={text,who:who||P[me()].name,at:stamp()};S.log.unshift(e);return e;};
+const hist=(id,text,who)=>{const e=log(text,who);(S.hist[id]=S.hist[id]||[]).push(e);return e;};
+const dv=(id,def)=>S.draft[id]!==undefined?S.draft[id]:def;
+
+/* Derived, recomputed at every render ---------------------------------------- */
+const ph=id=>S.ph[id]||0;
+const blockers=()=>Object.keys(BLOCK).filter(k=>!S.src[k]);
+const platOf=k=>S.plat[k]||(S.plat[k]={url:null,sug:null,ver:"unchecked",comp:"unchecked"});
+const verifiedN=()=>PLAT.filter(p=>platOf(p[0]).ver==="verified").length;
+const platDone=()=>PLAT.every(p=>platOf(p[0]).ver==="verified"&&platOf(p[0]).comp==="compliant");
+const openAnoms=()=>S.anom.filter(isOpen);
+function done(id){
+  if(id==="prep") return blockers().length===0;
+  if(id==="platforms") return platDone();
+  return ph(id)>=STEP(id).acts.length;
+}
+function statusOf(id){
+  const s=STEP(id);
+  if(!s.prereq.every(done)) return "blocked";
+  return done(id)?"done":"current";
+}
+const valOf=()=>S.par.val;
+const byOf=a=>a.by==="val"?valOf():a.by;
+/* Conditions of a normal closure, computed by the code (closure.ts). */
+function conds(){
+  const d=S.decl, notV=PLAT.filter(p=>platOf(p[0]).ver!=="verified").map(p=>p[1]), notC=PLAT.filter(p=>platOf(p[0]).comp!=="compliant").map(p=>p[1]);
+  const notChk=CHECKS.filter(c=>!S.chk[c[0]]||S.chk[c[0]].r==="non_compliant").map(c=>c[1]);
+  const miss=[["received","Réception non déclarée"],["accepted","Acceptation non déclarée"],["delivered","Livraison aux plateformes non déclarée"]].filter(x=>!d[x[0]]).map(x=>x[1]);
+  const pl=(n,w)=>`${n} plateforme${n>1?"s":""}`+(w?"":"");
+  return [
+    {k:"distributor",label:"Réception, acceptation et livraison aux plateformes déclarées",ok:!miss.length,res:`Retours du distributeur non déclarés (${miss.length})`,detail:miss.join(" · ")},
+    {k:"availability",label:"Les cinq plateformes de référence vérifiées disponibles",ok:!notV.length,res:`Disponibilité non vérifiée sur ${pl(notV.length)}`,detail:notV.join(" · ")},
+    {k:"compliance",label:"Leur conformité vérifiée",ok:!notC.length,res:`Conformité non vérifiée sur ${pl(notC.length)}`,detail:notC.join(" · ")},
+    {k:"checks",label:"Les six contrôles enregistrés, aucun non conforme",ok:!notChk.length,res:`${notChk.length} contrôle${notChk.length>1?"s":""} non effectué${notChk.length>1?"s":""} ou non conforme${notChk.length>1?"s":""}`,detail:notChk.join(" · ")},
+    {k:"anomalies",label:"Aucune anomalie ouverte",ok:!openAnoms().length,res:`${openAnoms().length} anomalie${openAnoms().length>1?"s":""} encore ouverte${openAnoms().length>1?"s":""}`,detail:openAnoms().map(a=>typeLabel(a.type)+(a.plat?" · "+PNAME(a.plat):"")).join(" · ")}
+  ];
+}
+const reservesNow=()=>conds().filter(c=>!c.ok);
+
+/* Who is expected now on a step. `wait`: the next gesture is the owner's, but
+   only once The Orchard (or another module's outside party) answers. `elsewhere`:
+   the gesture belongs to another module; Distribution only waits for it. */
+function actorsOf(id){
+  const s=STEP(id);
+  if(id==="dossier"&&statusOf(id)==="done"&&S.drift) return [{r:"cp",todo:`Préparer la V${S.v+1}`,step:id}];
+  if(statusOf(id)!=="current") return [];
+  if(id==="prep") return blockers().map(k=>{const b=BLOCK[k];return b.wait?{r:"cp",wait:true,waitWho:b.wait,waitText:b.waitText+" ("+b.mod+")",step:id,bk:k}:{r:b.who,todo:b.todo,elsewhere:b.path,step:id,bk:k};});
+  if(id==="platforms"){
+    const left=5-verifiedN();
+    if(!S.detected&&!PLAT.some(p=>platOf(p[0]).url)) return [{r:"cp",wait:true,waitWho:"la détection automatique",waitText:`trouver les liens, à partir du ${frDate(RELEASE)}`,step:id}];
+    if(openAnoms().length&&PLAT.every(p=>platOf(p[0]).ver!=="unchecked")) return [{r:"cp",todo:"Suivre l'anomalie ouverte",step:id}];
+    return [{r:"cp",todo:left?`Vérifier les plateformes (${5-left} sur 5)`:"Revérifier les plateformes",step:id}];
+  }
+  const a=s.acts[ph(id)];
+  if(id==="closure"&&ph(id)===0&&!done("platforms")&&statusOf("platforms")!=="done"&&!S.ret.closure) return [];
+  const r=byOf(a);
+  let todo=a.label;
+  if(id==="dossier") todo=ph(id)===0?(blockers().length?`Contrôler le dossier V${S.v}`:`Soumettre la V${S.v} à validation`):`Valider la V${S.v}`;
+  if(a.waitText) return [{r,todo,wait:true,waitWho:"The Orchard",waitText:a.waitText,step:id}];
+  return [{r,todo,step:id}];
+}
+const allActors=()=>STEPS.flatMap(s=>actorsOf(s.id));
+const myActs=()=>allActors().filter(a=>a.r===me()&&!a.wait&&!a.elsewhere);
+const myElsewhere=()=>allActors().filter(a=>a.r===me()&&a.elsewhere);
+const deOf=n=>(/^[AEIOUÉÈÊÀ]/i.test(n)?"d'":"de ")+n;
+const lc=t=>t.charAt(0).toLowerCase()+t.slice(1);
+const waitLine=a=>a.wait?`En attente ${esc(deOf(a.waitWho).slice(0,-a.waitWho.length))}<b>${esc(a.waitWho)}</b> : ${esc(a.waitText)}`:`En attente de <b>${esc(P[a.r].name)}</b> : ${esc(lc(a.todo))}${a.elsewhere?` <span class="t3">(${esc(a.elsewhere)})</span>`:""}`;
+function closedLabel(){if(!done("closure")||!S.close) return "";const n=S.close.reserves.length;return n?`Clôturée avec réserves (${n})`:"Clôturée normalement";}
+function summary(id){
+  switch(id){
+    case "prep":return "Prêt pour contrôle · 9 éléments sur 9";
+    case "params":return "Confirmés par Lina Haddad";
+    case "dossier":return `V${(S.vers.filter(v=>v.status==="approved").pop()||{n:S.v}).n} validée`;
+    case "deposit":return S.decl.deposit&&S.decl.deposit.proof?"Déclaré, preuve jointe":"Déclaré, sans preuve";
+    case "orchard":return "Acceptée et livrée, déclarées";
+    case "platforms":return "5 plateformes vérifiées sur 5";
+    case "closure":return closedLabel();
+  }
+  return "";
+}
+/* The workflow's common status (docs/VISION-UX.md § 3). */
+function wfStatus(){
+  if(done("closure")) return ["ok","Terminé"];
+  if(blockers().length) return ["bad","Bloqué"];
+  const acts=allActors();
+  if(acts.length&&acts.every(a=>(a.step==="dossier"&&ph("dossier")===1)||(a.step==="closure"&&ph("closure")===1)||a.wait)) return ["warn","En attente"];
+  return ["info","En cours"];
+}
+
+/* Render ------------------------------------------------------------------- */
+const app=document.getElementById("app");
+const av=(k,sm)=>k&&P[k]?`<span class="avatar ${sm?"sm":""}" aria-hidden="true">${esc(P[k].ini)}</span>`:"";
+const pill=(tone,t)=>`<span class="pill ${tone}">${esc(t)}</span>`;
+const errOf=k=>S.err[k]?`<span class="err" id="${k}-err" role="alert">${esc(S.err[k])}</span>`:"";
+const inv=k=>S.err[k]?` aria-invalid="true" aria-describedby="${k}-err"`:"";
+const fieldIn=(id,label,def,o)=>{o=o||{};return `<div class="field"><label for="${id}">${esc(label)}${o.req?" *":""}</label>${o.area?`<textarea class="in" id="${id}" rows="${o.rows||3}" placeholder="${esc(o.ph||"")}"${inv(id)}>${esc(dv(id,def||""))}</textarea>`:`<input class="in" id="${id}" type="${o.type||"text"}" value="${esc(dv(id,def||""))}" placeholder="${esc(o.ph||"")}"${inv(id)}>`}${o.src?`<span class="src">${o.src}</span>`:""}${errOf(id)}</div>`;};
+const fact=(k,v,src,o)=>{o=o||{};return `<div class="fact ${o.cls||""}"><span>${k?`<span class="k">${esc(k)}</span><br>`:""}<span class="v">${v}</span>${src?`<br><span class="src">${src}</span>`:""}${o.err||""}</span><span class="side">${o.side||""}</span>${o.edit||""}</div>`;};
+const protoBtn=(act,label,extra)=>`<button class="btn sm protobtn" type="button" data-act="${act}" ${extra||""}>${esc(label)}</button>`;
+function render(){
+  document.getElementById("roleSel").innerHTML=ROLE_ORDER.map(k=>`<option value="${k}" ${k===S.role?"selected":""}>${esc(P[k].name)} · ${esc(P[k].role)}</option>`).join("");
+  app.innerHTML=shell();
+  const f=document.querySelector("[data-autofocus]");if(f) f.focus();
+}
+function shell(){
+  const nav=[["home","Accueil"],["work","Travail"],["folder","Projets"],["nodes","Réseau"]];
+  ensureSel();
+  const n=myActs().length, w=wfStatus();
+  const dot={ok:"done",bad:"block",warn:"wait",info:"run"}[w[0]];
+  return `<div class="shell">
+  <nav class="mainnav" aria-label="Navigation principale"><span class="brand">PDS</span>
+    ${nav.map(([i,l])=>`<button class="navbtn ${i==="folder"?"on":""}" type="button" aria-label="${l}">${I[i]}${i==="work"&&(n+myElsewhere().length)?`<span class="cnt">${n+myElsewhere().length}</span>`:""}<span class="tip">${l}</span></button>`).join("")}
+    <div class="grow"></div><button class="navbtn" type="button" aria-label="Notifications">${I.bell}</button>${av(me())}</nav>
+  <nav class="projnav" aria-label="Sections du projet"><div class="switcher"><span>Néons</span><span class="t3">${I.updown}</span></div>
+    <button class="pitem" type="button">Vue d'ensemble</button><button class="pitem" type="button">Cadrage</button>
+    <div class="group">Workflows</div>
+    <button class="pitem" type="button"><span class="dot ${S.src.master?"done":"run"}"></span><span class="grow">Master</span>${me()==="ds"&&!S.src.master?`<span class="mine">1</span>`:""}</button>
+    <button class="pitem" type="button"><span class="dot ${S.src.borrow?"done":"run"}"></span><span class="grow">Juridique</span></button>
+    <button class="pitem" type="button"><span class="dot run"></span><span class="grow">Marketing</span>${me()==="ds"&&!S.src.cover?`<span class="mine">1</span>`:""}</button>
+    <button class="pitem on" type="button" aria-current="page"><span class="dot ${dot}"></span><span class="grow">Distribution</span>${n?`<span class="mine">${n}</span>`:""}</button>
+    <div class="group">Pilotage</div><button class="pitem" type="button">Travail</button><button class="pitem" type="button">Validations</button><button class="pitem" type="button">Activité</button>
+  </nav>
+  <main class="content"><div class="wrap">
+    <div class="h1row"><h1 class="h1">Distribution</h1>${pill(w[0],w[1])}</div>
+    <div class="facts"><span><b>« Néons »</b> · Mona Lys · single</span><span>Master final <b>${frDate(MASTER_FINAL)}</b></span><span>Sortie <b>${frDate(RELEASE)}</b></span><span>Distributeur <b>The Orchard</b></span></div>
+    ${S.flash&&!(S.view==="parcours"&&S.flash.step===S.sel)?flash():""}
+    ${nowCard()}
+    ${S.view==="history"?historyView():S.view==="anomalies"?anomaliesView():journey()}
+  </div></main></div>`;
+}
+function flash(){return `<div class="flash" role="status"><span>${I.ok}</span><div class="grow"><b>${esc(S.flash.title)}</b>${S.flash.lines.map(l=>`<span>${l}</span>`).join("")}</div><button type="button" data-act="unflash" aria-label="Fermer">${I.x}</button></div>`;}
+function nowCard(){
+  const mine=myActs();
+  const here=a=>S.view==="parcours"&&a.step===S.sel;
+  const rest=mine.filter(a=>!here(a));
+  if(rest.length){
+    const a=rest[0], s=STEP(a.step);
+    return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill info">${mine.length>rest.length?"Aussi à vous":"À vous"}</span><span>${esc(P[me()].name)} · Distribution › ${esc(s.title)}</span></div>
+      <h2>${esc(a.todo)}</h2><p class="note">${esc(s.why)}</p>
+      <div class="btnrow"><button class="btn" type="button" data-act="go" data-step="${a.step}">Ouvrir l'étape</button>${rest.length>1?`<span class="cap">Et ${rest.length-1} autre${rest.length>2?"s":""} : ${rest.slice(1,3).map(x=>esc(lc(x.todo))).join(" · ")}</span>`:""}</div></section>`;
+  }
+  if(mine.length) return "";
+  const away=myElsewhere();
+  if(away.length){
+    const a=away[0], b=BLOCK[a.bk];
+    return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill info">À vous, ailleurs</span><span>${esc(P[me()].name)} · ${esc(b.path)}</span></div>
+      <h2>${esc(a.todo)}</h2><p class="note">${esc(b.why)}</p>
+      <div class="btnrow"><button class="btn" type="button" data-act="ext" data-v="${esc(b.mod)}">Ouvrir dans ${esc(b.mod)}</button>${protoBtn("sim","Proto : le faire dans "+b.mod,`data-v="${a.bk}"`)}${away.length>1?`<span class="cap">Et ${away.length-1} autre : ${away.slice(1).map(x=>esc(lc(x.todo))+" ("+esc(BLOCK[x.bk].mod)+")").join(" · ")}</span>`:""}</div></section>`;
+  }
+  const others=allActors().filter(a=>a.r!==me()||a.wait).slice(0,4);
+  return `<section class="card now" aria-label="Maintenant"><div class="eyebrow"><span class="pill">Rien à faire pour vous</span><span>${esc(P[me()].name)}</span></div>
+    <h2>${others.length?"La Distribution avance sans vous pour l'instant":done("closure")?"La distribution est clôturée":"Rien n'attend personne ici"}</h2>
+    ${others.length?`<div class="rowlist">${others.map(a=>`<div class="wr">${a.wait?`<span class="avatar sm" aria-hidden="true">${I.clock}</span>`:av(a.r,true)}<span class="grow">${waitLine(a)} <span class="t3">· ${esc(STEP(a.step).title)}</span></span><button class="btn ghost sm" type="button" data-act="go" data-step="${a.step}">Voir</button></div>`).join("")}</div>`:""}</section>`;
+}
+// Opening the module lands on the step that waits for the person, else the one in progress.
+function ensureSel(){if(!S.sel){const a=myActs()[0];S.sel=a?a.step:(STEPS.find(s=>statusOf(s.id)==="current")||STEPS[STEPS.length-1]).id;}}
+function journey(){
+  let sect="";
+  const items=STEPS.map(s=>{const h=s.sect!==sect?`<span class="sect">${esc(s.sect)}</span>`:"";sect=s.sect;return h+spineItem(s);}).join("");
+  return `<div class="layout"><nav class="spine" aria-label="Parcours"><h2>Parcours</h2>${items}
+    <div class="foot"><button class="linkbtn" type="button" data-act="view" data-v="anomalies">Anomalies${openAnoms().length?` (${openAnoms().length} ouverte${openAnoms().length>1?"s":""})`:""}</button><button class="linkbtn" type="button" data-act="view" data-v="history">Historique de la distribution</button></div></nav>
+  <section class="card" aria-labelledby="dtitle">${detail(STEP(S.sel))}</section></div>`;
+}
+function spineItem(s){
+  const st=statusOf(s.id), acts=actorsOf(s.id), mine=acts.some(a=>a.r===me()&&!a.wait&&!a.elsewhere);
+  let sub, cls="";
+  if(st==="blocked") sub="Après : "+s.prereq.filter(p=>!done(p)).map(p=>STEP(p).title).join(", ");
+  else if(mine) sub=acts.find(a=>a.r===me()&&!a.wait).todo;
+  else if(st==="done") sub=summary(s.id);
+  else if(s.id==="prep"){const n=blockers().length;sub=`${n} élément${n>1?"s":""} bloque${n>1?"nt":""} le dossier`;cls="bad";}
+  else if(mine) sub=acts.find(a=>a.r===me()&&!a.wait).todo;
+  else if(acts.length&&acts[0].wait){sub=`En attente ${deOf(acts[0].waitWho)} · ${acts[0].waitText}`;cls="wait";}
+  else if(acts.length) sub=`${P[acts[0].r].name} · ${lc(acts[0].todo)}`;
+  else if(s.id==="closure") sub=S.ret.closure?"Lina Haddad · proposer la clôture":"Possible avec réserves dès maintenant";
+  else sub="";
+  const reserve=(s.id==="closure"&&st==="done"&&S.close&&S.close.reserves.length)||(s.id==="dossier"&&st==="done"&&S.drift);
+  const mk=st==="done"?(reserve?"done reserve":"done"):st==="blocked"?"blocked":acts.length&&acts.every(a=>a.wait)&&!mine?"current waitst":"current";
+  return `<button class="step ${mk} ${mine?"me":""} ${s.id===S.sel?"sel":""}" type="button" data-act="go" data-step="${s.id}" aria-current="${s.id===S.sel?"step":"false"}"><span class="mark">${st==="done"?(reserve?I.warn.replace('width="16" height="16"','width="13" height="13"'):I.check):st==="blocked"?I.lock:""}</span><span><span class="t">${esc(s.title)}</span><span class="s ${mine?"me":cls}">${mine?"À vous · ":""}${esc(sub)}</span></span></button>`;
+}
+function detail(s){
+  const st=statusOf(s.id), acts=actorsOf(s.id);
+  const next=STEPS.filter(x=>x.prereq.includes(s.id));
+  let pl;
+  if(s.id==="prep") pl=st==="done"?["info","Prêt pour contrôle"]:["bad",(9-blockers().length)?"Incomplet":"À préparer"];
+  else if(s.id==="closure"&&st==="done") pl=S.close.reserves.length?["warn",closedLabel()]:["ok","Clôturée normalement"];
+  else pl=st==="done"?["ok","Fait"]:st==="blocked"?["","Plus tard"]:acts.length&&acts.every(a=>a.wait)?["warn","En attente d'un retour"]:["info","En cours"];
+  const own=s.owner;
+  const pre=s.id==="prep"?Object.keys(BLOCK).map(k=>`<span class="${S.src[k]?"okc":"noc"}">${S.src[k]?"✓":"○"}</span> ${esc(BLOCK[k].label)} <span class="cap">· ${esc(BLOCK[k].mod)}</span>`).join("<br>"):s.prereq.length?s.prereq.map(p=>`<span class="${done(p)?"okc":"noc"}">${done(p)?"✓":"○"}</span> ${esc(STEP(p).title)}`).join("<br>"):"Projet lancé";
+  let h=`<div class="dhead"><h2 id="dtitle">${esc(s.title)}</h2>${pill(pl[0],pl[1])}</div><p class="note">${esc(s.why)}</p>
+  <div class="meta">
+    <div><div class="k">Responsable</div><div class="v">${own?`${esc(P[own].name)}<br><span class="cap">${esc(P[own].role)}</span>`:"Calculé par le code<br><span class=\"cap\">à chaque ouverture</span>"}</div></div>
+    <div><div class="k">Validation</div><div class="v">${s.validator?`${esc(P[valOf()].name)}<br><span class="cap">Validateur Distribution</span>`:"Aucune"}</div></div>
+    <div><div class="k">Prérequis</div><div class="v">${pre}</div></div>
+    <div><div class="k">Ensuite</div><div class="v">${next.length?next.map(x=>esc(x.title)).join("<br>"):s.id==="platforms"?"Clôture normale":s.id==="prep"?"Soumission du dossier":s.id==="closure"?"Clôture du projet":"—"}</div></div>
+  </div>`;
+  if(st==="blocked"){const miss=s.prereq.filter(p=>!done(p)).map(p=>STEP(p).title);h+=`<div class="callout info">${I.lock}<span>Se débloque quand ${esc(miss.join(" et "))} ${miss.length>1?"sont faits":"est fait"}.</span></div>`;}
+  if(S.ret[s.id]&&st==="current") h+=retCallout(s.id);
+  if(VIEWS[s.id]) h+=VIEWS[s.id](s,st);
+  if(st==="blocked"&&s.acts.length) h+=`<div class="vers"><h3 class="sub">Ce qui viendra</h3><ol class="hist">${s.acts.map((a,i)=>`<li><span class="noc">${i+1}.</span><span>${esc(a.label)} <span class="t3">· ${esc(P[byOf(a)].name)}</span></span></li>`).join("")}</ol></div>`;
+  if(S.flash&&S.flash.step===s.id&&S.view==="parcours") h+=flash();
+  if(st==="current"&&s.acts.length&&s.id!=="platforms") h+=actionBlock(s);
+  if(st==="done"&&s.acts.length&&!["dossier","closure","platforms"].includes(s.id)) h+=`<div class="callout ok">${I.ok}<span><b>${esc(lastDone(s))}</b></span></div>`;
+  const past=S.hist[s.id]||[];
+  if(past.length) h+=`<div class="vers"><h3 class="sub">Déjà fait</h3><ul class="hist">${past.map(e=>`<li><span class="okc">✓</span><span>${esc(e.text)} <span class="t3">· ${esc(e.who)} · ${esc(e.at)}</span></span></li>`).join("")}</ul></div>`;
+  return h;
+}
+const lastDone=s=>{const l=S.hist[s.id];return l&&l.length?l[l.length-1].text:summary(s.id);};
+function retCallout(id){
+  const r=S.ret[id];
+  let h=`<div class="callout warn ret">${I.warn}<span style="display:flex;flex-direction:column;gap:8px"><span><b>${esc(r.who)}</b> (${esc(lc(r.label))}) : « ${esc(r.note)} »</span>`;
+  if(r.mod) h+=`<span>À corriger dans : <b>${esc(r.mod)}</b>${r.mod==="Catalogue"&&S.fixed?" · corrigé":""}</span>${r.mod==="Paramètres de distribution"?"":`<span class="btnrow"><button class="btn out sm" type="button" data-act="ext" data-v="${esc(r.mod)}">Corriger dans ${esc(r.mod)}</button>${r.mod==="Catalogue"&&!S.fixed?protoBtn("fix","Proto : faire la correction au Catalogue"):""}</span>`}`;
+  return h+`</span></div>`;
+}
+/* The current gesture: the form when it is mine, otherwise who we wait for. */
+function actionBlock(s){
+  const a=s.acts[ph(s.id)], acts=actorsOf(s.id), mine=acts.find(x=>x.r===me());
+  if(s.id==="closure"&&ph(s.id)===0&&!acts.length) return me()===s.owner?UI.closeprop(s,false):`<p class="note">Lina Haddad proposera la clôture une fois les plateformes vérifiées, ou avant, avec des réserves.</p>`;
+  if(s.id==="orchard") return mine?UI.orchard(s,false):"";
+  if(mine&&mine.wait) return `<div class="callout warn">${I.clock}<span>${waitLine(mine)}. Déclarez-le ici dès que vous le savez.</span></div>${UI[a.ui](s,false)}`;
+  if(mine) return UI[a.ui](s,false);
+  const o=acts[0];
+  return `<div class="callout info">${I.clock}<span>${o?waitLine(o):""}.</span></div>${RO.includes(a.ui)?UI[a.ui](s,true):""}`;
+}
+// Views that can be read by someone who is not acting: one decides on the evidence.
+const RO=["submit","decide","params","closedec","closeprop"];
+const primary=(s,label,extra)=>`<div class="btnrow"><button class="btn" type="button" data-act="do" data-step="${s.id}">${esc(label)}</button>${extra||""}</div>`;
+const altBlock=(s,a,extra)=>a.alt?`<details class="vcard" ${S.err.altNote||S.draft["alt-"+s.id]?"open":""}><summary><span class="chv">${I.chevR}</span><h3>${esc(a.alt.label)}</h3></summary><div class="vb">
+   ${fieldIn("altNote",a.alt.field,dv("altNote",""),{req:true,area:true,ph:a.alt.ex})}${extra||""}
+   <div class="btnrow"><button class="btn out" type="button" data-act="alt" data-step="${s.id}">${esc(a.alt.btn||a.alt.label)}</button><button class="btn ghost sm" type="button" data-act="altex" data-step="${s.id}">Remplir avec un exemple</button></div></div></details>`:"";
+
+/* Parameters: a value, its source, and « Modifier » on the step in progress. */
+const canEditPar=()=>me()==="cp"&&((statusOf("params")==="current")||(statusOf("dossier")==="current"&&ph("dossier")===0));
+function parFact(k,o){
+  o=o||{};
+  const p=PAR[k], v=S.par[k], missing=v==null;
+  const src=S.parBy[k]?`Modifié par ${esc(S.parBy[k])}`:o.src||(p.src?esc(p.src):"");
+  const edit=o.edit&&canEditPar();
+  let side=o.copy?`<button class="btn out sm" type="button" data-act="copy" data-v="${esc(parText(k))}">Copier</button>`:edit&&S.editing!==k?`<button class="btn ghost sm" type="button" data-act="edit" data-k="${k}">${p.choose?"Changer":missing?"Renseigner":"Modifier"}</button>`:"";
+  let ed="";
+  if(edit&&S.editing===k){
+    const orig=p.def==null?"":`<span class="src">Proposé : ${esc(parText(k,p.def))} · ${esc(p.src||"")}</span>`;
+    ed=`<div class="edit">${editor(k)}${orig}<div class="btnrow"><button class="btn sm" type="button" data-act="editsave" data-k="${k}">Enregistrer</button><button class="btn ghost sm" type="button" data-act="editcancel">Annuler</button></div></div>`;
+  }
+  const valHtml=missing?`<span class="t3">À renseigner</span>`:k==="cover"?`<span class="vrow"><span class="cover" aria-hidden="true">NÉONS</span><span>${esc(parText(k))}<br><span class="src">${esc(FICHES[v].status())}</span></span></span>`:esc(parText(k));
+  return fact(o.label||p.label,valHtml,src,{cls:(S.err["par-"+k]?"missing":"")+(S.parBy[k]?" changed":""),side,edit:ed,err:errOf("par-"+k)});
+}
+const radios=(name,opts,cur)=>`<div class="opts" role="radiogroup">${opts.map(([v,l,hint])=>`<label class="opt"><input type="radio" name="${name}" value="${esc(v)}" ${String(cur)===String(v)?"checked":""}><span class="grow"><b>${esc(l)}</b>${hint?`<br><span class="src">${esc(hint)}</span>`:""}</span></label>`).join("")}</div>`;
+function editor(k){
+  const cur=S.par[k];
+  switch(k){
+    case "terr":{const m=dv("ed-mode",cur.mode), cs=dv("ed-c",cur.countries.slice());
+      return radios("ed-mode",[["world","Monde entier","Sous réserve des droits : le contrôle « Droits et territoires » le confirme."],["include","Seulement certains pays","La sortie n'est livrée que dans les pays choisis."],["exclude","Monde entier sauf certains pays","La sortie est livrée partout, sauf dans les pays choisis."]],m)
+        +(m!=="world"?`<div class="field"><span class="lbl2">Pays *</span><div class="chips">${COUNTRIES.map(c=>`<button class="chipbtn" type="button" data-act="ctog" data-v="${esc(c)}" aria-pressed="${cs.includes(c)}">${esc(c)}</button>`).join("")}</div>${errOf("ed-c")}</div>`:"");}
+    case "pre": case "listen":{const on=dv("ed-on",cur==null?"":cur.on?"yes":"no");
+      return radios("ed-on",[["yes","Oui"],["no","Non"]],on)+(on==="yes"?fieldIn("ed-date",k==="pre"?"Ouverture de la précommande":"Début de l'écoute en avant-première",cur&&cur.date?cur.date:"",{type:"date",req:true,src:`La sortie est le ${frDate(RELEASE)} : la date doit la précéder.`}):"")+errOf("ed-on");}
+    case "tier": return radios("ed-tier",Object.entries(TIERS).map(([v,l])=>[v,l]),dv("ed-tier",cur||""))+errOf("ed-tier");
+    case "cover": return radios("ed-cover",Object.entries(FICHES).map(([v,f])=>[v,f.name,"Fiche Livrable · "+f.status()]),dv("ed-cover",cur))+`<span class="src">La pochette reste validée dans sa Fiche Livrable ; seul le lien est gardé ici.</span>`;
+    case "val": return radios("ed-val",VALIDATORS.map(v=>[v,P[v].name,P[v].role]),dv("ed-val",cur))+`<span class="src">Parmi les personnes qui ont le droit de valider, jamais vous-même.</span>`;
+    case "notes": return fieldIn("ed-notes","Notes pour la saisie",cur,{area:true,ph:"Ce qu'il faut savoir au moment de remplir The Orchard."});
+  }
+}
+function saveEdit(k){
+  const cur=S.par[k];let nv;
+  switch(k){
+    case "terr":{const m=dv("ed-mode",cur.mode), cs=dv("ed-c",cur.countries.slice());if(m!=="world"&&!cs.length){S.err["ed-c"]="Choisissez au moins un pays.";return false;}nv={mode:m,countries:m==="world"?[]:cs};break;}
+    case "pre": case "listen":{const on=dv("ed-on",cur==null?"":cur.on?"yes":"no");if(!on){S.err["ed-on"]="Choisissez oui ou non.";return false;}
+      if(on==="no"){nv={on:false};break;}const d=dv("ed-date",cur&&cur.date?cur.date:"");
+      if(!d){S.err["ed-date"]="Indiquez la date.";return false;}
+      if(d>=RELEASE){S.err["ed-date"]=`${k==="pre"?"La précommande":"L'avant-première"} doit commencer avant la sortie, le ${frDate(RELEASE)}.`;return false;}
+      nv={on:true,date:d};break;}
+    case "tier":{const t=dv("ed-tier",cur||"");if(!t){S.err["ed-tier"]="Choisissez une catégorie.";return false;}nv=t;break;}
+    case "cover": nv=dv("ed-cover",cur); break;
+    case "val": nv=dv("ed-val",cur); break;
+    case "notes": nv=String(dv("ed-notes",cur)).trim(); break;
+  }
+  if(JSON.stringify(nv)!==JSON.stringify(cur)){
+    S.par[k]=nv;S.parBy[k]=P[me()].name;delete S.err["par-"+k];
+    hist(statusOf("params")==="current"?"params":"dossier",`${PAR[k].label} : ${parText(k)}`);toast(PAR[k].doneTxt+".");
+  }
+  clearEd();return true;
+}
+function clearEd(){S.editing=null;Object.keys(S.draft).filter(x=>x.startsWith("ed-")).forEach(x=>delete S.draft[x]);}
+
+/* The delivery file: what is typed into The Orchard, each value with its source. */
+function dossierSecs(){
+  const cred=S.fixed?"Mona Lys (texte, musique) · Samir Kader (musique)":"Mona Lys (texte, musique) · Sami Kader (musique)";
+  return [
+    ["Sortie",[{l:"Titre de la sortie",t:"Néons",src:"Catalogue"},{l:"Artiste principal",t:"Mona Lys",src:"Catalogue"},{l:"Label",t:"PDS Records",src:"Catalogue"},{l:"Format",t:"Single",src:"Projet · Lancement"},{l:"Date de sortie",t:frDate(RELEASE),src:"Projet · Lancement, validé par Claire Morel"},{l:"UPC",t:"Attribué par The Orchard au dépôt",src:"Ne bloque pas",muted:true}]],
+    ["Pistes",[{l:"Piste 1 · Titre",t:"Néons",src:"Catalogue"},{l:"ISRC",t:"FR-PDS-26-00041",src:"Catalogue"},{l:"Ligne ℗",t:"℗ 2026 PDS Records",src:"Catalogue"},{l:"Auteurs et compositeurs",t:cred,src:S.fixed?`Catalogue · corrigé le ${S.fixedAt} par Lina Haddad`:"Catalogue",changed:S.fixed},S.src.master?{l:"Audio",t:"Neons_master_V2.wav",src:"Master final V2, validé dans le workflow Master",audio:true}:{l:"Audio",t:"Pas encore de master final validé",src:"Master › Master final",missing:true}]],
+    ["Visuel",[{k:"cover"}]],
+    ["Territoires et droits",[{k:"terr"},S.src.borrow?{l:"État des droits",t:"Emprunt « Night Lights » sécurisé · couverture monde entier",src:"Juridique"}:{l:"État des droits",t:"Emprunt « Night Lights » à sécuriser",src:"Juridique",missing:true},{l:"Contrainte du Cadrage",t:"Aucune",src:"Cadrage"}]],
+    ["Prix et dates",[{k:"tier"},{k:"pre"},{k:"listen"}]],
+    ["Notes",[{k:"notes"}]]
+  ];
+}
+function dossierCard(mode){
+  const last=S.vers[S.vers.length-1], cur=last&&last.n===S.v?last:null;
+  const n=S.v;
+  let state, tone;
+  if(!cur){state="En préparation · paramètres modifiables jusqu'à la soumission";tone=["","En préparation"];}
+  else if(cur.status==="pending"){state=`Soumise le ${cur.at} par Lina Haddad, à ${P[cur.to].name} · paramètres figés`;tone=["warn","En attente de validation"];}
+  else if(cur.status==="approved"){state=`Validée le ${cur.dec.at} par ${cur.dec.by}`;tone=["ok","Validée"];}
+  else{state=`Remplacée le ${cur.dec?cur.dec.at:""}`;tone=["","Remplacée"];}
+  const prev=S.vers.filter(v=>v.n<n).pop();
+  let chg="";
+  const why=S.whyV[n];
+  if(cur&&cur.status==="approved"&&S.drift) chg=`<div class="docchg" style="background:var(--warn-bg);color:var(--warn-fg)">${I.warn}<span>Changé à la source depuis la V${n} validée : Pochette : v${S.coverV-1} → <b>v${S.coverV}</b> (Nadia Benali, Conception). Le dossier ne correspond plus à la source.</span></div>`;
+  else if(prev&&prev.status==="superseded"&&why==="drift") chg=`<div class="docchg">${I.info}<span>Changé à la source depuis la V${prev.n} : Pochette : v${S.coverV-1} → <b>v${S.coverV}</b> (Nadia Benali, Conception)</span></div>`;
+  else if(prev&&prev.status==="superseded"&&why==="orchard") chg=S.fixed?`<div class="docchg">${I.info}<span>Changé à la source depuis la V${prev.n} : Auteurs et compositeurs : Sami Kader → <b>Samir Kader</b> (Lina Haddad, Catalogue)</span></div>`:`<div class="docchg" style="background:var(--warn-bg);color:var(--warn-fg)">${I.warn}<span>Rien n'a changé à la source depuis la V${prev.n} : la correction demandée par The Orchard n'est pas encore faite.</span></div>`;
+  const row=f=>{
+    if(f.k) return parFact(f.k,{edit:mode==="edit",copy:mode==="copy",src:S.parBy[f.k]?null:f.k==="cover"?"Conception · désignée dans les paramètres":"Distribution · paramètres"});
+    let side=f.missing?pill("bad","Manquant"):f.audio?`<button class="btn ghost sm" type="button" data-act="dl">Télécharger</button>`:"";
+    if(mode==="copy"&&!f.muted&&!f.audio&&!f.missing) side=`<button class="btn out sm" type="button" data-act="copy" data-v="${esc(f.t)}">Copier</button>`;
+    let v=f.muted?`<span class="t3">${esc(f.t)}</span>`:esc(f.t);
+    if(f.audio) v=`<span class="vrow"><button class="play" type="button" data-act="play" aria-pressed="${S.playing}" aria-label="${S.playing?"Pause":"Écouter « Neons_master_V2.wav »"}">${S.playing?I.pause:I.play}</button><span class="grow">${v}<span class="wave">${S.playing?"<i></i>":""}</span></span></span>`;
+    return fact(f.l,v,esc(f.src),{cls:f.changed?"changed":"",side});
+  };
+  return `<div class="doccard"><div class="dochead">${I.file}<span class="grow"><b>Dossier de livraison · V${n}</b><br><span class="src">${esc(state)}</span></span>${pill(tone[0],tone[1])}${mode!=="copy"?`<button class="btn ghost sm" type="button" data-act="pdf">Exporter en PDF</button>`:""}</div>${chg}
+    ${dossierSecs().map(([t,rows])=>`<div class="dsec"><div class="dsec-h">${esc(t)}</div><div class="rows">${rows.map(row).join("")}</div></div>`).join("")}</div>`;
+}
+function versionsList(){
+  const old=S.vers.filter(v=>v.n<S.v);
+  if(!old.length) return "";
+  const ST={pending:"En attente de validation",approved:"Validée",rejected:"Refusée",superseded:"Remplacée"};
+  return `<details class="vcard"><summary><span class="chv">${I.chevR}</span><h3>Versions précédentes du dossier</h3><span class="cap">${old.length}</span></summary><div class="vb"><ul class="hist">${old.map(v=>`<li><span class="noc">•</span><span><b>V${v.n}</b> · ${ST[v.status]} · soumise le ${esc(v.at)}${v.dec?` · ${v.status==="rejected"?"refusée":v.status==="superseded"?"remplacée":"décidée"} le ${esc(v.dec.at)} par ${esc(v.dec.by)}${v.dec.note?` : « ${esc(v.dec.note)} »`:""}`:""}</span></li>`).join("")}</ul></div></details>`;
+}
+function checksBlock(editable){
+  const n=CHECKS.filter(c=>S.chk[c[0]]).length;
+  return `<div class="vers"><div class="dhead"><h3 class="sub">Contrôles de cohérence</h3><span class="cap">${n} contrôle${n>1?"s":""} sur 6 enregistré${n>1?"s":""}</span></div>
+    <p class="note">Chacun est enregistré par une personne. Le calcul de PDS OS aide, il ne vaut jamais contrôle.</p>
+    <div class="rows">${CHECKS.map(([k,l,what])=>{
+      const c=computed(k), r=S.chk[k], open=S.chkOpen===k, showBtns=editable&&(!r||S.chkEdit[k]);
+      let side=r&&!S.chkEdit[k]?pill(RES[r.r][0],RES[r.r][1]):"";
+      if(showBtns&&!open) side=`<button class="btn out sm" type="button" data-act="chk" data-k="${k}" data-v="compliant">Conforme</button><button class="btn ghost sm" type="button" data-act="chk" data-k="${k}" data-v="non_compliant">Non conforme</button><button class="btn ghost sm" type="button" data-act="chk" data-k="${k}" data-v="not_applicable">Non applicable</button>`;
+      else if(editable&&r&&!open) side+=`<button class="btn ghost sm" type="button" data-act="chkedit" data-k="${k}">Changer</button>`;
+      const ed=open?`<div class="edit">${fieldIn("chkNote","Ce qui ne correspond pas",dv("chkNote",""),{req:true,area:true,rows:2,ph:"Ex. la pochette publiée n'est pas la version validée."})}<div class="btnrow"><button class="btn sm" type="button" data-act="chksave" data-k="${k}">Enregistrer le contrôle</button><button class="btn ghost sm" type="button" data-act="chkcancel">Annuler</button></div></div>`:"";
+      const by=r?`<br><span class="src">Contrôlé par ${esc(r.by)} le ${esc(r.at)}${r.note?` : « ${esc(r.note)} »`:""}</span>`:`<br><span class="src">Personne n'a encore enregistré ce contrôle.</span>`;
+      return `<div class="fact"><span><span class="v"><b>${esc(l)}</b></span><br><span class="src">${esc(what)}</span><br><span class="src">Calcul de PDS OS : <span class="${c[0]==="gap"?"warnc":""}">${esc(COMP[c[0]][1])}</span> · ${esc(c[1])}</span>${by}</span><span class="side">${side}</span>${ed}</div>`;
+    }).join("")}</div></div>`;
+}
+
+/* What a step shows above its action ---------------------------------------- */
+const VIEWS={
+  params(s,st){return st==="done"?`<div class="rows">${["terr","pre","listen","tier","cover","val","notes"].map(k=>parFact(k,{})).join("")}</div>`:"";},
+  deposit(s,st){return st==="done"&&S.decl.deposit?`<div class="rows">${fact("Dépôt",`Dépôt manuel déclaré · dossier V${(S.vers.filter(v=>v.status==="approved").pop()||{n:S.v}).n}`,declSrc("deposit"),{side:evidencePill("deposit")+(S.decl.deposit.proof?`<button class="btn ghost sm" type="button" data-act="pdf">Voir la preuve</button>`:"")})}</div>`:"";},
+  prep(s,st){
+    const b=blockers(), ready=9-b.length;
+    const rows={Catalogue:[["Titre et artistes","« Néons » · Mona Lys","available","Fiche du titre · mis à jour le 02/10"],["ISRC","FR-PDS-26-00041","available","Fiche du titre · mis à jour le 02/10"],["Crédits auteurs et compositeurs","2 contributeurs crédités","available","Crédits du titre · mis à jour le 12/10"],["Ligne ℗ (ayant droit et année)","℗ 2026 PDS Records","available","Droits du titre · mis à jour le 02/10"],["UPC","Souvent attribué par le distributeur : ne bloque pas","later",""]],
+      Master:[["master"]],
+      Juridique:[["borrow"],["Couverture des droits","Monde entier · aucune restriction territoriale connue","available","Juridique › État des lieux · mis à jour le 14/10"],["Reste à suivre au Juridique","Contrat de Sami Kader · déclaration SACEM","later","Juridique › Suivi · à suivre, ne bloque pas le dépôt"]],
+      Conception:[["cover"]],
+      Projet:[["Sortie enregistrée","« Néons » · single","validated","Lancement · validé par Claire Morel le 14/10"],["Date de sortie prévue",frDate(RELEASE),"validated","Lancement · validé par Claire Morel le 14/10"]]};
+    const NOTE={Catalogue:"Saisi au Catalogue, qui n'a pas d'étape de validation : la donnée fait foi telle que saisie.",Master:"Le master final est validé dans le workflow Master.",Juridique:"Les droits restent gérés au Juridique ; la Distribution ne les modifie pas.",Conception:"La pochette est validée dans sa Fiche Livrable, en Conception.",Projet:"Saisi au lancement du projet."};
+    const STP={validated:["ok","Validé à la source"],available:["","Disponible"],unvalidated:["warn","Non validé"],missing:["bad","Manquant"],later:["","Ne bloque pas"]};
+    let h=b.length?`<div class="verdict bad">${I.stop}<div><h3>${b.length} élément${b.length>1?"s":""} bloque${b.length>1?"nt":""} le dossier</h3><span>${ready} élément${ready>1?"s":""} prêt${ready>1?"s":""} sur 9 · chacun se corrige dans son module.</span></div></div>`
+      :`<div class="callout info">${I.info}<span><b>Prêt pour contrôle.</b> Toutes les sources sont prêtes : le dossier de livraison peut être établi. Ce n'est pas une validation : les contrôles viennent ensuite.</span></div>`;
+    Object.keys(rows).forEach(m=>{
+      h+=`<h3 class="sub">${esc(m)}</h3><p class="cap">${esc(NOTE[m])}</p><div class="rows">${rows[m].map(r=>{
+        if(r.length===1){const k=r[0], x=BLOCK[k], ok=S.src[k];
+          const tone=ok?STP.validated:k==="borrow"?STP.missing:STP.unvalidated;
+          const side=pill(tone[0],tone[1])+(ok?(k==="master"?`<button class="play" type="button" data-act="play" aria-pressed="${S.playing}" aria-label="${S.playing?"Pause":"Écouter « Neons_master_V2.wav »"}">${S.playing?I.pause:I.play}</button><button class="btn ghost sm" type="button" data-act="dl">Télécharger</button>`:""):`<button class="btn out sm" type="button" data-act="ext" data-v="${esc(x.mod)}">Corriger dans ${esc(x.mod)}</button>`);
+          const wait=ok?"":x.wait?`En attente ${deOf(x.wait)} : ${x.waitText}`:`En attente de ${P[x.who].name} : ${lc(x.todo)}`;
+          return fact(x.label,esc(ok?x.on():x.off),esc(ok?x.path+" · "+(S.srcAt[k]||""):wait),{side,cls:ok?"":"missing"});}
+        const t=STP[r[2]];return fact(r[0],esc(r[1]),esc(r[3]),{side:pill(t[0],t[1])});
+      }).join("")}</div>`;
+    });
+    if(b.length) h+=`<div class="btnrow">${b.map(k=>protoBtn("sim",k==="borrow"?"Proto : la licence signée revient (Juridique)":`Proto : Nadia Benali valide ${k==="master"?"le master final":"la pochette"}`,`data-v="${k}"`)).join("")}</div>`;
+    return h+`<p class="note">Cette liste se relit seule à chaque ouverture : rien ne s'y coche à la main.</p>`;
+  },
+  dossier(s,st){
+    if(st==="blocked") return "";
+    if(st==="done"){
+      let h=dossierCard("read");
+      const unres=openAnoms().length;
+      if(me()==="cp"&&(S.drift||unres)){
+        const form=`<p class="note">Après une correction faite dans son module source. La V${S.v} et son cycle de dépôt restent dans l'historique ; paramètres et contrôles redeviennent modifiables et les six contrôles repartent à « non vérifié ».</p>${fieldIn("nvNote","Ce qui a été corrigé, et où",S.drift?"Pochette v"+S.coverV+" validée en Conception":"",{req:true,area:true,rows:2})}<div class="btnrow"><button class="btn${S.drift?"":" out"}" type="button" data-act="newver">Préparer la V${S.v+1}</button></div>`;
+        h+=S.drift?`<div class="vers"><h3 class="sub">Préparer la V${S.v+1}</h3>${form}</div>`:`<details class="vcard"><summary><span class="chv">${I.chevR}</span><h3>Préparer la V${S.v+1}</h3><span class="cap">${unres} anomalie${unres>1?"s":""} ouverte${unres>1?"s":""}</span></summary><div class="vb">${form}</div></details>`;
+      }
+      if(!S.drift&&!S.driftDone) h+=`<div class="btnrow">${protoBtn("drift","Proto : la pochette change en Conception")}</div>`;
+      return h+checksBlock(false)+versionsList();
+    }
+    return "";
+  },
+  orchard(s,st){
+    if(st==="blocked") return "";
+    const v=(S.vers.filter(x=>x.status==="approved").pop()||{n:S.v}).n, wait=STEP("orchard").acts[ph("orchard")];
+    const node=(k,label)=>{const d=S.decl[k], now=!d&&wait&&wait.kind===k;
+      return `<li class="${d?"done":now?"cur":""}"><span class="node">${d?I.check:""}</span><b>${esc(label)}</b><span class="src">${d?`${esc(d.date?frDate(d.date):"date non renseignée")}${d.proof?" · preuve jointe":" · sans preuve"}`:now?"En attente de The Orchard":"Pas encore"}</span>${d&&!d.proof&&me()==="cp"?`<button class="linkbtn" type="button" data-act="nodeproof" data-k="${k}">Ajouter une preuve</button>`:""}</li>`;};
+    return `<ol class="track" aria-label="Suivi chez The Orchard, dossier V${v}">${node("deposit","Déposé")}${node("received","Reçu")}${node("accepted","Accepté")}${node("delivered","Livré aux plateformes")}</ol>`;
+  },
+
+  platforms(s,st){
+    if(st==="blocked") return "";
+    return platformsView(s,st);
+  },
+  closure(s,st){
+    if(st==="blocked") return "";
+    if(st==="done"){
+      const c=S.close;
+      return `<div class="${c.reserves.length?"callout warn":"callout ok"}">${c.reserves.length?I.warn:I.ok}<span><b>${esc(closedLabel())}</b> le ${esc(c.dec.at)} par ${esc(c.dec.by)}${c.arb?`<br>Arbitrage : « ${esc(c.arb)} »`:""}</span></div>
+        ${c.reserves.length?`<div class="rows">${c.reserves.map(r=>fact("",`<b>${esc(r.res)}</b>`,esc(r.detail),{side:pill("warn","Non vérifiée")})).join("")}</div>`:""}
+        ${me()==="cp"?`<details class="vcard" ${S.err.reopenNote||S.draft.reopenOpen?"open":""}><summary><span class="chv">${I.chevR}</span><h3>Rouvrir le suivi</h3></summary><div class="vb">${fieldIn("reopenNote","Motif","",{req:true,area:true,rows:2,ph:"Ex. Amazon Music a retiré le titre."})}<span class="src">La décision de clôture reste dans l'historique ; la réouverture y est ajoutée avec votre motif.</span><div class="btnrow"><button class="btn out" type="button" data-act="reopen">Rouvrir</button></div></div></details>`:""}`;
+    }
+    return "";
+  }
+};
+const declSrc=k=>{const d=S.decl[k];if(!d) return "";return `Déclaré le ${esc(d.at)} par ${esc(d.by)} · ${d.date?"date indiquée : "+esc(frDate(d.date)):"date non renseignée"}${k==="deposit"?` · ${d.orchardId?"identifiant The Orchard : "+esc(d.orchardId):"identifiant The Orchard non renseigné"}`:""}`;};
+const evidencePill=k=>S.decl[k]?pill("",S.decl[k].proof?"Déclaré, preuve jointe":"Déclaré, sans preuve"):"";
+
+/* Platforms: link, availability seen by a person, conformity to the dossier. */
+function platformsView(s,st){
+  const n=verifiedN(), avail=availState(), d=S.decl.available;
+  const mineHere=me()==="cp"&&st==="current";
+  let h=`<div class="rows">${fact("Disponibilité publique",`<b>${esc(avail)}</b>`,`${n} plateforme${n>1?"s":""} de référence vérifiée${n>1?"s":""} sur 5 · ${d?`déclarée le ${esc(d.at)} par ${esc(d.by)}, ${d.proof?"preuve jointe":"sans preuve"}`:"pas encore déclarée"}`,{side:pill(n===5?"ok":"",`${n} sur 5`)+(mineHere&&!d?`<button class="btn out sm" type="button" data-act="declavail">Déclarer la disponibilité publique</button>`:"")})}</div>`;
+  const acts=actorsOf("platforms");
+  if(acts[0]&&acts[0].wait) h+=`<div class="callout warn">${I.clock}<span>${waitLine(acts[0])}. Vous pouvez aussi renseigner un lien vous-même.</span></div>${mineHere&&!S.detected?`<div class="btnrow">${protoBtn("detect","Proto : la détection passe le jour de la sortie")}</div>`:""}`;
+  h+=`<div class="dhead"><h3 class="sub">Plateformes</h3>${mineHere&&!S.adding?`<button class="btn out sm" type="button" data-act="padd">Ajouter une plateforme</button>`:""}</div>`;
+  if(S.adding) h+=`<div class="edit" style="display:flex;flex-direction:column;gap:10px">${fieldIn("paddName","Nom de la plateforme","",{req:true,ph:"Ex. Tidal"})}${fieldIn("paddUrl","Lien officiel","",{type:"url",ph:"https://…"})}<div class="btnrow"><button class="btn sm" type="button" data-act="paddsave">Ajouter</button><button class="btn ghost sm" type="button" data-act="paddcancel">Annuler</button></div></div>`;
+  h+=`<div class="rows">${allPlats().map(([k,name,,extra])=>{
+    const p=platOf(k);
+    let link;
+    if(p.url) link=`<code>${esc(p.url)}</code>${p.fromDetect?`<br><span class="src">Trouvé par la détection automatique le ${esc(p.fromDetect)}</span>`:""}`;
+    else if(p.sug) link=`<span class="src">Lien trouvé par la détection automatique, à reprendre et vérifier :</span> <code>${esc(p.sug)}</code>`;
+    else link=`<span class="t3">Lien non renseigné${S.detected?" · la détection ne l'a pas trouvé":""}</span>`;
+    const verP=p.ver==="verified"?pill("ok","Vérifiée disponible"):p.ver==="unavailable"?pill("bad","Indisponible"):pill("","À vérifier");
+    const compP=p.comp==="compliant"?pill("ok","Conforme"):p.comp==="non_compliant"?pill("bad","Non conforme"):pill("","Conformité non vérifiée");
+    let btns="";
+    if(mineHere&&S.verifying!==k&&S.linking!==k){
+      const ask=p.ver==="unchecked"||S.rechk[k];
+      if(!p.url) btns=`<button class="btn out sm" type="button" data-act="plink" data-k="${k}">Renseigner le lien</button>`;
+      else if(ask) btns=`<button class="btn ghost sm" type="button" data-act="ext" data-v="${esc(name)}">Ouvrir</button><button class="btn out sm" type="button" data-act="pok" data-k="${k}">${I.check} Tout est bon</button><button class="btn ghost sm" type="button" data-act="pver" data-k="${k}">Il y a un problème</button>${S.rechk[k]?`<button class="btn ghost sm" type="button" data-act="rechkno" data-k="${k}">Annuler</button>`:""}`;
+      else btns=`<button class="btn ghost sm" type="button" data-act="ext" data-v="${esc(name)}">Ouvrir</button><button class="btn ghost sm" type="button" data-act="rechk" data-k="${k}">Revérifier</button>`;
+    }
+    let body="";
+    if(S.linking===k) body=`<div class="edit">${fieldIn("plinkIn","Lien officiel","",{req:true,type:"url",ph:"https://…",src:"Commence par https://. Changer le lien remet sa vérification à faire."})}<div class="btnrow"><button class="btn sm" type="button" data-act="plinksave" data-k="${k}">Enregistrer</button><button class="btn ghost sm" type="button" data-act="plinkcancel">Annuler</button></div></div>`;
+    if(S.verifying===k){
+      const pp=dv("pp","");
+      body=`<div class="edit" style="display:flex;flex-direction:column;gap:10px"><p class="note">Ce que vous avez constaté en ouvrant le lien. Une anomalie s'ouvre, à corriger dans son module.</p>
+        <fieldset class="pick"><legend class="lbl2">Le problème *</legend>${radios("pp",[["unavailable","La sortie n'y est pas","Page introuvable, titre indisponible dans votre pays…"],["non_compliant","Elle y est, mais quelque chose diffère du dossier validé","Titre, artiste, pochette ou version."]],pp)}${errOf("pp")}</fieldset>
+        ${pp?fieldIn("pnote",pp==="unavailable"?"Ce que vous avez vu":"Ce qui diffère","",{req:true,area:true,rows:2,ph:pp==="unavailable"?"Ex. « Ce titre n'est pas disponible dans votre pays »":"Ex. la pochette affichée est l'ancienne version."})+`<div class="field"><label for="pmod">À corriger dans *</label><select class="in" id="pmod">${MODULES.map(m=>`<option ${dv("pmod",pp==="unavailable"?"Côté distributeur":"Conception")===m?"selected":""}>${esc(m)}</option>`).join("")}</select></div>`:""}
+        <div class="btnrow"><button class="btn sm" type="button" data-act="pversave" data-k="${k}">Enregistrer le problème</button><button class="btn ghost sm" type="button" data-act="pvercancel">Annuler</button></div></div>`;
+    }
+    return `<div class="plat"><div class="top"><b>${esc(name)}</b>${extra?`<span class="cap">hors des cinq de référence</span>`:""}<span class="grow"></span>${verP}${p.ver==="verified"?compP:""}</div><div>${link}</div>${p.by?`<span class="src">Vérifiée par ${esc(p.by)} le ${esc(p.at)}${p.note?` : « ${esc(p.note)} »`:""}</span>`:""}${btns?`<div class="btnrow">${btns}</div>`:""}${body}</div>`;
+  }).join("")}</div>`;
+  const pa=S.anom.filter(a=>a.plat);
+  if(pa.length) h+=`<div class="dhead"><h3 class="sub">Anomalies des plateformes</h3><button class="linkbtn" type="button" data-act="view" data-v="anomalies">Toutes les anomalies</button></div><div class="rows">${pa.map(a=>anomalyRow(a,me()==="cp")).join("")}</div>`;
+  if(st==="done") h+=`<div class="callout ok">${I.ok}<span><b>Les cinq plateformes de référence sont vérifiées, disponibles et conformes.</b> Une clôture normale est possible.</span></div>`;
+  return h;
+}
+
+function availState(){const n=verifiedN();if(n===5) return "Vérifiée";if(n) return "Vérifiée partiellement";if(S.decl.available||allPlats().some(p=>platOf(p[0]).declared)) return "Déclarée, non vérifiée";return "Non déclarée";}
+/* A new logical version of the dossier: the previous one and its deposit cycle stay in the history. */
+function newVersion(note){
+  const before=snap(), at=stamp(); S.clock--;
+  const v=S.vers.filter(x=>x.status==="approved").pop();
+  if(v){v.status="superseded";v.dec=Object.assign({},v.dec,{at,by:P[me()].name,note});}
+  hist("dossier",`V${S.v+1} en préparation : « ${note} » · la V${S.v} et son cycle de dépôt restent dans l'historique ; les six contrôles repartent à « non vérifié »`);
+  S.v++;S.ph.dossier=0;S.ph.deposit=0;S.ph.orchard=0;S.decl={};S.proof={};S.chk={};S.chkEdit={};S.drift=false;S.sel="dossier";
+  return before;
+}
+function anomalyRow(a,can){
+  const ed=S.anomEdit===a.id;
+  let side=pill(ASTATE[a.state][0],ASTATE[a.state][1])+pill(SEV[a.sev][0],SEV[a.sev][1]);
+  if(can&&!ed) side+=(isOpen(a)&&!["Côté distributeur","Paramètres de distribution"].includes(a.mod)?`<button class="btn out sm" type="button" data-act="ext" data-v="${esc(a.mod)}">Corriger dans ${esc(a.mod)}</button>`:"")+`<button class="btn ghost sm" type="button" data-act="anomedit" data-k="${a.id}">Changer l'état</button>`;
+  const edit=ed?`<div class="edit">${radios("an-st",Object.entries(ASTATE).map(([k,v])=>[k,v[1]]),dv("an-st",a.state))}${fieldIn("an-why","Pourquoi","",{area:true,rows:2,ph:"Obligatoire pour une anomalie résolue ou écartée."})}<div class="btnrow"><button class="btn sm" type="button" data-act="anomstate" data-k="${a.id}">Enregistrer</button><button class="btn ghost sm" type="button" data-act="anomeditcancel">Annuler</button></div></div>`:"";
+  return fact(typeLabel(a.type)+(a.plat?" · "+PNAME(a.plat):""),`« ${esc(a.desc)} »`,`Signalée le ${esc(a.at)} par ${esc(a.by)}${a.from?` (déclarée de ${esc(a.from)})`:""} · dossier V${a.ver} · à corriger dans : ${esc(a.mod)}${a.why?` · ${esc(ASTATE[a.state][1].toLowerCase())} : « ${esc(a.why)} »`:""}`,{side,edit});
+}
+function anomalyForm(){
+  const t=dv("an-type","metadata");
+  return `<div class="edit" style="display:flex;flex-direction:column;gap:12px;padding:14px;border:1px solid var(--hair);border-radius:12px"><h3 class="sub" style="margin:0">Signaler une anomalie</h3>
+    <div class="grid2"><div class="field"><label for="an-type">Type *</label><select class="in" id="an-type">${ANOM_TYPES.map(x=>`<option value="${x[0]}" ${x[0]===t?"selected":""}>${esc(x[1])}</option>`).join("")}</select></div>
+    <div class="field"><label for="an-mod">Module où corriger *</label><select class="in" id="an-mod">${MODULES.map(m=>`<option ${dv("an-mod",defMod(t))===m?"selected":""}>${esc(m)}</option>`).join("")}</select></div></div>
+    ${fieldIn("an-desc","Description","",{req:true,area:true,rows:2,ph:"Ce qui ne va pas, tel que vous l'avez constaté."})}
+    <div class="grid2"><div class="field"><label for="an-plat">Plateforme concernée</label><select class="in" id="an-plat"><option value="">Aucune</option>${allPlats().map(p=>`<option value="${p[0]}" ${dv("an-plat","")===p[0]?"selected":""}>${esc(p[1])}</option>`).join("")}</select></div>
+    <fieldset class="pick"><legend class="lbl2">Gravité *</legend>${radios("an-sev",[["minor","Mineure"],["major","Majeure"],["blocking","Bloquante"]],dv("an-sev","major"))}</fieldset></div>
+    <div class="btnrow"><button class="btn" type="button" data-act="anomsend">Signaler</button><button class="btn ghost sm" type="button" data-act="anomcancelnew">Annuler</button><button class="btn ghost sm" type="button" data-act="anomex">Remplir avec un exemple</button></div></div>`;
+}
+function anomaliesView(){
+  const can=me()==="cp";
+  const list=S.anom.slice().sort((a,b)=>(isOpen(b)-isOpen(a))||(SEV[b.sev][2]-SEV[a.sev][2]));
+  return `<section class="card"><div class="dhead"><h2>Anomalies</h2><div class="btnrow">${can&&!S.reporting?`<button class="btn out sm" type="button" data-act="anomnew">Signaler une anomalie</button>`:""}<button class="btn ghost sm" type="button" data-act="view" data-v="parcours">← Parcours</button></div></div>
+    <p class="note">Ce qui ne va pas, et le module où le corriger. Rien ne se corrige ici : une fois la source corrigée, une nouvelle version du dossier est préparée depuis l'étape Dossier.</p>
+    ${S.reporting?anomalyForm():""}
+    ${list.length?`<div class="rows">${list.map(a=>anomalyRow(a,can)).join("")}</div>`:`<p class="note">${CHECKS.some(c=>!S.chk[c[0]])?"Aucune anomalie déclarée, mais des contrôles restent non vérifiés : l'absence d'anomalie ne vaut pas conformité.":"Aucune anomalie déclarée."}</p>`}</section>`;
+}
+
+/* Step forms ------------------------------------------------------------------ */
+const SLUG={deposit:"Depot",received:"Reception",accepted:"Acceptation",delivered:"Livraison"};
+const TELL_SHORT={deposit:"Déposé",received:"Reçu",accepted:"Accepté",delivered:"Livré aux plateformes"};
+/* A ticked row's proof: its own file, else the file of the first ticked row that has one (« Même e-mail que… »), unless removed. */
+function proofOf(k){
+  const own=S.oproof[k];
+  if(own===false) return {};
+  if(own) return {file:own};
+  const src=TELL.find(t=>t[0]!==k&&dv("oc-"+t[0],false)&&!S.decl[t[0]]&&S.oproof[t[0]]);
+  return src?{file:S.oproof[src[0]],from:src[0]}:{};
+}
+const TELL=[["received","Il a reçu le dossier","Cela ne vaut ni acceptation ni livraison."],["accepted","Il a accepté la sortie","Cela ne vaut pas livraison aux plateformes."],["delivered","Il a livré les plateformes","Cela ne vaut pas disponibilité : elle se vérifie plateforme par plateforme."]];
+const UI={
+  orchard(s,ro){
+    if(ro) return "";
+    const left=TELL.filter(t=>!S.decl[t[0]]);
+    let prevOk=true;
+    const rows=left.map(([k,label,hint])=>{const on=!!dv("oc-"+k,false), en=prevOk;prevOk=on;
+      let side="";
+      if(on){
+        const pr=proofOf(k);
+        const pfc=pr.file?`<span class="pf">${I.file}<span>${pr.from?`Même e-mail que « ${esc(TELL_SHORT[pr.from])} »`:esc(pr.file)}</span></span>${pr.from?`<button class="btn ghost sm" type="button" data-act="oproofown" data-k="${k}">Changer</button>`:""}<button class="btn ghost sm" type="button" data-act="oproofrm" data-k="${k}" aria-label="Retirer la preuve">${I.x}</button>`:`<button class="btn ghost sm" type="button" data-act="oproofown" data-k="${k}">${I.up} Joindre une preuve</button>`;
+        side=`<span class="side"><input class="in" type="date" id="od-${k}" value="${esc(dv("od-"+k,S.base))}" aria-label="Date : ${esc(label.toLowerCase())}">${pfc}</span>`;
+      }
+      return `<div class="trow ${en?"":"off"}"><input type="checkbox" id="oc-${k}" ${on?"checked":""} ${en?"":"disabled"} aria-labelledby="ol-${k}"><label for="oc-${k}" id="ol-${k}" style="cursor:pointer"><b>${esc(label)}</b><br><span class="src">${esc(hint)}</span></label>${side}</div>`;}).join("");
+    return `<div class="vers"><h3 class="sub">Ce que The Orchard vous a dit</h3><p class="note">Cochez ce que vous avez appris, par e-mail ou sur leur site, puis enregistrez. Chaque état a sa date et, si vous l'avez, sa preuve.</p>
+      <div class="tell">${rows}</div>${errOf("tell")}
+      ${primary(s,"Enregistrer")}</div>${S.decl.accepted?"":altBlock(s,s.acts[1],UI.altCorrections())}`;
+  },
+  altCorrections(){const t=dv("altType","credit_isrc");return `<div class="grid2"><div class="field"><label for="altType">Type d'anomalie *</label><select class="in" id="altType">${ANOM_TYPES.map(x=>`<option value="${x[0]}" ${x[0]===t?"selected":""}>${esc(x[1])}</option>`).join("")}</select></div><div class="field"><label for="altMod">À corriger dans *</label><select class="in" id="altMod">${MODULES.map(m=>`<option ${dv("altMod",defMod(t))===m?"selected":""}>${esc(m)}</option>`).join("")}</select></div></div><fieldset class="pick"><legend class="lbl2">Gravité *</legend>${radios("altSev",[["minor","Mineure"],["major","Majeure"],["blocking","Bloquante"]],dv("altSev","major"))}</fieldset><span class="src">Une anomalie s'ouvre. La correction se fait dans ce module, puis une nouvelle version du dossier est validée et déposée.</span>`;},
+  params(s,ro){
+    const ks=["terr","pre","listen","tier","cover","val","notes"];
+    const nErr=ks.filter(k=>S.err["par-"+k]).length;
+    return `<div class="rows">${ks.map(k=>parFact(k,{edit:!ro})).join("")}</div>
+      ${ro?"":`${nErr?`<p class="formmsg" role="alert">${nErr} information${nErr>1?"s manquent":" manque"} : ${nErr>1?"elles sont":"elle est"} en rouge.</p>`:""}${primary(s,"Confirmer les paramètres")}`}`;
+  },
+  submit(s,ro){
+    const non=CHECKS.filter(c=>S.chk[c[0]]&&S.chk[c[0]].r==="non_compliant").length, un=CHECKS.filter(c=>!S.chk[c[0]]).length;
+    const b=blockers();
+    let h=b.length?`<div class="callout bad">${I.stop}<span style="display:flex;flex-direction:column;gap:8px"><span><b>${b.length} élément${b.length>1?"s":""} de la Préparation bloque${b.length>1?"nt":""} la soumission.</b> Vous pouvez déjà régler les paramètres et faire les contrôles.</span><span class="btnrow">${b.map(k=>`<button class="btn out sm" type="button" data-act="ext" data-v="${esc(BLOCK[k].mod)}">${esc(BLOCK[k].label)} · corriger dans ${esc(BLOCK[k].mod)}</button>`).join("")}</span></span></div>`:"";
+    h+=dossierCard(ro?"read":"edit")+checksBlock(!ro);
+    if(!ro){
+      if(non) h+=`<div class="callout bad">${I.stop}<span>${non} contrôle${non>1?"s":""} non conforme${non>1?"s":""} : corrigez à la source, puis enregistrez le contrôle à nouveau.</span></div>`;
+      else if(un) h+=`<div class="callout info">${I.info}<span>${un} contrôle${un>1?"s":""} sur 6 non vérifié${un>1?"s":""} : ${esc(P[valOf()].name)} le verra.</span></div>`;
+      h+=`${errOf("submit")}<p class="note">${esc(P[valOf()].name)} recevra le dossier tel qu'il est maintenant. Les paramètres seront figés jusqu'à sa décision.</p>${primary(s,`Soumettre la V${S.v} à ${P[valOf()].name}`)}`;
+    }
+    return h+versionsList();
+  },
+  decide(s,ro){
+    const a=s.acts[1], un=CHECKS.filter(c=>!S.chk[c[0]]).length;
+    let h=dossierCard("read")+checksBlock(false)+`<div class="callout info">${I.info}<span><b>Pas encore connu :</b> l'UPC et l'identifiant The Orchard, attribués au dépôt.${un?` ${un} contrôle${un>1?"s":""} non vérifié${un>1?"s":""}.`:""}</span></div>`;
+    if(!ro) h+=`<p class="note">En validant, Lina Haddad pourra faire le dépôt dans The Orchard et le déclarer.</p>${primary(s,`Valider la V${S.v}`)}${altBlock(s,a)}`;
+    return h+versionsList();
+  },
+  declare(s,ro){
+    const a=s.acts[ph(s.id)], k=a.kind, K=KIND[k];
+    let h="";
+    if(k==="deposit"&&S.drift) h+=`<div class="callout warn">${I.warn}<span>Le dossier validé ne correspond plus à la source (pochette v${S.coverV}). Préparez la V${S.v+1} avant de déposer.</span></div>`;
+    if(k==="deposit") h+=`<div class="callout info">${I.info}<span>${esc(MANUAL)}</span></div>
+      <details class="vcard" open><summary><span class="chv">${I.chevR}</span><h3>Ce que vous saisissez dans The Orchard</h3><span class="cap">Chaque valeur se copie</span></summary><div class="vb">${dossierCard("copy")}</div></details>`;
+    const pf=S.proof[k];
+    h+=`<div class="vers"><h3 class="sub">${esc(K.title)}</h3><p class="note">${esc(K.body)}</p>
+      <div class="grid2">${fieldIn("dd-date","Date",S.base,{type:"date"})}${k==="deposit"?fieldIn("dd-id","Identifiant The Orchard","",{ph:"Ex. 10458823"}):""}</div>
+      <div class="field"><span class="lbl2">Preuve</span>${pf?`<div class="wr">${I.file}<span class="grow">${esc(pf)}</span><button class="btn ghost sm" type="button" data-act="proofrm" data-k="${k}" aria-label="Retirer la preuve">${I.x}</button></div>`:`<button class="drop" type="button" data-act="proof" data-k="${k}">${I.up}<span class="grow">Ajouter une capture, un PDF ou un courriel exporté<br><span class="src">50 Mo au plus · sans preuve, la déclaration reste « sans preuve »</span></span></button>`}</div>
+      ${primary(s,a.label)}</div>`;
+    if(a.alt){const t=dv("altType","credit_isrc");h+=altBlock(s,a,`<div class="grid2"><div class="field"><label for="altType">Type d'anomalie *</label><select class="in" id="altType">${ANOM_TYPES.map(x=>`<option value="${x[0]}" ${x[0]===t?"selected":""}>${esc(x[1])}</option>`).join("")}</select></div><div class="field"><label for="altMod">À corriger dans *</label><select class="in" id="altMod">${MODULES.map(m=>`<option ${dv("altMod",defMod(t))===m?"selected":""}>${esc(m)}</option>`).join("")}</select></div></div><fieldset class="pick"><legend class="lbl2">Gravité *</legend>${radios("altSev",[["minor","Mineure"],["major","Majeure"],["blocking","Bloquante"]],dv("altSev","major"))}</fieldset><span class="src">Une anomalie s'ouvre. La correction se fait dans ce module, puis une nouvelle version du dossier est validée et déposée.</span>`);}
+    return h;
+  },
+  closeprop(s,ro){
+    const cs=conds(), res=cs.filter(c=>!c.ok);
+    let h=`<h3 class="sub">Conditions d'une clôture normale</h3><div class="rows">${cs.map(c=>`<div class="cond"><span class="${c.ok?"okc":"noc"}">${c.ok?"✓":"○"}</span><span>${esc(c.label)}${!c.ok&&c.detail?`<br><span class="src">${esc(c.detail)}</span>`:""}</span>${pill(c.ok?"ok":"",c.ok?"Remplie":"Non remplie")}</div>`).join("")}</div>`;
+    if(ro) return h;
+    if(!res.length) return h+`<div class="callout info">${I.info}<span>Aucune réserve : une clôture normale est possible. ${esc(P[valOf()].name)} la validera ; les conditions seront revérifiées au moment de sa décision.</span></div>${primary(s,"Proposer une clôture normale")}`;
+    return h+`<h3 class="sub">Réserves</h3><p class="note">Elles resteront non vérifiées : la distribution sera « clôturée avec réserves », jamais « distribuée » ni « conforme ».</p>
+      <div class="rows">${res.map(r=>fact("",`<b>${esc(r.res)}</b>`,esc(r.detail),{side:pill("warn","Réserve")})).join("")}</div>
+      ${fieldIn("arb","Arbitrage : pourquoi clôturer malgré ces réserves","",{req:true,area:true,ph:"Ex. Amazon Music relivré par The Orchard sous 10 jours ; on ne bloque pas le bilan pour ça."})}
+      <div class="checks"><label><input type="checkbox" id="ack" ${dv("ack",false)?"checked":""}${inv("ack")}> Je confirme que ces réserves restent non vérifiées après la clôture.</label>${errOf("ack")}</div>
+      ${primary(s,"Proposer une clôture avec réserves",`<button class="btn ghost sm" type="button" data-act="arbex">Remplir avec un exemple</button>`)}`;
+  },
+  closedec(s,ro){
+    const c=S.close, a=s.acts[1];
+    let h=`<div class="rows">${fact("Proposition",`<b>${c.reserves.length?"Clôture avec réserves":"Clôture normale"}</b>`,`Proposée le ${esc(c.at)} par Lina Haddad`)}${c.arb?fact("Arbitrage",`« ${esc(c.arb)} »`,"Lina Haddad"):""}</div>`;
+    h+=UI.closeprop(s,true);
+    if(c.reserves.length) h+=`<h3 class="sub">Réserves qui resteront non vérifiées</h3><div class="rows">${c.reserves.map(r=>fact("",`<b>${esc(r.res)}</b>`,esc(r.detail),{side:pill("warn","Réserve")})).join("")}</div>`;
+    if(!ro) h+=`<p class="note">Le suivi de la distribution sera fermé. Une réouverture reste possible et sera tracée.</p>${primary(s,"Valider la clôture")}${altBlock(s,a)}`;
+    return h;
+  }
+};
+function historyView(){
+  return `<section class="card"><div class="dhead"><h2>Historique de la distribution</h2><button class="btn ghost sm" type="button" data-act="view" data-v="parcours">← Parcours</button></div>
+    <p class="note">Chaque geste, qui l'a fait et quand, avec ou sans preuve. Une déclaration retirée ou une version remplacée reste ici.</p>
+    ${S.log.length?`<ul class="hist">${S.log.map(e=>`<li><span class="noc">•</span><span>${esc(e.at)} · <b>${esc(e.who)}</b> · ${esc(e.text)}</span></li>`).join("")}</ul>`:`<p class="note">Rien pour l'instant.</p>`}</section>`;
+}
+
+/* Actions -------------------------------------------------------------------- */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.hidden=true;},3600);}
+const snap=()=>Object.fromEntries(STEPS.map(s=>[s.id,statusOf(s.id)]));
+function after(id,title,before){
+  const lines=[];
+  actorsOf(id).forEach(a=>lines.push(a.wait?`Ensuite : en attente ${esc(deOf(a.waitWho).slice(0,-a.waitWho.length))}<b>${esc(a.waitWho)}</b> · ${esc(a.waitText)}`:`Ensuite : <b>${esc(P[a.r].name)}</b> · ${esc(lc(a.todo))}`));
+  STEPS.filter(s=>before[s.id]==="blocked"&&statusOf(s.id)==="current").forEach(s=>{const a=actorsOf(s.id)[0];if(!a) return;lines.push(`Débloqué : <b>${esc(s.title)}</b> · ${a.wait?`en attente ${esc(deOf(a.waitWho))} : ${esc(a.waitText)}`:`${esc(P[a.r].name)} · ${esc(lc(a.todo))}`}`);});
+  if(id==="prep"&&done("prep")) lines.push("Rien ne bloque plus le dossier.");
+  S.flash={title,lines:lines.slice(0,4),step:S.sel};
+  toast(title+".");
+}
+function advance(id,text,who){
+  const before=snap(), s=STEP(id), a=s.acts[ph(id)];
+  S.ph[id]=ph(id)+1; delete S.ret[id];
+  hist(id,text||a.done,who);
+  after(id,text||a.done,before);
+}
+const need=(id,msg,def)=>{const v=String(dv(id,def||"")).trim();if(v) return v;S.err[id]=msg;return null;};
+function doStep(id){
+  const s=STEP(id), a=s.acts[ph(id)];
+  switch(a.ui){
+    case "params":{
+      const miss=Object.keys(PAR).filter(k=>PAR[k].req&&S.par[k]==null);
+      if(miss.length){miss.forEach(k=>{S.err["par-"+k]=PAR[k].req;});S.focusErr=true;break;}
+      clearEd();
+      advance(id);S.sel=null;break;}
+    case "submit":{
+      if(blockers().length){S.err.submit="La Préparation n'est pas prête : corrigez d'abord à la source ce qui bloque.";break;}
+      if(CHECKS.some(c=>S.chk[c[0]]&&S.chk[c[0]].r==="non_compliant")){S.err.submit="Un contrôle est non conforme : corrigez à la source d'abord.";break;}
+      clearEd();const at=stamp();S.clock--;S.vers.push({n:S.v,status:"pending",at,to:valOf()});
+      advance(id,`V${S.v} soumise à ${P[valOf()].name}`);break;}
+    case "decide":{const at=stamp();S.clock--;const v=S.vers[S.vers.length-1];v.status="approved";v.dec={at,by:P[me()].name};advance(id,`V${S.v} validée : prête à déposer`);break;}
+    case "declare":{
+      const k=a.kind, date=String(dv("dd-date",S.base)).trim();
+      S.decl[k]={date,orchardId:k==="deposit"?String(dv("dd-id","")).trim():"",proof:S.proof[k]||null,by:P[me()].name,at:null};
+      const text=`${a.done}${S.proof[k]?" · preuve jointe":" · sans preuve"}`;
+      advance(id,text);S.decl[k].at=S.log[0].at;
+      ["dd-date","dd-id"].forEach(x=>delete S.draft[x]);break;}
+    case "orchard":{
+      const ticked=TELL.filter(t=>!S.decl[t[0]]&&dv("oc-"+t[0],false));
+      if(!ticked.length){S.err.tell="Cochez ce que The Orchard vous a fait savoir.";break;}
+      const before=snap(), pfs=Object.fromEntries(ticked.map(([k])=>[k,proofOf(k).file||null]));
+      ticked.forEach(([k])=>{const act=STEP("orchard").acts[ph("orchard")], pf=pfs[k];S.decl[k]={date:String(dv("od-"+k,S.base)),proof:pf,by:P[me()].name,at:null};S.ph.orchard=ph("orchard")+1;S.decl[k].at=hist("orchard",`${act.done}${pf?" · preuve jointe":" · sans preuve"}`).at;delete S.draft["oc-"+k];delete S.draft["od-"+k];});
+      S.oproof={};
+      after("orchard",ticked.length>1?`${ticked.length} réponses de The Orchard enregistrées`:STEP("orchard").acts.find(a=>a.kind===ticked[0][0]).done,before);break;}
+    case "closeprop":{
+      const res=reservesNow();
+      if(res.length){let ok=true;const arb=need("arb","L'arbitrage est obligatoire : c'est ce que lira "+P[valOf()].name+".");if(!arb) ok=false;if(!dv("ack",false)){S.err.ack="Confirmez que les réserves restent non vérifiées.";ok=false;}if(!ok) break;
+        S.close={reserves:res.map(r=>({res:r.res,detail:r.detail})),arb,at:null};}
+      else S.close={reserves:[],arb:"",at:null};
+      advance(id,res.length?`Clôture avec réserves proposée (${res.length})`:"Clôture normale proposée");S.close.at=S.log[0].at;delete S.draft.arb;delete S.draft.ack;break;}
+    case "closedec":{const at=stamp();S.clock--;S.close.dec={at,by:P[me()].name};advance(id,S.close.reserves.length?`Clôturée avec réserves (${S.close.reserves.length})`:"Clôturée normalement");break;}
+  }
+}
+function altDo(id){
+  const s=STEP(id), a=s.acts[ph(id)], n=String(dv("altNote","")).trim();
+  if(!n){S.err.altNote=id==="orchard"?"Dites ce que The Orchard demande.":"Dites pourquoi : c'est ce que Lina Haddad lira en tête de l'étape.";S.draft["alt-"+id]=true;return;}
+  const before=snap();
+  if(id==="dossier"){
+    const at=stamp();S.clock--;const v=S.vers[S.vers.length-1];v.status="rejected";v.dec={at,by:P[me()].name,note:n};
+    S.v++;S.ph.dossier=0;hist(id,`V${v.n} refusée : « ${n} »`);after(id,`V${v.n} refusée : renvoyée à Lina Haddad`,before);
+    S.ret.dossier={who:P[me()].name,label:"Refuser",note:n,mod:"Paramètres de distribution"};
+  }else if(id==="closure"){
+    S.ph.closure=0;S.close=null;hist(id,`Clôture refusée : « ${n} »`);after(id,"Clôture refusée : renvoyée à Lina Haddad",before);
+    S.ret.closure={who:P[me()].name,label:"Refuser",note:n};
+  }else if(id==="orchard"){
+    const type=dv("altType","credit_isrc"), mod=dv("altMod",defMod(type)), sev=dv("altSev","major"), at=stamp();S.clock--;
+    S.anom.push({id:"a"+S.anom.length,type,desc:n,plat:null,sev,mod,state:"open",by:P[me()].name,at,ver:S.v,from:"The Orchard"});
+    hist("orchard",`Corrections demandées par The Orchard : « ${n} » · anomalie ouverte, à corriger dans : ${mod}`);
+    newVersion("corrections demandées par The Orchard");S.whyV[S.v]="orchard";
+    S.ret.dossier={who:"The Orchard",label:"Corrections demandées, déclarées par Lina Haddad",note:n,mod};
+    S.sel="dossier";after("dossier",`Corrections demandées : V${S.v} à préparer`,before);
+    S.ret.dossier={who:"The Orchard",label:"Corrections demandées, déclarées par Lina Haddad",note:n,mod};
+  }
+  delete S.draft.altNote;delete S.draft["alt-"+id];delete S.draft.altMod;delete S.draft.altType;delete S.draft.altSev;
+}
+document.addEventListener("input",e=>{
+  const t=e.target; if(!t.id&&!t.name) return;
+  if(t.type==="radio"){S.draft[t.name]=t.value;return;}
+  S.draft[t.id]=t.type==="checkbox"?t.checked:t.value;
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.id&&t.id.startsWith("oc-")){S.draft[t.id]=t.checked;if(!t.checked) delete S.oproof[t.id.slice(3)];if(!t.checked){const i=TELL.findIndex(x=>"oc-"+x[0]===t.id);TELL.slice(i+1).forEach(x=>delete S.draft["oc-"+x[0]]);}render();return;}
+  if(t.type==="radio"&&t.name){S.draft[t.name]=t.value;if(["ed-mode","ed-on","pp","an-st"].includes(t.name)) render();return;}
+  if(t.tagName==="SELECT"&&t.id&&!["roleSel","scenSel"].includes(t.id)){S.draft[t.id]=t.value;if(t.id==="an-type"){delete S.draft["an-mod"];render();}if(t.id==="altType"){delete S.draft.altMod;S.draft["alt-"+S.sel]=true;render();}}
+});
+document.addEventListener("keydown",e=>{
+  if(e.target.id&&e.target.id.startsWith("ed-")&&e.target.tagName==="INPUT"){if(e.key==="Enter"){e.preventDefault();S.err={};saveEdit(S.editing);render();}else if(e.key==="Escape"){clearEd();render();}}
+});
+document.addEventListener("click",e=>{
+  const sm=e.target.closest("summary"); if(sm){const d=sm.parentElement; if(d.querySelector("#altNote")) S.draft["alt-"+S.sel]=!d.open; if(d.querySelector("#reopenNote")) S.draft.reopenOpen=!d.open; return;}
+  const el=e.target.closest("[data-act]"); if(!el) return;
+  const a=el.dataset.act, st=el.dataset.step, k=el.dataset.k;
+  S.err={}; S.focusErr=false;
+  switch(a){
+    case "go": S.view="parcours"; S.sel=st; S.flash=null; clearEd(); S.chkOpen=null; S.verifying=null; S.linking=null; window.scrollTo({top:0}); break;
+    case "view": S.view=el.dataset.v; S.flash=null; break;
+    case "unflash": S.flash=null; break;
+    case "do": doStep(st); break;
+    case "alt": altDo(st); break;
+    case "altex":{const s=STEP(st);S.draft.altNote=(s.acts[ph(st)].alt||s.acts.find(x=>x.alt).alt).ex;S.draft["alt-"+st]=true;break;}
+    case "edit": clearEd(); S.editing=k; break;
+    case "editsave": saveEdit(k); break;
+    case "editcancel": clearEd(); break;
+    case "ctog":{const cs=dv("ed-c",S.par.terr.countries.slice()), v=el.dataset.v;S.draft["ed-c"]=cs.includes(v)?cs.filter(x=>x!==v):cs.concat(v);break;}
+    case "chk":{const v=el.dataset.v;if(v==="non_compliant"){S.chkOpen=k;delete S.draft.chkNote;break;}
+      S.chk[k]={r:v,by:P[me()].name,at:stamp()};S.clock--;delete S.chkEdit[k];hist("dossier",`Contrôle « ${CHECKS.find(c=>c[0]===k)[1]} » : ${RES[v][1]}`);toast("Contrôle enregistré.");break;}
+    case "chkedit": S.chkEdit[k]=true; break;
+    case "chksave":{const n=need("chkNote","Dites ce qui ne correspond pas.");if(!n) break;S.chk[k]={r:"non_compliant",by:P[me()].name,at:stamp(),note:n};S.clock--;S.chkOpen=null;delete S.chkEdit[k];hist("dossier",`Contrôle « ${CHECKS.find(c=>c[0]===k)[1]} » : Non conforme · « ${n} »`);toast("Contrôle enregistré.");break;}
+    case "chkcancel": S.chkOpen=null; break;
+    case "sim":{const b=el.dataset.v, x=BLOCK[b], before=snap(), at=stamp();S.clock--;S.src[b]=true;S.srcAt[b]=at.split(",")[0];
+      hist("prep",`${x.path} : ${lc(x.done)}`,x.who?P[x.who].name:"Lina Haddad");after("prep",x.done,before);break;}
+    case "fix": S.fixed=true; S.fixedAt=stamp().split(",")[0]; S.clock--; hist("dossier","Catalogue : compositeur corrigé en Samir Kader","Lina Haddad"); toast("Correction faite au Catalogue : le dossier la reprend."); break;
+    case "ext": toast(`Ouvre ${el.dataset.v} sur l'élément à corriger ; « Revenir à la Distribution » ramène ici, à la même étape (hors de ce proto).`); return;
+    case "pdf": toast("PDF non ouvert dans le proto."); return;
+    case "copy": try{navigator.clipboard&&navigator.clipboard.writeText(el.dataset.v);}catch(_){} toast(`Copié : ${el.dataset.v}`); return;
+    case "play": S.playing=!S.playing; break;
+    case "oproofown": S.oproof[k]=`Mail_TheOrchard_${SLUG[k]}_V${S.v}.eml`; break;
+    case "oproofrm": S.oproof[k]=false; break;
+    case "nodeproof":{const d=S.decl[k];d.proof=k==="deposit"?`Capture_TheOrchard_Neons_V${S.v}.png`:`Mail_TheOrchard_${SLUG[k]}_V${S.v}.eml`;hist(k==="deposit"?"deposit":"orchard",`Preuve ajoutée : ${TELL_SHORT[k]} · ${d.proof}`);toast("Preuve ajoutée : la déclaration passe « preuve jointe ».");break;}
+    case "proof": S.proof[k]=k==="deposit"?`Capture_TheOrchard_Neons_V${S.v}.png`:`Courriel_TheOrchard_${k}.eml`; break;
+    case "proofrm": delete S.proof[k]; break;
+    case "detect":{const before=snap();S.detected=true;const day=frDate(S.base).slice(5,10);PLAT.forEach(([pk,,url])=>{if(pk!=="amazon") Object.assign(platOf(pk),{url,fromDetect:day});});hist("platforms","Détection automatique : 4 liens trouvés sur 5","PDS OS");after("platforms","4 liens trouvés par la détection",before);break;}
+    case "usesug":{const p=platOf(k);p.url=p.sug;p.ver="unchecked";p.comp="unchecked";hist("platforms",`${PNAME(k)} : lien de la détection repris`);toast("Lien repris : il reste à le vérifier.");break;}
+    case "plink": S.linking=k; break;
+    case "plinkcancel": S.linking=null; break;
+    case "plinksave":{const v=String(dv("plinkIn","")).trim();if(!/^https:\/\/\S+\.\S+/.test(v)){S.err.plinkIn="Collez le lien officiel : il commence par https://.";break;}const p=platOf(k);p.url=v;p.ver="unchecked";p.comp="unchecked";p.by=null;S.linking=null;delete S.draft.plinkIn;hist("platforms",`${PNAME(k)} : lien renseigné`);toast("Lien enregistré : il reste à le vérifier.");break;}
+    case "pver": S.verifying=k; ["pp","pnote","pmod"].forEach(x=>delete S.draft[x]); break;
+    case "pvercancel": S.verifying=null; break;
+    case "rechk": S.rechk[k]=true; break;
+    case "rechkno": delete S.rechk[k]; break;
+    case "pok":{const before=snap(), p=platOf(k), at=stamp();S.clock--;Object.assign(p,{ver:"verified",comp:"compliant",by:P[me()].name,at,note:""});delete S.rechk[k];
+      hist("platforms",`${PNAME(k)} : vérifiée, disponible et conforme`);
+      if(platDone()) after("platforms","Cinq plateformes vérifiées",before);else toast(`${PNAME(k)} vérifiée : ${verifiedN()} sur 5.`);break;}
+    case "pversave":{const pp=dv("pp","");
+      if(!pp){S.err.pp="Dites ce que vous avez constaté.";break;}
+      const v=pp==="unavailable"?"unavailable":"verified", c=pp==="unavailable"?"":"non_compliant";delete S.rechk[k];
+      const neg=v==="unavailable"||c==="non_compliant";let note="";
+      if(neg){note=need("pnote","Dites ce que vous avez constaté.");if(!note) break;}
+      const before=snap(), p=platOf(k), at=stamp();S.clock--;
+      Object.assign(p,{ver:v,comp:v==="verified"?c:"unchecked",by:P[me()].name,at,note});
+      if(neg) S.anom.push({id:"a"+S.anom.length,type:v==="unavailable"?"platform_unavailable":"metadata",desc:note,plat:k,sev:"major",mod:dv("pmod",v==="unavailable"?"Côté distributeur":"Conception"),state:"open",by:P[me()].name,at,ver:S.v});
+      S.verifying=null;
+      const text=`${PNAME(k)} : ${v==="verified"?"vérifiée disponible":"indisponible"}${v==="verified"?(c==="compliant"?", conforme":", non conforme"):""}`;
+      hist("platforms",text+(neg?" · anomalie ouverte":""));
+      if(platDone()) after("platforms","Cinq plateformes vérifiées",before);else toast(`Vérification enregistrée : ${verifiedN()} sur 5.`);
+      break;}
+    case "anomnew": S.reporting=true; ["an-type","an-mod","an-desc","an-plat","an-sev"].forEach(x=>delete S.draft[x]); break;
+    case "anomcancelnew": S.reporting=false; break;
+    case "anomex": S.draft["an-type"]="metadata"; S.draft["an-mod"]="Catalogue"; S.draft["an-desc"]="Sur Deezer, l'artiste principal apparaît « MonaLys », sans espace."; S.draft["an-plat"]="deezer"; S.draft["an-sev"]="minor"; break;
+    case "anomsend":{const d=need("an-desc","Décrivez ce qui ne va pas.");if(!d) break;const type=dv("an-type","metadata"), at=stamp();S.clock--;
+      S.anom.push({id:"a"+S.anom.length,type,desc:d,plat:dv("an-plat","")||null,sev:dv("an-sev","major"),mod:dv("an-mod",defMod(type)),state:"open",by:P[me()].name,at,ver:S.v});
+      S.reporting=false;log(`Anomalie signalée : ${typeLabel(type)}`);toast("Anomalie signalée.");break;}
+    case "anomedit": S.anomEdit=k; delete S.draft["an-st"]; delete S.draft["an-why"]; break;
+    case "anomeditcancel": S.anomEdit=null; break;
+    case "anomstate":{const an=S.anom.find(x=>x.id===k), st2=dv("an-st",an.state);
+      if((st2==="resolved"||st2==="dismissed")&&!need("an-why","Dites pourquoi : une anomalie résolue ou écartée reste dans l'historique.")) break;
+      an.state=st2;an.why=String(dv("an-why","")).trim();an.stAt=stamp();S.clock--;an.stBy=P[me()].name;S.anomEdit=null;
+      log(`Anomalie « ${typeLabel(an.type)} » : ${ASTATE[st2][1].toLowerCase()}${an.why?` · « ${an.why} »`:""}`);toast("État enregistré.");break;}
+    case "declavail":{const before=snap();S.decl.available={date:S.base,by:P[me()].name,proof:null,at:null};S.decl.available.at=hist("platforms","Disponibilité publique déclarée · sans preuve").at;toast("Disponibilité déclarée : elle reste à vérifier plateforme par plateforme.");void before;break;}
+    case "pdecl":{const p=platOf(k);p.declared={by:P[me()].name,at:stamp()};S.clock--;hist("platforms",`${PNAME(k)} : disponibilité déclarée`);toast("Déclarée : il reste à la vérifier.");break;}
+    case "padd": S.adding=true; break;
+    case "paddcancel": S.adding=false; break;
+    case "paddsave":{const nm=need("paddName","Donnez le nom de la plateforme.");if(!nm) break;const u=String(dv("paddUrl","")).trim();if(u&&!/^https:\/\/\S+\.\S+/.test(u)){S.err.paddUrl="Le lien commence par https://.";break;}
+      const id="x"+S.extra.length;S.extra.push({id,name:nm});if(u) platOf(id).url=u;S.adding=false;delete S.draft.paddName;delete S.draft.paddUrl;hist("platforms",`Plateforme ajoutée : ${nm}`);toast("Plateforme ajoutée.");break;}
+    case "drift":{const before=snap();S.drift=true;S.driftDone=true;S.coverV++;hist("dossier",`Conception : pochette « Néons » v${S.coverV} validée, après la V${S.v} du dossier`,"Nadia Benali");after("dossier","La pochette a changé à la source",before);break;}
+    case "newver":{const n=need("nvNote","Dites ce qui a été corrigé, et où.",S.drift?"Pochette v"+S.coverV+" validée en Conception":"");if(!n) break;const why=S.drift?"drift":"anomaly";const before=newVersion(n);S.whyV[S.v]=why;after("dossier",`V${S.v} en préparation`,before);delete S.draft.nvNote;break;}
+    case "dl": toast("Téléchargement de Neons_master_V2.wav (le fichier validé, même référence que dans Master et le Catalogue)."); return;
+    case "arbex": S.draft.arb="Amazon Music relivré par The Orchard sous 10 jours ; on ne bloque pas le bilan de la sortie pour ça."; S.draft.ack=true; break;
+    case "reopen":{const n=need("reopenNote","Dites pourquoi.");if(!n) break;const before=snap();S.ph.closure=0;S.close=null;hist("closure",`Suivi rouvert : « ${n} »`);after("closure","Suivi rouvert",before);delete S.draft.reopenNote;break;}
+  }
+  render();
+  if(S.focusErr){const f=document.querySelector(".fact.missing [data-act='edit'], [aria-invalid='true']");if(f) f.focus();}
+});
+
+/* Proto controls: who is looking, and jumping to key moments. ---------------- */
+function forceTo(id,n){const s=STEP(id);while(ph(id)<n){const a=s.acts[ph(id)];S.ph[id]=ph(id)+1;hist(id,a.done,P[byOf(a)].name);}}
+const simAll=()=>Object.keys(BLOCK).forEach(b=>{S.src[b]=true;S.srcAt[b]=b==="master"?"21/11":b==="cover"?"20/11":"18/11";hist("prep",`${BLOCK[b].path} : ${lc(BLOCK[b].done)}`,BLOCK[b].who?P[BLOCK[b].who].name:"Lina Haddad");});
+function paramsDone(){S.par.listen={on:false};S.par.tier="front";S.parBy.listen="Lina Haddad";S.parBy.tier="Lina Haddad";forceTo("params",1);}
+function checksAll(){CHECKS.forEach(([k,l])=>{S.chk[k]={r:"compliant",by:"Lina Haddad",at:stamp()};hist("dossier",`Contrôle « ${l} » : Conforme`,"Lina Haddad");});}
+function submitV1(){const at=stamp();S.vers.push({n:1,status:"pending",at,to:"dg"});S.ph.dossier=1;hist("dossier","V1 soumise à Claire Morel","Lina Haddad");}
+function approveV1(){const at=stamp();const v=S.vers[0];v.status="approved";v.dec={at,by:"Claire Morel"};S.ph.dossier=2;hist("dossier","V1 validée : prête à déposer","Claire Morel");}
+function declareTo(kinds){kinds.forEach(k=>{const id=k==="deposit"?"deposit":"orchard";const a=STEP(id).acts[ph(id)];S.decl[k]={date:S.base,orchardId:k==="deposit"?"10458823":"",proof:k==="deposit"?"Capture_TheOrchard_Neons_V1.png":null,by:"Lina Haddad",at:null};S.ph[id]=ph(id)+1;S.decl[k].at=hist(id,a.done+(S.decl[k].proof?" · preuve jointe":" · sans preuve"),"Lina Haddad").at;});}
+function detectAll(){S.detected=true;const day=frDate(S.base).slice(5,10);PLAT.forEach(([k,,url])=>{if(k!=="amazon") Object.assign(platOf(k),{url,fromDetect:day});});hist("platforms","Détection automatique : 4 liens trouvés sur 5","PDS OS");}
+const SCEN={
+  start(){},
+  ready(){S.base="2026-11-23";simAll();paramsDone();S.sel="dossier";},
+  review(){S.base="2026-11-23";simAll();paramsDone();checksAll();submitV1();S.role="dg";},
+  orchard(){S.base="2026-11-24";simAll();paramsDone();checksAll();submitV1();approveV1();declareTo(["deposit"]);S.sel="orchard";},
+  online(){S.base="2026-12-05";simAll();paramsDone();checksAll();submitV1();approveV1();declareTo(["deposit","received","accepted","delivered"]);detectAll();S.sel="platforms";},
+  closing(){S.base="2026-12-07";simAll();paramsDone();checksAll();submitV1();approveV1();declareTo(["deposit","received","accepted","delivered"]);detectAll();
+    PLAT.forEach(([k])=>{if(k==="amazon") return;const p=platOf(k);Object.assign(p,{ver:"verified",comp:"compliant",by:"Lina Haddad",at:stamp()});hist("platforms",`${PNAME(k)} : vérifiée disponible, conforme`,"Lina Haddad");});S.sel="closure";}
+};
+const SC_KEY="pds-distribution-scen";
+function go(scen){document.getElementById("toast").hidden=true;S=fresh();(SCEN[scen]||SCEN.start)();S.flash=null;try{localStorage.setItem(SC_KEY,scen);}catch(_){}render();window.scrollTo({top:0});}
+document.getElementById("roleSel").addEventListener("change",e=>{S.role=e.target.value;S.sel=null;S.flash=null;clearEd();S.view="parcours";S.verifying=null;S.chkOpen=null;render();window.scrollTo({top:0});});
+document.getElementById("scenSel").addEventListener("change",e=>go(e.target.value));
+document.getElementById("resetBtn").addEventListener("click",()=>{document.getElementById("scenSel").value="start";go("start");});
+let first="start";try{const h=location.hash.slice(1);first=SCEN[h]?h:(localStorage.getItem(SC_KEY)||"start");}catch(_){}
+if(!SCEN[first]) first="start";
+document.getElementById("scenSel").value=first;go(first);
+})();
+</script>
+</body>
+</html>
