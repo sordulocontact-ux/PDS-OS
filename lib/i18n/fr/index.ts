@@ -71,6 +71,7 @@ import { productionDelivery } from "./production-delivery";
 import { productionDirection } from "./production-direction";
 import { productionJourney } from "./production-journey";
 import { productionLink } from "./production-link";
+import { roles } from "./roles";
 import { stepTools } from "./step-tools";
 import { productionLocations } from "./production-locations";
 import { productionOrganization } from "./production-organization";
@@ -215,4 +216,5 @@ export const fr = {
   activationAgency,
   dialogs,
   stepTools,
+  roles,
 } as const;

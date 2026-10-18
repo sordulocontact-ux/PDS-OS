@@ -28,6 +28,7 @@ export function ResponsiblePicker({
   suggestions,
   canAssign,
   title,
+  compact = false,
 }: {
   projectId: string;
   scope: "direction" | "sheet";
@@ -38,12 +39,14 @@ export function ResponsiblePicker({
   canAssign: boolean;
   // Defaults to « Responsable de la direction artistique » / « de la fiche ».
   title?: string;
+  // The « Changer » of « Qui fait quoi » (RolesPanel): the button alone.
+  compact?: boolean;
 }) {
   const t = fr.conceptionIntents.people;
   const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex min-w-0 flex-col gap-0.5">
+      <div className={compact ? "hidden" : "flex min-w-0 flex-col gap-0.5"}>
         <p className="text-body-md font-medium">
           {title ??
             (scope === "direction"
@@ -58,7 +61,11 @@ export function ResponsiblePicker({
       </div>
       {canAssign && (
         <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-          {current ? t.change : t.designate}
+          {compact && current
+            ? fr.roles.change
+            : current
+              ? t.change
+              : t.designate}
         </Button>
       )}
       <FormDialog

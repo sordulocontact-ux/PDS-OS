@@ -1962,6 +1962,22 @@ date de sortie de la Stratégie, NDA : à décider).
   `actions.ts`), composants `components/shell/module/` (`docs/COMPOSANTS.md`). Branché sur le
   Juridique (`LegalStepFrame`) ; les autres modules s'y branchent avec leur `StepPanel`.
 
+### « Qui fait quoi » commun (C7, 18/10/2026)
+
+- Un seul rendu, `RolesPanel` (`components/shell/module/`), en ligne dans une étape ou dans la
+  modale `RolesDialog` ouverte par `WhoDoesWhatButton` (bouton autonome destiné à `ModuleHeader`).
+  Chaque module construit ses rôles : Production (`WhoDoesWhat` / `ProductionWhoDoesWhatButton` :
+  responsable du projet et de production = Coordonne, société / réalisation / image = Exécute,
+  validation budgétaire = Valide ; historique = organisation et liens, `loadProductionHistory(…,
+  only)` ; le changement passe toujours par « Modifier l'organisation »), Conception
+  (`DesignRoles` / `DesignWhoDoesWhatButton` : responsable du projet, responsable, validateurs, avec
+  « Changer » = les sélecteurs existants en `compact` ; délégations et gouvernance restent dessous).
+- **Liens privés** : n° du lien (compte des liens du contact sur la fiche), créé le … par …
+  (`created_by`), ouvert, expiration ; « Nouveau lien » remplace l'ancien (déjà le cas en SQL).
+  « Copier le lien » n'apparaît que si le module sait redonner le lien : aujourd'hui aucun (jeton
+  gardé en empreinte seule, règle 19) — le lien s'affiche une fois à sa création. « Relancer »
+  demande un `remindHref` (mailto) : non branché tant que l'e-mail réel ne l'est pas.
+
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
 Circuit : l'équipe écrit au **DG**, PO regroupe les doublons, le DG choisit ce qui est
