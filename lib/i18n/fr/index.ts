@@ -41,6 +41,7 @@ import { framing } from "./framing";
 import { framingGuide } from "./framing-guide";
 import { framingIntel } from "./framing-intel";
 import { journey } from "./journey";
+import { moduleFrame } from "./module-frame";
 import { labo } from "./labo";
 import { laboCaptures } from "./labo-captures";
 import { legal } from "./legal";
@@ -169,6 +170,7 @@ export const fr = {
   productionHistory,
   productionJourney,
   journey,
+  moduleFrame,
   productionLink,
   productionLocations,
   productionOrganization,

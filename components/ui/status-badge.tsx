@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 // from lib/ui/category-hues.ts, never picked ad hoc. Sizes of the proto
 // « Projet complet » (C0): 24 px, 13 px semi-bold; `sm` 20 px for dense rows.
 const statusBadgeVariants = cva(
-  "inline-flex shrink-0 items-center gap-1.5 rounded-pill text-micro font-semibold whitespace-nowrap",
+  "inline-flex shrink-0 items-center gap-1.5 rounded-pill text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold whitespace-nowrap",
   {
     variants: {
       tone: {

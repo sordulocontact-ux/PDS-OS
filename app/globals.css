@@ -156,6 +156,8 @@
   --glass-panel-blur: 20px;
   --glass-scrim: rgb(0 0 0 / 0.35);
   --dialog-width: 520px;
+  /* Colonne de contenu d'une page de projet (proto « Projet complet »). */
+  --content-width: 1180px;
   --dialog-width-wide: 900px;
   --surface-glass: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 
@@ -244,11 +246,6 @@
   --calendar-hour: 48px;
   --calendar-gutter: 56px;
   --calendar-viewport: max(420px, calc(100dvh - 260px));
-  /* Pointe d'un chevron du fil des étapes (ProcessSteps, Figma 1510:3096) ;
-     deux chevrons se chevauchent de la pointe moins 3 px : un filet du fond
-     les sépare. */
-  --process-step-notch: 14px;
-  --process-step-gap: 3px;
 
   /* --- Arrondis ---------------------------------------------------------- */
   /* Les paliers --radius-* sont déclarés dans le bloc @theme plus bas :
@@ -730,45 +727,6 @@
   :focus-visible {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
-  }
-}
-
-/* Fil des étapes d'un processus en chevrons (ProcessSteps) : chaque étape est
-   découpée en flèche, la suivante s'emboîte dans sa pointe. La première n'a
-   pas d'encoche, la dernière pas de pointe ; le conteneur arrondit les bouts. */
-@layer components {
-  .process-step {
-    margin-left: calc(var(--process-step-gap) - var(--process-step-notch));
-    clip-path: polygon(
-      0 0,
-      calc(100% - var(--process-step-notch)) 0,
-      100% 50%,
-      calc(100% - var(--process-step-notch)) 100%,
-      0 100%,
-      var(--process-step-notch) 50%
-    );
-  }
-  li:first-child > .process-step {
-    margin-left: 0;
-    clip-path: polygon(
-      0 0,
-      calc(100% - var(--process-step-notch)) 0,
-      100% 50%,
-      calc(100% - var(--process-step-notch)) 100%,
-      0 100%
-    );
-  }
-  li:last-child > .process-step {
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 100%,
-      0 100%,
-      var(--process-step-notch) 50%
-    );
-  }
-  li:only-child > .process-step {
-    clip-path: none;
   }
 }
 

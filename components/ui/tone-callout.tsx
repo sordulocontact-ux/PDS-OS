@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 // Shape of the proto « Projet complet » (C0): radius 10, 12/14 padding, 15 px,
 // the tone's icon on the left.
 const toneCalloutVariants = cva(
-  "flex items-start gap-2.5 rounded-xl px-3.5 py-3 text-body-sm font-medium break-words",
+  "flex items-start gap-2.5 rounded-xl px-3.5 py-3 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-medium break-words",
   {
     variants: {
       tone: {
