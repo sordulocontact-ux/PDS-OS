@@ -1104,3 +1104,14 @@ export const journeyStatusTone: Record<JourneyStatus, Tone> = {
   blocked: "neutral",
   upcoming: "neutral",
 };
+
+/** A line of a meeting's report, by what became of it in the step. */
+export const meetingLineTone: Record<string, Tone> = {
+  confirmed: "success",
+  corrected: "success",
+  discarded: "neutral",
+  pending: "warning",
+};
+
+/** The summary sent to a meeting's participants. */
+export const meetingSummaryTone: Tone = "success";

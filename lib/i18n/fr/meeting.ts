@@ -5,6 +5,8 @@
  * `crLine`, `crModal`, `sumDraft`, `summaryBlock`, `summaryFor`).
  */
 export const meeting = {
+  // The section of a call's page that holds them.
+  section: "La réunion",
   // MeetingFacts.
   report: "Compte rendu",
   readReport: "Lire le compte rendu",

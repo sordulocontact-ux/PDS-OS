@@ -2708,6 +2708,57 @@ export type Database = {
           },
         ]
       }
+      call_summaries: {
+        Row: {
+          call_id: string
+          id: string
+          organization_id: string
+          recipient_person_ids: string[]
+          recipients: Json
+          sent_at: string
+          sent_by: string | null
+          text: string
+          version: number
+        }
+        Insert: {
+          call_id: string
+          id?: string
+          organization_id: string
+          recipient_person_ids?: string[]
+          recipients: Json
+          sent_at?: string
+          sent_by?: string | null
+          text: string
+          version: number
+        }
+        Update: {
+          call_id?: string
+          id?: string
+          organization_id?: string
+          recipient_person_ids?: string[]
+          recipients?: Json
+          sent_at?: string
+          sent_by?: string | null
+          text?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_summaries_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "call_summaries_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_report_shares: {
         Row: {
           call_id: string
@@ -14322,6 +14373,7 @@ export type Database = {
       }
       report_items: {
         Row: {
+          agenda_topic: string | null
           brief_key: string | null
           created_at: string
           end_seconds: number | null
@@ -14340,6 +14392,7 @@ export type Database = {
           why: string | null
         }
         Insert: {
+          agenda_topic?: string | null
           brief_key?: string | null
           created_at?: string
           end_seconds?: number | null
@@ -14358,6 +14411,7 @@ export type Database = {
           why?: string | null
         }
         Update: {
+          agenda_topic?: string | null
           brief_key?: string | null
           created_at?: string
           end_seconds?: number | null
@@ -17543,6 +17597,10 @@ export type Database = {
           p_transcript_id: string
         }
         Returns: string
+      }
+      send_call_summary: {
+        Args: { p_call_id: string; p_recipients: Json; p_text: string }
+        Returns: number
       }
       save_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }

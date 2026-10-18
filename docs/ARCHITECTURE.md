@@ -904,6 +904,67 @@ de call qui donne un lien Google Meet.
 
 ---
 
+## 4 ter. Formulaire de call commun, compte rendu par point, résumé aux participants (18/10/2026)
+
+Sous-lots C8 et C10 de `docs/projet-complet/commons.md` (§ 4 et § 5), proto « Projet complet »
+(`docs/protos/src/mk.js` : `prepGate`, `whoChips`, `agendaRow`, `moveAgenda`, `newPersonModal`, `crLine`,
+`crModal`, `sumDraft`, `summaryBlock`, `summaryFor`).
+
+**Un seul formulaire de call** (`components/calls/prep/`) pour le Cadrage, la Stratégie, la Conception,
+la Production (call de production et call technique) et le Master. Il remplace `ParticipantsField`,
+`AttendeesField`, `AgendaEditor`, `AgendaTopicsField`, `CallRecap`, `PrepareCallSheet`,
+`PrepareExchangeButton` et les cinq formulaires de module (supprimés).
+
+- **Ce que le module calcule** (serveur) : `callPrepDefaults` (`lib/calls/prep/defaults.ts`) reçoit les
+  points de PO (`PreparedPoint` : clé, mots, durée estimée, questions), les participants proposés (ids de
+  personnes ou de contacts, sinon les noms que le module calcule, rapprochés de l'équipe puis du Réseau
+  côté serveur), l'objectif, les faits « Envoyé avec l'invitation », la note. Builders :
+  `lib/framing/call-sheet-data.ts`, `lib/strategy/call-sheet-data.ts`, `lib/design/call-sheet-data.ts`,
+  `lib/production/call-prep-defaults.ts`, `lib/master-workflow/exchange-defaults.ts`.
+- **Participants** : des clés `m:<personId>` (équipe du projet : responsable puis directeurs créatifs, seuls
+  admis par `call_attendees_check`), `c:<contactId>` (Réseau), `e:<adresse>` (tapée). Un contact sans
+  e-mail ne peut pas être invité (même règle que `call_guests`) ; une adresse tapée devient une fiche du
+  Réseau à la confirmation (`fileTypedGuests`). Au moins deux personnes.
+- **Ordre du jour** : la personne ordonne, reformule, retire, ajoute ; les points de PO gardent leur `key`
+  (stockée dans `calls.agenda`), le serveur recalcule les points de PO et n'en reprend que la durée et les
+  questions (`buildPreparedAgenda`, `lib/calls/prepare-schema.ts`) ; une durée absente = l'estimation de PO
+  (5 min pour un point ajouté). Durées et questions repliées sous « Préparer en détail » (décision C0 n° 6).
+- **Action unique** `createPreparedCall(kind, …)` (`lib/calls/prep/actions.ts`) : vérifie le formulaire,
+  recalcule les points (`lib/calls/prep/adapters/<kind>.ts`), résout les participants contre l'équipe et le
+  Réseau lus avec la session, appelle la fonction SQL du module (`create_framing_call`,
+  `create_strategy_call`, `create_design_call`, `create_production_call`, `create_master_exchange`),
+  invite l'équipe (`call_attendees`, notification par trigger), écrit les invités (`call_guests`), crée le
+  lien Meet par Google Agenda quand il est branché (Google envoie alors l'e-mail), sinon rien ne part
+  encore par e-mail et le lien de visio se colle. `stay` : la page reste (l'étape montre
+  `PlannedCallFacts`) ; sinon la page du call s'ouvre.
+- **Conteneur** : tant que l'étape d'une zone ne porte pas le formulaire, `CallPrepLauncher` le pose sous son
+  bouton (`inline`, cartes d'entrée) ou dans le panneau latéral (`sheet`, barres d'outils). Les zones le
+  placent ensuite directement dans l'étape (`<CallPrepForm defaults stay />`).
+
+**Compte rendu rangé par point** : `report_items.agenda_topic` (migration `20261018200101`). L'extraction
+reçoit l'ordre du jour du call avec la transcription (« p1 : … », données, jamais consignes) ; chaque
+décision, question ouverte et action nomme sa clé, le code la vérifie et recopie les mots du point
+(`toReportItemRows`) ; une clé inconnue = « dit en dehors de l'ordre du jour ». `loadMeeting`
+(`lib/calls/meeting/queries.ts`) lit le call et son dernier compte rendu ; **l'état de chaque ligne vient
+du module** (`states`, par id de ligne), jamais du compte rendu. Sur la page du call (`CallMeetingSection`),
+faute d'étape, ce que la clôture a gardé se lit « Confirmé par » qui a clôturé.
+
+**Résumé aux participants** : table `call_summaries` (version, texte, destinataires, `recipient_person_ids`,
+`sent_by`, `sent_at`), plutôt qu'une colonne de `call_report_shares` : un résumé n'est pas un partage du
+compte rendu figé et existe sans clôture. Écriture par `send_call_summary` seule (responsable du call ;
+les membres destinataires doivent être participants ou de l'équipe du projet ; version suivante calculée
+en SQL, les précédentes gardées) ; lecture par qui voit le call ou par les membres destinataires ;
+notification `call_summary_sent` par trigger ; supprimée avec le call (cascade, `delete_project_row`
+supprime les calls). Le brouillon est **écrit par le code** (`summaryDraft`, `lib/calls/meeting/draft.ts`)
+depuis les lignes confirmées ou corrigées : décisions, « À confirmer » (hypothèses), prochaines étapes
+avec qui et quand ; jamais de citation, d'écarté, de point à arbitrer ni de ligne `internal` (budget
+interne). Les destinataires sont relus côté serveur (`sendMeetingSummary`) ; l'e-mail aux externes n'est
+pas branché : l'app le dit (avertissement) sans bloquer.
+
+**Piège** : la contrainte `notifications_kind_check` est réécrite par plusieurs lots en parallèle ; la
+migration y **ajoute** `call_summary_sent` en relisant la liste en place (deux formes possibles de
+`pg_get_constraintdef`). Une migration ultérieure qui réécrit la liste à la main doit garder ce type.
+
 ## 5. IA (`lib/ai/`)
 
 - Points d'entrée uniques : `llm.ts` (`extract`, `getChatModel`) et `transcribe.ts`.

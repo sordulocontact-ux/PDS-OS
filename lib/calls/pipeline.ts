@@ -14,7 +14,7 @@ import { classifyProviderError } from "@/lib/calls/provider-error";
 import { loadLatestTranscript } from "@/lib/calls/queries";
 import { audioParts } from "@/lib/calls/recording-queries";
 import { joinTranscripts } from "@/lib/calls/join-transcripts";
-import { toReportItemRows } from "@/lib/calls/report-mapping";
+import { agendaTopicsOf, toReportItemRows } from "@/lib/calls/report-mapping";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**
@@ -165,9 +165,17 @@ export async function runExtraction(
   if (typeof call === "string") return { ok: false, error: call };
   const fail = (error: CallErrorCode) => finish(supabase, callId, { error });
 
+  // The agenda the call was prepared with: each line is filed under its point.
+  const { data: callRow } = await supabase
+    .from("calls")
+    .select("agenda")
+    .eq("id", callId)
+    .maybeSingle();
+  const agenda = agendaTopicsOf(callRow?.agenda ?? null);
+
   let extraction: Awaited<ReturnType<typeof extractCallReport>>;
   try {
-    extraction = await extractCallReport(stored.transcript);
+    extraction = await extractCallReport(stored.transcript, agenda);
   } catch (error) {
     console.error("[calls] extraction failed:", error);
     return fail(classifyProviderError(error));
@@ -175,10 +183,11 @@ export async function runExtraction(
 
   // Report and items are saved in one transaction (save_call_report): a
   // failure leaves no report without items. Runs under the user's RLS.
-  const items = toReportItemRows(extraction.output, {
-    organizationId: call.organization_id,
-    reportId: "",
-  }).map((row) => ({
+  const items = toReportItemRows(
+    extraction.output,
+    { organizationId: call.organization_id, reportId: "" },
+    agenda,
+  ).map((row) => ({
     kind: row.kind,
     position: row.position,
     what: row.what,
@@ -189,6 +198,7 @@ export async function runExtraction(
     located: row.located,
     start_seconds: row.start_seconds ?? null,
     end_seconds: row.end_seconds ?? null,
+    agenda_topic: row.agenda_topic ?? null,
   }));
   const { error: saveError } = await supabase.rpc("save_call_report", {
     p_call_id: callId,

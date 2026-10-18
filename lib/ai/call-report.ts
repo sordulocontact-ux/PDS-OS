@@ -34,13 +34,24 @@ export type LocatedCallReport = {
   };
 };
 
-/** Extracts the call report, then attaches the provenance of every item. */
+/** The agenda as given with the transcript: one key per point (p1, p2…). */
+export const agendaKey = (index: number) => `p${index + 1}`;
+
+/**
+ * Extracts the call report, then attaches the provenance of every item.
+ * With the call's agenda, each decision, open question and action names the
+ * point it belongs to (a key, checked by code afterwards).
+ */
 export async function extractCallReport(
   transcript: Transcript,
+  agenda: string[] = [],
 ): Promise<Extraction<LocatedCallReport>> {
+  const input = agenda.length
+    ? `Ordre du jour :\n${agenda.map((topic, i) => `${agendaKey(i)} : ${topic}`).join("\n")}\n\nTranscription :\n${transcript.text}`
+    : transcript.text;
   const extraction = await extract(
     callReportSchema,
-    transcript.text,
+    input,
     CALL_REPORT_INSTRUCTIONS,
   );
 
