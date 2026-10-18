@@ -6,8 +6,6 @@ export const shell = {
     back: "Revenir au projet",
     dismiss: "Rester ici",
   },
-  // Read after a validated step of a process (ProcessSteps), by screen readers.
-  processSteps: { done: "validée" },
   // The chevron of a collapsible PageSection, read with the section's title.
   section: {
     collapse: (title: string) => `Replier « ${title} »`,

@@ -251,3 +251,52 @@ export function projectTrail(
   const below = subPages[pathname];
   return below ? [home, ...below] : [{ label: section.label }];
 }
+
+/** A sub-module pill as the server computes it (lib/ui/marketing-steps.ts). */
+export type SubModuleStep = {
+  key: string;
+  label: string;
+  href: string;
+  built: boolean;
+  title?: string;
+  done?: boolean;
+  // Other pages it covers, and every page below its own when `nested`.
+  also?: string[];
+  nested?: boolean;
+};
+
+/** Whether `pathname` belongs to this sub-module. */
+export const isSubModuleAt = (step: SubModuleStep, pathname: string) =>
+  pathname === step.href ||
+  !!step.also?.includes(pathname) ||
+  (!!step.nested && pathname.startsWith(`${step.href}/`));
+
+// The head of a launched project's page (proto « Projet complet »,
+// docs/DESIGN.md § 4, « En-tête de module »): the trail starts with the
+// project, then the section (the module), then — in the Marketing — the
+// sub-module, then the sub-pages projectTrail knows. The h1 is the module:
+// the section's name, or the Marketing's sub-module. A page adds its step
+// (the last crumb) itself (components/projects/project-header.tsx).
+export function moduleTrail(
+  projectId: string,
+  pathname: string,
+  sections: ProjectSection[],
+  {
+    projectTitle,
+    subModules = [],
+  }: { projectTitle: string; subModules?: SubModuleStep[] },
+): { crumbs: ProjectCrumb[]; title: string } {
+  const section = sections.find((item) => item.match(pathname));
+  if (!section) return { crumbs: [], title: "" };
+  const project = { label: projectTitle, href: routes.project(projectId) };
+  const head = { label: section.label, href: section.href };
+  let rest = projectTrail(projectId, pathname, sections).slice(1);
+  let title = section.label;
+  const sub = subModules.find((step) => isSubModuleAt(step, pathname));
+  if (sub) {
+    title = sub.label;
+    if (rest[0]?.label !== sub.label)
+      rest = [{ label: sub.label, href: sub.href }, ...rest];
+  }
+  return { crumbs: [project, head, ...rest], title };
+}

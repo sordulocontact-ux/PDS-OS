@@ -1,0 +1,103 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
+import { AddExpenseButton } from "@/components/budget/add-expense-button";
+import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
+import {
+  ModuleHeader,
+  type ModuleHeaderProps,
+} from "@/components/shell/module/module-header";
+import type { ProjectHeaderData } from "@/lib/projects/header";
+import type { ModuleCrumb } from "@/lib/ui/module-frame";
+import {
+  isSubModuleAt,
+  moduleTrail,
+  projectSections,
+} from "@/lib/ui/project-sections";
+import { cn } from "@/lib/utils";
+
+export type ProjectHeaderOverrides = Partial<
+  Pick<ModuleHeaderProps, "title" | "status" | "actions" | "facts">
+> & {
+  // Replaces the whole trail.
+  crumbs?: ModuleCrumb[];
+  // Added after the URL's trail (a deliverable of the Production).
+  extraCrumbs?: ModuleCrumb[];
+  // The module's steps: the one whose page is open ends the trail.
+  steps?: Array<{ href: string; title: string }>;
+};
+
+/**
+ * The head of a launched project's page, read from the URL (trail, h1, the
+ * Marketing's pills) and completed by what the module gives (its step, its
+ * facts, its actions), then the read-only notice. `isDefault`: the one the
+ * project layout renders for every page; it steps aside when a page renders
+ * its own (docs/ARCHITECTURE.md § 3 ter).
+ */
+export function ProjectHeaderView({
+  data,
+  isDefault = false,
+  crumbs,
+  extraCrumbs = [],
+  steps,
+  title,
+  facts,
+  actions,
+  ...rest
+}: ProjectHeaderOverrides & { data: ProjectHeaderData; isDefault?: boolean }) {
+  const pathname = usePathname();
+  const trail = moduleTrail(
+    data.projectId,
+    pathname,
+    projectSections(data.projectId, data.sections),
+    { projectTitle: data.projectTitle, subModules: data.subModules },
+  );
+  const step = (steps ?? data.steps).find((s) => s.href === pathname);
+  const all = crumbs ?? [
+    ...trail.crumbs,
+    ...extraCrumbs,
+    ...(step ? [{ label: step.title }] : []),
+  ];
+  const inMarketing = data.subModules.some((s) => isSubModuleAt(s, pathname));
+  return (
+    <div
+      data-project-header={isDefault ? "default" : "page"}
+      className={cn(
+        "flex flex-col gap-5",
+        isDefault && "group-has-[[data-project-header=page]]/project:hidden",
+      )}
+    >
+      <ModuleHeader
+        crumbs={all}
+        title={title ?? trail.title}
+        tabs={
+          inMarketing
+            ? data.subModules.map((s) => ({
+                key: s.key,
+                label: s.label,
+                href: s.built ? s.href : undefined,
+                title: s.title,
+                done: s.done,
+                current: isSubModuleAt(s, pathname),
+              }))
+            : undefined
+        }
+        facts={facts ?? data.facts}
+        actions={
+          actions || data.canAddExpense ? (
+            <>
+              {actions}
+              {/* Hides itself outside the Marketing (MKT-S1-15). */}
+              {data.canAddExpense && (
+                <AddExpenseButton projectId={data.projectId} />
+              )}
+            </>
+          ) : undefined
+        }
+        {...rest}
+      />
+      <ReadOnlyNotice projectId={data.projectId} />
+    </div>
+  );
+}

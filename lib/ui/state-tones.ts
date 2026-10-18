@@ -1101,8 +1101,11 @@ export const creativeBriefTone: Record<string, Tone> = {
 export const journeyStatusTone: Record<JourneyStatus, Tone> = {
   done: "success",
   current: "info",
+  waiting: "warning",
+  rework: "warning",
   blocked: "neutral",
   upcoming: "neutral",
+  obsolete: "neutral",
 };
 
 /** A proposal decided one by one (ProposalRow): waiting for a person is a

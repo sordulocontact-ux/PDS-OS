@@ -1,16 +1,13 @@
 import { notFound } from "next/navigation";
 
-import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import {
   ProjectSidebar,
   ProjectSidebarMobile,
 } from "@/components/projects/project-sidebar";
+import { ProjectHeader } from "@/components/projects/project-header";
 import { ProjectLive } from "@/components/projects/project-live";
-import { ProjectPageTitle } from "@/components/projects/project-page-title";
 import { ProjectTabs } from "@/components/projects/project-tabs";
-import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
-import { SectionSteps } from "@/components/projects/section-steps";
 import { BackLink } from "@/components/shell/back-link";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
@@ -22,24 +19,21 @@ import {
   canSeeProjectBudget,
 } from "@/lib/projects/edit-access";
 import { getProject } from "@/lib/projects/queries";
-import {
-  distributionPages,
-  distributionSteps,
-} from "@/lib/ui/distribution-steps";
-import { marketingPages, marketingSteps } from "@/lib/ui/marketing-steps";
-import { masterSteps, type MasterTab } from "@/lib/ui/master-steps";
 import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
 import { allInOrder } from "@/lib/utils/parallel";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
-// Project frame: the page's title (the section's name once launched,
-// ProjectPageTitle), then the sections — either the contextual sidebar
-// next to the content (Figma "Double sidebar") or one row of tabs under the
-// header, never both: DOUBLE_SIDEBAR in lib/ui/project-sections.ts picks one
-// (docs/DESIGN.md § 4). With the sidebar, the main app sidebar collapses to
-// icons whenever a project page is open, and the two fuse into one card
-// (components/shell/use-collapsed-nav.tsx, shared through context so both
-// agree). Pages below still check access themselves (a layout does not
+// Project frame: the head of the page (ModuleHeader through ProjectHeader:
+// trail « Projet › Module › … », the Marketing's pills, the module's 30 px
+// title, its facts and actions, docs/DESIGN.md § 4), then the sections —
+// either the contextual sidebar next to the content (Figma "Double sidebar")
+// or one row of tabs under the header, never both: DOUBLE_SIDEBAR in
+// lib/ui/project-sections.ts picks one. The header rendered here is the
+// default one, read from the URL; a page or a section layout that knows more
+// (its step, its facts, « Qui fait quoi ») renders its own ProjectHeader and
+// this one steps aside (`group/project`, docs/ARCHITECTURE.md § 3 ter). With
+// the sidebar, the main app sidebar collapses to icons whenever a project
+// page is open. Pages below still check access themselves (a layout does not
 // re-run on client navigation); the project query is cached per request, so
 // they reuse it for free.
 export default async function ProjectLayout({
@@ -58,20 +52,13 @@ export default async function ProjectLayout({
   const canSeeBudget = canSeeProjectBudget(access, project);
 
   // Each workflow's state, read from its sources (shared with the overview
-  // in the same request): the sidebar's dots, the chevrons' checks. The
-  // Stratégie opens once the Plan du Projet launches it.
+  // and the header in the same request): the sidebar's dots.
   const flows = await loadWorkflowStates(project.id);
-  const stateOf = (key: keyof NonNullable<typeof flows>["states"]) => {
-    const state = flows?.states[key];
-    return state && state !== "restricted" ? state : null;
-  };
   const statuses = Object.fromEntries(
     Object.entries(flows?.states ?? {}).flatMap(([key, state]) =>
       state && state !== "restricted" ? [[key, state.status]] : [],
     ),
   );
-  const strategyLaunched =
-    (stateOf("marketing")?.status ?? "not_started") !== "not_started";
 
   return (
     <div className="flex flex-1">
@@ -90,24 +77,8 @@ export default async function ProjectLayout({
         />
       )}
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 pt-6 md:px-8">
-        {/* Launched: the section's name, nothing about the project (the
-            sidebar's switcher names it, Figma node 76:3145). Before, no
-            sections: the project itself is the page. */}
-        {project.stages.length > 0 ? (
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <ProjectPageTitle
-              projectId={project.id}
-              canSeeLegal={canSeeLegal}
-              canSeeBudget={canSeeBudget}
-              workflows={flows?.workflows}
-            />
-            {/* MKT-S1-15: a spend is added where it shows up. */}
-            {canEdit && canSeeBudget && (
-              <AddExpenseButton projectId={project.id} />
-            )}
-          </div>
-        ) : (
+      <div className="group/project mx-auto flex w-full max-w-[var(--content-width)] flex-1 flex-col gap-5 px-4 pt-7 md:px-10">
+        {project.stages.length === 0 && (
           <header className="flex flex-col gap-1">
             {/* No sidebar before launch, so no switcher either: the only
                 way back to the list (retour du 11/10/2026). */}
@@ -150,47 +121,14 @@ export default async function ProjectLayout({
                 workflows={flows?.workflows}
               />
             )}
-            {/* The chevrons of the open workflow, if any: each hides itself
-                outside its workflow. The Cadrage has none: it stands above
-                the workflows (ticket « Architecture globale »). */}
-            <SectionSteps
-              within={marketingPages(project.id)}
-              label={fr.shell.project.marketingSteps.label}
-              soon={fr.shell.project.marketingSteps.soon}
-              steps={marketingSteps(project.id, {
-                strategyLaunched,
-                validatedStages: project.stages
-                  .filter((stage) => stage.state === "validated")
-                  .map((stage) => stage.key),
-                marketingClosed:
-                  stateOf("marketing")?.done.includes("review") ?? false,
-              })}
-            />
-            <SectionSteps
-              within={distributionPages(project.id)}
-              label={fr.shell.project.distributionSteps.label}
-              soon={fr.shell.project.marketingSteps.soon}
-              steps={distributionSteps(
-                project.id,
-                stateOf("distribution")?.done,
-              )}
-            />
-            <SectionSteps
-              within={[routes.projectMaster(project.id)]}
-              label={fr.masterWorkflow.steps.label}
-              soon={fr.masterWorkflow.steps.soon}
-              steps={masterSteps(
-                project.id,
-                (stateOf("master")?.done ?? []) as MasterTab[],
-              )}
-            />
           </>
         )}
 
-        {/* Only the owner writes inside a launched project; the database enforces it. */}
+        {/* Only the owner writes inside a launched project; the database
+            enforces it. The read-only notice sits under the header. */}
         <EditAccessProvider canEdit={canEdit}>
           {project.stages.length > 0 && (
-            <ReadOnlyNotice projectId={project.id} />
+            <ProjectHeader projectId={project.id} isDefault />
           )}
           <div className="flex flex-col pb-8">{children}</div>
         </EditAccessProvider>

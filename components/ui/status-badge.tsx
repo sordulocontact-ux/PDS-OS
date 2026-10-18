@@ -4,9 +4,10 @@ import { cn } from "@/lib/utils";
 
 // Pill with a semantic tone (docs/DESIGN.md § 3) or a category hue (§ 3 ter):
 // pale background, dark text. Tones come from lib/ui/state-tones.ts, hues
-// from lib/ui/category-hues.ts, never picked ad hoc.
+// from lib/ui/category-hues.ts, never picked ad hoc. Sizes of the proto
+// « Projet complet » (C0): 24 px, 13 px semi-bold; `sm` 20 px for dense rows.
 const statusBadgeVariants = cva(
-  "inline-flex shrink-0 items-center gap-1.5 rounded-pill font-medium whitespace-nowrap",
+  "inline-flex shrink-0 items-center gap-1.5 rounded-pill text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold whitespace-nowrap",
   {
     variants: {
       tone: {
@@ -23,8 +24,8 @@ const statusBadgeVariants = cva(
         ...hueClass,
       },
       size: {
-        sm: "h-5 px-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)]",
-        md: "h-[26px] px-3 text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)]",
+        sm: "h-5 px-2",
+        md: "h-6 px-2.5",
       },
     },
     defaultVariants: {

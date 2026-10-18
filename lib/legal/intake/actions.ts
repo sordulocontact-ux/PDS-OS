@@ -21,6 +21,8 @@ import { knownContactOf } from "@/lib/legal/intake/known-people";
 import { loadKnownPeople } from "@/lib/legal/intake/known-queries";
 import { loadIntake } from "@/lib/legal/intake/queries";
 import { getProject } from "@/lib/projects/queries";
+import { withOutcome } from "@/lib/journey/outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
 import { createClient } from "@/lib/supabase/server";
 
 const questionSchema = z.object({
@@ -119,7 +121,7 @@ export async function saveLegalAnswer(
   return { ok: true };
 }
 
-export type ConfirmResult = { ok: true } | { ok: false; error: string };
+export type ConfirmResult = WriteResult;
 
 /**
  * Confirms the dossier (confirm_legal_intake): only once every question has
@@ -139,14 +141,22 @@ export async function confirmLegalIntake(
   if (intake.questions.some((q) => !q.answered))
     return { ok: false, error: t.openQuestions };
 
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("confirm_legal_intake", {
-    p_project_id: id.data,
-  });
-  if (error) {
-    console.error("confirmLegalIntake:", error.message);
-    return { ok: false, error: t.failed };
-  }
-  revalidatePath(routes.projectLegal(id.data), "layout");
-  return { ok: true };
+  // Said after the gesture: who acts now, what opened (rule 7).
+  return withOutcome(
+    id.data,
+    ["legal"],
+    fr.legalJourney.done.confirmed,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("confirm_legal_intake", {
+        p_project_id: id.data,
+      });
+      if (error) {
+        console.error("confirmLegalIntake:", error.message);
+        return { ok: false, error: t.failed };
+      }
+      revalidatePath(routes.projectLegal(id.data), "layout");
+      return { ok: true };
+    },
+  );
 }

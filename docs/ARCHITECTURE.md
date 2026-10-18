@@ -687,6 +687,57 @@ Migration `20261010002101_credits_at_creation.sql`, 11 tests pgTAP
 
 ---
 
+## 3 ter. Cadre d'écran commun (patron de module, proto « Projet complet », 18/10/2026)
+
+Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md` § 13). Rendu :
+`docs/DESIGN.md` § 4 ; composants : `docs/COMPOSANTS.md`.
+
+- **En-tête** (`ModuleHeader`, `components/shell/module/`). Le layout du projet rend
+  `<ProjectHeader isDefault />` (fil, h1 et pilules lus de l'URL par `moduleTrail`,
+  `lib/ui/project-sections.ts` ; faits du projet par `projectHeaderData`, `lib/projects/header.ts`,
+  `cache()`), suivi du `ReadOnlyNotice`. **Mécanisme choisi** : une page ou un layout de section
+  qui sait plus que son URL (son étape, ses faits, « Qui fait quoi ») rend **son propre**
+  `<ProjectHeader steps={…} facts={…} actions={…} />` en tête ; celui du layout s'efface en CSS
+  (`group/project` sur la colonne, `group-has-[[data-project-header=page]]/project:hidden` sur le
+  défaut). Pas de route parallèle (`@header` garderait l'ancien en-tête à la navigation client sans
+  route attrape-tout), pas de contexte client (l'en-tête apparaîtrait après l'hydratation). Le
+  Juridique (`LegalStepFrame`) et la Production (layout du livrable) le font déjà. Le Master et la
+  Distribution n'ont **plus de chevrons** (décision C0) : leur étape finit le fil (`steps` par
+  défaut de `projectHeaderData`) en attendant leur parcours. `ProjectPageTitle`, `SectionSteps`
+  et `ProcessSteps` sont supprimés ; `masterSteps` / `distributionSteps` restent (listes d'étapes).
+- **Parcours** (`lib/ui/journey.ts`). `JourneyStep` : statuts `done | current | waiting | rework |
+  blocked | upcoming | obsolete` (calculés, jamais stockés), `roles` (`exec`/`coord`/`valid`/`owner`
+  → grille 5 ou 4 colonnes), `prereq` (clés du même parcours) + `external` (`{key, label, done,
+  module?, source?}` d'un autre module, résolus par le loader), `next` + `nextExternal`, `group`,
+  `alert` (`overdue`/`decision`), `due`, `blocked` (blocage signalé, ≠ statut verrouillé),
+  `actor.kind` (`do`/`validate`). Une étape verrouillée (`blocked`/`upcoming`) est **en lecture
+  seule** : `StepPanel` rend son contenu `inert` (la Production perd « Vous pouvez déjà préparer » :
+  à rouvrir par son loader si une étape doit rester préparable, en la rendant `current`).
+- **Un seul « Maintenant »** (`lib/journey/`). `loadProjectJourneys(projectId)` (`cache()`, un
+  aller-retour `allInOrder`) réunit un loader par workflow (`JOURNEY_LOADERS`, `sources.ts`) :
+  Juridique (`legalJourneyContext`, `manage_legal` seulement), Marketing = la Conception
+  (`conception.ts`, pont depuis `lib/design/journey.ts`) + la Production de chaque livrable ouvert ;
+  Cadrage, Master, Distribution, Stratégie, Activations, Suivi & bilan : **loaders vides typés**, à
+  remplir par leur zone. Sortie : `journeys`, `mine` (ordre Cadrage, Marketing, Master, Juridique,
+  Distribution), `waiting`, `validations` (`actor.kind === "validate"`). `elsewhereOf(all, steps)`
+  = « À vous, ailleurs ». Une zone qui branche son parcours ajoute son loader ici, jamais une liste
+  à part.
+- **Résultat d'un geste** (règle 7). `WriteResult` (`lib/utils/write-result.ts`) accepte en plus
+  `done`, `next[]`, `unlocked[]`, rétrocompatible. Une Server Action enveloppe son écriture dans
+  `withOutcome(projectId, modules, done, write)` (`lib/journey/outcome.ts`) : parcours relus
+  (`readProjectJourneys`, sans cache) avant et après, `outcomeOf` dit qui agit désormais et ce qui
+  s'est ouvert. Côté client, `useWriteSubmit` / `usePublishResult` font le toast (`done` + « . »)
+  et posent le bandeau dans l'étape (`StepResultProvider` de `StepPanel`). Branché : confirmation
+  du Juridique (`confirmLegalIntake`), lancement du plan (`launchLegalPlan`), soumission et décision
+  d'un devis de Production (`submitQuote`, `decideQuote`). Coût : deux lectures des parcours des
+  `modules` donnés, à limiter au module concerné.
+- **Piège `cn()`** : le paquet `cn` (tailwind-merge) ne connaît pas les tailles maison
+  (`text-caption`, `text-micro`, `text-body-sm`…) et les **retire** dès qu'une couleur
+  `text-[color:…]` suit dans le même `cn()`/`cva`. Dans un composant fusionné, écrire la taille en
+  longueur explicite : `text-[length:var(--type-micro)] leading-[var(--type-micro-lh)]`.
+
+---
+
 ## 3 bis. Fluidité de la navigation
 
 Un clic ne doit jamais laisser l'écran figé, et changer de vue dans une même page (section

@@ -73,6 +73,12 @@ export const productionQuotes = {
     decidedBy: (verb: string, who: string, date: string) =>
       `${verb} par ${who} le ${date}`,
   },
+  // What a gesture did, for the result banner and its toast (rule 7).
+  done: {
+    submitted: "Devis soumis à la validation",
+    approved: "Devis validé",
+    rejected: "Devis refusé",
+  },
   wait: {
     check: (who: string) => `En attente de ${who} : vérifier le devis.`,
     decide: (who: string) => `En attente de ${who} : valider le devis.`,

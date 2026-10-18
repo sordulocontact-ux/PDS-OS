@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import {
   prepDone,
@@ -93,17 +94,25 @@ export async function submitQuote(
   const parsed = submitSchema.safeParse(input);
   if (!parsed.success) return invalid;
   const p = parsed.data;
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("submit_production_quote", {
-    p_quote_id: p.quoteId,
-    p_checks: Object.fromEntries(
-      QUOTE_CHECKS.map((k) => [k, p.checks.includes(k)]),
-    ),
-    p_note: p.note || null,
-  });
-  if (error) return failure(error);
-  await schedulePendingPushes();
-  return prepDone(p.projectId);
+  // Said after the gesture: who validates now (rule 7).
+  return withOutcome(
+    p.projectId,
+    ["marketing"],
+    fr.productionQuotes.done.submitted,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("submit_production_quote", {
+        p_quote_id: p.quoteId,
+        p_checks: Object.fromEntries(
+          QUOTE_CHECKS.map((k) => [k, p.checks.includes(k)]),
+        ),
+        p_note: p.note || null,
+      });
+      if (error) return failure(error);
+      await schedulePendingPushes();
+      return prepDone(p.projectId);
+    },
+  );
 }
 
 const decideSchema = z.object({
@@ -122,13 +131,22 @@ export async function decideQuote(
   if (!parsed.success) return invalid;
   const p = parsed.data;
   if (!p.approve && !p.reason) return { ok: false, error: e.reason_required };
-  const supabase = await createClient();
-  const { error } = await supabase.rpc("decide_production_quote", {
-    p_quote_id: p.quoteId,
-    p_approve: p.approve,
-    p_reason: p.reason || null,
-  });
-  if (error) return failure(error);
-  await schedulePendingPushes();
-  return prepDone(p.projectId);
+  const done = fr.productionQuotes.done;
+  // Said after the gesture: what opened, who acts now (rule 7).
+  return withOutcome(
+    p.projectId,
+    ["marketing"],
+    p.approve ? done.approved : done.rejected,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("decide_production_quote", {
+        p_quote_id: p.quoteId,
+        p_approve: p.approve,
+        p_reason: p.reason || null,
+      });
+      if (error) return failure(error);
+      await schedulePendingPushes();
+      return prepDone(p.projectId);
+    },
+  );
 }

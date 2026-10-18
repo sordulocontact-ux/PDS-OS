@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { Button } from "@/components/ui/button";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import type { WriteResult } from "@/lib/utils/write-result";
@@ -59,14 +59,12 @@ export function ReasonForm({
         error={missing ? t.reasonRequired : undefined}
       />
       {error && <FormMessage kind="error">{error}</FormMessage>}
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button type="button" variant="outline" size="lg" onClick={onDone}>
-          {t.cancel}
-        </Button>
-        <Button type="submit" size="lg" disabled={pending}>
-          {pending ? t.saving : submitLabel}
-        </Button>
-      </div>
+      {/* The main button first, on the left (DialogFormActions). */}
+      <DialogFormActions
+        pending={pending}
+        submitLabel={submitLabel}
+        onCancel={onDone}
+      />
     </form>
   );
 }
