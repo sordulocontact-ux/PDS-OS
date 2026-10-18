@@ -114,9 +114,16 @@ Titre du module                                   [chevrons des sous-modules]
   ne peut rien y faire : ni action, ni « Modifier ».
 
 Les écrans transverses reprennent les mêmes briques : la **Vue d'ensemble** a une carte par
-workflow (statut, barre, « Étape n sur N », qui fait quoi), **Travail** une carte par personne,
-**Validations** ce qui attend chaque valideur, **Activité** le journal horodaté de tous les
-gestes.
+workflow (statut, barre, « Étape n sur N », qui fait quoi), **Travail** la liste de **mes**
+actions tirées des parcours (« Module › Étape », pour quand), **Validations** les mêmes filtrées
+sur les actions de type *valider* (le type de l'action, jamais le verbe de son libellé),
+**Activité** le journal horodaté de tous les gestes. *(Correction du 18/10/2026, proto « Projet
+complet » : Travail n'est plus « une carte par personne » ; qui on attend se lit dans
+« Maintenant » et la Vue d'ensemble.)*
+
+**En-tête de module** (au-dessus de « Maintenant ») : fil d'Ariane « Projet › Module ›
+[sous-module ›] Étape », pilules des sous-modules (Marketing seul), titre du module, « Qui fait
+quoi » à droite, ligne de faits (`docs/DESIGN.md` § 4, « En-tête de module »).
 
 ## 5. Règles d'interaction
 

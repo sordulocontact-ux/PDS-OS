@@ -111,6 +111,14 @@ par défaut de Tailwind (`text-xs`, `text-sm`, `text-base`, `text-lg`…) sont b
 sur ces paliers dans `app/globals.css` : `text-sm` = 16 px, `text-xs` = 14 px. Ne jamais
 écrire une taille en pixels dans un composant.
 
+**Exception 13 px (décision C0 du 18/10/2026, proto « Projet complet »)** : seulement pour
+les **sources** (« Catalogue · le 02/10 », sous une valeur), les **libellés de la grille d'une
+étape** (Exécute, Prérequis…) et les **pastilles** (`StatusBadge`), via le token
+`--type-micro` (13 px, classe `text-micro`), jamais une valeur en dur. Tout autre texte reste à
+14 px au moins. Le titre d'un module (h1 de `ModuleHeader`) est à **30 px**
+(`--type-display-module`, classe `text-display-module`) ; le titre de l'étape ouverte et de la
+carte « Maintenant » à 22 px (`text-figure-lg`).
+
 **Graisse : medium (500) au minimum, partout.** Jamais de regular ni plus léger (demande
 de Sacha, 27/09/2026) ; semi-bold (600) et bold (700) si besoin de hiérarchie. `body`
 est en medium, et `font-normal` / `font-light` sont ramenés à 500 dans le bloc `@theme`
@@ -139,6 +147,11 @@ tons sémantiques, et seulement six (`--tone-*` dans `globals.css`) :
 | `danger`  | bloqué, refusé, en échec               | refusé, échec, en retard, citation introuvable |
 | `action`  | une validation attend une décision | étape « À valider », carte « Validations qui m'attendent » |
 
+Le ton `action` est **gris** (fond `--tone-neutral-bg`, texte encre) depuis le 18/10/2026
+(décision C0, proto « Projet complet » ; ticket « Architecture globale » d'Ibé : « noir,
+blanc, gris, sans violet ») : il garde son nom et son sens, sa pastille ne se distingue plus
+par la couleur mais par son libellé (« À valider », « ✦ PO »).
+
 - La correspondance état → ton vit **uniquement** dans `lib/ui/state-tones.ts`. Un écran
   n'écrit jamais une couleur, il passe `tone={…Tone[état]}`.
 - Le libellé porte toujours le sens : la couleur ne fait que le renforcer
@@ -163,8 +176,8 @@ pâle). Classes Tailwind `accent-selection`, `outline-ring`, `border-ring`. Il h
 - une **carte de choix** cochée (`ChoiceCards`, tuile ou non) et une option retenue de la
   Stratégie (`optionClass`) : contour `--selection-border`, fond `--selection-bg`.
 
-À changer dans `app/globals.css` seulement (`.surface-glass` éclaircit `--selection-bg`
-pour la modale). Ce n'est pas un ton d'état (§ 3) : le bleu `info` reste réservé à
+À changer dans `app/globals.css` seulement (la modale, en verre clair, garde le même
+`--selection-bg`). Ce n'est pas un ton d'état (§ 3) : le bleu `info` reste réservé à
 « en cours ». Les pastilles `FilterChip` (filtres, et `ChipChoice` qui s'en sert) restent
 en encre pleine : un filtre actif n'est pas une sélection de formulaire.
 
@@ -232,8 +245,8 @@ Demande de Sacha du 10/10/2026 : toute l'application existe en clair et en sombr
   passent en clair ; tons d'état et teintes de catégorie en fond sombre teinté **opaque**
   et texte clair (≥ 7:1) ; bleu de sélection éclairci (#3b7bff) pour garder 3:1 sur le
   noir ; ombres plus denses, les filets portent la forme.
-- **Modale « verre »** en sombre : panneau éclairci (gris 40 à 82 %) pour se détacher de
-  la page, liste posée dessus plus claire que lui (#2c2c2c).
+- **Modale « verre »** en sombre : le même verre (88 % de `--surface-raised`, donc sombre),
+  filet `--border-default` pour se détacher de la page (§ 4, « Modale »).
 - Hors périmètre : les PDF exportés (Brief, contrats, bulletin SACEM) restent clairs.
 
 ---
@@ -288,38 +301,41 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   ouvert par son État du master ; Juridique, ouvert par son État des lieux). Sans
   `manage_legal`, le Juridique reste listé, **grisé avec un cadenas** et sa raison, jamais
   un lien (sa page répond toujours 404) ; en onglets, il n'a pas d'onglet.
-- **Titre d'une page de projet lancé** (Sacha, 10/10/2026, Figma « PDS OS » 76:3145 : « il
-  y a trop d'information ») : seulement le **nom de la section** en h1 (« Master »,
-  « Budget », 28 px medium, `text-display-md` ; plus grand que la maquette à la demande de Sacha), puis les chevrons du workflow s'il en a, puis le contenu.
-  Plus de titre du projet (le sélecteur de la sidebar le nomme), ni d'artiste, ni de h2 +
-  phrase d'en-tête sur la page : l'étape est dite par son chevron. Une sous-page ouverte
-  depuis la section (branches du Juridique, Brief de cadrage) a un **fil
-  d'Ariane** à la place : « Juridique / Plan d'action / … », parents en gris et en lien
-  (`ProjectPageTitle`, `projectTrail` dans `lib/ui/project-sections.ts`). L'action d'une
-  page (« Nouveau call », « Ajouter une tâche ») reste, à droite au-dessus du contenu
-  (`ProjectPageActions`). Projet non lancé : son titre et son type restent l'en-tête.
-- **Étapes d'un processus en chevrons** (`ProcessSteps`, `components/ui/`), sous
-  l'en-tête, au même endroit pour chaque workflow, sans numéro : Marketing (**Stratégie ·
-  Conception · Production · Activations · Suivi & bilan**, `SectionSteps` +
-  `lib/ui/marketing-steps.ts` ; une organisation, pas une séquence : chaque étape qui a une
-  page s'ouvre seule, sauf la Stratégie avant son lancement ; Production et Suivi & bilan
-  grisés tant qu'ils n'ont pas de page ; Défense, non tranchée, n'est montrée nulle part),
-  Juridique (**État des lieux · Plan d'action**, sans numéro,
-  `LegalSteps` ; le Cadrage et la Confirmation vivent sur l'État des lieux, le Suivi est le
-  Plan d'action lancé ; le chevron devient « Suivi » une fois le plan lancé, et sous les
-  chevrons une ligne « Étape du dossier · … » donne l'une des cinq étapes du DG, un état et
-  jamais un chevron : `legalPhase`), Master (**Source · Brief · Mixage · Mastering · Master
-  final**, sans numéro, `SectionSteps`, depuis le 11/10/2026 : le Brief a son chevron, plus
-  de sous-page cachée sous une étape ; l'envoi au mixeur se fait dans Mixage ; les validations du mix et du master vivent dans Mixage et Mastering,
-  jamais une étape à part) et Distribution (**Préparation · En ligne** : la page Sortie en
-  deux, `lib/ui/distribution-steps.ts`). Le
-  Cadrage n'a pas de chevrons : il est au-dessus des workflows (les 7 chevrons du parcours,
-  `WorkflowBreadcrumb`, ont disparu le 08/10/2026). Trois
-  étapes au plus à l'écran pour un workflow spécialisé (simplification du 07/10/2026) : une
-  sous-page ouverte depuis une étape y revient par le fil d'Ariane du titre, jamais une pastille.
-  **Deux signaux jamais mélangés** : le fond noir = la page ouverte ; la coche dans le
-  rond = l'étape vraiment validée (états réels, `project_stages` pour le Marketing, jamais
-  la position de la page). Étape sans page ou verrouillée : grisée, non cliquable, `title` explicatif.
+- **En-tête de module** (`ModuleHeader`, `components/shell/module/`, décision C0 du
+  18/10/2026, proto « Projet complet ») : remplace le titre de section (`ProjectPageTitle`, 28 px,
+  fil dans le h1) et les chevrons (`SectionSteps`). De haut en bas :
+  1. **fil d'Ariane** sur sa ligne, 14 px `--text-tertiary`, séparateur « › » :
+     « Projet › Module › [sous-module ›] Étape » ; chaque segment sauf le dernier est un lien,
+     le dernier (`aria-current="page"`) en `--text-primary` ;
+  2. **pilules des sous-modules**, Marketing seul (Stratégie · Conception · Production ·
+     Activations · Suivi & bilan) : pilule 36 px, fond `--surface-soft`, texte
+     `--text-secondary` 15 px ; active = encre pleine (`--surface-inverse`) ; sous-module fait =
+     rond vert 16 px coché avant le libellé ; compteur « à vous » (rond bleu `--selection`) après ;
+  3. **ligne de titre** : h1 du module à **30 px** (`text-display-module`), pastille de statut
+     facultative à côté (Distribution), actions à droite (« Qui fait quoi » en `ghost sm`,
+     « Ajouter une dépense » du Budget) ;
+  4. **ligne de faits** (`ModuleFacts`) : 15 px `--text-secondary`, valeurs en semi-gras
+     `--text-primary` (« Néons · Mona Lys · Single », « Budget **25 000 € HT** », « Sortie
+     **Sam. 05/12/2026** »), dates toujours par `formatDay`.
+  Le **Master et la Distribution n'ont plus de chevrons** (leurs étapes sont dans le parcours),
+  ni le Juridique ni le Cadrage. Le layout du projet rend un en-tête par défaut, tiré de l'URL ;
+  une section qui a ses propres faits ou actions rend son `ModuleHeader` en tête de page, et
+  celui du layout s'efface (règle et mécanisme : `docs/ARCHITECTURE.md` § 3 ter). Projet non
+  lancé : son titre et son type restent l'en-tête.
+- **Navigation du projet** (décision C0, construite au lot « coquille ») : celle du proto —
+  Vue d'ensemble, Cadrage, **Workflows** (Master, Juridique, Marketing, Distribution),
+  **Pilotage** (Travail, Validations, Activité, **Budget**, ticket MKT-S1-15). Équipe, Planning,
+  Calls, Livrables et Fichiers sortent de la barre : leurs routes restent, joignables depuis
+  leurs étapes. **Mobile** : la navigation du projet en **puces horizontales** défilantes
+  au-dessus du contenu. Exception assumée à « une pastille = un filtre » (§ « Onglets et
+  filtres ») : ces puces sont des liens de navigation, signalés comme tels (`nav`,
+  `aria-current`), jamais mêlées à des filtres sur la même ligne.
+- **Patron d'étape** (`JourneySpine`, `StepPanel`, `NowCard`, `docs/VISION-UX.md` § 4) :
+  colonne de contenu de **1180 px** au plus, blocs espacés de **20 px** ; parcours et étape
+  en grille `[300 px | 1fr]` (écart 24 px, une colonne sous 900 px). Toute l'étape ouverte est
+  **dans une carte** (rayon 12, filet `--border-hairline`, padding 20, écart 14). La carte
+  « Maintenant » a le filet `--border-default` et l'ombre `--elevation-card`
+  (`0 1px 2px rgb(0 0 0/.04), 0 8px 24px rgb(0 0 0/.06)`).
 - **Sidebar ou onglets : un seul interrupteur**, `DOUBLE_SIDEBAR` dans
   `lib/ui/project-sections.ts` (liste des sections partagée par les deux). `true` : la
   sidebar contextuelle ci-dessus, la barre principale repliée. `false` : une seule
@@ -354,6 +370,11 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
 - « Mes projets » (chef de projet) occupe deux colonnes : la prochaine action se lit en
   entier. Une carte vide garde sa place avec une phrase : la page d'un poste a toujours
   la même structure.
+- **Travail et Validations d'un projet** (décision C0 du 18/10/2026, proto « Projet
+  complet ») : la liste de **mes** actions tirées des parcours (`loadProjectJourneys`, une
+  seule source), une ligne par action (« Module › Étape », pour quand) ; Validations = les
+  mêmes, filtrées par le **type d'action** `validate` de l'acteur (`JourneyActor.kind`),
+  jamais par le verbe du libellé. Ni tâches à part, ni tableau de bord.
 
 ### Onglets et filtres de liste
 
@@ -481,6 +502,30 @@ saisie : `--destructive` reste à l'encre pour les actions définitives (décisi
 Un champ redevient normal dès qu'il est corrigé. Le bouton n'est jamais désactivé pour
 cause de champs manquants.
 
+### Boutons, pastilles, encarts, toast, dates (décisions C0 du 18/10/2026)
+
+D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi :
+
+- **Bouton** (`Button`) : 40 px, padding 18, **15 px semi-gras (600)**, pilule ; `sm` 32 px,
+  padding 14, 14 px ; `ghost` en `--text-secondary`, encre au survol. À l'appui,
+  `scale(.97)` (140 ms, `--ease-out`), coupé quand le mouvement est réduit. Les autres
+  variantes ne changent pas.
+- **Pastille** (`StatusBadge`) : 24 px, padding 10, **13 px semi-gras** (`--type-micro`) ;
+  `sm` garde 20 px pour les lignes denses.
+- **Encart** (`ToneCallout`) : rayon 10, padding 12/14, 15 px, **icône du ton à gauche**
+  (info, alerte, stop, coche ; un cadenas pour une étape verrouillée, prop `icon`).
+- **Toast** (sonner) : **fond encre** (`--surface-inverse`), texte `--text-on-dark`, rayon
+  12, 15 px, sans filet, en bas à droite ; il reprend le verbe du bouton (« Confirmer » →
+  « Proposition confirmée. »).
+- **Dates** : une date de fait se dit en entier, « Sam. 05/12/2026 » (`formatDay`,
+  `lib/utils/day.ts`, Europe/Paris) ; dans une source ou un historique, en court :
+  « le 14/10 », et avec l'heure « 19/10, 11:16 » (`formatShortDay`, `formatShortInstant`).
+  `Timestamp` reste pour les instants détaillés (« 11 oct. 2026 à 16:42 »).
+- **Durées et questions par point d'ordre du jour** (formulaire de call) : gardées, mais
+  **repliées** derrière « Préparer en détail ».
+- **Page privée** : à terme **un lien par personne et par projet** (proto), construit en
+  dernier ; d'abord, le même habillage pour les liens existants (`/m`, `/p`, `/f`…).
+
 ### Action principale d'une carte
 
 Une seule action pleine (`variant="default"`) par carte, le reste en contour.
@@ -502,32 +547,26 @@ depuis un sélecteur… Il n'existe **pas** d'autre apparence de modale ; `Dialo
 n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
 `ConfirmDialog` (`components/ui/`), jamais par un panneau blanc refait à la main.
 
-- `DialogContent` (`components/ui/dialog.tsx`), d'après une référence fournie par Sacha
-  le 27/09/2026 : la page derrière est seulement floutée, **sans voile** : elle reste
-  blanche, le panneau noir suffit au contraste ; le panneau est sombre et translucide
-  (`--surface-glass`, noir à 82 % : 90 % était trop sombre ; les gris de texte du
-  panneau sont éclaircis d'un cran pour rester à 4,5:1), arrondi 16 px (`rounded-3xl`), en bas pleine largeur sur mobile.
-  **Deux flous** (demande de Sacha, 27/09/2026, ils n'en faisaient qu'un avant) : la page
-  derrière, `--glass-blur` (4 px ; 8 px avant, jugé trop flou), léger, les formes de la
-  page restent lisibles ; le panneau lui-même, `--glass-panel-blur` (24 px), plus fort,
-  pour que ce qu'il recouvre ne se lise pas à travers.
-- La classe `.surface-glass` (`app/globals.css`) inverse les tokens dans le panneau :
-  textes blancs, boutons contour sur voile blanc 8 %, bouton principal et action
-  définitive blancs, champs et filets blancs translucides, liste d'un sélecteur
-  (`SearchPicker`) opaque `--po-ink-700`. Aucun composant enfant n'est retouché.
-- **Piège** : un token lu dans une modale et absent de `.surface-glass` y garde sa valeur
-  claire (texte noir sur fond noir). Un composant qui lit un nouveau token et s'affiche
-  en modale → ajouter ce token à `.surface-glass`. Les couleurs brutes de la palette ne
-  s'inversent pas : ne pas les employer dans une modale (ni pour un texte, § 3 quater).
-- Hors périmètre : les panneaux latéraux (`Sheet` : relecture d'un brouillon de PO, ligne
-  de budget, tiroir de navigation mobile), les menus et listes déroulantes en portail
-  (`Select`, `DropdownMenu`, `Popover`, `Tooltip`) restent clairs.
-- **Fondu d'entrée et de sortie** (demande de Sacha, 27/09/2026) : le panneau en
-  opacité, et le **flou de la page monte avec lui** (`backdrop-filter` de 0 à
-  `--glass-blur`, en plus de l'opacité) ; entrée `--duration-base` (180 ms) `--ease-out`,
-  sortie plus courte `--duration-fast` (120 ms). Piège : un flou posé d'un coup, sans
-  transition, fait croire que la page se recharge avant l'arrivée de la modale. Ni
-  glissement ni zoom : rien à couper quand le mouvement est réduit.
+- **Verre clair** depuis le 18/10/2026 (décision C0, proto « Projet complet » ; le verre
+  sombre du 27/09/2026 est abandonné) : `DialogContent` (`components/ui/dialog.tsx`) pose un
+  **voile** `--glass-scrim` (noir à 35 %) sur la page, un flou léger `--glass-blur`, et un
+  panneau `--surface-glass` = `color-mix(in srgb, var(--surface-raised) 88%, transparent)`,
+  flou `--glass-panel-blur` (20 px), filet `--border-default`, rayon 16 px, ombre
+  `--elevation-modal` (`0 24px 60px rgb(0 0 0/.3)`). Largeur **520 px**, **900 px** en
+  `wide` ; en bas pleine largeur sur mobile. En sombre, le même mélange part de la surface
+  sombre (`--surface-raised` sombre) : rien d'autre à faire.
+- La classe `.surface-glass` (`app/globals.css`) **ne réinverse plus** les tokens : le panneau
+  est clair en clair et sombre en sombre, ce qui est posé dedans lit les tokens de la page.
+  Elle ne garde que les rares ajustements d'un panneau translucide (une liste déroulante
+  posée dessus, `--popover`, reste opaque). Un nouveau token n'a donc rien à y déclarer.
+- Hors périmètre : les panneaux latéraux (`Sheet`), les menus et listes déroulantes en
+  portail (`Select`, `DropdownMenu`, `Popover`, `Tooltip`).
+- **Entrée** : opacité et `scale(.97 → 1)` en `--duration-base` (180 ms) `--ease-out`, le flou
+  de la page monte avec le panneau ; sortie en opacité, `--duration-fast`. Mouvement réduit :
+  opacité seule.
+- **Boutons d'une modale ou d'une décision** (décision C0) : le **principal d'abord, à
+  gauche**, puis les secondaires (« Annuler » en dernier), comme le proto. Un seul endroit :
+  `DialogFormActions` et `ReasonForm` ; aucune modale ne range ses boutons à la main.
 
 ### Arrondis
 
