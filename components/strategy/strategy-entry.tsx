@@ -1,11 +1,12 @@
 import { StartStrategyForm } from "@/components/strategy/start-strategy-form";
-import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
+import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
+import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
-import type { StrategyCallSheetData } from "@/lib/strategy/call-prep";
+import type { CallPrepDefaults } from "@/lib/calls/prep/types";
 import { stageTone } from "@/lib/ui/state-tones";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,7 @@ export function StrategyEntry({
   };
   callReportCount: number;
   canEdit: boolean;
-  callSheet: StrategyCallSheetData | null;
+  callSheet: CallPrepDefaults | null;
 }) {
   const t = fr.strategyEntry;
   return (
@@ -84,11 +85,13 @@ export function StrategyEntry({
           <div className="flex flex-wrap gap-2">
             {/* In a card, preparing an exchange is the main action
                 (Sacha, 14/10/2026). */}
-            <StrategyCallSheet
-              projectId={projectId}
-              data={callSheet}
+            <CallPrepLauncher
+              label={t.prepare}
+              title={t.call.title}
               variant="default"
-            />
+            >
+              <CallPrepForm defaults={callSheet} />
+            </CallPrepLauncher>
             <StartStrategyForm projectId={projectId} />
           </div>
         </div>

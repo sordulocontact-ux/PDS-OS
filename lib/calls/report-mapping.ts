@@ -26,6 +26,20 @@ export type ReportItemRow = Pick<
 
 type Draft = Omit<ItemInsert, "organization_id" | "report_id" | "position">;
 
+/** The points of a call's agenda (calls.agenda), in order. */
+export function agendaTopicsOf(agenda: unknown): string[] {
+  if (!Array.isArray(agenda)) return [];
+  return agenda.flatMap((item: unknown) =>
+    item &&
+    typeof item === "object" &&
+    "topic" in item &&
+    typeof item.topic === "string" &&
+    item.topic.trim()
+      ? [item.topic.trim()]
+      : [],
+  );
+}
+
 function location(at: QuoteLocation) {
   return at.status === "timed"
     ? { located: "timed", start_seconds: at.start, end_seconds: at.end }
@@ -35,8 +49,16 @@ function location(at: QuoteLocation) {
 export function toReportItemRows(
   report: LocatedCallReport,
   ids: { organizationId: string; reportId: string },
+  // The call's agenda, in order: a key named by PO (p1, p2…) becomes the
+  // point's words; an unknown key, nothing (said outside the agenda).
+  agenda: string[] = [],
 ): ItemInsert[] {
   const { brief, strategy } = report;
+  const pointOf = (key: string | null) => {
+    const index =
+      key && /^p\d+$/.test(key.trim()) ? Number(key.trim().slice(1)) - 1 : -1;
+    return agenda[index] ?? null;
+  };
   const drafts: Draft[] = [
     ...report.decided.map((x) => ({
       kind: "decided",
@@ -44,6 +66,7 @@ export function toReportItemRows(
       who: x.who,
       why: x.why,
       quote: x.quote,
+      agenda_topic: pointOf(x.topic),
       ...location(x.at),
     })),
     ...report.open.map((x) => ({
@@ -51,6 +74,7 @@ export function toReportItemRows(
       what: x.what,
       why: x.why,
       quote: x.quote,
+      agenda_topic: pointOf(x.topic),
       ...location(x.at),
     })),
     ...report.nextActions.map((x) => ({
@@ -59,6 +83,7 @@ export function toReportItemRows(
       who: x.who,
       why: x.why,
       quote: x.quote,
+      agenda_topic: pointOf(x.topic),
       ...location(x.at),
     })),
     ...(["objective", "timing"] as const).flatMap((kind) => {
@@ -169,13 +194,20 @@ export function fromReportItemRows(
       what: r.what,
       who: r.who,
       why: r.why,
+      topic: null,
       ...base(r),
     })),
-    open: of("open").map((r) => ({ what: r.what, why: r.why, ...base(r) })),
+    open: of("open").map((r) => ({
+      what: r.what,
+      why: r.why,
+      topic: null,
+      ...base(r),
+    })),
     nextActions: of("next_action").map((r) => ({
       what: r.what,
       who: r.who,
       why: r.why,
+      topic: null,
       ...base(r),
     })),
     brief: {

@@ -12,6 +12,7 @@ export { IconDisc } from "./disc";
 export { IconDots } from "./dots";
 export { IconDownload } from "./download";
 export { IconExternalLink } from "./external-link";
+export { IconGrip } from "./grip";
 export { IconMenu } from "./menu";
 export { IconRefresh } from "./refresh";
 export { IconSidebar } from "./sidebar";

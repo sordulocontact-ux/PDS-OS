@@ -1,33 +1,53 @@
 import "server-only";
 
 import type { BudgetLine } from "@/lib/budget/types";
-import { nextRoundHourInput } from "@/lib/calls/format";
+import { callPrepDefaults } from "@/lib/calls/prep/defaults";
+import type { CallPrepDefaults } from "@/lib/calls/prep/types";
+import { fr } from "@/lib/i18n/fr";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import type { ProjectDetail } from "@/lib/projects/types";
 import {
   strategyCallPurpose,
   strategyCallTopics,
-  type StrategyCallSheetData,
 } from "@/lib/strategy/call-prep";
 import type { StrategyData } from "@/lib/strategy/queries";
 
-/** What « Préparer un échange » of the Stratégie opens with. */
+/**
+ * What the common call form of the Stratégie opens with: one point per
+ * dimension still open, the owner, the creative team and the artist.
+ */
 export async function strategySheetData(
   project: Pick<ProjectDetail, "id" | "ownerName" | "artistName">,
   data: StrategyData,
   budgetLines: BudgetLine[],
-): Promise<StrategyCallSheetData> {
+): Promise<CallPrepDefaults> {
+  const t = fr.callPrep.kinds;
   const topics = strategyCallTopics({ ...data, budgetLines });
   const creatives = await listProjectCreatives(project.id);
-  const people = [
-    project.ownerName,
-    ...creatives.map((c) => c.name),
-    project.artistName,
-  ].filter((name): name is string => Boolean(name?.trim()));
-  return {
-    topics,
-    purpose: strategyCallPurpose(topics),
-    people: [...new Set(people)],
-    defaultOccurredAt: nextRoundHourInput(new Date()),
-  };
+  return callPrepDefaults({
+    kind: "strategy",
+    projectId: project.id,
+    noun: "exchange",
+    title: t.strategy.title,
+    points: topics.map((x) => ({
+      key: x.key,
+      topic: x.topic,
+      minutes: x.minutes,
+      questions: x.questions,
+    })),
+    proposal: {
+      personIds: creatives.map((c) => c.personId),
+      names: [project.ownerName, project.artistName].filter(
+        (name): name is string => Boolean(name?.trim()),
+      ),
+    },
+    goal: strategyCallPurpose(topics),
+    facts: [
+      {
+        label: fr.callPrep.documents,
+        value: t.strategy.documents(project.artistName || null),
+      },
+      { label: t.subjects, value: t.strategy.subjects },
+    ],
+  });
 }

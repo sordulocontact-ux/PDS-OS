@@ -18,6 +18,8 @@ import { auth } from "./auth";
 import { briefRequests } from "./brief-requests";
 import { budget } from "./budget";
 import { calls } from "./calls";
+import { callPrep } from "./call-prep";
+import { meeting } from "./meeting";
 import { catalog } from "./catalog";
 import { catalogFiles } from "./catalog-files";
 import { contracts } from "./contracts";
@@ -119,6 +121,8 @@ export const fr = {
   auth,
   shell,
   calls,
+  callPrep,
+  meeting,
   catalog,
   framing,
   framingGuide,

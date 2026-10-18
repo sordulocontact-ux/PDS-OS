@@ -2,53 +2,40 @@
 
 import { useState } from "react";
 
+import type { PrepTopic } from "@/lib/calls/prep/types";
 import {
   designCallPurpose,
   designCallTopics,
   type DesignCallSheetData,
 } from "@/lib/design/call-prep";
 
-const flip = (set: ReadonlySet<string>, id: string) => {
-  const next = new Set(set);
-  if (next.has(id)) next.delete(id);
-  else next.add(id);
-  return next;
-};
-
 /**
- * The chosen deliverables of a creative exchange and what follows from them:
- * the agenda (a topic the person removed stays removed when the choice
- * changes) and the objective, until the person rewrites it.
+ * The deliverables a creative exchange is about and what follows from them:
+ * PO's points (the common form keeps what the person did with them) and the
+ * objective, until the person rewrites it in the form.
  */
 export function useDesignCallAgenda(data: DesignCallSheetData) {
-  const [selected, setSelected] = useState(() => new Set(data.selected));
-  const [removed, setRemoved] = useState(() => new Set<string>());
-  const [purpose, setPurpose] = useState(data.purpose);
-  const [purposeEdited, setPurposeEdited] = useState(false);
-
-  const topics = designCallTopics(data, [...selected]).map((x) => ({
-    ...x,
-    id: x.key,
-  }));
-  const kept = new Set(
-    topics.map((x) => x.id).filter((id) => !removed.has(id)),
+  const [selected, setSelected] = useState<ReadonlySet<string>>(
+    () => new Set(data.selected),
   );
-
+  const ids = [...selected];
+  const agenda: PrepTopic[] = designCallTopics(data, ids).map((x) => ({
+    key: x.key,
+    topic: x.topic,
+    minutes: x.minutes,
+    questions: x.questions,
+  }));
   return {
     selected,
-    chosen: data.deliverables.filter((d) => selected.has(d.id)),
-    topics,
-    kept,
-    purpose,
-    toggleDeliverable: (id: string) => {
-      const next = flip(selected, id);
-      setSelected(next);
-      if (!purposeEdited) setPurpose(designCallPurpose(data, [...next]));
-    },
-    toggleTopic: (id: string) => setRemoved((set) => flip(set, id)),
-    editPurpose: (value: string) => {
-      setPurpose(value);
-      setPurposeEdited(true);
-    },
+    ids: data.deliverables.filter((d) => selected.has(d.id)).map((d) => d.id),
+    agenda,
+    goal: designCallPurpose(data, ids),
+    toggle: (id: string) =>
+      setSelected((set) => {
+        const next = new Set(set);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      }),
   };
 }
