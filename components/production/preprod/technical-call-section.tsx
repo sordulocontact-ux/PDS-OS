@@ -3,12 +3,11 @@ import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
+import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
+import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
+import { technicalCallDefaults } from "@/lib/production/call-prep-defaults";
 import {
   TECHNICAL_TOPICS,
-  technicalCallDocuments,
-  technicalCallPeople,
-  technicalCallPurpose,
-  technicalCallTopics,
   technicalTopicLabel,
   type TechnicalCallInput,
 } from "@/lib/production/preprod/call-topics";
@@ -18,7 +17,6 @@ import { AddCallItemButton } from "./add-call-item-button";
 import type { Member } from "@/lib/framing/related";
 import type { NetworkOption } from "@/lib/production/sheet";
 import { CallItems } from "./call-items";
-import { TechnicalCallLauncher } from "./technical-call-launcher";
 
 const t = fr.productionPreprod.call;
 
@@ -27,7 +25,7 @@ const t = fr.productionPreprod.call;
  * produced, topic by topic. PO's proposals (from a call's report) wait for a
  * person; a person may also note a point during or after the call.
  */
-export function TechnicalCallSection({
+export async function TechnicalCallSection({
   projectId,
   input,
   calls,
@@ -62,21 +60,21 @@ export function TechnicalCallSection({
       t.otherTopic,
     ]),
   ];
-  const launcher =
-    canOrganize && withLauncher ? (
-      <TechnicalCallLauncher
-        projectId={projectId}
-        data={{
-          sheetId,
-          deliverableId: input.data.deliverable.id,
-          deliverableTitle: input.data.deliverable.title,
-          topics: technicalCallTopics(input),
-          purpose: technicalCallPurpose(input.data.deliverable.title),
-          people: technicalCallPeople(input),
-          documents: technicalCallDocuments(input),
-        }}
-      />
-    ) : undefined;
+  const defaults =
+    canOrganize && withLauncher
+      ? await technicalCallDefaults(projectId, input)
+      : null;
+  const launcher = defaults ? (
+    <CallPrepLauncher
+      label={t.prepare}
+      title={t.sheetTitle}
+      body={t.sheetBody}
+      mode="sheet"
+      variant="default"
+    >
+      <CallPrepForm defaults={defaults} />
+    </CallPrepLauncher>
+  ) : undefined;
 
   return (
     <PageSection
