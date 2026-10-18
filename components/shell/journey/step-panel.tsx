@@ -1,131 +1,135 @@
+import { IconLock } from "nucleo-sharp-essential";
+
+import {
+  ResultBanner,
+  StepResultProvider,
+} from "@/components/shell/module/result-banner";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
-import type { JourneyStep } from "@/lib/ui/journey";
+import {
+  isLocked,
+  type JourneyStep,
+  prereqsOf,
+  withModule,
+} from "@/lib/ui/journey";
 import { journeyStatusTone } from "@/lib/ui/state-tones";
+import { formatDay } from "@/lib/utils/day";
+import { cn } from "@/lib/utils";
+
+import { StepMeta } from "./step-meta";
 
 const t = fr.journey;
 
 /**
- * One step of the journey, as the right side of a module: its title
- * and state, why it matters, then who is responsible, who validates, what it
- * needs and what follows (Ibé: « chaque étape a une logique, un responsable,
- * des prérequis et une suite claire »), then its own content.
+ * The parts of an open step, in the order the proto shows them, each only
+ * if given (docs/VISION-UX.md § 4): the reason of a return (signed), the
+ * reported blockers, « À revoir après un changement », PO's box, the result
+ * banner of the last gesture (just above the content, where the gesture
+ * is; ResultBanner by default), the step's content (facts, what is missing, the action), its final
+ * result, the noted informations, the tools (« Signaler un blocage »,
+ * « Noter une information ») and, at the very bottom, « Déjà fait »
+ * (StepHistory).
+ */
+export type StepSlots = {
+  returned?: React.ReactNode;
+  blockers?: React.ReactNode;
+  review?: React.ReactNode;
+  po?: React.ReactNode;
+  flash?: React.ReactNode;
+  result?: React.ReactNode;
+  notes?: React.ReactNode;
+  tools?: React.ReactNode;
+  history?: React.ReactNode;
+};
+
+/**
+ * One step of the journey, as the right side of a module, all in one card
+ * (proto « Projet complet »): its title and state, why it matters, the grid
+ * (who executes, coordinates, validates — or who is responsible — what it
+ * needs, even in another module, and what follows), then its slots. A
+ * locked step says what unlocks it and shows its content read-only (inert):
+ * nothing to do there yet.
  */
 export function StepPanel({
   step,
   steps,
   rootPrereq,
-  blockedLabel,
+  blockedLabel = t.blocked,
   children,
-}: {
+  ...slots
+}: StepSlots & {
   step: JourneyStep;
   steps: JourneyStep[];
   // Shown when the step needs nothing before it.
   rootPrereq?: string;
-  // Replaces the generic « Normalement après… » of a blocked step.
+  // Replaces « Se débloque quand … » (Marketing: « S'ouvre quand … »).
   blockedLabel?: (prereqs: string) => string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
-  const of = (key: string) => steps.find((s) => s.key === key);
-  const pre = step.prereq.map(of).filter((s): s is JourneyStep => Boolean(s));
-  const next = step.next.map(of).filter((s): s is JourneyStep => Boolean(s));
+  const locked = isLocked(step.status);
+  const missing = prereqsOf(step, steps)
+    .filter((p) => !p.done)
+    .map(withModule);
   return (
-    <section
-      aria-labelledby="journey-step-title"
-      className="flex min-w-0 flex-col gap-6"
-    >
-      <div className="flex flex-col gap-4 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+    <StepResultProvider>
+      <section
+        aria-labelledby="journey-step-title"
+        className="flex min-w-0 flex-col gap-3.5 rounded-2xl border border-[color:var(--border-hairline)] bg-card p-5"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
           <h2
             id="journey-step-title"
-            className="text-display-sm font-medium text-balance"
+            className="text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)] font-medium tracking-[var(--type-display-tracking)] text-balance"
           >
             {step.title}
           </h2>
-          <StatusBadge tone={journeyStatusTone[step.status]}>
-            {t.status[step.status]}
-          </StatusBadge>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {step.due && step.status !== "done" && (
+              <span
+                className={cn(
+                  "text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]",
+                  step.alert === "overdue" &&
+                    "font-semibold text-[color:var(--tone-danger-fg)]",
+                )}
+              >
+                {t.meta.due(formatDay(step.due))}
+              </span>
+            )}
+            <StatusBadge tone={journeyStatusTone[step.status]}>
+              {t.status[step.status]}
+            </StatusBadge>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">{step.why}</p>
-        <dl className="grid grid-cols-2 gap-3 rounded-xl bg-[var(--surface-soft)] p-4 text-sm xl:grid-cols-4">
-          <Meta label={t.meta.owner}>
-            {step.owner ? (
-              <>
-                {step.owner.name}
-                <br />
-                <span className="text-muted-foreground">{step.owner.role}</span>
-              </>
-            ) : (
-              "—"
-            )}
-          </Meta>
-          <Meta label={t.meta.validation}>
-            {step.validator ? (
-              <>
-                {step.validator.name}
-                <br />
-                <span className="text-muted-foreground">
-                  {step.validator.role}
-                </span>
-              </>
-            ) : (
-              t.meta.none
-            )}
-          </Meta>
-          <Meta label={t.meta.prereq}>
-            {pre.length === 0
-              ? `✓ ${rootPrereq ?? t.meta.noPrereq}`
-              : pre.map((p) => (
-                  <span
-                    key={p.key}
-                    className={
-                      p.status === "done"
-                        ? "block text-[color:var(--tone-success-fg)]"
-                        : "block text-muted-foreground"
-                    }
-                  >
-                    {p.status === "done" ? "✓" : "○"} {p.title}
-                  </span>
-                ))}
-          </Meta>
-          <Meta label={t.meta.next}>
-            {next.length === 0
-              ? "—"
-              : next.map((n) => (
-                  <span key={n.key} className="block">
-                    {n.title}
-                  </span>
-                ))}
-          </Meta>
-        </dl>
-        {step.status === "blocked" && (
-          <ToneCallout tone="info">
-            {(blockedLabel ?? t.blocked)(
-              pre
-                .filter((p) => p.status !== "done")
-                .map((p) => p.title)
-                .join(" et "),
-            )}
+        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+          {step.why}
+        </p>
+        <StepMeta step={step} steps={steps} rootPrereq={rootPrereq} />
+        {locked && missing.length > 0 && (
+          <ToneCallout tone="info" icon={<IconLock />}>
+            {blockedLabel(missing.join(" et "))}
           </ToneCallout>
         )}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Meta({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-0.5">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="leading-snug break-words">{children}</dd>
-    </div>
+        {slots.returned}
+        {slots.blockers}
+        {slots.review}
+        {slots.po}
+        {/* The last gesture's result, just above where it was made. */}
+        {slots.flash ?? <ResultBanner />}
+        {children &&
+          (locked ? (
+            // Readable, never actionable (VISION-UX § 4).
+            <div inert className="flex flex-col gap-3.5 opacity-70">
+              {children}
+            </div>
+          ) : (
+            children
+          ))}
+        {slots.result}
+        {slots.notes}
+        {!locked && slots.tools}
+        {slots.history}
+      </section>
+    </StepResultProvider>
   );
 }
