@@ -104,10 +104,7 @@ export function LinkJourneyView({
             title={t.quote.title}
             hint={[
               t.quote.description,
-              t.quote.frame(
-                j.envelopeCents !== null ? formatEuros(j.envelopeCents) : null,
-                j.deliveryOn ? formatDate(j.deliveryOn) : null,
-              ),
+              t.quote.frame(j.deliveryOn ? formatDate(j.deliveryOn) : null),
             ]
               .filter(Boolean)
               .join(" ")}

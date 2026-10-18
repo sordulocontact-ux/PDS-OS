@@ -3951,7 +3951,8 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   modifier ensuite la remet en brouillon. **Liens privés** : la société dépose son devis, coche
   l'avancement de sa préproduction, propose des lieux ; le réalisateur écrit et envoie sa
   proposition ; le chef op envoie sa liste matériel (lignes « Besoin ») ; chacun voit ses tâches
-  (`get_production_link_journey`). Notifications `production_organized`, `production_quote_*`,
+  (`get_production_link_journey`, **jamais l'enveloppe interne** : retirée le 18/10/2026, migration
+  `20261018400101`, test `production-link-confidential.test.sql`, règle 21). Notifications `production_organized`, `production_quote_*`,
   `production_direction_*`. Décisions faute de règle (questions à Ibé) : le validateur des devis est
   proposé à la direction générale ; un chargé de production peut organiser toutes les productions du
   projet (droits par projet, pas par livrable).

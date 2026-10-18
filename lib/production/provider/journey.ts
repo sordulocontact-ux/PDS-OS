@@ -9,7 +9,6 @@ const text = z.string().nullable();
 const journeySchema = z.object({
   roles: z.array(z.enum(["company", "director", "dop"])),
   organization: z.enum(["internal", "external"]).nullable(),
-  envelopeCents: z.number().nullable(),
   deliveryOn: text,
   progress: z.record(z.string(), z.boolean()),
   direction: z.object({
