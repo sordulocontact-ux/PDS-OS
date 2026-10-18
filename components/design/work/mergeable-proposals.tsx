@@ -4,11 +4,12 @@ import { useState } from "react";
 
 import { MergeDialog } from "@/components/design/work/merge-dialog";
 import {
-  ProposalCard,
+  ConceptionProposalRow,
   type ProposalView,
-} from "@/components/design/work/proposal-card";
+} from "@/components/design/work/conception-proposal-row";
 import { SplitDialog } from "@/components/design/work/split-dialog";
 import { Button } from "@/components/ui/button";
+import { ProposalRows } from "@/components/ui/proposal-group";
 import { fr } from "@/lib/i18n/fr";
 
 /**
@@ -61,39 +62,34 @@ export function MergeableProposals({
           </Button>
         </div>
       )}
-      <ul className="flex flex-col gap-3">
+      <ProposalRows>
         {proposals.map((p) => (
-          <li key={p.id} className="flex items-start gap-3">
-            {canWrite && proposals.length > 1 && (
-              <input
-                type="checkbox"
-                className="mt-5 size-4 shrink-0 accent-foreground"
-                aria-label={t.pick(p.value)}
-                checked={checked.includes(p.id)}
-                onChange={() => toggle(p.id)}
-              />
-            )}
-            <div className="flex min-w-0 flex-1 flex-col gap-2">
-              <ProposalCard
-                projectId={projectId}
-                proposal={p}
-                canWrite={canWrite}
-                targets={attachTargets}
-              />
-              {canWrite && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="self-start"
-                  onClick={() => setSplitting(p)}
-                >
-                  {fr.conceptionIntents.split.open}
-                </Button>
-              )}
-            </div>
-          </li>
+          <ConceptionProposalRow
+            key={p.id}
+            projectId={projectId}
+            proposal={p}
+            canWrite={canWrite}
+            targets={attachTargets}
+            leading={
+              canWrite &&
+              proposals.length > 1 && (
+                <input
+                  type="checkbox"
+                  className="size-4 shrink-0 accent-foreground"
+                  aria-label={t.pick(p.value)}
+                  checked={checked.includes(p.id)}
+                  onChange={() => toggle(p.id)}
+                />
+              )
+            }
+            extraActions={
+              <Button variant="ghost" size="sm" onClick={() => setSplitting(p)}>
+                {fr.conceptionIntents.split.open}
+              </Button>
+            }
+          />
         ))}
-      </ul>
+      </ProposalRows>
       {merging && (
         <MergeDialog
           projectId={projectId}

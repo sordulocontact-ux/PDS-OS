@@ -10,6 +10,7 @@ import { activationInfluence } from "./activation-influence";
 import { activationPress } from "./activation-press";
 import { activationAgency } from "./activation-agency";
 import { dialogs } from "./dialogs";
+import { decisions } from "./decisions";
 import { artistActivity } from "./artist-activity";
 import { assistant } from "./assistant";
 import { assistantRecords } from "./assistant-records";
@@ -108,6 +109,7 @@ import { work } from "./work";
 import { workflowStatus } from "./workflow-status";
 
 export const fr = {
+  decisions,
   aiUsage,
   ...core,
   errors,

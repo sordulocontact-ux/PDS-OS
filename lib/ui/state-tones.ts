@@ -1104,3 +1104,11 @@ export const journeyStatusTone: Record<JourneyStatus, Tone> = {
   blocked: "neutral",
   upcoming: "neutral",
 };
+
+/** A proposal decided one by one (ProposalRow): waiting for a person is a
+ * warning, confirmed is done, set aside is neutral (never red). */
+export const proposalTone: Record<"proposed" | "kept" | "discarded", Tone> = {
+  proposed: "warning",
+  kept: "success",
+  discarded: "neutral",
+};

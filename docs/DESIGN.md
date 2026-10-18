@@ -494,6 +494,28 @@ Une seule action pleine (`variant="default"`) par carte, le reste en contour.
 - **Brief existant** : « Voir le Brief » est plein, « Mettre à jour le Brief » en contour
   (Sacha, 14/10/2026) ; sans Brief, « Créer le Brief » est plein.
 
+### Décisions, propositions et faits (composants communs, 18/10/2026)
+
+Rendu du proto « Projet complet » (`docs/projet-complet/commons.md` § 3, 6, 7, 10), un seul
+composant par motif, dans `components/ui/` (`docs/COMPOSANTS.md`) :
+
+- **Départ d'une étape = `StartChoices`** : cartes entières cliquables, sans bouton dedans ;
+  la carte « Recommandé » (choisie par le code) est placée **en premier** et la raison, calculée
+  par le code, est écrite **sous la grille**. La règle « l'échange est toujours plein » ci-dessus
+  vaut pour les cartes à bouton qui restent ; une entrée migrée vers `StartChoices` n'a plus de
+  bouton. Un choix de formulaire qui ne déclenche rien = `ChoiceCards variant="list"`.
+- **Proposition = `ProposalRow`** : rien de coché d'avance ; « Confirmer » (contour),
+  « Modifier », « Écarter » (fantômes) ; le texte modifié est **confirmé en l'enregistrant**
+  (bouton « Enregistrer », plus « Confirmer ainsi ») ; « Modifié par … » en gris dans la source
+  (proto), la citation gardée. La pastille « Proposition de PO » de l'ancienne `ProposalCard`
+  disparaît : la ligne dit sa source.
+- **Décision = `DecisionPanel`** : principal d'abord à gauche, puis contour, puis fantôme ;
+  commentaire **obligatoire pour toute issue autre que « oui »** (réserves, modification,
+  précision, refus), erreur rouge au premier essai, jamais de bouton désactivé.
+- **Fait = `FactRow`** : la source **sous** la valeur ; « Modifié par … » en couleur de
+  sélection (fait changé par une personne) ; une personne non désignée = « À choisir » en
+  rouge (`--error`), jamais une supposition.
+
 ### Modale : une seule, « verre »
 
 **Toute modale du site est la fenêtre « verre »** d'Espace Espace (décision de Sacha,

@@ -1,6 +1,6 @@
 import { MergeableProposals } from "@/components/design/work/mergeable-proposals";
-import type { ProposalView } from "@/components/design/work/proposal-card";
-import { PageSection } from "@/components/shell/page-section";
+import type { ProposalView } from "@/components/design/work/conception-proposal-row";
+import { ProposalGroup } from "@/components/ui/proposal-group";
 import { routes } from "@/lib/auth/redirects";
 import type {
   ConceptionData,
@@ -120,7 +120,12 @@ export function TargetProposals({
   );
   if (proposals.length === 0) return null;
   return (
-    <PageSection id="design-proposals" title={t.title} description={t.hint}>
+    <ProposalGroup
+      id="design-proposals"
+      title={t.title}
+      note={t.hint}
+      toConfirm={proposals.length}
+    >
       <MergeableProposals
         projectId={projectId}
         proposals={proposals.map((p) => viewOf(data, p, projectId))}
@@ -128,7 +133,7 @@ export function TargetProposals({
         target={deliverableId ?? DIRECTION_KEY}
         targets={targetsOf(data)}
       />
-    </PageSection>
+    </ProposalGroup>
   );
 }
 
@@ -147,7 +152,12 @@ export function UnassignedProposals({
   if (proposals.length === 0) return null;
   const targets = targetsOf(data);
   return (
-    <PageSection id="design-unassigned" title={t.title} description={t.hint}>
+    <ProposalGroup
+      id="design-unassigned"
+      title={t.title}
+      note={t.hint}
+      toConfirm={proposals.length}
+    >
       <MergeableProposals
         projectId={projectId}
         proposals={proposals.map((p) => viewOf(data, p, projectId))}
@@ -156,6 +166,6 @@ export function UnassignedProposals({
         targets={targets}
         attachTargets={targets}
       />
-    </PageSection>
+    </ProposalGroup>
   );
 }
