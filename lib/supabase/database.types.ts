@@ -16877,6 +16877,10 @@ export type Database = {
         Returns: undefined
       }
       step_tools_can_write: { Args: { p_project_id: string }; Returns: boolean }
+      get_private_link_frame: {
+        Args: { p_kind: string; p_token: string }
+        Returns: Json
+      }
       finish_production_step_by_link: {
         Args: { p_step_id: string; p_token: string }
         Returns: undefined

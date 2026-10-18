@@ -1978,6 +1978,26 @@ date de sortie de la Stratégie, NDA : à décider).
   gardé en empreinte seule, règle 19) — le lien s'affiche une fois à sa création. « Relancer »
   demande un `remindHref` (mailto) : non branché tant que l'e-mail réel ne l'est pas.
 
+### Habillage commun des pages privées (C13 A, 18/10/2026)
+
+- `/m`, `/p`, `/f`, `/s`, `/i` gardent chacune leur jeton et leurs fonctions SQL ; elles partagent
+  le cadre `PortalShell` + `PortalSections` (`components/portal/`, `docs/COMPOSANTS.md`). Le cadre
+  (projet, artiste, format, nom de la personne, responsable du projet et son poste) vient d'une
+  seule fonction `get_private_link_frame(kind, token)` (migration `20261018400301`, anon), qui ne
+  rend **que des noms** — jamais un montant, un statut interne ni un échange (test
+  `production-link-confidential.test.sql`). Un lien expiré, remplacé ou révoqué garde le cadre avec
+  « Ce lien n'est plus valable » et la phrase de la page.
+- Chaque page dit ses cartes (`PortalCardItem` : état `todo` / `waiting` / `done`, action et
+  échéance, place dans le parcours) : une carte pour la fiche, la répartition, l'accord, le dossier
+  du mixeur ; les parts du lien prestataire (`linkJourneyCards` : devis, proposition, avancement,
+  lieux, matériel, tâches), la postproduction restant dessous (`ProviderSpaceView`).
+- **Confidentialité** : le lien de la société de production ne reçoit plus l'enveloppe interne
+  (`get_production_link_journey` remplacée, migration `20261018400101`). Revue des autres liens
+  (18/10/2026) : `/m` (dossier sans tarif du Brief), `/f`, `/s` (parts), `/i` (le cachet du créateur,
+  qui est son propre tarif), `/fs`, `/d` (`assertNoBudget`) ne portent aucun montant interne.
+- À venir (lot 11) : un lien par personne et par projet qui réunit les cartes de chaque workflow
+  (`PortalSections` les range déjà sous un intertitre par workflow).
+
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
 Circuit : l'équipe écrit au **DG**, PO regroupe les doublons, le DG choisit ce qui est

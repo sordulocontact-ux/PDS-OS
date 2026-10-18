@@ -2,7 +2,7 @@
 -- (VISION-UX rule 21; supabase/migrations/20261018400101_production_link_no_envelope.sql).
 -- Run with `supabase test db`.
 begin;
-select plan(3);
+select plan(5);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -85,11 +85,18 @@ insert into vars select 'token', public.create_production_provider_link(pg_temp.
 reset role;
 set local role anon;
 insert into vars select 'journey', public.get_production_link_journey((select v from vars where k = 'token'))::text;
+insert into vars select 'frame', public.get_private_link_frame('provider', (select v from vars where k = 'token'))::text;
 reset role;
 
 select ok((select v::jsonb ? 'deliveryOn' from vars where k = 'journey'), 'the link reads its part of the journey');
 select ok((select not (v::jsonb ? 'envelopeCents') and position('1876543' in v) = 0 from vars where k = 'journey'),
           'the link never carries the internal envelope');
+
+-- The frame of the private page (C13 A): names only.
+select is((select v::jsonb ->> 'owner' from vars where k = 'frame'), 'manager-' || (select v from vars where k = 'tag'),
+          'the frame names the project''s owner as the contact');
+select ok((select position('1876543' in v) = 0 and not (v::jsonb ? 'budget') from vars where k = 'frame'),
+          'the frame carries no internal amount');
 
 select * from finish();
 rollback;

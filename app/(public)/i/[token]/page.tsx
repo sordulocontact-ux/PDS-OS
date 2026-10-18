@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PortalShell } from "@/components/portal/portal-shell";
+import {
+  PortalSections,
+  portalTitle,
+} from "@/components/portal/portal-sections";
 import { PublicAgreement } from "@/components/activations/influence/public-agreement";
 import { getPublicAgreement } from "@/lib/activations/influence/public";
 import { fr } from "@/lib/i18n/fr";
+import { getPortalFrame } from "@/lib/portal/frame";
 
 const t = fr.activationInfluence.public;
 
@@ -21,31 +27,48 @@ export default async function InfluenceAgreementPage({
   const { token } = await params;
   const agreement = await getPublicAgreement(token);
   if (!agreement) notFound();
-  return (
-    <main className="flex flex-1 justify-center bg-muted/40 px-4 py-8 sm:py-16">
-      <div className="flex w-full max-w-lg flex-col gap-5">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-balance">
-            {t.title}
-          </h1>
-          {agreement.state === "open" && (
-            <p className="text-muted-foreground">
-              {t.intro(
-                agreement.content.creator,
-                agreement.content.campaign,
-                agreement.content.project,
-              )}
-            </p>
-          )}
-        </header>
-        {agreement.state === "open" ? (
-          <PublicAgreement token={token} agreement={agreement} />
-        ) : (
-          <p className="rounded-2xl border bg-background p-6 font-medium">
-            {t.states[agreement.state]}
+  const frame = await getPortalFrame("influence", token);
+  if (agreement.state === "expired" || agreement.state === "revoked")
+    return (
+      <PortalShell frame={frame} title={fr.portal.closed}>
+        <p className="text-muted-foreground">{t.states[agreement.state]}</p>
+      </PortalShell>
+    );
+  const open = agreement.state === "open";
+  const cards = [
+    {
+      id: "ps-agreement",
+      title: fr.portal.influence.title,
+      state: open
+        ? ("todo" as const)
+        : agreement.state === "change_requested"
+          ? ("waiting" as const)
+          : ("done" as const),
+      action: { label: fr.portal.influence.action },
+      order: 1,
+      body: open ? (
+        <>
+          <p className="text-muted-foreground">
+            {t.intro(
+              agreement.content.creator,
+              agreement.content.campaign,
+              agreement.content.project,
+            )}
           </p>
-        )}
-      </div>
-    </main>
+          <PublicAgreement token={token} agreement={agreement} />
+        </>
+      ) : (
+        <p className="font-medium">{t.states[agreement.state]}</p>
+      ),
+    },
+  ];
+  return (
+    <PortalShell
+      frame={frame}
+      role={fr.portal.roles.influence}
+      title={portalTitle(cards)}
+    >
+      <PortalSections cards={cards} />
+    </PortalShell>
   );
 }
