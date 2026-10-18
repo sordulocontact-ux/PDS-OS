@@ -423,3 +423,57 @@ Au-delà des six étapes :
       partout où PO est appelé ; fournisseur `anthropic` (`claude-haiku-5-5`, effort `low`, sans
       température, cache des règles de PO) prêt, Mistral reste actif tant que la clé n'est pas fournie
       (migration `20261014100101`, 11 tests pgTAP)
+
+## Projet complet : l'app identique au proto (`docs/protos/projet.html`, 18/10/2026)
+
+Demande de Sacha du 18/10/2026 : porter dans l'app réelle tout le parcours du proto « Projet complet »
+(Cadrage, Plan du projet, Master, Juridique, Marketing, Distribution, Vue d'ensemble, Travail, pages
+privées), en parcours comme en design, tout branché. Branche `feat/projet-complet`, partie de `main`
+(qui contient déjà toute `feat/production-ibe`).
+
+**Inventaire écran par écran** (proto ↔ code, mots exacts, écarts, sous-lots, migrations) :
+`docs/projet-complet/<zone>.md` — `commons` (briques communes), `shell` (coquille, Vue d'ensemble, Travail,
+pages privées), `framing`, `strategy`, `design`, `production`, `activations`, `review`, `master`, `legal`,
+`distribution`. Estimation cumulée des inventaires : ~190 à 220 jours-développeur ; constat commun : le
+fond métier et le SQL couvrent l'essentiel des tickets, l'écart est le **parcours** (patron d'écran unique)
+et le **design**, plus quelques manques par zone.
+
+Décisions de design prises pour ce chantier (`docs/DESIGN.md`) : modale en verre clair du proto ; 13 px
+seulement pour les sources et pastilles ; ton « action » gris (ticket « Architecture globale » : sans
+violet) ; bouton principal d'abord, à gauche ; boutons 40 px / 15 px / 600 ; chevrons pour le seul
+Marketing ; navigation du projet du proto + Budget ; Travail et Validations = mes actions des parcours.
+
+Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, états calculés, textes dans
+`lib/i18n/fr/`, Server Actions par la session, notifications par triggers, `initial`/`defaults` + `stay`) :
+
+- [ ] **0. Briques communes** (`commons.md` § 13) : primitives et tokens, `ModuleHeader` (fil d'Ariane,
+      pilules, faits, « Qui fait quoi »), patron d'étape complet (`StepPanel` 4/5 colonnes, prérequis
+      inter-modules, verrouillée en lecture seule, « Déjà fait »), un seul « Maintenant »
+      (`loadProjectJourneys`), bandeau de résultat, blocages et informations notées (`step_blockers`,
+      `step_notes`), formulaire de call commun, compte rendu par point et résumé aux participants versionné,
+      proposition à trancher une par une, décision avec motif, fait avec source et « Modifier », cartes de
+      versions, cartes de départ « Recommandé », habillage commun des pages privées
+- [ ] **1. Coquille et Vue d'ensemble** (`shell.md`) : navigation du proto avec pastilles « À vous »,
+      Vue d'ensemble (tête, « Maintenant » global, cartes des workflows, dépendances), verrou avant le plan,
+      Travail, Validations, Activité depuis les parcours, navigation mobile en puces
+- [ ] **2. Cadrage et Plan du projet** (`framing.md`) : parcours en 4 étapes (Démarrer, 6 dimensions,
+      Brief, Plan), Plan dans le Cadrage, « Lancer le plan » démarre tous les workflows
+- [ ] **3. Stratégie** (`strategy.md`) : parcours, entrée, propositions une par une sur les 8 dimensions,
+      validation dans l'étape, « Stratégie validée », résumé de l'échange
+- [ ] **4. Conception** (`design.md`) : parcours en 6 étapes du proto, fiches champ par champ, transfert
+- [ ] **5. Production** (`production.md`) : d'abord la fuite de l'enveloppe interne sur le lien de la
+      société ; barre de livrables, « Qui produit ? », « Quelle société ? », mode de préparation, call de
+      production, réalisateur proposé et retenu, devis versionné, préproduction, lieux, contrôle, tournage,
+      rushes, montage, livraison
+- [ ] **6. Activations** (`activations.md`) : liste et activation ouverte, frise, « Maintenant » de
+      l'activation, influence et presse interne/agence, preuve calculée, lien de la créatrice
+- [ ] **7. Suivi & bilan** (`review.md`) : « Où on en est », préparation, rapport figé et PDF, réserves,
+      clôture, notifications
+- [ ] **8. Master** (`master.md`) : parcours sans chevrons, Source, Brief (dates calculées, « Modifier »),
+      Mixage (dossier, tarif, versions, décision), Mastering, Master final, facture
+- [ ] **9. Juridique** (`legal.md`) : démarches en étapes du parcours (Dossier, Suivi, Sortie), questions
+      comme au Cadrage, « Prêt pour la sortie »
+- [ ] **10. Distribution** (`distribution.md`) : parcours en 7 étapes, Préparation lue dans le Master, la
+      Production et le Juridique, gestes regroupés, dates cohérentes depuis le Cadrage
+- [ ] **11. Pages privées réunies par personne** : un lien par personne et par projet, « À vous » / « En
+      attente de PDS » / « Fait » replié
