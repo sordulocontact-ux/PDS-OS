@@ -1104,3 +1104,15 @@ export const journeyStatusTone: Record<JourneyStatus, Tone> = {
   blocked: "neutral",
   upcoming: "neutral",
 };
+
+// A noted information (proto KIND): an information, to confirm, waiting for a
+// decision, decided.
+export const noteStatusTone: Record<
+  "information" | "to_confirm" | "pending_decision" | "decided",
+  Tone
+> = {
+  information: "neutral",
+  to_confirm: "warning",
+  pending_decision: "info",
+  decided: "success",
+};

@@ -1930,6 +1930,38 @@ date de sortie de la Stratégie, NDA : à décider).
   - **Brief de stratégie** : prévisionnel, engagé, réel et à arbitrer, un reste par type ;
     les leviers sans dépense n'y sont plus listés (comptés en une ligne).
 
+### Blocages et informations notées d'une étape (C6, 18/10/2026)
+
+- Tables `step_blockers` et `step_notes` (migration `20261018400201`, tests `step-tools.test.sql`) :
+  projet, module (`framing` … `distribution`, sous-modules du Marketing compris), clé d'étape
+  (`JourneyStep.key`), objet facultatif (livrable, activation). Lecture : `can_see_project` ;
+  aucune écriture directe, tout passe par `report_step_blocker`, `lift_step_blocker`,
+  `note_step_information`, `decide_step_note` (sécurité définie, RLS forcée).
+- **Qui écrit** (décision du 18/10/2026, proto `isMember(me())`) : signaler un blocage et noter
+  une information sont ouverts à **toute l'équipe PDS du projet** (qui voit le projet lancé,
+  `step_tools_can_write`), pas seulement au responsable — ce ne sont pas des écritures d'état,
+  une information ne fait jamais avancer une étape. Lever : la personne qui débloque (membre) ou
+  le responsable, avec une explication obligatoire, jamais supprimé. Décider une information
+  (Confirmer, Décider, Écarter, « Fait foi ») : le responsable seul.
+- Qui débloque : un membre, un contact du Réseau (`PersonPickerField`, contacts de l'équipe du
+  projet en tête) ou un nom seul ; le nom est gardé (`unblocker_name`) si le contact est supprimé.
+- Contradiction : une note qui en contredit une autre partage son `contradiction_group` ; tant
+  qu'aucune ne fait foi, c'est un blocage (compté, callout dans l'étape). « Fait foi » décide
+  celle-ci et écarte les autres (`replaced_by_id`), rien ne s'efface.
+- Notifications par trigger : `step_blocker_reported` (qui débloque + responsable),
+  `step_blocker_lifted` (qui l'a signalé + responsable), `step_note_to_decide` (responsable, si
+  à confirmer, en attente de décision ou contradictoire) ; la cloche ouvre l'étape
+  (`lib/step-tools/href.ts`). Le contrôle des genres de notification est **étendu sans être
+  réécrit** (lecture de la contrainte en place), pour ne pas effacer ceux d'une migration voisine.
+- Suppression d'un projet : les deux tables partent en cascade (comme le reste après
+  `delete_project_row`), vérifié par le test. `ProjectLive` : trigger `zz_project_live`.
+- **Activations** : `activation_blockers` reste la table des blocages d'une activation (catégorie,
+  gravité, impact, date de résolution, journal et statut de l'activation) ; non migrée, elle est
+  **lue avec** les blocages communs pour les pastilles (`loadStepTools().activationBlockers`).
+- Code : `lib/step-tools/` (`model.ts`, `queries.ts` `loadStepTools` une lecture par requête,
+  `actions.ts`), composants `components/shell/module/` (`docs/COMPOSANTS.md`). Branché sur le
+  Juridique (`LegalStepFrame`) ; les autres modules s'y branchent avec leur `StepPanel`.
+
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
 Circuit : l'équipe écrit au **DG**, PO regroupe les doublons, le DG choisit ce qui est
