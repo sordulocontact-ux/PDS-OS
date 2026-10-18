@@ -1,100 +1,165 @@
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
 import { type JourneyStep, nowOf } from "@/lib/ui/journey";
+import { cn } from "@/lib/utils";
+import { formatShortDay } from "@/lib/utils/day";
 
-const t = fr.journey;
+import { WaitingRows } from "./now-waiting";
+
+const t = fr.journey.now;
+
+/** An action with where it is (« Marketing › Production › Pochette »). */
+export type NowItem = { step: JourneyStep; place?: string };
+
+export type NowCardProps = {
+  // The module's journey (variant « module ») or nothing (« overview »).
+  steps: JourneyStep[];
+  viewerName: string | null;
+  // The module's name in the eyebrow (« Marketing › Les 8 dimensions »).
+  moduleLabel?: string;
+  // The step shown below: never repeated (VISION-UX § 4).
+  shownKey?: string;
+  // The viewer's actions in other modules (loadProjectJourneys, elsewhereOf)
+  // — or, in the overview, all of them.
+  elsewhere?: NowItem[];
+  // What others are expected to do elsewhere (the overview's list).
+  waitingElsewhere?: NowItem[];
+  // Blockers the viewer has to lift (C6): title and where.
+  blockers?: Array<{ key: string; title: string; href: string }>;
+  // Per module: « Le Master avance sans vous… », « Le master final est au
+  // Catalogue ».
+  labels?: { waitingTitle: string; finished: string };
+  variant?: "module" | "overview";
+};
 
 /**
- * « Maintenant » (docs/VISION-UX.md § 4): what the viewer has to do in this
- * module, why, and the way to it; else who it waits for. Computed by code for
- * the person looking. It never repeats the step shown below: when `shownKey`
- * is the viewer's own step it is left out, the card disappears if nothing else
- * is theirs, and otherwise reads « Aussi à vous ».
+ * « Maintenant » (docs/VISION-UX.md § 4, proto « Projet complet »), one
+ * logic for every module and the overview: « À vous » (the action, its why,
+ * « Ouvrir l'étape »), « Aussi à vous » when the step shown is already the
+ * viewer's, « À vous, ailleurs » when only another module waits for them,
+ * else « Rien à faire pour vous » and who is expected; blockers to lift, the
+ * due date in the eyebrow. It disappears when the only action of the viewer
+ * is the step shown. Computed by code for the person looking.
  */
 export function NowCard({
   steps,
   viewerName,
+  moduleLabel,
   shownKey,
+  elsewhere = [],
+  waitingElsewhere = [],
+  blockers = [],
   labels,
-}: {
-  steps: JourneyStep[];
-  viewerName: string | null;
-  shownKey?: string;
-  labels?: { waitingTitle: string; finished: string };
-}) {
+  variant = "module",
+}: NowCardProps) {
+  const overview = variant === "overview";
   const all = nowOf(steps);
-  const mine = shownKey ? all.mine.filter((s) => s.key !== shownKey) : all.mine;
-  const waiting = all.waiting;
-  const also = mine.length < all.mine.length;
-  if (also && mine.length === 0) return null;
-  const href = (s: JourneyStep) => s.href;
+  const here = all.mine.filter((s) => s.key !== shownKey);
+  const also = here.length < all.mine.length;
+  const mine: NowItem[] = [
+    ...here.map((step) => ({ step, place: moduleLabel })),
+    ...elsewhere,
+  ];
+  const waiting: NowItem[] = [
+    ...all.waiting.map((step) => ({ step, place: moduleLabel })),
+    ...waitingElsewhere,
+  ];
+  if (also && mine.length === 0 && blockers.length === 0) return null;
   const [first, ...more] = mine;
+  const away = Boolean(first) && here.length === 0 && !overview;
+  const badge = first
+    ? {
+        tone: "info" as const,
+        label: away ? t.elsewhere : also ? t.alsoMine : t.mine,
+      }
+    : blockers.length > 0
+      ? { tone: "danger" as const, label: t.blocker }
+      : { tone: "neutral" as const, label: t.nothing };
   const texts = labels ?? {
-    waitingTitle: t.now.waitingTitle,
-    finished: t.now.finished,
+    waitingTitle: t.waitingTitle,
+    finished: t.finished,
   };
+  const eyebrow = first
+    ? [
+        viewerName,
+        [first.place, first.step.title].filter(Boolean).join(" › "),
+        first.step.due
+          ? t.due(formatShortDay(first.step.due, { bare: true }))
+          : null,
+      ]
+    : [viewerName];
   return (
     <section
-      aria-label={t.now.label}
-      className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-elevation-2"
+      aria-label={t.label}
+      className="flex flex-col gap-3.5 rounded-2xl border border-[color:var(--border-default)] bg-card p-5 shadow-elevation-card"
     >
-      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <StatusBadge size="sm" tone={first ? "info" : "neutral"}>
-          {first ? (also ? t.now.alsoMine : t.now.mine) : t.now.nothing}
-        </StatusBadge>
-        <span>{[viewerName, first?.title].filter(Boolean).join(" · ")}</span>
+      <div className="flex flex-wrap items-center gap-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+        <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+        <span>{eyebrow.filter(Boolean).join(" · ")}</span>
       </div>
-      {first ? (
-        <>
-          <h2 className="text-display-sm font-medium text-balance">
-            {first.actor?.todo}
-          </h2>
-          <p className="text-sm text-muted-foreground">{first.why}</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <ViewLink href={href(first)} className={buttonVariants()}>
-              {t.now.open}
-            </ViewLink>
-            {more.length > 0 && (
-              <span className="text-sm text-muted-foreground">
-                {t.now.others(
-                  more.length,
-                  more.map((s) => s.actor?.todo.toLowerCase()).join(" · "),
-                )}
-              </span>
-            )}
-          </div>
-        </>
-      ) : (
-        <h2 className="text-display-sm font-medium text-balance">
-          {waiting.length > 0 ? texts.waitingTitle : texts.finished}
-        </h2>
+      <h2
+        className={cn(
+          "font-medium tracking-[var(--type-display-tracking)] text-balance",
+          overview
+            ? "text-[length:var(--type-display-sm)] leading-[var(--type-display-sm-lh)]"
+            : "text-[length:var(--type-figure-lg)] leading-[var(--type-figure-lg-lh)]",
+        )}
+      >
+        {first
+          ? first.step.actor?.todo
+          : overview
+            ? t.allDone
+            : waiting.length > 0
+              ? texts.waitingTitle
+              : texts.finished}
+      </h2>
+      {first && !overview && (
+        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+          {first.step.why}
+        </p>
       )}
-      {waiting.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {waiting.slice(0, first ? 2 : 3).map((s) => (
-            <li
-              key={s.key}
-              className="flex items-center gap-3 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 text-sm"
-            >
-              <span className="min-w-0 flex-1">
-                {t.now.waitFor(s.actor?.name ?? "—")}
-                {s.actor?.viaLink && (
-                  <span className="text-muted-foreground"> ({t.viaLink})</span>
-                )}
-                {" : "}
-                {s.actor?.todo.toLowerCase()}
-              </span>
-              <ViewLink
-                href={href(s)}
-                className={buttonVariants({ variant: "ghost", size: "sm" })}
-              >
-                {t.now.see}
-              </ViewLink>
-            </li>
-          ))}
-        </ul>
+      {!first && overview && (
+        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+          {t.othersMove}
+        </p>
+      )}
+      {first && (
+        <div className="flex flex-wrap items-center gap-3">
+          <ViewLink href={first.step.href} className={buttonVariants()}>
+            {overview ? t.openShort : t.open}
+          </ViewLink>
+          {more.length > 0 && (
+            <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+              {t.others(
+                more.length,
+                more
+                  .map(
+                    (m) =>
+                      `${m.step.actor?.todo.toLowerCase()} (${
+                        overview || m.place !== moduleLabel
+                          ? (m.place ?? m.step.title)
+                          : m.step.title
+                      })`,
+                  )
+                  .join(" · "),
+              )}
+            </span>
+          )}
+        </div>
+      )}
+      {blockers.length > 0 && (
+        <ToneCallout tone="danger">
+          {t.blockers(
+            blockers.length,
+            blockers.map((b) => b.title).join(" · "),
+          )}
+        </ToneCallout>
+      )}
+      {!overview && waiting.length > 0 && (
+        <WaitingRows items={waiting.slice(0, first ? 2 : 3)} />
       )}
     </section>
   );

@@ -1,7 +1,9 @@
+import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { NowCard } from "@/components/shell/journey/now-card";
 import { StepPanel } from "@/components/shell/journey/step-panel";
 import { fr } from "@/lib/i18n/fr";
+import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import type { LegalStepKey } from "@/lib/ui/legal-steps";
 import { routes } from "@/lib/auth/redirects";
@@ -21,14 +23,24 @@ export async function LegalStepFrame({
   stepKey: LegalStepKey;
   children: React.ReactNode;
 }) {
-  const { steps, viewerName } = await legalJourneyContext(projectId);
+  const [{ steps, viewerName }, journeys] = await Promise.all([
+    legalJourneyContext(projectId),
+    loadProjectJourneys(projectId),
+  ]);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
   const empty = step.status === "blocked" && stepKey === "tracking";
   return (
-    <div className="flex flex-col gap-6 pt-6">
-      <NowCard steps={steps} viewerName={viewerName} shownKey={stepKey} />
-      <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="flex flex-col gap-5">
+      <ProjectHeader projectId={projectId} steps={steps} />
+      <NowCard
+        steps={steps}
+        viewerName={viewerName}
+        moduleLabel={fr.shell.project.sidebar.legal}
+        shownKey={stepKey}
+        elsewhere={elsewhereOf(journeys, steps)}
+      />
+      <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
         <JourneySpine
           steps={steps}
           openKey={stepKey}
