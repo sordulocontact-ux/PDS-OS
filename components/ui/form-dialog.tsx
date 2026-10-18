@@ -37,7 +37,9 @@ export function FormDialog({
       {trigger}
       <DialogContent
         closeLabel={closeLabel}
-        className={size === "wide" ? "sm:max-w-2xl" : undefined}
+        className={
+          size === "wide" ? "sm:max-w-[var(--dialog-width-wide)]" : undefined
+        }
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

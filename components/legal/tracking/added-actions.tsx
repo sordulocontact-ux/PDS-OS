@@ -24,7 +24,7 @@ export function AddedActions({
   return (
     <ToneCallout
       tone="action"
-      className="flex flex-wrap items-center justify-between gap-3"
+      contentClassName="flex flex-wrap items-center justify-between gap-3"
     >
       <span>{t.body(count)}</span>
       <Button

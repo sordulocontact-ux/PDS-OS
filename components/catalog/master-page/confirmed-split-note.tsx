@@ -33,7 +33,7 @@ export function ConfirmedSplitNote({
       mine.has(key(l.name, Math.round(l.units / 100) / 100)),
     );
   return (
-    <ToneCallout tone="success" className="flex flex-col gap-2">
+    <ToneCallout tone="success" contentClassName="flex flex-col gap-2">
       <span>
         {t.title(confirmed.projectTitle, confirmed.version)}{" "}
         {same ? t.same : t.differs}

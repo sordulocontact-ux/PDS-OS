@@ -29,17 +29,21 @@ const Toaster = ({ ...props }: ToasterProps) => {
           <IconLoader className="size-4 animate-spin" />
         ),
       }}
+      // The proto's toast (docs/DESIGN.md § 4, C0): ink background, light
+      // text, no border, radius 12, 15 px. Sonner's own sheet is not in a
+      // layer, so the sizes need Tailwind's important flag to win.
       style={
         {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
+          "--normal-bg": "var(--surface-inverse)",
+          "--normal-text": "var(--control-primary-fg)",
+          "--normal-border": "transparent",
+          "--border-radius": "var(--radius-2xl)",
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast:
+            "cn-toast !gap-2.5 !px-4 !py-3 !text-body-sm !font-medium !shadow-elevation-card",
         },
       }}
       {...props}

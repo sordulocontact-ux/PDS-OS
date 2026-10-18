@@ -93,10 +93,11 @@
   --tone-danger-bg: #fce1df;
   --tone-danger-fg: #9a1b1b;
   /* Réservé à l'action qui attend précisément la personne connectée (valider
-     un Brief, une Stratégie…) : plus voyant que warning, qui couvre tout ce
-     qui attend quelqu'un d'autre (transmis, invité, proposé). */
-  --tone-action-bg: #ece1fb;
-  --tone-action-fg: #4c1d9e;
+     un Brief, une Stratégie…). Gris depuis le 18/10/2026 (décision C0, proto
+     « Projet complet » ; Ibé : « noir, blanc, gris, sans violet ») : le
+     libellé porte le sens, plus la couleur. */
+  --tone-action-bg: var(--po-grey-100);
+  --tone-action-fg: var(--po-ink-800);
 
   /* --- Teintes de catégorie (DESIGN.md § 3 ter) : reconnaître d'un coup
      d'œil une catégorie (étape d'un projet, type) dans un tableau. Aucune
@@ -147,13 +148,16 @@
   --control-primary-bg-hover: var(--po-ink-600);
   --focus-ring: var(--selection);
   --overlay-scrim: rgba(0, 0, 0, 0.4);
-  /* Fenêtre « verre » (DESIGN.md § 4) : page floutée sans voile, panneau
-     sombre translucide. Deux flous depuis le 27/09/2026 (demande de Sacha) :
-     la page derrière, léger (4 px, 8 px avant), et le panneau, plus fort. */
+  /* Fenêtre « verre » (DESIGN.md § 4, « Modale ») : verre clair du proto
+     « Projet complet » depuis le 18/10/2026 (décision C0) — un voile sur la
+     page, un panneau à 88 % de la surface levée, flou 20 px. En sombre, le
+     même mélange part de la surface levée sombre : rien à redéclarer. */
   --glass-blur: 4px;
-  --glass-panel-blur: 24px;
-  /* 82 % (90 % jusqu'au 27/09/2026, jugé trop sombre par Sacha). */
-  --surface-glass: rgb(24 24 24 / 0.82);
+  --glass-panel-blur: 20px;
+  --glass-scrim: rgb(0 0 0 / 0.35);
+  --dialog-width: 520px;
+  --dialog-width-wide: 900px;
+  --surface-glass: color-mix(in srgb, var(--surface-raised) 88%, transparent);
 
   /* --- Graisses : medium au minimum, jamais de regular (DESIGN.md § 2) ---- */
   --fw-medium: 500;
@@ -169,6 +173,9 @@
   --type-display-lg-lh: 42px;
   --type-display-md: 28px;
   --type-display-md-lh: 34px;
+  /* Titre d'un module (h1 de ModuleHeader, proto « Projet complet »). */
+  --type-display-module: 30px;
+  --type-display-module-lh: 36px;
   --type-display-sm: 20px;
   --type-display-sm-lh: 28px;
   --type-figure-xl: 32px;
@@ -187,6 +194,10 @@
   --type-body-sm-lh: 22px;
   --type-caption: 14px;
   --type-caption-lh: 20px;
+  /* 13 px : seulement les sources, les libellés de la grille d'une étape et
+     les pastilles (décision C0, DESIGN.md § 2), jamais un texte courant. */
+  --type-micro: 13px;
+  --type-micro-lh: 18px;
   --type-eyebrow: 13px;
   --type-eyebrow-lh: 16px;
   --type-eyebrow-tracking: 0.09em;
@@ -251,6 +262,11 @@
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.06);
   --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.12);
   --elevation-3: 0 12px 32px rgba(0, 0, 0, 0.16);
+  /* Carte qui se détache (« Maintenant », proto « Projet complet ») : deux
+     couches douces. */
+  --elevation-card: 0 1px 2px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.06);
+  /* La modale verre (DESIGN.md § 4). */
+  --elevation-modal: 0 24px 60px rgb(0 0 0 / 0.3);
 
   /* --- Animation --------------------------------------------------------- */
   /* --ease-standard et --ease-out sont déclarées dans le bloc @theme, pour la
@@ -270,8 +286,8 @@
   --density-row-h: 58px;
   --density-cell-pad-y: 15px;
   --density-cell-pad-x: 18px;
-  --density-control-h: 38px;
-  --density-control-pad-x: 16px;
+  --density-control-h: 40px;
+  --density-control-pad-x: 18px;
   --density-field-h: 40px;
   --density-toolbar-gap: 12px;
   --density-card-pad: 22px;
@@ -412,8 +428,8 @@
   --tone-success-fg: #7fdca0;
   --tone-danger-bg: #3a1616;
   --tone-danger-fg: #ff9b94;
-  --tone-action-bg: #2a1c47;
-  --tone-action-fg: #c9b2ff;
+  --tone-action-bg: #262626;
+  --tone-action-fg: #ededed;
 
   /* --- Teintes de catégorie : même logique que les tons ------------------ */
   --hue-sky-bg: #0e2a3b;
@@ -456,13 +472,13 @@
   --control-primary-fg: #0a0a0a;
   --control-primary-bg-hover: var(--po-white);
   --overlay-scrim: rgba(0, 0, 0, 0.6);
-  /* Sur une page déjà sombre, le verre s'éclaircit pour s'en détacher. */
-  --surface-glass: rgb(40 40 40 / 0.82);
 
   /* --- Élévation : ombres plus denses, sinon invisibles ------------------- */
   --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.5);
   --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.55);
   --elevation-3: 0 12px 32px rgba(0, 0, 0, 0.65);
+  --elevation-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.4);
+  --elevation-modal: 0 24px 60px rgb(0 0 0 / 0.6);
 
   /* --- Pont shadcn : ce qui ne passe pas par un token sémantique ---------- */
   --secondary-foreground: #d4d4d4;
@@ -478,68 +494,13 @@
   --chart-5: #ededed;
 }
 
-/* Liste ou menu posé sur le verre : plus clair que le panneau en sombre
-   (en clair, ink-700 suffit sous un panneau presque noir). */
-:root.dark .surface-glass {
-  --surface-raised: #2c2c2c;
-  --popover: #2c2c2c;
-}
-
-/* Surface « verre » : panneau sombre translucide de toute modale (Dialog,
-   DESIGN.md § 4). Tout ce qui est posé dedans (boutons, saisie, listes,
-   textes) lit ces tokens et s'inverse sans retouche : un token lu dans une
-   modale et absent d'ici y garde sa valeur claire. */
+/* Surface « verre » de toute modale (Dialog, DESIGN.md § 4). Verre clair
+   depuis le 18/10/2026 (décision C0) : le panneau suit le thème de la page,
+   ce qui est posé dedans lit les mêmes tokens que la page ; plus aucune
+   inversion à tenir ici. Seule une liste posée sur le panneau translucide
+   (SearchPicker, menus) reste opaque, pour couvrir ce qui est dessous. */
 .surface-glass {
-  color-scheme: dark;
-  --text-primary: var(--po-white);
-  --text-secondary: var(--po-grey-200);
-  --text-tertiary: var(--po-grey-300);
-  --foreground: var(--po-white);
-  --muted-foreground: var(--po-grey-300);
-  --background: rgb(255 255 255 / 0.08);
-  --card: rgb(255 255 255 / 0.06);
-  --card-foreground: var(--po-white);
-  --muted: rgb(255 255 255 / 0.1);
-  --surface-soft: rgb(255 255 255 / 0.06);
-  --surface-sunken: rgb(255 255 255 / 0.1);
-  --surface-pressed: rgb(255 255 255 / 0.16);
-  --secondary: rgb(255 255 255 / 0.08);
-  --secondary-foreground: var(--po-grey-50);
-  --primary: var(--po-white);
-  --primary-foreground: var(--po-ink-900);
-  --control-primary-bg-hover: var(--po-grey-200);
-  --control-bg-hover: rgb(255 255 255 / 0.14);
-  --control-bg-pressed: rgb(255 255 255 / 0.2);
-  --accent: rgb(255 255 255 / 0.14);
-  --accent-foreground: var(--po-white);
-  --border: rgb(255 255 255 / 0.1);
-  --border-hairline: rgb(255 255 255 / 0.1);
-  --border-strong: rgb(255 255 255 / 0.4);
-  --input: rgb(255 255 255 / 0.12);
-  --surface-tint: rgb(255 255 255 / 0.06);
-  --meter-track: rgb(255 255 255 / 0.12);
-  --meter-fill: var(--po-grey-500);
-  --meter-fill-over: var(--po-white);
-  --text-muted: var(--po-grey-400);
-  --text-link: var(--po-white);
-  --border-default: rgb(255 255 255 / 0.1);
-  --border-field: rgb(255 255 255 / 0.12);
-  --surface-raised: var(--po-ink-700);
-  /* Liste posée sur le panneau (SearchPicker) : opaque, elle couvre ce qui
-     est dessous. */
-  --popover: var(--po-ink-700);
-  --popover-foreground: var(--po-white);
-  --control-fg: var(--po-white);
-  --control-bg: rgb(255 255 255 / 0.08);
-  --control-bg-soft: rgb(255 255 255 / 0.08);
-  --control-primary-bg: var(--po-white);
-  --control-primary-fg: var(--po-ink-900);
-  /* Pas de rouge : l'action définitive reste en « encre pleine », ici blanche. */
-  --destructive: var(--po-white);
-  --destructive-foreground: var(--po-ink-900);
-  --error: #f97066;
-  /* Plus présent sur le panneau sombre. */
-  --selection-bg: rgb(21 93 252 / 0.18);
+  --popover: var(--surface-raised);
 }
 
 /* ==========================================================================
@@ -613,6 +574,12 @@
   --text-display-lg--line-height: var(--type-display-lg-lh);
   --text-display-lg--font-weight: var(--fw-medium);
   --text-display-lg--letter-spacing: var(--type-display-tracking);
+  --text-display-module: var(--type-display-module);
+  --text-display-module--line-height: var(--type-display-module-lh);
+  --text-display-module--font-weight: var(--fw-medium);
+  --text-display-module--letter-spacing: var(--type-display-tracking);
+  --text-micro: var(--type-micro);
+  --text-micro--line-height: var(--type-micro-lh);
   --text-display-md: var(--type-display-md);
   --text-display-md--line-height: var(--type-display-md-lh);
   --text-display-md--font-weight: var(--fw-medium);
@@ -672,6 +639,8 @@
   --shadow-elevation-1: var(--elevation-1);
   --shadow-elevation-2: var(--elevation-2);
   --shadow-elevation-3: var(--elevation-3);
+  --shadow-elevation-card: var(--elevation-card);
+  --shadow-elevation-modal: var(--elevation-modal);
 }
 
 /* Valeurs littérales : Tailwind les publie en variables CSS utilisables

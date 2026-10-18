@@ -51,15 +51,8 @@ export function ConfirmDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         {error && <FormMessage kind="error">{error}</FormMessage>}
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button
-            type="button"
-            variant={onConfirm ? "ghost" : "default"}
-            size="lg"
-            onClick={() => onOpenChange(false)}
-          >
-            {cancelLabel}
-          </Button>
+        {/* The main button first, on the left (DialogFormActions). */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           {onConfirm && (
             <Button
               type="button"
@@ -72,6 +65,14 @@ export function ConfirmDialog({
               {pending ? pendingLabel : confirmLabel}
             </Button>
           )}
+          <Button
+            type="button"
+            variant={onConfirm ? "ghost" : "default"}
+            size="lg"
+            onClick={() => onOpenChange(false)}
+          >
+            {cancelLabel}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

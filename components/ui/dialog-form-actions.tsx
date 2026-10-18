@@ -3,7 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 
-/** « Annuler » then the main button, at the bottom of a dialog form. */
+/** The main button first, on the left, then « Annuler » (docs/DESIGN.md
+ * § 4, « Modale », C0 of 18/10/2026): the one place a dialog form lays out
+ * its buttons. */
 export function DialogFormActions({
   pending,
   submitLabel,
@@ -15,10 +17,7 @@ export function DialogFormActions({
 }) {
   const t = fr.dialogs;
   return (
-    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-      <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-        {t.cancel}
-      </Button>
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <Button
         type="submit"
         size="lg"
@@ -26,6 +25,9 @@ export function DialogFormActions({
         aria-busy={pending || undefined}
       >
         {pending ? t.saving : submitLabel}
+      </Button>
+      <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
+        {t.cancel}
       </Button>
     </div>
   );

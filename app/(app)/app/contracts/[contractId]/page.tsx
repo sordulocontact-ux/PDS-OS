@@ -62,7 +62,7 @@ export default async function ContractPage({
         // Where it comes from in the Juridique, and the way back (JUR-17).
         <ToneCallout
           tone="info"
-          className="flex flex-wrap items-center justify-between gap-3"
+          contentClassName="flex flex-wrap items-center justify-between gap-3"
         >
           <span>
             {origin.kind === "agreement"
