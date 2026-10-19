@@ -1,10 +1,9 @@
-import { IconSquareActivityChart } from "nucleo-sharp-essential";
-
 import { ActivityTimeline } from "@/components/project-history/activity-timeline";
-import { EmptyState } from "@/components/shell/empty-state";
+import { ContentCard } from "@/components/shell/content-card";
+import { ProjectHeader } from "@/components/projects/project-header";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
-import { loadRecentActivity } from "@/lib/insights/activity";
+import { loadProjectActivity } from "@/lib/overview/activity";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -12,29 +11,30 @@ const t = fr.projectHistory.activity;
 
 export const metadata = { title: `${t.title} · ${fr.app.name}` };
 
-// Whole history of the project, rebuilt from the tables' own timestamps
-// (lib/insights/activity.ts): no separate audit log.
+// What happened in the project (proto « Projet complet »): the journals of
+// the project and of its workflows, gathered by date (lib/overview/
+// activity.ts), each line prefixed by its workflow. No separate audit log.
 export default async function ProjectActivityPage({
   params,
 }: PageProps<"/app/projects/[projectId]/activity">) {
   const { projectId } = await params;
-  const [, , events] = await allInOrder([
+  const [access, project] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
-    loadRecentActivity({ projectId, days: 3650, limit: 200 }),
   ]);
-
+  const lines = await loadProjectActivity(project, access);
   return (
-    <div className="grid gap-6">
-      {events.length === 0 ? (
-        <EmptyState
-          icon={IconSquareActivityChart}
-          title={t.emptyTitle}
-          body={t.emptyBody}
-        />
-      ) : (
-        <ActivityTimeline events={events} />
-      )}
+    <div className="flex flex-col gap-5">
+      <ProjectHeader projectId={project.id} facts={[]} />
+      <ContentCard label={fr.projectShell.activity.label}>
+        {lines.length === 0 ? (
+          <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+            {fr.projectShell.activity.empty}
+          </p>
+        ) : (
+          <ActivityTimeline lines={lines} />
+        )}
+      </ContentCard>
     </div>
   );
 }

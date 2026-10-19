@@ -1,4 +1,5 @@
 import { MyActions } from "@/components/overview/my-actions";
+import { ProjectHeader } from "@/components/projects/project-header";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadShellJourneys } from "@/lib/overview/journeys";
@@ -22,5 +23,11 @@ export default async function ProjectWorkPage({
     requireLaunchedProject(projectId),
   ]);
   const all = await loadShellJourneys(project.id);
-  return <MyActions actions={all.mine} empty={fr.projectShell.work.empty} />;
+  return (
+    <div className="flex flex-col gap-5">
+      {/* The proto's head of a steering page: trail and title only. */}
+      <ProjectHeader projectId={project.id} facts={[]} />
+      <MyActions actions={all.mine} empty={fr.projectShell.work.empty} />
+    </div>
+  );
 }
