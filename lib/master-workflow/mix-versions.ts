@@ -1,5 +1,7 @@
 import "server-only";
 
+import { fr } from "@/lib/i18n/fr";
+
 import {
   MIX_DECISIONS,
   MIX_VERSION_STATUSES,
@@ -51,7 +53,7 @@ export async function loadMixVersions(
     supabase
       .from("master_mix_comments")
       .select(
-        "id, version_id, body, created_at, timecode_seconds, author:people!master_mix_comments_created_by_fkey(first_name, last_name)",
+        "id, version_id, body, created_at, timecode_seconds, author:people!master_mix_comments_created_by_fkey(first_name, last_name), contact:network_contacts!master_mix_comments_contact_id_fkey(name)",
       )
       .eq("project_id", projectId)
       .order("created_at"),
@@ -75,7 +77,11 @@ export async function loadMixVersions(
     list.push({
       id: row.id,
       body: row.body,
-      author: name(row.author),
+      // Left by the artist through their private link (rule 21: it stays
+      // in the team).
+      author: row.contact
+        ? fr.masterListen.viaLink(row.contact.name)
+        : name(row.author),
       createdAt: row.created_at,
       timecodeSeconds: row.timecode_seconds,
     });
