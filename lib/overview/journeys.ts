@@ -10,12 +10,17 @@ import {
   type ProjectJourneys,
   placeOf,
 } from "@/lib/journey/types";
+import { planLaunchedAt } from "@/lib/plan/queries";
 import { getProject } from "@/lib/projects/queries";
 
 import { framingFallback } from "./framing-steps";
 
-function gather(journeys: ModuleJourney[]): ProjectJourneys {
-  const actions: ProjectAction[] = journeys.flatMap((journey) =>
+// `acting`: the journeys whose actions count; `journeys`: all of them.
+function gather(
+  acting: ModuleJourney[],
+  journeys: ModuleJourney[] = acting,
+): ProjectJourneys {
+  const actions: ProjectAction[] = acting.flatMap((journey) =>
     journey.steps
       .filter((step) => step.actor)
       .map((step) => ({
@@ -37,8 +42,9 @@ function gather(journeys: ModuleJourney[]): ProjectJourneys {
  * The project's journeys as the shell shows them (navigation counts, the
  * overview, Travail, Validations): loadProjectJourneys, with the Cadrage's
  * four steps read from its current states while the Cadrage has no loader
- * of its own (lib/overview/framing-steps.ts). Once the zone Cadrage plugs
- * its journey into JOURNEY_LOADERS, this adds nothing. Once per request.
+ * of its own (lib/overview/framing-steps.ts; once the zone Cadrage plugs
+ * its journey into JOURNEY_LOADERS, this adds nothing), and before the plan
+ * only the Cadrage's actions. Once per request.
  */
 export const loadShellJourneys = cache(
   async (projectId: string): Promise<ProjectJourneys> => {
@@ -48,10 +54,18 @@ export const loadShellJourneys = cache(
       loadProjectJourneys(projectId),
     ]);
     if (!project || project.stages.length === 0) return all;
-    if (all.journeys.some((journey) => journey.module === "framing"))
-      return all;
-    const framing = await framingFallback(project, access);
-    return gather([framing, ...all.journeys]);
+    const launched = await planLaunchedAt(projectId);
+    const framing = all.journeys.some((j) => j.module === "framing")
+      ? []
+      : [await framingFallback(project, access)];
+    // Before « Lancer le plan » only the Cadrage asks something of anyone
+    // (proto « Projet complet », `myActions`): a workflow begun earlier keeps
+    // its page, but its steps wait for the plan to be counted.
+    const journeys = [...framing, ...all.journeys];
+    return gather(
+      launched ? journeys : journeys.filter((j) => j.module === "framing"),
+      journeys,
+    );
   },
 );
 

@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 // Proto « Projet complet » (`.mnav .chipbtn`): 34 px pills on a hairline,
 // the open one outlined in ink on soft grey.
 const chip =
-  "inline-flex h-8.5 shrink-0 items-center gap-2 rounded-full border px-3 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] whitespace-nowrap no-underline";
+  "relative inline-flex h-8.5 shrink-0 items-center gap-2 rounded-full border px-3 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] whitespace-nowrap no-underline";
 
 /**
  * The project's navigation on a phone (docs/DESIGN.md § 4, « Navigation du

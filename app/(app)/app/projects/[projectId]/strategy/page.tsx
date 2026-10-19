@@ -14,7 +14,6 @@ import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import { StrategyDraftButton } from "@/components/strategy/strategy-draft-button";
 import { StrategyEntry } from "@/components/strategy/strategy-entry";
 import { StrategyPilotage } from "@/components/strategy/strategy-pilotage";
-import { StrategyNeedsFraming } from "@/components/strategy/strategy-needs-framing";
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireApproved } from "@/lib/auth/dal";
@@ -25,7 +24,6 @@ import { canEditProject } from "@/lib/projects/edit-access";
 import { projectKindLabel } from "@/lib/projects/labels";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { importStrategyReport } from "@/lib/strategy/actions/import";
-import { isFramingValidated } from "@/lib/projects/types";
 import { briefReadiness } from "@/lib/strategy/brief";
 import { strategySheetData } from "@/lib/strategy/call-sheet-data";
 import { approvedOf, sentOf } from "@/lib/strategy/documents/model";
@@ -56,23 +54,14 @@ export default async function StrategyPage({
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
-  // The strategy is built on the validated Brief: nothing to open before.
-  if (!isFramingValidated(project.stages)) {
-    return (
-      <StrategyNeedsFraming
-        projectId={projectId}
-        canEdit={canEditProject(access, project)}
-      />
-    );
-  }
-  // The Stratégie starts from the Plan du Projet, never on its own.
+  // The Stratégie starts from the Plan du Projet, never on its own: before
+  // it, the lock of every workflow (proto « Projet complet »).
   const gate = await workflowGate(project, "strategy");
   if (gate)
     return (
       <WorkflowLocked
         projectId={projectId}
-        name={fr.framingIntel.plan.workflows.strategy}
-        {...gate}
+        title={fr.shell.project.sidebar.marketing}
       />
     );
   const [data, budget] = await Promise.all([

@@ -185,3 +185,22 @@ export async function workflowGate(
     absent: plan.data !== null && item.data === null,
   };
 }
+
+/**
+ * Whether the Distribution still waits for « Lancer le plan » (proto
+ * « Projet complet »): no plan launched and nothing recorded for the release
+ * yet. A Distribution begun before the plan existed keeps going. A lock of
+ * the journey, not of security: the tables' RLS is unchanged.
+ */
+export async function distributionLocked(projectId: string): Promise<boolean> {
+  if (await planLaunchedAt(projectId)) return false;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("releases")
+    .select("id")
+    .eq("project_id", projectId)
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error("distributionLocked:", error.message);
+  return data === null;
+}

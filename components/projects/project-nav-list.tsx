@@ -40,7 +40,7 @@ function toBlocks(items: ProjectSection[]): Block[] {
 // Proto « Projet complet » (`.pitem`): 38 px, 15 px grey at rest, sunken
 // grey and ink when open.
 const item =
-  "flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline";
+  "relative flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline";
 
 /** The status dot of an entry, said in its label. */
 export function NavDot({ status }: { status: string }) {
