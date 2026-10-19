@@ -4138,6 +4138,10 @@ plateformes. Ses colonnes de `releases` restent (données), plus rien ne les éc
   « distribué ». **Rouvrir** (motif) ajoute la réouverture sans effacer la décision.
   **Historique** : `distribution_events`, écrit par les fonctions et triggers seuls, rendu en
   phrases (`lib/distribution/history.ts`) : qui, quoi, quand, avec ou sans preuve (CA17).
+- **Plateformes après une clôture avec réserves** (finitions du 19/10) : l'étape est « Fait » avec la
+  marque de réserve, comme le workflow « Terminé » (elle restait « En cours » et proposait encore
+  « Déclarer la disponibilité publique ») ; la page est en lecture seule, un bandeau dit que rouvrir
+  la clôture relance les vérifications.
 - **Statut commun** (`distributionState`, `rules.ts`) : Préparation → Dossier (à soumettre, en
   attente, refusée) → Suivi (dépôt à déclarer — Bloqué si une dépendance manque —, en attente du
   distributeur, corrections) → Plateformes (n sur 5 vérifiées) → Clôture (en attente) → Terminé

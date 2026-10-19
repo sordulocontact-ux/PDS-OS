@@ -266,13 +266,15 @@ function platformsOutcome(
   const p = i.platforms;
   if (p.done)
     return { done: true, summary: t.summary.platformsDone, actor: null };
-  // Closed (with reserves): nobody is asked to verify any more; a reopening
-  // brings the question back.
+  // Closed (with reserves): the step is over like the workflow, with the
+  // reserve mark (never green, never « En cours »); nobody is asked to
+  // verify any more and a reopening brings the question back (recette).
   if (i.closure?.status === "closed")
     return {
-      done: false,
+      done: true,
       summary: t.summary.closedReserves(i.closure.reserves),
       actor: null,
+      reserve: true,
     };
   if (p.noLink)
     return {
