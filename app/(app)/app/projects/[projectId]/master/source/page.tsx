@@ -1,35 +1,31 @@
-import { MasterInventory } from "@/components/master-workflow/master-inventory";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
-import { MixDiagnosis } from "@/components/master-workflow/mix-diagnosis";
-import { routes } from "@/lib/auth/redirects";
-import { asFactStatus } from "@/lib/facts/views";
+import { SourceStep } from "@/components/master-workflow/source/source-step";
 import { fr } from "@/lib/i18n/fr";
-import { loadMasterInventory } from "@/lib/master-workflow/inventory";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
-import { loadStepView } from "@/lib/master-workflow/transmission";
+import { loadSourceStep } from "@/lib/master-workflow/source-step";
 
 export const metadata = {
   title: `${fr.masterJourney.steps.source.title} · ${fr.app.name}`,
 };
 
-// Master, Source: the version each title's mix starts from, confirmed.
+// Master, Source: the version each title's mix starts from, confirmed by
+// the owner, its final vocals awaited or anticipated (ticket § 1 and § 2).
+// The former État du master and « Où en est la préparation » end here.
 export default async function ProjectMasterSourcePage({
   params,
   searchParams,
 }: PageProps<"/app/projects/[projectId]/master/source">) {
-  const [{ projectId }, { state }] = await Promise.all([params, searchParams]);
-  const { access, project } = await masterJourneyContext(projectId);
-  const [inventory, mix] = await Promise.all([
-    loadMasterInventory(project, access),
-    loadStepView(project, access, "mix"),
+  const [{ projectId }, { titre }] = await Promise.all([params, searchParams]);
+  const [{ project }, view] = await Promise.all([
+    masterJourneyContext(projectId),
+    loadSourceStep(projectId),
   ]);
   return (
     <MasterStepFrame projectId={projectId} stepKey="source">
-      <MasterInventory
-        inventory={inventory}
-        basePath={routes.projectMasterStep(projectId, "source")}
-        state={asFactStatus(state)}
-        lead={<MixDiagnosis view={mix} />}
+      <SourceStep
+        view={view}
+        titleId={typeof titre === "string" ? titre : null}
+        ownerName={project.ownerName}
       />
     </MasterStepFrame>
   );

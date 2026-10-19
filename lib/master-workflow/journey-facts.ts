@@ -25,6 +25,10 @@ export type JourneySource = {
   fileName: string;
   confirmedAt: string;
   confirmedBy: string | null;
+  // Declared at the confirmation (null before 19/10/2026: not asked).
+  vocalsFinal: boolean | null;
+  vocalsPending: string | null;
+  plan: "wait" | "anticipate" | null;
 };
 
 export type JourneyTransmission = {
@@ -144,7 +148,7 @@ export async function loadMasterJourneyFacts(project: {
     supabase
       .from("master_flow_sources")
       .select(
-        "master_id, file_id, created_at, file:master_files!master_flow_sources_file_id_fkey(file_name), confirmer:people!master_flow_sources_created_by_fkey(first_name, last_name)",
+        "master_id, file_id, created_at, vocals_final, vocals_pending, plan, file:master_files!master_flow_sources_file_id_fkey(file_name), confirmer:people!master_flow_sources_created_by_fkey(first_name, last_name)",
       )
       .eq("project_id", project.id)
       .order("created_at", { ascending: false }),
@@ -246,6 +250,9 @@ export async function loadMasterJourneyFacts(project: {
           fileName: s.file?.file_name ?? "",
           confirmedAt: s.created_at,
           confirmedBy: nameOf(s.confirmer),
+          vocalsFinal: s.vocals_final,
+          vocalsPending: s.vocals_pending,
+          plan: s.plan === "wait" || s.plan === "anticipate" ? s.plan : null,
         })),
     })),
     brief: b

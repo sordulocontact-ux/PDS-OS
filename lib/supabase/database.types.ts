@@ -8781,7 +8781,10 @@ export type Database = {
           id: string
           master_id: string
           organization_id: string
+          plan: string | null
           project_id: string
+          vocals_final: boolean | null
+          vocals_pending: string | null
         }
         Insert: {
           created_at?: string
@@ -8790,7 +8793,10 @@ export type Database = {
           id?: string
           master_id: string
           organization_id: string
+          plan?: string | null
           project_id: string
+          vocals_final?: boolean | null
+          vocals_pending?: string | null
         }
         Update: {
           created_at?: string
@@ -8799,7 +8805,10 @@ export type Database = {
           id?: string
           master_id?: string
           organization_id?: string
+          plan?: string | null
           project_id?: string
+          vocals_final?: boolean | null
+          vocals_pending?: string | null
         }
         Relationships: [
           {
@@ -8907,6 +8916,7 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          source_file_id: string | null
           stage: string
           status: string
         }
@@ -8926,6 +8936,7 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          source_file_id?: string | null
           stage?: string
           status?: string
         }
@@ -8945,6 +8956,7 @@ export type Database = {
           number?: number
           organization_id?: string
           project_id?: string
+          source_file_id?: string | null
           stage?: string
           status?: string
         }
@@ -15880,6 +15892,19 @@ export type Database = {
       }
     }
     Functions: {
+      refresh_master_transmission_source: {
+        Args: {
+          p_master_id: string
+          p_project_id: string
+          p_source: Json
+          p_stems: Json
+        }
+        Returns: boolean
+      }
+      master_mix_on_working_source: {
+        Args: { p_version_id: string }
+        Returns: boolean
+      }
       ai_quota_day_start: { Args: never; Returns: string }
       ai_quota_resets_at: { Args: never; Returns: string }
       ai_usage_today: {

@@ -18,6 +18,7 @@ import {
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 import type { JourneyTransmission, MasterJourneyFacts } from "./journey-facts";
+import { newerThan, replacedForVocals, vocalsAwaited } from "./source-rules";
 
 const t = fr.masterJourney;
 
@@ -118,10 +119,28 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
     approved(id, "mix") !== null;
   const toConfirm = inFlow.filter((x) => !confirmed(x.id));
   const sourceConfirmed = inFlow.length > 0 && toConfirm.length === 0;
+  // Confirmed on a working version: the final vocals are awaited (the
+  // artist records them), then a newer version asks to replace the source.
+  const awaited = inFlow.filter(
+    (x) => !approved(x.id, "mix") && vocalsAwaited(x.sources[0] ?? null),
+  );
+  const arrived = awaited.filter((x) => newerThan(x.audio, x.sources[0]));
   const sourceActions: Action[] =
     toConfirm.length > 0
       ? ownerDoes(t.todo.confirmSource(toConfirm.length))
-      : [];
+      : arrived.length > 0
+        ? ownerDoes(t.todo.replaceSource)
+        : awaited.length > 0
+          ? [
+              {
+                who: { name: awaited[0].artists || "—" },
+                todo: t.todo.recordVocals(
+                  awaited[0].sources[0]?.vocalsPending ?? null,
+                ),
+              },
+            ]
+          : [];
+  const waitForVocals = awaited.some((x) => x.sources[0]?.plan === "wait");
   const allDeclared =
     inFlow.length > 0 &&
     inFlow.every((x) => approved(x.id, "mix")?.declared ?? false);
@@ -136,7 +155,10 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
             ? t.summary.existingMix(
                 approved(inFlow[0].id, "mix")?.fileName ?? "",
               )
-            : t.summary.source(inFlow[0].sources[0]?.fileName ?? "", false);
+            : t.summary.source(
+                inFlow[0].sources[0]?.fileName ?? "",
+                replacedForVocals(inFlow[0].sources),
+              );
 
   // --- Brief ---------------------------------------------------------------
   const briefDone = facts.brief !== null;
@@ -289,7 +311,9 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
         source: t.prereq.teamSource(day(input.framingValidatedAt)),
       },
     ],
-    mix: [],
+    mix: waitForVocals
+      ? [{ key: "vocals", label: t.prereq.vocals, done: false }]
+      : [],
     mastering: [],
     final: [],
   };
@@ -316,19 +340,28 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
         ? { name: validatorWho.name, role: t.validatorRole.owner }
         : null;
 
+  // Someone outside PDS acts now (an engineer by link, the artist).
+  const isOutside = (actions: Action[], actor: JourneyActor) => {
+    const who = actions.find(
+      (a) => a.who.name === actor.name && a.todo === actor.todo,
+    )?.who;
+    return Boolean(who && (who.viaLink || !who.personId));
+  };
   const status = new Map<MasterStepKey, JourneyStep["status"]>();
   return MASTER_STEP_KEYS.map((key) => {
     const ready =
       PREREQ[key].every((p) => status.get(p) === "done") &&
       // « Source confirmée », not the Source step done: anticipating with a
       // working version opens the Brief.
-      (key !== "brief" || sourceConfirmed || nothingToDo);
+      (key !== "brief" || sourceConfirmed || nothingToDo) &&
+      // Waiting for the final vocals keeps the Mixage closed.
+      (key !== "mix" || !waitForVocals);
     const actor = actorOf(actionsOf[key]);
     const st: JourneyStep["status"] = doneOf[key]
       ? "done"
       : !ready
         ? "blocked"
-        : actor && !actor.viewer && actor.viaLink
+        : actor && !actor.viewer && isOutside(actionsOf[key], actor)
           ? "waiting"
           : "current";
     status.set(key, st);

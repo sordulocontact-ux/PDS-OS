@@ -58,6 +58,7 @@ import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { masterJourney } from "./master-journey";
 import { masterPage } from "./master-page";
+import { masterSource } from "./master-source";
 import { masterWorkflow } from "./master-workflow";
 import { network } from "./network";
 import { notifications } from "./notifications";
@@ -215,6 +216,7 @@ export const fr = {
   legalSplits,
   masterWorkflow,
   masterJourney,
+  masterSource,
   artistActivity,
   masterPage,
   records,

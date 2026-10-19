@@ -93,6 +93,8 @@ export const notifications = {
       `Le mixeur a bien reçu le dossier de « ${project} ».`,
     master_mix_version_received: (actor: string, project: string) =>
       `${actor} a ajouté une version du mix de « ${project} » : vos retours sont attendus.`,
+    master_source_newer: (_actor: string, project: string) =>
+      `Une nouvelle version d'un titre de « ${project} » est arrivée au Catalogue : les voix définitives ? Remplacez la source.`,
     master_mix_approved: (actor: string, project: string) =>
       `${actor} a validé le mix final de « ${project} ».`,
     master_mix_changes_requested: (actor: string, project: string) =>
