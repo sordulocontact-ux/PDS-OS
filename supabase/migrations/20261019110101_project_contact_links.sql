@@ -493,8 +493,9 @@ begin
     select coalesce(jsonb_agg(jsonb_build_object(
              'contactId', nc.id, 'name', nc.name, 'email', nc.email,
              'items', jsonb_array_length(i.items),
+             -- What waits for them; an invitation to a call is not an action.
              'todo', (select count(*) from jsonb_array_elements(i.items) x
-                       where x ->> 'state' = 'todo'),
+                       where x ->> 'state' = 'todo' and x ->> 'kind' <> 'call'),
              'roles', (select coalesce(jsonb_agg(distinct x ->> 'kind'), '[]'::jsonb)
                          from jsonb_array_elements(i.items) x))
            order by nc.name), '[]'::jsonb)

@@ -8,6 +8,7 @@ import {
   StepBlockers,
   StepToolsBlock,
 } from "@/components/shell/module/step-tools-block";
+import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { fr } from "@/lib/i18n/fr";
 import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
@@ -80,6 +81,7 @@ export async function MasterStepFrame({
   const history = masterHistory(rows)
     .filter((item) => item.step === stepKey)
     .reverse();
+  const roles = masterRoles(rows, project.ownerName);
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader
@@ -87,7 +89,15 @@ export async function MasterStepFrame({
         steps={steps}
         facts={facts}
         actions={
-          <WhoDoesWhatButton {...masterRoles(rows, project.ownerName)} />
+          <WhoDoesWhatButton
+            {...roles}
+            personLinks={
+              <ContactLinksSection
+                projectId={projectId}
+                sub={(roles.links?.length ?? 0) > 0}
+              />
+            }
+          />
         }
       />
       <NowCard

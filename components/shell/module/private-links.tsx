@@ -33,7 +33,14 @@ export type PrivateLinkRow = {
  * (number, made when and by whom, sent, opened), « Copier le lien » when
  * it can be given again, « Relancer », « Nouveau lien ».
  */
-export function PrivateLinks({ links }: { links: PrivateLinkRow[] }) {
+export function PrivateLinks({
+  links,
+  children,
+}: {
+  links: PrivateLinkRow[];
+  // Under the module's links: each person's page (`ContactLinksSection`).
+  children?: React.ReactNode;
+}) {
   return (
     <section className="flex flex-col gap-2">
       <h3 className="text-body-md font-semibold">{t.title}</h3>
@@ -92,6 +99,7 @@ export function PrivateLinks({ links }: { links: PrivateLinkRow[] }) {
           </li>
         ))}
       </ul>
+      {children}
     </section>
   );
 }
