@@ -26,7 +26,14 @@ export function masterExchangeDefaults(
       questions: x.questions ?? [],
     })),
     proposal: {
-      personIds: ownerId ? [ownerId] : [],
+      // The owner and who validates the versions (proto `mxPrep`).
+      personIds: [
+        ...new Set(
+          [ownerId, view.brief.validatorPersonId].filter((id): id is string =>
+            Boolean(id),
+          ),
+        ),
+      ],
       contactIds: view.brief.mixContactId ? [view.brief.mixContactId] : [],
     },
     goal: t.goal,

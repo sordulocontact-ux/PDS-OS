@@ -79,6 +79,6 @@ export const conceptionClosure = {
     excluded: (reason: string) => `Resté en Conception : ${reason}`,
     waiting: "Pas encore transféré depuis la Conception",
     startBlocked:
-      "La Production démarre depuis la Conception validée, avec « Passer en Production ».",
+      "La Production d'un livrable s'ouvre quand sa Fiche Livrable est transférée depuis la Conception.",
   },
 };

@@ -470,6 +470,7 @@ export type Database = {
       distribution_anomalies: {
         Row: {
           description: string
+          from_distributor: boolean
           id: string
           kind: string
           organization_id: string
@@ -487,6 +488,7 @@ export type Database = {
         }
         Insert: {
           description: string
+          from_distributor?: boolean
           id?: string
           kind: string
           organization_id: string
@@ -504,6 +506,7 @@ export type Database = {
         }
         Update: {
           description?: string
+          from_distributor?: boolean
           id?: string
           kind?: string
           organization_id?: string
@@ -3724,6 +3727,7 @@ export type Database = {
           call_id: string | null
           created_at: string
           created_by: string | null
+          format: string | null
           id: string
           lever_id: string | null
           note: string | null
@@ -3738,6 +3742,7 @@ export type Database = {
           call_id?: string | null
           created_at?: string
           created_by?: string | null
+          format?: string | null
           id?: string
           lever_id?: string | null
           note?: string | null
@@ -3752,6 +3757,7 @@ export type Database = {
           call_id?: string | null
           created_at?: string
           created_by?: string | null
+          format?: string | null
           id?: string
           lever_id?: string | null
           note?: string | null
@@ -4076,6 +4082,9 @@ export type Database = {
           project_id: string
           started_at: string
           started_by: string | null
+          start_path: string | null
+          start_path_at: string | null
+          start_path_by: string | null
           validation_mode: string
         }
         Insert: {
@@ -4091,6 +4100,9 @@ export type Database = {
           project_id: string
           started_at?: string
           started_by?: string | null
+          start_path?: string | null
+          start_path_at?: string | null
+          start_path_by?: string | null
           validation_mode?: string
         }
         Update: {
@@ -4106,6 +4118,9 @@ export type Database = {
           project_id?: string
           started_at?: string
           started_by?: string | null
+          start_path?: string | null
+          start_path_at?: string | null
+          start_path_by?: string | null
           validation_mode?: string
         }
         Relationships: [
@@ -4531,6 +4546,7 @@ export type Database = {
           notes: string | null
           number: number
           objective: string | null
+          publish_date: string | null
           organization_id: string
           project_id: string
           reference_url: string | null
@@ -4547,6 +4563,7 @@ export type Database = {
           notes?: string | null
           number: number
           objective?: string | null
+          publish_date?: string | null
           organization_id: string
           project_id: string
           reference_url?: string | null
@@ -4563,6 +4580,7 @@ export type Database = {
           notes?: string | null
           number?: number
           objective?: string | null
+          publish_date?: string | null
           organization_id?: string
           project_id?: string
           reference_url?: string | null
@@ -4594,9 +4612,11 @@ export type Database = {
           design_deliverable_id: string
           duration_max_seconds: number | null
           duration_min_seconds: number | null
+          file_format: string | null
           id: string
           intention: string | null
           kind: string
+          new_version_at: string | null
           notes: string | null
           organization_id: string
           post_deadline: string | null
@@ -4627,9 +4647,11 @@ export type Database = {
           design_deliverable_id: string
           duration_max_seconds?: number | null
           duration_min_seconds?: number | null
+          file_format?: string | null
           id?: string
           intention?: string | null
           kind?: string
+          new_version_at?: string | null
           notes?: string | null
           organization_id: string
           post_deadline?: string | null
@@ -4660,9 +4682,11 @@ export type Database = {
           design_deliverable_id?: string
           duration_max_seconds?: number | null
           duration_min_seconds?: number | null
+          file_format?: string | null
           id?: string
           intention?: string | null
           kind?: string
+          new_version_at?: string | null
           notes?: string | null
           organization_id?: string
           post_deadline?: string | null
@@ -4955,6 +4979,8 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          params_confirmed_at: string | null
+          params_confirmed_by: string | null
           organization_id: string
           prelisten: boolean | null
           prelisten_on: string | null
@@ -4973,6 +4999,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          params_confirmed_at?: string | null
+          params_confirmed_by?: string | null
           organization_id: string
           prelisten?: boolean | null
           prelisten_on?: string | null
@@ -4991,6 +5019,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          params_confirmed_at?: string | null
+          params_confirmed_by?: string | null
           organization_id?: string
           prelisten?: boolean | null
           prelisten_on?: string | null
@@ -7561,6 +7591,8 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
           family: string
           id: string
           label: string
@@ -7568,6 +7600,7 @@ export type Database = {
           no_deliverables: boolean
           organization_id: string
           project_id: string
+          proposed_label: string | null
           review_status: string
           source_quote: string | null
           source_report_item_id: string | null
@@ -7579,6 +7612,8 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
           family: string
           id?: string
           label: string
@@ -7586,6 +7621,7 @@ export type Database = {
           no_deliverables?: boolean
           organization_id: string
           project_id: string
+          proposed_label?: string | null
           review_status?: string
           source_quote?: string | null
           source_report_item_id?: string | null
@@ -7597,6 +7633,8 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
           family?: string
           id?: string
           label?: string
@@ -7604,6 +7642,7 @@ export type Database = {
           no_deliverables?: boolean
           organization_id?: string
           project_id?: string
+          proposed_label?: string | null
           review_status?: string
           source_quote?: string | null
           source_report_item_id?: string | null
@@ -8433,7 +8472,9 @@ export type Database = {
       }
       master_briefs: {
         Row: {
+          changed_by: Json
           constraints_text: string | null
+          content_changed_at: string
           created_at: string
           created_by: string | null
           deliverables: string[]
@@ -8452,14 +8493,19 @@ export type Database = {
           mix_v1_due: string | null
           organization_id: string
           project_id: string
+          recorded_at: string | null
+          recorded_by: string | null
           references_text: string | null
           revisions: number | null
+          start_mode: string | null
           updated_at: string
           updated_by: string | null
           validator_person_id: string | null
         }
         Insert: {
+          changed_by?: Json
           constraints_text?: string | null
+          content_changed_at?: string
           created_at?: string
           created_by?: string | null
           deliverables?: string[]
@@ -8478,14 +8524,19 @@ export type Database = {
           mix_v1_due?: string | null
           organization_id: string
           project_id: string
+          recorded_at?: string | null
+          recorded_by?: string | null
           references_text?: string | null
           revisions?: number | null
+          start_mode?: string | null
           updated_at?: string
           updated_by?: string | null
           validator_person_id?: string | null
         }
         Update: {
+          changed_by?: Json
           constraints_text?: string | null
+          content_changed_at?: string
           created_at?: string
           created_by?: string | null
           deliverables?: string[]
@@ -8504,13 +8555,23 @@ export type Database = {
           mix_v1_due?: string | null
           organization_id?: string
           project_id?: string
+          recorded_at?: string | null
+          recorded_by?: string | null
           references_text?: string | null
           revisions?: number | null
+          start_mode?: string | null
           updated_at?: string
           updated_by?: string | null
           validator_person_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "master_briefs_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "master_briefs_created_by_fkey"
             columns: ["created_by"]
@@ -9018,7 +9079,10 @@ export type Database = {
           id: string
           master_id: string
           organization_id: string
+          plan: string | null
           project_id: string
+          vocals_final: boolean | null
+          vocals_pending: string | null
         }
         Insert: {
           created_at?: string
@@ -9027,7 +9091,10 @@ export type Database = {
           id?: string
           master_id: string
           organization_id: string
+          plan?: string | null
           project_id: string
+          vocals_final?: boolean | null
+          vocals_pending?: string | null
         }
         Update: {
           created_at?: string
@@ -9036,7 +9103,10 @@ export type Database = {
           id?: string
           master_id?: string
           organization_id?: string
+          plan?: string | null
           project_id?: string
+          vocals_final?: boolean | null
+          vocals_pending?: string | null
         }
         Relationships: [
           {
@@ -9144,6 +9214,10 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          reopen_reason: string | null
+          reopened_at: string | null
+          reopened_by: string | null
+          source_file_id: string | null
           stage: string
           status: string
         }
@@ -9163,6 +9237,10 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
+          source_file_id?: string | null
           stage?: string
           status?: string
         }
@@ -9182,6 +9260,10 @@ export type Database = {
           number?: number
           organization_id?: string
           project_id?: string
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
+          source_file_id?: string | null
           stage?: string
           status?: string
         }
@@ -9594,11 +9676,14 @@ export type Database = {
           organization_id: string
           package: Json
           project_id: string
+          proposed_mastering_cents: number | null
+          proposed_mix_cents: number | null
           revoke_reason: string | null
           revoked_at: string | null
           revoked_by: string | null
           role: string
           token_hash: string
+          token_secret: string | null
         }
         Insert: {
           acknowledged_at?: string | null
@@ -9617,11 +9702,14 @@ export type Database = {
           organization_id: string
           package: Json
           project_id: string
+          proposed_mastering_cents?: number | null
+          proposed_mix_cents?: number | null
           revoke_reason?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           role: string
           token_hash: string
+          token_secret?: string | null
         }
         Update: {
           acknowledged_at?: string | null
@@ -9640,11 +9728,14 @@ export type Database = {
           organization_id?: string
           package?: Json
           project_id?: string
+          proposed_mastering_cents?: number | null
+          proposed_mix_cents?: number | null
           revoke_reason?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           role?: string
           token_hash?: string
+          token_secret?: string | null
         }
         Relationships: [
           {
@@ -15044,7 +15135,7 @@ export type Database = {
           due_date: string | null
           format: string | null
           id: string
-          lever_id: string
+          lever_id: string | null
           organization_id: string
           production_lead_days: number | null
           project_id: string
@@ -15064,7 +15155,7 @@ export type Database = {
           due_date?: string | null
           format?: string | null
           id?: string
-          lever_id: string
+          lever_id?: string | null
           organization_id: string
           production_lead_days?: number | null
           project_id: string
@@ -15174,7 +15265,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           document_id: string
-          due_on: string
+          due_on: string | null
           id: string
           lift_note: string | null
           lifted_at: string | null
@@ -15190,7 +15281,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           document_id: string
-          due_on: string
+          due_on?: string | null
           id?: string
           lift_note?: string | null
           lifted_at?: string | null
@@ -15618,6 +15709,87 @@ export type Database = {
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      strategy_proposals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          format: string | null
+          id: string
+          item_id: string | null
+          kind: string
+          milestone_kind: string | null
+          offset_days: number | null
+          organization_id: string
+          project_id: string
+          proposed_text: string
+          source_quote: string | null
+          source_report_item_id: string | null
+          source_start_seconds: number | null
+          source_type: string
+          state: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          format?: string | null
+          id?: string
+          item_id?: string | null
+          kind: string
+          milestone_kind?: string | null
+          offset_days?: number | null
+          organization_id: string
+          project_id: string
+          proposed_text: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          state?: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          format?: string | null
+          id?: string
+          item_id?: string | null
+          kind?: string
+          milestone_kind?: string | null
+          offset_days?: number | null
+          organization_id?: string
+          project_id?: string
+          proposed_text?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          state?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_proposals_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "strategy_proposals_item_same_org"
+            columns: ["source_report_item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "report_items"
             referencedColumns: ["id", "organization_id"]
           },
         ]
@@ -16133,6 +16305,53 @@ export type Database = {
         Args: { p_contact_id: string; p_sheet_id: string }
         Returns: undefined
       }
+      reopen_mix_version: {
+        Args: { p_reason: string; p_version_id: string }
+        Returns: undefined
+      }
+      accept_master_rate: {
+        Args: { p_project_id: string; p_role: string }
+        Returns: undefined
+      }
+      take_master_transmission: {
+        Args: {
+          p_mastering_cents?: number
+          p_mix_cents?: number
+          p_token: string
+        }
+        Returns: string
+      }
+      master_transmission_link: {
+        Args: { p_transmission_id: string }
+        Returns: string
+      }
+      record_master_brief: {
+        Args: { p_project_id: string }
+        Returns: string
+      }
+      refresh_master_transmission_source: {
+        Args: {
+          p_master_id: string
+          p_project_id: string
+          p_source: Json
+          p_stems: Json
+        }
+        Returns: boolean
+      }
+      master_mix_on_working_source: {
+        Args: { p_version_id: string }
+        Returns: boolean
+      }
+      add_strategy_item: {
+        Args: {
+          p_format?: string
+          p_kind: string
+          p_offset_days?: number
+          p_project_id: string
+          p_text: string
+        }
+        Returns: string
+      }
       ai_quota_day_start: { Args: never; Returns: string }
       ai_quota_resets_at: { Args: never; Returns: string }
       ai_usage_today: {
@@ -16469,6 +16688,72 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: number
       }
+      declare_distribution_answers: {
+        Args: { p_items: Json; p_project_id: string }
+        Returns: number
+      }
+      attach_distribution_declaration_proof: {
+        Args: {
+          p_declaration_id: string
+          p_proof_name: string
+          p_proof_path: string
+        }
+        Returns: undefined
+      }
+      declare_distribution_corrections: {
+        Args: {
+          p_kind: string
+          p_module: string
+          p_note: string
+          p_project_id: string
+          p_severity: string
+        }
+        Returns: string
+      }
+      confirm_distribution_platform: {
+        Args: { p_platform: string; p_project_id: string; p_url: string | null }
+        Returns: undefined
+      }
+      report_distribution_platform_problem: {
+        Args: {
+          p_module: string
+          p_note: string
+          p_platform: string
+          p_problem: string
+          p_project_id: string
+          p_url: string | null
+        }
+        Returns: string
+      }
+      confirm_distribution_params: {
+        Args: {
+          p_preorder: boolean | null
+          p_preorder_on: string | null
+          p_project_id: string
+          p_validator: string | null
+        }
+        Returns: undefined
+      }
+      distribution_legal_blockers: {
+        Args: { p_project_id: string }
+        Returns: {
+          element: string
+          id: string
+          status: string
+          work: string
+        }[]
+      }
+      distribution_cover: {
+        Args: { p_project_id: string }
+        Returns: {
+          chosen: boolean
+          deliverable_id: string | null
+          delivered_at: string | null
+          sheet_id: string
+          title: string
+          version_number: number | null
+        }[]
+      }
       declare_distribution: {
         Args: {
           p_declared_on?: string
@@ -16758,6 +17043,10 @@ export type Database = {
       }
       check_project_shape: {
         Args: { p_master_ids: string[]; p_music_format: string; p_type: string }
+        Returns: undefined
+      }
+      choose_design_start: {
+        Args: { p_path: string | null; p_project_id: string }
         Returns: undefined
       }
       choose_production_location: {
@@ -17056,6 +17345,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      decide_strategy_proposal: {
+        Args: { p_keep: boolean; p_proposal_id: string; p_text?: string }
+        Returns: undefined
+      }
       decide_validation: {
         Args: {
           p_approve: boolean
@@ -17125,6 +17418,7 @@ export type Database = {
       assign_design_responsible: { Args: { p_person_id: string; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: string }
       set_design_validators: { Args: { p_people: string[]; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: undefined }
       set_design_validation_mode: { Args: { p_mode: string; p_project_id: string }; Returns: undefined }
+      design_is_done: { Args: { p_project_id: string }; Returns: boolean }
       design_is_responsible: { Args: { p_project_id: string }; Returns: boolean }
       design_sheet_can_edit: { Args: { p_sheet_id: string }; Returns: boolean }
       submit_design_direction: {
@@ -17155,6 +17449,10 @@ export type Database = {
       design_is_in_progress: {
         Args: { p_project_id: string }
         Returns: boolean
+      }
+      discard_strategy_item: {
+        Args: { p_item_id: string; p_kind: string }
+        Returns: undefined
       }
       discard_agency_snapshot: {
         Args: { p_snapshot_id: string }

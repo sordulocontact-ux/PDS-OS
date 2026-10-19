@@ -1,0 +1,259 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
+import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
+import { writeBrief, type BriefFields } from "@/lib/master-workflow/brief-row";
+import { loadBriefStep } from "@/lib/master-workflow/brief-step";
+import {
+  BRIEF_DATES,
+  briefDeliverablesOf,
+  type BriefDate,
+} from "@/lib/master-workflow/brief-types";
+import { calendarInOrder, isIsoDate } from "@/lib/master-workflow/calendar";
+import { missingSentence } from "@/lib/master-workflow/brief-rules";
+import { getProject } from "@/lib/projects/queries";
+import { createClient } from "@/lib/supabase/server";
+import { formatShortDay } from "@/lib/utils/day";
+import type { WriteResult } from "@/lib/utils/write-result";
+
+const t = fr.masterBrief;
+
+const text = z
+  .string()
+  .trim()
+  .max(2000)
+  .nullable()
+  .transform((v) => (v ? v : null));
+
+const patchSchema = z
+  .object({
+    mixContactId: z.uuid().nullable(),
+    masteringSame: z.boolean(),
+    masteringContactId: z.uuid().nullable(),
+    revisions: z.number().int().min(0).max(20).nullable(),
+    validatorPersonId: z.uuid().nullable(),
+    mixRateCents: z.number().int().min(0).max(100_000_000).nullable(),
+    masteringRateCents: z.number().int().min(0).max(100_000_000).nullable(),
+    direction: text,
+    references: text,
+    constraints: text,
+    formats: z
+      .string()
+      .trim()
+      .max(500)
+      .nullable()
+      .transform((v) => (v ? v : null)),
+    message: text,
+    deliverables: z.array(z.string()).max(9),
+    startMode: z.enum(["direct", "exchange"]),
+    mixV1Due: z.string().nullable(),
+    mixFinalDue: z.string().nullable(),
+    masteringDue: z.string().nullable(),
+    masterFinalDue: z.string().nullable(),
+  })
+  .partial();
+
+export type BriefPatch = z.input<typeof patchSchema>;
+
+const COLUMNS: Record<
+  keyof z.output<typeof patchSchema>,
+  keyof BriefFields | "start_mode"
+> = {
+  mixContactId: "mix_contact_id",
+  masteringSame: "mastering_same_engineer",
+  masteringContactId: "mastering_contact_id",
+  revisions: "revisions",
+  validatorPersonId: "validator_person_id",
+  mixRateCents: "mix_rate_cents",
+  masteringRateCents: "mastering_rate_cents",
+  direction: "direction",
+  references: "references_text",
+  constraints: "constraints_text",
+  formats: "delivery_formats",
+  message: "engineer_message",
+  deliverables: "deliverables",
+  startMode: "start_mode",
+  mixV1Due: "mix_v1_due",
+  mixFinalDue: "mix_final_due",
+  masteringDue: "mastering_due",
+  masterFinalDue: "master_final_due",
+};
+
+const refresh = (projectId: string) =>
+  revalidatePath(routes.projectMaster(projectId), "layout");
+
+/**
+ * One fact of the Brief changed in place (« Modifier », « Changer », a
+ * deliverable): saved at once with the owner's session. The first change
+ * writes the whole Brief as the project already knows it (engineers,
+ * validator, proposed dates) with this change in it. The dates must follow
+ * each other, said by the code before the database checks it again.
+ */
+export async function saveBriefFact(
+  projectId: string,
+  patch: BriefPatch,
+): Promise<WriteResult> {
+  const id = z.uuid().safeParse(projectId);
+  const parsed = patchSchema.safeParse(patch);
+  const access = await requireApproved();
+  if (!id.success || !parsed.success || !access.organizationId)
+    return { ok: false, error: t.errors.failed };
+  const project = await getProject(id.data);
+  if (!project) return { ok: false, error: t.errors.failed };
+  const p = parsed.data;
+  for (const key of BRIEF_DATES) {
+    const value = p[key];
+    if (value && !isIsoDate(value)) return { ok: false, error: t.errors.date };
+  }
+
+  const step = await loadBriefStep(project, access, null);
+  const b = step.view.brief;
+  const dates = Object.fromEntries(
+    BRIEF_DATES.map((key) => [
+      key,
+      key in p ? (p[key] ?? null) : step.dates[key].value,
+    ]),
+  ) as Record<BriefDate, string | null>;
+  if (!calendarInOrder(dates)) return { ok: false, error: t.orderError };
+
+  const changes: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(p))
+    changes[COLUMNS[key as keyof typeof COLUMNS]] =
+      key === "deliverables" ? briefDeliverablesOf(value as string[]) : value;
+  if (p.masteringSame) changes.mastering_contact_id = null;
+
+  const fields = step.saved
+    ? changes
+    : {
+        mix_contact_id: b.mixContactId,
+        mastering_same_engineer: b.masteringSameEngineer,
+        mastering_contact_id: b.masteringSameEngineer
+          ? null
+          : b.masteringContactId,
+        mix_rate_cents: b.mixRateCents,
+        mastering_rate_cents: b.masteringRateCents,
+        revisions: b.revisions,
+        validator_person_id: b.validatorPersonId,
+        references_text: b.references,
+        direction: b.direction,
+        constraints_text: b.constraints,
+        delivery_formats: b.formats,
+        engineer_message: b.message,
+        deliverables: b.deliverables,
+        mix_v1_due: dates.mixV1Due,
+        mix_final_due: dates.mixFinalDue,
+        mastering_due: dates.masteringDue,
+        master_final_due: dates.masterFinalDue,
+        ...changes,
+      };
+  const supabase = await createClient();
+  const error = await writeBrief(
+    supabase,
+    access.organizationId,
+    id.data,
+    fields as BriefFields,
+  );
+  if (error) {
+    console.error("saveBriefFact:", error.code, error.message);
+    return {
+      ok: false,
+      error:
+        error.code === "42501"
+          ? t.errors.forbidden
+          : error.message.includes("validator_not_in_project")
+            ? t.errors.validator
+            : error.message.includes("calendar_order")
+              ? t.orderError
+              : t.errors.failed,
+    };
+  }
+  refresh(id.data);
+  return { ok: true };
+}
+
+/**
+ * « Commencer directement » / « Préparer un échange »: the choice is kept;
+ * starting directly asks the validator the artistic direction when the
+ * Brief does not have it (a task in their Travail).
+ */
+export async function startBrief(
+  projectId: string,
+  mode: "direct" | "exchange",
+): Promise<WriteResult> {
+  const id = z.uuid().safeParse(projectId);
+  const access = await requireApproved();
+  if (!id.success) return { ok: false, error: t.errors.failed };
+  const done = mode === "direct" ? t.start.started : t.start.exchangeChosen;
+  return withOutcome(id.data, ["master"], done, async () => {
+    const saved = await saveBriefFact(id.data, { startMode: mode });
+    if (!saved.ok || mode === "exchange") return saved;
+    const project = await getProject(id.data);
+    if (!project) return { ok: false, error: t.errors.failed };
+    const step = await loadBriefStep(project, access, null);
+    const validator = step.view.brief.validatorPersonId;
+    const creative = step.questions.toAsk.some(
+      (q) =>
+        q.dimension === "direction" &&
+        q.people.some((x) => x.personId === validator),
+    );
+    if (!validator || !creative) return { ok: true };
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("ask_master_brief_questions", {
+      p_project_id: id.data,
+      p_items: [
+        {
+          dimension: "direction",
+          person_id: validator,
+          task_title: fr.masterWorkflow.questions.taskTitle.direction,
+        },
+      ],
+    });
+    if (error) console.error("startBrief ask:", error.message);
+    refresh(id.data);
+    return { ok: true };
+  });
+}
+
+/**
+ * « Enregistrer le Brief »: never refused silently — what is missing is
+ * said, and a Brief unchanged since it was recorded says so.
+ */
+export async function recordBrief(projectId: string): Promise<WriteResult> {
+  const id = z.uuid().safeParse(projectId);
+  const access = await requireApproved();
+  if (!id.success) return { ok: false, error: t.errors.failed };
+  const project = await getProject(id.data);
+  if (!project) return { ok: false, error: t.errors.failed };
+  const step = await loadBriefStep(project, access, null);
+  const missing = missingSentence(step.missing);
+  if (missing) return { ok: false, error: missing };
+  if (step.recordedAt && !step.dirty)
+    return {
+      ok: false,
+      error: t.nothingChanged(formatShortDay(step.recordedAt)),
+    };
+  return withOutcome(id.data, ["master"], t.recorded, async () => {
+    if (!step.saved) {
+      const saved = await saveBriefFact(id.data, {});
+      if (!saved.ok) return saved;
+    }
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("record_master_brief", {
+      p_project_id: id.data,
+    });
+    if (error) {
+      console.error("recordBrief:", error.code, error.message);
+      return {
+        ok: false,
+        error: error.code === "42501" ? t.errors.forbidden : t.errors.failed,
+      };
+    }
+    refresh(id.data);
+    return { ok: true };
+  });
+}

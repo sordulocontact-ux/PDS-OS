@@ -180,14 +180,20 @@ export const routes = {
   projectFramingBriefPdf: (id: string, version?: number | null) =>
     `/api/projects/${id}/framing-brief${version ? `?version=${version}` : ""}`,
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
-  // The Brief de sortie consolidé (ticket Stratégie § 8).
-  projectStrategyBrief: (id: string) => `/app/projects/${id}/strategy/brief`,
+  // A step of the Stratégie's journey (proto « Projet complet »): start,
+  // dimensions, validation, validated.
+  projectStrategyStep: (id: string, step: string) =>
+    `/app/projects/${id}/strategy/${step}`,
+  // The Brief de sortie, validated by the direction in its step (ticket
+  // Stratégie § 8–9); /strategy/brief redirects there.
+  projectStrategyBrief: (id: string) =>
+    `/app/projects/${id}/strategy/validation`,
   // One stored version of the Brief de sortie (V1, V2…), as it was sent.
   // A strategy document's version by its id: redirects to its page.
   projectStrategyDocument: (id: string, documentId: string) =>
     `/app/projects/${id}/strategy/document/${documentId}`,
   projectStrategyBriefVersion: (id: string, version: number) =>
-    `/app/projects/${id}/strategy/brief?v=${version}`,
+    `/app/projects/${id}/strategy/validation?v=${version}`,
   // A stored version of a strategy document as a PDF file.
   projectStrategyDocumentPdf: (id: string, documentId: string) =>
     `/api/projects/${id}/strategy-documents/${documentId}`,
@@ -205,25 +211,23 @@ export const routes = {
     `/app/projects/${id}/strategy/press-kit${step ? `?step=${step}` : ""}`,
   // A shared external document of the Stratégie, read without an account.
   sharedDocument: (token: string) => `/d/${token}`,
-  // A dimension of the Stratégie open in its work panel.
+  // A dimension of the Stratégie, in « Les 8 dimensions ».
   projectStrategyDimension: (id: string, dimension: string) =>
-    `/app/projects/${id}/strategy?d=${dimension}`,
+    `/app/projects/${id}/strategy/dimensions#dim-${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
+  // A step of the Conception's journey (lib/design/journey.ts).
+  projectDesignStep: (id: string, step: string) =>
+    `/app/projects/${id}/design/${step}`,
   // A validation request of the Conception, to decide (MKT-C2-11).
   projectDesignDecision: (id: string, submissionId: string) =>
     `/app/projects/${id}/design/decisions/${submissionId}`,
   // A creative proposal: redirects to its deliverable's work (MKT-C2-10).
   projectDesignVersion: (id: string, versionId: string) =>
     `/app/projects/${id}/design/versions/${versionId}`,
-  // The Conception's direct work (Chemin B), on one target: a deliverable
-  // (design_deliverables.id) or « direction »; `topic` unfolds one question.
-  projectDesignWork: (id: string, target?: string, topic?: string) => {
-    const query = new URLSearchParams({
-      ...(target ? { d: target } : {}),
-      ...(topic ? { q: topic } : {}),
-    }).toString();
-    return `/app/projects/${id}/design/work${query ? `?${query}` : ""}`;
-  },
+  // Conception › Intentions (the old direct work, Chemin B), on one target:
+  // a deliverable (design_deliverables.id) or « direction », by its anchor.
+  projectDesignWork: (id: string, target?: string) =>
+    `/app/projects/${id}/design/intentions${target ? `#target-${target}` : ""}`,
   // Moodboards and references, one resource linked to any number of targets.
   projectDesignReferences: (id: string) =>
     `/app/projects/${id}/design/references`,
@@ -239,10 +243,10 @@ export const routes = {
   // The Fiches Livrables, then one of them.
   projectDesignSheets: (id: string) => `/app/projects/${id}/design/sheets`,
   projectDesignSheet: (id: string, sheetId: string) =>
-    `/app/projects/${id}/design/sheets/${sheetId}`,
+    `/app/projects/${id}/design/sheets#sheet-${sheetId}`,
   // One deliverable of the Conception, by its anchor.
   projectDesignDeliverable: (id: string, deliverableId: string) =>
-    `/app/projects/${id}/design#deliverable-${deliverableId}`,
+    `/app/projects/${id}/design/home#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
@@ -255,6 +259,12 @@ export const routes = {
     `/app/projects/${id}/release/tracking`,
   projectReleaseOnline: (id: string) => `/app/projects/${id}/release/online`,
   projectReleaseClosure: (id: string) => `/app/projects/${id}/release/closure`,
+  // One step (or view) of the Distribution's journey (lib/ui/distribution-steps.ts).
+  // The delivery file being prepared or decided, as a PDF.
+  projectDistributionDossierPdf: (id: string) =>
+    `/api/projects/${id}/distribution-dossier`,
+  projectReleaseStep: (id: string, slug: string) =>
+    `/app/projects/${id}/release/${slug}`,
   // Specialised workflows next to the 7 steps, one URL per internal step.
   projectMaster: (id: string) => `/app/projects/${id}/master`,
   projectMasterStep: (id: string, step: string) =>

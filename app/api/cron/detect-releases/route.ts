@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
 import { getServerEnv } from "@/lib/env";
+import { releaseIsrcs } from "@/lib/release/isrc";
 import { detectAndRecord } from "@/lib/release/persist";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -49,14 +50,15 @@ export async function GET(request: Request) {
 
   const { data: releases, error } = await supabase
     .from("releases")
-    .select("id, isrc, spotify_url")
-    .not("isrc", "is", null)
+    .select("id, project_id, isrc, spotify_url")
     .order("last_checked_at", { ascending: true, nullsFirst: true });
   if (error) {
     console.error("cron detect-releases:", error.code, error.message);
     return json({ error: "query_failed" }, 500);
   }
 
+  // The Catalogue's ISRC (lib/release/isrc.ts): releases without one wait.
+  const isrcs = await releaseIsrcs(supabase, releases);
   const startedAt = Date.now();
   const summary = {
     total: releases.length,
@@ -73,11 +75,12 @@ export async function GET(request: Request) {
     }
     if (index > 0)
       await new Promise((resolve) => setTimeout(resolve, PAUSE_MS));
-    if (!release.isrc) continue;
+    const isrc = isrcs.get(release.id);
+    if (!isrc) continue;
 
     const outcome = await detectAndRecord(supabase, {
       id: release.id,
-      isrc: release.isrc,
+      isrc,
       spotifyUrl: release.spotify_url,
     }).catch(() => ({ ok: false as const }));
 

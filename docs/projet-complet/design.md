@@ -451,3 +451,31 @@ questions à choix fermés (11/10) ; identité artistique (MKT-C2-04) ; série �
 par élément (ticket § 9, MKT-C2-07) ; taxonomie des références (MKT-C2-09) ; propositions créatives
 versionnées (MKT-C2-10) ; validation globale du dossier et réouverture (MKT-C2-13) ; « Valider avec
 réserves » (MKT-C2-11).
+
+---
+
+## 7. Décisions prises au lot 4 (19/10/2026)
+
+- **Questions à choix fermés (11/10)** : retirées de l'écran ; « Ajouter une intention » = Question
+  (liste fermée) + Intention, comme le proto. `design_intentions.choices` gardée.
+- **Identité artistique (MKT-C2-04)** : hors écran de la Conception (le proto ne l'a pas) ; tables et
+  liens gardés, le Brief créatif la lit toujours.
+- **Série par contenu (ticket § 9, MKT-C2-07)** : la série se décide en bloc (proto) ; les éléments
+  gardent objectif et « Publié le » (`publish_date`, proposé depuis les jalons). Une version déjà
+  envoyée par contenu est décidée d'un coup sur chaque contenu.
+- **Taxonomie des références (MKT-C2-09)** : mots du proto (4 sortes, 3 droits, « À vérifier » par
+  défaut) ; les anciennes valeurs restent lisibles.
+- **Propositions créatives versionnées (MKT-C2-10)** : hors de la Conception (une proposition est une
+  sorte de référence) ; `design_versions` gardée pour la Production, la page d'une version renvoie aux
+  Intentions du livrable.
+- **Validation globale et réouverture (MKT-C2-13)** : retirées ; la Conception est faite quand toutes
+  les fiches sont transférées.
+- **« Valider avec réserves » (MKT-C2-11)** : retiré (ni proto ni ticket pour la Conception).
+- **Valideurs (ticket : « configurable »)** : la direction par défaut, changeable dans « Qui fait
+  quoi » ; plus de réglage dans l'étape. Délégations et auto-approbation : après MVP (ticket).
+- **Fusion / dissociation (ticket § 4)** et **import d'un brief (ticket § 3)** : gardés en actions
+  secondaires des Intentions.
+- **Tournage** : jamais proposé (aucune source structurée) ; les dates de postproduction se calculent
+  dès qu'un tournage ou une livraison existe.
+- **Concept d'un livrable sans intention propre** : proposé depuis la direction de la sortie (il en
+  hérite), source « Direction artistique ».

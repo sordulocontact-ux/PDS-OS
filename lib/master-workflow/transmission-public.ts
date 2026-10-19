@@ -25,6 +25,22 @@ const publicSchema = z.discriminatedUnion("state", [
     acknowledgedAt: z.string().nullable(),
     // The mastering added to the mix link of the same engineer.
     continued: z.boolean().default(false),
+    // The rates PDS estimated for this link's roles, and the ones given
+    // when taking the package (cents; null: not concerned or unknown).
+    estimate: z
+      .object({
+        mix: z.number().nullable().default(null),
+        mastering: z.number().nullable().default(null),
+      })
+      .nullable()
+      .default(null),
+    taken: z
+      .object({
+        mix: z.number().nullable().default(null),
+        mastering: z.number().nullable().default(null),
+      })
+      .nullable()
+      .default(null),
     // Every version of the engineer's stage, newest first, with what the
     // label sent and decided: one entry per version (PROJ-BUG-08).
     versions: z
@@ -40,10 +56,15 @@ const publicSchema = z.discriminatedUnion("state", [
           receivedAt: z.string(),
           summary: z.string().nullable(),
           sentAt: z.string().nullable(),
-          decision: z.enum(["approved", "changes_requested"]).nullable(),
+          decision: z
+            .enum(["approved", "changes_requested", "reopened"])
+            .nullable(),
           decidedAt: z.string().nullable(),
           decidedBy: z.string().nullable(),
           decisionNote: z.string().nullable(),
+          // « Rouvrir le mix »: the decision replaced, with its reason.
+          reopenedAt: z.string().nullable().default(null),
+          reopenReason: z.string().nullable().default(null),
         }),
       )
       .default([]),

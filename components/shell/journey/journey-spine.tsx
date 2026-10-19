@@ -1,6 +1,11 @@
 "use client";
 
-import { IconCheck, IconLock, IconXmark } from "nucleo-sharp-essential";
+import {
+  IconCheck,
+  IconLock,
+  IconTriangleWarning,
+  IconXmark,
+} from "nucleo-sharp-essential";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 
@@ -8,9 +13,9 @@ import { IconStop } from "@/components/icons";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
 import {
-  lowerFirst,
   isLocked,
   type JourneyStep,
+  lowerFirst,
   prereqsOf,
   withModule,
 } from "@/lib/ui/journey";
@@ -28,7 +33,8 @@ const t = fr.journey;
  * `group` sit under its intertitle. The open step is the page shown on the
  * right (`openKey`, else the one whose URL is the current path); `title`
  * defaults to « Parcours » (« Parcours · Stratégie » via `t.titleOf`);
- * `footer` is a link to the module's history.
+ * `footer`: links at its foot (the module's history; the Distribution adds
+ * its anomalies). A step done with `reserve` has a warning mark, never green.
  */
 export function JourneySpine({
   steps,
@@ -39,8 +45,10 @@ export function JourneySpine({
   steps: JourneyStep[];
   openKey?: string;
   title?: string;
-  footer?: { href: string; label: string };
+  footer?:
+    { href: string; label: string } | Array<{ href: string; label: string }>;
 }) {
+  const links = footer ? (Array.isArray(footer) ? footer : [footer]) : [];
   const pathname = usePathname();
   return (
     <nav
@@ -113,14 +121,19 @@ export function JourneySpine({
           );
         })}
       </ol>
-      {footer && (
-        <ViewLink
-          href={footer.href}
-          aria-current={pathname === footer.href ? "page" : undefined}
-          className="mt-4 rounded-lg px-2 py-1 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)] underline underline-offset-4 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-        >
-          {footer.label}
-        </ViewLink>
+      {links.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
+          {links.map((link) => (
+            <ViewLink
+              key={link.href}
+              href={link.href}
+              aria-current={pathname === link.href ? "page" : undefined}
+              className="rounded-lg px-2 py-1 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)] underline underline-offset-4 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
+              {link.label}
+            </ViewLink>
+          ))}
+        </div>
       )}
     </nav>
   );
@@ -135,7 +148,9 @@ function StepMark({ step: s }: { step: JourneyStep }) {
       className={cn(
         "relative z-10 grid size-6 place-items-center rounded-full border-2 border-[color:var(--border-default)] bg-card text-[color:var(--text-tertiary)]",
         s.status === "done" &&
-          "border-transparent bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]",
+          (s.reserve
+            ? "border-transparent bg-[var(--tone-warning-bg)] text-[color:var(--tone-warning-fg)]"
+            : "border-transparent bg-[var(--tone-success-bg)] text-[color:var(--tone-success-fg)]"),
         open &&
           (mine
             ? "border-[color:var(--selection)] bg-[var(--selection)]"
@@ -146,7 +161,11 @@ function StepMark({ step: s }: { step: JourneyStep }) {
       )}
     >
       {s.status === "done" ? (
-        <IconCheck className="size-3.5" />
+        s.reserve ? (
+          <IconTriangleWarning className="size-3.5" />
+        ) : (
+          <IconCheck className="size-3.5" />
+        )
       ) : open ? (
         <span
           className={cn(

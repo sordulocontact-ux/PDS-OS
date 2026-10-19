@@ -103,9 +103,13 @@ export const projectHeaderData = cache(
       subModules: marketingSteps(project.id, {
         strategyLaunched:
           (marketingState?.status ?? "not_started") !== "not_started",
-        validatedStages: project.stages
-          .filter((stage) => stage.state === "validated")
-          .map((stage) => stage.key),
+        validatedStages: [
+          ...project.stages
+            .filter((stage) => stage.state === "validated")
+            .map((stage) => stage.key),
+          // The Conception is done once every sheet is transferred.
+          ...(marketingState?.done.includes("conception") ? ["design"] : []),
+        ],
         marketingClosed: marketingState?.done.includes("review") ?? false,
       }),
       facts,

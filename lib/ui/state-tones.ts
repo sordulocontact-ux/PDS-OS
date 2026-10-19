@@ -337,6 +337,28 @@ export const strategyDimensionTone: Record<string, Tone> = {
   complete: "success",
 };
 
+/** A lever of the Dispositif (proto LSTATE): retained, to arbitrate, not
+ * retained. */
+export const leverStateTone: Record<
+  "retained" | "to_decide" | "not_retained",
+  Tone
+> = {
+  retained: "success",
+  to_decide: "warning",
+  not_retained: "neutral",
+};
+
+/** A line of the Budget stratégie (proto budget()): proposed (its status
+ * says the rest), to arbitrate with its lever, dropped with it. */
+export const strategyBudgetLineTone: Record<
+  "proposed" | "to_decide" | "dropped",
+  Tone
+> = {
+  proposed: "neutral",
+  to_decide: "warning",
+  dropped: "neutral",
+};
+
 /** A question of the Conception's intentions: no confirmed answer yet, or
  * answered — the same tones as the Stratégie's dimensions. */
 export const intentionTopicTone: Record<"to_complete" | "complete", Tone> = {
@@ -402,6 +424,20 @@ export const strategyReviewTone: Record<string, Tone> = {
   pending: "warning",
   approved: "success",
   changes_requested: "danger",
+  cancelled: "neutral",
+};
+
+/** A validator of the Brief de sortie in its step (proto st3): waiting
+ * (info), validated, with reserves, a change asked (warning), the round
+ * ended before they answered. */
+export const strategyBriefReviewTone: Record<
+  "pending" | "approved" | "reserves" | "changes" | "cancelled",
+  Tone
+> = {
+  pending: "info",
+  approved: "success",
+  reserves: "success",
+  changes: "warning",
   cancelled: "neutral",
 };
 
@@ -942,13 +978,19 @@ export const distributionPreparationTone: Record<
  * but not validated, missing (danger only when it blocks the dossier), or
  * closed to the viewer. */
 export const distributionSourceTone = (
-  state: "validated" | "available" | "unvalidated" | "missing" | "restricted",
+  state:
+    | "validated"
+    | "available"
+    | "unvalidated"
+    | "missing"
+    | "restricted"
+    | "later",
   blocking: boolean,
 ): Tone =>
   state === "validated"
     ? "success"
-    : state === "available"
-      ? "info"
+    : state === "available" || state === "later"
+      ? "neutral"
       : state === "unvalidated"
         ? "warning"
         : state === "missing"

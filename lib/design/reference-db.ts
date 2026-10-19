@@ -20,10 +20,18 @@ export const targets = z
   .transform((list) => [...new Set(list)]);
 // MKT-C2-09: what an element is, and its rights of use.
 export const referenceType = z
-  .enum(["reference", "moodboard"])
+  .enum(["reference", "moodboard", "proposal", "work_version"])
   .default("reference");
 export const referenceUsage = z
-  .enum(["inspiration", "free", "licensed", "to_license", "owned"])
+  .enum([
+    "free",
+    "internal",
+    "to_check",
+    "inspiration",
+    "licensed",
+    "to_license",
+    "owned",
+  ])
   .nullish()
   .transform((v) => v ?? null);
 

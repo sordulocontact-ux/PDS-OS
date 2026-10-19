@@ -36,7 +36,7 @@ export function ReservesList({
   const sorted = [...reserves].sort(
     (a, b) =>
       Number(a.status === "lifted") - Number(b.status === "lifted") ||
-      a.dueOn.localeCompare(b.dueOn),
+      (a.dueOn ?? "9999").localeCompare(b.dueOn ?? "9999"),
   );
   return (
     <section aria-labelledby="reserves-title" className="flex flex-col gap-3">
@@ -58,7 +58,7 @@ export function ReservesList({
               </StatusBadge>
             </div>
             <p className="text-caption text-muted-foreground">
-              {t.line(r.ownerName, formatBriefDate(r.dueOn))}
+              {t.line(r.ownerName, r.dueOn ? formatBriefDate(r.dueOn) : "—")}
             </p>
             <p className="text-caption text-muted-foreground">
               {t.from(r.createdByName, versions[r.documentId] ?? 0)}

@@ -1,189 +1,146 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { BriefChecksList } from "@/components/design/brief/brief-checks-list";
-import { BriefDocumentCard } from "@/components/design/brief/brief-document-card";
-import { CreateBriefButton } from "@/components/design/brief/create-brief-button";
-import { CreativeBriefView } from "@/components/design/brief/creative-brief-view";
-import { ConceptionTabs } from "@/components/design/conception-tabs";
-import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
-import { ValidationPanel } from "@/components/framing/validation-panel";
-import { FilterChipLink } from "@/components/ui/filter-chip";
-import { sectionCardClass } from "@/components/ui/section-card";
+import { CallFacts } from "@/components/calls/call-facts";
+import { DesignBlock } from "@/components/design/design-block";
+import { DesignStepFrame } from "@/components/design/design-step-frame";
+import { EstablishBriefButton } from "@/components/design/brief-step/establish-brief-button";
+import { DesignWaits } from "@/components/design/waiting-row";
+import { buttonVariants } from "@/components/ui/button";
+import { PoCallout } from "@/components/ui/po-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import { formatDateTime } from "@/lib/calls/format";
-import { briefChanges } from "@/lib/design/brief-diff";
 import { liveCreativeBrief } from "@/lib/design/brief-live";
-import { briefRequestBlock, briefStatus } from "@/lib/design/brief-status";
-import { loadCreativeBriefs, sameBrief } from "@/lib/design/brief-store";
-import { loadDesignPeople } from "@/lib/design/people";
-import { loadPendingValidation } from "@/lib/framing/related";
+import { sameBrief } from "@/lib/design/brief-store";
+import { designJourneyContext } from "@/lib/design/journey-context";
+import { loadSheetViews } from "@/lib/design/sheet-views";
 import { fr } from "@/lib/i18n/fr";
-import { canEditProject } from "@/lib/projects/edit-access";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { isStageValidated } from "@/lib/projects/types";
-import { allInOrder } from "@/lib/utils/parallel";
+import { isLocked } from "@/lib/ui/journey";
+import { formatDay, formatShortInstant } from "@/lib/utils/day";
+
+const t = fr.designSteps.brief;
 
 export const metadata = {
-  title: `${fr.conceptionDirection.brief.title} · ${fr.app.name}`,
+  title: `${fr.designJourney.steps.brief.title} · ${fr.app.name}`,
 };
 
 /**
- * The Brief créatif global (ticket « Conception » § 8, MKT-C2-12): what
- * the dossier lacks before a version is made, the version shown as a
- * document (status, author, changes, PDF), the list of versions, the live
- * preview when the project has moved since, and the dossier's validation.
+ * Conception › Brief créatif (proto deB, ticket § 8): the common frame of
+ * every deliverable, assembled by code from what is validated — never
+ * written by the model — then « Établir le Brief créatif V1 » (versioned,
+ * its PDF). Its open points are the sheets' empty required fields: it can
+ * be established before the sheets are complete.
  */
 export default async function DesignBriefPage({
   params,
-  searchParams,
 }: PageProps<"/app/projects/[projectId]/design/brief">) {
   const { projectId } = await params;
-  const query = await searchParams;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
+  const ctx = await designJourneyContext(projectId);
+  if (!ctx) notFound();
+  const step = ctx.steps[4];
+  const [live, views] = await Promise.all([
+    liveCreativeBrief(projectId, ctx.access),
+    loadSheetViews(ctx),
   ]);
-  if (!isStageValidated(project.stages, "launch_strategy"))
-    return (
-      <DesignNeedsStrategy
-        projectId={projectId}
-        canEdit={canEditProject(access, project)}
-      />
-    );
-  const live = await liveCreativeBrief(projectId, access);
-  if (!live) notFound();
-  const { data } = live;
-  if (!data.started) redirect(routes.projectDesign(projectId));
-  const people = await loadDesignPeople(projectId, data.organizationId, access);
-  const [briefs, pendingValidation] = await Promise.all([
-    loadCreativeBriefs(projectId),
-    data.stage ? loadPendingValidation(data.stage.id, people.members) : null,
-  ]);
-
-  const t = fr.conceptionDirection.brief;
-  const latest = briefs[0] ?? null;
-  const asked = Number(query.v);
-  const shown =
-    query.live === "1"
-      ? null
-      : (briefs.find((b) => b.number === asked) ?? latest);
-  const changed = latest !== null && !sameBrief(latest.content, live.content);
-  const inProgress = data.stage?.state === "in_progress";
-  const canCreate =
-    inProgress &&
-    (data.isOwner ||
-      people.direction.responsible?.personId === access.personId);
-  const nameOf = new Map(people.members.map((m) => [m.personId, m.name]));
-  const liveHref = `${routes.projectDesignBrief(projectId)}?live=1`;
-  const parts = (before: typeof live.content, after: typeof live.content) =>
-    briefChanges(before, after).join(", ");
-  const previous = shown && briefs.find((b) => b.number === shown.number - 1);
-  const changes = !shown
-    ? null
-    : shown.id === latest?.id && changed
-      ? t.document.changesLive(shown.number, parts(shown.content, live.content))
-      : previous && parts(previous.content, shown.content)
-        ? t.document.changesSince(
-            previous.number,
-            parts(previous.content, shown.content),
-          )
-        : null;
+  const stored = ctx.briefs[0] ?? null;
+  const c = stored?.content ?? live?.content;
+  const number = stored ? stored.number : 1;
+  const outdated = Boolean(
+    stored && live && !sameBrief(stored.content, live.content),
+  );
+  const join = (list: string[]) => (list.length ? list.join(" · ") : "—");
+  const open = views.flatMap((v) =>
+    v.missing.map((m) => `${v.facts.sheet.title} : ${m}`),
+  );
+  const validated = ctx.data.references.length
+    ? (c?.references ?? []).map((r) => r.label)
+    : [];
+  const canEstablish =
+    (ctx.isCreative || ctx.isOwner) && !isLocked(step.status);
 
   return (
-    <div className="flex flex-col gap-8 pt-6">
-      <ConceptionTabs projectId={projectId} />
-      <header className="flex flex-col gap-3">
-        <h2 className="text-display-sm font-semibold">{t.title}</h2>
-        <p className="max-w-prose text-body-md text-muted-foreground">
-          {canCreate ? t.intro : t.readOnly}
-        </p>
-      </header>
-
-      {canCreate && (!latest || changed) && (
-        <div className="flex flex-col items-start gap-4">
-          <BriefChecksList checks={live.checks} />
-          <CreateBriefButton projectId={projectId} first={!latest} />
-        </div>
-      )}
-
-      {briefs.length > 0 && (
-        <nav aria-label={t.versions} className="flex flex-wrap gap-2">
-          {briefs.map((b) => (
-            <FilterChipLink
-              key={b.id}
-              href={routes.projectDesignBrief(projectId, b.number)}
-              current={shown?.id === b.id}
-            >
-              {t.version(b.number)}
-            </FilterChipLink>
-          ))}
-          {changed && (
-            <FilterChipLink href={liveHref} current={!shown}>
-              {t.live}
-            </FilterChipLink>
+    <DesignStepFrame
+      projectId={projectId}
+      stepKey="brief"
+      po={stored ? undefined : <PoCallout>{t.po}</PoCallout>}
+    >
+      {stored && (
+        <ToneCallout tone="success">
+          {t.established(
+            stored.number,
+            ctx.nameOf(stored.createdBy) || "—",
+            formatShortInstant(stored.createdAt),
           )}
-        </nav>
-      )}
-
-      {shown && latest ? (
-        <BriefDocumentCard
-          projectId={projectId}
-          projectTitle={project.title}
-          number={shown.number}
-          meta={t.document.meta(
-            shown.createdBy ? (nameOf.get(shown.createdBy) ?? "") : "",
-            formatDateTime(shown.createdAt),
-          )}
-          status={briefStatus({
-            number: shown.number,
-            latest: latest.number,
-            changed,
-            stageState: data.stage?.state ?? null,
-          })}
-          changes={changes}
-        />
-      ) : (
-        <ToneCallout tone="info">
-          {latest ? t.changed(latest.number) : t.noVersion}
         </ToneCallout>
       )}
-
-      <CreativeBriefView
-        content={shown ? shown.content : live.content}
-        callLinks={Object.fromEntries(
-          data.sources.flatMap((s) =>
-            s.kind === "call" && s.callId
-              ? [[s.title, routes.projectCall(projectId, s.callId)]]
-              : [],
-          ),
-        )}
-      />
-
-      {data.stage && (
-        <section
-          aria-label={t.document.validationTitle}
-          className={sectionCardClass}
-        >
-          <p className="mb-3 text-caption text-muted-foreground">
-            {t.document.validationHint}
-          </p>
-          <ValidationPanel
-            stage={data.stage}
-            pendingValidation={pendingValidation}
-            projectId={projectId}
-            mePersonId={access.personId}
-            title={t.document.validationTitle}
-            startLabel={fr.design.validation.start}
-            requestBlocked={briefRequestBlock(
-              latest?.number ?? null,
-              changed,
-              t.document,
-            )}
-          />
-        </section>
+      {outdated && (
+        <ToneCallout tone="warning">{t.outdated(number)}</ToneCallout>
       )}
-    </div>
+      <DesignBlock
+        title={t.title(number)}
+        action={
+          stored && (
+            <a
+              href={routes.projectDesignBriefPdf(projectId, stored.number)}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              {t.pdf}
+            </a>
+          )
+        }
+      >
+        {c && (
+          <CallFacts
+            facts={[
+              {
+                label: t.rows.context,
+                value: t.contextValue(
+                  [c.context.project, c.context.artist]
+                    .filter(Boolean)
+                    .join(" · "),
+                  c.context.releaseDate
+                    ? formatDay(c.context.releaseDate)
+                    : null,
+                  ctx.start.strategy?.version ?? null,
+                ),
+              },
+              { label: t.rows.goals, value: c.objectives.strategic ?? "—" },
+              { label: t.rows.audiences, value: c.audiences.audiences ?? "—" },
+              {
+                label: t.rows.narrative,
+                value:
+                  c.narrative.angle ??
+                  join(c.narrative.parts.map((p) => p.value)),
+              },
+              { label: t.rows.principles, value: join(c.principles) },
+              { label: t.rows.tone, value: join(c.tone) },
+              { label: t.rows.avoid, value: join(c.showAvoid) },
+              {
+                label: t.rows.deliverables,
+                value: c.deliverables.map((d) => d.title).join(", ") || "—",
+              },
+              {
+                label: t.rows.references,
+                value: `${validated.length} · ${join(validated)}`,
+              },
+              {
+                label: t.rows.open,
+                value: open.length ? open.join(" · ") : t.none,
+              },
+            ]}
+          />
+        )}
+      </DesignBlock>
+      {canEstablish && (!stored || outdated) ? (
+        <EstablishBriefButton
+          projectId={projectId}
+          label={fr.designJourney.todo.brief(stored ? stored.number + 1 : 1)}
+          done={t.establishedDone(stored ? stored.number + 1 : 1)}
+        />
+      ) : (
+        <DesignWaits step={step} actors={[step.actor]} />
+      )}
+    </DesignStepFrame>
   );
 }

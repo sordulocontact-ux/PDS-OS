@@ -459,8 +459,12 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
 - [x] **2. Cadrage et Plan du projet** (`framing.md`, 19/10/2026, branche `pc/z2-framing`, migration
       `20261019020101` à pousser avec accord) : parcours en 4 étapes (Démarrer, 6 dimensions,
       Brief, Plan), Plan dans le Cadrage, « Lancer le plan » démarre tous les workflows
-- [ ] **3. Stratégie** (`strategy.md`) : parcours, entrée, propositions une par une sur les 8 dimensions,
-      validation dans l'étape, « Stratégie validée », résumé de l'échange
+- [x] **3. Stratégie** (`strategy.md`, branche `pc/z3-strategy`, 19/10/2026) : parcours en 4 étapes
+      (`/strategy/start|dimensions|validation|validated`), entrée `StartChoices` + échange dans l'étape,
+      lignes tranchées une par une sur les 8 dimensions (`ProposalRow`, plus de grille ni de
+      pré-cochage), PO propose aussi livrables, temps forts et objectifs, Brief en 4 blocs validé dans
+      l'étape (`DecisionPanel`), « Stratégie validée » ; migrations `20261019030101` et `20261019030201`
+      à pousser en prod avec accord ; 20 tests pgTAP (`strategy-proposals.test.sql`)
 - [ ] **4. Conception** (`design.md`) : parcours en 6 étapes du proto, fiches champ par champ, transfert
 - [ ] **5. Production** (`production.md`) : d'abord la fuite de l'enveloppe interne sur le lien de la
       société ; barre de livrables, « Qui produit ? », « Quelle société ? », mode de préparation, call de
@@ -486,3 +490,31 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
       (`report_items.agenda_topic`) et lu en modale ; résumé aux participants écrit par le code,
       envoyé en versions (`call_summaries`, `send_call_summary`, 11 tests pgTAP). Migration
       `20261018200101` à pousser en prod avec accord (docs/ARCHITECTURE.md § 4 ter)
+
+## Lot 10 — Distribution sur le patron commun (19/10/2026, branche `pc/z10-distribution`)
+
+- D0 : sources réelles (pochette livrée en Production, emprunts lisibles sans `manage_legal`,
+  « Prêt pour la sortie » lu du Juridique), une seule date de sortie (`projects.due_date`),
+  ligne `releases` créée au lancement du plan, détection par l'ISRC du Catalogue.
+- D1 : parcours en 7 étapes / 4 sections, une page par étape, loader du parcours (Maintenant,
+  Travail, Validations), statut Bloqué / En attente calculé, anciens onglets redirigés.
+- D2 à D6 : paramètres confirmés en un geste, dossier en document (PDF, écarts, contrôles sur la
+  ligne, décision sur pièce, motif en tête, V suivante), notifications, dépôt et frise de The
+  Orchard en un geste, corrections en un geste, plateformes « Tout est bon » / « Il y a un
+  problème », clôture avec réserves, vues Anomalies et Historique.
+- Migrations `20261019100101`, `…100201`, `…100301` à pousser en prod avec accord ; tests pgTAP
+  `distribution.test.sql` (105) et `distribution-journey.test.sql` (35).
+
+
+## Lot 4 — Conception sur le patron commun (19/10/2026, branche `pc/z4-design`)
+
+- Parcours du proto en six étapes (Accueil, Intentions, Références, Direction artistique, Brief
+  créatif, Fiches Livrables) sur `DesignStepFrame`, loader `lib/journey/design.ts` ; anciennes pages à
+  onglets redirigées vers leur étape.
+- Accueil : responsable créatif désigné en place, « Préparer un échange créatif » / « Commencer
+  directement » sans motif, échange dans l'étape, ajout de livrable avec format et motif.
+- Fiches créées par la base depuis la Stratégie validée, pré-remplies par le code avec leur source,
+  modifiables champ par champ, validées une par une, transférées une par une (la Production s'ouvre
+  au premier transfert) ; Conception faite quand tout est transféré, plus de validation globale.
+- Migrations `20261019040101` à `20261019040701` (à pousser en prod avec accord) ; pgTAP
+  `conception-journey.test.sql` + 6 fichiers adaptés.

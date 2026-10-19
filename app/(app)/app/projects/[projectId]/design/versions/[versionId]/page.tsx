@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 
 /**
  * A creative proposal by its id (MKT-C2-10): where a notification or a
- * retouche task leads — the work page of its deliverable, scrolled to the
- * proposal. Read with the viewer's session (RLS); unknown, the Conception.
+ * retouche task leads — its deliverable in the Intentions (the proposals
+ * themselves live with the Production). Read with the viewer's session (RLS); unknown, the Conception.
  */
 export default async function DesignVersionPage({
   params,
@@ -31,7 +31,7 @@ export default async function DesignVersionPage({
     : { data: null };
   redirect(
     deliverable
-      ? `${routes.projectDesignWork(projectId, deliverable.id)}#version-${versionId}`
+      ? routes.projectDesignWork(projectId, deliverable.id)
       : routes.projectDesign(projectId),
   );
 }

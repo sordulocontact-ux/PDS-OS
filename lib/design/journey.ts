@@ -1,158 +1,285 @@
-// The Conception's journey (MKT-C2-03): six steps, the blockers and the one
-// next action, all computed by code from the facts of the module (CLAUDE.md,
-// rule 6). Client-safe, pure. A step is done only when its minimal output
-// exists or was explicitly passed over (« Commencer sans échange » passes the
-// creative exchange); the dossier's progress is not a deliverable's.
+// The Conception as a journey of six steps (proto « Projet complet », module
+// design, ticket « Workflow Conception complet »): Accueil, Intentions,
+// Références, Direction artistique, Brief créatif, Fiches Livrables — the
+// Brief before the sheets. Statuses, actors and summaries are computed here
+// from what the project records (rule 6), never stored. Client-safe.
 
-import { blockersOf, nextOf } from "@/lib/design/journey-next";
-import type { DirectionState, SheetStatus } from "@/lib/design/states";
+import { routes } from "@/lib/auth/redirects";
+import type { SheetPhase } from "@/lib/design/sheet-phase";
 import { fr } from "@/lib/i18n/fr";
+import type {
+  JourneyActor,
+  JourneyPerson,
+  JourneyRole,
+  JourneyStatus,
+  JourneyStep,
+} from "@/lib/ui/journey";
+import { formatShortDay } from "@/lib/utils/day";
 
-export const JOURNEY_STEPS = [
-  "prepare",
-  "exchange",
-  "develop",
-  "consolidate",
-  "validate",
-  "production",
+export const DESIGN_STEPS = [
+  "home",
+  "intentions",
+  "references",
+  "direction",
+  "brief",
+  "sheets",
 ] as const;
-export type JourneyStepKey = (typeof JOURNEY_STEPS)[number];
-export type JourneyStepState = "done" | "current" | "todo" | "skipped";
+export type DesignStepKey = (typeof DESIGN_STEPS)[number];
+export const isDesignStep = (v: unknown): v is DesignStepKey =>
+  DESIGN_STEPS.includes(v as DesignStepKey);
 
-export type JourneyStep = {
-  key: JourneyStepKey;
-  state: JourneyStepState;
-  summary: string;
+export type DirectionPhase =
+  "draft" | "pending" | "approved" | "changes_requested" | "rejected";
+
+/** One sheet as the journey reads it. */
+export type JourneySheet = {
+  id: string;
+  title: string;
+  responsible: JourneyPerson | null;
+  phase: SheetPhase;
+  version: number;
+  transferred: number | null;
 };
 
-export type JourneyLink = { label: string; href: string; place: string };
-
-export type JourneyNext =
-  | { kind: "action"; action: JourneyLink }
-  // Nothing for this person: what the rest waits for, if anything.
-  | { kind: "waiting"; what: string | null }
-  | { kind: "read_only" };
-
-export type JourneyInput = {
+export type DesignJourneyInput = {
   projectId: string;
-  started: boolean;
-  // The owner, or whoever writes in the Conception (design_can_write).
-  isOwner: boolean;
-  canWrite: boolean;
-  // design_calls prepared, call reports already used as sources.
-  callsPlanned: number;
-  callSources: number;
-  // Why the Conception started without a creative exchange, if it did.
-  noExchangeReason: string | null;
-  proposals: number;
-  unattachedReferences: number;
-  toQualify: number;
-  direction: {
-    state: DirectionState;
-    answered: number;
-    proposals: number;
-    hasResponsible: boolean;
-    canSubmit: boolean;
-  };
-  // The committed deliverables, with their Fiche Livrable when created.
-  deliverables: Array<{
-    id: string;
-    title: string;
-    answered: number;
-    proposals: number;
-    sheet: { id: string; status: SheetStatus } | null;
-  }>;
-  brief: { latest: number | null; upToDate: boolean };
-  // The Conception stage as stored (not_started … validated).
-  stageState: string;
+  // Stratégie › Validation du Brief de sortie.
+  strategy: { validated: boolean; version: number | null; at: string | null };
+  owner: JourneyPerson | null;
+  creative: JourneyPerson | null;
+  // The direction's first validator (the label's direction by default).
+  validator: JourneyPerson | null;
+  path: "direct" | "call" | null;
+  // The creative exchange created; `held` once its report exists.
+  call: { occurredAt: string; held: boolean } | null;
+  intentions: { proposed: number; confirmed: number };
+  references: { total: number; unattached: number };
+  direction: DirectionPhase;
+  brief: number | null;
+  sheets: JourneySheet[];
 };
 
-const VALIDATED: SheetStatus[] = ["ready_for_production", "transferred"];
+const t = fr.designJourney;
 
-export function journey(input: JourneyInput): {
-  steps: JourneyStep[];
-  next: JourneyNext;
-  blockers: JourneyLink[];
-} {
-  const t = fr.conceptionJourney;
-  const s = t.summaries;
-  const sheets = input.deliverables.flatMap((d) =>
-    d.sheet ? [{ ...d.sheet, title: d.title }] : [],
+const actorOf = (
+  who: JourneyPerson | null,
+  todo: string,
+  validate = false,
+): JourneyActor | null =>
+  who ? { ...who, todo, kind: validate ? "validate" : "do" } : null;
+
+/** The sheet's next gesture and who makes it (proto actorsMk de3). */
+export function sheetAction(
+  sheet: JourneySheet,
+  i: Pick<DesignJourneyInput, "owner" | "validator">,
+): JourneyActor | null {
+  if (sheet.phase === "transferred") return null;
+  if (!sheet.responsible)
+    return actorOf(i.owner, t.todo.sheetResponsible(sheet.title));
+  if (sheet.phase === "submitted")
+    return actorOf(i.validator, t.todo.sheetValidate(sheet.title), true);
+  if (sheet.phase === "approved")
+    return actorOf(i.owner, t.todo.sheetTransfer(sheet.title));
+  return actorOf(
+    sheet.responsible,
+    sheet.phase === "changes" || sheet.phase === "refused"
+      ? t.todo.sheetFix(sheet.title)
+      : t.todo.sheetComplete(sheet.title),
   );
-  const total = input.deliverables.length;
-  const validated = input.deliverables.filter(
-    (d) => d.sheet && VALIDATED.includes(d.sheet.status),
-  ).length;
-  const transferred = sheets.filter((x) => x.status === "transferred").length;
-  const developDone =
-    input.direction.state === "approved" && total > 0 && validated === total;
-  const stageValidated = input.stageState === "validated";
+}
 
-  const states: Record<JourneyStepKey, JourneyStepState> = {
-    prepare: input.started ? "done" : "current",
-    exchange:
-      input.callSources > 0
-        ? "done"
-        : input.callsPlanned > 0
-          ? "current"
-          : input.started
-            ? "skipped"
-            : "todo",
-    develop: developDone ? "done" : input.started ? "current" : "todo",
-    consolidate:
-      input.brief.latest !== null && input.brief.upToDate
-        ? "done"
-        : developDone || input.brief.latest !== null
-          ? "current"
-          : "todo",
-    validate: stageValidated
-      ? "done"
-      : input.stageState === "awaiting_validation"
-        ? "current"
-        : "todo",
-    production:
-      total > 0 && transferred === total
-        ? "done"
-        : stageValidated || transferred > 0
-          ? "current"
-          : "todo",
-  };
-  const summaries: Record<JourneyStepKey, string> = {
-    prepare: input.started ? s.prepareDone(total) : s.prepareTodo,
-    exchange:
-      input.callSources > 0
-        ? s.exchangeDone(input.callSources)
-        : input.callsPlanned > 0
-          ? s.exchangePlanned(input.callsPlanned)
-          : input.started
-            ? s.exchangeSkipped(input.noExchangeReason)
-            : s.exchangeTodo,
-    develop: s.develop(
-      fr.conception.directionStates[input.direction.state],
-      validated,
-      total,
-    ),
-    consolidate:
-      input.brief.latest === null
-        ? s.consolidateTodo
-        : input.brief.upToDate
-          ? s.consolidateDone(input.brief.latest)
-          : s.consolidateOutdated(input.brief.latest),
-    validate: stageValidated
-      ? s.validateDone
-      : input.stageState === "awaiting_validation"
-        ? s.validatePending
-        : s.validateTodo,
-    production: total ? s.production(transferred, total) : s.productionTodo,
-  };
+/** The six steps, for the person looking (owner / creative / validator). */
+export function designJourney(i: DesignJourneyInput): JourneyStep[] {
+  const role = (
+    kind: JourneyRole["kind"],
+    who: JourneyPerson | null,
+    name: string,
+  ): JourneyRole[] => (who ? [{ kind, name: who.name, role: name }] : []);
+  const exec = role("exec", i.creative, t.roles.creative);
+  const coord = role("coord", i.owner, t.roles.owner);
+  const valid = role("valid", i.validator, t.roles.validator);
+  const step = (
+    key: DesignStepKey,
+    status: JourneyStatus,
+    rest: Partial<JourneyStep>,
+  ): JourneyStep => ({
+    key,
+    href: routes.projectDesignStep(i.projectId, key),
+    title: t.steps[key].title,
+    why: t.steps[key].why,
+    status,
+    owner: null,
+    validator: null,
+    roles: [...exec, ...coord],
+    prereq: [],
+    next: [],
+    actor: null,
+    summary: null,
+    ...rest,
+  });
 
-  return {
-    steps: JOURNEY_STEPS.map((key) => ({
-      key,
-      state: states[key],
-      summary: summaries[key],
-    })),
-    next: nextOf(input, developDone),
-    blockers: blockersOf(input),
-  };
+  // 1. Accueil: the responsible créatif, then the way in.
+  const homeDone =
+    Boolean(i.creative) &&
+    (i.path === "direct" || (i.path === "call" && Boolean(i.call?.held)));
+  const homeActor = !i.creative
+    ? actorOf(i.owner, t.todo.designate)
+    : !i.path
+      ? actorOf(i.owner, t.todo.choose)
+      : i.path === "call" && !i.call
+        ? actorOf(i.owner, t.todo.createCall)
+        : null;
+  const home = step(
+    "home",
+    !i.strategy.validated ? "blocked" : homeDone ? "done" : "current",
+    {
+      roles: role("exec", i.owner, t.roles.owner),
+      external: [
+        {
+          key: "strategy",
+          label: t.strategyPrereq.label,
+          module: t.strategyPrereq.module,
+          done: i.strategy.validated,
+          source:
+            i.strategy.validated && i.strategy.version && i.strategy.at
+              ? t.strategyPrereq.source(i.strategy.version, i.strategy.at)
+              : undefined,
+        },
+      ],
+      next: ["intentions"],
+      actor: i.strategy.validated && !homeDone ? homeActor : null,
+      summary: homeDone
+        ? i.path === "call" && i.call
+          ? t.summary.exchange(
+              formatShortDay(i.call.occurredAt, { bare: true }),
+            )
+          : t.summary.direct
+        : null,
+    },
+  );
+
+  // 2. Intentions, confirmed one by one by the responsible créatif.
+  const { proposed, confirmed } = i.intentions;
+  const intentionsDone = homeDone && proposed === 0 && confirmed > 0;
+  const intentions = step(
+    "intentions",
+    !homeDone ? "blocked" : intentionsDone ? "done" : "current",
+    {
+      prereq: ["home"],
+      next: ["references"],
+      actor:
+        homeDone && !intentionsDone
+          ? actorOf(
+              i.creative,
+              proposed ? t.todo.confirm(proposed) : t.todo.write,
+            )
+          : null,
+      summary: intentionsDone ? t.summary.intentions(confirmed) : null,
+    },
+  );
+
+  // 3. Références, each attached to the direction or a deliverable.
+  const refsDone =
+    intentionsDone && i.references.total > 0 && i.references.unattached === 0;
+  const references = step(
+    "references",
+    !intentionsDone ? "blocked" : refsDone ? "done" : "current",
+    {
+      prereq: ["intentions"],
+      next: ["direction"],
+      actor:
+        intentionsDone && !refsDone
+          ? actorOf(
+              i.creative,
+              i.references.unattached
+                ? t.todo.attach(i.references.unattached)
+                : t.todo.addReferences,
+            )
+          : null,
+      summary: refsDone ? t.summary.references(i.references.total) : null,
+    },
+  );
+
+  // 4. Direction artistique, validated by the direction.
+  const d = i.direction;
+  const approved = refsDone && d === "approved";
+  const direction = step(
+    "direction",
+    !refsDone
+      ? "blocked"
+      : d === "approved"
+        ? "done"
+        : d === "pending"
+          ? "waiting"
+          : "current",
+    {
+      roles: [...exec, ...coord, ...valid],
+      prereq: ["references"],
+      next: ["brief"],
+      actor: !refsDone
+        ? null
+        : d === "pending"
+          ? actorOf(i.validator, t.todo.validateDirection, true)
+          : d === "approved"
+            ? null
+            : actorOf(
+                i.creative,
+                d === "changes_requested" || d === "rejected"
+                  ? t.todo.resubmit
+                  : t.todo.submitDirection(i.validator?.name ?? "—"),
+              ),
+      alert: refsDone && d === "pending" ? "decision" : undefined,
+      summary: approved ? t.summary.direction : null,
+    },
+  );
+
+  // 5. Brief créatif, assembled by code from what is validated.
+  const briefDone = approved && i.brief !== null;
+  const brief = step(
+    "brief",
+    !approved ? "blocked" : briefDone ? "done" : "current",
+    {
+      prereq: ["direction"],
+      next: ["sheets"],
+      actor:
+        approved && !briefDone ? actorOf(i.creative, t.todo.brief(1)) : null,
+      summary: briefDone ? t.summary.brief(i.brief!) : null,
+    },
+  );
+
+  // 6. Fiches Livrables, each validated and transferred on its own.
+  const actions = i.sheets.flatMap((s) => sheetAction(s, i) ?? []);
+  const sheetsDone =
+    briefDone &&
+    i.sheets.length > 0 &&
+    i.sheets.every((s) => s.phase === "transferred");
+  const actor = actions.find((a) => a.viewer) ?? actions[0] ?? null;
+  const sheets = step(
+    "sheets",
+    !briefDone ? "blocked" : sheetsDone ? "done" : "current",
+    {
+      roles: [...exec, ...coord, ...valid],
+      prereq: ["brief"],
+      nextExternal: [
+        {
+          key: "production",
+          label: t.productionNext.label,
+          module: t.productionNext.module,
+        },
+      ],
+      actor: briefDone ? actor : null,
+      alert: briefDone && actor?.kind === "validate" ? "decision" : undefined,
+      summary: sheetsDone ? t.summary.sheets(i.sheets.length) : null,
+    },
+  );
+
+  return [home, intentions, references, direction, brief, sheets];
+}
+
+/** The step a person lands on: their own open step, else the first open. */
+export function designLanding(steps: JourneyStep[]): DesignStepKey {
+  const mine = steps.find((s) => s.actor?.viewer);
+  const open = steps.find((s) => s.status !== "done" && s.status !== "blocked");
+  const key = (mine ?? open ?? steps[steps.length - 1]).key;
+  return isDesignStep(key) ? key : "home";
 }

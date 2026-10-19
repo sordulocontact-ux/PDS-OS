@@ -1,4 +1,5 @@
 import { routes } from "@/lib/auth/redirects";
+import { DESIGN_STEPS } from "@/lib/design/journey";
 import { fr } from "@/lib/i18n/fr";
 
 // Navigation of a launched project — only one is ever shown (docs/DESIGN.md § 4):
@@ -208,29 +209,15 @@ export function projectTrail(
     [`${legal}/clearances`]: [plan, { label: fr.legalClearance.page.title }],
     [`${legal}/formalities`]: [plan, { label: fr.legalFormalities.page.title }],
     [`${legal}/history`]: [{ label: fr.legalHistory.title }],
-    // Marketing › Conception (ticket « Conception »): the module has its own
-    // home under the Marketing, and its direct work below it.
+    // Marketing › Conception (proto « Projet complet »): the open step ends
+    // the trail (ProjectHeader `steps`), « Conception » before it.
     [routes.projectDesign(projectId)]: [{ label: fr.conception.title }],
-    [routes.projectDesignWork(projectId)]: [
-      conception,
-      { label: fr.conception.workTitle },
-    ],
-    [routes.projectDesignReferences(projectId)]: [
-      conception,
-      { label: fr.conception.tabs.references },
-    ],
-    [routes.projectDesignDirection(projectId)]: [
-      conception,
-      { label: fr.conception.tabs.direction },
-    ],
-    [routes.projectDesignBrief(projectId)]: [
-      conception,
-      { label: fr.conception.tabs.brief },
-    ],
-    [routes.projectDesignSheets(projectId)]: [
-      conception,
-      { label: fr.conception.tabs.sheets },
-    ],
+    ...Object.fromEntries(
+      DESIGN_STEPS.map((step) => [
+        routes.projectDesignStep(projectId, step),
+        [conception],
+      ]),
+    ),
   };
   // One Fiche Livrable: its own page below the list.
   const sheets = routes.projectDesignSheets(projectId);

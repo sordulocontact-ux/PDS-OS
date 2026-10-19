@@ -41,6 +41,8 @@ export const notifications = {
       `${actor} vous demande une décision sur la conception (« ${project} »).`,
     design_submission_decided: (actor: string, project: string) =>
       `${actor} a décidé sur votre demande de validation (« ${project} »).`,
+    design_sheet_new_version: (actor: string, project: string) =>
+      `${actor} a transféré une nouvelle version d'une Fiche Livrable en Production (« ${project} »).`,
     // A contract or a meeting may have no project: the text never names one.
     contract_review_requested: (actor: string) =>
       `${actor} vous demande de valider un contrat.`,
@@ -73,6 +75,14 @@ export const notifications = {
     // The company has no account: the project names it.
     production_director_proposed: (_actor: string, project: string) =>
       `La société de production propose un réalisateur pour « ${project} » : à retenir.`,
+    distribution_version_submitted: (actor: string, project: string) =>
+      `${actor} a soumis le dossier de livraison de « ${project} » : il attend votre validation.`,
+    distribution_version_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur le dossier de livraison de « ${project} ».`,
+    distribution_closure_proposed: (actor: string, project: string) =>
+      `${actor} propose de clôturer la distribution de « ${project} » : votre décision est attendue.`,
+    distribution_closure_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur la clôture de la distribution de « ${project} ».`,
     step_blocker_reported: (actor: string, project: string) =>
       `${actor} a signalé un blocage sur « ${project} ».`,
     step_blocker_lifted: (actor: string, project: string) =>
@@ -96,6 +106,8 @@ export const notifications = {
       `Le mixeur a bien reçu le dossier de « ${project} ».`,
     master_mix_version_received: (actor: string, project: string) =>
       `${actor} a ajouté une version du mix de « ${project} » : vos retours sont attendus.`,
+    master_source_newer: (_actor: string, project: string) =>
+      `Une nouvelle version d'un titre de « ${project} » est arrivée au Catalogue : les voix définitives ? Remplacez la source.`,
     master_mix_approved: (actor: string, project: string) =>
       `${actor} a validé le mix final de « ${project} ».`,
     master_mix_changes_requested: (actor: string, project: string) =>
@@ -122,6 +134,8 @@ export const notifications = {
       `${actor} demande une modification d'un document de la stratégie de « ${project} ».`,
     strategy_review_reminder: (actor: string, project: string) =>
       `${actor} vous relance : votre validation est attendue sur la stratégie de « ${project} ».`,
+    strategy_validated: (_actor: string, project: string) =>
+      `La Stratégie de « ${project} » est validée : le Brief de sortie alimente la Conception et les Activations.`,
     project_launched: (actor: string, project: string) =>
       `« ${project} » est lancé : ${actor} en est responsable.`,
     brief_approved: (_actor: string, project: string) =>

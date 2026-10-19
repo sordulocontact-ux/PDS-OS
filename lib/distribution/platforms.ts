@@ -51,8 +51,13 @@ export type PlatformView = {
   compliance: Compliance;
   complianceNote: string | null;
   complianced: { at: string; by: string | null } | null;
-  // A link the automatic detection found: a suggestion, never filled in.
+  // A link the automatic detection found: proposed with its source (rule
+  // 1), never a verification until a person says « Tout est bon ».
   suggestion: string | null;
+  // When the detection found it.
+  suggestedAt: string | null;
+  // The link saved is the one the detection found.
+  fromDetection: string | null;
 };
 
 const empty = (platform: string): PlatformView => ({
@@ -68,21 +73,26 @@ const empty = (platform: string): PlatformView => ({
   complianceNote: null,
   complianced: null,
   suggestion: null,
+  suggestedAt: null,
+  fromDetection: null,
 });
 
 /** The five of reference (blank until written), then the added ones. */
 export function platformsOf(
   rows: PlatformView[],
-  detected: Array<{ platform: string; url: string }>,
+  detected: Array<{ platform: string; url: string; first_seen_at?: string }>,
 ): PlatformView[] {
-  const suggestionOf = (platform: string) =>
-    detected.find((link) => referenceOfDetected(link.platform) === platform)
-      ?.url ?? null;
+  const linkOf = (platform: string) =>
+    detected.find((link) => referenceOfDetected(link.platform) === platform) ??
+    null;
   const withSuggestion = (row: PlatformView): PlatformView => {
-    const suggestion = suggestionOf(row.platform);
+    const link = linkOf(row.platform);
+    const same = link !== null && link.url === row.url;
     return {
       ...row,
-      suggestion: suggestion && suggestion !== row.url ? suggestion : null,
+      suggestion: link && !same && !row.url ? link.url : null,
+      suggestedAt: link?.first_seen_at ?? null,
+      fromDetection: same ? (link.first_seen_at ?? null) : null,
     };
   };
   return [

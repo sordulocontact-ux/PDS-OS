@@ -2,10 +2,13 @@ import "server-only";
 
 import { getProject } from "@/lib/projects/queries";
 
-import { conceptionJourney } from "./conception";
+import { designJourneys } from "./design";
+import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
 import { legalJourneys } from "./legal";
 import { productionJourneys } from "./production";
+import { masterJourneys } from "./master";
+import { strategyJourneys } from "./strategy";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -15,15 +18,17 @@ import type { JourneyModuleKey, ModuleJourney } from "./types";
 // Distribution, Stratégie, Activations, Suivi & bilan).
 type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 
-// Marketing: the Conception (lib/journey/conception.ts) and each
-// deliverable's Production (lib/journey/production.ts). Stratégie,
-// Activations and Suivi & bilan come with their zone.
+// Marketing: the Stratégie (lib/journey/strategy.ts), the Conception
+// (lib/journey/design.ts) and each deliverable's Production
+// (lib/journey/production.ts). Activations and Suivi & bilan come with
+// their zone.
 const marketing: Loader = async (projectId) => {
-  const [design, productions] = await Promise.all([
-    conceptionJourney(projectId),
+  const [strategy, design, productions] = await Promise.all([
+    strategyJourneys(projectId),
+    designJourneys(projectId),
     productionJourneys(projectId),
   ]);
-  return [...design, ...productions];
+  return [...strategy, ...design, ...productions];
 };
 
 // Filled by their zone (C4: typed, empty until then).
@@ -32,9 +37,9 @@ const none: Loader = async () => [];
 export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   framing: framingJourneys,
   marketing,
-  master: none,
+  master: masterJourneys,
   legal: legalJourneys,
-  distribution: none,
+  distribution: distributionJourneys,
 };
 
 /** Whether the project's workflows are launched at all (no journeys before). */

@@ -1645,6 +1645,91 @@ livrable, les libellés ou l'action d'import en props.
 
 ---
 
+### Lot 3 du proto « Projet complet » : la Stratégie en parcours (19/10/2026)
+
+Cahier des charges `docs/projet-complet/strategy.md`. **Ce qui suit remplace, à l'écran, le pilotage
+en accordéon, la grille de choix, « Tout accepter », la page `/strategy/brief` et le plan
+d'exécution décrits plus haut** (tables et fonctions gardées).
+
+- **Parcours** (`lib/strategy/journey.ts`, pur ; contexte `lib/strategy/step-data.ts`, `cache()`) :
+  `start` Démarrer la stratégie (titre « Échange stratégique » ou « Départ ») · `dimensions` Les 8
+  dimensions · `validation` Validation du Brief de sortie · `validated` Stratégie validée. Prérequis
+  externe « Cadrage › Plan du projet » (`isWorkflowLaunched`), statuts et acteurs calculés (« Confirmer
+  ou écarter n propositions de PO », « Arbitrer : … », « Compléter : … », « Valider le Brief de sortie »
+  par valideur, `kind: "validate"`). Loader `lib/journey/strategy.ts`, branché dans le loader
+  `marketing` (`part.key = "strategy"`). Routes `/strategy/<étape>` (`routes.projectStrategyStep`),
+  `/strategy` redirige vers l'étape de la personne (`strategyLanding`), `?d=x` vers
+  `/strategy/dimensions#dim-x`, `/strategy/brief` vers `/strategy/validation` (`?v=n` gardé). Cadre :
+  `StrategyStepFrame`.
+- **Démarrer** : `StartChoices` « Commencer la stratégie » (`startStrategyDirect`, `withOutcome`) /
+  « Préparer un échange » (`CallPrepForm` dans l'étape, « Changer »). **Recommandé** : même règle que le
+  Cadrage — l'échange quand ce qui reste à décider dépasse ce que PDS OS sait déjà ; connu = besoins du
+  Brief à transformer en leviers, date de sortie, enveloppe, objectif du Cadrage (`knownAtStart`,
+  `lib/strategy/start-reco.ts`). Ordre du jour de l'échange = **les 8 dimensions** (proto), les questions
+  de ce qui manque repliées sous chaque point (`strategyCallTopics`) ; objectif du proto. Puis
+  `PlannedCallFacts`, et une fois le compte rendu rangé : `MeetingFacts` + `MeetingSummaryBlock`, les
+  lignes du compte rendu étant **les propositions de la Stratégie** (`strategyMeetingLines`), la
+  prochaine étape nommant direction **et** directions créatives (incohérence du proto corrigée).
+- **Les 8 dimensions** (`lib/strategy/dimension-model.ts`, `-items.ts`, `-levers.ts`, `-budget.ts`) :
+  chaque réponse, levier, livrable, temps fort et objectif est une ligne `ProposalRow` (Confirmer /
+  Modifier / Écarter, citation · « Échange stratégique du 05/10 », « Saisi par », « Modifié par »),
+  **un écarté reste visible barré**, rien n'est pré-coché (règle 21 : plus de `proposeStrategyChoices`
+  après un call, plus de « Tout accepter »). États : À compléter / En cours / À arbitrer / Complété
+  (mots du ticket, le proto disait « À trancher ») ; l'étape est faite quand plus rien n'est à arbitrer
+  ni à compléter (proto ; « En cours » ne bloque pas et part dans « Restant à arbitrer »). Positionnement
+  et Angle : une réponse (« Ajouter » tant qu'aucune n'est gardée) ; Publics : la réponse + une ligne
+  par public (`strategy_audiences`, « Écarter » le retire). **Dispositif** : tous les leviers listés —
+  propositions de PO, Retenu, À arbitrer (« Retenir » / « Ne pas retenir », aussi pour un besoin confirmé
+  du Brief sans levier, jamais retenu d'avance), Non retenu (« Leviers courants ») ; « Ajouter un
+  levier » choisit parmi les non retenus (ou « Autre levier »). **Budget**, règle tranchée (point 5) :
+  Proposé = lignes des leviers retenus et « Hors levier », À arbitrer = lignes d'un levier à arbitrer,
+  Écartée = levier non retenu, Validé = engagé, facturé ou payé parmi le proposé, Reste = enveloppe −
+  proposé − à arbitrer ; enveloppe non définie ou à confirmer = « En cours », listée sans bloquer.
+  **Replié** sous chaque dimension (`Fold`, `DimensionWork`) ce que le ticket ou Ibé demandent et que
+  le proto n'a pas : quatre points du positionnement (MKT-S1-05), publics détaillés, narratif en
+  5 parties et synthèse (ticket § 2, MKT-S1-06), prérequis juridiques (MKT-S1-07), quantité / levier /
+  délais des livrables (MKT-S1-08), temps forts modifiables et vue par canal (ticket § 5), répartition
+  par levier et lignes du budget (§ 6), objectif stratégique et KPI chiffrés (§ 7) ; « Avec PO »
+  (brouillon MKT-S1-09 et dictée). **Retiré** : la grille de choix fermés (code seul : MKT-S1-01 ne la
+  demandait pas, il corrigeait la lecture des choix ; le ticket refuse le « formulaire rigide »),
+  « Proposer des réponses », `ImportPanel`, `BriefReminder`, le pilotage en accordéon.
+- **PO propose livrables, temps forts et objectifs** (migration `20261019030101`) : `report_items.kind`
+  `deliverable` / `milestone` / `kpi` (schéma d'extraction, citation obligatoire) ; l'import ne les
+  propose que si la citation est **retrouvée mot pour mot** (`located ≠ missing`) et un temps fort
+  seulement si le code lit son jour dans les mots (`saidOffsetDays` : « J-14 », « une semaine après »,
+  « la veille »…) — sinon pas de temps fort proposé (point 6). **Table `strategy_proposals`** plutôt
+  qu'un statut sur `strategy_deliverables` / `milestones` / `strategy_objectives` : un livrable inséré est
+  aussitôt reflété en Conception (`z_design_mirror`) et lu par une dizaine de listes d'autres modules ;
+  une proposition n'atteint rien avant d'être gardée. `decide_strategy_proposal` (garder = crée la ligne
+  réelle : livrable « Hors levier », temps fort au jour J+n de `strategy_reference_date`, objectif
+  qualitatif ; reformuler = renomme ; écarter = retire la ligne et garde la proposition barrée),
+  `add_strategy_item` (« Ajouter », gardé d'office), `discard_strategy_item` (une ligne saisie avant :
+  retirée, gardée barrée). RLS : lecture `can_see_project`, insertion directe seulement par l'import
+  (responsable, stratégie ouverte, `state = proposed`). Cascade avec le projet et l'item de compte rendu
+  (`delete_project_row` inchangé). `strategy_deliverables.lever_id` **facultatif** (« Hors levier »,
+  `check_strategy_links`). `levers.decided_by / decided_at` (trigger) et `proposed_label` (mots de PO).
+- **Validation dans l'étape** : le Brief en **4 blocs** (Pour qui et pourquoi, Comment, Quand, Objectif
+  et budget, `lib/strategy/brief-out.ts`) écrit par le serveur dans chaque version (`content.out`) avec
+  « Restant à arbitrer » (`toDecide` = les points « En cours », jamais critiques) ; les versions
+  antérieures gardent leur rendu (`BriefSnapshotView`). `sendBriefOut` (refusé tant que l'étape 2 n'est
+  pas faite ; direction toujours, directions créatives cochées par défaut), `decideBriefOut`
+  (`DecisionPanel` : Valider le Brief de sortie / Valider avec réserves / Demander une modification ;
+  valider accepte les alertes critiques d'une ancienne version, montrées sur la pièce),
+  `ReturnCallout` + `ResubmitForm` (« Répondre et transmettre à nouveau » = version suivante, même
+  valideurs, réponse en note), « Relancer <Nom> » (`remind_strategy_review`). **Réserve** (migration
+  `20261019030201`, point 3 tranché comme le proto) : le commentaire devient la réserve et une tâche du
+  responsable du projet ; sans date donnée, échéance = date de sortie si elle est à venir, sinon dans 7
+  jours (une tâche exige une date, `tasks_due_date_required`). « Modifier avec PO » (ticket § 8) = la
+  dictée, tant que la Stratégie est ouverte.
+- **Stratégie validée** : encadré, Documents (Brief Vn · Voir (PDF) · Partager (lien interne copié) ;
+  Plan de sortie et Dossier de presse avec leur état réel, « Générer » → générateurs gardés, ticket
+  § 11–12), « Ce que la Stratégie alimente » à égalité (Conception, Activations, Planning chiffré, Suivi
+  § 14) — « Passer à la conception » n'est plus l'action principale (point 8, proto du 18/10) —,
+  réserves à lever, « Réviser la stratégie » (§ 9). **Retiré** : plan d'exécution (`ExecutionPlanCard`,
+  « Pas demandé » au 18/10 ; les Activations créeront leurs activations depuis « Leviers à préparer »),
+  les 8 rubriques repliées. Notification `strategy_validated` (trigger sur `strategy_documents`) au
+  responsable et aux directions créatives, ouvrant `/strategy/validated`.
+
 ### Retours Marketing du 12/10/2026, lot C1 (MKT-C2-01, MKT-C2-02)
 
 Migration `…20261013100001_strategy_recommendation_actions`.
@@ -3402,6 +3487,64 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
 
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
+### Parcours du Master sur le patron commun (lot 8 du proto « Projet complet », 19/10/2026)
+
+**Fait foi sur ce qui suit dans cette section** quand ils divergent (chevrons, État du master, « Où en
+est la préparation », modale de transmission, `BriefForm` : retirés de l'écran, tables gardées).
+
+- **Parcours** : `lib/master-workflow/journey.ts` (pur, 5 étapes `source|brief|mix|mastering|final`,
+  statuts calculés, multi-titre : une étape est faite quand tous les titres du tour le sont, le premier
+  titre en attente nomme l'action), faits lus en un aller-retour par `journey-facts.ts`, contexte
+  `journey-context.ts` (`cache`), loader du « Maintenant » `lib/journey/master.ts` (après lancement par
+  le Plan). Cadre : `components/master-workflow/master-step-frame.tsx` (en-tête + faits « Master final
+  attendu le », `NowCard`, `JourneySpine` + « Historique du master », `StepPanel`, blocages et
+  informations notées, « Qui fait quoi » `lib/master-workflow/roles.ts`, « Déjà fait »). Routes :
+  `/master` redirige vers l'étape qui attend la personne ; `/master/source`, `/brief`, `/mix`,
+  `/mastering`, `/final`, `/history` (filtre `?par=`, CSV). Historique reconstruit des tables
+  (`lib/master-workflow/history.ts`), sans journal à part.
+- **Source** (`source-step.ts`, `components/master-workflow/source/`, migration `20261019080101`) :
+  versions candidates = maquettes et mises à plat, **la plus récente détectée** (proto, ticket § 1) ; un
+  mix trouvé au Catalogue se propose comme mix final avec motif **obligatoire** (`declare_mix_final`
+  `reason_required`). **« Voix définitives » est déclaré par le responsable à la confirmation**
+  (`master_flow_sources.vocals_final`, `vocals_pending`, `plan` `wait|anticipate`) : aucun champ du
+  Cadrage ne le porte. « Attendre » verrouille le Mixage (prérequis « Arrivée des voix définitives »,
+  `create_master_transmission` refuse `vocals_awaited`) ; « Anticiper » ouvre le Brief, chaque version
+  de mix garde sa source (`master_mix_versions.source_file_id`, trigger) et `decide_mix_version` refuse
+  `working_source`. Une maquette arrivée ensuite notifie le responsable (`master_source_newer`) ;
+  « Remplacer la source et prévenir … » confirme la nouvelle version et met à jour le lien vivant
+  (`refresh_master_transmission_source`, `sourceUpdatedAt` dans le paquet, « Nouvelle source le … »).
+- **Brief en document** (`brief-step.ts`, `brief-fact-actions.ts`, `components/master-workflow/brief/`,
+  migration `20261019080201`) : `StartChoices` (« Préparer un échange » recommandé si ≥ 2 manques) ;
+  « Commencer directement » pose la question de la direction à la validatrice ; « Préparer un échange »
+  = `CallPrepForm stay` dans l'étape. Chaque fait se change sur place (`FactRow` `change`/`edit`,
+  `saveBriefFact`) ; la première modification écrit tout le Brief pré-rempli (ingénieur du Cadrage
+  avec sa citation, même ingénieur pour le mastering par défaut, validatrice = direction créative du
+  Cadrage › Équipe sinon du projet sinon le responsable, dates proposées 6/3/1 jours avant le master
+  final). Ordre des dates refusé par le code. « Enregistrer le Brief » (`record_master_brief`) : jamais
+  désactivé, dit les manques ; `content_changed_at` > `recorded_at` = « Modifications à enregistrer »,
+  et l'envoi est bloqué tant que le Brief n'est pas enregistré tel quel (blocage côté code). « Modifié
+  par … » : `changed_by` écrit par trigger.
+- **Mixage / Mastering** (`round-step.ts`, `round-actions.ts`, `components/master-workflow/round/`,
+  migrations `20261019080301` et `080401`) : avant l'envoi, « Avant d'envoyer », dossier, e-mail à
+  écrire (PDS OS n'envoie pas d'e-mail : lien + « Copier » + « Marquer comme envoyé »), dérogation sans
+  pistes **écrite** (`withoutStemsReason`, refusée sans) ; le jeton est gardé **chiffré**
+  (`token_secret`, clé Vault `master_link_key`) et relu par le responsable seul
+  (`master_transmission_link`) : lien visible, « Relancer » (mailto), « Renouveler », « Révoquer » avec
+  motif. Sur `/m/` « Prendre en charge le dossier » avec le tarif confirmé ou proposé
+  (`take_master_transmission` : ligne de budget `proposed`, notification `master_rate_proposed`) puis
+  « Accepter le tarif » (`accept_master_rate` → `committed`). Versions en `VersionCard`, retours minutés
+  (équipe seulement), « Transmettre les retours sans décider » (texte écrit par le code, chaque ligne
+  avec son auteur), décision `DecisionPanel` (motif **toujours** obligatoire pour une modification),
+  « Rouvrir le mix » (responsable, motif, refusé si le mastering est parti : décision `reopened`).
+- **Master final** (`components/master-workflow/final/`) : fichier au Catalogue, ISRC, filiation, « Ce
+  que ça débloque » (durée lue sur le titre), livrables attendus / reçus (notés par le responsable).
+- **Page privée `/m/`** : `PortalShell`, cartes « Votre dossier », « Mix » / « Mastering » (versions et
+  dépôt), « Échanges avec le label », triées par `PortalSections`.
+- **Reste** (non fait) : réponse de la DA lue par PO avec citations, livrables déposés par
+  l'ingénieur sur son lien, facture / RIB / paiement, lien d'écoute de l'artiste, escalade d'un retard
+  à la direction, ingénieur maison, PDF du Brief, rouvrir un master.
+
+
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique
 (`docs/CONTEXTE-PROJET.md` § 2), d'après le ticket « Workflow Master » du 30/09/2026.
 Parcours interne : État du master → Brief Mix/Master → Mix (versions, retours, validation
@@ -3942,6 +4085,71 @@ plateformes. Ses colonnes de `releases` restent (données), plus rien ne les éc
 - Migrations `20261011100101_distribution_dossier` à `…100601_distribution_closure` (7 lots) ;
   tests `supabase/tests/distribution.test.sql` (103, fixture Piégée simulée).
 
+### Distribution sur le patron commun (proto « Projet complet », lot 10, 19/10/2026)
+
+Remplace les cinq onglets ci-dessus (leurs données et fonctions SQL restent). Cahier des charges :
+`docs/projet-complet/distribution.md`.
+
+- **Parcours en 7 étapes, 4 sections** (`lib/distribution/journey.ts`, pur ; clés
+  `lib/ui/distribution-steps.ts`) : Préparation, Paramètres de distribution, Dossier de livraison
+  (Dossier) · Dépôt dans The Orchard, Réponse de The Orchard (Dépôt) · Plateformes (En ligne) ·
+  Clôture. Une page par étape sous `/release/<slug>` (`preparation`, `params`, `dossier`,
+  `deposit`, `orchard`, `online`, `closure`) + deux vues du pied du parcours (`anomalies`,
+  `history`) ; `/release` redirige vers l'étape de la personne, `/release/tracking` vers Dépôt ou
+  Réponse. Cadre : `DistributionFrame` (en-tête « Distribution » + statut calculé
+  `distributionStatus`, faits « « Projet » · artiste · format · Master final · Sortie ·
+  Distributeur », « Qui fait quoi », `NowCard`, `ModuleAttention`) et `DistributionStep`
+  (`StepPanel`, « Ce qui viendra » d'une étape verrouillée, blocages et informations notées,
+  « Déjà fait » filtré de `distribution_events` par `lib/distribution/step-history.ts`).
+  Données d'une requête : `distributionContext` (`lib/distribution/journey-context.ts`, `cache`),
+  qui sert aussi le loader `lib/journey/distribution.ts` (`JOURNEY_LOADERS.distribution`) :
+  Maintenant, Travail et Validations (acteur `kind: "validate"` pour « Valider la Vn » et
+  « Valider la clôture »). Avant « Lancer le plan » : rien (`WorkflowLocked`, statut Non démarré).
+  Statuts : Bloqué tant qu'une source manque (Préparation non faite), En attente quand seuls The
+  Orchard, la détection ou une validation sont attendus. Les acteurs non-personnes (The Orchard,
+  « la détection automatique ») sont des acteurs `viewer: false` d'une étape `waiting`.
+- **Sources réelles (D0)** : master final validé dans le Master (`loadFinalView`) ; pochette =
+  **livrée par la Production** (`distribution_cover`, SQL invoker : fiche choisie dans les
+  paramètres, sinon trouvée par son titre, et `deliverable_deliveries.delivered_at` + n° de version,
+  porté dans le dossier pour que « v2 → v3 » se voie dans les écarts) ; emprunts non sécurisés
+  (`distribution_legal_blockers`, `security definer`, lisible sans `manage_legal`, ne rend que
+  titre et état). **« Prêt pour la sortie » n'est pas recalculé** : la Préparation et le prérequis
+  externe de l'étape Dépôt lisent `loadLegalReadiness` (§ 8 sexies) — verdict et validation de la
+  direction ; sans `manage_legal`, seule la validation se lit, d'où la fonction des emprunts gardée
+  pour le blocage (la readiness juridique lit elle-même `loadDistributionSources`, donc pas
+  d'appel inverse dans les sources : il serait circulaire). `submit_distribution_version` refuse
+  désormais aussi en SQL un emprunt à sécuriser (`legal_blockers`) et des paramètres non confirmés.
+- **Dates** (`lib/projects/dates.ts`, `loadProjectDates`) : la **sortie** = `projects.due_date`
+  (saisie au Lancement, confirmée au Cadrage, validée avec son Brief ; source « Projet · Lancement,
+  validé par X le jj/mm ») ; `releases.planned_release_date` la suit par déclencheur et n'est plus
+  saisie nulle part (le formulaire « Sortie » est retiré). La ligne `releases` est créée **au
+  lancement du plan** (déclencheur sur `project_plans`, rattrapage des projets lancés). Le
+  **master final** = date du Brief Mix et Master, sinon échéance `master_final` confirmée du
+  Cadrage. Seule règle existante entre les deux : une échéance du Cadrage ne peut pas suivre la
+  date visée (`lib/framing/conflicts.ts`) ; l'écart « −14 j » du proto n'est pas une règle
+  (point à trancher, `docs/CONTEXTE-PROJET.md`). La détection lit l'ISRC du **Catalogue**
+  (`lib/release/isrc.ts`), plus celui de la sortie.
+- **Gestes groupés** (migrations `20261019100201`, `…100301`) : `confirm_distribution_params`
+  (« Confirmer les paramètres » écrit avec la confirmation ce que PDS OS proposait et que personne
+  n'a changé : validateur = la direction, jamais le responsable ; précommande = temps fort de la
+  Stratégie dont le titre dit pré-save / précommande, sinon « À renseigner » ; refuse un manque ou
+  une date ≥ sortie) ; `declare_distribution_answers` (frise de The Orchard en un seul geste, une
+  preuve partagée par plusieurs états) ; `attach_distribution_declaration_proof` (preuve ajoutée
+  après, jamais remplacée) ; `declare_distribution_corrections` (déclaration + anomalie
+  `from_distributor` + version suivante, une transaction) ; `confirm_distribution_platform`
+  (« Tout est bon » : lien proposé par la détection ou saisi, disponible et conforme) ;
+  `report_distribution_platform_problem` (« Il y a un problème » + anomalie). Chaque Server Action
+  passe par `withOutcome` (bandeau « Ensuite / Débloqué » dans l'étape).
+- **Notifications** (triggers) : version soumise → validateur, décidée → qui l'a soumise ;
+  clôture proposée → validateur, décidée → qui l'a proposée (`distribution_version_*`,
+  `distribution_closure_*`, ajoutés par `add_notification_kinds`), ouvertes sur l'étape Dossier
+  ou Clôture. « Exporter en PDF » du dossier : `/api/projects/[id]/distribution-dossier`
+  (`lib/distribution/dossier-html.ts`, la version décidée ou celle en préparation).
+- **Retiré de l'écran** (routes et données gardées) : formulaire « Sortie », carte smartlink (la
+  route publique `/l/` reste), rappel « dépôt manuel » répété (seulement à l'étape Dépôt), modales
+  par geste. « Lancer la détection maintenant » reste en recours dans l'attente de la détection.
+- Tests : `supabase/tests/distribution.test.sql` (105) et `distribution-journey.test.sql` (35).
+
 ## 8 nonies. Marketing : Production et Suivi & bilan
 
 Même test UX : « Production » et « Suivi & bilan » n'avaient pas de page, un contenu ne pouvait être
@@ -4387,6 +4595,62 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   parcours dans l'écran n'a pas pu être rejoué (Chrome ne charge pas l'app connectée).
 
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
+
+> **Lot 4 « Projet complet » (19/10/2026) — ce qui suit remplace l'écran décrit plus bas.** La
+> Conception est le parcours du proto en six étapes (`lib/design/journey.ts`, `DESIGN_STEPS`) :
+> Accueil (`/design/home`), Intentions (`/design/intentions`), Références, Direction artistique,
+> Brief créatif, Fiches Livrables — le Brief **avant** les fiches. `/design` envoie à l'étape de la
+> personne (`designLanding`) ; `/design/work`, `/design/sheets/[id]`, `/design/decisions/[id]` et
+> `/design/versions/[id]` redirigent vers leur étape (ancres `#target-…`, `#sheet-…`,
+> `#deliverable-…`). Les onglets (`ConceptionTabs`), le parcours maison (`journey-next`,
+> `ConceptionJourney`) et les composants de l'ancien écran sont supprimés.
+>
+> - **Données d'une requête** : `designJourneyContext` (`lib/design/journey-context.ts`, `cache`) lit
+>   `loadConception`, les personnes (`loadDesignPeople`), le départ (`design_workspaces.start_path*`),
+>   l'échange créatif (`design_calls` + `call_reports`), les briefs, les fiches (`loadFacts`) et leur
+>   état (`phaseOf` → `lib/design/sheet-phase.ts` : Brouillon / En attente de validation /
+>   Modifications demandées / Refusée / Validée · Prête pour Production / Transférée, et la version) ;
+>   le loader du projet `lib/journey/design.ts` le rend sous le Marketing. Cadre : `DesignStepFrame`.
+> - **Statuts** (code, jamais stockés) : Accueil fait = responsable créatif désigné **et** départ
+>   direct ou échange tenu ; Intentions = aucune à confirmer et ≥ 1 confirmée (plus de « Confirmer
+>   l'ensemble » par le chef de projet ; `design_intent_confirmations` gardée) ; Références = ≥ 1 et
+>   aucune à rattacher ; Direction = dernière version validée ; Brief = une version ; Fiches = toutes
+>   transférées. L'acteur des Fiches est le premier geste de la personne qui regarde (une fiche
+>   chacun), les autres sont listés dans l'étape (`DesignWaits`).
+> - **Départ** : `choose_design_start(project, 'direct'|'call'|null)` (propriétaire ; ouvre la
+>   Conception ; « Changer » tant qu'aucun échange n'existe ; plus de motif exigé). Désigner le
+>   responsable créatif ouvre aussi la Conception (`start_design` puis `assign_design_responsible`).
+>   Un livrable ajouté porte `format` et un motif obligatoire (`design_deliverables_reason_check`).
+> - **Validation** : la direction du label (titulaires de `validate`) est valideur **par défaut** de la
+>   direction et de chaque fiche (`design_default_validators`, appelée par `start_design` et à la
+>   création d'une fiche), changeable dans « Qui fait quoi » ; mode `global` par défaut. Une version
+>   envoyée « par section » est décidée d'un coup sur toutes ses sections (`decideDesignStep`).
+>   Délégations, auto-approbation, réserves, message / échéance : hors écran (tables et fonctions
+>   gardées).
+> - **Fiches créées par la base** : `design_ensure_sheets` crée une fiche par livrable (série si la
+>   quantité > 1, autant d'éléments) à la validation de la Stratégie et à chaque ajout ensuite.
+>   Les valeurs sont **proposées par le code** à la lecture (`lib/design/sheet-proposals.ts` :
+>   concept ← intention « Ce qu'il raconte » du livrable, sinon la direction ; ton ← direction ;
+>   ratios / durée / format ← format écrit en Stratégie ; livraison ← échéance de la Stratégie ou
+>   échéance amont « Production terminée » ; montant ← lignes de Budget du livrable, non engagé ;
+>   début / fin de postproduction calculés ; « Publié le » ← jalons du livrable) et **écrites avec
+>   leur source** (`provenance.<champ>.detail`) quand le responsable soumet (`submitSheetStep`).
+>   Champs par format : `lib/design/sheet-model.ts`. Un champ se modifie seul (`saveSheetField`,
+>   « Modifié par … ») ; le code refuse des dates qui ne se suivent pas ou une livraison après
+>   l'échéance amont (`lib/design/sheet-patch.ts`). Nouvelles colonnes : `design_sheets.file_format`,
+>   `new_version_at` (« Modifier (nouvelle version) »), `design_sheet_items.publish_date`.
+> - **Transfert** : `handoff_design_sheet` démarre l'étape Production au premier transfert ; un
+>   transfert d'une version suivante notifie (`design_sheet_new_version`) le propriétaire, le chargé
+>   de production et le réalisateur du livrable. La Conception est **faite quand toutes les fiches sont
+>   transférées** (`design_is_done`, lu par `loadWorkflowStates` et les pilules) : son étape n'est
+>   plus validée en bloc, « Valider la conception », la clôture, « Passer en Production » et la
+>   réouverture quittent l'écran (fonctions gardées). La page Production ne propose plus « Démarrer ».
+> - **Références** : sortes et droits du proto (`proposal`, `work_version`, `internal`, `to_check`
+>   ajoutés, anciennes valeurs gardées) ; ajout et rattachement en place ; « Chercher des
+>   références semblables » gardé en action secondaire.
+> - Migrations `20261019040101` à `20261019040701` ; tests `conception-journey.test.sql` (et les
+>   anciens adaptés : ils bâtissent leurs propres fiches).
+
 
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration
 `20261010000901_conception_entry.sql`, tests `supabase/tests/conception.test.sql`. La Stratégie dit
