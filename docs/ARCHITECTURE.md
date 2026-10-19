@@ -776,6 +776,17 @@ s'afficher sans chargement.
   `get_my_access` relit l'adhésion à chaque page et le RLS s'applique au même jeton.
 - **À savoir** : `next dev` ne précharge jamais et compile chaque page à sa première visite.
   La fluidité se juge avec `pnpm build && pnpm start`.
+- **Pas de cascade entre un layout et sa page** (finitions du 19/10) : une page ne commence à lire
+  qu'une fois son layout répondu. Le layout du projet lit `loadWorkflowStates` et `planLaunchedAt`
+  **avec** le projet ; `WorkflowGate` et les layouts Master / Juridique lisent `isWorkflowLaunched`
+  avec l'accès et, lancé (le cas courant), rendent la page sans autre requête ; la fiche de
+  production (`loadSheet`) lit en deux tours au lieu de quatre (hand-offs avec le premier,
+  `readHandoffs`), la préproduction en deux au lieu de trois, et `journeyContext` lance les
+  lectures du parcours dès que la fiche est connue (`preloadJourney`), pendant la phase et la
+  prochaine action. Outil : un `fetch` instrumenté dans `createClient` (non committé) et le
+  regroupement des requêtes par vague donnent la profondeur de la chaîne ; en `next dev`, le
+  suivi asynchrone de React (développement seulement) prend l'essentiel du CPU : ne juger qu'en
+  `pnpm start`.
 
 ---
 

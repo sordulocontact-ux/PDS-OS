@@ -32,73 +32,81 @@ export async function loadPreprod(
 ): Promise<PreprodData> {
   const sheetId = data.sheet.id;
   const supabase = await createClient();
-  const [briefs, items, actions, equipment, budget, callSheet, checks] =
-    await Promise.all([
-      supabase
-        .from("production_team_briefs")
-        .select("*")
-        .eq("sheet_id", sheetId),
-      supabase
-        .from("production_call_items")
-        .select("*")
-        .eq("sheet_id", sheetId)
-        .order("position")
-        .order("created_at"),
-      supabase
-        .from("production_plan_actions")
-        .select("*")
-        .eq("sheet_id", sheetId)
-        .order("position")
-        .order("created_at"),
-      supabase
-        .from("production_equipment")
-        .select("*")
-        .eq("sheet_id", sheetId)
-        .order("position")
-        .order("created_at"),
-      supabase
-        .from("production_budget_lines")
-        .select("*")
-        .eq("sheet_id", sheetId)
-        .order("position")
-        .order("created_at"),
-      supabase
-        .from("production_call_sheets")
-        .select("*")
-        .eq("sheet_id", sheetId)
-        .maybeSingle(),
-      supabase
-        .from("production_readiness_checks")
-        .select("*")
-        .eq("sheet_id", sheetId),
-    ]);
+  // The calls and files do not depend on the plan's rows: read with them,
+  // then the tasks and agendas they point to (two rounds, not three).
+  const [
+    briefs,
+    items,
+    actions,
+    equipment,
+    budget,
+    callSheet,
+    checks,
+    calls,
+    quotes,
+  ] = await Promise.all([
+    supabase.from("production_team_briefs").select("*").eq("sheet_id", sheetId),
+    supabase
+      .from("production_call_items")
+      .select("*")
+      .eq("sheet_id", sheetId)
+      .order("position")
+      .order("created_at"),
+    supabase
+      .from("production_plan_actions")
+      .select("*")
+      .eq("sheet_id", sheetId)
+      .order("position")
+      .order("created_at"),
+    supabase
+      .from("production_equipment")
+      .select("*")
+      .eq("sheet_id", sheetId)
+      .order("position")
+      .order("created_at"),
+    supabase
+      .from("production_budget_lines")
+      .select("*")
+      .eq("sheet_id", sheetId)
+      .order("position")
+      .order("created_at"),
+    supabase
+      .from("production_call_sheets")
+      .select("*")
+      .eq("sheet_id", sheetId)
+      .maybeSingle(),
+    supabase
+      .from("production_readiness_checks")
+      .select("*")
+      .eq("sheet_id", sheetId),
+    loadProductionCalls(projectId, sheetId),
+    listProductionFiles(supabase, sheetId, ["quote", "capture"]),
+  ]);
   for (const res of [briefs, items, actions, equipment, budget, checks])
     if (res.error) console.error("loadPreprod:", res.error.message);
 
   const taskIds = (actions.data ?? []).flatMap((a) =>
     a.task_id ? [a.task_id] : [],
   );
-  const [calls, quotes, tasks] = await Promise.all([
-    loadProductionCalls(projectId, sheetId),
-    listProductionFiles(supabase, sheetId, ["quote", "capture"]),
+  const [tasks, agendas] = await Promise.all([
     taskIds.length
       ? supabase.from("tasks").select("id, status").in("id", taskIds)
       : Promise.resolve({ data: [] as { id: string; status: string }[] }),
+    calls.length
+      ? supabase
+          .from("calls")
+          .select("id, agenda")
+          .in(
+            "id",
+            calls.map((c) => c.callId),
+          )
+      : {
+          data: [] as {
+            id: string;
+            agenda: Parameters<typeof agendaTopics>[0];
+          }[],
+        },
   ]);
-  const agendas = calls.length
-    ? await supabase
-        .from("calls")
-        .select("id, agenda")
-        .in(
-          "id",
-          calls.map((c) => c.callId),
-        )
-    : {
-        data: [] as {
-          id: string;
-          agenda: Parameters<typeof agendaTopics>[0];
-        }[],
-      };
 
   const nameOf = (id: string | null) =>
     id ? (data.members.find((m) => m.personId === id)?.name ?? "—") : null;

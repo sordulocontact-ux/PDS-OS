@@ -47,9 +47,14 @@ export default async function ProjectLayout({
   params,
 }: LayoutProps<"/app/projects/[projectId]">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
+  // Each workflow's state, read from its sources (shared with the overview
+  // and the header in the same request): the navigation's dots. Read with
+  // the project, not after it (one round fewer before every page).
+  const [access, project, flows, launchedAt] = await allInOrder([
     requireApproved(),
     getProject(projectId),
+    loadWorkflowStates(projectId),
+    planLaunchedAt(projectId),
   ]);
   if (!project) notFound();
 
@@ -57,13 +62,7 @@ export default async function ProjectLayout({
   const canSeeLegal = can(access, "manage_legal");
   const canSeeBudget = canSeeProjectBudget(access, project);
 
-  // Each workflow's state, read from its sources (shared with the overview
-  // and the header in the same request): the navigation's dots. The
-  // Cadrage's dot runs until the plan is launched, then is done (proto).
-  const [flows, launchedAt] = await Promise.all([
-    loadWorkflowStates(project.id),
-    planLaunchedAt(project.id),
-  ]);
+  // The Cadrage's dot runs until the plan is launched, then is done (proto).
   const statuses = {
     framing: launchedAt ? "done" : "in_progress",
     ...Object.fromEntries(

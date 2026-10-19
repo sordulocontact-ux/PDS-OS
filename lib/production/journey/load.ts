@@ -30,6 +30,78 @@ const QUOTE: readonly QuoteStatus[] = [
 ];
 
 /**
+ * What the journey reads, keyed by the sheet: started by journeyContext as
+ * soon as the sheet is known (preloadJourney), while the phase and the next
+ * action are read, then shared by loadJourney (one request round fewer).
+ */
+const journeyRows = cache(
+  async (
+    projectId: string,
+    deliverableId: string,
+    access: Access,
+    sheetId: string | null,
+  ) => {
+    const supabase = await createClient();
+    return Promise.all([
+      sheetId ? preprodFor(projectId, deliverableId, access) : null,
+      sheetId
+        ? supabase
+            .from("production_quotes")
+            .select("number, status, amount_cents")
+            .eq("sheet_id", sheetId)
+            .order("number", { ascending: true })
+        : null,
+      supabase
+        .from("project_creatives")
+        .select("person_id")
+        .eq("project_id", projectId),
+      sheetId
+        ? supabase
+            .from("production_location_options")
+            .select("id", { count: "exact", head: true })
+            .eq("sheet_id", sheetId)
+            .neq("status", "discarded")
+        : null,
+      sheetId
+        ? supabase
+            .from("production_call_sheet_versions")
+            .select("number")
+            .eq("sheet_id", sheetId)
+            .order("number", { ascending: false })
+            .limit(1)
+        : null,
+      loadStepTools(projectId),
+      sheetId
+        ? supabase
+            .from("production_shoots")
+            .select(
+              "state, ended_at, video_rushes, audio_sources, backup_verified, files_location, rushes_url",
+            )
+            .eq("sheet_id", sheetId)
+            .maybeSingle()
+        : null,
+      sheetId
+        ? supabase
+            .from("production_director_proposals")
+            .select("id", { count: "exact", head: true })
+            .eq("sheet_id", sheetId)
+            .eq("status", "proposed")
+        : null,
+    ]);
+  },
+);
+
+/** Starts the journey's reads early (React's preload pattern). */
+export function preloadJourney(
+  projectId: string,
+  deliverableId: string,
+  access: Access,
+  sheetId: string | null,
+): void {
+  void journeyRows(projectId, deliverableId, access, sheetId);
+}
+
+/**
  * The journey of one deliverable for the viewer: its steps, their state and
  * who acts now, from what the sheet, its preproduction, its quotes and its
  * phase say. Read once per request.
@@ -45,7 +117,6 @@ export const loadJourney = cache(
   ): Promise<JourneyStep[]> => {
     const sheet = data.sheet;
     const me = access.personId;
-    const supabase = await createClient();
     const [
       preprod,
       quotesRes,
@@ -55,52 +126,7 @@ export const loadJourney = cache(
       tools,
       shootRes,
       proposalsRes,
-    ] = await Promise.all([
-      sheet ? preprodFor(projectId, deliverableId, access) : null,
-      sheet
-        ? supabase
-            .from("production_quotes")
-            .select("number, status, amount_cents")
-            .eq("sheet_id", sheet.id)
-            .order("number", { ascending: true })
-        : null,
-      supabase
-        .from("project_creatives")
-        .select("person_id")
-        .eq("project_id", projectId),
-      sheet
-        ? supabase
-            .from("production_location_options")
-            .select("id", { count: "exact", head: true })
-            .eq("sheet_id", sheet.id)
-            .neq("status", "discarded")
-        : null,
-      sheet
-        ? supabase
-            .from("production_call_sheet_versions")
-            .select("number")
-            .eq("sheet_id", sheet.id)
-            .order("number", { ascending: false })
-            .limit(1)
-        : null,
-      loadStepTools(projectId),
-      sheet
-        ? supabase
-            .from("production_shoots")
-            .select(
-              "state, ended_at, video_rushes, audio_sources, backup_verified, files_location, rushes_url",
-            )
-            .eq("sheet_id", sheet.id)
-            .maybeSingle()
-        : null,
-      sheet
-        ? supabase
-            .from("production_director_proposals")
-            .select("id", { count: "exact", head: true })
-            .eq("sheet_id", sheet.id)
-            .eq("status", "proposed")
-        : null,
-    ]);
+    ] = await journeyRows(projectId, deliverableId, access, sheet?.id ?? null);
     const shoot = shootRes?.data ?? null;
 
     const person = (

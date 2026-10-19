@@ -1,7 +1,7 @@
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { workflowGate } from "@/lib/plan/queries";
+import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -13,12 +13,15 @@ export default async function LegalLayout({
   params,
 }: LayoutProps<"/app/projects/[projectId]/legal">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
+  // Launched (the common case): no round of its own before the pages.
+  const [access, project, launched] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
+    isWorkflowLaunched(projectId, "legal"),
   ]);
   // Without manage_legal, the page itself answers 404.
   if (!can(access, "manage_legal")) return children;
+  if (launched) return children;
   const gate = await workflowGate(project, "legal");
   if (gate) return <WorkflowLocked projectId={projectId} gate={gate} />;
   return children;
