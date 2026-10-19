@@ -35,6 +35,39 @@ export async function acknowledgeMasterPackage(token: string): Promise<string> {
   return data ?? "unknown";
 }
 
+/**
+ * « Prendre en charge le dossier », from the engineer's page, without an
+ * account: the rates confirmed (null) or proposed, in cents. The database
+ * checks the token, notes the taking charge, puts the amounts in the
+ * budget as « proposed » and tells the sender (take_master_transmission).
+ */
+export async function takeMasterPackage(
+  token: string,
+  mixCents: number | null,
+  masteringCents: number | null,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const t = fr.masterRound.take;
+  const amount = z.number().int().min(0).max(100_000_000).nullable();
+  if (
+    !TOKEN.test(token) ||
+    !amount.safeParse(mixCents).success ||
+    !amount.safeParse(masteringCents).success
+  )
+    return { ok: false, error: t.errors.amount };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("take_master_transmission", {
+    p_token: token,
+    p_mix_cents: mixCents ?? undefined,
+    p_mastering_cents: masteringCents ?? undefined,
+  });
+  if (error) {
+    console.error("takeMasterPackage:", error.message);
+    return { ok: false, error: t.errors.failed };
+  }
+  revalidatePath(`/m/${token}`);
+  return { ok: true };
+}
+
 export type DeliveryResult =
   { ok: true; path: string } | { ok: false; error: string };
 

@@ -1,6 +1,7 @@
 import { IconCheck } from "nucleo-sharp-essential";
 
 import { fr } from "@/lib/i18n/fr";
+import { cn } from "@/lib/utils";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 /** One gesture done on a step, read from the module's journal. */
@@ -25,14 +26,22 @@ const when = (at: string) =>
 export function StepHistory({
   items,
   title = fr.journey.history,
+  hideTitle = false,
 }: {
   items: StepHistoryItem[];
   title?: string;
+  // The page already says it (a module's whole history).
+  hideTitle?: boolean;
 }) {
   if (items.length === 0) return null;
   return (
     <section className="flex flex-col gap-2" aria-label={title}>
-      <h3 className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold text-[color:var(--text-secondary)]">
+      <h3
+        className={cn(
+          "text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold text-[color:var(--text-secondary)]",
+          hideTitle && "sr-only",
+        )}
+      >
         {title}
       </h3>
       <ul className="flex flex-col gap-2 text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">

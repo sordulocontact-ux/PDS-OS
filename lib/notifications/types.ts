@@ -34,6 +34,8 @@ export const NOTIFICATION_KINDS = [
   "master_mastering_version_received",
   "master_final_approved",
   "master_mastering_changes_requested",
+  // A newer version of a title whose final vocals were awaited.
+  "master_source_newer",
   // A borrowing's conditions (Juridique): to validate, validated, refused.
   "clearance_terms_proposed",
   "clearance_terms_validated",
@@ -46,6 +48,9 @@ export const NOTIFICATION_KINDS = [
   "strategy_review_approved",
   "strategy_review_changes_requested",
   "strategy_review_reminder",
+  // The Brief de sortie validated: the owner and the creative directors
+  // (Stratégie, lot 3 of the proto « Projet complet »).
+  "strategy_validated",
   // The creative team: the project launched, the Brief ready, a call.
   "project_launched",
   "brief_approved",
@@ -191,10 +196,14 @@ export function notificationHref(
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))
     return routes.projectMasterStep(projectId, "mastering");
+  if (kind === "master_source_newer")
+    return routes.projectMasterStep(projectId, "source");
   if (kind === "master_final_approved")
     return routes.projectMasterStep(projectId, "final");
   // A strategy document's review: the version itself (Brief de sortie or
   // Plan de sortie), where reviewers decide and the owner sees each answer.
+  if (kind === "strategy_validated")
+    return routes.projectStrategyStep(projectId, "validated");
   if (kind.startsWith("strategy_review_"))
     return subjectId
       ? routes.projectStrategyDocument(projectId, subjectId)

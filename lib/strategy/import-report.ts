@@ -10,7 +10,7 @@ import {
   ok,
   type ActionResult,
 } from "@/lib/framing/result";
-import { proposeStrategyChoices } from "@/lib/strategy/actions/choices";
+import { saidMilestoneKind, saidOffsetDays } from "@/lib/strategy/said-offset";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Client = SupabaseClient<Database>;
@@ -18,10 +18,13 @@ type Client = SupabaseClient<Database>;
 /**
  * Turns the strategy items of a call report into proposals ("proposé · à
  * confirmer"), each keeping its provenance: positioning, audiences, narrative
- * and levers heard during the call. A proposal never overwrites a confirmed
- * value, a proposed lever is "to decide", and a report is imported at most
- * once. Milestones are never proposed: the calendar is entered by a person.
- * Runs with the user's client: RLS decides (strategy_is_editable).
+ * and levers heard during the call, and — proto « Projet complet », lot 3 —
+ * deliverables, milestones and objectives (strategy_proposals), only when
+ * their quote was found word for word in the transcript; a milestone only
+ * when the code reads its day from the words (said-offset.ts), never
+ * guessed. A proposal never overwrites a confirmed value, nothing is decided
+ * in advance (rule 21), and a report is imported at most once. Runs with
+ * the user's client: RLS decides (strategy_is_editable).
  */
 export async function importReportIntoStrategy(
   supabase: Client,
@@ -34,13 +37,21 @@ export async function importReportIntoStrategy(
     .select("*")
     .eq("report_id", reportId)
     .order("position");
+  const PROPOSED = {
+    deliverable: "deliverable",
+    milestone: "milestone",
+    kpi: "objective",
+  } as const;
   const items = (all ?? []).filter(
-    (i) => isStrategyTextField(i.kind) || i.kind === "lever",
+    (i) =>
+      isStrategyTextField(i.kind) ||
+      i.kind === "lever" ||
+      (i.kind in PROPOSED && i.located !== "missing"),
   );
   if (items.length === 0) return fail("nothing_to_import");
   const itemIds = items.map((i) => i.id);
 
-  const [f, l] = await Promise.all([
+  const [f, l, p] = await Promise.all([
     supabase
       .from("field_values")
       .select("id")
@@ -51,8 +62,13 @@ export async function importReportIntoStrategy(
       .select("id")
       .in("source_report_item_id", itemIds)
       .limit(1),
+    supabase
+      .from("strategy_proposals")
+      .select("id")
+      .in("source_report_item_id", itemIds)
+      .limit(1),
   ]);
-  if ([f, l].some((r) => (r.data?.length ?? 0) > 0))
+  if ([f, l, p].some((r) => (r.data?.length ?? 0) > 0))
     return fail("already_imported");
 
   const { data: current } = await supabase
@@ -93,9 +109,31 @@ export async function importReportIntoStrategy(
       review_status: "proposed",
     }));
 
+  const proposals = items.flatMap((i) => {
+    const kind = PROPOSED[i.kind as keyof typeof PROPOSED];
+    if (!kind) return [];
+    const offset =
+      kind === "milestone" ? saidOffsetDays(i.what, i.quote) : null;
+    if (kind === "milestone" && offset === null) return [];
+    const text = i.what.trim().slice(0, 300);
+    return [
+      {
+        ...source(i),
+        kind,
+        text,
+        proposed_text: text,
+        offset_days: offset,
+        milestone_kind: kind === "milestone" ? saidMilestoneKind(i.what) : null,
+      },
+    ];
+  });
+
   const results = await Promise.all([
     fields.length ? supabase.from("field_values").insert(fields) : null,
     levers.length ? supabase.from("levers").insert(levers) : null,
+    proposals.length
+      ? supabase.from("strategy_proposals").insert(proposals)
+      : null,
   ]);
   const error = results.find((r) => r?.error)?.error;
   // RLS refuses once the strategy is submitted or validated.
@@ -106,9 +144,9 @@ export async function importReportIntoStrategy(
 /**
  * Right after the report of a strategy call is saved (« Préparer un
  * échange » of the Stratégie), its content lands in the Stratégie: nobody
- * imports by hand. The work counts as started (the entry gives way), the
- * report's items become proposals, then PO pre-checks the closed answers the
- * sources support — one passage of the call can feed several dimensions.
+ * imports by hand. The work counts as started (« Démarrer la stratégie » is
+ * done), the report's items become proposals decided one by one in « Les 8
+ * dimensions » — one passage of the call can feed several dimensions.
  * Only the first report of a call is imported. Returns whether anything was
  * done, so the processing can open the Stratégie.
  */
@@ -151,9 +189,6 @@ export async function fillStrategyFromCall(
   if (!imported.ok && imported.error !== "nothing_to_import")
     console.error("[strategy] auto import failed:", imported.error);
 
-  // A provider failure leaves the import in place: « Proposer des réponses »
-  // stays on the page to try again.
-  const proposed = await proposeStrategyChoices(projectId);
-  if (!proposed.ok) console.error("[strategy] auto choices:", proposed.error);
+  // Nothing is pre-checked (rule 21): no closed choice is proposed any more.
   return true;
 }

@@ -23,7 +23,7 @@ export type StrategyReserve = {
   text: string;
   ownerId: string;
   ownerName: string;
-  dueOn: string;
+  dueOn: string | null;
   status: "open" | "lifted";
   liftedAt: string | null;
   liftedByName: string | null;

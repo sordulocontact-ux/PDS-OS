@@ -252,6 +252,19 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
 - **Smartlink** : retiré de l'écran Distribution (route publique gardée) ; Distribution ou
   Marketing, à trancher avec la décision Odesli / maison.
 - **Ordre Reçu → Accepté → Livré** à la saisie : aide de l'écran seulement, la base ne déduit rien.
+### Master : décisions du lot 8 (19/10/2026, proto « Projet complet »)
+
+- « Voix définitives » : **déclaré par le responsable** à la confirmation de la source (aucune donnée du
+  Cadrage ne le porte). « Production définitive » n'est pas affichée faute de source réelle (point à
+  trancher : une dimension du Brief de cadrage ?).
+- Source détectée = la version la plus récente (maquette ou mise à plat), comme le proto et le ticket.
+- Dérogation sans pistes : **raison écrite obligatoire** (proto ; remplace la case seule du 12/10).
+- « Demander une modification » : motif **toujours** obligatoire (règle 6, proto).
+- Retours transmis sans décider : texte écrit par le code avec l'auteur de chaque ligne, sans PO.
+- Validatrice par défaut : la direction créative désignée au Cadrage › Équipe, sinon celle du projet,
+  sinon le responsable. Même ingénieur pour le mastering par défaut quand un seul est connu.
+- Rouvrir une décision : le mix seulement, tant que le mastering n'est pas parti.
+- Le lien privé du Master est gardé chiffré et relisible par le responsable (règle 19).
 
 ### Vocabulaire fixé
 

@@ -22,6 +22,8 @@ export const masterPackageSchema = z.object({
       // its audio state, worded.
       source: file.extend({ state: z.string() }),
       stems: z.array(file),
+      // The source replaced on the live link (final vocals arrived).
+      sourceUpdatedAt: z.string().nullable().default(null),
     }),
   ),
   direction: z.string().nullable(),

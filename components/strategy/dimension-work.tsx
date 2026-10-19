@@ -2,20 +2,17 @@ import { BudgetLines } from "@/components/budget/budget-lines";
 import { BriefFieldCard } from "@/components/framing/brief-field-card";
 import { AudiencesSection } from "@/components/strategy/audiences-section";
 import { LeverBudgetTable } from "@/components/strategy/budget/lever-budget-table";
-import { StrategyBudgetSummary } from "@/components/strategy/budget/strategy-budget-summary";
 import { CalendarSection } from "@/components/strategy/calendar-section";
 import { DeliverablesSection } from "@/components/strategy/deliverables-section";
-import { LeversSection } from "@/components/strategy/levers-section";
+import { LegalDependencies } from "@/components/strategy/legal-dependencies";
 import { NarrativeSummary } from "@/components/strategy/narrative-summary";
 import { ObjectivesWork } from "@/components/strategy/objectives-work";
 import { RedraftButton } from "@/components/strategy/redraft-button";
-import { StrategyChoices } from "@/components/strategy/strategy-choices";
 import type { BudgetData } from "@/lib/budget/queries";
 import type {
   FieldState,
   NarrativePart,
   PositioningPart,
-  StrategyTextField,
 } from "@/lib/framing/brief";
 import { fr } from "@/lib/i18n/fr";
 import { strategyBudget as computeStrategyBudget } from "@/lib/strategy/budget";
@@ -23,9 +20,16 @@ import type { StrategyDimension } from "@/lib/strategy/dimensions";
 import type { StrategyData } from "@/lib/strategy/queries";
 
 /**
- * The work of one dimension, unfolded on the pilotage: the blocks the Stratégie already
- * had (closed questions, levers, deliverables, calendar), the narrative's
- * story parts, the project's budget lines and the objectives.
+ * What a dimension keeps folded under its lines (« Garde, repliés »,
+ * docs/ARCHITECTURE.md § 6 bis « Lot 3 »): what the ticket and Ibé's returns
+ * asked beyond the proto — the four points of the positioning (MKT-S1-05),
+ * each public described, the narrative in five parts and its synthesis
+ * (ticket § 2, MKT-S1-06), the legal prerequisites (MKT-S1-07), quantity,
+ * lever and lead times of the deliverables (MKT-S1-08), the calendar by
+ * channel and its milestones to edit (ticket § 5), the budget by lever and
+ * its lines (ticket § 6), the strategic objective and figured KPIs (ticket
+ * § 7). The closed-choice grid is gone (code only, against the ticket's
+ * « pas un formulaire rigide »).
  */
 export function DimensionWork({
   dimension,
@@ -43,23 +47,6 @@ export function DimensionWork({
   // Where a spend's proof is uploaded.
   organizationId: string | null;
 }) {
-  // Remounts when the saved answers change on the server.
-  const choices = (key: StrategyTextField) => {
-    const field = data.fields.find((f) => f.key === key)!;
-    return (
-      // The card's « premier manque » may point here (MKT-S1-05).
-      <div id={`answer-${key}`} className="scroll-mt-24">
-        <StrategyChoices
-          key={`${key}-${JSON.stringify(data.choices[key])}-${field.value ?? ""}-${field.status ?? ""}`}
-          field={field}
-          value={data.choices[key]}
-          suggestions={data.suggestions[key]}
-          projectId={projectId}
-        />
-      </div>
-    );
-  };
-
   // A part of the positioning or the narrative: an anchor for the card's
   // « premier manque » and the draft's questions, and « Proposer à nouveau »
   // while it is not confirmed (MKT-S1-06).
@@ -88,42 +75,20 @@ export function DimensionWork({
   switch (dimension) {
     case "positioning":
       return (
-        <>
-          {choices("positioning")}
-          <div className="flex flex-col gap-3">
-            <h3 className="text-body-md font-semibold">
-              {fr.strategyPilot.positioning.title}
-            </h3>
-            {data.positioningParts.map((part) =>
-              partCard(part, fr.strategyPilot.positioning.parts[part.key]),
-            )}
-          </div>
-        </>
+        <div className="flex flex-col gap-3">
+          {data.positioningParts.map((part) =>
+            partCard(part, fr.strategyPilot.positioning.parts[part.key]),
+          )}
+        </div>
       );
-    case "audiences": {
-      const described = new Set(
-        data.audiences.map((a) => a.segment.trim().toLowerCase()),
-      );
-      const labels = fr.strategy.choices.options.audiences as Record<
-        string,
-        string
-      >;
+    case "audiences":
       return (
-        <>
-          {choices("audiences")}
-          <AudiencesSection
-            projectId={projectId}
-            audiences={data.audiences}
-            suggested={data.choices.audiences.choices
-              .map((c) => labels[c])
-              .filter(
-                (label): label is string =>
-                  !!label && !described.has(label.toLowerCase()),
-              )}
-          />
-        </>
+        <AudiencesSection
+          projectId={projectId}
+          audiences={data.audiences}
+          suggested={[]}
+        />
       );
-    }
     case "narrative":
       return (
         <>
@@ -137,17 +102,13 @@ export function DimensionWork({
               partCard(part, fr.strategyPilot.narrative.parts[part.key]),
             )}
           </div>
-          {choices("narrative")}
         </>
       );
     case "levers":
       return (
-        <LeversSection
-          levers={data.levers}
-          openNeeds={data.openNeeds}
-          legalNeeds={data.legalNeeds}
-          legalDependencies={data.legalDependencies}
-          projectId={projectId}
+        <LegalDependencies
+          dependencies={data.legalDependencies}
+          needs={data.legalNeeds}
         />
       );
     case "deliverables":
@@ -178,7 +139,6 @@ export function DimensionWork({
       );
       return (
         <>
-          <StrategyBudgetSummary budget={strategyBudget} />
           <LeverBudgetTable rows={strategyBudget.byLever} />
           <div className="flex flex-col gap-3">
             <h3 className="text-body-md font-semibold">

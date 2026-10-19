@@ -32,7 +32,7 @@ export type StrategyPrepInput = {
   narrativeParts: FieldState<NarrativePart>[];
   levers: Array<{ id: string; label: string; state: string }>;
   openNeeds: Array<{ label: string }>;
-  deliverables: Array<{ lever_id: string }>;
+  deliverables: Array<{ lever_id: string | null }>;
   milestones: unknown[];
   referenceDate: string | null;
   strategicObjective: { status: "proposed" | "confirmed" | null };
@@ -130,30 +130,25 @@ function textQuestion(
   return [fr.strategy.choices.questions[key]];
 }
 
+/**
+ * The agenda of a strategy exchange (proto PREP_CALL.strat): the 8
+ * dimensions, one per point, and under each — folded under « Préparer en
+ * détail » — the questions of what is still missing (ticket § 1: « PO
+ * réutilise les informations connues pour proposer les sujets »).
+ */
 export function strategyCallTopics(input: StrategyPrepInput): StrategyTopic[] {
-  return STRATEGY_TOPICS.flatMap((key) => {
+  return STRATEGY_TOPICS.map((key) => {
     const questions = questionsOf(key, input).slice(0, MAX_QUESTIONS);
-    if (questions.length === 0) return [];
-    return [
-      {
-        key,
-        topic: fr.strategyPilot.dimensions[key],
-        minutes: Math.min(
-          15,
-          Math.max(5, questions.length * MINUTES_PER_QUESTION),
-        ),
-        questions,
-      },
-    ];
+    return {
+      key,
+      topic: fr.strategyDimensions.names[key],
+      minutes: Math.min(
+        15,
+        Math.max(5, questions.length * MINUTES_PER_QUESTION),
+      ),
+      questions,
+    };
   });
-}
-
-/** The call's objective, proposed from the topics (the person rewrites it). */
-export function strategyCallPurpose(topics: StrategyTopic[]): string {
-  const t = fr.strategyEntry.call;
-  return topics.length
-    ? t.purpose(topics.map((topic) => topic.topic.toLowerCase()))
-    : t.purposeReview;
 }
 
 export const CALL_FORMATS = ["video", "in_person", "phone"] as const;

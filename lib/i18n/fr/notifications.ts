@@ -101,6 +101,8 @@ export const notifications = {
       `Le mixeur a bien reçu le dossier de « ${project} ».`,
     master_mix_version_received: (actor: string, project: string) =>
       `${actor} a ajouté une version du mix de « ${project} » : vos retours sont attendus.`,
+    master_source_newer: (_actor: string, project: string) =>
+      `Une nouvelle version d'un titre de « ${project} » est arrivée au Catalogue : les voix définitives ? Remplacez la source.`,
     master_mix_approved: (actor: string, project: string) =>
       `${actor} a validé le mix final de « ${project} ».`,
     master_mix_changes_requested: (actor: string, project: string) =>
@@ -127,6 +129,8 @@ export const notifications = {
       `${actor} demande une modification d'un document de la stratégie de « ${project} ».`,
     strategy_review_reminder: (actor: string, project: string) =>
       `${actor} vous relance : votre validation est attendue sur la stratégie de « ${project} ».`,
+    strategy_validated: (_actor: string, project: string) =>
+      `La Stratégie de « ${project} » est validée : le Brief de sortie alimente la Conception et les Activations.`,
     project_launched: (actor: string, project: string) =>
       `« ${project} » est lancé : ${actor} en est responsable.`,
     brief_approved: (_actor: string, project: string) =>

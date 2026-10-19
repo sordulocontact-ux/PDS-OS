@@ -459,8 +459,12 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
 - [x] **2. Cadrage et Plan du projet** (`framing.md`, 19/10/2026, branche `pc/z2-framing`, migration
       `20261019020101` à pousser avec accord) : parcours en 4 étapes (Démarrer, 6 dimensions,
       Brief, Plan), Plan dans le Cadrage, « Lancer le plan » démarre tous les workflows
-- [ ] **3. Stratégie** (`strategy.md`) : parcours, entrée, propositions une par une sur les 8 dimensions,
-      validation dans l'étape, « Stratégie validée », résumé de l'échange
+- [x] **3. Stratégie** (`strategy.md`, branche `pc/z3-strategy`, 19/10/2026) : parcours en 4 étapes
+      (`/strategy/start|dimensions|validation|validated`), entrée `StartChoices` + échange dans l'étape,
+      lignes tranchées une par une sur les 8 dimensions (`ProposalRow`, plus de grille ni de
+      pré-cochage), PO propose aussi livrables, temps forts et objectifs, Brief en 4 blocs validé dans
+      l'étape (`DecisionPanel`), « Stratégie validée » ; migrations `20261019030101` et `20261019030201`
+      à pousser en prod avec accord ; 20 tests pgTAP (`strategy-proposals.test.sql`)
 - [ ] **4. Conception** (`design.md`) : parcours en 6 étapes du proto, fiches champ par champ, transfert
 - [ ] **5. Production** (`production.md`) : d'abord la fuite de l'enveloppe interne sur le lien de la
       société ; barre de livrables, « Qui produit ? », « Quelle société ? », mode de préparation, call de

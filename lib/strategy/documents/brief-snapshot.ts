@@ -12,6 +12,7 @@ import { formatEuros } from "@/lib/budget/types";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
 import type { Arbitration } from "@/lib/strategy/brief";
+import { briefOutSchema } from "@/lib/strategy/brief-out";
 import type { StrategyBudget } from "@/lib/strategy/budget";
 import { isKpiMetric, kpiTracking } from "@/lib/strategy/kpis";
 import { dayOffset } from "@/lib/strategy/calendar";
@@ -60,6 +61,9 @@ const snapshotSchema = z.object({
       items: z.array(item),
     }),
   ),
+  // The proto's four blocks (lot 3 of the Stratégie, 19/10/2026); absent
+  // from the versions written before.
+  out: briefOutSchema.optional(),
 });
 
 export type SnapshotLine = z.infer<typeof line>;
@@ -263,7 +267,7 @@ export function buildBriefSnapshot(input: SnapshotInput): BriefSnapshot {
         lines: data.deliverables.map((d) => ({
           head: deliverableTitle(d.title, d.quantity),
           rest: joined([
-            leverName.get(d.lever_id),
+            d.lever_id ? leverName.get(d.lever_id) : null,
             d.assignee_person_id ? people.get(d.assignee_person_id) : null,
             d.due_date ? formatBriefDate(d.due_date) : null,
           ]),

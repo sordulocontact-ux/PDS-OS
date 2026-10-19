@@ -212,7 +212,8 @@ $$, '23514', 'stems_missing', 'a title without stems goes only on purpose (PROJ-
 insert into tokens select 'link', public.create_master_transmission(pg_temp.id_of('project'), 'mix',
   jsonb_build_object('titles', jsonb_build_array(jsonb_build_object('masterId', pg_temp.id_of('title'),
                                                                     'title', 'Titre'))),
-  null, now() + interval '60 days', '{"withoutStems": ["Titre"]}'::jsonb);
+  null, now() + interval '60 days',
+  '{"withoutStems": ["Titre"], "withoutStemsReason": "Pistes envoyées à part"}'::jsonb);
 reset role;
 select is((select expires_at::date from public.master_transmissions where project_id = pg_temp.id_of('project')),
           (now() + interval '60 days')::date, 'the link lives as long as code decided');

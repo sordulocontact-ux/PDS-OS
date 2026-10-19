@@ -180,14 +180,20 @@ export const routes = {
   projectFramingBriefPdf: (id: string, version?: number | null) =>
     `/api/projects/${id}/framing-brief${version ? `?version=${version}` : ""}`,
   projectStrategy: (id: string) => `/app/projects/${id}/strategy`,
-  // The Brief de sortie consolidé (ticket Stratégie § 8).
-  projectStrategyBrief: (id: string) => `/app/projects/${id}/strategy/brief`,
+  // A step of the Stratégie's journey (proto « Projet complet »): start,
+  // dimensions, validation, validated.
+  projectStrategyStep: (id: string, step: string) =>
+    `/app/projects/${id}/strategy/${step}`,
+  // The Brief de sortie, validated by the direction in its step (ticket
+  // Stratégie § 8–9); /strategy/brief redirects there.
+  projectStrategyBrief: (id: string) =>
+    `/app/projects/${id}/strategy/validation`,
   // One stored version of the Brief de sortie (V1, V2…), as it was sent.
   // A strategy document's version by its id: redirects to its page.
   projectStrategyDocument: (id: string, documentId: string) =>
     `/app/projects/${id}/strategy/document/${documentId}`,
   projectStrategyBriefVersion: (id: string, version: number) =>
-    `/app/projects/${id}/strategy/brief?v=${version}`,
+    `/app/projects/${id}/strategy/validation?v=${version}`,
   // A stored version of a strategy document as a PDF file.
   projectStrategyDocumentPdf: (id: string, documentId: string) =>
     `/api/projects/${id}/strategy-documents/${documentId}`,
@@ -205,9 +211,9 @@ export const routes = {
     `/app/projects/${id}/strategy/press-kit${step ? `?step=${step}` : ""}`,
   // A shared external document of the Stratégie, read without an account.
   sharedDocument: (token: string) => `/d/${token}`,
-  // A dimension of the Stratégie open in its work panel.
+  // A dimension of the Stratégie, in « Les 8 dimensions ».
   projectStrategyDimension: (id: string, dimension: string) =>
-    `/app/projects/${id}/strategy?d=${dimension}`,
+    `/app/projects/${id}/strategy/dimensions#dim-${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
   // A validation request of the Conception, to decide (MKT-C2-11).
   projectDesignDecision: (id: string, submissionId: string) =>

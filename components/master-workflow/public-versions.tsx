@@ -16,6 +16,7 @@ const stateOf = (v: Version) =>
 const TONE: Record<ReturnType<typeof stateOf>, Tone> = {
   approved: "success",
   changes_requested: "warning",
+  reopened: "neutral",
   feedback_sent: "info",
   received: "neutral",
 };
@@ -64,7 +65,15 @@ export function PublicVersions({
                   <p className="text-sm whitespace-pre-wrap">{v.summary}</p>
                 </div>
               )}
-              {v.decision && v.decidedAt && (
+              {v.decision === "reopened" && v.reopenedAt && (
+                <p className="text-sm font-medium">
+                  {t.reopened(
+                    formatShortDate(v.reopenedAt),
+                    v.reopenReason ?? "",
+                  )}
+                </p>
+              )}
+              {v.decision && v.decision !== "reopened" && v.decidedAt && (
                 <p className="text-sm font-medium">
                   {t.decided[stage][v.decision](
                     formatShortDate(v.decidedAt),

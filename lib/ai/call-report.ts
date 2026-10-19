@@ -31,6 +31,9 @@ export type LocatedCallReport = {
     audiences: Located<Field> | null;
     narrative: Located<Field> | null;
     levers: Located<Strategy["levers"][number]>[];
+    deliverables: Located<Strategy["deliverables"][number]>[];
+    milestones: Located<Strategy["milestones"][number]>[];
+    kpis: Located<Strategy["kpis"][number]>[];
   };
 };
 
@@ -81,6 +84,9 @@ export async function extractCallReport(
         audiences: locateField(report.strategy.audiences),
         narrative: locateField(report.strategy.narrative),
         levers: report.strategy.levers.map(locate),
+        deliverables: report.strategy.deliverables.map(locate),
+        milestones: report.strategy.milestones.map(locate),
+        kpis: report.strategy.kpis.map(locate),
       },
     },
   };
