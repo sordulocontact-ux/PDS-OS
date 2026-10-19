@@ -34,6 +34,8 @@ export function toActivation(r: ActivationRow): ActivationRecord {
     startsOn: r.starts_on,
     dueOn: r.due_on,
     status: r.status as ActivationRecord["status"],
+    statusBeforeSuspension:
+      r.status_before_suspension as ActivationRecord["statusBeforeSuspension"],
     statusReason: r.status_reason,
     evidenceExpected: r.evidence_expected,
     metricsExpected: r.metrics_expected,

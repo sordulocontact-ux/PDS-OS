@@ -1,93 +1,17 @@
 import "server-only";
 
-import { cache } from "react";
-
 import { isDivergent } from "@/lib/activations/agency/divergence";
+import {
+  loadModuleFacts,
+  type ModuleFacts,
+} from "@/lib/activations/module-facts";
 import type { ActivationRecord } from "@/lib/activations/types";
 import type { Alert, RuleStep } from "@/lib/activations/states";
 import { fr } from "@/lib/i18n/fr";
-import { createClient } from "@/lib/supabase/server";
 
 const t = fr.activations.module;
 
-/** The module objects of a project's activations, in one round: sheets,
- * messages, agency rows and reports, influence contents and rights, press
- * opportunities. Only what the next action and the alerts need. */
-export const loadModuleFacts = cache(async (projectId: string) => {
-  const supabase = await createClient();
-  const [
-    sheets,
-    messages,
-    rows,
-    reports,
-    sources,
-    contents,
-    rights,
-    opportunities,
-  ] = await Promise.all([
-    supabase
-      .from("activation_sheets")
-      .select("activation_id, kind, target_id, version, status")
-      .eq("project_id", projectId)
-      .order("version", { ascending: false }),
-    supabase
-      .from("activation_messages")
-      .select("activation_id, target_id, kind, status, sent_declared_at")
-      .eq("project_id", projectId),
-    supabase
-      .from("agency_rows")
-      .select(
-        "id, activation_id, pds_decision, agency_status, decided_at, absent_since",
-      )
-      .eq("project_id", projectId),
-    supabase
-      .from("agency_reports")
-      .select("activation_id, status")
-      .eq("project_id", projectId),
-    supabase
-      .from("agency_sources")
-      .select("activation_id")
-      .eq("project_id", projectId),
-    supabase
-      .from("influence_contents")
-      .select("activation_id, decision")
-      .eq("project_id", projectId),
-    supabase
-      .from("influence_rights")
-      .select("activation_id, target_id, kind, status, ends_on, superseded_at")
-      .eq("project_id", projectId)
-      .is("superseded_at", null),
-    supabase
-      .from("press_opportunities")
-      .select("activation_id, status, scheduled_at")
-      .eq("project_id", projectId),
-  ]);
-  const failed = [
-    sheets,
-    messages,
-    rows,
-    reports,
-    sources,
-    contents,
-    rights,
-    opportunities,
-  ]
-    .map((r) => r.error)
-    .find(Boolean);
-  if (failed) console.error("loadModuleFacts:", failed.message);
-  return {
-    sheets: sheets.data ?? [],
-    messages: messages.data ?? [],
-    rows: rows.data ?? [],
-    reports: reports.data ?? [],
-    sources: sources.data ?? [],
-    contents: contents.data ?? [],
-    rights: rights.data ?? [],
-    opportunities: opportunities.data ?? [],
-  };
-});
-
-export type ModuleFacts = Awaited<ReturnType<typeof loadModuleFacts>>;
+export { loadModuleFacts, type ModuleFacts };
 
 /** Rows whose agency status is ahead of, or contradicts, the PDS decision. */
 export function divergentRows(rows: ModuleFacts["rows"]) {

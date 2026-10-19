@@ -1350,6 +1350,36 @@ export type Database = {
           },
         ]
       }
+      activation_lever_choices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          lever_id: string
+          organization_id: string
+          project_id: string
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lever_id: string
+          organization_id: string
+          project_id: string
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lever_id?: string
+          organization_id?: string
+          project_id?: string
+          state?: string
+        }
+        Relationships: []
+      }
       activation_metrics: {
         Row: {
           activation_id: string
@@ -7574,6 +7604,7 @@ export type Database = {
           source_kind: string
           starts_on: string | null
           status: string
+          status_before_suspension: string | null
           status_reason: string | null
           title: string
           updated_at: string
@@ -7604,6 +7635,7 @@ export type Database = {
           source_kind?: string
           starts_on?: string | null
           status?: string
+          status_before_suspension?: string | null
           status_reason?: string | null
           title: string
           updated_at?: string
@@ -7634,6 +7666,7 @@ export type Database = {
           source_kind?: string
           starts_on?: string | null
           status?: string
+          status_before_suspension?: string | null
           status_reason?: string | null
           title?: string
           updated_at?: string
@@ -16943,6 +16976,10 @@ export type Database = {
           p_old_contact: string
           p_role: string
         }
+        Returns: undefined
+      }
+      declare_activation_transmission: {
+        Args: { p_activation_id: string }
         Returns: undefined
       }
       decide_activation_sheet: {

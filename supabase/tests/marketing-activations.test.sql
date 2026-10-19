@@ -1,11 +1,11 @@
 -- Marketing › Activations : the core, Influence, agency mode and RP
 -- (supabase/migrations/20261011000101 to 20261011000501, statuses
--- 20261011300101). Fixture « Piégée /
+-- 20261011300101, journey 20261019060101). Fixture « Piégée /
 -- Dioo / Alka » and ATYR figures : simulation only, rolled back. Nothing
 -- real is contacted, published, verified or paid.
 -- Run with `supabase test db`.
 begin;
-select plan(56);
+select plan(65);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -86,9 +86,18 @@ select throws_ok($$ update public.marketing_activations set status = 'cancelled'
                  '23514', null, 'cancelling says why');
 -- « Prête » is computed : starting (En cours, Réalisée déclarée) needs an owner,
 -- a due date, no open blocker, no blocking dependency left open.
-select throws_ok($$ update public.marketing_activations set status = 'suspended', status_reason = 'x'
+-- « Suspendue » is back (20261019060101): it keeps the status it interrupts.
+update public.marketing_activations set status = 'suspended', status_reason = 'On attend la salle (simulation)'
+ where id = pg_temp.id_of('session');
+select is((select status_before_suspension from public.marketing_activations where id = pg_temp.id_of('session')),
+          'to_prepare', 'a suspension keeps the status it interrupts');
+select throws_ok($$ update public.marketing_activations set status = 'in_progress', status_reason = null
                     where id = pg_temp.id_of('session') $$,
-                 '23514', null, '« Suspendue » is merged into « Bloquée », « Prête » is no longer ticked');
+                 '23514', 'invalid_transition', '« Reprendre » returns where it was, nowhere else');
+update public.marketing_activations set status = 'to_prepare' where id = pg_temp.id_of('session');
+select is((select row(status, status_reason, status_before_suspension)::text from public.marketing_activations
+            where id = pg_temp.id_of('session')),
+          '(to_prepare,,)', '« Reprendre » clears the reason and the kept status');
 select throws_ok($$ update public.marketing_activations set status = 'in_progress' where id = pg_temp.id_of('session') $$,
                  '23514', 'activation_not_ready:owner,due', 'no start without an owner nor a due date');
 update public.marketing_activations
@@ -326,6 +335,37 @@ select throws_ok($$ update public.activation_messages set status = 'sent_declare
                  '42501', null, 'a message is never marked sent by an update');
 select throws_ok($$ select public.advance_activation_message(pg_temp.id_of('pitch'), 'declare_sent', null, current_date, null) $$,
                  'P0001', 'invalid_transition', 'validated before sent, never sent from a draft');
+
+-- 9. The journey (20261019060101): « Réalisée » needs the campaign begun --------------------
+update public.marketing_activations
+   set owner_person_id = pg_temp.id_of('manager_person'), due_on = date '2026-12-12'
+ where id in (pg_temp.id_of('influence'), pg_temp.id_of('press'));
+update public.marketing_activations set status = 'in_progress'
+ where id in (pg_temp.id_of('influence'), pg_temp.id_of('press'));
+select throws_ok($$ update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('influence') $$,
+                 '23514', 'activation_not_done:no_publication', 'no creator has published: the campaign is not done');
+select throws_ok($$ update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('press') $$,
+                 '23514', 'activation_not_done:no_message', 'no message has left for the media: the campaign is not done');
+insert into public.activation_evidence (organization_id, project_id, activation_id, target_id, kind, url, declared_source)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('influence'), pg_temp.id_of('collab'),
+        'publication', 'https://video.example.com/alka', 'creator');
+select lives_ok($$ update public.marketing_activations set status = 'done_declared' where id = pg_temp.id_of('influence') $$,
+                'a first publication: the campaign may be declared done');
+update public.marketing_activations set status = 'suspended', status_reason = 'Campagne en pause (simulation)'
+ where id = pg_temp.id_of('press');
+select lives_ok($$ update public.marketing_activations set status = 'in_progress' where id = pg_temp.id_of('press') $$,
+                '« Reprendre » after a suspension, back to « En cours »');
+select throws_ok($$ select public.declare_activation_transmission(pg_temp.id_of('influence')) $$,
+                 '23514', 'activation_not_agency', 'only an agency receives the dossier');
+select throws_ok($$ select public.declare_activation_transmission(pg_temp.id_of('rp')) $$,
+                 '23514', 'framing_not_validated', 'the framing is validated before it is sent to the agency');
+update public.marketing_activations set owner_person_id = pg_temp.id_of('creative_person')
+ where id = pg_temp.id_of('atyr');
+reset role;
+select is((select count(*)::int from public.notifications
+            where kind = 'activation_owner_assigned' and subject_id = pg_temp.id_of('atyr')
+              and recipient_person_id = pg_temp.id_of('creative_person')),
+          1, 'the person given an activation is told');
 
 select * from finish();
 rollback;
