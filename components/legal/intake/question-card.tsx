@@ -5,11 +5,13 @@ import { useState, useTransition } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { TextareaField } from "@/components/auth/textarea-field";
-import { ProposalReview } from "@/components/legal/intake/proposal-review";
-import { PageSection } from "@/components/shell/page-section";
 import { Button } from "@/components/ui/button";
+import { PoQuestion } from "@/components/ui/po-question";
+import { PoReading } from "@/components/ui/po-reading";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { VoiceFieldControl } from "@/components/voice/voice-field-control";
 import { fr } from "@/lib/i18n/fr";
+import { factLabel } from "@/lib/legal/intake/labels";
 import {
   interpretLegalAnswer,
   saveLegalAnswer,
@@ -29,7 +31,9 @@ const NONE_FACT: ProposedFact = { kind: "none", value: {}, quote: null };
  * in it, then « Enregistrer ». Nothing is written before that. What the
  * Cadrage established, or the people already known on the title, comes as
  * the answer; « Aucun emprunt / accord… »
- * settles the question at once, without PO (UX test of 09/10/2026).
+ * settles the question at once, without PO (UX test of 09/10/2026). Shown
+ * as the Cadrage shows its questions (« Question de PO », PoQuestion and
+ * PoReading, proto « Projet complet »).
  */
 export function QuestionCard({
   projectId,
@@ -115,18 +119,27 @@ export function QuestionCard({
   const saveNone = () => noneLabel && record(noneLabel, [NONE_FACT]);
 
   return (
-    <PageSection
-      card
-      id="legal-question"
-      eyebrow={t.questionOf(position, total)}
+    <PoQuestion
+      eyebrow={fr.poQuestion.eyebrow(
+        t.domains[question.key],
+        from ? "confirm" : "missing",
+      )}
+      rank={{ position, total }}
       title={ask(question.title ?? "")}
-      description={why}
+      why={why}
     >
       {review ? (
-        <ProposalReview
-          question={question.key}
-          facts={review.facts}
+        <PoReading
+          items={review.facts.map((fact, index) => {
+            const label = factLabel(fact, question.key);
+            return { key: `${label}-${index}`, label, quote: fact.quote };
+          })}
           dropped={review.dropped}
+          empty={
+            <ToneCallout tone="info">
+              {noneLabel ? t.nothingFoundNone(noneLabel) : t.nothingFound}
+            </ToneCallout>
+          }
           onRemove={(index) =>
             setReview({
               ...review,
@@ -137,7 +150,7 @@ export function QuestionCard({
       ) : (
         <>
           {from && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
               {from === "known" ? t.fromKnown : t.fromCadrage}
             </p>
           )}
@@ -156,21 +169,12 @@ export function QuestionCard({
         </>
       )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      {/* The main action first, on the left (C0). */}
+      <div className="flex flex-wrap gap-2">
         {review ? (
           <>
             <Button
               type="button"
-              variant="ghost"
-              size="lg"
-              disabled={saving}
-              onClick={() => setReview(null)}
-            >
-              {t.editAnswer}
-            </Button>
-            <Button
-              type="button"
-              size="lg"
               disabled={saving || kept.length === 0}
               aria-busy={saving || undefined}
               onClick={save}
@@ -181,25 +185,29 @@ export function QuestionCard({
                   ? `${t.save} : ${noneLabel.toLowerCase()}`
                   : t.save}
             </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={saving}
+              onClick={() => setReview(null)}
+            >
+              {t.editAnswer}
+            </Button>
           </>
         ) : (
           <>
-            {correcting && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="lg"
-                disabled={reading}
-                onClick={onCancel}
-              >
-                {t.cancel}
-              </Button>
-            )}
+            <Button
+              type="button"
+              disabled={reading || saving || text.trim() === ""}
+              aria-busy={reading || undefined}
+              onClick={read}
+            >
+              {reading ? t.reading : t.read}
+            </Button>
             {noneLabel && (
               <Button
                 type="button"
                 variant="outline"
-                size="lg"
                 disabled={reading || saving}
                 aria-busy={saving || undefined}
                 onClick={saveNone}
@@ -207,18 +215,19 @@ export function QuestionCard({
                 {noneLabel}
               </Button>
             )}
-            <Button
-              type="button"
-              size="lg"
-              disabled={reading || saving || text.trim() === ""}
-              aria-busy={reading || undefined}
-              onClick={read}
-            >
-              {reading ? t.reading : t.read}
-            </Button>
+            {correcting && (
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={reading}
+                onClick={onCancel}
+              >
+                {t.cancel}
+              </Button>
+            )}
           </>
         )}
       </div>
-    </PageSection>
+    </PoQuestion>
   );
 }

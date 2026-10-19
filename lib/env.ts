@@ -72,6 +72,10 @@ export const serverEnvSchema = z
     GOOGLE_CALENDAR_CLIENT_SECRET: optionalSecret,
     GOOGLE_CALENDAR_REFRESH_TOKEN: optionalSecret,
     GOOGLE_CALENDAR_ID: optionalSecret,
+    /** Juridique: seals the private links kept visible in their démarche
+     * (32 bytes, base64: `openssl rand -base64 32`). Optional: without it,
+     * a link is shown once, then only its state. */
+    LEGAL_LINK_KEY: optionalSecret,
     /** Web Push: optional, browser notifications are off without them. */
     VAPID_PRIVATE_KEY: optionalSecret,
     /** Same value as the Vault secret push_claim_secret: pushes are off without it. */

@@ -1,6 +1,7 @@
 // Notification types and text. Client-safe.
 
 import { routes } from "@/lib/auth/redirects";
+import { legalDemarcheHref } from "@/lib/ui/legal-steps";
 import { fr } from "@/lib/i18n/fr";
 
 export const NOTIFICATION_KINDS = [
@@ -36,6 +37,8 @@ export const NOTIFICATION_KINDS = [
   "clearance_terms_proposed",
   "clearance_terms_validated",
   "clearance_terms_rejected",
+  // An element withdrawn from a title after a refusal: the Master redoes it.
+  "legal_element_withdrawn",
   // A strategy document's review (Brief de sortie, Plan de sortie…): asked,
   // approved, a change asked, a reminder.
   "strategy_review_requested",
@@ -157,10 +160,10 @@ export function notificationHref(
   // A fiche received: the project's Fiches de renseignements.
   if (kind === "legal_form_received")
     return routes.projectLegalStep(projectId, "forms");
-  // A borrowing opens on its panel, in the project's Emprunts.
-  if (kind.startsWith("clearance_"))
+  // A borrowing opens on its démarche, a step of the Juridique.
+  if (kind.startsWith("clearance_") || kind === "legal_element_withdrawn")
     return subjectId
-      ? `${routes.projectLegalStep(projectId, "clearances")}?emprunt=${subjectId}`
+      ? legalDemarcheHref(projectId, "clearance", subjectId)
       : routes.projectLegalStep(projectId, "clearances");
   // The engineer confirmed the package: its follow-up, in the Master's Mix.
   if (

@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
+import { FicheLinkCard } from "@/components/legal/forms/fiche-link-card";
 import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { fr } from "@/lib/i18n/fr";
 import { mailtoHref } from "@/lib/utils/mailto";
@@ -38,9 +39,12 @@ const facts = (values: Record<string, string>) =>
  */
 export function FichePanel({
   projectId,
+  projectTitle = "",
   row,
 }: {
   projectId: string;
+  // For the ready e-mail of « Relancer ».
+  projectTitle?: string;
   row: FormRow;
 }) {
   const t = fr.legalForms.page;
@@ -50,7 +54,8 @@ export function FichePanel({
   const sheet = usePlanSheet();
   const link = sheet.links[row.key] ?? null;
   const setLink = (next: PreparedLink | null) => sheet.setLink(row.key, next);
-  const url = link?.url ?? null;
+  // Just prepared, or kept sealed by the server (rule 19).
+  const url = link?.url ?? row.link?.url ?? null;
   const [pending, startTransition] = useTransition();
 
   const act = (action: () => Promise<{ ok: boolean; error?: string }>) =>
@@ -140,7 +145,9 @@ export function FichePanel({
             {t.email}
           </Button>
         )}
-        <p className="text-sm text-muted-foreground">{p.once}</p>
+        {link && !row.link?.url && (
+          <p className="text-sm text-muted-foreground">{p.once}</p>
+        )}
         <Button
           className="self-start"
           disabled={pending || !row.formId}
@@ -172,6 +179,11 @@ export function FichePanel({
         <p className="text-sm text-muted-foreground">
           {p.prepareBody(row.name, roles)}
         </p>
+        {row.revokedReason && (
+          <p className="text-sm text-muted-foreground">
+            {t.revokedWhy(row.revokedReason)}
+          </p>
+        )}
         <Button className="self-start" disabled={pending} onClick={prepare}>
           {pending ? t.preparing : t.prepare}
         </Button>
@@ -221,20 +233,13 @@ export function FichePanel({
         title={p.sent(row.since ? formatInstant(row.since) : "")}
       >
         <p className="text-sm text-muted-foreground">{p.sentBody}</p>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" disabled={pending} onClick={prepare}>
-            {t.newLink}
-          </Button>
-          <Button
-            variant="ghost"
-            disabled={pending}
-            onClick={() =>
-              act(() => setLegalFormState(projectId, row.formId!, "revoked"))
-            }
-          >
-            {t.revoke}
-          </Button>
-        </div>
+        <FicheLinkCard
+          projectId={projectId}
+          projectTitle={projectTitle}
+          row={row}
+          pending={pending}
+          onRenew={prepare}
+        />
       </NextCard>
     );
 

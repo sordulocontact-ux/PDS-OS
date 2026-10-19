@@ -3,6 +3,9 @@ import "server-only";
 import { can, type Access } from "@/lib/auth/access";
 import { formPeople, type FormPerson } from "@/lib/legal/forms/people";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
+import { unsealLinkToken } from "@/lib/legal/forms/link-seal";
+import { routes } from "@/lib/auth/redirects";
+import { siteUrl } from "@/lib/auth/site-url";
 import { createClient } from "@/lib/supabase/server";
 
 // The project's fiches de renseignements, read with the viewer's session
@@ -33,6 +36,18 @@ export type FormRow = FormPerson & {
   since: string | null;
   // When the person opened their link, while it waits (JUR-11).
   openedAt: string | null;
+  // The private link, kept visible while it is open (rule 19): its URL
+  // when the server can unseal it, when it was created and sent, by whom,
+  // until when it is valid.
+  link: {
+    url: string | null;
+    createdAt: string;
+    sentAt: string | null;
+    sentBy: string | null;
+    expiresAt: string;
+  } | null;
+  // Why the access was revoked, when it was.
+  revokedReason: string | null;
   submission: FormSubmission | null;
 };
 
@@ -63,7 +78,7 @@ export async function loadForms(
     supabase
       .from("legal_forms")
       .select(
-        "id, contact_id, status, expires_at, sent_at, submitted_at, completed_at, created_at, opened_at",
+        "id, contact_id, status, expires_at, sent_at, sent_by, submitted_at, completed_at, created_at, opened_at, link_sealed, revoked_reason",
       )
       .eq("project_id", project.id)
       .order("created_at", { ascending: false }),
@@ -110,6 +125,24 @@ export async function loadForms(
         submittedAt: s.created_at,
       });
 
+  const senders = [
+    ...new Set(
+      [...latest.values()].flatMap((f) => (f.sent_by ? [f.sent_by] : [])),
+    ),
+  ];
+  const { data: people } = senders.length
+    ? await supabase
+        .from("people")
+        .select("id, first_name, last_name")
+        .in("id", senders)
+    : { data: [] };
+  const nameOf = new Map(
+    (people ?? []).map((p) => [
+      p.id,
+      [p.first_name, p.last_name].filter(Boolean).join(" "),
+    ]),
+  );
+
   const now = new Date().toISOString();
   return formPeople(rows).map((person): FormRow => {
     const form = person.contactId ? latest.get(person.contactId) : undefined;
@@ -120,6 +153,8 @@ export async function loadForms(
         state: "none",
         since: null,
         openedAt: null,
+        link: null,
+        revokedReason: null,
         submission: null,
       };
     const open = form.status === "link_generated" || form.status === "sent";
@@ -135,6 +170,19 @@ export async function loadForms(
         form.sent_at ??
         form.created_at,
       openedAt: open ? form.opened_at : null,
+      link: open
+        ? {
+            url: ((token) =>
+              token ? `${siteUrl()}${routes.legalForm(token)}` : null)(
+              unsealLinkToken(form.link_sealed),
+            ),
+            createdAt: form.created_at,
+            sentAt: form.sent_at,
+            sentBy: form.sent_by ? (nameOf.get(form.sent_by) ?? null) : null,
+            expiresAt: form.expires_at,
+          }
+        : null,
+      revokedReason: form.status === "revoked" ? form.revoked_reason : null,
       submission: submissionOf.get(form.id) ?? null,
     };
   });

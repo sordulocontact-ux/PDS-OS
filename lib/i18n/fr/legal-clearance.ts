@@ -207,6 +207,23 @@ export const legalClearance = {
       refusedBody:
         "Le titre ne peut pas sortir avec cet élément en l'état : retirer, remplacer, ou reprendre la négociation.",
       resume: "Reprendre la négociation",
+      // « Décider de la suite » after a refusal (lot 9 J8, proto).
+      decide: {
+        title: "Décider de la suite",
+        blocked:
+          "Tant que rien n'est décidé, la sortie reste bloquée : l'emprunt est dans « À résoudre avant sortie ».",
+        withdraw: "Retirer l'élément du titre",
+        withdrawBody:
+          "Le titre sort sans l'élément : la personne qui suit le Master est prévenue pour refaire le passage.",
+        withdrawWhy: "Pourquoi",
+        withdrawDone: "Élément retiré du titre",
+        replace: "Le remplacer",
+        replaceBody:
+          "Une nouvelle demande part pour ce qui le remplace ; pour une version rejouée, seule l'œuvre est à autoriser.",
+        replaceWhat: "Par quoi",
+        replaceAction: "Remplacer et redemander",
+        replaceDone: "Nouvelle demande créée",
+      },
     },
     sign: {
       title: "Signer",

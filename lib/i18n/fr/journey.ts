@@ -2,6 +2,9 @@
 // modules that guide step by step (proto « Projet complet »).
 
 const joined = (titles: string) => titles.includes(" et ");
+// « de » elides before a vowel: « En attente d'Éditions Nocturne ».
+const de = (name: string) =>
+  /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
 
 export const journey = {
   label: "Parcours",
@@ -19,7 +22,7 @@ export const journey = {
   },
   after: (titles: string) => `Après : ${titles}`,
   me: "À vous",
-  waitingFor: (who: string) => `En attente de ${who}`,
+  waitingFor: (who: string) => `En attente ${de(who)}`,
   rework: "À revoir",
   alert: {
     overdue: "Échéance dépassée",
@@ -66,8 +69,11 @@ export const journey = {
     openShort: "Ouvrir",
     others: (n: number, list: string) =>
       `Et ${n} autre${n > 1 ? "s" : ""} : ${list}`,
-    waitFor: (who: string) => `En attente de ${who}`,
+    waitFor: (who: string) => `En attente ${de(who)}`,
     waitingOf: "En attente de",
+    // « En attente d' » before a vowel, then the name in bold.
+    waitingOfName: (who: string) =>
+      de(who).startsWith("d'") ? "En attente d'" : "En attente de ",
     due: (day: string) => `pour le ${day}`,
     blockers: (n: number, list: string) =>
       `${n} blocage${n > 1 ? "s" : ""} à lever par vous : ${list}`,

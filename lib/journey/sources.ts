@@ -1,15 +1,13 @@
 import "server-only";
 
-import { can } from "@/lib/auth/access";
-import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
-import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { journeyContext } from "@/lib/production/journey/context";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { conceptionJourney } from "./conception";
 import { framingJourneys } from "./framing";
+import { legalJourneys } from "./legal";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -21,14 +19,6 @@ type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 
 const label = fr.shell.project.sidebar;
 const parts = fr.shell.project.marketingSteps;
-
-// Juridique: its five steps (lib/legal/journey.ts), manage_legal only.
-const legal: Loader = async (projectId) => {
-  const access = await requireApproved();
-  if (!can(access, "manage_legal")) return [];
-  const { steps } = await legalJourneyContext(projectId);
-  return [{ module: "legal", label: label.legal, steps }];
-};
 
 // Marketing: each deliverable's Production once its sheet is opened, and the
 // Conception (lib/journey/conception.ts). Stratégie, Activations and Suivi &
@@ -72,7 +62,7 @@ export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   framing: framingJourneys,
   marketing,
   master: none,
-  legal,
+  legal: legalJourneys,
   distribution: none,
 };
 

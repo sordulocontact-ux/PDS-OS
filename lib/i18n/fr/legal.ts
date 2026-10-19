@@ -117,6 +117,24 @@ export const legal = {
       },
     },
     project: "Projet",
+    // The domain of a question, in the eyebrow of « Question de PO ».
+    domains: {
+      contributors: "Participants",
+      third_party: "Élément repris",
+      agreements: "Accords existants",
+      publisher: "Éditeur",
+    },
+    notAsked: {
+      sources: {
+        credits: "Crédits du titre",
+        contracts: "Contrats du projet",
+        splits: "Splits du titre",
+      },
+    },
+    answersOf: (answered: number, total: number) =>
+      `${answered} réponse${answered > 1 ? "s" : ""} sur ${total}`,
+    toAnswer: "Pas encore répondu",
+    answer: "Répondre",
     questionOf: (n: number, total: number) => `Question ${n} sur ${total}`,
     answerLabel: "Votre réponse",
     // An answer that says « nothing », saved without PO (UX test of
@@ -515,10 +533,13 @@ export const legal = {
     overdue: (date: string) => `Échéance dépassée : ${date}`,
     due: (date: string) => `Échéance : ${date}`,
     open: "Ouvrir",
-    delegate: "Modifier",
+    delegate: "Changer",
+    delegated: "Responsable et échéance changés",
+    delegateWhy: "Pourquoi",
+    delegateWhyMissing: "Dites pourquoi : c'est gardé dans l'historique.",
     delegateTitle: "Responsable et échéance",
     delegateDescription:
-      "Changer le responsable est une délégation : elle reste dans le journal du plan.",
+      "Gardé dans l'historique. La personne qui reprend est prévenue.",
     save: "Enregistrer",
     saving: "Enregistrement…",
     errors: {

@@ -3280,6 +3280,126 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   existant (avec les étapes suivantes), le générer depuis un modèle (Juridique du projet) ou
   créer un modèle (JUR-18). Pas encore : aperçu chiffré du partage statutaire des DEP / DR.
 
+### Parcours du proto « Projet complet » (lot 9, J1, 19/10/2026)
+
+Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/legal.md` § 5, J1).
+
+- **Une étape par démarche** dans le Parcours, en trois intertitres : **Dossier** (État des lieux,
+  Cadrage juridique, Confirmation, Plan d'action), **Suivi** (« Sami Kader · fiche et contrat »,
+  « Emprunt « Night Lights » », « Répartition de l'édition « Néons » », « Déclaration SACEM
+  « Néons » » ; « Suivi · démarches proposées » tant que le plan n'est pas lancé, verrouillées
+  « Après : Plan d'action » avec « Ce qui viendra »), **Sortie** (« Prêt pour la sortie »).
+  URL : `/legal/person/<ref>`, `/legal/clearance/<id>`, `/legal/split/<masterId>`,
+  `/legal/sacem/<masterId>`, `/legal/ready` (`legalRouteOf`, `legalDemarcheHref`,
+  `legalRefSlug` : la clé d'une personne `contact:<id>` / `artist:<id>` / nom normalisé devient
+  `c-…` / `a-…` / `n-…`).
+- **Calcul** : `lib/legal/demarches/build.ts` lit le tableau du plan lancé
+  (`lib/legal/plan/board.ts`, inchangé : chaque temps lu à sa source) et en fait des
+  `JourneyStep` (`launchedDemarches`) ; avant le lancement, `proposedDemarches` part de la
+  proposition (`proposeLegalPlan`, calculée même avant la Confirmation). Ce qui est attendu et
+  de qui : `lib/legal/demarches/todo.ts` (`expectedOf`). **Acteurs** : le responsable de la
+  démarche (`legal_plan_items.responsible_person_id`, sinon le responsable du projet) fait les
+  gestes ; la direction n'a « À vous » que sur ses décisions (Valider le document, Valider les
+  conditions : `kind: "validate"`, alerte « Décision requise ») ; une personne extérieure ou des
+  ayants droit mettent l'étape « En attente de … ». Le Dossier est au responsable du projet
+  (plus « à toute personne qui voit le Juridique »).
+- **Chargeur** : `lib/journey/legal.ts` (`legalJourneys`, ligne `legal` de `JOURNEY_LOADERS`)
+  lit `legalJourneyContext` (`lib/legal/journey-context.ts`, mis en cache par requête), qui lit
+  désormais fiches, accords (**sans génération** : `loadAgreements`), répartitions, emprunts et
+  bulletins. La génération automatique des contrats prêts se fait à l'ouverture de l'étape
+  d'une personne (`DemarcheStep`, puis relecture).
+- **Corps d'une démarche** (`components/legal/demarches/`) : les panneaux d'avant
+  (`FichePanel`, `ContractPanel`, `SplitPanel` avec le comparateur de versions repris de la
+  carte de répartition, `ClearanceBody`, `FormalityCard`) deviennent le corps de l'étape
+  (`DemarchePart`) ; une personne garde ses deux temps (fiche puis contrat, l'autre replié) ;
+  « Responsable et échéance » (`DelegateButton`) en bas ; « Déjà fait » = l'Historique du
+  dossier filtré sur les objets de la démarche (`lib/legal/demarches/history.ts`).
+- **Plan d'action lancé** : « Contrats à prévoir » (`MappingPanel`), « Ajouter au plan »
+  (`AddedActions`) et la liste des démarches avec « Ouvrir ».
+- **Redirections** (`lib/legal/demarches/where.ts`) : `/legal/tracking` (et `?ligne=`),
+  `/legal/forms`, `/contracts`, `/splits`, `/clearances` (`?emprunt=`), `/formalities` ouvrent
+  la démarche qu'elles nommaient, sinon la première de leur genre qui attend. Les `sourceHref`
+  du Suivi (`lib/legal/tracking/sources.ts`, lus par la Distribution et l'état des workflows)
+  pointent sur l'étape de la démarche. Retirés : `TrackingView`, `PlanRowSheet`,
+  `NextLineButton`, tuiles des 4 groupes, `FormsView`, `AgreementsView`, `SplitsView`,
+  `ClearancesView`, `FormalitiesView`, `FormRowActions`, `SubmissionDialog`, `SplitCard` (aucune
+  table ni donnée touchée).
+
+- **Cadrage juridique comme le Cadrage (J2)** : la question vit dans `PoQuestion`
+  (`components/ui/po-question.tsx`, encadré « Question de PO », surtitre domaine · état, rang) et
+  la lecture de PO dans `PoReading` (« ✦ Ce que PO a compris », citations, « Retirer ») — deux
+  briques communes prévues pour être reprises par le Cadrage (lot 2), qui garde ses propres
+  issues (Confirmer / Modifier, Non applicable, À définir plus tard). Les faits gardés portent
+  leur citation (`legal_facts.source_quote`, lue par `loadIntake`) ; `notAskedQuestions`
+  (`lib/legal/intake/questions.ts`) expose les questions qu'une donnée fiable règle (crédits du
+  titre, contrats du projet, splits du titre) : « Questions que PO ne pose pas ». « Corriger »
+  n'apparaît qu'une fois toutes les questions répondues (proto).
+
+- **Contrats à prévoir avant le lancement (J3)** : section « Contrats à prévoir » de l'étape Plan
+  d'action, avant et après le lancement (`MappingPanel` → `MappingForm` / `MappingRow`) : par
+  personne, le contrat (modèles validés compatibles avec ses rôles) ou « Pas d'accord nécessaire »
+  avec « Pourquoi aucun accord n'est nécessaire * » (table `legal_no_agreement_reasons`, écrite
+  par `approve_contract_mapping`, qui refuse `mapping_reason_required` ; lue par `manage_legal`),
+  la source de la proposition, et « Nouveau modèle de contrat » (`NewTemplateButton` : le
+  formulaire du modèle en modale verre, rôles de la personne cochés ; il entre dans la
+  bibliothèque une fois validé par la direction). Erreurs en rouge par personne. **Lancer le plan
+  est refusé** tant qu'une personne qui a un contact n'a pas de décision (`launchLegalPlan`, code
+  serveur : « Confirmez d'abord les contrats à prévoir. ») ; une personne **sans contact** reste
+  « Fiche à préparer d'abord » et se décide après sa fiche (décision : le besoin reste clé par
+  contact, `legal_agreement_needs`). Le Plan d'action affiche « À vous · Confirmer les contrats
+  nécessaires » tant que c'est à faire. **Changer** le responsable ou l'échéance d'une démarche
+  demande « Pourquoi * » (`change_legal_plan_item`, colonne `legal_plan_events.reason`, montrée
+  dans l'Historique). Migration `20261019090101`, tests `legal-contracts-before-launch.test.sql`.
+  Pas encore : validation / refus d'un modèle par la direction **dans** l'étape (elle se fait
+  sur la page du modèle) ; « document en tête » et « Changé depuis la v1 » dans la démarche
+  personne.
+
+- **« Prêt pour la sortie » (J11), un seul calcul** — contrat pour la Distribution et la Vue
+  d'ensemble : **`loadLegalReadiness(projectId)`** (`lib/legal/readiness/load.ts`, serveur) rend
+  `{ allowed: true, readiness: LegalReadiness | null }` avec `manage_legal` (null avant le
+  lancement du plan), sinon `{ allowed: false, validated: { by, at } | null }` (la validation
+  finale seule, lue en RLS `can_see_project`). `LegalReadiness`
+  (`lib/legal/readiness/controls.ts`, pur) : `verdict` (`"no"` Non prête · `"risk"` À risque ·
+  `"ok"` Prête à sortir), `controls` (clé, domaine `master | rights | metadata | assets |
+  distribution`, libellé, `blocking`, `status` `ok | open | waived`, raison, prochaine action,
+  responsable, source, `href`, dérogation ; le dernier est `final`, la validation finale),
+  `blocking` (« À résoudre avant sortie »), `toFollow` (« Reste à suivre »), `done`/`total`,
+  `sacemBlocks`, `validated`. **Sources** : Master, Catalogue, Conception et sortie viennent de
+  la lecture de la Distribution (`loadDistributionSources` + `distributionReadiness`, items hors
+  module `legal`) ; les droits viennent des démarches (emprunt bloquant ; contrat, répartition,
+  SACEM « à suivre », la SACEM bloquante si la politique le dit, et « faite » dès le dépôt).
+  Ne jamais recalculer ailleurs : la Distribution lit ce résultat pour son prérequis
+  « Juridique › Prêt pour la sortie ». **Décisions de la direction** (permission `validate`),
+  par fonctions : `grant_release_waiver` (motif obligatoire, table
+  `release_readiness_waivers`), `set_release_policy` (`release_readiness_policies`, par
+  organisation, « SACEM bloquante », défaut non), `validate_release` (`release_validations`,
+  une par projet, avec l'instantané des contrôles ; refusée côté serveur tant qu'un contrôle
+  bloquant est ouvert, `validateRelease`). Étape `ready` du Parcours : « À vous · Valider la
+  sortie avant The Orchard » pour la direction quand rien ne bloque (`kind: "validate"`),
+  faite quand validée ; Ensuite : Distribution. Migration `20261019090201`, tests
+  `legal-links-readiness.test.sql`. Pas de notification (aucun type ajouté).
+- **Liens privés visibles (J4, fiches)** : le jeton reste connu de la base par son empreinte
+  seulement ; le serveur le garde **scellé** (`legal_forms.link_sealed`, AES-256-GCM,
+  `lib/legal/forms/link-seal.ts`, clé `LEGAL_LINK_KEY` de l'environnement, jamais en base ni
+  au navigateur) via `seal_legal_form_link` à la préparation. La démarche montre alors le lien
+  tant qu'il est ouvert (`FicheLinkCard` : Copier le lien, Relancer = e-mail prêt `mailto:`,
+  Nouveau lien, « Révoquer l'accès » avec « Pourquoi * » = `revoke_legal_form`), « valable
+  jusqu'au … · créé le … · Envoyé par … le … · Ouvert le … » (`legal_forms.sent_by`,
+  `revoked_by`, `revoked_reason`). Sans la clé, ou pour un lien préparé avant, l'URL n'est pas
+  réaffichable : l'état reste, « Nouveau lien » en donne un. Migration `20261019090301`.
+  **Pas encore** : les liens de répartition (`legal_split_confirmations`, même méthode à
+  appliquer) ; l'envoi par PDS OS (pas de fournisseur d'e-mail : `mailto:` + « Marquer comme
+  envoyée »).
+
+- **Refus d'un emprunt (J8)** : « Décider de la suite » sous le refus (`RefusalDecision`) :
+  « Retirer l'élément du titre » avec « Pourquoi * » (`withdraw_clearance` : emprunt abandonné,
+  `legal_clearances.withdrawn_reason`, notification `legal_element_withdrawn` au responsable du
+  projet par trigger : refaire le passage dans le Master) ou « Le remplacer » / « Par quoi * »
+  (`replace_clearance` : nouvel emprunt `to_investigate`, l'œuvre seule, `replaces_id`, l'ancien
+  abandonné, puis ajouté au plan par `addLegalPlanItems`). « Retirer l'élément » hors refus passe
+  aussi par le motif. Migration `20261019090401`, tests `legal-clearance-refusal.test.sql`.
+  Les notifications d'emprunt ouvrent la démarche (`/legal/clearance/<id>`).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique

@@ -4,6 +4,7 @@
 // SACEM declaration, the clearance. Pure.
 
 import { routes } from "@/lib/auth/redirects";
+import { legalDemarcheHref } from "@/lib/ui/legal-steps";
 import { contractStateOf } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import type { InventoryRows } from "@/lib/legal/inventory-rows";
@@ -107,6 +108,8 @@ export function itemSource(
       : { status: "action_now", reason: t.fichesMissing(missing.size), href };
   }
   if (kind === "contract") {
+    // Every state of a person's contract is done in their démarche.
+    const person = legalDemarcheHref(projectId, "person", ref);
     if (!contactOf.has(ref))
       return { status: "obsolete", reason: t.noLongerCredited, href: null };
     const contactId = contactOf.get(ref);
@@ -123,7 +126,7 @@ export function itemSource(
       return {
         status: "done",
         reason: t.signed,
-        href: routes.contract(signed.c.id),
+        href: person,
       };
     const sent = pick("sent");
     if (sent)
@@ -131,7 +134,7 @@ export function itemSource(
         status: "waiting_external",
         reason: t.sentForSignature,
         since: sent.c.updatedAt,
-        href: routes.contract(sent.c.id),
+        href: person,
       };
     const review = pick("in_review");
     if (review)
@@ -139,14 +142,14 @@ export function itemSource(
         status: "waiting_external",
         decision: true,
         reason: t.awaitingDirector,
-        href: routes.contract(review.c.id),
+        href: person,
       };
     const draft = pick("draft") ?? pick("approved");
     if (draft)
       return {
         status: "action_now",
         reason: fr.contracts.states[draft.state],
-        href: routes.contract(draft.c.id),
+        href: person,
       };
     const ended = pick("expired") ?? pick("terminated");
     if (ended)
@@ -154,7 +157,7 @@ export function itemSource(
         status: "action_now",
         decision: true,
         reason: fr.contracts.states[ended.state],
-        href: routes.contract(ended.c.id),
+        href: person,
       };
     // « La réception de la fiche Ever ne débloque que l'accord Ever »
     // (Juridique 07): a contract waits for its own person's fiche only.
@@ -162,19 +165,19 @@ export function itemSource(
       ? {
           status: "action_now",
           reason: t.noContract,
-          href: routes.projectLegalStep(projectId, "contracts"),
+          href: person,
         }
       : {
           status: "blocked",
           reason: t.waitsForFiche,
-          href: routes.projectLegalStep(projectId, "forms"),
+          href: person,
         };
   }
   if (kind === "splits") {
     if (!titleIds.has(ref))
       return { status: "obsolete", reason: t.titleRemoved, href: null };
     // Done once every person confirmed the active version (Juridique 04).
-    const href = routes.projectLegalStep(projectId, "splits");
+    const href = legalDemarcheHref(projectId, "split", ref);
     const split = ctx.splitOf.get(ref);
     if (split?.status === "confirmed")
       return { status: "done", reason: t.splitConfirmed, href };
@@ -201,7 +204,7 @@ export function itemSource(
   }
   if (kind === "clearance") {
     const clearance = ctx.clearances.find((c) => c.id === ref);
-    const href = routes.projectLegalStep(projectId, "clearances");
+    const href = legalDemarcheHref(projectId, "clearance", ref);
     if (!clearance || clearance.status === "abandoned")
       return { status: "obsolete", reason: t.clearanceGone, href: null };
     if (clearance.status === "cleared")
@@ -237,21 +240,21 @@ export function itemSource(
     return {
       status: "done",
       reason: t.declared,
-      href: routes.projectLegalStep(projectId, "formalities"),
+      href: legalDemarcheHref(projectId, "sacem", ref),
     };
   if (sacem?.status === "submitted")
     return {
       status: "waiting_external",
       reason: t.submitted,
       since: sacem.date,
-      href: routes.projectLegalStep(projectId, "formalities"),
+      href: legalDemarcheHref(projectId, "sacem", ref),
     };
   if (sacem?.status === "rejected")
     return {
       status: "action_now",
       decision: true,
       reason: t.rejected,
-      href: routes.projectLegalStep(projectId, "formalities"),
+      href: legalDemarcheHref(projectId, "sacem", ref),
     };
-  return waitOr(t.toDeclare, routes.projectLegalStep(projectId, "formalities"));
+  return waitOr(t.toDeclare, legalDemarcheHref(projectId, "sacem", ref));
 }

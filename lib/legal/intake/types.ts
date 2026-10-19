@@ -80,8 +80,9 @@ export type IntakeQuestion = {
   answered: boolean;
   // The last answer, kept to correct it.
   lastAnswer: string | null;
-  // The facts of the last answer that are still active.
-  facts: FactValue[];
+  // The facts of the last answer that are still active, with the words
+  // they came from.
+  facts: ProposedFact[];
   // What the Cadrage already established, offered as the answer while the
   // question is open (UX test of 09/10/2026: PO asked it again); null if
   // the Cadrage says nothing about it. On the people question, the people
@@ -98,3 +99,14 @@ export const NONE_QUESTIONS: readonly QuestionKey[] = [
   "agreements",
   "publisher",
 ];
+
+/** A question PO does not ask: reliable data already settles it
+ * (« Questions que PO ne pose pas »), with what it says and where from. */
+export type NotAskedQuestion = {
+  key: QuestionKey;
+  masterId: string | null;
+  title: string | null;
+  // What the data says, when it can be said (« Mona Lys, Karim Haddou »).
+  value: string | null;
+  source: string;
+};

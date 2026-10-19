@@ -37,7 +37,8 @@ export function WaitingRows({ items }: { items: NowItem[] }) {
               {who ? initials(who) : <IconAlarmClock className="size-3.5" />}
             </span>
             <span className="min-w-0 flex-1">
-              {t.now.waitingOf} <b className="font-semibold">{who ?? "—"}</b>
+              {t.now.waitingOfName(who ?? "")}
+              <b className="font-semibold">{who ?? "—"}</b>
               {step.actor?.viaLink && (
                 <span className="text-[color:var(--text-secondary)]">
                   {" "}

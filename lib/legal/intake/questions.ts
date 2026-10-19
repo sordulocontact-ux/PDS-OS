@@ -17,9 +17,11 @@
 //                  (Juridique 06).
 
 import { knownAnswer, type KnownPerson } from "@/lib/legal/intake/known-people";
+import { fr } from "@/lib/i18n/fr";
 import type {
-  FactValue,
   IntakeQuestion,
+  NotAskedQuestion,
+  ProposedFact,
   QuestionKey,
 } from "@/lib/legal/intake/types";
 
@@ -34,7 +36,7 @@ export type IntakeKnowledge = {
   // A contract is attached to the project.
   hasContract: boolean;
   // The last answer and its active facts, by question and title.
-  answers: Map<string, { text: string; facts: FactValue[] }>;
+  answers: Map<string, { text: string; facts: ProposedFact[] }>;
   // What the Cadrage established, by question and title (answerKey).
   cadrage: Map<string, string>;
   // Who each title and the Cadrage already name, by title.
@@ -96,5 +98,52 @@ export function intakeQuestions(k: IntakeKnowledge): IntakeQuestion[] {
     ...k.titles.flatMap((title) =>
       answeredOr("publisher", title, k.publishedTitles.has(title.id)),
     ),
+  ];
+}
+
+/** The questions reliable data settles, left out of the conversation and
+ * said with their source (proto « Questions que PO ne pose pas »). */
+export function notAskedQuestions(k: IntakeKnowledge): NotAskedQuestion[] {
+  const t = fr.legal.intake.notAsked;
+  const unanswered = (key: QuestionKey, masterId: string | null) =>
+    !k.answers.has(answerKey(key, masterId));
+  return [
+    ...k.titles
+      .filter(
+        (title) =>
+          k.creditedTitles.has(title.id) &&
+          unanswered("contributors", title.id),
+      )
+      .map((title) => ({
+        key: "contributors" as const,
+        masterId: title.id,
+        title: title.title,
+        value:
+          (k.known.get(title.id) ?? []).map((p) => p.name).join(", ") || null,
+        source: t.sources.credits,
+      })),
+    ...(k.hasContract && unanswered("agreements", null)
+      ? [
+          {
+            key: "agreements" as const,
+            masterId: null,
+            title: null,
+            value: null,
+            source: t.sources.contracts,
+          },
+        ]
+      : []),
+    ...k.titles
+      .filter(
+        (title) =>
+          k.publishedTitles.has(title.id) && unanswered("publisher", title.id),
+      )
+      .map((title) => ({
+        key: "publisher" as const,
+        masterId: title.id,
+        title: title.title,
+        value: null,
+        source: t.sources.splits,
+      })),
   ];
 }

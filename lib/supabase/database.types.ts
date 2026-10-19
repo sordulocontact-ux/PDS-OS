@@ -6448,6 +6448,7 @@ export type Database = {
           master_id: string | null
           organization_id: string
           qualified_at: string | null
+          replaces_id: string | null
           project_id: string
           rights_scope: string | null
           scope_reason: string | null
@@ -6456,6 +6457,7 @@ export type Database = {
           status: string
           updated_at: string
           usage: string | null
+          withdrawn_reason: string | null
           work: string
         }
         Insert: {
@@ -6467,6 +6469,7 @@ export type Database = {
           master_id?: string | null
           organization_id: string
           qualified_at?: string | null
+          replaces_id?: string | null
           project_id: string
           rights_scope?: string | null
           scope_reason?: string | null
@@ -6475,6 +6478,7 @@ export type Database = {
           status?: string
           updated_at?: string
           usage?: string | null
+          withdrawn_reason?: string | null
           work: string
         }
         Update: {
@@ -6486,6 +6490,7 @@ export type Database = {
           master_id?: string | null
           organization_id?: string
           qualified_at?: string | null
+          replaces_id?: string | null
           project_id?: string
           rights_scope?: string | null
           scope_reason?: string | null
@@ -6494,6 +6499,7 @@ export type Database = {
           status?: string
           updated_at?: string
           usage?: string | null
+          withdrawn_reason?: string | null
           work?: string
         }
         Relationships: []
@@ -6814,11 +6820,15 @@ export type Database = {
           definition_version: number
           expires_at: string
           id: string
+          link_sealed: string | null
           organization_id: string
           prefill: Json
           project_id: string
           revoked_at: string | null
+          revoked_by: string | null
+          revoked_reason: string | null
           sent_at: string | null
+          sent_by: string | null
           status: string
           submitted_at: string | null
           token_hash: string
@@ -6833,11 +6843,15 @@ export type Database = {
           definition_version: number
           expires_at: string
           id?: string
+          link_sealed?: string | null
           organization_id: string
           prefill?: Json
           project_id: string
           revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
           sent_at?: string | null
+          sent_by?: string | null
           status?: string
           submitted_at?: string | null
           token_hash: string
@@ -6852,11 +6866,15 @@ export type Database = {
           definition_version?: number
           expires_at?: string
           id?: string
+          link_sealed?: string | null
           organization_id?: string
           prefill?: Json
           project_id?: string
           revoked_at?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
           sent_at?: string | null
+          sent_by?: string | null
           status?: string
           submitted_at?: string | null
           token_hash?: string
@@ -6900,6 +6918,117 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_no_agreement_reasons: {
+        Row: {
+          contact_id: string
+          decided_at: string
+          decided_by: string
+          id: string
+          organization_id: string
+          project_id: string
+          reason: string
+        }
+        Insert: {
+          contact_id: string
+          decided_at?: string
+          decided_by: string
+          id?: string
+          organization_id: string
+          project_id: string
+          reason: string
+        }
+        Update: {
+          contact_id?: string
+          decided_at?: string
+          decided_by?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          reason?: string
+        }
+        Relationships: []
+      }
+      release_readiness_policies: {
+        Row: {
+          organization_id: string
+          sacem_blocks: boolean
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          organization_id: string
+          sacem_blocks?: boolean
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          organization_id?: string
+          sacem_blocks?: boolean
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
+      }
+      release_readiness_waivers: {
+        Row: {
+          control_key: string
+          control_label: string
+          granted_at: string
+          granted_by: string
+          id: string
+          organization_id: string
+          project_id: string
+          reason: string
+        }
+        Insert: {
+          control_key: string
+          control_label: string
+          granted_at?: string
+          granted_by: string
+          id?: string
+          organization_id: string
+          project_id: string
+          reason: string
+        }
+        Update: {
+          control_key?: string
+          control_label?: string
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          organization_id?: string
+          project_id?: string
+          reason?: string
+        }
+        Relationships: []
+      }
+      release_validations: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          snapshot: Json
+          validated_at: string
+          validated_by: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          snapshot: Json
+          validated_at?: string
+          validated_by: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          snapshot?: Json
+          validated_at?: string
+          validated_by?: string
+        }
+        Relationships: []
+      }
       legal_plan_events: {
         Row: {
           created_at: string
@@ -6910,6 +7039,7 @@ export type Database = {
           kind: string
           organization_id: string
           project_id: string
+          reason: string | null
           to_value: string | null
         }
         Insert: {
@@ -6921,6 +7051,7 @@ export type Database = {
           kind: string
           organization_id: string
           project_id: string
+          reason?: string | null
           to_value?: string | null
         }
         Update: {
@@ -6932,6 +7063,7 @@ export type Database = {
           kind?: string
           organization_id?: string
           project_id?: string
+          reason?: string | null
           to_value?: string | null
         }
         Relationships: []
@@ -16393,6 +16525,48 @@ export type Database = {
           p_title: string
         }
         Returns: string
+      }
+      grant_release_waiver: {
+        Args: {
+          p_control_key: string
+          p_control_label: string
+          p_project_id: string
+          p_reason: string
+        }
+        Returns: undefined
+      }
+      set_release_policy: {
+        Args: { p_organization_id: string; p_sacem_blocks: boolean }
+        Returns: undefined
+      }
+      validate_release: {
+        Args: { p_project_id: string; p_snapshot: Json }
+        Returns: undefined
+      }
+      revoke_legal_form: {
+        Args: { p_form_id: string; p_reason: string }
+        Returns: undefined
+      }
+      seal_legal_form_link: {
+        Args: { p_form_id: string; p_sealed: string }
+        Returns: undefined
+      }
+      replace_clearance: {
+        Args: { p_clearance_id: string; p_what: string }
+        Returns: string
+      }
+      withdraw_clearance: {
+        Args: { p_clearance_id: string; p_reason: string }
+        Returns: undefined
+      }
+      change_legal_plan_item: {
+        Args: {
+          p_due_on: string | null
+          p_item_id: string
+          p_reason: string
+          p_responsible_person_id: string | null
+        }
+        Returns: undefined
       }
       approve_contract_mapping: {
         Args: { p_items: Json; p_project_id: string }

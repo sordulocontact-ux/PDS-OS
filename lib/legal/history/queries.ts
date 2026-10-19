@@ -40,7 +40,9 @@ export async function loadLegalHistory(
     supabase.from("legal_plan_items").select("id, label").eq("project_id", p),
     supabase
       .from("legal_plan_events")
-      .select("id, item_id, kind, from_value, to_value, created_by, created_at")
+      .select(
+        "id, item_id, kind, from_value, to_value, reason, created_by, created_at",
+      )
       .eq("project_id", p),
     supabase
       .from("legal_intakes")

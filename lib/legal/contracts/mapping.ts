@@ -71,6 +71,8 @@ export type AgreementRow = {
   state: AgreementState;
   fields: AgreementField[];
   financialNeedCents: number | null;
+  // « Pas d'accord nécessaire », with why (legal_no_agreement_reasons).
+  noAgreementReason: string | null;
 };
 
 export type MappingInput = {
@@ -89,6 +91,8 @@ export type MappingInput = {
   mappingApproved: boolean;
   // Contacts whose fiche is out, not back yet (JUR-16).
   ficheWaitingOf?: Set<string>;
+  // Why no agreement is needed, by contact.
+  noAgreementOf?: Map<string, string>;
 };
 
 const overlap = (a: readonly string[], b: readonly string[]) =>
@@ -197,6 +201,10 @@ export function agreementRows(input: MappingInput): AgreementRow[] {
       financialNeedCents: need?.contractId
         ? (input.financialNeedOf.get(need.contractId) ?? null)
         : null,
+      noAgreementReason:
+        !need && person.contactId
+          ? (input.noAgreementOf?.get(person.contactId) ?? null)
+          : null,
     };
   });
 }
