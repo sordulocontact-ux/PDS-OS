@@ -85,6 +85,7 @@ import { roles } from "./roles";
 import { stepTools } from "./step-tools";
 import { productionLocations } from "./production-locations";
 import { productionOrganization } from "./production-organization";
+import { productionProducer } from "./production-producer";
 import { productionHistory } from "./production-history";
 import { productionProvider } from "./production-provider";
 import { productionNext } from "./production-next";
@@ -189,6 +190,7 @@ export const fr = {
   productionLink,
   productionLocations,
   productionOrganization,
+  productionProducer,
   productionCallSheetPage,
   marketing,
   marketingReview,

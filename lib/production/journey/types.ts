@@ -1,6 +1,7 @@
 // The journey of one deliverable's production (docs/PRODUCTION-METIER.md § 0
-// and § 10): its steps, their state, who acts now. Computed by code from what
-// people recorded, never stored. Client-safe.
+// and § 10, proto « Projet complet » production.md § 1): its steps, their
+// state, who acts now. Computed by code from what people recorded, never
+// stored. Client-safe.
 
 import type {
   JourneyActor,
@@ -12,6 +13,7 @@ import type {
   OrganizationKind,
 } from "@/lib/production/organization";
 import type { ProductionPhase } from "@/lib/production/phase";
+import type { ProductionMode } from "@/lib/production/sheet";
 
 export const STEP_KEYS = [
   "organisation",
@@ -24,6 +26,7 @@ export const STEP_KEYS = [
   "call-sheet",
   "readiness",
   "shoot",
+  "rushes",
   "post",
   "delivery",
 ] as const;
@@ -40,29 +43,46 @@ export type JourneyStep = Omit<GenericStep, "key" | "prereq" | "next"> & {
   next: StepKey[];
 };
 
-export type QuoteStatus = "deposited" | "submitted" | "approved" | "rejected";
+export type QuoteStatus =
+  "deposited" | "submitted" | "approved" | "rejected" | "changes" | "replaced";
 
 export type JourneyInput = {
   projectId: string;
   deliverableId: string;
   kind: OrganizationKind | null;
+  // How the preproduction is organised: with PO, a call, an import.
+  mode: ProductionMode;
   opened: boolean;
   owner: JourneyPerson;
   // The line producer, else the owner.
   producer: JourneyPerson;
-  // « Chargé de production », or the owner's own role when none is named.
-  producerRole: string;
   validator: JourneyPerson | null;
   company: JourneyPerson | null;
   director: JourneyPerson | null;
   dop: JourneyPerson | null;
-  // Who decides on the director's proposal: the creative directors, else
-  // the owner.
+  // The creative side (responsable créatif, validation créative interne):
+  // the project's creative directors, else the owner.
   creative: JourneyPerson;
-  call: { count: number; reported: boolean; proposed: number; planned: number };
-  quote: { status: QuoteStatus | null; approved: number };
+  call: {
+    count: number;
+    // The first production call's day (ISO), once one is held.
+    heldOn: string | null;
+    reported: boolean;
+    proposed: number;
+    confirmed: number;
+  };
+  // The latest version of the quote and the active reference.
+  quote: {
+    status: QuoteStatus | null;
+    number: number | null;
+    active: { number: number; amountCents: number } | null;
+    revision: boolean;
+  };
+  // Directors proposed by the company, none retained yet.
+  directorProposals: number;
   direction: { status: DirectionStatus; written: boolean };
-  progress: number;
+  // The preproduction checklist (external): tasks, done, held by the viewer.
+  checklist: { total: number; done: number; companyOpen: number };
   gear: { lines: number; positions: number; filled: number };
   locations: {
     status: "to_find" | "to_verify" | "confirmed";
@@ -71,8 +91,14 @@ export type JourneyInput = {
   };
   callSheet: { ready: boolean; published: number | null };
   readyAt: string | null;
+  shotAt: string | null;
+  rushes: { linked: boolean; received: boolean; backup: boolean };
   phase: ProductionPhase;
   closed: boolean;
+  // Steps with an open blocker (« Signaler un blocage »).
+  blockedSteps: readonly string[];
+  // Steps to review after a change elsewhere (a place replaced).
+  reworkSteps: readonly string[];
   // During the shoot, the post and the delivery: who is expected, from the
   // detailed next action (lib/production/next).
   later: JourneyActor | null;

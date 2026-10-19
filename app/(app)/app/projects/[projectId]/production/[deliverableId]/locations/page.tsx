@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { LocationsBoard } from "@/components/production/locations/locations-board";
 import { LocationSection } from "@/components/production/preprod/location-section";
 import { fr } from "@/lib/i18n/fr";
@@ -27,10 +27,11 @@ export default async function ProductionLocationsStepPage({
   );
   const locations = await loadLocations(sheet.id, data, access);
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={step}
       steps={steps}
-      rootPrereq={fr.productionJourney.meta.fiche}
     >
       <LocationSection
         {...common}
@@ -53,6 +54,6 @@ export default async function ProductionLocationsStepPage({
           />
         )}
       </LocationSection>
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

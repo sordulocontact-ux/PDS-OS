@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ReadinessSection } from "@/components/production/preprod/readiness-section";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
@@ -33,10 +33,11 @@ export default async function ProductionReadinessStepPage({
     .order("number", { ascending: false })
     .limit(1);
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={step}
       steps={steps}
-      rootPrereq={fr.productionJourney.meta.fiche}
     >
       <ReadinessSection
         {...common}
@@ -52,6 +53,6 @@ export default async function ProductionReadinessStepPage({
         readyBy={sheet.readyBy}
         {...people}
       />
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

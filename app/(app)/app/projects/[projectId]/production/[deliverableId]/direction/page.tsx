@@ -1,5 +1,5 @@
 import { DirectionDecision } from "@/components/production/journey/direction-decision";
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ProductionBriefSection } from "@/components/production/prep/brief-section";
 import { ProductionImportButton } from "@/components/production/prep/import-dialog";
 import { fr } from "@/lib/i18n/fr";
@@ -35,10 +35,11 @@ export default async function ProductionDirectionStepPage({
     data.ownerName ??
     "—";
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={step}
       steps={steps}
-      rootPrereq={fr.productionJourney.meta.fiche}
     >
       <ProductionImportButton
         projectId={projectId}
@@ -70,6 +71,6 @@ export default async function ProductionDirectionStepPage({
         }
         reviewerName={reviewer}
       />
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

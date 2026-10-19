@@ -52,14 +52,20 @@ export function sheetFacts(data: ProductionSheetData): ModuleFact[] {
   return facts;
 }
 
-/** Who produces the deliverable, next to the module's title. */
+/** Who produces the deliverable, next to « Qui fait quoi » (proto:
+ * « Clip officiel · Externe · Studio Ressac »). */
 export function SheetKindBadge({ data }: { data: ProductionSheetData }) {
-  const kind = data.sheet?.organization.kind ?? null;
+  const org = data.sheet?.organization ?? null;
+  if (!org?.kind) return null;
   return (
-    <StatusBadge
-      tone={kind === "external" ? "action" : kind ? "info" : "warning"}
-    >
-      {kind ? j.organization[kind] : j.organization.none}
+    <StatusBadge tone="neutral">
+      {[
+        data.deliverable.title,
+        j.organization[org.kind],
+        org.kind === "external" ? org.company?.name : null,
+      ]
+        .filter(Boolean)
+        .join(" · ")}
     </StatusBadge>
   );
 }

@@ -1,13 +1,11 @@
 import "server-only";
 
-import { fr } from "@/lib/i18n/fr";
-import { journeyContext } from "@/lib/production/journey/context";
 import { getProject } from "@/lib/projects/queries";
-import { createClient } from "@/lib/supabase/server";
 
 import { conceptionJourney } from "./conception";
 import { framingJourneys } from "./framing";
 import { legalJourneys } from "./legal";
+import { productionJourneys } from "./production";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -17,42 +15,15 @@ import type { JourneyModuleKey, ModuleJourney } from "./types";
 // Distribution, Stratégie, Activations, Suivi & bilan).
 type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 
-const label = fr.shell.project.sidebar;
-const parts = fr.shell.project.marketingSteps;
-
-// Marketing: each deliverable's Production once its sheet is opened, and the
-// Conception (lib/journey/conception.ts). Stratégie, Activations and Suivi &
-// bilan come with their zone.
+// Marketing: the Conception (lib/journey/conception.ts) and each
+// deliverable's Production (lib/journey/production.ts). Stratégie,
+// Activations and Suivi & bilan come with their zone.
 const marketing: Loader = async (projectId) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("production_sheets")
-    .select("deliverable_id")
-    .eq("project_id", projectId);
-  if (error) console.error("loadProjectJourneys production:", error.message);
-  const [design, ...productions] = await Promise.all([
+  const [design, productions] = await Promise.all([
     conceptionJourney(projectId),
-    ...(data ?? []).map(async ({ deliverable_id: id }) => {
-      const ctx = await journeyContext(projectId, id);
-      const started = Boolean(
-        ctx.data.heritage.fiche || ctx.data.heritage.source,
-      );
-      return started
-        ? [
-            {
-              module: "marketing" as const,
-              label: label.marketing,
-              part: {
-                key: `production:${id}`,
-                label: `${parts.production} › ${ctx.data.deliverable.title}`,
-              },
-              steps: ctx.steps,
-            },
-          ]
-        : [];
-    }),
+    productionJourneys(projectId),
   ]);
-  return [...design, ...productions.flat()];
+  return [...design, ...productions];
 };
 
 // Filled by their zone (C4: typed, empty until then).

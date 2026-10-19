@@ -3,12 +3,12 @@ import "server-only";
 import { cache } from "react";
 
 import type { Access } from "@/lib/auth/access";
-import { fr } from "@/lib/i18n/fr";
 import type { ProductionNext } from "@/lib/production/next/types";
 import type { ProductionPhase } from "@/lib/production/phase";
 import { staffingCounts } from "@/lib/production/preprod/team";
 import type { Holder, ProductionSheetData } from "@/lib/production/sheet";
 import { preprodFor } from "@/lib/production/tab-data";
+import { loadStepTools } from "@/lib/step-tools/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { journeySteps } from "./steps";
@@ -24,6 +24,8 @@ const QUOTE: readonly QuoteStatus[] = [
   "submitted",
   "approved",
   "rejected",
+  "changes",
+  "replaced",
 ];
 
 /**
@@ -43,36 +45,54 @@ export const loadJourney = cache(
     const sheet = data.sheet;
     const me = access.personId;
     const supabase = await createClient();
-    const [preprod, quotesRes, creativesRes, optionsRes, versionsRes] =
-      await Promise.all([
-        sheet ? preprodFor(projectId, deliverableId, access) : null,
-        sheet
-          ? supabase
-              .from("production_quotes")
-              .select("status")
-              .eq("sheet_id", sheet.id)
-              .order("deposited_at", { ascending: false })
-          : null,
-        supabase
-          .from("project_creatives")
-          .select("person_id")
-          .eq("project_id", projectId),
-        sheet
-          ? supabase
-              .from("production_location_options")
-              .select("id", { count: "exact", head: true })
-              .eq("sheet_id", sheet.id)
-              .neq("status", "discarded")
-          : null,
-        sheet
-          ? supabase
-              .from("production_call_sheet_versions")
-              .select("number")
-              .eq("sheet_id", sheet.id)
-              .order("number", { ascending: false })
-              .limit(1)
-          : null,
-      ]);
+    const [
+      preprod,
+      quotesRes,
+      creativesRes,
+      optionsRes,
+      versionsRes,
+      tools,
+      shootRes,
+    ] = await Promise.all([
+      sheet ? preprodFor(projectId, deliverableId, access) : null,
+      sheet
+        ? supabase
+            .from("production_quotes")
+            .select("status, amount_cents")
+            .eq("sheet_id", sheet.id)
+            .order("deposited_at", { ascending: true })
+        : null,
+      supabase
+        .from("project_creatives")
+        .select("person_id")
+        .eq("project_id", projectId),
+      sheet
+        ? supabase
+            .from("production_location_options")
+            .select("id", { count: "exact", head: true })
+            .eq("sheet_id", sheet.id)
+            .neq("status", "discarded")
+        : null,
+      sheet
+        ? supabase
+            .from("production_call_sheet_versions")
+            .select("number")
+            .eq("sheet_id", sheet.id)
+            .order("number", { ascending: false })
+            .limit(1)
+        : null,
+      loadStepTools(projectId),
+      sheet
+        ? supabase
+            .from("production_shoots")
+            .select(
+              "state, ended_at, video_rushes, audio_sources, backup_verified, files_location",
+            )
+            .eq("sheet_id", sheet.id)
+            .maybeSingle()
+        : null,
+    ]);
+    const shoot = shootRes?.data ?? null;
 
     const person = (
       personId: string | null,
@@ -104,18 +124,34 @@ export const loadJourney = cache(
     const creative =
       creatives.find((c) => c?.viewer) ?? creatives.find(Boolean) ?? owner;
 
-    const quotes = (quotesRes?.data ?? []).map(
-      (q) => QUOTE.find((s) => s === q.status) ?? null,
-    );
+    // Oldest first: a version's number is its rank (V1, V2…).
+    const quotes = (quotesRes?.data ?? []).map((q, index) => ({
+      number: index + 1,
+      status: QUOTE.find((s) => s === q.status) ?? null,
+      amountCents: q.amount_cents,
+    }));
+    const latest = quotes.at(-1) ?? null;
+    const active = quotes.filter((q) => q.status === "approved").at(-1) ?? null;
     const items = preprod?.items ?? [];
+    const actions = (preprod?.actions ?? []).filter(
+      (a) => !a.templateKey?.startsWith("checklist:"),
+    );
     const staff = staffingCounts(data.needs);
     const callSheet = preprod?.callSheet ?? null;
     const published = versionsRes?.data?.[0]?.number ?? null;
+    const held = (preprod?.calls ?? [])
+      .filter((c) => c.status === "ready")
+      .map((c) => c.occurredAt)
+      .sort();
+    const progress = org ? Object.values(org.progress) : [];
+    const here = (x: { module: string; subjectId: string | null }) =>
+      x.module === "production" && x.subjectId === deliverableId;
 
     const input: JourneyInput = {
       projectId,
       deliverableId,
       kind: org?.kind ?? null,
+      mode: sheet?.mode ?? "direct",
       opened: sheet !== null,
       owner,
       producer:
@@ -123,9 +159,6 @@ export const loadJourney = cache(
           org?.lineProducer?.personId ?? null,
           org?.lineProducer?.name ?? null,
         ) ?? owner,
-      producerRole: org?.lineProducer
-        ? fr.productionJourney.roles.producer
-        : fr.productionJourney.roles.owner,
       validator: person(
         org?.quoteValidator?.personId ?? null,
         org?.quoteValidator?.name ?? null,
@@ -136,21 +169,33 @@ export const loadJourney = cache(
       creative: creative ?? owner,
       call: {
         count: preprod?.calls.length ?? 0,
-        reported: (preprod?.calls ?? []).some((c) => c.status === "ready"),
-        proposed: items.filter((it) => it.status === "proposed").length,
-        planned: (preprod?.actions ?? []).filter(
-          (a) => a.itemId && a.status === "approved",
-        ).length,
+        heldOn: held[0] ?? null,
+        reported: held.length > 0,
+        proposed:
+          items.filter((it) => it.status === "proposed").length +
+          actions.filter((a) => a.status === "draft").length,
+        confirmed:
+          items.filter((it) => it.status === "confirmed").length +
+          actions.filter((a) => !a.itemId && a.status === "approved").length,
       },
       quote: {
-        status: quotes[0] ?? null,
-        approved: quotes.filter((s) => s === "approved").length,
+        status: latest?.status ?? null,
+        number: latest?.number ?? null,
+        active: active
+          ? { number: active.number, amountCents: active.amountCents }
+          : null,
+        revision: false,
       },
+      directorProposals: 0,
       direction: {
         status: org?.direction.status ?? "draft",
         written: Boolean(sheet?.brief.stagingIntent && sheet.brief.runOfShow),
       },
-      progress: org ? Object.values(org.progress).filter(Boolean).length : 0,
+      checklist: {
+        total: progress.length,
+        done: progress.filter(Boolean).length,
+        companyOpen: progress.filter((x) => !x).length,
+      },
       gear: {
         lines: preprod?.equipment.length ?? 0,
         positions: staff.positions,
@@ -170,8 +215,18 @@ export const loadJourney = cache(
         published,
       },
       readyAt: sheet?.readyAt ?? null,
+      shotAt: shoot?.ended_at ?? null,
+      rushes: {
+        linked: Boolean(shoot?.files_location),
+        received: Boolean(shoot?.video_rushes && shoot.audio_sources),
+        backup: Boolean(shoot?.backup_verified),
+      },
       phase,
       closed: Boolean(sheet?.closedAt),
+      blockedSteps: tools.blockers
+        .filter((b) => !b.lifted && here(b))
+        .map((b) => b.stepKey),
+      reworkSteps: [],
       later:
         next?.who && next.kind !== "done"
           ? {

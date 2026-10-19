@@ -8,6 +8,10 @@ export type Choice<V extends string> = {
   label: string;
   // The consequence of the choice; optional on a tile (then a short note).
   hint?: string;
+  // List only: after the bold label, « · détail » (« Externe · Une société
+  // de production est mandatée »), and a quiet tag (« proposée par PO »).
+  detail?: string;
+  tag?: string;
   // Tile only: shown above the label.
   icon?: ReactNode;
   disabled?: boolean;
@@ -65,7 +69,7 @@ export function ChoiceCards<V extends string>({
         tile
           ? "flex-col items-center justify-center gap-2 p-6 text-center"
           : list
-            ? "gap-3"
+            ? "items-center gap-3"
             : "gap-3 p-3",
       )}
     >
@@ -81,9 +85,33 @@ export function ChoiceCards<V extends string>({
                 e.target.checked && onChange?.(choice.value),
             }
           : { defaultChecked: choice.value === defaultValue })}
-        className={tile ? "sr-only" : "mt-0.5 size-4 accent-selection"}
+        className={
+          tile
+            ? "sr-only"
+            : list
+              ? "size-[18px] shrink-0 accent-selection"
+              : "mt-0.5 size-4 accent-selection"
+        }
       />
-      {tile ? (
+      {list ? (
+        <span className="grid min-w-0 flex-1 gap-0.5">
+          <span className="break-words">
+            <b className="font-semibold">{choice.label}</b>
+            {choice.tag && (
+              <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
+                {" "}
+                · {choice.tag}
+              </span>
+            )}
+            {choice.detail && <> · {choice.detail}</>}
+          </span>
+          {choice.hint && (
+            <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+              {choice.hint}
+            </span>
+          )}
+        </span>
+      ) : tile ? (
         <>
           {choice.icon}
           <span className="text-sm font-medium">{choice.label}</span>
@@ -116,7 +144,15 @@ export function ChoiceCards<V extends string>({
       )}
       disabled={disabled}
     >
-      <legend className={hideLegend ? "sr-only" : "mb-1 text-sm font-medium"}>
+      <legend
+        className={
+          hideLegend
+            ? "sr-only"
+            : list
+              ? "mb-1.5 font-semibold"
+              : "mb-1 text-sm font-medium"
+        }
+      >
         {legend}
         {required && <RequiredMark announce />}
       </legend>
