@@ -43,8 +43,9 @@ export const distribution = {
       master: "Le master final est validé dans le workflow Master.",
       legal:
         "Les droits restent gérés au Juridique ; Distribution ne les modifie pas.",
-      design: "La pochette est validée dans sa Fiche Livrable, en Conception.",
-      project: "Saisi dans la Préparation, ci-dessous.",
+      design:
+        "La pochette est validée dans sa Fiche Livrable, en Conception, puis livrée par la Production.",
+      project: "Saisi au lancement du projet.",
     },
     states: {
       validated: "Validé à la source",
@@ -52,6 +53,7 @@ export const distribution = {
       unvalidated: "Non validé",
       missing: "Manquant",
       restricted: "Accès restreint",
+      later: "Ne bloque pas",
     },
     // One line per element the deposit needs.
     items: {
@@ -60,13 +62,27 @@ export const distribution = {
       credits: "Crédits auteurs et compositeurs",
       pLine: "Ligne ℗ (ayant droit et année)",
       finalMaster: "Master final",
-      legalState: "État du Juridique",
+      legalState: "Reste à suivre au Juridique",
       legalItem: "Action juridique ouverte",
+      clearance: (work: string) => `Emprunt « ${work} »`,
       rightsConstraint: "Contrainte de droits du Cadrage",
       cover: "Pochette",
       release: "Sortie enregistrée",
       releaseDate: "Date de sortie prévue",
       upc: "UPC",
+    },
+    // A borrowing's state, as the Juridique names it (legal_clearances).
+    clearanceStatus: {
+      to_investigate: "à instruire",
+      rightsholders_identified: "ayants droit identifiés",
+      contacted: "ayants droit contactés",
+      waiting_external: "réponse attendue",
+      negotiating: "en négociation",
+      agreement_reached: "accord trouvé, licence à signer",
+      document_pending: "licence envoyée, signature attendue",
+      signed: "licence signée, à confirmer",
+      refused: "refusé par les ayants droit",
+      action_required: "action requise",
     },
     details: {
       noMainArtist: "Aucun artiste principal au Catalogue",
@@ -76,28 +92,44 @@ export const distribution = {
         `${count} contributeur${count > 1 ? "s" : ""} crédité${count > 1 ? "s" : ""}`,
       noPLine: "Ayant droit ou année du ℗ manquant",
       pLine: (holder: string, year: number) => `℗ ${year} ${holder}`,
-      catalogNoValidation:
-        "Saisi au Catalogue, qui n'a pas d'étape de validation",
-      finalValidated: (version: number, date: string, by: string | null) =>
-        `Version V${version} validée le ${date}${by ? ` par ${by}` : ""}`,
+      titleSheet: "Fiche du titre",
+      titleCredits: "Crédits du titre",
+      titleRights: "Droits du titre",
+      updatedOn: (where: string, date: string) =>
+        `${where} · mis à jour le ${date}`,
+      finalFile: (file: string, version: number) =>
+        `${file} · version V${version}`,
+      finalVersion: (version: number) => `Version V${version}`,
+      finalValidated: (date: string, by: string | null) =>
+        `Master › Master final · validé le ${date}${by ? ` par ${by}` : ""}`,
+      finalBeforeShort: "Master final du Catalogue",
       finalBefore: (date: string) =>
-        `Master final déjà au Catalogue le ${date}, avant le workflow`,
+        `Catalogue · master final déjà là le ${date}, avant le workflow`,
+      finalWhere: "Master › Master final",
       noFinal: "Pas encore de master final validé",
       legalRestricted:
         "L'état des droits se lit avec l'accès au Juridique. Une personne qui l'a confirmera le contrôle « Droits et territoires ».",
       legalClear: "Aucune action juridique ouverte",
       legalBlocking: "Emprunt à sécuriser avant le dépôt",
       legalOpen: "À suivre au Juridique, ne bloque pas le dépôt",
+      legalWhere: "Juridique › Suivi",
+      clearanceStatus: (status: string) => `Juridique › Emprunts · ${status}`,
       constraint: "Confirmée au Cadrage : à respecter dans les territoires",
       coverNone:
         "Aucune Fiche Livrable de pochette en Conception (titre contenant « pochette », « cover » ou « artwork »)",
       coverStatus: (title: string, status: string) => `${title} · ${status}`,
-      coverValidated: (title: string) =>
-        `${title} · version validée en Conception`,
-      releaseMissing:
-        "La sortie n'est pas encore enregistrée (formulaire ci-dessous)",
+      coverDelivered: (title: string, version: number | null) =>
+        `${title}${version ? ` · v${version}` : ""} · livrée par la Production`,
+      coverDeliveredOn: (date: string) =>
+        `Production › Livraison · livrée le ${date}`,
+      coverNotDelivered: "pas encore livrée par la Production",
+      coverWaitDelivery:
+        "Désignée dans les paramètres · la Production la livre",
+      coverGuessed: "Trouvée par son titre en Conception : confirmez-la",
+      releaseMissing: "La sortie n'est pas encore enregistrée",
+      releaseSource: "Projet · Lancement",
       releaseTitle: (title: string) => `« ${title} »`,
-      dateMissing: "À renseigner dans le formulaire ci-dessous",
+      dateMissing: "Date de sortie à fixer au Lancement du projet",
       upcLater: "Souvent attribué par le distributeur : ne bloque pas",
     },
     // A Fiche Livrable's status, as the Conception names it.
@@ -319,9 +351,10 @@ export const distribution = {
       rightsConstraints: (count: number) =>
         `${count} contrainte${count > 1 ? "s" : ""} de droits du Cadrage à confronter aux territoires choisis.`,
       noCover: "Aucune pochette désignée.",
-      visual: (title: string) => `« ${title} » est validée en Conception.`,
+      visual: (title: string) =>
+        `« ${title} » est validée en Conception et livrée par la Production.`,
       coverNotValidated: (title: string) =>
-        `« ${title} » n'est pas validée en Conception.`,
+        `« ${title} » n'est pas encore livrée par la Production.`,
       noDate: "Pas de date de sortie prévue.",
       preorderLate: "La précommande ouvre le jour de la sortie ou après.",
       prelistenLate: "L'avant-première commence le jour de la sortie ou après.",

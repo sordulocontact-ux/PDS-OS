@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { Access } from "@/lib/auth/access";
 import {
   ANOMALY_KINDS,
@@ -22,7 +24,7 @@ const isState = oneOf(ANOMALY_STATES);
 const isModule = oneOf(ANOMALY_MODULES);
 
 /** A project's anomalies, read with the viewer's session. */
-export async function loadAnomalies(
+export const loadAnomalies = cache(async function loadAnomalies(
   projectId: string,
   access: Access,
 ): Promise<Anomaly[]> {
@@ -67,7 +69,7 @@ export async function loadAnomalies(
         : [],
     ),
   );
-}
+});
 
 /** How many of the six checks someone recorded (the rest: « non vérifié »). */
 export async function countRecordedChecks(projectId: string): Promise<number> {

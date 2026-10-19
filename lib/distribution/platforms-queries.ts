@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { can, type Access } from "@/lib/auth/access";
 import {
   availabilityOf,
@@ -33,7 +35,7 @@ export type PlatformsView = {
 
 /** The platforms of a release and its public availability, read with the
  * viewer's session; the detection's links come as suggestions only. */
-export async function loadPlatformsView(
+export const loadPlatformsView = cache(async function loadPlatformsView(
   project: ProjectDetail,
   access: Access,
 ): Promise<PlatformsView> {
@@ -105,4 +107,4 @@ export async function loadPlatformsView(
     canEdit: tracking.canEdit,
     canCheck,
   };
-}
+});

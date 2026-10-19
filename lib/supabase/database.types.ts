@@ -4799,6 +4799,8 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          params_confirmed_at: string | null
+          params_confirmed_by: string | null
           organization_id: string
           prelisten: boolean | null
           prelisten_on: string | null
@@ -4817,6 +4819,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          params_confirmed_at?: string | null
+          params_confirmed_by?: string | null
           organization_id: string
           prelisten?: boolean | null
           prelisten_on?: string | null
@@ -4835,6 +4839,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          params_confirmed_at?: string | null
+          params_confirmed_by?: string | null
           organization_id?: string
           prelisten?: boolean | null
           prelisten_on?: string | null
@@ -15987,6 +15993,35 @@ export type Database = {
       distribution_current_version: {
         Args: { p_project_id: string }
         Returns: number
+      }
+      confirm_distribution_params: {
+        Args: {
+          p_preorder: boolean | null
+          p_preorder_on: string | null
+          p_project_id: string
+          p_validator: string | null
+        }
+        Returns: undefined
+      }
+      distribution_legal_blockers: {
+        Args: { p_project_id: string }
+        Returns: {
+          element: string
+          id: string
+          status: string
+          work: string
+        }[]
+      }
+      distribution_cover: {
+        Args: { p_project_id: string }
+        Returns: {
+          chosen: boolean
+          deliverable_id: string | null
+          delivered_at: string | null
+          sheet_id: string
+          title: string
+          version_number: number | null
+        }[]
       }
       declare_distribution: {
         Args: {

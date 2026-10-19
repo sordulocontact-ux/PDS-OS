@@ -9,6 +9,7 @@ import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { conceptionJourney } from "./conception";
+import { distributionJourneys } from "./distribution";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -72,7 +73,7 @@ export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   marketing,
   master: none,
   legal,
-  distribution: none,
+  distribution: distributionJourneys,
 };
 
 /** Whether the project's workflows are launched at all (no journeys before). */

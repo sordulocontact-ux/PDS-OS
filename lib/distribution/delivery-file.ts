@@ -131,8 +131,8 @@ export function deliveryFile(input: {
             fromItem(
               "releaseDate",
               t.fields.releaseDate,
-              release?.plannedDate
-                ? input.formatDate(release.plannedDate)
+              sources.releaseDate
+                ? input.formatDate(sources.releaseDate.date)
                 : null,
             ),
           ],
@@ -222,7 +222,15 @@ export function deliveryFile(input: {
               "cover",
               t.fields.cover,
               sources.cover
-                ? `${sources.cover.title} · ${fr.distribution.readiness.sheetStatus[sources.cover.status]}`
+                ? sources.cover.delivered
+                  ? fr.distribution.readiness.details.coverDelivered(
+                      sources.cover.title,
+                      sources.cover.delivered.version,
+                    )
+                  : fr.distribution.readiness.details.coverStatus(
+                      sources.cover.title,
+                      fr.distribution.readiness.details.coverNotDelivered,
+                    )
                 : null,
             ),
           ],

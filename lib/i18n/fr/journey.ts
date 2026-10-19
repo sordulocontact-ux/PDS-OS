@@ -24,6 +24,8 @@ export const journey = {
   alert: {
     overdue: "Échéance dépassée",
     decision: "Décision requise",
+    // The step's own summary says what blocks (« 3 éléments bloquent… »).
+    blocking: "",
   },
   reported: "Blocage signalé",
   viaLink: "sur son lien privé",

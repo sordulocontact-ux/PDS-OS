@@ -930,13 +930,19 @@ export const distributionPreparationTone: Record<
  * but not validated, missing (danger only when it blocks the dossier), or
  * closed to the viewer. */
 export const distributionSourceTone = (
-  state: "validated" | "available" | "unvalidated" | "missing" | "restricted",
+  state:
+    | "validated"
+    | "available"
+    | "unvalidated"
+    | "missing"
+    | "restricted"
+    | "later",
   blocking: boolean,
 ): Tone =>
   state === "validated"
     ? "success"
-    : state === "available"
-      ? "info"
+    : state === "available" || state === "later"
+      ? "neutral"
       : state === "unvalidated"
         ? "warning"
         : state === "missing"

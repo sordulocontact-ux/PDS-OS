@@ -4,6 +4,7 @@
 // Pure.
 
 import { routes } from "@/lib/auth/redirects";
+import { distributionStepHref } from "@/lib/ui/distribution-steps";
 import { masterStepHref } from "@/lib/ui/master-steps";
 
 export const ANOMALY_KINDS = [
@@ -69,11 +70,11 @@ export function moduleHref(
     case "design":
       return routes.projectDesign(projectId);
     case "project":
-      return `${routes.projectRelease(projectId)}#release-form`;
+      return routes.project(projectId);
     case "distribution":
-      return routes.projectReleaseDossier(projectId);
+      return distributionStepHref(projectId, "params");
     case "distributor":
-      return routes.projectReleaseTracking(projectId);
+      return distributionStepHref(projectId, "orchard");
   }
 }
 

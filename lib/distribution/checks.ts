@@ -125,14 +125,19 @@ export function computedSignal(
       return { status: "coherent", text: t.identifiers };
     }
     case "rights": {
-      if (!sources.legal.allowed)
-        return { status: "human", text: t.rightsRestricted };
-      const blocking = sources.legal.items.filter((item) => item.blocking);
+      // A borrowing to secure is readable by all (distribution_legal_blockers).
+      const blocking = sources.legal.blockers;
       if (blocking.length)
         return {
           status: "gap",
-          text: t.missing(blocking.map((item) => item.label).join(", ")),
+          text: t.missing(
+            blocking
+              .map((b) => fr.distribution.readiness.items.clearance(b.work))
+              .join(", "),
+          ),
         };
+      if (sources.legal.open === null)
+        return { status: "human", text: t.rightsRestricted };
       // No structured rights per territory exist: code never says « cohérent ».
       return {
         status: "human",
@@ -144,13 +149,13 @@ export function computedSignal(
     case "visual": {
       const cover = sources.cover;
       if (!cover) return { status: "gap", text: t.noCover };
-      return cover.status === "ready_for_production" ||
-        cover.status === "transferred"
+      // The cover delivered by the Production, not the sheet's status.
+      return cover.delivered
         ? { status: "coherent", text: t.visual(cover.title) }
         : { status: "gap", text: t.coverNotValidated(cover.title) };
     }
     case "calendar": {
-      const date = sources.release?.plannedDate ?? null;
+      const date = sources.releaseDate?.date ?? null;
       if (!date) return { status: "gap", text: t.noDate };
       const late = [
         params.preorderOn && params.preorderOn >= date ? t.preorderLate : null,
