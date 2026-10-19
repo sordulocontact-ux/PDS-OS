@@ -74,7 +74,8 @@ function mondayAfter(day: string): string {
 }
 
 const RATIO = /\b\d{1,2}(?:\.\d{1,2})?:\d{1,2}(?:\.\d{1,2})?\b/g;
-const DURATION = /(\d{1,3}\s*min|\d{1,3}:[0-5]\d|\d{1,4}\s*s\b)/i;
+// « 3 min », « 15 s » (a « 9:16 » is a ratio, never a duration).
+const DURATION = /(\d{1,3}\s*min|\d{1,4}\s*s\b)/i;
 
 /** The upstream « Production terminée » deadline, when the calendar has one. */
 export function productionLimit(d: ConceptionDeliverable | undefined) {
@@ -117,6 +118,10 @@ export function proposalsFor(
         i.target === "direction" &&
         i.topic === topic,
     )?.value;
+  // No story of its own: the release's direction (MKT-C2-06, inherited).
+  const story = direction("story");
+  if (!concept && story)
+    out.concept = { value: story, source: t.sources.direction };
   const tone = [direction("tone"), direction("look")].filter(Boolean);
   if (tone.length)
     out.intention = { value: tone.join(" ; "), source: t.sources.direction };
@@ -126,7 +131,7 @@ export function proposalsFor(
     const ratios = [...new Set(format.match(RATIO) ?? [])].filter(isRatio);
     if (ratios.length)
       out.ratios = { value: ratios, source: t.sources.strategy };
-    const duration = DURATION.exec(format)?.[1];
+    const duration = DURATION.exec(format.replace(RATIO, ""))?.[1];
     const seconds = duration
       ? parseDuration(duration.replace(/\s+/g, " "))
       : null;

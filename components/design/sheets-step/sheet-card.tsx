@@ -115,7 +115,12 @@ export function SheetCard({
                   ? t.suggestion(ctx.people.direction.responsible.name)
                   : t.noSuggestion
               }
-              done={(name) => t.designated(name, sheet.title)}
+              done={Object.fromEntries(
+                ctx.people.members.map((m) => [
+                  m.personId,
+                  t.designated(m.name, sheet.title),
+                ]),
+              )}
             />
           </div>
         ) : (

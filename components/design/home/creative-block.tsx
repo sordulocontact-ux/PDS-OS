@@ -54,7 +54,9 @@ export function CreativeBlock({ ctx }: { ctx: DesignJourneyContext }) {
         members={members}
         suggestion={suggestion}
         hint={suggestion ? t.suggestion(suggestion.name) : t.noSuggestion}
-        done={t.done}
+        done={Object.fromEntries(
+          members.map((m) => [m.personId, t.done(m.name)]),
+        )}
       />
     </DesignBlock>
   );

@@ -35,8 +35,9 @@ export function DesignateInline({
   members: Member[];
   suggestion: Member | null;
   hint: string;
-  // The toast and the result banner (« Nadia Benali désigné responsable… »).
-  done: (person: string) => string;
+  // Per member: the toast and the result banner (« Nadia Benali désigné
+  // responsable… »), written on the server.
+  done: Record<string, string>;
 }) {
   const { pending, error, run } = useWriteSubmit(() => undefined, "");
   return (
@@ -53,7 +54,7 @@ export function DesignateInline({
             scope,
             sheetId,
             personId,
-            done: done(person.name),
+            done: done[personId] ?? "",
           }),
         );
       }}
