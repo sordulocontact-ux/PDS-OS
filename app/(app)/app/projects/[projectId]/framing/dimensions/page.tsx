@@ -77,6 +77,11 @@ export default async function FramingDimensionsPage({
   let box: React.ReactNode = null;
   if (question) {
     const editable = editableIn(question.dimension);
+    // A list question brings its lines; a single value opens its field.
+    const kind = QUESTIONS[question.key].kind;
+    const hasLines =
+      question.key === "commitments" ||
+      !(kind === "text" || kind === "date" || kind === "money");
     const suggestionsRow = k.framing.briefRows.find(
       (r) =>
         r.field_key === `${question.key}_suggestions` &&
@@ -127,13 +132,15 @@ export default async function FramingDimensionsPage({
               : null
           }
         >
-          <QuestionLines
-            projectId={projectId}
-            question={question}
-            k={k}
-            editable={editable}
-            nextHref={nextHref(question)}
-          />
+          {hasLines && (
+            <QuestionLines
+              projectId={projectId}
+              question={question}
+              k={k}
+              editable={editable}
+              nextHref={nextHref(question)}
+            />
+          )}
         </QuestionScreen>
         {canEdit && working && !editable && (
           <ToneCallout tone="neutral">{ti.guide.locked}</ToneCallout>

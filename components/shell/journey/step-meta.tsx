@@ -66,9 +66,14 @@ export function StepMeta({
       )}
       <Cell label={t.prereq}>
         {pre.length === 0 ? (
-          <span className="block text-[color:var(--tone-success-fg)]">
-            ✓ {rootPrereq ?? t.noPrereq}
-          </span>
+          // « Aucun » is plain (proto); a root prerequisite is done (✓).
+          rootPrereq ? (
+            <span className="block text-[color:var(--tone-success-fg)]">
+              ✓ {rootPrereq}
+            </span>
+          ) : (
+            <span className="block">{t.noPrereq}</span>
+          )
         ) : (
           pre.map((p) => (
             <span key={`${p.module ?? ""}${p.key}`} className="block">

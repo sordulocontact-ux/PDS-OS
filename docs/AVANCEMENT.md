@@ -456,7 +456,8 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
 - [ ] **1. Coquille et Vue d'ensemble** (`shell.md`) : navigation du proto avec pastilles « À vous »,
       Vue d'ensemble (tête, « Maintenant » global, cartes des workflows, dépendances), verrou avant le plan,
       Travail, Validations, Activité depuis les parcours, navigation mobile en puces
-- [ ] **2. Cadrage et Plan du projet** (`framing.md`) : parcours en 4 étapes (Démarrer, 6 dimensions,
+- [x] **2. Cadrage et Plan du projet** (`framing.md`, 19/10/2026, branche `pc/z2-framing`, migration
+      `20261019020101` à pousser avec accord) : parcours en 4 étapes (Démarrer, 6 dimensions,
       Brief, Plan), Plan dans le Cadrage, « Lancer le plan » démarre tous les workflows
 - [ ] **3. Stratégie** (`strategy.md`) : parcours, entrée, propositions une par une sur les 8 dimensions,
       validation dans l'étape, « Stratégie validée », résumé de l'échange

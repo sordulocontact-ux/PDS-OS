@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { FramingStepFrame } from "@/components/framing/framing-step-frame";
+import { LaunchWorkflowButton } from "@/components/overview/launch-workflow-button";
 import { BriefDrift } from "@/components/plan/brief-drift";
 import { PlanBoard } from "@/components/plan/plan-board";
 import { PlanColumns } from "@/components/plan/plan-columns";
@@ -77,6 +78,11 @@ export default async function FramingPlanPage({
       </>
     );
   else if (plan && flows) {
+    // Stratégie, Master, Juridique left out of the plan wait until added
+    // (« Ajouter et lancer »); the others open with the plan.
+    const absent = (["strategy", "master", "legal"] as const).filter(
+      (w) => !plan.items.some((i) => i.workflow === w),
+    );
     const group = (w: string | null) =>
       w && (MARKETING_PARTS as readonly string[]).includes(w) ? t.group : null;
     const cards = Object.fromEntries(
@@ -97,6 +103,19 @@ export default async function FramingPlanPage({
               dueDate={i.dueDate}
               issues={[]}
               muted={i.workflow === null && i.column === "anticipate"}
+              actions={
+                // A workflow a plan launched before « Lancer le plan »
+                // started them all, still waiting (« Lancer maintenant »).
+                canEdit &&
+                i.workflow &&
+                !i.launchedAt && (
+                  <LaunchWorkflowButton
+                    projectId={projectId}
+                    workflow={i.workflow}
+                    pilot={i.ownerName}
+                  />
+                )
+              }
             />
           )),
       ]),
@@ -113,6 +132,32 @@ export default async function FramingPlanPage({
           </span>
         </ToneCallout>
         <PlanColumns cards={cards} />
+        {absent.length > 0 && (
+          <section className="flex flex-col gap-2">
+            <h3 className="text-body-md font-semibold">
+              {fr.framingIntel.plan.absentTitle}
+            </h3>
+            <p className="text-caption text-[color:var(--text-secondary)]">
+              {canEdit
+                ? fr.framingIntel.plan.absentHint
+                : fr.framingIntel.plan.absentReadOnly}
+            </p>
+            <ul className="flex flex-wrap gap-3">
+              {absent.map((w) => (
+                <li key={w} className="flex items-center gap-2 text-body-md">
+                  {fr.framingIntel.plan.workflows[w]}
+                  {canEdit && (
+                    <LaunchWorkflowButton
+                      projectId={projectId}
+                      workflow={w}
+                      pilot={project.ownerName}
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <Fold summary={t.stepsTitle}>
           <PlanStepsSection
             projectId={projectId}

@@ -3,6 +3,7 @@ import { IconAlarmClock } from "nucleo-sharp-essential";
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
+import { lowerFirst } from "@/lib/ui/journey";
 
 import type { NowItem } from "./now-card";
 
@@ -44,7 +45,7 @@ export function WaitingRows({ items }: { items: NowItem[] }) {
                 </span>
               )}
               {" : "}
-              {step.actor?.todo.toLowerCase()}
+              {lowerFirst(step.actor?.todo ?? "")}
               <span className="text-[color:var(--text-secondary)]">
                 {" · "}
                 {[place, step.title].filter(Boolean).join(" › ")}

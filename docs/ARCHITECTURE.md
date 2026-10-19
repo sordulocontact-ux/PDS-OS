@@ -1330,6 +1330,63 @@ n'écrit qu'un **adaptateur**.
   transcrits) ; ensuite, c'est un message tapé comme un autre. Échap annule.
 - Les deux routes partagent `lib/voice/http.ts` (session approuvée, taille bornée).
 
+### Parcours du Cadrage en 4 étapes (lot 2 « Projet complet », 19/10/2026)
+
+Proto `docs/protos/src/mk.js` (FR_STEPS, frEntry, frDims, frBrief, frPlanView), cahier des charges
+`docs/projet-complet/framing.md`. Le Cadrage suit le patron commun (§ 3 ter) : une URL par étape,
+`/framing/start`, `/framing/dimensions`, `/framing/brief`, `/framing/plan` ; `/framing` redirige vers
+l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=<dimension>&q=`,
+`?step=review&call=`, `?step=brief`) vers leur étape. `routes.projectFramingStep` /
+`projectFramingQuestion` / `projectFramingReview` / `projectPlan` suivent.
+
+- **Parcours** : `lib/framing/journey.ts` (pur : statuts, acteurs, résumés, prérequis, « Ensuite :
+  Stratégie › Démarrer la stratégie ») ; données lues une fois par requête dans
+  `lib/framing/journey-context.ts` (`framingJourneyContext`, `cache()` : connaissance, évaluation, call
+  de cadrage `framing_calls`, plan) ; loader `lib/journey/framing.ts` branché dans `JOURNEY_LOADERS`
+  (le relais de la Vue d'ensemble s'efface). Acteurs : le responsable du projet (« Démarrer le cadrage »,
+  « Tenir l'échange de cadrage », « Répondre à n questions de PO », « Créer le Brief de cadrage » /
+  « Créer la version n du Brief », « Envoyer le Brief en validation », « Lancer le plan du projet ») ;
+  la direction `kind: "validate"` sur « Valider le Brief de cadrage » (Validations du projet).
+  Le Brief garde ses versions lisibles après une demande de modification (défaut du proto non recopié).
+- **Cadre** : `FramingStepFrame` (en-tête avec « Qui fait quoi » = responsable et validation,
+  `NowCard` aux mots du Cadrage, `ModuleAttention`, `JourneySpine`, `StepPanel` 5 colonnes, blocages et
+  informations notées `StepBlockers` / `StepToolsBlock`).
+- **Démarrer** : faits « Prise en charge » / « Projet », « Ce que le projet sait déjà » (comptes du code,
+  « Voir le détail » = une ligne par information, `FramingLine`), `StartWays` = `StartChoices fixedOrder`
+  (ordre fixe, « Recommandé » mobile) ; **règle retenue** (proto) : échange recommandé quand
+  manquant + à confirmer > connu (`recommendedStart`, `lib/framing/lines.ts`), raison dite seulement
+  dans ce cas. « Préparer un échange » ouvre `CallPrepForm` dans l'étape (`callSheetData` : un point par
+  dimension qui a un manque ou un « à confirmer »), « Changer » revient au choix. Après création :
+  `PlannedCallFacts` ; enregistré mais pas encore rangé : lien vers le call (le vrai pipeline
+  enregistrement → transcription → compte rendu se fait sur sa page) ; compte rendu reçu : `MeetingFacts`
+  avec, pour lignes, **ce que PO a proposé de l'échange par dimension** et son état dans le Cadrage
+  (confirmé, écarté, à confirmer ; budget interne), puis le résumé aux participants quand tout est
+  tranché (`MeetingSummaryBlock`, prochaine étape « Le Brief de cadrage part en validation »).
+  L'écran `?step=review` est supprimé : les propositions de l'échange sont dans « Les 6 dimensions ».
+- **Les 6 dimensions** : « Confirmation humaine · x/y · n dimensions complètes sur 6 », encadré
+  « Question de PO » (`QuestionScreen`, refait sur le proto : capitale « OBJECTIF · INFORMATION
+  MANQUANTE », champ « Votre réponse * » ouvert d'emblée pour une information manquante — il **est**
+  « Écrire moi-même » —, « M'aider à définir » au-dessus, Confirmer / Modifier, « Non applicable » →
+  « Pourquoi ce n'est pas applicable * » / « Marquer non applicable », « À définir plus tard » →
+  « À définir avant le * » / « Reporter, avec une tâche »), puis 6 cartes repliables (`DimensionCards`,
+  `VersionCard`) : une ligne par information avec pastille Connu / Confirmé / À confirmer / Manquant /
+  Non applicable / À définir plus tard et « Répondre » (`?q=`) ; après une demande de modification,
+  « Modifier » sur les réponses connues des dimensions rouvertes. Figé pendant la relecture (callout
+  cadenas). `DimensionNav` et `QuestionPager` ne servent plus au Cadrage. **Dictée gardée** : le bouton
+  « Dicter » reste sur la ligne de progression (il ne gêne pas le parcours, décision du lot 2).
+  **`QuestionScreen` est la référence** d'une question « une à la fois » (Cadrage juridique, lot 9).
+- **Brief de cadrage** : versions en cartes (la dernière ouverte, `BriefVersionDoc` = « 01 · Objectif »
+  puis « Libellé : valeur · source », « À revoir » sur les dimensions renvoyées), « Créer le Brief » /
+  « Créer la version n » / « Mettre à jour le Brief », « Envoyer en validation à X » (raison écrite si
+  rien n'a changé, PROJ-BUG-05) ; la direction décide **dans l'étape** (`BriefDirectionDecision` =
+  `DecisionPanel` + « Dimensions à revoir » ; `decideFramingBrief` → `decide_framing_brief` forme
+  « commentaire + dimensions » : seules les dimensions cochées rouvrent ; « Demander des corrections
+  détaillées » = l'ancien formulaire de demandes, replié). Repliés sous « Corrections détaillées,
+  comparaison et export » : complétude, demandes, comparaison, document complet, PDF, historique.
+  Gestes en `WriteResult` avec `withOutcome` (`lib/framing/actions/brief-step.ts`).
+- **Après le plan** : tout le Cadrage se lit (étapes faites, rien de modifiable), le Brief validé reste
+  consultable dans son étape.
+
 ---
 
 ## 6 bis. Stratégie de lancement
@@ -1747,7 +1804,7 @@ Migration `…20261012101201_strategy_audiences_kpi_owner`.
 
 ## 6 ter. Plan du Projet
 
-Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `components/plan/*`, migration
+Cadrage › Plan du projet `app/(app)/app/projects/[projectId]/framing/plan`, `lib/plan/*`, `components/plan/*`, migration
 `…20261006000201_project_plan.sql` (tests dans `framing-intelligent.test.sql`).
 
 - **Proposition calculée par le code** (`proposePlan`), à chaque visite tant que le plan
@@ -1760,8 +1817,8 @@ Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `com
 - **Modifier le plan** : changer de colonne, de responsable (membre approuvé), retirer ou
   remettre. **Lancer le plan** : le navigateur n'envoie que ces choix par clé, le serveur
   repropose et `launch_project_plan` enregistre une fois (`project_plans`,
-  `project_plan_items`). Les workflows en Focus ou Pendant ce temps démarrent (la Stratégie
-  passe en cours) ; ceux d'Ensuite attendent « Lancer maintenant » (`launch_plan_workflow`).
+  `project_plan_items`). Tous les workflows du plan démarrent (la Stratégie passe en cours ;
+  avant le 19/10, ceux d'Ensuite attendaient « Lancer maintenant », `launch_plan_workflow`).
 - **Workflow hors du plan** (audit du 07/10) : Stratégie, Master ou Juridique retirés avant le
   lancement, ou jamais proposés, sont listés sous le plan lancé (« Hors du plan ») ;
   « Ajouter et lancer » les ajoute en Focus (titre et raison écrits par le serveur,
@@ -1774,13 +1831,28 @@ Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `com
   RLS de leurs tables n'a pas changé). Fil des étapes : Stratégie grisée jusqu'au plan.
 - Mon Travail : un projet au Cadrage validé et sans plan a pour prochaine action
   « Construire et lancer le plan du projet ».
-- **Le plan est sur la Vue d'ensemble** (07/10/2026) : dès le Brief validé, la Vue
-  d'ensemble montre le plan lui-même (`ProjectPlanSection` : `PlanBoard` tant qu'il est
-  proposé) à la place de la liste des étapes ; **une fois lancé, la nouvelle Vue d'ensemble**
-  (`ProjectBoard`, § 8 ter, lot 4 de l'architecture globale) prend sa place. **Il n'y a
-  plus de page `/plan`** (supprimée le 08/10/2026) ni de section « Plan du projet » dans
-  `project-sections.ts` : `routes.projectPlan` = la Vue d'ensemble, ancre `#plan` (liens du
-  Brief, du Travail et du workflow verrouillé). Un ancien lien vers `/plan` répond 404.
+- **Le plan est l'étape 4 du Cadrage** (lot 2 « Projet complet », 19/10/2026, remplace la décision du
+  07/10) : `/framing/plan` (`routes.projectPlan`), plus rien sur la Vue d'ensemble. Avant lancement :
+  encadré PO, `PlanBoard` en 4 colonnes deux par deux (`PlanColumns`), cartes du proto (`PlanStepCard` :
+  « **Stratégie** · Marketing », raison, « pilote · échéance »), « Modifier le plan » = menus « Colonne
+  de X » / « Pilote de X » sous chaque carte + la modale détaillée (exécutant, échéance, dépendances),
+  ordre, retrait, ajout, « Enregistrer le plan » / « Annuler » ; « Lancer le plan » garde la revue
+  (`PlanLaunchReview`) et passe par `launchProjectPlan` (`withOutcome`, tous les parcours). Lancé :
+  « Plan lancé par X le … », colonnes en lecture, « Lancer » d'un workflow resté en attente (plans lancés
+  avant ce lot) et « Hors du plan », puis `PlanStepsSection` et l'historique repliés.
+- **Huit workflows** (migration `20261019020101_plan_all_workflows.sql`, tests
+  `plan-all-workflows.test.sql`) : `strategy`, `design`, `production`, `activations`, `review` (le
+  Marketing), `master`, `legal`, `distribution` (ex-`delivery`, repris). Proposition (`proposePlan`) :
+  Stratégie en Focus, Master et Juridique selon les règles d'avant, Conception (pilote = direction
+  créative), Production et Activations en Ensuite, Distribution (projet musical) et Suivi & bilan en
+  À anticiper ; les lignes-notes d'anticipation ne sont plus proposées. **« Lancer le plan » démarre
+  tous les workflows du plan, quelle que soit leur colonne** (la colonne dit l'ordre) ;
+  `launch_plan_workflow` garde sa signature (ajout d'un workflow oublié). **Verrou** :
+  `workflow_is_launched` couvre les huit ; Conception, Production, Activations, Suivi & bilan et
+  Distribution s'ouvrent au lancement du plan (ou s'ils avaient commencé avant : Stratégie entamée,
+  fiche de production, activation, dossier de distribution, étape avancée) ; layouts `design/`,
+  `production/`, `activations/`, `review/`, `release/` derrière `WorkflowGate` (`WorkflowLocked` :
+  « … démarre au lancement du plan », « Ouvrir le Cadrage »).
 - **Plan pilotable** (retours du 11/10/2026, PROJ-UX-07) : chaque étape a un **pilote**
   (`owner_person_id`) et un **exécutant** distinct (`executor_person_id`, « le pilote » par
   défaut), une **échéance** (proposée depuis l'échéance du Cadrage de son type :

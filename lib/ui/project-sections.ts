@@ -81,8 +81,8 @@ export function projectSections(
         p === routes.project(projectId) ||
         below(routes.projectClosure(projectId))(p),
     },
-    // No section for the Plan du Projet: it is the overview itself once the
-    // Brief is validated (docs/ARCHITECTURE.md § 6 ter).
+    // The Plan du projet is the Cadrage's fourth step (/framing/plan,
+    // docs/ARCHITECTURE.md § 6 ter): no section of its own.
     {
       key: "framing",
       label: t.framing,
@@ -203,9 +203,6 @@ export function projectTrail(
   const subPages: Record<string, ProjectCrumb[]> = {
     // Vue d'ensemble › Clôture du projet, apart from the Marketing closing.
     [routes.projectClosure(projectId)]: [{ label: fr.projectReview.title }],
-    [routes.projectFramingBrief(projectId)]: [
-      { label: fr.framingIntel.brief.title },
-    ],
     [`${legal}/forms`]: [plan, { label: fr.legalForms.page.title }],
     [`${legal}/contracts`]: [
       plan,

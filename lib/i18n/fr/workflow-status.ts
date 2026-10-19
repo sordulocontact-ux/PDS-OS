@@ -74,11 +74,11 @@ export const workflowStatus = {
     open: "Ce que disent les points de statut",
     title: "Statut des workflows",
     start:
-      "Un workflow non démarré se lance depuis le plan du projet, sur la Vue d'ensemble.",
+      "Un workflow non démarré démarre au lancement du plan du projet, dans le Cadrage.",
   },
   notStartedHint:
-    "Non démarré · se lance depuis le plan du projet (Vue d'ensemble)",
-  notLaunched: "Se lance depuis le plan du projet, sur la Vue d'ensemble",
+    "Non démarré · démarre au lancement du plan du projet, après le Cadrage",
+  notLaunched: "Démarre au lancement du plan du projet, dans le Cadrage",
   // Ce qu'un workflow attend d'un autre (lot 5), calculé par le code depuis
   // les sources : jamais une table saisie à la main.
   dependencies: {

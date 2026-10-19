@@ -183,10 +183,28 @@ export function QuestionScreen({
 
   // To confirm: « Confirmer » / « Modifier »; known (opened again):
   // « Modifier » (proto frQuestion).
-  const viewActions = editable &&
+  const viewActions =
+    editable &&
     isField &&
     mode === "view" &&
-    question.status !== "missing" && (
+    (question.status === "missing" ? (
+      // A list question shows its lines first; its single value is written
+      // on demand (« M'aider à définir », « Écrire moi-même »).
+      <div className="flex flex-wrap gap-2">
+        {def.poHelp && (
+          <Button variant="outline" disabled={busy} onClick={help}>
+            {helping ? t.helping : t.help}
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          disabled={busy}
+          onClick={() => setMode("write")}
+        >
+          {t.write}
+        </Button>
+      </div>
+    ) : (
       <div className="flex flex-wrap gap-2">
         {question.status === "to_confirm" &&
           (unstructured ? (
@@ -211,7 +229,7 @@ export function QuestionScreen({
           {t.modify}
         </Button>
       </div>
-    );
+    ));
 
   // A missing information: the field is open at once (it is « Écrire
   // moi-même »), « M'aider à définir » above it (proto frQuestion).

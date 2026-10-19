@@ -168,7 +168,12 @@ export function PlanBoard({
                     }
                     why={d.why || null}
                     specialized={d.specialized}
-                    status={stepStatus(d, context.states)}
+                    // Before the launch, « Non démarré » says nothing.
+                    status={
+                      stepStatus(d, context.states) === "not_started"
+                        ? null
+                        : stepStatus(d, context.states)
+                    }
                     pilot={nameOf(d.ownerPersonId)}
                     dueDate={d.dueDate}
                     issues={issuesOf(step)}

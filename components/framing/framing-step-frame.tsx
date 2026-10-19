@@ -103,7 +103,6 @@ export async function FramingStepFrame({
         <StepPanel
           step={step}
           steps={steps}
-          rootPrereq={fr.journey.meta.noPrereq}
           blockedLabel={t.blocked}
           {...slots}
         >

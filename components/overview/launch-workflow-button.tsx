@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { fr } from "@/lib/i18n/fr";
 import { launchPlanWorkflow } from "@/lib/plan/actions";
+import type { PlanWorkflow } from "@/lib/plan/propose";
 
 /** « Lancer » on a workflow card not started yet: the same action as the
  * launched Plan du projet's « Lancer maintenant » (launch_plan_workflow),
@@ -18,7 +19,7 @@ export function LaunchWorkflowButton({
   pilot,
 }: {
   projectId: string;
-  workflow: "strategy" | "master" | "legal";
+  workflow: PlanWorkflow;
   pilot: string | null;
 }) {
   const t = fr.planSteps.launchOne;
