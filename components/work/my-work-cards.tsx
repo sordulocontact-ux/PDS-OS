@@ -1,22 +1,23 @@
+import { Suspense } from "react";
+
 import { FormMessage } from "@/components/auth/form-message";
 import {
   HandoverCard,
   ProposalsCard,
   TasksCard,
-  ValidationsCard,
 } from "@/components/home/home-cards";
 import { CardGrid } from "@/components/ui/card-grid";
-import {
-  CreativeProjectsCard,
-  DeliverablesCard,
-  OwnedProjectsCard,
-} from "@/components/work/work-cards";
+import { JourneyCardsSkeleton } from "@/components/work/journey-actions-card";
+import { WorkJourneyCards } from "@/components/work/work-journey-cards";
 import { can, type Access } from "@/lib/auth/access";
 import { fr } from "@/lib/i18n/fr";
 import { loadMyWork } from "@/lib/work/queries";
 
-// The cards of the Travail page, each gated by a permission. Streamed
-// behind a Suspense boundary: the page header shows before they load.
+// The cards of the global Travail: a project to accept first, then one « À
+// vous » card per project read from its journeys (WorkJourneyCards, streamed
+// on its own), then what comes before a project's journeys, PO's proposals
+// and the tasks tied to no workflow. Streamed behind a Suspense boundary:
+// the header shows first.
 export async function MyWorkCards({ access }: { access: Access }) {
   const t = fr.work;
   const transmission = fr.transmission.cards;
@@ -35,9 +36,10 @@ export async function MyWorkCards({ access }: { access: Access }) {
           />
         )}
 
-        {can(access, "validate") && (
-          <ValidationsCard validations={work.validations} all />
-        )}
+        <Suspense fallback={<JourneyCardsSkeleton />}>
+          <WorkJourneyCards />
+        </Suspense>
+
         {can(access, "assign_projects") && (
           <>
             <HandoverCard
@@ -55,45 +57,10 @@ export async function MyWorkCards({ access }: { access: Access }) {
           </>
         )}
 
-        {can(access, "pilot_projects") && (
-          <>
-            <OwnedProjectsCard projects={work.ownedProjects} />
-            <DeliverablesCard
-              title={t.cards.deliverablesToStaff}
-              empty={t.cards.deliverablesToStaffEmpty}
-              deliverables={work.deliverablesToStaff}
-            />
-            <ProposalsCard proposals={work.proposals} all />
-          </>
+        {work.proposals.length > 0 && (
+          <ProposalsCard proposals={work.proposals} all />
         )}
-
-        {can(access, "creative_work") && (
-          <>
-            <DeliverablesCard
-              title={t.cards.myDeliverables}
-              empty={t.cards.myDeliverablesEmpty}
-              deliverables={work.myDeliverables}
-            />
-            <CreativeProjectsCard projects={work.creativeProjects} />
-          </>
-        )}
-
-        {work.myDesignDecisions.length > 0 && (
-          <DeliverablesCard
-            title={fr.conceptionRequests.myDecisions}
-            empty={fr.conceptionRequests.myDecisionsEmpty}
-            deliverables={work.myDesignDecisions}
-          />
-        )}
-        {work.myConception.length > 0 && (
-          <DeliverablesCard
-            title={t.cards.myConception}
-            empty={t.cards.myConceptionEmpty}
-            deliverables={work.myConception}
-          />
-        )}
-
-        <TasksCard tasks={work.tasks} all />
+        {work.tasks.length > 0 && <TasksCard tasks={work.tasks} all />}
       </CardGrid>
     </>
   );

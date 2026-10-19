@@ -131,18 +131,17 @@ export const planLaunchedAt = cache(
  * Whether a workflow may be worked on: launched from the plan, or begun
  * before the plan existed (workflow_is_launched, SQL).
  */
-export async function isWorkflowLaunched(
-  projectId: string,
-  workflow: PlanWorkflow,
-): Promise<boolean> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("workflow_is_launched", {
-    p_project_id: projectId,
-    p_workflow: workflow,
-  });
-  if (error) console.error("isWorkflowLaunched:", error.message);
-  return data === true;
-}
+export const isWorkflowLaunched = cache(
+  async (projectId: string, workflow: PlanWorkflow): Promise<boolean> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("workflow_is_launched", {
+      p_project_id: projectId,
+      p_workflow: workflow,
+    });
+    if (error) console.error("isWorkflowLaunched:", error.message);
+    return data === true;
+  },
+);
 
 export type WorkflowGate = {
   framingValidated: boolean;

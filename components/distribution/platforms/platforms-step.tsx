@@ -30,7 +30,10 @@ const p = fr.distribution.platforms;
 export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
   const view = ctx.platforms;
   const step = ctx.steps.find((s) => s.key === "platforms");
-  const mine = view.canCheck && step?.status !== "blocked";
+  // Closed with reserves: the step is over with the workflow (read only); a
+  // reopening of the closure brings the verifications back.
+  const closed = step?.status === "done" && step.reserve === true;
+  const mine = view.canCheck && step?.status !== "blocked" && !closed;
   const declared = view.cycle?.available ?? null;
   const detected = view.platforms.some((x) => x.suggestedAt);
   const verified = view.availability.verified;
@@ -152,10 +155,17 @@ export function PlatformsStep({ ctx }: { ctx: DistributionContext }) {
           </FactRows>
         </>
       )}
-      {done && (
-        <ToneCallout tone="success">
-          <strong className="font-semibold">{t.done}</strong> {t.doneBody}
+      {closed ? (
+        <ToneCallout tone="warning">
+          <strong className="font-semibold">{t.closedReserves}</strong>{" "}
+          {t.closedReservesBody}
         </ToneCallout>
+      ) : (
+        done && (
+          <ToneCallout tone="success">
+            <strong className="font-semibold">{t.done}</strong> {t.doneBody}
+          </ToneCallout>
+        )
       )}
     </div>
   );

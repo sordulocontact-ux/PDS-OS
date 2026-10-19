@@ -776,6 +776,17 @@ s'afficher sans chargement.
   `get_my_access` relit l'adhésion à chaque page et le RLS s'applique au même jeton.
 - **À savoir** : `next dev` ne précharge jamais et compile chaque page à sa première visite.
   La fluidité se juge avec `pnpm build && pnpm start`.
+- **Pas de cascade entre un layout et sa page** (finitions du 19/10) : une page ne commence à lire
+  qu'une fois son layout répondu. Le layout du projet lit `loadWorkflowStates` et `planLaunchedAt`
+  **avec** le projet ; `WorkflowGate` et les layouts Master / Juridique lisent `isWorkflowLaunched`
+  avec l'accès et, lancé (le cas courant), rendent la page sans autre requête ; la fiche de
+  production (`loadSheet`) lit en deux tours au lieu de quatre (hand-offs avec le premier,
+  `readHandoffs`), la préproduction en deux au lieu de trois, et `journeyContext` lance les
+  lectures du parcours dès que la fiche est connue (`preloadJourney`), pendant la phase et la
+  prochaine action. Outil : un `fetch` instrumenté dans `createClient` (non committé) et le
+  regroupement des requêtes par vague donnent la profondeur de la chaîne ; en `next dev`, le
+  suivi asynchrone de React (développement seulement) prend l'essentiel du CPU : ne juger qu'en
+  `pnpm start`.
 
 ---
 
@@ -1928,9 +1939,13 @@ Cadrage › Plan du projet `app/(app)/app/projects/[projectId]/framing/plan`, `l
 - **Huit workflows** (migration `20261019020101_plan_all_workflows.sql`, tests
   `plan-all-workflows.test.sql`) : `strategy`, `design`, `production`, `activations`, `review` (le
   Marketing), `master`, `legal`, `distribution` (ex-`delivery`, repris). Proposition (`proposePlan`) :
-  Stratégie en Focus, Master et Juridique selon les règles d'avant, Conception (pilote = direction
-  créative), Production et Activations en Ensuite, Distribution (projet musical) et Suivi & bilan en
-  À anticiper ; les lignes-notes d'anticipation ne sont plus proposées. **« Lancer le plan » démarre
+  Stratégie en Focus, puis **les workflows que le projet a** (`applicableWorkflows`, la règle de la
+  navigation, finitions du 19/10) : Master dès qu'il a un titre (Focus si la date cible est proche,
+  sinon Pendant ce temps, « master final déjà là » s'il ne reste rien à mixer), **Juridique toujours**
+  (Focus s'il y a un blocage de droits, sinon Pendant ce temps — y compris pour un projet de contenu),
+  Conception (pilote = direction créative), Production et Activations en Ensuite, Distribution
+  (projet musical) et Suivi & bilan en À anticiper. « Hors du plan » ne propose jamais un Master à
+  un projet sans titre ; les lignes-notes d'anticipation ne sont plus proposées. **« Lancer le plan » démarre
   tous les workflows du plan, quelle que soit leur colonne** (la colonne dit l'ordre) ;
   `launch_plan_workflow` garde sa signature (ajout d'un workflow oublié). **Verrou** :
   `workflow_is_launched` couvre les huit ; Conception, Production, Activations, Suivi & bilan et
@@ -1999,29 +2014,42 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
 - Accueil : `AssistantPanel` + cartes (`components/home/*`) alimentées par `lib/insights/`
   (todo, activité, sorties), les mêmes requêtes que l'assistant.
 
-### Page Travail (`/app/work`)
+### Page Travail (`/app/work`) et accueil : une seule source (finitions, 19/10/2026)
 
-Ce qui attend la personne connectée, **un bloc par permission** (jamais par nom de poste :
-qui cumule plusieurs permissions voit tous les blocs). Seule la phrase d'en-tête dépend du
-poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, RLS.
+Ce qui attend la personne vient **des parcours de chaque projet** (`docs/VISION-UX.md` § 3,
+« Une seule source »), jamais d'une liste à part :
 
-| Permission | Blocs |
-| --- | --- |
-| `validate` | À valider (validations dont on est le validateur) |
-| `assign_projects` | À retransmettre (refusés, précision demandée) · En attente d'un chef de projet |
-| `pilot_projects` | Projets à accepter · Mes projets (lancés, dont on est responsable) avec la **prochaine action** · Livrables à attribuer (sans responsable ou sans échéance) · Propositions de PO de ses projets |
-| `creative_work` | Livrables à concevoir (livrables de Stratégie qui lui sont attribués) · Projets de son équipe créative, Conception signalée |
-| tous | Mes tâches |
-
-- **Prochaine action** : décidée par le code (`lib/work/next-action.ts`) depuis l'étape en
-  cours — Cadrage sans compte rendu de call → planifier/enregistrer le call ; Cadrage →
-  rédiger le Brief ; Stratégie → la construire ; Conception → suivre l'équipe créative ;
-  Livraison → préparer la sortie ; étape soumise → « en attente de validation », rangée
-  après ce que le responsable peut faire. Jamais par PO (règle 6).
-- Le circuit d'attribution (à accepter, à retransmettre, en attente) est calculé par
-  `handoverOf` (`lib/projects/handover.ts`), partagé avec l'accueil.
-- Le directeur créatif ne dépose pas encore de versions : ses livrables mènent à la
-  Stratégie où ils sont engagés. Le dépôt viendra avec la Conception.
+- `loadMyJourneyWork` (`lib/work/journeys.ts`, `cache()`) : pour chaque projet lancé que la
+  personne voit (RLS), `loadShellActions` (`lib/overview/journeys.ts`) = `loadShellJourneys`
+  (la source du Travail, des Validations et des pastilles d'un projet) une fois le plan lancé ;
+  avant, le seul parcours du Cadrage (les autres chargeurs ne sont pas lus). Six projets à la
+  fois (`settleWithLimit`, `lib/utils/parallel.ts`) : tous ensemble, des milliers de requêtes
+  partaient d'un coup et la passerelle répondait « fetch failed ». Un projet en échec est
+  écarté et dit (`error`), jamais lu « rien ».
+- **Travail global** : un projet à accepter d'abord, puis **une carte « À vous » par projet**
+  (`WorkJourneyCards`, en streaming à part dans la grille), décisions marquées « À valider »
+  (acteur `kind: "validate"`) ; puis À retransmettre / En attente d'un chef de projet
+  (`assign_projects`, `handoverOf`), propositions de PO des projets dont on est responsable,
+  et « Mes tâches » réduite aux **tâches libres** (rattachées à aucun workflow, `free` de
+  `loadMyTodo`) : les autres sont des étapes des parcours. Retirés : « Mes projets » et sa
+  prochaine action, livrables à attribuer / à concevoir, conception, décisions de conception,
+  validations d'étape (`validations`) — tous doublaient les parcours.
+- **Accueil** : PO, bienvenue, cartes gardées (projets à accepter, projets en cours,
+  activité, sorties, propositions de PO) ; « Validations qui m'attendent » (les décisions des
+  parcours) et « À vous » (leurs autres actions, lien « Tout le travail ») remplacent « Mes
+  tâches » et l'ancienne carte des validations d'étape (`HomeJourneyCards`, en streaming).
+- **Compteur de « Travail »** dans la barre principale (`components/shell/work-count.tsx`) :
+  dans un projet, celui du projet (son layout) ; hors d'un projet, la **somme des projets**,
+  déclarée projet par projet par l'accueil et le Travail, puis tenue à jour par chaque projet
+  visité. Rien avant le premier passage sur l'accueil ou le Travail (pas de route d'API : le
+  `cache()` de React ne joue pas dans un route handler, la lecture y coûtait deux fois plus).
+- Lectures partagées une fois par requête pour tenir plusieurs projets : `loadMembers`,
+  `listValidatorRows` (`lib/framing/related.ts`), `isWorkflowLaunched`, `readInventoryRows`,
+  `loadIntake` (`memoPerRequest`, `lib/utils/request-memo.ts`, clé explicite pour des
+  arguments objets). Comme `cache()`, ces mémos ne jouent qu'au rendu : une Server Action
+  relit tout (l'avant/après de `withOutcome` reste juste).
+- `lib/work/next-action.ts` ne sert plus qu'à `stageHref`. L'assistant (`my_todo`) lit encore
+  `loadMyTodo` : à rebrancher sur les parcours (non fait ici).
 
 ---
 
@@ -4121,6 +4149,10 @@ plateformes. Ses colonnes de `releases` restent (données), plus rien ne les éc
   « distribué ». **Rouvrir** (motif) ajoute la réouverture sans effacer la décision.
   **Historique** : `distribution_events`, écrit par les fonctions et triggers seuls, rendu en
   phrases (`lib/distribution/history.ts`) : qui, quoi, quand, avec ou sans preuve (CA17).
+- **Plateformes après une clôture avec réserves** (finitions du 19/10) : l'étape est « Fait » avec la
+  marque de réserve, comme le workflow « Terminé » (elle restait « En cours » et proposait encore
+  « Déclarer la disponibilité publique ») ; la page est en lecture seule, un bandeau dit que rouvrir
+  la clôture relance les vérifications.
 - **Statut commun** (`distributionState`, `rules.ts`) : Préparation → Dossier (à soumettre, en
   attente, refusée) → Suivi (dépôt à déclarer — Bloqué si une dépendance manque —, en attente du
   distributeur, corrections) → Plateformes (n sur 5 vérifiées) → Clôture (en attente) → Terminé

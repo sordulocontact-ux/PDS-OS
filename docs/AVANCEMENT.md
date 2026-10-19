@@ -569,3 +569,12 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
   post, destinataires de livraison, PR-13 (pochette, teasers déclinés).
 - Migrations `20261019050101` à `20261019050801` à pousser en prod avec accord ; pgTAP
   `production-projet-complet.test.sql`.
+
+## Finitions de la recette (19/10/2026, branche `pc/finitions`)
+
+Accueil et Travail global tirés des parcours de chaque projet (une carte « À vous » par projet,
+Validations = décisions, compteur de la barre = somme), plan du projet selon les workflows que le
+projet a (Juridique toujours, Master avec un titre), Plateformes « Fait » après une clôture avec
+réserves, plus de cascade layout → page dans le Marketing, pastille d'état à droite du titre,
+compteur bleu sur les pilules, texte du verrou hors du plan. Détail et mesures :
+`docs/projet-complet/RECETTE.md` § 7. Aucune migration.

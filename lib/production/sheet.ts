@@ -14,7 +14,11 @@ import {
   type DesignTopic,
 } from "@/lib/design/intentions";
 import { listDesignVersions } from "@/lib/design/versions";
-import { loadHandedFiche, type HandedFiche } from "@/lib/production/fiche";
+import {
+  handedFicheOf,
+  readHandoffs,
+  type HandedFiche,
+} from "@/lib/production/fiche";
 import { loadMembers, type Member } from "@/lib/framing/related";
 import {
   cameraSetupOf,
@@ -176,7 +180,24 @@ async function loadSheet(
   access: Access,
 ): Promise<ProductionSheetData | null> {
   const supabase = await createClient();
-  const [projectRes, deliverableRes] = await Promise.all([
+  // Two rounds, not four (recette 19/10: the Production's first opening
+  // took seconds): everything keyed by the project or the deliverable at
+  // once, then what needs the deliverable's lever or the sheet. RLS applies
+  // to every read: starting them before the existence check reveals nothing.
+  const [
+    projectRes,
+    deliverableRes,
+    stageRes,
+    sheetRes,
+    designDeliverableRes,
+    milestonesRes,
+    contactsRes,
+    versions,
+    members,
+    intentionsRes,
+    referencesRes,
+    handoffs,
+  ] = await Promise.all([
     supabase
       .from("projects")
       .select("id, owner_person_id")
@@ -190,21 +211,6 @@ async function loadSheet(
       .eq("id", deliverableId)
       .eq("project_id", projectId)
       .maybeSingle(),
-  ]);
-  const project = projectRes.data;
-  const d = deliverableRes.data;
-  if (!project || !d) return null;
-
-  const [
-    stageRes,
-    sheetRes,
-    designDeliverableRes,
-    milestonesRes,
-    budgetRes,
-    contactsRes,
-    versions,
-    members,
-  ] = await Promise.all([
     supabase
       .from("project_stages")
       .select("state, stage_definitions!inner(key)")
@@ -226,6 +232,35 @@ async function loadSheet(
       .select("title, occurs_on")
       .eq("deliverable_id", deliverableId)
       .order("occurs_on"),
+    supabase
+      .from("network_contacts")
+      .select("id, name, roles")
+      .is("archived_at", null)
+      .order("name")
+      .limit(1000),
+    listDesignVersions(supabase, projectId),
+    loadMembers(access),
+    supabase
+      .from("design_intentions")
+      .select("topic, value, status, target, design_deliverable_id, updated_at")
+      .eq("project_id", projectId)
+      .in("status", ["confirmed", "proposed"])
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("design_references")
+      .select("url, note, design_reference_links(design_deliverable_id)")
+      .eq("project_id", projectId)
+      .order("created_at"),
+    readHandoffs(supabase, deliverableId),
+  ]);
+  const project = projectRes.data;
+  const d = deliverableRes.data;
+  if (!project || !d) return null;
+
+  const designDeliverableId = designDeliverableRes.data?.id ?? null;
+  const sheetRow = sheetRes.data;
+  const handed = handedFicheOf(handoffs, sheetRow?.handoff_id ?? null);
+  const [budgetRes, needsRes, assignmentsRes] = await Promise.all([
     d.lever_id
       ? supabase
           .from("budget_lines")
@@ -235,57 +270,24 @@ async function loadSheet(
       : Promise.resolve({
           data: [] as { amount_cents: number; status: string }[],
         }),
-    supabase
-      .from("network_contacts")
-      .select("id, name, roles")
-      .is("archived_at", null)
-      .order("name")
-      .limit(1000),
-    listDesignVersions(supabase, projectId),
-    loadMembers(access),
+    sheetRow
+      ? supabase
+          .from("production_needs")
+          .select("id, family, role_key, label, speciality, headcount, note")
+          .eq("sheet_id", sheetRow.id)
+          .order("position")
+          .order("created_at")
+      : Promise.resolve({ data: [] }),
+    sheetRow
+      ? supabase
+          .from("production_assignments")
+          .select(
+            "id, need_id, person_id, contact_id, availability, availability_set_by, availability_set_at, note, created_at",
+          )
+          .eq("project_id", projectId)
+          .order("created_at")
+      : Promise.resolve({ data: [] }),
   ]);
-
-  const designDeliverableId = designDeliverableRes.data?.id ?? null;
-  const sheetRow = sheetRes.data;
-  const handed = await loadHandedFiche(
-    supabase,
-    deliverableId,
-    sheetRow?.handoff_id ?? null,
-  );
-
-  const [intentionsRes, referencesRes, needsRes, assignmentsRes] =
-    await Promise.all([
-      supabase
-        .from("design_intentions")
-        .select(
-          "topic, value, status, target, design_deliverable_id, updated_at",
-        )
-        .eq("project_id", projectId)
-        .in("status", ["confirmed", "proposed"])
-        .order("updated_at", { ascending: false }),
-      supabase
-        .from("design_references")
-        .select("url, note, design_reference_links(design_deliverable_id)")
-        .eq("project_id", projectId)
-        .order("created_at"),
-      sheetRow
-        ? supabase
-            .from("production_needs")
-            .select("id, family, role_key, label, speciality, headcount, note")
-            .eq("sheet_id", sheetRow.id)
-            .order("position")
-            .order("created_at")
-        : Promise.resolve({ data: [] }),
-      sheetRow
-        ? supabase
-            .from("production_assignments")
-            .select(
-              "id, need_id, person_id, contact_id, availability, availability_set_by, availability_set_at, note, created_at",
-            )
-            .eq("project_id", projectId)
-            .order("created_at")
-        : Promise.resolve({ data: [] }),
-    ]);
 
   const nameOf = (personId: string | null) =>
     personId

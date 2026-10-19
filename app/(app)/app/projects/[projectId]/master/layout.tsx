@@ -1,6 +1,6 @@
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { requireApproved } from "@/lib/auth/dal";
-import { workflowGate } from "@/lib/plan/queries";
+import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -12,11 +12,14 @@ export default async function MasterLayout({
   params,
 }: LayoutProps<"/app/projects/[projectId]/master">) {
   const { projectId } = await params;
-  const [, project] = await allInOrder([
+  // Launched (the common case): no round of its own before the pages.
+  const [, project, launched] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
+    isWorkflowLaunched(projectId, "master"),
   ]);
+  if (launched) return children;
   const gate = await workflowGate(project, "master");
-  if (gate) return <WorkflowLocked projectId={projectId} />;
+  if (gate) return <WorkflowLocked projectId={projectId} gate={gate} />;
   return children;
 }

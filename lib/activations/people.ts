@@ -5,7 +5,7 @@ import { cache } from "react";
 import { canValidateMarketing } from "@/lib/activations/access";
 import type { ActionPerson } from "@/lib/activations/journey";
 import { requireApproved } from "@/lib/auth/dal";
-import { loadMembers } from "@/lib/framing/related";
+import { listValidatorRows, loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
@@ -29,9 +29,7 @@ export const loadActivationPeople = cache(async (projectId: string) => {
       loadMembers(access),
       canValidateMarketing(projectId),
       access.organizationId
-        ? supabase.rpc("list_validators", {
-            p_organization_id: access.organizationId,
-          })
+        ? listValidatorRows(access.organizationId)
         : Promise.resolve({ data: null, error: null }),
       supabase
         .from("project_creatives")

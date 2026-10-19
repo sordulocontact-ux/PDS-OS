@@ -27,8 +27,9 @@ function isActive(pathname: string, href: string, exact: boolean): boolean {
 // Hiding "Équipe" is comfort only: the page itself requires an admin.
 // Access requests waiting for a decision show as a count on "Équipe", which
 // then opens straight on them (the team page opens on approved members).
-// Inside a project, « Travail » carries the viewer's « À vous » count of that
-// project (proto « Projet complet », reported by the project's layout) and
+// Outside a project, « Travail » carries the viewer's « À vous » count over
+// every project (lib/work/journeys.ts). Inside a project, it carries that
+// project's count (proto « Projet complet », reported by its layout) and
 // opens that project's Travail, where these actions are listed (proto:
 // « Travail → Travail du projet »; the global Travail does not list the
 // journeys' actions, so its count and its page disagreed — recette 19/10).
@@ -47,8 +48,8 @@ export function NavLinks({
 }) {
   const pathname = usePathname();
   const t = fr.shell.nav;
-  const workCount = useWorkCount();
   const projectId = PROJECT_PATH.exec(pathname)?.[1];
+  const workCount = useWorkCount(Boolean(projectId));
 
   return (
     <nav aria-label={t.label}>

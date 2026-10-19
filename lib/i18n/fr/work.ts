@@ -4,31 +4,34 @@ export const work = {
   // Keyed by position: only the wording changes, the lists follow permissions.
   descriptions: {
     general_director:
-      "Ce qui attend votre décision : validations et projets à transmettre.",
-    project_manager: "Vos projets et la prochaine chose à faire sur chacun.",
-    creative_director:
-      "Les livrables à concevoir et les projets de votre équipe créative.",
+      "Ce qui attend votre décision, projet par projet, et les projets à transmettre.",
+    project_manager: "Ce qui vous attend, projet par projet.",
+    creative_director: "Ce qui vous attend, projet par projet.",
   } as Record<string, string>,
   descriptionFallback: "Ce qui vous attend, projet par projet.",
   loadError: "Impossible de charger votre travail. Rechargez la page.",
 
+  // The viewer's actions read from every project's journeys (docs/VISION-UX.md
+  // § 3, « Une seule source »): one card per project on the Travail, one card
+  // « À vous » and one for the decisions on the home.
+  journeys: {
+    mine: "À vous",
+    mineEmpty: "Rien ne vous attend pour l'instant.",
+    validations: "Validations qui m'attendent",
+    validationsEmpty: "Aucune validation ne vous attend.",
+    allWork: "Tout le travail",
+    toValidate: "À valider",
+    overdue: "En retard",
+    due: (day: string) => `avant le ${day}`,
+    // A project's journeys could not be read: its card is missing.
+    partial:
+      "Une partie de vos projets n'a pas pu être lue. Rechargez la page.",
+  },
+
   cards: {
-    // MKT-C2-08: designated or delegated in a Conception.
-    myConception: "Ma conception",
-    myConceptionEmpty: "Aucune responsabilité de conception.",
     toRetransmitEmpty: "Aucun projet refusé ni de précision demandée.",
     awaitingAcceptance: "En attente d'un chef de projet",
     awaitingAcceptanceEmpty: "Tous les projets transmis ont été acceptés.",
-    ownedProjects: "Mes projets",
-    ownedProjectsEmpty: "Aucun projet lancé sous votre responsabilité.",
-    deliverablesToStaff: "Livrables à attribuer",
-    deliverablesToStaffEmpty:
-      "Chaque livrable engagé a un responsable et une échéance.",
-    myDeliverables: "Livrables à concevoir",
-    myDeliverablesEmpty:
-      "Aucun livrable ne vous est attribué. Ils arrivent depuis la Stratégie de lancement.",
-    creativeProjects: "Projets de mon équipe créative",
-    creativeProjectsEmpty: "Aucun projet lancé ne vous est affecté.",
   },
 
   nextActions: {
@@ -41,19 +44,5 @@ export const work = {
     run_stage: "Faire avancer le projet",
     await_validation: "En attente de validation",
     done: "Projet terminé",
-  },
-
-  noDueDate: "Sans échéance",
-  noAssignee: "Sans responsable",
-  inDesign: "En conception",
-  allValidated: "Terminé",
-  // What the person is responsible for in a Conception (MKT-C2-08).
-  conception: {
-    direction: "Direction de la sortie",
-    sheet: (title: string) => `Fiche « ${title} »`,
-    decide: (title: string | null) =>
-      title
-        ? `Décider sur la fiche « ${title} » (délégation)`
-        : "Décider sur la direction (délégation)",
   },
 } as const;

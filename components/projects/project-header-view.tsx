@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 import { AddExpenseButton } from "@/components/budget/add-expense-button";
 import { ReadOnlyNotice } from "@/components/projects/read-only-notice";
+import { useSubModuleCounts } from "@/components/shell/module/sub-module-counts";
 import {
   ModuleHeader,
   type ModuleHeaderProps,
@@ -47,6 +48,8 @@ export function ProjectHeaderView({
   ...rest
 }: ProjectHeaderOverrides & { data: ProjectHeaderData; isDefault?: boolean }) {
   const pathname = usePathname();
+  // The viewer's actions per pill, reported by the project's navigation.
+  const mine = useSubModuleCounts(data.projectId);
   const trail = moduleTrail(
     data.projectId,
     pathname,
@@ -80,6 +83,7 @@ export function ProjectHeaderView({
                 title: s.title,
                 done: s.done,
                 current: isSubModuleAt(s, pathname),
+                mine: mine[s.key],
               }))
             : undefined
         }

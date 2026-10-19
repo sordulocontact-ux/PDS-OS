@@ -32,6 +32,8 @@ export type ProjectAction = {
   module: JourneyModuleKey;
   // « Marketing › Production › Pochette »
   place: string;
+  // The journey's part key (« strategy », « production:<id> »), if any.
+  part?: string;
   step: JourneyStep;
 };
 

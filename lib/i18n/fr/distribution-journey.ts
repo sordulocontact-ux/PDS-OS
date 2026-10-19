@@ -421,6 +421,9 @@ export const distributionJourney = {
     allAnomalies: "Toutes les anomalies",
     done: "Les cinq plateformes de référence sont vérifiées, disponibles et conformes.",
     doneBody: "Une clôture normale est possible.",
+    closedReserves: "Distribution clôturée avec réserves.",
+    closedReservesBody:
+      "Les vérifications s'arrêtent ici ; rouvrir la clôture les relance.",
   },
   closure: {
     conditions: "Conditions d'une clôture normale",

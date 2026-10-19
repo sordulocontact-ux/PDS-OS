@@ -4,7 +4,7 @@ import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { MARKETING_PARTS, type PlanWorkflow } from "@/lib/plan/propose";
-import { workflowGate } from "@/lib/plan/queries";
+import { isWorkflowLaunched, workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 import { applicableWorkflows } from "@/lib/workflow-status/rules";
@@ -25,9 +25,13 @@ export async function WorkflowGate({
   workflow: PlanWorkflow;
   children: React.ReactNode;
 }) {
-  const [, project] = await allInOrder([
+  // The common case (launched) costs no round of its own: the pages below
+  // only start once the gate answers (recette 19/10, Marketing's first
+  // opening). The lock's details are read only when it is locked.
+  const [, project, launched] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
+    isWorkflowLaunched(projectId, workflow),
   ]);
   // A workflow the project does not have (a content project has no
   // Distribution): no page, as the sidebar shows no entry (recette).
@@ -39,6 +43,7 @@ export async function WorkflowGate({
     }).includes("distribution")
   )
     notFound();
+  if (launched) return children;
   const gate = await workflowGate(project, workflow);
   const marketing = fr.shell.project.sidebar.marketing;
   if (gate)
@@ -46,6 +51,7 @@ export async function WorkflowGate({
       <WorkflowLocked
         projectId={projectId}
         title={MARKETING_PARTS.includes(workflow) ? marketing : undefined}
+        gate={gate}
       />
     );
   return children;

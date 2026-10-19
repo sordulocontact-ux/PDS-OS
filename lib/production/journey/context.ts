@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
 import { stepHref } from "./href";
-import { loadJourney } from "./load";
+import { loadJourney, preloadJourney } from "./load";
 import { landingStep } from "./steps";
 import type { StepKey } from "./types";
 
@@ -24,12 +24,18 @@ import type { StepKey } from "./types";
  */
 export const journeyContext = cache(
   async (projectId: string, deliverableId: string) => {
-    const [access] = await allInOrder([
+    // The sheet is read with the access check, not after it; once it is
+    // known, the journey's own reads start while the phase and the next
+    // action are read (recette 19/10: first opening of the Production).
+    const [access, , data] = await allInOrder([
       requireApproved(),
       requireLaunchedProject(projectId),
+      requireApproved().then((viewer) =>
+        loadProductionSheet(projectId, deliverableId, viewer),
+      ),
     ]);
-    const data = await loadProductionSheet(projectId, deliverableId, access);
     if (!data) notFound();
+    preloadJourney(projectId, deliverableId, access, data.sheet?.id ?? null);
     const facts = await loadPhaseFacts(
       await createClient(),
       data.sheet ? { id: data.sheet.id, readyAt: data.sheet.readyAt } : null,

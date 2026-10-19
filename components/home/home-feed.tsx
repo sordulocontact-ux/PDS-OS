@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import {
   ActivityCard,
   HandoverCard,
@@ -5,17 +7,18 @@ import {
   ProposalsCard,
   ReleasesCard,
   TasksCard,
-  ValidationsCard,
 } from "@/components/home/home-cards";
 import { PageSuggestions } from "@/components/assistant/assistant-suggestions";
+import { HomeJourneyCards } from "@/components/home/home-journey-cards";
 import { WelcomeCard } from "@/components/home/welcome-card";
 import { CardGrid } from "@/components/ui/card-grid";
+import { JourneyCardsSkeleton } from "@/components/work/journey-actions-card";
 import { can, type Access } from "@/lib/auth/access";
 import { fr } from "@/lib/i18n/fr";
 import { loadWelcome } from "@/lib/home/welcome";
 import { loadRecentActivity } from "@/lib/insights/activity";
 import { loadReleasesOverview } from "@/lib/insights/releases";
-import { loadMyTodo, plateOf } from "@/lib/insights/todo";
+import { freeTasksOf, loadMyTodo } from "@/lib/insights/todo";
 import { handoverOf } from "@/lib/projects/handover";
 import { listProjects } from "@/lib/projects/queries";
 
@@ -23,6 +26,10 @@ import { listProjects } from "@/lib/projects/queries";
 // and PO show before these queries answer.
 // A read that fails is said on its card, never shown as an empty list
 // (UX test of 09/10/2026: « Aucun projet » on a database timeout).
+// What waits for the person comes from the projects' journeys (lib/work/
+// journeys.ts, docs/VISION-UX.md § 3): « Validations qui m'attendent » are
+// their decisions, « À vous » their other actions (HomeJourneyCards, streamed
+// on their own); only the tasks tied to no workflow keep a card of their own.
 export async function HomeFeed({ access }: { access: Access }) {
   const [todo, events, { projects, error: projectsError }, releases, welcome] =
     await Promise.all([
@@ -44,6 +51,7 @@ export async function HomeFeed({ access }: { access: Access }) {
       ),
       loadWelcome(access),
     ]);
+  const freeTasks = freeTasksOf(todo);
   const { toAccept, toRetransmit } = handoverOf(projects, access);
   // « En cours »: launched projects only (accepted, with their stages).
   const running = projects.filter((p) => p.status === "launched");
@@ -70,13 +78,13 @@ export async function HomeFeed({ access }: { access: Access }) {
             projects={toRetransmit}
           />
         )}
-        <TasksCard tasks={plateOf(todo)} error={todo.error} />
-        <ProjectsCard projects={running} error={Boolean(projectsError)} />
-        {/* Only what the person can act on (UX test of 09/10/2026: a creative
-          director saw validations and PO's proposals she cannot handle). */}
-        {can(access, "validate") && (
-          <ValidationsCard validations={todo.validations} error={todo.error} />
+        <Suspense fallback={<JourneyCardsSkeleton />}>
+          <HomeJourneyCards access={access} />
+        </Suspense>
+        {(freeTasks.length > 0 || todo.error) && (
+          <TasksCard tasks={freeTasks} error={todo.error} />
         )}
+        <ProjectsCard projects={running} error={Boolean(projectsError)} />
         {can(access, "pilot_projects") &&
           (todo.proposals.length > 0 || todo.error) && (
             <ProposalsCard proposals={todo.proposals} error={todo.error} />

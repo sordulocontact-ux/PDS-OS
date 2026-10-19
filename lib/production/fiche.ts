@@ -123,6 +123,12 @@ export async function loadHandedFiche(
   deliverableId: string,
   handoffId: string | null,
 ): Promise<{ fiche: HandedFiche | null; newerVersion: number | null }> {
+  return handedFicheOf(await readHandoffs(supabase, deliverableId), handoffId);
+}
+
+/** The deliverable's hand-offs, newest first: readable before the sheet is
+ * known (lib/production/sheet.ts reads them with its first round). */
+export async function readHandoffs(supabase: Client, deliverableId: string) {
   const { data: designDeliverable } = await supabase
     .from("design_deliverables")
     .select("id, design_sheets(id)")
@@ -132,7 +138,7 @@ export async function loadHandedFiche(
   const sheetIds = (
     Array.isArray(linked) ? linked : linked ? [linked] : []
   ).map((s) => s.id);
-  if (sheetIds.length === 0) return { fiche: null, newerVersion: null };
+  if (sheetIds.length === 0) return [];
 
   const { data: handoffs, error } = await supabase
     .from("design_handoffs")
@@ -140,9 +146,16 @@ export async function loadHandedFiche(
     .in("sheet_id", sheetIds)
     .order("confirmed_at", { ascending: false });
   if (error) console.error("loadHandedFiche:", error.message);
-  const rows = (handoffs ?? []).flatMap((h) =>
+  return (handoffs ?? []).flatMap((h) =>
     h.design_submissions ? [{ ...h, submission: h.design_submissions }] : [],
   );
+}
+
+/** The hand-off chosen among `rows` (readHandoffs) and a newer version. */
+export function handedFicheOf(
+  rows: Awaited<ReturnType<typeof readHandoffs>>,
+  handoffId: string | null,
+): { fiche: HandedFiche | null; newerVersion: number | null } {
   const chosen =
     (handoffId ? rows.find((h) => h.id === handoffId) : null) ??
     rows[0] ??
