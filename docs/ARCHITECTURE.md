@@ -5308,6 +5308,61 @@ Piégée / Dioo / Alka et chiffres ATYR rejoués dans une transaction annulée).
   que s'il est écrit dans le libellé (« Micro (10k-100k) ») ; agrégations cross-projets,
   vérification automatique des liens, collecte API, synchronisation planifiée : après MVP.
 - **Dépendance** : `read-excel-file` (lecture seule d'un .xlsx côté serveur).
+### Lot 6 — Activations sur une seule page (proto « Projet complet », 19/10/2026)
+
+Migrations `20261019060101_activation_journey.sql` et `20261019060201_influence_creator_link.sql`,
+pgTAP `marketing-activations.test.sql` (65) et `activation-creator-link.test.sql` (11).
+
+- **Une page** (`ActivationsFrame`, `components/activations/journey/`) : en-tête du Marketing (pilules,
+  fil « Projet › Marketing › Activations › <activation> »), `NowCard`, bandeau **« Leviers à préparer »**
+  (`LeversBanner`), puis la **liste** à gauche (`ActivationList` : filtres « À moi / En cours / À mesurer /
+  Terminées » en `?vue=`, ligne = type · mode · responsable · échéance, frise `PhaseStrip`, phrase « À vous ·
+  … ») et l'**activation ouverte** à droite (`ActivationDetail` : grande frise, « Maintenant » `NowBox`, module,
+  relevés, « Informations » repliées, « Suspendre » / « Annuler l'activation »). `/activations` ouvre la
+  première activation de la personne ; les anciens onglets (`framing`, `concepts`, `targets`, `agency`,
+  `report`) et `targets/<id>` **redirigent** vers les ancres (`#framing`, `#module`, `#agency`, `#report`,
+  `#collab-<id>`, `#media-<id>`). Le tableau à tuiles et ses 7 vues ont quitté l'écran (`viewsOf` reste pour
+  Suivi & bilan).
+- **Calculs** (purs, `lib/activations/journey.ts`) : `phaseOf` (Préparer → Réaliser → Prouver → Mesurer →
+  Clôturer), `trunkAction` (le geste du tronc et sa personne : désigner, échéance, lancer, déclarer réalisée,
+  preuve, vérifier, relevé, clôturer, reprendre), `activationSentence`, `filtersOf`. Lignes du module
+  (`lib/activations/actors.ts`) : une par collaboration (la créatrice agit par son lien), l'agence (relier,
+  correspondance, aperçu, décider, récapitulatif, bilan, transmission), la presse (cadrage, dossier, modèle,
+  messages, interviews, retombées). Personnes (`lib/activations/people.ts`) : responsable, direction (seul
+  validateur nommé, sinon « La direction »), directrice créative du projet pour les contenus ; `viewer` vrai sur
+  les décisions pour qui valide. `ActivationSummary.actions` les porte, la personne d'abord.
+- **Parcours** (`lib/journey/activations.ts`, part `activations` du Marketing) : « Leviers à préparer » puis une
+  étape par activation (sa première ligne), plus une étape par autre ligne **de la personne** (Travail,
+  Validations) ; `kind: "validate"` pour la direction.
+- **Preuve calculée** (`lib/activations/campaign.ts`, `derivedProof`) pour Influence et RP en interne :
+  « N publications vérifiées sur M créateurs engagés » (engagé = pas sorti et conditions acceptées, accord, droits
+  acceptés, contenu ou publication), « N retombées vérifiées sur M déclarées » ; aucun lien unique. La base refuse
+  « Déclarer réalisée » sans première publication (influence) ou premier message envoyé (RP)
+  (`activation_not_done:*`).
+- **Statuts** : « Suspendue » revient (`status_before_suspension`, « Reprendre » y retourne, motif obligatoire,
+  annulable) ; « Bloquée » reste pour les lignes existantes. « Preuve indisponible » = preuve déclarée + contrôle
+  « indisponible » avec le motif. « Sans objet » = preuve / statistiques non attendues + motif gardé
+  (`activation_next_actions` `not_applicable`).
+- **Leviers** : retenus du Brief de sortie validé (`levers` sélectionnés et confirmés), état calculé Créée / Plus
+  tard (`activation_lever_choices`) / À préparer ; « Créer l'activation » (responsable du projet, type lu dans les
+  mots du levier, mode sur la ligne) ; **un contenu attend les livrables de son levier** (dépendance bloquante
+  créée à la création, levée par la livraison). « Nouvelle activation » hors levier en pied de liste.
+- **Influence** : concept de campagne lu dans la Stratégie (Narratif, `campaignConcept`), plus de cadrage Influence
+  ni de concept générique à valider à l'écran (tables gardées) ; une carte par créateur (`VersionCard`), ouverte
+  quand un geste attend la personne, la partie de l'étape ouverte (`collabFocus`), le reste sous « Toute la
+  collaboration ».
+- **Lien de la créatrice** (`/i/<jeton>`) : après « Bon pour accord », le même lien sert toute la collaboration
+  (`get_influence_collaboration`) jusqu'à son issue : déposer le contenu, déclarer la publication, envoyer la
+  facture (chemin à usage unique `influence_upload_slots`, fichier restreint, paiement « À valider »). Chaque geste
+  notifie le responsable (`activation_creator_acted`).
+- **Presse** : cartes « Cadrage RP » et « Dossier de presse » (celui de la **Stratégie**, source unique — décision
+  du 19/10), modèle commun, une carte par média, « Retombées », « Bilan RP » (tuiles calculées). Agence : même
+  cadrage + dossier, **« Marquer comme transmis »** (`declare_activation_transmission`, journal
+  `agency.transmitted`, cadrage validé et, pour la RP, dossier validé), puis tableau, aperçu, galerie,
+  récapitulatif et bilan d'agence dans la page.
+- **Notifications** : `activation_owner_assigned`, `activation_suspended`, `activation_creator_acted` (vers
+  l'activation).
+
 ## 8 terdecies. Marketing : Suivi & bilan et clôture du Marketing (`/review`, `lib/marketing/`, `components/marketing/`)
 
 Ticket « Suivi & bilan » (11/10/2026), livré en six lots, chacun testé (pgTAP
