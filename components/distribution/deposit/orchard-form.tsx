@@ -10,14 +10,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { declareAnswers } from "@/lib/distribution/declare-actions";
+import type { OrchardAnswer } from "@/lib/distribution/tracking";
 import { removeProof, uploadProof } from "@/lib/distribution/upload-proof";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 
 const t = fr.distributionJourney.orchard;
 
-export const ANSWERS = ["received", "accepted", "platforms_delivered"] as const;
-export type Answer = (typeof ANSWERS)[number];
+type Answer = OrchardAnswer;
 
 /**
  * « Ce que The Orchard vous a dit » (VISION-UX rule 7, proto `UI.orchard`):

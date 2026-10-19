@@ -266,6 +266,14 @@ function platformsOutcome(
   const p = i.platforms;
   if (p.done)
     return { done: true, summary: t.summary.platformsDone, actor: null };
+  // Closed (with reserves): nobody is asked to verify any more; a reopening
+  // brings the question back.
+  if (i.closure?.status === "closed")
+    return {
+      done: false,
+      summary: t.summary.closedReserves(i.closure.reserves),
+      actor: null,
+    };
   if (p.noLink)
     return {
       done: false,

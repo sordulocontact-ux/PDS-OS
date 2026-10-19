@@ -486,3 +486,18 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
       (`report_items.agenda_topic`) et lu en modale ; résumé aux participants écrit par le code,
       envoyé en versions (`call_summaries`, `send_call_summary`, 11 tests pgTAP). Migration
       `20261018200101` à pousser en prod avec accord (docs/ARCHITECTURE.md § 4 ter)
+
+## Lot 10 — Distribution sur le patron commun (19/10/2026, branche `pc/z10-distribution`)
+
+- D0 : sources réelles (pochette livrée en Production, emprunts lisibles sans `manage_legal`,
+  « Prêt pour la sortie » lu du Juridique), une seule date de sortie (`projects.due_date`),
+  ligne `releases` créée au lancement du plan, détection par l'ISRC du Catalogue.
+- D1 : parcours en 7 étapes / 4 sections, une page par étape, loader du parcours (Maintenant,
+  Travail, Validations), statut Bloqué / En attente calculé, anciens onglets redirigés.
+- D2 à D6 : paramètres confirmés en un geste, dossier en document (PDF, écarts, contrôles sur la
+  ligne, décision sur pièce, motif en tête, V suivante), notifications, dépôt et frise de The
+  Orchard en un geste, corrections en un geste, plateformes « Tout est bon » / « Il y a un
+  problème », clôture avec réserves, vues Anomalies et Historique.
+- Migrations `20261019100101`, `…100201`, `…100301` à pousser en prod avec accord ; tests pgTAP
+  `distribution.test.sql` (105) et `distribution-journey.test.sql` (35).
+

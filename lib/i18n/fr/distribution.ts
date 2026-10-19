@@ -166,6 +166,8 @@ export const distribution = {
     no: "Non",
     yesOn: (date: string) => `Oui, à partir du ${date}`,
     track: (n: number, title: string) => `Piste ${n} · ${title}`,
+    clearanceToSecure: (work: string) => `Emprunt « ${work} » à sécuriser`,
+    noClearanceToSecure: "Aucun emprunt à sécuriser",
     audioFinal: (version: number) =>
       `Master final V${version}, validé dans le workflow Master`,
     audioBefore: "Master final du Catalogue, antérieur au workflow",

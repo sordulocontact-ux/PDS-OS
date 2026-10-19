@@ -4,18 +4,18 @@ import { AddProof } from "@/components/distribution/deposit/add-proof";
 import { CorrectionsForm } from "@/components/distribution/deposit/corrections-form";
 import { DepositForm } from "@/components/distribution/deposit/deposit-form";
 import { WithdrawButton } from "@/components/distribution/declaration-forms";
-import {
-  ANSWERS,
-  OrchardForm,
-  type Answer,
-} from "@/components/distribution/deposit/orchard-form";
+import { OrchardForm } from "@/components/distribution/deposit/orchard-form";
 import { DossierCard } from "@/components/distribution/dossier/dossier-card";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
-import { evidenceOf, type Declaration } from "@/lib/distribution/tracking";
+import {
+  evidenceOf,
+  ORCHARD_ANSWERS as ANSWERS,
+  type Declaration,
+  type OrchardAnswer as Answer,
+} from "@/lib/distribution/tracking";
 import { fr } from "@/lib/i18n/fr";
 import { cn } from "@/lib/utils";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
@@ -234,11 +234,6 @@ export function OrchardStep({ ctx }: { ctx: DistributionContext }) {
       )}
       {canEdit && !declared("accepted") && (
         <CorrectionsForm projectId={ctx.project.id} next={cycle.version + 1} />
-      )}
-      {left.length === 0 && (
-        <StatusBadge tone="neutral">
-          {fr.distributionJourney.summary.orchardDone}
-        </StatusBadge>
       )}
     </div>
   );

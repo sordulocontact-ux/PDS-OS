@@ -3942,6 +3942,71 @@ plateformes. Ses colonnes de `releases` restent (données), plus rien ne les éc
 - Migrations `20261011100101_distribution_dossier` à `…100601_distribution_closure` (7 lots) ;
   tests `supabase/tests/distribution.test.sql` (103, fixture Piégée simulée).
 
+### Distribution sur le patron commun (proto « Projet complet », lot 10, 19/10/2026)
+
+Remplace les cinq onglets ci-dessus (leurs données et fonctions SQL restent). Cahier des charges :
+`docs/projet-complet/distribution.md`.
+
+- **Parcours en 7 étapes, 4 sections** (`lib/distribution/journey.ts`, pur ; clés
+  `lib/ui/distribution-steps.ts`) : Préparation, Paramètres de distribution, Dossier de livraison
+  (Dossier) · Dépôt dans The Orchard, Réponse de The Orchard (Dépôt) · Plateformes (En ligne) ·
+  Clôture. Une page par étape sous `/release/<slug>` (`preparation`, `params`, `dossier`,
+  `deposit`, `orchard`, `online`, `closure`) + deux vues du pied du parcours (`anomalies`,
+  `history`) ; `/release` redirige vers l'étape de la personne, `/release/tracking` vers Dépôt ou
+  Réponse. Cadre : `DistributionFrame` (en-tête « Distribution » + statut calculé
+  `distributionStatus`, faits « « Projet » · artiste · format · Master final · Sortie ·
+  Distributeur », « Qui fait quoi », `NowCard`, `ModuleAttention`) et `DistributionStep`
+  (`StepPanel`, « Ce qui viendra » d'une étape verrouillée, blocages et informations notées,
+  « Déjà fait » filtré de `distribution_events` par `lib/distribution/step-history.ts`).
+  Données d'une requête : `distributionContext` (`lib/distribution/journey-context.ts`, `cache`),
+  qui sert aussi le loader `lib/journey/distribution.ts` (`JOURNEY_LOADERS.distribution`) :
+  Maintenant, Travail et Validations (acteur `kind: "validate"` pour « Valider la Vn » et
+  « Valider la clôture »). Avant « Lancer le plan » : rien (`WorkflowLocked`, statut Non démarré).
+  Statuts : Bloqué tant qu'une source manque (Préparation non faite), En attente quand seuls The
+  Orchard, la détection ou une validation sont attendus. Les acteurs non-personnes (The Orchard,
+  « la détection automatique ») sont des acteurs `viewer: false` d'une étape `waiting`.
+- **Sources réelles (D0)** : master final validé dans le Master (`loadFinalView`) ; pochette =
+  **livrée par la Production** (`distribution_cover`, SQL invoker : fiche choisie dans les
+  paramètres, sinon trouvée par son titre, et `deliverable_deliveries.delivered_at` + n° de version,
+  porté dans le dossier pour que « v2 → v3 » se voie dans les écarts) ; emprunts non sécurisés
+  (`distribution_legal_blockers`, `security definer`, lisible sans `manage_legal`, ne rend que
+  titre et état). **« Prêt pour la sortie » n'est pas recalculé** : la Préparation et le prérequis
+  externe de l'étape Dépôt lisent `loadLegalReadiness` (§ 8 sexies) — verdict et validation de la
+  direction ; sans `manage_legal`, seule la validation se lit, d'où la fonction des emprunts gardée
+  pour le blocage (la readiness juridique lit elle-même `loadDistributionSources`, donc pas
+  d'appel inverse dans les sources : il serait circulaire). `submit_distribution_version` refuse
+  désormais aussi en SQL un emprunt à sécuriser (`legal_blockers`) et des paramètres non confirmés.
+- **Dates** (`lib/projects/dates.ts`, `loadProjectDates`) : la **sortie** = `projects.due_date`
+  (saisie au Lancement, confirmée au Cadrage, validée avec son Brief ; source « Projet · Lancement,
+  validé par X le jj/mm ») ; `releases.planned_release_date` la suit par déclencheur et n'est plus
+  saisie nulle part (le formulaire « Sortie » est retiré). La ligne `releases` est créée **au
+  lancement du plan** (déclencheur sur `project_plans`, rattrapage des projets lancés). Le
+  **master final** = date du Brief Mix et Master, sinon échéance `master_final` confirmée du
+  Cadrage. Seule règle existante entre les deux : une échéance du Cadrage ne peut pas suivre la
+  date visée (`lib/framing/conflicts.ts`) ; l'écart « −14 j » du proto n'est pas une règle
+  (point à trancher, `docs/CONTEXTE-PROJET.md`). La détection lit l'ISRC du **Catalogue**
+  (`lib/release/isrc.ts`), plus celui de la sortie.
+- **Gestes groupés** (migrations `20261019100201`, `…100301`) : `confirm_distribution_params`
+  (« Confirmer les paramètres » écrit avec la confirmation ce que PDS OS proposait et que personne
+  n'a changé : validateur = la direction, jamais le responsable ; précommande = temps fort de la
+  Stratégie dont le titre dit pré-save / précommande, sinon « À renseigner » ; refuse un manque ou
+  une date ≥ sortie) ; `declare_distribution_answers` (frise de The Orchard en un seul geste, une
+  preuve partagée par plusieurs états) ; `attach_distribution_declaration_proof` (preuve ajoutée
+  après, jamais remplacée) ; `declare_distribution_corrections` (déclaration + anomalie
+  `from_distributor` + version suivante, une transaction) ; `confirm_distribution_platform`
+  (« Tout est bon » : lien proposé par la détection ou saisi, disponible et conforme) ;
+  `report_distribution_platform_problem` (« Il y a un problème » + anomalie). Chaque Server Action
+  passe par `withOutcome` (bandeau « Ensuite / Débloqué » dans l'étape).
+- **Notifications** (triggers) : version soumise → validateur, décidée → qui l'a soumise ;
+  clôture proposée → validateur, décidée → qui l'a proposée (`distribution_version_*`,
+  `distribution_closure_*`, ajoutés par `add_notification_kinds`), ouvertes sur l'étape Dossier
+  ou Clôture. « Exporter en PDF » du dossier : `/api/projects/[id]/distribution-dossier`
+  (`lib/distribution/dossier-html.ts`, la version décidée ou celle en préparation).
+- **Retiré de l'écran** (routes et données gardées) : formulaire « Sortie », carte smartlink (la
+  route publique `/l/` reste), rappel « dépôt manuel » répété (seulement à l'étape Dépôt), modales
+  par geste. « Lancer la détection maintenant » reste en recours dans l'attente de la détection.
+- Tests : `supabase/tests/distribution.test.sql` (105) et `distribution-journey.test.sql` (35).
+
 ## 8 nonies. Marketing : Production et Suivi & bilan
 
 Même test UX : « Production » et « Suivi & bilan » n'avaient pas de page, un contenu ne pouvait être

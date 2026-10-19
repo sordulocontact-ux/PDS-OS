@@ -247,7 +247,20 @@ export function deliveryFile(input: {
           title: null,
           fields: [
             param("territories", t.fields.territories, territoriesText(params)),
-            fromItem("legal", t.fields.legal, item("legal")?.detail ?? null),
+            {
+              key: "legal",
+              label: t.fields.legal,
+              // The borrowings to secure, readable by all
+              // (distribution_legal_blockers).
+              value: sources.legal.blockers.length
+                ? sources.legal.blockers
+                    .map((b) => t.clearanceToSecure(b.work))
+                    .join(" · ")
+                : t.noClearanceToSecure,
+              origin: "legal",
+              state: sources.legal.blockers.length ? "missing" : "validated",
+              href: null,
+            },
             ...sources.constraints.map((constraint) =>
               fromItem(
                 `constraint-${constraint.id}`,
