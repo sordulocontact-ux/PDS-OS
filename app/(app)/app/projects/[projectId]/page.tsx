@@ -87,9 +87,6 @@ export default async function ProjectOverviewPage({
   const head = overviewHead(project, header, flows, launchedAt);
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
-  const framingValidated = project.stages.some(
-    (s) => s.key === "framing" && s.state === "validated",
-  );
   const deps =
     launchedAt && flows ? await overviewDependencies(project, flows, all) : [];
 
