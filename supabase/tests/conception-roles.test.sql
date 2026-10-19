@@ -66,6 +66,9 @@ update public.project_stages s set state = 'validated'
    and d.key in ('framing', 'launch_strategy');
 select pg_temp.act_as(pg_temp.id_of('owner'));
 select public.start_design(pg_temp.prj());
+-- Sheets are now created by the database from the validated Stratégie
+-- (20261019040301_design_sheets_auto): this test builds its own.
+delete from public.design_sheets where project_id = pg_temp.prj();
 with s as (insert into public.design_sheets (organization_id, project_id, design_deliverable_id, kind, title)
            values (pg_temp.org(), pg_temp.prj(), pg_temp.id_of('caps'), 'series', 'Capsules') returning id)
 insert into ids select 'series', id from s;

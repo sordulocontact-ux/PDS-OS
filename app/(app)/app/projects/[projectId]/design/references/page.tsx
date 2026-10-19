@@ -1,137 +1,151 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { ConceptionTabs } from "@/components/design/conception-tabs";
-import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
-import { AddReferencesDialog } from "@/components/design/references/add-references-dialog";
-import { ReferenceSection } from "@/components/design/references/reference-section";
-import { ReferenceTypesGuide } from "@/components/design/references/reference-types-guide";
+import { DesignStepFrame } from "@/components/design/design-step-frame";
+import { ReferenceGroup } from "@/components/design/refs/reference-group";
+import {
+  ReferenceTile,
+  type TileReference,
+} from "@/components/design/refs/reference-tile";
 import { SimilarReferencesDialog } from "@/components/design/references/similar-references-dialog";
-import { EmptyNote } from "@/components/shell/empty-state";
-import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
-import { loadConception } from "@/lib/design/conception";
+import { DesignWaits } from "@/components/design/waiting-row";
+import { designJourneyContext } from "@/lib/design/journey-context";
 import { DIRECTION_TARGET, targetKeyOf } from "@/lib/design/reference-rules";
-import { loadReferenceViews } from "@/lib/design/references";
+import {
+  loadReferenceViews,
+  type ReferenceView,
+} from "@/lib/design/references";
 import { similarSetup } from "@/lib/design/similar-sources";
 import { similarBases } from "@/lib/design/similar-rules";
 import { fr } from "@/lib/i18n/fr";
-import { canEditProject } from "@/lib/projects/edit-access";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { isStageValidated } from "@/lib/projects/types";
-import { allInOrder } from "@/lib/utils/parallel";
+
+const t = fr.designSteps.references;
+const k = fr.conceptionKinds;
 
 export const metadata = {
-  title: `${fr.conceptionRefs.title} · ${fr.app.name}`,
+  title: `${fr.designJourney.steps.references.title} · ${fr.app.name}`,
 };
 
 /**
- * Conception, étape 6: moodboards and references. One resource (a file or
- * a link) serves any number of targets — the direction, deliverables — and
- * one with no target waits « à rattacher ». No global moodboard imposed:
- * a whole moodboard, separate references, or both. A reference stays a
- * proposal until a validated section of the direction carries it. PO can
- * look for similar images (Unsplash, Tumblr); a human keeps them.
+ * Conception › Références (proto deR, ticket § 6): one group for the
+ * release's direction, one per deliverable, then « À rattacher »; a
+ * reference is one resource serving any number of them, proposed until the
+ * direction that carries it is validated. Similar images (Sacha, 11/10)
+ * stay a secondary action.
  */
 export default async function DesignReferencesPage({
   params,
 }: PageProps<"/app/projects/[projectId]/design/references">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-  if (!isStageValidated(project.stages, "launch_strategy"))
-    return (
-      <DesignNeedsStrategy
-        projectId={projectId}
-        canEdit={canEditProject(access, project)}
-      />
-    );
-  const data = await loadConception(project, access);
-  if (!data) notFound();
-  if (!data.started) redirect(routes.projectDesign(projectId));
+  const ctx = await designJourneyContext(projectId);
+  if (!ctx) notFound();
+  const { data } = ctx;
+  const step = ctx.steps[2];
+  const canEdit =
+    data.canWrite &&
+    ctx.directionPhase !== "pending" &&
+    ctx.directionPhase !== "approved";
   const references = await loadReferenceViews(projectId, data.references, {
     linkThumbnails: true,
   });
-
-  const t = fr.conceptionRefs;
-  const targets = [
-    { key: DIRECTION_TARGET, label: t.direction },
+  const options = [
+    { key: DIRECTION_TARGET, label: fr.designSteps.intentions.direction },
     ...data.deliverables.map((d) => ({ key: d.id, label: d.title })),
   ];
-  const serving = (key: string) =>
-    references.filter((r) => r.links.some((l) => targetKeyOf(l) === key));
-  const unattached = references.filter((r) => r.links.length === 0);
-  // MKT-C2-09: the moodboards, and how many references each holds.
-  const moodboards = references
-    .filter((r) => r.type === "moodboard")
-    .map((m) => ({
-      id: m.id,
-      label: m.name,
-      count: references.filter((r) => r.moodboardId === m.id).length,
-    }));
-  const section = {
-    projectId,
-    targets,
-    canWrite: data.canWrite,
-    moodboards,
+  const labelOf = (key: string) =>
+    options.find((o) => o.key === key)?.label ?? "";
+  const tile = (r: ReferenceView, current: string | null): TileReference => {
+    const keys = r.links.map(targetKeyOf);
+    return {
+      id: r.id,
+      name: r.name,
+      href: r.href,
+      thumbnail: r.thumbnail,
+      validated: r.status === "validated",
+      kindLine: [k.types[r.type], r.usage ? k.usages[r.usage] : null]
+        .filter(Boolean)
+        .join(" · "),
+      note: r.note,
+      targets: keys,
+      others: keys.filter((key) => key !== current).map(labelOf),
+      credit: t.depositedBy(ctx.nameOf(r.createdBy) || "—"),
+    };
   };
+  const add = (target: string) =>
+    canEdit
+      ? { organizationId: data.organizationId, projectId, options, target }
+      : null;
+  const unattached = references.filter((r) => r.links.length === 0);
 
   return (
-    <div className="flex flex-col gap-10 pt-6">
-      <ConceptionTabs projectId={projectId} />
-      <header className="flex flex-col gap-3">
-        <h2 className="text-display-sm font-semibold">{t.title}</h2>
-        <p className="max-w-prose text-body-md text-muted-foreground">
-          {data.canWrite ? t.description : t.readOnly}
+    <DesignStepFrame projectId={projectId} stepKey="references">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <p className="max-w-prose text-body-sm text-[color:var(--text-secondary)]">
+          {t.note}
         </p>
-        <ReferenceTypesGuide />
-        {data.canWrite && (
-          <div className="flex flex-wrap gap-2">
-            <AddReferencesDialog
-              organizationId={data.organizationId}
-              projectId={projectId}
-              options={targets}
-            />
-            <SimilarReferencesDialog
-              projectId={projectId}
-              bases={similarBases(
-                data.references,
-                targets,
-                t.similar.allImages,
-              )}
-              options={targets}
-              setup={similarSetup()}
-            />
-          </div>
+        {canEdit && (
+          <SimilarReferencesDialog
+            projectId={projectId}
+            bases={similarBases(
+              data.references,
+              options,
+              fr.conceptionRefs.similar.allImages,
+            )}
+            options={options}
+            setup={similarSetup()}
+          />
         )}
-      </header>
-
-      {references.length === 0 && <EmptyNote>{t.empty}</EmptyNote>}
+      </div>
+      {options.map((o, i) => {
+        const list = references.filter((r) =>
+          r.links.some((l) => targetKeyOf(l) === o.key),
+        );
+        return (
+          <ReferenceGroup
+            key={o.key}
+            id={`references-${o.key}`}
+            title={o.label}
+            status={{ tone: "neutral", label: t.count(list.length) }}
+            add={add(o.key)}
+            empty={
+              list.length
+                ? null
+                : i === 0
+                  ? t.emptyDirection
+                  : t.emptyDeliverable
+            }
+          >
+            {list.map((r) => (
+              <ReferenceTile
+                key={r.id}
+                projectId={projectId}
+                reference={tile(r, o.key)}
+                options={options}
+                canEdit={canEdit}
+              />
+            ))}
+          </ReferenceGroup>
+        );
+      })}
       {unattached.length > 0 && (
-        <ReferenceSection
+        <ReferenceGroup
           id="references-unattached"
           title={t.unattached}
-          description={t.unattachedHint}
-          references={unattached}
-          currentKey={null}
-          {...section}
-        />
+          status={{ tone: "warning", label: t.toAttach(unattached.length) }}
+          add={null}
+          empty={null}
+        >
+          {unattached.map((r) => (
+            <ReferenceTile
+              key={r.id}
+              projectId={projectId}
+              reference={tile(r, null)}
+              options={options}
+              canEdit={canEdit}
+            />
+          ))}
+        </ReferenceGroup>
       )}
-      {references.length > 0 &&
-        targets.map((target) => (
-          <ReferenceSection
-            key={target.key}
-            id={`references-${target.key}`}
-            title={target.label}
-            description={
-              target.key === DIRECTION_TARGET ? t.directionHint : undefined
-            }
-            references={serving(target.key)}
-            currentKey={target.key}
-            {...section}
-          />
-        ))}
-    </div>
+      <DesignWaits step={step} actors={[step.actor]} />
+    </DesignStepFrame>
   );
 }

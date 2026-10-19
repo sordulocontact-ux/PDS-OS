@@ -3,7 +3,7 @@
 -- « à qualifier »), creative calls, sources, intentions and references.
 -- Run with `supabase test db`.
 begin;
-select plan(30);
+select plan(31);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -117,8 +117,13 @@ select is((select status from public.design_deliverables where title = 'Teaser v
 select throws_ok($$ insert into public.design_deliverables (organization_id, project_id, title, origin)
                     values (pg_temp.org(), pg_temp.prj(), 'X', 'call') $$,
                  '23514', null, 'a decision of call names its call');
-select lives_ok($$ insert into public.design_deliverables (organization_id, project_id, title, origin, lever_id)
-                   values (pg_temp.org(), pg_temp.prj(), 'Making-of', 'strategy_decision', pg_temp.id_of('lever')) $$,
+-- A late addition always says why (« Motif * », 20261019040101).
+select throws_ok($$ insert into public.design_deliverables (organization_id, project_id, title, origin, lever_id)
+                    values (pg_temp.org(), pg_temp.prj(), 'Making-of', 'strategy_decision', pg_temp.id_of('lever')) $$,
+                 '23514', null, 'a late addition without its reason is refused');
+select lives_ok($$ insert into public.design_deliverables (organization_id, project_id, title, origin, lever_id, note)
+                   values (pg_temp.org(), pg_temp.prj(), 'Making-of', 'strategy_decision', pg_temp.id_of('lever'),
+                           'Décidé en Stratégie') $$,
                 'a decision of Stratégie names a retained lever');
 select throws_ok($$ insert into public.design_deliverables (organization_id, project_id, title, origin)
                     values (pg_temp.org(), pg_temp.prj(), 'X', 'strategy') $$,

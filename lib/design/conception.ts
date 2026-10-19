@@ -61,6 +61,12 @@ export type ConceptionDeliverable = {
   inherited: number;
   // What it is (clip, cover, short video, campaign…): its questions follow.
   format: DeliverableFormat;
+  // The format written by the Stratégie or with a late addition
+  // (« 16:9, 4 min »), as typed; the quantity committed.
+  formatText: string | null;
+  quantity: number;
+  // Who added it (a late addition's « par … »).
+  createdBy: string | null;
 };
 
 export type ConceptionIntention = {
@@ -179,7 +185,7 @@ export async function loadConception(
     supabase
       .from("design_deliverables")
       .select(
-        "id, strategy_deliverable_id, title, origin, status, note, call_id, created_at, strategy_deliverables(title, quantity, due_date, assignee_person_id, levers(label, family)), levers(label, family), calls(title)",
+        "id, strategy_deliverable_id, title, origin, status, note, call_id, format, created_by, created_at, strategy_deliverables(title, quantity, due_date, format, assignee_person_id, levers(label, family)), levers(label, family), calls(title)",
       )
       .eq("project_id", projectId)
       .order("created_at"),
@@ -366,6 +372,9 @@ export async function loadConception(
           committed?.title ?? d.title ?? "",
           lever?.label ?? null,
         ),
+        formatText: committed?.format ?? d.format ?? null,
+        quantity: committed?.quantity ?? 1,
+        createdBy: d.created_by,
       },
     ];
   });

@@ -20,6 +20,8 @@ export const SHEET_FIELDS = [
   "budget",
   "dependencies",
   "production_notes",
+  // The format of a cover or a visual (« 3000 × 3000 px, JPG ou PNG »).
+  "file_format",
 ] as const;
 export type SheetField = (typeof SHEET_FIELDS)[number];
 

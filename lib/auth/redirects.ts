@@ -215,21 +215,19 @@ export const routes = {
   projectStrategyDimension: (id: string, dimension: string) =>
     `/app/projects/${id}/strategy/dimensions#dim-${dimension}`,
   projectDesign: (id: string) => `/app/projects/${id}/design`,
+  // A step of the Conception's journey (lib/design/journey.ts).
+  projectDesignStep: (id: string, step: string) =>
+    `/app/projects/${id}/design/${step}`,
   // A validation request of the Conception, to decide (MKT-C2-11).
   projectDesignDecision: (id: string, submissionId: string) =>
     `/app/projects/${id}/design/decisions/${submissionId}`,
   // A creative proposal: redirects to its deliverable's work (MKT-C2-10).
   projectDesignVersion: (id: string, versionId: string) =>
     `/app/projects/${id}/design/versions/${versionId}`,
-  // The Conception's direct work (Chemin B), on one target: a deliverable
-  // (design_deliverables.id) or « direction »; `topic` unfolds one question.
-  projectDesignWork: (id: string, target?: string, topic?: string) => {
-    const query = new URLSearchParams({
-      ...(target ? { d: target } : {}),
-      ...(topic ? { q: topic } : {}),
-    }).toString();
-    return `/app/projects/${id}/design/work${query ? `?${query}` : ""}`;
-  },
+  // Conception › Intentions (the old direct work, Chemin B), on one target:
+  // a deliverable (design_deliverables.id) or « direction », by its anchor.
+  projectDesignWork: (id: string, target?: string) =>
+    `/app/projects/${id}/design/intentions${target ? `#target-${target}` : ""}`,
   // Moodboards and references, one resource linked to any number of targets.
   projectDesignReferences: (id: string) =>
     `/app/projects/${id}/design/references`,
@@ -245,10 +243,10 @@ export const routes = {
   // The Fiches Livrables, then one of them.
   projectDesignSheets: (id: string) => `/app/projects/${id}/design/sheets`,
   projectDesignSheet: (id: string, sheetId: string) =>
-    `/app/projects/${id}/design/sheets/${sheetId}`,
+    `/app/projects/${id}/design/sheets#sheet-${sheetId}`,
   // One deliverable of the Conception, by its anchor.
   projectDesignDeliverable: (id: string, deliverableId: string) =>
-    `/app/projects/${id}/design#deliverable-${deliverableId}`,
+    `/app/projects/${id}/design/home#deliverable-${deliverableId}`,
   projectCalls: (id: string) => `/app/projects/${id}/calls`,
   projectCall: (id: string, callId: string) =>
     `/app/projects/${id}/calls/${callId}`,
