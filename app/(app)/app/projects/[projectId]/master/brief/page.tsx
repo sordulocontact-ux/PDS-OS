@@ -31,6 +31,7 @@ export default async function ProjectMasterBriefPage({
         step={step}
         exchange={exchange}
         ownerName={project.ownerName}
+        projectTitle={project.title}
       />
     </MasterStepFrame>
   );

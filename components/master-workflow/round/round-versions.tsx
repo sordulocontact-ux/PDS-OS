@@ -126,14 +126,13 @@ export function RoundVersions({ round, engineer, viewerIsOwner }: Props) {
                 <ToneCallout tone="success">
                   {t.decision.final(label, approved.number, approved.decidedBy)}
                 </ToneCallout>
-                {viewerIsOwner &&
-                  round.stage === "mix" &&
-                  approved.id === latest.id && (
-                    <ReopenMix
-                      projectId={round.view.projectId}
-                      versionId={latest.id}
-                    />
-                  )}
+                {viewerIsOwner && approved.id === latest.id && (
+                  <ReopenMix
+                    projectId={round.view.projectId}
+                    versionId={latest.id}
+                    stage={round.stage}
+                  />
+                )}
               </>
             ) : latest.decision === null && !extra?.reopenedAt ? (
               <>

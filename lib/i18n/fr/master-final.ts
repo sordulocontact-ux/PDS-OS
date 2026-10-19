@@ -39,6 +39,22 @@ export const masterFinal = {
     by ? `Noté reçu par ${by}` : "Noté reçu",
   markReceived: "Noter comme reçu",
   waiting: "Le master final arrive avec la validation du Mastering.",
+  // Deposited by the engineer on their link (proto « Autres livrables »).
+  receivedVia: (day: string, by: string | null) =>
+    `Reçu le ${day} par son lien${by ? ` · ${by}` : ""}`,
+  waitingEngineer: (name: string, n: number) =>
+    `En attente de ${name} (lien privé) : ${n > 1 ? `déposer ${n} livrables` : "déposer le livrable"}.`,
+  link: {
+    title: "Autres livrables",
+    states: { todo: "À vous", done: "Reçus" },
+    todo: (n: number) =>
+      n > 1 ? `Déposer ${n} livrables` : "Déposer le livrable",
+    sent: (day: string) => `Envoyé le ${day}`,
+    hint: "WAV, AIFF, FLAC, MP3, M4A, AAC ou OGG.",
+    stemsHint: "Un ZIP des pistes, ou WAV, AIFF, FLAC.",
+    confirm: "C'est exactement ce fichier qui partira chez le label.",
+    notAccepted: "Ce format n'est pas accepté pour ce livrable.",
+  },
   done: "Master final au Catalogue, livrables reçus. Le paiement reste à suivre : il ne bloque rien.",
   missing: (n: number) =>
     n > 1 ? `En attente de ${n} livrables.` : "En attente d'un livrable.",

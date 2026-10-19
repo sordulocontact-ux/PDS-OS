@@ -62,15 +62,19 @@ export function VersionDecision({
   );
 }
 
-/** « Rouvrir le mix » (the owner, before the mastering), its reason said. */
+/** « Rouvrir le mix » (the owner, before the mastering) or « Rouvrir le
+ * master » (before the Distribution delivered), its reason said. */
 export function ReopenMix({
   projectId,
   versionId,
+  stage = "mix",
 }: {
   projectId: string;
   versionId: string;
+  stage?: "mix" | "mastering";
 }) {
   const [open, setOpen] = useState(false);
+  const r = stage === "mix" ? t.reopen : t.reopen.master;
   if (!open)
     return (
       <Button
@@ -78,16 +82,16 @@ export function ReopenMix({
         className="self-start"
         onClick={() => setOpen(true)}
       >
-        {t.reopen.button}
+        {r.button}
       </Button>
     );
   return (
     <ReasonForm
-      label={t.reopen.reason}
-      hint={t.reopen.hint}
-      submitLabel={t.reopen.button}
-      doneMessage={t.reopen.done}
-      run={(reason) => reopenMix(projectId, versionId, reason)}
+      label={r.reason}
+      hint={r.hint}
+      submitLabel={r.button}
+      doneMessage={r.done}
+      run={(reason) => reopenMix(projectId, versionId, reason, stage)}
       onDone={() => setOpen(false)}
     />
   );

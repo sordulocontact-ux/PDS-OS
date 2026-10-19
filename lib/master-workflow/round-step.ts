@@ -3,7 +3,11 @@ import "server-only";
 import { isBudgetStatus, type BudgetStatus } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
 import { liveTransmission } from "@/lib/master-workflow/journey";
-import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import {
+  loadDirectionPerson,
+  masterJourneyContext,
+} from "@/lib/master-workflow/journey-context";
+import { can } from "@/lib/auth/access";
 import type { JourneyTransmission } from "@/lib/master-workflow/journey-facts";
 import { loadMixVersions } from "@/lib/master-workflow/mix-versions";
 import type { MixVersionsView } from "@/lib/master-workflow/mix-types";
@@ -63,6 +67,16 @@ export type RoundStepView = {
   validator: string | null;
   owner: string | null;
   canSeeBudget: boolean;
+  // The direction decides a delay sent to it (proto `master:thread`).
+  isDirection: boolean;
+  direction: string | null;
+  // The in-house engineer of the round (a member: no link, no invoice).
+  inHouse: {
+    personId: string;
+    name: string;
+    assignedAt: string | null;
+    isViewer: boolean;
+  } | null;
 };
 
 /**
@@ -78,7 +92,7 @@ export async function loadRoundStep(
   const { access, project, facts } = await masterJourneyContext(projectId);
   const supabase = await createClient();
   const live = liveTransmission(facts, stage);
-  const [view, versions, budget, token] = await Promise.all([
+  const [view, versions, budget, token, direction] = await Promise.all([
     loadStepView(project, access, stage),
     loadMixVersions(project, access.personId, stage),
     supabase
@@ -91,6 +105,7 @@ export async function loadRoundStep(
           p_transmission_id: live.id,
         })
       : Promise.resolve({ data: null }),
+    loadDirectionPerson(),
   ]);
 
   const extras: Record<string, RoundVersionExtra> = {};
@@ -136,9 +151,23 @@ export async function loadRoundStep(
   const inRound = facts.titles.filter(
     (t) => mixVersions.some((v) => v.masterId === t.id) || t.sources.length,
   );
+  // An in-house engineer: nobody to choose in the Réseau.
+  const inHousePerson =
+    stage === "mix" || brief?.masteringSame
+      ? brief?.mixPerson
+      : brief?.masteringPerson;
+  const noContact = [
+    fr.masterWorkflow.mix.blockers.engineer,
+    fr.masterWorkflow.mix.blockers.masteringEngineer,
+  ] as string[];
   return {
     stage,
-    view,
+    view: inHousePerson
+      ? {
+          ...view,
+          blockers: view.blockers.filter((b) => !noContact.includes(b)),
+        }
+      : view,
     versions,
     extras,
     link: live
@@ -183,6 +212,22 @@ export async function loadRoundStep(
     validator: brief?.validatorName ?? project.ownerName,
     owner: project.ownerName,
     canSeeBudget: canSeeProjectBudget(access, project),
+    isDirection: can(access, "validate"),
+    direction: direction?.name ?? null,
+    inHouse: (() => {
+      const same = stage === "mix" || brief?.masteringSame;
+      const person = same ? brief?.mixPerson : brief?.masteringPerson;
+      return person
+        ? {
+            ...person,
+            assignedAt:
+              (stage === "mix"
+                ? brief?.mixAssignedAt
+                : brief?.masteringAssignedAt) ?? null,
+            isViewer: person.personId === access.personId,
+          }
+        : null;
+    })(),
   };
 }
 

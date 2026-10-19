@@ -43,8 +43,12 @@ export type BriefDate = (typeof BRIEF_DATES)[number];
 
 export type MasterBrief = {
   mixContactId: string | null;
+  // An in-house engineer (a member of PDS with an account): no link, no
+  // e-mail, no invoice (proto `master:hugo`). Exclusive with the contact.
+  mixPersonId: string | null;
   masteringSameEngineer: boolean;
   masteringContactId: string | null;
+  masteringPersonId: string | null;
   mixRateCents: number | null;
   masteringRateCents: number | null;
   revisions: number | null;
@@ -94,6 +98,8 @@ export type BriefView = {
   allFinal: boolean;
   sourcesFailed: boolean;
   engineers: NetworkEngineer[];
+  // The members of PDS who may be the in-house engineer.
+  members: BriefPerson[];
   validators: BriefPerson[];
   exchanges: BriefExchange[];
   budget: BriefBudgetLine[];

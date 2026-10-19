@@ -1,6 +1,7 @@
 import { BriefExchanges } from "@/components/master-workflow/brief-exchanges";
 import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
 import { fr } from "@/lib/i18n/fr";
@@ -37,11 +38,13 @@ export function BriefStep({
   step,
   exchange,
   ownerName,
+  projectTitle,
 }: {
   step: BriefStepView;
   // The common call form's defaults, for the owner.
   exchange: CallPrepDefaults | null;
   ownerName: string | null;
+  projectTitle: string;
 }) {
   const { view } = step;
   const canEdit = view.canEdit;
@@ -125,6 +128,18 @@ export function BriefStep({
                 tone: STATE_TONE[state],
                 label: t.document.states[state],
               }}
+              side={
+                step.saved && (
+                  <PdfExportButton
+                    href={`/api/projects/${view.projectId}/master-brief`}
+                    fileName={t.pdf.fileName(projectTitle)}
+                    label={t.pdf.export}
+                    pendingLabel={t.pdf.exporting}
+                    failedLabel={t.pdf.failed}
+                    variant="outline"
+                  />
+                )
+              }
             />
           </FactRows>
           {missing && <ToneCallout tone="warning">{missing}</ToneCallout>}
@@ -141,6 +156,7 @@ export function BriefStep({
               canSeeBudget={view.canSeeBudget}
               brief={view.brief}
               engineers={view.engineers}
+              members={view.members}
               validators={view.validators}
               designations={step.designations}
               changedBy={step.changedBy}

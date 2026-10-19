@@ -50,7 +50,14 @@ export type FinalTitle = {
   isrc: string | null;
   durationSeconds: number | null;
   // The brief's other deliverables, and whether each arrived.
-  deliverables: Array<{ key: BriefDeliverable; received: boolean }>;
+  deliverables: Array<{
+    key: BriefDeliverable;
+    received: boolean;
+    // Deposited by the engineer on their link: its file and when.
+    fileName: string | null;
+    at: string | null;
+    viaLink: boolean;
+  }>;
 };
 
 export type FinalView = {
@@ -111,7 +118,9 @@ export async function loadFinalView(
         .maybeSingle(),
       supabase
         .from("master_deliverables_received")
-        .select("master_id, deliverable")
+        .select(
+          "master_id, deliverable, created_at, via_link, file:master_files!master_deliverables_received_file_id_fkey(file_name)",
+        )
         .eq("project_id", project.id),
       supabase
         .from("master_mix_versions")
@@ -222,12 +231,18 @@ export async function loadFinalView(
         audioState: stateOf.get(master.id) ?? null,
         isrc: masterOf.get(master.id)?.isrc ?? null,
         durationSeconds: masterOf.get(master.id)?.duration_seconds ?? null,
-        deliverables: expected.map((key) => ({
-          key,
-          received: (received.data ?? []).some(
-            (row) => row.master_id === master.id && row.deliverable === key,
-          ),
-        })),
+        deliverables: expected.map((key) => {
+          const row = (received.data ?? []).find(
+            (r) => r.master_id === master.id && r.deliverable === key,
+          );
+          return {
+            key,
+            received: Boolean(row),
+            fileName: row?.file?.file_name ?? null,
+            at: row?.created_at ?? null,
+            viaLink: row?.via_link ?? false,
+          };
+        }),
       };
     }),
   };

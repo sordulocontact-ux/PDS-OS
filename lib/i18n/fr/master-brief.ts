@@ -45,6 +45,17 @@ export const masterBrief = {
     direction: "la direction artistique",
   },
   missingSentence: (list: string) => `Il manque ${list}.`,
+  // « Exporter en PDF » (lib/master-workflow/brief-html.ts).
+  pdf: {
+    export: "Exporter en PDF",
+    exporting: "Préparation du PDF…",
+    failed: "Le PDF n'a pas pu être préparé. Réessayez.",
+    title: (project: string) => `Brief Mix/Master · ${project}`,
+    fileName: (project: string) => `Brief Mix-Master - ${project}.pdf`,
+    recorded: "Brief enregistré",
+    draft: "Brouillon, pas encore enregistré",
+    none: "Non renseigné",
+  },
   sections: {
     conditions: "Conditions de prestation",
     direction: "Direction artistique",
@@ -102,6 +113,8 @@ export const masterBrief = {
     linked: "Déjà liés au projet",
     network: "Réseau",
     team: "Équipe du projet",
+    // A member of PDS with an account: the in-house engineer.
+    members: "Membres de PDS (ingénieur maison)",
     none: "Aucun ingénieur dans le Réseau.",
   },
   record: "Enregistrer le Brief",
