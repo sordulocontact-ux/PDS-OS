@@ -3274,6 +3274,15 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   appliquer) ; l'envoi par PDS OS (pas de fournisseur d'e-mail : `mailto:` + « Marquer comme
   envoyée »).
 
+- **Refus d'un emprunt (J8)** : « Décider de la suite » sous le refus (`RefusalDecision`) :
+  « Retirer l'élément du titre » avec « Pourquoi * » (`withdraw_clearance` : emprunt abandonné,
+  `legal_clearances.withdrawn_reason`, notification `legal_element_withdrawn` au responsable du
+  projet par trigger : refaire le passage dans le Master) ou « Le remplacer » / « Par quoi * »
+  (`replace_clearance` : nouvel emprunt `to_investigate`, l'œuvre seule, `replaces_id`, l'ancien
+  abandonné, puis ajouté au plan par `addLegalPlanItems`). « Retirer l'élément » hors refus passe
+  aussi par le motif. Migration `20261019090401`, tests `legal-clearance-refusal.test.sql`.
+  Les notifications d'emprunt ouvrent la démarche (`/legal/clearance/<id>`).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique
