@@ -82,6 +82,13 @@ export const projectShell = {
   locked: {
     body: "Ce workflow démarre au lancement du plan du projet, après le Cadrage.",
     open: "Ouvrir le Cadrage",
+    // The plan was launched without this workflow (workflowGate `absent`).
+    absentBody:
+      "Ce workflow n'est pas dans le plan du projet : le chef de projet responsable peut l'ajouter et le lancer depuis le Plan du projet.",
+    // In the plan, still waiting for « Lancer maintenant ».
+    waitingBody:
+      "Ce workflow est dans le plan du projet : il démarre quand le chef de projet responsable le lance depuis le Plan du projet.",
+    openPlan: "Ouvrir le Plan du projet",
   },
   work: {
     empty: "Rien ne vous attend pour l'instant.",

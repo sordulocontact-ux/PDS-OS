@@ -46,6 +46,7 @@ export async function WorkflowGate({
       <WorkflowLocked
         projectId={projectId}
         title={MARKETING_PARTS.includes(workflow) ? marketing : undefined}
+        gate={gate}
       />
     );
   return children;

@@ -23,6 +23,7 @@ import { loadLaunchedPlan } from "@/lib/plan/queries";
 import { stepStatus, workflowsToReview } from "@/lib/plan/steps";
 import { formatShortInstant } from "@/lib/utils/day";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
+import { applicableWorkflows } from "@/lib/workflow-status/rules";
 
 /**
  * Cadrage › Plan du projet (proto frPlanView, ticket § 9): PO proposes the
@@ -79,9 +80,16 @@ export default async function FramingPlanPage({
     );
   else if (plan && flows) {
     // Stratégie, Master, Juridique left out of the plan wait until added
-    // (« Ajouter et lancer »); the others open with the plan.
+    // (« Ajouter et lancer »); the others open with the plan. Only those
+    // the project has: no Master without a title (recette 19/10).
+    const applies = applicableWorkflows({
+      type: project.type,
+      masterCount: project.masters.length,
+    });
     const absent = (["strategy", "master", "legal"] as const).filter(
-      (w) => !plan.items.some((i) => i.workflow === w),
+      (w) =>
+        (w !== "master" || applies.includes("master")) &&
+        !plan.items.some((i) => i.workflow === w),
     );
     const group = (w: string | null) =>
       w && (MARKETING_PARTS as readonly string[]).includes(w) ? t.group : null;

@@ -20,6 +20,6 @@ export default async function LegalLayout({
   // Without manage_legal, the page itself answers 404.
   if (!can(access, "manage_legal")) return children;
   const gate = await workflowGate(project, "legal");
-  if (gate) return <WorkflowLocked projectId={projectId} />;
+  if (gate) return <WorkflowLocked projectId={projectId} gate={gate} />;
   return children;
 }

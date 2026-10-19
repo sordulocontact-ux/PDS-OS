@@ -17,6 +17,6 @@ export default async function MasterLayout({
     requireLaunchedProject(projectId),
   ]);
   const gate = await workflowGate(project, "master");
-  if (gate) return <WorkflowLocked projectId={projectId} />;
+  if (gate) return <WorkflowLocked projectId={projectId} gate={gate} />;
   return children;
 }

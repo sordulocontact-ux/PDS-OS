@@ -1928,9 +1928,13 @@ Cadrage › Plan du projet `app/(app)/app/projects/[projectId]/framing/plan`, `l
 - **Huit workflows** (migration `20261019020101_plan_all_workflows.sql`, tests
   `plan-all-workflows.test.sql`) : `strategy`, `design`, `production`, `activations`, `review` (le
   Marketing), `master`, `legal`, `distribution` (ex-`delivery`, repris). Proposition (`proposePlan`) :
-  Stratégie en Focus, Master et Juridique selon les règles d'avant, Conception (pilote = direction
-  créative), Production et Activations en Ensuite, Distribution (projet musical) et Suivi & bilan en
-  À anticiper ; les lignes-notes d'anticipation ne sont plus proposées. **« Lancer le plan » démarre
+  Stratégie en Focus, puis **les workflows que le projet a** (`applicableWorkflows`, la règle de la
+  navigation, finitions du 19/10) : Master dès qu'il a un titre (Focus si la date cible est proche,
+  sinon Pendant ce temps, « master final déjà là » s'il ne reste rien à mixer), **Juridique toujours**
+  (Focus s'il y a un blocage de droits, sinon Pendant ce temps — y compris pour un projet de contenu),
+  Conception (pilote = direction créative), Production et Activations en Ensuite, Distribution
+  (projet musical) et Suivi & bilan en À anticiper. « Hors du plan » ne propose jamais un Master à
+  un projet sans titre ; les lignes-notes d'anticipation ne sont plus proposées. **« Lancer le plan » démarre
   tous les workflows du plan, quelle que soit leur colonne** (la colonne dit l'ordre) ;
   `launch_plan_workflow` garde sa signature (ajout d'un workflow oublié). **Verrou** :
   `workflow_is_launched` couvre les huit ; Conception, Production, Activations, Suivi & bilan et

@@ -8,6 +8,7 @@
 import { formatBriefDate } from "@/lib/framing/assess";
 import type { FramingKnowledge } from "@/lib/framing/knowledge";
 import { fr } from "@/lib/i18n/fr";
+import { applicableWorkflows } from "@/lib/workflow-status/rules";
 
 export const PLAN_COLUMNS = [
   "focus",
@@ -90,19 +91,17 @@ const daysBetween = (from: string, to: string) =>
       86_400_000,
   );
 
-const confirmedText = (k: FramingKnowledge, key: string): string | null => {
-  const row = k.framing.briefRows.find((r) => r.field_key === key);
-  return row?.status === "confirmed" &&
-    typeof row.value === "string" &&
-    row.value.trim()
-    ? row.value
-    : null;
-};
-
 export function proposePlan(k: FramingKnowledge): ProposedItem[] {
   const t = fr.framingIntel.plan;
   const owner = k.project.ownerPersonId;
-  const music = k.project.type === "music_release" && k.titles.length > 0;
+  // The workflows the project has (proto « Projet complet »): the Master
+  // when it has a title, the Distribution for a music release, the
+  // Juridique and the Marketing always — the same rule as its navigation.
+  const applies = applicableWorkflows({
+    type: k.project.type,
+    masterCount: k.titles.length,
+  });
+  const music = applies.includes("distribution");
   const items: ProposedItem[] = [];
   const workflow = (
     key: PlanWorkflow,
@@ -134,36 +133,35 @@ export function proposePlan(k: FramingKnowledge): ProposedItem[] {
       ? targetRow.value
       : null;
 
-  if (music) {
+  if (applies.includes("master")) {
     const open = k.titles.filter(
       (title) => title.audioState !== "final_master",
     ).length;
-    if (open > 0) {
-      const critical =
-        target !== null && daysBetween(k.today, target) <= CRITICAL_DAYS;
-      workflow(
-        "master",
-        critical ? "focus" : "meanwhile",
-        critical
-          ? t.why.masterFocus(open, formatBriefDate(target))
-          : t.why.masterMeanwhile(open),
-        { specialized: t.specializedNames.master },
-      );
-    }
+    const critical =
+      open > 0 &&
+      target !== null &&
+      daysBetween(k.today, target) <= CRITICAL_DAYS;
+    workflow(
+      "master",
+      critical ? "focus" : "meanwhile",
+      critical
+        ? t.why.masterFocus(open, formatBriefDate(target))
+        : open > 0
+          ? t.why.masterMeanwhile(open)
+          : t.why.masterReady(k.titles.length),
+      { specialized: t.specializedNames.master },
+    );
   }
 
   const blockers = k.framing.constraints.filter(
     (c) => c.type === "rights" && c.review_status === "confirmed",
   ).length;
-  const legalNeeds = confirmedText(k, "legal_needs");
-  if (music || blockers > 0 || legalNeeds) {
-    workflow(
-      "legal",
-      blockers > 0 ? "focus" : "meanwhile",
-      blockers > 0 ? t.why.legalBlockers(blockers) : t.why.legalMeanwhile,
-      { specialized: t.specializedNames.legal },
-    );
-  }
+  workflow(
+    "legal",
+    blockers > 0 ? "focus" : "meanwhile",
+    blockers > 0 ? t.why.legalBlockers(blockers) : t.why.legalMeanwhile,
+    { specialized: t.specializedNames.legal },
+  );
 
   // Who pilots by default: the creative director for the Conception, the
   // owner otherwise (proto FR_PLAN; the production manager is chosen in

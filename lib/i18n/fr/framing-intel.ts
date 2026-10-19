@@ -742,6 +742,8 @@ export const framingIntel = {
         `${plural(n, "titre", "titres")} sans master final et une date cible le ${date} : la production est le chemin critique.`,
       masterMeanwhile: (n: number) =>
         `${plural(n, "titre", "titres")} sans master final : mix et mastering avancent en parallèle.`,
+      masterReady: (n: number) =>
+        `${plural(n, "titre a déjà son", "titres ont déjà leur")} master final : il reste à le confirmer.`,
       legalBlockers: (n: number) =>
         `${plural(n, "blocage juridique connu", "blocages juridiques connus")} : à lever avant la sortie.`,
       legalMeanwhile:
