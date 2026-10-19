@@ -9,7 +9,8 @@ import {
   findArtistsTool,
   findMastersTool,
 } from "@/lib/assistant/catalog-tools";
-import { activityLine, formatDay, lateness } from "@/lib/assistant/facts";
+import { activityLine } from "@/lib/assistant/facts";
+import { myWorkFacts } from "@/lib/assistant/my-work";
 import { projectStatus } from "@/lib/assistant/project-status";
 import { proposeArtistTool } from "@/lib/assistant/propose/artist";
 import { proposeContractTool } from "@/lib/assistant/propose/contract";
@@ -36,7 +37,6 @@ import { can, type Access } from "@/lib/auth/access";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { loadRecentActivity } from "@/lib/insights/activity";
-import { loadMyTodo } from "@/lib/insights/todo";
 import { handoverOf } from "@/lib/projects/handover";
 import { progressLabel } from "@/lib/projects/progress";
 import { listProjects } from "@/lib/projects/queries";
@@ -187,69 +187,9 @@ export function createAssistantTools(
 
     my_todo: tool({
       description:
-        "Ce qui attend l'utilisateur connecté : les projets qu'on lui a transmis et qu'il doit accepter, ses tâches et ses livrables à faire (retards calculés), les validations qui l'attendent, les propositions de PO à confirmer par projet.",
+        "Ce qui attend l'utilisateur connecté : les projets qu'on lui a transmis et qu'il doit accepter, ses actions dans les parcours de ses projets (validations d'abord, avec le projet, l'étape et l'échéance, retards calculés), ses tâches libres, les propositions de PO à confirmer par projet.",
       inputSchema: z.object({}),
-      execute: async () => {
-        const [todo, { projects }] = await Promise.all([
-          loadMyTodo(access),
-          listProjects(),
-        ]);
-        // What waits for the person's answer comes first (UX test of
-        // 09/10/2026: PO answered a new member without the project to accept).
-        const { toAccept } = handoverOf(projects, access);
-        const facts = [
-          ...(todo.error ? [fr.assistant.readFailed] : []),
-          ...toAccept.map(
-            (p) =>
-              `Projet « ${p.title} »${p.artistName ? ` (${p.artistName})` : ""} : il vous a été transmis et attend votre réponse (accepter, refuser ou demander une précision). C'est la première chose à faire.`,
-          ),
-          ...todo.deliverables.map(
-            (d) =>
-              `Livrable « ${d.title} » (${d.projectTitle}) : à concevoir, ${d.dueDate ? `échéance le ${formatDay(d.dueDate)}` : "sans échéance"}, ${lateness(d.overdue)}.`,
-          ),
-          ...todo.tasks.map(
-            (t) =>
-              `Tâche « ${t.title} » (${t.projectTitle}) : à faire, ${t.dueDate ? `échéance le ${formatDay(t.dueDate)}` : "sans échéance"}, ${lateness(t.overdue)}.`,
-          ),
-          ...todo.validations.map(
-            (v) =>
-              `Validation qui vous attend : ${v.stageLabel} de ${v.projectTitle}, demandée le ${formatDay(v.requestedAt)}.`,
-          ),
-          ...todo.proposals.map(
-            (p) =>
-              `${p.count} proposition(s) de PO à confirmer sur ${p.projectTitle}.`,
-          ),
-        ];
-        return {
-          facts: facts.length
-            ? facts
-            : [
-                "Rien ne vous attend : aucun projet à accepter, aucune tâche, aucun livrable, aucune validation, aucune proposition.",
-              ],
-          sources: uniqueSources([
-            ...toAccept.map((p) => ({
-              label: `${p.title} · à accepter`,
-              href: routes.project(p.id),
-            })),
-            ...todo.deliverables.map((d) => ({
-              label: `${d.projectTitle} · ${d.title}`,
-              href: d.href,
-            })),
-            ...todo.tasks.map((t) => ({
-              label: `${t.projectTitle} · ${t.title}`,
-              href: t.href,
-            })),
-            ...todo.validations.map((v) => ({
-              label: `${v.projectTitle} · validation ${v.stageLabel}`,
-              href: v.href,
-            })),
-            ...todo.proposals.map((p) => ({
-              label: `${p.projectTitle} · propositions`,
-              href: p.href,
-            })),
-          ]),
-        };
-      },
+      execute: async () => myWorkFacts(access),
     }),
 
     recent_activity: tool({

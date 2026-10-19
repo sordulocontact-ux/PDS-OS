@@ -329,6 +329,44 @@ export const assistant = {
   } as Record<string, string>,
   readFailed:
     "Lecture impossible pour l'instant : la base n'a pas répondu. Rien ne permet de dire qu'il ne s'est rien passé.",
+  // my_todo (lib/assistant/my-work.ts): facts for the model, the home's and
+  // the Travail's lists phrased in sentences.
+  myWork: {
+    toAccept: (title: string, artist: string | null) =>
+      `Projet « ${title} »${artist ? ` (${artist})` : ""} : il vous a été transmis et attend votre réponse (accepter, refuser ou demander une précision). C'est la première chose à faire.`,
+    action: (a: {
+      todo: string;
+      project: string;
+      place: string;
+      decision: boolean;
+      due: string | null;
+      late: string;
+    }) =>
+      `${a.decision ? "Validation qui vous attend" : "À faire"} : « ${a.todo} » (${a.project}, ${a.place})${a.due ? `, échéance le ${a.due}, ${a.late}` : ", sans échéance"}.`,
+    task: (a: {
+      title: string;
+      project: string;
+      due: string | null;
+      late: string;
+    }) =>
+      `Tâche « ${a.title} » (${a.project}) : à faire, ${a.due ? `échéance le ${a.due}, ${a.late}` : "sans échéance"}.`,
+    proposals: (count: number, project: string) =>
+      `${count} proposition(s) de PO à confirmer sur ${project}.`,
+    nothing:
+      "Rien ne vous attend : aucun projet à accepter, aucune action dans vos projets, aucune tâche, aucune proposition.",
+    // project_status: one open step of the project's journeys.
+    projectAction: (a: {
+      who: string | null;
+      todo: string;
+      place: string;
+      decision: boolean;
+      due: string | null;
+      late: boolean;
+    }) =>
+      `${a.who ? `Attendu de ${a.who}` : a.decision ? "Validation qui vous attend" : "À vous"} : « ${a.todo} » (${a.place})${a.due ? `, échéance le ${a.due}${a.late ? ", EN RETARD" : ""}` : ""}.`,
+    toAcceptSource: "à accepter",
+    proposalsSource: "propositions",
+  },
   activityMore: (n: number) => `et ${n} autre${n > 1 ? "s" : ""}`,
   validationStates: {
     pending: "en attente",

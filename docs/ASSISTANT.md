@@ -118,7 +118,7 @@ des `sources` (libellé + lien) que l'interface affiche.
 | --- | --- | --- |
 | `find_projects` | texte facultatif | projets (titre, artiste, type, étape actuelle), recherche tolérante aux fautes |
 | `project_status` | id de projet | étapes et leur état, Brief (confirmé / proposé / vide), besoins, points ouverts, tâches (retards calculés), validation en attente, sortie (ISRC, en ligne depuis, plateformes) |
-| `my_todo` | — | mes tâches à faire (retards calculés), validations qui m'attendent, propositions de PO à confirmer par projet |
+| `my_todo` | — | ce que l'Accueil et le Travail montrent (`lib/assistant/my-work.ts`, 20/10) : projets à accepter, puis **mes actions lues des parcours** de mes projets (`loadMyJourneyWork`, décisions d'abord, avec le projet, « Module › Étape », l'échéance et le retard calculé), tâches libres (sans workflow), propositions de PO à confirmer par projet. `project_status` dit aussi le « Maintenant » du projet (mes actions puis ce qu'on attend des autres, `loadShellActions`) |
 | `recent_activity` | id de projet facultatif, nombre de jours (7 par défaut, 90 max) | événements datés : calls, comptes rendus, Brief, tâches, points tranchés, étapes, validations, mise en ligne |
 | `search_calls` | texte, id de projet facultatif | passages de comptes rendus correspondants, avec call, minutage et citation |
 | `find_artists` | texte facultatif, relation (signés / collaborations) facultative | artistes classés par **fans Deezer** (rang calculé par le code, lu en direct, 30 au plus), relation avec PDS, nombre de titres ; les écoutes ne sont pas branchées |

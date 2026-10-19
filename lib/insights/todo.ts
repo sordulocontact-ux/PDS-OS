@@ -52,7 +52,8 @@ export type Todo = {
 
 /**
  * What waits for the signed-in person, computed by code (overdue included).
- * Shared by the home cards and the assistant's `my_todo` function.
+ * Shared by the home, the Travail and the assistant's `my_todo` (tasks
+ * tied to no workflow, PO's proposals; lib/assistant/my-work.ts).
  */
 export async function loadMyTodo(access: Access): Promise<Todo> {
   const supabase = await createClient();
