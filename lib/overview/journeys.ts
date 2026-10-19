@@ -29,6 +29,7 @@ function gather(
       .map((step) => ({
         module: journey.module,
         place: placeOf(journey),
+        part: journey.part?.key,
         step,
       })),
   );
@@ -96,6 +97,26 @@ export const loadShellActions = cache(
     );
   },
 );
+
+/** The viewer's actions per Marketing sub-module, keyed like its pills
+ * (lib/ui/marketing-steps.ts): « design » is the Conception's, every
+ * deliverable's « production:<id> » the Production's. */
+export function countMarketingParts(
+  all: ProjectJourneys,
+): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const action of all.mine) {
+    if (action.module !== "marketing" || !action.part) continue;
+    const key =
+      action.part === "design"
+        ? "conception"
+        : action.part.startsWith("production:")
+          ? "production"
+          : action.part;
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return counts;
+}
 
 /** The viewer's actions per navigation entry (Cadrage, each workflow); their
  * total is the Travail's count (`all.mine.length`). */

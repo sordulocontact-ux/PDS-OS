@@ -35,6 +35,7 @@ export async function readProjectJourneys(
       .map((step) => ({
         module: journey.module,
         place: placeOf(journey),
+        part: journey.part?.key,
         step,
       })),
   );
