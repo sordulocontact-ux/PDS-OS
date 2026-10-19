@@ -94,19 +94,29 @@ export async function loadProviderLinks(
   const { data, error } = await supabase
     .from("production_provider_links")
     .select(
-      "contact_id, created_at, expires_at, first_opened_at, last_opened_at",
+      "contact_id, created_at, expires_at, revoked_at, first_opened_at, last_opened_at, creator:people!production_provider_links_created_by_fkey(first_name, last_name)",
     )
     .eq("sheet_id", sheetId)
-    .is("revoked_at", null)
     .order("created_at", { ascending: false });
   if (error) console.error("loadProviderLinks:", error.message);
+  const rows = data ?? [];
   const links: Record<string, ProviderLinkState> = {};
-  for (const l of data ?? [])
-    links[l.contact_id] ??= {
+  for (const l of rows) {
+    if (l.revoked_at || links[l.contact_id]) continue;
+    const creator = l.creator as {
+      first_name: string;
+      last_name: string | null;
+    } | null;
+    links[l.contact_id] = {
+      number: rows.filter((r) => r.contact_id === l.contact_id).length,
       createdAt: l.created_at,
+      createdBy: creator
+        ? [creator.first_name, creator.last_name].filter(Boolean).join(" ")
+        : null,
       expiresAt: l.expires_at,
       firstOpenedAt: l.first_opened_at,
       lastOpenedAt: l.last_opened_at,
     };
+  }
   return links;
 }

@@ -8,13 +8,14 @@ import {
 } from "@/components/master-workflow/brief-next-step";
 import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { MasterFactAction } from "@/components/master-workflow/master-fact-action";
-import { PrepareExchangeButton } from "@/components/master-workflow/prepare-exchange-button";
+import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
+import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
 import { AddToNetworkButton } from "@/components/network/add-to-network-button";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { FactTable } from "@/components/ui/fact-table";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { toParisLocalInput } from "@/lib/calls/format";
+import type { CallPrepDefaults } from "@/lib/calls/prep/types";
 import { fr } from "@/lib/i18n/fr";
 import type { BriefView } from "@/lib/master-workflow/brief-types";
 import type { BriefQuestionsView } from "@/lib/master-workflow/question-types";
@@ -32,8 +33,11 @@ export function BriefPage({
   view,
   questions,
   next,
+  exchange,
 }: {
   view: BriefView;
+  // The common call form's defaults, for the owner only.
+  exchange: CallPrepDefaults | null;
   questions: BriefQuestionsView;
   // What the sending still needs, and whether it already left (PROJ-UX-08).
   next: NextStep;
@@ -98,12 +102,16 @@ export function BriefPage({
         description={t.exchanges.description}
         card
         action={
-          view.canEdit && (
-            <PrepareExchangeButton
-              projectId={view.projectId}
-              agenda={view.nextAgenda}
-              defaultOccurredAt={toParisLocalInput(new Date())}
-            />
+          exchange && (
+            <CallPrepLauncher
+              label={t.exchanges.prepare}
+              title={t.exchanges.prepareTitle}
+              body={t.exchanges.prepareDescription}
+              mode="sheet"
+              variant="default"
+            >
+              <CallPrepForm defaults={exchange} />
+            </CallPrepLauncher>
           )
         }
       >

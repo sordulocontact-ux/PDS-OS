@@ -123,11 +123,7 @@ export function ConceptionEntry({
           </p>
           <div className="flex flex-wrap gap-2">
             {callSheet && (
-              <ConceptionCallSheet
-                projectId={projectId}
-                data={callSheet}
-                variant="default"
-              />
+              <ConceptionCallSheet data={callSheet} variant="default" />
             )}
             <StartConceptionForm projectId={projectId} />
           </div>

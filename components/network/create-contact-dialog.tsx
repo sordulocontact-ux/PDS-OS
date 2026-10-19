@@ -9,12 +9,14 @@ import type { NetworkKind, NetworkRole } from "@/lib/network/types";
 
 function Body({
   name,
+  email,
   roles,
   kind,
   onCreated,
   onCancel,
 }: {
   name: string;
+  email?: string;
   roles: NetworkRole[];
   kind: NetworkKind;
   onCreated: (id: string) => void;
@@ -29,7 +31,7 @@ function Body({
       {(data) => (
         <ContactForm
           options={data}
-          initial={{ name, roles, kind }}
+          initial={{ name, email, roles, kind }}
           stay
           onCancel={onCancel}
           onSaved={onCreated}
@@ -45,15 +47,21 @@ export function CreateContactDialog({
   open,
   onOpenChange,
   name,
+  email,
   roles,
   kind = "person",
+  title,
   onCreated,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   name: string;
+  // An address already typed (a participant invited by e-mail).
+  email?: string;
   roles: NetworkRole[];
   kind?: NetworkKind;
+  // Said by the caller (« Nouvelle fiche dans le Réseau » from a call).
+  title?: string;
   onCreated: (id: string) => void;
 }) {
   const t = fr.network.form;
@@ -61,13 +69,14 @@ export function CreateContactDialog({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={t.createTitle}
+      title={title ?? t.createTitle}
       description={t.createDescription}
       closeLabel={t.close}
     >
       {open && (
         <Body
           name={name}
+          email={email}
           roles={roles}
           kind={kind}
           onCreated={onCreated}

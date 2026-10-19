@@ -1121,3 +1121,26 @@ export const proposalTone: Record<"proposed" | "kept" | "discarded", Tone> = {
   kept: "success",
   discarded: "neutral",
 };
+
+/** A line of a meeting's report, by what became of it in the step. */
+export const meetingLineTone: Record<string, Tone> = {
+  confirmed: "success",
+  corrected: "success",
+  discarded: "neutral",
+  pending: "warning",
+};
+
+/** The summary sent to a meeting's participants. */
+export const meetingSummaryTone: Tone = "success";
+
+// A noted information (proto KIND): an information, to confirm, waiting for a
+// decision, decided.
+export const noteStatusTone: Record<
+  "information" | "to_confirm" | "pending_decision" | "decided",
+  Tone
+> = {
+  information: "neutral",
+  to_confirm: "warning",
+  pending_decision: "info",
+  decided: "success",
+};

@@ -10,7 +10,8 @@ import {
 import { ConstraintLines } from "@/components/framing/intel/constraint-lines";
 import { DeadlineLines } from "@/components/framing/intel/deadline-lines";
 import { DimensionNav } from "@/components/framing/intel/dimension-nav";
-import { FramingCallSheet } from "@/components/framing/intel/framing-call-sheet";
+import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
+import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
 import { FramingEntry } from "@/components/framing/intel/framing-entry";
 import { FramingProgress } from "@/components/framing/intel/framing-progress";
 import { ExpenseLines } from "@/components/framing/intel/expense-lines";
@@ -89,7 +90,7 @@ export default async function FramingPage({
   // question, and the question says what was asked.
   const openRequests = (loadedRequests ?? []).filter(isOpenRequest);
   const assessment = assessFraming(k);
-  const sheet = callSheetData(k, assessment);
+  const sheet = canEdit ? await callSheetData(k, assessment) : null;
 
   if (!framingOpen || (canEdit && !framingStarted(k)))
     return (
@@ -499,7 +500,16 @@ export default async function FramingPage({
           blocking={assessment.blocking.length + assessment.conflicts.length}
         />
       </div>
-      {working && <FramingCallSheet projectId={projectId} data={sheet} />}
+      {working && sheet && (
+        <CallPrepLauncher
+          label={t.entry.prepare}
+          title={t.call.title}
+          body={t.call.body}
+          mode="sheet"
+        >
+          <CallPrepForm defaults={sheet} />
+        </CallPrepLauncher>
+      )}
     </div>
   );
   return (

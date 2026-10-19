@@ -156,7 +156,11 @@ export default async function ProjectOverviewPage({
           ownerName={project.ownerName}
           started={framingOpen && framingStarted(knowledge)}
           canEdit={canEdit}
-          callSheet={callSheetData(knowledge, assessFraming(knowledge))}
+          callSheet={
+            canEdit
+              ? await callSheetData(knowledge, assessFraming(knowledge))
+              : null
+          }
         />
       )}
       {framingState === "awaiting_validation" && (

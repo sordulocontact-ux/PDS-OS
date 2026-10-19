@@ -87,6 +87,13 @@ export const productionHistory = {
     status: (label: string, status: string) => `Étape « ${label} » : ${status}`,
   },
   link: (who: string) => `a créé le lien prestataire de ${who}`,
+  // « Qui fait quoi » : who produces (C7).
+  organized: (kind: "internal" | "external" | null, company: string | null) =>
+    kind === "external"
+      ? `a confié la production à ${company ?? "une société"}`
+      : kind === "internal"
+        ? "a choisi une production interne"
+        : "a retiré l'organisation de la production",
   callSheet: (n: number) => `a diffusé la feuille de service V${n}`,
   place: {
     created: (name: string) => `a ajouté le lieu candidat « ${name} »`,

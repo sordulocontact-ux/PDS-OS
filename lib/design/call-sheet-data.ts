@@ -1,13 +1,15 @@
 import "server-only";
 
-import { nextRoundHourInput } from "@/lib/calls/format";
+import { callPrepDefaults } from "@/lib/calls/prep/defaults";
 import {
   designCallPurpose,
+  designCallTopics,
   type DesignCallContext,
   type DesignCallSheetData,
 } from "@/lib/design/call-prep";
 import type { ConceptionData } from "@/lib/design/conception";
 import { missingTopics } from "@/lib/design/intentions";
+import { fr } from "@/lib/i18n/fr";
 import { listProjectCreatives } from "@/lib/projects/creatives";
 import { createClient } from "@/lib/supabase/server";
 import type { ProjectDetail } from "@/lib/projects/types";
@@ -114,19 +116,26 @@ export async function designSheetData(
     listProjectCreatives(project.id),
     designCallContext(project.id),
   ]);
-  const people = [
+  const names = [
     project.ownerName,
-    ...creatives.map((c) => c.name),
     project.artistName,
     ...data.deliverables.map((d) => d.assigneeName),
   ].filter((name): name is string => Boolean(name?.trim()));
+  const t = fr.callPrep.kinds;
+  const sheet = { deliverables, directionMissing, context, selected };
+  const prep = await callPrepDefaults({
+    kind: "design",
+    projectId: project.id,
+    noun: "exchange",
+    title: t.design.title,
+    points: designCallTopics(sheet, selected),
+    proposal: { personIds: creatives.map((c) => c.personId), names },
+    goal: designCallPurpose({ deliverables }, selected),
+    facts: [{ label: fr.callPrep.documents, value: t.design.documents }],
+  });
   return {
-    deliverables,
-    directionMissing,
-    context,
-    selected,
-    purpose: designCallPurpose({ deliverables }, selected),
-    people: [...new Set(people)],
-    defaultOccurredAt: nextRoundHourInput(new Date()),
+    ...sheet,
+    purpose: prep.goal,
+    prep,
   };
 }

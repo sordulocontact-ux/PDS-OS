@@ -36,18 +36,6 @@ export type ProductionCallTopic = {
   questions: string[];
 };
 
-/** What « Préparer un call de production » opens with, prepared by code. */
-export type ProductionCallSheetData = {
-  sheetId: string;
-  deliverableId: string;
-  deliverableTitle: string;
-  topics: ProductionCallTopic[];
-  purpose: string;
-  // Proposed as participants: the deliverable's owner, the director, the
-  // people assigned to a position (not those who said they are unavailable).
-  people: string[];
-};
-
 // What the topics read of the sheet.
 export type ProductionPrepInput = Pick<ProductionSheetData, "sheet" | "needs">;
 
@@ -167,26 +155,4 @@ export function productionCallPeople(
     ...data.needs.flatMap((need) => filling(need).map((a) => a.holder.name)),
   ].filter((name): name is string => Boolean(name?.trim()) && name !== "—");
   return [...new Set(names)];
-}
-
-/**
- * What the panel opens with, from the sheet as loadProductionSheet read it.
- * Null without a sheet: there is nothing to organize yet.
- */
-export function productionCallSheetData(
-  data: Pick<
-    ProductionSheetData,
-    "deliverable" | "sheet" | "needs" | "ownerName"
-  >,
-): ProductionCallSheetData | null {
-  if (!data.sheet) return null;
-  const topics = productionCallTopics(data);
-  return {
-    sheetId: data.sheet.id,
-    deliverableId: data.deliverable.id,
-    deliverableTitle: data.deliverable.title,
-    topics,
-    purpose: productionCallPurpose(data.deliverable.title, topics),
-    people: productionCallPeople(data),
-  };
 }

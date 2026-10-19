@@ -9,7 +9,8 @@ import { DimensionWork } from "@/components/strategy/dimension-work";
 import { ValidatedStrategyHome } from "@/components/strategy/documents/validated-strategy-home";
 import { StrategyValidationCard } from "@/components/strategy/documents/strategy-validation-card";
 import { ProposeChoices } from "@/components/strategy/propose-choices";
-import { StrategyCallSheet } from "@/components/strategy/strategy-call-sheet";
+import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
+import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
 import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import { StrategyDraftButton } from "@/components/strategy/strategy-draft-button";
 import { StrategyEntry } from "@/components/strategy/strategy-entry";
@@ -193,10 +194,14 @@ export default async function StrategyPage({
                     <StrategyDraftButton projectId={projectId} />
                     <ProposeChoices projectId={projectId} />
                     {callSheet && (
-                      <StrategyCallSheet
-                        projectId={projectId}
-                        data={callSheet}
-                      />
+                      <CallPrepLauncher
+                        label={fr.strategyEntry.prepare}
+                        title={fr.strategyEntry.call.title}
+                        body={fr.strategyEntry.call.body}
+                        mode="sheet"
+                      >
+                        <CallPrepForm defaults={callSheet} />
+                      </CallPrepLauncher>
                     )}
                   </>
                 }
