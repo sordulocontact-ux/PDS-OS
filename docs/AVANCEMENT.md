@@ -477,3 +477,11 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
       Production et le Juridique, gestes regroupés, dates cohérentes depuis le Cadrage
 - [ ] **11. Pages privées réunies par personne** : un lien par personne et par projet, « À vous » / « En
       attente de PDS » / « Fait » replié
+- [x] Projet complet C8 + C10 (18/10/2026) : formulaire de call commun (pastilles de
+      participants façon Teams, ordre du jour à poignée / clavier / tactile, « Envoyé avec
+      l'invitation », récapitulatif « Confirmer et inviter ») pour le Cadrage, la Stratégie, la
+      Conception, la Production (call de production et technique) et le Master, une action
+      `createPreparedCall` ; compte rendu rangé par point de l'ordre du jour
+      (`report_items.agenda_topic`) et lu en modale ; résumé aux participants écrit par le code,
+      envoyé en versions (`call_summaries`, `send_call_summary`, 11 tests pgTAP). Migration
+      `20261018200101` à pousser en prod avec accord (docs/ARCHITECTURE.md § 4 ter)

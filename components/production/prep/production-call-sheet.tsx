@@ -1,9 +1,10 @@
-import { ProductionCallLauncher } from "@/components/production/prep/production-call-launcher";
+import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
+import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
 import { ProductionCallList } from "@/components/production/prep/production-call-list";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { fr } from "@/lib/i18n/fr";
-import { productionCallSheetData } from "@/lib/production/call-prep";
+import { productionCallDefaults } from "@/lib/production/call-prep-defaults";
 import type { ProductionCallSummary } from "@/lib/production/call-queries";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 
@@ -13,7 +14,7 @@ import type { ProductionSheetData } from "@/lib/production/sheet";
  * runs, the button that opens the side panel PO prepared from what the
  * preparation lacks. Choosing it triggers nothing external.
  */
-export function ProductionCallPanel({
+export async function ProductionCallPanel({
   projectId,
   data,
   calls,
@@ -25,8 +26,10 @@ export function ProductionCallPanel({
   canOrganize: boolean;
 }) {
   const t = fr.productionCall;
-  // Only what the panel needs crosses to the client, never the whole sheet.
-  const sheetData = canOrganize ? productionCallSheetData(data) : null;
+  // Only what the form needs crosses to the client, never the whole sheet.
+  const defaults = canOrganize
+    ? await productionCallDefaults(projectId, data)
+    : null;
   return (
     <PageSection
       id="production-calls"
@@ -34,8 +37,16 @@ export function ProductionCallPanel({
       description={t.sectionDescription}
       card
       action={
-        sheetData ? (
-          <ProductionCallLauncher projectId={projectId} data={sheetData} />
+        defaults ? (
+          <CallPrepLauncher
+            label={t.prepare}
+            title={t.title}
+            body={t.body}
+            mode="sheet"
+            variant="default"
+          >
+            <CallPrepForm defaults={defaults} />
+          </CallPrepLauncher>
         ) : undefined
       }
     >

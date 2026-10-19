@@ -2708,6 +2708,57 @@ export type Database = {
           },
         ]
       }
+      call_summaries: {
+        Row: {
+          call_id: string
+          id: string
+          organization_id: string
+          recipient_person_ids: string[]
+          recipients: Json
+          sent_at: string
+          sent_by: string | null
+          text: string
+          version: number
+        }
+        Insert: {
+          call_id: string
+          id?: string
+          organization_id: string
+          recipient_person_ids?: string[]
+          recipients: Json
+          sent_at?: string
+          sent_by?: string | null
+          text: string
+          version: number
+        }
+        Update: {
+          call_id?: string
+          id?: string
+          organization_id?: string
+          recipient_person_ids?: string[]
+          recipients?: Json
+          sent_at?: string
+          sent_by?: string | null
+          text?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_summaries_call_same_org"
+            columns: ["call_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "call_summaries_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_report_shares: {
         Row: {
           call_id: string
@@ -14322,6 +14373,7 @@ export type Database = {
       }
       report_items: {
         Row: {
+          agenda_topic: string | null
           brief_key: string | null
           created_at: string
           end_seconds: number | null
@@ -14340,6 +14392,7 @@ export type Database = {
           why: string | null
         }
         Insert: {
+          agenda_topic?: string | null
           brief_key?: string | null
           created_at?: string
           end_seconds?: number | null
@@ -14358,6 +14411,7 @@ export type Database = {
           why?: string | null
         }
         Update: {
+          agenda_topic?: string | null
           brief_key?: string | null
           created_at?: string
           end_seconds?: number | null
@@ -14436,6 +14490,180 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      step_blockers: {
+        Row: {
+          description: string
+          id: string
+          lift_note: string | null
+          lifted_at: string | null
+          lifted_by: string | null
+          module: string
+          next_action: string
+          organization_id: string
+          project_id: string
+          reported_at: string
+          reported_by: string
+          step_key: string
+          subject_id: string | null
+          unblocker_contact_id: string | null
+          unblocker_name: string
+          unblocker_person_id: string | null
+        }
+        Insert: {
+          description: string
+          id?: string
+          lift_note?: string | null
+          lifted_at?: string | null
+          lifted_by?: string | null
+          module: string
+          next_action: string
+          organization_id: string
+          project_id: string
+          reported_at?: string
+          reported_by: string
+          step_key: string
+          subject_id?: string | null
+          unblocker_contact_id?: string | null
+          unblocker_name: string
+          unblocker_person_id?: string | null
+        }
+        Update: {
+          description?: string
+          id?: string
+          lift_note?: string | null
+          lifted_at?: string | null
+          lifted_by?: string | null
+          module?: string
+          next_action?: string
+          organization_id?: string
+          project_id?: string
+          reported_at?: string
+          reported_by?: string
+          step_key?: string
+          subject_id?: string | null
+          unblocker_contact_id?: string | null
+          unblocker_name?: string
+          unblocker_person_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_blockers_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "step_blockers_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "step_blockers_lifted_by_fkey"
+            columns: ["lifted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "step_blockers_unblocker_person_id_fkey"
+            columns: ["unblocker_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      step_notes: {
+        Row: {
+          authoritative: boolean
+          body: string
+          contradiction_group: string | null
+          contradicts_id: string | null
+          decided_at: string | null
+          decided_by: string | null
+          discarded_at: string | null
+          discarded_by: string | null
+          id: string
+          module: string
+          noted_at: string
+          noted_by: string
+          organization_id: string
+          project_id: string
+          replaced_by_id: string | null
+          source: string
+          status: string
+          step_key: string
+          subject_id: string | null
+        }
+        Insert: {
+          authoritative?: boolean
+          body: string
+          contradiction_group?: string | null
+          contradicts_id?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          discarded_at?: string | null
+          discarded_by?: string | null
+          id?: string
+          module: string
+          noted_at?: string
+          noted_by: string
+          organization_id: string
+          project_id: string
+          replaced_by_id?: string | null
+          source: string
+          status: string
+          step_key: string
+          subject_id?: string | null
+        }
+        Update: {
+          authoritative?: boolean
+          body?: string
+          contradiction_group?: string | null
+          contradicts_id?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          discarded_at?: string | null
+          discarded_by?: string | null
+          id?: string
+          module?: string
+          noted_at?: string
+          noted_by?: string
+          organization_id?: string
+          project_id?: string
+          replaced_by_id?: string | null
+          source?: string
+          status?: string
+          step_key?: string
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_notes_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "step_notes_noted_by_fkey"
+            columns: ["noted_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "step_notes_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -16667,6 +16895,46 @@ export type Database = {
         }
         Returns: string
       }
+      report_step_blocker: {
+        Args: {
+          p_description: string
+          p_module: string
+          p_next_action: string
+          p_project_id: string
+          p_step_key: string
+          p_subject_id: string | null
+          p_unblocker_contact_id: string | null
+          p_unblocker_name: string | null
+          p_unblocker_person_id: string | null
+        }
+        Returns: string
+      }
+      lift_step_blocker: {
+        Args: { p_blocker_id: string; p_note: string }
+        Returns: undefined
+      }
+      note_step_information: {
+        Args: {
+          p_body: string
+          p_contradicts_id: string | null
+          p_module: string
+          p_project_id: string
+          p_source: string
+          p_status: string
+          p_step_key: string
+          p_subject_id: string | null
+        }
+        Returns: string
+      }
+      decide_step_note: {
+        Args: { p_decision: string; p_note_id: string }
+        Returns: undefined
+      }
+      step_tools_can_write: { Args: { p_project_id: string }; Returns: boolean }
+      get_private_link_frame: {
+        Args: { p_kind: string; p_token: string }
+        Returns: Json
+      }
       finish_production_step_by_link: {
         Args: { p_step_id: string; p_token: string }
         Returns: undefined
@@ -17543,6 +17811,10 @@ export type Database = {
           p_transcript_id: string
         }
         Returns: string
+      }
+      send_call_summary: {
+        Args: { p_call_id: string; p_recipients: Json; p_text: string }
+        Returns: number
       }
       save_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }

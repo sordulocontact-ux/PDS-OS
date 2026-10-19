@@ -158,8 +158,8 @@ export default async function DesignPage({
                   <>
                     {callSheet && (
                       <ConceptionCallSheet
-                        projectId={projectId}
                         data={callSheet}
+                        mode="sheet"
                         variant="default"
                       />
                     )}

@@ -43,3 +43,20 @@ export function formatHour(iso: string): string {
 export function formatInstantFull(iso: string): string {
   return `${full.format(new Date(iso))} (heure de Paris)`;
 }
+
+const dayMonth = new Intl.DateTimeFormat("fr-FR", {
+  day: "2-digit",
+  month: "2-digit",
+  timeZone: ZONE,
+});
+
+/** « 14/10 », the short day of a source or a history line (proto, C0). */
+export function formatDayMonth(iso: string): string {
+  return dayMonth.format(new Date(iso));
+}
+
+/** « 19/10, 11:16 », a short instant in a source or a history line. */
+export function formatShortInstant(iso: string): string {
+  const date = new Date(iso);
+  return `${dayMonth.format(date)}, ${hour.format(date)}`;
+}

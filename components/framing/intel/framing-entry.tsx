@@ -2,10 +2,9 @@ import Link from "next/link";
 import { IconCheck } from "nucleo-sharp-essential";
 
 import { SubmitButton } from "@/components/auth/submit-button";
-import {
-  FramingCallSheet,
-  type CallSheetData,
-} from "@/components/framing/intel/framing-call-sheet";
+import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
+import { CallPrepLauncher } from "@/components/calls/prep/call-prep-launcher";
+import type { CallPrepDefaults } from "@/lib/calls/prep/types";
 import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
@@ -42,7 +41,7 @@ export function FramingEntry({
   // The Cadrage has begun: « Reprendre » instead of « Commencer ».
   started: boolean;
   canEdit: boolean;
-  callSheet: CallSheetData;
+  callSheet: CallPrepDefaults | null;
 }) {
   const t = fr.framingIntel;
   const { counts } = assessment;
@@ -109,11 +108,15 @@ export function FramingEntry({
             <>
               {/* In a card, preparing an exchange is the main action
                   (Sacha, 14/10/2026). */}
-              <FramingCallSheet
-                projectId={projectId}
-                data={callSheet}
-                variant="default"
-              />
+              {callSheet && (
+                <CallPrepLauncher
+                  label={t.entry.prepare}
+                  title={t.call.title}
+                  variant="default"
+                >
+                  <CallPrepForm defaults={callSheet} />
+                </CallPrepLauncher>
+              )}
               <Link
                 href={routes.projectFraming(projectId)}
                 className={buttonVariants({ size: "lg", variant: "outline" })}
@@ -159,11 +162,17 @@ export function FramingEntry({
                   </div>
                   <div className="mt-auto">
                     {way === "exchange" ? (
-                      <FramingCallSheet
-                        projectId={projectId}
-                        data={callSheet}
-                        variant="default"
-                      />
+                      callSheet && (
+                        <CallPrepLauncher
+                          label={t.entry.prepare}
+                          title={t.call.title}
+                          body={t.call.body}
+                          mode="sheet"
+                          variant="default"
+                        >
+                          <CallPrepForm defaults={callSheet} />
+                        </CallPrepLauncher>
+                      )
                     ) : (
                       <form action={startFramingWithPo.bind(null, projectId)}>
                         <SubmitButton

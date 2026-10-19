@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PortalShell } from "@/components/portal/portal-shell";
+import {
+  PortalSections,
+  portalTitle,
+} from "@/components/portal/portal-sections";
 import { PublicForm } from "@/components/legal/forms/public-form";
 import {
   DataUseNote,
   RequesterNote,
 } from "@/components/legal/forms/requester-note";
 import { fr } from "@/lib/i18n/fr";
+import { getPortalFrame } from "@/lib/portal/frame";
 import { getPublicForm, noteFormOpened } from "@/lib/legal/forms/public";
 
 const t = fr.legalForms.public;
@@ -26,21 +32,26 @@ export default async function LegalFormPage({
   const form = await getPublicForm(token);
   if (!form) notFound();
   if (form.state === "open") await noteFormOpened(token);
-
-  return (
-    <main className="flex flex-1 justify-center bg-muted/40 px-4 py-12 sm:py-16">
-      <div className="flex w-full max-w-2xl flex-col gap-6">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-balance">
-            {t.title}
-          </h1>
-          {form.state === "open" && (
-            <p className="text-muted-foreground">
-              {t.intro(form.person, form.project, form.requester.organization)}
-            </p>
-          )}
-        </header>
-        {form.state === "open" ? (
+  const frame = await getPortalFrame("form", token);
+  if (form.state === "expired" || form.state === "revoked")
+    return (
+      <PortalShell frame={frame} title={fr.portal.closed}>
+        <p className="text-muted-foreground">{t.states[form.state]}</p>
+      </PortalShell>
+    );
+  const open = form.state === "open";
+  const cards = [
+    {
+      id: "ps-form",
+      title: fr.portal.form.title,
+      state: open ? ("todo" as const) : ("done" as const),
+      action: { label: fr.portal.form.action },
+      order: 1,
+      body: open ? (
+        <>
+          <p className="text-muted-foreground">
+            {t.intro(form.person, form.project, form.requester.organization)}
+          </p>
           <PublicForm
             token={token}
             prefillRoles={form.prefill.roles}
@@ -48,19 +59,24 @@ export default async function LegalFormPage({
             known={{ ...form.prefill.answers, ...form.known }}
             requester={form.requester}
           />
-        ) : (
-          <div className="flex flex-col gap-4 rounded-2xl border bg-background p-6">
-            <p className="font-medium">{t.states[form.state]}</p>
-            <RequesterNote requester={form.requester} />
-          </div>
-        )}
-        {form.state === "open" && (
-          <aside className="flex flex-col gap-5 rounded-2xl border bg-background p-6">
-            <RequesterNote requester={form.requester} />
-            <DataUseNote requester={form.requester} />
-          </aside>
-        )}
-      </div>
-    </main>
+          <RequesterNote requester={form.requester} />
+          <DataUseNote requester={form.requester} />
+        </>
+      ) : (
+        <>
+          <p className="font-medium">{t.states[form.state]}</p>
+          <RequesterNote requester={form.requester} />
+        </>
+      ),
+    },
+  ];
+  return (
+    <PortalShell
+      frame={frame}
+      role={fr.portal.roles.form}
+      title={portalTitle(cards)}
+    >
+      <PortalSections cards={cards} />
+    </PortalShell>
   );
 }

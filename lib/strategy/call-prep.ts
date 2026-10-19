@@ -165,13 +165,3 @@ export function isCallFormat(value: unknown): value is CallFormat {
     (CALL_FORMATS as readonly string[]).includes(value)
   );
 }
-
-/** What « Préparer un échange » opens with, prepared by code. */
-export type StrategyCallSheetData = {
-  topics: StrategyTopic[];
-  purpose: string;
-  // Proposed as participants: the owner, the creative team, the artist.
-  people: string[];
-  // "YYYY-MM-DDTHH:mm", Paris time.
-  defaultOccurredAt: string;
-};

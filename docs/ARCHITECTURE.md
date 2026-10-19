@@ -955,6 +955,67 @@ de call qui donne un lien Google Meet.
 
 ---
 
+## 4 ter. Formulaire de call commun, compte rendu par point, résumé aux participants (18/10/2026)
+
+Sous-lots C8 et C10 de `docs/projet-complet/commons.md` (§ 4 et § 5), proto « Projet complet »
+(`docs/protos/src/mk.js` : `prepGate`, `whoChips`, `agendaRow`, `moveAgenda`, `newPersonModal`, `crLine`,
+`crModal`, `sumDraft`, `summaryBlock`, `summaryFor`).
+
+**Un seul formulaire de call** (`components/calls/prep/`) pour le Cadrage, la Stratégie, la Conception,
+la Production (call de production et call technique) et le Master. Il remplace `ParticipantsField`,
+`AttendeesField`, `AgendaEditor`, `AgendaTopicsField`, `CallRecap`, `PrepareCallSheet`,
+`PrepareExchangeButton` et les cinq formulaires de module (supprimés).
+
+- **Ce que le module calcule** (serveur) : `callPrepDefaults` (`lib/calls/prep/defaults.ts`) reçoit les
+  points de PO (`PreparedPoint` : clé, mots, durée estimée, questions), les participants proposés (ids de
+  personnes ou de contacts, sinon les noms que le module calcule, rapprochés de l'équipe puis du Réseau
+  côté serveur), l'objectif, les faits « Envoyé avec l'invitation », la note. Builders :
+  `lib/framing/call-sheet-data.ts`, `lib/strategy/call-sheet-data.ts`, `lib/design/call-sheet-data.ts`,
+  `lib/production/call-prep-defaults.ts`, `lib/master-workflow/exchange-defaults.ts`.
+- **Participants** : des clés `m:<personId>` (équipe du projet : responsable puis directeurs créatifs, seuls
+  admis par `call_attendees_check`), `c:<contactId>` (Réseau), `e:<adresse>` (tapée). Un contact sans
+  e-mail ne peut pas être invité (même règle que `call_guests`) ; une adresse tapée devient une fiche du
+  Réseau à la confirmation (`fileTypedGuests`). Au moins deux personnes.
+- **Ordre du jour** : la personne ordonne, reformule, retire, ajoute ; les points de PO gardent leur `key`
+  (stockée dans `calls.agenda`), le serveur recalcule les points de PO et n'en reprend que la durée et les
+  questions (`buildPreparedAgenda`, `lib/calls/prepare-schema.ts`) ; une durée absente = l'estimation de PO
+  (5 min pour un point ajouté). Durées et questions repliées sous « Préparer en détail » (décision C0 n° 6).
+- **Action unique** `createPreparedCall(kind, …)` (`lib/calls/prep/actions.ts`) : vérifie le formulaire,
+  recalcule les points (`lib/calls/prep/adapters/<kind>.ts`), résout les participants contre l'équipe et le
+  Réseau lus avec la session, appelle la fonction SQL du module (`create_framing_call`,
+  `create_strategy_call`, `create_design_call`, `create_production_call`, `create_master_exchange`),
+  invite l'équipe (`call_attendees`, notification par trigger), écrit les invités (`call_guests`), crée le
+  lien Meet par Google Agenda quand il est branché (Google envoie alors l'e-mail), sinon rien ne part
+  encore par e-mail et le lien de visio se colle. `stay` : la page reste (l'étape montre
+  `PlannedCallFacts`) ; sinon la page du call s'ouvre.
+- **Conteneur** : tant que l'étape d'une zone ne porte pas le formulaire, `CallPrepLauncher` le pose sous son
+  bouton (`inline`, cartes d'entrée) ou dans le panneau latéral (`sheet`, barres d'outils). Les zones le
+  placent ensuite directement dans l'étape (`<CallPrepForm defaults stay />`).
+
+**Compte rendu rangé par point** : `report_items.agenda_topic` (migration `20261018200101`). L'extraction
+reçoit l'ordre du jour du call avec la transcription (« p1 : … », données, jamais consignes) ; chaque
+décision, question ouverte et action nomme sa clé, le code la vérifie et recopie les mots du point
+(`toReportItemRows`) ; une clé inconnue = « dit en dehors de l'ordre du jour ». `loadMeeting`
+(`lib/calls/meeting/queries.ts`) lit le call et son dernier compte rendu ; **l'état de chaque ligne vient
+du module** (`states`, par id de ligne), jamais du compte rendu. Sur la page du call (`CallMeetingSection`),
+faute d'étape, ce que la clôture a gardé se lit « Confirmé par » qui a clôturé.
+
+**Résumé aux participants** : table `call_summaries` (version, texte, destinataires, `recipient_person_ids`,
+`sent_by`, `sent_at`), plutôt qu'une colonne de `call_report_shares` : un résumé n'est pas un partage du
+compte rendu figé et existe sans clôture. Écriture par `send_call_summary` seule (responsable du call ;
+les membres destinataires doivent être participants ou de l'équipe du projet ; version suivante calculée
+en SQL, les précédentes gardées) ; lecture par qui voit le call ou par les membres destinataires ;
+notification `call_summary_sent` par trigger ; supprimée avec le call (cascade, `delete_project_row`
+supprime les calls). Le brouillon est **écrit par le code** (`summaryDraft`, `lib/calls/meeting/draft.ts`)
+depuis les lignes confirmées ou corrigées : décisions, « À confirmer » (hypothèses), prochaines étapes
+avec qui et quand ; jamais de citation, d'écarté, de point à arbitrer ni de ligne `internal` (budget
+interne). Les destinataires sont relus côté serveur (`sendMeetingSummary`) ; l'e-mail aux externes n'est
+pas branché : l'app le dit (avertissement) sans bloquer.
+
+**Piège** : la contrainte `notifications_kind_check` est réécrite par plusieurs lots en parallèle ; la
+migration y **ajoute** `call_summary_sent` en relisant la liste en place (deux formes possibles de
+`pg_get_constraintdef`). Une migration ultérieure qui réécrit la liste à la main doit garder ce type.
+
 ## 5. IA (`lib/ai/`)
 
 - Points d'entrée uniques : `llm.ts` (`extract`, `getChatModel`) et `transcribe.ts`.
@@ -1980,6 +2041,74 @@ date de sortie de la Stratégie, NDA : à décider).
     formulaire, même ligne que la page Budget ; libellé, montant et statut suffisent.
   - **Brief de stratégie** : prévisionnel, engagé, réel et à arbitrer, un reste par type ;
     les leviers sans dépense n'y sont plus listés (comptés en une ligne).
+
+### Blocages et informations notées d'une étape (C6, 18/10/2026)
+
+- Tables `step_blockers` et `step_notes` (migration `20261018400201`, tests `step-tools.test.sql`) :
+  projet, module (`framing` … `distribution`, sous-modules du Marketing compris), clé d'étape
+  (`JourneyStep.key`), objet facultatif (livrable, activation). Lecture : `can_see_project` ;
+  aucune écriture directe, tout passe par `report_step_blocker`, `lift_step_blocker`,
+  `note_step_information`, `decide_step_note` (sécurité définie, RLS forcée).
+- **Qui écrit** (décision du 18/10/2026, proto `isMember(me())`) : signaler un blocage et noter
+  une information sont ouverts à **toute l'équipe PDS du projet** (qui voit le projet lancé,
+  `step_tools_can_write`), pas seulement au responsable — ce ne sont pas des écritures d'état,
+  une information ne fait jamais avancer une étape. Lever : la personne qui débloque (membre) ou
+  le responsable, avec une explication obligatoire, jamais supprimé. Décider une information
+  (Confirmer, Décider, Écarter, « Fait foi ») : le responsable seul.
+- Qui débloque : un membre, un contact du Réseau (`PersonPickerField`, contacts de l'équipe du
+  projet en tête) ou un nom seul ; le nom est gardé (`unblocker_name`) si le contact est supprimé.
+- Contradiction : une note qui en contredit une autre partage son `contradiction_group` ; tant
+  qu'aucune ne fait foi, c'est un blocage (compté, callout dans l'étape). « Fait foi » décide
+  celle-ci et écarte les autres (`replaced_by_id`), rien ne s'efface.
+- Notifications par trigger : `step_blocker_reported` (qui débloque + responsable),
+  `step_blocker_lifted` (qui l'a signalé + responsable), `step_note_to_decide` (responsable, si
+  à confirmer, en attente de décision ou contradictoire) ; la cloche ouvre l'étape
+  (`lib/step-tools/href.ts`). Le contrôle des genres de notification est **étendu sans être
+  réécrit** (lecture de la contrainte en place), pour ne pas effacer ceux d'une migration voisine.
+- Suppression d'un projet : les deux tables partent en cascade (comme le reste après
+  `delete_project_row`), vérifié par le test. `ProjectLive` : trigger `zz_project_live`.
+- **Activations** : `activation_blockers` reste la table des blocages d'une activation (catégorie,
+  gravité, impact, date de résolution, journal et statut de l'activation) ; non migrée, elle est
+  **lue avec** les blocages communs pour les pastilles (`loadStepTools().activationBlockers`).
+- Code : `lib/step-tools/` (`model.ts`, `queries.ts` `loadStepTools` une lecture par requête,
+  `actions.ts`), composants `components/shell/module/` (`docs/COMPOSANTS.md`). Branché sur le
+  Juridique (`LegalStepFrame`) ; les autres modules s'y branchent avec leur `StepPanel`.
+
+### « Qui fait quoi » commun (C7, 18/10/2026)
+
+- Un seul rendu, `RolesPanel` (`components/shell/module/`), en ligne dans une étape ou dans la
+  modale `RolesDialog` ouverte par `WhoDoesWhatButton` (bouton autonome destiné à `ModuleHeader`).
+  Chaque module construit ses rôles : Production (`WhoDoesWhat` / `ProductionWhoDoesWhatButton` :
+  responsable du projet et de production = Coordonne, société / réalisation / image = Exécute,
+  validation budgétaire = Valide ; historique = organisation et liens, `loadProductionHistory(…,
+  only)` ; le changement passe toujours par « Modifier l'organisation »), Conception
+  (`DesignRoles` / `DesignWhoDoesWhatButton` : responsable du projet, responsable, validateurs, avec
+  « Changer » = les sélecteurs existants en `compact` ; délégations et gouvernance restent dessous).
+- **Liens privés** : n° du lien (compte des liens du contact sur la fiche), créé le … par …
+  (`created_by`), ouvert, expiration ; « Nouveau lien » remplace l'ancien (déjà le cas en SQL).
+  « Copier le lien » n'apparaît que si le module sait redonner le lien : aujourd'hui aucun (jeton
+  gardé en empreinte seule, règle 19) — le lien s'affiche une fois à sa création. « Relancer »
+  demande un `remindHref` (mailto) : non branché tant que l'e-mail réel ne l'est pas.
+
+### Habillage commun des pages privées (C13 A, 18/10/2026)
+
+- `/m`, `/p`, `/f`, `/s`, `/i` gardent chacune leur jeton et leurs fonctions SQL ; elles partagent
+  le cadre `PortalShell` + `PortalSections` (`components/portal/`, `docs/COMPOSANTS.md`). Le cadre
+  (projet, artiste, format, nom de la personne, responsable du projet et son poste) vient d'une
+  seule fonction `get_private_link_frame(kind, token)` (migration `20261018400301`, anon), qui ne
+  rend **que des noms** — jamais un montant, un statut interne ni un échange (test
+  `production-link-confidential.test.sql`). Un lien expiré, remplacé ou révoqué garde le cadre avec
+  « Ce lien n'est plus valable » et la phrase de la page.
+- Chaque page dit ses cartes (`PortalCardItem` : état `todo` / `waiting` / `done`, action et
+  échéance, place dans le parcours) : une carte pour la fiche, la répartition, l'accord, le dossier
+  du mixeur ; les parts du lien prestataire (`linkJourneyCards` : devis, proposition, avancement,
+  lieux, matériel, tâches), la postproduction restant dessous (`ProviderSpaceView`).
+- **Confidentialité** : le lien de la société de production ne reçoit plus l'enveloppe interne
+  (`get_production_link_journey` remplacée, migration `20261018400101`). Revue des autres liens
+  (18/10/2026) : `/m` (dossier sans tarif du Brief), `/f`, `/s` (parts), `/i` (le cachet du créateur,
+  qui est son propre tarif), `/fs`, `/d` (`assertNoBudget`) ne portent aucun montant interne.
+- À venir (lot 11) : un lien par personne et par projet qui réunit les cartes de chaque workflow
+  (`PortalSections` les range déjà sous un intertitre par workflow).
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
@@ -4002,7 +4131,8 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
   modifier ensuite la remet en brouillon. **Liens privés** : la société dépose son devis, coche
   l'avancement de sa préproduction, propose des lieux ; le réalisateur écrit et envoie sa
   proposition ; le chef op envoie sa liste matériel (lignes « Besoin ») ; chacun voit ses tâches
-  (`get_production_link_journey`). Notifications `production_organized`, `production_quote_*`,
+  (`get_production_link_journey`, **jamais l'enveloppe interne** : retirée le 18/10/2026, migration
+  `20261018400101`, test `production-link-confidential.test.sql`, règle 21). Notifications `production_organized`, `production_quote_*`,
   `production_direction_*`. Décisions faute de règle (questions à Ibé) : le validateur des devis est
   proposé à la direction générale ; un chargé de production peut organiser toutes les productions du
   projet (droits par projet, pas par livrable).
