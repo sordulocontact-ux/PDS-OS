@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { can, type Access } from "@/lib/auth/access";
 import { createClient } from "@/lib/supabase/server";
 
@@ -12,30 +14,47 @@ export type ImportableReport = {
   imported: boolean;
 };
 
-/** People who can be named validator or task owner: approved members. */
-export async function loadMembers(access: Access): Promise<Member[]> {
-  const supabase = await createClient();
-  const { data: people } = await supabase
-    .from("people")
-    .select("id, first_name, last_name")
-    .order("first_name");
-  let rows = people ?? [];
+/** People who can be named validator or task owner: approved members.
+ * Read once per request (every workflow's journey asks for them; across
+ * all projects on the home and the Travail). */
+export function loadMembers(access: Access): Promise<Member[]> {
+  return membersOf(can(access, "administer"));
+}
 
+const membersOf = cache(async (admin: boolean): Promise<Member[]> => {
+  const supabase = await createClient();
   // RLS already limits a non-admin to approved members; an admin also sees
   // pending requests, which are filtered out here.
-  if (can(access, "administer")) {
-    const { data: approved } = await supabase
-      .from("memberships")
-      .select("person_id")
-      .eq("status", "approved");
-    const ids = new Set((approved ?? []).map((m) => m.person_id));
+  const [{ data: people }, approved] = await Promise.all([
+    supabase
+      .from("people")
+      .select("id, first_name, last_name")
+      .order("first_name"),
+    admin
+      ? supabase
+          .from("memberships")
+          .select("person_id")
+          .eq("status", "approved")
+      : null,
+  ]);
+  let rows = people ?? [];
+  if (approved) {
+    const ids = new Set((approved.data ?? []).map((m) => m.person_id));
     rows = rows.filter((p) => ids.has(p.id));
   }
   return rows.map((p) => ({
     personId: p.id,
     name: [p.first_name, p.last_name].filter(Boolean).join(" "),
   }));
-}
+});
+
+/** The rows of list_validators (holders of "validate"), once per request. */
+export const listValidatorRows = cache(async (organizationId: string) => {
+  const supabase = await createClient();
+  return supabase.rpc("list_validators", {
+    p_organization_id: organizationId,
+  });
+});
 
 /**
  * Latest report of each call of the project, and whether it was imported into
@@ -164,10 +183,7 @@ export async function loadPendingValidation(
 export async function loadValidators(
   organizationId: string,
 ): Promise<Member[]> {
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("list_validators", {
-    p_organization_id: organizationId,
-  });
+  const { data } = await listValidatorRows(organizationId);
   return (data ?? []).map((v) => ({
     personId: v.person_id,
     name: [v.first_name, v.last_name].filter(Boolean).join(" "),

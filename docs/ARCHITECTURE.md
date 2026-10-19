@@ -1999,29 +1999,42 @@ Spécification : `docs/ASSISTANT.md` (à modifier avant le code).
 - Accueil : `AssistantPanel` + cartes (`components/home/*`) alimentées par `lib/insights/`
   (todo, activité, sorties), les mêmes requêtes que l'assistant.
 
-### Page Travail (`/app/work`)
+### Page Travail (`/app/work`) et accueil : une seule source (finitions, 19/10/2026)
 
-Ce qui attend la personne connectée, **un bloc par permission** (jamais par nom de poste :
-qui cumule plusieurs permissions voit tous les blocs). Seule la phrase d'en-tête dépend du
-poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, RLS.
+Ce qui attend la personne vient **des parcours de chaque projet** (`docs/VISION-UX.md` § 3,
+« Une seule source »), jamais d'une liste à part :
 
-| Permission | Blocs |
-| --- | --- |
-| `validate` | À valider (validations dont on est le validateur) |
-| `assign_projects` | À retransmettre (refusés, précision demandée) · En attente d'un chef de projet |
-| `pilot_projects` | Projets à accepter · Mes projets (lancés, dont on est responsable) avec la **prochaine action** · Livrables à attribuer (sans responsable ou sans échéance) · Propositions de PO de ses projets |
-| `creative_work` | Livrables à concevoir (livrables de Stratégie qui lui sont attribués) · Projets de son équipe créative, Conception signalée |
-| tous | Mes tâches |
-
-- **Prochaine action** : décidée par le code (`lib/work/next-action.ts`) depuis l'étape en
-  cours — Cadrage sans compte rendu de call → planifier/enregistrer le call ; Cadrage →
-  rédiger le Brief ; Stratégie → la construire ; Conception → suivre l'équipe créative ;
-  Livraison → préparer la sortie ; étape soumise → « en attente de validation », rangée
-  après ce que le responsable peut faire. Jamais par PO (règle 6).
-- Le circuit d'attribution (à accepter, à retransmettre, en attente) est calculé par
-  `handoverOf` (`lib/projects/handover.ts`), partagé avec l'accueil.
-- Le directeur créatif ne dépose pas encore de versions : ses livrables mènent à la
-  Stratégie où ils sont engagés. Le dépôt viendra avec la Conception.
+- `loadMyJourneyWork` (`lib/work/journeys.ts`, `cache()`) : pour chaque projet lancé que la
+  personne voit (RLS), `loadShellActions` (`lib/overview/journeys.ts`) = `loadShellJourneys`
+  (la source du Travail, des Validations et des pastilles d'un projet) une fois le plan lancé ;
+  avant, le seul parcours du Cadrage (les autres chargeurs ne sont pas lus). Six projets à la
+  fois (`settleWithLimit`, `lib/utils/parallel.ts`) : tous ensemble, des milliers de requêtes
+  partaient d'un coup et la passerelle répondait « fetch failed ». Un projet en échec est
+  écarté et dit (`error`), jamais lu « rien ».
+- **Travail global** : un projet à accepter d'abord, puis **une carte « À vous » par projet**
+  (`WorkJourneyCards`, en streaming à part dans la grille), décisions marquées « À valider »
+  (acteur `kind: "validate"`) ; puis À retransmettre / En attente d'un chef de projet
+  (`assign_projects`, `handoverOf`), propositions de PO des projets dont on est responsable,
+  et « Mes tâches » réduite aux **tâches libres** (rattachées à aucun workflow, `free` de
+  `loadMyTodo`) : les autres sont des étapes des parcours. Retirés : « Mes projets » et sa
+  prochaine action, livrables à attribuer / à concevoir, conception, décisions de conception,
+  validations d'étape (`validations`) — tous doublaient les parcours.
+- **Accueil** : PO, bienvenue, cartes gardées (projets à accepter, projets en cours,
+  activité, sorties, propositions de PO) ; « Validations qui m'attendent » (les décisions des
+  parcours) et « À vous » (leurs autres actions, lien « Tout le travail ») remplacent « Mes
+  tâches » et l'ancienne carte des validations d'étape (`HomeJourneyCards`, en streaming).
+- **Compteur de « Travail »** dans la barre principale (`components/shell/work-count.tsx`) :
+  dans un projet, celui du projet (son layout) ; hors d'un projet, la **somme des projets**,
+  déclarée projet par projet par l'accueil et le Travail, puis tenue à jour par chaque projet
+  visité. Rien avant le premier passage sur l'accueil ou le Travail (pas de route d'API : le
+  `cache()` de React ne joue pas dans un route handler, la lecture y coûtait deux fois plus).
+- Lectures partagées une fois par requête pour tenir plusieurs projets : `loadMembers`,
+  `listValidatorRows` (`lib/framing/related.ts`), `isWorkflowLaunched`, `readInventoryRows`,
+  `loadIntake` (`memoPerRequest`, `lib/utils/request-memo.ts`, clé explicite pour des
+  arguments objets). Comme `cache()`, ces mémos ne jouent qu'au rendu : une Server Action
+  relit tout (l'avant/après de `withOutcome` reste juste).
+- `lib/work/next-action.ts` ne sert plus qu'à `stageHref`. L'assistant (`my_todo`) lit encore
+  `loadMyTodo` : à rebrancher sur les parcours (non fait ici).
 
 ---
 

@@ -17,6 +17,7 @@ import {
   type QuestionKey,
 } from "@/lib/legal/intake/types";
 import { createClient } from "@/lib/supabase/server";
+import { memoPerRequest } from "@/lib/utils/request-memo";
 
 // The Cadrage juridique of a project in one round of parallel queries, with
 // the viewer's session: RLS shows the legal tables to manage_legal only, and
@@ -41,7 +42,15 @@ export type Intake = {
   clearances: number;
 };
 
-export async function loadIntake(project: {
+/** Once per request for the same project and titles (the Juridique's
+ * journey, its steps done and the workflow statuses all read it). */
+export const loadIntake = memoPerRequest(
+  (project: { id: string; masters: Array<{ id: string; title: string }> }) =>
+    JSON.stringify([project.id, project.masters.map((m) => [m.id, m.title])]),
+  readIntake,
+);
+
+async function readIntake(project: {
   id: string;
   masters: Array<{ id: string; title: string }>;
 }): Promise<Intake> {

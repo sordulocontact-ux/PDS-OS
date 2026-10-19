@@ -27,17 +27,14 @@ import { loadSplits } from "@/lib/legal/splits/queries";
 import { loadTracking } from "@/lib/legal/tracking/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
-import { createClient } from "@/lib/supabase/server";
+import { listValidatorRows } from "@/lib/framing/related";
 import { allInOrder } from "@/lib/utils/parallel";
 
 /** The direction's name when exactly one member validates (« Claire
  * Morel »), else none (« La direction »). */
 async function validatorName(organizationId: string | null) {
   if (!organizationId) return null;
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("list_validators", {
-    p_organization_id: organizationId,
-  });
+  const { data, error } = await listValidatorRows(organizationId);
   if (error) console.error("legal validatorName:", error.message);
   return data && data.length === 1
     ? personName(data[0].first_name, data[0].last_name)

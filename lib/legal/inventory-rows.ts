@@ -26,6 +26,7 @@ import { FORM_ROLES, type FormRole } from "@/lib/legal/forms/definition";
 import type { InventoryMaster } from "@/lib/legal/title-facts";
 import type { LegalSectionKey } from "@/lib/legal/types";
 import { createClient } from "@/lib/supabase/server";
+import { memoPerRequest } from "@/lib/utils/request-memo";
 
 // Every row of the État des lieux in one round of parallel queries, with the
 // viewer's session: RLS decides what appears (splits need manage_catalog, a
@@ -63,9 +64,26 @@ function failed(scope: string, error: { message: string } | null): boolean {
   return error !== null;
 }
 
-export async function readInventoryRows(
+/** Read once per request for the same project, titles and split right:
+ * the Juridique's journey reads it from several of its steps (État des
+ * lieux, Plan, fiches, contrats, répartitions, Suivi). */
+export const readInventoryRows = memoPerRequest(
+  (
+    projectId: string,
+    // The project's titles in its order, with their credited artists.
+    projectMasters: Array<{ id: string; artists: string }>,
+    readSplits: boolean,
+  ) =>
+    JSON.stringify([
+      projectId,
+      projectMasters.map((m) => [m.id, m.artists]),
+      readSplits,
+    ]),
+  readRows,
+);
+
+async function readRows(
   projectId: string,
-  // The project's titles in its order, with their credited artists.
   projectMasters: Array<{ id: string; artists: string }>,
   readSplits: boolean,
 ): Promise<InventoryRows> {

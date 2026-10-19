@@ -16,7 +16,7 @@ export async function CountedProjectSidebar(props: ProjectNavProps) {
   return (
     <>
       <ProjectSidebar {...props} counts={countMine(all)} />
-      <WorkCountReporter count={all.mine.length} />
+      <WorkCountReporter projectId={props.projectId} count={all.mine.length} />
     </>
   );
 }

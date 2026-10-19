@@ -16,3 +16,32 @@ export async function allInOrder<const T extends readonly unknown[]>(
   }
   return values as { -readonly [K in keyof T]: Awaited<T[K]> };
 }
+
+/**
+ * Runs `fn` on every item, at most `limit` at a time, and settles each one
+ * in order (Promise.allSettled's shape). For a fan-out over many records
+ * (every project's journeys) that would otherwise open hundreds of requests
+ * at once: the database's gateway then answers « fetch failed ».
+ */
+export async function settleWithLimit<T, R>(
+  items: readonly T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<PromiseSettledResult<R>[]> {
+  const results: PromiseSettledResult<R>[] = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      try {
+        results[i] = { status: "fulfilled", value: await fn(items[i]) };
+      } catch (reason) {
+        results[i] = { status: "rejected", reason };
+      }
+    }
+  };
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, worker),
+  );
+  return results;
+}

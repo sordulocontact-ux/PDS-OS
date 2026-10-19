@@ -14,6 +14,9 @@ export type TodoTask = {
   // A deliverable assigned to the person is on their plate as any task
   // (UX test of 09/10/2026: « Mes tâches : aucune » next to 2 deliverables).
   kind: "task" | "deliverable";
+  // Tied to no workflow (a task of a call's report, of the old board): the
+  // journeys do not carry it, so the home and the Travail still list it.
+  free: boolean;
   title: string;
   // Null only for a task of the Juridique's plan without a date.
   dueDate: string | null;
@@ -68,7 +71,7 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
     supabase
       .from("tasks")
       .select(
-        "id, title, due_date, project_id, legal_plan_item_id, master_question_id, deliverable_id, activation_id, strategy_recommendations(id), design_version_id",
+        "id, title, due_date, project_id, legal_plan_item_id, master_question_id, deliverable_id, activation_id, strategy_recommendations(id), design_version_id, strategy_reserve_id, design_decision_id",
       )
       .eq("assignee_person_id", me)
       .eq("status", "todo")
@@ -131,6 +134,15 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
       {
         id: t.id,
         kind: "task" as const,
+        free:
+          !t.legal_plan_item_id &&
+          !t.master_question_id &&
+          !t.deliverable_id &&
+          !t.activation_id &&
+          !t.design_version_id &&
+          !t.strategy_reserve_id &&
+          !t.design_decision_id &&
+          t.strategy_recommendations.length === 0,
         title: t.title,
         dueDate: t.due_date,
         overdue: t.due_date !== null && isOverdue(t.due_date, today),
@@ -154,6 +166,7 @@ export async function loadMyTodo(access: Access): Promise<Todo> {
       {
         id: d.id,
         kind: "deliverable" as const,
+        free: false,
         title: d.title,
         dueDate: d.due_date,
         overdue: d.due_date !== null && isOverdue(d.due_date, today),
@@ -215,7 +228,9 @@ export function byUrgency(a: TodoTask, b: TodoTask): number {
   );
 }
 
-/** Tasks and deliverables together: everything on the person's plate. */
-export function plateOf(todo: Todo): TodoTask[] {
-  return [...todo.tasks, ...todo.deliverables].sort(byUrgency);
+/** The tasks tied to no workflow: what the journeys do not already list
+ * (docs/VISION-UX.md § 3, « Une seule source »), for the home and the
+ * Travail. */
+export function freeTasksOf(todo: Todo): TodoTask[] {
+  return todo.tasks.filter((task) => task.free);
 }
