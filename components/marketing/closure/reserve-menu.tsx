@@ -60,8 +60,12 @@ export function ReserveMenu({
   members,
   others,
   tasks,
+  inline = false,
 }: {
   projectId: string;
+  // The step « Réserves » arbitrates an open reserve and lifts one in
+  // place: the menu keeps the rest (re-arbitrate, note, tasks).
+  inline?: boolean;
   reserve: ReserveMenuReserve;
   role: {
     owner: boolean;
@@ -95,7 +99,10 @@ export function ReserveMenu({
   const followUp = r.status === "arbitrated" && r.decision === "follow_up";
 
   const actions: RowAction[] = [
-    ...(live && !role.closed && decisions.length > 0
+    ...(live &&
+    !role.closed &&
+    decisions.length > 0 &&
+    !(inline && r.status === "open")
       ? [
           {
             key: "arbitrate",
@@ -105,7 +112,7 @@ export function ReserveMenu({
           },
         ]
       : []),
-    ...(liftable
+    ...(liftable && !inline
       ? [
           {
             key: "lift",
@@ -147,6 +154,7 @@ export function ReserveMenu({
       : []),
   ];
 
+  if (actions.length === 0) return null;
   return (
     <>
       <RowActions label={t.menu(r.description)} actions={actions} />

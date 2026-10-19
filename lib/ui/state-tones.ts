@@ -1156,3 +1156,15 @@ export const noteStatusTone: Record<
   pending_decision: "info",
   decided: "success",
 };
+
+// « Avant la clôture » of the Marketing (proto `bi3`): Prêt, Pas prêt,
+// Attention, Avec réserves.
+export const reviewCheckTone: Record<
+  "ready" | "not_ready" | "attention" | "with_reserves",
+  Tone
+> = {
+  ready: "success",
+  not_ready: "danger",
+  attention: "warning",
+  with_reserves: "neutral",
+};

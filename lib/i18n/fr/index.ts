@@ -62,6 +62,7 @@ import { library } from "./library";
 import { masterBrief } from "./master-brief";
 import { masterFinal } from "./master-final";
 import { masterJourney } from "./master-journey";
+import { reviewJourney } from "./review-journey";
 import { masterPage } from "./master-page";
 import { masterRound } from "./master-round";
 import { masterSource } from "./master-source";
@@ -233,6 +234,7 @@ export const fr = {
   legalSplits,
   masterWorkflow,
   masterJourney,
+  reviewJourney,
   masterBrief,
   masterRound,
   masterFinal,

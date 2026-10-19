@@ -10,6 +10,7 @@ import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
 import { legalJourneys } from "./legal";
 import { masterJourneys } from "./master";
+import { reviewJourneys } from "./review";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -22,9 +23,9 @@ type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 const label = fr.shell.project.sidebar;
 const parts = fr.shell.project.marketingSteps;
 
-// Marketing: each deliverable's Production once its sheet is opened, and the
-// Conception (lib/journey/conception.ts). Stratégie, Activations and Suivi &
-// bilan come with their zone.
+// Marketing: each deliverable's Production once its sheet is opened, the
+// Conception (lib/journey/conception.ts) and the Suivi & bilan (lib/journey/
+// review.ts). Stratégie and Activations come with their zone.
 const marketing: Loader = async (projectId) => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -32,8 +33,9 @@ const marketing: Loader = async (projectId) => {
     .select("deliverable_id")
     .eq("project_id", projectId);
   if (error) console.error("loadProjectJourneys production:", error.message);
-  const [design, ...productions] = await Promise.all([
+  const [design, review, ...productions] = await Promise.all([
     conceptionJourney(projectId),
+    reviewJourneys(projectId),
     ...(data ?? []).map(async ({ deliverable_id: id }) => {
       const ctx = await journeyContext(projectId, id);
       const started = Boolean(
@@ -54,7 +56,7 @@ const marketing: Loader = async (projectId) => {
         : [];
     }),
   ]);
-  return [...design, ...productions.flat()];
+  return [...design, ...productions.flat(), ...review];
 };
 
 // Filled by their zone (C4: typed, empty until then).

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
 import { RESERVE_DECISIONS } from "@/lib/marketing/closure/reserves";
 import { RESERVE_CATEGORIES } from "@/lib/marketing/reports/model";
 import { marketingFailure } from "@/lib/marketing/result";
@@ -41,12 +42,19 @@ async function run(
   call: (
     supabase: Awaited<ReturnType<typeof createClient>>,
   ) => PromiseLike<{ error: { code?: string; message?: string } | null }>,
+  // The gesture said by the result banner (arbitrate, lift): what follows
+  // is read before and after (withOutcome).
+  said?: string,
 ): Promise<WriteResult> {
   await requireApproved();
-  const { error } = await call(await createClient());
-  if (error) return failure(error);
-  revalidatePath(routes.projectReview(projectId), "layout");
-  return { ok: true };
+  const supabase = await createClient();
+  const write = async (): Promise<WriteResult> => {
+    const { error } = await call(supabase);
+    if (error) return failure(error);
+    revalidatePath(routes.projectReview(projectId), "layout");
+    return { ok: true };
+  };
+  return said ? withOutcome(projectId, ["marketing"], said, write) : write();
 }
 
 const invalid = { ok: false, error: fr.marketing.errors.invalid } as const;
@@ -72,18 +80,21 @@ export async function arbitrateReserve(
   const p = arbitrateInput.safeParse(input);
   if (!p.success) return invalid;
   const d = p.data;
-  return run(d.projectId, (supabase) =>
-    supabase.rpc("arbitrate_marketing_reserve", {
-      p_reserve_id: d.reserveId,
-      p_decision: d.decision,
-      p_reason: d.reason,
-      // Optional in SQL; the generated types cannot say an argument is
-      // nullable.
-      p_follow_up_person_id: d.followUpPersonId as string,
-      p_follow_up_due_on: (d.followUpDueOn || null) as string,
-      p_follow_up_channel: d.followUpChannel,
-      p_duplicate_of: d.duplicateOf as string,
-    }),
+  return run(
+    d.projectId,
+    (supabase) =>
+      supabase.rpc("arbitrate_marketing_reserve", {
+        p_reserve_id: d.reserveId,
+        p_decision: d.decision,
+        p_reason: d.reason,
+        // Optional in SQL; the generated types cannot say an argument is
+        // nullable.
+        p_follow_up_person_id: d.followUpPersonId as string,
+        p_follow_up_due_on: (d.followUpDueOn || null) as string,
+        p_follow_up_channel: d.followUpChannel,
+        p_duplicate_of: d.duplicateOf as string,
+      }),
+    fr.reviewJourney.reserves.arbitrated,
   );
 }
 
@@ -100,11 +111,14 @@ export async function liftReserve(
   const p = noteInput.safeParse(input);
   if (!p.success || p.data.note.length > 1000) return invalid;
   const d = p.data;
-  return run(d.projectId, (supabase) =>
-    supabase.rpc("lift_marketing_reserve", {
-      p_reserve_id: d.reserveId,
-      p_note: d.note,
-    }),
+  return run(
+    d.projectId,
+    (supabase) =>
+      supabase.rpc("lift_marketing_reserve", {
+        p_reserve_id: d.reserveId,
+        p_note: d.note,
+      }),
+    fr.reviewJourney.reserves.lifted,
   );
 }
 

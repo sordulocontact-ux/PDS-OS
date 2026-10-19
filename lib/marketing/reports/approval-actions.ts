@@ -6,17 +6,22 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
 import { APPROVAL_DECISIONS } from "@/lib/marketing/reports/model";
 import { marketingFailure } from "@/lib/marketing/result";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
 // Écran 3 (ticket « Suivi & bilan »): submitting a version, then the
-// validator's decision on that precise version. Who may do what is decided
-// by the database (owner submits, holder of « validate » decides, never on a
-// version they prepared).
+// validator's decision on that precise version, both in the step « Bilan
+// provisoire ». Who may do what is decided by the database (owner submits,
+// holder of « validate » decides, never on a version they prepared). Each
+// says what follows (withOutcome) and sends the pushes of the notifications
+// its triggers wrote.
 
 const e = fr.marketingReview.approval.errors;
+const b = fr.reviewJourney.bilan;
 
 function failure(
   error: { code?: string; message?: string },
@@ -52,10 +57,14 @@ export async function submitReport(
   if (!p.success) return { ok: false, error: fr.marketing.errors.invalid };
   await requireApproved();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("submit_marketing_report", {
-    p_report_id: p.data.reportId,
+  return withOutcome(p.data.projectId, ["marketing"], b.submitted, async () => {
+    const { error } = await supabase.rpc("submit_marketing_report", {
+      p_report_id: p.data.reportId,
+    });
+    if (error) return failure(error, e.submitForbidden);
+    await schedulePendingPushes();
+    return done(p.data.projectId);
   });
-  return error ? failure(error, e.submitForbidden) : done(p.data.projectId);
 }
 
 const decideInput = z.object({
@@ -76,11 +85,20 @@ export async function decideReport(
     return { ok: false, error: e.commentRequired };
   await requireApproved();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("decide_marketing_report", {
-    p_report_id: p.data.reportId,
-    p_expected_version: p.data.version,
-    p_decision: p.data.decision,
-    p_comment: p.data.comment,
+  const said = {
+    approved_provisional: b.decision.approved,
+    changes_requested: b.decision.changesDone,
+    postponed: b.decision.postponed,
+  }[p.data.decision];
+  return withOutcome(p.data.projectId, ["marketing"], said, async () => {
+    const { error } = await supabase.rpc("decide_marketing_report", {
+      p_report_id: p.data.reportId,
+      p_expected_version: p.data.version,
+      p_decision: p.data.decision,
+      p_comment: p.data.comment,
+    });
+    if (error) return failure(error, e.forbidden);
+    await schedulePendingPushes();
+    return done(p.data.projectId);
   });
-  return error ? failure(error, e.forbidden) : done(p.data.projectId);
 }
