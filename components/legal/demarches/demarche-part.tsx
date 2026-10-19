@@ -11,6 +11,7 @@ import { NextCard } from "@/components/ui/next-card";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { fr } from "@/lib/i18n/fr";
 import type { Clearances } from "@/lib/legal/clearance/types";
+import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import type { BoardRow } from "@/lib/legal/plan/board";
 
 /**
@@ -24,6 +25,8 @@ export function DemarchePart({
   row,
   clearances,
   proof,
+  cards,
+  owner,
 }: {
   projectId: string;
   projectTitle: string;
@@ -31,6 +34,8 @@ export function DemarchePart({
   // The borrowings' context (who validates, the organization).
   clearances: Clearances;
   proof: Record<string, ContractProof>;
+  cards: Record<string, ContractCardData>;
+  owner: string;
 }) {
   const panel = row.panel;
   switch (panel.kind) {
@@ -54,7 +59,12 @@ export function DemarchePart({
       return (
         <ContractPanel
           projectId={projectId}
+          projectTitle={projectTitle}
           row={panel.row}
+          owner={owner}
+          card={
+            panel.row.contract ? (cards[panel.row.contract.id] ?? null) : null
+          }
           canValidate={clearances.canValidate}
           organizationId={clearances.organizationId}
           proof={

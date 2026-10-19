@@ -49,11 +49,16 @@ export function TemplateForm({
   initial,
   onDone,
   onCancel,
+  request,
+  submitLabel,
 }: {
   organizationId: string;
   initial?: TemplateDraft;
   onDone: () => void;
   onCancel: () => void;
+  // Made for a person of « Contrats à prévoir »: asked of the direction.
+  request?: { projectId: string; key: string; name: string };
+  submitLabel?: string;
 }) {
   const t = fr.legalContracts.templates;
   const [pending, startTransition] = useTransition();
@@ -109,8 +114,10 @@ export function TemplateForm({
               name: String(form.get("source_name") ?? ""),
             }
           : null,
+        request,
       });
       if (!result.ok) return setError(result.error);
+      if (request) toast.success(`${fr.legalDocuments.template.sent}.`);
       onDone();
     });
   }
@@ -224,7 +231,7 @@ export function TemplateForm({
           disabled={pending}
           aria-busy={pending || undefined}
         >
-          {pending ? t.form.submitting : t.form.submit}
+          {pending ? t.form.submitting : (submitLabel ?? t.form.submit)}
         </Button>
       </div>
     </form>

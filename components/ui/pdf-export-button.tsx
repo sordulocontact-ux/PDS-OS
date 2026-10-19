@@ -32,6 +32,7 @@ export function PdfExportButton({
   pendingLabel,
   failedLabel,
   variant = "default",
+  size = "lg",
 }: {
   href: string;
   fileName: string;
@@ -40,6 +41,8 @@ export function PdfExportButton({
   // The generation failed on the server.
   failedLabel: string;
   variant?: "default" | "outline";
+  // « sm » in the head of a document card (DocumentCard).
+  size?: "lg" | "sm";
 }) {
   const t = fr.pdf;
   const [exporting, setExporting] = useState(false);
@@ -98,7 +101,7 @@ export function PdfExportButton({
 
   return (
     <Button
-      size="lg"
+      size={size}
       variant={variant}
       disabled={exporting}
       aria-busy={exporting}

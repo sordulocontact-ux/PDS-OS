@@ -1,4 +1,5 @@
 import { MappingPanel } from "@/components/legal/contracts/mapping-panel";
+import { TemplateRequestCard } from "@/components/legal/contracts/template-request-card";
 import { LaunchedDemarches } from "@/components/legal/demarches/launched-demarches";
 import { LegalStepFrame } from "@/components/legal/legal-step-frame";
 import { PlanView } from "@/components/legal/plan/plan-view";
@@ -6,6 +7,7 @@ import { AddedActions } from "@/components/legal/tracking/added-actions";
 import { PageSection } from "@/components/shell/page-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
+import { latestRequestOf } from "@/lib/legal/contracts/template-requests";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 
 /**
@@ -15,9 +17,37 @@ import { legalJourneyContext } from "@/lib/legal/journey-context";
  * keeps the contracts, the démarches that appeared since and their list.
  */
 export async function PlanStep({ projectId }: { projectId: string }) {
-  const { plan, tracking, agreements, demarches, clearances } =
-    await legalJourneyContext(projectId);
+  const {
+    plan,
+    tracking,
+    agreements,
+    demarches,
+    clearances,
+    templateRequests,
+    direction,
+  } = await legalJourneyContext(projectId);
   const t = fr.legalJourney.plan;
+  // The direction decides on the templates asked from this project here.
+  const toDecide = clearances.canValidate
+    ? templateRequests.filter((r) => r.status === "draft")
+    : [];
+  const requests = Object.fromEntries(
+    [...latestRequestOf(templateRequests)].map(([key, r]) => [
+      key,
+      { name: r.name, pending: r.status === "draft", refusal: r.refusal },
+    ]),
+  );
+  const decisions = toDecide.length > 0 && (
+    <div className="flex flex-col gap-4">
+      {toDecide.map((request) => (
+        <TemplateRequestCard
+          key={request.id}
+          projectId={projectId}
+          request={request}
+        />
+      ))}
+    </div>
+  );
   const contracts = agreements.rows.length > 0 &&
     plan.state !== "needs_confirmation" && (
       <PageSection
@@ -30,6 +60,8 @@ export async function PlanStep({ projectId }: { projectId: string }) {
           rows={agreements.rows}
           approval={agreements.approval}
           organizationId={clearances.organizationId}
+          requests={requests}
+          direction={direction ?? fr.legalDemarches.direction}
         />
       </PageSection>
     );
@@ -40,6 +72,7 @@ export async function PlanStep({ projectId }: { projectId: string }) {
           <ToneCallout tone="success">
             {t.launched(demarches.length)}
           </ToneCallout>
+          {decisions}
           {tracking.state === "tracking" && tracking.added > 0 && (
             <AddedActions projectId={projectId} count={tracking.added} />
           )}
@@ -48,6 +81,7 @@ export async function PlanStep({ projectId }: { projectId: string }) {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
+          {decisions}
           {contracts}
           <PlanView projectId={projectId} plan={plan} />
         </div>

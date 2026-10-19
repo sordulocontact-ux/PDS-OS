@@ -3248,6 +3248,7 @@ export type Database = {
       }
       contract_documents: {
         Row: {
+          clause: string | null
           body: string
           comment: string | null
           contract_id: string
@@ -3261,6 +3262,7 @@ export type Database = {
           version: number
         }
         Insert: {
+          clause?: string | null
           body: string
           comment?: string | null
           contract_id: string
@@ -3274,6 +3276,7 @@ export type Database = {
           version: number
         }
         Update: {
+          clause?: string | null
           body?: string
           comment?: string | null
           contract_id?: string
@@ -3435,6 +3438,9 @@ export type Database = {
       }
       contract_templates: {
         Row: {
+          requested_for: string | null
+          requested_key: string | null
+          requested_project_id: string | null
           retired_by: string | null
           retired_reason: string | null
           body: string
@@ -3457,6 +3463,9 @@ export type Database = {
           version: number
         }
         Insert: {
+          requested_for?: string | null
+          requested_key?: string | null
+          requested_project_id?: string | null
           retired_by?: string | null
           retired_reason?: string | null
           body: string
@@ -3479,6 +3488,9 @@ export type Database = {
           version: number
         }
         Update: {
+          requested_for?: string | null
+          requested_key?: string | null
+          requested_project_id?: string | null
           retired_by?: string | null
           retired_reason?: string | null
           body?: string
@@ -18324,6 +18336,14 @@ export type Database = {
       review_production_location_by_link:
         | { Args: { p_comment: string | null; p_option_id: string; p_token: string; p_verdict: string }; Returns: undefined }
         | { Args: { p_comment: string | null; p_contact_token: string; p_item_id: string; p_option_id: string; p_verdict: string }; Returns: undefined }
+      request_contract_template: {
+        Args: { p_for: string; p_key: string; p_project_id: string; p_template_id: string }
+        Returns: undefined
+      }
+      revise_contract_clause: {
+        Args: { p_body: string; p_clause: string; p_contract_id: string; p_reason: string }
+        Returns: undefined
+      }
       revise_contract_document: {
         Args: { p_body: string; p_comment: string; p_contract_id: string }
         Returns: undefined

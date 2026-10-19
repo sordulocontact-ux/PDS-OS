@@ -8,6 +8,7 @@ import {
   MappingRow,
   NO_DEAL,
   type MappingChoice,
+  type RequestState,
 } from "@/components/legal/contracts/mapping-row";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
@@ -46,12 +47,16 @@ export function MappingForm({
   projectId,
   rows,
   organizationId,
+  requests,
+  direction,
   onDone,
   onCancel,
 }: {
   projectId: string;
   rows: AgreementRow[];
   organizationId: string | null;
+  requests: Record<string, RequestState>;
+  direction: string;
   onDone: () => void;
   onCancel?: () => void;
 }) {
@@ -69,7 +74,12 @@ export function MappingForm({
   const errorsOf = (row: AgreementRow) => {
     const c = choices[row.key];
     if (!tried || !c) return {};
-    if (!c.choice) return { choice: t.plan.choiceMissing(row.name) };
+    if (!c.choice)
+      return {
+        choice: requests[row.key]?.pending
+          ? fr.legalDocuments.template.waits(row.name, direction)
+          : t.plan.choiceMissing(row.name),
+      };
     if (c.choice === NO_DEAL && !c.reason.trim())
       return { reason: t.errors.reason };
     return {};
@@ -130,6 +140,9 @@ export function MappingForm({
             onChange={(change) => set(row.key, change)}
             errors={errorsOf(row)}
             organizationId={organizationId}
+            projectId={projectId}
+            request={requests[row.key] ?? null}
+            direction={direction}
           />
         ))}
       </ul>
