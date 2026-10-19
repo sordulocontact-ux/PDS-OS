@@ -3,7 +3,6 @@ import { ReturnCallout } from "@/components/ui/return-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import { bilanIssues } from "@/lib/marketing/review/issues";
-import { phaseOf } from "@/lib/marketing/review/phase";
 import { createClient } from "@/lib/supabase/server";
 import { formatDay } from "@/lib/utils/day";
 
@@ -78,12 +77,12 @@ export async function BilanStep({ ctx }: { ctx: ReviewContext }) {
         issues={issues}
         carried={open.length}
         activations={activations.map((a) => {
-          const phase = phaseOf(a);
+          const phase = a.phase;
           return {
             id: a.id,
             title: a.title,
             state:
-              phase === null
+              phase === -1
                 ? t.scopeState.cancelled
                 : phase === 5
                   ? t.scopeState.closed

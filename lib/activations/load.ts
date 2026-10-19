@@ -39,6 +39,7 @@ export function toActivation(r: ActivationRow): ActivationRecord {
     statusReason: r.status_reason,
     evidenceExpected: r.evidence_expected,
     metricsExpected: r.metrics_expected,
+    metricsUnavailable: r.metrics_unavailable,
     closureKind: r.closure_kind as ActivationRecord["closureKind"],
     closureReserves: Array.isArray(r.closure_reserves)
       ? (r.closure_reserves as Reserve[])
@@ -163,6 +164,7 @@ export const loadActivationData = cache(async (projectId: string) => {
     periodEnd: m.period_end,
     source: m.source as MetricRecord["source"],
     method: m.method,
+    partial: m.partial,
     collectedOn: m.collected_on,
     verification: m.verification as MetricRecord["verification"],
     invalidatedAt: m.invalidated_at,

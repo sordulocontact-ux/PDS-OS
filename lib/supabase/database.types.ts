@@ -1536,6 +1536,7 @@ export type Database = {
           method: string | null
           metric: string
           organization_id: string
+          partial: boolean
           period_end: string | null
           period_start: string | null
           platform: string | null
@@ -1560,6 +1561,7 @@ export type Database = {
           method?: string | null
           metric: string
           organization_id: string
+          partial?: boolean
           period_end?: string | null
           period_start?: string | null
           platform?: string | null
@@ -1584,6 +1586,7 @@ export type Database = {
           method?: string | null
           metric?: string
           organization_id?: string
+          partial?: boolean
           period_end?: string | null
           period_start?: string | null
           platform?: string | null
@@ -7829,6 +7832,7 @@ export type Database = {
           kind: string
           lever_id: string | null
           metrics_expected: boolean
+          metrics_unavailable: boolean
           mode: string | null
           objective: string | null
           organization_id: string
@@ -7860,6 +7864,7 @@ export type Database = {
           kind: string
           lever_id?: string | null
           metrics_expected?: boolean
+          metrics_unavailable?: boolean
           mode?: string | null
           objective?: string | null
           organization_id: string
@@ -7891,6 +7896,7 @@ export type Database = {
           kind?: string
           lever_id?: string | null
           metrics_expected?: boolean
+          metrics_unavailable?: boolean
           mode?: string | null
           objective?: string | null
           organization_id?: string

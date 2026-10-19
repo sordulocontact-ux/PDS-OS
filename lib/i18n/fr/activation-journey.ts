@@ -107,7 +107,6 @@ export const activationJourney = {
     },
     partial:
       "Relevé partiel (toutes les publications ne sont pas encore comptées)",
-    partialNote: "Relevé partiel",
     unavailable: "Donnée indisponible : la plateforme ne la fournit pas",
     save: "Enregistrer le relevé",
     add: "Ajouter un relevé",
@@ -196,6 +195,7 @@ export const activationJourney = {
     proof: "Preuve",
     stats: "Statistiques",
     lastSnapshot: "dernier relevé",
+    statsUnavailable: "Donnée indisponible",
     notExpectedWhy: (why: string) => `Non attendue · « ${why} »`,
     unavailableWhy: (why: string) => `Indisponible · « ${why} »`,
   },
@@ -337,6 +337,7 @@ export const activationJourney = {
     resumed: "Activation reprise",
     cancelled: "Activation annulée",
     notApplicable: "Marqué sans objet",
+    statsUnavailable: "Statistiques indisponibles",
     task: "Tâche créée dans Travail",
     created: (title: string) => `${title} : activation créée`,
     later: "Reporté : vous pourrez la créer plus tard",

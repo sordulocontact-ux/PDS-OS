@@ -106,11 +106,7 @@ function FigureDialog({
       description={figure ? t.rule(figure.rule) : ""}
       closeLabel={fr.dialogs.close}
     >
-      {figure?.unsourced ? (
-        <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
-          {t.unsourced}
-        </p>
-      ) : figure && figure.items.length > 0 ? (
+      {figure && figure.items.length > 0 ? (
         <ul className="flex flex-col">
           {figure.items.map((item) => (
             <li

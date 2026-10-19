@@ -122,8 +122,9 @@ export async function decideProof(input: {
 
 const SOURCES = ["internal", "creator", "agency", "platform"] as const;
 
-/** « Enregistrer le relevé » : a declared snapshot, never summed ; « Donnée
- * indisponible » says the statistics will not come (not expected). */
+/** « Enregistrer le relevé » : a declared snapshot, never summed, partial
+ * when ticked ; « Donnée indisponible » says the statistics will not come
+ * (« Indisponibles », not « Non attendues ») — a later reading lifts it. */
 export async function recordSnapshot(input: {
   projectId: string;
   activationId: string;
@@ -155,11 +156,11 @@ export async function recordSnapshot(input: {
     return withOutcome(
       d.projectId,
       ["marketing"],
-      t.done.notApplicable,
+      t.done.statsUnavailable,
       async () => {
         const { error } = await supabase
           .from("marketing_activations")
-          .update({ metrics_expected: false })
+          .update({ metrics_unavailable: true })
           .eq("id", d.activationId);
         return error ? activationFailure(error) : activationDone(d.projectId);
       },
@@ -185,12 +186,20 @@ export async function recordSnapshot(input: {
       period_start: d.from,
       period_end: d.to,
       source: d.source,
-      method: d.partial ? t.snapshot.partialNote : null,
+      partial: d.partial,
       collected_on: todayInParis(),
       organization_id: access.organizationId ?? "",
       project_id: d.projectId,
     });
-    return error ? activationFailure(error) : activationDone(d.projectId);
+    if (error) return activationFailure(error);
+    const lifted = await supabase
+      .from("marketing_activations")
+      .update({ metrics_unavailable: false })
+      .eq("id", d.activationId)
+      .eq("metrics_unavailable", true);
+    return lifted.error
+      ? activationFailure(lifted.error)
+      : activationDone(d.projectId);
   });
 }
 

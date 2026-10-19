@@ -27,7 +27,8 @@ export type MeasureState =
   | "to_collect"
   | "partial"
   | "available_declared"
-  | "available_verified";
+  | "available_verified"
+  | "unavailable";
 
 export type EvidenceFact = {
   id: string;
@@ -42,6 +43,7 @@ export type MetricFact = {
   agencyRowId: string | null;
   verification: MetricVerification;
   valid: boolean;
+  partial: boolean;
 };
 
 export type DependencyFact = {
@@ -60,6 +62,8 @@ export type ActivationFacts = {
   dueOn: string | null;
   evidenceExpected: boolean;
   metricsExpected: boolean;
+  // « Donnée indisponible : la plateforme ne la fournit pas ».
+  metricsUnavailable: boolean;
   evidences: EvidenceFact[];
   metrics: MetricFact[];
   // Targets still expected to produce something (no outcome other than
@@ -116,10 +120,18 @@ export function proofState(f: ActivationFacts): ProofState {
   return "verified";
 }
 
+/**
+ * The statistics (proto STSTATE): not expected (« Sans objet »), declared
+ * unavailable, to collect, partial — the latest reading is partial, or a
+ * creator or media still has none —, then available, declared or verified.
+ * `metrics` come newest first.
+ */
 export function measureState(f: ActivationFacts): MeasureState {
   if (!f.metricsExpected) return "not_expected";
+  if (f.metricsUnavailable) return "unavailable";
   const valid = f.metrics.filter((m) => m.valid);
   if (valid.length === 0) return "to_collect";
+  if (valid[0].partial) return "partial";
   const measured = new Set(
     valid.flatMap((m) => (m.targetId ? [m.targetId] : [])),
   );
@@ -274,6 +286,7 @@ export function reservesOf(f: ActivationFacts): Reserve[] {
     reserves.push({ key: "metrics_missing" });
   if (measure === "available_declared")
     reserves.push({ key: "metrics_declared" });
+  if (measure === "unavailable") reserves.push({ key: "metrics_unavailable" });
   if (f.openBlockers.length > 0)
     reserves.push({ key: "open_blockers", count: f.openBlockers.length });
   if (f.openTargetCount > 0)

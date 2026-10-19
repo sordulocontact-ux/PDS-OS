@@ -57,6 +57,7 @@ export const activations = {
       partial: "Partielles",
       available_declared: "Disponibles, déclarées",
       available_verified: "Disponibles, vérifiées",
+      unavailable: "Indisponibles",
     },
   },
   views: {
@@ -542,6 +543,7 @@ export const activations = {
     invalidateReason: "Raison",
     invalidated: "Relevé invalidé.",
     invalidatedLabel: "Invalidé",
+    partialMark: "partiel",
     none: "Aucune statistique relevée.",
     period: (from: string | null, to: string | null) =>
       from && to
@@ -657,6 +659,7 @@ export const activations = {
       proof_problem: "Preuve contestée ou indisponible",
       metrics_missing: "Aucune statistique relevée",
       metrics_declared: "Statistiques déclarées, non vérifiées",
+      metrics_unavailable: "Statistiques indisponibles",
       open_blockers: (n: number) =>
         `${n} ${plural(n, "blocage ouvert", "blocages ouverts")}`,
       open_targets: (n: number) =>

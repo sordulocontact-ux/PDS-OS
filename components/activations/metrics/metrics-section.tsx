@@ -125,6 +125,12 @@ export function MetricsSection({
                   </DataTableCell>
                   <DataTableCell align="end" className="tabular-nums">
                     {formatMetric(m.value, m.unit)}
+                    {m.partial && (
+                      <span className="text-[length:var(--type-micro)] text-[color:var(--text-tertiary)]">
+                        {" "}
+                        · {t.partialMark}
+                      </span>
+                    )}
                   </DataTableCell>
                   <DataTableCell hideBelow="md">
                     {t.sources[m.source]}

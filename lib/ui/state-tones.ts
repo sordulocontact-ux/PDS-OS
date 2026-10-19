@@ -914,6 +914,7 @@ export const measureTone: Record<string, Tone> = {
   partial: "warning",
   available_declared: "action",
   available_verified: "success",
+  unavailable: "neutral",
 };
 
 /** A versioned sheet (framing, concept) and a message to an outside party. */

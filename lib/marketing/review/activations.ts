@@ -2,98 +2,35 @@ import "server-only";
 
 import { cache } from "react";
 
-import { requireApproved } from "@/lib/auth/dal";
-import { loadMembers } from "@/lib/framing/related";
-import { createClient } from "@/lib/supabase/server";
+import { loadActivationsBoard } from "@/lib/activations/board";
+import { loadActivationPeople } from "@/lib/activations/people";
+import { phaseOf } from "@/lib/activations/phase";
 
-import {
-  measureOf,
-  proofOf,
-  type RawActivationStatus,
-  type ReviewActivation,
-} from "./phase";
-
-const STATUSES: readonly string[] = [
-  "draft",
-  "to_prepare",
-  "ready",
-  "in_progress",
-  "done_declared",
-  "closed",
-  "cancelled",
-  "suspended",
-  "blocked",
-];
-const isStatus = (v: string): v is RawActivationStatus => STATUSES.includes(v);
+import type { ReviewActivation } from "./review-activation";
 
 /**
- * The project's activations as the Suivi & bilan reads them (phase.ts):
- * the Activations' tables as they are, with the viewer's session (RLS
- * decides), once per request.
+ * The project's activations as the Suivi & bilan reads them: the
+ * Activations' own summaries (lib/activations/board.ts, cached per request
+ * and already read by the project's journeys), with the viewer's session
+ * (RLS decides) — the same phase, proof and statistics on both screens.
  */
 export const loadReviewActivations = cache(
   async (projectId: string): Promise<ReviewActivation[]> => {
-    const [supabase, access] = await Promise.all([
-      createClient(),
-      requireApproved(),
+    const [board, people] = await Promise.all([
+      loadActivationsBoard(projectId),
+      loadActivationPeople(projectId),
     ]);
-    const [acts, evidence, checks, metrics, members] = await Promise.all([
-      supabase
-        .from("marketing_activations")
-        .select(
-          "id, title, status, status_reason, owner_person_id, starts_on, due_on, evidence_expected, metrics_expected, created_at",
-        )
-        .eq("project_id", projectId)
-        .order("created_at"),
-      supabase
-        .from("activation_evidence")
-        .select("id, activation_id")
-        .eq("project_id", projectId)
-        .is("withdrawn_at", null),
-      supabase
-        .from("activation_evidence_checks")
-        .select("evidence_id, result, checked_at")
-        .eq("project_id", projectId)
-        .order("checked_at", { ascending: false }),
-      supabase
-        .from("activation_metrics")
-        .select("activation_id, verification")
-        .eq("project_id", projectId)
-        .is("invalidated_at", null),
-      loadMembers(access),
-    ]);
-    for (const res of [acts, evidence, checks, metrics])
-      if (res.error) console.error("loadReviewActivations:", res.error.message);
-    const lastCheck = new Map<string, string>();
-    for (const c of checks.data ?? [])
-      if (!lastCheck.has(c.evidence_id)) lastCheck.set(c.evidence_id, c.result);
-    const nameOf = (id: string | null) =>
-      members.find((m) => m.personId === id)?.name ?? null;
-    return (acts.data ?? []).flatMap((a) => {
-      if (!isStatus(a.status)) return [];
-      const records = {
-        status: a.status,
-        evidenceExpected: a.evidence_expected,
-        metricsExpected: a.metrics_expected,
-        evidence: (evidence.data ?? [])
-          .filter((e) => e.activation_id === a.id)
-          .map((e) => ({ lastCheck: lastCheck.get(e.id) ?? null })),
-        metrics: (metrics.data ?? []).filter((m) => m.activation_id === a.id),
-      };
-      return [
-        {
-          id: a.id,
-          title: a.title,
-          status: a.status,
-          reason: a.status_reason,
-          ownerName: nameOf(a.owner_person_id),
-          hasOwner: a.owner_person_id !== null,
-          hasDue: a.due_on !== null,
-          startsOn: a.starts_on ?? a.created_at.slice(0, 10),
-          proof: proofOf(records),
-          measure: measureOf(records),
-        },
-      ];
-    });
+    return board.summaries.map((a) => ({
+      id: a.id,
+      title: a.title,
+      status: a.status,
+      reason: a.statusReason,
+      ownerName: a.ownerPersonId ? people.person(a.ownerPersonId).name : null,
+      startsOn: a.startsOn ?? a.createdAt.slice(0, 10),
+      phase: phaseOf(a),
+      proof: a.proof,
+      measure: a.measure,
+      lastFigure: a.lastFigure,
+    }));
   },
 );
