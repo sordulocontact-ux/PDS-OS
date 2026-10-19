@@ -19,11 +19,13 @@ import type { BoardRow } from "@/lib/legal/plan/board";
  */
 export function DemarchePart({
   projectId,
+  projectTitle,
   row,
   clearances,
   proof,
 }: {
   projectId: string;
+  projectTitle: string;
   row: BoardRow;
   // The borrowings' context (who validates, the organization).
   clearances: Clearances;
@@ -32,7 +34,13 @@ export function DemarchePart({
   const panel = row.panel;
   switch (panel.kind) {
     case "fiche":
-      return <FichePanel projectId={projectId} row={panel.row} />;
+      return (
+        <FichePanel
+          projectId={projectId}
+          projectTitle={projectTitle}
+          row={panel.row}
+        />
+      );
     case "contract":
       return (
         <ContractPanel

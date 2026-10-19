@@ -16,12 +16,14 @@ import type { BoardRow } from "@/lib/legal/plan/board";
  */
 export function DemarcheBody({
   projectId,
+  projectTitle,
   demarche,
   clearances,
   proof,
   people,
 }: {
   projectId: string;
+  projectTitle: string;
   demarche: Demarche;
   clearances: Clearances;
   proof: Record<string, ContractProof>;
@@ -32,6 +34,7 @@ export function DemarcheBody({
   const part = (row: BoardRow) => (
     <DemarchePart
       projectId={projectId}
+      projectTitle={projectTitle}
       row={row}
       clearances={clearances}
       proof={proof}

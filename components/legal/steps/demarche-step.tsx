@@ -63,6 +63,7 @@ export async function DemarcheStep({
     >
       <DemarcheBody
         projectId={projectId}
+        projectTitle={ctx.project.title}
         demarche={demarche}
         clearances={ctx.clearances}
         proof={Object.fromEntries(proof)}
