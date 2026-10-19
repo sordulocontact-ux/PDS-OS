@@ -7,10 +7,24 @@ import { useCanEditProject } from "@/components/projects/edit-access";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
+// The sections without a journey, where nothing else says who writes.
+const PLAIN_SECTIONS = [
+  "budget",
+  "team",
+  "calls",
+  "planning",
+  "deliverables",
+  "files",
+];
+
 /**
- * Tells a viewer without edit rights why the write controls are missing. On
- * the Conception, the creative team still deposits versions: said so. On
- * the Juridique, nothing is shown: the journey already says who acts.
+ * Tells a viewer without edit rights why the write controls are missing,
+ * only on the project's sections without a journey (Budget, Équipe, Calls,
+ * Planning, Livrables, Fichiers). The workflows, Travail, Validations and
+ * Activité show no banner, as in the proto: their « Maintenant » and steps
+ * already say who acts, and the direction or the creative director often has
+ * a decision to make there (recette 19/10/2026; UX test of 09/10: « la DG
+ * voit Lecture seule au-dessus de boutons qu'elle peut utiliser »).
  */
 export function ReadOnlyNotice({
   projectId,
@@ -22,12 +36,10 @@ export function ReadOnlyNotice({
   const canEdit = useCanEditProject();
   const pathname = usePathname();
   if (canEdit) return null;
-  // The Juridique and Conception journeys already say who acts: no banner.
-  if (
-    pathname.startsWith(routes.projectLegal(projectId)) ||
-    pathname.startsWith(routes.projectDesign(projectId))
-  )
-    return null;
+  const section = pathname
+    .slice(routes.project(projectId).length + 1)
+    .split("/")[0];
+  if (!PLAIN_SECTIONS.includes(section)) return null;
   return (
     <FormMessage kind="info" className={className}>
       {fr.shell.project.readOnly}

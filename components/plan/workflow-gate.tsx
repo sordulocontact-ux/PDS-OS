@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -5,6 +7,7 @@ import { MARKETING_PARTS, type PlanWorkflow } from "@/lib/plan/propose";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
+import { applicableWorkflows } from "@/lib/workflow-status/rules";
 
 /**
  * A section that waits for the Plan du projet (proto « Projet complet »:
@@ -26,6 +29,16 @@ export async function WorkflowGate({
     requireApproved(),
     requireLaunchedProject(projectId),
   ]);
+  // A workflow the project does not have (a content project has no
+  // Distribution): no page, as the sidebar shows no entry (recette).
+  if (
+    workflow === "distribution" &&
+    !applicableWorkflows({
+      type: project.type,
+      masterCount: project.masters.length,
+    }).includes("distribution")
+  )
+    notFound();
   const gate = await workflowGate(project, workflow);
   const marketing = fr.shell.project.sidebar.marketing;
   if (gate)

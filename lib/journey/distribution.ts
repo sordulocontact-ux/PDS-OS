@@ -2,17 +2,29 @@ import "server-only";
 
 import { distributionContext } from "@/lib/distribution/journey-context";
 import { fr } from "@/lib/i18n/fr";
+import { getProject } from "@/lib/projects/queries";
+import { applicableWorkflows } from "@/lib/workflow-status/rules";
 
 import type { ModuleJourney } from "./types";
 
 /**
  * The Distribution's journey (lib/distribution/journey.ts) for the project's
  * « Maintenant », Travail and Validations: its seven steps once the plan is
- * launched, nothing before (the module waits for the plan).
+ * launched, nothing before (the module waits for the plan), nothing for a
+ * project without Distribution (a content project, recette 19/10).
  */
 export async function distributionJourneys(
   projectId: string,
 ): Promise<ModuleJourney[]> {
+  const project = await getProject(projectId);
+  if (
+    !project ||
+    !applicableWorkflows({
+      type: project.type,
+      masterCount: project.masters.length,
+    }).includes("distribution")
+  )
+    return [];
   const ctx = await distributionContext(projectId);
   if (!ctx) return [];
   return [

@@ -67,6 +67,8 @@ export function eventText(
         note: null,
       };
     }
+    case "dossier.parameters_confirmed":
+      return { text: t.parametersConfirmed, note: null };
     case "validator.set":
       return {
         text: data.person_id ? t.validatorSet : t.validatorCleared,
@@ -98,6 +100,15 @@ export function eventText(
           what && isDeclarationKind(what) ? d.tracking.kindTitles[what] : "",
         ),
         note,
+      };
+    }
+    case "declaration.proof_added": {
+      const what = str(data.kind);
+      return {
+        text: t.proofAdded(
+          what && isDeclarationKind(what) ? d.tracking.kindTitles[what] : "",
+        ),
+        note: null,
       };
     }
     case "platform.saved":

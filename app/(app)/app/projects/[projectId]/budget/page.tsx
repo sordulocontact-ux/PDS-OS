@@ -30,7 +30,9 @@ export default async function ProjectBudgetPage({
   const t = fr.budget;
 
   return (
-    <div className="grid gap-6">
+    // A column, not a grid: a grid track grows to the tab bar's min-content
+    // and the page scrolled sideways at 390 px (recette 19/10).
+    <div className="flex min-w-0 flex-col gap-6">
       {error && <FormMessage kind="error">{t.loadError}</FormMessage>}
       <BudgetSummary
         envelopeCents={project.budgetCents}
