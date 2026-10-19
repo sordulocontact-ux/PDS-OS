@@ -40,7 +40,18 @@ export const productionLink = {
       "PDS confirme les suites du call ; ce qui vous concerne apparaîtra ici.",
   },
   quote: {
-    title: "Votre devis",
+    title: "Devis",
+    depositV: (n: number) => `Déposer le devis V${n}`,
+    before: (day: string) => `avant le ${day}`,
+    file: "Devis (PDF)",
+    fileHint: "Le lien du PDF (Drive, WeTransfer…), commence par https://",
+    loc: "Dont montant prévu pour les lieux",
+    locHint: (days: number, day: string | null) =>
+      `Location des lieux pour ${days} jour${days > 1 ? "s" : ""} de tournage${day ? ` (${day})` : ""}. Le lieu retenu y sera comparé.`,
+    revision: (reason: string) => `PDS demande une révision : « ${reason} »`,
+    pds: "PDS",
+    waitCheck: "En attente de PDS : vérifier le devis",
+    waitDecide: "En attente de PDS : valider le devis",
     description:
       "Déposez-le ici : le chargé de production le vérifie, puis il est validé chez PDS.",
     // Never the internal envelope (VISION-UX rule 21): the delivery only.

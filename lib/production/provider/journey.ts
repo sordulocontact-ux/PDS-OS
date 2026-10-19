@@ -21,14 +21,29 @@ const journeySchema = z.object({
   quotes: z.array(
     z.object({
       id: z.string(),
+      number: z.number(),
       label: z.string(),
       amountCents: z.number(),
+      locBudgetCents: z.number().nullable(),
       deliveryOn: text,
-      status: z.enum(["deposited", "submitted", "approved", "rejected"]),
+      status: z.enum([
+        "deposited",
+        "submitted",
+        "approved",
+        "changes",
+        "rejected",
+        "replaced",
+      ]),
+      url: text,
+      note: text,
       reason: text,
       depositedAt: z.string(),
+      decidedAt: text,
     }),
   ),
+  quoteRevision: z.object({ reason: z.string(), at: z.string() }).nullable(),
+  quoteDue: text,
+  shootOn: text,
   gearCount: z.number(),
   locations: z
     .array(z.object({ name: z.string(), status: z.string() }))

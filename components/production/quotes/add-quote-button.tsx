@@ -77,6 +77,7 @@ function AddQuoteForm({
         sheetId,
         label: value("label"),
         amount: value("amount"),
+        loc: value("loc"),
         deliveryOn: value("deliveryOn"),
         url: value("url"),
         note: value("note"),
@@ -102,8 +103,9 @@ function AddQuoteForm({
           suffix="€"
           error={errors.amount}
         />
-        <Field name="deliveryOn" label={t.fields.delivery} type="date" />
+        <Field name="loc" label={t.fields.loc} inputMode="decimal" suffix="€" />
       </div>
+      <Field name="deliveryOn" label={t.fields.delivery} type="date" />
       <Field
         name="url"
         label={t.fields.url}

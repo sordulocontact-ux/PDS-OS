@@ -1,30 +1,26 @@
-import { PageSection } from "@/components/shell/page-section";
 import { EmptyNote } from "@/components/shell/empty-state";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatEuros } from "@/lib/budget/types";
+import { shortStamp } from "@/lib/calls/prep/dates";
 import { fr } from "@/lib/i18n/fr";
-import { quoteChecks } from "@/lib/production/quotes/check";
+import { quoteComputed } from "@/lib/production/quotes/check";
 import type { ProductionQuote } from "@/lib/production/quotes/queries";
-import { formatDate } from "@/lib/release/format";
+import { formatShortDay } from "@/lib/utils/day";
 
 import { AddQuoteButton } from "./add-quote-button";
 import { QuoteCheckForm } from "./quote-check-form";
 import { QuoteDecisionForm } from "./quote-decision-form";
+import { QuoteRevisionForm } from "./quote-revision-form";
+import { QuoteVersionList, type QuoteVersionView } from "./quote-version-row";
 
 const t = fr.productionQuotes;
-const TONE = {
-  deposited: "warning",
-  submitted: "action",
-  approved: "success",
-  rejected: "danger",
-} as const;
 
 /**
- * The quotes of a production (Ibé, 14/10): each deposited, checked point by
- * point by the line producer — PO prepares the comparison with the envelope
- * and the dates —, submitted, then approved or refused with a reason by its
- * validator. Each person sees the action that is theirs.
+ * The quote in versions (proto BODY.quote): the active reference and the
+ * revision asked, « Versions du devis », then the action of the person
+ * looking — the line producer checks (« Soumettre à … » or « Demander une
+ * modification »), the budget validation decides, whoever organises may ask
+ * for a revision once validated. What others wait for is said by the step.
  */
 export function QuotesSection({
   projectId,
@@ -36,143 +32,115 @@ export function QuotesSection({
   validatorName,
   canOrganize,
   isValidator,
-  handlerName,
+  revision,
 }: {
   projectId: string;
   sheetId: string;
   quotes: ProductionQuote[];
-  frame: { envelopeCents: number | null; deliveryDate: string | null };
+  frame: {
+    envelopeCents: number | null;
+    shootDate: string | null;
+    deliveryDate: string | null;
+    shootDays: number;
+  };
   external: boolean;
   companyName: string;
   validatorName: string | null;
   canOrganize: boolean;
   isValidator: boolean;
-  // Who checks: the line producer, else the owner.
-  handlerName: string;
+  revision: { reason: string; by: string | null; at: string } | null;
 }) {
+  const last = quotes[0] ?? null;
+  const active = quotes.find((q) => q.status === "approved") ?? null;
+  const view = (q: ProductionQuote): QuoteVersionView => ({
+    number: q.number,
+    label: q.label,
+    amountCents: q.amountCents,
+    locBudgetCents: q.locBudgetCents,
+    url: q.url,
+    note: q.note,
+    depositedBy: q.depositedBy ?? companyName,
+    depositedAt: q.depositedAt,
+    status: q.status,
+    decidedBy: q.decidedBy,
+    decidedAt: q.decidedAt,
+    comments: [
+      q.note && { who: q.depositedBy ?? companyName, text: q.note },
+      q.checkNote && { who: q.submittedBy ?? "—", text: q.checkNote },
+      q.reason && { who: q.decidedBy ?? "—", text: q.reason },
+    ].filter((c): c is { who: string; text: string } => Boolean(c)),
+  });
   return (
-    <PageSection
-      id="quotes"
-      title={t.title}
-      description={t.description}
-      card
-      action={
-        canOrganize ? (
-          <AddQuoteButton projectId={projectId} sheetId={sheetId} />
-        ) : undefined
-      }
-    >
-      {quotes.length === 0 ? (
-        <EmptyNote>
-          {external ? t.empty.external(companyName) : t.empty.internal}
-        </EmptyNote>
-      ) : (
-        <ul className="flex flex-col gap-4">
-          {quotes.map((q) => (
-            <li
-              key={q.id}
-              className="flex flex-col gap-3 rounded-xl border border-[color:var(--border-hairline)] p-4"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-semibold break-words">{q.label}</span>
-                <StatusBadge size="sm" tone={TONE[q.status]}>
-                  {t.status[q.status]}
-                </StatusBadge>
-              </div>
-              <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground tabular-nums">
-                <span>
-                  {t.amount}{" "}
-                  <b className="text-foreground">
-                    {formatEuros(q.amountCents)}
-                  </b>
-                </span>
-                {q.deliveryOn && (
-                  <span>
-                    {t.delivery} {formatDate(q.deliveryOn)}
-                  </span>
-                )}
-                <span>
-                  {t.deposited(
-                    q.depositedBy ?? t.byLink,
-                    formatDate(q.depositedAt),
-                  )}
-                </span>
-                {q.url && (
-                  <a
-                    href={q.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline underline-offset-4"
-                  >
-                    {t.fields.url}
-                  </a>
-                )}
-              </p>
-              {q.note && <p className="text-sm break-words">« {q.note} »</p>}
-              {q.status === "deposited" &&
-                (canOrganize && validatorName ? (
-                  <section className="flex flex-col gap-2">
-                    <h4 className="text-sm font-semibold">{t.check.title}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {t.check.note}
-                    </p>
-                    <QuoteCheckForm
-                      projectId={projectId}
-                      quoteId={q.id}
-                      checks={quoteChecks(q, frame)}
-                      validatorName={validatorName}
-                    />
-                  </section>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {t.wait.check(handlerName)}
-                  </p>
-                ))}
-              {q.status === "submitted" && (
-                <>
-                  {q.submittedBy && q.submittedAt && (
-                    <p className="text-sm text-muted-foreground">
-                      {t.decide.checkedBy(
-                        q.submittedBy,
-                        formatDate(q.submittedAt),
-                      )}
-                    </p>
-                  )}
-                  {q.checkNote && (
-                    <ToneCallout tone="info">« {q.checkNote} »</ToneCallout>
-                  )}
-                  {isValidator ? (
-                    <QuoteDecisionForm projectId={projectId} quoteId={q.id} />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      {t.wait.decide(validatorName ?? "—")}
-                    </p>
-                  )}
-                </>
-              )}
-              {q.status === "rejected" && q.reason && (
-                <ToneCallout tone="danger">
-                  {t.decide.decidedBy(
-                    t.status.rejected,
-                    q.decidedBy ?? "—",
-                    formatDate(q.decidedAt ?? q.depositedAt),
-                  )}{" "}
-                  : « {q.reason} »
-                </ToneCallout>
-              )}
-              {q.status === "approved" && (
-                <ToneCallout tone="success">
-                  {t.decide.decidedBy(
-                    t.status.approved,
-                    q.decidedBy ?? "—",
-                    formatDate(q.decidedAt ?? q.depositedAt),
-                  )}
-                </ToneCallout>
-              )}
-            </li>
-          ))}
-        </ul>
+    <div className="flex flex-col gap-4">
+      {active && (
+        <ToneCallout tone="success">
+          <b className="font-semibold">
+            {t.active(active.number, formatEuros(active.amountCents))}
+          </b>
+          {t.activeBy(
+            active.decidedBy ?? "—",
+            shortStamp(active.decidedAt ?? active.depositedAt),
+          )}
+          {quotes.length > 1 && t.previous}
+        </ToneCallout>
       )}
-    </PageSection>
+      {revision && (
+        <ToneCallout tone="warning">
+          <b className="font-semibold">
+            {t.revision.asked(revision.by ?? "—", formatShortDay(revision.at))}
+          </b>
+          « {revision.reason} »
+        </ToneCallout>
+      )}
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-semibold">{t.versions}</h3>
+          {canOrganize && (
+            <AddQuoteButton projectId={projectId} sheetId={sheetId} />
+          )}
+        </div>
+        {quotes.length === 0 ? (
+          <EmptyNote>
+            {external ? t.empty.external(companyName) : t.empty.internal}
+          </EmptyNote>
+        ) : (
+          <QuoteVersionList quotes={quotes.map(view)} />
+        )}
+      </section>
+      {last?.status === "deposited" && canOrganize && validatorName && (
+        <QuoteCheckForm
+          projectId={projectId}
+          quoteId={last.id}
+          number={last.number}
+          computed={quoteComputed(last, frame)}
+          delayText={t.check.delay(
+            frame.shootDate
+              ? formatShortDay(frame.shootDate, { bare: true })
+              : null,
+            frame.deliveryDate
+              ? formatShortDay(frame.deliveryDate, { bare: true })
+              : null,
+          )}
+          validatorName={validatorName}
+          companyName={external ? companyName : t.byLink}
+        />
+      )}
+      {last?.status === "submitted" && isValidator && (
+        <QuoteDecisionForm
+          projectId={projectId}
+          quoteId={last.id}
+          number={last.number}
+          checkedBy={last.submittedBy}
+        />
+      )}
+      {active && last === active && !revision && canOrganize && (
+        <QuoteRevisionForm
+          projectId={projectId}
+          sheetId={sheetId}
+          activeNumber={active.number}
+          companyName={external ? companyName : t.byLink}
+        />
+      )}
+    </div>
   );
 }

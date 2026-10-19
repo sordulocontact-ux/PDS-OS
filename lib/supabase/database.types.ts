@@ -12744,6 +12744,8 @@ export type Database = {
       }
       production_quotes: {
         Row: {
+          number: number
+          loc_budget_cents: number | null
           amount_cents: number
           check_note: string | null
           checks: Json
@@ -12766,6 +12768,8 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          number?: number
+          loc_budget_cents?: number | null
           amount_cents: number
           check_note?: string | null
           checks?: Json
@@ -12788,6 +12792,8 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          number?: number
+          loc_budget_cents?: number | null
           amount_cents?: number
           check_note?: string | null
           checks?: Json
@@ -12946,6 +12952,9 @@ export type Database = {
       }
       production_sheets: {
         Row: {
+          quote_revision_reason: string | null
+          quote_revision_by: string | null
+          quote_revision_at: string | null
           brief_updated_at: string | null
           brief_updated_by: string | null
           budget_envelope_cents: number | null
@@ -13001,6 +13010,9 @@ export type Database = {
           staging_intent: string | null
         }
         Insert: {
+          quote_revision_reason?: string | null
+          quote_revision_by?: string | null
+          quote_revision_at?: string | null
           brief_updated_at?: string | null
           brief_updated_by?: string | null
           budget_envelope_cents?: number | null
@@ -13056,6 +13068,9 @@ export type Database = {
           staging_intent?: string | null
         }
         Update: {
+          quote_revision_reason?: string | null
+          quote_revision_by?: string | null
+          quote_revision_at?: string | null
           brief_updated_at?: string | null
           brief_updated_by?: string | null
           budget_envelope_cents?: number | null
@@ -16289,6 +16304,14 @@ export type Database = {
       }
     }
     Functions: {
+      request_production_quote_changes: {
+        Args: { p_comment: string; p_quote_id: string }
+        Returns: undefined
+      }
+      request_production_quote_revision: {
+        Args: { p_reason: string; p_sheet_id: string }
+        Returns: undefined
+      }
       propose_production_director_by_link: {
         Args: { p_name: string; p_note: string | null; p_reel_url: string; p_token: string }
         Returns: undefined
@@ -16853,7 +16876,8 @@ export type Database = {
           p_note: string | null
           p_sheet_id: string
           p_url: string | null
-        }
+          p_loc_budget_cents?: number
+          }
         Returns: string
       }
       add_project_creative: {
@@ -17385,7 +17409,8 @@ export type Database = {
           p_note: string | null
           p_token: string
           p_url: string | null
-        }
+          p_loc_budget_cents?: number
+          }
         Returns: undefined
       }
       deposit_production_version: {

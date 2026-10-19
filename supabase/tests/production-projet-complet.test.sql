@@ -2,7 +2,7 @@
 -- « Changer qui produit », « Révoquer » a link (20261019050101), …
 -- Run with `supabase test db`.
 begin;
-select plan(22);
+select plan(34);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -140,7 +140,8 @@ select is(jsonb_array_length(public.get_production_link_journey((select v from v
 reset role;
 select is((select count(*)::int from public.notifications where kind = 'production_director_proposed'
             and recipient_person_id = pg_temp.id_of('manager_person')), 2, 'the owner is told each time');
-insert into ids select 'proposal', id from public.production_director_proposals where name = 'Bastien Roy';
+insert into ids select 'proposal', id from public.production_director_proposals
+ where name = 'Bastien Roy' and sheet_id = pg_temp.id_of('sheet');
 select pg_temp.act_as(pg_temp.id_of('creative'));
 select throws_ok($$ select public.retain_production_director(pg_temp.id_of('proposal')) $$,
                  '42501', null, 'only whoever organises retains');
@@ -151,8 +152,49 @@ select ok(length(public.retain_production_director(pg_temp.id_of('proposal'))) =
 reset role;
 select is((select c.name from public.production_sheets s join public.network_contacts c on c.id = s.director_contact_id
             where s.id = pg_temp.id_of('sheet')), 'Bastien Roy', 'he holds « Réalisation »');
-select is((select status from public.production_director_proposals where name = 'Inès Garnier'), 'declined',
+select is((select status from public.production_director_proposals where name = 'Inès Garnier'
+            and sheet_id = pg_temp.id_of('sheet')), 'declined',
           'the other is « Non retenu »');
+
+-- 4. The quote in versions -----------------------------------------------------------------
+set local role anon;
+select throws_ok($$ select public.deposit_production_quote_by_link((select v from vars where k = 'token3'), '', 1640000, null, 'https://x.example/v1.pdf', null, 1700000) $$,
+                 '23514', null, 'the places never cost more than the whole quote');
+select lives_ok($$ select public.deposit_production_quote_by_link((select v from vars where k = 'token3'), '', 1640000, null, 'https://x.example/v1.pdf', 'Tout compris', 180000) $$,
+                'the company deposits V1 with its places');
+reset role;
+insert into ids select 'q1', id from public.production_quotes where sheet_id = pg_temp.id_of('sheet') and number = 1;
+select pg_temp.act_as(pg_temp.id_of('producer'));
+select throws_ok($$ select public.request_production_quote_changes(pg_temp.id_of('q1'), ' ') $$,
+                 'P0001', 'reason_required', 'a modification says what');
+select lives_ok($$ select public.request_production_quote_changes(pg_temp.id_of('q1'), 'Détailler la régie') $$,
+                'the line producer asks for a modification');
+reset role;
+set local role anon;
+select is((public.get_production_link_journey((select v from vars where k = 'token3')) -> 'quotes' -> 0 ->> 'reason'),
+          'Détailler la régie', 'the company reads what to change');
+select lives_ok($$ select public.deposit_production_quote_by_link((select v from vars where k = 'token3'), '', 1690000, null, 'https://x.example/v2.pdf', null, 180000) $$,
+                'and deposits V2');
+reset role;
+insert into ids select 'q2', id from public.production_quotes where sheet_id = pg_temp.id_of('sheet') and number = 2;
+select is((select status from public.production_quotes where id = pg_temp.id_of('q1')), 'replaced', 'V1 is replaced');
+select pg_temp.act_as(pg_temp.id_of('producer'));
+select lives_ok($$ select public.submit_production_quote(pg_temp.id_of('q2'), '{"amount": true, "delay": true, "scope": true}'::jsonb, null) $$,
+                'V2 checked and submitted');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('validator'));
+select lives_ok($$ select public.decide_production_quote(pg_temp.id_of('q2'), true, null) $$, 'V2 validated');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select lives_ok($$ select public.request_production_quote_revision(pg_temp.id_of('sheet'), 'Régie en plus') $$,
+                'a revision is asked on the validated quote');
+reset role;
+set local role anon;
+select lives_ok($$ select public.deposit_production_quote_by_link((select v from vars where k = 'token3'), '', 1720000, null, 'https://x.example/v3.pdf', null, 150000) $$,
+                'the company deposits V3');
+reset role;
+select is((select status from public.production_quotes where id = pg_temp.id_of('q2')), 'approved',
+          'V2 stays the active reference meanwhile');
 
 select * from finish();
 rollback;

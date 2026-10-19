@@ -41,8 +41,11 @@ export default async function ProductionQuoteStepPage({
         quotes={quotes}
         frame={{
           envelopeCents: o.logistics.budgetEnvelopeCents.value,
+          shootDate: o.logistics.shootDate.value,
           deliveryDate: o.logistics.deliveryDate.value,
+          shootDays: 1,
         }}
+        revision={sheet.quoteRevision}
         external={external}
         companyName={org.company?.name ?? "—"}
         validatorName={org.quoteValidator?.name ?? null}
@@ -51,7 +54,6 @@ export default async function ProductionQuoteStepPage({
           access.personId !== null &&
           org.quoteValidator?.personId === access.personId
         }
-        handlerName={org.lineProducer?.name ?? data.ownerName ?? "—"}
       />
       {!external && (
         <BudgetBlock

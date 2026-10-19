@@ -3,99 +3,117 @@
 import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
-import { TextareaField } from "@/components/auth/textarea-field";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useWriteSubmit } from "@/components/ui/use-write-submit";
+import { CheckboxField } from "@/components/ui/checkbox-field";
+import { DecisionPanel } from "@/components/ui/decision-panel";
 import { fr } from "@/lib/i18n/fr";
-import { submitQuote } from "@/lib/production/quotes/actions";
-import type { QuoteCheck, QuoteCheckKey } from "@/lib/production/quotes/check";
+import {
+  requestQuoteChanges,
+  submitQuote,
+} from "@/lib/production/quotes/actions";
+import {
+  TICKED_CHECKS,
+  type QuoteComputed,
+} from "@/lib/production/quotes/check";
 
 const t = fr.productionQuotes.check;
 
-/** The line producer's check: each point PO prepared ticked « Vérifié »,
- * a note for the validator, then « Soumettre ». */
+/**
+ * « Vérifier le devis Vn » (the line producer, proto): the amount against
+ * the envelope and the places' amount, computed by code; the delays and the
+ * posts to tick; « Soumettre à … » or « Demander une modification » with a
+ * comment the company reads.
+ */
 export function QuoteCheckForm({
   projectId,
   quoteId,
-  checks,
+  number,
+  computed,
+  delayText,
   validatorName,
+  companyName,
 }: {
   projectId: string;
   quoteId: string;
-  checks: QuoteCheck[];
+  number: number;
+  computed: QuoteComputed[];
+  delayText: string;
   validatorName: string;
+  companyName: string;
 }) {
-  const [ticked, setTicked] = useState<QuoteCheckKey[]>([]);
-  const [note, setNote] = useState("");
-  const [tried, setTried] = useState(false);
-  const { pending, error, run } = useWriteSubmit(() => undefined, t.submitted);
-  const left = checks.length - ticked.length;
+  const [ticked, setTicked] = useState<string[]>([]);
+  const [missing, setMissing] = useState(false);
+  const label = (k: (typeof TICKED_CHECKS)[number]) =>
+    k === "delay" ? delayText : t.scope;
   return (
-    <div className="flex flex-col gap-4">
-      <ul className="flex flex-col gap-2">
-        {checks.map((c) => (
+    <section className="flex flex-col gap-3">
+      <h3 className="font-semibold">{t.title(number)}</h3>
+      <ul className="flex flex-col gap-1.5">
+        {computed.map((c) => (
           <li
-            key={c.key}
-            className="flex items-start gap-3 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5"
+            key={c.text}
+            className={
+              c.ok === false
+                ? "text-[color:var(--tone-danger-fg)]"
+                : c.ok
+                  ? "text-[color:var(--tone-success-fg)]"
+                  : "text-[color:var(--text-secondary)]"
+            }
           >
-            <span
-              aria-hidden
-              className={
-                c.ok === false
-                  ? "mt-0.5 text-[color:var(--tone-warning-fg)]"
-                  : c.ok
-                    ? "mt-0.5 text-[color:var(--tone-success-fg)]"
-                    : "mt-0.5 text-muted-foreground"
-              }
-            >
-              {c.ok === false ? "!" : c.ok ? "✓" : "○"}
-            </span>
-            <span className="min-w-0 flex-1 text-sm">{c.text}</span>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Checkbox
-                checked={ticked.includes(c.key)}
-                onChange={(event) => {
-                  const on = event.currentTarget.checked;
-                  setTicked((all) =>
-                    on ? [...all, c.key] : all.filter((k) => k !== c.key),
-                  );
-                }}
-              />
-              {t.verified}
-            </label>
+            {c.ok === false ? "✕" : c.ok ? "✓" : "○"} {c.text}{" "}
+            {c.source && (
+              <span className="text-[length:var(--type-micro)] text-[color:var(--text-tertiary)]">
+                {c.source}
+              </span>
+            )}
           </li>
         ))}
       </ul>
-      <TextareaField
-        name="note"
-        label={t.noteLabel}
-        placeholder={t.notePlaceholder}
-        rows={2}
-        maxLength={1000}
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
+      <DecisionPanel
+        id={`quote-check-${quoteId}`}
+        title={null}
+        commentLabel={t.comment}
+        commentHint={t.commentHint}
+        commentRequired={t.commentRequired(companyName)}
+        fields={
+          <div className="flex flex-col gap-2">
+            {TICKED_CHECKS.map((k) => (
+              <CheckboxField
+                key={k}
+                label={label(k)}
+                checked={ticked.includes(k)}
+                onChange={(on) => {
+                  setMissing(false);
+                  setTicked((all) =>
+                    on ? [...all, k] : all.filter((x) => x !== k),
+                  );
+                }}
+              />
+            ))}
+            {missing && <FormMessage kind="error">{t.incomplete}</FormMessage>}
+          </div>
+        }
+        check={(kind) => {
+          if (kind !== "approve") return true;
+          const ok = TICKED_CHECKS.every((k) => ticked.includes(k));
+          setMissing(!ok);
+          return ok;
+        }}
+        outcomes={[
+          { kind: "approve", label: t.submit(validatorName) },
+          { kind: "request_changes", label: t.changes },
+        ]}
+        onDecide={(kind, comment) =>
+          kind === "approve"
+            ? submitQuote({
+                projectId,
+                quoteId,
+                number,
+                checks: ["amount", ...TICKED_CHECKS],
+                note: comment,
+              })
+            : requestQuoteChanges({ projectId, quoteId, number, comment })
+        }
       />
-      {tried && left > 0 && (
-        <FormMessage kind="error">{t.incomplete(left)}</FormMessage>
-      )}
-      {error && <FormMessage kind="error">{error}</FormMessage>}
-      <div>
-        <Button
-          type="button"
-          disabled={pending}
-          aria-busy={pending || undefined}
-          onClick={() => {
-            setTried(true);
-            if (left > 0) return;
-            run(() =>
-              submitQuote({ projectId, quoteId, checks: ticked, note }),
-            );
-          }}
-        >
-          {t.submit(validatorName)}
-        </Button>
-      </div>
-    </div>
+    </section>
   );
 }

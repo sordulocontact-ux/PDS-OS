@@ -34,6 +34,7 @@ const addSchema = z.object({
   sheetId: z.uuid(),
   label: z.string().trim().min(1).max(200),
   amount: z.string().trim().min(1),
+  loc: z.string().trim(),
   deliveryOn: z.iso.date().or(z.literal("")),
   url: z
     .string()
@@ -67,8 +68,12 @@ export async function addQuote(
   const cents = parseEurosToCents(p.amount);
   if (cents === undefined || cents === null)
     return { ok: false, error: e.amount };
+  const loc = p.loc ? parseEurosToCents(p.loc) : null;
+  if (loc === undefined) return { ok: false, error: e.loc };
+  if (loc !== null && loc > cents) return { ok: false, error: e.locOver };
   const supabase = await createClient();
   const { error } = await supabase.rpc("add_production_quote", {
+    p_loc_budget_cents: loc ?? undefined,
     p_sheet_id: p.sheetId,
     p_label: p.label,
     p_amount_cents: cents,
@@ -82,6 +87,7 @@ export async function addQuote(
 const submitSchema = z.object({
   projectId: z.uuid(),
   quoteId: z.uuid(),
+  number: z.number().int().positive(),
   checks: z.array(z.enum(QUOTE_CHECKS)),
   note: z.string().trim().max(1000),
 });
@@ -98,7 +104,7 @@ export async function submitQuote(
   return withOutcome(
     p.projectId,
     ["marketing"],
-    fr.productionQuotes.done.submitted,
+    fr.productionQuotes.done.submitted(p.number),
     async () => {
       const supabase = await createClient();
       const { error } = await supabase.rpc("submit_production_quote", {
@@ -118,6 +124,7 @@ export async function submitQuote(
 const decideSchema = z.object({
   projectId: z.uuid(),
   quoteId: z.uuid(),
+  number: z.number().int().positive(),
   approve: z.boolean(),
   reason: z.string().trim().max(1000),
 });
@@ -136,7 +143,7 @@ export async function decideQuote(
   return withOutcome(
     p.projectId,
     ["marketing"],
-    p.approve ? done.approved : done.rejected,
+    p.approve ? done.approved(p.number) : done.rejected(p.number),
     async () => {
       const supabase = await createClient();
       const { error } = await supabase.rpc("decide_production_quote", {
@@ -146,6 +153,71 @@ export async function decideQuote(
       });
       if (error) return failure(error);
       await schedulePendingPushes();
+      return prepDone(p.projectId);
+    },
+  );
+}
+
+const changesSchema = z.object({
+  projectId: z.uuid(),
+  quoteId: z.uuid(),
+  number: z.number().int().positive(),
+  comment: z.string().trim().min(1).max(1000),
+});
+
+/** « Demander une modification » (the line producer while checking, the
+ * budget validation while deciding): the company reads the comment. */
+export async function requestQuoteChanges(
+  input: z.input<typeof changesSchema>,
+): Promise<PrepResult> {
+  await requireApproved();
+  const parsed = changesSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: e.reason_required };
+  const p = parsed.data;
+  return withOutcome(
+    p.projectId,
+    ["marketing"],
+    fr.productionQuotes.done.changes(p.number),
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("request_production_quote_changes", {
+        p_quote_id: p.quoteId,
+        p_comment: p.comment,
+      });
+      if (error) return failure(error);
+      await schedulePendingPushes();
+      return prepDone(p.projectId);
+    },
+  );
+}
+
+const revisionSchema = z.object({
+  projectId: z.uuid(),
+  sheetId: z.uuid(),
+  reason: z.string().trim().min(1).max(1000),
+});
+
+/** « Demander une révision du devis »: the validated version stays the
+ * reference until a new one is validated. */
+export async function requestQuoteRevision(
+  input: z.input<typeof revisionSchema>,
+): Promise<PrepResult> {
+  await requireApproved();
+  const parsed = revisionSchema.safeParse(input);
+  if (!parsed.success)
+    return { ok: false, error: fr.productionQuotes.revision.reasonRequired };
+  const p = parsed.data;
+  return withOutcome(
+    p.projectId,
+    ["marketing"],
+    fr.productionQuotes.done.revision,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc(
+        "request_production_quote_revision",
+        { p_sheet_id: p.sheetId, p_reason: p.reason },
+      );
+      if (error) return failure(error);
       return prepDone(p.projectId);
     },
   );

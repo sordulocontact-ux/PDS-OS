@@ -59,9 +59,9 @@ export const loadJourney = cache(
       sheet
         ? supabase
             .from("production_quotes")
-            .select("status, amount_cents")
+            .select("number, status, amount_cents")
             .eq("sheet_id", sheet.id)
-            .order("deposited_at", { ascending: true })
+            .order("number", { ascending: true })
         : null,
       supabase
         .from("project_creatives")
@@ -133,8 +133,8 @@ export const loadJourney = cache(
       creatives.find((c) => c?.viewer) ?? creatives.find(Boolean) ?? owner;
 
     // Oldest first: a version's number is its rank (V1, V2…).
-    const quotes = (quotesRes?.data ?? []).map((q, index) => ({
-      number: index + 1,
+    const quotes = (quotesRes?.data ?? []).map((q) => ({
+      number: q.number,
       status: QUOTE.find((s) => s === q.status) ?? null,
       amountCents: q.amount_cents,
     }));
@@ -192,7 +192,7 @@ export const loadJourney = cache(
         active: active
           ? { number: active.number, amountCents: active.amountCents }
           : null,
-        revision: false,
+        revision: Boolean(sheet?.quoteRevision),
       },
       directorProposals: proposalsRes?.count ?? 0,
       direction: {
@@ -234,7 +234,8 @@ export const loadJourney = cache(
       blockedSteps: tools.blockers
         .filter((b) => !b.lifted && here(b))
         .map((b) => b.stepKey),
-      reworkSteps: [],
+      // A revision asked on a validated quote: « À revoir », nothing blocked.
+      reworkSteps: sheet?.quoteRevision ? ["quote"] : [],
       later:
         next?.who && next.kind !== "done"
           ? {

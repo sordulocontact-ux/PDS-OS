@@ -1,68 +1,46 @@
-// The points a quote is checked on (Ibé, 14/10: « vérifie le devis, les
-// délais et la cohérence avec l'enveloppe »), prepared by code from the
-// sheet's envelope and delivery date. The line producer ticks each one.
-// Pure, client-safe.
+// What a quote is checked on (proto « Vérifier le devis Vn »): the amount
+// against the envelope and the places' amount, computed by code; the
+// delays and the posts, ticked by the line producer. Pure, client-safe.
 
 import { formatEuros } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
-import { formatDate } from "@/lib/release/format";
 
 const t = fr.productionQuotes.check;
 
+// The two points the line producer ticks; `amount` is computed.
 export const QUOTE_CHECKS = ["amount", "delay", "scope"] as const;
 export type QuoteCheckKey = (typeof QUOTE_CHECKS)[number];
+export const TICKED_CHECKS = ["delay", "scope"] as const;
 
-export type QuoteCheck = {
-  key: QuoteCheckKey;
-  text: string;
-  // Null: nothing for code to compare, the person checks it.
+export type QuoteComputed = {
   ok: boolean | null;
+  text: string;
+  source: string;
 };
 
-export function quoteChecks(
-  quote: { amountCents: number; deliveryOn: string | null },
-  frame: { envelopeCents: number | null; deliveryDate: string | null },
-): QuoteCheck[] {
+export function quoteComputed(
+  quote: { amountCents: number; locBudgetCents: number | null },
+  frame: { envelopeCents: number | null; shootDays: number },
+): QuoteComputed[] {
   const amount = formatEuros(quote.amountCents);
   const env = frame.envelopeCents;
   return [
     {
-      key: "amount",
       ok: env === null ? null : quote.amountCents <= env,
       text:
         env === null
           ? t.amountNoEnvelope(amount)
           : quote.amountCents <= env
-            ? t.amountOk(
-                amount,
-                formatEuros(env),
-                formatEuros(env - quote.amountCents),
-              )
-            : t.amountOver(
-                amount,
-                formatEuros(env),
-                formatEuros(quote.amountCents - env),
-              ),
+            ? t.amountOk(amount, formatEuros(env))
+            : t.amountOver(amount, formatEuros(env)),
+      source: t.computed,
     },
-    {
-      key: "delay",
-      ok:
-        quote.deliveryOn && frame.deliveryDate
-          ? quote.deliveryOn <= frame.deliveryDate
-          : null,
-      text:
-        quote.deliveryOn && frame.deliveryDate
-          ? quote.deliveryOn <= frame.deliveryDate
-            ? t.delayOk(
-                formatDate(quote.deliveryOn),
-                formatDate(frame.deliveryDate),
-              )
-            : t.delayLate(
-                formatDate(quote.deliveryOn),
-                formatDate(frame.deliveryDate),
-              )
-          : t.delayUnknown,
-    },
-    { key: "scope", ok: null, text: t.scope },
+    quote.locBudgetCents === null
+      ? { ok: null, text: t.locMissing, source: "" }
+      : {
+          ok: true,
+          text: t.loc(formatEuros(quote.locBudgetCents), frame.shootDays),
+          source: t.locSource,
+        },
   ];
 }

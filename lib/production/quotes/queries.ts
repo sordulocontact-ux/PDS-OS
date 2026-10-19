@@ -3,17 +3,30 @@ import "server-only";
 import type { Member } from "@/lib/framing/related";
 import { createClient } from "@/lib/supabase/server";
 
+export const QUOTE_STATUSES = [
+  "deposited",
+  "submitted",
+  "approved",
+  "changes",
+  "rejected",
+  "replaced",
+] as const;
+export type QuoteStatus = (typeof QUOTE_STATUSES)[number];
+
+/** One version of a sheet's quote (V1, V2…). */
 export type ProductionQuote = {
   id: string;
+  number: number;
   label: string;
   amountCents: number;
+  locBudgetCents: number | null;
   deliveryOn: string | null;
   url: string | null;
   note: string | null;
   // Null: the company, through its link.
   depositedBy: string | null;
   depositedAt: string;
-  status: "deposited" | "submitted" | "approved" | "rejected";
+  status: QuoteStatus;
   checkNote: string | null;
   submittedBy: string | null;
   submittedAt: string | null;
@@ -22,9 +35,7 @@ export type ProductionQuote = {
   reason: string | null;
 };
 
-const STATUSES = ["deposited", "submitted", "approved", "rejected"] as const;
-
-/** A sheet's quotes, newest first, read with the user's session. */
+/** A sheet's quote versions, newest first, read with the user's session. */
 export async function loadQuotes(
   sheetId: string,
   members: Member[],
@@ -33,23 +44,25 @@ export async function loadQuotes(
   const { data, error } = await supabase
     .from("production_quotes")
     .select(
-      "id, label, amount_cents, delivery_on, url, note, deposited_by, deposited_at, status, check_note, submitted_by, submitted_at, decided_by, decided_at, reason",
+      "id, number, label, amount_cents, loc_budget_cents, delivery_on, url, note, deposited_by, deposited_at, status, check_note, submitted_by, submitted_at, decided_by, decided_at, reason",
     )
     .eq("sheet_id", sheetId)
-    .order("deposited_at", { ascending: false });
+    .order("number", { ascending: false });
   if (error) console.error("loadQuotes:", error.message);
   const name = (id: string | null) =>
     id ? (members.find((m) => m.personId === id)?.name ?? "—") : null;
   return (data ?? []).map((q) => ({
     id: q.id,
+    number: q.number,
     label: q.label,
     amountCents: q.amount_cents,
+    locBudgetCents: q.loc_budget_cents,
     deliveryOn: q.delivery_on,
     url: q.url,
     note: q.note,
     depositedBy: name(q.deposited_by),
     depositedAt: q.deposited_at,
-    status: STATUSES.find((s) => s === q.status) ?? "deposited",
+    status: QUOTE_STATUSES.find((s) => s === q.status) ?? "deposited",
     checkNote: q.check_note,
     submittedBy: name(q.submitted_by),
     submittedAt: q.submitted_at,
@@ -59,20 +72,26 @@ export async function loadQuotes(
   }));
 }
 
-/** The active reference of a sheet's quote: the latest version approved,
- * with its number (its rank among the versions). Null before any. */
-export async function activeQuote(
-  sheetId: string,
-): Promise<{ number: number; amountCents: number } | null> {
+/** The active reference: the latest version validated. Null before any. */
+export async function activeQuote(sheetId: string): Promise<{
+  number: number;
+  amountCents: number;
+  locBudgetCents: number | null;
+} | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("production_quotes")
-    .select("status, amount_cents")
+    .select("number, amount_cents, loc_budget_cents")
     .eq("sheet_id", sheetId)
-    .order("deposited_at", { ascending: true });
-  const rows = (data ?? []).map((q, i) => ({ ...q, number: i + 1 }));
-  const active = rows.filter((q) => q.status === "approved").at(-1);
-  return active
-    ? { number: active.number, amountCents: active.amount_cents }
+    .eq("status", "approved")
+    .order("number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data
+    ? {
+        number: data.number,
+        amountCents: data.amount_cents,
+        locBudgetCents: data.loc_budget_cents,
+      }
     : null;
 }

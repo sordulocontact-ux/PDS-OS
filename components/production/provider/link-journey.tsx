@@ -11,8 +11,7 @@ import { LinkDirectionForm } from "./link-direction-form";
 import { LinkGearForm } from "./link-gear-form";
 import { LinkPlaceForm } from "./link-place-form";
 import { LinkProgress } from "./link-progress";
-import { LinkQuoteForm } from "./link-quote-form";
-import { LinkQuoteList } from "./link-quote-list";
+import { linkQuoteCard } from "./link-quote-card";
 
 const t = fr.productionLink;
 const p = fr.portal.provider;
@@ -38,8 +37,6 @@ export function linkJourneyCards({
   const company = j.roles.includes("company");
   const director = j.roles.includes("director");
   const dop = j.roles.includes("dop");
-  const latest = j.quotes[0] ?? null;
-  const canDeposit = !latest || latest.status === "rejected";
   const d = j.direction;
   const hint = (text: string) => (
     <p className="text-pretty text-muted-foreground">{text}</p>
@@ -127,27 +124,7 @@ export function linkJourneyCards({
       ),
     });
   if (company) {
-    const frame = t.quote.frame(j.deliveryOn ? formatDate(j.deliveryOn) : null);
-    cards.push({
-      id: "ps-quote",
-      title: t.quote.title,
-      state: canDeposit
-        ? "todo"
-        : latest?.status === "approved"
-          ? "done"
-          : "waiting",
-      order: 10,
-      action: { label: p.quote },
-      body: (
-        <>
-          {hint([t.quote.description, frame].filter(Boolean).join(" "))}
-          <LinkQuoteList quotes={j.quotes} />
-          {canDeposit && (
-            <LinkQuoteForm token={token} redo={latest?.status === "rejected"} />
-          )}
-        </>
-      ),
-    });
+    cards.push(linkQuoteCard(token, j, provider));
     if (j.organization === "external")
       cards.push({
         id: "ps-progress",
