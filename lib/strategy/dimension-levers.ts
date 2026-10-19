@@ -136,9 +136,11 @@ export function leverLines(
     action: { type: "need", id: n.id },
   }));
 
+  // A common lever is taken once a lever speaks of it (« Influence : une
+  // douzaine de créateurs » takes « Influence »).
   const taken = new Set(
-    [...levers.map((l) => l.label), ...openNeeds.map((n) => n.label)].map(
-      normalize,
+    [...levers.map((l) => l.label), ...openNeeds.map((n) => n.label)].flatMap(
+      (label) => [normalize(label), normalize(presetOf(label) ?? label)],
     ),
   );
   const absent = LEVER_PRESETS.filter(

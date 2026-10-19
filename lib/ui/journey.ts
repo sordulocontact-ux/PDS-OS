@@ -150,3 +150,8 @@ export function nowOf<S extends JourneyStep>(
     waiting: open.filter((s) => !s.actor?.viewer),
   };
 }
+
+/** « valider le Brief de sortie »: an action after a name, its first letter
+ * only lowered (proto: names and « PO » keep their capitals). */
+export const lowerFirst = (text: string | undefined) =>
+  text ? text.charAt(0).toLowerCase() + text.slice(1) : text;

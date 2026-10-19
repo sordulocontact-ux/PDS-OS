@@ -12,6 +12,7 @@ import {
   type JourneyStep,
   prereqsOf,
   withModule,
+  lowerFirst,
 } from "@/lib/ui/journey";
 import { cn } from "@/lib/utils";
 
@@ -173,7 +174,7 @@ function StepSub({
   steps: JourneyStep[];
 }) {
   const mine = Boolean(s.actor?.viewer);
-  const todo = s.actor?.todo.toLowerCase();
+  const todo = lowerFirst(s.actor?.todo);
   let text: string | null = null;
   let tone: "me" | "warn" | null = null;
   if (s.status === "done") text = s.summary;

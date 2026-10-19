@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-import { StatTiles } from "@/components/ui/stat-tiles";
-import { InfoRow, Rows } from "@/components/ui/rows";
+import { Rows } from "@/components/ui/rows";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { VersionCard } from "@/components/ui/version-card";
@@ -58,7 +57,12 @@ export function BriefOutDoc({
   alerts?: string[];
 }) {
   const row = (label: string, list: string[]) => (
-    <InfoRow title={list.join(" · ") || t.empty} detail={label} />
+    <li className="flex flex-col gap-0.5 px-3.5 py-3 text-body-sm">
+      <span className="text-caption text-[color:var(--text-secondary)]">
+        {label}
+      </span>
+      <b className="font-semibold break-words">{list.join(" · ") || t.empty}</b>
+    </li>
   );
   return (
     <VersionCard
@@ -143,24 +147,24 @@ export function BriefOutDoc({
         </Rows>
       </Block>
       <Block title={t.goal}>
-        <StatTiles
-          columns={3}
-          stats={[
-            {
-              label: t.objective,
-              value: out.objectives.join(" · ") || t.empty,
-            },
-            {
-              label: t.budget,
-              value: euros(out.budget.proposedCents),
-              hint: t.budgetOf(
+        <Rows label={t.goal}>
+          {row(t.objective, out.objectives)}
+          <li className="flex flex-col gap-0.5 px-3.5 py-3 text-body-sm">
+            <span className="text-caption text-[color:var(--text-secondary)]">
+              {t.budget}
+            </span>
+            <b className="font-semibold tabular-nums">
+              {euros(out.budget.proposedCents)}
+            </b>
+            <span className="text-caption text-[color:var(--text-tertiary)]">
+              {t.budgetOf(
                 out.budget.envelopeCents === null
                   ? null
                   : euros(out.budget.envelopeCents),
-              ),
-            },
-          ]}
-        />
+              )}
+            </span>
+          </li>
+        </Rows>
       </Block>
     </VersionCard>
   );

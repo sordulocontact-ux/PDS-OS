@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
+import { lowerFirst } from "@/lib/ui/journey";
 import type { WriteDone } from "@/lib/utils/write-result";
 
 const t = fr.moduleFrame.result;
@@ -80,13 +81,13 @@ export function ResultBannerView({
         {result.next?.map((n) => (
           <span key={`n-${n.step}-${n.who}`}>
             {t.next} <b className="font-semibold">{n.who}</b>
-            {n.viaLink && ` (${t.viaLink})`} · {n.todo.toLowerCase()} ({n.step})
+            {n.viaLink && ` (${t.viaLink})`} · {lowerFirst(n.todo)} ({n.step})
           </span>
         ))}
         {result.unlocked?.map((u) => (
           <span key={`u-${u.step}`}>
             {t.unlocked} <b className="font-semibold">{u.step}</b>
-            {[u.who, u.todo?.toLowerCase()]
+            {[u.who, lowerFirst(u.todo ?? undefined)]
               .filter(Boolean)
               .map((part) => ` · ${part}`)
               .join("")}
