@@ -578,3 +578,24 @@ projet a (Juridique toujours, Master avec un titre), Plateformes « Fait » apr�
 réserves, plus de cascade layout → page dans le Marketing, pastille d'état à droite du titre,
 compteur bleu sur les pilules, texte du verrou hors du plan. Détail et mesures :
 `docs/projet-complet/RECETTE.md` § 7. Aucune migration.
+
+## Le reste du Juridique (20/10/2026, branche `pc/r3-legal`)
+
+- Modèle de contrat demandé à la direction depuis les contrats à prévoir, validé ou refusé
+  (motif signé) **dans** le Plan d'action ; « À vous · Valider le modèle « … » » pour la direction.
+- Contrat en document en tête de sa carte à chaque étape qui suit la génération (nom versionné,
+  « Voir le PDF », valeurs sourcées), « Modifier une clause » dans l'étape, « Changé depuis la
+  v1 : clause « … » (qui, vN) : « … » », retour de la direction en tête, « Répondre et transmettre
+  à nouveau ».
+- Liens des confirmations de répartition visibles dans l'étape (scellés `LEGAL_LINK_KEY`, Copier /
+  Marquer comme envoyé / Relancer / Nouveau lien / Révoquer avec motif), `PrivateLinkCard` commun
+  avec la fiche.
+- SACEM sur une page : « Avant de générer » en trois colonnes (Bloquant / À confirmer / Facultatif),
+  « Générer la version à signer », « Générer un brouillon » (725 filigrané), bulletin en tête
+  ensuite (« Télécharger »).
+- Factures (J10) : dépôt par la page de la personne (`/c/`), écart expliqué, lecture et paiement par
+  la direction seule, jamais de virement ni d'IBAN dans l'app.
+- Migrations `20261020030101`, `20261020030201`, `20261020030301` à pousser en prod avec accord ;
+  pgTAP `legal-reste.test.sql` (31), tests Juridique verts.
+- Reste : envoi d'e-mails par PDS OS, contrat et bulletin signés déposés par la page de la
+  personne, contrôle des factures dans Prêt pour la sortie, liste « À payer », reflet Budget.
