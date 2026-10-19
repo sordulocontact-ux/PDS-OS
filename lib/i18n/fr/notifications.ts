@@ -41,6 +41,8 @@ export const notifications = {
       `${actor} vous demande une décision sur la conception (« ${project} »).`,
     design_submission_decided: (actor: string, project: string) =>
       `${actor} a décidé sur votre demande de validation (« ${project} »).`,
+    design_sheet_new_version: (actor: string, project: string) =>
+      `${actor} a transféré une nouvelle version d'une Fiche Livrable en Production (« ${project} »).`,
     // A contract or a meeting may have no project: the text never names one.
     contract_review_requested: (actor: string) =>
       `${actor} vous demande de valider un contrat.`,

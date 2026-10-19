@@ -21,6 +21,8 @@ export const NOTIFICATION_KINDS = [
   "design_version_discarded",
   "design_submission_requested",
   "design_submission_decided",
+  // A later version of a Fiche Livrable transferred: the Production is told.
+  "design_sheet_new_version",
   "contract_review_requested",
   "contract_approved",
   "contract_changes_requested",
@@ -208,7 +210,12 @@ export function notificationHref(
     return subjectId
       ? routes.projectStrategyDocument(projectId, subjectId)
       : routes.projectStrategyBrief(projectId);
-  // A validation request of the Conception: its decision page (MKT-C2-11).
+  // A new version of a sheet: its card in the Fiches Livrables.
+  if (kind === "design_sheet_new_version")
+    return subjectId
+      ? routes.projectDesignSheet(projectId, subjectId)
+      : routes.projectDesignStep(projectId, "sheets");
+  // A validation request of the Conception: decided in its step.
   if (kind.startsWith("design_submission_"))
     return subjectId
       ? routes.projectDesignDecision(projectId, subjectId)

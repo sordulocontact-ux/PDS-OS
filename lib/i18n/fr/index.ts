@@ -56,6 +56,8 @@ import { legalForms } from "./legal-forms";
 import { legalHistory } from "./legal-history";
 import { legalJourney } from "./legal-journey";
 import { framingJourney } from "./framing-journey";
+import { designJourney } from "./design-journey";
+import { designSteps } from "./design-steps";
 import { legalReadiness } from "./legal-readiness";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
@@ -235,6 +237,8 @@ export const fr = {
   legalHistory,
   legalJourney,
   framingJourney,
+  designJourney,
+  designSteps,
   legalReadiness,
   legalSplits,
   masterWorkflow,

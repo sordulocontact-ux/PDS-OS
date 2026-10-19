@@ -377,6 +377,7 @@ export const loadWorkflowStates = cache(
       distribution,
       constraints,
       marketingStanding,
+      designDone,
     ] = await Promise.all([
       has("master") ? masterFacts(project, access.personId) : null,
       has("legal") && legalAllowed ? legalFacts(project) : null,
@@ -389,6 +390,13 @@ export const loadWorkflowStates = cache(
         .eq("type", "rights")
         .eq("review_status", "confirmed"),
       has("marketing") ? loadMarketingStanding(project.id) : null,
+      // The Conception is done when every sheet is transferred (its stage
+      // is never validated as a whole, docs/ARCHITECTURE.md § 8 decies).
+      has("marketing")
+        ? supabase
+            .rpc("design_is_done", { p_project_id: project.id })
+            .then((r) => r.data === true)
+        : false,
     ]);
 
     let states: WorkflowStates["states"] = {};
@@ -397,7 +405,11 @@ export const loadWorkflowStates = cache(
     if (has("marketing"))
       states.marketing = marketingState({
         launched: strategyLaunched,
-        stages: project.stages,
+        stages: project.stages.map((stage) =>
+          stage.key === "design" && designDone
+            ? { ...stage, state: "validated" }
+            : stage,
+        ),
         closure: marketingStanding?.status ?? "not_started",
       });
     if (distribution) states.distribution = distribution.state;

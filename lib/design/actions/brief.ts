@@ -6,8 +6,10 @@ import { requireApproved } from "@/lib/auth/dal";
 import { designError, refreshConception } from "@/lib/design/actions/shared";
 import { liveCreativeBrief } from "@/lib/design/brief-live";
 import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
 import type { Json } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 /**
  * « Créer une nouvelle version » of the Brief créatif: its content is built
@@ -41,4 +43,20 @@ export async function createCreativeBrief(
   }
   refreshConception(projectId);
   return { ok: true, number };
+}
+
+/**
+ * « Établir le Brief créatif Vn » in the step (proto deB): the same
+ * version, built by code, and what follows (VISION-UX rule 7).
+ */
+export async function establishCreativeBrief(
+  projectId: string,
+  done: string,
+): Promise<WriteResult> {
+  if (!z.uuid().safeParse(projectId).success)
+    return { ok: false, error: fr.conception.errors.generic };
+  return withOutcome(projectId, ["marketing"], done, async () => {
+    const result = await createCreativeBrief(projectId);
+    return result.ok ? { ok: true } : result;
+  });
 }

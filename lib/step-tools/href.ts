@@ -15,7 +15,7 @@ export function stepHref(
     case "strategy":
       return routes.projectStrategy(projectId);
     case "design":
-      return routes.projectDesign(projectId);
+      return routes.projectDesignStep(projectId, step);
     case "production":
       return subject
         ? routes.projectProductionStep(projectId, subject, step)

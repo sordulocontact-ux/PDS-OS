@@ -3622,6 +3622,7 @@ export type Database = {
           call_id: string | null
           created_at: string
           created_by: string | null
+          format: string | null
           id: string
           lever_id: string | null
           note: string | null
@@ -3636,6 +3637,7 @@ export type Database = {
           call_id?: string | null
           created_at?: string
           created_by?: string | null
+          format?: string | null
           id?: string
           lever_id?: string | null
           note?: string | null
@@ -3650,6 +3652,7 @@ export type Database = {
           call_id?: string | null
           created_at?: string
           created_by?: string | null
+          format?: string | null
           id?: string
           lever_id?: string | null
           note?: string | null
@@ -3974,6 +3977,9 @@ export type Database = {
           project_id: string
           started_at: string
           started_by: string | null
+          start_path: string | null
+          start_path_at: string | null
+          start_path_by: string | null
           validation_mode: string
         }
         Insert: {
@@ -3989,6 +3995,9 @@ export type Database = {
           project_id: string
           started_at?: string
           started_by?: string | null
+          start_path?: string | null
+          start_path_at?: string | null
+          start_path_by?: string | null
           validation_mode?: string
         }
         Update: {
@@ -4004,6 +4013,9 @@ export type Database = {
           project_id?: string
           started_at?: string
           started_by?: string | null
+          start_path?: string | null
+          start_path_at?: string | null
+          start_path_by?: string | null
           validation_mode?: string
         }
         Relationships: [
@@ -4429,6 +4441,7 @@ export type Database = {
           notes: string | null
           number: number
           objective: string | null
+          publish_date: string | null
           organization_id: string
           project_id: string
           reference_url: string | null
@@ -4445,6 +4458,7 @@ export type Database = {
           notes?: string | null
           number: number
           objective?: string | null
+          publish_date?: string | null
           organization_id: string
           project_id: string
           reference_url?: string | null
@@ -4461,6 +4475,7 @@ export type Database = {
           notes?: string | null
           number?: number
           objective?: string | null
+          publish_date?: string | null
           organization_id?: string
           project_id?: string
           reference_url?: string | null
@@ -4492,9 +4507,11 @@ export type Database = {
           design_deliverable_id: string
           duration_max_seconds: number | null
           duration_min_seconds: number | null
+          file_format: string | null
           id: string
           intention: string | null
           kind: string
+          new_version_at: string | null
           notes: string | null
           organization_id: string
           post_deadline: string | null
@@ -4525,9 +4542,11 @@ export type Database = {
           design_deliverable_id: string
           duration_max_seconds?: number | null
           duration_min_seconds?: number | null
+          file_format?: string | null
           id?: string
           intention?: string | null
           kind?: string
+          new_version_at?: string | null
           notes?: string | null
           organization_id: string
           post_deadline?: string | null
@@ -4558,9 +4577,11 @@ export type Database = {
           design_deliverable_id?: string
           duration_max_seconds?: number | null
           duration_min_seconds?: number | null
+          file_format?: string | null
           id?: string
           intention?: string | null
           kind?: string
+          new_version_at?: string | null
           notes?: string | null
           organization_id?: string
           post_deadline?: string | null
@@ -16903,6 +16924,10 @@ export type Database = {
         Args: { p_master_ids: string[]; p_music_format: string; p_type: string }
         Returns: undefined
       }
+      choose_design_start: {
+        Args: { p_path: string | null; p_project_id: string }
+        Returns: undefined
+      }
       choose_production_location: {
         Args: { p_option_id: string; p_reason: string }
         Returns: undefined
@@ -17272,6 +17297,7 @@ export type Database = {
       assign_design_responsible: { Args: { p_person_id: string; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: string }
       set_design_validators: { Args: { p_people: string[]; p_project_id: string; p_scope: string; p_sheet_id: string | null }; Returns: undefined }
       set_design_validation_mode: { Args: { p_mode: string; p_project_id: string }; Returns: undefined }
+      design_is_done: { Args: { p_project_id: string }; Returns: boolean }
       design_is_responsible: { Args: { p_project_id: string }; Returns: boolean }
       design_sheet_can_edit: { Args: { p_sheet_id: string }; Returns: boolean }
       submit_design_direction: {

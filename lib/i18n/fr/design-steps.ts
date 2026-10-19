@@ -1,0 +1,407 @@
+// The content of the Conception's six steps (proto « Projet complet »,
+// BODY de0 / de1 / deR / de2 / deB / de3, ficheCard, fieldRow, refTile,
+// refAddForm; gestures of mk-actions.js). Exact words of the proto.
+
+const plural = (n: number, one: string, many: string) =>
+  `${n} ${n > 1 ? many : one}`;
+
+export const designSteps = {
+  waiting: (name: string) => `En attente de ${name}`,
+  home: {
+    facts: { project: "Projet", release: "Sortie", strategy: "Stratégie" },
+    strategyValue: (version: number, at: string) =>
+      `Brief de sortie V${version} validé le ${at}`,
+    strategyPending: "Brief de sortie pas encore validé",
+    received: (n: number) => `Livrables reçus (${n})`,
+    noneReceived: "Aucun livrable reçu de la Stratégie pour l'instant.",
+    add: "Ajouter un livrable",
+    single: "Fiche unique",
+    series: (n: number) => `Fiche série · ${plural(n, "élément", "éléments")}`,
+    fromStrategy: "Stratégie validée › Livrables engagés",
+    addedBy: (origin: string, who: string, why: string) =>
+      `${origin} par ${who} : ${why}`,
+    confirmed: "Confirmé",
+    toQualify: "À qualifier",
+    remove: "Retirer",
+    removed: "Livrable retiré",
+    form: {
+      name: "Livrable",
+      namePlaceholder: "Ex. : Session acoustique",
+      format: "Format",
+      formatPlaceholder: "Ex. : 16:9, 4 min",
+      origin: "Provenance",
+      origins: {
+        manual: "Ajout manuel",
+        call: "Décision d'un call",
+        strategy_decision: "Décision de Stratégie",
+      },
+      call: "Call",
+      callPlaceholder: "Choisir le call",
+      lever: "Levier",
+      leverPlaceholder: "Choisir le levier",
+      why: "Motif",
+      whyPlaceholder: "Pourquoi l'ajouter maintenant",
+      submit: "Ajouter",
+      cancel: "Annuler",
+      errors: {
+        name: "Nommez le livrable.",
+        why: "Dites pourquoi il arrive maintenant.",
+        call: "Choisissez le call où il a été décidé.",
+        lever: "Choisissez le levier de la Stratégie.",
+      },
+      added: (name: string) => `${name} ajouté, à qualifier`,
+    },
+    creative: {
+      title: "Responsable créatif",
+      label: "Qui prépare la direction artistique",
+      suggestion: (name: string) =>
+        `Suggestion : ${name}, de l'équipe créative du projet. Rien n'est affecté sans vous.`,
+      noSuggestion: "Rien n'est affecté sans vous.",
+      designate: "Désigner",
+      by: (name: string) => `désigné par ${name}`,
+      waiting: "désigner le responsable créatif",
+      done: (name: string) => `${name} désigné responsable créatif`,
+    },
+    start: {
+      title: "Comment commencer",
+      call: {
+        title: "Préparer un échange créatif",
+        body: "PO prépare l'objectif, les participants, les livrables et les sujets ; il propose ensuite les intentions, avec la phrase exacte.",
+      },
+      direct: {
+        title: "Commencer directement",
+        body: "PO montre ce qui est déjà connu et ne demande que ce qui manque.",
+      },
+      reasonEmpty:
+        "Rien n'a encore été dit sur la direction artistique : un échange ira plus vite que des questions une à une.",
+      reasonKnown: (n: number) =>
+        `${plural(n, "intention est déjà connue", "intentions sont déjà connues")} : un échange reste le plus sûr pour la direction de la sortie.`,
+      departure: "Départ",
+      chosenCall: "Préparer un échange créatif",
+      chosenBy: (name: string, at: string) => `choisi par ${name} le ${at}`,
+      change: "Changer",
+      direct_: "Commencé directement",
+      directBy: (name: string) => `Par ${name}`,
+      exchangeOf: (day: string) => `Échange créatif du ${day}`,
+      exchangeReady:
+        "Compte rendu disponible : les intentions sont proposées dans l'étape suivante",
+      processing:
+        "L'échange est enregistré : PO prépare le compte rendu, puis propose les intentions.",
+      openCall: "Ouvrir l'échange",
+      meetingName: "Échange créatif",
+      summaryNext: (creative: string, validator: string) =>
+        `${creative} soumet la direction artistique à ${validator}.`,
+      waiting: "choisir comment commencer la Conception",
+      started: "Conception commencée",
+      callChosen: "Préparez l'échange créatif.",
+    },
+  },
+  intentions: {
+    poCall:
+      "PO a rangé les intentions dites pendant l'échange, avec la phrase exacte. Confirmez, corrigez ou écartez ; les livrables hériteront de la direction.",
+    poDirect:
+      "Voici ce que PDS OS sait déjà. Écrivez les intentions qui manquent, en commençant par la direction de la sortie.",
+    facts: {
+      exchange: "Échange créatif",
+      exchangeValue: (day: string, format: string, minutes: number | null) =>
+        [day, format, minutes ? `${minutes} min` : null]
+          .filter(Boolean)
+          .join(" · "),
+      report: "Compte rendu",
+      roles: "Rôle des livrables",
+      audiences: "Publics",
+      narrative: "Narratif",
+      milestones: "Temps forts",
+    },
+    formats: { video: "Visio", in_person: "Sur place" },
+    direction: "Direction de la sortie",
+    state: {
+      toConfirm: "À confirmer",
+      confirmed: "Confirmé",
+      toComplete: "À compléter",
+      inherits: "Hérite de la direction",
+    },
+    emptyDirection: "Rien n'a encore été dit sur la direction de la sortie.",
+    emptyDeliverable:
+      "Rien n'a été dit sur ce livrable : il hérite de la direction de la sortie.",
+    add: "Ajouter une intention",
+    question: "Question",
+    intention: "Intention",
+    submit: "Ajouter",
+    cancel: "Annuler",
+    required: "Écrivez l'intention.",
+    added: "Ajouté",
+    unassigned: "À rattacher",
+    more: "Autres actions",
+    secondary: {
+      import: "Importer un brief existant",
+    },
+  },
+  references: {
+    note: "Une référence peut servir plusieurs livrables sans être importée deux fois. Pas de moodboard global imposé.",
+    count: (n: number) => plural(n, "référence", "références"),
+    toAttach: (n: number) => `${n} à rattacher`,
+    unattached: "À rattacher",
+    add: "Ajouter une référence",
+    emptyDirection: "Aucune référence pour la direction de la sortie.",
+    emptyDeliverable:
+      "Aucune référence propre : ce livrable hérite de celles de la direction.",
+    proposed: "Proposée",
+    validated: "Validée",
+    alsoFor: (list: string) => `Aussi pour : ${list}`,
+    depositedBy: (name: string) => `Déposée par ${name}`,
+    attachTo: "Rattacher à…",
+    attach: "Rattacher",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    attached: "Référence rattachée.",
+    detached: "Référence remise dans « À rattacher ».",
+    similar: "Chercher des références semblables",
+    form: {
+      drop: "Glissez une image, un PDF ou une vidéo, ou choisissez-la",
+      title: "Titre",
+      link: "Ou un lien",
+      linkPlaceholder: "https://…",
+      kind: "Sorte",
+      rights: "Droits d'usage",
+      targets: "Rattacher à",
+      noTarget: "Sans rattachement, elle va dans « À rattacher ».",
+      notes: "Notes",
+      submit: "Ajouter la référence",
+      cancel: "Annuler",
+      errors: {
+        title: "Donnez un titre à la référence.",
+        link: "Un lien qui commence par https://.",
+        file: "Ce fichier n'a pas pu être envoyé.",
+      },
+      added: "Référence ajoutée.",
+      addedLoose: "Référence ajoutée dans « À rattacher ».",
+    },
+    kinds: {
+      reference: "Référence",
+      moodboard: "Moodboard",
+      proposal: "Proposition créative",
+      work_version: "Version de travail",
+    },
+    rights: {
+      free: "Licence libre",
+      internal: "Usage interne",
+      to_check: "À vérifier",
+    },
+  },
+  direction: {
+    title: "Direction de la sortie",
+    fields: [
+      "Concept central et message",
+      "Codes communs",
+      "Ton",
+      "Contraintes et lignes rouges",
+    ],
+    toWrite: "Rien n'a été dit : à écrire",
+    writeBy: (name: string) => `À écrire par ${name}`,
+    writeRequired: "Écrivez ce point de la direction.",
+    typedBy: (name: string) => `Saisi par ${name}`,
+    changedBy: (name: string) => `Modifié par ${name}`,
+    submitted: "Ce qui est soumis",
+    who: (creative: string, validator: string) =>
+      `Responsable : ${creative} · validation : ${validator}`,
+    sectionMeta: (refs: number, missing: string[]) =>
+      `${plural(refs, "référence", "références")}${
+        missing.length
+          ? ` · à préciser dans la fiche : ${missing.join(", ")}`
+          : ""
+      }`,
+    submit: "Soumettre",
+    sectionSubmitted: "Soumise",
+    submitTo: (name: string) => `Soumettre à ${name}`,
+    resubmit: "Répondre et soumettre à nouveau",
+    submittedDone: "Direction soumise",
+    decisionTitle: "Votre décision",
+    comment: "Commentaire",
+    commentHint: "Obligatoire pour demander des modifications ou refuser",
+    approve: "Valider la direction",
+    changes: "Demander des modifications",
+    refuse: "Refuser",
+    commentRequired: "Dites ce qui doit changer.",
+    approvedDone: "Direction validée",
+    changesDone: "Modifications demandées",
+    refusedDone: "Direction refusée",
+    approved: (name: string, at: string) =>
+      `Direction validée par ${name} le ${at}. Les références soumises sont validées ; les livrables en héritent.`,
+    returned: (name: string, refused: boolean) =>
+      `${name} (${refused ? "refuser" : "demander des modifications"})`,
+    waitingDecision: "valider la direction artistique",
+    waitingSubmit: (validator: string) =>
+      `soumettre la direction à ${validator}`,
+    history: {
+      submitted: (n: number) => `Version ${n} soumise`,
+      approved: "Validée",
+      changes: "Modifications demandées",
+      refused: "Refusée",
+    },
+    outdated:
+      "Ce qui a été soumis a changé depuis : la décision porte sur une version qui n'est plus à jour.",
+  },
+  brief: {
+    po: "Le code assemble le Brief créatif depuis ce qui est validé : rien n'est écrit par l'IA. Relisez, puis établissez la V1.",
+    title: (n: number) => `Brief créatif — V${n}`,
+    established: (n: number, name: string, at: string) =>
+      `Brief créatif — V${n} établi par ${name} le ${at}. Sans budget.`,
+    pdf: "Voir le PDF",
+    establish: (n: number) => `Établir le Brief créatif V${n}`,
+    establishedDone: (n: number) => `Brief créatif V${n} établi`,
+    outdated: (n: number) =>
+      `Ce qui est validé a changé depuis la V${n} : établissez la V${n + 1}.`,
+    rows: {
+      context: "Contexte",
+      goals: "Objectifs créatifs",
+      audiences: "Publics et usages",
+      narrative: "Narratif",
+      principles: "Principes",
+      tone: "Ton",
+      avoid: "À éviter",
+      deliverables: "Livrables",
+      references: "Références validées",
+      open: "Points encore ouverts",
+    },
+    contextValue: (project: string, day: string | null, brief: number | null) =>
+      [
+        project,
+        day ? `sortie le ${day}` : null,
+        brief ? `Brief de sortie V${brief}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    none: "Aucun",
+    waiting: "établir le Brief créatif V1",
+  },
+  sheets: {
+    single: "Fiche unique",
+    series: (n: number) => `Fiche série · ${plural(n, "élément", "éléments")}`,
+    phases: {
+      draft: "Brouillon",
+      submitted: "En attente de validation",
+      changes: "Modifications demandées",
+      refused: "Refusée",
+      approved: "Validée · Prête pour Production",
+      transferred: "Transférée",
+    },
+    responsible: "Responsable",
+    designatedBy: (name: string) => `désigné par ${name}`,
+    responsibleLabel: "Responsable de la fiche",
+    suggestion: (name: string) =>
+      `Suggestion : ${name}, responsable créatif. Rien n'est affecté sans vous.`,
+    noSuggestion: "Rien n'est affecté sans vous.",
+    designate: "Désigner",
+    toDesignate: (name: string) => `Responsable à désigner par ${name}`,
+    designated: (name: string, sheet: string) =>
+      `${name} responsable de la fiche ${sheet}`,
+    validation: (name: string, version: number) =>
+      `Validation : ${name} · V${version}`,
+    toQualify: (source: string) => `À qualifier · ${source}`,
+    toFill: "À renseigner",
+    notFilled: "Non renseigné",
+    edit: "Modifier",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    saved: "Modifié.",
+    proposed: (value: string, source: string) =>
+      `Proposé : ${value} · ${source}`,
+    changedBy: (name: string) => `Modifié par ${name}`,
+    changedHere: "Modifié dans la fiche",
+    required: "Ce champ est obligatoire.",
+    datesOrder: (list: string) => `Les dates doivent se suivre : ${list}.`,
+    deliveryLimit: (limit: string) => `La livraison doit précéder ${limit}.`,
+    series_: "Éléments de la série",
+    itemLine: (name: string, phase: string) => `${name} · ${phase}`,
+    publishedOn: (day: string) => `Publié le · ${day}`,
+    noPublish: "Date de publication à fixer",
+    itemObjective: "Objectif",
+    itemDate: "Publié le",
+    submitTo: (name: string) => `Soumettre à ${name}`,
+    resubmit: "Corriger et soumettre à nouveau",
+    missing: (list: string) => `Il manque : ${list}`,
+    missingError: (list: string) => `Il manque : ${list}.`,
+    submittedDone: (title: string) => `Fiche ${title} soumise`,
+    approve: (n: number) => `Valider la fiche V${n}`,
+    changes: "Demander des modifications",
+    refuse: "Refuser",
+    comment: "Commentaire",
+    commentHint: "Obligatoire pour demander des modifications ou refuser",
+    changesRequired: "Dites ce qui doit changer.",
+    refuseRequired: "Dites pourquoi vous refusez.",
+    approvedDone: (title: string) => `Fiche ${title} validée`,
+    changesDone: "Modifications demandées",
+    refusedDone: "Fiche refusée",
+    returned: (name: string, refused: boolean) =>
+      `${name} (${refused ? "refuser" : "demander des modifications"})`,
+    transfer: "Transférer en Production",
+    transferredDone: (title: string) => `${title} transféré en Production`,
+    newVersion: "Modifier (nouvelle version)",
+    newVersionDone: (n: number) =>
+      `V${n} ouverte : elle devra être validée à nouveau.`,
+    transferred: (name: string, at: string, n: number) =>
+      `Transférée en Production par ${name} le ${at} · version V${n}`,
+    newerNotTransferred: (n: number) =>
+      `la V${n} n'est pas encore transférée : la Production sera prévenue`,
+    history: {
+      submitted: (n: number, name: string, at: string) =>
+        `V${n} soumise par ${name} le ${at}`,
+      approved: (n: number, name: string, at: string) =>
+        `V${n} validée par ${name} le ${at}`,
+      changes: (n: number, name: string, at: string) =>
+        `V${n} renvoyée pour modifications par ${name} le ${at}`,
+      refused: (n: number, name: string, at: string) =>
+        `V${n} refusée par ${name} le ${at}`,
+      comment: (text: string) => ` : « ${text} »`,
+    },
+    subtitles: [
+      "Oui, intégrés aux exports",
+      "Oui, fichier séparé",
+      "Oui, intégrés et fichier séparé",
+      "Non",
+    ],
+    subtitlesPlaceholder: "À choisir",
+    money: (amount: string, engaged: boolean) =>
+      `${amount} € HT · ${engaged ? "engagé" : "non engagé"}`,
+    moneyPlaceholder: "En euros HT",
+    engaged: "Engagé",
+    notEngaged: "Non engagé",
+    ratiosJoin: " et ",
+    fields: {
+      concept: "Concept",
+      intention: "Intention et ton",
+      duration: "Durée cible",
+      ratios: "Ratios et formats",
+      subtitles: "Sous-titres",
+      variants: "Déclinaisons",
+      notes: "Notes et contraintes",
+      file_format: "Format",
+      shoot_date: "Tournage le",
+      post_start: "Début de postproduction le",
+      post_deadline: "Fin de postproduction le",
+      delivery_date: "Livraison finale le",
+      budget: "Montant prévisionnel",
+      dependencies: "Dépendances",
+      production_notes: "Points à préciser en Production",
+    },
+    sources: {
+      intentionsOf: (title: string) => `Intentions › ${title}`,
+      direction: "Direction artistique",
+      strategy: "Stratégie › Livrables engagés",
+      strategyDue: "Stratégie › Livrables engagés · échéance",
+      postStart: "Calculé : le lundi qui suit le tournage",
+      postEnd: "Calculé : 8 jours avant la livraison",
+      upstream: (day: string) =>
+        `Avant l'échéance amont « Production terminée », ${day}`,
+      budget: (labels: string) => `Budget › ${labels}`,
+      brief: "Brief créatif",
+      milestone: (title: string) => `Calendrier de lancement › ${title}`,
+      typed: (name: string) => `Saisi par ${name}`,
+    },
+    limit: (day: string) => `l'échéance amont « Production terminée », ${day}`,
+    durationHint: "Ex. : 3 min, 0:45, 15 s",
+    durationError: "Une durée comme 3 min, 0:45 ou 15 s.",
+    moneyError: "Un montant en euros, par exemple 1 500.",
+  },
+};

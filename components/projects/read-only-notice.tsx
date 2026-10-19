@@ -22,12 +22,15 @@ export function ReadOnlyNotice({
   const canEdit = useCanEditProject();
   const pathname = usePathname();
   if (canEdit) return null;
-  // The Juridique journey already says who acts: no banner there.
-  if (pathname.startsWith(routes.projectLegal(projectId))) return null;
-  const onDesign = pathname.startsWith(routes.projectDesign(projectId));
+  // The Juridique and Conception journeys already say who acts: no banner.
+  if (
+    pathname.startsWith(routes.projectLegal(projectId)) ||
+    pathname.startsWith(routes.projectDesign(projectId))
+  )
+    return null;
   return (
     <FormMessage kind="info" className={className}>
-      {onDesign ? fr.shell.project.readOnlyDesign : fr.shell.project.readOnly}
+      {fr.shell.project.readOnly}
     </FormMessage>
   );
 }

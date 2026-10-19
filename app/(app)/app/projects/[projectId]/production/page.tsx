@@ -15,7 +15,6 @@ import { DELIVERY_STATES } from "@/lib/production/rules";
 import { loadProduction } from "@/lib/production/queries";
 import { canEditProject } from "@/lib/projects/edit-access";
 import { requireLaunchedProject } from "@/lib/projects/queries";
-import { isStageValidated } from "@/lib/projects/types";
 import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.production;
@@ -103,11 +102,9 @@ export default async function ProjectProductionPage({
                 mePersonId={access.personId}
                 title={t.stage}
                 startLabel={t.start}
-                startBlocked={
-                  isStageValidated(project.stages, "design")
-                    ? fr.conceptionClosure.production.startBlocked
-                    : null
-                }
+                // The Production opens with the first sheet transferred
+                // from the Conception (handoff_design_sheet), never apart.
+                startBlocked={fr.conceptionClosure.production.startBlocked}
               />
               {inProgress && (
                 <p className="text-xs text-muted-foreground">{t.finishHint}</p>

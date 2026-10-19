@@ -196,6 +196,13 @@ select throws_ok($$ insert into public.design_references (organization_id, proje
                  '23505', null, 'the same link is never stored twice');
 
 -- The artistic direction is submitted, by section ----------------------------------------------
+-- The direction validates by default (20261019040201) and in one global
+-- decision; the project may still decide section by section, and a scope
+-- left without validator still refuses a submission.
+reset role;
+update public.design_workspaces set validation_mode = 'per_section' where project_id = pg_temp.prj();
+delete from public.design_validators where project_id = pg_temp.prj() and scope = 'direction';
+select pg_temp.act_as(pg_temp.id_of('iyad'));
 select throws_ok($$ select public.submit_design_direction(pg_temp.prj(),
                      array['direction', pg_temp.id_of('session')::text]) $$,
                  'P0001', 'validator_required', 'no submission without a validator');
@@ -232,6 +239,9 @@ select is((select status from public.design_submissions where id = pg_temp.id_of
 -- Fiches Livrables -------------------------------------------------------------------------------
 reset role;
 select pg_temp.act_as(pg_temp.id_of('owner'));
+-- Sheets are now created by the database from the validated Stratégie
+-- (20261019040301_design_sheets_auto): this test builds its own.
+delete from public.design_sheets where project_id = pg_temp.prj();
 select lives_ok($$
   with s as (insert into public.design_sheets (organization_id, project_id, design_deliverable_id, kind, title)
              values (pg_temp.org(), pg_temp.prj(), pg_temp.id_of('session'), 'single', 'Session acoustique'),
@@ -256,6 +266,11 @@ select lives_ok($$
          delivery_date = '2026-10-26', budget_cents = 200000
    where id = pg_temp.id_of('sheet')
 $$, 'Alizée completes the sheet');
+-- The sheets get the direction as validators by default (20261019040201):
+-- taken away here, the rule still holds.
+reset role;
+delete from public.design_validators where sheet_id = pg_temp.id_of('sheet');
+select pg_temp.act_as(pg_temp.id_of('alizee'));
 select throws_ok($$ select public.submit_design_sheet(pg_temp.id_of('sheet')) $$,
                  'P0001', 'validator_required', 'the missing validator blocks this submission only');
 reset role;

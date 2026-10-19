@@ -7,6 +7,8 @@
 export const REFERENCE_TYPES = [
   "reference",
   "moodboard",
+  "proposal",
+  "work_version",
   "to_qualify",
 ] as const;
 export type ReferenceType = (typeof REFERENCE_TYPES)[number];
@@ -15,8 +17,10 @@ export type ReferenceType = (typeof REFERENCE_TYPES)[number];
 export const CHOSEN_REFERENCE_TYPES = ["reference", "moodboard"] as const;
 
 export const REFERENCE_USAGES = [
-  "inspiration",
   "free",
+  "internal",
+  "to_check",
+  "inspiration",
   "licensed",
   "to_license",
   "owned",
@@ -30,3 +34,14 @@ export function referenceTypeOf(value: string | null): ReferenceType {
 export function referenceUsageOf(value: string | null): ReferenceUsage | null {
   return REFERENCE_USAGES.find((u) => u === value) ?? null;
 }
+
+// The proto's words (« Projet complet », refAddForm): the four sorts and the
+// three rights a person picks now; « À vérifier » by default.
+export const PROTO_REFERENCE_TYPES = [
+  "reference",
+  "moodboard",
+  "proposal",
+  "work_version",
+] as const;
+export type ProtoReferenceType = (typeof PROTO_REFERENCE_TYPES)[number];
+export const PROTO_REFERENCE_USAGES = ["free", "internal", "to_check"] as const;

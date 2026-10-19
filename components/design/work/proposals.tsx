@@ -23,7 +23,7 @@ const placeOf = (i: ConceptionIntention) =>
  * from, which other targets the same passage feeds (one source, never
  * copied), whether it would replace an answer already confirmed.
  */
-function viewOf(
+export function viewOf(
   data: Data,
   proposal: ConceptionIntention,
   projectId: string,
@@ -92,7 +92,7 @@ function viewOf(
 }
 
 /** Every place a proposal can be attached to: the direction, each deliverable. */
-function targetsOf(data: Data): Record<string, string> {
+export function targetsOf(data: Data): Record<string, string> {
   return {
     [DIRECTION_KEY]: fr.conceptionWork.targets.direction,
     ...Object.fromEntries(data.deliverables.map((d) => [d.id, d.title])),

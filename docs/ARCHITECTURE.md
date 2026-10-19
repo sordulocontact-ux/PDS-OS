@@ -4596,6 +4596,62 @@ Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche
 
 ## 8 decies. Marketing : Conception (`/design`, `lib/design/`, `components/design/`)
 
+> **Lot 4 « Projet complet » (19/10/2026) — ce qui suit remplace l'écran décrit plus bas.** La
+> Conception est le parcours du proto en six étapes (`lib/design/journey.ts`, `DESIGN_STEPS`) :
+> Accueil (`/design/home`), Intentions (`/design/intentions`), Références, Direction artistique,
+> Brief créatif, Fiches Livrables — le Brief **avant** les fiches. `/design` envoie à l'étape de la
+> personne (`designLanding`) ; `/design/work`, `/design/sheets/[id]`, `/design/decisions/[id]` et
+> `/design/versions/[id]` redirigent vers leur étape (ancres `#target-…`, `#sheet-…`,
+> `#deliverable-…`). Les onglets (`ConceptionTabs`), le parcours maison (`journey-next`,
+> `ConceptionJourney`) et les composants de l'ancien écran sont supprimés.
+>
+> - **Données d'une requête** : `designJourneyContext` (`lib/design/journey-context.ts`, `cache`) lit
+>   `loadConception`, les personnes (`loadDesignPeople`), le départ (`design_workspaces.start_path*`),
+>   l'échange créatif (`design_calls` + `call_reports`), les briefs, les fiches (`loadFacts`) et leur
+>   état (`phaseOf` → `lib/design/sheet-phase.ts` : Brouillon / En attente de validation /
+>   Modifications demandées / Refusée / Validée · Prête pour Production / Transférée, et la version) ;
+>   le loader du projet `lib/journey/design.ts` le rend sous le Marketing. Cadre : `DesignStepFrame`.
+> - **Statuts** (code, jamais stockés) : Accueil fait = responsable créatif désigné **et** départ
+>   direct ou échange tenu ; Intentions = aucune à confirmer et ≥ 1 confirmée (plus de « Confirmer
+>   l'ensemble » par le chef de projet ; `design_intent_confirmations` gardée) ; Références = ≥ 1 et
+>   aucune à rattacher ; Direction = dernière version validée ; Brief = une version ; Fiches = toutes
+>   transférées. L'acteur des Fiches est le premier geste de la personne qui regarde (une fiche
+>   chacun), les autres sont listés dans l'étape (`DesignWaits`).
+> - **Départ** : `choose_design_start(project, 'direct'|'call'|null)` (propriétaire ; ouvre la
+>   Conception ; « Changer » tant qu'aucun échange n'existe ; plus de motif exigé). Désigner le
+>   responsable créatif ouvre aussi la Conception (`start_design` puis `assign_design_responsible`).
+>   Un livrable ajouté porte `format` et un motif obligatoire (`design_deliverables_reason_check`).
+> - **Validation** : la direction du label (titulaires de `validate`) est valideur **par défaut** de la
+>   direction et de chaque fiche (`design_default_validators`, appelée par `start_design` et à la
+>   création d'une fiche), changeable dans « Qui fait quoi » ; mode `global` par défaut. Une version
+>   envoyée « par section » est décidée d'un coup sur toutes ses sections (`decideDesignStep`).
+>   Délégations, auto-approbation, réserves, message / échéance : hors écran (tables et fonctions
+>   gardées).
+> - **Fiches créées par la base** : `design_ensure_sheets` crée une fiche par livrable (série si la
+>   quantité > 1, autant d'éléments) à la validation de la Stratégie et à chaque ajout ensuite.
+>   Les valeurs sont **proposées par le code** à la lecture (`lib/design/sheet-proposals.ts` :
+>   concept ← intention « Ce qu'il raconte » du livrable, sinon la direction ; ton ← direction ;
+>   ratios / durée / format ← format écrit en Stratégie ; livraison ← échéance de la Stratégie ou
+>   échéance amont « Production terminée » ; montant ← lignes de Budget du livrable, non engagé ;
+>   début / fin de postproduction calculés ; « Publié le » ← jalons du livrable) et **écrites avec
+>   leur source** (`provenance.<champ>.detail`) quand le responsable soumet (`submitSheetStep`).
+>   Champs par format : `lib/design/sheet-model.ts`. Un champ se modifie seul (`saveSheetField`,
+>   « Modifié par … ») ; le code refuse des dates qui ne se suivent pas ou une livraison après
+>   l'échéance amont (`lib/design/sheet-patch.ts`). Nouvelles colonnes : `design_sheets.file_format`,
+>   `new_version_at` (« Modifier (nouvelle version) »), `design_sheet_items.publish_date`.
+> - **Transfert** : `handoff_design_sheet` démarre l'étape Production au premier transfert ; un
+>   transfert d'une version suivante notifie (`design_sheet_new_version`) le propriétaire, le chargé
+>   de production et le réalisateur du livrable. La Conception est **faite quand toutes les fiches sont
+>   transférées** (`design_is_done`, lu par `loadWorkflowStates` et les pilules) : son étape n'est
+>   plus validée en bloc, « Valider la conception », la clôture, « Passer en Production » et la
+>   réouverture quittent l'écran (fonctions gardées). La page Production ne propose plus « Démarrer ».
+> - **Références** : sortes et droits du proto (`proposal`, `work_version`, `internal`, `to_check`
+>   ajoutés, anciennes valeurs gardées) ; ajout et rattachement en place ; « Chercher des
+>   références semblables » gardé en action secondaire.
+> - Migrations `20261019040101` à `20261019040701` ; tests `conception-journey.test.sql` (et les
+>   anciens adaptés : ils bâtissent leurs propres fiches).
+
+
 Ticket « Conception », étape 1 (Accueil, Chemin A, Chemin B). Migration
 `20261010000901_conception_entry.sql`, tests `supabase/tests/conception.test.sql`. La Stratégie dit
 quoi produire, pour qui et quand ; la Conception dit ce que chaque livrable raconte et à quoi il
