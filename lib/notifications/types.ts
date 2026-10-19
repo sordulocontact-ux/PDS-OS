@@ -4,6 +4,7 @@ import { routes } from "@/lib/auth/redirects";
 import { legalDemarcheHref } from "@/lib/ui/legal-steps";
 import { fr } from "@/lib/i18n/fr";
 import { distributionStepHref } from "@/lib/ui/distribution-steps";
+import { reviewStepHref } from "@/lib/ui/review-steps";
 
 export const NOTIFICATION_KINDS = [
   "project_transmitted",
@@ -92,6 +93,13 @@ export const NOTIFICATION_KINDS = [
   "distribution_version_decided",
   "distribution_closure_proposed",
   "distribution_closure_decided",
+  // The Suivi & bilan (lot 7): a version of the bilan to decide, the
+  // decision back; the Marketing closing asked, decided, reopened.
+  "marketing_report_submitted",
+  "marketing_report_decided",
+  "marketing_closure_requested",
+  "marketing_closure_decided",
+  "marketing_closure_reopened",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -169,6 +177,11 @@ export function notificationHref(
       projectId,
       kind.startsWith("distribution_closure") ? "closure" : "dossier",
     );
+  // The Suivi & bilan: the bilan's step, or the Marketing closing's.
+  if (kind.startsWith("marketing_report_"))
+    return reviewStepHref(projectId, "bilan");
+  if (kind.startsWith("marketing_closure_"))
+    return reviewStepHref(projectId, "closure");
   if (kind === "call_invited" && subjectId)
     return routes.projectCall(projectId, subjectId);
   if (kind === "brief_approved") return routes.projectFramingBrief(projectId);

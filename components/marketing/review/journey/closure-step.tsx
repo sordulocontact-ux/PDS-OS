@@ -74,7 +74,11 @@ export async function ClosureStep({ ctx }: { ctx: ReviewContext }) {
       : Promise.resolve(null),
   ]);
   const unpaid = (lines?.data ?? []).reduce(
-    (total, l) => total + (l.status === "committed" ? l.amount_cents : 0),
+    (total, l) =>
+      total +
+      (l.status === "committed" || l.status === "invoiced"
+        ? l.amount_cents
+        : 0),
     0,
   );
   const legal = flows?.states.legal;

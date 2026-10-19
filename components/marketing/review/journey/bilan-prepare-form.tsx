@@ -111,7 +111,7 @@ export function BilanPrepareForm({
   return (
     <form
       noValidate
-      className="flex flex-col gap-4 rounded-xl border border-[color:var(--border-hairline)] p-4"
+      className="flex flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault();
         submit(event.currentTarget);

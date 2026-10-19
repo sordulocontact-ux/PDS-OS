@@ -188,7 +188,9 @@ export function computeStanding(input: StandingInput): Standing {
     (budget?.lines ?? [])
       .filter((l) => keep(l.status))
       .reduce((total, l) => total + l.amountCents, 0);
-  const committed = (s: string) => s === "committed" || s === "paid";
+  // As the budget counts it (lib/budget/types.ts, budgetTotals).
+  const committed = (s: string) =>
+    s === "committed" || s === "invoiced" || s === "paid";
   const groupBudget = t.groups.budget;
   const budgetFigures = budget
     ? [
