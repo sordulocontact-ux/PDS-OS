@@ -152,7 +152,10 @@ export function BudgetClassificationFields({
                 variant="outline"
                 size="xs"
                 onClick={() =>
-                  set({ deliverableId: linked.id, leverId: linked.leverId })
+                  set({
+                    deliverableId: linked.id,
+                    leverId: linked.leverId ?? undefined,
+                  })
                 }
               >
                 {t.useSuggestion}

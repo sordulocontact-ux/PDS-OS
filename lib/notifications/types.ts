@@ -42,6 +42,9 @@ export const NOTIFICATION_KINDS = [
   "strategy_review_approved",
   "strategy_review_changes_requested",
   "strategy_review_reminder",
+  // The Brief de sortie validated: the owner and the creative directors
+  // (Stratégie, lot 3 of the proto « Projet complet »).
+  "strategy_validated",
   // The creative team: the project launched, the Brief ready, a call.
   "project_launched",
   "brief_approved",
@@ -179,6 +182,8 @@ export function notificationHref(
     return routes.projectMasterStep(projectId, "final");
   // A strategy document's review: the version itself (Brief de sortie or
   // Plan de sortie), where reviewers decide and the owner sees each answer.
+  if (kind === "strategy_validated")
+    return routes.projectStrategyStep(projectId, "validated");
   if (kind.startsWith("strategy_review_"))
     return subjectId
       ? routes.projectStrategyDocument(projectId, subjectId)

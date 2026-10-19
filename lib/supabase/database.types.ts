@@ -7324,6 +7324,8 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
           family: string
           id: string
           label: string
@@ -7331,6 +7333,7 @@ export type Database = {
           no_deliverables: boolean
           organization_id: string
           project_id: string
+          proposed_label: string | null
           review_status: string
           source_quote: string | null
           source_report_item_id: string | null
@@ -7342,6 +7345,8 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
           family: string
           id?: string
           label: string
@@ -7349,6 +7354,7 @@ export type Database = {
           no_deliverables?: boolean
           organization_id: string
           project_id: string
+          proposed_label?: string | null
           review_status?: string
           source_quote?: string | null
           source_report_item_id?: string | null
@@ -7360,6 +7366,8 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
           family?: string
           id?: string
           label?: string
@@ -7367,6 +7375,7 @@ export type Database = {
           no_deliverables?: boolean
           organization_id?: string
           project_id?: string
+          proposed_label?: string | null
           review_status?: string
           source_quote?: string | null
           source_report_item_id?: string | null
@@ -14807,7 +14816,7 @@ export type Database = {
           due_date: string | null
           format: string | null
           id: string
-          lever_id: string
+          lever_id: string | null
           organization_id: string
           production_lead_days: number | null
           project_id: string
@@ -14827,7 +14836,7 @@ export type Database = {
           due_date?: string | null
           format?: string | null
           id?: string
-          lever_id: string
+          lever_id?: string | null
           organization_id: string
           production_lead_days?: number | null
           project_id: string
@@ -14937,7 +14946,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           document_id: string
-          due_on: string
+          due_on: string | null
           id: string
           lift_note: string | null
           lifted_at: string | null
@@ -14953,7 +14962,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           document_id: string
-          due_on: string
+          due_on?: string | null
           id?: string
           lift_note?: string | null
           lifted_at?: string | null
@@ -15381,6 +15390,87 @@ export type Database = {
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      strategy_proposals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          decided_at: string | null
+          decided_by: string | null
+          format: string | null
+          id: string
+          item_id: string | null
+          kind: string
+          milestone_kind: string | null
+          offset_days: number | null
+          organization_id: string
+          project_id: string
+          proposed_text: string
+          source_quote: string | null
+          source_report_item_id: string | null
+          source_start_seconds: number | null
+          source_type: string
+          state: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          format?: string | null
+          id?: string
+          item_id?: string | null
+          kind: string
+          milestone_kind?: string | null
+          offset_days?: number | null
+          organization_id: string
+          project_id: string
+          proposed_text: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          state?: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          format?: string | null
+          id?: string
+          item_id?: string | null
+          kind?: string
+          milestone_kind?: string | null
+          offset_days?: number | null
+          organization_id?: string
+          project_id?: string
+          proposed_text?: string
+          source_quote?: string | null
+          source_report_item_id?: string | null
+          source_start_seconds?: number | null
+          source_type?: string
+          state?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_proposals_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "strategy_proposals_item_same_org"
+            columns: ["source_report_item_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "report_items"
             referencedColumns: ["id", "organization_id"]
           },
         ]
@@ -15880,6 +15970,16 @@ export type Database = {
       }
     }
     Functions: {
+      add_strategy_item: {
+        Args: {
+          p_format?: string
+          p_kind: string
+          p_offset_days?: number
+          p_project_id: string
+          p_text: string
+        }
+        Returns: string
+      }
       ai_quota_day_start: { Args: never; Returns: string }
       ai_quota_resets_at: { Args: never; Returns: string }
       ai_usage_today: {
@@ -16761,6 +16861,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      decide_strategy_proposal: {
+        Args: { p_keep: boolean; p_proposal_id: string; p_text?: string }
+        Returns: undefined
+      }
       decide_validation: {
         Args: {
           p_approve: boolean
@@ -16860,6 +16964,10 @@ export type Database = {
       design_is_in_progress: {
         Args: { p_project_id: string }
         Returns: boolean
+      }
+      discard_strategy_item: {
+        Args: { p_item_id: string; p_kind: string }
+        Returns: undefined
       }
       discard_agency_snapshot: {
         Args: { p_snapshot_id: string }
