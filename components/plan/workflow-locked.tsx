@@ -28,6 +28,7 @@ export function WorkflowLocked({
       <ProjectHeader
         projectId={projectId}
         title={title}
+        facts={[]}
         status={{ label: t.status.notStarted, tone: "neutral" }}
       />
       <ContentCard label={t.locked.body}>
