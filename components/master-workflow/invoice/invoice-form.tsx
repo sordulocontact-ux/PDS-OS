@@ -1,0 +1,228 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
+
+import { Field } from "@/components/auth/field";
+import { FormMessage } from "@/components/auth/form-message";
+import { TextareaField } from "@/components/auth/textarea-field";
+import { Button } from "@/components/ui/button";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { FilePickField } from "@/components/ui/file-pick-field";
+import { fr } from "@/lib/i18n/fr";
+import {
+  openTeamInvoiceSlot,
+  recordInvoiceOther,
+} from "@/lib/master-workflow/invoice-actions";
+import {
+  openInvoiceSlot,
+  submitInvoice,
+} from "@/lib/master-workflow/invoice-public-actions";
+import { eurosValue, invoiceDueOn } from "@/lib/master-workflow/invoice-rules";
+import { createClient } from "@/lib/supabase/client";
+import { formatDay } from "@/lib/utils/day";
+
+import { checkInvoice, type InvoiceDraft } from "./invoice-check";
+import { InvoiceRibFields } from "./invoice-rib-fields";
+
+const t = fr.masterInvoice;
+
+export type InvoiceTarget =
+  | { kind: "link"; linkKey: string }
+  | { kind: "team"; invoiceId: string; projectId: string };
+
+/**
+ * An invoice to deposit (proto `invoiceFields`): on the engineer's link
+ * (« Envoyer ma facture ») or added by the owner (« Ajouter la facture »).
+ * The PDF waits until the form is sent; every missing field turns red with
+ * its reason at the first try, the first one focused.
+ */
+export function InvoiceForm({
+  target,
+  expectedCents,
+  rib,
+  holder,
+}: {
+  target: InvoiceTarget;
+  expectedCents: number | null;
+  // The RIB on file as this reader may see it (masked on the link, its
+  // state for the team); null: none yet.
+  rib: { value: string; source: string } | null;
+  // Pre-filled « Titulaire du compte »: the engineer's name.
+  holder: string;
+}) {
+  const router = useRouter();
+  const root = useRef<HTMLFormElement>(null);
+  const link = target.kind === "link";
+  const [draft, setDraft] = useState<InvoiceDraft>({
+    file: null,
+    number: "",
+    amount: expectedCents ? eurosValue(expectedCents) : "",
+    why: "",
+    ribOpen: rib === null,
+    iban: "",
+    bic: "",
+    holder,
+  });
+  const [tried, setTried] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const set = (patch: Partial<InvoiceDraft>) =>
+    setDraft((d) => ({ ...d, ...patch }));
+  const check = checkInvoice(draft, expectedCents);
+  const shown = tried ? check.errors : {};
+  const missing = Object.keys(check.errors).length;
+
+  function send() {
+    setTried(true);
+    if (missing > 0 || !draft.file || check.amountCents === null) {
+      requestAnimationFrame(() =>
+        root.current
+          ?.querySelector<HTMLElement>(
+            '[aria-invalid="true"], input[type=file]',
+          )
+          ?.focus(),
+      );
+      return;
+    }
+    const file = draft.file;
+    const amountCents = check.amountCents;
+    setError(null);
+    start(async () => {
+      const slot = link
+        ? await openInvoiceSlot(target.linkKey)
+        : await openTeamInvoiceSlot(target.invoiceId);
+      if (!slot.ok) return setError(slot.error);
+      const { error: upload } = await createClient()
+        .storage.from("master-finance")
+        .upload(slot.path, file, {
+          contentType: "application/pdf",
+          upsert: false,
+        });
+      if (upload) return setError(t.fields.errors.failed);
+      const values = {
+        path: slot.path,
+        fileName: file.name,
+        number: draft.number,
+        amountCents,
+        reason: check.mismatch ? draft.why : null,
+        iban: draft.ribOpen ? draft.iban : null,
+        bic: draft.ribOpen ? draft.bic : null,
+        holder: draft.ribOpen ? draft.holder : null,
+      };
+      const result = link
+        ? await submitInvoice(target.linkKey, values)
+        : await recordInvoiceOther(target.projectId, target.invoiceId, values);
+      if (!result.ok) return setError(result.error);
+      if (link)
+        toast.success(t.link.sent, {
+          description: t.link.sentLine(
+            formatDay(invoiceDueOn(new Date().toISOString())),
+            draft.ribOpen && rib !== null,
+          ),
+        });
+      else toast.success(t.team.added);
+      router.refresh();
+    });
+  }
+
+  return (
+    <form
+      ref={root}
+      noValidate
+      className="flex flex-col gap-4"
+      aria-busy={pending || undefined}
+      onSubmit={(e) => {
+        e.preventDefault();
+        send();
+      }}
+    >
+      <FilePickField
+        id="invoice-pdf"
+        label={`${t.fields.pdf} *`}
+        hint={t.fields.pdfHint}
+        chosenLabel={t.fields.chosen}
+        file={draft.file}
+        error={shown.file}
+        onFile={(file) => set({ file })}
+      />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field
+          name="number"
+          label={t.fields.number}
+          aria-required
+          placeholder={t.fields.numberPlaceholder}
+          value={draft.number}
+          error={shown.number}
+          onChange={(e) => set({ number: e.target.value })}
+        />
+        <Field
+          name="amount"
+          label={t.fields.amount}
+          aria-required
+          inputMode="decimal"
+          suffix="€"
+          value={draft.amount}
+          hint={expectedCents ? t.fields.amountHint : undefined}
+          error={shown.amount}
+          onChange={(e) => set({ amount: e.target.value })}
+        />
+      </div>
+      {check.mismatch && (
+        <TextareaField
+          name="why"
+          label={t.fields.why}
+          aria-required
+          rows={2}
+          maxLength={1000}
+          placeholder={t.fields.whyPlaceholder}
+          value={draft.why}
+          error={shown.why}
+          onChange={(e) => set({ why: e.target.value })}
+        />
+      )}
+      {rib && !draft.ribOpen ? (
+        <FactRows>
+          <FactRow
+            label={link ? t.link.rib : t.fields.ribOf(holder)}
+            value={rib.value}
+            source={rib.source}
+            side={
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => set({ ribOpen: true })}
+              >
+                {t.link.ribChange}
+              </Button>
+            }
+          />
+        </FactRows>
+      ) : (
+        <InvoiceRibFields
+          title={
+            link ? (rib ? t.link.newRib : t.link.rib) : t.fields.ribOf(holder)
+          }
+          note={rib || !link ? t.fields.ribNew : t.fields.ribFirstLink}
+          draft={draft}
+          errors={shown}
+          onChange={set}
+        />
+      )}
+      {tried && missing > 0 && (
+        <FormMessage kind="error">{t.fields.missingCount(missing)}</FormMessage>
+      )}
+      {error && <FormMessage kind="error">{error}</FormMessage>}
+      <Button
+        type="submit"
+        variant={link ? "default" : "outline"}
+        className="self-start"
+        disabled={pending}
+      >
+        {link ? t.link.send : t.team.add}
+      </Button>
+    </form>
+  );
+}
