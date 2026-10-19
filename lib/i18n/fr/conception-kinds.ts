@@ -4,6 +4,8 @@ export const conceptionKinds = {
   types: {
     reference: "Référence",
     moodboard: "Moodboard",
+    proposal: "Proposition créative",
+    work_version: "Version de travail",
     to_qualify: "À qualifier",
   },
   definitions: {
@@ -45,8 +47,11 @@ export const conceptionKinds = {
   },
   example: (text: string) => `Par exemple : ${text}.`,
   usages: {
+    // The proto's three (« Projet complet »), then those of MKT-C2-09.
+    free: "Licence libre",
+    internal: "Usage interne",
+    to_check: "À vérifier",
     inspiration: "Inspiration seulement",
-    free: "Libre d'utilisation",
     licensed: "Licence acquise",
     to_license: "Licence à acquérir",
     owned: "Appartient au projet",

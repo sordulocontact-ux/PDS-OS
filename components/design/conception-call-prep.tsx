@@ -9,11 +9,19 @@ import type { DesignCallSheetData } from "@/lib/design/call-prep";
  * The creative exchange in the common call form: the deliverables it is
  * about come first, PO's points and the objective follow the choice.
  */
-export function ConceptionCallPrep({ data }: { data: DesignCallSheetData }) {
+export function ConceptionCallPrep({
+  data,
+  stay = false,
+}: {
+  data: DesignCallSheetData;
+  // In the Accueil: the planned exchange then shows in place.
+  stay?: boolean;
+}) {
   const agenda = useDesignCallAgenda(data);
   return (
     <CallPrepForm
       defaults={data.prep}
+      stay={stay}
       agenda={agenda.agenda}
       goal={agenda.goal}
       extraIds={agenda.ids}

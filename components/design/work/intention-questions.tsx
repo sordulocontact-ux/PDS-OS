@@ -73,7 +73,7 @@ export function IntentionQuestions({
                   : t.topicStates[state],
             tone: intentionTopicTone[state],
           },
-          href: routes.projectDesignWork(projectId, target, topic),
+          href: routes.projectDesignWork(projectId, target),
         };
       })}
       current={current}

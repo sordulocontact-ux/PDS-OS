@@ -5,6 +5,10 @@ import {
 } from "@/lib/design/actions/reference-files";
 import type { ReferenceResult } from "@/lib/design/reference-db";
 import {
+  referenceUsageOf,
+  type ProtoReferenceType,
+} from "@/lib/design/reference-kinds";
+import {
   MAX_REFERENCE_BYTES,
   REFERENCE_BUCKET,
   isReferenceMime,
@@ -38,7 +42,7 @@ export async function uploadReferenceFile(input: {
   note: string;
   targets: string[];
   // MKT-C2-09: what it is, and its rights of use.
-  type: "reference" | "moodboard";
+  type: ProtoReferenceType;
   usage: string | null;
 }): Promise<ReferenceResult> {
   const t = fr.conceptionRefs.add;
@@ -78,8 +82,7 @@ export async function uploadReferenceFile(input: {
     note: input.note,
     targets: input.targets,
     type: input.type,
-    usage: input.usage as
-      "inspiration" | "free" | "licensed" | "to_license" | "owned" | null,
+    usage: referenceUsageOf(input.usage),
   });
   if (!result.ok) await bucket.remove([path]);
   return result;
