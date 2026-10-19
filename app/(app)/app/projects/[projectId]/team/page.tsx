@@ -1,5 +1,6 @@
 import { ExternalTeamTable } from "@/components/project-work/external-team-table";
 import { TeamWorkloadTable } from "@/components/project-work/team-workload-table";
+import { AssignmentHistory } from "@/components/projects/assignment-history";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { PageSection } from "@/components/shell/page-section";
 import { can } from "@/lib/auth/access";
@@ -49,7 +50,6 @@ export default async function ProjectTeamPage({
     <div className="grid gap-8">
       <PageSection id="team-internal" title={t.internal}>
         <TeamWorkloadTable
-          projectId={project.id}
           people={work.people}
           counts={countByPerson(work.items)}
         />
@@ -66,6 +66,9 @@ export default async function ProjectTeamPage({
         <p className="-mt-1 text-sm text-muted-foreground">{t.externalHint}</p>
         <ExternalTeamTable projectId={project.id} members={external} />
       </PageSection>
+
+      {/* Who handed the project to whom: off the overview (proto). */}
+      <AssignmentHistory assignments={project.assignments} />
     </div>
   );
 }

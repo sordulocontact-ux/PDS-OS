@@ -66,6 +66,7 @@ import { projectPlan } from "./project-plan";
 import { projectWork } from "./project-work";
 import { records } from "./records";
 import { production, projectReview } from "./production";
+import { projectShell } from "./project-shell";
 import { productionBrief } from "./production-brief";
 import { productionCall } from "./production-call";
 import { productionClosure } from "./production-closure";
@@ -198,6 +199,7 @@ export const fr = {
   projectWork,
   projectPlan,
   projectHistory,
+  projectShell,
   budget,
   catalogFiles,
   library,

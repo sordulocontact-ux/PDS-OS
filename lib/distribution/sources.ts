@@ -21,7 +21,7 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
 const SONGWRITERS = new Set(["composer", "lyricist"]);
 
 // The Fiche Livrable taken as the cover, by its title, until one is chosen.
-const COVER = /pochette|cover|artwork/i;
+export const COVER = /pochette|cover|artwork/i;
 
 export type SheetOption = { id: string; title: string; status: SheetStatus };
 

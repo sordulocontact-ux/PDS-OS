@@ -135,7 +135,8 @@ export function NowCard({
             <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
               {t.others(
                 more.length,
-                more
+                // The overview names two, then counts (proto).
+                (overview ? more.slice(0, 2) : more)
                   .map(
                     (m) =>
                       `${m.step.actor?.todo.toLowerCase()} (${

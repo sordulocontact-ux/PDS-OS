@@ -1774,7 +1774,8 @@ Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `com
   RLS de leurs tables n'a pas changé). Fil des étapes : Stratégie grisée jusqu'au plan.
 - Mon Travail : un projet au Cadrage validé et sans plan a pour prochaine action
   « Construire et lancer le plan du projet ».
-- **Le plan est sur la Vue d'ensemble** (07/10/2026) : dès le Brief validé, la Vue
+- **Le plan est sur la Vue d'ensemble** (07/10/2026 ; depuis le lot 1 de la coquille, 19/10/2026, seulement
+  avant son lancement, en attendant d'être l'étape 4 du Cadrage — § 8 ter) : dès le Brief validé, la Vue
   d'ensemble montre le plan lui-même (`ProjectPlanSection` : `PlanBoard` tant qu'il est
   proposé) à la place de la liste des étapes ; **une fois lancé, la nouvelle Vue d'ensemble**
   (`ProjectBoard`, § 8 ter, lot 4 de l'architecture globale) prend sa place. **Il n'y a
@@ -1901,6 +1902,51 @@ poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, R
 - Une modification qui ne notifie personne ne rafraîchit pas les autres écrans.
 
 ## 8 ter. Pages d'un projet lancé
+
+**Coquille du proto « Projet complet » (lot 1, 19/10/2026 ; cahier `docs/projet-complet/shell.md`).** Remplace,
+pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` reste).
+
+- **Navigation** (`components/projects/project-sidebar.tsx`, `project-nav-list.tsx`, `project-nav-chips.tsx`) :
+  Vue d'ensemble, Cadrage, Workflows, Pilotage (Travail, Validations, Activité, Budget). Équipe, Planning, Calls,
+  Livrables, Fichiers ont `hidden` dans `projectSections` : route et fil d'Ariane gardés, plus d'entrée (Équipe
+  n'est plus liée de nulle part : à rattacher à « Qui fait quoi »). Point du Cadrage : `in_progress` jusqu'à
+  `planLaunchedAt` (`lib/plan/queries.ts`, `cache`), `done` après. Pastilles « À vous » : `countMine` de
+  `loadShellJourneys` dans `CountedProjectSidebar` sous `Suspense` (repli = la barre sans compteurs : la page
+  n'attend jamais les parcours) ; le total va sur « Travail » de la barre principale par `WorkCountReporter`
+  (magasin client, `components/shell/work-count.tsx`, remis à 0 en quittant le projet). Mobile : puces.
+- **`loadShellJourneys`** (`lib/overview/journeys.ts`, `cache`) = `loadProjectJourneys` + les quatre étapes du
+  Cadrage lues de ses états tant que la zone Cadrage n'a pas de loader (`framingFallback`,
+  `lib/overview/framing-steps.ts` : étape `framing` de `project_stages`, validation en attente, `project_plans`) ;
+  **avant « Lancer le plan », seules les actions du Cadrage comptent** (un workflow commencé avant le plan garde sa
+  page mais ses actions attendent le plan). Lu par la navigation, la Vue d'ensemble, Travail, Validations.
+- **Vue d'ensemble** (`app/(app)/app/projects/[projectId]/page.tsx`) : `ProjectHeader` avec le nom du projet, son
+  état calculé (`overviewHead`, `lib/overview/head.ts` : Non démarré avant le plan, Terminé si tous les workflows
+  lisibles le sont, sinon En cours) et ses faits (artiste · format, Budget, Responsable, Master final du Brief
+  Mix/Master après le plan, Sortie) ; « Bilan & clôture du projet » (page `closure`, hors proto) en action
+  `ghost` de la tête. `NowCard variant="overview"` (toutes mes actions, deux nommées). Avant le plan :
+  `BeforeWorkflows` + `PlanToLaunch` (le Plan du projet reste en `#plan` jusqu'au lot Cadrage qui en fait son étape
+  4 ; il partira alors de cette page). Après : `WorkflowCards` (`lib/overview/cards.ts` : parcours du workflow s'il
+  en a un, sinon ses chevrons ; « À vous · » / « Nom · » depuis `mine` / `waiting`) et `DependencyRows`
+  (`lib/overview/dependencies.ts` : Master final = dépendance `master-online` ; Pochette livrée = un livrable dont
+  le titre correspond à `COVER` livré (`deliverable_deliveries.delivered_at`) ; Prêt pour la sortie = étape `ready`
+  du parcours du Juridique s'il en a une, sinon Juridique Terminé ; Durée du master final = chaque titre a un fichier
+  `final_master` avec `duration_seconds`). Supprimés : `ProjectBoard`, À faire ensuite, Blocages, Échéances,
+  `DependenciesTable`, « Lancer » des cartes, `PlanStepsSection` et `BriefDrift` après lancement (à loger dans
+  l'étape Plan du projet du Cadrage), équipe créative (page Équipe), historique d'assignation (page Équipe), faits en
+  colonne, `lib/workflow-status/board.ts` (l'assistant ne s'en servait pas). `FramingEntry` n'est plus que sur
+  `/framing`.
+- **Verrou** (`WorkflowLocked`) : même écran pour Master, Juridique, Marketing (Stratégie, sans l'ancien état
+  « la stratégie suit le cadrage ») et **Distribution** (`release/layout.tsx`, `distributionLocked` : pas de plan
+  et aucune sortie enregistrée). « Ouvrir le Cadrage » mène à `/framing`. Les variantes « Ensuite » / « hors du
+  plan » n'ont plus de texte propre (proto) ; `launch_plan_workflow` reste en SQL pour l'étape Plan du Cadrage. La
+  Distribution est `not_started` dans `loadWorkflowStates` dans le même cas.
+- **Travail / Validations** : `MyActions` sur `mine` / `validations` (`actor.kind === "validate"`). Les tâches
+  libres (`tasks`) restent en base et dans le Travail global, plus dans le Travail du projet (VISION-UX § 3 : pas de
+  liste à part). L'historique des validations décidées est dans l'Activité (`loadRecentActivity`).
+- **Activité** (`loadProjectActivity`, `lib/overview/activity.ts`) : journal du projet (`loadRecentActivity`),
+  `marketing_events`, `production_events` (lien vers le livrable ; un contact du Réseau est dit « Quelqu'un »),
+  Juridique (`loadLegalHistory`, seulement avec `manage_legal`), `distribution_events` (`eventText`) ; triés par
+  date, 200 au plus. Le Master n'a pas encore de journal.
 
 Une page par section de la sidebar du projet, toutes derrière `requireLaunchedProject`
 (404 avant lancement), titre = nom de la section (`ProjectPageTitle` dans le layout,

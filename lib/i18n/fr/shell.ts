@@ -388,8 +388,6 @@ export const shell = {
       groups: {
         workflows: "Workflows",
         steering: "Pilotage",
-        // Not « Production »: the Marketing has a step of that name.
-        resources: "Ressources",
       },
       overview: "Vue d'ensemble",
       framing: "Cadrage",

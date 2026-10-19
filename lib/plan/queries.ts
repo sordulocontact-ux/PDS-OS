@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 import type { PlanColumn, PlanWorkflow } from "@/lib/plan/propose";
@@ -108,6 +110,24 @@ export async function loadLaunchedPlan(
 }
 
 /**
+ * When the project's plan was launched (« Lancer le plan »), null before:
+ * the moment the four workflows start (proto « Projet complet »). Read once
+ * per request: the navigation, the overview and the locks share it.
+ */
+export const planLaunchedAt = cache(
+  async (projectId: string): Promise<string | null> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("project_plans")
+      .select("launched_at")
+      .eq("project_id", projectId)
+      .maybeSingle();
+    if (error) console.error("planLaunchedAt:", error.message);
+    return data?.launched_at ?? null;
+  },
+);
+
+/**
  * Whether a workflow may be worked on: launched from the plan, or begun
  * before the plan existed (workflow_is_launched, SQL).
  */
@@ -164,4 +184,23 @@ export async function workflowGate(
     waiting: item.data !== null,
     absent: plan.data !== null && item.data === null,
   };
+}
+
+/**
+ * Whether the Distribution still waits for « Lancer le plan » (proto
+ * « Projet complet »): no plan launched and nothing recorded for the release
+ * yet. A Distribution begun before the plan existed keeps going. A lock of
+ * the journey, not of security: the tables' RLS is unchanged.
+ */
+export async function distributionLocked(projectId: string): Promise<boolean> {
+  if (await planLaunchedAt(projectId)) return false;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("releases")
+    .select("id")
+    .eq("project_id", projectId)
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error("distributionLocked:", error.message);
+  return data === null;
 }

@@ -1,6 +1,5 @@
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { requireApproved } from "@/lib/auth/dal";
-import { fr } from "@/lib/i18n/fr";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -18,13 +17,6 @@ export default async function MasterLayout({
     requireLaunchedProject(projectId),
   ]);
   const gate = await workflowGate(project, "master");
-  if (gate)
-    return (
-      <WorkflowLocked
-        projectId={projectId}
-        name={fr.framingIntel.plan.workflows.master}
-        {...gate}
-      />
-    );
+  if (gate) return <WorkflowLocked projectId={projectId} />;
   return children;
 }
