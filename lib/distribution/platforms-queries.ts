@@ -50,7 +50,7 @@ export const loadPlatformsView = cache(async function loadPlatformsView(
       .order("created_at"),
     supabase
       .from("releases")
-      .select("id, release_links(platform, url)")
+      .select("id, release_links(platform, url, first_seen_at)")
       .eq("project_id", project.id)
       .order("created_at", { ascending: true })
       .limit(1)
@@ -90,6 +90,8 @@ export const loadPlatformsView = cache(async function loadPlatformsView(
     complianceNote: row.compliance_note,
     complianced: stamp(row.compliance_at, row.compliance_by),
     suggestion: null,
+    suggestedAt: null,
+    fromDetection: null,
   }));
   const platforms = platformsOf(views, release.data?.release_links ?? []);
   const cycle =

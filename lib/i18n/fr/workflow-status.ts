@@ -112,6 +112,14 @@ export const workflowStatus = {
       open: (n: number, names: string) =>
         `${plural(n, "emprunt à sécuriser", "emprunts à sécuriser")} : ${names}`,
     },
+    cover: {
+      what: "Pochette livrée",
+      toWhat: "Dossier de livraison",
+      ready: (title: string) => `${title} · livrée par la Production`,
+      waiting: (title: string) =>
+        `${title} · pas encore livrée par la Production`,
+      none: "Aucune Fiche Livrable de pochette en Conception",
+    },
     engineers: {
       what: "Ingénieurs du mix et du mastering",
       toWhat: "Contrats de prestation",
@@ -176,6 +184,8 @@ export const workflowStatus = {
       `${done} étape${done > 1 ? "s" : ""} validée${done > 1 ? "s" : ""} sur ${total}`,
   },
   distribution: {
+    notLaunched: "Démarre au lancement du Plan du projet",
+    params: "Paramètres de distribution à confirmer",
     record: "Sortie à enregistrer : titre, ISRC, date",
     isrc: "ISRC à renseigner",
     date: "Date de sortie à renseigner",
@@ -194,6 +204,6 @@ export const workflowStatus = {
     closedNormal: (date: string) => `Clôturée normalement le ${date}`,
     closedReserves: (date: string, n: number) =>
       `Clôturée avec réserves le ${date} (${n} réserve${n > 1 ? "s" : ""} non vérifiée${n > 1 ? "s" : ""})`,
-    progress: (done: number) => `Étapes déclarées : ${done} sur 4`,
+    progress: (done: number) => `Étapes déclarées : ${done} sur 3`,
   },
 };

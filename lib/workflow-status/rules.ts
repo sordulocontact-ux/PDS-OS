@@ -401,6 +401,9 @@ export function marketingState(facts: MarketingFacts): WorkflowState {
 // What the Distribution's state reads (ticket « Distribution » § 7), each
 // fact from its own source, never one deduced from another.
 export type DistributionFacts = {
+  // The plan launched: the Distribution starts then.
+  launched: boolean;
+  paramsConfirmed: boolean;
   recorded: boolean;
   isrc: boolean;
   plannedDate: string | null;
@@ -430,21 +433,19 @@ export function distributionState(
 ): WorkflowState {
   const t = fr.workflowStatus.distribution;
   const base = { workflow: "distribution" as const };
-  const prepared = facts.recorded && facts.isrc && facts.plannedDate !== null;
   const approved = facts.version?.status === "approved";
+  const accepted = approved && facts.outcome === "accepted" && facts.delivered;
   const progress = t.progress(
-    [prepared, approved, facts.deposit !== null, facts.delivered].filter(
-      Boolean,
-    ).length,
+    [approved, facts.deposit !== null, accepted].filter(Boolean).length,
   );
+  // The steps of the journey (lib/ui/distribution-steps.ts) that are done.
   const done = [
-    ...(prepared ? ["prepare"] : []),
+    ...(facts.paramsConfirmed ? ["params"] : []),
     ...(approved ? ["dossier"] : []),
-    ...(approved && facts.outcome === "accepted" && facts.delivered
-      ? ["tracking"]
-      : []),
+    ...(facts.deposit ? ["deposit"] : []),
+    ...(accepted ? ["orchard"] : []),
     ...(facts.platforms.verified === facts.platforms.reference
-      ? ["online"]
+      ? ["platforms"]
       : []),
     ...(facts.closure?.status === "closed" ? ["closure"] : []),
   ];
@@ -454,6 +455,8 @@ export function distributionState(
     reason: string,
   ): WorkflowState => ({ ...base, status, step, reason, progress, done });
 
+  if (!facts.launched && !facts.version)
+    return state("not_started", "prep", t.notLaunched);
   // Closed: done, and said with its reserves (never « distribué » when
   // closed with reserves).
   if (facts.closure?.status === "closed")
@@ -469,10 +472,8 @@ export function distributionState(
     );
   if (facts.closure?.status === "pending")
     return state("waiting", "closure", t.closurePending);
-  if (!facts.recorded && !facts.version)
-    return state("not_started", "prepare", t.record);
-  if (!prepared && !facts.version)
-    return state("in_progress", "prepare", !facts.isrc ? t.isrc : t.date);
+  if (!facts.version && !facts.paramsConfirmed)
+    return state("in_progress", "params", t.params);
   if (!facts.version) return state("in_progress", "dossier", t.submit);
   if (facts.version.status === "pending")
     return state("waiting", "dossier", t.pending(facts.version.number));
@@ -480,13 +481,13 @@ export function distributionState(
     return state("in_progress", "dossier", t.rejected(facts.version.number));
   // Validated: the owner deposits by hand, then follows the distributor.
   if (!facts.deposit)
-    return state("in_progress", "tracking", t.deposit(facts.version.number));
+    return state("in_progress", "deposit", t.deposit(facts.version.number));
   if (facts.outcome === "corrections_requested")
-    return state("in_progress", "tracking", t.corrections);
+    return state("in_progress", "dossier", t.corrections);
   if (facts.outcome !== "accepted" || !facts.delivered)
     return state(
       "waiting",
-      "tracking",
+      "orchard",
       t.waiting(
         formatDate(facts.deposit.declaredAt),
         facts.plannedDate ? formatDate(facts.plannedDate) : null,
@@ -495,7 +496,7 @@ export function distributionState(
   if (facts.platforms.verified < facts.platforms.reference)
     return state(
       "in_progress",
-      "online",
+      "platforms",
       t.platforms(facts.platforms.verified, facts.platforms.reference),
     );
   return state("in_progress", "closure", t.closure);
@@ -527,6 +528,12 @@ export type Dependency = {
 };
 
 export type DependencyFacts = {
+  // The cover of the release and whether the Production delivered it
+  // (distribution_cover); null: none found or no Distribution.
+  cover?: { title: string; delivered: boolean } | null;
+  // Borrowings not secured, readable without the Juridique
+  // (distribution_legal_blockers); null: no Distribution.
+  legalBlockers?: string[] | null;
   projectId: string;
   workflows: WorkflowKey[];
   states: Partial<Record<WorkflowKey, WorkflowState | "restricted">>;
@@ -609,6 +616,53 @@ export function dependencies(facts: DependencyFacts): Dependency[] {
     });
   }
 
+  // The cover delivered by the Production (proto « Pochette livrée »).
+  if (
+    has("distribution") &&
+    facts.cover !== undefined &&
+    readable(facts.states, "distribution")?.status !== "not_started"
+  ) {
+    const delivered = facts.cover?.delivered ?? false;
+    deps.push({
+      key: "cover-online",
+      from: "marketing",
+      what: t.cover.what,
+      to: "distribution",
+      toWhat: t.cover.toWhat,
+      state: delivered ? "ready" : "waiting",
+      note: facts.cover
+        ? delivered
+          ? t.cover.ready(facts.cover.title)
+          : t.cover.waiting(facts.cover.title)
+        : t.cover.none,
+      due: null,
+      who: facts.owner,
+      href: workflowStepHref(facts.projectId, "distribution", "prep"),
+    });
+  }
+  // Without the Juridique, the borrowings still say whether they block.
+  if (
+    !legal &&
+    has("distribution") &&
+    facts.legalBlockers &&
+    facts.legalBlockers.length > 0
+  )
+    deps.push({
+      key: "clearances-online",
+      from: "legal",
+      what: t.clearances.what,
+      to: "distribution",
+      toWhat: t.clearances.toWhat,
+      state: "waiting",
+      note: t.clearances.open(
+        facts.legalBlockers.length,
+        facts.legalBlockers.join(", "),
+      ),
+      due: null,
+      who: facts.owner,
+      href: workflowStepHref(facts.projectId, "distribution", "prep"),
+    });
+
   if (master && legal && facts.engineers) {
     const { mix, mastering } = facts.engineers;
     const ready = mix !== null && mastering !== null;
@@ -642,10 +696,13 @@ export function withDependencies(
   const missing = deps.filter(
     (dep) => dep.to === "distribution" && dep.state !== "ready",
   );
+  // Bloqué while a source the dossier needs is missing (proto `wfStatus`),
+  // until the deposit is declared; never before the plan, never once done.
   if (
     !distribution ||
-    distribution.step !== "tracking" ||
-    distribution.status !== "in_progress" ||
+    distribution.status === "not_started" ||
+    distribution.status === "done" ||
+    distribution.done.includes("deposit") ||
     missing.length === 0
   )
     return states;

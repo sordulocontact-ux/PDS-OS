@@ -75,9 +75,14 @@ export function changedByOf(
     if (event.kind === "validator.set") out.validator ??= event.actor;
     if (event.kind !== "dossier.parameters_saved") continue;
     const changed = Array.isArray(event.data.changed) ? event.data.changed : [];
-    for (const column of changed)
-      if (typeof column === "string" && COLUMNS[column])
-        out[COLUMNS[column]] ??= event.actor;
+    const values = (event.data.values ?? {}) as Record<string, unknown>;
+    for (const column of changed) {
+      if (typeof column !== "string" || !COLUMNS[column]) continue;
+      // The first save writes the default territories: not a change.
+      if (column.startsWith("territor") && values.territory_mode === "world")
+        continue;
+      out[COLUMNS[column]] ??= event.actor;
+    }
   }
   return out;
 }

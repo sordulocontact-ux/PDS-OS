@@ -248,6 +248,9 @@ export const routes = {
   projectReleaseOnline: (id: string) => `/app/projects/${id}/release/online`,
   projectReleaseClosure: (id: string) => `/app/projects/${id}/release/closure`,
   // One step (or view) of the Distribution's journey (lib/ui/distribution-steps.ts).
+  // The delivery file being prepared or decided, as a PDF.
+  projectDistributionDossierPdf: (id: string) =>
+    `/api/projects/${id}/distribution-dossier`,
   projectReleaseStep: (id: string, slug: string) =>
     `/app/projects/${id}/release/${slug}`,
   // Specialised workflows next to the 7 steps, one URL per internal step.

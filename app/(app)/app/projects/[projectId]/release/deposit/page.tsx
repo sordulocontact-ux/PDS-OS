@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { DistributionFrame } from "@/components/distribution/frame/distribution-frame";
 import { DistributionStep } from "@/components/distribution/frame/distribution-step";
-import { TrackingCycle } from "@/components/distribution/tracking-cycle";
+import { DepositStep } from "@/components/distribution/deposit/deposit-steps";
 import { fr } from "@/lib/i18n/fr";
 import { isUuid } from "@/lib/release/uuid";
 
@@ -21,14 +21,7 @@ export default async function DistributionDepositPage({
     <DistributionFrame projectId={projectId} shownKey="deposit">
       {(ctx) => (
         <DistributionStep ctx={ctx} stepKey="deposit">
-          {ctx.cycle && (
-            <TrackingCycle
-              projectId={projectId}
-              organizationId={ctx.tracking.organizationId}
-              state={ctx.cycle}
-              canEdit={ctx.tracking.canEdit}
-            />
-          )}
+          <DepositStep ctx={ctx} />
         </DistributionStep>
       )}
     </DistributionFrame>

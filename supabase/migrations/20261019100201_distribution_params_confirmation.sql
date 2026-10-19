@@ -66,10 +66,10 @@ begin
     v_dossier.preorder_on := case when p_preorder then p_preorder_on end;
   end if;
 
-  if v_dossier.preorder is null then v_missing := v_missing || 'preorder'; end if;
-  if v_dossier.prelisten is null then v_missing := v_missing || 'prelisten'; end if;
-  if v_dossier.price_tier is null then v_missing := v_missing || 'price_tier'; end if;
-  if v_dossier.validator_person_id is null then v_missing := v_missing || 'validator'; end if;
+  if v_dossier.preorder is null then v_missing := array_append(v_missing, 'preorder'); end if;
+  if v_dossier.prelisten is null then v_missing := array_append(v_missing, 'prelisten'); end if;
+  if v_dossier.price_tier is null then v_missing := array_append(v_missing, 'price_tier'); end if;
+  if v_dossier.validator_person_id is null then v_missing := array_append(v_missing, 'validator'); end if;
   if cardinality(v_missing) > 0 then
     raise exception 'params_missing' using errcode = 'P0001',
       detail = array_to_string(v_missing, ',');

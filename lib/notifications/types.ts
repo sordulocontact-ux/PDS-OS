@@ -2,6 +2,7 @@
 
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { distributionStepHref } from "@/lib/ui/distribution-steps";
 
 export const NOTIFICATION_KINDS = [
   "project_transmitted",
@@ -80,6 +81,12 @@ export const NOTIFICATION_KINDS = [
   "step_blocker_reported",
   "step_blocker_lifted",
   "step_note_to_decide",
+  // The Distribution (proto « Projet complet »): the dossier or the closure
+  // to validate, then the decision back to who asked.
+  "distribution_version_submitted",
+  "distribution_version_decided",
+  "distribution_closure_proposed",
+  "distribution_closure_decided",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -151,6 +158,12 @@ export function notificationHref(
     const [step, anchor] = PRODUCTION_TARGETS[kind] ?? ["post", "versions"];
     return `${routes.projectProductionStep(projectId, subjectId, step)}#${anchor}`;
   }
+  // The Distribution: the dossier's step, or its closure.
+  if (kind.startsWith("distribution_"))
+    return distributionStepHref(
+      projectId,
+      kind.startsWith("distribution_closure") ? "closure" : "dossier",
+    );
   if (kind === "call_invited" && subjectId)
     return routes.projectCall(projectId, subjectId);
   if (kind === "brief_approved") return routes.projectFramingBrief(projectId);

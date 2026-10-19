@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import type { CheckReleaseResult } from "@/lib/release/action-types";
+import { releaseIsrcs } from "@/lib/release/isrc";
 import { detectAndRecord } from "@/lib/release/persist";
 import { getProjectRelease } from "@/lib/release/queries";
 import { isUuid } from "@/lib/release/uuid";
@@ -29,11 +30,12 @@ export async function checkRelease(
   const context = await load(projectId);
   if (!context?.release) return { ok: false, error: "not_found" };
   const { supabase, release } = context;
-  if (!release.isrc) return { ok: false, error: "no_isrc" };
+  const isrc = (await releaseIsrcs(supabase, [release])).get(release.id);
+  if (!isrc) return { ok: false, error: "no_isrc" };
 
   const outcome = await detectAndRecord(supabase, {
     id: release.id,
-    isrc: release.isrc,
+    isrc,
     spotifyUrl: release.spotify_url,
   });
   if (!outcome.ok) {

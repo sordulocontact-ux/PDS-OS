@@ -63,6 +63,7 @@ export function submitGate(input: {
   validator: { personId: string; name: string } | null;
   checks: RecordedCheck[];
   versions: DistributionVersion[];
+  paramsConfirmed: boolean;
 }): SubmitGate {
   const t = fr.distribution.validation.gate;
   const reasons: string[] = [];
@@ -73,8 +74,8 @@ export function submitGate(input: {
         ? t.pending(open.number)
         : t.approved(open.number),
     );
-  if (input.readiness.blockers.length)
-    reasons.push(t.blockers(input.readiness.blockers.length));
+  if (input.readiness.blockers.length) reasons.push(t.blockers());
+  if (!input.paramsConfirmed) reasons.push(t.notConfirmed);
   const missing = missingParams(input.params);
   if (missing.length) reasons.push(t.params(missing.join(", ")));
   if (!input.validator) reasons.push(t.noValidator);

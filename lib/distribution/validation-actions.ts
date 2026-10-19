@@ -22,6 +22,8 @@ function failure(error: {
 }): DistributionResult {
   const message = error.message ?? "";
   const known: Array<[string, string]> = [
+    ["params_not_confirmed", e.paramsNotConfirmed],
+    ["legal_blockers", e.legalBlockers],
     ["validator_invalid", e.validatorInvalid],
     ["version_open", e.versionOpen],
     ["no_validator", e.noValidator],

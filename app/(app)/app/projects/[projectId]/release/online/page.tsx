@@ -3,9 +3,7 @@ import { notFound } from "next/navigation";
 
 import { DistributionFrame } from "@/components/distribution/frame/distribution-frame";
 import { DistributionStep } from "@/components/distribution/frame/distribution-step";
-import { AvailabilityCard } from "@/components/distribution/availability-card";
-import { PlatformsSection } from "@/components/distribution/platforms-section";
-import { isOpen } from "@/lib/distribution/anomalies";
+import { PlatformsStep } from "@/components/distribution/platforms/platforms-step";
 import { fr } from "@/lib/i18n/fr";
 import { isUuid } from "@/lib/release/uuid";
 
@@ -23,14 +21,7 @@ export default async function DistributionPlatformsPage({
     <DistributionFrame projectId={projectId} shownKey="platforms">
       {(ctx) => (
         <DistributionStep ctx={ctx} stepKey="platforms">
-          <AvailabilityCard projectId={projectId} view={ctx.platforms} />
-          <PlatformsSection
-            projectId={projectId}
-            platforms={ctx.platforms.platforms}
-            anomalies={ctx.anomalies.filter(isOpen)}
-            canEdit={ctx.platforms.canEdit}
-            canCheck={ctx.platforms.canCheck}
-          />
+          <PlatformsStep ctx={ctx} />
         </DistributionStep>
       )}
     </DistributionFrame>

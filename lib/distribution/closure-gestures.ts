@@ -1,0 +1,59 @@
+"use server";
+
+import { z } from "zod";
+
+import {
+  decideDistributionClosure,
+  proposeDistributionClosure,
+  reopenDistributionClosure,
+} from "@/lib/distribution/closure-actions";
+import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
+import type { WriteResult } from "@/lib/utils/write-result";
+
+const id = z.uuid();
+const invalid = {
+  ok: false as const,
+  error: fr.distribution.closure.errors.invalid,
+};
+
+// The closure's gestures, each saying what follows (VISION-UX rule 7).
+
+export async function proposeClosure(input: {
+  projectId: string;
+  kind: "normal" | "reserves";
+  arbitration: string;
+  acknowledged: boolean;
+  done: string;
+}): Promise<WriteResult> {
+  if (!id.safeParse(input.projectId).success) return invalid;
+  return withOutcome(input.projectId, ["distribution"], input.done, () =>
+    proposeDistributionClosure(input),
+  );
+}
+
+export async function decideClosure(input: {
+  projectId: string;
+  closureId: string;
+  approve: boolean;
+  note: string;
+  done: string;
+}): Promise<WriteResult> {
+  if (!id.safeParse(input.projectId).success) return invalid;
+  return withOutcome(input.projectId, ["distribution"], input.done, () =>
+    decideDistributionClosure(input),
+  );
+}
+
+export async function reopenClosure(input: {
+  projectId: string;
+  note: string;
+}): Promise<WriteResult> {
+  if (!id.safeParse(input.projectId).success) return invalid;
+  return withOutcome(
+    input.projectId,
+    ["distribution"],
+    fr.distributionJourney.closure.reopened,
+    () => reopenDistributionClosure(input),
+  );
+}

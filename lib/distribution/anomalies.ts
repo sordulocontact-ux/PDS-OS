@@ -92,6 +92,8 @@ export type Anomaly = {
   reportedAt: string;
   stateBy: string | null;
   stateAt: string | null;
+  // Declared from The Orchard's corrections (declare_distribution_corrections).
+  fromDistributor: boolean;
 };
 
 export const isOpen = (anomaly: Anomaly) =>

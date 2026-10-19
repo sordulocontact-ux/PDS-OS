@@ -10,7 +10,7 @@
 -- Nothing is sent to The Orchard: these tables only keep what people say.
 -- Run with `supabase test db`.
 begin;
-select plan(103);
+select plan(105);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -167,6 +167,13 @@ select lives_ok($$ select public.record_distribution_check(pg_temp.id_of('projec
 
 -- 7. Submit, frozen, decide --------------------------------------------------
 select pg_temp.act_as(pg_temp.id_of('manager'));
+-- The parameters are confirmed first (lot D2, 20261019100201).
+select throws_ok($$ select public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb) $$,
+                 'P0001', 'params_not_confirmed', 'never submitted before the parameters are confirmed');
+update public.distribution_dossiers set preorder = false, prelisten = false, price_tier = 'front'
+ where project_id = pg_temp.id_of('project');
+select lives_ok($$ select public.confirm_distribution_params(pg_temp.id_of('project'), null, null, null) $$,
+                'the owner confirms the parameters');
 select throws_ok($$ select public.submit_distribution_version(pg_temp.id_of('project'), '{"format": 1}'::jsonb) $$,
                  'P0001', 'checks_non_compliant', 'never submitted with a check « non conforme »');
 select public.record_distribution_check(pg_temp.id_of('project'), 'rights', 'unchecked', null);

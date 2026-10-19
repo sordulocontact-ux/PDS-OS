@@ -55,3 +55,33 @@ export async function declareWithProof(input: {
   if (!result.ok) await bucket.remove([path]);
   return result;
 }
+
+/** Browser-side: one proof file put in the private bucket (storage RLS: the
+ * project's owner), its path and name returned for the declaration(s) that
+ * cite it; `removeProof` takes it back when the declaration is refused. */
+export async function uploadProof(input: {
+  organizationId: string;
+  projectId: string;
+  file: File;
+}): Promise<{ path: string; name: string } | { error: string }> {
+  const t = fr.distribution.tracking.errors;
+  if (input.file.size === 0) return { error: t.invalid };
+  if (input.file.size > MAX_PROOF_BYTES) return { error: t.fileTooLarge };
+  const ext = fileExtension(input.file.name);
+  const path = `${input.organizationId}/${input.projectId}/${crypto.randomUUID()}${ext ? `.${ext}` : ""}`;
+  const { error } = await createClient()
+    .storage.from(PROOF_BUCKET)
+    .upload(path, input.file, {
+      contentType: input.file.type || "application/octet-stream",
+      upsert: false,
+    });
+  if (error) {
+    console.error("[distribution] proof upload failed:", error.message);
+    return { error: t.uploadFailed };
+  }
+  return { path, name: input.file.name };
+}
+
+export async function removeProof(path: string): Promise<void> {
+  await createClient().storage.from(PROOF_BUCKET).remove([path]);
+}

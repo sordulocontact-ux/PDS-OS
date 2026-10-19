@@ -2,6 +2,8 @@ import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { NowCard } from "@/components/shell/journey/now-card";
+import { ModuleAttention } from "@/components/shell/module/module-attention";
+import { DistributionRolesButton } from "@/components/distribution/frame/distribution-roles";
 import { distributionStatus } from "@/lib/distribution/journey";
 import {
   distributionContext,
@@ -14,6 +16,7 @@ import { projectFormatLabel } from "@/lib/projects/labels";
 import { getProject } from "@/lib/projects/queries";
 import { distributionViewHref } from "@/lib/ui/distribution-steps";
 import type { ModuleFact } from "@/lib/ui/module-frame";
+import { stepChoiceKey } from "@/lib/step-tools/model";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 
@@ -104,6 +107,7 @@ export async function DistributionFrame({
         status={{ label: t.status[status], tone: workflowStatusTone[status] }}
         facts={factsOf(ctx)}
         steps={ctx.steps}
+        actions={<DistributionRolesButton ctx={ctx} />}
       />
       <NowCard
         steps={ctx.steps}
@@ -112,6 +116,19 @@ export async function DistributionFrame({
         shownKey={shownKey}
         elsewhere={elsewhereOf(journeys, ctx.steps)}
         labels={{ waitingTitle: t.now.waitingTitle, finished: t.now.finished }}
+      />
+      {/* Blockers and noted information of the module (sub-lot C6). */}
+      <ModuleAttention
+        stepRef={{
+          projectId,
+          module: "distribution",
+          stepKey: shownKey ?? ctx.steps[0]?.key ?? "prep",
+        }}
+        modules={["distribution"]}
+        steps={ctx.steps.map((s) => ({
+          key: stepChoiceKey({ module: "distribution", stepKey: s.key }),
+          label: s.title,
+        }))}
       />
       {shownKey ? (
         <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">

@@ -415,8 +415,9 @@ export const distribution = {
     gate: {
       pending: (n: number) => `La V${n} attend la décision du validateur.`,
       approved: (n: number) => `La V${n} est validée.`,
-      blockers: (count: number) =>
-        `${count} élément${count > 1 ? "s" : ""} de la Préparation bloque${count > 1 ? "nt" : ""}.`,
+      blockers: () =>
+        "La Préparation n'est pas prête : corrigez d'abord à la source ce qui bloque.",
+      notConfirmed: "Confirmez d'abord les paramètres de distribution.",
       params: (fields: string) => `Paramètres à renseigner : ${fields}.`,
       noValidator: "Aucun validateur désigné.",
       nonCompliant: (count: number) =>
@@ -434,6 +435,9 @@ export const distribution = {
       versionOpen:
         "Une version attend une décision ou est validée : le dossier est figé.",
       noValidator: "Désignez d'abord un validateur.",
+      paramsNotConfirmed: "Confirmez d'abord les paramètres de distribution.",
+      legalBlockers:
+        "Un emprunt reste à sécuriser au Juridique : la Préparation n'est pas prête.",
       nonCompliant:
         "Un contrôle est non conforme : corrigez à la source d'abord.",
       notValidator: "Seul le validateur désigné décide de cette version.",
@@ -649,7 +653,7 @@ export const distribution = {
   anomalies: {
     title: "Anomalies",
     description:
-      "Ce qui ne va pas, et le module où le corriger. Rien ne se corrige ici : une fois la source corrigée, préparez une nouvelle version du dossier.",
+      "Ce qui ne va pas, et le module où le corriger. Rien ne se corrige ici : une fois la source corrigée, une nouvelle version du dossier est préparée depuis l'étape Dossier.",
     empty: "Aucune anomalie déclarée.",
     emptyChecks:
       "Aucune anomalie déclarée, mais des contrôles restent non vérifiés : l'absence d'anomalie ne vaut pas conformité.",

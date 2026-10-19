@@ -1,8 +1,13 @@
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { StepPanel } from "@/components/shell/journey/step-panel";
+import {
+  StepBlockers,
+  StepToolsBlock,
+} from "@/components/shell/module/step-tools-block";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
 import { stepHistory } from "@/lib/distribution/step-history";
 import { fr } from "@/lib/i18n/fr";
+import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { isLocked } from "@/lib/ui/journey";
 import type { DistributionStep as StepKey } from "@/lib/ui/distribution-steps";
 import type { Tone } from "@/lib/ui/state-tones";
@@ -32,6 +37,16 @@ export function DistributionStep({
   if (!step) return null;
   const locked = isLocked(step.status);
   const acts = stepKey === "prep" ? [] : t.acts[stepKey];
+  // Blockers and noted information of the step (sub-lot C6).
+  const stepRef: StepRef = {
+    projectId: ctx.project.id,
+    module: "distribution",
+    stepKey,
+  };
+  const choices = ctx.steps.map((s) => ({
+    key: stepChoiceKey({ module: "distribution", stepKey: s.key }),
+    label: s.title,
+  }));
   return (
     <StepPanel
       step={step}
@@ -40,6 +55,10 @@ export function DistributionStep({
       badge={badge}
       returned={locked ? undefined : returned}
       history={<StepHistory items={stepHistory(ctx, stepKey)} />}
+      blockers={<StepBlockers stepRef={stepRef} steps={choices} />}
+      tools={
+        <StepToolsBlock stepRef={stepRef} steps={choices} locked={locked} />
+      }
     >
       {locked ? (
         acts.length > 0 ? (

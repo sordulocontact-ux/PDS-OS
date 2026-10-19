@@ -11,6 +11,7 @@ import type { SheetStatus } from "@/lib/design/states";
 import { fr } from "@/lib/i18n/fr";
 import { withReturn } from "@/lib/ui/return-to";
 import { masterStepHref } from "@/lib/ui/master-steps";
+import { formatShortDay } from "@/lib/utils/day";
 
 export const SOURCE_MODULES = [
   "catalog",
@@ -152,8 +153,10 @@ export function distributionReadiness(
   // A title's page, opened from here, brings back to this step once
   // corrected (PROJ-BUG-10).
   const back = routes.projectReleaseStep(input.projectId, "preparation");
+  // Sources say their date short (« le 12/10 », C0 decision 8).
+  const short = (at: string) => formatShortDay(at, { bare: true });
   const updated = (at: string | null, where: string) =>
-    at ? d.updatedOn(where, formatDate(at)) : where;
+    at ? d.updatedOn(where, short(at)) : where;
 
   for (const title of input.titles) {
     const subject = many ? title.label : null;
@@ -230,7 +233,7 @@ export function distributionReadiness(
               ? d.finalFile(title.finalFile.fileName, title.final.number)
               : d.finalVersion(title.final.number),
             source: d.finalValidated(
-              formatDate(title.final.decidedAt),
+              short(title.final.decidedAt),
               title.final.decidedBy,
             ),
           }
@@ -238,7 +241,7 @@ export function distributionReadiness(
           ? {
               state: "available" as const,
               detail: title.finalFile?.fileName ?? d.finalBeforeShort,
-              source: d.finalBefore(formatDate(title.before.addedAt)),
+              source: d.finalBefore(short(title.before.addedAt)),
             }
           : {
               state: "missing" as const,
@@ -404,7 +407,9 @@ function coverItem(
       ...base,
       state: "validated",
       detail: d.coverDelivered(cover.title, cover.delivered.version),
-      source: d.coverDeliveredOn(formatDate(cover.delivered.at)),
+      source: d.coverDeliveredOn(
+        formatShortDay(cover.delivered.at, { bare: true }),
+      ),
       href: production,
     };
   const validated =

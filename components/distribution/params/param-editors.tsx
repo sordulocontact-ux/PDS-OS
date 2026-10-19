@@ -169,7 +169,16 @@ export function patchOf(
   switch (key) {
     case "territories": {
       const mode = text("territoryMode");
-      const countries = form.getAll("territories").map(String).filter(Boolean);
+      // OptionSelect `multiple` submits a JSON array under its name.
+      let countries: string[] = [];
+      try {
+        const raw: unknown = JSON.parse(
+          String(form.get("territories") ?? "[]"),
+        );
+        if (Array.isArray(raw)) countries = raw.map(String).filter(Boolean);
+      } catch {
+        countries = [];
+      }
       if (mode !== "world" && countries.length === 0)
         return { error: t.errors.countries };
       return { patch: { territoryMode: mode, territories: countries } };
