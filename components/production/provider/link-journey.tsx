@@ -1,16 +1,18 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { shortStamp } from "@/lib/calls/prep/dates";
 import { fr } from "@/lib/i18n/fr";
 import type { LinkJourney } from "@/lib/production/provider/journey";
-import { formatDate } from "@/lib/release/format";
 
+import { linkCallCards } from "./link-call-cards";
+import { linkDirectorCard } from "./link-director-card";
 import { LinkDirectionForm } from "./link-direction-form";
 import { LinkGearForm } from "./link-gear-form";
 import { LinkPlaceForm } from "./link-place-form";
-import { LinkProgress } from "./link-progress";
-import { LinkQuoteForm } from "./link-quote-form";
-import { LinkQuoteList } from "./link-quote-list";
+import { linkQuoteCard } from "./link-quote-card";
+import { LinkRushesForm } from "./link-rushes-form";
+import { linkChecklistCard, LinkTaskList } from "./link-task-cards";
 
 const t = fr.productionLink;
 const p = fr.portal.provider;
@@ -26,48 +28,74 @@ const p = fr.portal.provider;
 export function linkJourneyCards({
   token,
   journey: j,
+  provider,
 }: {
   token: string;
   journey: LinkJourney;
+  // The contact's own name (« Proposé par Studio Ressac »).
+  provider: string;
 }): PortalCardItem[] {
   const company = j.roles.includes("company");
   const director = j.roles.includes("director");
   const dop = j.roles.includes("dop");
-  const latest = j.quotes[0] ?? null;
-  const canDeposit = !latest || latest.status === "rejected";
   const d = j.direction;
   const hint = (text: string) => (
     <p className="text-pretty text-muted-foreground">{text}</p>
   );
-  const cards: PortalCardItem[] = [];
-  if (j.actions.length > 0)
+  const cards: PortalCardItem[] = linkCallCards(token, j);
+  const directorCard = linkDirectorCard(token, j, provider);
+  if (directorCard) cards.push(directorCard);
+  // Without a call held, the actions given stand on their own card.
+  const asked = j.actions.filter((a) => !a.checklist && a.origin === null);
+  if (asked.length > 0 && !j.calls.some((c) => c.status === "ready"))
     cards.push({
       id: "ps-tasks",
       title: t.tasks.title,
-      state: "todo",
+      state: asked.some((a) => a.doneAt === null) ? "todo" : "done",
       order: 90,
-      action: {
-        label: j.actions[0].title,
-        due: j.actions[0].dueDate ? formatDate(j.actions[0].dueDate) : null,
-      },
-      dueKey: j.actions[0].dueDate,
+      action: { label: asked[0].title, due: asked[0].dueDate },
+      dueKey: asked[0].dueDate,
       body: (
-        <ul className="flex flex-col gap-2">
-          {j.actions.map((a) => (
-            <li
-              key={a.title}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 text-sm"
-            >
-              <span className="min-w-0 flex-1">{a.title}</span>
-              {a.dueDate && (
-                <span className="text-muted-foreground">
-                  {t.tasks.due(formatDate(a.dueDate))}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
+        <LinkTaskList
+          token={token}
+          actions={asked}
+          origin={fr.productionLink.call.confirmed}
+        />
       ),
+    });
+  const checklist = linkChecklistCard(token, j);
+  if (checklist) cards.push(checklist);
+  // After the shoot, the rushes' link (proto).
+  const shot = ["done", "partial", "interrupted"].includes(j.shootState ?? "");
+  if (company && j.organization === "external" && shot)
+    cards.push({
+      id: "ps-rushes",
+      title: t.rushes.title,
+      state: j.rushesUrl ? "done" : "todo",
+      order: 60,
+      action: j.rushesUrl ? null : { label: t.rushes.action },
+      body: j.rushesUrl ? (
+        <p className="break-words">
+          {j.rushesUrl}
+          {j.rushesAt && (
+            <span className="text-muted-foreground">
+              {" "}
+              · {t.rushes.sent(shortStamp(j.rushesAt))}
+            </span>
+          )}
+        </p>
+      ) : (
+        <LinkRushesForm token={token} />
+      ),
+    });
+  // The preparation confirmed by PDS (proto: the same sentence as in PDS).
+  if (company && j.readyAt)
+    cards.push({
+      id: "ps-ready",
+      title: fr.productionReady.link.title,
+      state: "done",
+      order: 50,
+      body: <p>{fr.productionReady.link.done}</p>,
     });
   if (director)
     cards.push({
@@ -119,45 +147,7 @@ export function linkJourneyCards({
       ),
     });
   if (company) {
-    const frame = t.quote.frame(j.deliveryOn ? formatDate(j.deliveryOn) : null);
-    cards.push({
-      id: "ps-quote",
-      title: t.quote.title,
-      state: canDeposit
-        ? "todo"
-        : latest?.status === "approved"
-          ? "done"
-          : "waiting",
-      order: 10,
-      action: { label: p.quote },
-      body: (
-        <>
-          {hint([t.quote.description, frame].filter(Boolean).join(" "))}
-          <LinkQuoteList quotes={j.quotes} />
-          {canDeposit && (
-            <LinkQuoteForm token={token} redo={latest?.status === "rejected"} />
-          )}
-        </>
-      ),
-    });
-    if (j.organization === "external")
-      cards.push({
-        id: "ps-progress",
-        title: t.progress.title,
-        state:
-          Object.values(j.progress).some((v) => !v) ||
-          Object.keys(j.progress).length === 0
-            ? "todo"
-            : "done",
-        order: 30,
-        action: { label: p.progress },
-        body: (
-          <>
-            {hint(t.progress.description)}
-            <LinkProgress token={token} progress={j.progress} />
-          </>
-        ),
-      });
+    cards.push(linkQuoteCard(token, j, provider));
     cards.push({
       id: "ps-places",
       title: t.places.title,

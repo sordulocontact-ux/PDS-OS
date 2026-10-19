@@ -38,10 +38,11 @@ const https = z
 
 const quoteSchema = z.object({
   token,
-  label: z.string().trim().min(1).max(200),
+  label: z.string().trim().max(200),
   amount: z.string().trim().min(1),
+  loc: z.string().trim().min(1),
   deliveryOn: z.iso.date().or(z.literal("")),
-  url: https,
+  url: https.refine((v) => v !== ""),
   note: z.string().trim().max(1000),
 });
 export async function depositQuoteByLink(
@@ -51,17 +52,28 @@ export async function depositQuoteByLink(
   if (!parsed.success)
     return {
       ok: false,
-      error: parsed.error.issues[0]?.path[0] === "url" ? e.url : e.amount,
+      error:
+        parsed.error.issues[0]?.path[0] === "url"
+          ? e.url
+          : parsed.error.issues[0]?.path[0] === "loc"
+            ? fr.productionQuotes.errors.loc
+            : e.amount,
     };
   const p = parsed.data;
   const cents = parseEurosToCents(p.amount);
   if (cents === null || cents === undefined)
     return { ok: false, error: e.amount };
+  const loc = parseEurosToCents(p.loc);
+  if (loc === null || loc === undefined)
+    return { ok: false, error: fr.productionQuotes.errors.loc };
+  if (loc > cents)
+    return { ok: false, error: fr.productionQuotes.errors.locOver };
   const supabase = await createClient();
   const { error } = await supabase.rpc("deposit_production_quote_by_link", {
     p_token: p.token,
     p_label: p.label,
     p_amount_cents: cents,
+    p_loc_budget_cents: loc,
     p_delivery_on: p.deliveryOn || null,
     p_url: p.url || null,
     p_note: p.note || null,

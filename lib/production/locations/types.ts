@@ -10,7 +10,7 @@ export type LocationRole = (typeof LOCATION_ROLES)[number];
 export const VERDICTS = ["favorable", "reserved", "unfavorable"] as const;
 export type Verdict = (typeof VERDICTS)[number];
 
-export type LocationStatus = "candidate" | "discarded" | "chosen";
+export type LocationStatus = "candidate" | "discarded" | "chosen" | "replaced";
 
 export type LocationMedia = {
   id: string;
@@ -80,7 +80,9 @@ export function missingOf(
 /** Who among the consulted has not given an opinion on every candidate
  * still in the running (PROD-012). */
 export function awaited(data: Pick<LocationsData, "options" | "consults">) {
-  const live = data.options.filter((o) => o.status !== "discarded");
+  const live = data.options.filter(
+    (o) => o.status === "candidate" || o.status === "chosen",
+  );
   return data.consults.filter((c) =>
     live.some(
       (o) => !o.reviews.some((r) => r.holderKey === holderKey(c.holder)),

@@ -1,14 +1,17 @@
-import { CompanyProgress } from "@/components/production/journey/company-progress";
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ChecklistSection } from "@/components/production/checklist/checklist-section";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { EquipmentSection } from "@/components/production/preprod/equipment-section";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
 import { prepContext } from "@/lib/production/journey/prep-context";
 
-export const metadata = { title: `Préproduction · ${fr.app.name}` };
+export const metadata = {
+  title: `${fr.productionJourney.steps["follow-up"].title} · ${fr.app.name}`,
+};
 
-/** External production: the company organises calls, gear, crew and
- * schedule; PDS follows its report and what it chose to list here. */
+/** « Préproduction » of an external production (proto BODY.prep): the
+ * company organises, PDS follows its checklist — tasks, due dates,
+ * blockers — and adds its own; the gear PDS listed, if any, follows. */
 export default async function ProductionFollowUpStepPage({
   params,
 }: PageProps<"/app/projects/[projectId]/production/[deliverableId]/follow-up">) {
@@ -18,21 +21,26 @@ export default async function ProductionFollowUpStepPage({
     deliverableId,
     "follow-up",
   );
-  const { data, sheet, preprod, today, links, common, people } =
-    await prepContext(projectId, deliverableId);
-  const company = sheet.organization.company;
+  const { data, sheet, preprod, today, common, people } = await prepContext(
+    projectId,
+    deliverableId,
+  );
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={step}
       steps={steps}
-      rootPrereq={fr.productionJourney.meta.fiche}
+      closed={Boolean(sheet.closedAt)}
     >
-      <CompanyProgress
+      <ChecklistSection
         projectId={projectId}
         sheetId={sheet.id}
-        organization={sheet.organization}
-        link={company ? (links[company.id] ?? null) : null}
+        actions={preprod.actions}
+        company={sheet.organization.company?.name ?? null}
         canOrganize={data.canOrganize}
+        mePersonId={access.personId}
+        {...people}
       />
       {preprod.equipment.length > 0 && (
         <EquipmentSection
@@ -44,6 +52,6 @@ export default async function ProductionFollowUpStepPage({
           today={today}
         />
       )}
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

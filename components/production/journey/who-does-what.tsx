@@ -8,7 +8,10 @@ import type { PrivateLinkRow } from "@/components/shell/module/private-links";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { fr } from "@/lib/i18n/fr";
 import type { ProviderLinkState } from "@/lib/production/post/types";
-import type { ProductionSheetData } from "@/lib/production/sheet";
+import type { Holder, ProductionSheetData } from "@/lib/production/sheet";
+
+import { RevokeLinkButton } from "./revoke-link-button";
+import { RoleChangeButton } from "./role-change-button";
 
 const t = fr.productionOrganization;
 const r = fr.roles.production;
@@ -17,16 +20,20 @@ type Props = {
   projectId: string;
   data: ProductionSheetData;
   links: Record<string, ProviderLinkState>;
+  // Contacts whose last link was revoked, and when.
+  revoked?: Record<string, string>;
   canOrganize: boolean;
+  // The creative side (responsable créatif, validation créative interne).
+  creativeName?: string | null;
   history?: RoleHistoryLine[];
 };
 
 /**
- * « Qui fait quoi » of a deliverable's production (Ibé 14/10, sub-lot C7),
- * on the common `RolesPanel`: each role with its kind and holder, the
- * private links of the Réseau contacts (no account for providers), the
- * changes of organisation. `ProductionWhoDoesWhatButton`: the same in the
- * header's modal.
+ * « Qui fait quoi » of a deliverable's production (proto rolesModal), on
+ * the common `RolesPanel`: each role with its kind (Coordonne / Exécute /
+ * Valide) and holder, « Changer » for the owner, the private links of the
+ * Réseau contacts (« Nouveau lien », « Révoquer »), the changes of role.
+ * `ProductionWhoDoesWhatButton`: the same in the header's modal.
  */
 export function WhoDoesWhat(props: Props) {
   const panel = productionRoles(props);
@@ -50,17 +57,48 @@ function productionRoles({
   projectId,
   data,
   links,
+  revoked = {},
   canOrganize,
+  creativeName,
   history,
 }: Props) {
   const sheet = data.sheet;
-  if (!sheet) return null;
+  if (!sheet?.organization.kind) return null;
   const org = sheet.organization;
+  const ext = org.kind === "external";
+  // « Changer »: the project's owner, while the production runs.
+  const canChange = data.canOpen && !sheet.closedAt;
   const member = (p: { name: string } | null) =>
     p ? { name: p.name, detail: r.member } : null;
-  const contact = (c: { name: string } | null) =>
-    c ? { name: c.name, viaLink: true } : null;
-  const rows: (RoleRow | null)[] = [
+  const held = (h: Holder | null) =>
+    h
+      ? h.kind === "contact"
+        ? { name: h.name, viaLink: true }
+        : member(h)
+      : null;
+  const change = (
+    role: "producer" | "validator" | "director" | "dop",
+    label: string,
+    current: Holder | null,
+    contacts = false,
+  ) =>
+    canChange ? (
+      <RoleChangeButton
+        projectId={projectId}
+        sheetId={sheet.id}
+        role={role}
+        label={label}
+        current={current}
+        members={data.members}
+        contacts={contacts ? data.contacts : []}
+      />
+    ) : undefined;
+  const asHolder = (
+    m: { personId: string; name: string } | null,
+  ): Holder | null =>
+    m ? { kind: "person", id: m.personId, name: m.name } : null;
+  const creative = creativeName ?? data.ownerName;
+  const rows: (RoleRow | null | false)[] = [
     {
       key: "owner",
       label: r.owner,
@@ -68,78 +106,123 @@ function productionRoles({
       holder: data.ownerName ? { name: data.ownerName } : null,
       what: t.tasks.owner,
     },
-    org.lineProducer && {
+    {
       key: "producer",
       label: r.producer,
       kind: "coord",
-      holder: member(org.lineProducer),
+      holder:
+        member(org.lineProducer) ??
+        (data.ownerName ? { name: data.ownerName } : null),
       what: t.tasks.lineProducer,
+      action: change("producer", r.producer, asHolder(org.lineProducer)),
     },
-    org.company && {
+    ext && {
       key: "company",
       label: r.company,
       kind: "exec",
-      holder: contact(org.company),
+      holder: held(org.company),
       what: t.tasks.company,
     },
-    sheet.director && {
+    {
       key: "director",
       label: r.director,
       kind: "exec",
-      holder:
-        sheet.director.kind === "contact"
-          ? contact(sheet.director)
-          : member(sheet.director),
+      holder: held(sheet.director),
       what: t.tasks.director,
+      action: change("director", r.director, sheet.director, true),
     },
-    org.dop && {
+    ext && {
+      key: "post",
+      label: r.post,
+      kind: "exec",
+      holder: held(org.company),
+      what: t.tasks.post,
+    },
+    !ext && {
       key: "dop",
       label: r.dop,
       kind: "exec",
-      holder: org.dop.kind === "contact" ? contact(org.dop) : member(org.dop),
+      holder: held(org.dop),
       what: t.tasks.dop,
+      action: change("dop", r.dop, org.dop, true),
     },
-    org.quoteValidator && {
+    {
+      key: "creative",
+      label: r.creative,
+      kind: "coord",
+      holder: creative ? { name: creative } : null,
+      what: t.tasks.creative,
+    },
+    {
       key: "validator",
       label: r.validator,
       kind: "valid",
       holder: member(org.quoteValidator),
       what: t.tasks.validator,
+      action: change("validator", r.validator, asHolder(org.quoteValidator)),
+    },
+    {
+      key: "creativeInt",
+      label: r.creativeInt,
+      kind: "valid",
+      holder: creative ? { name: creative } : null,
+      what: t.tasks.creativeInt,
     },
   ];
   const roles = rows.filter((x): x is RoleRow => Boolean(x));
   const holders = [
-    org.company && { holder: org.company, role: r.company },
+    ext && org.company && { holder: org.company, role: r.company },
     sheet.director?.kind === "contact" && {
       holder: sheet.director,
       role: r.director,
     },
-    org.dop?.kind === "contact" && { holder: org.dop, role: r.dop },
+    !ext && org.dop?.kind === "contact" && { holder: org.dop, role: r.dop },
   ].filter((x) => Boolean(x)) as {
     holder: { kind: "contact"; id: string; name: string };
     role: string;
   }[];
   const privateLinks: PrivateLinkRow[] = holders.map(({ holder, role }) => {
     const l = links[holder.id] ?? null;
+    const revokedAt = l ? null : (revoked[holder.id] ?? null);
     return {
       key: `${holder.id}-${role}`,
       name: holder.name,
       role,
-      link: l && {
-        number: l.number,
-        createdAt: l.createdAt,
-        createdBy: l.createdBy,
-        openedAt: l.lastOpenedAt,
-        expiresAt: l.expiresAt,
-      },
+      link: l
+        ? {
+            number: l.number,
+            createdAt: l.createdAt,
+            createdBy: l.createdBy,
+            openedAt: l.lastOpenedAt,
+            expiresAt: l.expiresAt,
+          }
+        : revokedAt
+          ? {
+              number: 0,
+              createdAt: revokedAt,
+              createdBy: null,
+              openedAt: null,
+              revokedAt,
+            }
+          : null,
       renew: canOrganize ? (
-        <ProviderLinkButton
-          projectId={projectId}
-          sheetId={sheet.id}
-          holder={holder}
-          link={l}
-          renew
-        />
+        <span className="flex flex-wrap items-center gap-1.5">
+          <ProviderLinkButton
+            projectId={projectId}
+            sheetId={sheet.id}
+            holder={holder}
+            link={l}
+            renew
+          />
+          {l && (
+            <RevokeLinkButton
+              projectId={projectId}
+              sheetId={sheet.id}
+              contactId={holder.id}
+              name={holder.name}
+            />
+          )}
+        </span>
       ) : null,
     };
   });

@@ -1,10 +1,11 @@
-// Production › Devis (Ibé, 14/10): a quote deposited (by the company through
-// its link, or in the app), checked point by point by the line producer,
-// submitted to its validator, approved or refused with a reason.
+// Production › Devis (Ibé, 14/10; proto « Projet complet » BODY.quote): a
+// quote in versions — deposited (by the company through its link, or in
+// the app), checked by the line producer, decided by the budget
+// validation; « Demander une modification », the active reference, the
+// revision asked after a validation.
 export const productionQuotes = {
   title: "Devis",
-  description:
-    "Chaque devis est vérifié par le chargé de production, puis validé par la personne désignée à l'organisation.",
+  versions: "Versions du devis",
   empty: {
     external: (company: string) =>
       `En attente du devis de ${company}, sur son lien privé.`,
@@ -13,11 +14,12 @@ export const productionQuotes = {
   add: "Ajouter un devis",
   addTitle: "Ajouter un devis",
   addDescription:
-    "Le devis d'un loueur, ou celui de la société reçu par e-mail. Il arrive « À vérifier ».",
+    "Le devis d'un loueur, ou celui de la société reçu par e-mail. Il arrive « Déposé, à vérifier ».",
   fields: {
     label: "Intitulé",
     labelHint: "Par exemple : Location caméra et lumière, Transpacam",
     amount: "Montant total HT",
+    loc: "Dont montant prévu pour les lieux",
     delivery: "Livraison ou fin de prestation proposée",
     url: "Lien du devis",
     urlHint: "Commence par https:// (Drive, PDF en ligne…)",
@@ -25,71 +27,97 @@ export const productionQuotes = {
   },
   added: "Devis ajouté : à vérifier.",
   status: {
-    deposited: "À vérifier",
-    submitted: "À valider",
+    deposited: "Déposé, à vérifier",
+    submitted: "Vérifié, à valider",
     approved: "Validé",
+    changes: "Révision demandée",
     rejected: "Refusé",
+    replaced: "Remplacé",
   },
-  deposited: (who: string, date: string) => `Déposé par ${who} le ${date}`,
-  byLink: "la société, sur son lien",
-  amount: "Montant",
-  delivery: "Livraison",
-  steps: { deposited: "Déposé", checked: "Vérifié", approved: "Validé" },
+  line: (n: number, amount: string) => `V${n} · ${amount}`,
+  loc: (amount: string) => `dont lieux ${amount}`,
+  open: "Voir le devis",
+  deposited: (who: string, at: string) => `Déposé par ${who} le ${at}`,
+  decided: (verb: string, who: string, at: string) =>
+    ` · ${verb} par ${who} le ${at}`,
+  verbs: { approved: "validé", other: "décidé" },
+  said: (who: string, text: string) => `${who} : « ${text} »`,
+  byLink: "la société",
   check: {
-    title: "Vérification préparée par PO",
-    note: "Calculée par le code depuis l'enveloppe et les dates de la fiche ; cochez chaque point vérifié.",
-    amountOk: (amount: string, envelope: string, margin: string) =>
-      `Montant ${amount} pour une enveloppe de ${envelope} : marge de ${margin}`,
-    amountOver: (amount: string, envelope: string, over: string) =>
-      `Montant ${amount} pour une enveloppe de ${envelope} : dépassement de ${over}`,
+    title: (n: number) => `Vérifier le devis V${n}`,
+    computed: "calculé par le code",
+    amountOk: (amount: string, envelope: string) =>
+      `Montant ${amount} ≤ enveloppe ${envelope}`,
+    amountOver: (amount: string, envelope: string) =>
+      `Montant ${amount} > enveloppe ${envelope}`,
     amountNoEnvelope: (amount: string) =>
       `Montant ${amount} : aucune enveloppe fixée pour comparer`,
-    delayOk: (on: string, due: string) =>
-      `Livraison proposée le ${on}, attendue au plus tard le ${due}`,
-    delayLate: (on: string, due: string) =>
-      `Livraison proposée le ${on}, après la date attendue du ${due}`,
-    delayUnknown: "Date de livraison à vérifier dans le devis",
+    loc: (amount: string, days: number) =>
+      `Dont lieux : ${amount} pour ${days} jour${days > 1 ? "s" : ""} de tournage`,
+    locSource: "le lieu retenu sera comparé à ce montant",
+    locMissing: "Le devis ne dit pas le montant prévu pour les lieux",
+    delay: (shoot: string | null, delivery: string | null) =>
+      `Délais compatibles avec ${
+        [
+          shoot ? `le tournage du ${shoot}` : null,
+          delivery ? `la livraison du ${delivery}` : null,
+        ]
+          .filter(Boolean)
+          .join(" et ") || "les dates de la fiche"
+      }`,
     scope:
-      "Le devis couvre tout ce que la Fiche Livrable attend (tournage, postproduction, exports)",
-    verified: "Vérifié",
-    noteLabel: "Note pour la validation",
-    notePlaceholder: "Ce que la personne qui valide doit savoir pour décider",
+      "Postes complets : réalisation, équipe, matériel, lieux, régie, postproduction",
+    comment: "Commentaire",
+    commentHint: "Obligatoire pour demander une modification",
+    commentRequired: (company: string) =>
+      `Dites ce qui doit changer : ${company} le lira.`,
     submit: (who: string) => `Soumettre à ${who}`,
-    submitted: "Devis soumis à la validation.",
-    incomplete: (n: number) =>
-      n === 1
-        ? "1 point reste à vérifier avant de soumettre."
-        : `${n} points restent à vérifier avant de soumettre.`,
+    changes: "Demander une modification",
+    incomplete:
+      "Cochez ce que vous avez vérifié, ou demandez une modification.",
   },
   decide: {
-    checkedBy: (who: string, date: string) => `Vérifié par ${who} le ${date}`,
-    reason: "Motif, si vous refusez",
-    reasonPlaceholder: "Ce qu'il faut corriger",
-    reasonRequired: "Un refus dit pourquoi : écrivez le motif.",
-    approve: "Valider le devis",
+    title: (n: number) => `Décider du devis V${n}`,
+    checkedBy: (who: string) =>
+      `Vérifié par ${who} : délais et postes cochés, montant dans l'enveloppe.`,
+    comment: "Commentaire",
+    commentHint: "Obligatoire pour une modification ou un refus",
+    approve: (n: number) => `Valider le devis V${n}`,
+    changes: "Demander une modification",
     reject: "Refuser",
-    approved: "Devis validé.",
-    rejected: "Devis refusé, avec le motif.",
-    decidedBy: (verb: string, who: string, date: string) =>
-      `${verb} par ${who} le ${date}`,
+  },
+  active: (n: number, amount: string) => `Référence active : V${n} · ${amount}`,
+  activeBy: (who: string, at: string) => `, validée par ${who} le ${at}.`,
+  previous: " Les versions précédentes restent ci-dessous.",
+  revision: {
+    open: "Demander une révision du devis",
+    note: (n: number) =>
+      `La V${n} reste la référence jusqu'à la validation de la nouvelle version.`,
+    reason: "Motif",
+    reasonPlaceholder: "Ex. : régie supplémentaire après le changement de lieu",
+    reasonRequired: "Dites pourquoi.",
+    submit: (company: string) => `Demander à ${company}`,
+    asked: (who: string, at: string) =>
+      `Révision demandée par ${who} le ${at} : `,
   },
   // What a gesture did, for the result banner and its toast (rule 7).
   done: {
-    submitted: "Devis soumis à la validation",
-    approved: "Devis validé",
-    rejected: "Devis refusé",
-  },
-  wait: {
-    check: (who: string) => `En attente de ${who} : vérifier le devis.`,
-    decide: (who: string) => `En attente de ${who} : valider le devis.`,
+    submitted: (n: number) => `Devis V${n} soumis`,
+    approved: (n: number) => `Devis V${n} validé`,
+    rejected: (n: number) => `Devis V${n} refusé`,
+    changes: (n: number) => `Révision demandée sur le devis V${n}`,
+    revision: "Révision du devis demandée",
   },
   errors: {
     checks_incomplete: "Chaque point doit être vérifié avant de soumettre.",
     quote_validator_required:
-      "Choisissez d'abord qui valide les devis, à l'étape Organisation.",
-    reason_required: "Un refus dit pourquoi : écrivez le motif.",
+      "Choisissez d'abord la validation budgétaire, dans « Qui fait quoi ».",
+    reason_required: "Dites ce qui doit changer.",
+    no_active_quote: "Aucun devis validé à réviser.",
     label: "Donnez un intitulé au devis.",
-    amount: "Indiquez le montant HT.",
+    amount: "Un montant en euros, par exemple 16 400.",
+    loc: "Le montant prévu pour les lieux, par exemple 2 500 (0 si aucun lieu à louer).",
+    locOver: "Ne peut pas dépasser le montant total du devis.",
     url: "Le lien doit commencer par https://",
   },
 } as const;

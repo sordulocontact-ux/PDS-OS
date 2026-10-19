@@ -21,6 +21,7 @@ export type SheetOrganization = {
   quoteValidator: Member | null;
   dop: Holder | null;
   organizedAt: string | null;
+  organizedBy: string | null;
   // The production company's own report of its preproduction.
   progress: Record<ProgressKey, boolean>;
   progressAt: string | null;
@@ -61,6 +62,7 @@ export function organizationOf(
     quoteValidator: member(row.quote_validator_person_id),
     dop: holderOf(row.dop_person_id, row.dop_contact_id),
     organizedAt: row.organized_at,
+    organizedBy: nameOf(row.organized_by),
     progress: Object.fromEntries(
       PROGRESS_KEYS.map((k) => [k, progress[k] === true]),
     ) as Record<ProgressKey, boolean>,

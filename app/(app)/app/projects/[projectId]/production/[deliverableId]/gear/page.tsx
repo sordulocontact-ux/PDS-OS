@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ProductionNeedsSection } from "@/components/production/prep/needs-section";
 import { EquipmentSection } from "@/components/production/preprod/equipment-section";
 import { fr } from "@/lib/i18n/fr";
@@ -25,10 +25,11 @@ export default async function ProductionGearStepPage({
     deliverableId,
   );
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={step}
       steps={steps}
-      rootPrereq={fr.productionJourney.meta.fiche}
     >
       <ProductionNeedsSection
         projectId={projectId}
@@ -47,6 +48,6 @@ export default async function ProductionGearStepPage({
         brief={sheet.brief}
         today={today}
       />
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

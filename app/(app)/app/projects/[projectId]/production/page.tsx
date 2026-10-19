@@ -1,118 +1,56 @@
 import { IconBox2 } from "nucleo-sharp-essential";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
-import { ValidationPanel } from "@/components/framing/validation-panel";
-import { ProductionDeliverableItem } from "@/components/production/production-deliverable";
 import { EmptyState } from "@/components/shell/empty-state";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { StatTiles } from "@/components/ui/stat-tiles";
 import { ViewLink } from "@/components/ui/view-link";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { DELIVERY_STATES } from "@/lib/production/rules";
-import { loadProduction } from "@/lib/production/queries";
-import { canEditProject } from "@/lib/projects/edit-access";
+import { productionDeliverables } from "@/lib/journey/production";
+import { loadProjectJourneys } from "@/lib/journey/project";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
-const t = fr.production;
+const t = fr.productionJourney.empty;
 
-export const metadata = { title: `${t.title} · ${fr.app.name}` };
+export const metadata = { title: `${fr.production.title} · ${fr.app.name}` };
 
 /**
- * Marketing › Production: each deliverable committed by the Stratégie, from
- * its creative source (the Conception's validated version) to « Livré »
- * (ticket « Workflow Production complet », § 20; docs/ARCHITECTURE.md
- * § 8 nonies). The stage is started and finished like the others: the
- * owner asks, the direction validates.
+ * Marketing › Production (proto « Projet complet »): no list of its own —
+ * it opens on the deliverable where the viewer has something to do, else
+ * the first one in Production; the bar of each deliverable's page switches
+ * between them. The Production starts with the transfer of a Fiche from
+ * the Conception: nothing to start nor to validate here (decision of the
+ * 19/10/2026, docs/ARCHITECTURE.md § 8 nonies).
  */
 export default async function ProjectProductionPage({
   params,
 }: PageProps<"/app/projects/[projectId]/production">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
+  await allInOrder([requireApproved(), requireLaunchedProject(projectId)]);
+  const [list, journeys] = await Promise.all([
+    productionDeliverables(projectId),
+    loadProjectJourneys(projectId),
   ]);
-  const data = await loadProduction(projectId, access);
-  if (!data) notFound();
-
-  const state = data.stage?.state ?? "not_started";
-  const inProgress = state === "in_progress";
-  const canEdit = canEditProject(access, project) && inProgress;
-  const canApprove = inProgress && (data.isOwner || data.isCreative);
-  const handed = (d: (typeof data.deliverables)[number]) =>
-    !d.conception || d.conception.state === "handed";
-  const status =
-    state === "not_started" ? t.notStarted : inProgress ? null : t.locked;
-
+  const mine = list.find((d) =>
+    journeys.mine.some((a) => a.step.href.includes(`/production/${d.id}/`)),
+  );
+  const first = mine ?? list[0];
+  if (first) redirect(routes.projectProductionSheet(projectId, first.id));
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="grid content-start gap-4">
-          {status && <p className="text-sm text-muted-foreground">{status}</p>}
-          {data.deliverables.length === 0 ? (
-            <EmptyState
-              icon={IconBox2}
-              title={t.emptyTitle}
-              body={t.empty}
-              action={
-                <ViewLink
-                  href={routes.projectStrategy(projectId)}
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  {t.toStrategy}
-                </ViewLink>
-              }
-            />
-          ) : (
-            <>
-              <StatTiles
-                columns={5}
-                stats={DELIVERY_STATES.map((key) => ({
-                  label: t.stats[key],
-                  value: String(data.counts[key]),
-                }))}
-              />
-              <ul className="grid gap-3">
-                {data.deliverables.map((deliverable) => (
-                  <li key={deliverable.id}>
-                    <ProductionDeliverableItem
-                      projectId={projectId}
-                      deliverable={deliverable}
-                      // MKT-C2-13: Production works on what was handed.
-                      canEdit={canEdit && handed(deliverable)}
-                      canApprove={canApprove && handed(deliverable)}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-        <aside className="grid content-start gap-6">
-          <Card>
-            <CardContent className="grid gap-3">
-              <ValidationPanel
-                stage={data.stage}
-                pendingValidation={data.pendingValidation}
-                projectId={projectId}
-                mePersonId={access.personId}
-                title={t.stage}
-                startLabel={t.start}
-                // The Production opens with the first sheet transferred
-                // from the Conception (handoff_design_sheet), never apart.
-                startBlocked={fr.conceptionClosure.production.startBlocked}
-              />
-              {inProgress && (
-                <p className="text-xs text-muted-foreground">{t.finishHint}</p>
-              )}
-            </CardContent>
-          </Card>
-        </aside>
-      </div>
-    </div>
+    <EmptyState
+      icon={IconBox2}
+      title={t.title}
+      body={t.body}
+      action={
+        <ViewLink
+          href={routes.projectDesign(projectId)}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          {t.action}
+        </ViewLink>
+      }
+    />
   );
 }

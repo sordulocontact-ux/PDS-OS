@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { CallSheetPublish } from "@/components/production/preprod/call-sheet-publish";
 import { CallSheetSection } from "@/components/production/preprod/call-sheet-section";
 import { fr } from "@/lib/i18n/fr";
@@ -67,10 +67,11 @@ export default async function ProductionCallSheetStepPage({
   const personName = (id: string | null) =>
     data.members.find((m) => m.personId === id)?.name ?? "—";
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={step}
       steps={steps}
-      rootPrereq={fr.productionJourney.meta.fiche}
     >
       <CallSheetSection
         {...common}
@@ -113,6 +114,6 @@ export default async function ProductionCallSheetStepPage({
           canOrganize={data.canOrganize}
         />
       </CallSheetSection>
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

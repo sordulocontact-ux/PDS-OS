@@ -1,15 +1,13 @@
 import "server-only";
 
-import { fr } from "@/lib/i18n/fr";
-import { journeyContext } from "@/lib/production/journey/context";
 import { getProject } from "@/lib/projects/queries";
-import { createClient } from "@/lib/supabase/server";
 
 import { activationsJourneys } from "./activations";
 import { designJourneys } from "./design";
 import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
 import { legalJourneys } from "./legal";
+import { productionJourneys } from "./production";
 import { masterJourneys } from "./master";
 import { strategyJourneys } from "./strategy";
 import { reviewJourneys } from "./review";
@@ -22,53 +20,20 @@ import type { JourneyModuleKey, ModuleJourney } from "./types";
 // Distribution, Stratégie, Activations, Suivi & bilan).
 type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 
-const label = fr.shell.project.sidebar;
-const parts = fr.shell.project.marketingSteps;
-
 // Marketing: the Stratégie (lib/journey/strategy.ts), the Conception
-// (lib/journey/design.ts), each deliverable's Production once its sheet is
-// opened, the Activations (lib/journey/activations.ts) and the Suivi & bilan
-// (lib/journey/review.ts).
+// (lib/journey/design.ts), each deliverable's Production
+// (lib/journey/production.ts), the Activations (lib/journey/activations.ts)
+// and the Suivi & bilan (lib/journey/review.ts).
 const marketing: Loader = async (projectId) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("production_sheets")
-    .select("deliverable_id")
-    .eq("project_id", projectId);
-  if (error) console.error("loadProjectJourneys production:", error.message);
-  const [strategy, design, review, activations, ...productions] =
+  const [strategy, design, productions, activations, review] =
     await Promise.all([
       strategyJourneys(projectId),
       designJourneys(projectId),
-      reviewJourneys(projectId),
+      productionJourneys(projectId),
       activationsJourneys(projectId),
-      ...(data ?? []).map(async ({ deliverable_id: id }) => {
-        const ctx = await journeyContext(projectId, id);
-        const started = Boolean(
-          ctx.data.heritage.fiche || ctx.data.heritage.source,
-        );
-        return started
-          ? [
-              {
-                module: "marketing" as const,
-                label: label.marketing,
-                part: {
-                  key: `production:${id}`,
-                  label: `${parts.production} › ${ctx.data.deliverable.title}`,
-                },
-                steps: ctx.steps,
-              },
-            ]
-          : [];
-      }),
+      reviewJourneys(projectId),
     ]);
-  return [
-    ...strategy,
-    ...design,
-    ...productions.flat(),
-    ...activations,
-    ...review,
-  ];
+  return [...strategy, ...design, ...productions, ...activations, ...review];
 };
 
 // Filled by their zone (C4: typed, empty until then).

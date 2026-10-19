@@ -447,3 +447,18 @@ devis et le choix interne / externe par livrable (déjà le cas). **Écart resta
 production **freelance** n'a pas de compte ; il faudrait soit lui ouvrir un compte limité à ce rôle,
 soit lui donner sa part par lien privé (lieux, devis, planning, feuille de service). À trancher.
 
+
+
+## 11. Décisions du lot 5 « Projet complet » (19/10/2026)
+
+- **La Production s'ouvre au transfert de la fiche**, sans étape à démarrer ni validation de la Production
+  entière par le DG : chaque décision (devis, proposition, montage, livraison) est validée dans son étape.
+  L'étape `production` de `project_stages` reste le verrou technique, démarrée par l'ouverture de la fiche.
+- **Contenus sans tournage** (question 13) : le proto y répond par un parcours léger (versions, contrôle
+  technique, livraison) ; non construit dans ce lot (reste PR-13), le parcours tournage s'applique encore.
+- **Lieu et devis** (question du 17/10) : hypothèse du proto retenue — le devis dit le montant prévu pour les
+  lieux, le lieu retenu y est comparé pour un jour de tournage ; un dépassement se lit « révision du devis à
+  prévoir » et le remplacement du lieu peut la demander.
+- **Validation créative externe** (management) : pas de lien Production pour le management en V1 ; la
+  proposition et le montage restent validés en interne (reste PR-11).
+- **Société suggérée** : calculée par le code depuis ce que PDS a produit avec chaque société, jamais par PO.

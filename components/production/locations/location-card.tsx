@@ -21,6 +21,7 @@ const STATUS_TONES: Record<LocationOption["status"], Tone> = {
   candidate: "neutral",
   chosen: "success",
   discarded: "danger",
+  replaced: "neutral",
 };
 const VERDICT_TONES = {
   favorable: "success",
@@ -39,12 +40,15 @@ export function LocationCard({
   scope,
   canOrganize,
   hasChoice,
+  budgetNote,
 }: {
   option: LocationOption;
   data: Pick<LocationsData, "viewerRole" | "viewerKey">;
   scope: { projectId: string; sheetId: string; organizationId: string };
   canOrganize: boolean;
   hasChoice: boolean;
+  // Its price for the shoot days against the quote's places (proto).
+  budgetNote?: { ok: boolean; text: string } | null;
 }) {
   const cover = option.media.find(
     (m) => m.file?.href && m.file.mime.startsWith("image/"),
@@ -111,6 +115,18 @@ export function LocationCard({
           ) : null,
         )}
       </dl>
+      {budgetNote && (
+        <p
+          className={cn(
+            "text-sm font-medium",
+            budgetNote.ok
+              ? "text-[color:var(--tone-success-fg)]"
+              : "text-[color:var(--tone-warning-fg)]",
+          )}
+        >
+          {budgetNote.text}
+        </p>
+      )}
       {missing.length > 0 && option.status !== "discarded" && (
         <p className="text-xs font-medium text-[color:var(--tone-warning-fg)]">
           {t.missingLine(missing.map((m) => t.missing[m]).join(", "))}

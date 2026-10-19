@@ -1,4 +1,4 @@
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { stepContext } from "@/lib/production/journey/context";
 import { notFound, redirect } from "next/navigation";
 
@@ -8,6 +8,8 @@ import { ShootFilesSection } from "@/components/production/shoot/shoot-files-sec
 import { ShootReportSection } from "@/components/production/shoot/shoot-report-section";
 import { ShootStateSection } from "@/components/production/shoot/shoot-state-section";
 import { ShootDay } from "@/components/production/shoot/shoot-day";
+import { ConfirmShootButton } from "@/components/production/shoot/confirm-shoot-button";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -18,6 +20,8 @@ import { shootReport } from "@/lib/production/shoot/report";
 import { loadProductionSheet } from "@/lib/production/sheet";
 import { preprodFor, shootFor } from "@/lib/production/tab-data";
 import { requireLaunchedProject } from "@/lib/projects/queries";
+import { isShootEnded } from "@/lib/production/shoot/rules";
+import { formatDay } from "@/lib/utils/day";
 import { allInOrder } from "@/lib/utils/parallel";
 
 const t = fr.productionShoot;
@@ -80,11 +84,51 @@ export default async function ProductionShootPage({
     deliverableId,
     "shoot",
   );
+  // External: the company holds the shoot; PDS confirms it happened, the
+  // incidents stay (proto BODY.shoot, Artefact § 14).
+  if (sheet.organization.kind === "external") {
+    const x = fr.productionShootExternal;
+    const ended = isShootEnded(shoot.state);
+    return (
+      <ProductionStepPanel
+        projectId={projectId}
+        deliverableId={deliverableId}
+        step={journeyStep}
+        steps={journeySteps}
+        closed={Boolean(sheet.closedAt)}
+      >
+        {ended ? (
+          <ToneCallout tone="success">
+            <b className="font-semibold">{x.done}</b>
+          </ToneCallout>
+        ) : (
+          <>
+            <p>
+              {x.planned(
+                shootDate ? formatDay(shootDate) : null,
+                sheet.logistics.locationName,
+              )}
+            </p>
+            {canOrganize && journeyStep.status !== "upcoming" && (
+              <ConfirmShootButton projectId={projectId} sheetId={sheet.id} />
+            )}
+          </>
+        )}
+        <IncidentsSection
+          {...common}
+          incidents={incidents}
+          members={data.members}
+          contacts={data.contacts}
+        />
+      </ProductionStepPanel>
+    );
+  }
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={journeyStep}
       steps={journeySteps}
-      rootPrereq={fr.productionJourney.meta.fiche}
     >
       {status && <p className="text-sm text-muted-foreground">{status}</p>}
       <ShootStateSection
@@ -137,6 +181,6 @@ export default async function ProductionShootPage({
         followUps={followUps}
         members={data.members}
       />
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

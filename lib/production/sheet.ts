@@ -27,6 +27,7 @@ import {
   type SheetOrganization,
 } from "@/lib/production/organization";
 import { isNeedFamily, type NeedFamily } from "@/lib/production/roles";
+import { readyRowsOf, type ReadyRow } from "@/lib/production/ready-rows";
 import { createClient } from "@/lib/supabase/server";
 
 export type ProductionMode = "direct" | "call" | "import";
@@ -124,6 +125,13 @@ export type ProductionSheetData = {
     // Closed by its owner once transmitted (PROD-040).
     closedAt: string | null;
     closedBy: string | null;
+    // « Demander une révision du devis » after a validation (proto).
+    quoteRevision: { reason: string; by: string | null; at: string } | null;
+    // A new version of the director's proposal asked (a place replaced).
+    directionRevision: { reason: string; at: string } | null;
+    // The synthesis confirmed before the shoot, as it was (external).
+    readySnapshot: ReadyRow[] | null;
+    readyForcedReason: string | null;
   } | null;
   needs: ProductionNeed[];
   // The owner, while Production may start or runs, on a validated sheet.
@@ -414,6 +422,23 @@ async function loadSheet(
         organization: organizationOf(sheetRow, holderOf, nameOf),
         closedAt: sheetRow.closed_at,
         closedBy: nameOf(sheetRow.closed_by),
+        quoteRevision:
+          sheetRow.quote_revision_at && sheetRow.quote_revision_reason
+            ? {
+                reason: sheetRow.quote_revision_reason,
+                by: nameOf(sheetRow.quote_revision_by),
+                at: sheetRow.quote_revision_at,
+              }
+            : null,
+        readySnapshot: readyRowsOf(sheetRow.ready_snapshot),
+        readyForcedReason: sheetRow.ready_forced_reason,
+        directionRevision:
+          sheetRow.direction_revision_at && sheetRow.direction_revision_reason
+            ? {
+                reason: sheetRow.direction_revision_reason,
+                at: sheetRow.direction_revision_at,
+              }
+            : null,
       }
     : null;
 

@@ -146,6 +146,7 @@ export async function loadPreprod(
       status: callItemStatusOf(i.status),
       source: i.source === "call_report" ? "call_report" : "manual",
       sourceQuote: i.source_quote,
+      sourceReportItemId: i.source_report_item_id,
       reviewedBy: nameOf(i.reviewed_by),
       reviewedAt: i.reviewed_at,
     })),
@@ -157,6 +158,14 @@ export async function loadPreprod(
       dueDate: a.due_date,
       dependsOn: a.depends_on,
       templateKey: a.template_key,
+      origin: a.origin,
+      doneAt: a.done_at,
+      doneBy:
+        nameOf(a.done_by) ??
+        (a.done_by_contact_id
+          ? (holderOf(null, a.done_by_contact_id)?.name ?? null)
+          : null),
+      review: a.review,
       blocking: a.blocking,
       status: planStatusOf(a.status),
       approvedBy: nameOf(a.approved_by),

@@ -21,19 +21,82 @@ const journeySchema = z.object({
   quotes: z.array(
     z.object({
       id: z.string(),
+      number: z.number(),
       label: z.string(),
       amountCents: z.number(),
+      locBudgetCents: z.number().nullable(),
       deliveryOn: text,
-      status: z.enum(["deposited", "submitted", "approved", "rejected"]),
+      status: z.enum([
+        "deposited",
+        "submitted",
+        "approved",
+        "changes",
+        "rejected",
+        "replaced",
+      ]),
+      url: text,
+      note: text,
       reason: text,
       depositedAt: z.string(),
+      decidedAt: text,
     }),
   ),
+  quoteRevision: z.object({ reason: z.string(), at: z.string() }).nullable(),
+  quoteDue: text,
+  shootOn: text,
+  readyAt: text.default(null),
+  shootState: text.default(null),
+  rushesUrl: text.default(null),
+  rushesAt: text.default(null),
   gearCount: z.number(),
   locations: z
     .array(z.object({ name: z.string(), status: z.string() }))
     .default([]),
-  actions: z.array(z.object({ title: z.string(), dueDate: text })),
+  actions: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      dueDate: text,
+      origin: text,
+      doneAt: text,
+      review: z.boolean(),
+      checklist: z.boolean(),
+    }),
+  ),
+  calls: z
+    .array(
+      z.object({
+        title: z.string(),
+        occurredAt: z.string(),
+        format: text,
+        meetingUrl: text,
+        status: z.string(),
+        participants: z.array(z.string().nullable()),
+        agenda: z.array(z.string().nullable()),
+        invitedAt: z.string(),
+        invitedBy: text,
+        summary: z
+          .object({
+            version: z.number(),
+            text: z.string(),
+            sentAt: z.string(),
+            sentBy: text,
+          })
+          .nullable(),
+      }),
+    )
+    .default([]),
+  directorProposals: z
+    .array(
+      z.object({
+        name: z.string(),
+        reelUrl: z.string(),
+        note: text,
+        status: z.enum(["proposed", "retained", "declined"]),
+        proposedAt: z.string(),
+      }),
+    )
+    .default([]),
 });
 export type LinkJourney = z.infer<typeof journeySchema>;
 

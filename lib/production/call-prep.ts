@@ -156,3 +156,28 @@ export function productionCallPeople(
   ].filter((name): name is string => Boolean(name?.trim()) && name !== "—");
   return [...new Set(names)];
 }
+
+export const EXTERNAL_CALL_TOPICS = [
+  "project",
+  "constraints",
+  "quote",
+  "next",
+] as const;
+
+/** The call of an external production (proto PREP_CALL.ext): the project,
+ * its constraints, what the quote must hold, what follows — the same four
+ * points every time, reordered or reworded by the person. */
+export function externalCallTopics(): Array<{
+  key: string;
+  topic: string;
+  minutes: number;
+  questions: string[];
+}> {
+  const t = fr.productionCall.external;
+  return EXTERNAL_CALL_TOPICS.map((key) => ({
+    key,
+    topic: t.topics[key],
+    minutes: topicMinutes(t.questions[key].length),
+    questions: [...t.questions[key]],
+  }));
+}

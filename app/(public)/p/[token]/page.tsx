@@ -47,7 +47,9 @@ export default async function ProviderSpacePage({
         </p>
       </PortalShell>
     );
-  const cards = journey ? linkJourneyCards({ token, journey }) : [];
+  const cards = journey
+    ? linkJourneyCards({ token, journey, provider: space.provider })
+    : [];
   return (
     <PortalShell
       frame={frame}

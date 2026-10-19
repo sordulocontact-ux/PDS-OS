@@ -35,6 +35,7 @@ export async function TechnicalCallSection({
   contacts,
   launcher: withLauncher = true,
   listCalls = true,
+  heading,
 }: {
   projectId: string;
   input: TechnicalCallInput & { data: { sheet: { id: string } } };
@@ -45,9 +46,11 @@ export async function TechnicalCallSection({
   members: Member[];
   contacts: NetworkOption[];
   // External production: the call is the presentation to the company,
-  // launched and listed by its own panel (ProductionCallPanel).
+  // prepared and held in the step itself (CallStepHead).
   launcher?: boolean;
   listCalls?: boolean;
+  // The step's own words for the section (« Ce qui a été dit »).
+  heading?: { title: string; description: string };
 }) {
   const sheetId = input.data.sheet.id;
   const items = input.preprod.items;
@@ -79,8 +82,8 @@ export async function TechnicalCallSection({
   return (
     <PageSection
       id="technical-call"
-      title={t.title}
-      description={t.description}
+      title={heading?.title ?? t.title}
+      description={heading?.description ?? t.description}
       action={launcher}
       card
     >

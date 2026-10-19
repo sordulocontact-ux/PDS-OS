@@ -3,8 +3,64 @@
 // director of photography's gear list, the actions given to each.
 export const productionLink = {
   tasks: { title: "Vos tâches", due: (date: string) => `Pour le ${date}` },
+  director: {
+    title: "Proposer un réalisateur",
+    action: "Proposer un réalisateur",
+    yours: "Votre proposition",
+    name: "Nom",
+    reel: "Lien du showreel",
+    why: "Pourquoi lui",
+    submit: "Proposer à PDS",
+    done: "Proposition envoyée à PDS.",
+    sent: "Envoyé à PDS",
+    another: "Proposer un autre réalisateur",
+    by: (company: string, at: string) => `Proposé par ${company} le ${at}`,
+    status: { proposed: "Proposé", retained: "Retenu", declined: "Non retenu" },
+    errors: {
+      name: "Le nom du réalisateur.",
+      reel: "Un lien qui commence par https://.",
+    },
+  },
+  rushes: {
+    title: "Rushes",
+    action: "Transmettre le lien des rushes",
+    url: "Lien de récupération des rushes",
+    submit: "Transmettre le lien",
+    done: "Lien transmis à PDS.",
+    sent: (at: string) => `Transmis le ${at}`,
+    errors: { url: "Un lien qui commence par https://." },
+  },
+  call: {
+    next: "Votre prochain rendez-vous avec PDS",
+    held: (day: string) => `Call de production du ${day}`,
+    invited: "Invité",
+    when: "Quand",
+    where: "Où",
+    video: "visio",
+    onSite: "sur place",
+    participants: "Participants",
+    agenda: "Ordre du jour",
+    invitedBy: (who: string, at: string) =>
+      `Invitation envoyée par ${who} le ${at}.`,
+    asked: "Ce qui vous a été demandé",
+    confirmed: "Confirmé par PDS après le call",
+    todo: "À faire",
+    nothingYet:
+      "PDS confirme les suites du call ; ce qui vous concerne apparaîtra ici.",
+  },
   quote: {
-    title: "Votre devis",
+    title: "Devis",
+    depositV: (n: number) => `Déposer le devis V${n}`,
+    before: (day: string) => `avant le ${day}`,
+    file: "Devis (PDF)",
+    fileHint: "Le lien du PDF (Drive, WeTransfer…), commence par https://",
+    loc: "Dont montant prévu pour les lieux",
+    locHint: (days: number, day: string | null) =>
+      `Location des lieux pour ${days} jour${days > 1 ? "s" : ""} de tournage${day ? ` (${day})` : ""}. Le lieu retenu y sera comparé.`,
+    revision: (reason: string) => `PDS demande une révision : « ${reason} »`,
+    pds: "PDS",
+    waitCheck: "En attente de PDS : vérifier le devis",
+    waitDecide: "En attente de PDS : valider le devis",
     description:
       "Déposez-le ici : le chargé de production le vérifie, puis il est validé chez PDS.",
     // Never the internal envelope (VISION-UX rule 21): the delivery only.

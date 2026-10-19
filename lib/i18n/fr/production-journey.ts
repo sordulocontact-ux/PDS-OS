@@ -1,49 +1,37 @@
-// Production as a journey (Ibé, 14/10, docs/PRODUCTION-METIER.md § 0): the
-// steps of each organisation, who acts and what for, the « Maintenant » of
-// each person.
+// Production as a journey (Ibé, 14/10, docs/PRODUCTION-METIER.md § 0; proto
+// « Projet complet », production.md § 2): the steps of each organisation,
+// their words, who acts and what for, the « Maintenant » of each person.
 export const productionJourney = {
   label: "Parcours de la production",
+  spine: "Parcours · Production",
   steps: {
     organisation: {
-      title: "Organisation",
-      why: "Qui produit décide de tout le reste : qui agit, qui valide, ce que PDS saisit.",
+      title: "Qui produit ?",
+      why: "Interne : PDS pilote, avec ses freelances. Externe : une société ou un prestataire est mandaté. Le choix se fait par livrable.",
     },
     call: {
-      title: {
-        internal: "Call technique",
-        external: "Call de présentation à la société",
-      },
-      why: {
-        internal:
-          "Chaque métier dit ses besoins à partir du découpage ; PO en tire les actions.",
-        external:
-          "La société découvre le projet, les attentes, les contraintes et l'enveloppe avant de chiffrer.",
-      },
+      title: "Call de production",
+      why: "Chaque point devient une décision, une hypothèse, une action proposée ou un point à arbitrer ; les actions deviennent des tâches.",
     },
     quote: {
-      title: { internal: "Devis et budget", external: "Devis de la société" },
-      why: {
-        internal:
-          "Les locations ne se réservent qu'une fois les devis validés.",
-        external:
-          "La société ne lance la préproduction qu'une fois son devis validé par PDS.",
-      },
+      title: "Devis",
+      why: "Déposé par la société, vérifié par la production, validé par la validation budgétaire. Un dépôt ne vaut jamais validation.",
     },
     direction: {
-      title: "Proposition de réalisation et découpage",
-      why: "Le découpage dit ce qu'on tourne : calls techniques, matériel et lieux en partent.",
+      title: "Proposition de réalisation",
+      why: "Traitement, moodboard, découpage : ce qu'on tourne. Validé en interne, et en externe quand c'est requis.",
     },
     "follow-up": {
-      title: (company: string) => `Préproduction par ${company}`,
-      why: "La société organise calls techniques, matériel, équipes et planning. PDS suit.",
+      title: "Préproduction",
+      why: "La société organise ; PDS suit les tâches, les échéances et les blocages.",
     },
     gear: {
-      title: "Équipe et matériel",
-      why: "Les besoins techniques deviennent des postes à pourvoir et des lignes de matériel à chiffrer.",
+      title: "Équipes et matériel",
+      why: "Équipe image, équipe son et musiciens sont séparées ; chaque poste est confirmé, jamais supposé.",
     },
     locations: {
       title: "Lieux",
-      why: "Le lieu retenu alimente la feuille de service et le contrôle avant tournage.",
+      why: "La société propose, PDS retient un lieu. Le remplacer crée une nouvelle décision, l'ancienne reste.",
     },
     "call-sheet": {
       title: "Planning et feuille de service",
@@ -51,70 +39,116 @@ export const productionJourney = {
     },
     readiness: {
       title: "Contrôle avant tournage",
-      why: "Rien ne part en tournage sans lieu, devis et convocations confirmés.",
+      why: "La synthèse de ce qui est réellement prêt, confirmée explicitement, puis gardée telle quelle.",
     },
     shoot: {
       title: "Tournage",
-      why: "Le jour J, ce qui a été tourné, les rushes et leur sauvegarde.",
+      why: "Confirmer qu'il a eu lieu ; ensuite, les fichiers sont attendus.",
+    },
+    rushes: {
+      title: "Rushes",
+      why: "Le lien des rushes, puis leur réception. Un transfert seulement si quelqu'un d'autre que la société monte.",
     },
     post: {
-      title: "Postproduction",
-      why: "Les versions, les retours et la validation du montage.",
+      title: "Montage et retours",
+      why: "Chaque version a son lien et ses retours ; elle est en revue, à modifier ou validée.",
     },
     delivery: {
       title: "Livraison et clôture",
-      why: "Les fichiers contrôlés, livrés, transmis aux Activations, puis la clôture.",
+      why: "Le fichier final validé, sa date, son valideur et ses destinataires ; puis la clôture.",
+    },
+  },
+  // The proto's words where the organisation changes them.
+  variants: {
+    call: {
+      direct: "Préparation avec PO",
+      call: "Call de production",
+      import: "Organisation importée",
+    },
+    internal: {
+      call: "Chaque métier dit ses besoins à partir du découpage ; PO en tire les actions, qui deviennent des tâches à l'approbation du plan.",
+      direction: {
+        title: "Brief réalisateur",
+        why: "L'approche de réalisation : mise en scène, découpage, caméra, son. Elle complète la direction créative.",
+      },
+      quote: {
+        title: "Devis et budget",
+        why: "Les locations ne se réservent qu'une fois les devis validés.",
+      },
+      shoot:
+        "Préparation confirmée, tournage déclaré, puis rushes et sauvegarde vérifiés séparément.",
+      post: {
+        title: "Versions",
+        why: "Chaque version a son fichier et ses retours ; elle est validée sur pièce, jamais par absence de commentaire.",
+      },
     },
   },
   todo: {
     organize: "Choisir qui produit",
     callPlan: "Planifier le call",
     callReport: "Après le call, lancer le compte rendu",
-    callProposals: "Relire et attribuer les actions proposées par PO",
+    callProposals: "Trancher les tâches proposées par PO",
+    prepare: "Trancher les points proposés par PO",
+    importPlan: "Importer l'organisation existante",
     quoteDeposit: {
       internal: "Ajouter les devis des loueurs",
       external: "Déposer le devis",
     },
-    quoteRedo: "Déposer un devis corrigé",
-    quoteCheck: "Vérifier le devis et le soumettre",
-    quoteDecide: "Valider le devis",
+    quoteRedo: "Déposer une nouvelle version du devis",
+    quoteCheck: "Vérifier le devis",
+    quoteDecide: (n: number) => `Valider le devis V${n}`,
     directionWrite: "Écrire la proposition et le découpage",
     directionChanges: "Revoir la proposition",
     directionDecide: "Valider la proposition de réalisation",
-    directionNobody: "Désigner le réalisateur",
-    progress: "Mettre à jour la préproduction",
+    directionNobody: "Proposer un réalisateur",
+    directorRetain: "Retenir un réalisateur",
+    progress: "Faire avancer la préproduction",
+    progressTasks: (n: number) =>
+      n === 1
+        ? "Faire avancer 1 tâche de préproduction"
+        : `Faire avancer ${n} tâches de préproduction`,
     gearList: "Lister les besoins en matériel",
     team: "Compléter l'équipe",
     locationsPropose: "Proposer des lieux",
     locationsChoose: "Retenir un lieu",
     callSheet: "Compléter et diffuser la feuille de service",
-    ready: "Marquer prêt pour tournage",
+    ready: "Confirmer : préparation validée",
+    shootDone: "Confirmer que le tournage a eu lieu",
+    rushesLink: "Transmettre le lien des rushes",
+    rushesReceived: "Confirmer la réception des rushes",
+    rushesBackup: "Vérifier la sauvegarde",
   },
   summary: {
     organization: {
       internal: "Interne",
       external: (company: string) => `Externe · ${company}`,
     },
-    calls: (n: number) =>
-      n === 1 ? "1 action attribuée" : `${n} actions attribuées`,
+    tasks: (n: number) =>
+      n === 1 ? "1 tâche confirmée" : `${n} tâches confirmées`,
+    callOf: (day: string, n: number) =>
+      `Call de production du ${day} · ${n === 1 ? "1 tâche confirmée" : `${n} tâches confirmées`}`,
     quote: {
-      approved: "Validé",
+      approved: (n: number, amount: string) => `V${n} validé · ${amount}`,
       submitted: "Soumis au validateur",
       deposited: "Reçu, à vérifier",
-      rejected: "Refusé, à corriger",
+      rejected: "Refusé",
+      changes: "Modification demandée",
     },
     direction: {
       approved: "Validée",
       submitted: "Envoyée, à valider",
       changes: "Modifications demandées",
     },
-    progress: (n: number) => `${n} / 4 faits`,
+    progress: (done: number, total: number) =>
+      `${done} / ${total} tâches faites`,
     gear: (lines: number) =>
       lines === 1 ? "1 ligne de matériel" : `${lines} lignes de matériel`,
     locations: (n: number) =>
       n === 1 ? "1 lieu proposé" : `${n} lieux proposés`,
     callSheet: (n: number) => `V${n} diffusée`,
-    ready: "Prêt pour tournage",
+    ready: "Préparation validée",
+    shot: "Tournage terminé",
+    rushes: "Rushes reçus · sauvegarde vérifiée",
   },
   meta: {
     fiche: "Fiche Livrable validée",
@@ -124,23 +158,37 @@ export const productionJourney = {
     finished: "La production est terminée",
   },
   roles: {
-    owner: "Cheffe ou chef de projet",
-    producer: "Chargé de production",
-    validator: "Valide les devis",
-    company: "Société de production",
-    director: "Réalisateur",
+    owner: "Responsable du projet",
+    producer: "Responsable de production",
+    validator: "Validation budgétaire",
+    company: "Production exécutive",
+    director: "Réalisation",
     dop: "Chef opérateur",
-    creative: "Validation créative",
+    creative: "Responsable créatif",
+    creativeInt: "Validation créative interne",
+    post: "Postproduction",
   },
   history: "Historique",
   header: {
     organization: {
-      internal: "Production interne",
-      external: "Production externe",
-      none: "Organisation à choisir",
+      internal: "Interne",
+      external: "Externe",
+      none: "Qui produit ? à choisir",
     },
-    envelope: "Enveloppe",
+    envelope: "Enveloppe interne",
     shoot: "Tournage visé",
     delivery: "Livraison",
+  },
+  bar: {
+    label: "Livrables en Production",
+    toChoose: "Qui produit ? à choisir",
+    delivered: "livré",
+    mine: (n: number) =>
+      n === 1 ? "1 action pour vous" : `${n} actions pour vous`,
+  },
+  empty: {
+    title: "Aucun livrable en Production",
+    body: "La Production commence quand une fiche validée y est transférée depuis la Conception.",
+    action: "Ouvrir la Conception",
   },
 } as const;

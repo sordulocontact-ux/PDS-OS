@@ -1,7 +1,9 @@
+import { DirectorBlock } from "@/components/production/journey/director-block";
 import { DirectionDecision } from "@/components/production/journey/direction-decision";
-import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ProductionBriefSection } from "@/components/production/prep/brief-section";
 import { ProductionImportButton } from "@/components/production/prep/import-dialog";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
 import { formatDate } from "@/lib/release/format";
@@ -31,15 +33,24 @@ export default async function ProductionDirectionStepPage({
   });
   const d = sheet.organization.direction;
   const reviewer =
-    steps.find((s) => s.key === "direction")?.validator?.name ??
+    steps
+      .find((s) => s.key === "direction")
+      ?.roles?.find((r) => r.kind === "valid")?.name ??
     data.ownerName ??
     "—";
   return (
-    <StepPanel
+    <ProductionStepPanel
+      projectId={projectId}
+      deliverableId={deliverableId}
       step={step}
       steps={steps}
-      rootPrereq={fr.productionJourney.meta.fiche}
     >
+      {sheet.directionRevision && (
+        <ToneCallout tone="warning">
+          {fr.productionDirector.revision(sheet.directionRevision.reason)}
+        </ToneCallout>
+      )}
+      <DirectorBlock projectId={projectId} data={data} />
       <ProductionImportButton
         projectId={projectId}
         sheetId={sheet.id}
@@ -70,6 +81,6 @@ export default async function ProductionDirectionStepPage({
         }
         reviewerName={reviewer}
       />
-    </StepPanel>
+    </ProductionStepPanel>
   );
 }

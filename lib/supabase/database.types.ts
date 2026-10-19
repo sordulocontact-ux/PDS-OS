@@ -34,6 +34,147 @@ export type Database = {
   }
   public: {
     Tables: {
+      production_location_decisions: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          option_id: string
+          replaced_option_id: string | null
+          reason: string | null
+          decided_by: string | null
+          decided_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          option_id: string
+          replaced_option_id?: string | null
+          reason?: string | null
+          decided_by?: string | null
+          decided_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          option_id?: string
+          replaced_option_id?: string | null
+          reason?: string | null
+          decided_by?: string | null
+          decided_at?: string
+        }
+        Relationships: []
+      }
+      production_director_proposals: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          name: string
+          reel_url: string
+          note: string | null
+          proposed_by_contact_id: string | null
+          proposed_at: string
+          status: string
+          decided_by: string | null
+          decided_at: string | null
+          contact_id: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          name: string
+          reel_url: string
+          note?: string | null
+          proposed_by_contact_id?: string | null
+          proposed_at?: string
+          status?: string
+          decided_by?: string | null
+          decided_at?: string | null
+          contact_id?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          name?: string
+          reel_url?: string
+          note?: string | null
+          proposed_by_contact_id?: string | null
+          proposed_at?: string
+          status?: string
+          decided_by?: string | null
+          decided_at?: string | null
+          contact_id?: string | null
+        }
+        Relationships: []
+      }
+      production_organization_changes: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          from_kind: string
+          from_company_contact_id: string | null
+          from_by: string | null
+          from_at: string | null
+          to_kind: string
+          to_company_contact_id: string | null
+          reason: string
+          done: string[]
+          carried: string[]
+          link_revoked: boolean
+          changed_by: string | null
+          changed_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          from_kind: string
+          from_company_contact_id?: string | null
+          from_by?: string | null
+          from_at?: string | null
+          to_kind: string
+          to_company_contact_id?: string | null
+          reason: string
+          done?: string[]
+          carried?: string[]
+          link_revoked?: boolean
+          changed_by?: string | null
+          changed_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          from_kind?: string
+          from_company_contact_id?: string | null
+          from_by?: string | null
+          from_at?: string | null
+          to_kind?: string
+          to_company_contact_id?: string | null
+          reason?: string
+          done?: string[]
+          carried?: string[]
+          link_revoked?: boolean
+          changed_by?: string | null
+          changed_at?: string
+        }
+        Relationships: []
+      }
       ai_requests: {
         Row: {
           created_at: string
@@ -12305,6 +12446,11 @@ export type Database = {
       }
       production_plan_actions: {
         Row: {
+          origin: string | null
+          done_at: string | null
+          done_by: string | null
+          done_by_contact_id: string | null
+          review: boolean
           approved_at: string | null
           approved_by: string | null
           blocking: boolean
@@ -12327,6 +12473,11 @@ export type Database = {
           title: string
         }
         Insert: {
+          origin?: string | null
+          done_at?: string | null
+          done_by?: string | null
+          done_by_contact_id?: string | null
+          review?: boolean
           approved_at?: string | null
           approved_by?: string | null
           blocking?: boolean
@@ -12349,6 +12500,11 @@ export type Database = {
           title: string
         }
         Update: {
+          origin?: string | null
+          done_at?: string | null
+          done_by?: string | null
+          done_by_contact_id?: string | null
+          review?: boolean
           approved_at?: string | null
           approved_by?: string | null
           blocking?: boolean
@@ -12672,6 +12828,8 @@ export type Database = {
       }
       production_quotes: {
         Row: {
+          number: number
+          loc_budget_cents: number | null
           amount_cents: number
           check_note: string | null
           checks: Json
@@ -12694,6 +12852,8 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          number?: number
+          loc_budget_cents?: number | null
           amount_cents: number
           check_note?: string | null
           checks?: Json
@@ -12716,6 +12876,8 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          number?: number
+          loc_budget_cents?: number | null
           amount_cents?: number
           check_note?: string | null
           checks?: Json
@@ -12874,6 +13036,13 @@ export type Database = {
       }
       production_sheets: {
         Row: {
+          ready_snapshot: Json | null
+          ready_forced_reason: string | null
+          direction_revision_reason: string | null
+          direction_revision_at: string | null
+          quote_revision_reason: string | null
+          quote_revision_by: string | null
+          quote_revision_at: string | null
           brief_updated_at: string | null
           brief_updated_by: string | null
           budget_envelope_cents: number | null
@@ -12929,6 +13098,13 @@ export type Database = {
           staging_intent: string | null
         }
         Insert: {
+          ready_snapshot?: Json | null
+          ready_forced_reason?: string | null
+          direction_revision_reason?: string | null
+          direction_revision_at?: string | null
+          quote_revision_reason?: string | null
+          quote_revision_by?: string | null
+          quote_revision_at?: string | null
           brief_updated_at?: string | null
           brief_updated_by?: string | null
           budget_envelope_cents?: number | null
@@ -12984,6 +13160,13 @@ export type Database = {
           staging_intent?: string | null
         }
         Update: {
+          ready_snapshot?: Json | null
+          ready_forced_reason?: string | null
+          direction_revision_reason?: string | null
+          direction_revision_at?: string | null
+          quote_revision_reason?: string | null
+          quote_revision_by?: string | null
+          quote_revision_at?: string | null
           brief_updated_at?: string | null
           brief_updated_by?: string | null
           budget_envelope_cents?: number | null
@@ -13162,6 +13345,9 @@ export type Database = {
       }
       production_shoots: {
         Row: {
+          rushes_url: string | null
+          rushes_url_at: string | null
+          rushes_url_contact_id: string | null
           audio_sources: boolean
           audio_sources_at: string | null
           audio_sources_by: string | null
@@ -13196,6 +13382,9 @@ export type Database = {
           video_rushes_by: string | null
         }
         Insert: {
+          rushes_url?: string | null
+          rushes_url_at?: string | null
+          rushes_url_contact_id?: string | null
           audio_sources?: boolean
           audio_sources_at?: string | null
           audio_sources_by?: string | null
@@ -13230,6 +13419,9 @@ export type Database = {
           video_rushes_by?: string | null
         }
         Update: {
+          rushes_url?: string | null
+          rushes_url_at?: string | null
+          rushes_url_contact_id?: string | null
           audio_sources?: boolean
           audio_sources_at?: string | null
           audio_sources_by?: string | null
@@ -16217,6 +16409,54 @@ export type Database = {
       }
     }
     Functions: {
+      set_production_rushes_by_link: {
+        Args: { p_token: string; p_url: string }
+        Returns: undefined
+      }
+      confirm_production_ready: {
+        Args: { p_force_reason: string | null; p_sheet_id: string; p_snapshot: Json }
+        Returns: undefined
+      }
+      replace_production_location: {
+        Args: { p_note_ids: string[]; p_option_id: string; p_reason: string; p_reviews: Json; p_revise_direction: boolean; p_revise_quote: boolean }
+        Returns: undefined
+      }
+      add_production_checklist_task: {
+        Args: { p_contact_id: string | null; p_due_date: string | null; p_person_id: string | null; p_sheet_id: string; p_title: string }
+        Returns: string
+      }
+      finish_production_action: {
+        Args: { p_action_id: string }
+        Returns: undefined
+      }
+      finish_production_action_by_link: {
+        Args: { p_action_id: string; p_token: string }
+        Returns: undefined
+      }
+      request_production_quote_changes: {
+        Args: { p_comment: string; p_quote_id: string }
+        Returns: undefined
+      }
+      request_production_quote_revision: {
+        Args: { p_reason: string; p_sheet_id: string }
+        Returns: undefined
+      }
+      propose_production_director_by_link: {
+        Args: { p_name: string; p_note: string | null; p_reel_url: string; p_token: string }
+        Returns: undefined
+      }
+      retain_production_director: {
+        Args: { p_proposal_id: string }
+        Returns: string
+      }
+      change_production_producer: {
+        Args: { p_carried: string[]; p_company_contact_id: string | null; p_done: string[]; p_organization: string; p_reason: string; p_revoke_link: boolean; p_sheet_id: string }
+        Returns: undefined
+      }
+      revoke_production_provider_link: {
+        Args: { p_contact_id: string; p_sheet_id: string }
+        Returns: undefined
+      }
       reopen_mix_version: {
         Args: { p_reason: string; p_version_id: string }
         Returns: undefined
@@ -16765,7 +17005,8 @@ export type Database = {
           p_note: string | null
           p_sheet_id: string
           p_url: string | null
-        }
+          p_loc_budget_cents?: number
+          }
         Returns: string
       }
       add_project_creative: {
@@ -17327,7 +17568,8 @@ export type Database = {
           p_note: string | null
           p_token: string
           p_url: string | null
-        }
+          p_loc_budget_cents?: number
+          }
         Returns: undefined
       }
       deposit_production_version: {

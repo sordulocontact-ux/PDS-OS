@@ -88,7 +88,9 @@ export async function loadLocations(
       constraints: o.constraints,
       verification: o.verification === "verified" ? "verified" : "to_verify",
       status:
-        o.status === "chosen" || o.status === "discarded"
+        o.status === "chosen" ||
+        o.status === "discarded" ||
+        o.status === "replaced"
           ? o.status
           : "candidate",
       decisionReason: o.decision_reason,

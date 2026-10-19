@@ -189,7 +189,17 @@ export function describeEvent(e: HistoryEvent, names: Names): string {
       return t.callSheet(num(a.number));
     case "link.sent":
       return t.link(names.holder(a.holder));
+    case "link.revoked":
+      return t.linkRevoked(
+        names.holder({ kind: "contact", id: str(a.contact) }),
+      );
     case "sheet.organized":
+      // Same organisation and company before and after: a role changed.
+      if (
+        b.organization === a.organization &&
+        (b.company ?? null) === (a.company ?? null)
+      )
+        return t.roles;
       return t.organized(
         a.organization === "internal" || a.organization === "external"
           ? a.organization

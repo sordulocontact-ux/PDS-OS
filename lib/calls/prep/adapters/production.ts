@@ -1,6 +1,9 @@
 import "server-only";
 
-import { productionCallTopics } from "@/lib/production/call-prep";
+import {
+  externalCallTopics,
+  productionCallTopics,
+} from "@/lib/production/call-prep";
 import { effectiveLogistics } from "@/lib/production/logistics";
 import { technicalCallTopics } from "@/lib/production/preprod/call-topics";
 import { loadPreprod } from "@/lib/production/preprod/queries";
@@ -46,6 +49,9 @@ export const productionAdapter: PrepAdapter = {
     const data = await sheetOf(access, projectId, target);
     if (!data) return { error: "not_found" };
     if (!data.canOrganize) return { error: fr.productionPrep.errors.forbidden };
+    // An external production: the four points of the call with the company.
+    if (data.sheet?.organization.kind === "external")
+      return { points: externalCallTopics() };
     return {
       points: productionCallTopics(data).map((x) => ({
         key: x.key,

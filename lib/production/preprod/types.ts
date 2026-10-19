@@ -141,6 +141,8 @@ export type CallItem = {
   status: CallItemStatus;
   source: "manual" | "call_report";
   sourceQuote: string | null;
+  // The report's line it comes from (the meeting's state per line).
+  sourceReportItemId: string | null;
   reviewedBy: string | null;
   reviewedAt: string | null;
 };
@@ -162,6 +164,13 @@ export type PlanAction = {
   note: string | null;
   // The step of the proposed plan it comes from (PROD-006), if any.
   templateKey: string | null;
+  // A task of the preproduction checklist (proto « Projet complet »):
+  // where it comes from (« checklist », « Saisie par … », « Changement de
+  // lieu du … »), when it was done and by whom, « À revoir ».
+  origin: string | null;
+  doneAt: string | null;
+  doneBy: string | null;
+  review: boolean;
 };
 
 export type Equipment = {
@@ -246,3 +255,8 @@ export type PreprodData = {
   // Quotes and rental captures, newest first (signed URLs).
   quotes: ProductionFile[];
 };
+
+/** A task of the preproduction checklist rather than of the call's plan. */
+export const isChecklistAction = (
+  a: Pick<PlanAction, "origin" | "templateKey">,
+) => a.origin !== null || Boolean(a.templateKey?.startsWith("checklist_"));

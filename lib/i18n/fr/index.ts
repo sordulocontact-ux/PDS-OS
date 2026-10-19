@@ -95,6 +95,12 @@ import { roles } from "./roles";
 import { stepTools } from "./step-tools";
 import { productionLocations } from "./production-locations";
 import { productionOrganization } from "./production-organization";
+import { productionChecklist } from "./production-checklist";
+import { productionDirector } from "./production-director";
+import { productionPlace } from "./production-place";
+import { productionProducer } from "./production-producer";
+import { productionReady } from "./production-ready";
+import { productionShootExternal } from "./production-shoot-external";
 import { productionHistory } from "./production-history";
 import { productionProvider } from "./production-provider";
 import { productionNext } from "./production-next";
@@ -207,6 +213,12 @@ export const fr = {
   productionLink,
   productionLocations,
   productionOrganization,
+  productionChecklist,
+  productionDirector,
+  productionPlace,
+  productionProducer,
+  productionReady,
+  productionShootExternal,
   productionCallSheetPage,
   marketing,
   marketingReview,

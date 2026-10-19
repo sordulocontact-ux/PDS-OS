@@ -1,8 +1,12 @@
-// The steps of each organisation (Ibé, 14/10), their state and who acts now.
-// Pure, client-safe; every state comes from recorded data, never from PO.
+// The steps of each organisation (Ibé, 14/10; proto « Projet complet »,
+// production.md § 1), their state, who executes, coordinates and validates,
+// and who acts now. Pure, client-safe; every state comes from recorded
+// data, never from PO.
 
+import { formatEuros } from "@/lib/budget/types";
 import { fr } from "@/lib/i18n/fr";
-import { nowOf } from "@/lib/ui/journey";
+import { type JourneyRole, nowOf } from "@/lib/ui/journey";
+import { formatShortDay } from "@/lib/utils/day";
 
 import { stepHref } from "./href";
 
@@ -15,106 +19,189 @@ import type {
 } from "./types";
 
 const t = fr.productionJourney;
+const r = t.roles;
 
 type Def = {
   key: StepKey;
   prereq: StepKey[];
-  owner: JourneyPerson | null;
-  ownerRole: string;
-  validator?: { person: JourneyPerson; role: string } | null;
+  roles: (JourneyRole | null)[];
   done: boolean;
   // Who acts now when the step is open.
   act: (() => JourneyActor | null) | null;
   summary: string | null;
 };
 
-const actor = (p: JourneyPerson | null, todo: string): JourneyActor | null =>
-  p ? { ...p, todo } : null;
+const actor = (
+  p: JourneyPerson | null,
+  todo: string,
+  kind: JourneyActor["kind"] = "do",
+): JourneyActor | null => (p ? { ...p, todo, kind } : null);
+
+const role = (
+  kind: JourneyRole["kind"],
+  p: JourneyPerson | null,
+  label: string,
+): JourneyRole | null =>
+  p ? { kind, name: p.name, role: label, viaLink: p.viaLink } : null;
 
 const SHOT = ["shot", "post", "final_check", "delivered", "handed_off"];
 const POSTED = ["final_check", "delivered", "handed_off"];
+// Steps that never open before their prerequisites are done.
+const LATER: readonly StepKey[] = ["shoot", "rushes", "post", "delivery"];
 
 export function journeySteps(input: JourneyInput): JourneyStep[] {
   const i = input;
-  const ext = i.kind === "external";
-  const kind = ext ? "external" : "internal";
-  // Past the preparation, its steps count as passed.
-  const passed =
-    i.opened &&
-    (i.readyAt !== null || !["to_prepare", "preproduction"].includes(i.phase));
-  const prep = (done: boolean) => done || (i.opened && passed);
+  // Before « Qui produit ? » is answered, the journey is that step alone
+  // (proto prodSteps): the rest depends on the answer.
+  const defs = i.kind === null ? [whoProduces(i)] : stepsOf(i);
+  const status = new Map<StepKey, JourneyStep["status"]>();
+  return defs.map((def) => {
+    const ready = def.prereq.every((p) => status.get(p) === "done");
+    // A step done, to review after a change elsewhere, stays passed for
+    // the next ones: nothing is blocked by a review (proto rule 14).
+    const rework = def.done && i.reworkSteps.includes(def.key);
+    const st: JourneyStep["status"] = rework
+      ? "rework"
+      : def.done
+        ? "done"
+        : ready
+          ? "current"
+          : LATER.includes(def.key)
+            ? "upcoming"
+            : "blocked";
+    status.set(def.key, def.done ? "done" : st);
+    const open = st === "current" || st === "rework";
+    return {
+      key: def.key,
+      href: stepHref(i.projectId, i.deliverableId, def.key),
+      title: titleOf(def.key, i),
+      why: whyOf(def.key, i),
+      status: st,
+      owner: null,
+      validator: null,
+      roles: def.roles.filter((x): x is JourneyRole => x !== null),
+      prereq: def.prereq,
+      next: defs.filter((x) => x.prereq.includes(def.key)).map((x) => x.key),
+      actor: open && def.act ? def.act() : null,
+      summary: def.summary,
+      blocked: i.blockedSteps.includes(def.key),
+    };
+  });
+}
 
-  const organisation: Def = {
+function whoProduces(i: JourneyInput): Def {
+  return {
     key: "organisation",
     prereq: [],
-    owner: i.owner,
-    ownerRole: t.roles.owner,
+    roles: [role("exec", i.owner, r.owner)],
     done: i.opened && i.kind !== null,
     act: () => actor(i.owner, t.todo.organize),
     summary: i.kind
-      ? ext
+      ? i.kind === "external"
         ? t.summary.organization.external(i.company?.name ?? "—")
         : t.summary.organization.internal
       : null,
   };
-  const callOwner = ext ? i.owner : i.producer;
+}
+
+function stepsOf(i: JourneyInput): Def[] {
+  const ext = i.kind === "external";
+  // Past the preparation, its steps count as passed.
+  const passed =
+    i.opened &&
+    (i.readyAt !== null || !["to_prepare", "preproduction"].includes(i.phase));
+  const prep = (done: boolean) => done || passed;
+  const owner = i.owner;
+  const producer = i.producer;
+  const exec = ext ? i.company : producer;
+
   const call: Def = {
     key: "call",
     prereq: [ext ? "organisation" : "direction"],
-    owner: callOwner,
-    ownerRole: ext ? t.roles.owner : i.producerRole,
-    done: prep(i.call.reported && i.call.proposed === 0),
+    roles: [
+      role("exec", owner, r.owner),
+      role("coord", ext ? null : producer, r.producer),
+    ],
+    done: prep(callDone(i)),
     act: () =>
       actor(
-        callOwner,
-        i.call.count === 0
-          ? t.todo.callPlan
-          : !i.call.reported
-            ? t.todo.callReport
-            : t.todo.callProposals,
+        owner,
+        i.mode === "call"
+          ? i.call.count === 0
+            ? t.todo.callPlan
+            : !i.call.reported
+              ? t.todo.callReport
+              : t.todo.callProposals
+          : i.mode === "import" && i.call.proposed + i.call.confirmed === 0
+            ? t.todo.importPlan
+            : t.todo.prepare,
       ),
-    summary: i.call.reported ? t.summary.calls(i.call.planned) : null,
+    summary:
+      i.call.heldOn && i.mode === "call"
+        ? t.summary.callOf(
+            formatShortDay(i.call.heldOn, { bare: true }),
+            i.call.confirmed,
+          )
+        : i.call.confirmed > 0
+          ? t.summary.tasks(i.call.confirmed)
+          : null,
   };
-  const depositor = ext ? i.company : i.producer;
+
+  const q = i.quote;
   const quote: Def = {
     key: "quote",
     prereq: [ext ? "call" : "gear"],
-    owner: i.producer,
-    ownerRole: i.producerRole,
-    validator: i.validator
-      ? { person: i.validator, role: t.roles.validator }
-      : null,
-    done: prep(i.quote.approved > 0),
+    roles: [
+      role("exec", exec, ext ? r.company : r.producer),
+      role("coord", producer, r.producer),
+      role("valid", i.validator, r.validator),
+    ],
+    done: prep(q.active !== null),
     act: () => {
-      switch (i.quote.status) {
+      switch (q.status) {
         case "deposited":
-          return actor(i.producer, t.todo.quoteCheck);
+          return actor(producer, t.todo.quoteCheck);
         case "submitted":
-          return actor(i.validator, t.todo.quoteDecide);
+          return actor(
+            i.validator,
+            t.todo.quoteDecide(q.number ?? 1),
+            "validate",
+          );
         case "rejected":
-          return actor(depositor, t.todo.quoteRedo);
+        case "changes":
+          return actor(exec, t.todo.quoteRedo);
+        case "approved":
+          return q.revision ? actor(exec, t.todo.quoteRedo) : null;
         default:
-          return actor(depositor, t.todo.quoteDeposit[kind]);
+          return actor(
+            exec,
+            t.todo.quoteDeposit[ext ? "external" : "internal"],
+          );
       }
     },
-    summary:
-      i.quote.approved > 0
-        ? t.summary.quote.approved
-        : i.quote.status
-          ? t.summary.quote[i.quote.status]
-          : null,
+    summary: q.active
+      ? t.summary.quote.approved(
+          q.active.number,
+          formatEuros(q.active.amountCents),
+        )
+      : q.status && q.status !== "replaced" && q.status !== "approved"
+        ? t.summary.quote[q.status]
+        : null,
   };
+
   const d = i.direction;
   const direction: Def = {
     key: "direction",
     prereq: [ext ? "quote" : "organisation"],
-    owner: i.director,
-    ownerRole: t.roles.director,
-    validator: { person: i.creative, role: t.roles.creative },
+    roles: [
+      role("exec", i.director, r.director),
+      role("coord", i.creative, r.creative),
+      role("valid", i.creative, r.creativeInt),
+    ],
     done: prep(d.status === "approved"),
     act: () =>
       d.status === "submitted"
-        ? actor(i.creative, t.todo.directionDecide)
+        ? actor(i.creative, t.todo.directionDecide, "validate")
         : i.director
           ? actor(
               i.director,
@@ -122,23 +209,36 @@ export function journeySteps(input: JourneyInput): JourneyStep[] {
                 ? t.todo.directionChanges
                 : t.todo.directionWrite,
             )
-          : actor(i.owner, t.todo.directionNobody),
+          : ext
+            ? i.directorProposals > 0
+              ? actor(owner, t.todo.directorRetain)
+              : actor(i.company, t.todo.directionNobody)
+            : actor(owner, t.todo.directionNobody),
     summary: d.status === "draft" ? null : t.summary.direction[d.status],
   };
+
   const followUp: Def = {
     key: "follow-up",
-    prereq: ["direction"],
-    owner: i.company,
-    ownerRole: t.roles.company,
-    done: prep(i.progress === 4),
-    act: () => actor(i.company, t.todo.progress),
-    summary: t.summary.progress(i.progress),
+    prereq: ["quote"],
+    roles: [
+      role("exec", i.company, r.company),
+      role("coord", producer, r.producer),
+    ],
+    done: prep(i.checklist.total > 0 && i.checklist.done === i.checklist.total),
+    act: () =>
+      i.checklist.companyOpen > 0
+        ? actor(i.company, t.todo.progressTasks(i.checklist.companyOpen))
+        : actor(producer, t.todo.progress),
+    summary:
+      i.checklist.total > 0
+        ? t.summary.progress(i.checklist.done, i.checklist.total)
+        : null,
   };
+
   const gear: Def = {
     key: "gear",
     prereq: ["call"],
-    owner: i.producer,
-    ownerRole: i.producerRole,
+    roles: [role("exec", producer, r.producer), role("coord", owner, r.owner)],
     done: prep(
       i.gear.lines > 0 &&
         i.gear.positions > 0 &&
@@ -146,22 +246,25 @@ export function journeySteps(input: JourneyInput): JourneyStep[] {
     ),
     act: () =>
       i.gear.lines === 0
-        ? actor(i.dop ?? i.producer, t.todo.gearList)
-        : actor(i.producer, t.todo.team),
+        ? actor(i.dop ?? producer, t.todo.gearList)
+        : actor(producer, t.todo.team),
     summary: i.gear.lines > 0 ? t.summary.gear(i.gear.lines) : null,
   };
-  const proposer = ext ? i.company : i.producer;
+
+  const proposer = ext ? i.company : producer;
   const locations: Def = {
     key: "locations",
     prereq: [ext ? "direction" : "call"],
-    owner: proposer,
-    ownerRole: ext ? t.roles.company : i.producerRole,
-    validator: { person: i.owner, role: t.roles.owner },
+    roles: [
+      role("exec", proposer, ext ? r.company : r.producer),
+      role("coord", producer, r.producer),
+      role("valid", owner, r.owner),
+    ],
     done: prep(i.locations.status === "confirmed"),
     act: () =>
       i.locations.candidates === 0
         ? actor(proposer, t.todo.locationsPropose)
-        : actor(i.owner, t.todo.locationsChoose),
+        : actor(owner, t.todo.locationsChoose),
     summary:
       i.locations.status === "confirmed"
         ? i.locations.name
@@ -169,40 +272,100 @@ export function journeySteps(input: JourneyInput): JourneyStep[] {
           ? t.summary.locations(i.locations.candidates)
           : null,
   };
+
   const callSheet: Def = {
     key: "call-sheet",
     prereq: ["locations", "quote"],
-    owner: i.producer,
-    ownerRole: i.producerRole,
+    roles: [role("exec", producer, r.producer), role("coord", owner, r.owner)],
     done: prep(i.callSheet.ready),
-    act: () => actor(i.producer, t.todo.callSheet),
+    act: () => actor(producer, t.todo.callSheet),
     summary: i.callSheet.published
       ? t.summary.callSheet(i.callSheet.published)
       : null,
   };
+
   const readiness: Def = {
     key: "readiness",
-    prereq: ext ? ["follow-up", "locations"] : ["call-sheet"],
-    owner: i.owner,
-    ownerRole: t.roles.owner,
+    prereq: ext ? ["quote", "direction", "locations"] : ["call-sheet"],
+    roles: [role("exec", owner, r.owner), role("coord", producer, r.producer)],
     done: passed,
-    act: () => actor(i.owner, t.todo.ready),
+    act: () => actor(owner, t.todo.ready),
     summary: i.readyAt ? t.summary.ready : null,
   };
-  const later = (key: StepKey, prereq: StepKey, done: boolean): Def => ({
-    key,
-    prereq: [prereq],
-    owner: null,
-    ownerRole: "",
-    done,
+
+  const shot = i.shotAt !== null || SHOT.includes(i.phase);
+  const shoot: Def = {
+    key: "shoot",
+    prereq: ["readiness"],
+    roles: [
+      role("exec", exec, ext ? r.company : r.producer),
+      role("coord", producer, r.producer),
+      role("valid", owner, r.owner),
+    ],
+    done: shot,
+    act: () => (ext ? actor(owner, t.todo.shootDone) : i.later),
+    summary: shot ? t.summary.shot : null,
+  };
+
+  const rushes: Def = {
+    key: "rushes",
+    prereq: ["shoot"],
+    roles: [
+      role("exec", i.company, r.company),
+      role("coord", producer, r.producer),
+    ],
+    done: (i.rushes.received && i.rushes.backup) || POSTED.includes(i.phase),
+    act: () =>
+      !i.rushes.linked
+        ? actor(i.company, t.todo.rushesLink)
+        : !i.rushes.received
+          ? actor(producer, t.todo.rushesReceived)
+          : actor(producer, t.todo.rushesBackup),
+    summary: i.rushes.received && i.rushes.backup ? t.summary.rushes : null,
+  };
+
+  const post: Def = {
+    key: "post",
+    prereq: [ext ? "rushes" : "shoot"],
+    roles: [
+      role("exec", exec, ext ? r.post : r.producer),
+      role("coord", i.creative, r.creative),
+      role("valid", i.creative, r.creativeInt),
+    ],
+    done: POSTED.includes(i.phase),
     act: () => i.later,
     summary: null,
-  });
+  };
 
-  const defs: Def[] = ext
-    ? [organisation, call, quote, direction, followUp, locations, readiness]
+  const delivery: Def = {
+    key: "delivery",
+    prereq: ["post"],
+    roles: [
+      role("exec", exec, ext ? r.post : r.producer),
+      role("coord", owner, r.owner),
+      role("valid", owner, r.owner),
+    ],
+    done: i.closed,
+    act: () => i.later,
+    summary: null,
+  };
+
+  return ext
+    ? [
+        whoProduces(i),
+        call,
+        quote,
+        direction,
+        followUp,
+        locations,
+        readiness,
+        shoot,
+        rushes,
+        post,
+        delivery,
+      ]
     : [
-        organisation,
+        whoProduces(i),
         direction,
         call,
         gear,
@@ -210,67 +373,56 @@ export function journeySteps(input: JourneyInput): JourneyStep[] {
         quote,
         callSheet,
         readiness,
+        shoot,
+        post,
+        delivery,
       ];
-  defs.push(
-    later("shoot", "readiness", SHOT.includes(i.phase)),
-    later("post", "shoot", POSTED.includes(i.phase)),
-    later("delivery", "post", i.closed),
-  );
+}
 
-  const status = new Map<StepKey, JourneyStep["status"]>();
-  return defs.map((def) => {
-    const ready = def.prereq.every((p) => status.get(p) === "done");
-    const st: JourneyStep["status"] = def.done
-      ? "done"
-      : ready
-        ? "current"
-        : // Preparation steps can be prepared ahead; the shoot cannot.
-          ["shoot", "post", "delivery"].includes(def.key)
-          ? "upcoming"
-          : "blocked";
-    status.set(def.key, st);
-    return {
-      key: def.key,
-      href: stepHref(i.projectId, i.deliverableId, def.key),
-      title: titleOf(def.key, i),
-      why: whyOf(def.key, i),
-      status: st,
-      owner: def.owner ? { name: def.owner.name, role: def.ownerRole } : null,
-      validator: def.validator
-        ? { name: def.validator.person.name, role: def.validator.role }
-        : null,
-      prereq: def.prereq,
-      next: defs.filter((x) => x.prereq.includes(def.key)).map((x) => x.key),
-      actor: st === "current" && def.act ? def.act() : null,
-      summary: def.summary,
-    };
-  });
+// The preparation is decided once PO's points (or the call's) are all
+// settled and at least one became a task.
+function callDone(i: JourneyInput): boolean {
+  const settled = i.call.proposed === 0 && i.call.confirmed > 0;
+  return i.mode === "call" ? i.call.reported && settled : settled;
 }
 
 export function titleOf(
   key: StepKey,
-  i: Pick<JourneyInput, "kind" | "company">,
+  i: Pick<JourneyInput, "kind" | "mode">,
 ): string {
-  const kind = i.kind === "external" ? "external" : "internal";
-  const s = t.steps;
+  const internal = i.kind === "internal";
+  const v = t.variants;
   switch (key) {
     case "call":
-      return s.call.title[kind];
+      return v.call[i.mode];
+    case "direction":
+      return internal ? v.internal.direction.title : t.steps.direction.title;
     case "quote":
-      return s.quote.title[kind];
-    case "follow-up":
-      return s["follow-up"].title(i.company?.name ?? t.roles.company);
+      return internal ? v.internal.quote.title : t.steps.quote.title;
+    case "post":
+      return internal ? v.internal.post.title : t.steps.post.title;
     default:
-      return s[key].title;
+      return t.steps[key].title;
   }
 }
 
 function whyOf(key: StepKey, i: JourneyInput): string {
-  const kind = i.kind === "external" ? "external" : "internal";
-  const s = t.steps;
-  if (key === "call") return s.call.why[kind];
-  if (key === "quote") return s.quote.why[kind];
-  return s[key].why;
+  const v = t.variants.internal;
+  if (i.kind !== "internal") return t.steps[key].why;
+  switch (key) {
+    case "call":
+      return v.call;
+    case "direction":
+      return v.direction.why;
+    case "quote":
+      return v.quote.why;
+    case "shoot":
+      return v.shoot;
+    case "post":
+      return v.post.why;
+    default:
+      return t.steps[key].why;
+  }
 }
 
 /** Where the viewer lands on the deliverable: their first own step, else
@@ -279,7 +431,7 @@ export function landingStep(steps: JourneyStep[]): StepKey {
   const { mine } = nowOf(steps);
   return (
     mine[0]?.key ??
-    steps.find((s) => s.status === "current")?.key ??
+    steps.find((s) => s.status === "current" || s.status === "rework")?.key ??
     steps.filter((s) => s.status === "done").at(-1)?.key ??
     "organisation"
   );
