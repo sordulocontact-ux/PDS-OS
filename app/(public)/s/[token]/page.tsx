@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { splitPortalCard } from "@/components/legal/splits/public-cards";
 import { PortalShell } from "@/components/portal/portal-shell";
 import {
   PortalSections,
   portalTitle,
 } from "@/components/portal/portal-sections";
-import { PublicSplit } from "@/components/legal/splits/public-split";
 import { fr } from "@/lib/i18n/fr";
 import { getPortalFrame } from "@/lib/portal/frame";
 import { getPublicSplit } from "@/lib/legal/splits/public";
@@ -36,32 +36,8 @@ export default async function SplitConfirmationPage({
         <p className="text-muted-foreground">{t.states[split.state]}</p>
       </PortalShell>
     );
-  const open = split.state === "open";
   const cards = [
-    {
-      id: "ps-split",
-      title: fr.portal.split.title(
-        open ? split.content.title : (frame?.project ?? ""),
-      ),
-      // A dispute waits for PDS; a confirmation is done.
-      state: open
-        ? ("todo" as const)
-        : split.state === "disputed"
-          ? ("waiting" as const)
-          : ("done" as const),
-      action: { label: fr.portal.split.action },
-      order: 1,
-      body: open ? (
-        <>
-          <p className="text-muted-foreground">
-            {t.intro(split.person, split.content.title, split.project)}
-          </p>
-          <PublicSplit token={token} split={split} />
-        </>
-      ) : (
-        <p className="font-medium">{t.states[split.state]}</p>
-      ),
-    },
+    splitPortalCard({ linkKey: token, split, project: frame?.project ?? "" }),
   ];
   return (
     <PortalShell

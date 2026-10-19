@@ -1,5 +1,6 @@
 import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
 import { PackagePreview } from "@/components/master-workflow/package-preview";
+import { ContactLinkOffer } from "@/components/portal/contact-links-section";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
@@ -234,6 +235,12 @@ export function RoundStep({
           expiresAt={link.expiresAt}
           daysLeft={link.daysLeft}
           canEdit={viewerIsOwner}
+        />
+      )}
+      {link && (
+        <ContactLinkOffer
+          projectId={view.projectId}
+          contactId={view.engineer?.id ?? null}
         />
       )}
       <EngineerThreadSection view={view} />

@@ -7,6 +7,7 @@ import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { TOKEN } from "@/lib/production/provider/public";
 import { createClient } from "@/lib/supabase/server";
+import { linkKeyArgs, linkKeyPath } from "@/lib/portal/link-key";
 
 const schema = z.object({
   token: z.string().regex(TOKEN),
@@ -26,7 +27,7 @@ export async function setRushesByLink(
     return { ok: false, error: fr.productionLink.rushes.errors.url };
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_production_rushes_by_link", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_url: parsed.data.url,
   });
   if (error) {
@@ -37,6 +38,6 @@ export async function setRushesByLink(
     return { ok: false, error: e.failed };
   }
   await schedulePendingPushes();
-  revalidatePath(`/p/${parsed.data.token}`);
+  revalidatePath(linkKeyPath("p", parsed.data.token));
   return { ok: true };
 }

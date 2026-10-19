@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { influencePortalCards } from "@/components/activations/influence/public-cards";
 import { PortalShell } from "@/components/portal/portal-shell";
 import {
   PortalSections,
   portalTitle,
 } from "@/components/portal/portal-sections";
-import { creatorCard } from "@/components/activations/influence/creator-collaboration";
-import { PublicAgreement } from "@/components/activations/influence/public-agreement";
 import { getCreatorCollaboration } from "@/lib/activations/influence/creator-link";
 import { getPublicAgreement } from "@/lib/activations/influence/public";
 import { fr } from "@/lib/i18n/fr";
@@ -42,47 +41,7 @@ export default async function InfluenceAgreementPage({
     agreement.state === "accepted"
       ? await getCreatorCollaboration(token)
       : null;
-  const step = collab ? creatorCard(token, collab) : null;
-  const open = agreement.state === "open";
-  const cards = [
-    ...(step
-      ? [
-          {
-            id: "ps-collaboration",
-            title: step.title,
-            state: step.state,
-            action: { label: step.title },
-            order: 2,
-            body: step.body,
-          },
-        ]
-      : []),
-    {
-      id: "ps-agreement",
-      title: fr.portal.influence.title,
-      state: open
-        ? ("todo" as const)
-        : agreement.state === "change_requested"
-          ? ("waiting" as const)
-          : ("done" as const),
-      action: { label: fr.portal.influence.action },
-      order: 1,
-      body: open ? (
-        <>
-          <p className="text-muted-foreground">
-            {t.intro(
-              agreement.content.creator,
-              agreement.content.campaign,
-              agreement.content.project,
-            )}
-          </p>
-          <PublicAgreement token={token} agreement={agreement} />
-        </>
-      ) : (
-        <p className="font-medium">{t.states[agreement.state]}</p>
-      ),
-    },
-  ];
+  const cards = influencePortalCards({ linkKey: token, agreement, collab });
   return (
     <PortalShell
       frame={frame}

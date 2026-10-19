@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { formPortalCard } from "@/components/legal/forms/public-cards";
 import { PortalShell } from "@/components/portal/portal-shell";
 import {
   PortalSections,
   portalTitle,
 } from "@/components/portal/portal-sections";
-import { PublicForm } from "@/components/legal/forms/public-form";
-import {
-  DataUseNote,
-  RequesterNote,
-} from "@/components/legal/forms/requester-note";
 import { fr } from "@/lib/i18n/fr";
 import { getPortalFrame } from "@/lib/portal/frame";
 import { getPublicForm, noteFormOpened } from "@/lib/legal/forms/public";
@@ -39,37 +35,7 @@ export default async function LegalFormPage({
         <p className="text-muted-foreground">{t.states[form.state]}</p>
       </PortalShell>
     );
-  const open = form.state === "open";
-  const cards = [
-    {
-      id: "ps-form",
-      title: fr.portal.form.title,
-      state: open ? ("todo" as const) : ("done" as const),
-      action: { label: fr.portal.form.action },
-      order: 1,
-      body: open ? (
-        <>
-          <p className="text-muted-foreground">
-            {t.intro(form.person, form.project, form.requester.organization)}
-          </p>
-          <PublicForm
-            token={token}
-            prefillRoles={form.prefill.roles}
-            // Their own earlier answers win over what the project knows.
-            known={{ ...form.prefill.answers, ...form.known }}
-            requester={form.requester}
-          />
-          <RequesterNote requester={form.requester} />
-          <DataUseNote requester={form.requester} />
-        </>
-      ) : (
-        <>
-          <p className="font-medium">{t.states[form.state]}</p>
-          <RequesterNote requester={form.requester} />
-        </>
-      ),
-    },
-  ];
+  const cards = [formPortalCard({ linkKey: token, form })];
   return (
     <PortalShell
       frame={frame}

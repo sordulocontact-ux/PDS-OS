@@ -8,6 +8,7 @@ import { schedulePendingPushes } from "@/lib/notifications/push";
 import { TOKEN } from "@/lib/production/provider/public";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 import { createClient } from "@/lib/supabase/server";
+import { linkKeyArgs, linkKeyPath } from "@/lib/portal/link-key";
 
 // The provider's part of the journey, from their link, without an account:
 // the database checks the token, the role and the stage.
@@ -27,7 +28,7 @@ function failure(message: string | undefined): Result {
 }
 async function done(t: string): Promise<Result> {
   await schedulePendingPushes();
-  revalidatePath(`/p/${t}`);
+  revalidatePath(linkKeyPath("p", t));
   return { ok: true };
 }
 const https = z
@@ -70,7 +71,7 @@ export async function depositQuoteByLink(
     return { ok: false, error: fr.productionQuotes.errors.locOver };
   const supabase = await createClient();
   const { error } = await supabase.rpc("deposit_production_quote_by_link", {
-    p_token: p.token,
+    ...linkKeyArgs(p.token),
     p_label: p.label,
     p_amount_cents: cents,
     p_loc_budget_cents: loc,
@@ -93,7 +94,7 @@ export async function setProgressByLink(
   if (!parsed.success) return failure("invalid");
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_production_progress_by_link", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_key: parsed.data.key,
     p_done: parsed.data.done,
   });
@@ -121,7 +122,7 @@ export async function proposeLocationByLink(
   const p = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("propose_production_location_by_link", {
-    p_token: p.token,
+    ...linkKeyArgs(p.token),
     p_name: p.name,
     p_address: p.address || null,
     p_price_cents: p.price ? (parseEurosToCents(p.price) ?? null) : null,
@@ -146,7 +147,7 @@ export async function submitDirectionByLink(
   const p = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_production_direction_by_link", {
-    p_token: p.token,
+    ...linkKeyArgs(p.token),
     p_staging_intent: p.stagingIntent,
     p_run_of_show: p.runOfShow,
     p_references_note: p.references,
@@ -178,7 +179,7 @@ export async function addGearByLink(
   if (lines.length === 0) return { ok: false, error: e.lines };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("add_production_gear_by_link", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_lines: lines,
   });
   if (error) return failure(error.message);

@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { SPLIT_ROLES } from "@/lib/legal/splits/shares";
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 /** A split confirmation as its public page sees it, read through
  * get_split_confirmation(token): the database checks the token, its expiry,
@@ -34,14 +35,14 @@ const publicSchema = z.discriminatedUnion("state", [
 
 export type PublicSplit = z.infer<typeof publicSchema>;
 
-const TOKEN = /^[0-9a-f]{64}$/;
+const TOKEN = LINK_KEY;
 
 export const getPublicSplit = cache(
   async (token: string): Promise<PublicSplit | null> => {
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("get_split_confirmation", {
-      p_token: token,
+      ...linkKeyArgs(token),
     });
     if (error) {
       console.error("getPublicSplit:", error.message);

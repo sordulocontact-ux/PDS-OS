@@ -26,6 +26,8 @@ type Props = {
   // The creative side (responsable créatif, validation créative interne).
   creativeName?: string | null;
   history?: RoleHistoryLine[];
+  // Each person's page by project (lot 11), given by the server page.
+  personLinks?: React.ReactNode;
 };
 
 /**
@@ -50,7 +52,9 @@ export function WhoDoesWhat(props: Props) {
 
 export function ProductionWhoDoesWhatButton(props: Props) {
   const panel = productionRoles(props);
-  return panel ? <WhoDoesWhatButton {...panel} /> : null;
+  return panel ? (
+    <WhoDoesWhatButton {...panel} personLinks={props.personLinks} />
+  ) : null;
 }
 
 function productionRoles({

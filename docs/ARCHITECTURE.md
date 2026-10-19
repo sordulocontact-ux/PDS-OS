@@ -2309,8 +2309,52 @@ date de sortie de la Stratégie, NDA : à décider).
   (`get_production_link_journey` remplacée, migration `20261018400101`). Revue des autres liens
   (18/10/2026) : `/m` (dossier sans tarif du Brief), `/f`, `/s` (parts), `/i` (le cachet du créateur,
   qui est son propre tarif), `/fs`, `/d` (`assertNoBudget`) ne portent aucun montant interne.
-- À venir (lot 11) : un lien par personne et par projet qui réunit les cartes de chaque workflow
-  (`PortalSections` les range déjà sous un intertitre par workflow).
+- Lot 11 (ci-dessous) : un lien par personne et par projet réunit les cartes de chaque workflow.
+
+### Une page privée par personne et par projet (lot 11, 19/10/2026)
+
+- **Table** `project_contact_links` (migration `20261019110101`) : projet, contact, n° du lien, empreinte
+  SHA-256 du jeton **et** jeton chiffré avec le mécanisme du Master (pgcrypto, clé Vault
+  `master_link_key`, pas de troisième mécanisme) pour que le responsable le recopie
+  (`contact_link_token`, responsable seul). Un seul lien actif par (projet, contact) (index unique
+  partiel) ; `issue_contact_link` (responsable du projet, révoque l'ancien « replaced »),
+  `revoke_contact_link` (motif obligatoire), `mark_contact_link_sent` (l'e-mail n'est pas envoyé par
+  PDS OS), `note_contact_link_opened` (ouvertures comptées). RLS forcée, lecture `can_see_project` sans
+  les colonnes du jeton, `anon` ne lit jamais la table. Dans `delete_project_row`.
+- **Objets de la personne** : `contact_page_items(project, contact)` (interne) liste, avec état calculé
+  (`todo` / `waiting` / `done`), échéance et étape : envois du Master (le dernier d'une suite), fiches et
+  confirmations de répartition du Juridique, liens prestataire de la Production, accords d'influence,
+  invitations aux calls (`call_guests`) avec le dernier résumé reçu (`call_summaries` dont les
+  destinataires portent son `contact_id`). Un call de production est déjà sur les cartes du lien
+  prestataire : il n'est pas répété. Le workflow d'un call : `call_workflow` (Master par
+  `master_brief_calls`, Marketing par production / conception / stratégie, sinon Cadrage).
+  `get_contact_page(token)` (anon) rend le cadre (projet, artiste, format, personne, ses rôles,
+  responsable) et cette liste ; un lien révoqué ou expiré ne rend que son état.
+  `project_link_contacts(project)` sert « Liens privés » (personnes, nombre d'objets, à faire hors
+  invitations).
+- **Surcharges** (migration `20261019110201`, générée depuis les définitions en vigueur) : chaque
+  fonction publique d'un lien privé `F(p_token, …)` (Master, fiche, répartition, influence,
+  prestataire : 37 fonctions et 5 aides) devient `_F_h(p_link_hash, …)` (corps inchangé, interne),
+  `F(p_token, …)` (même signature, les liens déjà envoyés marchent) et
+  `F(p_contact_token, p_item_id, …)` : `contact_item_hash` vérifie le lien de la personne et que l'objet
+  est à ce contact, dans ce projet, puis le même corps s'exécute. Les surcharges n'ont aucun défaut
+  (toujours un argument de plus que l'original : jamais d'ambiguïté). **Toute modification future
+  d'une de ces fonctions se fait dans son `_F_h`.**
+- **Côté code** : une vue publique reçoit une **clé de lien** (`lib/portal/link-key.ts`) : le jeton de
+  l'objet, ou `<jeton de la personne>~<id de l'objet>` ; `linkKeyArgs` donne les arguments RPC,
+  `linkKeyPath` la page à revalider (`/m/…` ou `/c/…`). Les cartes de chaque page sont construites une
+  fois (`masterPortalCards`, `formPortalCard`, `splitPortalCard`, `influencePortalCards`,
+  `providerPortalCards`) et posées par leur lien et par `/c/[token]` (`loadContactCards`), qui ajoute
+  `callPortalCard`. Ouvrir la page marque chaque objet ouvert, comme son lien.
+- **Côté app** : « Qui fait quoi » du Master et de la Production, section « Liens privés »
+  (`ContactLinksSection`, « Une page par personne » sous les liens du module) ; à côté du lien du
+  Master et de la fiche de renseignements, `ContactLinkOffer`. Gestes (responsable) : « Créer le
+  lien », « Copier le lien », « Marquer comme envoyé », « Nouveau lien », « Révoquer » avec motif.
+- **Décisions** : expiration 180 jours (1 à 365) ; un objet dont le propre lien est fermé (expiré,
+  remplacé) n'apparaît pas sur la page de la personne (mêmes règles que son lien) ; une invitation à
+  un call à venir trie avec « À vous » mais n'est pas une action (pastille « Invité », h1 « Votre
+  prochain rendez-vous avec PDS » s'il n'y a rien d'autre) ; les calls du Cadrage ont leur intertitre
+  « Cadrage » avant Master, Juridique, Marketing, Distribution (seul ordre que le proto ne dit pas).
 
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 

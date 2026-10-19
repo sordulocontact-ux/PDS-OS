@@ -22,6 +22,7 @@ export function PortalCard({
   id,
   title,
   state,
+  badge,
   action,
   className,
   children,
@@ -29,6 +30,8 @@ export function PortalCard({
   id: string;
   title: string;
   state: PortalCardState;
+  // The pill's words when they are not the state's (« Invité »).
+  badge?: string;
   action?: PortalAction | null;
   className?: string;
   children?: React.ReactNode;
@@ -38,7 +41,7 @@ export function PortalCard({
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <h2 className="text-display-sm font-medium text-balance">{title}</h2>
         <StatusBadge size="sm" tone={TONE[state]}>
-          {t.states[state]}
+          {badge ?? t.states[state]}
         </StatusBadge>
       </div>
       {action && state === "todo" && (

@@ -529,6 +529,17 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
 - R5 : notifications (migration `20261019070101` à pousser en prod avec accord), Maintenant / Travail /
   Validations par le parcours.
 
+## Lot 11 — Une page privée par personne et par projet (19/10/2026, branche `pc/z11-portal`)
+
+- `project_contact_links` (un lien actif par personne et par projet, jeton recopiable par le responsable),
+  `get_contact_page` pour `anon`, surcharges (jeton de la personne + id de l'objet) des 37 fonctions
+  publiques des liens privés, signatures existantes intactes.
+- Page `/c/[token]` : cartes du Master, du Juridique, du Marketing (créatrice, prestataire, calls) sous un
+  intertitre par workflow, résumé si plusieurs actions, « Votre contact chez PDS ».
+- « Liens privés » de « Qui fait quoi » (Master, Production) et à côté des liens du Master et de la fiche.
+- Migrations `20261019110101`, `20261019110201` à pousser en prod avec accord ; pgTAP
+  `contact-links.test.sql` (25).
+
 ## Lot 6 — Activations sur une seule page (19/10/2026, branche `pc/z6-activations`)
 
 - Page unique du proto : liste à frise et filtres, activation ouverte avec « Maintenant » (geste en place),

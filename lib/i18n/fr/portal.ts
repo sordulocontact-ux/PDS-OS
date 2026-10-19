@@ -53,7 +53,39 @@ export const portal = {
     post: "Votre postproduction",
   },
   closed: "Ce lien n'est plus valable",
+  // The person's page by project (lot 11, /c).
+  page: {
+    title: "Votre page PDS",
+    closed: {
+      revoked:
+        "Ce lien a été remplacé ou révoqué. Demandez le nouveau à votre contact chez PDS.",
+      expired:
+        "Ce lien a expiré. Demandez-en un nouveau à votre contact chez PDS.",
+    },
+  },
+  // A call the person is invited to (proto portalCalls).
+  call: {
+    invited: "Invité",
+    when: "Quand",
+    whenValue: (day: string, hour: string) => `${day} à ${hour}`,
+    where: "Où",
+    visio: "visio",
+    atPds: "Chez PDS",
+    participants: "Participants",
+    agenda: "Ordre du jour",
+    invitedBy: (who: string | null, day: string) =>
+      who
+        ? `Invitation envoyée par ${who} ${day}.`
+        : `Invitation envoyée ${day}.`,
+    held: (title: string, day: string) => `${title} du ${day}`,
+    summary: "Résumé de la réunion",
+    summaryBy: (who: string | null, at: string, version: number) =>
+      `Envoyé${who ? ` par ${who}` : ""} le ${at}${version > 1 ? ` · version ${version}` : ""}.`,
+    pending:
+      "PDS confirme les suites du call ; ce qui vous concerne apparaîtra ici.",
+  },
   workflows: {
+    framing: "Cadrage",
     master: "Master",
     legal: "Juridique",
     marketing: "Marketing",

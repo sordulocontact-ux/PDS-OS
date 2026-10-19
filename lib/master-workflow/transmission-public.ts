@@ -10,6 +10,7 @@ import { z } from "zod";
 
 import { masterPackageSchema } from "@/lib/master-workflow/transmission-types";
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 /** The package as its public page sees it, read through
  * get_master_transmission(token): the database checks the token, its
@@ -84,7 +85,7 @@ const publicSchema = z.discriminatedUnion("state", [
 
 export type PublicPackage = z.infer<typeof publicSchema>;
 
-export const TOKEN = /^[0-9a-f]{64}$/;
+export const TOKEN = LINK_KEY;
 
 /** Null when the token is malformed or unknown. */
 export const getPublicPackage = cache(
@@ -92,7 +93,7 @@ export const getPublicPackage = cache(
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("get_master_transmission", {
-      p_token: token,
+      ...linkKeyArgs(token),
     });
     if (error) {
       console.error("getPublicPackage:", error.message);
@@ -113,7 +114,7 @@ export async function noteOpened(token: string): Promise<void> {
   if (!TOKEN.test(token)) return;
   const supabase = await createClient();
   const { error } = await supabase.rpc("note_master_transmission_opened", {
-    p_token: token,
+    ...linkKeyArgs(token),
   });
   if (error) console.error("noteOpened:", error.message);
 }
@@ -125,7 +126,7 @@ export async function getEngineerThread(
   if (!TOKEN.test(token)) return [];
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_master_engineer_messages", {
-    p_token: token,
+    ...linkKeyArgs(token),
   });
   if (error) console.error("getEngineerThread:", error.message);
   return (data ?? []).map((m) => ({

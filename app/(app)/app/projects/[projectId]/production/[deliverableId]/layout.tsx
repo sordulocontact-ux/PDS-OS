@@ -1,5 +1,6 @@
 import { ProjectHeader } from "@/components/projects/project-header";
 import { DeliverableBar } from "@/components/production/journey/deliverable-bar";
+import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { ProductionWhoDoesWhatButton } from "@/components/production/journey/who-does-what";
 import {
   SheetKindBadge,
@@ -84,6 +85,12 @@ export default async function ProductionSheetLayout({
               creativeName={creativeName}
               canOrganize={data.canOrganize}
               history={history}
+              personLinks={
+                <ContactLinksSection
+                  projectId={projectId}
+                  sub={Object.keys(links).length > 0}
+                />
+              }
             />
           </>
         }

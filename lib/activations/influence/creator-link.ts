@@ -4,6 +4,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 /**
  * The collaboration as the creator's private link shows it once « Bon pour
@@ -63,10 +64,10 @@ export type CreatorCollaboration = z.infer<typeof schema>;
 
 export const getCreatorCollaboration = cache(
   async (token: string): Promise<CreatorCollaboration | null> => {
-    if (!/^[0-9a-f]{64}$/.test(token)) return null;
+    if (!LINK_KEY.test(token)) return null;
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("get_influence_collaboration", {
-      p_token: token,
+      ...linkKeyArgs(token),
     });
     if (error) {
       console.error("getCreatorCollaboration:", error.message);

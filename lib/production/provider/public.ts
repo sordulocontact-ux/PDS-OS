@@ -4,12 +4,13 @@ import { cache } from "react";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 // The provider's space as its public page sees it, read through
 // get_production_provider_space(token): the database checks the token, its
 // expiry and its replacement by a newer link (PROD-026).
 
-export const TOKEN = /^[0-9a-f]{64}$/;
+export const TOKEN = LINK_KEY;
 
 const text = z.string().nullable();
 
@@ -103,7 +104,7 @@ export const getProviderSpace = cache(
     const supabase = await createClient();
     const { data, error } = await supabase.rpc(
       "get_production_provider_space",
-      { p_token: token },
+      linkKeyArgs(token),
     );
     if (error) {
       console.error("getProviderSpace:", error.message);
@@ -125,7 +126,7 @@ export async function noteProviderOpened(token: string): Promise<void> {
   if (!TOKEN.test(token)) return;
   const supabase = await createClient();
   const { error } = await supabase.rpc("note_production_provider_opened", {
-    p_token: token,
+    ...linkKeyArgs(token),
   });
   if (error) console.error("noteProviderOpened:", error.message);
 }
@@ -161,7 +162,7 @@ export async function getProviderLocations(
   const supabase = await createClient();
   const { data, error } = await supabase.rpc(
     "get_production_provider_locations",
-    { p_token: token },
+    linkKeyArgs(token),
   );
   if (error) console.error("getProviderLocations:", error.message);
   const parsed = locationsSchema.safeParse(data);

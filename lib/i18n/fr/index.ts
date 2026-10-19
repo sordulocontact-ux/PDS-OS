@@ -91,6 +91,7 @@ import { productionDirection } from "./production-direction";
 import { productionJourney } from "./production-journey";
 import { productionLink } from "./production-link";
 import { portal } from "./portal";
+import { contactLinks } from "./contact-links";
 import { roles } from "./roles";
 import { stepTools } from "./step-tools";
 import { productionLocations } from "./production-locations";
@@ -279,4 +280,5 @@ export const fr = {
   stepTools,
   roles,
   portal,
+  contactLinks,
 } as const;

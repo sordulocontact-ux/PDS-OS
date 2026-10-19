@@ -14,6 +14,7 @@ import {
 } from "@/lib/production/prep-result";
 import { TOKEN } from "@/lib/production/provider/public";
 import { createClient } from "@/lib/supabase/server";
+import { linkKeyArgs, linkKeyPath } from "@/lib/portal/link-key";
 
 const t = fr.productionChecklist;
 
@@ -95,7 +96,7 @@ export async function finishTaskByLink(
   if (!parsed.success) return { ok: false, error: e.failed };
   const supabase = await createClient();
   const { error } = await supabase.rpc("finish_production_action_by_link", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_action_id: parsed.data.actionId,
   });
   if (error) {
@@ -106,6 +107,6 @@ export async function finishTaskByLink(
     console.error("finishTaskByLink:", error.message);
     return { ok: false, error: e.failed };
   }
-  revalidatePath(`/p/${parsed.data.token}`);
+  revalidatePath(linkKeyPath("p", parsed.data.token));
   return { ok: true };
 }

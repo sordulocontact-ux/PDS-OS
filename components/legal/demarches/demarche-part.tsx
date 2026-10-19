@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ClearanceBody } from "@/components/legal/clearance/clearance-drawer";
+import { ContactLinkOffer } from "@/components/portal/contact-links-section";
 import { FormalityCard } from "@/components/legal/formalities/formality-card";
 import { ContractPanel } from "@/components/legal/tracking/contract-panel";
 import { FichePanel } from "@/components/legal/tracking/fiche-panel";
@@ -35,11 +36,19 @@ export function DemarchePart({
   switch (panel.kind) {
     case "fiche":
       return (
-        <FichePanel
-          projectId={projectId}
-          projectTitle={projectTitle}
-          row={panel.row}
-        />
+        <>
+          <FichePanel
+            projectId={projectId}
+            projectTitle={projectTitle}
+            row={panel.row}
+          />
+          {panel.row.link && (
+            <ContactLinkOffer
+              projectId={projectId}
+              contactId={panel.row.contactId}
+            />
+          )}
+        </>
       );
     case "contract":
       return (

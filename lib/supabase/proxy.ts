@@ -7,7 +7,8 @@ import type { Database } from "@/lib/supabase/database.types";
 
 // Paths that never need a session: public smartlinks, fiches de
 // renseignements, the Master's packages, the Production providers' spaces (/p/) and the creators' express agreements
-// (/i/ : their token is checked by the database), the shared strategy documents (/d/) and the cron job
+// (/i/ : their token is checked by the database), a person's page by project (/c/), the shared
+// strategy documents (/d/) and the cron job
 // (authenticated by its own secret). Skipping them saves an auth round trip.
 const SESSIONLESS_PREFIXES = [
   "/l/",
@@ -18,6 +19,7 @@ const SESSIONLESS_PREFIXES = [
   "/s/",
   "/d/",
   "/i/",
+  "/c/",
   "/api/cron/",
 ];
 

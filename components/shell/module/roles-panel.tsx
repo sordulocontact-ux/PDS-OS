@@ -33,17 +33,20 @@ export type RolesPanelProps = {
   roles: RoleRow[];
   links?: PrivateLinkRow[];
   history?: RoleHistoryLine[];
+  // Each person's page by project (lot 11, `ContactLinksSection`).
+  personLinks?: React.ReactNode;
 };
 
 /**
  * « Qui fait quoi » (proto BODY.org): each role with its kind (Exécute,
- * Coordonne, Valide) and holder, then the private links, then the changes
- * of role. Shown in a step or in `RolesDialog`.
+ * Coordonne, Valide) and holder, then the private links (the module's,
+ * then each person's page by project), then the changes of role. Shown in a step or in `RolesDialog`.
  */
 export function RolesPanel({
   roles,
   links = [],
   history = [],
+  personLinks,
 }: RolesPanelProps) {
   const count = new Map<string, number>();
   for (const r of roles)
@@ -114,7 +117,11 @@ export function RolesPanel({
           </ul>
         </section>
       )}
-      {links.length > 0 && <PrivateLinks links={links} />}
+      {links.length > 0 ? (
+        <PrivateLinks links={links}>{personLinks}</PrivateLinks>
+      ) : (
+        personLinks
+      )}
     </div>
   );
 }
