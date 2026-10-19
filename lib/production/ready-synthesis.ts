@@ -5,8 +5,13 @@ import { fr } from "@/lib/i18n/fr";
 import { effectiveLogistics } from "@/lib/production/logistics";
 import { placeFit } from "@/lib/production/place";
 import type { PreprodData } from "@/lib/production/preprod/types";
+import {
+  proposalState,
+  type ProposalVersion,
+} from "@/lib/production/proposal/model";
 import type { ProductionQuote } from "@/lib/production/quotes/queries";
 import type { ReadyRow } from "@/lib/production/ready-rows";
+import { hourFr, type ScheduleDecision } from "@/lib/production/schedule/model";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 import type { StepTools } from "@/lib/step-tools/queries";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
@@ -25,8 +30,14 @@ export function readySynthesis({
   quotes,
   place,
   tools,
+  proposal = [],
+  schedule = null,
 }: {
   data: ProductionSheetData;
+  // The proposal's versions (external, PR-11), newest first.
+  proposal?: ProposalVersion[];
+  // The decision of date and hours in force (proto: without one, not ready).
+  schedule?: ScheduleDecision | null;
   preprod: PreprodData;
   quotes: ProductionQuote[];
   place: { name: string; priceCents: number | null } | null;
@@ -76,6 +87,26 @@ export function readySynthesis({
   const revising =
     Boolean(sheet.quoteRevision) || (quotes[0] && quotes[0] !== active);
   const d = sheet.organization.direction.status;
+  const pr = proposalState(proposal, Boolean(sheet.directionRevision));
+  const directionRow: ReadyRow = pr.retained
+    ? {
+        key: "direction",
+        label: t.rows.direction,
+        value:
+          v.proposal(pr.retained.number) + (pr.rework ? v.proposalNext : ""),
+        ok: !pr.rework,
+      }
+    : {
+        key: "direction",
+        label: t.rows.direction,
+        value:
+          d === "approved"
+            ? sheet.directionRevision
+              ? v.directionRevising
+              : v.direction
+            : v.noDirection,
+        ok: d === "approved" && !sheet.directionRevision,
+      };
   return [
     {
       key: "place",
@@ -85,12 +116,26 @@ export function readySynthesis({
         : v.noPlace,
       ok: Boolean(place) && !(fit && !fit.ok),
     },
-    {
-      key: "date",
-      label: t.rows.date,
-      value: shoot ? v.shootOn(formatDay(shoot)) : v.noDate(owner),
-      ok: Boolean(shoot),
-    },
+    schedule
+      ? {
+          key: "date",
+          label: t.rows.date,
+          value:
+            fr.productionSchedule.text(
+              formatDay(schedule.date),
+              hourFr(schedule.start),
+              hourFr(schedule.end),
+            ) + fr.productionSchedule.decidedBy(schedule.by ?? owner),
+          ok: true,
+        }
+      : {
+          key: "date",
+          label: t.rows.date,
+          value: shoot
+            ? `${v.shootOn(formatDay(shoot))} · ${fr.productionSchedule.none(owner)}`
+            : fr.productionSchedule.none(owner),
+          ok: false,
+        },
     task("crew", t.rows.crew, "crew"),
     task("schedule", t.rows.plan, "plan"),
     task("gear", t.rows.gear, "gear"),
@@ -103,17 +148,7 @@ export function readySynthesis({
         : v.noQuote,
       ok: Boolean(active) && !revising,
     },
-    {
-      key: "direction",
-      label: t.rows.direction,
-      value:
-        d === "approved"
-          ? sheet.directionRevision
-            ? v.directionRevising
-            : v.direction
-          : v.noDirection,
-      ok: d === "approved" && !sheet.directionRevision,
-    },
+    directionRow,
     {
       key: "blockers",
       label: t.rows.blockers,

@@ -25,6 +25,7 @@ export const roles = {
     post: "Postproduction",
     creative: "Responsable créatif",
     creativeInt: "Validation créative interne",
+    creativeExt: "Validation créative externe",
     member: "Compte PDS",
   },
   distribution: {

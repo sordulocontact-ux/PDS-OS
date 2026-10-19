@@ -12,6 +12,11 @@ import { callSheetEvidence } from "@/lib/production/preprod/readiness";
 import { loadQuotes } from "@/lib/production/quotes/queries";
 import { readySynthesis } from "@/lib/production/ready-synthesis";
 import { loadStepTools } from "@/lib/step-tools/queries";
+import { loadProposalVersions } from "@/lib/production/proposal/queries";
+import { loadScheduleDecisions } from "@/lib/production/schedule/queries";
+import { ScheduleButton } from "@/components/production/schedule/schedule-button";
+import { hourFr } from "@/lib/production/schedule/model";
+import { formatDay, formatShortInstant } from "@/lib/utils/day";
 import { createClient } from "@/lib/supabase/server";
 
 const r = fr.productionReady;
@@ -50,7 +55,13 @@ export default async function ProductionReadinessStepPage({
     </ProductionStepPanel>
   );
   if (sheet.organization.kind === "external") {
-    if (sheet.readyAt && sheet.readySnapshot)
+    // A change of date after the confirmation: to confirm again (rule 14).
+    const rework = Boolean(
+      sheet.readyAt &&
+      sheet.scheduleChangedAt &&
+      sheet.scheduleChangedAt > sheet.readyAt,
+    );
+    if (sheet.readyAt && sheet.readySnapshot && !rework)
       return panel(
         <>
           <ToneCallout tone="success">
@@ -62,10 +73,12 @@ export default async function ProductionReadinessStepPage({
           <ReadySynthesisTable rows={sheet.readySnapshot} />
         </>,
       );
-    const [quotes, locations, tools] = await Promise.all([
+    const [quotes, locations, tools, proposal, schedules] = await Promise.all([
       loadQuotes(sheet.id, data.members),
       loadLocations(sheet.id, data, access),
       loadStepTools(projectId),
+      loadProposalVersions(sheet.id),
+      loadScheduleDecisions(sheet.id),
     ]);
     const chosen = locations.options.find((x) => x.status === "chosen") ?? null;
     const rows = readySynthesis({
@@ -74,11 +87,76 @@ export default async function ProductionReadinessStepPage({
       quotes,
       place: chosen && { name: chosen.name, priceCents: chosen.priceCents },
       tools,
+      proposal,
+      schedule: schedules.find((x) => !x.replacedAt) ?? null,
     });
+    const current = schedules.find((x) => !x.replacedAt) ?? null;
+    const shootDay =
+      sheet.logistics.shootDate ?? data.heritage.fiche?.shootDate;
+    const owner = data.ownerPersonId === access.personId;
+    const s = fr.productionSchedule;
     return panel(
       <>
+        {rework && <ToneCallout tone="warning">{s.rework}</ToneCallout>}
         <p className="text-[color:var(--text-secondary)]">{r.note}</p>
-        <ReadySynthesisTable rows={rows} />
+        <ReadySynthesisTable
+          rows={rows}
+          actions={
+            owner && !sheet.closedAt
+              ? {
+                  date: (
+                    <ScheduleButton
+                      projectId={projectId}
+                      sheetId={sheet.id}
+                      current={
+                        current
+                          ? {
+                              text: s.text(
+                                formatDay(current.date),
+                                hourFr(current.start),
+                                hourFr(current.end),
+                              ),
+                              by: current.by ?? data.ownerName ?? "—",
+                            }
+                          : null
+                      }
+                      defaults={{
+                        date: current?.date ?? shootDay ?? "",
+                        start: current?.start ?? "08:00",
+                        end: current?.end ?? "19:00",
+                      }}
+                    />
+                  ),
+                }
+              : undefined
+          }
+        />
+        {schedules.length > 1 && (
+          <section className="flex flex-col gap-1.5">
+            <h3 className="font-semibold">{s.history}</h3>
+            <ul className="flex flex-col gap-1">
+              {schedules.map((d) => (
+                <li key={d.at} className="flex gap-2">
+                  <span
+                    aria-hidden
+                    className="text-[color:var(--text-tertiary)]"
+                  >
+                    {d.replacedAt ? "↺" : "✓"}
+                  </span>
+                  <span>
+                    {s.historyLine(
+                      s.text(formatDay(d.date), hourFr(d.start), hourFr(d.end)),
+                      d.by ?? "—",
+                      formatShortInstant(d.at),
+                    )}
+                    {d.replacedAt &&
+                      ` · ${s.replaced(formatShortInstant(d.replacedAt))}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         {data.canOrganize && (
           <ReadyConfirmForm
             projectId={projectId}

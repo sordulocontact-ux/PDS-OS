@@ -23,6 +23,9 @@ export type ProductionDeliverableRef = {
   kind: "internal" | "external" | null;
   company: string | null;
   closed: boolean;
+  sheetId: string | null;
+  // Teasers « Décliné du Clip officiel » (PR-13).
+  derived: boolean;
 };
 
 /** The deliverables in Production, in the Stratégie's order, read with the
@@ -39,7 +42,7 @@ export const productionDeliverables = cache(
       supabase
         .from("production_sheets")
         .select(
-          "deliverable_id, organization, closed_at, company:network_contacts!production_sheets_company_contact_id_fkey(name)",
+          "id, deliverable_id, organization, closed_at, derived_from_sheet_id, company:network_contacts!production_sheets_company_contact_id_fkey(name)",
         )
         .eq("project_id", projectId),
       supabase
@@ -75,6 +78,8 @@ export const productionDeliverables = cache(
           kind,
           company: kind === "external" ? (sheet?.company?.name ?? null) : null,
           closed: Boolean(sheet?.closed_at),
+          sheetId: sheet?.id ?? null,
+          derived: Boolean(sheet?.derived_from_sheet_id),
         },
       ];
     });

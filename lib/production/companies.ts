@@ -32,9 +32,12 @@ export async function companyOptions(
   projectId: string,
   contacts: NetworkOption[],
   current: string | null,
+  // Who may produce it: production companies, or for a cover the
+  // photographers and graphic designers of the Réseau.
+  roles: readonly string[] = ["production_company"],
 ): Promise<CompanyOption[]> {
   const companies = contacts.filter(
-    (c) => c.roles.includes("production_company") || c.id === current,
+    (c) => c.roles.some((r) => roles.includes(r)) || c.id === current,
   );
   if (companies.length === 0) return [];
   const ids = companies.map((c) => c.id);

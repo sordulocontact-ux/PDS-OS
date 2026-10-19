@@ -81,10 +81,11 @@ function productionRoles({
         : member(h)
       : null;
   const change = (
-    role: "producer" | "validator" | "director" | "dop",
+    role: "producer" | "validator" | "director" | "dop" | "creativeExt",
     label: string,
     current: Holder | null,
     contacts = false,
+    noneLabel?: string,
   ) =>
     canChange ? (
       <RoleChangeButton
@@ -93,8 +94,9 @@ function productionRoles({
         role={role}
         label={label}
         current={current}
-        members={data.members}
+        members={role === "creativeExt" ? [] : data.members}
         contacts={contacts ? data.contacts : []}
+        noneLabel={noneLabel}
       />
     ) : undefined;
   const asHolder = (
@@ -172,6 +174,22 @@ function productionRoles({
       holder: creative ? { name: creative } : null,
       what: t.tasks.creativeInt,
     },
+    ext && {
+      key: "creativeExt",
+      label: r.creativeExt,
+      kind: "valid",
+      holder: held(sheet.creativeExt) ?? {
+        name: fr.productionProposal.ext.none,
+      },
+      what: fr.productionProposal.ext.what,
+      action: change(
+        "creativeExt",
+        r.creativeExt,
+        sheet.creativeExt,
+        true,
+        fr.productionProposal.ext.none,
+      ),
+    },
   ];
   const roles = rows.filter((x): x is RoleRow => Boolean(x));
   const holders = [
@@ -181,6 +199,11 @@ function productionRoles({
       role: r.director,
     },
     !ext && org.dop?.kind === "contact" && { holder: org.dop, role: r.dop },
+    ext &&
+      sheet.creativeExt?.kind === "contact" && {
+        holder: sheet.creativeExt,
+        role: r.creativeExt,
+      },
   ].filter((x) => Boolean(x)) as {
     holder: { kind: "contact"; id: string; name: string };
     role: string;

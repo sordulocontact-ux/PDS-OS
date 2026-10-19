@@ -77,6 +77,20 @@ export function VersionCard({
             <StatusBadge tone={productionVersionTone[v.status]}>
               {t.versions.statuses[v.status]}
             </StatusBadge>
+            {v.ext !== "none" && (
+              <StatusBadge
+                size="sm"
+                tone={
+                  v.ext === "approved"
+                    ? "success"
+                    : v.ext === "changes"
+                      ? "warning"
+                      : "info"
+                }
+              >
+                {fr.productionCut.side.ext(fr.productionCut.side.states[v.ext])}
+              </StatusBadge>
+            )}
             {v.previousNumber !== null && (
               <span className="text-sm text-muted-foreground">
                 {t.versions.follows(v.previousNumber)}

@@ -6,7 +6,12 @@ import { ClosureSection } from "@/components/production/delivery/closure-section
 import { DecisionsSection } from "@/components/production/delivery/decisions-section";
 import { ExportChecklistSection } from "@/components/production/delivery/export-checklist-section";
 import { HandoffSection } from "@/components/production/delivery/handoff-section";
+import { LightDeliveryStep } from "@/components/production/light/light-steps";
+import { DeliverForm } from "@/components/production/delivery/deliver-form";
+import { recipientOptions } from "@/lib/production/delivery/recipients";
 import { requireApproved } from "@/lib/auth/dal";
+import { loadLightFacts } from "@/lib/production/light/queries";
+import { trackOf } from "@/lib/production/track";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { loadClosureFacts } from "@/lib/production/delivery/closure-queries";
@@ -35,6 +40,39 @@ export default async function ProductionDeliveryPage({
   params,
 }: PageProps<"/app/projects/[projectId]/production/[deliverableId]/delivery">) {
   const { projectId, deliverableId } = await params;
+  // A cover or teasers drawn from the clip: the light journey's Livraison.
+  const ctx = await stepContext(projectId, deliverableId, "delivery");
+  const light = ctx.data.sheet;
+  if (
+    light &&
+    trackOf(ctx.data.deliverable.title, light.derivedFromSheetId) !== "shoot"
+  ) {
+    const [facts, closure] = await Promise.all([
+      loadLightFacts(light.id, deliverableId, light.derivedFromSheetId),
+      loadClosureFacts(projectId, light.id, deliverableId, []),
+    ]);
+    const assignee = ctx.data.members.find(
+      (m) => m.personId === closure.assigneePersonId,
+    );
+    return (
+      <ProductionStepPanel
+        projectId={projectId}
+        deliverableId={deliverableId}
+        step={ctx.step}
+        steps={ctx.steps}
+      >
+        <LightDeliveryStep
+          projectId={projectId}
+          data={ctx.data}
+          facts={facts}
+          viewerId={ctx.access.personId}
+          activations={
+            assignee ? { id: assignee.personId, name: assignee.name } : null
+          }
+        />
+      </ProductionStepPanel>
+    );
+  }
   const [access] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),
@@ -52,6 +90,45 @@ export default async function ProductionDeliveryPage({
     deliverableId,
     tab.handoffs.map((h) => h.id),
   );
+  const recipientsFacts = await loadLightFacts(
+    data.sheet.id,
+    deliverableId,
+    data.sheet.derivedFromSheetId,
+  );
+  const r = fr.productionLight.recipients;
+  const assignee = data.members.find(
+    (m) => m.personId === closure.assigneePersonId,
+  );
+  const owner =
+    data.ownerPersonId && data.ownerName
+      ? { id: data.ownerPersonId, name: data.ownerName }
+      : null;
+  const creativeExt = data.sheet.creativeExt;
+  const deliver =
+    data.ownerPersonId === access.personId &&
+    data.stageState === "in_progress" &&
+    !data.sheet.closedAt ? (
+      <DeliverForm
+        projectId={projectId}
+        sheetId={data.sheet.id}
+        viewerId={access.personId}
+        handOff={false}
+        formats={[]}
+        options={recipientOptions({
+          distribution: owner,
+          activations: assignee
+            ? { id: assignee.personId, name: assignee.name }
+            : null,
+          validation: creativeExt?.kind === "contact" ? creativeExt : null,
+          members: data.members.map((m) => ({ id: m.personId, name: m.name })),
+          labels: {
+            distribution: r.purposes.distribution,
+            activations: r.purposes.activations,
+            validation: r.purposes.validation,
+          },
+        })}
+      />
+    ) : undefined;
   const since = checkSince(tab.delivery);
   const summary = summarize(tab.lines, since);
   const decisions = decisionsOf({
@@ -87,6 +164,10 @@ export default async function ProductionDeliveryPage({
         data={tab}
         decisions={decisions}
         canOrganize={data.canOrganize}
+        deliver={deliver}
+        recipients={recipientsFacts.recipients.map((x) =>
+          x.purpose ? `${x.name} · ${r.purposes[x.purpose]}` : x.name,
+        )}
       />
       <ExportChecklistSection
         projectId={projectId}

@@ -3,6 +3,7 @@ import { DirectionDecision } from "@/components/production/journey/direction-dec
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ProductionBriefSection } from "@/components/production/prep/brief-section";
 import { ProductionImportButton } from "@/components/production/prep/import-dialog";
+import { ProposalSection } from "@/components/production/proposal/proposal-section";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
@@ -20,7 +21,7 @@ export default async function ProductionDirectionStepPage({
   params,
 }: PageProps<"/app/projects/[projectId]/production/[deliverableId]/direction">) {
   const { projectId, deliverableId } = await params;
-  const { step, steps, data } = await stepContext(
+  const { step, steps, data, access } = await stepContext(
     projectId,
     deliverableId,
     "direction",
@@ -31,6 +32,25 @@ export default async function ProductionDirectionStepPage({
   const { data: canReview } = await supabase.rpc("production_can_review", {
     p_project_id: projectId,
   });
+  // External: the director deposits versions, validated inside and, when
+  // asked, outside (PR-11). Internal: the director's brief (PROD tickets).
+  if (sheet.organization.kind === "external")
+    return (
+      <ProductionStepPanel
+        projectId={projectId}
+        deliverableId={deliverableId}
+        step={step}
+        steps={steps}
+      >
+        <DirectorBlock projectId={projectId} data={data} />
+        <ProposalSection
+          projectId={projectId}
+          data={data}
+          viewerId={access.personId}
+          canReview={canReview === true}
+        />
+      </ProductionStepPanel>
+    );
   const d = sheet.organization.direction;
   const reviewer =
     steps

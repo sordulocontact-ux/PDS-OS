@@ -45,9 +45,13 @@ export function ProviderSpaceView({
   space,
   locations,
   quiet = false,
+  hideVersions = false,
 }: {
   token: string;
   space: OpenProviderSpace;
+  // The versions already shown on the journey's cards (the company, the
+  // external validation: « Montage et retours »).
+  hideVersions?: boolean;
   // A provider with a role before the postproduction (the company, the
   // director, the director of photography): its empty post sections wait.
   quiet?: boolean;
@@ -174,7 +178,7 @@ export function ProviderSpaceView({
         </ProviderSection>
       )}
 
-      {show(space.versions.length > 0) && (
+      {!hideVersions && show(space.versions.length > 0) && (
         <ProviderSection title={t.versions.title}>
           {space.versions.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t.versions.none}</p>

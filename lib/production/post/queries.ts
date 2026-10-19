@@ -214,6 +214,14 @@ export async function loadPostProduction(input: {
       comments: commentsOf(v.id),
       previousNumber: numberOf(v.previous_version_id),
       request: byVersion.get(v.id) ?? null,
+      intApproved: v.int_approved_at !== null,
+      ext:
+        v.ext_status === "pending" ||
+        v.ext_status === "approved" ||
+        v.ext_status === "changes"
+          ? v.ext_status
+          : "none",
+      extNote: v.ext_note,
     })),
     shootAlert: alertShows ? shootAlert : null,
     rushesLocation: shoot.data?.files_location ?? null,

@@ -4448,6 +4448,40 @@ Cahier des charges : `docs/projet-complet/production.md` (sous-lots PR-0 à PR-1
   société (`set_production_rushes_by_link`), réception et sauvegarde déclarées à part.
 - Migrations `20261019050101` à `20261019050801`, tests `production-projet-complet.test.sql`.
 
+### Ce qui restait de la Production (20/10/2026, branche `pc/r2-production`)
+
+Décisions métier : `docs/PRODUCTION-METIER.md` § 12. Migrations `20261020020101` à `20261020020401`,
+pgTAP `production-reste.test.sql`.
+
+- **Proposition en versions** (`production_direction_versions`, `lib/production/proposal/`,
+  `components/production/proposal/`) : `deposit_production_direction_version` (app) et
+  `deposit_production_direction_by_link` (réalisateur), `decide_production_direction_version` (interne) et
+  `decide_production_direction_by_link` (externe), `request_production_direction_version` ; la retenue =
+  la dernière validée des deux côtés (`production_direction_retained`), `direction_status` de la fiche suit
+  (`production_direction_sync`) pour les lecteurs d'avant. Parcours : `proposalState` (dépôt ouvert, attente
+  interne / externe, « À revoir »).
+- **Validation créative externe** : `production_sheets.creative_ext_contact_id`, rôle `creativeExt` de
+  `production_link_roles` (lien privé), `set_production_creative_ext` (« Qui fait quoi », `RoleChangeButton`
+  role `creativeExt`). Versions du montage : `int_approved_*`, `ext_status` sur `production_versions`
+  (ouvert à la soumission par `production_version_ext_open`), `decide_production_version` ne fait plus que
+  la moitié interne quand l'externe est attendue, `production_version_finalize` approuve quand les deux y
+  sont ; `decide_production_version_by_link`.
+- **Parcours légers** (`lib/production/track.ts` `trackOf`, `lib/production/light/`,
+  `components/production/light/`) : étapes `post` (Versions), `control` (nouvelle route), `delivery` ;
+  `production_sheets.derived_from_sheet_id` + `set_production_derived` (les teasers suivent le clip,
+  trigger `production_derived_follow`), `deposit_production_light_version(_by_link)` (dimensions
+  `image_width/height`), `decide_production_light_version`, `confirm_production_light_check`
+  (`production_cover_conforms`), `coverChecks` côté code.
+- **Montage et livraison externes** : dépôt par le lien sans étape de post (le lien de la seule validation
+  externe ne dépose rien), `set_production_final_by_link`, `production_link_cut` (versions, fichier final,
+  livraison lus sur le lien : `linkCutCards`) ; `deliver_production` + `production_delivery_recipients`
+  (`DeliverForm`, `recipientOptions`) pour tout livrable.
+- **Date et horaires** : `production_schedule_decisions`, `decide_production_schedule` (tâche « À revoir »,
+  `schedule_changed_at`), `confirm_production_ready` accepte une nouvelle confirmation après un changement
+  de date ; `ScheduleButton` sur la ligne « Date et horaires » de la synthèse (`ReadySynthesisTable actions`).
+- Notifications ajoutées : `production_version_decided`, `production_final_deposited`,
+  `production_delivered`, `production_schedule_changed`.
+
 ### Retours d'Ibé du 13/10/2026 sur la Production (PROD-001 à PROD-040)
 
 Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche `feat/production-ibe`.

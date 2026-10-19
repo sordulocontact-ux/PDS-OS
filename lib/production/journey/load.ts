@@ -10,6 +10,10 @@ import type { Holder, ProductionSheetData } from "@/lib/production/sheet";
 import { preprodFor } from "@/lib/production/tab-data";
 import { loadStepTools } from "@/lib/step-tools/queries";
 import { isChecklistAction } from "@/lib/production/preprod/types";
+import { loadLightFacts } from "@/lib/production/light/queries";
+import { proposalState } from "@/lib/production/proposal/model";
+import { trackOf } from "@/lib/production/track";
+import { loadProposalVersions } from "@/lib/production/proposal/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { journeySteps } from "./steps";
@@ -87,6 +91,7 @@ const journeyRows = cache(
             .eq("sheet_id", sheetId)
             .eq("status", "proposed")
         : null,
+      sheetId ? loadProposalVersions(sheetId) : [],
     ]);
   },
 );
@@ -126,7 +131,12 @@ export const loadJourney = cache(
       tools,
       shootRes,
       proposalsRes,
+      proposalVersions,
     ] = await journeyRows(projectId, deliverableId, access, sheet?.id ?? null);
+    const lightFacts = sheet
+      ? await loadLightFacts(sheet.id, deliverableId, sheet.derivedFromSheetId)
+      : null;
+    const lightLatest = lightFacts?.versions[0] ?? null;
     const shoot = shootRes?.data ?? null;
 
     const person = (
@@ -188,10 +198,38 @@ export const loadJourney = cache(
     const here = (x: { module: string; subjectId: string | null }) =>
       x.module === "production" && x.subjectId === deliverableId;
 
+    const proposal = proposalState(
+      proposalVersions,
+      Boolean(sheet?.directionRevision),
+    );
     const input: JourneyInput = {
       projectId,
       deliverableId,
       kind: org?.kind ?? null,
+      track: trackOf(data.deliverable.title, sheet?.derivedFromSheetId ?? null),
+      light: {
+        latest: lightLatest
+          ? {
+              number: lightLatest.number,
+              status: lightLatest.status,
+              intApproved: lightLatest.intApproved,
+              ext: lightLatest.ext,
+            }
+          : null,
+        finalUrl: lightFacts?.delivery?.finalUrl ?? null,
+        approved:
+          lightFacts?.versions.find((v) => v.status === "approved")?.number ??
+          null,
+        approvedAt: lightFacts?.delivery?.approvedAt ?? null,
+        checkedAt: lightFacts?.delivery?.checkedAt ?? null,
+        deliveredAt: lightFacts?.delivery?.deliveredAt ?? null,
+        gate: lightFacts?.source
+          ? {
+              clip: lightFacts.source.title,
+              done: lightFacts.source.cutApproved,
+            }
+          : null,
+      },
       mode: sheet?.mode ?? "direct",
       opened: sheet !== null,
       owner,
@@ -228,6 +266,15 @@ export const loadJourney = cache(
         revision: Boolean(sheet?.quoteRevision),
       },
       directorProposals: proposalsRes?.count ?? 0,
+      proposal: {
+        latest: proposal.latest?.number ?? null,
+        retained: proposal.retained?.number ?? null,
+        depositOpen: proposal.depositOpen,
+        waitsInt: proposal.waitsInt,
+        waitsExt: proposal.waitsExt,
+        rework: proposal.rework,
+      },
+      creativeExt: holder(sheet?.creativeExt ?? null),
       direction: {
         status: org?.direction.status ?? "draft",
         written: Boolean(sheet?.brief.stagingIntent && sheet.brief.runOfShow),
@@ -276,8 +323,14 @@ export const loadJourney = cache(
       // A place replaced: what it asked to review (proto rule 14).
       reworkSteps: [
         ...(sheet?.quoteRevision ? ["quote"] : []),
-        ...(sheet?.directionRevision ? ["direction"] : []),
+        ...(sheet?.directionRevision || proposal.rework ? ["direction"] : []),
         ...(checklist.some((a) => a.review && !isDone(a)) ? ["follow-up"] : []),
+        // The date changed after the preparation was confirmed.
+        ...(sheet?.readyAt &&
+        sheet.scheduleChangedAt &&
+        sheet.scheduleChangedAt > sheet.readyAt
+          ? ["readiness"]
+          : []),
       ],
       later:
         next?.who && next.kind !== "done"

@@ -7,7 +7,11 @@ import { ReferencesSection } from "@/components/production/post/references-secti
 import { ShootAlert } from "@/components/production/post/shoot-alert";
 import { StepsSection } from "@/components/production/post/steps-section";
 import { VersionsSection } from "@/components/production/post/versions-section";
+import { LightVersionsStep } from "@/components/production/light/light-steps";
 import { requireApproved } from "@/lib/auth/dal";
+import { loadLightFacts } from "@/lib/production/light/queries";
+import { trackOf } from "@/lib/production/track";
+import { createClient } from "@/lib/supabase/server";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
@@ -35,6 +39,36 @@ export default async function ProductionPostPage({
   params,
 }: PageProps<"/app/projects/[projectId]/production/[deliverableId]/post">) {
   const { projectId, deliverableId } = await params;
+  // A cover or teasers drawn from the clip: the light journey's Versions.
+  const ctx = await stepContext(projectId, deliverableId, "post");
+  const light = ctx.data.sheet;
+  if (
+    light &&
+    trackOf(ctx.data.deliverable.title, light.derivedFromSheetId) !== "shoot"
+  ) {
+    const [facts, { data: canReview }] = await Promise.all([
+      loadLightFacts(light.id, deliverableId, light.derivedFromSheetId),
+      (await createClient()).rpc("production_can_review", {
+        p_project_id: projectId,
+      }),
+    ]);
+    return (
+      <ProductionStepPanel
+        projectId={projectId}
+        deliverableId={deliverableId}
+        step={ctx.step}
+        steps={ctx.steps}
+      >
+        <LightVersionsStep
+          projectId={projectId}
+          data={ctx.data}
+          facts={facts}
+          organizationId={ctx.access.organizationId}
+          canReview={canReview === true}
+        />
+      </ProductionStepPanel>
+    );
+  }
   const [access] = await allInOrder([
     requireApproved(),
     requireLaunchedProject(projectId),

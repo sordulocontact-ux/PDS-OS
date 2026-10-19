@@ -206,6 +206,27 @@ export function describeEvent(e: HistoryEvent, names: Names): string {
           : null,
         a.company ? names.holder({ kind: "contact", id: a.company }) : null,
       );
+    case "direction.deposited":
+      return t.proposal.deposited(num(a.number));
+    case "direction.decided":
+      return t.proposal.decided(
+        num(a.number),
+        a.side === "ext" ? "ext" : "int",
+        a.status === "approved",
+      );
+    case "direction.version_requested":
+      return t.proposal.requested(str(a.reason));
+    case "sheet.creative_ext":
+      return t.creativeExt;
+    case "sheet.schedule":
+      return t.schedule(
+        `${day(a.date)}, ${str(a.start).slice(0, 5)} – ${str(a.end).slice(0, 5)}`,
+        !e.before,
+      );
+    case "sheet.derived":
+      return t.derived;
+    case "delivery.final_linked":
+      return t.finalLinked;
     case "delivery.decision": {
       if (a.delivered && !b.delivered) return t.delivery.delivered;
       if (a.checked && !b.checked) return t.delivery.checked;
@@ -223,6 +244,7 @@ export const actorless = (e: HistoryEvent) =>
   (e.entity === "sheet" && e.action === "ready" && !e.after?.ready) ||
   (e.entity === "export" && e.action === "result" && !e.after?.result) ||
   e.entity === "shoot" ||
+  (e.entity === "delivery" && e.action === "final_linked") ||
   (e.entity === "step" && e.action === "status") ||
   (e.entity === "delivery" &&
     !(

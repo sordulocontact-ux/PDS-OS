@@ -7,7 +7,15 @@ const t = fr.productionReady;
 
 /** The synthesis before the shoot (proto synTable): each line, its value
  * as read, « Prêt » or « Pas prêt ». The same live and frozen. */
-export function ReadySynthesisTable({ rows }: { rows: ReadyRow[] }) {
+export function ReadySynthesisTable({
+  rows,
+  actions = {},
+}: {
+  rows: ReadyRow[];
+  // A row's own gesture, by its key (« Changer la date et les horaires »),
+  // on the live synthesis only.
+  actions?: Record<string, React.ReactNode>;
+}) {
   return (
     <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
       {rows.map((r) => (
@@ -26,6 +34,7 @@ export function ReadySynthesisTable({ rows }: { rows: ReadyRow[] }) {
             >
               {r.value}
             </span>
+            {actions[r.key] && <span className="mt-2">{actions[r.key]}</span>}
           </span>
           <StatusBadge size="sm" tone={r.ok ? "success" : "danger"}>
             {r.ok ? t.ready : t.notReady}

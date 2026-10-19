@@ -19,8 +19,10 @@ const t = fr.productionProducer;
 const schema = z.object({
   projectId: z.uuid(),
   deliverableId: z.uuid(),
-  organization: z.enum(["internal", "external"]),
+  organization: z.enum(["internal", "external", "derived"]),
   companyContactId: z.uuid().nullable(),
+  // « Décliné du Clip officiel »: the clip's sheet (PR-13).
+  fromSheetId: z.uuid().nullable().optional(),
   mode: z.enum(["direct", "call", "import"]),
 });
 
@@ -52,6 +54,8 @@ export async function chooseProducer(
   const p = parsed.data;
   if (p.organization === "external" && !p.companyContactId)
     return { ok: false, error: t.errors.company };
+  if (p.organization === "derived" && !p.fromSheetId)
+    return { ok: false, error: t.errors.kind };
 
   const supabase = await createClient();
   const [{ data: deliverable }, { data: existing }] = await Promise.all([
@@ -63,12 +67,15 @@ export async function chooseProducer(
     supabase
       .from("production_sheets")
       .select(
-        "id, line_producer_person_id, quote_validator_person_id, dop_person_id, dop_contact_id",
+        "id, line_producer_person_id, quote_validator_person_id, dop_person_id, dop_contact_id, derived_from_sheet_id",
       )
       .eq("deliverable_id", p.deliverableId)
       .maybeSingle(),
   ]);
-  const kind = t.kinds[p.organization].label;
+  const kind =
+    p.organization === "derived"
+      ? fr.productionLight.derived
+      : t.kinds[p.organization].label;
   return withOutcome(
     p.projectId,
     ["marketing"],
@@ -80,6 +87,22 @@ export async function chooseProducer(
         { p_deliverable_id: p.deliverableId, p_mode: p.mode },
       );
       if (openError || !sheetId) return prepFailure(openError ?? {});
+      // Drawn from the clip: it follows the clip's production.
+      if (p.organization === "derived" || existing?.derived_from_sheet_id) {
+        const { error: derivedError } = await supabase.rpc(
+          "set_production_derived",
+          {
+            p_sheet_id: sheetId,
+            p_from_sheet_id:
+              p.organization === "derived" ? (p.fromSheetId ?? null) : null,
+          },
+        );
+        if (derivedError) return prepFailure(derivedError);
+        if (p.organization === "derived") {
+          await schedulePendingPushes();
+          return prepDone(p.projectId);
+        }
+      }
       const validator =
         existing?.quote_validator_person_id ??
         (access.organizationId

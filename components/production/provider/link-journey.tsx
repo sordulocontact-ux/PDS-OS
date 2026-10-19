@@ -10,6 +10,8 @@ import { linkDirectorCard } from "./link-director-card";
 import { LinkDirectionForm } from "./link-direction-form";
 import { LinkGearForm } from "./link-gear-form";
 import { LinkPlaceForm } from "./link-place-form";
+import { linkCutCards } from "./link-cut-cards";
+import { linkProposalCard } from "./link-proposal-card";
 import { linkQuoteCard } from "./link-quote-card";
 import { LinkRushesForm } from "./link-rushes-form";
 import { linkChecklistCard, LinkTaskList } from "./link-task-cards";
@@ -97,7 +99,15 @@ export function linkJourneyCards({
       order: 50,
       body: <p>{fr.productionReady.link.done}</p>,
     });
-  if (director)
+  // External: the proposal in versions (PR-11), for the director and the
+  // external creative validation.
+  const proposal = linkProposalCard(token, j);
+  if (proposal) cards.push(proposal);
+  // The edit (or a light journey's versions), the final file (PR-12, PR-13).
+  cards.push(...linkCutCards(token, j));
+  // A cover or teasers drawn from the clip: nothing of the shoot's journey.
+  if (j.cut && j.cut.track !== "shoot") return cards;
+  if (director && j.organization !== "external")
     cards.push({
       id: "ps-direction",
       title: t.direction.title,

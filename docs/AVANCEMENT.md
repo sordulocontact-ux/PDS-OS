@@ -578,3 +578,19 @@ projet a (Juridique toujours, Master avec un titre), Plateformes « Fait » apr�
 réserves, plus de cascade layout → page dans le Marketing, pastille d'état à droite du titre,
 compteur bleu sur les pilules, texte du verrou hors du plan. Détail et mesures :
 `docs/projet-complet/RECETTE.md` § 7. Aucune migration.
+
+## Reste de la Production (20/10/2026, branche `pc/r2-production`)
+
+- PR-11 : proposition de réalisation en versions (traitement, moodboard, découpage en liens), validations
+  interne et externe (management par son lien privé, rôle « Validation créative externe » de « Qui fait
+  quoi »), version retenue gardée jusqu'à la suivante, « Demander une nouvelle version ».
+- PR-13 : pochette en parcours léger (Versions de la pochette → Contrôle technique → Livraison, image
+  contrôlée par le code : 3000 × 3000 px, JPG ou PNG, carré, 10 Mo au plus) ; teasers « Décliné du Clip
+  officiel » qui suivent la production du clip et attendent « Montage du clip validé ».
+- Montage d'une production externe déposé par la société sur son lien (sans étape de post), validation
+  externe en plus de l'interne, fichier final déposé sur le lien, destinataires de la livraison (tout
+  livrable) ; livré ≠ publié.
+- Date et horaires du tournage en décision qui remplace l'ancienne (historique, tâche « À revoir »,
+  préparation à confirmer de nouveau).
+- Migrations `20261020020101` à `20261020020401` à pousser en prod avec accord ; pgTAP
+  `production-reste.test.sql`. Décisions : `docs/PRODUCTION-METIER.md` § 12.

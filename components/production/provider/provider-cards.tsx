@@ -37,7 +37,7 @@ export function providerPortalCards({
     !quiet ||
     space.steps.length > 0 ||
     space.requests.length > 0 ||
-    space.versions.length > 0;
+    (space.versions.length > 0 && !journey?.cut);
   const open = space.requests.some((r) => r.status !== "treated");
   if (post)
     cards.push({
@@ -57,6 +57,7 @@ export function providerPortalCards({
             space={space}
             locations={locations}
             quiet={quiet}
+            hideVersions={Boolean(journey?.cut)}
           />
         </>
       ),

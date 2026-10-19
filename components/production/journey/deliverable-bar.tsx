@@ -34,11 +34,13 @@ export async function DeliverableBar({
         key: d.id,
         title: d.title,
         sub: [
-          d.kind
-            ? [t.header.organization[d.kind], d.company]
-                .filter(Boolean)
-                .join(" · ")
-            : t.bar.toChoose,
+          d.derived
+            ? fr.productionLight.derived
+            : d.kind
+              ? [t.header.organization[d.kind], d.company]
+                  .filter(Boolean)
+                  .join(" · ")
+              : t.bar.toChoose,
           d.closed ? t.bar.delivered : null,
         ]
           .filter(Boolean)

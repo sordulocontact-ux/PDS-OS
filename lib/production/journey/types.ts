@@ -14,6 +14,8 @@ import type {
 } from "@/lib/production/organization";
 import type { ProductionPhase } from "@/lib/production/phase";
 import type { ProductionMode } from "@/lib/production/sheet";
+import type { VersionStatus } from "@/lib/production/post/rules";
+import type { ProductionTrack } from "@/lib/production/track";
 
 export const STEP_KEYS = [
   "organisation",
@@ -21,6 +23,7 @@ export const STEP_KEYS = [
   "quote",
   "direction",
   "follow-up",
+  "control",
   "gear",
   "locations",
   "call-sheet",
@@ -50,6 +53,24 @@ export type JourneyInput = {
   projectId: string;
   deliverableId: string;
   kind: OrganizationKind | null;
+  // The shoot's journey, or a light one (a cover, teasers drawn from the
+  // clip, PR-13), and what a light journey reads.
+  track: ProductionTrack;
+  light: {
+    latest: {
+      number: number;
+      status: VersionStatus;
+      intApproved: boolean;
+      ext: "none" | "pending" | "approved" | "changes";
+    } | null;
+    finalUrl: string | null;
+    approved: number | null;
+    approvedAt: string | null;
+    checkedAt: string | null;
+    deliveredAt: string | null;
+    // Teasers drawn from the clip: « Montage du clip validé ».
+    gate: { clip: string; done: boolean } | null;
+  };
   // How the preproduction is organised: with PO, a call, an import.
   mode: ProductionMode;
   opened: boolean;
@@ -81,6 +102,17 @@ export type JourneyInput = {
   // Directors proposed by the company, none retained yet.
   directorProposals: number;
   direction: { status: DirectionStatus; written: boolean };
+  // The proposal in versions (external, PR-11), and the external creative
+  // validation when « Qui fait quoi » names one.
+  proposal: {
+    latest: number | null;
+    retained: number | null;
+    depositOpen: boolean;
+    waitsInt: boolean;
+    waitsExt: boolean;
+    rework: boolean;
+  };
+  creativeExt: JourneyPerson | null;
   // The preproduction checklist (external): tasks, done, held by the viewer.
   checklist: { total: number; done: number; companyOpen: number };
   gear: { lines: number; positions: number; filled: number };

@@ -103,6 +103,11 @@ export type PostVersion = {
   // The version it follows in the cycle (PROD-032).
   previousNumber: number | null;
   request: CorrectionRequest | null;
+  // The internal creative validation given, the external one when « Qui
+  // fait quoi » names one (PR-12: in addition, never in its place).
+  intApproved: boolean;
+  ext: "none" | "pending" | "approved" | "changes";
+  extNote: string | null;
 };
 
 /** What the shoot report left missing (declarations not made once the shoot

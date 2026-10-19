@@ -66,6 +66,7 @@ export default async function ProviderSpacePage({
         space={space}
         locations={await getProviderLocations(token)}
         quiet={Boolean(journey && journey.roles.length > 0)}
+        hideVersions={Boolean(journey?.cut)}
       />
     </PortalShell>
   );

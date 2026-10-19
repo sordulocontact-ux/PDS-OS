@@ -96,6 +96,19 @@ export const productionHistory = {
       : kind === "internal"
         ? "a choisi une production interne"
         : "a retiré l'organisation de la production",
+  // The proposal in versions (PR-11).
+  proposal: {
+    deposited: (n: number) => `a déposé la proposition V${n}`,
+    decided: (n: number, side: "int" | "ext", approved: boolean) =>
+      `${approved ? `a validé la proposition V${n}` : `a demandé des modifications sur la proposition V${n}`} (${side === "ext" ? "externe" : "interne"})`,
+    requested: (reason: string) =>
+      `a demandé une nouvelle version de la proposition : « ${reason} »`,
+  },
+  creativeExt: "a changé la validation créative externe",
+  schedule: (text: string, first: boolean) =>
+    first ? `a fixé la date : ${text}` : `a changé la date : ${text}`,
+  derived: "a décliné ce livrable du Clip officiel",
+  finalLinked: "Le fichier final a été déposé par la société",
   callSheet: (n: number) => `a diffusé la feuille de service V${n}`,
   place: {
     created: (name: string) => `a ajouté le lieu candidat « ${name} »`,

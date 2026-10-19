@@ -53,6 +53,10 @@ export const productionJourney = {
       title: "Montage et retours",
       why: "Chaque version a son lien et ses retours ; elle est en revue, à modifier ou validée.",
     },
+    control: {
+      title: "Contrôle technique",
+      why: "Une version validée n'est pas encore livrable : on contrôle les fichiers attendus, un par un.",
+    },
     delivery: {
       title: "Livraison et clôture",
       why: "Le fichier final validé, sa date, son valideur et ses destinataires ; puis la clôture.",
@@ -166,6 +170,7 @@ export const productionJourney = {
     dop: "Chef opérateur",
     creative: "Responsable créatif",
     creativeInt: "Validation créative interne",
+    creativeExt: "Validation créative externe",
     post: "Postproduction",
   },
   history: "Historique",

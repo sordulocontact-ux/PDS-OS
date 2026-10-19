@@ -77,7 +77,17 @@ export function DecisionSection({
                 </ViewLink>
               </div>
             </div>
-            {canReview ? (
+            {v.intApproved ? (
+              <p className="text-sm text-muted-foreground">
+                {fr.productionCut.side.int(
+                  fr.productionCut.side.states.approved,
+                )}
+                {" · "}
+                {fr.productionCut.side.ext(
+                  fr.productionCut.side.states.pending,
+                )}
+              </p>
+            ) : canReview ? (
               <DecisionForm
                 projectId={projectId}
                 version={v}

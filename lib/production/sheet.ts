@@ -132,7 +132,13 @@ export type ProductionSheetData = {
     // « Demander une révision du devis » after a validation (proto).
     quoteRevision: { reason: string; by: string | null; at: string } | null;
     // A new version of the director's proposal asked (a place replaced).
-    directionRevision: { reason: string; at: string } | null;
+    directionRevision: { reason: string; by: string | null; at: string } | null;
+    // « Validation créative externe » (PR-11): a Réseau contact, or none.
+    creativeExt: Holder | null;
+    // Teasers « Décliné du Clip officiel » (PR-13): the clip's sheet.
+    derivedFromSheetId: string | null;
+    // The shoot's date changed after a first decision (« À revoir »).
+    scheduleChangedAt: string | null;
     // The synthesis confirmed before the shoot, as it was (external).
     readySnapshot: ReadyRow[] | null;
     readyForcedReason: string | null;
@@ -438,9 +444,13 @@ async function loadSheet(
           sheetRow.direction_revision_at && sheetRow.direction_revision_reason
             ? {
                 reason: sheetRow.direction_revision_reason,
+                by: nameOf(sheetRow.direction_revision_by),
                 at: sheetRow.direction_revision_at,
               }
             : null,
+        creativeExt: holderOf(null, sheetRow.creative_ext_contact_id),
+        derivedFromSheetId: sheetRow.derived_from_sheet_id,
+        scheduleChangedAt: sheetRow.schedule_changed_at,
       }
     : null;
 

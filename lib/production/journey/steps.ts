@@ -24,6 +24,8 @@ const r = t.roles;
 type Def = {
   key: StepKey;
   prereq: StepKey[];
+  // A prerequisite of another journey (« Montage du clip validé »).
+  gate?: { label: string; source: string; done: boolean } | null;
   roles: (JourneyRole | null)[];
   done: boolean;
   // Who acts now when the step is open.
@@ -53,10 +55,17 @@ export function journeySteps(input: JourneyInput): JourneyStep[] {
   const i = input;
   // Before « Qui produit ? » is answered, the journey is that step alone
   // (proto prodSteps): the rest depends on the answer.
-  const defs = i.kind === null ? [whoProduces(i)] : stepsOf(i);
+  const defs =
+    i.kind === null
+      ? [whoProduces(i)]
+      : i.track === "shoot"
+        ? stepsOf(i)
+        : lightSteps(i);
   const status = new Map<StepKey, JourneyStep["status"]>();
   return defs.map((def) => {
-    const ready = def.prereq.every((p) => status.get(p) === "done");
+    const ready =
+      def.prereq.every((p) => status.get(p) === "done") &&
+      (def.gate?.done ?? true);
     // A step done, to review after a change elsewhere, stays passed for
     // the next ones: nothing is blocked by a review (proto rule 14).
     const rework = def.done && i.reworkSteps.includes(def.key);
@@ -81,6 +90,16 @@ export function journeySteps(input: JourneyInput): JourneyStep[] {
       validator: null,
       roles: def.roles.filter((x): x is JourneyRole => x !== null),
       prereq: def.prereq,
+      external: def.gate
+        ? [
+            {
+              key: "gate",
+              label: def.gate.label,
+              done: def.gate.done,
+              module: def.gate.source,
+            },
+          ]
+        : undefined,
       next: defs.filter((x) => x.prereq.includes(def.key)).map((x) => x.key),
       actor: open && def.act ? def.act() : null,
       summary: def.summary,
@@ -102,6 +121,62 @@ function whoProduces(i: JourneyInput): Def {
         : t.summary.organization.internal
       : null,
   };
+}
+
+// A cover, or teasers drawn from the clip (proto lightSteps, PR-13):
+// Versions → Contrôle technique → Livraison, three distinct decisions.
+function lightSteps(i: JourneyInput): Def[] {
+  const L = i.light;
+  const tl = fr.productionLight;
+  const ext = i.kind === "external";
+  const exec = ext ? i.company : i.producer;
+  const last = L.latest;
+  const sentBack =
+    last?.status === "changes_requested" || last?.status === "refused";
+  const versions: Def = {
+    key: "post",
+    prereq: ["organisation"],
+    gate: L.gate && { label: tl.gate, source: L.gate.clip, done: L.gate.done },
+    roles: [
+      role("exec", exec, ext ? r.company : r.producer),
+      role("coord", i.owner, r.owner),
+      role("valid", i.creative, r.creativeInt),
+      ext ? role("valid", i.creativeExt, r.creativeExt) : null,
+    ],
+    done: L.approved !== null,
+    act: () =>
+      !last || sentBack
+        ? actor(exec, tl.todo.deposit((last?.number ?? 0) + 1))
+        : actor(i.creative, tl.todo.validate(last.number), "validate"),
+    summary:
+      L.approved !== null
+        ? tl.summary.validated(L.approved)
+        : last
+          ? sentBack
+            ? tl.summary.changes(last.number)
+            : tl.summary.pending(last.number)
+          : null,
+  };
+  const control: Def = {
+    key: "control",
+    prereq: ["post"],
+    roles: [
+      role("exec", i.producer, r.producer),
+      role("coord", i.owner, r.owner),
+    ],
+    done: L.checkedAt !== null,
+    act: () => actor(i.producer, tl.todo.control),
+    summary: L.checkedAt ? tl.summary.checked : null,
+  };
+  const delivery: Def = {
+    key: "delivery",
+    prereq: ["control"],
+    roles: [role("exec", i.owner, r.owner)],
+    done: L.deliveredAt !== null || i.closed,
+    act: () => actor(i.owner, tl.todo.deliver),
+    summary: L.deliveredAt ? tl.summary.delivered : null,
+  };
+  return [whoProduces(i), versions, control, delivery];
 }
 
 function stepsOf(i: JourneyInput): Def[] {
@@ -190,6 +265,26 @@ function stepsOf(i: JourneyInput): Def[] {
   };
 
   const d = i.direction;
+  const pr = i.proposal;
+  const tp = fr.productionProposal;
+  // External (PR-11): the director deposits versions; the internal creative
+  // validation and, when named, the external one decide the latest.
+  const externalAct = (): JourneyActor | null => {
+    if (!i.director)
+      return i.directorProposals > 0
+        ? actor(owner, t.todo.directorRetain)
+        : actor(i.company, t.todo.directionNobody);
+    if (pr.depositOpen)
+      return actor(
+        i.director,
+        pr.latest === null ? tp.todo.deposit : tp.todo.again,
+      );
+    if (pr.waitsInt && pr.latest !== null)
+      return actor(i.creative, tp.todo.validate(pr.latest), "validate");
+    if (pr.waitsExt && pr.latest !== null)
+      return actor(i.creativeExt, tp.todo.validate(pr.latest), "validate");
+    return null;
+  };
   const direction: Def = {
     key: "direction",
     prereq: [ext ? "quote" : "organisation"],
@@ -197,24 +292,37 @@ function stepsOf(i: JourneyInput): Def[] {
       role("exec", i.director, r.director),
       role("coord", i.creative, r.creative),
       role("valid", i.creative, r.creativeInt),
+      ext ? role("valid", i.creativeExt, r.creativeExt) : null,
     ],
-    done: prep(d.status === "approved"),
+    done: prep(
+      ext
+        ? pr.retained !== null || d.status === "approved"
+        : d.status === "approved",
+    ),
     act: () =>
-      d.status === "submitted"
-        ? actor(i.creative, t.todo.directionDecide, "validate")
-        : i.director
-          ? actor(
-              i.director,
-              d.status === "changes"
-                ? t.todo.directionChanges
-                : t.todo.directionWrite,
-            )
-          : ext
-            ? i.directorProposals > 0
-              ? actor(owner, t.todo.directorRetain)
-              : actor(i.company, t.todo.directionNobody)
+      ext
+        ? externalAct()
+        : d.status === "submitted"
+          ? actor(i.creative, t.todo.directionDecide, "validate")
+          : i.director
+            ? actor(
+                i.director,
+                d.status === "changes"
+                  ? t.todo.directionChanges
+                  : t.todo.directionWrite,
+              )
             : actor(owner, t.todo.directionNobody),
-    summary: d.status === "draft" ? null : t.summary.direction[d.status],
+    summary: ext
+      ? pr.retained !== null
+        ? tp.summary.retained(pr.retained)
+        : pr.latest === null
+          ? null
+          : pr.depositOpen
+            ? tp.summary.changes(pr.latest)
+            : tp.summary.pending(pr.latest)
+      : d.status === "draft"
+        ? null
+        : t.summary.direction[d.status],
   };
 
   const followUp: Def = {
@@ -324,6 +432,14 @@ function stepsOf(i: JourneyInput): Def[] {
     summary: i.rushes.received && i.rushes.backup ? t.summary.rushes : null,
   };
 
+  // External (PR-12): the company deposits each version on its link, the
+  // internal then, when named, the external creative validation review it;
+  // the company deposits the final file, PDS checks then delivers.
+  const L = i.light;
+  const tc = fr.productionCut;
+  const cut = L.latest;
+  const cutBack =
+    cut?.status === "changes_requested" || cut?.status === "refused";
   const post: Def = {
     key: "post",
     prereq: [ext ? "rushes" : "shoot"],
@@ -331,9 +447,21 @@ function stepsOf(i: JourneyInput): Def[] {
       role("exec", exec, ext ? r.post : r.producer),
       role("coord", i.creative, r.creative),
       role("valid", i.creative, r.creativeInt),
+      ext ? role("valid", i.creativeExt, r.creativeExt) : null,
     ],
     done: POSTED.includes(i.phase),
-    act: () => i.later,
+    act: () =>
+      !ext
+        ? i.later
+        : !cut || cutBack
+          ? actor(i.company, tc.todo.deposit((cut?.number ?? 0) + 1))
+          : cut.status === "approved"
+            ? null
+            : !cut.intApproved
+              ? actor(i.creative, tc.todo.review(cut.number), "validate")
+              : cut.ext === "pending"
+                ? actor(i.creativeExt, tc.todo.review(cut.number), "validate")
+                : null,
     summary: null,
   };
 
@@ -346,7 +474,16 @@ function stepsOf(i: JourneyInput): Def[] {
       role("valid", owner, r.owner),
     ],
     done: i.closed,
-    act: () => i.later,
+    act: () =>
+      !ext || !L.approvedAt
+        ? i.later
+        : !L.finalUrl
+          ? actor(i.company, tc.todo.final)
+          : !L.checkedAt
+            ? actor(producer, fr.productionLight.todo.control)
+            : !L.deliveredAt
+              ? actor(owner, tc.todo.deliver)
+              : i.later,
     summary: null,
   };
 
@@ -388,10 +525,20 @@ function callDone(i: JourneyInput): boolean {
 
 export function titleOf(
   key: StepKey,
-  i: Pick<JourneyInput, "kind" | "mode">,
+  i: Pick<JourneyInput, "kind" | "mode" | "track">,
 ): string {
   const internal = i.kind === "internal";
   const v = t.variants;
+  const tl = fr.productionLight.steps;
+  if (i.track !== "shoot")
+    switch (key) {
+      case "post":
+        return i.track === "artwork" ? tl.versions.cover : tl.versions.title;
+      case "control":
+        return tl.control.title;
+      case "delivery":
+        return tl.delivery.title;
+    }
   switch (key) {
     case "call":
       return v.call[i.mode];
@@ -408,6 +555,16 @@ export function titleOf(
 
 function whyOf(key: StepKey, i: JourneyInput): string {
   const v = t.variants.internal;
+  const tl = fr.productionLight.steps;
+  if (i.track !== "shoot")
+    switch (key) {
+      case "post":
+        return tl.versions.why;
+      case "control":
+        return tl.control.why;
+      case "delivery":
+        return tl.delivery.why;
+    }
   if (i.kind !== "internal") return t.steps[key].why;
   switch (key) {
     case "call":

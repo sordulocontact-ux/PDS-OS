@@ -29,7 +29,7 @@ const holder = z
 const roleSchema = z.object({
   projectId: z.uuid(),
   sheetId: z.uuid(),
-  role: z.enum(["producer", "validator", "director", "dop"]),
+  role: z.enum(["producer", "validator", "director", "dop", "creativeExt"]),
   holder,
 });
 
@@ -49,6 +49,16 @@ export async function changeProductionRole(
   if (p.role === "validator" && !p.holder.person)
     return { ok: false, error: t.role.required };
   const supabase = await createClient();
+  // The external creative validation: a Réseau contact, or nobody (PR-11).
+  if (p.role === "creativeExt") {
+    if (p.holder.person)
+      return { ok: false, error: fr.productionPrep.errors.invalid };
+    const { error } = await supabase.rpc("set_production_creative_ext", {
+      p_sheet_id: p.sheetId,
+      p_contact_id: p.holder.contact,
+    });
+    return error ? prepFailure(error) : prepDone(p.projectId);
+  }
   if (p.role === "director") {
     const { error } = await supabase.rpc("set_production_director", {
       p_sheet_id: p.sheetId,
