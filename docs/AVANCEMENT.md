@@ -518,3 +518,13 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
   au premier transfert) ; Conception faite quand tout est transféré, plus de validation globale.
 - Migrations `20261019040101` à `20261019040701` (à pousser en prod avec accord) ; pgTAP
   `conception-journey.test.sql` + 6 fichiers adaptés.
+## Lot 7 — Suivi & bilan sur le patron commun (19/10/2026, branche `pc/z7-review`)
+
+- R1 : parcours en 3 étapes (Bilan provisoire, Réserves, Clôture du Marketing), loader dans celui du
+  Marketing, anciens onglets redirigés, ligne « Volet Marketing » et sections en trop retirées.
+- R2 : « Où on en est » en 4 phrases cliquables, détail et filtres repliés, modale par chiffre.
+- R3 : préparation dans l'étape, cartes de versions, rapport en modale avec PDF serveur, soumission
+  directe, décision par `DecisionPanel`.
+- R4 : réserves arbitrées et levées en ligne, « Avant la clôture », demande, décision, réouverture.
+- R5 : notifications (migration `20261019070101` à pousser en prod avec accord), Maintenant / Travail /
+  Validations par le parcours.

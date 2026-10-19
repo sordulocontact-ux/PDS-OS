@@ -54,7 +54,9 @@ export async function loadReserves(
       .from("marketing_reserves")
       .select(COLUMNS)
       .eq("project_id", projectId)
-      .order("created_at"),
+      .order("created_at")
+      // A report creates its reserves in one go: a stable order.
+      .order("id"),
     loadMembers(access),
   ]);
   if (error) console.error("loadReserves:", error.message);

@@ -61,7 +61,7 @@ export const marketingReview = {
       statistics_unavailable: "Indisponibles",
       budget_planned: "Estimé",
       budget_committed: "Engagé",
-      budget_paid: "Payé",
+      budget_paid: "Payé administrativement",
       reserves_open: "Ouvertes",
       reserves_arbitrated: "Arbitrées",
       reserves_lifted: "Levées",
@@ -218,7 +218,7 @@ export const marketingReview = {
       results: "Résultats déclarés et vérifiés",
       statistics: "Statistiques",
       budget: "Budget",
-      reserves: "Blocages, écarts, réserves et recommandations",
+      reserves: "Écarts, réserves et recommandations",
       annexes: "Annexes : preuves et liens",
     },
     view: {

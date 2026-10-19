@@ -80,6 +80,16 @@ export const notifications = {
       `${actor} propose de clôturer la distribution de « ${project} » : votre décision est attendue.`,
     distribution_closure_decided: (actor: string, project: string) =>
       `${actor} a tranché sur la clôture de la distribution de « ${project} ».`,
+    marketing_report_submitted: (actor: string, project: string) =>
+      `${actor} a soumis le bilan Marketing de « ${project} » : il attend votre décision.`,
+    marketing_report_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur le bilan Marketing de « ${project} ».`,
+    marketing_closure_requested: (actor: string, project: string) =>
+      `${actor} demande la clôture du Marketing de « ${project} » : votre décision est attendue.`,
+    marketing_closure_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur la clôture du Marketing de « ${project} ».`,
+    marketing_closure_reopened: (actor: string, project: string) =>
+      `${actor} a rouvert le Marketing de « ${project} ».`,
     step_blocker_reported: (actor: string, project: string) =>
       `${actor} a signalé un blocage sur « ${project} ».`,
     step_blocker_lifted: (actor: string, project: string) =>

@@ -71,6 +71,22 @@ provisoire **possible avec des activations encore ouvertes**, réserves arbitré
 limite définitive, non applicable, **doublon**), clôture Marketing distincte de la clôture du projet,
 **réouverture** motivée.
 
+Décisions du lot 7 (19/10/2026, parcours du proto) :
+- « Reporter la validation » d'un bilan : la même version est soumise de nouveau (ticket : « rien ne
+  change ») ; le proto relançait une version. « Reporter la décision » de clôture gardé (ticket), en
+  troisième bouton.
+- Canal de suivi obligatoire pour « À suivre après clôture », motif obligatoire pour « Non applicable »
+  (ticket) ; seul le responsable arbitre, la direction accepte une limite définitive (règle « seul le
+  responsable écrit »), alors que le proto laissait la DG tout arbitrer.
+- Preuve « lien inaccessible » comptée « à vérifier » dans « Où on en est » ; « statistiques
+  indisponibles / partielles » : aucune source dans l'app pour l'instant, affichées « — ».
+- Les filtres du tableau de bord (ticket) sont gardés, repliés dans « Voir le détail » (retirés du proto
+  le 18/10).
+- « Avant la clôture » ajoute, comme le demande le ticket, l'engagé non payé et l'état du Juridique
+  (« Attention »), jamais bloquants.
+- La période d'une version est obligatoire, pré-remplie du début de la première activation à
+  aujourd'hui ; le résumé exécutif aussi (proto).
+
 ## Ce que le proto couvre et ce qui reste (18/10/2026)
 
 Codé : fil d'Ariane, plus de violet, « À arbitrer » / « À confirmer » ; Stratégie (8 dimensions à

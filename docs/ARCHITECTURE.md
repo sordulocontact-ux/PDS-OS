@@ -5404,6 +5404,43 @@ du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'�
 - **Fixture** : les noms Piégée / Dioo / Alka n'existent que dans le test pgTAP (tout est annulé à la
   fin) ; jamais dans le code, le seed ni comme valeur par défaut.
 
+### Lot 7 — Suivi & bilan en parcours (19/10/2026, proto « Projet complet »)
+
+- **Parcours** `lib/marketing/review/journey.ts` (pur) : Bilan provisoire (`/review/bilan`), Réserves
+  (`/review/reserves`), Clôture du Marketing (`/review/closure`) ; `/review` ouvre l'étape qui attend la
+  personne, `/review/history` = l'audit `marketing_events` ; `/review/reports` et `/reports/new`
+  redirigent vers l'étape 1, `/reports/<id>` reste le lien direct (comparaison, PDF). Contexte par
+  requête `reviewJourneyContext` (`context.ts`), loader `lib/journey/review.ts` **dans le loader
+  `marketing`** de `lib/journey/sources.ts` (partie `review`) : « Maintenant », Travail, Validations
+  (`actor.kind = "validate"` pour approuver le bilan et clôturer). Cadre `ReviewStepFrame` sur le modèle
+  du Juridique ; « Déjà fait » par étape (`history.ts`).
+- **États** : Bilan fait = une version approuvée (ou finalisée) et aucune version en cours ; verrouillé
+  sans activation ni rapport (prérequis externe « Activations › Leviers à préparer » = au moins une
+  activation). Réserves ouvertes une fois une version approuvée, faites quand aucune n'est à arbitrer ni
+  « à lever » non levée. Clôture ouverte après les Réserves, faite quand le Marketing est clôturé
+  (`reserve` si avec réserves). Préparer n'est proposé qu'à partir du jour de sortie (date de la
+  Distribution, sinon `projects.due_date`).
+- **« Où on en est »** (`standing.ts`, `standing-data.ts`) : 4 phrases calculées sur toutes les
+  activations, détail replié avec les filtres du ticket ; chaque chiffre ouvre sa liste et sa règle
+  (modale verre) ; « — » quand l'app n'a pas de source (statistiques partielles / indisponibles).
+  **Frise des activations calculée ici** depuis leurs tables (`phase.ts`, `activations.ts` :
+  `marketing_activations`, `activation_evidence` + dernier contrôle, `activation_metrics` valides) :
+  clôturée → Clôturées ; annulée à part ; sans responsable ou échéance, brouillon, à préparer, prête,
+  bloquée → À préparer ; en cours, suspendue → À réaliser ; réalisée déclarée : preuve non vérifiée →
+  À prouver, statistiques à collecter → À mesurer, sinon À clôturer. **À unifier avec la frise de la
+  zone Activations** (lot 6) quand elle existera.
+- **« Ce qui manque »** (`issues.ts`) : une ligne par activation annulée (motif), pas clôturée (état),
+  clôturée à preuve non vérifiée ; une ligne par objectif de la Stratégie (`strategy_objectives.due_on`)
+  lu après aujourd'hui (« Streams à 4 semaines : lus après le … »). Cochées dans « Réserves à
+  inclure », elles deviennent les réserves de la version (une par ligne, catégorie Activations / Preuves
+  / Statistiques) ; celles déjà ouvertes sont reprises telles quelles.
+- **Actions** : `generateReport` (période et résumé obligatoires), `submitReport`, `decideReport`,
+  `arbitrateReserve`, `liftReserve`, `requestClosure`, `decideClosure`, `reopenClosure` enveloppées dans
+  `withOutcome` (bandeau « Ensuite / Débloqué ») et `schedulePendingPushes`. Aucun SQL métier changé.
+- **Notifications** (migration `20261019070101`) : version soumise → la direction ; décision → qui l'a
+  soumise ; clôture demandée → la direction ; décidée → qui l'a demandée ; rouverte → le responsable.
+  Test `supabase/tests/marketing-review-notifications.test.sql`.
+
 ## 9. Design (`docs/DESIGN.md`)
 
 - Design system : tokens et pont shadcn dans `app/globals.css`, polices

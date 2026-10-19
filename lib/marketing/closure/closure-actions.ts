@@ -6,8 +6,10 @@ import { z } from "zod";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
 import { CLOSURE_DECISIONS } from "@/lib/marketing/closure/status";
 import { marketingFailure } from "@/lib/marketing/result";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -17,6 +19,7 @@ import type { WriteResult } from "@/lib/utils/write-result";
 // person who asked).
 
 const e = fr.marketingReview.decision.errors;
+const c = fr.reviewJourney.closure;
 
 function failure(error: { code?: string; message?: string }): WriteResult {
   const m = error.message ?? "";
@@ -44,9 +47,10 @@ function failure(error: { code?: string; message?: string }): WriteResult {
   return marketingFailure(error);
 }
 
-function done(projectId: string): WriteResult {
+async function done(projectId: string): Promise<WriteResult> {
   // The chevrons, the workflow cards and the project's closing read it too.
   revalidatePath(routes.project(projectId), "layout");
+  await schedulePendingPushes();
   return { ok: true };
 }
 
@@ -66,12 +70,14 @@ export async function requestClosure(
   if (!p.success) return invalid;
   await requireApproved();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("request_marketing_closure", {
-    p_project_id: p.data.projectId,
-    p_report_id: p.data.reportId,
-    p_note: p.data.note,
+  return withOutcome(p.data.projectId, ["marketing"], c.requested, async () => {
+    const { error } = await supabase.rpc("request_marketing_closure", {
+      p_project_id: p.data.projectId,
+      p_report_id: p.data.reportId,
+      p_note: p.data.note,
+    });
+    return error ? failure(error) : done(p.data.projectId);
   });
-  return error ? failure(error) : done(p.data.projectId);
 }
 
 const decideInput = z.object({
@@ -95,12 +101,20 @@ export async function decideClosure(
     return { ok: false, error: e.commentRequired };
   await requireApproved();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("decide_marketing_closure", {
-    p_closure_id: d.closureId,
-    p_decision: d.decision,
-    p_comment: d.comment,
+  const said =
+    d.decision === "changes_requested"
+      ? c.decision.changesDone
+      : d.decision === "postponed"
+        ? c.decision.postponed
+        : c.decision.closed;
+  return withOutcome(d.projectId, ["marketing"], said, async () => {
+    const { error } = await supabase.rpc("decide_marketing_closure", {
+      p_closure_id: d.closureId,
+      p_decision: d.decision,
+      p_comment: d.comment,
+    });
+    return error ? failure(error) : done(d.projectId);
   });
-  return error ? failure(error) : done(d.projectId);
 }
 
 const reopenInput = z.object({
@@ -117,9 +131,11 @@ export async function reopenClosure(
   if (!p.success) return { ok: false, error: e.reasonRequired };
   await requireApproved();
   const supabase = await createClient();
-  const { error } = await supabase.rpc("reopen_marketing_closure", {
-    p_closure_id: p.data.closureId,
-    p_reason: p.data.reason,
+  return withOutcome(p.data.projectId, ["marketing"], c.reopened, async () => {
+    const { error } = await supabase.rpc("reopen_marketing_closure", {
+      p_closure_id: p.data.closureId,
+      p_reason: p.data.reason,
+    });
+    return error ? failure(error) : done(p.data.projectId);
   });
-  return error ? failure(error) : done(p.data.projectId);
 }
