@@ -6,12 +6,13 @@ import { fr } from "@/lib/i18n/fr";
 import { LEGAL_FORM_VERSION } from "@/lib/legal/forms/definition";
 import { checkSubmission, submissionSchema } from "@/lib/legal/forms/schema";
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 export type SubmitFormResult =
   | { ok: true; status: "complete" | "action_required" }
   | { ok: false; error: string; missing?: string[]; invalid?: string[] };
 
-const TOKEN = z.string().regex(/^[0-9a-f]{64}$/);
+const TOKEN = z.string().regex(LINK_KEY);
 
 /**
  * Sends a fiche from its public page, without an account (« Aucun compte PO
@@ -39,7 +40,7 @@ export async function submitLegalForm(
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("submit_legal_form", {
-    p_token: parsedToken.data,
+    ...linkKeyArgs(parsedToken.data),
     p_roles: checked.roles,
     p_other_role: checked.otherRole,
     p_person: checked.person,

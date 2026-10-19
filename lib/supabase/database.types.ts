@@ -16536,7 +16536,7 @@ export type Database = {
         Returns: undefined
       }
       take_master_transmission:
-        | { Args: { p_mastering_cents?: number; p_mix_cents?: number; p_token: string }; Returns: string }
+        | { Args: { p_mastering_cents?: number | null; p_mix_cents?: number | null; p_token: string }; Returns: string }
         | { Args: { p_contact_token: string; p_item_id: string; p_mastering_cents: number | null; p_mix_cents: number | null }; Returns: string }
       master_transmission_link: {
         Args: { p_transmission_id: string }
@@ -16835,7 +16835,7 @@ export type Database = {
         Returns: string
       }
       post_master_engineer_message:
-        | { Args: { p_body: string; p_delay_days?: number; p_kind: string; p_token: string }; Returns: string }
+        | { Args: { p_body: string; p_delay_days?: number | null; p_kind: string; p_token: string }; Returns: string }
         | { Args: { p_body: string; p_contact_token: string; p_delay_days: number | null; p_item_id: string; p_kind: string }; Returns: string }
       prepare_distribution_version: {
         Args: { p_note: string; p_project_id: string }

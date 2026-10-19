@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { TOKEN } from "@/lib/production/provider/public";
 import { createClient } from "@/lib/supabase/server";
+import { linkKeyArgs } from "@/lib/portal/link-key";
 
 const text = z.string().nullable();
 const journeySchema = z.object({
@@ -107,7 +108,7 @@ export async function getLinkJourney(
   if (!TOKEN.test(token)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_production_link_journey", {
-    p_token: token,
+    ...linkKeyArgs(token),
   });
   if (error) console.error("getLinkJourney:", error.message);
   const parsed = journeySchema.safeParse(data);

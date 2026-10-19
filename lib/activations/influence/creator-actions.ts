@@ -6,13 +6,14 @@ import { z } from "zod";
 import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs, linkKeyPath } from "@/lib/portal/link-key";
 
 // The creator's gestures on her private link, without an account: the
 // database checks the token and the step (20261019060201).
 
 type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
-const token = z.string().regex(/^[0-9a-f]{64}$/);
+const token = z.string().regex(LINK_KEY);
 const url = z
   .string()
   .trim()
@@ -34,7 +35,7 @@ function failure(message: string | undefined): { ok: false; error: string } {
 
 async function done(t: string): Promise<{ ok: true }> {
   await schedulePendingPushes();
-  revalidatePath(`/i/${t}`);
+  revalidatePath(linkKeyPath("i", t));
   return { ok: true };
 }
 
@@ -47,7 +48,7 @@ export async function submitCreatorContent(input: {
   if (!v.success) return failure("url_invalid");
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_influence_content_by_token", {
-    p_token: v.data.token,
+    ...linkKeyArgs(v.data.token),
     p_url: v.data.url,
   });
   return error ? failure(error.message) : done(v.data.token);
@@ -64,7 +65,7 @@ export async function declareCreatorPublication(input: {
   const { error } = await supabase.rpc(
     "declare_influence_publication_by_token",
     {
-      p_token: v.data.token,
+      ...linkKeyArgs(v.data.token),
       p_url: v.data.url,
     },
   );
@@ -84,7 +85,7 @@ export async function openCreatorInvoiceSlot(input: {
     /\.([a-z0-9]{1,10})$/i.exec(v.data.fileName)?.[1]?.toLowerCase() ?? "";
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("open_influence_invoice_slot", {
-    p_token: v.data.token,
+    ...linkKeyArgs(v.data.token),
     p_ext: ext,
   });
   if (error || !data) return failure(error?.message);
@@ -111,7 +112,7 @@ export async function submitCreatorInvoice(input: {
   if (!v.success) return failure(undefined);
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_influence_invoice_by_token", {
-    p_token: v.data.token,
+    ...linkKeyArgs(v.data.token),
     p_path: v.data.path,
     p_file_name: v.data.fileName,
     p_mime: v.data.mime || "application/octet-stream",

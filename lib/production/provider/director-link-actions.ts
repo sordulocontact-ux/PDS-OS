@@ -7,6 +7,7 @@ import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { TOKEN } from "@/lib/production/provider/public";
 import { createClient } from "@/lib/supabase/server";
+import { linkKeyArgs, linkKeyPath } from "@/lib/portal/link-key";
 
 type Result = { ok: true } | { ok: false; error: string };
 const t = fr.productionLink.director;
@@ -39,7 +40,7 @@ export async function proposeDirectorByLink(
   const p = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("propose_production_director_by_link", {
-    p_token: p.token,
+    ...linkKeyArgs(p.token),
     p_name: p.name,
     p_reel_url: p.reel,
     p_note: p.note || null,
@@ -54,6 +55,6 @@ export async function proposeDirectorByLink(
     return { ok: false, error: e.failed };
   }
   await schedulePendingPushes();
-  revalidatePath(`/p/${p.token}`);
+  revalidatePath(linkKeyPath("p", p.token));
   return { ok: true };
 }

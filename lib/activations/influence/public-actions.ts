@@ -4,13 +4,14 @@ import { z } from "zod";
 
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 // The creator's answer, without an account : the token, the hash of the
 // version shown, the declared name and the consent are checked by
 // respond_influence_agreement.
 
 const schema = z.object({
-  token: z.string().regex(/^[0-9a-f]{64}$/),
+  token: z.string().regex(LINK_KEY),
   decision: z.enum(["accept", "change"]),
   name: z.string().trim().max(200),
   comment: z.string().trim().max(2000),
@@ -35,7 +36,7 @@ export async function answerAgreement(
     return { ok: false, error: t.commentRequired };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("respond_influence_agreement", {
-    p_token: v.token,
+    ...linkKeyArgs(v.token),
     p_decision: v.decision,
     p_name: v.name || null,
     p_comment: v.comment || null,

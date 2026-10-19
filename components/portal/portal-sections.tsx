@@ -19,8 +19,18 @@ export type PortalCardItem = {
   dueKey?: string | null;
   order: number;
   workflow?: keyof typeof t.workflows;
+  // A call the person is invited to: sorted with what is « À vous », but
+  // not an action (its pill says « Invité »).
+  invite?: boolean;
+  badge?: string;
   body?: React.ReactNode;
 };
+
+// The order of the intertitles (shell.md E10): the framing's calls, then
+// Master, Juridique, Marketing, Distribution.
+const WORKFLOW_ORDER = Object.keys(t.workflows);
+const rank = (w: PortalCardItem["workflow"]) =>
+  w ? WORKFLOW_ORDER.indexOf(w) : -1;
 
 const byDue = (a: PortalCardItem, b: PortalCardItem) =>
   (a.dueKey ?? "9999").localeCompare(b.dueKey ?? "9999") || b.order - a.order;
@@ -31,11 +41,20 @@ const byJourney = (a: PortalCardItem, b: PortalCardItem) => b.order - a.order;
  * The cards of a private page, sorted (proto portalCards): « À vous » by
  * deadline, then « En attente de PDS », then « Fait · n » folded. Several
  * actions: a summary on top (« action · échéance · Étape » + « Voir »).
- * Cards of several workflows: one intertitle per workflow.
+ * Cards of several workflows (or `grouped`): one intertitle per workflow.
  */
-export function PortalSections({ cards }: { cards: PortalCardItem[] }) {
-  const todo = cards.filter((c) => c.state === "todo").sort(byDue);
-  const workflows = [...new Set(cards.map((c) => c.workflow))];
+export function PortalSections({
+  cards,
+  grouped = false,
+}: {
+  cards: PortalCardItem[];
+  // The person's page by project: one intertitle per workflow, even alone.
+  grouped?: boolean;
+}) {
+  const todo = cards.filter((c) => c.state === "todo" && !c.invite).sort(byDue);
+  const workflows = [...new Set(cards.map((c) => c.workflow))].sort(
+    (a, b) => rank(a) - rank(b),
+  );
   return (
     <>
       {todo.length > 1 && (
@@ -62,7 +81,7 @@ export function PortalSections({ cards }: { cards: PortalCardItem[] }) {
       )}
       {workflows.map((w) => (
         <div key={w ?? "one"} className="flex flex-col gap-[18px]">
-          {workflows.length > 1 && w && (
+          {(grouped || workflows.length > 1) && w && (
             <GroupTitle>{t.workflows[w]}</GroupTitle>
           )}
           <Groups cards={cards.filter((c) => c.workflow === w)} />
@@ -82,6 +101,7 @@ function Groups({ cards }: { cards: PortalCardItem[] }) {
       id={c.id}
       title={c.title}
       state={c.state}
+      badge={c.badge}
       action={c.action}
     >
       {c.body}
@@ -117,9 +137,10 @@ function GroupTitle({ children }: { children: React.ReactNode }) {
 }
 
 /** The title of a private page: « Ce que PDS attend de vous » when a card
- * is « À vous », else « Rien à faire pour l'instant ». */
+ * is « À vous », else « Votre prochain rendez-vous avec PDS » when invited
+ * to a call, else « Rien à faire pour l'instant ». */
 export function portalTitle(cards: PortalCardItem[]): string {
-  return cards.some((c) => c.state === "todo")
-    ? t.headings.todo
-    : t.headings.idle;
+  if (cards.some((c) => c.state === "todo" && !c.invite))
+    return t.headings.todo;
+  return cards.some((c) => c.invite) ? t.headings.invited : t.headings.idle;
 }

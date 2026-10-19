@@ -7,6 +7,7 @@ import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
 import { TOKEN } from "@/lib/production/provider/public";
 import { createClient } from "@/lib/supabase/server";
+import { linkKeyArgs, linkKeyPath } from "@/lib/portal/link-key";
 
 // The provider's deposits, from their page, without an account: the
 // database checks the token, the stage and the file (PROD-028, PROD-036).
@@ -47,7 +48,7 @@ export async function openProviderSlot(
   if (!parsed.success) return failure(undefined);
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("open_production_provider_slot", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_file_name: parsed.data.fileName,
   });
   if (error || !data) return failure(error?.message);
@@ -73,7 +74,7 @@ export async function depositProviderVersion(
   const v = parsed.data;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("deposit_production_version", {
-    p_token: v.token,
+    ...linkKeyArgs(v.token),
     p_url: v.url,
     p_path: v.path,
     p_file_name: v.fileName,
@@ -81,7 +82,7 @@ export async function depositProviderVersion(
   });
   if (error || data === null) return failure(error?.message);
   await schedulePendingPushes();
-  revalidatePath(`/p/${v.token}`);
+  revalidatePath(linkKeyPath("p", v.token));
   return { ok: true, number: data };
 }
 
@@ -99,13 +100,13 @@ export async function depositProviderExport(
   if (!parsed.success) return failure("invalid_url");
   const supabase = await createClient();
   const { error } = await supabase.rpc("deposit_production_export", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_line_id: parsed.data.lineId,
     p_url: parsed.data.url,
   });
   if (error) return failure(error.message);
   await schedulePendingPushes();
-  revalidatePath(`/p/${parsed.data.token}`);
+  revalidatePath(linkKeyPath("p", parsed.data.token));
   return { ok: true };
 }
 
@@ -125,13 +126,13 @@ export async function reviewLocationByLink(
   const p = parsed.data;
   const supabase = await createClient();
   const { error } = await supabase.rpc("review_production_location_by_link", {
-    p_token: p.token,
+    ...linkKeyArgs(p.token),
     p_option_id: p.optionId,
     p_verdict: p.verdict,
     p_comment: p.comment,
   });
   if (error) return failure(error.message);
-  revalidatePath(`/p/${p.token}`);
+  revalidatePath(linkKeyPath("p", p.token));
   return { ok: true };
 }
 
@@ -146,11 +147,11 @@ export async function finishStepByLink(
   if (!parsed.success) return failure(undefined);
   const supabase = await createClient();
   const { error } = await supabase.rpc("finish_production_step_by_link", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_step_id: parsed.data.stepId,
   });
   if (error) return failure(error.message);
   await schedulePendingPushes();
-  revalidatePath(`/p/${parsed.data.token}`);
+  revalidatePath(linkKeyPath("p", parsed.data.token));
   return { ok: true };
 }

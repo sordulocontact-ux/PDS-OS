@@ -4,12 +4,13 @@ import { z } from "zod";
 
 import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 // The answer of a contributor, without an account: the token and the hash of
 // the content shown are checked by respond_split_confirmation.
 
 const answerSchema = z.object({
-  token: z.string().regex(/^[0-9a-f]{64}$/),
+  token: z.string().regex(LINK_KEY),
   decision: z.enum(["confirm", "dispute"]),
   comment: z.string().trim().max(2000),
   hash: z.string().regex(/^[0-9a-f]{64}$/),
@@ -28,7 +29,7 @@ export async function answerSplit(
     return { ok: false, error: t.commentRequired };
   const supabase = await createClient();
   const { error } = await supabase.rpc("respond_split_confirmation", {
-    p_token: parsed.data.token,
+    ...linkKeyArgs(parsed.data.token),
     p_decision: parsed.data.decision,
     p_comment: parsed.data.comment || null,
     p_hash: parsed.data.hash,

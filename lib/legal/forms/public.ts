@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { FORM_ROLES } from "@/lib/legal/forms/definition";
 import { createClient } from "@/lib/supabase/server";
+import { LINK_KEY, linkKeyArgs } from "@/lib/portal/link-key";
 
 /** A fiche as its public page sees it, read through get_legal_form(token):
  * the database checks the token, its expiry and revocation. */
@@ -54,7 +55,7 @@ const publicSchema = z.discriminatedUnion("state", [
 
 export type PublicForm = z.infer<typeof publicSchema>;
 
-const TOKEN = /^[0-9a-f]{64}$/;
+const TOKEN = LINK_KEY;
 
 /** Null when the token is malformed or unknown. */
 export const getPublicForm = cache(
@@ -62,7 +63,7 @@ export const getPublicForm = cache(
     if (!TOKEN.test(token)) return null;
     const supabase = await createClient();
     const { data, error } = await supabase.rpc("get_legal_form", {
-      p_token: token,
+      ...linkKeyArgs(token),
     });
     if (error) {
       console.error("getPublicForm:", error.message);
@@ -81,7 +82,7 @@ export async function noteFormOpened(token: string): Promise<void> {
   if (!TOKEN.test(token)) return;
   const supabase = await createClient();
   const { error } = await supabase.rpc("note_legal_form_opened", {
-    p_token: token,
+    ...linkKeyArgs(token),
   });
   if (error) console.error("noteFormOpened:", error.message);
 }

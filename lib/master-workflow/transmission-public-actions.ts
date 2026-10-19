@@ -12,6 +12,7 @@ import { fr } from "@/lib/i18n/fr";
 import { ENGINEER_MESSAGE_KINDS } from "@/lib/master-workflow/engineer-messages";
 import { TOKEN } from "@/lib/master-workflow/transmission-public";
 import { createClient } from "@/lib/supabase/server";
+import { linkKeyArgs, linkKeyPath } from "@/lib/portal/link-key";
 
 /**
  * "J'ai bien reçu le dossier", from the engineer's page, without an account:
@@ -24,14 +25,14 @@ export async function acknowledgeMasterPackage(token: string): Promise<string> {
   const { data, error } = await supabase.rpc(
     "acknowledge_master_transmission",
     {
-      p_token: token,
+      ...linkKeyArgs(token),
     },
   );
   if (error) {
     console.error("acknowledgeMasterPackage:", error.message);
     return "failed";
   }
-  revalidatePath(`/m/${token}`);
+  revalidatePath(linkKeyPath("m", token));
   return data ?? "unknown";
 }
 
@@ -56,15 +57,15 @@ export async function takeMasterPackage(
     return { ok: false, error: t.errors.amount };
   const supabase = await createClient();
   const { error } = await supabase.rpc("take_master_transmission", {
-    p_token: token,
-    p_mix_cents: mixCents ?? undefined,
-    p_mastering_cents: masteringCents ?? undefined,
+    ...linkKeyArgs(token),
+    p_mix_cents: mixCents,
+    p_mastering_cents: masteringCents,
   });
   if (error) {
     console.error("takeMasterPackage:", error.message);
     return { ok: false, error: t.errors.failed };
   }
-  revalidatePath(`/m/${token}`);
+  revalidatePath(linkKeyPath("m", token));
   return { ok: true };
 }
 
@@ -108,7 +109,7 @@ export async function openMasterDelivery(
     return { ok: false, error: deliveryError("invalid_file_name") };
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("open_master_delivery", {
-    p_token: token,
+    ...linkKeyArgs(token),
     p_master_id: masterId,
     p_extension: extension,
     p_file_name: fileName,
@@ -137,7 +138,7 @@ export async function recordMasterDelivery(
     return { ok: false, error: deliveryError(undefined) };
   const supabase = await createClient();
   const { error } = await supabase.rpc("record_master_delivery", {
-    p_token: token,
+    ...linkKeyArgs(token),
     p_path: path,
     p_file_name: fileName.slice(0, 255),
     p_mime: mime,
@@ -147,7 +148,7 @@ export async function recordMasterDelivery(
     console.error("recordMasterDelivery:", error.message);
     return { ok: false, error: deliveryError(error.message) };
   }
-  revalidatePath(`/m/${token}`);
+  revalidatePath(linkKeyPath("m", token));
   return { ok: true };
 }
 
@@ -175,10 +176,10 @@ export async function postEngineerMessage(
     return { ok: false, error: t.delayDaysRequired };
   const supabase = await createClient();
   const { error } = await supabase.rpc("post_master_engineer_message", {
-    p_token: v.token,
+    ...linkKeyArgs(v.token),
     p_kind: v.kind,
     p_body: v.body,
-    p_delay_days: v.kind === "delay" ? (v.delayDays ?? undefined) : undefined,
+    p_delay_days: v.kind === "delay" ? v.delayDays : null,
   });
   if (error) {
     console.error("postEngineerMessage:", error.message);
@@ -191,6 +192,6 @@ export async function postEngineerMessage(
           : t.failed,
     };
   }
-  revalidatePath(`/m/${v.token}`);
+  revalidatePath(linkKeyPath("m", v.token));
   return { ok: true };
 }
