@@ -18,6 +18,7 @@ import {
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 import type { JourneyTransmission, MasterJourneyFacts } from "./journey-facts";
+import { invoiceDueOn } from "./invoice-rules";
 import { newerThan, replacedForVocals, vocalsAwaited } from "./source-rules";
 
 const t = fr.masterJourney;
@@ -31,6 +32,8 @@ export type MasterJourneyInput = {
   facts: MasterJourneyFacts;
   viewerId: string | null;
   owner: { personId: string; name: string } | null;
+  // Who pays the engineers' invoices (the direction), when one waits.
+  direction?: { personId: string; name: string } | null;
   // The Cadrage's Brief validated (« Équipe et temporalité »).
   framingValidatedAt: string | null;
   now: Date;
@@ -94,6 +97,20 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
     stage === "mix" || facts.brief?.masteringSame
       ? (facts.brief?.mixContact ?? null)
       : (facts.brief?.masteringContact ?? null);
+  // The in-house engineer of a round (a member: no link, no invoice).
+  const inHouseOf = (stage: Stage) => {
+    const b = facts.brief;
+    const same = stage === "mix" || b?.masteringSame;
+    const person = same ? b?.mixPerson : b?.masteringPerson;
+    return person
+      ? {
+          ...person,
+          assignedAt:
+            (stage === "mix" ? b?.mixAssignedAt : b?.masteringAssignedAt) ??
+            null,
+        }
+      : null;
+  };
 
   const actorOf = (actions: Action[]): JourneyActor | null => {
     const mine = actions.find(
@@ -195,17 +212,24 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
   // --- Mixage and Mastering --------------------------------------------------
   const roundActions = (stage: Stage): Action[] => {
     const label = t.versionLabel[stage];
-    const engineer = engineerOf(stage);
+    const inHouse = inHouseOf(stage);
+    const engineer = engineerOf(stage) ?? inHouse;
     if (!engineer) return ownerDoes(t.todo.chooseEngineer(stage));
-    const link = liveTransmission(facts, stage);
-    if (!link) return ownerDoes(t.todo.transmit(stage));
+    const link = inHouse ? null : liveTransmission(facts, stage);
+    if (inHouse && !inHouse.assignedAt)
+      return ownerDoes(fr.masterInHouse.todo.assign(inHouse.name));
+    if (!inHouse && !link) return ownerDoes(t.todo.transmit(stage));
     const actions: Action[] = [];
-    const ext: Who = { name: engineer.name, viaLink: true };
+    const ext: Who = inHouse
+      ? { name: inHouse.name, personId: inHouse.personId }
+      : { name: engineer.name, viaLink: true };
     const expired =
-      Date.parse(link.expiresAt) < now.getTime() && !link.acknowledgedAt;
-    if ((link.revokedAt && link.revokeReason) || expired)
+      link !== null &&
+      Date.parse(link.expiresAt) < now.getTime() &&
+      !link.acknowledgedAt;
+    if (link && ((link.revokedAt && link.revokeReason) || expired))
       actions.push(...ownerDoes(t.todo.renewLink));
-    else if (!link.acknowledgedAt)
+    else if (link && !link.acknowledgedAt)
       actions.push({ who: ext, todo: t.todo.takeCharge });
     else
       for (const title of inFlow) {
@@ -239,6 +263,19 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       actions.push(
         ...ownerDoes(t.todo.answerEngineer(firstName(engineer.name), open)),
       );
+    // A delay sent to the direction: it decides (proto `master:thread`).
+    if (
+      input.direction &&
+      facts.messages.some((m) => m.stage === stage && m.status === "escalated")
+    )
+      actions.push({
+        who: {
+          name: input.direction.name,
+          personId: input.direction.personId,
+        },
+        todo: t.todo.arbitrateDelay(firstName(engineer.name)),
+        kind: "validate",
+      });
     if (facts.rates.some((r) => r.stage === stage && r.status === "proposed"))
       actions.push(...ownerDoes(t.todo.acceptRate(firstName(engineer.name))));
     return actions;
@@ -270,10 +307,52 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       ).length,
     0,
   );
-  const finalActions: Action[] =
-    missingDeliverables > 0
-      ? ownerDoes(t.todo.noteDeliverables(missingDeliverables))
-      : [];
+  // The invoices: a new RIB to confirm, then the transfer to note, by the
+  // direction. Never a blocker: the step stays done (proto).
+  const ti = fr.masterInvoice;
+  const directionWho: Who | null = input.direction
+    ? { name: input.direction.name, personId: input.direction.personId }
+    : null;
+  const invoiceActions: Action[] = directionWho
+    ? facts.invoices.flatMap((i) =>
+        !i.receivedAt || i.paidOn
+          ? []
+          : [
+              {
+                who: directionWho,
+                todo: i.bankPending
+                  ? ti.todo.confirmRib(i.contactName)
+                  : ti.todo.pay(
+                      i.contactName,
+                      formatDay(invoiceDueOn(i.receivedAt)),
+                    ),
+              },
+            ],
+      )
+    : [];
+  const finalActions: Action[] = [
+    // The mastering engineer deposits them on their link (proto); without
+    // one, the owner notes them received.
+    ...(missingDeliverables > 0
+      ? engineerOf("mastering")
+        ? [
+            {
+              who: { name: engineerOf("mastering")!.name, viaLink: true },
+              todo: t.todo.depositDeliverables(missingDeliverables),
+            },
+          ]
+        : ownerDoes(t.todo.noteDeliverables(missingDeliverables))
+      : []),
+    ...invoiceActions,
+  ];
+  const invoiceSummary =
+    facts.invoices.length === 0
+      ? null
+      : facts.invoices.some((i) => i.receivedAt && !i.paidOn)
+        ? ti.summary.toPay
+        : facts.invoices.some((i) => !i.receivedAt)
+          ? ti.summary.expected
+          : ti.summary.paid;
 
   // --- The steps ---------------------------------------------------------------
   const nothingToDo = facts.titles.length > 0 && inFlow.length === 0;
@@ -296,7 +375,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
     brief: brief?.dirty ? t.summary.briefDirty : t.summary.brief,
     mix: nothingToDo ? t.summary.allFinal : roundSummary("mix"),
     mastering: nothingToDo ? t.summary.allFinal : roundSummary("mastering"),
-    final: t.summary.final,
+    final: [t.summary.final, invoiceSummary].filter(Boolean).join(" · "),
   };
   const day = (value: string | null) => (value ? formatShortDay(value) : null);
   const externalOf: Record<MasterStepKey, JourneyPrereq[]> = {
@@ -400,7 +479,9 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
               { key: "legal", label: `${t.next.legal} · ${t.next.legalWhy}` },
             ]
           : undefined,
-      actor: open ? actor : null,
+      // A done Master final still names who pays an invoice (proto).
+      actor:
+        open || (key === "final" && invoiceActions.length > 0) ? actor : null,
       summary: summaryOf[key],
     };
   });

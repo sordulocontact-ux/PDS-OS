@@ -167,6 +167,22 @@ export const notifications = {
       `L'ingénieur a déposé une nouvelle version du mix de « ${project} ».`,
     master_mastering_delivery_received: (_actor: string, project: string) =>
       `L'ingénieur a déposé une nouvelle version du mastering de « ${project} ».`,
+    master_invoice_received: (_actor: string, project: string) =>
+      `La facture de l'ingénieur de « ${project} » est arrivée : elle est à payer sous 30 jours.`,
+    master_bank_details_changed: (_actor: string, project: string) =>
+      `L'ingénieur de « ${project} » a donné un nouveau RIB : vérifiez-le par téléphone avant de payer.`,
+    master_delay_escalated: (actor: string, project: string) =>
+      `${actor} vous envoie un retard de l'ingénieur de « ${project} » : le master final passerait après la sortie, à vous d'arbitrer.`,
+    master_delay_decided: (actor: string, project: string) =>
+      `${actor} a tranché le retard de l'ingénieur de « ${project} ».`,
+    master_round_assigned: (actor: string, project: string) =>
+      `${actor} vous confie le mix ou le mastering de « ${project} » : le dossier est dans PDS OS, déposez-y vos versions.`,
+    master_deliverable_received: (_actor: string, project: string) =>
+      `L'ingénieur de « ${project} » a déposé un livrable sur son lien.`,
+    master_listen_feedback: (_actor: string, project: string) =>
+      `L'artiste de « ${project} » a écouté une version et vous laisse son retour.`,
+    master_invoice_paid: (actor: string, project: string) =>
+      `${actor} a marqué payée la facture de l'ingénieur de « ${project} ».`,
     // Sent through a public link: no actor, the project names it.
     legal_form_received: (_actor: string, project: string) =>
       `Une fiche de renseignements de « ${project} » est arrivée : elle est à vérifier.`,

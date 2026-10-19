@@ -3222,6 +3222,73 @@ export type Database = {
           },
         ]
       }
+      contact_bank_accounts: {
+        Row: {
+          bic: string | null
+          contact_id: string
+          created_at: string
+          created_by: string | null
+          holder: string
+          iban: string
+          id: string
+          organization_id: string
+          source: string
+          superseded_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          bic?: string | null
+          contact_id: string
+          created_at?: string
+          created_by?: string | null
+          holder: string
+          iban: string
+          id?: string
+          organization_id: string
+          source?: string
+          superseded_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          bic?: string | null
+          contact_id?: string
+          created_at?: string
+          created_by?: string | null
+          holder?: string
+          iban?: string
+          id?: string
+          organization_id?: string
+          source?: string
+          superseded_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_bank_accounts_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_bank_accounts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_bank_accounts_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_legal_details: {
         Row: {
           contact_id: string
@@ -8541,6 +8608,7 @@ export type Database = {
       master_brief_questions: {
         Row: {
           answer_choices: string[] | null
+          answer_items: Json | null
           answer_text: string | null
           answered_at: string | null
           applied_at: string | null
@@ -8554,6 +8622,7 @@ export type Database = {
         }
         Insert: {
           answer_choices?: string[] | null
+          answer_items?: Json | null
           answer_text?: string | null
           answered_at?: string | null
           applied_at?: string | null
@@ -8567,6 +8636,7 @@ export type Database = {
         }
         Update: {
           answer_choices?: string[] | null
+          answer_items?: Json | null
           answer_text?: string | null
           answered_at?: string | null
           applied_at?: string | null
@@ -8615,12 +8685,18 @@ export type Database = {
           engineer_message: string | null
           id: string
           master_final_due: string | null
+          mastering_assigned_at: string | null
+          mastering_assigned_by: string | null
           mastering_contact_id: string | null
           mastering_due: string | null
+          mastering_person_id: string | null
           mastering_rate_cents: number | null
           mastering_same_engineer: boolean
+          mix_assigned_at: string | null
+          mix_assigned_by: string | null
           mix_contact_id: string | null
           mix_final_due: string | null
+          mix_person_id: string | null
           mix_rate_cents: number | null
           mix_v1_due: string | null
           organization_id: string
@@ -8646,12 +8722,18 @@ export type Database = {
           engineer_message?: string | null
           id?: string
           master_final_due?: string | null
+          mastering_assigned_at?: string | null
+          mastering_assigned_by?: string | null
           mastering_contact_id?: string | null
           mastering_due?: string | null
+          mastering_person_id?: string | null
           mastering_rate_cents?: number | null
           mastering_same_engineer?: boolean
+          mix_assigned_at?: string | null
+          mix_assigned_by?: string | null
           mix_contact_id?: string | null
           mix_final_due?: string | null
+          mix_person_id?: string | null
           mix_rate_cents?: number | null
           mix_v1_due?: string | null
           organization_id: string
@@ -8677,12 +8759,18 @@ export type Database = {
           engineer_message?: string | null
           id?: string
           master_final_due?: string | null
+          mastering_assigned_at?: string | null
+          mastering_assigned_by?: string | null
           mastering_contact_id?: string | null
           mastering_due?: string | null
+          mastering_person_id?: string | null
           mastering_rate_cents?: number | null
           mastering_same_engineer?: boolean
+          mix_assigned_at?: string | null
+          mix_assigned_by?: string | null
           mix_contact_id?: string | null
           mix_final_due?: string | null
+          mix_person_id?: string | null
           mix_rate_cents?: number | null
           mix_v1_due?: string | null
           organization_id?: string
@@ -8698,15 +8786,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "master_briefs_recorded_by_fkey"
-            columns: ["recorded_by"]
+            foreignKeyName: "master_briefs_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "master_briefs_created_by_fkey"
-            columns: ["created_by"]
+            foreignKeyName: "master_briefs_mastering_assigned_by_fkey"
+            columns: ["mastering_assigned_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -8719,6 +8807,20 @@ export type Database = {
             referencedColumns: ["id", "organization_id"]
           },
           {
+            foreignKeyName: "master_briefs_mastering_person_id_fkey"
+            columns: ["mastering_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_briefs_mix_assigned_by_fkey"
+            columns: ["mix_assigned_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "master_briefs_mix_contact_same_org"
             columns: ["mix_contact_id", "organization_id"]
             isOneToOne: false
@@ -8726,11 +8828,25 @@ export type Database = {
             referencedColumns: ["id", "organization_id"]
           },
           {
+            foreignKeyName: "master_briefs_mix_person_id_fkey"
+            columns: ["mix_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "master_briefs_project_same_org"
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_briefs_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "master_briefs_updated_by_fkey"
@@ -8924,28 +9040,34 @@ export type Database = {
           created_at: string
           created_by: string | null
           deliverable: string
+          file_id: string | null
           id: string
           master_id: string
           organization_id: string
           project_id: string
+          via_link: boolean
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           deliverable: string
+          file_id?: string | null
           id?: string
           master_id: string
           organization_id: string
           project_id: string
+          via_link?: boolean
         }
         Update: {
           created_at?: string
           created_by?: string | null
           deliverable?: string
+          file_id?: string | null
           id?: string
           master_id?: string
           organization_id?: string
           project_id?: string
+          via_link?: boolean
         }
         Relationships: [
           {
@@ -8956,11 +9078,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "master_deliverables_received_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "master_files"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "master_deliverables_received_project_same_org"
             columns: ["project_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_deliverables_received_title_in_project"
+            columns: ["project_id", "master_id"]
+            isOneToOne: false
+            referencedRelation: "project_masters"
+            referencedColumns: ["project_id", "master_id"]
           },
         ]
       }
@@ -8971,11 +9107,14 @@ export type Database = {
           body: string
           created_at: string
           delay_days: number | null
+          escalated_at: string | null
+          escalated_by: string | null
           handled_at: string | null
           handled_by: string | null
           id: string
           kind: string
           organization_id: string
+          outcome: string | null
           project_id: string
           stage: string
           status: string | null
@@ -8987,11 +9126,14 @@ export type Database = {
           body: string
           created_at?: string
           delay_days?: number | null
+          escalated_at?: string | null
+          escalated_by?: string | null
           handled_at?: string | null
           handled_by?: string | null
           id?: string
           kind: string
           organization_id: string
+          outcome?: string | null
           project_id: string
           stage: string
           status?: string | null
@@ -9003,11 +9145,14 @@ export type Database = {
           body?: string
           created_at?: string
           delay_days?: number | null
+          escalated_at?: string | null
+          escalated_by?: string | null
           handled_at?: string | null
           handled_by?: string | null
           id?: string
           kind?: string
           organization_id?: string
+          outcome?: string | null
           project_id?: string
           stage?: string
           status?: string | null
@@ -9017,6 +9162,13 @@ export type Database = {
           {
             foreignKeyName: "master_engineer_messages_author_person_id_fkey"
             columns: ["author_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_engineer_messages_escalated_by_fkey"
+            columns: ["escalated_by"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
@@ -9271,10 +9423,109 @@ export type Database = {
           },
         ]
       }
+      master_invoices: {
+        Row: {
+          amount_cents: number | null
+          amount_reason: string | null
+          bank_changed: boolean
+          contact_id: string
+          created_at: string
+          file_bytes: number | null
+          file_name: string | null
+          file_path: string | null
+          id: string
+          number: string | null
+          organization_id: string
+          paid_at: string | null
+          paid_by: string | null
+          paid_on: string | null
+          project_id: string
+          received_at: string | null
+          received_by: string | null
+          received_how: string | null
+          received_via: string | null
+          requested_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          amount_reason?: string | null
+          bank_changed?: boolean
+          contact_id: string
+          created_at?: string
+          file_bytes?: number | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          number?: string | null
+          organization_id: string
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          project_id: string
+          received_at?: string | null
+          received_by?: string | null
+          received_how?: string | null
+          received_via?: string | null
+          requested_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          amount_reason?: string | null
+          bank_changed?: boolean
+          contact_id?: string
+          created_at?: string
+          file_bytes?: number | null
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          number?: string | null
+          organization_id?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          project_id?: string
+          received_at?: string | null
+          received_by?: string | null
+          received_how?: string | null
+          received_via?: string | null
+          requested_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_invoices_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_invoices_paid_by_fkey"
+            columns: ["paid_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_invoices_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "master_invoices_received_by_fkey"
+            columns: ["received_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       master_mix_comments: {
         Row: {
           body: string
           client_key: string | null
+          contact_id: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -9286,6 +9537,7 @@ export type Database = {
         Insert: {
           body: string
           client_key?: string | null
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -9297,6 +9549,7 @@ export type Database = {
         Update: {
           body?: string
           client_key?: string | null
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -9306,6 +9559,13 @@ export type Database = {
           version_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "master_mix_comments_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "master_mix_comments_created_by_fkey"
             columns: ["created_by"]
@@ -9326,6 +9586,48 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "master_mix_versions"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      master_payment_proofs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_name: string
+          invoice_id: string
+          organization_id: string
+          path: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          invoice_id: string
+          organization_id: string
+          path: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          invoice_id?: string
+          organization_id?: string
+          path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_payment_proofs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_payment_proofs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "master_invoices"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -10678,6 +10980,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "projects"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      organization_billing: {
+        Row: {
+          address: string
+          legal_name: string
+          organization_id: string
+          siret: string | null
+          updated_at: string
+          updated_by: string | null
+          vat_number: string | null
+        }
+        Insert: {
+          address: string
+          legal_name: string
+          organization_id: string
+          siret?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vat_number?: string | null
+        }
+        Update: {
+          address?: string
+          legal_name?: string
+          organization_id?: string
+          siret?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          vat_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_billing_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_billing_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -18063,6 +18410,170 @@ export type Database = {
       open_strategy_revision: {
         Args: { p_project_id: string }
         Returns: undefined
+      }
+      contact_bank_state: { Args: { p_contact_id: string }; Returns: string }
+      confirm_contact_bank_account: {
+        Args: { p_account_id: string; p_phone_checked: boolean }
+        Returns: undefined
+      }
+      get_master_invoice:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      iban_valid: { Args: { p_iban: string }; Returns: boolean }
+      is_direction: { Args: { p_org: string }; Returns: boolean }
+      open_master_finance_slot: {
+        Args: { p_ext: string; p_invoice_id: string; p_kind: string }
+        Returns: string
+      }
+      open_master_invoice_slot:
+        | { Args: { p_token: string }; Returns: string }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: string }
+      pay_master_invoice: {
+        Args: {
+          p_file_name: string
+          p_invoice_id: string
+          p_mime: string
+          p_paid_on: string
+          p_path: string
+        }
+        Returns: undefined
+      }
+      record_master_invoice_other: {
+        Args: {
+          p_amount_cents: number
+          p_file_name: string
+          p_how: string | null
+          p_invoice_id: string
+          p_mime: string
+          p_number: string
+          p_path: string
+          p_reason: string | null
+          p_iban: string | null
+          p_bic: string | null
+          p_holder: string | null
+        }
+        Returns: undefined
+      }
+      submit_master_invoice:
+        | {
+            Args: {
+              p_amount_cents: number
+              p_bic: string | null
+              p_file_name: string
+              p_holder: string | null
+              p_iban: string | null
+              p_mime: string
+              p_number: string
+              p_path: string
+              p_reason: string | null
+              p_token: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_amount_cents: number
+              p_bic: string | null
+              p_contact_token: string
+              p_file_name: string
+              p_holder: string | null
+              p_iban: string | null
+              p_item_id: string
+              p_mime: string
+              p_number: string
+              p_path: string
+              p_reason: string | null
+            }
+            Returns: undefined
+          }
+      get_master_listen: { Args: { p_contact_token: string }; Returns: Json }
+      post_master_listen_comment: {
+        Args: {
+          p_body: string
+          p_client_key: string
+          p_contact_token: string
+          p_timecode_seconds: number | null
+          p_version_id: string
+        }
+        Returns: undefined
+      }
+      apply_master_delay: {
+        Args: { p_dates: Json; p_message_id: string; p_reply: string | null }
+        Returns: undefined
+      }
+      escalate_master_delay: { Args: { p_message_id: string }; Returns: undefined }
+      keep_master_dates: {
+        Args: { p_message_id: string; p_reply: string }
+        Returns: undefined
+      }
+      answer_master_question_read: {
+        Args: { p_items: Json; p_question_id: string; p_text: string }
+        Returns: undefined
+      }
+      get_master_deliverables:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      open_master_deliverable:
+        | {
+            Args: {
+              p_deliverable: string
+              p_extension: string
+              p_file_name: string
+              p_master_id: string
+              p_token: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_contact_token: string
+              p_deliverable: string
+              p_extension: string
+              p_file_name: string
+              p_item_id: string
+              p_master_id: string
+            }
+            Returns: string
+          }
+      record_master_deliverable:
+        | {
+            Args: {
+              p_bytes: number
+              p_file_name: string
+              p_mime: string
+              p_path: string
+              p_token: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_bytes: number
+              p_contact_token: string
+              p_file_name: string
+              p_item_id: string
+              p_mime: string
+              p_path: string
+            }
+            Returns: string
+          }
+      assign_master_round: {
+        Args: { p_project_id: string; p_role: string }
+        Returns: undefined
+      }
+      open_master_member_delivery: {
+        Args: {
+          p_extension: string
+          p_file_name: string
+          p_master_id: string
+          p_project_id: string
+          p_stage: string
+        }
+        Returns: string
+      }
+      record_master_member_delivery: {
+        Args: { p_bytes: number; p_file_name: string; p_mime: string; p_path: string }
+        Returns: string
       }
       open_master_delivery:
         | { Args: { p_extension: string; p_file_name?: string; p_master_id: string; p_token: string }; Returns: string }

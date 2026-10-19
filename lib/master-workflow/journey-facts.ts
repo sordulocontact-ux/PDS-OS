@@ -94,6 +94,11 @@ export type MasterJourneyFacts = {
     mixContact: { id: string; name: string } | null;
     masteringSame: boolean;
     masteringContact: { id: string; name: string } | null;
+    // In-house engineers (members), and when their round was assigned.
+    mixPerson: { personId: string; name: string } | null;
+    masteringPerson: { personId: string; name: string } | null;
+    mixAssignedAt: string | null;
+    masteringAssignedAt: string | null;
     deliverables: string[];
     masterFinalDue: string | null;
   } | null;
@@ -113,6 +118,8 @@ export type MasterJourneyFacts = {
     kind: string;
     status: string | null;
     createdAt: string;
+    // A delay sent to the direction.
+    escalatedAt: string | null;
   }>;
   questions: Array<{
     askedTo: string | null;
@@ -126,7 +133,26 @@ export type MasterJourneyFacts = {
   // The Master's budget lines (owner and direction only, RLS): a rate
   // proposed by the engineer waits for « Accepter le tarif ».
   rates: Array<{ stage: "mix" | "mastering"; status: string }>;
+  // The engineers' invoices (owner and direction only, RLS).
+  invoices: JourneyInvoice[];
   failed: boolean;
+};
+
+export type JourneyInvoice = {
+  id: string;
+  contactName: string;
+  requestedAt: string;
+  number: string | null;
+  amountCents: number | null;
+  receivedAt: string | null;
+  viaLink: boolean;
+  receivedBy: string | null;
+  bankChanged: boolean;
+  // A new RIB waits for the direction's phone call.
+  bankPending: boolean;
+  paidOn: string | null;
+  paidAt: string | null;
+  paidBy: string | null;
 };
 
 export async function loadMasterJourneyFacts(project: {
@@ -149,6 +175,7 @@ export async function loadMasterJourneyFacts(project: {
     exchanges,
     plan,
     rates,
+    invoices,
   ] = await Promise.all([
     ids.length
       ? supabase
@@ -169,7 +196,7 @@ export async function loadMasterJourneyFacts(project: {
     supabase
       .from("master_briefs")
       .select(
-        "created_at, updated_at, recorded_at, content_changed_at, start_mode, direction, references_text, constraints_text, validator_person_id, mix_contact_id, mastering_same_engineer, mastering_contact_id, deliverables, master_final_due, validator:people!master_briefs_validator_person_id_fkey(first_name, last_name), updater:people!master_briefs_updated_by_fkey(first_name, last_name), recorder:people!master_briefs_recorded_by_fkey(first_name, last_name), mix:network_contacts!master_briefs_mix_contact_same_org(name), mastering:network_contacts!master_briefs_mastering_contact_same_org(name)",
+        "created_at, updated_at, recorded_at, content_changed_at, start_mode, direction, references_text, constraints_text, validator_person_id, mix_contact_id, mastering_same_engineer, mastering_contact_id, deliverables, master_final_due, validator:people!master_briefs_validator_person_id_fkey(first_name, last_name), updater:people!master_briefs_updated_by_fkey(first_name, last_name), recorder:people!master_briefs_recorded_by_fkey(first_name, last_name), mix:network_contacts!master_briefs_mix_contact_same_org(name), mastering:network_contacts!master_briefs_mastering_contact_same_org(name), mix_person_id, mastering_person_id, mix_assigned_at, mastering_assigned_at, mixer:people!master_briefs_mix_person_id_fkey(first_name, last_name), masterer:people!master_briefs_mastering_person_id_fkey(first_name, last_name)",
       )
       .eq("project_id", project.id)
       .maybeSingle(),
@@ -203,7 +230,7 @@ export async function loadMasterJourneyFacts(project: {
       .eq("project_id", project.id),
     supabase
       .from("master_engineer_messages")
-      .select("stage, kind, status, created_at")
+      .select("stage, kind, status, created_at, escalated_at")
       .eq("project_id", project.id)
       .eq("author", "engineer"),
     supabase
@@ -233,7 +260,27 @@ export async function loadMasterJourneyFacts(project: {
       .select("master_role, status")
       .eq("project_id", project.id)
       .not("master_role", "is", null),
+    supabase
+      .from("master_invoices")
+      .select(
+        "id, contact_id, requested_at, number, amount_cents, received_at, received_via, bank_changed, paid_on, paid_at, contact:network_contacts!master_invoices_contact_same_org(name), receiver:people!master_invoices_received_by_fkey(first_name, last_name), payer:people!master_invoices_paid_by_fkey(first_name, last_name)",
+      )
+      .eq("project_id", project.id)
+      .order("requested_at"),
   ]);
+  // Whether a new RIB waits, per engineer (never a digit): few rows, only
+  // once an invoice was received with a new RIB.
+  const pendingOf = new Map(
+    await Promise.all(
+      (invoices.data ?? [])
+        .filter((i) => i.bank_changed && !i.paid_on)
+        .map((i) =>
+          supabase
+            .rpc("contact_bank_state", { p_contact_id: i.contact_id })
+            .then(({ data }) => [i.id, data === "pending"] as const),
+        ),
+    ),
+  );
   const errors = [
     files.error,
     sources.error,
@@ -300,6 +347,19 @@ export async function loadMasterJourneyFacts(project: {
               : null,
           deliverables: b.deliverables ?? [],
           masterFinalDue: b.master_final_due,
+          mixPerson:
+            b.mix_person_id && b.mixer
+              ? { personId: b.mix_person_id, name: nameOf(b.mixer) ?? "" }
+              : null,
+          masteringPerson:
+            b.mastering_person_id && b.masterer
+              ? {
+                  personId: b.mastering_person_id,
+                  name: nameOf(b.masterer) ?? "",
+                }
+              : null,
+          mixAssignedAt: b.mix_assigned_at,
+          masteringAssignedAt: b.mastering_assigned_at,
         }
       : null,
     creative: creative
@@ -357,6 +417,7 @@ export async function loadMasterJourneyFacts(project: {
       kind: m.kind,
       status: m.status,
       createdAt: m.created_at,
+      escalatedAt: m.escalated_at,
     })),
     questions: (questions.data ?? []).map((q) => ({
       askedTo: q.asked_to,
@@ -382,6 +443,21 @@ export async function loadMasterJourneyFacts(project: {
         ? [{ stage: r.master_role, status: r.status }]
         : [],
     ),
+    invoices: (invoices.data ?? []).map((i) => ({
+      id: i.id,
+      contactName: i.contact?.name ?? "",
+      requestedAt: i.requested_at,
+      number: i.number,
+      amountCents: i.amount_cents,
+      receivedAt: i.received_at,
+      viaLink: i.received_via === "link",
+      receivedBy: nameOf(i.receiver),
+      bankChanged: i.bank_changed,
+      bankPending: pendingOf.get(i.id) ?? false,
+      paidOn: i.paid_on,
+      paidAt: i.paid_at,
+      paidBy: nameOf(i.payer),
+    })),
     failed: errors.length > 0,
   };
 }

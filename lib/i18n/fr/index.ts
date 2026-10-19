@@ -65,6 +65,11 @@ import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { masterBrief } from "./master-brief";
 import { masterFinal } from "./master-final";
+import { masterInvoice } from "./master-invoice";
+import { masterListen } from "./master-listen";
+import { masterDelay } from "./master-delay";
+import { masterAnswer } from "./master-answer";
+import { masterInHouse } from "./master-inhouse";
 import { masterJourney } from "./master-journey";
 import { reviewJourney } from "./review-journey";
 import { masterPage } from "./master-page";
@@ -263,6 +268,11 @@ export const fr = {
   masterBrief,
   masterRound,
   masterFinal,
+  masterInvoice,
+  masterListen,
+  masterDelay,
+  masterAnswer,
+  masterInHouse,
   masterSource,
   artistActivity,
   masterPage,
