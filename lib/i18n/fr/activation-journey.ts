@@ -119,7 +119,8 @@ export const activationJourney = {
   detail: {
     gate: (what: string) => `Elle commence quand ${what}.`,
     gateBlocker: (what: string) => `Elle attend : ${what}.`,
-    delivered: (title: string) => `« ${title} » est livré`,
+    // « Clip officiel livré » (list), « le Clip officiel est livré » (callout).
+    deliveredShort: (title: string) => `${title} livré`,
     cancelled: (by: string, day: string, why: string) =>
       `Annulée par ${by} le ${day} : « ${why} ». Elle reste dans le bilan, avec ce motif.`,
     cancelledShort: (why: string) =>
@@ -133,6 +134,8 @@ export const activationJourney = {
     and: " et ",
     pills: { suspended: "Suspendue", cancelled: "Annulée", blocked: "Bloquée" },
   },
+  collabAll: "Toute la collaboration",
+  mediaAll: "Tout le suivi du média",
   influence: {
     title: "Campagne d'influence · gestion interne",
     concept: "Concept de campagne",

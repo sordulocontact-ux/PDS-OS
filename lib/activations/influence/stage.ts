@@ -53,3 +53,46 @@ export function collaborationStage(f: CollaborationFacts): CollaborationStage {
   if (f.conceptStatus === "to_validate") return "concept_to_validate";
   return "candidate";
 }
+
+/** The parts of a collaboration's fiche. */
+export type CollabPart =
+  | "concept"
+  | "negotiation"
+  | "messages"
+  | "rights"
+  | "contents"
+  | "publication"
+  | "metrics"
+  | "payment"
+  | "journal";
+
+/**
+ * The parts shown open in a collaboration's card for its step (proto
+ * collabCard: one gesture at a time); the others stay folded under « Toute
+ * la collaboration ».
+ */
+export function collabFocus(stage: CollaborationStage): CollabPart[] {
+  switch (stage) {
+    case "candidate":
+    case "concept_to_validate":
+      return ["concept"];
+    case "validated_internal":
+    case "to_contact":
+      return ["concept", "messages"];
+    case "negotiation":
+    case "agreement_to_obtain":
+      return ["negotiation"];
+    case "agreed":
+    case "content_in_progress":
+    case "in_validation":
+      return ["contents"];
+    case "ready_to_publish":
+    case "published_declared":
+      return ["publication"];
+    case "published_verified":
+    case "administration":
+      return ["publication", "payment"];
+    default:
+      return ["publication", "metrics"];
+  }
+}

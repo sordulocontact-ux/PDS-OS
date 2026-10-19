@@ -1,5 +1,3 @@
-import { IconLock } from "nucleo-sharp-essential";
-
 import { MetricsSection } from "@/components/activations/metrics/metrics-section";
 import {
   ResultBanner,
@@ -106,10 +104,7 @@ export async function ActivationDetail({
         <ResultBanner />
         {gated ? (
           <ToneCallout tone="neutral">
-            <IconLock aria-hidden className="mr-1 inline size-4 align-[-3px]" />
-            {a.launchGaps.includes("dependency")
-              ? t.detail.gate(a.waitsFor ?? "")
-              : t.detail.gateBlocker(a.waitsFor ?? "")}
+            {t.detail.gateBlocker(a.waitsFor ?? "")}
           </ToneCallout>
         ) : (
           <>

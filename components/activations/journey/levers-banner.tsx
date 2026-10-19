@@ -60,7 +60,7 @@ export function LeversBanner({
             key={l.leverId}
             className="flex flex-wrap items-center justify-between gap-3 px-3.5 py-3"
           >
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 flex-1 basis-56">
               <b className="block font-semibold break-words">{l.label}</b>
               <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-tertiary)]">
                 {t.source(

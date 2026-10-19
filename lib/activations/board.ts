@@ -173,14 +173,7 @@ export const loadActivationsBoard = cache(async (projectId: string) => {
       sourceLabel: sources.get(a.id) ?? null,
       derived,
       actions: viewerFirst([...(trunk ? [trunk] : []), ...lines]),
-      waitsFor: gated
-        ? [
-            ...facts.openBlockers.map((b) => b.description),
-            ...facts.dependencies
-              .filter((d) => d.blocking && d.resolved === false)
-              .map((d) => d.label),
-          ].join(" · ") || null
-        : null,
+      waitsFor: gated ? waitsForOf(facts) : null,
       lastFigure: lastFigureOf(a, data),
       proof,
       measure,
@@ -247,4 +240,22 @@ function lastFigureOf(a: ActivationRecord, data: Data): string | null {
   return m
     ? `${count.format(m.value)} ${fr.activationJourney.units[a.kind]}`
     : null;
+}
+
+/** What a gated activation waits for, said like the proto (« Clip officiel
+ * livré »): a deliverable by its title, else the blocker or dependency. */
+function waitsForOf(facts: ActivationFacts): string | null {
+  const t = fr.activationJourney.detail;
+  const items = [
+    ...facts.dependencies
+      .filter((d) => d.blocking && d.resolved === false)
+      .map((d) => {
+        const title = /«\s*(.+?)\s*»/.exec(d.label)?.[1];
+        return d.kind === "deliverable" && title
+          ? t.deliveredShort(title)
+          : d.label;
+      }),
+    ...facts.openBlockers.map((b) => b.description),
+  ];
+  return items.join(" · ") || null;
 }

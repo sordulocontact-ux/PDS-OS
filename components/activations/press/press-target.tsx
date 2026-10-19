@@ -2,6 +2,7 @@ import { EvidenceSection } from "@/components/activations/evidence/evidence-sect
 import { JournalSection } from "@/components/activations/journal-section";
 import { MessagesSection } from "@/components/activations/messages/messages-section";
 import { MetricsSection } from "@/components/activations/metrics/metrics-section";
+import { Fold } from "@/components/ui/fold";
 import { TargetHeader } from "@/components/activations/targets/target-header";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
@@ -66,6 +67,33 @@ export async function PressTarget({
   );
   const t = fr.activationPress;
 
+  const rest = (
+    <>
+      <EvidenceSection
+        scope={scope}
+        evidences={board.data.evidences.filter((e) => e.targetId === target.id)}
+        files={files}
+        members={members}
+        canWrite={canWrite}
+        canVerify={canValidate}
+        targetId={target.id}
+        defaultKind="coverage"
+        defaultSource="media"
+        title={t.coverage.title}
+      />
+      <MetricsSection
+        scope={scope}
+        metrics={board.data.metrics.filter((m) => m.targetId === target.id)}
+        canWrite={canWrite}
+        canVerify={canValidate}
+        today={today}
+        targetId={target.id}
+        defaultSource="media"
+      />
+      <JournalSection entries={journal} />
+    </>
+  );
+
   return (
     <div className="grid gap-8">
       <TargetHeader
@@ -118,28 +146,11 @@ export async function PressTarget({
         members={members}
         canWrite={canWrite}
       />
-      <EvidenceSection
-        scope={scope}
-        evidences={board.data.evidences.filter((e) => e.targetId === target.id)}
-        files={files}
-        members={members}
-        canWrite={canWrite}
-        canVerify={canValidate}
-        targetId={target.id}
-        defaultKind="coverage"
-        defaultSource="media"
-        title={t.coverage.title}
-      />
-      <MetricsSection
-        scope={scope}
-        metrics={board.data.metrics.filter((m) => m.targetId === target.id)}
-        canWrite={canWrite}
-        canVerify={canValidate}
-        today={today}
-        targetId={target.id}
-        defaultSource="media"
-      />
-      <JournalSection entries={journal} />
+      {inCard ? (
+        <Fold summary={fr.activationJourney.mediaAll}>{rest}</Fold>
+      ) : (
+        rest
+      )}
     </div>
   );
 }
