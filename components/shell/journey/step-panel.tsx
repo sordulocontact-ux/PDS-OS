@@ -13,7 +13,7 @@ import {
   prereqsOf,
   withModule,
 } from "@/lib/ui/journey";
-import { journeyStatusTone } from "@/lib/ui/state-tones";
+import { journeyStatusTone, type Tone } from "@/lib/ui/state-tones";
 import { formatDay } from "@/lib/utils/day";
 import { cn } from "@/lib/utils";
 
@@ -56,11 +56,15 @@ export function StepPanel({
   steps,
   rootPrereq,
   blockedLabel = t.blocked,
+  badge,
   children,
   ...slots
 }: StepSlots & {
   step: JourneyStep;
   steps: JourneyStep[];
+  // Replaces the state's pill when the module says more (Distribution:
+  // « Prêt pour contrôle », « Clôturée avec réserves (3) »).
+  badge?: { tone: Tone; label: string };
   // Shown when the step needs nothing before it.
   rootPrereq?: string;
   // Replaces « Se débloque quand … » (Marketing: « S'ouvre quand … »).
@@ -96,8 +100,8 @@ export function StepPanel({
                 {t.meta.due(formatDay(step.due))}
               </span>
             )}
-            <StatusBadge tone={journeyStatusTone[step.status]}>
-              {t.status[step.status]}
+            <StatusBadge tone={badge?.tone ?? journeyStatusTone[step.status]}>
+              {badge?.label ?? t.status[step.status]}
             </StatusBadge>
           </div>
         </div>

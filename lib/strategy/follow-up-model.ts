@@ -42,7 +42,7 @@ export type FollowUpInput = {
     id: string;
     title: string;
     quantity: number | null;
-    lever_id: string;
+    lever_id: string | null;
     // Who delivers it: the task proposed by a recommendation goes to them.
     assignee_person_id?: string | null;
   }>;

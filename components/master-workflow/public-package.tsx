@@ -1,13 +1,11 @@
-import { AcknowledgeButton } from "@/components/master-workflow/acknowledge-button";
 import { DeliverVersion } from "@/components/master-workflow/deliver-version";
-import { EngineerThread } from "@/components/master-workflow/engineer-thread";
+import { TakeChargeForm } from "@/components/master-workflow/take-charge-form";
 import { PublicRefresh } from "@/components/master-workflow/public-refresh";
 import { PublicVersions } from "@/components/master-workflow/public-versions";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { fr } from "@/lib/i18n/fr";
-import type { EngineerMessage } from "@/lib/master-workflow/engineer-messages";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
 import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/release/format";
@@ -15,20 +13,17 @@ import { formatShortDate } from "@/lib/release/format";
 type Open = Extract<PublicPackage, { state: "open" | "received" }>;
 
 /**
- * The package as the mix engineer opens it, without an account: the label's
- * message, the files of each title (signed links, as long as the link
- * lives) and where to deposit a version of it, what is expected, then the
- * confirmation of the reception.
+ * « Votre dossier », as the engineer opens it without an account: the
+ * label's message, the files of each title (signed links, as long as the
+ * link lives; « Nouvelle source le … » when the final vocals replaced it),
+ * what is expected, then « Prendre en charge le dossier » with the rate.
  */
 export function PublicPackageView({
   token,
   data,
-  messages,
 }: {
   token: string;
   data: Open;
-  // The thread with the label (PROJ-AMEL-02).
-  messages: EngineerMessage[];
 }) {
   const t = fr.masterWorkflow.publicPackage;
   const th = fr.masterWorkflow.engineerThread;
@@ -39,7 +34,6 @@ export function PublicPackageView({
   return (
     <div className="flex flex-col gap-6">
       {data.continued && <p className="text-sm font-medium">{t.continued}</p>}
-      <PublicVersions role={pack.role} versions={data.versions} />
       {data.note && (
         <section className={sectionCardClass}>
           <h2 className="text-base font-medium">{t.from}</h2>
@@ -72,24 +66,13 @@ export function PublicPackageView({
               {title.stems.map((stem) => (
                 <FileLine key={stem.url} label={t.stem} file={stem} />
               ))}
-              {title.masterId && (
-                <>
-                  {data.deliveries
-                    .filter((d) => d.masterId === title.masterId)
-                    .map((d) => (
-                      <p
-                        key={`${d.fileName}-${d.sentAt}`}
-                        className="text-sm text-[color:var(--text-secondary)]"
-                      >
-                        {t.deliver.sent(d.fileName, formatShortDate(d.sentAt))}
-                      </p>
-                    ))}
-                  <DeliverVersion
-                    token={token}
-                    masterId={title.masterId}
-                    role={pack.role}
-                  />
-                </>
+              {title.sourceUpdatedAt && (
+                <p className="text-sm font-medium">
+                  {fr.masterRound.portal.newSource(
+                    formatShortDate(title.sourceUpdatedAt),
+                    title.source.fileName,
+                  )}
+                </p>
               )}
             </li>
           ))}
@@ -137,18 +120,70 @@ export function PublicPackageView({
           ]}
         />
       </details>
-      <EngineerThread token={token} messages={messages} />
       {data.state === "received" && data.acknowledgedAt ? (
         <p className="text-sm font-medium">
-          {t.received(formatShortDate(data.acknowledgedAt))}
+          {fr.masterRound.take.taken(formatShortDate(data.acknowledgedAt))}
         </p>
       ) : (
-        <AcknowledgeButton token={token} />
+        <TakeChargeForm
+          token={token}
+          estimate={{
+            [pack.role]: data.estimate?.[pack.role] ?? null,
+            // The mix link of the engineer who masters too: both rates.
+            ...(pack.role === "mix" && data.estimate?.mastering != null
+              ? { mastering: data.estimate.mastering }
+              : {}),
+          }}
+        />
       )}
       <p className="text-caption text-[color:var(--text-secondary)]">
         {t.expires(formatShortDate(data.expiresAt))}
       </p>
       <PublicRefresh />
+    </div>
+  );
+}
+
+/**
+ * The versions the engineer delivered with what the label sent and
+ * decided, then « Déposer votre version » for each title of the package.
+ */
+export function PublicDeliveries({
+  token,
+  data,
+}: {
+  token: string;
+  data: Open;
+}) {
+  const t = fr.masterWorkflow.publicPackage;
+  const pack = data.package;
+  return (
+    <div className="flex flex-col gap-5">
+      <PublicVersions role={pack.role} versions={data.versions} />
+      {pack.titles.map((title) =>
+        title.masterId ? (
+          <div key={title.title} className="flex flex-col gap-2">
+            {pack.titles.length > 1 && (
+              <p className="font-medium">{title.title}</p>
+            )}
+            {data.deliveries
+              .filter((d) => d.masterId === title.masterId)
+              .map((d) => (
+                <p
+                  key={`${d.fileName}-${d.sentAt}`}
+                  className="text-sm text-[color:var(--text-secondary)]"
+                >
+                  {t.deliver.sent(d.fileName, formatShortDate(d.sentAt))}
+                </p>
+              ))}
+            <DeliverVersion
+              token={token}
+              masterId={title.masterId}
+              role={pack.role}
+            />
+          </div>
+        ) : null,
+      )}
     </div>
   );
 }

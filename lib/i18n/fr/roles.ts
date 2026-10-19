@@ -24,6 +24,19 @@ export const roles = {
     dop: "Image",
     member: "Compte PDS",
   },
+  distribution: {
+    owner: "Responsable de la distribution",
+    ownerWhat:
+      "Prépare le dossier, le dépose à la main dans The Orchard et déclare ses réponses.",
+    validator: "Validateur Distribution",
+    validatorWhat: "Valide le dossier avant le dépôt, puis la clôture.",
+    proposed: "proposé : la direction valide les dossiers",
+    distributor: "Distributeur",
+    distributorWhat:
+      "Reçoit, accepte et livre la sortie ; ce qu'il répond est déclaré dans PDS OS.",
+    noLink: "sans lien : ses réponses sont déclarées",
+    validatorSet: "Validateur Distribution désigné",
+  },
   design: {
     owner: "Responsable du projet",
     owners:

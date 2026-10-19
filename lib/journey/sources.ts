@@ -6,8 +6,11 @@ import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { designJourneys } from "./design";
+import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
 import { legalJourneys } from "./legal";
+import { masterJourneys } from "./master";
+import { strategyJourneys } from "./strategy";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -20,8 +23,9 @@ type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 const label = fr.shell.project.sidebar;
 const parts = fr.shell.project.marketingSteps;
 
-// Marketing: each deliverable's Production once its sheet is opened, and the
-// Conception (lib/journey/design.ts). Stratégie, Activations and Suivi &
+// Marketing: the Stratégie (lib/journey/strategy.ts), the Conception
+// (lib/journey/design.ts) and each deliverable's Production once its sheet
+// is opened. Activations and Suivi &
 // bilan come with their zone.
 const marketing: Loader = async (projectId) => {
   const supabase = await createClient();
@@ -30,7 +34,8 @@ const marketing: Loader = async (projectId) => {
     .select("deliverable_id")
     .eq("project_id", projectId);
   if (error) console.error("loadProjectJourneys production:", error.message);
-  const [design, ...productions] = await Promise.all([
+  const [strategy, design, ...productions] = await Promise.all([
+    strategyJourneys(projectId),
     designJourneys(projectId),
     ...(data ?? []).map(async ({ deliverable_id: id }) => {
       const ctx = await journeyContext(projectId, id);
@@ -52,7 +57,7 @@ const marketing: Loader = async (projectId) => {
         : [];
     }),
   ]);
-  return [...design, ...productions.flat()];
+  return [...strategy, ...design, ...productions.flat()];
 };
 
 // Filled by their zone (C4: typed, empty until then).
@@ -61,9 +66,9 @@ const none: Loader = async () => [];
 export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   framing: framingJourneys,
   marketing,
-  master: none,
+  master: masterJourneys,
   legal: legalJourneys,
-  distribution: none,
+  distribution: distributionJourneys,
 };
 
 /** Whether the project's workflows are launched at all (no journeys before). */

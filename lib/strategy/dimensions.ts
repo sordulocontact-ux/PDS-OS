@@ -113,7 +113,7 @@ export type DimensionInput = {
   openNeeds: unknown[];
   deliverables: Array<
     UpstreamDeliverable & {
-      lever_id: string;
+      lever_id: string | null;
       assignee_person_id: string | null;
       due_date: string | null;
     }

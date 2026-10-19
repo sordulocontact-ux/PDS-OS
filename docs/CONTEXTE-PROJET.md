@@ -237,6 +237,35 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
 - **Bilan Marketing** : le ticket « Bilan, validation et clôture » n'est pas codé ; Suivi & bilan
   lit déjà les trois axes et les réserves de chaque activation.
 
+### Points à trancher : Distribution (lot 10, 19/10/2026)
+
+- **Écart master final → sortie** : le proto montre 14 jours ; aucun ticket ni code ne le fixe.
+  Seule règle tenue : une échéance du Cadrage (master final) ne suit pas la date visée. Sans
+  date de master final, l'en-tête n'en montre pas.
+- **Précommande** : proposée seulement si la Stratégie a un temps fort « pré-save » /
+  « précommande » ; pas de règle « 3 semaines avant » inventée.
+- **Master déjà au Catalogue sans workflow Master** : gardé « Disponible » (non bloquant) comme
+  avant ; le proto bloque tant que le Master ne l'a pas validé.
+- **« Prêt pour la sortie » du Juridique** : montré comme prérequis de l'étape Dépôt (✓/○ avec sa
+  source), sans verrouiller le dépôt ; seul un emprunt non sécurisé bloque la soumission.
+- **UPC** : « Attribué par The Orchard au dépôt », pas encore de champ pour l'enregistrer.
+- **Smartlink** : retiré de l'écran Distribution (route publique gardée) ; Distribution ou
+  Marketing, à trancher avec la décision Odesli / maison.
+- **Ordre Reçu → Accepté → Livré** à la saisie : aide de l'écran seulement, la base ne déduit rien.
+### Master : décisions du lot 8 (19/10/2026, proto « Projet complet »)
+
+- « Voix définitives » : **déclaré par le responsable** à la confirmation de la source (aucune donnée du
+  Cadrage ne le porte). « Production définitive » n'est pas affichée faute de source réelle (point à
+  trancher : une dimension du Brief de cadrage ?).
+- Source détectée = la version la plus récente (maquette ou mise à plat), comme le proto et le ticket.
+- Dérogation sans pistes : **raison écrite obligatoire** (proto ; remplace la case seule du 12/10).
+- « Demander une modification » : motif **toujours** obligatoire (règle 6, proto).
+- Retours transmis sans décider : texte écrit par le code avec l'auteur de chaque ligne, sans PO.
+- Validatrice par défaut : la direction créative désignée au Cadrage › Équipe, sinon celle du projet,
+  sinon le responsable. Même ingénieur pour le mastering par défaut quand un seul est connu.
+- Rouvrir une décision : le mix seulement, tant que le mastering n'est pas parti.
+- Le lien privé du Master est gardé chiffré et relisible par le responsable (règle 19).
+
 ### Vocabulaire fixé
 
 Trois objets, trois noms. Ne jamais en introduire d'autres dans l'interface.

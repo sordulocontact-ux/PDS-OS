@@ -37,7 +37,7 @@ export type ExecutionInput = {
   deliverables: Array<{
     id: string;
     title: string;
-    lever_id: string;
+    lever_id: string | null;
     assignee_person_id: string | null;
     due_date: string | null;
   }>;
@@ -71,8 +71,10 @@ export function executionPlan(input: ExecutionInput): ExecutionPlan {
     (l) => l.state === "selected" && l.review_status === "confirmed",
   );
   const retainedIds = new Set(retained.map((l) => l.id));
-  const deliverables = input.deliverables.filter((d) =>
-    retainedIds.has(d.lever_id),
+  const deliverables = input.deliverables.flatMap((d) =>
+    d.lever_id !== null && retainedIds.has(d.lever_id)
+      ? [{ ...d, lever_id: d.lever_id }]
+      : [],
   );
 
   const items: ExecutionItem[] = [];

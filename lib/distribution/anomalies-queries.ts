@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { Access } from "@/lib/auth/access";
 import {
   ANOMALY_KINDS,
@@ -22,7 +24,7 @@ const isState = oneOf(ANOMALY_STATES);
 const isModule = oneOf(ANOMALY_MODULES);
 
 /** A project's anomalies, read with the viewer's session. */
-export async function loadAnomalies(
+export const loadAnomalies = cache(async function loadAnomalies(
   projectId: string,
   access: Access,
 ): Promise<Anomaly[]> {
@@ -31,7 +33,7 @@ export async function loadAnomalies(
     supabase
       .from("distribution_anomalies")
       .select(
-        "id, version_number, kind, description, platform, severity, source_module, state, state_note, reported_by, reported_at, state_by, state_at",
+        "id, version_number, kind, description, platform, severity, source_module, state, state_note, reported_by, reported_at, state_by, state_at, from_distributor",
       )
       .eq("project_id", projectId),
     loadMembers(access),
@@ -62,12 +64,13 @@ export async function loadAnomalies(
               reportedAt: row.reported_at,
               stateBy: nameOf(row.state_by),
               stateAt: row.state_at,
+              fromDistributor: row.from_distributor,
             },
           ]
         : [],
     ),
   );
-}
+});
 
 /** How many of the six checks someone recorded (the rest: « non vérifié »). */
 export async function countRecordedChecks(projectId: string): Promise<number> {

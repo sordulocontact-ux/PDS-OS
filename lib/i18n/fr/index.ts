@@ -61,7 +61,12 @@ import { designSteps } from "./design-steps";
 import { legalReadiness } from "./legal-readiness";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
+import { masterBrief } from "./master-brief";
+import { masterFinal } from "./master-final";
+import { masterJourney } from "./master-journey";
 import { masterPage } from "./master-page";
+import { masterRound } from "./master-round";
+import { masterSource } from "./master-source";
 import { masterWorkflow } from "./master-workflow";
 import { network } from "./network";
 import { notifications } from "./notifications";
@@ -99,19 +104,24 @@ import { productionPreprod } from "./production-preprod";
 import { productionShoot } from "./production-shoot";
 import { release } from "./release";
 import { distribution } from "./distribution";
+import { distributionJourney } from "./distribution-journey";
+import { projectDates } from "./project-dates";
 import { marketing } from "./marketing";
 import { marketingReview } from "./marketing-review";
 import { shell } from "./shell";
 import { strategy } from "./strategy";
 import { strategyBrief } from "./strategy-brief";
+import { strategyBriefOut } from "./strategy-brief-out";
 import { strategyBudget } from "./strategy-budget";
 import { strategyCalendar } from "./strategy-calendar";
 import { strategyDeliverables } from "./strategy-deliverables";
 import { strategyDocuments } from "./strategy-documents";
 import { strategyDispositif } from "./strategy-dispositif";
+import { strategyDimensions } from "./strategy-dimensions";
 import { strategyDraft } from "./strategy-draft";
 import { strategyEntry } from "./strategy-entry";
 import { strategyFollowUp } from "./strategy-follow-up";
+import { strategyJourney } from "./strategy-journey";
 import { strategyKpis } from "./strategy-kpis";
 import { strategyPilot } from "./strategy-pilot";
 import { strategyPressKit } from "./strategy-press-kit";
@@ -154,6 +164,9 @@ export const fr = {
   strategyFollowUp,
   strategyPilot,
   strategyDraft,
+  strategyDimensions,
+  strategyBriefOut,
+  strategyJourney,
   design,
   artistIdentity,
   conception,
@@ -197,6 +210,8 @@ export const fr = {
   projectReview,
   release,
   distribution,
+  distributionJourney,
+  projectDates,
   assistant,
   assistantRecords,
   voice,
@@ -227,6 +242,11 @@ export const fr = {
   legalReadiness,
   legalSplits,
   masterWorkflow,
+  masterJourney,
+  masterBrief,
+  masterRound,
+  masterFinal,
+  masterSource,
   artistActivity,
   masterPage,
   records,

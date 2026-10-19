@@ -45,7 +45,12 @@ export type BudgetLine = {
 };
 
 export type BudgetLever = { id: string; label: string };
-export type BudgetDeliverable = { id: string; title: string; leverId: string };
+export type BudgetDeliverable = {
+  id: string;
+  title: string;
+  // Null: « Hors levier » (proto, lot 3 of the Stratégie).
+  leverId: string | null;
+};
 
 export type BudgetTotals = {
   plannedCents: number;

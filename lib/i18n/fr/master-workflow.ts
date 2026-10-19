@@ -773,12 +773,14 @@ export const masterWorkflow = {
           feedback_sent: "Retours envoyés",
           changes_requested: "Modification demandée",
           approved: "Mix validé",
+          reopened: "Rouverte",
         },
         mastering: {
           received: "En écoute",
           feedback_sent: "Retours envoyés",
           changes_requested: "Modification demandée",
           approved: "Master validé",
+          reopened: "Rouverte",
         },
       },
       feedbackSent: (date: string) => `Retours du label, le ${date} :`,
@@ -804,6 +806,8 @@ export const masterWorkflow = {
               : `Modification demandée le ${date}.`,
         },
       },
+      reopened: (date: string, reason: string) =>
+        `Rouvert le ${date} : « ${reason} ». Déposez une nouvelle version.`,
       note: (text: string) => `Précision : ${text}`,
       next: {
         mix: "Étape suivante : le mastering, avec l'ingénieur qui en est chargé. Le mix validé ne valide pas le master.",

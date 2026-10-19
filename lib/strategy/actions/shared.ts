@@ -16,6 +16,7 @@ export async function done(
 ): Promise<ActionResult> {
   if (error?.code === "42501") return { ok: false, error: "stage_locked" };
   if (error) return fromDatabaseError(error);
-  revalidatePath(routes.projectStrategy(projectId));
+  // Every step of the Stratégie, and the project's « Maintenant ».
+  revalidatePath(routes.project(projectId), "layout");
   return ok;
 }

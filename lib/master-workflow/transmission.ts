@@ -95,7 +95,7 @@ export async function loadStepView(
   role: PackageRole,
 ): Promise<StepView> {
   const supabase = await createClient();
-  const [rows, briefRow, history, finals] = await Promise.all([
+  const [rows, briefRow, history, finals, recorded] = await Promise.all([
     readMasterRows(project.id, project.masters),
     supabase
       .from("master_briefs")
@@ -116,6 +116,12 @@ export async function loadStepView(
       )
       .eq("project_id", project.id)
       .eq("stage", "mix"),
+    // Recorded and unchanged since: what the engineer will receive.
+    supabase
+      .from("master_briefs")
+      .select("recorded_at, content_changed_at")
+      .eq("project_id", project.id)
+      .maybeSingle(),
   ]);
   // Every version of the mix round, for where each title stands (PROJ-BUG-06).
   const mixVersions = finals.data ?? [];
@@ -269,7 +275,14 @@ export async function loadStepView(
     role === "mix" &&
     titles.length === 0 &&
     diagnosis.some((row) => row.state === "done");
+  const r = fr.masterRound.blockers;
+  const rec = recorded.data;
   const blockers = [
+    ...(!rec?.recorded_at
+      ? [r.briefNotRecorded]
+      : rec.content_changed_at > rec.recorded_at
+        ? [r.briefDirty(contact?.name ?? "")]
+        : []),
     ...(contact ? [] : [role === "mix" ? t.engineer : t.masteringEngineer]),
     ...(titles.length === 0 ? [mixedAll ? t.allMixed : t.noTitle] : []),
     ...titles

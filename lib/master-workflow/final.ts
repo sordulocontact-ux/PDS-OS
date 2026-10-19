@@ -44,8 +44,11 @@ export type FinalTitle = {
     source: { fileName: string; confirmedAt: string } | null;
     mixFinal: { number: number; fileName: string } | null;
   };
-  // The title's state in the Catalogue.
+  // The title's state in the Catalogue, its ISRC and duration (the
+  // Juridique's SACEM bulletin reads it).
   audioState: AudioState | null;
+  isrc: string | null;
+  durationSeconds: number | null;
   // The brief's other deliverables, and whether each arrived.
   deliverables: Array<{ key: BriefDeliverable; received: boolean }>;
 };
@@ -86,7 +89,10 @@ export async function loadFinalView(
         .eq("stage", "mastering")
         .eq("decision", "approved"),
       ids.length
-        ? supabase.from("masters").select("id, audio_state").in("id", ids)
+        ? supabase
+            .from("masters")
+            .select("id, audio_state, isrc, duration_seconds")
+            .in("id", ids)
         : none,
       ids.length
         ? supabase
@@ -156,6 +162,7 @@ export async function loadFinalView(
   const stateOf = new Map(
     (masters.data ?? []).map((row) => [row.id, audioStateOf(row.audio_state)]),
   );
+  const masterOf = new Map((masters.data ?? []).map((row) => [row.id, row]));
   const engineer = brief.data?.mastering_same_engineer
     ? brief.data?.mix?.name
     : brief.data?.mastering?.name;
@@ -213,6 +220,8 @@ export async function loadFinalView(
           })(),
         },
         audioState: stateOf.get(master.id) ?? null,
+        isrc: masterOf.get(master.id)?.isrc ?? null,
+        durationSeconds: masterOf.get(master.id)?.duration_seconds ?? null,
         deliverables: expected.map((key) => ({
           key,
           received: (received.data ?? []).some(

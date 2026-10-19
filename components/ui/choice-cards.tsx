@@ -10,6 +10,8 @@ export type Choice<V extends string> = {
   hint?: string;
   // Tile only: shown above the label.
   icon?: ReactNode;
+  // Card and list: on the right of the row (a player to listen first).
+  aside?: ReactNode;
   disabled?: boolean;
 };
 
@@ -65,8 +67,8 @@ export function ChoiceCards<V extends string>({
         tile
           ? "flex-col items-center justify-center gap-2 p-6 text-center"
           : list
-            ? "gap-3"
-            : "gap-3 p-3",
+            ? "flex-wrap gap-3 sm:flex-nowrap"
+            : "flex-wrap gap-3 p-3 sm:flex-nowrap",
       )}
     >
       <input
@@ -95,14 +97,24 @@ export function ChoiceCards<V extends string>({
         </>
       ) : (
         // Top-aligned: side by side, cards stretch to the tallest.
-        <span className="grid content-start gap-0.5">
-          <span className="text-sm font-medium">{choice.label}</span>
-          {choice.hint && (
-            <span className="text-sm text-muted-foreground">
-              {choice.hint}
+        <>
+          <span className="grid min-w-0 flex-1 content-start gap-0.5">
+            <span className="text-sm font-medium break-words">
+              {choice.label}
+            </span>
+            {choice.hint && (
+              <span className="text-sm text-muted-foreground">
+                {choice.hint}
+              </span>
+            )}
+          </span>
+          {choice.aside && (
+            // Under the text on a phone, on the right from the small breakpoint.
+            <span className="flex w-full shrink-0 items-center pl-7 sm:w-auto sm:self-center sm:pl-0">
+              {choice.aside}
             </span>
           )}
-        </span>
+        </>
       )}
     </label>
   ));

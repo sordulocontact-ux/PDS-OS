@@ -120,6 +120,24 @@ export const callReportSchema = z.object({
       .describe(
         "Leviers du dispositif de lancement évoqués (clip, playlisting, live, relations presse…).",
       ),
+    // Proto « Projet complet » (Stratégie, 19/10/2026): PO also proposes
+    // deliverables, milestones and objectives, each with its quote; a
+    // milestone's day is computed by code from the sentence, never here.
+    deliverables: z
+      .array(z.object({ label: z.string(), quote }))
+      .describe(
+        "Livrables à produire évoqués (clip, teasers, pochette…), nommés comme dit, avec leur format s'il a été dit. Liste vide si aucun.",
+      ),
+    milestones: z
+      .array(z.object({ label: z.string(), quote }))
+      .describe(
+        "Temps forts du lancement évoqués (annonce, teaser, sortie d'un clip…), tels qu'ils ont été situés par rapport à la sortie. Ne jamais convertir en date. Liste vide si aucun.",
+      ),
+    kpis: z
+      .array(z.object({ label: z.string(), quote }))
+      .describe(
+        "Objectifs de la sortie ou signaux de réussite évoqués, tels que dits (« 200 000 streams à 4 semaines »). Liste vide si aucun.",
+      ),
   }),
 });
 

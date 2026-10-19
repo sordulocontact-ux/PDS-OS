@@ -1,4 +1,5 @@
-import { FinalPage } from "@/components/master-workflow/final-page";
+import { FinalStep } from "@/components/master-workflow/final/final-step";
+import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadFinalView } from "@/lib/master-workflow/final";
@@ -21,5 +22,9 @@ export default async function ProjectMasterFinalPage({
   ]);
 
   const view = await loadFinalView(project, access);
-  return <FinalPage view={view} />;
+  return (
+    <MasterStepFrame projectId={projectId} stepKey="final">
+      <FinalStep view={view} />
+    </MasterStepFrame>
+  );
 }

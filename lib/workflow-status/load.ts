@@ -213,44 +213,61 @@ async function legalFacts(project: Project) {
 
 async function distributionFacts(projectId: string) {
   const supabase = await createClient();
-  const [release, versions, declarations, platforms, closures, launchedAt] =
-    await Promise.all([
-      supabase
-        .from("releases")
-        .select("isrc, planned_release_date")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("distribution_versions")
-        .select("number, status")
-        .eq("project_id", projectId)
-        .is("superseded_at", null)
-        .order("number", { ascending: false })
-        .limit(1),
-      supabase
-        .from("distribution_declarations")
-        .select("version_number, kind, declared_at")
-        .eq("project_id", projectId)
-        .is("withdrawn_at", null)
-        .order("declared_at", { ascending: false }),
-      supabase
-        .from("distribution_platforms")
-        .select("platform")
-        .eq("project_id", projectId)
-        .eq("verification", "verified")
-        .in("platform", [...REFERENCE_PLATFORMS]),
-      supabase
-        .from("distribution_closures")
-        .select("kind, status, reserves, proposed_at, decided_at, reopened_at")
-        .eq("project_id", projectId)
-        .is("reopened_at", null)
-        .in("status", ["pending", "closed"])
-        .limit(1)
-        .maybeSingle(),
-      planLaunchedAt(projectId),
-    ]);
+  const [
+    release,
+    versions,
+    declarations,
+    platforms,
+    closures,
+    launchedAt,
+    dossier,
+    cover,
+    blockers,
+  ] = await Promise.all([
+    supabase
+      .from("releases")
+      .select("isrc, planned_release_date")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("distribution_versions")
+      .select("number, status")
+      .eq("project_id", projectId)
+      .is("superseded_at", null)
+      .order("number", { ascending: false })
+      .limit(1),
+    supabase
+      .from("distribution_declarations")
+      .select("version_number, kind, declared_at")
+      .eq("project_id", projectId)
+      .is("withdrawn_at", null)
+      .order("declared_at", { ascending: false }),
+    supabase
+      .from("distribution_platforms")
+      .select("platform")
+      .eq("project_id", projectId)
+      .eq("verification", "verified")
+      .in("platform", [...REFERENCE_PLATFORMS]),
+    supabase
+      .from("distribution_closures")
+      .select("kind, status, reserves, proposed_at, decided_at, reopened_at")
+      .eq("project_id", projectId)
+      .is("reopened_at", null)
+      .in("status", ["pending", "closed"])
+      .limit(1)
+      .maybeSingle(),
+    // The Distribution starts with the plan (lib/distribution/journey-context.ts).
+    planLaunchedAt(projectId),
+    supabase
+      .from("distribution_dossiers")
+      .select("params_confirmed_at")
+      .eq("project_id", projectId)
+      .maybeSingle(),
+    supabase.rpc("distribution_cover", { p_project_id: projectId }),
+    supabase.rpc("distribution_legal_blockers", { p_project_id: projectId }),
+  ]);
   const open = closures.data;
   if (release.error) console.error("distributionFacts:", release.error.message);
   const latest = versions.data?.[0] ?? null;
@@ -278,15 +295,19 @@ async function distributionFacts(projectId: string) {
       state: {
         workflow: "distribution" as const,
         status: "not_started" as const,
-        step: "prepare",
+        step: "prep",
         reason: fr.workflowStatus.notLaunched,
         progress: fr.workflowStatus.distribution.progress(0),
         done: [],
       },
       plannedDate: null,
+      cover: null,
+      legalBlockers: null,
     };
   const state = distributionState(
     {
+      launched: Boolean(launchedAt),
+      paramsConfirmed: Boolean(dossier.data?.params_confirmed_at),
       recorded: data !== null,
       isrc: Boolean(data?.isrc),
       plannedDate: data?.planned_release_date ?? null,
@@ -314,7 +335,17 @@ async function distributionFacts(projectId: string) {
     },
     formatDate,
   );
-  return { state, plannedDate: data?.planned_release_date ?? null };
+  const found = cover.data?.[0] ?? null;
+  return {
+    state,
+    plannedDate: data?.planned_release_date ?? null,
+    // What the deposit waits for from the Marketing and the Juridique,
+    // readable by all (supabase/migrations/20261019100101).
+    cover: found
+      ? { title: found.title, delivered: found.delivered_at !== null }
+      : null,
+    legalBlockers: (blockers.data ?? []).map((b) => b.work),
+  };
 }
 
 /**
@@ -384,6 +415,8 @@ export const loadWorkflowStates = cache(
     if (distribution) states.distribution = distribution.state;
 
     const deps = dependencies({
+      cover: distribution?.cover ?? null,
+      legalBlockers: distribution?.legalBlockers ?? null,
       projectId: project.id,
       workflows,
       states,

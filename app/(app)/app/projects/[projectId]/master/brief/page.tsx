@@ -1,50 +1,37 @@
-import { BriefPage } from "@/components/master-workflow/brief-page";
-import { masterExchangeDefaults } from "@/lib/master-workflow/exchange-defaults";
-import { requireApproved } from "@/lib/auth/dal";
+import { BriefStep } from "@/components/master-workflow/brief/brief-step";
+import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { fr } from "@/lib/i18n/fr";
-import { loadMasterBrief } from "@/lib/master-workflow/brief";
-import { loadBriefQuestions } from "@/lib/master-workflow/questions";
-import { loadStepView } from "@/lib/master-workflow/transmission";
-import { masterStepHref } from "@/lib/ui/master-steps";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { allInOrder } from "@/lib/utils/parallel";
+import { loadBriefStep } from "@/lib/master-workflow/brief-step";
+import { masterExchangeDefaults } from "@/lib/master-workflow/exchange-defaults";
+import { liveTransmission } from "@/lib/master-workflow/journey";
+import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 
 export const metadata = {
-  title: `${fr.masterWorkflow.brief.title} · ${fr.app.name}`,
+  title: `${fr.masterJourney.steps.brief.title} · ${fr.app.name}`,
 };
 
-// Master, second step: the Brief Mix/Master of the project. Read by whoever
-// sees the project, written by its owner (master_briefs, RLS).
+// Master, Brief: what the engineers will receive, as a document whose facts
+// are changed in place, then recorded by the project's owner.
 export default async function ProjectMasterBriefPage({
   params,
 }: PageProps<"/app/projects/[projectId]/master/brief">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-
-  const [view, questions, mix] = await Promise.all([
-    loadMasterBrief(project, access),
-    loadBriefQuestions(project, access),
-    // What the sending to the mix engineer still needs (PROJ-UX-08).
-    loadStepView(project, access, "mix"),
-  ]);
-  const exchange = view.canEdit
-    ? await masterExchangeDefaults(view, project.ownerPersonId)
+  const { access, project, facts } = await masterJourneyContext(projectId);
+  const step = await loadBriefStep(
+    project,
+    access,
+    liveTransmission(facts, "mix")?.createdAt ?? null,
+  );
+  const exchange = step.view.canEdit
+    ? await masterExchangeDefaults(step.view, project.ownerPersonId)
     : null;
-  // The Brief step of the Master (lib/ui/master-steps.ts): its chevron
-  // names it, the title stays « Master » (ProjectPageTitle).
   return (
-    <BriefPage
-      view={view}
-      questions={questions}
-      exchange={exchange}
-      next={{
-        href: masterStepHref(project.id, "mix"),
-        blockers: mix.blockers,
-        sentAt: mix.history[0]?.sentAt ?? null,
-      }}
-    />
+    <MasterStepFrame projectId={projectId} stepKey="brief">
+      <BriefStep
+        step={step}
+        exchange={exchange}
+        ownerName={project.ownerName}
+      />
+    </MasterStepFrame>
   );
 }

@@ -1,15 +1,17 @@
-// The Distribution's « contrôle de préparation » (ticket « Distribution »
-// § 6.2, § 12): every element the deposit reuses, read from the module that
-// owns it — Catalogue, Master, Juridique, Conception, Projet — with where it
-// comes from, whether it is validated there, when it last changed and where
-// it is corrected. Nothing is copied nor stored: pure, computed on each read
-// from lib/distribution/sources.ts, so the server checks with the same rule.
+// The Distribution's « Préparation » (ticket « Distribution » § 6.2, § 12,
+// proto « Projet complet », step `prep`): every element the deposit reuses,
+// read from the module that owns it — Catalogue, Master, Juridique,
+// Conception, Projet — with its value, where it comes from, whether it is
+// ready and where it is corrected. Nothing is copied nor stored: pure,
+// computed on each read from lib/distribution/sources.ts, so the server
+// checks with the same rule as the screen.
 
 import { routes } from "@/lib/auth/redirects";
 import type { SheetStatus } from "@/lib/design/states";
 import { fr } from "@/lib/i18n/fr";
 import { withReturn } from "@/lib/ui/return-to";
 import { masterStepHref } from "@/lib/ui/master-steps";
+import { formatShortDay } from "@/lib/utils/day";
 
 export const SOURCE_MODULES = [
   "catalog",
@@ -21,11 +23,16 @@ export const SOURCE_MODULES = [
 export type SourceModule = (typeof SOURCE_MODULES)[number];
 
 // validated: present and validated in its module; available: present, in a
-// module without a validation step (Catalogue, the release's identifiers);
-// unvalidated: present but its validation is missing or refused; missing;
-// restricted: the viewer may not read it (the Juridique).
+// module without a validation step (Catalogue); unvalidated: present but not
+// validated (or not delivered) yet; missing; restricted: the viewer may not
+// read it (the Juridique's detail); later: does not block the deposit.
 export type ReadinessState =
-  "validated" | "available" | "unvalidated" | "missing" | "restricted";
+  | "validated"
+  | "available"
+  | "unvalidated"
+  | "missing"
+  | "restricted"
+  | "later";
 
 export type ReadinessItem = {
   key: string;
@@ -38,9 +45,8 @@ export type ReadinessItem = {
   blocking: boolean;
   // What the source says, or why it is not ready, in words.
   detail: string;
-  // How it is validated at its source, in words.
-  validation: string | null;
-  updatedAt: string | null;
+  // Under the value: where it comes from and when, or what it waits for.
+  source: string | null;
   // Where it is corrected: always its owner module, never Distribution.
   href: string;
   // The master final itself, listened and downloaded here without a new
@@ -70,21 +76,26 @@ export type ReadinessTitle = {
   } | null;
 };
 
-export type ReadinessLegal =
-  | { allowed: false }
-  | {
-      allowed: true;
-      // The Juridique's state in words (lib/workflow-status), if launched.
-      reason: string | null;
-      items: Array<{
-        id: string;
-        label: string;
-        reason: string;
-        // Only a borrowing to secure blocks (ticket Juridique 08).
-        blocking: boolean;
-        href: string;
-      }>;
-    };
+/** A borrowing not secured at the Juridique (distribution_legal_blockers):
+ * readable by whoever sees the project. */
+export type LegalBlocker = { id: string; work: string; status: string };
+
+export type ReadinessLegal = {
+  blockers: LegalBlocker[];
+};
+
+/** The cover (distribution_cover): its Fiche Livrable and its delivery. */
+export type ReadinessCover = {
+  id: string;
+  title: string;
+  // Chosen in the dossier's parameters, or found by its title.
+  chosen: boolean;
+  status: SheetStatus | null;
+  // The Production's deliverable behind the sheet, if any.
+  deliverableId: string | null;
+  // Delivered by the Production: the fact the Distribution waits for.
+  delivered: { at: string; version: number | null } | null;
+};
 
 export type ReadinessInput = {
   projectId: string;
@@ -92,15 +103,15 @@ export type ReadinessInput = {
   legal: ReadinessLegal;
   // Rights constraints confirmed in the Cadrage (readable by all).
   constraints: Array<{ id: string; text: string }>;
-  // The Fiche Livrable taken as the cover, if one is found.
-  cover: { id: string; title: string; status: SheetStatus } | null;
+  cover: ReadinessCover | null;
   release: {
     title: string;
-    plannedDate: string | null;
     upc: string | null;
     isrc: string | null;
     updatedAt: string;
   } | null;
+  // The release date, from the project (lib/projects/dates.ts).
+  releaseDate: { date: string; source: string } | null;
 };
 
 export type Readiness = {
@@ -131,17 +142,15 @@ export function distributionReadiness(
   const many = input.titles.length > 1;
   // A title's page, opened from here, brings back to this step once
   // corrected (PROJ-BUG-10).
-  const back = routes.projectRelease(input.projectId);
+  const back = routes.projectReleaseStep(input.projectId, "preparation");
+  // Sources say their date short (« le 12/10 », C0 decision 8).
+  const short = (at: string) => formatShortDay(at, { bare: true });
+  const updated = (at: string | null, where: string) =>
+    at ? d.updatedOn(where, short(at)) : where;
 
   for (const title of input.titles) {
     const subject = many ? title.label : null;
-    const catalog = {
-      module: "catalog" as const,
-      subject,
-      blocking: true,
-      validation: null,
-      updatedAt: title.updatedAt,
-    };
+    const catalog = { module: "catalog" as const, subject, blocking: true };
     items.push(
       {
         ...catalog,
@@ -149,8 +158,9 @@ export function distributionReadiness(
         label: t.items.identity,
         state: title.hasMainArtist ? "available" : "missing",
         detail: title.hasMainArtist
-          ? `${title.label} · ${title.artists}`
+          ? `« ${title.label} » · ${title.artists}`
           : d.noMainArtist,
+        source: updated(title.updatedAt, d.titleSheet),
         href: withReturn(routes.master(title.id), back),
       },
       {
@@ -159,6 +169,7 @@ export function distributionReadiness(
         label: t.items.isrc,
         state: title.isrc ? "available" : "missing",
         detail: title.isrc ?? d.noIsrc,
+        source: updated(title.updatedAt, d.titleSheet),
         href: withReturn(routes.master(title.id), back),
       },
       {
@@ -169,6 +180,7 @@ export function distributionReadiness(
         detail: title.hasSongwriter
           ? d.credits(title.contributorCount)
           : d.noCredits,
+        source: d.titleCredits,
         href: withReturn(routes.masterCredits(title.id), back),
       },
       {
@@ -180,38 +192,51 @@ export function distributionReadiness(
           title.rightsHolder && title.rightsYear
             ? d.pLine(title.rightsHolder, title.rightsYear)
             : d.noPLine,
+        source: d.titleRights,
         href: withReturn(routes.masterRights(title.id), back),
       },
     );
+  }
+  items.push({
+    key: "upc",
+    module: "catalog",
+    label: t.items.upc,
+    subject: null,
+    state: input.release?.upc ? "available" : "later",
+    blocking: false,
+    detail: input.release?.upc ?? d.upcLater,
+    source: null,
+    href: routes.projectReleaseStep(input.projectId, "deposit"),
+  });
+
+  for (const title of input.titles)
     items.push({
       key: `final-${title.id}`,
       module: "master",
       label: t.items.finalMaster,
-      subject,
+      subject: many ? title.label : null,
       blocking: true,
       ...(title.final
         ? {
             state: "validated" as const,
-            detail: d.finalValidated(
-              title.final.number,
-              formatDate(title.final.decidedAt),
+            detail: title.finalFile
+              ? d.finalFile(title.finalFile.fileName, title.final.number)
+              : d.finalVersion(title.final.number),
+            source: d.finalValidated(
+              short(title.final.decidedAt),
               title.final.decidedBy,
             ),
-            validation: null,
-            updatedAt: title.final.decidedAt,
           }
         : title.before
           ? {
               state: "available" as const,
-              detail: d.finalBefore(formatDate(title.before.addedAt)),
-              validation: d.catalogNoValidation,
-              updatedAt: title.before.addedAt,
+              detail: title.finalFile?.fileName ?? d.finalBeforeShort,
+              source: d.finalBefore(short(title.before.addedAt)),
             }
           : {
               state: "missing" as const,
               detail: d.noFinal,
-              validation: null,
-              updatedAt: null,
+              source: d.finalWhere,
             }),
       href: masterStepHref(input.projectId, "final"),
       ...(title.finalFile?.listenUrl
@@ -224,124 +249,37 @@ export function distributionReadiness(
           }
         : {}),
     });
-  }
 
-  if (!input.legal.allowed) {
-    items.push({
-      key: "legal",
-      module: "legal",
-      label: t.items.legalState,
-      subject: null,
-      state: "restricted",
-      blocking: false,
-      detail: d.legalRestricted,
-      validation: null,
-      updatedAt: null,
-      href: routes.projectLegal(input.projectId),
-    });
-  } else {
-    items.push({
-      key: "legal",
-      module: "legal",
-      label: t.items.legalState,
-      subject: null,
-      state: "available",
-      blocking: false,
-      detail:
-        input.legal.items.length === 0
-          ? d.legalClear
-          : (input.legal.reason ?? d.legalOpen),
-      validation: null,
-      updatedAt: null,
-      href: routes.projectLegal(input.projectId),
-    });
-    for (const item of input.legal.items)
-      items.push({
-        key: `legal-${item.id}`,
-        module: "legal",
-        label: item.label,
-        subject: null,
-        state: item.blocking ? "missing" : "unvalidated",
-        blocking: item.blocking,
-        detail: item.blocking
-          ? `${d.legalBlocking} · ${item.reason}`
-          : item.reason,
-        validation: item.blocking ? null : d.legalOpen,
-        updatedAt: null,
-        href: item.href,
-      });
-  }
-  for (const constraint of input.constraints)
-    items.push({
-      key: `constraint-${constraint.id}`,
-      module: "legal",
-      label: t.items.rightsConstraint,
-      subject: null,
-      state: "validated",
-      blocking: false,
-      detail: constraint.text,
-      validation: d.constraint,
-      updatedAt: null,
-      href: routes.projectFraming(input.projectId),
-    });
-
-  const cover = input.cover;
-  const coverValidated =
-    cover?.status === "ready_for_production" || cover?.status === "transferred";
-  items.push({
-    key: "cover",
-    module: "design",
-    label: t.items.cover,
-    subject: null,
-    state: !cover ? "missing" : coverValidated ? "validated" : "unvalidated",
-    blocking: true,
-    detail: !cover
-      ? d.coverNone
-      : coverValidated
-        ? d.coverValidated(cover.title)
-        : d.coverStatus(cover.title, t.sheetStatus[cover.status]),
-    validation: null,
-    updatedAt: null,
-    href: cover
-      ? routes.projectDesignSheet(input.projectId, cover.id)
-      : routes.projectDesign(input.projectId),
-  });
+  items.push(...legalItems(input));
+  items.push(coverItem(input, formatDate));
 
   const release = input.release;
-  const prepare = `${routes.projectRelease(input.projectId)}#release-form`;
-  const project = {
-    module: "project" as const,
-    subject: null,
-    validation: null,
-    updatedAt: release?.updatedAt ?? null,
-    href: prepare,
-  };
+  const date = input.releaseDate;
+  // The project's dates are changed on the project (Lancement), confirmed
+  // by the Cadrage: never here.
+  const projectHref = routes.project(input.projectId);
   items.push(
     {
-      ...project,
       key: "release",
+      module: "project",
       label: t.items.release,
-      state: release ? "available" : "missing",
+      subject: null,
+      state: release ? "validated" : "missing",
       blocking: true,
       detail: release ? d.releaseTitle(release.title) : d.releaseMissing,
+      source: release ? (date?.source ?? d.releaseSource) : null,
+      href: projectHref,
     },
     {
-      ...project,
       key: "releaseDate",
+      module: "project",
       label: t.items.releaseDate,
-      state: release?.plannedDate ? "available" : "missing",
+      subject: null,
+      state: date ? "validated" : "missing",
       blocking: true,
-      detail: release?.plannedDate
-        ? formatDate(release.plannedDate)
-        : d.dateMissing,
-    },
-    {
-      ...project,
-      key: "upc",
-      label: t.items.upc,
-      state: release?.upc ? "available" : "missing",
-      blocking: false,
-      detail: release?.upc ?? d.upcLater,
+      detail: date ? formatDate(date.date) : d.dateMissing,
+      source: date?.source ?? null,
+      href: projectHref,
     },
   );
 
@@ -356,5 +294,100 @@ export function distributionReadiness(
     next: blockers[0] ?? null,
     state:
       blockers.length === 0 ? "ready" : ready === 0 ? "to_prepare" : "partial",
+  };
+}
+
+/** Each borrowing not secured blocks (ticket Juridique 08); the rest of the
+ * Juridique (« Prêt pour la sortie ») is read from its own computation,
+ * loadLegalReadiness, by the step itself — never recomputed here. */
+function legalItems(input: ReadinessInput): ReadinessItem[] {
+  const t = fr.distribution.readiness;
+  const d = t.details;
+  const items: ReadinessItem[] = input.legal.blockers.map((blocker) => ({
+    key: `clearance-${blocker.id}`,
+    module: "legal",
+    label: t.items.clearance(blocker.work),
+    subject: null,
+    state: "missing",
+    blocking: true,
+    detail: d.legalBlocking,
+    source: d.clearanceStatus(
+      (t.clearanceStatus as Record<string, string>)[blocker.status] ??
+        blocker.status,
+    ),
+    href: routes.projectLegalStep(input.projectId, "clearances"),
+  }));
+  for (const constraint of input.constraints)
+    items.push({
+      key: `constraint-${constraint.id}`,
+      module: "legal",
+      label: t.items.rightsConstraint,
+      subject: null,
+      state: "validated",
+      blocking: false,
+      detail: constraint.text,
+      source: d.constraint,
+      href: routes.projectFraming(input.projectId),
+    });
+  return items;
+}
+
+/** The cover: ready once the Production delivered it (proto « Pochette
+ * livrée »), never on the Conception's status alone. */
+function coverItem(
+  input: ReadinessInput,
+  formatDate: (iso: string) => string,
+): ReadinessItem {
+  const t = fr.distribution.readiness;
+  const d = t.details;
+  const cover = input.cover;
+  const base = {
+    key: "cover",
+    module: "design" as const,
+    label: t.items.cover,
+    subject: null,
+    blocking: true,
+  };
+  if (!cover)
+    return {
+      ...base,
+      state: "missing",
+      detail: d.coverNone,
+      source: null,
+      href: routes.projectDesign(input.projectId),
+    };
+  const sheet = routes.projectDesignSheet(input.projectId, cover.id);
+  const production = cover.deliverableId
+    ? routes.projectProductionStep(
+        input.projectId,
+        cover.deliverableId,
+        "delivery",
+      )
+    : sheet;
+  if (cover.delivered)
+    return {
+      ...base,
+      state: "validated",
+      detail: d.coverDelivered(cover.title, cover.delivered.version),
+      source: d.coverDeliveredOn(
+        formatShortDay(cover.delivered.at, { bare: true }),
+      ),
+      href: production,
+    };
+  const validated =
+    cover.status === "ready_for_production" || cover.status === "transferred";
+  return {
+    ...base,
+    state: "unvalidated",
+    detail: d.coverStatus(
+      cover.title,
+      validated
+        ? d.coverNotDelivered
+        : cover.status
+          ? t.sheetStatus[cover.status]
+          : d.coverNotDelivered,
+    ),
+    source: cover.chosen ? d.coverWaitDelivery : d.coverGuessed,
+    href: validated ? production : sheet,
   };
 }
