@@ -124,7 +124,15 @@ export function ProposeSplitButton({
   const t = fr.legalSplits.page;
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
-  const setLinks = (links: SplitLink[]) => showLinks(title, links);
+  const router = useRouter();
+  // Sealed, the links stay in the step (rule 19): nothing to show once.
+  const setLinks = (links: SplitLink[]) => {
+    if (links.every((l) => l.sealed)) {
+      toast.success(`${fr.legalDocuments.split.proposed}.`);
+      return router.refresh();
+    }
+    showLinks(title, links);
+  };
   return (
     <Button
       size="sm"
@@ -160,7 +168,14 @@ export function NewSplitLinkButton({
 }) {
   const [pending, startTransition] = useTransition();
   const showLinks = useShowSplitLinks();
-  const setLinks = (links: SplitLink[]) => showLinks(title, links);
+  const router = useRouter();
+  const setLinks = (links: SplitLink[]) => {
+    if (links.every((l) => l.sealed)) {
+      toast.success(`${fr.legalDocuments.split.renewed}.`);
+      return router.refresh();
+    }
+    showLinks(title, links);
+  };
   return (
     <Button
       variant="outline"

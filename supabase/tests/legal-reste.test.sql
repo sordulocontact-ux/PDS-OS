@@ -1,7 +1,7 @@
 -- Juridique, « le reste » (supabase/migrations/20261020030101 and after): a template asked of
 -- the direction in the Plan d'action, a clause revised in the person's step.
 begin;
-select plan(12);
+select plan(31);
 
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
 declare v_id uuid := gen_random_uuid();
@@ -17,12 +17,12 @@ begin
   execute 'set local role authenticated';
 end $$;
 create temp table ids (name text primary key, id uuid) on commit drop;
-grant all on ids to authenticated;
+grant all on ids to authenticated, anon;
 create function pg_temp.id_of(p_name text) returns uuid language sql as $$
   select id from ids where name = p_name
 $$;
 create temp table vars (k text primary key, v text) on commit drop;
-grant all on vars to authenticated;
+grant all on vars to authenticated, anon;
 insert into vars select 'tag', substr(md5(random()::text), 1, 8);
 
 insert into ids values
@@ -115,6 +115,135 @@ select is((select comment from public.contract_documents
 select throws_ok(format($$ update public.contract_documents set clause = 'credit'
                             where contract_id = %L and version = 1 $$, pg_temp.id_of('contract')),
                  '23514', null, 'the first version changes no clause');
+
+-- 3. The links of a split's confirmations, kept sealed and visible --------------------------------
+reset role;
+insert into public.artists (organization_id, name, relation)
+values (pg_temp.id_of('org'), 'Mona ' || (select v from vars where k = 'tag'), 'signed');
+insert into ids select 'artist', id from public.artists
+ where name = 'Mona ' || (select v from vars where k = 'tag');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+insert into ids select 'master', public.create_master(
+  pg_temp.id_of('org'), 'Néons',
+  jsonb_build_array(jsonb_build_object('artist_id', pg_temp.id_of('artist'))));
+reset role;
+insert into public.project_masters (organization_id, project_id, master_id, position)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('master'), 1);
+select pg_temp.act_as(pg_temp.id_of('manager'));
+insert into ids select 'v1', public.save_split_draft(pg_temp.id_of('project'), pg_temp.id_of('master'),
+  jsonb_build_array(jsonb_build_object('name', 'Mona', 'role', 'composer', 'share', '50'),
+                    jsonb_build_object('name', 'Sami', 'role', 'composer', 'share', '50')), null);
+select count(*) from public.propose_split_version(pg_temp.id_of('v1'));
+insert into ids select 'conf', c.id from public.legal_split_confirmations c
+  join public.legal_split_entries e on e.id = c.entry_id
+ where c.version_id = pg_temp.id_of('v1') and e.name = 'Sami';
+select lives_ok(format($$ select public.seal_split_confirmation_link(%L, 'v1.sealed') $$,
+                       pg_temp.id_of('conf')), 'the server keeps the link sealed');
+select public.mark_split_confirmation_sent(pg_temp.id_of('conf'));
+select isnt((select sent_by from public.legal_split_confirmations where id = pg_temp.id_of('conf')),
+            null, 'who sent it is written by the database');
+-- A new version: Sami keeps the same link, still sealed and sent.
+insert into ids select 'v2', public.save_split_draft(pg_temp.id_of('project'), pg_temp.id_of('master'),
+  jsonb_build_array(jsonb_build_object('name', 'Mona', 'role', 'composer', 'share', '60'),
+                    jsonb_build_object('name', 'Sami', 'role', 'composer', 'share', '40')),
+  'Mona a composé le refrain.');
+select count(*) from public.propose_split_version(pg_temp.id_of('v2'));
+insert into ids select 'conf2', c.id from public.legal_split_confirmations c
+  join public.legal_split_entries e on e.id = c.entry_id
+ where c.version_id = pg_temp.id_of('v2') and e.name = 'Sami';
+select is((select link_sealed || ' · ' || (sent_at is not null)::text
+             from public.legal_split_confirmations where id = pg_temp.id_of('conf2')),
+          'v1.sealed · true', 'a carried link keeps its seal and its sending');
+select throws_ok(format($$ select public.revoke_split_confirmation(%L, '  ') $$, pg_temp.id_of('conf2')),
+                 'P0001', 'split_link_reason_required', 'a revocation says why');
+select lives_ok(format($$ select public.revoke_split_confirmation(%L, 'Mauvaise adresse.') $$,
+                       pg_temp.id_of('conf2')), 'the access is revoked');
+select is((select status || ' · ' || revoked_reason || ' · ' || coalesce(link_sealed, 'none')
+             from public.legal_split_confirmations where id = pg_temp.id_of('conf2')),
+          'revoked · Mauvaise adresse. · none', 'with its reason, and the link forgotten');
+reset role;
+set local role anon;
+select throws_ok(format($$ select public.mark_split_confirmation_sent(%L) $$, pg_temp.id_of('conf')),
+                 '42501', null, 'nobody without an account touches a link');
+reset role;
+
+-- 4. Invoices: deposited by the person's link, read and paid by the direction only -------------
+insert into public.network_contacts (organization_id, kind, name, roles)
+values (pg_temp.id_of('org'), 'person', 'Yanis ' || (select v from vars where k = 'tag'),
+        array['musician']),
+       (pg_temp.id_of('org'), 'person', 'Inès ' || (select v from vars where k = 'tag'),
+        array['musician']);
+insert into ids select 'yanis', id from public.network_contacts
+ where name = 'Yanis ' || (select v from vars where k = 'tag');
+insert into ids select 'ines', id from public.network_contacts
+ where name = 'Inès ' || (select v from vars where k = 'tag');
+insert into public.contracts (organization_id, title, type, status, signed_on, project_id,
+                              owner_person_id)
+values (pg_temp.id_of('org'), 'Musicien ' || (select v from vars where k = 'tag'), 'service',
+        'signed', current_date, pg_temp.id_of('project'), pg_temp.id_of('manager_person'));
+insert into ids select 'paid_contract', id from public.contracts
+ where title = 'Musicien ' || (select v from vars where k = 'tag');
+insert into public.financial_needs (organization_id, project_id, contract_id, contact_id, amount_cents)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('paid_contract'),
+        pg_temp.id_of('yanis'), 25000);
+insert into ids select 'need', id from public.financial_needs
+ where contract_id = pg_temp.id_of('paid_contract');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+insert into vars select 'yanis_token', public.issue_contact_link(pg_temp.id_of('project'), pg_temp.id_of('yanis'));
+insert into vars select 'ines_token', public.issue_contact_link(pg_temp.id_of('project'), pg_temp.id_of('ines'));
+reset role;
+
+set local role anon;
+select is((select jsonb_array_length(public.get_contact_invoices((select v from vars where k = 'yanis_token')))),
+          1, 'the person''s page lists their signed contract with a fee');
+select throws_ok(format($$ select public.open_legal_invoice_slot(%L, %L, 'pdf') $$,
+                        (select v from vars where k = 'ines_token'), pg_temp.id_of('need')),
+                 'P0001', 'invoice_link_closed', 'nobody deposits the invoice of another person');
+insert into vars select 'path', public.open_legal_invoice_slot(
+  (select v from vars where k = 'yanis_token'), pg_temp.id_of('need'), 'pdf');
+reset role;
+insert into storage.objects (bucket_id, name) values ('legal-invoices', (select v from vars where k = 'path'));
+set local role anon;
+select throws_ok(format($$ select public.submit_legal_invoice(%L, %L, %L, 'Facture.pdf', 'application/pdf', 1000, 'YM-1', 30000, null) $$,
+                        (select v from vars where k = 'yanis_token'), pg_temp.id_of('need'),
+                        (select v from vars where k = 'path')),
+                 'P0001', 'invoice_gap_reason_required', 'an amount that is not the fee agreed says why');
+select lives_ok(format($$ select public.submit_legal_invoice(%L, %L, %L, 'Facture.pdf', 'application/pdf', 1000, 'YM-1', 30000, 'Une heure de plus.') $$,
+                       (select v from vars where k = 'yanis_token'), pg_temp.id_of('need'),
+                       (select v from vars where k = 'path')),
+                'the person deposits their invoice by their link');
+reset role;
+select is((select status from public.financial_needs where id = pg_temp.id_of('need')),
+          'invoiced', 'the money is invoiced');
+select is((select count(*)::int from public.notifications
+            where recipient_person_id = pg_temp.id_of('director_person')
+              and kind = 'legal_invoice_received'), 1, 'the direction is told');
+
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select is((select count(*)::int from public.legal_invoices where project_id = pg_temp.id_of('project')),
+          0, 'the Juridique never reads an invoice');
+select is((select state from public.legal_invoice_states(pg_temp.id_of('project'))),
+          'to_pay', 'but sees where it stands');
+select throws_ok(format($$ select public.open_legal_invoice_team_slot(%L, 'proof', 'pdf') $$,
+                        pg_temp.id_of('need')),
+                 '42501', null, 'only the direction pays');
+reset role;
+
+select pg_temp.act_as(pg_temp.id_of('director'));
+select is((select gap_reason from public.legal_invoices where financial_need_id = pg_temp.id_of('need')),
+          'Une heure de plus.', 'the direction reads it, with the gap explained');
+insert into vars select 'proof', public.open_legal_invoice_team_slot(pg_temp.id_of('need'), 'proof', 'pdf');
+reset role;
+insert into storage.objects (bucket_id, name) values ('legal-invoices', (select v from vars where k = 'proof'));
+insert into ids select 'invoice', id from public.legal_invoices where financial_need_id = pg_temp.id_of('need');
+select pg_temp.act_as(pg_temp.id_of('director'));
+select lives_ok(format($$ select public.mark_legal_invoice_paid(%L, %L, %L, 'Virement.pdf') $$,
+                       pg_temp.id_of('invoice'), (now() at time zone 'Europe/Paris')::date,
+                       (select v from vars where k = 'proof')),
+                'the direction marks it paid, with its proof');
+reset role;
+select is((select status from public.financial_needs where id = pg_temp.id_of('need')),
+          'paid', 'the money is paid');
 
 select * from finish();
 rollback;

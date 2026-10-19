@@ -85,4 +85,42 @@ export const legalDocuments = {
     missingText: "Changez la clause dans le texte : sinon, rien ne change.",
     missingWhy: "Dites pourquoi : c'est gardé avec la version.",
   },
+  bulletin: {
+    fileName: (title: string, version: number) =>
+      `Bulletin_725_${title}_v${version}.pdf`,
+    draftName: (title: string) => `Bulletin_725_${title}_BROUILLON.pdf`,
+    draftMark: "BROUILLON — informations manquantes",
+    generatedOn: (day: string, signed: number, total: number) =>
+      `Généré le ${day} · signatures : ${signed} sur ${total}`,
+    download: "Télécharger",
+    pdfPending: "Préparation du PDF…",
+    pdfFailed: "Le PDF n'a pas pu être préparé.",
+    values: "Les valeurs du bulletin",
+    // « Avant de générer », in three columns (proto).
+    before: "Avant de générer",
+    blocking: "Bloquant",
+    toConfirm: "À confirmer",
+    optional: "Facultatif",
+    nothing: "Rien.",
+    required: "Obligatoire pour la SACEM : sans lui, pas de version à signer",
+    proposed: (source: string) =>
+      `Proposé depuis ${source} : à confirmer, jamais repris sans votre accord`,
+    optionalNote: "Facultatif",
+    confirm: "Confirmer",
+    generate: "Générer la version à signer",
+    draft: "Générer un brouillon",
+    notYet: (blocking: number, toConfirm: number) =>
+      `Pas encore : ${blocking} point${blocking > 1 ? "s" : ""} bloquant${blocking > 1 ? "s" : ""} et ${toConfirm} à confirmer. Un brouillon reste possible.`,
+    draftDone: "Brouillon prêt",
+  },
+  split: {
+    confirmations: "Confirmations · liens privés",
+    confirmationsBody:
+      "Un lien par personne, valable 30 jours : chacun confirme ou conteste. Une contestation revient ici, avec son motif.",
+    markSent: "Marquer comme envoyé",
+    sent: "Lien marqué comme envoyé",
+    proposed: "Envoyée pour confirmation",
+    renewed: "Nouveau lien créé",
+    emailSubject: (title: string) => `Répartition à confirmer · ${title}`,
+  },
 } as const;
