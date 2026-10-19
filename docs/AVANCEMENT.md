@@ -505,3 +505,16 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
 - Migrations `20261019100101`, `…100201`, `…100301` à pousser en prod avec accord ; tests pgTAP
   `distribution.test.sql` (105) et `distribution-journey.test.sql` (35).
 
+
+## Lot 4 — Conception sur le patron commun (19/10/2026, branche `pc/z4-design`)
+
+- Parcours du proto en six étapes (Accueil, Intentions, Références, Direction artistique, Brief
+  créatif, Fiches Livrables) sur `DesignStepFrame`, loader `lib/journey/design.ts` ; anciennes pages à
+  onglets redirigées vers leur étape.
+- Accueil : responsable créatif désigné en place, « Préparer un échange créatif » / « Commencer
+  directement » sans motif, échange dans l'étape, ajout de livrable avec format et motif.
+- Fiches créées par la base depuis la Stratégie validée, pré-remplies par le code avec leur source,
+  modifiables champ par champ, validées une par une, transférées une par une (la Production s'ouvre
+  au premier transfert) ; Conception faite quand tout est transféré, plus de validation globale.
+- Migrations `20261019040101` à `20261019040701` (à pousser en prod avec accord) ; pgTAP
+  `conception-journey.test.sql` + 6 fichiers adaptés.

@@ -64,12 +64,10 @@ export function ReferenceTile({
         {r.thumbnail ? (
           <ReferenceThumbnail
             src={r.thumbnail}
-            fallback={<span className="sr-only">{r.name}</span>}
+            fallback={<TileName name={r.name} />}
           />
         ) : (
-          <span className="absolute inset-0 grid place-items-center px-3 text-center text-caption break-all text-[color:var(--text-secondary)]">
-            {r.name}
-          </span>
+          <TileName name={r.name} />
         )}
       </a>
       <div className="flex flex-col gap-1.5 p-3">
@@ -145,5 +143,14 @@ export function ReferenceTile({
         )}
       </div>
     </article>
+  );
+}
+
+/** What stands for a picture that is missing or refused by its site. */
+function TileName({ name }: { name: string }) {
+  return (
+    <span className="absolute inset-0 grid place-items-center px-3 text-center text-caption break-all text-[color:var(--text-secondary)]">
+      {name}
+    </span>
   );
 }
