@@ -446,14 +446,14 @@ Marketing ; navigation du projet du proto + Budget ; Travail et Validations = me
 Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, états calculés, textes dans
 `lib/i18n/fr/`, Server Actions par la session, notifications par triggers, `initial`/`defaults` + `stay`) :
 
-- [ ] **0. Briques communes** (`commons.md` § 13) : primitives et tokens, `ModuleHeader` (fil d'Ariane,
+- [x] **0. Briques communes** (`commons.md` § 13) : primitives et tokens, `ModuleHeader` (fil d'Ariane,
       pilules, faits, « Qui fait quoi »), patron d'étape complet (`StepPanel` 4/5 colonnes, prérequis
       inter-modules, verrouillée en lecture seule, « Déjà fait »), un seul « Maintenant »
       (`loadProjectJourneys`), bandeau de résultat, blocages et informations notées (`step_blockers`,
       `step_notes`), formulaire de call commun, compte rendu par point et résumé aux participants versionné,
       proposition à trancher une par une, décision avec motif, fait avec source et « Modifier », cartes de
       versions, cartes de départ « Recommandé », habillage commun des pages privées
-- [ ] **1. Coquille et Vue d'ensemble** (`shell.md`) : navigation du proto avec pastilles « À vous »,
+- [x] **1. Coquille et Vue d'ensemble** (`shell.md`) : navigation du proto avec pastilles « À vous »,
       Vue d'ensemble (tête, « Maintenant » global, cartes des workflows, dépendances), verrou avant le plan,
       Travail, Validations, Activité depuis les parcours, navigation mobile en puces
 - [x] **2. Cadrage et Plan du projet** (`framing.md`, 19/10/2026, branche `pc/z2-framing`, migration
@@ -465,20 +465,20 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
       pré-cochage), PO propose aussi livrables, temps forts et objectifs, Brief en 4 blocs validé dans
       l'étape (`DecisionPanel`), « Stratégie validée » ; migrations `20261019030101` et `20261019030201`
       à pousser en prod avec accord ; 20 tests pgTAP (`strategy-proposals.test.sql`)
-- [ ] **4. Conception** (`design.md`) : parcours en 6 étapes du proto, fiches champ par champ, transfert
-- [ ] **5. Production** (`production.md`) : d'abord la fuite de l'enveloppe interne sur le lien de la
+- [x] **4. Conception** (`design.md`) : parcours en 6 étapes du proto, fiches champ par champ, transfert
+- [x] **5. Production** (`production.md`) : d'abord la fuite de l'enveloppe interne sur le lien de la
       société ; barre de livrables, « Qui produit ? », « Quelle société ? », mode de préparation, call de
       production, réalisateur proposé et retenu, devis versionné, préproduction, lieux, contrôle, tournage,
       rushes, montage, livraison
-- [ ] **6. Activations** (`activations.md`) : liste et activation ouverte, frise, « Maintenant » de
+- [x] **6. Activations** (`activations.md`) : liste et activation ouverte, frise, « Maintenant » de
       l'activation, influence et presse interne/agence, preuve calculée, lien de la créatrice
-- [ ] **7. Suivi & bilan** (`review.md`) : « Où on en est », préparation, rapport figé et PDF, réserves,
+- [x] **7. Suivi & bilan** (`review.md`) : « Où on en est », préparation, rapport figé et PDF, réserves,
       clôture, notifications
-- [ ] **8. Master** (`master.md`) : parcours sans chevrons, Source, Brief (dates calculées, « Modifier »),
+- [x] **8. Master** (`master.md`) : parcours sans chevrons, Source, Brief (dates calculées, « Modifier »),
       Mixage (dossier, tarif, versions, décision), Mastering, Master final, facture
-- [ ] **9. Juridique** (`legal.md`) : démarches en étapes du parcours (Dossier, Suivi, Sortie), questions
+- [x] **9. Juridique** (`legal.md`) : démarches en étapes du parcours (Dossier, Suivi, Sortie), questions
       comme au Cadrage, « Prêt pour la sortie »
-- [ ] **10. Distribution** (`distribution.md`) : parcours en 7 étapes, Préparation lue dans le Master, la
+- [x] **10. Distribution** (`distribution.md`) : parcours en 7 étapes, Préparation lue dans le Master, la
       Production et le Juridique, gestes regroupés, dates cohérentes depuis le Cadrage
 - [ ] **11. Pages privées réunies par personne** : un lien par personne et par projet, « À vous » / « En
       attente de PDS » / « Fait » replié
