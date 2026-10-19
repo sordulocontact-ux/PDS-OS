@@ -48,7 +48,17 @@ const journeySchema = z.object({
   locations: z
     .array(z.object({ name: z.string(), status: z.string() }))
     .default([]),
-  actions: z.array(z.object({ title: z.string(), dueDate: text })),
+  actions: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      dueDate: text,
+      origin: text,
+      doneAt: text,
+      review: z.boolean(),
+      checklist: z.boolean(),
+    }),
+  ),
   calls: z
     .array(
       z.object({

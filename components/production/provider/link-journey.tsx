@@ -3,15 +3,14 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { LinkJourney } from "@/lib/production/provider/journey";
-import { formatDate } from "@/lib/release/format";
 
 import { linkCallCards } from "./link-call-cards";
 import { linkDirectorCard } from "./link-director-card";
 import { LinkDirectionForm } from "./link-direction-form";
 import { LinkGearForm } from "./link-gear-form";
 import { LinkPlaceForm } from "./link-place-form";
-import { LinkProgress } from "./link-progress";
 import { linkQuoteCard } from "./link-quote-card";
+import { linkChecklistCard, LinkTaskList } from "./link-task-cards";
 
 const t = fr.productionLink;
 const p = fr.portal.provider;
@@ -41,39 +40,29 @@ export function linkJourneyCards({
   const hint = (text: string) => (
     <p className="text-pretty text-muted-foreground">{text}</p>
   );
-  const cards: PortalCardItem[] = linkCallCards(j);
+  const cards: PortalCardItem[] = linkCallCards(token, j);
   const directorCard = linkDirectorCard(token, j, provider);
   if (directorCard) cards.push(directorCard);
   // Without a call held, the actions given stand on their own card.
-  if (j.actions.length > 0 && !j.calls.some((c) => c.status === "ready"))
+  const asked = j.actions.filter((a) => !a.checklist && a.origin === null);
+  if (asked.length > 0 && !j.calls.some((c) => c.status === "ready"))
     cards.push({
       id: "ps-tasks",
       title: t.tasks.title,
-      state: "todo",
+      state: asked.some((a) => a.doneAt === null) ? "todo" : "done",
       order: 90,
-      action: {
-        label: j.actions[0].title,
-        due: j.actions[0].dueDate ? formatDate(j.actions[0].dueDate) : null,
-      },
-      dueKey: j.actions[0].dueDate,
+      action: { label: asked[0].title, due: asked[0].dueDate },
+      dueKey: asked[0].dueDate,
       body: (
-        <ul className="flex flex-col gap-2">
-          {j.actions.map((a) => (
-            <li
-              key={a.title}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5 text-sm"
-            >
-              <span className="min-w-0 flex-1">{a.title}</span>
-              {a.dueDate && (
-                <span className="text-muted-foreground">
-                  {t.tasks.due(formatDate(a.dueDate))}
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
+        <LinkTaskList
+          token={token}
+          actions={asked}
+          origin={fr.productionLink.call.confirmed}
+        />
       ),
     });
+  const checklist = linkChecklistCard(token, j);
+  if (checklist) cards.push(checklist);
   if (director)
     cards.push({
       id: "ps-direction",
@@ -125,24 +114,6 @@ export function linkJourneyCards({
     });
   if (company) {
     cards.push(linkQuoteCard(token, j, provider));
-    if (j.organization === "external")
-      cards.push({
-        id: "ps-progress",
-        title: t.progress.title,
-        state:
-          Object.values(j.progress).some((v) => !v) ||
-          Object.keys(j.progress).length === 0
-            ? "todo"
-            : "done",
-        order: 30,
-        action: { label: p.progress },
-        body: (
-          <>
-            {hint(t.progress.description)}
-            <LinkProgress token={token} progress={j.progress} />
-          </>
-        ),
-      });
     cards.push({
       id: "ps-places",
       title: t.places.title,

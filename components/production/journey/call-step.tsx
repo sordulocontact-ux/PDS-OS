@@ -154,9 +154,14 @@ export async function CallStepSummary({
     <MeetingSummaryBlock
       callId={call.callId}
       draft={summaryDraft(meeting, data.ownerName)}
-      recipients={meeting.participants.filter(
-        (p) => p.key !== `m:${mePersonId}`,
-      )}
+      // The company reads it on its private link, never by e-mail.
+      recipients={meeting.participants
+        .filter((p) => p.key !== `m:${mePersonId}`)
+        .map((p) =>
+          p.key === `c:${data.sheet?.organization.company?.id}`
+            ? { ...p, invite: "link" as const }
+            : p,
+        )}
       versions={summaries}
       canSend
       ownerName={data.ownerName}

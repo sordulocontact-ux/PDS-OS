@@ -14,6 +14,7 @@ import {
   proposePlan,
   reschedulePlan,
 } from "@/lib/production/preprod/plan-template";
+import { isChecklistAction } from "@/lib/production/preprod/types";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
@@ -46,7 +47,7 @@ export default async function ProductionCallStepPage({
     sheet.mode !== "call" ||
     preprod.calls.some((c) => c.status === "ready") ||
     preprod.items.length > 0 ||
-    preprod.actions.some((a) => !a.templateKey?.startsWith("checklist:"));
+    preprod.actions.some((a) => !isChecklistAction(a));
   const { data: creatives } = await (
     await createClient()
   )
@@ -77,6 +78,10 @@ export default async function ProductionCallStepPage({
           actions={preprod.actions}
           launcher={false}
           listCalls={false}
+          heading={{
+            title: fr.productionCall.step.items[sheet.mode],
+            description: fr.productionCall.step.itemsDescription,
+          }}
           {...people}
         />
       )}
@@ -84,9 +89,7 @@ export default async function ProductionCallStepPage({
         <PlanSection
           {...common}
           {...people}
-          actions={preprod.actions.filter(
-            (a) => !a.templateKey?.startsWith("checklist:"),
-          )}
+          actions={preprod.actions.filter((a) => !isChecklistAction(a))}
           states={o.actionStates}
           planState={o.planState}
           items={preprod.items}

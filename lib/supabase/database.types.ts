@@ -12377,6 +12377,11 @@ export type Database = {
       }
       production_plan_actions: {
         Row: {
+          origin: string | null
+          done_at: string | null
+          done_by: string | null
+          done_by_contact_id: string | null
+          review: boolean
           approved_at: string | null
           approved_by: string | null
           blocking: boolean
@@ -12399,6 +12404,11 @@ export type Database = {
           title: string
         }
         Insert: {
+          origin?: string | null
+          done_at?: string | null
+          done_by?: string | null
+          done_by_contact_id?: string | null
+          review?: boolean
           approved_at?: string | null
           approved_by?: string | null
           blocking?: boolean
@@ -12421,6 +12431,11 @@ export type Database = {
           title: string
         }
         Update: {
+          origin?: string | null
+          done_at?: string | null
+          done_by?: string | null
+          done_by_contact_id?: string | null
+          review?: boolean
           approved_at?: string | null
           approved_by?: string | null
           blocking?: boolean
@@ -16304,6 +16319,18 @@ export type Database = {
       }
     }
     Functions: {
+      add_production_checklist_task: {
+        Args: { p_contact_id: string | null; p_due_date: string | null; p_person_id: string | null; p_sheet_id: string; p_title: string }
+        Returns: string
+      }
+      finish_production_action: {
+        Args: { p_action_id: string }
+        Returns: undefined
+      }
+      finish_production_action_by_link: {
+        Args: { p_action_id: string; p_token: string }
+        Returns: undefined
+      }
       request_production_quote_changes: {
         Args: { p_comment: string; p_quote_id: string }
         Returns: undefined

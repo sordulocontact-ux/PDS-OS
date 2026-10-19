@@ -9,6 +9,7 @@ import { staffingCounts } from "@/lib/production/preprod/team";
 import type { Holder, ProductionSheetData } from "@/lib/production/sheet";
 import { preprodFor } from "@/lib/production/tab-data";
 import { loadStepTools } from "@/lib/step-tools/queries";
+import { isChecklistAction } from "@/lib/production/preprod/types";
 import { createClient } from "@/lib/supabase/server";
 
 import { journeySteps } from "./steps";
@@ -142,7 +143,7 @@ export const loadJourney = cache(
     const active = quotes.filter((q) => q.status === "approved").at(-1) ?? null;
     const items = preprod?.items ?? [];
     const actions = (preprod?.actions ?? []).filter(
-      (a) => !a.templateKey?.startsWith("checklist:"),
+      (a) => !isChecklistAction(a),
     );
     const staff = staffingCounts(data.needs);
     const callSheet = preprod?.callSheet ?? null;
@@ -151,7 +152,13 @@ export const loadJourney = cache(
       .filter((c) => c.status === "ready")
       .map((c) => c.occurredAt)
       .sort();
-    const progress = org ? Object.values(org.progress) : [];
+    // The company's checklist (seeded at the quote's validation) and the
+    // tasks PDS added to it.
+    const checklist = (preprod?.actions ?? []).filter(
+      (a) => isChecklistAction(a) && a.status === "approved",
+    );
+    const isDone = (a: (typeof checklist)[number]) =>
+      a.doneAt !== null || a.taskDone === true;
     const here = (x: { module: string; subjectId: string | null }) =>
       x.module === "production" && x.subjectId === deliverableId;
 
@@ -200,9 +207,14 @@ export const loadJourney = cache(
         written: Boolean(sheet?.brief.stagingIntent && sheet.brief.runOfShow),
       },
       checklist: {
-        total: progress.length,
-        done: progress.filter(Boolean).length,
-        companyOpen: progress.filter((x) => !x).length,
+        total: checklist.length,
+        done: checklist.filter(isDone).length,
+        companyOpen: checklist.filter(
+          (a) =>
+            !isDone(a) &&
+            a.holder?.kind === "contact" &&
+            a.holder.id === org?.company?.id,
+        ).length,
       },
       gear: {
         lines: preprod?.equipment.length ?? 0,

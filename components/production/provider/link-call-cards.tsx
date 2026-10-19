@@ -5,7 +5,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { callWhen, shortDay, shortStamp } from "@/lib/calls/prep/dates";
 import { fr } from "@/lib/i18n/fr";
 import type { LinkJourney } from "@/lib/production/provider/journey";
-import { formatDate } from "@/lib/release/format";
+import { formatShortDay } from "@/lib/utils/day";
+
+import { LinkTaskList } from "./link-task-cards";
 
 const t = fr.productionLink.call;
 
@@ -16,7 +18,7 @@ const t = fr.productionLink.call;
  * summary sent to the company and what PDS confirmed was asked of it.
  * Never the report itself.
  */
-export function linkCallCards(j: LinkJourney): PortalCardItem[] {
+export function linkCallCards(token: string, j: LinkJourney): PortalCardItem[] {
   const held = j.calls.filter((c) => c.status === "ready");
   const planned = j.calls.filter((c) => c.status !== "ready");
   const cards: PortalCardItem[] = planned.map((c, i) => ({
@@ -70,52 +72,37 @@ export function linkCallCards(j: LinkJourney): PortalCardItem[] {
     ),
   }));
   const last = held.at(-1);
+  const asked = j.actions.filter((a) => !a.checklist && a.origin === null);
+  const open = asked.filter((a) => a.doneAt === null);
   if (last)
     cards.push({
       id: "ps-call-held",
       title: t.held(shortDay(last.occurredAt)),
-      state: j.actions.length > 0 ? "todo" : "waiting",
+      state: open.length > 0 ? "todo" : "waiting",
       order: 6,
       action:
-        j.actions.length > 0
+        open.length > 0
           ? {
-              label: j.actions[0].title,
-              due: j.actions[0].dueDate
-                ? formatDate(j.actions[0].dueDate)
+              label: open[0].title,
+              due: open[0].dueDate
+                ? formatShortDay(open[0].dueDate, { bare: true })
                 : null,
             }
           : null,
-      dueKey: j.actions[0]?.dueDate ?? null,
+      dueKey: open[0]?.dueDate ?? null,
       body: (
         <>
           <MeetingSummaryFor
             summary={last.summary && { ...last.summary, count: 0 }}
           />
-          {j.actions.length > 0 ? (
+          {asked.length > 0 ? (
             <section className="flex flex-col gap-2">
               <h3 className="font-semibold">{t.asked}</h3>
-              <ul className="flex flex-col gap-2">
-                {j.actions.map((a) => (
-                  <li
-                    key={a.title}
-                    className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--surface-soft)] px-3 py-2.5"
-                  >
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span>
-                        {a.title}
-                        {a.dueDate &&
-                          ` · ${fr.productionLink.tasks.due(formatDate(a.dueDate)).toLowerCase()}`}
-                      </span>
-                      <span className="text-caption text-[color:var(--text-tertiary)]">
-                        {t.confirmed}
-                      </span>
-                    </span>
-                    <StatusBadge size="sm" tone="neutral">
-                      {t.todo}
-                    </StatusBadge>
-                  </li>
-                ))}
-              </ul>
+              <LinkTaskList
+                token={token}
+                actions={asked}
+                origin={t.confirmed}
+              />
             </section>
           ) : (
             <p className="text-muted-foreground">{t.nothingYet}</p>

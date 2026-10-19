@@ -2,7 +2,7 @@
 -- « Changer qui produit », « Révoquer » a link (20261019050101), …
 -- Run with `supabase test db`.
 begin;
-select plan(34);
+select plan(43);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -195,6 +195,38 @@ select lives_ok($$ select public.deposit_production_quote_by_link((select v from
 reset role;
 select is((select status from public.production_quotes where id = pg_temp.id_of('q2')), 'approved',
           'V2 stays the active reference meanwhile');
+
+-- 5. The preproduction checklist -------------------------------------------------------------
+select is((select count(*)::int from public.production_plan_actions
+            where sheet_id = pg_temp.id_of('sheet') and template_key like 'checklist\_%'), 4,
+          'the validated quote seeded the company''s checklist');
+insert into ids select 'task', id from public.production_plan_actions
+ where sheet_id = pg_temp.id_of('sheet') and template_key = 'checklist_gear';
+set local role anon;
+select lives_ok($$ select public.finish_production_action_by_link((select v from vars where k = 'token3'), pg_temp.id_of('task')) $$,
+                'the company marks a task done on its link');
+reset role;
+select ok((select done_at is not null from public.production_plan_actions where id = pg_temp.id_of('task')),
+          'it is done');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select ok(public.add_production_checklist_task(pg_temp.id_of('sheet'), 'Réserver 15 figurants', pg_temp.id_of('producer_person'), null, '2026-10-21') is not null,
+          'PDS adds its own task');
+reset role;
+select alike((select origin from public.production_plan_actions where title = 'Réserver 15 figurants'
+              and sheet_id = pg_temp.id_of('sheet')), 'Saisie par %', 'it says who wrote it');
+insert into ids select 'mine', id from public.production_plan_actions where title = 'Réserver 15 figurants'
+   and sheet_id = pg_temp.id_of('sheet');
+select ok((select task_id is not null from public.production_plan_actions where id = pg_temp.id_of('mine')),
+          'and it is in Travail');
+select pg_temp.act_as(pg_temp.id_of('creative'));
+select throws_ok($$ select public.finish_production_action(pg_temp.id_of('mine')) $$, '42501', null,
+                 'only its holder or whoever organises marks it done');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('producer'));
+select lives_ok($$ select public.finish_production_action(pg_temp.id_of('mine')) $$, 'its holder marks it done');
+reset role;
+select is((select t.status from public.tasks t join public.production_plan_actions a on a.task_id = t.id
+            where a.id = pg_temp.id_of('mine')), 'done', 'the task in Travail follows');
 
 select * from finish();
 rollback;

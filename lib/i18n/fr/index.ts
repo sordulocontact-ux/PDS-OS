@@ -92,6 +92,7 @@ import { roles } from "./roles";
 import { stepTools } from "./step-tools";
 import { productionLocations } from "./production-locations";
 import { productionOrganization } from "./production-organization";
+import { productionChecklist } from "./production-checklist";
 import { productionDirector } from "./production-director";
 import { productionProducer } from "./production-producer";
 import { productionHistory } from "./production-history";
@@ -206,6 +207,7 @@ export const fr = {
   productionLink,
   productionLocations,
   productionOrganization,
+  productionChecklist,
   productionDirector,
   productionProducer,
   productionCallSheetPage,

@@ -79,6 +79,13 @@ export const productionCall = {
       "Le call est enregistré : la transcription puis le compte rendu arrivent ici.",
     openCall: "Ouvrir le call",
     hold: "tenir le call et l'enregistrer dans PDS OS",
+    items: {
+      call: "Ce qui a été dit",
+      direct: "Points proposés par PO",
+      import: "Points tirés du document",
+    },
+    itemsDescription:
+      "Une proposition de PO ne compte qu'une fois confirmée ; une action confirmée devient une tâche, avec qui et quand.",
   },
   topicLabels: {
     brief: "Brief réalisateur",
