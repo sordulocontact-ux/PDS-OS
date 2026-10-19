@@ -139,7 +139,7 @@ export function DeliverablesSection({
                         <DeliverableForm
                           idPrefix={`deliverable-${d.id}`}
                           initial={{
-                            leverId: d.lever_id,
+                            leverId: d.lever_id ?? "",
                             title: d.title,
                             quantity:
                               d.quantity === null ? "" : String(d.quantity),

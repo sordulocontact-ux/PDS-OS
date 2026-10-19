@@ -139,6 +139,20 @@ export function toReportItemRows(
       quote: x.quote,
       ...location(x.at),
     })),
+    ...(
+      [
+        ["deliverable", strategy.deliverables],
+        ["milestone", strategy.milestones],
+        ["kpi", strategy.kpis],
+      ] as const
+    ).flatMap(([kind, list]) =>
+      list.map((x) => ({
+        kind,
+        what: x.label,
+        quote: x.quote,
+        ...location(x.at),
+      })),
+    ),
   ];
 
   // Position is the order within a kind, as returned by the extraction.
@@ -230,6 +244,12 @@ export function fromReportItemRows(
         family: toFamily(r.need_family),
         ...base(r),
       })),
+      deliverables: of("deliverable").map((r) => ({
+        label: r.what,
+        ...base(r),
+      })),
+      milestones: of("milestone").map((r) => ({ label: r.what, ...base(r) })),
+      kpis: of("kpi").map((r) => ({ label: r.what, ...base(r) })),
     },
   };
 }

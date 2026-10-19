@@ -129,6 +129,8 @@ export const notifications = {
       `${actor} demande une modification d'un document de la stratégie de « ${project} ».`,
     strategy_review_reminder: (actor: string, project: string) =>
       `${actor} vous relance : votre validation est attendue sur la stratégie de « ${project} ».`,
+    strategy_validated: (_actor: string, project: string) =>
+      `La Stratégie de « ${project} » est validée : le Brief de sortie alimente la Conception et les Activations.`,
     project_launched: (actor: string, project: string) =>
       `« ${project} » est lancé : ${actor} en est responsable.`,
     brief_approved: (_actor: string, project: string) =>

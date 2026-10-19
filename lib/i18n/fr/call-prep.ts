@@ -133,7 +133,10 @@ export const callPrep = {
           ? `Brief de cadrage validé · Fiche artiste de ${artist}`
           : "Brief de cadrage validé",
       subjects:
-        "Les dimensions de la Stratégie encore ouvertes, une par point de l'ordre du jour",
+        "Les 8 dimensions de la Stratégie, une par point de l'ordre du jour",
+      // The proto's objective (PREP_CALL.strat).
+      goal: (title: string) =>
+        `Cadrer la sortie de « ${title} » : positionnement, publics, narratif, dispositif, livrables, calendrier, budget et objectifs.`,
     },
     design: {
       title: "Échange créatif",

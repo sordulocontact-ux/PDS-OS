@@ -25,7 +25,7 @@ export type DeliverableState = "overdue" | "to_staff" | "planned";
 export type PlanDeliverable = {
   id: string;
   title: string;
-  leverId: string;
+  leverId: string | null;
   leverLabel: string;
   family: LeverFamily | null;
   assigneeName: string | null;
@@ -163,7 +163,7 @@ export async function loadProjectPlan(projectId: string): Promise<ProjectPlan> {
 
   const deliverables: PlanDeliverable[] = (deliverablesRes.data ?? []).map(
     (d) => {
-      const lever = leverById.get(d.lever_id);
+      const lever = d.lever_id ? leverById.get(d.lever_id) : undefined;
       return {
         id: d.id,
         title: d.title,

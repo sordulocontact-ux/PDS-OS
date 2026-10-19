@@ -51,15 +51,14 @@ export function marketingSteps(
       href: step.href ? step.href(projectId) : "",
       built: step.href !== null && !locked,
       title: locked ? t.strategyLocked : undefined,
-      // The Brief de sortie is a page of the Stratégie.
-      also:
-        step.key === "strategy"
-          ? [routes.projectStrategyBrief(projectId)]
-          : undefined,
+      also: undefined,
       // Production, Conception, Activations and Suivi & bilan have pages
       // below their own (a deliverable's preparation; intentions, references,
       // sheets…; an activation; a report, the closing).
+      // The Stratégie's steps (start, dimensions, validation, validated)
+      // and its generators are pages below its own.
       nested:
+        step.key === "strategy" ||
         step.key === "production" ||
         step.key === "conception" ||
         step.key === "activations" ||
