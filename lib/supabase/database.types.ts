@@ -34,6 +34,159 @@ export type Database = {
   }
   public: {
     Tables: {
+      production_schedule_decisions: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          shoot_on: string
+          starts_at: string
+          ends_at: string
+          source: string
+          decided_by: string | null
+          decided_at: string
+          replaced_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          shoot_on: string
+          starts_at: string
+          ends_at: string
+          source: string
+          decided_by?: string | null
+          decided_at?: string
+          replaced_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          shoot_on?: string
+          starts_at?: string
+          ends_at?: string
+          source?: string
+          decided_by?: string | null
+          decided_at?: string
+          replaced_at?: string | null
+        }
+        Relationships: []
+      }
+      production_delivery_recipients: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          delivered_at: string
+          person_id: string | null
+          contact_id: string | null
+          name: string | null
+          purpose: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          delivered_at: string
+          person_id?: string | null
+          contact_id?: string | null
+          name?: string | null
+          purpose?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          delivered_at?: string
+          person_id?: string | null
+          contact_id?: string | null
+          name?: string | null
+          purpose?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      production_direction_versions: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          number: number
+          treatment_url: string
+          moodboard_url: string | null
+          cutting_url: string
+          note: string | null
+          deposited_by_person: string | null
+          deposited_by_contact: string | null
+          deposited_at: string
+          int_status: string
+          int_by: string | null
+          int_at: string | null
+          int_comment: string | null
+          ext_status: string
+          ext_contact_id: string | null
+          ext_at: string | null
+          ext_comment: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          number: number
+          treatment_url: string
+          moodboard_url?: string | null
+          cutting_url: string
+          note?: string | null
+          deposited_by_person?: string | null
+          deposited_by_contact?: string | null
+          deposited_at?: string
+          int_status?: string
+          int_by?: string | null
+          int_at?: string | null
+          int_comment?: string | null
+          ext_status?: string
+          ext_contact_id?: string | null
+          ext_at?: string | null
+          ext_comment?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          number?: number
+          treatment_url?: string
+          moodboard_url?: string | null
+          cutting_url?: string
+          note?: string | null
+          deposited_by_person?: string | null
+          deposited_by_contact?: string | null
+          deposited_at?: string
+          int_status?: string
+          int_by?: string | null
+          int_at?: string | null
+          int_comment?: string | null
+          ext_status?: string
+          ext_contact_id?: string | null
+          ext_at?: string | null
+          ext_comment?: string | null
+        }
+        Relationships: []
+      }
       production_location_decisions: {
         Row: {
           id: string
@@ -13099,6 +13252,10 @@ export type Database = {
       }
       production_sheets: {
         Row: {
+          schedule_changed_at: string | null
+          derived_from_sheet_id: string | null
+          creative_ext_contact_id: string | null
+          direction_revision_by: string | null
           ready_snapshot: Json | null
           ready_forced_reason: string | null
           direction_revision_reason: string | null
@@ -13161,6 +13318,10 @@ export type Database = {
           staging_intent: string | null
         }
         Insert: {
+          schedule_changed_at?: string | null
+          derived_from_sheet_id?: string | null
+          creative_ext_contact_id?: string | null
+          direction_revision_by?: string | null
           ready_snapshot?: Json | null
           ready_forced_reason?: string | null
           direction_revision_reason?: string | null
@@ -13223,6 +13384,10 @@ export type Database = {
           staging_intent?: string | null
         }
         Update: {
+          schedule_changed_at?: string | null
+          derived_from_sheet_id?: string | null
+          creative_ext_contact_id?: string | null
+          direction_revision_by?: string | null
           ready_snapshot?: Json | null
           ready_forced_reason?: string | null
           direction_revision_reason?: string | null
@@ -13768,6 +13933,14 @@ export type Database = {
       }
       production_versions: {
         Row: {
+          int_approved_by: string | null
+          int_approved_at: string | null
+          ext_status: string
+          ext_contact_id: string | null
+          ext_at: string | null
+          ext_note: string | null
+          image_width: number | null
+          image_height: number | null
           contact_id: string | null
           created_at: string
           created_by: string | null
@@ -13790,6 +13963,14 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          int_approved_by?: string | null
+          int_approved_at?: string | null
+          ext_status?: string
+          ext_contact_id?: string | null
+          ext_at?: string | null
+          ext_note?: string | null
+          image_width?: number | null
+          image_height?: number | null
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -13812,6 +13993,14 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          int_approved_by?: string | null
+          int_approved_at?: string | null
+          ext_status?: string
+          ext_contact_id?: string | null
+          ext_at?: string | null
+          ext_note?: string | null
+          image_width?: number | null
+          image_height?: number | null
           contact_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -16472,6 +16661,65 @@ export type Database = {
       }
     }
     Functions: {
+      decide_production_schedule: {
+        Args: { p_date: string; p_end: string; p_sheet_id: string; p_source: string; p_start: string }
+        Returns: undefined
+      }
+      decide_production_version_by_link:
+        | { Args: { p_approve: boolean; p_note: string; p_token: string; p_version_id: string }; Returns: undefined }
+        | { Args: { p_approve: boolean; p_contact_token: string; p_item_id: string; p_note: string; p_version_id: string }; Returns: undefined }
+      set_production_final_by_link:
+        | { Args: { p_token: string; p_url: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_url: string }; Returns: undefined }
+      production_is_artwork: {
+        Args: { p_deliverable_id: string }
+        Returns: boolean
+      }
+      set_production_derived: {
+        Args: { p_from_sheet_id: string | null; p_sheet_id: string }
+        Returns: undefined
+      }
+      deposit_production_light_version: {
+        Args: { p_file_id: string | null; p_height: number | null; p_sheet_id: string; p_url: string | null; p_width: number | null }
+        Returns: number
+      }
+      deposit_production_light_version_by_link:
+        | { Args: { p_file_name: string | null; p_height: number | null; p_path: string | null; p_token: string; p_url: string | null; p_width: number | null }; Returns: number }
+        | { Args: { p_contact_token: string; p_file_name: string | null; p_height: number | null; p_item_id: string; p_path: string | null; p_url: string | null; p_width: number | null }; Returns: number }
+      decide_production_light_version: {
+        Args: { p_approve: boolean; p_note: string; p_version_id: string }
+        Returns: undefined
+      }
+      confirm_production_light_check: {
+        Args: { p_sheet_id: string }
+        Returns: undefined
+      }
+      deliver_production: {
+        Args: { p_recipients: Json; p_sheet_id: string }
+        Returns: undefined
+      }
+      deposit_production_direction_version: {
+        Args: { p_cutting: string; p_moodboard: string | null; p_note: string | null; p_sheet_id: string; p_treatment: string }
+        Returns: number
+      }
+      deposit_production_direction_by_link:
+        | { Args: { p_cutting: string; p_moodboard: string | null; p_note: string | null; p_token: string; p_treatment: string }; Returns: number }
+        | { Args: { p_contact_token: string; p_cutting: string; p_item_id: string; p_moodboard: string | null; p_note: string | null; p_treatment: string }; Returns: number }
+      decide_production_direction_version: {
+        Args: { p_approve: boolean; p_comment: string; p_version_id: string }
+        Returns: undefined
+      }
+      decide_production_direction_by_link:
+        | { Args: { p_approve: boolean; p_comment: string; p_token: string; p_version_id: string }; Returns: undefined }
+        | { Args: { p_approve: boolean; p_comment: string; p_contact_token: string; p_item_id: string; p_version_id: string }; Returns: undefined }
+      request_production_direction_version: {
+        Args: { p_reason: string; p_sheet_id: string }
+        Returns: undefined
+      }
+      set_production_creative_ext: {
+        Args: { p_contact_id: string | null; p_sheet_id: string }
+        Returns: undefined
+      }
       contact_link_token: { Args: { p_link_id: string }; Returns: string }
       get_contact_page: { Args: { p_token: string }; Returns: Json }
       issue_contact_link: {
