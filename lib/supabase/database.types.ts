@@ -6448,6 +6448,7 @@ export type Database = {
           master_id: string | null
           organization_id: string
           qualified_at: string | null
+          replaces_id: string | null
           project_id: string
           rights_scope: string | null
           scope_reason: string | null
@@ -6456,6 +6457,7 @@ export type Database = {
           status: string
           updated_at: string
           usage: string | null
+          withdrawn_reason: string | null
           work: string
         }
         Insert: {
@@ -6467,6 +6469,7 @@ export type Database = {
           master_id?: string | null
           organization_id: string
           qualified_at?: string | null
+          replaces_id?: string | null
           project_id: string
           rights_scope?: string | null
           scope_reason?: string | null
@@ -6475,6 +6478,7 @@ export type Database = {
           status?: string
           updated_at?: string
           usage?: string | null
+          withdrawn_reason?: string | null
           work: string
         }
         Update: {
@@ -6486,6 +6490,7 @@ export type Database = {
           master_id?: string | null
           organization_id?: string
           qualified_at?: string | null
+          replaces_id?: string | null
           project_id?: string
           rights_scope?: string | null
           scope_reason?: string | null
@@ -6494,6 +6499,7 @@ export type Database = {
           status?: string
           updated_at?: string
           usage?: string | null
+          withdrawn_reason?: string | null
           work?: string
         }
         Relationships: []
@@ -16543,6 +16549,14 @@ export type Database = {
       }
       seal_legal_form_link: {
         Args: { p_form_id: string; p_sealed: string }
+        Returns: undefined
+      }
+      replace_clearance: {
+        Args: { p_clearance_id: string; p_what: string }
+        Returns: string
+      }
+      withdraw_clearance: {
+        Args: { p_clearance_id: string; p_reason: string }
         Returns: undefined
       }
       change_legal_plan_item: {

@@ -109,6 +109,8 @@ export const notifications = {
       `${actor} a validé les conditions de l'emprunt (« ${project} ») : le contrat est prêt à envoyer.`,
     clearance_terms_rejected: (actor: string, project: string) =>
       `${actor} demande une contre-proposition sur l'emprunt (« ${project} »).`,
+    legal_element_withdrawn: (actor: string, project: string) =>
+      `${actor} a retiré un élément emprunté de « ${project} » : le passage est à refaire sans lui dans le Master.`,
     strategy_review_requested: (actor: string, project: string) =>
       `${actor} vous demande de valider un document de la stratégie de « ${project} ».`,
     strategy_review_approved: (actor: string, project: string) =>

@@ -1,13 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
+import { DialogButton } from "@/components/ui/dialog-button";
+import { ReasonForm } from "@/components/ui/reason-form";
 import { fr } from "@/lib/i18n/fr";
-import { advanceClearance } from "@/lib/legal/clearance/actions";
+import { withdrawClearance } from "@/lib/legal/clearance/actions";
 
-import { useLegalAction } from "@/components/legal/use-legal-action";
-
-/** « Autre issue : Retirer l'élément du titre » — the borrowing abandoned,
- * with its reason said; it no longer blocks the release. */
+/** « Autre issue : Retirer l'élément du titre » — the borrowing abandoned
+ * with its reason; it no longer blocks the release and whoever answers for
+ * the project is told (the Master redoes the passage). */
 export function WithdrawButton({
   projectId,
   clearanceId,
@@ -16,27 +18,29 @@ export function WithdrawButton({
   clearanceId: string;
 }) {
   const t = fr.legalClearance;
-  const { pending, run } = useLegalAction();
+  const router = useRouter();
   return (
     <div className="flex flex-wrap items-center gap-2 border-t pt-4">
       <span className="text-sm text-muted-foreground">{t.stages.other}</span>
-      <Button
+      <DialogButton
+        label={t.flow.withdraw}
         variant="ghost"
-        size="sm"
-        disabled={pending}
-        onClick={() =>
-          run(() =>
-            advanceClearance({
-              projectId,
-              clearanceId,
-              status: "abandoned",
-              note: t.flow.withdrawNote,
-            }),
-          )
-        }
+        title={t.flow.withdraw}
+        description={t.flow.decide.withdrawBody}
       >
-        {t.flow.withdraw}
-      </Button>
+        {(close) => (
+          <ReasonForm
+            label={t.flow.decide.withdrawWhy}
+            submitLabel={t.flow.withdraw}
+            doneMessage={t.flow.decide.withdrawDone}
+            run={(text) => withdrawClearance({ projectId, clearanceId, text })}
+            onDone={() => {
+              close();
+              router.refresh();
+            }}
+          />
+        )}
+      </DialogButton>
     </div>
   );
 }

@@ -9,6 +9,8 @@ import {
   CLEARANCE_PATH,
 } from "@/lib/legal/clearance/matrix";
 import { run } from "@/lib/legal/clearance/run";
+import { addLegalPlanItems } from "@/lib/legal/plan/actions";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 
 const ids = { projectId: catalogIdSchema, clearanceId: catalogIdSchema };
 
@@ -45,4 +47,42 @@ export async function advanceClearance(input: z.input<typeof advanceSchema>) {
       p_note: p.data.note || null,
     }),
   );
+}
+
+const decideSchema = z.object({
+  ...ids,
+  text: z.string().trim().min(1).max(1000),
+});
+
+/** « Retirer l'élément du titre », with why: the borrowing no longer blocks
+ * the release, and whoever answers for the project is told (the Master
+ * redoes the passage without it). */
+export async function withdrawClearance(input: z.input<typeof decideSchema>) {
+  const p = decideSchema.safeParse(input);
+  if (!p.success)
+    return { ok: false as const, error: fr.legalClearance.errors.note };
+  const result = await run(p.data.projectId, (s) =>
+    s.rpc("withdraw_clearance", {
+      p_clearance_id: p.data.clearanceId,
+      p_reason: p.data.text,
+    }),
+  );
+  if (result.ok) await schedulePendingPushes();
+  return result;
+}
+
+/** « Remplacer et redemander »: a new borrowing for what replaces the
+ * element, added to the plan at once (a new démarche of the Suivi). */
+export async function replaceClearance(input: z.input<typeof decideSchema>) {
+  const p = decideSchema.safeParse(input);
+  if (!p.success)
+    return { ok: false as const, error: fr.legalClearance.errors.note };
+  const result = await run(p.data.projectId, (s) =>
+    s.rpc("replace_clearance", {
+      p_clearance_id: p.data.clearanceId,
+      p_what: p.data.text,
+    }),
+  );
+  if (result.ok) await addLegalPlanItems(p.data.projectId);
+  return result;
 }

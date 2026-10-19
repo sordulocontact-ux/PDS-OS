@@ -1,5 +1,6 @@
 "use client";
 
+import { RefusalDecision } from "@/components/legal/clearance/refusal-decision";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -113,6 +114,7 @@ export function NegotiateMoment({
             {t.resume}
           </Button>
         </div>
+        <RefusalDecision projectId={projectId} clearanceId={clearance.id} />
       </>
     );
 
