@@ -15,9 +15,7 @@ import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
 // project's journeys of that workflow as JourneyStep[], read with the
-// viewer's session, and nothing when the viewer may not read it. The zones
-// fill the empty ones as they move onto the common frame (Cadrage, Master,
-// Distribution, Stratégie, Activations, Suivi & bilan).
+// viewer's session, and nothing when the viewer may not read it.
 type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 
 // Marketing: the Stratégie (lib/journey/strategy.ts), the Conception
@@ -35,9 +33,6 @@ const marketing: Loader = async (projectId) => {
     ]);
   return [...strategy, ...design, ...productions, ...activations, ...review];
 };
-
-// Filled by their zone (C4: typed, empty until then).
-const none: Loader = async () => [];
 
 export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   framing: framingJourneys,
