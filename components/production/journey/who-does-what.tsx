@@ -1,123 +1,147 @@
 import { ProviderLinkButton } from "@/components/production/post/provider-link-button";
-import { Avatar } from "@/components/ui/avatar";
-import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  RolesPanel,
+  type RoleHistoryLine,
+  type RoleRow,
+} from "@/components/shell/module/roles-panel";
+import type { PrivateLinkRow } from "@/components/shell/module/private-links";
+import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { fr } from "@/lib/i18n/fr";
 import type { ProviderLinkState } from "@/lib/production/post/types";
 import type { ProductionSheetData } from "@/lib/production/sheet";
 
 const t = fr.productionOrganization;
+const r = fr.roles.production;
 
-type Row = {
-  key: string;
-  name: string;
-  task: string;
-  holder: { kind: "person" | "contact"; id: string; name: string } | null;
-};
-
-/**
- * « Qui fait quoi » once the organisation is chosen: each role, who holds
- * it, what it does, and for a contact of the Réseau its private link (MVP:
- * no account for providers, Ibé 14/10).
- */
-export function WhoDoesWhat({
-  projectId,
-  data,
-  links,
-  canOrganize,
-}: {
+type Props = {
   projectId: string;
   data: ProductionSheetData;
   links: Record<string, ProviderLinkState>;
   canOrganize: boolean;
-}) {
-  const sheet = data.sheet;
-  if (!sheet) return null;
-  const org = sheet.organization;
-  const person = (p: { personId: string; name: string } | null) =>
-    p ? { kind: "person" as const, id: p.personId, name: p.name } : null;
-  const owner = data.ownerPersonId
-    ? {
-        kind: "person" as const,
-        id: data.ownerPersonId,
-        name: data.ownerName ?? "—",
-      }
-    : null;
-  const all: (Row | null)[] = [
-    org.company
-      ? {
-          key: "company",
-          name: org.company.name,
-          task: t.tasks.company,
-          holder: org.company,
-        }
-      : null,
-    {
-      key: "owner",
-      name: data.ownerName ?? "—",
-      task: t.tasks.owner,
-      holder: owner,
-    },
-    org.lineProducer
-      ? {
-          key: "producer",
-          name: org.lineProducer.name,
-          task: t.tasks.lineProducer,
-          holder: person(org.lineProducer),
-        }
-      : null,
-    org.quoteValidator
-      ? {
-          key: "validator",
-          name: org.quoteValidator.name,
-          task: t.tasks.validator,
-          holder: person(org.quoteValidator),
-        }
-      : null,
-    sheet.director
-      ? {
-          key: "director",
-          name: sheet.director.name,
-          task: t.tasks.director,
-          holder: sheet.director,
-        }
-      : null,
-    org.dop
-      ? { key: "dop", name: org.dop.name, task: t.tasks.dop, holder: org.dop }
-      : null,
-  ];
-  const rows = all.filter((r): r is Row => r !== null);
+  history?: RoleHistoryLine[];
+};
 
-  return (
+/**
+ * « Qui fait quoi » of a deliverable's production (Ibé 14/10, sub-lot C7),
+ * on the common `RolesPanel`: each role with its kind and holder, the
+ * private links of the Réseau contacts (no account for providers), the
+ * changes of organisation. `ProductionWhoDoesWhatButton`: the same in the
+ * header's modal.
+ */
+export function WhoDoesWhat(props: Props) {
+  const panel = productionRoles(props);
+  return panel ? (
     <section aria-labelledby="who-does-what" className="flex flex-col gap-3">
       <h3 id="who-does-what" className="text-body-md font-semibold">
         {t.whoDoesWhat}
       </h3>
-      <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
-        {rows.map((r) => (
-          <li
-            key={r.key}
-            className="flex flex-wrap items-center gap-3 border-b border-[color:var(--border-hairline)] px-4 py-3 last:border-b-0"
-          >
-            <Avatar name={r.name} pictureUrl={null} className="size-7" />
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="font-semibold">{r.name}</span>
-              <span className="text-sm text-muted-foreground">{r.task}</span>
-            </span>
-            <StatusBadge size="sm">
-              {r.holder?.kind === "contact" ? t.link : t.account}
-            </StatusBadge>
-            {canOrganize && r.holder?.kind === "contact" && (
-              <ProviderLinkButton
-                projectId={projectId}
-                sheetId={sheet.id}
-                holder={r.holder}
-                link={links[r.holder.id] ?? null}
-              />
-            )}
-          </li>
-        ))}
-      </ul>
+      <RolesPanel {...panel} />
       <p className="text-sm text-muted-foreground">{t.explain}</p>
     </section>
-  );
+  ) : null;
+}
+
+export function ProductionWhoDoesWhatButton(props: Props) {
+  const panel = productionRoles(props);
+  return panel ? <WhoDoesWhatButton {...panel} /> : null;
+}
+
+function productionRoles({
+  projectId,
+  data,
+  links,
+  canOrganize,
+  history,
+}: Props) {
+  const sheet = data.sheet;
+  if (!sheet) return null;
+  const org = sheet.organization;
+  const member = (p: { name: string } | null) =>
+    p ? { name: p.name, detail: r.member } : null;
+  const contact = (c: { name: string } | null) =>
+    c ? { name: c.name, viaLink: true } : null;
+  const rows: (RoleRow | null)[] = [
+    {
+      key: "owner",
+      label: r.owner,
+      kind: "coord",
+      holder: data.ownerName ? { name: data.ownerName } : null,
+      what: t.tasks.owner,
+    },
+    org.lineProducer && {
+      key: "producer",
+      label: r.producer,
+      kind: "coord",
+      holder: member(org.lineProducer),
+      what: t.tasks.lineProducer,
+    },
+    org.company && {
+      key: "company",
+      label: r.company,
+      kind: "exec",
+      holder: contact(org.company),
+      what: t.tasks.company,
+    },
+    sheet.director && {
+      key: "director",
+      label: r.director,
+      kind: "exec",
+      holder:
+        sheet.director.kind === "contact"
+          ? contact(sheet.director)
+          : member(sheet.director),
+      what: t.tasks.director,
+    },
+    org.dop && {
+      key: "dop",
+      label: r.dop,
+      kind: "exec",
+      holder: org.dop.kind === "contact" ? contact(org.dop) : member(org.dop),
+      what: t.tasks.dop,
+    },
+    org.quoteValidator && {
+      key: "validator",
+      label: r.validator,
+      kind: "valid",
+      holder: member(org.quoteValidator),
+      what: t.tasks.validator,
+    },
+  ];
+  const roles = rows.filter((x): x is RoleRow => Boolean(x));
+  const holders = [
+    org.company && { holder: org.company, role: r.company },
+    sheet.director?.kind === "contact" && {
+      holder: sheet.director,
+      role: r.director,
+    },
+    org.dop?.kind === "contact" && { holder: org.dop, role: r.dop },
+  ].filter((x) => Boolean(x)) as {
+    holder: { kind: "contact"; id: string; name: string };
+    role: string;
+  }[];
+  const privateLinks: PrivateLinkRow[] = holders.map(({ holder, role }) => {
+    const l = links[holder.id] ?? null;
+    return {
+      key: `${holder.id}-${role}`,
+      name: holder.name,
+      role,
+      link: l && {
+        number: l.number,
+        createdAt: l.createdAt,
+        createdBy: l.createdBy,
+        openedAt: l.lastOpenedAt,
+        expiresAt: l.expiresAt,
+      },
+      renew: canOrganize ? (
+        <ProviderLinkButton
+          projectId={projectId}
+          sheetId={sheet.id}
+          holder={holder}
+          link={l}
+          renew
+        />
+      ) : null,
+    };
+  });
+  return { roles, links: privateLinks, history };
 }

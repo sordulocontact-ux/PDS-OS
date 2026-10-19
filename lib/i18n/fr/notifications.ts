@@ -70,6 +70,12 @@ export const notifications = {
       `${actor} a envoyé la proposition de réalisation de « ${project} » : elle attend votre validation.`,
     production_direction_decided: (actor: string, project: string) =>
       `${actor} a tranché sur la proposition de réalisation de « ${project} ».`,
+    step_blocker_reported: (actor: string, project: string) =>
+      `${actor} a signalé un blocage sur « ${project} ».`,
+    step_blocker_lifted: (actor: string, project: string) =>
+      `${actor} a levé un blocage sur « ${project} ».`,
+    step_note_to_decide: (actor: string, project: string) =>
+      `${actor} a noté une information à confirmer sur « ${project} ».`,
     production_handed_off: (actor: string, project: string) =>
       `${actor} vous a transmis un livrable de « ${project} » pour les Activations : fichiers, formats et contraintes sont sur sa livraison.`,
     production_step_done: (_actor: string, project: string) =>

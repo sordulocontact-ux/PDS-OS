@@ -5,11 +5,10 @@ import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
 import { DirectionSubmitForm } from "@/components/design/direction/direction-submit-form";
 import { ValidationModeField } from "@/components/design/direction/validation-mode-field";
 import { VersionCard } from "@/components/design/direction/version-card";
-import { ResponsiblePicker } from "@/components/design/people/responsible-picker";
 import { DelegationsPanel } from "@/components/design/roles/delegations-panel";
+import { DesignRoles } from "@/components/design/roles/design-roles";
 import { RightsMatrix } from "@/components/design/roles/rights-matrix";
 import { SelfApprovalSwitch } from "@/components/design/roles/self-approval-switch";
-import { ValidatorsPicker } from "@/components/design/people/validators-picker";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -131,22 +130,16 @@ export default async function DesignDirectionPage({
         card
       >
         <div className="flex flex-col gap-6">
-          <ResponsiblePicker
+          <DesignRoles
             projectId={projectId}
             scope="direction"
             sheetId={null}
-            current={scope.responsible}
+            people={scope}
+            ownerName={project.ownerName}
             members={people.members}
             suggestions={people.suggestions}
             canAssign={data.isOwner && inProgress}
-          />
-          <ValidatorsPicker
-            projectId={projectId}
-            scope="direction"
-            sheetId={null}
-            validators={scope.validators}
-            members={people.members}
-            canEdit={data.isOwner && inProgress}
+            canEditValidators={data.isOwner && inProgress}
           />
           <ValidationModeField
             projectId={projectId}

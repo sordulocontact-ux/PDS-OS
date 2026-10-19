@@ -4,6 +4,7 @@ export { IconArrowDown } from "./arrow-down";
 export { IconArrowLeft } from "./arrow-left";
 export { IconArrowUp } from "./arrow-up";
 export { IconArrowUpRight } from "./arrow-up-right";
+export { IconBan } from "./ban";
 export { IconBriefcase } from "./briefcase";
 export { IconCircleCheck } from "./circle-check";
 export { IconCircleXmark } from "./circle-xmark";
