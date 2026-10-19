@@ -101,7 +101,7 @@ export function EngineerThreadPanel({
                       ? t.engineer
                       : (m.authorName ?? t.label)}
                   </span>
-                  <Timestamp iso={m.createdAt} />
+                  <Timestamp iso={m.createdAt} show="short" />
                   <span>· {t.stages[m.stage]}</span>
                   {m.kind !== "message" && (
                     <StatusBadge
