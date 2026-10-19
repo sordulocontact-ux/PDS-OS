@@ -7149,6 +7149,69 @@ export type Database = {
         }
         Relationships: []
       }
+      project_contact_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          contact_id: string
+          expires_at: string
+          first_opened_at: string | null
+          id: string
+          last_opened_at: string | null
+          number: number
+          open_count: number
+          organization_id: string
+          project_id: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          sent_at: string | null
+          sent_by: string | null
+          token_hash: string
+          token_secret: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          contact_id: string
+          expires_at: string
+          first_opened_at?: string | null
+          id?: string
+          last_opened_at?: string | null
+          number: number
+          open_count?: number
+          organization_id: string
+          project_id: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          token_hash: string
+          token_secret: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          contact_id?: string
+          expires_at?: string
+          first_opened_at?: string | null
+          id?: string
+          last_opened_at?: string | null
+          number?: number
+          open_count?: number
+          organization_id?: string
+          project_id?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
+          token_hash?: string
+          token_secret?: string
+        }
+        Relationships: []
+      }
       release_readiness_policies: {
         Row: {
           organization_id: string
@@ -16409,10 +16472,19 @@ export type Database = {
       }
     }
     Functions: {
-      set_production_rushes_by_link: {
-        Args: { p_token: string; p_url: string }
-        Returns: undefined
+      contact_link_token: { Args: { p_link_id: string }; Returns: string }
+      get_contact_page: { Args: { p_token: string }; Returns: Json }
+      issue_contact_link: {
+        Args: { p_contact_id: string; p_expires_at?: string; p_project_id: string }
+        Returns: string
       }
+      mark_contact_link_sent: { Args: { p_link_id: string }; Returns: undefined }
+      note_contact_link_opened: { Args: { p_token: string }; Returns: undefined }
+      project_link_contacts: { Args: { p_project_id: string }; Returns: Json }
+      revoke_contact_link: { Args: { p_link_id: string; p_reason: string }; Returns: undefined }
+      set_production_rushes_by_link:
+        | { Args: { p_token: string; p_url: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_url: string }; Returns: undefined }
       confirm_production_ready: {
         Args: { p_force_reason: string | null; p_sheet_id: string; p_snapshot: Json }
         Returns: undefined
@@ -16429,10 +16501,9 @@ export type Database = {
         Args: { p_action_id: string }
         Returns: undefined
       }
-      finish_production_action_by_link: {
-        Args: { p_action_id: string; p_token: string }
-        Returns: undefined
-      }
+      finish_production_action_by_link:
+        | { Args: { p_action_id: string; p_token: string }; Returns: undefined }
+        | { Args: { p_action_id: string; p_contact_token: string; p_item_id: string }; Returns: undefined }
       request_production_quote_changes: {
         Args: { p_comment: string; p_quote_id: string }
         Returns: undefined
@@ -16441,10 +16512,9 @@ export type Database = {
         Args: { p_reason: string; p_sheet_id: string }
         Returns: undefined
       }
-      propose_production_director_by_link: {
-        Args: { p_name: string; p_note: string | null; p_reel_url: string; p_token: string }
-        Returns: undefined
-      }
+      propose_production_director_by_link:
+        | { Args: { p_name: string; p_note: string | null; p_reel_url: string; p_token: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_name: string; p_note: string | null; p_reel_url: string }; Returns: undefined }
       retain_production_director: {
         Args: { p_proposal_id: string }
         Returns: string
@@ -16465,14 +16535,9 @@ export type Database = {
         Args: { p_project_id: string; p_role: string }
         Returns: undefined
       }
-      take_master_transmission: {
-        Args: {
-          p_mastering_cents?: number
-          p_mix_cents?: number
-          p_token: string
-        }
-        Returns: string
-      }
+      take_master_transmission:
+        | { Args: { p_mastering_cents?: number; p_mix_cents?: number; p_token: string }; Returns: string }
+        | { Args: { p_contact_token: string; p_item_id: string; p_mastering_cents: number | null; p_mix_cents: number | null }; Returns: string }
       master_transmission_link: {
         Args: { p_transmission_id: string }
         Returns: string
@@ -16703,8 +16768,12 @@ export type Database = {
         Args: { p_note: string; p_reserve_id: string }
         Returns: undefined
       }
-      note_master_transmission_opened: { Args: { p_token: string }; Returns: undefined }
-      note_legal_form_opened: { Args: { p_token: string }; Returns: undefined }
+      note_master_transmission_opened:
+        | { Args: { p_token: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: undefined }
+      note_legal_form_opened:
+        | { Args: { p_token: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: undefined }
       reclassify_master_audio: {
         Args: { p_file_id: string; p_state: string }
         Returns: undefined
@@ -16765,15 +16834,9 @@ export type Database = {
         }
         Returns: string
       }
-      post_master_engineer_message: {
-        Args: {
-          p_body: string
-          p_delay_days?: number
-          p_kind: string
-          p_token: string
-        }
-        Returns: string
-      }
+      post_master_engineer_message:
+        | { Args: { p_body: string; p_delay_days?: number; p_kind: string; p_token: string }; Returns: string }
+        | { Args: { p_body: string; p_contact_token: string; p_delay_days: number | null; p_item_id: string; p_kind: string }; Returns: string }
       prepare_distribution_version: {
         Args: { p_note: string; p_project_id: string }
         Returns: undefined
@@ -16971,10 +17034,9 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: boolean
       }
-      acknowledge_master_transmission: {
-        Args: { p_token: string }
-        Returns: string
-      }
+      acknowledge_master_transmission:
+        | { Args: { p_token: string }; Returns: string }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: string }
       activation_can_write: {
         Args: { p_activation_id: string }
         Returns: boolean
@@ -16993,10 +17055,9 @@ export type Database = {
         Args: { p_contact_id: string; p_project_id: string; p_role: string }
         Returns: string
       }
-      add_production_gear_by_link: {
-        Args: { p_lines: Json; p_token: string }
-        Returns: number
-      }
+      add_production_gear_by_link:
+        | { Args: { p_lines: Json; p_token: string }; Returns: number }
+        | { Args: { p_contact_token: string; p_item_id: string; p_lines: Json }; Returns: number }
       add_production_quote: {
         Args: {
           p_amount_cents: number
@@ -17433,32 +17494,21 @@ export type Database = {
         }
         Returns: undefined
       }
-      get_influence_collaboration: {
-        Args: { p_token: string }
-        Returns: Json
-      }
-      submit_influence_content_by_token: {
-        Args: { p_token: string; p_url: string }
-        Returns: undefined
-      }
-      declare_influence_publication_by_token: {
-        Args: { p_token: string; p_url: string }
-        Returns: undefined
-      }
-      open_influence_invoice_slot: {
-        Args: { p_ext: string; p_token: string }
-        Returns: string
-      }
-      submit_influence_invoice_by_token: {
-        Args: {
-          p_bytes: number
-          p_file_name: string
-          p_mime: string
-          p_path: string
-          p_token: string
-        }
-        Returns: undefined
-      }
+      get_influence_collaboration:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      submit_influence_content_by_token:
+        | { Args: { p_token: string; p_url: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_url: string }; Returns: undefined }
+      declare_influence_publication_by_token:
+        | { Args: { p_token: string; p_url: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_url: string }; Returns: undefined }
+      open_influence_invoice_slot:
+        | { Args: { p_ext: string; p_token: string }; Returns: string }
+        | { Args: { p_contact_token: string; p_ext: string; p_item_id: string }; Returns: string }
+      submit_influence_invoice_by_token:
+        | { Args: { p_bytes: number; p_file_name: string; p_mime: string; p_path: string; p_token: string }; Returns: undefined }
+        | { Args: { p_bytes: number; p_contact_token: string; p_file_name: string; p_item_id: string; p_mime: string; p_path: string }; Returns: undefined }
       declare_activation_transmission: {
         Args: { p_activation_id: string }
         Returns: undefined
@@ -17556,32 +17606,15 @@ export type Database = {
         }[]
       }
       design_is_editable: { Args: { p_project_id: string }; Returns: boolean }
-      deposit_production_export: {
-        Args: { p_line_id: string; p_token: string; p_url: string }
-        Returns: undefined
-      }
-      deposit_production_quote_by_link: {
-        Args: {
-          p_amount_cents: number
-          p_delivery_on: string | null
-          p_label: string
-          p_note: string | null
-          p_token: string
-          p_url: string | null
-          p_loc_budget_cents?: number
-          }
-        Returns: undefined
-      }
-      deposit_production_version: {
-        Args: {
-          p_file_name: string | null
-          p_notes: string | null
-          p_path: string | null
-          p_token: string
-          p_url: string | null
-        }
-        Returns: number
-      }
+      deposit_production_export:
+        | { Args: { p_line_id: string; p_token: string; p_url: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_line_id: string; p_url: string }; Returns: undefined }
+      deposit_production_quote_by_link:
+        | { Args: { p_amount_cents: number; p_delivery_on: string | null; p_label: string; p_loc_budget_cents?: number; p_note: string | null; p_token: string; p_url: string | null }; Returns: undefined }
+        | { Args: { p_amount_cents: number; p_contact_token: string; p_delivery_on: string | null; p_item_id: string; p_label: string; p_loc_budget_cents: number | null; p_note: string | null; p_url: string | null }; Returns: undefined }
+      deposit_production_version:
+        | { Args: { p_file_name: string | null; p_notes: string | null; p_path: string | null; p_token: string; p_url: string | null }; Returns: number }
+        | { Args: { p_contact_token: string; p_file_name: string | null; p_item_id: string; p_notes: string | null; p_path: string | null; p_url: string | null }; Returns: number }
       derogate_production_check: {
         Args: { p_key: string; p_reason: string; p_sheet_id: string }
         Returns: undefined
@@ -17712,10 +17745,9 @@ export type Database = {
         Args: { p_kind: string; p_token: string }
         Returns: Json
       }
-      finish_production_step_by_link: {
-        Args: { p_step_id: string; p_token: string }
-        Returns: undefined
-      }
+      finish_production_step_by_link:
+        | { Args: { p_step_id: string; p_token: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_step_id: string }; Returns: undefined }
       forget_push_subscription: {
         Args: { p_endpoint: string }
         Returns: undefined
@@ -17786,9 +17818,8 @@ export type Database = {
         Args: { p_fields: Json; p_need_id: string }
         Returns: string
       }
-      get_master_engineer_messages: {
-        Args: { p_token: string }
-        Returns: {
+      get_master_engineer_messages:
+        | { Args: { p_token: string }; Returns: {
           author: string
           body: string
           created_at: string
@@ -17797,23 +17828,36 @@ export type Database = {
           kind: string
           stage: string
           status: string
-        }[]
-      }
-      get_master_transmission: { Args: { p_token: string }; Returns: Json }
+        }[] }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: {
+          author: string
+          body: string
+          created_at: string
+          delay_days: number
+          id: string
+          kind: string
+          stage: string
+          status: string
+        }[] }
+      get_master_transmission:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
       get_my_access: { Args: never; Returns: Json }
       get_production_call_sheet: { Args: { p_token: string }; Returns: Json }
-      get_production_link_journey: { Args: { p_token: string }; Returns: Json }
-      get_production_provider_locations: {
-        Args: { p_token: string }
-        Returns: Json
-      }
-      get_production_provider_space: {
-        Args: { p_token: string }
-        Returns: Json
-      }
+      get_production_link_journey:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      get_production_provider_locations:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      get_production_provider_space:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
       get_shared_strategy_document: { Args: { p_token: string }; Returns: Json }
       get_smartlink: { Args: { p_token: string }; Returns: Json }
-      get_split_confirmation: { Args: { p_token: string }; Returns: Json }
+      get_split_confirmation:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
       has_permission: {
         Args: { org_id: string; p_permission: string }
         Returns: boolean
@@ -17999,10 +18043,9 @@ export type Database = {
         }
         Returns: undefined
       }
-      note_production_provider_opened: {
-        Args: { p_token: string }
-        Returns: undefined
-      }
+      note_production_provider_opened:
+        | { Args: { p_token: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: undefined }
       notify: {
         Args: {
           p_kind: string
@@ -18021,15 +18064,9 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: undefined
       }
-      open_master_delivery: {
-        Args: {
-          p_extension: string
-          p_file_name?: string
-          p_master_id: string
-          p_token: string
-        }
-        Returns: string
-      }
+      open_master_delivery:
+        | { Args: { p_extension: string; p_file_name?: string; p_master_id: string; p_token: string }; Returns: string }
+        | { Args: { p_contact_token: string; p_extension: string; p_file_name: string | null; p_item_id: string; p_master_id: string }; Returns: string }
       person_has_permission: {
         Args: {
           p_organization_id: string
@@ -18054,10 +18091,9 @@ export type Database = {
         }
         Returns: string
       }
-      open_production_provider_slot: {
-        Args: { p_file_name: string; p_token: string }
-        Returns: string
-      }
+      open_production_provider_slot:
+        | { Args: { p_file_name: string; p_token: string }; Returns: string }
+        | { Args: { p_contact_token: string; p_file_name: string; p_item_id: string }; Returns: string }
       open_production_sheet: {
         Args: {
           p_deliverable_id: string
@@ -18179,18 +18215,9 @@ export type Database = {
         }
         Returns: string
       }
-      propose_production_location_by_link: {
-        Args: {
-          p_address: string | null
-          p_availability: string | null
-          p_constraints: string | null
-          p_name: string
-          p_price_cents: number | null
-          p_token: string
-          p_url: string | null
-        }
-        Returns: undefined
-      }
+      propose_production_location_by_link:
+        | { Args: { p_address: string | null; p_availability: string | null; p_constraints: string | null; p_name: string; p_price_cents: number | null; p_token: string; p_url: string | null }; Returns: undefined }
+        | { Args: { p_address: string | null; p_availability: string | null; p_constraints: string | null; p_contact_token: string; p_item_id: string; p_name: string; p_price_cents: number | null; p_url: string | null }; Returns: undefined }
       propose_split_version: {
         Args: { p_version_id: string }
         Returns: {
@@ -18207,8 +18234,12 @@ export type Database = {
         Args: { p_project_id: string }
         Returns: undefined
       }
-      get_influence_agreement: { Args: { p_token: string }; Returns: Json }
-      get_legal_form: { Args: { p_token: string }; Returns: Json }
+      get_influence_agreement:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
+      get_legal_form:
+        | { Args: { p_token: string }; Returns: Json }
+        | { Args: { p_contact_token: string; p_item_id: string }; Returns: Json }
       legal_name_key: { Args: { p_name: string }; Returns: string }
       launch_legal_plan: {
         Args: { p_items: Json; p_project_id: string }
@@ -18236,16 +18267,9 @@ export type Database = {
         Args: { p_proof: string; p_signature_id: string }
         Returns: undefined
       }
-      record_master_delivery: {
-        Args: {
-          p_bytes?: number
-          p_file_name: string
-          p_mime: string
-          p_path: string
-          p_token: string
-        }
-        Returns: string
-      }
+      record_master_delivery:
+        | { Args: { p_bytes?: number; p_file_name: string; p_mime: string; p_path: string; p_token: string }; Returns: string }
+        | { Args: { p_bytes: number | null; p_contact_token: string; p_file_name: string; p_item_id: string; p_mime: string; p_path: string }; Returns: string }
       record_release_delivery: {
         Args: {
           p_contact_id: string
@@ -18279,26 +18303,12 @@ export type Database = {
         Args: { p_fields: string[]; p_formality_id: string; p_note: string }
         Returns: undefined
       }
-      respond_influence_agreement: {
-        Args: {
-          p_comment: string | null
-          p_consent: boolean | null
-          p_decision: string
-          p_hash: string | null
-          p_name: string | null
-          p_token: string | null
-        }
-        Returns: string
-      }
-      respond_split_confirmation: {
-        Args: {
-          p_comment: string | null
-          p_decision: string
-          p_hash: string
-          p_token: string
-        }
-        Returns: string
-      }
+      respond_influence_agreement:
+        | { Args: { p_comment: string | null; p_consent: boolean | null; p_decision: string; p_hash: string | null; p_name: string | null; p_token: string | null }; Returns: string }
+        | { Args: { p_comment: string | null; p_consent: boolean | null; p_contact_token: string; p_decision: string; p_hash: string | null; p_item_id: string; p_name: string | null }; Returns: string }
+      respond_split_confirmation:
+        | { Args: { p_comment: string | null; p_decision: string; p_hash: string; p_token: string }; Returns: string }
+        | { Args: { p_comment: string | null; p_contact_token: string; p_decision: string; p_hash: string; p_item_id: string }; Returns: string }
       retire_legal_plan_items: {
         Args: { p_keys: string[]; p_project_id: string }
         Returns: undefined
@@ -18311,15 +18321,9 @@ export type Database = {
         Args: { p_comment: string; p_option_id: string; p_verdict: string }
         Returns: undefined
       }
-      review_production_location_by_link: {
-        Args: {
-          p_comment: string | null
-          p_option_id: string
-          p_token: string
-          p_verdict: string
-        }
-        Returns: undefined
-      }
+      review_production_location_by_link:
+        | { Args: { p_comment: string | null; p_option_id: string; p_token: string; p_verdict: string }; Returns: undefined }
+        | { Args: { p_comment: string | null; p_contact_token: string; p_item_id: string; p_option_id: string; p_verdict: string }; Returns: undefined }
       revise_contract_document: {
         Args: { p_body: string; p_comment: string; p_contract_id: string }
         Returns: undefined
@@ -18401,30 +18405,16 @@ export type Database = {
         Args: { p_formality_id: string; p_proof: string }
         Returns: undefined
       }
-      submit_legal_form: {
-        Args: {
-          p_contribution: Json
-          p_other_role: string | null
-          p_person: Json
-          p_roles: string[]
-          p_token: string
-          p_version: number
-        }
-        Returns: string
-      }
+      submit_legal_form:
+        | { Args: { p_contribution: Json; p_other_role: string | null; p_person: Json; p_roles: string[]; p_token: string; p_version: number }; Returns: string }
+        | { Args: { p_contact_token: string; p_contribution: Json; p_item_id: string; p_other_role: string | null; p_person: Json; p_roles: string[]; p_version: number }; Returns: string }
       submit_production_direction: {
         Args: { p_sheet_id: string }
         Returns: undefined
       }
-      submit_production_direction_by_link: {
-        Args: {
-          p_references_note: string
-          p_run_of_show: string
-          p_staging_intent: string
-          p_token: string
-        }
-        Returns: undefined
-      }
+      submit_production_direction_by_link:
+        | { Args: { p_references_note: string; p_run_of_show: string; p_staging_intent: string; p_token: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_item_id: string; p_references_note: string; p_run_of_show: string; p_staging_intent: string }; Returns: undefined }
       submit_production_quote: {
         Args: { p_checks: Json; p_note: string | null; p_quote_id: string }
         Returns: undefined
@@ -18645,10 +18635,9 @@ export type Database = {
         }
         Returns: undefined
       }
-      set_production_progress_by_link: {
-        Args: { p_done: boolean; p_key: string; p_token: string }
-        Returns: undefined
-      }
+      set_production_progress_by_link:
+        | { Args: { p_done: boolean; p_key: string; p_token: string }; Returns: undefined }
+        | { Args: { p_contact_token: string; p_done: boolean; p_item_id: string; p_key: string }; Returns: undefined }
       set_project_archived: {
         Args: { p_archived: boolean; p_project_id: string }
         Returns: undefined
