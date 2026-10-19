@@ -8,6 +8,8 @@ import {
   type StageKey,
 } from "@/lib/notifications/types";
 import { personName } from "@/lib/projects/types";
+import { stepHref } from "@/lib/step-tools/href";
+import { STEP_MODULES, type StepModule } from "@/lib/step-tools/model";
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
@@ -48,7 +50,47 @@ async function loadStageKeys(
   return map;
 }
 
-function toItem(row: Row, stageKey: StageKey | null): NotificationItem | null {
+// A step's blocker or note: the step itself, resolved from its row (RLS:
+// whoever sees the project); the project when it is gone.
+async function loadStepTargets(
+  supabase: SupabaseClient<Database>,
+  rows: Row[],
+): Promise<Map<string, string>> {
+  const of = (prefix: string) =>
+    rows
+      .filter((r) => r.kind.startsWith(prefix) && r.subject_id)
+      .map((r) => r.subject_id!);
+  const blockerIds = of("step_blocker_");
+  const noteIds = of("step_note_");
+  if (blockerIds.length === 0 && noteIds.length === 0) return new Map();
+  const cols = "id, project_id, module, step_key, subject_id";
+  const [blockers, notes] = await Promise.all([
+    blockerIds.length
+      ? supabase.from("step_blockers").select(cols).in("id", blockerIds)
+      : Promise.resolve({ data: [] }),
+    noteIds.length
+      ? supabase.from("step_notes").select(cols).in("id", noteIds)
+      : Promise.resolve({ data: [] }),
+  ]);
+  const map = new Map<string, string>();
+  for (const r of [...(blockers.data ?? []), ...(notes.data ?? [])])
+    if ((STEP_MODULES as readonly string[]).includes(r.module))
+      map.set(
+        r.id,
+        stepHref(r.project_id, {
+          module: r.module as StepModule,
+          stepKey: r.step_key,
+          subjectId: r.subject_id,
+        }),
+      );
+  return map;
+}
+
+function toItem(
+  row: Row,
+  stageKey: StageKey | null,
+  target?: string,
+): NotificationItem | null {
   if (!isNotificationKind(row.kind)) return null;
   const actor = row.actor
     ? personName(row.actor.first_name, row.actor.last_name)
@@ -57,7 +99,9 @@ function toItem(row: Row, stageKey: StageKey | null): NotificationItem | null {
     id: row.id,
     kind: row.kind,
     text: notificationText(row.kind, actor, row.project?.title ?? null),
-    href: notificationHref(row.kind, row.project_id, stageKey, row.subject_id),
+    href:
+      target ??
+      notificationHref(row.kind, row.project_id, stageKey, row.subject_id),
     createdAt: row.created_at,
     read: row.read_at !== null,
   };
@@ -90,13 +134,17 @@ export async function loadNotifications(limit = 20): Promise<{
   const validationIds = rows
     .filter((r) => r.kind.startsWith("validation_") && r.subject_id)
     .map((r) => r.subject_id!);
-  const stageKeys = await loadStageKeys(supabase, validationIds);
+  const [stageKeys, targets] = await Promise.all([
+    loadStageKeys(supabase, validationIds),
+    loadStepTargets(supabase, rows),
+  ]);
   return {
     items: rows.flatMap(
       (row) =>
         toItem(
           row,
           row.subject_id ? (stageKeys.get(row.subject_id) ?? null) : null,
+          row.subject_id ? targets.get(row.subject_id) : undefined,
         ) ?? [],
     ),
     unreadCount: unread.count ?? 0,
@@ -114,11 +162,15 @@ export async function loadNotification(
     .maybeSingle();
   if (error || !data) return null;
   const row = data as Row;
-  const stageKeys = row.subject_id
-    ? await loadStageKeys(supabase, [row.subject_id])
-    : new Map<string, StageKey>();
+  const [stageKeys, targets] = row.subject_id
+    ? await Promise.all([
+        loadStageKeys(supabase, [row.subject_id]),
+        loadStepTargets(supabase, [row]),
+      ])
+    : [new Map<string, StageKey>(), new Map<string, string>()];
   return toItem(
     row,
     row.subject_id ? (stageKeys.get(row.subject_id) ?? null) : null,
+    row.subject_id ? targets.get(row.subject_id) : undefined,
   );
 }

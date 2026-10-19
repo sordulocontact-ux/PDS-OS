@@ -23,11 +23,15 @@ export function ProviderLinkButton({
   sheetId,
   holder,
   link,
+  renew = false,
 }: {
   projectId: string;
   sheetId: string;
   holder: Holder;
   link: ProviderLinkState | null;
+  // « Nouveau lien » of « Liens privés » (RolesPanel): the button alone,
+  // the panel says when the link was made and opened.
+  renew?: boolean;
 }) {
   const showLinks = useShowLinks();
   const [pending, setPending] = useState(false);
@@ -70,9 +74,9 @@ export function ProviderLinkButton({
         aria-busy={pending || undefined}
         onClick={create}
       >
-        {link ? t.linkAgain : t.link}
+        {renew && link ? fr.roles.links.renew : link ? t.linkAgain : t.link}
       </Button>
-      {link && (
+      {link && !renew && (
         <span className="text-xs text-muted-foreground">
           {t.sentOn(formatDateTime(link.createdAt))}
           {" · "}

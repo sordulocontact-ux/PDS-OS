@@ -23,6 +23,9 @@ const record = (v: unknown): Record<string, unknown> | null =>
 export async function loadProductionHistory(
   sheetId: string,
   data: Pick<ProductionSheetData, "members" | "contacts">,
+  // Only these events (« entity.action »): the changes of role of « Qui
+  // fait quoi ».
+  only?: string[],
 ): Promise<HistoryLine[]> {
   const supabase = await createClient();
   const { data: rows, error } = await supabase
@@ -45,6 +48,7 @@ export async function loadProductionHistory(
       : (data.contacts.find((c) => c.id === h.id)?.name ?? t.someone);
   };
   return (rows ?? []).flatMap((row) => {
+    if (only && !only.includes(`${row.entity}.${row.action}`)) return [];
     const event: HistoryEvent = {
       id: row.id,
       entity: row.entity,

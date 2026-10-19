@@ -189,6 +189,13 @@ export function describeEvent(e: HistoryEvent, names: Names): string {
       return t.callSheet(num(a.number));
     case "link.sent":
       return t.link(names.holder(a.holder));
+    case "sheet.organized":
+      return t.organized(
+        a.organization === "internal" || a.organization === "external"
+          ? a.organization
+          : null,
+        a.company ? names.holder({ kind: "contact", id: a.company }) : null,
+      );
     case "delivery.decision": {
       if (a.delivered && !b.delivered) return t.delivery.delivered;
       if (a.checked && !b.checked) return t.delivery.checked;

@@ -23,6 +23,7 @@ export function ValidatorsPicker({
   validators,
   members,
   canEdit,
+  compact = false,
 }: {
   projectId: string;
   scope: "direction" | "sheet";
@@ -30,12 +31,14 @@ export function ValidatorsPicker({
   validators: Member[];
   members: Member[];
   canEdit: boolean;
+  // The « Changer » of « Qui fait quoi » (RolesPanel): the button alone.
+  compact?: boolean;
 }) {
   const t = fr.conceptionIntents.people;
   const [open, setOpen] = useState(false);
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex min-w-0 flex-col gap-0.5">
+      <div className={compact ? "hidden" : "flex min-w-0 flex-col gap-0.5"}>
         <p className="text-body-md font-medium">{t.validatorsTitle}</p>
         <p className="text-caption text-muted-foreground">
           {validators.length
@@ -45,7 +48,7 @@ export function ValidatorsPicker({
       </div>
       {canEdit && (
         <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-          {t.editValidators}
+          {compact ? fr.roles.change : t.editValidators}
         </Button>
       )}
       <FormDialog
