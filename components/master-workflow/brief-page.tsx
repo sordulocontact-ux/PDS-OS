@@ -2,10 +2,6 @@ import { BriefBudget } from "@/components/master-workflow/brief-budget";
 import { BriefExchanges } from "@/components/master-workflow/brief-exchanges";
 import { BriefForm } from "@/components/master-workflow/brief-form";
 import { BriefHeader } from "@/components/master-workflow/brief-header";
-import {
-  BriefNextStep,
-  type NextStep,
-} from "@/components/master-workflow/brief-next-step";
 import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { MasterFactAction } from "@/components/master-workflow/master-fact-action";
 import { CallPrepForm } from "@/components/calls/prep/call-prep-form";
@@ -32,15 +28,12 @@ import { formatDateTime } from "@/lib/calls/format";
 export function BriefPage({
   view,
   questions,
-  next,
   exchange,
 }: {
   view: BriefView;
   // The common call form's defaults, for the owner only.
   exchange: CallPrepDefaults | null;
   questions: BriefQuestionsView;
-  // What the sending still needs, and whether it already left (PROJ-UX-08).
-  next: NextStep;
 }) {
   const t = fr.masterWorkflow.brief;
   return (
@@ -131,8 +124,6 @@ export function BriefPage({
       {/* Remounted on each save (an answer applied included): the fields
           start again from the saved brief. */}
       <BriefForm key={view.savedAt ?? "new"} view={view} />
-
-      {view.canEdit && <BriefNextStep next={next} />}
 
       {view.canSeeBudget && (
         <PageSection

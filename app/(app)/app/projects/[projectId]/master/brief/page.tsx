@@ -1,11 +1,10 @@
 import { BriefPage } from "@/components/master-workflow/brief-page";
+import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { masterExchangeDefaults } from "@/lib/master-workflow/exchange-defaults";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { loadMasterBrief } from "@/lib/master-workflow/brief";
 import { loadBriefQuestions } from "@/lib/master-workflow/questions";
-import { loadStepView } from "@/lib/master-workflow/transmission";
-import { masterStepHref } from "@/lib/ui/master-steps";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
 
@@ -24,27 +23,16 @@ export default async function ProjectMasterBriefPage({
     requireLaunchedProject(projectId),
   ]);
 
-  const [view, questions, mix] = await Promise.all([
+  const [view, questions] = await Promise.all([
     loadMasterBrief(project, access),
     loadBriefQuestions(project, access),
-    // What the sending to the mix engineer still needs (PROJ-UX-08).
-    loadStepView(project, access, "mix"),
   ]);
   const exchange = view.canEdit
     ? await masterExchangeDefaults(view, project.ownerPersonId)
     : null;
-  // The Brief step of the Master (lib/ui/master-steps.ts): its chevron
-  // names it, the title stays « Master » (ProjectPageTitle).
   return (
-    <BriefPage
-      view={view}
-      questions={questions}
-      exchange={exchange}
-      next={{
-        href: masterStepHref(project.id, "mix"),
-        blockers: mix.blockers,
-        sentAt: mix.history[0]?.sentAt ?? null,
-      }}
-    />
+    <MasterStepFrame projectId={projectId} stepKey="brief">
+      <BriefPage view={view} questions={questions} exchange={exchange} />
+    </MasterStepFrame>
   );
 }

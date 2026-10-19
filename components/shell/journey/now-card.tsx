@@ -3,7 +3,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
-import { type JourneyStep, nowOf } from "@/lib/ui/journey";
+import { type JourneyStep, lowerFirst, nowOf } from "@/lib/ui/journey";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 
@@ -138,7 +138,7 @@ export function NowCard({
                 more
                   .map(
                     (m) =>
-                      `${m.step.actor?.todo.toLowerCase()} (${
+                      `${lowerFirst(m.step.actor?.todo ?? "")} (${
                         overview || m.place !== moduleLabel
                           ? (m.place ?? m.step.title)
                           : m.step.title

@@ -2,6 +2,7 @@ import {
   ProductionPage,
   mixRoundDone,
 } from "@/components/master-workflow/production-page";
+import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
@@ -32,13 +33,13 @@ export default async function ProjectMasterMixPage({
     loadStepView(project, access, "mastering"),
   ]);
   return (
-    <>
+    <MasterStepFrame projectId={projectId} stepKey="mix">
       <ProductionPage
         stage="mix"
         round={{ view, versions }}
         done={mixRoundDone(masteringView)}
       />
       <EngineerThreadSection view={view} />
-    </>
+    </MasterStepFrame>
   );
 }

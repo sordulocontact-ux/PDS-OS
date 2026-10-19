@@ -56,6 +56,7 @@ import { legalHistory } from "./legal-history";
 import { legalJourney } from "./legal-journey";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
+import { masterJourney } from "./master-journey";
 import { masterPage } from "./master-page";
 import { masterWorkflow } from "./master-workflow";
 import { network } from "./network";
@@ -210,6 +211,7 @@ export const fr = {
   legalJourney,
   legalSplits,
   masterWorkflow,
+  masterJourney,
   artistActivity,
   masterPage,
   records,

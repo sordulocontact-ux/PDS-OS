@@ -133,7 +133,7 @@ export function TransmitReview({
                 <Link
                   href={masterStepHref(
                     view.projectId,
-                    view.role === "mix" ? "state" : "mix",
+                    view.role === "mix" ? "source" : "mix",
                   )}
                   className="text-caption underline underline-offset-4"
                 >

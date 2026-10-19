@@ -9,6 +9,7 @@ import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { conceptionJourney } from "./conception";
+import { masterJourneys } from "./master";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -70,7 +71,7 @@ const none: Loader = async () => [];
 export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   framing: none,
   marketing,
-  master: none,
+  master: masterJourneys,
   legal,
   distribution: none,
 };

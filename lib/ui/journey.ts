@@ -150,3 +150,8 @@ export function nowOf<S extends JourneyStep>(
     waiting: open.filter((s) => !s.actor?.viewer),
   };
 }
+
+/** « valider le Mix V1 »: only the first letter lowered (proto `low`), so
+ * names and versions keep their capitals inside a sentence. */
+export const lowerFirst = (text: string) =>
+  text ? text.charAt(0).toLowerCase() + text.slice(1) : text;
