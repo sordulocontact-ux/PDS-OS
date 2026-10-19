@@ -3,6 +3,7 @@ import "server-only";
 import type { Access } from "@/lib/auth/access";
 import { DEFAULT_DELIVERABLES } from "@/lib/master-workflow/brief-types";
 import {
+  answerItemsOf,
   QUESTION_DIMENSIONS,
   questionDeliverablesOf,
   type BriefQuestion,
@@ -36,7 +37,7 @@ export async function readQuestionInputs(projectId: string) {
     supabase
       .from("master_brief_questions")
       .select(
-        "id, dimension, asked_to, created_at, answer_text, answer_choices, answered_at, applied_at, person:people!master_brief_questions_asked_to_fkey(first_name, last_name)",
+        "id, dimension, asked_to, created_at, answer_text, answer_choices, answer_items, answered_at, applied_at, person:people!master_brief_questions_asked_to_fkey(first_name, last_name)",
       )
       .eq("project_id", projectId)
       .order("created_at", { ascending: false }),
@@ -75,6 +76,7 @@ export async function loadBriefQuestions(
             },
             askedAt: row.created_at,
             answerText: row.answer_text,
+            answerItems: answerItemsOf(row.answer_items),
             answerChoices: row.answer_choices
               ? questionDeliverablesOf(row.answer_choices)
               : null,

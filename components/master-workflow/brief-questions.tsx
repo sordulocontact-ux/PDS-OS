@@ -1,5 +1,9 @@
 import { ApplyAnswerButton } from "@/components/master-workflow/apply-answer-button";
+import { DirectionAnswerForm } from "@/components/master-workflow/direction-answer-form";
 import { QuestionAnswerForm } from "@/components/master-workflow/question-answer-form";
+import { ToneCallout } from "@/components/ui/tone-callout";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { formatShortDay } from "@/lib/utils/day";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { PageSection } from "@/components/shell/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -84,13 +88,18 @@ function QuestionItem({
         </StatusBadge>
       </div>
       {state === "open" ? (
-        question.isMine && (
+        question.isMine &&
+        (question.dimension === "direction" ? (
+          <DirectionAnswerForm projectId={projectId} questionId={question.id} />
+        ) : (
           <QuestionAnswerForm
             projectId={projectId}
             questionId={question.id}
             dimension={question.dimension}
           />
-        )
+        ))
+      ) : question.answerItems && question.answerItems.length > 0 ? (
+        <ReadAnswer question={question} pending={state === "answered"} />
       ) : (
         <Answer question={question} />
       )}
@@ -103,6 +112,53 @@ function QuestionItem({
         </div>
       )}
     </li>
+  );
+}
+
+const GROUPS = ["direction", "references", "constraints"] as const;
+
+/** An answer read by PO (rule 12): each item in its group with its words;
+ * « Rien n'entre dans le Brief avant que vous l'ajoutiez. » */
+function ReadAnswer({
+  question,
+  pending,
+}: {
+  question: BriefQuestion;
+  pending: boolean;
+}) {
+  const a = fr.masterAnswer;
+  const items = question.answerItems ?? [];
+  const day = question.answeredAt
+    ? formatShortDay(question.answeredAt, { bare: true })
+    : "";
+  return (
+    <div className="flex flex-col gap-2.5">
+      {pending && (
+        <ToneCallout tone="info">
+          {a.answered(question.askedTo.name, day)}
+        </ToneCallout>
+      )}
+      <FactRows>
+        <FactRow
+          value={
+            <span className="flex flex-col gap-1">
+              {GROUPS.filter((g) => items.some((i) => i.group === g)).map(
+                (g) => (
+                  <span key={g}>
+                    <b className="font-semibold">{a.groups[g]} · </b>
+                    {items
+                      .filter((i) => i.group === g)
+                      .map((i) => i.label)
+                      .join(" · ")}
+                  </span>
+                ),
+              )}
+            </span>
+          }
+          source={a.source(question.askedTo.name, day)}
+        />
+      </FactRows>
+    </div>
   );
 }
 
