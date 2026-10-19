@@ -8,7 +8,15 @@ import type { StepView } from "@/lib/master-workflow/transmission";
  * the whole history of the project's links (it follows the engineer from
  * the mix to the mastering), answers going to this round's latest sending.
  */
-export async function EngineerThreadSection({ view }: { view: StepView }) {
+export async function EngineerThreadSection({
+  view,
+  isDirection,
+  direction,
+}: {
+  view: StepView;
+  isDirection: boolean;
+  direction: string;
+}) {
   const messages = await loadEngineerMessages(view.projectId);
   return (
     <EngineerThreadPanel
@@ -26,6 +34,9 @@ export async function EngineerThreadSection({ view }: { view: StepView }) {
       today={todayInParis()}
       replyTo={view.history[0]?.id ?? null}
       canEdit={view.canEdit}
+      isDirection={isDirection}
+      direction={direction}
+      engineer={view.engineer?.name ?? view.history[0]?.engineer ?? ""}
     />
   );
 }

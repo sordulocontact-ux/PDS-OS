@@ -16,12 +16,13 @@ import { fr } from "@/lib/i18n/fr";
 import type { BriefDate } from "@/lib/master-workflow/brief-types";
 import { delayImpact } from "@/lib/master-workflow/delay-impact";
 import {
-  applyDelayDates,
   replyToEngineer,
   setSignalStatus,
 } from "@/lib/master-workflow/engineer-thread-actions";
 import type { TeamEngineerMessage } from "@/lib/master-workflow/engineer-thread";
 import { engineerSignalTone } from "@/lib/ui/state-tones";
+
+import { DelayDecision } from "./delay-decision";
 
 /**
  * « Fil avec l'ingénieur » (PROJ-AMEL-02): the engineer's questions,
@@ -38,6 +39,9 @@ export function EngineerThreadPanel({
   today,
   replyTo,
   canEdit,
+  isDirection = false,
+  direction,
+  engineer,
 }: {
   projectId: string;
   messages: TeamEngineerMessage[];
@@ -48,6 +52,10 @@ export function EngineerThreadPanel({
   // The sending an answer goes to (the latest); null: none yet.
   replyTo: string | null;
   canEdit: boolean;
+  // The direction decides a delay the owner sent to it.
+  isDirection?: boolean;
+  direction: string;
+  engineer: string;
 }) {
   const t = fr.masterWorkflow.engineerThread;
   const labels = fr.masterWorkflow.brief.fields;
@@ -84,7 +92,9 @@ export function EngineerThreadPanel({
         <ol className="flex flex-col divide-y">
           {messages.map((m) => {
             const impact =
-              m.kind === "delay" && m.delayDays && m.status === "open"
+              m.kind === "delay" &&
+              m.delayDays &&
+              (m.status === "open" || m.status === "escalated")
                 ? delayImpact({
                     stage: m.stage,
                     days: m.delayDays,
@@ -111,7 +121,7 @@ export function EngineerThreadPanel({
                       {t.kinds[m.kind]}
                       {m.delayDays ? ` · ${t.days(m.delayDays)}` : ""}
                       {" · "}
-                      {t.statuses[m.status ?? "open"]}
+                      {fr.masterDelay.statuses[m.status ?? "open"]}
                     </StatusBadge>
                   )}
                 </p>
@@ -142,25 +152,45 @@ export function EngineerThreadPanel({
                       </>
                     )}
                     {impact.beyondRelease && (
-                      <ToneCallout tone="warning">
-                        {t.beyondRelease}
+                      <ToneCallout tone="danger">
+                        {fr.masterDelay.beyond(
+                          formatBriefDate(
+                            impact.impacts.find(
+                              (i) => i.key === "masterFinalDue",
+                            )?.to ?? "",
+                          ),
+                          formatBriefDate(releaseDue ?? ""),
+                        )}
                       </ToneCallout>
                     )}
                   </div>
                 )}
-                {canEdit && m.kind !== "message" && (
+                {m.kind === "delay" && m.outcome && (
+                  <p className="text-sm text-muted-foreground">
+                    {m.outcome === "applied"
+                      ? fr.masterDelay.outcomes.applied(
+                          t.days(m.delayDays ?? 0),
+                          m.handledBy,
+                        )
+                      : fr.masterDelay.outcomes[m.outcome](m.handledBy)}
+                  </p>
+                )}
+                {impact &&
+                  (m.status === "open" || m.status === "escalated") && (
+                    <DelayDecision
+                      projectId={projectId}
+                      messageId={m.id}
+                      status={m.status}
+                      engineer={engineer}
+                      beyondRelease={impact.beyondRelease}
+                      canMove={impact.impacts.length > 0}
+                      isOwner={canEdit}
+                      isDirection={isDirection}
+                      direction={direction}
+                    />
+                  )}
+                {canEdit && m.kind !== "message" && m.kind !== "delay" && (
                   <div className="flex flex-wrap gap-2">
-                    {impact && impact.impacts.length > 0 && (
-                      <Button
-                        size="sm"
-                        disabled={pending}
-                        onClick={() =>
-                          run(() => applyDelayDates(projectId, m.id), t.applied)
-                        }
-                      >
-                        {t.applyDates}
-                      </Button>
-                    )}
                     <Button
                       size="sm"
                       variant="outline"

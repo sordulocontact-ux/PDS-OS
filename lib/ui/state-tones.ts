@@ -379,6 +379,8 @@ export const strategyDocumentTone: Record<string, Tone> = {
 /** A signal of the engineer (PROJ-AMEL-02): to handle, handled. */
 export const engineerSignalTone: Record<string, Tone> = {
   open: "warning",
+  // A delay sent to the direction (proto « Chez la direction »).
+  escalated: "danger",
   handled: "success",
 };
 
