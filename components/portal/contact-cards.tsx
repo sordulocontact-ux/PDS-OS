@@ -14,7 +14,11 @@ import {
   getPublicPackage,
   noteOpened,
 } from "@/lib/master-workflow/transmission-public";
-import type { ContactItem, OpenContactPage } from "@/lib/portal/contact-page";
+import {
+  getContactCallRequests,
+  type ContactItem,
+  type OpenContactPage,
+} from "@/lib/portal/contact-page";
 import { contactItemKey } from "@/lib/portal/link-key";
 import { getLinkJourney } from "@/lib/production/provider/journey";
 import {
@@ -106,7 +110,12 @@ async function cardsOf(
       ]);
       return providerPortalCards({ linkKey: key, space, journey, locations });
     }
-    case "call":
-      return item.detail ? [callPortalCard(item, item.detail, order)] : [];
+    case "call": {
+      if (!item.detail) return [];
+      const requests = await getContactCallRequests(token);
+      return [
+        callPortalCard(item, item.detail, order, requests.get(item.id) ?? null),
+      ];
+    }
   }
 }

@@ -99,3 +99,44 @@ export async function noteContactPageOpened(token: string): Promise<void> {
   });
   if (error) console.error("noteContactPageOpened:", error.message);
 }
+
+const requests = z.array(
+  z.object({
+    callId: z.uuid(),
+    settled: z.boolean(),
+    asked: z
+      .array(
+        z.object({
+          id: z.uuid(),
+          title: z.string(),
+          due: text,
+          doneAt: text,
+        }),
+      )
+      .catch([]),
+  }),
+);
+export type ContactCallRequests = z.infer<typeof requests>[number];
+
+/**
+ * After each call the person attended, whether PDS confirmed its suites and
+ * what it asked of them (get_contact_call_requests): never the report.
+ * Keyed by call. Empty when the token is unknown or closed.
+ */
+export const getContactCallRequests = cache(
+  async (token: string): Promise<Map<string, ContactCallRequests>> => {
+    if (!TOKEN.test(token)) return new Map();
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_contact_call_requests", {
+      p_token: token,
+    });
+    if (error) {
+      console.error("getContactCallRequests:", error.message);
+      return new Map();
+    }
+    const parsed = requests.safeParse(data);
+    return new Map(
+      (parsed.success ? parsed.data : []).map((r) => [r.callId, r]),
+    );
+  },
+);

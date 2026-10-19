@@ -578,3 +578,17 @@ projet a (Juridique toujours, Master avec un titre), Plateformes « Fait » apr�
 réserves, plus de cascade layout → page dans le Marketing, pastille d'état à droite du titre,
 compteur bleu sur les pilules, texte du verrou hors du plan. Détail et mesures :
 `docs/projet-complet/RECETTE.md` § 7. Aucune migration.
+
+## Reste des Activations et des pages privées (20/10/2026, branche `pc/r4-activations`)
+
+- Activations : « Brief et proposition » en un formulaire (position de PDS + brief déclaré envoyé),
+  récapitulatif d'agence marqué envoyé directement, alerte « Doublon probable » sur les cibles presse
+  (même média, même journaliste), statistiques « Partielles » / « Indisponibles » comme états réels
+  (relevé partiel, donnée indisponible) branchés dans Suivi & bilan, **une seule frise**
+  (`lib/activations/phase.ts`) lue par les Activations et le Suivi & bilan.
+- Pages privées : lien de la personne proposé dans « Qui fait quoi » de la Conception et de la
+  Distribution et sur la carte d'une créatrice ; sur `/c/`, après un call, « Ce qui vous a été demandé »
+  (actions confirmées par PDS, « À faire » / « Fait », jamais le compte rendu).
+- Migrations `20261020040101`, `20261020040201`, `20261020040301` à pousser en prod avec accord ;
+  pgTAP `activations-remaining.test.sql` (23). Détail : `docs/ARCHITECTURE.md` § 8 duodecies
+  (« Reste des Activations ») et lot 11.

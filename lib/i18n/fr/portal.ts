@@ -83,6 +83,13 @@ export const portal = {
       `Envoyé${who ? ` par ${who}` : ""} le ${at}${version > 1 ? ` · version ${version}` : ""}.`,
     pending:
       "PDS confirme les suites du call ; ce qui vous concerne apparaîtra ici.",
+    asked: "Ce qui vous a été demandé",
+    confirmed: "Confirmé par PDS après le call",
+    doneOn: (day: string) => `Fait ${day}`,
+    dueFor: (day: string) => `pour le ${day}`,
+    todo: "À faire",
+    done: "Fait",
+    nothingAsked: "Rien ne vous a été demandé pendant ce call.",
   },
   workflows: {
     framing: "Cadrage",
