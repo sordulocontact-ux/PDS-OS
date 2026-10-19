@@ -178,32 +178,8 @@ grant execute on function public.send_call_summary(uuid, text, jsonb) to authent
 
 -- Notifications ---------------------------------------------------------------
 
--- The kind is added to the list as it stands (other lots add theirs in
--- parallel): read, then rewritten with this kind, never a fixed list.
-do $$
-declare
-  v_def text;
-  v_list text;
-begin
-  select pg_get_constraintdef(oid) into v_def
-    from pg_constraint
-   where conname = 'notifications_kind_check' and conrelid = 'public.notifications'::regclass;
-  if v_def is null or v_def like '%call_summary_sent%' then
-    return;
-  end if;
-  -- Either form Postgres prints: '{a,b}'::text[] or ARRAY['a'::text, …].
-  v_list := (regexp_match(v_def, '''\{([^}]*)\}''::text\[\]'))[1];
-  if v_list is null then
-    select string_agg(m[1], ',') into v_list
-      from regexp_matches(v_def, '''([a-z_]+)''::text', 'g') as m;
-  end if;
-  alter table public.notifications drop constraint notifications_kind_check;
-  execute format(
-    'alter table public.notifications add constraint notifications_kind_check '
-    'check (kind = any (%L::text[])) not valid',
-    '{' || v_list || ',call_summary_sent}');
-end;
-$$;
+-- The kind is added to the list as it stands (20261018000101).
+select public.add_notification_kinds(array['call_summary_sent']);
 
 -- Each team member the summary is sent to is told, once per version.
 create or replace function public.call_summaries_notify()
