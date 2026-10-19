@@ -6,6 +6,15 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 
 export const activationJourney = {
   crumb: "Activations",
+  levers: {
+    step: "Leviers à préparer",
+    why: "Chaque levier retenu dans le Brief de sortie peut devenir une activation. Vous la créez quand vous êtes prêt, avec son mode pour l'influence et la presse.",
+    todo: (n: number) =>
+      `Créer ou reporter ${n} ${plural(n, "activation", "activations")}`,
+    done: (n: number) =>
+      `${n} ${plural(n, "activation créée", "activations créées")}`,
+  },
+  owner: "Responsable de l'activation",
   listTitle: "Activations",
   phases: ["Préparer", "Réaliser", "Prouver", "Mesurer", "Clôturer"] as const,
   phaseClosed: "Clôturée",

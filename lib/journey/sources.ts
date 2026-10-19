@@ -5,6 +5,7 @@ import { journeyContext } from "@/lib/production/journey/context";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
+import { activationsJourneys } from "./activations";
 import { conceptionJourney } from "./conception";
 import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
@@ -23,9 +24,9 @@ type Loader = (projectId: string) => Promise<ModuleJourney[]>;
 const label = fr.shell.project.sidebar;
 const parts = fr.shell.project.marketingSteps;
 
-// Marketing: the Stratégie (lib/journey/strategy.ts), the Conception and each
-// deliverable's Production once its sheet is opened. Activations and Suivi &
-// bilan come with their zone.
+// Marketing: the Stratégie (lib/journey/strategy.ts), the Conception, each
+// deliverable's Production once its sheet is opened and the Activations
+// (lib/journey/activations.ts). Suivi & bilan comes with its zone.
 const marketing: Loader = async (projectId) => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -33,9 +34,10 @@ const marketing: Loader = async (projectId) => {
     .select("deliverable_id")
     .eq("project_id", projectId);
   if (error) console.error("loadProjectJourneys production:", error.message);
-  const [strategy, design, ...productions] = await Promise.all([
+  const [strategy, design, activations, ...productions] = await Promise.all([
     strategyJourneys(projectId),
     conceptionJourney(projectId),
+    activationsJourneys(projectId),
     ...(data ?? []).map(async ({ deliverable_id: id }) => {
       const ctx = await journeyContext(projectId, id);
       const started = Boolean(
@@ -56,7 +58,7 @@ const marketing: Loader = async (projectId) => {
         : [];
     }),
   ]);
-  return [...strategy, ...design, ...productions.flat()];
+  return [...strategy, ...design, ...productions.flat(), ...activations];
 };
 
 // Filled by their zone (C4: typed, empty until then).
