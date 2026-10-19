@@ -336,23 +336,9 @@ grant execute on function public.decide_step_note(uuid, text) to authenticated;
 
 -- 5. Notifications ------------------------------------------------------------------------------
 
--- The kinds are added to the constraint as it is now (other migrations of
--- the same days add theirs): read, extended, put back.
-do $$
-declare
-  v_def text;
-  v_kinds text[];
-begin
-  select pg_get_constraintdef(oid) into v_def from pg_constraint
-   where conname = 'notifications_kind_check' and conrelid = 'public.notifications'::regclass;
-  select array_agg(m[1]) into v_kinds
-    from regexp_matches(v_def, '''([a-z_]+)''', 'g') as m;
-  v_kinds := v_kinds || array(select k from unnest(array['step_blocker_reported',
-               'step_blocker_lifted', 'step_note_to_decide']) k where k <> all (v_kinds));
-  alter table public.notifications drop constraint notifications_kind_check;
-  execute format('alter table public.notifications add constraint notifications_kind_check '
-                 'check (kind = any (%L::text[])) not valid', v_kinds);
-end $$;
+-- The kinds are added to the constraint as it is now (20261018000101).
+select public.add_notification_kinds(array['step_blocker_reported',
+  'step_blocker_lifted', 'step_note_to_decide']);
 
 create or replace function public.step_blockers_notify()
 returns trigger
