@@ -481,6 +481,17 @@ export const distributionJourney = {
     ) =>
       `Signalée le ${at}${by ? ` par ${by}` : ""}${from ? " (déclarée de The Orchard)" : ""}${version ? ` · dossier V${version}` : ""} · à corriger dans : ${module}`,
   },
+  legalReady: {
+    label: "Prêt pour la sortie",
+    module: "Juridique",
+    validated: (by: string, on: string) =>
+      `Juridique › Prêt pour la sortie · validée par ${by} ${on}`,
+    notValidated:
+      "Juridique › Prêt pour la sortie · pas encore validée par la direction",
+    restricted:
+      "Le détail se lit avec l'accès au Juridique ; la validation de la direction se voit ici.",
+    states: { ok: "Validé à la source", open: "Non validé" },
+  },
   // The 4-column grid.
   computed: { name: "Calculé par le code", role: "à chaque ouverture" },
   ownerRole: "Cheffe ou chef de projet",

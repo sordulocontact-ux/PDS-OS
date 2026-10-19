@@ -56,7 +56,7 @@ export function PlanStepForm({
     setValues((v) => ({ ...v, ...change }));
   const titleMissing = withTitle && !values.title?.trim();
   const columns = Object.fromEntries(
-    PLAN_COLUMNS.filter((c) => workflow === null || c !== "anticipate").map(
+    PLAN_COLUMNS.filter((c) => workflow !== null || c !== "anticipate").map(
       (c) => [c, tp.columns[c]],
     ),
   );

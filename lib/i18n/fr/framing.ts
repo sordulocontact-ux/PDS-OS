@@ -207,7 +207,7 @@ export const framing = {
       "Générez d'abord le Brief : c'est lui que le valideur relit.",
     dimensions_required: "Choisissez au moins une dimension à rouvrir.",
     plan_required:
-      "La Stratégie se lance depuis le plan du projet, sur la Vue d'ensemble.",
+      "La Stratégie démarre au lancement du plan du projet, dans le Cadrage.",
     plan_already_launched: "Le plan de ce projet est déjà lancé.",
     framing_not_validated: "Le plan se construit une fois le Brief validé.",
     invalid_owner: "Ce responsable n'est pas membre de l'équipe.",

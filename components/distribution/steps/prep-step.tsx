@@ -27,9 +27,13 @@ const j = fr.distributionJourney.prep;
 export function PrepStep({
   readiness,
   failed,
+  legal,
 }: {
   readiness: Readiness;
   failed: boolean;
+  // « Juridique › Prêt pour la sortie », read from its own computation
+  // (loadLegalReadiness): said, never recomputed here.
+  legal: { value: string; source: string; done: boolean; href: string };
 }) {
   const blockers = readiness.blockers.length;
   return (
@@ -50,7 +54,7 @@ export function PrepStep({
       )}
       {SOURCE_MODULES.map((module) => {
         const items = readiness.items.filter((item) => item.module === module);
-        if (items.length === 0) return null;
+        if (items.length === 0 && module !== "legal") return null;
         return (
           <section key={module} className="flex flex-col gap-2">
             <h3 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
@@ -60,6 +64,30 @@ export function PrepStep({
               {t.moduleNotes[module]}
             </p>
             <FactRows>
+              {module === "legal" && (
+                <FactRow
+                  label={fr.distributionJourney.legalReady.label}
+                  value={legal.value}
+                  source={legal.source}
+                  state={{
+                    tone: legal.done ? "success" : "neutral",
+                    label: legal.done
+                      ? fr.distributionJourney.legalReady.states.ok
+                      : fr.distributionJourney.legalReady.states.open,
+                  }}
+                  side={
+                    <ViewLink
+                      href={legal.href}
+                      className={buttonVariants({
+                        variant: "ghost",
+                        size: "sm",
+                      })}
+                    >
+                      {t.see}
+                    </ViewLink>
+                  }
+                />
+              )}
               {items.map((item) => (
                 <PrepRow key={item.key} item={item} />
               ))}

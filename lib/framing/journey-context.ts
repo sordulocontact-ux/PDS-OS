@@ -1,0 +1,142 @@
+import "server-only";
+
+import { cache } from "react";
+
+import { requireApproved } from "@/lib/auth/dal";
+import { assessFraming } from "@/lib/framing/assess";
+import { framingJourney } from "@/lib/framing/journey";
+import { framingStarted, loadFramingKnowledge } from "@/lib/framing/knowledge";
+import { canEditProject } from "@/lib/projects/edit-access";
+import { getProject } from "@/lib/projects/queries";
+import { personName } from "@/lib/projects/types";
+import { createClient } from "@/lib/supabase/server";
+import { allInOrder } from "@/lib/utils/parallel";
+
+export type FramingCallInfo = {
+  callId: string;
+  occurredAt: string;
+  createdAt: string;
+  // Recorded or processed: its page carries the pipeline.
+  recorded: boolean;
+  // Its report exists: PO proposed what was said.
+  reported: boolean;
+};
+
+/** The project's framing call (framing_calls), the latest prepared. */
+async function loadFramingCall(
+  projectId: string,
+): Promise<FramingCallInfo | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("framing_calls")
+    .select(
+      "created_at, call:calls!inner(id, occurred_at, status, audio_path, call_reports(id))",
+    )
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error("[framing] framing call:", error.message);
+  if (!data?.call) return null;
+  return {
+    callId: data.call.id,
+    occurredAt: data.call.occurred_at,
+    createdAt: data.created_at,
+    recorded: Boolean(data.call.audio_path) || data.call.status !== "draft",
+    reported: (data.call.call_reports ?? []).length > 0,
+  };
+}
+
+/** When the plan was launched, and by whom (project_plans). */
+async function loadPlanLaunch(projectId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("project_plans")
+    .select(
+      "launched_at, launcher:people!project_plans_launched_by_fkey(first_name, last_name)",
+    )
+    .eq("project_id", projectId)
+    .maybeSingle();
+  return data
+    ? {
+        launchedAt: data.launched_at,
+        launchedBy: data.launcher
+          ? personName(data.launcher.first_name, data.launcher.last_name)
+          : null,
+      }
+    : null;
+}
+
+/**
+ * Everything the four steps of the Cadrage share, read once per request:
+ * access, the project, what PO knows (FramingKnowledge and its
+ * assessment), the framing call, the plan, and the journey for the person
+ * looking. Null when the project cannot be read or is not launched.
+ */
+export const framingJourneyContext = cache(async (projectId: string) => {
+  const [access, project] = await allInOrder([
+    requireApproved(),
+    getProject(projectId),
+  ]);
+  if (!project || project.stages.length === 0) return null;
+  const [k, call, plan] = await Promise.all([
+    loadFramingKnowledge(projectId, access),
+    loadFramingCall(projectId),
+    loadPlanLaunch(projectId),
+  ]);
+  if (!k) return null;
+  const assessment = assessFraming(k);
+  const stage = k.framing.stage?.state ?? "not_started";
+  const canEdit = canEditProject(access, project);
+  const viewerName =
+    personName(access.firstName ?? "", access.lastName ?? "") || null;
+  const pending = k.framing.pendingValidation;
+  const validatorMember = pending
+    ? { personId: pending.validatorPersonId, name: pending.validatorName }
+    : (k.framing.validators[0] ?? null);
+  const latest = k.briefs[0] ?? null;
+  const steps = framingJourney({
+    projectId,
+    owner: project.ownerPersonId
+      ? {
+          name: project.ownerName ?? "—",
+          viewer: project.ownerPersonId === access.personId,
+          viaLink: false,
+        }
+      : null,
+    validator: validatorMember
+      ? {
+          name: validatorMember.name,
+          viewer: validatorMember.personId === access.personId,
+          viaLink: false,
+        }
+      : null,
+    call: call ? { occurredAt: call.occurredAt, held: call.reported } : null,
+    startedDirect: framingStarted(k),
+    stage,
+    dimensions: {
+      open: assessment.blocking.length + assessment.conflicts.length,
+      ready: assessment.ready,
+      confirmed: assessment.counts.known,
+    },
+    brief: latest ? { version: latest.version, state: latest.state } : null,
+    plan,
+  });
+  return {
+    access,
+    project,
+    k,
+    assessment,
+    stage,
+    canEdit,
+    viewerName,
+    validator: validatorMember,
+    call,
+    plan,
+    steps,
+  };
+});
+
+export type FramingJourneyContext = NonNullable<
+  Awaited<ReturnType<typeof framingJourneyContext>>
+>;

@@ -1,13 +1,11 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { IconCheck, IconPenWriting2 } from "nucleo-sharp-essential";
 
 import { BriefActions } from "@/components/framing/guide/brief-actions";
+import { BriefDirectionDecision } from "@/components/framing/brief/brief-direction-decision";
+import { BriefOwnerStep } from "@/components/framing/brief/brief-owner-step";
+import { BriefVersionDoc } from "@/components/framing/brief/brief-version-doc";
+import { FramingStepFrame } from "@/components/framing/framing-step-frame";
 import { BriefDocument } from "@/components/framing/intel/brief-document";
-import {
-  BriefOwnerActions,
-  BriefValidatorActions,
-} from "@/components/framing/intel/brief-decision";
 import {
   BriefCompare,
   defaultComparison,
@@ -15,13 +13,10 @@ import {
 import { BriefHistory } from "@/components/framing/intel/brief-history";
 import { FramingReadiness } from "@/components/framing/intel/framing-readiness";
 import { BriefRequestsSection } from "@/components/framing/requests/brief-requests-section";
-import { EmptyState } from "@/components/shell/empty-state";
-import { buttonVariants } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { Fold } from "@/components/ui/fold";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { requireApproved } from "@/lib/auth/dal";
+import { VersionCard } from "@/components/ui/version-card";
 import { routes } from "@/lib/auth/redirects";
-import { assessFraming } from "@/lib/framing/assess";
 import { briefFileName } from "@/lib/framing/brief-pdf";
 import {
   blocksValidation,
@@ -33,25 +28,19 @@ import {
   snapshotMatches,
   snapshotOf,
 } from "@/lib/framing/brief-snapshot";
-import { framingReadiness } from "@/lib/framing/readiness";
 import type { Dimension } from "@/lib/framing/dimensions";
-import { loadFramingKnowledge } from "@/lib/framing/knowledge";
+import { framingJourneyContext } from "@/lib/framing/journey-context";
+import { framingReadiness } from "@/lib/framing/readiness";
 import { fr } from "@/lib/i18n/fr";
-import { canEditProject } from "@/lib/projects/edit-access";
-import { requireLaunchedProject } from "@/lib/projects/queries";
 import { briefVersionTone } from "@/lib/ui/state-tones";
-import { allInOrder } from "@/lib/utils/parallel";
-
-const dateFormat = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  timeZone: "Europe/Paris",
-});
+import { formatShortInstant } from "@/lib/utils/day";
 
 /**
- * The Brief de cadrage (ticket § 7 and § 8): its latest version as it was
- * written, its state, the owner's and the validator's moves, and every
- * version before it. The source of truth of the Cadrage once validated.
+ * Cadrage › Brief de cadrage (proto frBrief, ticket § 7 and § 8): every
+ * version as a card, the latest open; the owner creates and sends it; the
+ * direction validates it here, or asks for a change on the dimensions it
+ * checks, which alone reopen. The detailed corrections, the comparison of
+ * versions, the full document and its PDF stay, folded.
  */
 export default async function FramingBriefPage({
   params,
@@ -63,233 +52,203 @@ export default async function FramingBriefPage({
   const compareParam = Number(
     Array.isArray(sp.comparer) ? sp.comparer[0] : sp.comparer,
   );
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-  const [k, loadedRequests] = await Promise.all([
-    loadFramingKnowledge(projectId, access),
+  const comparing = Number.isInteger(compareParam) && compareParam > 0;
+  const [ctx, loadedRequests] = await Promise.all([
+    framingJourneyContext(projectId),
     loadBriefRequests(projectId),
   ]);
-  if (!k) notFound();
+  if (!ctx) notFound();
+  const { k, assessment, stage, canEdit, access, project } = ctx;
+  const t = fr.framingJourney.brief;
+  const ti = fr.framingIntel;
   const requests = loadedRequests ?? [];
-  // The page's URL with its filter and comparison, one changed at a time.
-  const hrefWith = (change: { all?: boolean; compare?: number | null }) => {
-    const params = new URLSearchParams();
-    if (change.all ?? showAll) params.set("demandes", "toutes");
-    const compare =
-      change.compare === undefined
-        ? Number.isInteger(compareParam) && compareParam > 0
-          ? compareParam
-          : null
-        : change.compare;
-    if (compare) params.set("comparer", String(compare));
-    const query = params.toString();
-    return `${routes.projectFramingBrief(projectId)}${query ? `?${query}` : ""}`;
-  };
-  const t = fr.framingIntel;
-  const canEdit = canEditProject(access, project);
-  const stage = k.framing.stage?.state ?? "not_started";
   const latest = k.briefs[0] ?? null;
-  const stored = latest ? snapshotOf(latest.content) : null;
   const live = buildBriefSnapshot(k);
+  const stored = latest ? snapshotOf(latest.content) : null;
   const pending = k.framing.pendingValidation;
+  const open = assessment.blocking.length + assessment.conflicts.length;
+  const working = stage === "not_started" || stage === "in_progress";
+  const validatorName = ctx.validator?.name ?? "—";
 
-  const tools = (
-    <div className="flex flex-wrap justify-end gap-2">
-      <BriefActions
-        pdfHref={routes.projectFramingBriefPdf(projectId, latest?.version)}
-        fileName={briefFileName(project.title)}
-      />
-    </div>
-  );
-
-  // No version yet: a Cadrage validated before versions reads live.
-  if (!latest || !stored) {
-    if (stage === "validated")
-      return (
-        <div className="flex flex-col gap-4">
-          <ToneCallout tone="neutral">{t.brief.legacy}</ToneCallout>
-          <BriefDocument
-            snapshot={live}
-            eyebrow={
-              <StatusBadge tone="success" size="sm">
-                {t.brief.states.approved}
-              </StatusBadge>
-            }
-          />
-          {tools}
-        </div>
-      );
-    return (
-      <EmptyState
-        icon={IconPenWriting2}
-        title={t.brief.emptyTitle}
-        body={t.brief.emptyBody}
-        action={
-          <Link
-            href={routes.projectFramingStep(projectId, "brief")}
-            className={buttonVariants({ size: "lg" })}
-          >
-            {t.brief.toFraming}
-          </Link>
-        }
-      />
+  // What the step offers now (proto frBrief, in this order).
+  let act: React.ReactNode = null;
+  if (stage === "validated")
+    act = (
+      <ToneCallout tone="success">
+        <span>
+          <b>{t.validated}</b>{" "}
+          {t.validatedBody(
+            latest?.decidedByName ?? null,
+            latest?.decided_at ? formatShortInstant(latest.decided_at) : "—",
+          )}
+        </span>
+      </ToneCallout>
     );
-  }
-
-  const outdated = latest.state === "pending" && !snapshotMatches(stored, live);
-  const isValidator =
-    latest.state === "sent" && pending?.validatorPersonId === access.personId;
-  const request = k.briefs.find((b) => b.change_comment);
-  const openRequests = requests.filter(isOpenRequest);
-  // The last version sent before this one, when this one says the same thing
-  // (PROJ-BUG-05): sending it again asks why.
-  const lastSent = k.briefs.find(
-    (b) => b.version < latest.version && b.sent_at,
-  );
-  const lastSentSnapshot = lastSent ? snapshotOf(lastSent.content) : null;
-  const unchangedFrom =
-    lastSent && lastSentSnapshot && snapshotMatches(lastSentSnapshot, stored)
-      ? lastSent.version
-      : null;
-  const against =
-    Number.isInteger(compareParam) && compareParam > 0
-      ? compareParam
-      : defaultComparison(k.briefs, latest);
-  const working =
-    canEdit && (stage === "not_started" || stage === "in_progress");
-  // Shown in the document: what is open, and what was asked on or answered
-  // by this version.
-  const inPlace = requests.filter(
-    (r) =>
-      isOpenRequest(r) ||
-      r.briefId === latest.id ||
-      r.resolvedBriefId === latest.id,
-  );
-
-  return (
-    <div className="flex flex-col gap-6">
-      {latest.state === "approved" && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--tone-success-bg)] px-5 py-4 text-[color:var(--tone-success-fg)]">
-          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-md font-semibold">
-            <span className="flex items-center gap-2">
-              <IconCheck aria-hidden className="size-4" />
-              {t.entry.validated}
-            </span>
-            <span className="flex items-center gap-2">
-              <IconCheck aria-hidden className="size-4" />
-              {t.entry.framingDone}
-            </span>
-          </p>
-          <Link
-            href={routes.projectPlan(projectId)}
-            className={buttonVariants({ size: "sm" })}
-          >
-            {t.entry.seePlan}
-          </Link>
-        </div>
-      )}
-      {openRequests.length > 0 ? (
-        <ToneCallout tone="danger">
-          <span className="font-semibold">
-            {fr.briefRequests.callout(openRequests.length)}
-          </span>{" "}
-          {fr.briefRequests.calloutBody}
-        </ToneCallout>
+  else if (latest?.state === "sent")
+    act =
+      pending && pending.validatorPersonId === access.personId ? (
+        <BriefDirectionDecision
+          projectId={projectId}
+          validationId={pending.id}
+          openMandatory={requests.filter(blocksValidation).length}
+        />
       ) : (
-        latest.state === "changes_requested" &&
-        request?.change_comment && (
-          <ToneCallout tone="danger">
-            {t.guide.correction(
-              request.change_comment,
-              (latest.reopened_dimensions ?? [])
-                .map((d) => t.dimensions[d as Dimension])
+        <p className="text-caption text-[color:var(--text-tertiary)]">
+          {t.waiting(pending?.validatorName ?? validatorName)}
+        </p>
+      );
+  else if (canEdit && working && open === 0) {
+    const outdated =
+      latest?.state === "pending" &&
+      stored !== null &&
+      !snapshotMatches(stored, live);
+    if (latest?.state === "pending" && stored && !outdated) {
+      const lastSent = k.briefs.find(
+        (b) => b.version < latest.version && b.sent_at,
+      );
+      const lastSnap = lastSent ? snapshotOf(lastSent.content) : null;
+      act = (
+        <BriefOwnerStep
+          projectId={projectId}
+          action={{
+            kind: "send",
+            briefId: latest.id,
+            validatorName,
+            unchangedFrom:
+              lastSent && lastSnap && snapshotMatches(lastSnap, stored)
+                ? lastSent.version
+                : null,
+          }}
+        />
+      );
+    } else
+      act = (
+        <>
+          {outdated && (
+            <ToneCallout tone="warning">{ti.brief.outdated}</ToneCallout>
+          )}
+          <BriefOwnerStep
+            projectId={projectId}
+            action={{
+              kind: "create",
+              label: outdated
+                ? ti.guide.update
+                : latest
+                  ? t.createVersion(latest.version + 1)
+                  : t.create,
+            }}
+          />
+        </>
+      );
+  } else if (open > 0 && working)
+    act = (
+      <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+        {t.notYet(open)}
+      </p>
+    );
+
+  // The versions, latest first and open; each says who sent it back.
+  const cards = k.briefs.map((b, index) => {
+    const snap = snapshotOf(b.content);
+    const state = (ti.brief.states as Record<string, string>)[b.state];
+    return (
+      <VersionCard
+        key={b.id}
+        defaultOpen={index === 0}
+        title={t.versionTitle(b.version)}
+        status={{
+          tone: briefVersionTone[b.state] ?? "neutral",
+          label: state ?? b.state,
+        }}
+        meta={t.created(b.createdByName, formatShortInstant(b.created_at))}
+      >
+        {snap && (
+          <BriefVersionDoc
+            snapshot={snap}
+            reopened={b.reopened_dimensions ?? []}
+          />
+        )}
+        {b.change_comment && b.state === "changes_requested" && (
+          <ToneCallout tone="warning">
+            {t.returned(
+              b.decidedByName ?? "—",
+              b.change_comment,
+              (b.reopened_dimensions ?? [])
+                .map((d) => ti.dimensions[d as Dimension])
                 .join(", "),
             )}
           </ToneCallout>
-        )
-      )}
-      {outdated && <ToneCallout tone="warning">{t.brief.outdated}</ToneCallout>}
+        )}
+      </VersionCard>
+    );
+  });
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-caption text-muted-foreground">
-          {latest.state === "pending"
-            ? t.brief.notSent
-            : latest.state === "sent" && pending
-              ? isValidator
-                ? t.brief.youDecide
-                : t.brief.waitingFor(pending.validatorName)
-              : latest.sent_at && pending
-                ? t.brief.sentTo(
-                    pending.validatorName,
-                    dateFormat.format(new Date(latest.sent_at)),
-                  )
-                : null}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {canEdit && latest.state === "pending" && stage === "in_progress" && (
-            <BriefOwnerActions
-              projectId={projectId}
-              briefId={latest.id}
-              outdated={outdated}
-              unchangedFrom={unchangedFrom}
-            />
-          )}
-          {canEdit && latest.state === "changes_requested" && (
-            <Link
-              href={routes.projectFraming(projectId)}
-              className={buttonVariants({ size: "lg" })}
-            >
-              {t.brief.toFraming}
-            </Link>
-          )}
-          {isValidator && pending && (
-            <BriefValidatorActions
-              projectId={projectId}
-              validationId={pending.id}
-              openMandatory={requests.filter(blocksValidation).length}
-            />
-          )}
-        </div>
-      </div>
-
-      <FramingReadiness readiness={framingReadiness(assessFraming(k))} />
+  // Folded: what the feedback asked for (PROJ-UX-06, PROJ-BUG-04/05).
+  const hrefWith = (change: { all?: boolean; compare?: number | null }) => {
+    const query = new URLSearchParams();
+    if (change.all ?? showAll) query.set("demandes", "toutes");
+    const compare =
+      change.compare === undefined
+        ? comparing
+          ? compareParam
+          : null
+        : change.compare;
+    if (compare) query.set("comparer", String(compare));
+    const q = query.toString();
+    return `${routes.projectFramingBrief(projectId)}${q ? `?${q}` : ""}`;
+  };
+  const more = latest && stored && (
+    <Fold summary={t.more} defaultOpen={showAll || comparing}>
+      <FramingReadiness readiness={framingReadiness(assessment)} />
       <BriefRequestsSection
         projectId={projectId}
         requests={requests}
         versions={k.briefs}
         showAll={showAll}
         hrefOf={(all) => hrefWith({ all })}
-        canAnswer={working}
+        canAnswer={canEdit && working}
         viewerPersonId={access.personId}
       />
       <BriefCompare
         versions={k.briefs}
         shown={latest}
-        against={against}
+        against={comparing ? compareParam : defaultComparison(k.briefs, latest)}
         hrefOf={(version) => hrefWith({ compare: version })}
       />
       <BriefDocument
         snapshot={stored}
-        requests={inPlace}
-        eyebrow={
-          <>
-            <span>{t.brief.title}</span>
-            <span aria-hidden>·</span>
-            <span>{t.brief.version(latest.version)}</span>
-            <StatusBadge
-              tone={briefVersionTone[latest.state] ?? "neutral"}
-              size="sm"
-            >
-              {(t.brief.states as Record<string, string>)[latest.state] ??
-                latest.state}
-            </StatusBadge>
-          </>
-        }
+        requests={requests.filter(
+          (r) =>
+            isOpenRequest(r) ||
+            r.briefId === latest.id ||
+            r.resolvedBriefId === latest.id,
+        )}
+        eyebrow={<span>{t.versionTitle(latest.version)}</span>}
       />
-      {tools}
+      <div className="flex flex-wrap justify-end gap-2">
+        <BriefActions
+          pdfHref={routes.projectFramingBriefPdf(projectId, latest.version)}
+          fileName={briefFileName(project.title)}
+        />
+      </div>
       <BriefHistory versions={k.briefs} />
-    </div>
+    </Fold>
+  );
+
+  return (
+    <FramingStepFrame projectId={projectId} stepKey="brief">
+      <div className="flex flex-col gap-4">
+        {/* A Cadrage validated before the versions reads live. */}
+        {!latest && stage === "validated" && (
+          <>
+            <ToneCallout tone="neutral">{ti.brief.legacy}</ToneCallout>
+            <BriefVersionDoc snapshot={live} />
+          </>
+        )}
+        {cards}
+        {act}
+        {more}
+      </div>
+    </FramingStepFrame>
   );
 }

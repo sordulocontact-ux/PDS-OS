@@ -1330,6 +1330,63 @@ n'écrit qu'un **adaptateur**.
   transcrits) ; ensuite, c'est un message tapé comme un autre. Échap annule.
 - Les deux routes partagent `lib/voice/http.ts` (session approuvée, taille bornée).
 
+### Parcours du Cadrage en 4 étapes (lot 2 « Projet complet », 19/10/2026)
+
+Proto `docs/protos/src/mk.js` (FR_STEPS, frEntry, frDims, frBrief, frPlanView), cahier des charges
+`docs/projet-complet/framing.md`. Le Cadrage suit le patron commun (§ 3 ter) : une URL par étape,
+`/framing/start`, `/framing/dimensions`, `/framing/brief`, `/framing/plan` ; `/framing` redirige vers
+l'étape qui attend la personne (`framingLanding`) et les anciennes URL (`?step=<dimension>&q=`,
+`?step=review&call=`, `?step=brief`) vers leur étape. `routes.projectFramingStep` /
+`projectFramingQuestion` / `projectFramingReview` / `projectPlan` suivent.
+
+- **Parcours** : `lib/framing/journey.ts` (pur : statuts, acteurs, résumés, prérequis, « Ensuite :
+  Stratégie › Démarrer la stratégie ») ; données lues une fois par requête dans
+  `lib/framing/journey-context.ts` (`framingJourneyContext`, `cache()` : connaissance, évaluation, call
+  de cadrage `framing_calls`, plan) ; loader `lib/journey/framing.ts` branché dans `JOURNEY_LOADERS`
+  (le relais de la Vue d'ensemble s'efface). Acteurs : le responsable du projet (« Démarrer le cadrage »,
+  « Tenir l'échange de cadrage », « Répondre à n questions de PO », « Créer le Brief de cadrage » /
+  « Créer la version n du Brief », « Envoyer le Brief en validation », « Lancer le plan du projet ») ;
+  la direction `kind: "validate"` sur « Valider le Brief de cadrage » (Validations du projet).
+  Le Brief garde ses versions lisibles après une demande de modification (défaut du proto non recopié).
+- **Cadre** : `FramingStepFrame` (en-tête avec « Qui fait quoi » = responsable et validation,
+  `NowCard` aux mots du Cadrage, `ModuleAttention`, `JourneySpine`, `StepPanel` 5 colonnes, blocages et
+  informations notées `StepBlockers` / `StepToolsBlock`).
+- **Démarrer** : faits « Prise en charge » / « Projet », « Ce que le projet sait déjà » (comptes du code,
+  « Voir le détail » = une ligne par information, `FramingLine`), `StartWays` = `StartChoices fixedOrder`
+  (ordre fixe, « Recommandé » mobile) ; **règle retenue** (proto) : échange recommandé quand
+  manquant + à confirmer > connu (`recommendedStart`, `lib/framing/lines.ts`), raison dite seulement
+  dans ce cas. « Préparer un échange » ouvre `CallPrepForm` dans l'étape (`callSheetData` : un point par
+  dimension qui a un manque ou un « à confirmer »), « Changer » revient au choix. Après création :
+  `PlannedCallFacts` ; enregistré mais pas encore rangé : lien vers le call (le vrai pipeline
+  enregistrement → transcription → compte rendu se fait sur sa page) ; compte rendu reçu : `MeetingFacts`
+  avec, pour lignes, **ce que PO a proposé de l'échange par dimension** et son état dans le Cadrage
+  (confirmé, écarté, à confirmer ; budget interne), puis le résumé aux participants quand tout est
+  tranché (`MeetingSummaryBlock`, prochaine étape « Le Brief de cadrage part en validation »).
+  L'écran `?step=review` est supprimé : les propositions de l'échange sont dans « Les 6 dimensions ».
+- **Les 6 dimensions** : « Confirmation humaine · x/y · n dimensions complètes sur 6 », encadré
+  « Question de PO » (`QuestionScreen`, refait sur le proto : capitale « OBJECTIF · INFORMATION
+  MANQUANTE », champ « Votre réponse * » ouvert d'emblée pour une information manquante — il **est**
+  « Écrire moi-même » —, « M'aider à définir » au-dessus, Confirmer / Modifier, « Non applicable » →
+  « Pourquoi ce n'est pas applicable * » / « Marquer non applicable », « À définir plus tard » →
+  « À définir avant le * » / « Reporter, avec une tâche »), puis 6 cartes repliables (`DimensionCards`,
+  `VersionCard`) : une ligne par information avec pastille Connu / Confirmé / À confirmer / Manquant /
+  Non applicable / À définir plus tard et « Répondre » (`?q=`) ; après une demande de modification,
+  « Modifier » sur les réponses connues des dimensions rouvertes. Figé pendant la relecture (callout
+  cadenas). `DimensionNav` et `QuestionPager` ne servent plus au Cadrage. **Dictée gardée** : le bouton
+  « Dicter » reste sur la ligne de progression (il ne gêne pas le parcours, décision du lot 2).
+  **`QuestionScreen` est la référence** d'une question « une à la fois » (Cadrage juridique, lot 9).
+- **Brief de cadrage** : versions en cartes (la dernière ouverte, `BriefVersionDoc` = « 01 · Objectif »
+  puis « Libellé : valeur · source », « À revoir » sur les dimensions renvoyées), « Créer le Brief » /
+  « Créer la version n » / « Mettre à jour le Brief », « Envoyer en validation à X » (raison écrite si
+  rien n'a changé, PROJ-BUG-05) ; la direction décide **dans l'étape** (`BriefDirectionDecision` =
+  `DecisionPanel` + « Dimensions à revoir » ; `decideFramingBrief` → `decide_framing_brief` forme
+  « commentaire + dimensions » : seules les dimensions cochées rouvrent ; « Demander des corrections
+  détaillées » = l'ancien formulaire de demandes, replié). Repliés sous « Corrections détaillées,
+  comparaison et export » : complétude, demandes, comparaison, document complet, PDF, historique.
+  Gestes en `WriteResult` avec `withOutcome` (`lib/framing/actions/brief-step.ts`).
+- **Après le plan** : tout le Cadrage se lit (étapes faites, rien de modifiable), le Brief validé reste
+  consultable dans son étape.
+
 ---
 
 ## 6 bis. Stratégie de lancement
@@ -1747,7 +1804,7 @@ Migration `…20261012101201_strategy_audiences_kpi_owner`.
 
 ## 6 ter. Plan du Projet
 
-Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `components/plan/*`, migration
+Cadrage › Plan du projet `app/(app)/app/projects/[projectId]/framing/plan`, `lib/plan/*`, `components/plan/*`, migration
 `…20261006000201_project_plan.sql` (tests dans `framing-intelligent.test.sql`).
 
 - **Proposition calculée par le code** (`proposePlan`), à chaque visite tant que le plan
@@ -1760,8 +1817,8 @@ Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `com
 - **Modifier le plan** : changer de colonne, de responsable (membre approuvé), retirer ou
   remettre. **Lancer le plan** : le navigateur n'envoie que ces choix par clé, le serveur
   repropose et `launch_project_plan` enregistre une fois (`project_plans`,
-  `project_plan_items`). Les workflows en Focus ou Pendant ce temps démarrent (la Stratégie
-  passe en cours) ; ceux d'Ensuite attendent « Lancer maintenant » (`launch_plan_workflow`).
+  `project_plan_items`). Tous les workflows du plan démarrent (la Stratégie passe en cours ;
+  avant le 19/10, ceux d'Ensuite attendaient « Lancer maintenant », `launch_plan_workflow`).
 - **Workflow hors du plan** (audit du 07/10) : Stratégie, Master ou Juridique retirés avant le
   lancement, ou jamais proposés, sont listés sous le plan lancé (« Hors du plan ») ;
   « Ajouter et lancer » les ajoute en Focus (titre et raison écrits par le serveur,
@@ -1774,13 +1831,29 @@ Vue d'ensemble `app/(app)/app/projects/[projectId]/page.tsx`, `lib/plan/*`, `com
   RLS de leurs tables n'a pas changé). Fil des étapes : Stratégie grisée jusqu'au plan.
 - Mon Travail : un projet au Cadrage validé et sans plan a pour prochaine action
   « Construire et lancer le plan du projet ».
-- **Le plan est sur la Vue d'ensemble** (07/10/2026) : dès le Brief validé, la Vue
-  d'ensemble montre le plan lui-même (`ProjectPlanSection` : `PlanBoard` tant qu'il est
-  proposé) à la place de la liste des étapes ; **une fois lancé, la nouvelle Vue d'ensemble**
-  (`ProjectBoard`, § 8 ter, lot 4 de l'architecture globale) prend sa place. **Il n'y a
-  plus de page `/plan`** (supprimée le 08/10/2026) ni de section « Plan du projet » dans
-  `project-sections.ts` : `routes.projectPlan` = la Vue d'ensemble, ancre `#plan` (liens du
-  Brief, du Travail et du workflow verrouillé). Un ancien lien vers `/plan` répond 404.
+- **Le plan est l'étape 4 du Cadrage** (lot 2 « Projet complet », 19/10/2026, remplace la décision du
+  07/10) : `/framing/plan` (`routes.projectPlan`), plus rien sur la Vue d'ensemble. Avant lancement :
+  encadré PO, `PlanBoard` en 4 colonnes deux par deux (`PlanColumns`), cartes du proto (`PlanStepCard` :
+  « **Stratégie** · Marketing », raison, « pilote · échéance »), « Modifier le plan » = menus « Colonne
+  de X » / « Pilote de X » sous chaque carte + la modale détaillée (exécutant, échéance, dépendances),
+  ordre, retrait, ajout, « Enregistrer le plan » / « Annuler » ; « Lancer le plan » garde la revue
+  (`PlanLaunchReview`) et passe par `launchProjectPlan` (`withOutcome`, tous les parcours). Lancé :
+  « Plan lancé par X le … », colonnes en lecture, « Lancer » d'un workflow resté en attente (plans lancés
+  avant ce lot) et « Hors du plan », puis `PlanStepsSection` et l'historique repliés.
+- **Huit workflows** (migration `20261019020101_plan_all_workflows.sql`, tests
+  `plan-all-workflows.test.sql`) : `strategy`, `design`, `production`, `activations`, `review` (le
+  Marketing), `master`, `legal`, `distribution` (ex-`delivery`, repris). Proposition (`proposePlan`) :
+  Stratégie en Focus, Master et Juridique selon les règles d'avant, Conception (pilote = direction
+  créative), Production et Activations en Ensuite, Distribution (projet musical) et Suivi & bilan en
+  À anticiper ; les lignes-notes d'anticipation ne sont plus proposées. **« Lancer le plan » démarre
+  tous les workflows du plan, quelle que soit leur colonne** (la colonne dit l'ordre) ;
+  `launch_plan_workflow` garde sa signature (ajout d'un workflow oublié). **Verrou** :
+  `workflow_is_launched` couvre les huit ; Conception, Production, Activations, Suivi & bilan et
+  Distribution s'ouvrent au lancement du plan (ou s'ils avaient commencé avant : Stratégie entamée,
+  fiche de production, activation, dossier de distribution, étape avancée) ; layouts `design/`,
+  `production/`, `activations/`, `review/`, `release/` derrière `WorkflowGate` (`WorkflowLocked` :
+  verrou commun du lot 1). Le relais `lib/overview/framing-steps.ts` de la Vue d'ensemble ne sert plus : le
+  loader du Cadrage est branché.
 - **Plan pilotable** (retours du 11/10/2026, PROJ-UX-07) : chaque étape a un **pilote**
   (`owner_person_id`) et un **exécutant** distinct (`executor_person_id`, « le pilote » par
   défaut), une **échéance** (proposée depuis l'échéance du Cadrage de son type :
@@ -1901,6 +1974,50 @@ poste. Chargée par `loadMyWork` (`lib/work/queries.ts`), session utilisateur, R
 - Une modification qui ne notifie personne ne rafraîchit pas les autres écrans.
 
 ## 8 ter. Pages d'un projet lancé
+
+**Coquille du proto « Projet complet » (lot 1, 19/10/2026 ; cahier `docs/projet-complet/shell.md`).** Remplace,
+pour l'écran, les lots 1 et 4 ci-dessous (la logique `lib/workflow-status/` reste).
+
+- **Navigation** (`components/projects/project-sidebar.tsx`, `project-nav-list.tsx`, `project-nav-chips.tsx`) :
+  Vue d'ensemble, Cadrage, Workflows, Pilotage (Travail, Validations, Activité, Budget). Équipe, Planning, Calls,
+  Livrables, Fichiers ont `hidden` dans `projectSections` : route et fil d'Ariane gardés, plus d'entrée (Équipe
+  n'est plus liée de nulle part : à rattacher à « Qui fait quoi »). Point du Cadrage : `in_progress` jusqu'à
+  `planLaunchedAt` (`lib/plan/queries.ts`, `cache`), `done` après. Pastilles « À vous » : `countMine` de
+  `loadShellJourneys` dans `CountedProjectSidebar` sous `Suspense` (repli = la barre sans compteurs : la page
+  n'attend jamais les parcours) ; le total va sur « Travail » de la barre principale par `WorkCountReporter`
+  (magasin client, `components/shell/work-count.tsx`, remis à 0 en quittant le projet). Mobile : puces.
+- **`loadShellJourneys`** (`lib/overview/journeys.ts`, `cache`) = `loadProjectJourneys` + les quatre étapes du
+  Cadrage lues de ses états tant que la zone Cadrage n'a pas de loader (`framingFallback`,
+  `lib/overview/framing-steps.ts` : étape `framing` de `project_stages`, validation en attente, `project_plans`) ;
+  **avant « Lancer le plan », seules les actions du Cadrage comptent** (un workflow commencé avant le plan garde sa
+  page mais ses actions attendent le plan). Lu par la navigation, la Vue d'ensemble, Travail, Validations.
+- **Vue d'ensemble** (`app/(app)/app/projects/[projectId]/page.tsx`) : `ProjectHeader` avec le nom du projet, son
+  état calculé (`overviewHead`, `lib/overview/head.ts` : Non démarré avant le plan, Terminé si tous les workflows
+  lisibles le sont, sinon En cours) et ses faits (artiste · format, Budget, Responsable, Master final du Brief
+  Mix/Master après le plan, Sortie) ; « Bilan & clôture du projet » (page `closure`, hors proto) en action
+  `ghost` de la tête. `NowCard variant="overview"` (toutes mes actions, deux nommées). Avant le plan :
+  `BeforeWorkflows` seul (le Plan du projet est l'étape 4 du Cadrage depuis le lot 2, `/framing/plan`, § 6 ter). Après : `WorkflowCards` (`lib/overview/cards.ts` : parcours du workflow s'il
+  en a un, sinon ses chevrons ; « À vous · » / « Nom · » depuis `mine` / `waiting`) et `DependencyRows`
+  (`lib/overview/dependencies.ts` : Master final = dépendance `master-online` ; Pochette livrée = un livrable dont
+  le titre correspond à `COVER` livré (`deliverable_deliveries.delivered_at`) ; Prêt pour la sortie = étape `ready`
+  du parcours du Juridique s'il en a une, sinon Juridique Terminé ; Durée du master final = chaque titre a un fichier
+  `final_master` avec `duration_seconds`). Supprimés : `ProjectBoard`, À faire ensuite, Blocages, Échéances,
+  `DependenciesTable`, « Lancer » des cartes, `PlanStepsSection` et `BriefDrift` après lancement (à loger dans
+  l'étape Plan du projet du Cadrage), équipe créative (page Équipe), historique d'assignation (page Équipe), faits en
+  colonne, `lib/workflow-status/board.ts` (l'assistant ne s'en servait pas). `FramingEntry` n'est plus que sur
+  `/framing`.
+- **Verrou** (`WorkflowLocked`) : même écran pour Master, Juridique, Marketing (Stratégie, sans l'ancien état
+  « la stratégie suit le cadrage ») et **Distribution** (`release/layout.tsx`, `distributionLocked` : pas de plan
+  et aucune sortie enregistrée). « Ouvrir le Cadrage » mène à `/framing`. Les variantes « Ensuite » / « hors du
+  plan » n'ont plus de texte propre (proto) ; `launch_plan_workflow` reste en SQL pour l'étape Plan du Cadrage. La
+  Distribution est `not_started` dans `loadWorkflowStates` dans le même cas.
+- **Travail / Validations** : `MyActions` sur `mine` / `validations` (`actor.kind === "validate"`). Les tâches
+  libres (`tasks`) restent en base et dans le Travail global, plus dans le Travail du projet (VISION-UX § 3 : pas de
+  liste à part). L'historique des validations décidées est dans l'Activité (`loadRecentActivity`).
+- **Activité** (`loadProjectActivity`, `lib/overview/activity.ts`) : journal du projet (`loadRecentActivity`),
+  `marketing_events`, `production_events` (lien vers le livrable ; un contact du Réseau est dit « Quelqu'un »),
+  Juridique (`loadLegalHistory`, seulement avec `manage_legal`), `distribution_events` (`eventText`) ; triés par
+  date, 200 au plus. Le Master n'a pas encore de journal.
 
 Une page par section de la sidebar du projet, toutes derrière `requireLaunchedProject`
 (404 avant lancement), titre = nom de la section (`ProjectPageTitle` dans le layout,
@@ -3162,6 +3279,126 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   « Nouveau contrat » demande d'abord le cas (`ContractCreation`) : enregistrer un contrat
   existant (avec les étapes suivantes), le générer depuis un modèle (Juridique du projet) ou
   créer un modèle (JUR-18). Pas encore : aperçu chiffré du partage statutaire des DEP / DR.
+
+### Parcours du proto « Projet complet » (lot 9, J1, 19/10/2026)
+
+Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/legal.md` § 5, J1).
+
+- **Une étape par démarche** dans le Parcours, en trois intertitres : **Dossier** (État des lieux,
+  Cadrage juridique, Confirmation, Plan d'action), **Suivi** (« Sami Kader · fiche et contrat »,
+  « Emprunt « Night Lights » », « Répartition de l'édition « Néons » », « Déclaration SACEM
+  « Néons » » ; « Suivi · démarches proposées » tant que le plan n'est pas lancé, verrouillées
+  « Après : Plan d'action » avec « Ce qui viendra »), **Sortie** (« Prêt pour la sortie »).
+  URL : `/legal/person/<ref>`, `/legal/clearance/<id>`, `/legal/split/<masterId>`,
+  `/legal/sacem/<masterId>`, `/legal/ready` (`legalRouteOf`, `legalDemarcheHref`,
+  `legalRefSlug` : la clé d'une personne `contact:<id>` / `artist:<id>` / nom normalisé devient
+  `c-…` / `a-…` / `n-…`).
+- **Calcul** : `lib/legal/demarches/build.ts` lit le tableau du plan lancé
+  (`lib/legal/plan/board.ts`, inchangé : chaque temps lu à sa source) et en fait des
+  `JourneyStep` (`launchedDemarches`) ; avant le lancement, `proposedDemarches` part de la
+  proposition (`proposeLegalPlan`, calculée même avant la Confirmation). Ce qui est attendu et
+  de qui : `lib/legal/demarches/todo.ts` (`expectedOf`). **Acteurs** : le responsable de la
+  démarche (`legal_plan_items.responsible_person_id`, sinon le responsable du projet) fait les
+  gestes ; la direction n'a « À vous » que sur ses décisions (Valider le document, Valider les
+  conditions : `kind: "validate"`, alerte « Décision requise ») ; une personne extérieure ou des
+  ayants droit mettent l'étape « En attente de … ». Le Dossier est au responsable du projet
+  (plus « à toute personne qui voit le Juridique »).
+- **Chargeur** : `lib/journey/legal.ts` (`legalJourneys`, ligne `legal` de `JOURNEY_LOADERS`)
+  lit `legalJourneyContext` (`lib/legal/journey-context.ts`, mis en cache par requête), qui lit
+  désormais fiches, accords (**sans génération** : `loadAgreements`), répartitions, emprunts et
+  bulletins. La génération automatique des contrats prêts se fait à l'ouverture de l'étape
+  d'une personne (`DemarcheStep`, puis relecture).
+- **Corps d'une démarche** (`components/legal/demarches/`) : les panneaux d'avant
+  (`FichePanel`, `ContractPanel`, `SplitPanel` avec le comparateur de versions repris de la
+  carte de répartition, `ClearanceBody`, `FormalityCard`) deviennent le corps de l'étape
+  (`DemarchePart`) ; une personne garde ses deux temps (fiche puis contrat, l'autre replié) ;
+  « Responsable et échéance » (`DelegateButton`) en bas ; « Déjà fait » = l'Historique du
+  dossier filtré sur les objets de la démarche (`lib/legal/demarches/history.ts`).
+- **Plan d'action lancé** : « Contrats à prévoir » (`MappingPanel`), « Ajouter au plan »
+  (`AddedActions`) et la liste des démarches avec « Ouvrir ».
+- **Redirections** (`lib/legal/demarches/where.ts`) : `/legal/tracking` (et `?ligne=`),
+  `/legal/forms`, `/contracts`, `/splits`, `/clearances` (`?emprunt=`), `/formalities` ouvrent
+  la démarche qu'elles nommaient, sinon la première de leur genre qui attend. Les `sourceHref`
+  du Suivi (`lib/legal/tracking/sources.ts`, lus par la Distribution et l'état des workflows)
+  pointent sur l'étape de la démarche. Retirés : `TrackingView`, `PlanRowSheet`,
+  `NextLineButton`, tuiles des 4 groupes, `FormsView`, `AgreementsView`, `SplitsView`,
+  `ClearancesView`, `FormalitiesView`, `FormRowActions`, `SubmissionDialog`, `SplitCard` (aucune
+  table ni donnée touchée).
+
+- **Cadrage juridique comme le Cadrage (J2)** : la question vit dans `PoQuestion`
+  (`components/ui/po-question.tsx`, encadré « Question de PO », surtitre domaine · état, rang) et
+  la lecture de PO dans `PoReading` (« ✦ Ce que PO a compris », citations, « Retirer ») — deux
+  briques communes prévues pour être reprises par le Cadrage (lot 2), qui garde ses propres
+  issues (Confirmer / Modifier, Non applicable, À définir plus tard). Les faits gardés portent
+  leur citation (`legal_facts.source_quote`, lue par `loadIntake`) ; `notAskedQuestions`
+  (`lib/legal/intake/questions.ts`) expose les questions qu'une donnée fiable règle (crédits du
+  titre, contrats du projet, splits du titre) : « Questions que PO ne pose pas ». « Corriger »
+  n'apparaît qu'une fois toutes les questions répondues (proto).
+
+- **Contrats à prévoir avant le lancement (J3)** : section « Contrats à prévoir » de l'étape Plan
+  d'action, avant et après le lancement (`MappingPanel` → `MappingForm` / `MappingRow`) : par
+  personne, le contrat (modèles validés compatibles avec ses rôles) ou « Pas d'accord nécessaire »
+  avec « Pourquoi aucun accord n'est nécessaire * » (table `legal_no_agreement_reasons`, écrite
+  par `approve_contract_mapping`, qui refuse `mapping_reason_required` ; lue par `manage_legal`),
+  la source de la proposition, et « Nouveau modèle de contrat » (`NewTemplateButton` : le
+  formulaire du modèle en modale verre, rôles de la personne cochés ; il entre dans la
+  bibliothèque une fois validé par la direction). Erreurs en rouge par personne. **Lancer le plan
+  est refusé** tant qu'une personne qui a un contact n'a pas de décision (`launchLegalPlan`, code
+  serveur : « Confirmez d'abord les contrats à prévoir. ») ; une personne **sans contact** reste
+  « Fiche à préparer d'abord » et se décide après sa fiche (décision : le besoin reste clé par
+  contact, `legal_agreement_needs`). Le Plan d'action affiche « À vous · Confirmer les contrats
+  nécessaires » tant que c'est à faire. **Changer** le responsable ou l'échéance d'une démarche
+  demande « Pourquoi * » (`change_legal_plan_item`, colonne `legal_plan_events.reason`, montrée
+  dans l'Historique). Migration `20261019090101`, tests `legal-contracts-before-launch.test.sql`.
+  Pas encore : validation / refus d'un modèle par la direction **dans** l'étape (elle se fait
+  sur la page du modèle) ; « document en tête » et « Changé depuis la v1 » dans la démarche
+  personne.
+
+- **« Prêt pour la sortie » (J11), un seul calcul** — contrat pour la Distribution et la Vue
+  d'ensemble : **`loadLegalReadiness(projectId)`** (`lib/legal/readiness/load.ts`, serveur) rend
+  `{ allowed: true, readiness: LegalReadiness | null }` avec `manage_legal` (null avant le
+  lancement du plan), sinon `{ allowed: false, validated: { by, at } | null }` (la validation
+  finale seule, lue en RLS `can_see_project`). `LegalReadiness`
+  (`lib/legal/readiness/controls.ts`, pur) : `verdict` (`"no"` Non prête · `"risk"` À risque ·
+  `"ok"` Prête à sortir), `controls` (clé, domaine `master | rights | metadata | assets |
+  distribution`, libellé, `blocking`, `status` `ok | open | waived`, raison, prochaine action,
+  responsable, source, `href`, dérogation ; le dernier est `final`, la validation finale),
+  `blocking` (« À résoudre avant sortie »), `toFollow` (« Reste à suivre »), `done`/`total`,
+  `sacemBlocks`, `validated`. **Sources** : Master, Catalogue, Conception et sortie viennent de
+  la lecture de la Distribution (`loadDistributionSources` + `distributionReadiness`, items hors
+  module `legal`) ; les droits viennent des démarches (emprunt bloquant ; contrat, répartition,
+  SACEM « à suivre », la SACEM bloquante si la politique le dit, et « faite » dès le dépôt).
+  Ne jamais recalculer ailleurs : la Distribution lit ce résultat pour son prérequis
+  « Juridique › Prêt pour la sortie ». **Décisions de la direction** (permission `validate`),
+  par fonctions : `grant_release_waiver` (motif obligatoire, table
+  `release_readiness_waivers`), `set_release_policy` (`release_readiness_policies`, par
+  organisation, « SACEM bloquante », défaut non), `validate_release` (`release_validations`,
+  une par projet, avec l'instantané des contrôles ; refusée côté serveur tant qu'un contrôle
+  bloquant est ouvert, `validateRelease`). Étape `ready` du Parcours : « À vous · Valider la
+  sortie avant The Orchard » pour la direction quand rien ne bloque (`kind: "validate"`),
+  faite quand validée ; Ensuite : Distribution. Migration `20261019090201`, tests
+  `legal-links-readiness.test.sql`. Pas de notification (aucun type ajouté).
+- **Liens privés visibles (J4, fiches)** : le jeton reste connu de la base par son empreinte
+  seulement ; le serveur le garde **scellé** (`legal_forms.link_sealed`, AES-256-GCM,
+  `lib/legal/forms/link-seal.ts`, clé `LEGAL_LINK_KEY` de l'environnement, jamais en base ni
+  au navigateur) via `seal_legal_form_link` à la préparation. La démarche montre alors le lien
+  tant qu'il est ouvert (`FicheLinkCard` : Copier le lien, Relancer = e-mail prêt `mailto:`,
+  Nouveau lien, « Révoquer l'accès » avec « Pourquoi * » = `revoke_legal_form`), « valable
+  jusqu'au … · créé le … · Envoyé par … le … · Ouvert le … » (`legal_forms.sent_by`,
+  `revoked_by`, `revoked_reason`). Sans la clé, ou pour un lien préparé avant, l'URL n'est pas
+  réaffichable : l'état reste, « Nouveau lien » en donne un. Migration `20261019090301`.
+  **Pas encore** : les liens de répartition (`legal_split_confirmations`, même méthode à
+  appliquer) ; l'envoi par PDS OS (pas de fournisseur d'e-mail : `mailto:` + « Marquer comme
+  envoyée »).
+
+- **Refus d'un emprunt (J8)** : « Décider de la suite » sous le refus (`RefusalDecision`) :
+  « Retirer l'élément du titre » avec « Pourquoi * » (`withdraw_clearance` : emprunt abandonné,
+  `legal_clearances.withdrawn_reason`, notification `legal_element_withdrawn` au responsable du
+  projet par trigger : refaire le passage dans le Master) ou « Le remplacer » / « Par quoi * »
+  (`replace_clearance` : nouvel emprunt `to_investigate`, l'œuvre seule, `replaces_id`, l'ancien
+  abandonné, puis ajouté au plan par `addLegalPlanItems`). « Retirer l'élément » hors refus passe
+  aussi par le motif. Migration `20261019090401`, tests `legal-clearance-refusal.test.sql`.
+  Les notifications d'emprunt ouvrent la démarche (`/legal/clearance/<id>`).
 
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 

@@ -136,8 +136,6 @@ export function computedSignal(
               .join(", "),
           ),
         };
-      if (sources.legal.open === null)
-        return { status: "human", text: t.rightsRestricted };
       // No structured rights per territory exist: code never says « cohérent ».
       return {
         status: "human",

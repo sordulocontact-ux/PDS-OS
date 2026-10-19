@@ -147,6 +147,28 @@ Modules transversaux présents dans la navigation du prototype : Accueil, Projet
 Talents, Musique, Budgets, Calls, Idées, Équipe, Paramètres. Onglets au sein d'un
 projet : Vue d'ensemble, Travail, Budget, Calls, Fichiers, Historique.
 
+### Cadrage et Plan du projet : décisions du 19/10/2026 (lot 2 « Projet complet »)
+
+Prises en codant le proto (`docs/projet-complet/framing.md`), à confirmer par Sacha :
+
+- **Recommandation du départ** (règle du proto, remplace celle du 11/10) : « Préparer un échange » est
+  recommandé quand manquant + à confirmer > connu ; sinon « Commencer le cadrage ». Les cartes gardent
+  leur ordre ; la raison n'est dite que pour l'échange.
+- **« Lancer le plan » démarre tous les workflows du plan**, quelle que soit leur colonne (Focus,
+  Ensuite, Pendant ce temps, À anticiper = ordre de priorité, plus un verrou). Avant le plan, **tous**
+  les workflows sont verrouillés (Master, Juridique, tout le Marketing, Distribution), sauf ce qui avait
+  commencé avant.
+- **Le plan propose huit workflows** (Stratégie, Conception, Production, Activations, Suivi & bilan,
+  Master, Juridique, Distribution) ; les lignes-notes d'« À anticiper » (rôles à trouver, enveloppe,
+  points ouverts) ne sont plus proposées : le proto n'en a pas.
+- **Décision de la direction** : cases « Dimensions à revoir » + commentaire (proto) ; les demandes
+  détaillées (PROJ-UX-06) restent possibles, repliées.
+- **Le compte rendu de l'échange de cadrage** se lit dans l'étape par dimension : ce que PO en a proposé
+  et ce que le Cadrage en a fait ; le résumé aux participants part quand tout est tranché.
+- **La dictée** reste dans « Les 6 dimensions » (bouton sur la ligne de progression).
+- Écart au mot du ticket : « Écrire moi-même » n'est plus un bouton pour une information manquante,
+  le champ « Votre réponse * » est ouvert d'emblée (proto).
+
 ### Points à trancher : les autres rôles (test UX du 09/10/2026, section 5)
 
 Décisions prises en construisant le lot (`docs/ARCHITECTURE.md` § 8 undecies), à confirmer :

@@ -44,6 +44,11 @@ export function AgreementList({
                 .filter(Boolean)
                 .join(" — ")}
             </span>
+            {row.noAgreementReason && (
+              <span className="text-sm break-words text-muted-foreground">
+                {t.plan.noDealReason(row.noAgreementReason)}
+              </span>
+            )}
             {row.existing && (
               <Link
                 href={routes.contract(row.existing.id)}

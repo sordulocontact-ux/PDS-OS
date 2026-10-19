@@ -11,7 +11,7 @@ export const DOUBLE_SIDEBAR = true;
 // Titled groups of the sidebar (ticket « Architecture globale », 08/10/2026:
 // the business workflows run in parallel under one heading). The tabs ignore
 // them: a tab bar has no headings.
-export type ProjectSectionGroup = "workflows" | "steering" | "resources";
+export type ProjectSectionGroup = "workflows" | "steering";
 
 export type ProjectSection = {
   key: string;
@@ -29,6 +29,10 @@ export type ProjectSection = {
   // listed on its parent tab's page (the overview), which stays lit while it
   // is open.
   tabParent?: string;
+  // Out of the navigation (decision C0, proto « Projet complet »): the page
+  // keeps its route and its trail, reached from the steps that use it
+  // (Équipe, Planning, Calls, Livrables, Fichiers).
+  hidden?: boolean;
 };
 
 const below =
@@ -81,8 +85,8 @@ export function projectSections(
         p === routes.project(projectId) ||
         below(routes.projectClosure(projectId))(p),
     },
-    // No section for the Plan du Projet: it is the overview itself once the
-    // Brief is validated (docs/ARCHITECTURE.md § 6 ter).
+    // The Plan du projet is the Cadrage's fourth step (/framing/plan,
+    // docs/ARCHITECTURE.md § 6 ter): no section of its own.
     {
       key: "framing",
       label: t.framing,
@@ -114,32 +118,9 @@ export function projectSections(
       routes.projectRelease(projectId),
       "workflows",
     ),
+    // Pilotage (proto): Travail, Validations, Activité, then the Budget
+    // (ticket MKT-S1-15).
     section("work", t.work, routes.projectWork(projectId), "steering"),
-    section(
-      "team",
-      t.team,
-      routes.projectTeam(projectId),
-      "steering",
-      "overview",
-    ),
-    section(
-      "planning",
-      t.planning,
-      routes.projectPlanning(projectId),
-      "steering",
-    ),
-    ...(budget
-      ? [
-          section(
-            "budget",
-            t.budget,
-            routes.projectBudget(projectId),
-            "steering",
-          ),
-        ]
-      : []),
-    // With the steering: what was decided and what happened (UX test of
-    // 09/10/2026: Validations sat under « Production »).
     section(
       "validations",
       t.validations,
@@ -154,15 +135,30 @@ export function projectSections(
       "steering",
       "overview",
     ),
-    // The project's resources: its calls, deliverables and files.
-    section("calls", t.calls, routes.projectCalls(projectId), "resources"),
-    section(
-      "deliverables",
-      t.deliverables,
-      routes.projectDeliverables(projectId),
-      "resources",
-    ),
-    section("files", t.files, routes.projectFiles(projectId), "resources"),
+    ...(budget
+      ? [
+          section(
+            "budget",
+            t.budget,
+            routes.projectBudget(projectId),
+            "steering",
+          ),
+        ]
+      : []),
+    // Out of the navigation, routes kept (decision C0): each is reached from
+    // the step that uses it; its trail still names it.
+    ...(
+      [
+        ["team", t.team, routes.projectTeam(projectId)],
+        ["planning", t.planning, routes.projectPlanning(projectId)],
+        ["calls", t.calls, routes.projectCalls(projectId)],
+        ["deliverables", t.deliverables, routes.projectDeliverables(projectId)],
+        ["files", t.files, routes.projectFiles(projectId)],
+      ] as const
+    ).map(([key, label, href]) => ({
+      ...section(key, label, href, "steering"),
+      hidden: true,
+    })),
   ];
   const workflowKeys = ["master", "legal", "marketing", "distribution"];
   return all.filter(
@@ -203,9 +199,6 @@ export function projectTrail(
   const subPages: Record<string, ProjectCrumb[]> = {
     // Vue d'ensemble › Clôture du projet, apart from the Marketing closing.
     [routes.projectClosure(projectId)]: [{ label: fr.projectReview.title }],
-    [routes.projectFramingBrief(projectId)]: [
-      { label: fr.framingIntel.brief.title },
-    ],
     [`${legal}/forms`]: [plan, { label: fr.legalForms.page.title }],
     [`${legal}/contracts`]: [
       plan,

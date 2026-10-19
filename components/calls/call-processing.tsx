@@ -105,7 +105,7 @@ export function CallProcessing({
       router.push(routes.projectStrategy(projectId));
     } else if (extracted.briefFilled && projectId) {
       toast.success(t.briefFilled);
-      router.push(routes.projectFramingReview(projectId, callId));
+      router.push(routes.projectFramingReview(projectId));
     } else {
       toast.success(t.done);
       router.refresh();

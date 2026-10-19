@@ -55,8 +55,6 @@ export const planSteps = {
     title: "Lancer le plan ?",
     body: "Relisez ce qui démarre. Le lancement est enregistré à votre nom, avec la date.",
     starts: "Démarrent maintenant",
-    waits: "Attendent votre feu vert (Ensuite)",
-    follows: "Suivent leur propre étape",
     steps: "Autres étapes",
     removed: "Retirés du plan",
     issues: (n: number) =>

@@ -51,44 +51,56 @@ export async function loadAgreements(
   access: Access,
 ): Promise<Agreements> {
   const supabase = await createClient();
-  const [rows, templates, needs, forms, money, approval, organization] =
-    await Promise.all([
-      readInventoryRows(
-        project.id,
-        project.masters,
-        can(access, "manage_catalog"),
-      ),
-      listTemplates(),
-      supabase
-        .from("legal_agreement_needs")
-        .select("id, contact_id, roles, template_id, fee_cents, contract_id")
-        .eq("project_id", project.id),
-      supabase
-        .from("legal_forms")
-        .select("id, contact_id, status")
-        .eq("project_id", project.id)
-        .neq("status", "revoked"),
-      supabase
-        .from("financial_needs")
-        .select("contract_id, amount_cents")
-        .eq("project_id", project.id),
-      supabase
-        .from("contract_events")
-        .select("actor_person_id, created_at")
-        .eq("project_id", project.id)
-        .is("contract_id", null)
-        .eq("kind", "contract_mapping.approved")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      access.organizationId
-        ? supabase
-            .from("organizations")
-            .select("name")
-            .eq("id", access.organizationId)
-            .maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
-    ]);
+  const [
+    rows,
+    templates,
+    needs,
+    forms,
+    money,
+    approval,
+    organization,
+    noAgreement,
+  ] = await Promise.all([
+    readInventoryRows(
+      project.id,
+      project.masters,
+      can(access, "manage_catalog"),
+    ),
+    listTemplates(),
+    supabase
+      .from("legal_agreement_needs")
+      .select("id, contact_id, roles, template_id, fee_cents, contract_id")
+      .eq("project_id", project.id),
+    supabase
+      .from("legal_forms")
+      .select("id, contact_id, status")
+      .eq("project_id", project.id)
+      .neq("status", "revoked"),
+    supabase
+      .from("financial_needs")
+      .select("contract_id, amount_cents")
+      .eq("project_id", project.id),
+    supabase
+      .from("contract_events")
+      .select("actor_person_id, created_at")
+      .eq("project_id", project.id)
+      .is("contract_id", null)
+      .eq("kind", "contract_mapping.approved")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    access.organizationId
+      ? supabase
+          .from("organizations")
+          .select("name")
+          .eq("id", access.organizationId)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    supabase
+      .from("legal_no_agreement_reasons")
+      .select("contact_id, reason")
+      .eq("project_id", project.id),
+  ]);
   for (const [scope, result] of Object.entries({
     needs,
     forms,
@@ -231,6 +243,9 @@ export async function loadAgreements(
       ),
       mappingApproved: approval.data !== null,
       ficheWaitingOf,
+      noAgreementOf: new Map(
+        (noAgreement.data ?? []).map((r) => [r.contact_id, r.reason]),
+      ),
     }),
     hasValidatedTemplate: templates.some((t) => t.status === "validated"),
     approval: approval.data

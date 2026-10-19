@@ -13,7 +13,6 @@ import { isOpen } from "@/lib/distribution/anomalies";
 import { fr } from "@/lib/i18n/fr";
 import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { projectFormatLabel } from "@/lib/projects/labels";
-import { getProject } from "@/lib/projects/queries";
 import { distributionViewHref } from "@/lib/ui/distribution-steps";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { stepChoiceKey } from "@/lib/step-tools/model";
@@ -81,22 +80,7 @@ export async function DistributionFrame({
     distributionContext(projectId),
     loadProjectJourneys(projectId),
   ]);
-  if (!ctx) {
-    const project = await getProject(projectId);
-    return (
-      <WorkflowLocked
-        projectId={projectId}
-        name={t.module}
-        framingValidated={
-          project?.stages.some(
-            (s) => s.key === "framing" && s.state === "validated",
-          ) ?? false
-        }
-        waiting={false}
-        absent={false}
-      />
-    );
-  }
+  if (!ctx) return <WorkflowLocked projectId={projectId} title={t.module} />;
   const status = distributionStatus(ctx.steps);
   const open = ctx.anomalies.filter(isOpen).length;
   return (

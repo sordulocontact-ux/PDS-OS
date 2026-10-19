@@ -350,7 +350,11 @@ Source : maquette Figma « Desktop - 11 » (accueil) et « Devis Sordulo » nœu
   sur celle de la barre latérale, Figma), demandes d'accès en attente à droite
   d'« Équipe » (et sur le bouton du menu en mobile).
 - Mobile : même navigation (pleine largeur) dans un tiroir blanc, ouvert depuis l'en-tête ;
-  la sidebar contextuelle du projet n'a pas encore d'équivalent mobile.
+  la navigation du projet y est la rangée de puces (`ProjectNavChips`, ci-dessus), toutes ses
+  entrées (Validations, Activité et Budget compris, pour qu'aucune page ne soit sans accès).
+- Barre principale repliée (dans un projet) : le carré **PDS** (40 px, rayon 10) reste
+  toujours visible au-dessus du bouton de dépliage ; « Travail » porte le nombre de mes actions
+  du projet ouvert (`CountBadge size="sm"` 16 px au coin de l'icône).
 
 ### Accueil
 

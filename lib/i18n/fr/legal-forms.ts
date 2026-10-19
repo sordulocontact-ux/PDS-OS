@@ -195,6 +195,25 @@ export const legalForms = {
       `Bonjour ${name},\n\nPour le projet « ${project} », pouvez-vous remplir votre fiche de renseignements ? Cela prend quelques minutes, sans compte :\n${url}\n\nMerci !`,
     markSent: "Marquer comme envoyée",
     revoke: "Révoquer",
+    // The private link kept visible (lot 9 J4, rule 19).
+    revokeAccess: "Révoquer l'accès",
+    revokeWhy: "Pourquoi vous révoquez l'accès",
+    revokeWhyMissing: "Dites pourquoi vous révoquez l'accès.",
+    revokeBody:
+      "Le lien cesse de fonctionner tout de suite ; ce que la personne a déjà envoyé est conservé.",
+    revoked: "Accès révoqué",
+    revokedWhy: (reason: string) => `Accès révoqué : « ${reason} »`,
+    remind: "Relancer",
+    linkMeta: (parts: string[]) => `Lien privé · ${parts.join(" · ")}`,
+    validUntil: (day: string) => `valable jusqu'au ${day}`,
+    createdOn: (at: string) => `créé le ${at}`,
+    sentBy: (who: string | null, at: string) =>
+      who ? `Envoyé par ${who} le ${at}` : `Envoyé le ${at}`,
+    openedOn: (at: string) => `Ouvert le ${at}`,
+    waitingFor: (name: string) =>
+      `En attente de ${name} (lien privé) : remplir sa fiche de renseignements.`,
+    noLink:
+      "Le lien n'est plus affichable : créez-en un nouveau pour le lui renvoyer.",
     answers: "Voir les réponses",
     answersTitle: (name: string) => `Fiche de ${name}`,
     roles: "Rôles",

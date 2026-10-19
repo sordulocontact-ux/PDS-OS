@@ -16,12 +16,13 @@ import { loadTrackingView } from "@/lib/distribution/tracking-queries";
 import { loadDistributionView } from "@/lib/distribution/view";
 import { loadMembers } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { loadLegalReadiness } from "@/lib/legal/readiness/load";
 import { loadProjectDates } from "@/lib/projects/dates";
 import { getProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 import type { JourneyPrereq } from "@/lib/ui/journey";
-import { formatDay } from "@/lib/utils/day";
+import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 const t = fr.distributionJourney;
 
@@ -52,7 +53,7 @@ export const distributionContext = cache(async (projectId: string) => {
   ]);
   if (!project || project.stages.length === 0) return null;
   if (!(await distributionLaunched(projectId))) return null;
-  const [view, tracking, platforms, anomalies, closure, dates, members] =
+  const [view, tracking, platforms, anomalies, closure, dates, members, legal] =
     await Promise.all([
       loadDistributionView(project, access),
       loadTrackingView(project, access),
@@ -61,6 +62,9 @@ export const distributionContext = cache(async (projectId: string) => {
       loadClosureView(project, access),
       loadProjectDates(project.id),
       loadMembers(access),
+      // The Juridique's one computation of « Prêt pour la sortie »
+      // (docs/ARCHITECTURE.md § 8 sexies): read, never recomputed here.
+      loadLegalReadiness(project.id),
     ]);
   const preorder =
     view.sources.params.preorder === null
@@ -102,6 +106,21 @@ export const distributionContext = cache(async (projectId: string) => {
       done: false,
     })),
   ];
+  const legalValidated = legal.allowed
+    ? (legal.readiness?.validated ?? null)
+    : legal.validated;
+  const legalReady: JourneyPrereq = {
+    key: "legal-ready",
+    label: t.legalReady.label,
+    module: t.legalReady.module,
+    done: legalValidated !== null,
+    source: legalValidated
+      ? t.legalReady.validated(
+          legalValidated.by,
+          formatShortDay(legalValidated.at),
+        )
+      : t.legalReady.notValidated,
+  };
   const versions = view.versions;
   const open = view.open;
 
@@ -127,6 +146,7 @@ export const distributionContext = cache(async (projectId: string) => {
       blockers: view.readiness.blockers.length,
       sources: prepSources,
     },
+    legalReady,
     params: sources.paramsConfirmed
       ? { confirmedBy: nameOf(sources.paramsConfirmed.byId) }
       : null,
@@ -217,6 +237,8 @@ export const distributionContext = cache(async (projectId: string) => {
   };
 
   return {
+    legal,
+    legalReady,
     paramsData,
     access,
     project,

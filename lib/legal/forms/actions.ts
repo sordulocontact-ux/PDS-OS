@@ -7,6 +7,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { siteUrl } from "@/lib/auth/site-url";
+import { sealLinkToken } from "@/lib/legal/forms/link-seal";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { LEGAL_FORM_VERSION } from "@/lib/legal/forms/definition";
@@ -78,6 +79,15 @@ export async function prepareLegalForm(
     if (error) console.error("prepareLegalForm:", error.message);
     return { ok: false, error: t.failed };
   }
+  // Kept sealed so the link stays visible in the démarche (rule 19).
+  const sealed = sealLinkToken(token);
+  if (sealed) {
+    const { error: sealError } = await supabase.rpc("seal_legal_form_link", {
+      p_form_id: data[0].form_id,
+      p_sealed: sealed,
+    });
+    if (sealError) console.error("prepareLegalForm seal:", sealError.message);
+  }
   const { data: contact } = person.contactId
     ? await supabase
         .from("network_contacts")
@@ -132,6 +142,20 @@ export async function setLegalFormState(
     return { ok: false, error: fr.auth.errors.forbidden };
   return run({ projectId, formId }, (supabase, id) =>
     supabase.rpc("set_legal_form_state", { p_form_id: id, p_state: state }),
+  );
+}
+
+/** « Révoquer l'accès », with why (proto « Projet complet »): the link
+ * stops working at once; what the person sent is kept. */
+export async function revokeLegalForm(
+  projectId: string,
+  formId: string,
+  reason: string,
+): Promise<FormActionResult> {
+  const why = reason.trim().slice(0, 1000);
+  if (!why) return { ok: false, error: fr.legalForms.page.revokeWhyMissing };
+  return run({ projectId, formId }, (supabase, id) =>
+    supabase.rpc("revoke_legal_form", { p_form_id: id, p_reason: why }),
   );
 }
 

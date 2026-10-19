@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import { can, type Access } from "@/lib/auth/access";
+import type { Access } from "@/lib/auth/access";
 import { variantOf } from "@/lib/catalog/title-rules";
 import { masterLabel } from "@/lib/catalog/types";
 import { loadSheetSummaries } from "@/lib/design/sheet-summaries";
@@ -13,7 +13,6 @@ import type {
   ReadinessInput,
   ReadinessLegal,
 } from "@/lib/distribution/readiness";
-import { legalActionHref } from "@/lib/legal/plan/where";
 import { loadFinalView } from "@/lib/master-workflow/final";
 import { loadProjectDates } from "@/lib/projects/dates";
 import type { ProjectDetail } from "@/lib/projects/types";
@@ -23,6 +22,10 @@ import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
 // Credits the stores ask for: who wrote and composed the work.
 const SONGWRITERS = new Set(["composer", "lyricist"]);
+
+// The Fiche Livrable taken as the cover, by its title, until one is chosen
+// (the same rule as distribution_cover, SQL; read by the Marketing).
+export const COVER = /pochette|cover|artwork/i;
 
 export type SheetOption = { id: string; title: string; status: SheetStatus };
 
@@ -58,7 +61,6 @@ export const loadDistributionSources = cache(async function load(
 ): Promise<DistributionSources> {
   const supabase = await createClient();
   const ids = project.masters.map((master) => master.id);
-  const legalReadable = can(access, "manage_legal");
   const [
     masters,
     contributors,
@@ -156,35 +158,12 @@ export const loadDistributionSources = cache(async function load(
     ];
   });
 
-  const legalState = states?.states.legal;
   const legal: ReadinessLegal = {
     blockers: (blockers.data ?? []).map((b) => ({
       id: b.id,
       work: b.work,
       status: b.status,
     })),
-    // The other open actions, said to who reads the Juridique; borrowings
-    // already come from the function above.
-    open:
-      legalReadable && legalState && legalState !== "restricted"
-        ? (states?.details.legalItems ?? [])
-            .filter(
-              (item) =>
-                item.kind !== "clearance" &&
-                item.current !== "done" &&
-                item.current !== "obsolete",
-            )
-            .map((item) => ({
-              id: item.id,
-              label: item.subject
-                ? `${item.label} · ${item.subject}`
-                : item.label,
-              reason: item.reason,
-              href: item.sourceHref ?? legalActionHref(project.id, item.kind),
-            }))
-        : null,
-    reason:
-      legalState && legalState !== "restricted" ? legalState.reason : null,
   };
 
   const params = paramsOf(dossier.data);

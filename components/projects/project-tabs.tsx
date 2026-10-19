@@ -35,7 +35,10 @@ export function ProjectTabs({
     <TabBar
       label={fr.shell.project.sidebar.label}
       items={sections
-        .filter((section) => !section.tabParent && !section.restricted)
+        .filter(
+          (section) =>
+            !section.tabParent && !section.restricted && !section.hidden,
+        )
         .map((section) => ({
           href: section.href,
           label: section.label,

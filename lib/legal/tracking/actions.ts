@@ -16,6 +16,8 @@ const inputSchema = z.object({
   itemId: catalogIdSchema,
   responsibleId: catalogIdSchema.nullable(),
   dueOn: z.iso.date().nullable(),
+  // « Pourquoi * »: kept in the plan's journal.
+  reason: z.string().trim().min(1).max(1000),
 });
 
 export type DelegateResult = { ok: true } | { ok: false; error: string };
@@ -23,7 +25,8 @@ export type DelegateResult = { ok: true } | { ok: false; error: string };
 /**
  * Delegates an action or moves its due date (« Délégation ou escalade
  * explicite lorsque le responsable change », Juridique 07): written by
- * update_legal_plan_item, which keeps the change in the plan's journal.
+ * change_legal_plan_item, which keeps the change and its reason in the
+ * plan's journal.
  */
 export async function delegateLegalPlanItem(
   input: z.infer<typeof inputSchema>,
@@ -33,13 +36,14 @@ export async function delegateLegalPlanItem(
   const access = await requireApproved();
   if (!parsed.success || !can(access, "manage_legal"))
     return { ok: false, error: fr.auth.errors.forbidden };
-  const { projectId, itemId, responsibleId, dueOn } = parsed.data;
+  const { projectId, itemId, responsibleId, dueOn, reason } = parsed.data;
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("update_legal_plan_item", {
+  const { error } = await supabase.rpc("change_legal_plan_item", {
     p_item_id: itemId,
     p_responsible_person_id: responsibleId,
     p_due_on: dueOn,
+    p_reason: reason,
   });
   if (error) {
     console.error("delegateLegalPlanItem:", error.message);

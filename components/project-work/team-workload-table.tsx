@@ -4,24 +4,20 @@ import {
   DataTableCell,
   DataTableHead,
   DataTableHeader,
-  DataTableLink,
   DataTableMedia,
   DataTableRow,
 } from "@/components/ui/data-table";
-import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { WorkPerson } from "@/lib/project-work/queries";
 import type { WorkCounts } from "@/lib/project-work/workload";
 
 const t = fr.projectWork;
 
-// Internal members and their load; a row opens their card on Travail.
+// Internal members and their load.
 export function TeamWorkloadTable({
-  projectId,
   people,
   counts,
 }: {
-  projectId: string;
   people: WorkPerson[];
   counts: Map<string, WorkCounts>;
 }) {
@@ -47,13 +43,9 @@ export function TeamWorkloadTable({
             <DataTableRow key={p.personId}>
               <DataTableCell fill>
                 <DataTableMedia
-                  title={
-                    <DataTableLink
-                      href={`${routes.projectWork(projectId)}?person=${p.personId}`}
-                    >
-                      {p.name || t.work.unknownPerson}
-                    </DataTableLink>
-                  }
+                  // The project's Travail lists the viewer's own actions
+                  // (proto « Projet complet »): no per-person page any more.
+                  title={p.name || t.work.unknownPerson}
                   subtitle={t.work.roles[p.role]}
                 />
               </DataTableCell>

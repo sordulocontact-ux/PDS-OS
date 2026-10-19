@@ -282,6 +282,17 @@ export const factTone: Record<string, Tone> = {
   missing: "neutral",
 };
 
+/** A line of the Cadrage (proto FR_ST, lib/framing/lines.ts): Connu,
+ * Confirmé, À confirmer, Manquant, Non applicable, À définir plus tard. */
+export const framingLineTone: Record<string, Tone> = {
+  known: "neutral",
+  confirmed: "success",
+  to_confirm: "warning",
+  missing: "danger",
+  na: "neutral",
+  later: "info",
+};
+
 /** An item of the Stratégie's follow-up before the release
  * (lib/strategy/follow-up.ts): ready, running, waiting for a decision, blocked. */
 export const followUpTone: Record<string, Tone> = {
@@ -539,9 +550,10 @@ export const contractStateTone: Record<string, Tone> = {
  * validator, validated, sent back for a change, replaced by a newer one. */
 export const briefVersionTone: Record<string, Tone> = {
   pending: "neutral",
-  sent: "warning",
+  // Proto « Projet complet » (frBrief): in review = info, a change = warning.
+  sent: "info",
   approved: "success",
-  changes_requested: "danger",
+  changes_requested: "warning",
   superseded: "neutral",
 };
 

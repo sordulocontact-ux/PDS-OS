@@ -19,9 +19,8 @@ export type ReviewStep = {
 };
 
 /**
- * The review before « Lancer le plan » (PROJ-UX-07): what starts now, what
- * waits for its go, what follows its own stage, the added steps, what was
- * removed, and how many inconsistencies are still said. Launching records
+ * The review before « Lancer le plan » (PROJ-UX-07): the workflows that
+ * start (all of them, in their order), the added steps, what was removed, and how many inconsistencies are still said. Launching records
  * who confirmed it.
  */
 export function PlanLaunchReview({
@@ -41,18 +40,11 @@ export function PlanLaunchReview({
 }) {
   const t = fr.planSteps.review;
   const kept = steps.filter((s) => !s.removed && !s.note);
+  // Every workflow of the plan starts (migration 20261019020101).
   const launchable = (s: ReviewStep) =>
     s.workflow !== null && LAUNCHABLE.includes(s.workflow);
   const groups: Array<[string, ReviewStep[]]> = [
-    [
-      t.starts,
-      kept.filter(
-        (s) =>
-          launchable(s) && (s.column === "focus" || s.column === "meanwhile"),
-      ),
-    ],
-    [t.waits, kept.filter((s) => launchable(s) && s.column === "next")],
-    [t.follows, kept.filter((s) => s.workflow !== null && !launchable(s))],
+    [t.starts, kept.filter(launchable)],
     [t.steps, kept.filter((s) => s.workflow === null)],
     [t.removed, steps.filter((s) => s.removed && !s.note)],
   ];
@@ -88,13 +80,9 @@ export function PlanLaunchReview({
         <ToneCallout tone="warning">{t.issues(issueCount)}</ToneCallout>
       )}
       {error && <FormMessage kind="error">{error}</FormMessage>}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="ghost" size="lg" onClick={onCancel}>
-          {fr.dialogs.cancel}
-        </Button>
+      <div className="flex flex-col gap-2 sm:flex-row">
         <Button
           type="button"
-          size="lg"
           disabled={pending}
           aria-busy={pending || undefined}
           onClick={onConfirm}
@@ -102,6 +90,9 @@ export function PlanLaunchReview({
           {pending
             ? fr.framingIntel.plan.launching
             : fr.framingIntel.plan.launch}
+        </Button>
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          {fr.dialogs.cancel}
         </Button>
       </div>
     </div>

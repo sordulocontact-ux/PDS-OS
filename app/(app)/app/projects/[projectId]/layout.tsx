@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { EditAccessProvider } from "@/components/projects/edit-access";
+import {
+  CountedProjectSidebar,
+  CountedProjectSidebarMobile,
+} from "@/components/projects/project-nav-counted";
 import {
   ProjectSidebar,
   ProjectSidebarMobile,
@@ -18,6 +23,7 @@ import {
   canEditProject,
   canSeeProjectBudget,
 } from "@/lib/projects/edit-access";
+import { planLaunchedAt } from "@/lib/plan/queries";
 import { getProject } from "@/lib/projects/queries";
 import { DOUBLE_SIDEBAR } from "@/lib/ui/project-sections";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -52,13 +58,28 @@ export default async function ProjectLayout({
   const canSeeBudget = canSeeProjectBudget(access, project);
 
   // Each workflow's state, read from its sources (shared with the overview
-  // and the header in the same request): the sidebar's dots.
-  const flows = await loadWorkflowStates(project.id);
-  const statuses = Object.fromEntries(
-    Object.entries(flows?.states ?? {}).flatMap(([key, state]) =>
-      state && state !== "restricted" ? [[key, state.status]] : [],
+  // and the header in the same request): the navigation's dots. The
+  // Cadrage's dot runs until the plan is launched, then is done (proto).
+  const [flows, launchedAt] = await Promise.all([
+    loadWorkflowStates(project.id),
+    planLaunchedAt(project.id),
+  ]);
+  const statuses = {
+    framing: launchedAt ? "done" : "in_progress",
+    ...Object.fromEntries(
+      Object.entries(flows?.states ?? {}).flatMap(([key, state]) =>
+        state && state !== "restricted" ? [[key, state.status]] : [],
+      ),
     ),
-  );
+  };
+  const nav = {
+    projectId: project.id,
+    projectTitle: project.title,
+    canSeeLegal,
+    canSeeBudget,
+    workflows: flows?.workflows,
+    statuses,
+  };
 
   return (
     <div className="flex flex-1">
@@ -66,72 +87,70 @@ export default async function ProjectLayout({
       <ProjectLive projectId={project.id} />
       {/* Sits right against the main sidebar (collapsed to icons on a
           project page), so the two read as one "double sidebar" (Figma). */}
+      {/* The viewer's counts come from the journeys, under a Suspense: the
+          page never waits for them. */}
       {DOUBLE_SIDEBAR && project.stages.length > 0 && (
-        <ProjectSidebar
-          projectId={project.id}
-          projectTitle={project.title}
-          canSeeLegal={canSeeLegal}
-          canSeeBudget={canSeeBudget}
-          workflows={flows?.workflows}
-          statuses={statuses}
-        />
+        <Suspense fallback={<ProjectSidebar {...nav} />}>
+          <CountedProjectSidebar {...nav} />
+        </Suspense>
       )}
 
-      <div className="group/project mx-auto flex w-full max-w-[var(--content-width)] flex-1 flex-col gap-5 px-4 pt-7 md:px-10">
-        {project.stages.length === 0 && (
-          <header className="flex flex-col gap-1">
-            {/* No sidebar before launch, so no switcher either: the only
+      {/* Proto « Projet complet » (`.content`, `.wrap`): 28 / 40 px around a
+          column of 1180 px at most, blocks 20 px apart. */}
+      <div className="flex min-w-0 flex-1 flex-col px-4 pt-5 md:px-10 md:pt-7">
+        <div className="group/project mx-auto flex w-full max-w-[var(--content-width)] flex-1 flex-col gap-5">
+          {project.stages.length === 0 && (
+            <header className="flex flex-col gap-1">
+              {/* No sidebar before launch, so no switcher either: the only
                 way back to the list (retour du 11/10/2026). */}
-            <BackLink href={routes.projects}>{fr.shell.project.back}</BackLink>
-            <h1 className="text-2xl font-semibold tracking-tight break-words">
-              {project.title}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {[
-                project.artistName,
-                projectKindLabel({
-                  type: project.type,
-                  musicFormat: project.musicFormat,
-                  contentFormatName: project.contentFormat?.name ?? null,
-                }),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          </header>
-        )}
-
-        {/* Sections exist once the project is launched, not before. */}
-        {project.stages.length > 0 && (
-          <>
-            {DOUBLE_SIDEBAR ? (
-              <ProjectSidebarMobile
-                projectId={project.id}
-                projectTitle={project.title}
-                canSeeLegal={canSeeLegal}
-                canSeeBudget={canSeeBudget}
-                workflows={flows?.workflows}
-                statuses={statuses}
-              />
-            ) : (
-              <ProjectTabs
-                projectId={project.id}
-                canSeeLegal={canSeeLegal}
-                canSeeBudget={canSeeBudget}
-                workflows={flows?.workflows}
-              />
-            )}
-          </>
-        )}
-
-        {/* Only the owner writes inside a launched project; the database
-            enforces it. The read-only notice sits under the header. */}
-        <EditAccessProvider canEdit={canEdit}>
-          {project.stages.length > 0 && (
-            <ProjectHeader projectId={project.id} isDefault />
+              <BackLink href={routes.projects}>
+                {fr.shell.project.back}
+              </BackLink>
+              <h1 className="text-2xl font-semibold tracking-tight break-words">
+                {project.title}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {[
+                  project.artistName,
+                  projectKindLabel({
+                    type: project.type,
+                    musicFormat: project.musicFormat,
+                    contentFormatName: project.contentFormat?.name ?? null,
+                  }),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            </header>
           )}
-          <div className="flex flex-col pb-8">{children}</div>
-        </EditAccessProvider>
+
+          {/* Sections exist once the project is launched, not before. */}
+          {project.stages.length > 0 && (
+            <>
+              {DOUBLE_SIDEBAR ? (
+                <Suspense fallback={<ProjectSidebarMobile {...nav} />}>
+                  <CountedProjectSidebarMobile {...nav} />
+                </Suspense>
+              ) : (
+                <ProjectTabs
+                  projectId={project.id}
+                  canSeeLegal={canSeeLegal}
+                  canSeeBudget={canSeeBudget}
+                  workflows={flows?.workflows}
+                />
+              )}
+            </>
+          )}
+
+          {/* Only the owner writes inside a launched project; the database
+            enforces it. The read-only notice sits under the header. */}
+          <EditAccessProvider canEdit={canEdit}>
+            {project.stages.length > 0 && (
+              <ProjectHeader projectId={project.id} isDefault />
+            )}
+            <div className="flex flex-col pb-8">{children}</div>
+          </EditAccessProvider>
+        </div>
       </div>
     </div>
   );

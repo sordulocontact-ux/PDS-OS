@@ -1,10 +1,7 @@
 import "server-only";
 
 import { getAudioUrl } from "@/lib/calls/queries";
-import { personName } from "@/lib/projects/types";
-import { progressLabel } from "@/lib/projects/progress";
 import { createClient } from "@/lib/supabase/server";
-import { stageHref } from "@/lib/work/next-action";
 
 export type ProjectFile = {
   callId: string;
@@ -66,56 +63,5 @@ export async function listProjectFiles(
     downloadUrl: urls[i] ?? null,
     hasTranscript: transcribed.has(c.id),
     hasReport: reported.has(c.id),
-  }));
-}
-
-export type ProjectValidation = {
-  id: string;
-  state: string;
-  stageLabel: string;
-  stageHref: string;
-  requestedByName: string;
-  validatorName: string;
-  requestNote: string | null;
-  decisionComment: string | null;
-  requestedAt: string;
-  decidedAt: string | null;
-};
-
-type RawPerson = { first_name: string | null; last_name: string | null } | null;
-const nameOf = (p: RawPerson) =>
-  p ? personName(p.first_name, p.last_name) : "";
-
-/** Every validation request of the project's stages, newest first. */
-export async function listProjectValidations(
-  projectId: string,
-): Promise<ProjectValidation[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("validations")
-    .select(
-      "id, state, request_note, decision_comment, requested_at, decided_at, requester:people!validations_requested_by_fkey(first_name, last_name), validator:people!validations_validator_person_id_fkey(first_name, last_name), project_stages!inner(project_id, stage_definitions!inner(key, label))",
-    )
-    .eq("project_stages.project_id", projectId)
-    .order("requested_at", { ascending: false });
-  if (error) {
-    console.error("listProjectValidations:", error.message);
-    return [];
-  }
-  return (data ?? []).map((v) => ({
-    id: v.id,
-    state: v.state,
-    // In the words of the workflows, not the stage's (UX test of 09/10/2026).
-    stageLabel: progressLabel({
-      key: v.project_stages.stage_definitions.key,
-      state: "in_progress",
-    }),
-    stageHref: stageHref(projectId, v.project_stages.stage_definitions.key),
-    requestedByName: nameOf(v.requester),
-    validatorName: nameOf(v.validator),
-    requestNote: v.request_note,
-    decisionComment: v.decision_comment,
-    requestedAt: v.requested_at,
-    decidedAt: v.decided_at,
   }));
 }

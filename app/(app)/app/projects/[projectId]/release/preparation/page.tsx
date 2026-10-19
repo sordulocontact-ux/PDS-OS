@@ -6,6 +6,8 @@ import { DistributionStep } from "@/components/distribution/frame/distribution-s
 import { PrepStep } from "@/components/distribution/steps/prep-step";
 import { fr } from "@/lib/i18n/fr";
 import { isUuid } from "@/lib/release/uuid";
+import { routes } from "@/lib/auth/redirects";
+import { LEGAL_READY_KEY } from "@/lib/ui/legal-steps";
 import { distributionPreparationTone } from "@/lib/ui/state-tones";
 
 const t = fr.distributionJourney;
@@ -34,6 +36,19 @@ export default async function DistributionPreparationPage({
           <PrepStep
             readiness={ctx.view.readiness}
             failed={ctx.view.sources.failed}
+            legal={{
+              value:
+                ctx.legal.allowed && ctx.legal.readiness
+                  ? ctx.legal.readiness.verdict === "no"
+                    ? fr.legalReadiness.verdictBody.no(
+                        ctx.legal.readiness.blocking.length,
+                      )
+                    : fr.legalReadiness.verdictBody[ctx.legal.readiness.verdict]
+                  : t.legalReady.restricted,
+              source: ctx.legalReady.source ?? "",
+              done: ctx.legalReady.done,
+              href: routes.projectLegalStep(projectId, LEGAL_READY_KEY),
+            }}
           />
         </DistributionStep>
       )}

@@ -82,16 +82,6 @@ export type LegalBlocker = { id: string; work: string; status: string };
 
 export type ReadinessLegal = {
   blockers: LegalBlocker[];
-  // The Juridique's other open actions, for a reader with manage_legal
-  // (null otherwise): they never block the deposit.
-  open: Array<{
-    id: string;
-    label: string;
-    reason: string;
-    href: string;
-  }> | null;
-  // The Juridique's state in words (lib/workflow-status), if readable.
-  reason: string | null;
 };
 
 /** The cover (distribution_cover): its Fiche Livrable and its delivery. */
@@ -308,7 +298,8 @@ export function distributionReadiness(
 }
 
 /** Each borrowing not secured blocks (ticket Juridique 08); the rest of the
- * Juridique is said, never blocking, and only to who may read it. */
+ * Juridique (« Prêt pour la sortie ») is read from its own computation,
+ * loadLegalReadiness, by the step itself — never recomputed here. */
 function legalItems(input: ReadinessInput): ReadinessItem[] {
   const t = fr.distribution.readiness;
   const d = t.details;
@@ -326,35 +317,6 @@ function legalItems(input: ReadinessInput): ReadinessItem[] {
     ),
     href: routes.projectLegalStep(input.projectId, "clearances"),
   }));
-  const open = input.legal.open;
-  items.push({
-    key: "legal",
-    module: "legal",
-    label: t.items.legalState,
-    subject: null,
-    state: open === null ? "restricted" : "later",
-    blocking: false,
-    detail:
-      open === null
-        ? d.legalRestricted
-        : open.length === 0
-          ? d.legalClear
-          : (input.legal.reason ?? d.legalOpen),
-    source: d.legalWhere,
-    href: routes.projectLegal(input.projectId),
-  });
-  for (const item of open ?? [])
-    items.push({
-      key: `legal-${item.id}`,
-      module: "legal",
-      label: item.label,
-      subject: null,
-      state: "later",
-      blocking: false,
-      detail: item.reason,
-      source: d.legalOpen,
-      href: item.href,
-    });
   for (const constraint of input.constraints)
     items.push({
       key: `constraint-${constraint.id}`,

@@ -50,10 +50,13 @@ import { laboCaptures } from "./labo-captures";
 import { legal } from "./legal";
 import { legalClearance } from "./legal-clearance";
 import { legalContracts } from "./legal-contracts";
+import { legalDemarches } from "./legal-demarches";
 import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
 import { legalHistory } from "./legal-history";
 import { legalJourney } from "./legal-journey";
+import { framingJourney } from "./framing-journey";
+import { legalReadiness } from "./legal-readiness";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { masterPage } from "./master-page";
@@ -62,10 +65,12 @@ import { network } from "./network";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
 import { planSteps } from "./plan-steps";
+import { poQuestion } from "./po-question";
 import { projectPlan } from "./project-plan";
 import { projectWork } from "./project-work";
 import { records } from "./records";
 import { production, projectReview } from "./production";
+import { projectShell } from "./project-shell";
 import { productionBrief } from "./production-brief";
 import { productionCall } from "./production-call";
 import { productionClosure } from "./production-closure";
@@ -134,6 +139,7 @@ export const fr = {
   framingIntel,
   briefRequests,
   planSteps,
+  poQuestion,
   strategy,
   strategyEntry,
   strategyDispositif,
@@ -202,6 +208,7 @@ export const fr = {
   projectWork,
   projectPlan,
   projectHistory,
+  projectShell,
   budget,
   catalogFiles,
   library,
@@ -211,10 +218,13 @@ export const fr = {
   legal,
   legalClearance,
   legalContracts,
+  legalDemarches,
   legalFormalities,
   legalForms,
   legalHistory,
   legalJourney,
+  framingJourney,
+  legalReadiness,
   legalSplits,
   masterWorkflow,
   artistActivity,

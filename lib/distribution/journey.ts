@@ -37,6 +37,9 @@ export type DistributionJourneyInput = {
     sources: JourneyPrereq[];
   };
   params: { confirmedBy: string | null } | null;
+  // « Juridique › Prêt pour la sortie » (loadLegalReadiness), what the
+  // deposit waits for from the Juridique.
+  legalReady: JourneyPrereq | null;
   dossier: {
     // The number of the version being prepared or decided.
     number: number;
@@ -238,7 +241,12 @@ export function distributionJourney(
           }
         : null,
       prereq: PREREQ[key],
-      external: key === "prep" ? i.prep.sources : undefined,
+      external:
+        key === "prep"
+          ? i.prep.sources
+          : key === "deposit" && i.legalReady
+            ? [i.legalReady]
+            : undefined,
       next: DISTRIBUTION_STEPS.filter((k) => PREREQ[k].includes(key)),
       nextExternal: NEXT_ELSEWHERE[key],
       actor: st === "blocked" ? null : o.actor,

@@ -3,6 +3,7 @@ import { IconAlarmClock } from "nucleo-sharp-essential";
 import { buttonVariants } from "@/components/ui/button";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
+import { lowerFirst } from "@/lib/ui/journey";
 
 import type { NowItem } from "./now-card";
 
@@ -36,7 +37,8 @@ export function WaitingRows({ items }: { items: NowItem[] }) {
               {who ? initials(who) : <IconAlarmClock className="size-3.5" />}
             </span>
             <span className="min-w-0 flex-1">
-              {t.now.waitingOf} <b className="font-semibold">{who ?? "—"}</b>
+              {t.now.waitingOfName(who ?? "")}
+              <b className="font-semibold">{who ?? "—"}</b>
               {step.actor?.viaLink && (
                 <span className="text-[color:var(--text-secondary)]">
                   {" "}
@@ -44,7 +46,7 @@ export function WaitingRows({ items }: { items: NowItem[] }) {
                 </span>
               )}
               {" : "}
-              {step.actor?.todo.toLowerCase()}
+              {lowerFirst(step.actor?.todo ?? "")}
               <span className="text-[color:var(--text-secondary)]">
                 {" · "}
                 {[place, step.title].filter(Boolean).join(" › ")}

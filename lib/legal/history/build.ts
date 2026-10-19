@@ -39,6 +39,7 @@ export type HistoryRows = {
     | "kind"
     | "from_value"
     | "to_value"
+    | "reason"
     | "created_by"
     | "created_at"
   >[];
@@ -172,6 +173,7 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
       action: text,
       subject: itemLabel.get(e.item_id) ?? null,
       by: who(e.created_by),
+      note: e.reason,
       href: step("plan"),
     });
   }
