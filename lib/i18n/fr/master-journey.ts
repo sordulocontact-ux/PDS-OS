@@ -10,6 +10,16 @@ const lowerFirst = (text: string) =>
 export const masterJourney = {
   module: "Master",
   facts: { masterFinal: "Master final attendu le" },
+  roles: {
+    owner: "Responsable du Master",
+    ownerWhat: "Confirme la source, remplit le Brief, envoie les dossiers",
+    mix: "Ingénieur du mix",
+    mixWhat: "Prend en charge le dossier et dépose les versions du mix",
+    mastering: "Ingénieur du mastering",
+    masteringWhat: "Dépose les versions du master et les livrables",
+    validator: "Validation des versions",
+    validatorWhat: "Écoute, valide ou demande une modification",
+  },
   owner: "Cheffe ou chef de projet",
   validatorRole: {
     brief: "Valide les versions · désignée au Brief",

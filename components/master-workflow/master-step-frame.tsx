@@ -3,10 +3,18 @@ import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { NowCard } from "@/components/shell/journey/now-card";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { StepPanel } from "@/components/shell/journey/step-panel";
+import { ModuleAttention } from "@/components/shell/module/module-attention";
+import {
+  StepBlockers,
+  StepToolsBlock,
+} from "@/components/shell/module/step-tools-block";
+import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import { fr } from "@/lib/i18n/fr";
 import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { masterHistory } from "@/lib/master-workflow/history";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import { masterRoles } from "@/lib/master-workflow/roles";
+import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 import { projectHeaderData } from "@/lib/projects/header";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import { masterStepHref, type MasterStepKey } from "@/lib/ui/master-steps";
@@ -55,7 +63,7 @@ export async function MasterStepFrame({
   children: React.ReactNode;
   slots?: Omit<React.ComponentProps<typeof StepPanel>, "step" | "steps">;
 }) {
-  const [{ steps, viewerName, facts: rows }, journeys, facts] =
+  const [{ steps, viewerName, facts: rows, project }, journeys, facts] =
     await Promise.all([
       masterJourneyContext(projectId),
       loadProjectJourneys(projectId),
@@ -63,12 +71,25 @@ export async function MasterStepFrame({
     ]);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
+  // Blockers and noted information of the step (C6).
+  const stepRef: StepRef = { projectId, module: "master", stepKey };
+  const choices = steps.map((s) => ({
+    key: stepChoiceKey({ module: "master", stepKey: s.key }),
+    label: s.title,
+  }));
   const history = masterHistory(rows)
     .filter((item) => item.step === stepKey)
     .reverse();
   return (
     <div className="flex flex-col gap-5">
-      <ProjectHeader projectId={projectId} steps={steps} facts={facts} />
+      <ProjectHeader
+        projectId={projectId}
+        steps={steps}
+        facts={facts}
+        actions={
+          <WhoDoesWhatButton {...masterRoles(rows, project.ownerName)} />
+        }
+      />
       <NowCard
         steps={steps}
         viewerName={viewerName}
@@ -77,6 +98,7 @@ export async function MasterStepFrame({
         elsewhere={elsewhereOf(journeys, steps)}
         labels={t.now}
       />
+      <ModuleAttention stepRef={stepRef} modules={["master"]} steps={choices} />
       <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
         <JourneySpine
           steps={steps}
@@ -93,7 +115,13 @@ export async function MasterStepFrame({
           history={<StepHistory items={history} />}
           {...slots}
         >
+          <StepBlockers stepRef={stepRef} steps={choices} />
           {children}
+          <StepToolsBlock
+            stepRef={stepRef}
+            steps={choices}
+            locked={step.status === "blocked"}
+          />
         </StepPanel>
       </div>
     </div>
