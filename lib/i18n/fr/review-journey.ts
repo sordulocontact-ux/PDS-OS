@@ -123,7 +123,8 @@ export const reviewJourney = {
     budgetHint: "Visible de la cheffe de projet et de la direction",
     detail: "Voir le détail",
     open: (label: string) => `Ouvrir le détail : ${label}`,
-    rule: (rule: string) => `Règle de calcul : ${rule}`,
+    rule: (rule: string) =>
+      `Règle de calcul : ${rule}${/[.!?]$/.test(rule) ? "" : "."}`,
     none: "Aucun élément.",
     noSource: "—",
     unsourced:
