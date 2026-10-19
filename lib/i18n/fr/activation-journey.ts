@@ -81,7 +81,7 @@ export const activationJourney = {
       `Suspendue par ${by} le ${day} : « ${why} »`,
     resume: "Reprendre l'activation",
     close: "Clôturer l'activation",
-    closeReserves: (list: string) => `Clôturée avec réserves : ${list}.`,
+    closeReserves: (list: string) => `Clôture avec réserves : ${list}.`,
   },
   snapshot: {
     title: "Nouveau relevé",
@@ -132,6 +132,50 @@ export const activationJourney = {
     aDue: "une échéance",
     and: " et ",
     pills: { suspended: "Suspendue", cancelled: "Annulée", blocked: "Bloquée" },
+  },
+  influence: {
+    title: "Campagne d'influence · gestion interne",
+    concept: "Concept de campagne",
+    conceptSource: (version: number | null) =>
+      version
+        ? `Brief de sortie V${version} › Narratif`
+        : "Brief de sortie › Narratif",
+    conceptMissing: "Pas encore écrit dans le Brief de sortie",
+    creators: "Créateurs",
+    creatorsCount: (n: number, verified: number, out: number) =>
+      `${n} · ${verified} ${plural(verified, "publié et vérifié", "publiés et vérifiés")} · ${out} ${plural(out, "sorti", "sortis")}`,
+    none: "Aucun pour l'instant",
+  },
+  pressBlock: {
+    internal: "Relations presse · gestion interne",
+    agency: "Relations presse · agence externe",
+    agencyInfluence: "Campagne d'influence · agence externe",
+    framing: "Cadrage RP",
+    framingNone: "Brouillon",
+    common: "Commun aux deux modes",
+    kit: "Dossier de presse",
+    kitMeta: "Validé ≠ envoyé",
+    media: (n: number) => `Médias ciblés · ${n}`,
+    template: "Modèle commun",
+    coverage: "Retombées",
+    report: "Bilan RP",
+    tiles: {
+      targets: "Médias ciblés",
+      sent: "Messages envoyés",
+      positive: "Réponses positives",
+      interviews: "Interviews réalisées",
+      broadcasts: "Diffusions déclarées",
+      coverage: "Retombées vérifiées",
+      missing: "Preuves manquantes",
+    },
+    coverageValue: (verified: number, all: number) => `${verified} sur ${all}`,
+    transmission: (agency: string) => `Transmission à ${agency}`,
+    transmissionAgency: "l'agence",
+    transmissionHint:
+      "L'agence n'a pas de compte : envoyez-lui le cadrage et le dossier hors PDS OS, puis déclarez-le.",
+    transmit: "Marquer comme transmis",
+    transmitted: (who: string, at: string) =>
+      `Cadrage et dossier transmis à l'agence (déclaré par ${who}) le ${at}. L'agence n'a pas de compte et ne voit rien d'autre.`,
   },
   infos: {
     title: "Informations",

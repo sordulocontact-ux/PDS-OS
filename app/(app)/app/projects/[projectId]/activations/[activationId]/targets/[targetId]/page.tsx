@@ -1,32 +1,23 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
-import { InfluenceCollaboration } from "@/components/activations/influence/influence-collaboration";
-import { PressTarget } from "@/components/activations/press/press-target";
-import { loadActivationFiche } from "@/lib/activations/fiche";
-import { loadTargets } from "@/lib/activations/targets";
-import { requireApproved } from "@/lib/auth/dal";
-import { fr } from "@/lib/i18n/fr";
+import { routes } from "@/lib/auth/redirects";
+import { createClient } from "@/lib/supabase/server";
 
-export const metadata = {
-  title: `${fr.activations.tabs.targets} · ${fr.app.name}`,
-};
-
-/** One collaboration (Influence) or one press target (RP), in house. */
-export default async function ActivationTargetPage({
+// The former page of one collaboration (Influence) or one press target (RP):
+// now a folded card of the activation's page (proto « Projet complet »),
+// opened at its anchor. Kept so notifications and tasks keep working.
+export default async function FormerTargetPage({
   params,
 }: PageProps<"/app/projects/[projectId]/activations/[activationId]/targets/[targetId]">) {
   const { projectId, activationId, targetId } = await params;
-  const access = await requireApproved();
-  const fiche = await loadActivationFiche(projectId, activationId, access);
-  const target = (await loadTargets(activationId)).find(
-    (x) => x.id === targetId,
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("marketing_activations")
+    .select("kind")
+    .eq("id", activationId)
+    .maybeSingle();
+  const anchor = data?.kind === "press" ? "media" : "collab";
+  redirect(
+    `${routes.projectActivation(projectId, activationId)}#${anchor}-${targetId}`,
   );
-  if (!target || fiche.activation.mode !== "internal") notFound();
-  if (fiche.activation.kind === "influence")
-    return (
-      <InfluenceCollaboration fiche={fiche} target={target} access={access} />
-    );
-  if (fiche.activation.kind === "press")
-    return <PressTarget fiche={fiche} target={target} access={access} />;
-  notFound();
 }

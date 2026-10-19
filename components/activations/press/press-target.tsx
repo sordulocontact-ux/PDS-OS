@@ -28,10 +28,13 @@ export async function PressTarget({
   fiche,
   target,
   access,
+  inCard = false,
 }: {
   fiche: ActivationFiche;
   target: TargetRecord;
   access: Access;
+  // Inside its folded card of the activation page.
+  inCard?: boolean;
 }) {
   const {
     activation: a,
@@ -72,6 +75,7 @@ export async function PressTarget({
         stage={null}
         press
         canWrite={canWrite}
+        inCard={inCard}
       />
       <MessagesSection
         projectId={project.id}

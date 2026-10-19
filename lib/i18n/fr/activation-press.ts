@@ -14,6 +14,7 @@ export const activationPress = {
     lastMessage: "Dernier message",
     opportunity: "Opportunité",
     coverage: "Retombée",
+    targeted: "Ciblé",
     none: "—",
   },
   template: {

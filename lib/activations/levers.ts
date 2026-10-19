@@ -115,3 +115,23 @@ export const proposedDue = cache(
     return project?.dueDate ? { date: project.dueDate, from: null } : null;
   },
 );
+
+/** The campaign's concept for an influence in house (proto: « Concept de
+ * campagne · Brief de sortie V1 › Narratif »): the Stratégie's confirmed
+ * narrative, read where it lives, never copied. */
+export const campaignConcept = cache(
+  async (projectId: string): Promise<string | null> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("current_field_values")
+      .select("value, status")
+      .eq("project_id", projectId)
+      .eq("deliverable", "strategy")
+      .eq("field_key", "narrative");
+    if (error) console.error("campaignConcept:", error.message);
+    const row = (data ?? []).find((f) => f.status === "confirmed");
+    return typeof row?.value === "string" && row.value.trim()
+      ? row.value
+      : null;
+  },
+);
