@@ -34,6 +34,29 @@ const journeySchema = z.object({
     .array(z.object({ name: z.string(), status: z.string() }))
     .default([]),
   actions: z.array(z.object({ title: z.string(), dueDate: text })),
+  calls: z
+    .array(
+      z.object({
+        title: z.string(),
+        occurredAt: z.string(),
+        format: text,
+        meetingUrl: text,
+        status: z.string(),
+        participants: z.array(z.string().nullable()),
+        agenda: z.array(z.string().nullable()),
+        invitedAt: z.string(),
+        invitedBy: text,
+        summary: z
+          .object({
+            version: z.number(),
+            text: z.string(),
+            sentAt: z.string(),
+            sentBy: text,
+          })
+          .nullable(),
+      }),
+    )
+    .default([]),
 });
 export type LinkJourney = z.infer<typeof journeySchema>;
 

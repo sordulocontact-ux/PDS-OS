@@ -45,7 +45,7 @@ export async function TechnicalCallSection({
   members: Member[];
   contacts: NetworkOption[];
   // External production: the call is the presentation to the company,
-  // launched and listed by its own panel (ProductionCallPanel).
+  // prepared and held in the step itself (CallStepHead).
   launcher?: boolean;
   listCalls?: boolean;
 }) {

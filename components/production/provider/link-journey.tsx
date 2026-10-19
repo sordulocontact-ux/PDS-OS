@@ -5,6 +5,7 @@ import { fr } from "@/lib/i18n/fr";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 import { formatDate } from "@/lib/release/format";
 
+import { linkCallCards } from "./link-call-cards";
 import { LinkDirectionForm } from "./link-direction-form";
 import { LinkGearForm } from "./link-gear-form";
 import { LinkPlaceForm } from "./link-place-form";
@@ -39,8 +40,9 @@ export function linkJourneyCards({
   const hint = (text: string) => (
     <p className="text-pretty text-muted-foreground">{text}</p>
   );
-  const cards: PortalCardItem[] = [];
-  if (j.actions.length > 0)
+  const cards: PortalCardItem[] = linkCallCards(j);
+  // Without a call held, the actions given stand on their own card.
+  if (j.actions.length > 0 && !j.calls.some((c) => c.status === "ready"))
     cards.push({
       id: "ps-tasks",
       title: t.tasks.title,

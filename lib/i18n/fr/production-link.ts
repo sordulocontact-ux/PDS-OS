@@ -3,6 +3,24 @@
 // director of photography's gear list, the actions given to each.
 export const productionLink = {
   tasks: { title: "Vos tâches", due: (date: string) => `Pour le ${date}` },
+  call: {
+    next: "Votre prochain rendez-vous avec PDS",
+    held: (day: string) => `Call de production du ${day}`,
+    invited: "Invité",
+    when: "Quand",
+    where: "Où",
+    video: "visio",
+    onSite: "sur place",
+    participants: "Participants",
+    agenda: "Ordre du jour",
+    invitedBy: (who: string, at: string) =>
+      `Invitation envoyée par ${who} le ${at}.`,
+    asked: "Ce qui vous a été demandé",
+    confirmed: "Confirmé par PDS après le call",
+    todo: "À faire",
+    nothingYet:
+      "PDS confirme les suites du call ; ce qui vous concerne apparaîtra ici.",
+  },
   quote: {
     title: "Votre devis",
     description:

@@ -146,6 +146,7 @@ export async function loadPreprod(
       status: callItemStatusOf(i.status),
       source: i.source === "call_report" ? "call_report" : "manual",
       sourceQuote: i.source_quote,
+      sourceReportItemId: i.source_report_item_id,
       reviewedBy: nameOf(i.reviewed_by),
       reviewedAt: i.reviewed_at,
     })),

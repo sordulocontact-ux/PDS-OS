@@ -141,6 +141,8 @@ export type CallItem = {
   status: CallItemStatus;
   source: "manual" | "call_report";
   sourceQuote: string | null;
+  // The report's line it comes from (the meeting's state per line).
+  sourceReportItemId: string | null;
   reviewedBy: string | null;
   reviewedAt: string | null;
 };

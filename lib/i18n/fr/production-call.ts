@@ -24,6 +24,62 @@ export const productionCall = {
   noParticipants: "Ajoutez au moins une personne.",
   failed: "Le call n'a pas pu être créé. Réessayez.",
   // One topic per kind of gap, in this order.
+  // The call of an external production (proto PREP_CALL.ext): four points.
+  external: {
+    topics: {
+      project: "Le projet et le Brief créatif",
+      constraints: "Contraintes : dates, lieu, enveloppe",
+      quote: "Ce que le devis doit contenir",
+      next: "Prochaines étapes",
+    },
+    questions: {
+      project: [
+        "Ce que le livrable doit raconter, d'après la Fiche Livrable",
+        "Les références validées",
+      ],
+      constraints: [
+        "Les dates de tournage et de livraison",
+        "Le lieu envisagé",
+        "Ce que l'enveloppe permet",
+      ],
+      quote: [
+        "Les postes attendus : réalisation, équipe, matériel, lieux, régie, postproduction",
+        "Le montant prévu pour les lieux",
+      ],
+      next: ["Qui propose le réalisateur", "Quand le devis est déposé"],
+    },
+    goal: (company: string) =>
+      `Présenter le projet à ${company} et cadrer le devis : attentes, contraintes, enveloppe.`,
+    documents: (deliverable: string, version: number | null, refs: number) =>
+      [
+        `Fiche Livrable « ${deliverable} »${version ? ` V${version}` : ""}`,
+        "Brief créatif",
+        refs > 0
+          ? refs === 1
+            ? "1 référence validée"
+            : `${refs} références validées`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+  },
+  step: {
+    meetingName: "Call de production",
+    direct: "Organisation",
+    directValue: "Préparation directe avec PO, sans call",
+    imported: "Organisation importée",
+    po: {
+      call: "PO propose ce qui a été dit pendant le call, avec la phrase exacte. Retenez, corrigez ou écartez chaque point ; une phrase ambiguë reste « à confirmer ».",
+      direct:
+        "PO propose les points d'après la fiche et le Brief créatif. Retenez, corrigez ou écartez chacun.",
+      import:
+        "PO propose les points tirés du document importé. Retenez, corrigez ou écartez chacun.",
+    },
+    processing:
+      "Le call est enregistré : la transcription puis le compte rendu arrivent ici.",
+    openCall: "Ouvrir le call",
+    hold: "tenir le call et l'enregistrer dans PDS OS",
+  },
   topicLabels: {
     brief: "Brief réalisateur",
     director: "Réalisateur",
