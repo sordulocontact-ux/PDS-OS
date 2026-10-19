@@ -73,6 +73,10 @@ export const notifications = {
     production_direction_decided: (actor: string, project: string) =>
       `${actor} a tranché sur la proposition de réalisation de « ${project} ».`,
     // The company has no account: the project names it.
+    production_quote_changes: (actor: string, project: string) =>
+      `${actor} demande une modification d'un devis de « ${project} ».`,
+    production_rushes_linked: (_actor: string, project: string) =>
+      `La société a transmis le lien des rushes de « ${project} » : à récupérer.`,
     production_director_proposed: (_actor: string, project: string) =>
       `La société de production propose un réalisateur pour « ${project} » : à retenir.`,
     distribution_version_submitted: (actor: string, project: string) =>

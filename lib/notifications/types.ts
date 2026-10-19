@@ -87,6 +87,10 @@ export const NOTIFICATION_KINDS = [
   "production_direction_decided",
   // Projet complet (lot 5): a director proposed by the company.
   "production_director_proposed",
+  // The company gave the rushes' link on its private link.
+  "production_rushes_linked",
+  // A modification asked on a quote by its validator.
+  "production_quote_changes",
   // A step's blocker reported (to the person who unblocks and the owner) or
   // lifted (to its reporter and the owner); a noted information the owner
   // decides (to confirm, waiting for a decision, contradicting another).
@@ -150,6 +154,8 @@ const PRODUCTION_TARGETS: Partial<Record<NotificationKind, [string, string]>> =
     production_direction_submitted: ["direction", "direction-decision"],
     production_direction_decided: ["direction", "direction-decision"],
     production_director_proposed: ["direction", "director-proposals"],
+    production_rushes_linked: ["rushes", "rushes"],
+    production_quote_changes: ["quote", "quotes"],
   };
 
 export function notificationHref(

@@ -1,6 +1,7 @@
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { shortStamp } from "@/lib/calls/prep/dates";
 import { fr } from "@/lib/i18n/fr";
 import type { LinkJourney } from "@/lib/production/provider/journey";
 
@@ -10,6 +11,7 @@ import { LinkDirectionForm } from "./link-direction-form";
 import { LinkGearForm } from "./link-gear-form";
 import { LinkPlaceForm } from "./link-place-form";
 import { linkQuoteCard } from "./link-quote-card";
+import { LinkRushesForm } from "./link-rushes-form";
 import { linkChecklistCard, LinkTaskList } from "./link-task-cards";
 
 const t = fr.productionLink;
@@ -63,6 +65,29 @@ export function linkJourneyCards({
     });
   const checklist = linkChecklistCard(token, j);
   if (checklist) cards.push(checklist);
+  // After the shoot, the rushes' link (proto).
+  const shot = ["done", "partial", "interrupted"].includes(j.shootState ?? "");
+  if (company && j.organization === "external" && shot)
+    cards.push({
+      id: "ps-rushes",
+      title: t.rushes.title,
+      state: j.rushesUrl ? "done" : "todo",
+      order: 60,
+      action: j.rushesUrl ? null : { label: t.rushes.action },
+      body: j.rushesUrl ? (
+        <p className="break-words">
+          {j.rushesUrl}
+          {j.rushesAt && (
+            <span className="text-muted-foreground">
+              {" "}
+              · {t.rushes.sent(shortStamp(j.rushesAt))}
+            </span>
+          )}
+        </p>
+      ) : (
+        <LinkRushesForm token={token} />
+      ),
+    });
   // The preparation confirmed by PDS (proto: the same sentence as in PDS).
   if (company && j.readyAt)
     cards.push({

@@ -21,6 +21,15 @@ export const productionLink = {
       reel: "Un lien qui commence par https://.",
     },
   },
+  rushes: {
+    title: "Rushes",
+    action: "Transmettre le lien des rushes",
+    url: "Lien de récupération des rushes",
+    submit: "Transmettre le lien",
+    done: "Lien transmis à PDS.",
+    sent: (at: string) => `Transmis le ${at}`,
+    errors: { url: "Un lien qui commence par https://." },
+  },
   call: {
     next: "Votre prochain rendez-vous avec PDS",
     held: (day: string) => `Call de production du ${day}`,

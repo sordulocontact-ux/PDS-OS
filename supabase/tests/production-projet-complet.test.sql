@@ -2,7 +2,7 @@
 -- « Changer qui produit », « Révoquer » a link (20261019050101), …
 -- Run with `supabase test db`.
 begin;
-select plan(54);
+select plan(57);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -268,6 +268,21 @@ select is((select ready_forced_reason from public.production_sheets where id = p
 set local role anon;
 select ok(public.get_production_link_journey((select v from vars where k = 'token3')) ->> 'readyAt' is not null,
           'the company reads that the preparation is validated');
+reset role;
+
+-- 8. The rushes' link, after the shoot --------------------------------------------------------
+set local role anon;
+select throws_ok($$ select public.set_production_rushes_by_link((select v from vars where k = 'token3'), 'https://x.example/rushes') $$,
+                 'P0001', 'shoot_not_done', 'no rushes before the shoot');
+reset role;
+insert into public.production_shoots (sheet_id, organization_id, project_id, state)
+values (pg_temp.id_of('sheet'), pg_temp.id_of('org'), pg_temp.id_of('project'), 'done')
+on conflict (sheet_id) do update set state = 'done';
+set local role anon;
+select lives_ok($$ select public.set_production_rushes_by_link((select v from vars where k = 'token3'), 'https://x.example/rushes') $$,
+                'the company gives the rushes'' link');
+select is(public.get_production_link_journey((select v from vars where k = 'token3')) ->> 'rushesUrl',
+          'https://x.example/rushes', 'and reads it back');
 reset role;
 
 select * from finish();

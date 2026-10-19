@@ -97,6 +97,7 @@ import { productionDirector } from "./production-director";
 import { productionPlace } from "./production-place";
 import { productionProducer } from "./production-producer";
 import { productionReady } from "./production-ready";
+import { productionShootExternal } from "./production-shoot-external";
 import { productionHistory } from "./production-history";
 import { productionProvider } from "./production-provider";
 import { productionNext } from "./production-next";
@@ -214,6 +215,7 @@ export const fr = {
   productionPlace,
   productionProducer,
   productionReady,
+  productionShootExternal,
   productionCallSheetPage,
   marketing,
   marketingReview,

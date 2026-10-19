@@ -88,7 +88,7 @@ export const loadJourney = cache(
         ? supabase
             .from("production_shoots")
             .select(
-              "state, ended_at, video_rushes, audio_sources, backup_verified, files_location",
+              "state, ended_at, video_rushes, audio_sources, backup_verified, files_location, rushes_url",
             )
             .eq("sheet_id", sheet.id)
             .maybeSingle()
@@ -237,7 +237,7 @@ export const loadJourney = cache(
       readyAt: sheet?.readyAt ?? null,
       shotAt: shoot?.ended_at ?? null,
       rushes: {
-        linked: Boolean(shoot?.files_location),
+        linked: Boolean(shoot?.rushes_url || shoot?.files_location),
         received: Boolean(shoot?.video_rushes && shoot.audio_sources),
         backup: Boolean(shoot?.backup_verified),
       },

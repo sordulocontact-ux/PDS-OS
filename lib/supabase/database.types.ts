@@ -13312,6 +13312,9 @@ export type Database = {
       }
       production_shoots: {
         Row: {
+          rushes_url: string | null
+          rushes_url_at: string | null
+          rushes_url_contact_id: string | null
           audio_sources: boolean
           audio_sources_at: string | null
           audio_sources_by: string | null
@@ -13346,6 +13349,9 @@ export type Database = {
           video_rushes_by: string | null
         }
         Insert: {
+          rushes_url?: string | null
+          rushes_url_at?: string | null
+          rushes_url_contact_id?: string | null
           audio_sources?: boolean
           audio_sources_at?: string | null
           audio_sources_by?: string | null
@@ -13380,6 +13386,9 @@ export type Database = {
           video_rushes_by?: string | null
         }
         Update: {
+          rushes_url?: string | null
+          rushes_url_at?: string | null
+          rushes_url_contact_id?: string | null
           audio_sources?: boolean
           audio_sources_at?: string | null
           audio_sources_by?: string | null
@@ -16367,6 +16376,10 @@ export type Database = {
       }
     }
     Functions: {
+      set_production_rushes_by_link: {
+        Args: { p_token: string; p_url: string }
+        Returns: undefined
+      }
       confirm_production_ready: {
         Args: { p_force_reason: string | null; p_sheet_id: string; p_snapshot: Json }
         Returns: undefined

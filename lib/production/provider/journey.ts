@@ -45,6 +45,9 @@ const journeySchema = z.object({
   quoteDue: text,
   shootOn: text,
   readyAt: text.default(null),
+  shootState: text.default(null),
+  rushesUrl: text.default(null),
+  rushesAt: text.default(null),
   gearCount: z.number(),
   locations: z
     .array(z.object({ name: z.string(), status: z.string() }))
