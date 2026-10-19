@@ -175,6 +175,8 @@ export const masterJourney = {
     approved: (label: string, n: number) => `${label} V${n} validé`,
     changes: (label: string, n: number) =>
       `Modification demandée sur le ${label} V${n}`,
+    reopened: (label: string, reason: string) =>
+      `${label} rouvert : « ${reason} »`,
     catalogued: (n: number) =>
       `Master V${n} rattaché au titre du Catalogue : master final`,
     deliverable: (label: string) => `${label} reçu`,

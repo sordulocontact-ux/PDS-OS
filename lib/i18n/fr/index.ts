@@ -59,6 +59,7 @@ import { library } from "./library";
 import { masterBrief } from "./master-brief";
 import { masterJourney } from "./master-journey";
 import { masterPage } from "./master-page";
+import { masterRound } from "./master-round";
 import { masterSource } from "./master-source";
 import { masterWorkflow } from "./master-workflow";
 import { network } from "./network";
@@ -218,6 +219,7 @@ export const fr = {
   masterWorkflow,
   masterJourney,
   masterBrief,
+  masterRound,
   masterSource,
   artistActivity,
   masterPage,

@@ -150,13 +150,22 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
         key: `${v.id}-dec`,
         step: v.stage,
         text:
-          v.decision === "approved"
-            ? t.approved(label, v.number)
-            : t.changes(label, v.number),
+          v.decision === "changes_requested"
+            ? t.changes(label, v.number)
+            : t.approved(label, v.number),
         who: v.decidedBy,
         at: v.decidedAt,
         cause: null,
       });
+      if (v.reopenedAt)
+        items.push({
+          key: `${v.id}-reopen`,
+          step: v.stage,
+          text: t.reopened(label, v.reopenReason ?? ""),
+          who: null,
+          at: v.reopenedAt,
+          cause: null,
+        });
       if (v.decision === "approved" && v.stage === "mastering")
         items.push({
           key: `${v.id}-cat`,

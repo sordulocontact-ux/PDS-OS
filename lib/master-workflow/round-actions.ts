@@ -1,0 +1,192 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+import { requireApproved } from "@/lib/auth/dal";
+import { routes } from "@/lib/auth/redirects";
+import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
+import { transmitPackage } from "@/lib/master-workflow/transmission-actions";
+import { createClient } from "@/lib/supabase/server";
+import type { WriteResult } from "@/lib/utils/write-result";
+
+const t = fr.masterRound;
+const stageSchema = z.enum(["mix", "mastering"]);
+const refresh = (projectId: string) =>
+  revalidatePath(routes.projectMaster(projectId), "layout");
+
+/**
+ * « Envoyer à Karim Haddou » (or « Transmettre au mastering », « Renvoyer
+ * le dossier »): the package recomputed and signed on the server
+ * (transmitPackage), sent with the written reason when stems are missing.
+ * The link is then readable again in the step by the owner.
+ */
+export async function sendRound(
+  projectId: string,
+  stage: string,
+  note: string,
+  withoutStemsReason: string | null,
+  done: string,
+): Promise<WriteResult> {
+  const s = stageSchema.safeParse(stage);
+  if (!s.success)
+    return { ok: false, error: fr.masterWorkflow.mix.errors.failed };
+  return withOutcome(projectId, ["master"], done, async () => {
+    const result = await transmitPackage(
+      projectId,
+      s.data,
+      note,
+      withoutStemsReason,
+    );
+    if (!result.ok) return result;
+    refresh(projectId);
+    return { ok: true };
+  });
+}
+
+/** « Accepter le tarif »: the proposed amount is committed. */
+export async function acceptRate(
+  projectId: string,
+  stage: string,
+): Promise<WriteResult> {
+  const s = stageSchema.safeParse(stage);
+  const id = z.uuid().safeParse(projectId);
+  await requireApproved();
+  if (!s.success || !id.success)
+    return { ok: false, error: fr.masterBrief.errors.failed };
+  return withOutcome(id.data, ["master"], t.rate.accepted, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("accept_master_rate", {
+      p_project_id: id.data,
+      p_role: s.data,
+    });
+    if (error) {
+      console.error("acceptRate:", error.code, error.message);
+      return { ok: false, error: fr.masterBrief.errors.failed };
+    }
+    refresh(id.data);
+    return { ok: true };
+  });
+}
+
+const versionIds = z.object({ projectId: z.uuid(), versionId: z.uuid() });
+
+/**
+ * « Transmettre les retours sans décider »: the text, each line with its
+ * author, becomes the feedback the engineer reads on the link; the version
+ * stays in listening (send_mix_feedback).
+ */
+export async function transmitFeedback(
+  projectId: string,
+  versionId: string,
+  text: string,
+): Promise<WriteResult> {
+  const input = versionIds
+    .extend({ text: z.string().trim().min(1).max(4000) })
+    .safeParse({ projectId, versionId, text });
+  await requireApproved();
+  if (!input.success) return { ok: false, error: t.transmit.error };
+  const v = input.data;
+  return withOutcome(v.projectId, ["master"], t.transmit.done, async () => {
+    const supabase = await createClient();
+    const saved = await supabase
+      .from("master_mix_versions")
+      .update({ feedback_summary: v.text })
+      .eq("id", v.versionId)
+      .eq("project_id", v.projectId)
+      .select("id");
+    if (saved.error || !saved.data?.length)
+      return {
+        ok: false,
+        error: fr.masterWorkflow.mixVersions.errors.forbidden,
+      };
+    const { error } = await supabase.rpc("send_mix_feedback", {
+      p_version_id: v.versionId,
+    });
+    if (error) {
+      console.error("transmitFeedback:", error.code, error.message);
+      return { ok: false, error: fr.masterWorkflow.mixVersions.errors.send };
+    }
+    refresh(v.projectId);
+    return { ok: true };
+  });
+}
+
+/** « Valider ce mix » / « Demander une modification » (the validator). */
+export async function decideRound(
+  projectId: string,
+  versionId: string,
+  decision: "approved" | "changes_requested",
+  note: string,
+  done: string,
+): Promise<WriteResult> {
+  const input = versionIds
+    .extend({
+      decision: z.enum(["approved", "changes_requested"]),
+      note: z.string().max(2000),
+    })
+    .safeParse({ projectId, versionId, decision, note });
+  await requireApproved();
+  if (!input.success) return { ok: false, error: t.decision.errors.failed };
+  const v = input.data;
+  return withOutcome(v.projectId, ["master"], done, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("decide_mix_version", {
+      p_version_id: v.versionId,
+      p_decision: v.decision,
+      p_note: v.note,
+    });
+    if (error) {
+      console.error("decideRound:", error.code, error.message);
+      const refused = fr.masterWorkflow.mixVersions.errors.decisionRefused;
+      const known = (Object.keys(refused) as Array<keyof typeof refused>).find(
+        (code) => error.message.includes(code),
+      );
+      return {
+        ok: false,
+        error: error.message.includes("working_source")
+          ? t.decision.errors.working
+          : error.code === "42501"
+            ? fr.masterWorkflow.mixVersions.errors.forbidden
+            : known
+              ? refused[known]
+              : t.decision.errors.failed,
+      };
+    }
+    refresh(v.projectId);
+    return { ok: true };
+  });
+}
+
+/** « Rouvrir le mix » with its reason (the owner, before the mastering). */
+export async function reopenMix(
+  projectId: string,
+  versionId: string,
+  reason: string,
+): Promise<WriteResult> {
+  const input = versionIds
+    .extend({ reason: z.string().trim().min(1).max(2000) })
+    .safeParse({ projectId, versionId, reason });
+  await requireApproved();
+  if (!input.success) return { ok: false, error: fr.dialogs.reasonRequired };
+  const v = input.data;
+  return withOutcome(v.projectId, ["master"], t.reopen.done, async () => {
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("reopen_mix_version", {
+      p_version_id: v.versionId,
+      p_reason: v.reason,
+    });
+    if (error) {
+      console.error("reopenMix:", error.code, error.message);
+      return {
+        ok: false,
+        error: error.message.includes("mastering_started")
+          ? t.reopen.errors.started
+          : t.reopen.errors.failed,
+      };
+    }
+    refresh(v.projectId);
+    return { ok: true };
+  });
+}

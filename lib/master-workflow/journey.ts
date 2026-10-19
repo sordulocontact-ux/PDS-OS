@@ -212,7 +212,11 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
         if (approved(title.id, stage)) continue;
         if (stage === "mastering" && !approved(title.id, "mix")) continue;
         const [last] = versionsOf(title.id, stage);
-        if (!last || last.decision === "changes_requested")
+        if (
+          !last ||
+          last.decision === "changes_requested" ||
+          last.decision === "reopened"
+        )
           actions.push({
             who: ext,
             todo: t.todo.deposit(
@@ -235,6 +239,8 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       actions.push(
         ...ownerDoes(t.todo.answerEngineer(firstName(engineer.name), open)),
       );
+    if (facts.rates.some((r) => r.stage === stage && r.status === "proposed"))
+      actions.push(...ownerDoes(t.todo.acceptRate(firstName(engineer.name))));
     return actions;
   };
   const roundDone = (stage: Stage) =>

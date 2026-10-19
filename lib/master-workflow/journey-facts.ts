@@ -57,9 +57,12 @@ export type JourneyVersion = {
   createdAt: string;
   createdBy: string | null;
   feedbackSentAt: string | null;
-  decision: "approved" | "changes_requested" | null;
+  decision: "approved" | "changes_requested" | "reopened" | null;
   decidedAt: string | null;
   decidedBy: string | null;
+  reopenedAt: string | null;
+  reopenReason: string | null;
+  sourceFileId: string | null;
   // An existing mix declared Mix final (declare_mix_final): created and
   // decided in the same transaction.
   declared: boolean;
@@ -78,6 +81,7 @@ export type MasterJourneyFacts = {
   brief: {
     recordedAt: string | null;
     recordedBy: string | null;
+    contentChangedAt: string;
     dirty: boolean;
     startMode: string | null;
     // Something to say in « direction artistique ».
@@ -119,6 +123,9 @@ export type MasterJourneyFacts = {
   }>;
   exchanges: Array<{ title: string; occurredAt: string; status: string }>;
   planLaunchedAt: string | null;
+  // The Master's budget lines (owner and direction only, RLS): a rate
+  // proposed by the engineer waits for « Accepter le tarif ».
+  rates: Array<{ stage: "mix" | "mastering"; status: string }>;
   failed: boolean;
 };
 
@@ -141,6 +148,7 @@ export async function loadMasterJourneyFacts(project: {
     questions,
     exchanges,
     plan,
+    rates,
   ] = await Promise.all([
     ids.length
       ? supabase
@@ -183,7 +191,7 @@ export async function loadMasterJourneyFacts(project: {
     supabase
       .from("master_mix_versions")
       .select(
-        "id, master_id, stage, number, created_at, feedback_sent_at, decision, decided_at, file:master_files!master_mix_versions_file_id_fkey(file_name), author:people!master_mix_versions_created_by_fkey(first_name, last_name), decider:people!master_mix_versions_decided_by_fkey(first_name, last_name)",
+        "id, master_id, stage, number, created_at, feedback_sent_at, decision, decided_at, reopened_at, reopen_reason, source_file_id, file:master_files!master_mix_versions_file_id_fkey(file_name), author:people!master_mix_versions_created_by_fkey(first_name, last_name), decider:people!master_mix_versions_decided_by_fkey(first_name, last_name)",
       )
       .eq("project_id", project.id)
       .order("number", { ascending: false }),
@@ -220,6 +228,11 @@ export async function loadMasterJourneyFacts(project: {
       .not("launched_at", "is", null)
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("budget_lines")
+      .select("master_role, status")
+      .eq("project_id", project.id)
+      .not("master_role", "is", null),
   ]);
   const errors = [
     files.error,
@@ -265,6 +278,7 @@ export async function loadMasterJourneyFacts(project: {
       ? {
           recordedAt: b.recorded_at,
           recordedBy: nameOf(b.recorder),
+          contentChangedAt: b.content_changed_at,
           dirty: !b.recorded_at || b.content_changed_at > b.recorded_at,
           startMode: b.start_mode,
           hasDirection: Boolean(
@@ -317,11 +331,16 @@ export async function loadMasterJourneyFacts(project: {
       createdBy: nameOf(v.author),
       feedbackSentAt: v.feedback_sent_at,
       decision:
-        v.decision === "approved" || v.decision === "changes_requested"
+        v.decision === "approved" ||
+        v.decision === "changes_requested" ||
+        v.decision === "reopened"
           ? v.decision
           : null,
       decidedAt: v.decided_at,
       decidedBy: nameOf(v.decider),
+      reopenedAt: v.reopened_at,
+      reopenReason: v.reopen_reason,
+      sourceFileId: v.source_file_id,
       declared:
         v.decision === "approved" &&
         v.stage === "mix" &&
@@ -358,6 +377,11 @@ export async function loadMasterJourneyFacts(project: {
         : [],
     ),
     planLaunchedAt: plan.data?.launched_at ?? null,
+    rates: (rates.data ?? []).flatMap((r) =>
+      r.master_role === "mix" || r.master_role === "mastering"
+        ? [{ stage: r.master_role, status: r.status }]
+        : [],
+    ),
     failed: errors.length > 0,
   };
 }

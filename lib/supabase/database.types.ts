@@ -8938,6 +8938,9 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          reopen_reason: string | null
+          reopened_at: string | null
+          reopened_by: string | null
           source_file_id: string | null
           stage: string
           status: string
@@ -8958,6 +8961,9 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
           source_file_id?: string | null
           stage?: string
           status?: string
@@ -8978,6 +8984,9 @@ export type Database = {
           number?: number
           organization_id?: string
           project_id?: string
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
           source_file_id?: string | null
           stage?: string
           status?: string
@@ -9391,11 +9400,14 @@ export type Database = {
           organization_id: string
           package: Json
           project_id: string
+          proposed_mastering_cents: number | null
+          proposed_mix_cents: number | null
           revoke_reason: string | null
           revoked_at: string | null
           revoked_by: string | null
           role: string
           token_hash: string
+          token_secret: string | null
         }
         Insert: {
           acknowledged_at?: string | null
@@ -9414,11 +9426,14 @@ export type Database = {
           organization_id: string
           package: Json
           project_id: string
+          proposed_mastering_cents?: number | null
+          proposed_mix_cents?: number | null
           revoke_reason?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           role: string
           token_hash: string
+          token_secret?: string | null
         }
         Update: {
           acknowledged_at?: string | null
@@ -9437,11 +9452,14 @@ export type Database = {
           organization_id?: string
           package?: Json
           project_id?: string
+          proposed_mastering_cents?: number | null
+          proposed_mix_cents?: number | null
           revoke_reason?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           role?: string
           token_hash?: string
+          token_secret?: string | null
         }
         Relationships: [
           {
@@ -15914,6 +15932,26 @@ export type Database = {
       }
     }
     Functions: {
+      reopen_mix_version: {
+        Args: { p_reason: string; p_version_id: string }
+        Returns: undefined
+      }
+      accept_master_rate: {
+        Args: { p_project_id: string; p_role: string }
+        Returns: undefined
+      }
+      take_master_transmission: {
+        Args: {
+          p_mastering_cents?: number
+          p_mix_cents?: number
+          p_token: string
+        }
+        Returns: string
+      }
+      master_transmission_link: {
+        Args: { p_transmission_id: string }
+        Returns: string
+      }
       record_master_brief: {
         Args: { p_project_id: string }
         Returns: string

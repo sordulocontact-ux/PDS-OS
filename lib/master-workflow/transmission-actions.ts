@@ -31,8 +31,9 @@ export async function transmitPackage(
   projectId: string,
   role: string,
   note: string,
-  // The owner chose to send the titles without stems (PROJ-UX-09).
-  withoutStems = false,
+  // Why the titles leave without stems, written (proto: a waiver kept in
+  // the history); null: every title must have them.
+  withoutStemsReason: string | null = null,
 ): Promise<TransmitResult> {
   const t = fr.masterWorkflow.mix.errors;
   const input = z
@@ -130,6 +131,7 @@ export async function transmitPackage(
                 file.master_id === title.id && file.category === "stems",
             )
             .map(fileOf),
+          sourceUpdatedAt: null,
         },
       ];
     }),
@@ -155,7 +157,8 @@ export async function transmitPackage(
           .filter((title) => title.stems.length === 0)
           .map((x) => x.title)
       : [];
-  if (noStems.length > 0 && !withoutStems)
+  const reason = withoutStemsReason?.trim().slice(0, 1000) || null;
+  if (noStems.length > 0 && !reason)
     return { ok: false, error: t.stemsMissing(noStems) };
 
   const { data: token, error: sendError } = await supabase.rpc(
@@ -166,7 +169,9 @@ export async function transmitPackage(
       p_package: pack,
       p_note: input.data.note,
       p_expires_at: expiresAt.toISOString(),
-      p_derogations: noStems.length ? { withoutStems: noStems } : {},
+      p_derogations: noStems.length
+        ? { withoutStems: noStems, withoutStemsReason: reason }
+        : {},
     },
   );
   if (sendError || !token) {
@@ -176,9 +181,12 @@ export async function transmitPackage(
       error:
         sendError?.code === "42501"
           ? t.forbidden
-          : sendError?.message.includes("stems_missing")
+          : sendError?.message.includes("stems_missing") ||
+              sendError?.message.includes("stems_reason_required")
             ? t.stemsMissing(noStems)
-            : t.failed,
+            : sendError?.message.includes("vocals_awaited")
+              ? fr.masterRound.blockers.vocals
+              : t.failed,
     };
   }
   revalidatePath(routes.projectMasterStep(project.id, input.data.role));

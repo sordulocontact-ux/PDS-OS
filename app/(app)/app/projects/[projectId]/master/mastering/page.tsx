@@ -1,50 +1,30 @@
-import {
-  ProductionPage,
-  mixRoundDone,
-  roundCount,
-} from "@/components/master-workflow/production-page";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
-import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
-import { requireApproved } from "@/lib/auth/dal";
+import { RoundStep } from "@/components/master-workflow/round/round-step";
 import { fr } from "@/lib/i18n/fr";
-import { loadMixVersions } from "@/lib/master-workflow/mix-versions";
-import { loadStepView } from "@/lib/master-workflow/transmission";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { allInOrder } from "@/lib/utils/parallel";
+import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import { loadRoundStep } from "@/lib/master-workflow/round-step";
 
 export const metadata = {
-  title: `${fr.masterWorkflow.production.mastering.title} · ${fr.app.name}`,
+  title: `${fr.masterJourney.steps.mastering.title} · ${fr.app.name}`,
 };
 
-// Master, Mastering: same round as the Mixage, opened once every title has
-// its Mix final; before, the page says how many are there (the step stays
-// readable, ticket « Architecture globale » § 5). The master validation
-// lives here.
+// Master, Mastering: the package sent to the engineer, the private link, the
+// rate, the versions, their feedback and the validator's decision.
 export default async function ProjectMasterMasteringPage({
   params,
 }: PageProps<"/app/projects/[projectId]/master/mastering">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
+  const [{ project }, round] = await Promise.all([
+    masterJourneyContext(projectId),
+    loadRoundStep(projectId, "mastering"),
   ]);
-
-  const [view, versions, mixVersions] = await Promise.all([
-    loadStepView(project, access, "mastering"),
-    loadMixVersions(project, access.personId, "mastering"),
-    loadMixVersions(project, access.personId, "mix"),
-  ]);
-  const open = mixRoundDone(view);
-  const mastered = roundCount(versions, view);
   return (
     <MasterStepFrame projectId={projectId} stepKey="mastering">
-      <ProductionPage
-        stage="mastering"
-        round={{ view, versions }}
-        done={open && mastered.total > 0 && mastered.finals === mastered.total}
-        waiting={open ? null : roundCount(mixVersions, view)}
+      <RoundStep
+        round={round}
+        viewerIsOwner={round.view.canEdit}
+        projectTitle={project.title}
       />
-      <EngineerThreadSection view={view} />
     </MasterStepFrame>
   );
 }

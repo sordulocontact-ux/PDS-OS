@@ -1,45 +1,30 @@
-import {
-  ProductionPage,
-  mixRoundDone,
-} from "@/components/master-workflow/production-page";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
-import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
-import { requireApproved } from "@/lib/auth/dal";
+import { RoundStep } from "@/components/master-workflow/round/round-step";
 import { fr } from "@/lib/i18n/fr";
-import { loadMixVersions } from "@/lib/master-workflow/mix-versions";
-import { loadStepView } from "@/lib/master-workflow/transmission";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { allInOrder } from "@/lib/utils/parallel";
+import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
+import { loadRoundStep } from "@/lib/master-workflow/round-step";
 
 export const metadata = {
-  title: `${fr.masterWorkflow.production.mix.title} · ${fr.app.name}`,
+  title: `${fr.masterJourney.steps.mix.title} · ${fr.app.name}`,
 };
 
-// Master, Mixage: the package sent to the mixer and its follow-up, then the
-// versions and their decisions (the mix validation lives here). Read by
-// whoever sees the project, sent by its owner (create_master_transmission).
+// Master, Mixage: the package sent to the engineer, the private link, the
+// rate, the versions, their feedback and the validator's decision.
 export default async function ProjectMasterMixPage({
   params,
 }: PageProps<"/app/projects/[projectId]/master/mix">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-
-  const [view, versions, masteringView] = await Promise.all([
-    loadStepView(project, access, "mix"),
-    loadMixVersions(project, access.personId, "mix"),
-    loadStepView(project, access, "mastering"),
+  const [{ project }, round] = await Promise.all([
+    masterJourneyContext(projectId),
+    loadRoundStep(projectId, "mix"),
   ]);
   return (
     <MasterStepFrame projectId={projectId} stepKey="mix">
-      <ProductionPage
-        stage="mix"
-        round={{ view, versions }}
-        done={mixRoundDone(masteringView)}
+      <RoundStep
+        round={round}
+        viewerIsOwner={round.view.canEdit}
+        projectTitle={project.title}
       />
-      <EngineerThreadSection view={view} />
     </MasterStepFrame>
   );
 }
