@@ -26,13 +26,13 @@ export function WithdrawButton({
         label={t.flow.withdraw}
         variant="ghost"
         title={t.flow.withdraw}
-        description={t.flow.decide.withdrawBody}
+        description={t.stages.negotiate.decide.withdrawBody}
       >
         {(close) => (
           <ReasonForm
-            label={t.flow.decide.withdrawWhy}
+            label={t.stages.negotiate.decide.withdrawWhy}
             submitLabel={t.flow.withdraw}
-            doneMessage={t.flow.decide.withdrawDone}
+            doneMessage={t.stages.negotiate.decide.withdrawDone}
             run={(text) => withdrawClearance({ projectId, clearanceId, text })}
             onDone={() => {
               close();

@@ -13,7 +13,7 @@ import {
   withdrawClearance,
 } from "@/lib/legal/clearance/actions";
 
-const t = fr.legalClearance.flow.decide;
+const t = fr.legalClearance.stages.negotiate.decide;
 
 /** One way out of a refusal, with its required text. */
 function Choice({
