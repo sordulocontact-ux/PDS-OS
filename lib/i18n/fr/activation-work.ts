@@ -173,8 +173,8 @@ export const activationWork = {
   },
   targets: {
     add: "Ajouter depuis le Réseau",
-    addInfluencer: "Ajouter un influenceur",
-    addMedia: "Ajouter un média",
+    addInfluencer: "Choisir des créateurs",
+    addMedia: "Ajouter des médias",
     addTitle: "Ajouter depuis le Réseau",
     addDescription:
       "Un profil existe une seule fois dans le Réseau ; la campagne crée une relation, pas une fiche.",

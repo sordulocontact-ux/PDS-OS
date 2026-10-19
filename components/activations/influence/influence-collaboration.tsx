@@ -1,14 +1,21 @@
+import { Fragment } from "react";
+
 import { EvidenceSection } from "@/components/activations/evidence/evidence-section";
 import { JournalSection } from "@/components/activations/journal-section";
 import { MessagesSection } from "@/components/activations/messages/messages-section";
 import { MetricsSection } from "@/components/activations/metrics/metrics-section";
 import { SheetPanel } from "@/components/activations/sheets/sheet-panel";
+import { Fold } from "@/components/ui/fold";
 import { TargetHeader } from "@/components/activations/targets/target-header";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
 import { composeBrief } from "@/lib/activations/influence/brief";
 import { collaborationRows } from "@/lib/activations/influence/collaborations";
 import { loadInfluenceData } from "@/lib/activations/influence/queries";
+import {
+  collabFocus,
+  type CollabPart,
+} from "@/lib/activations/influence/stage";
 import { loadActivationJournal } from "@/lib/activations/journal";
 import { loadMessages } from "@/lib/activations/messages/queries";
 import { loadSheets, versionsOf } from "@/lib/activations/sheet-queries";
@@ -34,10 +41,13 @@ export async function InfluenceCollaboration({
   fiche,
   target,
   access,
+  inCard = false,
 }: {
   fiche: ActivationFiche;
   target: TargetRecord;
   access: Access;
+  // Inside its folded card of the activation page.
+  inCard?: boolean;
 }) {
   const {
     activation: a,
@@ -86,21 +96,11 @@ export async function InfluenceCollaboration({
     mine(influence.rights),
   );
   const t = fr.activationWork.concepts;
-
-  return (
-    <div className="grid gap-8">
-      <TargetHeader
-        projectId={project.id}
-        activationId={a.id}
-        target={target}
-        stage={{
-          label: fr.activationInfluence.stages[row.stage],
-          tone: collaborationStageTone[row.stage],
-        }}
-        press={false}
-        canWrite={canWrite}
-      />
+  const sections: Array<[CollabPart, React.ReactNode]> = [
+    [
+      "concept",
       <SheetPanel
+        key="concept"
         id="concept"
         title={t.variationOf}
         description={t.variationDescription}
@@ -114,8 +114,12 @@ export async function InfluenceCollaboration({
         members={members}
         canWrite={canWrite}
         canValidate={canValidate}
-      />
+      />,
+    ],
+    [
+      "negotiation",
       <NegotiationSection
+        key="negotiation"
         projectId={project.id}
         activationId={a.id}
         targetId={target.id}
@@ -126,8 +130,12 @@ export async function InfluenceCollaboration({
         members={members}
         canWrite={canWrite}
         canSeeBudget={canSeeBudget}
-      />
+      />,
+    ],
+    [
+      "messages",
       <MessagesSection
+        key="messages"
         projectId={project.id}
         activationId={a.id}
         targetId={target.id}
@@ -138,16 +146,24 @@ export async function InfluenceCollaboration({
         members={members}
         canWrite={canWrite}
         today={today}
-      />
+      />,
+    ],
+    [
+      "rights",
       <RightsSection
+        key="rights"
         projectId={project.id}
         activationId={a.id}
         targetId={target.id}
         rights={mine(influence.rights)}
         today={today}
         canWrite={canWrite}
-      />
+      />,
+    ],
+    [
+      "contents",
       <ContentsSection
+        key="contents"
         scope={scope}
         targetId={target.id}
         contents={mine(influence.contents)}
@@ -156,8 +172,12 @@ export async function InfluenceCollaboration({
         members={members}
         canWrite={canWrite}
         canValidate={canValidate}
-      />
+      />,
+    ],
+    [
+      "publication",
       <EvidenceSection
+        key="publication"
         scope={scope}
         evidences={board.data.evidences.filter((e) => e.targetId === target.id)}
         files={files}
@@ -168,8 +188,12 @@ export async function InfluenceCollaboration({
         defaultKind="publication"
         defaultSource="creator"
         title={fr.activationInfluence.list.publication}
-      />
+      />,
+    ],
+    [
+      "metrics",
       <MetricsSection
+        key="metrics"
         scope={scope}
         metrics={board.data.metrics.filter((m) => m.targetId === target.id)}
         canWrite={canWrite}
@@ -177,16 +201,52 @@ export async function InfluenceCollaboration({
         today={today}
         targetId={target.id}
         defaultSource="creator"
-      />
+      />,
+    ],
+    [
+      "payment",
       <PaymentSection
+        key="payment"
         scope={scope}
         targetId={target.id}
         payment={mine(influence.payments)[0] ?? null}
         files={files}
         canWrite={canWrite}
         canSeeBudget={canSeeBudget}
+      />,
+    ],
+    ["journal", <JournalSection key="journal" entries={journal} />],
+  ];
+  const focus = collabFocus(row.stage);
+
+  return (
+    <div className="grid gap-8">
+      <TargetHeader
+        projectId={project.id}
+        activationId={a.id}
+        target={target}
+        stage={{
+          label: fr.activationInfluence.stages[row.stage],
+          tone: collaborationStageTone[row.stage],
+        }}
+        press={false}
+        canWrite={canWrite}
+        inCard={inCard}
       />
-      <JournalSection entries={journal} />
+      {sections
+        .filter(([key]) => !inCard || focus.includes(key))
+        .map(([key, node]) => (
+          <Fragment key={key}>{node}</Fragment>
+        ))}
+      {inCard && (
+        <Fold summary={fr.activationJourney.collabAll}>
+          {sections
+            .filter(([key]) => !focus.includes(key))
+            .map(([key, node]) => (
+              <Fragment key={key}>{node}</Fragment>
+            ))}
+        </Fold>
+      )}
     </div>
   );
 }

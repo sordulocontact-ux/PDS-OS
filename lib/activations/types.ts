@@ -17,6 +17,8 @@ import type {
   Priority,
   Severity,
 } from "@/lib/activations/model";
+import type { DerivedProof } from "@/lib/activations/campaign";
+import type { ActivationAction } from "@/lib/activations/journey";
 import type {
   ActivationView,
   Alert,
@@ -44,6 +46,8 @@ export type ActivationRecord = {
   startsOn: string | null;
   dueOn: string | null;
   status: ActivationStatus;
+  // The status a suspension interrupted, where « Reprendre » returns.
+  statusBeforeSuspension: ActivationStatus | null;
   statusReason: string | null;
   evidenceExpected: boolean;
   metricsExpected: boolean;
@@ -144,6 +148,15 @@ export type NextAction = {
 
 export type ActivationSummary = ActivationRecord & {
   sourceLabel: string | null;
+  // Influence and RP in house: the proof computed from the campaign.
+  derived: DerivedProof | null;
+  // Every gesture it waits for, the trunk's first, with its person
+  // (lib/activations/journey.ts, actors.ts), for the person looking.
+  actions: ActivationAction[];
+  // What a gated one waits for (« Clip officiel livré »).
+  waitsFor: string | null;
+  // The latest statistic, for « Clôturée · 48 200 vues ».
+  lastFigure: string | null;
   proof: ProofState;
   measure: MeasureState;
   alerts: Alert[];

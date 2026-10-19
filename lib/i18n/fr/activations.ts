@@ -35,6 +35,7 @@ export const activations = {
     closed: "Clôturée",
     cancelled: "Annulée",
     blocked: "Bloquée",
+    suspended: "Suspendue",
   },
   priorities: { high: "Haute", normal: "Normale", low: "Basse" },
   proof: {

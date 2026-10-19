@@ -17,8 +17,9 @@ export type ActivationMode = (typeof ACTIVATION_MODES)[number];
 export const kindHasMode = (kind: ActivationKind) =>
   kind === "influence" || kind === "press";
 
-// « Prête » is computed (`launchGaps`), « Suspendue » merged into « Bloquée »
-// (supabase/migrations/20261011300101_activation_statuses.sql).
+// « Prête » is computed (`launchGaps`); « Suspendue » keeps the status it
+// interrupted and « Reprendre » returns to it (proto 18/10,
+// supabase/migrations/20261019060101_activation_journey.sql).
 export const ACTIVATION_STATUSES = [
   "to_prepare",
   "in_progress",
@@ -26,16 +27,19 @@ export const ACTIVATION_STATUSES = [
   "closed",
   "cancelled",
   "blocked",
+  "suspended",
 ] as const;
 export type ActivationStatus = (typeof ACTIVATION_STATUSES)[number];
-/** The statuses a person sets by hand (« Clôturée » has its own action). */
+/** The statuses a person sets by hand (« Clôturée » has its own action,
+ * « Suspendre » / « Reprendre » theirs). */
 export const SETTABLE_STATUSES = ACTIVATION_STATUSES.filter(
-  (s) => s !== "closed",
+  (s) => s !== "closed" && s !== "suspended",
 );
 /** Those that need a written reason. */
 export const REASONED_STATUSES: readonly ActivationStatus[] = [
   "cancelled",
   "blocked",
+  "suspended",
 ];
 /** Starting = from these to `STARTED_STATUSES`, refused by the database while
  * something of `LAUNCH_GAPS` is missing. */

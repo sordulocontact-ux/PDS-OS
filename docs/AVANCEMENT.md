@@ -528,3 +528,16 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
 - R4 : réserves arbitrées et levées en ligne, « Avant la clôture », demande, décision, réouverture.
 - R5 : notifications (migration `20261019070101` à pousser en prod avec accord), Maintenant / Travail /
   Validations par le parcours.
+
+## Lot 6 — Activations sur une seule page (19/10/2026, branche `pc/z6-activations`)
+
+- Page unique du proto : liste à frise et filtres, activation ouverte avec « Maintenant » (geste en place),
+  bandeau « Leviers à préparer » (créer en un clic, « Plus tard »), modules en cartes repliables,
+  « Informations » repliées ; onglets et sous-pages redirigés vers leurs ancres.
+- Suspendre / Reprendre / Annuler avec motif ; preuve calculée des campagnes internes ; « Déclarer réalisée »
+  refusé avant la première publication / le premier message ; transmission à l'agence déclarée.
+- Lien de la créatrice étendu : contenu, publication, facture sans compte.
+- Parcours `lib/journey/activations.ts` dans `loadProjectJourneys` (Travail, Validations, Maintenant).
+- Migrations `20261019060101`, `20261019060201` (à pousser en prod avec accord) ; pgTAP
+  `marketing-activations.test.sql` (65) et `activation-creator-link.test.sql`.
+

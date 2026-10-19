@@ -16,6 +16,7 @@ export function kindOfLever(label: string): ActivationKind {
   if (/influen/.test(l)) return "influence";
   if (/(presse|press|media|rp\b|relations)/.test(l)) return "press";
   if (/(live|showcase|session|concert|evenement|event)/.test(l)) return "event";
-  if (/(clip|video|contenu|content|capsule)/.test(l)) return "content";
+  if (/(clip|video|contenu|content|capsule|social|organique|reseaux)/.test(l))
+    return "content";
   return "other";
 }

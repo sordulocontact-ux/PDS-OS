@@ -21,6 +21,7 @@ export function TargetHeader({
   stage,
   press,
   canWrite,
+  inCard = false,
 }: {
   projectId: string;
   activationId: string;
@@ -28,6 +29,9 @@ export function TargetHeader({
   stage: { label: string; tone: Tone } | null;
   press: boolean;
   canWrite: boolean;
+  // Inside its folded card of the activation (the card says the name and
+  // the step): only the profile's links and the outcome.
+  inCard?: boolean;
 }) {
   const accounts = [
     x.tiktok && {
@@ -41,16 +45,20 @@ export function TargetHeader({
   ].filter((a): a is { label: string; href: string } => Boolean(a));
   return (
     <header className="flex flex-col gap-2">
-      <ViewLink
-        href={routes.projectActivationTab(projectId, activationId, "targets")}
-        className="-ml-1 inline-flex min-h-10 w-fit items-center gap-1 rounded-md px-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <IconChevronLeft aria-hidden className="size-4" />
-        {press ? t.back : t.backCollaborations}
-      </ViewLink>
+      {!inCard && (
+        <ViewLink
+          href={routes.projectActivationTab(projectId, activationId, "targets")}
+          className="-ml-1 inline-flex min-h-10 w-fit items-center gap-1 rounded-md px-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <IconChevronLeft aria-hidden className="size-4" />
+          {press ? t.back : t.backCollaborations}
+        </ViewLink>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <h3 className="text-xl font-semibold break-words">
+          <h3
+            className={inCard ? "sr-only" : "text-xl font-semibold break-words"}
+          >
             <ViewLink
               href={routes.networkContact(x.contactId)}
               className="underline-offset-4 hover:underline"
@@ -58,7 +66,9 @@ export function TargetHeader({
               {x.contactName}
             </ViewLink>
           </h3>
-          {stage && <StatusBadge tone={stage.tone}>{stage.label}</StatusBadge>}
+          {stage && !inCard && (
+            <StatusBadge tone={stage.tone}>{stage.label}</StatusBadge>
+          )}
           {x.outcome && (
             <StatusBadge tone="neutral">{t.outcomes[x.outcome]}</StatusBadge>
           )}

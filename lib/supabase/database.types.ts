@@ -1350,6 +1350,36 @@ export type Database = {
           },
         ]
       }
+      activation_lever_choices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          lever_id: string
+          organization_id: string
+          project_id: string
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lever_id: string
+          organization_id: string
+          project_id: string
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          lever_id?: string
+          organization_id?: string
+          project_id?: string
+          state?: string
+        }
+        Relationships: []
+      }
       activation_metrics: {
         Row: {
           activation_id: string
@@ -7604,6 +7634,7 @@ export type Database = {
           source_kind: string
           starts_on: string | null
           status: string
+          status_before_suspension: string | null
           status_reason: string | null
           title: string
           updated_at: string
@@ -7634,6 +7665,7 @@ export type Database = {
           source_kind?: string
           starts_on?: string | null
           status?: string
+          status_before_suspension?: string | null
           status_reason?: string | null
           title: string
           updated_at?: string
@@ -7664,6 +7696,7 @@ export type Database = {
           source_kind?: string
           starts_on?: string | null
           status?: string
+          status_before_suspension?: string | null
           status_reason?: string | null
           title?: string
           updated_at?: string
@@ -17157,6 +17190,36 @@ export type Database = {
           p_old_contact: string
           p_role: string
         }
+        Returns: undefined
+      }
+      get_influence_collaboration: {
+        Args: { p_token: string }
+        Returns: Json
+      }
+      submit_influence_content_by_token: {
+        Args: { p_token: string; p_url: string }
+        Returns: undefined
+      }
+      declare_influence_publication_by_token: {
+        Args: { p_token: string; p_url: string }
+        Returns: undefined
+      }
+      open_influence_invoice_slot: {
+        Args: { p_ext: string; p_token: string }
+        Returns: string
+      }
+      submit_influence_invoice_by_token: {
+        Args: {
+          p_bytes: number
+          p_file_name: string
+          p_mime: string
+          p_path: string
+          p_token: string
+        }
+        Returns: undefined
+      }
+      declare_activation_transmission: {
+        Args: { p_activation_id: string }
         Returns: undefined
       }
       decide_activation_sheet: {

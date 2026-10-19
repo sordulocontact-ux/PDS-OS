@@ -69,6 +69,9 @@ export type ActivationFacts = {
   openTargetCount: number;
   openBlockers: { id: string; description: string }[];
   dependencies: DependencyFact[];
+  // Influence and RP in house: the proof computed from each publication or
+  // coverage verified (lib/activations/campaign.ts), never one link.
+  derivedProof?: ProofState | null;
 };
 
 const OPEN_WORK: readonly ActivationStatus[] = [
@@ -104,6 +107,7 @@ export function evidenceState(e: EvidenceFact): ProofState {
 
 export function proofState(f: ActivationFacts): ProofState {
   if (!f.evidenceExpected) return "not_expected";
+  if (f.derivedProof) return f.derivedProof;
   const live = f.evidences.filter((e) => !e.withdrawn);
   if (live.length === 0) return "to_provide";
   if (live.some((e) => e.lastCheck === "contested")) return "contested";
@@ -223,6 +227,7 @@ export type ActivationView = (typeof ACTIVATION_VIEWS)[number];
 export function isBlocked(f: ActivationFacts, alerts: Alert[]): boolean {
   return (
     f.status === "blocked" ||
+    f.status === "suspended" ||
     f.openBlockers.length > 0 ||
     alerts.some((a) => a.key === "dependency_open")
   );
@@ -310,7 +315,7 @@ export function ruleSteps(
   today: string,
   moduleSteps: RuleStep[] = [],
 ): RuleStep[] {
-  if (!isOpen(f.status)) return [];
+  if (!isOpen(f.status) || f.status === "suspended") return [];
   const steps: RuleStep[] = [];
   if (!f.ownerPersonId) steps.push({ key: "owner_missing" });
   const notStarted = NOT_STARTED_STATUSES.includes(f.status);

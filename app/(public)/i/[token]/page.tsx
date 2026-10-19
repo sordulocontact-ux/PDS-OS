@@ -6,7 +6,9 @@ import {
   PortalSections,
   portalTitle,
 } from "@/components/portal/portal-sections";
+import { creatorCard } from "@/components/activations/influence/creator-collaboration";
 import { PublicAgreement } from "@/components/activations/influence/public-agreement";
+import { getCreatorCollaboration } from "@/lib/activations/influence/creator-link";
 import { getPublicAgreement } from "@/lib/activations/influence/public";
 import { fr } from "@/lib/i18n/fr";
 import { getPortalFrame } from "@/lib/portal/frame";
@@ -34,8 +36,27 @@ export default async function InfluenceAgreementPage({
         <p className="text-muted-foreground">{t.states[agreement.state]}</p>
       </PortalShell>
     );
+  // After « Bon pour accord », the same link serves the whole collaboration
+  // (proto creatorPortal): content, publication, invoice.
+  const collab =
+    agreement.state === "accepted"
+      ? await getCreatorCollaboration(token)
+      : null;
+  const step = collab ? creatorCard(token, collab) : null;
   const open = agreement.state === "open";
   const cards = [
+    ...(step
+      ? [
+          {
+            id: "ps-collaboration",
+            title: step.title,
+            state: step.state,
+            action: { label: step.title },
+            order: 2,
+            body: step.body,
+          },
+        ]
+      : []),
     {
       id: "ps-agreement",
       title: fr.portal.influence.title,

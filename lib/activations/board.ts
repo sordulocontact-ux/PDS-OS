@@ -2,7 +2,12 @@ import "server-only";
 
 import { cache } from "react";
 
+import { moduleActions } from "@/lib/activations/actors";
+import { collaborationsOf, derivedProof } from "@/lib/activations/campaign";
 import { stepText } from "@/lib/activations/describe";
+import { isGated, trunkAction, viewerFirst } from "@/lib/activations/journey";
+import { loadActivationPeople } from "@/lib/activations/people";
+import { loadPressKit } from "@/lib/activations/press-kit";
 import { resolveDependencies } from "@/lib/activations/dependencies";
 import { loadActivationData } from "@/lib/activations/load";
 import { loadModuleFacts, moduleSignals } from "@/lib/activations/modules";
@@ -24,6 +29,7 @@ import type {
   DependencyRecord,
   NextAction,
 } from "@/lib/activations/types";
+import { fr } from "@/lib/i18n/fr";
 import { todayInParis } from "@/lib/insights/dates";
 import { createClient } from "@/lib/supabase/server";
 
@@ -112,9 +118,11 @@ function nextActionOf(
 /** Every activation of the project with its computed states. Cached per
  * request. */
 export const loadActivationsBoard = cache(async (projectId: string) => {
-  const [data, modules] = await Promise.all([
+  const [data, modules, people, kit] = await Promise.all([
     loadActivationData(projectId),
     loadModuleFacts(projectId),
+    loadActivationPeople(projectId),
+    loadPressKit(projectId),
   ]);
   const [deps, sources] = await Promise.all([
     resolveDependencies(projectId, data.dependencies),
@@ -123,7 +131,8 @@ export const loadActivationsBoard = cache(async (projectId: string) => {
   const today = todayInParis();
 
   const summaries: ActivationSummary[] = data.activations.map((a) => {
-    const facts = factsOf(a, data, deps);
+    const derived = derivedProof(a, modules, data.evidences);
+    const facts = { ...factsOf(a, data, deps), derivedProof: derived?.state };
     const signals = moduleSignals(a, modules, today);
     const alerts = alertsOf(facts, today, signals.alerts);
     const steps = ruleSteps(facts, today, signals.steps);
@@ -133,18 +142,48 @@ export const loadActivationsBoard = cache(async (projectId: string) => {
         .filter((e) => e.activationId === a.id)
         .map((e) => e.createdAt),
     ].sort();
+    const proof = proofState(facts);
+    const measure = measureState(facts);
+    const gaps = launchGaps(facts);
+    const owner = a.ownerPersonId ? people.person(a.ownerPersonId) : null;
+    const trunk = trunkAction(
+      { ...a, launchGaps: gaps, proof, measure, derivedProof: !!derived },
+      { owner, projectOwner: people.projectOwner, direction: people.direction },
+    );
+    const lines = moduleActions(a, {
+      m: modules,
+      evidences: data.evidences,
+      collabs:
+        a.kind === "influence" && a.mode === "internal"
+          ? collaborationsOf(a.id, modules, data.evidences)
+          : [],
+      people: {
+        owner: owner ?? people.projectOwner,
+        direction: people.direction,
+        creative: people.creative,
+      },
+      kit: {
+        approved: kit.approved !== null,
+        state: kit.latest?.state ?? null,
+      },
+    });
+    const gated = isGated({ ...a, launchGaps: gaps, proof, measure });
     return {
       ...a,
       sourceLabel: sources.get(a.id) ?? null,
-      proof: proofState(facts),
-      measure: measureState(facts),
+      derived,
+      actions: viewerFirst([...(trunk ? [trunk] : []), ...lines]),
+      waitsFor: gated ? waitsForOf(facts) : null,
+      lastFigure: lastFigureOf(a, data),
+      proof,
+      measure,
       alerts,
       views: viewsOf(facts, alerts),
       blocked: isBlocked(facts, alerts),
       next: nextActionOf(a, data, steps),
       reserves: reservesOf(facts),
       openBlockerCount: facts.openBlockers.length,
-      launchGaps: launchGaps(facts),
+      launchGaps: gaps,
       lastChangeAt: changes.at(-1) ?? a.updatedAt,
     };
   });
@@ -185,4 +224,38 @@ async function loadSourceLabels(activations: ActivationRecord[]) {
     if (label) labels.set(a.id, label);
   }
   return labels;
+}
+
+const count = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
+
+/** The latest valid statistic of an activation, in its unit. */
+function lastFigureOf(a: ActivationRecord, data: Data): string | null {
+  const m = data.metrics.find(
+    (x) =>
+      x.activationId === a.id &&
+      x.invalidatedAt === null &&
+      x.targetId === null &&
+      x.unit === "count",
+  );
+  return m
+    ? `${count.format(m.value)} ${fr.activationJourney.units[a.kind]}`
+    : null;
+}
+
+/** What a gated activation waits for, said like the proto (« Clip officiel
+ * livré »): a deliverable by its title, else the blocker or dependency. */
+function waitsForOf(facts: ActivationFacts): string | null {
+  const t = fr.activationJourney.detail;
+  const items = [
+    ...facts.dependencies
+      .filter((d) => d.blocking && d.resolved === false)
+      .map((d) => {
+        const title = /«\s*(.+?)\s*»/.exec(d.label)?.[1];
+        return d.kind === "deliverable" && title
+          ? t.deliveredShort(title)
+          : d.label;
+      }),
+    ...facts.openBlockers.map((b) => b.description),
+  ];
+  return items.join(" · ") || null;
 }

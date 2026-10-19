@@ -90,6 +90,12 @@ export const notifications = {
       `${actor} a tranché sur la clôture du Marketing de « ${project} ».`,
     marketing_closure_reopened: (actor: string, project: string) =>
       `${actor} a rouvert le Marketing de « ${project} ».`,
+    activation_owner_assigned: (actor: string, project: string) =>
+      `${actor} vous a confié une activation de « ${project} ».`,
+    activation_suspended: (actor: string, project: string) =>
+      `${actor} a suspendu une de vos activations de « ${project} ».`,
+    activation_creator_acted: (_actor: string, project: string) =>
+      `Une créatrice a agi sur son lien privé pour « ${project} » : contenu, publication ou facture à reprendre.`,
     step_blocker_reported: (actor: string, project: string) =>
       `${actor} a signalé un blocage sur « ${project} ».`,
     step_blocker_lifted: (actor: string, project: string) =>

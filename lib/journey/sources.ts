@@ -5,6 +5,7 @@ import { journeyContext } from "@/lib/production/journey/context";
 import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
+import { activationsJourneys } from "./activations";
 import { designJourneys } from "./design";
 import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
@@ -26,8 +27,8 @@ const parts = fr.shell.project.marketingSteps;
 
 // Marketing: the Stratégie (lib/journey/strategy.ts), the Conception
 // (lib/journey/design.ts), each deliverable's Production once its sheet is
-// opened, and the Suivi & bilan (lib/journey/review.ts). Activations comes
-// with its zone.
+// opened, the Activations (lib/journey/activations.ts) and the Suivi & bilan
+// (lib/journey/review.ts).
 const marketing: Loader = async (projectId) => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -35,31 +36,39 @@ const marketing: Loader = async (projectId) => {
     .select("deliverable_id")
     .eq("project_id", projectId);
   if (error) console.error("loadProjectJourneys production:", error.message);
-  const [strategy, design, review, ...productions] = await Promise.all([
-    strategyJourneys(projectId),
-    designJourneys(projectId),
-    reviewJourneys(projectId),
-    ...(data ?? []).map(async ({ deliverable_id: id }) => {
-      const ctx = await journeyContext(projectId, id);
-      const started = Boolean(
-        ctx.data.heritage.fiche || ctx.data.heritage.source,
-      );
-      return started
-        ? [
-            {
-              module: "marketing" as const,
-              label: label.marketing,
-              part: {
-                key: `production:${id}`,
-                label: `${parts.production} › ${ctx.data.deliverable.title}`,
+  const [strategy, design, review, activations, ...productions] =
+    await Promise.all([
+      strategyJourneys(projectId),
+      designJourneys(projectId),
+      reviewJourneys(projectId),
+      activationsJourneys(projectId),
+      ...(data ?? []).map(async ({ deliverable_id: id }) => {
+        const ctx = await journeyContext(projectId, id);
+        const started = Boolean(
+          ctx.data.heritage.fiche || ctx.data.heritage.source,
+        );
+        return started
+          ? [
+              {
+                module: "marketing" as const,
+                label: label.marketing,
+                part: {
+                  key: `production:${id}`,
+                  label: `${parts.production} › ${ctx.data.deliverable.title}`,
+                },
+                steps: ctx.steps,
               },
-              steps: ctx.steps,
-            },
-          ]
-        : [];
-    }),
-  ]);
-  return [...strategy, ...design, ...productions.flat(), ...review];
+            ]
+          : [];
+      }),
+    ]);
+  return [
+    ...strategy,
+    ...design,
+    ...productions.flat(),
+    ...activations,
+    ...review,
+  ];
 };
 
 // Filled by their zone (C4: typed, empty until then).

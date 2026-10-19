@@ -894,6 +894,7 @@ export const activationStatusTone: Record<string, Tone> = {
   closed: "success",
   cancelled: "neutral",
   blocked: "danger",
+  suspended: "warning",
 };
 
 /** The proof of an activation, computed: only a successful check is green. */
