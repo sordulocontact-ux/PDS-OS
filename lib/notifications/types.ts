@@ -95,6 +95,11 @@ export const NOTIFICATION_KINDS = [
   "distribution_version_decided",
   "distribution_closure_proposed",
   "distribution_closure_decided",
+  // The Activations (proto « Projet complet »): an activation given to its
+  // owner, suspended, a creator's gesture on her private link.
+  "activation_owner_assigned",
+  "activation_suspended",
+  "activation_creator_acted",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -172,6 +177,11 @@ export function notificationHref(
       projectId,
       kind.startsWith("distribution_closure") ? "closure" : "dossier",
     );
+  // An activation: its page, the list on the left (the subject is it).
+  if (kind.startsWith("activation_"))
+    return subjectId
+      ? routes.projectActivation(projectId, subjectId)
+      : routes.projectActivations(projectId);
   if (kind === "call_invited" && subjectId)
     return routes.projectCall(projectId, subjectId);
   if (kind === "brief_approved") return routes.projectFramingBrief(projectId);

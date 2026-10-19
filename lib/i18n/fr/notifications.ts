@@ -78,6 +78,12 @@ export const notifications = {
       `${actor} propose de clôturer la distribution de « ${project} » : votre décision est attendue.`,
     distribution_closure_decided: (actor: string, project: string) =>
       `${actor} a tranché sur la clôture de la distribution de « ${project} ».`,
+    activation_owner_assigned: (actor: string, project: string) =>
+      `${actor} vous a confié une activation de « ${project} ».`,
+    activation_suspended: (actor: string, project: string) =>
+      `${actor} a suspendu une de vos activations de « ${project} ».`,
+    activation_creator_acted: (_actor: string, project: string) =>
+      `Une créatrice a agi sur son lien privé pour « ${project} » : contenu, publication ou facture à reprendre.`,
     step_blocker_reported: (actor: string, project: string) =>
       `${actor} a signalé un blocage sur « ${project} ».`,
     step_blocker_lifted: (actor: string, project: string) =>
