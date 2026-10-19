@@ -1,88 +1,49 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
-import { ConceptionTabs } from "@/components/design/conception-tabs";
-import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
-import { SheetsTable } from "@/components/design/sheets/sheets-table";
-import { EmptyNote } from "@/components/shell/empty-state";
-import { requireApproved } from "@/lib/auth/dal";
-import { routes } from "@/lib/auth/redirects";
-import { loadPlannedQuantities } from "@/lib/design/sheet-summaries";
-import { loadSheetsPage } from "@/lib/design/sheets-page";
+import { DesignStepFrame } from "@/components/design/design-step-frame";
+import { SheetCard } from "@/components/design/sheets-step/sheet-card";
+import { DesignWaits } from "@/components/design/waiting-row";
+import { sheetAction } from "@/lib/design/journey";
+import { designJourneyContext } from "@/lib/design/journey-context";
+import { loadSheetViews } from "@/lib/design/sheet-views";
 import { fr } from "@/lib/i18n/fr";
-import { canEditProject } from "@/lib/projects/edit-access";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { isStageValidated } from "@/lib/projects/types";
-import { allInOrder } from "@/lib/utils/parallel";
+import { isLocked } from "@/lib/ui/journey";
 
 export const metadata = {
-  title: `${fr.conceptionSheet.listTitle} · ${fr.app.name}`,
+  title: `${fr.designJourney.steps.sheets.title} · ${fr.app.name}`,
 };
 
 /**
- * The Fiches Livrables (ticket « Conception » § 9): one per deliverable or
- * per series, each one created by the chef de projet from the validated
- * Stratégie, then completed, validated and handed to Production on its own.
+ * Conception › Fiches Livrables (proto de3, ticket § 9 to 13): one card per
+ * sheet, created from the validated Stratégie and pre-filled by code with
+ * its sources; each has its responsible, is completed field by field,
+ * validated by the direction and transferred to the Production on its own.
+ * The Conception is done when every sheet is transferred.
  */
 export default async function DesignSheetsPage({
   params,
 }: PageProps<"/app/projects/[projectId]/design/sheets">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-  if (!isStageValidated(project.stages, "launch_strategy"))
-    return (
-      <DesignNeedsStrategy
-        projectId={projectId}
-        canEdit={canEditProject(access, project)}
-      />
-    );
-  const [page, planned] = await Promise.all([
-    loadSheetsPage(project, access),
-    loadPlannedQuantities(projectId),
-  ]);
-  if (!page) notFound();
-  const { data, people, sheets } = page;
-  if (!data.started) redirect(routes.projectDesign(projectId));
-
-  const t = fr.conceptionSheet;
-  const canCreate = data.isOwner && data.stage?.state === "in_progress";
-  const rows = data.deliverables.map((d) => {
-    const sheet = sheets.find((s) => s.sheet.design_deliverable_id === d.id);
-    return {
-      deliverableId: d.id,
-      deliverableTitle: d.title,
-      planned: planned[d.id] ?? null,
-      sheet: sheet
-        ? {
-            id: sheet.sheet.id,
-            title: sheet.sheet.title,
-            kind: sheet.sheet.kind,
-            items: sheet.items.length,
-            status: sheet.status,
-            responsible:
-              people.sheets[sheet.sheet.id]?.responsible?.name ?? null,
-            deliveryDate: sheet.sheet.delivery_date,
-          }
-        : null,
-    };
-  });
-
+  const ctx = await designJourneyContext(projectId);
+  if (!ctx) notFound();
+  const step = ctx.steps[5];
+  const views = await loadSheetViews(ctx);
+  const canWrite =
+    ctx.data.stage?.state === "in_progress" && !isLocked(step.status);
   return (
-    <div className="flex flex-col gap-10 pt-6">
-      <ConceptionTabs projectId={projectId} />
-      <header className="flex flex-col gap-2">
-        <h2 className="text-display-sm font-semibold">{t.listTitle}</h2>
-        <p className="max-w-prose text-body-md text-muted-foreground">
-          {t.listBody}
-        </p>
-      </header>
-      {rows.length ? (
-        <SheetsTable projectId={projectId} rows={rows} canCreate={canCreate} />
-      ) : (
-        <EmptyNote>{t.empty}</EmptyNote>
-      )}
-    </div>
+    <DesignStepFrame projectId={projectId} stepKey="sheets">
+      {views.map((v) => (
+        <SheetCard
+          key={v.facts.sheet.id}
+          ctx={ctx}
+          view={v}
+          canWrite={canWrite}
+        />
+      ))}
+      <DesignWaits
+        step={step}
+        actors={ctx.journeySheets.map((s) => sheetAction(s, ctx))}
+      />
+    </DesignStepFrame>
   );
 }
