@@ -3237,6 +3237,43 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   sur la page du modèle) ; « document en tête » et « Changé depuis la v1 » dans la démarche
   personne.
 
+- **« Prêt pour la sortie » (J11), un seul calcul** — contrat pour la Distribution et la Vue
+  d'ensemble : **`loadLegalReadiness(projectId)`** (`lib/legal/readiness/load.ts`, serveur) rend
+  `{ allowed: true, readiness: LegalReadiness | null }` avec `manage_legal` (null avant le
+  lancement du plan), sinon `{ allowed: false, validated: { by, at } | null }` (la validation
+  finale seule, lue en RLS `can_see_project`). `LegalReadiness`
+  (`lib/legal/readiness/controls.ts`, pur) : `verdict` (`"no"` Non prête · `"risk"` À risque ·
+  `"ok"` Prête à sortir), `controls` (clé, domaine `master | rights | metadata | assets |
+  distribution`, libellé, `blocking`, `status` `ok | open | waived`, raison, prochaine action,
+  responsable, source, `href`, dérogation ; le dernier est `final`, la validation finale),
+  `blocking` (« À résoudre avant sortie »), `toFollow` (« Reste à suivre »), `done`/`total`,
+  `sacemBlocks`, `validated`. **Sources** : Master, Catalogue, Conception et sortie viennent de
+  la lecture de la Distribution (`loadDistributionSources` + `distributionReadiness`, items hors
+  module `legal`) ; les droits viennent des démarches (emprunt bloquant ; contrat, répartition,
+  SACEM « à suivre », la SACEM bloquante si la politique le dit, et « faite » dès le dépôt).
+  Ne jamais recalculer ailleurs : la Distribution lit ce résultat pour son prérequis
+  « Juridique › Prêt pour la sortie ». **Décisions de la direction** (permission `validate`),
+  par fonctions : `grant_release_waiver` (motif obligatoire, table
+  `release_readiness_waivers`), `set_release_policy` (`release_readiness_policies`, par
+  organisation, « SACEM bloquante », défaut non), `validate_release` (`release_validations`,
+  une par projet, avec l'instantané des contrôles ; refusée côté serveur tant qu'un contrôle
+  bloquant est ouvert, `validateRelease`). Étape `ready` du Parcours : « À vous · Valider la
+  sortie avant The Orchard » pour la direction quand rien ne bloque (`kind: "validate"`),
+  faite quand validée ; Ensuite : Distribution. Migration `20261019090201`, tests
+  `legal-links-readiness.test.sql`. Pas de notification (aucun type ajouté).
+- **Liens privés visibles (J4, fiches)** : le jeton reste connu de la base par son empreinte
+  seulement ; le serveur le garde **scellé** (`legal_forms.link_sealed`, AES-256-GCM,
+  `lib/legal/forms/link-seal.ts`, clé `LEGAL_LINK_KEY` de l'environnement, jamais en base ni
+  au navigateur) via `seal_legal_form_link` à la préparation. La démarche montre alors le lien
+  tant qu'il est ouvert (`FicheLinkCard` : Copier le lien, Relancer = e-mail prêt `mailto:`,
+  Nouveau lien, « Révoquer l'accès » avec « Pourquoi * » = `revoke_legal_form`), « valable
+  jusqu'au … · créé le … · Envoyé par … le … · Ouvert le … » (`legal_forms.sent_by`,
+  `revoked_by`, `revoked_reason`). Sans la clé, ou pour un lien préparé avant, l'URL n'est pas
+  réaffichable : l'état reste, « Nouveau lien » en donne un. Migration `20261019090301`.
+  **Pas encore** : les liens de répartition (`legal_split_confirmations`, même méthode à
+  appliquer) ; l'envoi par PDS OS (pas de fournisseur d'e-mail : `mailto:` + « Marquer comme
+  envoyée »).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique

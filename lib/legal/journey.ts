@@ -30,11 +30,18 @@ export type LegalJourneyInput = {
     status: "not_started" | "draft" | "confirmed";
     reopened: boolean;
   };
-  plan: { launched: boolean; items: number };
+  // `contractsToConfirm`: a person still waits for « Contrats à prévoir ».
+  plan: { launched: boolean; items: number; contractsToConfirm: boolean };
   // The démarches' steps, built by lib/legal/demarches/build.ts.
   demarches: JourneyStep[];
-  // What blocks the release, once the plan is launched.
-  ready: { blocking: number; remaining: number } | null;
+  // « Prêt pour la sortie », once the plan is launched
+  // (lib/legal/readiness/controls.ts).
+  ready: {
+    verdict: "no" | "risk" | "ok";
+    blocking: number;
+    validated: { by: string; at: string } | null;
+    viewer: { name: string; canValidate: boolean };
+  } | null;
   // The direction's name, when one member validates.
   direction: string | null;
 };
@@ -68,7 +75,9 @@ function dossierSteps(i: LegalJourneyInput): JourneyStep[] {
     confirmation: i.confirmation.reopened
       ? t.todo.confirmAgain
       : t.todo.confirm,
-    plan: t.todo.launch,
+    plan: i.plan.contractsToConfirm
+      ? fr.legalContracts.agreements.approveMapping
+      : t.todo.launch,
   };
   const summary: Record<DossierKey, string | null> = {
     inventory: t.summary.inventory(
@@ -112,29 +121,46 @@ function dossierSteps(i: LegalJourneyInput): JourneyStep[] {
   });
 }
 
-/** « Prêt pour la sortie », computed at each read (ticket Juridique 08). */
+/** « Prêt pour la sortie », computed at each read (ticket Juridique 08):
+ * the direction validates it once nothing blocks — a decision, its own
+ * « À vous » (`kind: "validate"`). */
 function readyStep(i: LegalJourneyInput): JourneyStep {
   const direction = i.direction ?? d.direction;
   const r = i.ready;
+  const decide = r && !r.validated && r.verdict !== "no";
   return {
     key: LEGAL_READY_KEY,
     href: routes.projectLegalStep(i.projectId, LEGAL_READY_KEY),
     title: d.titles.ready,
     why: d.why.ready,
-    status: r ? "current" : "blocked",
+    status: !r ? "blocked" : r.validated ? "done" : "current",
     owner: { name: direction, role: d.readyRole },
     validator: { name: direction, role: d.readyRole },
     prereq: ["plan"],
     next: [],
-    actor: null,
+    nextExternal: [
+      { key: "distribution", label: fr.shell.project.sidebar.distribution },
+    ],
+    actor: decide
+      ? {
+          name: r.viewer.canValidate ? r.viewer.name : direction,
+          viewer: r.viewer.canValidate,
+          viaLink: false,
+          todo: d.ready.todo,
+          kind: "validate",
+        }
+      : null,
     summary: !r
       ? null
-      : r.blocking > 0
-        ? d.ready.summary.no(r.blocking)
-        : r.remaining > 0
-          ? d.ready.summary.risk
-          : d.ready.summary.ok,
+      : r.validated
+        ? d.ready.summary.validated(r.validated.by)
+        : r.verdict === "no"
+          ? d.ready.summary.no(r.blocking)
+          : r.verdict === "risk"
+            ? d.ready.summary.risk
+            : d.ready.summary.ok,
     group: d.groups.release,
+    alert: decide ? "decision" : undefined,
   };
 }
 

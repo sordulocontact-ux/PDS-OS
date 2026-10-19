@@ -20,6 +20,8 @@ import { loadIntake } from "@/lib/legal/intake/queries";
 import { loadLegalInventory } from "@/lib/legal/inventory";
 import { legalJourney } from "@/lib/legal/journey";
 import { planBoard } from "@/lib/legal/plan/board";
+import { legalReadiness } from "@/lib/legal/readiness/controls";
+import { loadReadinessInputs } from "@/lib/legal/readiness/queries";
 import { loadLegalPlan, proposeLegalPlan } from "@/lib/legal/plan/queries";
 import { loadSplits } from "@/lib/legal/splits/queries";
 import { loadTracking } from "@/lib/legal/tracking/queries";
@@ -118,6 +120,14 @@ export const legalJourneyContext = cache(async (projectId: string) => {
             : await proposeLegalPlan(project, access),
         ctx,
       });
+  // « Prêt pour la sortie », once the plan is launched (ticket 08).
+  const readiness = board
+    ? legalReadiness({
+        ...(await loadReadinessInputs(project, access)),
+        demarches,
+        direction: direction ?? fr.legalDemarches.direction,
+      })
+    : null;
   const steps = legalJourney({
     projectId,
     owner: {
@@ -142,10 +152,21 @@ export const legalJourneyContext = cache(async (projectId: string) => {
     plan: {
       launched: plan.state === "launched",
       items: plan.state === "launched" ? plan.items.length : 0,
+      contractsToConfirm: agreements.rows.some(
+        (r) => r.contactId && !r.contract && r.state === "unmapped",
+      ),
     },
     demarches: demarches.map((d) => d.step),
-    ready: board
-      ? { blocking: board.blocking.length, remaining: board.remaining.length }
+    ready: readiness
+      ? {
+          verdict: readiness.verdict,
+          blocking: readiness.blocking.length,
+          validated: readiness.validated,
+          viewer: {
+            name: viewerName ?? fr.legalDemarches.direction,
+            canValidate: clearances.canValidate,
+          },
+        }
       : null,
     direction,
   });
@@ -164,6 +185,7 @@ export const legalJourneyContext = cache(async (projectId: string) => {
     formalities,
     board,
     demarches,
+    readiness,
     steps,
     viewerName,
   };
