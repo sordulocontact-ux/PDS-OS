@@ -57,7 +57,10 @@ export type CorrectionStatus = "draft" | "sent" | "viewed" | "treated";
 
 /** A provider's current private link (PROD-026). */
 export type ProviderLinkState = {
+  // The n-th link made for this contact on the sheet (« Lien n° 2 »).
+  number: number;
   createdAt: string;
+  createdBy: string | null;
   expiresAt: string;
   firstOpenedAt: string | null;
   lastOpenedAt: string | null;

@@ -7,13 +7,9 @@ export const productionLink = {
     title: "Votre devis",
     description:
       "Déposez-le ici : le chargé de production le vérifie, puis il est validé chez PDS.",
-    frame: (envelope: string | null, delivery: string | null) =>
-      [
-        envelope ? `Enveloppe : ${envelope}` : null,
-        delivery ? `Livraison attendue au plus tard le ${delivery}` : null,
-      ]
-        .filter(Boolean)
-        .join(" · "),
+    // Never the internal envelope (VISION-UX rule 21): the delivery only.
+    frame: (delivery: string | null) =>
+      delivery ? `Livraison attendue au plus tard le ${delivery}` : null,
     label: "Intitulé",
     labelDefault: "Devis de production",
     amount: "Montant total HT",

@@ -12,6 +12,7 @@ import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { loadValidators } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
+import { loadProductionHistory } from "@/lib/production/history";
 import { stepContext } from "@/lib/production/journey/context";
 import { stepHref } from "@/lib/production/journey/href";
 import { prepContext } from "@/lib/production/journey/prep-context";
@@ -59,7 +60,13 @@ export default async function ProductionOrganisationPage({
   const validators = access.organizationId
     ? await loadValidators(access.organizationId)
     : [];
-  const prep = sheet ? await prepContext(projectId, deliverableId) : null;
+  const [prep, roleHistory] = sheet
+    ? await Promise.all([
+        prepContext(projectId, deliverableId),
+        // The changes of role of « Qui fait quoi » (C7).
+        loadProductionHistory(sheet.id, data, ["sheet.organized", "link.sent"]),
+      ])
+    : [null, []];
   const form = data.canOpen && (
     <OrganisationForm
       projectId={projectId}
@@ -95,6 +102,7 @@ export default async function ProductionOrganisationPage({
             data={data}
             links={prep.links}
             canOrganize={data.canOrganize}
+            history={roleHistory}
           />
           {form && (
             <PageSection
