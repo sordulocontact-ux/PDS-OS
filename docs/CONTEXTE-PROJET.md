@@ -266,6 +266,28 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
 - Rouvrir une décision : le mix seulement, tant que le mastering n'est pas parti.
 - Le lien privé du Master est gardé chiffré et relisible par le responsable (règle 19).
 
+### Master, le reste : décisions du 20/10/2026 (branche `pc/r1-master`)
+
+Prises sans tickets plus précis, cohérentes avec le proto `master-v2.html` ; à confirmer par Ibé :
+
+- **La direction = la permission `validate`** (directeur général) : elle lit les RIB et les preuves de
+  virement, confirme un RIB, marque une facture payée, arbitre un retard escaladé. Le responsable du
+  projet lit la facture et son PDF (comme le budget), jamais un RIB.
+- **Premier RIB** donné par l'ingénieur sur son propre lien avec sa première facture : gardé tel quel
+  (proto « gardé dans votre fiche ») ; un RIB **changé**, ou **saisi par un membre** d'après un e-mail,
+  n'est jamais utilisé avant la vérification par téléphone de la direction.
+- **Facture demandée** quand chaque titre du tour a son Master final, aux seuls ingénieurs qui ont reçu un
+  lien (l'ingénieur maison ne facture pas) ; PDS OS n'envoie pas l'e-mail de demande : la carte est sur
+  son lien, l'étape le dit.
+- **« Facturer à »** : identité de facturation de l'organisation saisie dans les réglages
+  (administration) ; vide, la carte ne l'affiche pas.
+- **L'artiste qui écoute** = les contacts du Réseau liés à l'artiste du projet ou d'un de ses titres ;
+  pas de lien `/v/` à part : sa page par personne `/c/`. Le fichier d'une version en écoute peut être signé
+  par cette page tant que la version n'est pas décidée (chemin non devinable, donné par la page seule).
+- **Rouvrir le master** : refusé une fois la sortie livrée par la Distribution (`delivered_on`).
+- **Un livrable déposé** est un fichier du titre (catégorie « autre », ou « pistes » pour les stems),
+  jamais une version audio.
+
 ### Vocabulaire fixé
 
 Trois objets, trois noms. Ne jamais en introduire d'autres dans l'interface.
