@@ -3218,6 +3218,25 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   titre, contrats du projet, splits du titre) : « Questions que PO ne pose pas ». « Corriger »
   n'apparaît qu'une fois toutes les questions répondues (proto).
 
+- **Contrats à prévoir avant le lancement (J3)** : section « Contrats à prévoir » de l'étape Plan
+  d'action, avant et après le lancement (`MappingPanel` → `MappingForm` / `MappingRow`) : par
+  personne, le contrat (modèles validés compatibles avec ses rôles) ou « Pas d'accord nécessaire »
+  avec « Pourquoi aucun accord n'est nécessaire * » (table `legal_no_agreement_reasons`, écrite
+  par `approve_contract_mapping`, qui refuse `mapping_reason_required` ; lue par `manage_legal`),
+  la source de la proposition, et « Nouveau modèle de contrat » (`NewTemplateButton` : le
+  formulaire du modèle en modale verre, rôles de la personne cochés ; il entre dans la
+  bibliothèque une fois validé par la direction). Erreurs en rouge par personne. **Lancer le plan
+  est refusé** tant qu'une personne qui a un contact n'a pas de décision (`launchLegalPlan`, code
+  serveur : « Confirmez d'abord les contrats à prévoir. ») ; une personne **sans contact** reste
+  « Fiche à préparer d'abord » et se décide après sa fiche (décision : le besoin reste clé par
+  contact, `legal_agreement_needs`). Le Plan d'action affiche « À vous · Confirmer les contrats
+  nécessaires » tant que c'est à faire. **Changer** le responsable ou l'échéance d'une démarche
+  demande « Pourquoi * » (`change_legal_plan_item`, colonne `legal_plan_events.reason`, montrée
+  dans l'Historique). Migration `20261019090101`, tests `legal-contracts-before-launch.test.sql`.
+  Pas encore : validation / refus d'un modèle par la direction **dans** l'étape (elle se fait
+  sur la page du modèle) ; « document en tête » et « Changé depuis la v1 » dans la démarche
+  personne.
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique

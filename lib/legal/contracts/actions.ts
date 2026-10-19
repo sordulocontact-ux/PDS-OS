@@ -33,6 +33,8 @@ const mappingSchema = z.object({
         needed: z.boolean(),
         templateId: catalogIdSchema.nullable(),
         feeCents: z.number().int().positive().max(100_000_000).nullable(),
+        // « Pas d'accord nécessaire »: why (required by the database).
+        reason: z.string().trim().max(1000).nullable().optional(),
       }),
     )
     .max(200),
@@ -57,6 +59,7 @@ function errorOf(message: string): string {
   if (message.includes("mapping_template_not_validated")) return t.template;
   if (message.includes("mapping_template_incompatible")) return t.incompatible;
   if (message.includes("agreement_already_generated")) return t.already;
+  if (message.includes("mapping_reason_required")) return t.reason;
   return t.failed;
 }
 
@@ -80,6 +83,7 @@ export async function approveContractMapping(
         roles: row.formRoles,
         template_id: item.templateId,
         fee_cents: item.feeCents,
+        reason: item.needed ? null : (item.reason ?? null),
       },
     ];
   });

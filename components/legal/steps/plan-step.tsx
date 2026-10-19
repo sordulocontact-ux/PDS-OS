@@ -9,14 +9,30 @@ import { fr } from "@/lib/i18n/fr";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 
 /**
- * Plan d'action: proposed, modified, launched. Once launched, each démarche
- * is a step of the journey: the plan keeps the contracts to provide for,
- * the démarches that appeared since, and the list of its démarches.
+ * Plan d'action (proto « Projet complet »): the contracts to provide for,
+ * confirmed together before the launch, then the démarches to keep, give
+ * and date; launched, each démarche is a step of the journey and the plan
+ * keeps the contracts, the démarches that appeared since and their list.
  */
 export async function PlanStep({ projectId }: { projectId: string }) {
-  const { plan, tracking, agreements, demarches } =
+  const { plan, tracking, agreements, demarches, clearances } =
     await legalJourneyContext(projectId);
   const t = fr.legalJourney.plan;
+  const contracts = agreements.rows.length > 0 &&
+    plan.state !== "needs_confirmation" && (
+      <PageSection
+        id="legal-contracts"
+        title={fr.legalContracts.agreements.mappingTitle}
+        card={false}
+      >
+        <MappingPanel
+          projectId={projectId}
+          rows={agreements.rows}
+          approval={agreements.approval}
+          organizationId={clearances.organizationId}
+        />
+      </PageSection>
+    );
   return (
     <LegalStepFrame projectId={projectId} stepKey="plan">
       {plan.state === "launched" ? (
@@ -27,23 +43,14 @@ export async function PlanStep({ projectId }: { projectId: string }) {
           {tracking.state === "tracking" && tracking.added > 0 && (
             <AddedActions projectId={projectId} count={tracking.added} />
           )}
-          {agreements.rows.length > 0 && (
-            <PageSection
-              id="legal-contracts"
-              title={fr.legalContracts.agreements.mappingTitle}
-              card={false}
-            >
-              <MappingPanel
-                projectId={projectId}
-                rows={agreements.rows}
-                approval={agreements.approval}
-              />
-            </PageSection>
-          )}
+          {contracts}
           <LaunchedDemarches demarches={demarches} />
         </div>
       ) : (
-        <PlanView projectId={projectId} plan={plan} />
+        <div className="flex flex-col gap-6">
+          {contracts}
+          <PlanView projectId={projectId} plan={plan} />
+        </div>
       )}
     </LegalStepFrame>
   );

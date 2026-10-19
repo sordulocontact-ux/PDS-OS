@@ -8,40 +8,57 @@ import { MappingForm } from "@/components/legal/contracts/mapping-form";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
-import { formatInstant } from "@/lib/utils/instant";
+import { formatShortInstant } from "@/lib/utils/day";
 
-/** The mapping to approve, or approved (with « Modifier la cartographie »). */
+/**
+ * « Contrats à prévoir » (proto « Projet complet »): the form while a
+ * person with a contact has no decision, else what was confirmed, by whom
+ * and when, and « Modifier les contrats à prévoir ».
+ */
 export function MappingPanel({
   projectId,
   rows,
   approval,
+  organizationId,
 }: {
   projectId: string;
   rows: AgreementRow[];
   approval: { by: string; at: string } | null;
+  organizationId: string | null;
 }) {
   const t = fr.legalContracts.agreements;
   const router = useRouter();
-  const [editing, setEditing] = useState(approval === null);
+  const undecided = rows.some(
+    (r) => r.contactId && !r.contract && r.state === "unmapped",
+  );
+  const [editing, setEditing] = useState(approval === null || undecided);
 
   if (editing)
     return (
-      <MappingForm
-        projectId={projectId}
-        rows={rows}
-        onCancel={approval ? () => setEditing(false) : undefined}
-        onDone={() => {
-          setEditing(false);
-          router.refresh();
-        }}
-      />
+      <div className="flex flex-col gap-4">
+        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+          {t.plan.intro}
+        </p>
+        <MappingForm
+          projectId={projectId}
+          rows={rows}
+          organizationId={organizationId}
+          onCancel={
+            approval && !undecided ? () => setEditing(false) : undefined
+          }
+          onDone={() => {
+            setEditing(false);
+            router.refresh();
+          }}
+        />
+      </div>
     );
   return (
     <div className="flex flex-col gap-4">
       {approval && (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground">
-            {t.mappingApproved(approval.by, formatInstant(approval.at))}
+          <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+            {t.plan.confirmedBy(approval.by, formatShortInstant(approval.at))}
           </p>
           <Button
             type="button"

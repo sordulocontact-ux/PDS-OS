@@ -31,7 +31,7 @@ export const legalJourney = {
     },
     plan: {
       title: "Plan d'action",
-      why: "Le code propose les démarches ; lancées, elles sont suivies et cochées par leurs sources.",
+      why: "Le code propose les démarches et les contrats à prévoir. Vous confirmez les contrats en une fois, puis vous gardez, attribuez et datez chaque démarche.",
     },
     tracking: {
       title: "Suivi",

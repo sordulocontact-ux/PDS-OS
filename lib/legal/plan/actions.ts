@@ -8,6 +8,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
+import { loadAgreements } from "@/lib/legal/contracts/queries";
 import { todayInParis } from "@/lib/insights/dates";
 import { planDueDates } from "@/lib/legal/plan/due-dates";
 import { planItemPayload } from "@/lib/legal/plan/payload";
@@ -50,6 +51,19 @@ export async function launchLegalPlan(
     return { ok: false, error: fr.auth.errors.forbidden };
   const project = await getProject(id.data);
   if (!project) return { ok: false, error: fr.auth.errors.forbidden };
+
+  // The contracts to provide for are confirmed first (proto « Projet
+  // complet », lot 9 J3): a person with a contact and no decision blocks.
+  const agreements = await loadAgreements(project, access);
+  if (
+    agreements.rows.some(
+      (r) => r.contactId && !r.contract && r.state === "unmapped",
+    )
+  )
+    return {
+      ok: false,
+      error: fr.legalContracts.agreements.plan.launchFirst,
+    };
 
   const chosen = new Map(parsed.data.map((c) => [c.key, c]));
   const proposal = await proposeLegalPlan(project, access);

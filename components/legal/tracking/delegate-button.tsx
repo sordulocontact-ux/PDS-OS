@@ -2,19 +2,23 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
+import { TextareaField } from "@/components/auth/textarea-field";
 import { OptionSelect } from "@/components/projects/option-select";
 import { Button } from "@/components/ui/button";
+import { DialogFormActions } from "@/components/ui/dialog-form-actions";
 import { FormDialog } from "@/components/ui/form-dialog";
 import { fr } from "@/lib/i18n/fr";
 import { delegateLegalPlanItem } from "@/lib/legal/tracking/actions";
 
 const NONE = "none";
 
-/** « Modifier »: hand an action to someone else or move its due date, an
- * explicit delegation kept in the plan's journal (Juridique 07). */
+/** « Changer »: hand a démarche to someone else or move its due date, with
+ * its reason (« Pourquoi * »), kept in the plan's journal; the person who
+ * takes it over is told (Juridique 07, proto « Projet complet »). */
 export function DelegateButton({
   projectId,
   itemId,
@@ -36,10 +40,19 @@ export function DelegateButton({
   const [open, setOpen] = useState(false);
   const [responsible, setResponsible] = useState(responsibleId);
   const [due, setDue] = useState(dueOn);
+  const [reason, setReason] = useState("");
+  const [tried, setTried] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const missing = reason.trim() === "";
 
-  const save = () =>
+  const save = (event: React.FormEvent) => {
+    event.preventDefault();
+    setTried(true);
+    if (missing) {
+      document.getElementById(`delegate-why-${itemId}`)?.focus();
+      return;
+    }
     startTransition(async () => {
       setError(null);
       const result = await delegateLegalPlanItem({
@@ -47,11 +60,16 @@ export function DelegateButton({
         itemId,
         responsibleId: responsible,
         dueOn: due,
+        reason,
       });
       if (!result.ok) return setError(result.error);
+      toast.success(t.delegated);
       setOpen(false);
+      setReason("");
+      setTried(false);
       router.refresh();
     });
+  };
 
   return (
     <>
@@ -71,7 +89,7 @@ export function DelegateButton({
         description={t.delegateDescription}
         closeLabel={fr.masterPage.form.close}
       >
-        <div className="flex flex-col gap-5">
+        <form className="flex flex-col gap-5" onSubmit={save} noValidate>
           <p className="font-medium break-words">{label}</p>
           <OptionSelect
             name={`delegate-${itemId}`}
@@ -92,28 +110,24 @@ export function DelegateButton({
             defaultValue={dueOn ?? ""}
             onChange={(event) => setDue(event.target.value || null)}
           />
+          <TextareaField
+            id={`delegate-why-${itemId}`}
+            name="reason"
+            label={t.delegateWhy}
+            required
+            rows={2}
+            maxLength={1000}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            error={tried && missing ? t.delegateWhyMissing : undefined}
+          />
           {error && <FormMessage kind="error">{error}</FormMessage>}
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="lg"
-              disabled={pending}
-              onClick={() => setOpen(false)}
-            >
-              {fr.legal.intake.cancel}
-            </Button>
-            <Button
-              type="button"
-              size="lg"
-              disabled={pending}
-              aria-busy={pending || undefined}
-              onClick={save}
-            >
-              {pending ? t.saving : t.save}
-            </Button>
-          </div>
-        </div>
+          <DialogFormActions
+            pending={pending}
+            submitLabel={t.save}
+            onCancel={() => setOpen(false)}
+          />
+        </form>
       </FormDialog>
     </>
   );

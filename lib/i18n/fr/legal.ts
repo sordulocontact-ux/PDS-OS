@@ -533,10 +533,13 @@ export const legal = {
     overdue: (date: string) => `Échéance dépassée : ${date}`,
     due: (date: string) => `Échéance : ${date}`,
     open: "Ouvrir",
-    delegate: "Modifier",
+    delegate: "Changer",
+    delegated: "Responsable et échéance changés",
+    delegateWhy: "Pourquoi",
+    delegateWhyMissing: "Dites pourquoi : c'est gardé dans l'historique.",
     delegateTitle: "Responsable et échéance",
     delegateDescription:
-      "Changer le responsable est une délégation : elle reste dans le journal du plan.",
+      "Gardé dans l'historique. La personne qui reprend est prévenue.",
     save: "Enregistrer",
     saving: "Enregistrement…",
     errors: {

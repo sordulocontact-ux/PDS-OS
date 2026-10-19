@@ -224,6 +224,32 @@ export const legalContracts = {
     feeFromFiche: "d'après la fiche",
     existing: (title: string) => `Contrat existant : ${title}`,
     noContact: "Fiche à préparer d'abord",
+    // The proto's « Contrats à prévoir », before the launch (lot 9 J3).
+    plan: {
+      intro:
+        "Un contrat par personne, proposé d'après son rôle. Vous les confirmez ensemble : ce n'est ni valider leur contenu, ni les générer.",
+      contract: "Contrat",
+      choose: "Choisir un contrat",
+      noDeal: "Pas d'accord nécessaire",
+      noDealWhy: "Pourquoi aucun accord n'est nécessaire",
+      noDealReason: (reason: string) =>
+        `Pas d'accord nécessaire : « ${reason} »`,
+      noValidated: "Aucun modèle validé pour ce rôle",
+      proposedFrom: (role: string) =>
+        `Proposé d'après son rôle (${role}) · bibliothèque, validé par la direction`,
+      noTemplateSource:
+        "Aucun modèle de la bibliothèque ne correspond à son rôle : sans modèle validé, pas de contrat",
+      newTemplate: "Nouveau modèle de contrat",
+      newTemplateBody:
+        "Il entre dans la bibliothèque une fois validé par la direction, et sera proposé pour ces rôles sur tous les projets.",
+      choiceMissing: (name: string) =>
+        `Choisissez un contrat pour ${name}, créez un modèle, ou « Pas d'accord nécessaire ».`,
+      remaining: "Il reste des contrats à régler avant de confirmer.",
+      confirmedBy: (name: string, date: string) =>
+        `Confirmés par ${name} le ${date} : ce n'est ni valider leur contenu, ni les générer.`,
+      launchFirst: "Confirmez d'abord les contrats à prévoir.",
+      done: "Contrats nécessaires confirmés",
+    },
     states: {
       unmapped: "Contrats nécessaires à confirmer",
       not_needed: "Pas d'accord",
@@ -254,6 +280,7 @@ export const legalContracts = {
       incompatible: "Ce modèle n'est pas prévu pour ces rôles.",
       already: "Ce contrat a déjà été généré.",
       fee: "Vérifiez les rémunérations (un montant en euros).",
+      reason: "Dites pourquoi aucun accord n'est nécessaire.",
       failed: "L'action n'a pas pu être faite. Réessayez.",
     },
   },
