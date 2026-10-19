@@ -19,7 +19,7 @@ export const legalJourney = {
   steps: {
     inventory: {
       title: "État des lieux",
-      why: "Ce que le projet sait déjà, classé connu, à confirmer ou manquant.",
+      why: "Ce que le projet sait déjà, classé connu, à confirmer ou manquant. Lu par le code à chaque ouverture : rien ne s'y coche à la main.",
     },
     framing: {
       title: "Cadrage juridique",
@@ -27,7 +27,7 @@ export const legalJourney = {
     },
     confirmation: {
       title: "Confirmation",
-      why: "Une synthèse écrite par le code, confirmée par une personne.",
+      why: "Une synthèse écrite par le code, confirmée par une personne. Confirmer le dossier ne vaut ni signature, ni autorisation, ni dépôt.",
     },
     plan: {
       title: "Plan d'action",

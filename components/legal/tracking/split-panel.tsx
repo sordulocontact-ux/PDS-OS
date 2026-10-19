@@ -1,11 +1,12 @@
 import { ProposeSplitButton } from "@/components/legal/splits/split-actions";
 import { SplitLines } from "@/components/legal/splits/split-lines";
+import { SplitVersionChanges } from "@/components/legal/splits/split-version-changes";
 import { NextCard } from "@/components/ui/next-card";
 import { SplitEditorInline } from "@/components/legal/tracking/split-editor-inline";
 import { EmptyNote } from "@/components/shell/empty-state";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
-import type { TitleSplit } from "@/lib/legal/splits/queries";
+import type { SplitVersionView, TitleSplit } from "@/lib/legal/splits/queries";
 
 /**
  * One title's split in the plan's panel (the prototype's): the parts to
@@ -23,11 +24,23 @@ export function SplitPanel({
   const t = fr.legal.panels.split;
   const page = fr.legalSplits.page;
   const { active, draft } = split;
+  // JUR-29: a version against the one it follows.
+  const before = (v: SplitVersionView) =>
+    [...(active ? [active] : []), ...split.history]
+      .filter((x) => x.version < v.version)
+      .sort((a, b) => b.version - a.version)[0];
+  const changes = (v: SplitVersionView) => {
+    const previous = before(v);
+    return previous ? (
+      <SplitVersionChanges previous={previous} version={v} />
+    ) : null;
+  };
 
   if (draft)
     return (
       <NextCard kind="act" label={t.next} title={t.send}>
         <p className="text-sm text-muted-foreground">{t.sendBody}</p>
+        {changes(draft)}
         <SplitLines
           projectId={projectId}
           title={split.title}
@@ -101,12 +114,15 @@ export function SplitPanel({
       line.confirmation.state === "disputed" && line.confirmation.comment,
   );
   const lines = (
-    <SplitLines
-      projectId={projectId}
-      title={split.title}
-      lines={active.lines}
-      open={active.status !== "confirmed"}
-    />
+    <>
+      {changes(active)}
+      <SplitLines
+        projectId={projectId}
+        title={split.title}
+        lines={active.lines}
+        open={active.status !== "confirmed"}
+      />
+    </>
   );
 
   if (active.status === "confirmed")

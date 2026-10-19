@@ -38,18 +38,63 @@ export const LEGAL_BRANCH_PAGES = [
 ] as const;
 export type LegalBranchPage = (typeof LEGAL_BRANCH_PAGES)[number];
 
-/** The built step or branch page a URL's segments open: a single known
- * segment; none, unknown or deeper = null (the section's entry redirects
+// Each démarche of the plan is a step of the journey (proto « Projet
+// complet », Juridique): a person's fiche and contract, a borrowing, a
+// title's publishing split, a title's SACEM declaration. One URL each,
+// /legal/<kind>/<ref>; then « Prêt pour la sortie » at /legal/ready.
+export const LEGAL_DEMARCHE_KINDS = [
+  "person",
+  "clearance",
+  "split",
+  "sacem",
+] as const;
+export type LegalDemarcheKind = (typeof LEGAL_DEMARCHE_KINDS)[number];
+
+export const LEGAL_READY_KEY = "ready";
+
+/** A démarche's ref as a URL segment: ids stay as they are, a person's key
+ * (`contact:<id>`, `artist:<id>` or a normalized name) becomes a slug. */
+export function legalRefSlug(ref: string): string {
+  if (ref.startsWith("contact:")) return `c-${ref.slice(8)}`;
+  if (ref.startsWith("artist:")) return `a-${ref.slice(7)}`;
+  if (/^[0-9a-f-]{36}$/.test(ref)) return ref;
+  return `n-${ref.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+}
+
+/** The key of a démarche in the journey (« person:<ref> »). */
+export const legalDemarcheKey = (kind: LegalDemarcheKind, ref: string) =>
+  `${kind}:${ref}`;
+
+export const legalDemarcheHref = (
+  projectId: string,
+  kind: LegalDemarcheKind,
+  ref: string,
+) => `${routes.projectLegal(projectId)}/${kind}/${legalRefSlug(ref)}`;
+
+export type LegalRoute =
+  | { type: "step"; key: LegalStepKey }
+  | { type: "branch"; key: LegalBranchPage }
+  | { type: "demarche"; kind: LegalDemarcheKind; slug: string }
+  | { type: "ready" };
+
+/** What a URL's segments below /legal open: a step of the Dossier, a
+ * démarche, « Prêt pour la sortie » or a former branch page (redirected to
+ * its démarche); none or unknown = null (the section's entry redirects
  * before asking). */
-export function builtLegalStepOf(
+export function legalRouteOf(
   segments: string[] | undefined,
-): LegalStepKey | LegalBranchPage | null {
-  if (!segments || segments.length !== 1) return null;
-  return (
-    LEGAL_BUILT_STEPS.find((key) => key === segments[0]) ??
-    LEGAL_BRANCH_PAGES.find((key) => key === segments[0]) ??
-    null
-  );
+): LegalRoute | null {
+  if (!segments || segments.length === 0 || segments.length > 2) return null;
+  const [first, second] = segments;
+  if (segments.length === 2) {
+    const kind = LEGAL_DEMARCHE_KINDS.find((k) => k === first);
+    return kind ? { type: "demarche", kind, slug: second } : null;
+  }
+  if (first === LEGAL_READY_KEY) return { type: "ready" };
+  const step = LEGAL_BUILT_STEPS.find((key) => key === first);
+  if (step) return { type: "step", key: step };
+  const branch = LEGAL_BRANCH_PAGES.find((key) => key === first);
+  return branch ? { type: "branch", key: branch } : null;
 }
 
 /** Where the dossier stands, in the DG's five words (ticket « Architecture

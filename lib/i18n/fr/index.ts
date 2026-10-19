@@ -48,6 +48,7 @@ import { laboCaptures } from "./labo-captures";
 import { legal } from "./legal";
 import { legalClearance } from "./legal-clearance";
 import { legalContracts } from "./legal-contracts";
+import { legalDemarches } from "./legal-demarches";
 import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
 import { legalHistory } from "./legal-history";
@@ -60,6 +61,7 @@ import { network } from "./network";
 import { notifications } from "./notifications";
 import { projectHistory } from "./project-history";
 import { planSteps } from "./plan-steps";
+import { poQuestion } from "./po-question";
 import { projectPlan } from "./project-plan";
 import { projectWork } from "./project-work";
 import { records } from "./records";
@@ -125,6 +127,7 @@ export const fr = {
   framingIntel,
   briefRequests,
   planSteps,
+  poQuestion,
   strategy,
   strategyEntry,
   strategyDispositif,
@@ -200,6 +203,7 @@ export const fr = {
   legal,
   legalClearance,
   legalContracts,
+  legalDemarches,
   legalFormalities,
   legalForms,
   legalHistory,

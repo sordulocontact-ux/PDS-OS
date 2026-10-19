@@ -3034,6 +3034,51 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   existant (avec les étapes suivantes), le générer depuis un modèle (Juridique du projet) ou
   créer un modèle (JUR-18). Pas encore : aperçu chiffré du partage statutaire des DEP / DR.
 
+### Parcours du proto « Projet complet » (lot 9, J1, 19/10/2026)
+
+Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/legal.md` § 5, J1).
+
+- **Une étape par démarche** dans le Parcours, en trois intertitres : **Dossier** (État des lieux,
+  Cadrage juridique, Confirmation, Plan d'action), **Suivi** (« Sami Kader · fiche et contrat »,
+  « Emprunt « Night Lights » », « Répartition de l'édition « Néons » », « Déclaration SACEM
+  « Néons » » ; « Suivi · démarches proposées » tant que le plan n'est pas lancé, verrouillées
+  « Après : Plan d'action » avec « Ce qui viendra »), **Sortie** (« Prêt pour la sortie »).
+  URL : `/legal/person/<ref>`, `/legal/clearance/<id>`, `/legal/split/<masterId>`,
+  `/legal/sacem/<masterId>`, `/legal/ready` (`legalRouteOf`, `legalDemarcheHref`,
+  `legalRefSlug` : la clé d'une personne `contact:<id>` / `artist:<id>` / nom normalisé devient
+  `c-…` / `a-…` / `n-…`).
+- **Calcul** : `lib/legal/demarches/build.ts` lit le tableau du plan lancé
+  (`lib/legal/plan/board.ts`, inchangé : chaque temps lu à sa source) et en fait des
+  `JourneyStep` (`launchedDemarches`) ; avant le lancement, `proposedDemarches` part de la
+  proposition (`proposeLegalPlan`, calculée même avant la Confirmation). Ce qui est attendu et
+  de qui : `lib/legal/demarches/todo.ts` (`expectedOf`). **Acteurs** : le responsable de la
+  démarche (`legal_plan_items.responsible_person_id`, sinon le responsable du projet) fait les
+  gestes ; la direction n'a « À vous » que sur ses décisions (Valider le document, Valider les
+  conditions : `kind: "validate"`, alerte « Décision requise ») ; une personne extérieure ou des
+  ayants droit mettent l'étape « En attente de … ». Le Dossier est au responsable du projet
+  (plus « à toute personne qui voit le Juridique »).
+- **Chargeur** : `lib/journey/legal.ts` (`legalJourneys`, ligne `legal` de `JOURNEY_LOADERS`)
+  lit `legalJourneyContext` (`lib/legal/journey-context.ts`, mis en cache par requête), qui lit
+  désormais fiches, accords (**sans génération** : `loadAgreements`), répartitions, emprunts et
+  bulletins. La génération automatique des contrats prêts se fait à l'ouverture de l'étape
+  d'une personne (`DemarcheStep`, puis relecture).
+- **Corps d'une démarche** (`components/legal/demarches/`) : les panneaux d'avant
+  (`FichePanel`, `ContractPanel`, `SplitPanel` avec le comparateur de versions repris de la
+  carte de répartition, `ClearanceBody`, `FormalityCard`) deviennent le corps de l'étape
+  (`DemarchePart`) ; une personne garde ses deux temps (fiche puis contrat, l'autre replié) ;
+  « Responsable et échéance » (`DelegateButton`) en bas ; « Déjà fait » = l'Historique du
+  dossier filtré sur les objets de la démarche (`lib/legal/demarches/history.ts`).
+- **Plan d'action lancé** : « Contrats à prévoir » (`MappingPanel`), « Ajouter au plan »
+  (`AddedActions`) et la liste des démarches avec « Ouvrir ».
+- **Redirections** (`lib/legal/demarches/where.ts`) : `/legal/tracking` (et `?ligne=`),
+  `/legal/forms`, `/contracts`, `/splits`, `/clearances` (`?emprunt=`), `/formalities` ouvrent
+  la démarche qu'elles nommaient, sinon la première de leur genre qui attend. Les `sourceHref`
+  du Suivi (`lib/legal/tracking/sources.ts`, lus par la Distribution et l'état des workflows)
+  pointent sur l'étape de la démarche. Retirés : `TrackingView`, `PlanRowSheet`,
+  `NextLineButton`, tuiles des 4 groupes, `FormsView`, `AgreementsView`, `SplitsView`,
+  `ClearancesView`, `FormalitiesView`, `FormRowActions`, `SubmissionDialog`, `SplitCard` (aucune
+  table ni donnée touchée).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique
