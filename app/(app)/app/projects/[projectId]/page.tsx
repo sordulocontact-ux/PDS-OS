@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 
 import { BeforeWorkflows } from "@/components/overview/before-workflows";
 import { DependencyRows } from "@/components/overview/dependency-rows";
-import { PlanToLaunch } from "@/components/overview/plan-to-launch";
 import { WorkflowCards } from "@/components/overview/workflow-cards";
 import { CreativeTeam } from "@/components/projects/creative-team";
 import { ProjectHeader } from "@/components/projects/project-header";
@@ -88,9 +87,6 @@ export default async function ProjectOverviewPage({
   const head = overviewHead(project, header, flows, launchedAt);
   const framing =
     all.journeys.find((journey) => journey.module === "framing")?.steps ?? [];
-  const framingValidated = project.stages.some(
-    (s) => s.key === "framing" && s.state === "validated",
-  );
   const deps =
     launchedAt && flows ? await overviewDependencies(project, flows, all) : [];
 
@@ -134,15 +130,8 @@ export default async function ProjectOverviewPage({
         </>
       ) : (
         <>
+          {/* The Plan du projet is the Cadrage's fourth step (lot 2). */}
           <BeforeWorkflows projectId={project.id} steps={framing} />
-          {framingValidated && (
-            <PlanToLaunch
-              projectId={project.id}
-              access={access}
-              flows={flows}
-              canEdit={canEditProject(access, project)}
-            />
-          )}
         </>
       )}
     </div>

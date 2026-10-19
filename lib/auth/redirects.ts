@@ -152,19 +152,27 @@ export const routes = {
   projectsNewFromMaster: (masterId: string) =>
     `/app/projects/new?master=${masterId}`,
   project: (id: string) => `/app/projects/${id}`,
+  // The Cadrage's entry: it opens the step that waits for the viewer.
   projectFraming: (id: string) => `/app/projects/${id}/framing`,
-  // One screen of the Framing's guided review (lib/framing/guide.ts).
+  // One step of the Cadrage (lib/framing/journey.ts): start, dimensions,
+  // brief, plan. Any other value (a dimension, « review ») is a screen of
+  // the six dimensions.
   projectFramingStep: (id: string, step: string) =>
-    `/app/projects/${id}/framing?step=${step}`,
-  // One question of the Cadrage intelligent (lib/framing/dimensions.ts).
-  projectFramingQuestion: (id: string, dimension: string, key: string) =>
-    `/app/projects/${id}/framing?step=${dimension}&q=${key}`,
-  // What PO understood from a framing call, to confirm item by item.
-  projectFramingReview: (id: string, callId: string) =>
-    `/app/projects/${id}/framing?step=review&call=${callId}`,
-  // The plan PO proposes once the Brief is validated: a section of the
-  // overview (there is no plan page).
-  projectPlan: (id: string) => `/app/projects/${id}#plan`,
+    `/app/projects/${id}/framing/${
+      ["start", "dimensions", "brief", "plan"].includes(step)
+        ? step
+        : "dimensions"
+    }`,
+  // One question of the Cadrage intelligent (lib/framing/dimensions.ts),
+  // asked in « Les 6 dimensions ».
+  projectFramingQuestion: (id: string, _dimension: string, key: string) =>
+    `/app/projects/${id}/framing/dimensions?q=${key}`,
+  // What PO understood from a framing call: its proposals, with their
+  // sentence, in « Les 6 dimensions ».
+  projectFramingReview: (id: string) =>
+    `/app/projects/${id}/framing/dimensions`,
+  // The Plan du projet: step 4 of the Cadrage (proto « Projet complet »).
+  projectPlan: (id: string) => `/app/projects/${id}/framing/plan`,
   // The shareable Brief, printable as a PDF.
   projectFramingBrief: (id: string) => `/app/projects/${id}/framing/brief`,
   // The same Brief as a downloaded PDF file.

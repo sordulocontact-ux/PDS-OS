@@ -85,5 +85,5 @@ export async function startFramingWithPo(projectId: string) {
   // The redirect lands on the same URL: without this, the router serves its
   // cached entry screen (staleTimes) until a reload.
   revalidatePath(routes.project(projectId), "layout");
-  redirect(routes.projectFraming(projectId));
+  redirect(routes.projectFramingStep(projectId, "dimensions"));
 }

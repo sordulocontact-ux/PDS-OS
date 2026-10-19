@@ -150,3 +150,8 @@ export function nowOf<S extends JourneyStep>(
     waiting: open.filter((s) => !s.actor?.viewer),
   };
 }
+
+/** « Valider le Brief » → « valider le Brief »: an action inside a
+ * sentence keeps its proper nouns (proto: « répondre à 9 questions de PO »). */
+export const lowerFirst = (text: string) =>
+  text.charAt(0).toLowerCase() + text.slice(1);

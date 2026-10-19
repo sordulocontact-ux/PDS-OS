@@ -36,6 +36,7 @@ export function StartChoices({
   name = "choice",
   legend,
   columns = 2,
+  fixedOrder = false,
 }: {
   choices: StartChoice[];
   recommended?: string | null;
@@ -45,10 +46,16 @@ export function StartChoices({
   // The question above the cards (« Comment voulez-vous remplir le Brief ? »).
   legend?: string;
   columns?: 1 | 2;
+  // Keep the cards in the given order (the Cadrage's proto: the pill moves,
+  // never the cards).
+  fixedOrder?: boolean;
 }) {
-  const ordered = [...choices].sort(
-    (a, b) => Number(b.value === recommended) - Number(a.value === recommended),
-  );
+  const ordered = fixedOrder
+    ? choices
+    : [...choices].sort(
+        (a, b) =>
+          Number(b.value === recommended) - Number(a.value === recommended),
+      );
   const cards = ordered.map((choice) => {
     const inner = (
       <>

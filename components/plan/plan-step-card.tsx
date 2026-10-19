@@ -1,106 +1,90 @@
 import Link from "next/link";
 
 import { StatusDot } from "@/components/ui/status-dot";
-import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
-import type { PlanWorkflow } from "@/lib/plan/propose";
 import type { StepIssue } from "@/lib/plan/steps";
 import { workflowStatusTone } from "@/lib/ui/state-tones";
+import { formatDay } from "@/lib/utils/day";
 import type { CommonStatus } from "@/lib/workflow-status/rules";
 
 /** The anchor of a step in the board: its dependencies link to it. */
 export const stepAnchor = (key: string) => `plan-step-${key}`;
 
 /**
- * A step of the plan in its column (PROJ-UX-07): its real state, why it is
- * there, who pilots and who executes, for when, what it waits for (links
- * to those steps) and what does not hold. `actions`: the editing controls.
+ * A step of the plan in its column (proto frPlanView `.pcard`, PROJ-UX-07):
+ * « **Stratégie** · Marketing », why it is there, « pilote · échéance »,
+ * its real state once it runs, and what does not hold. `actions`: the
+ * editing controls; `below`: the column and pilot menus of « Modifier le
+ * plan ».
  */
 export function PlanStepCard({
   stepKey,
   title,
+  group,
   why,
   specialized,
   status,
   pilot,
-  executor,
   dueDate,
-  dependsOn,
-  dependencyKey,
   issues,
   actions,
+  below,
   muted = false,
 }: {
   stepKey: string;
   title: string;
+  // « Marketing » for its parts.
+  group?: string | null;
   why: string | null;
   specialized: string | null;
   // Null: not a workflow (a note, an added step) or not readable.
   status: CommonStatus | null;
   pilot: string | null;
-  executor: string | null;
   dueDate: string | null;
-  dependsOn: PlanWorkflow[];
-  // The key of the step a dependency points at, when it is on the board.
-  dependencyKey: (workflow: PlanWorkflow) => string | null;
   issues: StepIssue[];
   actions?: React.ReactNode;
+  below?: React.ReactNode;
   // A note of « À anticiper »: no pilot, no status.
   muted?: boolean;
 }) {
-  const t = fr.planSteps;
   const tp = fr.framingIntel.plan;
   return (
     <li
       id={stepAnchor(stepKey)}
-      className="flex scroll-mt-24 flex-col gap-2 rounded-2xl border border-border bg-background p-3"
+      className="flex scroll-mt-24 flex-col gap-1 rounded-xl border border-[color:var(--border-hairline)] bg-card p-3"
     >
-      <p className="text-body-md font-semibold break-words">{title}</p>
+      <p className="break-words">
+        <span className="text-body-md font-semibold">{title}</span>
+        {group && (
+          <span className="text-caption text-[color:var(--text-secondary)]">
+            {" "}
+            · {group}
+          </span>
+        )}
+      </p>
+      {why && (
+        <p className="text-caption text-[color:var(--text-secondary)]">{why}</p>
+      )}
+      {!muted && (
+        <p className="text-caption text-[color:var(--text-secondary)]">
+          {[pilot ?? tp.noOwner, dueDate ? formatDay(dueDate) : null]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      )}
+      {specialized && (
+        <p className="text-caption">{tp.specialized(specialized)}</p>
+      )}
       {status && (
         <StatusDot
           tone={workflowStatusTone[status]}
           label={fr.workflowStatus.statuses[status]}
           showLabel
-          className="text-caption text-muted-foreground"
+          className="text-caption text-[color:var(--text-secondary)]"
         />
       )}
-      {why && <p className="text-caption text-muted-foreground">{why}</p>}
-      {specialized && (
-        <p className="text-caption">{tp.specialized(specialized)}</p>
-      )}
-      {!muted && (
-        <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-caption">
-          <dt className="text-muted-foreground">{t.pilot}</dt>
-          <dd>{pilot ?? tp.noOwner}</dd>
-          <dt className="text-muted-foreground">{t.executor}</dt>
-          <dd>{executor ?? t.executorSame}</dd>
-          <dt className="text-muted-foreground">{t.due}</dt>
-          <dd>{dueDate ? formatBriefDate(dueDate) : t.noDue}</dd>
-          {dependsOn.length > 0 && (
-            <>
-              <dt className="text-muted-foreground">{t.dependsOn}</dt>
-              <dd className="flex flex-wrap gap-x-2">
-                {dependsOn.map((w) => {
-                  const key = dependencyKey(w);
-                  return key ? (
-                    <Link
-                      key={w}
-                      href={`#${stepAnchor(key)}`}
-                      className="underline underline-offset-4"
-                    >
-                      {tp.workflows[w]}
-                    </Link>
-                  ) : (
-                    <span key={w}>{tp.workflows[w]}</span>
-                  );
-                })}
-              </dd>
-            </>
-          )}
-        </dl>
-      )}
       {issues.length > 0 && (
-        <ul className="flex flex-col gap-1 rounded-xl bg-[var(--tone-warning-bg)] px-3 py-2 text-caption text-[color:var(--tone-warning-fg)]">
+        <ul className="flex flex-col gap-1 rounded-lg bg-[var(--tone-warning-bg)] px-3 py-2 text-caption text-[color:var(--tone-warning-fg)]">
           {issues.map((issue) => (
             <li key={issue.text}>
               {issue.href ? (
@@ -117,6 +101,7 @@ export function PlanStepCard({
           ))}
         </ul>
       )}
+      {below}
       {actions && <div className="flex flex-wrap gap-1">{actions}</div>}
     </li>
   );

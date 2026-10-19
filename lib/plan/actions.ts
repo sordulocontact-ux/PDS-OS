@@ -14,7 +14,10 @@ import {
 } from "@/lib/framing/result";
 import { fr } from "@/lib/i18n/fr";
 import { PLAN_COLUMNS, PLAN_WORKFLOWS, proposePlan } from "@/lib/plan/propose";
+import { withOutcome } from "@/lib/journey/outcome";
+import { JOURNEY_MODULES } from "@/lib/journey/types";
 import { createClient } from "@/lib/supabase/server";
+import type { WriteResult } from "@/lib/utils/write-result";
 
 // « Modifier le plan » then « Lancer le plan » (ticket § 9, PROJ-UX-07): the
 // browser sends the person's choices (column, kept or removed, pilot,
@@ -58,13 +61,10 @@ export async function launchPlan(
   const proposed = proposePlan(knowledge).flatMap((item, index) => {
     const chosen = byKey.get(item.key);
     if (chosen?.removed) return [];
-    // A note stays a note; a workflow may move between the three others.
+    // A note stays a note; a workflow may go in any column (Distribution
+    // and Suivi & bilan are « À anticiper », proto « Projet complet »).
     const column =
-      item.workflow === null
-        ? "anticipate"
-        : chosen && chosen.column !== "anticipate"
-          ? chosen.column
-          : item.column;
+      item.workflow === null ? "anticipate" : (chosen?.column ?? item.column);
     const isWorkflow = item.workflow !== null;
     return [
       {
@@ -137,7 +137,7 @@ export async function launchPlanWorkflow(
   const p = z
     .object({
       projectId: z.uuid(),
-      workflow: z.enum(["strategy", "master", "legal"]),
+      workflow: z.enum(PLAN_WORKFLOWS),
     })
     .safeParse({ projectId, workflow });
   if (!p.success) return fail("invalid_input");
@@ -153,4 +153,27 @@ export async function launchPlanWorkflow(
   if (error) return fromDatabaseError(error);
   revalidatePath(routes.project(projectId), "layout");
   return ok;
+}
+
+/**
+ * « Lancer le plan » from the Cadrage's step (proto frPlanView): the same
+ * launch, then what it started (rule 7: every workflow's journey read
+ * before and after).
+ */
+export async function launchProjectPlan(
+  projectId: string,
+  choices: z.input<typeof choice>[],
+  addedSteps: z.input<typeof added>[] = [],
+): Promise<WriteResult> {
+  return withOutcome(
+    projectId,
+    JOURNEY_MODULES,
+    fr.framingJourney.done.planLaunched,
+    async () => {
+      const result = await launchPlan(projectId, choices, addedSteps);
+      return result.ok
+        ? { ok: true }
+        : { ok: false, error: fr.framing.errors[result.error] };
+    },
+  );
 }

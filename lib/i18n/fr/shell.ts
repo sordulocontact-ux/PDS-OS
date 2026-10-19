@@ -452,7 +452,7 @@ export const shell = {
       review: "Suivi & bilan",
       soon: "Pas encore de page",
       strategyLocked:
-        "Se lance depuis le plan du projet (Vue d'ensemble), une fois le Brief validé",
+        "Démarre au lancement du plan du projet, après le Cadrage",
     },
     notFoundTitle: "Projet introuvable",
     notFoundBody: "Ce projet n'existe pas ou vous n'y avez pas accès.",

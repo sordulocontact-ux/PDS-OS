@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { GuideRow } from "@/components/framing/guide/guide-row";
-import { FramingStepCard } from "@/components/framing/guide/step-card";
+import { sourceLabel } from "@/components/framing/guide/source-quote";
 import { SourceLine } from "@/components/framing/source-line";
 import {
   LaterForm,
@@ -20,9 +20,7 @@ import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ToneCallout } from "@/components/ui/tone-callout";
 import { answerEnvelope } from "@/lib/framing/actions/answers";
 import {
   chooseHelp,
@@ -41,7 +39,6 @@ import type { QuestionState } from "@/lib/framing/assess";
 import { QUESTIONS } from "@/lib/framing/dimensions";
 import type { HelpSuggestion } from "@/lib/framing/help";
 import { fr } from "@/lib/i18n/fr";
-import { factTone, reviewTone } from "@/lib/ui/state-tones";
 
 // na / later: « Non applicable », « À définir plus tard » (PROJ-UX-04).
 type Mode = "view" | "write" | "na" | "later";
@@ -72,7 +69,6 @@ export function QuestionScreen({
   nextHref,
   suggestions = [],
   hint,
-  nav,
   itemPresets = [],
   children,
 }: {
@@ -84,8 +80,6 @@ export function QuestionScreen({
   suggestions?: HelpSuggestion[];
   // What was said about it, when it helps to answer (the timing, said in a call).
   hint?: string | null;
-  // Previous / next question (QuestionPager), beside the surtitle.
-  nav?: React.ReactNode;
   // Items to pick in one click for a structured list (PROJ-UX-05).
   itemPresets?: string[];
   children?: React.ReactNode;
@@ -95,18 +89,16 @@ export function QuestionScreen({
   const router = useRouter();
   const { pending, run } = useFramingAction();
   const [helping, startHelp] = useTransition();
-  const [mode, setMode] = useState<Mode>(
-    question.status === "missing" && def.kind !== "text" && !children
-      ? "write"
-      : "view",
-  );
+  const isField =
+    def.kind === "text" || def.kind === "date" || def.kind === "money";
+  const initialMode: Mode =
+    question.status === "missing" && isField && !children ? "write" : "view";
+  const [mode, setMode] = useState<Mode>(initialMode);
   // A PO suggestion picked: it opens the answer, editable, never saved as
   // is (« M'aider à définir » proposes, a person decides; PROJ-UX-04).
   const [picked, setPicked] = useState<string | null>(null);
   const next = () => router.push(nextHref);
   const busy = pending || helping;
-  const isField =
-    def.kind === "text" || def.kind === "date" || def.kind === "money";
   const provenance = question.provenance;
   // A sentence where a structure is asked (a call's proposal): structured
   // before it is confirmed, its source kept.
@@ -135,16 +127,16 @@ export function QuestionScreen({
       {question.status !== "known" && def.kind !== "parties" && (
         <>
           <Button
-            size="lg"
-            variant="outline"
+            size="sm"
+            variant="ghost"
             disabled={busy}
             onClick={() => setMode("na")}
           >
             {fr.framingIntel.answerStates.naAction}
           </Button>
           <Button
-            size="lg"
-            variant="outline"
+            size="sm"
+            variant="ghost"
             disabled={busy}
             onClick={() => setMode("later")}
           >
@@ -154,8 +146,8 @@ export function QuestionScreen({
       )}
       {question.status === "missing" && def.allowNone && (
         <Button
-          size="lg"
-          variant="outline"
+          size="sm"
+          variant="ghost"
           disabled={busy}
           onClick={() => run(() => answerNone(projectId, question.key), next)}
         >
@@ -164,7 +156,7 @@ export function QuestionScreen({
       )}
       {question.status === "to_confirm" && isField && (
         <Button
-          size="lg"
+          size="sm"
           variant="ghost"
           disabled={busy}
           onClick={() =>
@@ -176,7 +168,7 @@ export function QuestionScreen({
       )}
       {question.status === "missing" && !def.required && (
         <Button
-          size="lg"
+          size="sm"
           variant="ghost"
           disabled={busy}
           onClick={() =>
@@ -189,128 +181,129 @@ export function QuestionScreen({
     </>
   );
 
-  const fieldActions =
+  // To confirm: « Confirmer » / « Modifier »; known (opened again):
+  // « Modifier » (proto frQuestion).
+  const viewActions =
     editable &&
     isField &&
     mode === "view" &&
-    (question.status === "to_confirm" ? (
-      <>
-        {unstructured ? (
-          <Button size="lg" disabled={busy} onClick={() => setMode("write")}>
-            {t.structure}
-          </Button>
-        ) : (
-          <Button
-            size="lg"
-            disabled={busy}
-            onClick={() =>
-              run(() => confirmQuestion(projectId, question.key), next)
-            }
-          >
-            {t.confirm}
-          </Button>
-        )}
-        <Button
-          size="lg"
-          variant="outline"
-          disabled={busy}
-          onClick={() => setMode("write")}
-        >
-          {t.modify}
-        </Button>
-      </>
-    ) : question.status === "missing" ? (
-      <>
+    (question.status === "missing" ? (
+      // A list question shows its lines first; its single value is written
+      // on demand (« M'aider à définir », « Écrire moi-même »).
+      <div className="flex flex-wrap gap-2">
         {def.poHelp && (
-          <Button size="lg" disabled={busy} onClick={help}>
+          <Button variant="outline" disabled={busy} onClick={help}>
             {helping ? t.helping : t.help}
           </Button>
         )}
         <Button
-          size="lg"
-          variant={def.poHelp ? "outline" : "default"}
+          variant="outline"
           disabled={busy}
           onClick={() => setMode("write")}
         >
           {t.write}
         </Button>
-      </>
+      </div>
     ) : (
-      <>
-        <Button size="lg" disabled={busy} onClick={next}>
-          {t.next}
-        </Button>
+      <div className="flex flex-wrap gap-2">
+        {question.status === "to_confirm" &&
+          (unstructured ? (
+            <Button disabled={busy} onClick={() => setMode("write")}>
+              {t.structure}
+            </Button>
+          ) : (
+            <Button
+              disabled={busy}
+              onClick={() =>
+                run(() => confirmQuestion(projectId, question.key), next)
+              }
+            >
+              {t.confirm}
+            </Button>
+          ))}
         <Button
-          size="lg"
           variant="outline"
           disabled={busy}
           onClick={() => setMode("write")}
         >
           {t.modify}
         </Button>
-      </>
+      </div>
     ));
 
+  // A missing information: the field is open at once (it is « Écrire
+  // moi-même »), « M'aider à définir » above it (proto frQuestion).
+  const missingWrite = question.status === "missing" && mode === "write";
+  const quote =
+    provenance?.kind === "call" || provenance?.kind === "voice"
+      ? provenance.quote
+      : null;
+
   return (
-    <FramingStepCard
-      eyebrow={eyebrow}
-      nav={nav}
-      title={titleOf(question)}
-      description={
-        <span className="flex flex-col gap-2">
-          <span>{fr.framingIntel.questions[question.key].why}</span>
-          <span className="flex flex-wrap items-center gap-2">
-            <StatusBadge tone={factTone[question.status]} size="sm">
-              {fr.framingIntel.statuses[question.status]}
-            </StatusBadge>
-          </span>
-        </span>
-      }
-      actions={
-        (fieldActions || secondary) && (
-          <>
-            {fieldActions}
-            {mode === "view" && secondary}
-          </>
-        )
-      }
+    <section
+      aria-labelledby="po-question-title"
+      className="flex min-w-0 flex-col gap-2.5 rounded-xl bg-[var(--surface-tint)] p-4"
     >
+      <h3 className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold text-[color:var(--text-tertiary)]">
+        {t.poQuestion}
+      </h3>
+      <p className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold tracking-wide text-[color:var(--text-tertiary)] uppercase">
+        {eyebrow}
+      </p>
+      <h4
+        id="po-question-title"
+        className="text-[length:var(--type-figure-md)] leading-[var(--type-figure-md-lh)] font-semibold tracking-[var(--type-display-tracking)] break-words"
+      >
+        {titleOf(question)}
+      </h4>
+
       {isField && question.display && mode === "view" && (
-        <div className="flex flex-col gap-2">
-          <p className="text-body-lg font-semibold break-words whitespace-pre-line">
+        <div className="flex flex-col gap-1">
+          <p className="text-body-md font-semibold break-words whitespace-pre-line">
             {question.display}
           </p>
-          <SourceLine
-            projectId={projectId}
-            provenance={provenance}
-            state={
-              question.status === "known"
-                ? "known"
-                : question.fromRecord
-                  ? "record"
-                  : "proposed"
-            }
-            confirmed={question.confirmed}
-          />
-          {question.status === "to_confirm" && provenance?.quote && (
-            <ToneCallout tone={reviewTone.proposed}>
-              « {provenance.quote} »
-            </ToneCallout>
+          {quote ? (
+            <p className="text-caption text-[color:var(--text-secondary)]">
+              « {quote} » · {provenance ? sourceLabel(provenance) : ""}
+            </p>
+          ) : (
+            <SourceLine
+              projectId={projectId}
+              provenance={provenance}
+              state={
+                question.status === "known"
+                  ? "known"
+                  : question.fromRecord
+                    ? "record"
+                    : "proposed"
+              }
+              confirmed={question.confirmed}
+            />
           )}
         </div>
       )}
 
-      {hint && mode !== "view" && (
-        <p className="text-caption text-muted-foreground">{hint}</p>
-      )}
-      {hint && mode === "view" && question.status === "missing" && (
-        <ToneCallout tone={reviewTone.proposed}>{hint}</ToneCallout>
+      {hint && question.status === "missing" && (
+        <p className="text-caption text-[color:var(--text-secondary)]">
+          {hint}
+        </p>
       )}
 
       {isField &&
+        editable &&
+        missingWrite &&
+        def.poHelp &&
+        suggestions.length === 0 && (
+          <div>
+            <Button size="sm" variant="outline" disabled={busy} onClick={help}>
+              {helping ? t.helping : t.help}
+            </Button>
+          </div>
+        )}
+      {isField &&
         suggestions.length > 0 &&
-        mode === "view" &&
-        question.status !== "known" && (
+        question.status !== "known" &&
+        (mode === "view" || missingWrite) && (
           <Suggestions
             projectId={projectId}
             questionKey={question.key}
@@ -347,25 +340,27 @@ export function QuestionScreen({
           />
         ) : (
           <AnswerForm
+            key={picked ?? ""}
             projectId={projectId}
             question={question}
             picked={picked}
             onCancel={
-              question.status === "missing" && def.kind !== "text" && !picked
+              question.status === "missing" && !picked
                 ? undefined
                 : () => {
                     setPicked(null);
-                    setMode("view");
+                    setMode(question.status === "missing" ? "write" : "view");
                   }
             }
             onDone={next}
           />
         ))}
+      {viewActions}
       {editable && mode === "na" && (
         <NotApplicableForm
           projectId={projectId}
           questionKey={question.key}
-          onCancel={() => setMode("view")}
+          onCancel={() => setMode(initialMode)}
           onDone={next}
         />
       )}
@@ -373,13 +368,16 @@ export function QuestionScreen({
         <LaterForm
           projectId={projectId}
           questionKey={question.key}
-          onCancel={() => setMode("view")}
+          onCancel={() => setMode(initialMode)}
           onDone={next}
         />
       )}
 
       {children}
-    </FramingStepCard>
+      {(mode === "view" || missingWrite) && secondary && (
+        <div className="flex flex-wrap gap-1">{secondary}</div>
+      )}
+    </section>
   );
 }
 
@@ -539,17 +537,12 @@ function AnswerForm({
         />
       )}
       <div className="flex flex-wrap gap-2">
-        <Button
-          type="submit"
-          size="lg"
-          disabled={pending || value.trim() === ""}
-        >
-          {t.save}
+        <Button type="submit" disabled={pending || value.trim() === ""}>
+          {t.confirm}
         </Button>
         {onCancel && (
           <Button
             type="button"
-            size="lg"
             variant="ghost"
             disabled={pending}
             onClick={onCancel}

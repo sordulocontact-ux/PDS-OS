@@ -8,6 +8,7 @@ import { IconStop } from "@/components/icons";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
 import {
+  lowerFirst,
   isLocked,
   type JourneyStep,
   prereqsOf,
@@ -173,7 +174,7 @@ function StepSub({
   steps: JourneyStep[];
 }) {
   const mine = Boolean(s.actor?.viewer);
-  const todo = s.actor?.todo.toLowerCase();
+  const todo = s.actor ? lowerFirst(s.actor.todo) : undefined;
   let text: string | null = null;
   let tone: "me" | "warn" | null = null;
   if (s.status === "done") text = s.summary;

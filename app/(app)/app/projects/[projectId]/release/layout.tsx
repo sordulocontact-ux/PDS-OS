@@ -1,19 +1,15 @@
-import { WorkflowLocked } from "@/components/plan/workflow-locked";
-import { requireApproved } from "@/lib/auth/dal";
-import { distributionLocked } from "@/lib/plan/queries";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { allInOrder } from "@/lib/utils/parallel";
+import { WorkflowGate } from "@/components/plan/workflow-gate";
 
-// The Distribution starts with the plan, like the other workflows (proto
-// « Projet complet »): before « Lancer le plan », every step below shows the
-// lock instead of the page.
-export default async function ReleaseLayout({
+// Distribution waits for the Plan du projet (lot 2 « Projet complet »): every
+// workflow starts at « Lancer le plan », after the Cadrage.
+export default async function ReleaseGateLayout({
   children,
   params,
 }: LayoutProps<"/app/projects/[projectId]/release">) {
   const { projectId } = await params;
-  await allInOrder([requireApproved(), requireLaunchedProject(projectId)]);
-  if (await distributionLocked(projectId))
-    return <WorkflowLocked projectId={projectId} />;
-  return children;
+  return (
+    <WorkflowGate projectId={projectId} workflow="distribution">
+      {children}
+    </WorkflowGate>
+  );
 }

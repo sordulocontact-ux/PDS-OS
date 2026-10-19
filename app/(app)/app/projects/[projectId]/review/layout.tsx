@@ -1,3 +1,4 @@
+import { WorkflowGate } from "@/components/plan/workflow-gate";
 import { SectionTabs } from "@/components/shell/section-tabs";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { routes } from "@/lib/auth/redirects";
@@ -18,33 +19,35 @@ export default async function MarketingReviewLayout({
   const { projectId } = await params;
   const standing = await loadMarketingStanding(projectId);
   return (
-    <div className="flex flex-col gap-6">
-      <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-        <span>{t.status.label}</span>
-        <StatusBadge tone={marketingStatusTone[standing.status]} size="sm">
-          {t.status.values[standing.status]}
-        </StatusBadge>
-        <span>{t.status.projectApart}</span>
-      </p>
-      <SectionTabs
-        label={t.tabsLabel}
-        tabs={[
-          {
-            href: routes.projectReview(projectId),
-            label: t.tabs.dashboard,
-            exact: true,
-          },
-          {
-            href: routes.projectReviewReports(projectId),
-            label: t.tabs.reports,
-          },
-          {
-            href: routes.projectReviewClosure(projectId),
-            label: t.tabs.closure,
-          },
-        ]}
-      />
-      {children}
-    </div>
+    <WorkflowGate projectId={projectId} workflow="review">
+      <div className="flex flex-col gap-6">
+        <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>{t.status.label}</span>
+          <StatusBadge tone={marketingStatusTone[standing.status]} size="sm">
+            {t.status.values[standing.status]}
+          </StatusBadge>
+          <span>{t.status.projectApart}</span>
+        </p>
+        <SectionTabs
+          label={t.tabsLabel}
+          tabs={[
+            {
+              href: routes.projectReview(projectId),
+              label: t.tabs.dashboard,
+              exact: true,
+            },
+            {
+              href: routes.projectReviewReports(projectId),
+              label: t.tabs.reports,
+            },
+            {
+              href: routes.projectReviewClosure(projectId),
+              label: t.tabs.closure,
+            },
+          ]}
+        />
+        {children}
+      </div>
+    </WorkflowGate>
   );
 }
