@@ -9,6 +9,11 @@ export const framingJourney = {
   module: "Cadrage",
   owner: "Responsable du projet",
   validatorRole: "Validation de la direction",
+  // « Qui fait quoi » of the Cadrage.
+  roleWhat: {
+    owner: "Mène le cadrage, crée le Brief et lance le plan",
+    validator: "Valide le Brief de cadrage",
+  },
   // « S'ouvre quand Les 6 dimensions est fait. » (proto, Marketing wording).
   blocked: (prereqs: string) =>
     prereqs.includes(" et ")
@@ -180,6 +185,7 @@ export const framingJourney = {
     waiting: (name: string) =>
       `En attente de ${name} : valider le Brief de cadrage`,
     more: "Corrections détaillées, comparaison et export",
+    detailed: "Demander des corrections détaillées",
     openRequests: (n: number) =>
       `${plural(n, "demande obligatoire reste ouverte", "demandes obligatoires restent ouvertes")} : elle${n > 1 ? "s" : ""} empêche${n > 1 ? "nt" : ""} de valider. Levez-la${n > 1 ? "s" : ""} ou demandez une modification.`,
   },
@@ -192,6 +198,7 @@ export const framingJourney = {
     columnOf: (name: string) => `Colonne de ${name}`,
     pilotOf: (name: string) => `Pilote de ${name}`,
     save: "Enregistrer le plan",
+    saved: "Plan enregistré.",
     cancel: "Annuler",
     waiting: (name: string) =>
       `En attente de ${name} : lancer le plan du projet`,

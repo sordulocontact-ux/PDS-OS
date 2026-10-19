@@ -550,9 +550,10 @@ export const contractStateTone: Record<string, Tone> = {
  * validator, validated, sent back for a change, replaced by a newer one. */
 export const briefVersionTone: Record<string, Tone> = {
   pending: "neutral",
-  sent: "warning",
+  // Proto « Projet complet » (frBrief): in review = info, a change = warning.
+  sent: "info",
   approved: "success",
-  changes_requested: "danger",
+  changes_requested: "warning",
   superseded: "neutral",
 };
 

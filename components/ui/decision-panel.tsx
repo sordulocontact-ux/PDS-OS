@@ -45,6 +45,8 @@ export function DecisionPanel({
   commentHint = t.commentHint,
   commentPlaceholder,
   commentRequired = t.commentRequired,
+  fields,
+  check,
   onDone,
 }: {
   id?: string;
@@ -57,6 +59,11 @@ export function DecisionPanel({
   commentHint?: string | null;
   commentPlaceholder?: string;
   commentRequired?: string;
+  // The step's own fields, above the comment (the Cadrage's « Dimensions à
+  // revoir »).
+  fields?: React.ReactNode;
+  // Before deciding: false stops it (the step shows its own error).
+  check?: (kind: DecisionOutcomeKind) => boolean;
   onDone?: () => void;
 }) {
   const [comment, setComment] = useState("");
@@ -74,6 +81,8 @@ export function DecisionPanel({
     const needs = outcome.kind !== "approve";
     const lacking = needs && !comment.trim();
     setMissing(lacking);
+    const own = check ? check(outcome.kind) : true;
+    if (!own) return;
     if (lacking) {
       document.getElementById(fieldId)?.focus();
       return;
@@ -84,6 +93,7 @@ export function DecisionPanel({
   return (
     <div className="flex flex-col gap-3">
       {title && <h3 className="text-body-md font-semibold">{title}</h3>}
+      {fields}
       <TextareaField
         id={fieldId}
         name="comment"

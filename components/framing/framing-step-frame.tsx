@@ -3,6 +3,12 @@ import { notFound } from "next/navigation";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { NowCard } from "@/components/shell/journey/now-card";
+import { ModuleAttention } from "@/components/shell/module/module-attention";
+import {
+  StepBlockers,
+  StepToolsBlock,
+} from "@/components/shell/module/step-tools-block";
+import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import {
   StepPanel,
   type StepSlots,
@@ -11,6 +17,7 @@ import { framingJourneyContext } from "@/lib/framing/journey-context";
 import type { FramingStepKey } from "@/lib/framing/journey";
 import { fr } from "@/lib/i18n/fr";
 import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
+import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 
 const t = fr.framingJourney;
 
@@ -40,9 +47,40 @@ export async function FramingStepFrame({
   const { steps, viewerName } = ctx;
   const step = steps.find((s) => s.key === stepKey);
   if (!step) notFound();
+  // Blockers and noted information of the step (sub-lot C6).
+  const stepRef: StepRef = { projectId, module: "framing", stepKey };
+  const choices = steps.map((s) => ({
+    key: stepChoiceKey({ module: "framing", stepKey: s.key }),
+    label: s.title,
+  }));
   return (
     <div className="flex flex-col gap-5">
-      <ProjectHeader projectId={projectId} steps={steps} />
+      <ProjectHeader
+        projectId={projectId}
+        steps={steps}
+        actions={
+          <WhoDoesWhatButton
+            roles={[
+              {
+                key: "owner",
+                label: t.owner,
+                kind: "exec",
+                holder: ctx.project.ownerName
+                  ? { name: ctx.project.ownerName }
+                  : null,
+                what: t.roleWhat.owner,
+              },
+              {
+                key: "validator",
+                label: t.validatorRole,
+                kind: "valid",
+                holder: ctx.validator ? { name: ctx.validator.name } : null,
+                what: t.roleWhat.validator,
+              },
+            ]}
+          />
+        }
+      />
       <NowCard
         steps={steps}
         viewerName={viewerName}
@@ -50,6 +88,11 @@ export async function FramingStepFrame({
         shownKey={stepKey}
         elsewhere={elsewhereOf(journeys, steps)}
         labels={t.now}
+      />
+      <ModuleAttention
+        stepRef={stepRef}
+        modules={["framing"]}
+        steps={choices}
       />
       <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
         <JourneySpine
@@ -64,7 +107,13 @@ export async function FramingStepFrame({
           blockedLabel={t.blocked}
           {...slots}
         >
+          <StepBlockers stepRef={stepRef} steps={choices} />
           {children}
+          <StepToolsBlock
+            stepRef={stepRef}
+            steps={choices}
+            locked={step.status === "blocked"}
+          />
         </StepPanel>
       </div>
     </div>
