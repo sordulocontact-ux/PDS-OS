@@ -51,11 +51,9 @@ const firstDue = (work: ProjectWork) =>
 export const loadMyJourneyWork = cache(async (): Promise<MyJourneyWork> => {
   const { projects, error } = await listProjects();
   const launched = projects.filter((p) => p.status === "launched");
-  const t0 = Date.now();
   const settled = await settleWithLimit(launched, PROJECTS_AT_ONCE, (p) =>
     loadShellActions(p.id),
   );
-  console.log("TIMING all", launched.length, Date.now() - t0);
   let failed = error;
   const works: ProjectWork[] = [];
   const byProject: Record<string, number> = {};
