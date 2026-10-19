@@ -3,11 +3,8 @@ import { fr } from "@/lib/i18n/fr";
 import {
   DISTRIBUTION_STEPS,
   distributionStepHref,
-  type DistributionStep,
+  isDistributionStep,
 } from "@/lib/ui/distribution-steps";
-
-const isDistributionStep = (step: string): step is DistributionStep =>
-  (DISTRIBUTION_STEPS as readonly string[]).includes(step);
 
 // Where each step of a workflow is done (lib/workflow-status/rules.ts names
 // the step): the overview's cards and actions open it.
@@ -62,7 +59,12 @@ export function workflowSteps(
         ? fr.shell.project.legalSteps
         : workflow === "marketing"
           ? fr.shell.project.marketingSteps
-          : fr.shell.project.distributionSteps;
+          : Object.fromEntries(
+              Object.entries(fr.distributionJourney.steps).map(([k, v]) => [
+                k,
+                v.title,
+              ]),
+            );
   return (STEP_KEYS[workflow] ?? []).map((key) => ({
     key,
     label: typeof labels[key] === "string" ? labels[key] : key,

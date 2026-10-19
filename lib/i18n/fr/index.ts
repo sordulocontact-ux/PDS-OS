@@ -97,6 +97,8 @@ import { productionPreprod } from "./production-preprod";
 import { productionShoot } from "./production-shoot";
 import { release } from "./release";
 import { distribution } from "./distribution";
+import { distributionJourney } from "./distribution-journey";
+import { projectDates } from "./project-dates";
 import { marketing } from "./marketing";
 import { marketingReview } from "./marketing-review";
 import { shell } from "./shell";
@@ -195,6 +197,8 @@ export const fr = {
   projectReview,
   release,
   distribution,
+  distributionJourney,
+  projectDates,
   assistant,
   assistantRecords,
   voice,

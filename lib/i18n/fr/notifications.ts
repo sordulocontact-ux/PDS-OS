@@ -70,6 +70,14 @@ export const notifications = {
       `${actor} a envoyé la proposition de réalisation de « ${project} » : elle attend votre validation.`,
     production_direction_decided: (actor: string, project: string) =>
       `${actor} a tranché sur la proposition de réalisation de « ${project} ».`,
+    distribution_version_submitted: (actor: string, project: string) =>
+      `${actor} a soumis le dossier de livraison de « ${project} » : il attend votre validation.`,
+    distribution_version_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur le dossier de livraison de « ${project} ».`,
+    distribution_closure_proposed: (actor: string, project: string) =>
+      `${actor} propose de clôturer la distribution de « ${project} » : votre décision est attendue.`,
+    distribution_closure_decided: (actor: string, project: string) =>
+      `${actor} a tranché sur la clôture de la distribution de « ${project} ».`,
     step_blocker_reported: (actor: string, project: string) =>
       `${actor} a signalé un blocage sur « ${project} ».`,
     step_blocker_lifted: (actor: string, project: string) =>

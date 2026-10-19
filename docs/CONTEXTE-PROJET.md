@@ -237,6 +237,22 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
 - **Bilan Marketing** : le ticket « Bilan, validation et clôture » n'est pas codé ; Suivi & bilan
   lit déjà les trois axes et les réserves de chaque activation.
 
+### Points à trancher : Distribution (lot 10, 19/10/2026)
+
+- **Écart master final → sortie** : le proto montre 14 jours ; aucun ticket ni code ne le fixe.
+  Seule règle tenue : une échéance du Cadrage (master final) ne suit pas la date visée. Sans
+  date de master final, l'en-tête n'en montre pas.
+- **Précommande** : proposée seulement si la Stratégie a un temps fort « pré-save » /
+  « précommande » ; pas de règle « 3 semaines avant » inventée.
+- **Master déjà au Catalogue sans workflow Master** : gardé « Disponible » (non bloquant) comme
+  avant ; le proto bloque tant que le Master ne l'a pas validé.
+- **« Prêt pour la sortie » du Juridique** : montré comme prérequis de l'étape Dépôt (✓/○ avec sa
+  source), sans verrouiller le dépôt ; seul un emprunt non sécurisé bloque la soumission.
+- **UPC** : « Attribué par The Orchard au dépôt », pas encore de champ pour l'enregistrer.
+- **Smartlink** : retiré de l'écran Distribution (route publique gardée) ; Distribution ou
+  Marketing, à trancher avec la décision Odesli / maison.
+- **Ordre Reçu → Accepté → Livré** à la saisie : aide de l'écran seulement, la base ne déduit rien.
+
 ### Vocabulaire fixé
 
 Trois objets, trois noms. Ne jamais en introduire d'autres dans l'interface.

@@ -35,7 +35,7 @@ import { loadMembers, loadValidators } from "@/lib/framing/related";
 import { fr } from "@/lib/i18n/fr";
 import { canEditProject } from "@/lib/projects/edit-access";
 import type { ProjectDetail } from "@/lib/projects/types";
-import { formatDate } from "@/lib/release/format";
+import { formatDay as formatDate } from "@/lib/utils/day";
 import { createClient } from "@/lib/supabase/server";
 
 export type CheckView = RecordedCheck & {
@@ -189,6 +189,7 @@ export async function loadDistributionView(
       validator,
       checks,
       versions,
+      paramsConfirmed: sources.paramsConfirmed !== null,
     }),
     drift: open?.snapshot
       ? snapshotDrift(open.snapshot.sections, sections)

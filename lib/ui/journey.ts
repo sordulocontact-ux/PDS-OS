@@ -104,8 +104,12 @@ export type JourneyStep = {
   summary: string | null;
   // Intertitle of the journey this step sits under (« Dossier »).
   group?: string;
-  // Red subtitle in the journey: a missed due date, a decision required.
-  alert?: "overdue" | "decision";
+  // Red subtitle in the journey: a missed due date, a decision required,
+  // sources that block it (the subtitle is then its summary alone).
+  alert?: "overdue" | "decision" | "blocking";
+  // Done, but not « clean »: closed with reserves (warning mark, never
+  // green; proto Distribution).
+  reserve?: boolean;
   // ISO date the step is due (« avant le Sam. 05/12/2026 »).
   due?: string | null;
   // A blocker was reported on it (stop icon after its title).

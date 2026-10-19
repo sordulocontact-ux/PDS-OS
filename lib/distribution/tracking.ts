@@ -101,3 +101,12 @@ export function cycles(
       .sort((a, b) => b.declaredAt.localeCompare(a.declaredAt)),
   }));
 }
+
+/** What The Orchard answers after a deposit, in the order of the frieze
+ * (an order of the screen only: nothing is deduced, § 7). */
+export const ORCHARD_ANSWERS = [
+  "received",
+  "accepted",
+  "platforms_delivered",
+] as const;
+export type OrchardAnswer = (typeof ORCHARD_ANSWERS)[number];

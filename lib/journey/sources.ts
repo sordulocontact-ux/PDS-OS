@@ -6,6 +6,7 @@ import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { conceptionJourney } from "./conception";
+import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
 import { legalJourneys } from "./legal";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
@@ -63,7 +64,7 @@ export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   marketing,
   master: none,
   legal: legalJourneys,
-  distribution: none,
+  distribution: distributionJourneys,
 };
 
 /** Whether the project's workflows are launched at all (no journeys before). */

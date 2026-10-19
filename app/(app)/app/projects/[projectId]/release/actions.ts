@@ -4,13 +4,10 @@ import { revalidatePath } from "next/cache";
 
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
-import type {
-  CheckReleaseResult,
-  SaveReleaseState,
-} from "@/lib/release/action-types";
+import type { CheckReleaseResult } from "@/lib/release/action-types";
+import { releaseIsrcs } from "@/lib/release/isrc";
 import { detectAndRecord } from "@/lib/release/persist";
 import { getProjectRelease } from "@/lib/release/queries";
-import { parseReleaseForm, type ReleaseField } from "@/lib/release/schema";
 import { isUuid } from "@/lib/release/uuid";
 import { createClient } from "@/lib/supabase/server";
 
@@ -27,98 +24,18 @@ async function load(projectId: string) {
   return data ? { supabase, ...data } : null;
 }
 
-export async function saveRelease(
-  projectId: string,
-  _previous: SaveReleaseState,
-  formData: FormData,
-): Promise<SaveReleaseState> {
-  const fields: ReleaseField[] = [
-    "title",
-    "isrc",
-    "upc",
-    "plannedReleaseDate",
-    "spotifyUrl",
-  ];
-  const values = Object.fromEntries(
-    fields.map((name) => [name, String(formData.get(name) ?? "")]),
-  ) as Record<ReleaseField, string>;
-  const fail = (
-    formError: "isrcTaken" | "generic" | null,
-    fieldErrors: Partial<Record<ReleaseField, true>> = {},
-  ): SaveReleaseState => ({ status: "error", fieldErrors, formError, values });
-
-  const parsed = parseReleaseForm(formData);
-  if (!parsed.success) {
-    const fieldErrors: Partial<Record<ReleaseField, true>> = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path[0];
-      if (typeof field === "string" && fields.includes(field as ReleaseField)) {
-        fieldErrors[field as ReleaseField] = true;
-      }
-    }
-    return fail(null, fieldErrors);
-  }
-
-  const context = await load(projectId);
-  if (!context) return fail("generic");
-  const { supabase, project, release } = context;
-  const row = {
-    title: parsed.data.title,
-    isrc: parsed.data.isrc,
-    upc: parsed.data.upc,
-    planned_release_date: parsed.data.plannedReleaseDate,
-    spotify_url: parsed.data.spotifyUrl,
-  };
-
-  // `select` returns the written row: an update the RLS filters out (not the
-  // project's owner) writes nothing without an error, never "saved".
-  const { data: written, error } = release
-    ? await supabase
-        .from("releases")
-        .update(row)
-        .eq("id", release.id)
-        .select("id")
-    : await supabase
-        .from("releases")
-        .insert({
-          ...row,
-          organization_id: project.organizationId,
-          project_id: project.id,
-        })
-        .select("id");
-
-  if (error) {
-    if (error.code === "23505") return fail("isrcTaken", { isrc: true });
-    console.error("saveRelease:", error.code, error.message);
-    return fail("generic");
-  }
-  if (!written?.length) return fail("generic");
-
-  revalidatePath(routes.projectRelease(projectId), "layout");
-  return {
-    status: "saved",
-    at: Date.now(),
-    values: {
-      title: row.title,
-      isrc: row.isrc ?? "",
-      upc: row.upc ?? "",
-      plannedReleaseDate: row.planned_release_date ?? "",
-      spotifyUrl: row.spotify_url ?? "",
-    },
-  };
-}
-
 export async function checkRelease(
   projectId: string,
 ): Promise<CheckReleaseResult> {
   const context = await load(projectId);
   if (!context?.release) return { ok: false, error: "not_found" };
   const { supabase, release } = context;
-  if (!release.isrc) return { ok: false, error: "no_isrc" };
+  const isrc = (await releaseIsrcs(supabase, [release])).get(release.id);
+  if (!isrc) return { ok: false, error: "no_isrc" };
 
   const outcome = await detectAndRecord(supabase, {
     id: release.id,
-    isrc: release.isrc,
+    isrc,
     spotifyUrl: release.spotify_url,
   });
   if (!outcome.ok) {

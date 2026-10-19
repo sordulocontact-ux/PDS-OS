@@ -365,6 +365,7 @@ export type Database = {
       distribution_anomalies: {
         Row: {
           description: string
+          from_distributor: boolean
           id: string
           kind: string
           organization_id: string
@@ -382,6 +383,7 @@ export type Database = {
         }
         Insert: {
           description: string
+          from_distributor?: boolean
           id?: string
           kind: string
           organization_id: string
@@ -399,6 +401,7 @@ export type Database = {
         }
         Update: {
           description?: string
+          from_distributor?: boolean
           id?: string
           kind?: string
           organization_id?: string
@@ -4850,6 +4853,8 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          params_confirmed_at: string | null
+          params_confirmed_by: string | null
           organization_id: string
           prelisten: boolean | null
           prelisten_on: string | null
@@ -4868,6 +4873,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          params_confirmed_at?: string | null
+          params_confirmed_by?: string | null
           organization_id: string
           prelisten?: boolean | null
           prelisten_on?: string | null
@@ -4886,6 +4893,8 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          params_confirmed_at?: string | null
+          params_confirmed_by?: string | null
           organization_id?: string
           prelisten?: boolean | null
           prelisten_on?: string | null
@@ -16347,6 +16356,72 @@ export type Database = {
       distribution_current_version: {
         Args: { p_project_id: string }
         Returns: number
+      }
+      declare_distribution_answers: {
+        Args: { p_items: Json; p_project_id: string }
+        Returns: number
+      }
+      attach_distribution_declaration_proof: {
+        Args: {
+          p_declaration_id: string
+          p_proof_name: string
+          p_proof_path: string
+        }
+        Returns: undefined
+      }
+      declare_distribution_corrections: {
+        Args: {
+          p_kind: string
+          p_module: string
+          p_note: string
+          p_project_id: string
+          p_severity: string
+        }
+        Returns: string
+      }
+      confirm_distribution_platform: {
+        Args: { p_platform: string; p_project_id: string; p_url: string | null }
+        Returns: undefined
+      }
+      report_distribution_platform_problem: {
+        Args: {
+          p_module: string
+          p_note: string
+          p_platform: string
+          p_problem: string
+          p_project_id: string
+          p_url: string | null
+        }
+        Returns: string
+      }
+      confirm_distribution_params: {
+        Args: {
+          p_preorder: boolean | null
+          p_preorder_on: string | null
+          p_project_id: string
+          p_validator: string | null
+        }
+        Returns: undefined
+      }
+      distribution_legal_blockers: {
+        Args: { p_project_id: string }
+        Returns: {
+          element: string
+          id: string
+          status: string
+          work: string
+        }[]
+      }
+      distribution_cover: {
+        Args: { p_project_id: string }
+        Returns: {
+          chosen: boolean
+          deliverable_id: string | null
+          delivered_at: string | null
+          sheet_id: string
+          title: string
+          version_number: number | null
+        }[]
       }
       declare_distribution: {
         Args: {
