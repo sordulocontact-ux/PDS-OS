@@ -72,8 +72,10 @@ select throws_ok($$ update public.design_references set moodboard_id = pg_temp.i
                     where id = pg_temp.id_of('board') $$, '23514', null, 'a moodboard never sits in another');
 select throws_ok($$ update public.design_references set usage = 'stolen' where id = pg_temp.id_of('old') $$,
   '23514', null, 'the rights of use come from a closed list');
-select throws_ok($$ update public.design_references set type = 'proposal' where id = pg_temp.id_of('old') $$,
-  '23514', null, 'a proposal is not a reference: it is a design version');
+-- « Proposition créative » is one of the four sorts of the proto (20261019040601);
+-- anything else is still refused.
+select throws_ok($$ update public.design_references set type = 'deliverable' where id = pg_temp.id_of('old') $$,
+  '23514', null, 'the sort of a reference comes from a closed list');
 
 select * from finish();
 rollback;

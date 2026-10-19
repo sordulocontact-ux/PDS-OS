@@ -69,9 +69,9 @@ select pg_temp.id_of('org'), p.id, d.id
    and not exists (select 1 from public.project_stages s
                     where s.project_id = p.id and s.stage_definition_id = d.id);
 -- A Fiche Livrable « Pochette » in each project.
-insert into public.design_deliverables (organization_id, project_id, origin, title)
-values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'manual', 'Pochette'),
-       (pg_temp.id_of('org'), pg_temp.id_of('other_project'), 'manual', 'Pochette');
+insert into public.design_deliverables (organization_id, project_id, origin, title, note)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), 'manual', 'Pochette', 'Pochette du single'),
+       (pg_temp.id_of('org'), pg_temp.id_of('other_project'), 'manual', 'Pochette', 'Pochette du single');
 insert into public.design_sheets (organization_id, project_id, design_deliverable_id, title)
 select organization_id, project_id, id, 'Pochette' from public.design_deliverables
  where project_id in (pg_temp.id_of('project'), pg_temp.id_of('other_project'));
