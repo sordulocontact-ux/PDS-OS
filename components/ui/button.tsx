@@ -7,22 +7,25 @@ import { cn } from "cn"
 // primary = black pill, outline = border, ghost = grey text and soft hover.
 // A press scales to .97, unless motion is reduced; no shadow.
 // rounded-full, not rounded-pill: Tailwind sorts radius utilities by name, so
-// only rounded-full lets the icon sizes' rounded-lg win.
+// only rounded-full lets the icon sizes' rounded-lg win. Each variant sets its
+// own border colour (never the base): buttonVariants() is also used raw on
+// links, without cn(), and a base border-transparent sorted after
+// border-border erased every outline (recette, 19/10/2026).
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline transition-[background-color,border-color,color,scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] outline-none motion-safe:active:scale-[.97] select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-full border bg-clip-padding text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold whitespace-nowrap no-underline transition-[background-color,border-color,color,scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] outline-none motion-safe:active:scale-[.97] select-none disabled:pointer-events-none disabled:opacity-40 aria-invalid:border-[color:var(--border-strong)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-[var(--control-primary-bg-hover)]",
+        default: "border-transparent bg-primary text-primary-foreground hover:bg-[var(--control-primary-bg-hover)]",
         outline:
           "border-border bg-background text-foreground hover:border-[color:var(--border-hover)] hover:bg-[var(--control-bg-hover)] active:bg-[var(--control-bg-pressed)] aria-expanded:bg-[var(--control-bg-hover)]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[var(--control-bg-pressed)]",
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-[var(--control-bg-pressed)]",
         ghost:
-          "text-[color:var(--text-secondary)] hover:bg-[var(--control-bg-hover)] hover:text-foreground active:bg-[var(--control-bg-pressed)] aria-expanded:bg-[var(--control-bg-hover)]",
+          "border-transparent text-[color:var(--text-secondary)] hover:bg-[var(--control-bg-hover)] hover:text-foreground active:bg-[var(--control-bg-pressed)] aria-expanded:bg-[var(--control-bg-hover)]",
         // No red in the system: a destructive action reads as a full-ink control.
-        destructive: "bg-destructive text-destructive-foreground hover:bg-[var(--control-primary-bg-hover)]",
-        link: "text-foreground underline underline-offset-4",
+        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-[var(--control-primary-bg-hover)]",
+        link: "border-transparent text-foreground underline underline-offset-4",
       },
       size: {
         default: "h-[var(--density-control-h)] gap-1.5 px-[var(--density-control-pad-x)]",
