@@ -126,6 +126,8 @@ export type ProductionSheetData = {
     closedBy: string | null;
     // « Demander une révision du devis » after a validation (proto).
     quoteRevision: { reason: string; by: string | null; at: string } | null;
+    // A new version of the director's proposal asked (a place replaced).
+    directionRevision: { reason: string; at: string } | null;
   } | null;
   needs: ProductionNeed[];
   // The owner, while Production may start or runs, on a validated sheet.
@@ -422,6 +424,13 @@ async function loadSheet(
                 reason: sheetRow.quote_revision_reason,
                 by: nameOf(sheetRow.quote_revision_by),
                 at: sheetRow.quote_revision_at,
+              }
+            : null,
+        directionRevision:
+          sheetRow.direction_revision_at && sheetRow.direction_revision_reason
+            ? {
+                reason: sheetRow.direction_revision_reason,
+                at: sheetRow.direction_revision_at,
               }
             : null,
       }

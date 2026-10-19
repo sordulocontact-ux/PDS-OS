@@ -13,6 +13,8 @@ export const productionDirector = {
   retained: (name: string, company: string) =>
     `Réalisation : ${name} · proposé par ${company}. Il a son lien privé pour la proposition de réalisation.`,
   status: { proposed: "Proposé", retained: "Retenu", declined: "Non retenu" },
+  revision: (reason: string) =>
+    `Nouvelle version de la proposition demandée : « ${reason} »`,
   linkTitle: (name: string) => `Lien de ${name}`,
   linkDescription:
     "Affiché une seule fois : copiez-le et envoyez-le-lui. Il y dépose sa proposition de réalisation.",

@@ -247,7 +247,12 @@ export const loadJourney = cache(
         .filter((b) => !b.lifted && here(b))
         .map((b) => b.stepKey),
       // A revision asked on a validated quote: « À revoir », nothing blocked.
-      reworkSteps: sheet?.quoteRevision ? ["quote"] : [],
+      // A place replaced: what it asked to review (proto rule 14).
+      reworkSteps: [
+        ...(sheet?.quoteRevision ? ["quote"] : []),
+        ...(sheet?.directionRevision ? ["direction"] : []),
+        ...(checklist.some((a) => a.review && !isDone(a)) ? ["follow-up"] : []),
+      ],
       later:
         next?.who && next.kind !== "done"
           ? {

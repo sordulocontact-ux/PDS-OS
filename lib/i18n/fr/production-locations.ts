@@ -45,6 +45,7 @@ export const productionLocations = {
     candidate: "Candidat",
     discarded: "Écarté",
     chosen: "Retenu",
+    replaced: "Remplacé",
   },
   missing: {
     price: "Tarif",

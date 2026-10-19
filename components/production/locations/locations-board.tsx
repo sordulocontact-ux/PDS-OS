@@ -37,6 +37,7 @@ export function LocationsBoard({
   members,
   contacts,
   links,
+  budgetNotes = {},
 }: {
   scope: { projectId: string; sheetId: string; organizationId: string };
   links: Record<string, ProviderLinkState>;
@@ -44,11 +45,17 @@ export function LocationsBoard({
   canOrganize: boolean;
   members: Member[];
   contacts: NetworkOption[];
+  // By place: its price against the quote's places (proto).
+  budgetNotes?: Record<string, { ok: boolean; text: string }>;
 }) {
   const waiting = awaited(data).map((c) => c.id);
   const hasChoice = data.options.some((o) => o.status === "chosen");
-  const live = data.options.filter((o) => o.status !== "discarded");
-  const discarded = data.options.filter((o) => o.status === "discarded");
+  const live = data.options.filter(
+    (o) => o.status === "candidate" || o.status === "chosen",
+  );
+  const discarded = data.options.filter(
+    (o) => o.status === "discarded" || o.status === "replaced",
+  );
   const card = (o: (typeof data.options)[number]) => (
     <LocationCard
       key={o.id}
@@ -57,6 +64,7 @@ export function LocationsBoard({
       scope={scope}
       canOrganize={canOrganize}
       hasChoice={hasChoice && o.status !== "chosen"}
+      budgetNote={budgetNotes[o.id] ?? null}
     />
   );
   return (

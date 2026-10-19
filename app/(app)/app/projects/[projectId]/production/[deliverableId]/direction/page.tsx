@@ -3,6 +3,7 @@ import { DirectionDecision } from "@/components/production/journey/direction-dec
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ProductionBriefSection } from "@/components/production/prep/brief-section";
 import { ProductionImportButton } from "@/components/production/prep/import-dialog";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import { stepContext } from "@/lib/production/journey/context";
 import { formatDate } from "@/lib/release/format";
@@ -44,6 +45,11 @@ export default async function ProductionDirectionStepPage({
       step={step}
       steps={steps}
     >
+      {sheet.directionRevision && (
+        <ToneCallout tone="warning">
+          {fr.productionDirector.revision(sheet.directionRevision.reason)}
+        </ToneCallout>
+      )}
       <DirectorBlock projectId={projectId} data={data} />
       <ProductionImportButton
         projectId={projectId}

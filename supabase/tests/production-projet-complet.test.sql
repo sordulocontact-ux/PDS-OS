@@ -2,7 +2,7 @@
 -- « Changer qui produit », « Révoquer » a link (20261019050101), …
 -- Run with `supabase test db`.
 begin;
-select plan(43);
+select plan(50);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -227,6 +227,32 @@ select lives_ok($$ select public.finish_production_action(pg_temp.id_of('mine'))
 reset role;
 select is((select t.status from public.tasks t join public.production_plan_actions a on a.task_id = t.id
             where a.id = pg_temp.id_of('mine')), 'done', 'the task in Travail follows');
+
+-- 6. Replacing the place retained ------------------------------------------------------------
+reset role;
+insert into public.production_location_options (organization_id, project_id, sheet_id, name, verification, price_cents)
+values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'Rooftop', 'verified', 140000),
+       (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'Entrepôt', 'verified', 220000);
+insert into ids select 'rooftop', id from public.production_location_options where sheet_id = pg_temp.id_of('sheet') and name = 'Rooftop';
+insert into ids select 'entrepot', id from public.production_location_options where sheet_id = pg_temp.id_of('sheet') and name = 'Entrepôt';
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select lives_ok($$ select public.choose_production_location(pg_temp.id_of('rooftop'), null) $$, 'a place is retained');
+select throws_ok($$ select public.replace_production_location(pg_temp.id_of('entrepot'), ' ', '[]', false, false, '{}') $$,
+                 'P0001', 'reason_required', 'a replacement says why');
+select lives_ok($$ select public.replace_production_location(pg_temp.id_of('entrepot'), 'La copropriété refuse le toit',
+                     jsonb_build_array(jsonb_build_object('title', 'Revoir le matériel', 'contact_id', pg_temp.id_of('ressac'))),
+                     true, false, '{}') $$,
+                'the owner replaces it with a reason and what to review');
+reset role;
+select is((select status from public.production_location_options where id = pg_temp.id_of('rooftop')), 'replaced',
+          'the former place is « Remplacé », kept');
+select is((select count(*)::int from public.production_location_decisions where sheet_id = pg_temp.id_of('sheet')), 2,
+          'both decisions stay');
+select ok((select review and origin like 'Changement de lieu du %' from public.production_plan_actions
+            where sheet_id = pg_temp.id_of('sheet') and title = 'Revoir le matériel'),
+          'what to review became a task, « À revoir », with its origin');
+select ok((select quote_revision_at is not null from public.production_sheets where id = pg_temp.id_of('sheet')),
+          'the quote''s revision is asked');
 
 select * from finish();
 rollback;

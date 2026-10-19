@@ -34,6 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      production_location_decisions: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          option_id: string
+          replaced_option_id: string | null
+          reason: string | null
+          decided_by: string | null
+          decided_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          option_id: string
+          replaced_option_id?: string | null
+          reason?: string | null
+          decided_by?: string | null
+          decided_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          option_id?: string
+          replaced_option_id?: string | null
+          reason?: string | null
+          decided_by?: string | null
+          decided_at?: string
+        }
+        Relationships: []
+      }
       production_director_proposals: {
         Row: {
           id: string
@@ -12967,6 +13003,8 @@ export type Database = {
       }
       production_sheets: {
         Row: {
+          direction_revision_reason: string | null
+          direction_revision_at: string | null
           quote_revision_reason: string | null
           quote_revision_by: string | null
           quote_revision_at: string | null
@@ -13025,6 +13063,8 @@ export type Database = {
           staging_intent: string | null
         }
         Insert: {
+          direction_revision_reason?: string | null
+          direction_revision_at?: string | null
           quote_revision_reason?: string | null
           quote_revision_by?: string | null
           quote_revision_at?: string | null
@@ -13083,6 +13123,8 @@ export type Database = {
           staging_intent?: string | null
         }
         Update: {
+          direction_revision_reason?: string | null
+          direction_revision_at?: string | null
           quote_revision_reason?: string | null
           quote_revision_by?: string | null
           quote_revision_at?: string | null
@@ -16319,6 +16361,10 @@ export type Database = {
       }
     }
     Functions: {
+      replace_production_location: {
+        Args: { p_note_ids: string[]; p_option_id: string; p_reason: string; p_reviews: Json; p_revise_direction: boolean; p_revise_quote: boolean }
+        Returns: undefined
+      }
       add_production_checklist_task: {
         Args: { p_contact_id: string | null; p_due_date: string | null; p_person_id: string | null; p_sheet_id: string; p_title: string }
         Returns: string
