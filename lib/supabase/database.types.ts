@@ -34,6 +34,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      production_organization_changes: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          from_kind: string
+          from_company_contact_id: string | null
+          from_by: string | null
+          from_at: string | null
+          to_kind: string
+          to_company_contact_id: string | null
+          reason: string
+          done: string[]
+          carried: string[]
+          link_revoked: boolean
+          changed_by: string | null
+          changed_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          from_kind: string
+          from_company_contact_id?: string | null
+          from_by?: string | null
+          from_at?: string | null
+          to_kind: string
+          to_company_contact_id?: string | null
+          reason: string
+          done?: string[]
+          carried?: string[]
+          link_revoked?: boolean
+          changed_by?: string | null
+          changed_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          from_kind?: string
+          from_company_contact_id?: string | null
+          from_by?: string | null
+          from_at?: string | null
+          to_kind?: string
+          to_company_contact_id?: string | null
+          reason?: string
+          done?: string[]
+          carried?: string[]
+          link_revoked?: boolean
+          changed_by?: string | null
+          changed_at?: string
+        }
+        Relationships: []
+      }
       ai_requests: {
         Row: {
           created_at: string
@@ -16012,6 +16069,14 @@ export type Database = {
       }
     }
     Functions: {
+      change_production_producer: {
+        Args: { p_carried: string[]; p_company_contact_id: string | null; p_done: string[]; p_organization: string; p_reason: string; p_revoke_link: boolean; p_sheet_id: string }
+        Returns: undefined
+      }
+      revoke_production_provider_link: {
+        Args: { p_contact_id: string; p_sheet_id: string }
+        Returns: undefined
+      }
       ai_quota_day_start: { Args: never; Returns: string }
       ai_quota_resets_at: { Args: never; Returns: string }
       ai_usage_today: {

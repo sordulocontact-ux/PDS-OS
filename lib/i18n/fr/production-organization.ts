@@ -61,6 +61,9 @@ export const productionOrganization = {
     validator: "Valide les devis",
     director: "Proposition de réalisation, découpage, besoins artistiques",
     dop: "Besoins techniques, matériel",
+    post: "Monte et dépose les versions, puis le fichier final",
+    creative: "Coordonne la proposition et le montage",
+    creativeInt: "Valide la proposition de réalisation et le montage",
     owner:
       "Suit l'avancement, coordonne, s'assure que les décisions sont prises",
   },

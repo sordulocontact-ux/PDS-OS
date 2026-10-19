@@ -22,6 +22,9 @@ export const roles = {
     validator: "Validation budgétaire",
     director: "Réalisation",
     dop: "Image",
+    post: "Postproduction",
+    creative: "Responsable créatif",
+    creativeInt: "Validation créative interne",
     member: "Compte PDS",
   },
   design: {

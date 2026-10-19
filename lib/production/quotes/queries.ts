@@ -58,3 +58,21 @@ export async function loadQuotes(
     reason: q.reason,
   }));
 }
+
+/** The active reference of a sheet's quote: the latest version approved,
+ * with its number (its rank among the versions). Null before any. */
+export async function activeQuote(
+  sheetId: string,
+): Promise<{ number: number; amountCents: number } | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("production_quotes")
+    .select("status, amount_cents")
+    .eq("sheet_id", sheetId)
+    .order("deposited_at", { ascending: true });
+  const rows = (data ?? []).map((q, i) => ({ ...q, number: i + 1 }));
+  const active = rows.filter((q) => q.status === "approved").at(-1);
+  return active
+    ? { number: active.number, amountCents: active.amount_cents }
+    : null;
+}

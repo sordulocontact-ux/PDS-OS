@@ -19,6 +19,7 @@ import {
   productionStepRef,
 } from "@/lib/production/journey/step-ref";
 import { loadProviderLinks } from "@/lib/production/post/requests";
+import { loadRevokedLinks } from "@/lib/production/producer-history";
 import { projectHeaderData } from "@/lib/projects/header";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,12 +45,22 @@ export default async function ProductionSheetLayout({
     data.members.find((m) => m.personId === access.personId)?.name ?? null;
   const sheet = data.sheet;
   const organized = Boolean(sheet?.organization.kind);
-  const [links, history] = sheet
+  const [links, history, revoked] = sheet
     ? await Promise.all([
         loadProviderLinks(await createClient(), sheet.id),
-        loadProductionHistory(sheet.id, data, ["sheet.organized", "link.sent"]),
+        loadProductionHistory(sheet.id, data, [
+          "sheet.organized",
+          "link.sent",
+          "link.revoked",
+        ]),
+        loadRevokedLinks(sheet.id),
       ])
-    : [{}, []];
+    : [{}, [], {}];
+  // The creative side, as the journey resolved it (direction's coordinator).
+  const creativeName =
+    steps
+      .find((s) => s.key === "direction")
+      ?.roles?.find((x) => x.kind === "coord")?.name ?? null;
   const release = header?.facts.find((f) => f.key === "release");
   return (
     <div className="flex flex-col gap-5">
@@ -69,6 +80,8 @@ export default async function ProductionSheetLayout({
               projectId={projectId}
               data={data}
               links={links}
+              revoked={revoked}
+              creativeName={creativeName}
               canOrganize={data.canOrganize}
               history={history}
             />

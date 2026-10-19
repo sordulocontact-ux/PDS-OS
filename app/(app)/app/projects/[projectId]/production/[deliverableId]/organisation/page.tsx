@@ -1,6 +1,7 @@
 import { IconBox2 } from "nucleo-sharp-essential";
 
 import { CallFacts } from "@/components/calls/call-facts";
+import { ChangeProducerButton } from "@/components/production/journey/change-producer-button";
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { WhoProducesForm } from "@/components/production/journey/who-produces-form";
 import { HeritageSection } from "@/components/production/prep/heritage-section";
@@ -12,7 +13,10 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
+import { formatEuros } from "@/lib/budget/types";
 import { companyOptions } from "@/lib/production/companies";
+import { loadProducerChanges } from "@/lib/production/producer-history";
+import { activeQuote } from "@/lib/production/quotes/queries";
 import { stepContext } from "@/lib/production/journey/context";
 import { prepContext } from "@/lib/production/journey/prep-context";
 import { effectiveLogistics } from "@/lib/production/logistics";
@@ -115,12 +119,56 @@ export default async function ProductionOrganisationPage({
   }
 
   const prep = await prepContext(projectId, deliverableId);
-  const who = [
-    t.kinds[org.kind].label,
-    org.kind === "external" ? org.company?.name : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const whoOf = (kind: "internal" | "external", company: string | null) =>
+    [t.kinds[kind].label, kind === "external" ? company : null]
+      .filter(Boolean)
+      .join(" · ");
+  const who = whoOf(org.kind, org.company?.name ?? null);
+  const [changes, companies, active] = await Promise.all([
+    loadProducerChanges(prep.sheet.id, {
+      person: (id) => data.members.find((m) => m.personId === id)?.name ?? null,
+      contact: (id) => data.contacts.find((x) => x.id === id)?.name ?? null,
+    }),
+    data.canOpen
+      ? companyOptions(projectId, data.contacts, org.company?.id ?? null)
+      : Promise.resolve([]),
+    activeQuote(prep.sheet.id),
+  ]);
+  const c = t.change;
+  const passed = steps.filter(
+    (s) => s.key !== "organisation" && s.status === "done",
+  );
+  const doneOf = (key: string) => passed.find((s) => s.key === key);
+  const carried = [
+    doneOf("locations")?.summary &&
+      c.carry.place(doneOf("locations")?.summary ?? ""),
+    doneOf("quote")?.summary && c.carry.quote(doneOf("quote")?.summary ?? ""),
+    doneOf("direction") && c.carry.direction,
+    doneOf("rushes") && c.carry.rushes,
+  ].filter((x): x is string => Boolean(x));
+  const choices = [
+    ...companies
+      .filter((co) => !(org.kind === "external" && co.id === org.company?.id))
+      .map((co) => ({
+        value: `external:${co.id}`,
+        label: t.kinds.external.label,
+        detail: co.name,
+        hint: co.reason,
+      })),
+    ...(org.kind === "external"
+      ? [
+          {
+            value: "internal",
+            label: t.kinds.internal.label,
+            detail: t.kinds.internal.detail,
+          },
+        ]
+      : []),
+  ];
+  const companyLink =
+    org.kind === "external" && org.company
+      ? (prep.links[org.company.id] ?? null)
+      : null;
   return (
     <ProductionStepPanel
       projectId={projectId}
@@ -137,7 +185,65 @@ export default async function ProductionOrganisationPage({
           formatShortDay(org.organizedAt ?? prep.sheet.openedAt),
         )}
       </ToneCallout>
-      <CallFacts facts={facts} />
+      <CallFacts
+        facts={[
+          ...facts,
+          ...(changes[0]?.carried.length
+            ? [{ label: c.carriedFact, value: changes[0].carried.join(" · ") }]
+            : []),
+        ]}
+      />
+      {data.canOpen && !prep.sheet.closedAt && (
+        <ChangeProducerButton
+          projectId={projectId}
+          sheetId={prep.sheet.id}
+          deliverableTitle={data.deliverable.title}
+          today={who}
+          choices={choices}
+          done={passed.map((s) => c.stepDone(s.title, s.summary))}
+          carried={carried}
+          engaged={
+            active && org.kind === "external" && org.company
+              ? c.engaged(
+                  formatEuros(active.amountCents),
+                  org.company.name,
+                  active.number,
+                )
+              : null
+          }
+          revokeName={companyLink ? (org.company?.name ?? null) : null}
+        />
+      )}
+      {changes.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h3 className="font-semibold">{c.history}</h3>
+          <ul className="flex flex-col gap-1.5">
+            {changes.map((h) => (
+              <li key={h.id} className="flex gap-2">
+                <span aria-hidden className="text-[color:var(--text-tertiary)]">
+                  ↺
+                </span>
+                <span className="flex flex-col">
+                  <span>
+                    {c.historyLine(
+                      whoOf(h.kind, h.company),
+                      formatShortDay(h.stoppedAt),
+                      h.stoppedBy ?? "—",
+                      h.reason,
+                    )}
+                    {h.linkRevoked ? ` · ${c.historyRevoked}` : ""}
+                  </span>
+                  {h.done.length > 0 && (
+                    <span className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+                      {c.historyDone(h.done.join(" · "))}
+                    </span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <PageSection
         id="production-frame"
         title={t.more}

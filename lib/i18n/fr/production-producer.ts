@@ -79,5 +79,59 @@ export const productionProducer = {
     delivery: "Livraison finale le",
   },
   wait: "choisir qui produit",
+  change: {
+    open: "Changer qui produit",
+    title: (deliverable: string) => `Changer qui produit · ${deliverable}`,
+    description:
+      "Ce parcours n'est pas effacé : il reste dans l'historique avec ses décisions.",
+    today: "Aujourd'hui",
+    done: "Déjà fait",
+    carried: "Repris dans le nouveau parcours",
+    engaged: (amount: string, company: string, n: number) =>
+      `${amount} sont engagés auprès de ${company} (devis V${n} validé). Changer de production ne les annule pas.`,
+    choice: "Nouveau choix",
+    revoke: (name: string) => `Révoquer le lien privé de ${name}`,
+    revokeHint:
+      "Ce qu'elle a déposé reste. Décochez si des fichiers sont encore attendus d'elle.",
+    reason: "Motif",
+    reasonPlaceholder:
+      "Ex. : la société ne peut plus tenir la date de tournage",
+    errors: {
+      choice: "Choisissez qui produit désormais.",
+      reason: "Dites pourquoi la production change.",
+      same: "C'est déjà qui produit.",
+    },
+    history: "Choix précédents",
+    historyLine: (who: string, day: string, by: string, reason: string) =>
+      `${who} · arrêté ${day} par ${by} : « ${reason} »`,
+    historyDone: (list: string) => `Déjà fait : ${list}`,
+    historyRevoked: "lien privé révoqué",
+    carriedFact: "Repris du parcours précédent",
+    stepDone: (title: string, summary: string | null) =>
+      `${title} (${summary ?? "fait"})`,
+    carry: {
+      place: (name: string) => `Lieu retenu : ${name}`,
+      quote: (summary: string) => `Budget de référence : ${summary}`,
+      direction: "Proposition de réalisation retenue",
+      rushes: "Rushes déjà reçus",
+    },
+  },
+  role: {
+    change: "Changer",
+    changeLabel: (role: string) => `Changer ${role}`,
+    title: (role: string) => `Changer : ${role}`,
+    description:
+      "Les étapes déjà commencées restent intactes ; l'ancien titulaire reste dans l'historique.",
+    holder: "Nouveau titulaire",
+    nobody: "Personne",
+    save: "Enregistrer",
+    done: (role: string) => `${role} : changé`,
+    required: "Choisissez qui tient ce rôle.",
+  },
+  revoke: {
+    button: "Révoquer",
+    label: (name: string) => `Révoquer le lien de ${name}`,
+    done: "Lien révoqué",
+  },
   more: "Dates, enveloppe et héritage de la Conception",
 } as const;

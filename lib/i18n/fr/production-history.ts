@@ -88,6 +88,8 @@ export const productionHistory = {
   },
   link: (who: string) => `a créé le lien prestataire de ${who}`,
   // « Qui fait quoi » : who produces (C7).
+  linkRevoked: (holder: string) => `a révoqué le lien privé de ${holder}`,
+  roles: "a changé un rôle de « Qui fait quoi »",
   organized: (kind: "internal" | "external" | null, company: string | null) =>
     kind === "external"
       ? `a confié la production à ${company ?? "une société"}`
