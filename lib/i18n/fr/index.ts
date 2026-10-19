@@ -10,6 +10,7 @@ import { activationInfluence } from "./activation-influence";
 import { activationPress } from "./activation-press";
 import { activationAgency } from "./activation-agency";
 import { activationJourney } from "./activation-journey";
+import { activationCreator } from "./activation-creator";
 import { dialogs } from "./dialogs";
 import { decisions } from "./decisions";
 import { artistActivity } from "./artist-activity";
@@ -259,6 +260,7 @@ export const fr = {
   activationPress,
   activationAgency,
   activationJourney,
+  activationCreator,
   dialogs,
   stepTools,
   roles,

@@ -17192,6 +17192,32 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_influence_collaboration: {
+        Args: { p_token: string }
+        Returns: Json
+      }
+      submit_influence_content_by_token: {
+        Args: { p_token: string; p_url: string }
+        Returns: undefined
+      }
+      declare_influence_publication_by_token: {
+        Args: { p_token: string; p_url: string }
+        Returns: undefined
+      }
+      open_influence_invoice_slot: {
+        Args: { p_ext: string; p_token: string }
+        Returns: string
+      }
+      submit_influence_invoice_by_token: {
+        Args: {
+          p_bytes: number
+          p_file_name: string
+          p_mime: string
+          p_path: string
+          p_token: string
+        }
+        Returns: undefined
+      }
       declare_activation_transmission: {
         Args: { p_activation_id: string }
         Returns: undefined
