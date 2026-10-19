@@ -480,7 +480,7 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
       comme au Cadrage, « Prêt pour la sortie »
 - [x] **10. Distribution** (`distribution.md`) : parcours en 7 étapes, Préparation lue dans le Master, la
       Production et le Juridique, gestes regroupés, dates cohérentes depuis le Cadrage
-- [ ] **11. Pages privées réunies par personne** : un lien par personne et par projet, « À vous » / « En
+- [x] **11. Pages privées réunies par personne** : un lien par personne et par projet, « À vous » / « En
       attente de PDS » / « Fait » replié
 - [x] Projet complet C8 + C10 (18/10/2026) : formulaire de call commun (pastilles de
       participants façon Teams, ordre du jour à poignée / clavier / tactile, « Envoyé avec
