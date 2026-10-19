@@ -63,6 +63,15 @@ export function linkJourneyCards({
     });
   const checklist = linkChecklistCard(token, j);
   if (checklist) cards.push(checklist);
+  // The preparation confirmed by PDS (proto: the same sentence as in PDS).
+  if (company && j.readyAt)
+    cards.push({
+      id: "ps-ready",
+      title: fr.productionReady.link.title,
+      state: "done",
+      order: 50,
+      body: <p>{fr.productionReady.link.done}</p>,
+    });
   if (director)
     cards.push({
       id: "ps-direction",

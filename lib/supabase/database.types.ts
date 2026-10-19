@@ -13003,6 +13003,8 @@ export type Database = {
       }
       production_sheets: {
         Row: {
+          ready_snapshot: Json | null
+          ready_forced_reason: string | null
           direction_revision_reason: string | null
           direction_revision_at: string | null
           quote_revision_reason: string | null
@@ -13063,6 +13065,8 @@ export type Database = {
           staging_intent: string | null
         }
         Insert: {
+          ready_snapshot?: Json | null
+          ready_forced_reason?: string | null
           direction_revision_reason?: string | null
           direction_revision_at?: string | null
           quote_revision_reason?: string | null
@@ -13123,6 +13127,8 @@ export type Database = {
           staging_intent?: string | null
         }
         Update: {
+          ready_snapshot?: Json | null
+          ready_forced_reason?: string | null
           direction_revision_reason?: string | null
           direction_revision_at?: string | null
           quote_revision_reason?: string | null
@@ -16361,6 +16367,10 @@ export type Database = {
       }
     }
     Functions: {
+      confirm_production_ready: {
+        Args: { p_force_reason: string | null; p_sheet_id: string; p_snapshot: Json }
+        Returns: undefined
+      }
       replace_production_location: {
         Args: { p_note_ids: string[]; p_option_id: string; p_reason: string; p_reviews: Json; p_revise_direction: boolean; p_revise_quote: boolean }
         Returns: undefined

@@ -2,7 +2,7 @@
 -- « Changer qui produit », « Révoquer » a link (20261019050101), …
 -- Run with `supabase test db`.
 begin;
-select plan(50);
+select plan(54);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -253,6 +253,22 @@ select ok((select review and origin like 'Changement de lieu du %' from public.p
           'what to review became a task, « À revoir », with its origin');
 select ok((select quote_revision_at is not null from public.production_sheets where id = pg_temp.id_of('sheet')),
           'the quote''s revision is asked');
+
+-- 7. The preparation confirmed, forced with a reason, kept --------------------------------
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select throws_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'),
+                     '[{"key":"place","label":"Lieu retenu","value":"Entrepôt","ok":true},{"key":"crew","label":"Équipe confirmée","value":"Pas encore","ok":false}]'::jsonb, '') $$,
+                 'P0001', 'reason_required', 'a line not ready needs a reason');
+select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'),
+                     '[{"key":"place","label":"Lieu retenu","value":"Entrepôt","ok":true},{"key":"crew","label":"Équipe confirmée","value":"Pas encore","ok":false}]'::jsonb, 'Équipe confirmée oralement') $$,
+                'the owner confirms anyway, with a reason');
+reset role;
+select is((select ready_forced_reason from public.production_sheets where id = pg_temp.id_of('sheet')),
+          'Équipe confirmée oralement', 'the reason is kept with the frozen synthesis');
+set local role anon;
+select ok(public.get_production_link_journey((select v from vars where k = 'token3')) ->> 'readyAt' is not null,
+          'the company reads that the preparation is validated');
+reset role;
 
 select * from finish();
 rollback;

@@ -27,6 +27,7 @@ import {
   type SheetOrganization,
 } from "@/lib/production/organization";
 import { isNeedFamily, type NeedFamily } from "@/lib/production/roles";
+import { readyRowsOf, type ReadyRow } from "@/lib/production/ready-rows";
 import { createClient } from "@/lib/supabase/server";
 
 export type ProductionMode = "direct" | "call" | "import";
@@ -128,6 +129,9 @@ export type ProductionSheetData = {
     quoteRevision: { reason: string; by: string | null; at: string } | null;
     // A new version of the director's proposal asked (a place replaced).
     directionRevision: { reason: string; at: string } | null;
+    // The synthesis confirmed before the shoot, as it was (external).
+    readySnapshot: ReadyRow[] | null;
+    readyForcedReason: string | null;
   } | null;
   needs: ProductionNeed[];
   // The owner, while Production may start or runs, on a validated sheet.
@@ -426,6 +430,8 @@ async function loadSheet(
                 at: sheetRow.quote_revision_at,
               }
             : null,
+        readySnapshot: readyRowsOf(sheetRow.ready_snapshot),
+        readyForcedReason: sheetRow.ready_forced_reason,
         directionRevision:
           sheetRow.direction_revision_at && sheetRow.direction_revision_reason
             ? {

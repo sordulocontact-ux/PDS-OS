@@ -96,6 +96,7 @@ import { productionChecklist } from "./production-checklist";
 import { productionDirector } from "./production-director";
 import { productionPlace } from "./production-place";
 import { productionProducer } from "./production-producer";
+import { productionReady } from "./production-ready";
 import { productionHistory } from "./production-history";
 import { productionProvider } from "./production-provider";
 import { productionNext } from "./production-next";
@@ -212,6 +213,7 @@ export const fr = {
   productionDirector,
   productionPlace,
   productionProducer,
+  productionReady,
   productionCallSheetPage,
   marketing,
   marketingReview,
