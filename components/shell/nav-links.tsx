@@ -28,7 +28,12 @@ function isActive(pathname: string, href: string, exact: boolean): boolean {
 // Access requests waiting for a decision show as a count on "Équipe", which
 // then opens straight on them (the team page opens on approved members).
 // Inside a project, « Travail » carries the viewer's « À vous » count of that
-// project (proto « Projet complet », reported by the project's layout).
+// project (proto « Projet complet », reported by the project's layout) and
+// opens that project's Travail, where these actions are listed (proto:
+// « Travail → Travail du projet »; the global Travail does not list the
+// journeys' actions, so its count and its page disagreed — recette 19/10).
+const PROJECT_PATH = /^\/app\/projects\/([0-9a-f-]{36})(?:\/|$)/;
+
 export function NavLinks({
   isAdmin,
   pendingMembers = 0,
@@ -43,12 +48,17 @@ export function NavLinks({
   const pathname = usePathname();
   const t = fr.shell.nav;
   const workCount = useWorkCount();
+  const projectId = PROJECT_PATH.exec(pathname)?.[1];
 
   return (
     <nav aria-label={t.label}>
       <ul className="flex flex-col gap-1">
         {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
-          const active = isActive(pathname, item.href, item.exact ?? false);
+          const href =
+            item.href === routes.work && projectId
+              ? routes.projectWork(projectId)
+              : item.href;
+          const active = isActive(pathname, href, item.exact ?? false);
           const Icon = item.icon;
           const mine = item.href === routes.work ? workCount : 0;
           const count = item.href === routes.members ? pendingMembers : 0;
@@ -67,7 +77,7 @@ export function NavLinks({
                   ? item.href
                   : count > 0
                     ? `${item.href}?status=pending`
-                    : item.href
+                    : href
               }
               onClick={
                 item.disabled ? (event) => event.preventDefault() : onNavigate
