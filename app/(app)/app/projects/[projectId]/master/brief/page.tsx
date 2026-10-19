@@ -1,38 +1,37 @@
-import { BriefPage } from "@/components/master-workflow/brief-page";
+import { BriefStep } from "@/components/master-workflow/brief/brief-step";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
-import { masterExchangeDefaults } from "@/lib/master-workflow/exchange-defaults";
-import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
-import { loadMasterBrief } from "@/lib/master-workflow/brief";
-import { loadBriefQuestions } from "@/lib/master-workflow/questions";
-import { requireLaunchedProject } from "@/lib/projects/queries";
-import { allInOrder } from "@/lib/utils/parallel";
+import { loadBriefStep } from "@/lib/master-workflow/brief-step";
+import { masterExchangeDefaults } from "@/lib/master-workflow/exchange-defaults";
+import { liveTransmission } from "@/lib/master-workflow/journey";
+import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 
 export const metadata = {
-  title: `${fr.masterWorkflow.brief.title} · ${fr.app.name}`,
+  title: `${fr.masterJourney.steps.brief.title} · ${fr.app.name}`,
 };
 
-// Master, second step: the Brief Mix/Master of the project. Read by whoever
-// sees the project, written by its owner (master_briefs, RLS).
+// Master, Brief: what the engineers will receive, as a document whose facts
+// are changed in place, then recorded by the project's owner.
 export default async function ProjectMasterBriefPage({
   params,
 }: PageProps<"/app/projects/[projectId]/master/brief">) {
   const { projectId } = await params;
-  const [access, project] = await allInOrder([
-    requireApproved(),
-    requireLaunchedProject(projectId),
-  ]);
-
-  const [view, questions] = await Promise.all([
-    loadMasterBrief(project, access),
-    loadBriefQuestions(project, access),
-  ]);
-  const exchange = view.canEdit
-    ? await masterExchangeDefaults(view, project.ownerPersonId)
+  const { access, project, facts } = await masterJourneyContext(projectId);
+  const step = await loadBriefStep(
+    project,
+    access,
+    liveTransmission(facts, "mix")?.createdAt ?? null,
+  );
+  const exchange = step.view.canEdit
+    ? await masterExchangeDefaults(step.view, project.ownerPersonId)
     : null;
   return (
     <MasterStepFrame projectId={projectId} stepKey="brief">
-      <BriefPage view={view} questions={questions} exchange={exchange} />
+      <BriefStep
+        step={step}
+        exchange={exchange}
+        ownerName={project.ownerName}
+      />
     </MasterStepFrame>
   );
 }

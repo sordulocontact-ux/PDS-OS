@@ -1,0 +1,237 @@
+"use client";
+
+import { FactRow, FactRows, type FactSource } from "@/components/ui/fact-row";
+import { PickList } from "@/components/ui/pick-list";
+import { fr } from "@/lib/i18n/fr";
+import type { BriefDesignation } from "@/lib/master-workflow/brief-rules";
+import { saveBriefFact } from "@/lib/master-workflow/brief-fact-actions";
+import type {
+  BriefPerson,
+  MasterBrief,
+} from "@/lib/master-workflow/brief-types";
+import type { NetworkEngineer } from "@/lib/master-workflow/types";
+import { parseEurosToCents } from "@/lib/projects/schemas";
+
+const t = fr.masterBrief;
+
+export type BriefFactsProps = {
+  projectId: string;
+  canEdit: boolean;
+  canSeeBudget: boolean;
+  brief: MasterBrief;
+  engineers: NetworkEngineer[];
+  validators: BriefPerson[];
+  designations: {
+    mix: BriefDesignation | null;
+    mastering: BriefDesignation | null;
+    validator: BriefDesignation | null;
+  };
+  changedBy: Partial<Record<string, string>>;
+};
+
+const euros = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
+
+/** Where a designation comes from, as the row says it (rule 22). */
+function sourceOf(
+  d: BriefDesignation | null,
+  female = false,
+): FactSource | null {
+  if (!d) return t.sources.nobody;
+  const from = female ? t.sources.framingFemale : t.sources.framing;
+  if (d.kind === "framing")
+    return d.quote
+      ? { quote: d.quote, from: d.label ? `${from} · ${d.label}` : from }
+      : from;
+  return d.kind === "credited"
+    ? t.sources.credited
+    : d.kind === "owner"
+      ? t.sources.owner
+      : t.sources.chosen;
+}
+
+/**
+ * « Conditions de prestation » (proto): the engineers, chosen from the
+ * Réseau with « Changer », whether the mix engineer masters too, the
+ * revisions, who validates the versions, and the internal rates (the owner
+ * and the direction only). Each change is saved at once.
+ */
+export function BriefConditions(props: BriefFactsProps) {
+  const { brief, canEdit, projectId, changedBy } = props;
+  const save = (patch: Parameters<typeof saveBriefFact>[1]) =>
+    saveBriefFact(projectId, patch);
+  const engineer = (id: string | null) =>
+    props.engineers.find((e) => e.id === id) ?? null;
+  const groups = [
+    {
+      label: t.picker.network,
+      options: props.engineers.map((e) => ({
+        id: e.id,
+        label: e.name,
+        detail: [e.structure, e.city, e.history].filter(Boolean).join(" · "),
+        avatar: { pictureUrl: null },
+      })),
+    },
+  ];
+  const pick = (
+    field: "mixContactId" | "masteringContactId",
+    selected: string | null,
+  ) =>
+    canEdit
+      ? {
+          list: (
+            <PickList
+              groups={groups}
+              selectedId={selected}
+              searchable
+              searchLabel={t.picker.search}
+              done={t.changed}
+              onChoose={(id) => save({ [field]: id })}
+            />
+          ),
+        }
+      : null;
+  const mix = engineer(brief.mixContactId);
+  const mastering = engineer(brief.masteringContactId);
+  const validator = props.validators.find(
+    (v) => v.personId === brief.validatorPersonId,
+  );
+  const rateEdit = (field: "mixRateCents" | "masteringRateCents") =>
+    canEdit
+      ? {
+          kind: "text" as const,
+          value: brief[field] === null ? "" : euros.format(brief[field]! / 100),
+          optional: true,
+          done: t.changed,
+          onSave: async (value: string) => {
+            const cents = parseEurosToCents(value);
+            if (cents === undefined)
+              return { ok: false as const, error: t.errors.amount };
+            return save({ [field]: cents });
+          },
+        }
+      : null;
+  const rateValue = (cents: number | null) =>
+    cents === null ? null : t.euros(euros.format(cents / 100));
+  return (
+    <FactRows>
+      <FactRow
+        label={t.fields.mix}
+        value={mix?.name ?? null}
+        missing={!mix}
+        source={mix ? sourceOf(props.designations.mix) : t.sources.nobody}
+        changedBy={changedBy.mix_contact_id}
+        change={pick("mixContactId", brief.mixContactId)}
+      />
+      <FactRow
+        label={t.fields.same}
+        value={brief.masteringSameEngineer ? t.fields.yes : t.fields.no}
+        changedBy={changedBy.mastering_same_engineer}
+        edit={
+          canEdit
+            ? {
+                kind: "select",
+                value: brief.masteringSameEngineer ? "yes" : "no",
+                options: { yes: t.fields.yes, no: t.fields.no },
+                done: t.changed,
+                onSave: (value) => save({ masteringSame: value === "yes" }),
+              }
+            : null
+        }
+      />
+      {!brief.masteringSameEngineer && (
+        <FactRow
+          label={t.fields.mastering}
+          value={mastering?.name ?? null}
+          missing={!mastering}
+          source={
+            mastering
+              ? sourceOf(props.designations.mastering)
+              : t.sources.nobody
+          }
+          changedBy={changedBy.mastering_contact_id}
+          change={pick("masteringContactId", brief.masteringContactId)}
+        />
+      )}
+      <FactRow
+        label={t.fields.revisions}
+        value={brief.revisions === null ? null : t.revisions(brief.revisions)}
+        source={t.sources.typed}
+        changedBy={changedBy.revisions}
+        edit={
+          canEdit
+            ? {
+                kind: "number",
+                value: brief.revisions === null ? "" : String(brief.revisions),
+                optional: true,
+                done: t.changed,
+                onSave: async (value) => {
+                  const n = value === "" ? null : Number(value);
+                  if (n !== null && !(Number.isInteger(n) && n >= 0 && n <= 20))
+                    return { ok: false, error: t.errors.revisions };
+                  return save({ revisions: n });
+                },
+              }
+            : null
+        }
+      />
+      <FactRow
+        label={t.fields.validator}
+        value={validator?.name ?? null}
+        missing={!validator}
+        source={sourceOf(props.designations.validator, true)}
+        changedBy={changedBy.validator_person_id}
+        change={
+          canEdit
+            ? {
+                list: (
+                  <PickList
+                    groups={[
+                      {
+                        label: t.picker.team,
+                        options: props.validators.map((v) => ({
+                          id: v.personId,
+                          label: v.name,
+                          avatar: { pictureUrl: null },
+                        })),
+                      },
+                    ]}
+                    selectedId={brief.validatorPersonId}
+                    done={t.changed}
+                    onChoose={(id) => save({ validatorPersonId: id })}
+                  />
+                ),
+              }
+            : null
+        }
+      />
+      {props.canSeeBudget && (
+        <>
+          <FactRow
+            label={mix ? `${t.fields.mixRate} · ${mix.name}` : t.fields.mixRate}
+            value={rateValue(brief.mixRateCents)}
+            source={t.sources.rate}
+            state={
+              brief.mixRateCents === null
+                ? null
+                : { tone: "neutral", label: t.sources.estimated }
+            }
+            changedBy={changedBy.mix_rate_cents}
+            edit={rateEdit("mixRateCents")}
+          />
+          <FactRow
+            label={t.fields.masteringRate}
+            value={rateValue(brief.masteringRateCents)}
+            source={t.sources.rate}
+            state={
+              brief.masteringRateCents === null
+                ? null
+                : { tone: "neutral", label: t.sources.estimated }
+            }
+            changedBy={changedBy.mastering_rate_cents}
+            edit={rateEdit("masteringRateCents")}
+          />
+        </>
+      )}
+    </FactRows>
+  );
+}

@@ -76,6 +76,12 @@ export type MasterJourneyFacts = {
     sources: JourneySource[];
   }>;
   brief: {
+    recordedAt: string | null;
+    recordedBy: string | null;
+    dirty: boolean;
+    startMode: string | null;
+    // Something to say in « direction artistique ».
+    hasDirection: boolean;
     updatedAt: string;
     updatedBy: string | null;
     createdAt: string;
@@ -155,7 +161,7 @@ export async function loadMasterJourneyFacts(project: {
     supabase
       .from("master_briefs")
       .select(
-        "created_at, updated_at, validator_person_id, mix_contact_id, mastering_same_engineer, mastering_contact_id, deliverables, master_final_due, validator:people!master_briefs_validator_person_id_fkey(first_name, last_name), updater:people!master_briefs_updated_by_fkey(first_name, last_name), mix:network_contacts!master_briefs_mix_contact_same_org(name), mastering:network_contacts!master_briefs_mastering_contact_same_org(name)",
+        "created_at, updated_at, recorded_at, content_changed_at, start_mode, direction, references_text, constraints_text, validator_person_id, mix_contact_id, mastering_same_engineer, mastering_contact_id, deliverables, master_final_due, validator:people!master_briefs_validator_person_id_fkey(first_name, last_name), updater:people!master_briefs_updated_by_fkey(first_name, last_name), recorder:people!master_briefs_recorded_by_fkey(first_name, last_name), mix:network_contacts!master_briefs_mix_contact_same_org(name), mastering:network_contacts!master_briefs_mastering_contact_same_org(name)",
       )
       .eq("project_id", project.id)
       .maybeSingle(),
@@ -257,6 +263,13 @@ export async function loadMasterJourneyFacts(project: {
     })),
     brief: b
       ? {
+          recordedAt: b.recorded_at,
+          recordedBy: nameOf(b.recorder),
+          dirty: !b.recorded_at || b.content_changed_at > b.recorded_at,
+          startMode: b.start_mode,
+          hasDirection: Boolean(
+            b.direction || b.references_text || b.constraints_text,
+          ),
           createdAt: b.created_at,
           updatedAt: b.updated_at,
           updatedBy: nameOf(b.updater),

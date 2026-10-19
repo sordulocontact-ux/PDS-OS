@@ -161,12 +161,17 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
               );
 
   // --- Brief ---------------------------------------------------------------
-  const briefDone = facts.brief !== null;
+  const brief = facts.brief;
+  const briefDone = brief?.recordedAt != null;
   const pendingQuestion = facts.questions.find((q) => !q.answeredAt);
   const answered = facts.questions.find((q) => q.answeredAt && !q.appliedAt);
   const planned = facts.exchanges.find(
     (e) => e.status === "planned" && Date.parse(e.occurredAt) > now.getTime(),
   );
+  const briefMissing =
+    !brief?.mixContact ||
+    (!brief.masteringSame && !brief.masteringContact) ||
+    !brief.hasDirection;
   const briefActions: Action[] = pendingQuestion
     ? [
         {
@@ -181,11 +186,11 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       ? ownerDoes(t.todo.applyAnswer)
       : planned
         ? ownerDoes(t.todo.callHeld(formatShortDay(planned.occurredAt)))
-        : ownerDoes(
-            facts.questions.length === 0 && facts.exchanges.length === 0
-              ? t.todo.startBrief
-              : t.todo.recordBrief,
-          );
+        : !brief?.startMode && !briefDone && facts.questions.length === 0
+          ? ownerDoes(t.todo.startBrief)
+          : briefMissing
+            ? ownerDoes(t.todo.completeBrief)
+            : ownerDoes(t.todo.recordBrief);
 
   // --- Mixage and Mastering --------------------------------------------------
   const roundActions = (stage: Stage): Action[] => {
@@ -282,7 +287,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
   };
   const summaryOf: Record<MasterStepKey, string> = {
     source: sourceSummary,
-    brief: t.summary.brief,
+    brief: brief?.dirty ? t.summary.briefDirty : t.summary.brief,
     mix: nothingToDo ? t.summary.allFinal : roundSummary("mix"),
     mastering: nothingToDo ? t.summary.allFinal : roundSummary("mastering"),
     final: t.summary.final,

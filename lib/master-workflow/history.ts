@@ -40,13 +40,13 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
         cause: null,
       });
 
-  if (facts.brief)
+  if (facts.brief?.recordedAt)
     items.push({
       key: "brief",
       step: "brief",
       text: t.briefSaved,
-      who: facts.brief.updatedBy,
-      at: facts.brief.updatedAt,
+      who: facts.brief.recordedBy,
+      at: facts.brief.recordedAt,
       cause: null,
     });
   facts.questions.forEach((q, i) => {
