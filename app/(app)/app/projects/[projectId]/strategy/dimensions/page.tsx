@@ -5,6 +5,9 @@ import { MeetingReportDialog } from "@/components/calls/meeting/meeting-report-d
 import { EditAccessProvider } from "@/components/projects/edit-access";
 import { DimensionWork } from "@/components/strategy/dimension-work";
 import { DimensionGroup } from "@/components/strategy/dimensions/dimension-group";
+import { StrategyDictation } from "@/components/strategy/strategy-dictation";
+import { StrategyDraftButton } from "@/components/strategy/strategy-draft-button";
+import { Fold } from "@/components/ui/fold";
 import { UpstreamBlock } from "@/components/strategy/dimensions/upstream-block";
 import { StrategyStepFrame } from "@/components/strategy/journey/strategy-step-frame";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -111,6 +114,20 @@ export default async function StrategyDimensionsPage({
               </span>
             )}
           </p>
+          {canEdit && (
+            // MKT-S1-09 (« Préparer un brouillon ») and the dictation:
+            // kept, folded, as the proto has neither.
+            <Fold summary={t.details.withPo}>
+              <StrategyDictation
+                projectId={projectId}
+                actions={<StrategyDraftButton projectId={projectId} />}
+              >
+                <p className="text-caption text-[color:var(--text-secondary)]">
+                  {t.withPoBody}
+                </p>
+              </StrategyDictation>
+            </Fold>
+          )}
           {model.dimensions.map((view) => (
             <DimensionGroup
               key={view.key}

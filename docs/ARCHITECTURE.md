@@ -1588,6 +1588,91 @@ livrable, les libellés ou l'action d'import en props.
 
 ---
 
+### Lot 3 du proto « Projet complet » : la Stratégie en parcours (19/10/2026)
+
+Cahier des charges `docs/projet-complet/strategy.md`. **Ce qui suit remplace, à l'écran, le pilotage
+en accordéon, la grille de choix, « Tout accepter », la page `/strategy/brief` et le plan
+d'exécution décrits plus haut** (tables et fonctions gardées).
+
+- **Parcours** (`lib/strategy/journey.ts`, pur ; contexte `lib/strategy/step-data.ts`, `cache()`) :
+  `start` Démarrer la stratégie (titre « Échange stratégique » ou « Départ ») · `dimensions` Les 8
+  dimensions · `validation` Validation du Brief de sortie · `validated` Stratégie validée. Prérequis
+  externe « Cadrage › Plan du projet » (`isWorkflowLaunched`), statuts et acteurs calculés (« Confirmer
+  ou écarter n propositions de PO », « Arbitrer : … », « Compléter : … », « Valider le Brief de sortie »
+  par valideur, `kind: "validate"`). Loader `lib/journey/strategy.ts`, branché dans le loader
+  `marketing` (`part.key = "strategy"`). Routes `/strategy/<étape>` (`routes.projectStrategyStep`),
+  `/strategy` redirige vers l'étape de la personne (`strategyLanding`), `?d=x` vers
+  `/strategy/dimensions#dim-x`, `/strategy/brief` vers `/strategy/validation` (`?v=n` gardé). Cadre :
+  `StrategyStepFrame`.
+- **Démarrer** : `StartChoices` « Commencer la stratégie » (`startStrategyDirect`, `withOutcome`) /
+  « Préparer un échange » (`CallPrepForm` dans l'étape, « Changer »). **Recommandé** : même règle que le
+  Cadrage — l'échange quand ce qui reste à décider dépasse ce que PDS OS sait déjà ; connu = besoins du
+  Brief à transformer en leviers, date de sortie, enveloppe, objectif du Cadrage (`knownAtStart`,
+  `lib/strategy/start-reco.ts`). Ordre du jour de l'échange = **les 8 dimensions** (proto), les questions
+  de ce qui manque repliées sous chaque point (`strategyCallTopics`) ; objectif du proto. Puis
+  `PlannedCallFacts`, et une fois le compte rendu rangé : `MeetingFacts` + `MeetingSummaryBlock`, les
+  lignes du compte rendu étant **les propositions de la Stratégie** (`strategyMeetingLines`), la
+  prochaine étape nommant direction **et** directions créatives (incohérence du proto corrigée).
+- **Les 8 dimensions** (`lib/strategy/dimension-model.ts`, `-items.ts`, `-levers.ts`, `-budget.ts`) :
+  chaque réponse, levier, livrable, temps fort et objectif est une ligne `ProposalRow` (Confirmer /
+  Modifier / Écarter, citation · « Échange stratégique du 05/10 », « Saisi par », « Modifié par »),
+  **un écarté reste visible barré**, rien n'est pré-coché (règle 21 : plus de `proposeStrategyChoices`
+  après un call, plus de « Tout accepter »). États : À compléter / En cours / À arbitrer / Complété
+  (mots du ticket, le proto disait « À trancher ») ; l'étape est faite quand plus rien n'est à arbitrer
+  ni à compléter (proto ; « En cours » ne bloque pas et part dans « Restant à arbitrer »). Positionnement
+  et Angle : une réponse (« Ajouter » tant qu'aucune n'est gardée) ; Publics : la réponse + une ligne
+  par public (`strategy_audiences`, « Écarter » le retire). **Dispositif** : tous les leviers listés —
+  propositions de PO, Retenu, À arbitrer (« Retenir » / « Ne pas retenir », aussi pour un besoin confirmé
+  du Brief sans levier, jamais retenu d'avance), Non retenu (« Leviers courants ») ; « Ajouter un
+  levier » choisit parmi les non retenus (ou « Autre levier »). **Budget**, règle tranchée (point 5) :
+  Proposé = lignes des leviers retenus et « Hors levier », À arbitrer = lignes d'un levier à arbitrer,
+  Écartée = levier non retenu, Validé = engagé, facturé ou payé parmi le proposé, Reste = enveloppe −
+  proposé − à arbitrer ; enveloppe non définie ou à confirmer = « En cours », listée sans bloquer.
+  **Replié** sous chaque dimension (`Fold`, `DimensionWork`) ce que le ticket ou Ibé demandent et que
+  le proto n'a pas : quatre points du positionnement (MKT-S1-05), publics détaillés, narratif en
+  5 parties et synthèse (ticket § 2, MKT-S1-06), prérequis juridiques (MKT-S1-07), quantité / levier /
+  délais des livrables (MKT-S1-08), temps forts modifiables et vue par canal (ticket § 5), répartition
+  par levier et lignes du budget (§ 6), objectif stratégique et KPI chiffrés (§ 7) ; « Avec PO »
+  (brouillon MKT-S1-09 et dictée). **Retiré** : la grille de choix fermés (code seul : MKT-S1-01 ne la
+  demandait pas, il corrigeait la lecture des choix ; le ticket refuse le « formulaire rigide »),
+  « Proposer des réponses », `ImportPanel`, `BriefReminder`, le pilotage en accordéon.
+- **PO propose livrables, temps forts et objectifs** (migration `20261019030101`) : `report_items.kind`
+  `deliverable` / `milestone` / `kpi` (schéma d'extraction, citation obligatoire) ; l'import ne les
+  propose que si la citation est **retrouvée mot pour mot** (`located ≠ missing`) et un temps fort
+  seulement si le code lit son jour dans les mots (`saidOffsetDays` : « J-14 », « une semaine après »,
+  « la veille »…) — sinon pas de temps fort proposé (point 6). **Table `strategy_proposals`** plutôt
+  qu'un statut sur `strategy_deliverables` / `milestones` / `strategy_objectives` : un livrable inséré est
+  aussitôt reflété en Conception (`z_design_mirror`) et lu par une dizaine de listes d'autres modules ;
+  une proposition n'atteint rien avant d'être gardée. `decide_strategy_proposal` (garder = crée la ligne
+  réelle : livrable « Hors levier », temps fort au jour J+n de `strategy_reference_date`, objectif
+  qualitatif ; reformuler = renomme ; écarter = retire la ligne et garde la proposition barrée),
+  `add_strategy_item` (« Ajouter », gardé d'office), `discard_strategy_item` (une ligne saisie avant :
+  retirée, gardée barrée). RLS : lecture `can_see_project`, insertion directe seulement par l'import
+  (responsable, stratégie ouverte, `state = proposed`). Cascade avec le projet et l'item de compte rendu
+  (`delete_project_row` inchangé). `strategy_deliverables.lever_id` **facultatif** (« Hors levier »,
+  `check_strategy_links`). `levers.decided_by / decided_at` (trigger) et `proposed_label` (mots de PO).
+- **Validation dans l'étape** : le Brief en **4 blocs** (Pour qui et pourquoi, Comment, Quand, Objectif
+  et budget, `lib/strategy/brief-out.ts`) écrit par le serveur dans chaque version (`content.out`) avec
+  « Restant à arbitrer » (`toDecide` = les points « En cours », jamais critiques) ; les versions
+  antérieures gardent leur rendu (`BriefSnapshotView`). `sendBriefOut` (refusé tant que l'étape 2 n'est
+  pas faite ; direction toujours, directions créatives cochées par défaut), `decideBriefOut`
+  (`DecisionPanel` : Valider le Brief de sortie / Valider avec réserves / Demander une modification ;
+  valider accepte les alertes critiques d'une ancienne version, montrées sur la pièce),
+  `ReturnCallout` + `ResubmitForm` (« Répondre et transmettre à nouveau » = version suivante, même
+  valideurs, réponse en note), « Relancer <Nom> » (`remind_strategy_review`). **Réserve** (migration
+  `20261019030201`, point 3 tranché comme le proto) : le commentaire devient la réserve et une tâche du
+  responsable du projet ; sans date donnée, échéance = date de sortie si elle est à venir, sinon dans 7
+  jours (une tâche exige une date, `tasks_due_date_required`). « Modifier avec PO » (ticket § 8) = la
+  dictée, tant que la Stratégie est ouverte.
+- **Stratégie validée** : encadré, Documents (Brief Vn · Voir (PDF) · Partager (lien interne copié) ;
+  Plan de sortie et Dossier de presse avec leur état réel, « Générer » → générateurs gardés, ticket
+  § 11–12), « Ce que la Stratégie alimente » à égalité (Conception, Activations, Planning chiffré, Suivi
+  § 14) — « Passer à la conception » n'est plus l'action principale (point 8, proto du 18/10) —,
+  réserves à lever, « Réviser la stratégie » (§ 9). **Retiré** : plan d'exécution (`ExecutionPlanCard`,
+  « Pas demandé » au 18/10 ; les Activations créeront leurs activations depuis « Leviers à préparer »),
+  les 8 rubriques repliées. Notification `strategy_validated` (trigger sur `strategy_documents`) au
+  responsable et aux directions créatives, ouvrant `/strategy/validated`.
+
 ### Retours Marketing du 12/10/2026, lot C1 (MKT-C2-01, MKT-C2-02)
 
 Migration `…20261013100001_strategy_recommendation_actions`.

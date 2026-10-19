@@ -6,6 +6,8 @@ import {
   BriefDecision,
   BriefResubmit,
 } from "@/components/strategy/validation/brief-decision";
+import { EditAccessProvider } from "@/components/projects/edit-access";
+import { StrategyDictation } from "@/components/strategy/strategy-dictation";
 import { BriefOutDoc } from "@/components/strategy/validation/brief-out-doc";
 import { RemindReviewer } from "@/components/strategy/validation/remind-reviewer";
 import { ReviewRows } from "@/components/strategy/validation/review-rows";
@@ -128,6 +130,17 @@ export default async function StrategyValidationPage({
             projectId={projectId}
             creativeIds={creatives.map((c) => c.personId)}
           />
+        )}
+        {ctx.canEdit && !sent && (
+          // Ticket § 8: « Modifier avec PO », the Stratégie's dictation.
+          <EditAccessProvider canEdit>
+            <StrategyDictation
+              projectId={projectId}
+              label={fr.strategyBrief.modifyWithPo}
+            >
+              <span />
+            </StrategyDictation>
+          </EditAccessProvider>
         )}
         {!sent && !returned && step?.status === "current" && isOwner && (
           <SendBrief

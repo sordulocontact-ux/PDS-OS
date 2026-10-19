@@ -149,6 +149,8 @@ export const strategyDimensions = {
     objectives: "Objectif stratégique et KPI chiffrés",
     withPo: "Avec PO",
   },
+  withPoBody:
+    "PO prépare un brouillon depuis le Brief de cadrage et les comptes rendus, ou range ce que vous lui dictez : chaque réponse arrive en proposition, à trancher ici.",
   strategicObjective: "Objectif stratégique",
   toConfirm: (n: number) => `${n} à confirmer`,
   pending: (n: number) =>
