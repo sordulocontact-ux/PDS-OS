@@ -107,6 +107,7 @@ export const routes = {
   contractTemplate: (seriesId: string) =>
     `/app/contracts/templates/${seriesId}`,
   contractDocumentPdf: (id: string) => `/api/contracts/${id}/document`,
+  formalityDraftPdf: (id: string) => `/api/legal/formalities/${id}/draft`,
   formalityDocumentPdf: (id: string, version: number) =>
     `/api/legal/formalities/${id}/document?version=${version}`,
   feedback: "/app/feedback",

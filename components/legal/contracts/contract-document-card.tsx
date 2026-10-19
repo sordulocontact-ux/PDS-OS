@@ -5,19 +5,13 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { isBlocking } from "@/lib/legal/contracts/completeness";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
+import { fileNamePart } from "@/lib/utils/file-name-part";
 import type {
   AgreementField,
   AgreementRow,
 } from "@/lib/legal/contracts/mapping";
 
 const t = fr.legalDocuments.contract;
-
-// « Kader », « Neons »: what a file name keeps of a name.
-const plain = (text: string) =>
-  text
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .replace(/[^A-Za-z0-9]+/g, "");
 
 /** « Contrat_Kader_Neons_v1.pdf ». Client-safe. */
 export function contractFileName(
@@ -27,8 +21,8 @@ export function contractFileName(
 ) {
   const last = person.trim().split(/\s+/).pop() ?? person;
   return t.fileName(
-    plain(last) || "Contrat",
-    plain(project) || "Projet",
+    fileNamePart(last, "Contrat"),
+    fileNamePart(project, "Projet"),
     version,
   );
 }

@@ -19,6 +19,66 @@ async function isPdf(blob: Blob): Promise<boolean> {
 }
 
 /**
+ * Downloads the PDF the server makes at `href` as `fileName`, the same way
+ * as « Exporter en PDF » (a gesture that downloads after another action:
+ * « Générer un brouillon »). Never saves what is not a PDF.
+ */
+export async function downloadPdf(
+  href: string,
+  fileName: string,
+  failedLabel: string,
+): Promise<boolean> {
+  const t = fr.pdf;
+  let blob: Blob;
+  try {
+    const response = await fetch(href, { cache: "no-store" });
+    if (response.status === 401) {
+      toast.error(t.expired);
+      return false;
+    }
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      console.error("[pdf] generation failed", response.status, body);
+      toast.error(failedLabel);
+      return false;
+    }
+    blob = await response.blob();
+    if (!(await isPdf(blob))) {
+      console.error(
+        "[pdf] not a PDF",
+        response.headers.get("content-type"),
+        blob.size,
+      );
+      toast.error(t.notPdf);
+      return false;
+    }
+  } catch (error) {
+    console.error("[pdf] request failed", error);
+    toast.error(failedLabel);
+    return false;
+  }
+  try {
+    const url = URL.createObjectURL(blob);
+    // In the document, and revoked later: Firefox ignores a detached
+    // link, Safari cancels a download whose URL is revoked at once.
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    toast.success(t.ready);
+    return true;
+  } catch (error) {
+    console.error("[pdf] download failed", error);
+    toast.error(t.downloadFailed);
+    return false;
+  }
+}
+
+/**
  * « Exporter en PDF »: the PDF is made on the server (Playwright,
  * lib/pdf/render.ts) and downloaded as a file, never the print dialog. The
  * generation and the download are told apart, and nothing is saved unless
@@ -44,58 +104,14 @@ export function PdfExportButton({
   // « sm » in the head of a document card (DocumentCard).
   size?: "lg" | "sm";
 }) {
-  const t = fr.pdf;
   const [exporting, setExporting] = useState(false);
 
   async function exportPdf() {
     setExporting(true);
-    let blob: Blob;
     try {
-      const response = await fetch(href, { cache: "no-store" });
-      if (response.status === 401) {
-        toast.error(t.expired);
-        return;
-      }
-      if (!response.ok) {
-        const body = await response.text().catch(() => "");
-        console.error("[pdf] generation failed", response.status, body);
-        toast.error(failedLabel);
-        return;
-      }
-      blob = await response.blob();
-      if (!(await isPdf(blob))) {
-        console.error(
-          "[pdf] not a PDF",
-          response.headers.get("content-type"),
-          blob.size,
-        );
-        toast.error(t.notPdf);
-        return;
-      }
-    } catch (error) {
-      console.error("[pdf] request failed", error);
-      toast.error(failedLabel);
-      return;
+      await downloadPdf(href, fileName, failedLabel);
     } finally {
       setExporting(false);
-    }
-
-    try {
-      const url = URL.createObjectURL(blob);
-      // In the document, and revoked later: Firefox ignores a detached
-      // link, Safari cancels a download whose URL is revoked at once.
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = fileName;
-      link.hidden = true;
-      document.body.append(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
-      toast.success(t.ready);
-    } catch (error) {
-      console.error("[pdf] download failed", error);
-      toast.error(t.downloadFailed);
     }
   }
 

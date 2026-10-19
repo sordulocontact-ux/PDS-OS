@@ -1,9 +1,11 @@
 import Link from "next/link";
 
+import { BulletinCard } from "@/components/legal/formalities/bulletin-card";
 import { DossierForm } from "@/components/legal/formalities/dossier-form";
 import { OpenFormalityButton } from "@/components/legal/formalities/open-formality-button";
 import { StepsPanel } from "@/components/legal/formalities/steps-panel";
 import { PageSection } from "@/components/shell/page-section";
+import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
@@ -53,6 +55,8 @@ export function FormalityCard({
     >
       {f && (
         <div className="flex flex-col gap-6">
+          {/* The bulletin in head, at every step that follows it. */}
+          <BulletinCard title={title.title} f={f} />
           {(f.submittedAt || f.completedAt) && (
             <div className="flex flex-wrap items-center gap-2">
               {f.submittedAt && (
@@ -116,8 +120,17 @@ export function FormalityCard({
               </ul>
             )}
           </div>
-          <StepsPanel projectId={projectId} title={title.title} f={f} />
-          <DossierForm projectId={projectId} title={title} />
+          <StepsPanel projectId={projectId} f={f} />
+          {f.documents.length > 0 &&
+          !["collecting_data", "ready_to_generate", "action_required"].includes(
+            f.status,
+          ) ? (
+            <Fold summary={fr.legalDocuments.bulletin.values}>
+              <DossierForm projectId={projectId} title={title} />
+            </Fold>
+          ) : (
+            <DossierForm projectId={projectId} title={title} />
+          )}
           {f.history.length > 0 && (
             <section className="flex flex-col gap-2 border-t border-[color:var(--border-hairline)] pt-6">
               <h3 className="font-medium">{t.page.history}</h3>
