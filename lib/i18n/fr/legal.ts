@@ -117,6 +117,24 @@ export const legal = {
       },
     },
     project: "Projet",
+    // The domain of a question, in the eyebrow of « Question de PO ».
+    domains: {
+      contributors: "Participants",
+      third_party: "Élément repris",
+      agreements: "Accords existants",
+      publisher: "Éditeur",
+    },
+    notAsked: {
+      sources: {
+        credits: "Crédits du titre",
+        contracts: "Contrats du projet",
+        splits: "Splits du titre",
+      },
+    },
+    answersOf: (answered: number, total: number) =>
+      `${answered} réponse${answered > 1 ? "s" : ""} sur ${total}`,
+    toAnswer: "Pas encore répondu",
+    answer: "Répondre",
     questionOf: (n: number, total: number) => `Question ${n} sur ${total}`,
     answerLabel: "Votre réponse",
     // An answer that says « nothing », saved without PO (UX test of

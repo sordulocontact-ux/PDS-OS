@@ -20,6 +20,7 @@ export async function FramingStep({
         key={question ?? "intake"}
         projectId={projectId}
         questions={intake.questions}
+        notAsked={intake.notAsked}
         initialQuestion={question}
       />
     </LegalStepFrame>

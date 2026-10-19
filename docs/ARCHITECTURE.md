@@ -3208,6 +3208,16 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   `ClearancesView`, `FormalitiesView`, `FormRowActions`, `SubmissionDialog`, `SplitCard` (aucune
   table ni donnée touchée).
 
+- **Cadrage juridique comme le Cadrage (J2)** : la question vit dans `PoQuestion`
+  (`components/ui/po-question.tsx`, encadré « Question de PO », surtitre domaine · état, rang) et
+  la lecture de PO dans `PoReading` (« ✦ Ce que PO a compris », citations, « Retirer ») — deux
+  briques communes prévues pour être reprises par le Cadrage (lot 2), qui garde ses propres
+  issues (Confirmer / Modifier, Non applicable, À définir plus tard). Les faits gardés portent
+  leur citation (`legal_facts.source_quote`, lue par `loadIntake`) ; `notAskedQuestions`
+  (`lib/legal/intake/questions.ts`) expose les questions qu'une donnée fiable règle (crédits du
+  titre, contrats du projet, splits du titre) : « Questions que PO ne pose pas ». « Corriger »
+  n'apparaît qu'une fois toutes les questions répondues (proto).
+
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique

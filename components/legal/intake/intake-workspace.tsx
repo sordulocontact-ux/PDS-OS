@@ -4,30 +4,37 @@ import Link from "next/link";
 import { IconCheck } from "nucleo-sharp-essential";
 import { useState } from "react";
 
-import { AnsweredList } from "@/components/legal/intake/answered-list";
+import { IntakeAnswers } from "@/components/legal/intake/intake-answers";
 import { QuestionCard } from "@/components/legal/intake/question-card";
 import { EmptyState } from "@/components/shell/empty-state";
 import { Button } from "@/components/ui/button";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { answerKey } from "@/lib/legal/intake/questions";
-import type { IntakeQuestion } from "@/lib/legal/intake/types";
+import type {
+  IntakeQuestion,
+  NotAskedQuestion,
+} from "@/lib/legal/intake/types";
 
 const keyOf = (q: IntakeQuestion) => answerKey(q.key, q.masterId);
 
 /**
  * The Cadrage juridique's conversation: the first open question (in the
- * order the code decided), or the one being corrected; then the answers.
+ * order the code decided), or the one opened from the answers (« Répondre »,
+ * « Corriger »); then every question at a glance and the ones PO does not
+ * ask.
  * The server sends the questions again after each save, so the next one
  * comes by itself.
  */
 export function IntakeWorkspace({
   projectId,
   questions,
+  notAsked,
   initialQuestion,
 }: {
   projectId: string;
   questions: IntakeQuestion[];
+  notAsked: NotAskedQuestion[];
   // `?question=<key>:<title|project>` (from the Confirmation's « Corriger »
   // or « Répondre »): that question opens first.
   initialQuestion: string | null;
@@ -42,7 +49,6 @@ export function IntakeWorkspace({
     ? questions.find((q) => keyOf(q) === correcting)
     : undefined;
   const active = corrected ?? questions.find((q) => !q.answered);
-  const answered = questions.filter((q) => q.answered);
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
@@ -78,9 +84,12 @@ export function IntakeWorkspace({
           }
         />
       )}
-      <AnsweredList
-        questions={answered.filter((q) => keyOf(q) !== correcting)}
-        onCorrect={(q) => setCorrecting(keyOf(q))}
+      <IntakeAnswers
+        questions={questions}
+        notAsked={notAsked}
+        activeKey={active ? keyOf(active) : null}
+        keyOf={keyOf}
+        onOpen={(q) => setCorrecting(keyOf(q))}
       />
     </div>
   );

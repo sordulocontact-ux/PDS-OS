@@ -5,13 +5,15 @@ import { loadKnownPeople } from "@/lib/legal/intake/known-queries";
 import {
   answerKey,
   intakeQuestions,
+  notAskedQuestions,
   type IntakeKnowledge,
 } from "@/lib/legal/intake/questions";
 import {
   QUESTION_KEYS,
   factValueSchema,
-  type FactValue,
   type IntakeQuestion,
+  type NotAskedQuestion,
+  type ProposedFact,
   type QuestionKey,
 } from "@/lib/legal/intake/types";
 import { createClient } from "@/lib/supabase/server";
@@ -33,6 +35,8 @@ const isQuestionKey = (value: string): value is QuestionKey =>
 
 export type Intake = {
   questions: IntakeQuestion[];
+  // Questions reliable data settles, not asked.
+  notAsked: NotAskedQuestion[];
   // Third-party elements to secure, opened by the answers.
   clearances: number;
 };
@@ -83,7 +87,7 @@ export async function loadIntake(project: {
       .limit(ANSWERS_LIMIT),
     supabase
       .from("legal_facts")
-      .select("question_key, master_id, kind, value")
+      .select("question_key, master_id, kind, value, source_quote")
       .eq("project_id", project.id)
       .is("superseded_by_answer_id", null)
       .order("created_at"),
@@ -119,7 +123,7 @@ export async function loadIntake(project: {
   failed("cadrage fields", briefLegal.error);
 
   // Active facts by question and title; a row the schema refuses is skipped.
-  const factsOf = new Map<string, FactValue[]>();
+  const factsOf = new Map<string, ProposedFact[]>();
   for (const row of facts.data ?? []) {
     if (!isQuestionKey(row.question_key)) continue;
     const parsed = factValueSchema.safeParse({
@@ -128,7 +132,10 @@ export async function loadIntake(project: {
     });
     if (!parsed.success) continue;
     const key = answerKey(row.question_key, row.master_id);
-    factsOf.set(key, [...(factsOf.get(key) ?? []), parsed.data]);
+    factsOf.set(key, [
+      ...(factsOf.get(key) ?? []),
+      { ...parsed.data, quote: row.source_quote },
+    ]);
   }
   // The latest answer of each question (rows come newest first).
   const answersOf: IntakeKnowledge["answers"] = new Map();
@@ -140,23 +147,25 @@ export async function loadIntake(project: {
   }
 
   const titles = project.masters.map((m) => ({ id: m.id, title: m.title }));
-  return {
-    questions: intakeQuestions({
-      titles,
-      cadrage: cadrageAnswers(titles, {
-        constraints: (constraints.data ?? []).map((row) => row.text),
-        fields: new Map(
-          (briefLegal.data ?? []).flatMap((row) =>
-            row.field_key ? [[row.field_key, row.value]] : [],
-          ),
+  const knowledge: IntakeKnowledge = {
+    titles,
+    cadrage: cadrageAnswers(titles, {
+      constraints: (constraints.data ?? []).map((row) => row.text),
+      fields: new Map(
+        (briefLegal.data ?? []).flatMap((row) =>
+          row.field_key ? [[row.field_key, row.value]] : [],
         ),
-      }),
-      creditedTitles: new Set((credits.data ?? []).map((r) => r.master_id)),
-      publishedTitles: new Set((publishers.data ?? []).map((r) => r.master_id)),
-      hasContract: (contracts.count ?? 0) > 0,
-      known,
-      answers: answersOf,
+      ),
     }),
+    creditedTitles: new Set((credits.data ?? []).map((r) => r.master_id)),
+    publishedTitles: new Set((publishers.data ?? []).map((r) => r.master_id)),
+    hasContract: (contracts.count ?? 0) > 0,
+    known,
+    answers: answersOf,
+  };
+  return {
+    questions: intakeQuestions(knowledge),
+    notAsked: notAskedQuestions(knowledge),
     clearances: clearances.count ?? 0,
   };
 }
