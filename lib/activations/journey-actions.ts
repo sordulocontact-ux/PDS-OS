@@ -10,6 +10,7 @@ import {
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { withOutcome } from "@/lib/journey/outcome";
+import { schedulePendingPushes } from "@/lib/notifications/push";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
@@ -34,7 +35,10 @@ async function update(
       .from("marketing_activations")
       .update(values)
       .eq("id", activationId);
-    return error ? activationFailure(error) : activationDone(projectId);
+    if (error) return activationFailure(error);
+    // An owner given, a suspension: its person is told (triggers).
+    await schedulePendingPushes();
+    return activationDone(projectId);
   });
 }
 
