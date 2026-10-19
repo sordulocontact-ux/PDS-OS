@@ -18,6 +18,8 @@ const FOLLOWS: Record<string, string[]> = {
   "signature.requested": ["contract.approved"],
   "contract.signed": ["signature.requested", "contract.approved"],
   "contract.terminated": ["contract.signed"],
+  "invoice.received": ["contract.signed"],
+  "invoice.paid": ["invoice.received"],
   // Fiches de renseignements.
   "form.sent": ["form.prepared"],
   "form.submitted": ["form.sent", "form.prepared"],

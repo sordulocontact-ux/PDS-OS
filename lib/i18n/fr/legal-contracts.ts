@@ -319,6 +319,8 @@ export const legalContracts = {
       "contract.signed": "Signé",
       "contract.terminated": "Résilié",
       "financial_need.created": "Besoin financier créé",
+      "invoice.received": "Facture reçue",
+      "invoice.paid": "Facture payée",
     } as Record<string, string>,
     eventLine: (event: string, who: string, date: string) =>
       who ? `${event} · ${who} · ${date}` : `${event} · ${date}`,

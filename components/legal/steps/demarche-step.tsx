@@ -7,6 +7,7 @@ import { StepHistory } from "@/components/shell/journey/step-history";
 import { contractProofOf } from "@/lib/contracts/proof";
 import { generateReadyAgreements } from "@/lib/legal/contracts/auto-generate";
 import { loadContractCards } from "@/lib/legal/contracts/document-card";
+import { loadContractInvoices } from "@/lib/legal/invoices/queries";
 import { demarcheHistory } from "@/lib/legal/demarches/history";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { fr } from "@/lib/i18n/fr";
@@ -51,10 +52,11 @@ export async function DemarcheStep({
       ? [p.panel.row.contract.id]
       : [],
   );
-  const [proof, history, cards] = await Promise.all([
+  const [proof, history, cards, invoices] = await Promise.all([
     contractProofOf(contractIds),
     loadLegalHistory(ctx.project, ctx.access),
     loadContractCards(contractIds),
+    loadContractInvoices(projectId, ctx.clearances.canValidate),
   ]);
   return (
     <LegalStepFrame
@@ -71,6 +73,8 @@ export async function DemarcheStep({
         clearances={ctx.clearances}
         proof={Object.fromEntries(proof)}
         cards={cards}
+        invoices={invoices}
+        direction={ctx.direction ?? fr.legalDemarches.direction}
         owner={
           demarche.own?.responsibleName ??
           ctx.project.ownerName ??

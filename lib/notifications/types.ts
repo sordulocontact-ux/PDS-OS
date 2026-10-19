@@ -116,6 +116,13 @@ export const NOTIFICATION_KINDS = [
   "activation_owner_assigned",
   "activation_suspended",
   "activation_creator_acted",
+  // The Juridique (« le reste », 20/10): a template asked of the direction
+  // in the Plan d'action, its decision; an invoice deposited, paid.
+  "legal_template_to_validate",
+  "legal_template_validated",
+  "legal_template_refused",
+  "legal_invoice_received",
+  "legal_invoice_paid",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -212,6 +219,14 @@ export function notificationHref(
   // A fiche received: the project's Fiches de renseignements.
   if (kind === "legal_form_received")
     return routes.projectLegalStep(projectId, "forms");
+  // A template asked from « Contrats à prévoir »: the Plan d'action.
+  if (kind.startsWith("legal_template_"))
+    return `${routes.projectLegalStep(projectId, "plan")}#legal-contracts`;
+  // An invoice opens the person's démarche (the subject is the contact).
+  if (kind.startsWith("legal_invoice_"))
+    return subjectId
+      ? legalDemarcheHref(projectId, "person", `contact:${subjectId}`)
+      : routes.projectLegal(projectId);
   // A borrowing opens on its démarche, a step of the Juridique.
   if (kind.startsWith("clearance_") || kind === "legal_element_withdrawn")
     return subjectId

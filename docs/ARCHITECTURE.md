@@ -3507,9 +3507,8 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   nécessaires » tant que c'est à faire. **Changer** le responsable ou l'échéance d'une démarche
   demande « Pourquoi * » (`change_legal_plan_item`, colonne `legal_plan_events.reason`, montrée
   dans l'Historique). Migration `20261019090101`, tests `legal-contracts-before-launch.test.sql`.
-  Pas encore : validation / refus d'un modèle par la direction **dans** l'étape (elle se fait
-  sur la page du modèle) ; « document en tête » et « Changé depuis la v1 » dans la démarche
-  personne.
+  Validation du modèle dans l'étape et « document en tête » : voir « Le reste du Juridique »
+  ci-dessous.
 
 - **« Prêt pour la sortie » (J11), un seul calcul** — contrat pour la Distribution et la Vue
   d'ensemble : **`loadLegalReadiness(projectId)`** (`lib/legal/readiness/load.ts`, serveur) rend
@@ -3544,9 +3543,9 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   jusqu'au … · créé le … · Envoyé par … le … · Ouvert le … » (`legal_forms.sent_by`,
   `revoked_by`, `revoked_reason`). Sans la clé, ou pour un lien préparé avant, l'URL n'est pas
   réaffichable : l'état reste, « Nouveau lien » en donne un. Migration `20261019090301`.
-  **Pas encore** : les liens de répartition (`legal_split_confirmations`, même méthode à
-  appliquer) ; l'envoi par PDS OS (pas de fournisseur d'e-mail : `mailto:` + « Marquer comme
-  envoyée »).
+  Les liens de répartition suivent la même méthode (« Le reste du Juridique » ci-dessous).
+  **Pas encore** : l'envoi par PDS OS (pas de fournisseur d'e-mail : `mailto:` + « Marquer
+  comme envoyée »).
 
 - **Refus d'un emprunt (J8)** : « Décider de la suite » sous le refus (`RefusalDecision`) :
   « Retirer l'élément du titre » avec « Pourquoi * » (`withdraw_clearance` : emprunt abandonné,
@@ -3556,6 +3555,75 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   abandonné, puis ajouté au plan par `addLegalPlanItems`). « Retirer l'élément » hors refus passe
   aussi par le motif. Migration `20261019090401`, tests `legal-clearance-refusal.test.sql`.
   Les notifications d'emprunt ouvrent la démarche (`/legal/clearance/<id>`).
+
+### Le reste du Juridique (20/10/2026, branche `pc/r3-legal`)
+
+- **Modèle de contrat décidé dans l'étape (règle 18)** : « Nouveau modèle de contrat » des
+  contrats à prévoir crée le modèle puis le **demande** à la direction pour cette personne
+  (`request_contract_template` : `contract_templates.requested_project_id`, `requested_key` =
+  clé de la ligne, `requested_for` = nom ; auteur seulement, brouillon seulement ;
+  notification `legal_template_to_validate` à chaque membre `validate`). La direction le
+  voit en tête du Plan d'action (`TemplateRequestCard` : `DocumentCard` du modèle, « S'applique
+  à », valeurs repérées, `DecisionPanel` « Valider le modèle » / « Refuser le modèle » avec
+  « Ce qui ne va pas * », `decideTemplateRequest` → `set_contract_template_status`) ; son
+  « À vous » est sur l'étape Plan d'action (`kind: "validate"`, même plan lancé). Chez
+  l'auteur : « Modèle « X » envoyé à … : en attente de sa validation », puis le refus signé
+  (`ReturnCallout`) et « Nouveau modèle de contrat » à nouveau ; notifications
+  `legal_template_validated` / `legal_template_refused` (trigger). Lecture :
+  `lib/legal/contracts/template-requests.ts`.
+- **Document en tête de la carte du contrat** : dès la génération, chaque étape qui suit
+  (soumettre, valider, envoyer, signer, signé) montre `ContractDocumentCard`
+  (« Contrat_Kader_Neons_v2.pdf », « Généré depuis les valeurs ci-dessous · n bloquantes sur
+  m », « Voir le PDF » = `/api/contracts/[id]/document`, valeurs avec leur source corrigées à
+  leur source). « Modifier une clause » est dans l'étape (`ClauseForm` : clause, nouvelle
+  rédaction dans le texte, « Pourquoi * » → `revise_contract_clause`, colonne
+  `contract_documents.clause`) ; « Changé depuis la v1 : clause « Crédit » (Lina Haddad, v2) :
+  « … » » lit le paragraphe changé entre deux versions (`lib/legal/contracts/document-card.ts`,
+  `changedParagraph`). Le retour de la direction est en tête (`ReturnCallout`) et le bouton
+  devient « Répondre et transmettre à nouveau » ; la décision passe par `DecisionPanel`.
+- **Liens des confirmations de répartition** : même méthode que les fiches — jeton scellé par
+  le serveur (`LEGAL_LINK_KEY`, `legal_split_confirmations.link_sealed`,
+  `seal_split_confirmation_link`, `lib/legal/splits/link-seal.ts`), montré dans l'étape par
+  `SplitLinks` / `PrivateLinkCard` (Copier le lien, « Marquer comme envoyé »
+  `mark_split_confirmation_sent`, Relancer = `mailto:`, Nouveau lien, « Révoquer l'accès » avec
+  « Pourquoi * » `revoke_split_confirmation`). Un lien reporté sur une nouvelle version (JUR-27)
+  garde son sceau et son envoi (trigger `a_carry_link`). Sans clé, le lien s'affiche une fois
+  comme avant. La carte de la confirmation est déjà sur la page de la personne (`/c/`, lot 11).
+- **SACEM sur une page** : sections en place (`DossierSection`), puis « Avant de générer » en
+  trois colonnes Bloquant / À confirmer / Facultatif (`BeforeGenerate`,
+  `lib/legal/formalities/before-items.ts` : requis vide, proposé par une source non confirmé —
+  « Confirmer » le fait sien —, rouvert par la SACEM, codes de `formality_missing` hors champ),
+  « Générer la version à signer » (enregistre puis génère ; refusé par le code : « Pas encore :
+  n points bloquants et m à confirmer. Un brouillon reste possible. ») et « Générer un
+  brouillon » (`/api/legal/formalities/[id]/draft` : le 725 rempli des valeurs enregistrées,
+  « BROUILLON — informations manquantes » en travers, aucune version gardée). Une fois généré,
+  `BulletinCard` (« Bulletin_725_Neons_v1.pdf · Généré le … · signatures : n sur m »,
+  « Télécharger ») est en tête à chaque étape qui suit, le dossier replié sous « Les valeurs du
+  bulletin ». Retirés : étapes du dossier (`DossierStepChips`), récapitulatif (`DossierRecap`).
+- **Factures (J10)** : table `legal_invoices` (une par `financial_needs`, cascade avec lui ;
+  numéro, montant HT, `gap_reason` obligatoire si le montant n'est pas la rémunération
+  convenue, fichier du bucket privé `legal-invoices`, reçue le, échéance = +30 jours, `link` ou
+  `team`, payée le / par / preuve). **Lecture : direction seule** (RLS `validate`) ; le
+  Juridique ne voit que l'état (`legal_invoice_states` : `asked` / `to_pay` / `paid`). Dépôt par
+  la page de la personne (`/c/`, carte « Votre facture » : « Facturer à », « Montant attendu »,
+  PDF, « Numéro de facture * », « Montant HT (€) * », « Explication de l'écart * » →
+  `open_legal_invoice_slot` puis `submit_legal_invoice`, fonctions `anon` vérifiées par le
+  jeton de la personne, le projet et le contrat signé) ; la direction peut « Ajouter une facture
+  reçue autrement » et « Marquer comme payée » (« Payée le * », « Preuve du virement * »,
+  `mark_legal_invoice_paid`). `financial_needs.status` : `waiting_for_invoice` → `invoiced` →
+  `paid`. Journal du contrat `invoice.received` / `invoice.paid` (sans le numéro).
+  Notifications `legal_invoice_received` (direction), `legal_invoice_paid` (responsable).
+  Parcours (`lib/legal/invoices/journey.ts`) : la démarche signée dit « Contrat signé · facture
+  attendue / à payer / payée », la personne « Déposer la facture » (lien), la direction « Payer
+  la facture de X ». **PDS OS ne fait jamais de virement et ne garde aucun IBAN** (décision du
+  20/10/2026 : le RIB reste hors de l'app, le contrôle anti-fraude se fait au téléphone) ; « Facturer
+  à » montre le nom de l'organisation (raison sociale, adresse, SIRET pas encore en base).
+- Migrations `20261020030101` (modèle demandé, clause), `20261020030201` (liens de
+  répartition), `20261020030301` (factures) ; tests `supabase/tests/legal-reste.test.sql` (31).
+- **Pas encore** : envoi d'e-mails par PDS OS (fiche, contrat, demande, bulletin), dépôt du
+  contrat signé et du bulletin signé par la page de la personne, contrôle « Facture de X » dans
+  Prêt pour la sortie, liste « À payer » sous le Maintenant de la direction, reflet des
+  factures dans le Budget (`budget_lines`).
 
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 

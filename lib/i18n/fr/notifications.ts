@@ -144,6 +144,16 @@ export const notifications = {
       `${actor} a validé les conditions de l'emprunt (« ${project} ») : le contrat est prêt à envoyer.`,
     clearance_terms_rejected: (actor: string, project: string) =>
       `${actor} demande une contre-proposition sur l'emprunt (« ${project} »).`,
+    legal_template_to_validate: (actor: string, project: string) =>
+      `${actor} vous demande de valider un modèle de contrat (« ${project} »).`,
+    legal_template_validated: (actor: string, project: string) =>
+      `${actor} a validé votre modèle de contrat (« ${project} ») : il entre dans la bibliothèque.`,
+    legal_template_refused: (actor: string, project: string) =>
+      `${actor} a refusé votre modèle de contrat (« ${project} ») : voyez pourquoi dans les contrats à prévoir.`,
+    legal_invoice_received: (_actor: string, project: string) =>
+      `Une facture est arrivée pour « ${project} » : à payer.`,
+    legal_invoice_paid: (actor: string, project: string) =>
+      `${actor} a marqué une facture de « ${project} » comme payée.`,
     legal_element_withdrawn: (actor: string, project: string) =>
       `${actor} a retiré un élément emprunté de « ${project} » : le passage est à refaire sans lui dans le Master.`,
     strategy_review_requested: (actor: string, project: string) =>
