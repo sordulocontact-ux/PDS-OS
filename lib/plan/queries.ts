@@ -113,7 +113,7 @@ export async function loadLaunchedPlan(
  */
 export async function isWorkflowLaunched(
   projectId: string,
-  workflow: "strategy" | "master" | "legal",
+  workflow: PlanWorkflow,
 ): Promise<boolean> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("workflow_is_launched", {
@@ -139,7 +139,7 @@ export type WorkflowGate = {
  */
 export async function workflowGate(
   project: { id: string; stages: Array<{ key: string; state: string }> },
-  workflow: "strategy" | "master" | "legal",
+  workflow: PlanWorkflow,
 ): Promise<WorkflowGate | null> {
   const supabase = await createClient();
   const [launched, plan, item] = await Promise.all([

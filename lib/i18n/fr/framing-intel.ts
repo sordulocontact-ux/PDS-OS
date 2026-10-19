@@ -690,11 +690,14 @@ export const framingIntel = {
       anticipate: "Ce qu'il faut prévoir",
     },
     workflows: {
-      strategy: "Stratégie de lancement",
+      strategy: "Stratégie",
       master: "Master",
       legal: "Juridique",
       design: "Conception",
-      delivery: "Livraison & sortie",
+      production: "Production",
+      activations: "Activations",
+      distribution: "Distribution",
+      review: "Suivi & bilan",
     },
     specialized: (name: string) => `Cadrage spécialisé : ${name}`,
     specializedNames: {
@@ -714,7 +717,7 @@ export const framingIntel = {
     launching: "Lancement…",
     launchConfirmTitle: "Lancer le plan ?",
     launchConfirmBody:
-      "Les workflows placés en Focus et Pendant ce temps démarrent maintenant. Ceux d'Ensuite attendent votre feu vert.",
+      "Tous les workflows du plan démarrent maintenant ; la colonne dit l'ordre de priorité.",
     launched: (date: string, name: string | null) =>
       name ? `Lancé le ${date} par ${name}` : `Lancé le ${date}`,
     launchNow: "Lancer maintenant",
@@ -734,8 +737,7 @@ export const framingIntel = {
     notReady: "Le plan se construit une fois le Brief validé.",
     readOnly: "Le chef de projet responsable lance le plan.",
     why: {
-      strategy:
-        "La prochaine étape du projet : positionnement, publics, dispositif.",
+      strategy: "Elle décide du dispositif et des livrables",
       masterFocus: (n: number, date: string) =>
         `${plural(n, "titre", "titres")} sans master final et une date cible le ${date} : la production est le chemin critique.`,
       masterMeanwhile: (n: number) =>
@@ -744,9 +746,11 @@ export const framingIntel = {
         `${plural(n, "blocage juridique connu", "blocages juridiques connus")} : à lever avant la sortie.`,
       legalMeanwhile:
         "Personnes, droits et contrats à sécuriser pendant que le reste avance.",
-      design: "Après la Stratégie : direction créative, cover, contenus.",
-      delivery:
-        "Quand le master final et le juridique sont prêts : livraison et sortie.",
+      design: "Après la Stratégie",
+      production: "Après la Conception",
+      activations: "Après la Stratégie",
+      distribution: "Après le Master final",
+      review: "Après la sortie",
       addedLater: "Ajouté au plan après son lancement.",
     },
     anticipate: {
@@ -760,16 +764,15 @@ export const framingIntel = {
     },
   },
   locked: {
-    title: (name: string) =>
-      `${name} se lance depuis le plan du projet, sur la Vue d'ensemble`,
-    body: "Le Brief est validé : ouvrez le plan pour décider de ce qui commence maintenant.",
+    title: (name: string) => `${name} démarre au lancement du plan`,
+    body: "Ce workflow démarre au lancement du plan du projet, après le Cadrage.",
     bodyBeforeBrief:
-      "Il démarrera une fois le cadrage validé et le plan du projet lancé depuis la Vue d'ensemble.",
+      "Ce workflow démarre au lancement du plan du projet, après le Cadrage.",
     bodyWaiting:
       "Le plan le place en Ensuite : lancez-le depuis le plan quand le moment est venu.",
     bodyAbsent:
       "Il n'est pas dans le plan lancé : ajoutez-le depuis le plan pour le démarrer.",
-    openPlan: "Ouvrir le plan",
-    openFraming: "Ouvrir le cadrage",
+    openPlan: "Ouvrir le plan du projet",
+    openFraming: "Ouvrir le Cadrage",
   },
 } as const;

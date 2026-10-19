@@ -172,10 +172,12 @@ insert into ids select 'plan', public.launch_project_plan(pg_temp.id_of('project
   jsonb_build_object('column', 'anticipate', 'title', 'Master final attendu le 5 octobre')));
 select is((select state from public.project_stages where id = pg_temp.id_of('strategy')), 'in_progress',
           'launching the plan starts the Stratégie placed in Focus');
-select is(public.workflow_is_launched(pg_temp.id_of('project'), 'master'), false,
-          'a workflow placed in Ensuite waits');
-select lives_ok($$ select public.launch_plan_workflow(pg_temp.id_of('project'), 'master') $$,
-                'the owner launches it when the time comes');
+-- « Lancer le plan » starts every workflow of the plan (lot 2 « Projet
+-- complet », 20261019020101): Ensuite is an order, not a lock.
+select is(public.workflow_is_launched(pg_temp.id_of('project'), 'master'), true,
+          'a workflow placed in Ensuite starts with the plan');
+select throws_ok($$ select public.launch_plan_workflow(pg_temp.id_of('project'), 'master') $$,
+                 'P0001', 'invalid_transition', 'it is not launched twice');
 -- A workflow the plan left out still starts: added in Focus, then launched.
 select throws_ok($$ select public.launch_plan_workflow(pg_temp.id_of('project'), 'legal') $$,
                  '23514', null, 'a workflow left out of the plan needs its title');

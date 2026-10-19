@@ -35,14 +35,18 @@ export type StepIssue = { text: string; href?: string };
 export const PLAN_FLOW: Record<PlanWorkflow, WorkflowKey> = {
   strategy: "marketing",
   design: "marketing",
+  production: "marketing",
+  activations: "marketing",
+  review: "marketing",
   master: "master",
   legal: "legal",
-  delivery: "distribution",
+  distribution: "distribution",
 };
 // The Marketing's chevron each of its plan workflows stands for.
 const MARKETING_STEP: Partial<Record<PlanWorkflow, string>> = {
   strategy: "strategy",
   design: "conception",
+  production: "production",
 };
 
 type States = Partial<Record<WorkflowKey, WorkflowState | "restricted">>;
@@ -57,7 +61,9 @@ export function stepStatus(
   const state = states[PLAN_FLOW[step.workflow]];
   if (!state || state === "restricted") return null;
   const chevron = MARKETING_STEP[step.workflow];
-  if (!chevron) return state.status;
+  // Activations, Suivi & bilan: no chevron of their own to read.
+  if (!chevron)
+    return PLAN_FLOW[step.workflow] === "marketing" ? null : state.status;
   if (state.done.includes(chevron)) return "done";
   return state.step === chevron ? state.status : "not_started";
 }
@@ -73,12 +79,12 @@ const RANK: Record<PlanColumn, number> = {
 // The workflows a dimension of the Cadrage feeds: a change there makes the
 // steps built on it « à revoir ».
 const FED_BY: Record<Dimension, PlanWorkflow[]> = {
-  objective: ["strategy", "design"],
-  timing: ["strategy", "master", "delivery"],
-  budget: ["strategy", "design", "master"],
-  team: ["strategy", "master", "legal", "design"],
+  objective: ["strategy", "design", "activations"],
+  timing: ["strategy", "master", "distribution"],
+  budget: ["strategy", "design", "production", "master"],
+  team: ["strategy", "master", "legal", "design", "production"],
   start: ["master", "design"],
-  legal: ["legal", "delivery"],
+  legal: ["legal", "distribution"],
 };
 
 /** The workflows a change of the validated Brief puts back to review. */
