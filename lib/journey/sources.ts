@@ -9,6 +9,7 @@ import { getProject } from "@/lib/projects/queries";
 import { createClient } from "@/lib/supabase/server";
 
 import { conceptionJourney } from "./conception";
+import { strategyJourneys } from "./strategy";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -29,9 +30,9 @@ const legal: Loader = async (projectId) => {
   return [{ module: "legal", label: label.legal, steps }];
 };
 
-// Marketing: each deliverable's Production once its sheet is opened, and the
-// Conception (lib/journey/conception.ts). Stratégie, Activations and Suivi &
-// bilan come with their zone.
+// Marketing: the Stratégie (lib/journey/strategy.ts), the Conception
+// (lib/journey/conception.ts) and each deliverable's Production once its
+// sheet is opened. Activations and Suivi & bilan come with their zone.
 const marketing: Loader = async (projectId) => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -39,7 +40,8 @@ const marketing: Loader = async (projectId) => {
     .select("deliverable_id")
     .eq("project_id", projectId);
   if (error) console.error("loadProjectJourneys production:", error.message);
-  const [design, ...productions] = await Promise.all([
+  const [strategy, design, ...productions] = await Promise.all([
+    strategyJourneys(projectId),
     conceptionJourney(projectId),
     ...(data ?? []).map(async ({ deliverable_id: id }) => {
       const ctx = await journeyContext(projectId, id);
@@ -61,7 +63,7 @@ const marketing: Loader = async (projectId) => {
         : [];
     }),
   ]);
-  return [...design, ...productions.flat()];
+  return [...strategy, ...design, ...productions.flat()];
 };
 
 // Filled by their zone (C4: typed, empty until then).
