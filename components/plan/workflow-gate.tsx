@@ -1,7 +1,7 @@
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
-import type { PlanWorkflow } from "@/lib/plan/propose";
+import { MARKETING_PARTS, type PlanWorkflow } from "@/lib/plan/propose";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -27,12 +27,12 @@ export async function WorkflowGate({
     requireLaunchedProject(projectId),
   ]);
   const gate = await workflowGate(project, workflow);
+  const marketing = fr.shell.project.sidebar.marketing;
   if (gate)
     return (
       <WorkflowLocked
         projectId={projectId}
-        name={fr.framingIntel.plan.workflows[workflow]}
-        {...gate}
+        title={MARKETING_PARTS.includes(workflow) ? marketing : undefined}
       />
     );
   return children;

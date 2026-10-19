@@ -64,6 +64,7 @@ as $$
           select 1 from public.marketing_activations x where x.project_id = p_project_id))
     or (p_workflow = 'distribution' and (
           exists (select 1 from public.distribution_dossiers x where x.project_id = p_project_id)
+          or exists (select 1 from public.releases x where x.project_id = p_project_id)
           or exists (
             select 1 from public.project_stages s
             join public.stage_definitions d on d.id = s.stage_definition_id

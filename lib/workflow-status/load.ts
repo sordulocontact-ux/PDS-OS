@@ -14,7 +14,8 @@ import { loadFinalView } from "@/lib/master-workflow/final";
 import { loadMixVersions } from "@/lib/master-workflow/mix-versions";
 import type { MixVersionsView } from "@/lib/master-workflow/mix-types";
 import { loadStepView } from "@/lib/master-workflow/transmission";
-import { isWorkflowLaunched } from "@/lib/plan/queries";
+import { isWorkflowLaunched, planLaunchedAt } from "@/lib/plan/queries";
+import { fr } from "@/lib/i18n/fr";
 import { getProject } from "@/lib/projects/queries";
 import { REFERENCE_PLATFORMS } from "@/lib/distribution/platforms";
 import { formatDate } from "@/lib/release/format";
@@ -48,7 +49,7 @@ export type WorkflowStates = {
   legalDone: LegalStepKey[];
   // What each workflow expects from another (lot 5), computed here.
   dependencies: Dependency[];
-  // What the overview adds to the states (lib/workflow-status/board.ts),
+  // What the overview adds to the states (the Master final of its head),
   // read in the same pass: the Brief's calendar, the planned release date,
   // the Suivi's actions (empty without manage_legal).
   details: {
@@ -154,7 +155,7 @@ async function masterFacts(project: Project, personId: string | null) {
     state: masterState(facts),
     allFinal: mastersFinal(facts),
     // The Mix V1 is met once a title has a mix version: no longer a
-    // deadline to show (lib/workflow-status/board.ts).
+    // deadline to show.
     dates: mixView.brief?.dates
       ? {
           ...mixView.brief.dates,
@@ -212,7 +213,7 @@ async function legalFacts(project: Project) {
 
 async function distributionFacts(projectId: string) {
   const supabase = await createClient();
-  const [release, versions, declarations, platforms, closures] =
+  const [release, versions, declarations, platforms, closures, launchedAt] =
     await Promise.all([
       supabase
         .from("releases")
@@ -248,6 +249,7 @@ async function distributionFacts(projectId: string) {
         .in("status", ["pending", "closed"])
         .limit(1)
         .maybeSingle(),
+      planLaunchedAt(projectId),
     ]);
   const open = closures.data;
   if (release.error) console.error("distributionFacts:", release.error.message);
@@ -268,6 +270,21 @@ async function distributionFacts(projectId: string) {
     (d) => d.kind === "corrections_requested" || d.kind === "accepted",
   );
   const data = release.data;
+  // Like the other workflows, the Distribution starts when the plan is
+  // launched (proto « Projet complet »); one begun before (a release
+  // recorded) keeps going.
+  if (!launchedAt && data === null)
+    return {
+      state: {
+        workflow: "distribution" as const,
+        status: "not_started" as const,
+        step: "prepare",
+        reason: fr.workflowStatus.notLaunched,
+        progress: fr.workflowStatus.distribution.progress(0),
+        done: [],
+      },
+      plannedDate: null,
+    };
   const state = distributionState(
     {
       recorded: data !== null,

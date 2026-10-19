@@ -1,9 +1,11 @@
 import { cn } from "@/lib/utils";
 import type { Tone } from "@/lib/ui/state-tones";
 
+// Proto « Projet complet » (`.dot`): running in the selection blue, not
+// started in muted grey, the other tones' text colour.
 const DOT: Record<Tone, string> = {
-  neutral: "bg-[color:var(--po-grey-300)]",
-  info: "bg-[color:var(--tone-info-fg)]",
+  neutral: "bg-[color:var(--text-muted)]",
+  info: "bg-[color:var(--selection)]",
   warning: "bg-[color:var(--tone-warning-fg)]",
   success: "bg-[color:var(--tone-success-fg)]",
   danger: "bg-[color:var(--tone-danger-fg)]",

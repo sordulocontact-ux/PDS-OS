@@ -1,7 +1,6 @@
 import { WorkflowLocked } from "@/components/plan/workflow-locked";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
-import { fr } from "@/lib/i18n/fr";
 import { workflowGate } from "@/lib/plan/queries";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { allInOrder } from "@/lib/utils/parallel";
@@ -21,13 +20,6 @@ export default async function LegalLayout({
   // Without manage_legal, the page itself answers 404.
   if (!can(access, "manage_legal")) return children;
   const gate = await workflowGate(project, "legal");
-  if (gate)
-    return (
-      <WorkflowLocked
-        projectId={projectId}
-        name={fr.framingIntel.plan.workflows.legal}
-        {...gate}
-      />
-    );
+  if (gate) return <WorkflowLocked projectId={projectId} />;
   return children;
 }

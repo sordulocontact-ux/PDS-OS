@@ -1,58 +1,50 @@
-import Link from "next/link";
 import { IconLock } from "nucleo-sharp-essential";
 
-import { EmptyState } from "@/components/shell/empty-state";
+import { ProjectHeader } from "@/components/projects/project-header";
+import { ContentCard } from "@/components/shell/content-card";
 import { buttonVariants } from "@/components/ui/button";
+import { ViewLink } from "@/components/ui/view-link";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 
 /**
- * A workflow that waits for the Plan du Projet (decision of 06/10/2026):
- * nothing starts silently. Before the Brief is validated it says when it
- * will open; after, it leads to the plan, where it is launched (or added,
- * when the launched plan left it out).
+ * A workflow before « Lancer le plan » (proto « Projet complet », `locked()`):
+ * its head with « Non démarré », then one card that says when it starts and
+ * leads to the Cadrage, where the plan is built and launched. The same for
+ * the Master, the Juridique, the Marketing and the Distribution.
  */
 export function WorkflowLocked({
   projectId,
-  name,
-  framingValidated,
-  waiting,
-  absent,
+  title,
 }: {
   projectId: string;
-  name: string;
-  framingValidated: boolean;
-  // Placed in Ensuite by a launched plan: waiting for « Lancer maintenant ».
-  waiting: boolean;
-  // Left out of the launched plan: added from it.
-  absent: boolean;
+  // The workflow's name when the URL names a part of it (the Marketing's
+  // Stratégie).
+  title?: string;
 }) {
-  const t = fr.framingIntel.locked;
+  const t = fr.projectShell;
   return (
-    <EmptyState
-      icon={IconLock}
-      title={t.title(name)}
-      body={
-        waiting
-          ? t.bodyWaiting
-          : absent
-            ? t.bodyAbsent
-            : framingValidated
-              ? t.body
-              : t.bodyBeforeBrief
-      }
-      action={
-        <Link
-          href={
-            framingValidated
-              ? routes.projectPlan(projectId)
-              : routes.projectFraming(projectId)
-          }
-          className={buttonVariants({ size: "lg" })}
-        >
-          {framingValidated ? t.openPlan : t.openFraming}
-        </Link>
-      }
-    />
+    <div className="flex flex-col gap-5">
+      <ProjectHeader
+        projectId={projectId}
+        title={title}
+        facts={[]}
+        status={{ label: t.status.notStarted, tone: "neutral" }}
+      />
+      <ContentCard label={t.locked.body}>
+        <p className="flex items-start gap-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
+          <IconLock aria-hidden className="mt-0.5 size-3.5 shrink-0" />
+          {t.locked.body}
+        </p>
+        <div>
+          <ViewLink
+            href={routes.projectFraming(projectId)}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            {t.locked.open}
+          </ViewLink>
+        </div>
+      </ContentCard>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { navItemActiveClass, navItemClass } from "@/components/shell/nav-item";
+import { useWorkCount } from "@/components/shell/work-count";
 import { CountBadge } from "@/components/ui/count-badge";
 import {
   Tooltip,
@@ -26,6 +27,8 @@ function isActive(pathname: string, href: string, exact: boolean): boolean {
 // Hiding "Équipe" is comfort only: the page itself requires an admin.
 // Access requests waiting for a decision show as a count on "Équipe", which
 // then opens straight on them (the team page opens on approved members).
+// Inside a project, « Travail » carries the viewer's « À vous » count of that
+// project (proto « Projet complet », reported by the project's layout).
 export function NavLinks({
   isAdmin,
   pendingMembers = 0,
@@ -39,6 +42,7 @@ export function NavLinks({
 }) {
   const pathname = usePathname();
   const t = fr.shell.nav;
+  const workCount = useWorkCount();
 
   return (
     <nav aria-label={t.label}>
@@ -46,12 +50,15 @@ export function NavLinks({
         {NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin).map((item) => {
           const active = isActive(pathname, item.href, item.exact ?? false);
           const Icon = item.icon;
+          const mine = item.href === routes.work ? workCount : 0;
           const count = item.href === routes.members ? pendingMembers : 0;
           const label = item.disabled
             ? `${item.label} — ${t.comingSoon}`
             : count > 0
               ? `${item.label}, ${t.pendingMembers(count)}`
-              : item.label;
+              : mine > 0
+                ? `${item.label}, ${fr.moduleFrame.mine(mine)}`
+                : item.label;
 
           const link = (
             <Link
@@ -68,10 +75,13 @@ export function NavLinks({
               aria-current={active ? "page" : undefined}
               aria-disabled={item.disabled}
               aria-label={
-                collapsed || item.disabled || count > 0 ? label : undefined
+                collapsed || item.disabled || count > 0 || mine > 0
+                  ? label
+                  : undefined
               }
               className={cn(
                 navItemClass,
+                "relative",
                 collapsed && "justify-center px-0",
                 active && navItemActiveClass,
                 item.disabled &&
@@ -82,6 +92,15 @@ export function NavLinks({
               {!collapsed && item.label}
               {!collapsed && count > 0 && (
                 <CountBadge count={count} className="ml-auto" />
+              )}
+              {mine > 0 && (
+                <CountBadge
+                  count={mine}
+                  size="sm"
+                  className={
+                    collapsed ? "absolute top-0.5 right-1.5" : "ml-auto"
+                  }
+                />
               )}
             </Link>
           );

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { FramingStepFrame } from "@/components/framing/framing-step-frame";
-import { LaunchWorkflowButton } from "@/components/overview/launch-workflow-button";
+import { LaunchWorkflowButton } from "@/components/plan/launch-workflow-button";
 import { BriefDrift } from "@/components/plan/brief-drift";
 import { PlanBoard } from "@/components/plan/plan-board";
 import { PlanColumns } from "@/components/plan/plan-columns";
