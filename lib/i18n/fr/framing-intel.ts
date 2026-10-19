@@ -520,7 +520,6 @@ export const framingIntel = {
   guide: {
     eyebrow: (number: string, dimension: string) => `${number} · ${dimension}`,
     knownTitle: "Déjà connu",
-    poQuestion: "Question de PO",
     // The capital line above the question (proto frQuestion).
     capital: (dimension: string, missing: boolean) =>
       `${dimension} · ${missing ? "Information manquante" : "À confirmer"}`,
