@@ -288,9 +288,13 @@ export const framingIntel = {
     later: (date: string) => `À définir plus tard · suivi avant le ${date}`,
     naAction: "Non applicable",
     laterAction: "À définir plus tard",
-    naTitle: "Pourquoi ce point ne s'applique pas ?",
+    naTitle: "Pourquoi ce n'est pas applicable",
     reason: "Raison",
-    reasonRequired: "Dites pourquoi, en une phrase.",
+    reasonRequired: "Dites pourquoi.",
+    // Proto « Projet complet » (frQuestion).
+    naSave: "Marquer non applicable",
+    laterSave: "Reporter, avec une tâche",
+    laterDone: "Reporté : une tâche est créée.",
     laterTitle: "Quand faut-il le définir ?",
     due: "À définir avant le",
     dueRequired: "Choisissez une date.",
@@ -516,6 +520,10 @@ export const framingIntel = {
   guide: {
     eyebrow: (number: string, dimension: string) => `${number} · ${dimension}`,
     knownTitle: "Déjà connu",
+    poQuestion: "Question de PO",
+    // The capital line above the question (proto frQuestion).
+    capital: (dimension: string, missing: boolean) =>
+      `${dimension} · ${missing ? "Information manquante" : "À confirmer"}`,
     help: "M'aider à définir",
     helping: "PO cherche…",
     write: "Écrire moi-même",

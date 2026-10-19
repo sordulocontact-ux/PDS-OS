@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { FieldError } from "@/components/auth/form-message";
 import { useFramingAction } from "@/components/framing/use-framing-action";
@@ -24,19 +25,21 @@ type Props = {
 
 function Actions({
   pending,
+  label,
   onCancel,
 }: {
   pending: boolean;
+  label: string;
   onCancel: () => void;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      <Button type="submit" size="lg" disabled={pending}>
-        {fr.framingIntel.answerStates.save}
+      <Button type="submit" size="sm" disabled={pending}>
+        {label}
       </Button>
       <Button
         type="button"
-        size="lg"
+        size="sm"
         variant="ghost"
         disabled={pending}
         onClick={onCancel}
@@ -87,7 +90,7 @@ export function NotApplicableForm({
         />
         <FieldError id={`${id}-error`}>{error}</FieldError>
       </div>
-      <Actions pending={pending} onCancel={onCancel} />
+      <Actions pending={pending} label={t.naSave} onCancel={onCancel} />
     </form>
   );
 }
@@ -119,7 +122,10 @@ export function LaterForm({ projectId, questionKey, onCancel, onDone }: Props) {
               due,
               t.task(fr.framingIntel.questions[questionKey].label),
             ),
-          onDone,
+          () => {
+            toast.success(t.laterDone);
+            onDone();
+          },
         );
       }}
     >
@@ -139,7 +145,7 @@ export function LaterForm({ projectId, questionKey, onCancel, onDone }: Props) {
         />
         <FieldError id={`${id}-error`}>{error}</FieldError>
       </div>
-      <Actions pending={pending} onCancel={onCancel} />
+      <Actions pending={pending} label={t.laterSave} onCancel={onCancel} />
     </form>
   );
 }

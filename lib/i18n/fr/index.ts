@@ -54,6 +54,7 @@ import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
 import { legalHistory } from "./legal-history";
 import { legalJourney } from "./legal-journey";
+import { framingJourney } from "./framing-journey";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
 import { masterPage } from "./master-page";
@@ -208,6 +209,7 @@ export const fr = {
   legalForms,
   legalHistory,
   legalJourney,
+  framingJourney,
   legalSplits,
   masterWorkflow,
   artistActivity,

@@ -282,6 +282,17 @@ export const factTone: Record<string, Tone> = {
   missing: "neutral",
 };
 
+/** A line of the Cadrage (proto FR_ST, lib/framing/lines.ts): Connu,
+ * Confirmé, À confirmer, Manquant, Non applicable, À définir plus tard. */
+export const framingLineTone: Record<string, Tone> = {
+  known: "neutral",
+  confirmed: "success",
+  to_confirm: "warning",
+  missing: "danger",
+  na: "neutral",
+  later: "info",
+};
+
 /** An item of the Stratégie's follow-up before the release
  * (lib/strategy/follow-up.ts): ready, running, waiting for a decision, blocked. */
 export const followUpTone: Record<string, Tone> = {
