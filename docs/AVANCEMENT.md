@@ -518,3 +518,20 @@ Lots, dans l'ordre (chaque lot : migrations avec RLS et `delete_project_row`, é
   au premier transfert) ; Conception faite quand tout est transféré, plus de validation globale.
 - Migrations `20261019040101` à `20261019040701` (à pousser en prod avec accord) ; pgTAP
   `conception-journey.test.sql` + 6 fichiers adaptés.
+
+
+## Lot 5 — Production par livrable sur le patron commun (19/10/2026, branche `pc/z5-production`)
+
+- PR-0/1 : parcours du proto (étapes, rôles Exécute/Coordonne/Valide, étape Rushes), barre des livrables,
+  Production ouverte au transfert, « Qui produit ? » (société proposée avec sa raison, mode de préparation).
+- PR-2/3 : « Qui fait quoi » (Changer, Révoquer), « Changer qui produit » avec motif et choix précédents.
+- PR-4/5 : call de production dans l'étape, invitation et résumé sur le lien ; réalisateur proposé par la
+  société, « Retenir ».
+- PR-6/7 : devis en versions (dont lieux, modification, référence active, révision) ; checklist de
+  préproduction.
+- PR-9/10/12 : lieu comparé au devis et remplacé ; contrôle avant tournage par synthèse figée ; tournage
+  confirmé et lien des rushes.
+- Reste : PR-11 (proposition versionnée, validation externe), montage déposé par la société sans étape de
+  post, destinataires de livraison, PR-13 (pochette, teasers déclinés).
+- Migrations `20261019050101` à `20261019050801` à pousser en prod avec accord ; pgTAP
+  `production-projet-complet.test.sql`.

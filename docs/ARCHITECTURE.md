@@ -4319,6 +4319,59 @@ ni livré ni clos. Migration `20261010000301_production_delivery_and_review.sql`
   prise ici, faute de ticket : la clôture n'exige pas que les autres workflows soient terminés, la
   direction en juge en lisant l'état affiché (dont l'encart « Volet Marketing »).
 
+### Production du proto « Projet complet » (lot 5, 19/10/2026)
+
+Cahier des charges : `docs/projet-complet/production.md` (sous-lots PR-0 à PR-13).
+
+- **Entrée** : plus de liste ni d'étape `production` à démarrer ou faire valider par le DG. Un livrable est
+  en Production dès le transfert de sa fiche (`design_handoffs`, lot 4 ; projets d'avant : version validée).
+  `/production` ouvre le livrable où le visiteur a une action, sinon le premier ; chaque page de livrable a la
+  **barre des livrables** (`DeliverableBar` → `PickBar`), à part du parcours. `lib/journey/production.ts`
+  (`productionDeliverables`, `productionJourneys`) remplit la part Production du loader Marketing.
+- **Parcours** (`lib/production/journey/steps.ts`) : « Qui produit ? » seul tant qu'il n'est pas répondu ;
+  externe = Qui produit ? → Call de production (ou Préparation avec PO / Organisation importée, selon
+  `production_sheets.mode`) → Devis → Proposition de réalisation → Préproduction (après le devis, en
+  parallèle) → Lieux → Contrôle avant tournage (devis + proposition + lieux) → Tournage → **Rushes** →
+  Montage et retours → Livraison et clôture. Interne : l'app riche des tickets PROD-001 à 040, titres alignés
+  (Brief réalisateur, Équipes et matériel, Devis et budget, Versions). Rôles en `roles` (Exécute / Coordonne
+  / Valide). « À revoir » (`rework`) calculé : révision du devis, nouvelle version de proposition demandée,
+  tâche de checklist « À revoir » ouverte. Chaque étape passe par `ProductionStepPanel` (blocages,
+  informations notées, « Signaler un blocage » / « Noter une information »).
+- **Qui produit ?** (`WhoProducesForm`, `chooseProducer`) : externe / interne (`ChoiceCards variant="list"`),
+  sociétés du Réseau classées par le code (`companyOptions` : a produit pour le même artiste, sinon le plus
+  de livrables, sinon sa note, sinon « n'a jamais travaillé avec PDS »), « Créer la fiche d'une société »,
+  mode de préparation ; ouvre la fiche (`open_production_sheet`, qui démarre l'étape Production) et garde
+  les rôles déjà donnés (validation budgétaire par défaut : le premier validateur). **Changer qui produit**
+  (`change_production_producer`, table `production_organization_changes`) : motif obligatoire, déjà fait
+  et repris gardés, lien de l'ancienne société révocable ; rien n'est supprimé.
+- **Qui fait quoi** (`ProductionWhoDoesWhatButton` dans l'en-tête) : rôles du proto, « Changer » (le
+  responsable du projet, `changeProductionRole`), « Révoquer » un lien (`revoke_production_provider_link`).
+- **Call de production** : formulaire commun dans l'étape (externe : quatre points fixes, la société invitée
+  sur son lien privé), call prévu, compte rendu par point (`MeetingFacts`, états des lignes lus des
+  `production_call_items`), propositions puis tâches, résumé aux participants (la société le lit sur son
+  lien, `get_production_link_journey.calls`).
+- **Réalisateur** : proposé par la société sur son lien (`production_director_proposals`,
+  `propose_production_director_by_link`), « Retenir » (`retain_production_director` : fiche Réseau, rôle
+  Réalisation, lien privé montré une fois), les autres « Non retenu ».
+- **Devis en versions** (`production_quotes.number`, `loc_budget_cents`, statuts `changes` / `replaced`) :
+  « Demander une modification » (vérification ou décision, `request_production_quote_changes`), référence
+  active = dernière version validée, « Demander une révision du devis » (`request_production_quote_revision`,
+  colonnes `quote_revision_*`). Échéance du dépôt lue de la tâche « devis » de la société.
+- **Préproduction** : checklist (`production_plan_actions` + `origin`, `done_at`, `review`) amorcée par la
+  validation du devis (`production_seed_checklist`, échéances depuis le jour de tournage), tâches ajoutées
+  (`add_production_checklist_task`, « Saisie par … »), « Fait » dans l'étape (`finish_production_action`,
+  la tâche de Travail suit) et sur le lien (`finish_production_action_by_link`). `company_progress` repris.
+- **Lieux** : tarif × jours de tournage comparé au « dont lieux » du devis actif (`placeFit`) ; « Remplacer le
+  lieu retenu » (`replace_production_location`, `production_location_decisions`) : motif, informations liées
+  décidées, « Ce qu'il faut revoir » → tâches d'origine « Changement de lieu du … », révision du devis et
+  nouvelle version de proposition demandées. « Retenir ce lieu » garde son comportement (PROD-013).
+- **Contrôle avant tournage (externe)** : synthèse calculée côté serveur (`readySynthesis`), confirmation
+  avec motif si des lignes ne sont pas prêtes (`confirm_production_ready`), synthèse figée
+  (`ready_snapshot`), lue « Préparation validée » sur le lien. L'interne garde ses contrôles sur preuves.
+- **Après tournage (externe)** : « Confirmer que le tournage a eu lieu » ; étape Rushes : lien déposé par la
+  société (`set_production_rushes_by_link`), réception et sauvegarde déclarées à part.
+- Migrations `20261019050101` à `20261019050801`, tests `production-projet-complet.test.sql`.
+
 ### Retours d'Ibé du 13/10/2026 sur la Production (PROD-001 à PROD-040)
 
 Référence métier et questions ouvertes : `docs/PRODUCTION-METIER.md`. Branche `feat/production-ibe`.

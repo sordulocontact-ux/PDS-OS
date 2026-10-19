@@ -256,6 +256,7 @@ contrôles `--control-*` · erreur de saisie `--error` (le seul rouge : champ ma
 | `BriefChangeList`, `BriefCompare`, `FramingReadiness` | `framing/intel/` | changements entre deux versions du Brief ; « Comparer les versions » (`?comparer=n`) ; « Cadrage complet » ≠ prérequis opérationnels satisfaits |
 | `PlanStepCard`, `PlanStepForm`, `PlanLaunchReview`, `PlanStepsSection`, `PlanStepsTable`, `PlanHistory` | `plan/` | plan pilotable (PROJ-UX-07) : étape (statut réel, pilote, exécutant, échéance, dépendances en liens, incohérences) ; formulaire d'une étape (avant et après lancement) ; revue avant « Lancer le plan » ; étapes du plan lancé par statut et historique |
 | `ProgressBar` | `ui/progress-bar.tsx` | barre fine d'avancement (`value` / `max`, annoncée comme progressbar) : Cadrage, « Prêt pour la sortie » ; `tone="error"` = limite atteinte (requêtes à PO du jour) ; `tone="success"` + `size="sm"` = étapes faites d'un workflow (4 px, rail `--border-hairline`, proto `.prog`) |
+| `PickBar` | `ui/pick-bar.tsx` | **choix d'un objet à part du parcours** (proto `.pickbar`) : une carte-lien par objet (nom + `MineBadge`, ligne d'état), la courante cerclée d'encre ; barre des livrables de la Production (`DeliverableBar`) |
 | `MineBadge` | `ui/mine-badge.tsx` | **toute pastille « À vous »** (proto `.mine`) : rond bleu `--selection` 18 px, 13 px gras, nom accessible « n à vous », rien à 0 ; pilules du Marketing, navigation du projet, puces mobiles |
 | `Rows`, `InfoRow`, `LinkRow` | `ui/rows.tsx` | lignes jointes dans un cadre filet (proto `.rows`) : `InfoRow` = titre semi-gras, source 13 px, pastille à droite (`.irow`) ; `LinkRow` = toute la ligne ouvre une page, titre 16 px, lieu 14 px, chevron (`.srow`) |
 | `ContentCard` | `shell/content-card.tsx` | bloc d'une page sur sa carte blanche (proto `.card`) : rayon 12, filet, padding 20, écart 14, titre h2 18 px facultatif (sinon `label`) ; Vue d'ensemble, verrou, Travail, Validations, Activité |
@@ -311,3 +312,17 @@ contrôles `--control-*` · erreur de saisie `--error` (le seul rouge : champ ma
 | `PlatformsStep`, `PlatformRow`, `AddPlatform`, `DeclareAvailability`, `DetectNow` | `platforms/` | lien proposé par la détection avec sa source, « Tout est bon », « Il y a un problème » (anomalie), ajout en tête de liste |
 | `ClosureStep`, `ProposeClosure`, `DecideClosure`, `ReopenClosure` | `closure/` | conditions, réserves, arbitrage, décision, réouverture |
 
+
+
+### Production du proto « Projet complet » (lot 5)
+
+| Composant | Où | Rôle |
+| --- | --- | --- |
+| `ProductionStepPanel` | `production/journey/` | une étape de la Production sur `StepPanel` + blocages et informations notées (`StepBlockers`, `StepToolsBlock`) |
+| `DeliverableBar`, `WhoProducesForm`, `ChangeProducerButton`, `RoleChangeButton`, `RevokeLinkButton` | `production/journey/` | barre des livrables, « Qui produit ? », « Changer qui produit », « Changer » et « Révoquer » de « Qui fait quoi » |
+| `CallStepHead`, `CallStepSummary`, `DirectorBlock`, `RetainDirectorButton` | `production/journey/` | call de production dans l'étape (formulaire commun, réunion, résumé), réalisateurs proposés et « Retenir » |
+| `QuoteVersionRow` / `QuoteVersionList`, `QuoteCheckForm`, `QuoteDecisionForm`, `QuoteRevisionForm` | `production/quotes/` | versions du devis (dans l'étape et sur le lien), vérification et décision (`DecisionPanel`), révision |
+| `ChecklistSection`, `AddTaskForm`, `FinishTaskButton` | `production/checklist/` | checklist de préproduction |
+| `ReplacePlaceButton`, `PlaceDecisions` | `production/locations/` | remplacer le lieu retenu, décisions sur le lieu |
+| `ReadySynthesisTable`, `ReadyConfirmForm` | `production/readiness/` | synthèse avant tournage, confirmation avec motif |
+| `linkCallCards`, `linkDirectorCard`, `linkQuoteCard`, `linkChecklistCard`, `LinkTaskRow`, `LinkRushesForm` | `production/provider/` | cartes du lien de la société (`/p/`) |
