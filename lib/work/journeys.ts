@@ -5,10 +5,12 @@ import { cache } from "react";
 import type { ProjectAction } from "@/lib/journey/types";
 import { loadShellActions } from "@/lib/overview/journeys";
 import { listProjects } from "@/lib/projects/queries";
+import { withQueryBatching } from "@/lib/supabase/batch";
 import { settleWithLimit } from "@/lib/utils/parallel";
 
-// Projects read at once: each one already reads its workflows in parallel.
-const PROJECTS_AT_ONCE = 6;
+// Projects read at once. Their reads are batched (lib/supabase/batch.ts):
+// the more projects run in step, the fewer requests leave.
+const PROJECTS_AT_ONCE = 40;
 
 /** The viewer's actions in one project, read from its journeys. */
 export type ProjectWork = {
@@ -51,8 +53,8 @@ const firstDue = (work: ProjectWork) =>
 export const loadMyJourneyWork = cache(async (): Promise<MyJourneyWork> => {
   const { projects, error } = await listProjects();
   const launched = projects.filter((p) => p.status === "launched");
-  const settled = await settleWithLimit(launched, PROJECTS_AT_ONCE, (p) =>
-    loadShellActions(p.id),
+  const settled = await withQueryBatching(() =>
+    settleWithLimit(launched, PROJECTS_AT_ONCE, (p) => loadShellActions(p.id)),
   );
   let failed = error;
   const works: ProjectWork[] = [];

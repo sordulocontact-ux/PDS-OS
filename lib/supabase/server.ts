@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 import { getPublicEnv } from "@/lib/env-public";
+import { batchingFetch } from "@/lib/supabase/batch";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**
@@ -19,6 +20,8 @@ export async function createClient() {
     NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
+      // Batched only inside withQueryBatching (lib/supabase/batch.ts).
+      global: { fetch: batchingFetch },
       cookies: {
         getAll() {
           return cookieStore.getAll();
