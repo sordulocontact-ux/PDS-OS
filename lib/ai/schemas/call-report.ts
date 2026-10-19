@@ -31,6 +31,15 @@ export const NEED_FAMILIES = [
 
 export type NeedFamily = (typeof NEED_FAMILIES)[number];
 
+// The agenda point an item belongs to: a key given with the transcript,
+// checked by code against the call's agenda (lib/calls/report-mapping.ts).
+const topic = z
+  .string()
+  .nullable()
+  .describe(
+    "Clé du point de l'ordre du jour auquel l'élément se rattache (p1, p2…), recopiée telle quelle ; null si aucun ne convient ou sans ordre du jour.",
+  );
+
 const field = z
   .object({
     value: z.string().describe("Ce qui a été dit, reformulé en une phrase."),
@@ -44,17 +53,31 @@ export const callReportSchema = z.object({
     .describe("Résumé factuel du call en deux ou trois phrases."),
   decided: z
     .array(
-      z.object({ what: z.string(), who, why: z.string().nullable(), quote }),
+      z.object({
+        what: z.string(),
+        who,
+        why: z.string().nullable(),
+        quote,
+        topic,
+      }),
     )
     .describe("Décisions explicitement prises pendant le call."),
   open: z
-    .array(z.object({ what: z.string(), why: z.string().nullable(), quote }))
+    .array(
+      z.object({ what: z.string(), why: z.string().nullable(), quote, topic }),
+    )
     .describe(
       "Questions restées sans décision. Pas de responsable, pas d'échéance.",
     ),
   nextActions: z
     .array(
-      z.object({ what: z.string(), who, why: z.string().nullable(), quote }),
+      z.object({
+        what: z.string(),
+        who,
+        why: z.string().nullable(),
+        quote,
+        topic,
+      }),
     )
     .describe("Actions à mener, telles qu'annoncées pendant le call."),
   brief: z.object({

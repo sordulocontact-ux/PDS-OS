@@ -2,9 +2,8 @@ import { notFound, redirect } from "next/navigation";
 
 import { ConceptionTabs } from "@/components/design/conception-tabs";
 import { DesignNeedsStrategy } from "@/components/design/design-needs-strategy";
-import { ResponsiblePicker } from "@/components/design/people/responsible-picker";
-import { ValidatorsPicker } from "@/components/design/people/validators-picker";
 import { DelegationsPanel } from "@/components/design/roles/delegations-panel";
+import { DesignRoles } from "@/components/design/roles/design-roles";
 import { SheetChecksPanel } from "@/components/design/sheets/sheet-checks-panel";
 import { SheetForm } from "@/components/design/sheets/sheet-form";
 import { SheetHeader } from "@/components/design/sheets/sheet-header";
@@ -219,23 +218,19 @@ export default async function DesignSheetPage({
         <aside className="flex flex-col gap-8 self-start">
           <PageSection id="sheet-people" title={t.sections.people} card>
             <div className="flex flex-col gap-6">
-              <ResponsiblePicker
+              <DesignRoles
                 projectId={projectId}
                 scope="sheet"
                 sheetId={sheetId}
-                current={scope.responsible}
+                people={scope}
+                ownerName={project.ownerName}
                 members={people.members}
                 suggestions={people.suggestions}
                 canAssign={data.isOwner && inProgress}
-                title={t.people.responsible}
-              />
-              <ValidatorsPicker
-                projectId={projectId}
-                scope="sheet"
-                sheetId={sheetId}
-                validators={scope.validators}
-                members={people.members}
-                canEdit={data.isOwner && inProgress && s.status !== "pending"}
+                canEditValidators={
+                  data.isOwner && inProgress && s.status !== "pending"
+                }
+                responsibleLabel={t.people.responsible}
               />
               <DelegationsPanel
                 projectId={projectId}

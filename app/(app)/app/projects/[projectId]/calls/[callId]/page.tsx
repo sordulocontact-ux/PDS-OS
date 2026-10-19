@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { CallOutcomes } from "@/components/calls/call-outcomes";
 import { CallClosureSection } from "@/components/calls/closure/call-closure-section";
 import { CallWorkspace } from "@/components/calls/call-workspace";
+import { CallMeetingSection } from "@/components/calls/meeting/call-meeting-section";
 import { buttonVariants } from "@/components/ui/button";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
@@ -141,6 +142,19 @@ export default async function CallPage({
               canEdit={canEdit}
               members={members}
               mePersonId={access.personId}
+            />
+            <CallMeetingSection
+              callId={callId}
+              title={call.title}
+              canEdit={canEdit}
+              mePersonId={access.personId}
+              ownerName={project.ownerName ?? null}
+              format={
+                call.prepared?.format === "video" ||
+                call.prepared?.format === "in_person"
+                  ? call.prepared.format
+                  : null
+              }
             />
           </>
         )

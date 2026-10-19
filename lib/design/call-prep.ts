@@ -8,6 +8,8 @@
 import type { DeliverableStatus, DesignTopic } from "@/lib/design/intentions";
 import { fr } from "@/lib/i18n/fr";
 
+import type { CallPrepDefaults } from "@/lib/calls/prep/types";
+
 export {
   CALL_FORMATS,
   isCallFormat,
@@ -37,11 +39,8 @@ export type DesignCallSheetData = {
   // Checked when the panel opens: the deliverables that lack something.
   selected: string[];
   purpose: string;
-  // Proposed as participants: the owner, the creative team, the artist, the
-  // people named on the deliverables.
-  people: string[];
-  // "YYYY-MM-DDTHH:mm", Paris time.
-  defaultOccurredAt: string;
+  // The common call form's defaults (participants, date, facts).
+  prep: CallPrepDefaults;
 };
 
 export type DesignCallTopic = {

@@ -74,6 +74,12 @@ export const NOTIFICATION_KINDS = [
   "production_quote_decided",
   "production_direction_submitted",
   "production_direction_decided",
+  // A step's blocker reported (to the person who unblocks and the owner) or
+  // lifted (to its reporter and the owner); a noted information the owner
+  // decides (to confirm, waiting for a decision, contradicting another).
+  "step_blocker_reported",
+  "step_blocker_lifted",
+  "step_note_to_decide",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 

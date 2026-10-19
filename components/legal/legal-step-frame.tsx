@@ -1,5 +1,10 @@
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
+import { ModuleAttention } from "@/components/shell/module/module-attention";
+import {
+  StepBlockers,
+  StepToolsBlock,
+} from "@/components/shell/module/step-tools-block";
 import { NowCard } from "@/components/shell/journey/now-card";
 import {
   StepPanel,
@@ -9,6 +14,8 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { elsewhereOf, loadProjectJourneys } from "@/lib/journey/project";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
+import { isLocked } from "@/lib/ui/journey";
+import { stepChoiceKey, type StepRef } from "@/lib/step-tools/model";
 
 /**
  * The frame of a Juridique step (docs/VISION-UX.md § 4, proto « Projet
@@ -33,6 +40,12 @@ export async function LegalStepFrame({
   ]);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
+  // Blockers and noted information of the step (sub-lot C6).
+  const stepRef: StepRef = { projectId, module: "legal", stepKey };
+  const choices = steps.map((s) => ({
+    key: stepChoiceKey({ module: "legal", stepKey: s.key }),
+    label: s.title,
+  }));
   return (
     <div className="flex flex-col gap-5">
       <ProjectHeader projectId={projectId} steps={steps} />
@@ -47,6 +60,7 @@ export async function LegalStepFrame({
           finished: fr.journey.now.finished,
         }}
       />
+      <ModuleAttention stepRef={stepRef} modules={["legal"]} steps={choices} />
       <div className="grid items-start gap-6 min-[900px]:grid-cols-[300px_minmax(0,1fr)]">
         <JourneySpine
           steps={steps}
@@ -63,7 +77,13 @@ export async function LegalStepFrame({
           blockedLabel={fr.legalJourney.blocked}
           {...slots}
         >
+          <StepBlockers stepRef={stepRef} steps={choices} />
           {children}
+          <StepToolsBlock
+            stepRef={stepRef}
+            steps={choices}
+            locked={isLocked(step.status)}
+          />
         </StepPanel>
       </div>
     </div>

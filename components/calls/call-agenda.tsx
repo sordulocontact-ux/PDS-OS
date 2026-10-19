@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { AgendaEditor, cleanAgenda } from "@/components/calls/agenda-editor";
+import { AgendaList } from "@/components/calls/prep/agenda-list";
+import type { AgendaDraftItem } from "@/components/calls/prep/use-agenda-draft";
 import { Button } from "@/components/ui/button";
 import { updateCallAgenda } from "@/lib/calls/actions";
 import type { AgendaItem } from "@/lib/calls/first-call-agenda";
+import { EXTRA_TOPIC_MINUTES } from "@/lib/calls/prepare";
 import { fr } from "@/lib/i18n/fr";
 
 const day = new Intl.DateTimeFormat("fr-FR", {
@@ -37,8 +39,30 @@ export function CallAgenda({
   const t = fr.calls.agenda;
   const dimensions = fr.framingIntel.dimensions;
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(agenda);
+  const [draft, setDraft] = useState<AgendaDraftItem[]>([]);
+  const [detailed, setDetailed] = useState(true);
   const [pending, setPending] = useState(false);
+  // The points as the common agenda editor holds them; questions and the
+  // Cadrage dimension of each point stay with it, by id.
+  const toDraft = () =>
+    agenda.map((item, index) => ({
+      id: `a${index}`,
+      key: null,
+      topic: item.topic,
+      minutes: item.minutes,
+      questions: item.questions ?? [],
+    }));
+  const fromDraft = (items: AgendaDraftItem[]): AgendaItem[] =>
+    items.map((item) => {
+      const index = item.id.startsWith("a") ? Number(item.id.slice(1)) : -1;
+      const before = agenda[index];
+      return {
+        topic: item.topic.trim(),
+        minutes: item.minutes ?? EXTRA_TOPIC_MINUTES,
+        ...(before?.questions?.length ? { questions: before.questions } : {}),
+        ...(before?.dimension ? { dimension: before.dimension } : {}),
+      };
+    });
 
   if (!editing) {
     return (
@@ -51,7 +75,7 @@ export function CallAgenda({
               size="sm"
               variant="ghost"
               onClick={() => {
-                setDraft(agenda);
+                setDraft(toDraft());
                 setEditing(true);
               }}
             >
@@ -101,7 +125,7 @@ export function CallAgenda({
 
   const save = async () => {
     setPending(true);
-    const result = await updateCallAgenda(callId, cleanAgenda(draft));
+    const result = await updateCallAgenda(callId, fromDraft(draft));
     setPending(false);
     if (result.ok) setEditing(false);
     else toast.error(fr.calls.errors[result.error]);
@@ -109,11 +133,24 @@ export function CallAgenda({
 
   return (
     <div className="grid gap-3 rounded-lg border border-border p-4">
-      <h3 className="text-sm font-medium">{t.title}</h3>
-      <AgendaEditor
-        value={draft}
+      <AgendaList
+        id={`agenda-${callId}`}
+        items={draft}
         onChange={setDraft}
-        idPrefix={`agenda-${callId}`}
+        onAdd={(topic) =>
+          setDraft([
+            ...draft,
+            {
+              id: `n${draft.length}-${Date.now()}`,
+              key: null,
+              topic,
+              minutes: null,
+              questions: [],
+            },
+          ])
+        }
+        detailed={detailed}
+        onDetailedChange={setDetailed}
       />
 
       <div className="flex flex-wrap items-center gap-2">

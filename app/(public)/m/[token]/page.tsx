@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PortalShell } from "@/components/portal/portal-shell";
+import {
+  PortalSections,
+  portalTitle,
+} from "@/components/portal/portal-sections";
 import { PublicPackageView } from "@/components/master-workflow/public-package";
 import { fr } from "@/lib/i18n/fr";
+import { getPortalFrame } from "@/lib/portal/frame";
 import {
   getEngineerThread,
   getPublicPackage,
@@ -25,37 +31,51 @@ export default async function MasterPackagePage({
   const { token } = await params;
   const data = await getPublicPackage(token);
   if (!data) notFound();
-  if (data.state === "open" || data.state === "received")
-    await noteOpened(token);
-
-  return (
-    <main className="flex flex-1 justify-center bg-muted/40 px-4 py-12 sm:py-16">
-      <div className="flex w-full max-w-2xl flex-col gap-6">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-balance">
-            {data.state === "open" || data.state === "received"
-              ? t.title[data.package.role]
-              : t.pageTitle}
-          </h1>
-          {(data.state === "open" || data.state === "received") && (
-            <p className="text-muted-foreground">
-              {t.intro[data.package.role](
-                data.package.project,
-                data.package.engineer,
-              )}
-            </p>
-          )}
-        </header>
-        {data.state === "open" || data.state === "received" ? (
+  const frame = await getPortalFrame("master", token);
+  if (data.state !== "open" && data.state !== "received")
+    return (
+      <PortalShell frame={frame} title={fr.portal.closed}>
+        <p className="text-muted-foreground">{t[data.state]}</p>
+      </PortalShell>
+    );
+  await noteOpened(token);
+  const role = data.package.role;
+  const p = fr.portal.master;
+  // Acknowledge first; then deposit a version, until one is delivered.
+  const cards = [
+    {
+      id: "ps-package",
+      title: p.title[role],
+      state:
+        data.state === "open" || data.deliveries.length === 0
+          ? ("todo" as const)
+          : ("waiting" as const),
+      action: {
+        label: data.state === "open" ? p.acknowledge : p.deliver,
+        due: null,
+      },
+      order: 1,
+      body: (
+        <>
+          <p className="text-muted-foreground">
+            {t.intro[role](data.package.project, data.package.engineer)}
+          </p>
           <PublicPackageView
             token={token}
             data={data}
             messages={await getEngineerThread(token)}
           />
-        ) : (
-          <p className="text-muted-foreground">{t[data.state]}</p>
-        )}
-      </div>
-    </main>
+        </>
+      ),
+    },
+  ];
+  return (
+    <PortalShell
+      frame={frame}
+      role={fr.portal.roles[role]}
+      title={portalTitle(cards)}
+    >
+      <PortalSections cards={cards} />
+    </PortalShell>
   );
 }

@@ -18,6 +18,8 @@ import { auth } from "./auth";
 import { briefRequests } from "./brief-requests";
 import { budget } from "./budget";
 import { calls } from "./calls";
+import { callPrep } from "./call-prep";
+import { meeting } from "./meeting";
 import { catalog } from "./catalog";
 import { catalogFiles } from "./catalog-files";
 import { contracts } from "./contracts";
@@ -75,6 +77,9 @@ import { productionDelivery } from "./production-delivery";
 import { productionDirection } from "./production-direction";
 import { productionJourney } from "./production-journey";
 import { productionLink } from "./production-link";
+import { portal } from "./portal";
+import { roles } from "./roles";
+import { stepTools } from "./step-tools";
 import { productionLocations } from "./production-locations";
 import { productionOrganization } from "./production-organization";
 import { productionHistory } from "./production-history";
@@ -121,6 +126,8 @@ export const fr = {
   auth,
   shell,
   calls,
+  callPrep,
+  meeting,
   catalog,
   framing,
   framingGuide,
@@ -221,4 +228,7 @@ export const fr = {
   activationPress,
   activationAgency,
   dialogs,
+  stepTools,
+  roles,
+  portal,
 } as const;
