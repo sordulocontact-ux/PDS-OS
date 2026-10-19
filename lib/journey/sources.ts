@@ -9,6 +9,7 @@ import { conceptionJourney } from "./conception";
 import { distributionJourneys } from "./distribution";
 import { framingJourneys } from "./framing";
 import { legalJourneys } from "./legal";
+import { masterJourneys } from "./master";
 import type { JourneyModuleKey, ModuleJourney } from "./types";
 
 // One loader per workflow (docs/ARCHITECTURE.md § 3 ter): each returns the
@@ -62,7 +63,7 @@ const none: Loader = async () => [];
 export const JOURNEY_LOADERS: Record<JourneyModuleKey, Loader> = {
   framing: framingJourneys,
   marketing,
-  master: none,
+  master: masterJourneys,
   legal: legalJourneys,
   distribution: distributionJourneys,
 };

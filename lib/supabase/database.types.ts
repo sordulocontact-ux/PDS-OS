@@ -8337,7 +8337,9 @@ export type Database = {
       }
       master_briefs: {
         Row: {
+          changed_by: Json
           constraints_text: string | null
+          content_changed_at: string
           created_at: string
           created_by: string | null
           deliverables: string[]
@@ -8356,14 +8358,19 @@ export type Database = {
           mix_v1_due: string | null
           organization_id: string
           project_id: string
+          recorded_at: string | null
+          recorded_by: string | null
           references_text: string | null
           revisions: number | null
+          start_mode: string | null
           updated_at: string
           updated_by: string | null
           validator_person_id: string | null
         }
         Insert: {
+          changed_by?: Json
           constraints_text?: string | null
+          content_changed_at?: string
           created_at?: string
           created_by?: string | null
           deliverables?: string[]
@@ -8382,14 +8389,19 @@ export type Database = {
           mix_v1_due?: string | null
           organization_id: string
           project_id: string
+          recorded_at?: string | null
+          recorded_by?: string | null
           references_text?: string | null
           revisions?: number | null
+          start_mode?: string | null
           updated_at?: string
           updated_by?: string | null
           validator_person_id?: string | null
         }
         Update: {
+          changed_by?: Json
           constraints_text?: string | null
+          content_changed_at?: string
           created_at?: string
           created_by?: string | null
           deliverables?: string[]
@@ -8408,13 +8420,23 @@ export type Database = {
           mix_v1_due?: string | null
           organization_id?: string
           project_id?: string
+          recorded_at?: string | null
+          recorded_by?: string | null
           references_text?: string | null
           revisions?: number | null
+          start_mode?: string | null
           updated_at?: string
           updated_by?: string | null
           validator_person_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "master_briefs_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "master_briefs_created_by_fkey"
             columns: ["created_by"]
@@ -8922,7 +8944,10 @@ export type Database = {
           id: string
           master_id: string
           organization_id: string
+          plan: string | null
           project_id: string
+          vocals_final: boolean | null
+          vocals_pending: string | null
         }
         Insert: {
           created_at?: string
@@ -8931,7 +8956,10 @@ export type Database = {
           id?: string
           master_id: string
           organization_id: string
+          plan?: string | null
           project_id: string
+          vocals_final?: boolean | null
+          vocals_pending?: string | null
         }
         Update: {
           created_at?: string
@@ -8940,7 +8968,10 @@ export type Database = {
           id?: string
           master_id?: string
           organization_id?: string
+          plan?: string | null
           project_id?: string
+          vocals_final?: boolean | null
+          vocals_pending?: string | null
         }
         Relationships: [
           {
@@ -9048,6 +9079,10 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          reopen_reason: string | null
+          reopened_at: string | null
+          reopened_by: string | null
+          source_file_id: string | null
           stage: string
           status: string
         }
@@ -9067,6 +9102,10 @@ export type Database = {
           number: number
           organization_id: string
           project_id: string
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
+          source_file_id?: string | null
           stage?: string
           status?: string
         }
@@ -9086,6 +9125,10 @@ export type Database = {
           number?: number
           organization_id?: string
           project_id?: string
+          reopen_reason?: string | null
+          reopened_at?: string | null
+          reopened_by?: string | null
+          source_file_id?: string | null
           stage?: string
           status?: string
         }
@@ -9498,11 +9541,14 @@ export type Database = {
           organization_id: string
           package: Json
           project_id: string
+          proposed_mastering_cents: number | null
+          proposed_mix_cents: number | null
           revoke_reason: string | null
           revoked_at: string | null
           revoked_by: string | null
           role: string
           token_hash: string
+          token_secret: string | null
         }
         Insert: {
           acknowledged_at?: string | null
@@ -9521,11 +9567,14 @@ export type Database = {
           organization_id: string
           package: Json
           project_id: string
+          proposed_mastering_cents?: number | null
+          proposed_mix_cents?: number | null
           revoke_reason?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           role: string
           token_hash: string
+          token_secret?: string | null
         }
         Update: {
           acknowledged_at?: string | null
@@ -9544,11 +9593,14 @@ export type Database = {
           organization_id?: string
           package?: Json
           project_id?: string
+          proposed_mastering_cents?: number | null
+          proposed_mix_cents?: number | null
           revoke_reason?: string | null
           revoked_at?: string | null
           revoked_by?: string | null
           role?: string
           token_hash?: string
+          token_secret?: string | null
         }
         Relationships: [
           {
@@ -16021,6 +16073,43 @@ export type Database = {
       }
     }
     Functions: {
+      reopen_mix_version: {
+        Args: { p_reason: string; p_version_id: string }
+        Returns: undefined
+      }
+      accept_master_rate: {
+        Args: { p_project_id: string; p_role: string }
+        Returns: undefined
+      }
+      take_master_transmission: {
+        Args: {
+          p_mastering_cents?: number
+          p_mix_cents?: number
+          p_token: string
+        }
+        Returns: string
+      }
+      master_transmission_link: {
+        Args: { p_transmission_id: string }
+        Returns: string
+      }
+      record_master_brief: {
+        Args: { p_project_id: string }
+        Returns: string
+      }
+      refresh_master_transmission_source: {
+        Args: {
+          p_master_id: string
+          p_project_id: string
+          p_source: Json
+          p_stems: Json
+        }
+        Returns: boolean
+      }
+      master_mix_on_working_source: {
+        Args: { p_version_id: string }
+        Returns: boolean
+      }
       ai_quota_day_start: { Args: never; Returns: string }
       ai_quota_resets_at: { Args: never; Returns: string }
       ai_usage_today: {

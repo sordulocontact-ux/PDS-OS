@@ -34,6 +34,8 @@ export const NOTIFICATION_KINDS = [
   "master_mastering_version_received",
   "master_final_approved",
   "master_mastering_changes_requested",
+  // A newer version of a title whose final vocals were awaited.
+  "master_source_newer",
   // A borrowing's conditions (Juridique): to validate, validated, refused.
   "clearance_terms_proposed",
   "clearance_terms_validated",
@@ -191,6 +193,8 @@ export function notificationHref(
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))
     return routes.projectMasterStep(projectId, "mastering");
+  if (kind === "master_source_newer")
+    return routes.projectMasterStep(projectId, "source");
   if (kind === "master_final_approved")
     return routes.projectMasterStep(projectId, "final");
   // A strategy document's review: the version itself (Brief de sortie or

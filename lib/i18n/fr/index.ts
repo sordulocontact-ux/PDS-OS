@@ -59,7 +59,12 @@ import { framingJourney } from "./framing-journey";
 import { legalReadiness } from "./legal-readiness";
 import { legalSplits } from "./legal-splits";
 import { library } from "./library";
+import { masterBrief } from "./master-brief";
+import { masterFinal } from "./master-final";
+import { masterJourney } from "./master-journey";
 import { masterPage } from "./master-page";
+import { masterRound } from "./master-round";
+import { masterSource } from "./master-source";
 import { masterWorkflow } from "./master-workflow";
 import { network } from "./network";
 import { notifications } from "./notifications";
@@ -227,6 +232,11 @@ export const fr = {
   legalReadiness,
   legalSplits,
   masterWorkflow,
+  masterJourney,
+  masterBrief,
+  masterRound,
+  masterFinal,
+  masterSource,
   artistActivity,
   masterPage,
   records,

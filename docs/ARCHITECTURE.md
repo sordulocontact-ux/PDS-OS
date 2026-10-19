@@ -3402,6 +3402,64 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
 
 ## 8 septies. Master (`/master`, `lib/master-workflow/`, `components/master-workflow/`)
 
+### Parcours du Master sur le patron commun (lot 8 du proto « Projet complet », 19/10/2026)
+
+**Fait foi sur ce qui suit dans cette section** quand ils divergent (chevrons, État du master, « Où en
+est la préparation », modale de transmission, `BriefForm` : retirés de l'écran, tables gardées).
+
+- **Parcours** : `lib/master-workflow/journey.ts` (pur, 5 étapes `source|brief|mix|mastering|final`,
+  statuts calculés, multi-titre : une étape est faite quand tous les titres du tour le sont, le premier
+  titre en attente nomme l'action), faits lus en un aller-retour par `journey-facts.ts`, contexte
+  `journey-context.ts` (`cache`), loader du « Maintenant » `lib/journey/master.ts` (après lancement par
+  le Plan). Cadre : `components/master-workflow/master-step-frame.tsx` (en-tête + faits « Master final
+  attendu le », `NowCard`, `JourneySpine` + « Historique du master », `StepPanel`, blocages et
+  informations notées, « Qui fait quoi » `lib/master-workflow/roles.ts`, « Déjà fait »). Routes :
+  `/master` redirige vers l'étape qui attend la personne ; `/master/source`, `/brief`, `/mix`,
+  `/mastering`, `/final`, `/history` (filtre `?par=`, CSV). Historique reconstruit des tables
+  (`lib/master-workflow/history.ts`), sans journal à part.
+- **Source** (`source-step.ts`, `components/master-workflow/source/`, migration `20261019080101`) :
+  versions candidates = maquettes et mises à plat, **la plus récente détectée** (proto, ticket § 1) ; un
+  mix trouvé au Catalogue se propose comme mix final avec motif **obligatoire** (`declare_mix_final`
+  `reason_required`). **« Voix définitives » est déclaré par le responsable à la confirmation**
+  (`master_flow_sources.vocals_final`, `vocals_pending`, `plan` `wait|anticipate`) : aucun champ du
+  Cadrage ne le porte. « Attendre » verrouille le Mixage (prérequis « Arrivée des voix définitives »,
+  `create_master_transmission` refuse `vocals_awaited`) ; « Anticiper » ouvre le Brief, chaque version
+  de mix garde sa source (`master_mix_versions.source_file_id`, trigger) et `decide_mix_version` refuse
+  `working_source`. Une maquette arrivée ensuite notifie le responsable (`master_source_newer`) ;
+  « Remplacer la source et prévenir … » confirme la nouvelle version et met à jour le lien vivant
+  (`refresh_master_transmission_source`, `sourceUpdatedAt` dans le paquet, « Nouvelle source le … »).
+- **Brief en document** (`brief-step.ts`, `brief-fact-actions.ts`, `components/master-workflow/brief/`,
+  migration `20261019080201`) : `StartChoices` (« Préparer un échange » recommandé si ≥ 2 manques) ;
+  « Commencer directement » pose la question de la direction à la validatrice ; « Préparer un échange »
+  = `CallPrepForm stay` dans l'étape. Chaque fait se change sur place (`FactRow` `change`/`edit`,
+  `saveBriefFact`) ; la première modification écrit tout le Brief pré-rempli (ingénieur du Cadrage
+  avec sa citation, même ingénieur pour le mastering par défaut, validatrice = direction créative du
+  Cadrage › Équipe sinon du projet sinon le responsable, dates proposées 6/3/1 jours avant le master
+  final). Ordre des dates refusé par le code. « Enregistrer le Brief » (`record_master_brief`) : jamais
+  désactivé, dit les manques ; `content_changed_at` > `recorded_at` = « Modifications à enregistrer »,
+  et l'envoi est bloqué tant que le Brief n'est pas enregistré tel quel (blocage côté code). « Modifié
+  par … » : `changed_by` écrit par trigger.
+- **Mixage / Mastering** (`round-step.ts`, `round-actions.ts`, `components/master-workflow/round/`,
+  migrations `20261019080301` et `080401`) : avant l'envoi, « Avant d'envoyer », dossier, e-mail à
+  écrire (PDS OS n'envoie pas d'e-mail : lien + « Copier » + « Marquer comme envoyé »), dérogation sans
+  pistes **écrite** (`withoutStemsReason`, refusée sans) ; le jeton est gardé **chiffré**
+  (`token_secret`, clé Vault `master_link_key`) et relu par le responsable seul
+  (`master_transmission_link`) : lien visible, « Relancer » (mailto), « Renouveler », « Révoquer » avec
+  motif. Sur `/m/` « Prendre en charge le dossier » avec le tarif confirmé ou proposé
+  (`take_master_transmission` : ligne de budget `proposed`, notification `master_rate_proposed`) puis
+  « Accepter le tarif » (`accept_master_rate` → `committed`). Versions en `VersionCard`, retours minutés
+  (équipe seulement), « Transmettre les retours sans décider » (texte écrit par le code, chaque ligne
+  avec son auteur), décision `DecisionPanel` (motif **toujours** obligatoire pour une modification),
+  « Rouvrir le mix » (responsable, motif, refusé si le mastering est parti : décision `reopened`).
+- **Master final** (`components/master-workflow/final/`) : fichier au Catalogue, ISRC, filiation, « Ce
+  que ça débloque » (durée lue sur le titre), livrables attendus / reçus (notés par le responsable).
+- **Page privée `/m/`** : `PortalShell`, cartes « Votre dossier », « Mix » / « Mastering » (versions et
+  dépôt), « Échanges avec le label », triées par `PortalSections`.
+- **Reste** (non fait) : réponse de la DA lue par PO avec citations, livrables déposés par
+  l'ingénieur sur son lien, facture / RIB / paiement, lien d'écoute de l'artiste, escalade d'un retard
+  à la direction, ingénieur maison, PDF du Brief, rouvrir un master.
+
+
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique
 (`docs/CONTEXTE-PROJET.md` § 2), d'après le ticket « Workflow Master » du 30/09/2026.
 Parcours interne : État du master → Brief Mix/Master → Mix (versions, retours, validation

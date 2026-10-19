@@ -13,9 +13,9 @@ import { IconStop } from "@/components/icons";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
 import {
-  lowerFirst,
   isLocked,
   type JourneyStep,
+  lowerFirst,
   prereqsOf,
   withModule,
 } from "@/lib/ui/journey";

@@ -155,7 +155,7 @@ export function nowOf<S extends JourneyStep>(
   };
 }
 
-/** « Valider le Brief » → « valider le Brief »: an action inside a
- * sentence keeps its proper nouns (proto: « répondre à 9 questions de PO »). */
+/** « valider le Mix V1 »: only the first letter lowered (proto `low`), so
+ * names and versions keep their capitals inside a sentence. */
 export const lowerFirst = (text: string) =>
-  text.charAt(0).toLowerCase() + text.slice(1);
+  text ? text.charAt(0).toLowerCase() + text.slice(1) : text;
