@@ -5179,3 +5179,8 @@ clés VAPID et `PUSH_CLAIM_SECRET` (≥ 32 car., même valeur que le secret Vaul
 - Données de test locales : `admin@pds.test` / `Framing-test-2026!` (admin), projet
   « Lueur » ; `cp-conception@pds.test` / `Conception-test-2026!` (chef de projet, responsable
   de « Soleil noir — conception (test) »). Fictives uniquement : les paliers gratuits peuvent entraîner leurs modèles.
+- **Types de notification** (18/10/2026) : `notifications_kind_check` ne se réécrit plus à la main ni par
+  une relecture en expression régulière (Postgres affiche la contrainte sous deux formes, une migration en
+  avait reconstruit la liste avec ses seuls quatre types et cassé tous les autres déclencheurs). Toute
+  migration ajoute ses types par `select public.add_notification_kinds(array['…'])`
+  (`20261018000101`), qui relit tous les noms quelle que soit la forme et les réunit.
