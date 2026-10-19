@@ -406,9 +406,11 @@ select lives_ok($$ select public.decide_distribution_closure(
                      (select id from public.distribution_closures
                        where project_id = pg_temp.id_of('project') and status = 'pending'), true, null) $$,
                 'the validator closes normally');
-select is((select array_agg(kind order by created_at)::text from public.distribution_events
+-- Inside one test transaction every event has the same now(): compare the
+-- steps as a set with their counts, not in time order.
+select is((select array_agg(kind order by kind)::text from public.distribution_events
             where project_id = pg_temp.id_of('project') and kind like 'closure.%'),
-          '{closure.proposed,closure.closed,closure.reopened,closure.proposed,closure.closed}',
+          '{closure.closed,closure.closed,closure.proposed,closure.proposed,closure.reopened}',
           'every closure step is in the history');
 
 select * from finish();
