@@ -116,6 +116,13 @@ function groupLines(board: PlanBoard) {
   );
 }
 
+/** A work or title as typed, without the guillemets the title adds. */
+const bare = (text: string) =>
+  text
+    .trim()
+    .replace(/^[«"“]\s*/, "")
+    .replace(/\s*[»"”]$/, "");
+
 /** Who or what the démarche is about, read from its steps' sources. */
 function subjectOf(parts: BoardRow[]): string | null {
   for (const part of parts) {
@@ -260,7 +267,7 @@ export function launchedDemarches(input: {
         return k ? [legalDemarcheKey(k, refOf(dep))] : [];
       }),
     ];
-    const subject = subjectOf(parts) ?? own?.subject ?? own?.label ?? "";
+    const subject = bare(subjectOf(parts) ?? own?.subject ?? own?.label ?? "");
     const step: JourneyStep = {
       key: legalDemarcheKey(kind, ref),
       href: legalDemarcheHref(ctx.projectId, kind, ref),
@@ -270,7 +277,8 @@ export function launchedDemarches(input: {
       owner: ownerOf(own, ctx),
       validator: validatorOf(kind, ctx),
       prereq,
-      external: deps.includes("onboarding") ? fiches : undefined,
+      external:
+        kind !== "person" && deps.includes("onboarding") ? fiches : undefined,
       next: [],
       actor: state.actor,
       summary:
@@ -309,7 +317,7 @@ export function proposedDemarches(input: {
     const kind = kindOfPart(item.key);
     if (!kind) return [];
     const ref = refOf(item.key);
-    const subject = item.subject ?? item.label;
+    const subject = bare(item.subject ?? item.label);
     const step: JourneyStep = {
       key: legalDemarcheKey(kind, ref),
       href: legalDemarcheHref(ctx.projectId, kind, ref),

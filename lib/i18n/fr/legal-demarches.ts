@@ -3,6 +3,9 @@
 // what a done one gave, and « Prêt pour la sortie ». Words of the proto.
 
 const lower = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+// « de » elides before a vowel: « Fiche d'Owen Delacroix ».
+const de = (name: string) =>
+  /^[aeiouyàâéèêëîïôûüh]/i.test(name) ? `d'${name}` : `de ${name}`;
 
 export const legalDemarches = {
   groups: {
@@ -39,7 +42,7 @@ export const legalDemarches = {
   sacemOrg: "La SACEM",
   // Prerequisites said in the grid and « Après : … ».
   prereq: {
-    fiche: (name: string) => `Fiche de ${name}`,
+    fiche: (name: string) => `Fiche ${de(name)}`,
   },
   // What is expected now, by whom (the journey's « À vous · … »).
   todo: {
