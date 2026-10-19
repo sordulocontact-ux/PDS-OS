@@ -848,6 +848,7 @@ export const distribution = {
     events: {
       parameters: (fields: string) =>
         `Paramètres de distribution enregistrés (${fields})`,
+      parametersConfirmed: "Paramètres de distribution confirmés",
       validatorSet: "Validateur Distribution désigné",
       validatorCleared: "Validateur Distribution retiré",
       check: (label: string, result: string) =>
@@ -859,6 +860,8 @@ export const distribution = {
       declaration: (what: string, proof: boolean) =>
         `${what} (${proof ? "preuve jointe" : "sans preuve"})`,
       withdrawn: (what: string) => `Déclaration retirée : ${what}`,
+      proofAdded: (what: string) =>
+        what ? `Preuve ajoutée : ${what}` : "Preuve ajoutée",
       platformSaved: (name: string) => `Plateforme ${name} renseignée`,
       platformVerified: (name: string, seen: string, match: string) =>
         `${name} vérifiée : ${seen}, ${match}`,
