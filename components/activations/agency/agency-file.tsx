@@ -1,21 +1,27 @@
 import { AgencyGallery } from "@/components/activations/agency/agency-gallery";
 import { PreviewPanel } from "@/components/activations/agency/preview-panel";
-import { RecapButton } from "@/components/activations/agency/recap-button";
+import { RecapForm } from "@/components/activations/agency/recap-form";
 import { SourcesSection } from "@/components/activations/agency/sources-section";
-import { MessagesSection } from "@/components/activations/messages/messages-section";
 import { PageSection } from "@/components/shell/page-section";
+import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { loadAgency } from "@/lib/activations/agency/queries";
+import {
+  agencyRecapText,
+  lastRecapAt,
+  recapPending,
+} from "@/lib/activations/agency/recap";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadMessages } from "@/lib/activations/messages/queries";
 import type { Access } from "@/lib/auth/access";
 import { fr } from "@/lib/i18n/fr";
-import { todayInParis } from "@/lib/insights/dates";
+import { createClient } from "@/lib/supabase/server";
+import { formatShortInstant } from "@/lib/utils/day";
 
 /**
  * Agency mode in the activation's page (tickets Influence parcours B, RP
  * § 6): the agency's sources read only, the read waiting for confirmation,
  * the rows with the agency's status and the PDS decision side by side, the
- * recap message.
+ * recap written by code and marked sent in one gesture (proto agsent).
  */
 export async function AgencyFile({
   fiche,
@@ -41,6 +47,22 @@ export async function AgencyFile({
   const previewSource =
     agency.preview &&
     agency.sources.find((s) => s.id === agency.preview?.sourceId);
+  const recaps = messages.filter(
+    (m) => m.kind === "agency_recap" && m.sentDeclaredAt,
+  );
+  const pending =
+    canWrite &&
+    a.status !== "closed" &&
+    a.status !== "cancelled" &&
+    recapPending(rows, lastRecapAt(recaps.map((m) => m.sentDeclaredAt)));
+  const source = agency.sources.find(
+    (s) => s.agencyContactId || s.agencyPerson,
+  );
+  const agencyName = pending
+    ? await agencyNameOf(source?.agencyContactId ?? null)
+    : null;
+  const nameOf = (id: string | null) =>
+    members.find((m) => m.personId === id)?.name ?? "—";
 
   return (
     <div id="agency" className="grid scroll-mt-5 gap-8">
@@ -80,27 +102,53 @@ export async function AgencyFile({
           )}
         </div>
       </PageSection>
-      <MessagesSection
-        projectId={projectId}
-        activationId={a.id}
-        targetId={null}
-        messages={messages.filter((m) => m.kind === "agency_recap")}
-        kinds={["agency_recap"]}
-        defaults={{
-          kind: "agency_recap",
-          subject: t.recap.subject(a.title),
-          body: t.recap.intro,
-        }}
-        members={members}
-        canWrite={canWrite}
-        today={todayInParis()}
-        title={t.recap.title}
-        addAction={
-          agency.rows.length > 0 && (
-            <RecapButton projectId={projectId} activationId={a.id} />
-          )
-        }
-      />
+      {recaps.length > 0 && (
+        <FactRows>
+          <FactRow
+            label={fr.activationBrief.recap.sent}
+            value={recaps
+              .map((m) =>
+                fr.activationBrief.recap.sentLine(
+                  formatShortInstant(m.sentDeclaredAt ?? m.createdAt),
+                  nameOf(m.sentDeclaredBy),
+                ),
+              )
+              .join(" · ")}
+          />
+        </FactRows>
+      )}
+      {pending && (
+        <RecapForm
+          projectId={projectId}
+          activationId={a.id}
+          agency={
+            agencyName ??
+            source?.agencyPerson ??
+            fr.activationBrief.recap.agency
+          }
+          subject={t.recap.subject(a.title)}
+          body={agencyRecapText({
+            rows,
+            contact: source?.agencyPerson ?? null,
+            press,
+            title: project.title,
+            artist: project.artistName,
+            owner: nameOf(a.ownerPersonId ?? project.ownerPersonId),
+          })}
+        />
+      )}
     </div>
   );
+}
+
+/** The agency's name in the Réseau (« Agence Halo »), if linked. */
+async function agencyNameOf(contactId: string | null): Promise<string | null> {
+  if (!contactId) return null;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("network_contacts")
+    .select("name")
+    .eq("id", contactId)
+    .maybeSingle();
+  return data?.name ?? null;
 }

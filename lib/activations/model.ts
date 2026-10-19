@@ -166,7 +166,13 @@ export const MESSAGE_KINDS = [
 ] as const;
 export type MessageKind = (typeof MESSAGE_KINDS)[number];
 
-export const MESSAGE_CHANNELS = ["email", "dm", "phone", "other"] as const;
+export const MESSAGE_CHANNELS = [
+  "email",
+  "dm",
+  "phone",
+  "whatsapp",
+  "other",
+] as const;
 export type MessageChannel = (typeof MESSAGE_CHANNELS)[number];
 
 export const MESSAGE_STATUSES = [

@@ -22,10 +22,18 @@ import type { RankedPerson } from "@/lib/network/ranked-people";
 
 const t = fr.activationWork.targets;
 
-const warningText = (w: TargetWarning) =>
-  w.key === "proposed"
-    ? t.warningLabels.proposed(w.count)
-    : t.warningLabels[w.key];
+function warningText(w: TargetWarning): string {
+  switch (w.key) {
+    case "proposed":
+      return t.warningLabels.proposed(w.count);
+    case "duplicate":
+      return t.warningLabels.duplicate(w.of);
+    case "sameJournalist":
+      return t.warningLabels.sameJournalist(w.journalist, w.of);
+    default:
+      return t.warningLabels[w.key];
+  }
+}
 
 /**
  * Adds an influencer (Influence) or a media and its journalist (RP) from the
@@ -47,6 +55,7 @@ export function AddTargetForm({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [contactId, setContactId] = useState<string | null>(null);
+  const [journalistId, setJournalistId] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<TargetWarning[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [priority, setPriority] = useState<Priority>("normal");
@@ -58,16 +67,28 @@ export function AddTargetForm({
     listNetworkForRole(["journalist"]),
   );
 
-  function pick(option: RankedPerson | null) {
-    setContactId(option?.id ?? null);
+  // The alerts of the media (or creator) picked; for RP, again once the
+  // journalist is picked (« Doublon probable »).
+  function check(contact: string | null, journalist: string | null) {
     setWarnings([]);
     setConfirmed(false);
-    if (option)
+    if (contact)
       targetWarnings({
-        contactId: option.id,
+        contactId: contact,
         activationId,
         withAudience: !press,
+        press: press ? { journalistId: journalist } : undefined,
       }).then(setWarnings);
+  }
+
+  function pick(option: RankedPerson | null) {
+    setContactId(option?.id ?? null);
+    check(option?.id ?? null, journalistId);
+  }
+
+  function pickJournalist(option: RankedPerson | null) {
+    setJournalistId(option?.id ?? null);
+    check(contactId, option?.id ?? null);
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -147,6 +168,7 @@ export function AddTargetForm({
           refOfContact={(id) => id}
           allowNameOnly={false}
           suggest={(o) => o.group !== "network"}
+          onPick={pickJournalist}
         />
       )}
       <ChipChoice

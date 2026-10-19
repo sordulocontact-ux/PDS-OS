@@ -7,9 +7,11 @@ import { MetricsSection } from "@/components/activations/metrics/metrics-section
 import { SheetPanel } from "@/components/activations/sheets/sheet-panel";
 import { Fold } from "@/components/ui/fold";
 import { TargetHeader } from "@/components/activations/targets/target-header";
+import { ContactLinkOffer } from "@/components/portal/contact-links-section";
 import type { ActivationFiche } from "@/lib/activations/fiche";
 import { loadActivationFiles } from "@/lib/activations/files/queries";
 import { composeBrief } from "@/lib/activations/influence/brief";
+import { loadBriefDefaults } from "@/lib/activations/influence/brief-defaults";
 import { collaborationRows } from "@/lib/activations/influence/collaborations";
 import { loadInfluenceData } from "@/lib/activations/influence/queries";
 import {
@@ -27,6 +29,7 @@ import { todayInParis } from "@/lib/insights/dates";
 import { canSeeProjectBudget } from "@/lib/projects/edit-access";
 import { collaborationStageTone } from "@/lib/ui/state-tones";
 
+import { BriefProposalForm } from "./brief-proposal-form";
 import { ContentsSection } from "./contents-section";
 import { NegotiationSection } from "./negotiation-section";
 import { PaymentSection } from "./payment-section";
@@ -96,7 +99,24 @@ export async function InfluenceCollaboration({
     mine(influence.rights),
   );
   const t = fr.activationWork.concepts;
+  const focus = collabFocus(row.stage);
+  // « Brief et proposition » once the concept is validated (proto cbrief).
+  const briefForm =
+    canWrite && focus.includes("brief") && concept[0]?.status === "validated"
+      ? await loadBriefDefaults({ target, concept: concept[0], project })
+      : null;
   const sections: Array<[CollabPart, React.ReactNode]> = [
+    [
+      "brief",
+      briefForm && (
+        <BriefProposalForm
+          key="brief"
+          projectId={project.id}
+          targetId={target.id}
+          defaults={briefForm}
+        />
+      ),
+    ],
     [
       "concept",
       <SheetPanel
@@ -217,7 +237,6 @@ export async function InfluenceCollaboration({
     ],
     ["journal", <JournalSection key="journal" entries={journal} />],
   ];
-  const focus = collabFocus(row.stage);
 
   return (
     <div className="grid gap-8">
@@ -233,6 +252,10 @@ export async function InfluenceCollaboration({
         canWrite={canWrite}
         inCard={inCard}
       />
+      {/* Once she has an agreement link, her page by project (lot 11). */}
+      {mine(influence.agreements).length > 0 && (
+        <ContactLinkOffer projectId={project.id} contactId={target.contactId} />
+      )}
       {sections
         .filter(([key]) => !inCard || focus.includes(key))
         .map(([key, node]) => (

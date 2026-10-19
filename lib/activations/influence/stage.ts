@@ -56,6 +56,7 @@ export function collaborationStage(f: CollaborationFacts): CollaborationStage {
 
 /** The parts of a collaboration's fiche. */
 export type CollabPart =
+  | "brief"
   | "concept"
   | "negotiation"
   | "messages"
@@ -78,7 +79,7 @@ export function collabFocus(stage: CollaborationStage): CollabPart[] {
       return ["concept"];
     case "validated_internal":
     case "to_contact":
-      return ["concept", "messages"];
+      return ["brief"];
     case "negotiation":
     case "agreement_to_obtain":
       return ["negotiation"];

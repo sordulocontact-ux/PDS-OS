@@ -24,6 +24,7 @@ export type MessageRecord = {
   validatedBy: string | null;
   validatedAt: string | null;
   sentDeclaredBy: string | null;
+  sentDeclaredAt: string | null;
   sentOn: string | null;
   sentProofUrl: string | null;
   sentNote: string | null;
@@ -55,6 +56,7 @@ export const loadMessages = cache(
       validatedBy: m.validated_by,
       validatedAt: m.validated_at,
       sentDeclaredBy: m.sent_declared_by,
+      sentDeclaredAt: m.sent_declared_at,
       sentOn: m.sent_on,
       sentProofUrl: m.sent_proof_url,
       sentNote: m.sent_note,

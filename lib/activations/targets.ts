@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
+import { probableDuplicate } from "@/lib/activations/duplicates";
 import type { Priority, TargetOutcome } from "@/lib/activations/model";
 import { createClient } from "@/lib/supabase/server";
 
@@ -84,7 +85,11 @@ export const loadTargets = cache(
 
 export type TargetWarning =
   | { key: "proposed"; count: number }
-  | { key: "contacted" | "collaborated" | "refused" | "stale" | "noData" };
+  | { key: "contacted" | "collaborated" | "refused" | "stale" | "noData" }
+  // RP: the same media already targeted under another card, or the same
+  // journalist under another media (« Doublon probable »).
+  | { key: "duplicate"; of: string }
+  | { key: "sameJournalist"; journalist: string; of: string };
 
 const SIX_MONTHS = 183 * 24 * 60 * 60 * 1000;
 
@@ -99,6 +104,7 @@ export async function warningsFor(
   contactId: string,
   activationId: string,
   withAudience: boolean,
+  press: { journalistId: string | null } | null = null,
 ): Promise<TargetWarning[]> {
   const supabase = await createClient();
   const [targets, rows, observations] = await Promise.all([
@@ -146,5 +152,59 @@ export async function warningsFor(
     else if (Date.now() - new Date(last).getTime() > SIX_MONTHS)
       warnings.push({ key: "stale" });
   }
+  if (press)
+    warnings.push(
+      ...(await duplicatesFor(contactId, activationId, press.journalistId)),
+    );
   return warnings;
+}
+
+/** « Doublon probable » in this campaign: the media under another card of
+ * the Réseau, or the journalist already targeted under another media. */
+async function duplicatesFor(
+  contactId: string,
+  activationId: string,
+  journalistId: string | null,
+): Promise<TargetWarning[]> {
+  const supabase = await createClient();
+  const { data: targets } = await supabase
+    .from("activation_targets")
+    .select("contact_id, journalist_contact_id")
+    .eq("activation_id", activationId)
+    .neq("contact_id", contactId);
+  const others = targets ?? [];
+  if (others.length === 0) return [];
+  const ids = [
+    contactId,
+    ...others.map((o) => o.contact_id),
+    ...(journalistId ? [journalistId] : []),
+  ];
+  const { data: contacts } = await supabase
+    .from("network_contacts")
+    .select("id, name, email")
+    .in("id", ids);
+  const card = (id: string | null) => contacts?.find((c) => c.id === id);
+  const media = card(contactId);
+  const out: TargetWarning[] = [];
+  if (media) {
+    const twin = probableDuplicate(
+      media,
+      others.flatMap((o) => {
+        const c = card(o.contact_id);
+        return c ? [c] : [];
+      }),
+    );
+    if (twin) out.push({ key: "duplicate", of: twin.name });
+  }
+  const journalist = card(journalistId);
+  const already = journalistId
+    ? others.find((o) => o.journalist_contact_id === journalistId)
+    : null;
+  if (journalist && already)
+    out.push({
+      key: "sameJournalist",
+      journalist: journalist.name,
+      of: card(already.contact_id)?.name ?? "—",
+    });
+  return out;
 }
