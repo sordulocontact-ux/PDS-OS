@@ -2,7 +2,7 @@
 -- « Changer qui produit », « Révoquer » a link (20261019050101), …
 -- Run with `supabase test db`.
 begin;
-select plan(13);
+select plan(22);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -123,6 +123,36 @@ select is((select count(*)::int from public.production_organization_changes), 1,
 select throws_ok($$ insert into public.production_organization_changes (organization_id, project_id, sheet_id, from_kind, to_kind, reason) values (pg_temp.id_of('org'), pg_temp.id_of('project'), pg_temp.id_of('sheet'), 'internal', 'internal', 'x') $$,
                  '42501', null, 'never written directly');
 reset role;
+
+-- 3. A director proposed by the company, retained by PDS --------------------------------
+select pg_temp.act_as(pg_temp.id_of('manager'));
+insert into vars select 'token3', public.create_production_provider_link(pg_temp.id_of('sheet'), pg_temp.id_of('ressac'));
+reset role;
+set local role anon;
+select throws_ok($$ select public.propose_production_director_by_link((select v from vars where k = 'token3'), 'Bastien', 'vimeo.com/x', null) $$,
+                 '22023', null, 'a showreel is an https link');
+select lives_ok($$ select public.propose_production_director_by_link((select v from vars where k = 'token3'), 'Bastien Roy', 'https://vimeo.com/bastien', 'A tourné de nuit') $$,
+                'the company proposes a director');
+select lives_ok($$ select public.propose_production_director_by_link((select v from vars where k = 'token3'), 'Inès Garnier', 'https://vimeo.com/ines', null) $$,
+                'and another one');
+select is(jsonb_array_length(public.get_production_link_journey((select v from vars where k = 'token3')) -> 'directorProposals'), 2,
+          'the company sees its proposals');
+reset role;
+select is((select count(*)::int from public.notifications where kind = 'production_director_proposed'
+            and recipient_person_id = pg_temp.id_of('manager_person')), 2, 'the owner is told each time');
+insert into ids select 'proposal', id from public.production_director_proposals where name = 'Bastien Roy';
+select pg_temp.act_as(pg_temp.id_of('creative'));
+select throws_ok($$ select public.retain_production_director(pg_temp.id_of('proposal')) $$,
+                 '42501', null, 'only whoever organises retains');
+reset role;
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select ok(length(public.retain_production_director(pg_temp.id_of('proposal'))) = 64,
+          'retaining gives the director his private link');
+reset role;
+select is((select c.name from public.production_sheets s join public.network_contacts c on c.id = s.director_contact_id
+            where s.id = pg_temp.id_of('sheet')), 'Bastien Roy', 'he holds « Réalisation »');
+select is((select status from public.production_director_proposals where name = 'Inès Garnier'), 'declined',
+          'the other is « Non retenu »');
 
 select * from finish();
 rollback;

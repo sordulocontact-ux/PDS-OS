@@ -1,3 +1,4 @@
+import { DirectorBlock } from "@/components/production/journey/director-block";
 import { DirectionDecision } from "@/components/production/journey/direction-decision";
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { ProductionBriefSection } from "@/components/production/prep/brief-section";
@@ -31,7 +32,9 @@ export default async function ProductionDirectionStepPage({
   });
   const d = sheet.organization.direction;
   const reviewer =
-    steps.find((s) => s.key === "direction")?.validator?.name ??
+    steps
+      .find((s) => s.key === "direction")
+      ?.roles?.find((r) => r.kind === "valid")?.name ??
     data.ownerName ??
     "—";
   return (
@@ -41,6 +44,7 @@ export default async function ProductionDirectionStepPage({
       step={step}
       steps={steps}
     >
+      <DirectorBlock projectId={projectId} data={data} />
       <ProductionImportButton
         projectId={projectId}
         sheetId={sheet.id}

@@ -34,6 +34,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      production_director_proposals: {
+        Row: {
+          id: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          name: string
+          reel_url: string
+          note: string | null
+          proposed_by_contact_id: string | null
+          proposed_at: string
+          status: string
+          decided_by: string | null
+          decided_at: string | null
+          contact_id: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          project_id: string
+          sheet_id: string
+          name: string
+          reel_url: string
+          note?: string | null
+          proposed_by_contact_id?: string | null
+          proposed_at?: string
+          status?: string
+          decided_by?: string | null
+          decided_at?: string | null
+          contact_id?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          project_id?: string
+          sheet_id?: string
+          name?: string
+          reel_url?: string
+          note?: string | null
+          proposed_by_contact_id?: string | null
+          proposed_at?: string
+          status?: string
+          decided_by?: string | null
+          decided_at?: string | null
+          contact_id?: string | null
+        }
+        Relationships: []
+      }
       production_organization_changes: {
         Row: {
           id: string
@@ -16069,6 +16117,14 @@ export type Database = {
       }
     }
     Functions: {
+      propose_production_director_by_link: {
+        Args: { p_name: string; p_note: string | null; p_reel_url: string; p_token: string }
+        Returns: undefined
+      }
+      retain_production_director: {
+        Args: { p_proposal_id: string }
+        Returns: string
+      }
       change_production_producer: {
         Args: { p_carried: string[]; p_company_contact_id: string | null; p_done: string[]; p_organization: string; p_reason: string; p_revoke_link: boolean; p_sheet_id: string }
         Returns: undefined

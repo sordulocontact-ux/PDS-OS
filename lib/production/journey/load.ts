@@ -53,6 +53,7 @@ export const loadJourney = cache(
       versionsRes,
       tools,
       shootRes,
+      proposalsRes,
     ] = await Promise.all([
       sheet ? preprodFor(projectId, deliverableId, access) : null,
       sheet
@@ -90,6 +91,13 @@ export const loadJourney = cache(
             )
             .eq("sheet_id", sheet.id)
             .maybeSingle()
+        : null,
+      sheet
+        ? supabase
+            .from("production_director_proposals")
+            .select("id", { count: "exact", head: true })
+            .eq("sheet_id", sheet.id)
+            .eq("status", "proposed")
         : null,
     ]);
     const shoot = shootRes?.data ?? null;
@@ -186,7 +194,7 @@ export const loadJourney = cache(
           : null,
         revision: false,
       },
-      directorProposals: 0,
+      directorProposals: proposalsRes?.count ?? 0,
       direction: {
         status: org?.direction.status ?? "draft",
         written: Boolean(sheet?.brief.stagingIntent && sheet.brief.runOfShow),

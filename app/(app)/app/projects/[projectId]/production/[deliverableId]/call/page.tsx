@@ -2,6 +2,7 @@ import {
   CallStepHead,
   CallStepSummary,
 } from "@/components/production/journey/call-step";
+import { DirectorBlock } from "@/components/production/journey/director-block";
 import { ProductionStepPanel } from "@/components/production/journey/production-step-panel";
 import { PlanSection } from "@/components/production/preprod/plan-section";
 import { TeamBriefsSection } from "@/components/production/preprod/team-briefs-section";
@@ -116,6 +117,9 @@ export default async function ProductionCallStepPage({
         canOrganize={data.canOrganize}
         mePersonId={access.personId}
       />
+      {external && preprod.calls.some((c) => c.status === "ready") && (
+        <DirectorBlock projectId={projectId} data={data} />
+      )}
       {!external && (
         <TeamBriefsSection
           {...common}

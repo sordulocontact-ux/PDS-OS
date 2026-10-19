@@ -6,6 +6,7 @@ import type { LinkJourney } from "@/lib/production/provider/journey";
 import { formatDate } from "@/lib/release/format";
 
 import { linkCallCards } from "./link-call-cards";
+import { linkDirectorCard } from "./link-director-card";
 import { LinkDirectionForm } from "./link-direction-form";
 import { LinkGearForm } from "./link-gear-form";
 import { LinkPlaceForm } from "./link-place-form";
@@ -27,9 +28,12 @@ const p = fr.portal.provider;
 export function linkJourneyCards({
   token,
   journey: j,
+  provider,
 }: {
   token: string;
   journey: LinkJourney;
+  // The contact's own name (« Proposé par Studio Ressac »).
+  provider: string;
 }): PortalCardItem[] {
   const company = j.roles.includes("company");
   const director = j.roles.includes("director");
@@ -41,6 +45,8 @@ export function linkJourneyCards({
     <p className="text-pretty text-muted-foreground">{text}</p>
   );
   const cards: PortalCardItem[] = linkCallCards(j);
+  const directorCard = linkDirectorCard(token, j, provider);
+  if (directorCard) cards.push(directorCard);
   // Without a call held, the actions given stand on their own card.
   if (j.actions.length > 0 && !j.calls.some((c) => c.status === "ready"))
     cards.push({

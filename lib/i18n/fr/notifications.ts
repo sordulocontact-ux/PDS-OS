@@ -70,6 +70,9 @@ export const notifications = {
       `${actor} a envoyé la proposition de réalisation de « ${project} » : elle attend votre validation.`,
     production_direction_decided: (actor: string, project: string) =>
       `${actor} a tranché sur la proposition de réalisation de « ${project} ».`,
+    // The company has no account: the project names it.
+    production_director_proposed: (_actor: string, project: string) =>
+      `La société de production propose un réalisateur pour « ${project} » : à retenir.`,
     step_blocker_reported: (actor: string, project: string) =>
       `${actor} a signalé un blocage sur « ${project} ».`,
     step_blocker_lifted: (actor: string, project: string) =>

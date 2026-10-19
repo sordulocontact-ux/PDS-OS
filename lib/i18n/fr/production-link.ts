@@ -3,6 +3,24 @@
 // director of photography's gear list, the actions given to each.
 export const productionLink = {
   tasks: { title: "Vos tâches", due: (date: string) => `Pour le ${date}` },
+  director: {
+    title: "Proposer un réalisateur",
+    action: "Proposer un réalisateur",
+    yours: "Votre proposition",
+    name: "Nom",
+    reel: "Lien du showreel",
+    why: "Pourquoi lui",
+    submit: "Proposer à PDS",
+    done: "Proposition envoyée à PDS.",
+    sent: "Envoyé à PDS",
+    another: "Proposer un autre réalisateur",
+    by: (company: string, at: string) => `Proposé par ${company} le ${at}`,
+    status: { proposed: "Proposé", retained: "Retenu", declined: "Non retenu" },
+    errors: {
+      name: "Le nom du réalisateur.",
+      reel: "Un lien qui commence par https://.",
+    },
+  },
   call: {
     next: "Votre prochain rendez-vous avec PDS",
     held: (day: string) => `Call de production du ${day}`,

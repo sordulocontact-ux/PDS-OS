@@ -57,6 +57,17 @@ const journeySchema = z.object({
       }),
     )
     .default([]),
+  directorProposals: z
+    .array(
+      z.object({
+        name: z.string(),
+        reelUrl: z.string(),
+        note: text,
+        status: z.enum(["proposed", "retained", "declined"]),
+        proposedAt: z.string(),
+      }),
+    )
+    .default([]),
 });
 export type LinkJourney = z.infer<typeof journeySchema>;
 
