@@ -132,7 +132,12 @@ export function linkCutCards(token: string, j: LinkJourney): PortalCardItem[] {
   const light = cut.track !== "shoot";
   const gateOpen = !cut.gate || cut.gate.done;
   // Before the shoot, the edit's card waits (proto: newest step on top).
-  if (!light && !SHOT.includes(j.shootState ?? "") && cut.versions.length === 0)
+  // The edit follows the rushes (proto: Rushes → Montage et retours).
+  if (
+    !light &&
+    cut.versions.length === 0 &&
+    (!SHOT.includes(j.shootState ?? "") || (company && !j.rushesUrl))
+  )
     return [];
   const deposit =
     company && gateOpen && (!latest || SENT_BACK.includes(latest.status));

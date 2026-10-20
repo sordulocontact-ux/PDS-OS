@@ -96,7 +96,11 @@ begin
    where id = s.id;
 
   -- A change: what depends on the date is to review.
-  if prev.id is not null then
+  -- One task to review at a time: a further change keeps the open one.
+  if prev.id is not null and not exists (
+       select 1 from public.production_plan_actions a
+        where a.sheet_id = s.id and a.review and a.done_at is null
+          and a.title = 'Mettre à jour le planning et la feuille de service') then
     v_origin := 'Changement de date du ' || to_char((now() at time zone 'Europe/Paris')::date, 'DD/MM');
     select coalesce(max(position) + 1, 0) into v_pos from public.production_plan_actions where sheet_id = s.id;
     insert into public.production_plan_actions
@@ -107,6 +111,8 @@ begin
                  else public.production_quote_handler(s.id) end,
             case when s.organization = 'external' then s.company_contact_id end,
             'approved', public.auth_person_id(), now(), v_pos, v_origin, true);
+  end if;
+  if prev.id is not null then
     v_handler := public.production_quote_handler(s.id);
     insert into public.notifications
       (organization_id, recipient_person_id, actor_person_id, kind, project_id, subject_id)

@@ -134,6 +134,7 @@ export const loadLightFacts = cache(
       .filter((r) => r.delivered_at === last)
       .map((r) => ({
         name: person(r.person_id) ?? contact(r.contact_id) ?? r.name ?? "—",
+        personId: r.person_id,
         purpose: PURPOSES.find((p) => p === r.purpose) ?? null,
       }));
     const d = delivery.data;

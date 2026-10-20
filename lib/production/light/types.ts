@@ -36,6 +36,7 @@ export type LightDelivery = {
 
 export type DeliveryRecipient = {
   name: string;
+  personId: string | null;
   purpose: "distribution" | "activations" | "validation" | null;
 };
 

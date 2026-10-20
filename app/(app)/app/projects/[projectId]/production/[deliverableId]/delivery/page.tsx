@@ -10,6 +10,7 @@ import { LightDeliveryStep } from "@/components/production/light/light-steps";
 import { DeliverForm } from "@/components/production/delivery/deliver-form";
 import { recipientOptions } from "@/lib/production/delivery/recipients";
 import { requireApproved } from "@/lib/auth/dal";
+import { createClient } from "@/lib/supabase/server";
 import { loadLightFacts } from "@/lib/production/light/queries";
 import { trackOf } from "@/lib/production/track";
 import { routes } from "@/lib/auth/redirects";
@@ -47,12 +48,13 @@ export default async function ProductionDeliveryPage({
     light &&
     trackOf(ctx.data.deliverable.title, light.derivedFromSheetId) !== "shoot"
   ) {
-    const [facts, closure] = await Promise.all([
+    const [facts, closure, creativeId] = await Promise.all([
       loadLightFacts(light.id, deliverableId, light.derivedFromSheetId),
       loadClosureFacts(projectId, light.id, deliverableId, []),
+      firstCreative(projectId),
     ]);
     const assignee = ctx.data.members.find(
-      (m) => m.personId === closure.assigneePersonId,
+      (m) => m.personId === (closure.assigneePersonId ?? creativeId),
     );
     return (
       <ProductionStepPanel
@@ -96,8 +98,14 @@ export default async function ProductionDeliveryPage({
     data.sheet.derivedFromSheetId,
   );
   const r = fr.productionLight.recipients;
+  const creativeId = await firstCreative(projectId);
+  // Activations: whom the deliverable is entrusted to, else the project's
+  // creative side (proto: « Nadia Benali · Activations »).
   const assignee = data.members.find(
-    (m) => m.personId === closure.assigneePersonId,
+    (m) => m.personId === (closure.assigneePersonId ?? creativeId),
+  );
+  const deliveredTo = recipientsFacts.recipients.find(
+    (x) => x.purpose === "activations" && x.personId,
   );
   const owner =
     data.ownerPersonId && data.ownerName
@@ -184,7 +192,9 @@ export default async function ProductionDeliveryPage({
         fiche={data.heritage.fiche}
         canOrganize={data.canOrganize}
         members={data.members}
-        recipientId={closure.assigneePersonId}
+        recipientId={
+          deliveredTo?.personId ?? closure.assigneePersonId ?? creativeId
+        }
       />
       <ClosureSection
         projectId={projectId}
@@ -202,4 +212,18 @@ export default async function ProductionDeliveryPage({
       />
     </ProductionStepPanel>
   );
+}
+
+/** The project's first creative director, who follows the Activations
+ * when nobody else was named. */
+async function firstCreative(projectId: string): Promise<string | null> {
+  const { data } = await (
+    await createClient()
+  )
+    .from("project_creatives")
+    .select("person_id")
+    .eq("project_id", projectId)
+    .limit(1)
+    .maybeSingle();
+  return data?.person_id ?? null;
 }

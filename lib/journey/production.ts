@@ -5,6 +5,7 @@ import { cache } from "react";
 import { fr } from "@/lib/i18n/fr";
 import { loadConceptionLinks } from "@/lib/production/conception-links";
 import { journeyContext } from "@/lib/production/journey/context";
+import { isArtworkTitle } from "@/lib/production/track";
 import { createClient } from "@/lib/supabase/server";
 
 import type { ModuleJourney } from "./types";
@@ -33,25 +34,34 @@ export type ProductionDeliverableRef = {
 export const productionDeliverables = cache(
   async (projectId: string): Promise<ProductionDeliverableRef[]> => {
     const supabase = await createClient();
-    const [deliverables, sheets, versions, links] = await Promise.all([
-      supabase
-        .from("strategy_deliverables")
-        .select("id, title")
-        .eq("project_id", projectId)
-        .order("created_at"),
-      supabase
-        .from("production_sheets")
-        .select(
-          "id, deliverable_id, organization, closed_at, derived_from_sheet_id, company:network_contacts!production_sheets_company_contact_id_fkey(name)",
-        )
-        .eq("project_id", projectId),
-      supabase
-        .from("design_versions")
-        .select("deliverable_id")
-        .eq("project_id", projectId)
-        .eq("status", "approved"),
-      loadConceptionLinks(supabase, projectId),
-    ]);
+    const [deliverables, sheets, versions, links, deliveries] =
+      await Promise.all([
+        supabase
+          .from("strategy_deliverables")
+          .select("id, title")
+          .eq("project_id", projectId)
+          .order("created_at"),
+        supabase
+          .from("production_sheets")
+          .select(
+            "id, deliverable_id, organization, closed_at, derived_from_sheet_id, company:network_contacts!production_sheets_company_contact_id_fkey(name)",
+          )
+          .eq("project_id", projectId),
+        supabase
+          .from("design_versions")
+          .select("deliverable_id")
+          .eq("project_id", projectId)
+          .eq("status", "approved"),
+        loadConceptionLinks(supabase, projectId),
+        supabase
+          .from("deliverable_deliveries")
+          .select("deliverable_id, delivered_at")
+          .eq("project_id", projectId)
+          .not("delivered_at", "is", null),
+      ]);
+    const delivered = new Set(
+      (deliveries.data ?? []).map((x) => x.deliverable_id),
+    );
     const failed = deliverables.error ?? sheets.error;
     if (failed) console.error("productionDeliverables:", failed.message);
     const sheetOf = new Map(
@@ -77,7 +87,13 @@ export const productionDeliverables = cache(
           title: d.title,
           kind,
           company: kind === "external" ? (sheet?.company?.name ?? null) : null,
-          closed: Boolean(sheet?.closed_at),
+          // « livré »: closed, or delivered for a light journey (proto
+          // livDelivered: a cover, teasers drawn from the clip).
+          closed:
+            Boolean(sheet?.closed_at) ||
+            (delivered.has(d.id) &&
+              (Boolean(sheet?.derived_from_sheet_id) ||
+                isArtworkTitle(d.title))),
           sheetId: sheet?.id ?? null,
           derived: Boolean(sheet?.derived_from_sheet_id),
         },

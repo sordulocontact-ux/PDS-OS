@@ -53,7 +53,11 @@ export default async function ProviderSpacePage({
   return (
     <PortalShell
       frame={frame}
-      role={fr.portal.roles.provider}
+      role={
+        journey?.roles.length === 1 && journey.roles[0] === "creativeExt"
+          ? fr.roles.production.creativeExt
+          : fr.portal.roles.provider
+      }
       title={portalTitle(cards)}
     >
       <p className="text-muted-foreground">
@@ -61,13 +65,19 @@ export default async function ProviderSpacePage({
         {t.until(formatDate(space.expiresAt))}
       </p>
       <PortalSections cards={cards} />
-      <ProviderSpaceView
-        token={token}
-        space={space}
-        locations={await getProviderLocations(token)}
-        quiet={Boolean(journey && journey.roles.length > 0)}
-        hideVersions={Boolean(journey?.cut)}
-      />
+      {!(
+        journey?.roles.length === 1 &&
+        journey.roles[0] === "creativeExt" &&
+        space.steps.length === 0
+      ) && (
+        <ProviderSpaceView
+          token={token}
+          space={space}
+          locations={await getProviderLocations(token)}
+          quiet={Boolean(journey && journey.roles.length > 0)}
+          hideVersions={Boolean(journey?.cut)}
+        />
+      )}
     </PortalShell>
   );
 }
