@@ -275,7 +275,7 @@ Prises sans ticket plus précis, cohérentes avec le proto « Projet complet » 
   rémunération ont chacun leur facture, dans une seule table ; mêmes règles partout (écart motivé,
   échéance à 30 jours, RIB vérifié par téléphone s'il change, payée par la direction seule avec
   date et preuve, jamais de virement par l'app).
-- **Le RIB est gardé** pour toute facture (il était refusé côté Juridique) : lu par la direction seule,
+- **Le RIB est demandé et gardé** pour toute facture (il était refusé côté Juridique ; confirmé par Sacha le 20/10/2026) : lu par la direction seule,
   demandé avec la première facture ; le proto du Juridique le montre (« Virement sur », « Mon RIB a changé »).
 - **Le responsable du projet lit la facture d'un contrat** comme le budget (proto : la cheffe de
   projet voit la facture et ajoute une facture reçue autrement), jamais le RIB ; le Juridique qui ne

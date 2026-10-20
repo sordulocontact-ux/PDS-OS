@@ -3717,8 +3717,9 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   Parcours (`lib/legal/invoices/journey.ts`) : la démarche signée dit « Contrat signé · facture
   attendue / à payer / payée », la personne « Déposer la facture » (lien), la direction « Payer
   la facture de X ». *(Remplacé le 20/10/2026 par § 8 ter bis : une seule table `project_invoices`,
-  RIB commun.)* **PDS OS ne fait jamais de virement et ne garde aucun IBAN** (décision du
-  20/10/2026 : le RIB reste hors de l'app, le contrôle anti-fraude se fait au téléphone) ; « Facturer
+  RIB commun.)* **PDS OS ne fait jamais de virement** ; ~~ne garde aucun IBAN~~ : décision
+  remplacée le 20/10/2026, **le RIB est demandé** avec la première facture (confirmé par Sacha), lu par
+  la direction seule, un RIB qui change se vérifie au téléphone ; « Facturer
   à » montre le nom de l'organisation (raison sociale, adresse, SIRET pas encore en base).
 - Migrations `20261020030101` (modèle demandé, clause), `20261020030201` (liens de
   répartition), `20261020030301` (factures) ; tests `supabase/tests/legal-reste.test.sql` (31).
