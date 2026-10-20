@@ -2,7 +2,8 @@
 -- (supabase/migrations/20261020010101_master_invoices.sql): requested at the
 -- Master final, deposited by the link (PDF, amount checked against the rate
 -- committed, a new RIB), the RIB read and confirmed by the direction alone,
--- marked paid by the direction on a confirmed RIB. Run with `supabase test db`.
+-- marked paid by the direction on a confirmed RIB. Since 20261020060101 every invoice is a row
+-- of project_invoices. Run with `supabase test db`.
 begin;
 select plan(25);
 
@@ -111,13 +112,13 @@ select pg_temp.act_as(pg_temp.id_of('creative'));
 select public.decide_mix_version((select id from public.master_mix_versions where file_id = pg_temp.id_of('mix1')),
                                  'approved', null);
 reset role;
-select is((select count(*)::int from public.master_invoices where project_id = pg_temp.id_of('project')),
+select is((select count(*)::int from public.project_invoices where project_id = pg_temp.id_of('project')),
           0, 'the mix validated does not ask for the invoice');
 select pg_temp.act_as(pg_temp.id_of('creative'));
 select public.decide_mix_version((select id from public.master_mix_versions where file_id = pg_temp.id_of('master1')),
                                  'approved', null);
 reset role;
-insert into ids select 'invoice', id from public.master_invoices where project_id = pg_temp.id_of('project');
+insert into ids select 'invoice', id from public.project_invoices where project_id = pg_temp.id_of('project');
 select isnt(pg_temp.id_of('invoice'), null, 'the Master final validated asks the engineer for the invoice');
 
 select pg_temp.as_anon();
@@ -132,7 +133,7 @@ select throws_ok($$ select public.open_master_invoice_slot(repeat('0', 64)) $$, 
                  'invoice_not_requested', 'an unknown link opens nothing');
 reset role;
 insert into storage.objects (bucket_id, name, metadata)
-values ('master-finance', (select v from vars where k = 'slot'), '{"size": 2048}'::jsonb);
+values ('project-invoices', (select v from vars where k = 'slot'), '{"size": 2048}'::jsonb);
 select pg_temp.as_anon();
 select throws_ok(format($$ select public.submit_master_invoice(%L, %L, 'f.pdf', 'application/pdf',
   'KH-1', 110000, null, null, null, null) $$, (select token from tokens where name = 'link'),
@@ -173,11 +174,11 @@ select is((select count(*)::int from public.notifications
 select pg_temp.act_as(pg_temp.id_of('owner'));
 select is((select count(*)::int from public.contact_bank_accounts), 0, 'the owner never reads a RIB');
 select is(public.contact_bank_state(pg_temp.id_of('engineer')), 'pending', 'but knows one waits');
-select is((select count(*)::int from public.master_invoices where id = pg_temp.id_of('invoice')), 1,
+select is((select count(*)::int from public.project_invoices where id = pg_temp.id_of('invoice')), 1,
           'the owner reads the invoice');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('creative'));
-select is((select count(*)::int from public.master_invoices where id = pg_temp.id_of('invoice')), 0,
+select is((select count(*)::int from public.project_invoices where id = pg_temp.id_of('invoice')), 0,
           'the creative director does not');
 reset role;
 select pg_temp.act_as(pg_temp.id_of('director'));
@@ -193,7 +194,7 @@ select public.confirm_contact_bank_account(
 insert into vars select 'proof', public.open_master_finance_slot(pg_temp.id_of('invoice'), 'proof', 'png');
 reset role;
 insert into storage.objects (bucket_id, name, metadata)
-values ('master-finance', (select v from vars where k = 'proof'), '{"size": 1024}'::jsonb);
+values ('project-invoices', (select v from vars where k = 'proof'), '{"size": 1024}'::jsonb);
 select pg_temp.act_as(pg_temp.id_of('owner'));
 select throws_ok(format($$ select public.pay_master_invoice(%L, current_date, %L, 'p.png', 'image/png') $$,
   pg_temp.id_of('invoice'), (select v from vars where k = 'proof')), '42501', null,
@@ -207,7 +208,10 @@ select is((select array_agg(status order by master_role)::text from public.budge
             where project_id = pg_temp.id_of('project') and master_role is not null),
           '{paid,paid}', 'the lines are paid');
 select pg_temp.act_as(pg_temp.id_of('owner'));
-select is((select count(*)::int from public.master_payment_proofs), 0, 'the proof is the direction''s');
+-- One table for every invoice (20261020060101): the proof is a file the owner never opens.
+select is((select count(*)::int from storage.objects
+            where bucket_id = 'project-invoices' and name = (select v from vars where k = 'proof')),
+          0, 'the proof is the direction''s');
 reset role;
 
 select * from finish();
