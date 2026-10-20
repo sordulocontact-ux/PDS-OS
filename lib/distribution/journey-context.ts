@@ -207,6 +207,8 @@ export const distributionContext = cache(async (projectId: string) => {
     releaseDay: dates.release ? formatDay(dates.release.date) : null,
     params,
     territoriesText: territoriesText(sources.params),
+    upc: sources.input.release?.upc ?? null,
+    upcEditable: view.canEdit,
     preorderProposal: preorder,
     validator: validator
       ? {

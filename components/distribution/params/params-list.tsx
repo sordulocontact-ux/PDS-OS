@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { FormMessage } from "@/components/auth/form-message";
 import { ParamField } from "@/components/distribution/params/param-field";
+import { UpcField } from "@/components/distribution/params/upc-field";
 import { Button } from "@/components/ui/button";
 import { FactRows } from "@/components/ui/fact-row";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -64,6 +65,7 @@ export function ParamsList({
         {PARAM_KEYS.map((key) => (
           <ParamField key={key} data={data} field={key} missing={reason(key)} />
         ))}
+        <UpcField data={data} />
       </FactRows>
       {confirm && data.canEdit && (
         <>

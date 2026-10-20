@@ -596,4 +596,21 @@ export const distributionJourney = {
       "Chaque geste, qui l'a fait et quand, avec ou sans preuve. Une déclaration retirée ou une version remplacée reste ici.",
     historyEmpty: "Rien pour l'instant.",
   },
+  // The UPC, in the Paramètres de distribution (lib/distribution/upc.ts).
+  upc: {
+    label: "UPC",
+    empty: "Pas encore connu",
+    later: "Attribué par The Orchard au dépôt · ne bloque pas",
+    source:
+      "Saisi dans les paramètres · vérifié (12 ou 13 chiffres, clé de contrôle)",
+    saved: "UPC enregistré",
+    cleared: "UPC retiré",
+    errors: {
+      digits: "Un UPC ne contient que des chiffres.",
+      length: "Un UPC a 12 chiffres (UPC-A) ou 13 (EAN-13).",
+      check:
+        "La clé de contrôle ne correspond pas : vérifiez les chiffres, le dernier se calcule à partir des autres.",
+      failed: "L'UPC n'a pas pu être enregistré. Réessayez.",
+    },
+  },
 } as const;

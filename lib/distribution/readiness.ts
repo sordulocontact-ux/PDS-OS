@@ -206,7 +206,8 @@ export function distributionReadiness(
     blocking: false,
     detail: input.release?.upc ?? d.upcLater,
     source: null,
-    href: routes.projectReleaseStep(input.projectId, "deposit"),
+    // Typed in the Paramètres de distribution, checked by the code.
+    href: routes.projectReleaseStep(input.projectId, "params"),
   });
 
   for (const title of input.titles)
