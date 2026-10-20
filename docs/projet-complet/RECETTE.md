@@ -192,3 +192,21 @@ page : ≈ 600 requêtes pour 21 projets, surtout des RPC par projet (`workflow_
 `distribution_cover`, `design_is_done`…) et des lectures dont la forme dépend du projet ; la piste
 suivante est une RPC « état des workflows » par lot de projets. Les pages d'un projet ne passent
 pas par le regroupement (inchangées).
+
+## 9. Signatures, UPC, 404, Production (20/10/2026, branche `pc/f2-signatures`)
+
+Rejoué en `pnpm dev -p 3402`, Chrome sans tête, cheffe de projet et page privée, 1440 et 390 px, clair
+et sombre, aucun défilement horizontal.
+
+| Point | Rejoué | Commit |
+| --- | --- | --- |
+| Contrat signé par `/c/` | « Je l'ai remis autrement » sans choix → « Choisissez comment vous l'avez remis » ; « Envoyer à Yanis Morel (test) » → page : « Mis sur votre page le … », « Télécharger » (`Contrat_Morel_…_v1.pdf`), un faux PDF refusé (« Ce fichier n'est pas un PDF… »), le PDF accepté → « Contrat signé reçu le … Camille Test le vérifie » ; équipe : « Reçu … par son lien privé », « Marquer comme signé » → Signé, besoin financier créé, notification | `d157994` |
+| Bulletin SACEM par `/c/` | « Télécharger » (`Bulletin_725_…_v1.pdf`), dépôt → « Signé · Par son lien privé · le 20/10 · Voir le PDF », 1 sur 2 | `d157994` |
+| UPC | `036000291453` refusé (clé de contrôle), `036000291452` enregistré, lu par le dossier | `1a5f760` |
+| 404 | livrable, activation, call, compte rendu, document, route juridique inconnus : 404 ; les mêmes pages existantes : 200 ; démarche inconnue : 200 (reste) | `29f0e9e` |
+| Exports point par point (PROD-037) | voir `docs/ARCHITECTURE.md` § 8 nonies « Rejoué dans l'app » ; la production de recette rouverte puis reclôturée par l'écran | — |
+| Blocage dans une étape | signalé, notifié, affiché, levé avec explication | — |
+| Lieu non vérifié (PROD-013) | refus à l'écran ajouté ; rejeu navigateur impossible faute d'étape Lieux ouverte dans les données de test (vérifié par `production-locations.test.sql`) | `77d757c` |
+
+Données de test : le contrat et le bulletin de démonstration (« Néons (test reste Juridique) ») ont été
+retirés après le rejeu ; le contrat de Yanis Morel (test) a retrouvé son état.
