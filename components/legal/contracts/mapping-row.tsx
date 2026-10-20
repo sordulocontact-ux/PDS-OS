@@ -4,10 +4,18 @@ import { Field } from "@/components/auth/field";
 import { TextareaField } from "@/components/auth/textarea-field";
 import { NewTemplateButton } from "@/components/legal/contracts/new-template-button";
 import { OptionSelect } from "@/components/projects/option-select";
+import { ReturnCallout } from "@/components/ui/return-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
 
 export const NO_DEAL = "none";
+
+/** A template made for this person and asked of the direction. */
+export type RequestState = {
+  name: string;
+  pending: boolean;
+  refusal: { by: string; reason: string } | null;
+};
 
 /** What is chosen for a person: a validated template, or no agreement. */
 export type MappingChoice = {
@@ -28,13 +36,21 @@ export function MappingRow({
   onChange,
   errors,
   organizationId,
+  projectId,
+  request,
+  direction,
 }: {
   row: AgreementRow;
   value: MappingChoice;
   onChange: (change: Partial<MappingChoice>) => void;
   errors: { choice?: string; reason?: string };
   organizationId: string | null;
+  projectId: string;
+  request: RequestState | null;
+  // « Claire Morel », else « la direction ».
+  direction: string;
 }) {
+  const d = fr.legalDocuments.template;
   const t = fr.legalContracts.agreements;
   const p = t.plan;
   const roles = row.creditRoles.map((r) => fr.masterPage.credits.roles[r]);
@@ -106,19 +122,31 @@ export function MappingRow({
           <span className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] text-[color:var(--text-secondary)]">
             {row.compatible.length > 0
               ? p.proposedFrom(roleLabel)
-              : p.noTemplateSource}
+              : request?.pending
+                ? d.pending(request.name, direction)
+                : p.noTemplateSource}
           </span>
           {row.existing && (
             <span className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
               {t.existing(row.existing.title)}
             </span>
           )}
-          {row.compatible.length === 0 && organizationId && (
-            <NewTemplateButton
-              organizationId={organizationId}
-              roles={row.formRoles}
+          {row.compatible.length === 0 && request?.refusal && (
+            <ReturnCallout
+              by={request.refusal.by}
+              outcome={d.refuseVerb}
+              note={request.refusal.reason}
             />
           )}
+          {row.compatible.length === 0 &&
+            organizationId &&
+            !request?.pending && (
+              <NewTemplateButton
+                organizationId={organizationId}
+                roles={row.formRoles}
+                request={{ projectId, key: row.key, name: row.name }}
+              />
+            )}
         </div>
       )}
     </li>

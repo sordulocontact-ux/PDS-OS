@@ -11,6 +11,9 @@ import { NextCard } from "@/components/ui/next-card";
 import type { ContractProof } from "@/lib/contracts/proof";
 import { fr } from "@/lib/i18n/fr";
 import type { Clearances } from "@/lib/legal/clearance/types";
+import type { ContractCardData } from "@/lib/legal/contracts/document-card";
+import type { ContractInvoice } from "@/lib/legal/invoices/queries";
+import { InvoiceBlock } from "@/components/legal/invoices/invoice-block";
 import type { BoardRow } from "@/lib/legal/plan/board";
 
 /**
@@ -24,6 +27,10 @@ export function DemarchePart({
   row,
   clearances,
   proof,
+  cards,
+  invoices,
+  direction,
+  owner,
 }: {
   projectId: string;
   projectTitle: string;
@@ -31,6 +38,10 @@ export function DemarchePart({
   // The borrowings' context (who validates, the organization).
   clearances: Clearances;
   proof: Record<string, ContractProof>;
+  cards: Record<string, ContractCardData>;
+  invoices: Record<string, ContractInvoice>;
+  direction: string;
+  owner: string;
 }) {
   const panel = row.panel;
   switch (panel.kind) {
@@ -50,11 +61,27 @@ export function DemarchePart({
           )}
         </>
       );
-    case "contract":
+    case "contract": {
+      const contractId = panel.row.contract?.id;
+      const invoice = contractId ? invoices[contractId] : undefined;
       return (
         <ContractPanel
           projectId={projectId}
+          projectTitle={projectTitle}
           row={panel.row}
+          owner={owner}
+          card={contractId ? (cards[contractId] ?? null) : null}
+          invoice={
+            invoice && (
+              <InvoiceBlock
+                projectId={projectId}
+                personName={panel.row.name}
+                data={invoice}
+                canValidate={clearances.canValidate}
+                direction={direction}
+              />
+            )
+          }
           canValidate={clearances.canValidate}
           organizationId={clearances.organizationId}
           proof={
@@ -62,6 +89,7 @@ export function DemarchePart({
           }
         />
       );
+    }
     case "split":
       return <SplitPanel projectId={projectId} split={panel.split} />;
     case "clearance":

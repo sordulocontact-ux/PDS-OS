@@ -1,5 +1,6 @@
 import { ProposeSplitButton } from "@/components/legal/splits/split-actions";
 import { SplitLines } from "@/components/legal/splits/split-lines";
+import { SplitLinks } from "@/components/legal/splits/split-links";
 import { SplitVersionChanges } from "@/components/legal/splits/split-version-changes";
 import { NextCard } from "@/components/ui/next-card";
 import { SplitEditorInline } from "@/components/legal/tracking/split-editor-inline";
@@ -121,6 +122,11 @@ export function SplitPanel({
         title={split.title}
         lines={active.lines}
         open={active.status !== "confirmed"}
+      />
+      <SplitLinks
+        projectId={projectId}
+        title={split.title}
+        lines={active.lines}
       />
     </>
   );

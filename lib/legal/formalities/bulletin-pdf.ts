@@ -4,7 +4,9 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import {
+  degrees,
   PDFDocument,
+  rgb,
   StandardFonts,
   type PDFFont,
   type PDFForm,
@@ -187,8 +189,13 @@ function writer(form: PDFForm, font: PDFFont) {
   };
 }
 
-/** The official bulletin of a document version, filled, as a PDF. */
-export async function sacem725Pdf(content: Content): Promise<Uint8Array> {
+/** The official bulletin of a document version, filled, as a PDF. A draft
+ * (« Générer un brouillon », proto « Projet complet ») carries `draft` across
+ * each page: it is never signed. */
+export async function sacem725Pdf(
+  content: Content,
+  draft: string | null = null,
+): Promise<Uint8Array> {
   const pdf = await PDFDocument.load(await readFile(TEMPLATE));
   const form = pdf.getForm();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -279,5 +286,20 @@ export async function sacem725Pdf(content: Content): Promise<Uint8Array> {
   }
 
   form.updateFieldAppearances(font);
+  if (draft) {
+    const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+    for (const page of pdf.getPages()) {
+      const { width, height } = page.getSize();
+      page.drawText(draft, {
+        x: width * 0.12,
+        y: height * 0.3,
+        size: 30,
+        font: bold,
+        color: rgb(0.8, 0.1, 0.1),
+        opacity: 0.35,
+        rotate: degrees(40),
+      });
+    }
+  }
   return pdf.save();
 }

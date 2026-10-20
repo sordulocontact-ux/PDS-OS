@@ -18,9 +18,12 @@ import type { FormRole } from "@/lib/legal/forms/definition";
 export function NewTemplateButton({
   organizationId,
   roles,
+  request,
 }: {
   organizationId: string;
   roles: FormRole[];
+  // The project and the person it is made for: asked of the direction.
+  request: { projectId: string; key: string; name: string };
 }) {
   const t = fr.legalContracts;
   const router = useRouter();
@@ -40,7 +43,7 @@ export function NewTemplateButton({
         open={open}
         onOpenChange={setOpen}
         title={t.agreements.plan.newTemplate}
-        description={t.agreements.plan.newTemplateBody}
+        description={fr.legalDocuments.template.modalBody}
         closeLabel={t.templates.close}
         size="wide"
       >
@@ -55,6 +58,8 @@ export function NewTemplateButton({
             body: "",
             source: null,
           }}
+          request={request}
+          submitLabel={fr.legalDocuments.template.send}
           onCancel={() => setOpen(false)}
           onDone={() => {
             setOpen(false);

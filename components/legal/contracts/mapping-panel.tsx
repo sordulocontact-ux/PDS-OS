@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { AgreementList } from "@/components/legal/contracts/agreement-list";
 import { MappingForm } from "@/components/legal/contracts/mapping-form";
+import type { RequestState } from "@/components/legal/contracts/mapping-row";
 import { Button } from "@/components/ui/button";
 import { fr } from "@/lib/i18n/fr";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
@@ -20,11 +21,15 @@ export function MappingPanel({
   rows,
   approval,
   organizationId,
+  requests,
+  direction,
 }: {
   projectId: string;
   rows: AgreementRow[];
   approval: { by: string; at: string } | null;
   organizationId: string | null;
+  requests: Record<string, RequestState>;
+  direction: string;
 }) {
   const t = fr.legalContracts.agreements;
   const router = useRouter();
@@ -43,6 +48,8 @@ export function MappingPanel({
           projectId={projectId}
           rows={rows}
           organizationId={organizationId}
+          requests={requests}
+          direction={direction}
           onCancel={
             approval && !undecided ? () => setEditing(false) : undefined
           }

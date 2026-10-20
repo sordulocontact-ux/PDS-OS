@@ -2,15 +2,20 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import { FormMessage } from "@/components/auth/form-message";
-import { TextareaField } from "@/components/auth/textarea-field";
-import { ContractProofSlot } from "@/components/legal/clearance/contract-proof-slot";
-import { ContractValueList } from "@/components/legal/contracts/contract-value-list";
-import { NextCard } from "@/components/ui/next-card";
+import { ClauseForm } from "@/components/legal/contracts/clause-form";
+import { ContractDocumentCard } from "@/components/legal/contracts/contract-document-card";
+import { ContractSign } from "@/components/legal/tracking/contract-sign";
+import {
+  ContractValues,
+  contractFixHref,
+} from "@/components/legal/tracking/contract-values";
 import { Button } from "@/components/ui/button";
+import { DecisionPanel } from "@/components/ui/decision-panel";
+import { NextCard } from "@/components/ui/next-card";
+import { ReturnCallout } from "@/components/ui/return-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { advanceContract } from "@/lib/contracts/actions";
@@ -18,100 +23,56 @@ import type { ContractProof } from "@/lib/contracts/proof";
 import { todayInParis } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
-import { isBlocking } from "@/lib/legal/contracts/completeness";
+import type { ContractCardData } from "@/lib/legal/contracts/document-card";
 import { formatFee } from "@/lib/legal/contracts/fields";
 import type { AgreementRow } from "@/lib/legal/contracts/mapping";
-import { withReturn } from "@/lib/ui/return-to";
-
-/** The values of the contract, each with its source (« Rempli
- * automatiquement » / « Manquant », ticket Juridique 03). */
-function Values({
-  row,
-  open,
-  projectId,
-}: {
-  row: AgreementRow;
-  open: boolean;
-  projectId: string;
-}) {
-  const p = fr.legal.panels.contract;
-  const blocking = row.fields.filter((f) => isBlocking(f.status));
-  const missing = blocking.length;
-  // Not asked yet: the fiche is to prepare or send (a sent one is waiting).
-  const fromFiche = blocking.filter(
-    (f) => f.status === "missing" && f.home === "fiche",
-  );
-  // Back to this person's panel once the value is completed (JUR-10).
-  const back = `${routes.projectLegalStep(projectId, "tracking")}?ligne=person:${row.key}`;
-  const fixHref = (home: string): string | null =>
-    home === "network" && row.contactId
-      ? withReturn(routes.networkContact(row.contactId), back)
-      : home === "mapping"
-        ? routes.projectLegalStep(projectId, "contracts")
-        : home === "credits"
-          ? routes.projectLegalStep(projectId, "inventory")
-          : home === "fiche"
-            ? routes.projectLegalStep(projectId, "forms")
-            : null;
-  return (
-    <details open={open} className="group rounded-xl border p-4">
-      <summary className="cursor-pointer list-none text-sm text-muted-foreground marker:hidden">
-        {fr.legal.panels.contract.values(row.fields.length, missing)}
-      </summary>
-      {fromFiche.length > 0 && (
-        <ToneCallout tone="warning" className="mt-3">
-          {p.missingFromFiche(
-            row.name,
-            fromFiche.map((f) => f.label).join(", "),
-          )}
-        </ToneCallout>
-      )}
-      <div className="mt-3">
-        <ContractValueList
-          fields={row.fields}
-          personName={row.name}
-          fixHref={(field) => fixHref(field.home)}
-        />
-      </div>
-    </details>
-  );
-}
 
 /**
- * One person's contract in the plan's panel (the prototype's): generated
- * from its template, read and submitted, validated by the direction, sent
+ * One person's contract in their démarche (proto « Projet complet »): once
+ * generated, the document in head of the card at every step that follows
+ * (name, version, « Voir le PDF », its values with their source, « Changé
+ * depuis la v1 »); read and submitted — a clause changed in place, the
+ * direction's return signed at the top — validated by the direction, sent
  * (the way it went is its proof of sending), then its signed copy and its
  * proof dropped here and the contract marked signed.
  */
 export function ContractPanel({
   projectId,
+  projectTitle,
   row,
   canValidate,
   organizationId,
   proof,
+  card,
+  owner,
+  invoice,
 }: {
   projectId: string;
+  projectTitle: string;
   row: AgreementRow;
   canValidate: boolean;
   organizationId: string | null;
   proof: ContractProof | null;
+  card: ContractCardData | null;
+  // The démarche's responsible (« Revient signé en tête de l'étape de … »).
+  owner: string;
+  // The invoice block, once the contract is signed (J10).
+  invoice?: ReactNode;
 }) {
   const t = fr.legal.panels.contract;
+  const d = fr.legalDocuments.contract;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [changes, setChanges] = useState<string | null>(null);
-  const [tried, setTried] = useState(false);
   const contractId = row.contract?.id ?? null;
 
   const run = (action: () => Promise<{ ok: boolean; error?: string }>) =>
     startTransition(async () => {
       const result = await action();
       if (!result.ok) return void toast.error(result.error ?? t.failed);
-      setChanges(null);
       router.refresh();
     });
   const advance = (
-    action: "submit" | "approve" | "request_changes" | "send" | "sign",
+    action: "submit" | "send" | "sign",
     extra?: { comment?: string; signedOn?: string },
   ) =>
     contractId && run(() => advanceContract({ contractId, action, ...extra }));
@@ -126,26 +87,27 @@ export function ContractPanel({
       {t.openContract}
     </Button>
   );
-  const head = (
-    <div className="flex flex-col gap-1">
-      {row.template && (
-        <p className="text-sm text-muted-foreground">
-          {`${row.template.name} · v${row.template.version}`}
-        </p>
-      )}
-      {/* JUR-15: the fee recorded, with where it comes from. */}
-      <p className="text-sm">
-        <span className="text-muted-foreground">{t.financial.title} · </span>
-        {row.proposal.feeCents
-          ? t.financial.amount(
-              formatFee(row.proposal.feeCents),
-              row.proposal.feeFromFiche
-                ? t.financial.fromFiche
-                : t.financial.fromMapping,
-            )
-          : t.financial.none}
-      </p>
-    </div>
+  const fee = (
+    <p className="text-sm">
+      <span className="text-muted-foreground">{t.financial.title} · </span>
+      {row.proposal.feeCents
+        ? t.financial.amount(
+            formatFee(row.proposal.feeCents),
+            row.proposal.feeFromFiche
+              ? t.financial.fromFiche
+              : t.financial.fromMapping,
+          )
+        : t.financial.none}
+    </p>
+  );
+  // The document in head, from its generation on (rule 18).
+  const documentCard = card && (
+    <ContractDocumentCard
+      row={row}
+      data={card}
+      projectTitle={projectTitle}
+      fixHref={contractFixHref(row, projectId)}
+    />
   );
 
   switch (row.state) {
@@ -159,14 +121,14 @@ export function ContractPanel({
           <NextCard kind="act" label={t.next} title={t.needsInfo}>
             <p className="text-sm text-muted-foreground">{t.needsInfoBody}</p>
           </NextCard>
-          <Values row={row} open projectId={projectId} />
+          <ContractValues row={row} open projectId={projectId} />
         </>
       );
     case "ready_to_generate":
       return (
         <>
           <NextCard kind="act" label={t.next} title={t.generate}>
-            {head}
+            {fee}
             <Button
               className="self-start"
               disabled={pending}
@@ -177,171 +139,132 @@ export function ContractPanel({
               {fr.legalContracts.agreements.generate}
             </Button>
           </NextCard>
-          <Values row={row} open={false} projectId={projectId} />
+          <ContractValues row={row} open={false} projectId={projectId} />
         </>
       );
     case "draft":
       return (
         <>
-          <NextCard kind="act" label={t.next} title={t.submit}>
-            {head}
-            <p className="text-sm text-muted-foreground">{t.submitBody}</p>
-            <div className="flex flex-wrap gap-2">
-              <Button disabled={pending} onClick={() => advance("submit")}>
-                {t.submitAction}
-              </Button>
-              {open}
-            </div>
-          </NextCard>
-          <Values row={row} open={false} projectId={projectId} />
+          {card?.review && (
+            <ReturnCallout
+              by={card.review.by}
+              outcome={d.returnVerb}
+              note={card.review.note}
+            />
+          )}
+          {documentCard}
+          {fee}
+          {card && contractId && (
+            <ClauseForm
+              projectId={projectId}
+              contractId={contractId}
+              body={card.body}
+            />
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button disabled={pending} onClick={() => advance("submit")}>
+              {card?.review ? d.resubmit : t.submitAction}
+            </Button>
+            {open}
+          </div>
         </>
       );
     case "review_required":
       if (!canValidate)
         return (
           <>
+            {documentCard}
             <NextCard kind="wait" label={t.atDirection} title={t.reviewWait}>
               <p className="text-sm text-muted-foreground">
                 {t.reviewWaitBody}
               </p>
             </NextCard>
-            <Values row={row} open={false} projectId={projectId} />
           </>
         );
       return (
         <>
-          <NextCard kind="decision" label={t.decision} title={t.review}>
-            <p className="text-sm text-muted-foreground">{t.reviewBody}</p>
-            {changes !== null && (
-              <TextareaField
-                name={`changes-${row.key}`}
-                label={t.changesLabel}
-                aria-required
-                rows={3}
-                maxLength={2000}
-                value={changes}
-                onChange={(event) => setChanges(event.target.value)}
-                error={tried && !changes.trim() ? t.changesMissing : undefined}
-              />
-            )}
-            <div className="flex flex-wrap gap-2">
-              {changes === null ? (
-                <>
-                  <Button disabled={pending} onClick={() => advance("approve")}>
-                    {t.approve}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    disabled={pending}
-                    onClick={() => setChanges("")}
-                  >
-                    {t.requestChanges}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    disabled={pending}
-                    onClick={() => {
-                      if (!changes.trim()) return setTried(true);
-                      advance("request_changes", { comment: changes });
-                    }}
-                  >
-                    {t.sendChanges}
-                  </Button>
-                  <Button variant="ghost" onClick={() => setChanges(null)}>
-                    {fr.legalSplits.public.cancel}
-                  </Button>
-                </>
-              )}
-              {open}
-            </div>
-          </NextCard>
-          <Values row={row} open projectId={projectId} />
+          {documentCard}
+          {fee}
+          <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+            {d.decide}
+          </p>
+          <DecisionPanel
+            id={`contract-${row.key}`}
+            title={null}
+            commentLabel={d.changesLabel}
+            commentHint={d.returnHint(owner)}
+            commentRequired={t.changesMissing}
+            outcomes={[
+              { kind: "approve", label: t.approve, done: d.approved },
+              {
+                kind: "request_changes",
+                label: t.requestChanges,
+                done: d.changesSent,
+              },
+            ]}
+            onDecide={async (kind, comment) => {
+              if (!contractId) return { ok: false, error: t.failed };
+              const result = await advanceContract({
+                contractId,
+                action: kind === "approve" ? "approve" : "request_changes",
+                comment: comment || undefined,
+              });
+              return result.ok
+                ? { ok: true }
+                : { ok: false, error: result.error ?? t.failed };
+            }}
+            onDone={() => router.refresh()}
+          />
         </>
       );
     case "ready_for_signature":
       return (
-        <NextCard kind="act" label={t.next} title={t.send}>
-          <p className="text-sm text-muted-foreground">{t.sendBody}</p>
-          <div className="flex flex-wrap gap-2">
-            {fr.legalClearance.flow.sendBy.map((how) => (
-              <Button
-                key={how}
-                variant="outline"
-                disabled={pending}
-                onClick={() => advance("send", { comment: how })}
-              >
-                {how}
-              </Button>
-            ))}
-          </div>
-          {open}
-        </NextCard>
-      );
-    case "signature_pending": {
-      const missing = [
-        ...(proof?.signed ? [] : [fr.legalClearance.flow.signedMissing]),
-        ...(proof?.evidence ? [] : [fr.legalClearance.flow.evidenceMissing]),
-      ];
-      return (
-        <NextCard kind="wait" label={t.waiting} title={t.deposit}>
-          {organizationId && contractId && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              <ContractProofSlot
-                organizationId={organizationId}
-                contractId={contractId}
-                category="signed"
-                label={fr.legalClearance.stages.sign.signedSlot}
-                hint={fr.legalClearance.stages.sign.slotHint}
-                present={proof?.signed ?? false}
-                invalid={tried && !proof?.signed}
-              />
-              <ContractProofSlot
-                organizationId={organizationId}
-                contractId={contractId}
-                category="evidence"
-                label={fr.legalClearance.stages.sign.evidenceSlot}
-                hint={fr.legalClearance.stages.sign.evidenceHint}
-                present={proof?.evidence ?? false}
-                invalid={tried && !proof?.evidence}
-              />
+        <>
+          {documentCard}
+          <NextCard kind="act" label={t.next} title={t.send}>
+            <p className="text-sm text-muted-foreground">{t.sendBody}</p>
+            <div className="flex flex-wrap gap-2">
+              {fr.legalClearance.flow.sendBy.map((how) => (
+                <Button
+                  key={how}
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() => advance("send", { comment: how })}
+                >
+                  {how}
+                </Button>
+              ))}
             </div>
-          )}
-          {tried && missing.length > 0 && (
-            <FormMessage kind="error">
-              {fr.legalClearance.flow.filesMissing(
-                missing.join(fr.legalClearance.flow.and),
-              )}
-            </FormMessage>
-          )}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={missing.length === 0 ? "default" : "outline"}
-              disabled={pending}
-              onClick={() => {
-                if (missing.length > 0) return setTried(true);
-                advance("sign", { signedOn: todayInParis(new Date()) });
-              }}
-            >
-              {t.markSigned}
-            </Button>
             {open}
-          </div>
-        </NextCard>
+          </NextCard>
+        </>
       );
-    }
+    case "signature_pending":
+      return (
+        <>
+          {documentCard}
+          {contractId && (
+            <ContractSign
+              contractId={contractId}
+              organizationId={organizationId}
+              proof={proof}
+              pending={pending}
+              onSign={() =>
+                advance("sign", { signedOn: todayInParis(new Date()) })
+              }
+              extra={open}
+            />
+          )}
+        </>
+      );
     default:
       return (
         <>
+          {documentCard}
           <ToneCallout tone="success">
             <span className="font-medium">{t.signed}</span>
-            {row.financialNeedCents
-              ? ` — ${fr.legalContracts.agreements.waitingInvoice(
-                  formatFee(row.financialNeedCents),
-                )}`
-              : ""}
           </ToneCallout>
+          {invoice}
           {open}
         </>
       );

@@ -31,7 +31,13 @@ export type LegalJourneyInput = {
     reopened: boolean;
   };
   // `contractsToConfirm`: a person still waits for « Contrats à prévoir ».
-  plan: { launched: boolean; items: number; contractsToConfirm: boolean };
+  plan: {
+    launched: boolean;
+    items: number;
+    contractsToConfirm: boolean;
+    // Templates made from « Contrats à prévoir », asked of the direction.
+    templatesToValidate: string[];
+  };
   // The démarches' steps, built by lib/legal/demarches/build.ts.
   demarches: JourneyStep[];
   // « Prêt pour la sortie », once the plan is launched
@@ -44,6 +50,8 @@ export type LegalJourneyInput = {
   } | null;
   // The direction's name, when one member validates.
   direction: string | null;
+  // Who reads the journey: the direction decides on templates.
+  viewer: { name: string; canValidate: boolean };
 };
 
 type DossierKey = Exclude<LegalStepKey, "tracking">;
@@ -93,6 +101,9 @@ function dossierSteps(i: LegalJourneyInput): JourneyStep[] {
     plan: t.summary.launched(i.demarches.length || i.plan.items),
   };
   const status = new Map<string, JourneyStep["status"]>();
+  // The direction's decision on a template, in the Plan d'action (proto).
+  const template = i.plan.templatesToValidate[0];
+  const decide = template && i.viewer.canValidate;
   return DOSSIER.map((key) => {
     const ready = PREREQ[key].every((p) => status.get(p) === "done");
     const st: JourneyStep["status"] = done[key]
@@ -114,7 +125,19 @@ function dossierSteps(i: LegalJourneyInput): JourneyStep[] {
         key === "plan"
           ? i.demarches.map((s) => s.key)
           : DOSSIER.filter((k) => PREREQ[k].includes(key)),
-      actor: st === "current" && key !== "inventory" ? actor(todo[key]) : null,
+      actor:
+        key === "plan" && decide
+          ? {
+              name: i.viewer.name,
+              viewer: true,
+              viaLink: false,
+              todo: fr.legalDocuments.template.todo(template),
+              kind: "validate",
+            }
+          : st === "current" && key !== "inventory"
+            ? actor(todo[key])
+            : null,
+      alert: key === "plan" && decide ? "decision" : undefined,
       summary: summary[key],
       group: d.groups.dossier,
     };

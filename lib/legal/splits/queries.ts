@@ -1,6 +1,9 @@
 import "server-only";
 
 import { can, type Access } from "@/lib/auth/access";
+import { routes } from "@/lib/auth/redirects";
+import { siteUrl } from "@/lib/auth/site-url";
+import { unsealLinkToken } from "@/lib/legal/forms/link-seal";
 import { readInventoryRows } from "@/lib/legal/inventory-rows";
 import {
   equalUnits,
@@ -9,6 +12,7 @@ import {
   unitsOf,
   type SplitRole,
 } from "@/lib/legal/splits/shares";
+import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeSearch } from "@/lib/utils/search";
 
@@ -37,7 +41,19 @@ export type SplitLine = {
     state: ConfirmationState;
     at: string | null;
     comment: string | null;
+    // The private link while it waits (rule 19): its URL when the server
+    // can unseal it, when it was created and sent, by whom.
+    link?: SplitLinkView | null;
   };
+};
+
+export type SplitLinkView = {
+  confirmationId: string;
+  url: string | null;
+  createdAt: string;
+  expiresAt: string;
+  sentAt: string | null;
+  sentBy: string | null;
 };
 
 export type SplitVersionView = {
@@ -108,7 +124,7 @@ export async function loadSplits(
           supabase
             .from("legal_split_confirmations")
             .select(
-              "entry_id, status, expires_at, responded_at, comment, created_at",
+              "id, entry_id, status, expires_at, responded_at, comment, created_at, link_sealed, sent_at, sent_by",
             )
             .in("version_id", versionIds)
             .order("created_at", { ascending: false }),
@@ -120,17 +136,49 @@ export async function loadSplits(
 
   // Each entry's latest link speaks for it.
   const now = new Date().toISOString();
+  const senders = [
+    ...new Set(
+      (answers.data ?? []).flatMap((a) => (a.sent_by ? [a.sent_by] : [])),
+    ),
+  ];
+  const people =
+    senders.length > 0
+      ? await supabase
+          .from("people")
+          .select("id, first_name, last_name")
+          .in("id", senders)
+      : { data: [] };
+  const nameOf = new Map(
+    (people.data ?? []).map((p) => [
+      p.id,
+      personName(p.first_name, p.last_name),
+    ]),
+  );
   const answerOf = new Map<string, SplitLine["confirmation"]>();
-  for (const a of answers.data ?? [])
-    if (!answerOf.has(a.entry_id))
-      answerOf.set(a.entry_id, {
-        state:
-          a.status === "pending" && a.expires_at < now
-            ? "expired"
-            : (a.status as ConfirmationState),
-        at: a.responded_at,
-        comment: a.comment,
-      });
+  for (const a of answers.data ?? []) {
+    if (answerOf.has(a.entry_id)) continue;
+    const state: ConfirmationState =
+      a.status === "pending" && a.expires_at < now
+        ? "expired"
+        : (a.status as ConfirmationState);
+    const token = state === "pending" ? unsealLinkToken(a.link_sealed) : null;
+    answerOf.set(a.entry_id, {
+      state,
+      at: a.responded_at,
+      comment: a.comment,
+      link:
+        state === "pending"
+          ? {
+              confirmationId: a.id,
+              url: token ? `${siteUrl()}${routes.legalSplit(token)}` : null,
+              createdAt: a.created_at,
+              expiresAt: a.expires_at,
+              sentAt: a.sent_at,
+              sentBy: a.sent_by ? (nameOf.get(a.sent_by) ?? null) : null,
+            }
+          : null,
+    });
+  }
 
   const view = (
     v: NonNullable<typeof versions.data>[number],

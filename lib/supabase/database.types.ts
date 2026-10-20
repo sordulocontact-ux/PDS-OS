@@ -3318,6 +3318,7 @@ export type Database = {
       }
       contract_documents: {
         Row: {
+          clause: string | null
           body: string
           comment: string | null
           contract_id: string
@@ -3331,6 +3332,7 @@ export type Database = {
           version: number
         }
         Insert: {
+          clause?: string | null
           body: string
           comment?: string | null
           contract_id: string
@@ -3344,6 +3346,7 @@ export type Database = {
           version: number
         }
         Update: {
+          clause?: string | null
           body?: string
           comment?: string | null
           contract_id?: string
@@ -3505,6 +3508,9 @@ export type Database = {
       }
       contract_templates: {
         Row: {
+          requested_for: string | null
+          requested_key: string | null
+          requested_project_id: string | null
           retired_by: string | null
           retired_reason: string | null
           body: string
@@ -3527,6 +3533,9 @@ export type Database = {
           version: number
         }
         Insert: {
+          requested_for?: string | null
+          requested_key?: string | null
+          requested_project_id?: string | null
           retired_by?: string | null
           retired_reason?: string | null
           body: string
@@ -3549,6 +3558,9 @@ export type Database = {
           version: number
         }
         Update: {
+          requested_for?: string | null
+          requested_key?: string | null
+          requested_project_id?: string | null
           retired_by?: string | null
           retired_reason?: string | null
           body?: string
@@ -7603,8 +7615,91 @@ export type Database = {
           },
         ]
       }
+      legal_invoices: {
+        Row: {
+          amount_cents: number
+          bytes: number
+          contact_id: string
+          contract_id: string
+          created_at: string
+          due_on: string
+          file_name: string
+          file_path: string
+          financial_need_id: string
+          gap_reason: string | null
+          id: string
+          mime: string
+          number: string
+          organization_id: string
+          paid_at: string | null
+          paid_by: string | null
+          paid_on: string | null
+          paid_proof_name: string | null
+          paid_proof_path: string | null
+          project_id: string
+          received_on: string
+          submitted_via: string
+          added_by: string | null
+        }
+        Insert: {
+          amount_cents: number
+          bytes: number
+          contact_id: string
+          contract_id: string
+          created_at?: string
+          due_on: string
+          file_name: string
+          file_path: string
+          financial_need_id: string
+          gap_reason?: string | null
+          id?: string
+          mime: string
+          number: string
+          organization_id: string
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          paid_proof_name?: string | null
+          paid_proof_path?: string | null
+          project_id: string
+          received_on: string
+          submitted_via: string
+          added_by?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          bytes?: number
+          contact_id?: string
+          contract_id?: string
+          created_at?: string
+          due_on?: string
+          file_name?: string
+          file_path?: string
+          financial_need_id?: string
+          gap_reason?: string | null
+          id?: string
+          mime?: string
+          number?: string
+          organization_id?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          paid_proof_name?: string | null
+          paid_proof_path?: string | null
+          project_id?: string
+          received_on?: string
+          submitted_via?: string
+          added_by?: string | null
+        }
+        Relationships: []
+      }
       legal_split_confirmations: {
         Row: {
+          link_sealed: string | null
+          revoked_by: string | null
+          revoked_reason: string | null
+          sent_at: string | null
+          sent_by: string | null
           comment: string | null
           created_at: string
           created_by: string | null
@@ -7620,6 +7715,11 @@ export type Database = {
           version_id: string
         }
         Insert: {
+          link_sealed?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
           comment?: string | null
           created_at?: string
           created_by?: string | null
@@ -7635,6 +7735,11 @@ export type Database = {
           version_id: string
         }
         Update: {
+          link_sealed?: string | null
+          revoked_by?: string | null
+          revoked_reason?: string | null
+          sent_at?: string | null
+          sent_by?: string | null
           comment?: string | null
           created_at?: string
           created_by?: string | null
@@ -16825,6 +16930,46 @@ export type Database = {
       }
     }
     Functions: {
+      legal_invoice_states: {
+        Args: { p_project_id: string }
+        Returns: { financial_need_id: string; contact_id: string; state: string; due_on: string | null }[]
+      }
+      mark_legal_invoice_paid: {
+        Args: { p_invoice_id: string; p_paid_on: string; p_proof_name: string; p_proof_path: string }
+        Returns: undefined
+      }
+      add_legal_invoice: {
+        Args: { p_amount_cents: number; p_bytes: number; p_file_name: string; p_gap_reason: string | null; p_mime: string; p_need_id: string; p_number: string; p_path: string; p_received_on: string }
+        Returns: string
+      }
+      open_legal_invoice_team_slot: {
+        Args: { p_ext: string; p_kind: string; p_need_id: string }
+        Returns: string
+      }
+      submit_legal_invoice: {
+        Args: { p_amount_cents: number; p_bytes: number; p_contact_token: string; p_file_name: string; p_gap_reason: string | null; p_mime: string; p_need_id: string; p_number: string; p_path: string }
+        Returns: undefined
+      }
+      open_legal_invoice_slot: {
+        Args: { p_contact_token: string; p_ext: string; p_need_id: string }
+        Returns: string
+      }
+      get_contact_invoices: {
+        Args: { p_contact_token: string }
+        Returns: Json
+      }
+      revoke_split_confirmation: {
+        Args: { p_confirmation_id: string; p_reason: string }
+        Returns: undefined
+      }
+      mark_split_confirmation_sent: {
+        Args: { p_confirmation_id: string }
+        Returns: undefined
+      }
+      seal_split_confirmation_link: {
+        Args: { p_confirmation_id: string; p_sealed: string }
+        Returns: undefined
+      }
       contact_link_token: { Args: { p_link_id: string }; Returns: string }
       get_contact_call_requests: {
         Args: { p_token: string }
@@ -18861,6 +19006,14 @@ export type Database = {
       review_production_location_by_link:
         | { Args: { p_comment: string | null; p_option_id: string; p_token: string; p_verdict: string }; Returns: undefined }
         | { Args: { p_comment: string | null; p_contact_token: string; p_item_id: string; p_option_id: string; p_verdict: string }; Returns: undefined }
+      request_contract_template: {
+        Args: { p_for: string; p_key: string; p_project_id: string; p_template_id: string }
+        Returns: undefined
+      }
+      revise_contract_clause: {
+        Args: { p_body: string; p_clause: string; p_contract_id: string; p_reason: string }
+        Returns: undefined
+      }
       revise_contract_document: {
         Args: { p_body: string; p_comment: string; p_contract_id: string }
         Returns: undefined

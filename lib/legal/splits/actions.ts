@@ -11,6 +11,7 @@ import { listMasterSplits } from "@/lib/catalog/master/queries";
 import { catalogIdSchema } from "@/lib/catalog/schemas";
 import { fr } from "@/lib/i18n/fr";
 import { schedulePendingPushes } from "@/lib/notifications/push";
+import { sealSplitLinks } from "@/lib/legal/splits/link-seal";
 import {
   SPLIT_ROLES,
   shareOf,
@@ -31,6 +32,8 @@ export type SplitLink = {
   // version (JUR-27).
   url: string | null;
   email: string | null;
+  // Kept sealed: the link stays visible in the step (rule 19).
+  sealed: boolean;
 };
 export type SplitResult<T = undefined> =
   | ({ ok: true } & (T extends undefined ? object : { data: T }))
@@ -193,6 +196,12 @@ async function sendVersion(
       e.contact_id ? (emails.get(e.contact_id) ?? null) : null,
     ]),
   );
+  const sealed = await sealSplitLinks(
+    supabase,
+    data.flatMap((row) =>
+      row.token ? [{ entryId: row.entry_id, token: row.token }] : [],
+    ),
+  );
   await schedulePendingPushes();
   revalidatePath(routes.projectLegal(projectId), "layout");
   return {
@@ -202,6 +211,8 @@ async function sendVersion(
       name: nameOf.get(row.entry_id) ?? "",
       url: row.token ? `${siteUrl()}${routes.legalSplit(row.token)}` : null,
       email: emailOf.get(row.entry_id) ?? null,
+      // A carried link (no token) was sealed with its first version.
+      sealed: !row.token || sealed.has(row.entry_id),
     })),
   };
 }
@@ -210,7 +221,9 @@ async function sendVersion(
 export async function newSplitLink(
   projectId: string,
   entryId: string,
-): Promise<SplitResult<{ url: string; email: string | null }>> {
+): Promise<
+  SplitResult<{ url: string; email: string | null; sealed: boolean }>
+> {
   const ids = z.object({
     projectId: catalogIdSchema,
     entryId: catalogIdSchema,
@@ -232,16 +245,17 @@ export async function newSplitLink(
     .select("contact_id")
     .eq("id", parsed.data.entryId)
     .maybeSingle();
-  const emails = await contactEmails(
-    supabase,
-    entry?.contact_id ? [entry.contact_id] : [],
-  );
+  const [emails, sealed] = await Promise.all([
+    contactEmails(supabase, entry?.contact_id ? [entry.contact_id] : []),
+    sealSplitLinks(supabase, [{ entryId: parsed.data.entryId, token: data }]),
+  ]);
   revalidatePath(routes.projectLegal(parsed.data.projectId), "layout");
   return {
     ok: true,
     data: {
       url: `${siteUrl()}${routes.legalSplit(data)}`,
       email: entry?.contact_id ? (emails.get(entry.contact_id) ?? null) : null,
+      sealed: sealed.has(parsed.data.entryId),
     },
   };
 }

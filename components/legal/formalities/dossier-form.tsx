@@ -2,41 +2,28 @@
 
 import { useState } from "react";
 
-import { Field } from "@/components/auth/field";
 import { FormMessage } from "@/components/auth/form-message";
-import { OptionSelect } from "@/components/projects/option-select";
+import { useLegalAction } from "@/components/legal/use-legal-action";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { downloadPdf } from "@/components/ui/pdf-export-button";
+import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { saveFormalityValues } from "@/lib/legal/formalities/actions";
+import { beforeItems, type Entry } from "@/lib/legal/formalities/before-items";
 import {
   SACEM_725_FIELDS,
   type Creator,
   type Publisher,
 } from "@/lib/legal/formalities/definition";
 import { splitShareOf } from "@/lib/legal/formalities/prefill";
+import { generateFormality } from "@/lib/legal/formalities/step-actions";
 import type { TitleFormality } from "@/lib/legal/formalities/types";
+import { fileNamePart } from "@/lib/utils/file-name-part";
 
-import { DepDrPreview } from "./dep-dr-preview";
-import { ArrangementField, ContractField } from "./dossier-fields";
-import { DossierRecap } from "./dossier-recap";
-import { DossierStepButtons, DossierStepChips } from "./dossier-steps";
-import { PeopleEditor } from "./people-editor";
+import { BeforeGenerate } from "./before-generate";
+import { DossierSection } from "./dossier-section";
 import { useDossierErrors } from "./use-dossier-errors";
-import { useLegalAction } from "@/components/legal/use-legal-action";
-import { CURRENT_SHARING_RULE } from "@/lib/legal/formalities/sharing-rule";
-import { cn } from "@/lib/utils";
 
-type Entry = { value: unknown; typed: boolean };
-// Short fields side by side from `sm`; the people, arrangement and contract
-// blocks take the whole width.
-const HALF: readonly string[] = ["text", "date"];
-// Publishers are edited with the creators (one Phono total); in a section,
-// the required fields come first.
-const sectionFields = (section: string) =>
-  SACEM_725_FIELDS.filter(
-    (field) => field.section === section && field.kind !== "publishers",
-  ).sort((a, b) => Number(b.required) - Number(a.required));
 const SECTIONS = ["work", "exploitation", "people", "agreements"] as const;
 const EDITABLE = [
   "collecting_data",
@@ -48,9 +35,12 @@ const EDITABLE = [
 ];
 
 /**
- * « Il préremplit les champs sourcés et liste les valeurs manquantes ou à
- * vérifier » then « Justine valide » in one grouped control: each field with
- * where its value comes from; a value typed is kept as typed.
+ * The SACEM dossier on one page (proto « Projet complet », Déclaration
+ * SACEM): every section in place, each field pre-filled from its source
+ * and kept as typed, then « Avant de générer » in three columns (Bloquant,
+ * À confirmer, Facultatif) and « Générer la version à signer » — refused
+ * while something blocks or waits for a confirmation — or « Générer un
+ * brouillon », never signed.
  */
 export function DossierForm({
   projectId,
@@ -60,9 +50,10 @@ export function DossierForm({
   title: TitleFormality;
 }) {
   const t = fr.legalFormalities;
+  const b = fr.legalDocuments.bulletin;
   const f = title.formality!;
   // A share left empty in a dossier saved before the split was confirmed is
-  // taken from it (UX test of 09/10/2026), « à vérifier » like the others.
+  // taken from it (UX test of 09/10/2026), « à confirmer » like the others.
   const [initial] = useState(() => {
     let filled = false;
     const withShares = <T extends { phono: string; contact_id?: string }>(
@@ -99,13 +90,8 @@ export function DossierForm({
     return { entries, filled };
   });
   const [entries, setEntries] = useState(initial.entries);
-  // Step by step (JUR-21): one section at a time, then the recap; « all »
-  // once a validation was tried, so every field in red can be reached.
-  const [step, setStep] = useState<number | "all">(0);
-  const RECAP = SECTIONS.length;
+  const [refused, setRefused] = useState<string | null>(null);
   const { pending, run } = useLegalAction();
-  // « Dossier enregistré » only once the server said so.
-  const [saved, setSaved] = useState(false);
   const { root, errors, markEdited, attempt } = useDossierErrors(
     f.missing,
     Object.fromEntries(Object.entries(entries).map(([k, e]) => [k, e.value])),
@@ -117,6 +103,7 @@ export function DossierForm({
   const set = (key: string, value: unknown) => {
     setEntries((all) => ({ ...all, [key]: { value, typed: true } }));
     markEdited(key);
+    setRefused(null);
   };
   const text = (key: string) =>
     typeof entries[key]?.value === "string"
@@ -125,201 +112,88 @@ export function DossierForm({
   const obj = <T,>(key: string, fallback: T) =>
     (entries[key]?.value as T | null) ?? fallback;
 
-  // Only a field reopened by a correction is flagged: where a value comes
-  // from is not shown (Sacha, 07/10/2026), what misses turns red.
-  const toVerify = (key: string) =>
-    f.values[key]?.status === "to_verify" && (
-      <StatusBadge tone="warning" size="sm" className="self-start">
-        {t.sources.toVerify}
-      </StatusBadge>
-    );
+  const items = beforeItems({
+    entries,
+    sourceOf: (key) =>
+      title.prefill[key]?.source ?? f.values[key]?.source ?? null,
+    reopened: new Set(
+      Object.entries(f.values)
+        .filter(([, v]) => v.status === "to_verify")
+        .map(([k]) => k),
+    ),
+    missing: f.missing,
+  }).map((item) => ({
+    ...item,
+    onConfirm:
+      item.confirmable && editable(item.key)
+        ? () => set(item.key, entries[item.key]?.value)
+        : undefined,
+  }));
+  const blocking = items.filter((i) => i.column === "blocking").length;
+  const toConfirm = items.filter((i) => i.column === "toConfirm").length;
+  const save = () =>
+    saveFormalityValues(projectId, title.masterId, f.id, entries);
 
   return (
     <div ref={root} className="flex flex-col gap-8">
-      <DossierStepChips sections={SECTIONS} step={step} onStep={setStep} />
-      {SECTIONS.map((section, index) => (
-        <section
+      {SECTIONS.map((section) => (
+        <DossierSection
           key={section}
-          hidden={step !== "all" && step !== index}
-          className="grid gap-x-4 gap-y-5 border-t border-[color:var(--border-hairline)] pt-6 sm:grid-cols-2"
-        >
-          <h3 className="text-base font-medium sm:col-span-2">
-            {t.sections[section]}
-          </h3>
-          {sectionFields(section).map((field) => {
-            const label = t.fields[field.key];
-            const disabled = !editable(field.key);
-            return (
-              <div
-                key={field.key}
-                className={cn(
-                  "flex min-w-0 flex-col gap-1.5",
-                  !HALF.includes(field.kind) && "sm:col-span-2",
-                )}
-              >
-                {toVerify(field.key)}
-                {(field.kind === "text" || field.kind === "date") && (
-                  <Field
-                    type={field.kind}
-                    name={`${f.id}-${field.key}`}
-                    label={label}
-                    aria-required={field.required || undefined}
-                    value={text(field.key)}
-                    disabled={disabled}
-                    maxLength={2000}
-                    hint={t.notes[field.key]}
-                    error={errors?.fields[field.key]}
-                    onChange={(e) => set(field.key, e.target.value)}
-                  />
-                )}
-                {field.kind === "creators" && (
-                  <PeopleEditor
-                    masterId={title.masterId}
-                    formalityId={f.id}
-                    errors={errors}
-                    creators={obj<Creator[]>("creators", [])}
-                    publishers={obj<Publisher[]>("publishers", [])}
-                    disabled={disabled}
-                    splitShares={title.splitShares}
-                    // Shares taken from the confirmed split, not typed yet.
-                    fromSplit={
-                      initial.filled ||
-                      (Boolean(title.prefill.phono_from_split) &&
-                        !entries.creators?.typed)
-                    }
-                    onCreators={(next) => set("creators", next)}
-                    onPublishers={(next) => {
-                      set("publishers", next);
-                      // « Copie jointe » only with every publisher's
-                      // contract chosen (JUR-25).
-                      set("publishing_contract", {
-                        ...obj("publishing_contract", {
-                          provided: false,
-                          rubric_g: "",
-                        }),
-                        provided:
-                          next.length > 0 && next.every((p) => p.contract_id),
-                      });
-                    }}
-                  />
-                )}
-                {field.kind === "dep_dr" && (
-                  <OptionSelect
-                    name={`${f.id}-dep-dr`}
-                    label={label}
-                    required={field.required}
-                    hint={t.notes.dep_dr}
-                    error={errors?.fields.dep_dr}
-                    items={t.depDrChoices}
-                    defaultValue={
-                      obj<{ choice: string }>("dep_dr", { choice: "" })
-                        .choice || null
-                    }
-                    onValueChange={(v) =>
-                      set("dep_dr", {
-                        choice: v,
-                        // The rule the preview used is kept with the
-                        // dossier: a later rule never changes it (JUR-23).
-                        rule:
-                          obj<{ rule?: string }>("dep_dr", {}).rule ??
-                          CURRENT_SHARING_RULE,
-                      })
-                    }
-                  />
-                )}
-                {field.kind === "dep_dr" && (
-                  <DepDrPreview
-                    creators={obj<Creator[]>("creators", [])}
-                    publishers={obj<Publisher[]>("publishers", [])}
-                    choice={
-                      obj<{ choice: string }>("dep_dr", { choice: "" }).choice
-                    }
-                    ruleId={
-                      obj<{ rule?: string }>("dep_dr", {}).rule ??
-                      CURRENT_SHARING_RULE
-                    }
-                  />
-                )}
-                {field.kind === "arrangement" && (
-                  <ArrangementField
-                    id={f.id}
-                    label={label}
-                    // Required once a creator is an arranger (formality_missing).
-                    required={obj<Creator[]>("creators", []).some(
-                      (c) => c.quality === "arranger",
-                    )}
-                    disabled={disabled}
-                    value={obj("arrangement", { scope: "", detail: "" })}
-                    error={errors?.fields.arrangement}
-                    onChange={(v) => set("arrangement", v)}
-                  />
-                )}
-                {field.kind === "contract" && (
-                  <ContractField
-                    id={f.id}
-                    // Without a copy, the rubric G is required as soon as
-                    // there is a publisher (formality_missing).
-                    required={obj<Publisher[]>("publishers", []).length > 0}
-                    disabled={disabled}
-                    error={errors?.fields.publishing_contract}
-                    value={obj("publishing_contract", {
-                      provided: false,
-                      rubric_g: "",
-                    })}
-                    onChange={(v) => set("publishing_contract", v)}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </section>
-      ))}
-      {step === RECAP && (
-        <DossierRecap
-          entries={entries}
-          toVerify={
-            new Set(
-              Object.entries(f.values)
-                .filter(([, v]) => v.status === "to_verify")
-                .map(([k]) => k),
-            )
+          section={section}
+          title={title}
+          errors={errors}
+          editable={editable}
+          fromSplit={
+            initial.filled ||
+            (Boolean(title.prefill.phono_from_split) &&
+              !entries.creators?.typed)
           }
+          text={text}
+          obj={obj}
+          set={set}
         />
-      )}
-      {typeof step === "number" && (
-        <DossierStepButtons step={step} last={RECAP} onStep={setStep} />
-      )}
-      {EDITABLE.includes(f.status) && (step === RECAP || step === "all") && (
-        <div className="flex flex-col items-end gap-3 border-t border-[color:var(--border-hairline)] pt-6">
-          {errors && errors.count > 0 && !pending && (
-            <FormMessage kind="error" className="self-stretch">
-              {saved
-                ? t.page.invalid(errors.count)
-                : t.page.missingCount(errors.count)}
-            </FormMessage>
-          )}
-          <Button
-            size="lg"
-            disabled={pending}
-            aria-busy={pending || undefined}
-            onClick={() => {
-              setSaved(false);
-              // Every section shown: the first field in red takes the focus.
-              setStep("all");
-              attempt();
-              run(
-                () =>
-                  saveFormalityValues(projectId, title.masterId, f.id, entries),
-                () => setSaved(true),
-              );
-            }}
-          >
-            {pending
-              ? t.page.validating
-              : Object.keys(f.values).length > 0
-                ? t.page.update
-                : t.page.validate}
-          </Button>
+      ))}
+      <BeforeGenerate items={items} />
+      {EDITABLE.includes(f.status) && (
+        <div className="flex flex-col gap-3 border-t border-[color:var(--border-hairline)] pt-6">
+          {refused && <FormMessage kind="error">{refused}</FormMessage>}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={pending}
+              aria-busy={pending || undefined}
+              onClick={() => {
+                attempt();
+                if (blocking > 0 || toConfirm > 0)
+                  return setRefused(b.notYet(blocking, toConfirm));
+                run(
+                  async () => {
+                    const saved = await save();
+                    if (!saved.ok) return saved;
+                    return generateFormality(projectId, f.id);
+                  },
+                  undefined,
+                  t.transitions.generated,
+                );
+              }}
+            >
+              {pending ? t.page.validating : b.generate}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={pending}
+              onClick={() =>
+                run(save, () => {
+                  void downloadPdf(
+                    routes.formalityDraftPdf(f.id),
+                    b.draftName(fileNamePart(title.title, "Titre")),
+                    b.pdfFailed,
+                  );
+                })
+              }
+            >
+              {b.draft}
+            </Button>
+          </div>
         </div>
       )}
     </div>

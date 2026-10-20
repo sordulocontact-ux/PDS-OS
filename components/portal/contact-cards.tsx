@@ -2,6 +2,7 @@ import "server-only";
 
 import { influencePortalCards } from "@/components/activations/influence/public-cards";
 import { formPortalCard } from "@/components/legal/forms/public-cards";
+import { invoicePortalCards } from "@/components/legal/invoices/invoice-portal-cards";
 import { splitPortalCard } from "@/components/legal/splits/public-cards";
 import { listenPortalCards } from "@/components/master-workflow/listen/listen-cards";
 import { masterPortalCards } from "@/components/master-workflow/public-cards";
@@ -9,6 +10,7 @@ import { providerPortalCards } from "@/components/production/provider/provider-c
 import { getCreatorCollaboration } from "@/lib/activations/influence/creator-link";
 import { getPublicAgreement } from "@/lib/activations/influence/public";
 import { getPublicForm, noteFormOpened } from "@/lib/legal/forms/public";
+import { getContactInvoices } from "@/lib/legal/invoices/public";
 import { getPublicSplit } from "@/lib/legal/splits/public";
 import { getLinkDeliverables } from "@/lib/master-workflow/deliverables-public";
 import { getPublicInvoice } from "@/lib/master-workflow/invoice-public";
@@ -46,19 +48,29 @@ export async function loadContactCards(
   token: string,
   page: OpenContactPage,
 ): Promise<PortalCardItem[]> {
-  const lists = await Promise.all(
-    page.items.map((item, i) =>
-      cardsOf(token, page, item, i).then((cards) =>
-        cards.map((c) => ({
-          ...c,
-          id: `${c.id}-${item.id.slice(0, 8)}`,
-          workflow: c.workflow ?? item.workflow,
-          order: i * 100 + c.order,
-        })),
+  const [lists, invoices] = await Promise.all([
+    Promise.all(
+      page.items.map((item, i) =>
+        cardsOf(token, page, item, i).then((cards) =>
+          cards.map((c) => ({
+            ...c,
+            id: `${c.id}-${item.id.slice(0, 8)}`,
+            workflow: c.workflow ?? item.workflow,
+            order: i * 100 + c.order,
+          })),
+        ),
       ),
     ),
-  );
-  return lists.flat();
+    // The invoices of their signed contracts (J10): read by the same token.
+    getContactInvoices(token),
+  ]);
+  return [
+    ...lists.flat(),
+    ...invoicePortalCards({ token, invoices }).map((c) => ({
+      ...c,
+      order: page.items.length * 100 + c.order,
+    })),
+  ];
 }
 
 async function cardsOf(

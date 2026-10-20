@@ -54,9 +54,11 @@ import { legal } from "./legal";
 import { legalClearance } from "./legal-clearance";
 import { legalContracts } from "./legal-contracts";
 import { legalDemarches } from "./legal-demarches";
+import { legalDocuments } from "./legal-documents";
 import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
 import { legalHistory } from "./legal-history";
+import { legalInvoices } from "./legal-invoices";
 import { legalJourney } from "./legal-journey";
 import { framingJourney } from "./framing-journey";
 import { designJourney } from "./design-journey";
@@ -254,9 +256,11 @@ export const fr = {
   legalClearance,
   legalContracts,
   legalDemarches,
+  legalDocuments,
   legalFormalities,
   legalForms,
   legalHistory,
+  legalInvoices,
   legalJourney,
   framingJourney,
   designJourney,

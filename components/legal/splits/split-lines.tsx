@@ -64,8 +64,10 @@ export function SplitLines({
                       {t.answeredOn(formatInstant(line.confirmation.at))}
                     </span>
                   )}
+                  {/* A waiting link has its own card (SplitLinks). */}
                   {open &&
                     line.id &&
+                    !line.confirmation.link &&
                     line.confirmation.state !== "confirmed" && (
                       <NewSplitLinkButton
                         projectId={projectId}

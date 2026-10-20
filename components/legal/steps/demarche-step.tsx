@@ -6,8 +6,11 @@ import { LegalStepFrame } from "@/components/legal/legal-step-frame";
 import { StepHistory } from "@/components/shell/journey/step-history";
 import { contractProofOf } from "@/lib/contracts/proof";
 import { generateReadyAgreements } from "@/lib/legal/contracts/auto-generate";
+import { loadContractCards } from "@/lib/legal/contracts/document-card";
+import { loadContractInvoices } from "@/lib/legal/invoices/queries";
 import { demarcheHistory } from "@/lib/legal/demarches/history";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
+import { fr } from "@/lib/i18n/fr";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalRefSlug, type LegalDemarcheKind } from "@/lib/ui/legal-steps";
 
@@ -49,9 +52,11 @@ export async function DemarcheStep({
       ? [p.panel.row.contract.id]
       : [],
   );
-  const [proof, history] = await Promise.all([
+  const [proof, history, cards, invoices] = await Promise.all([
     contractProofOf(contractIds),
     loadLegalHistory(ctx.project, ctx.access),
+    loadContractCards(contractIds),
+    loadContractInvoices(projectId, ctx.clearances.canValidate),
   ]);
   return (
     <LegalStepFrame
@@ -67,6 +72,14 @@ export async function DemarcheStep({
         demarche={demarche}
         clearances={ctx.clearances}
         proof={Object.fromEntries(proof)}
+        cards={cards}
+        invoices={invoices}
+        direction={ctx.direction ?? fr.legalDemarches.direction}
+        owner={
+          demarche.own?.responsibleName ??
+          ctx.project.ownerName ??
+          fr.legalDemarches.direction
+        }
         people={ctx.tracking.state === "tracking" ? ctx.tracking.people : []}
       />
     </LegalStepFrame>

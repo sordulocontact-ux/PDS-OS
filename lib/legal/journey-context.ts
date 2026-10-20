@@ -9,6 +9,9 @@ import { fr } from "@/lib/i18n/fr";
 import { loadClearances } from "@/lib/legal/clearance/queries";
 import { loadConfirmation } from "@/lib/legal/confirmation/queries";
 import { loadAgreements } from "@/lib/legal/contracts/queries";
+import { loadTemplateRequests } from "@/lib/legal/contracts/template-requests";
+import { withInvoices } from "@/lib/legal/invoices/journey";
+import { loadInvoiceStates } from "@/lib/legal/invoices/states";
 import {
   launchedDemarches,
   proposedDemarches,
@@ -68,6 +71,8 @@ export const legalJourneyContext = cache(async (projectId: string) => {
     clearances,
     formalities,
     direction,
+    templateRequests,
+    invoiceStates,
   ] = await Promise.all([
     loadIntake(project),
     loadLegalInventory(project, access),
@@ -80,6 +85,8 @@ export const legalJourneyContext = cache(async (projectId: string) => {
     loadClearances(project, access),
     loadFormalities(project, access),
     validatorName(access.organizationId),
+    loadTemplateRequests(projectId),
+    loadInvoiceStates(projectId),
   ]);
   const ownerPerson = project.ownerPersonId
     ? { personId: project.ownerPersonId, name: project.ownerName ?? "—" }
@@ -108,7 +115,7 @@ export const legalJourneyContext = cache(async (projectId: string) => {
           canValidate: clearances.canValidate,
         })
       : null;
-  const demarches = board
+  const built = board
     ? launchedDemarches({ board, forms, ctx })
     : proposedDemarches({
         items:
@@ -117,6 +124,17 @@ export const legalJourneyContext = cache(async (projectId: string) => {
             : await proposeLegalPlan(project, access),
         ctx,
       });
+  // A signed contract's invoice: deposited by the person, paid by the
+  // direction (J10).
+  const demarches = withInvoices(
+    built,
+    invoiceStates,
+    {
+      name: viewerName ?? fr.legalDemarches.direction,
+      canValidate: clearances.canValidate,
+    },
+    direction ?? fr.legalDemarches.direction,
+  );
   // « Prêt pour la sortie », once the plan is launched (ticket 08).
   const readiness = board
     ? legalReadiness({
@@ -152,6 +170,10 @@ export const legalJourneyContext = cache(async (projectId: string) => {
       contractsToConfirm: agreements.rows.some(
         (r) => r.contactId && !r.contract && r.state === "unmapped",
       ),
+      // Templates asked of the direction: its decision, in this step.
+      templatesToValidate: templateRequests
+        .filter((r) => r.status === "draft")
+        .map((r) => r.name),
     },
     demarches: demarches.map((d) => d.step),
     ready: readiness
@@ -166,6 +188,10 @@ export const legalJourneyContext = cache(async (projectId: string) => {
         }
       : null,
     direction,
+    viewer: {
+      name: viewerName ?? fr.legalDemarches.direction,
+      canValidate: clearances.canValidate,
+    },
   });
   return {
     access,
@@ -185,5 +211,7 @@ export const legalJourneyContext = cache(async (projectId: string) => {
     readiness,
     steps,
     viewerName,
+    direction,
+    templateRequests,
   };
 });
