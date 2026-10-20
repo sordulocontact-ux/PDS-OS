@@ -19,7 +19,12 @@ export function contractFileName(
   project: string,
   version: number,
 ) {
-  const last = person.trim().split(/\s+/).pop() ?? person;
+  const last =
+    person
+      .replace(/\(.*?\)/g, "")
+      .trim()
+      .split(/\s+/)
+      .pop() ?? person;
   return t.fileName(
     fileNamePart(last, "Contrat"),
     fileNamePart(project, "Projet"),
