@@ -21,7 +21,12 @@ import { cn } from "@/lib/utils";
 export type ProjectNavState = {
   statuses?: Partial<Record<string, string>>;
   counts?: Partial<Record<string, number>>;
+  // Why a workflow has not started once the plan is launched: left out of
+  // it, or in it and waiting to be launched (lib/plan/queries.ts).
+  reasons?: Partial<Record<string, NotStartedReason>>;
 };
+
+export type NotStartedReason = "absent" | "waiting";
 
 type Block = { group?: ProjectSectionGroup; items: ProjectSection[] };
 
@@ -42,15 +47,26 @@ function toBlocks(items: ProjectSection[]): Block[] {
 const item =
   "relative flex min-h-9.5 w-full items-center gap-2.5 rounded-lg px-2.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] no-underline";
 
-/** The status dot of an entry, said in its label. */
-export function NavDot({ status }: { status: string }) {
+/** The status dot of an entry, said in its label; a workflow not started
+ * says why (before the plan, left out of it, waiting in it). */
+export function NavDot({
+  status,
+  reason,
+}: {
+  status: string;
+  reason?: NotStartedReason;
+}) {
   const t = fr.workflowStatus;
   return (
     <StatusDot
       tone={workflowStatusTone[status] ?? "neutral"}
       label={
         status === "not_started"
-          ? t.notStartedHint
+          ? reason === "absent"
+            ? t.notInPlanHint
+            : reason === "waiting"
+              ? t.waitingInPlanHint
+              : t.notStartedHint
           : (t.statuses[status as keyof typeof t.statuses] ?? status)
       }
     />
@@ -63,6 +79,7 @@ export function ProjectNavList({
   items,
   statuses = {},
   counts = {},
+  reasons = {},
 }: { items: ProjectSection[] } & ProjectNavState) {
   const pathname = usePathname();
   const groups = fr.shell.project.sidebar.groups;
@@ -121,7 +138,9 @@ export function ProjectNavList({
                         "bg-[var(--surface-sunken)] text-[color:var(--text-primary)] hover:bg-[var(--surface-sunken)]",
                     )}
                   >
-                    {status && <NavDot status={status} />}
+                    {status && (
+                      <NavDot status={status} reason={reasons[section.key]} />
+                    )}
                     <span className="min-w-0 flex-1">{section.label}</span>
                     <MineBadge count={counts[section.key] ?? 0} />
                   </ViewLink>

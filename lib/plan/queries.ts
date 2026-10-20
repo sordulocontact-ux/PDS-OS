@@ -128,6 +128,26 @@ export const planLaunchedAt = cache(
 );
 
 /**
+ * The workflows the project's plan holds (launched or waiting in Ensuite),
+ * once per request: the navigation says why a workflow has not started
+ * (left out of the plan, or waiting in it).
+ */
+export const planWorkflows = cache(
+  async (projectId: string): Promise<PlanWorkflow[]> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("project_plan_items")
+      .select("workflow")
+      .eq("project_id", projectId)
+      .not("workflow", "is", null);
+    if (error) console.error("planWorkflows:", error.message);
+    return (data ?? []).flatMap((row) =>
+      row.workflow ? [row.workflow as PlanWorkflow] : [],
+    );
+  },
+);
+
+/**
  * Whether a workflow may be worked on: launched from the plan, or begun
  * before the plan existed (workflow_is_launched, SQL).
  */

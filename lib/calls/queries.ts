@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cache } from "react";
 
 import type { LocatedCallReport } from "@/lib/ai/call-report";
 import type { Transcript } from "@/lib/ai/schemas/transcript";
@@ -23,6 +24,7 @@ import {
   type ReportItemRow,
 } from "@/lib/calls/report-mapping";
 import type { Database } from "@/lib/supabase/database.types";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Read side of calls. Every query runs with the user's client: RLS decides
@@ -474,3 +476,9 @@ export async function loadLatestReport(
     count: count ?? 1,
   };
 }
+
+/** An internal meeting (getCall without a project), once per request: its
+ * frame answers a real 404 without it and its pages reuse the read. */
+export const getMeeting = cache(async (callId: string) =>
+  getCall(await createClient(), null, callId),
+);

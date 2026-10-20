@@ -11,7 +11,7 @@ import { routes } from "@/lib/auth/redirects";
 import { listOwnedProjects, loadCallOutcomes } from "@/lib/calls/outcomes";
 import {
   getCallAudioUrls,
-  getCall,
+  getMeeting,
   loadLatestReport,
   loadLatestTranscript,
 } from "@/lib/calls/queries";
@@ -36,7 +36,7 @@ export default async function MeetingPage({
   const { meet } = await searchParams;
   const supabase = await createClient();
 
-  const call = await getCall(supabase, null, callId);
+  const call = await getMeeting(callId);
   if (!call) notFound();
   const [transcript, report, audioUrls, members] = await Promise.all([
     loadLatestTranscript(supabase, callId),

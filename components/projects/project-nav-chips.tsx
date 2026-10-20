@@ -28,6 +28,7 @@ export function ProjectNavChips({
   items,
   statuses = {},
   counts = {},
+  reasons = {},
 }: { items: ProjectSection[] } & ProjectNavState) {
   const pathname = usePathname();
   return (
@@ -68,7 +69,7 @@ export function ProjectNavChips({
                 "border-[color:var(--border-strong)] bg-[var(--surface-soft)]",
             )}
           >
-            {status && <NavDot status={status} />}
+            {status && <NavDot status={status} reason={reasons[section.key]} />}
             {section.label}
             <MineBadge count={counts[section.key] ?? 0} />
           </ViewLink>

@@ -17,7 +17,7 @@ import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fileViewOf } from "@/lib/catalog/file-rules";
 import { listCatalogFiles } from "@/lib/catalog/files";
-import { getContract } from "@/lib/contracts/queries";
+import { findContract } from "@/lib/contracts/queries";
 import { todayInParis } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { getContractDocument } from "@/lib/legal/contracts/document";
@@ -36,9 +36,9 @@ export default async function ContractPage({
   params,
   searchParams,
 }: PageProps<"/app/contracts/[contractId]">) {
-  const access = await requireApproved();
+  await requireApproved();
   const [{ contractId }, query] = await Promise.all([params, searchParams]);
-  const contract = await getContract(contractId, access);
+  const contract = await findContract(contractId);
   if (!contract) notFound();
 
   const owner = { kind: "contract" as const, id: contract.id };
