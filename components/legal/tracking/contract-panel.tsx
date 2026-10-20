@@ -7,7 +7,8 @@ import { toast } from "sonner";
 
 import { ClauseForm } from "@/components/legal/contracts/clause-form";
 import { ContractDocumentCard } from "@/components/legal/contracts/contract-document-card";
-import { ContractSign } from "@/components/legal/tracking/contract-sign";
+import { ContractAwaiting } from "@/components/legal/signed-returns/contract-awaiting";
+import { ContractSend } from "@/components/legal/signed-returns/contract-send";
 import {
   ContractValues,
   contractFixHref,
@@ -20,7 +21,6 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { advanceContract } from "@/lib/contracts/actions";
 import type { ContractProof } from "@/lib/contracts/proof";
-import { todayInParis } from "@/lib/contracts/types";
 import { fr } from "@/lib/i18n/fr";
 import { generateLegalContract } from "@/lib/legal/contracts/actions";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
@@ -46,6 +46,8 @@ export function ContractPanel({
   card,
   owner,
   invoice,
+  hasLink = false,
+  personLink,
 }: {
   projectId: string;
   projectTitle: string;
@@ -58,6 +60,9 @@ export function ContractPanel({
   owner: string;
   // The invoice block, once the contract is signed (J10).
   invoice?: ReactNode;
+  // The person's private page (/c/): sent there, deposited signed there.
+  hasLink?: boolean;
+  personLink?: ReactNode;
 }) {
   const t = fr.legal.panels.contract;
   const d = fr.legalDocuments.contract;
@@ -222,21 +227,18 @@ export function ContractPanel({
         <>
           {documentCard}
           <NextCard kind="act" label={t.next} title={t.send}>
-            <p className="text-sm text-muted-foreground">{t.sendBody}</p>
-            <div className="flex flex-wrap gap-2">
-              {fr.legalClearance.flow.sendBy.map((how) => (
-                <Button
-                  key={how}
-                  variant="outline"
-                  disabled={pending}
-                  onClick={() => advance("send", { comment: how })}
-                >
-                  {how}
-                </Button>
-              ))}
-            </div>
-            {open}
+            {contractId && (
+              <ContractSend
+                projectId={projectId}
+                contractId={contractId}
+                contactId={row.contactId}
+                person={row.name}
+                hasLink={hasLink}
+              />
+            )}
           </NextCard>
+          {personLink}
+          {open}
         </>
       );
     case "signature_pending":
@@ -244,14 +246,14 @@ export function ContractPanel({
         <>
           {documentCard}
           {contractId && (
-            <ContractSign
+            <ContractAwaiting
+              person={row.name}
               contractId={contractId}
               organizationId={organizationId}
               proof={proof}
               pending={pending}
-              onSign={() =>
-                advance("sign", { signedOn: todayInParis(new Date()) })
-              }
+              onSign={(signedOn) => advance("sign", { signedOn })}
+              personLink={personLink}
               extra={open}
             />
           )}

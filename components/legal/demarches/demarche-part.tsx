@@ -29,6 +29,7 @@ export function DemarchePart({
   proof,
   cards,
   invoices,
+  linkedContacts,
   direction,
   owner,
 }: {
@@ -40,6 +41,7 @@ export function DemarchePart({
   proof: Record<string, ContractProof>;
   cards: Record<string, ContractCardData>;
   invoices: Record<string, ContractInvoice>;
+  linkedContacts: string[];
   direction: string;
   owner: string;
 }) {
@@ -84,6 +86,21 @@ export function DemarchePart({
           }
           canValidate={clearances.canValidate}
           organizationId={clearances.organizationId}
+          hasLink={
+            panel.row.contactId !== null &&
+            linkedContacts.includes(panel.row.contactId)
+          }
+          personLink={
+            panel.row.contract &&
+            ["ready_for_signature", "signature_pending"].includes(
+              panel.row.state,
+            ) && (
+              <ContactLinkOffer
+                projectId={projectId}
+                contactId={panel.row.contactId}
+              />
+            )
+          }
           proof={
             panel.row.contract ? (proof[panel.row.contract.id] ?? null) : null
           }

@@ -27,28 +27,6 @@ export async function generateFormality(
   );
 }
 
-export async function signFormality(
-  projectId: string,
-  signatureId: string,
-  proof: string,
-) {
-  const p = z
-    .object({
-      projectId: id,
-      signatureId: id,
-      proof: z.string().trim().max(2000),
-    })
-    .safeParse({ projectId, signatureId, proof });
-  if (!p.success)
-    return { ok: false as const, error: fr.auth.errors.forbidden };
-  return run(projectId, (s) =>
-    s.rpc("record_formality_signature", {
-      p_signature_id: signatureId,
-      p_proof: p.data.proof,
-    }),
-  );
-}
-
 export async function formalityStep(
   projectId: string,
   formalityId: string,

@@ -23,10 +23,15 @@ const nextConfig: NextConfig = {
         "/api/projects/[projectId]/strategy-documents/[documentId]",
         "/api/projects/[projectId]/marketing-reports/[reportId]",
         "/api/contracts/[contractId]/document",
+        // The contract a person downloads from their page (/c/).
+        "/c/[token]/contrat/[contractId]",
       ].map((route) => [routeGlob(route), [CHROMIUM_BIN]]),
     ),
     // The official SACEM 725 bulletin the formality fills, read at run time.
     [routeGlob("/api/legal/formalities/[formalityId]/document")]: [
+      "./lib/legal/formalities/assets/**",
+    ],
+    [routeGlob("/c/[token]/bulletin/[signatureId]")]: [
       "./lib/legal/formalities/assets/**",
     ],
   },

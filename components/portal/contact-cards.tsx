@@ -3,14 +3,17 @@ import "server-only";
 import { influencePortalCards } from "@/components/activations/influence/public-cards";
 import { formPortalCard } from "@/components/legal/forms/public-cards";
 import { invoicePortalCards } from "@/components/legal/invoices/invoice-portal-cards";
+import { signedPortalCards } from "@/components/legal/signed-returns/signed-portal-cards";
 import { splitPortalCard } from "@/components/legal/splits/public-cards";
 import { listenPortalCards } from "@/components/master-workflow/listen/listen-cards";
 import { masterPortalCards } from "@/components/master-workflow/public-cards";
 import { providerPortalCards } from "@/components/production/provider/provider-cards";
+import { fr } from "@/lib/i18n/fr";
 import { getCreatorCollaboration } from "@/lib/activations/influence/creator-link";
 import { getPublicAgreement } from "@/lib/activations/influence/public";
 import { getPublicForm, noteFormOpened } from "@/lib/legal/forms/public";
 import { getContactInvoices } from "@/lib/legal/invoices/public";
+import { getContactSignatures } from "@/lib/legal/signed-returns/public";
 import { getPublicSplit } from "@/lib/legal/splits/public";
 import { getLinkDeliverables } from "@/lib/master-workflow/deliverables-public";
 import { getPublicInvoice } from "@/lib/master-workflow/invoice-public";
@@ -48,7 +51,7 @@ export async function loadContactCards(
   token: string,
   page: OpenContactPage,
 ): Promise<PortalCardItem[]> {
-  const [lists, invoices] = await Promise.all([
+  const [lists, invoices, signatures] = await Promise.all([
     Promise.all(
       page.items.map((item, i) =>
         cardsOf(token, page, item, i).then((cards) =>
@@ -63,6 +66,8 @@ export async function loadContactCards(
     ),
     // The invoices of their signed contracts (J10): read by the same token.
     getContactInvoices(token),
+    // What they sign: their contract, their line of the SACEM bulletin.
+    getContactSignatures(token),
   ]);
   return [
     ...lists.flat(),
@@ -70,6 +75,15 @@ export async function loadContactCards(
       ...c,
       order: page.items.length * 100 + c.order,
     })),
+    ...signedPortalCards(
+      {
+        token,
+        person: page.person,
+        project: page.project,
+        owner: page.owner ?? fr.signedReturns.portal.someone,
+      },
+      signatures,
+    ).map((c) => ({ ...c, order: page.items.length * 100 + c.order })),
   ];
 }
 

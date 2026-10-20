@@ -106,7 +106,7 @@ export async function loadFormalities(
     ),
   ];
   const fIds = (formalities.data ?? []).map((f) => f.id);
-  const [details, values, documents, signatures, events, splits] =
+  const [details, values, documents, signatures, events, splits, links] =
     await Promise.all([
       contactIds.length > 0
         ? supabase
@@ -131,7 +131,7 @@ export async function loadFormalities(
         ? supabase
             .from("legal_formality_signatures")
             .select(
-              "id, formality_id, document_version, signer, role, status, proof, signed_at",
+              "id, formality_id, document_version, signer, role, status, proof, signed_at, contact_id, via, signed_on, file_path",
             )
             .in("formality_id", fIds)
         : Promise.resolve(none),
@@ -143,7 +143,34 @@ export async function loadFormalities(
             .order("created_at", { ascending: false })
         : Promise.resolve(none),
       confirmedSplits(supabase, masterIds),
+      // Who has a private page on this project (/c/): they sign there.
+      fIds.length > 0
+        ? supabase
+            .from("project_contact_links")
+            .select("contact_id")
+            .eq("project_id", project.id)
+            .is("revoked_at", null)
+            .gt("expires_at", new Date().toISOString())
+        : Promise.resolve(none),
     ]);
+  const linked = new Set((links.data ?? []).map((l) => l.contact_id));
+  // The signed bulletins deposited by a link: « Voir le PDF », one hour.
+  const filed = (signatures.data ?? []).flatMap((s) =>
+    s.file_path ? [{ id: s.id, path: s.file_path }] : [],
+  );
+  const urlOf = new Map<string, string>();
+  if (filed.length > 0) {
+    const { data } = await supabase.storage
+      .from("formality-signatures")
+      .createSignedUrls(
+        filed.map((f) => f.path),
+        3600,
+      );
+    filed.forEach((f, i) => {
+      const url = data?.[i]?.signedUrl;
+      if (url) urlOf.set(f.id, url);
+    });
+  }
   const detailsOf = new Map(
     (details.data ?? []).map((d) => [d.contact_id, asText(d.details)]),
   );
@@ -231,6 +258,10 @@ export async function loadFormalities(
               status: s.status as "pending" | "signed",
               proof: s.proof,
               at: s.signed_at,
+              via: (s.via as "link" | "other" | null) ?? null,
+              signedOn: s.signed_on,
+              onLink: s.contact_id !== null && linked.has(s.contact_id),
+              fileUrl: urlOf.get(s.id) ?? null,
             })),
           history: (events.data ?? [])
             .filter((e) => e.formality_id === f.id)

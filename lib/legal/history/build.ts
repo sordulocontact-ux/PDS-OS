@@ -215,8 +215,11 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
       subject: e.contract_id
         ? (contractTitle.get(e.contract_id) ?? null)
         : null,
-      by: who(e.actor_person_id) ?? t.system,
-      note: e.note,
+      // A signed copy deposited by a private link: by the person named.
+      by:
+        who(e.actor_person_id) ??
+        (e.kind === "signature.received" && e.note ? e.note : t.system),
+      note: e.kind === "signature.received" ? null : e.note,
       href: e.contract_id ? routes.contract(e.contract_id) : step("contracts"),
     });
 
@@ -274,7 +277,10 @@ export function buildLegalEvents(r: HistoryRows): LegalEvent[] {
       branch: "formalities",
       action: fr.legalFormalities.events[e.kind] ?? e.kind,
       subject: formalityTitle.get(e.formality_id) ?? null,
-      by: who(e.actor_person_id) ?? t.system,
+      // A signature deposited by a private link: by the signer named.
+      by:
+        who(e.actor_person_id) ??
+        (e.kind === "signature.completed" && e.note ? e.note : t.system),
       ...(PROOF_KINDS.has(e.kind) ? { manualProof: e.note } : { note: e.note }),
       href: step("formalities"),
     });

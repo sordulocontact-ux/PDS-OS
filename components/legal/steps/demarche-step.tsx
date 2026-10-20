@@ -10,6 +10,7 @@ import { loadContractCards } from "@/lib/legal/contracts/document-card";
 import { loadContractInvoices } from "@/lib/legal/invoices/queries";
 import { demarcheHistory } from "@/lib/legal/demarches/history";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
+import { loadContactLinks } from "@/lib/portal/contact-links";
 import { fr } from "@/lib/i18n/fr";
 import { legalJourneyContext } from "@/lib/legal/journey-context";
 import { legalRefSlug, type LegalDemarcheKind } from "@/lib/ui/legal-steps";
@@ -52,11 +53,12 @@ export async function DemarcheStep({
       ? [p.panel.row.contract.id]
       : [],
   );
-  const [proof, history, cards, invoices] = await Promise.all([
+  const [proof, history, cards, invoices, links] = await Promise.all([
     contractProofOf(contractIds),
     loadLegalHistory(ctx.project, ctx.access),
     loadContractCards(contractIds),
     loadContractInvoices(projectId, ctx.clearances.canValidate),
+    contractIds.length > 0 ? loadContactLinks(projectId) : null,
   ]);
   return (
     <LegalStepFrame
@@ -74,6 +76,9 @@ export async function DemarcheStep({
         proof={Object.fromEntries(proof)}
         cards={cards}
         invoices={invoices}
+        linkedContacts={(links?.rows ?? []).flatMap((r) =>
+          r.link ? [r.contactId] : [],
+        )}
         direction={ctx.direction ?? fr.legalDemarches.direction}
         owner={
           demarche.own?.responsibleName ??
