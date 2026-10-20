@@ -130,13 +130,15 @@ function SelectItem({
       {indicator === "checkbox" && (
         // Drawn, not a native input: an option is not a form control of its
         // own (the list carries aria-multiselectable, the option aria-selected).
+        // `data-[selected]`, not `data-selected`: shadcn's variant only matches
+        // data-selected="true", Base UI sets the attribute empty.
         <span
           aria-hidden
-          className="flex size-4 shrink-0 items-center justify-center rounded-sm border border-[color:var(--border-default)] bg-[var(--control-bg)] group-data-selected/item:border-selection group-data-selected/item:bg-selection-bg"
+          className="flex size-4 shrink-0 items-center justify-center rounded-sm border border-[color:var(--border-default)] bg-[var(--control-bg)] group-data-[selected]/item:border-selection group-data-[selected]/item:bg-selection-bg"
         >
           <CheckboxMark
             kind="check"
-            className="size-3 text-selection opacity-0 group-data-selected/item:opacity-100"
+            className="size-3 text-selection opacity-0 group-data-[selected]/item:opacity-100"
           />
         </span>
       )}
