@@ -11,30 +11,33 @@ import { Button } from "@/components/ui/button";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { FilePickField } from "@/components/ui/file-pick-field";
 import { fr } from "@/lib/i18n/fr";
+import { todayInParis } from "@/lib/insights/dates";
 import {
+  addReceivedInvoice,
   openTeamInvoiceSlot,
-  recordInvoiceOther,
-} from "@/lib/master-workflow/invoice-actions";
+} from "@/lib/invoices/actions";
 import {
-  openInvoiceSlot,
-  submitInvoice,
-} from "@/lib/master-workflow/invoice-public-actions";
-import { eurosValue, invoiceDueOn } from "@/lib/master-workflow/invoice-rules";
+  openPersonInvoiceSlot,
+  submitPersonInvoice,
+} from "@/lib/invoices/public-actions";
+import { invoiceDueOn } from "@/lib/invoices/rules";
 import { createClient } from "@/lib/supabase/client";
 import { formatDay } from "@/lib/utils/day";
+import { amountInput } from "@/lib/utils/money";
 
 import { checkInvoice, type InvoiceDraft } from "./invoice-check";
 import { InvoiceRibFields } from "./invoice-rib-fields";
 
-const t = fr.masterInvoice;
+const t = fr.invoices;
 
 export type InvoiceTarget =
-  | { kind: "link"; linkKey: string }
+  | { kind: "link"; token: string; invoiceId: string }
   | { kind: "team"; invoiceId: string; projectId: string };
 
 /**
- * An invoice to deposit (proto `invoiceFields`): on the engineer's link
- * (« Envoyer ma facture ») or added by the owner (« Ajouter la facture »).
+ * An invoice to deposit (proto `invoiceFields`, `invPortal`): on the
+ * person's private link (« Envoyer ma facture ») or added by the team
+ * (« Ajouter la facture », with the day it arrived).
  * The PDF waits until the form is sent; every missing field turns red with
  * its reason at the first try, the first one focused.
  */
@@ -49,7 +52,7 @@ export function InvoiceForm({
   // The RIB on file as this reader may see it (masked on the link, its
   // state for the team); null: none yet.
   rib: { value: string; source: string } | null;
-  // Pre-filled « Titulaire du compte »: the engineer's name.
+  // Pre-filled « Titulaire du compte »: the person's name.
   holder: string;
 }) {
   const router = useRouter();
@@ -58,8 +61,9 @@ export function InvoiceForm({
   const [draft, setDraft] = useState<InvoiceDraft>({
     file: null,
     number: "",
-    amount: expectedCents ? eurosValue(expectedCents) : "",
+    amount: expectedCents ? amountInput(expectedCents) : "",
     why: "",
+    receivedOn: link ? null : todayInParis(),
     ribOpen: rib === null,
     iban: "",
     bic: "",
@@ -91,16 +95,16 @@ export function InvoiceForm({
     setError(null);
     start(async () => {
       const slot = link
-        ? await openInvoiceSlot(target.linkKey)
+        ? await openPersonInvoiceSlot(target.token, target.invoiceId)
         : await openTeamInvoiceSlot(target.invoiceId);
       if (!slot.ok) return setError(slot.error);
       const { error: upload } = await createClient()
-        .storage.from("master-finance")
+        .storage.from("project-invoices")
         .upload(slot.path, file, {
           contentType: "application/pdf",
           upsert: false,
         });
-      if (upload) return setError(t.fields.errors.failed);
+      if (upload) return setError(t.errors.upload_missing);
       const values = {
         path: slot.path,
         fileName: file.name,
@@ -112,13 +116,16 @@ export function InvoiceForm({
         holder: draft.ribOpen ? draft.holder : null,
       };
       const result = link
-        ? await submitInvoice(target.linkKey, values)
-        : await recordInvoiceOther(target.projectId, target.invoiceId, values);
+        ? await submitPersonInvoice(target.token, target.invoiceId, values)
+        : await addReceivedInvoice(target.projectId, target.invoiceId, {
+            ...values,
+            receivedOn: draft.receivedOn ?? todayInParis(),
+          });
       if (!result.ok) return setError(result.error);
       if (link)
-        toast.success(t.link.sent, {
-          description: t.link.sentLine(
-            formatDay(invoiceDueOn(new Date().toISOString())),
+        toast.success(t.portal.sent, {
+          description: t.portal.sentLine(
+            formatDay(invoiceDueOn()),
             draft.ribOpen && rib !== null,
           ),
         });
@@ -139,7 +146,7 @@ export function InvoiceForm({
       }}
     >
       <FilePickField
-        id="invoice-pdf"
+        id={`invoice-pdf-${target.invoiceId}`}
         label={`${t.fields.pdf} *`}
         hint={t.fields.pdfHint}
         chosenLabel={t.fields.chosen}
@@ -149,7 +156,7 @@ export function InvoiceForm({
       />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field
-          name="number"
+          name={`number-${target.invoiceId}`}
           label={t.fields.number}
           aria-required
           placeholder={t.fields.numberPlaceholder}
@@ -158,7 +165,7 @@ export function InvoiceForm({
           onChange={(e) => set({ number: e.target.value })}
         />
         <Field
-          name="amount"
+          name={`amount-${target.invoiceId}`}
           label={t.fields.amount}
           aria-required
           inputMode="decimal"
@@ -169,9 +176,23 @@ export function InvoiceForm({
           onChange={(e) => set({ amount: e.target.value })}
         />
       </div>
+      {draft.receivedOn !== null && (
+        <div className="max-w-60">
+          <Field
+            name={`received-on-${target.invoiceId}`}
+            type="date"
+            label={t.fields.receivedOn}
+            aria-required
+            max={todayInParis()}
+            value={draft.receivedOn}
+            error={shown.receivedOn}
+            onChange={(e) => set({ receivedOn: e.target.value })}
+          />
+        </div>
+      )}
       {check.mismatch && (
         <TextareaField
-          name="why"
+          name={`why-${target.invoiceId}`}
           label={t.fields.why}
           aria-required
           rows={2}
@@ -185,7 +206,7 @@ export function InvoiceForm({
       {rib && !draft.ribOpen ? (
         <FactRows>
           <FactRow
-            label={link ? t.link.rib : t.fields.ribOf(holder)}
+            label={link ? t.portal.rib : t.fields.ribOf(holder)}
             value={rib.value}
             source={rib.source}
             side={
@@ -195,15 +216,20 @@ export function InvoiceForm({
                 size="sm"
                 onClick={() => set({ ribOpen: true })}
               >
-                {t.link.ribChange}
+                {t.portal.ribChange}
               </Button>
             }
           />
         </FactRows>
       ) : (
         <InvoiceRibFields
+          id={target.invoiceId}
           title={
-            link ? (rib ? t.link.newRib : t.link.rib) : t.fields.ribOf(holder)
+            link
+              ? rib
+                ? t.portal.newRib
+                : t.portal.rib
+              : t.fields.ribOf(holder)
           }
           note={rib || !link ? t.fields.ribNew : t.fields.ribFirstLink}
           draft={draft}
@@ -221,7 +247,7 @@ export function InvoiceForm({
         className="self-start"
         disabled={pending}
       >
-        {link ? t.link.send : t.team.add}
+        {link ? t.portal.send : t.team.add}
       </Button>
     </form>
   );

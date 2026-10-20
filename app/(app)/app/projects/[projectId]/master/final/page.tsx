@@ -1,9 +1,10 @@
 import { FinalStep } from "@/components/master-workflow/final/final-step";
-import { InvoiceBlock } from "@/components/master-workflow/invoice/invoice-block";
+import { InvoiceBlock } from "@/components/master-workflow/invoice-block";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { fr } from "@/lib/i18n/fr";
+import { loadProjectInvoices } from "@/lib/invoices/queries";
+import { loadMasterBudgetLines } from "@/lib/master-workflow/budget-lines";
 import { loadFinalView } from "@/lib/master-workflow/final";
-import { loadMasterInvoices } from "@/lib/master-workflow/invoices";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
 
 export const metadata = {
@@ -18,9 +19,10 @@ export default async function ProjectMasterFinalPage({
   const { projectId } = await params;
   const { access, project, facts } = await masterJourneyContext(projectId);
 
-  const [view, invoices] = await Promise.all([
+  const [view, invoices, budget] = await Promise.all([
     loadFinalView(project, access),
-    loadMasterInvoices(projectId, access, project.ownerPersonId),
+    loadProjectInvoices(projectId, project.ownerPersonId),
+    loadMasterBudgetLines(projectId),
   ]);
   return (
     <MasterStepFrame projectId={projectId} stepKey="final">
@@ -29,6 +31,7 @@ export default async function ProjectMasterFinalPage({
         <InvoiceBlock
           projectId={projectId}
           view={invoices}
+          budget={budget}
           inHouse={Boolean(
             facts.brief?.mixPerson &&
             (facts.brief.masteringSame || facts.brief.masteringPerson) &&

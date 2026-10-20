@@ -127,7 +127,6 @@ export const masterRound = {
     accept: "Accepter le tarif",
     accepted: "Tarif accepté : le montant est engagé",
     note: "Un montant proposé ne consomme pas le budget : il ne compte qu'une fois accepté.",
-    euros: (v: string) => `${v} € HT`,
   },
   versions: {
     title: (label: string, n: number) =>
@@ -234,7 +233,7 @@ export const masterRound = {
     title: "Prendre en charge le dossier",
     estimate: "Tarif estimé par PDS d'après vos tarifs habituels",
     line: (stage: "mix" | "mastering", euros: string) =>
-      `${stage === "mix" ? "Mix" : "Mastering"} · ${euros} € HT`,
+      `${stage === "mix" ? "Mix" : "Mastering"} · ${euros}`,
     unknown: "PDS n'a pas encore estimé le tarif : proposez le vôtre.",
     legend: "Le tarif",
     confirm: "Je confirme ce tarif",

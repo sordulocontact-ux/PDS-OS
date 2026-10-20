@@ -7,7 +7,7 @@ import type { BudgetView } from "@/lib/strategy/dimension-budget";
 import { strategyBudgetLineTone } from "@/lib/ui/state-tones";
 
 const t = fr.strategyDimensions.budget;
-const euros = (cents: number) => t.amount(formatEuros(cents));
+const euros = formatEuros;
 
 /**
  * « Budget stratégie » (proto dimBody « bud »): Enveloppe, Proposé, Validé,

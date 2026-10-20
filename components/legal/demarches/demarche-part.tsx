@@ -1,6 +1,10 @@
 import Link from "next/link";
 
 import { ClearanceBody } from "@/components/legal/clearance/clearance-drawer";
+import {
+  ContractInvoice,
+  type ContractInvoices,
+} from "@/components/invoices/contract-invoice";
 import { ContactLinkOffer } from "@/components/portal/contact-links-section";
 import { FormalityCard } from "@/components/legal/formalities/formality-card";
 import { ContractPanel } from "@/components/legal/tracking/contract-panel";
@@ -12,8 +16,6 @@ import type { ContractProof } from "@/lib/contracts/proof";
 import { fr } from "@/lib/i18n/fr";
 import type { Clearances } from "@/lib/legal/clearance/types";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
-import type { ContractInvoice } from "@/lib/legal/invoices/queries";
-import { InvoiceBlock } from "@/components/legal/invoices/invoice-block";
 import type { BoardRow } from "@/lib/legal/plan/board";
 
 /**
@@ -39,7 +41,7 @@ export function DemarchePart({
   clearances: Clearances;
   proof: Record<string, ContractProof>;
   cards: Record<string, ContractCardData>;
-  invoices: Record<string, ContractInvoice>;
+  invoices: ContractInvoices;
   direction: string;
   owner: string;
 }) {
@@ -63,7 +65,7 @@ export function DemarchePart({
       );
     case "contract": {
       const contractId = panel.row.contract?.id;
-      const invoice = contractId ? invoices[contractId] : undefined;
+      const invoice = contractId ? invoices.byContract[contractId] : undefined;
       return (
         <ContractPanel
           projectId={projectId}
@@ -73,12 +75,11 @@ export function DemarchePart({
           card={contractId ? (cards[contractId] ?? null) : null}
           invoice={
             invoice && (
-              <InvoiceBlock
+              <ContractInvoice
                 projectId={projectId}
                 personName={panel.row.name}
                 data={invoice}
-                canValidate={clearances.canValidate}
-                direction={direction}
+                view={{ ...invoices.view, direction }}
               />
             )
           }

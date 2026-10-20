@@ -2,7 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 
-// The organization's billing identity (« Facturer à » on an engineer's
+// The organization's billing identity (« Facturer à » on a person's
 // link), written by the administration in /app/settings.
 
 export type Billing = {

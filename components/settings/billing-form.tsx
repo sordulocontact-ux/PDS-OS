@@ -8,10 +8,10 @@ import { TextareaField } from "@/components/auth/textarea-field";
 import { Button } from "@/components/ui/button";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
-import type { Billing } from "@/lib/master-workflow/billing";
-import { saveBilling } from "@/lib/master-workflow/billing-actions";
+import type { Billing } from "@/lib/invoices/billing";
+import { saveBilling } from "@/lib/invoices/billing-actions";
 
-const t = fr.masterInvoice.billing;
+const t = fr.invoices.billing;
 
 /** « Facturation de PDS »: what an invoice is addressed to. */
 export function BillingForm({ initial }: { initial: Billing | null }) {
@@ -89,7 +89,7 @@ export function BillingForm({ initial }: { initial: Billing | null }) {
       </div>
       {tried && missing > 0 && (
         <FormMessage kind="error">
-          {fr.masterInvoice.fields.missingCount(missing)}
+          {fr.invoices.fields.missingCount(missing)}
         </FormMessage>
       )}
       {submit.error && <FormMessage kind="error">{submit.error}</FormMessage>}

@@ -11,7 +11,7 @@ import { loadConfirmation } from "@/lib/legal/confirmation/queries";
 import { loadAgreements } from "@/lib/legal/contracts/queries";
 import { loadTemplateRequests } from "@/lib/legal/contracts/template-requests";
 import { withInvoices } from "@/lib/legal/invoices/journey";
-import { loadInvoiceStates } from "@/lib/legal/invoices/states";
+import { loadInvoiceStates } from "@/lib/invoices/states";
 import {
   launchedDemarches,
   proposedDemarches,
@@ -141,6 +141,8 @@ export const legalJourneyContext = cache(async (projectId: string) => {
         ...(await loadReadinessInputs(project, access)),
         demarches,
         direction: direction ?? fr.legalDemarches.direction,
+        invoices: invoiceStates,
+        projectId,
       })
     : null;
   const steps = legalJourney({

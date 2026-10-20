@@ -26,7 +26,7 @@ export async function loadBudget(projectId: string): Promise<BudgetData> {
     supabase
       .from("budget_lines")
       .select(
-        "id, label, amount_cents, status, family, family_detail, lever_id, deliverable_id, note, lever:levers!budget_lines_lever_same_org(label), deliverable:strategy_deliverables!budget_lines_deliverable_id_fkey(title), attachment:project_files!budget_lines_attachment_file_id_fkey(id, file_name, path)",
+        "id, label, amount_cents, status, family, family_detail, lever_id, deliverable_id, note, invoice_id, committed_cents, lever:levers!budget_lines_lever_same_org(label), deliverable:strategy_deliverables!budget_lines_deliverable_id_fkey(title), attachment:project_files!budget_lines_attachment_file_id_fkey(id, file_name, path)",
       )
       .eq("project_id", projectId)
       .order("created_at"),
@@ -80,6 +80,8 @@ export async function loadBudget(projectId: string): Promise<BudgetData> {
           }
         : null,
       note: row.note,
+      invoiceId: row.invoice_id,
+      committedCents: row.committed_cents,
     };
   });
   return {

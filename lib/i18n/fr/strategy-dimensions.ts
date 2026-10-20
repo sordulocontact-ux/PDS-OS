@@ -133,7 +133,6 @@ export const strategyDimensions = {
     lineDropped: "Écartée",
     outOfLever: "Hors levier",
     leverOf: (label: string) => `Levier : ${label}`,
-    amount: (euros: string) => `${euros} HT`,
     internal:
       "Le budget reste interne : il ne figure ni dans le Plan de sortie, ni dans le Dossier de presse.",
   },

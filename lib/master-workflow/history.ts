@@ -6,8 +6,8 @@
 import { fr } from "@/lib/i18n/fr";
 import type { MasterStepKey } from "@/lib/ui/master-steps";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
+import { formatAmount } from "@/lib/utils/money";
 
-import { eurosHt } from "./invoice-rules";
 import type { MasterJourneyFacts } from "./journey-facts";
 
 const t = fr.masterJourney.history;
@@ -243,7 +243,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
           i.number,
           i.contactName,
           i.viaLink,
-          eurosHt(i.amountCents),
+          formatAmount(i.amountCents),
         ),
         who: i.viaLink ? linked(i.contactName) : i.receivedBy,
         at: i.receivedAt,
@@ -266,7 +266,7 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
           i.number,
           i.contactName,
           formatDay(i.paidOn),
-          eurosHt(i.amountCents ?? 0),
+          formatAmount(i.amountCents ?? 0),
         ),
         who: i.paidBy,
         at: i.paidAt,

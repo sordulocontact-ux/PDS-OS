@@ -42,6 +42,10 @@ export type BudgetLine = {
   // Its proof: a file of the project's library, opened by a signed link.
   attachment: { id: string; name: string; url: string | null } | null;
   note: string | null;
+  // Follows an invoice (lib/invoices): its amount and state are the
+  // invoice's, never typed; the amount agreed kept when the invoice changed it.
+  invoiceId: string | null;
+  committedCents: number | null;
 };
 
 export type BudgetLever = { id: string; label: string };
@@ -184,15 +188,9 @@ export function suggestBudgetLink<T extends { id: string; label: string }>(
   return best?.item ?? null;
 }
 
-const euroFormatter = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 2,
-  minimumFractionDigits: 0,
-});
-
-export const formatEuros = (cents: number): string =>
-  euroFormatter.format(cents / 100);
+// « 1 100 € HT »: the one formatter of an amount (lib/utils/money.ts), kept
+// under this name for the modules that import it from the budget.
+export { formatAmount as formatEuros } from "@/lib/utils/money";
 
 // The amount as typed back into the form ("1500,5"), without currency sign.
 export const centsToInput = (cents: number): string =>

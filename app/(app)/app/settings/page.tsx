@@ -7,7 +7,7 @@ import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { getOwnAiUsage } from "@/lib/members/queries";
-import { loadBilling } from "@/lib/master-workflow/billing";
+import { loadBilling } from "@/lib/invoices/billing";
 
 import { AiUsageMeter } from "./ai-usage-meter";
 
@@ -46,8 +46,8 @@ export default async function SettingsPage() {
       {admin && (
         <PageSection
           id="billing"
-          title={fr.masterInvoice.billing.title}
-          description={fr.masterInvoice.billing.description}
+          title={fr.invoices.billing.title}
+          description={fr.invoices.billing.description}
           card
         >
           <BillingForm initial={billing} />

@@ -18,6 +18,17 @@ export const legalReadiness = {
     legal: "Juridique",
   } as Record<string, string>,
   contractOf: (name: string) => `Contrat de ${name}`,
+  // An invoice received and not paid: followed, never blocking (20/10/2026).
+  invoice: {
+    label: (name: string) => `Facture de ${name}`,
+    rib: (at: string) => `Reçue le ${at} : nouveau RIB à confirmer`,
+    toPay: (at: string, due: string) =>
+      `Reçue le ${at} : à payer avant le ${due}`,
+    paid: (day: string) => `Payée le ${day}`,
+    nextRib: "Confirmer le nouveau RIB",
+    nextPay: "Payer la facture",
+    source: "Budget du projet",
+  },
   final: "Validation finale avant The Orchard",
   finalLast: "En dernier, par la direction",
   validatedBy: (name: string) => `Validée par ${name}`,

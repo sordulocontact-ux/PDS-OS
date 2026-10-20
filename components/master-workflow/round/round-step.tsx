@@ -286,7 +286,7 @@ export function RoundStep({
       <EngineerThreadSection
         view={view}
         isDirection={round.isDirection}
-        direction={round.direction ?? fr.masterInvoice.team.direction}
+        direction={round.direction ?? fr.invoices.team.direction}
       />
     </div>
   );

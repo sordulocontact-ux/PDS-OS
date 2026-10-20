@@ -58,6 +58,9 @@ export function BudgetTable({
                       line.leverLabel,
                       line.deliverableTitle,
                       line.note,
+                      line.committedCents !== null
+                        ? t.committedWas(formatEuros(line.committedCents))
+                        : null,
                     ]
                       .filter(Boolean)
                       .join(" · ")}
@@ -95,14 +98,16 @@ export function BudgetTable({
                   >
                     <IconPenWriting2 aria-hidden />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={t.remove(line.label)}
-                    onClick={() => onDelete(line)}
-                  >
-                    <IconTrash aria-hidden />
-                  </Button>
+                  {!line.invoiceId && (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={t.remove(line.label)}
+                      onClick={() => onDelete(line)}
+                    >
+                      <IconTrash aria-hidden />
+                    </Button>
+                  )}
                 </div>
               </DataTableCell>
             )}

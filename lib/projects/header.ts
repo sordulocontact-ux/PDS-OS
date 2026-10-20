@@ -17,6 +17,7 @@ import { masterSteps } from "@/lib/ui/master-steps";
 import type { ModuleFact } from "@/lib/ui/module-frame";
 import type { SubModuleStep } from "@/lib/ui/project-sections";
 import { formatDay } from "@/lib/utils/day";
+import { formatAmount } from "@/lib/utils/money";
 import { allInOrder } from "@/lib/utils/parallel";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
@@ -36,8 +37,6 @@ export type ProjectHeaderData = {
   // « Ajouter une dépense » on the Marketing's pages (MKT-S1-15).
   canAddExpense: boolean;
 };
-
-const euros = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
 
 /**
  * Everything the head of a launched project's page needs (ModuleHeader
@@ -79,7 +78,7 @@ export const projectHeaderData = cache(
       facts.push({
         key: "budget",
         label: t.budget,
-        value: t.budgetValue(euros.format(project.budgetCents / 100)),
+        value: formatAmount(project.budgetCents),
       });
     if (project.ownerName)
       facts.push({ key: "owner", label: t.owner, value: project.ownerName });

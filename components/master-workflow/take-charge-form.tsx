@@ -9,11 +9,11 @@ import { FieldError, FormMessage } from "@/components/auth/form-message";
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { fr } from "@/lib/i18n/fr";
+import { formatAmount } from "@/lib/utils/money";
 import { takeMasterPackage } from "@/lib/master-workflow/transmission-public-actions";
 import { parseEurosToCents } from "@/lib/projects/schemas";
 
 const t = fr.masterRound.take;
-const euros = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 type Stage = "mix" | "mastering";
 
 /**
@@ -75,7 +75,7 @@ export function TakeChargeForm({
         <div className="flex flex-col gap-0.5">
           {roles.map((r) => (
             <b key={r} className="font-semibold">
-              {t.line(r, euros.format((estimate[r] ?? 0) / 100))}
+              {t.line(r, formatAmount(estimate[r] ?? 0))}
             </b>
           ))}
           <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">

@@ -11,8 +11,7 @@ import { dayLabel } from "@/lib/strategy/dimension-model";
 import { formatDay } from "@/lib/utils/day";
 
 const t = fr.strategyBriefOut.doc;
-const euros = (cents: number) =>
-  fr.strategyDimensions.budget.amount(formatEuros(cents));
+const euros = formatEuros;
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (

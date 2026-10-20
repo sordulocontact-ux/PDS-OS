@@ -1,6 +1,6 @@
 import { deliverablesPortalCard } from "@/components/master-workflow/deliverables-link-card";
 import { EngineerThread } from "@/components/master-workflow/engineer-thread";
-import { invoicePortalCard } from "@/components/master-workflow/invoice/invoice-link-card";
+import { invoicePortalCards } from "@/components/invoices/invoice-portal-cards";
 import {
   PublicDeliveries,
   PublicPackageView,
@@ -9,7 +9,7 @@ import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { fr } from "@/lib/i18n/fr";
 import type { EngineerMessage } from "@/lib/master-workflow/engineer-messages";
 import type { LinkDeliverable } from "@/lib/master-workflow/deliverables-public";
-import type { PublicInvoice } from "@/lib/master-workflow/invoice-public";
+import type { PersonInvoices } from "@/lib/invoices/public";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
 
 const t = fr.masterWorkflow.publicPackage;
@@ -27,14 +27,16 @@ export function masterPortalCards({
   linkKey,
   data,
   thread,
-  invoice = null,
+  invoices = null,
   deliverables = [],
 }: {
   linkKey: string;
   data: OpenPackage;
   thread: EngineerMessage[];
-  // « Votre facture », once PDS asked for it (the Master final validated).
-  invoice?: PublicInvoice | null;
+  // « Votre facture », once PDS asked for one (the Master final validated,
+  // a paid contract signed): on the link /m only; the person's page /c
+  // reads them by its own token, once for the whole page.
+  invoices?: PersonInvoices | null;
   // « Autres livrables », once a title has its Master final.
   deliverables?: LinkDeliverable[];
 }): PortalCardItem[] {
@@ -60,15 +62,13 @@ export function masterPortalCards({
     titles.length > 0 &&
     titles.every((x) => latestOf(x.masterId)?.decision === "approved");
   return [
-    ...(invoice
-      ? [
-          invoicePortalCard({
-            linkKey,
-            invoice,
-            project: data.package.project,
-            engineer: data.package.engineer,
-          }),
-        ]
+    ...(invoices
+      ? invoicePortalCards({
+          token: linkKey,
+          data: invoices,
+          project: data.package.project,
+          person: data.package.engineer,
+        })
       : []),
     ...(deliverablesCard ? [deliverablesCard] : []),
     {

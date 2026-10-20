@@ -8,9 +8,9 @@ import { CheckboxField } from "@/components/ui/checkbox-field";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
-import { confirmBankAccount } from "@/lib/master-workflow/invoice-actions";
+import { confirmBankAccount } from "@/lib/invoices/actions";
 
-const t = fr.masterInvoice.team;
+const t = fr.invoices.team;
 
 /** « Le RIB a changé » (proto, direction): call the engineer at the number
  * of their Network card, check the box, « Confirmer le nouveau RIB ». */

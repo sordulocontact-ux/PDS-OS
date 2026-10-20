@@ -8,7 +8,10 @@
 
 import { fr } from "@/lib/i18n/fr";
 import type { ReadinessItem } from "@/lib/distribution/readiness";
+import type { InvoiceStateRow } from "@/lib/invoices/states";
+import { invoiceHref } from "@/lib/invoices/href";
 import type { Demarche } from "@/lib/legal/demarches/build";
+import { formatDay } from "@/lib/utils/day";
 import { legalRefSlug } from "@/lib/ui/legal-steps";
 
 export const READINESS_DOMAINS = [
@@ -133,6 +136,46 @@ function fromDemarches(
     });
 }
 
+/** Each invoice received of a credited person (the engineer's, a contract's):
+ * open until paid, never blocking — the label pays after the release as
+ * well (decision of 20/10/2026, proto invControl). An invoice still awaited
+ * has nothing to pay yet: its démarche says it. */
+function fromInvoices(
+  invoices: InvoiceStateRow[],
+  projectId: string | null,
+  direction: string,
+): ReadinessControl[] {
+  const ti = t.invoice;
+  return invoices
+    .filter((i) => i.state !== "asked" && i.receivedOn)
+    .map((i): ReadinessControl => {
+      const at = formatDay(i.receivedOn!);
+      return {
+        key: keyOf(`invoice:${i.invoiceId}`),
+        domain: i.origin === "master" ? "master" : "rights",
+        label: ti.label(i.contactName),
+        blocking: false,
+        status: i.state === "paid" ? "ok" : "open",
+        reason:
+          i.state === "paid"
+            ? ti.paid(formatDay(i.paidOn ?? i.receivedOn!))
+            : i.state === "rib"
+              ? ti.rib(at)
+              : ti.toPay(at, formatDay(i.dueOn ?? i.receivedOn!)),
+        next:
+          i.state === "paid"
+            ? null
+            : i.state === "rib"
+              ? ti.nextRib
+              : ti.nextPay,
+        responsible: direction,
+        source: ti.source,
+        href: projectId ? invoiceHref(projectId, i) : null,
+        waiver: null,
+      };
+    });
+}
+
 /** The controls, then the verdict: « Non prête » while a blocking control
  * is open, « À risque » with a waiver or something to follow, else « Prête
  * à sortir ». The final validation never counts against itself. */
@@ -143,11 +186,19 @@ export function legalReadiness(input: {
   sacemBlocks: boolean;
   validated: { by: string; at: string } | null;
   direction: string;
+  // The project's invoices, where each one stands (never their content).
+  invoices?: InvoiceStateRow[];
+  projectId?: string;
 }): LegalReadiness {
   const waiverOf = new Map(input.waivers.map((w) => [w.key, w]));
   const controls = [
     ...fromDistribution(input.distribution ?? []),
     ...fromDemarches(input.demarches, input.sacemBlocks),
+    ...fromInvoices(
+      input.invoices ?? [],
+      input.projectId ?? null,
+      input.direction,
+    ),
   ]
     .map((c) => {
       const w = c.status === "open" ? waiverOf.get(c.key) : undefined;
