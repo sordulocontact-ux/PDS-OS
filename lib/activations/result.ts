@@ -14,6 +14,7 @@ const i = fr.activationInfluence.errors;
 // Database refusals → their sentence. Codes raised by the activation
 // functions and triggers (supabase/migrations/20261011000*).
 const j = fr.activationJourney.errors;
+const b = fr.activationBrief;
 
 const MESSAGES: Array<[string, string]> = [
   ["activation_not_done:no_publication", j.noPublication],
@@ -44,6 +45,9 @@ const MESSAGES: Array<[string, string]> = [
   ["already_decided", i.alreadyDecided],
   ["influence_contents_media_check", i.mediaRequired],
   ["activation_not_agency", e.transition],
+  ["concept_not_validated", b.brief.errors.conceptNotValidated],
+  ["brief_already_sent", b.brief.errors.alreadySent],
+  ["message_body_required", b.recap.errors.message],
 ];
 
 export function activationFailure(error: { code?: string; message?: string }): {

@@ -9,13 +9,9 @@ import type { Dashboard, FigureKey } from "@/lib/marketing/dashboard";
 import type { Activation, Evidence } from "@/lib/marketing/model";
 import type { Reserve } from "@/lib/marketing/reserves/queries";
 
-import {
-  isRealised,
-  phaseOf,
-  PHASES,
-  proofBucket,
-  type ReviewActivation,
-} from "./phase";
+import { isRealised, PHASES } from "@/lib/activations/phase";
+
+import { proofBucket, type ReviewActivation } from "./review-activation";
 
 const t = fr.reviewJourney.standing;
 const d = fr.marketingReview.dashboard;
@@ -37,8 +33,6 @@ export type StandingFigure = {
   value: string;
   rule: string;
   items: StandingItem[];
-  // No source of the app gives it yet: « — ».
-  unsourced?: boolean;
 };
 
 export type StandingRow = {
@@ -79,10 +73,8 @@ export type StandingInput = {
   budget: { envelopeCents: number | null; lines: BudgetLineFact[] } | null;
 };
 
-const phaseLabel = (a: ReviewActivation) => {
-  const phase = phaseOf(a);
-  return phase === null ? t.labels.cancelled : t.labels.phases[phase];
-};
+const phaseLabel = (a: ReviewActivation) =>
+  a.phase === -1 ? t.labels.cancelled : t.labels.phases[a.phase];
 
 export function computeStanding(input: StandingInput): Standing {
   const { activations, dashboard, live, reserves, budget } = input;
@@ -128,7 +120,7 @@ export function computeStanding(input: StandingInput): Standing {
       groupActs,
       t.labels.phases[phase],
       acts
-        .filter((a) => phaseOf(a) === phase)
+        .filter((a) => a.phase === phase)
         .map((a) => actItem(a, a.ownerName ?? t.noOwner)),
       t.rules.phases[phase],
     ),
@@ -163,12 +155,14 @@ export function computeStanding(input: StandingInput): Standing {
   };
   const bucket = (b: string) =>
     realised.filter((a) => proofBucket(a.proof) === b).length;
-  const got = realised.filter(
-    (a) =>
-      a.measure === "available_declared" || a.measure === "available_verified",
+  const got = realised.filter((a) =>
+    ["available_declared", "available_verified", "partial"].includes(a.measure),
   ).length;
   const statsMissing = realised.filter(
     (a) => a.measure === "to_collect",
+  ).length;
+  const statsUnavailable = realised.filter(
+    (a) => a.measure === "unavailable",
   ).length;
   const closedCount = activations.filter((a) => a.status === "closed").length;
   const cancelledCount = activations.filter(
@@ -244,7 +238,9 @@ export function computeStanding(input: StandingInput): Standing {
     },
     {
       key: "stats",
-      text: realised.length ? t.stats(got, statsMissing) : t.statsNone,
+      text: realised.length
+        ? t.stats(got, statsMissing, statsUnavailable)
+        : t.statsNone,
       sub: null,
       figure: stats,
     },
@@ -285,10 +281,28 @@ export function computeStanding(input: StandingInput): Standing {
     });
     return figure(key, group, d.figures[key], items, d.rules[key]);
   };
-  const unsourced = (key: FigureKey, group: string): StandingFigure => ({
-    ...figure(key, group, d.figures[key], [], d.rules[key], t.noSource),
-    unsourced: true,
-  });
+  // Partial or unavailable: a state of the activation's statistics (proto
+  // STSTATE), counted by activation like the proto, never as zero.
+  const measureFigure = (
+    key: "statistics_partial" | "statistics_unavailable",
+    measure: "partial" | "unavailable",
+  ) =>
+    figure(
+      key,
+      t.groups.statistics,
+      d.figures[key],
+      acts
+        .filter((a) => a.measure === measure)
+        .map((a) =>
+          actItem(
+            a,
+            measure === "partial"
+              ? [a.lastFigure, t.partialMark].filter(Boolean).join(" · ")
+              : t.unavailableDetail,
+          ),
+        ),
+      t.rules[key],
+    );
   const reserveFigure = (
     key: FigureKey,
     keep: (r: Reserve) => boolean,
@@ -346,8 +360,8 @@ export function computeStanding(input: StandingInput): Standing {
       figures: [
         evidenceFigure("statistics_declared", t.groups.statistics),
         evidenceFigure("statistics_verified", t.groups.statistics),
-        unsourced("statistics_partial", t.groups.statistics),
-        unsourced("statistics_unavailable", t.groups.statistics),
+        measureFigure("statistics_partial", "partial"),
+        measureFigure("statistics_unavailable", "unavailable"),
       ],
     },
     ...(budget

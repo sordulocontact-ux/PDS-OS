@@ -210,6 +210,8 @@ export async function importAgencyMetrics(input: {
               : null,
           source: "agency",
           method: t.agencyData,
+          // The agency's figures, read from its sheet: partial (proto agstats).
+          partial: true,
           collected_on: today,
           organization_id: org,
           project_id: projectId,

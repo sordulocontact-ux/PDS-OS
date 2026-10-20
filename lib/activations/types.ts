@@ -51,6 +51,8 @@ export type ActivationRecord = {
   statusReason: string | null;
   evidenceExpected: boolean;
   metricsExpected: boolean;
+  // « Donnée indisponible » : expected, and will not come.
+  metricsUnavailable: boolean;
   closureKind: "definitive" | "with_reserves" | null;
   closureReserves: Reserve[] | null;
   closureNote: string | null;
@@ -103,6 +105,8 @@ export type MetricRecord = {
   periodEnd: string | null;
   source: MetricSource;
   method: string | null;
+  // « Relevé partiel » : not everything is counted yet.
+  partial: boolean;
   collectedOn: string;
   verification: MetricVerification;
   invalidatedAt: string | null;

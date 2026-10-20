@@ -6,9 +6,8 @@ import {
   type ActivationFilter,
   activationSentence,
   filtersOf,
-  phaseLabel,
-  phaseOf,
 } from "@/lib/activations/journey";
+import { phaseLabel, phaseOf } from "@/lib/activations/phase";
 import type { ActivationSummary } from "@/lib/activations/types";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";

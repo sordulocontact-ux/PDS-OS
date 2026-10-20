@@ -1,61 +1,14 @@
 // Marketing › Activations, the journey of one activation as the proto
-// « Projet complet » computes it (mk.js phaseOf, actNext, actSentence): its
-// phase on the frieze Préparer → Réaliser → Prouver → Mesurer → Clôturer,
-// the one gesture of its trunk and who does it, and the sentence of the
-// list. Computed by code at each read, never stored. Pure, client-safe.
+// « Projet complet » computes it (mk.js actNext, actSentence): the one
+// gesture of its trunk and who does it, and the sentence of the list. Its
+// phase on the frieze is computed once, in lib/activations/phase.ts.
+// Computed by code at each read, never stored. Pure, client-safe.
 
-import type { ActivationStatus, LaunchGap } from "@/lib/activations/model";
-import type { MeasureState, ProofState } from "@/lib/activations/states";
+import { isGated, phaseOf, type PhaseInput } from "@/lib/activations/phase";
 import { fr } from "@/lib/i18n/fr";
 import { lowerFirst } from "@/lib/ui/journey";
 
 const t = fr.activationJourney;
-
-/** -1 cancelled, 0 Préparer … 4 Clôturer, 5 closed. */
-export type Phase = -1 | 0 | 1 | 2 | 3 | 4 | 5;
-
-export type PhaseInput = {
-  status: ActivationStatus;
-  statusBeforeSuspension: ActivationStatus | null;
-  ownerPersonId: string | null;
-  dueOn: string | null;
-  launchGaps: readonly LaunchGap[];
-  proof: ProofState;
-  measure: MeasureState;
-};
-
-/** The status a suspended activation will return to. */
-export const liveStatus = (a: PhaseInput): ActivationStatus =>
-  a.status === "suspended"
-    ? (a.statusBeforeSuspension ?? "to_prepare")
-    : a.status;
-
-/** Waiting for something outside it: an open blocker, a prerequisite not
- * there yet (« Elle commence quand le Clip officiel est livré. »). */
-export const isGated = (a: PhaseInput) =>
-  ["to_prepare", "blocked"].includes(liveStatus(a)) &&
-  a.launchGaps.some((g) => g === "blocker" || g === "dependency");
-
-export function phaseOf(a: PhaseInput): Phase {
-  if (a.status === "closed") return 5;
-  if (a.status === "cancelled") return -1;
-  const s = liveStatus(a);
-  if (!a.ownerPersonId || !a.dueOn || s === "to_prepare" || s === "blocked")
-    return 0;
-  if (s === "in_progress") return 1;
-  if (["to_provide", "contested", "provided_unverified"].includes(a.proof))
-    return 2;
-  if (a.measure === "to_collect") return 3;
-  return 4;
-}
-
-/** « Mesurer », « Clôturée », « Annulée », « Réaliser · suspendue ». */
-export function phaseLabel(a: PhaseInput): string {
-  const phase = phaseOf(a);
-  if (phase === -1) return t.phaseCancelled;
-  const label: string = phase === 5 ? t.phaseClosed : t.phases[phase];
-  return a.status === "suspended" ? `${label}${t.phaseSuspended}` : label;
-}
 
 /** Who acts: a member of PDS, or a contact through her private link. */
 export type ActionPerson = {

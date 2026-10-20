@@ -14,10 +14,9 @@ import {
 } from "@/lib/activations/result";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
+import { withOutcome } from "@/lib/journey/outcome";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
-
-const t = fr.activationAgency;
 
 const reportSchema = z.object({
   projectId: z.uuid(),
@@ -101,53 +100,40 @@ export async function decideAgencyReport(
 }
 
 /**
- * « Préparer le retour à l'agence » : a draft written by code from the PDS
- * decisions (validated, refused, to discuss…), without the internal notes —
- * then read, edited and validated by a person ; never sent by PDS OS.
+ * « Marquer comme envoyé » (proto `agsent`): the recap written by code from
+ * the PDS decisions, read (and perhaps edited) by the owner, declared sent
+ * at once — PDS OS sends nothing (send_agency_recap).
  */
-export async function prepareAgencyRecap(input: {
+export async function sendAgencyRecap(input: {
   projectId: string;
   activationId: string;
+  subject: string;
+  body: string;
 }): Promise<WriteResult> {
-  const access = await requireApproved();
+  await requireApproved();
   const parsed = z
-    .object({ projectId: z.uuid(), activationId: z.uuid() })
+    .object({
+      projectId: z.uuid(),
+      activationId: z.uuid(),
+      subject: z.string().max(300),
+      body: z.string().max(20000),
+    })
     .safeParse(input);
   if (!parsed.success) return invalid();
-  const { projectId, activationId } = parsed.data;
-  const supabase = await createClient();
-  const [{ data: activation }, agency] = await Promise.all([
-    supabase
-      .from("marketing_activations")
-      .select("title")
-      .eq("id", activationId)
-      .single(),
-    loadAgency(activationId),
-  ]);
-  const sections = (
-    Object.keys(t.recap.sections) as (keyof typeof t.recap.sections)[]
-  ).flatMap((decision) => {
-    const rows = agency.rows.filter(
-      (r) => !r.absentSince && r.pdsDecision === decision,
-    );
-    if (rows.length === 0) return [];
-    const name = (r: (typeof rows)[number]) =>
-      String(
-        r.current.handle
-          ? `@${String(r.current.handle).replace(/^@/, "")}`
-          : (r.current.name ?? r.current.media ?? r.rowKey),
-      );
-    return [
-      `${t.recap.sections[decision]} :\n${rows.map((r) => `- ${name(r)}`).join("\n")}`,
-    ];
-  });
-  const { error } = await supabase.from("activation_messages").insert({
-    activation_id: activationId,
-    kind: "agency_recap",
-    subject: t.recap.subject(activation?.title ?? ""),
-    body: [t.recap.intro, ...sections, t.recap.outro].join("\n\n"),
-    organization_id: access.organizationId ?? "",
-    project_id: projectId,
-  });
-  return error ? activationFailure(error) : activationDone(projectId);
+  const v = parsed.data;
+  if (!v.body.trim()) return invalid(fr.activationBrief.recap.errors.message);
+  return withOutcome(
+    v.projectId,
+    ["marketing"],
+    fr.activationBrief.recap.done,
+    async () => {
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("send_agency_recap", {
+        p_activation_id: v.activationId,
+        p_subject: v.subject,
+        p_body: v.body,
+      });
+      return error ? activationFailure(error) : activationDone(v.projectId);
+    },
+  );
 }

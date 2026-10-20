@@ -2378,6 +2378,13 @@ date de sortie de la Stratégie, NDA : à décider).
   (`ContactLinksSection`, « Une page par personne » sous les liens du module) ; à côté du lien du
   Master et de la fiche de renseignements, `ContactLinkOffer`. Gestes (responsable) : « Créer le
   lien », « Copier le lien », « Marquer comme envoyé », « Nouveau lien », « Révoquer » avec motif.
+- **Après un call** (20/10, `get_contact_call_requests`, anon) : « Ce qui vous a été demandé » —
+  les actions du plan de production planifiées depuis une action du call pour ce contact
+  (`production_plan_actions.item_id` → `production_call_items.call_id`), « À faire » / « Fait », source
+  « Confirmé par PDS après le call » ; tant que PDS n'a pas confirmé les suites (résumé envoyé à la
+  personne, ou call de production avec compte rendu sans action proposée restante) : « PDS confirme les
+  suites du call ; ce qui vous concerne apparaîtra ici. » ; sinon « Rien ne vous a été demandé pendant ce
+  call. ». Jamais le compte rendu (règle 21). Fonction à part : `contact_page_items` inchangée.
 - **Décisions** : expiration 180 jours (1 à 365) ; un objet dont le propre lien est fermé (expiré,
   remplacé) n'apparaît pas sur la page de la personne (mêmes règles que son lien) ; une invitation à
   un call à venir trie avec « À vous » mais n'est pas une action (pastille « Invité », h1 « Votre
@@ -5452,8 +5459,8 @@ pgTAP `marketing-activations.test.sql` (65) et `activation-creator-link.test.sql
   `report`) et `targets/<id>` **redirigent** vers les ancres (`#framing`, `#module`, `#agency`, `#report`,
   `#collab-<id>`, `#media-<id>`). Le tableau à tuiles et ses 7 vues ont quitté l'écran (`viewsOf` reste pour
   Suivi & bilan).
-- **Calculs** (purs, `lib/activations/journey.ts`) : `phaseOf` (Préparer → Réaliser → Prouver → Mesurer →
-  Clôturer), `trunkAction` (le geste du tronc et sa personne : désigner, échéance, lancer, déclarer réalisée,
+- **Calculs** (purs, `lib/activations/journey.ts` ; la frise dans `lib/activations/phase.ts`) : `phaseOf`
+  (Préparer → Réaliser → Prouver → Mesurer → Clôturer), `trunkAction` (le geste du tronc et sa personne : désigner, échéance, lancer, déclarer réalisée,
   preuve, vérifier, relevé, clôturer, reprendre), `activationSentence`, `filtersOf`. Lignes du module
   (`lib/activations/actors.ts`) : une par collaboration (la créatrice agit par son lien), l'agence (relier,
   correspondance, aperçu, décider, récapitulatif, bilan, transmission), la presse (cadrage, dossier, modèle,
@@ -5491,6 +5498,48 @@ pgTAP `marketing-activations.test.sql` (65) et `activation-creator-link.test.sql
   récapitulatif et bilan d'agence dans la page.
 - **Notifications** : `activation_owner_assigned`, `activation_suspended`, `activation_creator_acted` (vers
   l'activation).
+
+### Reste des Activations (20/10/2026, branche `pc/r4-activations`)
+
+Migrations `20261020040101_activation_stats_states.sql`, `20261020040201_activation_direct_sends.sql`,
+`20261020040301_contact_call_requests.sql` ; pgTAP `activations-remaining.test.sql` (23).
+
+- **Une seule frise** : `lib/activations/phase.ts` (`phaseOf`, `liveStatus`, `isGated`, `phaseLabel`,
+  `isRealised`, `PHASES`), lue par la liste, l'activation ouverte, le parcours et le Suivi & bilan
+  (`lib/marketing/review/activations.ts` reprend les résumés de `loadActivationsBoard`, déjà lus par le
+  parcours du projet : même phase, même preuve, mêmes statistiques). `lib/marketing/review/phase.ts`
+  supprimé ; `ReviewActivation` porte sa `phase` (`review-activation.ts`).
+- **Statistiques partielles / indisponibles** : `activation_metrics.partial` (« Relevé partiel », relevé
+  repris du tableau d'une agence ; l'ancien `method = 'Relevé partiel'` repris) et
+  `marketing_activations.metrics_unavailable` (« Donnée indisponible : la plateforme ne la fournit pas »,
+  distinct de « Non attendues » = Sans objet ; levé par le relevé suivant). `measureState` :
+  non attendues → indisponibles → à collecter → partielles (dernier relevé partiel ou une cible sans
+  relevé) → disponibles. La vue `marketing_review_evidence` donne `availability = 'partial'`. Suivi &
+  bilan : tuiles Partielles / Indisponibles listées par activation, phrase « Statistiques : N relevées,
+  M manquantes, K indisponibles », « Ce qui manque » ajoute « … : statistiques indisponibles » ; réserve
+  de clôture `metrics_unavailable`.
+- **« Brief et proposition »** (carte d'une créatrice à « Validée en interne ») : un formulaire
+  (`BriefProposalForm`) — Rémunération proposée *, Livrables (format du concept), Droits organiques
+  (« Sur son compte TikTok · republication par <artiste> »), Droits publicitaires (Non demandés / Spark
+  Ads · 30 jours · inclus / en supplément + montant), Message écrit par le code depuis le concept validé
+  (`brief-message.ts`), Canal (E-mail / Message <plateforme> / WhatsApp) → « Marquer le brief comme
+  envoyé » / « Copier le message ». `send_influence_brief` écrit la position de PDS et le brief déclaré
+  envoyé en une transaction (concept validé exigé, première position seulement). Rémunération
+  pré-remplie seulement par un tarif noté au Réseau (`network_observations` `rate`), jamais estimée.
+- **Récapitulatif d'agence envoyé directement** : `RecapForm` (« Récapitulatif pour <agence> », texte
+  écrit par le code depuis les décisions, sans notes internes, `agency/recap.ts`) dès qu'une décision est
+  plus récente que le dernier envoi ; « Marquer comme envoyé » (`send_agency_recap`) ; fait
+  « Récapitulatifs envoyés : 17/11, 11:30 par … ». Plus de brouillon à valider (`prepareAgencyRecap`
+  retiré). Les deux envois directs passent par `_send_activation_message` (validé et déclaré par la même
+  personne, journal `message.declare_sent`) ; les messages presse gardent leur validation par la
+  direction. Canal `whatsapp` ajouté à la liste fermée.
+- **« Doublon probable »** des cibles presse (`lib/activations/duplicates.ts`, `warningsFor` avec
+  `press`) : même média sous une autre fiche (nom normalisé sans « Le », « Magazine »… ou même domaine
+  d'adresse non partagé) → « Doublon probable de « Le Contrechamp » » ; même journaliste déjà ciblé
+  sous un autre média → « Doublon probable : … est déjà ciblé sous « … » ». Alerte à confirmer, jamais
+  un refus ; recalculée quand le journaliste est choisi.
+- **Lien de la personne** : `ContactLinkOffer` sur la carte d'une créatrice dès qu'elle a un lien
+  d'accord ; `ContactLinksSection` dans « Qui fait quoi » de la Conception et de la Distribution.
 
 ## 8 terdecies. Marketing : Suivi & bilan et clôture du Marketing (`/review`, `lib/marketing/`, `components/marketing/`)
 
@@ -5606,15 +5655,12 @@ du volet Marketing**. Aucun ne clôt le projet : la clôture du projet reste l'�
   Distribution, sinon `projects.due_date`).
 - **« Où on en est »** (`standing.ts`, `standing-data.ts`) : 4 phrases calculées sur toutes les
   activations, détail replié avec les filtres du ticket ; chaque chiffre ouvre sa liste et sa règle
-  (modale verre) ; « — » quand l'app n'a pas de source (statistiques partielles / indisponibles).
-  **Frise des activations calculée ici** depuis leurs tables (`phase.ts`, `activations.ts` :
-  `marketing_activations`, `activation_evidence` + dernier contrôle, `activation_metrics` valides) :
-  clôturée → Clôturées ; annulée à part ; sans responsable ou échéance, brouillon, à préparer, prête,
-  bloquée → À préparer ; en cours, suspendue → À réaliser ; réalisée déclarée : preuve non vérifiée →
-  À prouver, statistiques à collecter → À mesurer, sinon À clôturer. **À unifier avec la frise de la
-  zone Activations** (lot 6) quand elle existera.
+  (modale verre) ; statistiques « Partielles » / « Indisponibles » = activations dont l'état des
+  statistiques l'est (20/10, ci-dessous « Reste des Activations »). **Frise, preuve et statistiques lues
+  dans les Activations** (`activations.ts` lit `loadActivationsBoard` ; une seule frise,
+  `lib/activations/phase.ts`) : plus de second calcul ici.
 - **« Ce qui manque »** (`issues.ts`) : une ligne par activation annulée (motif), pas clôturée (état),
-  clôturée à preuve non vérifiée ; une ligne par objectif de la Stratégie (`strategy_objectives.due_on`)
+  clôturée à preuve non vérifiée ou à statistiques indisponibles ; une ligne par objectif de la Stratégie (`strategy_objectives.due_on`)
   lu après aujourd'hui (« Streams à 4 semaines : lus après le … »). Cochées dans « Réserves à
   inclure », elles deviennent les réserves de la version (une par ligne, catégorie Activations / Preuves
   / Statistiques) ; celles déjà ouvertes sont reprises telles quelles.

@@ -127,6 +127,7 @@ export const activationWork = {
       email: "E-mail",
       dm: "Message privé",
       phone: "Téléphone",
+      whatsapp: "WhatsApp",
       other: "Autre",
     },
     add: "Préparer un message",
@@ -197,6 +198,9 @@ export const activationWork = {
       refused: "Refus antérieur",
       stale: "Dernière donnée d'audience de plus de 6 mois",
       noData: "Aucune donnée d'audience datée",
+      duplicate: (of: string) => `Doublon probable de « ${of} »`,
+      sameJournalist: (journalist: string, of: string) =>
+        `Doublon probable : ${journalist} est déjà ciblé sous « ${of} »`,
     },
     outcome: "Issue",
     outcomes: {

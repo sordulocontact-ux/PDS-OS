@@ -5,7 +5,8 @@ import { cache } from "react";
 import { moduleActions } from "@/lib/activations/actors";
 import { collaborationsOf, derivedProof } from "@/lib/activations/campaign";
 import { stepText } from "@/lib/activations/describe";
-import { isGated, trunkAction, viewerFirst } from "@/lib/activations/journey";
+import { trunkAction, viewerFirst } from "@/lib/activations/journey";
+import { isGated } from "@/lib/activations/phase";
 import { loadActivationPeople } from "@/lib/activations/people";
 import { loadPressKit } from "@/lib/activations/press-kit";
 import { resolveDependencies } from "@/lib/activations/dependencies";
@@ -49,6 +50,7 @@ function factsOf(
     dueOn: a.dueOn,
     evidenceExpected: a.evidenceExpected,
     metricsExpected: a.metricsExpected,
+    metricsUnavailable: a.metricsUnavailable,
     evidences: data.evidences
       .filter((e) => e.activationId === a.id)
       .map((e) => ({
@@ -64,6 +66,7 @@ function factsOf(
         agencyRowId: m.agencyRowId,
         verification: m.verification,
         valid: m.invalidatedAt === null,
+        partial: m.partial,
       })),
     liveTargetIds: targets
       .filter((x) => !x.outcome || CLOSING_OUTCOMES.includes(x.outcome))

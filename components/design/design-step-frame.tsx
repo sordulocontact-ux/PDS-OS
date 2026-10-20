@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { DesignWhoDoesWhatButton } from "@/components/design/roles/design-roles";
+import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import { ProjectHeader } from "@/components/projects/project-header";
 import { JourneySpine } from "@/components/shell/journey/journey-spine";
 import { NowCard } from "@/components/shell/journey/now-card";
@@ -72,6 +73,7 @@ export async function DesignStepFrame({
             canAssign={ctx.isOwner && open}
             canEditValidators={ctx.isOwner && open}
             responsibleLabel={t.roles.creative}
+            personLinks={<ContactLinksSection projectId={projectId} />}
           />
         }
       />

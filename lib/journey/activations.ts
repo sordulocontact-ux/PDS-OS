@@ -1,7 +1,7 @@
 import "server-only";
 
 import { loadActivationsBoard } from "@/lib/activations/board";
-import { isGated, phaseOf } from "@/lib/activations/journey";
+import { isGated, phaseOf } from "@/lib/activations/phase";
 import { loadLevers } from "@/lib/activations/levers";
 import {
   loadActivationPeople,

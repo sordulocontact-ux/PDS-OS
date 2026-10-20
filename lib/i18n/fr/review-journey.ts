@@ -91,6 +91,8 @@ export const reviewJourney = {
     notClosed: (title: string, state: string) =>
       `${title} : pas encore clôturée (${state})`,
     proof: (title: string) => `${title} : preuve non vérifiée`,
+    statsUnavailable: (title: string) =>
+      `${title} : statistiques indisponibles`,
     horizon: (label: string, day: string) => `${label} : lus après le ${day}`,
     states: {
       draft: "brouillon",
@@ -115,8 +117,8 @@ export const reviewJourney = {
     proofs: (ok: number, toVerify: number, missing: number) =>
       `Preuves : ${ok} vérifiée${s(ok)}${toVerify ? `, ${toVerify} à vérifier` : ""}${missing ? `, ${missing} manquante${s(missing)}` : ""}`,
     proofsNone: "Preuves : aucune activation réalisée",
-    stats: (got: number, missing: number) =>
-      `Statistiques : ${got} relevée${s(got)}${missing ? `, ${missing} manquante${s(missing)}` : ""}`,
+    stats: (got: number, missing: number, unavailable: number) =>
+      `Statistiques : ${got} relevée${s(got)}${missing ? `, ${missing} manquante${s(missing)}` : ""}${unavailable ? `, ${unavailable} indisponible${s(unavailable)}` : ""}`,
     statsNone: "Statistiques : aucune activation réalisée",
     budget: (committed: string, envelope: string) =>
       `Budget : ${committed} engagés sur ${envelope}`,
@@ -127,8 +129,6 @@ export const reviewJourney = {
       `Règle de calcul : ${rule}${/[.!?]$/.test(rule) ? "" : "."}`,
     none: "Aucun élément.",
     noSource: "—",
-    unsourced:
-      "Aucune source de l'app ne fournit encore cet état : il n'est pas compté, jamais comme zéro.",
     groups: {
       activations: "Activations",
       publications: "Publications",
@@ -168,7 +168,12 @@ export const reviewJourney = {
         "La preuve de chaque activation réalisée : vérifiée, à vérifier ou manquante",
       stats: "Le dernier relevé de chaque activation réalisée",
       committed: "Devis validés et rémunérations acceptées",
+      statistics_partial:
+        "Relevé incomplet : toutes les publications ne sont pas comptées",
+      statistics_unavailable: "Indisponible n'est jamais compté comme zéro",
     },
+    partialMark: "partiel",
+    unavailableDetail: "la plateforme ne les fournit pas",
     proof: {
       not_expected: "Non attendue",
       to_provide: "À fournir",
@@ -180,8 +185,10 @@ export const reviewJourney = {
     measure: {
       not_expected: "Non attendues",
       to_collect: "À collecter",
+      partial: "Partielles",
       available_declared: "Disponibles, déclarées",
       available_verified: "Disponibles, vérifiées",
+      unavailable: "Indisponibles",
     },
     noOwner: "Responsable à désigner",
   },

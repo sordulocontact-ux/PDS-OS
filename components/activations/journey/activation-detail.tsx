@@ -7,7 +7,7 @@ import { PhaseStrip } from "@/components/ui/phase-strip";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import type { ActivationFiche } from "@/lib/activations/fiche";
-import { isGated, phaseLabel, phaseOf } from "@/lib/activations/journey";
+import { isGated, phaseLabel, phaseOf } from "@/lib/activations/phase";
 import type { ActivationPeople } from "@/lib/activations/people";
 import { lastStatusEvent } from "@/lib/activations/status-events";
 import type { Access } from "@/lib/auth/access";

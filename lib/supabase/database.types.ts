@@ -1536,6 +1536,7 @@ export type Database = {
           method: string | null
           metric: string
           organization_id: string
+          partial: boolean
           period_end: string | null
           period_start: string | null
           platform: string | null
@@ -1560,6 +1561,7 @@ export type Database = {
           method?: string | null
           metric: string
           organization_id: string
+          partial?: boolean
           period_end?: string | null
           period_start?: string | null
           platform?: string | null
@@ -1584,6 +1586,7 @@ export type Database = {
           method?: string | null
           metric?: string
           organization_id?: string
+          partial?: boolean
           period_end?: string | null
           period_start?: string | null
           platform?: string | null
@@ -7829,6 +7832,7 @@ export type Database = {
           kind: string
           lever_id: string | null
           metrics_expected: boolean
+          metrics_unavailable: boolean
           mode: string | null
           objective: string | null
           organization_id: string
@@ -7860,6 +7864,7 @@ export type Database = {
           kind: string
           lever_id?: string | null
           metrics_expected?: boolean
+          metrics_unavailable?: boolean
           mode?: string | null
           objective?: string | null
           organization_id: string
@@ -7891,6 +7896,7 @@ export type Database = {
           kind?: string
           lever_id?: string | null
           metrics_expected?: boolean
+          metrics_unavailable?: boolean
           mode?: string | null
           objective?: string | null
           organization_id?: string
@@ -16473,6 +16479,10 @@ export type Database = {
     }
     Functions: {
       contact_link_token: { Args: { p_link_id: string }; Returns: string }
+      get_contact_call_requests: {
+        Args: { p_token: string }
+        Returns: Json
+      }
       get_contact_page: { Args: { p_token: string }; Returns: Json }
       issue_contact_link: {
         Args: { p_contact_id: string; p_expires_at?: string; p_project_id: string }
@@ -18354,6 +18364,18 @@ export type Database = {
         Args: { p_brief_id: string; p_note?: string; p_unchanged_reason?: string }
         Returns: string
       }
+      send_influence_brief: {
+        Args: {
+          p_ads: string
+          p_body: string
+          p_channel: string
+          p_deliverables: string
+          p_fee: number
+          p_organic: string
+          p_target_id: string
+        }
+        Returns: string
+      }
       send_mix_feedback: { Args: { p_version_id: string }; Returns: undefined }
       send_production_corrections: {
         Args: { p_request_id: string }
@@ -18577,6 +18599,10 @@ export type Database = {
           p_summary: string
           p_transcript_id: string
         }
+        Returns: string
+      }
+      send_agency_recap: {
+        Args: { p_activation_id: string; p_body: string; p_subject: string }
         Returns: string
       }
       send_call_summary: {

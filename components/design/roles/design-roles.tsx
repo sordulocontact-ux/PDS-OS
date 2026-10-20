@@ -26,6 +26,8 @@ type Props = {
   canEditValidators: boolean;
   // « Responsable de la fiche » rather than « Responsable ».
   responsibleLabel?: string;
+  // Each person's page by project (lot 11, `ContactLinksSection`).
+  personLinks?: React.ReactNode;
 };
 
 /** « Qui fait quoi » of a Conception scope (MKT-C2-08, sub-lot C7) on the
@@ -93,5 +95,5 @@ function designRoles(p: Props): RolesPanelProps {
         ) : undefined,
     })),
   ];
-  return { roles };
+  return { roles, personLinks: p.personLinks };
 }

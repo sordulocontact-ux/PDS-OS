@@ -90,7 +90,13 @@ export async function Informations({
         />
         <FactRow
           label={t.stats}
-          value={a.lastFigure ? `${a.lastFigure} · ${t.lastSnapshot}` : null}
+          value={
+            a.measure === "unavailable"
+              ? t.statsUnavailable
+              : a.lastFigure
+                ? `${a.lastFigure} · ${t.lastSnapshot}`
+                : null
+          }
           state={{
             tone: measureTone[a.measure],
             label: ta.measure.states[a.measure],

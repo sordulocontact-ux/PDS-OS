@@ -1,3 +1,4 @@
+import { ContactLinksSection } from "@/components/portal/contact-links-section";
 import type { RoleRow } from "@/components/shell/module/roles-panel";
 import { WhoDoesWhatButton } from "@/components/shell/module/who-does-what-button";
 import type { DistributionContext } from "@/lib/distribution/journey-context";
@@ -47,5 +48,11 @@ export function DistributionRolesButton({ ctx }: { ctx: DistributionContext }) {
       who: e.actor,
       at: e.at,
     }));
-  return <WhoDoesWhatButton roles={roles} history={history} />;
+  return (
+    <WhoDoesWhatButton
+      roles={roles}
+      history={history}
+      personLinks={<ContactLinksSection projectId={ctx.project.id} />}
+    />
+  );
 }

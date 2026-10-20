@@ -6,6 +6,7 @@ import { errors } from "./errors";
 import { aiUsage } from "./ai-usage";
 import { activations } from "./activations";
 import { activationWork } from "./activation-work";
+import { activationBrief } from "./activation-brief";
 import { activationInfluence } from "./activation-influence";
 import { activationPress } from "./activation-press";
 import { activationAgency } from "./activation-agency";
@@ -272,6 +273,7 @@ export const fr = {
   activations,
   activationWork,
   activationInfluence,
+  activationBrief,
   activationPress,
   activationAgency,
   activationJourney,

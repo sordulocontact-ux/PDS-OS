@@ -8,7 +8,7 @@ import { fr } from "@/lib/i18n/fr";
 import type { ReserveCategory } from "@/lib/marketing/reports/model";
 import { formatDay } from "@/lib/utils/day";
 
-import type { ReviewActivation } from "./phase";
+import type { ReviewActivation } from "./review-activation";
 
 const t = fr.reviewJourney.issues;
 
@@ -29,7 +29,8 @@ export type HorizonObjective = {
 
 /**
  * What is missing for the bilan: an activation cancelled (with its reason),
- * not yet closed (with its state), closed with a proof not verified; an
+ * not yet closed (with its state), closed with a proof not verified or its
+ * statistics unavailable; an
  * objective whose figure is read after today. `known`: descriptions of the
  * reserves already open, carried over by the version as they are.
  */
@@ -55,13 +56,22 @@ export function bilanIssues(
         text: t.notClosed(a.title, t.states[a.status]),
         activationId: a.id,
       });
-    else if (a.proof !== "verified" && a.proof !== "not_expected")
-      issues.push({
-        key: `proof:${a.id}`,
-        category: "evidence",
-        text: t.proof(a.title),
-        activationId: a.id,
-      });
+    else {
+      if (a.proof !== "verified" && a.proof !== "not_expected")
+        issues.push({
+          key: `proof:${a.id}`,
+          category: "evidence",
+          text: t.proof(a.title),
+          activationId: a.id,
+        });
+      if (a.measure === "unavailable")
+        issues.push({
+          key: `stats:${a.id}`,
+          category: "statistics",
+          text: t.statsUnavailable(a.title),
+          activationId: a.id,
+        });
+    }
   }
   for (const o of objectives)
     if (o.dueOn && o.dueOn > today)

@@ -21,6 +21,8 @@ export async function targetWarnings(input: {
   contactId: string;
   activationId: string;
   withAudience: boolean;
+  // RP: the journalist picked, for « Doublon probable ».
+  press?: { journalistId: string | null };
 }): Promise<TargetWarning[]> {
   await requireApproved();
   const parsed = z
@@ -28,6 +30,7 @@ export async function targetWarnings(input: {
       contactId: z.uuid(),
       activationId: z.uuid(),
       withAudience: z.boolean(),
+      press: z.object({ journalistId: z.uuid().nullable() }).optional(),
     })
     .safeParse(input);
   if (!parsed.success) return [];
@@ -35,6 +38,7 @@ export async function targetWarnings(input: {
     parsed.data.contactId,
     parsed.data.activationId,
     parsed.data.withAudience,
+    parsed.data.press ?? null,
   );
 }
 
