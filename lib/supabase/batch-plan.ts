@@ -62,8 +62,15 @@ function innerPath(path: string, select: string) {
 
 /** Null when the read must not be merged: a page (`offset`), a long
  * `limit`, or no id condition. */
-export function mergePlan(url: URL, headerKey: string): MergePlan | null {
+export function mergePlan(
+  url: URL,
+  headerKey: string,
+  // A count without rows (`head`, `count=exact`): merged on plain columns,
+  // without a `limit` (PostgREST counts beyond it).
+  count = false,
+): MergePlan | null {
   if (url.searchParams.has("offset")) return null;
+  if (count && url.searchParams.has("limit")) return null;
   const limitParam = url.searchParams.get("limit");
   const limit = limitParam === null ? null : Number(limitParam);
   if (limit !== null && !(limit > 0 && limit <= MERGED_ROWS)) return null;
@@ -78,6 +85,7 @@ export function mergePlan(url: URL, headerKey: string): MergePlan | null {
     else rest.push([name, value]);
   }
   if (ids.size === 0) return null;
+  if (count && [...ids.keys()].some((c) => c.includes("."))) return null;
   // An alias named like an id column would hide it in the rows.
   const tokens = topLevel(select);
   if ([...ids.keys()].some((c) => tokens.some((t) => t.startsWith(`${c}:`))))
@@ -87,6 +95,7 @@ export function mergePlan(url: URL, headerKey: string): MergePlan | null {
     rest,
     [...ids.keys()],
     headerKey,
+    count,
   ]);
   return { key, ids, limit };
 }
@@ -97,11 +106,14 @@ export function mergedUrl(
   base: URL,
   union: Map<string, Set<string>>,
   limited: boolean,
+  // A count: only the id columns come back, to count each caller's rows.
+  count = false,
 ): { url: URL; added: string[] } {
   const url = new URL(base);
   for (const [column, values] of union)
     url.searchParams.set(column, `in.(${[...values].join(",")})`);
   if (limited) url.searchParams.set("limit", String(MERGED_ROWS));
+  if (count) url.searchParams.set("select", [...union.keys()].join(","));
   const tokens = topLevel(url.searchParams.get("select"));
   const added = tokens.includes("*")
     ? []
