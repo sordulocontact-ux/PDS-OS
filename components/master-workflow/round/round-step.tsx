@@ -199,7 +199,7 @@ export function RoundStep({
         <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
           {fr.masterInHouse.assignedLine(
             inHouse.name,
-            formatShortDay(inHouse.assignedAt),
+            formatShortDay(inHouse.assignedAt, { bare: true }),
             null,
           )}
         </p>

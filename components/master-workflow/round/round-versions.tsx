@@ -42,7 +42,9 @@ export function RoundVersions({ round, engineer, viewerIsOwner }: Props) {
   if (titles.length === 0)
     return (
       <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {t.versions.none(engineer)}
+        {round.inHouse
+          ? fr.masterInHouse.noVersion(engineer)
+          : t.versions.none(engineer)}
       </p>
     );
   return (

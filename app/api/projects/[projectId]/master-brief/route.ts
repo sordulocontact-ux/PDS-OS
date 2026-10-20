@@ -27,8 +27,11 @@ export async function GET(
     return Response.json({ ok: false, error: "not_found" }, { status: 404 });
   const step = await loadBriefStep(project, access, null);
   const t = fr.masterBrief;
-  const name = (id: string | null) =>
-    step.view.engineers.find((e) => e.id === id)?.name ?? null;
+  // A contact of the Réseau, or the in-house engineer (a member).
+  const name = (id: string | null, personId: string | null) =>
+    step.view.engineers.find((e) => e.id === id)?.name ??
+    step.view.members.find((m) => m.personId === personId)?.name ??
+    null;
   const html = briefHtml({
     project: project.title,
     titles: project.masters.map((m) => m.title),
@@ -37,8 +40,11 @@ export async function GET(
     dates: Object.fromEntries(
       BRIEF_DATES.map((key) => [key, step.dates[key].value]),
     ) as Record<BriefDate, string | null>,
-    mix: name(step.view.brief.mixContactId),
-    mastering: name(step.view.brief.masteringContactId),
+    mix: name(step.view.brief.mixContactId, step.view.brief.mixPersonId),
+    mastering: name(
+      step.view.brief.masteringContactId,
+      step.view.brief.masteringPersonId,
+    ),
     validator:
       step.view.validators.find(
         (v) => v.personId === step.view.brief.validatorPersonId,

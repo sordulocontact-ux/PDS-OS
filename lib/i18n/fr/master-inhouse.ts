@@ -8,6 +8,8 @@ export const masterInHouse = {
   assigned: (name: string) => `Assigné à ${name}`,
   assignedLine: (name: string, day: string, by: string | null) =>
     `Assigné à ${name} le ${day}${by ? ` par ${by}` : ""} : il dépose ses versions dans PDS OS.`,
+  noVersion: (name: string) =>
+    `Aucune version pour l'instant : ${name.split(" ")[0] ?? name} dépose la première dans PDS OS.`,
   todo: { assign: (name: string) => `Assigner à ${name}` },
   deposit: (label: string, n: number) => `Déposer ma version · ${label} V${n}`,
   depositHint: "Rangée dans le titre, au Catalogue, comme nouvelle version.",
