@@ -92,12 +92,11 @@ export async function loadMasterBrief(
         .eq("project_id", project.id)
         .not("master_role", "is", null),
       loadFramingDefaults(project.id),
-      supabase
-        .from("memberships")
-        .select(
-          "person_id, person:people!memberships_person_id_fkey(first_name, last_name)",
-        )
-        .eq("status", "approved"),
+      access.organizationId
+        ? supabase.rpc("list_member_people", {
+            p_organization_id: access.organizationId,
+          })
+        : Promise.resolve({ data: [] }),
     ]);
   if (exchanges.error)
     console.error("loadMasterBrief exchanges:", exchanges.error.message);
@@ -177,18 +176,10 @@ export async function loadMasterBrief(
       ? []
       : networkEngineers(rows.contacts, rows.linkedCredits),
     validators,
-    members: (members.data ?? [])
-      .flatMap((m) =>
-        m.person
-          ? [
-              {
-                personId: m.person_id,
-                name: personName(m.person.first_name, m.person.last_name),
-              },
-            ]
-          : [],
-      )
-      .sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    members: (members.data ?? []).map((m) => ({
+      personId: m.person_id,
+      name: personName(m.first_name, m.last_name),
+    })),
     exchanges: (exchanges.data ?? []).flatMap((row) =>
       row.call
         ? [

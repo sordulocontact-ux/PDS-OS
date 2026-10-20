@@ -18756,6 +18756,22 @@ export type Database = {
         Args: { p_items: Json; p_project_id: string }
         Returns: string
       }
+      list_direction_people: {
+        Args: { p_organization_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+        }[]
+      }
+      list_member_people: {
+        Args: { p_organization_id: string }
+        Returns: {
+          first_name: string
+          last_name: string
+          person_id: string
+        }[]
+      }
       list_legal_people: {
         Args: { p_organization_id: string }
         Returns: {

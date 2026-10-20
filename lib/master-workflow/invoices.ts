@@ -8,6 +8,7 @@ import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
 import { invoiceDueOn, maskIban } from "./invoice-rules";
+import { loadDirectionPerson } from "./journey-context";
 
 // The engineers' invoices of a project, as the team reads them in the
 // Master final (docs/projet-complet/master.md § 9). Read with the session:
@@ -103,15 +104,7 @@ export const loadMasterInvoices = cache(
         .select("mix_contact_id, mastering_contact_id, mastering_same_engineer")
         .eq("project_id", projectId)
         .maybeSingle(),
-      supabase
-        .from("memberships")
-        .select(
-          "person:people!memberships_person_id_fkey(first_name, last_name)",
-        )
-        .eq("role", "general_director")
-        .eq("status", "approved")
-        .limit(1)
-        .maybeSingle(),
+      loadDirectionPerson(),
     ]);
     if (invoices.error)
       console.error("loadMasterInvoices:", invoices.error.message);
@@ -182,7 +175,7 @@ export const loadMasterInvoices = cache(
       isDirection,
       canAddOther:
         access.personId !== null && access.personId === ownerPersonId,
-      direction: nameOf(director.data?.person ?? null),
+      direction: director?.name ?? null,
       budget: (lines.data ?? []).flatMap((l) =>
         l.master_role === "mix" || l.master_role === "mastering"
           ? [

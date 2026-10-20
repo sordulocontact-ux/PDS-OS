@@ -46,23 +46,22 @@ export const masterJourneyContext = cache(async (projectId: string) => {
   return { access, project, facts, steps, viewerName };
 });
 
-/** The general director, who pays (the direction): the first one. */
+/** The direction (permission `validate`), who pays and arbitrates: the
+ * first one (list_direction_people; a member reads only their own
+ * membership). */
 export const loadDirectionPerson = cache(async () => {
+  const access = await requireApproved();
+  if (!access.organizationId) return null;
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("memberships")
-    .select(
-      "person_id, person:people!memberships_person_id_fkey(first_name, last_name)",
-    )
-    .eq("role", "general_director")
-    .eq("status", "approved")
-    .order("requested_at")
-    .limit(1)
-    .maybeSingle();
-  return data?.person
+  const { data, error } = await supabase.rpc("list_direction_people", {
+    p_organization_id: access.organizationId,
+  });
+  if (error) console.error("loadDirectionPerson:", error.message);
+  const first = data?.[0];
+  return first
     ? {
-        personId: data.person_id,
-        name: personName(data.person.first_name, data.person.last_name),
+        personId: first.person_id,
+        name: personName(first.first_name, first.last_name),
       }
     : null;
 });
