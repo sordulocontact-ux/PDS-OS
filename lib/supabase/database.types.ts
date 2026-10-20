@@ -2730,6 +2730,7 @@ export type Database = {
       }
       budget_lines: {
         Row: {
+          committed_cents: number | null
           amount_cents: number
           attachment_file_id: string | null
           created_at: string
@@ -2737,6 +2738,7 @@ export type Database = {
           deliverable_id: string | null
           family: string | null
           family_detail: string | null
+          invoice_id: string | null
           id: string
           label: string
           lever_id: string | null
@@ -2748,6 +2750,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          committed_cents?: number | null
           amount_cents: number
           attachment_file_id?: string | null
           created_at?: string
@@ -2755,6 +2758,7 @@ export type Database = {
           deliverable_id?: string | null
           family?: string | null
           family_detail?: string | null
+          invoice_id?: string | null
           id?: string
           label: string
           lever_id?: string | null
@@ -2766,6 +2770,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          committed_cents?: number | null
           amount_cents?: number
           attachment_file_id?: string | null
           created_at?: string
@@ -2773,6 +2778,7 @@ export type Database = {
           deliverable_id?: string | null
           family?: string | null
           family_detail?: string | null
+          invoice_id?: string | null
           id?: string
           label?: string
           lever_id?: string | null
@@ -2784,6 +2790,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "budget_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "project_invoices"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "budget_lines_deliverable_id_fkey"
             columns: ["deliverable_id"]
@@ -9684,6 +9697,138 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "project_masters"
             referencedColumns: ["project_id", "master_id"]
+          },
+        ]
+      }
+      project_invoices: {
+        Row: {
+          amount_cents: number | null
+          bank_changed: boolean
+          contact_id: string
+          contract_id: string | null
+          created_at: string
+          due_on: string | null
+          file_bucket: string | null
+          file_bytes: number | null
+          file_name: string | null
+          file_path: string | null
+          financial_need_id: string | null
+          gap_reason: string | null
+          id: string
+          number: string | null
+          organization_id: string
+          origin: string
+          paid_at: string | null
+          paid_by: string | null
+          paid_on: string | null
+          project_id: string
+          proof_bucket: string | null
+          proof_name: string | null
+          proof_path: string | null
+          received_at: string | null
+          received_by: string | null
+          received_how: string | null
+          received_on: string | null
+          received_via: string | null
+          requested_at: string
+        }
+        Insert: {
+          amount_cents?: number | null
+          bank_changed?: boolean
+          contact_id: string
+          contract_id?: string | null
+          created_at?: string
+          due_on?: string | null
+          file_bucket?: string | null
+          file_bytes?: number | null
+          file_name?: string | null
+          file_path?: string | null
+          financial_need_id?: string | null
+          gap_reason?: string | null
+          id?: string
+          number?: string | null
+          organization_id: string
+          origin: string
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          project_id: string
+          proof_bucket?: string | null
+          proof_name?: string | null
+          proof_path?: string | null
+          received_at?: string | null
+          received_by?: string | null
+          received_how?: string | null
+          received_on?: string | null
+          received_via?: string | null
+          requested_at?: string
+        }
+        Update: {
+          amount_cents?: number | null
+          bank_changed?: boolean
+          contact_id?: string
+          contract_id?: string | null
+          created_at?: string
+          due_on?: string | null
+          file_bucket?: string | null
+          file_bytes?: number | null
+          file_name?: string | null
+          file_path?: string | null
+          financial_need_id?: string | null
+          gap_reason?: string | null
+          id?: string
+          number?: string | null
+          organization_id?: string
+          origin?: string
+          paid_at?: string | null
+          paid_by?: string | null
+          paid_on?: string | null
+          project_id?: string
+          proof_bucket?: string | null
+          proof_name?: string | null
+          proof_path?: string | null
+          received_at?: string | null
+          received_by?: string | null
+          received_how?: string | null
+          received_on?: string | null
+          received_via?: string | null
+          requested_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_invoices_contact_same_org"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "network_contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "project_invoices_financial_need_id_fkey"
+            columns: ["financial_need_id"]
+            isOneToOne: true
+            referencedRelation: "financial_needs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_invoices_paid_by_fkey"
+            columns: ["paid_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_invoices_project_same_org"
+            columns: ["project_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "project_invoices_received_by_fkey"
+            columns: ["received_by"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -17119,6 +17264,31 @@ export type Database = {
       }
     }
     Functions: {
+      add_received_invoice: {
+        Args: { p_amount_cents: number; p_bic: string | null; p_file_name: string; p_holder: string | null; p_how: string | null; p_iban: string | null; p_invoice_id: string; p_mime: string; p_number: string; p_path: string; p_reason: string | null; p_received_on: string | null }
+        Returns: undefined
+      }
+      get_person_invoices: { Args: { p_token: string }; Returns: Json }
+      open_invoice_slot: {
+        Args: { p_ext: string; p_invoice_id: string; p_kind: string }
+        Returns: string
+      }
+      open_person_invoice_slot: {
+        Args: { p_ext: string; p_invoice_id: string; p_token: string }
+        Returns: string
+      }
+      pay_invoice: {
+        Args: { p_file_name: string; p_invoice_id: string; p_mime: string; p_paid_on: string; p_path: string }
+        Returns: undefined
+      }
+      project_invoice_states: {
+        Args: { p_project_id: string }
+        Returns: { invoice_id: string; origin: string; contact_id: string; contact_name: string; financial_need_id: string | null; contract_id: string | null; state: string; received_on: string | null; due_on: string | null; paid_on: string | null }[]
+      }
+      submit_person_invoice: {
+        Args: { p_amount_cents: number; p_bic: string | null; p_file_name: string; p_holder: string | null; p_iban: string | null; p_invoice_id: string; p_mime: string; p_number: string; p_path: string; p_reason: string | null; p_token: string }
+        Returns: undefined
+      }
       legal_invoice_states: {
         Args: { p_project_id: string }
         Returns: { financial_need_id: string; contact_id: string; state: string; due_on: string | null }[]

@@ -109,7 +109,7 @@ select pg_temp.act_as(pg_temp.id_of('creative'));
 select public.decide_mix_version((select id from public.master_mix_versions where file_id = pg_temp.id_of('mix1')),
                                  'approved', null);
 reset role;
-select is((select count(*)::int from public.master_invoices where project_id = pg_temp.id_of('project')),
+select is((select count(*)::int from public.project_invoices where project_id = pg_temp.id_of('project')),
           0, 'the mix validated does not ask for the invoice');
 select pg_temp.act_as(pg_temp.id_of('creative'));
 select public.decide_mix_version((select id from public.master_mix_versions where file_id = pg_temp.id_of('master1')),

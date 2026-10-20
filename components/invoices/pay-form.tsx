@@ -9,13 +9,10 @@ import { FilePickField } from "@/components/ui/file-pick-field";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { todayInParis } from "@/lib/insights/dates";
 import { fr } from "@/lib/i18n/fr";
-import {
-  openProofSlot,
-  payInvoice,
-} from "@/lib/master-workflow/invoice-actions";
+import { openProofSlot, payInvoice } from "@/lib/invoices/actions";
 import { createClient } from "@/lib/supabase/client";
 
-const t = fr.masterInvoice.team;
+const t = fr.invoices.team;
 const MIMES = ["application/pdf", "image/png", "image/jpeg"] as const;
 type Mime = (typeof MIMES)[number];
 
@@ -71,9 +68,9 @@ export function PayForm({
       const slot = await openProofSlot(invoiceId, proof.name);
       if (!slot.ok) return slot;
       const { error } = await createClient()
-        .storage.from("master-finance")
+        .storage.from("project-invoices")
         .upload(slot.path, proof, { contentType: mime, upsert: false });
-      if (error) return { ok: false, error: t.errors.failed };
+      if (error) return { ok: false, error: fr.invoices.errors.upload_missing };
       return payInvoice(projectId, invoiceId, {
         paidOn,
         path: slot.path,
@@ -85,12 +82,13 @@ export function PayForm({
 
   return (
     <div ref={root} className="flex flex-col gap-3">
+      <h4 className="font-semibold">{t.payTitle}</h4>
       <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
         {t.payNote}
       </p>
       <div className="max-w-60">
         <Field
-          name="paid-on"
+          name={`paid-on-${invoiceId}`}
           type="date"
           label={t.paidOn}
           aria-required
@@ -102,7 +100,7 @@ export function PayForm({
         />
       </div>
       <FilePickField
-        id="payment-proof"
+        id={`payment-proof-${invoiceId}`}
         label={`${t.proof} *`}
         hint={t.proofHint}
         chosenLabel={t.proofChosen}

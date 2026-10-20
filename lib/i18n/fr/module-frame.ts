@@ -10,7 +10,6 @@ export const moduleFrame = {
   facts: {
     label: "Le projet en bref",
     budget: "Budget",
-    budgetValue: (euros: string) => `${euros} € HT`,
     owner: "Responsable",
     release: "Sortie",
   },

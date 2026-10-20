@@ -8,7 +8,7 @@ import { fr } from "@/lib/i18n/fr";
 import { createClient } from "@/lib/supabase/server";
 import type { WriteResult } from "@/lib/utils/write-result";
 
-const t = fr.masterInvoice.billing;
+const t = fr.invoices.billing;
 
 const billing = z.object({
   legalName: z.string().trim().min(1).max(200),

@@ -7,7 +7,8 @@ import { StepHistory } from "@/components/shell/journey/step-history";
 import { contractProofOf } from "@/lib/contracts/proof";
 import { generateReadyAgreements } from "@/lib/legal/contracts/auto-generate";
 import { loadContractCards } from "@/lib/legal/contracts/document-card";
-import { loadContractInvoices } from "@/lib/legal/invoices/queries";
+import { loadProjectInvoices } from "@/lib/invoices/queries";
+import { loadInvoiceStates } from "@/lib/invoices/states";
 import { demarcheHistory } from "@/lib/legal/demarches/history";
 import { loadLegalHistory } from "@/lib/legal/history/queries";
 import { fr } from "@/lib/i18n/fr";
@@ -52,12 +53,26 @@ export async function DemarcheStep({
       ? [p.panel.row.contract.id]
       : [],
   );
-  const [proof, history, cards, invoices] = await Promise.all([
-    contractProofOf(contractIds),
-    loadLegalHistory(ctx.project, ctx.access),
-    loadContractCards(contractIds),
-    loadContractInvoices(projectId, ctx.clearances.canValidate),
-  ]);
+  const [proof, history, cards, invoiceView, invoiceStates] = await Promise.all(
+    [
+      contractProofOf(contractIds),
+      loadLegalHistory(ctx.project, ctx.access),
+      loadContractCards(contractIds),
+      loadProjectInvoices(projectId, ctx.project.ownerPersonId),
+      loadInvoiceStates(projectId),
+    ],
+  );
+  // A contract's invoice: read by the owner and the direction, where it
+  // stands for the Juridique (one invoice system, 20/10/2026).
+  const byContract = Object.fromEntries(
+    contractIds.map((id) => [
+      id,
+      {
+        invoice: invoiceView.invoices.find((i) => i.contractId === id) ?? null,
+        state: invoiceStates.find((s) => s.contractId === id) ?? null,
+      },
+    ]),
+  );
   return (
     <LegalStepFrame
       projectId={projectId}
@@ -73,7 +88,7 @@ export async function DemarcheStep({
         clearances={ctx.clearances}
         proof={Object.fromEntries(proof)}
         cards={cards}
-        invoices={invoices}
+        invoices={{ byContract, view: invoiceView }}
         direction={ctx.direction ?? fr.legalDemarches.direction}
         owner={
           demarche.own?.responsibleName ??

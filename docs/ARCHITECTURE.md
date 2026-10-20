@@ -2429,6 +2429,62 @@ date de sortie de la Stratégie, NDA : à décider).
   prochain rendez-vous avec PDS » s'il n'y a rien d'autre) ; les calls du Cadrage ont leur intertitre
   « Cadrage » avant Master, Juridique, Marketing, Distribution (seul ordre que le proto ne dit pas).
 
+## 8 ter bis. Factures des externes et « À payer » : un seul système (20/10/2026, `lib/invoices/`)
+
+Les deux gestions codées en parallèle (facture de l'ingénieur au Master final, `20261020010101` ;
+facture d'un contrat payé du Juridique, `20261020030301`) n'en font plus qu'une
+(`20261020060101_project_invoices`, `20261020060201_invoice_former_signatures`).
+
+- **Table `project_invoices`** : une ligne par facture demandée à une personne externe sur un projet,
+  `origin` `master` (rôles de l'ingénieur, unique par projet et contact) ou `contract` (un
+  `financial_needs`, donc un contrat signé avec rémunération ; trigger `z_request_invoice` sur
+  `financial_needs`). Reçue (`received_at`, `received_on`, `due_on` = +30 jours, `received_via`
+  `link` / `team`), montant comparé à ce qui était convenu (`project_invoice_expected` : tarifs engagés
+  du Master, ou montant du contrat ; motif obligatoire si écart), payée (`paid_on`, preuve
+  `proof_*`). Lue par le responsable et la direction comme le budget (RLS
+  `can_read_project_budget`) ; ce que sait le Juridique sans la lire : `project_invoice_states`
+  (`asked` / `rib` / `to_pay` / `paid`). Fichiers : bucket privé `project-invoices` par créneaux à usage
+  unique (`project_invoice_slots`) ; les fichiers migrés restent dans `master-finance` /
+  `legal-invoices`, lisibles par la ligne (`file_bucket`, `proof_bucket`, `project_invoice_file_readable`).
+- **Fonctions** : lien privé (sans compte) `get_person_invoices`, `open_person_invoice_slot`,
+  `submit_person_invoice` — le jeton est celui de la page de la personne (`/c`) **ou** du lien Master
+  de l'ingénieur (`/m`) (`invoice_person_of_token`) ; équipe : `open_invoice_slot`,
+  `add_received_invoice` (responsable **ou** direction, « Reçue le »), `confirm_contact_bank_account`,
+  `pay_invoice` (direction seule, RIB confirmé, jour ≥ réception, preuve). Cœur commun :
+  `record_project_invoice`. Les anciennes signatures (`get_master_invoice`, `submit_master_invoice`,
+  `get_contact_invoices`, `submit_legal_invoice`, `pay_master_invoice`, `mark_legal_invoice_paid`,
+  `legal_invoice_states`…) sont gardées et écrivent la même table. `master_invoices`,
+  `legal_invoices`, `master_payment_proofs` : gardées avec leurs données, plus écrites.
+- **RIB** : un seul, `contact_bank_accounts` (direction seule) — le premier donné par la personne sur
+  son lien est gardé, un RIB changé ou saisi par un membre attend la vérification par téléphone
+  (notification `master_bank_details_changed` ou `legal_invoice_bank_changed`). Requis à la première
+  facture, quelle qu'elle soit.
+- **Budget sans double compte** : `budget_lines.invoice_id` ; les lignes des rôles de l'ingénieur sont
+  liées à sa facture, un contrat signé crée sa ligne `Engagé` (libellé du contrat). À la réception, les
+  lignes prennent le montant facturé (réparti au prorata, le convenu gardé dans `committed_cents`,
+  « Engagé 250 € HT » sous la ligne) et passent `Facturé`, puis `Payé`. Une ligne qui suit une facture :
+  ni montant, ni état, ni suppression par l'équipe (trigger `budget_line_follows_invoice`,
+  `line_follows_invoice` ; formulaire en lecture seule sur ces champs).
+- **Code** : `lib/invoices/` (`queries.ts` `loadProjectInvoices`, `actions.ts`, `public.ts`,
+  `public-actions.ts`, `states.ts`, `rules.ts`, `href.ts`, `billing*.ts` « Facturation de PDS »),
+  `components/invoices/` (`InvoiceCard`, `InvoicePanel`, `InvoiceForm`, `PayForm`, `RibConfirmForm`,
+  `ContractInvoice`, `invoicePortalCards`, `PayList`). Master final : `components/master-workflow/
+  invoice-block.tsx` (panneau commun + budget du Master) ; étape d'une personne du Juridique :
+  `ContractInvoice` ; `/m` et `/c` : `invoicePortalCards` (une carte par facture, lues une fois par le
+  jeton de la page).
+- **« À payer »** (`PayList`) : sur le **Budget** du projet, pour la direction seule, chaque facture
+  reçue non payée (échéance la plus proche d'abord, « En retard »), payable sur place (« Voir et
+  payer » : le panneau commun), « Ouvrir » vers le Master final pour l'ingénieur. Tous projets : les
+  actions « Payer la facture de X » / « Confirmer le nouveau RIB de X » des parcours Master et Juridique
+  dans le Travail de la direction.
+- **« Prêt pour la sortie »** : un contrôle « Facture de X » par facture **reçue**, jamais bloquant
+  (ouvert tant qu'elle n'est pas payée → « À risque », fait une fois payée), source « Budget du
+  projet » ; une facture encore attendue n'y est pas (sa démarche le dit).
+- **Montants** : un seul formateur, `formatAmount` (`lib/utils/money.ts`, « 1 100 € HT ») ;
+  `formatEuros` (budget) et `formatFee` (contrats) en sont des alias.
+- pgTAP : `project-invoices.test.sql` (24), `master-invoices`, `legal-reste`, `master-deliverables`
+  adaptés (même table ; le responsable lit désormais la facture d'un contrat, jamais le RIB).
+
 ## 8 quater. Retours sur l'application (`/app/feedback`)
 
 Circuit : l'équipe écrit au **DG**, PO regroupe les doublons, le DG choisit ce qui est
@@ -3660,7 +3716,8 @@ Remplace l'étape « Suivi » et les pages de branche (`docs/projet-complet/lega
   Notifications `legal_invoice_received` (direction), `legal_invoice_paid` (responsable).
   Parcours (`lib/legal/invoices/journey.ts`) : la démarche signée dit « Contrat signé · facture
   attendue / à payer / payée », la personne « Déposer la facture » (lien), la direction « Payer
-  la facture de X ». **PDS OS ne fait jamais de virement et ne garde aucun IBAN** (décision du
+  la facture de X ». *(Remplacé le 20/10/2026 par § 8 ter bis : une seule table `project_invoices`,
+  RIB commun.)* **PDS OS ne fait jamais de virement et ne garde aucun IBAN** (décision du
   20/10/2026 : le RIB reste hors de l'app, le contrôle anti-fraude se fait au téléphone) ; « Facturer
   à » montre le nom de l'organisation (raison sociale, adresse, SIRET pas encore en base).
 - Migrations `20261020030101` (modèle demandé, clause), `20261020030201` (liens de
@@ -3726,7 +3783,7 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
 - **Page privée `/m/`** : `PortalShell`, cartes « Votre dossier », « Mix » / « Mastering » (versions et
   dépôt), « Échanges avec le label », triées par `PortalSections`.
 - **Le reste du Master (20/10/2026, branche `pc/r1-master`, migrations `20261020010101` à `010601`)** :
-  - **Facture, RIB, paiement** (`20261020010101`, `lib/master-workflow/invoices.ts`, `invoice-*.ts`,
+  - *(Unifié le 20/10/2026 : § 8 ter bis.)* **Facture, RIB, paiement** (`20261020010101`, `lib/master-workflow/invoices.ts`, `invoice-*.ts`,
     `components/master-workflow/invoice/`) : quand chaque titre du tour a son Master final, un trigger
     demande la facture à chaque ingénieur **externe** (celui qui a reçu un lien) : `master_invoices`, une
     par ingénieur et projet. Carte « Votre facture » sur `/m/` et `/c/` : « Facturer à » (table

@@ -8,9 +8,9 @@ import { acceptRate } from "@/lib/master-workflow/round-actions";
 import { budgetStatusTone } from "@/lib/ui/state-tones";
 import type { RoundRate } from "@/lib/master-workflow/round-step";
 import { formatShortInstant } from "@/lib/utils/day";
+import { formatAmount } from "@/lib/utils/money";
 
 const t = fr.masterRound.rate;
-const euros = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 
 /** « Tarif » (proto `master:v1`): the rate the engineer proposed when
  * taking the package, « Accepter le tarif » for the owner. */
@@ -37,7 +37,7 @@ export function RateBlock({
           <FactRow
             key={r.stage}
             label={t.line(r.stage, engineer)}
-            value={t.euros(euros.format(r.amountCents / 100))}
+            value={formatAmount(r.amountCents)}
             source={
               r.status === "proposed"
                 ? t.proposedBy(

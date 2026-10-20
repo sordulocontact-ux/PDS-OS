@@ -266,6 +266,30 @@ par les tickets ou laissé « à confirmer », donc décidé provisoirement ou r
 - Rouvrir une décision : le mix seulement, tant que le mastering n'est pas parti.
 - Le lien privé du Master est gardé chiffré et relisible par le responsable (règle 19).
 
+### Finances unifiées : décisions du 20/10/2026 (branche `pc/f1-finance`)
+
+Prises sans ticket plus précis, cohérentes avec le proto « Projet complet » (`invBlock`, `payList`,
+`invControl`) et `master-v2.html` ; à confirmer par Ibé :
+
+- **Une seule facture par chose payée** : l'ingénieur (ses rôles du Master) et chaque contrat signé avec
+  rémunération ont chacun leur facture, dans une seule table ; mêmes règles partout (écart motivé,
+  échéance à 30 jours, RIB vérifié par téléphone s'il change, payée par la direction seule avec
+  date et preuve, jamais de virement par l'app).
+- **Le RIB est gardé** pour toute facture (il était refusé côté Juridique) : lu par la direction seule,
+  demandé avec la première facture ; le proto du Juridique le montre (« Virement sur », « Mon RIB a changé »).
+- **Le responsable du projet lit la facture d'un contrat** comme le budget (proto : la cheffe de
+  projet voit la facture et ajoute une facture reçue autrement), jamais le RIB ; le Juridique qui ne
+  lit pas le budget voit seulement où elle en est.
+- **« Ajouter une facture reçue autrement »** : le responsable ou la direction, avec « Reçue le ».
+- **« À payer »** : sur le Budget du projet (direction seule, payable sur place) ; tous projets : les
+  actions « Payer la facture de X » du Travail. Pas de page à part.
+- **Budget** : un contrat signé avec rémunération crée sa ligne « Engagé » (libellé du contrat) ; une
+  facture reçue donne son montant à ses lignes (« Facturé », le convenu gardé), puis « Payé » ; ces
+  lignes ne se modifient plus à la main (montant, état, suppression).
+- **« Prêt pour la sortie »** : une facture reçue et non payée est « À suivre », jamais bloquante ;
+  une facture encore attendue n'y figure pas.
+- **Tout montant est HT** et le dit (« 1 100 € HT »), un seul formateur.
+
 ### Master, le reste : décisions du 20/10/2026 (branche `pc/r1-master`)
 
 Prises sans tickets plus précis, cohérentes avec le proto `master-v2.html` ; à confirmer par Ibé :

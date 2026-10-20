@@ -9,7 +9,7 @@ import {
 } from "@/components/portal/portal-sections";
 import { fr } from "@/lib/i18n/fr";
 import { getLinkDeliverables } from "@/lib/master-workflow/deliverables-public";
-import { getPublicInvoice } from "@/lib/master-workflow/invoice-public";
+import { getPersonInvoices } from "@/lib/invoices/public";
 import { getPortalFrame } from "@/lib/portal/frame";
 import {
   getEngineerThread,
@@ -47,7 +47,7 @@ export default async function MasterPackagePage({
     linkKey: token,
     data,
     thread: await getEngineerThread(token),
-    invoice: await getPublicInvoice(token),
+    invoices: await getPersonInvoices(token),
     deliverables: await getLinkDeliverables(token),
   });
   return (

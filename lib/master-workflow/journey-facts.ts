@@ -261,11 +261,12 @@ export async function loadMasterJourneyFacts(project: {
       .eq("project_id", project.id)
       .not("master_role", "is", null),
     supabase
-      .from("master_invoices")
+      .from("project_invoices")
       .select(
-        "id, contact_id, requested_at, number, amount_cents, received_at, received_via, bank_changed, paid_on, paid_at, contact:network_contacts!master_invoices_contact_same_org(name), receiver:people!master_invoices_received_by_fkey(first_name, last_name), payer:people!master_invoices_paid_by_fkey(first_name, last_name)",
+        "id, contact_id, requested_at, number, amount_cents, received_at, received_via, bank_changed, paid_on, paid_at, contact:network_contacts!project_invoices_contact_same_org(name), receiver:people!project_invoices_received_by_fkey(first_name, last_name), payer:people!project_invoices_paid_by_fkey(first_name, last_name)",
       )
       .eq("project_id", project.id)
+      .eq("origin", "master")
       .order("requested_at"),
   ]);
   // Whether a new RIB waits, per engineer (never a digit): few rows, only

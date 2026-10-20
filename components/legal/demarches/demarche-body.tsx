@@ -6,7 +6,7 @@ import type { ContractProof } from "@/lib/contracts/proof";
 import { fr } from "@/lib/i18n/fr";
 import type { Clearances } from "@/lib/legal/clearance/types";
 import type { ContractCardData } from "@/lib/legal/contracts/document-card";
-import type { ContractInvoice } from "@/lib/legal/invoices/queries";
+import type { ContractInvoices } from "@/components/invoices/contract-invoice";
 import type { Demarche } from "@/lib/legal/demarches/build";
 import type { BoardRow } from "@/lib/legal/plan/board";
 
@@ -34,7 +34,7 @@ export function DemarcheBody({
   clearances: Clearances;
   proof: Record<string, ContractProof>;
   cards: Record<string, ContractCardData>;
-  invoices: Record<string, ContractInvoice>;
+  invoices: ContractInvoices;
   direction: string;
   // Who answers for it (« Revient signé en tête de l'étape de … »).
   owner: string;

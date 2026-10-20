@@ -167,7 +167,8 @@ select throws_ok(format($$ select public.mark_split_confirmation_sent(%L) $$, pg
                  '42501', null, 'nobody without an account touches a link');
 reset role;
 
--- 4. Invoices: deposited by the person's link, read and paid by the direction only -------------
+-- 4. Invoices (one table since 20261020060101): deposited by the person's link with their RIB,
+--    read by the owner and the direction, paid by the direction only --------------------------
 insert into public.network_contacts (organization_id, kind, name, roles)
 values (pg_temp.id_of('org'), 'person', 'Yanis ' || (select v from vars where k = 'tag'),
         array['musician']),
@@ -192,6 +193,8 @@ select pg_temp.act_as(pg_temp.id_of('manager'));
 insert into vars select 'yanis_token', public.issue_contact_link(pg_temp.id_of('project'), pg_temp.id_of('yanis'));
 insert into vars select 'ines_token', public.issue_contact_link(pg_temp.id_of('project'), pg_temp.id_of('ines'));
 reset role;
+insert into ids select 'need_invoice', id from public.project_invoices
+ where financial_need_id = pg_temp.id_of('need');
 
 set local role anon;
 select is((select jsonb_array_length(public.get_contact_invoices((select v from vars where k = 'yanis_token')))),
@@ -202,14 +205,16 @@ select throws_ok(format($$ select public.open_legal_invoice_slot(%L, %L, 'pdf') 
 insert into vars select 'path', public.open_legal_invoice_slot(
   (select v from vars where k = 'yanis_token'), pg_temp.id_of('need'), 'pdf');
 reset role;
-insert into storage.objects (bucket_id, name) values ('legal-invoices', (select v from vars where k = 'path'));
+insert into storage.objects (bucket_id, name) values ('project-invoices', (select v from vars where k = 'path'));
 set local role anon;
 select throws_ok(format($$ select public.submit_legal_invoice(%L, %L, %L, 'Facture.pdf', 'application/pdf', 1000, 'YM-1', 30000, null) $$,
                         (select v from vars where k = 'yanis_token'), pg_temp.id_of('need'),
                         (select v from vars where k = 'path')),
-                 'P0001', 'invoice_gap_reason_required', 'an amount that is not the fee agreed says why');
-select lives_ok(format($$ select public.submit_legal_invoice(%L, %L, %L, 'Facture.pdf', 'application/pdf', 1000, 'YM-1', 30000, 'Une heure de plus.') $$,
-                       (select v from vars where k = 'yanis_token'), pg_temp.id_of('need'),
+                 '23514', 'reason_required', 'an amount that is not the fee agreed says why');
+-- A RIB is needed to be paid: the first one comes with the first invoice (unified rule).
+select lives_ok(format($$ select public.submit_person_invoice(%L, %L, %L, 'Facture.pdf', 'application/pdf', 'YM-1', 30000, 'Une heure de plus.', 'FR7630006000011234567890189', null, 'Yanis') $$,
+                       (select v from vars where k = 'yanis_token'),
+                       pg_temp.id_of('need_invoice'),
                        (select v from vars where k = 'path')),
                 'the person deposits their invoice by their link');
 reset role;
@@ -220,8 +225,11 @@ select is((select count(*)::int from public.notifications
               and kind = 'legal_invoice_received'), 1, 'the direction is told');
 
 select pg_temp.act_as(pg_temp.id_of('manager'));
-select is((select count(*)::int from public.legal_invoices where project_id = pg_temp.id_of('project')),
-          0, 'the Juridique never reads an invoice');
+-- The owner reads the invoice like the budget (proto « Projet complet »), never a RIB.
+select is((select count(*)::int from public.project_invoices i
+             join public.contact_bank_accounts a on a.contact_id = i.contact_id
+            where i.project_id = pg_temp.id_of('project')),
+          0, 'the owner never reads the RIB');
 select is((select state from public.legal_invoice_states(pg_temp.id_of('project'))),
           'to_pay', 'but sees where it stands');
 select throws_ok(format($$ select public.open_legal_invoice_team_slot(%L, 'proof', 'pdf') $$,
@@ -230,12 +238,12 @@ select throws_ok(format($$ select public.open_legal_invoice_team_slot(%L, 'proof
 reset role;
 
 select pg_temp.act_as(pg_temp.id_of('director'));
-select is((select gap_reason from public.legal_invoices where financial_need_id = pg_temp.id_of('need')),
+select is((select gap_reason from public.project_invoices where financial_need_id = pg_temp.id_of('need')),
           'Une heure de plus.', 'the direction reads it, with the gap explained');
 insert into vars select 'proof', public.open_legal_invoice_team_slot(pg_temp.id_of('need'), 'proof', 'pdf');
 reset role;
-insert into storage.objects (bucket_id, name) values ('legal-invoices', (select v from vars where k = 'proof'));
-insert into ids select 'invoice', id from public.legal_invoices where financial_need_id = pg_temp.id_of('need');
+insert into storage.objects (bucket_id, name) values ('project-invoices', (select v from vars where k = 'proof'));
+insert into ids select 'invoice', id from public.project_invoices where financial_need_id = pg_temp.id_of('need');
 select pg_temp.act_as(pg_temp.id_of('director'));
 select lives_ok(format($$ select public.mark_legal_invoice_paid(%L, %L, %L, 'Virement.pdf') $$,
                        pg_temp.id_of('invoice'), (now() at time zone 'Europe/Paris')::date,

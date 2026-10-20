@@ -104,7 +104,6 @@ export const masterBrief = {
         "Brief de cadrage › Temporalité · la date dont tout le reste dépend",
     },
   },
-  euros: (value: string) => `${value} € HT`,
   revisions: (n: number) => (n > 1 ? `${n} révisions` : `${n} révision`),
   orderError:
     "Les dates doivent se suivre : Mix V1, Mix final, Mastering, puis Master final.",

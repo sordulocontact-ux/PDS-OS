@@ -58,6 +58,7 @@ import { legalDocuments } from "./legal-documents";
 import { legalFormalities } from "./legal-formalities";
 import { legalForms } from "./legal-forms";
 import { legalHistory } from "./legal-history";
+import { invoices } from "./invoices";
 import { legalInvoices } from "./legal-invoices";
 import { legalJourney } from "./legal-journey";
 import { framingJourney } from "./framing-journey";
@@ -268,6 +269,7 @@ export const fr = {
   legalFormalities,
   legalForms,
   legalHistory,
+  invoices,
   legalInvoices,
   legalJourney,
   framingJourney,

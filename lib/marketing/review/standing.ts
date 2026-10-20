@@ -5,6 +5,7 @@
 // data. Pure, client-safe.
 
 import { fr } from "@/lib/i18n/fr";
+import { formatAmount } from "@/lib/utils/money";
 import type { Dashboard, FigureKey } from "@/lib/marketing/dashboard";
 import type { Activation, Evidence } from "@/lib/marketing/model";
 import type { Reserve } from "@/lib/marketing/reserves/queries";
@@ -15,9 +16,7 @@ import { proofBucket, type ReviewActivation } from "./review-activation";
 
 const t = fr.reviewJourney.standing;
 const d = fr.marketingReview.dashboard;
-const euros = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
-export const money = (cents: number) =>
-  fr.moduleFrame.facts.budgetValue(euros.format(cents / 100));
+export const money = (cents: number) => formatAmount(cents);
 
 export type StandingItem = {
   key: string;

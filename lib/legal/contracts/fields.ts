@@ -59,13 +59,8 @@ export const isContractField = (id: string): id is ContractFieldId =>
 export const unknownPlaceholders = (body: string) =>
   placeholdersOf(body).filter((id) => !isContractField(id));
 
-/** « 600 € » from cents, the way a contract writes an amount. */
-export const formatFee = (cents: number) =>
-  new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
-  }).format(cents / 100);
+/** « 600 € HT » from cents: the one formatter of an amount. */
+export { formatAmount as formatFee } from "@/lib/utils/money";
 
 /** Cents from what a person typed (« 600 », « 600 € », « 1 200,50 »), or
  * null when it is not a plain amount: then a human types it. */

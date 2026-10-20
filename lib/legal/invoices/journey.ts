@@ -1,52 +1,53 @@
 // The invoices in the Juridique's journey (J10, proto « Projet complet »
 // invActors): once a paid contract is signed, the person's step says where
-// the invoice stands, the person deposits it through their link, the
-// direction pays it (« Payer la facture de Yanis Morel »). Pure, computed
-// at each read from legal_invoice_states, never stored.
+// its invoice stands; the person deposits it through their link, the
+// direction confirms a new RIB then pays (« Payer la facture de Yanis
+// Morel »). Pure, computed at each read from project_invoice_states, never
+// stored. The invoice itself: lib/invoices/.
 
 import { fr } from "@/lib/i18n/fr";
 import type { Demarche } from "@/lib/legal/demarches/build";
-import type { InvoiceState } from "@/lib/legal/invoices/queries";
+import type { InvoiceStateRow } from "@/lib/invoices/states";
 
 const t = fr.legalInvoices;
 
-export type InvoiceStateRow = { contactId: string; state: InvoiceState };
+// The most urgent first.
+const URGENCY = ["rib", "to_pay", "asked", "paid"] as const;
 
-/** The person démarches with their invoice's state and who acts on it. */
+/** The person démarches with their contract invoice's state and who acts. */
 export function withInvoices(
   demarches: Demarche[],
   states: InvoiceStateRow[],
   viewer: { name: string; canValidate: boolean },
   direction: string,
 ): Demarche[] {
-  if (states.length === 0) return demarches;
+  const contracts = states.filter((s) => s.origin === "contract");
+  if (contracts.length === 0) return demarches;
   return demarches.map((d) => {
     if (d.kind !== "person" || !d.ref.startsWith("contact:")) return d;
     const contactId = d.ref.slice("contact:".length);
-    const mine = states.filter((s) => s.contactId === contactId);
+    const mine = contracts.filter((s) => s.contactId === contactId);
     if (mine.length === 0 || d.step.status !== "done") return d;
-    // The most urgent: to pay, then awaited, then paid.
-    const state: InvoiceState = mine.some((s) => s.state === "to_pay")
-      ? "to_pay"
-      : mine.some((s) => s.state === "asked")
-        ? "asked"
-        : "paid";
+    const state =
+      URGENCY.find((u) => mine.some((s) => s.state === u)) ?? "paid";
+    const byDirection = {
+      name: viewer.canValidate ? viewer.name : direction,
+      viewer: viewer.canValidate,
+      viaLink: false,
+    };
     const actor =
-      state === "to_pay"
-        ? {
-            name: viewer.canValidate ? viewer.name : direction,
-            viewer: viewer.canValidate,
-            viaLink: false,
-            todo: t.todo.pay(d.subject),
-          }
-        : state === "asked"
-          ? {
-              name: d.subject,
-              viewer: false,
-              viaLink: true,
-              todo: t.todo.deposit,
-            }
-          : null;
+      state === "rib"
+        ? { ...byDirection, todo: t.todo.confirmRib(d.subject) }
+        : state === "to_pay"
+          ? { ...byDirection, todo: t.todo.pay(d.subject) }
+          : state === "asked"
+            ? {
+                name: d.subject,
+                viewer: false,
+                viaLink: true,
+                todo: t.todo.deposit,
+              }
+            : null;
     return {
       ...d,
       step: { ...d.step, summary: t.summary[state], actor },

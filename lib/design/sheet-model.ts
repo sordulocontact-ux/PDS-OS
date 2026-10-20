@@ -5,14 +5,11 @@
 // server (lib/design/sheet-proposals.ts). Client-safe.
 
 import type { DeliverableFormat } from "@/lib/design/formats";
-import {
-  formatEuros,
-  RATIO_PRESETS,
-  type SheetProvenance,
-} from "@/lib/design/sheet-fields";
+import { RATIO_PRESETS, type SheetProvenance } from "@/lib/design/sheet-fields";
 import { fr } from "@/lib/i18n/fr";
 import type { Database } from "@/lib/supabase/database.types";
 import { formatDay } from "@/lib/utils/day";
+import { formatAmount } from "@/lib/utils/money";
 
 type SheetRow = Database["public"]["Tables"]["design_sheets"]["Row"];
 
@@ -183,7 +180,7 @@ export function fieldText(type: SheetFieldType, v: FieldValue): string | null {
       return (v as string[]).join(t.ratiosJoin);
     case "money": {
       const m = v as Money;
-      return t.money(formatEuros(m.cents), m.engaged);
+      return t.money(formatAmount(m.cents), m.engaged);
     }
     case "subs":
       return t.subtitles[SUBTITLE_CHOICES.indexOf(v as SubtitleChoice)] ?? null;

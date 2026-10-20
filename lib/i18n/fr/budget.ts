@@ -76,6 +76,8 @@ export const budget = {
   add: "Ajouter une dépense",
   edit: (label: string) => `Modifier « ${label} »`,
   remove: (label: string) => `Supprimer « ${label} »`,
+  // A line that follows an invoice (lib/invoices).
+  committedWas: (amount: string) => `Engagé ${amount}`,
   form: {
     newTitle: "Nouvelle dépense",
     editTitle: "Modifier la dépense",
@@ -84,7 +86,9 @@ export const budget = {
       "Un libellé, un montant et son statut suffisent : le classement est proposé, à corriger si besoin. La dépense rejoint le Budget du projet.",
     loading: "Chargement…",
     label: "Libellé",
-    amount: "Montant (€)",
+    amount: "Montant HT (€)",
+    followsInvoice:
+      "Le montant et l'état suivent la facture : ils changent quand elle est reçue, puis payée.",
     amountHint: "Par exemple 1500 ou 1 500,50.",
     status: "Statut",
     family: "Famille",

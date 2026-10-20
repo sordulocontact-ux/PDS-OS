@@ -77,6 +77,8 @@ export function BudgetLineForm({
   const [amountError, setAmountError] = useState(false);
   const [detailError, setDetailError] = useState(false);
   const none = (value: string) => (value === NONE ? "" : value);
+  // A line that follows an invoice: its amount and state are the invoice's.
+  const followsInvoice = Boolean(line?.invoiceId);
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -152,6 +154,7 @@ export function BudgetLineForm({
           autoComplete="off"
           aria-invalid={amountError || undefined}
           aria-describedby="budget-amount-hint"
+          readOnly={followsInvoice}
           defaultValue={
             line ? centsToInput(line.amountCents) : (initial?.amount ?? "")
           }
@@ -164,7 +167,11 @@ export function BudgetLineForm({
               : "text-caption text-muted-foreground"
           }
         >
-          {amountError ? t.invalidAmount : t.amountHint}
+          {amountError
+            ? t.invalidAmount
+            : followsInvoice
+              ? t.followsInvoice
+              : t.amountHint}
         </p>
       </div>
       <div className="grid gap-1.5">
@@ -176,6 +183,7 @@ export function BudgetLineForm({
           required
           label={t.status}
           options={fr.budget.statuses}
+          disabled={followsInvoice}
           value={status}
           onChange={(v) => isBudgetStatus(v) && setStatus(v)}
         />

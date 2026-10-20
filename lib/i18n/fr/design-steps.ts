@@ -363,7 +363,7 @@ export const designSteps = {
     ],
     subtitlesPlaceholder: "À choisir",
     money: (amount: string, engaged: boolean) =>
-      `${amount} € HT · ${engaged ? "engagé" : "non engagé"}`,
+      `${amount} · ${engaged ? "engagé" : "non engagé"}`,
     moneyPlaceholder: "En euros HT",
     engaged: "Engagé",
     notEngaged: "Non engagé",

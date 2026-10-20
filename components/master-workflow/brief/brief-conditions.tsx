@@ -11,6 +11,7 @@ import type {
 } from "@/lib/master-workflow/brief-types";
 import type { NetworkEngineer } from "@/lib/master-workflow/types";
 import { parseEurosToCents } from "@/lib/projects/schemas";
+import { amountInput, formatAmount } from "@/lib/utils/money";
 
 const t = fr.masterBrief;
 
@@ -29,8 +30,6 @@ export type BriefFactsProps = {
   };
   changedBy: Partial<Record<string, string>>;
 };
-
-const euros = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 });
 
 /** Where a designation comes from, as the row says it (rule 22). */
 function sourceOf(
@@ -122,7 +121,7 @@ export function BriefConditions(props: BriefFactsProps) {
     canEdit
       ? {
           kind: "text" as const,
-          value: brief[field] === null ? "" : euros.format(brief[field]! / 100),
+          value: brief[field] === null ? "" : amountInput(brief[field]!),
           optional: true,
           done: t.changed,
           onSave: async (value: string) => {
@@ -134,7 +133,7 @@ export function BriefConditions(props: BriefFactsProps) {
         }
       : null;
   const rateValue = (cents: number | null) =>
-    cents === null ? null : t.euros(euros.format(cents / 100));
+    cents === null ? null : formatAmount(cents);
   return (
     <FactRows>
       <FactRow

@@ -18,7 +18,7 @@ import {
 import { formatDay, formatShortDay } from "@/lib/utils/day";
 
 import type { JourneyTransmission, MasterJourneyFacts } from "./journey-facts";
-import { invoiceDueOn } from "./invoice-rules";
+import { invoiceDueOn } from "@/lib/invoices/rules";
 import { newerThan, replacedForVocals, vocalsAwaited } from "./source-rules";
 
 const t = fr.masterJourney;
