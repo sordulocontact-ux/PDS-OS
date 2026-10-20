@@ -13,6 +13,7 @@ import { Timestamp } from "@/components/ui/timestamp";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { formatBriefDate } from "@/lib/framing/assess";
 import { fr } from "@/lib/i18n/fr";
+import { formatDay } from "@/lib/utils/day";
 import type { BriefDate } from "@/lib/master-workflow/brief-types";
 import { delayImpact } from "@/lib/master-workflow/delay-impact";
 import {
@@ -154,12 +155,12 @@ export function EngineerThreadPanel({
                     {impact.beyondRelease && (
                       <ToneCallout tone="danger">
                         {fr.masterDelay.beyond(
-                          formatBriefDate(
+                          formatDay(
                             impact.impacts.find(
                               (i) => i.key === "masterFinalDue",
                             )?.to ?? "",
                           ),
-                          formatBriefDate(releaseDue ?? ""),
+                          formatDay(releaseDue ?? ""),
                         )}
                       </ToneCallout>
                     )}

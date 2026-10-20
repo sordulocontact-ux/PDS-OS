@@ -5,6 +5,7 @@ import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
 import { fr } from "@/lib/i18n/fr";
 import { acceptRate } from "@/lib/master-workflow/round-actions";
+import { budgetStatusTone } from "@/lib/ui/state-tones";
 import type { RoundRate } from "@/lib/master-workflow/round-step";
 import { formatShortInstant } from "@/lib/utils/day";
 
@@ -47,8 +48,9 @@ export function RateBlock({
                 : r.note
             }
             state={{
-              tone: r.status === "proposed" ? "info" : "success",
-              label: r.status === "proposed" ? t.proposed : t.committed,
+              tone: budgetStatusTone[r.status] ?? "neutral",
+              // Invoiced, then paid, once the engineer's invoice came in.
+              label: fr.budget.statuses[r.status],
             }}
             side={
               canEdit &&

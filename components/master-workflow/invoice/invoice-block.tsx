@@ -53,7 +53,9 @@ export function InvoiceBlock({
   return (
     <section className="flex flex-col gap-3">
       <h3 className={h3}>
-        {view.isDirection ? t.team.titleDirection : t.team.title}
+        {view.isDirection && view.invoices.some((i) => !i.paidOn)
+          ? t.team.titleDirection
+          : t.team.title}
       </h3>
       {view.invoices.map((i) => (
         <OneInvoice key={i.id} projectId={projectId} invoice={i} view={view} />

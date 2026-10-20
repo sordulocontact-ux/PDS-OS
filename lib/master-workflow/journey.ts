@@ -481,7 +481,15 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
           : undefined,
       // A done Master final still names who pays an invoice (proto).
       actor:
-        open || (key === "final" && invoiceActions.length > 0) ? actor : null,
+        open ||
+        (key === "final" && invoiceActions.length > 0) ||
+        ((key === "mix" || key === "mastering") &&
+          input.direction &&
+          facts.messages.some(
+            (m) => m.stage === key && m.status === "escalated",
+          ))
+          ? actor
+          : null,
       summary: summaryOf[key],
     };
   });
