@@ -210,3 +210,13 @@ et sombre, aucun défilement horizontal.
 
 Données de test : le contrat et le bulletin de démonstration (« Néons (test reste Juridique) ») ont été
 retirés après le rejeu ; le contrat de Yanis Morel (test) a retrouvé son état.
+
+## 9. Vérification finale (20/10/2026, après les chantiers « le reste »)
+
+- `pnpm build` et `pnpm lint` (0 erreur) ; pgTAP : 138 fichiers, 2 289 tests, seuls échouent les cas d'environnement
+  local connus (`multiple_validators` : deux DG dans la base locale ; un ISRC déjà pris par un vieux projet de test).
+- Passe navigateur en `pnpm start` (cheffe de projet et DG, 9 projets de test × 14 sections, Accueil, Travail) :
+  258 pages, toutes en 200, 0 erreur JavaScript, aucun défilement horizontal à 390 px.
+- Temps (machine chargée à ~5) : navigation entre sections par clic 60 à 120 ms (préchargée) ; premier affichage
+  d'une page 0,9 à 3 s (Accueil de la cheffe de projet ~3 s : parcours de ses 12 projets, lectures groupées) ; à
+  remesurer sur Vercel.
