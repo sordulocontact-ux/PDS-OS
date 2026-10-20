@@ -722,6 +722,10 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   Distribution), `waiting`, `validations` (`actor.kind === "validate"`). `elsewhereOf(all, steps)`
   = « À vous, ailleurs ». Une zone qui branche son parcours ajoute son loader ici, jamais une liste
   à part.
+  Tous projets confondus (Accueil, Travail global, compteur de la barre, `my_todo` de PO,
+  `project_status`) : `loadMyJourneyWork` / `loadShellActions`, lectures groupées (§ 3 bis).
+  Point d'un workflow non démarré dans la barre : son infobulle dit pourquoi (`NavDot reason`,
+  `planWorkflows`) — avant le plan, hors du plan lancé, ou dans le plan sans être lancé.
 - **Résultat d'un geste** (règle 7). `WriteResult` (`lib/utils/write-result.ts`) accepte en plus
   `done`, `next[]`, `unlocked[]`, rétrocompatible. Une Server Action enveloppe son écriture dans
   `withOutcome(projectId, modules, done, write)` (`lib/journey/outcome.ts`) : parcours relus
@@ -787,6 +791,40 @@ s'afficher sans chargement.
   regroupement des requêtes par vague donnent la profondeur de la chaîne ; en `next dev`, le
   suivi asynchrone de React (développement seulement) prend l'essentiel du CPU : ne juger qu'en
   `pnpm start`.
+- **Lectures groupées des vues multi-projets** (20/10, `lib/supabase/batch.ts`) : l'Accueil, le
+  Travail global, le compteur de la barre et `my_todo` lisent les parcours de **chaque** projet
+  lancé (`loadMyJourneyWork`, `lib/work/journeys.ts`) avec les loaders mêmes des pages du projet
+  (une seule source de vérité, rien de réécrit). Sous `withQueryBatching`, le `fetch` du client
+  serveur (`batchingFetch`) retient chaque lecture 2 ms : les lectures identiques à un id près
+  (`project_id=eq.A`, `master_id=in.(a,b)`, une condition `calls.project_id` sous `!inner`)
+  partent **en une requête** (`in.(A,B…)`) et chaque appelant reçoit ses lignes, filtrées sur
+  toutes ses conditions d'id, ordre gardé (`batch-plan.ts`) ; un compte sans lignes (`head`,
+  `count=exact`) se fusionne de même, chacun comptant ses lignes ; les lectures et RPC strictement
+  identiques partent une fois. **10 requêtes en vol au plus** : une lecture qui attend son tour
+  continue d'agréger la même lecture des autres projets (une base chargée fusionne plus au lieu
+  d'empiler). Une lecture avec `offset`, un `limit` > 1 000, une écriture, un `single()` partent
+  tels quels ; une réponse fusionnée coupée (1 000 lignes) ou une ligne impossible à replacer →
+  chaque lecture repart seule. Hors de ce périmètre, le `fetch` est inchangé. Les projets se lisent
+  tous ensemble (40 au plus). Piège : une requête sans `order` (ou des égalités sur la colonne
+  d'ordre) peut rendre ses lignes dans un autre ordre fusionnée que seule, comme le permet SQL ;
+  un ordre qui compte se dit dans la requête (`created_at` puis `id`). Mesures :
+  `docs/projet-complet/RECETTE.md` § 8.
+  Écarté : un chargeur « actions seules » par workflow ou une fonction SQL des actions, qui
+  recopieraient les règles des parcours (deux logiques qui divergent).
+- **Vrais 404** (20/10) : **aucun `loading.tsx` au-dessus du cadre d'un enregistrement**. Un
+  `notFound()` levé sous une frontière `Suspense` arrive après le début du flux : Next garde 200
+  et ajoute `noindex`. `app/(app)/app/loading.tsx` est donc supprimé ; chaque segment a le sien
+  (`work`, `assistant`, `feedback`, `labo`, `…/new`, `contracts/templates/(list)`), et un
+  enregistrement est lu **dans le layout de son segment dynamique, avant** son `loading.tsx` :
+  projet (`ProjectLayout` ne lit que l'accès et le projet, puis rend `ProjectFrame` sous un
+  `Suspense` à repli `PageLoading` ; les autres lectures du cadre partent en même temps), artiste et
+  master du catalogue (layouts existants), call interne (`getMeeting`), contact (`getNetworkContact`
+  en `cache`), contrat (`findContract`), modèle de contrat (`findTemplateSeries`), toujours la
+  lecture même de la page (`cache()`, aucune requête de plus). Coût : le premier octet attend cette
+  lecture (une requête, déjà sur le chemin critique). **Reste 200 + `noindex`** : un id inconnu
+  **sous** un projet existant (livrable, activation, version, compte rendu…), car le
+  `loading.tsx` du projet (squelette de section sous la barre et l'en-tête) l'enveloppe ;
+  l'éviter demanderait une lecture avant le squelette de chaque section : écarté.
 
 ---
 

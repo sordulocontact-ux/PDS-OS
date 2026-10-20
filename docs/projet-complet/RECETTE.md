@@ -160,3 +160,35 @@ contextes complets des étapes. Lectures partagées une fois par requête ajout�
 Reste aussi : le point de la barre du projet d'un workflow hors du plan garde l'infobulle « démarre au
 lancement du plan » (`workflowStatus.notStartedHint`) ; l'assistant (`my_todo`) lit encore
 `loadMyTodo`, pas les parcours.
+
+## 8. Le reste transverse (20/10/2026, branche `pc/r5-transverse`)
+
+| Point du § 7 | Correction | Commit |
+| --- | --- | --- |
+| Cartes de l'Accueil et du Travail global en 3 à 7 s (≈ 250 requêtes par projet) | **Lectures groupées** (`lib/supabase/batch.ts`, `docs/ARCHITECTURE.md` § 3 bis) : les mêmes loaders de parcours, une seule source de vérité ; les lectures identiques à un id près partent en une requête `in.(…)`, chaque appelant reçoit ses lignes ; comptes fusionnés, lectures et RPC identiques partagées, 10 requêtes en vol au plus | `3b87b35`, `e110e97` |
+| `my_todo` de PO lit `loadMyTodo` | **corrigé** : projets à accepter, puis mes actions lues des parcours (décisions d'abord, projet, « Module › Étape », échéance, retard calculé), tâches libres, propositions ; `project_status` dit le « Maintenant » du projet (`lib/assistant/my-work.ts`, `journey-facts.ts`) | `f565588` |
+| Deux encadrés de question de PO (`QuestionScreen`, `PoQuestion`) | **corrigé** : `PoQuestion` est le seul encadré, au style `.nowbox` du proto ; `QuestionScreen` (Cadrage) rend son contenu dedans, comme `QuestionCard` (Juridique) | `f3cb670` |
+| Pages introuvables en 200 + `noindex` | **corrigé** : plus de `loading.tsx` au-dessus du cadre d'un enregistrement ; projet, artiste, master, call interne, contact, contrat, modèle répondent **404** (vérifié en `pnpm start`). Reste 200 + `noindex` : un id inconnu sous un projet existant (livrable, activation…), enveloppé par le squelette de section du projet | `eda8c5c` |
+| Infobulle « démarre au lancement du plan » d'un workflow hors du plan | **corrigé** : « pas dans le plan du projet : à ajouter depuis le Plan du projet », ou « dans le plan du projet : démarre quand le chef de projet le lance » | `eda8c5c` |
+
+**Mesures** (`pnpm start`, même build, deux serveurs côte à côte, l'un avec, l'autre sans les
+lectures groupées). Machine partagée **très chargée** (charge 13 à 16, base locale à 200 % de CPU
+du fait des autres worktrees, une requête triviale entre 0,03 et 6 s) : les durées varient du simple
+au décuple d'un essai à l'autre, le nombre de requêtes est la mesure stable.
+
+| Page `/app/work` | Requêtes à la base | Réponse complète (HTML, cartes comprises) |
+| --- | --- | --- |
+| DG, 21 projets, sans | 5 028 à 5 291 (des « fetch failed ») | 9,9 à 49,9 s |
+| DG, 21 projets, avec | **602 à 652** | 3,0 à 19,5 s |
+| Cheffe de projet, 12 projets, sans | 2 297 à 2 356 | 5,6 à 8,0 s |
+| Cheffe de projet, 12 projets, avec | **442** | 2,2 à 15 s |
+
+Contenu identique avec et sans (comparé texte à texte), à deux nuances près, toutes deux hors du
+regroupement : sans regroupement, des « fetch failed » de la passerelle font disparaître des actions
+(`isWorkflowLaunched` en échec lu « non lancé ») ; deux livrables créés au même instant
+(`strategy_deliverables.created_at` égal) peuvent s'afficher dans l'autre ordre. **La cible < 1 s
+n'est pas vérifiable sur cette machine** : à la reprendre au calme ou sur Vercel. Ce qui reste par
+page : ≈ 600 requêtes pour 21 projets, surtout des RPC par projet (`workflow_is_launched`,
+`distribution_cover`, `design_is_done`…) et des lectures dont la forme dépend du projet ; la piste
+suivante est une RPC « état des workflows » par lot de projets. Les pages d'un projet ne passent
+pas par le regroupement (inchangées).

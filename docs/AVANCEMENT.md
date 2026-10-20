@@ -578,3 +578,12 @@ projet a (Juridique toujours, Master avec un titre), Plateformes « Fait » apr�
 réserves, plus de cascade layout → page dans le Marketing, pastille d'état à droite du titre,
 compteur bleu sur les pilules, texte du verrou hors du plan. Détail et mesures :
 `docs/projet-complet/RECETTE.md` § 7. Aucune migration.
+
+## Le reste transverse (20/10/2026, branche `pc/r5-transverse`)
+
+Accueil et Travail global : lectures des parcours groupées entre projets (`lib/supabase/batch.ts`,
+5 à 8 fois moins de requêtes, même contenu) ; `my_todo` et `project_status` de PO lisent les
+parcours ; un seul encadré de question de PO (`PoQuestion`) ; vrais 404 pour un projet, un artiste,
+un master, un call, un contact, un contrat ou un modèle introuvable (`app/(app)/app/loading.tsx`
+supprimé, un `loading.tsx` par segment) ; infobulle du point d'un workflow hors du plan. Détail et
+mesures : `docs/projet-complet/RECETTE.md` § 8. Aucune migration.
