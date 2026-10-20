@@ -8,11 +8,10 @@ import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
-import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import { listTemplateSeries } from "@/lib/legal/contracts/templates";
+import { findTemplateSeries } from "@/lib/contracts/template-series";
 import { templateStatusTone } from "@/lib/ui/state-tones";
 
 export const metadata = {
@@ -29,12 +28,10 @@ export default async function ContractTemplatePage({
   params,
 }: PageProps<"/app/contracts/templates/[seriesId]">) {
   const access = await requireApproved();
-  if (!can(access, "manage_legal") || !access.organizationId) notFound();
   const { seriesId } = await params;
-  const template = (await listTemplateSeries(access)).find(
-    (s) => s.seriesId === seriesId,
-  );
-  if (!template) notFound();
+  const template = await findTemplateSeries(seriesId);
+  // Never without manage_legal and an organization (findTemplateSeries).
+  if (!template || !access.organizationId) notFound();
   const t = fr.legalContracts.templates;
 
   return (

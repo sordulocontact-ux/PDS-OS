@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { Access } from "@/lib/auth/access";
 import { can } from "@/lib/auth/access";
 import {
@@ -12,6 +14,7 @@ import {
   type ContractFormOptions,
   type ContractRow,
 } from "@/lib/contracts/types";
+import { requireApproved } from "@/lib/auth/dal";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -177,3 +180,9 @@ export async function loadContractFormOptions(
     artists: artists.data ?? [],
   };
 }
+
+/** getContract for the viewer, once per request: the contract's frame
+ * answers a real 404 without it and its page reuses the read. */
+export const findContract = cache(async (id: string) =>
+  getContract(id, await requireApproved()),
+);

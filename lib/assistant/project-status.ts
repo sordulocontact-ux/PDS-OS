@@ -12,12 +12,14 @@ import {
   reviewLabel,
   stageState,
 } from "@/lib/assistant/facts";
+import { journeyFacts } from "@/lib/assistant/journey-facts";
 import { type Source } from "@/lib/assistant/sources";
 import { assessFraming } from "@/lib/framing/assess";
 import { DIMENSIONS } from "@/lib/framing/dimensions";
 import { loadFramingKnowledge } from "@/lib/framing/knowledge";
 import { loadFraming } from "@/lib/framing/queries";
 import { isOverdue, todayInParis } from "@/lib/insights/dates";
+import { loadShellActions } from "@/lib/overview/journeys";
 import { getProject } from "@/lib/projects/queries";
 import { getProjectRelease } from "@/lib/release/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -27,10 +29,12 @@ export async function projectStatus(projectId: string, access: Access) {
   const project = await getProject(projectId);
   if (!project) return { found: false as const };
 
-  const [framing, knowledge, release] = await Promise.all([
+  const [framing, knowledge, release, journeys] = await Promise.all([
     loadFraming(projectId, access),
     loadFramingKnowledge(projectId, access),
     createClient().then((supabase) => getProjectRelease(supabase, projectId)),
+    // Who does what now: the project's journeys, as its Travail reads them.
+    loadShellActions(projectId),
   ]);
   const today = todayInParis();
   const people = new Map(
@@ -109,6 +113,9 @@ export async function projectStatus(projectId: string, access: Access) {
         `Envoi en validation impossible : ${fr.framing.errors[validators.length === 0 ? "no_validator" : "multiple_validators"]}`,
       );
   }
+  // The project's « Maintenant » (docs/VISION-UX.md § 3): the viewer's
+  // actions, then what others are expected to do, step by step.
+  facts.push(...journeyFacts(journeys));
   for (const need of framing?.needs ?? []) {
     facts.push(
       `Besoin « ${need.label} » (${familyLabel(need.family)}) : ${need.state === "committed" ? "engagé" : "identifié"}, ${reviewLabel(need.review_status)}.`,

@@ -72,6 +72,12 @@ export const workflowStatus = {
   // The dot of a workflow not started yet, in the project's navigation.
   notStartedHint:
     "Non démarré · démarre au lancement du plan du projet, après le Cadrage",
+  // The plan is launched without it (WorkflowLocked `absent`).
+  notInPlanHint:
+    "Non démarré · pas dans le plan du projet : à ajouter depuis le Plan du projet",
+  // In the launched plan, not launched yet (WorkflowLocked `waiting`).
+  waitingInPlanHint:
+    "Non démarré · dans le plan du projet : démarre quand le chef de projet le lance",
   notLaunched: "Démarre au lancement du plan du projet, après le Cadrage",
   // Ce qu'un workflow attend d'un autre (lot 5), calculé par le code depuis
   // les sources : jamais une table saisie à la main.

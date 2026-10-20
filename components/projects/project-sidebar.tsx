@@ -51,6 +51,7 @@ export function ProjectSidebar(props: ProjectNavProps) {
         items={navItems(props)}
         statuses={props.statuses}
         counts={props.counts}
+        reasons={props.reasons}
       />
     </nav>
   );
@@ -63,6 +64,7 @@ export function ProjectSidebarMobile(props: ProjectNavProps) {
       items={navItems(props)}
       statuses={props.statuses}
       counts={props.counts}
+      reasons={props.reasons}
     />
   );
 }

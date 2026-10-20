@@ -20,6 +20,7 @@ import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PoQuestion } from "@/components/ui/po-question";
 import { Textarea } from "@/components/ui/textarea";
 import { answerEnvelope } from "@/lib/framing/actions/answers";
 import {
@@ -59,7 +60,8 @@ function titleOf(q: QuestionState): string {
  * dimension, the question adapted to what is known, and the ways to answer
  * — confirm, modify, « M'aider à définir », « Écrire moi-même ». A list
  * question brings its own lines (`children`) and keeps the common answers
- * (« Rien à signaler », « Passer »).
+ * (« Rien à signaler », « Passer »). In the box every question of PO uses
+ * (PoQuestion, shared with the Cadrage juridique).
  */
 export function QuestionScreen({
   projectId,
@@ -240,23 +242,7 @@ export function QuestionScreen({
       : null;
 
   return (
-    <section
-      aria-labelledby="po-question-title"
-      className="flex min-w-0 flex-col gap-2.5 rounded-xl bg-[var(--surface-tint)] p-4"
-    >
-      <h3 className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] font-semibold text-[color:var(--text-tertiary)]">
-        {t.poQuestion}
-      </h3>
-      <p className="text-[length:var(--type-micro)] leading-[var(--type-micro-lh)] font-semibold tracking-wide text-[color:var(--text-tertiary)] uppercase">
-        {eyebrow}
-      </p>
-      <h4
-        id="po-question-title"
-        className="text-[length:var(--type-figure-md)] leading-[var(--type-figure-md-lh)] font-semibold tracking-[var(--type-display-tracking)] break-words"
-      >
-        {titleOf(question)}
-      </h4>
-
+    <PoQuestion eyebrow={eyebrow} title={titleOf(question)}>
       {isField && question.display && mode === "view" && (
         <div className="flex flex-col gap-1">
           <p className="text-body-md font-semibold break-words whitespace-pre-line">
@@ -377,7 +363,7 @@ export function QuestionScreen({
       {(mode === "view" || missingWrite) && secondary && (
         <div className="flex flex-wrap gap-1">{secondary}</div>
       )}
-    </section>
+    </PoQuestion>
   );
 }
 

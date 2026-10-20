@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import {
   networkRelationsOf,
   networkRolesOf,
@@ -91,7 +93,9 @@ export type NetworkContactDetail = NetworkContactValues & {
   }[];
 };
 
-export async function getNetworkContact(
+// Once per request: the contact's frame answers a real 404 without it and
+// its page reuses the read.
+export const getNetworkContact = cache(async function getNetworkContact(
   id: string,
 ): Promise<NetworkContactDetail | null> {
   const supabase = await createClient();
@@ -157,7 +161,7 @@ export async function getNetworkContact(
         : [],
     ),
   };
-}
+});
 
 /** What the contact form offers: live organizations and catalog artists,
  * and the live contacts a new one may duplicate. */
