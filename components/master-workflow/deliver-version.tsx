@@ -21,6 +21,14 @@ import {
   deliveryNameOk,
 } from "@/lib/master-workflow/delivery-rules";
 import {
+  openDeliverable,
+  recordDeliverable,
+} from "@/lib/master-workflow/deliverables-public-actions";
+import {
+  openMemberDelivery,
+  recordMemberDelivery,
+} from "@/lib/master-workflow/inhouse-actions";
+import {
   openMasterDelivery,
   recordMasterDelivery,
 } from "@/lib/master-workflow/transmission-public-actions";
@@ -45,12 +53,22 @@ export function DeliverVersion({
   token,
   masterId,
   role,
+  deliverable,
+  member,
 }: {
+  // The link's key; unused for the in-house engineer (`member`).
   token: string;
   masterId: string;
   role: "mix" | "mastering";
+  // Set: another deliverable of the Brief (« Autres livrables »), not a
+  // version; stems may come as a zip.
+  deliverable?: { key: string; label: string };
+  // The in-house engineer, in the app (proto `master:hugo`): his session.
+  member?: { projectId: string; label: string };
 }) {
   const t = fr.masterWorkflow.publicPackage.deliver;
+  const d = fr.masterFinal.link;
+  const zipOk = deliverable?.key === "stems";
   const router = useRouter();
   const [chosen, setChosen] = useState<File | null>(null);
   const preview = useObjectUrl(chosen);
@@ -63,15 +81,22 @@ export function DeliverVersion({
   // The precise reason, before anything is sent (PROJ-BUG-08).
   function choose(file: File) {
     const extension = fileExtension(file.name);
-    const refusal = !isAudioFile(file)
-      ? t.notAudio
-      : !extension || !DELIVERY_EXTENSIONS.includes(extension)
-        ? t.errors.invalid_extension
-        : !deliveryNameOk(file.name)
-          ? t.errors.invalid_file_name
-          : file.size > MAX_FILE_BYTES
-            ? t.tooLarge
-            : null;
+    const zip = zipOk && extension === "zip";
+    const refusal = zip
+      ? file.size > MAX_FILE_BYTES
+        ? t.tooLarge
+        : null
+      : !isAudioFile(file)
+        ? deliverable
+          ? d.notAccepted
+          : t.notAudio
+        : !extension || !DELIVERY_EXTENSIONS.includes(extension)
+          ? t.errors.invalid_extension
+          : !deliveryNameOk(file.name)
+            ? t.errors.invalid_file_name
+            : file.size > MAX_FILE_BYTES
+              ? t.tooLarge
+              : null;
     if (refusal) {
       setChosen(null);
       setMessage({ kind: "error", text: refusal });
@@ -84,12 +109,19 @@ export function DeliverVersion({
   function send(file: File) {
     setMessage(null);
     startTransition(async () => {
-      const slot = await openMasterDelivery(token, masterId, file.name);
+      const slot = member
+        ? await openMemberDelivery(member.projectId, masterId, role, file.name)
+        : deliverable
+          ? await openDeliverable(token, masterId, deliverable.key, file.name)
+          : await openMasterDelivery(token, masterId, file.name);
       if (!slot.ok) return setMessage({ kind: "error", text: slot.error });
       // Some browsers give no type to a WAV or an AIFF.
-      const mime = file.type.startsWith("audio/")
-        ? file.type
-        : `audio/${fileExtension(file.name) ?? "wav"}`;
+      const mime =
+        fileExtension(file.name) === "zip"
+          ? "application/zip"
+          : file.type.startsWith("audio/")
+            ? file.type
+            : `audio/${fileExtension(file.name) ?? "wav"}`;
       const { error } = await createClient()
         .storage.from("master-files")
         .upload(slot.path, file, { contentType: mime, upsert: false });
@@ -97,13 +129,21 @@ export function DeliverVersion({
         console.error("DeliverVersion upload:", error.message);
         return setMessage({ kind: "error", text: t.errors.failed });
       }
-      const recorded = await recordMasterDelivery(
-        token,
-        slot.path,
-        file.name,
-        mime,
-        file.size,
-      );
+      const recorded = member
+        ? await recordMemberDelivery(
+            member.projectId,
+            slot.path,
+            file.name,
+            mime,
+            file.size,
+          )
+        : await (deliverable ? recordDeliverable : recordMasterDelivery)(
+            token,
+            slot.path,
+            file.name,
+            mime,
+            file.size,
+          );
       if (!recorded.ok)
         return setMessage({ kind: "error", text: recorded.error });
       setChosen(null);
@@ -142,7 +182,7 @@ export function DeliverVersion({
             />
           )}
           <p className="text-caption text-[color:var(--text-secondary)]">
-            {t.confirmHint[role]}
+            {deliverable ? d.confirm : t.confirmHint[role]}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -165,9 +205,23 @@ export function DeliverVersion({
         </div>
       ) : (
         <FileDropZone
-          label={t.title}
-          hint={t.hint[role]}
-          accept={AUDIO_ACCEPT}
+          label={
+            member
+              ? member.label
+              : deliverable
+                ? `${deliverable.label} *`
+                : t.title
+          }
+          hint={
+            member
+              ? fr.masterInHouse.depositHint
+              : deliverable
+                ? zipOk
+                  ? d.stemsHint
+                  : d.hint
+                : t.hint[role]
+          }
+          accept={zipOk ? `${AUDIO_ACCEPT},.zip,application/zip` : AUDIO_ACCEPT}
           icon={IconVolumeUp}
           disabled={pending}
           onFiles={([file]) => file && choose(file)}

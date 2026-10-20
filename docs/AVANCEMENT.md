@@ -600,3 +600,22 @@ parcours ; un seul encadré de question de PO (`PoQuestion`) ; vrais 404 pour un
 un master, un call, un contact, un contrat ou un modèle introuvable (`app/(app)/app/loading.tsx`
 supprimé, un `loading.tsx` par segment) ; infobulle du point d'un workflow hors du plan. Détail et
 mesures : `docs/projet-complet/RECETTE.md` § 8. Aucune migration.
+## Master — le reste (20/10/2026, branche `pc/r1-master`)
+
+Ce qui manquait au Master par rapport au proto (`docs/protos/master-v2.html`, `docs/projet-complet/master.md`),
+détail dans `docs/ARCHITECTURE.md` § 8 septies (« Le reste du Master ») :
+
+- [x] **Facture, RIB et paiement** (`master:invoice`) : facture demandée au Master final, déposée sur le lien
+      de l'ingénieur (`/m/`, `/c/`) ou ajoutée « reçue autrement », montant comparé au tarif engagé, échéance à
+      30 jours, RIB lu par la direction seule et confirmé par téléphone s'il change, « Marquer comme payée »
+      (date + preuve) ; budget du Master `Facturé` puis `Payé` ; « Facturation de PDS » dans les réglages
+- [x] **Écoute de l'artiste** sur sa page par personne (`/c/`) : versions en écoute, retour minuté gardé dans
+      l'équipe (règle 21), la validatrice notifiée
+- [x] **Escalade d'un retard** à la direction, « Garder les dates » avec réponse, décision de la direction
+- [x] **Réponse de la directrice créative lue par PO** avec ses citations vérifiées mot pour mot (règle 12)
+- [x] **Livrables déposés par l'ingénieur** sur son lien, **Rouvrir le master**, **PDF du Brief**,
+      **ingénieur maison** (membre de PDS, assigné, dépôt dans l'app, pas de facture)
+
+Migrations `20261020010101` à `20261020010601` à pousser en prod avec accord. Tests pgTAP :
+`master-invoices`, `master-listen`, `master-delay-escalation`, `master-answer-reading`,
+`master-deliverables`, `master-inhouse`.

@@ -26,13 +26,15 @@ export type BriefFields = Omit<
 >;
 
 export const BRIEF_COLUMNS =
-  "mix_contact_id, mastering_same_engineer, mastering_contact_id, mix_rate_cents, mastering_rate_cents, revisions, validator_person_id, references_text, direction, constraints_text, deliverables, mix_v1_due, mix_final_due, mastering_due, master_final_due, delivery_formats, engineer_message";
+  "mix_contact_id, mix_person_id, mastering_same_engineer, mastering_contact_id, mastering_person_id, mix_rate_cents, mastering_rate_cents, revisions, validator_person_id, references_text, direction, constraints_text, deliverables, mix_v1_due, mix_final_due, mastering_due, master_final_due, delivery_formats, engineer_message";
 
 type BriefRow = Pick<
   Row,
   | "mix_contact_id"
+  | "mix_person_id"
   | "mastering_same_engineer"
   | "mastering_contact_id"
+  | "mastering_person_id"
   | "mix_rate_cents"
   | "mastering_rate_cents"
   | "revisions"
@@ -52,8 +54,10 @@ type BriefRow = Pick<
 export function briefFromRow(row: BriefRow): MasterBrief {
   return {
     mixContactId: row.mix_contact_id,
+    mixPersonId: row.mix_person_id,
     masteringSameEngineer: row.mastering_same_engineer,
     masteringContactId: row.mastering_contact_id,
+    masteringPersonId: row.mastering_person_id,
     mixRateCents: row.mix_rate_cents,
     masteringRateCents: row.mastering_rate_cents,
     revisions: row.revisions,
@@ -77,8 +81,10 @@ export function briefFromRow(row: BriefRow): MasterBrief {
 export function emptyBrief(validatorPersonId: string | null): MasterBrief {
   return {
     mixContactId: null,
+    mixPersonId: null,
     masteringSameEngineer: false,
     masteringContactId: null,
+    masteringPersonId: null,
     mixRateCents: null,
     masteringRateCents: null,
     revisions: null,

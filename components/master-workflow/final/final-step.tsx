@@ -8,7 +8,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { FinalTitle, FinalView } from "@/lib/master-workflow/final";
-import { formatShortDay } from "@/lib/utils/day";
+import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 import { DeliverableReceived } from "./deliverable-received";
 
@@ -158,8 +158,22 @@ function TitleFinal({
               <FactRow
                 key={d.key}
                 label={labels[d.key]}
-                value={d.received ? t.received : t.expected}
-                source={d.received ? t.receivedSource(null) : t.expectedSource}
+                value={
+                  d.fileName ? (
+                    <b className="font-semibold break-all">{d.fileName}</b>
+                  ) : d.received ? (
+                    t.received
+                  ) : (
+                    t.expected
+                  )
+                }
+                source={
+                  d.viaLink && d.at
+                    ? t.receivedVia(formatShortInstant(d.at), view.engineer)
+                    : d.received
+                      ? t.receivedSource(null)
+                      : t.expectedSource
+                }
                 state={
                   d.received
                     ? { tone: "success", label: t.received }
@@ -178,6 +192,16 @@ function TitleFinal({
               />
             ))}
           </FactRows>
+          {view.engineer &&
+            title.final &&
+            title.deliverables.some((d) => !d.received) && (
+              <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
+                {t.waitingEngineer(
+                  view.engineer,
+                  title.deliverables.filter((d) => !d.received).length,
+                )}
+              </p>
+            )}
         </section>
       )}
     </section>

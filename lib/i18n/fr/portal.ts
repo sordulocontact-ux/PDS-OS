@@ -19,6 +19,7 @@ export const portal = {
   roles: {
     mix: "Ingénieur du mix",
     mastering: "Ingénieur du mastering",
+    listen: "Artiste",
     form: "Intervenant",
     split: "Ayant droit",
     influence: "Créateur",

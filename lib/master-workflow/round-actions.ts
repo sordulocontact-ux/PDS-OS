@@ -164,14 +164,16 @@ export async function reopenMix(
   projectId: string,
   versionId: string,
   reason: string,
+  stage: "mix" | "mastering" = "mix",
 ): Promise<WriteResult> {
   const input = versionIds
     .extend({ reason: z.string().trim().min(1).max(2000) })
     .safeParse({ projectId, versionId, reason });
+  const done = stage === "mix" ? t.reopen.done : t.reopen.master.done;
   await requireApproved();
   if (!input.success) return { ok: false, error: fr.dialogs.reasonRequired };
   const v = input.data;
-  return withOutcome(v.projectId, ["master"], t.reopen.done, async () => {
+  return withOutcome(v.projectId, ["master"], done, async () => {
     const supabase = await createClient();
     const { error } = await supabase.rpc("reopen_mix_version", {
       p_version_id: v.versionId,
@@ -183,7 +185,9 @@ export async function reopenMix(
         ok: false,
         error: error.message.includes("mastering_started")
           ? t.reopen.errors.started
-          : t.reopen.errors.failed,
+          : error.message.includes("distribution_delivered")
+            ? t.reopen.master.delivered
+            : t.reopen.errors.failed,
       };
     }
     refresh(v.projectId);

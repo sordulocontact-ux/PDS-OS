@@ -3,12 +3,16 @@ import "server-only";
 import { influencePortalCards } from "@/components/activations/influence/public-cards";
 import { formPortalCard } from "@/components/legal/forms/public-cards";
 import { splitPortalCard } from "@/components/legal/splits/public-cards";
+import { listenPortalCards } from "@/components/master-workflow/listen/listen-cards";
 import { masterPortalCards } from "@/components/master-workflow/public-cards";
 import { providerPortalCards } from "@/components/production/provider/provider-cards";
 import { getCreatorCollaboration } from "@/lib/activations/influence/creator-link";
 import { getPublicAgreement } from "@/lib/activations/influence/public";
 import { getPublicForm, noteFormOpened } from "@/lib/legal/forms/public";
 import { getPublicSplit } from "@/lib/legal/splits/public";
+import { getLinkDeliverables } from "@/lib/master-workflow/deliverables-public";
+import { getPublicInvoice } from "@/lib/master-workflow/invoice-public";
+import { getPublicListen } from "@/lib/master-workflow/listen-public";
 import {
   getEngineerThread,
   getPublicPackage,
@@ -70,8 +74,22 @@ async function cardsOf(
       if (!data || (data.state !== "open" && data.state !== "received"))
         return [];
       await noteOpened(key);
-      const thread = await getEngineerThread(key);
-      return masterPortalCards({ linkKey: key, data, thread });
+      const [thread, invoice, deliverables] = await Promise.all([
+        getEngineerThread(key),
+        getPublicInvoice(key),
+        getLinkDeliverables(key),
+      ]);
+      return masterPortalCards({
+        linkKey: key,
+        data,
+        thread,
+        invoice,
+        deliverables,
+      });
+    }
+    case "listen": {
+      const listen = await getPublicListen(token);
+      return listen ? listenPortalCards({ token, listen }) : [];
     }
     case "form": {
       const form = await getPublicForm(key);

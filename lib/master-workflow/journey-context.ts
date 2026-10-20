@@ -5,6 +5,7 @@ import { cache } from "react";
 import { requireApproved } from "@/lib/auth/dal";
 import { requireLaunchedProject } from "@/lib/projects/queries";
 import { personName } from "@/lib/projects/types";
+import { createClient } from "@/lib/supabase/server";
 import { allInOrder } from "@/lib/utils/parallel";
 
 import { masterJourney } from "./journey";
@@ -21,6 +22,12 @@ export const masterJourneyContext = cache(async (projectId: string) => {
     requireLaunchedProject(projectId),
   ]);
   const facts = await loadMasterJourneyFacts(project);
+  // Who pays an invoice, read only when one waits for it.
+  const direction =
+    facts.invoices.some((i) => i.receivedAt && !i.paidOn) ||
+    facts.messages.some((m) => m.status === "escalated")
+      ? await loadDirectionPerson()
+      : null;
   const viewerName =
     personName(access.firstName ?? "", access.lastName ?? "") || null;
   const framing = project.stages.find((s) => s.key === "framing");
@@ -34,6 +41,27 @@ export const masterJourneyContext = cache(async (projectId: string) => {
     framingValidatedAt:
       framing?.state === "validated" ? (framing.stateChangedAt ?? null) : null,
     now: new Date(),
+    direction,
   });
   return { access, project, facts, steps, viewerName };
+});
+
+/** The direction (permission `validate`), who pays and arbitrates: the
+ * first one (list_direction_people; a member reads only their own
+ * membership). */
+export const loadDirectionPerson = cache(async () => {
+  const access = await requireApproved();
+  if (!access.organizationId) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_direction_people", {
+    p_organization_id: access.organizationId,
+  });
+  if (error) console.error("loadDirectionPerson:", error.message);
+  const first = data?.[0];
+  return first
+    ? {
+        personId: first.person_id,
+        name: personName(first.first_name, first.last_name),
+      }
+    : null;
 });

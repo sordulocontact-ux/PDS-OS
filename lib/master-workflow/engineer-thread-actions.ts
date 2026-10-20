@@ -95,13 +95,15 @@ export async function setSignalStatus(
 }
 
 /**
- * « Appliquer ces dates »: the Brief's dates the delay touches, computed
- * again here by the code (never sent by the browser), moved, and the delay
- * handled.
+ * « Appliquer ces dates » (the owner, or the direction once the delay was
+ * sent to them): the Brief's dates the delay touches, computed again here
+ * by the code (never sent by the browser), moved by apply_master_delay,
+ * the engineer answered and the delay handled.
  */
 export async function applyDelayDates(
   projectId: string,
   messageId: string,
+  reply = "",
 ): Promise<Result> {
   if (!id.safeParse(projectId).success || !id.safeParse(messageId).success)
     return { ok: false, error: t.failed };
@@ -144,18 +146,72 @@ export async function applyDelayDates(
     today: todayInParis(),
     releaseDate: release?.planned_release_date ?? null,
   });
-  if (impacts.length > 0) {
-    const moved: Partial<Record<(typeof COLUMN)[keyof typeof COLUMN], string>> =
-      {};
-    for (const impact of impacts) moved[COLUMN[impact.key]] = impact.to;
-    const { error } = await supabase
-      .from("master_briefs")
-      .update(moved)
-      .eq("id", brief.id);
-    if (error) {
-      console.error("applyDelayDates:", error.message);
-      return { ok: false, error: t.failed };
-    }
+  const moved: Partial<Record<(typeof COLUMN)[keyof typeof COLUMN], string>> =
+    {};
+  for (const impact of impacts) moved[COLUMN[impact.key]] = impact.to;
+  const { error } = await supabase.rpc("apply_master_delay", {
+    p_message_id: messageId,
+    p_dates: moved,
+    p_reply: reply.trim() || null,
+  });
+  return done(projectId, error, "applyDelayDates");
+}
+
+function done(
+  projectId: string,
+  error: { message: string; code?: string } | null,
+  where: string,
+): Result {
+  const d = fr.masterDelay.errors;
+  if (error) {
+    console.error(`${where}:`, error.message);
+    return {
+      ok: false,
+      error:
+        error.code === "42501"
+          ? d.forbidden
+          : error.message.includes("reply_required")
+            ? d.replyRequired
+            : error.message.includes("master_briefs")
+              ? d.order
+              : t.failed,
+    };
   }
-  return setSignalStatus(projectId, messageId, "handled");
+  refresh(projectId);
+  return { ok: true };
+}
+
+/** « Envoyer à la direction »: the Master final would pass the release. */
+export async function escalateDelay(
+  projectId: string,
+  messageId: string,
+): Promise<Result> {
+  if (!id.safeParse(projectId).success || !id.safeParse(messageId).success)
+    return { ok: false, error: t.failed };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("escalate_master_delay", {
+    p_message_id: messageId,
+  });
+  return done(projectId, error, "escalateDelay");
+}
+
+/** « Garder les dates » (owner) or « Refuser le retard » (direction),
+ * saying why to the engineer. */
+export async function keepDelayDates(
+  projectId: string,
+  messageId: string,
+  reply: string,
+): Promise<Result> {
+  if (!id.safeParse(projectId).success || !id.safeParse(messageId).success)
+    return { ok: false, error: t.failed };
+  if (!reply.trim())
+    return { ok: false, error: fr.masterDelay.errors.replyRequired };
+  await requireApproved();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("keep_master_dates", {
+    p_message_id: messageId,
+    p_reply: reply.trim().slice(0, 2000),
+  });
+  return done(projectId, error, "keepDelayDates");
 }

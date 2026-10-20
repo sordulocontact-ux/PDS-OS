@@ -70,7 +70,7 @@ export async function loadMasterBrief(
   access: Access,
 ): Promise<BriefView> {
   const supabase = await createClient();
-  const [rows, saved, creatives, exchanges, budget, framing] =
+  const [rows, saved, creatives, exchanges, budget, framing, members] =
     await Promise.all([
       readMasterRows(project.id, project.masters),
       supabase
@@ -92,6 +92,11 @@ export async function loadMasterBrief(
         .eq("project_id", project.id)
         .not("master_role", "is", null),
       loadFramingDefaults(project.id),
+      access.organizationId
+        ? supabase.rpc("list_member_people", {
+            p_organization_id: access.organizationId,
+          })
+        : Promise.resolve({ data: [] }),
     ]);
   if (exchanges.error)
     console.error("loadMasterBrief exchanges:", exchanges.error.message);
@@ -171,6 +176,10 @@ export async function loadMasterBrief(
       ? []
       : networkEngineers(rows.contacts, rows.linkedCredits),
     validators,
+    members: (members.data ?? []).map((m) => ({
+      personId: m.person_id,
+      name: personName(m.first_name, m.last_name),
+    })),
     exchanges: (exchanges.data ?? []).flatMap((row) =>
       row.call
         ? [

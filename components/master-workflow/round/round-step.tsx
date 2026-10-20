@@ -1,4 +1,5 @@
 import { EngineerThreadSection } from "@/components/master-workflow/engineer-thread-section";
+import { ListenLinkOffer } from "@/components/master-workflow/listen/listen-link-offer";
 import { PackagePreview } from "@/components/master-workflow/package-preview";
 import { ContactLinkOffer } from "@/components/portal/contact-links-section";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
@@ -9,6 +10,8 @@ import type { RoundStepView } from "@/lib/master-workflow/round-step";
 import { formatDay, formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 import { LinkPanel } from "./link-panel";
+import { AssignRound } from "./assign-round";
+import { InHouseDeposit } from "./inhouse-deposit";
 import { RateBlock } from "./rate-block";
 import { RoundVersions } from "./round-versions";
 import { SendForm } from "./send-form";
@@ -33,8 +36,9 @@ export function RoundStep({
   viewerIsOwner: boolean;
   projectTitle: string;
 }) {
-  const { view, stage, link } = round;
-  const engineer = view.engineer?.name ?? link?.contactName ?? "";
+  const { view, stage, link, inHouse } = round;
+  const engineer =
+    view.engineer?.name ?? link?.contactName ?? inHouse?.name ?? "";
   if (stage === "mix" && round.notNeeded.length > 0 && view.titles.length === 0)
     return (
       <div className="flex flex-col gap-3">
@@ -45,7 +49,7 @@ export function RoundStep({
         ))}
       </div>
     );
-  const sent = link !== null;
+  const sent = link !== null || Boolean(inHouse?.assignedAt);
   const noStems = view.titles.filter((x) => x.stems === 0).map((x) => x.title);
   const sameEngineer =
     stage === "mastering" && view.brief?.masteringSameEngineer === true;
@@ -70,7 +74,20 @@ export function RoundStep({
             engineer={engineer}
             viewerIsOwner={viewerIsOwner}
           />
-          {round.canSeeBudget && (
+          <ListenLinkOffer projectId={view.projectId} />
+          {inHouse?.isViewer && inHouse.assignedAt && (
+            <InHouseDeposit round={round} />
+          )}
+          {round.canSeeBudget && inHouse && (
+            <FactRows>
+              <FactRow
+                label={fr.masterInHouse.inHouse}
+                value={inHouse.name}
+                source={fr.masterInHouse.budget}
+              />
+            </FactRows>
+          )}
+          {round.canSeeBudget && !inHouse && (
             <RateBlock
               projectId={view.projectId}
               engineer={engineer}
@@ -164,6 +181,29 @@ export function RoundStep({
         </VersionCard>
       )}
 
+      {inHouse && !inHouse.assignedAt && (
+        <>
+          <ToneCallout tone="info">
+            {fr.masterInHouse.note(inHouse.name)}
+          </ToneCallout>
+          {viewerIsOwner && blockers.length === 0 && (
+            <AssignRound
+              projectId={view.projectId}
+              stage={stage}
+              name={inHouse.name}
+            />
+          )}
+        </>
+      )}
+      {inHouse?.assignedAt && (
+        <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
+          {fr.masterInHouse.assignedLine(
+            inHouse.name,
+            formatShortDay(inHouse.assignedAt, { bare: true }),
+            null,
+          )}
+        </p>
+      )}
       {viewerIsOwner &&
         view.engineer &&
         (!sent || round.briefChangedSinceSent) && (
@@ -243,7 +283,11 @@ export function RoundStep({
           contactId={view.engineer?.id ?? null}
         />
       )}
-      <EngineerThreadSection view={view} />
+      <EngineerThreadSection
+        view={view}
+        isDirection={round.isDirection}
+        direction={round.direction ?? fr.masterInvoice.team.direction}
+      />
     </div>
   );
 }

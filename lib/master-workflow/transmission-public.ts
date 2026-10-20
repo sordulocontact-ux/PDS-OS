@@ -136,7 +136,13 @@ export async function getEngineerThread(
     author: m.author === "team" ? "team" : "engineer",
     body: m.body,
     delayDays: m.delay_days,
-    status: m.status === "open" || m.status === "handled" ? m.status : null,
+    // « Chez la direction » is still waiting, for the engineer.
+    status:
+      m.status === "open" || m.status === "escalated"
+        ? "open"
+        : m.status === "handled"
+          ? "handled"
+          : null,
     createdAt: m.created_at,
   }));
 }

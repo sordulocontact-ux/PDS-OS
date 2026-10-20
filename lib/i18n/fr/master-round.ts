@@ -218,6 +218,17 @@ export const masterRound = {
         "Le mastering est parti sur ce mix : il ne peut plus être rouvert.",
       failed: "Le mix n'a pas pu être rouvert. Réessayez.",
     },
+    // « Rouvrir le master »: same rule, until the Distribution delivered.
+    master: {
+      button: "Rouvrir le master",
+      reason: "Pourquoi rouvrir le master",
+      placeholder: "Mona veut une voix plus en avant sur le dernier refrain.",
+      done: "Master rouvert",
+      hint: "Possible tant que la Distribution n'a pas livré la sortie : la décision reste dans l'historique, le titre repasse de « Master final » à « Master », l'ingénieur peut déposer une nouvelle version.",
+      delivered:
+        "La Distribution a livré la sortie : ce master ne peut plus être rouvert.",
+      failed: "Le master n'a pas pu être rouvert. Réessayez.",
+    },
   },
   take: {
     title: "Prendre en charge le dossier",

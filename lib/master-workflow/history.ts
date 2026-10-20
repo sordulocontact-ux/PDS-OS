@@ -5,7 +5,9 @@
 
 import { fr } from "@/lib/i18n/fr";
 import type { MasterStepKey } from "@/lib/ui/master-steps";
+import { formatDay, formatShortInstant } from "@/lib/utils/day";
 
+import { eurosHt } from "./invoice-rules";
 import type { MasterJourneyFacts } from "./journey-facts";
 
 const t = fr.masterJourney.history;
@@ -191,6 +193,86 @@ export function masterHistory(facts: MasterJourneyFacts): MasterHistoryItem[] {
       at: r.at,
       cause: null,
     });
+
+  const b = facts.brief;
+  for (const [stage, person, at] of [
+    ["mix", b?.mixPerson, b?.mixAssignedAt],
+    [
+      "mastering",
+      b?.masteringSame ? b?.mixPerson : b?.masteringPerson,
+      b?.masteringAssignedAt,
+    ],
+  ] as const)
+    if (person && at)
+      items.push({
+        key: `assigned-${stage}`,
+        step: stage,
+        text: fr.masterInHouse.history.assigned(person.name, stage),
+        who: null,
+        at,
+        cause: null,
+      });
+
+  facts.messages.forEach((m, i) => {
+    if (m.escalatedAt)
+      items.push({
+        key: `esc-${i}`,
+        step: m.stage,
+        text: fr.masterDelay.history.escalated,
+        who: null,
+        at: m.escalatedAt,
+        cause: null,
+      });
+  });
+
+  const ti = fr.masterInvoice.history;
+  for (const i of facts.invoices) {
+    items.push({
+      key: `inv-${i.id}`,
+      step: "final",
+      text: ti.requested(i.contactName),
+      who: t.pdsName,
+      at: i.requestedAt,
+      cause: ti.requestedCause,
+    });
+    if (i.receivedAt && i.number && i.amountCents !== null)
+      items.push({
+        key: `inv-${i.id}-rec`,
+        step: "final",
+        text: ti.received(
+          i.number,
+          i.contactName,
+          i.viaLink,
+          eurosHt(i.amountCents),
+        ),
+        who: i.viaLink ? linked(i.contactName) : i.receivedBy,
+        at: i.receivedAt,
+        cause: ti.receivedCause,
+      });
+    if (i.receivedAt && i.bankChanged && i.number)
+      items.push({
+        key: `inv-${i.id}-rib`,
+        step: "final",
+        text: ti.ribChanged(i.contactName),
+        who: t.pdsName,
+        at: i.receivedAt,
+        cause: ti.ribCause(i.number),
+      });
+    if (i.paidOn && i.paidAt && i.receivedAt && i.number)
+      items.push({
+        key: `inv-${i.id}-paid`,
+        step: "final",
+        text: ti.paid(
+          i.number,
+          i.contactName,
+          formatDay(i.paidOn),
+          eurosHt(i.amountCents ?? 0),
+        ),
+        who: i.paidBy,
+        at: i.paidAt,
+        cause: ti.paidCause(formatShortInstant(i.receivedAt)),
+      });
+  }
 
   return items.sort((a, b) => a.at.localeCompare(b.at));
 }

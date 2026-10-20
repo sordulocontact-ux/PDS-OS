@@ -42,7 +42,9 @@ export function RoundVersions({ round, engineer, viewerIsOwner }: Props) {
   if (titles.length === 0)
     return (
       <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-        {t.versions.none(engineer)}
+        {round.inHouse
+          ? fr.masterInHouse.noVersion(engineer)
+          : t.versions.none(engineer)}
       </p>
     );
   return (
@@ -126,14 +128,13 @@ export function RoundVersions({ round, engineer, viewerIsOwner }: Props) {
                 <ToneCallout tone="success">
                   {t.decision.final(label, approved.number, approved.decidedBy)}
                 </ToneCallout>
-                {viewerIsOwner &&
-                  round.stage === "mix" &&
-                  approved.id === latest.id && (
-                    <ReopenMix
-                      projectId={round.view.projectId}
-                      versionId={latest.id}
-                    />
-                  )}
+                {viewerIsOwner && approved.id === latest.id && (
+                  <ReopenMix
+                    projectId={round.view.projectId}
+                    versionId={latest.id}
+                    stage={round.stage}
+                  />
+                )}
               </>
             ) : latest.decision === null && !extra?.reopenedAt ? (
               <>

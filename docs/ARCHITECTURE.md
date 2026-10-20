@@ -3657,9 +3657,62 @@ est la préparation », modale de transmission, `BriefForm` : retirés de l'écr
   que ça débloque » (durée lue sur le titre), livrables attendus / reçus (notés par le responsable).
 - **Page privée `/m/`** : `PortalShell`, cartes « Votre dossier », « Mix » / « Mastering » (versions et
   dépôt), « Échanges avec le label », triées par `PortalSections`.
-- **Reste** (non fait) : réponse de la DA lue par PO avec citations, livrables déposés par
-  l'ingénieur sur son lien, facture / RIB / paiement, lien d'écoute de l'artiste, escalade d'un retard
-  à la direction, ingénieur maison, PDF du Brief, rouvrir un master.
+- **Le reste du Master (20/10/2026, branche `pc/r1-master`, migrations `20261020010101` à `010601`)** :
+  - **Facture, RIB, paiement** (`20261020010101`, `lib/master-workflow/invoices.ts`, `invoice-*.ts`,
+    `components/master-workflow/invoice/`) : quand chaque titre du tour a son Master final, un trigger
+    demande la facture à chaque ingénieur **externe** (celui qui a reçu un lien) : `master_invoices`, une
+    par ingénieur et projet. Carte « Votre facture » sur `/m/` et `/c/` : « Facturer à » (table
+    `organization_billing`, saisie par l'administration dans `/app/settings`), montant attendu = lignes du
+    budget engagées de ses rôles, PDF (bucket privé `master-finance`, emplacements à usage unique
+    `master_finance_slots`), n°, montant HT (motif **obligatoire** s'il diffère, `check_master_invoice_amount`),
+    RIB. Les lignes du budget passent `invoiced`. **RIB** (`contact_bank_accounts`) : lu par la **direction
+    seule** (RLS `is_direction` = permission `validate`), l'ingénieur ne voit que les 4 derniers chiffres,
+    l'équipe que l'état (`contact_bank_state` : aucun / à confirmer / vérifié). Le premier RIB donné par
+    l'ingénieur sur son lien est gardé (proto) ; un RIB **changé**, ou saisi par un membre d'après un
+    e-mail, attend que la direction coche « J'ai vérifié ce RIB par téléphone » (`confirm_contact_bank_account`).
+    « Marquer comme payée » (`pay_master_invoice`, direction, RIB confirmé, date ≤ aujourd'hui, preuve
+    lue par la direction seule `master_payment_proofs`) : lignes `paid`. **PDS OS ne fait jamais le
+    virement.** Échéance = réception + 30 jours, calculée par le code (`invoiceDueOn`). Facture et PDF lus
+    par le responsable et la direction (`can_read_project_budget`, comme le budget) ; jamais bloquante :
+    le Master final reste « Fait », la direction a l'action « Confirmer le nouveau RIB de … » puis « Payer
+    la facture de … avant le … » dans son Maintenant. Notifications `master_invoice_received`,
+    `master_bank_details_changed`, `master_invoice_paid`.
+  - **Écoute de l'artiste** (`20261020010201`, `lib/master-workflow/listen-*.ts`,
+    `components/master-workflow/listen/`) : l'artiste (contact du Réseau lié à l'artiste du projet ou d'un
+    titre, `master_listener_contacts`) a l'objet « listen » sur sa **page par personne** `/c/`
+    (`contact_page_items` et `project_link_contacts` redéfinies, corps gardés mot pour mot) : chaque
+    version en écoute (la plus récente non décidée de chaque titre), lecteur (fichier signé par la page :
+    politique storage anon tant que la version est en écoute et l'artiste a un lien ouvert), « Minutage »
+    + « Votre retour ». Le retour est un commentaire de la version (`master_mix_comments.contact_id`), lu
+    par l'équipe « Mona Lys (lien privé) » ; **l'ingénieur ne reçoit que ce que la validatrice transmet ou
+    décide** (règle 21). La validatrice est notifiée (`master_listen_feedback`). Le lien se crée dans le
+    Mixage (`ListenLinkOffer`).
+  - **Escalade d'un retard** (`20261020010301`) : statut `escalated` (« Chez la direction »), `outcome`
+    (`applied` / `kept` / `refused`). Le responsable : « Appliquer ces dates », « Garder les dates »
+    (réponse obligatoire, lue sur le lien), ou « Envoyer à la direction » quand le master final passerait
+    après la sortie ; la direction (notifiée, action « Arbitrer le retard de … ») : « Appliquer ces dates
+    (la sortie est à revoir) » ou « Refuser le retard ». Les dates sont calculées par le code
+    (`delayImpact`) et écrites par `apply_master_delay` (l'ordre du Brief vérifié par sa contrainte).
+  - **Réponse de la directrice créative lue par PO** (`20261020010401`, `answer-reading.ts`) : « Lire ma
+    réponse » → `extract` (schéma `answer-reading`), chaque élément gardé **seulement si sa citation se
+    retrouve mot pour mot** (`verbatimFrom` côté code, `fold_words` côté SQL dans
+    `answer_master_question_read`) ; « Retirer », « Envoyer la réponse » ; le responsable « Ajouter au
+    Brief » range chaque élément dans Direction / Références / Contraintes (`apply_master_question`).
+  - **Livrables déposés par l'ingénieur** (`20261020010501`) : carte « Autres livrables » sur le lien de
+    l'ingénieur du mastering quand un titre a son Master final (`get_master_deliverables`), dépôt par
+    emplacement (`master_deliverable_slots`, ZIP pour les stems), fichier rangé dans le titre (jamais une
+    version), `master_deliverables_received.file_id` / `via_link` ; « Noter comme reçu » reste le recours.
+    **Rouvrir le master** : `reopen_mix_version` accepte le mastering (motif, responsable), refusé quand la
+    Distribution a livré (`releases.delivered_on`) ; le fichier et le titre repassent « Master ».
+  - **PDF du Brief** : `/api/projects/[projectId]/master-brief` (`brief-html.ts`, `htmlToPdf`), sans les
+    tarifs internes ; bouton sur la ligne « Brief » une fois enregistré.
+  - **Ingénieur maison** (`20261020010601`, `inhouse-actions.ts`) : `master_briefs.mix_person_id` /
+    `mastering_person_id` (un membre, exclusif avec le contact), choisi dans le Brief (groupe « Membres de
+    PDS »). Il voit le projet (`can_see_project_row` redéfinie, clause de la Production gardée). « Assigner
+    à … » (`assign_master_round`, responsable, notification `master_round_assigned`) ; son action « Déposer
+    le Mix V1 » est dans son Maintenant et son Travail (parcours) ; il dépose dans l'app
+    (`open_` / `record_master_member_delivery`, sans `manage_catalog`) ; pas de lien, pas de tarif, pas de
+    facture (« Ingénieur maison · Pas de facture : interne »).
 
 
 Workflow spécialisé du projet, mené en parallèle des 7 étapes et du Juridique

@@ -2,10 +2,12 @@ import { FormMessage } from "@/components/auth/form-message";
 import { PageContainer } from "@/components/shell/page-container";
 import { PageHeader } from "@/components/shell/page-header";
 import { PageSection } from "@/components/shell/page-section";
+import { BillingForm } from "@/components/settings/billing-form";
 import { can } from "@/lib/auth/access";
 import { requireApproved } from "@/lib/auth/dal";
 import { fr } from "@/lib/i18n/fr";
 import { getOwnAiUsage } from "@/lib/members/queries";
+import { loadBilling } from "@/lib/master-workflow/billing";
 
 import { AiUsageMeter } from "./ai-usage-meter";
 
@@ -14,10 +16,13 @@ import { AiUsageMeter } from "./ai-usage-meter";
 export default async function SettingsPage() {
   const access = await requireApproved();
   const t = fr.aiUsage.settings;
-  const usage =
+  const admin = can(access, "administer");
+  const [usage, billing] = await Promise.all([
     access.organizationId && access.personId
-      ? await getOwnAiUsage(access.organizationId, access.personId)
-      : null;
+      ? getOwnAiUsage(access.organizationId, access.personId)
+      : null,
+    admin && access.organizationId ? loadBilling(access.organizationId) : null,
+  ]);
 
   return (
     <PageContainer className="max-w-2xl">
@@ -38,6 +43,16 @@ export default async function SettingsPage() {
           <FormMessage kind="error">{t.usage.loadError}</FormMessage>
         )}
       </PageSection>
+      {admin && (
+        <PageSection
+          id="billing"
+          title={fr.masterInvoice.billing.title}
+          description={fr.masterInvoice.billing.description}
+          card
+        >
+          <BillingForm initial={billing} />
+        </PageSection>
+      )}
     </PageContainer>
   );
 }

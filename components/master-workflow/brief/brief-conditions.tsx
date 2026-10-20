@@ -20,6 +20,7 @@ export type BriefFactsProps = {
   canSeeBudget: boolean;
   brief: MasterBrief;
   engineers: NetworkEngineer[];
+  members: BriefPerson[];
   validators: BriefPerson[];
   designations: {
     mix: BriefDesignation | null;
@@ -59,8 +60,12 @@ export function BriefConditions(props: BriefFactsProps) {
   const { brief, canEdit, projectId, changedBy } = props;
   const save = (patch: Parameters<typeof saveBriefFact>[1]) =>
     saveBriefFact(projectId, patch);
-  const engineer = (id: string | null) =>
-    props.engineers.find((e) => e.id === id) ?? null;
+  // A contact of the Réseau, or a member of PDS (in-house engineer).
+  const engineer = (id: string | null, personId: string | null = null) =>
+    props.engineers.find((e) => e.id === id) ??
+    (personId
+      ? { name: props.members.find((m) => m.personId === personId)?.name ?? "" }
+      : null);
   const groups = [
     {
       label: t.picker.network,
@@ -68,6 +73,14 @@ export function BriefConditions(props: BriefFactsProps) {
         id: e.id,
         label: e.name,
         detail: [e.structure, e.city, e.history].filter(Boolean).join(" · "),
+        avatar: { pictureUrl: null },
+      })),
+    },
+    {
+      label: t.picker.members,
+      options: props.members.map((m) => ({
+        id: `person:${m.personId}`,
+        label: m.name,
         avatar: { pictureUrl: null },
       })),
     },
@@ -85,13 +98,23 @@ export function BriefConditions(props: BriefFactsProps) {
               searchable
               searchLabel={t.picker.search}
               done={t.changed}
-              onChoose={(id) => save({ [field]: id })}
+              onChoose={(id) =>
+                save(
+                  id.startsWith("person:")
+                    ? {
+                        [field === "mixContactId"
+                          ? "mixPersonId"
+                          : "masteringPersonId"]: id.slice("person:".length),
+                      }
+                    : { [field]: id },
+                )
+              }
             />
           ),
         }
       : null;
-  const mix = engineer(brief.mixContactId);
-  const mastering = engineer(brief.masteringContactId);
+  const mix = engineer(brief.mixContactId, brief.mixPersonId);
+  const mastering = engineer(brief.masteringContactId, brief.masteringPersonId);
   const validator = props.validators.find(
     (v) => v.personId === brief.validatorPersonId,
   );
@@ -120,7 +143,11 @@ export function BriefConditions(props: BriefFactsProps) {
         missing={!mix}
         source={mix ? sourceOf(props.designations.mix) : t.sources.nobody}
         changedBy={changedBy.mix_contact_id}
-        change={pick("mixContactId", brief.mixContactId)}
+        change={pick(
+          "mixContactId",
+          brief.mixContactId ??
+            (brief.mixPersonId ? `person:${brief.mixPersonId}` : null),
+        )}
       />
       <FactRow
         label={t.fields.same}
@@ -149,7 +176,13 @@ export function BriefConditions(props: BriefFactsProps) {
               : t.sources.nobody
           }
           changedBy={changedBy.mastering_contact_id}
-          change={pick("masteringContactId", brief.masteringContactId)}
+          change={pick(
+            "masteringContactId",
+            brief.masteringContactId ??
+              (brief.masteringPersonId
+                ? `person:${brief.masteringPersonId}`
+                : null),
+          )}
         />
       )}
       <FactRow

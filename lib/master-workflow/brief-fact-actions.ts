@@ -33,8 +33,10 @@ const text = z
 const patchSchema = z
   .object({
     mixContactId: z.uuid().nullable(),
+    mixPersonId: z.uuid().nullable(),
     masteringSame: z.boolean(),
     masteringContactId: z.uuid().nullable(),
+    masteringPersonId: z.uuid().nullable(),
     revisions: z.number().int().min(0).max(20).nullable(),
     validatorPersonId: z.uuid().nullable(),
     mixRateCents: z.number().int().min(0).max(100_000_000).nullable(),
@@ -65,8 +67,10 @@ const COLUMNS: Record<
   keyof BriefFields | "start_mode"
 > = {
   mixContactId: "mix_contact_id",
+  mixPersonId: "mix_person_id",
   masteringSame: "mastering_same_engineer",
   masteringContactId: "mastering_contact_id",
+  masteringPersonId: "mastering_person_id",
   revisions: "revisions",
   validatorPersonId: "validator_person_id",
   mixRateCents: "mix_rate_cents",
@@ -125,16 +129,28 @@ export async function saveBriefFact(
   for (const [key, value] of Object.entries(p))
     changes[COLUMNS[key as keyof typeof COLUMNS]] =
       key === "deliverables" ? briefDeliverablesOf(value as string[]) : value;
-  if (p.masteringSame) changes.mastering_contact_id = null;
+  if (p.masteringSame) {
+    changes.mastering_contact_id = null;
+    changes.mastering_person_id = null;
+  }
+  // One engineer per round: a contact of the Réseau or a member of PDS.
+  if (p.mixContactId) changes.mix_person_id = null;
+  if (p.mixPersonId) changes.mix_contact_id = null;
+  if (p.masteringContactId) changes.mastering_person_id = null;
+  if (p.masteringPersonId) changes.mastering_contact_id = null;
 
   const fields = step.saved
     ? changes
     : {
         mix_contact_id: b.mixContactId,
+        mix_person_id: b.mixPersonId,
         mastering_same_engineer: b.masteringSameEngineer,
         mastering_contact_id: b.masteringSameEngineer
           ? null
           : b.masteringContactId,
+        mastering_person_id: b.masteringSameEngineer
+          ? null
+          : b.masteringPersonId,
         mix_rate_cents: b.mixRateCents,
         mastering_rate_cents: b.masteringRateCents,
         revisions: b.revisions,
@@ -167,9 +183,11 @@ export async function saveBriefFact(
           ? t.errors.forbidden
           : error.message.includes("validator_not_in_project")
             ? t.errors.validator
-            : error.message.includes("calendar_order")
-              ? t.orderError
-              : t.errors.failed,
+            : error.message.includes("engineer_not_member")
+              ? t.errors.failed
+              : error.message.includes("calendar_order")
+                ? t.orderError
+                : t.errors.failed,
     };
   }
   refresh(id.data);

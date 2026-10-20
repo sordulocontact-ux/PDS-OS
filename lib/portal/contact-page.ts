@@ -35,7 +35,15 @@ const callDetail = z.object({
 export type ContactCallDetail = z.infer<typeof callDetail>;
 
 const item = z.object({
-  kind: z.enum(["master", "form", "split", "influence", "provider", "call"]),
+  kind: z.enum([
+    "master",
+    "listen",
+    "form",
+    "split",
+    "influence",
+    "provider",
+    "call",
+  ]),
   id: z.uuid(),
   workflow: z.enum(["framing", "master", "legal", "marketing", "distribution"]),
   step: z.string(),

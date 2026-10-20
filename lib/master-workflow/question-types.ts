@@ -38,11 +38,35 @@ export type BriefQuestion = {
   answerText: string | null;
   // [] = « rien d'autre » for the deliverables.
   answerChoices: QuestionDeliverable[] | null;
+  // What PO read in a direction answer, each item with its words (rule 12).
+  answerItems: AnswerItem[] | null;
   answeredAt: string | null;
   appliedAt: string | null;
   // Asked to the viewer: they answer it.
   isMine: boolean;
 };
+
+export type AnswerItem = {
+  group: "direction" | "references" | "constraints";
+  label: string;
+  quote: string;
+};
+
+/** The items stored with an answer (jsonb), the malformed ones left out. */
+export function answerItemsOf(value: unknown): AnswerItem[] | null {
+  if (!Array.isArray(value)) return null;
+  return value.flatMap((x): AnswerItem[] => {
+    const i = x as Partial<AnswerItem> | null;
+    return i &&
+      (i.group === "direction" ||
+        i.group === "references" ||
+        i.group === "constraints") &&
+      typeof i.label === "string" &&
+      typeof i.quote === "string"
+      ? [{ group: i.group, label: i.label, quote: i.quote }]
+      : [];
+  });
+}
 
 /** Who should be asked what, decided by code (questions-plan.ts). */
 export type QuestionToAsk = {

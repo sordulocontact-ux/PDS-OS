@@ -1,4 +1,6 @@
+import { deliverablesPortalCard } from "@/components/master-workflow/deliverables-link-card";
 import { EngineerThread } from "@/components/master-workflow/engineer-thread";
+import { invoicePortalCard } from "@/components/master-workflow/invoice/invoice-link-card";
 import {
   PublicDeliveries,
   PublicPackageView,
@@ -6,6 +8,8 @@ import {
 import type { PortalCardItem } from "@/components/portal/portal-sections";
 import { fr } from "@/lib/i18n/fr";
 import type { EngineerMessage } from "@/lib/master-workflow/engineer-messages";
+import type { LinkDeliverable } from "@/lib/master-workflow/deliverables-public";
+import type { PublicInvoice } from "@/lib/master-workflow/invoice-public";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
 
 const t = fr.masterWorkflow.publicPackage;
@@ -23,11 +27,21 @@ export function masterPortalCards({
   linkKey,
   data,
   thread,
+  invoice = null,
+  deliverables = [],
 }: {
   linkKey: string;
   data: OpenPackage;
   thread: EngineerMessage[];
+  // « Votre facture », once PDS asked for it (the Master final validated).
+  invoice?: PublicInvoice | null;
+  // « Autres livrables », once a title has its Master final.
+  deliverables?: LinkDeliverable[];
 }): PortalCardItem[] {
+  const deliverablesCard = deliverablesPortalCard({
+    linkKey,
+    items: deliverables,
+  });
   const role = data.package.role;
   const taken = data.state === "received";
   // Per title, the latest version and whether a new one is expected.
@@ -46,6 +60,17 @@ export function masterPortalCards({
     titles.length > 0 &&
     titles.every((x) => latestOf(x.masterId)?.decision === "approved");
   return [
+    ...(invoice
+      ? [
+          invoicePortalCard({
+            linkKey,
+            invoice,
+            project: data.package.project,
+            engineer: data.package.engineer,
+          }),
+        ]
+      : []),
+    ...(deliverablesCard ? [deliverablesCard] : []),
     {
       id: "ps-package",
       title: r.portal.package,

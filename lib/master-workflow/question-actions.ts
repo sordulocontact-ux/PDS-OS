@@ -23,6 +23,18 @@ const answerInput = z.object({
   questionId: z.uuid(),
   text: z.string().trim().max(2000),
   choices: z.array(z.enum(QUESTION_DELIVERABLES)).max(7).nullable(),
+  // What PO read in a direction answer, each item with its quote (checked
+  // again word for word by the database).
+  items: z
+    .array(
+      z.object({
+        group: z.enum(["direction", "references", "constraints"]),
+        label: z.string().trim().min(1).max(200),
+        quote: z.string().trim().min(3).max(2000),
+      }),
+    )
+    .max(30)
+    .nullable(),
 });
 
 /** The person asked answers, once; their task is ticked with it. */
@@ -31,17 +43,30 @@ export async function answerBriefQuestion(
   questionId: string,
   text: string,
   choices: string[] | null,
+  items: Array<{ group: string; label: string; quote: string }> | null = null,
 ): Promise<QuestionResult> {
-  const input = answerInput.safeParse({ projectId, questionId, text, choices });
+  const input = answerInput.safeParse({
+    projectId,
+    questionId,
+    text,
+    choices,
+    items,
+  });
   await requireApproved();
   if (!input.success) return { ok: false, error: t.errors.answer };
   const supabase = await createClient();
-  const { error } = await supabase.rpc("answer_master_question", {
-    p_question_id: input.data.questionId,
-    p_text: input.data.text,
-    // Text questions send no choices (null in SQL).
-    p_choices: input.data.choices ?? undefined,
-  });
+  const { error } = input.data.items
+    ? await supabase.rpc("answer_master_question_read", {
+        p_question_id: input.data.questionId,
+        p_text: input.data.text,
+        p_items: input.data.items,
+      })
+    : await supabase.rpc("answer_master_question", {
+        p_question_id: input.data.questionId,
+        p_text: input.data.text,
+        // Text questions send no choices (null in SQL).
+        p_choices: input.data.choices ?? undefined,
+      });
   if (error) {
     console.error("answerBriefQuestion:", error.code, error.message);
     return {
@@ -49,11 +74,13 @@ export async function answerBriefQuestion(
       error:
         error.code === "42501"
           ? t.errors.notYours
-          : error.message.includes("empty_answer")
-            ? t.errors.empty
-            : error.message.includes("already_answered")
-              ? t.errors.already
-              : t.errors.answer,
+          : error.message.includes("not_verbatim")
+            ? fr.masterAnswer.notVerbatim
+            : error.message.includes("empty_answer")
+              ? t.errors.empty
+              : error.message.includes("already_answered")
+                ? t.errors.already
+                : t.errors.answer,
     };
   }
   refresh(input.data.projectId);

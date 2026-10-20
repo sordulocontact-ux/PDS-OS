@@ -61,6 +61,20 @@ export const NOTIFICATION_KINDS = [
   // The engineer deposited a version through their link.
   "master_delivery_received",
   "master_mastering_delivery_received",
+  // The engineer's invoice, a new RIB to confirm, the invoice paid
+  // (docs/projet-complet/master.md § 9).
+  "master_invoice_received",
+  "master_bank_details_changed",
+  "master_invoice_paid",
+  // The artist left feedback on a version through their page (§ 11).
+  "master_listen_feedback",
+  // A delay the owner sent to the direction, then its decision (§ 6).
+  "master_delay_escalated",
+  "master_delay_decided",
+  // A deliverable deposited on the engineer's link (§ 8).
+  "master_deliverable_received",
+  // The in-house engineer got a round of the Master (proto `master:hugo`).
+  "master_round_assigned",
   // A fiche de renseignements came back through its link (JUR-11).
   "legal_form_received",
   // Production: a version waits for its decision; corrections are asked to
@@ -225,14 +239,26 @@ export function notificationHref(
   )
     return routes.projectMasterStep(projectId, "mix");
   // A message or a signal of the engineer: the thread, under the Mix.
-  if (kind === "master_engineer_signal")
+  if (kind === "master_listen_feedback" || kind === "master_round_assigned")
+    return routes.projectMasterStep(projectId, "mix");
+  if (
+    kind === "master_engineer_signal" ||
+    kind === "master_delay_escalated" ||
+    kind === "master_delay_decided"
+  )
     return `${routes.projectMasterStep(projectId, "mix")}#engineer-thread`;
   // The mastering has its own step (ticket « Architecture globale »).
   if (kind.startsWith("master_mastering_"))
     return routes.projectMasterStep(projectId, "mastering");
   if (kind === "master_source_newer")
     return routes.projectMasterStep(projectId, "source");
-  if (kind === "master_final_approved")
+  if (
+    kind === "master_final_approved" ||
+    kind === "master_invoice_received" ||
+    kind === "master_bank_details_changed" ||
+    kind === "master_invoice_paid" ||
+    kind === "master_deliverable_received"
+  )
     return routes.projectMasterStep(projectId, "final");
   // A strategy document's review: the version itself (Brief de sortie or
   // Plan de sortie), where reviewers decide and the owner sees each answer.
