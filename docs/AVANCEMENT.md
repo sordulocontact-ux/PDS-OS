@@ -662,3 +662,19 @@ Migrations `20261020010101` à `20261020010601` à pousser en prod avec accord. 
   base), la vérification d'un lieu avant de le retenir (PROD-013), « HT » absent des montants du devis.
 - Migrations `20261020020101` à `20261020020501` à pousser en prod avec accord ; pgTAP
   `production-reste.test.sql`. Décisions : `docs/PRODUCTION-METIER.md` § 12.
+## Finances unifiées (20/10/2026, branche `pc/f1-finance`)
+
+- [x] **Une seule gestion des factures** des externes (Master et Juridique) : table `project_invoices`,
+      données migrées, anciennes signatures gardées, un seul « Facturer à », un seul RIB, une seule carte
+      (`components/invoices/`, `lib/invoices/`) au Master final, dans l'étape d'une personne du
+      Juridique et sur `/m` et `/c`
+- [x] **« À payer »** de la direction sur le Budget du projet, payable sur place
+- [x] **Budget** Estimé → Proposé → Engagé → Facturé → Payé suivi par les factures, sans double compte
+- [x] **« Prêt pour la sortie »** : « Facture de X » à suivre tant qu'elle n'est pas payée, jamais bloquante
+- [x] **« HT »** sur tous les montants, un seul formateur (`lib/utils/money.ts`)
+
+Migrations `20261020060101`, `20261020060201` à pousser en prod avec accord (après `20261020010101` et
+`20261020030301`). pgTAP : `project-invoices` (24), `master-invoices`, `legal-reste`,
+`master-deliverables` adaptés. Reste : paiements des créateurs d'Influence (`influence_payments`, leur
+propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel des e-mails de demande de facture.
+

@@ -204,6 +204,8 @@ export const invoices = {
     source: (at: string, due: string, rib: boolean) =>
       `Reçue le ${at} · à payer avant le ${due} · ${rib ? "nouveau RIB à confirmer" : "RIB vérifié"}`,
     open: "Ouvrir",
+    pay: "Voir et payer",
+    confirm: "Confirmer le RIB, puis payer",
     late: "En retard",
   },
   // The organization's billing identity (/app/settings, administration).

@@ -9,14 +9,18 @@ import { invoiceState, type ProjectInvoicesView } from "@/lib/invoices/types";
 import { formatDay } from "@/lib/utils/day";
 import { formatAmount } from "@/lib/utils/money";
 
+import { InvoicePanel } from "./invoice-panel";
+
 const t = fr.invoices;
 
 /**
  * « À payer » (proto payList), the direction's list on the project's
  * Budget: each invoice received and not paid, whatever it pays, the
- * soonest due first, with where to pay it (« Ouvrir »: the Master final or
- * the person's step). The transfer is made from PDS's bank; nothing for
- * anyone else, nothing when all is paid.
+ * soonest due first. Each one is paid here (« Voir et payer »: the one
+ * invoice panel of the app) — a contract signed before the Juridique's
+ * plan has no step yet — and the engineer's opens its Master final. The
+ * transfer is made from PDS's bank; nothing for anyone else, nothing when
+ * all is paid.
  */
 export function PayList({
   projectId,
@@ -68,12 +72,28 @@ export function PayList({
                     }
               }
               side={
-                <ViewLink
-                  href={invoiceHref(projectId, i)}
-                  className={buttonVariants({ variant: "ghost", size: "sm" })}
-                >
-                  {t.payList.open}
-                </ViewLink>
+                i.origin === "master" ? (
+                  <ViewLink
+                    href={invoiceHref(projectId, i)}
+                    className={buttonVariants({ variant: "ghost", size: "sm" })}
+                  >
+                    {t.payList.open}
+                  </ViewLink>
+                ) : undefined
+              }
+              below={
+                <details className="px-4 pb-4">
+                  <summary className="cursor-pointer text-[length:var(--type-body-sm)] font-semibold">
+                    {state === "rib" ? t.payList.confirm : t.payList.pay}
+                  </summary>
+                  <div className="pt-3">
+                    <InvoicePanel
+                      projectId={projectId}
+                      invoice={i}
+                      view={view}
+                    />
+                  </div>
+                </details>
               }
             />
           );
