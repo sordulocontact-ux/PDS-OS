@@ -592,5 +592,13 @@ compteur bleu sur les pilules, texte du verrou hors du plan. Détail et mesures 
   livrable) ; livré ≠ publié.
 - Date et horaires du tournage en décision qui remplace l'ancienne (historique, tâche « À revoir »,
   préparation à confirmer de nouveau).
-- Migrations `20261020020101` à `20261020020401` à pousser en prod avec accord ; pgTAP
+- Corrigé en rejouant `docs/protos/tests/production-v2.cjs` sur l'app (projet « Néons (recette Production) »,
+  cheffe de projet, directeur créatif, DG, liens de la société, du réalisateur et du management) : une
+  préparation externe confirmée n'est plus effacée par une écriture sur la fiche (`production_recheck` ne
+  touche que l'interne), « Rushes reçus » / « Sauvegarde vérifiée » en gestes du proto, montage proposé à la
+  société après ses rushes, une seule tâche « À revoir » par changement de date, responsable Activations
+  pré-rempli, mots de la clôture du proto. Captures 390 clair et sombre, 1440 sombre : aucun défilement
+  horizontal. Restent hors de cette zone : le contrôle point par point des exports (PROD-037, rejoué en
+  base), la vérification d'un lieu avant de le retenir (PROD-013), « HT » absent des montants du devis.
+- Migrations `20261020020101` à `20261020020501` à pousser en prod avec accord ; pgTAP
   `production-reste.test.sql`. Décisions : `docs/PRODUCTION-METIER.md` § 12.

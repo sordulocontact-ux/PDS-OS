@@ -4450,7 +4450,7 @@ Cahier des charges : `docs/projet-complet/production.md` (sous-lots PR-0 à PR-1
 
 ### Ce qui restait de la Production (20/10/2026, branche `pc/r2-production`)
 
-Décisions métier : `docs/PRODUCTION-METIER.md` § 12. Migrations `20261020020101` à `20261020020401`,
+Décisions métier : `docs/PRODUCTION-METIER.md` § 12. Migrations `20261020020101` à `20261020020501`,
 pgTAP `production-reste.test.sql`.
 
 - **Proposition en versions** (`production_direction_versions`, `lib/production/proposal/`,
@@ -4479,6 +4479,9 @@ pgTAP `production-reste.test.sql`.
 - **Date et horaires** : `production_schedule_decisions`, `decide_production_schedule` (tâche « À revoir »,
   `schedule_changed_at`), `confirm_production_ready` accepte une nouvelle confirmation après un changement
   de date ; `ScheduleButton` sur la ligne « Date et horaires » de la synthèse (`ReadySynthesisTable actions`).
+- **Piège corrigé** : `production_recheck` (déclenché par toute écriture sur `production_sheets`) effaçait
+  `ready_at` d'une production externe, dont les contrôles sur preuves ne sont jamais confirmés ; il ne
+  vise plus que l'interne (`20261020020501`).
 - Notifications ajoutées : `production_version_decided`, `production_final_deposited`,
   `production_delivered`, `production_schedule_changed`.
 
