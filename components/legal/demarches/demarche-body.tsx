@@ -24,6 +24,7 @@ export function DemarcheBody({
   proof,
   cards,
   invoices,
+  linkedContacts,
   direction,
   owner,
   people,
@@ -35,6 +36,8 @@ export function DemarcheBody({
   proof: Record<string, ContractProof>;
   cards: Record<string, ContractCardData>;
   invoices: ContractInvoices;
+  // The people with an active private link on this project (/c/).
+  linkedContacts: string[];
   direction: string;
   // Who answers for it (« Revient signé en tête de l'étape de … »).
   owner: string;
@@ -51,6 +54,7 @@ export function DemarcheBody({
       proof={proof}
       cards={cards}
       invoices={invoices}
+      linkedContacts={linkedContacts}
       direction={direction}
       owner={owner}
     />

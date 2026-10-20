@@ -136,7 +136,7 @@ function DecideForm({
   onDone: () => void;
 }) {
   const [missing, setMissing] = useState(false);
-  const { pending, error, run } = useWriteSubmit(
+  const { pending, error, setError, run } = useWriteSubmit(
     onDone,
     decision === "choose" ? t.decide.chosen : t.decide.discarded,
   );
@@ -154,6 +154,8 @@ function DecideForm({
         const lack = decision === "discard" && !reason;
         setMissing(lack);
         if (lack) return;
+        // PROD-013: never kept before it is verified — said in red, here.
+        if (unverified) return setError(t.errors.location_not_verified);
         run(() =>
           decideLocation({ projectId, optionId: option.id, decision, reason }),
         );

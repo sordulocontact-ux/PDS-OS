@@ -36,6 +36,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  // The path served, for the project's layout to answer a real 404 for a
+  // record it does not have (lib/projects/record-guard.ts). Always set here,
+  // so a header sent by the browser is never the one read.
+  request.headers.set("x-pds-path", pathname);
+
   const env = parsePublicEnv();
   if (!env.success) {
     // Invalid configuration: let the home page display the diagnostic.

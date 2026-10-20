@@ -27,6 +27,14 @@ export type FormalityView = {
     status: "pending" | "signed";
     proof: string | null;
     at: string | null;
+    // How it was signed (20261020070101): by the person's private link,
+    // or « A signé autrement » with its day.
+    via: "link" | "other" | null;
+    signedOn: string | null;
+    // The signer has an active private page on the project: they sign there.
+    onLink: boolean;
+    // The bulletin they deposited signed, « Voir le PDF » (one hour).
+    fileUrl: string | null;
   }>;
   history: Array<{
     id: string;

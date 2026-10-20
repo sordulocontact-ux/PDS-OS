@@ -106,7 +106,9 @@ export const productionLocations = {
       "Un autre lieu était retenu : le contrôle « Lieu » est à reconfirmer, et la feuille de service et le planning sont à revoir.",
     reason: "Pourquoi ce lieu",
     chosen: "Lieu retenu.",
-    notVerified: "Vérifiez le lieu avant de le retenir.",
+    notVerified:
+      "Ce lieu n'est pas encore vérifié (accès, électricité, son, autorisations) : il ne peut pas être retenu. Vérifiez-le sur place ou avec le lieu, puis cochez « Vérifié sur place ou avec le lieu » dans « Modifier ».",
+    verifyFirst: "À vérifier avant de le retenir",
     discard: "Écarter",
     discardTitle: (name: string) => `Écarter « ${name} » ?`,
     discardDescription:
@@ -134,6 +136,7 @@ export const productionLocations = {
     not_consulted: "Seule une personne consultée donne un avis.",
     location_discarded: "Ce lieu est écarté.",
     location_chosen: "Le lieu retenu ne s'écarte pas : retenez-en un autre.",
-    location_not_verified: "Vérifiez le lieu avant de le retenir.",
+    location_not_verified:
+      "Ce lieu n'est pas vérifié : cochez « Vérifié sur place ou avec le lieu » dans « Modifier » avant de le retenir.",
   },
 } as const;

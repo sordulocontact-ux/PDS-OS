@@ -93,6 +93,13 @@ export function LocationCard({
         {option.address && (
           <p className="text-sm text-muted-foreground">{option.address}</p>
         )}
+        {/* PROD-013: kept only once verified (also refused by the database). */}
+        {option.status === "candidate" &&
+          option.verification !== "verified" && (
+            <p className="text-sm font-medium text-[color:var(--tone-warning-fg)]">
+              {t.decide.verifyFirst}
+            </p>
+          )}
       </div>
 
       <dl className="grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]">

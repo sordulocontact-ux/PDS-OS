@@ -678,3 +678,22 @@ Migrations `20261020060101`, `20261020060201` à pousser en prod avec accord (ap
 `master-deliverables` adaptés. Reste : paiements des créateurs d'Influence (`influence_payments`, leur
 propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel des e-mails de demande de facture.
 
+## Signatures par la page privée, UPC, vrais 404, reste de la Production (20/10/2026, branche `pc/f2-signatures`)
+
+- **Contrat et bulletin SACEM signés par la page de la personne** (`/c/`, règle 19) : « Envoyer à X » met
+  la version validée sur sa page (lien créé au besoin), « Je l'ai remis autrement » garde comment et le
+  jour ; la personne télécharge le PDF, dépose le signé (PDF seul, refusé avec sa raison) ; l'équipe lit
+  « Reçu de X par son lien privé » et marque signé (le dépôt horodaté vaut preuve) ; le bulletin signé
+  par le lien enregistre la signature, « A signé autrement » + date pour l'équipe. Notifications
+  `legal_contract_signed_received`, `legal_bulletin_signed`.
+- **UPC** dans les Paramètres de distribution, contrôlé par le code (12 ou 13 chiffres, clé GS1), lu par
+  le dossier de livraison.
+- **Vrais 404** pour un livrable, une activation, un call, un compte rendu, un document ou une route
+  juridique inconnus sous un projet existant (`lib/projects/record-guard.ts`).
+- **Production** : contrôle point par point des exports, blocage signalé puis levé, rejoués dans l'app ;
+  lieu non vérifié refusé à l'écran avec sa raison.
+- Migration `20261020070101` à pousser en prod avec accord ; pgTAP `signed-returns.test.sql` (30), tests
+  Juridique existants verts. Détail : `docs/ARCHITECTURE.md` (lot 11 « Ce qui revient signé… »,
+  § 3 bis « Vrais 404 », § 8 octies « UPC », § 8 nonies « Rejoué dans l'app »).
+- Reste : envoi réel des e-mails ; « Signer pour PDS Éditions » par la DG ; 404 d'une démarche juridique
+  inconnue ; le contrat ne compte pas dans « n objets » des liens privés (`contact_page_items`).

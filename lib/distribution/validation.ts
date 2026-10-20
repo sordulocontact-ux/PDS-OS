@@ -96,7 +96,8 @@ export type DriftLine = {
   now: string | null;
 };
 
-/** Every field whose value differs between a version and the sources now. */
+/** Every field whose value differs between a version and the sources now
+ * (a UPC that arrives after the version, once given, is not one). */
 export function snapshotDrift(
   frozen: DossierSection[],
   current: DossierSection[],
@@ -108,6 +109,7 @@ export function snapshotDrift(
           group.fields.map((field) => [
             `${section.key}/${group.key}/${field.key}/${field.label}`,
             {
+              key: field.key,
               section: group.title ?? section.title,
               label: field.label,
               value: field.value,
@@ -123,6 +125,9 @@ export function snapshotDrift(
     const a = before.get(key);
     const b = now.get(key);
     if ((a?.value ?? null) === (b?.value ?? null)) return [];
+    // The UPC given by The Orchard at the deposit, after the version was
+    // validated « Attribué au dépôt »: what was expected, not a change.
+    if (b?.key === "upc" && !a?.value) return [];
     const ref = b ?? a;
     if (!ref) return [];
     return [

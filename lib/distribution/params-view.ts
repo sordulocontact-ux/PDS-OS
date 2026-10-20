@@ -46,6 +46,10 @@ export type ParamsData = {
   validatorOptions: Array<{ personId: string; name: string }>;
   cover: { id: string; title: string; line: string; chosen: boolean } | null;
   sheets: Array<{ id: string; title: string; line: string }>;
+  // The release's UPC (releases.upc) and whether the owner may type it:
+  // given by The Orchard at the deposit, so still editable once submitted.
+  upc: string | null;
+  upcEditable: boolean;
   // The last person who changed each row (the module's journal).
   changedBy: Partial<Record<ParamKey, string>>;
 };

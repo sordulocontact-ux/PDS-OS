@@ -144,6 +144,9 @@ export const NOTIFICATION_KINDS = [
   "legal_template_refused",
   "legal_invoice_received",
   "legal_invoice_paid",
+  // What comes back signed by a private link (20261020070101).
+  "legal_contract_signed_received",
+  "legal_bulletin_signed",
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 
@@ -251,6 +254,16 @@ export function notificationHref(
   if (kind.startsWith("legal_invoice_"))
     return subjectId
       ? legalDemarcheHref(projectId, "person", `contact:${subjectId}`)
+      : routes.projectLegal(projectId);
+  // A signed contract opens the person's démarche (the subject is the
+  // contact), a signed bulletin the title's SACEM démarche (the master).
+  if (kind === "legal_contract_signed_received")
+    return subjectId
+      ? legalDemarcheHref(projectId, "person", `contact:${subjectId}`)
+      : routes.projectLegal(projectId);
+  if (kind === "legal_bulletin_signed")
+    return subjectId
+      ? legalDemarcheHref(projectId, "sacem", subjectId)
       : routes.projectLegal(projectId);
   // A borrowing opens on its démarche, a step of the Juridique.
   if (kind.startsWith("clearance_") || kind === "legal_element_withdrawn")

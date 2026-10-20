@@ -162,6 +162,10 @@ export const notifications = {
       `Une facture est arrivée pour « ${project} » : à payer.`,
     legal_invoice_paid: (actor: string, project: string) =>
       `${actor} a marqué une facture de « ${project} » comme payée.`,
+    legal_contract_signed_received: (_actor: string, project: string) =>
+      `Un contrat signé est arrivé par un lien privé (« ${project} ») : à vérifier, puis à marquer comme signé.`,
+    legal_bulletin_signed: (_actor: string, project: string) =>
+      `Un bulletin SACEM signé est arrivé par un lien privé (« ${project} »).`,
     legal_element_withdrawn: (actor: string, project: string) =>
       `${actor} a retiré un élément emprunté de « ${project} » : le passage est à refaire sans lui dans le Master.`,
     strategy_review_requested: (actor: string, project: string) =>

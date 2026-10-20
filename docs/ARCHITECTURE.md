@@ -825,6 +825,16 @@ s'afficher sans chargement.
   **sous** un projet existant (livrable, activation, version, compte rendu…), car le
   `loading.tsx` du projet (squelette de section sous la barre et l'en-tête) l'enveloppe ;
   l'éviter demanderait une lecture avant le squelette de chaque section : écarté.
+  **Corrigé (20/10, `pc/f2-signatures`)** : le proxy transmet le chemin servi (`x-pds-path`, toujours
+  réécrit par lui) et `ProjectLayout`, au-dessus du squelette, demande à
+  `lib/projects/record-guard.ts` (`missingProjectRecord`) si l'enregistrement nommé existe : livrable
+  de Production (`strategy_deliverables`), activation, call, compte rendu de Suivi & bilan, document
+  de Stratégie (une lecture `id + project_id` sous RLS, en parallèle de celle du projet), route du
+  Juridique (`legalRouteOf`, pure). Absent → `notFound()` avant le flux : **404**. Le layout ne se
+  rejoue pas d'une page à l'autre du projet : la lecture n'a lieu qu'au chargement complet ou à
+  l'entrée dans le projet, jamais en navigation interne (où la page dit toujours « Page
+  introuvable »). Reste 200 : une démarche juridique inconnue (`/legal/person/<inconnu>`), qui
+  demanderait tout le contexte du Juridique avant le premier octet.
 
 ---
 
@@ -3346,6 +3356,47 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
   Le Juridique **se lance depuis le Plan du Projet** (§ 6 ter) : layout `legal/` verrouillé
   tant que le plan ne l'a pas lancé, sauf s'il avait déjà commencé (Cadrage juridique).
 
+
+### Ce qui revient signé par la page privée (20/10/2026, branche `pc/f2-signatures`)
+
+Règle 19 de `docs/VISION-UX.md` : le contrat et le bulletin SACEM 725 signés reviennent par la page de
+la personne (`/c/`). Migration `20261020070101_signed_returns.sql`, pgTAP `signed-returns.test.sql` (30).
+
+- **Envoi** (étape « Envoyer en signature » de la démarche « fiche et contrat ») : « Envoyer à X » met
+  la version validée sur sa page (`send_contract(contrat, 'link')`, exige un lien actif ;
+  « Créer son lien privé » s'il n'en a pas, `issue_contact_link`) ; PDS OS n'envoie pas l'e-mail :
+  le lien se copie dans la carte « Sa page du projet » (`ContactLinkOffer`) sous l'étape. Recours
+  « Je l'ai remis autrement » : comment (Remis en main propre / outil de signature / messagerie) et
+  le jour (`send_contract(…, 'other', how, on)`, jamais dans le futur ni plus d'un an avant).
+  `contracts.sent_via / sent_how / sent_on` ; l'événement reste `signature.requested` (avec la façon).
+- **Page de la personne** (`components/legal/signed-returns/signed-portal-cards.tsx`,
+  `get_contact_signatures`) : « Votre contrat » (en préparation → approuvé → à signer → reçu, PDS le
+  vérifie → signé) et « Le bulletin SACEM de « … » » (sa ligne de la version en cours). « Télécharger »
+  : `/c/[token]/contrat/[contractId]` (PDF imprimé comme `/api/contracts/…/document`, seulement une fois
+  envoyé) et `/c/[token]/bulletin/[signatureId]` (725 rempli). Dépôt : `SignedUploadForm` vérifie les
+  premiers octets (`%PDF-`) et 20 Mo dans le navigateur, refus en rouge avec sa raison ; chemin à usage
+  unique (`open_signed_return_slot`, table `signed_return_slots`, 30 min), envoi direct au bucket
+  (`contract-files` pour un contrat, `formality-signatures` — PDF seul — pour un bulletin), puis
+  `submit_signed_contract` / `submit_signed_bulletin` qui revérifient l'objet (présent, `mimetype` PDF).
+- **Contrat** : le signé devient un fichier du contrat (`contract_files` catégorie `signed`,
+  `via_contact_id`), événement `signature.received` (« Contrat signé reçu par son lien privé », par la
+  personne), le responsable du contrat notifié (`legal_contract_signed_received`, ouvre la démarche
+  de la personne). Dans l'étape : « Reçu de X par son lien privé » (fichier, « Voir le PDF » signé une
+  heure, « Preuve de signature · Dépôt par son lien privé, horodaté ») + « Vérifiez… » + « Marquer comme
+  signé » daté du dépôt. **Décision** (proto) : le contrat ne passe pas « Signé » seul au dépôt,
+  l'équipe vérifie ; `advance_contract('sign')` accepte ce dépôt à la place du fichier de preuve. Sans
+  dépôt : « En attente de X (lien privé) » et, replié, « Le signé vous est parvenu autrement ? » (signé +
+  preuve, comme avant).
+- **Bulletin** : chaque signataire porte son contact (`legal_formality_signatures.contact_id`, lu des
+  créateurs et éditeurs du dossier à la génération ; repris pour les versions existantes). Le dépôt par
+  le lien enregistre la signature (`via = 'link'`, fichier, jour) ; tout signé → `ready_to_submit`
+  (`settle_formality_signature`, commun avec l'équipe) ; responsable de la démarche (sinon du projet)
+  notifié (`legal_bulletin_signed`). Équipe : « A signé autrement » + « Signé le * »
+  (`note_formality_signature`), la saisie libre « Comment X a signé » est retirée de l'écran.
+- **Sécurité** : toutes les fonctions partent de `contact_link_of(token)` ; un jeton ne lit, ne
+  télécharge et ne dépose que les contrats (`legal_agreement_needs`) et les lignes de bulletin de **son**
+  contact dans **son** projet (`contact_contract`, `contact_bulletin_signature`).
+
 ### Allègement du test UX du 09/10/2026 (section 6)
 
 « Complet mais lourd pour un non-juriste » (sévérité 2-3). Aucun changement de schéma.
@@ -4448,6 +4499,14 @@ Remplace les cinq onglets ci-dessus (leurs données et fonctions SQL restent). C
 - **Retiré de l'écran** (routes et données gardées) : formulaire « Sortie », carte smartlink (la
   route publique `/l/` reste), rappel « dépôt manuel » répété (seulement à l'étape Dépôt), modales
   par geste. « Lancer la détection maintenant » reste en recours dans l'attente de la détection.
+- **UPC** (20/10, `pc/f2-signatures`) : le ticket « Ticket PO — Distribution » ne le place pas ; il est
+  donc une ligne des Paramètres de distribution (`UpcField`, `releases.upc`), « Pas encore connu ·
+  Attribué par The Orchard au dépôt · ne bloque pas » tant qu'il n'est pas tapé. Contrôlé par le code
+  (`lib/distribution/upc.ts` : 12 chiffres UPC-A ou 13 EAN-13, clé de contrôle GS1 ; espaces et tirets
+  ignorés), refus en rouge avec sa raison, écrit par le responsable même après la soumission
+  (`setReleaseUpc`, RLS `releases_update_owner`), lu par le dossier de livraison (`delivery-file.ts`).
+  Un UPC qui arrive après une version validée (« Attribué au dépôt ») n'est pas un écart à la source
+  (`snapshotDrift`) ; un UPC changé l'est. Le point « UPC » de la préparation mène aux paramètres.
 - Tests : `supabase/tests/distribution.test.sql` (105) et `distribution-journey.test.sql` (35).
 
 ## 8 nonies. Marketing : Production et Suivi & bilan
@@ -4708,6 +4767,14 @@ pgTAP `production-reste.test.sql`.
   vise plus que l'interne (`20261020020501`).
 - Notifications ajoutées : `production_version_decided`, `production_final_deposited`,
   `production_delivered`, `production_schedule_changed`.
+- **Rejoué dans l'app (20/10, `pc/f2-signatures`)** : contrôle point par point des exports (PROD-037,
+  « Revérifier » → un point « Non conforme » sans raison refusé en rouge, avec raison : la ligne passe
+  « Non conforme », contrôle et livraison défaits par `b_stamp` ; « Conforme » → « Exports contrôlés »
+  → « Confirmer la livraison » → transmission → clôture) ; « Signaler un blocage » dans une étape
+  (Contrôle technique des teasers : trois champs obligatoires en rouge, « Dario Test » choisi, notifié
+  `step_blocker_reported`, pastille « 1 blocage », icône sur l'étape, « Lever le blocage » avec ce qui
+  l'a réglé). Lieu non vérifié (PROD-013) : « À vérifier avant de le retenir » sur la carte du
+  candidat, « Retenir ce lieu » refusé en rouge avec comment le vérifier (la base le refuse aussi).
 
 ### Retours d'Ibé du 13/10/2026 sur la Production (PROD-001 à PROD-040)
 

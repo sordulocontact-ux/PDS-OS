@@ -3576,6 +3576,7 @@ export type Database = {
           replaces_id: string | null
           series_id: string
           version: number
+          via_contact_id: string | null
         }
         Insert: {
           bytes: number
@@ -3592,6 +3593,7 @@ export type Database = {
           replaces_id?: string | null
           series_id?: string
           version?: number
+          via_contact_id?: string | null
         }
         Update: {
           bytes?: number
@@ -3608,6 +3610,7 @@ export type Database = {
           replaces_id?: string | null
           series_id?: string
           version?: number
+          via_contact_id?: string | null
         }
         Relationships: [
           {
@@ -3793,6 +3796,9 @@ export type Database = {
           title: string
           type: string
           updated_at: string
+          sent_via: string | null
+          sent_how: string | null
+          sent_on: string | null
         }
         Insert: {
           artist_id?: string | null
@@ -3814,6 +3820,9 @@ export type Database = {
           title: string
           type: string
           updated_at?: string
+          sent_via?: string | null
+          sent_how?: string | null
+          sent_on?: string | null
         }
         Update: {
           artist_id?: string | null
@@ -3835,6 +3844,9 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          sent_via?: string | null
+          sent_how?: string | null
+          sent_on?: string | null
         }
         Relationships: [
           {
@@ -7199,6 +7211,12 @@ export type Database = {
           signed_at: string | null
           signer: string
           status: string
+          contact_id: string | null
+          via: string | null
+          signed_on: string | null
+          file_path: string | null
+          file_name: string | null
+          bytes: number | null
         }
         Insert: {
           document_version: number
@@ -7211,6 +7229,12 @@ export type Database = {
           signed_at?: string | null
           signer: string
           status?: string
+          contact_id?: string | null
+          via?: string | null
+          signed_on?: string | null
+          file_path?: string | null
+          file_name?: string | null
+          bytes?: number | null
         }
         Update: {
           document_version?: number
@@ -7223,6 +7247,12 @@ export type Database = {
           signed_at?: string | null
           signer?: string
           status?: string
+          contact_id?: string | null
+          via?: string | null
+          signed_on?: string | null
+          file_path?: string | null
+          file_name?: string | null
+          bytes?: number | null
         }
         Relationships: []
       }
@@ -17316,6 +17346,38 @@ export type Database = {
       get_contact_invoices: {
         Args: { p_contact_token: string }
         Returns: Json
+      }
+      send_contract: {
+        Args: { p_contract_id: string; p_how: string | null; p_on: string | null; p_via: string }
+        Returns: undefined
+      }
+      note_formality_signature: {
+        Args: { p_signature_id: string; p_signed_on: string }
+        Returns: undefined
+      }
+      get_contact_signatures: {
+        Args: { p_contact_token: string }
+        Returns: Json
+      }
+      get_contact_contract_document: {
+        Args: { p_contact_token: string; p_contract_id: string }
+        Returns: Json
+      }
+      get_contact_bulletin_document: {
+        Args: { p_contact_token: string; p_signature_id: string }
+        Returns: Json
+      }
+      open_signed_return_slot: {
+        Args: { p_contact_token: string; p_kind: string; p_object_id: string }
+        Returns: string
+      }
+      submit_signed_contract: {
+        Args: { p_contact_token: string; p_contract_id: string; p_file_name: string; p_path: string }
+        Returns: undefined
+      }
+      submit_signed_bulletin: {
+        Args: { p_contact_token: string; p_file_name: string; p_path: string; p_signature_id: string }
+        Returns: undefined
       }
       revoke_split_confirmation: {
         Args: { p_confirmation_id: string; p_reason: string }
