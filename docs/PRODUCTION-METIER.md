@@ -455,10 +455,47 @@ soit lui donner sa part par lien privé (lieux, devis, planning, feuille de serv
   entière par le DG : chaque décision (devis, proposition, montage, livraison) est validée dans son étape.
   L'étape `production` de `project_stages` reste le verrou technique, démarrée par l'ouverture de la fiche.
 - **Contenus sans tournage** (question 13) : le proto y répond par un parcours léger (versions, contrôle
-  technique, livraison) ; non construit dans ce lot (reste PR-13), le parcours tournage s'applique encore.
+  technique, livraison) ; non construit dans ce lot (reste PR-13, fait le 20/10 : § 12).
 - **Lieu et devis** (question du 17/10) : hypothèse du proto retenue — le devis dit le montant prévu pour les
   lieux, le lieu retenu y est comparé pour un jour de tournage ; un dépassement se lit « révision du devis à
   prévoir » et le remplacement du lieu peut la demander.
 - **Validation créative externe** (management) : pas de lien Production pour le management en V1 ; la
-  proposition et le montage restent validés en interne (reste PR-11).
+  proposition et le montage restent validés en interne (reste PR-11, fait le 20/10 : § 12).
 - **Société suggérée** : calculée par le code depuis ce que PDS a produit avec chaque société, jamais par PO.
+
+## 12. Ce qui restait de la Production (20/10/2026, branche `pc/r2-production`)
+
+Décisions prises en codant le reste du proto (`docs/protos/production-v2.html`, `src/mk.js`), à revoir
+avec Ibé si elles ne lui conviennent pas :
+
+- **Proposition de réalisation en versions** (externe) : le réalisateur dépose V1, V2… avec trois
+  pièces — traitement, moodboard (facultatif), découpage technique — sous forme de **liens vers les
+  PDF**, comme le « Devis (PDF) » de la société (un fichier déposé sur un lien privé ne pourrait pas être
+  ouvert par le management, qui n'a pas de compte). La version retenue est la dernière validée en interne
+  **et**, quand « Qui fait quoi » en nomme une, en externe ; « Demander une nouvelle version » la garde
+  retenue jusqu'à la suivante (règle 14). L'interne garde le brief réalisateur des tickets PROD.
+- **Validation créative externe** (management de l'artiste) : un contact du Réseau nommé dans « Qui fait
+  quoi » (le responsable du projet), qui reçoit un lien privé de la fiche (rôle `creativeExt`) et y décide
+  la proposition et le montage, en plus de la validation interne, jamais à sa place. Il ne voit ni devis,
+  ni lieux, ni enveloppe. « Pas de validation externe » : ce qui l'attendait n'est plus attendu.
+- **Pochette** (titre « pochette / cover / artwork », la règle de `distribution_cover`) : parcours léger
+  Versions de la pochette → Contrôle technique → Livraison, interne ou externe (photographe / graphiste du
+  Réseau, dépôt sur son lien). Le code lit le format et le poids dans le stockage, les dimensions dans le
+  navigateur au dépôt (comme le proto) ; contrôles : 3000 × 3000 px, JPG ou PNG, carré et **10 Mo au plus**
+  (limite choisie pour ce lot, à confirmer avec The Orchard). La base refuse « Confirmer : fichiers
+  conformes » sur une pochette non conforme.
+- **Teasers « Décliné du Clip officiel »** (titre « teaser / extrait », un clip en Production) : ils suivent
+  la production du clip (organisation et société, qui suivent aussi un changement) et leurs versions
+  attendent « Montage du clip validé ». Interne : le parcours tournage interne des tickets reste.
+- **Montage d'une production externe** : la société dépose chaque version sur son lien sans étape de post à
+  créer ; elle dépose aussi le lien du fichier final de la version validée. Validation créative, contrôle
+  technique des exports et livraison restent trois décisions distinctes.
+- **Destinataires de la livraison** (tout livrable) : pré-cochés la Distribution (responsable du projet),
+  les Activations (la personne à qui le livrable est confié) et la validation externe, puis les membres,
+  le Réseau ou un nom seul ; les membres sont prévenus. Parcours léger : la transmission aux Activations
+  suit la livraison ; clip : elle reste confirmée à part. Livré ne veut pas dire publié.
+- **Date et horaires du tournage** : une décision datée (responsable du projet) qui remplace la précédente,
+  gardée dans l'historique. Sans décision, la ligne « Date et horaires » du contrôle n'est pas prête (proto).
+  Un changement crée la tâche « Mettre à jour le planning et la feuille de service » (société en externe,
+  responsable de production en interne) et, si la préparation était confirmée, la remet « À revoir » : elle
+  se confirme de nouveau, la synthèse précédente reste dans l'historique.

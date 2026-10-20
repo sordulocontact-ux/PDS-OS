@@ -132,7 +132,7 @@ export const productionClosure = {
     pending: "Clôture…",
     done: "Production clôturée.",
     closed: (who: string | null, date: string) =>
-      who ? `Clôturée par ${who} le ${date}.` : `Clôturée le ${date}.`,
+      `Production clôturée le ${date}${who ? ` par ${who}` : ""}. La synthèse avant tournage et la version livrée restent consultables.`,
     activation: "Ouvrir l'activation",
     activations: "Créer l'activation dans Activations",
   },

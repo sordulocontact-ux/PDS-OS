@@ -9,4 +9,20 @@ export const productionShootExternal = {
   awaited: (company: string) => `Attendu de ${company}`,
   sentBy: (company: string, at: string) =>
     ` · transmis par ${company} le ${at}`,
+  // The production's two declarations on the rushes (proto BODY.rushes).
+  received: "Rushes reçus",
+  receivedHint:
+    "Le lien fonctionne et les fichiers sont complets. Sinon : signalez un blocage.",
+  receivedDone: "Rushes reçus",
+  backup: "Sauvegarde vérifiée",
+  backupHint:
+    "Les rushes sont copiés à deux endroits au moins, et les copies s'ouvrent.",
+  backupDone: "Sauvegarde vérifiée",
+  receivedRow: "Rushes reçus",
+  backupRow: "Sauvegarde vérifiée",
+  yesBy: (who: string, at: string) => `Oui, accès vérifié · ${who}, ${at}`,
+  doneBy: (who: string, at: string) => `Oui · ${who}, ${at}`,
+  notYet: "Pas encore",
+  sameEditor: (company: string) =>
+    `${company} monte aussi : pas de transfert, le montage peut commencer.`,
 } as const;

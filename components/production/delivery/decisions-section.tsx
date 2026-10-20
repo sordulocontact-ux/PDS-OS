@@ -38,12 +38,19 @@ export function DecisionsSection({
   data,
   decisions,
   canOrganize,
+  deliver,
+  recipients = [],
 }: {
   projectId: string;
   deliverable: { id: string; title: string };
   data: DeliveryTabData;
   decisions: { creative: Decision; technical: Decision; delivery: Decision };
   canOrganize: boolean;
+  // « Destinataires de la livraison » and « Confirmer la livraison »
+  // (proto recipientsPick), for the project's owner, under the three.
+  deliver?: React.ReactNode;
+  // The last delivery's recipients (« Livré à … »).
+  recipients?: string[];
 }) {
   const { delivery: d, version } = data;
   const { creative, technical, delivery } = decisions;
@@ -135,6 +142,9 @@ export function DecisionsSection({
           }
           note={
             [
+              d?.deliveredAt && recipients.length > 0
+                ? `${fr.productionLight.recipients.deliveredTo} : ${recipients.join(", ")}.`
+                : null,
               d?.deliveredAt ? t.delivery.notPublished : null,
               canOrganize && d?.checkedAt ? t.delivery.reopenHint : null,
             ]
@@ -152,7 +162,10 @@ export function DecisionsSection({
               {t.delivery.final}
             </a>
           )}
-          {canOrganize && delivery.state === "to_do" && step("deliver")}
+          {canOrganize &&
+            delivery.state === "to_do" &&
+            !deliver &&
+            step("deliver")}
           {canOrganize && (
             <FinalFileButton
               projectId={projectId}
@@ -171,6 +184,7 @@ export function DecisionsSection({
           {canOrganize && d?.checkedAt && step("reopen")}
         </DecisionCard>
       </ol>
+      {delivery.state === "to_do" && deliver}
     </PageSection>
   );
 }

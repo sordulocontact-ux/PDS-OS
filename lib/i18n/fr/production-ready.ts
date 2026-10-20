@@ -26,6 +26,8 @@ export const productionReady = {
     direction: "Validée",
     directionRevising: "Validée · nouvelle version demandée",
     noDirection: "Pas encore validée",
+    proposal: (n: number) => `V${n} validée`,
+    proposalNext: " · nouvelle version en cours",
     none: "Aucun",
     noneF: "Aucune",
     blockers: (n: number) => (n === 1 ? "1 blocage" : `${n} blocages`),

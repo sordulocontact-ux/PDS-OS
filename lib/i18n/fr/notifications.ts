@@ -75,6 +75,14 @@ export const notifications = {
     // The company has no account: the project names it.
     production_quote_changes: (actor: string, project: string) =>
       `${actor} demande une modification d'un devis de « ${project} ».`,
+    production_version_decided: (_actor: string, project: string) =>
+      `La validation créative externe a donné son retour sur le montage de « ${project} ».`,
+    production_final_deposited: (_actor: string, project: string) =>
+      `La société a déposé le fichier final validé de « ${project} » : à contrôler.`,
+    production_delivered: (actor: string, project: string) =>
+      `${actor} vous a livré un livrable de « ${project} ». Livré ne veut pas dire publié.`,
+    production_schedule_changed: (actor: string, project: string) =>
+      `${actor} a changé la date du tournage de « ${project} » : le planning est à revoir.`,
     production_rushes_linked: (_actor: string, project: string) =>
       `La société a transmis le lien des rushes de « ${project} » : à récupérer.`,
     production_director_proposed: (_actor: string, project: string) =>

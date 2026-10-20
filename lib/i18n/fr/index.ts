@@ -106,6 +106,10 @@ import { productionLocations } from "./production-locations";
 import { productionOrganization } from "./production-organization";
 import { productionChecklist } from "./production-checklist";
 import { productionDirector } from "./production-director";
+import { productionProposal } from "./production-proposal";
+import { productionLight } from "./production-light";
+import { productionCut } from "./production-cut";
+import { productionSchedule } from "./production-schedule";
 import { productionPlace } from "./production-place";
 import { productionProducer } from "./production-producer";
 import { productionReady } from "./production-ready";
@@ -224,6 +228,10 @@ export const fr = {
   productionOrganization,
   productionChecklist,
   productionDirector,
+  productionProposal,
+  productionLight,
+  productionCut,
+  productionSchedule,
   productionPlace,
   productionProducer,
   productionReady,

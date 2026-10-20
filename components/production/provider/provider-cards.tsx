@@ -33,11 +33,18 @@ export function providerPortalCards({
     ? linkJourneyCards({ token: linkKey, journey, provider: space.provider })
     : [];
   const quiet = Boolean(journey && journey.roles.length > 0);
+  // The external creative validation alone decides on its cards: no post
+  // space (exports, deposits) for it.
+  const validatorOnly =
+    journey?.roles.length === 1 &&
+    journey.roles[0] === "creativeExt" &&
+    space.steps.length === 0;
   const post =
-    !quiet ||
-    space.steps.length > 0 ||
-    space.requests.length > 0 ||
-    space.versions.length > 0;
+    !validatorOnly &&
+    (!quiet ||
+      space.steps.length > 0 ||
+      space.requests.length > 0 ||
+      (space.versions.length > 0 && !journey?.cut));
   const open = space.requests.some((r) => r.status !== "treated");
   if (post)
     cards.push({
@@ -57,6 +64,7 @@ export function providerPortalCards({
             space={space}
             locations={locations}
             quiet={quiet}
+            hideVersions={Boolean(journey?.cut)}
           />
         </>
       ),

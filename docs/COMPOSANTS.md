@@ -336,6 +336,11 @@ contrôles `--control-*` · erreur de saisie `--error` (le seul rouge : champ ma
 | `CallStepHead`, `CallStepSummary`, `DirectorBlock`, `RetainDirectorButton` | `production/journey/` | call de production dans l'étape (formulaire commun, réunion, résumé), réalisateurs proposés et « Retenir » |
 | `QuoteVersionRow` / `QuoteVersionList`, `QuoteCheckForm`, `QuoteDecisionForm`, `QuoteRevisionForm` | `production/quotes/` | versions du devis (dans l'étape et sur le lien), vérification et décision (`DecisionPanel`), révision |
 | `ChecklistSection`, `AddTaskForm`, `FinishTaskButton` | `production/checklist/` | checklist de préproduction |
+| `ProposalSection`, `ProposalVersions`, `ProposalDepositForm`, `ProposalDecision`, `ProposalRequestForm` | `production/proposal/` | proposition de réalisation en versions (pièces en liens, « Retenue » / « Remplacée par la Vn », validations interne et externe, dépôt dans l'étape ou sur le lien `place`, « Demander une nouvelle version ») |
+| `LightVersionsStep`, `LightControlStep`, `LightDeliveryStep`, `LightVersions`, `LightDepositForm`, `LightDecision`, `LightControlForm` | `production/light/` | pochette et teasers déclinés : versions (image lue par le code ou lien), « Contrôlé par le code » / « À contrôler », livraison |
+| `DeliverForm` | `production/delivery/deliver-form.tsx` | « Destinataires de la livraison * » (pré-cochés, membres, « Ajouter un destinataire » = `PersonPickList`) puis « Confirmer la livraison » |
+| `ScheduleButton` | `production/schedule/` | « Fixer / Changer la date et les horaires » (modale verre, décision qui remplace l'ancienne) |
+| `linkProposalCard`, `linkCutCards`, `LinkCutDepositForm`, `LinkFinalForm`, `LinkCutDecision` | `production/provider/` | sur le lien : proposition (réalisateur, validation externe), montage et livraison (société, validation externe), versions d'un parcours léger |
 | `ReplacePlaceButton`, `PlaceDecisions` | `production/locations/` | remplacer le lieu retenu, décisions sur le lieu |
-| `ReadySynthesisTable`, `ReadyConfirmForm` | `production/readiness/` | synthèse avant tournage, confirmation avec motif |
+| `ReadySynthesisTable`, `ReadyConfirmForm` | `production/readiness/` | synthèse avant tournage (`actions` = le geste d'une ligne, « Changer la date et les horaires »), confirmation avec motif |
 | `linkCallCards`, `linkDirectorCard`, `linkQuoteCard`, `linkChecklistCard`, `LinkTaskRow`, `LinkRushesForm` | `production/provider/` | cartes du lien de la société (`/p/`) |

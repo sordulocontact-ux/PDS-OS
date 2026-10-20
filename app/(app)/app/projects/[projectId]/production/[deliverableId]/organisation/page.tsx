@@ -15,6 +15,12 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import { formatEuros } from "@/lib/budget/types";
 import { companyOptions } from "@/lib/production/companies";
+import { productionDeliverables } from "@/lib/journey/production";
+import {
+  isArtworkTitle,
+  isClipTitle,
+  isTeaserTitle,
+} from "@/lib/production/track";
 import { loadProducerChanges } from "@/lib/production/producer-history";
 import { activeQuote } from "@/lib/production/quotes/queries";
 import { stepContext } from "@/lib/production/journey/context";
@@ -89,10 +95,40 @@ export default async function ProductionOrganisationPage({
       : []),
   ];
 
+  const title = data.deliverable.title;
+  const variant = isArtworkTitle(title)
+    ? "cover"
+    : isTeaserTitle(title)
+      ? "teasers"
+      : "clip";
   if (!org?.kind) {
-    const companies = data.canOpen
-      ? await companyOptions(projectId, data.contacts, null)
-      : [];
+    const [companies, others] = await Promise.all([
+      data.canOpen
+        ? companyOptions(
+            projectId,
+            data.contacts,
+            null,
+            variant === "cover"
+              ? ["photographer", "designer"]
+              : ["production_company"],
+          )
+        : [],
+      variant === "teasers" ? productionDeliverables(projectId) : [],
+    ]);
+    // Teasers may be drawn from a clip already produced (proto « Décliné
+    // du Clip officiel »).
+    const clipRef = others.find(
+      (o) => o.id !== deliverableId && isClipTitle(o.title) && o.kind,
+    );
+    const clip = clipRef?.sheetId
+      ? {
+          sheetId: clipRef.sheetId,
+          who:
+            clipRef.kind === "external"
+              ? `${t.kinds.external.label} · ${clipRef.company ?? "—"}`
+              : t.kinds.internal.label,
+        }
+      : null;
     const producer = org?.lineProducer;
     return (
       <ProductionStepPanel
@@ -112,6 +148,8 @@ export default async function ProductionOrganisationPage({
             )}
             companies={companies}
             defaults={{ mode: sheet?.mode ?? null }}
+            variant={variant}
+            clip={clip}
           />
         )}
       </ProductionStepPanel>
@@ -123,7 +161,10 @@ export default async function ProductionOrganisationPage({
     [t.kinds[kind].label, kind === "external" ? company : null]
       .filter(Boolean)
       .join(" · ");
-  const who = whoOf(org.kind, org.company?.name ?? null);
+  const light = variant === "cover" || Boolean(sheet?.derivedFromSheetId);
+  const who = sheet?.derivedFromSheetId
+    ? `${fr.productionLight.derived} · ${whoOf(org.kind, org.company?.name ?? null)}`
+    : whoOf(org.kind, org.company?.name ?? null);
   const [changes, companies, active] = await Promise.all([
     loadProducerChanges(prep.sheet.id, {
       person: (id) => data.members.find((m) => m.personId === id)?.name ?? null,
@@ -180,7 +221,7 @@ export default async function ProductionOrganisationPage({
       <ToneCallout tone="success">
         <b className="font-semibold">{who}</b>
         {t.chosen(
-          t.mode.short[prep.sheet.mode],
+          light ? null : t.mode.short[prep.sheet.mode],
           org.organizedBy ?? data.ownerName ?? "—",
           formatShortDay(org.organizedAt ?? prep.sheet.openedAt),
         )}

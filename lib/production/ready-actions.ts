@@ -16,6 +16,8 @@ import { loadQuotes } from "@/lib/production/quotes/queries";
 import { readySynthesis } from "@/lib/production/ready-synthesis";
 import { preprodFor } from "@/lib/production/tab-data";
 import { loadStepTools } from "@/lib/step-tools/queries";
+import { loadProposalVersions } from "@/lib/production/proposal/queries";
+import { loadScheduleDecisions } from "@/lib/production/schedule/queries";
 import { createClient } from "@/lib/supabase/server";
 
 const schema = z.object({
@@ -40,12 +42,15 @@ export async function confirmReady(
   const { data } = await journeyContext(p.projectId, p.deliverableId);
   const sheet = data.sheet;
   if (!sheet) return { ok: false, error: fr.productionPrep.errors.notFound };
-  const [preprod, quotes, locations, tools] = await Promise.all([
-    preprodFor(p.projectId, p.deliverableId, access),
-    loadQuotes(sheet.id, data.members),
-    loadLocations(sheet.id, data, access),
-    loadStepTools(p.projectId),
-  ]);
+  const [preprod, quotes, locations, tools, proposal, schedules] =
+    await Promise.all([
+      preprodFor(p.projectId, p.deliverableId, access),
+      loadQuotes(sheet.id, data.members),
+      loadLocations(sheet.id, data, access),
+      loadStepTools(p.projectId),
+      loadProposalVersions(sheet.id),
+      loadScheduleDecisions(sheet.id),
+    ]);
   if (!preprod) return { ok: false, error: fr.productionPrep.errors.notFound };
   const chosen = locations.options.find((o) => o.status === "chosen") ?? null;
   const rows = readySynthesis({
@@ -54,6 +59,8 @@ export async function confirmReady(
     quotes,
     place: chosen && { name: chosen.name, priceCents: chosen.priceCents },
     tools,
+    proposal,
+    schedule: schedules.find((x) => !x.replacedAt) ?? null,
   });
   if (rows.some((r) => !r.ok) && !p.reason)
     return { ok: false, error: fr.productionReady.errors.reason };

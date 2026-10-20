@@ -8,7 +8,7 @@ import { linkKeyArgs } from "@/lib/portal/link-key";
 
 const text = z.string().nullable();
 const journeySchema = z.object({
-  roles: z.array(z.enum(["company", "director", "dop"])),
+  roles: z.array(z.enum(["company", "director", "dop", "creativeExt"])),
   organization: z.enum(["internal", "external"]).nullable(),
   deliveryOn: text,
   progress: z.record(z.string(), z.boolean()),
@@ -19,6 +19,63 @@ const journeySchema = z.object({
     runOfShow: text,
     references: text,
   }),
+  // The proposal's versions (PR-11): the director's and the external
+  // validation's links only.
+  directionVersions: z
+    .array(
+      z.object({
+        id: z.string(),
+        number: z.number(),
+        treatmentUrl: z.string(),
+        moodboardUrl: text,
+        cuttingUrl: z.string(),
+        note: text,
+        depositedAt: z.string(),
+        depositedBy: text,
+        intStatus: z.enum(["pending", "approved", "changes"]),
+        intComment: text,
+        intAt: text,
+        extStatus: z.enum(["none", "pending", "approved", "changes"]),
+        extComment: text,
+        extAt: text,
+      }),
+    )
+    .default([]),
+  directionRevision: z
+    .object({ reason: z.string(), at: z.string() })
+    .nullable()
+    .default(null),
+  // The edit's versions (or a light journey's), the final file and the
+  // delivery: the company's and the external validation's links only.
+  cut: z
+    .object({
+      track: z.enum(["shoot", "artwork", "derived"]),
+      gate: z.object({ clip: text, done: z.boolean() }).nullable(),
+      versions: z.array(
+        z.object({
+          id: z.string(),
+          number: z.number(),
+          status: z.string(),
+          url: text,
+          fileName: text,
+          width: z.number().nullable(),
+          height: z.number().nullable(),
+          submittedAt: z.string(),
+          intApproved: z.boolean(),
+          extStatus: z.enum(["none", "pending", "approved", "changes"]),
+          extNote: text,
+          note: text,
+        }),
+      ),
+      finalUrl: text,
+      finalAt: text,
+      approvedAt: text,
+      checkedAt: text,
+      deliveredAt: text,
+      recipients: z.array(z.string().nullable()),
+    })
+    .nullable()
+    .default(null),
   quotes: z.array(
     z.object({
       id: z.string(),

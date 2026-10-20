@@ -28,11 +28,14 @@ export function RoleChangeButton({
   current,
   members,
   contacts = [],
+  noneLabel,
 }: {
   projectId: string;
   sheetId: string;
-  role: "producer" | "validator" | "director" | "dop";
+  role: "producer" | "validator" | "director" | "dop" | "creativeExt";
   label: string;
+  // What « nobody » means for this role (« Pas de validation externe »).
+  noneLabel?: string;
   current: Holder | null;
   members: Member[];
   // Réseau contacts may hold the role (director, director of photography).
@@ -78,7 +81,7 @@ export function RoleChangeButton({
           <HolderSelect
             id={`role-${role}`}
             label={t.holder}
-            noneLabel={t.nobody}
+            noneLabel={noneLabel ?? t.nobody}
             value={value}
             current={current}
             members={members}

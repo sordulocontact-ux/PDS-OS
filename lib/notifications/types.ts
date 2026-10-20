@@ -106,6 +106,13 @@ export const NOTIFICATION_KINDS = [
   "production_rushes_linked",
   // A modification asked on a quote by its validator.
   "production_quote_changes",
+  // What remained of the Production (20/10): the external validation's
+  // decision on a version, the final file on the company's link, a delivery
+  // to its recipients, the shoot's date changed.
+  "production_version_decided",
+  "production_final_deposited",
+  "production_delivered",
+  "production_schedule_changed",
   // A step's blocker reported (to the person who unblocks and the owner) or
   // lifted (to its reporter and the owner); a noted information the owner
   // decides (to confirm, waiting for a decision, contradicting another).
@@ -185,11 +192,15 @@ const PRODUCTION_TARGETS: Partial<Record<NotificationKind, [string, string]>> =
     production_quote_deposited: ["quote", "quotes"],
     production_quote_submitted: ["quote", "quotes"],
     production_quote_decided: ["quote", "quotes"],
-    production_direction_submitted: ["direction", "direction-decision"],
-    production_direction_decided: ["direction", "direction-decision"],
     production_director_proposed: ["direction", "director-proposals"],
     production_rushes_linked: ["rushes", "rushes"],
     production_quote_changes: ["quote", "quotes"],
+    production_version_decided: ["post", "decision"],
+    production_final_deposited: ["delivery", "decisions"],
+    production_delivered: ["delivery", "decisions"],
+    production_schedule_changed: ["readiness", "ready"],
+    production_direction_submitted: ["direction", "proposal"],
+    production_direction_decided: ["direction", "proposal"],
   };
 
 export function notificationHref(

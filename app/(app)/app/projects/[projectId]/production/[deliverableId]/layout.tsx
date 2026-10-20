@@ -61,7 +61,13 @@ export default async function ProductionSheetLayout({
   const creativeName =
     steps
       .find((s) => s.key === "direction")
-      ?.roles?.find((x) => x.kind === "coord")?.name ?? null;
+      ?.roles?.find((x) => x.kind === "coord")?.name ??
+    // A light journey: who validates its versions.
+    steps
+      .find((s) => s.key === "post")
+      ?.roles?.find((x) => x.role === fr.productionJourney.roles.creativeInt)
+      ?.name ??
+    null;
   const release = header?.facts.find((f) => f.key === "release");
   return (
     <div className="flex flex-col gap-5">

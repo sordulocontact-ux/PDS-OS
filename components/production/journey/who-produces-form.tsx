@@ -15,10 +15,12 @@ import { chooseProducer } from "@/lib/production/producer-actions";
 import type { ProductionMode } from "@/lib/production/sheet";
 
 const t = fr.productionProducer;
+const tl = fr.productionLight.choices;
 const MODES = ["direct", "call", "import"] as const;
+type Kind = OrganizationKind | "derived";
 
 export type WhoProducesDefaults = {
-  kind?: OrganizationKind | null;
+  kind?: Kind | null;
   companyId?: string | null;
   mode?: ProductionMode | null;
 };
@@ -38,9 +40,15 @@ export function WhoProducesForm({
   companies,
   defaults,
   stay = false,
+  variant = "clip",
+  clip = null,
 }: {
   projectId: string;
   deliverableId: string;
+  // The kind of deliverable (proto PROD_CHOICES): a clip, a cover, teasers.
+  variant?: "clip" | "cover" | "teasers";
+  // Teasers: the clip they may be drawn from, and who produces it.
+  clip?: { sheetId: string; who: string } | null;
   // « Tom Mercier · chargé de production ».
   internalHint: string;
   companies: CompanyOption[];
@@ -49,9 +57,18 @@ export function WhoProducesForm({
 }) {
   const router = useRouter();
   const suggested = companies.find((c) => c.suggested) ?? null;
-  const [kind, setKind] = useState<OrganizationKind | null>(
-    defaults?.kind ?? (companies.length > 0 ? "external" : "internal"),
+  const [kind, setKind] = useState<Kind | null>(
+    defaults?.kind ??
+      (variant === "teasers" && clip
+        ? "derived"
+        : variant === "cover"
+          ? "internal"
+          : companies.length > 0
+            ? "external"
+            : "internal"),
   );
+  // A cover and teasers drawn from the clip need no preparation mode.
+  const withMode = !(variant === "cover" || kind === "derived");
   const [company, setCompany] = useState<string | null>(
     defaults?.companyId ?? suggested?.id ?? null,
   );
@@ -71,7 +88,7 @@ export function WhoProducesForm({
     const next: Record<string, string> = {};
     if (!kind) next.kind = t.errors.kind;
     if (kind === "external" && !company) next.company = t.errors.company;
-    if (!mode) next.mode = t.errors.mode;
+    if (withMode && !mode) next.mode = t.errors.mode;
     setErrors(next);
     const first = Object.keys(next)[0];
     if (first) {
@@ -80,14 +97,15 @@ export function WhoProducesForm({
         ?.focus();
       return;
     }
-    if (!kind || !mode) return;
+    if (!kind || (withMode && !mode)) return;
     run(() =>
       chooseProducer({
         projectId,
         deliverableId,
         organization: kind,
         companyContactId: kind === "external" ? company : null,
-        mode,
+        fromSheetId: kind === "derived" ? (clip?.sheetId ?? null) : null,
+        mode: withMode && mode ? mode : "direct",
       }),
     );
   }
@@ -101,26 +119,58 @@ export function WhoProducesForm({
       onSubmit={submit}
     >
       <div data-field="kind" className="flex flex-col gap-1.5">
-        <ChoiceCards<OrganizationKind>
+        <ChoiceCards<Kind>
           name="producer-kind"
           legend={t.legend}
           variant="list"
           value={kind}
           onChange={setKind}
-          choices={[
-            {
-              value: "external",
-              label: t.kinds.external.label,
-              detail: t.kinds.external.detail,
-              hint: t.kinds.external.hint,
-            },
-            {
-              value: "internal",
-              label: t.kinds.internal.label,
-              detail: t.kinds.internal.detail,
-              hint: internalHint,
-            },
-          ]}
+          choices={
+            variant === "cover"
+              ? [
+                  {
+                    value: "internal",
+                    label: tl.cover.internal.label,
+                    detail: tl.cover.internal.detail,
+                    hint: internalHint,
+                  },
+                  {
+                    value: "external",
+                    label: tl.cover.external.label,
+                    detail: tl.cover.external.detail,
+                    hint: tl.cover.external.hint,
+                  },
+                ]
+              : variant === "teasers" && clip
+                ? [
+                    {
+                      value: "derived",
+                      label: tl.teasers.derived.label,
+                      detail: tl.teasers.derived.detail,
+                      hint: tl.teasers.clipBy(clip.who),
+                    },
+                    {
+                      value: "internal",
+                      label: tl.teasers.internal.label,
+                      detail: tl.teasers.internal.detail,
+                      hint: internalHint,
+                    },
+                  ]
+                : [
+                    {
+                      value: "external",
+                      label: t.kinds.external.label,
+                      detail: t.kinds.external.detail,
+                      hint: t.kinds.external.hint,
+                    },
+                    {
+                      value: "internal",
+                      label: t.kinds.internal.label,
+                      detail: t.kinds.internal.detail,
+                      hint: internalHint,
+                    },
+                  ]
+          }
         />
         <p className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
           {t.proposed}
@@ -132,7 +182,7 @@ export function WhoProducesForm({
           {companies.length > 0 ? (
             <ChoiceCards<string>
               name="producer-company"
-              legend={t.company.legend}
+              legend={variant === "cover" ? tl.cover.who : t.company.legend}
               required
               variant="list"
               value={company}
@@ -146,7 +196,7 @@ export function WhoProducesForm({
             />
           ) : (
             <p className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-              {t.company.none}
+              {variant === "cover" ? tl.cover.none : t.company.none}
             </p>
           )}
           <div>
@@ -156,7 +206,7 @@ export function WhoProducesForm({
               size="sm"
               onClick={() => setCreating(true)}
             >
-              {t.company.create}
+              {variant === "cover" ? tl.cover.create : t.company.create}
             </Button>
           </div>
           <FieldError id="producer-company-error">{errors.company}</FieldError>
@@ -164,8 +214,10 @@ export function WhoProducesForm({
             open={creating}
             onOpenChange={setCreating}
             name=""
-            kind="organization"
-            roles={["production_company"]}
+            kind={variant === "cover" ? "person" : "organization"}
+            roles={
+              variant === "cover" ? ["photographer"] : ["production_company"]
+            }
             title={t.company.createTitle}
             onCreated={(id) => {
               setCreating(false);
@@ -175,24 +227,26 @@ export function WhoProducesForm({
           />
         </div>
       )}
-      <div data-field="mode" className="flex flex-col gap-1.5">
-        <ChoiceCards<ProductionMode>
-          name="producer-mode"
-          legend={t.mode.legend}
-          variant="list"
-          value={mode}
-          onChange={setMode}
-          choices={MODES.map((m) => ({
-            value: m,
-            label: t.mode.choices[m].label,
-            hint: t.mode.choices[m].hint,
-          }))}
-        />
-        <p className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
-          {t.mode.nothingOutside}
-        </p>
-        <FieldError id="producer-mode-error">{errors.mode}</FieldError>
-      </div>
+      {withMode && (
+        <div data-field="mode" className="flex flex-col gap-1.5">
+          <ChoiceCards<ProductionMode>
+            name="producer-mode"
+            legend={t.mode.legend}
+            variant="list"
+            value={mode}
+            onChange={setMode}
+            choices={MODES.map((m) => ({
+              value: m,
+              label: t.mode.choices[m].label,
+              hint: t.mode.choices[m].hint,
+            }))}
+          />
+          <p className="text-[length:var(--type-caption)] leading-[var(--type-caption-lh)] text-[color:var(--text-secondary)]">
+            {t.mode.nothingOutside}
+          </p>
+          <FieldError id="producer-mode-error">{errors.mode}</FieldError>
+        </div>
+      )}
       {count > 0 && (
         <FormMessage kind="error">{t.errors.missing(count)}</FormMessage>
       )}
