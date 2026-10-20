@@ -59,8 +59,39 @@ export default async function ProductionReadinessStepPage({
     const rework = Boolean(
       sheet.readyAt &&
       sheet.scheduleChangedAt &&
-      sheet.scheduleChangedAt > sheet.readyAt,
+      sheet.scheduleChangedAt >= sheet.readyAt,
     );
+    const schedules = await loadScheduleDecisions(sheet.id);
+    const current = schedules.find((x) => !x.replacedAt) ?? null;
+    const shootDay =
+      sheet.logistics.shootDate ?? data.heritage.fiche?.shootDate;
+    const owner = data.ownerPersonId === access.personId;
+    const s = fr.productionSchedule;
+    const shot = steps.find((x) => x.key === "shoot")?.status === "done";
+    const scheduleButton =
+      owner && !sheet.closedAt && !shot ? (
+        <ScheduleButton
+          projectId={projectId}
+          sheetId={sheet.id}
+          current={
+            current
+              ? {
+                  text: s.text(
+                    formatDay(current.date),
+                    hourFr(current.start),
+                    hourFr(current.end),
+                  ),
+                  by: current.by ?? data.ownerName ?? "—",
+                }
+              : null
+          }
+          defaults={{
+            date: current?.date ?? shootDay ?? "",
+            start: current?.start ?? "08:00",
+            end: current?.end ?? "19:00",
+          }}
+        />
+      ) : null;
     if (sheet.readyAt && sheet.readySnapshot && !rework)
       return panel(
         <>
@@ -71,14 +102,14 @@ export default async function ProductionReadinessStepPage({
             {r.kept}
           </ToneCallout>
           <ReadySynthesisTable rows={sheet.readySnapshot} />
+          {scheduleButton && <div>{scheduleButton}</div>}
         </>,
       );
-    const [quotes, locations, tools, proposal, schedules] = await Promise.all([
+    const [quotes, locations, tools, proposal] = await Promise.all([
       loadQuotes(sheet.id, data.members),
       loadLocations(sheet.id, data, access),
       loadStepTools(projectId),
       loadProposalVersions(sheet.id),
-      loadScheduleDecisions(sheet.id),
     ]);
     const chosen = locations.options.find((x) => x.status === "chosen") ?? null;
     const rows = readySynthesis({
@@ -90,46 +121,13 @@ export default async function ProductionReadinessStepPage({
       proposal,
       schedule: schedules.find((x) => !x.replacedAt) ?? null,
     });
-    const current = schedules.find((x) => !x.replacedAt) ?? null;
-    const shootDay =
-      sheet.logistics.shootDate ?? data.heritage.fiche?.shootDate;
-    const owner = data.ownerPersonId === access.personId;
-    const s = fr.productionSchedule;
     return panel(
       <>
         {rework && <ToneCallout tone="warning">{s.rework}</ToneCallout>}
         <p className="text-[color:var(--text-secondary)]">{r.note}</p>
         <ReadySynthesisTable
           rows={rows}
-          actions={
-            owner && !sheet.closedAt
-              ? {
-                  date: (
-                    <ScheduleButton
-                      projectId={projectId}
-                      sheetId={sheet.id}
-                      current={
-                        current
-                          ? {
-                              text: s.text(
-                                formatDay(current.date),
-                                hourFr(current.start),
-                                hourFr(current.end),
-                              ),
-                              by: current.by ?? data.ownerName ?? "—",
-                            }
-                          : null
-                      }
-                      defaults={{
-                        date: current?.date ?? shootDay ?? "",
-                        start: current?.start ?? "08:00",
-                        end: current?.end ?? "19:00",
-                      }}
-                    />
-                  ),
-                }
-              : undefined
-          }
+          actions={scheduleButton ? { date: scheduleButton } : undefined}
         />
         {schedules.length > 1 && (
           <section className="flex flex-col gap-1.5">

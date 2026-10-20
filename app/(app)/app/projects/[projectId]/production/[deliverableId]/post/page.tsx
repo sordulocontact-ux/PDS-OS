@@ -2,6 +2,7 @@ import { ProductionStepPanel } from "@/components/production/journey/production-
 import { stepContext } from "@/lib/production/journey/context";
 import { notFound, redirect } from "next/navigation";
 
+import { CutDecision } from "@/components/production/post/cut-decision";
 import { DecisionSection } from "@/components/production/post/decision-section";
 import { ReferencesSection } from "@/components/production/post/references-section";
 import { ShootAlert } from "@/components/production/post/shoot-alert";
@@ -119,6 +120,15 @@ export default async function ProductionPostPage({
     author: editStep?.holder ?? null,
     nextNumber: (post.versions[0]?.number ?? 0) + 1,
   };
+  // External: the company deposits on its link, no post step to create;
+  // the proto's decision on the latest version (PR-12).
+  const external = sheet.organization.kind === "external";
+  const cutWaiting =
+    post.versions.find(
+      (v) =>
+        (v.status === "in_review" || v.status === "final_review") &&
+        !v.intApproved,
+    ) ?? null;
   const status =
     data.stageState !== "in_progress"
       ? t.locked
@@ -147,15 +157,17 @@ export default async function ProductionPostPage({
         references={post.references}
         canOrganize={role.canOrganize}
       />
-      <StepsSection
-        scope={scope}
-        people={people}
-        steps={post.steps}
-        suggestions={suggestions}
-        canOrganize={role.canOrganize}
-        links={post.providerLinks}
-        deliverableId={deliverableId}
-      />
+      {!external && (
+        <StepsSection
+          scope={scope}
+          people={people}
+          steps={post.steps}
+          suggestions={suggestions}
+          canOrganize={role.canOrganize}
+          links={post.providerLinks}
+          deliverableId={deliverableId}
+        />
+      )}
       <VersionsSection
         scope={scope}
         people={people}
@@ -164,15 +176,26 @@ export default async function ProductionPostPage({
         defaults={versionDefaults}
         links={post.providerLinks}
       />
-      <DecisionSection
-        projectId={projectId}
-        deliverableId={deliverableId}
-        versions={post.versions}
-        canReview={role.canReview}
-        reviewers={post.reviewers}
-        people={people}
-        defaults={correctionDefaults}
-      />
+      {external ? (
+        cutWaiting &&
+        role.canReview && (
+          <CutDecision
+            projectId={projectId}
+            versionId={cutWaiting.id}
+            number={cutWaiting.number}
+          />
+        )
+      ) : (
+        <DecisionSection
+          projectId={projectId}
+          deliverableId={deliverableId}
+          versions={post.versions}
+          canReview={role.canReview}
+          reviewers={post.reviewers}
+          people={people}
+          defaults={correctionDefaults}
+        />
+      )}
     </ProductionStepPanel>
   );
 }

@@ -148,7 +148,7 @@ begin
     raise exception 'not_external';
   end if;
   if s.ready_at is not null
-     and not (s.schedule_changed_at is not null and s.schedule_changed_at > s.ready_at) then
+     and not (s.schedule_changed_at is not null and s.schedule_changed_at >= s.ready_at) then
     raise exception 'already_ready';
   end if;
   if jsonb_typeof(coalesce(p_snapshot, 'null'::jsonb)) <> 'array' or jsonb_array_length(p_snapshot) = 0

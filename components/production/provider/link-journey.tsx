@@ -95,7 +95,8 @@ export function linkJourneyCards({
     cards.push({
       id: "ps-ready",
       title: fr.productionReady.link.title,
-      state: "done",
+      // Shown above until the shoot took place (proto: the callout on top).
+      state: shot ? "done" : "waiting",
       order: 50,
       body: <p>{fr.productionReady.link.done}</p>,
     });

@@ -116,9 +116,11 @@ function whoProduces(i: JourneyInput): Def {
     done: i.opened && i.kind !== null,
     act: () => actor(i.owner, t.todo.organize),
     summary: i.kind
-      ? i.kind === "external"
-        ? t.summary.organization.external(i.company?.name ?? "—")
-        : t.summary.organization.internal
+      ? i.track === "derived"
+        ? fr.productionLight.derived
+        : i.kind === "external"
+          ? t.summary.organization.external(i.company?.name ?? "—")
+          : t.summary.organization.internal
       : null,
   };
 }

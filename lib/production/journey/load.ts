@@ -328,7 +328,7 @@ export const loadJourney = cache(
         // The date changed after the preparation was confirmed.
         ...(sheet?.readyAt &&
         sheet.scheduleChangedAt &&
-        sheet.scheduleChangedAt > sheet.readyAt
+        sheet.scheduleChangedAt >= sheet.readyAt
           ? ["readiness"]
           : []),
       ],

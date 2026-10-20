@@ -2,7 +2,7 @@
 -- PR-13, montage and delivery, date and hours): migrations 20261020020101 and
 -- following. Run with `supabase test db`.
 begin;
-select plan(62);
+select plan(66);
 
 
 -- Fixtures ------------------------------------------------------------------
@@ -297,6 +297,19 @@ select ok((select review from public.production_plan_actions where sheet_id = pg
           'the planning is to review');
 select is((select shoot_date from public.production_sheets where id = pg_temp.id_of('sheet')), '2026-10-23'::date,
           'the sheet''s date follows');
+
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'), '[{"key":"date","label":"Date et horaires","value":"x","ok":true}]'::jsonb, null) $$,
+                'the preparation is confirmed');
+select lives_ok($$ select public.decide_production_schedule(pg_temp.id_of('sheet'), '2026-10-24', '09:00', '15:00', 'email') $$,
+                'the date changes after the confirmation');
+reset role;
+select ok((select ready_at is not null from public.production_sheets where id = pg_temp.id_of('sheet')),
+          'the confirmation stays, to confirm again');
+select pg_temp.act_as(pg_temp.id_of('manager'));
+select lives_ok($$ select public.confirm_production_ready(pg_temp.id_of('sheet'), '[{"key":"date","label":"Date et horaires","value":"y","ok":true}]'::jsonb, null) $$,
+                'and is confirmed again');
+reset role;
 
 select * from finish();
 rollback;

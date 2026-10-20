@@ -209,3 +209,24 @@ export async function startShoot(
   if (result.ok) await schedulePendingPushes();
   return result;
 }
+
+const rushesSchema = ref.extend({ step: z.enum(["received", "backup"]) });
+
+/** « Rushes reçus », then « Sauvegarde vérifiée » (proto BODY.rushes, an
+ * external production): a person's word each, stamped by the database. */
+export async function declareRushes(
+  input: z.input<typeof rushesSchema>,
+): Promise<PrepResult> {
+  const parsed = rushesSchema.safeParse(input);
+  if (!parsed.success) return invalidInput;
+  const d = parsed.data;
+  const result = await writeShoot(
+    d.projectId,
+    d.sheetId,
+    d.step === "received"
+      ? { video_rushes: true, audio_sources: true }
+      : { backup_verified: true },
+  );
+  if (result.ok) await schedulePendingPushes();
+  return result;
+}
