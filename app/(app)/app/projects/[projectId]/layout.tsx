@@ -6,6 +6,7 @@ import { PageLoading } from "@/components/shell/page-loading";
 import { requireApproved } from "@/lib/auth/dal";
 import { planLaunchedAt, planWorkflows } from "@/lib/plan/queries";
 import { getProject } from "@/lib/projects/queries";
+import { missingProjectRecord } from "@/lib/projects/record-guard";
 import { allInOrder } from "@/lib/utils/parallel";
 import { loadWorkflowStates } from "@/lib/workflow-status/load";
 
@@ -32,11 +33,14 @@ export default async function ProjectLayout({
   started(loadWorkflowStates(projectId));
   started(planLaunchedAt(projectId));
   started(planWorkflows(projectId));
-  const [access, project] = await allInOrder([
+  const [access, project, missing] = await allInOrder([
     requireApproved(),
     getProject(projectId),
+    // A record under the project (livrable, activation, call…) it does not
+    // have: a real 404 too, decided before the section's skeleton streams.
+    missingProjectRecord(projectId),
   ]);
-  if (!project) notFound();
+  if (!project || missing) notFound();
   return (
     <Suspense fallback={<PageLoading />}>
       <ProjectFrame access={access} project={project}>
