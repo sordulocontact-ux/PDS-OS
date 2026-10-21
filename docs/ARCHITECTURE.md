@@ -760,14 +760,25 @@ s'afficher sans chargement.
   Action vide ce cache, les notifications Realtime font `router.refresh()`. Une écriture
   d'un collègue **sans** notification peut rester invisible 60 s au plus.
 - **Squelettes** (`loading.tsx`) pour ce qui n'est pas préchargé (première entrée dans une
-  page) : `app/(app)/app/loading.tsx` générique (`PageLoading`), listes avec leur vrai titre,
+  page) : une page de premier niveau a le sien (`PageLoading`), listes avec leur vrai titre,
   sections d'un projet (`ProjectSectionLoading`, sous l'en-tête et les barres qui restent),
   onglets d'artiste, accueil (`HomeFrame` : PO utilisable avant les cartes). Piège : un
   `loading.tsx` enveloppe **aussi les segments enfants**, et le layout asynchrone d'un
   enfant s'attend sous le `loading.tsx` du parent. D'où les groupes `(list)` et `(home)` :
   sans eux, ouvrir une fiche artiste montrait le squelette de la liste des artistes.
-- **Streaming** : accueil et Travail affichent l'en-tête tout de suite, les cartes arrivent
-  derrière un `<Suspense>` (`HomeFeed`, `MyWorkCards`).
+  **Règle** (21/10) : pendant une navigation, Next n'affiche que le `loading.tsx` du segment
+  **dont l'enfant change** (la frontière est recréée pour le nouvel enfant) ; plus haut, la
+  transition garde l'ancienne page figée à l'écran, sans squelette. Donc tout dossier d'un
+  projet qui a plusieurs enfants (une page + des sous-pages) ou un enfant dynamique (`[id]`)
+  a son `loading.tsx` : Stratégie, Cadrage, Conception (et ses fiches, versions, décisions),
+  Master, Juridique, Suivi & bilan (et ses rapports), Activations (et une activation, ses
+  cibles), Calls, Production (et un livrable). Une ligne suffit
+  (`export { ProjectSectionLoading as default } …`) ; un changement de `?param=` ne recrée
+  pas la frontière (la vue reste, rafraîchie sur place). Exception voulue : l'entrée dans une
+  fiche (`[projectId]`, `[artistId]`, `[masterId]`…) lit l'enregistrement **avant** tout
+  squelette, pour un vrai 404 ; le préchargement des liens la rend d'ordinaire immédiate.
+- **Streaming** : accueil et Travail affichent l'en-tête tout de suite, le contenu arrive
+  derrière un `<Suspense>` (`HomeFeed`, `WorkList`).
 - **Pas de cascade** : une page lance l'accès, l'enregistrement et ses données en un seul
   aller-retour avec `allInOrder` (`lib/utils/parallel.ts`), qui renvoie la première erreur
   **dans l'ordre des arguments** (accès, puis enregistrement, puis données) : une

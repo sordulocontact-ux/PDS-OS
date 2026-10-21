@@ -28,6 +28,45 @@ export const work = {
       "Une partie de vos projets n'a pas pu être lue. Rechargez la page.",
   },
 
+  // The global Travail's table: every action in one list, tabs by kind.
+  table: {
+    views: {
+      all: "Tout",
+      todo: "À faire",
+      validate: "À valider",
+      overdue: "En retard",
+    },
+    viewsLabel: "Filtrer le travail",
+    columns: {
+      action: "Action",
+      project: "Projet",
+      due: "Échéance",
+      state: "État",
+    },
+    // Rows whose wording the page writes (no step, no task behind them).
+    titles: {
+      accept: "Accepter le projet",
+      retransmit: "Retransmettre le projet",
+      awaiting: "En attente d'un chef de projet",
+      proposals: "Relire les propositions de PO",
+    },
+    places: {
+      task: "Tâche",
+      deliverable: "Livrable",
+    },
+    todo: "À faire",
+    noDue: "Sans échéance",
+    emptyTitle: "Rien ne vous attend",
+    emptyBody:
+      "Les actions de vos projets apparaîtront ici dès qu'elles vous reviennent.",
+    viewEmpty: {
+      all: "Rien ne vous attend pour l'instant.",
+      todo: "Rien à faire pour l'instant.",
+      validate: "Aucune décision ne vous attend.",
+      overdue: "Rien n'est en retard.",
+    },
+  },
+
   cards: {
     toRetransmitEmpty: "Aucun projet refusé ni de précision demandée.",
     awaitingAcceptance: "En attente d'un chef de projet",
