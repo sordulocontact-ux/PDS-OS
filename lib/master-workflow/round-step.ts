@@ -25,6 +25,9 @@ export type RoundVersionExtra = {
   // The source a mix version was made on, and whether it was a working one.
   source: string | null;
   working: boolean;
+  // The title's current source has its final vocals (a working mix then
+  // only needs a new version).
+  finalVocals: boolean;
   reopenedAt: string | null;
   reopenReason: string | null;
   // Deposited by the engineer through the link (no member as author).
@@ -118,6 +121,7 @@ export async function loadRoundStep(
         sourceRow?.fileName ??
         null,
       working: sourceRow?.vocalsFinal === false,
+      finalVocals: title?.sources[0]?.vocalsFinal === true,
       reopenedAt: v.reopenedAt,
       reopenReason: v.reopenReason,
       viaLink: v.createdBy === null,
@@ -165,7 +169,7 @@ export async function loadRoundStep(
     view: inHousePerson
       ? {
           ...view,
-          blockers: view.blockers.filter((b) => !noContact.includes(b)),
+          blockers: view.blockers.filter((b) => !noContact.includes(b.text)),
         }
       : view,
     versions,

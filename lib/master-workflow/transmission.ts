@@ -12,6 +12,8 @@ import type { MasterBrief } from "@/lib/master-workflow/brief-types";
 import { readMasterRows } from "@/lib/master-workflow/inventory-rows";
 import type { TransmissionRow } from "@/lib/master-workflow/transmission-types";
 import { canEditProject } from "@/lib/projects/edit-access";
+import type { Blocker } from "@/lib/ui/journey";
+import { masterStepHref } from "@/lib/ui/master-steps";
 import { personName } from "@/lib/projects/types";
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,8 +41,9 @@ export type StepView = {
   titles: PlannedTitle[];
   // Titles left out because they already have their master final.
   finished: number;
-  // What prevents the sending, worded; empty when it can go.
-  blockers: string[];
+  // What prevents the sending, worded, with the step where it is lifted;
+  // empty when it can go.
+  blockers: Blocker[];
   history: TransmissionRow[];
   // A link to listen to each title's file before it leaves (PROJ-BUG-09).
   sourceUrls: Record<string, string>;
@@ -277,18 +280,32 @@ export async function loadStepView(
     diagnosis.some((row) => row.state === "done");
   const r = fr.masterRound.blockers;
   const rec = recorded.data;
-  const blockers = [
+  const at = (step: "source" | "brief" | "mix") =>
+    masterStepHref(project.id, step);
+  const blockers: Blocker[] = [
     ...(!rec?.recorded_at
-      ? [r.briefNotRecorded]
+      ? [{ text: r.briefNotRecorded, href: at("brief") }]
       : rec.content_changed_at > rec.recorded_at
-        ? [r.briefDirty(contact?.name ?? "")]
+        ? [{ text: r.briefDirty(contact?.name ?? ""), href: at("brief") }]
         : []),
-    ...(contact ? [] : [role === "mix" ? t.engineer : t.masteringEngineer]),
-    ...(titles.length === 0 ? [mixedAll ? t.allMixed : t.noTitle] : []),
+    ...(contact
+      ? []
+      : [
+          {
+            text: role === "mix" ? t.engineer : t.masteringEngineer,
+            href: at("brief"),
+          },
+        ]),
+    // Nothing to lift: every title is already past this stage.
+    ...(titles.length === 0
+      ? [{ text: mixedAll ? t.allMixed : t.noTitle, href: null }]
+      : []),
     ...titles
       .filter((title) => !title.source)
       .map((title) =>
-        role === "mix" ? t.source(title.title) : t.mixFinal(title.title),
+        role === "mix"
+          ? { text: t.source(title.title), href: at("source") }
+          : { text: t.mixFinal(title.title), href: at("mix") },
       ),
   ];
 

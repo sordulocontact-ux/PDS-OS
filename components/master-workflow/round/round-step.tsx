@@ -7,6 +7,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { fr } from "@/lib/i18n/fr";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
+import { masterStepHref } from "@/lib/ui/master-steps";
 import { formatDay, formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
 import { LinkPanel } from "./link-panel";
@@ -54,7 +55,14 @@ export function RoundStep({
   const sameEngineer =
     stage === "mastering" && view.brief?.masteringSameEngineer === true;
   const blockers = [
-    ...(round.vocalsAwaited ? [t.blockers.vocals] : []),
+    ...(round.vocalsAwaited
+      ? [
+          {
+            text: t.blockers.vocals,
+            href: masterStepHref(view.projectId, "source"),
+          },
+        ]
+      : []),
     ...view.blockers,
   ];
   return (

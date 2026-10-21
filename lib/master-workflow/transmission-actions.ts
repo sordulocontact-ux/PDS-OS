@@ -51,7 +51,7 @@ export async function transmitPackage(
   const view = await loadStepView(project, access, input.data.role);
   if (!view.canEdit) return { ok: false, error: t.forbidden };
   if (view.blockers.length > 0 || !view.brief || !view.engineer)
-    return { ok: false, error: view.blockers[0] ?? t.failed };
+    return { ok: false, error: view.blockers[0]?.text ?? t.failed };
 
   const supabase = await createClient();
   // The link lives until the stage's final date plus a margin (never under

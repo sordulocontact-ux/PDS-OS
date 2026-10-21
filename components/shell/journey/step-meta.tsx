@@ -100,7 +100,9 @@ export function StepMeta({
           ? "—"
           : next.slice(0, MAX_NEXT).map((n) => (
               <span key={`${n.module ?? ""}${n.key}`} className="block">
-                {withModule(n)}
+                {n.who
+                  ? fr.journey.nextBy(withModule(n), n.who)
+                  : withModule(n)}
               </span>
             ))}
         {next.length > MAX_NEXT && (

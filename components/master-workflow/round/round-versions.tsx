@@ -1,9 +1,11 @@
 import { AudioFile } from "@/components/ui/audio-file";
+import { BlockerCallout } from "@/components/ui/blocker-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { fr } from "@/lib/i18n/fr";
 import type { MixVersion } from "@/lib/master-workflow/mix-types";
 import type { RoundStepView } from "@/lib/master-workflow/round-step";
+import { masterStepHref } from "@/lib/ui/master-steps";
 import type { Tone } from "@/lib/ui/state-tones";
 import { formatShortDay, formatShortInstant } from "@/lib/utils/day";
 
@@ -139,9 +141,28 @@ export function RoundVersions({ round, engineer, viewerIsOwner }: Props) {
             ) : latest.decision === null && !extra?.reopenedAt ? (
               <>
                 {extra?.working && (
-                  <ToneCallout tone="warning">
-                    {t.decision.working(extra.source ?? "")}
-                  </ToneCallout>
+                  <>
+                    <ToneCallout tone="warning">
+                      {t.decision.working(extra.source ?? "")}
+                    </ToneCallout>
+                    <BlockerCallout
+                      blockers={[
+                        extra.finalVocals
+                          ? {
+                              text: t.decision.unblock.newMix(engineer),
+                              href: null,
+                            }
+                          : {
+                              text: t.decision.unblock.vocals,
+                              href: masterStepHref(
+                                round.view.projectId,
+                                "source",
+                              ),
+                            },
+                      ]}
+                      then={t.decision.unblock.then(engineer)}
+                    />
+                  </>
                 )}
                 <VersionFeedback
                   projectId={round.view.projectId}
