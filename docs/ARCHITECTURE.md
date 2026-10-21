@@ -778,6 +778,10 @@ s'afficher sans chargement.
   d'interroger le serveur Auth deux fois par page. Revers : une session révoquée ailleurs
   reste lisible jusqu'à l'expiration du jeton (1 h) ; sans effet sur les droits,
   `get_my_access` relit l'adhésion à chaque page et le RLS s'applique au même jeton.
+- **Région des fonctions** (`vercel.json`, `regions: ["dub1"]`) : les fonctions Vercel tournent à
+  Dublin, à côté de la base Supabase (`eu-west-1`, Irlande). Sans ce réglage, Vercel les place à
+  Washington (`iad1`) et chaque requête à la base traverse l'Atlantique (~80 ms aller-retour,
+  multiplié par les lectures en série d'une page). Changer la région de la base = changer celle-ci.
 - **À savoir** : `next dev` ne précharge jamais et compile chaque page à sa première visite.
   La fluidité se juge avec `pnpm build && pnpm start`.
 - **Pas de cascade entre un layout et sa page** (finitions du 19/10) : une page ne commence à lire
