@@ -8,9 +8,27 @@ import { recordBrief } from "@/lib/master-workflow/brief-fact-actions";
 
 const t = fr.masterBrief;
 
-/** « Enregistrer le Brief »: never disabled; what is missing is said. */
-export function BriefRecord({ projectId }: { projectId: string }) {
+/**
+ * « Enregistrer le Brief »: never disabled; what is missing is said. Once
+ * recorded, the button only comes back when a fact has changed since —
+ * otherwise the Brief says it is done and how to change it.
+ */
+export function BriefRecord({
+  projectId,
+  recorded,
+  dirty,
+}: {
+  projectId: string;
+  recorded: boolean;
+  dirty: boolean;
+}) {
   const submit = useWriteSubmit(() => undefined, t.recorded);
+  if (recorded && !dirty)
+    return (
+      <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
+        {t.upToDate}
+      </p>
+    );
   return (
     <div className="flex flex-col gap-2">
       <FormMessage kind="error">{submit.error}</FormMessage>
@@ -21,7 +39,7 @@ export function BriefRecord({ projectId }: { projectId: string }) {
         aria-busy={submit.pending || undefined}
         onClick={() => submit.run(() => recordBrief(projectId))}
       >
-        {submit.pending ? t.recording : t.record}
+        {submit.pending ? t.recording : recorded ? t.recordChanges : t.record}
       </Button>
     </div>
   );

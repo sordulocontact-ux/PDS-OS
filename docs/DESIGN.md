@@ -542,6 +542,11 @@ Une seule action pleine (`variant="default"`) par carte, le reste en contour.
   « Dicter ») ne sont pas des cartes : l'échange y reste en contour.
 - **Brief existant** : « Voir le Brief » est plein, « Mettre à jour le Brief » en contour
   (Sacha, 14/10/2026) ; sans Brief, « Créer le Brief » est plein.
+- **Bouton selon le statut** (retour « Néons » 04, 21/10/2026) : une action déjà faite
+  n'est jamais reproposée telle quelle. Rien n'a changé depuis → plus de bouton, une ligne
+  qui dit que c'est fait et comment le changer ; modifié depuis → « Enregistrer les
+  modifications » ; modification interdite → l'état terminé seul. Le serveur garde son
+  refus (« Rien à enregistrer… ») en filet. Premier cas : `BriefRecord` du Brief Master.
 
 ### Décisions, propositions et faits (composants communs, 18/10/2026)
 
