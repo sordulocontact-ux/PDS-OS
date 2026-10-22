@@ -1,5 +1,6 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ReturnCallout } from "@/components/ui/return-callout";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { fr } from "@/lib/i18n/fr";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import { bilanIssues } from "@/lib/marketing/review/issues";
@@ -9,7 +10,6 @@ import { formatDay } from "@/lib/utils/day";
 import { BilanPrepareForm } from "./bilan-prepare-form";
 import { ReportCards } from "./report-cards";
 import { ReportDecision } from "./report-decision";
-import { StepWaiting } from "./step-waiting";
 import { SubmitReportButton } from "./submit-report-button";
 
 const t = fr.reviewJourney.bilan;

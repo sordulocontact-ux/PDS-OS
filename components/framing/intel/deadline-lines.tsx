@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useNextQuestion } from "@/components/framing/dimensions/use-next-question";
 import { FormMessage } from "@/components/auth/form-message";
 import { OptionSelect } from "@/components/framing/option-select";
 import { sourceLabel } from "@/components/framing/guide/source-quote";
@@ -46,6 +47,7 @@ export function DeadlineLines({
   const t = fr.framingIntel.guide.deadlines;
   const kinds = fr.framingIntel.deadlineKinds;
   const router = useRouter();
+  const goNext = useNextQuestion(nextHref, "deadlines");
   const { pending, run } = useFramingAction();
   const [editing, setEditing] = useState<Deadline | null | undefined>();
   const proposed = deadlines.some((d) => d.review_status === "proposed");
@@ -115,7 +117,8 @@ export function DeadlineLines({
                 proposed
                   ? run(
                       () => confirmQuestion(projectId, "deadlines"),
-                      () => router.push(nextHref),
+                      () =>
+                        goNext(fr.framingJourney.dimensions.gesture.confirmed),
                     )
                   : router.push(nextHref)
               }

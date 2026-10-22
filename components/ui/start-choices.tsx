@@ -37,6 +37,7 @@ export function StartChoices({
   legend,
   columns = 2,
   fixedOrder = false,
+  pending = null,
 }: {
   choices: StartChoice[];
   recommended?: string | null;
@@ -49,6 +50,9 @@ export function StartChoices({
   // Keep the cards in the given order (the Cadrage's proto: the pill moves,
   // never the cards).
   fixedOrder?: boolean;
+  // The client choice running (`onChoose`): its card is busy, the others
+  // wait (no second click while it runs).
+  pending?: string | null;
 }) {
   const ordered = fixedOrder
     ? choices
@@ -89,6 +93,8 @@ export function StartChoices({
         key={choice.value}
         type="button"
         className={startChoiceClass}
+        disabled={pending !== null}
+        aria-busy={pending === choice.value || undefined}
         onClick={choice.onChoose}
       >
         {inner}

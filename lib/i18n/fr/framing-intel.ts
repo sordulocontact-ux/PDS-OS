@@ -527,6 +527,7 @@ export const framingIntel = {
     helping: "PO cherche…",
     write: "Écrire moi-même",
     confirm: "Confirmer",
+    confirming: "Confirmation…",
     modify: "Modifier",
     skip: "Passer",
     dismiss: "Écarter",

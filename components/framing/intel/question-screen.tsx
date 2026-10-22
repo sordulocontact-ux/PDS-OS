@@ -15,6 +15,7 @@ import {
   ItemsAnswer,
   MeasureAnswer,
 } from "@/components/framing/intel/structured-answer";
+import { useNextQuestion } from "@/components/framing/dimensions/use-next-question";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Button } from "@/components/ui/button";
@@ -99,7 +100,11 @@ export function QuestionScreen({
   // A PO suggestion picked: it opens the answer, editable, never saved as
   // is (« M'aider à définir » proposes, a person decides; PROJ-UX-04).
   const [picked, setPicked] = useState<string | null>(null);
-  const next = () => router.push(nextHref);
+  const goNext = useNextQuestion(nextHref, question.key);
+  const g = fr.framingJourney.dimensions.gesture;
+  // After a gesture: its confirmation, then the next question (or the
+  // Brief de cadrage after the last one).
+  const next = (done: string) => () => goNext(done);
   const busy = pending || helping;
   const provenance = question.provenance;
   // A sentence where a structure is asked (a call's proposal): structured
@@ -151,7 +156,9 @@ export function QuestionScreen({
           size="sm"
           variant="ghost"
           disabled={busy}
-          onClick={() => run(() => answerNone(projectId, question.key), next)}
+          onClick={() =>
+            run(() => answerNone(projectId, question.key), next(g.saved))
+          }
         >
           {fr.framingIntel.none}
         </Button>
@@ -162,7 +169,10 @@ export function QuestionScreen({
           variant="ghost"
           disabled={busy}
           onClick={() =>
-            run(() => dismissQuestion(projectId, question.key), next)
+            run(
+              () => dismissQuestion(projectId, question.key),
+              next(g.dismissed),
+            )
           }
         >
           {t.dismiss}
@@ -174,7 +184,7 @@ export function QuestionScreen({
           variant="ghost"
           disabled={busy}
           onClick={() =>
-            run(() => dismissQuestion(projectId, question.key), next)
+            run(() => dismissQuestion(projectId, question.key), next(g.skipped))
           }
         >
           {t.skip}
@@ -217,10 +227,13 @@ export function QuestionScreen({
             <Button
               disabled={busy}
               onClick={() =>
-                run(() => confirmQuestion(projectId, question.key), next)
+                run(
+                  () => confirmQuestion(projectId, question.key),
+                  next(g.confirmed),
+                )
               }
             >
-              {t.confirm}
+              {pending ? t.confirming : t.confirm}
             </Button>
           ))}
         <Button
@@ -313,7 +326,7 @@ export function QuestionScreen({
             keepSource={question.proposed && !picked}
             presets={itemPresets}
             onCancel={() => setMode("view")}
-            onDone={next}
+            onDone={next(g.saved)}
           />
         ) : def.shape === "measure" ? (
           <MeasureAnswer
@@ -322,7 +335,7 @@ export function QuestionScreen({
             draft={picked}
             keepSource={question.proposed && !picked}
             onCancel={() => setMode("view")}
-            onDone={next}
+            onDone={next(g.saved)}
           />
         ) : (
           <AnswerForm
@@ -338,7 +351,7 @@ export function QuestionScreen({
                     setMode(question.status === "missing" ? "write" : "view");
                   }
             }
-            onDone={next}
+            onDone={next(g.saved)}
           />
         ))}
       {viewActions}
@@ -347,7 +360,7 @@ export function QuestionScreen({
           projectId={projectId}
           questionKey={question.key}
           onCancel={() => setMode(initialMode)}
-          onDone={next}
+          onDone={next(g.notApplicable)}
         />
       )}
       {editable && mode === "later" && (
@@ -355,7 +368,7 @@ export function QuestionScreen({
           projectId={projectId}
           questionKey={question.key}
           onCancel={() => setMode(initialMode)}
-          onDone={next}
+          onDone={next(g.later)}
         />
       )}
 

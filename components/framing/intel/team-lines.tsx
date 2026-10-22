@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useNextQuestion } from "@/components/framing/dimensions/use-next-question";
 import { AssignRoleDialog } from "@/components/framing/guide/assign-role-dialog";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
 import { useFramingAction } from "@/components/framing/use-framing-action";
@@ -40,6 +41,7 @@ export function TeamLines({
 }) {
   const t = fr.framingGuide.team;
   const router = useRouter();
+  const goNext = useNextQuestion(nextHref, "contributors");
   const { pending, run } = useFramingAction();
   const [assigning, setAssigning] = useState<RoleCard | null | undefined>();
   const { roles, others } = teamBoard(team, needs, { music, creatives });
@@ -151,7 +153,8 @@ export function TeamLines({
                 proposed
                   ? run(
                       () => confirmQuestion(projectId, "contributors"),
-                      () => router.push(nextHref),
+                      () =>
+                        goNext(fr.framingJourney.dimensions.gesture.confirmed),
                     )
                   : router.push(nextHref)
               }

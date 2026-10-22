@@ -697,3 +697,15 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   § 3 bis « Vrais 404 », § 8 octies « UPC », § 8 nonies « Rejoué dans l'app »).
 - Reste : envoi réel des e-mails ; « Signer pour PDS Éditions » par la DG ; 404 d'une démarche juridique
   inconnue ; le contrat ne compte pas dans « n objets » des liens privés (`contact_page_items`).
+
+- [x] **Retours d'Ibé, lot 3 : confirmation et passage à la suite** (22/10/2026, branche
+  `retours/lot3-confirmation-suite`) : après un envoi ou une validation, le bouton dit qu'il travaille,
+  le bandeau confirme dans l'étape, puis dit la suite — « À vous : … », ou « En attente de **X** : … ».
+  Si la suite revient à la même personne sur une autre étape, elle s'ouvre seule avec le bandeau
+  (`withOutcome … { openNext: true }`, `open`). Sur les 6 dimensions (chaque réponse confirmée dans le
+  bandeau, la dernière ouvre le Brief de cadrage), le Brief de cadrage (créer, envoyer, décision de la
+  direction), le plan du projet (lancer) et le Brief Master (commencer, enregistrer). Attente d'un
+  autre = `StepWaiting` (remonté du Suivi & bilan dans `shell/journey/`). Sans migration. Détail :
+  `docs/ARCHITECTURE.md` § 3 ter, « Passage à la suite ».
+  Reste : à rejouer dans un vrai navigateur par l'équipe (pas de session locale en mode auto) ;
+  les numéros « Retours 02, 01 » du lot n'ont pas de page Notion retrouvée.

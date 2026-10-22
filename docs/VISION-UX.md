@@ -165,7 +165,11 @@ valent partout, dans l'app comme dans les protos.
    doit agir ensuite** ; le toast reprend le même verbe que le bouton (« Confirmer » →
    « confirmée ») ; l'Activité l'horodate. On ne laisse jamais la personne devant une page qui ne
    bouge plus. **Le bandeau s'affiche là où on a cliqué**, dans l'étape, juste au-dessus du geste,
-   jamais seulement en haut de page où on ne le voit pas. Une suite d'états déclarés (un
+   jamais seulement en haut de page où on ne le voit pas. Pendant le geste, le bouton dit qu'il
+   travaille (« Envoi en validation… »). Si la suite revient à la même personne sur une autre étape,
+   elle **s'ouvre toute seule** avec le bandeau (« Étape ouverte pour vous : … ») ; sinon le bandeau
+   et l'étape disent **qui on attend** et sur quoi (« En attente de Lina Haddad : valider le Brief
+   de cadrage »). *(Ibé, lot 3 « confirmation et passage à la suite », 22/10)* Une suite d'états déclarés (un
    distributeur qui reçoit, accepte, livre) se montre en **frise** dont chaque point se coche avec
    sa date, et se déclare en **un seul geste** (on coche ce qu'on a appris), pas un bouton par
    état. *(Sacha 18/10, proto Distribution)*

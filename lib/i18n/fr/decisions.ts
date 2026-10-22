@@ -49,6 +49,14 @@ export const decisions = {
       request_info: "Demander une précision",
       refuse: "Refuser",
     },
+    // The outcome running (lot 3 of Ibé's feedback).
+    pending: {
+      approve: "Validation en cours…",
+      approve_reserves: "Validation en cours…",
+      request_changes: "Envoi de la demande…",
+      request_info: "Envoi de la question…",
+      refuse: "Refus en cours…",
+    },
     // « Claire Morel (demander une modification) » : the verb in lower case.
     returnBy: (who: string, outcome: string) => `${who} (${outcome})`,
     decided: "Décision enregistrée.",

@@ -735,6 +735,19 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   du Juridique (`confirmLegalIntake`), lancement du plan (`launchLegalPlan`), soumission et décision
   d'un devis de Production (`submitQuote`, `decideQuote`). Coût : deux lectures des parcours des
   `modules` donnés, à limiter au module concerné.
+  **Passage à la suite** (lot 3 des retours d'Ibé, 22/10/2026) : `next[]` porte `viewer` — le bandeau
+  dit « À vous : … » ou « En attente de **X** : … ». `withOutcome(…, { openNext: true })` ajoute
+  `open` (`{href, step}`, la première action **nouvelle** du lecteur) : `usePublishResult` l'ouvre
+  (`router.push`) si elle est sur une autre page, et le résultat la suit (variable de module
+  `carried`, lue par le `StepResultProvider` de la page d'arrivée) → « Étape ouverte pour vous :
+  Cadrage › Brief de cadrage ». Activé seulement sur le Cadrage (Brief : créer, envoyer, décider ;
+  dernière réponse des 6 dimensions, `useNextQuestion`), le plan (`launchProjectPlan`) et le Brief
+  Master (`startBrief`, `recordBrief`) ; ailleurs le bandeau dit la suite sans naviguer. Les
+  réponses aux 6 dimensions n'ont pas de toast (des dizaines par Cadrage) : « Réponse confirmée ·
+  Date cible » dans le bandeau, au-dessus de la question suivante. Pendant le geste, le bouton dit
+  ce qui se passe (« Envoi en validation… », « Validation en cours… » sur l'issue cliquée de
+  `DecisionPanel`, carte occupée de `StartChoices pending`). L'attente d'un autre est `StepWaiting`
+  (avatar + « En attente de **X** : … », pris sur l'acteur de l'étape), jamais une ligne grise.
 - **Piège `cn()`** : le paquet `cn` (tailwind-merge) ne connaît pas les tailles maison
   (`text-caption`, `text-micro`, `text-body-sm`…) et les **retire** dès qu'une couleur
   `text-[color:…]` suit dans le même `cn()`/`cva`. Dans un composant fusionné, écrire la taille en

@@ -68,6 +68,8 @@ export function DecisionPanel({
 }) {
   const [comment, setComment] = useState("");
   const [missing, setMissing] = useState(false);
+  // The outcome running: its button says so (« Validation en cours… »).
+  const [deciding, setDeciding] = useState<DecisionOutcomeKind | null>(null);
   const { pending, error, run } = useWriteSubmit(
     () => {
       setComment("");
@@ -87,6 +89,7 @@ export function DecisionPanel({
       document.getElementById(fieldId)?.focus();
       return;
     }
+    setDeciding(outcome.kind);
     run(() => onDecide(outcome.kind, comment.trim()), outcome.done);
   };
 
@@ -117,10 +120,12 @@ export function DecisionPanel({
             type="button"
             variant={index === 0 ? "default" : index === 1 ? "outline" : "ghost"}
             disabled={pending}
-            aria-busy={pending || undefined}
+            aria-busy={(pending && deciding === outcome.kind) || undefined}
             onClick={() => decide(outcome)}
           >
-            {outcome.label ?? t.outcomes[outcome.kind]}
+            {pending && deciding === outcome.kind
+              ? t.pending[outcome.kind]
+              : (outcome.label ?? t.outcomes[outcome.kind])}
           </Button>
         ))}
       </div>

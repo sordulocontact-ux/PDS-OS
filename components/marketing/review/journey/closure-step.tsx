@@ -3,6 +3,7 @@ import { IconCheck } from "nucleo-sharp-essential";
 import { ReturnCallout } from "@/components/ui/return-callout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { fr } from "@/lib/i18n/fr";
 import type { ReviewContext } from "@/lib/marketing/review/context";
 import {
@@ -23,7 +24,6 @@ import {
   ReopenForm,
   RequestClosureButton,
 } from "./closure-actions";
-import { StepWaiting } from "./step-waiting";
 
 const t = fr.reviewJourney.closure;
 const LABEL = {

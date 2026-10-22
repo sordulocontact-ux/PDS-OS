@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useNextQuestion } from "@/components/framing/dimensions/use-next-question";
 import { ConstraintDialog } from "@/components/framing/guide/constraint-dialog";
 import { sourceLabel } from "@/components/framing/guide/source-quote";
 import { ProposedBadge } from "@/components/framing/proposed-badge";
@@ -44,6 +45,7 @@ export function ConstraintLines({
   );
   const proposed = lines.some((c) => c.review_status === "proposed");
   const key = scope === "legal" ? "legal_blockers" : "constraints";
+  const goNext = useNextQuestion(nextHref, key);
 
   return (
     <div className="flex flex-col gap-4">
@@ -95,7 +97,8 @@ export function ConstraintLines({
                 proposed
                   ? run(
                       () => confirmQuestion(projectId, key),
-                      () => router.push(nextHref),
+                      () =>
+                        goNext(fr.framingJourney.dimensions.gesture.confirmed),
                     )
                   : router.push(nextHref)
               }

@@ -207,34 +207,40 @@ export async function startBrief(
   const access = await requireApproved();
   if (!id.success) return { ok: false, error: t.errors.failed };
   const done = mode === "direct" ? t.start.started : t.start.exchangeChosen;
-  return withOutcome(id.data, ["master"], done, async () => {
-    const saved = await saveBriefFact(id.data, { startMode: mode });
-    if (!saved.ok || mode === "exchange") return saved;
-    const project = await getProject(id.data);
-    if (!project) return { ok: false, error: t.errors.failed };
-    const step = await loadBriefStep(project, access, null);
-    const validator = step.view.brief.validatorPersonId;
-    const creative = step.questions.toAsk.some(
-      (q) =>
-        q.dimension === "direction" &&
-        q.people.some((x) => x.personId === validator),
-    );
-    if (!validator || !creative) return { ok: true };
-    const supabase = await createClient();
-    const { error } = await supabase.rpc("ask_master_brief_questions", {
-      p_project_id: id.data,
-      p_items: [
-        {
-          dimension: "direction",
-          person_id: validator,
-          task_title: fr.masterWorkflow.questions.taskTitle.direction,
-        },
-      ],
-    });
-    if (error) console.error("startBrief ask:", error.message);
-    refresh(id.data);
-    return { ok: true };
-  });
+  return withOutcome(
+    id.data,
+    ["master"],
+    done,
+    async () => {
+      const saved = await saveBriefFact(id.data, { startMode: mode });
+      if (!saved.ok || mode === "exchange") return saved;
+      const project = await getProject(id.data);
+      if (!project) return { ok: false, error: t.errors.failed };
+      const step = await loadBriefStep(project, access, null);
+      const validator = step.view.brief.validatorPersonId;
+      const creative = step.questions.toAsk.some(
+        (q) =>
+          q.dimension === "direction" &&
+          q.people.some((x) => x.personId === validator),
+      );
+      if (!validator || !creative) return { ok: true };
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("ask_master_brief_questions", {
+        p_project_id: id.data,
+        p_items: [
+          {
+            dimension: "direction",
+            person_id: validator,
+            task_title: fr.masterWorkflow.questions.taskTitle.direction,
+          },
+        ],
+      });
+      if (error) console.error("startBrief ask:", error.message);
+      refresh(id.data);
+      return { ok: true };
+    },
+    { openNext: true },
+  );
 }
 
 /**
@@ -255,23 +261,29 @@ export async function recordBrief(projectId: string): Promise<WriteResult> {
       ok: false,
       error: t.nothingChanged(formatShortDay(step.recordedAt)),
     };
-  return withOutcome(id.data, ["master"], t.recorded, async () => {
-    if (!step.saved) {
-      const saved = await saveBriefFact(id.data, {});
-      if (!saved.ok) return saved;
-    }
-    const supabase = await createClient();
-    const { error } = await supabase.rpc("record_master_brief", {
-      p_project_id: id.data,
-    });
-    if (error) {
-      console.error("recordBrief:", error.code, error.message);
-      return {
-        ok: false,
-        error: error.code === "42501" ? t.errors.forbidden : t.errors.failed,
-      };
-    }
-    refresh(id.data);
-    return { ok: true };
-  });
+  return withOutcome(
+    id.data,
+    ["master"],
+    t.recorded,
+    async () => {
+      if (!step.saved) {
+        const saved = await saveBriefFact(id.data, {});
+        if (!saved.ok) return saved;
+      }
+      const supabase = await createClient();
+      const { error } = await supabase.rpc("record_master_brief", {
+        p_project_id: id.data,
+      });
+      if (error) {
+        console.error("recordBrief:", error.code, error.message);
+        return {
+          ok: false,
+          error: error.code === "42501" ? t.errors.forbidden : t.errors.failed,
+        };
+      }
+      refresh(id.data);
+      return { ok: true };
+    },
+    { openNext: true },
+  );
 }

@@ -15,7 +15,10 @@ export const moduleFrame = {
   },
   result: {
     label: "Résultat",
-    next: "Ensuite :",
+    // The viewer's own next action, and the step opened for them.
+    mine: "À vous :",
+    opened: "Étape ouverte pour vous :",
+    waiting: "En attente de",
     unlocked: "Débloqué :",
     viaLink: "lien privé",
     close: "Fermer",

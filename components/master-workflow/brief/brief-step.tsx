@@ -3,6 +3,7 @@ import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { ToneCallout } from "@/components/ui/tone-callout";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import type { CallPrepDefaults } from "@/lib/calls/prep/types";
 import { fr } from "@/lib/i18n/fr";
 import {
@@ -91,7 +92,7 @@ export function BriefStep({
         !step.recordedAt &&
         ownerName &&
         !step.questions.questions.some((q) => q.isMine && !q.answeredAt) && (
-          <ToneCallout tone="info">{t.waitingOwner(ownerName)}</ToneCallout>
+          <StepWaiting who={ownerName} todo={t.ownerTodo} />
         )}
 
       {step.startMode === "exchange" &&

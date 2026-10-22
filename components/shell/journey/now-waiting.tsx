@@ -6,16 +6,9 @@ import { fr } from "@/lib/i18n/fr";
 import { lowerFirst } from "@/lib/ui/journey";
 
 import type { NowItem } from "./now-card";
+import { initials } from "./step-waiting";
 
 const t = fr.journey;
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
 
 /** « En attente de **Claire Morel** (lien privé) : valider la V1 · Étape »
  * — who « Maintenant » waits for, an avatar or a clock when nobody is named

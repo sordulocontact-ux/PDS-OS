@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useNextQuestion } from "@/components/framing/dimensions/use-next-question";
 import { AddNeedDialog } from "@/components/framing/guide/add-need-dialog";
 import { useFramingAction } from "@/components/framing/use-framing-action";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ export function NeedsLines({
   nextHref: string;
 }) {
   const t = fr.framingGuide.needs;
-  const router = useRouter();
+  const goNext = useNextQuestion(nextHref, "needs");
   const { pending, run } = useFramingAction();
   const saved = GROUPS.flatMap((g) => needChips(needs, g));
   const [added, setAdded] = useState<NeedChip[]>([]);
@@ -119,7 +119,7 @@ export function NeedsLines({
                     toAdd.map((c) => ({ label: c.label, family: c.family })),
                     toRemove,
                   ),
-                () => router.push(nextHref),
+                () => goNext(fr.framingJourney.dimensions.gesture.saved),
               )
             }
           >

@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { FormMessage } from "@/components/auth/form-message";
 import { StartChoices } from "@/components/ui/start-choices";
 import { useWriteSubmit } from "@/components/ui/use-write-submit";
@@ -23,14 +25,18 @@ export function BriefStart({
   missing: string[];
 }) {
   const submit = useWriteSubmit(() => undefined, t.started);
+  const [chosen, setChosen] = useState<"direct" | "exchange" | null>(null);
   const recommended = missing.length >= 2 ? "exchange" : "direct";
-  const choose = (mode: "direct" | "exchange") => () =>
+  const choose = (mode: "direct" | "exchange") => () => {
+    setChosen(mode);
     submit.run(() => startBrief(projectId, mode));
+  };
   return (
     <div className="flex flex-col gap-2">
       <StartChoices
         legend={t.legend}
         recommended={recommended}
+        pending={submit.pending ? chosen : null}
         reason={
           recommended === "exchange" ? t.reason(missing.join(", ")) : null
         }

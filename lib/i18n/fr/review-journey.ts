@@ -84,7 +84,6 @@ export const reviewJourney = {
     closure: (withReserves: boolean) =>
       `Clôturé ${withReserves ? "avec" : "sans"} réserve`,
   },
-  waiting: (todo: string) => ` : ${todo}`,
   issues: {
     cancelled: (title: string, reason: string | null) =>
       reason ? `${title} : annulée (« ${reason} »)` : `${title} : annulée`,

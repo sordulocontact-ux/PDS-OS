@@ -50,7 +50,7 @@ export function BriefOwnerStep({
             aria-busy={pending || undefined}
             onClick={() => run(() => createBriefVersion(projectId))}
           >
-            {action.label}
+            {pending ? fr.framingJourney.brief.creating : action.label}
           </Button>
         </div>
         <FormMessage kind="error">{error}</FormMessage>
@@ -94,7 +94,9 @@ export function BriefOwnerStep({
             run(() => sendBriefVersion(projectId, action.briefId, reason));
           }}
         >
-          {fr.framingJourney.brief.sendTo(action.validatorName)}
+          {pending
+            ? fr.framingJourney.brief.sending
+            : fr.framingJourney.brief.sendTo(action.validatorName)}
         </Button>
       </div>
     </div>

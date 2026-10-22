@@ -17,7 +17,8 @@ import type { WriteResult } from "@/lib/utils/write-result";
 // The gestures of the step « Brief de cadrage » (proto frBrief), each with
 // what follows (rule 7): create a version, send it, and the direction's
 // decision in the step — validate, or ask for a change on the dimensions
-// checked, with a comment. States move in SQL only.
+// checked, with a comment. States move in SQL only. The viewer's next step,
+// on another page, opens by itself (lot 3 of Ibé's feedback).
 
 const t = fr.framingJourney.done;
 
@@ -30,8 +31,12 @@ const asWrite = (result: ActionResult): WriteResult =>
 export async function createBriefVersion(
   projectId: string,
 ): Promise<WriteResult> {
-  return withOutcome(projectId, ["framing"], t.briefCreated, async () =>
-    asWrite(await generateBrief(projectId)),
+  return withOutcome(
+    projectId,
+    ["framing"],
+    t.briefCreated,
+    async () => asWrite(await generateBrief(projectId)),
+    { openNext: true },
   );
 }
 
@@ -41,8 +46,13 @@ export async function sendBriefVersion(
   briefId: string,
   unchangedReason = "",
 ): Promise<WriteResult> {
-  return withOutcome(projectId, ["framing"], t.briefSent, async () =>
-    asWrite(await sendBrief(projectId, briefId, "", unchangedReason)),
+  return withOutcome(
+    projectId,
+    ["framing"],
+    t.briefSent,
+    async () =>
+      asWrite(await sendBrief(projectId, briefId, "", unchangedReason)),
+    { openNext: true },
   );
 }
 
@@ -90,5 +100,6 @@ export async function decideFramingBrief(
       revalidatePath(routes.project(projectId), "layout");
       return { ok: true };
     },
+    { openNext: true },
   );
 }

@@ -7,6 +7,7 @@ import { PlanBoard } from "@/components/plan/plan-board";
 import { PlanColumns } from "@/components/plan/plan-columns";
 import { PlanStepCard } from "@/components/plan/plan-step-card";
 import { PlanStepsSection } from "@/components/plan/plan-steps-section";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { Fold } from "@/components/ui/fold";
 import { PoCallout } from "@/components/ui/po-callout";
 import { ToneCallout } from "@/components/ui/tone-callout";
@@ -72,9 +73,7 @@ export default async function FramingPlanPage({
           }}
         />
         {!canEdit && (
-          <p className="text-caption text-[color:var(--text-tertiary)]">
-            {t.waiting(project.ownerName ?? "—")}
-          </p>
+          <StepWaiting step={ctx.steps.find((s) => s.key === "plan")} />
         )}
       </>
     );

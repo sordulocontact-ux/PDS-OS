@@ -3,13 +3,14 @@ import "server-only";
 import { isLocked, OPEN_STATUSES } from "@/lib/ui/journey";
 import type {
   ResultNext,
+  ResultOpen,
   ResultUnlocked,
   WriteDone,
   WriteResult,
 } from "@/lib/utils/write-result";
 
 import { readProjectJourneys } from "./project";
-import type { JourneyModuleKey, ProjectJourneys } from "./types";
+import type { JourneyModuleKey, ProjectAction, ProjectJourneys } from "./types";
 
 // Four lines at most (proto « Projet complet »).
 const MAX = 4;
@@ -17,35 +18,37 @@ const MAX = 4;
 const id = (place: string, key: string, href: string) =>
   `${place}|${key}|${href}`;
 
+const actingId = (a: ProjectAction) =>
+  `${id(a.place, a.step.key, a.step.href)}|${a.step.actor?.name}|${a.step.actor?.todo}`;
+
 /**
  * What a gesture changed (VISION-UX rule 7): who acts now that did not
- * before (`next`) and the steps that left their lock (`unlocked`), by
- * comparing the journeys read before and after the write. Code only.
+ * before (`next`, the viewer's own first), the steps that left their lock
+ * (`unlocked`) and the viewer's first new action (`open`: the client opens
+ * it when it is on another page — « ouvrir tout seul la prochaine étape si
+ * elle est à la même personne », lot 3 of Ibé's feedback), by comparing
+ * the journeys read before and after the write. Code only.
  */
 export function outcomeOf(
   before: ProjectJourneys,
   after: ProjectJourneys,
-): Pick<WriteDone, "next" | "unlocked"> {
-  const acting = new Set(
-    [...before.mine, ...before.waiting].map(
-      (a) =>
-        `${id(a.place, a.step.key, a.step.href)}|${a.step.actor?.name}|${a.step.actor?.todo}`,
-    ),
+): Pick<WriteDone, "next" | "unlocked" | "open"> {
+  const acting = new Set([...before.mine, ...before.waiting].map(actingId));
+  const fresh = [...after.mine, ...after.waiting].filter(
+    (a) => !acting.has(actingId(a)),
   );
-  const next: ResultNext[] = [...after.mine, ...after.waiting]
-    .filter(
-      (a) =>
-        !acting.has(
-          `${id(a.place, a.step.key, a.step.href)}|${a.step.actor?.name}|${a.step.actor?.todo}`,
-        ),
-    )
-    .slice(0, MAX)
-    .map((a) => ({
-      who: a.step.actor?.name ?? "—",
-      viaLink: a.step.actor?.viaLink ?? false,
-      todo: a.step.actor?.todo ?? "",
-      step: `${a.place} › ${a.step.title}`,
-    }));
+  const next: ResultNext[] = fresh.slice(0, MAX).map((a) => ({
+    who: a.step.actor?.name ?? "—",
+    viewer: a.step.actor?.viewer ?? false,
+    viaLink: a.step.actor?.viaLink ?? false,
+    todo: a.step.actor?.todo ?? "",
+    step: `${a.place} › ${a.step.title}`,
+  }));
+  const mine = fresh.find((a) => a.step.actor?.viewer);
+  const open: ResultOpen | undefined = mine && {
+    href: mine.step.href,
+    step: `${mine.place} › ${mine.step.title}`,
+  };
   const wasLocked = new Set(
     before.journeys.flatMap((j) =>
       j.steps
@@ -68,13 +71,16 @@ export function outcomeOf(
         })),
     )
     .slice(0, MAX);
-  return { next, unlocked };
+  return { next, unlocked, ...(open && { open }) };
 }
 
 /**
  * Runs a write of a Server Action and says what follows: the journeys of
  * `modules` read before and after, `done` the gesture in the past
- * participle, used by ResultBanner and the toast.
+ * participle, used by ResultBanner and the toast. `openNext`: the
+ * viewer's next step, when it is on another page, opens by itself (the
+ * Cadrage, its plan and the Master's Brief, lot 3 of Ibé's feedback);
+ * elsewhere the banner only says it.
  *
  *   return withOutcome(projectId, ["legal"], t.done.confirmed, async () => {
  *     const { error } = await supabase.rpc(…);
@@ -86,10 +92,12 @@ export async function withOutcome(
   modules: readonly JourneyModuleKey[],
   done: string,
   write: () => Promise<WriteResult>,
+  { openNext = false }: { openNext?: boolean } = {},
 ): Promise<WriteResult> {
   const before = await readProjectJourneys(projectId, modules);
   const result = await write();
   if (!result.ok) return result;
   const after = await readProjectJourneys(projectId, modules);
-  return { ...result, done, ...outcomeOf(before, after) };
+  const { open, ...outcome } = outcomeOf(before, after);
+  return { ...result, done, ...outcome, ...(openNext && open && { open }) };
 }

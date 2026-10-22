@@ -175,5 +175,6 @@ export async function launchProjectPlan(
         ? { ok: true }
         : { ok: false, error: fr.framing.errors[result.error] };
     },
+    { openNext: true },
   );
 }

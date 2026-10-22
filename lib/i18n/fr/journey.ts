@@ -76,6 +76,8 @@ export const journey = {
     // « En attente d' » before a vowel, then the name in bold.
     waitingOfName: (who: string) =>
       de(who).startsWith("d'") ? "En attente d'" : "En attente de ",
+    // « En attente de X : valider le Brief » (StepWaiting).
+    waitingOn: (todo: string) => ` : ${todo}`,
     due: (day: string) => `pour le ${day}`,
     blockers: (n: number, list: string) =>
       `${n} blocage${n > 1 ? "s" : ""} à lever par vous : ${list}`,

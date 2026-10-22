@@ -5,6 +5,7 @@ import { BriefDirectionDecision } from "@/components/framing/brief/brief-directi
 import { BriefOwnerStep } from "@/components/framing/brief/brief-owner-step";
 import { BriefVersionDoc } from "@/components/framing/brief/brief-version-doc";
 import { FramingStepFrame } from "@/components/framing/framing-step-frame";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { BriefDocument } from "@/components/framing/intel/brief-document";
 import {
   BriefCompare,
@@ -69,20 +70,25 @@ export default async function FramingBriefPage({
   const open = assessment.blocking.length + assessment.conflicts.length;
   const working = stage === "not_started" || stage === "in_progress";
   const validatorName = ctx.validator?.name ?? "—";
+  const stepOf = (key: string) => ctx.steps.find((s) => s.key === key);
 
   // What the step offers now (proto frBrief, in this order).
   let act: React.ReactNode = null;
   if (stage === "validated")
     act = (
-      <ToneCallout tone="success">
-        <span>
-          <b>{t.validated}</b>{" "}
-          {t.validatedBody(
-            latest?.decidedByName ?? null,
-            latest?.decided_at ? formatShortInstant(latest.decided_at) : "—",
-          )}
-        </span>
-      </ToneCallout>
+      <>
+        <ToneCallout tone="success">
+          <span>
+            <b>{t.validated}</b>{" "}
+            {t.validatedBody(
+              latest?.decidedByName ?? null,
+              latest?.decided_at ? formatShortInstant(latest.decided_at) : "—",
+            )}
+          </span>
+        </ToneCallout>
+        {/* The direction, once it validated: who launches the plan. */}
+        {!ctx.plan?.launchedAt && <StepWaiting step={stepOf("plan")} />}
+      </>
     );
   else if (latest?.state === "sent")
     act =
@@ -93,9 +99,7 @@ export default async function FramingBriefPage({
           openMandatory={requests.filter(blocksValidation).length}
         />
       ) : (
-        <p className="text-caption text-[color:var(--text-tertiary)]">
-          {t.waiting(pending?.validatorName ?? validatorName)}
-        </p>
+        <StepWaiting step={stepOf("brief")} />
       );
   else if (canEdit && working && open === 0) {
     const outdated =

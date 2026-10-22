@@ -122,7 +122,8 @@ export const masterBrief = {
   nothingChanged: (day: string) =>
     `Rien à enregistrer : le Brief n'a pas changé depuis ${day}.`,
   changed: "Brief mis à jour",
-  waitingOwner: (owner: string) => `En attente de ${owner} : remplir le Brief.`,
+  // « En attente de X : remplir le Brief » (StepWaiting).
+  ownerTodo: "Remplir le Brief",
   errors: {
     failed: "Le Brief n'a pas pu être enregistré. Réessayez.",
     forbidden: "Seul le responsable du projet modifie le Brief.",

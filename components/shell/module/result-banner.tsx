@@ -1,7 +1,15 @@
 "use client";
 
 import { IconCheck, IconXmark } from "nucleo-sharp-essential";
-import { createContext, use, useCallback, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,39 +22,65 @@ const t = fr.moduleFrame.result;
 type Ctx = { result: WriteDone | null; show: (r: WriteDone | null) => void };
 const StepResult = createContext<Ctx | null>(null);
 
+const pathOf = (href: string) => new URL(href, "http://pds.local").pathname;
+
+// The result carried to the step opened for the viewer, until its page
+// shows it: the banner goes where the person now is.
+let carried: { path: string; result: WriteDone } | null = null;
+
 /**
  * Holds the last gesture's result of an open step, so ResultBanner shows it
  * where the person clicked (VISION-UX rule 7). StepPanel wraps its content
- * in it; a new page (another step) starts empty.
+ * in it; a new page (another step) starts empty, unless the gesture opened
+ * it (`open`): it then starts with that gesture's result.
  */
 export function StepResultProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [result, setResult] = useState<WriteDone | null>(null);
+  const pathname = usePathname();
+  const [result, setResult] = useState<WriteDone | null>(() =>
+    carried?.path === pathname ? carried.result : null,
+  );
+  useEffect(() => {
+    if (carried?.path === pathname) carried = null;
+  }, [pathname]);
   const value = useMemo(() => ({ result, show: setResult }), [result]);
   return <StepResult value={value}>{children}</StepResult>;
 }
 
 /**
  * After a successful write: the toast with the same verb as the button
- * (`done`, else `fallback`), and the banner in the step when the result says
- * what follows. Safe outside a step: only the toast then.
+ * (`done`, else `fallback`; `toast: false` for a gesture repeated many
+ * times, the banner says it), and the banner in the step when the result
+ * says what follows. When the viewer's next step is on another page
+ * (`open`), it is opened at once and the banner goes with it (lot 3 of
+ * Ibé's feedback). Safe outside a step: only the toast and the opening.
  */
 export function usePublishResult() {
   const ctx = use(StepResult);
   const show = ctx?.show;
+  const router = useRouter();
+  const pathname = usePathname();
   return useCallback(
-    (result: WriteDone, fallback?: string) => {
+    (
+      result: WriteDone,
+      fallback?: string,
+      options: { toast?: boolean } = {},
+    ) => {
       if (result.notice) toast.warning(result.notice);
-      else {
+      else if (options.toast !== false) {
         const message = result.done ? `${result.done}.` : fallback;
         if (message) toast.success(message);
       }
-      if (result.done) show?.(result);
+      const open = result.open;
+      const away = open && pathOf(open.href) !== pathname ? open : null;
+      if (away && result.done) carried = { path: pathOf(away.href), result };
+      else if (result.done) show?.(result);
+      if (away) router.push(away.href);
     },
-    [show],
+    [show, router, pathname],
   );
 }
 
@@ -60,8 +94,9 @@ export function ResultBanner() {
 }
 
 /**
- * « ✓ **Dossier confirmé** · Ensuite : **Lina Haddad** · lancer le plan
- * (Juridique › Plan d'action) · Débloqué : **Plan d'action** · … ».
+ * « ✓ **Dossier confirmé** · Étape ouverte pour vous : **Juridique › Plan
+ * d'action** · En attente de **Lina Haddad** : valider le plan (Juridique ›
+ * Plan d'action) · Débloqué : **Plan d'action** · … ».
  */
 export function ResultBannerView({
   result,
@@ -78,12 +113,26 @@ export function ResultBannerView({
       <IconCheck aria-hidden className="mt-0.5 size-4 shrink-0" />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <b className="font-semibold">{result.done}</b>
-        {result.next?.map((n) => (
-          <span key={`n-${n.step}-${n.who}`}>
-            {t.next} <b className="font-semibold">{n.who}</b>
-            {n.viaLink && ` (${t.viaLink})`} · {lowerFirst(n.todo)} ({n.step})
+        {result.open && (
+          <span>
+            {t.opened} <b className="font-semibold">{result.open.step}</b>
           </span>
-        ))}
+        )}
+        {result.next
+          ?.filter((n) => !(n.viewer && n.step === result.open?.step))
+          .map((n) =>
+            n.viewer ? (
+              <span key={`n-${n.step}-${n.who}`}>
+                {t.mine} {lowerFirst(n.todo)} ({n.step})
+              </span>
+            ) : (
+              <span key={`n-${n.step}-${n.who}`}>
+                {t.waiting} <b className="font-semibold">{n.who}</b>
+                {n.viaLink && ` (${t.viaLink})`} : {lowerFirst(n.todo)} (
+                {n.step})
+              </span>
+            ),
+          )}
         {result.unlocked?.map((u) => (
           <span key={`u-${u.step}`}>
             {t.unlocked} <b className="font-semibold">{u.step}</b>

@@ -139,10 +139,19 @@ export const framingJourney = {
     answer: "Répondre",
     done: "Les 6 dimensions sont complètes.",
     doneBody: "Le Brief de cadrage peut être créé.",
+    // The banner after an answer (lot 3 of Ibé's feedback): the verb of
+    // the button, then the question's name.
+    answered: (done: string, label: string) => `${done} · ${label}`,
+    gesture: {
+      confirmed: "Réponse confirmée",
+      saved: "Réponse enregistrée",
+      dismissed: "Question écartée",
+      skipped: "Question passée",
+      notApplicable: "Marquée non applicable",
+      later: "Reportée, avec une tâche",
+    },
     frozen: (name: string) =>
       `Le cadrage est figé pendant la relecture du Brief par ${name}.`,
-    waiting: (name: string) =>
-      `En attente de ${name} : répondre aux questions de PO`,
     states: {
       known: "Connu",
       confirmed: "Confirmé",
@@ -169,6 +178,9 @@ export const framingJourney = {
     create: "Créer le Brief",
     createVersion: (n: number) => `Créer la version ${n}`,
     sendTo: (name: string) => `Envoyer en validation à ${name}`,
+    // While it runs (lot 3 of Ibé's feedback).
+    creating: "Création du Brief…",
+    sending: "Envoi en validation…",
     question: "Le projet est-il assez clair pour que PO organise la suite ?",
     toReview: "Dimensions à revoir",
     comment: "Commentaire",
@@ -182,8 +194,6 @@ export const framingJourney = {
     validated: "✓ Brief validé · ✓ Cadrage terminé.",
     validatedBody: (name: string | null, when: string) =>
       `Validé par ${name ?? "la direction"} le ${when}. PO propose maintenant le plan du projet.`,
-    waiting: (name: string) =>
-      `En attente de ${name} : valider le Brief de cadrage`,
     more: "Corrections détaillées, comparaison et export",
     detailed: "Demander des corrections détaillées",
     openRequests: (n: number) =>
@@ -200,8 +210,6 @@ export const framingJourney = {
     save: "Enregistrer le plan",
     saved: "Plan enregistré.",
     cancel: "Annuler",
-    waiting: (name: string) =>
-      `En attente de ${name} : lancer le plan du projet`,
     details: "Détail de chaque étape, ajouts et revue",
     stepsTitle: "Étapes du plan et historique",
   },

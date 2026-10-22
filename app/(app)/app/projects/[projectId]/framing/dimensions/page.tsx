@@ -7,6 +7,7 @@ import { DimensionCards } from "@/components/framing/dimensions/dimension-cards"
 import { FramingReturn } from "@/components/framing/dimensions/framing-return";
 import { QuestionLines } from "@/components/framing/dimensions/question-lines";
 import { QuestionScreen } from "@/components/framing/intel/question-screen";
+import { StepWaiting } from "@/components/shell/journey/step-waiting";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { routes } from "@/lib/auth/redirects";
 import { editableDimensions } from "@/lib/framing/analyse";
@@ -191,9 +192,7 @@ export default async function FramingDimensionsPage({
           progress
         )}
         {!canEdit && working && question && (
-          <p className="text-caption text-[color:var(--text-tertiary)]">
-            {t.waiting(ctx.project.ownerName ?? "—")}
-          </p>
+          <StepWaiting step={ctx.steps.find((s) => s.key === "dimensions")} />
         )}
         {box}
         <DimensionCards
