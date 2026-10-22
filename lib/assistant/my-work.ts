@@ -9,6 +9,7 @@ import { isOverdue, todayInParis } from "@/lib/insights/dates";
 import { freeTasksOf, loadMyTodo } from "@/lib/insights/todo";
 import { handoverOf } from "@/lib/projects/handover";
 import { listProjects } from "@/lib/projects/queries";
+import { actionHref } from "@/lib/ui/journey";
 import { loadMyJourneyWork } from "@/lib/work/journeys";
 
 /**
@@ -85,7 +86,7 @@ export async function myWorkFacts(
       })),
       ...actions.map(({ action, projectTitle }) => ({
         label: `${projectTitle} · ${action.step.actor?.todo ?? action.step.title}`,
-        href: action.step.href,
+        href: actionHref(action.step),
       })),
       ...tasks.map((task) => ({
         label: `${task.projectTitle} · ${task.title}`,

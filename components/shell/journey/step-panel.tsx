@@ -4,12 +4,14 @@ import {
   ResultBanner,
   StepResultProvider,
 } from "@/components/shell/module/result-banner";
+import { Fold } from "@/components/ui/fold";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import {
   isLocked,
   type JourneyStep,
+  LEAD_ANCHOR,
   prereqsOf,
   withModule,
 } from "@/lib/ui/journey";
@@ -30,8 +32,16 @@ const t = fr.journey;
  * result, the noted informations, the tools (« Signaler un blocage »,
  * « Noter une information ») and, at the very bottom, « Déjà fait »
  * (StepHistory).
+ *
+ * `lead`: the viewer's gesture, given when the step's page puts it first
+ * (lot 4 of Ibé's feedback: « l'action attendue en tête de page, les
+ * informations secondaires repliées »). It comes right under the « why »,
+ * named by the step's action (« À vous · Valider le Mix V1 ») and anchored
+ * (`#a-vous`, where Travail opens it); the result banner moves above it and
+ * the grid folds under it.
  */
 export type StepSlots = {
+  lead?: React.ReactNode;
   returned?: React.ReactNode;
   blockers?: React.ReactNode;
   review?: React.ReactNode;
@@ -75,6 +85,9 @@ export function StepPanel({
   const missing = prereqsOf(step, steps)
     .filter((p) => !p.done)
     .map(withModule);
+  const lead = !locked && slots.lead ? slots.lead : null;
+  const meta = <StepMeta step={step} steps={steps} rootPrereq={rootPrereq} />;
+  const banner = slots.flash ?? <ResultBanner />;
   return (
     <StepResultProvider>
       <section
@@ -108,7 +121,32 @@ export function StepPanel({
         <p className="text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)] text-[color:var(--text-secondary)]">
           {step.why}
         </p>
-        <StepMeta step={step} steps={steps} rootPrereq={rootPrereq} />
+        {lead ? (
+          <>
+            {banner}
+            <section
+              id={LEAD_ANCHOR}
+              aria-labelledby="journey-step-lead"
+              className="flex scroll-mt-24 flex-col gap-3.5 rounded-xl border border-[color:var(--selection-border)] bg-[color:var(--selection-bg)] p-4"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge tone="info">{t.now.mine}</StatusBadge>
+                {step.actor?.viewer && (
+                  <h3
+                    id="journey-step-lead"
+                    className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold"
+                  >
+                    {step.actor.todo}
+                  </h3>
+                )}
+              </div>
+              {lead}
+            </section>
+            <Fold summary={t.lead.meta}>{meta}</Fold>
+          </>
+        ) : (
+          meta
+        )}
         {locked && missing.length > 0 && (
           <ToneCallout tone="info" icon={<IconLock />}>
             {blockedLabel(missing.join(" et "))}
@@ -119,7 +157,7 @@ export function StepPanel({
         {slots.review}
         {slots.po}
         {/* The last gesture's result, just above where it was made. */}
-        {slots.flash ?? <ResultBanner />}
+        {!lead && banner}
         {children &&
           (locked ? (
             // Readable, never actionable (VISION-UX § 4).

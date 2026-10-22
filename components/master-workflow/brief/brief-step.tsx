@@ -1,6 +1,7 @@
 import { BriefExchanges } from "@/components/master-workflow/brief-exchanges";
 import { BriefQuestions } from "@/components/master-workflow/brief-questions";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { Fold } from "@/components/ui/fold";
 import { PdfExportButton } from "@/components/ui/pdf-export-button";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { StepWaiting } from "@/components/shell/journey/step-waiting";
@@ -33,15 +34,20 @@ const sectionTitle =
  * The Brief step (proto `master-v2.html`): how to start it, the exchange
  * or the question to the creative director, then the Brief as a document —
  * its state, what is missing, each fact with its source, changed in place —
- * and « Enregistrer le Brief ».
+ * and « Enregistrer le Brief ». For the person asked a question, the
+ * question goes first (BriefLead) and the rest folds under « Le Brief en
+ * cours » (lot 4 of Ibé's feedback).
  */
 export function BriefStep({
   step,
   exchange,
   ownerName,
   projectTitle,
+  lead = false,
 }: {
   step: BriefStepView;
+  // The viewer's open questions are shown at the head of the step.
+  lead?: boolean;
   // The common call form's defaults, for the owner.
   exchange: CallPrepDefaults | null;
   ownerName: string | null;
@@ -65,8 +71,12 @@ export function BriefStep({
     step.dirty,
   );
   const missing = missingSentence(step.missing);
-  return (
-    <div className="flex flex-col gap-5">
+  // The questions left once the viewer's open ones went to the head.
+  const others = lead
+    ? step.questions.questions.filter((q) => !isOpenForViewer(q))
+    : step.questions.questions;
+  const body = (
+    <>
       {choosing && (
         <>
           <FactRows>
@@ -107,8 +117,11 @@ export function BriefStep({
           canEdit={canEdit}
         />
       )}
-      {asked && (
-        <BriefQuestions projectId={view.projectId} view={step.questions} />
+      {asked && others.length > 0 && (
+        <BriefQuestions
+          projectId={view.projectId}
+          view={{ ...step.questions, questions: others }}
+        />
       )}
 
       {!choosing && (
@@ -174,6 +187,16 @@ export function BriefStep({
           {canEdit && <BriefRecord projectId={view.projectId} />}
         </>
       )}
+    </>
+  );
+  return (
+    <div className="flex flex-col gap-5">
+      {lead ? <Fold summary={t.lead.more}>{body}</Fold> : body}
     </div>
   );
 }
+
+/** A question the viewer still has to answer. */
+export const isOpenForViewer = (
+  q: BriefStepView["questions"]["questions"][number],
+) => q.isMine && !q.answeredAt;

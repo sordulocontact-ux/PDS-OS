@@ -2,12 +2,13 @@ import { ContentCard } from "@/components/shell/content-card";
 import { LinkRow, Rows } from "@/components/ui/rows";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectAction } from "@/lib/journey/types";
+import { actionHref } from "@/lib/ui/journey";
 import { formatShortDay } from "@/lib/utils/day";
 
 /**
  * The viewer's actions in a project (proto « Projet complet », `workPage`),
  * one row each: the action, « Workflow › Étape · avant le … », a chevron;
- * the row opens the step. Travail lists them all, Validations the decisions.
+ * the row opens the step, on the gesture when it has its section. Travail lists them all, Validations the decisions.
  * Read from the journeys (lib/overview/journeys.ts), the Cadrage first.
  */
 export function MyActions({
@@ -29,7 +30,7 @@ export function MyActions({
           {actions.map((action) => (
             <LinkRow
               key={`${action.place}|${action.step.key}|${action.step.href}`}
-              href={action.step.href}
+              href={actionHref(action.step)}
               title={action.step.actor?.todo ?? action.step.title}
               detail={[
                 `${action.place} › ${action.step.title}`,

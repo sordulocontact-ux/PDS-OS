@@ -3,7 +3,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { ViewLink } from "@/components/ui/view-link";
 import { fr } from "@/lib/i18n/fr";
-import { lowerFirst, type JourneyStep, nowOf } from "@/lib/ui/journey";
+import {
+  actionHref,
+  lowerFirst,
+  type JourneyStep,
+  nowOf,
+} from "@/lib/ui/journey";
 import { cn } from "@/lib/utils";
 import { formatShortDay } from "@/lib/utils/day";
 
@@ -128,7 +133,7 @@ export function NowCard({
       )}
       {first && (
         <div className="flex flex-wrap items-center gap-3">
-          <ViewLink href={first.step.href} className={buttonVariants()}>
+          <ViewLink href={actionHref(first.step)} className={buttonVariants()}>
             {overview ? t.openShort : t.open}
           </ViewLink>
           {more.length > 0 && (

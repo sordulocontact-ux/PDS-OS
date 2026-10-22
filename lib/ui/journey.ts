@@ -47,7 +47,22 @@ export type JourneyPerson = { name: string; viewer: boolean; viaLink: boolean };
 export type JourneyActor = JourneyPerson & {
   todo: string;
   kind?: "do" | "validate";
+  // The section of the step where the gesture is (« …/master/mix#a-vous »),
+  // when the step's page shows it at its head: Travail, the home and
+  // « Maintenant » open it there, not at the top of the step (lot 4 of
+  // Ibé's feedback). `step.href` stays the page itself.
+  href?: string;
 };
+
+/** Anchor of the viewer's gesture at the head of a step (StepPanel `lead`). */
+export const LEAD_ANCHOR = "a-vous";
+
+/** The step's page, opened on its lead. */
+export const leadHref = (href: string) => `${href}#${LEAD_ANCHOR}`;
+
+/** Where an action opens: its own section when it has one, else its step. */
+export const actionHref = (step: Pick<JourneyStep, "href" | "actor">) =>
+  step.actor?.href ?? step.href;
 
 /**
  * A role on a step, for the grid of the open step: Exécute / Coordonne /

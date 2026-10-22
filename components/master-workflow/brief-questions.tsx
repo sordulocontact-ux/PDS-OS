@@ -44,20 +44,41 @@ export function BriefQuestions({
           {view.questions.length === 0 ? (
             <EmptyNote>{t.empty}</EmptyNote>
           ) : (
-            <ul className="grid gap-6">
-              {view.questions.map((question) => (
-                <QuestionItem
-                  key={question.id}
-                  projectId={projectId}
-                  question={question}
-                  canApply={view.canAsk}
-                />
-              ))}
-            </ul>
+            <QuestionList
+              projectId={projectId}
+              questions={view.questions}
+              canApply={view.canAsk}
+            />
           )}
         </div>
       )}
     </PageSection>
+  );
+}
+
+/** The questions, each with its answer, its form for the person asked, or
+ * « Reprendre dans le Brief » for the owner. Alone at the head of the step
+ * for the person asked (lot 4 of Ibé's feedback). */
+export function QuestionList({
+  projectId,
+  questions,
+  canApply,
+}: {
+  projectId: string;
+  questions: BriefQuestion[];
+  canApply: boolean;
+}) {
+  return (
+    <ul className="grid gap-6">
+      {questions.map((question) => (
+        <QuestionItem
+          key={question.id}
+          projectId={projectId}
+          question={question}
+          canApply={canApply}
+        />
+      ))}
+    </ul>
   );
 }
 

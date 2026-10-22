@@ -108,7 +108,11 @@ Titre du module                                   [chevrons des sous-modules]
   **tout en bas l'historique « Déjà fait »** : ce qui est fait ferme l'étape, sous tout ce qui
   compte encore *(Sacha 17/10)*.
 - **On arrive au bon endroit.** Ouvrir un module ouvre l'étape qui attend la personne, sinon
-  l'étape en cours. Une page qui n'a plus de raison d'être (ancienne fiche à onglets) redirige
+  l'étape en cours. Quand la personne a un geste à faire, **il passe en tête de l'étape**
+  (« À vous · Valider le Mix V1 » : la version, ses retours et la décision ; ou la question qu'on
+  lui pose), les informations secondaires repliées dessous (qui fait quoi, versions précédentes,
+  tarif, lien privé, échanges), et **un clic dans Travail ouvre ce geste**, pas le haut de la page
+  ni celle du projet. *(Ibé, lot 4 « l'action principale en haut », 22/10)* Une page qui n'a plus de raison d'être (ancienne fiche à onglets) redirige
   vers cette étape.
 - **Les étapes verrouillées sont visibles et lisibles**, jamais cachées : on voit ce qui vient. On
   ne peut rien y faire : ni action, ni « Modifier ».

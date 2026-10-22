@@ -128,6 +128,15 @@ export const masterRound = {
     accepted: "Tarif accepté : le montant est engagé",
     note: "Un montant proposé ne consomme pas le budget : il ne compte qu'une fois accepté.",
   },
+  // The validator's decision at the head of the step (lot 4 of Ibé's
+  // feedback), the rest folded.
+  lead: {
+    title: (title: string) => `« ${title} »`,
+    more: (engineer: string) =>
+      engineer
+        ? `Tarif, lien privé et échanges avec ${engineer}`
+        : "Tarif, lien privé et échanges",
+  },
   versions: {
     title: (label: string, n: number) =>
       `${label} · ${n > 1 ? `${n} versions` : "1 version"}`,

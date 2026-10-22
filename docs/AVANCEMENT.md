@@ -709,3 +709,16 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   `docs/ARCHITECTURE.md` § 3 ter, « Passage à la suite ».
   Reste : à rejouer dans un vrai navigateur par l'équipe (pas de session locale en mode auto) ;
   les numéros « Retours 02, 01 » du lot n'ont pas de page Notion retrouvée.
+
+- [x] **Retours d'Ibé, lot 4 : l'action principale en haut, des liens directs depuis Travail**
+  (retours 03 et partie lien du 09, 22/10/2026, branche `retours/lots-4-7`) : quand la personne a un
+  geste à faire dans une étape, il passe en tête (`StepPanel lead`, encadré « À vous · action »
+  ancré `#a-vous`), le bandeau de résultat au-dessus, la grille « Qui fait quoi, prérequis et
+  suite » repliée dessous. Cas de Nadia : la décision d'une version au Mixage et au Mastering
+  (la version, ses retours, Valider / Demander une modification ; versions précédentes, tarif,
+  lien privé et échanges repliés) et la question qu'on lui pose au Brief (le Brief replié sous
+  « Le Brief en cours »). L'acteur porte `href` (`leadHref`) : Travail (global et du projet),
+  l'Accueil, « Maintenant », la Vue d'ensemble, les sources de PO et l'ouverture automatique du
+  lot 3 ouvrent la section (`actionHref`). Sans migration. Détail : `docs/ARCHITECTURE.md` § 3 ter,
+  « Action en tête, lien direct ». La prise en charge par Karim est sur son lien privé : lot 6.
+  Reste : à rejouer dans un vrai navigateur par l'équipe.

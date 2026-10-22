@@ -3,6 +3,10 @@
 // « Enregistrer le Brief ».
 
 export const masterBrief = {
+  // A question asked to the viewer goes first (lot 4 of Ibé's feedback).
+  lead: {
+    more: "Le Brief en cours",
+  },
   prefilled: {
     label: "Déjà pré-rempli",
     value: "Ingénieur, validatrice, livrables, formats et dates",

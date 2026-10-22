@@ -1,4 +1,8 @@
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
+import {
+  leadVersionsOf,
+  RoundLead,
+} from "@/components/master-workflow/round/round-lead";
 import { RoundStep } from "@/components/master-workflow/round/round-step";
 import { fr } from "@/lib/i18n/fr";
 import { masterJourneyContext } from "@/lib/master-workflow/journey-context";
@@ -18,12 +22,38 @@ export default async function ProjectMasterMasteringPage({
     masterJourneyContext(projectId),
     loadRoundStep(projectId, "mastering"),
   ]);
+  // The validator decides first (lot 4 of Ibé's feedback): the version,
+  // its feedback and the decision at the head of the step.
+  const lead = leadVersionsOf(round);
+  const engineer =
+    round.view.engineer?.name ??
+    round.link?.contactName ??
+    round.inHouse?.name ??
+    "";
   return (
-    <MasterStepFrame projectId={projectId} stepKey="mastering">
+    <MasterStepFrame
+      projectId={projectId}
+      stepKey="mastering"
+      slots={
+        lead.length > 0
+          ? {
+              lead: (
+                <RoundLead
+                  round={round}
+                  versions={lead}
+                  engineer={engineer}
+                  viewerIsOwner={round.view.canEdit}
+                />
+              ),
+            }
+          : undefined
+      }
+    >
       <RoundStep
         round={round}
         viewerIsOwner={round.view.canEdit}
         projectTitle={project.title}
+        leadIds={new Set(lead.map((v) => v.id))}
       />
     </MasterStepFrame>
   );

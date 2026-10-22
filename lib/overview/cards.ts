@@ -5,7 +5,7 @@
 // Pure, client-safe.
 
 import type { ProjectJourneys } from "@/lib/journey/types";
-import { OPEN_STATUSES } from "@/lib/ui/journey";
+import { actionHref, OPEN_STATUSES } from "@/lib/ui/journey";
 import { workflowStepHref, workflowSteps } from "@/lib/ui/workflow-hrefs";
 import type {
   CommonStatus,
@@ -68,7 +68,8 @@ export function workflowCards({
       const index = current ? steps.indexOf(current) : steps.length - 1;
       return {
         ...base,
-        href: action?.step.href ?? current?.href ?? steps[0].href,
+        href:
+          (action && actionHref(action.step)) ?? current?.href ?? steps[0].href,
         index: index + 1,
         total: steps.length,
         stepTitle: (current ?? steps[steps.length - 1]).title,
@@ -85,7 +86,8 @@ export function workflowCards({
     return {
       ...base,
       href:
-        action?.step.href ?? workflowStepHref(projectId, workflow, state.step),
+        (action && actionHref(action.step)) ??
+        workflowStepHref(projectId, workflow, state.step),
       index: at + 1,
       total: chevrons.length,
       stepTitle: chevrons[at]?.label ?? "",

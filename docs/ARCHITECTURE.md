@@ -748,6 +748,17 @@ Socle de toutes les zones (sous-lots C0 à C5 de `docs/projet-complet/commons.md
   ce qui se passe (« Envoi en validation… », « Validation en cours… » sur l'issue cliquée de
   `DecisionPanel`, carte occupée de `StartChoices pending`). L'attente d'un autre est `StepWaiting`
   (avatar + « En attente de **X** : … », pris sur l'acteur de l'étape), jamais une ligne grise.
+  **Action en tête, lien direct** (lot 4 des retours d'Ibé, 22/10/2026) : `StepPanel` a un slot
+  `lead` — le geste du lecteur, juste sous le « pourquoi », dans un encadré « À vous · *action de
+  l'étape* » ancré `#a-vous` (`LEAD_ANCHOR`) ; le bandeau de résultat passe au-dessus et la grille
+  `StepMeta` se replie dessous (« Qui fait quoi, prérequis et suite »). Le parcours qui donne un
+  `lead` met sur l'acteur `href` = `leadHref(page de l'étape)` ; Travail (global et du projet),
+  l'Accueil, « Maintenant », la Vue d'ensemble, les sources de PO et `open` de `withOutcome` lisent
+  `actionHref(step)` (= `actor.href ?? step.href`) : un clic ouvre la section, jamais le haut de
+  la page. `step.href` reste le chemin seul (comparé au `pathname`). Branché sur le Master : la
+  décision d'une version (Mixage, Mastering : `RoundLead`, la version, ses retours et la décision ;
+  versions précédentes, tarif, lien privé et échanges repliés) et la question posée à une personne
+  au Brief (`QuestionList` ; le Brief replié sous « Le Brief en cours »).
 - **Piège `cn()`** : le paquet `cn` (tailwind-merge) ne connaît pas les tailles maison
   (`text-caption`, `text-micro`, `text-body-sm`…) et les **retire** dès qu'une couleur
   `text-[color:…]` suit dans le même `cn()`/`cva`. Dans un composant fusionné, écrire la taille en

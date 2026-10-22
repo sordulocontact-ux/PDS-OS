@@ -54,6 +54,11 @@ export const journey = {
       ? `Se débloque quand ${titles} sont faits.`
       : `Se débloque quand ${titles} est fait.`,
   history: "Déjà fait",
+  // The viewer's gesture at the head of the step (lot 4 of Ibé's
+  // feedback), the step's grid folded under it.
+  lead: {
+    meta: "Qui fait quoi, prérequis et suite",
+  },
   historyAfter: (cause: string) => `suite à : ${cause}`,
   now: {
     label: "Maintenant",

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { isLocked, OPEN_STATUSES } from "@/lib/ui/journey";
+import { actionHref, isLocked, OPEN_STATUSES } from "@/lib/ui/journey";
 import type {
   ResultNext,
   ResultOpen,
@@ -46,7 +46,7 @@ export function outcomeOf(
   }));
   const mine = fresh.find((a) => a.step.actor?.viewer);
   const open: ResultOpen | undefined = mine && {
-    href: mine.step.href,
+    href: actionHref(mine.step),
     step: `${mine.place} › ${mine.step.title}`,
   };
   const wasLocked = new Set(

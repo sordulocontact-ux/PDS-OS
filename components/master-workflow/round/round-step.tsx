@@ -3,6 +3,7 @@ import { ListenLinkOffer } from "@/components/master-workflow/listen/listen-link
 import { PackagePreview } from "@/components/master-workflow/package-preview";
 import { ContactLinkOffer } from "@/components/portal/contact-links-section";
 import { FactRow, FactRows } from "@/components/ui/fact-row";
+import { Fold } from "@/components/ui/fold";
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { fr } from "@/lib/i18n/fr";
@@ -25,16 +26,20 @@ const h3 =
  * sending, what is ready, the package exactly as the engineer will get it,
  * the e-mail to write and « Envoyer à … »; once sent, the versions with
  * their feedback and decision, the rate, the private link and the thread
- * with the engineer.
+ * with the engineer. With a lead (the validator's decision at the head of
+ * the step, RoundLead), the rest — older versions apart — folds under one
+ * line (lot 4 of Ibé's feedback).
  */
 export function RoundStep({
   round,
   viewerIsOwner,
   projectTitle,
+  leadIds,
 }: {
   round: RoundStepView;
   viewerIsOwner: boolean;
   projectTitle: string;
+  leadIds?: ReadonlySet<string>;
 }) {
   const { view, stage, link, inHouse } = round;
   const engineer =
@@ -57,23 +62,11 @@ export function RoundStep({
     ...(round.vocalsAwaited ? [t.blockers.vocals] : []),
     ...view.blockers,
   ];
-  return (
-    <div className="flex flex-col gap-5">
-      {stage === "mastering" && round.mixReady && engineer && (
-        <ToneCallout tone="success">
-          <b className="font-semibold">{t.mastering.ready}</b>{" "}
-          {sameEngineer
-            ? t.mastering.same(engineer)
-            : t.mastering.other(engineer)}
-        </ToneCallout>
-      )}
+  const lead = (leadIds?.size ?? 0) > 0;
+  const rest = (
+    <>
       {sent && (
         <>
-          <RoundVersions
-            round={round}
-            engineer={engineer}
-            viewerIsOwner={viewerIsOwner}
-          />
           <ListenLinkOffer projectId={view.projectId} />
           {inHouse?.isViewer && inHouse.assignedAt && (
             <InHouseDeposit round={round} />
@@ -288,6 +281,27 @@ export function RoundStep({
         isDirection={round.isDirection}
         direction={round.direction ?? fr.invoices.team.direction}
       />
+    </>
+  );
+  return (
+    <div className="flex flex-col gap-5">
+      {stage === "mastering" && round.mixReady && engineer && (
+        <ToneCallout tone="success">
+          <b className="font-semibold">{t.mastering.ready}</b>{" "}
+          {sameEngineer
+            ? t.mastering.same(engineer)
+            : t.mastering.other(engineer)}
+        </ToneCallout>
+      )}
+      {sent && (
+        <RoundVersions
+          round={round}
+          engineer={engineer}
+          viewerIsOwner={viewerIsOwner}
+          leadIds={leadIds}
+        />
+      )}
+      {lead ? <Fold summary={t.lead.more(engineer)}>{rest}</Fold> : rest}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { LoadingRegion, Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectAction } from "@/lib/journey/types";
+import { actionHref } from "@/lib/ui/journey";
 import { myValidationTone, overdueTone } from "@/lib/ui/state-tones";
 import { formatShortDay } from "@/lib/utils/day";
 
@@ -17,7 +18,8 @@ const MAX = 5;
 /**
  * The viewer's actions read from the projects' journeys (lib/work/
  * journeys.ts), one row each: the action, « Projet · Workflow › Étape ·
- * avant le … », « À valider » on a decision; the row opens the step. The
+ * avant le … », « À valider » on a decision; the row opens the step, on the gesture
+ * when the step shows it at its head (`actionHref`). The
  * global Travail shows one card per project (`all`: every row, counted),
  * the home one card for everything (first rows, `action` to the Travail).
  */
@@ -48,7 +50,7 @@ export function JourneyActionsCard({
       {(all ? rows : rows.slice(0, MAX)).map(({ action: a, projectTitle }) => (
         <CardRow
           key={`${projectTitle ?? ""}|${a.place}|${a.step.key}|${a.step.href}`}
-          href={a.step.href}
+          href={actionHref(a.step)}
           main={a.step.actor?.todo ?? a.step.title}
           sub={[
             projectTitle,

@@ -1,4 +1,8 @@
-import { BriefStep } from "@/components/master-workflow/brief/brief-step";
+import {
+  BriefStep,
+  isOpenForViewer,
+} from "@/components/master-workflow/brief/brief-step";
+import { QuestionList } from "@/components/master-workflow/brief-questions";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { fr } from "@/lib/i18n/fr";
 import { loadBriefStep } from "@/lib/master-workflow/brief-step";
@@ -25,13 +29,33 @@ export default async function ProjectMasterBriefPage({
   const exchange = step.view.canEdit
     ? await masterExchangeDefaults(step.view, project.ownerPersonId)
     : null;
+  // A question asked to the viewer (Nadia's answer) comes first, the Brief
+  // folded under it (lot 4 of Ibé's feedback).
+  const mine = step.questions.questions.filter(isOpenForViewer);
   return (
-    <MasterStepFrame projectId={projectId} stepKey="brief">
+    <MasterStepFrame
+      projectId={projectId}
+      stepKey="brief"
+      slots={
+        mine.length > 0
+          ? {
+              lead: (
+                <QuestionList
+                  projectId={projectId}
+                  questions={mine}
+                  canApply={false}
+                />
+              ),
+            }
+          : undefined
+      }
+    >
       <BriefStep
         step={step}
         exchange={exchange}
         ownerName={project.ownerName}
         projectTitle={project.title}
+        lead={mine.length > 0}
       />
     </MasterStepFrame>
   );

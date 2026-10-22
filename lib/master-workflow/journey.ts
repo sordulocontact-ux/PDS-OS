@@ -5,10 +5,11 @@
 // of the round is; the first title still waiting names the action.
 
 import { fr } from "@/lib/i18n/fr";
-import type {
-  JourneyActor,
-  JourneyPrereq,
-  JourneyStep,
+import {
+  type JourneyActor,
+  type JourneyPrereq,
+  type JourneyStep,
+  leadHref,
 } from "@/lib/ui/journey";
 import {
   MASTER_STEP_KEYS,
@@ -47,7 +48,14 @@ export type MasterJourneyStep = Omit<JourneyStep, "key" | "prereq" | "next"> & {
 
 type Stage = "mix" | "mastering";
 type Who = { name: string; personId?: string | null; viaLink?: boolean };
-type Action = { who: Who; todo: string; kind?: "do" | "validate" };
+// `lead`: the step's page shows this gesture at its head (StepPanel
+// `lead`), so Travail opens it there (lot 4 of Ibé's feedback).
+type Action = {
+  who: Who;
+  todo: string;
+  kind?: "do" | "validate";
+  lead?: boolean;
+};
 
 const firstName = (name: string) => name.split(" ")[0] ?? name;
 
@@ -112,7 +120,10 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       : null;
   };
 
-  const actorOf = (actions: Action[]): JourneyActor | null => {
+  const actorOf = (
+    actions: Action[],
+    key: MasterStepKey,
+  ): JourneyActor | null => {
     const mine = actions.find(
       (a) => a.who.personId && a.who.personId === viewerId,
     );
@@ -124,6 +135,9 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
           viaLink: a.who.viaLink ?? false,
           todo: a.todo,
           kind: a.kind ?? "do",
+          ...(a.lead && {
+            href: leadHref(masterStepHref(input.projectId, key)),
+          }),
         }
       : null;
   };
@@ -197,6 +211,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
             personId: pendingQuestion.askedTo,
           },
           todo: t.todo.answerQuestion,
+          lead: true,
         },
       ]
     : answered
@@ -254,6 +269,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
             who: validatorWho,
             todo: t.todo.validate(label, last.number, titleOf(title.id)),
             kind: "validate",
+            lead: true,
           });
       }
     const open = facts.messages.filter(
@@ -446,7 +462,7 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
       (key !== "brief" || sourceConfirmed || nothingToDo) &&
       // Waiting for the final vocals keeps the Mixage closed.
       (key !== "mix" || !waitForVocals);
-    const actor = actorOf(actionsOf[key]);
+    const actor = actorOf(actionsOf[key], key);
     const st: JourneyStep["status"] = doneOf[key]
       ? "done"
       : !ready
