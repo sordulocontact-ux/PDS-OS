@@ -3,6 +3,7 @@ import { ToneCallout } from "@/components/ui/tone-callout";
 import { VersionCard } from "@/components/ui/version-card";
 import { fr } from "@/lib/i18n/fr";
 import type { ProjectInvoice, ProjectInvoicesView } from "@/lib/invoices/types";
+import { invoiceAnchor } from "@/lib/invoices/href";
 import { formatDay, formatShortInstant } from "@/lib/utils/day";
 
 import { agreedLine, InvoiceCard } from "./invoice-card";
@@ -32,7 +33,10 @@ export function InvoicePanel({
   const direction = view.direction ?? t.direction;
   if (!i.receivedAt)
     return (
-      <div className="flex flex-col gap-2.5">
+      <div
+        id={invoiceAnchor(i.id)}
+        className="flex scroll-mt-24 flex-col gap-2.5"
+      >
         <FactRows>
           <FactRow
             label={t.of(i.contactName)}
@@ -70,7 +74,7 @@ export function InvoicePanel({
       </div>
     );
   return (
-    <div className="flex flex-col gap-3">
+    <div id={invoiceAnchor(i.id)} className="flex scroll-mt-24 flex-col gap-3">
       <InvoiceCard invoice={i} />
       {!i.paidOn &&
         (i.bankState === "pending" ? (

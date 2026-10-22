@@ -2511,6 +2511,21 @@ facture d'un contrat payé du Juridique, `20261020030301`) n'en font plus qu'une
   payer » : le panneau commun), « Ouvrir » vers le Master final pour l'ingénieur. Tous projets : les
   actions « Payer la facture de X » / « Confirmer le nouveau RIB de X » des parcours Master et Juridique
   dans le Travail de la direction.
+- **La page s'ouvre sur la facture** (lot 5 des retours d'Ibé, retour 09, 22/10/2026) : l'action
+  de facture du parcours Master a `lead` → depuis Travail, `…/master/final#a-vous` ; pour la
+  direction, le Master final met en tête (`InvoiceLead`, `leadInvoicesOf`) chaque facture reçue non
+  payée — PDF, montant contre le tarif, échéance, RIB, puis « Confirmer le RIB » ou la date et le
+  justificatif du virement — et replie le reste sous « Le Master final et le budget ». Le geste
+  reste possible si l'étape est encore verrouillée (une facture n'attend pas le mastering :
+  `StepPanel` garde le `lead` d'un acteur lecteur). Une fois payée, l'action sort du parcours, donc
+  de Travail. Chaque panneau a l'ancre `#facture-<id>` (`invoiceAnchor`) : « Ouvrir » de « À payer »
+  et « Prêt pour la sortie » y mènent (`invoiceHref`).
+- **Où est rangé le justificatif** (vérifié le 22/10) : dans le bucket privé `project-invoices`, à
+  côté du PDF de la facture (`<organisation>/<projet>/<facture>/<uuid>.<ext>`, emplacement à usage
+  unique `open_invoice_slot` « proof », PDF / PNG / JPG), inscrit sur la facture (`proof_path`,
+  `proof_name`, `paid_on`, `paid_by` par `pay_invoice`). Lu par la direction seule : « Voir le
+  justificatif » sur la carte de la facture (Master final, « À payer » du Budget, étape d'une
+  personne du Juridique) ; le responsable voit « Payée le … » et le nom du fichier, jamais le fichier.
 - **« Prêt pour la sortie »** : un contrôle « Facture de X » par facture **reçue**, jamais bloquant
   (ouvert tant qu'elle n'est pas payée → « À risque », fait une fois payée), source « Budget du
   projet » ; une facture encore attendue n'y est pas (sa démarche le dit).

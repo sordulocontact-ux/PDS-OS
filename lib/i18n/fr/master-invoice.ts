@@ -4,6 +4,10 @@
 const first = (name: string) => name.split(" ")[0] ?? name;
 
 export const masterInvoice = {
+  // The invoice at the head of the Master final (lot 5 of Ibé's feedback).
+  lead: {
+    more: "Le Master final et le budget",
+  },
   // The budget lines of the Master final.
   budget: {
     title: "Budget",

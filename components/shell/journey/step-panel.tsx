@@ -85,7 +85,10 @@ export function StepPanel({
   const missing = prereqsOf(step, steps)
     .filter((p) => !p.done)
     .map(withModule);
-  const lead = !locked && slots.lead ? slots.lead : null;
+  // A gesture the viewer has stays usable on a locked step (an invoice to
+  // pay never waits for the mastering).
+  const lead =
+    slots.lead && (!locked || step.actor?.viewer) ? slots.lead : null;
   const meta = <StepMeta step={step} steps={steps} rootPrereq={rootPrereq} />;
   const banner = slots.flash ?? <ResultBanner />;
   return (

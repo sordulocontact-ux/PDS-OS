@@ -1,5 +1,10 @@
 import { FinalStep } from "@/components/master-workflow/final/final-step";
-import { InvoiceBlock } from "@/components/master-workflow/invoice-block";
+import {
+  InvoiceBlock,
+  InvoiceLead,
+  leadInvoicesOf,
+} from "@/components/master-workflow/invoice-block";
+import { Fold } from "@/components/ui/fold";
 import { MasterStepFrame } from "@/components/master-workflow/master-step-frame";
 import { fr } from "@/lib/i18n/fr";
 import { loadProjectInvoices } from "@/lib/invoices/queries";
@@ -24,21 +29,40 @@ export default async function ProjectMasterFinalPage({
     loadProjectInvoices(projectId, project.ownerPersonId),
     loadMasterBudgetLines(projectId),
   ]);
+  // The direction opens on the invoice to pay (lot 5 of Ibé's feedback):
+  // the Master final and the budget fold under it.
+  const lead = leadInvoicesOf(invoices);
+  const body = (
+    <div className="flex flex-col gap-6">
+      <FinalStep view={view} />
+      <InvoiceBlock
+        projectId={projectId}
+        view={invoices}
+        budget={budget}
+        leadIds={new Set(lead.map((i) => i.id))}
+        inHouse={Boolean(
+          facts.brief?.mixPerson &&
+          (facts.brief.masteringSame || facts.brief.masteringPerson) &&
+          view.titles.some((x) => x.final),
+        )}
+      />
+    </div>
+  );
   return (
-    <MasterStepFrame projectId={projectId} stepKey="final">
-      <div className="flex flex-col gap-6">
-        <FinalStep view={view} />
-        <InvoiceBlock
-          projectId={projectId}
-          view={invoices}
-          budget={budget}
-          inHouse={Boolean(
-            facts.brief?.mixPerson &&
-            (facts.brief.masteringSame || facts.brief.masteringPerson) &&
-            view.titles.some((x) => x.final),
-          )}
-        />
-      </div>
+    <MasterStepFrame
+      projectId={projectId}
+      stepKey="final"
+      slots={
+        lead.length > 0
+          ? { lead: <InvoiceLead projectId={projectId} view={invoices} /> }
+          : undefined
+      }
+    >
+      {lead.length > 0 ? (
+        <Fold summary={fr.masterInvoice.lead.more}>{body}</Fold>
+      ) : (
+        body
+      )}
     </MasterStepFrame>
   );
 }

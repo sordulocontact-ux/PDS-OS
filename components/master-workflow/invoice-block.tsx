@@ -23,14 +23,18 @@ export function InvoiceBlock({
   view,
   budget,
   inHouse = false,
+  leadIds,
 }: {
   projectId: string;
   view: ProjectInvoicesView;
   budget: MasterBudgetLine[];
   // The engineer is a member of PDS: no invoice (proto `payBlock`).
   inHouse?: boolean;
+  // Invoices already shown at the head of the step (InvoiceLead).
+  leadIds?: ReadonlySet<string>;
 }) {
   const invoices = view.invoices.filter((i) => i.origin === "master");
+  const listed = invoices.filter((i) => !leadIds?.has(i.id));
   if (invoices.length === 0)
     return inHouse ? (
       <section className="flex flex-col gap-3">
@@ -46,19 +50,23 @@ export function InvoiceBlock({
     ) : null;
   return (
     <section className="flex flex-col gap-3">
-      <h3 className={h3}>
-        {view.isDirection && invoices.some((i) => i.receivedAt && !i.paidOn)
-          ? t.titleDirection
-          : t.title}
-      </h3>
-      {invoices.map((i) => (
-        <InvoicePanel
-          key={i.id}
-          projectId={projectId}
-          invoice={i}
-          view={view}
-        />
-      ))}
+      {listed.length > 0 && (
+        <>
+          <h3 className={h3}>
+            {view.isDirection && listed.some((i) => i.receivedAt && !i.paidOn)
+              ? t.titleDirection
+              : t.title}
+          </h3>
+          {listed.map((i) => (
+            <InvoicePanel
+              key={i.id}
+              projectId={projectId}
+              invoice={i}
+              view={view}
+            />
+          ))}
+        </>
+      )}
       {budget.length > 0 && (
         <>
           <h3 className={h3}>{tb.title}</h3>
@@ -101,5 +109,45 @@ export function InvoiceBlock({
         </>
       )}
     </section>
+  );
+}
+
+/**
+ * The engineers' invoices the viewer handles now: received, unpaid, for
+ * the direction (a new RIB to confirm, the transfer to note). The Master
+ * final opens on them (lot 5 of Ibé's feedback).
+ */
+export function leadInvoicesOf(view: ProjectInvoicesView) {
+  return view.isDirection
+    ? view.invoices.filter(
+        (i) => i.origin === "master" && i.receivedAt && !i.paidOn,
+      )
+    : [];
+}
+
+/**
+ * « À vous · Payer la facture de Karim Haddou » at the head of the Master
+ * final: the PDF, the amount against the rate, the due date and the RIB,
+ * then the RIB to confirm or the date and proof of the transfer. Once
+ * paid, the action leaves Travail.
+ */
+export function InvoiceLead({
+  projectId,
+  view,
+}: {
+  projectId: string;
+  view: ProjectInvoicesView;
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      {leadInvoicesOf(view).map((i) => (
+        <InvoicePanel
+          key={i.id}
+          projectId={projectId}
+          invoice={i}
+          view={view}
+        />
+      ))}
+    </div>
   );
 }

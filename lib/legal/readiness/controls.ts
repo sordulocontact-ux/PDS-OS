@@ -170,7 +170,9 @@ function fromInvoices(
               : ti.nextPay,
         responsible: direction,
         source: ti.source,
-        href: projectId ? invoiceHref(projectId, i) : null,
+        href: projectId
+          ? invoiceHref(projectId, { ...i, id: i.invoiceId })
+          : null,
         waiver: null,
       };
     });

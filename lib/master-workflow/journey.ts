@@ -336,6 +336,8 @@ export function masterJourney(input: MasterJourneyInput): MasterJourneyStep[] {
           : [
               {
                 who: directionWho,
+                // The invoice at the head of the Master final (lot 5).
+                lead: true,
                 todo: i.bankPending
                   ? ti.todo.confirmRib(i.contactName)
                   : ti.todo.pay(

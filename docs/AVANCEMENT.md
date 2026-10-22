@@ -722,3 +722,12 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   lot 3 ouvrent la section (`actionHref`). Sans migration. Détail : `docs/ARCHITECTURE.md` § 3 ter,
   « Action en tête, lien direct ». La prise en charge par Karim est sur son lien privé : lot 6.
   Reste : à rejouer dans un vrai navigateur par l'équipe.
+
+- [x] **Retours d'Ibé, lot 5 : facture et paiement** (retour 09, 22/10/2026, branche
+  `retours/lots-4-7`) : depuis Travail, « Payer la facture de Karim » ouvre la facture elle-même,
+  en tête du Master final (`InvoiceLead`) : PDF, montant contre le tarif, échéance et RIB, puis la
+  confirmation du RIB ou la date et le justificatif du virement ; le Master final et le budget se
+  replient dessous. Une fois payée, l'action quitte le parcours et Travail. « Ouvrir » de « À payer »
+  et de « Prêt pour la sortie » mène à la facture (`#facture-<id>`). Justificatif vérifié : dans le
+  bucket privé `project-invoices` à côté du PDF, lisible par la direction seule. Sans migration.
+  Détail : `docs/ARCHITECTURE.md` § 8 ter bis. Reste : à rejouer dans un vrai navigateur.
