@@ -740,3 +740,12 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   au label quand il a écrit en dernier. Les fichiers et le Brief restent à un clic (« Revoir le
   dossier »). Sans migration. Détail : `docs/ARCHITECTURE.md` § 8 septies, « La page suit
   l'avancement ». Reste : à rejouer dans un vrai navigateur.
+
+- [x] **Retours d'Ibé, lot 7 : retours audio et versions** (retour 06, 22/10/2026, branche
+  `retours/lots-4-7`) : au Mixage et au Mastering, les retours sont rangés dans leur version
+  (minutage, contenu, auteur, quand), marqués « Interne » ; ce que Karim a reçu est un encadré à
+  part (« Demande de modification envoyée à Karim » ou « Retours transmis à Karim, sans décision »,
+  signé, daté, « Envoyé à Karim ») ; la version suivante s'ouvre sur « Corrections reçues : répond
+  à la demande sur le Mix V1 » : Mix V1, demande à Karim, Mix V2 se lisent d'un coup. Sur le lien de
+  Karim, la demande est au-dessus de son dépôt. Sans migration. Détail : `docs/ARCHITECTURE.md`
+  § 8 septies, « Retours rangés par version ». Reste : à rejouer dans un vrai navigateur.

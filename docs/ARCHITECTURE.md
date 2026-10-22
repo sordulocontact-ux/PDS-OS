@@ -4202,6 +4202,16 @@ lots, chacun utile seul.
     responsable seul, une fois, synthèse obligatoire) : la synthèse envoyée n'est **plus
     jamais réécrite** (RLS) et s'affiche sur la page du mixeur (`/m/[token]`, « Retours sur
     vos versions », renvoyés par `get_master_transmission`).
+  - **Retours rangés par version** (lot 7 des retours d'Ibé, 22/10/2026, sans migration) : chaque
+    carte de version (`RoundVersionCard`) porte, dans l'ordre, « Corrections reçues : répond à la
+    demande sur le Mix V*n* du … » avec les mots de cette demande (version précédente, `sentOf`),
+    le fichier, ce que l'ingénieur a reçu (`SentRequest` : « Demande de modification envoyée à
+    Karim » = décision `changes_requested`, texte `feedback_summary` sinon la note de décision ;
+    « Retours transmis à Karim, sans décision » = `feedback_sent_at`), puis les retours de
+    l'équipe (`VersionComments` : minutage, contenu, auteur, quand, « Interne · jamais envoyés tels
+    quels »). La version en écoute garde ses retours et leur formulaire sous elle
+    (`VersionFeedback`, même liste). Sur `/m`, la demande du label est au-dessus de la zone de
+    dépôt de la version suivante (« Ce que le label demande pour la V2 »).
   - La validation d'une version (Valider / Demander une modification) et le Mix final
     viennent au lot 7.
 - **Lot 7 : validation du mix, puis mastering** (ticket § 11 et 12 ; migration

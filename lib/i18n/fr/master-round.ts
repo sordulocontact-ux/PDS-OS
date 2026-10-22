@@ -158,14 +158,28 @@ export const masterRound = {
       approved: { mix: "Mix validé", mastering: "Master validé" },
       reopened: "Rouverte",
     },
-    changesNote: (by: string | null, day: string, text: string) =>
-      `${by ?? "La validatrice"} (demander une modification, ${day}) : « ${text} »`,
     approvedNote: (label: string, by: string | null, day: string) =>
       `Validée${by ? ` par ${by}` : ""} ${day} : c'est le ${label.toLowerCase()} final, il ne changera plus.`,
     reopenedNote: (by: string | null, day: string, reason: string) =>
       `Rouverte${by ? ` par ${by}` : ""} ${day} : « ${reason} ». Elle reste dans l'historique.`,
-    sentNote: (day: string, text: string) =>
-      `Retours transmis ${day}, sans décision : « ${text} »`,
+  },
+  // Feedback grouped by version (lot 7 of Ibé's feedback): what stays in
+  // the team, apart from what was sent to the engineer, and the chain
+  // « Mix V1 → demande à Karim → Mix V2 ».
+  chain: {
+    internal: "Retours de l'équipe",
+    internalBadge: "Interne",
+    internalHint: (engineer: string) =>
+      `Jamais envoyés tels quels à ${first(engineer)}.`,
+    sentBadge: (engineer: string) => `Envoyé à ${first(engineer)}`,
+    request: (engineer: string) =>
+      `Demande de modification envoyée à ${first(engineer)}`,
+    transmitted: (engineer: string) =>
+      `Retours transmis à ${first(engineer)}, sans décision`,
+    sentMeta: (by: string | null, day: string) =>
+      [by, day].filter(Boolean).join(" · "),
+    answers: (label: string, n: number, day: string) =>
+      `Corrections reçues : répond à la demande sur le ${label} V${n} du ${day}`,
   },
   feedback: {
     title: (label: string, n: number) => `Retours sur le ${label} V${n}`,
@@ -268,6 +282,8 @@ export const masterRound = {
     thread: "Échanges avec le label",
     // The engineer's page by progress (lot 6 of Ibé's feedback).
     reply: "Répondre au label",
+    // Above the drop zone: what the label asked for the next version.
+    asked: (n: number) => `Ce que le label demande pour la V${n}`,
     seePackage: "Revoir le dossier : fichiers et Brief",
     otherVersion: "Envoyer une autre version",
     newSource: (day: string, file: string) =>

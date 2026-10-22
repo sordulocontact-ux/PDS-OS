@@ -56,8 +56,10 @@ export function RoundLead({
             <RoundVersionCard
               round={round}
               version={version}
+              previous={title?.versions[1] ?? null}
               engineer={engineer}
               open
+              pending
             />
             <PendingVersion
               round={round}

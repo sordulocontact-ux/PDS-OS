@@ -103,7 +103,7 @@ export function masterPortalCards({
             {t.intro[role](data.package.project, data.package.engineer)}
           </p>
           <PackageTakeCharge token={linkKey} data={data} />
-          <PublicPackageView token={linkKey} data={data} />
+          <PublicPackageView data={data} />
         </>
       ),
     },

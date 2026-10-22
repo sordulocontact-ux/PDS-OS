@@ -244,7 +244,12 @@ valent partout, dans l'app comme dans les protos.
     (mix, master, montage), chacun commente avec son minutage, artiste comprise par son lien ;
     l'ingénieur ne reçoit que la demande de modification du valideur, ou des retours que le
     responsable lui transmet explicitement (« Transmettre les retours sans décider »). L'écran le
-    dit sous les retours. *(Sacha 18/10, proto Master)*
+    dit sous les retours. *(Sacha 18/10, proto Master)* Les retours sont **rangés dans leur
+    version** (minutage, contenu, auteur, quand), marqués « Interne » ; ce que l'ingénieur a reçu
+    est un encadré à part, « Demande de modification envoyée à Karim » / « Envoyé à Karim », signé
+    et daté ; la version suivante s'ouvre sur « Corrections reçues : répond à la demande sur le
+    Mix V1 » avec ses mots, et le lien de l'ingénieur montre la demande au-dessus de son dépôt.
+    *(Ibé, lot 7, 22/10)*
 22. **Une désignation dit d'où elle vient.** Une personne présélectionnée (ingénieur, valideur)
     porte la vraie raison (« Désigné au Cadrage › Équipe », citation), le Réseau n'étant qu'un
     complément ; « Changer » ouvre la liste et recalcule ce qui en dépend (tarifs, révisions).

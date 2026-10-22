@@ -4,6 +4,7 @@ import { PublicRefresh } from "@/components/master-workflow/public-refresh";
 import { PublicVersions } from "@/components/master-workflow/public-versions";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { Fold } from "@/components/ui/fold";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { fr } from "@/lib/i18n/fr";
@@ -20,13 +21,7 @@ type Open = Extract<PublicPackage, { state: "open" | "received" }>;
  * and what is expected. « Prendre en charge le dossier » comes before it
  * (PackageTakeCharge, lot 6 of Ibé's feedback).
  */
-export function PublicPackageView({
-  token,
-  data,
-}: {
-  token: string;
-  data: Open;
-}) {
+export function PublicPackageView({ data }: { data: Open }) {
   const t = fr.masterWorkflow.publicPackage;
   const th = fr.masterWorkflow.engineerThread;
   const p = fr.masterWorkflow.mix.package;
@@ -180,10 +175,41 @@ export function PublicDeliveries({
 }) {
   const t = fr.masterWorkflow.publicPackage;
   const pack = data.package;
-  const deposit = (title: Open["package"]["titles"][number]) =>
-    title.masterId ? (
+  // The label's request on the title's latest version: what the next one
+  // must correct, right above the drop zone (lot 7 of Ibé's feedback).
+  const askedOf = (masterId: string) => {
+    const v = data.versions.find(
+      (x) => x.masterId === masterId && (x.stage ?? pack.role) === pack.role,
+    );
+    const text = v?.summary ?? v?.decisionNote;
+    return v?.decision === "changes_requested" && text
+      ? { next: v.number + 1, text, by: v.decidedBy, at: v.decidedAt }
+      : null;
+  };
+  const deposit = (title: Open["package"]["titles"][number]) => {
+    if (!title.masterId) return null;
+    const asked = askedOf(title.masterId);
+    return (
       <div key={title.title} className="flex flex-col gap-2">
         {pack.titles.length > 1 && <p className="font-medium">{title.title}</p>}
+        {asked && (
+          <ToneCallout tone="warning">
+            <span className="flex flex-col gap-1">
+              <b className="font-semibold">
+                {fr.masterRound.portal.asked(asked.next)}
+              </b>
+              {asked.at && (
+                <span className="text-caption">
+                  {fr.masterRound.chain.sentMeta(
+                    asked.by,
+                    formatShortDate(asked.at),
+                  )}
+                </span>
+              )}
+              <span className="whitespace-pre-wrap">« {asked.text} »</span>
+            </span>
+          </ToneCallout>
+        )}
         {data.deliveries
           .filter((d) => d.masterId === title.masterId)
           .map((d) => (
@@ -200,7 +226,8 @@ export function PublicDeliveries({
           role={pack.role}
         />
       </div>
-    ) : null;
+    );
+  };
   const expected = pack.titles.filter((x) => x.masterId && expects(x.masterId));
   const others = pack.titles.filter((x) => x.masterId && !expects(x.masterId));
   return (

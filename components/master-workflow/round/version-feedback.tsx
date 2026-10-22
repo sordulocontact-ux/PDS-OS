@@ -16,7 +16,8 @@ import {
   type MixVersion,
 } from "@/lib/master-workflow/mix-types";
 import { transmitFeedback } from "@/lib/master-workflow/round-actions";
-import { formatShortInstant } from "@/lib/utils/day";
+
+import { VersionComments } from "./version-comments";
 
 const t = fr.masterRound;
 
@@ -67,32 +68,11 @@ export function VersionFeedback({
   const send = useWriteSubmit(() => undefined, t.transmit.done);
   return (
     <section className="flex flex-col gap-3">
-      <h3 className="text-[length:var(--type-body-md)] leading-[var(--type-body-md-lh)] font-semibold">
-        {t.feedback.title(label, version.number)}
-      </h3>
-      {version.comments.length === 0 ? (
-        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {t.feedback.empty}
-        </p>
-      ) : (
-        <ul className="flex flex-col overflow-hidden rounded-xl border border-[color:var(--border-hairline)]">
-          {version.comments.map((c) => (
-            <li
-              key={c.id}
-              className="flex flex-col gap-0.5 border-b border-[color:var(--border-hairline)] px-3.5 py-2.5 last:border-b-0"
-            >
-              <span className="text-[length:var(--type-body-sm)]">
-                {c.timecodeSeconds !== null &&
-                  `${formatTimecode(c.timecodeSeconds)} · `}
-                « {c.body} »
-              </span>
-              <span className="text-[length:var(--type-caption)] text-[color:var(--text-secondary)]">
-                {t.feedback.by(c.author, formatShortInstant(c.createdAt))}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <VersionComments
+        comments={version.comments}
+        engineer={engineer}
+        title={t.feedback.title(label, version.number)}
+      />
       <form
         noValidate
         className="grid gap-3 sm:grid-cols-[8rem_minmax(0,1fr)]"

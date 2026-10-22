@@ -49,13 +49,18 @@ export function RoundVersions({
         if (inLead && older.length === 0) return null;
         const extra = round.extras[latest.id];
         const approved = title.versions.find((v) => v.decision === "approved");
+        // Newest first: the one after a version in the list came before it.
         const card = (v: (typeof older)[number], open: boolean) => (
           <RoundVersionCard
             key={v.id}
             round={round}
             version={v}
+            previous={title.versions[title.versions.indexOf(v) + 1] ?? null}
             engineer={engineer}
             open={open}
+            pending={
+              v.id === latest.id && v.decision === null && !extra?.reopenedAt
+            }
           />
         );
         return (
