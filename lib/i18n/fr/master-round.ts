@@ -266,6 +266,10 @@ export const masterRound = {
     versions: { mix: "Mix", mastering: "Mastering" },
     deposit: "Déposer votre version",
     thread: "Échanges avec le label",
+    // The engineer's page by progress (lot 6 of Ibé's feedback).
+    reply: "Répondre au label",
+    seePackage: "Revoir le dossier : fichiers et Brief",
+    otherVersion: "Envoyer une autre version",
     newSource: (day: string, file: string) =>
       `Nouvelle source le ${day} : ${file}, et ses pistes. Vos prochaines versions partent de là.`,
   },

@@ -2,6 +2,7 @@ import { deliverablesPortalCard } from "@/components/master-workflow/deliverable
 import { EngineerThread } from "@/components/master-workflow/engineer-thread";
 import { invoicePortalCards } from "@/components/invoices/invoice-portal-cards";
 import {
+  PackageTakeCharge,
   PublicDeliveries,
   PublicPackageView,
 } from "@/components/master-workflow/public-package";
@@ -22,6 +23,12 @@ type OpenPackage = Extract<PublicPackage, { state: "open" | "received" }>;
  * take charge of, the exchanges with the label, the versions to deposit.
  * Shown on the sending's own link (/m) and on the person's page (/c):
  * `linkKey` says which (lib/portal/link-key.ts).
+ *
+ * The page follows the progress (lot 6 of Ibé's feedback): the gesture of
+ * the moment is « À vous », framed like a step's lead, and comes first in
+ * its card — « Prendre en charge le dossier » before the files and the
+ * Brief, « Déposer votre version » before the versions already sent,
+ * « Répondre au label » when the label wrote last — the details below.
  */
 export function masterPortalCards({
   linkKey,
@@ -52,12 +59,23 @@ export function masterPortalCards({
       (v) => v.masterId === masterId && (v.stage ?? role) === role,
     );
   const titles = data.package.titles.filter((x) => x.masterId);
-  const toDeposit = titles.some((x) => {
-    const v = latestOf(x.masterId);
+  const expects = (masterId: string | null) => {
+    const v = latestOf(masterId);
     return (
       !v || v.decision === "changes_requested" || v.decision === "reopened"
     );
-  });
+  };
+  const toDeposit = titles.some((x) => expects(x.masterId));
+  // The label wrote last, and not to answer the engineer's question or
+  // signal: an answer is awaited from the engineer.
+  const ordered = [...thread].sort((a, b) =>
+    a.createdAt.localeCompare(b.createdAt),
+  );
+  const [before, last] =
+    ordered.slice(-2).length === 2 ? ordered.slice(-2) : [null, ordered[0]];
+  const toReply =
+    last?.author === "team" &&
+    !(before?.author === "engineer" && before.kind !== "message");
   const allApproved =
     titles.length > 0 &&
     titles.every((x) => latestOf(x.masterId)?.decision === "approved");
@@ -76,6 +94,7 @@ export function masterPortalCards({
       title: r.portal.package,
       state: taken ? "done" : "todo",
       action: taken ? null : { label: r.take.title, due: null },
+      lead: !taken,
       order: 1,
       workflow: "master",
       body: (
@@ -83,6 +102,7 @@ export function masterPortalCards({
           <p className="text-muted-foreground">
             {t.intro[role](data.package.project, data.package.engineer)}
           </p>
+          <PackageTakeCharge token={linkKey} data={data} />
           <PublicPackageView token={linkKey} data={data} />
         </>
       ),
@@ -90,7 +110,9 @@ export function masterPortalCards({
     {
       id: "ps-thread",
       title: r.portal.thread,
-      state: "waiting",
+      state: toReply ? "todo" : "waiting",
+      action: toReply ? { label: r.portal.reply, due: null } : null,
+      lead: toReply,
       order: 2,
       workflow: "master",
       body: <EngineerThread token={linkKey} messages={thread} />,
@@ -107,9 +129,16 @@ export function masterPortalCards({
             : "waiting",
       action:
         taken && toDeposit ? { label: r.portal.deposit, due: null } : null,
+      lead: taken && toDeposit,
       order: 3,
       workflow: "master",
-      body: <PublicDeliveries token={linkKey} data={data} />,
+      body: (
+        <PublicDeliveries
+          token={linkKey}
+          data={data}
+          expects={(id) => expects(id)}
+        />
+      ),
     },
   ];
 }

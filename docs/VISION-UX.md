@@ -188,7 +188,9 @@ valent partout, dans l'app comme dans les protos.
     (`/m/…`, son dossier du master), la société de production (`/p/…`, son espace : devis, lieux
     proposés, avancement), le co-auteur (`/f/…`, sa fiche de renseignements). Leur page s'ouvre
     sur « Ce que PDS attend de vous ». Les vrais comptes prestataires viendront plus tard
-    (marketplace). *(Ibé 14/10, choix du MVP)*
+    (marketplace). *(Ibé 14/10, choix du MVP)* Comme dans l'app, **le geste du moment passe en
+    tête** (prendre en charge, déposer, répondre), encadré « À vous », les détails et les
+    échanges en dessous, et la page change avec l'avancement. *(Ibé, lot 6, 22/10)*
 11. **PO propose, l'humain décide.** Après un call, PO propose des actions tirées du compte rendu,
     **chacune avec la phrase qui la justifie** ; on les attribue ou on les décoche, puis on
     confirme, et elles arrivent chez chacun. PO ne valide, ne transmet, ne signe jamais, et

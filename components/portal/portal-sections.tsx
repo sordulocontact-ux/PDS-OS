@@ -23,6 +23,9 @@ export type PortalCardItem = {
   // not an action (its pill says « Invité »).
   invite?: boolean;
   badge?: string;
+  // The gesture of the moment, framed like a step's lead (lot 6 of Ibé's
+  // feedback): « À vous » in selection, the gesture first in its body.
+  lead?: boolean;
   body?: React.ReactNode;
 };
 
@@ -103,6 +106,7 @@ function Groups({ cards }: { cards: PortalCardItem[] }) {
       state={c.state}
       badge={c.badge}
       action={c.action}
+      lead={c.lead}
     >
       {c.body}
     </PortalCard>

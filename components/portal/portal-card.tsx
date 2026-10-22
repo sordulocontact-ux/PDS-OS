@@ -24,6 +24,7 @@ export function PortalCard({
   state,
   badge,
   action,
+  lead = false,
   className,
   children,
 }: {
@@ -33,11 +34,20 @@ export function PortalCard({
   // The pill's words when they are not the state's (« Invité »).
   badge?: string;
   action?: PortalAction | null;
+  // « À vous » framed like a step's lead (StepPanel `lead`).
+  lead?: boolean;
   className?: string;
   children?: React.ReactNode;
 }) {
   return (
-    <section id={id} className={cn(portalCardClass, className)}>
+    <section
+      id={id}
+      className={cn(
+        portalCardClass,
+        lead && state === "todo" && "border-[color:var(--selection-border)]",
+        className,
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <h2 className="text-display-sm font-medium text-balance">{title}</h2>
         <StatusBadge size="sm" tone={TONE[state]}>

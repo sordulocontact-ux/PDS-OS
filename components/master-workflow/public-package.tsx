@@ -4,6 +4,7 @@ import { PublicRefresh } from "@/components/master-workflow/public-refresh";
 import { PublicVersions } from "@/components/master-workflow/public-versions";
 import { Button } from "@/components/ui/button";
 import { FactList } from "@/components/ui/fact-list";
+import { Fold } from "@/components/ui/fold";
 import { sectionCardClass } from "@/components/ui/section-card";
 import { fr } from "@/lib/i18n/fr";
 import type { PublicPackage } from "@/lib/master-workflow/transmission-public";
@@ -15,8 +16,9 @@ type Open = Extract<PublicPackage, { state: "open" | "received" }>;
 /**
  * « Votre dossier », as the engineer opens it without an account: the
  * label's message, the files of each title (signed links, as long as the
- * link lives; « Nouvelle source le … » when the final vocals replaced it),
- * what is expected, then « Prendre en charge le dossier » with the rate.
+ * link lives; « Nouvelle source le … » when the final vocals replaced it)
+ * and what is expected. « Prendre en charge le dossier » comes before it
+ * (PackageTakeCharge, lot 6 of Ibé's feedback).
  */
 export function PublicPackageView({
   token,
@@ -120,22 +122,6 @@ export function PublicPackageView({
           ]}
         />
       </details>
-      {data.state === "received" && data.acknowledgedAt ? (
-        <p className="text-sm font-medium">
-          {fr.masterRound.take.taken(formatShortDate(data.acknowledgedAt))}
-        </p>
-      ) : (
-        <TakeChargeForm
-          token={token}
-          estimate={{
-            [pack.role]: data.estimate?.[pack.role] ?? null,
-            // The mix link of the engineer who masters too: both rates.
-            ...(pack.role === "mix" && data.estimate?.mastering != null
-              ? { mastering: data.estimate.mastering }
-              : {}),
-          }}
-        />
-      )}
       <p className="text-caption text-[color:var(--text-secondary)]">
         {t.expires(formatShortDate(data.expiresAt))}
       </p>
@@ -145,45 +131,94 @@ export function PublicPackageView({
 }
 
 /**
- * The versions the engineer delivered with what the label sent and
- * decided, then « Déposer votre version » for each title of the package.
+ * « Prendre en charge le dossier » with the rate, first on the engineer's
+ * page until it is done; then the day it was taken.
  */
-export function PublicDeliveries({
+export function PackageTakeCharge({
   token,
   data,
 }: {
   token: string;
   data: Open;
 }) {
+  const pack = data.package;
+  if (data.state === "received" && data.acknowledgedAt)
+    return (
+      <p className="text-sm font-medium">
+        {fr.masterRound.take.taken(formatShortDate(data.acknowledgedAt))}
+      </p>
+    );
+  return (
+    <TakeChargeForm
+      token={token}
+      estimate={{
+        [pack.role]: data.estimate?.[pack.role] ?? null,
+        // The mix link of the engineer who masters too: both rates.
+        ...(pack.role === "mix" && data.estimate?.mastering != null
+          ? { mastering: data.estimate.mastering }
+          : {}),
+      }}
+    />
+  );
+}
+
+/**
+ * « Déposer votre version » for each title still expected, first; then the
+ * versions the engineer delivered with what the label sent and decided,
+ * and the way back to the files of the package (lot 6 of Ibé's feedback).
+ */
+export function PublicDeliveries({
+  token,
+  data,
+  expects,
+}: {
+  token: string;
+  data: Open;
+  // The title waits for a version from the engineer (none yet, or changes
+  // asked): its drop zone shows.
+  expects: (masterId: string) => boolean;
+}) {
   const t = fr.masterWorkflow.publicPackage;
   const pack = data.package;
+  const deposit = (title: Open["package"]["titles"][number]) =>
+    title.masterId ? (
+      <div key={title.title} className="flex flex-col gap-2">
+        {pack.titles.length > 1 && <p className="font-medium">{title.title}</p>}
+        {data.deliveries
+          .filter((d) => d.masterId === title.masterId)
+          .map((d) => (
+            <p
+              key={`${d.fileName}-${d.sentAt}`}
+              className="text-sm text-[color:var(--text-secondary)]"
+            >
+              {t.deliver.sent(d.fileName, formatShortDate(d.sentAt))}
+            </p>
+          ))}
+        <DeliverVersion
+          token={token}
+          masterId={title.masterId}
+          role={pack.role}
+        />
+      </div>
+    ) : null;
+  const expected = pack.titles.filter((x) => x.masterId && expects(x.masterId));
+  const others = pack.titles.filter((x) => x.masterId && !expects(x.masterId));
   return (
     <div className="flex flex-col gap-5">
+      {expected.map(deposit)}
       <PublicVersions role={pack.role} versions={data.versions} />
-      {pack.titles.map((title) =>
-        title.masterId ? (
-          <div key={title.title} className="flex flex-col gap-2">
-            {pack.titles.length > 1 && (
-              <p className="font-medium">{title.title}</p>
-            )}
-            {data.deliveries
-              .filter((d) => d.masterId === title.masterId)
-              .map((d) => (
-                <p
-                  key={`${d.fileName}-${d.sentAt}`}
-                  className="text-sm text-[color:var(--text-secondary)]"
-                >
-                  {t.deliver.sent(d.fileName, formatShortDate(d.sentAt))}
-                </p>
-              ))}
-            <DeliverVersion
-              token={token}
-              masterId={title.masterId}
-              role={pack.role}
-            />
-          </div>
-        ) : null,
+      {/* Nothing asked: sending another version stays possible, folded. */}
+      {others.length > 0 && (
+        <Fold summary={fr.masterRound.portal.otherVersion}>
+          {others.map(deposit)}
+        </Fold>
       )}
+      <a
+        href="#ps-package"
+        className="self-start text-sm font-medium text-[color:var(--text-secondary)] underline-offset-4 hover:text-foreground hover:underline"
+      >
+        {fr.masterRound.portal.seePackage}
+      </a>
     </div>
   );
 }

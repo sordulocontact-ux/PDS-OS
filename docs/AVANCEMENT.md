@@ -731,3 +731,12 @@ propre circuit « Payé déclaré / vérifié »), non fusionnés ; envoi réel 
   et de « Prêt pour la sortie » mène à la facture (`#facture-<id>`). Justificatif vérifié : dans le
   bucket privé `project-invoices` à côté du PDF, lisible par la direction seule. Sans migration.
   Détail : `docs/ARCHITECTURE.md` § 8 ter bis. Reste : à rejouer dans un vrai navigateur.
+
+- [x] **Retours d'Ibé, lot 6 : page du prestataire externe** (retour 08, 22/10/2026, branche
+  `retours/lots-4-7`) : sur le lien privé de Karim (`/m/[token]`, et ses cartes sur `/c`), le geste
+  du moment est « À vous », encadré comme l'action en tête du lot 4, et vient en premier dans sa
+  carte : prendre en charge (avant le message, les fichiers et le Brief), déposer la version
+  attendue (avant les versions envoyées ; un dépôt non demandé reste possible, replié), répondre
+  au label quand il a écrit en dernier. Les fichiers et le Brief restent à un clic (« Revoir le
+  dossier »). Sans migration. Détail : `docs/ARCHITECTURE.md` § 8 septies, « La page suit
+  l'avancement ». Reste : à rejouer dans un vrai navigateur.

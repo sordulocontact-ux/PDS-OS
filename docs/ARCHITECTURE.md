@@ -4137,6 +4137,16 @@ lots, chacun utile seul.
     reçu, sinon « remplacé » ou « expiré » ; « J'ai bien reçu le dossier »
     (`acknowledge_master_transmission`, une seule fois) **notifie l'expéditeur**
     (notification `master_transmission_received`, lien vers l'étape Mix).
+  - **La page suit l'avancement** (lot 6 des retours d'Ibé, 22/10/2026, `masterPortalCards`) : le
+    geste du moment est la carte « À vous », encadrée comme le `lead` d'une étape
+    (`PortalCardItem.lead`, bordure de sélection) et **en tête de sa carte** : « Prendre en charge
+    le dossier » (`PackageTakeCharge`) avant le message, les fichiers et le Brief ; puis « Déposer
+    votre version » pour chaque titre qui en attend une (aucune, ou modification demandée) avant
+    « Vos versions » et le lien « Revoir le dossier : fichiers et Brief » (`#ps-package`, la carte
+    du dossier étant passée dans « Fait ») ; un dépôt que personne n'attend reste possible, replié
+    (« Envoyer une autre version »). « Échanges avec le label » passe « À vous · Répondre au
+    label » quand le label a écrit en dernier, sauf pour répondre à une question ou un signal de
+    l'ingénieur (règle du code, pas un statut stocké). Même cartes sur la page de la personne `/c`.
   - **Suivi** (`TransmissionHistory`) : un envoi par ligne, état **calculé par le code**
     (`transmissionState`) : reçu, en attente, **sans réponse depuis 3 jours → à relancer**
     (`REMIND_AFTER_DAYS`, décision du 05/10/2026 : le ticket ne fixe pas de délai, trois
