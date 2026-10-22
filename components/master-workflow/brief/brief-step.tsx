@@ -35,8 +35,8 @@ const sectionTitle =
  * or the question to the creative director, then the Brief as a document —
  * its state, what is missing, each fact with its source, changed in place —
  * and « Enregistrer le Brief ». For the person asked a question, the
- * question goes first (BriefLead) and the rest folds under « Le Brief en
- * cours » (lot 4 of Ibé's feedback).
+ * question goes first (QuestionList, the step's lead) and the rest folds
+ * under « Le Brief en cours » (lot 4 of Ibé's feedback).
  */
 export function BriefStep({
   step,

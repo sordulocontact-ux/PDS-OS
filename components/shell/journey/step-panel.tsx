@@ -129,7 +129,9 @@ export function StepPanel({
             {banner}
             <section
               id={LEAD_ANCHOR}
-              aria-labelledby="journey-step-lead"
+              {...(step.actor?.viewer
+                ? { "aria-labelledby": "journey-step-lead" }
+                : { "aria-label": t.now.mine })}
               className="flex scroll-mt-24 flex-col gap-3.5 rounded-xl border border-[color:var(--selection-border)] bg-[color:var(--selection-bg)] p-4"
             >
               <div className="flex flex-wrap items-center gap-2">
