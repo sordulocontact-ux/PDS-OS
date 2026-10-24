@@ -130,6 +130,7 @@ export function expectedOf(row: BoardRow): Expected | null {
         case "processing":
           return outside(fr.legalDemarches.sacemOrg, t.sacemAnswer, false);
         case "action_required":
+        case "rejected":
           return owner(t.correct);
         default:
           return owner(t.bulletin);

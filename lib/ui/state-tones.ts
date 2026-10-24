@@ -531,6 +531,7 @@ export const formalityTone: Record<string, Tone> = {
   processing: "info",
   completed: "success",
   action_required: "warning",
+  rejected: "danger",
 };
 
 /** A contract template: to validate, in use, retired. */

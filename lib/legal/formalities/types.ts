@@ -14,6 +14,11 @@ export type FormalityView = {
   completionProof: string | null;
   completedAt: string | null;
   externalId: string | null;
+  // JUR-03: the proofs as files, « Voir la preuve » (one hour).
+  submissionFileUrl: string | null;
+  completionFileUrl: string | null;
+  rejectedAt: string | null;
+  rejectionReason: string | null;
   values: Record<
     string,
     { value: unknown; source: string; status: "validated" | "to_verify" }

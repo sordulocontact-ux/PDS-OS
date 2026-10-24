@@ -18,6 +18,8 @@ export const FORMALITY_STATUSES = [
   "processing",
   "completed",
   "action_required",
+  // Recette Juridique V1, JUR-03 (20261024000501).
+  "rejected",
 ] as const;
 export type FormalityStatus = (typeof FORMALITY_STATUSES)[number];
 

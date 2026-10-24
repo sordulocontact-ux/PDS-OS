@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FormMessage } from "@/components/auth/form-message";
 import { useLegalAction } from "@/components/legal/use-legal-action";
 import { Button } from "@/components/ui/button";
+import { ToneCallout } from "@/components/ui/tone-callout";
 import { downloadPdf } from "@/components/ui/pdf-export-button";
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
@@ -136,8 +137,17 @@ export function DossierForm({
   const save = () =>
     saveFormalityValues(projectId, title.masterId, f.id, entries);
 
+  // JUR-03: a change after generation makes a new version; the signatures
+  // already given stop counting.
+  const generated = ["document_ready", "signatures_pending", "ready_to_submit"];
+  // The signatures read are the current version's.
+  const signed = f.signatures.filter((x) => x.status === "signed").length;
+
   return (
     <div ref={root} className="flex flex-col gap-3.5">
+      {generated.includes(f.status) && (
+        <ToneCallout tone="warning">{t.page.editWarning(signed)}</ToneCallout>
+      )}
       {FORMALITY_SECTIONS.map((section) => (
         <DossierSection
           key={section}

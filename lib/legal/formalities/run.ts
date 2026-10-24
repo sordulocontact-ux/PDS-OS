@@ -28,6 +28,8 @@ function errorOf(error: DbError) {
         .join(", "),
     );
   if (m.includes("formality_proof_required")) return t.proof;
+  if (m.includes("formality_proof_file_required")) return t.proofFile;
+  if (m.includes("formality_external_id_required")) return t.externalId;
   if (
     m.includes("formality_reason_required") ||
     m.includes("formality_correction_invalid")

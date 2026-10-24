@@ -7105,6 +7105,7 @@ export type Database = {
       legal_formalities: {
         Row: {
           completed_at: string | null
+          completion_file: string | null
           completion_proof: string | null
           created_at: string
           created_by: string | null
@@ -7116,15 +7117,19 @@ export type Database = {
           organization_id: string
           partial_reason: string | null
           project_id: string
+          rejected_at: string | null
+          rejection_reason: string | null
           reopened: string[]
           responsible_person_id: string | null
           status: string
+          submission_file: string | null
           submission_proof: string | null
           submitted_at: string | null
           updated_at: string
         }
         Insert: {
           completed_at?: string | null
+          completion_file?: string | null
           completion_proof?: string | null
           created_at?: string
           created_by?: string | null
@@ -7136,15 +7141,19 @@ export type Database = {
           organization_id: string
           partial_reason?: string | null
           project_id: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
           reopened?: string[]
           responsible_person_id?: string | null
           status?: string
+          submission_file?: string | null
           submission_proof?: string | null
           submitted_at?: string | null
           updated_at?: string
         }
         Update: {
           completed_at?: string | null
+          completion_file?: string | null
           completion_proof?: string | null
           created_at?: string
           created_by?: string | null
@@ -7156,9 +7165,12 @@ export type Database = {
           organization_id?: string
           partial_reason?: string | null
           project_id?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
           reopened?: string[]
           responsible_person_id?: string | null
           status?: string
+          submission_file?: string | null
           submission_proof?: string | null
           submitted_at?: string | null
           updated_at?: string
@@ -18356,6 +18368,7 @@ export type Database = {
       complete_formality: {
         Args: {
           p_external_id: string | null
+          p_file?: string
           p_formality_id: string
           p_iswc: string | null
           p_proof: string
@@ -19633,7 +19646,15 @@ export type Database = {
         Returns: undefined
       }
       submit_formality: {
-        Args: { p_formality_id: string; p_proof: string }
+        Args: { p_file?: string; p_formality_id: string; p_proof: string }
+        Returns: undefined
+      }
+      reject_formality: {
+        Args: { p_formality_id: string; p_reason: string }
+        Returns: undefined
+      }
+      restart_formality: {
+        Args: { p_formality_id: string }
         Returns: undefined
       }
       submit_legal_form:

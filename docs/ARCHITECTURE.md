@@ -2859,6 +2859,23 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     règle « jamais déduite » du ticket 06. `formality_missing` (renommée
     `formality_missing_base` et enveloppée) ajoute `first_exploitation` et `dep_dr_check`.
     Plus de frise ni de liste « Il manque » en tête ; brouillon « BROUILLON — ne pas signer ».
+  - *Lot 6b, dépôt et réponse de la SACEM* (JUR-03, JUR-10, migration
+    `20261024000501_sacem_outcomes`, test `legal-formalities`) : les preuves sont des **PDF**
+    déposés par l'équipe dans le bucket privé `formality-signatures`, sous
+    `<org>/proofs/<formalité>/<uuid>.pdf` (`openFormalityProof` donne le chemin, le navigateur
+    envoie avec la session, politiques `formality_proofs_objects_*` via
+    `formality_proof_allowed`) ; `submit_formality` exige l'accusé de dépôt
+    (`formality_proof_file_required`), `complete_formality` la preuve de l'enregistrement **et**
+    l'identifiant SACEM de l'œuvre (`formality_external_id_required`) : jamais « Enregistrée »
+    sans eux. Réponse « Rejetée » (`reject_formality`, motif, statut `rejected`, déclaration du
+    titre `rejected`) puis « Préparer une nouvelle déclaration » (`restart_formality`, valeurs
+    gardées, historique intact). Écran : « Enregistrer le dépôt » (`DepositForm`) et
+    « Enregistrer la réponse de la SACEM » (`SacemAnswerForm` : Enregistrée / À corriger /
+    Rejetée) en modale, « Voir l'accusé de dépôt » / « Voir la preuve de l'enregistrement » ;
+    modifier le bulletin généré avertit que les signatures recueillies ne vaudront plus (une
+    nouvelle version est signée de nouveau, déjà en base). Reste : la signature de PDS Éditions
+    par la direction dans l'app (le bulletin ne sait pas encore quelle ligne d'éditeur est la
+    maison).
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un

@@ -70,7 +70,7 @@ export async function loadFormalities(
     supabase
       .from("legal_formalities")
       .select(
-        "id, master_id, status, reopened, partial_reason, submission_proof, submitted_at, completion_proof, completed_at, external_id",
+        "id, master_id, status, reopened, partial_reason, submission_proof, submitted_at, completion_proof, completed_at, external_id, submission_file, completion_file, rejected_at, rejection_reason",
       )
       .eq("project_id", project.id)
       .eq("definition_key", SACEM_725),
@@ -165,9 +165,17 @@ export async function loadFormalities(
     ]);
   const linked = new Set((links.data ?? []).map((l) => l.contact_id));
   // The signed bulletins deposited by a link: « Voir le PDF », one hour.
-  const filed = (signatures.data ?? []).flatMap((s) =>
-    s.file_path ? [{ id: s.id, path: s.file_path }] : [],
-  );
+  // With the proofs of deposit and registration (JUR-03), by their path.
+  const filed = [
+    ...(signatures.data ?? []).flatMap((s) =>
+      s.file_path ? [{ id: s.id, path: s.file_path }] : [],
+    ),
+    ...(formalities.data ?? []).flatMap((f) =>
+      [f.submission_file, f.completion_file].flatMap((path) =>
+        path ? [{ id: path, path }] : [],
+      ),
+    ),
+  ];
   const urlOf = new Map<string, string>();
   if (filed.length > 0) {
     const { data } = await supabase.storage
@@ -242,6 +250,14 @@ export async function loadFormalities(
           completionProof: f.completion_proof,
           completedAt: f.completed_at,
           externalId: f.external_id,
+          submissionFileUrl: f.submission_file
+            ? (urlOf.get(f.submission_file) ?? null)
+            : null,
+          completionFileUrl: f.completion_file
+            ? (urlOf.get(f.completion_file) ?? null)
+            : null,
+          rejectedAt: f.rejected_at,
+          rejectionReason: f.rejection_reason,
           values: Object.fromEntries(
             (values.data ?? [])
               .filter((v) => v.formality_id === f.id)

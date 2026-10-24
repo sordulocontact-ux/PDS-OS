@@ -3,7 +3,7 @@
 -- `supabase test db`. Fixture of the ticket (« Piégée », test data only: the
 -- shares, signatures, deposit, registration and ISWC here are SIMULATED).
 begin;
-select plan(25);
+select plan(30);
 
 -- Fixtures ------------------------------------------------------------------
 create function pg_temp.new_user(p_email text) returns uuid language plpgsql as $$
@@ -146,6 +146,17 @@ select pg_temp.act_as(pg_temp.id_of('manager'));
 select public.save_formality_values(pg_temp.id_of('f'), '{}'::jsonb);
 select is(pg_temp.status(), 'ready_to_generate', 'ready once everything is there');
 
+-- JUR-03 (…20261024000501): the proofs are files the team deposits in the formality's folder.
+reset role;
+insert into storage.objects (bucket_id, name)
+values ('formality-signatures', pg_temp.id_of('org') || '/proofs/' || pg_temp.id_of('f')
+                                || '/11111111-1111-1111-1111-111111111111.pdf');
+create function pg_temp.proof() returns text language sql as $$
+  select pg_temp.id_of('org') || '/proofs/' || pg_temp.id_of('f') || '/11111111-1111-1111-1111-111111111111.pdf'
+$$;
+grant execute on function pg_temp.proof() to authenticated;
+select pg_temp.act_as(pg_temp.id_of('manager'));
+
 -- Document, signatures, deposit ----------------------------------------------------
 select is(public.generate_formality_document(pg_temp.id_of('f')), 1, 'version 1 of the bulletin');
 select is((select count(*)::int from public.legal_formality_signatures where formality_id = pg_temp.id_of('f')), 3,
@@ -157,8 +168,19 @@ select throws_ok(format($$ select public.record_formality_signature((select id f
 select public.record_formality_signature(id, 'Bulletin signé reçu (SIMULÉ)')
   from public.legal_formality_signatures where formality_id = pg_temp.id_of('f');
 select is(pg_temp.status(), 'ready_to_submit', 'all signed: ready to submit');
-select public.submit_formality(pg_temp.id_of('f'), 'Envoyé par courrier le 05/10 (SIMULÉ)');
+select throws_ok(format($$ select public.submit_formality(%L, 'Envoyé', null) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_proof_file_required', 'a deposit is recorded with its receipt, a file');
+select public.submit_formality(pg_temp.id_of('f'), 'Envoyé par courrier le 05/10 (SIMULÉ)', pg_temp.proof());
 select is(pg_temp.status(), 'submitted', 'submitted is not registered');
+-- « Rejetée » by the SACEM, then a new declaration, history kept (rolled back after).
+savepoint rejected;
+select throws_ok(format($$ select public.reject_formality(%L, null) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_reason_required', 'a rejection says why');
+select public.reject_formality(pg_temp.id_of('f'), 'Œuvre déjà déclarée (SIMULÉ)');
+select is(pg_temp.status(), 'rejected', 'REJECTED, with its reason');
+select public.restart_formality(pg_temp.id_of('f'));
+select is(pg_temp.status(), 'ready_to_generate', 'a new declaration starts from the dossier kept');
+rollback to savepoint rejected;
 select is((select status from public.master_declarations where master_id = pg_temp.id_of('master') and organism = 'sacem'),
           'submitted', 'the title''s SACEM declaration reads submitted');
 
@@ -180,11 +202,13 @@ select is((select count(*)::int from public.legal_formality_signatures
 select throws_ok(format($$ select public.declare_formality_partial(%L, null) $$, pg_temp.id_of('f')),
                  'P0001', 'formality_reason_required', 'a partial declaration says why');
 select public.declare_formality_partial(pg_temp.id_of('f'), 'Le J injoignable (SIMULÉ)');
-select public.submit_formality(pg_temp.id_of('f'), 'Renvoyé le 20/10 (SIMULÉ)');
+select public.submit_formality(pg_temp.id_of('f'), 'Renvoyé le 20/10 (SIMULÉ)', pg_temp.proof());
 select public.mark_formality_processing(pg_temp.id_of('f'));
 select throws_ok(format($$ select public.complete_formality(%L, null, null, null) $$, pg_temp.id_of('f')),
-                 'P0001', 'formality_proof_required', 'COMPLETED needs the proof of the result');
-select public.complete_formality(pg_temp.id_of('f'), 'Avis d''enregistrement SACEM (SIMULÉ)', 'W-123', 'T1234567890');
+                 'P0001', 'formality_proof_file_required', 'COMPLETED needs the proof of the result, a file');
+select throws_ok(format($$ select public.complete_formality(%L, null, null, null, pg_temp.proof()) $$, pg_temp.id_of('f')),
+                 'P0001', 'formality_external_id_required', 'and the work''s SACEM identifier');
+select public.complete_formality(pg_temp.id_of('f'), 'Avis d''enregistrement SACEM (SIMULÉ)', 'W-123', 'T1234567890', pg_temp.proof());
 select is((select iswc from public.masters where id = pg_temp.id_of('master')), 'T1234567890',
           'the ISWC received is carried to the title');
 reset role;

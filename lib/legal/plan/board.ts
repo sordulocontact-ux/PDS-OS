@@ -354,6 +354,8 @@ function formalityVerb(title: TitleFormality) {
     case "ready_to_submit":
       return v.file;
     case "action_required":
+    // Rejected: a new declaration to prepare (JUR-03).
+    case "rejected":
       return v.correct;
     default:
       return v.open;

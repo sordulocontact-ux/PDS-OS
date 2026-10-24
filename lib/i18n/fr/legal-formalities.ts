@@ -33,7 +33,10 @@ export const legalFormalities = {
     correction:
       "Correction demandée : les champs concernés sont rouverts dans le dossier.",
     complete:
-      "Résultat enregistré : la déclaration est terminée et reste dans l'Historique du dossier.",
+      "Enregistrée par la SACEM : la déclaration est terminée et reste dans l'Historique du dossier.",
+    reject: "Rejet enregistré : préparez une nouvelle déclaration.",
+    restart:
+      "Nouvelle déclaration : le dossier est rouvert, l'historique reste.",
   },
   statuses: {
     none: "Pas encore ouverte",
@@ -46,6 +49,7 @@ export const legalFormalities = {
     processing: "En traitement",
     completed: "Enregistrée",
     action_required: "Correction demandée",
+    rejected: "Rejetée",
   } as Record<string, string>,
   genrePlaceholder: "Choisir un genre",
   // JUR-02: the bulletin in five numbered sections.
@@ -297,7 +301,36 @@ export const legalFormalities = {
     partialReason: "Pourquoi certaines signatures manquent",
     partialDone: (reason: string) => `Déclaration partielle : ${reason}`,
     submit: "Enregistrer le dépôt",
-    submitProof: "Preuve du dépôt (envoi, date, référence)",
+    submitBody:
+      "Déposez la version signée sur l'espace SACEM, puis gardez ici l'accusé de dépôt. Déposé ne veut pas dire enregistré : la SACEM répondra.",
+    submitFile: "Accusé de dépôt (PDF)",
+    submitProof: "Note (facultatif : date, référence)",
+    proofHint: "Un PDF de 20 Mo au plus.",
+    proofChosen: (name: string) => `Fichier choisi : ${name}`,
+    proofMissing: "Joignez le PDF : c'est la preuve.",
+    viewDeposit: "Voir l'accusé de dépôt",
+    viewRegistration: "Voir la preuve de l'enregistrement",
+    // JUR-03: the SACEM's answer, one of three, each with its proof.
+    answer: "Enregistrer la réponse de la SACEM",
+    answerBody:
+      "Pas d'« enregistrée » sans la preuve de la SACEM : c'est elle qui fait foi.",
+    outcome: "Réponse",
+    outcomes: {
+      registered: "Enregistrée",
+      fix: "À corriger",
+      rejected: "Rejetée",
+    },
+    completeFile:
+      "Preuve de l'enregistrement (e-mail ou relevé de la SACEM, en PDF)",
+    externalIdMissing: "L'identifiant SACEM de l'œuvre est obligatoire.",
+    rejectReason: "Motif du rejet",
+    rejected: (date: string, reason: string) =>
+      `Rejetée par la SACEM le ${date} : « ${reason} »`,
+    restart: "Préparer une nouvelle déclaration",
+    editWarning: (n: number) =>
+      n > 0
+        ? `Modifier le bulletin : les ${n} signature${n > 1 ? "s" : ""} déjà recueillie${n > 1 ? "s" : ""} ne vaudront plus, une nouvelle version sera générée et chacun la signera à nouveau.`
+        : "Modifier le bulletin : une nouvelle version sera générée, et chacun la signera.",
     processing: "Marquer en traitement",
     correction: "Correction demandée",
     correctionFields: "Champs à corriger",
@@ -305,7 +338,7 @@ export const legalFormalities = {
     reopened: (fields: string) => `Rouverts par la correction : ${fields}`,
     complete: "Enregistrer le résultat",
     completeProof: "Preuve de l'enregistrement",
-    externalId: "Identifiant SACEM",
+    externalId: "Identifiant SACEM de l'œuvre",
     iswc: "ISWC reçu",
     completed: (date: string) => `Enregistrée le ${date}`,
     history: "Historique",
@@ -323,11 +356,15 @@ export const legalFormalities = {
     "formality.processing": "En traitement",
     "formality.action_required": "Correction demandée",
     "formality.completed": "Enregistrement confirmé",
+    "formality.rejected": "Rejetée par la SACEM",
+    "formality.restarted": "Nouvelle déclaration préparée",
     "contract.signed": "Contrat d'édition signé",
   } as Record<string, string>,
   errors: {
     missing: (items: string) => `Il manque : ${items}.`,
     proof: "Joignez la preuve.",
+    proofFile: "Joignez la preuve en PDF.",
+    externalId: "L'identifiant SACEM de l'œuvre est obligatoire.",
     reason: "Dites pourquoi.",
     notReady: "Le dossier n'est pas prêt pour cette étape.",
     iswc: "L'ISWC s'écrit T suivi de 10 chiffres.",
