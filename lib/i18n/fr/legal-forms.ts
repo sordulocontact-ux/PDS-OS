@@ -204,6 +204,13 @@ export const legalForms = {
     revoked: "Accès révoqué",
     revokedWhy: (reason: string) => `Accès révoqué : « ${reason} »`,
     remind: "Relancer",
+    // The private link's card (Figma PDS OS, node 229:2257).
+    linkOf: (name: string) => `Lien privé de ${name}`,
+    linkState: {
+      opened: "Ouvert",
+      sent: "Envoyé",
+      unsent: "Pas encore envoyé",
+    },
     linkMeta: (parts: string[]) => `Lien privé · ${parts.join(" · ")}`,
     validUntil: (day: string) => `valable jusqu'au ${day}`,
     createdOn: (at: string) => `créé le ${at}`,

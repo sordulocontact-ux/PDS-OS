@@ -1,6 +1,7 @@
 import { ToneCallout } from "@/components/ui/tone-callout";
 import { fr } from "@/lib/i18n/fr";
 import type { Demarche } from "@/lib/legal/demarches/build";
+import { StepSection } from "@/components/shell/journey/step-section";
 
 const t = fr.legalDemarches.proposed;
 
@@ -16,10 +17,7 @@ export function ProposedDemarche({ demarche }: { demarche: Demarche }) {
   return (
     <div className="flex flex-col gap-3.5">
       <ToneCallout tone="info">{t.note}</ToneCallout>
-      <section className="flex flex-col gap-2" aria-label={t.comes}>
-        <h3 className="text-[length:var(--type-body-sm)] font-semibold text-[color:var(--text-secondary)]">
-          {t.comes}
-        </h3>
+      <StepSection title={t.comes}>
         <ol className="flex flex-col gap-1.5 text-[length:var(--type-body-sm)] leading-[var(--type-body-sm-lh)]">
           {gestures.map(([by, label], index) => (
             <li key={label} className="flex flex-wrap gap-x-2">
@@ -32,7 +30,7 @@ export function ProposedDemarche({ demarche }: { demarche: Demarche }) {
             </li>
           ))}
         </ol>
-      </section>
+      </StepSection>
     </div>
   );
 }

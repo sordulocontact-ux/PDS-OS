@@ -2783,6 +2783,16 @@ Workflow spécialisé du projet, mené en parallèle des 7 étapes (`docs/CONTEX
 Parcours interne : État des lieux → Cadrage juridique → Confirmation → Plan d'action → Suivi
 (`lib/ui/legal-steps.ts`). Les tickets Juridique 01 à 08 du 30/09 sont livrés par lots.
 
+- **Recette Juridique V1 d'Ibé (21/10/2026, JUR-01 à JUR-12, numérotation propre à cette
+  recette ; proto `docs/protos/juridique-v3.html`)**, branche `retours/juridique-v1`, par lots :
+  - *Lot 1, transverse* : sections d'étape (`StepSection`, règle `docs/DESIGN.md` « Sections
+    d'une étape ») ; carte « Lien privé » d'après la maquette Figma (`PrivateLinkCard`, sans
+    ligne de dates) ; « À vous » (JUR-08) : `legalJourney` donne à tout geste du lecteur un
+    lien vers l'encadré de son étape (`leadHref`), et `LegalStepFrame` met le contenu de
+    l'étape dans le `lead` de `StepPanel` quand l'étape attend le lecteur ; JUR-04 :
+    `legalOutcome` (`lib/legal/outcome.ts`, `withOutcome` + `openNext`) et `useLegalAction`
+    qui publie le bandeau de résultat, branchés geste par geste dans les lots suivants.
+
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un
   distributeur, un photographe, un réalisateur… ajouté au dossier depuis le Réseau (jamais un

@@ -19,6 +19,7 @@ import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
 import type { Confirmation } from "@/lib/legal/confirmation/queries";
 import { formatInstant } from "@/lib/utils/instant";
+import { StepSection } from "@/components/shell/journey/step-section";
 
 /** Where the dossier stands, said once at the top of the État des lieux:
  * confirmed (by whom, when, and the way to the plan), or reopened by a
@@ -79,15 +80,12 @@ export function ConfirmationPanel({
       collapsible={confirmed}
       defaultOpen={!confirmed}
     >
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-3.5">
         {c.sections.map((section) => (
-          <section key={section.key} className="flex flex-col gap-2">
-            <div className="flex flex-col gap-0.5">
-              <h3 className="font-medium">{t.sections[section.key].title}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t.sections[section.key].description}
-              </p>
-            </div>
+          <StepSection key={section.key} title={t.sections[section.key].title}>
+            <p className="text-sm text-muted-foreground">
+              {t.sections[section.key].description}
+            </p>
             {section.facts.length === 0 ? (
               <EmptyNote>{t.empty}</EmptyNote>
             ) : (
@@ -96,13 +94,12 @@ export function ConfirmationPanel({
                 renderAction={(action) => <SynthesisAction action={action} />}
               />
             )}
-          </section>
+          </StepSection>
         ))}
         {!confirmed && (
           <div className="flex flex-col gap-3">
             {/* What confirming creates, said before (JUR-06). */}
-            <section className="flex flex-col gap-1 rounded-xl border p-4">
-              <h3 className="font-medium">{t.preview.title}</h3>
+            <StepSection title={t.preview.title}>
               {planPreview.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   {t.preview.empty}
@@ -121,7 +118,7 @@ export function ConfirmationPanel({
                 </ul>
               )}
               <p className="text-sm text-muted-foreground">{t.preview.then}</p>
-            </section>
+            </StepSection>
             <div className="flex flex-col items-end gap-3">
               <p className="text-sm text-muted-foreground">{t.notice}</p>
               <ConfirmButton projectId={projectId} />

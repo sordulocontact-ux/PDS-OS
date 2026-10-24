@@ -67,6 +67,18 @@ Le trait est fixé à 2 dans la grille de 24 : il s'affine avec la taille (1,33 
 Les icônes sont en `currentColor` : elles prennent la couleur du texte qui les porte.
 Jamais de couleur en dur sur une icône ; changer la couleur du parent.
 
+### Rangée de boutons
+
+Quand **trois boutons ou plus** se suivent dans une rangée **dense** (beaucoup d'information,
+peu de place), ce sont des **boutons-icônes seuls**, sans texte : icône `size-5`,
+`aria-label` et infobulle avec le libellé. Ailleurs (place disponible, action principale),
+les boutons gardent leur libellé, sans icône. Décision de Sacha, 24/10/2026.
+
+**Lien privé** (maquette Figma PDS OS, node `229:2257`) : en-tête = icône lien, « Lien privé
+de … », pastille d'état ; dessous, l'URL dans une pastille avec son bouton-icône « Copier »
+(icône copy), puis « Relancer », « Nouveau lien », « Révoquer l'accès » en texte. Ni
+sous-titre ni ligne de dates : seuls « Révoqué le … » ou « Expiré le … » s'affichent.
+
 ### Accessibilité
 
 Le composant Nucleo n'ajoute pas `aria-hidden` tout seul :
@@ -506,6 +518,13 @@ saisie : `--destructive` reste à l'encre pour les actions définitives (décisi
 Un champ redevient normal dès qu'il est corrigé. Le bouton n'est jamais désactivé pour
 cause de champs manquants.
 
+### Sections d'une étape
+
+Dans une étape ouverte, chaque section a un titre à l'encre (`StepSection`, 18 px, semibold),
+jamais un intertitre gris : il passe au-dessus des libellés de champs et des valeurs qu'il
+introduit. 28 px séparent deux sections, 8 px séparent un titre de son contenu, et une
+explication reste collée à la liste qu'elle commente (proto Juridique v3, Sacha, 24/10/2026).
+
 ### Boutons, pastilles, encarts, toast, dates (décisions C0 du 18/10/2026)
 
 D'après le proto « Projet complet » (`docs/protos/projet.html`), qui fait foi :
@@ -599,6 +618,12 @@ n'a plus de variante. Toute nouvelle modale passe par `Dialog` / `FormDialog` /
   est clair en clair et sombre en sombre, ce qui est posé dedans lit les tokens de la page.
   Elle ne garde que les rares ajustements d'un panneau translucide (une liste déroulante
   posée dessus, `--popover`, reste opaque). Un nouveau token n'a donc rien à y déclarer.
+- **Un geste qui demande une saisie ouvre une modale** (`FormDialog` / `ConfirmDialog`,
+  décision de Sacha du 24/10/2026) : révoquer un accès (motif), accorder une dérogation,
+  changer un responsable, noter une signature reçue autrement, contester… Jamais un champ
+  ou un formulaire qui s'ouvre dans une carte ou une ligne : il change la taille de la carte
+  et la page saute. Un geste sans saisie (« Nouveau lien », « Relancer ») reste un bouton
+  direct. Le bouton principal de la modale reprend le verbe (« Révoquer l'accès »).
 - Hors périmètre : les panneaux latéraux (`Sheet`), les menus et listes déroulantes en
   portail (`Select`, `DropdownMenu`, `Popover`, `Tooltip`).
 - **Entrée** : opacité et `scale(.97 → 1)` en `--duration-base` (180 ms) `--ease-out`, le flou

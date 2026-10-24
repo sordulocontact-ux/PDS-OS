@@ -8,6 +8,7 @@ import type {
   IntakeQuestion,
   NotAskedQuestion,
 } from "@/lib/legal/intake/types";
+import { StepSection } from "@/components/shell/journey/step-section";
 
 /**
  * Under « Question de PO », every question at a glance (proto « Projet
@@ -38,21 +39,14 @@ export function IntakeAnswers({
   return (
     <div className="flex flex-col gap-4">
       {questions.length > 0 && (
-        <section
-          aria-labelledby="legal-answers"
-          className="flex flex-col gap-2"
-        >
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3
-              id="legal-answers"
-              className="text-[length:var(--type-body-sm)] font-semibold"
-            >
-              {t.answers}
-            </h3>
+        <StepSection
+          title={t.answers}
+          aside={
             <span className="text-[length:var(--type-micro)] text-[color:var(--text-secondary)] tabular-nums">
               {t.answersOf(answered, questions.length)}
             </span>
-          </div>
+          }
+        >
           <ul className="flex flex-col divide-y divide-[color:var(--border-hairline)] rounded-xl border border-[color:var(--border-hairline)]">
             {questions.map((q) => {
               const key = keyOf(q);
@@ -108,7 +102,7 @@ export function IntakeAnswers({
               );
             })}
           </ul>
-        </section>
+        </StepSection>
       )}
       {notAsked.length > 0 && (
         <details className="group rounded-xl border border-[color:var(--border-hairline)] px-3.5 py-2.5">

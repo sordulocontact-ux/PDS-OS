@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { useShowSplitLinks } from "@/components/legal/splits/split-actions";
 import { PrivateLinkCard } from "@/components/legal/private-link-card";
+import { StepSection } from "@/components/shell/journey/step-section";
 import { fr } from "@/lib/i18n/fr";
 import { newSplitLink } from "@/lib/legal/splits/actions";
 import {
@@ -13,10 +14,8 @@ import {
   revokeSplitLink,
 } from "@/lib/legal/splits/link-actions";
 import type { SplitLine } from "@/lib/legal/splits/queries";
-import { formatDay, formatShortInstant } from "@/lib/utils/day";
 import { mailtoHref } from "@/lib/utils/mailto";
 
-const t = fr.legalForms.page;
 const s = fr.legalDocuments.split;
 
 /**
@@ -49,35 +48,19 @@ export function SplitLinks({
     });
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex flex-col gap-0.5">
-        <h3 className="font-semibold">{s.confirmations}</h3>
-        <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
-          {s.confirmationsBody}
-        </p>
-      </div>
+    <StepSection title={s.confirmations}>
+      <p className="text-[length:var(--type-body-sm)] text-[color:var(--text-secondary)]">
+        {s.confirmationsBody}
+      </p>
       <ul className="flex flex-col gap-3">
         {waiting.map((line) => {
           const link = line.confirmation.link!;
-          const meta = [
-            t.validUntil(formatDay(link.expiresAt)),
-            t.createdOn(formatShortInstant(link.createdAt)),
-            link.sentAt
-              ? t.sentBy(link.sentBy, formatShortInstant(link.sentAt))
-              : null,
-          ].filter((part): part is string => Boolean(part));
           return (
             <li key={line.id} className="flex flex-col gap-1.5">
-              <span className="font-medium">
-                {line.name}
-                <span className="font-normal text-[color:var(--text-secondary)]">
-                  {" "}
-                  · {fr.legalSplits.roles[line.role]}
-                </span>
-              </span>
               <PrivateLinkCard
+                name={`${line.name} · ${fr.legalSplits.roles[line.role]}`}
+                state={link.sentAt ? "sent" : "unsent"}
                 url={link.url}
-                meta={meta}
                 remindHref={
                   link.url && link.sentAt
                     ? mailtoHref(
@@ -123,6 +106,6 @@ export function SplitLinks({
           );
         })}
       </ul>
-    </section>
+    </StepSection>
   );
 }

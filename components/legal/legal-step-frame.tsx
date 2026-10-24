@@ -40,6 +40,13 @@ export async function LegalStepFrame({
   ]);
   const step = steps.find((s) => s.key === stepKey);
   if (!step) return null;
+  // The viewer's gesture comes first (« À vous », JUR-08): the step's content
+  // is its lead, the grid folded under it (StepPanel), unless the page gives
+  // its own lead.
+  const asLead =
+    slots.lead === undefined &&
+    Boolean(step.actor?.viewer) &&
+    !isLocked(step.status);
   // Blockers and noted information of the step (sub-lot C6).
   const stepRef: StepRef = { projectId, module: "legal", stepKey };
   const choices = steps.map((s) => ({
@@ -76,9 +83,10 @@ export async function LegalStepFrame({
           rootPrereq={fr.legalJourney.rootPrereq}
           blockedLabel={fr.legalJourney.blocked}
           {...slots}
+          {...(asLead && { lead: children })}
         >
           <StepBlockers stepRef={stepRef} steps={choices} />
-          {children}
+          {!asLead && children}
           <StepToolsBlock
             stepRef={stepRef}
             steps={choices}

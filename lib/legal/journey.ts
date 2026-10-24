@@ -9,7 +9,11 @@
 
 import { routes } from "@/lib/auth/redirects";
 import { fr } from "@/lib/i18n/fr";
-import type { JourneyPerson, JourneyStep } from "@/lib/ui/journey";
+import {
+  type JourneyPerson,
+  type JourneyStep,
+  leadHref,
+} from "@/lib/ui/journey";
 import {
   LEGAL_READY_KEY,
   legalStepHref,
@@ -187,6 +191,13 @@ function readyStep(i: LegalJourneyInput): JourneyStep {
   };
 }
 
+/** The Juridique's journey. A gesture of the viewer opens on its step's
+ * lead (« À vous », JUR-08): Travail and « Maintenant » land on it. */
 export function legalJourney(input: LegalJourneyInput): JourneyStep[] {
-  return [...dossierSteps(input), ...input.demarches, readyStep(input)];
+  return [...dossierSteps(input), ...input.demarches, readyStep(input)].map(
+    (s) =>
+      s.actor?.viewer && !s.actor.href && s.key !== "inventory"
+        ? { ...s, actor: { ...s.actor, href: leadHref(s.href) } }
+        : s,
+  );
 }
