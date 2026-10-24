@@ -71,8 +71,8 @@ export const legalReadiness = {
     title: "Politique du label",
     body: (sacem: boolean) =>
       sacem
-        ? "Bloque la sortie : master final absent, emprunt non sécurisé, métadonnées ou visuels manquants, déclaration SACEM non déposée."
-        : "Bloque la sortie : master final absent, emprunt non sécurisé, métadonnées ou visuels manquants. SACEM : ne bloque pas, la sortie passe « À risque ».",
+        ? "Bloque la sortie : master final absent, œuvre existante non autorisée, métadonnées ou visuels manquants, déclaration SACEM non déposée."
+        : "Bloque la sortie : master final absent, œuvre existante non autorisée, métadonnées ou visuels manquants. SACEM : ne bloque pas, la sortie passe « À risque ».",
     by: "Réglée par la direction",
     sacem: "SACEM bloquante",
     saved: "Politique du label enregistrée",

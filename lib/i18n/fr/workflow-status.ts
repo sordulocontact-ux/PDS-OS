@@ -51,7 +51,7 @@ export const workflowStatus = {
       dependencyImpact: (workflow: string, toWhat: string) =>
         `${workflow} ne peut pas faire « ${toWhat.toLowerCase()} » tant que cet élément manque ; le reste de ses étapes avance.`,
       clearanceImpact:
-        "Un titre avec un emprunt non sécurisé ne part pas au distributeur : la sortie attend.",
+        "Un titre avec une œuvre existante non autorisée ne part pas au distributeur : la sortie attend.",
       rightsCause:
         "Contrainte de droits confirmée au cadrage : à sécuriser dans le Juridique.",
     },
@@ -105,12 +105,12 @@ export const workflowStatus = {
       ready: "Chaque titre a son master final",
     },
     clearances: {
-      what: "Emprunts sécurisés",
+      what: "Autorisations d'utilisation obtenues",
       toWhat: "Dépôt chez le distributeur",
       ready: (n: number) =>
-        `${n} emprunt${n > 1 ? "s" : ""} sécurisé${n > 1 ? "s" : ""} sur ${n}`,
+        `${n} autorisation${n > 1 ? "s" : ""} obtenue${n > 1 ? "s" : ""} sur ${n}`,
       open: (n: number, names: string) =>
-        `${plural(n, "emprunt à sécuriser", "emprunts à sécuriser")} : ${names}`,
+        `${plural(n, "autorisation à obtenir", "autorisations à obtenir")} : ${names}`,
     },
     cover: {
       what: "Pochette livrée",

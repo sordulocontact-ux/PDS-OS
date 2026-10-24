@@ -1209,3 +1209,15 @@ export const reviewCheckTone: Record<
   attention: "warning",
   with_reserves: "neutral",
 };
+
+/** A right of a clearance (JUR-09, JUR-10): accepted is not authorised. */
+export const rightStateTone: Record<string, Tone> = {
+  to_identify: "action",
+  to_ask: "action",
+  asked: "neutral",
+  terms_proposed: "warning",
+  terms_accepted: "warning",
+  to_sign: "warning",
+  authorized: "success",
+  refused: "danger",
+};

@@ -222,8 +222,7 @@ export const legalFormalities = {
     arrangement: "La portée de l'autorisation d'arrangement",
     publishing_contract: "Le contrat d'édition (seuls les éditeurs signent)",
     rubric_g: "La date du contrat d'édition (copie non jointe, rubrique G)",
-    borrowing: (work: string) =>
-      `L'accord pour « ${work} » (emprunt non sécurisé)`,
+    borrowing: (work: string) => `L'autorisation d'utilisation de « ${work} »`,
     to_verify: (field: string) => `À vérifier : ${field}`,
   },
   // Said under the field that misses, once « Valider le dossier » is tried.

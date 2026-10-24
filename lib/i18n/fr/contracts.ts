@@ -109,9 +109,9 @@ export const contracts = {
       agreement: (project: string) =>
         `Contrat préparé dans le Juridique du projet « ${project} ».`,
       clearance: (element: string) =>
-        `Contrat d'autorisation de l'emprunt « ${element} ».`,
+        `Licence d'utilisation de « ${element} ».`,
       backToPlan: "Revenir au Suivi",
-      backToClearance: "Revenir à l'emprunt",
+      backToClearance: "Revenir à l'autorisation",
     },
     back: "Tous les contrats",
     facts: "Informations",

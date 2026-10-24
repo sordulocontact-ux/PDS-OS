@@ -400,12 +400,12 @@ export const activations = {
     add: "Rattacher",
     addTitle: "Rattacher une dépendance",
     addDescription:
-      "Un livrable, un contrat, un emprunt ou une tâche du projet dont l'activation dépend.",
+      "Un livrable, un contrat, une autorisation d'œuvre existante ou une tâche du projet dont l'activation dépend.",
     kind: "Type",
     kinds: {
       deliverable: "Livrable",
       contract: "Contrat",
-      clearance: "Emprunt",
+      clearance: "Autorisation d'utilisation",
       task: "Tâche",
     },
     object: "Objet",

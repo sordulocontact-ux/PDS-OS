@@ -2876,6 +2876,16 @@ Parcours interne : État des lieux → Cadrage juridique → Confirmation → Pl
     nouvelle version est signée de nouveau, déjà en base). Reste : la signature de PDS Éditions
     par la direction dans l'app (le bulletin ne sait pas encore quelle ligne d'éditeur est la
     maison).
+  - *Lot 7, autorisation d'utilisation* (JUR-09, JUR-10) : « Emprunt » renommé partout à
+    l'écran (« Autorisation d'utilisation « X » », « Autorisations d'œuvres existantes »,
+    « œuvre existante non autorisée » ; les paramètres d'URL `?emprunt=` restent). Le panneau
+    montre « La demande » (ce qui est repris, l'œuvre, l'ayant droit de chaque droit) puis
+    « Deux autorisations distinctes », un état par droit calculé par le code
+    (`lib/legal/clearance/right-states.ts` : ayant droit à identifier, demande envoyée,
+    conditions proposées, **conditions acceptées · pas encore autorisée**, licence à signer,
+    autorisée · licence signée, refusée), puis le seul temps en cours sous son titre
+    (`ClearanceStages` sans frise). Pas de migration : ayants droit, conditions et contrats
+    étaient déjà par droit.
 
 - **Intervenants non crédités** (08/10/2026, lot 6 de l'architecture globale ;
   `legal_project_contacts`, migration `20261008000101`, 11 tests pgTAP) : un avocat, un

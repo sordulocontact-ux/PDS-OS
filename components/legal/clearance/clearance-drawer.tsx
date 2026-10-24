@@ -17,6 +17,7 @@ import { isClosed } from "@/lib/legal/clearance/matrix";
 import type { Clearance, Clearances } from "@/lib/legal/clearance/types";
 import { clearanceTone } from "@/lib/ui/state-tones";
 
+import { ClearanceRequest } from "./clearance-request";
 import { ClearanceStages } from "./clearance-stages";
 import { ExchangesTab } from "./exchanges-tab";
 import { HistoryTab } from "./history-tab";
@@ -99,9 +100,9 @@ export function ClearanceDrawer({
   );
 }
 
-/** What the borrowing's panel holds, on the Emprunts page and in the plan:
- * its outcome once closed, the three moments, the folded journal, the one
- * other way out. */
+/** What an authorisation's panel holds (recette Juridique V1, JUR-09): its
+ * outcome once closed, « La demande », each right apart, the moment open,
+ * the folded journal, the one other way out. */
 export function ClearanceBody({
   projectId,
   clearance,
@@ -124,6 +125,7 @@ export function ClearanceBody({
             : t.stages.done.abandoned}
         </ToneCallout>
       )}
+      <ClearanceRequest clearance={clearance} />
       <ClearanceStages
         projectId={projectId}
         clearance={clearance}

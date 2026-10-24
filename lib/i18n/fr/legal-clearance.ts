@@ -1,4 +1,4 @@
-// Emprunts à sécuriser (ticket Juridique 05): the clearance of an element taken
+// Autorisations d'utilisation d'une œuvre existante (ticket Juridique 05, JUR-09): the clearance of an element taken
 // from an existing work, from the qualification of its usage to the proof.
 export const legalClearance = {
   statuses: {
@@ -63,7 +63,7 @@ export const legalClearance = {
       `Déposer le signé et sa preuve dans le contrat (${right})`,
   },
   page: {
-    title: "Emprunts",
+    title: "Autorisations d'œuvres existantes",
     description:
       "Chaque élément repris d'une œuvre existante, de la qualification de l'usage à la preuve. Un contact trouvé ou un accord de principe ne suffit pas : l'élément n'est sécurisé qu'avec la preuve de chaque droit concerné.",
     empty: "Aucun élément à sécuriser dans ce projet.",
@@ -177,11 +177,40 @@ export const legalClearance = {
   // The drawer in three moments (Sacha, 07/10/2026: « simplifie-la au max
   // et rends-la plus fluide »). The nine states of the ticket stay
   // underneath; each moment ends with one action.
+  // JUR-09: what is asked, then each right apart, with its own state.
+  request: {
+    title: "La demande",
+    element: "Ce qui est repris",
+    work: "Œuvre existante",
+    usage: "Usage",
+    holder: (right: string) => `Ayant droit de ${right}`,
+    noHolder: "À identifier",
+    rightsTitle: (n: number) =>
+      n > 1 ? "Deux autorisations distinctes" : "L'autorisation",
+    rightsBody:
+      "Les droits sur l'œuvre (auteurs, éditeur) et sur l'enregistrement (producteur) s'autorisent chacun à part. Accepter des conditions n'est pas être autorisé : seule la licence signée finalise.",
+    rightOf: { work: "l'œuvre", master: "l'enregistrement" } as Record<
+      string,
+      string
+    >,
+    rightLabel: {
+      work: "Droits sur l'œuvre",
+      master: "Droits sur l'enregistrement",
+    } as Record<string, string>,
+    states: {
+      to_identify: "Ayant droit à identifier",
+      to_ask: "Demande à envoyer",
+      asked: "Demande envoyée · en attente",
+      terms_proposed: "Conditions proposées",
+      terms_accepted: "Conditions acceptées · pas encore autorisée",
+      to_sign: "Licence à signer · pas encore autorisée",
+      authorized: "Autorisée · licence signée",
+      refused: "Refusée",
+    },
+  },
   stages: {
-    label: "Avancement de l'emprunt",
     ask: {
       title: "Demander",
-      future: "Ce qui est repris, et à qui le demander.",
       sent: "J'ai envoyé la demande",
       sending: "Enregistrement…",
       note: "Ce qui est parti",
@@ -195,8 +224,6 @@ export const legalClearance = {
     },
     negotiate: {
       title: "Négocier",
-      future:
-        "Leur réponse, puis la validation des conditions par la direction.",
       reply: "Leur réponse",
       replyHint:
         "Collez leur e-mail ou leur message : PO en tire les conditions et les ayants droit, rien n'est appliqué sans vous.",
@@ -211,7 +238,7 @@ export const legalClearance = {
       decide: {
         title: "Décider de la suite",
         blocked:
-          "Tant que rien n'est décidé, la sortie reste bloquée : l'emprunt est dans « À résoudre avant sortie ».",
+          "Tant que rien n'est décidé, la sortie reste bloquée : l'autorisation est dans « À résoudre avant sortie ».",
         withdraw: "Retirer l'élément du titre",
         withdrawBody:
           "Le titre sort sans l'élément : la personne qui suit le Master est prévenue pour refaire le passage.",
@@ -227,7 +254,6 @@ export const legalClearance = {
     },
     sign: {
       title: "Signer",
-      future: "Un contrat par droit concerné, signé, avec sa preuve.",
       contract: (right: string) => `Contrat · ${right}`,
       deposit:
         "Déposez ici le contrat signé et sa preuve : ils sont rangés dans le contrat.",
@@ -244,16 +270,11 @@ export const legalClearance = {
       securing: "Vérification…",
     },
     done: {
-      cleared: "Sécurisé : le titre n'est plus bloqué par cet emprunt.",
+      cleared:
+        "Autorisée : le titre n'est plus bloqué par cette œuvre existante.",
       abandoned: "Élément abandonné : il ne bloque plus la sortie.",
     },
-    summary: {
-      ask: (scope: string, holders: string) =>
-        holders ? `${scope} · ${holders}` : scope,
-      negotiate: "Conditions validées par la direction",
-      sign: "Signé, avec sa preuve",
-    },
-    journal: "Journal de l'emprunt",
+    journal: "Journal de l'autorisation",
     other: "Autre issue",
   },
   // The words of the panel's three moments, as in the prototype of
@@ -341,9 +362,9 @@ export const legalClearance = {
     refusedBody:
       "Le titre ne peut pas sortir avec cet élément en l'état : reprendre la négociation, ou retirer l'élément.",
     resume: "Reprendre la négociation",
-    contractTitle: (work: string) => `Autorisation d'emprunt · « ${work} »`,
+    contractTitle: (work: string) => `Licence d'utilisation · « ${work} »`,
     contractNotes:
-      "Préparé à la validation des conditions de l'emprunt (Juridique, Emprunts).",
+      "Préparé à la validation des conditions de l'autorisation (Juridique, Autorisations).",
     contractCard: "Contrat d'autorisation",
     contractDetail: (terms: string) =>
       terms

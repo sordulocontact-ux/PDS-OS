@@ -12,7 +12,7 @@ export const legalHistory = {
     forms: "Fiches",
     contracts: "Contrats",
     splits: "Répartitions",
-    clearances: "Emprunts",
+    clearances: "Autorisations",
     formalities: "SACEM",
   },
   empty: "Rien n'a encore été enregistré sur le dossier.",

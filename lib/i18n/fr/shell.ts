@@ -424,8 +424,8 @@ export const shell = {
         splits: "Répartitions",
         // « Accords » named both the clearances and the contracts (ticket
         // Juridique 01 calls the contracts « Accords »): the clearance of an
-        // element taken from another work is an « Emprunt » on screen.
-        clearances: "Emprunts",
+        // element taken from another work is an « Autorisation » on screen (JUR-09).
+        clearances: "Autorisations",
         formalities: "SACEM",
         history: "Historique",
       },

@@ -4,7 +4,10 @@
 
 export const legalJourney = {
   owner: "Cheffe ou chef de projet",
-  validator: { name: "La direction", role: "Contrats et conditions d'emprunt" },
+  validator: {
+    name: "La direction",
+    role: "Contrats et conditions d'utilisation",
+  },
   rootPrereq: "Dossier ouvert",
   // What a gesture did, for the result banner and its toast (rule 7).
   done: {
@@ -35,7 +38,7 @@ export const legalJourney = {
     },
     tracking: {
       title: "Suivi",
-      why: "Chaque démarche se fait depuis sa ligne ; un emprunt non sécurisé bloque la sortie.",
+      why: "Chaque démarche se fait depuis sa ligne ; une œuvre existante non autorisée bloque la sortie.",
     },
   },
   todo: {

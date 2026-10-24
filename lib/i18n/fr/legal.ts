@@ -63,11 +63,11 @@ export const legal = {
       flaggedProposed: "Proposé, à confirmer au cadrage",
       // JUR-03: what to do with a confirmed constraint.
       flaggedToHandle:
-        "À traiter : ouvrir un emprunt, ou dire qu'il n'y a rien à sécuriser",
+        "À traiter : ouvrir une autorisation, ou dire qu'il n'y a rien à autoriser",
       flaggedFollowed: (n: number) =>
         n === 1
-          ? "Suivi dans l'emprunt du projet : vérifiez qu'il le couvre"
-          : `Suivi dans les ${n} emprunts du projet : vérifiez qu'ils le couvrent`,
+          ? "Suivi dans l'autorisation du projet : vérifiez qu'elle le couvre"
+          : `Suivi dans les ${n} autorisations du projet : vérifiez qu'elles le couvrent`,
     },
     sources: {
       title: "Fiche du titre",
@@ -100,7 +100,7 @@ export const legal = {
         ask: (title: string) =>
           `« ${title} » reprend-il un élément d'une œuvre existante ?`,
         hint: "Une topline, un sample, une interpolation, une reprise… Précisez l'œuvre et, si vous le savez, son auteur. Sinon, répondez « non ».",
-        why: "Un emprunt à une œuvre existante exige l'autorisation préalable de ses ayants droit (bulletin SACEM).",
+        why: "Utiliser une œuvre existante exige l'autorisation préalable de ses ayants droit (bulletin SACEM).",
         short: "Élément repris",
       },
       agreements: {
@@ -140,7 +140,7 @@ export const legal = {
     // An answer that says « nothing », saved without PO (UX test of
     // 09/10/2026: « Enregistrer » greyed when the right answer was none).
     none: {
-      third_party: "Aucun emprunt",
+      third_party: "Aucune œuvre existante",
       agreements: "Aucun accord",
       publisher: "Pas d'éditeur",
     } as Record<string, string>,
@@ -169,7 +169,7 @@ export const legal = {
     },
     cadrageNone: {
       third_party:
-        "Aucun emprunt : ni sample, ni reprise, ni interpolation (Cadrage).",
+        "Aucune œuvre existante : ni sample, ni reprise, ni interpolation (Cadrage).",
       agreements: "Aucun accord pour l'instant (Cadrage).",
     } as Record<string, string>,
     read: "Lire ma réponse",
@@ -243,7 +243,7 @@ export const legal = {
       },
       third_party: {
         title: "Éléments repris",
-        description: "Ce que les titres empruntent à des œuvres existantes.",
+        description: "Ce que les titres reprennent d'œuvres existantes.",
       },
       agreements: {
         title: "Contrats",
@@ -298,7 +298,7 @@ export const legal = {
             ? "1 répartition de l'édition à faire confirmer"
             : `${n} répartitions de l'édition à faire confirmer`,
         clearance: (n: number) =>
-          n === 1 ? "1 emprunt à sécuriser" : `${n} emprunts à sécuriser`,
+          n === 1 ? "1 autorisation à obtenir" : `${n} autorisations à obtenir`,
         formality: (n: number) =>
           n === 1 ? "1 déclaration SACEM" : `${n} déclarations SACEM`,
       },
@@ -353,7 +353,7 @@ export const legal = {
       contract: (name: string) => `Faire signer un contrat à ${name}`,
       contractWhy:
         "Sa participation (rémunération, cession de ses droits) doit être écrite et signée.",
-      clearance: (work: string) => `Sécuriser l'emprunt de « ${work} »`,
+      clearance: (work: string) => `Autorisation d'utilisation « ${work} »`,
       clearanceDetail: (title: string) => `Repris dans « ${title} »`,
       clearanceWhy:
         "Reprendre un élément d'une œuvre existante exige l'accord de ses ayants droit avant la sortie.",
@@ -362,7 +362,7 @@ export const legal = {
         "Les auteurs et compositeurs doivent s'accorder sur la part de chacun : elle sert à la déclaration SACEM.",
       formality: (title: string) => `Déclarer « ${title} » à la SACEM`,
       formalityWhy:
-        "La déclaration ouvre les droits d'auteur. Elle attend les informations des créateurs, la répartition, les emprunts sécurisés et le master final.",
+        "La déclaration ouvre les droits d'auteur. Elle attend les informations des créateurs, la répartition, les autorisations d'œuvres existantes et le master final.",
     },
     after: (labels: string) => `Prérequis : ${labels}`,
     // JUR-05: immediate actions apart from dependent ones.
@@ -401,7 +401,7 @@ export const legal = {
       onboarding: "Fiches de renseignements",
       contract: "Contrats à faire signer",
       splits: "Répartitions de l'édition",
-      clearance: "Emprunts à sécuriser",
+      clearance: "Autorisations à obtenir",
       formality: "Déclarations SACEM",
     },
     // Where an action is done, the same button everywhere.
@@ -409,7 +409,7 @@ export const legal = {
       onboarding: "Préparer les fiches",
       contract: "Voir les contrats",
       splits: "Répartir",
-      clearance: "Ouvrir l'emprunt",
+      clearance: "Ouvrir l'autorisation",
       formality: "Déclarer",
     },
     empty: "Rien dans cette colonne.",
@@ -501,7 +501,7 @@ export const legal = {
         action_required: "Action requise",
       },
       clearanceWaiting:
-        "En attente de la réponse des ayants droit, à consigner dans l'emprunt",
+        "En attente de la réponse des ayants droit, à consigner dans l'autorisation",
       clearanceTermsPending: "Conditions à valider par la direction",
       toInvestigate: "À instruire",
       declared: "Déclaration confirmée",
@@ -517,7 +517,7 @@ export const legal = {
       onboarding: "Ouvrir les fiches",
       contract: "Ouvrir le contrat",
       splits: "Répartir",
-      clearance: "Ouvrir l'emprunt",
+      clearance: "Ouvrir l'autorisation",
       formality: "Ouvrir la déclaration",
     },
     views: { act: "Ce qui attend une action", all: "Tout le plan" },
@@ -558,11 +558,11 @@ export const legal = {
       toFollow: "Démarches ouvertes",
       remaining: (count: number) =>
         count === 1
-          ? "Les emprunts sont sécurisés, mais 1 démarche reste ouverte :"
-          : `Les emprunts sont sécurisés, mais ${count} démarches restent ouvertes :`,
+          ? "Les autorisations sont obtenues, mais 1 démarche reste ouverte :"
+          : `Les autorisations sont obtenues, mais ${count} démarches restent ouvertes :`,
       more: (count: number) => `et ${count} de plus`,
       policy:
-        "Un emprunt non sécurisé bloque la sortie. Les fiches, contrats, répartitions et la SACEM ne la bloquent pas, mais restent à suivre.",
+        "Une œuvre existante non autorisée bloque la sortie. Les fiches, contrats, répartitions et la SACEM ne la bloquent pas, mais restent à suivre.",
     },
     since: (date: string) => `depuis le ${date}`,
     overdue: (date: string) => `Échéance dépassée : ${date}`,
@@ -702,7 +702,7 @@ export const legal = {
       splits:
         "Terminé quand chaque personne a confirmé la dernière version de la répartition.",
       clearance:
-        "Terminé quand l'emprunt est sécurisé : contrat signé et preuve déposés.",
+        "Terminé quand l'utilisation est autorisée : licence signée et preuve déposées.",
       formality:
         "Terminé quand la SACEM a confirmé l'enregistrement de la déclaration.",
     },
@@ -724,7 +724,7 @@ export const legal = {
       split: "Répartition de l'édition",
       sacem: "Bulletin SACEM",
       mapping: "Contrats à prévoir",
-      clearance: "Emprunt",
+      clearance: "Autorisation d'utilisation",
       link: "Démarche",
       steps: "Démarche",
     } as Record<string, string>,
@@ -748,7 +748,7 @@ export const legal = {
     after: {
       contract: "Fiches, puis contrats à prévoir",
       splits: "Fiches des auteurs",
-      formality: "Répartitions et emprunts",
+      formality: "Répartitions et autorisations",
     },
     progress: (done: number, total: number) =>
       `${done} fait${done > 1 ? "s" : ""} sur ${total}`,
@@ -793,8 +793,8 @@ export const legal = {
     },
     readiness: {
       borrowings: (secured: number, total: number) =>
-        `${secured} emprunt${total > 1 ? "s" : ""} sécurisé${secured > 1 ? "s" : ""} sur ${total}`,
-      noBorrowing: "Aucun emprunt dans ce projet.",
+        `${secured} autorisation${total > 1 ? "s" : ""} obtenue${secured > 1 ? "s" : ""} sur ${total}`,
+      noBorrowing: "Aucune œuvre existante dans ce projet.",
     },
     responsible: "Responsable et échéance",
     open: "Ouvrir la page",

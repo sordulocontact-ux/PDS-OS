@@ -64,7 +64,7 @@ export const distribution = {
       finalMaster: "Master final",
       legalState: "Reste à suivre au Juridique",
       legalItem: "Action juridique ouverte",
-      clearance: (work: string) => `Emprunt « ${work} »`,
+      clearance: (work: string) => `Autorisation d'utilisation « ${work} »`,
       rightsConstraint: "Contrainte de droits du Cadrage",
       cover: "Pochette",
       release: "Sortie enregistrée",
@@ -110,10 +110,11 @@ export const distribution = {
       legalRestricted:
         "L'état des droits se lit avec l'accès au Juridique. Une personne qui l'a confirmera le contrôle « Droits et territoires ».",
       legalClear: "Aucune action juridique ouverte",
-      legalBlocking: "Emprunt à sécuriser avant le dépôt",
+      legalBlocking: "Œuvre existante à faire autoriser avant le dépôt",
       legalOpen: "À suivre au Juridique, ne bloque pas le dépôt",
       legalWhere: "Juridique › Suivi",
-      clearanceStatus: (status: string) => `Juridique › Emprunts · ${status}`,
+      clearanceStatus: (status: string) =>
+        `Juridique › Autorisations · ${status}`,
       constraint: "Confirmée au Cadrage : à respecter dans les territoires",
       coverNone:
         "Aucune Fiche Livrable de pochette en Conception (titre contenant « pochette », « cover » ou « artwork »)",
@@ -166,8 +167,9 @@ export const distribution = {
     no: "Non",
     yesOn: (date: string) => `Oui, à partir du ${date}`,
     track: (n: number, title: string) => `Piste ${n} · ${title}`,
-    clearanceToSecure: (work: string) => `Emprunt « ${work} » à sécuriser`,
-    noClearanceToSecure: "Aucun emprunt à sécuriser",
+    clearanceToSecure: (work: string) =>
+      `Autorisation d'utilisation « ${work} » à obtenir`,
+    noClearanceToSecure: "Aucune autorisation à obtenir",
     audioFinal: (version: number) =>
       `Master final V${version}, validé dans le workflow Master`,
     audioBefore: "Master final du Catalogue, antérieur au workflow",
@@ -439,7 +441,7 @@ export const distribution = {
       noValidator: "Désignez d'abord un validateur.",
       paramsNotConfirmed: "Confirmez d'abord les paramètres de distribution.",
       legalBlockers:
-        "Un emprunt reste à sécuriser au Juridique : la Préparation n'est pas prête.",
+        "Une autorisation d'utilisation reste à obtenir au Juridique : la Préparation n'est pas prête.",
       nonCompliant:
         "Un contrôle est non conforme : corrigez à la source d'abord.",
       notValidator: "Seul le validateur désigné décide de cette version.",

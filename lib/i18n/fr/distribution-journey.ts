@@ -510,7 +510,7 @@ export const distributionJourney = {
   external: {
     master: "Master final",
     cover: "Pochette",
-    clearance: (work: string) => `Emprunt « ${work} »`,
+    clearance: (work: string) => `Autorisation d'utilisation « ${work} »`,
     masterModule: "Master",
     coverModule: "Conception",
     legalModule: "Juridique",

@@ -147,11 +147,11 @@ export const notifications = {
     master_mastering_changes_requested: (actor: string, project: string) =>
       `${actor} demande une modification du mastering de « ${project} ».`,
     clearance_terms_proposed: (actor: string, project: string) =>
-      `${actor} vous demande de valider les conditions d'un emprunt (« ${project} »).`,
+      `${actor} vous demande de valider les conditions d'utilisation d'une œuvre existante (« ${project} »).`,
     clearance_terms_validated: (actor: string, project: string) =>
-      `${actor} a validé les conditions de l'emprunt (« ${project} ») : le contrat est prêt à envoyer.`,
+      `${actor} a validé les conditions d'utilisation (« ${project} ») : la licence est prête à envoyer.`,
     clearance_terms_rejected: (actor: string, project: string) =>
-      `${actor} demande une contre-proposition sur l'emprunt (« ${project} »).`,
+      `${actor} demande une contre-proposition sur l'autorisation d'utilisation (« ${project} »).`,
     legal_template_to_validate: (actor: string, project: string) =>
       `${actor} vous demande de valider un modèle de contrat (« ${project} »).`,
     legal_template_validated: (actor: string, project: string) =>
@@ -167,7 +167,7 @@ export const notifications = {
     legal_bulletin_signed: (_actor: string, project: string) =>
       `Un bulletin SACEM signé est arrivé par un lien privé (« ${project} »).`,
     legal_element_withdrawn: (actor: string, project: string) =>
-      `${actor} a retiré un élément emprunté de « ${project} » : le passage est à refaire sans lui dans le Master.`,
+      `${actor} a retiré un élément repris d'une œuvre existante de « ${project} » : le passage est à refaire sans lui dans le Master.`,
     strategy_review_requested: (actor: string, project: string) =>
       `${actor} vous demande de valider un document de la stratégie de « ${project} ».`,
     strategy_review_approved: (actor: string, project: string) =>

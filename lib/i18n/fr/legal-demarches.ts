@@ -32,7 +32,7 @@ export const legalDemarches = {
   },
   titles: {
     person: (name: string) => `${name} · fiche et contrat`,
-    clearance: (work: string) => `Emprunt « ${work} »`,
+    clearance: (work: string) => `Autorisation d'utilisation « ${work} »`,
     split: (title: string) => `Répartition de l'édition « ${title} »`,
     sacem: (title: string) => `Déclaration SACEM « ${title} »`,
     ready: "Prêt pour la sortie",
@@ -41,7 +41,7 @@ export const legalDemarches = {
     person:
       "Sa fiche donne au contrat ce qui lui manque. La direction valide le document avant l'envoi en signature.",
     clearance:
-      "Un emprunt non sécurisé bloque la sortie. Demander, négocier, faire signer : chaque temps garde sa preuve. Un refus se décide : retirer, remplacer, ou rester bloqué.",
+      "Une œuvre existante non autorisée bloque la sortie. Demander, négocier, faire signer : chaque temps garde sa preuve. Un refus se décide : retirer, remplacer, ou rester bloqué.",
     split:
       "Les parts de l'œuvre, saisies par une personne et confirmées par chaque ayant droit par son lien. Confirmer n'est pas signer un contrat.",
     sacem:
@@ -101,7 +101,7 @@ export const legalDemarches = {
   summary: {
     person: "Contrat signé",
     noDeal: "Pas d'accord nécessaire",
-    clearance: "Emprunt sécurisé",
+    clearance: "Autorisation obtenue",
     split: "Confirmée par tous",
     sacem: "Enregistrée par la SACEM",
   },
